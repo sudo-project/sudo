@@ -57,13 +57,42 @@ extern const char *const sudo_sys_signame[NSIG];
 #endif
 
 /*
+ * Many systems use aliases for source backward compatibility.
+ */
+static struct sigalias {
+    const char *name;
+    int number;
+} sigaliases[] = {
+#ifdef SIGABRT
+    { "ABRT", SIGABRT },
+#endif
+#ifdef SIGCLD
+    { "CLD",  SIGCLD },
+#endif
+#ifdef SIGIO
+    { "IO",   SIGIO },
+#endif
+#ifdef SIGIOT
+    { "IOT",  SIGIOT },
+#endif
+#ifdef SIGLOST
+    { "LOST", SIGLOST },
+#endif
+#ifdef SIGPOLL
+    { "POLL", SIGPOLL },
+#endif
+    { NULL, -1 }
+};
+
+/*
  * Translate signal name to number.
  */
 int
 sudo_str2sig(const char *signame, int *result)
 {
-    int signo;
+    struct sigalias *alias;
     const char *errstr;
+    int signo;
 
     /* Could be a signal number encoded as a string. */
     if (isdigit((unsigned char)signame[0])) {
@@ -74,84 +103,55 @@ sudo_str2sig(const char *signame, int *result)
 	return 0;
     }
 
-    /* Special cases. */
-    switch (signame[0]) {
-    case 'C':
-	/* support both SIGCLD and SIGCHLD */
-#ifdef SIGCLD
-	if (strcmp(signame, "CLD") == 0) {
-	    *result = SIGCLD;
-	    return 0;
-	}
-#endif
-#ifdef SIGCHLD
-	if (strcmp(signame, "CHLD") == 0) {
-	    *result = SIGCHLD;
-	    return 0;
-	}
-#endif
-	break;
-#ifdef SIGIO
-    case 'I':
-	/* support both SIGIO and SIGPOLL */
-	if (strcmp(signame, "IO") == 0) {
-	    *result = SIGIO;
-	    return 0;
-	}
-	break;
-#endif
-#ifdef SIGPOLL
-    case 'P':
-	/* support both SIGIO and SIGPOLL */
-	if (strcmp(signame, "POLL") == 0) {
-	    *result = SIGPOLL;
-	    return 0;
-	}
-	break;
-#endif
-    case 'R':
-	/* real-time signals */
+    /* Check real-time signals. */
 #if defined(SIGRTMIN)
-	if (strncmp(signame, "RTMIN", 5) == 0) {
-	    if (signame[5] == '\0') {
-		*result = SIGRTMIN;
-		return 0;
-	    }
-	    if (signame[5] == '+') {
-		if (isdigit((unsigned char)signame[6])) {
-		    const long rtmax = sysconf(_SC_RTSIG_MAX);
-		    const int off = signame[6] - '0';
+    if (strncmp(signame, "RTMIN", 5) == 0) {
+	if (signame[5] == '\0') {
+	    *result = SIGRTMIN;
+	    return 0;
+	}
+	if (signame[5] == '+') {
+	    if (isdigit((unsigned char)signame[6])) {
+		const long rtmax = sysconf(_SC_RTSIG_MAX);
+		const int off = signame[6] - '0';
 
-		    if (rtmax > 0 && off < rtmax / 2) {
-			*result = SIGRTMIN + off;
-			return 0;
-		    }
+		if (rtmax > 0 && off < rtmax / 2) {
+		    *result = SIGRTMIN + off;
+		    return 0;
 		}
 	    }
 	}
+    }
 #endif
 #if defined(SIGRTMAX)
-	if (strncmp(signame, "RTMAX", 5) == 0) {
-	    if (signame[5] == '\0') {
-		*result = SIGRTMAX;
-		return 0;
-	    }
-	    if (signame[5] == '-') {
-		if (isdigit((unsigned char)signame[6])) {
-		    const long rtmax = sysconf(_SC_RTSIG_MAX);
-		    const int off = signame[6] - '0';
+    if (strncmp(signame, "RTMAX", 5) == 0) {
+	if (signame[5] == '\0') {
+	    *result = SIGRTMAX;
+	    return 0;
+	}
+	if (signame[5] == '-') {
+	    if (isdigit((unsigned char)signame[6])) {
+		const long rtmax = sysconf(_SC_RTSIG_MAX);
+		const int off = signame[6] - '0';
 
-		    if (rtmax > 0 && off < rtmax / 2) {
-			*result = SIGRTMAX - off;
-			return 0;
-		    }
+		if (rtmax > 0 && off < rtmax / 2) {
+		    *result = SIGRTMAX - off;
+		    return 0;
 		}
 	    }
 	}
+    }
 #endif
-	break;
+
+    /* Check aliases. */
+    for (alias = sigaliases; alias->name != NULL; alias++) {
+	if (strcmp(signame, alias->name) == 0) {
+	    *result = alias->number;
+	    return 0;
+	}
     }
 
+    /* Check sys_signame[]. */
     for (signo = 1; signo < NSIG; signo++) {
 	if (sudo_sys_signame[signo] != NULL) {
 	    if (strcmp(signame, sudo_sys_signame[signo]) == 0) {
