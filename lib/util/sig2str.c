@@ -62,9 +62,22 @@ int
 sudo_sig2str(int signo, char *signame)
 {
 #if defined(SIGRTMIN) && defined(SIGRTMAX)
-    /* Realtime signal support as per Solaris. */
+    /* Realtime signal support. */
     if (signo >= SIGRTMIN && signo <= SIGRTMAX) {
-	(void)snprintf(signame, SIG2STR_MAX, "RTMIN+%d", (signo - SIGRTMIN));
+	const long rtmax = sysconf(_SC_RTSIG_MAX);
+	if (rtmax > 0) {
+	    if (signo == SIGRTMIN) {
+		strlcpy(signame, "RTMIN", SIG2STR_MAX);
+	    } else if (signo == SIGRTMAX) {
+		strlcpy(signame, "RTMAX", SIG2STR_MAX);
+	    } else if (signo <= SIGRTMIN + (rtmax / 2) - 1) {
+		(void)snprintf(signame, SIG2STR_MAX, "RTMIN+%d",
+		    (signo - SIGRTMIN));
+	    } else {
+		(void)snprintf(signame, SIG2STR_MAX, "RTMAX-%d",
+		    (SIGRTMAX - signo));
+	    }
+	}
 	return 0;
     }
 #endif

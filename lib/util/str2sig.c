@@ -36,8 +36,9 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <signal.h>
 #include <ctype.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
 
@@ -117,9 +118,14 @@ sudo_str2sig(const char *signame, int *result)
 		return 0;
 	    }
 	    if (signame[5] == '+') {
-		if (signame[6] == '1' || signame[6] == '2' || signame[6] == '3') {
-		    *result = SIGRTMIN + (signame[6] - '0');
-		    return 0;
+		if (isdigit((unsigned char)signame[6])) {
+		    const long rtmax = sysconf(_SC_RTSIG_MAX);
+		    const int off = signame[6] - '0';
+
+		    if (rtmax > 0 && off < rtmax / 2) {
+			*result = SIGRTMIN + off;
+			return 0;
+		    }
 		}
 	    }
 	}
@@ -131,9 +137,14 @@ sudo_str2sig(const char *signame, int *result)
 		return 0;
 	    }
 	    if (signame[5] == '-') {
-		if (signame[6] == '1' || signame[6] == '2' || signame[6] == '3') {
-		    *result = SIGRTMAX - (signame[6] - '0');
-		    return 0;
+		if (isdigit((unsigned char)signame[6])) {
+		    const long rtmax = sysconf(_SC_RTSIG_MAX);
+		    const int off = signame[6] - '0';
+
+		    if (rtmax > 0 && off < rtmax / 2) {
+			*result = SIGRTMAX - off;
+			return 0;
+		    }
 		}
 	    }
 	}
@@ -141,10 +152,12 @@ sudo_str2sig(const char *signame, int *result)
 	break;
     }
 
-    for (signo = 0; signo < NSIG; signo++) {
-	if (strcmp(signame, sudo_sys_signame[signo]) == 0) {
-	    *result = signo;
-	    return 0;
+    for (signo = 1; signo < NSIG; signo++) {
+	if (sudo_sys_signame[signo] != NULL) {
+	    if (strcmp(signame, sudo_sys_signame[signo]) == 0) {
+		*result = signo;
+		return 0;
+	    }
 	}
     }
 
