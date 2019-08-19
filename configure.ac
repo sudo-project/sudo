@@ -113,6 +113,7 @@ AC_SUBST([TMPFILES_D])
 AC_SUBST([exampledir])
 AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
+AC_SUBST([SIGNAME])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -245,6 +246,7 @@ INIT_SCRIPT=
 INIT_DIR=
 RC_LINK=
 COMPAT_EXP=
+SIGNAME=
 dnl
 dnl Other vaiables
 dnl
@@ -3290,8 +3292,10 @@ AC_CHECK_FUNCS([str2sig], [], [
 
 dnl
 dnl Check for sys_signame or sys_sigabbrev if missing sig2str() or str2sig().
+dnl Also enable unit tests for sig2str() and str2sig().
 dnl
 if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
     HAVE_SIGNAME="false"
     AC_CHECK_DECLS([sys_signame, _sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"
@@ -3313,6 +3317,7 @@ AC_INCLUDES_DEFAULT
 	    AC_DEFINE(HAVE_SYS_SIGABBREV)
 	else
 	    AC_LIBOBJ(signame)
+	    SIGNAME=signame.lo
 	fi
     fi
 fi

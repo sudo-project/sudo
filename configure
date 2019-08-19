@@ -722,6 +722,7 @@ timeout
 vardir
 rundir
 iolog_dir
+SIGNAME
 devsearch
 DIGEST
 exampledir
@@ -3080,6 +3081,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3165,6 +3167,7 @@ INIT_SCRIPT=
 INIT_DIR=
 RC_LINK=
 COMPAT_EXP=
+SIGNAME=
 WEAK_ALIAS=no
 CHECKSHADOW=true
 shadow_funcs=
@@ -22831,6 +22834,7 @@ done
 
 
 if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
     HAVE_SIGNAME="false"
     ac_fn_c_check_decl "$LINENO" "sys_signame" "ac_cv_have_decl_sys_signame" "
 $ac_includes_default
@@ -22930,6 +22934,7 @@ $as_echo "$sudo_cv_var_sys_sigabbrev" >&6; }
  ;;
 esac
 
+	    SIGNAME=signame.lo
 	fi
     fi
 fi
