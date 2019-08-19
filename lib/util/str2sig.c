@@ -154,7 +154,8 @@ sudo_str2sig(const char *signame, int *result)
     /* Check sys_signame[]. */
     for (signo = 1; signo < NSIG; signo++) {
 	if (sudo_sys_signame[signo] != NULL) {
-	    if (strcmp(signame, sudo_sys_signame[signo]) == 0) {
+	    /* On macOS sys_signame[] may contain lower-case names. */
+	    if (strcasecmp(signame, sudo_sys_signame[signo]) == 0) {
 		*result = signo;
 		return 0;
 	    }

@@ -36,6 +36,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <ctype.h>
 #include <signal.h>
 #include <unistd.h>
 
@@ -83,6 +84,12 @@ sudo_sig2str(int signo, char *signame)
 #endif
     if (signo > 0 && signo < NSIG && sudo_sys_signame[signo] != NULL) {
 	strlcpy(signame, sudo_sys_signame[signo], SIG2STR_MAX);
+	/* Make sure we always return an upper case signame. */
+	if (islower((unsigned char)signame[0])) {
+	    int i;
+	    for (i = 0; signame[i] != '\0'; i++)
+		signame[i] = toupper((unsigned char)signame[i]);
+	}
 	return 0;
     }
     errno = EINVAL;
