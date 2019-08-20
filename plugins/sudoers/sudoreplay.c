@@ -704,7 +704,7 @@ setup_terminal(struct log_info *li, bool interactive, bool resize)
     }
 
     if (li->rows > terminal_rows || li->cols > terminal_cols) {
-	printf(_("Warning: your terminal is too small to properly replay the log.\n"));
+	fputs(_("Warning: your terminal is too small to properly replay the log.\n"), stdout);
 	printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), li->rows, li->cols, terminal_rows, terminal_cols);
     }
     debug_return;
@@ -733,7 +733,8 @@ restore_terminal_size(void)
     if (terminal_was_resized) {
 	/* We are still in raw mode, hence the carriage return. */
 	putchar('\r');
-	printf(U_("Replay finished, press any key to restore the terminal."));
+	fputs(U_("Replay finished, press any key to restore the terminal."),
+	    stdout);
 	fflush(stdout);
 	(void)getchar();
 	xterm_set_size(terminal_rows, terminal_cols);
