@@ -902,7 +902,7 @@ done:
 static char *
 sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 {
-    char *buf, timebuffer[TIMEFILTER_LENGTH + 1], gidbuf[MAX_UID_T_LEN + 1];
+    char *buf, timebuffer[TIMEFILTER_LENGTH + 1], idbuf[MAX_UID_T_LEN + 1];
     struct ldap_netgroup_list netgroups;
     struct ldap_netgroup *ng = NULL;
     struct gid_list *gidlist;
@@ -922,8 +922,8 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     if (ldap_conf.search_filter)
 	sz += strlen(ldap_conf.search_filter);
 
-    /* Then add (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
-    sz += 29 + sudo_ldap_value_len(pw->pw_name);
+    /* Then add (|(sudoUser=USERNAME)(sudoUser=#uid)(sudoUser=ALL)) + NUL */
+    sz += 29 + (12 + MAX_UID_T_LEN) + sudo_ldap_value_len(pw->pw_name);
 
     /* Add space for primary and supplementary groups and gids */
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
@@ -984,18 +984,24 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     CHECK_LDAP_VCAT(buf, pw->pw_name, sz);
     CHECK_STRLCAT(buf, ")", sz);
 
-    /* Append primary group and gid */
+    /* Append user ID */
+    (void) snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int)pw->pw_uid);
+    CHECK_STRLCAT(buf, "(sudoUser=#", sz);
+    CHECK_STRLCAT(buf, idbuf, sz);
+    CHECK_STRLCAT(buf, ")", sz);
+
+    /* Append primary group and group ID */
     if (grp != NULL) {
 	CHECK_STRLCAT(buf, "(sudoUser=%", sz);
 	CHECK_LDAP_VCAT(buf, grp->gr_name, sz);
 	CHECK_STRLCAT(buf, ")", sz);
     }
-    (void) snprintf(gidbuf, sizeof(gidbuf), "%u", (unsigned int)pw->pw_gid);
+    (void) snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int)pw->pw_gid);
     CHECK_STRLCAT(buf, "(sudoUser=%#", sz);
-    CHECK_STRLCAT(buf, gidbuf, sz);
+    CHECK_STRLCAT(buf, idbuf, sz);
     CHECK_STRLCAT(buf, ")", sz);
 
-    /* Append supplementary groups and gids */
+    /* Append supplementary groups and group IDs */
     if (grlist != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
@@ -1009,10 +1015,10 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	for (i = 0; i < gidlist->ngids; i++) {
 	    if (pw->pw_gid == gidlist->gids[i])
 		continue;
-	    (void) snprintf(gidbuf, sizeof(gidbuf), "%u",
+	    (void) snprintf(idbuf, sizeof(idbuf), "%u",
 		(unsigned int)gidlist->gids[i]);
 	    CHECK_STRLCAT(buf, "(sudoUser=%#", sz);
-	    CHECK_STRLCAT(buf, gidbuf, sz);
+	    CHECK_STRLCAT(buf, idbuf, sz);
 	    CHECK_STRLCAT(buf, ")", sz);
 	}
     }
