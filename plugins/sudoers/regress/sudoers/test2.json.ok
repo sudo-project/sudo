@@ -34,7 +34,7 @@
         },
         {
             "Binding": [
-                { "username": "%them" }
+                { "usergroup": "them" }
             ],
             "Options": [
                 { "set_home": true }
@@ -42,7 +42,7 @@
         },
         {
             "Binding": [
-                { "username": "%: non UNIX 0 c" }
+                { "nonunixgroup": " non UNIX 0 c" }
             ],
             "Options": [
                 { "set_home": true }
@@ -50,7 +50,7 @@
         },
         {
             "Binding": [
-                { "username": "+net" }
+                { "netgroup": "net" }
             ],
             "Options": [
                 { "set_home": true }

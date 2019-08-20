@@ -2656,7 +2656,7 @@ YY_RULE_SETUP
 				LEXTRACE("ERROR "); /* empty string */
 				LEXRETURN(ERROR);
 			    }
-			    if (prev_state == INITIAL) {
+			    if (prev_state == INITIAL || prev_state == GOTDEFS) {
 				switch (sudoerslval.string[0]) {
 				case '%':
 				    if (sudoerslval.string[1] == '\0' ||
