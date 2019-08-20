@@ -119,10 +119,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #endif
 
-    /* Restore coredumpsize resource limit before running. */
-    if (sudo_conf_disable_coredump())
-	disable_coredump(true);
-
     if (details->pw != NULL) {
 #ifdef HAVE_PROJECT_H
 	set_project(details->pw);
@@ -409,6 +405,13 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		_exit(0);
 	}
     }
+
+    /*
+     * Restore coredumpsize resource limit before running.
+     * We must do this *before* calling the PAM session module.
+     */
+    if (sudo_conf_disable_coredump())
+	disable_coredump(true);
 
     /*
      * Run the command in a new pty if there is an I/O plugin or the policy
