@@ -304,7 +304,7 @@ case "$osversion" in
 		test -n "$linux_audit" && break;
 	    fi
 	done
-	if [ -z "linux_audit" ]; then
+	if [ -z "$linux_audit" ]; then
 	    echo "unable to determine package for libaudit" 1>&2
 	    exit 1
 	fi
