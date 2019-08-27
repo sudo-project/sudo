@@ -29,6 +29,7 @@ doc/schema.OpenLDAP
 doc/schema.iPlanet
 doc/schema.olcSudo
 doc/sudo.conf.man.in
+doc/sudo.conf.man.in.sed
 doc/sudo.conf.mdoc.in
 doc/sudo.man.in
 doc/sudo.man.in.sed
