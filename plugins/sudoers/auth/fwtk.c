@@ -109,7 +109,7 @@ restart:
     } else if (strncmp(resp, "password", 8) == 0) {
 	pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else if (strncmp(resp, "display ", 8) == 0) {
-	sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", &resp[8]);
+	sudo_printf(SUDO_CONV_INFO_MSG|SUDO_CONV_PREFER_TTY, "%s\n", &resp[8]);
 	strlcpy(buf, "response dummy", sizeof(buf));
 	goto restart;
     } else {

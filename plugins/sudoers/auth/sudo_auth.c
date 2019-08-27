@@ -227,7 +227,7 @@ pass_warn(void)
     if (def_insults)
 	warning = INSULT;
 #endif
-    sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", warning);
+    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY, "%s\n", warning);
 
     debug_return;
 }

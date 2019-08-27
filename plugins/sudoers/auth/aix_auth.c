@@ -256,7 +256,8 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
     if (result != 0) {
 	/* Display error message, if any. */
 	if (sudo_aix_valid_message(message))
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s", message);
+	    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY,
+		"%s", message);
 	ret = pass ? AUTH_FAILURE : AUTH_INTR;
     }
     free(message);
@@ -266,8 +267,9 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
     if (ret == AUTH_SUCCESS) {
 	result = passwdexpired(pw->pw_name, &message);
 	if (message != NULL && message[0] != '\0') {
-	    sudo_printf(result ? SUDO_CONV_ERROR_MSG : SUDO_CONV_INFO_MSG,
-		"%s", message);
+	    int msg_type = SUDO_CONV_PREFER_TTY;
+	    msg_type |= result ? SUDO_CONV_ERROR_MSG : SUDO_CONV_INFO_MSG,
+	    sudo_printf(msg_type, "%s", message);
 	    free(message);
 	    message = NULL;
 	}

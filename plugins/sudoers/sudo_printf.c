@@ -32,22 +32,28 @@
 #include "sudo_compat.h"
 #include "sudo_plugin.h"
 #include "sudo_debug.h"
+#include "pathnames.h"
 
 static int
 sudo_printf_int(int msg_type, const char *fmt, ...)
 {
+    FILE *fp = stdout;
+    FILE *ttyfp = NULL;
     va_list ap;
     int len;
 
-    switch (msg_type) {
+    if (ISSET(msg_type, SUDO_CONV_PREFER_TTY)) {
+	/* Try writing to /dev/tty first. */
+	ttyfp = fopen(_PATH_TTY, "w");
+    }
+
+    switch (msg_type & 0xff) {
+    case SUDO_CONV_ERROR_MSG:
+	fp = stderr;
+	/* FALLTHROUGH */
     case SUDO_CONV_INFO_MSG:
 	va_start(ap, fmt);
-	len = vfprintf(stdout, fmt, ap);
-	va_end(ap);
-	break;
-    case SUDO_CONV_ERROR_MSG:
-	va_start(ap, fmt);
-	len = vfprintf(stderr, fmt, ap);
+	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);
 	va_end(ap);
 	break;
     default:
@@ -55,6 +61,9 @@ sudo_printf_int(int msg_type, const char *fmt, ...)
 	errno = EINVAL;
 	break;
     }
+
+    if (ttyfp != NULL)
+	fclose(ttyfp);
 
     return len;
 }

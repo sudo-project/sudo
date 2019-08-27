@@ -696,11 +696,13 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		break;
 	    case PAM_TEXT_INFO:
 		if (pm->msg != NULL && !is_filtered(pm->msg))
-		    sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", pm->msg);
+		    sudo_printf(SUDO_CONV_INFO_MSG|SUDO_CONV_PREFER_TTY,
+			"%s\n", pm->msg);
 		break;
 	    case PAM_ERROR_MSG:
 		if (pm->msg != NULL)
-		    sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", pm->msg);
+		    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY,
+			"%s\n", pm->msg);
 		break;
 	    default:
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
