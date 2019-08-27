@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "August 27, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -51,11 +51,20 @@ The
 should either be a six character sequence of digits and
 upper case letters, e.g.,
 \fR0100A5\fR,
-or a pattern matching the
+a pattern matching the
 \fIiolog_file\fR
 option in the
 \fIsudoers\fR
-file.
+file, or a path name.
+Path names may be relative to the
+\fIiolog_dir\fR
+option in the
+\fIsudoers\fR
+file (unless overridden by the
+\fB\-d\fR
+option) or fully qualified, beginning with a
+\(oq/\(cq
+character.
 When a command is run via
 \fBsudo\fR
 with

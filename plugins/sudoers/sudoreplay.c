@@ -320,12 +320,15 @@ main(int argc, char *argv[])
 	if (plen < 0 || plen >= ssizeof(path))
 	    sudo_fatalx(U_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
-    } else {
-	plen = snprintf(path, sizeof(path), "%s/%s/timing",
-	    session_dir, id);
+    } else if (id[0] == '/') {
+	plen = snprintf(path, sizeof(path), "%s/timing", id);
 	if (plen < 0 || plen >= ssizeof(path))
-	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir,
-		id, strerror(ENAMETOOLONG));
+	    sudo_fatalx(U_("%s/timing: %s"), id, strerror(ENAMETOOLONG));
+    } else {
+	plen = snprintf(path, sizeof(path), "%s/%s/timing", session_dir, id);
+	if (plen < 0 || plen >= ssizeof(path))
+	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir, id,
+		strerror(ENAMETOOLONG));
     }
     plen -= 7;
 
