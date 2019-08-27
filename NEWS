@@ -65,6 +65,11 @@ What's new in Sudo 1.8.28
    Previously, the user name, group name and group IDs were used
    when matching but not the user ID.
 
+ * Sudo now writes PAM messages to the user's terminal, if available,
+   instead of the standard output or standard error.  This prevents
+   PAM output from being intermixed with that of the command when
+   output is sent to a file or pipe.  Bug #895.
+
 What's new in Sudo 1.8.27
 
  * On HP-UX, sudo will now update the utmps file when running a command
