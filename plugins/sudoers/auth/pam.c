@@ -179,6 +179,7 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 {
     static int pam_status = PAM_SUCCESS;
     const char *tty = user_ttypath;
+    const char *errstr, *pam_service;
     int rc;
     debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH)
 
@@ -192,12 +193,18 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
     }
 #endif /* _AIX */
 
-    /* Initial PAM setup */
-    pam_status = pam_start(ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
-	def_pam_login_service : def_pam_service, pw->pw_name, &pam_conv, &pamh);
+    /* Initial PAM. */
+    pam_service = ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
+	def_pam_login_service : def_pam_service;
+    pam_status = pam_start(pam_service, pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
+	if ((errstr = pam_strerror(NULL, pam_status)) == NULL)
+	    errstr = "unknown error";
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "pam_start(%s, %s, %p, %p): %s", pam_service, pw->pw_name,
+	    &pam_conv, &pamh, errstr);
 	if (!quiet)
-	    log_warning(0, N_("unable to initialize PAM"));
+	    log_warningx(0, N_("unable to initialize PAM: %s"), errstr);
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -210,18 +217,18 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
      */
     rc = pam_set_item(pamh, PAM_RUSER, user_name);
     if (rc != PAM_SUCCESS) {
-	const char *errstr = pam_strerror(pamh, rc);
+	if ((errstr = pam_strerror(pamh, rc)) == NULL)
+	    errstr = "unknown error";
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "pam_set_item(pamh, PAM_RUSER, %s): %s", user_name,
-	    errstr ? errstr : "unknown error");
+	    "pam_set_item(pamh, PAM_RUSER, %s): %s", user_name, errstr);
     }
 #ifdef __sun__
     rc = pam_set_item(pamh, PAM_RHOST, user_host);
     if (rc != PAM_SUCCESS) {
-	const char *errstr = pam_strerror(pamh, rc);
+	if ((errstr = pam_strerror(pamh, rc)) == NULL)
+	    errstr = "unknown error";
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "pam_set_item(pamh, PAM_RHOST, %s): %s", user_host,
-	    errstr ? errstr : "unknown error");
+	    "pam_set_item(pamh, PAM_RHOST, %s): %s", user_host, errstr);
     }
 #endif
 
@@ -236,10 +243,10 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
     if (tty != NULL) {
 	rc = pam_set_item(pamh, PAM_TTY, tty);
 	if (rc != PAM_SUCCESS) {
-	    const char *errstr = pam_strerror(pamh, rc);
+	    if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		errstr = "unknown error";
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"pam_set_item(pamh, PAM_TTY, %s): %s", tty,
-		errstr ? errstr : "unknown error");
+		"pam_set_item(pamh, PAM_TTY, %s): %s", tty, errstr);
 	}
     }
 
@@ -405,9 +412,10 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	if (pamh != NULL) {
 	    rc = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	    if (rc != PAM_SUCCESS) {
-		errstr = pam_strerror(pamh, rc);
+		if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		    errstr = "unknown error";
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "pam_end: %s", errstr ? errstr : "unknown error");
+		    "pam_end: %s", errstr);
 	    }
 	    pamh = NULL;
 	}
@@ -420,10 +428,10 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      */
     rc = pam_set_item(pamh, PAM_USER, pw->pw_name);
     if (rc != PAM_SUCCESS) {
-	errstr = pam_strerror(pamh, rc);
+	if ((errstr = pam_strerror(pamh, rc)) == NULL)
+	    errstr = "unknown error";
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "pam_set_item(pamh, PAM_USER, %s): %s", pw->pw_name,
-	    errstr ? errstr : "unknown error");
+	    "pam_set_item(pamh, PAM_USER, %s): %s", pw->pw_name, errstr);
     }
 
     /*
@@ -437,9 +445,10 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     if (def_pam_setcred) {
 	rc = pam_setcred(pamh, PAM_REINITIALIZE_CRED);
 	if (rc != PAM_SUCCESS) {
-	    errstr = pam_strerror(pamh, rc);
+	    if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		errstr = "unknown error";
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"pam_setcred: %s", errstr ? errstr : "unknown error");
+		"pam_setcred: %s", errstr);
 	}
     }
 
@@ -455,23 +464,25 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	    break;
 	case PAM_SESSION_ERR:
 	    /* Treat PAM_SESSION_ERR as a non-fatal error. */
-	    errstr = pam_strerror(pamh, rc);
+	    if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		errstr = "unknown error";
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"pam_open_session: %s", errstr ? errstr : "unknown error");
+		"pam_open_session: %s", errstr);
 	    /* Avoid closing session that was not opened. */
 	    def_pam_session = false;
 	    break;
 	default:
 	    /* Unexpected session failure, treat as fatal error. */
 	    *pam_status = rc;
-	    errstr = pam_strerror(pamh, *pam_status);
-	    log_warningx(0, N_("%s: %s"), "pam_open_session",
-		errstr ? errstr : "unknown error");
+	    if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		errstr = "unknown error";
+	    log_warningx(0, N_("%s: %s"), "pam_open_session", errstr);
 	    rc = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
 	    if (rc != PAM_SUCCESS) {
-		errstr = pam_strerror(pamh, rc);
+		if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		    errstr = "unknown error";
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "pam_end: %s", errstr ? errstr : "unknown error");
+		    "pam_end: %s", errstr);
 	    }
 	    pamh = NULL;
 	    status = AUTH_FATAL;
@@ -507,6 +518,7 @@ int
 sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 {
     int rc, status = AUTH_SUCCESS;
+    const char *errstr;
     debug_decl(sudo_pam_end_session, SUDOERS_DEBUG_AUTH)
 
     if (pamh != NULL) {
@@ -517,32 +529,35 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 	 */
 	rc = pam_set_item(pamh, PAM_USER, pw->pw_name);
 	if (rc != PAM_SUCCESS) {
-	    const char *errstr = pam_strerror(pamh, rc);
+	    if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		errstr = "unknown error";
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"pam_set_item(pamh, PAM_USER, %s): %s", pw->pw_name,
-		errstr ? errstr : "unknown error");
+		"pam_set_item(pamh, PAM_USER, %s): %s", pw->pw_name, errstr);
 	}
 	if (def_pam_session) {
 	    rc = pam_close_session(pamh, PAM_SILENT);
 	    if (rc != PAM_SUCCESS) {
-		const char *errstr = pam_strerror(pamh, rc);
+		if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		    errstr = "unknown error";
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "pam_close_session: %s", errstr ? errstr : "unknown error");
+		    "pam_close_session: %s", errstr);
 	    }
 	}
 	if (def_pam_setcred) {
 	    rc = pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 	    if (rc != PAM_SUCCESS) {
-		const char *errstr = pam_strerror(pamh, rc);
+		if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		    errstr = "unknown error";
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "pam_setcred: %s", errstr ? errstr : "unknown error");
+		    "pam_setcred: %s", errstr);
 	    }
 	}
 	rc = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	if (rc != PAM_SUCCESS) {
-	    const char *errstr = pam_strerror(pamh, rc);
+	    if ((errstr = pam_strerror(pamh, rc)) == NULL)
+		errstr = "unknown error";
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"pam_end: %s", errstr ? errstr : "unknown error");
+		"pam_end: %s", errstr);
 	    status = AUTH_FATAL;
 	}
 	pamh = NULL;
