@@ -41,6 +41,7 @@
 #include <ctype.h>
 #include <grp.h>
 #include <pwd.h>
+#include <assert.h>
 
 #include <sudo_usage.h>
 #include "sudo.h"
@@ -310,6 +311,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 #ifdef HAVE_BSD_AUTH_H
 		case 'a':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_BSDAUTH_TYPE].value = optarg;
@@ -322,6 +324,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    SET(tgetpass_flags, TGP_BELL);
 		    break;
 		case 'C':
+		    assert(optarg != NULL);
 		    if (strtonum(optarg, 3, INT_MAX, NULL) == 0) {
 			sudo_warnx(U_("the argument to -C must be a number greater than or equal to 3"));
 			usage(1);
@@ -330,6 +333,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 #ifdef HAVE_LOGIN_CAP_H
 		case 'c':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_LOGIN_CLASS].value = optarg;
@@ -359,6 +363,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    valid_flags = MODE_NONINTERACTIVE;
 		    break;
 		case 'g':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    runas_group = optarg;
@@ -389,6 +394,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    }
 		    /* FALLTHROUGH */
 		case OPT_HOSTNAME:
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_REMOTE_HOST].value = optarg;
@@ -426,15 +432,18 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 		case 'p':
 		    /* An empty prompt is allowed. */
+		    assert(optarg != NULL);
 		    sudo_settings[ARG_PROMPT].value = optarg;
 		    break;
 #ifdef HAVE_SELINUX
 		case 'r':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_SELINUX_ROLE].value = optarg;
 		    break;
 		case 't':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_SELINUX_TYPE].value = optarg;
@@ -442,6 +451,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 #endif
 		case 'T':
 		    /* Plugin determines whether empty timeout is allowed. */
+		    assert(optarg != NULL);
 		    sudo_settings[ARG_TIMEOUT].value = optarg;
 		    break;
 		case 'S':
@@ -452,11 +462,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    SET(flags, MODE_SHELL);
 		    break;
 		case 'U':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    list_user = optarg;
 		    break;
 		case 'u':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    runas_user = optarg;

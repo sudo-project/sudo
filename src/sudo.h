@@ -45,6 +45,11 @@
 # include <priv.h>
 #endif
 
+/* Enable asserts() to avoid static analyzer false positives. */
+#if !defined(SUDO_DEVEL) && !defined(__clang_analyzer__)
+# define NDEBUG
+#endif
+
 #ifdef __TANDEM
 # define ROOT_UID	65535
 #else
