@@ -46,7 +46,7 @@
 #endif
 
 /* Enable asserts() to avoid static analyzer false positives. */
-#if !defined(SUDO_DEVEL) && !defined(__clang_analyzer__)
+#if !(defined(SUDO_DEVEL) || defined(__clang_analyzer__) || defined(__COVERITY__))
 # define NDEBUG
 #endif
 
