@@ -408,6 +408,7 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 				    cs->runasuserlist =
 					malloc(sizeof(*cs->runasuserlist));
 				    if (cs->runasuserlist == NULL) {
+					free(cs);
 					sudoerserror(N_("unable to allocate memory"));
 					YYERROR;
 				    }
@@ -418,6 +419,7 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 				    cs->runasgrouplist =
 					malloc(sizeof(*cs->runasgrouplist));
 				    if (cs->runasgrouplist == NULL) {
+					free(cs);
 					sudoerserror(N_("unable to allocate memory"));
 					YYERROR;
 				    }
