@@ -509,6 +509,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (priv != NULL) {
+	TAILQ_CONCAT(&priv->hostlist, &negated_hosts, entries);
 	TAILQ_CONCAT(&priv->cmndlist, &negated_cmnds, entries);
 	free_privilege(priv);
     }
