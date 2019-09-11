@@ -682,6 +682,7 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
     ssize_t nwritten, nread;
     struct timespec ts;
     struct stat sb;
+    mode_t oldmask;
     debug_decl(sudo_edit_copy_tfiles, SUDO_DEBUG_EDIT)
 
     /* Copy contents of temp files to real ones. */
@@ -725,8 +726,10 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	}
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
+	oldmask = umask(command_details->umask);
 	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details);
+	umask(oldmask);
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
 	if (ofd == -1) {
