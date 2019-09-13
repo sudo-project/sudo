@@ -509,7 +509,7 @@ sudo_ev_add_v2(struct sudo_event_base *base, struct sudo_event *ev,
 	sudo_gettime_mono(&ev->timeout);
 	sudo_timespecadd(&ev->timeout, timo, &ev->timeout);
 	TAILQ_FOREACH(evtmp, &base->timeouts, timeouts_entries) {
-	    if (sudo_timespeccmp(timo, &evtmp->timeout, <))
+	    if (sudo_timespeccmp(&ev->timeout, &evtmp->timeout, <))
 		break;
 	}
 	if (evtmp != NULL) {
