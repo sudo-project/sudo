@@ -70,6 +70,9 @@ What's new in Sudo 1.8.28
    PAM output from being intermixed with that of the command when
    output is sent to a file or pipe.  Bug #895.
 
+ * Sudoedit now honors the umask and umask_override settings in sudoers.
+   Previously, the user's umask was used as-is.
+
 What's new in Sudo 1.8.27
 
  * On HP-UX, sudo will now update the utmps file when running a command

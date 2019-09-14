@@ -9,6 +9,10 @@ o Upgrading from a version prior to 1.8.28:
     1.8.28 can process either type of I/O log file but older versions
     of sudoreplay are unable to replay the newer logs.
 
+    Starting with version 1.8.28, sudoedit honors the umask and
+    umask_override settings in sudoers.  Previously, the user's
+    umask was used as-is.
+
 o Upgrading from a version prior to 1.8.26:
 
     Starting with version 1.8.26, sudo no long sets the USERNAME
