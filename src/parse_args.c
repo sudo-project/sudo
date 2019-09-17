@@ -662,7 +662,7 @@ usage(int fatal)
      * Use usage vectors appropriate to the progname.
      */
     if (strcmp(getprogname(), "sudoedit") == 0) {
-	uvec[0] = SUDO_USAGE5 + 3;
+	uvec[0] = &SUDO_USAGE5[3];
 	uvec[1] = NULL;
     } else {
 	uvec[0] = SUDO_USAGE1;
