@@ -2350,6 +2350,7 @@ fi
 dnl
 dnl C compiler checks (to be done after os checks)
 dnl
+AC_PROG_CC([clang gcc])
 AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_INLINE
