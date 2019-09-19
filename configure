@@ -15397,6 +15397,8 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_mantype" >&5
 $as_echo "$sudo_cv_var_mantype" >&6; }
 	MANTYPE="$sudo_cv_var_mantype"
+    else
+	: ${MANTYPE='mdoc'}
     fi
 fi
 

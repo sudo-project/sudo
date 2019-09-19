@@ -1753,6 +1753,8 @@ else
 	    ]
 	)
 	MANTYPE="$sudo_cv_var_mantype"
+    else
+	: ${MANTYPE='mdoc'}
     fi
 fi
 
