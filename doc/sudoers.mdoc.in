@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 5, 2019
+.Dd September 16, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4522,7 +4522,7 @@ who ran
 the name of the target user, the name of the target group (optional),
 the terminal that
 .Nm sudo
-was run from, and the number of rows and columns of the terminal.
+was run from, and the number of lines and columns of the terminal.
 The second and third lines contain the working directory the command
 was run from and the path name of the command itself (with arguments
 if present).
@@ -4544,7 +4544,7 @@ terminal input, number of bytes in the entry
 .It 4
 terminal output, number of bytes in the entry
 .It 5
-window change, new number rows and columns
+window change, new number lines and columns
 .It 6
 bug compatibility for
 .Nm sudo

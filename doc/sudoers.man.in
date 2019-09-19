@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 5, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 16, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4848,7 +4848,7 @@ who ran
 the name of the target user, the name of the target group (optional),
 the terminal that
 \fBsudo\fR
-was run from, and the number of rows and columns of the terminal.
+was run from, and the number of lines and columns of the terminal.
 The second and third lines contain the working directory the command
 was run from and the path name of the command itself (with arguments
 if present).
@@ -4878,7 +4878,7 @@ terminal input, number of bytes in the entry
 terminal output, number of bytes in the entry
 .TP 6n
 5
-window change, new number rows and columns
+window change, new number lines and columns
 .TP 6n
 6
 bug compatibility for
