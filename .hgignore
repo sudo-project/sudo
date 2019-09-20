@@ -16,6 +16,7 @@
 Makefile$
 ^config\.(h|log|status)$
 ^libtool$
+^build$
 
 ^ChangeLog$
 ^PVS-Studio.cfg$
