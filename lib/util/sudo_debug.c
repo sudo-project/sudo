@@ -155,15 +155,15 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
     /* XXX - reuse fd for existing filename? */
     output = calloc(1, sizeof(*output));
     if (output == NULL)
-	goto bad;
+	goto oom;
     output->fd = -1;
     output->settings = reallocarray(NULL, instance->max_subsystem + 1,
 	sizeof(int));
     if (output->settings == NULL)
-	goto bad;
+	goto oom;
     output->filename = strdup(debug_file->debug_file);
     if (output->filename == NULL)
-	goto bad;
+	goto oom;
     output->fd = -1;
 
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
@@ -178,8 +178,10 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	    output->fd = open(output->filename, O_WRONLY|O_APPEND|O_CREAT,
 		S_IRUSR|S_IWUSR);
 	}
-	if (output->fd == -1)
+	if (output->fd == -1) {
+	    sudo_warn_nodebug("%s", output->filename);
 	    goto bad;
+	}
 	ignore_result(fchown(output->fd, (uid_t)-1, 0));
     }
     (void)fcntl(output->fd, F_SETFD, FD_CLOEXEC);
@@ -191,7 +193,7 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 
 	new_fds = realloc(sudo_debug_fds, new_size);
 	if (new_fds == NULL)
-	    goto bad;
+	    goto oom;
 	memset(new_fds + old_size, 0, new_size - old_size);
 	sudo_debug_fds = new_fds;
 	sudo_debug_fds_size = new_size * NBBY;
@@ -203,7 +205,7 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
     /* Parse Debug conf string. */
     buf = strdup(debug_file->debug_flags);
     if (buf == NULL)
-	goto bad;
+	goto oom;
     for ((cp = strtok_r(buf, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
 	/* Should be in the form subsys@pri. */
 	subsys = cp;
@@ -237,8 +239,9 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
     free(buf);
 
     return output;
-bad:
+oom:
     sudo_warn_nodebug(NULL);
+bad:
     if (output != NULL)
 	sudo_debug_free_output(output);
     return NULL;
