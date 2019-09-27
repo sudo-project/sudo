@@ -160,6 +160,7 @@ _rs_rekey(unsigned char *dat, size_t datlen)
 	rs->rs_have = sizeof(rsx->rs_buf) - KEYSZ - IVSZ;
 }
 
+#ifdef notdef
 static inline void
 _rs_random_buf(void *_buf, size_t n)
 {
@@ -183,6 +184,7 @@ _rs_random_buf(void *_buf, size_t n)
 			_rs_rekey(NULL, 0);
 	}
 }
+#endif
 
 static inline void
 _rs_random_u32(uint32_t *val)
