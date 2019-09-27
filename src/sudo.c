@@ -284,6 +284,7 @@ main(int argc, char *argv[], char *envp[])
 	    }
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
+	    command_details.tty = user_details.tty;
 	    command_details.argv = argv_out;
 	    command_details.envp = user_env_out;
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))

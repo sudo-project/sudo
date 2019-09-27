@@ -171,6 +171,7 @@ struct command_details {
     const char *selinux_role;
     const char *selinux_type;
     const char *utmp_user;
+    const char *tty;
     char **argv;
     char **envp;
 #ifdef HAVE_PRIV_SET

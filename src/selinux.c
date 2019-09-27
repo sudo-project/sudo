@@ -130,10 +130,11 @@ selinux_restore_tty(void)
 	goto skip_relabel;
     }
 
-    if (strcmp(chk_tty_context, se_state.new_tty_context) == 0) {
+    if (strcmp(chk_tty_context, se_state.new_tty_context) != 0) {
 	sudo_warnx(U_("%s changed labels"), se_state.ttyn);
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: tty label changed, skipping",
-	    __func__);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: not restoring tty label, expected %s, have %s",
+	    __func__, se_state.new_tty_context, chk_tty_context);
 	goto skip_relabel;
     }
 
@@ -180,6 +181,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 	    __func__);
 	debug_return_int(0);
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: relabeling tty %s", __func__, ttyn);
 
     /* If sudo is not allocating a pty for the command, open current tty. */
     if (ptyfd == -1) {
@@ -352,8 +354,9 @@ bad:
 }
 
 /* 
- * Set the exec and tty contexts in preparation for fork/exec.
- * Must run as root, before the uid change.
+ * Determine the exec and tty contexts in preparation for fork/exec.
+ * Must run as root, before forking the child process.
+ * Sets the tty context but not the exec context (which happens later).
  * If ptyfd is not -1, it indicates we are running
  * in a pty and do not need to reset std{in,out,err}.
  * Returns 0 on success and -1 on failure.

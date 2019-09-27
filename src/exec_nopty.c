@@ -378,6 +378,17 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	debug_return;
     }
 
+#ifdef HAVE_SELINUX
+    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+        if (selinux_setup(details->selinux_role, details->selinux_type,
+		details->tty, -1) == -1) {
+	    cstat->type = CMD_ERRNO;
+	    cstat->val = errno;
+	    debug_return;
+	}
+    }
+#endif
+
     ec.cmnd_pid = sudo_debug_fork();
     switch (ec.cmnd_pid) {
     case -1:

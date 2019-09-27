@@ -104,7 +104,7 @@ struct io_buffer {
 };
 SLIST_HEAD(io_buffer_list, io_buffer);
 
-static char slavename[PATH_MAX];
+static char ptyname[PATH_MAX];
 int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static bool foreground, pipeline;
 static int ttymode = TERM_COOKED;
@@ -131,7 +131,7 @@ pty_cleanup(void)
     if (io_fds[SFD_USERTTY] != -1)
 	sudo_term_restore(io_fds[SFD_USERTTY], false);
     if (utmp_user != NULL)
-	utmp_logout(slavename, 0);
+	utmp_logout(ptyname, 0);
 
     debug_return;
 }
@@ -139,7 +139,7 @@ pty_cleanup(void)
 /*
  * Allocate a pty if /dev/tty is a tty.
  * Fills in io_fds[SFD_USERTTY], io_fds[SFD_MASTER], io_fds[SFD_SLAVE]
- * and slavename globals.
+ * and ptyname globals.
  */
 static bool
 pty_setup(struct command_details *details, const char *tty)
@@ -154,14 +154,17 @@ pty_setup(struct command_details *details, const char *tty)
     }
 
     if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
-	slavename, sizeof(slavename), details->euid))
+	ptyname, sizeof(ptyname), details->euid))
 	sudo_fatal(U_("unable to allocate pty"));
+
+    /* Update tty name in command details (used by SELinux and AIX). */
+    details->tty = ptyname;
 
     /* Add entry to utmp/utmpx? */
     if (ISSET(details->flags, CD_SET_UTMP)) {
 	utmp_user =
 	    details->utmp_user ? details->utmp_user : user_details.username;
-	utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
+	utmp_login(tty, ptyname, io_fds[SFD_SLAVE], utmp_user);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -174,7 +177,7 @@ pty_setup(struct command_details *details, const char *tty)
 
 /*
  * Make the tty slave the controlling tty.
- * This is only used by the monitor but slavename[] is static.
+ * This is only used by the monitor but ptyname[] is static.
  */
 int
 pty_make_controlling(void)
@@ -184,8 +187,8 @@ pty_make_controlling(void)
 	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
 	    return -1;
 #else
-	/* Set controlling tty by reopening slave. */
-	int fd = open(slavename, O_RDWR);
+	/* Set controlling tty by reopening pty slave. */
+	int fd = open(ptyname, O_RDWR);
 	if (fd == -1)
 	    return -1;
 	close(fd);
@@ -831,7 +834,7 @@ pty_finish(struct command_status *cstat)
 
     /* Update utmp */
     if (utmp_user != NULL)
-	utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0);
+	utmp_logout(ptyname, cstat->type == CMD_WSTATUS ? cstat->val : 0);
 
     debug_return;
 }

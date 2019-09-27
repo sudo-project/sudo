@@ -610,10 +610,24 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	    sudo_fatal(U_("unable to receive message from parent"));
     }
 
+#ifdef HAVE_SELINUX
+    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+        if (selinux_setup(details->selinux_role, details->selinux_type,
+            details->tty, io_fds[SFD_SLAVE]) == -1)
+            goto bad;
+    }
+#endif
+
     mc.cmnd_pid = sudo_debug_fork();
     switch (mc.cmnd_pid) {
     case -1:
 	sudo_warn(U_("unable to fork"));
+#ifdef HAVE_SELINUX
+	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+	    if (selinux_restore_tty() != 0)
+		sudo_warnx(U_("unable to restore tty label"));
+	}
+#endif
 	goto bad;
     case 0:
 	/* child */
