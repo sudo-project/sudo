@@ -73,6 +73,9 @@ What's new in Sudo 1.8.28
  * Sudoedit now honors the umask and umask_override settings in sudoers.
    Previously, the user's umask was used as-is.
 
+ * Fixed a bug where the terminal's file context was not restored
+   when using SELinux RBAC.  Bug #898.
+
 What's new in Sudo 1.8.27
 
  * On HP-UX, sudo will now update the utmps file when running a command
