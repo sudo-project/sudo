@@ -91,7 +91,7 @@ CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=c
 SPLINT_OPTS = -D__restrict= -checks
 
 # Default PVS-studio options when run from the top-level Makefile
-PVS_CFG = $(top_srcdir)/PVS-Studio.cfg
+PVS_CFG = $(top_builddir)/PVS-Studio.cfg
 PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
