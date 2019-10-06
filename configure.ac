@@ -272,8 +272,14 @@ AC_CONFIG_LIBOBJ_DIR(lib/util)
 
 dnl
 dnl We must call AC_USE_SYSTEM_EXTENSIONS before the compiler is run.
+dnl On BSD systems we prefer clang over gcc.
 dnl
-AC_PROG_CC([clang gcc])
+case "$host" in
+    *-*-*bsd*|*-*-darwin*)
+	AC_PROG_CC([clang gcc]);;
+    *)
+	AC_PROG_CC;;
+esac
 AC_USE_SYSTEM_EXTENSIONS
 
 #
