@@ -76,6 +76,10 @@ What's new in Sudo 1.8.28
  * Fixed a bug where the terminal's file context was not restored
    when using SELinux RBAC.  Bug #898.
 
+ * Fixed CVE-2019-14287, a bug where a sudo user may be able to
+   run a command as root when the Runas specification explicitly
+   disallows root access as long as the ALL keyword is listed first.
+
 What's new in Sudo 1.8.27
 
  * On HP-UX, sudo will now update the utmps file when running a command
