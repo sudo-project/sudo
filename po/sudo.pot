@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.28\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2019-09-27 15:38-0600\n"
+"POT-Creation-Date: 2019-10-10 10:07-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,19 +96,19 @@ msgstr ""
 msgid "Unknown signal"
 msgstr ""
 
-#: lib/util/strtoid.c:84 lib/util/strtoid.c:131 lib/util/strtoid.c:159
-#: lib/util/strtomode.c:56 lib/util/strtonum.c:65 lib/util/strtonum.c:183
-msgid "invalid value"
-msgstr ""
-
-#: lib/util/strtoid.c:91 lib/util/strtoid.c:138 lib/util/strtoid.c:166
+#: lib/util/strtoid.c:98 lib/util/strtoid.c:141 lib/util/strtoid.c:164
 #: lib/util/strtomode.c:62 lib/util/strtonum.c:68 lib/util/strtonum.c:195
 msgid "value too large"
 msgstr ""
 
-#: lib/util/strtoid.c:93 lib/util/strtoid.c:144 lib/util/strtomode.c:62
+#: lib/util/strtoid.c:104 lib/util/strtoid.c:147 lib/util/strtomode.c:62
 #: lib/util/strtonum.c:68 lib/util/strtonum.c:189
 msgid "value too small"
+msgstr ""
+
+#: lib/util/strtoid.c:111 lib/util/strtoid.c:154 lib/util/strtoid.c:171
+#: lib/util/strtomode.c:56 lib/util/strtonum.c:65 lib/util/strtonum.c:183
+msgid "invalid value"
 msgstr ""
 
 #: lib/util/sudo_conf.c:212
