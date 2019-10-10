@@ -4,7 +4,7 @@ Parse error in sudoers near line 1.
 Entries for user root:
 
 Command unmatched
-testsudoers: test5.inc should be owned by gid 4294967295
+testsudoers: test5.inc should be owned by gid 4294967294
 Parse error in sudoers near line 1.
 
 Entries for user root:

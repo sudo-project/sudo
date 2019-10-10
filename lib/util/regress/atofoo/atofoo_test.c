@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +26,7 @@
 #else
 # include "compat/stdbool.h"
 #endif
+#include <errno.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"
@@ -80,15 +81,20 @@ static struct strtoid_data {
     id_t id;
     const char *sep;
     const char *ep;
+    int errnum;
 } strtoid_data[] = {
-    { "0,1", 0, ",", "," },
-    { "10", 10, NULL, NULL },
-    { "-2", -2, NULL, NULL },
+    { "0,1", 0, ",", ",", 0 },
+    { "10", 10, NULL, NULL, 0 },
+    { "-1", 0, NULL, NULL, EINVAL },
+    { "4294967295", 0, NULL, NULL, EINVAL },
+    { "4294967296", 0, NULL, NULL, ERANGE },
+    { "-2147483649", 0, NULL, NULL, ERANGE },
+    { "-2", -2, NULL, NULL, 0 },
 #if SIZEOF_ID_T != SIZEOF_LONG_LONG
-    { "-2", (id_t)4294967294U, NULL, NULL },
+    { "-2", (id_t)4294967294U, NULL, NULL, 0 },
 #endif
-    { "4294967294", (id_t)4294967294U, NULL, NULL },
-    { NULL, 0, NULL, NULL }
+    { "4294967294", (id_t)4294967294U, NULL, NULL, 0 },
+    { NULL, 0, NULL, NULL, 0 }
 };
 
 static int
@@ -104,11 +110,23 @@ test_strtoid(int *ntests)
 	(*ntests)++;
 	errstr = "some error";
 	value = sudo_strtoid(d->idstr, d->sep, &ep, &errstr);
-	if (errstr != NULL) {
-	    if (d->id != (id_t)-1) {
-		sudo_warnx_nodebug("FAIL: %s: %s", d->idstr, errstr);
+	if (d->errnum != 0) {
+	    if (errstr == NULL) {
+		sudo_warnx_nodebug("FAIL: %s: missing errstr for errno %d",
+		    d->idstr, d->errnum);
+		errors++;
+	    } else if (value != 0) {
+		sudo_warnx_nodebug("FAIL: %s should return 0 on error",
+		    d->idstr);
+		errors++;
+	    } else if (errno != d->errnum) {
+		sudo_warnx_nodebug("FAIL: %s: errno mismatch, %d != %d",
+		    d->idstr, errno, d->errnum);
 		errors++;
 	    }
+	} else if (errstr != NULL) {
+	    sudo_warnx_nodebug("FAIL: %s: %s", d->idstr, errstr);
+	    errors++;
 	} else if (value != d->id) {
 	    sudo_warnx_nodebug("FAIL: %s != %u", d->idstr, (unsigned int)d->id);
 	    errors++;
