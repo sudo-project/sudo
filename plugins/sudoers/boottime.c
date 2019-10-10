@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2009-2015, 2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -72,7 +74,7 @@ get_boottime(struct timespec *ts)
     /* read btime from /proc/stat */
     fp = fopen("/proc/stat", "r");
     if (fp != NULL) {
-	while ((len = getline(&line, &linesize, fp)) != -1) {
+	while ((len = getdelim(&line, &linesize, '\n', fp)) != -1) {
 	    if (strncmp(line, "btime ", 6) == 0) {
 		if (line[len - 1] == '\n')
 		    line[len - 1] = '\0';

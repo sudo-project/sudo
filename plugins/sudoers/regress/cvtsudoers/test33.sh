@@ -3,7 +3,6 @@
 # Test LDAP negated sudoRunAsUser and sudoRunAsGroup converted to sudoers.
 #
 
-exec 2>&1
 ./cvtsudoers -c "" -i ldif -f sudoers <<EOF
 dn: dc=sudo,dc=ws
 objectClass: dcObject

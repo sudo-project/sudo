@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2004-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -83,7 +85,7 @@ sudo_file_open(struct sudo_nss *nss)
     if (handle != NULL) {
 	handle->fp = open_sudoers(sudoers_file, false, NULL);
 	if (handle->fp != NULL) {
-	    init_parse_tree(&handle->parse_tree);
+	    init_parse_tree(&handle->parse_tree, NULL, NULL);
 	} else {
 	    free(handle);
 	    handle = NULL;

@@ -1,7 +1,7 @@
 #!/bin/sh
-# Copyright 2018 One Identity, LLC. ALL RIGHTS RESERVED
-pp_revision="20180220"
- # Copyright 2018 One Identity, LLC.  ALL RIGHTS RESERVED.
+# Copyright 2019 One Identity LLC. ALL RIGHTS RESERVED
+pp_revision="20190919"
+ # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
  # modification, are permitted provided that the following conditions
@@ -12,7 +12,7 @@ pp_revision="20180220"
  # 2. Redistributions in binary form must reproduce the above copyright
  #    notice, this list of conditions and the following disclaimer in the
  #    documentation and/or other materials provided with the distribution.
- # 3. Neither the name of One Identity, LLC. nor the names of its
+ # 3. Neither the name of One Identity LLC. nor the names of its
  #    contributors may be used to endorse or promote products derived from
  #    this software without specific prior written permission.
  #
@@ -31,7 +31,7 @@ pp_revision="20180220"
  # Please see <http://rc.quest.com/topics/polypkg/> for more information
 
 pp_version="1.0.0.$pp_revision"
-pp_copyright="Copyright 2018, One Identity, LLC. ALL RIGHTS RESERVED."
+pp_copyright="Copyright 2018, One Identity LLC. ALL RIGHTS RESERVED."
 
 pp_opt_debug=false
 pp_opt_destdir="$DESTDIR"
@@ -800,9 +800,10 @@ pp_if_false=0
 pp_frontend_init () {
     name=
     version=
+    build_number=
     summary="no summary"
     description="No description"
-    copyright="Copyright 2018 One Identity, LLC. ALL RIGHTS RESERVED."
+    copyright="Copyright 2018 One Identity LLC. ALL RIGHTS RESERVED."
 
     #-- if the user supplied extra arguments on the command line
     #   then load them now.
@@ -1165,7 +1166,7 @@ pp_set_expand_converter_or_reexec () {
     else
 	test x"$pp_expand_rexec" != x"true" ||
 	    pp_die "problem finding shell that can do brace expansion"
-	for shell in ksh ksh93 bash; do
+	for shell in bash ksh ksh93; do
 	    if ($shell -c 'echo /{usr,bin}' |
 			pp_expand_test_usr_bin) 2>/dev/null ||
 	       ($shell -c 'echo /@(usr|bin)' |
@@ -1638,7 +1639,6 @@ pp_aix_copy_root () {
         esac
     done
 }
-
 
 pp_aix_size () {
     typeset prefix t m o g f p st
@@ -2230,12 +2230,12 @@ pp_backend_sd_detect () {
 }
 
 pp_backend_sd_init () {
-    pp_sd_sudo=
+    pp_sd_sudo=sudo
     pp_sd_startlevels=2
     pp_sd_stoplevels=auto
     pp_sd_config_file=
     pp_sd_vendor=
-    pp_sd_vendor_tag=Quest
+    pp_sd_vendor_tag=OneIdentity
     pp_sd_default_start=1           # config_file default start value
 
     pp_readlink_fn=pp_ls_readlink   # HPUX has no readlink
@@ -3510,6 +3510,8 @@ pp_solaris_smf () {
                 exec='$_pp_solaris_service_script restart'
                 timeout_seconds='$smf_restart_timeout' />
 
+          $pp_solaris_smf_property_groups
+
           <template>
               <common_name>
                   <loctext xml:lang='C'>$description</loctext>
@@ -3783,7 +3785,15 @@ pp_solaris_remove_service () {
 if [ "x${PKG_INSTALL_ROOT}" = 'x' ]; then
     if [ -x /usr/sbin/svcadm ] ; then
         /usr/sbin/svcadm disable -s '$svc' 2>/dev/null
-        /usr/sbin/svccfg delete '$svc' 2>/dev/null
+	case "`uname -r`-$pp_svc_xml_file" in
+	  5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
+	    # Use manifest-import if > 5.10 and manifest in default location
+	    /usr/sbin/svcadm restart manifest-import 2>/dev/null
+	    ;;
+	  *)
+	    /usr/sbin/svccfg delete '$svc' 2>/dev/null
+	    ;;
+	esac
     else
         '$file' stop >/dev/null 2>/dev/null
     fi
@@ -3803,7 +3813,15 @@ pp_solaris_install_service () {
     echo '
 if [ "x${PKG_INSTALL_ROOT}" != "x" ]; then
   if [ -x ${PKG_INSTALL_ROOT}/usr/sbin/svcadm ]; then
-    echo "/usr/sbin/svccfg import '$pp_svc_xml_file' 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
+    case "`uname -r`-$pp_svc_xml_file" in
+      5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
+	# Use manifest-import if > 5.10 and manifest in default location
+	echo "/usr/sbin/svcadm restart manifest-import 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
+	;;
+      *)
+	echo "/usr/sbin/svccfg import '$pp_svc_xml_file' 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
+	;;
+    esac
   else'
     test -n "${solaris_sysv_init_start_states}" &&
         for state in ${solaris_sysv_init_start_states}; do
@@ -3825,8 +3843,30 @@ else
     if [ -x /usr/sbin/svcadm ]; then
         echo "Registering '$svc' with SMF"
         /usr/sbin/svcadm disable -s '$svc' 2>/dev/null
-        /usr/sbin/svccfg delete '$svc' 2>/dev/null
-        /usr/sbin/svccfg import '$pp_svc_xml_file'
+	case "`uname -r`-$pp_svc_xml_file" in
+	  5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
+	    # Use manifest-import if > 5.10 and manifest in default location
+	    /usr/sbin/svcadm restart manifest-import
+	    # Wait for import to complete, otherwise it will not know
+	    # about our service until after we try to start it
+	    echo Waiting for manifest-import...
+	    typeset waited
+	    waited=0
+	    while [ $waited -lt 15 ] && ! /usr/bin/svcs -l '$svc' >/dev/null 2>&1; do
+		sleep 1
+		waited=`expr $waited + 1`
+	    done
+	    if /usr/bin/svcs -l '$svc' >/dev/null 2>&1; then
+		echo OK
+	    else
+		echo manifest-import took to long, you might have to control '$svc' manually.
+	    fi
+	    ;;
+	  *)
+	    /usr/sbin/svccfg delete '$svc' 2>/dev/null
+	    /usr/sbin/svccfg import '$pp_svc_xml_file'
+	    ;;
+	esac
     else'
     test -n "${solaris_sysv_init_start_states}" &&
         for state in ${solaris_sysv_init_start_states}; do
@@ -3884,7 +3924,7 @@ pp_backend_deb_init () {
     pp_deb_release=
     pp_deb_arch=
     pp_deb_arch_std=
-    pp_deb_maintainer="One Identity, LLC <support@oneidentity.com>"
+    pp_deb_maintainer="One Identity LLC <support@oneidentity.com>"
     pp_deb_copyright=
     pp_deb_distro=
     pp_deb_control_description=
@@ -3935,7 +3975,7 @@ pp_deb_munge_description () {
 }
 
 pp_deb_detect_arch () {
-   pp_deb_arch=`dpkg --print-architecture`
+   pp_deb_arch=`dpkg-architecture -qDEB_HOST_ARCH`
    pp_deb_arch_std=`uname -m`
 }
 
@@ -4404,6 +4444,15 @@ pp_backend_deb_probe() {
 		squeeze)
 		    release="60"
 		    ;;
+        wheezy)
+            release="70"
+            ;;
+        jessie)
+            release="80"
+            ;;
+        stretch)
+            release="90"
+            ;;
 	    esac
 	    ;;
 	*)
@@ -5456,7 +5505,7 @@ pp_rpm_detect_arch () {
 		pp_rpm_arch_std=i386
 		break
 		;;
-	    x86_64|ppc|ppc64|ia64|s390|s390x)
+	    x86_64|ppc|ppc64|ppc64le|ia64|s390|s390x)
 		pp_rpm_arch_std="$arch"
 		break
 		;;
@@ -5514,6 +5563,8 @@ pp_rpm_detect_distro () {
           /^S[uU]SE LINUX Enterprise Server [0-9]/ { print "sles" $5; exit; }
           /^SuSE SLES-[0-9]/  { print "sles" substr($2,6); exit; }
        ' /etc/SuSE-release`
+    elif test -f /etc/os-release; then
+      pp_rpm_distro="`. /etc/os-release && echo \$ID\$VERSION`"
     elif test -f /etc/pld-release; then
        pp_rpm_distro=`awk '
           /^[^ ]* PLD Linux/ { print "pld" $1; exit; }
@@ -5583,6 +5634,8 @@ pp_rpm_writefiles () {
 		    farch=x86_64;;
 		*": ELF 32-bit MSB "*", PowerPC"*)
 		    farch=ppc;;
+        *": ELF 64-bit LSB "*", 64-bit PowerPC"*)
+            farch=ppc64le;;
 		*": ELF 64-bit MSB "*", 64-bit PowerPC"*)
 		    farch=ppc64;;
 		*": ELF 64-bit LSB "*", IA-64"*)
@@ -5595,6 +5648,8 @@ pp_rpm_writefiles () {
 		    farch=ppc;;
 		*"64-bit XCOFF executable"*)
 		    farch=ppc64;;
+        *": ELF 64-bit LSB "*", ARM aarch64"*)
+            farch=aarch64;;
 		*" ELF "*)
 		    farch=ELF;;
 		*)
@@ -5618,6 +5673,8 @@ pp_rpm_writefiles () {
 			farch=s390;;
 		    "ELF64 IBM S/390")
 			farch=s390x;;
+            "ELF64 AArch64")
+            farch=aarch64;;
 		    *)
 			farch=noarch;;
 		esac
@@ -5889,6 +5946,8 @@ pp_backend_rpm () {
 		    pp_rpm_arch_seen=x86_64;;
 		*"s390 s390x"* | *"s390x s390"* )
 		    pp_rpm_arch_seen=s390x;;
+        *"aarch64"* )
+            pp_rpm_arch_seen=aarch64;;
 		*" "*)
 		    pp_error "detected multiple targets: $pp_rpm_arch_seen"
 		    pp_rpm_arch_seen=unknown;;	    # not detected
@@ -6599,7 +6658,7 @@ pp_backend_rpm_function () {
 
     <http://developer.apple.com/documentation/DeveloperTools/Conceptual/SoftwareDistribution4/Concepts/sd_pkg_flags.html>
     Info.plist = {
-     CFBundleGetInfoString: "1.2.3, One Identity, LLC.",
+     CFBundleGetInfoString: "1.2.3, One Identity LLC.",
      CFBundleIdentifier: "com.quest.rc.openssh",
      CFBundleShortVersionString: "1.2.3",
      IFMajorVersion: 1,
@@ -7086,7 +7145,7 @@ pp_backend_macos_bundle () {
 	key CFBundleIdentifier string \
 	    "${pp_macos_bundle_id}" \
     key CFBundleName string "$name" \
-	key CFBundleShortVersionString string "$bundle_version" \
+    key CFBundleShortVersionString string "$bundle_version.$source_version" \
 	key IFMajorVersion integer 1 \
 	key IFMinorVersion integer 0 \
 	key IFPkgFlagAllowBackRev false \
@@ -7113,7 +7172,7 @@ pp_backend_macos_bundle () {
         key IFPkgDescriptionDeleteWarning string "" \
 	    key IFPkgDescriptionDescription string "$pp_macos_bundle_info_string" \
 	    key IFPkgDescriptionTitle       string "$name" \
-	    key IFPkgDescriptionVersion string "$version" \
+	    key IFPkgDescriptionVersion string "$bundle_version.$source_version" \
  	\} end-plist > $Description_plist
 
     # write Resources/files
@@ -7478,7 +7537,7 @@ pp_backend_macos_install_script () {
 }
 
 pp_backend_macos_init_svc_vars () {
-    pp_macos_start_services_after_install=false
+    pp_macos_start_services_after_install=true
     pp_macos_service_name=
     pp_macos_default_service_id_prefix="com.quest.rc."
     pp_macos_service_id=
@@ -7573,10 +7632,17 @@ pp_macos_add_service () {
     cp "$pp_macos_svc_plist_file" "$pp_destdir/$plist_file"
     pp_add_file_if_missing "$plist_file"
 
-    #-- add code to start the service on install
+    #-- add code to start the service on install & upgrade
     ${pp_macos_start_services_after_install} && <<-. >> $pp_wrkdir/%post.$svc
 	# start service '$svc' automatically after install
 	launchctl load "$plist_file"
+.
+    ${pp_macos_start_services_after_install} && <<-. >> $pp_wrkdir/%postup.$svc
+        # start service '$svc' automatically after upgrade
+        # This is necessary if the service is new since the previous version.
+        # XXX: Does launchd automatically reload an service if its binary
+        # is replaced?
+        launchctl load "$plist_file"
 .
 }
 
@@ -7831,9 +7897,10 @@ pp_backend_bsd_init () {
     pp_bsd_origin=
     pp_bsd_comment=
     pp_bsd_arch=
+    pp_bsd_abi=
     pp_bsd_www=
     pp_bsd_maintainer=
-    pp_bsd_prefix="/usr/local"
+    pp_bsd_prefix="/usr/local/"
     pp_bsd_desc=
     pp_bsd_message=
 
@@ -8021,6 +8088,7 @@ pp_bsd_make_manifest() {
     # Optional, so if they are not included in the pkg-product.pp file then do not create the label
     pp_bsd_label "categories" "${pp_bsd_categories}" >> $manifest
     pp_bsd_label "arch" "${pp_bsd_arch}" >> $manifest
+    pp_bsd_label "abi" "${pp_bsd_abi}" >> $manifest
     pp_bsd_label "licenselogic" "${pp_bsd_licenselogic}" >> $manifest
     pp_bsd_label "licenses" "${pp_bsd_licenses}" >> $manifest
 
@@ -8065,7 +8133,7 @@ pp_bsd_make_data() {
     cat $pp_wrkdir/%files.${cmp} | while read t m o g f p st; do
         test x"$o" = x"-" && o="${pp_bsd_defattr_uid:-root}"
         test x"$g" = x"-" && g="${pp_bsd_defattr_gid:-wheel}"
-        path=$pp_bsd_prefix$p
+        path=$p
         case "$t" in
             f) # Files
                 # For now just skip the file if it is volatile, we will need to remove it in the pre uninstall script
@@ -8092,7 +8160,7 @@ pp_bsd_make_data() {
                 pp_debug "Found symlink: $datadir$path";
                 # Remove leading /
                 rel_p=`echo $p | sed s,^/,,`
-                (cd $datadir$pp_bsd_prefix; ln -sf $st $rel_p);                 
+                (cd $datadir; ln -sf $st $rel_p);
                 # Do we care if the file doesn't exist? Just symnlink it regardless and throw a warning? This will be important in the case 
                 # where we depend on other packages to be installed and will be using the libs from that package.
                 if [ ! -e "$datadir$path" ]; then
@@ -8206,6 +8274,7 @@ pp_backend_bsd() {
     #create-postinstall
     #create-package
     #
+    pp_bsd_handle_services
 
     for cmp in $pp_components
     do
@@ -8342,6 +8411,326 @@ pp_backend_bsd_install_script () {
                 ;;
         esac
 .
+}
+pp_backend_bsd_init_svc_vars () {
+	svc_process_regex="${pp_bsd_svc_process_regex}"
+    svc_description=$summary
+    svc_init_prefix="${pp_bsd_prefix}"
+    svc_init_filename="${pp_bsd_svc_init_filename}"     # == $svc
+    svc_init_filepath="${pp_bsd_svc_init_filepath}"     # == $pp_bsd_prefix/etc/rc.d/ by default
+
+    bsd_svc_before="${pp_bsd_svc_before}"
+    bsd_svc_require="${pp_bsd_svc_require}"
+    bsd_svc_keyword="${pp_bsd_svc_keyword}"
+    
+}
+
+pp_bsd_service_make_init_info() {
+	local svc=$1
+	local out=$2
+	cat <<-. >$out
+	#!/bin/sh
+	#
+	# FreeBSD Script Header Detail
+	#
+	# PROVIDE: $svc
+.
+
+	if [ ! -z "$bsd_svc_before" ]; then
+	cat <<-. >>$out
+		# BEFORE: $bsd_svc_before
+.
+	fi
+
+	if [ ! -z "$bsd_svc_require" ]; then
+    cat <<-. >>$out
+		# REQUIRE: $bsd_svc_require
+.
+	fi
+
+	if [ ! -z "$bsd_svc_keyword" ]; then
+    cat <<-. >>$out
+		# KEYWORD: $bsd_svc_keyword
+.
+	fi
+
+	cat <<-'.' >>$out
+		### END INIT INFO
+
+.
+
+}
+
+pp_bsd_service_make_init_set_vars() {
+	local svc=$1
+    local out=$2
+
+	svc_command="$cmd"
+	svc_pre_command="${pp_bsd_svc_pre_command}"
+	svc_pre_command_args="${pp_bsd_svc_pre_command_args}"
+
+	local run_command="${svc_pre_command:-$svc_command}"
+	local run_pre_command_args="${svc_pre_command:+"${svc_pre_command_args}"}"
+	local run_post_command_args="${svc_command:+"${svc_command_args}"}"
+    local run_post_command_without_pre_command="${svc_pre_command:+"$svc_command"}"
+	local run_post_command_with_args="${run_post_command_without_pre_command}${run_post_command_args:+" $run_post_command_args"}"
+	local run_command_args="${run_pre_command_args:+"$run_pre_command_args"}${run_post_command_with_args:+" $run_post_command_with_args"}"
+
+    # https://www.freebsd.org/cgi/man.cgi?query=rc.subr
+	cat <<-. >>$out
+	# FreeBSD rc subroutines
+	. /etc/rc.subr
+
+	# 0: Not running.
+	# 1: Running normally
+	# 2: Running, but no PID file.
+	# 3: Running, but PID file doesn't match running processes.
+	# If the PID file is found but no process, the file is removed and 0 is returned.
+	DAEMON_RUNNING=0
+
+	name="$svc"
+	desc="${svc_description:-\$name}"
+
+	start_cmd="\${name}_start"
+	status_cmd="\${name}_status"
+	stop_cmd="\${name}_stop"
+
+	# Loads any variables set in /etc/rc.conf.d/\$name
+	load_rc_config \$name
+
+	: \${${svc}_enable:="Yes"}
+	: \${${svc}_pidfile:="${pidfile:-/var/run/\${name\}.pid}"}
+	: \${${svc}_args:="$run_command_args"}
+	: \${${svc}_cmd:="$run_command"}
+
+	# Regex used in the pp_check_daemon_running ps check to find our running processe(s)
+	# If it's set in /etc/rc.conf.d/\$name this will be used first
+	# then check if pp_bsd_svc_process_regex is set, finally set to the \${name}_cmd
+	# When set to \${name}_cmd pp_check_daemon_running will only find the parent process pid
+	: \${${svc}_process_regex:="${pp_bsd_svc_process_regex:-${cmd}}"}
+
+	# For additional information about the rc.subr see:
+	# https://www.freebsd.org/cgi/man.cgi?query=rc.subr
+	rcvar="\${name}_enable"
+
+	pidfile=\${${svc}_pidfile}
+
+	command="\$${svc}_cmd"
+	command_args="\$${svc}_args"
+
+.
+
+}
+
+pp_bsd_service_make_init_body() {
+	local svc=$1
+	local out=$2
+
+	cat<<-'.' >>$out
+	pp_exec_cmd() { (eval $command $command_args) }
+
+	pp_success_msg () { echo ${1:+"$*:"} OK; }
+	pp_failure_msg () { echo ${1:+"$*:"} FAIL; }
+	pp_warning_msg () { echo ${1:+"$*:"} WARNING; }
+
+	#-- prints a status message
+	pp_msg () { echo -n "$*: "; }
+
+	# Kills process $1.
+	# First a sigterm, then wait up to 10 seconds
+	# before issuing a sig kill.
+	pp_signal () {
+	    # Kill the processes the nice way first
+	    if [ -z "$1" ]; then
+	        # No pid file. Use the list from pp_check_daemon_running
+	        kill $PROCESSES 2>/dev/null
+	    else
+	        kill $1 2>/dev/null
+	    fi
+	    count=1
+
+	    #Check to make sure the processes died, if not kill them the hard way
+	    while [ $count -le 10 ]; do
+	        sleep 1
+	        pp_check_daemon_running
+	        if [ $DAEMON_RUNNING -eq 0 ]; then
+	            break;
+	        fi
+	        if [ $count -eq 1 ]; then
+	            # We tried killing the pid associated to the pidfile, now try the ones we found from pp_check_daemon_running
+	            kill $PROCESSES 2>/dev/null
+	        fi
+	        count=`expr $count + 1`
+	    done
+	    # Check one more time to make sure we got them all
+	    if [ $DAEMON_RUNNING -ne 0 ]; then
+	       # These guys don't want to go down the nice way, now just kill them
+	       kill -9 $PROCESSES 2>/dev/null
+	    fi
+	    # make sure to remove the pidfile
+	    rm -f $pidfile
+	}
+
+	# Check to see if the daemon process is running
+	# Sets the PROCESSES global variable with all pids that match
+	# ${name}_process_regex 
+	# Sets global variable DAEMON_RUNNING to one of the following:
+	# 0: Not Running
+	# 1: Running normally
+	# 2: Running, but no PID file
+	# 3: Running, but PID file doesn't match running processes.
+	# 
+	pp_check_daemon_running()
+	{
+		DAEMON_RUNNING=0
+.
+	cat<<-. >>$out
+
+		PROCESSES="\`eval ps -axo pid,args | grep "\${${svc}_process_regex}" | grep -v grep | awk '{print \$1}'\`"
+
+.
+	cat<<-'.' >>$out
+    if [ -f $pidfile ]; then
+        if [ ! -z "$PROCESSES" ]; then
+            PARENT_PID=`cat $pidfile 2>/dev/null`
+            PPROCESS=`echo $PROCESSES | grep "${PARENT_PID:-"NOPID"}"`
+            if [ $? -eq 0 ]; then
+                DAEMON_RUNNING=1
+            else
+                DAEMON_RUNNING=3
+            fi
+        else
+            rm -r $pidfile
+        fi
+    else
+        if [ ! -z "$PROCESSES" ]; then
+            DAEMON_RUNNING=2
+        fi
+    fi
+	}
+.
+	cat <<-. >>$out
+
+	# starts the service
+	${svc}_start()
+.
+	cat <<-'.' >>$out
+	{
+	    pp_msg "Starting ${desc}"
+	    pp_check_daemon_running
+
+	    if [ $DAEMON_RUNNING -eq 0 ]; then
+	        pp_exec_cmd
+	        RETVAL=$?
+	        if [ $RETVAL -eq 0 ]; then
+	            pp_success_msg
+	        else
+	            pp_failure_msg "cannot start"
+	        fi
+	    else
+	        if [ $DAEMON_RUNNING -eq 1 ]; then
+	            pp_success_msg "${name} appears to be running already"
+	        else
+	            pp_warning_msg "${name} is already running but without a pid file"
+	        fi
+	    fi
+	}
+
+.
+
+	cat <<-. >>$out
+	# stops the service
+	${svc}_stop()
+.
+
+	cat <<-'.' >>$out
+	{
+	    pp_msg "Stopping ${desc}"
+	    pp_check_daemon_running
+
+	    if [ $DAEMON_RUNNING -ne 0 ]; then
+	        pp_signal `cat $pidfile 2>/dev/null`
+	        if [ -n "$pidfile" ]; then
+	            loop_cnt=1
+	            while [ -e ${pidfile} ]; do
+	                sleep 1
+	                loop_cnt=`expr $loop_cnt + 1`
+	                if [ $loop_cnt -eq 10 ]; then
+	                    break
+	                fi
+	            done
+	        fi
+	        rm -f $pidfile
+
+	        pp_success_msg
+	    else
+	        pp_failure_msg
+	        echo -n "$desc does not appear to be running."
+	        echo
+	    fi
+	}
+.
+
+	cat <<-. >>$out
+	# prints information about the service status
+	# returns:
+	# 0=running
+	# 1=Not running
+	# 2=Running without pidfile
+	# 3=Running with pid that doesn't match pidfile
+	${svc}_status()
+.
+	
+	cat <<-'.' >>$out
+	{
+	    pp_msg "Checking ${desc}"
+	    pp_check_daemon_running
+	    if [ $DAEMON_RUNNING -eq 1 ]; then
+	        pp_success_msg "PID $PARENT_PID: running"
+	        return 0
+	    else
+	        if [ $DAEMON_RUNNING -eq 0 ]; then
+	            pp_failure_msg "not running"
+	            return 1
+	        elif [ $DAEMON_RUNNING -eq 2 ]; then
+	            pp_warning_msg "running without a pid file"
+	            return 2
+	        else
+	            pp_warning_msg "running but pid file doesn't match running processe()"
+	            return 3
+	        fi
+	    fi
+	}
+
+	run_rc_command "$1"
+.
+}
+
+pp_bsd_service_make_init_script () {
+    local svc=${svc_init_filename:-$1}
+    local script="${svc_init_filepath:-"${svc_init_prefix}/etc/rc.d"}/$svc"
+    script=`echo $script | sed 's://*:/:g'`
+    local out=$pp_destdir$script
+
+	pp_add_file_if_missing $script run 755 || return 0
+
+	pp_bsd_service_make_init_info "$svc" "$out"
+	pp_bsd_service_make_init_set_vars "$svc" "$out"
+	pp_bsd_service_make_init_body "$svc" "$out"
+
+	chmod 755 $out
+
+}
+
+pp_bsd_handle_services () {
+	if test -n "$pp_services"; then
+		for svc in $pp_services; do
+			pp_load_service_vars $svc
+ 			# Append some code to %post to install the svc TODO: Figure out why/what
+			pp_bsd_service_make_init_script $svc
+			# prepend some code to %preun to uninstall svc TODO: Figure out why/what
+		done
+	fi
 }
 pp_backend_bsd_function() {
     case "$1" in

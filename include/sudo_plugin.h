@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -169,7 +171,7 @@ struct io_plugin {
     int (*log_stderr)(const char *buf, unsigned int len);
     void (*register_hooks)(int version, int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version, int (*deregister_hook)(struct sudo_hook *hook));
-    int (*change_winsize)(unsigned int rows, unsigned int cols);
+    int (*change_winsize)(unsigned int line, unsigned int cols);
     int (*log_suspend)(int signo);
 };
 

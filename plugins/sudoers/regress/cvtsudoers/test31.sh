@@ -3,7 +3,6 @@
 # Test cvtsudoers.conf with padding
 #
 
-exec 2>&1
 ./cvtsudoers -c $TESTDIR/test31.conf <<EOF
 Defaults authenticate, timestamp_timeout=0
 User_Alias FULLTIMERS = user1, user2, user3

@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -315,15 +317,18 @@ main(int argc, char *argv[])
     if (VALID_ID(id)) {
 	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	    session_dir, id, &id[2], &id[4]);
-	if (plen <= 0 || (size_t)plen >= sizeof(path))
+	if (plen < 0 || plen >= ssizeof(path))
 	    sudo_fatalx(U_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
+    } else if (id[0] == '/') {
+	plen = snprintf(path, sizeof(path), "%s/timing", id);
+	if (plen < 0 || plen >= ssizeof(path))
+	    sudo_fatalx(U_("%s/timing: %s"), id, strerror(ENAMETOOLONG));
     } else {
-	plen = snprintf(path, sizeof(path), "%s/%s/timing",
-	    session_dir, id);
-	if (plen <= 0 || (size_t)plen >= sizeof(path))
-	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir,
-		id, strerror(ENAMETOOLONG));
+	plen = snprintf(path, sizeof(path), "%s/%s/timing", session_dir, id);
+	if (plen < 0 || plen >= ssizeof(path))
+	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir, id,
+		strerror(ENAMETOOLONG));
     }
     plen -= 7;
 
@@ -617,7 +622,7 @@ xterm_set_size(int rows, int cols)
 
     /* XXX - save cursor and position restore after resizing */
     len = snprintf(buf, sizeof(buf), setsize_fmt, rows, cols);
-    if (len < 0 || len >= (int)sizeof(buf)) {
+    if (len < 0 || len >= ssizeof(buf)) {
 	/* not possible due to size of buf */
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: internal error, buffer too small?", __func__);
@@ -702,7 +707,7 @@ setup_terminal(struct log_info *li, bool interactive, bool resize)
     }
 
     if (li->rows > terminal_rows || li->cols > terminal_cols) {
-	printf(_("Warning: your terminal is too small to properly replay the log.\n"));
+	fputs(_("Warning: your terminal is too small to properly replay the log.\n"), stdout);
 	printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), li->rows, li->cols, terminal_rows, terminal_cols);
     }
     debug_return;
@@ -731,7 +736,8 @@ restore_terminal_size(void)
     if (terminal_was_resized) {
 	/* We are still in raw mode, hence the carriage return. */
 	putchar('\r');
-	printf(U_("Replay finished, press any key to restore the terminal."));
+	fputs(U_("Replay finished, press any key to restore the terminal."),
+	    stdout);
 	fflush(stdout);
 	(void)getchar();
 	xterm_set_size(terminal_rows, terminal_cols);
@@ -1471,7 +1477,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 	for (i = 0; i < sessions_len; i++) {
 	    len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
 		"%s/log", sessions[i]);
-	    if (len <= 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
+	    if (len < 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
 		errno = ENAMETOOLONG;
 		sudo_fatal("%s/%s/log", dir, sessions[i]);
 	    }

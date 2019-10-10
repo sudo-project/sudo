@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1999-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -621,9 +623,9 @@ init_defaults(void)
 #ifdef _PATH_SUDO_SENDMAIL
     if ((def_mailerpath = strdup(_PATH_SUDO_SENDMAIL)) == NULL)
 	goto oom;
+#endif
     if ((def_mailerflags = strdup("-t")) == NULL)
 	goto oom;
-#endif
 #if (LOGGING & SLOG_FILE)
     if ((def_logfile = strdup(_PATH_SUDO_LOGFILE)) == NULL)
 	goto oom;
@@ -639,6 +641,7 @@ init_defaults(void)
     if ((def_editor = strdup(EDITOR)) == NULL)
 	goto oom;
     def_set_utmp = true;
+    def_pam_acct_mgmt = true;
     def_pam_setcred = true;
     def_syslog_maxlen = MAXSYSLOGLEN;
     def_case_insensitive_user = true;

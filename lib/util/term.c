@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2011-2015, 2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -88,14 +90,6 @@
 #endif
 #ifndef PENDIN
 # define PENDIN		0
-#endif
-
-#ifndef _POSIX_VDISABLE
-# ifdef VDISABLE
-#  define _POSIX_VDISABLE	VDISABLE
-# else
-#  define _POSIX_VDISABLE	0
-# endif
 #endif
 
 static struct termios term, oterm;

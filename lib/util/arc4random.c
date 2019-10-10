@@ -1,6 +1,8 @@
 /*	$OpenBSD: arc4random.c,v 1.54 2015/09/13 08:31:47 guenther Exp $	*/
 
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1996, David Mazieres <dm@uun.org>
  * Copyright (c) 2008, Damien Miller <djm@openbsd.org>
  * Copyright (c) 2013, Markus Friedl <markus@openbsd.org>
@@ -34,6 +36,9 @@
 
 #include <sys/types.h>
 #include <sys/time.h>
+#ifdef HAVE_SYS_RANDOM_H
+# include <sys/random.h>
+#endif
 
 #include <fcntl.h>
 #include <limits.h>
@@ -155,6 +160,7 @@ _rs_rekey(unsigned char *dat, size_t datlen)
 	rs->rs_have = sizeof(rsx->rs_buf) - KEYSZ - IVSZ;
 }
 
+#ifdef notdef
 static inline void
 _rs_random_buf(void *_buf, size_t n)
 {
@@ -178,6 +184,7 @@ _rs_random_buf(void *_buf, size_t n)
 			_rs_rekey(NULL, 0);
 	}
 }
+#endif
 
 static inline void
 _rs_random_u32(uint32_t *val)

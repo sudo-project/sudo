@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1993-1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -36,10 +38,16 @@
 #include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_queue.h"
 #include "sudo_util.h"
 
 #ifdef HAVE_PRIV_SET
 # include <priv.h>
+#endif
+
+/* Enable asserts() to avoid static analyzer false positives. */
+#if !(defined(SUDO_DEVEL) || defined(__clang_analyzer__) || defined(__COVERITY__))
+# define NDEBUG
 #endif
 
 #ifdef __TANDEM
@@ -83,6 +91,7 @@
 #define TGP_ASKPASS	0x04		/* read from askpass helper program */
 #define TGP_MASK	0x08		/* mask user input when reading */
 #define TGP_NOECHO_TRY	0x10		/* turn off echo if possible */
+#define TGP_BELL	0x20		/* bell on password prompt */
 
 /* name/value pairs for command line settings. */
 struct sudo_settings {
@@ -162,6 +171,7 @@ struct command_details {
     const char *selinux_role;
     const char *selinux_type;
     const char *utmp_user;
+    const char *tty;
     char **argv;
     char **envp;
 #ifdef HAVE_PRIV_SET

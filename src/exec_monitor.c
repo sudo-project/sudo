@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -86,11 +88,11 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	debug_return;
 
     if (signo == SIGCONT_FG)
-	strlcpy(signame, "CONT_FG", sizeof(signame));
+	(void)strlcpy(signame, "CONT_FG", sizeof(signame));
     else if (signo == SIGCONT_BG)
-	strlcpy(signame, "CONT_BG", sizeof(signame));
+	(void)strlcpy(signame, "CONT_BG", sizeof(signame));
     else if (sig2str(signo, signame) == -1)
-	snprintf(signame, sizeof(signame), "%d", signo);
+	(void)snprintf(signame, sizeof(signame), "%d", signo);
 
     /* Handle signal from parent or monitor. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "received SIG%s%s",
@@ -216,12 +218,12 @@ mon_handle_sigchld(struct monitor_closure *mc)
 	    __func__, (int)mc->cmnd_pid);
     } else if (WIFSTOPPED(status)) {
 	if (sig2str(WSTOPSIG(status), signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
+	    (void)snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
 	    __func__, (int)mc->cmnd_pid, signame);
     } else if (WIFSIGNALED(status)) {
 	if (sig2str(WTERMSIG(status), signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	    (void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
 	    __func__, (int)mc->cmnd_pid, signame);
 	mc->cmnd_pid = -1;
@@ -608,10 +610,24 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	    sudo_fatal(U_("unable to receive message from parent"));
     }
 
+#ifdef HAVE_SELINUX
+    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+        if (selinux_setup(details->selinux_role, details->selinux_type,
+            details->tty, io_fds[SFD_SLAVE]) == -1)
+            goto bad;
+    }
+#endif
+
     mc.cmnd_pid = sudo_debug_fork();
     switch (mc.cmnd_pid) {
     case -1:
 	sudo_warn(U_("unable to fork"));
+#ifdef HAVE_SELINUX
+	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+	    if (selinux_restore_tty() != 0)
+		sudo_warnx(U_("unable to restore tty label"));
+	}
+#endif
 	goto bad;
     case 0:
 	/* child */

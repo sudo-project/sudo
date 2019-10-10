@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2012-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2012-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -158,7 +160,7 @@ get_process_ttyname(char *name, size_t namelen)
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /* Try to determine the tty from pr_ttydev in /proc/pid/psinfo. */
-    snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)getpid());
+    (void)snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)getpid());
     if ((fd = open(path, O_RDONLY, 0)) != -1) {
 	nread = read(fd, &psinfo, sizeof(psinfo));
 	close(fd);
@@ -284,9 +286,10 @@ get_process_ttyname(char *name, size_t namelen)
 
     /*
      * Determine the tty from psdev in struct pst_status.
-     * We may get EOVERFLOW if the whole thing doesn't fit but that is OK.
+     * EOVERFLOW is not a fatal error for the fields we use.
+     * See the "EOVERFLOW Error" section of pstat_getvminfo(3).
      */
-    rc = pstat_getproc(&pstat, sizeof(pstat), (size_t)0, (int)getpid());
+    rc = pstat_getproc(&pstat, sizeof(pstat), 0, getpid());
     if (rc != -1 || errno == EOVERFLOW) {
 	if (pstat.pst_term.psd_major != -1 && pstat.pst_term.psd_minor != -1) {
 	    errno = serrno;

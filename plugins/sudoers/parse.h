@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1996, 1998-2000, 2004, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -18,8 +20,13 @@
 #ifndef SUDOERS_PARSE_H
 #define SUDOERS_PARSE_H
 
-/* Characters that must be quoted in sudoers */
-#define SUDOERS_QUOTED  ":\\,=#\""
+#include "sudo_queue.h"
+
+/* Characters that must be quoted in sudoers. */
+#define SUDOERS_QUOTED	":\\,=#\""
+
+/* Returns true if string 's' contains meta characters. */
+#define has_meta(s)	(strpbrk(s, "\\?*[]") != NULL)
 
 #undef UNSPEC
 #define UNSPEC	-1
@@ -174,8 +181,8 @@ struct userspec {
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
     struct comment_list comments;	/* optional comments */
-    int lineno;
-    char *file;
+    int lineno;				/* line number in sudoers */
+    char *file;				/* name of sudoers file */
 };
 
 /*
@@ -265,6 +272,7 @@ struct sudoers_parse_tree {
     struct userspec_list userspecs;
     struct defaults_list defaults;
     struct rbtree *aliases;
+    const char *shost, *lhost;
 };
 
 /* alias.c */
@@ -290,17 +298,22 @@ void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
 void free_default(struct defaults *def, struct member_list **binding);
 void free_defaults(struct defaults_list *defs);
-void init_parse_tree(struct sudoers_parse_tree *parse_tree);
+void init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *shost, const char *lhost);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
 void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 
 /* match_addr.c */
 bool addr_matches(char *n);
 
+/* match_command.c */
+bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
+
+/* match_digest.c */
+bool digest_matches(int fd, const char *file, const struct command_digest *digest);
+
 /* match.c */
 struct group;
 struct passwd;
-bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
 bool group_matches(const char *sudoers_group, const struct group *gr);
 bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
 bool netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user);

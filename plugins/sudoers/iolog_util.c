@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -35,6 +37,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <signal.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <errno.h>
@@ -81,9 +84,9 @@ parse_logfile(const char *logfile)
      */
     if ((li = calloc(1, sizeof(*li))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (getline(&buf, &bufsize, fp) == -1 ||
-	getline(&li->cwd, &cwdsize, fp) == -1 ||
-	getline(&li->cmd, &cmdsize, fp) == -1) {
+    if (getdelim(&buf, &bufsize, '\n', fp) == -1 ||
+	getdelim(&li->cwd, &cwdsize, '\n', fp) == -1 ||
+	getdelim(&li->cmd, &cmdsize, '\n', fp) == -1) {
 	sudo_warn(U_("%s: invalid log file"), logfile);
 	goto bad;
     }
@@ -331,12 +334,9 @@ parse_timing(const char *buf, struct timespec *delay,
 
     switch (timing->event) {
     case IO_EVENT_SUSPEND:
-	ulval = strtoul(cp, &ep, 10);
-	if (ep == cp || *ep != '\0')
+	/* Signal name (no leading SIG prefix) or number. */
+	if (str2sig(cp, &timing->u.signo) == -1)
 	    goto bad;
-	if (ulval > INT_MAX)
-	    goto bad;
-	timing->u.signo = (int)ulval;
 	break;
     case IO_EVENT_WINSIZE:
 	ulval = strtoul(cp, &ep, 10);

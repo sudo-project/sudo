@@ -1,6 +1,8 @@
 .\" Automatically generated from an mdoc input file.  Do not edit.
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2018
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 1996,1998-2005, 2007-2019
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "December 24, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "June 20, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -40,7 +42,7 @@ vipw(@mansectsu@).
 locks the
 \fIsudoers\fR
 file against multiple simultaneous edits, provides basic sanity checks,
-and checks for parse errors.
+and checks for parse errors before installing the edited file.
 If the
 \fIsudoers\fR
 file is currently being edited you will receive a message to try again later.
@@ -70,8 +72,7 @@ option should be used with extreme caution because if
 \fBvisudo\fR
 believes there to be a parse error, so will
 \fBsudo\fR
-and no one
-will be able to run
+and no one will be able to run
 \fBsudo\fR
 again until the error is fixed.
 If
@@ -100,15 +101,20 @@ or
 \fREDITOR\fR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
-Note that the
+Note that
+\fBsudo\fR
+does not preserve the
 \fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
-and
+or
 \fREDITOR\fR
-environment variables are not preserved by default when the
+environment variables unless they are present in the
+\fIenv_keep\fR
+list or the
 \fIenv_reset\fR
+option is disabled in the
 \fIsudoers\fR
-option is enabled.
+file.
 The default editor path is
 \fI@editor@\fR
 which can be set at compile time via the
@@ -124,10 +130,14 @@ will use the value of the
 or
 \fREDITOR\fR
 environment variables before falling back on the default editor list.
-Note that this may create a security hole as it allows the user to
-run any arbitrary command as root without logging.
-A safer alternative is to place a colon-separated list of editors
-in the
+Note that
+\fBvisudo\fR
+is typically run as root so this option may allow a user with
+\fBvisudo\fR
+privileges to run arbitrary commands as root without logging.
+An alternative is to place a colon-separated list of
+\(lqsafe\(rq
+editors int the
 \fIeditor\fR
 variable.
 \fBvisudo\fR
@@ -236,7 +246,7 @@ A
 \fIsudoers\fR
 file may be specified instead of the default,
 \fI@sysconfdir@/sudoers\fR.
-The lock file used is the specified
+The temporary file used is the specified
 \fIsudoers\fR
 file with
 \(lq\.tmp\(rq
@@ -350,7 +360,7 @@ Sudo front end configuration
 List of who can run what
 .TP 26n
 \fI@sysconfdir@/sudoers.tmp\fR
-Lock file for visudo
+Default temporary file used by visudo
 .SH "DIAGNOSTICS"
 In addition to reporting
 \fIsudoers\fR
@@ -363,7 +373,7 @@ Someone else is currently editing the
 \fIsudoers\fR
 file.
 .TP 6n
-\fR@sysconfdir@/sudoers.tmp: Permission denied\fR
+\fR@sysconfdir@/sudoers: Permission denied\fR
 You didn't run
 \fBvisudo\fR
 as root.

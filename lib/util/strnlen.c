@@ -1,6 +1,8 @@
 /*	$OpenBSD: strnlen.c,v 1.5 2014/06/10 04:17:37 deraadt Exp $	*/
 
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2010 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any

@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -141,6 +143,9 @@
 #else
 # define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->st_mtime; (_y).tv_nsec = 0; } while (0)
 #endif /* HAVE_ST_MTIM */
+
+/* sizeof() that returns a signed value */
+#define ssizeof(_x)	((ssize_t)sizeof(_x))
 
 /* Bit map macros. */
 #define sudo_setbit(_a, _i)	((_a)[(_i) / NBBY] |= 1 << ((_i) % NBBY))

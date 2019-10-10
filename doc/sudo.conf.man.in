@@ -1,6 +1,8 @@
 .\" Automatically generated from an mdoc input file.  Do not edit.
 .\"
-.\" Copyright (c) 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 2010-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +16,8 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO.CONF" "@mansectform@" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.nr SL @SEMAN@
+.TH "SUDO.CONF" "@mansectform@" "July 3, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -114,7 +117,7 @@ specified by the
 \fIplugin_dir\fR
 \fRPath\fR
 setting, which defaults to
-\fI@PLUGINDIR@\fR.
+\fI@plugindir@\fR.
 In other words:
 .nf
 .sp
@@ -127,7 +130,7 @@ is equivalent to:
 .nf
 .sp
 .RS 6n
-Plugin sudoers_policy @PLUGINDIR@/sudoers.so
+Plugin sudoers_policy @plugindir@/sudoers.so
 .RE
 .fi
 .PP
@@ -249,7 +252,7 @@ If terminal devices may be located in a sub-directory of
 \fI/dev\fR,
 that path must be explicitly listed in
 \fIdevsearch\fR.
-The default value is:
+The default value is
 \fR/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev\fR
 .sp
 This option is ignored on systems that support either the
@@ -285,14 +288,15 @@ This is used to implement the
 functionality on systems that support
 \fRLD_PRELOAD\fR
 or its equivalent.
-The default value is:
+The default value is
 \fI@noexec_file@\fR.
 .TP 10n
 plugin_dir
 The default directory to use when searching for plugins
 that are specified without a fully qualified path name.
 The default value is
-\fI@PLUGINDIR@\fR.
+\fI@plugindir@\fR.
+.if \n(SL \{\
 .TP 10n
 sesh
 The fully-qualified path to the
@@ -303,6 +307,7 @@ This setting is only used when
 is built with SELinux support.
 The default value is
 \fI@sesh_file@\fR.
+.\}
 .SS "Other settings"
 The
 \fBsudo.conf\fR
@@ -613,7 +618,7 @@ communication with the plugin
 plugin configuration
 .TP 12n
 \fIpty\fR
-pseudo-tty related code
+pseudo-terminal related code
 .TP 12n
 \fIselinux\fR
 SELinux-specific handling
@@ -645,7 +650,7 @@ front end configuration
 #   Debug sudo /var/log/sudo_debug all@warn
 #   Set disable_coredump true
 #
-# The plugin_path is relative to @PLUGINDIR@ unless
+# The plugin_path is relative to @plugindir@ unless
 #   fully qualified.
 # The plugin_name corresponds to a global symbol in the plugin
 #   that contains the plugin interface structure.

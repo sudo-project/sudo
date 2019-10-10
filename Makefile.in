@@ -1,4 +1,6 @@
 #
+# SPDX-License-Identifier: ISC
+#
 # Copyright (c) 2010-2015, 2017-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -89,7 +91,7 @@ CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=c
 SPLINT_OPTS = -D__restrict= -checks
 
 # Default PVS-studio options when run from the top-level Makefile
-PVS_CFG = $(top_srcdir)/PVS-Studio.cfg
+PVS_CFG = $(top_builddir)/PVS-Studio.cfg
 PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 

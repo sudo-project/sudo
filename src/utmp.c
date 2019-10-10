@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2011-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -49,6 +51,14 @@
 
 #include "sudo.h"
 #include "sudo_exec.h"
+
+/*
+ * GCC 8 warns about strncpy() where the size field is the size of the buffer.
+ * However, strings in utmp may not be NUL terminated so this usage is correct.
+ */
+#if __GNUC_PREREQ__(8, 0)
+# pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
 
 /*
  * Simplify handling of different utmp types.

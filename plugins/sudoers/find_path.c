@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2010-2015
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 1996, 1998-2005, 2010-2015, 2017-2019
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -140,7 +142,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	 */
 	len = snprintf(command, sizeof(command), "%.*s/%s",
 	    (int)(ep - cp), cp, infile);
-	if (len <= 0 || (size_t)len >= sizeof(command)) {
+	if (len < 0 || len >= ssizeof(command)) {
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
@@ -154,7 +156,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
      */
     if (!found && checkdot) {
 	len = snprintf(command, sizeof(command), "./%s", infile);
-	if (len <= 0 || (size_t)len >= sizeof(command)) {
+	if (len < 0 || len >= ssizeof(command)) {
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}

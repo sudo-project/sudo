@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1999-2005, 2008-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -225,7 +227,7 @@ pass_warn(void)
     if (def_insults)
 	warning = INSULT;
 #endif
-    sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", warning);
+    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY, "%s\n", warning);
 
     debug_return;
 }

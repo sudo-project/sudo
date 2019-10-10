@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2012-2015, 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +36,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <ctype.h>
 #include <signal.h>
 #include <unistd.h>
 
@@ -60,14 +63,33 @@ int
 sudo_sig2str(int signo, char *signame)
 {
 #if defined(SIGRTMIN) && defined(SIGRTMAX)
-    /* Realtime signal support as per Solaris. */
+    /* Realtime signal support. */
     if (signo >= SIGRTMIN && signo <= SIGRTMAX) {
-	snprintf(signame, SIG2STR_MAX, "RTMIN+%d", (signo - SIGRTMIN));
+	const long rtmax = sysconf(_SC_RTSIG_MAX);
+	if (rtmax > 0) {
+	    if (signo == SIGRTMIN) {
+		strlcpy(signame, "RTMIN", SIG2STR_MAX);
+	    } else if (signo == SIGRTMAX) {
+		strlcpy(signame, "RTMAX", SIG2STR_MAX);
+	    } else if (signo <= SIGRTMIN + (rtmax / 2) - 1) {
+		(void)snprintf(signame, SIG2STR_MAX, "RTMIN+%d",
+		    (signo - SIGRTMIN));
+	    } else {
+		(void)snprintf(signame, SIG2STR_MAX, "RTMAX-%d",
+		    (SIGRTMAX - signo));
+	    }
+	}
 	return 0;
     }
 #endif
     if (signo > 0 && signo < NSIG && sudo_sys_signame[signo] != NULL) {
 	strlcpy(signame, sudo_sys_signame[signo], SIG2STR_MAX);
+	/* Make sure we always return an upper case signame. */
+	if (islower((unsigned char)signame[0])) {
+	    int i;
+	    for (i = 0; signame[i] != '\0'; i++)
+		signame[i] = toupper((unsigned char)signame[i]);
+	}
 	return 0;
     }
     errno = EINVAL;

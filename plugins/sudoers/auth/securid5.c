@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1999-2005, 2007, 2010-2012, 2014-2016
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2002 Michael Stroucken <michael@stroucken.org>
@@ -204,9 +206,9 @@ then enter the new token code.\n", \
 		 */
 		/* XXX - Is setting up a new PIN within sudo's scope? */
 		SD_Pin(*sd, "");
-		sudo_printf(SUDO_CONV_ERROR_MSG, 
+		sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY, 
 		    "Your SecurID access has not yet been set up.\n");
-		sudo_printf(SUDO_CONV_ERROR_MSG, 
+		sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY, 
 		    "Please set up a PIN before you try to authenticate.\n");
 		ret = AUTH_FATAL;
 		break;

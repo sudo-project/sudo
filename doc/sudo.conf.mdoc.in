@@ -1,5 +1,7 @@
 .\"
-.\" Copyright (c) 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 2010-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +15,8 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 7, 2018
+.nr SL @SEMAN@
+.Dd July 3, 2019
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -111,7 +114,7 @@ specified by the
 .Em plugin_dir
 .Li Path
 setting, which defaults to
-.Pa @PLUGINDIR@ .
+.Pa @plugindir@ .
 In other words:
 .Bd -literal -offset indent
 Plugin sudoers_policy sudoers.so
@@ -119,7 +122,7 @@ Plugin sudoers_policy sudoers.so
 .Pp
 is equivalent to:
 .Bd -literal -offset indent
-Plugin sudoers_policy @PLUGINDIR@/sudoers.so
+Plugin sudoers_policy @plugindir@/sudoers.so
 .Ed
 .Pp
 If the plugin was compiled statically into the
@@ -226,7 +229,7 @@ If terminal devices may be located in a sub-directory of
 .Pa /dev ,
 that path must be explicitly listed in
 .Em devsearch .
-The default value is:
+The default value is
 .Li /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
 .Pp
 This option is ignored on systems that support either the
@@ -261,13 +264,14 @@ This is used to implement the
 functionality on systems that support
 .Ev LD_PRELOAD
 or its equivalent.
-The default value is:
+The default value is
 .Pa @noexec_file@ .
 .It plugin_dir
 The default directory to use when searching for plugins
 that are specified without a fully qualified path name.
 The default value is
-.Pa @PLUGINDIR@ .
+.Pa @plugindir@ .
+.if \n(SL \{\
 .It sesh
 The fully-qualified path to the
 .Nm sesh
@@ -277,6 +281,7 @@ This setting is only used when
 is built with SELinux support.
 The default value is
 .Pa @sesh_file@ .
+.\}
 .El
 .Ss Other settings
 The
@@ -552,7 +557,7 @@ communication with the plugin
 .It Em plugin
 plugin configuration
 .It Em pty
-pseudo-tty related code
+pseudo-terminal related code
 .It Em selinux
 SELinux-specific handling
 .It Em util
@@ -582,7 +587,7 @@ front end configuration
 #   Debug sudo /var/log/sudo_debug all@warn
 #   Set disable_coredump true
 #
-# The plugin_path is relative to @PLUGINDIR@ unless
+# The plugin_path is relative to @plugindir@ unless
 #   fully qualified.
 # The plugin_name corresponds to a global symbol in the plugin
 #   that contains the plugin interface structure.

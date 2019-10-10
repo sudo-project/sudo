@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2010, 2011, 2013-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -144,6 +146,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	/* Dynamically-sized group vector, count groups and alloc. */
 	grpsize = 1;	/* reserve one for basegid */
 	if (*grset != '\0') {
+	    grpsize++;	/* at least one supplementary group */
 	    for (cp = grset; *cp != '\0'; cp++) {
 		if (*cp == ',')
 		    grpsize++;

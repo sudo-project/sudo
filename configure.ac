@@ -1,10 +1,24 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl SPDX-License-Identifier: ISC
+dnl
+dnl Copyright (c) 1994-1996, 1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl
+dnl Permission to use, copy, modify, and distribute this software for any
+dnl purpose with or without fee is hereby granted, provided that the above
+dnl copyright notice and this permission notice appear in all copies.
+dnl
+dnl THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+dnl WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+dnl MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+dnl ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+dnl WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.27], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.28], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -99,6 +113,7 @@ AC_SUBST([TMPFILES_D])
 AC_SUBST([exampledir])
 AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
+AC_SUBST([SIGNAME])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -141,7 +156,7 @@ AC_SUBST([secure_path])
 AC_SUBST([editor])
 AC_SUBST([pam_session])
 AC_SUBST([pam_login_service])
-AC_SUBST([PLUGINDIR])
+AC_SUBST([plugindir])
 #
 # Begin initial values for man page substitution
 #
@@ -168,7 +183,7 @@ mailsub="*** SECURITY information for %h ***"
 badpass_message="Sorry, try again."
 fqdn=off
 runas_default=root
-env_editor=off
+env_editor=on
 env_reset=on
 editor=vi
 passwd_tries=3
@@ -179,13 +194,13 @@ path_info=on
 ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
-noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
-sesh_file=/usr/local/libexec/sudo/sesh
+noexec_file="$libexecdir/sudo/sudo_noexec.so"
+sesh_file="$libexecdir/sudo/sesh"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
 pam_login_service=sudo
-PLUGINDIR=/usr/local/libexec/sudo
+plugindir="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -231,6 +246,7 @@ INIT_SCRIPT=
 INIT_DIR=
 RC_LINK=
 COMPAT_EXP=
+SIGNAME=
 dnl
 dnl Other vaiables
 dnl
@@ -1235,10 +1251,13 @@ esac])
 
 AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir=DIR], [set directory to load plugins from])],
 [case $with_plugindir in
-    no)		AC_MSG_ERROR(["illegal argument: --without-plugindir."])
+    yes)	AC_MSG_ERROR(["must give --with-plugindir an argument."])
 		;;
-    *)		;;
-esac], [with_plugindir="$libexecdir/sudo"])
+    no)		AC_MSG_ERROR(["--without-plugindir not supported."])
+		;;
+    *)		plugindir="$with_plugindir"
+		;;
+esac])
 
 AC_ARG_WITH(man, [AS_HELP_STRING([--with-man], [manual pages use man macros])],
 [case $with_man in
@@ -1697,14 +1716,14 @@ SHLIB_ENABLE="$enable_dlopen"
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[[=PATH]]], [fully qualified pathname of sudo_noexec.so])],
 [case $with_noexec in
-    yes)	with_noexec="$libexecdir/sudo/sudo_noexec.so"
-		;;
+    yes)	;;
     no)		;;
-    *)		;;
-esac], [with_noexec="$libexecdir/sudo/sudo_noexec.so"])
+    *)		noexec_file="$with_noexec"
+		;;
+esac], [with_noexec="$noexec_file"])
 AC_MSG_RESULT($with_noexec)
 NOEXECFILE="sudo_noexec.so"
-NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
+NOEXECDIR="`echo $noexec_file|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
 
 dnl
 dnl Find programs we use
@@ -1735,9 +1754,7 @@ else
 	)
 	MANTYPE="$sudo_cv_var_mantype"
     else
-	MANTYPE=cat
-	MANDIRTYPE=cat
-	mansrcdir='$(srcdir)'
+	: ${MANTYPE='mdoc'}
     fi
 fi
 
@@ -1829,11 +1846,11 @@ case "$host" in
 		    ac_cv_func_strnlen=no
 		fi
 
-		# getline() may or may ont be present on AIX <= 6.1.
-		# bos610 is missing getline/getdelim but bos61J has it.
+		# getdelim() may or may not be present on AIX <= 6.1.
+		# bos610 is missing getdelim but bos61J has it.
 		if test "$enable_package_build" = "yes"; then
 		    if test $OSMAJOR -le 6; then
-			ac_cv_func_getline=no
+			ac_cv_func_getdelim=no
 		    fi
 		fi
 
@@ -1954,8 +1971,6 @@ case "$host" in
 			hpux10.*)
 			    shadow_funcs="getprpwnam iscomsec"
 			    shadow_libs="-lsec"
-			    # HP-UX 10.20 libc has an incompatible getline
-			    ac_cv_func_getline="no"
 			    # HP-UX 10.x doesn't support LD_PRELOAD
 			    with_noexec=no
 			;;
@@ -2020,24 +2035,11 @@ case "$host" in
 		;;
     *-*-irix*)
 		AC_DEFINE([_BSD_TYPES])
-		if test -z "$NROFFPROG"; then
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
-			if test -d /usr/share/catman/local; then
-			    mandir="/usr/share/catman/local"
-			else
-			    mandir="/usr/catman/local"
-			fi
-		    fi
-		    # Compress cat pages with pack
-		    MANCOMPRESS='pack'
-		    MANCOMPRESSEXT='.z'
-		else
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
-			if test -d "/usr/share/man/local"; then
-			    mandir="/usr/share/man/local"
-			else
-			    mandir="/usr/man/local"
-			fi
+		if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
+		    if test -d "/usr/share/man/local"; then
+			mandir="/usr/share/man/local"
+		    else
+			mandir="/usr/man/local"
 		    fi
 		fi
 		# IRIX <= 4 needs -lsun
@@ -2293,7 +2295,7 @@ fi
 dnl
 dnl Library preloading to support NOEXEC
 dnl
-if test -n "$with_noexec"; then
+if test X"$with_noexec" != X"no"; then
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_VAR, "$RTLD_PRELOAD_VAR")
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, "$RTLD_PRELOAD_DELIM")
     if test -n "$RTLD_PRELOAD_DEFAULT"; then
@@ -2555,10 +2557,10 @@ AC_CHECK_FUNCS([getgrouplist], [], [
     esac
     SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
-AC_CHECK_FUNCS([getline], [], [
-    AC_LIBOBJ(getline)
-    SUDO_APPEND_COMPAT_EXP(sudo_getline)
-    AC_CHECK_FUNCS([fgetln])
+AC_CHECK_FUNCS([getdelim], [], [
+    AC_LIBOBJ(getdelim)
+    SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
 ])
 AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
@@ -2571,7 +2573,9 @@ AC_CHECK_FUNCS([arc4random_uniform], [], [
 	AC_LIBOBJ(arc4random)
 	SUDO_APPEND_COMPAT_EXP(sudo_arc4random)
 	# arc4random.c needs getentropy()
-	AC_CHECK_FUNCS([getentropy], [], [
+	AC_CHECK_FUNCS([getentropy], [
+	    AC_CHECK_HEADERS([sys/random.h])
+	], [
 	    AC_LIBOBJ(getentropy)
 	    SUDO_APPEND_COMPAT_EXP(sudo_getentropy)
 	])
@@ -3264,7 +3268,6 @@ AC_CHECK_FUNCS([strsignal], [], [
     HAVE_SIGLIST="false"
     AC_CHECK_DECLS([sys_siglist, _sys_siglist], [
 	HAVE_SIGLIST="true"
-	break
     ], [ ], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
@@ -3275,7 +3278,7 @@ AC_INCLUDES_DEFAULT
 ])
 
 dnl
-dnl Check for sig2str(), sys_signame or sys_sigabbrev
+dnl Check for sig2str() and str2sig(), sys_signame or sys_sigabbrev
 dnl
 AC_CHECK_FUNCS([sig2str], [
     AC_CHECK_DECLS(SIG2STR_MAX, [], [], [
@@ -3283,10 +3286,21 @@ AC_CHECK_FUNCS([sig2str], [
 ])], [
     AC_LIBOBJ(sig2str)
     SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
+])
+AC_CHECK_FUNCS([str2sig], [], [
+    AC_LIBOBJ(str2sig)
+    SUDO_APPEND_COMPAT_EXP(sudo_str2sig)
+])
+
+dnl
+dnl Check for sys_signame or sys_sigabbrev if missing sig2str() or str2sig().
+dnl Also enable unit tests for sig2str() and str2sig().
+dnl
+if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
     HAVE_SIGNAME="false"
     AC_CHECK_DECLS([sys_signame, _sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"
-	break
     ], [ ], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
@@ -3305,9 +3319,10 @@ AC_INCLUDES_DEFAULT
 	    AC_DEFINE(HAVE_SYS_SIGABBREV)
 	else
 	    AC_LIBOBJ(signame)
+	    SIGNAME=signame.lo
 	fi
     fi
-])
+fi
 
 dnl
 dnl Check for dl_iterate_phdr, may require -ldl
@@ -3755,7 +3770,9 @@ if test ${with_passwd-'no'} != "no"; then
     dnl
     if test -z "$LIB_CRYPT"; then
 	_LIBS="$LIBS"
-	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [
+	    test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
+	])
 	LIBS="$_LIBS"
     fi
 
@@ -3775,10 +3792,19 @@ if test ${with_passwd-'no'} != "no"; then
 	LIBS="$_LIBS"
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getspnam], [gen shadow], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+	AC_SEARCH_LIBS([getspnam], [gen shadow], [
+	    AC_DEFINE(HAVE_GETSPNAM)
+	    test "${ac_cv_search_getspnam}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_getspnam}"
+	    CHECKSHADOW=false
+	])
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [
+	    AC_DEFINE(HAVE_GETPRPWNAM)
+	    test "${ac_cv_search_getprpwnam}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_getprpwnam}"
+	    SECUREWARE=1
+	    CHECKSHADOW=false
+	])
     fi
     if test -n "$shadow_libs"; then
 	# sudoers needs to link with shadow libs for password auth
@@ -3843,8 +3869,8 @@ if test ${with_ldap-'no'} != "no"; then
     case "$host_os" in
 	hpux*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
     esac
-    AC_SEARCH_LIBS(ldap_init, "ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}", [
-	test "$ac_res" != "none required" && LDAP_LIBS="$ac_res"
+    AC_SEARCH_LIBS([ldap_init], ["ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}]", [
+	test "${ac_cv_search_ldap_init}" != "none required" && LDAP_LIBS="${ac_cv_search_ldap_init}"
 	found=yes
     ])
     # If nothing linked, try -lldap and hope for the best
@@ -4358,63 +4384,64 @@ dnl
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
 dnl
-dnl Defer setting _PATH_SUDO_NOEXEC until after exec_prefix is set
-dnl XXX - this is gross!
+dnl Expand exec_prefix in in variables used by the manual pages
 dnl
-if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_shared" != X"no"; then
-    oexec_prefix="$exec_prefix"
-    if test "$exec_prefix" = '$(prefix)'; then
-	if test "$prefix" = "NONE"; then
-	    exec_prefix="$ac_default_prefix"
-	else
-	    exec_prefix="$prefix"
-	fi
+oexec_prefix="$exec_prefix"
+if test "$exec_prefix" = '$(prefix)'; then
+    if test "$prefix" = "NONE"; then
+	exec_prefix="$ac_default_prefix"
+    else
+	exec_prefix="$prefix"
     fi
-    if test X"$with_noexec" != X"no"; then
-	PROGS="${PROGS} sudo_noexec.la"
-	INSTALL_NOEXEC="install-noexec"
-
-	# Can't use asan with LD_PRELOAD
-	if test "$enable_asan" != "yes"; then
-	    CHECK_NOEXEC=check_noexec
-	fi
-
-	noexec_file="$with_noexec"
-	_noexec_file=
-	while test X"$noexec_file" != X"$_noexec_file"; do
-	    _noexec_file="$noexec_file"
-	    eval noexec_file="$_noexec_file"
-	done
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
-    fi
-    if test X"$with_selinux" != X"no"; then
-	sesh_file="$libexecdir/sudo/sesh"
-	_sesh_file=
-	while test X"$sesh_file" != X"$_sesh_file"; do
-	    _sesh_file="$sesh_file"
-	    eval sesh_file="$_sesh_file"
-	done
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
-    fi
-    if test X"$enable_shared" != X"no"; then
-	PLUGINDIR="$with_plugindir"
-	_PLUGINDIR=
-	while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
-	    _PLUGINDIR="$PLUGINDIR"
-	    eval PLUGINDIR="$_PLUGINDIR"
-	done
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
-	AC_DEFINE(ENABLE_SUDO_PLUGIN_API, 1, [Define to 1 to enable sudo's plugin interface.])
-    fi
-    exec_prefix="$oexec_prefix"
 fi
-if test X"$with_noexec" = X"no"; then
+
+# Update exec_prefix in noexec_file
+_noexec_file=
+while test X"$noexec_file" != X"$_noexec_file"; do
+    _noexec_file="$noexec_file"
+    eval noexec_file="$_noexec_file"
+done
+
+# Update exec_prefix in sesh_file
+_sesh_file=
+while test X"$sesh_file" != X"$_sesh_file"; do
+    _sesh_file="$sesh_file"
+    eval sesh_file="$_sesh_file"
+done
+
+# Update exec_prefix in plugindir
+_plugindir=
+while test X"$plugindir" != X"$_plugindir"; do
+    _plugindir="$plugindir"
+    eval plugindir="$_plugindir"
+done
+exec_prefix="$oexec_prefix"
+
+dnl
+dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
+dnl
+if test X"$with_noexec" != X"no"; then
+    PROGS="${PROGS} sudo_noexec.la"
+    INSTALL_NOEXEC="install-noexec"
+
+    # Can't use asan with LD_PRELOAD
+    if test "$enable_asan" != "yes"; then
+	CHECK_NOEXEC=check_noexec
+    fi
+
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
+else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, NULL)
 fi
-if test X"$with_selinux" = X"no"; then
+if test X"$with_selinux" != X"no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
+else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, NULL)
 fi
-if test X"$enable_shared" = X"no"; then
+if test X"$enable_shared" != X"no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$plugindir/")
+    AC_DEFINE(ENABLE_SUDO_PLUGIN_API, 1, [Define to 1 to enable sudo's plugin interface.])
+else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, NULL)
 fi
 

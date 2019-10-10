@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1999-2005, 2008-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -24,6 +26,7 @@
 
 #include <time.h>
 #include <def_data.h>
+#include "sudo_queue.h"
 
 struct list_member {
     SLIST_ENTRY(list_member) entries;

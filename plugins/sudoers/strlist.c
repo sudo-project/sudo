@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -32,8 +34,8 @@
 #endif /* HAVE_STRINGS_H */
 
 #include "sudo_compat.h"
-#include "sudo_util.h"
 #include "sudo_queue.h"
+#include "sudo_util.h"
 #include "sudoers_debug.h"
 #include "strlist.h"
 

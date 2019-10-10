@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -42,7 +44,6 @@
 
 #include "sudoers.h"
 #include "sudoers_version.h"
-#include "sudo_conf.h"
 #include "sudo_lbuf.h"
 #include "redblack.h"
 #include "cvtsudoers.h"

@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 1993-1996, 1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 1993-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -573,7 +575,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Insert system-wide environment variables. */
     if (def_restricted_env_file) {
-	if (!read_env_file(def_env_file, false, true))
+	if (!read_env_file(def_restricted_env_file, false, true))
 	    sudo_warn("%s", def_restricted_env_file);
     }
     if (def_env_file) {
@@ -877,11 +879,13 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
+    bool perm_root = false;
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN)
 
     if (!set_perms(PERM_SUDOERS))
 	debug_return_ptr(NULL);
 
+again:
     switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
 	    /*
@@ -891,8 +895,10 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	     */
 	    if (sudoers_uid == ROOT_UID && ISSET(sudoers_mode, S_IRGRP)) {
 		if (!ISSET(sb.st_mode, S_IRGRP) || sb.st_gid != SUDOERS_GID) {
-		    if (!restore_perms() || !set_perms(PERM_ROOT))
-			debug_return_ptr(NULL);
+		    if (!perm_root) {
+			if (!restore_perms() || !set_perms(PERM_ROOT))
+			    debug_return_ptr(NULL);
+		    }
 		}
 	    }
 	    /*
@@ -915,6 +921,20 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	    }
 	    break;
 	case SUDO_PATH_MISSING:
+	    /*
+	     * If we tried to stat() sudoers as non-root but got EACCES,
+	     * try again as root.
+	     */
+	    if (errno == EACCES && geteuid() != ROOT_UID) {
+		int serrno = errno;
+		if (restore_perms()) {
+		    if (!set_perms(PERM_ROOT))
+			debug_return_ptr(NULL);
+		    perm_root = true;
+		    goto again;
+		}
+		errno = serrno;
+	    }
 	    log_warning(SLOG_SEND_MAIL, N_("unable to stat %s"), sudoers);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
@@ -1244,7 +1264,7 @@ create_admin_success_flag(void)
     /* Build path to flag file. */
     len = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
 	user_dir);
-    if (len <= 0 || (size_t)len >= sizeof(flagfile))
+    if (len < 0 || len >= ssizeof(flagfile))
 	debug_return_int(false);
 
     /* Create admin flag file if it doesn't already exist. */
@@ -1270,12 +1290,13 @@ create_admin_success_flag(void)
 static bool
 tty_present(void)
 {
-#if defined(HAVE_KINFO_PROC2_NETBSD) || defined(HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC_FREEBSD) || defined(HAVE_KINFO_PROC_44BSD) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
-    return user_ttypath != NULL;
-#else
-    int fd = open(_PATH_TTY, O_RDWR);
-    if (fd != -1)
+    debug_decl(tty_present, SUDOERS_DEBUG_PLUGIN)
+    
+    if (user_ttypath == NULL) {
+	int fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    debug_return_bool(false);
 	close(fd);
-    return fd != -1;
-#endif
+    }
+    debug_return_bool(true);
 }

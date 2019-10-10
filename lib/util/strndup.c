@@ -1,6 +1,8 @@
 /*	$OpenBSD: strndup.c,v 1.1 2010/05/18 22:24:55 tedu Exp $	*/
 
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2010 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any

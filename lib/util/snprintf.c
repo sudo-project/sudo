@@ -1,5 +1,7 @@
 /*	$OpenBSD: vfprintf.c,v 1.67 2014/12/21 00:23:30 daniel Exp $	*/
-/*-
+/* 
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Copyright (c) 1999-2005, 2008, 2010-2016
  *      Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 1990, 1993

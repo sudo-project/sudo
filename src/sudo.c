@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -282,6 +284,7 @@ main(int argc, char *argv[], char *envp[])
 	    }
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
+	    command_details.tty = user_details.tty;
 	    command_details.argv = argv_out;
 	    command_details.envp = user_env_out;
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
@@ -466,7 +469,7 @@ get_user_groups(struct user_details *ud)
     for (i = 0; i < ud->ngroups; i++) {
 	len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
 	    i ? "," : "", (unsigned int)ud->groups[i]);
-	if (len <= 0 || (size_t)len >= glsize - (cp - gid_list))
+	if (len < 0 || (size_t)len >= glsize - (cp - gid_list))
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
     }
@@ -862,7 +865,7 @@ sudo_check_suid(const char *sudo)
 
 		    int len = snprintf(pathbuf, sizeof(pathbuf), "%.*s/%s",
 			(int)(ep - cp), cp, sudo);
-		    if (len <= 0 || (size_t)len >= sizeof(pathbuf))
+		    if (len < 0 || len >= ssizeof(pathbuf))
 			continue;
 		    if (access(pathbuf, X_OK) == 0) {
 			sudo = pathbuf;

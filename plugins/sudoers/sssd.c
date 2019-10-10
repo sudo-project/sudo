@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2003-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
@@ -110,7 +112,7 @@ get_ipa_hostname(char **shostp, char **lhostp)
 
     fp = fopen(_PATH_SSSD_CONF, "r");
     if (fp != NULL) {
-	while ((len = getline(&line, &linesize, fp)) != -1) {
+	while ((len = getdelim(&line, &linesize, '\n', fp)) != -1) {
 	    char *cp = line;
 
 	    /* Trim trailing and leading spaces. */
@@ -552,7 +554,6 @@ sudo_sss_open(struct sudo_nss *nss)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(ENOMEM);
     }
-    init_parse_tree(&handle->parse_tree);
 
     /* Load symbols */
     handle->ssslib = sudo_dso_load(path, SUDO_DSO_LAZY);
@@ -610,8 +611,6 @@ sudo_sss_open(struct sudo_nss *nss)
 	debug_return_int(EFAULT);
     }
 
-    nss->handle = handle;
-
     /*
      * If runhost is the same as the local host, check for ipa_hostname
      * in sssd.conf and use it in preference to user_runhost.
@@ -622,6 +621,10 @@ sudo_sss_open(struct sudo_nss *nss)
 	    debug_return_int(ENOMEM);
 	}
     }
+
+    /* The "parse tree" contains userspecs, defaults, aliases and hostnames. */
+    init_parse_tree(&handle->parse_tree, handle->ipa_host, handle->ipa_shost);
+    nss->handle = handle;
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "handle=%p", handle);
 

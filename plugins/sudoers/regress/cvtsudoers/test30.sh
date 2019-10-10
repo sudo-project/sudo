@@ -4,7 +4,6 @@
 # See https://bugzilla.sudo.ws/show_bug.cgi?id=853
 #
 
-exec 2>&1
 ./cvtsudoers -c "" -e -f json <<EOF
 Cmnd_Alias	CMDA=/path/to/cmda
 Cmnd_Alias	CMDB=/path/to/cmdb

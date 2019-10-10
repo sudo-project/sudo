@@ -398,6 +398,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Create a new PAM session for the command to run in"),
 	NULL,
     }, {
+	"pam_acct_mgmt", T_FLAG,
+	N_("Perform PAM account validation management"),
+	NULL,
+    }, {
 	"maxseq", T_UINT,
 	N_("Maximum I/O log sequence number: %u"),
 	NULL,

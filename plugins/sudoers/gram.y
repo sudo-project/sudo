@@ -1,5 +1,7 @@
 %{
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -61,7 +63,9 @@ char *errorfile = NULL;
 struct sudoers_parse_tree parsed_policy = {
     TAILQ_HEAD_INITIALIZER(parsed_policy.userspecs),
     TAILQ_HEAD_INITIALIZER(parsed_policy.defaults),
-    NULL /* aliases */
+    NULL, /* aliases */
+    NULL, /* lhost */
+    NULL /* shost */
 };
 
 /*
@@ -115,8 +119,8 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 NOLOG_OUTPUT		/* don't log cmnd output */
 %token <tok>	 MAIL			/* mail log message */
 %token <tok>	 NOMAIL			/* don't mail log message */
-%token <tok>	 FOLLOW			/* follow symbolic links */
-%token <tok>	 NOFOLLOW		/* don't follow symbolic links */
+%token <tok>	 FOLLOWLNK		/* follow symbolic links */
+%token <tok>	 NOFOLLOWLNK		/* don't follow symbolic links */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -404,6 +408,7 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 				    cs->runasuserlist =
 					malloc(sizeof(*cs->runasuserlist));
 				    if (cs->runasuserlist == NULL) {
+					free(cs);
 					sudoerserror(N_("unable to allocate memory"));
 					YYERROR;
 				    }
@@ -414,6 +419,7 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 				    cs->runasgrouplist =
 					malloc(sizeof(*cs->runasgrouplist));
 				    if (cs->runasgrouplist == NULL) {
+					free(cs);
 					sudoerserror(N_("unable to allocate memory"));
 					YYERROR;
 				    }
@@ -687,10 +693,10 @@ cmndtag		:	/* empty */ {
 		|	cmndtag NOLOG_OUTPUT {
 			    $$.log_output = false;
 			}
-		|	cmndtag FOLLOW {
+		|	cmndtag FOLLOWLNK {
 			    $$.follow = true;
 			}
-		|	cmndtag NOFOLLOW {
+		|	cmndtag NOFOLLOWLNK {
 			    $$.follow = false;
 			}
 		|	cmndtag MAIL {
@@ -1244,11 +1250,14 @@ free_userspec(struct userspec *us)
  * Initialized a sudoers parse tree.
  */
 void
-init_parse_tree(struct sudoers_parse_tree *parse_tree)
+init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *lhost,
+    const char *shost)
 {
     TAILQ_INIT(&parse_tree->userspecs);
     TAILQ_INIT(&parse_tree->defaults);
     parse_tree->aliases = NULL;
+    parse_tree->shost = shost;
+    parse_tree->lhost = lhost;
 }
 
 /*

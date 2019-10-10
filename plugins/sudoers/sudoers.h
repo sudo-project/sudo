@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1993-1996, 1998-2005, 2007-2017
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -224,6 +226,17 @@ struct sudo_user {
 #define	runas_limitprivs	(sudo_user.limitprivs)
 #define user_timeout		(sudo_user.timeout)
 
+/* Default sudoers uid/gid/mode if not set by the Makefile. */
+#ifndef SUDOERS_UID
+# define SUDOERS_UID	0
+#endif
+#ifndef SUDOERS_GID
+# define SUDOERS_GID	0
+#endif
+#ifndef SUDOERS_MODE
+# define SUDOERS_MODE	0600
+#endif
+
 #ifdef __TANDEM
 # define ROOT_UID	65535
 #else
@@ -366,6 +379,7 @@ int sudoers_hook_getenv(const char *name, char **value, void *closure);
 int sudoers_hook_putenv(char *string, void *closure);
 int sudoers_hook_setenv(const char *name, const char *value, int overwrite, void *closure);
 int sudoers_hook_unsetenv(const char *name, void *closure);
+void register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *), char * (*ef_next)(void *, int *), bool system);
 
 /* env_pattern.c */
 bool matches_env_pattern(const char *pattern, const char *var, bool *full_match);

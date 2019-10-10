@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1993-1996, 1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -39,6 +41,7 @@
 #include <ctype.h>
 #include <grp.h>
 #include <pwd.h>
+#include <assert.h>
 
 #include <sudo_usage.h>
 #include "sudo.h"
@@ -131,11 +134,12 @@ struct environment {
  * Note that we must disable arg permutation to support setting environment
  * variables and to better support the optional arg of the -h flag.
  */
-static const char short_opts[] =  "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:SsT:t:U:u:Vv";
+static const char short_opts[] =  "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:r:SsT:t:U:u:Vv";
 static struct option long_opts[] = {
     { "askpass",	no_argument,		NULL,	'A' },
     { "auth-type",	required_argument,	NULL,	'a' },
     { "background",	no_argument,		NULL,	'b' },
+    { "bell",	        no_argument,		NULL,	'B' },
     { "close-from",	required_argument,	NULL,	'C' },
     { "login-class",	required_argument,	NULL,	'c' },
     { "preserve-env",	optional_argument,	NULL,	'E' },
@@ -307,6 +311,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 #ifdef HAVE_BSD_AUTH_H
 		case 'a':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_BSDAUTH_TYPE].value = optarg;
@@ -315,7 +320,11 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		case 'b':
 		    SET(flags, MODE_BACKGROUND);
 		    break;
+		case 'B':
+		    SET(tgetpass_flags, TGP_BELL);
+		    break;
 		case 'C':
+		    assert(optarg != NULL);
 		    if (strtonum(optarg, 3, INT_MAX, NULL) == 0) {
 			sudo_warnx(U_("the argument to -C must be a number greater than or equal to 3"));
 			usage(1);
@@ -324,6 +333,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 #ifdef HAVE_LOGIN_CAP_H
 		case 'c':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_LOGIN_CLASS].value = optarg;
@@ -353,6 +363,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    valid_flags = MODE_NONINTERACTIVE;
 		    break;
 		case 'g':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    runas_group = optarg;
@@ -383,6 +394,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    }
 		    /* FALLTHROUGH */
 		case OPT_HOSTNAME:
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_REMOTE_HOST].value = optarg;
@@ -420,15 +432,18 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 		case 'p':
 		    /* An empty prompt is allowed. */
+		    assert(optarg != NULL);
 		    sudo_settings[ARG_PROMPT].value = optarg;
 		    break;
 #ifdef HAVE_SELINUX
 		case 'r':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_SELINUX_ROLE].value = optarg;
 		    break;
 		case 't':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    sudo_settings[ARG_SELINUX_TYPE].value = optarg;
@@ -436,6 +451,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 #endif
 		case 'T':
 		    /* Plugin determines whether empty timeout is allowed. */
+		    assert(optarg != NULL);
 		    sudo_settings[ARG_TIMEOUT].value = optarg;
 		    break;
 		case 'S':
@@ -446,11 +462,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    SET(flags, MODE_SHELL);
 		    break;
 		case 'U':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    list_user = optarg;
 		    break;
 		case 'u':
+		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage(1);
 		    runas_user = optarg;
@@ -644,7 +662,7 @@ usage(int fatal)
      * Use usage vectors appropriate to the progname.
      */
     if (strcmp(getprogname(), "sudoedit") == 0) {
-	uvec[0] = SUDO_USAGE5 + 3;
+	uvec[0] = &SUDO_USAGE5[3];
 	uvec[1] = NULL;
     } else {
 	uvec[0] = SUDO_USAGE1;
@@ -709,6 +727,8 @@ help(void)
 #endif
     sudo_lbuf_append(&lbuf, "  -b, --background              %s\n",
 	_("run command in the background"));
+    sudo_lbuf_append(&lbuf, "  -B, --bell                    %s\n",
+	_("ring bell when prompting"));
     sudo_lbuf_append(&lbuf, "  -C, --close-from=num          %s\n",
 	_("close all file descriptors >= num"));
 #ifdef HAVE_LOGIN_CAP_H

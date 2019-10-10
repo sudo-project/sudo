@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2004-2005, 2007, 2010, 2012-2015, 2017-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -91,7 +93,12 @@ sudo_closefrom(int lowfd)
 	return;
 #endif
 #if defined(HAVE_PSTAT_GETPROC)
-    if (pstat_getproc(&pstat, sizeof(pstat), 0, getpid()) != -1) {
+    /*
+     * EOVERFLOW is not a fatal error for the fields we use.
+     * See the "EOVERFLOW Error" section of pstat_getvminfo(3).
+     */                             
+    if (pstat_getproc(&pstat, sizeof(pstat), 0, getpid()) != -1 ||
+	errno == EOVERFLOW) {
 	int fd;
 
 	for (fd = lowfd; fd <= pstat.pst_highestfd; fd++)
@@ -99,8 +106,8 @@ sudo_closefrom(int lowfd)
 	return;
     }
 #elif defined(HAVE_DIRFD)
-    /* Use /proc/self/fd (or /dev/fd on FreeBSD) if it exists. */
-# if defined(__FreeBSD__) || defined(__APPLE__)
+    /* Use /proc/self/fd (or /dev/fd on macOS) if it exists. */
+# ifdef __APPLE__
     path = _PATH_DEV "fd";
 # else
     path = "/proc/self/fd";

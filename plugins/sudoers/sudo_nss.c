@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2007-2015 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -38,7 +40,6 @@
 #include <ctype.h>
 
 #include "sudoers.h"
-#include "sudo_lbuf.h"
 
 extern struct sudo_nss sudo_nss_file;
 #ifdef HAVE_LDAP

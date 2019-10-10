@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -102,7 +104,7 @@ struct io_buffer {
 };
 SLIST_HEAD(io_buffer_list, io_buffer);
 
-static char slavename[PATH_MAX];
+static char ptyname[PATH_MAX];
 int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static bool foreground, pipeline;
 static int ttymode = TERM_COOKED;
@@ -129,7 +131,7 @@ pty_cleanup(void)
     if (io_fds[SFD_USERTTY] != -1)
 	sudo_term_restore(io_fds[SFD_USERTTY], false);
     if (utmp_user != NULL)
-	utmp_logout(slavename, 0);
+	utmp_logout(ptyname, 0);
 
     debug_return;
 }
@@ -137,7 +139,7 @@ pty_cleanup(void)
 /*
  * Allocate a pty if /dev/tty is a tty.
  * Fills in io_fds[SFD_USERTTY], io_fds[SFD_MASTER], io_fds[SFD_SLAVE]
- * and slavename globals.
+ * and ptyname globals.
  */
 static bool
 pty_setup(struct command_details *details, const char *tty)
@@ -152,14 +154,17 @@ pty_setup(struct command_details *details, const char *tty)
     }
 
     if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
-	slavename, sizeof(slavename), details->euid))
+	ptyname, sizeof(ptyname), details->euid))
 	sudo_fatal(U_("unable to allocate pty"));
+
+    /* Update tty name in command details (used by SELinux and AIX). */
+    details->tty = ptyname;
 
     /* Add entry to utmp/utmpx? */
     if (ISSET(details->flags, CD_SET_UTMP)) {
 	utmp_user =
 	    details->utmp_user ? details->utmp_user : user_details.username;
-	utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
+	utmp_login(tty, ptyname, io_fds[SFD_SLAVE], utmp_user);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -172,7 +177,7 @@ pty_setup(struct command_details *details, const char *tty)
 
 /*
  * Make the tty slave the controlling tty.
- * This is only used by the monitor but slavename[] is static.
+ * This is only used by the monitor but ptyname[] is static.
  */
 int
 pty_make_controlling(void)
@@ -182,8 +187,8 @@ pty_make_controlling(void)
 	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
 	    return -1;
 #else
-	/* Set controlling tty by reopening slave. */
-	int fd = open(slavename, O_RDWR);
+	/* Set controlling tty by reopening pty slave. */
+	int fd = open(ptyname, O_RDWR);
 	if (fd == -1)
 	    return -1;
 	close(fd);
@@ -513,7 +518,7 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	log_suspend(signo);
 
 	if (sig2str(signo, signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", signo);
+	    (void)snprintf(signame, sizeof(signame), "%d", signo);
 
 	/* Suspend self and continue command when we resume. */
 	if (signo != SIGSTOP) {
@@ -829,7 +834,7 @@ pty_finish(struct command_status *cstat)
 
     /* Update utmp */
     if (utmp_user != NULL)
-	utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0);
+	utmp_logout(ptyname, cstat->type == CMD_WSTATUS ? cstat->val : 0);
 
     debug_return;
 }
@@ -872,7 +877,7 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
     else if (signo == SIGCONT_BG)
 	strlcpy(signame, "CONT_BG", sizeof(signame));
     else if (sig2str(signo, signame) == -1)
-	snprintf(signame, sizeof(signame), "%d", signo);
+	(void)snprintf(signame, sizeof(signame), "%d", signo);
     sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for command", signame);
 
     send_command_status(ec, CMD_SIGNO, signo);
@@ -1014,7 +1019,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
     } else if (WIFSIGNALED(status)) {
 	char signame[SIG2STR_MAX];
 	if (sig2str(WTERMSIG(status), signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	    (void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) killed, SIG%s",
 	    __func__, (int)ec->monitor_pid, signame);
 	ec->monitor_pid = -1;
@@ -1039,7 +1044,7 @@ signal_cb_pty(int signo, int what, void *v)
 	debug_return;
 
     if (sig2str(signo, signame) == -1)
-	snprintf(signame, sizeof(signame), "%d", signo);
+	(void)snprintf(signame, sizeof(signame), "%d", signo);
     sudo_debug_printf(SUDO_DEBUG_DIAG,
 	"%s: evbase %p, monitor: %d, signo %s(%d), cstat %p", __func__,
 	ec->evbase, (int)ec->monitor_pid, signame, signo, ec->cstat);
@@ -1096,7 +1101,7 @@ fwdchannel_cb(int sock, int what, void *v)
 	    else if (msg->cstat.val == SIGCONT_BG)
 		strlcpy(signame, "CONT_BG", sizeof(signame));
 	    else if (sig2str(msg->cstat.val, signame) == -1)
-		snprintf(signame, sizeof(signame), "%d", msg->cstat.val);
+		(void)snprintf(signame, sizeof(signame), "%d", msg->cstat.val);
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"sending SIG%s to monitor over backchannel", signame);
 	    break;

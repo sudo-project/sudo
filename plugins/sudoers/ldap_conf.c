@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2003-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -199,7 +201,7 @@ sudo_ldap_conf_add_ports(void)
 
     hostbuf[0] = '\0';
     len = snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
-    if (len <= 0 || (size_t)len >= sizeof(defport)) {
+    if (len < 0 || len >= ssizeof(defport)) {
 	sudo_warnx(U_("sudo_ldap_conf_add_ports: port too large"));
 	debug_return_bool(false);
     }
@@ -361,7 +363,7 @@ sudo_ldap_read_secret(const char *path)
     debug_decl(sudo_ldap_read_secret, SUDOERS_DEBUG_LDAP)
 
     if ((fp = fopen(path_ldap_secret, "r")) != NULL) {
-	len = getline(&line, &linesize, fp);
+	len = getdelim(&line, &linesize, '\n', fp);
 	if (len != -1) {
 	    /* trim newline */
 	    while (len > 0 && line[len - 1] == '\n')

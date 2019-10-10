@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -123,7 +125,7 @@ signal_cb_nopty(int signo, int what, void *v)
 	debug_return;
 
     if (sig2str(signo, signame) == -1)
-	snprintf(signame, sizeof(signame), "%d", signo);
+	(void)snprintf(signame, sizeof(signame), "%d", signo);
     sudo_debug_printf(SUDO_DEBUG_DIAG,
 	"%s: evbase %p, command: %d, signo %s(%d), cstat %p",
 	__func__, ec->evbase, (int)ec->cmnd_pid, signame, signo, ec->cstat);
@@ -376,6 +378,17 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	debug_return;
     }
 
+#ifdef HAVE_SELINUX
+    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+        if (selinux_setup(details->selinux_role, details->selinux_type,
+		details->tty, -1) == -1) {
+	    cstat->type = CMD_ERRNO;
+	    cstat->val = errno;
+	    debug_return;
+	}
+    }
+#endif
+
     ec.cmnd_pid = sudo_debug_fork();
     switch (ec.cmnd_pid) {
     case -1:
@@ -482,7 +495,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	int fd, signo = WSTOPSIG(status);
 
 	if (sig2str(signo, signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", signo);
+	    (void)snprintf(signame, sizeof(signame), "%d", signo);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
 	    __func__, (int)ec->cmnd_pid, signame);
 
@@ -550,7 +563,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	/* Command has exited or been killed, we are done. */
 	if (WIFSIGNALED(status)) {
 	    if (sig2str(WTERMSIG(status), signame) == -1)
-		snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+		(void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
 		__func__, (int)ec->cmnd_pid, signame);
 	} else {

@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2004-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2004-2005, 2007-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,7 +44,7 @@
 #include <gram.h>
 
 /*
- * Look up the user in the sudoers prase tree for pseudo-commands like
+ * Look up the user in the sudoers parse tree for pseudo-commands like
  * list, verify and kill.
  */
 static int
@@ -60,7 +62,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER)
 
     pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
-    nopass = (pwcheck == all) ? true : false;
+    nopass = (pwcheck == never) ? true : false;
 
     if (list_pw == NULL)
 	SET(validated, FLAG_NO_CHECK);
@@ -166,6 +168,9 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 			}
 			*matching_cs = cs;
 			*defs = &priv->defaults;
+			sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+			    "userspec matched @ %s:%d %s", us->file, us->lineno,
+			    cmnd_match ? "allowed" : "denied");
 			debug_return_int(cmnd_match);
 		    }
 		}
@@ -268,7 +273,7 @@ apply_cmndspec(struct cmndspec *cs)
 }
 
 /*
- * Look up the user in the sudoers prase tree and check to see if they are
+ * Look up the user in the sudoers parse tree and check to see if they are
  * allowed to run the specified command on this host as the target user.
  */
 int
@@ -506,24 +511,20 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 #endif /* HAVE_SELINUX */
 		if (cs->timeout > 0) {
 		    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
-		    snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
+		    (void)snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
 		    sudo_lbuf_append(lbuf, "    Timeout: %s\n", numbuf);
 		}
 		if (cs->notbefore != UNSPEC) {
 		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
 		    struct tm *tm = gmtime(&cs->notbefore);
-		    snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
-			tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-			tm->tm_hour, tm->tm_min, tm->tm_sec);
-		    sudo_lbuf_append(lbuf, "    NotBefore: %s\n", buf);
+		    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
+			sudo_lbuf_append(lbuf, "    NotBefore: %s\n", buf);
 		}
 		if (cs->notafter != UNSPEC) {
 		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
 		    struct tm *tm = gmtime(&cs->notafter);
-		    snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
-			tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-			tm->tm_hour, tm->tm_min, tm->tm_sec);
-		    sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
+		    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
+			sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
 		}
 		sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	    }
@@ -768,7 +769,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 	priv_buf.len = 0;
 	sudo_lbuf_append(&priv_buf,
 	    _("User %s is not allowed to run sudo on %s.\n"),
-	    pw->pw_name, user_shost);
+	    pw->pw_name, user_srunhost);
     }
     if (sudo_lbuf_error(&def_buf) || sudo_lbuf_error(&priv_buf))
 	goto bad;

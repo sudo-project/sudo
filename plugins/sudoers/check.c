@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1993-1996,1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -257,13 +259,13 @@ display_lecture(int status)
     if (def_lecture_file && (fp = fopen(def_lecture_file, "r")) != NULL) {
 	while ((nread = fread(buf, sizeof(char), sizeof(buf) - 1, fp)) != 0) {
 	    buf[nread] = '\0';
-	    msg.msg_type = SUDO_CONV_ERROR_MSG;
+	    msg.msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
 	    msg.msg = buf;
 	    sudo_conv(1, &msg, &repl, NULL);
 	}
 	fclose(fp);
     } else {
-	msg.msg_type = SUDO_CONV_ERROR_MSG;
+	msg.msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
 	msg.msg = _("\n"
 	    "We trust you have received the usual lecture from the local System\n"
 	    "Administrator. It usually boils down to these three things:\n\n"

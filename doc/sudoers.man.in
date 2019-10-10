@@ -1,6 +1,8 @@
 .\" Automatically generated from an mdoc input file.  Do not edit.
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2018
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -23,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 20, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 16, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -259,7 +261,7 @@ See
 for a description of the log file format.
 .PP
 \fBsudoers\fR
-is also capable of running a command in a pseudo-tty and logging all
+is also capable of running a command in a pseudo-terminal and logging all
 input and/or output.
 The standard input, standard output and standard error can be logged
 even when not associated with a terminal.
@@ -309,31 +311,42 @@ and
 settings in
 \fI/etc/login.conf\fR.
 .\}
-The new environment contains the
-\fRTERM\fR,
-\fRPATH\fR,
+The
 \fRHOME\fR,
 \fRMAIL\fR,
 \fRSHELL\fR,
-\fRLOGNAME\fR,
-\fRUSER\fR
-and
-\fRSUDO_*\fR
-variables
-in addition to variables from the invoking process permitted by the
-\fIenv_check\fR
-and
-\fIenv_keep\fR
-options.
-This is effectively a whitelist
-for environment variables.
-The environment variables
 \fRLOGNAME\fR
 and
 \fRUSER\fR
-are treated specially.
-If one of them is preserved (or removed) from user's environment, the other
-will be as well.
+environment variables are initialized based on the target user
+and the
+\fRSUDO_*\fR
+variables are set based on the invoking user.
+Additional variables, such as
+\fRDISPLAY\fR,
+\fRPATH\fR
+and
+\fRTERM\fR,
+are preserved from the invoking user's environment if permitted by the
+\fIenv_check\fR
+or
+\fIenv_keep\fR
+options.
+This is effectively a whitelist for environment variables.
+A few environment variables are treated specially.
+If the
+\fRPATH\fR
+and
+\fRTERM\fR
+variables are not preserved from the user's environment, they will be set
+to default values.
+The
+\fRLOGNAME\fR
+and
+\fRUSER\fR
+are handled as a single entity.
+If one of them is preserved (or removed) from the user's environment,
+the other will be as well.
 If
 \fRLOGNAME\fR
 and
@@ -343,6 +356,7 @@ the other will be set to the same value.
 This avoids an inconsistent environment where one of the variables
 describing the user name is set to the invoking user and one is
 set to the target user.
+Environment variables with a value beginning with
 \fR()\fR
 are removed unless both the name and value parts are matched by
 \fIenv_keep\fR
@@ -411,14 +425,27 @@ suffix, this would not match, as
 \fBbash\fR
 shell functions are not preserved by default.
 .PP
-The complete list of environment variables that
+The complete list of environment variables that are preserved or removed,
+as modified by global Defaults parameters in
+\fIsudoers\fR,
+is displayed when
 \fBsudo\fR
-allows or denies is contained in the output of
-\(lq\fRsudo -V\fR\(rq
-when run as root.
-Please note that this list varies based on the operating system
+is run by root with the
+\fB\-V\fR
+option.
+Please note that the list of environment variables to remove
+varies based on the operating system
 \fBsudo\fR
 is running on.
+.PP
+Other
+\fBsudoers\fR
+options may influence the command environment, such as
+\fIalways_set_home\fR,
+\fIsecure_path\fR,
+\fIset_logname\fR,
+and
+\fIset_home\fR.
 .PP
 On systems that support PAM where the
 \fBpam_env\fR
@@ -838,7 +865,7 @@ only the case for non-networked systems.
 .sp
 .RS 0n
 digest ::= [A-Fa-f0-9]+ |
-	   [[A-Za-z0-9\+/=]+
+	   [A-Za-z0-9\e+/=]+
 
 Digest_Spec ::= "sha224" ':' digest |
 		"sha256" ':' digest |
@@ -867,7 +894,7 @@ shell-style wildcards (see the
 \fIWildcards\fR
 section below).
 A simple file name allows the user to run the command with any
-arguments he/she wishes.
+arguments they wish.
 However, you may also specify command line arguments (including
 wildcards).
 Alternately, you can specify
@@ -1607,15 +1634,16 @@ option.
 .sp
 By default, if the
 \fRNOPASSWD\fR
-tag is applied to any of the entries for a user on the current host,
-he or she will be able to run
+tag is applied to any of a user's entries for the current host,
+the user will be able to run
 \(lq\fRsudo -l\fR\(rq
 without a password.
 Additionally, a user may only run
 \(lq\fRsudo -v\fR\(rq
-without a password if the
+without a password if all of the user's entries for the current
+host have the
 \fRNOPASSWD\fR
-tag is present for all a user's entries that pertain to the current host.
+tag.
 This behavior may be overridden via the
 \fIverifypw\fR
 and
@@ -2060,25 +2088,17 @@ If enabled,
 will set the
 \fRHOME\fR
 environment variable to the home directory of the target user
-(which is root unless the
+(which is root unless
+\fBsudo\fR's
 \fB\-u\fR
 option is used).
-This effectively means that the
-\fB\-H\fR
-option is always implied.
-Note that by default,
-\fRHOME\fR
-will be set to the home directory of the target user when the
+This option is largely obsolete and has no effect unless the
 \fIenv_reset\fR
-option is enabled, so
-\fIalways_set_home\fR
-only has an effect for configurations where either
-\fIenv_reset\fR
-is disabled or
+option has been disabled or
 \fRHOME\fR
 is present in the
 \fIenv_keep\fR
-list.
+list, both of which are strongly discouraged.
 This flag is
 \fIoff\fR
 by default.
@@ -2146,8 +2166,8 @@ runs a command as the foreground process as long as
 itself is running in the foreground.
 When the
 \fIexec_background\fR
-flag is enabled and the command is being run in a pty (due to I/O logging
-or the
+flag is enabled and the command is being run in a pseudo-terminal
+(due to I/O logging or the
 \fIuse_pty\fR
 flag), the command will be run as a background process.
 Attempts to read from the controlling terminal (or to change terminal
@@ -2168,7 +2188,7 @@ has required it or not (the kernel buffers terminals so it is not possible
 to tell whether the command really wants the input).
 This is different from historic
 \fIsudo\fR
-behavior or when the command is not being run in a pty.
+behavior or when the command is not being run in a pseudo-terminal.
 .sp
 For this to work seamlessly, the operating system must support the
 automatic restarting of system calls.
@@ -2208,10 +2228,14 @@ will use the value of the
 or
 \fREDITOR\fR
 environment variables before falling back on the default editor list.
-Note that this may create a security hole as it allows the user to
-run any arbitrary command as root without logging.
-A safer alternative is to place a colon-separated list of editors
-in the
+Note that
+\fBvisudo\fR
+is typically run as root so this option may allow a user with
+\fBvisudo\fR
+privileges to run arbitrary commands as root without logging.
+An alternative is to place a colon-separated list of
+\(lqsafe\(rq
+editors int the
 \fIeditor\fR
 variable.
 \fBvisudo\fR
@@ -2366,7 +2390,7 @@ has the fully-qualified domain name as the
 host name, and the short version as an alias.
 .sp
 .RS 24n
-192.168.1.1	xyzzy.sudo.ws xyzzy
+192.168.1.1 xyzzy.sudo.ws xyzzy
 .RE
 .RS 18n
 .sp
@@ -2501,7 +2525,7 @@ by default.
 log_input
 If set,
 \fBsudo\fR
-will run the command in a pseudo-tty and log all user input.
+will run the command in a pseudo-terminal and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
@@ -2522,7 +2546,7 @@ by default.
 log_output
 If set,
 \fBsudo\fR
-will run the command in a pseudo-tty and log all output that is sent
+will run the command in a pseudo-terminal and log all output that is sent
 to the screen, similar to the
 script(1)
 command.
@@ -2720,10 +2744,34 @@ This flag is
 \fIoff\fR
 by default.
 .TP 18n
+pam_acct_mgmt
+On systems that use PAM for authentication,
+\fBsudo\fR
+will perform PAM account validation for the invoking user by default.
+The actual checks performed depend on which PAM modules are configured.
+If enabled, account validation will be performed regardless of whether
+or not a password is required.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.28 or higher.
+.TP 18n
 pam_session
 On systems that use PAM for authentication,
 \fBsudo\fR
 will create a new PAM session for the command to be run in.
+Unless
+\fBsudo\fR
+is given the
+\fB\-i\fR
+or
+\fB\-s\fR
+options, PAM session modules are run with the
+\(lqsilent\(rq
+flag enabled.
+This prevents last login information from being displayed for every
+command on some systems.
 Disabling
 \fIpam_session\fR
 may be needed on older PAM implementations or on operating systems where
@@ -2887,30 +2935,20 @@ If enabled and
 \fBsudo\fR
 is invoked with the
 \fB\-s\fR
-option the
+option, the
 \fRHOME\fR
 environment variable will be set to the home directory of the target
-user (which is root unless the
+user (which is root unless
+\fBsudo\fR's
 \fB\-u\fR
 option is used).
-This effectively makes the
-\fB\-s\fR
-option imply
-\fB\-H\fR.
-Note that
-\fRHOME\fR
-is already set when the
+This option is largely obsolete and has no effect unless the
 \fIenv_reset\fR
-option is enabled, so
-\fIset_home\fR
-is only effective for configurations where either
-\fIenv_reset\fR
-is disabled
-or
+option has been disabled or
 \fRHOME\fR
 is present in the
 \fIenv_keep\fR
-list.
+list, both of which are strongly discouraged.
 This flag is
 \fIoff\fR
 by default.
@@ -2948,16 +2986,16 @@ by default.
 set_utmp
 When enabled,
 \fBsudo\fR
-will create an entry in the utmp (or utmpx) file when a pseudo-tty
+will create an entry in the utmp (or utmpx) file when a pseudo-terminal
 is allocated.
-A pseudo-tty is allocated by
+A pseudo-terminal is allocated by
 \fBsudo\fR
-when the
+when it is running in a terminal and one or more of the
 \fIlog_input\fR,
 \fIlog_output\fR
 or
 \fIuse_pty\fR
-flags are enabled.
+flags is enabled.
 By default, the new entry will be a copy of the user's existing utmp
 entry (if any), with the tty, time, type and pid fields updated.
 This flag is
@@ -3155,7 +3193,7 @@ by default.
 use_pty
 If set, and
 \fBsudo\fR
-is running in a terminal, the command will be run in a pseudo-pty
+is running in a terminal, the command will be run in a pseudo-terminal
 (even if no I/O logging is being done).
 If the
 \fBsudo\fR
@@ -3169,7 +3207,7 @@ may be capable of injecting commands into the user's
 terminal or running a background process that retains access to the
 user's terminal device even after the main program has finished
 executing.
-By running the command in a separate pseudo-pty, this attack is
+By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
 This flag is
 \fIoff\fR
@@ -3412,11 +3450,13 @@ Unless invoked as
 does not preserve the
 \fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
-and
+or
 \fREDITOR\fR
-environment variables by default, even when the
+environment variables unless they are present in the
+\fIenv_keep\fR
+list or the
 \fIenv_reset\fR
-option is enabled.
+option is disabled.
 The default is
 \fI@editor@\fR.
 .TP 18n
@@ -3942,7 +3982,7 @@ A string containing a
 group plugin with optional arguments.
 The string should consist of the plugin
 path, either fully-qualified or relative to the
-\fI@PLUGINDIR@\fR
+\fI@plugindir@\fR
 directory, followed by any configuration arguments the plugin requires.
 These arguments (if any) will be passed to the plugin's initialization function.
 If arguments are present, the string must be enclosed in double quotes
@@ -4118,18 +4158,17 @@ are processed before the contents of
 \fIenv_file\fR.
 .TP 14n
 secure_path
-Path used for every command run from
-\fBsudo\fR.
-If you don't trust the
-people running
+If set,
 \fBsudo\fR
-to have a sane
+will use this value in place of the user's
 \fRPATH\fR
-environment variable you may want to use this.
-Another use is if you want to have the
-\(lqroot path\(rq
-be separate from the
-\(lquser path\(rq.
+environment variable.
+This option can be used to reset the
+\fRPATH\fR
+to a known good value that contains directories for system administrator
+commands such as
+\fI/usr/sbin\fR.
+.sp
 Users in the group specified by the
 \fIexempt_group\fR
 option are not affected by
@@ -4352,6 +4391,26 @@ is displayed when
 is run by root with the
 \fB\-V\fR
 option.
+.sp
+Preserving the
+\fRHOME\fR
+environment variable has security implications since many programs use it
+when searching for configuration or data files.
+Adding
+\fRHOME\fR
+to
+\fIenv_keep\fR
+may enable a user to run unrestricted commands via
+\fBsudo\fR
+and is strongly discouraged.
+Users wishing to edit files with
+\fBsudo\fR
+should run
+\fBsudoedit\fR
+(or
+\fBsudo\fR \fB\-e\fR)
+to get their accustomed editor configuration instead of
+invoking the editor directly.
 .SH "GROUP PROVIDER PLUGINS"
 The
 \fBsudoers\fR
@@ -4368,7 +4427,7 @@ Defaults setting.
 The argument to
 \fIgroup_plugin\fR
 should consist of the plugin path, either fully-qualified or relative to the
-\fI@PLUGINDIR@\fR
+\fI@plugindir@\fR
 directory, followed by any configuration options the plugin requires.
 These options (if specified) will be passed to the plugin's initialization
 function.
@@ -4762,7 +4821,7 @@ word wrap will be disabled.
 .SH "I/O LOG FILES"
 When I/O logging is enabled,
 \fBsudo\fR
-will run the command in a pseudo-tty and log all user input and/or output,
+will run the command in a pseudo-terminal and log all user input and/or output,
 depending on which options are enabled.
 I/O is logged to the directory specified by the
 \fIiolog_dir\fR
@@ -4781,34 +4840,82 @@ Each I/O log is stored in a separate directory that contains the
 following files:
 .TP 10n
 \fIlog\fR
-a text file containing the time the command was run, the name of the user
+A text file containing information about the command.
+The first line consists of the following colon-delimited fields:
+the time the command was run, the name of the user
 who ran
 \fBsudo\fR,
 the name of the target user, the name of the target group (optional),
 the terminal that
 \fBsudo\fR
-was run from, the number of rows and columns of the terminal,
-the working directory the command was run from and the path name of
-the command itself (with arguments if present)
+was run from, and the number of lines and columns of the terminal.
+The second and third lines contain the working directory the command
+was run from and the path name of the command itself (with arguments
+if present).
 .TP 10n
 \fItiming\fR
-a log of the amount of time between, and the number of bytes in, each
-I/O log entry (used for session playback)
+Timing information used to replay the session.
+Each line consists of the I/O log entry type and amount of time
+since the last entry, followed by type-specific data.
+The I/O log entry types and their corresponding type-specific data are:
+.PP
+.RS 10n
+.PD 0
+.TP 6n
+0
+standard input, number of bytes in the entry
+.TP 6n
+1
+standard output, number of bytes in the entry
+.TP 6n
+2
+standard error, number of bytes in the entry
+.TP 6n
+3
+terminal input, number of bytes in the entry
+.TP 6n
+4
+terminal output, number of bytes in the entry
+.TP 6n
+5
+window change, new number lines and columns
+.TP 6n
+6
+bug compatibility for
+\fBsudo\fR
+1.8.7 terminal output
+.TP 6n
+7
+command suspend or resume, signal received
+.PP
+.RE
+.PD
 .TP 10n
 \fIttyin\fR
-input from the user's tty (what the user types)
+Raw input from the user's terminal, exactly as it was received.
+No post-processing is performed.
+For manual viewing, you may wish to convert carriage return characters
+in the log to line feeds.
+For example:
+\(oqgunzip -c ttyin | tr \&"\er\&" \&"\en\&"\(cq
 .TP 10n
 \fIstdin\fR
-input from a pipe or file
+The standard input when no terminal is present, or input redirected from
+a pipe or file.
 .TP 10n
 \fIttyout\fR
-output from the pseudo-tty (what the command writes to the screen)
+Output from the pseudo-terminal (what the command writes to the screen).
+Note that terminal-specific post-processing is performed before the
+data is logged.
+This means that, for example, line feeds are usually converted to
+line feed/carriage return pairs and tabs may be expanded to spaces.
 .TP 10n
 \fIstdout\fR
-standard output to a pipe or redirected to a file
+The standard output when no terminal is present, or output redirected to
+a pipe or file.
 .TP 10n
 \fIstderr\fR
-standard error to a pipe or redirected to a file
+The standard error redirected to a pipe or file.
 .PP
 All files other than
 \fIlog\fR
@@ -4816,7 +4923,7 @@ are compressed in gzip format unless the
 \fIcompress_io\fR
 flag has been disabled.
 Due to buffering, it is not normally possible to display the I/O logs in
-real-time as the program is executing
+real-time as the program is executing.
 The I/O log data will not be complete until the program run by
 \fBsudo\fR
 has exited or has been terminated by a signal.
@@ -5734,7 +5841,7 @@ The equivalent of
 for the plugin.
 .TP 10n
 \fIpty\fR
-pseudo-tty related code
+pseudo-terminal related code
 .TP 10n
 \fIrbtree\fR
 redblack tree internals

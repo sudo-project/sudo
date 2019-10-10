@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1996, 1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -353,6 +355,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*grlitem) + nsize;
+    total += sizeof(char *) * gidlist->ngids;
     total += groupname_len * gidlist->ngids;
 
 again:

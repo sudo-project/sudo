@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1996, 1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -249,7 +251,8 @@ done:
 	    item->d.pw ? item->d.pw->pw_name : "unknown",
 	    item->registry, node ? "cache hit" : "cached");
     }
-    item->refcnt++;
+    if (item->d.pw != NULL)
+	item->refcnt++;
     debug_return_ptr(item->d.pw);
 }
 
@@ -319,7 +322,8 @@ done:
 	    key.registry, item->d.pw ? (int)item->d.pw->pw_uid : -1,
 	    item->registry, node ? "cache hit" : "cached");
     }
-    item->refcnt++;
+    if (item->d.pw != NULL)
+	item->refcnt++;
     debug_return_ptr(item->d.pw);
 }
 
@@ -630,7 +634,8 @@ done:
 	    key.registry, item->d.gr ? (int)item->d.gr->gr_gid : -1,
 	    item->registry, node ? "cache hit" : "cached");
     }
-    item->refcnt++;
+    if (item->d.gr != NULL)
+	item->refcnt++;
     debug_return_ptr(item->d.gr);
 }
 
@@ -713,7 +718,8 @@ sudo_fakegrnam(const char *group)
 	    break;
 	}
     }
-    item->refcnt++;
+    if (item->d.gr != NULL)
+	item->refcnt++;
     debug_return_ptr(item->d.gr);
 }
 
@@ -854,7 +860,8 @@ sudo_get_grlist(const struct passwd *pw)
 	}
     }
 done:
-    item->refcnt++;
+    if (item->d.grlist != NULL)
+	item->refcnt++;
     debug_return_ptr(item->d.grlist);
 }
 
@@ -957,7 +964,8 @@ sudo_get_gidlist(const struct passwd *pw, unsigned int type)
 	}
     }
 done:
-    item->refcnt++;
+    if (item->d.gidlist != NULL)
+	item->refcnt++;
     debug_return_ptr(item->d.gidlist);
 }
 

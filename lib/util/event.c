@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -507,7 +509,7 @@ sudo_ev_add_v2(struct sudo_event_base *base, struct sudo_event *ev,
 	sudo_gettime_mono(&ev->timeout);
 	sudo_timespecadd(&ev->timeout, timo, &ev->timeout);
 	TAILQ_FOREACH(evtmp, &base->timeouts, timeouts_entries) {
-	    if (sudo_timespeccmp(timo, &evtmp->timeout, <))
+	    if (sudo_timespeccmp(&ev->timeout, &evtmp->timeout, <))
 		break;
 	}
 	if (evtmp != NULL) {
@@ -723,6 +725,12 @@ void
 sudo_ev_loopexit_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopexit, SUDO_DEBUG_EVENT)
+
+    if (base == NULL) {
+	if ((base = default_base) == NULL)
+	    debug_return;
+    }
+
     /* SUDO_EVBASE_LOOPBREAK trumps SUDO_EVBASE_LOOPEXIT */
     if (!ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
 	/* SUDO_EVBASE_LOOPEXIT trumps SUDO_EVBASE_LOOPCONT */
@@ -736,6 +744,12 @@ void
 sudo_ev_loopbreak_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopbreak, SUDO_DEBUG_EVENT)
+
+    if (base == NULL) {
+	if ((base = default_base) == NULL)
+	    debug_return;
+    }
+
     /* SUDO_EVBASE_LOOPBREAK trumps SUDO_EVBASE_LOOP{CONT,EXIT,ONCE}. */
     CLR(base->flags, (SUDO_EVBASE_LOOPCONT|SUDO_EVBASE_LOOPEXIT|SUDO_EVBASE_LOOPONCE));
     SET(base->flags, SUDO_EVBASE_LOOPBREAK);
@@ -746,6 +760,12 @@ void
 sudo_ev_loopcontinue_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopcontinue, SUDO_DEBUG_EVENT)
+
+    if (base == NULL) {
+	if ((base = default_base) == NULL)
+	    debug_return;
+    }
+
     /* SUDO_EVBASE_LOOP{BREAK,EXIT} trumps SUDO_EVBASE_LOOPCONT */
     if (!ISSET(base->flags, SUDO_EVBASE_LOOPONCE|SUDO_EVBASE_LOOPBREAK)) {
 	SET(base->flags, SUDO_EVBASE_LOOPCONT);
@@ -757,6 +777,11 @@ bool
 sudo_ev_got_exit_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_got_exit, SUDO_DEBUG_EVENT)
+
+    if (base == NULL) {
+	if ((base = default_base) == NULL)
+	    debug_return_bool(false);
+    }
     debug_return_bool(ISSET(base->flags, SUDO_EVBASE_GOT_EXIT));
 }
 
@@ -764,6 +789,11 @@ bool
 sudo_ev_got_break_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_got_break, SUDO_DEBUG_EVENT)
+
+    if (base == NULL) {
+	if ((base = default_base) == NULL)
+	    debug_return_bool(false);
+    }
     debug_return_bool(ISSET(base->flags, SUDO_EVBASE_GOT_BREAK));
 }
 

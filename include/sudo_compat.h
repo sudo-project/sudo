@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 1996, 1998-2005, 2008, 2009-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
@@ -217,7 +219,8 @@
 #endif
 
 /* For pipe2() emulation. */
-#if !defined(HAVE_PIPE2) && defined(O_NONBLOCK) && !defined(O_CLOEXEC)
+#if !defined(HAVE_PIPE2) && defined(O_NONBLOCK) && (!defined(O_CLOEXEC) || O_CLOEXEC > 0xffffffff)
+# undef O_CLOEXEC
 # define O_CLOEXEC	0x80000000
 #endif
 
@@ -404,11 +407,11 @@ __dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GETGRO
 # undef getgrouplist
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
-#ifndef HAVE_GETLINE
-__dso_public ssize_t sudo_getline(char **bufp, size_t *bufsizep, FILE *fp);
-# undef getline
-# define getline(_a, _b, _c) sudo_getline((_a), (_b), (_c))
-#endif /* HAVE_GETLINE */
+#ifndef HAVE_GETDELIM
+__dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+# undef getdelim
+# define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
+#endif /* HAVE_GETDELIM */
 #ifndef HAVE_UTIMENSAT
 __dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
 # undef utimensat
@@ -497,6 +500,11 @@ __dso_public int sudo_sig2str(int signo, char *signame);
 # undef sig2str
 # define sig2str(_a, _b) sudo_sig2str((_a), (_b))
 #endif /* HAVE_SIG2STR */
+#ifndef HAVE_STR2SIG
+__dso_public int sudo_str2sig(const char *signame, int *signum);
+# undef str2sig
+# define str2sig(_a, _b) sudo_str2sig((_a), (_b))
+#endif /* HAVE_STR2SIG */
 #if !defined(HAVE_INET_NTOP) && defined(SUDO_NET_IFS_C)
 __dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
 # undef inet_ntop

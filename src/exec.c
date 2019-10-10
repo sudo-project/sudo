@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -104,22 +106,10 @@ restore_nproc(void)
  * Returns true on success and false on failure.
  */
 static bool
-exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
+exec_setup(struct command_details *details)
 {
     bool ret = false;
     debug_decl(exec_setup, SUDO_DEBUG_EXEC)
-
-#ifdef HAVE_SELINUX
-    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
-	if (selinux_setup(details->selinux_role, details->selinux_type,
-	    ptyname ? ptyname : user_details.tty, ptyfd) == -1)
-	    goto done;
-    }
-#endif
-
-    /* Restore coredumpsize resource limit before running. */
-    if (sudo_conf_disable_coredump())
-	disable_coredump(true);
 
     if (details->pw != NULL) {
 #ifdef HAVE_PROJECT_H
@@ -146,7 +136,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #endif /* HAVE_PRIV_SET */
 
 #ifdef HAVE_GETUSERATTR
-	if (aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty) != 0) {
+	if (aix_prep_user(details->pw->pw_name, details->tty) != 0) {
 	    /* error message displayed by aix_prep_user */
 	    goto done;
 	}
@@ -267,7 +257,7 @@ exec_cmnd(struct command_details *details, int errfd)
     debug_decl(exec_cmnd, SUDO_DEBUG_EXEC)
 
     restore_signals();
-    if (exec_setup(details, NULL, -1) == true) {
+    if (exec_setup(details) == true) {
 	/* headed for execve() */
 	if (details->closefrom >= 0) {
 	    int fd, maxfd;
@@ -407,6 +397,13 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		_exit(0);
 	}
     }
+
+    /*
+     * Restore coredumpsize resource limit before running.
+     * We must do this *before* calling the PAM session module.
+     */
+    if (sudo_conf_disable_coredump())
+	disable_coredump(true);
 
     /*
      * Run the command in a new pty if there is an I/O plugin or the policy

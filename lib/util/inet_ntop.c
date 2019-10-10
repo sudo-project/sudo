@@ -1,6 +1,9 @@
 /*	$OpenBSD: inet_ntop.c,v 1.9 2014/02/05 14:20:43 millert Exp $	*/
 
-/* Copyright (c) 1996 by Internet Software Consortium.
+/*
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 1996 by Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -76,7 +79,7 @@ inet_ntop4(const unsigned char *src, char *dst, socklen_t size)
 	int len;
 
 	len = snprintf(dst, size, fmt, src[0], src[1], src[2], src[3]);
-	if (len <= 0 || len >= size) {
+	if (len < 0 || len >= size) {
 		errno = ENOSPC;
 		return (NULL);
 	}

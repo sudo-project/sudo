@@ -1,5 +1,7 @@
 .\"
-.\" Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 6, 2018
+.Dd August 27, 2019
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -47,11 +49,20 @@ The
 should either be a six character sequence of digits and
 upper case letters, e.g.,
 .Li 0100A5 ,
-or a pattern matching the
+a pattern matching the
 .Em iolog_file
 option in the
 .Em sudoers
-file.
+file, or a path name.
+Path names may be relative to the
+.Em iolog_dir
+option in the
+.Em sudoers
+file (unless overridden by the
+.Fl d
+option) or fully qualified, beginning with a
+.Ql /
+character.
 When a command is run via
 .Nm sudo
 with
