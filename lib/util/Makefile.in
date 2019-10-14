@@ -117,14 +117,15 @@ SHELL = @SHELL@
 LTOBJS = @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
 	 getgrouplist.lo gidlist.lo lbuf.lo locking.lo parseln.lo progname.lo \
 	 secure_path.lo setgroups.lo strsplit.lo strtobool.lo strtoid.lo \
-	 strtomode.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo \
-	 ttyname_dev.lo ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
+	 strtomode.lo strtonum.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo \
+	 term.lo ttyname_dev.lo ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
 
 IOBJS = $(LTOBJS:.lo=.i)
 
 POBJS = $(IOBJS:.i=.plog)
 
-ATOFOO_TEST_OBJS = atofoo_test.lo strtobool.lo strtoid.lo strtomode.lo
+ATOFOO_TEST_OBJS = atofoo_test.lo strtobool.lo strtoid.lo strtomode.lo \
+		   strtonum.lo
 
 MKTEMP_TEST_OBJS = mktemp_test.lo mktemp.lo
 

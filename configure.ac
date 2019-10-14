@@ -2800,10 +2800,6 @@ else
     # Missing or non-compliant v?snprintf(), assume missing/bad v?asprintf()
     SUDO_APPEND_COMPAT_EXP(sudo_snprintf sudo_vsnprintf sudo_asprintf sudo_vasprintf)
 fi
-# We wrap OpenBSD's strtonum() to get translatable error strings.
-AC_CHECK_FUNCS([strtonum])
-AC_LIBOBJ(strtonum)
-SUDO_APPEND_COMPAT_EXP(sudo_strtonum)
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff], [], [], [
 AC_INCLUDES_DEFAULT
 #include <errno.h>

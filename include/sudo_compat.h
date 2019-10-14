@@ -379,7 +379,7 @@ int getdomainname(char *, size_t);
 # endif
 #endif /* __hpux && !__LP64__ */
 
-/* We wrap OpenBSD's strtonum() to get translatable error strings. */
+/* We use our own strtonum() to get translatable error strings. */
 __dso_public long long sudo_strtonum(const char *, long long, long long, const char **);
 #undef strtonum
 #define strtonum(_a, _b, _c, _d) sudo_strtonum((_a), (_b), (_c), (_d))
