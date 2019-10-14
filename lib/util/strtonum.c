@@ -41,6 +41,7 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 enum strtonum_err {
     STN_INITIAL,

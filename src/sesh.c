@@ -103,7 +103,7 @@ main(int argc, char *argv[], char *envp[])
 	    const char *errstr;
 
 	    cp = argv[1] + 9;
-	    fd = strtonum(cp, 0, INT_MAX, &errstr);
+	    fd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 	    if (errstr != NULL)
 		sudo_fatalx(U_("invalid file descriptor number: %s"), cp);
 	    argv++;

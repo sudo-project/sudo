@@ -206,7 +206,7 @@ io_set_max_sessid(const char *maxval)
     unsigned int value;
     debug_decl(io_set_max_sessid, SUDOERS_DEBUG_UTIL)
 
-    value = strtonum(maxval, 0, SESSID_MAX, &errstr);
+    value = sudo_strtonum(maxval, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
 	if (errno != ERANGE) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -611,7 +611,8 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	switch (**cur) {
 	case 'c':
 	    if (strncmp(*cur, "cols=", sizeof("cols=") - 1) == 0) {
-		int n = strtonum(*cur + sizeof("cols=") - 1, 1, INT_MAX, NULL);
+		int n = sudo_strtonum(*cur + sizeof("cols=") - 1, 1, INT_MAX,
+		    NULL);
 		if (n > 0)
 		    details->cols = n;
 		continue;
@@ -623,7 +624,8 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    break;
 	case 'l':
 	    if (strncmp(*cur, "lines=", sizeof("lines=") - 1) == 0) {
-		int n = strtonum(*cur + sizeof("lines=") - 1, 1, INT_MAX, NULL);
+		int n = sudo_strtonum(*cur + sizeof("lines=") - 1, 1, INT_MAX,
+		    NULL);
 		if (n > 0)
 		    details->lines = n;
 		continue;

@@ -235,7 +235,8 @@ get_process_ttyname(char *name, size_t namelen)
 		    if (*ep == ' ') {
 			*ep = '\0';
 			if (++field == 7) {
-			    int tty_nr = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+			    int tty_nr = sudo_strtonum(cp, INT_MIN, INT_MAX,
+				&errstr);
 			    if (errstr) {
 				sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 				    "%s: tty device %s: %s", path, cp, errstr);

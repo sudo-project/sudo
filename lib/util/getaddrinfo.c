@@ -239,7 +239,7 @@ gai_service(const char *servname, int flags, int *type, unsigned short *port)
     const char *errstr;
     unsigned short value;
 
-    value = strtonum(servname, 0, USHRT_MAX, &errstr);
+    value = sudo_strtonum(servname, 0, USHRT_MAX, &errstr);
     if (errstr == NULL) {
         *port = value;
     } else if (errno == ERANGE) {

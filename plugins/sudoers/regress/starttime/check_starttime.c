@@ -52,7 +52,7 @@ get_now(struct timespec *now)
 	    buf[strcspn(buf, "\n")] = '\0';
 
 	    /* Boot time is in seconds since the epoch. */
-	    seconds = strtonum(buf + 6, 0, TIME_T_MAX, &errstr);
+	    seconds = sudo_strtonum(buf + 6, 0, TIME_T_MAX, &errstr);
 	    if (errstr != NULL)
 		return -1;
 

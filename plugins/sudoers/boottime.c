@@ -78,7 +78,7 @@ get_boottime(struct timespec *ts)
 	    if (strncmp(line, "btime ", 6) == 0) {
 		if (line[len - 1] == '\n')
 		    line[len - 1] = '\0';
-		llval = strtonum(line + 6, 1, LLONG_MAX, NULL);
+		llval = sudo_strtonum(line + 6, 1, LLONG_MAX, NULL);
 		if (llval > 0) {
 		    ts->tv_sec = (time_t)llval;
 		    ts->tv_nsec = 0;

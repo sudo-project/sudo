@@ -39,6 +39,7 @@
 #endif
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 #include "pathnames.h"
 
 #ifndef _POSIX_OPEN_MAX
@@ -116,7 +117,7 @@ sudo_closefrom(int lowfd)
 	struct dirent *dent;
 	while ((dent = readdir(dirp)) != NULL) {
 	    const char *errstr;
-	    int fd = strtonum(dent->d_name, lowfd, INT_MAX, &errstr);
+	    int fd = sudo_strtonum(dent->d_name, lowfd, INT_MAX, &errstr);
 	    if (errstr == NULL && fd != dirfd(dirp)) {
 # ifdef __APPLE__
 		/* Avoid potential libdispatch crash when we close its fds. */

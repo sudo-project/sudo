@@ -89,10 +89,10 @@ main(int argc, char *argv[])
 		dash = strchr(cp, '-');
 		if (dash != NULL) {
 		    *dash = '\0';
-		    len = strtonum(cp, 1, INT_MAX, NULL);
-		    maxlen = strtonum(dash + 1, 1, INT_MAX, NULL);
+		    len = sudo_strtonum(cp, 1, INT_MAX, NULL);
+		    maxlen = sudo_strtonum(dash + 1, 1, INT_MAX, NULL);
 		} else {
-		    len = maxlen = strtonum(cp, 1, INT_MAX, NULL);
+		    len = maxlen = sudo_strtonum(cp, 1, INT_MAX, NULL);
 		}
 		if (len == 0 || maxlen == 0)
 		    sudo_fatalx("%s: invalid length on line %d\n", argv[1], lineno);

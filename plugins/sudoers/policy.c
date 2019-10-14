@@ -173,7 +173,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "closefrom=")) {
 	    errno = 0;
 	    p = *cur + sizeof("closefrom=") - 1;
-	    user_closefrom = strtonum(p, 4, INT_MAX, &errstr);
+	    user_closefrom = sudo_strtonum(p, 4, INT_MAX, &errstr);
 	    if (user_closefrom == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -300,7 +300,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "max_groups=")) {
 	    errno = 0;
 	    p = *cur + sizeof("max_groups=") - 1;
-	    sudo_user.max_groups = strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.max_groups = sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.max_groups == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -397,7 +397,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "lines=")) {
 	    errno = 0;
 	    p = *cur + sizeof("lines=") - 1;
-	    sudo_user.lines = strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.lines = sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.lines == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -407,7 +407,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "cols=")) {
 	    errno = 0;
 	    p = *cur + sizeof("cols=") - 1;
-	    sudo_user.cols = strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.cols = sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.cols == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;

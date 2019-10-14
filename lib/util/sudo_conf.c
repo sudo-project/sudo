@@ -410,7 +410,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
     int max_groups;
     debug_decl(set_var_max_groups, SUDO_DEBUG_UTIL)
 
-    max_groups = strtonum(strval, 1, INT_MAX, NULL);
+    max_groups = sudo_strtonum(strval, 1, INT_MAX, NULL);
     if (max_groups <= 0) {
 	sudo_warnx(U_("invalid max groups \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);

@@ -674,7 +674,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("cwd=", cwd)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
 		    cp = info[i] + sizeof("closefrom=") - 1;
-		    details->closefrom = strtonum(cp, 0, INT_MAX, &errstr);
+		    details->closefrom = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    break;
@@ -684,7 +684,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_FLAG("exec_background=", CD_EXEC_BG)
 		if (strncmp("execfd=", info[i], sizeof("execfd=") - 1) == 0) {
 		    cp = info[i] + sizeof("execfd=") - 1;
-		    details->execfd = strtonum(cp, 0, INT_MAX, &errstr);
+		    details->execfd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 #ifdef HAVE_FEXECVE
@@ -704,7 +704,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'n':
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
 		    cp = info[i] + sizeof("nice=") - 1;
-		    details->priority = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+		    details->priority = sudo_strtonum(cp, INT_MIN, INT_MAX,
+			&errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_PRIORITY);
@@ -799,7 +800,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
 		    cp = info[i] + sizeof("timeout=") - 1;
-		    details->timeout = strtonum(cp, 0, INT_MAX, &errstr);
+		    details->timeout = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_TIMEOUT);

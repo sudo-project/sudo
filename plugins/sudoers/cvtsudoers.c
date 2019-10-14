@@ -416,7 +416,7 @@ cvtsudoers_parse_keyword(const char *conf_file, const char *keyword,
 	    case CONF_UINT:
 		{
 		    unsigned int uval = 
-			strtonum(value, 0, UINT_MAX, &errstr);
+			sudo_strtonum(value, 0, UINT_MAX, &errstr);
 		    if (errstr != NULL) {
 			sudo_warnx(U_("%s: %s: %s: %s"),
 			    conf_file, keyword, value, U_(errstr));
