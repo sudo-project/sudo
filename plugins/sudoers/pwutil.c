@@ -219,8 +219,7 @@ sudo_getpwuid(uid_t uid)
 #endif
     if (item == NULL) {
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item))) == NULL) {
-	    sudo_warnx(U_("unable to cache uid %u, out of memory"),
-		(unsigned int) uid);
+	    sudo_warn(U_("unable to cache uid %u"), (unsigned int) uid);
 	    /* cppcheck-suppress memleak */
 	    debug_return_ptr(NULL);
 	}
@@ -238,8 +237,7 @@ sudo_getpwuid(uid_t uid)
 	break;
     case -1:
 	/* can't cache item, just return it */
-	sudo_warnx(U_("unable to cache uid %u, out of memory"),
-	    (unsigned int) uid);
+	sudo_warn(U_("unable to cache uid %u"), (unsigned int) uid);
 	item->refcnt = 0;
 	break;
     }
@@ -293,7 +291,7 @@ sudo_getpwnam(const char *name)
     if (item == NULL) {
 	const size_t len = strlen(name) + 1;
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item) + len)) == NULL) {
-	    sudo_warnx(U_("unable to cache user %s, out of memory"), name);
+	    sudo_warn(U_("unable to cache user %s"), name);
 	    /* cppcheck-suppress memleak */
 	    debug_return_ptr(NULL);
 	}
@@ -311,7 +309,7 @@ sudo_getpwnam(const char *name)
 	break;
     case -1:
 	/* can't cache item, just return it */
-	sudo_warnx(U_("unable to cache user %s, out of memory"), name);
+	sudo_warn(U_("unable to cache user %s"), name);
 	item->refcnt = 0;
 	break;
     }
@@ -374,7 +372,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 
 	pwitem = calloc(1, len);
 	if (pwitem == NULL) {
-	    sudo_warnx(U_("unable to cache user %s, out of memory"), user);
+	    sudo_warn(U_("unable to cache user %s"), user);
 	    debug_return_ptr(NULL);
 	}
 	pw = &pwitem->pw;
@@ -419,7 +417,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	    break;
 	case -1:
 	    /* can't cache item, just return it */
-	    sudo_warnx(U_("unable to cache user %s, out of memory"), user);
+	    sudo_warn(U_("unable to cache user %s"), user);
 	    item->refcnt = 0;
 	    break;
 	}
@@ -538,8 +536,7 @@ sudo_getgrgid(gid_t gid)
     item = make_gritem(gid, NULL);
     if (item == NULL) {
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item))) == NULL) {
-	    sudo_warnx(U_("unable to cache gid %u, out of memory"),
-		(unsigned int) gid);
+	    sudo_warn(U_("unable to cache gid %u"), (unsigned int) gid);
 	    /* cppcheck-suppress memleak */
 	    debug_return_ptr(NULL);
 	}
@@ -557,8 +554,7 @@ sudo_getgrgid(gid_t gid)
 	break;
     case -1:
 	/* can't cache item, just return it */
-	sudo_warnx(U_("unable to cache gid %u, out of memory"),
-	    (unsigned int) gid);
+	sudo_warn(U_("unable to cache gid %u"), (unsigned int) gid);
 	item->refcnt = 0;
 	break;
     }
@@ -605,7 +601,7 @@ sudo_getgrnam(const char *name)
     if (item == NULL) {
 	const size_t len = strlen(name) + 1;
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item) + len)) == NULL) {
-	    sudo_warnx(U_("unable to cache group %s, out of memory"), name);
+	    sudo_warn(U_("unable to cache group %s"), name);
 	    /* cppcheck-suppress memleak */
 	    debug_return_ptr(NULL);
 	}
@@ -623,7 +619,7 @@ sudo_getgrnam(const char *name)
 	break;
     case -1:
 	/* can't cache item, just return it */
-	sudo_warnx(U_("unable to cache group %s, out of memory"), name);
+	sudo_warn(U_("unable to cache group %s"), name);
 	item->refcnt = 0;
 	break;
     }
@@ -671,7 +667,7 @@ sudo_fakegrnam(const char *group)
 
 	gritem = calloc(1, len);
 	if (gritem == NULL) {
-	    sudo_warnx(U_("unable to cache group %s, out of memory"), group);
+	    sudo_warn(U_("unable to cache group %s"), group);
 	    debug_return_ptr(NULL);
 	}
 	gr = &gritem->gr;
@@ -713,7 +709,7 @@ sudo_fakegrnam(const char *group)
 	    break;
 	case -1:
 	    /* can't cache item, just return it */
-	    sudo_warnx(U_("unable to cache group %s, out of memory"), group);
+	    sudo_warn(U_("unable to cache group %s"), group);
 	    item->refcnt = 0;
 	    break;
 	}
@@ -846,8 +842,7 @@ sudo_get_grlist(const struct passwd *pw)
 	break;
     case -1:
 	/* can't cache item, just return it */
-	sudo_warnx(U_("unable to cache group list for %s, out of memory"),
-	    pw->pw_name);
+	sudo_warn(U_("unable to cache group list for %s"), pw->pw_name);
 	item->refcnt = 0;
 	break;
     }
@@ -898,8 +893,7 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
 	    sudo_grlist_delref_item(item);
 	    break;
 	case -1:
-	    sudo_warnx(U_("unable to cache group list for %s, out of memory"),
-		pw->pw_name);
+	    sudo_warn(U_("unable to cache group list for %s"), pw->pw_name);
 	    sudo_grlist_delref_item(item);
 	    debug_return_int(-1);
 	}
@@ -950,8 +944,7 @@ sudo_get_gidlist(const struct passwd *pw, unsigned int type)
 	break;
     case -1:
 	/* can't cache item, just return it */
-	sudo_warnx(U_("unable to cache group list for %s, out of memory"),
-	    pw->pw_name);
+	sudo_warn(U_("unable to cache group list for %s"), pw->pw_name);
 	item->refcnt = 0;
 	break;
     }
@@ -1003,8 +996,7 @@ sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
 	    sudo_gidlist_delref_item(item);
 	    break;
 	case -1:
-	    sudo_warnx(U_("unable to cache group list for %s, out of memory"),
-		pw->pw_name);
+	    sudo_warn(U_("unable to cache group list for %s"), pw->pw_name);
 	    sudo_gidlist_delref_item(item);
 	    debug_return_int(-1);
 	}
