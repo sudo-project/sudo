@@ -566,11 +566,17 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 		    base=`basename $$t .sh`; \
 		    out="regress/$$dir/$${base}.out"; \
 		    err="regress/$$dir/$${base}.err"; \
+		    status=0; \
 		    TESTDIR=$(srcdir)/regress/$$dir \
-			$(SHELL) $$t >$$out 2>$$err; \
+			$(SHELL) $$t >$$out 2>$$err || status=$$?; \
 		    if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
-			passed=`expr $$passed + 1`; \
-			echo "$$dir/$$base: OK"; \
+			if test $$status -ne 0; then \
+			    failed=`expr $$failed + 1`; \
+			    echo "$$dir/$$base (exit $$status): FAIL"; \
+			else \
+			    passed=`expr $$passed + 1`; \
+			    echo "$$dir/$$base: OK"; \
+			fi; \
 		    else \
 			failed=`expr $$failed + 1`; \
 			echo "$$dir/$$base: FAIL"; \

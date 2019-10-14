@@ -38,3 +38,10 @@ sudoCommand: ALL
 sudoOption: !authenticate
 sudoOrder: 10
 EOF
+
+# cvtsudoers should exit with an error
+if [ $? -eq 0 ]; then
+    exit 1
+else
+    exit 0
+fi
