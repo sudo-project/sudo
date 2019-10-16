@@ -384,9 +384,9 @@ sudoers: $(srcdir)/sudoers.in
 	cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@
 
 pre-install:
-	@if test X"$(cross_compiling)" != X"yes" -a -r $(DESTDIR)$(sudoersdir)/sudoers; then \
+	@if test X"$(cross_compiling)" != X"yes" -a X"$(DESTDIR)" = X""; then \
 	    echo "Checking existing sudoers file for syntax errors."; \
-	    ./visudo -c -f $(DESTDIR)$(sudoersdir)/sudoers; \
+	    ./visudo -c -f $(sudoersdir)/sudoers; \
 	fi
 
 install: install-plugin install-binaries install-sudoers install-doc
