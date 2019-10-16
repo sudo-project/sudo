@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 16, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 16, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -255,7 +255,7 @@ but this is changeable via the
 \fIsyslog\fR
 and
 \fIlogfile\fR
-Defaults settings.
+settings.
 See
 \fILOG FORMAT\fR
 for a description of the log file format.
@@ -290,7 +290,7 @@ can deal with environment variables.
 .PP
 By default, the
 \fIenv_reset\fR
-option is enabled.
+flag is enabled.
 This causes commands
 to be executed with a new, minimal environment.
 On AIX (and Linux
@@ -303,7 +303,7 @@ On
 BSD
 systems, if the
 \fIuse_loginclass\fR
-option is enabled, the environment is initialized
+flag is enabled, the environment is initialized
 based on the
 \fIpath\fR
 and
@@ -369,7 +369,7 @@ Prior to version 1.8.11, such variables were always removed.
 .PP
 If, however, the
 \fIenv_reset\fR
-option is disabled, any variables not
+flag is disabled, any variables not
 explicitly denied by the
 \fIenv_check\fR
 and
@@ -491,8 +491,7 @@ and, as such, it is not possible for
 \fBsudo\fR
 to preserve them.
 .PP
-As a special case, if
-\fBsudo\fR's
+As a special case, if the
 \fB\-i\fR
 option (initial login) is
 specified,
@@ -852,7 +851,7 @@ but unless the
 command on your machine returns the fully
 qualified host name, you'll need to use the
 \fIfqdn\fR
-option for wildcards to be useful.
+flag for wildcards to be useful.
 Note that
 \fBsudo\fR
 only inspects actual network interfaces; this means that IP address
@@ -1130,13 +1129,10 @@ consists of two
 and enclosed in a set of parentheses.
 The first
 \fRRunas_List\fR
-indicates
-which users the command may be run as via
-\fBsudo\fR's
+indicates which users the command may be run as via the
 \fB\-u\fR
 option.
-The second defines a list of groups that can be specified via
-\fBsudo\fR's
+The second defines a list of groups that can be specified via the
 \fB\-g\fR
 option in addition to any of the target user's groups.
 If both
@@ -1438,7 +1434,7 @@ timeout values:
 \fR30s10m4h\fR,
 \fR1d2d3h\fR.
 .PP
-This option is only supported by version 1.8.20 or higher.
+This setting is only supported by version 1.8.20 or higher.
 .SS "Tag_Spec"
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -1510,7 +1506,7 @@ Starting with version 1.8.15,
 \fBsudoedit\fR
 will not open a file that is a symbolic link unless the
 \fIsudoedit_follow\fR
-option is enabled.
+flag is enabled.
 The
 \fIFOLLOW\fR
 and
@@ -1527,7 +1523,7 @@ command and are ignored for all other commands.
 .sp
 These tags override the value of the
 \fIlog_input\fR
-option on a per-command basis.
+flag on a per-command basis.
 For more information, see the description of
 \fIlog_input\fR
 in the
@@ -1538,7 +1534,7 @@ section below.
 .sp
 These tags override the value of the
 \fIlog_output\fR
-option on a per-command basis.
+flag on a per-command basis.
 For more information, see the description of
 \fIlog_output\fR
 in the
@@ -1551,7 +1547,7 @@ These tags provide fine-grained control over whether
 mail will be sent when a user runs a command by
 overriding the value of the
 \fImail_all_cmnds\fR
-option on a per-command basis.
+flag on a per-command basis.
 They have no effect when
 \fBsudo\fR
 is run with the
@@ -1630,7 +1626,7 @@ Note, however, that the
 \fRPASSWD\fR
 tag has no effect on users who are in the group specified by the
 \fIexempt_group\fR
-option.
+setting.
 .sp
 By default, if the
 \fRNOPASSWD\fR
@@ -1655,12 +1651,12 @@ options.
 .sp
 These tags override the value of the
 \fIsetenv\fR
-option on a per-command basis.
+flag on a per-command basis.
 Note that if
 \fRSETENV\fR
 has been set for a command, the user may disable the
 \fIenv_reset\fR
-option from the command line via the
+flag from the command line via the
 \fB\-E\fR
 option.
 Additionally, environment variables set on the command
@@ -2088,13 +2084,12 @@ If enabled,
 will set the
 \fRHOME\fR
 environment variable to the home directory of the target user
-(which is root unless
-\fBsudo\fR's
+(which is the root user unless the
 \fB\-u\fR
 option is used).
-This option is largely obsolete and has no effect unless the
+This flag is largely obsolete and has no effect unless the
 \fIenv_reset\fR
-option has been disabled or
+flag has been disabled or
 \fRHOME\fR
 is present in the
 \fIenv_keep\fR
@@ -2134,8 +2129,7 @@ This flag is
 by default.
 .TP 18n
 closefrom_override
-If set, the user may use
-\fBsudo\fR's
+If set, the user may use the
 \fB\-C\fR
 option which overrides the default starting point at which
 \fBsudo\fR
@@ -2230,7 +2224,7 @@ or
 environment variables before falling back on the default editor list.
 Note that
 \fBvisudo\fR
-is typically run as root so this option may allow a user with
+is typically run as root so this flag may allow a user with
 \fBvisudo\fR
 privileges to run arbitrary commands as root without logging.
 An alternative is to place a colon-separated list of
@@ -2282,14 +2276,14 @@ variables.
 Any variables in the caller's environment or in the file specified
 by the
 \fIrestricted_env_file\fR
-option that match the
+setting that match the
 \fRenv_keep\fR
 and
 \fRenv_check\fR
 lists are then added, followed by any variables present in the file
 specified by the
 \fIenv_file\fR
-option (if any).
+setting (if any).
 The contents of the
 \fRenv_keep\fR
 and
@@ -2303,7 +2297,7 @@ is run by root with the
 option.
 If the
 \fIsecure_path\fR
-option is set, its value will be used for the
+setting is enabled, its value will be used for the
 \fRPATH\fR
 environment variable.
 This flag is
@@ -2323,7 +2317,7 @@ when the pattern references a network file system that is mounted
 on demand (auto mounted).
 The
 \fIfast_glob\fR
-option causes
+flag causes
 \fBsudo\fR
 to use the
 fnmatch(3)
@@ -2338,7 +2332,7 @@ This has security implications when path names that include globbing
 characters are used with the negation operator,
 \(oq!\&\(cq,
 as such rules can be trivially bypassed.
-As such, this option should not be used when the
+As such, this flag should not be used when the
 \fIsudoers\fR
 file contains rules that contain negated path names which include globbing
 characters.
@@ -2354,7 +2348,7 @@ file when the local host name (as returned by the
 command) does not contain the domain name.
 In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
-This option is only effective when the
+This flag is only effective when the
 \(lqcanonical\(rq
 host name, as returned by the
 \fBgetaddrinfo\fR()
@@ -2396,7 +2390,7 @@ host name, and the short version as an alias.
 .sp
 If the machine's hosts file entry is not formatted properly, the
 \fIfqdn\fR
-option will not be effective if it is queried before DNS.
+flag will not be effective if it is queried before DNS.
 .sp
 Beware that when using DNS for host name resolution, turning on
 \fIfqdn\fR
@@ -2469,7 +2463,7 @@ This flag only has an effect when
 \fBsudoers\fR
 is configured to use file-based logging via the
 \fIlogfile\fR
-option.
+setting.
 This flag is
 \fIon\fR
 by default.
@@ -2482,10 +2476,10 @@ This is intended for Enterprises that wish to prevent the usage of local
 sudoers files so that only LDAP is used.
 This thwarts the efforts of rogue operators who would attempt to add roles to
 \fI@sysconfdir@/sudoers\fR.
-When this option is present,
+When this flag is enabled,
 \fI@sysconfdir@/sudoers\fR
 does not even need to exist.
-Since this option tells
+Since this flag tells
 \fBsudo\fR
 how to behave when no specific LDAP entries have been matched, this
 sudoOption is only meaningful for the
@@ -2938,13 +2932,12 @@ is invoked with the
 option, the
 \fRHOME\fR
 environment variable will be set to the home directory of the target
-user (which is root unless
-\fBsudo\fR's
+user (which is the root user unless the
 \fB\-u\fR
 option is used).
-This option is largely obsolete and has no effect unless the
+This flag is largely obsolete and has no effect unless the
 \fIenv_reset\fR
-option has been disabled or
+flag has been disabled or
 \fRHOME\fR
 is present in the
 \fIenv_keep\fR
@@ -4423,7 +4416,7 @@ syntax described earlier.
 .PP
 Group provider plugins are specified via the
 \fIgroup_plugin\fR
-Defaults setting.
+setting.
 The argument to
 \fIgroup_plugin\fR
 should consist of the plugin path, either fully-qualified or relative to the
@@ -4593,7 +4586,7 @@ failed attempts and the value of the
 option.
 .TP 3n
 a password is required
-\fBsudo\fR's
+The
 \fB\-n\fR
 option was specified but a password was required.
 .TP 3n

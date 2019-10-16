@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 16, 2019
+.Dd October 16, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -245,7 +245,7 @@ but this is changeable via the
 .Em syslog
 and
 .Em logfile
-Defaults settings.
+settings.
 See
 .Sx "LOG FORMAT"
 for a description of the log file format.
@@ -280,7 +280,7 @@ can deal with environment variables.
 .Pp
 By default, the
 .Em env_reset
-option is enabled.
+flag is enabled.
 This causes commands
 to be executed with a new, minimal environment.
 On AIX (and Linux
@@ -293,7 +293,7 @@ On
 .Bx
 systems, if the
 .Em use_loginclass
-option is enabled, the environment is initialized
+flag is enabled, the environment is initialized
 based on the
 .Em path
 and
@@ -359,7 +359,7 @@ Prior to version 1.8.11, such variables were always removed.
 .Pp
 If, however, the
 .Em env_reset
-option is disabled, any variables not
+flag is disabled, any variables not
 explicitly denied by the
 .Em env_check
 and
@@ -478,8 +478,7 @@ and, as such, it is not possible for
 .Nm sudo
 to preserve them.
 .Pp
-As a special case, if
-.Nm sudo Ns 's
+As a special case, if the
 .Fl i
 option (initial login) is
 specified,
@@ -819,7 +818,7 @@ but unless the
 command on your machine returns the fully
 qualified host name, you'll need to use the
 .Em fqdn
-option for wildcards to be useful.
+flag for wildcards to be useful.
 Note that
 .Nm sudo
 only inspects actual network interfaces; this means that IP address
@@ -1083,13 +1082,10 @@ consists of two
 and enclosed in a set of parentheses.
 The first
 .Li Runas_List
-indicates
-which users the command may be run as via
-.Nm sudo Ns 's
+indicates which users the command may be run as via the
 .Fl u
 option.
-The second defines a list of groups that can be specified via
-.Nm sudo Ns 's
+The second defines a list of groups that can be specified via the
 .Fl g
 option in addition to any of the target user's groups.
 If both
@@ -1359,7 +1355,7 @@ timeout values:
 .Li 30s10m4h ,
 .Li 1d2d3h .
 .Pp
-This option is only supported by version 1.8.20 or higher.
+This setting is only supported by version 1.8.20 or higher.
 .Ss Tag_Spec
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -1425,7 +1421,7 @@ Starting with version 1.8.15,
 .Nm sudoedit
 will not open a file that is a symbolic link unless the
 .Em sudoedit_follow
-option is enabled.
+flag is enabled.
 The
 .Em FOLLOW
 and
@@ -1441,7 +1437,7 @@ command and are ignored for all other commands.
 .sp
 These tags override the value of the
 .Em log_input
-option on a per-command basis.
+flag on a per-command basis.
 For more information, see the description of
 .Em log_input
 in the
@@ -1451,7 +1447,7 @@ section below.
 .sp
 These tags override the value of the
 .Em log_output
-option on a per-command basis.
+flag on a per-command basis.
 For more information, see the description of
 .Em log_output
 in the
@@ -1463,7 +1459,7 @@ These tags provide fine-grained control over whether
 mail will be sent when a user runs a command by
 overriding the value of the
 .Em mail_all_cmnds
-option on a per-command basis.
+flag on a per-command basis.
 They have no effect when
 .Nm sudo
 is run with the
@@ -1534,7 +1530,7 @@ Note, however, that the
 .Li PASSWD
 tag has no effect on users who are in the group specified by the
 .Em exempt_group
-option.
+setting.
 .Pp
 By default, if the
 .Li NOPASSWD
@@ -1557,12 +1553,12 @@ options.
 .sp
 These tags override the value of the
 .Em setenv
-option on a per-command basis.
+flag on a per-command basis.
 Note that if
 .Li SETENV
 has been set for a command, the user may disable the
 .Em env_reset
-option from the command line via the
+flag from the command line via the
 .Fl E
 option.
 Additionally, environment variables set on the command
@@ -1960,13 +1956,12 @@ If enabled,
 will set the
 .Ev HOME
 environment variable to the home directory of the target user
-(which is root unless
-.Nm sudo Ns 's
+(which is the root user unless the
 .Fl u
 option is used).
-This option is largely obsolete and has no effect unless the
+This flag is largely obsolete and has no effect unless the
 .Em env_reset
-option has been disabled or
+flag has been disabled or
 .Ev HOME
 is present in the
 .Em env_keep
@@ -2002,8 +1997,7 @@ This flag is
 .Em on
 by default.
 .It closefrom_override
-If set, the user may use
-.Nm sudo Ns 's
+If set, the user may use the
 .Fl C
 option which overrides the default starting point at which
 .Nm sudo
@@ -2095,7 +2089,7 @@ or
 environment variables before falling back on the default editor list.
 Note that
 .Nm visudo
-is typically run as root so this option may allow a user with
+is typically run as root so this flag may allow a user with
 .Nm visudo
 privileges to run arbitrary commands as root without logging.
 An alternative is to place a colon-separated list of
@@ -2146,14 +2140,14 @@ variables.
 Any variables in the caller's environment or in the file specified
 by the
 .Em restricted_env_file
-option that match the
+setting that match the
 .Li env_keep
 and
 .Li env_check
 lists are then added, followed by any variables present in the file
 specified by the
 .Em env_file
-option (if any).
+setting (if any).
 The contents of the
 .Li env_keep
 and
@@ -2167,7 +2161,7 @@ is run by root with the
 option.
 If the
 .Em secure_path
-option is set, its value will be used for the
+setting is enabled, its value will be used for the
 .Ev PATH
 environment variable.
 This flag is
@@ -2186,7 +2180,7 @@ when the pattern references a network file system that is mounted
 on demand (auto mounted).
 The
 .Em fast_glob
-option causes
+flag causes
 .Nm sudo
 to use the
 .Xr fnmatch 3
@@ -2201,7 +2195,7 @@ This has security implications when path names that include globbing
 characters are used with the negation operator,
 .Ql !\& ,
 as such rules can be trivially bypassed.
-As such, this option should not be used when the
+As such, this flag should not be used when the
 .Em sudoers
 file contains rules that contain negated path names which include globbing
 characters.
@@ -2216,7 +2210,7 @@ file when the local host name (as returned by the
 command) does not contain the domain name.
 In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
-This option is only effective when the
+This flag is only effective when the
 .Dq canonical
 host name, as returned by the
 .Fn getaddrinfo
@@ -2255,7 +2249,7 @@ host name, and the short version as an alias.
 .sp
 If the machine's hosts file entry is not formatted properly, the
 .Em fqdn
-option will not be effective if it is queried before DNS.
+flag will not be effective if it is queried before DNS.
 .Pp
 Beware that when using DNS for host name resolution, turning on
 .Em fqdn
@@ -2325,7 +2319,7 @@ This flag only has an effect when
 .Nm
 is configured to use file-based logging via the
 .Em logfile
-option.
+setting.
 This flag is
 .Em on
 by default.
@@ -2337,10 +2331,10 @@ This is intended for Enterprises that wish to prevent the usage of local
 sudoers files so that only LDAP is used.
 This thwarts the efforts of rogue operators who would attempt to add roles to
 .Pa @sysconfdir@/sudoers .
-When this option is present,
+When this flag is enabled,
 .Pa @sysconfdir@/sudoers
 does not even need to exist.
-Since this option tells
+Since this flag tells
 .Nm sudo
 how to behave when no specific LDAP entries have been matched, this
 sudoOption is only meaningful for the
@@ -2765,13 +2759,12 @@ is invoked with the
 option, the
 .Ev HOME
 environment variable will be set to the home directory of the target
-user (which is root unless
-.Nm sudo Ns 's
+user (which is the root user unless the
 .Fl u
 option is used).
-This option is largely obsolete and has no effect unless the
+This flag is largely obsolete and has no effect unless the
 .Em env_reset
-option has been disabled or
+flag has been disabled or
 .Ev HOME
 is present in the
 .Em env_keep
@@ -4129,7 +4122,7 @@ syntax described earlier.
 .Pp
 Group provider plugins are specified via the
 .Em group_plugin
-Defaults setting.
+setting.
 The argument to
 .Em group_plugin
 should consist of the plugin path, either fully-qualified or relative to the
@@ -4277,7 +4270,7 @@ failed attempts and the value of the
 .Em passwd_tries
 option.
 .It a password is required
-.Nm sudo Ns 's
+The
 .Fl n
 option was specified but a password was required.
 .It sorry, you are not allowed to set the following environment variables
