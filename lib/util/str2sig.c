@@ -41,6 +41,7 @@
 #include <unistd.h>
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 #if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1
 #  define sudo_sys_signame	sys_signame
