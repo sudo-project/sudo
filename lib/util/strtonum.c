@@ -109,12 +109,16 @@ sudo_strtonumx(const char *str, long long minval, long long maxval, char **endp,
 		break;
 	    ch -= '0';
 	    if (result < lastval || (result == lastval && ch > remainder)) {
+		/* Skip remaining digits. */
+		do {
+		    ch = *cp++;
+		} while (isdigit(ch));
 		errval = STN_TOOSMALL;
 		break;
 	    } else {
-		errval = STN_VALID;
 		result *= 10;
 		result -= ch;
+		errval = STN_VALID;
 	    }
 	}
 	if (result > maxval)
@@ -127,12 +131,16 @@ sudo_strtonumx(const char *str, long long minval, long long maxval, char **endp,
 		break;
 	    ch -= '0';
 	    if (result > lastval || (result == lastval && ch > remainder)) {
+		/* Skip remaining digits. */
+		do {
+		    ch = *cp++;
+		} while (isdigit(ch));
 		errval = STN_TOOBIG;
 		break;
 	    } else {
-		errval = STN_VALID;
 		result *= 10;
 		result += ch;
+		errval = STN_VALID;
 	    }
 	}
 	if (result < minval)
@@ -153,20 +161,12 @@ done:
 	    *errstrp = N_("invalid value");
 	break;
     case STN_TOOSMALL:
-	/* Skip remaining digits. */
-	do {
-	    ch = *cp++;
-	} while (isdigit(ch));
 	result = 0;
 	errno = ERANGE;
 	if (errstrp != NULL)
 	    *errstrp = N_("value too small");
 	break;
     case STN_TOOBIG:
-	/* Skip remaining digits. */
-	do {
-	    ch = *cp++;
-	} while (isdigit(ch));
 	result = 0;
 	errno = ERANGE;
 	if (errstrp != NULL)
