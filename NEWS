@@ -1,3 +1,9 @@
+What's new in Sudo 1.8.28p1
+
+ * The fix for Bug #869 caused "sudo -v" to prompt for a password
+   when "verifypw" is set to "all" (the default) and all of the
+   user's sudoers entries are marked with NOPASSWD.  Bug #901.
+
 What's new in Sudo 1.8.28
 
  * Sudo will now only set PAM_TTY to the empty string when no
