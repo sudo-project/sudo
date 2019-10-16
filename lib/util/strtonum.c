@@ -154,8 +154,9 @@ done:
 	break;
     case STN_TOOSMALL:
 	/* Skip remaining digits. */
-	while (isdigit(ch))
+	do {
 	    ch = *cp++;
+	} while (isdigit(ch));
 	result = 0;
 	errno = ERANGE;
 	if (errstrp != NULL)
@@ -163,8 +164,9 @@ done:
 	break;
     case STN_TOOBIG:
 	/* Skip remaining digits. */
-	while (isdigit(ch))
+	do {
 	    ch = *cp++;
+	} while (isdigit(ch));
 	result = 0;
 	errno = ERANGE;
 	if (errstrp != NULL)

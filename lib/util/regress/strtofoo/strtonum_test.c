@@ -90,7 +90,7 @@ main(int argc, char *argv[])
     for (d = strtonum_data; d->str != NULL; d++) {
 	ntests++;
 	errstr = "some error";
-	value = strtonum(d->str, d->minval, d->maxval, &errstr);
+	value = sudo_strtonum(d->str, d->minval, d->maxval, &errstr);
 	if (d->errnum != 0) {
 	    if (errstr == NULL) {
 		sudo_warnx_nodebug("FAIL: \"%s\": missing errstr for errno %d",
