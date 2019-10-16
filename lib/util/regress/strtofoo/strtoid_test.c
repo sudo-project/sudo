@@ -21,11 +21,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif
 #include <errno.h>
 
 #include "sudo_compat.h"
@@ -33,47 +28,6 @@
 #include "sudo_fatal.h"
 
 __dso_public int main(int argc, char *argv[]);
-
-/* sudo_strtobool() tests */
-static struct strtobool_data {
-    const char *bool_str;
-    int value;
-} strtobool_data[] = {
-    { "true", true },
-    { "false", false },
-    { "TrUe", true },
-    { "fAlSe", false },
-    { "1", true },
-    { "0", false },
-    { "on", true },
-    { "off", false },
-    { "yes", true },
-    { "no", false },
-    { "nope", -1 },
-    { "10", -1 },
-    { "one", -1 },
-    { "zero", -1 },
-    { NULL, 0 }
-};
-
-static int
-test_strtobool(int *ntests)
-{
-    struct strtobool_data *d;
-    int errors = 0;
-    int value;
-
-    for (d = strtobool_data; d->bool_str != NULL; d++) {
-	(*ntests)++;
-	value = sudo_strtobool(d->bool_str);
-	if (value != d->value) {
-	    sudo_warnx_nodebug("FAIL: %s != %d", d->bool_str, d->value);
-	    errors++;
-	}
-    }
-
-    return errors;
-}
 
 /* sudo_strtoid() tests */
 static struct strtoid_data {
@@ -97,17 +51,23 @@ static struct strtoid_data {
     { NULL, 0, NULL, NULL, 0 }
 };
 
-static int
-test_strtoid(int *ntests)
+/*
+ * Simple tests for sudo_strtoid()
+ */
+int
+main(int argc, char *argv[])
 {
     struct strtoid_data *d;
     const char *errstr;
     char *ep;
     int errors = 0;
+    int ntests = 0;
     id_t value;
 
+    initprogname(argc > 0 ? argv[0] : "strtoid_test");
+
     for (d = strtoid_data; d->idstr != NULL; d++) {
-	(*ntests)++;
+	ntests++;
 	errstr = "some error";
 	value = sudo_strtoid(d->idstr, d->sep, &ep, &errstr);
 	if (d->errnum != 0) {
@@ -137,67 +97,10 @@ test_strtoid(int *ntests)
 	}
     }
 
-    return errors;
-}
-
-/* sudo_strtomode() tests */
-static struct strtomode_data {
-    const char *mode_str;
-    mode_t mode;
-} strtomode_data[] = {
-    { "755", 0755 },
-    { "007", 007 },
-    { "7", 7 },
-    { "8", (mode_t)-1 },
-    { NULL, 0 }
-};
-
-static int
-test_strtomode(int *ntests)
-{
-    struct strtomode_data *d;
-    const char *errstr;
-    int errors = 0;
-    mode_t mode;
-
-    for (d = strtomode_data; d->mode_str != NULL; d++) {
-	(*ntests)++;
-	errstr = "some error";
-	mode = sudo_strtomode(d->mode_str, &errstr);
-	if (errstr != NULL) {
-	    if (d->mode != (mode_t)-1) {
-		sudo_warnx_nodebug("FAIL: %s: %s", d->mode_str, errstr);
-		errors++;
-	    }
-	} else if (mode != d->mode) {
-	    sudo_warnx_nodebug("FAIL: %s != 0%o", d->mode_str,
-		(unsigned int) d->mode);
-	    errors++;
-	}
-    }
-
-    return errors;
-}
-
-/*
- * Simple tests for sudo_strtobool(), sudo_strtoid(), sudo_strtomode().
- */
-int
-main(int argc, char *argv[])
-{
-    int errors = 0;
-    int ntests = 0;
-
-    initprogname(argc > 0 ? argv[0] : "atofoo");
-
-    errors += test_strtobool(&ntests);
-    errors += test_strtoid(&ntests);
-    errors += test_strtomode(&ntests);
-
     if (ntests != 0) {
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }
