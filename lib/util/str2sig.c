@@ -96,7 +96,7 @@ sudo_str2sig(const char *signame, int *result)
 
     /* Could be a signal number encoded as a string. */
     if (isdigit((unsigned char)signame[0])) {
-	signo = strtonum(signame, 0, NSIG - 1, &errstr);
+	signo = sudo_strtonum(signame, 0, NSIG - 1, &errstr);
 	if (errstr != NULL)
 	    return -1;
 	*result = signo;
