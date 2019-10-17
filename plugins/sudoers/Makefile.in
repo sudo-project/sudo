@@ -453,6 +453,8 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    LC_ALL=C; export LC_ALL; \
 	    unset LANG || LANG=; \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
 	    mkdir -p regress/parser; \
 	    ./check_addr $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \

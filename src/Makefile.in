@@ -256,6 +256,8 @@ pvs-studio: $(POBJS)
 
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    ./check_ttyname; \
 	    if test X"@CHECK_NOEXEC@" != X""; then \
 		./check_noexec .libs/$(noexecfile); \

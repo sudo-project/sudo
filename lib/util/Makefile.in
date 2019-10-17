@@ -304,6 +304,8 @@ pvs-log-files: $(POBJS)
 # Note: some regress checks are run from srcdir for consistent error messages
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
 	    if test -f parse_gids_test; then \
 		./parse_gids_test || rval=`expr $$rval + $$?`; \
