@@ -576,6 +576,8 @@ init_defaults(void)
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;
     def_fdexec = digest_only;
+    def_log_allowed = true;
+    def_log_denied = true;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)

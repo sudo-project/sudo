@@ -240,6 +240,7 @@ log_denial(int status, bool inform_user)
     char *logline;
     int oldlocale;
     bool uid_changed, ret = true;
+    bool mailit;
     debug_decl(log_denial, SUDOERS_DEBUG_LOGGING)
 
     /* Handle auditing first (audit_failure() handles the locale itself). */
@@ -248,44 +249,49 @@ log_denial(int status, bool inform_user)
     else
 	audit_failure(NewArgc, NewArgv, N_("validation failure"));
 
-    /* Log and mail messages should be in the sudoers locale. */
-    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+    /* Send mail based on status. */
+    mailit = should_mail(status);
 
-    /* Set error message. */
-    if (ISSET(status, FLAG_NO_USER))
-	message = _("user NOT in sudoers");
-    else if (ISSET(status, FLAG_NO_HOST))
-	message = _("user NOT authorized on host");
-    else
-	message = _("command not allowed");
+    if (def_log_denied || mailit) {
+	/* Log and mail messages should be in the sudoers locale. */
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-    logline = new_logline(message, NULL);
-    if (logline == NULL)
-	debug_return_bool(false);
+	/* Set error message. */
+	if (ISSET(status, FLAG_NO_USER))
+	    message = _("user NOT in sudoers");
+	else if (ISSET(status, FLAG_NO_HOST))
+	    message = _("user NOT authorized on host");
+	else
+	    message = _("command not allowed");
 
-    /* Become root if we are not already. */
-    uid_changed = set_perms(PERM_ROOT);
+	logline = new_logline(message, NULL);
+	if (logline == NULL)
+	    debug_return_bool(false);
 
-    if (should_mail(status))
-	send_mail("%s", logline);	/* send mail based on status */
+	/* Become root if we are not already. */
+	uid_changed = set_perms(PERM_ROOT);
 
-    /*
-     * Log via syslog and/or a file.
-     */
-    if (def_syslog)
-	do_syslog(def_syslog_badpri, logline);
-    if (def_logfile && !do_logfile(logline))
-	ret = false;
+	if (mailit)
+	    send_mail("%s", logline);	/* XXX - return value */
 
-    if (uid_changed) {
-	if (!restore_perms())
-	    ret = false;		/* XXX - return -1 instead? */
+	/* Log via syslog and/or a file. */
+	if (def_log_denied) {
+	    if (def_syslog)
+		do_syslog(def_syslog_badpri, logline);
+	    if (def_logfile && !do_logfile(logline))
+		ret = false;
+	}
+
+	if (uid_changed) {
+	    if (!restore_perms())
+		ret = false;		/* XXX - return -1 instead? */
+	}
+
+	free(logline);
+
+	/* Restore locale. */
+	sudoers_setlocale(oldlocale, NULL);
     }
-
-    free(logline);
-
-    /* Restore locale. */
-    sudoers_setlocale(oldlocale, NULL);
 
     /* Inform the user if they failed to authenticate (in their locale).  */
     if (inform_user) {
@@ -398,37 +404,44 @@ log_allowed(int status)
     char *logline;
     int oldlocale;
     bool uid_changed, ret = true;
+    bool mailit;
     debug_decl(log_allowed, SUDOERS_DEBUG_LOGGING)
 
-    /* Log and mail messages should be in the sudoers locale. */
-    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+    /* Send mail based on status. */
+    mailit = should_mail(status);
 
-    if ((logline = new_logline(NULL, NULL)) == NULL)
-	debug_return_bool(false);
+    if (def_log_allowed || mailit) {
+	/* Log and mail messages should be in the sudoers locale. */
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-    /* Become root if we are not already. */
-    uid_changed = set_perms(PERM_ROOT);
+	if ((logline = new_logline(NULL, NULL)) == NULL)
+	    debug_return_bool(false);
 
-    /* XXX - return value */
-    if (should_mail(status))
-	send_mail("%s", logline);	/* send mail based on status */
+	/* Become root if we are not already. */
+	uid_changed = set_perms(PERM_ROOT);
 
-    /*
-     * Log via syslog and/or a file.
-     */
-    if (def_syslog)
-	do_syslog(def_syslog_goodpri, logline);
-    if (def_logfile && !do_logfile(logline))
-	ret = false;
+	if (mailit)
+	    send_mail("%s", logline);	/* XXX - return value */
 
-    if (uid_changed) {
-	if (!restore_perms())
-	    ret = false;		/* XXX - return -1 instead? */
+	/*
+	 * Log via syslog and/or a file.
+	 */
+	if (def_log_allowed) {
+	    if (def_syslog)
+		do_syslog(def_syslog_goodpri, logline);
+	    if (def_logfile && !do_logfile(logline))
+		ret = false;
+	}
+
+	if (uid_changed) {
+	    if (!restore_perms())
+		ret = false;		/* XXX - return -1 instead? */
+	}
+
+	free(logline);
+
+	sudoers_setlocale(oldlocale, NULL);
     }
-
-    free(logline);
-
-    sudoers_setlocale(oldlocale, NULL);
 
     debug_return_bool(ret);
 }

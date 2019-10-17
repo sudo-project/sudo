@@ -360,3 +360,9 @@ case_insensitive_user
 case_insensitive_group
 	T_FLAG
 	"Ignore case when matching group names"
+log_allowed
+	T_FLAG
+	"Log when a command is allowed by sudoers"
+log_denied
+	T_FLAG
+	"Log when a command is denied by sudoers"

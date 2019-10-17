@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "October 16, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 17, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -191,10 +191,10 @@ flags are enabled.
 This allows users to
 determine for themselves whether or not they are allowed to use
 \fBsudo\fR.
-All attempts to run
+By default, all attempts to run
 \fBsudo\fR
 (successful or not)
-will be logged, regardless of whether or not mail is sent.
+are logged, regardless of whether or not mail is sent.
 .PP
 If
 \fBsudo\fR
@@ -242,16 +242,21 @@ option can be used to select the type of time stamp record
 \fBsudoers\fR
 will use.
 .SS "Logging"
-\fBsudoers\fR
-can log both successful and unsuccessful attempts (as well
-as errors) to
-syslog(3),
-a log file, or both.
 By default,
 \fBsudoers\fR
-will log via
+logs both successful and unsuccessful attempts (as well
+as errors).
+The
+\fIlog_allowed\fR
+and
+\fIlog_denied\fR
+flags can be used to control this behavior.
+Messages can be logged to
+syslog(3),
+a log file, or both.
+The default is to log to
 syslog(3)
-but this is changeable via the
+but this is configurable via the
 \fIsyslog\fR
 and
 \fIlogfile\fR
@@ -2508,10 +2513,33 @@ This flag is
 \fI@insults@\fR
 by default.
 .TP 18n
+log_allowed
+If set,
+\fBsudoers\fR
+will log commands allowed by the policy to the system audit log
+(where supported) as well as to syslog and/or a log file.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.29 or higher.
+.TP 18n
+log_denied
+If set,
+\fBsudoers\fR
+will log commands denied by the policy to the system audit log
+(where supported) as well as to syslog and/or a log file.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.29 or higher.
+.TP 18n
 log_host
-If set, the host name will be logged in the (non-syslog)
-\fBsudo\fR
-log file.
+If set, the host name will be included in log entries written to
+the file configured by the
+\fIlogfile\fR
+setting.
 This flag is
 \fIoff\fR
 by default.

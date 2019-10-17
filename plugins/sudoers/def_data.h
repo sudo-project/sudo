@@ -228,6 +228,10 @@
 #define def_case_insensitive_user (sudo_defs_table[I_CASE_INSENSITIVE_USER].sd_un.flag)
 #define I_CASE_INSENSITIVE_GROUP 114
 #define def_case_insensitive_group (sudo_defs_table[I_CASE_INSENSITIVE_GROUP].sd_un.flag)
+#define I_LOG_ALLOWED           115
+#define def_log_allowed         (sudo_defs_table[I_LOG_ALLOWED].sd_un.flag)
+#define I_LOG_DENIED            116
+#define def_log_denied          (sudo_defs_table[I_LOG_DENIED].sd_un.flag)
 
 enum def_tuple {
 	never,
