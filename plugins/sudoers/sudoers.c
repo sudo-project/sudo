@@ -79,6 +79,7 @@
 static bool cb_fqdn(const union sudo_defs_val *);
 static bool cb_runas_default(const union sudo_defs_val *);
 static bool cb_tty_tickets(const union sudo_defs_val *);
+static bool cb_umask(const union sudo_defs_val *);
 static int set_cmnd(void);
 static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
@@ -97,6 +98,7 @@ gid_t timestamp_gid;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
+bool force_umask;
 int sudo_mode;
 
 static char *prev_user;
@@ -738,6 +740,9 @@ init_vars(char * const envp[])
     /* Set tty_tickets callback. */
     sudo_defs_table[I_TTY_TICKETS].callback = cb_tty_tickets;
 
+    /* Set umask callback. */
+    sudo_defs_table[I_UMASK].callback = cb_umask;
+
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
 	log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"),
@@ -1211,7 +1216,7 @@ cb_runas_default(const union sudo_defs_val *sd_un)
 }
 
 /*
- * Callback for runas_default sudoers setting.
+ * Callback for tty_tickets sudoers setting.
  */
 static bool
 cb_tty_tickets(const union sudo_defs_val *sd_un)
@@ -1223,6 +1228,20 @@ cb_tty_tickets(const union sudo_defs_val *sd_un)
 	def_timestamp_type = tty;
     else
 	def_timestamp_type = global;
+    debug_return_bool(true);
+}
+
+/*
+ * Callback for umask sudoers setting.
+ */
+static bool
+cb_umask(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_umask, SUDOERS_DEBUG_PLUGIN)
+
+    /* Force umask if explicitly set in sudoers. */
+    force_umask = sd_un->mode != ACCESSPERMS;
+
     debug_return_bool(true);
 }
 

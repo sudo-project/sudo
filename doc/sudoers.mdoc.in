@@ -3209,20 +3209,32 @@ and
 .Dq Li sudo -k
 respectively.
 .It umask
-Umask to use when running the command.
-Negate this option or set it to 0777 to preserve the user's umask.
-The actual umask that is used will be the union of the user's umask
-and the value of the
+File mode creation mask to use when running the command.
+Negate this option or set it to 0777 to prevent
+.Nm
+from changing the umask.
+Unless the
+.Em umask_override
+flag is set, the actual umask will be the union of the
+user's umask and the value of the
 .Em umask
-option, which defaults to
+setting, which defaults to
 .Li @sudo_umask@ .
 This guarantees
 that
 .Nm sudo
 never lowers the umask when running a command.
-Note: on systems that use PAM, the default PAM configuration may specify
-its own umask which will override the value set in
-.Em sudoers .
+.Pp
+If
+.Em umask
+is explicitly set in
+.Em sudoers ,
+it will override any umask setting in PAM or login.conf.
+If
+.Em umask
+is not set in
+.Em sudoers ,
+the umask specified by PAM or login.conf will take precedence.
 .El
 .Pp
 .Sy Strings :

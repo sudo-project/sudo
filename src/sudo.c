@@ -816,6 +816,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}
+		SET_FLAG("umask_override=", CD_OVERRIDE_UMASK)
 		SET_FLAG("use_pty=", CD_USE_PTY)
 		SET_STRING("utmp_user=", utmp_user)
 		break;
@@ -826,6 +827,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 	details->euid = details->uid;
     if (!ISSET(details->flags, CD_SET_EGID))
 	details->egid = details->gid;
+    if (!ISSET(details->flags, CD_SET_UMASK))
+	CLR(details->flags, CD_OVERRIDE_UMASK);
 
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(details->euid), NULL);
@@ -1234,6 +1237,10 @@ policy_init_session(struct command_details *details)
 	if (!set_user_groups(details))
 	    goto done;
     }
+
+    /* Session setup may override sudoers umask so set it first. */
+    if (ISSET(details->flags, CD_SET_UMASK))
+	(void) umask(details->umask);
 
     if (policy_plugin.u.policy->init_session) {
 	/*

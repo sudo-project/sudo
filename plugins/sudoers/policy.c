@@ -693,6 +693,10 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if (asprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask) == -1)
 	    goto oom;
     }
+    if (force_umask) {
+	if ((command_info[info_len++] = strdup("umask_override=true")) == NULL)
+	    goto oom;
+    }
     if (cmnd_fd != -1) {
 	if (sudo_version < SUDO_API_MKVERSION(1, 9)) {
 	    /* execfd only supported by plugin API 1.9 and higher */

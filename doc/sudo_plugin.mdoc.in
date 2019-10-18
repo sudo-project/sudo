@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 20, 2019
+.Dd October 18, 2019
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -953,6 +953,14 @@ Command timeout.
 If non-zero then when the timeout expires the command will be killed.
 .It umask=octal
 The file creation mask to use when executing the command.
+This value may be overridden by PAM or login.conf on some systems
+unless the
+.Em umask_override
+option is also set.
+.It umask_override=bool
+Force the value specified by the
+.Em umask
+option to override any umask set by PAM or login.conf.
 .It use_pty=bool
 Allocate a pseudo-terminal to run the command in, regardless of whether
 or not I/O logging is in use.
@@ -2589,6 +2597,12 @@ field was added to the io_plugin struct.
 The
 .Li log_suspend
 field was added to the io_plugin struct.
+.It Version 1.14 (sudo 1.8.29)
+The
+.Em umask_override
+entry was added to the
+.Li command_info
+list.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,
