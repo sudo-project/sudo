@@ -3235,6 +3235,9 @@ If
 is not set in
 .Em sudoers ,
 the umask specified by PAM or login.conf will take precedence.
+The umask setting in PAM is not used for
+.Nm sudoedit ,
+which does not create a new PAM session.
 .El
 .Pp
 .Sy Strings :

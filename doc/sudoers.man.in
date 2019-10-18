@@ -3434,6 +3434,9 @@ If
 is not set in
 \fIsudoers\fR,
 the umask specified by PAM or login.conf will take precedence.
+The umask setting in PAM is not used for
+\fBsudoedit\fR,
+which does not create a new PAM session.
 .PP
 \fBStrings\fR:
 .TP 18n
