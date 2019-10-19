@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 27, 2019
+.Dd October 20, 2019
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -100,7 +100,7 @@ as the superuser or another user, as specified by the security
 policy.
 The invoking user's real
 .Pq Em not No effective
-user ID is used to determine the user name with which
+user-ID is used to determine the user name with which
 to query the security policy.
 .Pp
 .Nm
@@ -252,7 +252,7 @@ If
 is
 .Cm - ,
 the default login class of the target user will be used.
-Otherwise, the command must be run as the superuser (user ID 0), or
+Otherwise, the command must be run as the superuser (user-ID 0), or
 .Nm
 must be run from a shell that is already running as the superuser.
 If the command is being run as a login shell, additional
@@ -341,7 +341,7 @@ instead of the primary group specified by the target
 user's password database entry.
 The
 .Ar group
-may be either a group name or a numeric group ID
+may be either a group name or a numeric group-ID
 .Pq GID
 prefixed with the
 .Ql #
@@ -475,7 +475,7 @@ By default, the
 .Em sudoers
 policy will initialize the group vector to the list of groups the
 target user is a member of.
-The real and effective group IDs, however, are still set to match
+The real and effective group-IDs, however, are still set to match
 the target user.
 .It Fl p Ar prompt , Fl -prompt Ns = Ns Ar prompt
 Use a custom password prompt with optional escape sequences.
@@ -583,7 +583,7 @@ Run the command as a user other than the default target user
 .Em root ) .
 The
 .Ar user
-may be either a user name or a numeric user ID
+may be either a user name or a numeric user-ID
 .Pq UID
 prefixed with the
 .Ql #
@@ -671,11 +671,11 @@ option was specified).
 The following parameters may be specified by security policy:
 .Bl -bullet -width 1n
 .It
-real and effective user ID
+real and effective user-ID
 .It
-real and effective group ID
+real and effective group-ID
 .It
-supplementary group IDs
+supplementary group-IDs
 .It
 the environment list
 .It
@@ -968,7 +968,7 @@ To prevent the disclosure of potentially sensitive information,
 disables core dumps by default while it is executing (they are
 re-enabled for the command that is run).
 This historical practice dates from a time when most operating
-systems allowed setuid processes to dump core by default.
+systems allowed set-user-ID processes to dump core by default.
 To aid in debugging
 .Nm
 crashes, you may wish to re-enable core dumps by setting
@@ -1067,7 +1067,7 @@ Default editor to use in
 .Fl e
 (sudoedit) mode.
 .It Ev SUDO_GID
-Set to the group ID of the user who invoked sudo.
+Set to the group-ID of the user who invoked sudo.
 .It Ev SUDO_PROMPT
 Used as the default password prompt unless
 the
@@ -1078,7 +1078,7 @@ If set,
 .Ev PS1
 will be set to its value for the program being run.
 .It Ev SUDO_UID
-Set to the user ID of the user who invoked sudo.
+Set to the user-ID of the user who invoked sudo.
 .It Ev SUDO_USER
 Set to the login name of the user who invoked sudo.
 .It Ev USER
@@ -1174,7 +1174,7 @@ for more information.
 was not run with root privileges.
 The
 .Nm
-binary must be owned by the root user and have the Set-user-ID bit set.
+binary must be owned by the root user and have the set-user-ID bit set.
 Also, it must not be located on a file system mounted with the
 .Sq nosuid
 option or on an NFS file system that maps uid 0 to an unprivileged uid.
@@ -1233,7 +1233,7 @@ was not run with root privileges.
 The
 .Nm
 binary does not have the correct owner or permissions.
-It must be owned by the root user and have the Set-user-ID bit set.
+It must be owned by the root user and have the set-user-ID bit set.
 .It Li sudoedit is not supported on this platform
 It is only possible to run
 .Nm sudoedit
@@ -1242,7 +1242,7 @@ on systems that support setting the effective user-ID.
 The user did not enter a password before the password timeout
 (5 minutes by default) expired.
 .It Li you do not exist in the passwd database
-Your user ID does not appear in the system passwd database.
+Your user-ID does not appear in the system passwd database.
 .It Li you may not specify environment variables in edit mode
 It is only possible to specify environment variables when running
 a command.
@@ -1305,9 +1305,9 @@ section for more information.
 .Pp
 Running shell scripts via
 .Nm
-can expose the same kernel bugs that make setuid shell scripts
+can expose the same kernel bugs that make set-user-ID shell scripts
 unsafe on some operating systems (if your OS has a /dev/fd/ directory,
-setuid shell scripts are generally safe).
+set-user-ID shell scripts are generally safe).
 .Sh BUGS
 If you feel you have found a bug in
 .Nm ,

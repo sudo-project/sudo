@@ -984,13 +984,13 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     CHECK_LDAP_VCAT(buf, pw->pw_name, sz);
     CHECK_STRLCAT(buf, ")", sz);
 
-    /* Append user ID */
+    /* Append user-ID */
     (void) snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int)pw->pw_uid);
     CHECK_STRLCAT(buf, "(sudoUser=#", sz);
     CHECK_STRLCAT(buf, idbuf, sz);
     CHECK_STRLCAT(buf, ")", sz);
 
-    /* Append primary group and group ID */
+    /* Append primary group and group-ID */
     if (grp != NULL) {
 	CHECK_STRLCAT(buf, "(sudoUser=%", sz);
 	CHECK_LDAP_VCAT(buf, grp->gr_name, sz);
@@ -1001,7 +1001,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     CHECK_STRLCAT(buf, idbuf, sz);
     CHECK_STRLCAT(buf, ")", sz);
 
-    /* Append supplementary groups and group IDs */
+    /* Append supplementary groups and group-IDs */
     if (grlist != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)

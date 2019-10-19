@@ -234,7 +234,7 @@ cb_maxseq(const union sudo_defs_val *sd_un)
 }
 
 /*
- * Look up I/O log user ID from user name.  Sets iolog_uid.
+ * Look up I/O log user-ID from user name.  Sets iolog_uid.
  * Also sets iolog_gid if iolog_group not specified.
  */
 static bool
@@ -274,7 +274,7 @@ cb_iolog_user(const union sudo_defs_val *sd_un)
 }
 
 /*
- * Look up I/O log group ID from group name.
+ * Look up I/O log group-ID from group name.
  * Sets iolog_gid.
  */
 static bool
@@ -303,7 +303,7 @@ iolog_set_group(const char *name)
 }
 
 /*
- * Look up I/O log group ID from group name.
+ * Look up I/O log group-ID from group name.
  */
 bool
 cb_iolog_group(const union sudo_defs_val *sd_un)

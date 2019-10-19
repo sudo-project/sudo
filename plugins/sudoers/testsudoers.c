@@ -157,7 +157,7 @@ main(int argc, char *argv[])
 	    case 'G':
 		sudoers_gid = (gid_t)sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
-		    sudo_fatalx("group ID %s: %s", optarg, errstr);
+		    sudo_fatalx("group-ID %s: %s", optarg, errstr);
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -188,7 +188,7 @@ main(int argc, char *argv[])
 	    case 'U':
 		sudoers_uid = (uid_t)sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
-		    sudo_fatalx("user ID %s: %s", optarg, errstr);
+		    sudo_fatalx("user-ID %s: %s", optarg, errstr);
 		break;
 	    case 'u':
 		runas_user = optarg;

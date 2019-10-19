@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd July 3, 2019
+.Dd October 20, 2019
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -305,12 +305,12 @@ Set disable_coredump false
 .Ed
 .Pp
 All modern operating systems place restrictions on core dumps
-from setuid processes like
+from set-user-ID processes like
 .Nm sudo
 so this option can be enabled without compromising security.
 To actually get a
 .Nm sudo
-core file you will likely need to enable core dumps for setuid processes.
+core file you will likely need to enable core dumps for set-user-ID processes.
 On
 .Bx
 and Linux systems this is accomplished in the

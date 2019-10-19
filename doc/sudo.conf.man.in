@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "July 3, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -334,12 +334,12 @@ Set disable_coredump false
 .RS 10n
 .sp
 All modern operating systems place restrictions on core dumps
-from setuid processes like
+from set-user-ID processes like
 \fBsudo\fR
 so this option can be enabled without compromising security.
 To actually get a
 \fBsudo\fR
-core file you will likely need to enable core dumps for setuid processes.
+core file you will likely need to enable core dumps for set-user-ID processes.
 On
 BSD
 and Linux systems this is accomplished in the

@@ -434,17 +434,17 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
     }
 
-    /* User name, user ID, group ID and host name must be specified. */
+    /* User name, user-ID, group-ID and host name must be specified. */
     if (user_name == NULL) {
 	sudo_warnx(U_("user name not set by sudo front-end"));
 	goto bad;
     }
     if (!uid_set) {
-	sudo_warnx(U_("user ID not set by sudo front-end"));
+	sudo_warnx(U_("user-ID not set by sudo front-end"));
 	goto bad;
     }
     if (!gid_set) {
-	sudo_warnx(U_("group ID not set by sudo front-end"));
+	sudo_warnx(U_("group-ID not set by sudo front-end"));
 	goto bad;
     }
     if (user_host == NULL) {

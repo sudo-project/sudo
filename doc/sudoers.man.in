@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "October 17, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -123,13 +123,13 @@ sudoers_uid=uid
 The
 \fIsudoers_uid\fR
 argument can be used to override the default owner of the sudoers file.
-It should be specified as a numeric user ID.
+It should be specified as a numeric user-ID.
 .TP 10n
 sudoers_gid=gid
 The
 \fIsudoers_gid\fR
 argument can be used to override the default group of the sudoers file.
-It must be specified as a numeric group ID (not a group name).
+It must be specified as a numeric group-ID (not a group name).
 .TP 10n
 sudoers_mode=mode
 The
@@ -220,7 +220,7 @@ file lookup is still done for root, not the user specified by
 \fBsudoers\fR
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
-containing the user ID that was used to authenticate, the
+containing the user-ID that was used to authenticate, the
 terminal session ID, the start time of the session leader
 (or parent process) and a time stamp
 (using a monotonic clock if one is available).
@@ -477,7 +477,7 @@ list.
 .PP
 Note that the dynamic linker on most operating systems will remove
 variables that can control dynamic linking from the environment of
-setuid executables, including
+set-user-ID executables, including
 \fBsudo\fR.
 Depending on the operating
 system this may include
@@ -712,7 +712,7 @@ User ::= '!'* user name |
 .PP
 A
 \fRUser_List\fR
-is made up of one or more user names, user IDs
+is made up of one or more user names, user-IDs
 (prefixed with
 \(oq#\(cq),
 system group names and IDs (prefixed with
@@ -811,10 +811,13 @@ it can contain
 \fRRunas_Alias\fRes.
 Note that
 user names and groups are matched as strings.
-In other words, two
-users (groups) with the same uid (gid) are considered to be distinct.
-If you wish to match all user names with the same uid (e.g.,
-root and toor), you can use a uid instead (#0 in the example given).
+In other words, two users (groups) with the same user (group) ID
+are considered to be distinct.
+If you wish to match all user names with the same user-ID (e.g., root and
+toor), you can use a user-ID instead of a name (#0 in the example given).
+Note that the user-ID or group-ID specified in a
+\fRRunas_Member\fR
+need not be listed in the password or group database.
 .nf
 .sp
 .RS 0n
@@ -1969,7 +1972,7 @@ The pound sign
 is used to indicate a comment (unless it is part of a #include
 directive or unless it occurs in the context of a user name and is
 followed by one or more digits, in which case it is treated as a
-uid).
+user-ID).
 Both the comment character and any text after it, up to the end of
 the line, are ignored.
 .PP
@@ -2683,7 +2686,7 @@ by default.
 match_group_by_gid
 By default,
 \fBsudoers\fR
-will look up each group the user is a member of by group ID to
+will look up each group the user is a member of by group-ID to
 determine the group name (this is only done once).
 The resulting list of the user's group names is used when matching
 groups listed in the
@@ -2702,21 +2705,21 @@ running commands via
 may take longer than normal.
 On such systems it may be faster to use the
 \fImatch_group_by_gid\fR
-flag to avoid resolving the user's group IDs to group names.
+flag to avoid resolving the user's group-IDs to group names.
 In this case,
 \fBsudoers\fR
 must look up any group name listed in the
 \fIsudoers\fR
-file and use the group ID instead of the group name when determining
+file and use the group-ID instead of the group name when determining
 whether the user is a member of the group.
 .sp
 Note that if
 \fImatch_group_by_gid\fR
 is enabled, group database lookups performed by
 \fBsudoers\fR
-will be keyed by group name as opposed to group ID.
+will be keyed by group name as opposed to group-ID.
 On systems where there are multiple sources for the group database,
-it is possible to have conflicting group names or group IDs in the local
+it is possible to have conflicting group names or group-IDs in the local
 \fI/etc/group\fR
 file and the remote group database.
 On such systems, enabling or disabling
@@ -2872,7 +2875,7 @@ will initialize the group vector to the list of groups the target user is in.
 When
 \fIpreserve_groups\fR
 is set, the user's existing group vector is left unaltered.
-The real and effective group IDs, however, are still set to match the
+The real and effective group-IDs, however, are still set to match the
 target user.
 This flag is
 \fIoff\fR
@@ -3063,9 +3066,9 @@ This option changes that behavior such that the real UID is left
 as the invoking user's UID.
 In other words, this makes
 \fBsudo\fR
-act as a setuid wrapper.
+act as a set-user-ID wrapper.
 This can be useful on systems that disable some potentially
-dangerous functionality when a program is run setuid.
+dangerous functionality when a program is run set-user-ID.
 This option is only effective on systems that support either the
 setreuid(2)
 or
@@ -3140,7 +3143,7 @@ option (defaults to
 \fRroot\fR)
 instead of the password of the invoking user
 when running a command or editing a file.
-Note that this flag precludes the use of a uid not listed in the passwd
+Note that this flag precludes the use of a user-ID not listed in the passwd
 database as an argument to the
 \fB\-u\fR
 option.
@@ -3529,7 +3532,7 @@ where every two digits are used to form a new directory, e.g.,
 expanded to the invoking user's login name
 .TP 6n
 \fR%{group}\fR
-expanded to the name of the invoking user's real group ID
+expanded to the name of the invoking user's real group-ID
 .TP 6n
 \fR%{runas_user}\fR
 expanded to the login name of the user the command will
@@ -3614,19 +3617,19 @@ by default.
 This setting is only supported by version 1.8.20 or higher.
 .TP 18n
 iolog_group
-The group name to look up when setting the group ID on new I/O log
+The group name to look up when setting the group-ID on new I/O log
 files and directories.
 If
 \fIiolog_group\fR
 is not set,
-the primary group ID of the user specified by
+the primary group-ID of the user specified by
 \fIiolog_user\fR
 is used.
 If neither
 \fIiolog_group\fR
 nor
 \fIiolog_user\fR
-are set, I/O log files and directories are created with group ID 0.
+are set, I/O log files and directories are created with group-ID 0.
 .sp
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
@@ -3644,19 +3647,19 @@ Defaults to 0600 (read and write by user only).
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
 iolog_user
-The user name to look up when setting the user and group IDs on new
+The user name to look up when setting the user and group-IDs on new
 I/O log files and directories.
 If
 \fIiolog_group\fR
-is set, it will be used instead of the user's primary group ID.
+is set, it will be used instead of the user's primary group-ID.
 By default, I/O log files and directories are created with user and
-group ID 0.
+group-ID 0.
 .sp
 This setting can be useful when the I/O logs are stored on a Network
 File System (NFS) share.
 Having a dedicated user own the I/O log files means that
 \fBsudoers\fR
-does not write to the log files as user ID 0, which is usually
+does not write to the log files as user-ID 0, which is usually
 not permitted by NFS.
 .sp
 This setting is only supported by version 1.8.19 or higher.
@@ -4402,7 +4405,7 @@ is run by root with the
 \fB\-V\fR
 option.
 Note that many operating systems will remove potentially dangerous
-variables from the environment of any setuid process (such as
+variables from the environment of any set-user-ID process (such as
 \fBsudo\fR).
 .TP 18n
 env_keep
@@ -4672,7 +4675,7 @@ The
 file could not be opened for reading.
 This can happen when the
 \fIsudoers\fR
-file is located on a remote file system that maps user ID 0 to
+file is located on a remote file system that maps user-ID 0 to
 a different value.
 Normally,
 \fBsudoers\fR
@@ -4685,7 +4688,7 @@ or adding an argument like
 \(lqsudoers_uid=N\(rq
 (where
 \(oqN\(cq
-is the user ID that owns the
+is the user-ID that owns the
 \fIsudoers\fR
 file) to the end of the
 \fBsudoers\fR
@@ -4714,7 +4717,7 @@ file owner, please add
 \(lqsudoers_uid=N\(rq
 (where
 \(oqN\(cq
-is the user ID that owns the
+is the user-ID that owns the
 \fIsudoers\fR
 file) to the
 \fBsudoers\fR
@@ -4750,7 +4753,7 @@ file group ownership, please add
 \(lqsudoers_gid=N\(rq
 (where
 \(oqN\(cq
-is the group ID that owns the
+is the group-ID that owns the
 \fIsudoers\fR
 file) to the
 \fBsudoers\fR

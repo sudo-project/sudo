@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "June 20, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -305,13 +305,13 @@ sudoers_uid=uid
 The
 \fIsudoers_uid\fR
 argument can be used to override the default owner of the sudoers file.
-It should be specified as a numeric user ID.
+It should be specified as a numeric user-ID.
 .TP 10n
 sudoers_gid=gid
 The
 \fIsudoers_gid\fR
 argument can be used to override the default group of the sudoers file.
-It must be specified as a numeric group ID (not a group name).
+It must be specified as a numeric group-ID (not a group name).
 .TP 10n
 sudoers_mode=mode
 The
@@ -379,7 +379,7 @@ You didn't run
 as root.
 .TP 6n
 \fRyou do not exist in the passwd database\fR
-Your user ID does not appear in the system passwd database.
+Your user-ID does not appear in the system passwd database.
 .TP 6n
 \fRWarning: {User,Runas,Host,Cmnd}_Alias referenced but not defined\fR
 Either you are trying to use an undeclared {User,Runas,Host,Cmnd}_Alias

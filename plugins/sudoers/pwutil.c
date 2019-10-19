@@ -103,7 +103,7 @@ sudo_pwutil_set_backend(sudo_make_pwitem_t pwitem, sudo_make_gritem_t gritem,
 }
 
 /*
- * Compare by user ID.
+ * Compare by user-ID.
  * v1 is the key to find or data to insert, v2 is in-tree data.
  */
 static int
@@ -135,7 +135,7 @@ cmp_pwnam(const void *v1, const void *v2)
 
 /*
  * Compare by user name, taking into account the source type.
- * Need to differentiate between group IDs received from the front-end
+ * Need to differentiate between group-IDs received from the front-end
  * (via getgroups()) and groups IDs queried from the group database.
  * v1 is the key to find or data to insert, v2 is in-tree data.
  */
@@ -463,7 +463,7 @@ sudo_freepwcache(void)
 }
 
 /*
- * Compare by group ID.
+ * Compare by group-ID.
  * v1 is the key to find or data to insert, v2 is in-tree data.
  */
 static int
@@ -908,7 +908,7 @@ sudo_get_gidlist(const struct passwd *pw, unsigned int type)
     struct rbnode *node;
     debug_decl(sudo_get_gidlist, SUDOERS_DEBUG_NSS)
 
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: looking up group IDs for %s",
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: looking up group-IDs for %s",
 	__func__, pw->pw_name);
 
     if (gidlist_cache == NULL) {
@@ -1015,7 +1015,7 @@ user_in_group(const struct passwd *pw, const char *group)
     debug_decl(user_in_group, SUDOERS_DEBUG_NSS)
 
     /*
-     * If it could be a sudo-style group ID check gids first.
+     * If it could be a sudo-style group-ID check gids first.
      */
     if (group[0] == '#') {
 	const char *errstr;
@@ -1041,8 +1041,8 @@ user_in_group(const struct passwd *pw, const char *group)
 
     /*
      * Next match the group name.  By default, sudoers resolves all the user's
-     * group IDs to names and matches by name.  If match_group_by_gid is
-     * set, each group is sudoers is resolved and matching is by group ID.
+     * group-IDs to names and matches by name.  If match_group_by_gid is
+     * set, each group is sudoers is resolved and matching is by group-ID.
      */
     if (def_match_group_by_gid) {
 	gid_t gid;
@@ -1052,7 +1052,7 @@ user_in_group(const struct passwd *pw, const char *group)
 	    goto done;
 	gid = grp->gr_gid;
 
-	/* Check against user's primary (passwd file) group ID. */
+	/* Check against user's primary (passwd file) group-ID. */
 	if (gid == pw->pw_gid) {
 	    matched = true;
 	    goto done;

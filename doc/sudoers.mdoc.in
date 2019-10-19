@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd October 17, 2019
+.Dd October 20, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -113,12 +113,12 @@ file.
 The
 .Em sudoers_uid
 argument can be used to override the default owner of the sudoers file.
-It should be specified as a numeric user ID.
+It should be specified as a numeric user-ID.
 .It sudoers_gid=gid
 The
 .Em sudoers_gid
 argument can be used to override the default group of the sudoers file.
-It must be specified as a numeric group ID (not a group name).
+It must be specified as a numeric group-ID (not a group name).
 .It sudoers_mode=mode
 The
 .Em sudoers_mode
@@ -209,7 +209,7 @@ file lookup is still done for root, not the user specified by
 .Nm
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
-containing the user ID that was used to authenticate, the
+containing the user-ID that was used to authenticate, the
 terminal session ID, the start time of the session leader
 (or parent process) and a time stamp
 (using a monotonic clock if one is available).
@@ -464,7 +464,7 @@ list.
 .Pp
 Note that the dynamic linker on most operating systems will remove
 variables that can control dynamic linking from the environment of
-setuid executables, including
+set-user-ID executables, including
 .Nm sudo .
 Depending on the operating
 system this may include
@@ -686,7 +686,7 @@ User ::= '!'* user name |
 .Pp
 A
 .Li User_List
-is made up of one or more user names, user IDs
+is made up of one or more user names, user-IDs
 (prefixed with
 .Ql # ) ,
 system group names and IDs (prefixed with
@@ -781,10 +781,13 @@ it can contain
 .Li Runas_Alias Ns es .
 Note that
 user names and groups are matched as strings.
-In other words, two
-users (groups) with the same uid (gid) are considered to be distinct.
-If you wish to match all user names with the same uid (e.g.,
-root and toor), you can use a uid instead (#0 in the example given).
+In other words, two users (groups) with the same user (group) ID
+are considered to be distinct.
+If you wish to match all user names with the same user-ID (e.g., root and
+toor), you can use a user-ID instead of a name (#0 in the example given).
+Note that the user-ID or group-ID specified in a
+.Li Runas_Member
+need not be listed in the password or group database.
 .Bd -literal
 Host_List ::= Host |
               Host ',' Host_List
@@ -1846,7 +1849,7 @@ The pound sign
 is used to indicate a comment (unless it is part of a #include
 directive or unless it occurs in the context of a user name and is
 followed by one or more digits, in which case it is treated as a
-uid).
+user-ID).
 Both the comment character and any text after it, up to the end of
 the line, are ignored.
 .Pp
@@ -2522,7 +2525,7 @@ by default.
 .It match_group_by_gid
 By default,
 .Nm
-will look up each group the user is a member of by group ID to
+will look up each group the user is a member of by group-ID to
 determine the group name (this is only done once).
 The resulting list of the user's group names is used when matching
 groups listed in the
@@ -2541,21 +2544,21 @@ running commands via
 may take longer than normal.
 On such systems it may be faster to use the
 .Em match_group_by_gid
-flag to avoid resolving the user's group IDs to group names.
+flag to avoid resolving the user's group-IDs to group names.
 In this case,
 .Nm
 must look up any group name listed in the
 .Em sudoers
-file and use the group ID instead of the group name when determining
+file and use the group-ID instead of the group name when determining
 whether the user is a member of the group.
 .Pp
 Note that if
 .Em match_group_by_gid
 is enabled, group database lookups performed by
 .Nm
-will be keyed by group name as opposed to group ID.
+will be keyed by group name as opposed to group-ID.
 On systems where there are multiple sources for the group database,
-it is possible to have conflicting group names or group IDs in the local
+it is possible to have conflicting group names or group-IDs in the local
 .Pa /etc/group
 file and the remote group database.
 On such systems, enabling or disabling
@@ -2703,7 +2706,7 @@ will initialize the group vector to the list of groups the target user is in.
 When
 .Em preserve_groups
 is set, the user's existing group vector is left unaltered.
-The real and effective group IDs, however, are still set to match the
+The real and effective group-IDs, however, are still set to match the
 target user.
 This flag is
 .Em off
@@ -2883,9 +2886,9 @@ This option changes that behavior such that the real UID is left
 as the invoking user's UID.
 In other words, this makes
 .Nm sudo
-act as a setuid wrapper.
+act as a set-user-ID wrapper.
 This can be useful on systems that disable some potentially
-dangerous functionality when a program is run setuid.
+dangerous functionality when a program is run set-user-ID.
 This option is only effective on systems that support either the
 .Xr setreuid 2
 or
@@ -2955,7 +2958,7 @@ option (defaults to
 .Li root )
 instead of the password of the invoking user
 when running a command or editing a file.
-Note that this flag precludes the use of a uid not listed in the passwd
+Note that this flag precludes the use of a user-ID not listed in the passwd
 database as an argument to the
 .Fl u
 option.
@@ -3322,7 +3325,7 @@ where every two digits are used to form a new directory, e.g.,
 .It Li %{user}
 expanded to the invoking user's login name
 .It Li %{group}
-expanded to the name of the invoking user's real group ID
+expanded to the name of the invoking user's real group-ID
 .It Li %{runas_user}
 expanded to the login name of the user the command will
 be run as (e.g., root)
@@ -3400,19 +3403,19 @@ by default.
 .Pp
 This setting is only supported by version 1.8.20 or higher.
 .It iolog_group
-The group name to look up when setting the group ID on new I/O log
+The group name to look up when setting the group-ID on new I/O log
 files and directories.
 If
 .Em iolog_group
 is not set,
-the primary group ID of the user specified by
+the primary group-ID of the user specified by
 .Em iolog_user
 is used.
 If neither
 .Em iolog_group
 nor
 .Em iolog_user
-are set, I/O log files and directories are created with group ID 0.
+are set, I/O log files and directories are created with group-ID 0.
 .Pp
 This setting is only supported by version 1.8.19 or higher.
 .It iolog_mode
@@ -3428,19 +3431,19 @@ Defaults to 0600 (read and write by user only).
 .Pp
 This setting is only supported by version 1.8.19 or higher.
 .It iolog_user
-The user name to look up when setting the user and group IDs on new
+The user name to look up when setting the user and group-IDs on new
 I/O log files and directories.
 If
 .Em iolog_group
-is set, it will be used instead of the user's primary group ID.
+is set, it will be used instead of the user's primary group-ID.
 By default, I/O log files and directories are created with user and
-group ID 0.
+group-ID 0.
 .Pp
 This setting can be useful when the I/O logs are stored on a Network
 File System (NFS) share.
 Having a dedicated user own the I/O log files means that
 .Nm
-does not write to the log files as user ID 0, which is usually
+does not write to the log files as user-ID 0, which is usually
 not permitted by NFS.
 .Pp
 This setting is only supported by version 1.8.19 or higher.
@@ -4106,7 +4109,7 @@ is run by root with the
 .Fl V
 option.
 Note that many operating systems will remove potentially dangerous
-variables from the environment of any setuid process (such as
+variables from the environment of any set-user-ID process (such as
 .Nm sudo ) .
 .It env_keep
 Environment variables to be preserved in the user's environment when the
@@ -4351,7 +4354,7 @@ The
 file could not be opened for reading.
 This can happen when the
 .Em sudoers
-file is located on a remote file system that maps user ID 0 to
+file is located on a remote file system that maps user-ID 0 to
 a different value.
 Normally,
 .Nm
@@ -4364,7 +4367,7 @@ or adding an argument like
 .Dq sudoers_uid=N
 (where
 .Sq N
-is the user ID that owns the
+is the user-ID that owns the
 .Em sudoers
 file) to the end of the
 .Nm
@@ -4390,7 +4393,7 @@ file owner, please add
 .Dq sudoers_uid=N
 (where
 .Sq N
-is the user ID that owns the
+is the user-ID that owns the
 .Em sudoers
 file) to the
 .Nm
@@ -4424,7 +4427,7 @@ file group ownership, please add
 .Dq sudoers_gid=N
 (where
 .Sq N
-is the group ID that owns the
+is the group-ID that owns the
 .Em sudoers
 file) to the
 .Nm

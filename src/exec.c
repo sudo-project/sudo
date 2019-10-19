@@ -215,7 +215,7 @@ exec_setup(struct command_details *details)
 	goto done;
     }
 #else
-    /* Cannot support real user ID that is different from effective user ID. */
+    /* Cannot support real user-ID that is different from effective user-ID. */
     if (setuid(details->euid) != 0) {
 	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
 	    (unsigned int)details->euid, (unsigned int)details->euid);

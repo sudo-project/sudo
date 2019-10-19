@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS_TIMESTAMP" "@mansectform@" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS_TIMESTAMP" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -117,13 +117,13 @@ and
 which is used only when matching records.
 .TP 6n
 auth_uid
-The user ID that was used for authentication.
+The user-ID that was used for authentication.
 Depending on the value of the
 \fIrootpw\fR,
 \fIrunaspw\fR
 and
 \fItargetpw\fR
-options, the user ID may be that of the invoking user, the root user,
+options, the user-ID may be that of the invoking user, the root user,
 the default runas user or the target user.
 .TP 6n
 sid
