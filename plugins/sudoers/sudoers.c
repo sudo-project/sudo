@@ -344,7 +344,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 	if (*def_timestampowner == '#') {
 	    const char *errstr;
-	    uid_t uid = sudo_strtoid(def_timestampowner + 1, NULL, NULL, &errstr);
+	    uid_t uid = sudo_strtoid(def_timestampowner + 1, &errstr);
 	    if (errstr == NULL)
 		pw = sudo_getpwuid(uid);
 	}
@@ -1151,7 +1151,7 @@ set_runaspw(const char *user, bool quiet)
 
     if (*user == '#') {
 	const char *errstr;
-	uid_t uid = sudo_strtoid(user + 1, NULL, NULL, &errstr);
+	uid_t uid = sudo_strtoid(user + 1, &errstr);
 	if (errstr == NULL) {
 	    if ((pw = sudo_getpwuid(uid)) == NULL)
 		pw = sudo_fakepwnam(user, user_gid);
@@ -1182,7 +1182,7 @@ set_runasgr(const char *group, bool quiet)
 
     if (*group == '#') {
 	const char *errstr;
-	gid_t gid = sudo_strtoid(group + 1, NULL, NULL, &errstr);
+	gid_t gid = sudo_strtoid(group + 1, &errstr);
 	if (errstr == NULL) {
 	    if ((gr = sudo_getgrgid(gid)) == NULL)
 		gr = sudo_fakegrnam(group);

@@ -155,7 +155,7 @@ main(int argc, char *argv[])
 		dflag = 1;
 		break;
 	    case 'G':
-		sudoers_gid = (gid_t)sudo_strtoid(optarg, NULL, NULL, &errstr);
+		sudoers_gid = (gid_t)sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
 		    sudo_fatalx("group ID %s: %s", optarg, errstr);
 		break;
@@ -186,7 +186,7 @@ main(int argc, char *argv[])
 		trace_print = testsudoers_error;
 		break;
 	    case 'U':
-		sudoers_uid = (uid_t)sudo_strtoid(optarg, NULL, NULL, &errstr);
+		sudoers_uid = (uid_t)sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
 		    sudo_fatalx("user ID %s: %s", optarg, errstr);
 		break;
@@ -389,7 +389,7 @@ set_runaspw(const char *user)
 
     if (*user == '#') {
 	const char *errstr;
-	uid_t uid = sudo_strtoid(user + 1, NULL, NULL, &errstr);
+	uid_t uid = sudo_strtoid(user + 1, &errstr);
 	if (errstr == NULL) {
 	    if ((pw = sudo_getpwuid(uid)) == NULL)
 		pw = sudo_fakepwnam(user, user_gid);
@@ -413,7 +413,7 @@ set_runasgr(const char *group)
 
     if (*group == '#') {
 	const char *errstr;
-	gid_t gid = sudo_strtoid(group + 1, NULL, NULL, &errstr);
+	gid_t gid = sudo_strtoid(group + 1, &errstr);
 	if (errstr == NULL) {
 	    if ((gr = sudo_getgrgid(gid)) == NULL)
 		gr = sudo_fakegrnam(group);

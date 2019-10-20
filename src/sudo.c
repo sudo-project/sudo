@@ -724,7 +724,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'r':
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
-		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->egid = (gid_t)id;
@@ -733,7 +733,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_euid=", info[i], sizeof("runas_euid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_euid=") - 1;
-		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->euid = (uid_t)id;
@@ -742,7 +742,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_gid=", info[i], sizeof("runas_gid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_gid=") - 1;
-		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->gid = (gid_t)id;
@@ -759,7 +759,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_uid=") - 1;
-		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->uid = (uid_t)id;

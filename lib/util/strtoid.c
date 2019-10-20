@@ -79,7 +79,7 @@ valid_separator(const char *p, const char *ep, const char *sep)
  * On error, returns 0 and sets errstr.
  */
 id_t
-sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstrp)
+sudo_strtoidx_v1(const char *p, const char *sep, char **endp, const char **errstrp)
 {
     const char *errstr;
     char *ep;
@@ -103,4 +103,18 @@ sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr
     if (endp != NULL)
 	*endp = ep;
     debug_return_id_t(ret);
+}
+
+/* Backwards compatibility */
+id_t
+sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstrp)
+{
+    return sudo_strtoidx_v1(p, sep, endp, errstrp);
+}
+
+/* Simplified interface */
+id_t
+sudo_strtoid_v2(const char *p, const char **errstrp)
+{
+    return sudo_strtoidx_v1(p, NULL, NULL, errstrp);
 }

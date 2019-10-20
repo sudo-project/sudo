@@ -165,7 +165,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     groups[0] = basegid;
 
     for (cp = strtok_r(grset, ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
-	gid = sudo_strtoid(cp, NULL, NULL, &errstr);
+	gid = sudo_strtoid(cp, &errstr);
 	if (errstr == NULL && gid != basegid) {
 	    if (ngroups == grpsize)
 		goto done;
@@ -251,7 +251,7 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     if ((fieldsep = strchr(cp = fieldsep, ':')) == NULL)
 	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
     *fieldsep++ = '\0';
-    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+    id = sudo_strtoid(cp, &errstr);
     if (errstr != NULL) {
 	/*
 	 * A range error is always a fatal error, but ignore garbage

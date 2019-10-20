@@ -436,7 +436,7 @@ sudo_fakepwnam(const char *user, gid_t gid)
     uid_t uid;
     debug_decl(sudo_fakepwnam, SUDOERS_DEBUG_NSS)
 
-    uid = (uid_t) sudo_strtoid(user + 1, NULL, NULL, &errstr);
+    uid = (uid_t) sudo_strtoid(user + 1, &errstr);
     if (errstr != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 	    "uid %s %s", user, errstr);
@@ -671,7 +671,7 @@ sudo_fakegrnam(const char *group)
 	    debug_return_ptr(NULL);
 	}
 	gr = &gritem->gr;
-	gr->gr_gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
+	gr->gr_gid = (gid_t) sudo_strtoid(group + 1, &errstr);
 	gr->gr_name = (char *)(gritem + 1);
 	memcpy(gr->gr_name, group, name_len + 1);
 	if (errstr != NULL) {
@@ -1019,7 +1019,7 @@ user_in_group(const struct passwd *pw, const char *group)
      */
     if (group[0] == '#') {
 	const char *errstr;
-	gid_t gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
+	gid_t gid = (gid_t) sudo_strtoid(group + 1, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 		"gid %s %s", group, errstr);

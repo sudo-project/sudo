@@ -130,7 +130,7 @@ sysgroup_query(const char *user, const char *group, const struct passwd *pwd)
     grp = sysgroup_getgrnam(group);
     if (grp == NULL && group[0] == '#' && group[1] != '\0') {
 	const char *errstr;
-	gid_t gid = sudo_strtoid(group + 1, NULL, NULL, &errstr);
+	gid_t gid = sudo_strtoid(group + 1, &errstr);
 	if (errstr == NULL)
 	    grp = sysgroup_getgrgid(gid);
     }

@@ -29,14 +29,14 @@
 
 __dso_public int main(int argc, char *argv[]);
 
-/* sudo_strtoid() tests */
-static struct strtoid_data {
+/* sudo_strtoidx() tests */
+static struct strtoidx_data {
     const char *idstr;
     id_t id;
     const char *sep;
     const char *ep;
     int errnum;
-} strtoid_data[] = {
+} strtoidx_data[] = {
     { "0,1", 0, ",", ",", 0 },
     { "10", 10, NULL, NULL, 0 },
     { "-1", 0, NULL, NULL, EINVAL },
@@ -52,12 +52,12 @@ static struct strtoid_data {
 };
 
 /*
- * Simple tests for sudo_strtoid()
+ * Simple tests for sudo_strtoidx()
  */
 int
 main(int argc, char *argv[])
 {
-    struct strtoid_data *d;
+    struct strtoidx_data *d;
     const char *errstr;
     char *ep;
     int errors = 0;
@@ -66,10 +66,10 @@ main(int argc, char *argv[])
 
     initprogname(argc > 0 ? argv[0] : "strtoid_test");
 
-    for (d = strtoid_data; d->idstr != NULL; d++) {
+    for (d = strtoidx_data; d->idstr != NULL; d++) {
 	ntests++;
 	errstr = "some error";
-	value = sudo_strtoid(d->idstr, d->sep, &ep, &errstr);
+	value = sudo_strtoidx(d->idstr, d->sep, &ep, &errstr);
 	if (d->errnum != 0) {
 	    if (errstr == NULL) {
 		sudo_warnx_nodebug("FAIL: %s: missing errstr for errno %d",

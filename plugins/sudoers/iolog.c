@@ -742,7 +742,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_euid_str != NULL)
 	runas_uid_str = runas_euid_str;
     if (runas_uid_str != NULL) {
-	id = sudo_strtoid(runas_uid_str, NULL, NULL, &errstr);
+	id = sudo_strtoid(runas_uid_str, &errstr);
 	if (errstr != NULL)
 	    sudo_warnx("runas uid %s: %s", runas_uid_str, U_(errstr));
 	else
@@ -751,7 +751,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_egid_str != NULL)
 	runas_gid_str = runas_egid_str;
     if (runas_gid_str != NULL) {
-	id = sudo_strtoid(runas_gid_str, NULL, NULL, &errstr);
+	id = sudo_strtoid(runas_gid_str, &errstr);
 	if (errstr != NULL)
 	    sudo_warnx("runas gid %s: %s", runas_gid_str, U_(errstr));
 	else
