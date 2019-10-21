@@ -1,6 +1,15 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.29:
+
+    Starting with version 1.8.29, if the umask is explicitly set
+    in sudoers, that value is used regardless of the umask specified
+    by PAM or login.conf.  However, if the umask is not explicitly
+    set in sudoers, PAM or login.conf may now override the default
+    sudoers umask.  Previously, the sudoers umask always overrode
+    the umask set by PAM, which was not the documented behavior.
+
 o Upgrading from a version prior to 1.8.28:
 
     Starting with version 1.8.28, sudo stores the signal that caused
