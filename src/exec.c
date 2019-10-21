@@ -56,50 +56,6 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-#ifdef __linux__
-static struct rlimit nproclimit;
-#endif
-
-/*
- * Unlimit the number of processes since Linux's setuid() will
- * apply resource limits when changing uid and return EAGAIN if
- * nproc would be exceeded by the uid switch.
- */
-static void
-unlimit_nproc(void)
-{
-#ifdef __linux__
-    struct rlimit rl;
-    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
-
-    if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
-	sudo_warn("getrlimit");
-    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
-    if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
-	rl.rlim_cur = rl.rlim_max = nproclimit.rlim_max;
-	if (setrlimit(RLIMIT_NPROC, &rl) != 0)
-	    sudo_warn("setrlimit");
-    }
-    debug_return;
-#endif /* __linux__ */
-}
-
-/*
- * Restore saved value of RLIMIT_NPROC.
- */
-static void
-restore_nproc(void)
-{
-#ifdef __linux__
-    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
-
-    if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
-	sudo_warn("setrlimit");
-
-    debug_return;
-#endif /* __linux__ */
-}
-
 /*
  * Setup the execution environment immediately prior to the call to execve().
  * Group setup is performed by policy_init_session(), called earlier.
@@ -401,11 +357,10 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     }
 
     /*
-     * Restore coredumpsize resource limit before running.
+     * Restore resource limits before running.
      * We must do this *before* calling the PAM session module.
      */
-    if (sudo_conf_disable_coredump())
-	disable_coredump(true);
+    restore_limits();
 
     /*
      * Run the command in a new pty if there is an I/O plugin or the policy

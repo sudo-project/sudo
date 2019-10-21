@@ -780,6 +780,7 @@ src/exec_nopty.c
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c
+src/limits.c
 src/load_plugins.c
 src/net_ifs.c
 src/openbsd.c

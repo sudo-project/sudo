@@ -31,7 +31,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
-#include <sys/resource.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -64,9 +63,6 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
-#ifdef __linux__
-# include <sys/prctl.h>
-#endif
 
 #include <sudo_usage.h>
 #include "sudo.h"
@@ -146,6 +142,11 @@ main(int argc, char *argv[], char *envp[])
     sigset_t mask;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
+    initprogname(argc > 0 ? argv[0] : "sudo");
+
+    /* Crank resource limits to unlimited. */
+    unlimit_sudo();
+
     /* Make sure fds 0-2 are open and do OS-specific initialization. */
     fix_fds();
     os_init(argc, argv, envp);
@@ -192,7 +193,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Disable core dumps if not enabled in sudo.conf. */
     if (sudo_conf_disable_coredump())
-	disable_coredump(false);
+	disable_coredump();
 
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
@@ -314,7 +315,7 @@ main(int argc, char *argv[], char *envp[])
 	struct sigaction sa;
 
 	if (WCOREDUMP(status))
-	    disable_coredump(false);
+	    disable_coredump();
 
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
@@ -332,7 +333,6 @@ main(int argc, char *argv[], char *envp[])
 int
 os_init_common(int argc, char *argv[], char *envp[])
 {
-    initprogname(argc > 0 ? argv[0] : "sudo");
 #ifdef STATIC_SUDOERS_PLUGIN
     preload_static_symbols();
 #endif
@@ -897,43 +897,6 @@ sudo_check_suid(const char *sudo)
 		ROOT_UID);
 	}
     }
-    debug_return;
-}
-
-/*
- * Disable core dumps to avoid dropping a core with user password in it.
- * Called with restore set to true before executing the command.
- * Not all operating systems disable core dumps for setuid processes.
- */
-void
-disable_coredump(bool restore)
-{
-    struct rlimit rl;
-    static struct rlimit corelimit;
-#ifdef __linux__
-    static int dumpflag;
-#endif
-    debug_decl(disable_coredump, SUDO_DEBUG_UTIL)
-
-    if (restore) {
-	(void) setrlimit(RLIMIT_CORE, &corelimit);
-#ifdef __linux__
-	(void) prctl(PR_SET_DUMPABLE, dumpflag, 0, 0, 0);
-#endif /* __linux__ */
-	debug_return;
-    }
-
-    (void) getrlimit(RLIMIT_CORE, &corelimit);
-    rl.rlim_cur = 0;
-    rl.rlim_max = 0;
-    (void) setrlimit(RLIMIT_CORE, &rl);
-#ifdef __linux__
-    /* On Linux, also set PR_SET_DUMPABLE to zero (reset by execve). */
-    if ((dumpflag = prctl(PR_GET_DUMPABLE, 0, 0, 0, 0)) == -1)
-	dumpflag = 0;
-    (void) prctl(PR_SET_DUMPABLE, 0, 0, 0, 0);
-#endif /* __linux__ */
-
     debug_return;
 }
 

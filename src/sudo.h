@@ -223,7 +223,6 @@ int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
-void disable_coredump(bool restore);
 bool set_user_groups(struct command_details *details);
 extern const char *list_user;
 extern struct user_details user_details;
@@ -286,5 +285,12 @@ void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
 
 /* setpgrp_nobg.c */
 int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
+
+/* limits.c */
+void disable_coredump();
+void restore_limits(void);
+void restore_nproc(void);
+void unlimit_nproc(void);
+void unlimit_sudo(void);
 
 #endif /* SUDO_SUDO_H */
