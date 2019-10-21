@@ -34,6 +34,7 @@
 #if defined(HAVE_KINFO_PROC_44BSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC2_NETBSD2)
 # include <sys/sysctl.h>
 #elif defined(HAVE_KINFO_PROC_FREEBSD)
+# include <sys/param.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif

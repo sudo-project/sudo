@@ -52,6 +52,7 @@
 #if defined(HAVE_KINFO_PROC2_NETBSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC_44BSD)
 # include <sys/sysctl.h>
 #elif defined(HAVE_KINFO_PROC_FREEBSD)
+# include <sys/param.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif
