@@ -116,6 +116,11 @@ VERSION = @PACKAGE_VERSION@
 
 all: group_file.la
 
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	    --builddir=`pwd`/$(top_builddir) plugins/group_file/Makefile.in
+	cd $(top_builddir) && ./config.status --file plugins/group_file/Makefile
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/group_file/Makefile
 

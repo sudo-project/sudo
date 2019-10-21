@@ -166,6 +166,11 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	    --builddir=`pwd`/$(top_builddir) lib/util/Makefile.in
+	cd $(top_builddir) && ./config.status --file lib/util/Makefile
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/util/Makefile
 

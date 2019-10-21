@@ -111,6 +111,11 @@ VERSION = @PACKAGE_VERSION@
 
 all: sample_plugin.la
 
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	    --builddir=`pwd`/$(top_builddir) plugins/sample/Makefile.in
+	cd $(top_builddir) && ./config.status --file plugins/sample/Makefile
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sample/Makefile
 

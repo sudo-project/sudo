@@ -261,6 +261,11 @@ $(shlib_opt): $(shlib_exp)
 .y.c:
 	@true
 
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	    --builddir=`pwd`/$(top_builddir) plugins/sudoers/Makefile.in
+	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
 
