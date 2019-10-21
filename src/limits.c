@@ -52,8 +52,12 @@ static struct saved_limit {
     { RLIMIT_DATA },
     { RLIMIT_FSIZE },
     { RLIMIT_NOFILE },
+#ifdef RLIMIT_NPROC
     { RLIMIT_NPROC },
+#endif
+#ifdef RLIMIT_RSS
     { RLIMIT_RSS },
+#endif
     { RLIMIT_STACK }
 };
 
