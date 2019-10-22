@@ -116,6 +116,8 @@ AC_SUBST([exampledir])
 AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
 AC_SUBST([SIGNAME])
+AC_SUBST([PYTHON_PLUGIN_SRC])
+
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -2506,6 +2508,56 @@ else
 fi
 
 dnl
+dnl Python plugin support
+dnl
+AC_MSG_CHECKING(whether to compile python plugin support)
+AC_ARG_ENABLE(python,
+[AS_HELP_STRING([--enable-python], [Compile python plugin support])],
+[ case "$enableval" in
+    yes|no)
+        AC_MSG_RESULT($enableval)
+        USE_PYTHON=$enableval
+        ;;
+    *)
+        AC_MSG_WARN([Ignoring unknown argument to --enable-python: $enableval])
+        ;;
+  esac
+], AC_MSG_RESULT(no))
+
+if test ${USE_PYTHON-'no'} = "yes"; then
+    AM_PATH_PYTHON([3])
+
+    AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
+    AC_ARG_VAR([PYTHON_LIBS], [Linker flags for python, bypassing python-config])
+    AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
+
+    AS_IF([test -z "$PYTHON_INCLUDE" || test -z "$PYTHON_LIBS"], [
+      AS_IF([test -z "$PYTHON_CONFIG"], [
+        AC_PATH_PROGS([PYTHON_CONFIG],
+                      [python$PYTHON_VERSION-config python-config],
+                      [no],
+                      [`dirname $PYTHON`])
+        AS_IF([test "$PYTHON_CONFIG" = no], [AC_MSG_ERROR([cannot find python-config for $PYTHON.])])
+      ])
+    ])
+
+    AS_IF([test -z "$PYTHON_INCLUDE"], [
+      AC_MSG_CHECKING([python include flags])
+      PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
+      AC_MSG_RESULT([$PYTHON_INCLUDE])
+    ])
+
+    AS_IF([test -z "$PYTHON_LIBS"], [
+      AC_MSG_CHECKING([python linker flags])
+      PYTHON_LIBS=`$PYTHON_CONFIG --libs`
+      AC_MSG_RESULT([$PYTHON_LIBS])
+    ])
+
+    PYTHON_PLUGIN_SRC=plugins/python
+    AC_CONFIG_FILES([$PYTHON_PLUGIN_SRC/Makefile])
+fi
+
+dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
@@ -4514,7 +4566,9 @@ if test X"$INIT_SCRIPT" != X""; then
 elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([init.d/sudo.conf])
 fi
+
 AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+
 AC_OUTPUT
 
 dnl
