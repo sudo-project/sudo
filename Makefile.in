@@ -51,7 +51,7 @@ shlib_mode = @SHLIB_MODE@
 
 SUBDIRS = lib/util @ZLIB_SRC@ lib/iolog lib/logsrv logsrvd \
 	  plugins/group_file plugins/sudoers plugins/system_group \
-	  src include doc examples
+	  @PYTHON_PLUGIN_SRC@ src include doc examples
 
 SAMPLES = plugins/sample
 
@@ -202,6 +202,7 @@ depend: siglist.c signame.c
 	    lib/logsrv/Makefile.in logsrvd/Makefile.in \
 	    plugins/group_file/Makefile.in plugins/sample/Makefile.in \
 	    plugins/sudoers/Makefile.in plugins/system_group/Makefile.in \
+	    plugins/python/Makefile.in \
 	    src/Makefile.in && \
 	$(top_builddir)/config.status --file $(top_builddir)/lib/util/Makefile \
 	    --file $(top_builddir)/lib/zlib/Makefile \
@@ -212,6 +213,7 @@ depend: siglist.c signame.c
 	    --file $(top_builddir)/plugins/group_file/Makefile \
 	    --file $(top_builddir)/plugins/sudoers/Makefile \
 	    --file $(top_builddir)/plugins/system_group/Makefile \
+	    --file $(top_builddir)/plugins/python/Makefile \
 	    --file $(top_builddir)/src/Makefile
 
 ChangeLog:
