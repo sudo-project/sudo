@@ -553,12 +553,18 @@ get_user_info(struct user_details *ud)
 	goto oom;
     if (asprintf(&user_info[++i], "ppid=%d", (int)ud->ppid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "pgid=%d", (int)ud->pgid) == -1)
-	goto oom;
-    if (asprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
-	goto oom;
-    if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
-	goto oom;
+    if (ud->pgid != -1) {
+	if (asprintf(&user_info[++i], "pgid=%d", (int)ud->pgid) == -1)
+	    goto oom;
+    }
+    if (ud->tcpgid != -1) {
+	if (asprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
+	    goto oom;
+    }
+    if (ud->sid != -1) {
+	if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
+	    goto oom;
+    }
     if (asprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid) == -1)
 	goto oom;
     if (asprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid) == -1)

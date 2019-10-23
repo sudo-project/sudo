@@ -21,6 +21,10 @@ What's new in Sudo 1.8.29
    problems caused by insufficient resources, such as an inability to
    allocate memory or open files and pipes.
 
+ * Fixed a regression introduced in sudo 1.8.28 where sudo would refuse
+   to run if the parent process was not associated with a session.
+   This was due to sudo passing a session ID of -1 to the plugin.
+
 What's new in Sudo 1.8.28p1
 
  * The fix for Bug #869 caused "sudo -v" to prompt for a password
