@@ -368,17 +368,18 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 }
 
 /*
- * Write the "/log" file that contains the user and command info.
+ * Write the "log" file that contains the user and command info.
  * This file is not compressed.
  */
 static bool
-write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
+write_info_log(int dfd, char *iolog_dir, struct iolog_details *details,
     char * const argv[])
 {
     struct iolog_info iolog_info;
     debug_decl(write_info_log, SUDOERS_DEBUG_UTIL)
 
     /* XXX - just use iolog_info in the first place? */
+    memset(&iolog_info, 0, sizeof(iolog_info));
     time(&iolog_info.tstamp);
     iolog_info.user = (char *)details->user;
     iolog_info.runas_user = details->runas_pw->pw_name;
@@ -388,9 +389,8 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     iolog_info.cmd = (char *)details->command;
     iolog_info.lines = details->lines;
     iolog_info.cols = details->cols;
-    pathbuf[len] = '\0';
 
-    if (!iolog_write_info_file(pathbuf, &iolog_info, argv)) {
+    if (!iolog_write_info_file(dfd, iolog_dir, &iolog_info, argv)) {
 	log_warning(SLOG_SEND_MAIL,
 	    N_("unable to write to I/O log file: %s"), strerror(errno));
 	warned = true;
@@ -406,12 +406,13 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     int argc, char * const argv[], char * const user_env[], char * const args[])
 {
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
-    char pathbuf[PATH_MAX], sessid[7];
+    char iolog_path[PATH_MAX], sessid[7];
     char *tofree = NULL;
     char * const *cur;
     const char *cp, *plugin_path = NULL;
     size_t len;
     int i, ret = -1;
+    int iolog_dir_fd = -1;
     debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN)
 
     sudo_conv = conversation;
@@ -474,27 +475,27 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
      * Make local copy of I/O log path and create it, along with any
      * intermediate subdirs.  Calls mkdtemp() if iolog_path ends in XXXXXX.
      */
-    len = mkdir_iopath(iolog_details.iolog_path, pathbuf, sizeof(pathbuf));
-    if (len >= sizeof(pathbuf)) {
+    len = mkdir_iopath(iolog_details.iolog_path, iolog_path, sizeof(iolog_path));
+    if (len >= sizeof(iolog_path)) {
 	log_warning(SLOG_SEND_MAIL, "%s", iolog_details.iolog_path);
 	goto done;
     }
 
+    iolog_dir_fd = iolog_openat(AT_FDCWD, iolog_path, O_RDONLY);
+    if (iolog_dir_fd == -1) {
+	log_warning(SLOG_SEND_MAIL, "%s", iolog_path);
+	goto done;
+    }
+
     /* Write log file with user and command details. */
-    if (!write_info_log(pathbuf, len, &iolog_details, argv))
+    if (!write_info_log(iolog_dir_fd, iolog_path, &iolog_details, argv))
 	goto done;
 
     /* Create the timing and I/O log files. */
     for (i = 0; i < IOFD_MAX; i++) {
-	pathbuf[len] = '/';
-	pathbuf[len + 1] = '\0';
-	if (strlcat(pathbuf, iolog_fd_to_name(i), sizeof(pathbuf)) >= sizeof(pathbuf)) {
-	    errno = ENAMETOOLONG;
-	    log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
-	    goto done;
-	}
-	if (!iolog_open(&iolog_files[i], pathbuf, "w")) {
-	    log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
+	if (!iolog_open(&iolog_files[i], iolog_dir_fd, i, "w")) {
+	    log_warning(SLOG_SEND_MAIL, N_("unable to create %s/%s"),
+		iolog_path, iolog_fd_to_name(i));
 	    goto done;
 	}
     }
@@ -522,6 +523,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     ret = true;
 
 done:
+    if (iolog_dir_fd != -1)
+	close(iolog_dir_fd);
     free(tofree);
     if (iolog_details.runas_pw)
 	sudo_pw_delref(iolog_details.runas_pw);

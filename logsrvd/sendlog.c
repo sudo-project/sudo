@@ -58,7 +58,7 @@
 #include "sendlog.h"
 
 static struct iolog_file iolog_files[IOFD_MAX];
-static char *iolog_path;
+static char *iolog_dir;
 
 static void
 usage(void)
@@ -188,7 +188,7 @@ read_io_buf(struct client_closure *closure)
 
     if (!iolog_files[timing->event].enabled) {
 	errno = ENOENT;
-	sudo_warn("%s/%s", iolog_path, iolog_fd_to_name(timing->event));
+	sudo_warn("%s/%s", iolog_dir, iolog_fd_to_name(timing->event));
 	debug_return_bool(false);
     }
 
@@ -208,7 +208,7 @@ read_io_buf(struct client_closure *closure)
     nread = iolog_read(&iolog_files[timing->event], closure->buf,
 	timing->u.nbytes, &errstr);
     if (nread != timing->u.nbytes) {
-	sudo_warnx(U_("unable to read %s/%s: %s"), iolog_path,
+	sudo_warnx(U_("unable to read %s/%s: %s"), iolog_dir,
 	    iolog_fd_to_name(timing->event), errstr);
 	debug_return_bool(false);
     }
@@ -1015,28 +1015,26 @@ bad:
  * Open any I/O log files that are present.
  * The timing file must always exist.
  */
-bool
-iolog_open_all(char *path, size_t dir_len)
+static bool
+iolog_open_all(int dfd, const char *iolog_dir)
 {
-    size_t file_len;
-    int i;
+    int iofd;
     debug_decl(iolog_open_all, SUDO_DEBUG_UTIL)
 
-    for (i = 0; i < IOFD_MAX; i++) {
-	path[dir_len] = '\0';
-	file_len = strlen(iolog_fd_to_name(i));
-	if (dir_len + 1 + file_len + 1 >= PATH_MAX) {
-            errno = ENAMETOOLONG;
-            sudo_warn("%s/%s", path, iolog_fd_to_name(i));
-	    debug_return_bool(false);
+    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+	iolog_files[iofd].enabled = true;
+        if (!iolog_open(&iolog_files[iofd], dfd, iofd, "r")) {
+	    if (errno != ENOENT) {
+		sudo_warn(U_("unable to open %s/%s"), iolog_dir,
+		    iolog_fd_to_name(iofd));
+		debug_return_bool(false);
+	    }
 	}
-	path[dir_len++] = '/';
-	memcpy(path + dir_len, iolog_fd_to_name(i), file_len + 1);
-	iolog_files[i].enabled = true;
-        if (!iolog_open(&iolog_files[i], path, "r")) {
-            sudo_warn(U_("unable to open %s"), path);
-	    debug_return_bool(false);
-	}
+    }
+    if (!iolog_files[IOFD_TIMING].enabled) {
+	sudo_warn(U_("unable to open %s/%s"), iolog_dir,
+	    iolog_fd_to_name(IOFD_TIMING));
+	debug_return_bool(false);
     }
     debug_return_bool(true);
 }
@@ -1088,10 +1086,12 @@ main(int argc, char *argv[])
     const char *host = "localhost";
     const char *port = DEFAULT_PORT_STR;
     struct timespec restart = { 0, 0 };
-    char pathbuf[PATH_MAX];
     const char *iolog_id = NULL;
-    int ch, len, sock;
+    int ch, sock, iolog_dir_fd, fd;
+    FILE *fp;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
+
+    signal(SIGPIPE, SIG_IGN);
 
     initprogname(argc > 0 ? argv[0] : "sendlog");
     setlocale(LC_ALL, "");
@@ -1134,26 +1134,26 @@ main(int argc, char *argv[])
 	usage();
     }
 
-    /* Remaining arg should be path to I/O log file to send. */
+    /* Remaining arg should be to I/O log dir to send. */
     if (argc != 1)
 	usage();
-    iolog_path = argv[0];
-
-    signal(SIGPIPE, SIG_IGN);
-
-    /* Parse I/O info log file. */
-    len = snprintf(pathbuf, sizeof(pathbuf), "%s/log", iolog_path);
-    if (len < 0 || len >= ssizeof(pathbuf)) {
-	errno = ENAMETOOLONG;
-	sudo_warn("%s/log", iolog_path);
+    iolog_dir = argv[0];
+    if ((iolog_dir_fd = open(iolog_dir, O_RDONLY)) == -1) {
+	sudo_warn("%s", iolog_dir);
 	goto bad;
     }
-    len -= 4;
-    if ((log_info = parse_logfile(pathbuf)) == NULL)
+
+    /* Parse I/O log info file. */
+    fd = openat(iolog_dir_fd, "log", O_RDONLY, 0);
+    if (fd == -1 || (fp = fdopen(fd, "r")) == NULL) {
+	sudo_warn("%s/log", iolog_dir);
+	goto bad;
+    }
+    if ((log_info = parse_logfile(fp, iolog_dir)) == NULL)
 	goto bad;
 
     /* Open the I/O log files. */
-    if (!iolog_open_all(pathbuf, len))
+    if (!iolog_open_all(iolog_dir_fd, iolog_dir))
 	goto bad;
 
     /* Connect to server, setup events. */

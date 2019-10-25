@@ -102,12 +102,14 @@ struct iolog_path_escape {
 };
 
 /* iolog_path.c */
+/* XXX - bad API */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file, char **slashp, const struct iolog_path_escape *escapes, void *closure);
 
 /* iolog_util.c */
+/* XXX - prefix these */
 bool parse_timing(const char *line, struct timing_closure *timing);
 char *parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
-struct iolog_info *parse_logfile(const char *logfile);
+struct iolog_info *parse_logfile(FILE *fp, const char *iolog_dir);
 void free_iolog_info(struct iolog_info *li);
 void adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
 
@@ -117,19 +119,20 @@ struct group;
 bool iolog_close(struct iolog_file *iol, const char **errstr);
 bool iolog_eof(struct iolog_file *iol);
 bool iolog_nextid(char *iolog_dir, char sessid[7]);
-bool iolog_open(struct iolog_file *iol, char *pathbuf, const char *mode);
+bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
 bool iolog_set_compress(const char *str);
 bool iolog_set_flush(const char *str);
 bool iolog_set_group(const struct group *gr);
 bool iolog_set_maxseq(const char *maxval);
 bool iolog_set_mode(mode_t mode);
 bool iolog_set_user(const struct passwd *pw);
-bool iolog_write_info_file(const char *parent, struct iolog_info *log_info, char * const argv[]);
+bool iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info, char * const argv[]);
 char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
 const char *iolog_fd_to_name(int iofd);
 off_t iolog_seek(struct iolog_file *iol, off_t offset, int whence);
 size_t mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize);
 ssize_t iolog_read(struct iolog_file *iol, void *buf, size_t nbytes, const char **errstr);
 ssize_t iolog_write(struct iolog_file *iol, const void *buf, size_t len, const char **errstr);
+int iolog_openat(int fdf, const char *path, int flags);
 
 #endif /* SUDO_IOLOG_H */

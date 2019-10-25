@@ -368,25 +368,25 @@ iolog_set_flush(const char *str)
 }
 
 /*
- * Wrapper for open(2) that sets umask and retries as iolog_uid/iolog_gid
- * if open(2) returns EACCES.
+ * Wrapper for openat(2) that sets umask and retries as iolog_uid/iolog_gid
+ * if openat(2) returns EACCES.
  */
-static int
-io_open(const char *path, int flags)
+int
+iolog_openat(int dfd, const char *path, int flags)
 {
     int fd;
     mode_t omask = S_IRWXG|S_IRWXO;
-    debug_decl(io_open, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_openat, SUDO_DEBUG_UTIL)
 
     if (ISSET(flags, O_CREAT)) {
 	/* umask must not be more restrictive than the file modes. */
 	omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
     }
-    fd = open(path, flags, iolog_filemode);
+    fd = openat(dfd, path, flags, iolog_filemode);
     if (fd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (io_swapids(false)) {
-	    fd = open(path, flags, iolog_filemode);
+	    fd = openat(dfd, path, flags, iolog_filemode);
 	    if (!io_swapids(true)) {
 		/* io_swapids() warns on error. */
 		if (fd != -1) {
@@ -430,10 +430,14 @@ iolog_nextid(char *iolog_dir, char sessid[7])
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", iolog_dir);
     if (len < 0 || len >= ssizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: %s/seq", __func__, iolog_dir);
 	goto done;
     }
-    fd = io_open(pathbuf, O_RDWR|O_CREAT);
+    fd = iolog_openat(AT_FDCWD, pathbuf, O_RDWR|O_CREAT);
     if (fd == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to open %s", __func__, pathbuf);
 	goto done;
     }
     sudo_lock_file(fd, SUDO_LOCK);
@@ -483,6 +487,8 @@ iolog_nextid(char *iolog_dir, char sessid[7])
 #else
     if (lseek(fd, 0, SEEK_SET) == -1 || write(fd, buf, 7) != 7) {
 #endif
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to write %s", __func__, pathbuf);
 	goto done;
     }
     ret = true;
@@ -531,9 +537,10 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
  * XXX - move enabled logic into caller?
  */
 bool
-iolog_open(struct iolog_file *iol, char *path, const char *mode)
+iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 {
     int flags;
+    const char *file;
     unsigned char magic[2];
     debug_decl(iolog_open, SUDO_DEBUG_UTIL)
 
@@ -547,16 +554,21 @@ iolog_open(struct iolog_file *iol, char *path, const char *mode)
 	    "%s: invalid I/O mode %s", __func__, mode);
 	debug_return_bool(false);
     }
+    if ((file = iolog_fd_to_name(iofd)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: invalid iofd %d", __func__, iofd);
+	debug_return_bool(false);
+    }
 
     iol->compressed = false;
     if (iol->enabled) {
-	int fd = io_open(path, flags);
+	int fd = iolog_openat(dfd, file, flags);
 	if (fd != -1) {
 	    if (*mode == 'w') {
 		if (fchown(fd, iolog_uid, iolog_gid) != 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 			"%s: unable to fchown %d:%d %s", __func__,
-			(int)iolog_uid, (int)iolog_gid, path);
+			(int)iolog_uid, (int)iolog_gid, file);
 		}
 		iol->compressed = iolog_compress;
 	    } else {
@@ -588,7 +600,7 @@ iolog_open(struct iolog_file *iol, char *path, const char *mode)
     } else {
 	if (*mode == 'w') {
 	    /* Remove old log file in case we recycled sequence numbers. */
-	    (void)unlink(path);
+	    (void)unlinkat(dfd, file, 0);
 	}
     }
     debug_return_bool(true);
@@ -806,34 +818,26 @@ iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes,
  * This file is not compressed.
  */
 bool
-iolog_write_info_file(const char *parent, struct iolog_info *log_info,
+iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info,
     char * const argv[])
 {
-    char path[PATH_MAX];
     char * const *av;
     FILE *fp;
-    int error, len, fd;
+    int error, fd;
     debug_decl(iolog_info_write_log, SUDO_DEBUG_UTIL)
 
-    len = snprintf(path, sizeof(path), "%s/log", parent);
-    if (len < 0 || len >= ssizeof(path)) {
-	errno = ENAMETOOLONG;
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s/log", parent);
-	debug_return_bool(false);
-    }
-    fd = io_open(path, O_CREAT|O_TRUNC|O_WRONLY);
+    fd = iolog_openat(dfd, "log", O_CREAT|O_TRUNC|O_WRONLY);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to open %s", path);
+	    "unable to open %s/log", parent);
 	if (fd != -1)
 	    close(fd);
 	debug_return_bool(false);
     }
     if (fchown(fd, iolog_uid, iolog_gid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "%s: unable to fchown %d:%d %s", __func__,
-	    (int)iolog_uid, (int)iolog_gid, path);
+	    "%s: unable to fchown %d:%d %s/log", __func__,
+	    (int)iolog_uid, (int)iolog_gid, parent);
     }
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n",
@@ -853,7 +857,7 @@ iolog_write_info_file(const char *parent, struct iolog_info *log_info,
     fflush(fp);
     if ((error = ferror(fp))) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to write to I/O log file %s", path);
+	    "unable to write to I/O log file %s/log", parent);
     }
     fclose(fp);
 

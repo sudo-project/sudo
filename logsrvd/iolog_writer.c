@@ -352,7 +352,7 @@ static const struct iolog_path_escape path_escapes[] = {
 
 /*
  * Create I/O log path
- * Sets iolog_dir and iolog_dir_fd in the closure (XXX - not iolog_dir_fd)
+ * Sets iolog_dir and iolog_dir_fd in the closure
  */
 static bool
 create_iolog_dir(struct iolog_details *details, struct connection_closure *closure)
@@ -388,15 +388,14 @@ create_iolog_dir(struct iolog_details *details, struct connection_closure *closu
 	goto bad;
     }
 
-#if 0
     /* We use iolog_dir_fd in calls to openat(2) */
-    closure->iolog_dir_fd = open(closure->iolog_dir, O_RDONLY);
+    closure->iolog_dir_fd =
+	iolog_openat(AT_FDCWD, closure->iolog_dir, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "%s", closure->iolog_dir);
 	goto bad;
     }
-#endif
 
     debug_return_bool(true);
 bad:
@@ -408,57 +407,30 @@ bad:
  * Write the sudo-style I/O log info file containing user and command info.
  */
 static bool
-iolog_details_write(struct iolog_details *details, struct connection_closure *closure)
+iolog_details_write(struct iolog_details *details,
+     struct connection_closure *closure)
 {
-    int fd, i;
-    FILE *fp;
-    int error;
+    struct iolog_info log_info;
     debug_decl(iolog_details_write, SUDO_DEBUG_UTIL)
 
-#if 0
-    fd = openat(closure->iolog_dir_fd, "log", O_CREAT|O_EXCL|O_WRONLY, 0600);
-#else
-    /* XXX */
-    char path[PATH_MAX]; // XXX
-    snprintf(path, sizeof(path), "%s/log", closure->iolog_dir);
-    fd = open(path, O_CREAT|O_EXCL|O_WRONLY, 0600);
-#endif
-    if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to open %s", closure->iolog_dir);
-	if (fd != -1)
-	    close(fd);
-	debug_return_bool(false);
-    }
+    /* Convert to iolog_info */
+    memset(&log_info, 0, sizeof(log_info));
+    log_info.user = details->submituser;
+    log_info.runas_user = details->runuser;
+    log_info.runas_group = details->rungroup;
+    log_info.tty = details->ttyname;
+    log_info.cwd = details->cwd;
+    log_info.cmd = details->command;
+    log_info.lines = details->lines;
+    log_info.cols = details->columns;
 
-    fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n",
-	(long long)details->start_time, details->submituser,
-	details->runuser ? details->runuser : RUNAS_DEFAULT,
-	details->rungroup ? details->rungroup : "",
-	details->ttyname ? details->ttyname : "unknown",
-	details->lines, details->columns,
-	details->cwd ? details->cwd : "unknown");
-    fputs(details->command, fp);
-    for (i = 1; i < details->argc; i++) {
-	fputc(' ', fp);
-	fputs(details->argv[i], fp);
-    }
-    fputc('\n', fp);
-    fflush(fp);
-    if ((error = ferror(fp))) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to write to I/O log file %s", closure->iolog_dir);
-    }
-    fclose(fp);
-
-    debug_return_bool(!error);
+    debug_return_bool(iolog_write_info_file(closure->iolog_dir_fd,
+	 closure->iolog_dir, &log_info, details->argv));
 }
 
 static bool
 iolog_create(int iofd, struct connection_closure *closure)
 {
-    char path[PATH_MAX];
-    int len;
     debug_decl(iolog_create, SUDO_DEBUG_UTIL)
 
     if (iofd < 0 || iofd >= IOFD_MAX) {
@@ -467,17 +439,9 @@ iolog_create(int iofd, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    len = snprintf(path, sizeof(path), "%s/%s", closure->iolog_dir,
-	iolog_fd_to_name(iofd));
-    if (len < 0 || len >= ssizeof(path)) {
-	errno = ENAMETOOLONG;
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s/%s", closure->iolog_dir, iolog_fd_to_name(iofd));
-	debug_return_bool(false);
-    }
-
     closure->iolog_files[iofd].enabled = true;
-    debug_return_bool(iolog_open(&closure->iolog_files[iofd], path, "w"));
+    debug_return_bool(iolog_open(&closure->iolog_files[iofd],
+	closure->iolog_dir_fd, iofd, "w"));
 }
 
 void
@@ -495,10 +459,8 @@ iolog_close_all(struct connection_closure *closure)
 		"error closing iofd %d: %s", i, errstr);
 	}
     }
-#if 0
     if (closure->iolog_dir_fd != -1)
 	close(closure->iolog_dir_fd);
-#endif
 
     debug_return;
 }
@@ -574,7 +536,7 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     struct timespec target;
     struct timing_closure timing;
     off_t pos;
-    int i;
+    int iofd;
     debug_decl(iolog_init, SUDO_DEBUG_UTIL)
 
     target.tv_sec = msg->resume_point->tv_sec;
@@ -587,21 +549,24 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     }
 
     /* Open existing I/O log files. */
-    for (i = 0; i < IOFD_MAX; i++) {
-	char path[PATH_MAX];
-	int len = snprintf(path, sizeof(path), "%s/%s", closure->iolog_dir,
-	    iolog_fd_to_name(i));
-	if (len < 0 || len >= ssizeof(path)) {
-	    errno = ENAMETOOLONG;
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: %s/%s", __func__, closure->iolog_dir, iolog_fd_to_name(i));
-	    goto bad;
+    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+	closure->iolog_files[iofd].enabled = true;
+	if (!iolog_open(&closure->iolog_files[iofd], closure->iolog_dir_fd,
+		iofd, "r+")) {
+	    if (errno != ENOENT) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to open %s/%s", closure->iolog_dir,
+		    iolog_fd_to_name(iofd));
+		goto bad;
+	    }
 	}
-	closure->iolog_files[i].enabled = true;
-	(void)iolog_open(&closure->iolog_files[i], path, "r+");
     }
-    if (!closure->iolog_files[IOFD_TIMING].enabled)
+    if (!closure->iolog_files[IOFD_TIMING].enabled) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "missing timing file in %s", closure->iolog_dir);
 	goto bad;
+    }
 
     /* Parse timing file until we reach the target point. */
     /* XXX - split up */

@@ -91,6 +91,7 @@ struct replay_closure {
     struct sudo_event *sigtstp_ev;
     struct timespec *max_delay;
     struct timing_closure timing;
+    int iolog_dir_fd;
     bool interactive;
     bool suspend_wait;
     struct io_buffer {
@@ -178,8 +179,9 @@ static int list_sessions(int, char **, const char *, const char *, const char *)
 static int parse_expr(struct search_node_list *, char **, bool);
 static void read_keyboard(int fd, int what, void *v);
 static void help(void) __attribute__((__noreturn__));
-static int replay_session(const char *iolog_dir, struct timespec *max_wait,
-    const char *decimal, bool interactive, bool suspend_wait);
+static int replay_session(int iolog_dir_fd, const char *iolog_dir,
+    struct timespec *max_wait, const char *decimal, bool interactive,
+    bool suspend_wait);
 static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
@@ -205,14 +207,15 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    int ch, i, plen, exitcode = 0;
+    int ch, fd, i, iolog_dir_fd, len, exitcode = EXIT_FAILURE;
     bool def_filter = true, listonly = false;
     bool interactive = true, suspend_wait = false, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
-    char *cp, *ep, path[PATH_MAX];
+    char *cp, *ep, iolog_dir[PATH_MAX];
     struct iolog_info *li;
     struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
+    FILE *fp;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -297,6 +300,7 @@ main(int argc, char *argv[])
 	    break;
 	case 'V':
 	    (void) printf(_("%s version %s\n"), getprogname(), PACKAGE_VERSION);
+	    exitcode = EXIT_SUCCESS;
 	    goto done;
 	default:
 	    usage(1);
@@ -325,41 +329,46 @@ main(int argc, char *argv[])
     /* 6 digit ID in base 36, e.g. 01G712AB or free-form name */
     id = argv[0];
     if (VALID_ID(id)) {
-	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
+	len = snprintf(iolog_dir, sizeof(iolog_dir), "%s/%.2s/%.2s/%.2s",
 	    session_dir, id, &id[2], &id[4]);
-	if (plen < 0 || plen >= ssizeof(path))
-	    sudo_fatalx(U_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
+	if (len < 0 || len >= ssizeof(iolog_dir))
+	    sudo_fatalx(U_("%s/%.2s/%.2s/%.2s: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
     } else if (id[0] == '/') {
-	plen = snprintf(path, sizeof(path), "%s/timing", id);
-	if (plen < 0 || plen >= ssizeof(path))
+	len = snprintf(iolog_dir, sizeof(iolog_dir), "%s", id);
+	if (len < 0 || len >= ssizeof(iolog_dir))
 	    sudo_fatalx(U_("%s/timing: %s"), id, strerror(ENAMETOOLONG));
     } else {
-	plen = snprintf(path, sizeof(path), "%s/%s/timing", session_dir, id);
-	if (plen < 0 || plen >= ssizeof(path)) {
-	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir, id,
+	len = snprintf(iolog_dir, sizeof(iolog_dir), "%s/%s", session_dir, id);
+	if (len < 0 || len >= ssizeof(iolog_dir)) {
+	    sudo_fatalx(U_("%s/%s: %s"), session_dir, id,
 		strerror(ENAMETOOLONG));
 	}
     }
-    plen -= 7;
 
     /* Open files for replay, applying replay filter for the -f flag. */
+    if ((iolog_dir_fd = iolog_openat(AT_FDCWD, iolog_dir, O_RDONLY)) == -1)
+	sudo_fatal("%s", iolog_dir);
     for (i = 0; i < IOFD_MAX; i++) {
-	path[plen] = '/';
-	path[plen + 1] = '\0';
-	if (strlcat(path, iolog_fd_to_name(i), sizeof(path)) >= sizeof(path)) {
-	    errno = ENAMETOOLONG;
-	    sudo_fatal("%s%s", path, iolog_fd_to_name(i));
+	if (!iolog_open(&iolog_files[i], iolog_dir_fd, i, "r")) {
+	    if (errno != ENOENT) {
+		sudo_fatal(U_("unable to open %s/%s"), iolog_dir,
+		    iolog_fd_to_name(i));
+	    }
 	}
-	if (!iolog_open(&iolog_files[i], path, "r"))
-	    sudo_fatal(U_("unable to open %s"), path);
+    }
+    if (!iolog_files[IOFD_TIMING].enabled) {
+	sudo_fatal(U_("unable to open %s/%s"), iolog_dir,
+	    iolog_fd_to_name(IOFD_TIMING));
     }
 
     /* Parse log file. */
-    path[plen] = '\0';
-    strlcat(path, "/log", sizeof(path));
-    if ((li = parse_logfile(path)) == NULL)
-	exit(1);
+    fd = openat(iolog_dir_fd, "log", O_RDONLY, 0);
+    if (fd == -1 || (fp = fdopen(fd, "r")) == NULL)
+	sudo_fatal(U_("unable to open %s/%s"), iolog_dir, "log");
+    if ((li = parse_logfile(fp, iolog_dir)) == NULL)
+	goto done;
+    fclose(fp);
     printf(_("Replaying sudo session: %s"), li->cmd);
 
     /* Setup terminal if appropriate. */
@@ -374,15 +383,14 @@ main(int argc, char *argv[])
     li = NULL;
 
     /* Replay session corresponding to iolog_files[]. */
-    path[plen] = '\0';
-    exitcode = replay_session(path, max_delay, decimal, interactive,
-	suspend_wait);
+    exitcode = replay_session(iolog_dir_fd, iolog_dir, max_delay, decimal,
+	interactive, suspend_wait);
 
     restore_terminal_size();
     sudo_term_restore(ttyfd, true);
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
-    exit(exitcode);
+    return exitcode;
 }
 
 /*
@@ -884,6 +892,8 @@ replay_closure_free(struct replay_closure *closure)
     /*
      * Free events and event base, then the closure itself.
      */
+    if (closure->iolog_dir_fd != -1)
+	close(closure->iolog_dir_fd);
     sudo_ev_free(closure->delay_ev);
     sudo_ev_free(closure->keyboard_ev);
     sudo_ev_free(closure->output_ev);
@@ -923,8 +933,9 @@ signal_cb(int signo, int what, void *v)
 }
 
 static struct replay_closure *
-replay_closure_alloc(const char *iolog_dir, struct timespec *max_delay,
-    const char *decimal, bool interactive, bool suspend_wait)
+replay_closure_alloc(int iolog_dir_fd, const char *iolog_dir,
+    struct timespec *max_delay, const char *decimal, bool interactive,
+    bool suspend_wait)
 {
     struct replay_closure *closure;
     debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
@@ -932,6 +943,7 @@ replay_closure_alloc(const char *iolog_dir, struct timespec *max_delay,
     if ((closure = calloc(1, sizeof(*closure))) == NULL)
 	debug_return_ptr(NULL);
 
+    closure->iolog_dir_fd = iolog_dir_fd;
     closure->iolog_dir = iolog_dir;
     closure->interactive = interactive;
     closure->suspend_wait = suspend_wait;
@@ -1007,16 +1019,17 @@ bad:
 }
 
 static int
-replay_session(const char *iolog_dir, struct timespec *max_delay,
-    const char *decimal, bool interactive, bool suspend_wait)
+replay_session(int iolog_dir_fd, const char *iolog_dir,
+    struct timespec *max_delay, const char *decimal, bool interactive,
+    bool suspend_wait)
 {
     struct replay_closure *closure;
     int ret = 0;
     debug_decl(replay_session, SUDO_DEBUG_UTIL)
 
     /* Allocate the delay closure and read the first timing record. */
-    closure = replay_closure_alloc(iolog_dir, max_delay, decimal, interactive,
-	suspend_wait);
+    closure = replay_closure_alloc(iolog_dir_fd, iolog_dir, max_delay, decimal,
+	interactive, suspend_wait);
     if (read_timing_record(closure) != 0) {
 	ret = 1;
 	goto done;
@@ -1309,12 +1322,17 @@ static int
 list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
+    struct iolog_info *li = NULL;
     const char *timestr;
-    struct iolog_info *li;
     int ret = -1;
+    FILE *fp;
     debug_decl(list_session, SUDO_DEBUG_UTIL)
 
-    if ((li = parse_logfile(logfile)) == NULL)
+    if ((fp = fopen(logfile, "r")) == NULL) {
+	sudo_warn("%s", logfile);
+	goto done;
+    }
+    if ((li = parse_logfile(fp, logfile)) == NULL)
 	goto done;
 
     /* Match on search expression if there is one. */
@@ -1349,6 +1367,8 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
     ret = 0;
 
 done:
+    if (fp != NULL)
+	fclose(fp);
     free_iolog_info(li);
     debug_return_int(ret);
 }

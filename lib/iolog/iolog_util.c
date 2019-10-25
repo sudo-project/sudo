@@ -61,20 +61,13 @@
 static int timing_event_adj;
 
 struct iolog_info *
-parse_logfile(const char *logfile)
+parse_logfile(FILE *fp, const char *logfile)
 {
-    FILE *fp;
     char *buf = NULL, *cp, *ep;
     const char *errstr;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     struct iolog_info *li = NULL;
     debug_decl(parse_logfile, SUDO_DEBUG_UTIL)
-
-    fp = fopen(logfile, "r");
-    if (fp == NULL) {
-	sudo_warn(U_("unable to open %s"), logfile);
-	goto bad;
-    }
 
     /*
      * ID file has three lines:
@@ -174,13 +167,10 @@ parse_logfile(const char *logfile)
 	    }
 	}
     }
-    fclose(fp);
     free(buf);
     debug_return_ptr(li);
 
 bad:
-    if (fp != NULL)
-	fclose(fp);
     free(buf);
     free_iolog_info(li);
     debug_return_ptr(NULL);

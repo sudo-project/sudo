@@ -84,13 +84,20 @@ sudo_printf_int(int msg_type, const char *fmt, ...)
 bool
 validate_iolog_info(const char *logfile)
 {
-    time_t now;
     struct iolog_info *info;
+    time_t now;
+    FILE *fp;
 
     time(&now);
 
     /* Parse log file. */
-    if ((info = parse_logfile(logfile)) == NULL)
+    if ((fp = fopen(logfile, "r")) == NULL) {
+	sudo_warn("%s", logfile);
+	return false;
+    }
+    info = parse_logfile(fp, logfile);
+    fclose(fp);
+    if (info == NULL)
 	return false;
 
     if (strcmp(info->cwd, "/") != 0) {
