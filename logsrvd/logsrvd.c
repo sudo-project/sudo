@@ -236,7 +236,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	debug_return_bool(true);
     }
 
-    /* Send log ID to client for restarting connectoins. */
+    /* Send log ID to client for restarting connections. */
     if (!fmt_log_id_message(closure->details.iolog_path, &closure->write_buf))
 	debug_return_bool(false);
     if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
@@ -297,6 +297,7 @@ static bool
 handle_exit(ExitMessage *msg, struct connection_closure *closure)
 {
     struct timespec tv = { 0, 0 };
+    mode_t mode;
     debug_decl(handle_exit, SUDO_DEBUG_UTIL)
 
     if (closure->state != RUNNING) {
@@ -325,6 +326,14 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 	__func__, (long long)closure->elapsed_time.tv_sec,
 	closure->elapsed_time.tv_nsec);
 
+    /* Clear write bits from I/O timing file to indicate completion. */
+    mode = logsrvd_conf_iolog_mode();
+    CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
+    if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to fchmodat timing file");
+    }
+
     /* Schedule the final commit point event immediately. */
     if (sudo_ev_add(NULL, closure->commit_ev, &tv, false) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -352,7 +361,7 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
     if (!iolog_restart(msg, closure)) {
 	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log", __func__);
 	/* XXX - structured error message so client can send from beginning */
-	if (!fmt_error_message("unable to restart log", &closure->write_buf))
+	if (!fmt_error_message(closure->errstr, &closure->write_buf))
 	    debug_return_bool(false);
 	sudo_ev_del(NULL, closure->read_ev);
 	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {

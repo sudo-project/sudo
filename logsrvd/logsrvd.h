@@ -145,6 +145,7 @@ int logsrvd_conf_syslog_facility(void);
 int logsrvd_conf_syslog_acceptpri(void);
 int logsrvd_conf_syslog_rejectpri(void);
 int logsrvd_conf_syslog_alertpri(void);
+mode_t logsrvd_conf_iolog_mode(void);
 const char *logsrvd_conf_logfile_path(void);
 const char *logsrvd_conf_logfile_time_format(void);
 

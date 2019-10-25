@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "October 3, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "October 16, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -46,6 +46,16 @@ utility in the same way as logs generated directly by the
 \fBsudoers\fR
 plugin.
 .PP
+The server also supports restarting interrupted log transfers.
+To distinguish completed I/O logs from incomplete ones, the
+I/O log timing file is set to be read-only when the log is complete.
+.PP
+Configuration parameters for
+\fBsudo_logsrvd\fR
+may be specified in the
+sudo_logsrvd.conf(@mansectform@)
+file.
+.PP
 The options are as follows:
 .TP 12n
 \fB\-f\fR, \fB\--file\fR
@@ -60,7 +70,7 @@ Display a short help message to the standard output and exit.
 \fB\-n\fR, \fB\--no-fork\fR
 Run
 \fBsudo_logsrvd\fR
-in the the foreground instead of detaching from the terminal and becoming
+in the foreground instead of detaching from the terminal and becoming
 a daemon.
 .TP 12n
 \fB\-R\fR, \fB\--random-drop\fR
@@ -74,12 +84,6 @@ client to restart a connection.
 Print the
 \fBsudo_logsrvd\fR
 version and exit.
-.PP
-Configuration parameters for
-\fBsudo_logsrvd\fR
-may be set in the
-sudo_logsrvd.conf(@mansectform@)
-file.
 .SS "Debugging sudo_logsrvd"
 \fBsudo_logsrvd\fR
 supports a flexible debugging framework that is configured via
@@ -98,8 +102,12 @@ Sudo front end configuration
 .TP 26n
 \fI@sysconfdir@/sudo_logsrvd.conf\fR
 Sudo log server configuration file
+.TP 26n
+\fI@iolog_dir@\fR
+Default I/O log file location
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
+sudo_logsrvd.conf(@mansectform@),
 sudoers(@mansectform@),
 sudo(@mansectsu@),
 sudo_sendlog(@mansectsu@),

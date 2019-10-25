@@ -98,6 +98,12 @@ static struct logsrvd_config {
 } *logsrvd_config;
 
 /* iolog getters */
+mode_t
+logsrvd_conf_iolog_mode(void)
+{
+    return logsrvd_config->iolog.mode;
+}
+
 const char *
 logsrvd_conf_iolog_dir(void)
 {

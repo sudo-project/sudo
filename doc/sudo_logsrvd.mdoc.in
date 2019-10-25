@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 3, 2019
+.Dd October 16, 2019
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -44,6 +44,16 @@ utility in the same way as logs generated directly by the
 .Nm sudoers
 plugin.
 .Pp
+The server also supports restarting interrupted log transfers.
+To distinguish completed I/O logs from incomplete ones, the
+I/O log timing file is set to be read-only when the log is complete.
+.Pp
+Configuration parameters for
+.Nm
+may be specified in the
+.Xr sudo_logsrvd.conf @mansectform@
+file.
+.Pp
 The options are as follows:
 .Bl -tag -width Fl
 .It Fl f , -file
@@ -69,12 +79,6 @@ Print the
 .Nm
 version and exit.
 .El
-.Pp
-Configuration parameters for
-.Nm
-may be set in the
-.Xr sudo_logsrvd.conf @mansectform@
-file.
 .Ss Debugging sudo_logsrvd
 .Nm
 supports a flexible debugging framework that is configured via
@@ -92,9 +96,12 @@ please refer to its manual.
 Sudo front end configuration
 .It Pa @sysconfdir@/sudo_logsrvd.conf
 Sudo log server configuration file
+.It Pa @iolog_dir@
+Default I/O log file location
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,
+.Xr sudo_logsrvd.conf @mansectform@ ,
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@ ,
 .Xr sudo_sendlog @mansectsu@ ,

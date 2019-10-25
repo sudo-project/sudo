@@ -37,6 +37,7 @@
 #include <unistd.h>
 
 #include "log_server.pb-c.h"
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 #include "sudo_compat.h"
 #include "sudo_queue.h"
 #include "sudo_debug.h"
@@ -809,6 +810,7 @@ bool
 iolog_restart(RestartMessage *msg, struct connection_closure *closure)
 {
     struct timespec target;
+    struct stat sb;
     int iofd;
     debug_decl(iolog_restart, SUDO_DEBUG_UTIL)
 
@@ -827,6 +829,19 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     if (closure->iolog_dir_fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "%s", closure->details.iolog_path);
+	goto bad;
+    }
+
+    /* If the timing file write bit is clear, log is already complete. */
+    if (fstatat(closure->iolog_dir_fd, "timing", &sb, 0) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to stat %s/timing", closure->details.iolog_path);
+	goto bad;
+    }
+    if (!ISSET(sb.st_mode, S_IWUSR)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s already complete", closure->details.iolog_path);
+	closure->errstr = _("log is already complete, cannot be restarted");
 	goto bad;
     }
 
@@ -856,6 +871,8 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     /* Ready to log I/O buffers. */
     debug_return_bool(true);
 bad:
+    if (closure->errstr == NULL)
+	closure->errstr = _("unable to restart log");
     debug_return_bool(false);
 }
 
