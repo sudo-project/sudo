@@ -54,9 +54,14 @@
 
 typedef bool (*logsrvd_conf_cb_t)(const char *);
 
-struct logsrvd_config_table {
+struct logsrvd_config_entry {
     char *conf_str;
     logsrvd_conf_cb_t setter;
+};
+
+struct logsrvd_config_section {
+    char *name;
+    struct logsrvd_config_entry *entries;
 };
 
 static char *logsrvd_iolog_dir;
@@ -268,7 +273,12 @@ cb_maxseq(const char *str)
     return iolog_set_maxseq(str);
 }
 
-static struct logsrvd_config_table conf_table[] = {
+static struct logsrvd_config_entry server_conf_entries[] = {
+    { "listen_address", cb_listen_address },    
+    { NULL }
+};
+
+static struct logsrvd_config_entry iolog_conf_entries[] = {
     { "iolog_dir", cb_iolog_dir },
     { "iolog_file", cb_iolog_file },
     { "iolog_flush", cb_iolog_flush },
@@ -276,15 +286,25 @@ static struct logsrvd_config_table conf_table[] = {
     { "iolog_user", cb_iolog_user },
     { "iolog_group", cb_iolog_group },
     { "iolog_mode", cb_iolog_mode },
-    { "listen_address", cb_listen_address },
     { "maxseq", cb_maxseq },
     { NULL }
 };
 
+static struct logsrvd_config_section logsrvd_config_sections[] = {
+    { "server", server_conf_entries },
+    { "iolog", iolog_conf_entries },
+    { NULL }
+};
+
+/*
+ * Read .ini style logsrvd.conf file.
+ * Note that we use '#' not ';' for the comment character.
+ */
 /* XXX - on reload we should preserve old config if there is an error */
 bool
 logsrvd_conf_read(const char *path)
 {
+    struct logsrvd_config_section *conf_section = NULL;
     unsigned int lineno = 0;
     size_t linesize = 0;
     char *line = NULL;
@@ -301,14 +321,44 @@ logsrvd_conf_read(const char *path)
     logsrvd_conf_reset();
 
     while (sudo_parseln(&line, &linesize, &lineno, fp, 0) != -1) {
-	struct logsrvd_config_table *ct;
+	struct logsrvd_config_entry *entry;
 	char *ep, *val;
 
 	/* Skip blank, comment or invalid lines. */
-	if (*line == '\0')
+	if (*line == '\0' || *line == ';')
 	    continue;
+
+	/* New section */
+	if (line[0] == '[') {
+	    char *section_name = line + 1;
+	    char *cp = strchr(section_name, ']');
+	    if (cp == NULL) {
+		sudo_warnx(U_("%s:%d unmatched '[': %s"),
+		    path, lineno, line);
+		debug_return_bool(false);
+	    }
+	    *cp = '\0';
+	    for (conf_section = logsrvd_config_sections; conf_section->name != NULL;
+		    conf_section++) {
+		if (strcasecmp(section_name, conf_section->name) == 0)
+		    break;
+	    }
+	    if (conf_section->name == NULL) {
+		sudo_warnx(U_("%s:%d invalid config section: %s"),
+		    path, lineno, section_name);
+		debug_return_bool(false);
+	    }
+	    continue;
+	}
+
 	if ((ep = strchr(line, '=')) == NULL) {
 	    sudo_warnx(U_("%s:%d invalid configuration line: %s"),
+		path, lineno, line);
+	    debug_return_bool(false);
+	}
+
+	if (conf_section == NULL) {
+	    sudo_warnx(U_("%s:%d expected section name: %s"),
 		path, lineno, line);
 	    debug_return_bool(false);
 	}
@@ -319,15 +369,20 @@ logsrvd_conf_read(const char *path)
 	while (ep > line && isspace((unsigned char)ep[-1]))
 	    ep--;
 	*ep = '\0';
-	for (ct = conf_table; ct->conf_str != NULL; ct++) {
-	    if (strcmp(line, ct->conf_str) == 0) {
-		if (!ct->setter(val)) {
+	for (entry = conf_section->entries; entry->conf_str != NULL; entry++) {
+	    if (strcasecmp(line, entry->conf_str) == 0) {
+		if (!entry->setter(val)) {
 		    sudo_warnx(U_("invalid value for %s: %s"),
-			ct->conf_str, val);
+			entry->conf_str, val);
 		    debug_return_bool(false);
 		}
 		break;
 	    }
+	}
+	if (entry->conf_str == NULL) {
+	    sudo_warnx(U_("%s:%d unknown key: %s"),
+		path, lineno, line);
+	    debug_return_bool(false);
 	}
     }
 
