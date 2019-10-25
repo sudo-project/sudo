@@ -727,29 +727,16 @@ restore_terminal_size(void)
  * Read the next record from the timing file and schedule a delay
  * event with the specified timeout.
  * Return 0 on success, 1 on EOF and -1 on error.
- * XXX - duplicated in sendlog
  */
 static int
-read_timing_record(struct replay_closure *closure)
+get_timing_record(struct replay_closure *closure)
 {
     struct timing_closure *timing = &closure->timing;
-    char line[LINE_MAX];
-    const char *errstr;
-    debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
+    int ret;
+    debug_decl(get_timing_record, SUDO_DEBUG_UTIL)
 
-    /* Read next record from timing file. */
-    if (iolog_gets(&iolog_files[IOFD_TIMING], line, sizeof(line), &errstr) == NULL) {
-	/* EOF or error reading timing file, we are done. */
-	if (iolog_eof(&iolog_files[IOFD_TIMING]))
-	    debug_return_int(1);
-	sudo_fatalx(U_("error reading timing file: %s"), errstr);
-	debug_return_int(-1);
-    }
-
-    /* Parse timing file record. */
-    line[strcspn(line, "\n")] = '\0';
-    if (!parse_timing(line, timing))
-	sudo_fatalx(U_("invalid timing file line: %s"), line);
+    if ((ret = read_timing_record(&iolog_files[IOFD_TIMING], timing)) != 0)
+	debug_return_int(ret);
 
     /* Record number bytes to read. */
     if (timing->event != IO_EVENT_WINSIZE &&
@@ -780,7 +767,7 @@ next_timing_record(struct replay_closure *closure)
     debug_decl(next_timing_record, SUDO_DEBUG_UTIL)
 
 again:
-    switch (read_timing_record(closure)) {
+    switch (get_timing_record(closure)) {
     case 0:
 	/* success */
 	if (closure->timing.event == IO_EVENT_SUSPEND &&
@@ -1030,7 +1017,7 @@ replay_session(int iolog_dir_fd, const char *iolog_dir,
     /* Allocate the delay closure and read the first timing record. */
     closure = replay_closure_alloc(iolog_dir_fd, iolog_dir, max_delay, decimal,
 	interactive, suspend_wait);
-    if (read_timing_record(closure) != 0) {
+    if (get_timing_record(closure) != 0) {
 	ret = 1;
 	goto done;
     }
@@ -1121,7 +1108,7 @@ write_output(int fd, int what, void *v)
 
     if (iobuf->off == iobuf->len) {
 	/* Write complete, go to next timing entry if possible. */
-	switch (read_timing_record(closure)) {
+	switch (get_timing_record(closure)) {
 	case 0:
 	    /* success */
 	    break;

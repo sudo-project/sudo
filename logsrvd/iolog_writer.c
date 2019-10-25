@@ -618,38 +618,6 @@ iolog_init(AcceptMessage *msg, struct connection_closure *closure)
 }
 
 /*
- * Read the next record from the timing file.
- * Return 0 on success, 1 on EOF and -1 on error.
- */
-static int
-read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
-{
-    char line[LINE_MAX];
-    const char *errstr;
-    debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
-
-    /* Read next record from timing file. */
-    if (iolog_gets(iol, line, sizeof(line), &errstr) == NULL) {
-	/* EOF or error reading timing file, we are done. */
-	if (iolog_eof(iol))
-	    debug_return_int(1);	/* EOF */
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "error reading timing file: %s", errstr);
-	debug_return_int(-1);
-    }
-
-    /* Parse timing file record. */
-    line[strcspn(line, "\n")] = '\0';
-    if (!parse_timing(line, timing)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "invalid timing file line: %s", line);
-	debug_return_int(-1);
-    }
-
-    debug_return_int(0);
-}
-
-/*
  * Copy len bytes from src to dst.
  */
 static bool

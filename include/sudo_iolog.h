@@ -109,9 +109,10 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file, c
 /* XXX - prefix these */
 bool parse_timing(const char *line, struct timing_closure *timing);
 char *parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
+int read_timing_record(struct iolog_file *iol, struct timing_closure *timing);
 struct iolog_info *parse_logfile(FILE *fp, const char *iolog_dir);
-void free_iolog_info(struct iolog_info *li);
 void adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
+void free_iolog_info(struct iolog_info *li);
 
 /* iolog_fileio.c */
 struct passwd;
