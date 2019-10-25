@@ -52,7 +52,8 @@
 #include "pathnames.h"
 #include "logsrvd.h"
 
-typedef bool (*logsrvd_conf_cb_t)(const char *);
+struct logsrvd_config;
+typedef bool (*logsrvd_conf_cb_t)(struct logsrvd_config *config, const char *);
 
 struct logsrvd_config_entry {
     char *conf_str;
@@ -69,9 +70,14 @@ static struct logsrvd_config {
 	struct listen_address_list addresses;
     } server;
     struct logsrvd_config_iolog {
-	/* XXX - others private to iolog */
+	bool compress;
+	bool flush;
+	mode_t mode;
+	unsigned int maxseq;
 	char *iolog_dir;
 	char *iolog_file;
+	struct passwd user;
+	struct group group;
     } iolog;
     struct logsrvd_config_eventlog {
 	enum logsrvd_eventlog_type log_type;
@@ -88,121 +94,93 @@ static struct logsrvd_config {
 	char *path;
 	char *time_format;
     } logfile;
-} logsrvd_config = {
-    { TAILQ_HEAD_INITIALIZER(logsrvd_config.server.addresses) }
-};
+} *logsrvd_config;
 
 /* iolog getters */
 const char *
 logsrvd_conf_iolog_dir(void)
 {
-    return logsrvd_config.iolog.iolog_dir;
+    return logsrvd_config->iolog.iolog_dir;
 }
 
 const char *
 logsrvd_conf_iolog_file(void)
 {
-    return logsrvd_config.iolog.iolog_file;
+    return logsrvd_config->iolog.iolog_file;
 }
 
 /* server getters */
 struct listen_address_list *
 logsrvd_conf_listen_address(void)
 {
-    return &logsrvd_config.server.addresses;
+    return &logsrvd_config->server.addresses;
 }
 
 /* eventlog getters */
 enum logsrvd_eventlog_type
 logsrvd_conf_eventlog_type(void)
 {
-    return logsrvd_config.eventlog.log_type;
+    return logsrvd_config->eventlog.log_type;
 }
 
 enum logsrvd_eventlog_format
 logsrvd_conf_eventlog_format(void)
 {
-    return logsrvd_config.eventlog.log_format;
+    return logsrvd_config->eventlog.log_format;
 }
 
 /* syslog getters */
 unsigned int
 logsrvd_conf_syslog_maxlen(void)
 {
-    return logsrvd_config.syslog.maxlen;
+    return logsrvd_config->syslog.maxlen;
 }
 
 int
 logsrvd_conf_syslog_facility(void)
 {
-    return logsrvd_config.syslog.facility;
+    return logsrvd_config->syslog.facility;
 }
 
 int
 logsrvd_conf_syslog_acceptpri(void)
 {
-    return logsrvd_config.syslog.acceptpri;
+    return logsrvd_config->syslog.acceptpri;
 }
 
 int
 logsrvd_conf_syslog_rejectpri(void)
 {
-    return logsrvd_config.syslog.rejectpri;
+    return logsrvd_config->syslog.rejectpri;
 }
 
 int
 logsrvd_conf_syslog_alertpri(void)
 {
-    return logsrvd_config.syslog.alertpri;
+    return logsrvd_config->syslog.alertpri;
 }
 
 /* logfile getters */
 const char *
 logsrvd_conf_logfile_path(void)
 {
-    return logsrvd_config.logfile.path;
+    return logsrvd_config->logfile.path;
 }
 
 const char *
 logsrvd_conf_logfile_time_format(void)
 {
-    return logsrvd_config.logfile.time_format;
-}
-
-/*
- * Reset logsrvd_config to default values and reset I/O log values.
- */
-static void
-logsrvd_conf_reset(void)
-{
-    struct listen_address *addr;
-    debug_decl(logsrvd_conf_reset, SUDO_DEBUG_UTIL)
-
-    iolog_set_defaults();
-    free(logsrvd_config.iolog.iolog_dir);
-    logsrvd_config.iolog.iolog_dir = NULL;
-    free(logsrvd_config.iolog.iolog_file);
-    logsrvd_config.iolog.iolog_file = NULL;
-
-    while ((addr = TAILQ_FIRST(&logsrvd_config.server.addresses))) {
-        TAILQ_REMOVE(&logsrvd_config.server.addresses, addr, entries);
-	free(addr);
-    }
-
-    free(logsrvd_config.logfile.path);
-    free(logsrvd_config.logfile.time_format);
-
-    debug_return;
+    return logsrvd_config->logfile.time_format;
 }
 
 /* I/O log callbacks */
 static bool
-cb_iolog_dir(const char *path)
+cb_iolog_dir(struct logsrvd_config *config, const char *path)
 {
     debug_decl(cb_iolog_dir, SUDO_DEBUG_UTIL)
 
-    free(logsrvd_config.iolog.iolog_dir);
-    if ((logsrvd_config.iolog.iolog_dir = strdup(path)) == NULL) {
+    free(config->iolog.iolog_dir);
+    if ((config->iolog.iolog_dir = strdup(path)) == NULL) {
 	sudo_warn(NULL);
 	debug_return_bool(false);
     }
@@ -210,12 +188,12 @@ cb_iolog_dir(const char *path)
 }
 
 static bool
-cb_iolog_file(const char *path)
+cb_iolog_file(struct logsrvd_config *config, const char *path)
 {
     debug_decl(cb_iolog_file, SUDO_DEBUG_UTIL)
 
-    free(logsrvd_config.iolog.iolog_file);
-    if ((logsrvd_config.iolog.iolog_file = strdup(path)) == NULL) {
+    free(config->iolog.iolog_file);
+    if ((config->iolog.iolog_file = strdup(path)) == NULL) {
 	sudo_warn(NULL);
 	debug_return_bool(false);
     }
@@ -223,19 +201,33 @@ cb_iolog_file(const char *path)
 }
 
 static bool
-cb_iolog_compress(const char *str)
+cb_iolog_compress(struct logsrvd_config *config, const char *str)
 {
-    return iolog_set_compress(str);
+    int val;
+    debug_decl(cb_iolog_compress, SUDO_DEBUG_UTIL)
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->iolog.compress = val;
+    debug_return_bool(true);
 }
 
 static bool
-cb_iolog_flush(const char *str)
+cb_iolog_flush(struct logsrvd_config *config, const char *str)
 {
-    return iolog_set_flush(str);
+    int val;
+    debug_decl(cb_iolog_flush, SUDO_DEBUG_UTIL)
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->iolog.flush = val;
+    debug_return_bool(true);
 }
 
 static bool
-cb_iolog_user(const char *user)
+cb_iolog_user(struct logsrvd_config *config, const char *user)
 {
     struct passwd *pw;
     debug_decl(cb_iolog_user, SUDO_DEBUG_UTIL)
@@ -245,12 +237,14 @@ cb_iolog_user(const char *user)
 	    "unknown user %s", user);
 	debug_return_bool(false);
     }
+    config->iolog.user.pw_uid = pw->pw_uid;
+    config->iolog.user.pw_gid = pw->pw_gid;
 
-    debug_return_bool(iolog_set_user(pw));
+    debug_return_bool(true);
 }
 
 static bool
-cb_iolog_group(const char *group)
+cb_iolog_group(struct logsrvd_config *config, const char *group)
 {
     struct group *gr;
     debug_decl(cb_iolog_group, SUDO_DEBUG_UTIL)
@@ -260,12 +254,13 @@ cb_iolog_group(const char *group)
 	    "unknown group %s", group);
 	debug_return_bool(false);
     }
+    config->iolog.group.gr_gid = gr->gr_gid;
 
-    debug_return_bool(iolog_set_group(gr));
+    debug_return_bool(true);
 }
 
 static bool
-cb_iolog_mode(const char *str)
+cb_iolog_mode(struct logsrvd_config *config, const char *str)
 {
     const char *errstr;
     mode_t mode;
@@ -277,19 +272,35 @@ cb_iolog_mode(const char *str)
 	    "unable to parse iolog mode %s", str);
 	debug_return_bool(false);
     }
-    debug_return_bool(iolog_set_mode(mode));
+    config->iolog.mode = mode;
+    debug_return_bool(true);
 }
 
 static bool
-cb_iolog_maxseq(const char *str)
+cb_iolog_maxseq(struct logsrvd_config *config, const char *str)
 {
-    return iolog_set_maxseq(str);
+    const char *errstr;
+    unsigned int value;
+    debug_decl(cb_iolog_maxseq, SUDO_DEBUG_UTIL)
+
+    value = sudo_strtonum(str, 0, SESSID_MAX, &errstr);
+    if (errstr != NULL) {
+        if (errno != ERANGE) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "bad maxseq: %s: %s", str, errstr);
+            debug_return_bool(false);
+        }
+        /* Out of range, clamp to SESSID_MAX as documented. */
+        value = SESSID_MAX;
+    }
+    config->iolog.maxseq = value;
+    debug_return_bool(true);
 }
 
 /* Server callbacks */
 /* TODO: unit test */
 static bool
-cb_listen_address(const char *str)
+cb_listen_address(struct logsrvd_config *config, const char *str)
 {
     struct addrinfo hints, *res, *res0 = NULL;
     char *copy, *host, *port;
@@ -351,7 +362,7 @@ cb_listen_address(const char *str)
 	}
 	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
 	addr->sa_len = res->ai_addrlen;
-	TAILQ_INSERT_TAIL(&logsrvd_config.server.addresses, addr, entries);
+	TAILQ_INSERT_TAIL(&config->server.addresses, addr, entries);
     }
 
     ret = true;
@@ -364,16 +375,16 @@ done:
 
 /* eventlog callbacks */
 static bool
-cb_eventlog_type(const char *str)
+cb_eventlog_type(struct logsrvd_config *config, const char *str)
 {
     debug_decl(cb_eventlog_type, SUDO_DEBUG_UTIL)
 
     if (strcmp(str, "none") == 0)
-	logsrvd_config.eventlog.log_type = EVLOG_NONE;
+	config->eventlog.log_type = EVLOG_NONE;
     else if (strcmp(str, "syslog") == 0)
-	logsrvd_config.eventlog.log_type = EVLOG_SYSLOG;
+	config->eventlog.log_type = EVLOG_SYSLOG;
     else if (strcmp(str, "logfile") == 0)
-	logsrvd_config.eventlog.log_type = EVLOG_FILE;
+	config->eventlog.log_type = EVLOG_FILE;
     else
 	debug_return_bool(false);
 
@@ -381,12 +392,12 @@ cb_eventlog_type(const char *str)
 }
 
 static bool
-cb_eventlog_format(const char *str)
+cb_eventlog_format(struct logsrvd_config *config, const char *str)
 {
     debug_decl(cb_eventlog_format, SUDO_DEBUG_UTIL)
 
     if (strcmp(str, "sudo") == 0)
-	logsrvd_config.eventlog.log_format = EVLOG_SUDO;
+	config->eventlog.log_format = EVLOG_SUDO;
     else
 	debug_return_bool(false);
 
@@ -395,7 +406,7 @@ cb_eventlog_format(const char *str)
 
 /* syslog callbacks */
 static bool
-cb_syslog_maxlen(const char *str)
+cb_syslog_maxlen(struct logsrvd_config *config, const char *str)
 {
     unsigned int maxlen;
     const char *errstr;
@@ -405,13 +416,13 @@ cb_syslog_maxlen(const char *str)
     if (errstr != NULL)
 	debug_return_bool(false);
 
-    logsrvd_config.syslog.maxlen = maxlen;
+    config->syslog.maxlen = maxlen;
 
     debug_return_bool(true);
 }
 
 static bool
-cb_syslog_facility(const char *str)
+cb_syslog_facility(struct logsrvd_config *config, const char *str)
 {
     int logfac;
     debug_decl(cb_syslog_facility, SUDO_DEBUG_UTIL)
@@ -422,13 +433,13 @@ cb_syslog_facility(const char *str)
 	debug_return_bool(false);
     }
 
-    logsrvd_config.syslog.facility = logfac;
+    config->syslog.facility = logfac;
 
     debug_return_bool(true);
 }
 
 static bool
-cb_syslog_acceptpri(const char *str)
+cb_syslog_acceptpri(struct logsrvd_config *config, const char *str)
 {
     int logpri;
     debug_decl(cb_syslog_acceptpri, SUDO_DEBUG_UTIL)
@@ -439,13 +450,13 @@ cb_syslog_acceptpri(const char *str)
 	debug_return_bool(false);
     }
 
-    logsrvd_config.syslog.acceptpri = logpri;
+    config->syslog.acceptpri = logpri;
 
     debug_return_bool(true);
 }
 
 static bool
-cb_syslog_rejectpri(const char *str)
+cb_syslog_rejectpri(struct logsrvd_config *config, const char *str)
 {
     int logpri;
     debug_decl(cb_syslog_rejectpri, SUDO_DEBUG_UTIL)
@@ -453,13 +464,13 @@ cb_syslog_rejectpri(const char *str)
     if (!sudo_str2logpri(str, &logpri))
 	debug_return_bool(false);
 
-    logsrvd_config.syslog.rejectpri = logpri;
+    config->syslog.rejectpri = logpri;
 
     debug_return_bool(true);
 }
 
 static bool
-cb_syslog_alertpri(const char *str)
+cb_syslog_alertpri(struct logsrvd_config *config, const char *str)
 {
     int logpri;
     debug_decl(cb_syslog_alertpri, SUDO_DEBUG_UTIL)
@@ -470,14 +481,14 @@ cb_syslog_alertpri(const char *str)
 	debug_return_bool(false);
     }
 
-    logsrvd_config.syslog.alertpri = logpri;
+    config->syslog.alertpri = logpri;
 
     debug_return_bool(true);
 }
 
 /* logfile callbacks */
 static bool
-cb_logfile_path(const char *str)
+cb_logfile_path(struct logsrvd_config *config, const char *str)
 {
     char *copy = NULL;
     debug_decl(cb_logfile_path, SUDO_DEBUG_UTIL)
@@ -492,14 +503,14 @@ cb_logfile_path(const char *str)
 	debug_return_bool(false);
     }
 
-    free(logsrvd_config.logfile.path);
-    logsrvd_config.logfile.path = copy;
+    free(config->logfile.path);
+    config->logfile.path = copy;
 
     debug_return_bool(true);
 }
 
 static bool
-cb_logfile_time_format(const char *str)
+cb_logfile_time_format(struct logsrvd_config *config, const char *str)
 {
     char *copy = NULL;
     debug_decl(cb_logfile_time_format, SUDO_DEBUG_UTIL)
@@ -509,14 +520,14 @@ cb_logfile_time_format(const char *str)
 	debug_return_bool(false);
     }
 
-    free(logsrvd_config.logfile.time_format);
-    logsrvd_config.logfile.time_format = copy;
+    free(config->logfile.time_format);
+    config->logfile.time_format = copy;
 
     debug_return_bool(true);
 }
 
 static struct logsrvd_config_entry server_conf_entries[] = {
-    { "listen_address", cb_listen_address },    
+    { "listen_address", cb_listen_address },
     { NULL }
 };
 
@@ -563,7 +574,7 @@ static struct logsrvd_config_section logsrvd_config_sections[] = {
 };
 
 static bool
-logsrvd_conf_parse(FILE *fp, const char *path)
+logsrvd_conf_parse(struct logsrvd_config *config, FILE *fp, const char *path)
 {
     struct logsrvd_config_section *conf_section = NULL;
     unsigned int lineno = 0;
@@ -623,7 +634,7 @@ logsrvd_conf_parse(FILE *fp, const char *path)
 	*ep = '\0';
 	for (entry = conf_section->entries; entry->conf_str != NULL; entry++) {
 	    if (strcasecmp(line, entry->conf_str) == 0) {
-		if (!entry->setter(val)) {
+		if (!entry->setter(config, val)) {
 		    sudo_warnx(U_("invalid value for %s: %s"),
 			entry->conf_str, val);
 		    goto done;
@@ -643,39 +654,137 @@ done:
     debug_return_bool(ret);
 }
 
+/* Free the specified struct logsrvd_config and its contents. */
+void
+logsrvd_conf_free(struct logsrvd_config *config)
+{
+    struct listen_address *addr;
+    debug_decl(logsrvd_conf_free, SUDO_DEBUG_UTIL)
+
+    if (config == NULL)
+	debug_return;
+
+    /* struct logsrvd_config_server */
+    while ((addr = TAILQ_FIRST(&config->server.addresses))) {
+	TAILQ_REMOVE(&config->server.addresses, addr, entries);
+	free(addr);
+    }
+
+    /* struct logsrvd_config_iolog */
+    free(config->iolog.iolog_dir);
+    free(config->iolog.iolog_file);
+
+    /* struct logsrvd_config_logfile */
+    free(config->logfile.path);
+    free(config->logfile.time_format);
+
+    free(config);
+
+    debug_return;
+}
+
+/* Allocate a new struct logsrvd_config and set default values. */
+struct logsrvd_config *
+logsrvd_conf_alloc(void)
+{
+    struct logsrvd_config *config;
+    debug_decl(logsrvd_conf_alloc, SUDO_DEBUG_UTIL)
+
+    if ((config = calloc(1, sizeof(*config))) == NULL) {
+	sudo_warn(NULL);
+	debug_return_ptr(NULL);
+    }
+
+    /* Server defaults */
+    TAILQ_INIT(&config->server.addresses);
+
+    /* I/O log defaults */
+    config->iolog.compress = false;
+    config->iolog.flush = true;
+    config->iolog.mode = S_IRUSR|S_IWUSR;
+    config->iolog.maxseq = SESSID_MAX;
+    if (!cb_iolog_dir(config, _PATH_SUDO_IO_LOGDIR))
+	goto bad;
+    if (!cb_iolog_file(config, "%{seq}"))
+	goto bad;
+    config->iolog.user.pw_uid = ROOT_UID;
+    config->iolog.user.pw_gid = ROOT_GID;
+    config->iolog.group.gr_gid = ROOT_GID;
+
+    /* Event log defaults */
+    config->eventlog.log_type = EVLOG_SYSLOG;
+    config->eventlog.log_format = EVLOG_SUDO;
+
+    /* Syslog defaults */
+    config->syslog.maxlen = 960;
+    if (!cb_syslog_facility(config, LOGFAC)) {
+	sudo_warnx(U_("unknown syslog facility %s"), LOGFAC);
+	goto bad;
+    }
+    if (!cb_syslog_acceptpri(config, PRI_SUCCESS)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_SUCCESS);
+	goto bad;
+    }
+    if (!cb_syslog_rejectpri(config, PRI_FAILURE)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
+	goto bad;
+    }
+    if (!cb_syslog_alertpri(config, PRI_FAILURE)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
+	goto bad;
+    }
+
+    /* Log file defaults */
+    if (!cb_logfile_time_format(config, "%h %e %T"))
+	goto bad;
+    if (!cb_logfile_path(config, _PATH_SUDO_LOGFILE))
+	goto bad;
+
+    debug_return_ptr(config);
+bad:
+    logsrvd_conf_free(config);
+    debug_return_ptr(NULL);
+}
+
+bool
+logsrvd_conf_apply(struct logsrvd_config *config)
+{
+    debug_decl(logsrvd_conf_apply, SUDO_DEBUG_UTIL)
+
+    /* There can be multiple addresses so we can't set a default earlier. */
+    if (TAILQ_EMPTY(&config->server.addresses)) {
+	if (!cb_listen_address(config, "*:30344"))
+	    debug_return_bool(false);
+    }
+
+    /* Set I/O log library settings */
+    iolog_set_defaults();
+    iolog_set_compress(config->iolog.compress);
+    iolog_set_flush(config->iolog.flush);
+    iolog_set_user(&config->iolog.user);
+    iolog_set_group(&config->iolog.group);
+    iolog_set_mode(config->iolog.mode);
+    iolog_set_maxseq(config->iolog.maxseq);
+
+    logsrvd_conf_free(logsrvd_config);
+    logsrvd_config = config;
+
+    debug_return_bool(true);
+}
+
 /*
  * Read .ini style logsrvd.conf file.
  * Note that we use '#' not ';' for the comment character.
  */
-/* XXX - split into read and apply so we don't overwrite good config with bad */
 bool
 logsrvd_conf_read(const char *path)
 {
+    struct logsrvd_config *config;
     bool ret = false;
     FILE *fp = NULL;
     debug_decl(logsrvd_conf_read, SUDO_DEBUG_UTIL)
 
-    /* Initialize default values for settings that take int values. */
-    logsrvd_conf_reset();
-    logsrvd_config.eventlog.log_type = EVLOG_SYSLOG;
-    logsrvd_config.eventlog.log_format = EVLOG_SUDO;
-    logsrvd_config.syslog.maxlen = 960;
-    if (!cb_syslog_facility(LOGFAC)) {
-	sudo_warnx(U_("unknown syslog facility %s"), LOGFAC);
-	goto done;
-    }
-    if (!cb_syslog_acceptpri(PRI_SUCCESS)) {
-	sudo_warnx(U_("unknown syslog priority %s"), PRI_SUCCESS);
-	goto done;
-    }
-    if (!cb_syslog_rejectpri(PRI_FAILURE)) {
-	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
-	goto done;
-    }
-    if (!cb_syslog_alertpri(PRI_FAILURE)) {
-	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
-	goto done;
-    }
+    config = logsrvd_conf_alloc();
 
     if ((fp = fopen(path, "r")) == NULL) {
 	if (errno != ENOENT) {
@@ -683,34 +792,18 @@ logsrvd_conf_read(const char *path)
 	    goto done;
 	}
     } else {
-	if (!logsrvd_conf_parse(fp, path))
+	if (!logsrvd_conf_parse(config, fp, path))
 	    goto done;
     }
 
-    /* For settings with pointer values we can tell what is unset. */
-    if (logsrvd_config.iolog.iolog_dir == NULL) {
-	if (!cb_iolog_dir(_PATH_SUDO_IO_LOGDIR))
-	    goto done;
+    /* Install new config */
+    if (logsrvd_conf_apply(config)) {
+	config = NULL;
+	ret = true;
     }
-    if (logsrvd_config.iolog.iolog_file == NULL) {
-	if (!cb_iolog_file("%{seq}"))
-	    goto done;
-    }
-    if (TAILQ_EMPTY(&logsrvd_config.server.addresses)) {
-	if (!cb_listen_address("*:30344"))
-	    goto done;
-    }
-    if (logsrvd_config.logfile.time_format == NULL) {
-	if (!cb_logfile_time_format("%h %e %T"))
-	    goto done;
-    }
-    if (logsrvd_config.logfile.path == NULL) {
-	if (!cb_logfile_path(_PATH_SUDO_LOGFILE))
-	    goto done;
-    }
-    ret = true;
 
 done:
+    logsrvd_conf_free(config);
     if (fp != NULL)
 	fclose(fp);
     debug_return_bool(ret);

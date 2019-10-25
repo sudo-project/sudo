@@ -83,7 +83,22 @@ extern __dso_public struct io_plugin sudoers_io;
 bool
 cb_maxseq(const union sudo_defs_val *sd_un)
 {
-    return iolog_set_maxseq(sd_un->str);
+    const char *errstr;
+    unsigned int value;
+    debug_decl(cb_maxseq, SUDO_DEBUG_UTIL)
+
+    value = sudo_strtonum(sd_un->str, 0, SESSID_MAX, &errstr);
+    if (errstr != NULL) {
+        if (errno != ERANGE) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "bad maxseq: %s: %s", sd_un->str, errstr);
+            debug_return_bool(false);
+        }
+        /* Out of range, clamp to SESSID_MAX as documented. */
+        value = SESSID_MAX;
+    }
+    iolog_set_maxseq(value);
+    debug_return_bool(true);
 }
 
 /*
@@ -94,7 +109,6 @@ cb_iolog_user(const union sudo_defs_val *sd_un)
 {
     const char *name = sd_un->str;
     struct passwd *pw = NULL;
-    bool ret;
     debug_decl(cb_iolog_user, SUDOERS_DEBUG_UTIL)
 
     /* NULL name means reset to default. */
@@ -104,11 +118,11 @@ cb_iolog_user(const union sudo_defs_val *sd_un)
 	    debug_return_bool(false);
 	}
     }
-    ret = iolog_set_user(pw);
+    iolog_set_user(pw);
     if (pw != NULL)
 	sudo_pw_delref(pw);
 
-    debug_return_bool(ret);
+    debug_return_bool(true);
 }
 
 /*
@@ -119,7 +133,6 @@ cb_iolog_group(const union sudo_defs_val *sd_un)
 {
     const char *name = sd_un->str;
     struct group *gr = NULL;
-    bool ret;
     debug_decl(cb_iolog_group, SUDOERS_DEBUG_UTIL)
 
     /* NULL name means reset to default. */
@@ -129,11 +142,11 @@ cb_iolog_group(const union sudo_defs_val *sd_un)
 	    debug_return_bool(false);
 	}
     }
-    ret = iolog_set_group(gr);
+    iolog_set_group(gr);
     if (gr != NULL)
 	sudo_gr_delref(gr);
 
-    debug_return_bool(ret);
+    debug_return_bool(true);
 }
 
 /*
@@ -142,7 +155,8 @@ cb_iolog_group(const union sudo_defs_val *sd_un)
 bool
 cb_iolog_mode(const union sudo_defs_val *sd_un)
 {
-    return iolog_set_mode(sd_un->mode);
+    iolog_set_mode(sd_un->mode);
+    return true;
 }
 
 /*
@@ -249,14 +263,20 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_compress=", sizeof("iolog_compress=") - 1) == 0) {
-		if (!iolog_set_compress(*cur + sizeof("iolog_compress=") - 1)) {
+		int val = sudo_strtobool(*cur + sizeof("iolog_compress=") - 1);
+		if (val != -1) {
+		    iolog_set_compress(val);
+		} else {
 		    sudo_debug_printf(SUDO_DEBUG_WARN,
 			"%s: unable to parse %s", __func__, *cur);
 		}
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_flush=", sizeof("iolog_flush=") - 1) == 0) {
-		if (!iolog_set_flush(*cur + sizeof("iolog_flush=") - 1)) {
+		int val = sudo_strtobool(*cur + sizeof("iolog_flush=") - 1);
+		if (val != -1) {
+		    iolog_set_flush(val);
+		} else {
 		    sudo_debug_printf(SUDO_DEBUG_WARN,
 			"%s: unable to parse %s", __func__, *cur);
 		}
@@ -299,7 +319,9 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    break;
 	case 'm':
 	    if (strncmp(*cur, "maxseq=", sizeof("maxseq=") - 1) == 0) {
-		iolog_set_maxseq(*cur + sizeof("maxseq=") - 1);
+		union sudo_defs_val sd_un;
+		sd_un.str = *cur + sizeof("maxseq=") - 1;
+		cb_maxseq(&sd_un);
 		continue;
 	    }
 	    break;

@@ -296,31 +296,23 @@ iolog_set_defaults(void)
 /*
  * Set max sequence number (aka session ID)
  */
-bool
-iolog_set_maxseq(const char *maxval)
+void
+iolog_set_maxseq(unsigned int newval)
 {
-    const char *errstr;
-    unsigned int value;
     debug_decl(iolog_set_maxseq, SUDO_DEBUG_UTIL)
 
-    value = sudo_strtonum(maxval, 0, SESSID_MAX, &errstr);
-    if (errstr != NULL) {
-	if (errno != ERANGE) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"bad maxseq: %s: %s", maxval, errstr);
-	    debug_return_bool(false);
-	}
-	/* Out of range, clamp to SESSID_MAX as documented. */
-	value = SESSID_MAX;
-    }
-    sessid_max = value;
-    debug_return_bool(true);
+    /* Clamp to SESSID_MAX as documented. */
+    if (newval > SESSID_MAX)
+	newval = SESSID_MAX;
+    sessid_max = newval;
+
+    debug_return;
 }
 
 /*
  * Set iolog_uid (and iolog_gid if iolog_group not specified).
  */
-bool
+void
 iolog_set_user(const struct passwd *pw)
 {
     debug_decl(iolog_set_user, SUDO_DEBUG_UTIL)
@@ -336,13 +328,13 @@ iolog_set_user(const struct passwd *pw)
 	    iolog_gid = ROOT_GID;
     }
 
-    debug_return_bool(true);
+    debug_return;
 }
 
 /*
  * Set iolog_gid.
  */
-bool
+void
 iolog_set_group(const struct group *gr)
 {
     debug_decl(iolog_set_group, SUDO_DEBUG_UTIL)
@@ -356,13 +348,13 @@ iolog_set_group(const struct group *gr)
 	iolog_gid_set = false;
     }
 
-    debug_return_bool(true);
+    debug_return;
 }
 
 /*
  * Set iolog_filemode and iolog_dirmode.
  */
-bool
+void
 iolog_set_mode(mode_t mode)
 {
     debug_decl(iolog_set_mode, SUDO_DEBUG_UTIL)
@@ -380,39 +372,29 @@ iolog_set_mode(mode_t mode)
     if (iolog_dirmode & (S_IROTH|S_IWOTH))
 	iolog_dirmode |= S_IXOTH;
 
-    debug_return_bool(true);
+    debug_return;
 }
 
 /*
  * Set iolog_compress
  */
-bool
-iolog_set_compress(const char *str)
+void
+iolog_set_compress(bool newval)
 {
-    int result;
     debug_decl(iolog_set_compress, SUDO_DEBUG_UTIL)
-
-    if ((result = sudo_strtobool(str)) == -1)
-	debug_return_bool(false);
-
-    iolog_compress = result;
-    debug_return_bool(true);
+    iolog_compress = newval;
+    debug_return;
 }
 
 /*
  * Set iolog_flush
  */
-bool
-iolog_set_flush(const char *str)
+void
+iolog_set_flush(bool newval)
 {
-    int result;
     debug_decl(iolog_set_flush, SUDO_DEBUG_UTIL)
-
-    if ((result = sudo_strtobool(str)) == -1)
-	debug_return_bool(false);
-
-    iolog_flush = result;
-    debug_return_bool(true);
+    iolog_flush = newval;
+    debug_return;
 }
 
 /*

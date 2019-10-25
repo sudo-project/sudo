@@ -123,12 +123,6 @@ bool iolog_mkdtemp(char *path);
 bool iolog_nextid(char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
 bool iolog_rename(const char *from, const char *to);
-bool iolog_set_compress(const char *str);
-bool iolog_set_flush(const char *str);
-bool iolog_set_group(const struct group *gr);
-bool iolog_set_maxseq(const char *maxval);
-bool iolog_set_mode(mode_t mode);
-bool iolog_set_user(const struct passwd *pw);
 bool iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info, char * const argv[]);
 char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
 const char *iolog_fd_to_name(int iofd);
@@ -138,6 +132,12 @@ size_t mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize);
 ssize_t iolog_read(struct iolog_file *iol, void *buf, size_t nbytes, const char **errstr);
 ssize_t iolog_write(struct iolog_file *iol, const void *buf, size_t len, const char **errstr);
 void iolog_rewind(struct iolog_file *iol);
+void iolog_set_compress(bool);
 void iolog_set_defaults(void);
+void iolog_set_flush(bool);
+void iolog_set_group(const struct group *gr);
+void iolog_set_maxseq(unsigned int maxval);
+void iolog_set_mode(mode_t mode);
+void iolog_set_user(const struct passwd *pw);
 
 #endif /* SUDO_IOLOG_H */
