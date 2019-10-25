@@ -2893,7 +2893,6 @@ as_fn_append ac_func_list " killpg"
 as_fn_append ac_func_list " nl_langinfo"
 as_fn_append ac_func_list " pread"
 as_fn_append ac_func_list " pwrite"
-as_fn_append ac_func_list " openat"
 as_fn_append ac_func_list " faccessat"
 as_fn_append ac_func_list " wordexp"
 as_fn_append ac_func_list " getauxval"
@@ -19227,8 +19226,6 @@ done
 
 
 
-
-
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -20497,6 +20494,58 @@ esac
 
 
 fi
+
+
+fi
+done
+
+for ac_func in openat
+do :
+  ac_fn_c_check_func "$LINENO" "openat" "ac_cv_func_openat"
+if test "x$ac_cv_func_openat" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENAT 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" openat.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS openat.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_openat; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+for ac_func in unlinkat
+do :
+  ac_fn_c_check_func "$LINENO" "unlinkat" "ac_cv_func_unlinkat"
+if test "x$ac_cv_func_unlinkat" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UNLINKAT 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" unlinkat.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS unlinkat.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_unlinkat; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
 
 fi

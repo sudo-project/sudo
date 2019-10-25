@@ -275,37 +275,6 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
     debug_return_int(tfd);
 }
 
-#ifndef HAVE_OPENAT
-static int
-sudo_openat(int dfd, const char *path, int flags, mode_t mode)
-{
-    int fd, odfd;
-    debug_decl(sudo_openat, SUDO_DEBUG_EDIT)
-
-    if (dfd == AT_FDCWD)
-	debug_return_int(open(path, flags, mode));
-
-    /* Save cwd */
-    if ((odfd = open(".", O_RDONLY)) == -1)
-	debug_return_int(-1);
-
-    if (fchdir(dfd) == -1) {
-	close(odfd);
-	debug_return_int(-1);
-    }
-
-    fd = open(path, flags, mode);
-
-    /* Restore cwd */
-    if (fchdir(odfd) == -1)
-	sudo_fatal(U_("unable to restore current working directory"));
-    close(odfd);
-
-    debug_return_int(fd);
-}
-#define openat sudo_openat
-#endif /* HAVE_OPENAT */
-
 #ifdef O_NOFOLLOW
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)

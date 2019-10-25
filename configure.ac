@@ -2509,7 +2509,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite openat faccessat wordexp getauxval])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite faccessat wordexp getauxval])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -2729,6 +2729,14 @@ AC_CHECK_FUNCS(nanosleep, [], [
 	AC_LIBOBJ(nanosleep)
 	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
     ])
+])
+AC_CHECK_FUNCS([openat], [], [
+    AC_LIBOBJ(openat)
+    SUDO_APPEND_COMPAT_EXP(sudo_openat)
+])
+AC_CHECK_FUNCS([unlinkat], [], [
+    AC_LIBOBJ(unlinkat)
+    SUDO_APPEND_COMPAT_EXP(sudo_unlinkat)
 ])
 AC_CHECK_FUNCS([pipe2], [], [
     AC_LIBOBJ(pipe2)
