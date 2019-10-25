@@ -53,7 +53,7 @@ static struct parse_delay_test {
 };
 
 /*
- * Test parse_delay()
+ * Test iolog_parse_delay()
  */
 void
 test_parse_delay(int *ntests, int *nerrors)
@@ -63,7 +63,7 @@ test_parse_delay(int *ntests, int *nerrors)
     for (i = 0; i < nitems(parse_delay_tests); i++) {
 	struct timespec delay;
 	struct parse_delay_test *test = &parse_delay_tests[i];
-	char *cp = parse_delay(test->input, &delay, ".");
+	char *cp = iolog_parse_delay(test->input, &delay, ".");
 	if (cp == NULL) {
 	    sudo_warnx("%s:%u failed to parse delay: %s", __func__,
 		i, test->input);
@@ -110,7 +110,7 @@ static struct adjust_delay_test {
 };
 
 /*
- * Test adjust_delay()
+ * Test iolog_adjust_delay()
  */
 void
 test_adjust_delay(int *ntests, int *nerrors)
@@ -120,8 +120,9 @@ test_adjust_delay(int *ntests, int *nerrors)
     for (i = 0; i < nitems(adjust_delay_tests); i++) {
 	struct adjust_delay_test *test = &adjust_delay_tests[i];
 
-	adjust_delay(&test->in_delay, sudo_timespecisset(&test->max_delay) ?
-	    &test->max_delay : NULL, test->scale_factor);
+	iolog_adjust_delay(&test->in_delay,
+	    sudo_timespecisset(&test->max_delay) ? &test->max_delay : NULL,
+	    test->scale_factor);
 	if (!sudo_timespeccmp(&test->in_delay, &test->out_delay, ==)) {
 	    sudo_warnx("%s:%u want {%lld, %ld}, got {%lld, %ld}", __func__, i,
 		(long long)test->out_delay.tv_sec, test->out_delay.tv_nsec,

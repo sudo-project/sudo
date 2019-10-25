@@ -670,7 +670,7 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
     /* TODO: use iolog_seekto with a callback? */
     for (;;) {
 	/* Read next record from timing file. */
-	if (read_timing_record(&closure->iolog_files[IOFD_TIMING], &timing) != 0)
+	if (iolog_read_timing_record(&closure->iolog_files[IOFD_TIMING], &timing) != 0)
 	    goto done;
 	sudo_timespecadd(&timing.delay, &closure->elapsed_time,
 	    &closure->elapsed_time);

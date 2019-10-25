@@ -366,7 +366,7 @@ main(int argc, char *argv[])
     fd = openat(iolog_dir_fd, "log", O_RDONLY, 0);
     if (fd == -1 || (fp = fdopen(fd, "r")) == NULL)
 	sudo_fatal(U_("unable to open %s/%s"), iolog_dir, "log");
-    if ((li = parse_logfile(fp, iolog_dir)) == NULL)
+    if ((li = iolog_parse_loginfo(fp, iolog_dir)) == NULL)
 	goto done;
     fclose(fp);
     printf(_("Replaying sudo session: %s"), li->cmd);
@@ -379,7 +379,7 @@ main(int argc, char *argv[])
     putchar('\n');
 
     /* Done with parsed log file. */
-    free_iolog_info(li);
+    iolog_free_loginfo(li);
     li = NULL;
 
     /* Replay session corresponding to iolog_files[]. */
@@ -735,7 +735,7 @@ get_timing_record(struct replay_closure *closure)
     int ret;
     debug_decl(get_timing_record, SUDO_DEBUG_UTIL)
 
-    if ((ret = read_timing_record(&iolog_files[IOFD_TIMING], timing)) != 0)
+    if ((ret = iolog_read_timing_record(&iolog_files[IOFD_TIMING], timing)) != 0)
 	debug_return_int(ret);
 
     /* Record number bytes to read. */
@@ -748,7 +748,7 @@ get_timing_record(struct replay_closure *closure)
     }
 
     /* Adjust delay using speed factor and max_delay. */
-    adjust_delay(&timing->delay, closure->max_delay, speed_factor);
+    iolog_adjust_delay(&timing->delay, closure->max_delay, speed_factor);
 
     /* Schedule the delay event. */
     if (sudo_ev_add(closure->evbase, closure->delay_ev, &timing->delay, false) == -1)
@@ -1319,7 +1319,7 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 	sudo_warn("%s", logfile);
 	goto done;
     }
-    if ((li = parse_logfile(fp, logfile)) == NULL)
+    if ((li = iolog_parse_loginfo(fp, logfile)) == NULL)
 	goto done;
 
     /* Match on search expression if there is one. */
@@ -1356,7 +1356,7 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 done:
     if (fp != NULL)
 	fclose(fp);
-    free_iolog_info(li);
+    iolog_free_loginfo(li);
     debug_return_int(ret);
 }
 

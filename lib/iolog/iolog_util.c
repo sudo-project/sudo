@@ -61,16 +61,16 @@
 static int timing_event_adj;
 
 struct iolog_info *
-parse_logfile(FILE *fp, const char *logfile)
+iolog_parse_loginfo(FILE *fp, const char *logfile)
 {
     char *buf = NULL, *cp, *ep;
     const char *errstr;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     struct iolog_info *li = NULL;
-    debug_decl(parse_logfile, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_parse_loginfo, SUDO_DEBUG_UTIL)
 
     /*
-     * ID file has three lines:
+     * Info file has three lines:
      *  1) a log info line
      *  2) cwd
      *  3) command with args
@@ -172,16 +172,16 @@ parse_logfile(FILE *fp, const char *logfile)
 
 bad:
     free(buf);
-    free_iolog_info(li);
+    iolog_free_loginfo(li);
     debug_return_ptr(NULL);
 }
 
 void
-adjust_delay(struct timespec *delay, struct timespec *max_delay,
+iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay,
      double scale_factor)
 {
     double seconds;
-    debug_decl(adjust_delay, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_adjust_delay, SUDO_DEBUG_UTIL)
 
     if (scale_factor != 1.0) {
 	/* Order is important: we don't want to double the remainder. */
@@ -212,13 +212,14 @@ adjust_delay(struct timespec *delay, struct timespec *max_delay,
  * in the C locale this may not match the current locale.
  */
 char *
-parse_delay(const char *cp, struct timespec *delay, const char *decimal_point)
+iolog_parse_delay(const char *cp, struct timespec *delay,
+    const char *decimal_point)
 {
     char numbuf[(((sizeof(long long) * 8) + 2) / 3) + 2];
     const char *errstr, *ep;
     long long llval;
     size_t len;
-    debug_decl(parse_delay, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_parse_delay, SUDO_DEBUG_UTIL)
 
     /* Parse seconds (whole number portion). */
     for (ep = cp; isdigit((unsigned char)*ep); ep++)
@@ -295,11 +296,11 @@ parse_delay(const char *cp, struct timespec *delay, const char *decimal_point)
  * Returns true on success and false on failure.
  */
 bool
-parse_timing(const char *line, struct timing_closure *timing)
+iolog_parse_timing(const char *line, struct timing_closure *timing)
 {
     unsigned long ulval;
     char *cp, *ep;
-    debug_decl(parse_timing, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_parse_timing, SUDO_DEBUG_UTIL)
 
     /* Clear iolog descriptor. */
     timing->iol = NULL;
@@ -319,7 +320,7 @@ parse_timing(const char *line, struct timing_closure *timing)
 	continue;
 
     /* Parse delay, returns the next field or NULL on error. */
-    if ((cp = parse_delay(cp, &timing->delay, timing->decimal)) == NULL)
+    if ((cp = iolog_parse_delay(cp, &timing->delay, timing->decimal)) == NULL)
 	goto bad;
 
     switch (timing->event) {
@@ -367,11 +368,11 @@ bad:
  * Return 0 on success, 1 on EOF and -1 on error.
  */
 int
-read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
+iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 {
     char line[LINE_MAX];
     const char *errstr;
-    debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
     if (iolog_gets(iol, line, sizeof(line), &errstr) == NULL) {
@@ -384,7 +385,7 @@ read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 
     /* Parse timing file record. */
     line[strcspn(line, "\n")] = '\0';
-    if (!parse_timing(line, timing)) {
+    if (!iolog_parse_timing(line, timing)) {
 	sudo_warnx(U_("invalid timing file line: %s"), line);
 	debug_return_int(-1);
     }
@@ -393,7 +394,7 @@ read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 }
 
 void
-free_iolog_info(struct iolog_info *li)
+iolog_free_loginfo(struct iolog_info *li)
 {
     if (li != NULL) {
 	free(li->cwd);

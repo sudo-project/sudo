@@ -106,13 +106,12 @@ struct iolog_path_escape {
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file, char **slashp, const struct iolog_path_escape *escapes, void *closure);
 
 /* iolog_util.c */
-/* XXX - prefix these */
-bool parse_timing(const char *line, struct timing_closure *timing);
-char *parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
-int read_timing_record(struct iolog_file *iol, struct timing_closure *timing);
-struct iolog_info *parse_logfile(FILE *fp, const char *iolog_dir);
-void adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
-void free_iolog_info(struct iolog_info *li);
+bool iolog_parse_timing(const char *line, struct timing_closure *timing);
+char *iolog_parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
+int iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing);
+struct iolog_info *iolog_parse_loginfo(FILE *fp, const char *iolog_dir);
+void iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
+void iolog_free_loginfo(struct iolog_info *li);
 
 /* iolog_fileio.c */
 struct passwd;

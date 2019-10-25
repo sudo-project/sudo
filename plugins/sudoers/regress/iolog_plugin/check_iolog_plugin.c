@@ -95,7 +95,7 @@ validate_iolog_info(const char *logfile)
 	sudo_warn("%s", logfile);
 	return false;
     }
-    info = parse_logfile(fp, logfile);
+    info = iolog_parse_loginfo(fp, logfile);
     fclose(fp);
     if (info == NULL)
 	return false;
@@ -146,7 +146,7 @@ validate_iolog_info(const char *logfile)
 	return false;
     }
 
-    free_iolog_info(info);
+    iolog_free_loginfo(info);
 
     return true;
 }
@@ -162,7 +162,7 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 	return false;
     }
     buf[strcspn(buf, "\n")] = '\0';
-    if (!parse_timing(buf, &timing)) {
+    if (!iolog_parse_timing(buf, &timing)) {
 	sudo_warnx("invalid timing file line: %s", buf);
 	return false;
     }

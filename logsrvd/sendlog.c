@@ -622,7 +622,7 @@ fmt_next_iolog(struct client_closure *closure)
 
     /* TODO: fill write buffer with multiple messages */
 again:
-    switch (read_timing_record(&iolog_files[IOFD_TIMING], timing)) {
+    switch (iolog_read_timing_record(&iolog_files[IOFD_TIMING], timing)) {
     case 0:
 	/* OK */
 	break;
@@ -1045,7 +1045,7 @@ iolog_seekto(int iolog_dir_fd, const char *iolog_path,
 
     /* Parse timing file until we reach the target point. */
     for (;;) {
-	if (read_timing_record(&iolog_files[IOFD_TIMING], &timing) != 0)
+	if (iolog_read_timing_record(&iolog_files[IOFD_TIMING], &timing) != 0)
 	    goto bad;
 	sudo_timespecadd(&timing.delay, elapsed_time, elapsed_time);
 	if (timing.event < IOFD_TIMING) {
@@ -1223,7 +1223,7 @@ main(int argc, char *argv[])
 	sudo_warn("%s/log", iolog_dir);
 	goto bad;
     }
-    if ((log_info = parse_logfile(fp, iolog_dir)) == NULL)
+    if ((log_info = iolog_parse_loginfo(fp, iolog_dir)) == NULL)
 	goto bad;
 
     /* Open the I/O log files and seek to restart point if there is one. */
