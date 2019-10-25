@@ -21,10 +21,7 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
-#include "buffer.h"
-
-/* XXX: share with server */
-#define DEFAULT_PORT_STR	"30344"
+#include "logsrv_util.h"
 
 enum client_state {
     ERROR,

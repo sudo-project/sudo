@@ -927,7 +927,7 @@ iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info,
 const char *
 iolog_fd_to_name(int iofd)
 {
-    const char *ret = NULL;
+    const char *ret;
     debug_decl(iolog_fd_to_name, SUDO_DEBUG_UTIL)
 
     switch (iofd) {
@@ -950,6 +950,7 @@ iolog_fd_to_name(int iofd)
 	ret = "timing";
 	break;
     default:
+	ret = "unknown";
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: unexpected iofd %d",
 	    __func__, iofd);
 	break;

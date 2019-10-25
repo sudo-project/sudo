@@ -14,8 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef SUDO_BUFFER_H
-#define SUDO_BUFFER_H
+#ifndef SUDO_LOGSRV_UTIL_H
+#define SUDO_LOGSRV_UTIL_H
+
+/* Default port to listen on */
+#define DEFAULT_PORT_STR	"30344"
 
 /* Maximum message size (2Mb) */
 #define MESSAGE_SIZE_MAX	(2 * 1024 * 1024)
@@ -27,8 +30,12 @@ struct connection_buffer {
     unsigned int off;
 };
 
-/* buffer.c */
+/* logsrv_util.c */
+struct iolog_file;
 bool expand_buf(struct connection_buffer *buf, unsigned int needed);
+bool iolog_open_all(int dfd, const char *iolog_dir, struct iolog_file *iolog_files, const char *mode);
+bool iolog_seekto(int iolog_dir_fd, const char *iolog_path, struct iolog_file *iolog_files, struct timespec *elapsed_time, const struct timespec *target);
 unsigned int bufsize_roundup(unsigned int len);
 
-#endif /* SUDO_BUFFER_H */
+
+#endif /* SUDO_LOGSRV_UTIL_H */

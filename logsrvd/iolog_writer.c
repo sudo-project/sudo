@@ -662,6 +662,7 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
     debug_decl(iolog_rewrite, SUDO_DEBUG_UTIL)
 
     /* Parse timing file until we reach the target point. */
+    /* TODO: use iolog_seekto with a callback? */
     for (;;) {
 	/* Read next record from timing file. */
 	if (read_timing_record(&closure->iolog_files[IOFD_TIMING], &timing) != 0)
@@ -803,9 +804,6 @@ bool
 iolog_restart(RestartMessage *msg, struct connection_closure *closure)
 {
     struct timespec target;
-    struct timing_closure timing;
-    bool compressed = false;
-    off_t pos;
     int iofd;
     debug_decl(iolog_restart, SUDO_DEBUG_UTIL)
 
@@ -828,68 +826,21 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     }
 
     /* Open existing I/O log files. */
-    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
-	closure->iolog_files[iofd].enabled = true;
-	if (!iolog_open(&closure->iolog_files[iofd], closure->iolog_dir_fd,
-		iofd, "r+")) {
-	    if (errno != ENOENT) {
-		sudo_debug_printf(
-		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "unable to open %s/%s", closure->details.iolog_path,
-		    iolog_fd_to_name(iofd));
-		goto bad;
-	    }
-	}
-	if (closure->iolog_files[iofd].compressed)
-	    compressed = true;
-    }
-    if (!closure->iolog_files[IOFD_TIMING].enabled) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "missing timing file in %s", closure->details.iolog_path);
+    if (!iolog_open_all(closure->iolog_dir_fd, closure->details.iolog_path,
+	    closure->iolog_files, "r+"))
 	goto bad;
-    }
-    if (compressed) {
-	/* Compressed logs don't support random access, need to rewrite them. */
-	debug_return_bool(iolog_rewrite(&target, closure));
+
+    /* Compressed logs don't support random access, so rewrite them. */
+    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+	if (closure->iolog_files[iofd].compressed)
+	    debug_return_bool(iolog_rewrite(&target, closure));
     }
 
     /* Parse timing file until we reach the target point. */
-    /* XXX - split up */
-    for (;;) {
-	if (read_timing_record(&closure->iolog_files[IOFD_TIMING], &timing) != 0)
-	    goto bad;
-	sudo_timespecadd(&timing.delay, &closure->elapsed_time,
-	    &closure->elapsed_time);
-	if (timing.event < IOFD_TIMING) {
-	    if (!closure->iolog_files[timing.event].enabled) {
-		/* Missing log file. */
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "iofd %d referenced but not open", timing.event);
-		goto bad;
-	    }
-	    pos = iolog_seek(&closure->iolog_files[timing.event],
-		timing.u.nbytes, SEEK_CUR);
-	    if (pos == -1) {
-		sudo_debug_printf(
-		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "seek(%d, %lld, SEEK_CUR", timing.event,
-		    (long long)timing.u.nbytes);
-		goto bad;
-	    }
-	}
-	if (sudo_timespeccmp(&closure->elapsed_time, &target, >=)) {
-	    if (sudo_timespeccmp(&closure->elapsed_time, &target, ==))
-		break;
+    if (!iolog_seekto(closure->iolog_dir_fd, closure->details.iolog_path,
+	    closure->iolog_files, &closure->elapsed_time, &target))
+	goto bad;
 
-	    /* Mismatch between resume point and stored log. */
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"resume point mismatch, target [%lld, %ld], have [%lld, %ld]",
-		(long long)target.tv_sec, target.tv_nsec,
-		(long long)closure->elapsed_time.tv_sec,
-		closure->elapsed_time.tv_nsec);
-	    goto bad;
-	}
-    }
     /* Must seek or flush before switching from read -> write. */
     if (iolog_seek(&closure->iolog_files[IOFD_TIMING], 0, SEEK_CUR) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,

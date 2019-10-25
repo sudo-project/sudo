@@ -1010,6 +1010,7 @@ bad:
     debug_return_bool(false);
 }
 
+#if 0
 /*
  * Open the I/O log files and seek to the specified point in time.
  * TODO: share with logsrvd restart code
@@ -1079,34 +1080,7 @@ iolog_seekto(int iolog_dir_fd, const char *iolog_path,
 bad:
     debug_return_bool(false);
 }
-
-/*
- * Open any I/O log files that are present.
- * The timing file must always exist.
- */
-static bool
-iolog_open_all(int dfd, const char *iolog_dir)
-{
-    int iofd;
-    debug_decl(iolog_open_all, SUDO_DEBUG_UTIL)
-
-    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
-	iolog_files[iofd].enabled = true;
-        if (!iolog_open(&iolog_files[iofd], dfd, iofd, "r")) {
-	    if (errno != ENOENT) {
-		sudo_warn(U_("unable to open %s/%s"), iolog_dir,
-		    iolog_fd_to_name(iofd));
-		debug_return_bool(false);
-	    }
-	}
-    }
-    if (!iolog_files[IOFD_TIMING].enabled) {
-	sudo_warn(U_("unable to open %s/%s"), iolog_dir,
-	    iolog_fd_to_name(IOFD_TIMING));
-	debug_return_bool(false);
-    }
-    debug_return_bool(true);
-}
+#endif
 
 /*
  * Parse a timespec on the command line of the form
@@ -1170,6 +1144,7 @@ main(int argc, char *argv[])
     struct timespec restart = { 0, 0 };
     struct timespec elapsed = { 0, 0 };
     const char *iolog_id = NULL;
+    const char *open_mode = "r";
     int ch, sock, iolog_dir_fd, fd;
     FILE *fp;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
@@ -1211,6 +1186,7 @@ main(int argc, char *argv[])
 	case 'r':
 	    if (!parse_timespec(&restart, optarg))
 		goto bad;
+	    open_mode = "r+";
 	    break;
 	case 1:
 	    help();
@@ -1250,13 +1226,11 @@ main(int argc, char *argv[])
 	goto bad;
 
     /* Open the I/O log files and seek to restart point if there is one. */
+    if (!iolog_open_all(iolog_dir_fd, iolog_dir, iolog_files, open_mode))
+	goto bad;
     if (sudo_timespecisset(&restart)) {
-	if (!iolog_seekto(iolog_dir_fd, iolog_dir, &elapsed, &restart)) {
-	    sudo_warnx(U_("unable to find restart point in %s"), iolog_dir);
-	    goto bad;
-	}
-    } else {
-	if (!iolog_open_all(iolog_dir_fd, iolog_dir))
+	if (!iolog_seekto(iolog_dir_fd, iolog_dir, iolog_files, &elapsed,
+		&restart))
 	    goto bad;
     }
 

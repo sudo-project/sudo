@@ -21,11 +21,9 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
-#include "buffer.h"
+#include "logsrv_util.h"
 
 /* Default listen address (port 30344 on all interfaces). */
-/* XXX: share with client */
-#define DEFAULT_PORT_STR	"30344"
 #define DEFAULT_LISTEN_ADDR	"*:" DEFAULT_PORT_STR
 
 /* How often to send an ACK to the client (commit point) in seconds */
