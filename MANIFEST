@@ -236,6 +236,8 @@ logsrvd/log_server.proto
 logsrvd/iolog_writer.c
 logsrvd/logsrvd.c
 logsrvd/logsrvd.h
+logsrvd/protobuf-c/protobuf-c.c
+logsrvd/protobuf-c/protobuf-c.h
 logsrvd/sendlog.c
 logsrvd/sendlog.h
 ltmain.sh
