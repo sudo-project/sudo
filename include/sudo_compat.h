@@ -212,9 +212,12 @@
 #  define UTIME_NOW	-2L
 # endif
 #endif
-#if !defined(HAVE_OPENAT) || (!defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT))
+#if !defined(HAVE_OPENAT) || (!defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT)) || !defined(HAVE_FCHMODAT) || !defined(HAVE_FSTATAT) || !defined(HAVE_UNLINKAT)
 # ifndef AT_FDCWD
-#  define AT_FDCWD	-100
+#  define AT_FDCWD		-100
+# endif
+# ifndef AT_SYMLINK_NOFOLLOW
+#  define AT_SYMLINK_NOFOLLOW	0x02
 # endif
 #endif
 
@@ -385,6 +388,7 @@ int getdomainname(char *, size_t);
  */
 
 struct passwd;
+struct stat;
 struct timespec;
 
 #ifndef HAVE_CLOSEFROM
@@ -412,6 +416,16 @@ __dso_public int sudo_utimensat(int fd, const char *file, const struct timespec 
 # undef utimensat
 # define utimensat(_a, _b, _c, _d) sudo_utimensat((_a), (_b), (_c), (_d))
 #endif /* HAVE_UTIMENSAT */
+#ifndef HAVE_FCHMODAT
+__dso_public int sudo_fchmodat(int dfd, const char *path, mode_t mode, int flag);
+# undef fchmodat
+# define fchmodat(_a, _b, _c, _d) sudo_fchmodat((_a), (_b), (_c), (_d))
+#endif /* HAVE_FCHMODAT */
+#ifndef HAVE_FSTATAT
+__dso_public int sudo_fstatat(int dfd, const char *path, struct stat *sb, int flag);
+# undef fstatat
+# define fstatat(_a, _b, _c, _d) sudo_fstatat((_a), (_b), (_c), (_d))
+#endif /* HAVE_FSTATAT */
 #ifndef HAVE_FUTIMENS
 __dso_public int sudo_futimens(int fd, const struct timespec *times);
 # undef futimens

@@ -20511,6 +20511,58 @@ esac
 fi
 done
 
+for ac_func in fchmodat
+do :
+  ac_fn_c_check_func "$LINENO" "fchmodat" "ac_cv_func_fchmodat"
+if test "x$ac_cv_func_fchmodat" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FCHMODAT 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" fchmodat.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS fchmodat.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_fchmodat; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+for ac_func in fstatat
+do :
+  ac_fn_c_check_func "$LINENO" "fstatat" "ac_cv_func_fstatat"
+if test "x$ac_cv_func_fstatat" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FSTATAT 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" fstatat.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS fstatat.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_fstatat; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
 for ac_func in pipe2
 do :
   ac_fn_c_check_func "$LINENO" "pipe2" "ac_cv_func_pipe2"

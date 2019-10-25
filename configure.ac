@@ -2732,6 +2732,14 @@ AC_CHECK_FUNCS([unlinkat], [], [
     AC_LIBOBJ(unlinkat)
     SUDO_APPEND_COMPAT_EXP(sudo_unlinkat)
 ])
+AC_CHECK_FUNCS([fchmodat], [], [
+    AC_LIBOBJ(fchmodat)
+    SUDO_APPEND_COMPAT_EXP(sudo_fchmodat)
+])
+AC_CHECK_FUNCS([fstatat], [], [
+    AC_LIBOBJ(fstatat)
+    SUDO_APPEND_COMPAT_EXP(sudo_fstatat)
+])
 AC_CHECK_FUNCS([pipe2], [], [
     AC_LIBOBJ(pipe2)
     SUDO_APPEND_COMPAT_EXP(sudo_pipe2)

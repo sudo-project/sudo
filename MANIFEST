@@ -111,7 +111,9 @@ lib/util/event.c
 lib/util/event_poll.c
 lib/util/event_select.c
 lib/util/fatal.c
+lib/util/fchmodat.c
 lib/util/fnmatch.c
+lib/util/fstatat.c
 lib/util/getaddrinfo.c
 lib/util/getcwd.c
 lib/util/getdelim.c
