@@ -114,6 +114,7 @@ lib/util/lbuf.c
 lib/util/locking.c
 lib/util/memrchr.c
 lib/util/memset_s.c
+lib/util/mkdir_parents.c
 lib/util/mksiglist.c
 lib/util/mksiglist.h
 lib/util/mksigname.c
@@ -349,7 +350,6 @@ plugins/sudoers/match_addr.c
 plugins/sudoers/match_command.c
 plugins/sudoers/match_digest.c
 plugins/sudoers/mkdefaults
-plugins/sudoers/mkdir_parents.c
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/parse_ldif.c

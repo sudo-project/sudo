@@ -421,9 +421,6 @@ extern const char *path_plugin_dir;
 char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
      char * const *whitelist, const char **env_editor, bool env_error);
 
-/* mkdir_parents.c */
-bool sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
-
 /* gc.c */
 enum sudoers_gc_types {
     GC_UNKNOWN,

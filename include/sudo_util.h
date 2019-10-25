@@ -213,6 +213,10 @@ __dso_public bool sudo_lock_file_v1(int fd, int action);
 __dso_public bool sudo_lock_region_v1(int fd, int action, off_t len);
 #define sudo_lock_region(_a, _b, _c) sudo_lock_region_v1((_a), (_b), (_c))
 
+/* mkdir_parents.c */
+__dso_public bool sudo_mkdir_parents_v1(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
+#define sudo_mkdir_parents(_a, _b, _c, _d, _e) sudo_mkdir_parents_v1((_a), (_b), (_c), (_d), (_e))
+
 /* parseln.c */
 __dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
 __dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp, int flags);

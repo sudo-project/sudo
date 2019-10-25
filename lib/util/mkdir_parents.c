@@ -27,6 +27,11 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -38,18 +43,24 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudoers.h"
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
+
+#include "sudo_compat.h"
+#include "sudo_fatal.h"
+#include "sudo_debug.h"
+#include "sudo_util.h"
 
 /*
  * Create any parent directories needed by path (but not path itself).
  * Note that path is modified but is restored before it returns.
  */
 bool
-sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
+sudo_mkdir_parents_v1(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
 {
     struct stat sb;
     char *slash = path;
-    debug_decl(sudo_mkdir_parents, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudo_mkdir_parents, SUDO_DEBUG_UTIL)
 
     /* cppcheck-suppress nullPointerRedundantCheck */
     while ((slash = strchr(slash + 1, '/')) != NULL) {
