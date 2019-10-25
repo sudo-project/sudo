@@ -310,23 +310,16 @@ iolog_set_maxseq(unsigned int newval)
 }
 
 /*
- * Set iolog_uid (and iolog_gid if iolog_group not specified).
+ * Set iolog_uid (and iolog_gid if gid not explicitly set).
  */
 void
-iolog_set_user(const struct passwd *pw)
+iolog_set_owner(uid_t uid, gid_t gid)
 {
-    debug_decl(iolog_set_user, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_set_owner, SUDO_DEBUG_UTIL)
 
-    if (pw != NULL) {
-	iolog_uid = pw->pw_uid;
-	if (!iolog_gid_set)
-	    iolog_gid = pw->pw_gid;
-    } else {
-	/* Reset to default. */
-	iolog_uid = ROOT_UID;
-	if (!iolog_gid_set)
-	    iolog_gid = ROOT_GID;
-    }
+    iolog_uid = uid;
+    if (!iolog_gid_set)
+	iolog_gid = gid;
 
     debug_return;
 }
@@ -335,18 +328,12 @@ iolog_set_user(const struct passwd *pw)
  * Set iolog_gid.
  */
 void
-iolog_set_group(const struct group *gr)
+iolog_set_gid(gid_t gid)
 {
-    debug_decl(iolog_set_group, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_set_gid, SUDO_DEBUG_UTIL)
 
-    if (gr != NULL) {
-	iolog_gid = gr->gr_gid;
-	iolog_gid_set = true;
-    } else {
-	/* Reset to default. */
-	iolog_gid = ROOT_GID;
-	iolog_gid_set = false;
-    }
+    iolog_gid = gid;
+    iolog_gid_set = true;
 
     debug_return;
 }

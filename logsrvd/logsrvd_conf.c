@@ -72,12 +72,13 @@ static struct logsrvd_config {
     struct logsrvd_config_iolog {
 	bool compress;
 	bool flush;
+	bool gid_set;
+	uid_t uid;
+	gid_t gid;
 	mode_t mode;
 	unsigned int maxseq;
 	char *iolog_dir;
 	char *iolog_file;
-	struct passwd user;
-	struct group group;
     } iolog;
     struct logsrvd_config_eventlog {
 	enum logsrvd_eventlog_type log_type;
@@ -237,8 +238,9 @@ cb_iolog_user(struct logsrvd_config *config, const char *user)
 	    "unknown user %s", user);
 	debug_return_bool(false);
     }
-    config->iolog.user.pw_uid = pw->pw_uid;
-    config->iolog.user.pw_gid = pw->pw_gid;
+    config->iolog.uid = pw->pw_uid;
+    if (!config->iolog.gid_set)
+	config->iolog.gid = pw->pw_gid;
 
     debug_return_bool(true);
 }
@@ -254,7 +256,8 @@ cb_iolog_group(struct logsrvd_config *config, const char *group)
 	    "unknown group %s", group);
 	debug_return_bool(false);
     }
-    config->iolog.group.gr_gid = gr->gr_gid;
+    config->iolog.gid = gr->gr_gid;
+    config->iolog.gid_set = true;
 
     debug_return_bool(true);
 }
@@ -707,9 +710,9 @@ logsrvd_conf_alloc(void)
 	goto bad;
     if (!cb_iolog_file(config, "%{seq}"))
 	goto bad;
-    config->iolog.user.pw_uid = ROOT_UID;
-    config->iolog.user.pw_gid = ROOT_GID;
-    config->iolog.group.gr_gid = ROOT_GID;
+    config->iolog.uid = ROOT_UID;
+    config->iolog.gid = ROOT_GID;
+    config->iolog.gid_set = false;
 
     /* Event log defaults */
     config->eventlog.log_type = EVLOG_SYSLOG;
@@ -761,8 +764,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     iolog_set_defaults();
     iolog_set_compress(config->iolog.compress);
     iolog_set_flush(config->iolog.flush);
-    iolog_set_user(&config->iolog.user);
-    iolog_set_group(&config->iolog.group);
+    iolog_set_owner(config->iolog.uid, config->iolog.gid);
     iolog_set_mode(config->iolog.mode);
     iolog_set_maxseq(config->iolog.maxseq);
 

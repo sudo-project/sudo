@@ -108,19 +108,20 @@ bool
 cb_iolog_user(const union sudo_defs_val *sd_un)
 {
     const char *name = sd_un->str;
-    struct passwd *pw = NULL;
+    struct passwd *pw;
     debug_decl(cb_iolog_user, SUDOERS_DEBUG_UTIL)
 
     /* NULL name means reset to default. */
-    if (name != NULL) {
+    if (name == NULL) {
+	iolog_set_owner(ROOT_UID, ROOT_GID);
+    } else {
 	if ((pw = sudo_getpwnam(name)) == NULL) {
 	    log_warningx(SLOG_SEND_MAIL, N_("unknown user: %s"), name);
 	    debug_return_bool(false);
 	}
-    }
-    iolog_set_user(pw);
-    if (pw != NULL)
+	iolog_set_owner(pw->pw_uid, pw->pw_gid);
 	sudo_pw_delref(pw);
+    }
 
     debug_return_bool(true);
 }
@@ -132,19 +133,20 @@ bool
 cb_iolog_group(const union sudo_defs_val *sd_un)
 {
     const char *name = sd_un->str;
-    struct group *gr = NULL;
+    struct group *gr;
     debug_decl(cb_iolog_group, SUDOERS_DEBUG_UTIL)
 
     /* NULL name means reset to default. */
-    if (name != NULL) {
+    if (name == NULL) {
+	iolog_set_gid(ROOT_GID);
+    } else {
 	if ((gr = sudo_getgrnam(name)) == NULL) {
 	    log_warningx(SLOG_SEND_MAIL, N_("unknown group: %s"), name);
 	    debug_return_bool(false);
 	}
-    }
-    iolog_set_group(gr);
-    if (gr != NULL)
+	iolog_set_gid(gr->gr_gid);
 	sudo_gr_delref(gr);
+    }
 
     debug_return_bool(true);
 }
@@ -299,7 +301,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unknown group %s",
 			__func__, *cur + sizeof("iolog_group=") - 1);
 		} else {
-		    iolog_set_group(gr);
+		    iolog_set_gid(gr->gr_gid);
 		    sudo_gr_delref(gr);
 		}
 		continue;
@@ -311,7 +313,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unknown user %s",
 			__func__, *cur + sizeof("iolog_user=") - 1);
 		} else {
-		    iolog_set_user(pw);
+		    iolog_set_owner(pw->pw_uid, pw->pw_gid);
 		    sudo_pw_delref(pw);
 		}
 		continue;

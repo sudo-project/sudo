@@ -134,9 +134,9 @@ void iolog_rewind(struct iolog_file *iol);
 void iolog_set_compress(bool);
 void iolog_set_defaults(void);
 void iolog_set_flush(bool);
-void iolog_set_group(const struct group *gr);
+void iolog_set_gid(gid_t gid);
 void iolog_set_maxseq(unsigned int maxval);
 void iolog_set_mode(mode_t mode);
-void iolog_set_user(const struct passwd *pw);
+void iolog_set_owner(uid_t uid, uid_t gid);
 
 #endif /* SUDO_IOLOG_H */

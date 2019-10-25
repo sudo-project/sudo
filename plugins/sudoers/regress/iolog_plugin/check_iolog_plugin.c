@@ -367,7 +367,7 @@ main(int argc, char *argv[], char *envp[])
     sudo_user.pw = pw_dup(tpw);
 
     /* Set iolog uid/gid to invoking user. */
-    iolog_set_user(sudo_user.pw);
+    iolog_set_owner(sudo_user.pw->pw_uid, sudo_user.pw->pw_gid);
 
     test_endpoints(&tests, &errors, iolog_dir, envp);
 
