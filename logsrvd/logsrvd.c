@@ -960,25 +960,25 @@ logsrvd_cleanup(void)
  * Fork and detatch from the terminal.
  */
 static void
-daemonize(void)
+daemonize(bool nofork)
 {
     int fd;
     debug_decl(daemonize, SUDO_DEBUG_UTIL)
 
-    switch (fork()) {
-    case -1:
-	sudo_fatal("fork");
-    case 0:
-	/* child */
-	break;
-    default:
-	/* parent */
-	_exit(0);
+    if (!nofork) {
+	switch (fork()) {
+	case -1:
+	    sudo_fatal("fork");
+	case 0:
+	    /* child, detach from terminal */
+	    if (setsid() == -1)
+	    sudo_fatal("setsid");
+	    break;
+	default:
+	    /* parent, exit */
+	    _exit(0);
+	}
     }
-
-    /* detach from terminal */
-    if (setsid() == -1)
-	sudo_fatal("setsid");
 
     if (chdir("/") == -1)
 	sudo_warn("chdir(\"/\")");
@@ -1095,8 +1095,7 @@ main(int argc, char *argv[])
     logsrvd_conf_read(conf_file);
 
     signal(SIGPIPE, SIG_IGN);
-    if (!nofork)
-	daemonize();
+    daemonize(nofork);
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);
