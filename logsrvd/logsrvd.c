@@ -856,7 +856,7 @@ register_listener(struct listen_address *addr, struct sudo_event_base *base)
 	if (ev == NULL)
 	    sudo_fatal(NULL);
 	if (sudo_ev_add(base, ev, NULL, false) == -1)
-	    sudo_fatal("unable to add listener event to queue");
+	    sudo_fatal(U_("unable to add event to queue"));
     }
 
     debug_return;
@@ -872,7 +872,7 @@ register_signal(int signo, struct sudo_event_base *base)
     if (ev == NULL)
 	sudo_fatal(NULL);
     if (sudo_ev_add(base, ev, NULL, false) == -1)
-	sudo_fatal("unable to add signal event to queue");
+	sudo_fatal(U_("unable to add event to queue"));
 
     debug_return;
 }
@@ -954,7 +954,7 @@ main(int argc, char *argv[])
         sudo_conf_debug_files(getprogname()));
 
     if (protobuf_c_version_number() < 1003000)
-	sudo_fatalx("Protobuf-C version 1.3 or higher required");
+	sudo_fatalx(U_("Protobuf-C version 1.3 or higher required"));
 
     /* XXX - getopt_long option handling */
     while ((ch = getopt(argc, argv, "f:nR:")) != -1) {

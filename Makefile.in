@@ -240,7 +240,7 @@ update-pot:
 		echo "Updating $$pot"; \
 		domain=`basename $$pot .pot`; \
 		case "$$domain" in \
-		    sudo) tmpfiles=; cfiles="src/*c lib/*/*c";; \
+		    sudo) tmpfiles=; cfiles="src/*c lib/util/*c";; \
 		    sudoers) \
 			echo "gettext \"syntax error\"" > confstr.sh; \
 			$(SED) -n 's/^.*--with-passprompt=\(.*\)$$/gettext \"\1\"/p' mkpkg | sort -u >> confstr.sh; \
@@ -249,7 +249,7 @@ update-pot:
 			    -e 's/^mailsub="/gettext "/p' configure.ac \
 			    >> confstr.sh; \
 			tmpfiles=confstr.sh; \
-			cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
+			cfiles="lib/iolog/*.c logsrvd/*.c plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
 		    *) echo unknown domain $$domain; continue;; \
 		esac; \
 		$(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles $$tmpfiles -o $$pot.tmp; \

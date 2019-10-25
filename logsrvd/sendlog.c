@@ -86,7 +86,7 @@ connect_server(const char *host, const char *port)
     hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo(host, port, &hints, &res0);
     if (error != 0) {
-	sudo_warnx("unable to resolve %s:%s: %s", host, port,
+	sudo_warnx(U_("unable to look up %s:%s: %s"), host, port,
 	    gai_strerror(error));
 	debug_return_int(-1);
     }
@@ -199,7 +199,7 @@ read_io_buf(struct client_closure *closure)
 	    closure->bufsize *= 2;
 	} while (timing->u.nbytes > closure->bufsize);
 	if ((closure->buf = malloc(closure->bufsize)) == NULL) {
-	    sudo_warn("malloc %zu", closure->bufsize);
+	    sudo_warn(NULL);
 	    timing->u.nbytes = 0;
 	    debug_return_bool(false);
 	}
@@ -229,7 +229,7 @@ fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
 
     len = client_message__get_packed_size(msg);
     if (len > UINT16_MAX) {
-    	sudo_warnx("client message too large: %zu\n", len);
+    	sudo_warnx(U_("client message too large: %zu\n"), len);
         goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
@@ -237,7 +237,8 @@ fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
     len += sizeof(msg_len);
 
     if (len > buf->size) {
-	sudo_warnx("client message too big for buffer, %zu > %u", len, buf->size);
+	sudo_warnx(U_("client message too large for buffer, %zu > %u"),
+	    len, buf->size);
 	goto done;
     }
 
@@ -620,7 +621,7 @@ fmt_next_iolog(struct client_closure *closure)
     debug_decl(fmt_next_iolog, SUDO_DEBUG_UTIL)
 
     if (buf->len != 0) {
-	sudo_warnx("%s: write buffer already in use", __func__);
+	sudo_warnx(U_("%s: write buffer already in use"), __func__);
 	debug_return_bool(false);
     }
 
@@ -672,7 +673,7 @@ again:
 	ret = fmt_suspend(closure, buf);
 	break;
     default:
-	sudo_warnx("unexpected I/O event %d", timing->event);
+	sudo_warnx(U_("unexpected I/O event %d"), timing->event);
 	break;
     }
 
@@ -704,7 +705,7 @@ client_message_completion(struct client_closure *closure)
 	closure->state = CLOSING;
 	break;
     default:
-	sudo_warnx("%s: unexpected state %d", __func__, closure->state);
+	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -721,7 +722,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
     debug_decl(handle_server_hello, SUDO_DEBUG_UTIL)
 
     if (closure->state != RECV_HELLO) {
-	sudo_warnx("%s: unexpected state %d", __func__, closure->state);
+	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
 	debug_return_bool(false);
     }
 
@@ -753,7 +754,7 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 
     /* Only valid after we have sent an IO buffer. */
     if (closure->state < SEND_IO) {
-	sudo_warnx("%s: unexpected state %d", __func__, closure->state);
+	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
 	debug_return_bool(false);
     }
 
@@ -789,7 +790,7 @@ handle_server_error(char *errmsg, struct client_closure *closure)
 {
     debug_decl(handle_server_error, SUDO_DEBUG_UTIL)
 
-    sudo_warnx("server error: %s", errmsg);
+    sudo_warnx(U_("error message received from server: %s"), errmsg);
     debug_return_bool(false);
 }
 
@@ -802,7 +803,7 @@ handle_server_abort(char *errmsg, struct client_closure *closure)
 {
     debug_decl(handle_server_abort, SUDO_DEBUG_UTIL)
 
-    sudo_warnx("server abort: %s", errmsg);
+    sudo_warnx(U_("abort message received from server: %s"), errmsg);
     debug_return_bool(false);
 }
 
@@ -821,7 +822,7 @@ handle_server_message(uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx("unable to unpack ServerMessage");
+	sudo_warnx(U_("unable to unpack ServerMessage"));
 	debug_return_bool(false);
     }
 
@@ -857,7 +858,7 @@ handle_server_message(uint8_t *buf, size_t len,
 	closure->state = ERROR;
 	break;
     default:
-	sudo_warnx("%s: unexpected type_case value %d",
+	sudo_warnx(U_("%s: unexpected type_case value %d"),
 	    __func__, msg->type_case);
 	break;
     }
@@ -890,7 +891,7 @@ server_msg_cb(int fd, int what, void *v)
 	sudo_warn("recv");
 	goto bad;
     case 0:
-	sudo_warnx("premature EOF");
+	sudo_warnx(U_("premature EOF"));
 	goto bad;
     default:
 	break;
@@ -1108,7 +1109,7 @@ main(int argc, char *argv[])
         sudo_conf_debug_files(getprogname()));
 
     if (protobuf_c_version_number() < 1003000)
-	sudo_fatalx("Protobuf-C version 1.3 or higher required");
+	sudo_fatalx("%s", U_("Protobuf-C version 1.3 or higher required"));
 
     while ((ch = getopt(argc, argv, "h:i:p:r:")) != -1) {
 	switch (ch) {
@@ -1133,7 +1134,7 @@ main(int argc, char *argv[])
     argv += optind;
 
     if (sudo_timespecisset(&restart) != (iolog_id != NULL)) {
-	sudo_warnx("must specify both restart point and iolog ID");
+	sudo_warnx(U_("both restart point and iolog ID must be specified"));
 	usage();
     }
 
@@ -1178,10 +1179,10 @@ main(int argc, char *argv[])
     sudo_ev_dispatch(evbase);
 
     if (closure.state != FINISHED) {
-	sudo_warnx("exited prematurely with state %d", closure.state);
-	sudo_warnx("elapsed time sent to server [%lld, %ld]",
+	sudo_warnx(U_("exited prematurely with state %d"), closure.state);
+	sudo_warnx(U_("elapsed time sent to server [%lld, %ld]"),
 	    (long long)closure.elapsed.tv_sec, closure.elapsed.tv_nsec);
-	sudo_warnx("commit point received from server [%lld, %ld]",
+	sudo_warnx(U_("commit point received from server [%lld, %ld]"),
 	    (long long)closure.committed.tv_sec, closure.committed.tv_nsec);
 	goto bad;
     }

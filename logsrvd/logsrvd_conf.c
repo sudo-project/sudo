@@ -308,7 +308,8 @@ logsrvd_conf_read(const char *path)
 	if (*line == '\0')
 	    continue;
 	if ((ep = strchr(line, '=')) == NULL) {
-	    sudo_warnx("%s:%d invalid setting %s", path, lineno, line);
+	    sudo_warnx(U_("%s:%d invalid configuration line: %s"),
+		path, lineno, line);
 	    debug_return_bool(false);
 	}
 
@@ -321,7 +322,8 @@ logsrvd_conf_read(const char *path)
 	for (ct = conf_table; ct->conf_str != NULL; ct++) {
 	    if (strcmp(line, ct->conf_str) == 0) {
 		if (!ct->setter(val)) {
-		    sudo_warnx("invalid value for %s: %s", ct->conf_str, val);
+		    sudo_warnx(U_("invalid value for %s: %s"),
+			ct->conf_str, val);
 		    debug_return_bool(false);
 		}
 		break;

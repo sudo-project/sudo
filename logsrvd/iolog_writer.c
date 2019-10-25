@@ -41,7 +41,6 @@
 #include "sudo_queue.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
-#include "sudo_fatal.h"
 #include "sudo_iolog.h"
 #include "logsrvd.h"
 
