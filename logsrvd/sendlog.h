@@ -39,7 +39,7 @@ enum client_state {
 
 struct client_closure {
     struct timespec *restart;
-    struct timespec elapsed;
+    struct timespec *elapsed;
     struct timespec committed;
     struct timing_closure timing;
     struct connection_buffer read_buf;

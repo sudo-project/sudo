@@ -169,18 +169,19 @@ client_closure_free(struct client_closure *closure)
 /*
  * Read the next record from the timing file.
  * Return 0 on success, 1 on EOF and -1 on error.
+ * TODO: share with logsrvd
  */
 int
-read_timing_record(struct timing_closure *timing)
+read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 {
     char line[LINE_MAX];
     const char *errstr;
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
-    if (iolog_gets(&iolog_files[IOFD_TIMING], line, sizeof(line), &errstr) == NULL) {
+    if (iolog_gets(iol, line, sizeof(line), &errstr) == NULL) {
 	/* EOF or error reading timing file, we are done. */
-	if (iolog_eof(&iolog_files[IOFD_TIMING]))
+	if (iolog_eof(iol))
 	    debug_return_int(1);
 	sudo_warnx(U_("error reading timing file: %s"), errstr);
 	debug_return_int(-1);
@@ -651,7 +652,7 @@ fmt_next_iolog(struct client_closure *closure)
 
     /* TODO: fill write buffer with multiple messages */
 again:
-    switch (read_timing_record(timing)) {
+    switch (read_timing_record(&iolog_files[IOFD_TIMING], timing)) {
     case 0:
 	/* OK */
 	break;
@@ -665,11 +666,11 @@ again:
     }
 
     /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(&timing->delay, &closure->elapsed, &closure->elapsed);
+    sudo_timespecadd(&timing->delay, closure->elapsed, closure->elapsed);
 
     /* If we have a restart point, ignore records until we hit it. */
     if (closure->restart != NULL) {
-	if (sudo_timespeccmp(closure->restart, &closure->elapsed, >=))
+	if (sudo_timespeccmp(closure->restart, closure->elapsed, >=))
 	    goto again;
 	closure->restart = NULL;	/* caught up */
     }
@@ -864,7 +865,7 @@ handle_server_message(uint8_t *buf, size_t len,
 	break;
     case SERVER_MESSAGE__TYPE_COMMIT_POINT:
 	ret = handle_commit_point(msg->commit_point, closure);
-	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
+	if (sudo_timespeccmp(closure->elapsed, &closure->committed, ==)) {
 	    sudo_ev_del(NULL, closure->read_ev);
 	    sudo_ev_loopexit(NULL);
 	    closure->state = FINISHED;
@@ -1000,7 +1001,7 @@ bad:
  */
 static bool
 client_closure_fill(struct client_closure *closure, int sock,
-    struct timespec *restart, const char *iolog_id,
+    struct timespec *elapsed, struct timespec *restart, const char *iolog_id,
     struct iolog_info *log_info)
 {
     debug_decl(client_closure_fill, SUDO_DEBUG_UTIL)
@@ -1010,6 +1011,7 @@ client_closure_fill(struct client_closure *closure, int sock,
     closure->state = RECV_HELLO;
     closure->log_info = log_info;
 
+    closure->elapsed = elapsed;
     closure->restart = restart;
     closure->iolog_id = iolog_id;
 
@@ -1036,6 +1038,76 @@ client_closure_fill(struct client_closure *closure, int sock,
     debug_return_bool(true);
 bad:
     client_closure_free(closure);
+    debug_return_bool(false);
+}
+
+/*
+ * Open the I/O log files and seek to the specified point in time.
+ * TODO: share with logsrvd restart code
+ */
+static bool
+iolog_seekto(int iolog_dir_fd, const char *iolog_path,
+    struct timespec *elapsed_time, const struct timespec *target)
+{
+    struct timing_closure timing;
+    off_t pos;
+    int iofd;
+    debug_decl(iolog_seekto, SUDO_DEBUG_UTIL)
+
+    /* Open existing I/O log files. */
+    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+	iolog_files[iofd].enabled = true;
+	if (!iolog_open(&iolog_files[iofd], iolog_dir_fd, iofd, "r+")) {
+	    if (errno != ENOENT) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to open %s/%s", iolog_path, iolog_fd_to_name(iofd));
+		goto bad;
+	    }
+	}
+    }
+    if (!iolog_files[IOFD_TIMING].enabled) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "missing timing file in %s", iolog_path);
+	goto bad;
+    }
+
+    /* Parse timing file until we reach the target point. */
+    for (;;) {
+	if (read_timing_record(&iolog_files[IOFD_TIMING], &timing) != 0)
+	    goto bad;
+	sudo_timespecadd(&timing.delay, elapsed_time, elapsed_time);
+	if (timing.event < IOFD_TIMING) {
+	    if (!iolog_files[timing.event].enabled) {
+		/* Missing log file. */
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "iofd %d referenced but not open", timing.event);
+		goto bad;
+	    }
+	    pos = iolog_seek(&iolog_files[timing.event], timing.u.nbytes,
+		SEEK_CUR);
+	    if (pos == -1) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "seek(%d, %lld, SEEK_CUR", timing.event,
+		    (long long)timing.u.nbytes);
+		goto bad;
+	    }
+	}
+	if (sudo_timespeccmp(elapsed_time, target, >=)) {
+	    if (sudo_timespeccmp(elapsed_time, target, ==))
+		break;
+
+	    /* Mismatch between resume point and stored log. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"resume point mismatch, target [%lld, %ld], have [%lld, %ld]",
+		(long long)target->tv_sec, target->tv_nsec,
+		(long long)elapsed_time->tv_sec, elapsed_time->tv_nsec);
+	    goto bad;
+	}
+    }
+    debug_return_bool(true);
+bad:
     debug_return_bool(false);
 }
 
@@ -1127,6 +1199,7 @@ main(int argc, char *argv[])
     const char *host = "localhost";
     const char *port = DEFAULT_PORT_STR;
     struct timespec restart = { 0, 0 };
+    struct timespec elapsed = { 0, 0 };
     const char *iolog_id = NULL;
     int ch, sock, iolog_dir_fd, fd;
     FILE *fp;
@@ -1207,9 +1280,16 @@ main(int argc, char *argv[])
     if ((log_info = parse_logfile(fp, iolog_dir)) == NULL)
 	goto bad;
 
-    /* Open the I/O log files. */
-    if (!iolog_open_all(iolog_dir_fd, iolog_dir))
-	goto bad;
+    /* Open the I/O log files and seek to restart point if there is one. */
+    if (sudo_timespecisset(&restart)) {
+	if (!iolog_seekto(iolog_dir_fd, iolog_dir, &elapsed, &restart)) {
+	    sudo_warnx(U_("unable to find restart point in %s"), iolog_dir);
+	    goto bad;
+	}
+    } else {
+	if (!iolog_open_all(iolog_dir_fd, iolog_dir))
+	    goto bad;
+    }
 
     /* Connect to server, setup events. */
     sock = connect_server(host, port);
@@ -1221,7 +1301,7 @@ main(int argc, char *argv[])
 	sudo_fatal(NULL);
     sudo_ev_base_setdef(evbase);
 
-    if (!client_closure_fill(&closure, sock, &restart, iolog_id, log_info))
+    if (!client_closure_fill(&closure, sock, &elapsed, &restart, iolog_id, log_info))
 	goto bad;
 
     /* Add read event for the server hello message and enter event loop. */
@@ -1232,7 +1312,7 @@ main(int argc, char *argv[])
     if (closure.state != FINISHED) {
 	sudo_warnx(U_("exited prematurely with state %d"), closure.state);
 	sudo_warnx(U_("elapsed time sent to server [%lld, %ld]"),
-	    (long long)closure.elapsed.tv_sec, closure.elapsed.tv_nsec);
+	    (long long)closure.elapsed->tv_sec, closure.elapsed->tv_nsec);
 	sudo_warnx(U_("commit point received from server [%lld, %ld]"),
 	    (long long)closure.committed.tv_sec, closure.committed.tv_nsec);
 	goto bad;
