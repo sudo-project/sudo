@@ -20,7 +20,8 @@ typedef struct _TimeSpec TimeSpec;
 typedef struct _IoBuffer IoBuffer;
 typedef struct _InfoMessage InfoMessage;
 typedef struct _InfoMessage__StringList InfoMessage__StringList;
-typedef struct _ExecMessage ExecMessage;
+typedef struct _AcceptMessage AcceptMessage;
+typedef struct _RejectMessage RejectMessage;
 typedef struct _ExitMessage ExitMessage;
 typedef struct _AlertMessage AlertMessage;
 typedef struct _RestartMessage RestartMessage;
@@ -37,17 +38,18 @@ typedef struct _ServerHello ServerHello;
 
 typedef enum {
   CLIENT_MESSAGE__TYPE__NOT_SET = 0,
-  CLIENT_MESSAGE__TYPE_EXEC_MSG = 1,
-  CLIENT_MESSAGE__TYPE_EXIT_MSG = 2,
-  CLIENT_MESSAGE__TYPE_RESTART_MSG = 3,
-  CLIENT_MESSAGE__TYPE_ALERT_MSG = 4,
-  CLIENT_MESSAGE__TYPE_TTYIN_BUF = 5,
-  CLIENT_MESSAGE__TYPE_TTYOUT_BUF = 6,
-  CLIENT_MESSAGE__TYPE_STDIN_BUF = 7,
-  CLIENT_MESSAGE__TYPE_STDOUT_BUF = 8,
-  CLIENT_MESSAGE__TYPE_STDERR_BUF = 9,
-  CLIENT_MESSAGE__TYPE_WINSIZE_EVENT = 10,
-  CLIENT_MESSAGE__TYPE_SUSPEND_EVENT = 11
+  CLIENT_MESSAGE__TYPE_ACCEPT_MSG = 1,
+  CLIENT_MESSAGE__TYPE_REJECT_MSG = 2,
+  CLIENT_MESSAGE__TYPE_EXIT_MSG = 3,
+  CLIENT_MESSAGE__TYPE_RESTART_MSG = 4,
+  CLIENT_MESSAGE__TYPE_ALERT_MSG = 5,
+  CLIENT_MESSAGE__TYPE_TTYIN_BUF = 6,
+  CLIENT_MESSAGE__TYPE_TTYOUT_BUF = 7,
+  CLIENT_MESSAGE__TYPE_STDIN_BUF = 8,
+  CLIENT_MESSAGE__TYPE_STDOUT_BUF = 9,
+  CLIENT_MESSAGE__TYPE_STDERR_BUF = 10,
+  CLIENT_MESSAGE__TYPE_WINSIZE_EVENT = 11,
+  CLIENT_MESSAGE__TYPE_SUSPEND_EVENT = 12
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(CLIENT_MESSAGE__TYPE)
 } ClientMessage__TypeCase;
 
@@ -60,7 +62,8 @@ struct  _ClientMessage
   ProtobufCMessage base;
   ClientMessage__TypeCase type_case;
   union {
-    ExecMessage *exec_msg;
+    AcceptMessage *accept_msg;
+    RejectMessage *reject_msg;
     ExitMessage *exit_msg;
     RestartMessage *restart_msg;
     AlertMessage *alert_msg;
@@ -158,24 +161,53 @@ struct  _InfoMessage
 
 
 /*
- * Event log data for executed command.
+ * Event log data for command accepted by the policy.
  */
-struct  _ExecMessage
+struct  _AcceptMessage
 {
   ProtobufCMessage base;
   /*
-   * wallclock time when command began 
+   * time when command was submitted 
    */
-  TimeSpec *start_time;
+  TimeSpec *submit_time;
+  /*
+   * key,value event log data 
+   */
+  size_t n_info_msgs;
+  InfoMessage **info_msgs;
+  /*
+   * true if I/O logging is enabled 
+   */
+  protobuf_c_boolean expect_iobufs;
+};
+#define ACCEPT_MESSAGE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&accept_message__descriptor) \
+    , NULL, 0,NULL, 0 }
+
+
+/*
+ * Event log data for command rejected by the policy.
+ */
+struct  _RejectMessage
+{
+  ProtobufCMessage base;
+  /*
+   * time when command was submitted 
+   */
+  TimeSpec *submit_time;
+  /*
+   * reason commamd was rejected 
+   */
+  char *reason;
   /*
    * key,value event log data 
    */
   size_t n_info_msgs;
   InfoMessage **info_msgs;
 };
-#define EXEC_MESSAGE__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&exec_message__descriptor) \
-    , NULL, 0,NULL }
+#define REJECT_MESSAGE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&reject_message__descriptor) \
+    , NULL, (char *)protobuf_c_empty_string, 0,NULL }
 
 
 /*
@@ -322,7 +354,7 @@ struct  _ServerMessage
      */
     TimeSpec *commit_point;
     /*
-     * ID of new I/O log (ExecMessage ACK) 
+     * ID of new I/O log (AcceptMessage ACK) 
      */
     char *log_id;
     /*
@@ -444,24 +476,43 @@ InfoMessage *
 void   info_message__free_unpacked
                      (InfoMessage *message,
                       ProtobufCAllocator *allocator);
-/* ExecMessage methods */
-void   exec_message__init
-                     (ExecMessage         *message);
-size_t exec_message__get_packed_size
-                     (const ExecMessage   *message);
-size_t exec_message__pack
-                     (const ExecMessage   *message,
+/* AcceptMessage methods */
+void   accept_message__init
+                     (AcceptMessage         *message);
+size_t accept_message__get_packed_size
+                     (const AcceptMessage   *message);
+size_t accept_message__pack
+                     (const AcceptMessage   *message,
                       uint8_t             *out);
-size_t exec_message__pack_to_buffer
-                     (const ExecMessage   *message,
+size_t accept_message__pack_to_buffer
+                     (const AcceptMessage   *message,
                       ProtobufCBuffer     *buffer);
-ExecMessage *
-       exec_message__unpack
+AcceptMessage *
+       accept_message__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   exec_message__free_unpacked
-                     (ExecMessage *message,
+void   accept_message__free_unpacked
+                     (AcceptMessage *message,
+                      ProtobufCAllocator *allocator);
+/* RejectMessage methods */
+void   reject_message__init
+                     (RejectMessage         *message);
+size_t reject_message__get_packed_size
+                     (const RejectMessage   *message);
+size_t reject_message__pack
+                     (const RejectMessage   *message,
+                      uint8_t             *out);
+size_t reject_message__pack_to_buffer
+                     (const RejectMessage   *message,
+                      ProtobufCBuffer     *buffer);
+RejectMessage *
+       reject_message__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   reject_message__free_unpacked
+                     (RejectMessage *message,
                       ProtobufCAllocator *allocator);
 /* ExitMessage methods */
 void   exit_message__init
@@ -613,8 +664,11 @@ typedef void (*InfoMessage__StringList_Closure)
 typedef void (*InfoMessage_Closure)
                  (const InfoMessage *message,
                   void *closure_data);
-typedef void (*ExecMessage_Closure)
-                 (const ExecMessage *message,
+typedef void (*AcceptMessage_Closure)
+                 (const AcceptMessage *message,
+                  void *closure_data);
+typedef void (*RejectMessage_Closure)
+                 (const RejectMessage *message,
                   void *closure_data);
 typedef void (*ExitMessage_Closure)
                  (const ExitMessage *message,
@@ -648,7 +702,8 @@ extern const ProtobufCMessageDescriptor time_spec__descriptor;
 extern const ProtobufCMessageDescriptor io_buffer__descriptor;
 extern const ProtobufCMessageDescriptor info_message__descriptor;
 extern const ProtobufCMessageDescriptor info_message__string_list__descriptor;
-extern const ProtobufCMessageDescriptor exec_message__descriptor;
+extern const ProtobufCMessageDescriptor accept_message__descriptor;
+extern const ProtobufCMessageDescriptor reject_message__descriptor;
 extern const ProtobufCMessageDescriptor exit_message__descriptor;
 extern const ProtobufCMessageDescriptor alert_message__descriptor;
 extern const ProtobufCMessageDescriptor restart_message__descriptor;

@@ -285,25 +285,25 @@ split_command(char *command, size_t *lenp)
 }
 
 /*
- * Build and format an ExecMessage wrapped in a ClientMessage.
+ * Build and format an AcceptMessage wrapped in a ClientMessage.
  * Stores the wire format message in the closure's write buffer.
  * Returns true on success, false on failure.
  */
 static bool
-fmt_exec_message(struct client_closure *closure)
+fmt_accept_message(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
-    ExecMessage exec_msg = EXEC_MESSAGE__INIT;
+    AcceptMessage accept_msg = ACCEPT_MESSAGE__INIT;
     TimeSpec tv = TIME_SPEC__INIT;
     InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
     struct iolog_info *log_info = closure->log_info;
     char hostname[1024];
     bool ret = false;
     size_t n;
-    debug_decl(fmt_exec_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_accept_message, SUDO_DEBUG_UTIL)
 
     /*
-     * Fill in ExecMessage and add it to ClientMessage.
+     * Fill in AcceptMessage and add it to ClientMessage.
      * TODO: handle buf large than 64K?
      */
     if (gethostname(hostname, sizeof(hostname)) == -1) {
@@ -315,7 +315,10 @@ fmt_exec_message(struct client_closure *closure)
     /* Sudo I/O logs only store start time in seconds. */
     tv.tv_sec = log_info->tstamp;
     tv.tv_nsec = 0;
-    exec_msg.start_time = &tv;
+    accept_msg.submit_time = &tv;
+
+    /* Client will send IoBuffer messages. */
+    accept_msg.expect_iobufs = true;
 
     /* Split command into a StringList. */
     runargv.strings = split_command(log_info->cmd, &runargv.n_strings);
@@ -323,82 +326,82 @@ fmt_exec_message(struct client_closure *closure)
 	sudo_fatal(NULL);
 
     /* The sudo I/O log info file has limited info. */
-    exec_msg.n_info_msgs = 10;
-    exec_msg.info_msgs = calloc(exec_msg.n_info_msgs, sizeof(InfoMessage *));
-    if (exec_msg.info_msgs == NULL)
+    accept_msg.n_info_msgs = 10;
+    accept_msg.info_msgs = calloc(accept_msg.n_info_msgs, sizeof(InfoMessage *));
+    if (accept_msg.info_msgs == NULL)
 	debug_return_bool(false);
-    for (n = 0; n < exec_msg.n_info_msgs; n++) {
-	exec_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
-	if (exec_msg.info_msgs[n] == NULL) {
-	    exec_msg.n_info_msgs = n;
+    for (n = 0; n < accept_msg.n_info_msgs; n++) {
+	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
+	if (accept_msg.info_msgs[n] == NULL) {
+	    accept_msg.n_info_msgs = n;
 	    goto done;
 	}
-	info_message__init(exec_msg.info_msgs[n]);
+	info_message__init(accept_msg.info_msgs[n]);
     }
 
     /* Fill in info_msgs */
     n = 0;
-    exec_msg.info_msgs[n]->key = "command";
-    exec_msg.info_msgs[n]->strval = log_info->cmd;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    accept_msg.info_msgs[n]->key = "command";
+    accept_msg.info_msgs[n]->strval = log_info->cmd;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    exec_msg.info_msgs[n]->key = "columns";
-    exec_msg.info_msgs[n]->numval = log_info->cols;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    accept_msg.info_msgs[n]->key = "columns";
+    accept_msg.info_msgs[n]->numval = log_info->cols;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
-    exec_msg.info_msgs[n]->key = "cwd";
-    exec_msg.info_msgs[n]->strval = log_info->cwd;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    accept_msg.info_msgs[n]->key = "cwd";
+    accept_msg.info_msgs[n]->strval = log_info->cwd;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    exec_msg.info_msgs[n]->key = "lines";
-    exec_msg.info_msgs[n]->numval = log_info->lines;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    accept_msg.info_msgs[n]->key = "lines";
+    accept_msg.info_msgs[n]->numval = log_info->lines;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
-    exec_msg.info_msgs[n]->key = "runargv";
-    exec_msg.info_msgs[n]->strlistval = &runargv;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    accept_msg.info_msgs[n]->key = "runargv";
+    accept_msg.info_msgs[n]->strlistval = &runargv;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     n++;
 
     if (log_info->runas_group != NULL) {
-	exec_msg.info_msgs[n]->key = "rungroup";
-	exec_msg.info_msgs[n]->strval = log_info->runas_group;
-	exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	accept_msg.info_msgs[n]->key = "rungroup";
+	accept_msg.info_msgs[n]->strval = log_info->runas_group;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
 
-    exec_msg.info_msgs[n]->key = "runuser";
-    exec_msg.info_msgs[n]->strval = log_info->runas_user;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    accept_msg.info_msgs[n]->key = "runuser";
+    accept_msg.info_msgs[n]->strval = log_info->runas_user;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    exec_msg.info_msgs[n]->key = "submithost";
-    exec_msg.info_msgs[n]->strval = hostname;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    accept_msg.info_msgs[n]->key = "submithost";
+    accept_msg.info_msgs[n]->strval = hostname;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    exec_msg.info_msgs[n]->key = "submituser";
-    exec_msg.info_msgs[n]->strval = log_info->user;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    accept_msg.info_msgs[n]->key = "submituser";
+    accept_msg.info_msgs[n]->strval = log_info->user;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    exec_msg.info_msgs[n]->key = "ttyname";
-    exec_msg.info_msgs[n]->strval = log_info->tty;
-    exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    accept_msg.info_msgs[n]->key = "ttyname";
+    accept_msg.info_msgs[n]->strval = log_info->tty;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     /* Update n_info_msgs. */
-    exec_msg.n_info_msgs = n;
+    accept_msg.n_info_msgs = n;
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: sending ExecMessage, array length %zu", __func__, n);
+	"%s: sending AcceptMessage, array length %zu", __func__, n);
 
     /* Schedule ClientMessage */
-    client_msg.exec_msg = &exec_msg;
-    client_msg.type_case = CLIENT_MESSAGE__TYPE_EXEC_MSG;
+    client_msg.accept_msg = &accept_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
 	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1)
@@ -406,10 +409,10 @@ fmt_exec_message(struct client_closure *closure)
     }
 
 done:
-    for (n = 0; n < exec_msg.n_info_msgs; n++) {
-	free(exec_msg.info_msgs[n]);
+    for (n = 0; n < accept_msg.n_info_msgs; n++) {
+	free(accept_msg.info_msgs[n]);
     }
-    free(exec_msg.info_msgs);
+    free(accept_msg.info_msgs);
 
     debug_return_bool(ret);
 }
@@ -686,7 +689,7 @@ client_message_completion(struct client_closure *closure)
     debug_decl(client_message_completion, SUDO_DEBUG_UTIL)
 
     switch (closure->state) {
-    case SEND_EXEC:
+    case SEND_ACCEPT:
     case SEND_RESTART:
 	closure->state = SEND_IO;
 	/* FALLTHROUGH */
@@ -829,8 +832,8 @@ handle_server_message(uint8_t *buf, size_t len,
 		closure->state = SEND_RESTART;
 		ret = fmt_restart_message(closure);
 	    } else {
-		closure->state = SEND_EXEC;
-		ret = fmt_exec_message(closure);
+		closure->state = SEND_ACCEPT;
+		ret = fmt_accept_message(closure);
 	    }
 	}
 	break;

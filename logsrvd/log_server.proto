@@ -6,17 +6,18 @@ syntax = "proto3";
  */
 message ClientMessage {
   oneof type {
-    ExecMessage exec_msg = 1;
-    ExitMessage exit_msg = 2;
-    RestartMessage restart_msg = 3;
-    AlertMessage alert_msg = 4;
-    IoBuffer ttyin_buf = 5;
-    IoBuffer ttyout_buf = 6;
-    IoBuffer stdin_buf = 7;
-    IoBuffer stdout_buf = 8;
-    IoBuffer stderr_buf = 9;
-    ChangeWindowSize winsize_event = 10;
-    CommandSuspend suspend_event = 11;
+    AcceptMessage accept_msg = 1;
+    RejectMessage reject_msg = 2;
+    ExitMessage exit_msg = 3;
+    RestartMessage restart_msg = 4;
+    AlertMessage alert_msg = 5;
+    IoBuffer ttyin_buf = 6;
+    IoBuffer ttyout_buf = 7;
+    IoBuffer stdin_buf = 8;
+    IoBuffer stdout_buf = 9;
+    IoBuffer stderr_buf = 10;
+    ChangeWindowSize winsize_event = 11;
+    CommandSuspend suspend_event = 12;
   }
 }
 
@@ -49,11 +50,21 @@ message InfoMessage {
 }
 
 /*
- * Event log data for executed command.
+ * Event log data for command accepted by the policy.
  */
-message ExecMessage {
-  TimeSpec start_time = 1;		/* wallclock time when command began */
+message AcceptMessage {
+  TimeSpec submit_time = 1;		/* time when command was submitted */
   repeated InfoMessage info_msgs = 2;	/* key,value event log data */
+  bool expect_iobufs = 3;		/* true if I/O logging is enabled */
+}
+
+/*
+ * Event log data for command rejected by the policy.
+ */
+message RejectMessage {
+  TimeSpec submit_time = 1;		/* time when command was submitted */
+  string reason = 2;			/* reason commamd was rejected */
+  repeated InfoMessage info_msgs = 3;	/* key,value event log data */
 }
 
 /* Message sent by client when command exits. */
@@ -99,7 +110,7 @@ message ServerMessage {
   oneof type {
     ServerHello hello = 1;	/* server hello message */
     TimeSpec commit_point = 2;	/* cumulative time of records stored */
-    string log_id = 3;		/* ID of new I/O log (ExecMessage ACK) */
+    string log_id = 3;		/* ID of new I/O log (AcceptMessage ACK) */
     string error = 4;		/* error message from server (restartable) */
     string abort = 5;		/* abort message from server (kill session) */
   }

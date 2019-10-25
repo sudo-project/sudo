@@ -193,49 +193,94 @@ void   info_message__free_unpacked
   assert(message->base.descriptor == &info_message__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-void   exec_message__init
-                     (ExecMessage         *message)
+void   accept_message__init
+                     (AcceptMessage         *message)
 {
-  static const ExecMessage init_value = EXEC_MESSAGE__INIT;
+  static const AcceptMessage init_value = ACCEPT_MESSAGE__INIT;
   *message = init_value;
 }
-size_t exec_message__get_packed_size
-                     (const ExecMessage *message)
+size_t accept_message__get_packed_size
+                     (const AcceptMessage *message)
 {
-  assert(message->base.descriptor == &exec_message__descriptor);
+  assert(message->base.descriptor == &accept_message__descriptor);
   return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
-size_t exec_message__pack
-                     (const ExecMessage *message,
+size_t accept_message__pack
+                     (const AcceptMessage *message,
                       uint8_t       *out)
 {
-  assert(message->base.descriptor == &exec_message__descriptor);
+  assert(message->base.descriptor == &accept_message__descriptor);
   return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
-size_t exec_message__pack_to_buffer
-                     (const ExecMessage *message,
+size_t accept_message__pack_to_buffer
+                     (const AcceptMessage *message,
                       ProtobufCBuffer *buffer)
 {
-  assert(message->base.descriptor == &exec_message__descriptor);
+  assert(message->base.descriptor == &accept_message__descriptor);
   return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
-ExecMessage *
-       exec_message__unpack
+AcceptMessage *
+       accept_message__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data)
 {
-  return (ExecMessage *)
-     protobuf_c_message_unpack (&exec_message__descriptor,
+  return (AcceptMessage *)
+     protobuf_c_message_unpack (&accept_message__descriptor,
                                 allocator, len, data);
 }
-void   exec_message__free_unpacked
-                     (ExecMessage *message,
+void   accept_message__free_unpacked
+                     (AcceptMessage *message,
                       ProtobufCAllocator *allocator)
 {
   if(!message)
     return;
-  assert(message->base.descriptor == &exec_message__descriptor);
+  assert(message->base.descriptor == &accept_message__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   reject_message__init
+                     (RejectMessage         *message)
+{
+  static const RejectMessage init_value = REJECT_MESSAGE__INIT;
+  *message = init_value;
+}
+size_t reject_message__get_packed_size
+                     (const RejectMessage *message)
+{
+  assert(message->base.descriptor == &reject_message__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t reject_message__pack
+                     (const RejectMessage *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &reject_message__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t reject_message__pack_to_buffer
+                     (const RejectMessage *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &reject_message__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+RejectMessage *
+       reject_message__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (RejectMessage *)
+     protobuf_c_message_unpack (&reject_message__descriptor,
+                                allocator, len, data);
+}
+void   reject_message__free_unpacked
+                     (RejectMessage *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &reject_message__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 void   exit_message__init
@@ -553,23 +598,35 @@ void   server_hello__free_unpacked
   assert(message->base.descriptor == &server_hello__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
+static const ProtobufCFieldDescriptor client_message__field_descriptors[12] =
 {
   {
-    "exec_msg",
+    "accept_msg",
     1,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, exec_msg),
-    &exec_message__descriptor,
+    offsetof(ClientMessage, accept_msg),
+    &accept_message__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "reject_msg",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(ClientMessage, type_case),
+    offsetof(ClientMessage, reject_msg),
+    &reject_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
     "exit_msg",
-    2,
+    3,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -581,7 +638,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "restart_msg",
-    3,
+    4,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -593,7 +650,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "alert_msg",
-    4,
+    5,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -605,7 +662,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "ttyin_buf",
-    5,
+    6,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -617,7 +674,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "ttyout_buf",
-    6,
+    7,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -629,7 +686,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "stdin_buf",
-    7,
+    8,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -641,7 +698,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "stdout_buf",
-    8,
+    9,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -653,7 +710,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "stderr_buf",
-    9,
+    10,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -665,7 +722,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "winsize_event",
-    10,
+    11,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -677,7 +734,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
   {
     "suspend_event",
-    11,
+    12,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
@@ -689,22 +746,23 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[11] =
   },
 };
 static const unsigned client_message__field_indices_by_name[] = {
-  3,   /* field[3] = alert_msg */
-  0,   /* field[0] = exec_msg */
-  1,   /* field[1] = exit_msg */
-  2,   /* field[2] = restart_msg */
-  8,   /* field[8] = stderr_buf */
-  6,   /* field[6] = stdin_buf */
-  7,   /* field[7] = stdout_buf */
-  10,   /* field[10] = suspend_event */
-  4,   /* field[4] = ttyin_buf */
-  5,   /* field[5] = ttyout_buf */
-  9,   /* field[9] = winsize_event */
+  0,   /* field[0] = accept_msg */
+  4,   /* field[4] = alert_msg */
+  2,   /* field[2] = exit_msg */
+  1,   /* field[1] = reject_msg */
+  3,   /* field[3] = restart_msg */
+  9,   /* field[9] = stderr_buf */
+  7,   /* field[7] = stdin_buf */
+  8,   /* field[8] = stdout_buf */
+  11,   /* field[11] = suspend_event */
+  5,   /* field[5] = ttyin_buf */
+  6,   /* field[6] = ttyout_buf */
+  10,   /* field[10] = winsize_event */
 };
 static const ProtobufCIntRange client_message__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 11 }
+  { 0, 12 }
 };
 const ProtobufCMessageDescriptor client_message__descriptor =
 {
@@ -714,7 +772,7 @@ const ProtobufCMessageDescriptor client_message__descriptor =
   "ClientMessage",
   "",
   sizeof(ClientMessage),
-  11,
+  12,
   client_message__field_descriptors,
   client_message__field_indices_by_name,
   1,  client_message__number_ranges,
@@ -938,15 +996,15 @@ const ProtobufCMessageDescriptor info_message__descriptor =
   (ProtobufCMessageInit) info_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor exec_message__field_descriptors[2] =
+static const ProtobufCFieldDescriptor accept_message__field_descriptors[3] =
 {
   {
-    "start_time",
+    "submit_time",
     1,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    offsetof(ExecMessage, start_time),
+    offsetof(AcceptMessage, submit_time),
     &time_spec__descriptor,
     NULL,
     0,             /* flags */
@@ -957,36 +1015,113 @@ static const ProtobufCFieldDescriptor exec_message__field_descriptors[2] =
     2,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(ExecMessage, n_info_msgs),
-    offsetof(ExecMessage, info_msgs),
+    offsetof(AcceptMessage, n_info_msgs),
+    offsetof(AcceptMessage, info_msgs),
+    &info_message__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "expect_iobufs",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(AcceptMessage, expect_iobufs),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned accept_message__field_indices_by_name[] = {
+  2,   /* field[2] = expect_iobufs */
+  1,   /* field[1] = info_msgs */
+  0,   /* field[0] = submit_time */
+};
+static const ProtobufCIntRange accept_message__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 3 }
+};
+const ProtobufCMessageDescriptor accept_message__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "AcceptMessage",
+  "AcceptMessage",
+  "AcceptMessage",
+  "",
+  sizeof(AcceptMessage),
+  3,
+  accept_message__field_descriptors,
+  accept_message__field_indices_by_name,
+  1,  accept_message__number_ranges,
+  (ProtobufCMessageInit) accept_message__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor reject_message__field_descriptors[3] =
+{
+  {
+    "submit_time",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    offsetof(RejectMessage, submit_time),
+    &time_spec__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "reason",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(RejectMessage, reason),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "info_msgs",
+    3,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(RejectMessage, n_info_msgs),
+    offsetof(RejectMessage, info_msgs),
     &info_message__descriptor,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
-static const unsigned exec_message__field_indices_by_name[] = {
-  1,   /* field[1] = info_msgs */
-  0,   /* field[0] = start_time */
+static const unsigned reject_message__field_indices_by_name[] = {
+  2,   /* field[2] = info_msgs */
+  1,   /* field[1] = reason */
+  0,   /* field[0] = submit_time */
 };
-static const ProtobufCIntRange exec_message__number_ranges[1 + 1] =
+static const ProtobufCIntRange reject_message__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 3 }
 };
-const ProtobufCMessageDescriptor exec_message__descriptor =
+const ProtobufCMessageDescriptor reject_message__descriptor =
 {
   PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "ExecMessage",
-  "ExecMessage",
-  "ExecMessage",
+  "RejectMessage",
+  "RejectMessage",
+  "RejectMessage",
   "",
-  sizeof(ExecMessage),
-  2,
-  exec_message__field_descriptors,
-  exec_message__field_indices_by_name,
-  1,  exec_message__number_ranges,
-  (ProtobufCMessageInit) exec_message__init,
+  sizeof(RejectMessage),
+  3,
+  reject_message__field_descriptors,
+  reject_message__field_indices_by_name,
+  1,  reject_message__number_ranges,
+  (ProtobufCMessageInit) reject_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
 static const ProtobufCFieldDescriptor exit_message__field_descriptors[5] =

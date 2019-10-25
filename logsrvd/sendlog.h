@@ -27,7 +27,7 @@ enum client_state {
     ERROR,
     RECV_HELLO,
     SEND_RESTART,
-    SEND_EXEC,
+    SEND_ACCEPT,
     SEND_IO,
     SEND_EXIT,
     CLOSING,

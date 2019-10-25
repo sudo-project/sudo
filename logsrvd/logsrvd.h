@@ -32,7 +32,7 @@
 #define SHUTDOWN_TIMEO	10
 
 /*
- * I/O log details from the ExecMessage + iolog path and sessid.
+ * I/O log details from the AcceptMessage + iolog path and sessid.
  */
 struct iolog_details {
     char *command;
@@ -45,7 +45,7 @@ struct iolog_details {
     char *submitgroup;
     char *ttyname;
     char **argv;
-    time_t start_time;
+    time_t submit_time;
     int argc;
     int lines;
     int columns;
@@ -78,7 +78,7 @@ struct connection_buffer {
  */
 struct connection_closure {
     TAILQ_ENTRY(connection_closure) entries;
-    struct timespec start_time;
+    struct timespec submit_time;
     struct timespec elapsed_time;
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
@@ -93,7 +93,7 @@ struct connection_closure {
 };
 
 /* iolog_writer.c */
-bool iolog_init(ExecMessage *msg, struct connection_closure *closure);
+bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
 bool iolog_restart(RestartMessage *msg, struct connection_closure *closure);
 int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);
 int store_suspend(CommandSuspend *msg, struct connection_closure *closure);

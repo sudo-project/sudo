@@ -64,11 +64,11 @@ has_strlistval(InfoMessage *info)
 }
 
 /*
- * Fill in I/O log details from an ExecMessage
+ * Fill in I/O log details from an AcceptMessage
  * Only makes a shallow copy of strings and string lists.
  */
 static bool
-iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
+iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 {
     size_t idx;
     bool ret = true;
@@ -76,8 +76,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 
     memset(details, 0, sizeof(*details));
 
-    /* Start time. */
-    details->start_time = msg->start_time->tv_sec;
+    /* Submit time. */
+    details->submit_time = msg->submit_time->tv_sec;
 
     /* Default values */
     details->lines = 24;
@@ -211,17 +211,17 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
     /* Check for required settings */
     if (details->submituser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "missing user in ExecMessage");
+	    "missing user in AcceptMessage");
 	ret = false;
     }
     if (details->submithost == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "missing host in ExecMessage");
+	    "missing host in AcceptMessage");
 	ret = false;
     }
     if (details->command == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "missing command in ExecMessage");
+	    "missing command in AcceptMessage");
 	ret = false;
     }
 
@@ -466,7 +466,7 @@ iolog_close_all(struct connection_closure *closure)
 }
 
 bool
-iolog_init(ExecMessage *msg, struct connection_closure *closure)
+iolog_init(AcceptMessage *msg, struct connection_closure *closure)
 {
     struct iolog_details details;
     debug_decl(iolog_init, SUDO_DEBUG_UTIL)

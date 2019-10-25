@@ -180,12 +180,12 @@ fmt_error_message(const char *errstr, struct connection_buffer *buf)
 }
 
 /*
- * Parse an ExecMessage
+ * Parse an AcceptMessage
  */
 static bool
-handle_exec(ExecMessage *msg, struct connection_closure *closure)
+handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 {
-    debug_decl(handle_exec, SUDO_DEBUG_UTIL)
+    debug_decl(handle_accept, SUDO_DEBUG_UTIL)
 
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -194,17 +194,23 @@ handle_exec(ExecMessage *msg, struct connection_closure *closure)
     }
 
     /* Sanity check message. */
-    if (msg->start_time == NULL || msg->n_info_msgs == 0) {
+    if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid ExecMessage, start_time: %p, n_info_msgs: %zu",
-	    msg->start_time, msg->n_info_msgs);
+	    "invalid AcceptMessage, submit_time: %p, n_info_msgs: %zu",
+	    msg->submit_time, msg->n_info_msgs);
 	debug_return_bool(false);
     }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExecMessage", __func__);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
 
     /* Save start time. */
-    closure->start_time.tv_sec = msg->start_time->tv_sec;
-    closure->start_time.tv_nsec = msg->start_time->tv_nsec;
+    closure->submit_time.tv_sec = msg->submit_time->tv_sec;
+    closure->submit_time.tv_nsec = msg->submit_time->tv_nsec;
+
+    /* TODO: handle event logging via syslog */
+    if (!msg->expect_iobufs) {
+	closure->state = FLUSHED;
+	debug_return_bool(true);
+    }
 
     /* Create I/O log info file and parent directories. */
     if (!iolog_init(msg, closure))
@@ -220,6 +226,39 @@ handle_exec(ExecMessage *msg, struct connection_closure *closure)
     }
 
     closure->state = RUNNING;
+    debug_return_bool(true);
+}
+
+/*
+ * Parse a RejectMessage
+ */
+static bool
+handle_reject(RejectMessage *msg, struct connection_closure *closure)
+{
+    debug_decl(handle_reject, SUDO_DEBUG_UTIL)
+
+    if (closure->state != INITIAL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d", closure->state);
+	debug_return_bool(false);
+    }
+
+    /* Sanity check message. */
+    if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid RejectMessage, submit_time: %p, n_info_msgs: %zu",
+	    msg->submit_time, msg->n_info_msgs);
+	debug_return_bool(false);
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
+
+    /* Save start time. */
+    closure->submit_time.tv_sec = msg->submit_time->tv_sec;
+    closure->submit_time.tv_nsec = msg->submit_time->tv_nsec;
+
+    /* TODO: handle event logging via syslog */
+
+    closure->state = FLUSHED;
     debug_return_bool(true);
 }
 
@@ -412,8 +451,11 @@ handle_client_message(uint8_t *buf, size_t len,
     }
 
     switch (msg->type_case) {
-    case CLIENT_MESSAGE__TYPE_EXEC_MSG:
-	ret = handle_exec(msg->exec_msg, closure);
+    case CLIENT_MESSAGE__TYPE_ACCEPT_MSG:
+	ret = handle_accept(msg->accept_msg, closure);
+	break;
+    case CLIENT_MESSAGE__TYPE_REJECT_MSG:
+	ret = handle_reject(msg->reject_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_EXIT_MSG:
 	ret = handle_exit(msg->exit_msg, closure);
