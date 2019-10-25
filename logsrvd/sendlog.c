@@ -443,7 +443,6 @@ fmt_restart_message(struct client_closure *closure)
 	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1)
 	    ret = false;
     }
-    ret = true;
 
     debug_return_bool(ret);
 }

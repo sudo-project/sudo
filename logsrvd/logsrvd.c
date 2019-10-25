@@ -1081,8 +1081,6 @@ main(int argc, char *argv[])
 	    usage(true);
 	}
     }
-    argc -= optind;
-    argv += optind;
 
     /* Read sudo_logsrvd.conf */
     logsrvd_conf_read(conf_file);
