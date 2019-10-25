@@ -148,6 +148,12 @@ void   info_message__string_list__init
   static const InfoMessage__StringList init_value = INFO_MESSAGE__STRING_LIST__INIT;
   *message = init_value;
 }
+void   info_message__number_list__init
+                     (InfoMessage__NumberList         *message)
+{
+  static const InfoMessage__NumberList init_value = INFO_MESSAGE__NUMBER_LIST__INIT;
+  *message = init_value;
+}
 void   info_message__init
                      (InfoMessage         *message)
 {
@@ -919,7 +925,45 @@ const ProtobufCMessageDescriptor info_message__string_list__descriptor =
   (ProtobufCMessageInit) info_message__string_list__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor info_message__field_descriptors[4] =
+static const ProtobufCFieldDescriptor info_message__number_list__field_descriptors[1] =
+{
+  {
+    "numbers",
+    1,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_INT64,
+    offsetof(InfoMessage__NumberList, n_numbers),
+    offsetof(InfoMessage__NumberList, numbers),
+    NULL,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned info_message__number_list__field_indices_by_name[] = {
+  0,   /* field[0] = numbers */
+};
+static const ProtobufCIntRange info_message__number_list__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor info_message__number_list__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "InfoMessage.NumberList",
+  "NumberList",
+  "InfoMessage__NumberList",
+  "",
+  sizeof(InfoMessage__NumberList),
+  1,
+  info_message__number_list__field_descriptors,
+  info_message__number_list__field_indices_by_name,
+  1,  info_message__number_list__number_ranges,
+  (ProtobufCMessageInit) info_message__number_list__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
 {
   {
     "key",
@@ -969,9 +1013,22 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[4] =
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "numlistval",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(InfoMessage, value_case),
+    offsetof(InfoMessage, numlistval),
+    &info_message__number_list__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned info_message__field_indices_by_name[] = {
   0,   /* field[0] = key */
+  4,   /* field[4] = numlistval */
   1,   /* field[1] = numval */
   3,   /* field[3] = strlistval */
   2,   /* field[2] = strval */
@@ -979,7 +1036,7 @@ static const unsigned info_message__field_indices_by_name[] = {
 static const ProtobufCIntRange info_message__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 4 }
+  { 0, 5 }
 };
 const ProtobufCMessageDescriptor info_message__descriptor =
 {
@@ -989,7 +1046,7 @@ const ProtobufCMessageDescriptor info_message__descriptor =
   "InfoMessage",
   "",
   sizeof(InfoMessage),
-  4,
+  5,
   info_message__field_descriptors,
   info_message__field_indices_by_name,
   1,  info_message__number_ranges,

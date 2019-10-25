@@ -20,6 +20,7 @@ typedef struct _TimeSpec TimeSpec;
 typedef struct _IoBuffer IoBuffer;
 typedef struct _InfoMessage InfoMessage;
 typedef struct _InfoMessage__StringList InfoMessage__StringList;
+typedef struct _InfoMessage__NumberList InfoMessage__NumberList;
 typedef struct _AcceptMessage AcceptMessage;
 typedef struct _RejectMessage RejectMessage;
 typedef struct _ExitMessage ExitMessage;
@@ -54,8 +55,8 @@ typedef enum {
 } ClientMessage__TypeCase;
 
 /*
- * Client message to the server.
- * Messages on the wire are prefixed with a 16-bit size in network byte order.
+ * Client message to the server.  Messages on the wire are
+ * prefixed with a 32-bit size in network byte order.
  */
 struct  _ClientMessage
 {
@@ -108,7 +109,7 @@ struct  _IoBuffer
 {
   ProtobufCMessage base;
   /*
-   * elapsed time since last record (monotonic) 
+   * elapsed time since last record 
    */
   TimeSpec *delay;
   /*
@@ -132,11 +133,23 @@ struct  _InfoMessage__StringList
     , 0,NULL }
 
 
+struct  _InfoMessage__NumberList
+{
+  ProtobufCMessage base;
+  size_t n_numbers;
+  int64_t *numbers;
+};
+#define INFO_MESSAGE__NUMBER_LIST__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&info_message__number_list__descriptor) \
+    , 0,NULL }
+
+
 typedef enum {
   INFO_MESSAGE__VALUE__NOT_SET = 0,
   INFO_MESSAGE__VALUE_NUMVAL = 2,
   INFO_MESSAGE__VALUE_STRVAL = 3,
-  INFO_MESSAGE__VALUE_STRLISTVAL = 4
+  INFO_MESSAGE__VALUE_STRLISTVAL = 4,
+  INFO_MESSAGE__VALUE_NUMLISTVAL = 5
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(INFO_MESSAGE__VALUE)
 } InfoMessage__ValueCase;
 
@@ -153,6 +166,7 @@ struct  _InfoMessage
     int64_t numval;
     char *strval;
     InfoMessage__StringList *strlistval;
+    InfoMessage__NumberList *numlistval;
   };
 };
 #define INFO_MESSAGE__INIT \
@@ -167,7 +181,7 @@ struct  _AcceptMessage
 {
   ProtobufCMessage base;
   /*
-   * time when command was submitted 
+   * when command was submitted 
    */
   TimeSpec *submit_time;
   /*
@@ -176,7 +190,7 @@ struct  _AcceptMessage
   size_t n_info_msgs;
   InfoMessage **info_msgs;
   /*
-   * true if I/O logging is enabled 
+   * true if I/O logging enabled 
    */
   protobuf_c_boolean expect_iobufs;
 };
@@ -192,11 +206,11 @@ struct  _RejectMessage
 {
   ProtobufCMessage base;
   /*
-   * time when command was submitted 
+   * when command was submitted 
    */
   TimeSpec *submit_time;
   /*
-   * reason commamd was rejected 
+   * reason command was rejected 
    */
   char *reason;
   /*
@@ -217,7 +231,7 @@ struct  _ExitMessage
 {
   ProtobufCMessage base;
   /*
-   * total elapsed run time (monotonic) 
+   * total elapsed run time 
    */
   TimeSpec *run_time;
   /*
@@ -249,7 +263,7 @@ struct  _AlertMessage
 {
   ProtobufCMessage base;
   /*
-   * time alert message ocurred 
+   * time alert message occurred 
    */
   TimeSpec *alert_time;
   /*
@@ -273,7 +287,7 @@ struct  _RestartMessage
    */
   char *log_id;
   /*
-   * resume point in ellaped time (monotonic) 
+   * resume point (elapsed time) 
    */
   TimeSpec *resume_point;
 };
@@ -289,7 +303,7 @@ struct  _ChangeWindowSize
 {
   ProtobufCMessage base;
   /*
-   * elapsed time since last record (monotonic) 
+   * elapsed time since last record 
    */
   TimeSpec *delay;
   /*
@@ -313,11 +327,11 @@ struct  _CommandSuspend
 {
   ProtobufCMessage base;
   /*
-   * elapsed time since last record (monotonic) 
+   * elapsed time since last record 
    */
   TimeSpec *delay;
   /*
-   * signal that caused the suspend/resume 
+   * signal that caused suspend/resume 
    */
   char *signal;
 };
@@ -337,8 +351,8 @@ typedef enum {
 } ServerMessage__TypeCase;
 
 /*
- * Server messages to the client.
- * Messages on the wire are prefixed with a 16-bit size in network byte order.
+ * Server messages to the client.  Messages on the wire are
+ * prefixed with a 32-bit size in network byte order.
  */
 struct  _ServerMessage
 {
@@ -354,15 +368,15 @@ struct  _ServerMessage
      */
     TimeSpec *commit_point;
     /*
-     * ID of new I/O log (AcceptMessage ACK) 
+     * ID of server-side I/O log 
      */
     char *log_id;
     /*
-     * error message from server (restartable) 
+     * error message from server 
      */
     char *error;
     /*
-     * abort message from server (kill session) 
+     * abort message, kill command 
      */
     char *abort;
   };
@@ -383,11 +397,11 @@ struct  _ServerHello
    */
   char *server_id;
   /*
-   * optional redirect to other server if busy 
+   * optional redirect if busy 
    */
   char *redirect;
   /*
-   * optional list of known audit servers 
+   * optional list of known servers 
    */
   size_t n_servers;
   char **servers;
@@ -457,6 +471,9 @@ void   io_buffer__free_unpacked
 /* InfoMessage__StringList methods */
 void   info_message__string_list__init
                      (InfoMessage__StringList         *message);
+/* InfoMessage__NumberList methods */
+void   info_message__number_list__init
+                     (InfoMessage__NumberList         *message);
 /* InfoMessage methods */
 void   info_message__init
                      (InfoMessage         *message);
@@ -661,6 +678,9 @@ typedef void (*IoBuffer_Closure)
 typedef void (*InfoMessage__StringList_Closure)
                  (const InfoMessage__StringList *message,
                   void *closure_data);
+typedef void (*InfoMessage__NumberList_Closure)
+                 (const InfoMessage__NumberList *message,
+                  void *closure_data);
 typedef void (*InfoMessage_Closure)
                  (const InfoMessage *message,
                   void *closure_data);
@@ -702,6 +722,7 @@ extern const ProtobufCMessageDescriptor time_spec__descriptor;
 extern const ProtobufCMessageDescriptor io_buffer__descriptor;
 extern const ProtobufCMessageDescriptor info_message__descriptor;
 extern const ProtobufCMessageDescriptor info_message__string_list__descriptor;
+extern const ProtobufCMessageDescriptor info_message__number_list__descriptor;
 extern const ProtobufCMessageDescriptor accept_message__descriptor;
 extern const ProtobufCMessageDescriptor reject_message__descriptor;
 extern const ProtobufCMessageDescriptor exit_message__descriptor;
