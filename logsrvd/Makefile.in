@@ -236,8 +236,9 @@ log_server.pb-c.i: $(srcdir)/log_server.pb-c.c $(devdir)/log_server.pb-c.h \
 log_server.pb-c.plog: log_server.pb-c.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/log_server.pb-c.c --i-file $< --output-file $@
 logsrvd.o: $(srcdir)/logsrvd.c $(devdir)/log_server.pb-c.h \
-           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrvd.h \
@@ -245,8 +246,9 @@ logsrvd.o: $(srcdir)/logsrvd.c $(devdir)/log_server.pb-c.h \
            $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd.c
 logsrvd.i: $(srcdir)/logsrvd.c $(devdir)/log_server.pb-c.h \
-           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrvd.h \
@@ -282,18 +284,18 @@ protobuf-c.i: $(srcdir)/protobuf-c/protobuf-c.c
 protobuf-c.plog: protobuf-c.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/protobuf-c/protobuf-c.c --i-file $< --output-file $@
 sendlog.o: $(srcdir)/sendlog.c $(devdir)/log_server.pb-c.h \
-           $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
-           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/compat/getaddrinfo.h $(incdir)/compat/getopt.h \
+           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
            $(srcdir)/protobuf-c/protobuf-c.h $(srcdir)/sendlog.h \
            $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sendlog.c
 sendlog.i: $(srcdir)/sendlog.c $(devdir)/log_server.pb-c.h \
-           $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
-           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/compat/getaddrinfo.h $(incdir)/compat/getopt.h \
+           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
            $(srcdir)/protobuf-c/protobuf-c.h $(srcdir)/sendlog.h \

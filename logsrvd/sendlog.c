@@ -42,10 +42,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
-#endif
-
 #include "log_server.pb-c.h"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 #include "sudo_compat.h"
@@ -57,15 +53,40 @@
 #include "sudo_iolog.h"
 #include "sendlog.h"
 
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
+
 static struct iolog_file iolog_files[IOFD_MAX];
 static char *iolog_dir;
 
 static void
-usage(void)
+usage(bool fatal)
 {
     fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] "
 	"[-r restart-point] /path/to/iolog\n", getprogname());
     exit(1);
+}
+
+static void
+help(void)
+{
+    (void)printf(_("%s - send sudo I/O log to remote server\n\n"),
+	getprogname());
+    usage(false);
+    (void)puts(_("\nOptions:\n"
+	"      --help               display help message and exit\n"
+	"  -h, --host               host to send logs to\n"
+	"  -i, --iolog_id           remote ID of I/O log to be resumed\n"
+	"  -p, --port               port to use when connecting to host\n"
+	"  -r, --restart            restart previous I/O log transfer\n"
+	"  -V, --version            display version information and exit\n"));
+    exit(0);
 }
 
 /*
@@ -1081,6 +1102,19 @@ parse_timespec(struct timespec *ts, const char *strval)
     debug_return_bool(true);
 }
 
+static const char short_opts[] = "h:i:p:r:V";
+static struct option long_opts[] = {
+    { "help",		no_argument,		NULL,	1 },
+    { "host",		required_argument,	NULL,	'h' },
+    { "iolog-id",	required_argument,	NULL,	'i' },
+    { "port",		required_argument,	NULL,	'p' },
+    { "restart",	required_argument,	NULL,	'r' },
+    { "version",	no_argument,		NULL,	'V' },
+    { NULL,		no_argument,		NULL,	0 },
+};
+
+__dso_public int main(int argc, char *argv[]);
+
 int
 main(int argc, char *argv[])
 {
@@ -1111,7 +1145,7 @@ main(int argc, char *argv[])
     if (protobuf_c_version_number() < 1003000)
 	sudo_fatalx("%s", U_("Protobuf-C version 1.3 or higher required"));
 
-    while ((ch = getopt(argc, argv, "h:i:p:r:")) != -1) {
+    while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	case 'h':
 	    host = optarg;
@@ -1126,8 +1160,15 @@ main(int argc, char *argv[])
 	    if (!parse_timespec(&restart, optarg))
 		goto bad;
 	    break;
+	case 1:
+	    help();
+	    break;
+	case 'V':
+	    (void)printf(_("%s version %s\n"), getprogname(),
+		PACKAGE_VERSION);
+	    return 0;
 	default:
-	    usage();
+	    usage(true);
 	}
     }
     argc -= optind;
@@ -1135,12 +1176,12 @@ main(int argc, char *argv[])
 
     if (sudo_timespecisset(&restart) != (iolog_id != NULL)) {
 	sudo_warnx(U_("both restart point and iolog ID must be specified"));
-	usage();
+	usage(true);
     }
 
     /* Remaining arg should be to I/O log dir to send. */
     if (argc != 1)
-	usage();
+	usage(true);
     iolog_dir = argv[0];
     if ((iolog_dir_fd = open(iolog_dir, O_RDONLY)) == -1) {
 	sudo_warn("%s", iolog_dir);

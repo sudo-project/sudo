@@ -54,6 +54,12 @@
 #include "pathnames.h"
 #include "logsrvd.h"
 
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
+
 /*
  * Sudo I/O audit server.
  */
@@ -922,12 +928,40 @@ daemonize(void)
 }
 
 static void
-usage(void)
+usage(bool fatal)
 {
     fprintf(stderr, "usage: %s [-n] [-f conf_file] [-R percentage]\n",
 	getprogname());
-    exit(1);
+    if (fatal)
+	exit(1);
 }
+
+static void
+help(void)
+{
+    (void)printf(_("%s - send sudo I/O log to remote server\n\n"),
+	getprogname());
+    usage(false);
+    (void)puts(_("\nOptions:\n"
+	"  -f, --file               path to configuration file\n"
+	"  -h  --help               display help message and exit\n"
+	"  -n, --no-fork            do not fork, run in the foreground\n"
+	"  -R, --random-drop        percent chance connections will drop\n"
+	"  -V, --version            display version information and exit\n"));
+    exit(0);
+}
+
+static const char short_opts[] = "f:hnR:V";
+static struct option long_opts[] = {
+    { "file",		required_argument,	NULL,	'f' },
+    { "help",		no_argument,		NULL,	'h' },
+    { "no-fork",	no_argument,		NULL,	'n' },
+    { "random-drop",	required_argument,	NULL,	'R' },
+    { "version",	no_argument,		NULL,	'V' },
+    { NULL,		no_argument,		NULL,	0 },
+};
+
+__dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])
@@ -956,11 +990,13 @@ main(int argc, char *argv[])
     if (protobuf_c_version_number() < 1003000)
 	sudo_fatalx(U_("Protobuf-C version 1.3 or higher required"));
 
-    /* XXX - getopt_long option handling */
-    while ((ch = getopt(argc, argv, "f:nR:")) != -1) {
+    while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	case 'f':
 	    conf_file = optarg;
+	    break;
+	case 'h':
+	    help();
 	    break;
 	case 'n':
 	    nofork = true;
@@ -973,8 +1009,12 @@ main(int argc, char *argv[])
                 sudo_fatalx(U_("invalid random drop value: %s"), optarg);
 	    random_drop /= 100.0;	/* convert from percentage */
 	    break;
+	case 'V':
+	    (void)printf(_("%s version %s\n"), getprogname(),
+		PACKAGE_VERSION);
+	    return 0;
 	default:
-	    usage();
+	    usage(true);
 	}
     }
     argc -= optind;
