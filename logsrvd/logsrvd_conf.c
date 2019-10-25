@@ -562,49 +562,15 @@ static struct logsrvd_config_section logsrvd_config_sections[] = {
     { NULL }
 };
 
-/*
- * Read .ini style logsrvd.conf file.
- * Note that we use '#' not ';' for the comment character.
- */
-/* XXX - split into read and apply so we don't overwrite good config with bad */
-bool
-logsrvd_conf_read(const char *path)
+static bool
+logsrvd_conf_parse(FILE *fp, const char *path)
 {
     struct logsrvd_config_section *conf_section = NULL;
     unsigned int lineno = 0;
     size_t linesize = 0;
     char *line = NULL;
-    FILE *fp;
-    debug_decl(read_config, SUDO_DEBUG_UTIL)
-
-    if ((fp = fopen(path, "r")) == NULL) {
-	if (errno == ENOENT)
-	    debug_return_bool(true);
-	sudo_warn("%s", path);
-	debug_return_bool(false);
-    }
-
-    /* Initialize default values for settings that take int values. */
-    logsrvd_conf_reset();
-    logsrvd_config.eventlog.log_type = EVLOG_SYSLOG;
-    logsrvd_config.eventlog.log_format = EVLOG_SUDO;
-    logsrvd_config.syslog.maxlen = 960;
-    if (!cb_syslog_facility(LOGFAC)) {
-	sudo_warnx(U_("unknown syslog facility %s"), LOGFAC);
-	debug_return_bool(false);
-    }
-    if (!cb_syslog_acceptpri(PRI_SUCCESS)) {
-	sudo_warnx(U_("unknown syslog priority %s"), PRI_SUCCESS);
-	debug_return_bool(false);
-    }
-    if (!cb_syslog_rejectpri(PRI_FAILURE)) {
-	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
-	debug_return_bool(false);
-    }
-    if (!cb_syslog_alertpri(PRI_FAILURE)) {
-	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
-	debug_return_bool(false);
-    }
+    bool ret = false;
+    debug_decl(logsrvd_conf_parse, SUDO_DEBUG_UTIL)
 
     while (sudo_parseln(&line, &linesize, &lineno, fp, 0) != -1) {
 	struct logsrvd_config_entry *entry;
@@ -621,7 +587,7 @@ logsrvd_conf_read(const char *path)
 	    if (cp == NULL) {
 		sudo_warnx(U_("%s:%d unmatched '[': %s"),
 		    path, lineno, line);
-		debug_return_bool(false);
+		goto done;
 	    }
 	    *cp = '\0';
 	    for (conf_section = logsrvd_config_sections; conf_section->name != NULL;
@@ -632,7 +598,7 @@ logsrvd_conf_read(const char *path)
 	    if (conf_section->name == NULL) {
 		sudo_warnx(U_("%s:%d invalid config section: %s"),
 		    path, lineno, section_name);
-		debug_return_bool(false);
+		goto done;
 	    }
 	    continue;
 	}
@@ -640,13 +606,13 @@ logsrvd_conf_read(const char *path)
 	if ((ep = strchr(line, '=')) == NULL) {
 	    sudo_warnx(U_("%s:%d invalid configuration line: %s"),
 		path, lineno, line);
-	    debug_return_bool(false);
+	    goto done;
 	}
 
 	if (conf_section == NULL) {
 	    sudo_warnx(U_("%s:%d expected section name: %s"),
 		path, lineno, line);
-	    debug_return_bool(false);
+	    goto done;
 	}
 
 	val = ep + 1;
@@ -660,39 +626,92 @@ logsrvd_conf_read(const char *path)
 		if (!entry->setter(val)) {
 		    sudo_warnx(U_("invalid value for %s: %s"),
 			entry->conf_str, val);
-		    debug_return_bool(false);
+		    goto done;
 		}
 		break;
 	    }
 	}
 	if (entry->conf_str == NULL) {
-	    sudo_warnx(U_("%s:%d unknown key: %s"),
-		path, lineno, line);
-	    debug_return_bool(false);
+	    sudo_warnx(U_("%s:%d unknown key: %s"), path, lineno, line);
+	    goto done;
 	}
+    }
+    ret = true;
+
+done:
+    free(line);
+    debug_return_bool(ret);
+}
+
+/*
+ * Read .ini style logsrvd.conf file.
+ * Note that we use '#' not ';' for the comment character.
+ */
+/* XXX - split into read and apply so we don't overwrite good config with bad */
+bool
+logsrvd_conf_read(const char *path)
+{
+    bool ret = false;
+    FILE *fp = NULL;
+    debug_decl(logsrvd_conf_read, SUDO_DEBUG_UTIL)
+
+    /* Initialize default values for settings that take int values. */
+    logsrvd_conf_reset();
+    logsrvd_config.eventlog.log_type = EVLOG_SYSLOG;
+    logsrvd_config.eventlog.log_format = EVLOG_SUDO;
+    logsrvd_config.syslog.maxlen = 960;
+    if (!cb_syslog_facility(LOGFAC)) {
+	sudo_warnx(U_("unknown syslog facility %s"), LOGFAC);
+	goto done;
+    }
+    if (!cb_syslog_acceptpri(PRI_SUCCESS)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_SUCCESS);
+	goto done;
+    }
+    if (!cb_syslog_rejectpri(PRI_FAILURE)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
+	goto done;
+    }
+    if (!cb_syslog_alertpri(PRI_FAILURE)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
+	goto done;
+    }
+
+    if ((fp = fopen(path, "r")) == NULL) {
+	if (errno != ENOENT) {
+	    sudo_warn("%s", path);
+	    goto done;
+	}
+    } else {
+	if (!logsrvd_conf_parse(fp, path))
+	    goto done;
     }
 
     /* For settings with pointer values we can tell what is unset. */
     if (logsrvd_config.iolog.iolog_dir == NULL) {
 	if (!cb_iolog_dir(_PATH_SUDO_IO_LOGDIR))
-	    debug_return_bool(false);
+	    goto done;
     }
     if (logsrvd_config.iolog.iolog_file == NULL) {
 	if (!cb_iolog_file("%{seq}"))
-	    debug_return_bool(false);
+	    goto done;
     }
     if (TAILQ_EMPTY(&logsrvd_config.server.addresses)) {
 	if (!cb_listen_address("*:30344"))
-	    debug_return_bool(false);
+	    goto done;
     }
     if (logsrvd_config.logfile.time_format == NULL) {
 	if (!cb_logfile_time_format("%h %e %T"))
-	    debug_return_bool(false);
+	    goto done;
     }
     if (logsrvd_config.logfile.path == NULL) {
 	if (!cb_logfile_path(_PATH_SUDO_LOGFILE))
-	    debug_return_bool(false);
+	    goto done;
     }
+    ret = true;
 
-    debug_return_bool(true);
+done:
+    if (fp != NULL)
+	fclose(fp);
+    debug_return_bool(ret);
 }
