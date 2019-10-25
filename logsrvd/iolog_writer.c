@@ -778,8 +778,8 @@ store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 	iofd, (long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->data.len);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to format timing buffer");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to format timing buffer, len %d", len);
 	debug_return_int(-1);
     }
 
@@ -819,8 +819,9 @@ store_suspend(CommandSuspend *msg, struct connection_closure *closure)
 	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->signal);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to format timing buffer");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to format timing buffer, len %d, signal %s",
+	    len, msg->signal);
 	debug_return_int(-1);
     }
 
@@ -851,8 +852,8 @@ store_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->rows, msg->cols);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to format timing buffer");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to format timing buffer, len %d", len);
 	debug_return_int(-1);
     }
 

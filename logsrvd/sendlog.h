@@ -21,6 +21,9 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
+#include "buffer.h"
+
+/* XXX: share with server */
 #define DEFAULT_PORT_STR	"30344"
 
 enum client_state {
@@ -32,14 +35,6 @@ enum client_state {
     SEND_EXIT,
     CLOSING,
     FINISHED
-};
-
-/* TODO: share with server */
-struct connection_buffer {
-    uint8_t *data;		/* pre-allocated data buffer */
-    unsigned int size;		/* currently always UINT16_MAX + 2 */
-    unsigned int len;
-    unsigned int off;
 };
 
 struct client_closure {

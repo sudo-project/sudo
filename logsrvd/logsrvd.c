@@ -102,7 +102,7 @@ connection_closure_free(struct connection_closure *closure)
 static bool
 fmt_server_message(struct connection_buffer *buf, ServerMessage *msg)
 {
-    uint16_t msg_len;
+    uint32_t msg_len;
     bool ret = false;
     size_t len;
     debug_decl(fmt_server_message, SUDO_DEBUG_UTIL)
@@ -114,19 +114,25 @@ fmt_server_message(struct connection_buffer *buf, ServerMessage *msg)
     }
 
     len = server_message__get_packed_size(msg);
-    if (len > UINT16_MAX) {
+    if (len > MESSAGE_SIZE_MAX) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "server message too large: %zu", len);
         goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
-    msg_len = htons((uint16_t)len);
+    msg_len = htonl((uint32_t)len);
     len += sizeof(msg_len);
 
+    /* Resize buffer as needed. */
     if (len > buf->size) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "server message too big for buffer, %zu > %u", len, buf->size);
-	goto done;
+	free(buf->data);
+	buf->size = bufsize_roundup(len);
+	if ((buf->data = malloc(buf->size)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to malloc %u", buf->size);
+	    buf->size = 0;
+	    goto done;
+	}
     }
 
     memcpy(buf->data, &msg_len, sizeof(msg_len));
@@ -633,7 +639,7 @@ client_msg_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
     struct connection_buffer *buf = &closure->read_buf;
-    uint16_t msg_len;
+    uint32_t msg_len;
     ssize_t nread;
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
 
@@ -656,41 +662,48 @@ client_msg_cb(int fd, int what, void *v)
     buf->len += nread;
 
     while (buf->len - buf->off >= sizeof(msg_len)) {
-	/* Read wire message size (uint16_t in network byte order). */
+	/* Read wire message size (uint32_t in network byte order). */
 	memcpy(&msg_len, buf->data + buf->off, sizeof(msg_len));
-	msg_len = ntohs(msg_len);
+	msg_len = ntohl(msg_len);
+
+	if (msg_len > MESSAGE_SIZE_MAX) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"client message too large: %u", msg_len);
+	    closure->errstr = _("client message too large");
+	    goto send_error;
+	}
 
 	if (msg_len + sizeof(msg_len) > buf->len - buf->off) {
 	    /* Incomplete message, we'll read the rest next time. */
-	    /* TODO: realloc if max message size increases */
-	    if (buf->off > 0)
-		memmove(buf->data, buf->data + buf->off, buf->len - buf->off);
-	    break;
+	    if (!expand_buf(buf, msg_len + sizeof(msg_len)))
+		goto finished;
+	    debug_return;
 	}
 
 	/* Parse ClientMessage, could be zero bytes. */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: parsing ClientMessage, size %hu", __func__, msg_len);
+	    "%s: parsing ClientMessage, size %u", __func__, msg_len);
 	buf->off += sizeof(msg_len);
 	if (!handle_client_message(buf->data + buf->off, msg_len, closure)) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to parse ClientMessage, size %hu", msg_len);
-	    if (closure->errstr == NULL)
-		goto finished;
-	    if (!fmt_error_message(closure->errstr, &closure->write_buf))
-		goto finished;
-	    sudo_ev_del(NULL, closure->read_ev);
-	    if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to add server write event");
-		goto finished;
-	    }
+		"unable to parse ClientMessage, size %u", msg_len);
+	    goto send_error;
 	}
 	buf->off += msg_len;
     }
     buf->len -= buf->off;
     buf->off = 0;
     debug_return;
+send_error:
+    if (closure->errstr == NULL)
+	goto finished;
+    if (fmt_error_message(closure->errstr, &closure->write_buf)) {
+	sudo_ev_del(NULL, closure->read_ev);
+	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	}
+    }
 finished:
     connection_closure_free(closure);
     debug_return;
@@ -776,14 +789,9 @@ connection_closure_alloc(int sock)
 
     closure->sock = sock;
 
-    closure->read_buf.size = UINT16_MAX + sizeof(uint16_t);
+    closure->read_buf.size = 64 * 1024;
     closure->read_buf.data = malloc(closure->read_buf.size);
     if (closure->read_buf.data == NULL)
-	goto bad;
-
-    closure->write_buf.size = UINT16_MAX + sizeof(uint16_t);
-    closure->write_buf.data = malloc(closure->write_buf.size);
-    if (closure->write_buf.data == NULL)
 	goto bad;
 
     closure->commit_ev = sudo_ev_alloc(-1, SUDO_EV_TIMEOUT,
@@ -898,7 +906,6 @@ listener_cb(int fd, int what, void *v)
 }
 
 static void
-
 register_listener(struct listen_address *addr, struct sudo_event_base *base)
 {
     struct sudo_event *ev;

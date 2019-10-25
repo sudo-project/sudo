@@ -245,6 +245,8 @@ logsrvd/Makefile.in
 logsrvd/log_server.pb-c.c
 logsrvd/log_server.pb-c.h
 logsrvd/log_server.proto
+logsrvd/buffer.c
+logsrvd/buffer.h
 logsrvd/eventlog.c
 logsrvd/iolog_writer.c
 logsrvd/logsrvd.c

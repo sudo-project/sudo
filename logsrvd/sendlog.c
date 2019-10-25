@@ -216,9 +216,7 @@ read_io_buf(struct client_closure *closure)
     /* Expand buf as needed. */
     if (timing->u.nbytes > closure->bufsize) {
 	free(closure->buf);
-	do {
-	    closure->bufsize *= 2;
-	} while (timing->u.nbytes > closure->bufsize);
+	closure->bufsize = bufsize_roundup(timing->u.nbytes);
 	if ((closure->buf = malloc(closure->bufsize)) == NULL) {
 	    sudo_warn(NULL);
 	    timing->u.nbytes = 0;
@@ -243,24 +241,30 @@ read_io_buf(struct client_closure *closure)
 static bool
 fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
 {
-    uint16_t msg_len;
+    uint32_t msg_len;
     bool ret = false;
     size_t len;
     debug_decl(fmt_client_message, SUDO_DEBUG_UTIL)
 
     len = client_message__get_packed_size(msg);
-    if (len > UINT16_MAX) {
+    if (len > MESSAGE_SIZE_MAX) {
     	sudo_warnx(U_("client message too large: %zu\n"), len);
         goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
-    msg_len = htons((uint16_t)len);
+    msg_len = htonl((uint32_t)len);
     len += sizeof(msg_len);
 
+    /* Resize buffer as needed. */
     if (len > buf->size) {
-	sudo_warnx(U_("client message too large for buffer, %zu > %u"),
-	    len, buf->size);
-	goto done;
+	free(buf->data);
+	buf->size = bufsize_roundup(len);
+	if ((buf->data = malloc(buf->size)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to malloc %u", buf->size);
+	    buf->size = 0;
+	    goto done;
+	}
     }
 
     memcpy(buf->data, &msg_len, sizeof(msg_len));
@@ -319,20 +323,18 @@ fmt_accept_message(struct client_closure *closure)
     TimeSpec tv = TIME_SPEC__INIT;
     InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
     struct iolog_info *log_info = closure->log_info;
-    char hostname[1024];
+    char *hostname;
     bool ret = false;
     size_t n;
     debug_decl(fmt_accept_message, SUDO_DEBUG_UTIL)
 
     /*
      * Fill in AcceptMessage and add it to ClientMessage.
-     * TODO: handle buf large than 64K?
      */
-    if (gethostname(hostname, sizeof(hostname)) == -1) {
+    if ((hostname = sudo_gethostname()) == NULL) {
 	sudo_warn("gethostname");
 	debug_return_bool(false);
     }
-    hostname[sizeof(hostname) - 1] = '\0';
 
     /* Sudo I/O logs only store start time in seconds. */
     tv.tv_sec = log_info->tstamp;
@@ -435,6 +437,7 @@ done:
 	free(accept_msg.info_msgs[n]);
     }
     free(accept_msg.info_msgs);
+    free(hostname);
 
     debug_return_bool(ret);
 }
@@ -843,7 +846,7 @@ handle_server_message(uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx(U_("unable to unpack ServerMessage"));
+	sudo_warnx("%s", U_("unable to unpack ServerMessage"));
 	debug_return_bool(false);
     }
 
@@ -897,11 +900,12 @@ server_msg_cb(int fd, int what, void *v)
     struct client_closure *closure = v;
     struct connection_buffer *buf = &closure->read_buf;
     ssize_t nread;
-    uint16_t msg_len;
+    uint32_t msg_len;
     debug_decl(server_msg_cb, SUDO_DEBUG_UTIL)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
 
+    /* XXX - make common */
     nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
 	__func__, nread);
@@ -912,7 +916,7 @@ server_msg_cb(int fd, int what, void *v)
 	sudo_warn("recv");
 	goto bad;
     case 0:
-	sudo_warnx(U_("premature EOF"));
+	sudo_warnx("%s", U_("premature EOF"));
 	goto bad;
     default:
 	break;
@@ -920,21 +924,25 @@ server_msg_cb(int fd, int what, void *v)
     buf->len += nread;
 
     while (buf->len - buf->off >= sizeof(msg_len)) {
-	/* Read wire message size (uint16_t in network byte order). */
+	/* Read wire message size (uint32_t in network byte order). */
 	memcpy(&msg_len, buf->data + buf->off, sizeof(msg_len));
-	msg_len = ntohs(msg_len);
+	msg_len = ntohl(msg_len);
+
+	if (msg_len > MESSAGE_SIZE_MAX) {
+	    sudo_warnx(U_("server message too large: %u\n"), msg_len);
+	    goto bad;
+	}
 
 	if (msg_len + sizeof(msg_len) > buf->len - buf->off) {
 	    /* Incomplete message, we'll read the rest next time. */
-	    /* TODO: realloc if max message size increases */
-	    if (buf->off > 0)
-		memmove(buf->data, buf->data + buf->off, buf->len - buf->off);
-	    break;
+	    if (!expand_buf(buf, msg_len + sizeof(msg_len)))
+		    goto bad;
+	    debug_return;
 	}
 
 	/* Parse ServerMessage, could be zero bytes. */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: parsing ServerMessage, size %hu", __func__, msg_len);
+	    "%s: parsing ServerMessage, size %u", __func__, msg_len);
 	buf->off += sizeof(msg_len);
 	if (!handle_server_message(buf->data + buf->off, msg_len, closure))
 	    goto bad;
@@ -1005,19 +1013,14 @@ client_closure_fill(struct client_closure *closure, int sock,
     closure->restart = restart;
     closure->iolog_id = iolog_id;
 
-    closure->bufsize = 10240;
+    closure->bufsize = 8 * 1024;
     closure->buf = malloc(closure->bufsize);
     if (closure->buf == NULL)
 	goto bad;
 
-    closure->read_buf.size = UINT16_MAX + sizeof(uint16_t);
+    closure->read_buf.size = 64 * 1024;
     closure->read_buf.data = malloc(closure->read_buf.size);
     if (closure->read_buf.data == NULL)
-	goto bad;
-
-    closure->write_buf.size = UINT16_MAX + sizeof(uint16_t);
-    closure->write_buf.data = malloc(closure->write_buf.size);
-    if (closure->write_buf.data == NULL)
 	goto bad;
 
     closure->read_ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST,
@@ -1138,7 +1141,7 @@ main(int argc, char *argv[])
 
     signal(SIGPIPE, SIG_IGN);
 
-    initprogname(argc > 0 ? argv[0] : "sendlog");
+    initprogname(argc > 0 ? argv[0] : "sudo_sendlog");
     setlocale(LC_ALL, "");
     bindtextdomain("sudo", LOCALEDIR); /* XXX - add logsrvd domain */
     textdomain("sudo");
@@ -1182,7 +1185,7 @@ main(int argc, char *argv[])
     argv += optind;
 
     if (sudo_timespecisset(&restart) != (iolog_id != NULL)) {
-	sudo_warnx(U_("both restart point and iolog ID must be specified"));
+	sudo_warnx("%s", U_("both restart point and iolog ID must be specified"));
 	usage(true);
     }
 

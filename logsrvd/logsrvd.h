@@ -21,7 +21,10 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
+#include "buffer.h"
+
 /* Default listen address (port 30344 on all interfaces). */
+/* XXX: share with client */
 #define DEFAULT_PORT_STR	"30344"
 #define DEFAULT_LISTEN_ADDR	"*:" DEFAULT_PORT_STR
 
@@ -67,16 +70,8 @@ enum connection_status {
     ERROR
 };
 
-struct connection_buffer {
-    uint8_t *data;		/* pre-allocated data buffer */
-    unsigned int size;		/* currently always UINT16_MAX + 2 */
-    unsigned int len;
-    unsigned int off;
-};
-
 /*
  * Per-connection state.
- * TODO: iolog_compress
  */
 struct connection_closure {
     TAILQ_ENTRY(connection_closure) entries;
