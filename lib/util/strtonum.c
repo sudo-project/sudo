@@ -173,8 +173,12 @@ done:
 	    *errstrp = N_("value too large");
 	break;
     }
-    if (endp != NULL)
-	*endp = (char *)(errval == STN_INITIAL ? str : cp - 1);
+    if (endp != NULL) {
+	if (errval == STN_INITIAL || errval == STN_INVALID)
+	    *endp = (char *)str;
+	else
+	    *endp = (char *)(cp - 1);
+    }
     return result;
 }
 
