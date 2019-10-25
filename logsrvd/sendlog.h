@@ -33,25 +33,10 @@
 #define IOFD_TIMING	5
 #define IOFD_MAX	6
 
-#if 0
-struct timing_closure {
-    struct timespec delay;
-    int event;
-    union {
-	struct {
-	    int lines;
-	    int columns;
-	} winsize;
-	size_t nbytes;
-    } u;
-    char *buf;
-    size_t bufsize;
-};
-#endif
-
 enum client_state {
     ERROR,
     RECV_HELLO,
+    SEND_RESTART,
     SEND_EXEC,
     SEND_IO,
     SEND_EXIT,
@@ -68,6 +53,7 @@ struct connection_buffer {
 };
 
 struct client_closure {
+    struct timespec *restart;
     struct timespec elapsed;
     struct timespec committed;
     struct timing_closure timing;
@@ -76,7 +62,7 @@ struct client_closure {
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
     struct iolog_info *log_info;
-    char *iolog_dir;
+    const char *iolog_id;
     char *buf; /* XXX */
     size_t bufsize; /* XXX */
     enum client_state state;

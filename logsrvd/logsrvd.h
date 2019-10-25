@@ -66,10 +66,10 @@ struct iolog_details {
 enum connection_status {
     INITIAL,
     RUNNING,
-    RESTARTING,
     EXITED,
     SHUTDOWN,
-    FLUSHED
+    FLUSHED,
+    ERROR
 };
 
 union sockaddr_union {
@@ -109,6 +109,7 @@ struct connection_closure {
 
 /* iolog.c */
 bool iolog_init(ExecMessage *msg, struct connection_closure *closure);
+bool iolog_restart(RestartMessage *msg, struct connection_closure *closure);
 int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);
 int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);

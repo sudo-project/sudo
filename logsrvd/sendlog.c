@@ -59,7 +59,7 @@
 
 static gzFile io_fds[IOFD_MAX];
 
-/* I/O log file names relative to iolog_dir. */
+/* I/O log file names relative to the iolog dir. */
 /* XXX - duplicated with server */
 static const char *iolog_names[] = {
     "stdin",	/* IOFD_STDIN */
@@ -74,8 +74,8 @@ static const char *iolog_names[] = {
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: %s [-h host] [-p port] /path/to/iolog\n",
-	getprogname());
+    fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] "
+	"[-r restart-point] /path/to/iolog\n", getprogname());
     exit(1);
 }
 
@@ -138,7 +138,7 @@ connect_server(const char *host, const char *port)
 }
 
 /*
- * Free client closure allocated by client_closure_alloc()
+ * Free client closure contents.
  */
 static void
 client_closure_free(struct client_closure *closure)
@@ -151,7 +151,8 @@ client_closure_free(struct client_closure *closure)
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
 	free(closure->buf);
-	free(closure);
+	// XXX - avoid use after free
+	//free(closure);
     }
 
     debug_return;
@@ -432,6 +433,42 @@ done:
 }
 
 /*
+ * Build and format a RestartMessage wrapped in a ClientMessage.
+ * Stores the wire format message in the closure's write buffer.
+ * Returns true on success, false on failure.
+ */
+static bool
+fmt_restart_message(struct client_closure *closure)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    RestartMessage restart_msg = RESTART_MESSAGE__INIT;
+    TimeSpec tv = TIME_SPEC__INIT;
+    bool ret = false;
+    debug_decl(fmt_restart_message, SUDO_DEBUG_UTIL)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending RestartMessage, [%lld, %ld]", __func__,
+	(long long)closure->restart->tv_sec, closure->restart->tv_nsec);
+
+    tv.tv_sec = closure->restart->tv_sec;
+    tv.tv_nsec = closure->restart->tv_nsec;
+    restart_msg.resume_point = &tv;
+    restart_msg.log_id = (char *)closure->iolog_id;
+
+    /* Schedule ClientMessage */
+    client_msg.restart_msg = &restart_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_RESTART_MSG;
+    ret = fmt_client_message(&closure->write_buf, &client_msg);
+    if (ret) {
+	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1)
+	    ret = false;
+    }
+    ret = true;
+
+    debug_return_bool(ret);
+}
+
+/*
  * Build and format an ExitMessage wrapped in a ClientMessage.
  * Stores the wire format message in the closure's write buffer.
  * Returns true on success, false on failure.
@@ -603,6 +640,7 @@ fmt_next_iolog(struct client_closure *closure)
     }
 
     /* TODO: fill write buffer with multiple messages */
+again:
     switch (read_timing_record(timing)) {
     case 0:
 	/* OK */
@@ -614,6 +652,16 @@ fmt_next_iolog(struct client_closure *closure)
     case -1:
     default:
 	debug_return_bool(false);
+    }
+
+    /* Track elapsed time for comparison with commit points. */
+    sudo_timespecadd(&timing->delay, &closure->elapsed, &closure->elapsed);
+
+    /* If we have a restart point, ignore records until we hit it. */
+    if (closure->restart != NULL) {
+	if (sudo_timespeccmp(closure->restart, &closure->elapsed, >=))
+	    goto again;
+	closure->restart = NULL;	/* caught up */
     }
 
     switch (timing->event) {
@@ -643,9 +691,6 @@ fmt_next_iolog(struct client_closure *closure)
 	break;
     }
 
-    /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(&timing->delay, &closure->elapsed, &closure->elapsed);
-
     debug_return_bool(ret);
 }
 
@@ -660,6 +705,7 @@ client_message_completion(struct client_closure *closure)
 
     switch (closure->state) {
     case SEND_EXEC:
+    case SEND_RESTART:
 	closure->state = SEND_IO;
 	/* FALLTHROUGH */
     case SEND_IO:
@@ -744,7 +790,7 @@ handle_log_id(char *id, struct client_closure *closure)
     debug_decl(handle_log_id, SUDO_DEBUG_UTIL)
 
     printf("remote log ID: %s\n", id);
-    if ((closure->iolog_dir = strdup(id)) == NULL)
+    if ((closure->iolog_id = strdup(id)) == NULL)
 	sudo_fatal(NULL);
     debug_return_bool(true);
 }
@@ -797,8 +843,13 @@ handle_server_message(uint8_t *buf, size_t len,
     switch (msg->type_case) {
     case SERVER_MESSAGE__TYPE_HELLO:
 	if ((ret = handle_server_hello(msg->hello, closure))) {
-	    closure->state = SEND_EXEC;
-	    ret = fmt_exec_message(closure);
+	    if (sudo_timespecisset(closure->restart)) {
+		closure->state = SEND_RESTART;
+		ret = fmt_restart_message(closure);
+	    } else {
+		closure->state = SEND_EXEC;
+		ret = fmt_exec_message(closure);
+	    }
 	}
 	break;
     case SERVER_MESSAGE__TYPE_COMMIT_POINT:
@@ -930,19 +981,22 @@ bad:
 }
 
 /*
- * Allocate a new connection closure.
+ * Initialize a new client closure
  */
-static struct client_closure *
-client_closure_alloc(int sock, struct iolog_info *log_info)
+static bool
+client_closure_fill(struct client_closure *closure, int sock,
+    struct timespec *restart, const char *iolog_id,
+    struct iolog_info *log_info)
 {
-    struct client_closure *closure;
-    debug_decl(client_closure_alloc, SUDO_DEBUG_UTIL)
+    debug_decl(client_closure_fill, SUDO_DEBUG_UTIL)
 
-    if ((closure = calloc(1, sizeof(*closure))) == NULL)
-	debug_return_ptr(NULL);
+    memset(closure, 0, sizeof(*closure));
 
     closure->state = RECV_HELLO;
     closure->log_info = log_info;
+
+    closure->restart = restart;
+    closure->iolog_id = iolog_id;
 
     closure->bufsize = 10240;
     closure->buf = malloc(closure->bufsize);
@@ -969,10 +1023,10 @@ client_closure_alloc(int sock, struct iolog_info *log_info)
     if (closure->write_ev == NULL)
 	goto bad;
 
-    debug_return_ptr(closure);
+    debug_return_bool(true);
 bad:
     client_closure_free(closure);
-    debug_return_ptr(NULL);
+    debug_return_bool(false);
 }
 
 /*
@@ -1003,16 +1057,55 @@ iolog_open_all(const char *iolog_path)
     debug_return_bool(true);
 }
 
+/*
+ * Parse a timespec on the command line of the form
+ * seconds[,nanoseconds]
+ */
+static bool
+parse_timespec(struct timespec *ts, const char *strval)
+{
+    long long tv_sec;
+    long tv_nsec;
+    char *ep;
+    debug_decl(parse_timespec, SUDO_DEBUG_UTIL)
+
+    errno = 0;
+    tv_sec = strtoll(strval, &ep, 10);
+    if (strval == ep || (*ep != ',' && *ep != '\0'))
+	debug_return_bool(false);
+#if TIME_T_MAX != LLONG_MAX
+    if (tv_sec > TIME_T_MAX)
+	debug_return_bool(false);
+#endif
+    if (tv_sec < 0 || (errno == ERANGE && tv_sec == LLONG_MAX))
+	debug_return_bool(false);
+    strval = ep + 1;
+
+    errno = 0;
+    tv_nsec = strtol(strval, &ep, 10);
+    if (strval == ep || *ep != '\0')
+	debug_return_bool(false);
+    if (tv_nsec < 0 || (errno == ERANGE && tv_nsec == LONG_MAX))
+	debug_return_bool(false);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: parsed timespec [%lld, %ld]",
+	__func__, tv_sec, tv_nsec);
+    ts->tv_sec = (time_t)tv_sec;
+    ts->tv_nsec = tv_nsec;
+    debug_return_bool(true);
+}
+
 int
 main(int argc, char *argv[])
 {
-    struct client_closure *closure;
+    struct client_closure closure;
     struct sudo_event_base *evbase;
     struct iolog_info *log_info;
     const char *host = "localhost";
     const char *port = DEFAULT_PORT_STR;
-    char fname[PATH_MAX];
-    char *iolog_path;
+    struct timespec restart = { 0, 0 };
+    char fname[PATH_MAX], *iolog_path;
+    const char *iolog_id = NULL;
     int ch, sock;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
@@ -1030,13 +1123,20 @@ main(int argc, char *argv[])
     if (protobuf_c_version_number() < 1003000)
 	sudo_fatalx("Protobuf-C version 1.3 or higher required");
 
-    while ((ch = getopt(argc, argv, "h:p:")) != -1) {
+    while ((ch = getopt(argc, argv, "h:i:p:r:")) != -1) {
 	switch (ch) {
 	case 'h':
 	    host = optarg;
 	    break;
+	case 'i':
+	    iolog_id = optarg;
+	    break;
 	case 'p':
 	    port = optarg;
+	    break;
+	case 'r':
+	    if (!parse_timespec(&restart, optarg))
+		goto bad;
 	    break;
 	default:
 	    usage();
@@ -1044,6 +1144,11 @@ main(int argc, char *argv[])
     }
     argc -= optind;
     argv += optind;
+
+    if (sudo_timespecisset(&restart) != (iolog_id != NULL)) {
+	sudo_warnx("must specify both restart point and iolog ID");
+	usage();
+    }
 
     /* Remaining arg should be path to I/O log file to send. */
     if (argc != 1)
@@ -1071,22 +1176,20 @@ main(int argc, char *argv[])
 	sudo_fatal(NULL);
     sudo_ev_base_setdef(evbase);
 
-    if ((closure = client_closure_alloc(sock, log_info)) == NULL)
+    if (!client_closure_fill(&closure, sock, &restart, iolog_id, log_info))
 	goto bad;
 
     /* Add read event for the server hello message and enter event loop. */
-    if (sudo_ev_add(evbase, closure->read_ev, NULL, false) == -1)
+    if (sudo_ev_add(evbase, closure.read_ev, NULL, false) == -1)
 	goto bad;
     sudo_ev_dispatch(evbase);
 
-    if (!sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
-	sudo_warnx("commit point mismatch, expected [%lld, %ld], got [%lld, %ld]",
-	    (long long)closure->elapsed.tv_sec, closure->elapsed.tv_nsec, 
-	    (long long)closure->committed.tv_sec, closure->committed.tv_nsec);
-    }
-
-    if (closure->state != FINISHED) {
-	sudo_warnx("exited prematurely with state %d", closure->state);
+    if (closure.state != FINISHED) {
+	sudo_warnx("exited prematurely with state %d", closure.state);
+	sudo_warnx("elapsed time sent to server [%lld, %ld]",
+	    (long long)closure.elapsed.tv_sec, closure.elapsed.tv_nsec);
+	sudo_warnx("commit point received from server [%lld, %ld]",
+	    (long long)closure.committed.tv_sec, closure.committed.tv_nsec);
 	goto bad;
     }
     printf("I/O log transmitted successfully\n");

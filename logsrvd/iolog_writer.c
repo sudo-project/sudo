@@ -42,7 +42,7 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 #include "sudo_fatal.h"
-#include "iolog.h"
+#include "iolog_util.h"
 #include "logsrvd.h"
 
 /* I/O log file names relative to iolog_dir. */
@@ -294,7 +294,7 @@ create_iolog_dir(struct iolog_details *details, struct connection_closure *closu
     closure->iolog_dir_fd = open(closure->iolog_dir, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s", path);
+	    "%s", closure->iolog_dir);
 	goto bad;
     }
 
@@ -412,6 +412,151 @@ iolog_init(ExecMessage *msg, struct connection_closure *closure)
 
     /* Ready to log I/O buffers. */
     debug_return_bool(true);
+}
+
+/*
+ * Read the next record from the timing file.
+ * Return 0 on success, 1 on EOF and -1 on error.
+ */
+static int
+read_timing_record(FILE *fp, struct timing_closure *timing)
+{
+    char line[LINE_MAX];
+    debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
+
+    /* Read next record from timing file. */
+    if (fgets(line, sizeof(line), fp) == NULL) {
+	/* EOF or error reading timing file, we are done. */
+	if (feof(fp))
+	    debug_return_int(1);	/* EOF */
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "error reading timing file");
+	debug_return_int(-1);
+    }
+
+    /* Parse timing file record. */
+    line[strcspn(line, "\n")] = '\0';
+    if (!parse_timing(line, timing)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "invalid timing file line: %s", line);
+	debug_return_int(-1);
+    }
+
+    debug_return_int(0);
+}
+
+bool
+iolog_restart(RestartMessage *msg, struct connection_closure *closure)
+{
+    struct timespec target;
+    struct timing_closure timing;
+    FILE *fp = NULL;
+    int i, fd;
+    off_t length;
+    debug_decl(iolog_init, SUDO_DEBUG_UTIL)
+
+    target.tv_sec = msg->resume_point->tv_sec;
+    target.tv_nsec = msg->resume_point->tv_nsec;
+
+    /* We use iolog_dir_fd in calls to openat(2) */
+    if ((closure->iolog_dir = strdup(msg->log_id)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "strdup");
+	goto bad;
+    }
+    closure->iolog_dir_fd = open(closure->iolog_dir, O_RDONLY);
+    if (closure->iolog_dir_fd == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "%s", closure->iolog_dir);
+	goto bad;
+    }
+
+    /* Open existing I/O log files. */
+    for (i = 0; i < IOFD_MAX; i++) {
+	closure->io_fds[i] = openat(closure->iolog_dir_fd, iolog_names[i],
+	    O_RDWR, 0600);
+    }
+
+    /* Dup IOFD_TIMING to a stream for easier processing. */
+    if (closure->io_fds[IOFD_TIMING] == -1)
+	goto bad;
+    if ((fd = dup(closure->io_fds[IOFD_TIMING])) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "dup");
+	goto bad;
+    }
+    if ((fp = fdopen(fd, "r")) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "fdopen");
+	goto bad;
+    }
+
+    /* Parse timing file until we reach the target point. */
+    /* XXX - split up */
+    for (;;) {
+	if (read_timing_record(fp, &timing) != 0)
+	    goto bad;
+	sudo_timespecadd(&timing.delay, &closure->elapsed_time,
+	    &closure->elapsed_time);
+	if (timing.event < IOFD_TIMING) {
+	    if (closure->io_fds[timing.event] == -1) {
+		/* Missing log file. */
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "iofd %d referenced but not open", timing.event);
+		goto bad;
+	    }
+	    length = lseek(closure->io_fds[timing.event], timing.u.nbytes,
+		SEEK_CUR);
+	    if (length == -1) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "lseek(%d, %lld, SEEK_CUR", closure->io_fds[timing.event],
+		    (long long)timing.u.nbytes);
+		goto bad;
+	    }
+	    if (ftruncate(closure->io_fds[timing.event], length) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "ftruncate(%d, %lld)", closure->io_fds[IOFD_TIMING], length);
+		goto bad;
+	    }
+	}
+	if (sudo_timespeccmp(&closure->elapsed_time, &target, >=)) {
+	    if (sudo_timespeccmp(&closure->elapsed_time, &target, ==))
+		break;
+
+	    /* Mismatch between resume point and stored log. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"resume point mismatch, target [%lld, %ld], have [%lld, %ld]",
+		(long long)target.tv_sec, target.tv_nsec,
+		(long long)closure->elapsed_time.tv_sec,
+		closure->elapsed_time.tv_nsec);
+	    goto bad;
+	}
+    }
+    /* Update timing file position after determining resume point. */
+#ifdef HAVE_FSEEKO
+    length = ftello(fp);
+#else
+    length = ftell(fp);
+#endif
+    fclose(fp);
+    if (lseek(closure->io_fds[IOFD_TIMING], length, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "lseek(%d, %lld, SEEK_SET", closure->io_fds[IOFD_TIMING], length);
+	goto bad;
+    }
+    if (ftruncate(closure->io_fds[IOFD_TIMING], length) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "ftruncate(%d, %lld)", closure->io_fds[IOFD_TIMING], length);
+	goto bad;
+    }
+
+    /* Ready to log I/O buffers. */
+    debug_return_bool(true);
+bad:
+    if (fp != NULL)
+	fclose(fp);
+    debug_return_bool(false);
 }
 
 static bool

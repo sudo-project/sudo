@@ -156,6 +156,18 @@ fmt_log_id_message(const char *id, struct connection_buffer *buf)
     debug_return_bool(fmt_server_message(buf, &msg));
 }
 
+static bool
+fmt_error_message(const char *errstr, struct connection_buffer *buf)
+{
+    ServerMessage msg = SERVER_MESSAGE__INIT;
+    debug_decl(fmt_error_message, SUDO_DEBUG_UTIL)
+
+    msg.error = (char *)errstr;
+    msg.type_case = SERVER_MESSAGE__TYPE_ERROR;
+
+    debug_return_bool(fmt_server_message(buf, &msg));
+}
+
 /*
  * Parse an ExecMessage
  */
@@ -211,6 +223,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 	    "unexpected state %d", closure->state);
 	debug_return_bool(false);
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExitMessage", __func__);
 
     /* Sudo I/O logs don't store this info. */
     if (msg->signal != NULL && msg->signal[0] != '\0') {
@@ -250,12 +263,26 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 	    "unexpected state %d", closure->state);
 	debug_return_bool(false);
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RestartMessage for %s",
+	__func__, msg->log_id);
 
-    /* TODO */
-    closure->state = RESTARTING;
-    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	"server restart not implemented");
-    debug_return_bool(false);
+    if (!iolog_restart(msg, closure)) {
+	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log", __func__);
+	/* XXX - structured error message so client can send from beginning */
+	if (!fmt_error_message("unable to restart log", &closure->write_buf))
+	    debug_return_bool(false);
+	sudo_ev_del(NULL, closure->read_ev);
+	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    debug_return_bool(false);
+	}
+	closure->state = ERROR;
+	debug_return_bool(true);
+    }
+
+    closure->state = RUNNING;
+    debug_return_bool(true);
 }
 
 static bool
@@ -491,7 +518,8 @@ server_msg_cb(int fd, int what, void *v)
 	buf->off = 0;
 	buf->len = 0;
 	sudo_ev_del(NULL, closure->write_ev);
-	if (closure->state == FLUSHED || closure->state == SHUTDOWN)
+	if (closure->state == FLUSHED || closure->state == SHUTDOWN ||
+		closure->state == ERROR)
 	    goto finished;
     }
     debug_return;
