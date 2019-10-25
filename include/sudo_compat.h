@@ -479,7 +479,12 @@ __dso_public int sudo_mkstemps(char *path, int slen);
 __dso_public int sudo_nanosleep(const struct timespec *timeout, struct timespec *remainder);
 #undef nanosleep
 # define nanosleep(_a, _b) sudo_nanosleep((_a), (_b))
-#endif
+#endif /* HAVE_NANOSLEEP */
+#ifndef HAVE_OPENAT
+__dso_public int sudo_openat(int dfd, const char *path, int flags, mode_t mode);
+# undef openat
+# define openat(_a, _b, _c, _d) sudo_openat((_a), (_b), (_c), (_d))
+#endif /* HAVE_OPENAT */
 #ifndef HAVE_PW_DUP
 __dso_public struct passwd *sudo_pw_dup(const struct passwd *pw);
 # undef pw_dup
@@ -530,5 +535,10 @@ __dso_public int sudo_pipe2(int fildes[2], int flags);
 # undef pipe2
 # define pipe2(_a, _b) sudo_pipe2((_a), (_b))
 #endif /* HAVE_PIPE2 */
+#ifndef HAVE_UNLINKAT
+__dso_public int sudo_unlinkat(int dfd, const char *path, int flag);
+# undef unlinkat
+# define unlinkat(_a, _b, _c) sudo_unlinkat((_a), (_b), (_c))
+#endif /* HAVE_UNLINKAT */
 
 #endif /* SUDO_COMPAT_H */

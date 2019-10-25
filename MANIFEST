@@ -119,6 +119,7 @@ lib/util/mksigname.c
 lib/util/mksigname.h
 lib/util/mktemp.c
 lib/util/nanosleep.c
+lib/util/openat.c
 lib/util/parseln.c
 lib/util/pipe2.c
 lib/util/progname.c
@@ -195,6 +196,7 @@ lib/util/sudo_dso.c
 lib/util/term.c
 lib/util/ttyname_dev.c
 lib/util/ttysize.c
+lib/util/unlinkat.c
 lib/util/util.exp.in
 lib/util/utimens.c
 lib/util/vsyslog.c
