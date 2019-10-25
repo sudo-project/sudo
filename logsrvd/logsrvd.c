@@ -1022,6 +1022,13 @@ main(int argc, char *argv[])
     int ch;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
+#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
+    {
+	extern char *malloc_options;
+	malloc_options = "S";
+    }
+#endif
+
     initprogname(argc > 0 ? argv[0] : "sudo_logsrvd");
     setlocale(LC_ALL, "");
     bindtextdomain("sudo", LOCALEDIR); /* XXX - add logsrvd domain */

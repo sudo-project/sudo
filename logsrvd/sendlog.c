@@ -1129,6 +1129,13 @@ main(int argc, char *argv[])
     FILE *fp;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
+#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
+    {
+	extern char *malloc_options;
+	malloc_options = "S";
+    }
+#endif
+
     signal(SIGPIPE, SIG_IGN);
 
     initprogname(argc > 0 ? argv[0] : "sendlog");
