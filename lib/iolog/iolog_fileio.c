@@ -246,6 +246,22 @@ io_mkdtemp(char *path)
 }
 
 /*
+ * Reset I/O log settings to default values.
+ */
+void
+iolog_set_defaults(void)
+{
+    sessid_max = SESSID_MAX;
+    iolog_filemode = S_IRUSR|S_IWUSR;
+    iolog_dirmode = S_IRWXU;
+    iolog_uid = ROOT_UID;
+    iolog_gid = ROOT_GID;
+    iolog_gid_set = false;
+    iolog_compress = false;
+    iolog_flush = false;
+}
+
+/*
  * Set max sequence number (aka session ID)
  */
 bool

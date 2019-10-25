@@ -64,14 +64,6 @@ static const char server_id[] = "Sudo Audit Server 0.1";
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
 static double random_drop;
 
-union sockaddr_union {
-    struct sockaddr sa;
-    struct sockaddr_in sin;
-#ifdef HAVE_STRUCT_IN6_ADDR
-    struct sockaddr_in6 sin6;
-#endif
-};
-
 /*
  * Free a struct connection_closure container and its contents.
  */
@@ -791,41 +783,19 @@ bad:
 }
 
 static int
-create_listener(sa_family_t family, in_port_t port)
+create_listener(struct listen_address *addr)
 {
-    union sockaddr_union s_un;
-    socklen_t salen;
     int flags, i, sock;
     debug_decl(create_listener, SUDO_DEBUG_UTIL)
 
-    memset(&s_un, 0, sizeof(s_un));
-    switch (family) {
-    case AF_INET:
-	s_un.sin.sin_family = AF_INET;
-	s_un.sin.sin_addr.s_addr = INADDR_ANY;
-	s_un.sin.sin_port = htons(port);
-	salen = sizeof(s_un.sin);
-	break;
-#ifdef HAVE_STRUCT_IN6_ADDR
-    case AF_INET6:
-	s_un.sin6.sin6_family = AF_INET6;
-	s_un.sin6.sin6_addr = in6addr_any;
-	s_un.sin6.sin6_port = htons(port);
-	salen = sizeof(s_un.sin6);
-	break;
-#endif
-    default:
-	debug_return_int(-1);
-    }
-
-    if ((sock = socket(family, SOCK_STREAM, 0)) == -1) {
+    if ((sock = socket(addr->sa_un.sa.sa_family, SOCK_STREAM, 0)) == -1) {
 	sudo_warn("socket");
 	goto bad;
     }
     i = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i)) == -1)
 	sudo_warn("SO_REUSEADDR");
-    if (bind(sock, &s_un.sa, salen) == -1) {
+    if (bind(sock, &addr->sa_un.sa, addr->sa_len) == -1) {
 	sudo_warn("bind");
 	goto bad;
     }
@@ -873,13 +843,14 @@ listener_cb(int fd, int what, void *v)
 }
 
 static void
-register_listener(sa_family_t family, in_port_t port, struct sudo_event_base *base)
+
+register_listener(struct listen_address *addr, struct sudo_event_base *base)
 {
     struct sudo_event *ev;
     int sock;
     debug_decl(register_listener, SUDO_DEBUG_UTIL)
 
-    sock = create_listener(family, port);
+    sock = create_listener(addr);
     if (sock != -1) {
 	ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, base);
 	if (ev == NULL)
@@ -961,6 +932,7 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
+    struct listen_address *addr;
     struct sudo_event_base *evbase;
     bool nofork = false;
     char *ep;
@@ -1019,12 +991,8 @@ main(int argc, char *argv[])
 	sudo_fatal(NULL);
     sudo_ev_base_setdef(evbase);
 
-    register_listener(AF_INET, DEFAULT_PORT, evbase);
-#ifdef HAVE_STRUCT_IN6_ADDR
-    register_listener(AF_INET6, DEFAULT_PORT, evbase);
-#endif
-    if (TAILQ_EMPTY(&evbase->events))
-	debug_return_int(-1);
+    TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries)
+	register_listener(addr, evbase);
 
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);

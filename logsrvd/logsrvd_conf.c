@@ -18,11 +18,14 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 #include <errno.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <netdb.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -34,6 +37,10 @@
 #include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
+
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
 
 #include "log_server.pb-c.h"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
@@ -68,6 +75,34 @@ logsrvd_conf_iolog_file(void)
     return logsrvd_iolog_file;
 }
 
+static struct listen_address_list addresses = TAILQ_HEAD_INITIALIZER(addresses);
+
+struct listen_address_list *
+logsrvd_conf_listen_address(void)
+{
+    return &addresses;
+}
+
+static void
+logsrvd_conf_reset(void)
+{
+    struct listen_address *addr;
+    debug_decl(logsrvd_conf_reset, SUDO_DEBUG_UTIL)
+
+    iolog_set_defaults();
+    free(logsrvd_iolog_dir);
+    logsrvd_iolog_dir = NULL;
+    free(logsrvd_iolog_file);
+    logsrvd_iolog_file = NULL;
+
+    while ((addr = TAILQ_FIRST(&addresses))) {
+        TAILQ_REMOVE(&addresses, addr, entries);
+	free(addr);
+    }
+
+    debug_return;
+}
+
 static bool
 cb_iolog_dir(const char *path)
 {
@@ -75,8 +110,7 @@ cb_iolog_dir(const char *path)
 
     free(logsrvd_iolog_dir);
     if ((logsrvd_iolog_dir = strdup(path)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "strdup");
+	sudo_warn(NULL);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -89,8 +123,7 @@ cb_iolog_file(const char *path)
 
     free(logsrvd_iolog_file);
     if ((logsrvd_iolog_file = strdup(path)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "strdup");
+	sudo_warn(NULL);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -154,6 +187,81 @@ cb_iolog_mode(const char *str)
     debug_return_bool(iolog_set_mode(mode));
 }
 
+/* TODO: unit test */
+static bool
+cb_listen_address(const char *str)
+{
+    struct addrinfo hints, *res, *res0 = NULL;
+    char *copy, *host, *port;
+    bool ret = false;
+    int error;
+    debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL)
+
+    if ((copy = strdup(str)) == NULL) {
+	sudo_warn(NULL);
+	debug_return_bool(false);
+    }
+    host = copy;
+
+    /* Check for IPv6 address like [::0] followed by optional port */
+    if (*host == '[') {
+	host++;
+	port = strchr(host, ']');
+	if (port == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"invalid IPv6 address %s", str);
+	    goto done;
+	}
+	*port++ = '\0';
+	if (*port == ':') {
+	    port++;
+	} else if (*port == '\0') {
+	    port = NULL;		/* no port specified */
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"invalid IPv6 address %s", str);
+	    goto done;
+	}
+    } else {
+	port = strrchr(host, ':');
+	if (port != NULL)
+	    *port++ = '\0';
+    }
+
+    if (port == NULL)
+	port = DEFAULT_PORT_STR;
+    if (host[0] == '*' && host[1] == '\0')
+	host = NULL;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+    error = getaddrinfo(host, port, &hints, &res0);
+    if (error != 0) {
+	sudo_warnx("%s", gai_strerror(error));
+	goto done;
+    }
+    for (res = res0; res != NULL; res = res->ai_next) {
+	struct listen_address *addr;
+
+	if ((addr = malloc(sizeof(*addr))) == NULL) {
+	    sudo_warn(NULL);
+	    goto done;
+	}
+	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
+	addr->sa_len = res->ai_addrlen;
+	TAILQ_INSERT_TAIL(&addresses, addr, entries);
+    }
+
+    ret = true;
+done:
+    if (res0 != NULL)
+	freeaddrinfo(res0);
+    free(copy);
+    debug_return_bool(ret);
+}
+
 static bool
 cb_maxseq(const char *str)
 {
@@ -168,11 +276,13 @@ static struct logsrvd_config_table conf_table[] = {
     { "iolog_user", cb_iolog_user },
     { "iolog_group", cb_iolog_group },
     { "iolog_mode", cb_iolog_mode },
+    { "listen_address", cb_listen_address },
     { "maxseq", cb_maxseq },
     { NULL }
 };
 
-void
+/* XXX - on reload we should preserve old config if there is an error */
+bool
 logsrvd_conf_read(const char *path)
 {
     unsigned int lineno = 0;
@@ -182,10 +292,13 @@ logsrvd_conf_read(const char *path)
     debug_decl(read_config, SUDO_DEBUG_UTIL)
 
     if ((fp = fopen(path, "r")) == NULL) {
-	if (errno != ENOENT)
-	    sudo_warn("%s", path);
-	debug_return;
+	if (errno == ENOENT)
+	    debug_return_bool(true);
+	sudo_warn("%s", path);
+	debug_return_bool(false);
     }
+
+    logsrvd_conf_reset();
 
     while (sudo_parseln(&line, &linesize, &lineno, fp, 0) != -1) {
 	struct logsrvd_config_table *ct;
@@ -196,7 +309,7 @@ logsrvd_conf_read(const char *path)
 	    continue;
 	if ((ep = strchr(line, '=')) == NULL) {
 	    sudo_warnx("%s:%d invalid setting %s", path, lineno, line);
-	    continue;
+	    debug_return_bool(false);
 	}
 
 	val = ep + 1;
@@ -207,18 +320,32 @@ logsrvd_conf_read(const char *path)
 	*ep = '\0';
 	for (ct = conf_table; ct->conf_str != NULL; ct++) {
 	    if (strcmp(line, ct->conf_str) == 0) {
-		if (!ct->setter(val))
+		if (!ct->setter(val)) {
 		    sudo_warnx("invalid value for %s: %s", ct->conf_str, val);
+		    debug_return_bool(false);
+		}
 		break;
 	    }
 	}
     }
 
     /* All the others have default values. */
-    if (logsrvd_iolog_dir == NULL)
-	logsrvd_iolog_dir = strdup(_PATH_SUDO_IO_LOGDIR);
-    if (logsrvd_iolog_file == NULL)
-	logsrvd_iolog_file = strdup("%{seq}");
+    if (logsrvd_iolog_dir == NULL) {
+	if ((logsrvd_iolog_dir = strdup(_PATH_SUDO_IO_LOGDIR)) == NULL) {
+	    sudo_warn(NULL);
+	    debug_return_bool(false);
+	}
+    }
+    if (logsrvd_iolog_file == NULL) {
+	if ((logsrvd_iolog_file = strdup("%{seq}")) == NULL) {
+	    sudo_warn(NULL);
+	    debug_return_bool(false);
+	}
+    }
+    if (TAILQ_EMPTY(&addresses)) {
+	if (!cb_listen_address("*:30344"))
+	    debug_return_bool(false);
+    }
 
-    debug_return;
+    debug_return_bool(true);
 }

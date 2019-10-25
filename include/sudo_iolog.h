@@ -129,10 +129,11 @@ bool iolog_set_user(const struct passwd *pw);
 bool iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info, char * const argv[]);
 char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
 const char *iolog_fd_to_name(int iofd);
+int iolog_openat(int fdf, const char *path, int flags);
 off_t iolog_seek(struct iolog_file *iol, off_t offset, int whence);
 size_t mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize);
 ssize_t iolog_read(struct iolog_file *iol, void *buf, size_t nbytes, const char **errstr);
 ssize_t iolog_write(struct iolog_file *iol, const void *buf, size_t len, const char **errstr);
-int iolog_openat(int fdf, const char *path, int flags);
+void iolog_set_defaults(void);
 
 #endif /* SUDO_IOLOG_H */
