@@ -37,7 +37,7 @@
 #include "sudoers.h"
 #include "def_data.c"		/* for iolog_path.c */
 #include "sudo_plugin.h"
-#include "iolog.h"
+#include "iolog_util.h"
 
 extern struct io_plugin sudoers_io;
 
@@ -85,7 +85,7 @@ bool
 validate_iolog_info(const char *logfile)
 {
     time_t now;
-    struct log_info *info;
+    struct iolog_info *info;
 
     time(&now);
 
@@ -123,8 +123,8 @@ validate_iolog_info(const char *logfile)
 	return false;
     }
 
-    if (info->rows != 24) {
-	sudo_warnx("bad rows: want 24 got %d", info->rows);
+    if (info->lines != 24) {
+	sudo_warnx("bad lines: want 24 got %d", info->lines);
 	return false;
     }
 
@@ -139,7 +139,7 @@ validate_iolog_info(const char *logfile)
 	return false;
     }
 
-    free_log_info(info);
+    free_iolog_info(info);
 
     return true;
 }
@@ -149,14 +149,13 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 {
     struct timing_closure timing;
     char buf[LINE_MAX];
-    struct timespec delay;
 
     if (!fgets(buf, sizeof(buf), fp)) {
 	sudo_warn("unable to read timing file");
 	return false;
     }
     buf[strcspn(buf, "\n")] = '\0';
-    if (!parse_timing(buf, &delay, &timing)) {
+    if (!parse_timing(buf, &timing)) {
 	sudo_warnx("invalid timing file line: %s", buf);
 	return false;
     }
@@ -166,9 +165,9 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 	return false;
     }
     if (type == IO_EVENT_WINSIZE) {
-	if (timing.u.winsize.rows != (int)p1) {
-	    sudo_warnx("record %d: want %u rows, got %u", recno, p1,
-		timing.u.winsize.rows);
+	if (timing.u.winsize.lines != (int)p1) {
+	    sudo_warnx("record %d: want %u lines, got %u", recno, p1,
+		timing.u.winsize.lines);
 	    return false;
 	}
 	if (timing.u.winsize.cols != (int)p2) {
@@ -183,9 +182,9 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 	    return false;
 	}
     }
-    if (delay.tv_sec != 0 || delay.tv_nsec > 10000000) {
+    if (timing.delay.tv_sec != 0 || timing.delay.tv_nsec > 10000000) {
 	sudo_warnx("record %d: got excessive delay %lld.%09ld", recno,
-	    (long long)delay.tv_sec, delay.tv_nsec);
+	    (long long)timing.delay.tv_sec, timing.delay.tv_nsec);
 	return false;
     }
 

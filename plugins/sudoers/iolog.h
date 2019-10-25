@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,42 +47,5 @@ union io_fd {
 #endif
     void *v;
 };
-
-/*
- * Info present in the I/O log file
- */
-struct log_info {
-    char *cwd;
-    char *user;
-    char *runas_user;
-    char *runas_group;
-    char *tty;
-    char *cmd;
-    time_t tstamp;
-    int rows;
-    int cols;
-};
-
-struct timing_closure {
-    const char *decimal;
-    struct timespec *max_delay;
-    union io_fd fd;
-    int event;
-    union {
-	struct {
-	    int rows;
-	    int cols;
-	} winsize;
-	size_t nbytes; // XXX
-	int signo;
-    } u;
-};
-
-/* iolog_util.c */
-bool parse_timing(const char *buf, struct timespec *delay, struct timing_closure *timing);
-char *parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
-struct log_info *parse_logfile(const char *logfile);
-void free_log_info(struct log_info *li);
-void adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
 
 #endif /* SUDOERS_IOLOG_H */

@@ -54,8 +54,22 @@
 #include "sudo_util.h"
 #include "sudo_event.h"
 #include "sudo_fatal.h"
-#include "iolog.h"
+#include "iolog_util.h"
 #include "sendlog.h"
+
+static gzFile io_fds[IOFD_MAX];
+
+/* I/O log file names relative to iolog_dir. */
+/* XXX - duplicated with server */
+static const char *iolog_names[] = {
+    "stdin",	/* IOFD_STDIN */
+    "stdout",	/* IOFD_STDOUT */
+    "stderr",	/* IOFD_STDERR */
+    "ttyin",	/* IOFD_TTYIN  */
+    "ttyout",	/* IOFD_TTYOUT */
+    "timing",	/* IOFD_TIMING */
+    NULL	/* IOFD_MAX */
+};
 
 static void
 usage(void)
@@ -135,11 +149,85 @@ client_closure_free(struct client_closure *closure)
 	sudo_ev_free(closure->write_ev);
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
-	free(closure->timing.buf);
+	free(closure->buf);
 	free(closure);
     }
 
     debug_return;
+}
+
+/*
+ * Read the next record from the timing file.
+ * Return 0 on success, 1 on EOF and -1 on error.
+ */
+int
+read_timing_record(struct timing_closure *timing)
+{
+    const char *errstr;
+    char line[LINE_MAX];
+    int errnum;
+    debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
+
+    /* Read next record from timing file. */
+    if (gzgets(io_fds[IOFD_TIMING], line, sizeof(line)) == NULL) {
+	/* EOF or error reading timing file, we are done. */
+	if (gzeof(io_fds[IOFD_TIMING]))
+	    debug_return_int(1);	/* EOF */
+	if ((errstr = gzerror(io_fds[IOFD_TIMING], &errnum)) == NULL)
+	    errstr = strerror(errno);
+	sudo_warnx("error reading timing file: %s", errstr);
+	debug_return_int(-1);
+    }
+
+    /* Parse timing file record. */
+    line[strcspn(line, "\n")] = '\0';
+    if (!parse_timing(line, timing)) {
+	sudo_warnx("invalid timing file line: %s", line);
+	debug_return_int(-1);
+    }
+
+    debug_return_int(0);
+}
+
+/*
+ * Read the next I/O buffer as described by closure->timing.
+ */
+static bool
+read_io_buf(struct client_closure *closure)
+{
+    struct timing_closure *timing = &closure->timing;
+    size_t nread;
+    debug_decl(read_io_buf, SUDO_DEBUG_UTIL)
+
+    if (io_fds[timing->event] == NULL) {
+	sudo_warnx("%s file not open", iolog_names[timing->event]);
+	debug_return_bool(false);
+    }
+
+    /* Expand buf as needed. */
+    if (timing->u.nbytes > closure->bufsize) {
+	free(closure->buf);
+	do {
+	    closure->bufsize *= 2;
+	} while (timing->u.nbytes > closure->bufsize);
+	if ((closure->buf = malloc(closure->bufsize)) == NULL) {
+	    sudo_warn("malloc %zu", closure->bufsize);
+	    timing->u.nbytes = 0;
+	    debug_return_bool(false);
+	}
+    }
+
+    nread = gzread(io_fds[timing->event], closure->buf, timing->u.nbytes);
+    if (nread != timing->u.nbytes) {
+	int errnum;
+	const char *errstr;
+
+	if ((errstr = gzerror(io_fds[timing->event], &errnum)) == NULL)
+	    errstr = strerror(errno);
+	sudo_warnx("unable to read %s file: %s", iolog_names[timing->event], errstr);
+	debug_return_bool(false);
+    }
+    debug_return_bool(true);
 }
 
 /*
@@ -178,6 +266,40 @@ done:
 }
 
 /*
+ * Split command + args into an array of strings.
+ * Returns an array containing command and args, reusing space in "command".
+ * Note that the returned array does not end with a terminating NULL.
+ */
+static char **
+split_command(char *command, size_t *lenp)
+{
+    char *cp;
+    char **args;
+    size_t len;
+    debug_decl(split_command, SUDO_DEBUG_UTIL)
+
+    for (cp = command, len = 0;;) {
+	len++;
+	if ((cp = strchr(cp, ' ')) == NULL)
+	    break;
+	cp++;
+    }
+    args = reallocarray(NULL, len, sizeof(char *));
+    if (args == NULL)
+	debug_return_ptr(NULL);
+
+    for (cp = command, len = 0;;) {
+	args[len++] = cp;
+	if ((cp = strchr(cp, ' ')) == NULL)
+	    break;
+	*cp++ = '\0';
+    }
+
+    *lenp = len;
+    debug_return_ptr(args);
+}
+
+/*
  * Build and format an ExecMessage wrapped in a ClientMessage.
  * Stores the wire format message in the closure's write buffer.
  * Returns true on success, false on failure.
@@ -189,7 +311,7 @@ fmt_exec_message(struct client_closure *closure)
     ExecMessage exec_msg = EXEC_MESSAGE__INIT;
     TimeSpec tv = TIME_SPEC__INIT;
     InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
-    struct log_info *log_info = closure->log_info;
+    struct iolog_info *log_info = closure->log_info;
     char hostname[1024];
     bool ret = false;
     size_t n;
@@ -205,14 +327,15 @@ fmt_exec_message(struct client_closure *closure)
     }
     hostname[sizeof(hostname) - 1] = '\0';
 
-    /* Format argv/argc as a StringList */
-    runargv.strings = log_info->argv;
-    runargv.n_strings = log_info->argc;
-
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = log_info->start_time;
+    tv.tv_sec = log_info->tstamp;
     tv.tv_nsec = 0;
     exec_msg.start_time = &tv;
+
+    /* Split command into a StringList. */
+    runargv.strings = split_command(log_info->cmd, &runargv.n_strings);
+    if (runargv.strings == NULL)
+	sudo_fatal(NULL);
 
     /* The sudo I/O log info file has limited info. */
     exec_msg.n_info_msgs = 10;
@@ -231,55 +354,56 @@ fmt_exec_message(struct client_closure *closure)
     /* Fill in info_msgs */
     n = 0;
     exec_msg.info_msgs[n]->key = "command";
-    exec_msg.info_msgs[n]->strval = log_info->command;
+    exec_msg.info_msgs[n]->strval = log_info->cmd;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-
     n++;
+
     exec_msg.info_msgs[n]->key = "columns";
-    exec_msg.info_msgs[n]->numval = log_info->columns;
+    exec_msg.info_msgs[n]->numval = log_info->cols;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-
     n++;
+
     exec_msg.info_msgs[n]->key = "cwd";
     exec_msg.info_msgs[n]->strval = log_info->cwd;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-
     n++;
+
     exec_msg.info_msgs[n]->key = "lines";
     exec_msg.info_msgs[n]->numval = log_info->lines;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-
     n++;
+
     exec_msg.info_msgs[n]->key = "runargv";
     exec_msg.info_msgs[n]->strlistval = &runargv;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    n++;
 
-    if (log_info->rungroup != NULL) {
-	n++;
+    if (log_info->runas_group != NULL) {
 	exec_msg.info_msgs[n]->key = "rungroup";
-	exec_msg.info_msgs[n]->strval = log_info->rungroup;
+	exec_msg.info_msgs[n]->strval = log_info->runas_group;
 	exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
     }
 
-    n++;
     exec_msg.info_msgs[n]->key = "runuser";
-    exec_msg.info_msgs[n]->strval = log_info->runuser;
+    exec_msg.info_msgs[n]->strval = log_info->runas_user;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-
     n++;
+
     exec_msg.info_msgs[n]->key = "submithost";
     exec_msg.info_msgs[n]->strval = hostname;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-
     n++;
+
     exec_msg.info_msgs[n]->key = "submituser";
-    exec_msg.info_msgs[n]->strval = log_info->submituser;
+    exec_msg.info_msgs[n]->strval = log_info->user;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-
     n++;
+
     exec_msg.info_msgs[n]->key = "ttyname";
-    exec_msg.info_msgs[n]->strval = log_info->ttyname;
+    exec_msg.info_msgs[n]->strval = log_info->tty;
     exec_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
 
     /* Update n_info_msgs. */
     exec_msg.n_info_msgs = n;
@@ -344,7 +468,7 @@ done:
  * Returns true on success, false on failure.
  */
 static bool
-fmt_io_buf(int type, struct timing_closure *timing,
+fmt_io_buf(int type, struct client_closure *closure,
     struct connection_buffer *buf)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
@@ -353,15 +477,15 @@ fmt_io_buf(int type, struct timing_closure *timing,
     bool ret = false;
     debug_decl(fmt_io_buf, SUDO_DEBUG_UTIL)
 
-    if (!read_io_buf(timing))
+    if (!read_io_buf(closure))
 	goto done;
 
     /* Fill in IoBuffer. */
-    delay.tv_sec = timing->delay.tv_sec;
-    delay.tv_nsec = timing->delay.tv_nsec;
+    delay.tv_sec = closure->timing.delay.tv_sec;
+    delay.tv_nsec = closure->timing.delay.tv_nsec;
     iobuf_msg.delay = &delay;
-    iobuf_msg.data.data = (void *)timing->buf;
-    iobuf_msg.data.len = timing->u.nbytes;
+    iobuf_msg.data.data = (void *)closure->buf;
+    iobuf_msg.data.len = closure->timing.u.nbytes;
 
     /* TODO: split buffer if it is too large */
     sudo_warnx("sending IoBuffer length %zu, type %d, size %zu", iobuf_msg.data.len, type, io_buffer__get_packed_size(&iobuf_msg)); // XXX
@@ -384,11 +508,12 @@ done:
  * Returns true on success, false on failure.
  */
 static bool
-fmt_winsize(struct timing_closure *timing, struct connection_buffer *buf)
+fmt_winsize(struct client_closure *closure, struct connection_buffer *buf)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     ChangeWindowSize winsize_msg = CHANGE_WINDOW_SIZE__INIT;
     TimeSpec delay = TIME_SPEC__INIT;
+    struct timing_closure *timing = &closure->timing;
     bool ret = false;
     debug_decl(fmt_winsize, SUDO_DEBUG_UTIL)
 
@@ -397,7 +522,7 @@ fmt_winsize(struct timing_closure *timing, struct connection_buffer *buf)
     delay.tv_nsec = timing->delay.tv_nsec;
     winsize_msg.delay = &delay;
     winsize_msg.rows = timing->u.winsize.lines;
-    winsize_msg.cols = timing->u.winsize.columns;
+    winsize_msg.cols = timing->u.winsize.cols;
 
     sudo_warnx("sending ChangeWindowSize, %dx%d, size %zu", winsize_msg.rows, winsize_msg.cols, change_window_size__get_packed_size(&winsize_msg)); // XXX
 
@@ -419,11 +544,12 @@ done:
  * Returns true on success, false on failure.
  */
 static bool
-fmt_suspend(struct timing_closure *timing, struct connection_buffer *buf)
+fmt_suspend(struct client_closure *closure, struct connection_buffer *buf)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     CommandSuspend suspend_msg = COMMAND_SUSPEND__INIT;
     TimeSpec delay = TIME_SPEC__INIT;
+    struct timing_closure *timing = &closure->timing;
     bool ret = false;
     debug_decl(fmt_suspend, SUDO_DEBUG_UTIL)
 
@@ -431,7 +557,9 @@ fmt_suspend(struct timing_closure *timing, struct connection_buffer *buf)
     delay.tv_sec = timing->delay.tv_sec;
     delay.tv_nsec = timing->delay.tv_nsec;
     suspend_msg.delay = &delay;
-    suspend_msg.signal = timing->buf;
+    if (sig2str(timing->u.signo, closure->buf) == -1)
+	goto done;
+    suspend_msg.signal = closure->buf;
 
     sudo_warnx("sending CommandSuspend, %s, size %zu", suspend_msg.signal, command_suspend__get_packed_size(&suspend_msg)); // XXX
 
@@ -481,25 +609,25 @@ fmt_next_iolog(struct client_closure *closure)
 
     switch (timing->event) {
     case IO_EVENT_STDIN:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDIN_BUF, timing, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDIN_BUF, closure, buf);
 	break;
     case IO_EVENT_STDOUT:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDOUT_BUF, timing, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDOUT_BUF, closure, buf);
 	break;
     case IO_EVENT_STDERR:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDERR_BUF, timing, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDERR_BUF, closure, buf);
 	break;
     case IO_EVENT_TTYIN:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYIN_BUF, timing, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYIN_BUF, closure, buf);
 	break;
     case IO_EVENT_TTYOUT:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYOUT_BUF, timing, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYOUT_BUF, closure, buf);
 	break;
     case IO_EVENT_WINSIZE:
-	ret = fmt_winsize(timing, buf);
+	ret = fmt_winsize(closure, buf);
 	break;
     case IO_EVENT_SUSPEND:
-	ret = fmt_suspend(timing, buf);
+	ret = fmt_suspend(closure, buf);
 	break;
     default:
 	sudo_warnx("unexpected I/O event %d", timing->event);
@@ -607,7 +735,7 @@ handle_log_id(char *id, struct client_closure *closure)
     debug_decl(handle_log_id, SUDO_DEBUG_UTIL)
 
     sudo_warnx("remote log ID: %s", id);
-    if ((closure->log_info->iolog_dir = strdup(id)) == NULL)
+    if ((closure->iolog_dir = strdup(id)) == NULL)
 	sudo_fatal(NULL);
     debug_return_bool(true);
 }
@@ -794,7 +922,7 @@ bad:
  * Allocate a new connection closure.
  */
 static struct client_closure *
-client_closure_alloc(int sock, struct log_info *log_info)
+client_closure_alloc(int sock, struct iolog_info *log_info)
 {
     struct client_closure *closure;
     debug_decl(client_closure_alloc, SUDO_DEBUG_UTIL)
@@ -805,9 +933,9 @@ client_closure_alloc(int sock, struct log_info *log_info)
     closure->state = RECV_HELLO;
     closure->log_info = log_info;
 
-    closure->timing.bufsize = 10240;
-    closure->timing.buf = malloc(closure->timing.bufsize);
-    if (closure->timing.buf == NULL)
+    closure->bufsize = 10240;
+    closure->buf = malloc(closure->bufsize);
+    if (closure->buf == NULL)
 	goto bad;
 
     closure->read_buf.size = UINT16_MAX + sizeof(uint16_t);
@@ -836,12 +964,40 @@ bad:
     debug_return_ptr(NULL);
 }
 
+/*
+ * Open any I/O log files that are present.
+ * The timing file must always exist.
+ */
+bool
+iolog_open_all(const char *iolog_path)
+{
+    char fname[PATH_MAX];
+    int i, len;
+    debug_decl(iolog_open_all, SUDO_DEBUG_UTIL)
+
+    for (i = 0; iolog_names[i] != NULL; i++) {
+	len = snprintf(fname, sizeof(fname), "%s/%s", iolog_path,
+	    iolog_names[i]);
+	if (len < 0 || len >= ssizeof(fname)) {
+	    errno = ENAMETOOLONG;
+	    sudo_warn("%s/%s", iolog_path, iolog_names[i]);
+	}
+	io_fds[i] = gzopen(fname, "r");
+	if (io_fds[i] == NULL && i == IOFD_TIMING) {
+	    /* The timing file is not optional. */
+	    sudo_warn("unable to open %s/%s", iolog_path, iolog_names[i]);
+	    debug_return_bool(false);
+	}
+    }
+    debug_return_bool(true);
+}
+
 int
 main(int argc, char *argv[])
 {
     struct client_closure *closure;
     struct sudo_event_base *evbase;
-    struct log_info *log_info;
+    struct iolog_info *log_info;
     const char *host = "localhost";
     const char *port = DEFAULT_PORT_STR;
     char fname[PATH_MAX];
@@ -892,7 +1048,7 @@ main(int argc, char *argv[])
     sudo_warnx("parsed log file %s", fname); // XXX
 
     /* Open the I/O log files. */
-    if (!iolog_open(iolog_path))
+    if (!iolog_open_all(iolog_path))
 	goto bad;
 
     /* Connect to server, setup events. */

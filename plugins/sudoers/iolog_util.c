@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -56,18 +56,18 @@
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
-#include "iolog.h"
+#include "iolog_util.h"
 
 static int timing_event_adj;
 
-struct log_info *
+struct iolog_info *
 parse_logfile(const char *logfile)
 {
     FILE *fp;
     char *buf = NULL, *cp, *ep;
     const char *errstr;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
-    struct log_info *li = NULL;
+    struct iolog_info *li = NULL;
     debug_decl(parse_logfile, SUDO_DEBUG_UTIL)
 
     fp = fopen(logfile, "r");
@@ -96,8 +96,8 @@ parse_logfile(const char *logfile)
     li->cmd[strcspn(li->cmd, "\n")] = '\0';
 
     /*
-     * Crack the log line (rows and cols not present in old versions).
-     *	timestamp:user:runas_user:runas_group:tty:rows:cols
+     * Crack the log line (lines and cols not present in old versions).
+     *	timestamp:user:runas_user:runas_group:tty:lines:cols
      * XXX - probably better to use strtok and switch on the state.
      */
     buf[strcspn(buf, "\n")] = '\0';
@@ -115,7 +115,7 @@ parse_logfile(const char *logfile)
 	goto bad;
     }
 
-    /* user */
+    /* submit user */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
 	sudo_warn(U_("%s: user field is missing"), logfile);
@@ -144,14 +144,14 @@ parse_logfile(const char *logfile)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
 
-    /* tty, followed by optional rows + columns */
+    /* tty, followed by optional lines + cols */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
 	/* just the tty */
 	if ((li->tty = strdup(cp)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     } else {
-	/* tty followed by rows + columns */
+	/* tty followed by lines + cols */
 	if ((li->tty = strndup(cp, (size_t)(ep - cp))) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	cp = ep + 1;
@@ -160,10 +160,10 @@ parse_logfile(const char *logfile)
 	if ((ep = strchr(cp, ':')) != NULL) {
 	    *ep = '\0';
 	}
-	li->rows = sudo_strtonum(cp, 1, INT_MAX, &errstr);
+	li->lines = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: tty rows %s: %s", logfile, cp, errstr);
+		"%s: tty lines %s: %s", logfile, cp, errstr);
 	}
 	if (ep != NULL) {
 	    cp = ep + 1;
@@ -182,7 +182,7 @@ bad:
     if (fp != NULL)
 	fclose(fp);
     free(buf);
-    free_log_info(li);
+    free_iolog_info(li);
     debug_return_ptr(NULL);
 }
 
@@ -298,15 +298,14 @@ parse_delay(const char *cp, struct timespec *delay, const char *decimal_point)
 /*
  * Parse a timing line, which is formatted as:
  *	IO_EVENT_TTYOUT sleep_time num_bytes
- *	IO_EVENT_WINSIZE sleep_time rows cols
+ *	IO_EVENT_WINSIZE sleep_time lines cols
  *	IO_EVENT_SUSPEND sleep_time signo
  * Where type is IO_EVENT_*, sleep_time is the number of seconds to sleep
  * before writing the data and num_bytes is the number of bytes to output.
  * Returns true on success and false on failure.
  */
 bool
-parse_timing(const char *buf, struct timespec *delay,
-    struct timing_closure *timing)
+parse_timing(const char *line, struct timing_closure *timing)
 {
     unsigned long ulval;
     char *cp, *ep;
@@ -316,8 +315,8 @@ parse_timing(const char *buf, struct timespec *delay,
     timing->fd.v = NULL;
 
     /* Parse event type. */
-    ulval = strtoul(buf, &ep, 10);
-    if (ep == buf || !isspace((unsigned char) *ep))
+    ulval = strtoul(line, &ep, 10);
+    if (ep == line || !isspace((unsigned char) *ep))
 	goto bad;
     if (ulval >= IO_EVENT_COUNT)
 	goto bad;
@@ -330,7 +329,7 @@ parse_timing(const char *buf, struct timespec *delay,
 	continue;
 
     /* Parse delay, returns the next field or NULL on error. */
-    if ((cp = parse_delay(cp, delay, timing->decimal)) == NULL)
+    if ((cp = parse_delay(cp, &timing->delay, timing->decimal)) == NULL)
 	goto bad;
 
     switch (timing->event) {
@@ -345,7 +344,7 @@ parse_timing(const char *buf, struct timespec *delay,
 	    goto bad;
 	if (ulval > INT_MAX)
 	    goto bad;
-	timing->u.winsize.rows = (int)ulval;
+	timing->u.winsize.lines = (int)ulval;
 	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
 	    continue;
 
@@ -374,7 +373,7 @@ bad:
 }
 
 void
-free_log_info(struct log_info *li)
+free_iolog_info(struct iolog_info *li)
 {
     if (li != NULL) {
 	free(li->cwd);

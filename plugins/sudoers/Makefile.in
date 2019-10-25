@@ -964,7 +964,8 @@ check_iolog_plugin.o: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
                       $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                       $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                      $(srcdir)/iolog.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                      $(srcdir)/iolog.h $(srcdir)/iolog_util.h \
+                      $(srcdir)/logging.h $(srcdir)/parse.h \
                       $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                       $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                       $(top_builddir)/pathnames.h
@@ -976,7 +977,8 @@ check_iolog_plugin.i: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
                       $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                       $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                      $(srcdir)/iolog.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                      $(srcdir)/iolog.h $(srcdir)/iolog_util.h \
+                      $(srcdir)/logging.h $(srcdir)/parse.h \
                       $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                       $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                       $(top_builddir)/pathnames.h
@@ -986,12 +988,14 @@ check_iolog_plugin.plog: check_iolog_plugin.i
 check_iolog_util.o: $(srcdir)/regress/iolog_util/check_iolog_util.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
-                    $(srcdir)/iolog.h $(top_builddir)/config.h
+                    $(srcdir)/iolog.h $(srcdir)/iolog_util.h \
+                    $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_util/check_iolog_util.c
 check_iolog_util.i: $(srcdir)/regress/iolog_util/check_iolog_util.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
-                    $(srcdir)/iolog.h $(top_builddir)/config.h
+                    $(srcdir)/iolog.h $(srcdir)/iolog_util.h \
+                    $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_iolog_util.plog: check_iolog_util.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_util/check_iolog_util.c --i-file $< --output-file $@
@@ -1589,13 +1593,13 @@ iolog_util.o: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
-              $(top_builddir)/config.h
+              $(srcdir)/iolog_util.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_util.c
 iolog_util.i: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
-              $(top_builddir)/config.h
+              $(srcdir)/iolog_util.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog_util.plog: iolog_util.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_util.c --i-file $< --output-file $@
@@ -2431,8 +2435,9 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
-              $(srcdir)/iolog_files.h $(srcdir)/logging.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(srcdir)/iolog_files.h $(srcdir)/iolog_util.h \
+              $(srcdir)/logging.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoreplay.c
 sudoreplay.i: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2440,8 +2445,9 @@ sudoreplay.i: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
-              $(srcdir)/iolog_files.h $(srcdir)/logging.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(srcdir)/iolog_files.h $(srcdir)/iolog_util.h \
+              $(srcdir)/logging.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sudoreplay.plog: sudoreplay.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudoreplay.c --i-file $< --output-file $@

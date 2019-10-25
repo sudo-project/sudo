@@ -147,7 +147,8 @@ sub mkdep {
     $dir_vars{'devdir'} = $dir_vars{'srcdir'};
     $dir_vars{'authdir'} = $dir_vars{'srcdir'} . "/auth";
     $dir_vars{'builddir'} = $top_builddir . "/" . $dir_vars{'srcdir'};
-    $dir_vars{'top_srcdir'} = '.';
+    $dir_vars{'top_srcdir'} = $top_srcdir;
+    $dir_vars{'sudoers_srcdir'} = $top_srcdir . "/plugins/sudoers";
     #$dir_vars{'top_builddir'} = '.';
     $dir_vars{'incdir'} = 'include';
 

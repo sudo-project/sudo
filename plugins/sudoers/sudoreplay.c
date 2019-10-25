@@ -64,7 +64,7 @@
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
 #include "logging.h"
-#include "iolog.h"
+#include "iolog_util.h"
 #include "iolog_files.h"
 #include "sudo_queue.h"
 #include "sudo_plugin.h"
@@ -89,6 +89,7 @@ struct replay_closure {
     struct sudo_event *sigquit_ev;
     struct sudo_event *sigterm_ev;
     struct sudo_event *sigtstp_ev;
+    struct timespec *max_delay;
     struct timing_closure timing;
     bool interactive;
     bool suspend_wait;
@@ -141,7 +142,7 @@ static const char *session_dir = _PATH_SUDO_IO_LOGDIR;
 
 static bool terminal_can_resize, terminal_was_resized;
 
-static int terminal_rows, terminal_cols;
+static int terminal_lines, terminal_cols;
 
 static int ttyfd = -1;
 
@@ -174,7 +175,7 @@ static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
 static void restore_terminal_size(void);
-static void setup_terminal(struct log_info *li, bool interactive, bool resize);
+static void setup_terminal(struct iolog_info *li, bool interactive, bool resize);
 
 #define VALID_ID(s) (isalnum((unsigned char)(s)[0]) && \
     isalnum((unsigned char)(s)[1]) && isalnum((unsigned char)(s)[2]) && \
@@ -200,7 +201,7 @@ main(int argc, char *argv[])
     bool interactive = true, suspend_wait = false, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, path[PATH_MAX];
-    struct log_info *li;
+    struct iolog_info *li;
     struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
     debug_decl(main, SUDO_DEBUG_MAIN)
@@ -353,7 +354,7 @@ main(int argc, char *argv[])
     putchar('\n');
 
     /* Done with parsed log file. */
-    free_log_info(li);
+    free_iolog_info(li);
     li = NULL;
 
     /* Replay session corresponding to io_log_files[]. */
@@ -551,7 +552,7 @@ done:
  * Get the terminal size using vt100 terminal escapes.
  */
 static bool
-xterm_get_size(int *new_rows, int *new_cols)
+xterm_get_size(int *new_lines, int *new_cols)
 {
     struct sudo_event_base *evbase;
     struct getsize_closure gc;
@@ -569,7 +570,7 @@ xterm_get_size(int *new_rows, int *new_cols)
 
     /*
      * Callback info for reading back the size with a 10 second timeout.
-     * We expect two numbers (rows and cols).
+     * We expect two numbers (lines and cols).
      */
     gc.state = INITIAL|READCHAR;
     gc.nums_depth = 0;
@@ -594,7 +595,7 @@ xterm_get_size(int *new_rows, int *new_cols)
     if (gc.state == GOTSIZE) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "terminal size %d x %x", gc.nums[0], gc.nums[1]);
-	*new_rows = gc.nums[0];
+	*new_lines = gc.nums[0];
 	*new_cols = gc.nums[1];
 	ret = true;
     }
@@ -607,21 +608,21 @@ done:
 }
 
 /*
- * Set the size of the text area to rows and cols.
+ * Set the size of the text area to lines and cols.
  * Depending on the terminal implementation, the window itself may
  * or may not shrink to a smaller size.
  */
 static bool
-xterm_set_size(int rows, int cols)
+xterm_set_size(int lines, int cols)
 {
     const char setsize_fmt[] = "\033[8;%d;%dt";
-    int len, new_rows, new_cols;
+    int len, new_lines, new_cols;
     bool ret = false;
     char buf[1024];
     debug_decl(xterm_set_size, SUDO_DEBUG_UTIL)
 
     /* XXX - save cursor and position restore after resizing */
-    len = snprintf(buf, sizeof(buf), setsize_fmt, rows, cols);
+    len = snprintf(buf, sizeof(buf), setsize_fmt, lines, cols);
     if (len < 0 || len >= ssizeof(buf)) {
 	/* not possible due to size of buf */
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -634,9 +635,9 @@ xterm_set_size(int rows, int cols)
 	goto done;
     }
     /* XXX - keyboard input will interfere with this */
-    if (!xterm_get_size(&new_rows, &new_cols))
+    if (!xterm_get_size(&new_lines, &new_cols))
 	goto done;
-    if (rows == new_rows && cols == new_cols)
+    if (lines == new_lines && cols == new_cols)
 	ret = true;
 
 done:
@@ -644,7 +645,7 @@ done:
 }
 
 static void
-setup_terminal(struct log_info *li, bool interactive, bool resize)
+setup_terminal(struct iolog_info *li, bool interactive, bool resize)
 {
     const char *term;
     debug_decl(check_terminal, SUDO_DEBUG_UTIL)
@@ -662,7 +663,7 @@ setup_terminal(struct log_info *li, bool interactive, bool resize)
     }
 
     /* Find terminal size if the session has size info. */
-    if (li->rows == 0 && li->cols == 0) {
+    if (li->lines == 0 && li->cols == 0) {
 	/* no tty size info, hope for the best... */
 	debug_return;
     }
@@ -675,7 +676,7 @@ setup_terminal(struct log_info *li, bool interactive, bool resize)
 	    for (tn = compatible_terms; tn->name != NULL; tn++) {
 		if (strncmp(term, tn->name, tn->len) == 0) {
 		    /* xterm-like terminals can resize themselves. */
-		    if (xterm_get_size(&terminal_rows, &terminal_cols))
+		    if (xterm_get_size(&terminal_lines, &terminal_cols))
 			terminal_can_resize = true;
 		    break;
 		}
@@ -685,20 +686,20 @@ setup_terminal(struct log_info *li, bool interactive, bool resize)
 
     if (!terminal_can_resize) {
 	/* either not xterm or not interactive */
-	sudo_get_ttysize(&terminal_rows, &terminal_cols);
+	sudo_get_ttysize(&terminal_lines, &terminal_cols);
     }
 
-    if (li->rows == terminal_rows && li->cols == terminal_cols) {
+    if (li->lines == terminal_lines && li->cols == terminal_cols) {
 	/* nothing to change */
 	debug_return;
     }
 
     if (terminal_can_resize) {
 	/* session terminal size is different, try to resize ours */
-	if (xterm_set_size(li->rows, li->cols)) {
+	if (xterm_set_size(li->lines, li->cols)) {
 	    /* success */
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"resized terminal to %d x %x", li->rows, li->cols);
+		"resized terminal to %d x %x", li->lines, li->cols);
 	    terminal_was_resized = true;
 	    debug_return;
 	}
@@ -706,20 +707,20 @@ setup_terminal(struct log_info *li, bool interactive, bool resize)
 	terminal_can_resize = false;
     }
 
-    if (li->rows > terminal_rows || li->cols > terminal_cols) {
+    if (li->lines > terminal_lines || li->cols > terminal_cols) {
 	fputs(_("Warning: your terminal is too small to properly replay the log.\n"), stdout);
-	printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), li->rows, li->cols, terminal_rows, terminal_cols);
+	printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), li->lines, li->cols, terminal_lines, terminal_cols);
     }
     debug_return;
 }
 
 static void
-resize_terminal(int rows, int cols)
+resize_terminal(int lines, int cols)
 {
     debug_decl(resize_terminal, SUDO_DEBUG_UTIL)
 
     if (terminal_can_resize) {
-	if (xterm_set_size(rows, cols))
+	if (xterm_set_size(lines, cols))
 	    terminal_was_resized = true;
 	else
 	    terminal_can_resize = false;
@@ -740,7 +741,7 @@ restore_terminal_size(void)
 	    stdout);
 	fflush(stdout);
 	(void)getchar();
-	xterm_set_size(terminal_rows, terminal_cols);
+	xterm_set_size(terminal_lines, terminal_cols);
 	putchar('\r');
 	putchar('\n');
     }
@@ -756,36 +757,36 @@ restore_terminal_size(void)
 static int
 read_timing_record(struct replay_closure *closure)
 {
-    struct timespec timeout;
-    char buf[LINE_MAX];
+    struct timing_closure *timing = &closure->timing;
+    char line[LINE_MAX];
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
-    if (io_log_gets(io_log_files[IOFD_TIMING].fd, buf, sizeof(buf)) == NULL) {
+    if (io_log_gets(io_log_files[IOFD_TIMING].fd, line, sizeof(line)) == NULL) {
 	/* EOF or error reading timing file, we are done. */
 	debug_return_int(io_log_eof(io_log_files[IOFD_TIMING].fd) ? 1 : -1);
     }
 
     /* Parse timing file record. */
-    buf[strcspn(buf, "\n")] = '\0';
-    if (!parse_timing(buf, &timeout, &closure->timing))
-	sudo_fatalx(U_("invalid timing file line: %s"), buf);
+    line[strcspn(line, "\n")] = '\0';
+    if (!parse_timing(line, timing))
+	sudo_fatalx(U_("invalid timing file line: %s"), line);
 
     /* Record number bytes to read. */
     /* XXX - remove timing->nbytes? */
-    if (closure->timing.event != IO_EVENT_WINSIZE &&
-	closure->timing.event != IO_EVENT_SUSPEND) {
+    if (timing->event != IO_EVENT_WINSIZE &&
+	timing->event != IO_EVENT_SUSPEND) {
     	closure->iobuf.len = 0;
     	closure->iobuf.off = 0;
     	closure->iobuf.lastc = '\0';
-    	closure->iobuf.toread = closure->timing.u.nbytes;
+    	closure->iobuf.toread = timing->u.nbytes;
     }
 
     /* Adjust delay using speed factor and max_delay. */
-    adjust_delay(&timeout, closure->timing.max_delay, speed_factor);
+    adjust_delay(&timing->delay, closure->max_delay, speed_factor);
 
     /* Schedule the delay event. */
-    if (sudo_ev_add(closure->evbase, closure->delay_ev, &timeout, false) == -1)
+    if (sudo_ev_add(closure->evbase, closure->delay_ev, &timing->delay, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     debug_return_int(0);
@@ -868,7 +869,7 @@ delay_cb(int fd, int what, void *v)
 
     switch (timing->event) {
     case IO_EVENT_WINSIZE:
-	resize_terminal(timing->u.winsize.rows, timing->u.winsize.cols);
+	resize_terminal(timing->u.winsize.lines, timing->u.winsize.cols);
 	break;
     case IO_EVENT_STDIN:
 	if (io_log_files[IOFD_STDIN].enabled)
@@ -960,7 +961,7 @@ replay_closure_alloc(struct timespec *max_delay, const char *decimal,
 
     closure->interactive = interactive;
     closure->suspend_wait = suspend_wait;
-    closure->timing.max_delay = max_delay;
+    closure->max_delay = max_delay;
     closure->timing.decimal = decimal;
 
     /*
@@ -1297,7 +1298,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 }
 
 static bool
-match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
+match_expr(struct search_node_list *head, struct iolog_info *log, bool last_match)
 {
     struct search_node *sn;
     bool res = false, matched = last_match;
@@ -1357,7 +1358,7 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
     const char *timestr;
-    struct log_info *li;
+    struct iolog_info *li;
     int ret = -1;
     debug_decl(list_session, SUDO_DEBUG_UTIL)
 
@@ -1384,7 +1385,7 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 	cp[strlen(cp) - 4] = '\0';
 	idstr = cp;
     }
-    /* XXX - print rows + cols? */
+    /* XXX - print lines + cols? */
     timestr = get_timestr(li->tstamp, 1);
     printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
 	timestr ? timestr : "invalid date",
@@ -1396,7 +1397,7 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
     ret = 0;
 
 done:
-    free_log_info(li);
+    free_iolog_info(li);
     debug_return_int(ret);
 }
 

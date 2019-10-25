@@ -41,6 +41,25 @@
 #define IOFD_MAX	6
 
 /*
+ * I/O log details from the ExecMessage
+ */
+struct iolog_details {
+    char *command;
+    char *cwd;
+    char *iolog_dir;
+    char *rungroup;
+    char *runuser;
+    char *submithost;
+    char *submituser;
+    char *ttyname;
+    char **argv;
+    time_t start_time;
+    int argc;
+    int lines;
+    int columns;
+};
+
+/*
  * Connection status.
  * In the RUNNING state we expect I/O log buffers.
  */

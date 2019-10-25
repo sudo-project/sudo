@@ -75,24 +75,24 @@ has_strlistval(InfoMessage *info)
 }
 
 /*
- * Fill in log info from an ExecMessage
+ * Fill in I/O log details from an ExecMessage
  * Only makes a shallow copy of strings and string lists.
  */
 static bool
-log_info_fill(struct log_info *log_info, ExecMessage *msg)
+iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 {
     size_t idx;
     bool ret = true;
-    debug_decl(log_info_fill, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_details_fill, SUDO_DEBUG_UTIL)
 
-    memset(log_info, 0, sizeof(*log_info));
+    memset(details, 0, sizeof(*details));
 
     /* Start time. */
-    log_info->start_time = msg->start_time->tv_sec;
+    details->start_time = msg->start_time->tv_sec;
 
     /* Default values */
-    log_info->lines = 24;
-    log_info->columns = 80;
+    details->lines = 24;
+    details->columns = 80;
 
     /* Pull out values by key from info array. */
     for (idx = 0; idx < msg->n_info_msgs; idx++) {
@@ -106,13 +106,13 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 		} else if (info->numval <= 0 || info->numval > INT_MAX) {
 		    sudo_warnx("columns (%" PRId64 ") out of range", info->numval);
 		} else {
-		    log_info->columns = info->numval;
+		    details->columns = info->numval;
 		}
 		continue;
 	    }
 	    if (strcmp(key, "command") == 0) {
 		if (has_strval(info)) {
-		    log_info->command = info->strval;
+		    details->command = info->strval;
 		} else {
 		    sudo_warnx("command specified but not a string");
 		}
@@ -120,7 +120,7 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 	    }
 	    if (strcmp(key, "cwd") == 0) {
 		if (has_strval(info)) {
-		    log_info->cwd = info->strval;
+		    details->cwd = info->strval;
 		} else {
 		    sudo_warnx("cwd specified but not a string");
 		}
@@ -134,7 +134,7 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 		} else if (info->numval <= 0 || info->numval > INT_MAX) {
 		    sudo_warnx("lines (%" PRId64 ") out of range", info->numval);
 		} else {
-		    log_info->lines = info->numval;
+		    details->lines = info->numval;
 		}
 		continue;
 	    }
@@ -142,8 +142,8 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 	case 'r':
 	    if (strcmp(key, "runargv") == 0) {
 		if (has_strlistval(info)) {
-		    log_info->argv = info->strlistval->strings;
-		    log_info->argc = info->strlistval->n_strings;
+		    details->argv = info->strlistval->strings;
+		    details->argc = info->strlistval->n_strings;
 		} else {
 		    sudo_warnx("runargv specified but not a string list");
 		}
@@ -151,7 +151,7 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 	    }
 	    if (strcmp(key, "rungroup") == 0) {
 		if (has_strval(info)) {
-		    log_info->rungroup = info->strval;
+		    details->rungroup = info->strval;
 		} else {
 		    sudo_warnx("rungroup specified but not a string");
 		}
@@ -159,7 +159,7 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 	    }
 	    if (strcmp(key, "runuser") == 0) {
 		if (has_strval(info)) {
-		    log_info->runuser = info->strval;
+		    details->runuser = info->strval;
 		} else {
 		    sudo_warnx("runuser specified but not a string");
 		}
@@ -169,7 +169,7 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 	case 's':
 	    if (strcmp(key, "submithost") == 0) {
 		if (has_strval(info)) {
-		    log_info->submithost = info->strval;
+		    details->submithost = info->strval;
 		} else {
 		    sudo_warnx("submithost specified but not a string");
 		}
@@ -177,7 +177,7 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 	    }
 	    if (strcmp(key, "submituser") == 0) {
 		if (has_strval(info)) {
-		    log_info->submituser = info->strval;
+		    details->submituser = info->strval;
 		} else {
 		    sudo_warnx("submituser specified but not a string");
 		}
@@ -187,7 +187,7 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
 	case 't':
 	    if (strcmp(key, "ttyname") == 0) {
 		if (has_strval(info)) {
-		    log_info->ttyname = info->strval;
+		    details->ttyname = info->strval;
 		} else {
 		    sudo_warnx("ttyname specified but not a string");
 		}
@@ -198,15 +198,15 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
     }
 
     /* Check for required settings */
-    if (log_info->submituser == NULL) {
+    if (details->submituser == NULL) {
 	sudo_warnx("missing user in ExecMessage");
 	ret = false;
     }
-    if (log_info->submithost == NULL) {
+    if (details->submithost == NULL) {
 	sudo_warnx("missing host in ExecMessage");
 	ret = false;
     }
-    if (log_info->command == NULL) {
+    if (details->command == NULL) {
 	sudo_warnx("missing command in ExecMessage");
 	ret = false;
     }
@@ -219,7 +219,7 @@ log_info_fill(struct log_info *log_info, ExecMessage *msg)
  * Set iolog_dir and iolog_dir_fd in the closure
  */
 static bool
-create_iolog_dir(struct log_info *log_info, struct connection_closure *closure)
+create_iolog_dir(struct iolog_details *details, struct connection_closure *closure)
 {
     char path[PATH_MAX];
     int len;
@@ -231,7 +231,7 @@ create_iolog_dir(struct log_info *log_info, struct connection_closure *closure)
 	goto bad;
     }
     len = snprintf(path, sizeof(path), "%s/%s", IOLOG_DIR,
-	log_info->submithost);
+	details->submithost);
     if (len < 0 || len >= ssizeof(path)) {
 	sudo_warn("snprintf");
 	goto bad;
@@ -241,7 +241,7 @@ create_iolog_dir(struct log_info *log_info, struct connection_closure *closure)
 	goto bad;
     }
     len = snprintf(path, sizeof(path), "%s/%s/%s", IOLOG_DIR,
-	log_info->submithost, log_info->submituser);
+	details->submithost, details->submituser);
     if (len < 0 || len >= ssizeof(path)) {
 	sudo_warn("snprintf");
 	goto bad;
@@ -251,7 +251,7 @@ create_iolog_dir(struct log_info *log_info, struct connection_closure *closure)
 	goto bad;
     }
     len = snprintf(path, sizeof(path), "%s/%s/%s/XXXXXX", IOLOG_DIR,
-	log_info->submithost, log_info->submituser);
+	details->submithost, details->submituser);
     if (len < 0 || len >= ssizeof(path)) {
 	sudo_warn("snprintf");
 	goto bad;
@@ -264,7 +264,7 @@ create_iolog_dir(struct log_info *log_info, struct connection_closure *closure)
 
     /* Make a copy of iolog_dir for error messages. */
     if ((closure->iolog_dir = strdup(path)) == NULL) {
-	sudo_warn("strdup");
+	sudo_warn(NULL);
 	goto bad;
     }
 
@@ -285,12 +285,12 @@ bad:
  * Write the sudo-style I/O log info file containing user and command info.
  */
 static bool
-log_info_write(struct log_info *log_info, struct connection_closure *closure)
+iolog_details_write(struct iolog_details *details, struct connection_closure *closure)
 {
     int fd, i;
     FILE *fp;
     int error;
-    debug_decl(log_info_write, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_details_write, SUDO_DEBUG_UTIL)
 
     fd = openat(closure->iolog_dir_fd, "log", O_CREAT|O_EXCL|O_WRONLY, 0600);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
@@ -301,16 +301,16 @@ log_info_write(struct log_info *log_info, struct connection_closure *closure)
     }
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n",
-	(long long)log_info->start_time, log_info->submituser,
-	log_info->runuser ? log_info->runuser : RUNAS_DEFAULT,
-	log_info->rungroup ? log_info->rungroup : "",
-	log_info->ttyname ? log_info->ttyname : "unknown",
-	log_info->lines, log_info->columns,
-	log_info->cwd ? log_info->cwd : "unknown");
-    fputs(log_info->command, fp);
-    for (i = 1; i < log_info->argc; i++) {
+	(long long)details->start_time, details->submituser,
+	details->runuser ? details->runuser : RUNAS_DEFAULT,
+	details->rungroup ? details->rungroup : "",
+	details->ttyname ? details->ttyname : "unknown",
+	details->lines, details->columns,
+	details->cwd ? details->cwd : "unknown");
+    fputs(details->command, fp);
+    for (i = 1; i < details->argc; i++) {
 	fputc(' ', fp);
-	fputs(log_info->argv[i], fp);
+	fputs(details->argv[i], fp);
     }
     fputc('\n', fp);
     fflush(fp);
@@ -356,7 +356,7 @@ iolog_close(struct connection_closure *closure)
 bool
 iolog_init(ExecMessage *msg, struct connection_closure *closure)
 {
-    struct log_info log_info;
+    struct iolog_details details;
     int i;
     debug_decl(iolog_init, SUDO_DEBUG_UTIL)
 
@@ -364,16 +364,16 @@ iolog_init(ExecMessage *msg, struct connection_closure *closure)
     for (i = 0; i < IOFD_MAX; i++)
         closure->io_fds[i] = -1;
 
-    /* Fill in log_info */
-    if (!log_info_fill(&log_info, msg))
+    /* Fill in iolog_details */
+    if (!iolog_details_fill(&details, msg))
 	debug_return_bool(false);
 
     /* Create I/O log dir */
-    if (!create_iolog_dir(&log_info, closure))
+    if (!create_iolog_dir(&details, closure))
 	debug_return_bool(false);
 
     /* Write sudo I/O log info file */
-    if (!log_info_write(&log_info, closure))
+    if (!iolog_details_write(&details, closure))
 	debug_return_bool(false);
 
     /* Create timing, stdout, stderr and ttyout files for sudoreplay. */

@@ -33,6 +33,7 @@
 #define IOFD_TIMING	5
 #define IOFD_MAX	6
 
+#if 0
 struct timing_closure {
     struct timespec delay;
     int event;
@@ -46,6 +47,7 @@ struct timing_closure {
     char *buf;
     size_t bufsize;
 };
+#endif
 
 enum client_state {
     ERROR,
@@ -73,13 +75,9 @@ struct client_closure {
     struct connection_buffer write_buf;
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
-    struct log_info *log_info;
+    struct iolog_info *log_info;
+    char *iolog_dir;
+    char *buf; /* XXX */
+    size_t bufsize; /* XXX */
     enum client_state state;
 };
-
-/* iolog_reader.c */
-bool iolog_open(const char *iolog_path);
-bool read_io_buf(struct timing_closure *timing);
-int read_timing_record(struct timing_closure *timing);
-struct log_info *parse_logfile(const char *logfile);
-void free_log_info(struct log_info *li);
