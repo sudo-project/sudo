@@ -50,6 +50,7 @@ doc/visudo.mdoc.in
 examples/Makefile.in
 examples/pam.conf
 examples/sudo.conf
+examples/sudo_logsrvd.conf
 examples/sudoers
 examples/syslog.conf
 include/Makefile.in
@@ -236,6 +237,7 @@ logsrvd/log_server.proto
 logsrvd/iolog_writer.c
 logsrvd/logsrvd.c
 logsrvd/logsrvd.h
+logsrvd/logsrvd_conf.c
 logsrvd/protobuf-c/protobuf-c.c
 logsrvd/protobuf-c/protobuf-c.h
 logsrvd/sendlog.c

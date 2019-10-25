@@ -72,14 +72,6 @@ enum connection_status {
     ERROR
 };
 
-union sockaddr_union {
-    struct sockaddr sa;
-    struct sockaddr_in sin;
-#ifdef HAVE_STRUCT_IN6_ADDR
-    struct sockaddr_in6 sin6;
-#endif
-};
-
 struct connection_buffer {
     uint8_t *data;		/* pre-allocated data buffer */
     unsigned int size;		/* currently always UINT16_MAX + 2 */
@@ -114,3 +106,14 @@ int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);
 int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 void iolog_close(struct connection_closure *closure);
+
+/* logsrvd_conf.c */
+bool logsrvd_conf_iolog_compress(void);
+bool logsrvd_conf_iolog_flush(void);
+const char *logsrvd_conf_iolog_dir(void);
+const char *logsrvd_conf_iolog_file(void);
+const char *logsrvd_conf_iolog_group(void);
+const char *logsrvd_conf_iolog_user(void);
+mode_t logsrvd_conf_iolog_mode(void);
+unsigned int logsrvd_conf_maxseq(void);
+void logsrvd_conf_read(const char *path);

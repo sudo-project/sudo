@@ -231,7 +231,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 
 /*
  * Create I/O log path
- * Set iolog_dir and iolog_dir_fd in the closure
+ * Sets iolog_dir and iolog_dir_fd in the closure
+ * XXX - use iolog_dir and iolog_file code from sudoers/iolog.c
  */
 static bool
 create_iolog_dir(struct iolog_details *details, struct connection_closure *closure)

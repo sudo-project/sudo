@@ -53,16 +53,23 @@
 #include "pathnames.h"
 #include "logsrvd.h"
 
+/*
+ * Sudo I/O audit server.
+ */
+
 TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static const char server_id[] = "Sudo Audit Server 0.1";
+static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
 static double random_drop;
 
-/*
- * Proof of concept audit server.
- * Currently only handle a single connection at a time.
- * TODO: use atomic I/O when we know the packed buffer size.
- */
+union sockaddr_union {
+    struct sockaddr sa;
+    struct sockaddr_in sin;
+#ifdef HAVE_STRUCT_IN6_ADDR
+    struct sockaddr_in6 sin6;
+#endif
+};
 
 /*
  * Free a struct connection_closure container and its contents.
@@ -648,8 +655,8 @@ signal_cb(int signo, int what, void *v)
 
     switch (signo) {
 	case SIGHUP:
-	    /* TODO: reload config */
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "received SIGHUP");
+	    logsrvd_conf_read(conf_file);
 	    break;
 	case SIGINT:
 	case SIGTERM:
@@ -903,7 +910,8 @@ daemonize(void)
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: %s [-n] [-R percentage]\n", getprogname());
+    fprintf(stderr, "usage: %s [-n] [-f conf_file] [-R percentage]\n",
+	getprogname());
     exit(1);
 }
 
@@ -934,12 +942,16 @@ main(int argc, char *argv[])
 	sudo_fatalx("Protobuf-C version 1.3 or higher required");
 
     /* XXX - getopt_long option handling */
-    while ((ch = getopt(argc, argv, "nR:")) != -1) {
+    while ((ch = getopt(argc, argv, "f:nR:")) != -1) {
 	switch (ch) {
+	case 'f':
+	    conf_file = optarg;
+	    break;
 	case 'n':
 	    nofork = true;
 	    break;
 	case 'R':
+	    /* random connection drop probability as a percentage (debug) */
             errno = 0;
 	    random_drop = strtod(optarg, &ep);
             if (*ep != '\0' || errno != 0)
@@ -952,6 +964,9 @@ main(int argc, char *argv[])
     }
     argc -= optind;
     argv += optind;
+
+    /* Read sudo_logsrvd.conf */
+    logsrvd_conf_read(conf_file);
 
     signal(SIGPIPE, SIG_IGN);
     if (!nofork)

@@ -79,6 +79,13 @@
 #endif /* _PATH_CVTSUDOERS_CONF */
 
 /*
+ * NOTE: _PATH_SUDO_LOGSRVD_CONF is usually overridden by the Makefile.
+ */
+#ifndef _PATH_SUDO_LOGSRVD_CONF
+# define _PATH_SUDO_LOGSRVD_CONF	"/etc/sudo_logsrvd.conf"
+#endif /* _PATH_SUDO_LOGSRVD_CONF */
+
+/*
  * The following paths are controlled via the configure script.
  */
 
