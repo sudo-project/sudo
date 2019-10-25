@@ -327,12 +327,17 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
     /* Check for required settings */
     if (details->submituser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "missing user in AcceptMessage");
+	    "missing submituser in AcceptMessage");
 	goto done;
     }
     if (details->submithost == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "missing host in AcceptMessage");
+	    "missing submithost in AcceptMessage");
+	goto done;
+    }
+    if (details->runuser == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "missing runuser in AcceptMessage");
 	goto done;
     }
     if (details->command == NULL) {

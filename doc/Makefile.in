@@ -72,6 +72,7 @@ SHELL = @SHELL@
 
 DOCS = $(mansrcdir)/cvtsudoers.$(mantype) $(mansrcdir)/sudo.$(mantype) \
        $(mansrcdir)/sudo.conf.$(mantype) $(mansrcdir)/sudo_logsrvd.$(mantype) \
+       $(mansrcdir)/sudo_logsrv.proto.$(mantype) \
        $(mansrcdir)/sudo_logsrvd.conf.$(mantype) \
        $(mansrcdir)/sudo_plugin.$(mantype) \
        $(mansrcdir)/sudo_sendlog.$(mantype) \
@@ -81,6 +82,7 @@ DOCS = $(mansrcdir)/cvtsudoers.$(mantype) $(mansrcdir)/sudo.$(mantype) \
 
 DEVDOCS = $(srcdir)/cvtsudoers.man.in $(srcdir)/sudo.conf.man.in \
 	  $(srcdir)/sudo.man.in $(srcdir)/sudo_logsrvd.man.in \
+	  $(srcdir)/sudo_logsrv.proto.man.in \
 	  $(srcdir)/sudo_logsrvd.conf.man.in \
 	  $(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_sendlog.man.in \
 	  $(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.man.in \
@@ -260,6 +262,20 @@ $(mansrcdir)/sudo_logsrvd.man: $(top_builddir)/config.status $(srcdir)/sudo_logs
 $(mansrcdir)/sudo_logsrvd.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_logsrvd.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
+$(srcdir)/sudo_logsrv.proto.man.in: $(srcdir)/sudo_logsrv.proto.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_logsrv.proto.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_LOGSRV.PROTO" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(5)/($$mansectform)/g" > $@; \
+	fi
+
+$(mansrcdir)/sudo_logsrv.proto.man: $(top_builddir)/config.status $(srcdir)/sudo_logsrv.proto.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrv.proto.man.in | $(SED) -f fixman.sed > $@
+
+$(mansrcdir)/sudo_logsrv.proto.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_logsrv.proto.mdoc.in
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+
 $(srcdir)/sudo_logsrvd.conf.man.in: $(srcdir)/sudo_logsrvd.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -325,12 +341,13 @@ install-doc: install-dirs
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudoreplay.$(mantype) $(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudo.conf.$(mantype) $(DESTDIR)$(mandirform)/sudo.conf.$(mansectform)
+	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudo_logsrv.proto.$(mantype) $(DESTDIR)$(mandirform)/sudo_logsrv.proto.$(mansectform)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudo_logsrvd.conf.$(mantype) $(DESTDIR)$(mandirform)/sudo_logsrvd.conf.$(mansectform)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudoers_timestamp.$(mantype) $(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform)
 	@LDAP@$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 	@if test -n "$(MANCOMPRESS)"; then \
-	    for f in $(mandirexe)/cvtsudoers.1 $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/sudo_logsrvd.$(mansectsu) $(mandirsu)/sudo_plugin.$(mansectsu) $(mandirsu)/sudo_sendlog.$(mansectsu) $(mandirsu)/sudoreplay.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudo.conf.$(mansectform) $(mandirform)/sudo_logsrvd.conf.$(mansectform) $(mandirform)/sudoers.$(mansectform) $(mandirform)/sudoers_timestamp.$(mansectform) $(mandirform)/sudoers.ldap.$(mansectform); do \
+	    for f in $(mandirexe)/cvtsudoers.1 $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/sudo_logsrvd.$(mansectsu) $(mandirsu)/sudo_plugin.$(mansectsu) $(mandirsu)/sudo_sendlog.$(mansectsu) $(mandirsu)/sudoreplay.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudo.conf.$(mansectform) $(mandirform)/sudo_logsrv.proto.$(mansectform) $(mandirform)/sudo_logsrvd.conf.$(mansectform) $(mandirform)/sudoers.$(mansectform) $(mandirform)/sudoers_timestamp.$(mansectform) $(mandirform)/sudoers.ldap.$(mansectform); do \
 		if test -f $(DESTDIR)$$f; then \
 		    echo $(MANCOMPRESS) -f $(DESTDIR)$$f; \
 		    $(MANCOMPRESS) -f $(DESTDIR)$$f; \
@@ -358,6 +375,7 @@ uninstall:
 		$(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/visudo.$(mansectsu) \
 		$(DESTDIR)$(mandirform)/sudo.conf.$(mansectform) \
+		$(DESTDIR)$(mandirform)/sudo_logsrv.proto.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudo_logsrvd.conf.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform)

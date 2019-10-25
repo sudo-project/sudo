@@ -34,10 +34,12 @@ doc/sudo.conf.mdoc.in
 doc/sudo.man.in
 doc/sudo.man.in.sed
 doc/sudo.mdoc.in
-doc/sudo_logsrvd.man.in
-doc/sudo_logsrvd.mdoc.in
+doc/sudo_logsrv.proto.man.in
+doc/sudo_logsrv.proto.mdoc.in
 doc/sudo_logsrvd.conf.man.in
 doc/sudo_logsrvd.conf.mdoc.in
+doc/sudo_logsrvd.man.in
+doc/sudo_logsrvd.mdoc.in
 doc/sudo_plugin.man.in
 doc/sudo_plugin.mdoc.in
 doc/sudo_sendlog.man.in
