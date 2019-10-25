@@ -118,8 +118,10 @@ struct passwd;
 struct group;
 bool iolog_close(struct iolog_file *iol, const char **errstr);
 bool iolog_eof(struct iolog_file *iol);
+bool iolog_mkdtemp(char *path);
 bool iolog_nextid(char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
+bool iolog_rename(const char *from, const char *to);
 bool iolog_set_compress(const char *str);
 bool iolog_set_flush(const char *str);
 bool iolog_set_group(const struct group *gr);
@@ -134,6 +136,7 @@ off_t iolog_seek(struct iolog_file *iol, off_t offset, int whence);
 size_t mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize);
 ssize_t iolog_read(struct iolog_file *iol, void *buf, size_t nbytes, const char **errstr);
 ssize_t iolog_write(struct iolog_file *iol, const void *buf, size_t len, const char **errstr);
+void iolog_rewind(struct iolog_file *iol);
 void iolog_set_defaults(void);
 
 #endif /* SUDO_IOLOG_H */

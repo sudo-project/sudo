@@ -649,12 +649,194 @@ read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
     debug_return_int(0);
 }
 
-/* XXX - compressed I/O logs cannot be restarted, must re-write them */
+/*
+ * Copy len bytes from src to dst.
+ */
+static bool
+iolog_copy(struct iolog_file *src, struct iolog_file *dst, off_t remainder,
+    const char **errstr)
+{
+    char buf[64 * 1024];
+    ssize_t nread;
+    debug_decl(iolog_copy, SUDO_DEBUG_UTIL)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"copying %lld bytes", (long long)remainder);
+    while (remainder > 0) {
+	const ssize_t toread = MIN(remainder, ssizeof(buf));
+	nread = iolog_read(src, buf, toread, errstr);
+	if (nread == -1)
+	    debug_return_bool(false);
+	remainder -= nread;
+
+	do {
+	    ssize_t nwritten = iolog_write(dst, buf, nread, errstr);
+	    if (nwritten == -1)
+		debug_return_bool(false);
+	    nread -= nwritten;
+	} while (nread > 0);
+    }
+
+    debug_return_bool(true);
+}
+
+/* Compressed logs don't support random access, need to rewrite them. */
+static bool
+iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
+{
+    struct iolog_file new_iolog_files[IOFD_MAX];
+    off_t iolog_file_sizes[IOFD_MAX] = { 0 };
+    struct timing_closure timing;
+    int iofd, len, tmpdir_fd = -1;
+    const char *name, *errstr;
+    char tmpdir[PATH_MAX];
+    bool ret = false;
+    debug_decl(iolog_rewrite, SUDO_DEBUG_UTIL)
+
+    /* Parse timing file until we reach the target point. */
+    for (;;) {
+	/* Read next record from timing file. */
+	if (read_timing_record(&closure->iolog_files[IOFD_TIMING], &timing) != 0)
+	    goto done;
+	sudo_timespecadd(&timing.delay, &closure->elapsed_time,
+	    &closure->elapsed_time);
+	if (timing.event < IOFD_TIMING) {
+	    if (!closure->iolog_files[timing.event].enabled) {
+		/* Missing log file. */
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "iofd %d referenced but not open", timing.event);
+		goto done;
+	    }
+	    iolog_file_sizes[timing.event] += timing.u.nbytes;
+	}
+
+	if (sudo_timespeccmp(&closure->elapsed_time, target, >=)) {
+	    if (sudo_timespeccmp(&closure->elapsed_time, target, ==))
+		break;
+
+	    /* Mismatch between resume point and stored log. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"resume point mismatch, target [%lld, %ld], have [%lld, %ld]",
+		(long long)target->tv_sec, target->tv_nsec,
+		(long long)closure->elapsed_time.tv_sec,
+		closure->elapsed_time.tv_nsec);
+	    goto done;
+	}
+    }
+    iolog_file_sizes[IOFD_TIMING] =
+	iolog_seek(&closure->iolog_files[IOFD_TIMING], 0, SEEK_CUR);
+    iolog_rewind(&closure->iolog_files[IOFD_TIMING]);
+
+    /* Create new I/O log files in a temporary directory. */
+    len = snprintf(tmpdir, sizeof(tmpdir), "%s/restart.XXXXXX",
+	closure->details.iolog_path);
+    if (len < 0 || len >= ssizeof(tmpdir)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to format %s/restart.XXXXXX", closure->details.iolog_path);
+	goto done;
+    }
+    if (!iolog_mkdtemp(tmpdir)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to mkdtemp %s", tmpdir);
+	goto done;
+    }
+    if ((tmpdir_fd = iolog_openat(AT_FDCWD, tmpdir, O_RDONLY)) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to open %s", tmpdir);
+	goto done;
+    }
+
+    /* Create new copies of the existing iologs */
+    memset(new_iolog_files, 0, sizeof(new_iolog_files));
+    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+	if (!closure->iolog_files[iofd].enabled)
+	    continue;
+	new_iolog_files[iofd].enabled = true;
+	if (!iolog_open(&new_iolog_files[iofd], tmpdir_fd, iofd, "w")) {
+	    if (errno != ENOENT) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to open %s/%s", tmpdir, iolog_fd_to_name(iofd));
+		goto done;
+	    }
+	}
+    }
+
+    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+	if (!closure->iolog_files[iofd].enabled)
+	    continue;
+	if (!iolog_copy(&closure->iolog_files[iofd], &new_iolog_files[iofd],
+		iolog_file_sizes[iofd], &errstr)) {
+	    name = iolog_fd_to_name(iofd);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to copy %s/%s to %s/%s: %s",
+		closure->details.iolog_path, name, tmpdir, name, errstr);
+	    goto done;
+	}
+    }
+
+    /* Move copied log files into place. */
+    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+	char from[PATH_MAX], to[PATH_MAX];
+
+	if (!closure->iolog_files[iofd].enabled)
+	    continue;
+
+	/* This would be easier with renameat(2), old systems are annoying. */
+	name = iolog_fd_to_name(iofd);
+	len = snprintf(from, sizeof(from), "%s/%s", tmpdir, name);
+	if (len < 0 || len >= ssizeof(from)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to format %s/%s", tmpdir, name);
+	    goto done;
+	}
+	len = snprintf(to, sizeof(to), "%s/%s", closure->details.iolog_path,
+	    name);
+	if (len < 0 || len >= ssizeof(from)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to format %s/%s", closure->details.iolog_path, name);
+	    goto done;
+	}
+	if (!iolog_rename(from, to)) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to rename %s to %s", from, to);
+	    goto done;
+	}
+    }
+
+    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+	if (!closure->iolog_files[iofd].enabled)
+	    continue;
+	(void)iolog_close(&closure->iolog_files[iofd], &errstr);
+	closure->iolog_files[iofd] = new_iolog_files[iofd];
+	new_iolog_files[iofd].enabled = false;
+    }
+
+    /* Ready to log I/O buffers. */
+    ret = true;
+done:
+    if (tmpdir_fd != -1) {
+	if (!ret) {
+	    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+		if (!new_iolog_files[iofd].enabled)
+		    continue;
+		(void)iolog_close(&new_iolog_files[iofd], &errstr);
+		(void)unlinkat(tmpdir_fd, iolog_fd_to_name(iofd), 0);
+	    }
+	}
+	close(tmpdir_fd);
+	(void)rmdir(tmpdir);
+    }
+    debug_return_bool(ret);
+}
+
 bool
 iolog_restart(RestartMessage *msg, struct connection_closure *closure)
 {
     struct timespec target;
     struct timing_closure timing;
+    bool compressed = false;
     off_t pos;
     int iofd;
     debug_decl(iolog_restart, SUDO_DEBUG_UTIL)
@@ -665,6 +847,15 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     if ((closure->details.iolog_path = strdup(msg->log_id)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "strdup");
+	goto bad;
+    }
+
+    /* We use iolog_dir_fd in calls to openat(2) */
+    closure->iolog_dir_fd =
+	iolog_openat(AT_FDCWD, closure->details.iolog_path, O_RDONLY);
+    if (closure->iolog_dir_fd == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "%s", closure->details.iolog_path);
 	goto bad;
     }
 
@@ -681,11 +872,17 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
 		goto bad;
 	    }
 	}
+	if (closure->iolog_files[iofd].compressed)
+	    compressed = true;
     }
     if (!closure->iolog_files[IOFD_TIMING].enabled) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing timing file in %s", closure->details.iolog_path);
 	goto bad;
+    }
+    if (compressed) {
+	/* Compressed logs don't support random access, need to rewrite them. */
+	debug_return_bool(iolog_rewrite(&target, closure));
     }
 
     /* Parse timing file until we reach the target point. */

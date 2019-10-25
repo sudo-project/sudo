@@ -123,12 +123,12 @@ io_swapids(bool restore)
  * Create directory and any parent directories as needed.
  */
 static bool
-io_mkdirs(char *path)
+iolog_mkdirs(char *path)
 {
     mode_t omask;
     struct stat sb;
     bool ok, uid_changed = false;
-    debug_decl(io_mkdirs, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL)
 
     /* umask must not be more restrictive than the file modes. */
     omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
@@ -207,11 +207,11 @@ done:
 /*
  * Create temporary directory and any parent directories as needed.
  */
-static bool
-io_mkdtemp(char *path)
+bool
+iolog_mkdtemp(char *path)
 {
     bool ok, uid_changed = false;
-    debug_decl(io_mkdtemp, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_mkdtemp, SUDO_DEBUG_UTIL)
 
     ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
     if (!ok && errno == EACCES) {
@@ -236,6 +236,29 @@ io_mkdtemp(char *path)
 		    path, (unsigned int)iolog_dirmode);
 	    }
 	}
+    }
+
+    if (uid_changed) {
+	if (!io_swapids(true))
+	    ok = false;
+    }
+    debug_return_bool(ok);
+}
+
+/*
+ * Like rename(2) but changes UID as needed.
+ */
+bool
+iolog_rename(const char *from, const char *to)
+{
+    bool ok, uid_changed = false;
+    debug_decl(iolog_rename, SUDO_DEBUG_UTIL)
+
+    ok = rename(from, to) == 0;
+    if (!ok && errno == EACCES) {
+	uid_changed = io_swapids(false);
+	if (uid_changed)
+	    ok = rename(from, to) == 0;
     }
 
     if (uid_changed) {
@@ -437,7 +460,7 @@ iolog_nextid(char *iolog_dir, char sessid[7])
     /*
      * Create I/O log directory if it doesn't already exist.
      */
-    if (!io_mkdirs(iolog_dir))
+    if (!iolog_mkdirs(iolog_dir))
 	goto done;
 
     /*
@@ -539,9 +562,9 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
      * Sets iolog_gid (if it is not already set) as a side effect.
      */
     if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0)
-	ok = io_mkdtemp(pathbuf);
+	ok = iolog_mkdtemp(pathbuf);
     else
-	ok = io_mkdirs(pathbuf);
+	ok = iolog_mkdirs(pathbuf);
 
     debug_return_size_t(ok ? len : (size_t)-1);
 }
@@ -681,6 +704,24 @@ iolog_seek(struct iolog_file *iol, off_t offset, int whence)
 
     //debug_return_off_t(ret);
     return ret;
+}
+
+/*
+ * I/O log wrapper for rewind/gzrewind.
+ */
+void
+iolog_rewind(struct iolog_file *iol)
+{
+    debug_decl(iolog_rewind, SUDO_DEBUG_UTIL)
+
+#ifdef HAVE_ZLIB_H
+    if (iol->compressed)
+	(void)gzrewind(iol->fd.g);
+    else
+#endif
+	rewind(iol->fd.f);
+
+    debug_return;
 }
 
 /*

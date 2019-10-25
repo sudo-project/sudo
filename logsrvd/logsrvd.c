@@ -787,6 +787,7 @@ connection_closure_alloc(int sock)
     if ((closure = calloc(1, sizeof(*closure))) == NULL)
 	debug_return_ptr(NULL);
 
+    closure->iolog_dir_fd = -1;
     closure->sock = sock;
 
     closure->read_buf.size = 64 * 1024;
