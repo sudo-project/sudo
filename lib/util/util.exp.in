@@ -88,6 +88,8 @@ sudo_lbuf_init_v1
 sudo_lbuf_print_v1
 sudo_lock_file_v1
 sudo_lock_region_v1
+sudo_logfac2str_v1
+sudo_logpri2str_v1
 sudo_mkdir_parents_v1
 sudo_new_key_val_v1
 sudo_parse_gids_v1
@@ -96,6 +98,8 @@ sudo_parseln_v2
 sudo_secure_dir_v1
 sudo_secure_file_v1
 sudo_setgroups_v1
+sudo_str2logfac_v1
+sudo_str2logpri_v1
 sudo_strsplit_v1
 sudo_strtobool_v1
 sudo_strtoid_v1

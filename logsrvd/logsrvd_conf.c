@@ -64,30 +64,114 @@ struct logsrvd_config_section {
     struct logsrvd_config_entry *entries;
 };
 
-static char *logsrvd_iolog_dir;
+static struct logsrvd_config {
+    struct logsrvd_config_server {
+	struct listen_address_list addresses;
+    } server;
+    struct logsrvd_config_iolog {
+	/* XXX - others private to iolog */
+	char *iolog_dir;
+	char *iolog_file;
+    } iolog;
+    struct logsrvd_config_eventlog {
+	enum logsrvd_eventlog_type log_type;
+	enum logsrvd_eventlog_format log_format;
+    } eventlog;
+    struct logsrvd_config_syslog {
+	unsigned int maxlen;
+	int facility;
+	int acceptpri;
+	int rejectpri;
+	int alertpri;
+    } syslog;
+    struct logsrvd_config_logfile {
+	char *path;
+	char *time_format;
+    } logfile;
+} logsrvd_config = {
+    { TAILQ_HEAD_INITIALIZER(logsrvd_config.server.addresses) }
+};
 
+/* iolog getters */
 const char *
 logsrvd_conf_iolog_dir(void)
 {
-    return logsrvd_iolog_dir;
+    return logsrvd_config.iolog.iolog_dir;
 }
-
-static char *logsrvd_iolog_file;
 
 const char *
 logsrvd_conf_iolog_file(void)
 {
-    return logsrvd_iolog_file;
+    return logsrvd_config.iolog.iolog_file;
 }
 
-static struct listen_address_list addresses = TAILQ_HEAD_INITIALIZER(addresses);
-
+/* server getters */
 struct listen_address_list *
 logsrvd_conf_listen_address(void)
 {
-    return &addresses;
+    return &logsrvd_config.server.addresses;
 }
 
+/* eventlog getters */
+enum logsrvd_eventlog_type
+logsrvd_conf_eventlog_type(void)
+{
+    return logsrvd_config.eventlog.log_type;
+}
+
+enum logsrvd_eventlog_format
+logsrvd_conf_eventlog_format(void)
+{
+    return logsrvd_config.eventlog.log_format;
+}
+
+/* syslog getters */
+unsigned int
+logsrvd_conf_syslog_maxlen(void)
+{
+    return logsrvd_config.syslog.maxlen;
+}
+
+int
+logsrvd_conf_syslog_facility(void)
+{
+    return logsrvd_config.syslog.facility;
+}
+
+int
+logsrvd_conf_syslog_acceptpri(void)
+{
+    return logsrvd_config.syslog.acceptpri;
+}
+
+int
+logsrvd_conf_syslog_rejectpri(void)
+{
+    return logsrvd_config.syslog.rejectpri;
+}
+
+int
+logsrvd_conf_syslog_alertpri(void)
+{
+    return logsrvd_config.syslog.alertpri;
+}
+
+/* logfile getters */
+const char *
+logsrvd_conf_logfile_path(void)
+{
+    return logsrvd_config.logfile.path;
+}
+
+const char *
+logsrvd_conf_logfile_time_format(void)
+{
+    return logsrvd_config.logfile.time_format;
+}
+
+/*
+ * Reset logsrvd_config to default values and reset I/O log values.
+ */
 static void
 logsrvd_conf_reset(void)
 {
@@ -95,26 +179,30 @@ logsrvd_conf_reset(void)
     debug_decl(logsrvd_conf_reset, SUDO_DEBUG_UTIL)
 
     iolog_set_defaults();
-    free(logsrvd_iolog_dir);
-    logsrvd_iolog_dir = NULL;
-    free(logsrvd_iolog_file);
-    logsrvd_iolog_file = NULL;
+    free(logsrvd_config.iolog.iolog_dir);
+    logsrvd_config.iolog.iolog_dir = NULL;
+    free(logsrvd_config.iolog.iolog_file);
+    logsrvd_config.iolog.iolog_file = NULL;
 
-    while ((addr = TAILQ_FIRST(&addresses))) {
-        TAILQ_REMOVE(&addresses, addr, entries);
+    while ((addr = TAILQ_FIRST(&logsrvd_config.server.addresses))) {
+        TAILQ_REMOVE(&logsrvd_config.server.addresses, addr, entries);
 	free(addr);
     }
+
+    free(logsrvd_config.logfile.path);
+    free(logsrvd_config.logfile.time_format);
 
     debug_return;
 }
 
+/* I/O log callbacks */
 static bool
 cb_iolog_dir(const char *path)
 {
     debug_decl(cb_iolog_dir, SUDO_DEBUG_UTIL)
 
-    free(logsrvd_iolog_dir);
-    if ((logsrvd_iolog_dir = strdup(path)) == NULL) {
+    free(logsrvd_config.iolog.iolog_dir);
+    if ((logsrvd_config.iolog.iolog_dir = strdup(path)) == NULL) {
 	sudo_warn(NULL);
 	debug_return_bool(false);
     }
@@ -126,8 +214,8 @@ cb_iolog_file(const char *path)
 {
     debug_decl(cb_iolog_file, SUDO_DEBUG_UTIL)
 
-    free(logsrvd_iolog_file);
-    if ((logsrvd_iolog_file = strdup(path)) == NULL) {
+    free(logsrvd_config.iolog.iolog_file);
+    if ((logsrvd_config.iolog.iolog_file = strdup(path)) == NULL) {
 	sudo_warn(NULL);
 	debug_return_bool(false);
     }
@@ -192,6 +280,13 @@ cb_iolog_mode(const char *str)
     debug_return_bool(iolog_set_mode(mode));
 }
 
+static bool
+cb_iolog_maxseq(const char *str)
+{
+    return iolog_set_maxseq(str);
+}
+
+/* Server callbacks */
 /* TODO: unit test */
 static bool
 cb_listen_address(const char *str)
@@ -256,7 +351,7 @@ cb_listen_address(const char *str)
 	}
 	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
 	addr->sa_len = res->ai_addrlen;
-	TAILQ_INSERT_TAIL(&addresses, addr, entries);
+	TAILQ_INSERT_TAIL(&logsrvd_config.server.addresses, addr, entries);
     }
 
     ret = true;
@@ -267,10 +362,157 @@ done:
     debug_return_bool(ret);
 }
 
+/* eventlog callbacks */
 static bool
-cb_maxseq(const char *str)
+cb_eventlog_type(const char *str)
 {
-    return iolog_set_maxseq(str);
+    debug_decl(cb_eventlog_type, SUDO_DEBUG_UTIL)
+
+    if (strcmp(str, "none") == 0)
+	logsrvd_config.eventlog.log_type = EVLOG_NONE;
+    else if (strcmp(str, "syslog") == 0)
+	logsrvd_config.eventlog.log_type = EVLOG_SYSLOG;
+    else if (strcmp(str, "logfile") == 0)
+	logsrvd_config.eventlog.log_type = EVLOG_FILE;
+    else
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_eventlog_format(const char *str)
+{
+    debug_decl(cb_eventlog_format, SUDO_DEBUG_UTIL)
+
+    if (strcmp(str, "sudo") == 0)
+	logsrvd_config.eventlog.log_format = EVLOG_SUDO;
+    else
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}
+
+/* syslog callbacks */
+static bool
+cb_syslog_maxlen(const char *str)
+{
+    unsigned int maxlen;
+    const char *errstr;
+    debug_decl(cb_syslog_maxlen, SUDO_DEBUG_UTIL)
+
+    maxlen = sudo_strtonum(str, 1, UINT_MAX, &errstr);
+    if (errstr != NULL)
+	debug_return_bool(false);
+
+    logsrvd_config.syslog.maxlen = maxlen;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_syslog_facility(const char *str)
+{
+    int logfac;
+    debug_decl(cb_syslog_facility, SUDO_DEBUG_UTIL)
+
+    if (!sudo_str2logfac(str, &logfac)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid syslog priority %s", str);
+	debug_return_bool(false);
+    }
+
+    logsrvd_config.syslog.facility = logfac;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_syslog_acceptpri(const char *str)
+{
+    int logpri;
+    debug_decl(cb_syslog_acceptpri, SUDO_DEBUG_UTIL)
+
+    if (!sudo_str2logpri(str, &logpri)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid syslog priority %s", str);
+	debug_return_bool(false);
+    }
+
+    logsrvd_config.syslog.acceptpri = logpri;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_syslog_rejectpri(const char *str)
+{
+    int logpri;
+    debug_decl(cb_syslog_rejectpri, SUDO_DEBUG_UTIL)
+
+    if (!sudo_str2logpri(str, &logpri))
+	debug_return_bool(false);
+
+    logsrvd_config.syslog.rejectpri = logpri;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_syslog_alertpri(const char *str)
+{
+    int logpri;
+    debug_decl(cb_syslog_alertpri, SUDO_DEBUG_UTIL)
+
+    if (!sudo_str2logpri(str, &logpri)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid syslog priority %s", str);
+	debug_return_bool(false);
+    }
+
+    logsrvd_config.syslog.alertpri = logpri;
+
+    debug_return_bool(true);
+}
+
+/* logfile callbacks */
+static bool
+cb_logfile_path(const char *str)
+{
+    char *copy = NULL;
+    debug_decl(cb_logfile_path, SUDO_DEBUG_UTIL)
+
+    if (*str != '/') {
+	debug_return_bool(false);
+	sudo_warnx(U_("%s: not a fully qualified path"), str);
+	debug_return_bool(false);
+    }
+    if ((copy = strdup(str)) == NULL) {
+	sudo_warn(NULL);
+	debug_return_bool(false);
+    }
+
+    free(logsrvd_config.logfile.path);
+    logsrvd_config.logfile.path = copy;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_logfile_time_format(const char *str)
+{
+    char *copy = NULL;
+    debug_decl(cb_logfile_time_format, SUDO_DEBUG_UTIL)
+
+    if ((copy = strdup(str)) == NULL) {
+	sudo_warn(NULL);
+	debug_return_bool(false);
+    }
+
+    free(logsrvd_config.logfile.time_format);
+    logsrvd_config.logfile.time_format = copy;
+
+    debug_return_bool(true);
 }
 
 static struct logsrvd_config_entry server_conf_entries[] = {
@@ -286,13 +528,37 @@ static struct logsrvd_config_entry iolog_conf_entries[] = {
     { "iolog_user", cb_iolog_user },
     { "iolog_group", cb_iolog_group },
     { "iolog_mode", cb_iolog_mode },
-    { "maxseq", cb_maxseq },
+    { "maxseq", cb_iolog_maxseq },
+    { NULL }
+};
+
+static struct logsrvd_config_entry eventlog_conf_entries[] = {
+    { "log_type", cb_eventlog_type },
+    { "log_format", cb_eventlog_format },
+    { NULL }
+};
+
+static struct logsrvd_config_entry syslog_conf_entries[] = {
+    { "maxlen", cb_syslog_maxlen },
+    { "facility", cb_syslog_facility },
+    { "reject_priority", cb_syslog_rejectpri },
+    { "accept_priority", cb_syslog_acceptpri },
+    { "alert_priority", cb_syslog_alertpri },
+    { NULL }
+};
+
+static struct logsrvd_config_entry logfile_conf_entries[] = {
+    { "path", cb_logfile_path },
+    { "time_format", cb_logfile_time_format },
     { NULL }
 };
 
 static struct logsrvd_config_section logsrvd_config_sections[] = {
     { "server", server_conf_entries },
     { "iolog", iolog_conf_entries },
+    { "eventlog", eventlog_conf_entries },
+    { "syslog", syslog_conf_entries },
+    { "logfile", logfile_conf_entries },
     { NULL }
 };
 
@@ -300,7 +566,7 @@ static struct logsrvd_config_section logsrvd_config_sections[] = {
  * Read .ini style logsrvd.conf file.
  * Note that we use '#' not ';' for the comment character.
  */
-/* XXX - on reload we should preserve old config if there is an error */
+/* XXX - split into read and apply so we don't overwrite good config with bad */
 bool
 logsrvd_conf_read(const char *path)
 {
@@ -318,7 +584,27 @@ logsrvd_conf_read(const char *path)
 	debug_return_bool(false);
     }
 
+    /* Initialize default values for settings that take int values. */
     logsrvd_conf_reset();
+    logsrvd_config.eventlog.log_type = EVLOG_SYSLOG;
+    logsrvd_config.eventlog.log_format = EVLOG_SUDO;
+    logsrvd_config.syslog.maxlen = 960;
+    if (!cb_syslog_facility(LOGFAC)) {
+	sudo_warnx(U_("unknown syslog facility %s"), LOGFAC);
+	debug_return_bool(false);
+    }
+    if (!cb_syslog_acceptpri(PRI_SUCCESS)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_SUCCESS);
+	debug_return_bool(false);
+    }
+    if (!cb_syslog_rejectpri(PRI_FAILURE)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
+	debug_return_bool(false);
+    }
+    if (!cb_syslog_alertpri(PRI_FAILURE)) {
+	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
+	debug_return_bool(false);
+    }
 
     while (sudo_parseln(&line, &linesize, &lineno, fp, 0) != -1) {
 	struct logsrvd_config_entry *entry;
@@ -386,21 +672,25 @@ logsrvd_conf_read(const char *path)
 	}
     }
 
-    /* All the others have default values. */
-    if (logsrvd_iolog_dir == NULL) {
-	if ((logsrvd_iolog_dir = strdup(_PATH_SUDO_IO_LOGDIR)) == NULL) {
-	    sudo_warn(NULL);
+    /* For settings with pointer values we can tell what is unset. */
+    if (logsrvd_config.iolog.iolog_dir == NULL) {
+	if (!cb_iolog_dir(_PATH_SUDO_IO_LOGDIR))
 	    debug_return_bool(false);
-	}
     }
-    if (logsrvd_iolog_file == NULL) {
-	if ((logsrvd_iolog_file = strdup("%{seq}")) == NULL) {
-	    sudo_warn(NULL);
+    if (logsrvd_config.iolog.iolog_file == NULL) {
+	if (!cb_iolog_file("%{seq}"))
 	    debug_return_bool(false);
-	}
     }
-    if (TAILQ_EMPTY(&addresses)) {
+    if (TAILQ_EMPTY(&logsrvd_config.server.addresses)) {
 	if (!cb_listen_address("*:30344"))
+	    debug_return_bool(false);
+    }
+    if (logsrvd_config.logfile.time_format == NULL) {
+	if (!cb_logfile_time_format("%h %e %T"))
+	    debug_return_bool(false);
+    }
+    if (logsrvd_config.logfile.path == NULL) {
+	if (!cb_logfile_path(_PATH_SUDO_LOGFILE))
 	    debug_return_bool(false);
     }
 

@@ -63,29 +63,94 @@ has_strlistval(InfoMessage *info)
 }
 
 /*
- * Fill in I/O log details from an AcceptMessage
- * Only makes a shallow copy of strings and string lists.
+ * Copy the specified string list.
+ * The input string list need not be NULL-terminated.
+ * Returns a NULL-terminated string vector.
  */
-static bool
-iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
+static char **
+strlist_copy(InfoMessage__StringList *strlist)
+{
+    char **dst, **src = strlist->strings;
+    size_t i, len = strlist->n_strings;
+    debug_decl(strlist_copy, SUDO_DEBUG_UTIL)
+
+    dst = reallocarray(NULL, len + 1, sizeof(char *));
+    if (dst == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "reallocarray(NULL, %zu, %zu)", len + 1, sizeof(char *));
+	goto bad;
+    }
+    for (i = 0; i < len; i++) {
+	if ((dst[i] = strdup(src[i])) == NULL) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO, "strdup");
+	    goto bad;
+	}
+    }
+    dst[i] = NULL;
+    debug_return_ptr(dst);
+
+bad:
+    if (dst != NULL) {
+	while (i--)
+	    free(dst[i]);
+	free(dst);
+    }
+    debug_return_ptr(NULL);
+}
+
+/*
+ * Free the strings in a struct iolog_details.
+ */
+void
+iolog_details_free(struct iolog_details *details)
+{
+    int i;
+    debug_decl(iolog_details_free, SUDO_DEBUG_UTIL)
+
+    if (details != NULL) {
+	free(details->iolog_path);
+	free(details->command);
+	free(details->cwd);
+	free(details->rungroup);
+	free(details->runuser);
+	free(details->submithost);
+	free(details->submituser);
+	free(details->submitgroup);
+	free(details->ttyname);
+	for (i = 0; i < details->argc; i++)
+	    free(details->argv[i]);
+	free(details->argv);
+    }
+
+    debug_return;
+}
+
+/*
+ * Fill in I/O log details from an AcceptMessage
+ * Caller is responsible for freeing strings in struct iolog_details.
+ * Returns true on success and false on failure.
+ */
+bool
+iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
+    InfoMessage **info_msgs, size_t infolen)
 {
     size_t idx;
-    bool ret = true;
+    bool ret = false;
     debug_decl(iolog_details_fill, SUDO_DEBUG_UTIL)
 
     memset(details, 0, sizeof(*details));
 
     /* Submit time. */
-    details->submit_time = msg->submit_time->tv_sec;
+    details->submit_time = submit_time->tv_sec;
 
     /* Default values */
     details->lines = 24;
     details->columns = 80;
-    details->submitgroup = "unknown";
 
     /* Pull out values by key from info array. */
-    for (idx = 0; idx < msg->n_info_msgs; idx++) {
-	InfoMessage *info = msg->info_msgs[idx];
+    for (idx = 0; idx < infolen; idx++) {
+	InfoMessage *info = info_msgs[idx];
 	const char *key = info->key;
 	switch (key[0]) {
 	case 'c':
@@ -103,7 +168,12 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	    }
 	    if (strcmp(key, "command") == 0) {
 		if (has_strval(info)) {
-		    details->command = info->strval;
+		    if ((details->command = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"command specified but not a string");
@@ -112,7 +182,12 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	    }
 	    if (strcmp(key, "cwd") == 0) {
 		if (has_strval(info)) {
-		    details->cwd = info->strval;
+		    if ((details->cwd = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"cwd specified but not a string");
@@ -137,7 +212,9 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	case 'r':
 	    if (strcmp(key, "runargv") == 0) {
 		if (has_strlistval(info)) {
-		    details->argv = info->strlistval->strings;
+		    details->argv = strlist_copy(info->strlistval);
+		    if (details->argv == NULL)
+			goto done;
 		    details->argc = info->strlistval->n_strings;
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -147,7 +224,12 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	    }
 	    if (strcmp(key, "rungroup") == 0) {
 		if (has_strval(info)) {
-		    details->rungroup = info->strval;
+		    if ((details->rungroup = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"rungroup specified but not a string");
@@ -156,7 +238,12 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	    }
 	    if (strcmp(key, "runuser") == 0) {
 		if (has_strval(info)) {
-		    details->runuser = info->strval;
+		    if ((details->runuser = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runuser specified but not a string");
@@ -167,7 +254,12 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	case 's':
 	    if (strcmp(key, "submithost") == 0) {
 		if (has_strval(info)) {
-		    details->submithost = info->strval;
+		    if ((details->submithost = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"submithost specified but not a string");
@@ -176,7 +268,12 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	    }
 	    if (strcmp(key, "submitgroup") == 0) {
 		if (has_strval(info)) {
-		    details->submitgroup = info->strval;
+		    if ((details->submitgroup = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"submitgroup specified but not a string");
@@ -185,7 +282,12 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	    }
 	    if (strcmp(key, "submituser") == 0) {
 		if (has_strval(info)) {
-		    details->submituser = info->strval;
+		    if ((details->submituser = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"submituser specified but not a string");
@@ -196,7 +298,12 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	case 't':
 	    if (strcmp(key, "ttyname") == 0) {
 		if (has_strval(info)) {
-		    details->ttyname = info->strval;
+		    if ((details->ttyname = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"ttyname specified but not a string");
@@ -207,23 +314,38 @@ iolog_details_fill(struct iolog_details *details, AcceptMessage *msg)
 	}
     }
 
+    /* TODO: make submitgroup required */
+    if (details->submitgroup == NULL) {
+	if ((details->submitgroup = strdup("unknown")) == NULL) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"strdup");
+	    goto done;
+	}
+    }
+
     /* Check for required settings */
     if (details->submituser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing user in AcceptMessage");
-	ret = false;
+	goto done;
     }
     if (details->submithost == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing host in AcceptMessage");
-	ret = false;
+	goto done;
     }
     if (details->command == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing command in AcceptMessage");
-	ret = false;
+	goto done;
     }
 
+    ret = true;
+
+done:
+    if (!ret)
+	iolog_details_free(details);
     debug_return_bool(ret);
 }
 
@@ -351,54 +473,58 @@ static const struct iolog_path_escape path_escapes[] = {
 
 /*
  * Create I/O log path
- * Sets iolog_dir and iolog_dir_fd in the closure
+ * Sets iolog_path, iolog_file and iolog_dir_fd in the closure
  */
 static bool
-create_iolog_dir(struct iolog_details *details, struct connection_closure *closure)
+create_iolog_path(struct connection_closure *closure)
 {
+    struct iolog_details *details = &closure->details;
     char pathbuf[PATH_MAX];
-    size_t len;
-    debug_decl(create_iolog_dir, SUDO_DEBUG_UTIL)
+    size_t len, pathlen;
+    debug_decl(create_iolog_path, SUDO_DEBUG_UTIL)
 
-    /* XXX - awkward api */
-    closure->iolog_dir = expand_iolog_path(NULL, logsrvd_conf_iolog_dir(),
-	logsrvd_conf_iolog_file(), NULL, &path_escapes[0], details);
-    if (closure->iolog_dir == NULL) {
+    details->iolog_path = expand_iolog_path(NULL, logsrvd_conf_iolog_dir(),
+	logsrvd_conf_iolog_file(), &details->iolog_file, &path_escapes[0],
+	details);
+    if (details->iolog_path == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to expand iolog path %s/%s",
 	    logsrvd_conf_iolog_dir(), logsrvd_conf_iolog_file());
 	goto bad;
     }
+    pathlen = details->iolog_file - details->iolog_path;
 
     /*
      * Make local copy of I/O log path and create it, along with any
      * intermediate subdirs.  Calls mkdtemp() if iolog_path ends in XXXXXX.
      */
-    len = mkdir_iopath(closure->iolog_dir, pathbuf, sizeof(pathbuf));
+    len = mkdir_iopath(details->iolog_path, pathbuf, sizeof(pathbuf));
     if (len >= sizeof(pathbuf)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to mkdir iolog path %s", closure->iolog_dir);
+	    "unable to mkdir iolog path %s", details->iolog_path);
         goto bad;
     }
-    free(closure->iolog_dir);
-    if ((closure->iolog_dir = strdup(pathbuf)) == NULL) {
+    free(details->iolog_path);
+    if ((details->iolog_path = strdup(pathbuf)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "strdup");
 	goto bad;
     }
+    details->iolog_file = details->iolog_path + pathlen + 1;
 
     /* We use iolog_dir_fd in calls to openat(2) */
     closure->iolog_dir_fd =
-	iolog_openat(AT_FDCWD, closure->iolog_dir, O_RDONLY);
+	iolog_openat(AT_FDCWD, details->iolog_path, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s", closure->iolog_dir);
+	    "%s", details->iolog_path);
 	goto bad;
     }
 
     debug_return_bool(true);
 bad:
-    free(closure->iolog_dir);
+    free(details->iolog_path);
+    details->iolog_path = NULL;
     debug_return_bool(false);
 }
 
@@ -424,7 +550,7 @@ iolog_details_write(struct iolog_details *details,
     log_info.cols = details->columns;
 
     debug_return_bool(iolog_write_info_file(closure->iolog_dir_fd,
-	 closure->iolog_dir, &log_info, details->argv));
+	 details->iolog_path, &log_info, details->argv));
 }
 
 static bool
@@ -467,19 +593,14 @@ iolog_close_all(struct connection_closure *closure)
 bool
 iolog_init(AcceptMessage *msg, struct connection_closure *closure)
 {
-    struct iolog_details details;
     debug_decl(iolog_init, SUDO_DEBUG_UTIL)
 
-    /* Fill in iolog_details */
-    if (!iolog_details_fill(&details, msg))
-	debug_return_bool(false);
-
-    /* Create I/O log dir */
-    if (!create_iolog_dir(&details, closure))
+    /* Create I/O log path */
+    if (!create_iolog_path(closure))
 	debug_return_bool(false);
 
     /* Write sudo I/O log info file */
-    if (!iolog_details_write(&details, closure))
+    if (!iolog_details_write(&closure->details, closure))
 	debug_return_bool(false);
 
     /*
@@ -541,7 +662,7 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     target.tv_sec = msg->resume_point->tv_sec;
     target.tv_nsec = msg->resume_point->tv_nsec;
 
-    if ((closure->iolog_dir = strdup(msg->log_id)) == NULL) {
+    if ((closure->details.iolog_path = strdup(msg->log_id)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "strdup");
 	goto bad;
@@ -555,7 +676,7 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
 	    if (errno != ENOENT) {
 		sudo_debug_printf(
 		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "unable to open %s/%s", closure->iolog_dir,
+		    "unable to open %s/%s", closure->details.iolog_path,
 		    iolog_fd_to_name(iofd));
 		goto bad;
 	    }
@@ -563,7 +684,7 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     }
     if (!closure->iolog_files[IOFD_TIMING].enabled) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "missing timing file in %s", closure->iolog_dir);
+	    "missing timing file in %s", closure->details.iolog_path);
 	goto bad;
     }
 
@@ -666,7 +787,7 @@ store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     if (!iolog_write(&closure->iolog_files[iofd], msg->data.data,
 	    msg->data.len, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->iolog_dir,
+	    "unable to write to %s/%s: %s", closure->details.iolog_path,
 	    iolog_fd_to_name(iofd), errstr);
 	debug_return_int(-1);
     }
@@ -675,7 +796,7 @@ store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->iolog_dir,
+	    "unable to write to %s/%s: %s", closure->details.iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	debug_return_int(-1);
     }
@@ -707,7 +828,7 @@ store_suspend(CommandSuspend *msg, struct connection_closure *closure)
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->iolog_dir,
+	    "unable to write to %s/%s: %s", closure->details.iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	debug_return_int(-1);
     }
@@ -739,7 +860,7 @@ store_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->iolog_dir,
+	    "unable to write to %s/%s: %s", closure->details.iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	debug_return_int(-1);
     }

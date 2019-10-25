@@ -35,9 +35,10 @@
  * I/O log details from the AcceptMessage + iolog path and sessid.
  */
 struct iolog_details {
+    char *iolog_path;
+    char *iolog_file;		/* substring of iolog_path, do not free */
     char *command;
     char *cwd;
-    char *iolog_dir;
     char *rungroup;
     char *runuser;
     char *submithost;
@@ -45,6 +46,7 @@ struct iolog_details {
     char *submitgroup;
     char *ttyname;
     char **argv;
+    char **env_add;
     time_t submit_time;
     int argc;
     int lines;
@@ -78,6 +80,7 @@ struct connection_buffer {
  */
 struct connection_closure {
     TAILQ_ENTRY(connection_closure) entries;
+    struct iolog_details details;
     struct timespec submit_time;
     struct timespec elapsed_time;
     struct connection_buffer read_buf;
@@ -85,7 +88,6 @@ struct connection_closure {
     struct sudo_event *commit_ev;
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
-    char *iolog_dir;
     const char *errstr;
     struct iolog_file iolog_files[IOFD_MAX];
     int iolog_dir_fd;
@@ -111,18 +113,46 @@ struct listen_address {
 };
 TAILQ_HEAD(listen_address_list, listen_address);
 
+/* Supported eventlog types */
+enum logsrvd_eventlog_type {
+    EVLOG_NONE,
+    EVLOG_SYSLOG,
+    EVLOG_FILE,
+};
+
+/* Supported eventlog formats (currently just sudo) */
+enum logsrvd_eventlog_format {
+    EVLOG_SUDO
+};
+
+/* eventlog.c */
+bool log_accept(const struct iolog_details *details);
+bool log_reject(const struct iolog_details *details, const char *reason);
+bool log_alert(const struct iolog_details *details, TimeSpec *alert_time, const char *reason);
+
 /* iolog_writer.c */
+bool iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen);
 bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
 bool iolog_restart(RestartMessage *msg, struct connection_closure *closure);
 int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);
 int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
+void iolog_details_free(struct iolog_details *details);
 
 /* logsrvd_conf.c */
 bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct listen_address_list *logsrvd_conf_listen_address(void);
+enum logsrvd_eventlog_type logsrvd_conf_eventlog_type(void);
+enum logsrvd_eventlog_format logsrvd_conf_eventlog_format(void);
+unsigned int logsrvd_conf_syslog_maxlen(void);
+int logsrvd_conf_syslog_facility(void);
+int logsrvd_conf_syslog_acceptpri(void);
+int logsrvd_conf_syslog_rejectpri(void);
+int logsrvd_conf_syslog_alertpri(void);
+const char *logsrvd_conf_logfile_path(void);
+const char *logsrvd_conf_logfile_time_format(void);
 
 #endif /* SUDO_LOGSRVD_H */

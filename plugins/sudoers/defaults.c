@@ -46,45 +46,6 @@
 #include "sudoers.h"
 #include <gram.h>
 
-/*
- * For converting between syslog numbers and strings.
- */
-struct strmap {
-    char *name;
-    int num;
-};
-
-static struct strmap facilities[] = {
-#ifdef LOG_AUTHPRIV
-	{ "authpriv",	LOG_AUTHPRIV },
-#endif
-	{ "auth",	LOG_AUTH },
-	{ "daemon",	LOG_DAEMON },
-	{ "user",	LOG_USER },
-	{ "local0",	LOG_LOCAL0 },
-	{ "local1",	LOG_LOCAL1 },
-	{ "local2",	LOG_LOCAL2 },
-	{ "local3",	LOG_LOCAL3 },
-	{ "local4",	LOG_LOCAL4 },
-	{ "local5",	LOG_LOCAL5 },
-	{ "local6",	LOG_LOCAL6 },
-	{ "local7",	LOG_LOCAL7 },
-	{ NULL,		-1 }
-};
-
-static struct strmap priorities[] = {
-	{ "alert",	LOG_ALERT },
-	{ "crit",	LOG_CRIT },
-	{ "debug",	LOG_DEBUG },
-	{ "emerg",	LOG_EMERG },
-	{ "err",	LOG_ERR },
-	{ "info",	LOG_INFO },
-	{ "notice",	LOG_NOTICE },
-	{ "warning",	LOG_WARNING },
-	{ "none",	-1 },
-	{ NULL,		-1 }
-};
-
 static struct early_default early_defaults[] = {
     { I_IGNORE_UNKNOWN_DEFAULTS },
 #ifdef FQDN
@@ -113,8 +74,6 @@ static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_
 static bool store_uint(const char *str, union sudo_defs_val *sd_un);
 static bool store_timespec(const char *str, union sudo_defs_val *sd_un);
 static bool list_op(const char *str, size_t, union sudo_defs_val *sd_un, enum list_ops op);
-static const char *logfac2str(int);
-static const char *logpri2str(int);
 
 /*
  * Table describing compile-time and run-time options.
@@ -150,14 +109,14 @@ dump_defaults(void)
 		case T_LOGFAC:
 		    if (cur->sd_un.ival) {
 			sudo_printf(SUDO_CONV_INFO_MSG, desc,
-			    logfac2str(cur->sd_un.ival));
+			    sudo_logfac2str(cur->sd_un.ival));
 			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    }
 		    break;
 		case T_LOGPRI:
 		    if (cur->sd_un.ival) {
 			sudo_printf(SUDO_CONV_INFO_MSG, desc,
-			    logpri2str(cur->sd_un.ival));
+			    sudo_logpri2str(cur->sd_un.ival));
 			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    }
 		    break;
@@ -990,63 +949,25 @@ store_list(const char *str, union sudo_defs_val *sd_un, int op)
 static bool
 store_syslogfac(const char *str, union sudo_defs_val *sd_un)
 {
-    struct strmap *fac;
     debug_decl(store_syslogfac, SUDOERS_DEBUG_DEFAULTS)
 
     if (str == NULL) {
 	sd_un->ival = false;
 	debug_return_bool(true);
     }
-    for (fac = facilities; fac->name != NULL; fac++) {
-	if (strcmp(str, fac->name) == 0) {
-	    sd_un->ival = fac->num;
-	    debug_return_bool(true);
-	}
-    }
-    debug_return_bool(false);		/* not found */
-}
-
-static const char *
-logfac2str(int n)
-{
-    struct strmap *fac;
-    debug_decl(logfac2str, SUDOERS_DEBUG_DEFAULTS)
-
-    for (fac = facilities; fac->name && fac->num != n; fac++)
-	continue;
-    debug_return_const_str(fac->name);
+    debug_return_bool(sudo_str2logfac(str, &sd_un->ival));
 }
 
 static bool
 store_syslogpri(const char *str, union sudo_defs_val *sd_un)
 {
-    struct strmap *pri;
     debug_decl(store_syslogpri, SUDOERS_DEBUG_DEFAULTS)
 
     if (str == NULL) {
 	sd_un->ival = -1;
 	debug_return_bool(true);
     }
-    for (pri = priorities; pri->name != NULL; pri++) {
-	if (strcmp(str, pri->name) == 0) {
-	    sd_un->ival = pri->num;
-	    debug_return_bool(true);
-	}
-    }
-    debug_return_bool(false); 	/* not found */
-}
-
-static const char *
-logpri2str(int n)
-{
-    struct strmap *pri;
-    debug_decl(logpri2str, SUDOERS_DEBUG_DEFAULTS)
-
-    for (pri = priorities; pri->name != NULL; pri++) {
-	if (pri->num == n)
-	    debug_return_const_str(pri->name);
-    }
-    debug_return_const_str("unknown");
+    debug_return_bool(sudo_str2logpri(str, &sd_un->ival));
 }
 
 static bool

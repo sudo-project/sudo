@@ -87,9 +87,9 @@ connection_closure_free(struct connection_closure *closure)
 	sudo_ev_free(closure->commit_ev);
 	sudo_ev_free(closure->read_ev);
 	sudo_ev_free(closure->write_ev);
+	iolog_details_free(&closure->details);
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
-	free(closure->iolog_dir);
 	free(closure);
 
 	if (shutting_down && TAILQ_EMPTY(&connections))
@@ -206,20 +206,32 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     closure->submit_time.tv_sec = msg->submit_time->tv_sec;
     closure->submit_time.tv_nsec = msg->submit_time->tv_nsec;
 
-    /* TODO: handle event logging via syslog */
+    if (!iolog_details_fill(&closure->details, msg->submit_time, msg->info_msgs,
+	    msg->n_info_msgs)) {
+	closure->errstr = _("error parsing AcceptMessage");
+	debug_return_bool(false);
+    }
+
+    /* Create I/O log info file and parent directories. */
+    if (msg->expect_iobufs) {
+	if (!iolog_init(msg, closure)) {
+	    closure->errstr = _("error creating I/O log");
+	    debug_return_bool(false);
+	}
+    }
+
+    if (!log_accept(&closure->details)) {
+	closure->errstr = _("error logging accept event");
+	debug_return_bool(false);
+    }
+
     if (!msg->expect_iobufs) {
 	closure->state = FLUSHED;
 	debug_return_bool(true);
     }
 
-    /* Create I/O log info file and parent directories. */
-    if (!iolog_init(msg, closure)) {
-	closure->errstr = _("error creating I/O log");
-	debug_return_bool(false);
-    }
-
     /* Send log ID to client for restarting connectoins. */
-    if (!fmt_log_id_message(closure->iolog_dir, &closure->write_buf))
+    if (!fmt_log_id_message(closure->details.iolog_path, &closure->write_buf))
 	debug_return_bool(false);
     if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -260,7 +272,16 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     closure->submit_time.tv_sec = msg->submit_time->tv_sec;
     closure->submit_time.tv_nsec = msg->submit_time->tv_nsec;
 
-    /* TODO: handle event logging via syslog */
+    if (!iolog_details_fill(&closure->details, msg->submit_time, msg->info_msgs,
+	    msg->n_info_msgs)) {
+	closure->errstr = _("error parsing RejectMessage");
+	debug_return_bool(false);
+    }
+
+    if (!log_reject(&closure->details, msg->reason)) {
+	closure->errstr = _("error logging reject event");
+	debug_return_bool(false);
+    }
 
     closure->state = FLUSHED;
     debug_return_bool(true);
@@ -346,8 +367,12 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 {
     debug_decl(handle_alert, SUDO_DEBUG_UTIL)
 
-    /* TODO */
-    debug_return_bool(false);
+    if (!log_alert(&closure->details, msg->alert_time, msg->reason)) {
+	closure->errstr = _("error logging alert event");
+	debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
 }
 
 static bool

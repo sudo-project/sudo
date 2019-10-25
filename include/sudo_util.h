@@ -220,6 +220,18 @@ __dso_public bool sudo_lock_file_v1(int fd, int action);
 __dso_public bool sudo_lock_region_v1(int fd, int action, off_t len);
 #define sudo_lock_region(_a, _b, _c) sudo_lock_region_v1((_a), (_b), (_c))
 
+/* logfac.c */
+__dso_public bool sudo_str2logfac_v1(const char *str, int *logfac);
+#define sudo_str2logfac(_a, _b) sudo_str2logfac_v1((_a), (_b))
+__dso_public const char *sudo_logfac2str_v1(int num);
+#define sudo_logfac2str(_a) sudo_logfac2str_v1((_a))
+
+/* logpri.c */
+__dso_public bool sudo_str2logpri_v1(const char *str, int *logpri);
+#define sudo_str2logpri(_a, _b) sudo_str2logpri_v1((_a), (_b))
+__dso_public const char *sudo_logpri2str_v1(int num);
+#define sudo_logpri2str(_a) sudo_logpri2str_v1((_a))
+
 /* mkdir_parents.c */
 __dso_public bool sudo_mkdir_parents_v1(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
 #define sudo_mkdir_parents(_a, _b, _c, _d, _e) sudo_mkdir_parents_v1((_a), (_b), (_c), (_d), (_e))

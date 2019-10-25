@@ -120,6 +120,8 @@ lib/util/isblank.c
 lib/util/key_val.c
 lib/util/lbuf.c
 lib/util/locking.c
+lib/util/logfac.c
+lib/util/logpri.c
 lib/util/memrchr.c
 lib/util/memset_s.c
 lib/util/mkdir_parents.c
@@ -243,6 +245,7 @@ logsrvd/Makefile.in
 logsrvd/log_server.pb-c.c
 logsrvd/log_server.pb-c.h
 logsrvd/log_server.proto
+logsrvd/eventlog.c
 logsrvd/iolog_writer.c
 logsrvd/logsrvd.c
 logsrvd/logsrvd.h
