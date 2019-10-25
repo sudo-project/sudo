@@ -536,7 +536,7 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     struct timing_closure timing;
     off_t pos;
     int iofd;
-    debug_decl(iolog_init, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_restart, SUDO_DEBUG_UTIL)
 
     target.tv_sec = msg->resume_point->tv_sec;
     target.tv_nsec = msg->resume_point->tv_nsec;

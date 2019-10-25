@@ -188,6 +188,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
+	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
@@ -196,6 +197,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid AcceptMessage, submit_time: %p, n_info_msgs: %zu",
 	    msg->submit_time, msg->n_info_msgs);
+	closure->errstr = _("invalid AcceptMessage");
 	debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
@@ -211,8 +213,10 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
 
     /* Create I/O log info file and parent directories. */
-    if (!iolog_init(msg, closure))
+    if (!iolog_init(msg, closure)) {
+	closure->errstr = _("error creating I/O log");
 	debug_return_bool(false);
+    }
 
     /* Send log ID to client for restarting connectoins. */
     if (!fmt_log_id_message(closure->iolog_dir, &closure->write_buf))
@@ -238,6 +242,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
+	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
@@ -246,6 +251,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid RejectMessage, submit_time: %p, n_info_msgs: %zu",
 	    msg->submit_time, msg->n_info_msgs);
+	closure->errstr = _("invalid RejectMessage");
 	debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
@@ -269,6 +275,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
+	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExitMessage", __func__);
@@ -309,6 +316,7 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
+	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RestartMessage for %s",
@@ -350,6 +358,7 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
+	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
@@ -359,6 +368,7 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     if (store_iobuf(iofd, msg, closure) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "failed to store IoBuffer");
+	closure->errstr = _("error writing IoBuffer");
 	debug_return_bool(false);
     }
 
@@ -393,6 +403,7 @@ handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
+	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
@@ -403,6 +414,7 @@ handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
     if (store_winsize(msg, closure) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "failed to store ChangeWindowSize");
+	closure->errstr = _("error writing ChangeWindowSize");
 	debug_return_bool(false);
     }
 
@@ -417,6 +429,7 @@ handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
+	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
@@ -427,6 +440,7 @@ handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
     if (store_suspend(msg, closure) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "failed to store CommandSuspend");
+	closure->errstr = _("error writing CommandSuspend");
 	debug_return_bool(false);
     }
 
@@ -488,6 +502,7 @@ handle_client_message(uint8_t *buf, size_t len,
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected type_case value %d", msg->type_case);
+	closure->errstr = _("unrecognized ClientMessage type");
 	break;
     }
     client_message__free_unpacked(msg, NULL);
@@ -635,7 +650,16 @@ client_msg_cb(int fd, int what, void *v)
 	if (!handle_client_message(buf->data + buf->off, msg_len, closure)) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to parse ClientMessage, size %hu", msg_len);
-	    goto finished;
+	    if (closure->errstr == NULL)
+		goto finished;
+	    if (!fmt_error_message(closure->errstr, &closure->write_buf))
+		goto finished;
+	    sudo_ev_del(NULL, closure->read_ev);
+	    if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to add server write event");
+		goto finished;
+	    }
 	}
 	buf->off += msg_len;
     }

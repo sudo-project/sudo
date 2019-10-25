@@ -86,6 +86,7 @@ struct connection_closure {
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
     char *iolog_dir;
+    const char *errstr;
     struct iolog_file iolog_files[IOFD_MAX];
     int iolog_dir_fd;
     int sock;
