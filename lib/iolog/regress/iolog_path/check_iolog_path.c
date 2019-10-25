@@ -27,6 +27,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <limits.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -69,7 +70,7 @@ reset_escape_data(struct iolog_escape_data *data)
 }
 
 static size_t
-fill_seq(char *str, size_t strsize, char *logdir, void *closure)
+fill_seq(char *str, size_t strsize, void *unused)
 {
     int len;
 
@@ -83,37 +84,37 @@ fill_seq(char *str, size_t strsize, char *logdir, void *closure)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, char *unused, void *closure)
+fill_user(char *str, size_t strsize, void *unused)
 {
     return strlcpy(str, escape_data.user, strsize);
 }
 
 static size_t
-fill_group(char *str, size_t strsize, char *unused, void *closure)
+fill_group(char *str, size_t strsize, void *unused)
 {
     return strlcpy(str, escape_data.group, strsize);
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, char *unused, void *closure)
+fill_runas_user(char *str, size_t strsize, void *unused)
 {
     return strlcpy(str, escape_data.runas_user, strsize);
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, char *unused, void *closure)
+fill_runas_group(char *str, size_t strsize, void *unused)
 {
     return strlcpy(str, escape_data.runas_group, strsize);
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, char *unused, void *closure)
+fill_hostname(char *str, size_t strsize, void *unused)
 {
     return strlcpy(str, escape_data.host, strsize);
 }
 
 static size_t
-fill_command(char *str, size_t strsize, char *unused, void *closure)
+fill_command(char *str, size_t strsize, void *unused)
 {
     return strlcpy(str, escape_data.command, strsize);
 }
@@ -133,8 +134,8 @@ static struct iolog_path_escape path_escapes[] = {
 static int
 do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
 {
-    char *path, *slash;
-    char dir_out[4096], file_out[4096];
+    char dir[PATH_MAX], dir_out[PATH_MAX];
+    char file[PATH_MAX], file_out[PATH_MAX];
     struct tm *timeptr;
     time_t now;
     int error = 0;
@@ -150,19 +151,19 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
     strftime(dir_out, sizeof(dir_out), tdir_out, timeptr);
     strftime(file_out, sizeof(file_out), tfile_out, timeptr);
 
-    path = expand_iolog_path(NULL, dir_in, file_in, &slash, path_escapes, NULL);
-    if (path == NULL)
-	sudo_fatalx("unable to expand I/O log path");
-    *slash = '\0';
-    if (strcmp(path, dir_out) != 0) {
-	sudo_warnx("%s: expected %s, got %s", dir_in, dir_out, path);
+    if (!expand_iolog_path(dir_in, dir, sizeof(dir), &path_escapes[1], NULL))
+	sudo_fatalx("unable to expand I/O log dir");
+    if (!expand_iolog_path(file_in, file, sizeof(file), &path_escapes[0], dir))
+	sudo_fatalx("unable to expand I/O log file");
+
+    if (strcmp(dir, dir_out) != 0) {
+	sudo_warnx("%s: expected %s, got %s", dir_in, dir_out, dir);
 	error = 1;
     }
-    if (strcmp(slash + 1, file_out) != 0) {
-	sudo_warnx("%s: expected %s, got %s", file_in, file_out, slash + 1);
+    if (strcmp(file, file_out) != 0) {
+	sudo_warnx("%s: expected %s, got %s", file_in, file_out, file);
 	error = 1;
     }
-    free(path);
 
     return error;
 }

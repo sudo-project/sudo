@@ -52,135 +52,88 @@
 #include "sudo_iolog.h"
 
 /*
- * Concatenate dir + file, expanding any escape sequences.
- * Returns the concatenated path and sets slashp point to
- * the path separator between the expanded dir and file.
- * XXX - simplify by only expanding one thing and removing prefix
+ * Expand any escape sequences in inpath, returning the expanded path.
  */
-char *
-expand_iolog_path(const char *prefix, const char *dir, const char *file,
-    char **slashp, const struct iolog_path_escape *escapes, void *closure)
+bool
+expand_iolog_path(const char *inpath, char *path, size_t pathlen,
+    const struct iolog_path_escape *escapes, void *closure)
 {
-    size_t len, prelen = 0;
-    char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];
-    char *slash = NULL;
-    const char *endbrace, *src = dir;
-    int pass;
-    bool strfit;
+    char *dst, *pathend, tmpbuf[PATH_MAX];
+    const char *endbrace, *src;
+    bool strfit = false;
+    size_t len;
     debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL)
 
-    /* Expanded path must be <= PATH_MAX */
-    if (prefix != NULL)
-	prelen = strlen(prefix);
-    path = malloc(prelen + PATH_MAX);
-    if (path == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto bad;
-    }
-    *path = '\0';
-    pathend = path + prelen + PATH_MAX;
-    dst = path;
+    /* Collapse multiple leading slashes. */
+    while (inpath[0] == '/' && inpath[1] == '/')
+	inpath++;
 
-    /* Copy prefix, if present. */
-    if (prefix != NULL) {
-	memcpy(path, prefix, prelen);
-	dst += prelen;
-	*dst = '\0';
-    }
-
-    /* Trim leading slashes from file component. */
-    while (*file == '/')
-	file++;
-
-    for (pass = 0; pass < 3; pass++) {
-	strfit = false;
-	switch (pass) {
-	case 0:
-	    src = dir;
-	    escapes++;	/* skip "%{seq}" */
-	    break;
-	case 1:
-	    /* Trim trailing slashes from dir component. */
-	    while (dst > path + prelen + 1 && dst[-1] == '/')
-		dst--;
-	    /* The NUL will be replaced with a '/' at the end. */
-	    if (dst + 1 >= pathend)
-		goto bad;
-	    slash = dst++;
-	    continue;
-	case 2:
-	    src = file;
-	    escapes--;	/* restore "%{seq}" */
-	    break;
-	}
-	dst0 = dst;
-	for (; *src != '\0'; src++) {
-	    if (src[0] == '%') {
-		if (src[1] == '{') {
-		    endbrace = strchr(src + 2, '}');
-		    if (endbrace != NULL) {
-			const struct iolog_path_escape *esc;
-			len = (size_t)(endbrace - src - 2);
-			for (esc = escapes; esc->name != NULL; esc++) {
-			    if (strncmp(src + 2, esc->name, len) == 0 &&
-				esc->name[len] == '\0')
-				break;
-			}
-			if (esc->name != NULL) {
-			    len = esc->copy_fn(dst, (size_t)(pathend - dst),
-				path + prelen, closure);
-			    if (len >= (size_t)(pathend - dst))
-				goto bad;
-			    dst += len;
-			    src = endbrace;
-			    continue;
-			}
+    pathend = path + pathlen;
+    for (src = inpath, dst = path; *src != '\0'; src++) {
+	if (src[0] == '%') {
+	    if (src[1] == '{') {
+		endbrace = strchr(src + 2, '}');
+		if (endbrace != NULL) {
+		    const struct iolog_path_escape *esc;
+		    len = (size_t)(endbrace - src - 2);
+		    for (esc = escapes; esc->name != NULL; esc++) {
+			if (strncmp(src + 2, esc->name, len) == 0 &&
+			    esc->name[len] == '\0')
+			    break;
 		    }
-		} else if (src[1] == '%') {
-		    /* Collapse %% -> % */
-		    src++;
-		} else {
-		    /* May need strftime() */
-		    strfit = true;
+		    if (esc->name != NULL) {
+			len = esc->copy_fn(dst, (size_t)(pathend - dst),
+			    closure);
+			if (len >= (size_t)(pathend - dst))
+			    goto bad;
+			dst += len;
+			src = endbrace;
+			continue;
+		    }
 		}
+	    } else if (src[1] == '%') {
+		/* Collapse %% -> % */
+		src++;
+	    } else {
+		/* May need strftime() */
+		strfit = true;
 	    }
-	    /* Need at least 2 chars, including the NUL terminator. */
-	    if (dst + 1 >= pathend)
-		goto bad;
-	    *dst++ = *src;
 	}
-	*dst = '\0';
-
-	/* Expand strftime escapes as needed. */
-	if (strfit) {
-	    time_t now;
-	    struct tm *timeptr;
-
-	    time(&now);
-	    if ((timeptr = localtime(&now)) == NULL)
-		goto bad;
-
-	    /* We only call strftime() on the current part of the buffer. */
-	    tmpbuf[sizeof(tmpbuf) - 1] = '\0';
-	    len = strftime(tmpbuf, sizeof(tmpbuf), dst0, timeptr);
-
-	    if (len == 0 || tmpbuf[sizeof(tmpbuf) - 1] != '\0')
-		goto bad;		/* strftime() failed, buf too small? */
-
-	    if (len >= (size_t)(pathend - dst0))
-		goto bad;		/* expanded buffer too big to fit. */
-	    memcpy(dst0, tmpbuf, len);
-	    dst = dst0 + len;
-	    *dst = '\0';
-	}
+	/* Need at least 2 chars, including the NUL terminator. */
+	if (dst + 1 >= pathend)
+	    goto bad;
+	*dst++ = *src;
     }
-    if (slash != NULL)
-	*slash = '/';
-    if (slashp != NULL)
-	*slashp = slash;
 
-    debug_return_str(path);
+    /* Trim trailing slashes and NUL terminate. */
+    while (dst > path && dst[-1] == '/')
+	dst--;
+    *dst = '\0';
+
+    /* Expand strftime escapes as needed. */
+    if (strfit) {
+	time_t now;
+	struct tm *timeptr;
+
+	time(&now);
+	if ((timeptr = localtime(&now)) == NULL)
+	    goto bad;
+
+	/* We only call strftime() on the current part of the buffer. */
+	tmpbuf[sizeof(tmpbuf) - 1] = '\0';
+	len = strftime(tmpbuf, sizeof(tmpbuf), path, timeptr);
+
+	if (len == 0 || tmpbuf[sizeof(tmpbuf) - 1] != '\0')
+	    goto bad;		/* strftime() failed, buf too small? */
+
+	if (len >= (size_t)(pathend - path))
+	    goto bad;		/* expanded buffer too big to fit. */
+	memcpy(path, tmpbuf, len);
+	dst = path + len;
+	*dst = '\0';
+    }
+
+    debug_return_bool(true);
 bad:
-    free(path);
-    debug_return_str(NULL);
+    debug_return_bool(false);
 }

@@ -431,7 +431,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 {
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     char iolog_path[PATH_MAX], sessid[7];
-    char *tofree = NULL;
     char * const *cur;
     const char *cp, *plugin_path = NULL;
     size_t len;
@@ -478,30 +477,36 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /* If no I/O log path defined we need to figure it out ourselves. */
     if (iolog_details.iolog_path == NULL) {
 	/* Get next session ID and convert it into a path. */
-	tofree = malloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
-	if (tofree == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	len = strlcpy(iolog_path, _PATH_SUDO_IO_LOGDIR, sizeof(iolog_path));
+	if (len + strlen("/00/00/00") >= sizeof(iolog_path)) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    ret = false;
 	    goto done;
 	}
-	memcpy(tofree, _PATH_SUDO_IO_LOGDIR, sizeof(_PATH_SUDO_IO_LOGDIR));
-	if (!iolog_nextid(tofree, sessid)) {
+	if (!iolog_nextid(iolog_path, sessid)) {
 	    log_warning(SLOG_SEND_MAIL, N_("unable to update sequence file"));
 	    ret = false;
 	    goto done;
 	}
-	(void)snprintf(tofree + sizeof(_PATH_SUDO_IO_LOGDIR),
-	    sizeof(sessid) + 2, "%c%c/%c%c/%c%c", sessid[0], sessid[1],
-	    sessid[2], sessid[3], sessid[4], sessid[5]);
-	iolog_details.iolog_path = tofree;
+	(void)snprintf(iolog_path + sizeof(_PATH_SUDO_IO_LOGDIR),
+	    sizeof(iolog_path) - sizeof(_PATH_SUDO_IO_LOGDIR),
+	    "/%c%c/%c%c/%c%c", sessid[0], sessid[1], sessid[2],
+	    sessid[3], sessid[4], sessid[5]);
+    } else {
+	len = strlcpy(iolog_path, iolog_details.iolog_path, sizeof(iolog_path));
+	if (len >= sizeof(iolog_path)) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    ret = false;
+	    goto done;
+	}
     }
 
     /*
-     * Make local copy of I/O log path and create it, along with any
-     * intermediate subdirs.  Calls mkdtemp() if iolog_path ends in XXXXXX.
+     * Create I/O log path along with any * intermediate subdirs.
+     * Calls mkdtemp() if iolog_path ends in XXXXXX.
      */
-    len = mkdir_iopath(iolog_details.iolog_path, iolog_path, sizeof(iolog_path));
-    if (len >= sizeof(iolog_path)) {
-	log_warning(SLOG_SEND_MAIL, "%s", iolog_details.iolog_path);
+    if (!iolog_mkpath(iolog_path)) {
+	log_warning(SLOG_SEND_MAIL, "%s", iolog_path);
 	goto done;
     }
 
@@ -549,7 +554,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 done:
     if (iolog_dir_fd != -1)
 	close(iolog_dir_fd);
-    free(tofree);
     if (iolog_details.runas_pw)
 	sudo_pw_delref(iolog_details.runas_pw);
     if (iolog_details.runas_gr)

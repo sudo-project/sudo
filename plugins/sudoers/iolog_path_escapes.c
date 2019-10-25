@@ -42,12 +42,13 @@
 #include "sudo_iolog.h"
 
 static size_t
-fill_seq(char *str, size_t strsize, char *logdir, void *closure)
+fill_seq(char *str, size_t strsize, void *v)
 {
 #ifdef SUDOERS_NO_SEQ
     debug_decl(fill_seq, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, "%{seq}", strsize));
 #else
+    char *logdir = v;
     static char sessid[7];
     int len;
     debug_decl(fill_seq, SUDO_DEBUG_UTIL)
@@ -67,14 +68,14 @@ fill_seq(char *str, size_t strsize, char *logdir, void *closure)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, char *unused, void *closure)
+fill_user(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_user, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_name, strsize));
 }
 
 static size_t
-fill_group(char *str, size_t strsize, char *unused, void *closure)
+fill_group(char *str, size_t strsize, void *unused)
 {
     struct group *grp;
     size_t len;
@@ -92,14 +93,14 @@ fill_group(char *str, size_t strsize, char *unused, void *closure)
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, char *unused, void *closure)
+fill_runas_user(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_runas_user, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, runas_pw->pw_name, strsize));
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, char *unused, void *closure)
+fill_runas_group(char *str, size_t strsize, void *unused)
 {
     struct group *grp;
     size_t len;
@@ -121,14 +122,14 @@ fill_runas_group(char *str, size_t strsize, char *unused, void *closure)
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, char *unused, void *closure)
+fill_hostname(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_hostname, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_shost, strsize));
 }
 
 static size_t
-fill_command(char *str, size_t strsize, char *unused, void *closure)
+fill_command(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_command, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_base, strsize));

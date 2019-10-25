@@ -98,12 +98,11 @@ struct iolog_file {
 
 struct iolog_path_escape {
     const char *name;
-    size_t (*copy_fn)(char *, size_t, char *, void *);
+    size_t (*copy_fn)(char *, size_t, void *);
 };
 
 /* iolog_path.c */
-/* XXX - bad API */
-char *expand_iolog_path(const char *prefix, const char *dir, const char *file, char **slashp, const struct iolog_path_escape *escapes, void *closure);
+bool expand_iolog_path(const char *inpath, char *path, size_t pathlen, const struct iolog_path_escape *escapes, void *closure);
 
 /* iolog_util.c */
 bool iolog_parse_timing(const char *line, struct timing_closure *timing);
@@ -119,6 +118,7 @@ struct group;
 bool iolog_close(struct iolog_file *iol, const char **errstr);
 bool iolog_eof(struct iolog_file *iol);
 bool iolog_mkdtemp(char *path);
+bool iolog_mkpath(char *path);
 bool iolog_nextid(char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
 bool iolog_rename(const char *from, const char *to);
@@ -127,7 +127,6 @@ char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **
 const char *iolog_fd_to_name(int iofd);
 int iolog_openat(int fdf, const char *path, int flags);
 off_t iolog_seek(struct iolog_file *iol, off_t offset, int whence);
-size_t mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize);
 ssize_t iolog_read(struct iolog_file *iol, void *buf, size_t nbytes, const char **errstr);
 ssize_t iolog_write(struct iolog_file *iol, const void *buf, size_t len, const char **errstr);
 void iolog_rewind(struct iolog_file *iol);

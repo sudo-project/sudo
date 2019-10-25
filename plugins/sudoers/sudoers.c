@@ -233,6 +233,45 @@ cleanup:
     debug_return_int(ret);
 }
 
+/*
+ * Expand I/O log dir and file into a full path.
+ * Returns the full I/O log path prefixed with "iolog_path=".
+ * Sets sudo_user.iolog_file as a side effect.
+ */
+static char *
+format_iolog_path(void)
+{
+    char dir[PATH_MAX], file[PATH_MAX];
+    char *iolog_path = NULL;
+    int oldlocale;
+    bool ok;
+    debug_decl(format_iolog_path, SUDOERS_DEBUG_PLUGIN)
+
+    /* Use sudoers locale for strftime() */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+    ok = expand_iolog_path(def_iolog_dir, dir, sizeof(dir),
+	&sudoers_iolog_path_escapes[1], NULL);
+    if (ok) {
+	ok = expand_iolog_path(def_iolog_file, file, sizeof(file),
+	    &sudoers_iolog_path_escapes[0], dir);
+    }
+    sudoers_setlocale(oldlocale, NULL);
+    if (!ok)
+	goto done;
+
+    if (asprintf(&iolog_path, "iolog_path=%s/%s", dir, file) == -1) {
+	iolog_path = NULL;
+	goto done;
+    }
+
+    /* Stash pointer to the I/O log file for use when logging. */
+    sudo_user.iolog_file =
+	iolog_path + sizeof("iolog_path=") - 1 + strlen(dir) + 1;
+
+done:
+    debug_return_str(iolog_path);
+}
+
 int
 sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     bool verbose, void *closure)
@@ -472,21 +511,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT))) {
 	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
-	    const char prefix[] = "iolog_path=";
-	    /* Use sudoers locale for strftime() */
-	    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-	    iolog_path = expand_iolog_path(prefix, def_iolog_dir,
-		def_iolog_file, &sudo_user.iolog_file,
-		sudoers_iolog_path_escapes, NULL);
-	    sudoers_setlocale(oldlocale, NULL);
-	    if (iolog_path == NULL) {
+	    if ((iolog_path = format_iolog_path()) == NULL) {
 		if (!def_ignore_iolog_errors)
 		    goto done;
 		/* Unable to expand I/O log path, disable I/O logging. */
 		def_log_input = false;
 		def_log_output = false;
-	    } else {
-		sudo_user.iolog_file++;
 	    }
 	}
     }

@@ -517,34 +517,28 @@ done:
 }
 
 /*
- * Copy iolog_path to pathbuf and create the directory and any intermediate
- * directories.  If iolog_path ends in 'XXXXXX', use mkdtemp().
- * Returns SIZE_MAX on error.
+ * Create path and any intermediate directories.
+ * If path ends in 'XXXXXX', use mkdtemp().
  */
-size_t
-mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
+bool
+iolog_mkpath(char *path)
 {
     size_t len;
-    bool ok;
-    debug_decl(mkdir_iopath, SUDO_DEBUG_UTIL)
-
-    len = strlcpy(pathbuf, iolog_path, pathsize);
-    if (len >= pathsize) {
-	errno = ENAMETOOLONG;
-	debug_return_size_t((size_t)-1);
-    }
+    bool ret;
+    debug_decl(iolog_mkpath, SUDO_DEBUG_UTIL)
 
     /*
      * Create path and intermediate subdirs as needed.
      * If path ends in at least 6 Xs (ala POSIX mktemp), use mkdtemp().
      * Sets iolog_gid (if it is not already set) as a side effect.
      */
-    if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0)
-	ok = iolog_mkdtemp(pathbuf);
+    len = strlen(path);
+    if (len >= 6 && strcmp(&path[len - 6], "XXXXXX") == 0)
+	ret = iolog_mkdtemp(path);
     else
-	ok = iolog_mkdirs(pathbuf);
+	ret = iolog_mkdirs(path);
 
-    debug_return_size_t(ok ? len : (size_t)-1);
+    debug_return_bool(ret);
 }
 
 /*

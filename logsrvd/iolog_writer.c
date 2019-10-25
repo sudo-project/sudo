@@ -355,16 +355,21 @@ done:
     debug_return_bool(ret);
 }
 
+struct iolog_path_closure {
+    char *iolog_dir;
+    struct iolog_details *details;
+};
+
 static size_t
-fill_seq(char *str, size_t strsize, char *logdir, void *closure)
+fill_seq(char *str, size_t strsize, void *v)
 {
-    struct iolog_details *details = closure;
-    char *sessid = details->sessid;
+    struct iolog_path_closure *closure = v;
+    char *sessid = closure->details->sessid;
     int len;
     debug_decl(fill_seq, SUDO_DEBUG_UTIL)
 
     if (sessid[0] == '\0') {
-	if (!iolog_nextid(logdir, sessid))
+	if (!iolog_nextid(closure->iolog_dir, sessid))
 	    debug_return_size_t((size_t)-1);
     }
 
@@ -380,9 +385,10 @@ fill_seq(char *str, size_t strsize, char *logdir, void *closure)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, char *unused, void *closure)
+fill_user(char *str, size_t strsize, void *v)
 {
-    const struct iolog_details *details = closure;
+    struct iolog_path_closure *closure = v;
+    const struct iolog_details *details = closure->details;
     debug_decl(fill_user, SUDO_DEBUG_UTIL)
 
     if (details->submituser == NULL) {
@@ -394,9 +400,10 @@ fill_user(char *str, size_t strsize, char *unused, void *closure)
 }
 
 static size_t
-fill_group(char *str, size_t strsize, char *unused, void *closure)
+fill_group(char *str, size_t strsize, void *v)
 {
-    const struct iolog_details *details = closure;
+    struct iolog_path_closure *closure = v;
+    const struct iolog_details *details = closure->details;
     debug_decl(fill_group, SUDO_DEBUG_UTIL)
 
     if (details->submitgroup == NULL) {
@@ -408,9 +415,10 @@ fill_group(char *str, size_t strsize, char *unused, void *closure)
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, char *unused, void *closure)
+fill_runas_user(char *str, size_t strsize, void *v)
 {
-    const struct iolog_details *details = closure;
+    struct iolog_path_closure *closure = v;
+    const struct iolog_details *details = closure->details;
     debug_decl(fill_runas_user, SUDO_DEBUG_UTIL)
 
     if (details->runuser == NULL) {
@@ -422,9 +430,10 @@ fill_runas_user(char *str, size_t strsize, char *unused, void *closure)
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, char *unused, void *closure)
+fill_runas_group(char *str, size_t strsize, void *v)
 {
-    const struct iolog_details *details = closure;
+    struct iolog_path_closure *closure = v;
+    const struct iolog_details *details = closure->details;
     debug_decl(fill_runas_group, SUDO_DEBUG_UTIL)
 
     /* FIXME: rungroup not guaranteed to be set */
@@ -437,9 +446,10 @@ fill_runas_group(char *str, size_t strsize, char *unused, void *closure)
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, char *unused, void *closure)
+fill_hostname(char *str, size_t strsize, void *v)
 {
-    const struct iolog_details *details = closure;
+    struct iolog_path_closure *closure = v;
+    const struct iolog_details *details = closure->details;
     debug_decl(fill_hostname, SUDO_DEBUG_UTIL)
 
     if (details->submithost == NULL) {
@@ -451,9 +461,10 @@ fill_hostname(char *str, size_t strsize, char *unused, void *closure)
 }
 
 static size_t
-fill_command(char *str, size_t strsize, char *unused, void *closure)
+fill_command(char *str, size_t strsize, void *v)
 {
-    const struct iolog_details *details = closure;
+    struct iolog_path_closure *closure = v;
+    const struct iolog_details *details = closure->details;
     debug_decl(fill_command, SUDO_DEBUG_UTIL)
 
     if (details->command == NULL) {
@@ -476,7 +487,6 @@ static const struct iolog_path_escape path_escapes[] = {
     { NULL, NULL }
 };
 
-
 /*
  * Create I/O log path
  * Sets iolog_path, iolog_file and iolog_dir_fd in the closure
@@ -485,38 +495,52 @@ static bool
 create_iolog_path(struct connection_closure *closure)
 {
     struct iolog_details *details = &closure->details;
-    char pathbuf[PATH_MAX];
-    size_t len, pathlen;
+    struct iolog_path_closure path_closure;
+    char expanded_dir[PATH_MAX], expanded_file[PATH_MAX], pathbuf[PATH_MAX];
+    size_t len;
     debug_decl(create_iolog_path, SUDO_DEBUG_UTIL)
 
-    details->iolog_path = expand_iolog_path(NULL, logsrvd_conf_iolog_dir(),
-	logsrvd_conf_iolog_file(), &details->iolog_file, &path_escapes[0],
-	details);
-    if (details->iolog_path == NULL) {
+    path_closure.details = details;
+    path_closure.iolog_dir = expanded_dir;
+
+    if (!expand_iolog_path(logsrvd_conf_iolog_dir(), expanded_dir,
+	    sizeof(expanded_dir), &path_escapes[1], &path_closure)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to expand iolog path %s/%s",
-	    logsrvd_conf_iolog_dir(), logsrvd_conf_iolog_file());
+	    "unable to expand iolog dir %s", logsrvd_conf_iolog_dir());
 	goto bad;
     }
-    pathlen = details->iolog_file - details->iolog_path;
+
+    if (!expand_iolog_path(logsrvd_conf_iolog_file(), expanded_file,
+	    sizeof(expanded_file), &path_escapes[0], &path_closure)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to expand iolog dir %s", logsrvd_conf_iolog_file());
+	goto bad;
+    }
+
+    len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", expanded_dir,
+	expanded_file);
+    if (len >= sizeof(pathbuf)) {
+	errno = ENAMETOOLONG;
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "%s/%s", expanded_dir, expanded_file);
+	goto bad;
+    }
 
     /*
-     * Make local copy of I/O log path and create it, along with any
-     * intermediate subdirs.  Calls mkdtemp() if iolog_path ends in XXXXXX.
+     * Create log path, along with any intermediate subdirs.
+     * Calls mkdtemp() if pathbuf ends in XXXXXX.
      */
-    len = mkdir_iopath(details->iolog_path, pathbuf, sizeof(pathbuf));
-    if (len >= sizeof(pathbuf)) {
+    if (!iolog_mkpath(pathbuf)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to mkdir iolog path %s", details->iolog_path);
+	    "unable to mkdir iolog path %s", pathbuf);
         goto bad;
     }
-    free(details->iolog_path);
     if ((details->iolog_path = strdup(pathbuf)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "strdup");
 	goto bad;
     }
-    details->iolog_file = details->iolog_path + pathlen + 1;
+    details->iolog_file = details->iolog_path + strlen(expanded_dir) + 1;
 
     /* We use iolog_dir_fd in calls to openat(2) */
     closure->iolog_dir_fd =
