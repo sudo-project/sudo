@@ -322,8 +322,10 @@ fmt_accept_message(struct client_closure *closure)
     /* The sudo I/O log info file has limited info. */
     accept_msg.n_info_msgs = 10;
     accept_msg.info_msgs = calloc(accept_msg.n_info_msgs, sizeof(InfoMessage *));
-    if (accept_msg.info_msgs == NULL)
-	debug_return_bool(false);
+    if (accept_msg.info_msgs == NULL) {
+	accept_msg.n_info_msgs = 0;
+	goto done;
+    }
     for (n = 0; n < accept_msg.n_info_msgs; n++) {
 	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
 	if (accept_msg.info_msgs[n] == NULL) {
