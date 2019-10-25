@@ -21,6 +21,8 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
+#include <openssl/ssl.h>
+
 #include "logsrv_util.h"
 
 /* Default listen address (port 30344 on all interfaces). */
@@ -81,6 +83,7 @@ struct connection_closure {
     struct sudo_event *commit_ev;
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
+    SSL *ssl;
     const char *errstr;
     struct iolog_file iolog_files[IOFD_MAX];
     int iolog_dir_fd;
@@ -105,6 +108,21 @@ struct listen_address {
     socklen_t sa_len;
 };
 TAILQ_HEAD(listen_address_list, listen_address);
+
+/* parameters to configure tls */
+struct logsrvd_tls_config {
+    char *pkey_path;
+    char *cert_path;
+    char *cacert_path;
+    char *dhparams_path;
+    char *ciphers_v12;
+    char *ciphers_v13;
+    bool check_peer;
+};
+
+struct logsrvd_tls_runtime {
+    SSL_CTX *ssl_ctx;
+};
 
 /* Supported eventlog types */
 enum logsrvd_eventlog_type {
@@ -138,6 +156,9 @@ bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct listen_address_list *logsrvd_conf_listen_address(void);
+bool logsrvd_conf_get_tls_opt(void);
+const struct logsrvd_tls_config *logsrvd_get_tls_config(void);
+struct logsrvd_tls_runtime *logsrvd_get_tls_runtime(void);
 enum logsrvd_eventlog_type logsrvd_conf_eventlog_type(void);
 enum logsrvd_eventlog_format logsrvd_conf_eventlog_format(void);
 unsigned int logsrvd_conf_syslog_maxlen(void);
