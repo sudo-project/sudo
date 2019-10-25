@@ -97,7 +97,8 @@ connect_server(const char *host, const char *port)
     hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo(host, port, &hints, &res0);
     if (error != 0) {
-	sudo_warnx("unable to resolve %s:%s: %s", host, port, gai_strerror(error));
+	sudo_warnx("unable to resolve %s:%s: %s", host, port,
+	    gai_strerror(error));
 	debug_return_int(-1);
     }
 
@@ -224,7 +225,8 @@ read_io_buf(struct client_closure *closure)
 
 	if ((errstr = gzerror(io_fds[timing->event], &errnum)) == NULL)
 	    errstr = strerror(errno);
-	sudo_warnx("unable to read %s file: %s", iolog_names[timing->event], errstr);
+	sudo_warnx("unable to read %s file: %s", iolog_names[timing->event],
+	    errstr);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -408,7 +410,8 @@ fmt_exec_message(struct client_closure *closure)
     /* Update n_info_msgs. */
     exec_msg.n_info_msgs = n;
 
-    sudo_warnx("sending ExecMessage array length %zu", n); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending ExecMessage, array length %zu", __func__, n);
 
     /* Schedule ClientMessage */
     client_msg.exec_msg = &exec_msg;
@@ -448,7 +451,9 @@ fmt_exit_message(struct client_closure *closure)
      */
     exit_msg.exit_value = 0;
 
-    sudo_warnx("sending ExitMessage"); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending ExitMessage, exit value %d",
+	__func__, exit_msg.exit_value);
 
     /* Send ClientMessage */
     client_msg.exit_msg = &exit_msg;
@@ -481,14 +486,16 @@ fmt_io_buf(int type, struct client_closure *closure,
 	goto done;
 
     /* Fill in IoBuffer. */
+    /* TODO: split buffer if it is too large */
     delay.tv_sec = closure->timing.delay.tv_sec;
     delay.tv_nsec = closure->timing.delay.tv_nsec;
     iobuf_msg.delay = &delay;
     iobuf_msg.data.data = (void *)closure->buf;
     iobuf_msg.data.len = closure->timing.u.nbytes;
 
-    /* TODO: split buffer if it is too large */
-    sudo_warnx("sending IoBuffer length %zu, type %d, size %zu", iobuf_msg.data.len, type, io_buffer__get_packed_size(&iobuf_msg)); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending IoBuffer length %zu, type %d, size %zu", __func__,
+	iobuf_msg.data.len, type, io_buffer__get_packed_size(&iobuf_msg));
 
     /* Send ClientMessage, it doesn't matter which IoBuffer we set. */
     client_msg.ttyout_buf = &iobuf_msg;
@@ -524,7 +531,8 @@ fmt_winsize(struct client_closure *closure, struct connection_buffer *buf)
     winsize_msg.rows = timing->u.winsize.lines;
     winsize_msg.cols = timing->u.winsize.cols;
 
-    sudo_warnx("sending ChangeWindowSize, %dx%d, size %zu", winsize_msg.rows, winsize_msg.cols, change_window_size__get_packed_size(&winsize_msg)); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ChangeWindowSize, %dx%d",
+	__func__, winsize_msg.rows, winsize_msg.cols);
 
     /* Send ClientMessage */
     client_msg.winsize_event = &winsize_msg;
@@ -561,7 +569,8 @@ fmt_suspend(struct client_closure *closure, struct connection_buffer *buf)
 	goto done;
     suspend_msg.signal = closure->buf;
 
-    sudo_warnx("sending CommandSuspend, %s, size %zu", suspend_msg.signal, command_suspend__get_packed_size(&suspend_msg)); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+    	"%s: sending CommandSuspend, SIG%s", __func__, suspend_msg.signal);
 
     /* Send ClientMessage */
     client_msg.suspend_event = &suspend_msg;
@@ -691,12 +700,12 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
-    printf("Server: %s\n", msg->server_id);
+    printf("server ID: %s\n", msg->server_id);
     /* TODO: handle redirect */
     if (msg->redirect != NULL && msg->redirect[0] != '\0')
-	printf("Redirect: %s\n", msg->redirect);
+	printf("redirect: %s\n", msg->redirect);
     for (n = 0; n < msg->n_servers; n++) {
-	printf("Server %zu: %s\n", n + 1, msg->servers[n]);
+	printf("server %zu: %s\n", n + 1, msg->servers[n]);
     }
 
     debug_return_bool(true);
@@ -717,11 +726,11 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: commit point: [%lld, %d]",
+	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec);
     closure->committed.tv_sec = commit_point->tv_sec;
     closure->committed.tv_nsec = commit_point->tv_nsec;
 
-    printf("commit point: %lld %d\n", (long long)commit_point->tv_sec,
-	commit_point->tv_nsec); /* XXX */
     debug_return_bool(true);
 }
 
@@ -734,7 +743,7 @@ handle_log_id(char *id, struct client_closure *closure)
 {
     debug_decl(handle_log_id, SUDO_DEBUG_UTIL)
 
-    sudo_warnx("remote log ID: %s", id);
+    printf("remote log ID: %s\n", id);
     if ((closure->iolog_dir = strdup(id)) == NULL)
 	sudo_fatal(NULL);
     debug_return_bool(true);
@@ -778,7 +787,7 @@ handle_server_message(uint8_t *buf, size_t len,
     bool ret = false;
     debug_decl(handle_server_message, SUDO_DEBUG_UTIL)
 
-    sudo_warnx("unpacking ServerMessage"); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
     if (msg == NULL) {
 	sudo_warnx("unable to unpack ServerMessage");
@@ -812,8 +821,8 @@ handle_server_message(uint8_t *buf, size_t len,
 	closure->state = ERROR;
 	break;
     default:
-	/* XXX */
-	sudo_warnx("unexpected type_case value %d", msg->type_case);
+	sudo_warnx("%s: unexpected type_case value %d",
+	    __func__, msg->type_case);
 	break;
     }
 
@@ -833,10 +842,11 @@ server_msg_cb(int fd, int what, void *v)
     uint16_t msg_len;
     debug_decl(server_msg_cb, SUDO_DEBUG_UTIL)
 
-    sudo_warnx("reading server message"); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
 
     nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
-    sudo_warnx("received %zd bytes from server", nread);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
+	__func__, nread);
     switch (nread) {
     case -1:
 	if (errno == EAGAIN)
@@ -865,12 +875,11 @@ server_msg_cb(int fd, int what, void *v)
 	}
 
 	/* Parse ServerMessage, could be zero bytes. */
-	sudo_warnx("parsing ServerMessage, size %hu", msg_len); // XXX
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: parsing ServerMessage, size %hu", __func__, msg_len);
 	buf->off += sizeof(msg_len);
-	if (!handle_server_message(buf->data + buf->off, msg_len, closure)) {
-	    /* XXX - do something on error */
+	if (!handle_server_message(buf->data + buf->off, msg_len, closure))
 	    goto bad;
-	}
 	buf->off += msg_len;
     }
     buf->len -= buf->off;
@@ -893,7 +902,8 @@ client_msg_cb(int fd, int what, void *v)
     ssize_t nwritten;
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
 
-    sudo_warnx("sending %u bytes to server", buf->len - buf->off);
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+    	"%s: sending %u bytes to server", __func__, buf->len - buf->off);
 
     nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
     if (nwritten == -1) {
@@ -904,7 +914,8 @@ client_msg_cb(int fd, int what, void *v)
 
     if (buf->off == buf->len) {
 	/* sent entire message */
-	sudo_warnx("finished sending %u bytes to server", buf->len); // XXX
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: finished sending %u bytes to server", __func__, buf->len);
 	buf->off = 0;
 	buf->len = 0;
 	if (!client_message_completion(closure))
@@ -1045,7 +1056,6 @@ main(int argc, char *argv[])
     snprintf(fname, sizeof(fname), "%s/log", iolog_path);
     if ((log_info = parse_logfile(fname)) == NULL)
 	goto bad;
-    sudo_warnx("parsed log file %s", fname); // XXX
 
     /* Open the I/O log files. */
     if (!iolog_open_all(iolog_path))
@@ -1055,7 +1065,7 @@ main(int argc, char *argv[])
     sock = connect_server(host, port);
     if (sock == -1)
 	goto bad;
-    sudo_warnx("connected to %s:%s", host, port); // XXX
+    printf("connected to %s:%s\n", host, port);
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);
@@ -1079,6 +1089,7 @@ main(int argc, char *argv[])
 	sudo_warnx("exited prematurely with state %d", closure->state);
 	goto bad;
     }
+    printf("I/O log transmitted successfully\n");
 
     debug_return_int(EXIT_SUCCESS);
 bad:

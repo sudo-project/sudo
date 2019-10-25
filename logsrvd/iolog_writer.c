@@ -102,9 +102,11 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 	case 'c':
 	    if (strcmp(key, "columns") == 0) {
 		if (!has_numval(info)) {
-		    sudo_warnx("columns specified but not a number");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"columns specified but not a number");
 		} else if (info->numval <= 0 || info->numval > INT_MAX) {
-		    sudo_warnx("columns (%" PRId64 ") out of range", info->numval);
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"columns (%" PRId64 ") out of range", info->numval);
 		} else {
 		    details->columns = info->numval;
 		}
@@ -114,7 +116,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		if (has_strval(info)) {
 		    details->command = info->strval;
 		} else {
-		    sudo_warnx("command specified but not a string");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"command specified but not a string");
 		}
 		continue;
 	    }
@@ -122,7 +125,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		if (has_strval(info)) {
 		    details->cwd = info->strval;
 		} else {
-		    sudo_warnx("cwd specified but not a string");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"cwd specified but not a string");
 		}
 		continue;
 	    }
@@ -130,9 +134,11 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 	case 'l':
 	    if (strcmp(key, "lines") == 0) {
 		if (!has_numval(info)) {
-		    sudo_warnx("lines specified but not a number");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"lines specified but not a number");
 		} else if (info->numval <= 0 || info->numval > INT_MAX) {
-		    sudo_warnx("lines (%" PRId64 ") out of range", info->numval);
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"lines (%" PRId64 ") out of range", info->numval);
 		} else {
 		    details->lines = info->numval;
 		}
@@ -145,7 +151,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		    details->argv = info->strlistval->strings;
 		    details->argc = info->strlistval->n_strings;
 		} else {
-		    sudo_warnx("runargv specified but not a string list");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"runargv specified but not a string list");
 		}
 		continue;
 	    }
@@ -153,7 +160,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		if (has_strval(info)) {
 		    details->rungroup = info->strval;
 		} else {
-		    sudo_warnx("rungroup specified but not a string");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"rungroup specified but not a string");
 		}
 		continue;
 	    }
@@ -161,7 +169,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		if (has_strval(info)) {
 		    details->runuser = info->strval;
 		} else {
-		    sudo_warnx("runuser specified but not a string");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"runuser specified but not a string");
 		}
 		continue;
 	    }
@@ -171,7 +180,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		if (has_strval(info)) {
 		    details->submithost = info->strval;
 		} else {
-		    sudo_warnx("submithost specified but not a string");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"submithost specified but not a string");
 		}
 		continue;
 	    }
@@ -179,7 +189,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		if (has_strval(info)) {
 		    details->submituser = info->strval;
 		} else {
-		    sudo_warnx("submituser specified but not a string");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"submituser specified but not a string");
 		}
 		continue;
 	    }
@@ -189,7 +200,8 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		if (has_strval(info)) {
 		    details->ttyname = info->strval;
 		} else {
-		    sudo_warnx("ttyname specified but not a string");
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"ttyname specified but not a string");
 		}
 		continue;
 	    }
@@ -199,15 +211,18 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 
     /* Check for required settings */
     if (details->submituser == NULL) {
-	sudo_warnx("missing user in ExecMessage");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "missing user in ExecMessage");
 	ret = false;
     }
     if (details->submithost == NULL) {
-	sudo_warnx("missing host in ExecMessage");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "missing host in ExecMessage");
 	ret = false;
     }
     if (details->command == NULL) {
-	sudo_warnx("missing command in ExecMessage");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "missing command in ExecMessage");
 	ret = false;
     }
 
@@ -227,51 +242,59 @@ create_iolog_dir(struct iolog_details *details, struct connection_closure *closu
 
     /* Create IOLOG_DIR/host/user/XXXXXX directory */
     if (mkdir(IOLOG_DIR, 0755) == -1 && errno != EEXIST) {
-	sudo_warn("mkdir %s", path);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "mkdir %s", path);
 	goto bad;
     }
     len = snprintf(path, sizeof(path), "%s/%s", IOLOG_DIR,
 	details->submithost);
     if (len < 0 || len >= ssizeof(path)) {
-	sudo_warn("snprintf");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "failed to snprintf I/O log path");
 	goto bad;
     }
     if (mkdir(path, 0755) == -1 && errno != EEXIST) {
-	sudo_warn("mkdir %s", path);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "mkdir %s", path);
 	goto bad;
     }
     len = snprintf(path, sizeof(path), "%s/%s/%s", IOLOG_DIR,
 	details->submithost, details->submituser);
     if (len < 0 || len >= ssizeof(path)) {
-	sudo_warn("snprintf");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "failed to snprintf I/O log path");
 	goto bad;
     }
     if (mkdir(path, 0755) == -1 && errno != EEXIST) {
-	sudo_warn("mkdir %s", path);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "mkdir %s", path);
 	goto bad;
     }
     len = snprintf(path, sizeof(path), "%s/%s/%s/XXXXXX", IOLOG_DIR,
 	details->submithost, details->submituser);
     if (len < 0 || len >= ssizeof(path)) {
-	sudo_warn("snprintf");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "failed to snprintf I/O log path");
 	goto bad;
     }
     if (mkdtemp(path) == NULL) {
-	sudo_warn("mkdtemp %s", path);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "mkdtemp %s", path);
 	goto bad;
     }
-    sudo_warnx("I/O log path %s", path); // XXX
 
     /* Make a copy of iolog_dir for error messages. */
     if ((closure->iolog_dir = strdup(path)) == NULL) {
-	sudo_warn(NULL);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "strdup");
 	goto bad;
     }
 
     /* We use iolog_dir_fd in calls to openat(2) */
     closure->iolog_dir_fd = open(closure->iolog_dir, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
-	sudo_warn("%s", path);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "%s", path);
 	goto bad;
     }
 
@@ -294,7 +317,8 @@ iolog_details_write(struct iolog_details *details, struct connection_closure *cl
 
     fd = openat(closure->iolog_dir_fd, "log", O_CREAT|O_EXCL|O_WRONLY, 0600);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
-	sudo_warn("unable to open %s", closure->iolog_dir);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to open %s", closure->iolog_dir);
 	if (fd != -1)
 	    close(fd);
 	debug_return_bool(false);
@@ -314,8 +338,10 @@ iolog_details_write(struct iolog_details *details, struct connection_closure *cl
     }
     fputc('\n', fp);
     fflush(fp);
-    if ((error = ferror(fp)))
-	sudo_warn("unable to write to I/O log file %s", closure->iolog_dir);
+    if ((error = ferror(fp))) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to write to I/O log file %s", closure->iolog_dir);
+    }
     fclose(fp);
 
     debug_return_bool(!error);
@@ -327,7 +353,8 @@ iolog_open(int iofd, struct connection_closure *closure)
     debug_decl(iolog_open, SUDO_DEBUG_UTIL)
 
     if (iofd < 0 || iofd >= IOFD_MAX) {
-	sudo_warnx("invalid iofd %d", iofd);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid iofd %d", iofd);
 	debug_return_bool(false);
     }
 
@@ -394,7 +421,8 @@ iolog_write(int iofd, void *buf, size_t len, struct connection_closure *closure)
     size_t nread;
 
     if (iofd < 0 || iofd >= IOFD_MAX) {
-	sudo_warnx("invalid iofd %d", iofd);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid iofd %d", iofd);
 	debug_return_bool(false);
     }
     nread = write(closure->io_fds[iofd], buf, len);
@@ -440,7 +468,8 @@ store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 	iofd, (long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->data.len);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_warnx("unable to format timing buffer");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to format timing buffer");
 	debug_return_int(-1);
     }
 
@@ -469,7 +498,8 @@ store_suspend(CommandSuspend *msg, struct connection_closure *closure)
 	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->signal);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_warnx("unable to format timing buffer");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to format timing buffer");
 	debug_return_int(-1);
     }
 
@@ -494,7 +524,8 @@ store_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->rows, msg->cols);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_warnx("unable to format timing buffer");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to format timing buffer");
 	debug_return_int(-1);
     }
 

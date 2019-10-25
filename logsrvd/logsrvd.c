@@ -99,13 +99,15 @@ fmt_server_message(struct connection_buffer *buf, ServerMessage *msg)
     debug_decl(fmt_server_message, SUDO_DEBUG_UTIL)
 
     if (buf->len != 0) {
-	sudo_warnx("pending write!");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "pending write, unable to format ServerMessage");
 	debug_return_bool(false);
     }
 
     len = server_message__get_packed_size(msg);
     if (len > UINT16_MAX) {
-    	sudo_warnx("server message too large: %zu\n", len);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "server message too large: %zu", len);
         goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
@@ -113,7 +115,8 @@ fmt_server_message(struct connection_buffer *buf, ServerMessage *msg)
     len += sizeof(msg_len);
 
     if (len > buf->size) {
-	sudo_warnx("server message too big for buffer, %zu > %u", len, buf->size);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "server message too big for buffer, %zu > %u", len, buf->size);
 	goto done;
     }
 
@@ -162,16 +165,19 @@ handle_exec(ExecMessage *msg, struct connection_closure *closure)
     debug_decl(handle_exec, SUDO_DEBUG_UTIL)
 
     if (closure->state != INITIAL) {
-	sudo_warnx("unexpected state %d", closure->state);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d", closure->state);
 	debug_return_bool(false);
     }
 
     /* Sanity check message. */
     if (msg->start_time == NULL || msg->n_info_msgs == 0) {
-	sudo_warnx("invalid ExecMessage");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid ExecMessage, start_time: %p, n_info_msgs: %zu",
+	    msg->start_time, msg->n_info_msgs);
 	debug_return_bool(false);
     }
-    sudo_warnx("received ExecMessage"); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExecMessage", __func__);
 
     /* Save start time. */
     closure->start_time.tv_sec = msg->start_time->tv_sec;
@@ -184,8 +190,11 @@ handle_exec(ExecMessage *msg, struct connection_closure *closure)
     /* Send log ID to client for restarting connectoins. */
     if (!fmt_log_id_message(closure->iolog_dir, &closure->write_buf))
 	debug_return_bool(false);
-    if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1)
+    if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to add server write event");
 	debug_return_bool(false);
+    }
 
     closure->state = RUNNING;
     debug_return_bool(true);
@@ -198,28 +207,35 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
     debug_decl(handle_exit, SUDO_DEBUG_UTIL)
 
     if (closure->state != RUNNING) {
-	sudo_warnx("unexpected state %d", closure->state);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d", closure->state);
 	debug_return_bool(false);
     }
 
     /* Sudo I/O logs don't store this info. */
     if (msg->signal != NULL && msg->signal[0] != '\0') {
-	sudo_warnx("command was killed by SIG%s%s", msg->signal,
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "command was killed by SIG%s%s", msg->signal,
 	    msg->dumped_core ? " (core dumped)" : "");
     } else {
-	sudo_warnx("command exited with %d", msg->exit_value);
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "command exited with %d", msg->exit_value);
     }
 
     /* No more data, command exited. */
     closure->state = EXITED;
     sudo_ev_del(NULL, closure->read_ev);
 
-    sudo_warnx("elapsed time: %lld, %ld", (long long)closure->elapsed_time.tv_sec,
-	closure->elapsed_time.tv_nsec); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: elapsed time: %lld, %ld",
+	__func__, (long long)closure->elapsed_time.tv_sec,
+	closure->elapsed_time.tv_nsec);
 
     /* Schedule the final commit point event immediately. */
-    if (sudo_ev_add(NULL, closure->commit_ev, &tv, false) == -1)
+    if (sudo_ev_add(NULL, closure->commit_ev, &tv, false) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to add commit point event");
 	debug_return_bool(false);
+    }
 
     debug_return_bool(true);
 }
@@ -230,13 +246,15 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
     debug_decl(handle_restart, SUDO_DEBUG_UTIL)
 
     if (closure->state != INITIAL) {
-	sudo_warnx("unexpected state %d", closure->state);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d", closure->state);
 	debug_return_bool(false);
     }
 
     /* TODO */
     closure->state = RESTARTING;
-    sudo_warnx("server restart not implemented");
+    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	"server restart not implemented");
     debug_return_bool(false);
 }
 
@@ -255,15 +273,17 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     debug_decl(handle_iobuf, SUDO_DEBUG_UTIL)
 
     if (closure->state != RUNNING) {
-	sudo_warnx("unexpected state %d", closure->state);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d", closure->state);
 	debug_return_bool(false);
     }
 
-    sudo_warnx("received IoBuffer"); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received IoBuffer", __func__);
 
     /* Store IoBuffer in log. */
     if (store_iobuf(iofd, msg, closure) == -1) {
-	sudo_warnx("failed to store IoBuffer"); // XXX
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "failed to store IoBuffer");
 	debug_return_bool(false);
     }
 
@@ -275,8 +295,11 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     /* Schedule a commit point in 10 sec if one is not already pending. */
     if (!ISSET(closure->commit_ev->flags, SUDO_EVQ_INSERTED)) {
 	struct timespec tv = { ACK_FREQUENCY, 0 };
-	if (sudo_ev_add(NULL, closure->commit_ev, &tv, false) == -1)
+	if (sudo_ev_add(NULL, closure->commit_ev, &tv, false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add commit point event");
 	    debug_return_bool(false);
+	}
     }
 
     debug_return_bool(true);
@@ -288,15 +311,18 @@ handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
     debug_decl(handle_winsize, SUDO_DEBUG_UTIL)
 
     if (closure->state != RUNNING) {
-	sudo_warnx("unexpected state %d", closure->state);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d", closure->state);
 	debug_return_bool(false);
     }
 
-    sudo_warnx("received ChangeWindowSize"); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize",
+	__func__);
 
     /* Store new window size in log. */
     if (store_winsize(msg, closure) == -1) {
-	sudo_warnx("failed to store ChangeWindowSize"); // XXX
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "failed to store ChangeWindowSize");
 	debug_return_bool(false);
     }
 
@@ -309,15 +335,18 @@ handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
     debug_decl(handle_suspend, SUDO_DEBUG_UTIL)
 
     if (closure->state != RUNNING) {
-	sudo_warnx("unexpected state %d", closure->state);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d", closure->state);
 	debug_return_bool(false);
     }
 
-    sudo_warnx("received CommandSuspend"); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend",
+	__func__);
 
     /* Store suspend siganl in log. */
     if (store_suspend(msg, closure) == -1) {
-	sudo_warnx("failed to store CommandSuspend"); // XXX
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "failed to store CommandSuspend");
 	debug_return_bool(false);
     }
 
@@ -334,7 +363,8 @@ handle_client_message(uint8_t *buf, size_t len,
 
     msg = client_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx("unable to unpack ClientMessage size %zu", len);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to unpack ClientMessage size %zu", len);
 	debug_return_bool(false);
     }
 
@@ -373,7 +403,8 @@ handle_client_message(uint8_t *buf, size_t len,
 	ret = handle_suspend(msg->suspend_event, closure);
 	break;
     default:
-	sudo_warnx("unexpected type_case value %d", msg->type_case);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected type_case value %d", msg->type_case);
 	break;
     }
     client_message__free_unpacked(msg, NULL);
@@ -412,16 +443,20 @@ server_shutdown(struct sudo_event_base *base)
     TAILQ_FOREACH(closure, &connections, entries) {
 	closure->state = SHUTDOWN;
 	sudo_ev_del(base, closure->read_ev);
-	if (sudo_ev_add(base, closure->commit_ev, &tv, false) == -1)
-	    sudo_warnx("unable to add commit point event");
+	if (sudo_ev_add(base, closure->commit_ev, &tv, false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add commit point event");
+	}
     }
 
     /* We need a timed event to exit even if clients time out. */
     ev = sudo_ev_alloc(-1, SUDO_EV_TIMEOUT, shutdown_cb, base);
     if (ev != NULL) {
 	tv.tv_sec = SHUTDOWN_TIMEO;
-	if (sudo_ev_add(base, ev, &tv, false) == -1)
-	    sudo_warnx("unable to add commit point event");
+	if (sudo_ev_add(base, ev, &tv, false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add shutdown event");
+	}
     }
 
     debug_return;
@@ -438,18 +473,21 @@ server_msg_cb(int fd, int what, void *v)
     ssize_t nwritten;
     debug_decl(server_msg_cb, SUDO_DEBUG_UTIL)
 
-    sudo_warnx("sending %u bytes to client", buf->len - buf->off);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to client",
+	__func__, buf->len - buf->off);
 
     nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
     if (nwritten == -1) {
-	sudo_warn("send");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to send %u bytes", buf->len - buf->off);
 	goto finished;
     }
     buf->off += nwritten;
 
     if (buf->off == buf->len) {
 	/* sent entire message */
-	sudo_warnx("finished sending %u bytes to client", buf->len); // XXX
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: finished sending %u bytes to client", __func__, buf->len);
 	buf->off = 0;
 	buf->len = 0;
 	sudo_ev_del(NULL, closure->write_ev);
@@ -476,15 +514,17 @@ client_msg_cb(int fd, int what, void *v)
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
 
     nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
-    sudo_warnx("received %zd bytes from client", nread);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client",
+	__func__, nread);
     switch (nread) {
     case -1:
 	if (errno == EAGAIN)
 	    debug_return;
-	sudo_warn("recv");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to receive %u bytes", buf->size - buf->len);
 	goto finished;
     case 0:
-	sudo_warnx("unexpected EOF");
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO, "unexpected EOF");
 	goto finished;
     default:
 	break;
@@ -505,10 +545,12 @@ client_msg_cb(int fd, int what, void *v)
 	}
 
 	/* Parse ClientMessage, could be zero bytes. */
-	sudo_warnx("parsing ClientMessage, size %hu", msg_len); // XXX
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: parsing ClientMessage, size %hu", __func__, msg_len);
 	buf->off += sizeof(msg_len);
 	if (!handle_client_message(buf->data + buf->off, msg_len, closure)) {
-	    /* XXX - do something on error */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to parse ClientMessage, size %hu", msg_len);
 	    goto finished;
 	}
 	buf->off += msg_len;
@@ -538,16 +580,19 @@ server_commit_cb(int unused, int what, void *v)
     msg.commit_point = &commit_point;
     msg.type_case = SERVER_MESSAGE__TYPE_COMMIT_POINT;
 
-    sudo_warnx("sending commit point [%lld, %ld]", (long long)closure->elapsed_time.tv_sec, closure->elapsed_time.tv_nsec); // XXX
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending commit point [%lld, %ld]",
+	__func__, (long long)closure->elapsed_time.tv_sec,
+	closure->elapsed_time.tv_nsec);
 
     /* XXX - assumes no other server message pending, use a queue instead? */
-    /* XXX - close connection on error */
     if (!fmt_server_message(&closure->write_buf, &msg)) {
-	sudo_warnx("unable to format server message (commit point)");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to format ServerMessage (commit point)");
 	goto bad;
     }
     if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
-	sudo_warnx("unable to add server write event");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to add server write event");
 	goto bad;
     }
 
@@ -568,7 +613,7 @@ signal_cb(int signo, int what, void *v)
     switch (signo) {
 	case SIGHUP:
 	    /* TODO: reload config */
-	    sudo_warnx("Received SIGHUP");
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "received SIGHUP");
 	    break;
 	case SIGINT:
 	case SIGTERM:
@@ -576,7 +621,8 @@ signal_cb(int signo, int what, void *v)
 	    server_shutdown(base);
 	    break;
 	default:
-	    sudo_warnx("unexpected signal %d", signo);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected signal %d", signo);
 	    break;
     }
 
@@ -727,11 +773,14 @@ listener_cb(int fd, int what, void *v)
     if (sock != -1) {
 	if (!new_connection(sock, base)) {
 	    /* TODO: pause accepting on ENOMEM */
-	    sudo_warnx("unable to start new connection");
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to start new connection");
 	}
     } else {
-	if (errno != EAGAIN)
-	    sudo_warn("accept");
+	if (errno != EAGAIN) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to accept new connection");
+	}
 	/* TODO: pause accepting on ENFILE and EMFILE */
     }
     debug_return;
@@ -798,7 +847,7 @@ main(int argc, char *argv[])
     sudo_debug_register(getprogname(), NULL, NULL,
         sudo_conf_debug_files(getprogname()));
 
-    /* XXX - getopt_long handling */
+    /* XXX - getopt_long option handling */
 
     if (protobuf_c_version_number() < 1003000)
 	sudo_fatalx("Protobuf-C version 1.3 or higher required");
