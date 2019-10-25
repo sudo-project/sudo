@@ -105,7 +105,7 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-PROGS = logsrvd sendlog
+PROGS = sudo_logsrvd sudo_sendlog
 
 LOGSRVD_OBJS = iolog_writer.o logsrvd.o \
 	       logsrvd_conf.o log_server.pb-c.o protobuf-c.o
@@ -139,10 +139,10 @@ Makefile: $(srcdir)/Makefile.in
 .i.plog:
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
-logsrvd: $(LOGSRVD_OBJS) $(LT_LIBS)
+sudo_logsrvd: $(LOGSRVD_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LOGSRVD_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
-sendlog: $(SENDLOG_OBJS) $(LT_LIBS)
+sudo_sendlog: $(SENDLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SENDLOG_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 GENERATED = log_server.pb-c.h log_server.pb-c.c
@@ -161,8 +161,8 @@ install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(sbindir)
 
 install-binaries: install-dirs $(PROGS)
-	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 logsrvd $(DESTDIR)$(sbindir)/logsrvd
-	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sendlog $(DESTDIR)$(sbindir)/sendlog
+	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudo_logsrvd $(DESTDIR)$(sbindir)/sudo_logsrvd
+	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudo_sendlog $(DESTDIR)$(sbindir)/sudo_sendlog
 
 install-doc:
 
@@ -171,11 +171,11 @@ install-includes:
 install-plugin:
 
 uninstall:
-	-rm -f	$(DESTDIR)$(sbindir)/logsrvd \
-		$(DESTDIR)$(sbindir)/sendlog
+	-rm -f	$(DESTDIR)$(sbindir)/sudo_logsrvd \
+		$(DESTDIR)$(sbindir)/sudo_sendlog
 	-test -z "$(INSTALL_BACKUP)" || \
-	    rm -f $(DESTDIR)$(sbindir)/logsrvd$(INSTALL_BACKUP) \
-		  $(DESTDIR)$(sbindir)/sendlog
+	    rm -f $(DESTDIR)$(sbindir)/sudo_logsrvd$(INSTALL_BACKUP) \
+		  $(DESTDIR)$(sbindir)/sudo_sendlog$(INSTALL_BACKUP)
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
