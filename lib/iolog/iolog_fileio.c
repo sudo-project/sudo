@@ -127,32 +127,34 @@ iolog_mkdirs(char *path)
 {
     mode_t omask;
     struct stat sb;
-    bool ok, uid_changed = false;
+    int dfd;
+    bool ok = false, uid_changed = false;
     debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL)
 
-    /* umask must not be more restrictive than the file modes. */
-    omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
-
-    ok = stat(path, &sb) == 0;
+    if ((dfd = open(path, O_RDONLY|O_NONBLOCK)) != -1)
+	ok = true;
     if (!ok && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (io_swapids(false)) {
-	    ok = stat(path, &sb) == 0;
+	    if ((dfd = open(path, O_RDONLY|O_NONBLOCK)) != -1)
+		ok = true;
 	    if (!io_swapids(true))
 		ok = false;
 	}
     }
+    if (ok && fstat(dfd, &sb) == -1)
+	ok = false;
     if (ok) {
 	if (S_ISDIR(sb.st_mode)) {
 	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid) {
-		if (chown(path, iolog_uid, iolog_gid) != 0) {
+		if (fchown(dfd, iolog_uid, iolog_gid) != 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 			"%s: unable to chown %d:%d %s", __func__,
 			(int)iolog_uid, (int)iolog_gid, path);
 		}
 	    }
 	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode) {
-		if (chmod(path, iolog_dirmode) != 0) {
+		if (fchmod(dfd, iolog_dirmode) != 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 			"%s: unable to chmod 0%o %s", __func__,
 			(int)iolog_dirmode, path);
@@ -165,6 +167,9 @@ iolog_mkdirs(char *path)
 	}
 	goto done;
     }
+
+    /* umask must not be more restrictive than the file modes. */
+    omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
 
     ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
     if (!ok && errno == EACCES) {
@@ -199,8 +204,12 @@ iolog_mkdirs(char *path)
 	if (!io_swapids(true))
 	    ok = false;
     }
-done:
+
     umask(omask);
+
+done:
+    if (dfd != -1)
+	close(dfd);
     debug_return_bool(ok);
 }
 
