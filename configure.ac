@@ -2566,24 +2566,27 @@ AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
     SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
 ])
-AC_CHECK_FUNCS([arc4random_uniform], [], [
+AC_CHECK_FUNCS([arc4random], [
+    AC_CHECK_FUNCS([arc4random_uniform], [], [
+	AC_LIBOBJ(arc4random_uniform)
+	SUDO_APPEND_COMPAT_EXP(sudo_arc4random_uniform)
+    ])
+], [
+    AC_LIBOBJ(arc4random)
+    SUDO_APPEND_COMPAT_EXP(sudo_arc4random)
     AC_LIBOBJ(arc4random_uniform)
     SUDO_APPEND_COMPAT_EXP(sudo_arc4random_uniform)
-    AC_CHECK_FUNCS([arc4random], [], [
-	AC_LIBOBJ(arc4random)
-	SUDO_APPEND_COMPAT_EXP(sudo_arc4random)
-	# arc4random.c needs getentropy()
-	AC_CHECK_FUNCS([getentropy], [
-	    AC_CHECK_HEADERS([sys/random.h])
-	], [
-	    AC_LIBOBJ(getentropy)
-	    SUDO_APPEND_COMPAT_EXP(sudo_getentropy)
-	])
-	# arc4random.c wants pthread_atfork
-	AC_CHECK_HEADERS([pthread.h], [
-	    AC_CHECK_LIB(pthread, main, [LIBPTHREAD="-lpthread"])
-	    AC_CHECK_FUNCS([pthread_atfork])
-	])
+    # arc4random.c needs getentropy()
+    AC_CHECK_FUNCS([getentropy], [
+	AC_CHECK_HEADERS([sys/random.h])
+    ], [
+	AC_LIBOBJ(getentropy)
+	SUDO_APPEND_COMPAT_EXP(sudo_getentropy)
+    ])
+    # arc4random.c wants pthread_atfork
+    AC_CHECK_HEADERS([pthread.h], [
+	AC_CHECK_LIB(pthread, main, [LIBPTHREAD="-lpthread"])
+	AC_CHECK_FUNCS([pthread_atfork])
     ])
 ])
 

@@ -30,8 +30,7 @@
  */
 
 #ifndef HAVE_ARC4RANDOM
-/* Note: not exported by libutil. */
-uint32_t sudo_arc4random(void);
+__dso_public uint32_t sudo_arc4random(void);
 # undef arc4random
 # define arc4random() sudo_arc4random()
 #endif /* ARC4RANDOM */

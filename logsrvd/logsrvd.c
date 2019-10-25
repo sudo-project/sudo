@@ -48,12 +48,15 @@
 #include "sudo_event.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"
+#include "sudo_rand.h"
 #include "sudo_fatal.h"
+#include "pathnames.h"
 #include "logsrvd.h"
 
 TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static const char server_id[] = "Sudo Audit Server 0.1";
+static double random_drop;
 
 /*
  * Proof of concept audit server.
@@ -314,10 +317,15 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-#ifdef SERVER_DEBUG
-    if (rand() % 4 == 3)
-	kill(getpid(), SIGTERM);
-#endif
+    /* Random drop is a debugging tool to test client restart. */
+    if (random_drop > 0.0) {
+	double randval = arc4random() / (double)UINT32_MAX;
+	if (randval < random_drop) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"randomly dropping connection (%f < %f)", randval, random_drop);
+	    debug_return_bool(false);
+	}
+    }
 
     /* Schedule a commit point in 10 sec if one is not already pending. */
     if (!ISSET(closure->commit_ev->flags, SUDO_EVQ_INSERTED)) {
@@ -855,10 +863,57 @@ logsrvd_cleanup(void)
     return;
 }
 
+/*
+ * Fork and detatch from the terminal.
+ */
+static void
+daemonize(void)
+{
+    int fd;
+    debug_decl(daemonize, SUDO_DEBUG_UTIL)
+
+    switch (fork()) {
+    case -1:
+	sudo_fatal("fork");
+    case 0:
+	/* child */
+	break;
+    default:
+	/* parent */
+	_exit(0);
+    }
+
+    /* detach from terminal */
+    if (setsid() == -1)
+	sudo_fatal("setsid");
+
+    if (chdir("/") == -1)
+	sudo_warn("chdir(\"/\")");
+    if ((fd = open(_PATH_DEVNULL, O_RDWR)) != -1) {
+	(void) dup2(fd, STDIN_FILENO);
+	(void) dup2(fd, STDOUT_FILENO);
+	(void) dup2(fd, STDERR_FILENO);
+	if (fd > STDERR_FILENO)
+	    (void) close(fd);
+    }
+
+    debug_return;
+}
+
+static void
+usage(void)
+{
+    fprintf(stderr, "usage: %s [-n] [-R percentage]\n", getprogname());
+    exit(1);
+}
+
 int
 main(int argc, char *argv[])
 {
     struct sudo_event_base *evbase;
+    bool nofork = false;
+    char *ep;
+    int ch;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
     initprogname(argc > 0 ? argv[0] : "sudo_logsrvd");
@@ -875,12 +930,32 @@ main(int argc, char *argv[])
     sudo_debug_register(getprogname(), NULL, NULL,
         sudo_conf_debug_files(getprogname()));
 
-    /* XXX - getopt_long option handling */
-
     if (protobuf_c_version_number() < 1003000)
 	sudo_fatalx("Protobuf-C version 1.3 or higher required");
 
+    /* XXX - getopt_long option handling */
+    while ((ch = getopt(argc, argv, "nR:")) != -1) {
+	switch (ch) {
+	case 'n':
+	    nofork = true;
+	    break;
+	case 'R':
+            errno = 0;
+	    random_drop = strtod(optarg, &ep);
+            if (*ep != '\0' || errno != 0)
+                sudo_fatalx(U_("invalid random drop value: %s"), optarg);
+	    random_drop /= 100.0;	/* convert from percentage */
+	    break;
+	default:
+	    usage();
+	}
+    }
+    argc -= optind;
+    argv += optind;
+
     signal(SIGPIPE, SIG_IGN);
+    if (!nofork)
+	daemonize();
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);
