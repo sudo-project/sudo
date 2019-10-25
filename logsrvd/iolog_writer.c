@@ -82,6 +82,7 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
     /* Default values */
     details->lines = 24;
     details->columns = 80;
+    details->submitgroup = "unknown";
 
     /* Pull out values by key from info array. */
     for (idx = 0; idx < msg->n_info_msgs; idx++) {
@@ -174,6 +175,15 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
 		}
 		continue;
 	    }
+	    if (strcmp(key, "submitgroup") == 0) {
+		if (has_strval(info)) {
+		    details->submitgroup = info->strval;
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"submitgroup specified but not a string");
+		}
+		continue;
+	    }
 	    if (strcmp(key, "submituser") == 0) {
 		if (has_strval(info)) {
 		    details->submituser = info->strval;
@@ -218,62 +228,161 @@ iolog_details_fill(struct iolog_details *details, ExecMessage *msg)
     debug_return_bool(ret);
 }
 
+static size_t
+fill_seq(char *str, size_t strsize, char *logdir, void *closure)
+{
+    struct iolog_details *details = closure;
+    char *sessid = details->sessid;
+    int len;
+    debug_decl(fill_seq, SUDO_DEBUG_UTIL)
+
+    if (sessid[0] == '\0') {
+	if (!iolog_nextid(logdir, sessid))
+	    debug_return_size_t((size_t)-1);
+    }
+
+    /* Path is of the form /var/log/sudo-io/00/00/01. */
+    len = snprintf(str, strsize, "%c%c/%c%c/%c%c", sessid[0],
+	sessid[1], sessid[2], sessid[3], sessid[4], sessid[5]);
+    if (len < 0 || len >= (ssize_t)strsize) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to format session id");
+	debug_return_size_t(strsize); /* handle non-standard snprintf() */
+    }
+    debug_return_size_t(len);
+}
+
+static size_t
+fill_user(char *str, size_t strsize, char *unused, void *closure)
+{
+    const struct iolog_details *details = closure;
+    debug_decl(fill_user, SUDO_DEBUG_UTIL)
+
+    if (details->submituser == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "submituser not set");
+	debug_return_size_t(strsize);
+    }
+    debug_return_size_t(strlcpy(str, details->submituser, strsize));
+}
+
+static size_t
+fill_group(char *str, size_t strsize, char *unused, void *closure)
+{
+    const struct iolog_details *details = closure;
+    debug_decl(fill_group, SUDO_DEBUG_UTIL)
+
+    if (details->submitgroup == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "submitgroup not set");
+	debug_return_size_t(strsize);
+    }
+    debug_return_size_t(strlcpy(str, details->submitgroup, strsize));
+}
+
+static size_t
+fill_runas_user(char *str, size_t strsize, char *unused, void *closure)
+{
+    const struct iolog_details *details = closure;
+    debug_decl(fill_runas_user, SUDO_DEBUG_UTIL)
+
+    if (details->runuser == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "runuser not set");
+	debug_return_size_t(strsize);
+    }
+    debug_return_size_t(strlcpy(str, details->runuser, strsize));
+}
+
+static size_t
+fill_runas_group(char *str, size_t strsize, char *unused, void *closure)
+{
+    const struct iolog_details *details = closure;
+    debug_decl(fill_runas_group, SUDO_DEBUG_UTIL)
+
+    /* FIXME: rungroup not guaranteed to be set */
+    if (details->rungroup == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "rungroup not set");
+	debug_return_size_t(strsize);
+    }
+    debug_return_size_t(strlcpy(str, details->rungroup, strsize));
+}
+
+static size_t
+fill_hostname(char *str, size_t strsize, char *unused, void *closure)
+{
+    const struct iolog_details *details = closure;
+    debug_decl(fill_hostname, SUDO_DEBUG_UTIL)
+
+    if (details->submithost == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "submithost not set");
+	debug_return_size_t(strsize);
+    }
+    debug_return_size_t(strlcpy(str, details->submithost, strsize));
+}
+
+static size_t
+fill_command(char *str, size_t strsize, char *unused, void *closure)
+{
+    const struct iolog_details *details = closure;
+    debug_decl(fill_command, SUDO_DEBUG_UTIL)
+
+    if (details->command == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "command not set");
+	debug_return_size_t(strsize);
+    }
+    debug_return_size_t(strlcpy(str, details->command, strsize));
+}
+
+/* Note: "seq" must be first in the list. */
+static const struct iolog_path_escape path_escapes[] = {
+    { "seq", fill_seq },
+    { "user", fill_user },
+    { "group", fill_group },
+    { "runas_user", fill_runas_user },
+    { "runas_group", fill_runas_group },
+    { "hostname", fill_hostname },
+    { "command", fill_command },
+    { NULL, NULL }
+};
+
+
 /*
  * Create I/O log path
- * Sets iolog_dir and iolog_dir_fd in the closure
- * XXX - use iolog_dir and iolog_file code from sudoers/iolog.c
+ * Sets iolog_dir and iolog_dir_fd in the closure (XXX - not iolog_dir_fd)
  */
 static bool
 create_iolog_dir(struct iolog_details *details, struct connection_closure *closure)
 {
-    char path[PATH_MAX];
-    int len;
+    char pathbuf[PATH_MAX];
+    size_t len;
     debug_decl(create_iolog_dir, SUDO_DEBUG_UTIL)
 
-    /* Create IOLOG_DIR/host/user/XXXXXX directory */
-    if (mkdir(IOLOG_DIR, 0755) == -1 && errno != EEXIST) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "mkdir %s", path);
-	goto bad;
-    }
-    len = snprintf(path, sizeof(path), "%s/%s", IOLOG_DIR,
-	details->submithost);
-    if (len < 0 || len >= ssizeof(path)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "failed to snprintf I/O log path");
-	goto bad;
-    }
-    if (mkdir(path, 0755) == -1 && errno != EEXIST) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "mkdir %s", path);
-	goto bad;
-    }
-    len = snprintf(path, sizeof(path), "%s/%s/%s", IOLOG_DIR,
-	details->submithost, details->submituser);
-    if (len < 0 || len >= ssizeof(path)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "failed to snprintf I/O log path");
-	goto bad;
-    }
-    if (mkdir(path, 0755) == -1 && errno != EEXIST) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "mkdir %s", path);
-	goto bad;
-    }
-    len = snprintf(path, sizeof(path), "%s/%s/%s/XXXXXX", IOLOG_DIR,
-	details->submithost, details->submituser);
-    if (len < 0 || len >= ssizeof(path)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "failed to snprintf I/O log path");
-	goto bad;
-    }
-    if (mkdtemp(path) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "mkdtemp %s", path);
+    /* XXX - awkward api */
+    closure->iolog_dir = expand_iolog_path(NULL, logsrvd_conf_iolog_dir(),
+	logsrvd_conf_iolog_file(), NULL, &path_escapes[0], details);
+    if (closure->iolog_dir == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to expand iolog path %s/%s",
+	    logsrvd_conf_iolog_dir(), logsrvd_conf_iolog_file());
 	goto bad;
     }
 
-    if ((closure->iolog_dir = strdup(path)) == NULL) {
+    /*
+     * Make local copy of I/O log path and create it, along with any
+     * intermediate subdirs.  Calls mkdtemp() if iolog_path ends in XXXXXX.
+     */
+    len = mkdir_iopath(closure->iolog_dir, pathbuf, sizeof(pathbuf));
+    if (len >= sizeof(pathbuf)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to mkdir iolog path %s", closure->iolog_dir);
+        goto bad;
+    }
+    free(closure->iolog_dir);
+    if ((closure->iolog_dir = strdup(pathbuf)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "strdup");
 	goto bad;
@@ -306,7 +415,14 @@ iolog_details_write(struct iolog_details *details, struct connection_closure *cl
     int error;
     debug_decl(iolog_details_write, SUDO_DEBUG_UTIL)
 
+#if 0
     fd = openat(closure->iolog_dir_fd, "log", O_CREAT|O_EXCL|O_WRONLY, 0600);
+#else
+    /* XXX */
+    char path[PATH_MAX]; // XXX
+    snprintf(path, sizeof(path), "%s/log", closure->iolog_dir);
+    fd = open(path, O_CREAT|O_EXCL|O_WRONLY, 0600);
+#endif
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to open %s", closure->iolog_dir);
@@ -379,6 +495,10 @@ iolog_close_all(struct connection_closure *closure)
 		"error closing iofd %d: %s", i, errstr);
 	}
     }
+#if 0
+    if (closure->iolog_dir_fd != -1)
+	close(closure->iolog_dir_fd);
+#endif
 
     debug_return;
 }

@@ -69,7 +69,7 @@ reset_escape_data(struct iolog_escape_data *data)
 }
 
 static size_t
-fill_seq(char *str, size_t strsize, char *logdir)
+fill_seq(char *str, size_t strsize, char *logdir, void *closure)
 {
     int len;
 
@@ -83,37 +83,37 @@ fill_seq(char *str, size_t strsize, char *logdir)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, char *unused)
+fill_user(char *str, size_t strsize, char *unused, void *closure)
 {
     return strlcpy(str, escape_data.user, strsize);
 }
 
 static size_t
-fill_group(char *str, size_t strsize, char *unused)
+fill_group(char *str, size_t strsize, char *unused, void *closure)
 {
     return strlcpy(str, escape_data.group, strsize);
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, char *unused)
+fill_runas_user(char *str, size_t strsize, char *unused, void *closure)
 {
     return strlcpy(str, escape_data.runas_user, strsize);
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, char *unused)
+fill_runas_group(char *str, size_t strsize, char *unused, void *closure)
 {
     return strlcpy(str, escape_data.runas_group, strsize);
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, char *unused)
+fill_hostname(char *str, size_t strsize, char *unused, void *closure)
 {
     return strlcpy(str, escape_data.host, strsize);
 }
 
 static size_t
-fill_command(char *str, size_t strsize, char *unused)
+fill_command(char *str, size_t strsize, char *unused, void *closure)
 {
     return strlcpy(str, escape_data.command, strsize);
 }
@@ -150,7 +150,7 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
     strftime(dir_out, sizeof(dir_out), tdir_out, timeptr);
     strftime(file_out, sizeof(file_out), tfile_out, timeptr);
 
-    path = expand_iolog_path(NULL, dir_in, file_in, &slash, path_escapes);
+    path = expand_iolog_path(NULL, dir_in, file_in, &slash, path_escapes, NULL);
     if (path == NULL)
 	sudo_fatalx("unable to expand I/O log path");
     *slash = '\0';

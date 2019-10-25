@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <grp.h>
+#include <pwd.h>
 
 #include "log_server.pb-c.h"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
@@ -43,96 +45,132 @@
 #include "pathnames.h"
 #include "logsrvd.h"
 
-enum config_type {
-    CONF_BOOL,
-    CONF_INT,
-    CONF_UINT,
-    CONF_MODE,
-    CONF_STR
-};
-
-union config_value {
-    char *strval;
-    int intval;
-    unsigned int uintval;
-    mode_t modeval;
-    bool boolval;
-};
+typedef bool (*logsrvd_conf_cb_t)(const char *);
 
 struct logsrvd_config_table {
     char *conf_str;
-    enum config_type conf_type;
-    union config_value conf_val;
+    logsrvd_conf_cb_t setter;
 };
 
-/* Indexes into conf_table */
-#define LOGSRVD_CONF_IOLOG_DIR		0
-#define LOGSRVD_CONF_IOLOG_FILE		1
-#define LOGSRVD_CONF_IOLOG_FLUSH	2
-#define LOGSRVD_CONF_IOLOG_COMPRESS	3
-#define LOGSRVD_CONF_IOLOG_USER		4
-#define LOGSRVD_CONF_IOLOG_GROUP	5
-#define LOGSRVD_CONF_IOLOG_MODE		6
-#define LOGSRVD_CONF_MAXSEQ		7
+static char *logsrvd_iolog_dir;
 
-/* XXX - use callbacks into iolog.c instead */
-static struct logsrvd_config_table conf_table[] = {
-    { "iolog_dir", CONF_STR, { .strval = _PATH_SUDO_IO_LOGDIR } },
-    { "iolog_file", CONF_STR, { .strval = "%{seq}" } },
-    { "iolog_flush", CONF_BOOL, { .boolval = true } },
-    { "iolog_compress", CONF_BOOL, { .boolval = false } },
-    { "iolog_user", CONF_STR, { .strval = NULL } },
-    { "iolog_group", CONF_STR, { .strval = NULL } },
-    { "iolog_mode", CONF_MODE, { .intval = S_IRUSR|S_IWUSR } },
-    { "maxseq", CONF_UINT, { .intval = SESSID_MAX } },
-    { NULL }
-};
+const char *
+logsrvd_conf_iolog_dir(void)
+{
+    return logsrvd_iolog_dir;
+}
+
+static char *logsrvd_iolog_file;
+
+const char *
+logsrvd_conf_iolog_file(void)
+{
+    return logsrvd_iolog_file;
+}
 
 static bool
-parse_value(struct logsrvd_config_table *ct, const char *val)
+cb_iolog_dir(const char *path)
 {
-    int ival;
-    unsigned int uval;
-    mode_t mode;
-    const char *errstr;
-    debug_decl(parse_value, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_dir, SUDO_DEBUG_UTIL)
 
-    switch (ct->conf_type) {
-    case CONF_BOOL:
-	ival = sudo_strtobool(val);
-	if (ival == -1)
-	    debug_return_bool(false);
-	ct->conf_val.boolval = ival;
-	break;
-    case CONF_INT:
-	ival = sudo_strtonum(val, INT_MIN, INT_MAX, &errstr);
-	if (errstr != NULL)
-	    debug_return_bool(false);
-	ct->conf_val.intval = ival;
-	break;
-    case CONF_UINT:
-	uval = sudo_strtonum(val, 0, UINT_MAX, &errstr);
-	if (errstr != NULL)
-	    debug_return_bool(false);
-	ct->conf_val.uintval = uval;
-	break;
-    case CONF_MODE:
-	mode = sudo_strtomode(val, &errstr);
-	if (errstr != NULL)
-	    debug_return_bool(false);
-	ct->conf_val.modeval = mode;
-	break;
-    case CONF_STR:
-	ct->conf_val.strval = strdup(val);
-	if (ct->conf_val.strval == NULL)
-	    debug_return_bool(false);
-	break;
-    default:
+    free(logsrvd_iolog_dir);
+    if ((logsrvd_iolog_dir = strdup(path)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "strdup");
+	debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+static bool
+cb_iolog_file(const char *path)
+{
+    debug_decl(cb_iolog_file, SUDO_DEBUG_UTIL)
+
+    free(logsrvd_iolog_file);
+    if ((logsrvd_iolog_file = strdup(path)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "strdup");
+	debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+static bool
+cb_iolog_compress(const char *str)
+{
+    return iolog_set_compress(str);
+}
+
+static bool
+cb_iolog_flush(const char *str)
+{
+    return iolog_set_flush(str);
+}
+
+static bool
+cb_iolog_user(const char *user)
+{
+    struct passwd *pw;
+    debug_decl(cb_iolog_user, SUDO_DEBUG_UTIL)
+
+    if ((pw = getpwnam(user)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unknown user %s", user);
 	debug_return_bool(false);
     }
 
-    debug_return_bool(true);
+    debug_return_bool(iolog_set_user(pw));
 }
+
+static bool
+cb_iolog_group(const char *group)
+{
+    struct group *gr;
+    debug_decl(cb_iolog_group, SUDO_DEBUG_UTIL)
+
+    if ((gr = getgrnam(group)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unknown group %s", group);
+	debug_return_bool(false);
+    }
+
+    debug_return_bool(iolog_set_group(gr));
+}
+
+static bool
+cb_iolog_mode(const char *str)
+{
+    const char *errstr;
+    mode_t mode;
+    debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL)
+
+    mode = sudo_strtomode(str, &errstr);
+    if (errstr != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to parse iolog mode %s", str);
+	debug_return_bool(false);
+    }
+    debug_return_bool(iolog_set_mode(mode));
+}
+
+static bool
+cb_maxseq(const char *str)
+{
+    return iolog_set_maxseq(str);
+}
+
+static struct logsrvd_config_table conf_table[] = {
+    { "iolog_dir", cb_iolog_dir },
+    { "iolog_file", cb_iolog_file },
+    { "iolog_flush", cb_iolog_flush },
+    { "iolog_compress", cb_iolog_compress },
+    { "iolog_user", cb_iolog_user },
+    { "iolog_group", cb_iolog_group },
+    { "iolog_mode", cb_iolog_mode },
+    { "maxseq", cb_maxseq },
+    { NULL }
+};
 
 void
 logsrvd_conf_read(const char *path)
@@ -153,9 +191,14 @@ logsrvd_conf_read(const char *path)
 	struct logsrvd_config_table *ct;
 	char *ep, *val;
 
-	// XXX - warn about bogus lines
-	if ((ep = strchr(line, '=')) == NULL)
+	/* Skip blank, comment or invalid lines. */
+	if (*line == '\0')
 	    continue;
+	if ((ep = strchr(line, '=')) == NULL) {
+	    sudo_warnx("%s:%d invalid setting %s", path, lineno, line);
+	    continue;
+	}
+
 	val = ep + 1;
 	while (isspace((unsigned char)*val))
 	    val++;
@@ -164,72 +207,18 @@ logsrvd_conf_read(const char *path)
 	*ep = '\0';
 	for (ct = conf_table; ct->conf_str != NULL; ct++) {
 	    if (strcmp(line, ct->conf_str) == 0) {
-		if (!parse_value(ct, val))
+		if (!ct->setter(val))
 		    sudo_warnx("invalid value for %s: %s", ct->conf_str, val);
 		break;
 	    }
 	}
     }
 
-#if 0
-    /*
-     * TODO: iolog_dir, iolog_file, iolog_flush, iolog_compress
-     */
-    iolog_set_user(conf_table[LOGSRVD_CONF_IOLOG_USER].conf_val.strval);
-    iolog_set_group(conf_table[LOGSRVD_CONF_IOLOG_GROUP].conf_val.strval);
-    iolog_set_mode(conf_table[LOGSRVD_CONF_IOLOG_MODE].conf_val.modeval);
-    /* XXX - expects a string */
-    iolog_set_max_sessid(conf_table[LOGSRVD_CONF_MAXSEQ].conf_val.uintval);
-#endif
+    /* All the others have default values. */
+    if (logsrvd_iolog_dir == NULL)
+	logsrvd_iolog_dir = strdup(_PATH_SUDO_IO_LOGDIR);
+    if (logsrvd_iolog_file == NULL)
+	logsrvd_iolog_file = strdup("%{seq}");
 
     debug_return;
-}
-
-/* XXX - use callbacks instead */
-const char *
-logsrvd_conf_iolog_dir(void)
-{
-    return conf_table[LOGSRVD_CONF_IOLOG_DIR].conf_val.strval;
-}
-
-const char *
-logsrvd_conf_iolog_file(void)
-{
-    return conf_table[LOGSRVD_CONF_IOLOG_FILE].conf_val.strval;
-}
-
-const char *
-logsrvd_conf_iolog_user(void)
-{
-    return conf_table[LOGSRVD_CONF_IOLOG_USER].conf_val.strval;
-}
-
-const char *
-logsrvd_conf_iolog_group(void)
-{
-    return conf_table[LOGSRVD_CONF_IOLOG_GROUP].conf_val.strval;
-}
-
-bool
-logsrvd_conf_iolog_flush(void)
-{
-    return conf_table[LOGSRVD_CONF_IOLOG_FLUSH].conf_val.boolval;
-}
-
-bool
-logsrvd_conf_iolog_compress(void)
-{
-    return conf_table[LOGSRVD_CONF_IOLOG_COMPRESS].conf_val.boolval;
-}
-
-mode_t
-logsrvd_conf_iolog_mode(void)
-{
-    return conf_table[LOGSRVD_CONF_IOLOG_MODE].conf_val.modeval;
-}
-
-unsigned int
-logsrvd_conf_maxseq(void)
-{
-    return conf_table[LOGSRVD_CONF_MAXSEQ].conf_val.uintval;
 }

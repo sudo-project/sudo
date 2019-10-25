@@ -98,11 +98,11 @@ struct iolog_file {
 
 struct iolog_path_escape {
     const char *name;
-    size_t (*copy_fn)(char *, size_t, char *);
+    size_t (*copy_fn)(char *, size_t, char *, void *);
 };
 
 /* iolog_path.c */
-char *expand_iolog_path(const char *prefix, const char *dir, const char *file, char **slashp, const struct iolog_path_escape *escapes);
+char *expand_iolog_path(const char *prefix, const char *dir, const char *file, char **slashp, const struct iolog_path_escape *escapes, void *closure);
 
 /* iolog_util.c */
 bool parse_timing(const char *line, struct timing_closure *timing);

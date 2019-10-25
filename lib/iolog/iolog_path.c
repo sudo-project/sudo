@@ -59,7 +59,7 @@
  */
 char *
 expand_iolog_path(const char *prefix, const char *dir, const char *file,
-    char **slashp, const struct iolog_path_escape *escapes)
+    char **slashp, const struct iolog_path_escape *escapes, void *closure)
 {
     size_t len, prelen = 0;
     char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];
@@ -128,7 +128,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 			}
 			if (esc->name != NULL) {
 			    len = esc->copy_fn(dst, (size_t)(pathend - dst),
-				path + prelen);
+				path + prelen, closure);
 			    if (len >= (size_t)(pathend - dst))
 				goto bad;
 			    dst += len;

@@ -42,7 +42,7 @@
 #include "sudo_iolog.h"
 
 static size_t
-fill_seq(char *str, size_t strsize, char *logdir)
+fill_seq(char *str, size_t strsize, char *logdir, void *closure)
 {
 #ifdef SUDOERS_NO_SEQ
     debug_decl(fill_seq, SUDO_DEBUG_UTIL)
@@ -67,14 +67,14 @@ fill_seq(char *str, size_t strsize, char *logdir)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, char *unused)
+fill_user(char *str, size_t strsize, char *unused, void *closure)
 {
     debug_decl(fill_user, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_name, strsize));
 }
 
 static size_t
-fill_group(char *str, size_t strsize, char *unused)
+fill_group(char *str, size_t strsize, char *unused, void *closure)
 {
     struct group *grp;
     size_t len;
@@ -92,14 +92,14 @@ fill_group(char *str, size_t strsize, char *unused)
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, char *unused)
+fill_runas_user(char *str, size_t strsize, char *unused, void *closure)
 {
     debug_decl(fill_runas_user, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, runas_pw->pw_name, strsize));
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, char *unused)
+fill_runas_group(char *str, size_t strsize, char *unused, void *closure)
 {
     struct group *grp;
     size_t len;
@@ -121,14 +121,14 @@ fill_runas_group(char *str, size_t strsize, char *unused)
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, char *unused)
+fill_hostname(char *str, size_t strsize, char *unused, void *closure)
 {
     debug_decl(fill_hostname, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_shost, strsize));
 }
 
 static size_t
-fill_command(char *str, size_t strsize, char *unused)
+fill_command(char *str, size_t strsize, char *unused, void *closure)
 {
     debug_decl(fill_command, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_base, strsize));

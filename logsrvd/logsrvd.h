@@ -32,7 +32,7 @@
 #define SHUTDOWN_TIMEO	10
 
 /*
- * I/O log details from the ExecMessage
+ * I/O log details from the ExecMessage + iolog path and sessid.
  */
 struct iolog_details {
     char *command;
@@ -42,12 +42,14 @@ struct iolog_details {
     char *runuser;
     char *submithost;
     char *submituser;
+    char *submitgroup;
     char *ttyname;
     char **argv;
     time_t start_time;
     int argc;
     int lines;
     int columns;
+    char sessid[7];
 };
 
 /*
@@ -85,7 +87,9 @@ struct connection_closure {
     struct sudo_event *write_ev;
     char *iolog_dir;
     struct iolog_file iolog_files[IOFD_MAX];
+#if 0
     int iolog_dir_fd;
+#endif
     int sock;
     enum connection_status state;
 };
@@ -99,14 +103,8 @@ int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
 
 /* logsrvd_conf.c */
-bool logsrvd_conf_iolog_compress(void);
-bool logsrvd_conf_iolog_flush(void);
+void logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
-const char *logsrvd_conf_iolog_group(void);
-const char *logsrvd_conf_iolog_user(void);
-mode_t logsrvd_conf_iolog_mode(void);
-unsigned int logsrvd_conf_maxseq(void);
-void logsrvd_conf_read(const char *path);
 
 #endif /* SUDO_LOGSRVD_H */

@@ -477,7 +477,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 	    iolog_path = expand_iolog_path(prefix, def_iolog_dir,
 		def_iolog_file, &sudo_user.iolog_file,
-		sudoers_iolog_path_escapes);
+		sudoers_iolog_path_escapes, NULL);
 	    sudoers_setlocale(oldlocale, NULL);
 	    if (iolog_path == NULL) {
 		if (!def_ignore_iolog_errors)
