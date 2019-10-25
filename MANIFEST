@@ -71,6 +71,7 @@ include/sudo_dso.h
 include/sudo_event.h
 include/sudo_fatal.h
 include/sudo_gettext.h
+include/sudo_iolog.h
 include/sudo_lbuf.h
 include/sudo_plugin.h
 include/sudo_queue.h
@@ -81,6 +82,13 @@ init.d/aix.sh.in
 init.d/hpux.sh.in
 init.d/sudo.conf.in
 install-sh
+lib/iolog/Makefile.in
+lib/iolog/iolog_fileio.c
+lib/iolog/iolog_path.c
+lib/iolog/iolog_util.c
+lib/iolog/regress/iolog_path/check_iolog_path.c
+lib/iolog/regress/iolog_path/data
+lib/iolog/regress/iolog_util/check_iolog_util.c
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/arc4random.c
@@ -331,11 +339,7 @@ plugins/sudoers/insults.h
 plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
-plugins/sudoers/iolog.h
-plugins/sudoers/iolog_files.h
-plugins/sudoers/iolog_path.c
-plugins/sudoers/iolog_util.c
-plugins/sudoers/iolog_util.h
+plugins/sudoers/iolog_path_escapes.c
 plugins/sudoers/ldap.c
 plugins/sudoers/ldap_conf.c
 plugins/sudoers/ldap_util.c
@@ -503,10 +507,7 @@ plugins/sudoers/regress/cvtsudoers/test9.out.ok
 plugins/sudoers/regress/cvtsudoers/test9.sh
 plugins/sudoers/regress/env_match/check_env_pattern.c
 plugins/sudoers/regress/env_match/data
-plugins/sudoers/regress/iolog_path/check_iolog_path.c
-plugins/sudoers/regress/iolog_path/data
 plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
-plugins/sudoers/regress/iolog_util/check_iolog_util.c
 plugins/sudoers/regress/logging/check_wrap.c
 plugins/sudoers/regress/logging/check_wrap.in
 plugins/sudoers/regress/logging/check_wrap.out.ok

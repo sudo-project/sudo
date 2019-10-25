@@ -287,8 +287,8 @@ pam_acct_mgmt
 	T_FLAG
 	"Perform PAM account validation management"
 maxseq
-	T_UINT
-	"Maximum I/O log sequence number: %u"
+	T_STR
+	"Maximum I/O log sequence number: %s"
 use_netgroups
 	T_FLAG
 	"Enable sudoers netgroup support"

@@ -14,24 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef SUDO_SENDLOG_H
+#define SUDO_SENDLOG_H
+
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
 #endif
 
 #define DEFAULT_PORT_STR	"30344"
-
-/*
- * Indexes into io_fds[] and iolog_names[]
- * The first five must match the IO_EVENT_ defines in iolog.h.
- * XXX - needed?
- */
-#define IOFD_STDIN	0
-#define IOFD_STDOUT	1
-#define IOFD_STDERR	2
-#define IOFD_TTYIN	3
-#define IOFD_TTYOUT	4
-#define IOFD_TIMING	5
-#define IOFD_MAX	6
 
 enum client_state {
     ERROR,
@@ -67,3 +57,5 @@ struct client_closure {
     size_t bufsize; /* XXX */
     enum client_state state;
 };
+
+#endif /* SUDO_SENDLOG_H */

@@ -50,6 +50,7 @@
 #include "sudo_util.h"
 #include "sudo_rand.h"
 #include "sudo_fatal.h"
+#include "sudo_iolog.h"
 #include "pathnames.h"
 #include "logsrvd.h"
 
@@ -84,7 +85,7 @@ connection_closure_free(struct connection_closure *closure)
 
 	TAILQ_REMOVE(&connections, closure, entries);
 	close(closure->sock);
-	iolog_close(closure);
+	iolog_close_all(closure);
 	sudo_ev_free(closure->commit_ev);
 	sudo_ev_free(closure->read_ev);
 	sudo_ev_free(closure->write_ev);

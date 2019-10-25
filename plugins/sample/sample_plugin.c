@@ -59,12 +59,6 @@
  * caching the validate and invalidate functions are NULL.
  */
 
-#ifdef __TANDEM
-# define ROOT_UID       65535
-#else
-# define ROOT_UID       0
-#endif
-
 static struct plugin_state {
     char **envp;
     char * const *settings;

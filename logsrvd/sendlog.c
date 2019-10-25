@@ -54,22 +54,11 @@
 #include "sudo_util.h"
 #include "sudo_event.h"
 #include "sudo_fatal.h"
-#include "iolog_util.h"
+#include "sudo_iolog.h"
 #include "sendlog.h"
 
-static gzFile io_fds[IOFD_MAX];
-
-/* I/O log file names relative to the iolog dir. */
-/* XXX - duplicated with server */
-static const char *iolog_names[] = {
-    "stdin",	/* IOFD_STDIN */
-    "stdout",	/* IOFD_STDOUT */
-    "stderr",	/* IOFD_STDERR */
-    "ttyin",	/* IOFD_TTYIN  */
-    "ttyout",	/* IOFD_TTYOUT */
-    "timing",	/* IOFD_TIMING */
-    NULL	/* IOFD_MAX */
-};
+static struct iolog_file iolog_files[IOFD_MAX];
+static char *iolog_path;
 
 static void
 usage(void)
@@ -151,8 +140,6 @@ client_closure_free(struct client_closure *closure)
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
 	free(closure->buf);
-	// XXX - avoid use after free
-	//free(closure);
     }
 
     debug_return;
@@ -165,26 +152,23 @@ client_closure_free(struct client_closure *closure)
 int
 read_timing_record(struct timing_closure *timing)
 {
-    const char *errstr;
     char line[LINE_MAX];
-    int errnum;
+    const char *errstr;
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
-    if (gzgets(io_fds[IOFD_TIMING], line, sizeof(line)) == NULL) {
+    if (iolog_gets(&iolog_files[IOFD_TIMING], line, sizeof(line), &errstr) == NULL) {
 	/* EOF or error reading timing file, we are done. */
-	if (gzeof(io_fds[IOFD_TIMING]))
-	    debug_return_int(1);	/* EOF */
-	if ((errstr = gzerror(io_fds[IOFD_TIMING], &errnum)) == NULL)
-	    errstr = strerror(errno);
-	sudo_warnx("error reading timing file: %s", errstr);
+	if (iolog_eof(&iolog_files[IOFD_TIMING]))
+	    debug_return_int(1);
+	sudo_warnx(U_("error reading timing file: %s"), errstr);
 	debug_return_int(-1);
     }
 
     /* Parse timing file record. */
     line[strcspn(line, "\n")] = '\0';
     if (!parse_timing(line, timing)) {
-	sudo_warnx("invalid timing file line: %s", line);
+	sudo_warnx(U_("invalid timing file line: %s"), line);
 	debug_return_int(-1);
     }
 
@@ -198,11 +182,13 @@ static bool
 read_io_buf(struct client_closure *closure)
 {
     struct timing_closure *timing = &closure->timing;
+    const char *errstr = NULL;
     size_t nread;
     debug_decl(read_io_buf, SUDO_DEBUG_UTIL)
 
-    if (io_fds[timing->event] == NULL) {
-	sudo_warnx("%s file not open", iolog_names[timing->event]);
+    if (!iolog_files[timing->event].enabled) {
+	errno = ENOENT;
+	sudo_warn("%s/%s", iolog_path, iolog_fd_to_name(timing->event));
 	debug_return_bool(false);
     }
 
@@ -219,15 +205,11 @@ read_io_buf(struct client_closure *closure)
 	}
     }
 
-    nread = gzread(io_fds[timing->event], closure->buf, timing->u.nbytes);
+    nread = iolog_read(&iolog_files[timing->event], closure->buf,
+	timing->u.nbytes, &errstr);
     if (nread != timing->u.nbytes) {
-	int errnum;
-	const char *errstr;
-
-	if ((errstr = gzerror(io_fds[timing->event], &errnum)) == NULL)
-	    errstr = strerror(errno);
-	sudo_warnx("unable to read %s file: %s", iolog_names[timing->event],
-	    errstr);
+	sudo_warnx(U_("unable to read %s/%s: %s"), iolog_path,
+	    iolog_fd_to_name(timing->event), errstr);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -742,7 +724,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 
     /* Sanity check ServerHello message. */
     if (msg->server_id == NULL || msg->server_id[0] == '\0') {
-	sudo_warnx("invalid ServerHello");
+	sudo_warnx("%s", U_("invalid ServerHello"));
 	debug_return_bool(false);
     }
 
@@ -1034,23 +1016,25 @@ bad:
  * The timing file must always exist.
  */
 bool
-iolog_open_all(const char *iolog_path)
+iolog_open_all(char *path, size_t dir_len)
 {
-    char fname[PATH_MAX];
-    int i, len;
+    size_t file_len;
+    int i;
     debug_decl(iolog_open_all, SUDO_DEBUG_UTIL)
 
-    for (i = 0; iolog_names[i] != NULL; i++) {
-	len = snprintf(fname, sizeof(fname), "%s/%s", iolog_path,
-	    iolog_names[i]);
-	if (len < 0 || len >= ssizeof(fname)) {
-	    errno = ENAMETOOLONG;
-	    sudo_warn("%s/%s", iolog_path, iolog_names[i]);
+    for (i = 0; i < IOFD_MAX; i++) {
+	path[dir_len] = '\0';
+	file_len = strlen(iolog_fd_to_name(i));
+	if (dir_len + 1 + file_len + 1 >= PATH_MAX) {
+            errno = ENAMETOOLONG;
+            sudo_warn("%s/%s", path, iolog_fd_to_name(i));
+	    debug_return_bool(false);
 	}
-	io_fds[i] = gzopen(fname, "r");
-	if (io_fds[i] == NULL && i == IOFD_TIMING) {
-	    /* The timing file is not optional. */
-	    sudo_warn("unable to open %s/%s", iolog_path, iolog_names[i]);
+	path[dir_len++] = '/';
+	memcpy(path + dir_len, iolog_fd_to_name(i), file_len + 1);
+	iolog_files[i].enabled = true;
+        if (!iolog_open(&iolog_files[i], path, "r")) {
+            sudo_warn(U_("unable to open %s"), path);
 	    debug_return_bool(false);
 	}
     }
@@ -1104,9 +1088,9 @@ main(int argc, char *argv[])
     const char *host = "localhost";
     const char *port = DEFAULT_PORT_STR;
     struct timespec restart = { 0, 0 };
-    char fname[PATH_MAX], *iolog_path;
+    char pathbuf[PATH_MAX];
     const char *iolog_id = NULL;
-    int ch, sock;
+    int ch, len, sock;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
     initprogname(argc > 0 ? argv[0] : "sendlog");
@@ -1158,12 +1142,18 @@ main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     /* Parse I/O info log file. */
-    snprintf(fname, sizeof(fname), "%s/log", iolog_path);
-    if ((log_info = parse_logfile(fname)) == NULL)
+    len = snprintf(pathbuf, sizeof(pathbuf), "%s/log", iolog_path);
+    if (len < 0 || len >= ssizeof(pathbuf)) {
+	errno = ENAMETOOLONG;
+	sudo_warn("%s/log", iolog_path);
+	goto bad;
+    }
+    len -= 4;
+    if ((log_info = parse_logfile(pathbuf)) == NULL)
 	goto bad;
 
     /* Open the I/O log files. */
-    if (!iolog_open_all(iolog_path))
+    if (!iolog_open_all(pathbuf, len))
 	goto bad;
 
     /* Connect to server, setup events. */

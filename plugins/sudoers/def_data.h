@@ -181,7 +181,7 @@
 #define I_PAM_ACCT_MGMT         90
 #define def_pam_acct_mgmt       (sudo_defs_table[I_PAM_ACCT_MGMT].sd_un.flag)
 #define I_MAXSEQ                91
-#define def_maxseq              (sudo_defs_table[I_MAXSEQ].sd_un.uival)
+#define def_maxseq              (sudo_defs_table[I_MAXSEQ].sd_un.str)
 #define I_USE_NETGROUPS         92
 #define def_use_netgroups       (sudo_defs_table[I_USE_NETGROUPS].sd_un.flag)
 #define I_SUDOEDIT_CHECKDIR     93

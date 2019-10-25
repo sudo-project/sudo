@@ -27,19 +27,25 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <pwd.h>
-#include <grp.h>
 #include <time.h>
+#include <unistd.h>
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudoers.h"
-#include "def_data.c"
+#include "sudo_compat.h"
+#include "sudo_util.h"
+#include "sudo_fatal.h"
+#include "sudo_iolog.h"
 
-struct sudo_user sudo_user;
-struct passwd *list_pw;
-
-static char sessid[7];
+static struct iolog_escape_data {
+    char sessid[7];
+    char *user;
+    char *group;
+    char *runas_user;
+    char *runas_group;
+    char *host;
+    char *command;
+} escape_data;
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -49,6 +55,80 @@ usage(void)
     fprintf(stderr, "usage: %s datafile\n", getprogname());
     exit(1);
 }
+
+static void
+reset_escape_data(struct iolog_escape_data *data)
+{
+    free(data->user);
+    free(data->group);
+    free(data->runas_user);
+    free(data->runas_group);
+    free(data->host);
+    free(data->command);
+    memset(data, 0, sizeof(*data));
+}
+
+static size_t
+fill_seq(char *str, size_t strsize, char *logdir)
+{
+    int len;
+
+    /* Path is of the form /var/log/sudo-io/00/00/01. */
+    len = snprintf(str, strsize, "%c%c/%c%c/%c%c", escape_data.sessid[0],
+	escape_data.sessid[1], escape_data.sessid[2], escape_data.sessid[3],
+	escape_data.sessid[4], escape_data.sessid[5]);
+    if (len < 0)
+	return strsize; /* handle non-standard snprintf() */
+    return len;
+}
+
+static size_t
+fill_user(char *str, size_t strsize, char *unused)
+{
+    return strlcpy(str, escape_data.user, strsize);
+}
+
+static size_t
+fill_group(char *str, size_t strsize, char *unused)
+{
+    return strlcpy(str, escape_data.group, strsize);
+}
+
+static size_t
+fill_runas_user(char *str, size_t strsize, char *unused)
+{
+    return strlcpy(str, escape_data.runas_user, strsize);
+}
+
+static size_t
+fill_runas_group(char *str, size_t strsize, char *unused)
+{
+    return strlcpy(str, escape_data.runas_group, strsize);
+}
+
+static size_t
+fill_hostname(char *str, size_t strsize, char *unused)
+{
+    return strlcpy(str, escape_data.host, strsize);
+}
+
+static size_t
+fill_command(char *str, size_t strsize, char *unused)
+{
+    return strlcpy(str, escape_data.command, strsize);
+}
+
+/* Note: "seq" must be first in the list. */
+static struct iolog_path_escape path_escapes[] = {
+    { "seq", fill_seq },
+    { "user", fill_user },
+    { "group", fill_group },
+    { "runas_user", fill_runas_user },
+    { "runas_group", fill_runas_group },
+    { "hostname", fill_hostname },
+    { "command", fill_command },
+    { NULL, NULL }
+};
 
 static int
 do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
@@ -70,7 +150,7 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
     strftime(dir_out, sizeof(dir_out), tdir_out, timeptr);
     strftime(file_out, sizeof(file_out), tfile_out, timeptr);
 
-    path = expand_iolog_path(NULL, dir_in, file_in, &slash);
+    path = expand_iolog_path(NULL, dir_in, file_in, &slash, path_escapes);
     if (path == NULL)
 	sudo_fatalx("unable to expand I/O log path");
     *slash = '\0';
@@ -92,13 +172,11 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
 int
 main(int argc, char *argv[])
 {
-    struct passwd pw, rpw;
     size_t len;
     FILE *fp;
     char line[2048];
     char *file_in = NULL, *file_out = NULL;
     char *dir_in = NULL, *dir_out = NULL;
-    const char *errstr;
     int state = 0;
     int errors = 0;
     int tests = 0;
@@ -111,11 +189,6 @@ main(int argc, char *argv[])
     fp = fopen(argv[1], "r");
     if (fp == NULL)
 	sudo_fatalx("unable to open %s", argv[1]);
-
-    memset(&pw, 0, sizeof(pw));
-    memset(&rpw, 0, sizeof(rpw));
-    sudo_user.pw = &pw;
-    sudo_user._runas_pw = &rpw;
 
     /*
      * Input consists of 12 lines:
@@ -138,37 +211,31 @@ main(int argc, char *argv[])
 
 	switch (state) {
 	case 0:
-	    strlcpy(sessid, line, sizeof(sessid));
+	    strlcpy(escape_data.sessid, line, sizeof(escape_data.sessid));
 	    break;
 	case 1:
-	    if (user_name != NULL)
-		free(user_name);
-	    user_name = strdup(line);
+	    if ((escape_data.user = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 2:
-	    user_gid = (gid_t)sudo_strtoid(line, &errstr);
-	    if (errstr != NULL)
-		sudo_fatalx("group ID %s: %s", line, errstr);
+	    if ((escape_data.group = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 3:
-	    if (runas_pw->pw_name != NULL)
-		free(runas_pw->pw_name);
-	    runas_pw->pw_name = strdup(line);
+	    if ((escape_data.runas_user = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 4:
-	    runas_pw->pw_gid = (gid_t)sudo_strtoid(line, &errstr);
-	    if (errstr != NULL)
-		sudo_fatalx("group ID %s: %s", line, errstr);
+	    if ((escape_data.runas_group = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 5:
-	    if (user_shost != NULL)
-		free(user_shost);
-	    user_shost = strdup(line);
+	    if ((escape_data.host = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 6:
-	    if (user_base != NULL)
-		free(user_base);
-	    user_base = strdup(line);
+	    if ((escape_data.command = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 7:
 	    if (dir_in != NULL)
@@ -193,6 +260,7 @@ main(int argc, char *argv[])
 	case 11:
 	    errors += do_check(dir_in, file_in, dir_out, file_out);
 	    tests++;
+	    reset_escape_data(&escape_data);
 	    break;
 	default:
 	    sudo_fatalx("internal error, invalid state %d", state);
@@ -207,11 +275,4 @@ main(int argc, char *argv[])
     }
 
     exit(errors);
-}
-
-bool
-io_nextid(char *iolog_dir, char *fallback, char id[7])
-{
-    memcpy(id, sessid, sizeof(sessid));
-    return true;
 }

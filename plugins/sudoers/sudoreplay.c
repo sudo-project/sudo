@@ -64,8 +64,7 @@
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
 #include "logging.h"
-#include "iolog_util.h"
-#include "iolog_files.h"
+#include "sudo_iolog.h"
 #include "sudo_queue.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
@@ -80,6 +79,7 @@
 #endif /* HAVE_GETOPT_LONG */
 
 struct replay_closure {
+    const char *iolog_dir;
     struct sudo_event_base *evbase;
     struct sudo_event *delay_ev;
     struct sudo_event *keyboard_ev;
@@ -146,6 +146,15 @@ static int terminal_lines, terminal_cols;
 
 static int ttyfd = -1;
 
+static struct iolog_file iolog_files[] = {
+    { false },	/* IOFD_STDIN */
+    { false },	/* IOFD_STDOUT */
+    { false },	/* IOFD_STDERR */
+    { false },	/* IOFD_TTYIN  */
+    { false },	/* IOFD_TTYOUT */
+    { true, },	/* IOFD_TIMING */
+};
+
 static const char short_opts[] =  "d:f:hlm:nRSs:V";
 static struct option long_opts[] = {
     { "directory",	required_argument,	NULL,	'd' },
@@ -166,11 +175,11 @@ extern char *get_timestr(time_t, int);
 extern time_t get_date(char *);
 
 static int list_sessions(int, char **, const char *, const char *, const char *);
-static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_expr(struct search_node_list *, char **, bool);
 static void read_keyboard(int fd, int what, void *v);
 static void help(void) __attribute__((__noreturn__));
-static int replay_session(struct timespec *max_wait, const char *decimal, bool interactive, bool suspend_wait);
+static int replay_session(const char *iolog_dir, struct timespec *max_wait,
+    const char *decimal, bool interactive, bool suspend_wait);
 static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
@@ -238,15 +247,15 @@ main(int argc, char *argv[])
 	    def_filter = false;
 	    for (cp = strtok_r(optarg, ",", &ep); cp; cp = strtok_r(NULL, ",", &ep)) {
 		if (strcmp(cp, "stdin") == 0)
-		    io_log_files[IOFD_STDIN].enabled = true;
+		    iolog_files[IOFD_STDIN].enabled = true;
 		else if (strcmp(cp, "stdout") == 0)
-		    io_log_files[IOFD_STDOUT].enabled = true;
+		    iolog_files[IOFD_STDOUT].enabled = true;
 		else if (strcmp(cp, "stderr") == 0)
-		    io_log_files[IOFD_STDERR].enabled = true;
+		    iolog_files[IOFD_STDERR].enabled = true;
 		else if (strcmp(cp, "ttyin") == 0)
-		    io_log_files[IOFD_TTYIN].enabled = true;
+		    iolog_files[IOFD_TTYIN].enabled = true;
 		else if (strcmp(cp, "ttyout") == 0)
-		    io_log_files[IOFD_TTYOUT].enabled = true;
+		    iolog_files[IOFD_TTYOUT].enabled = true;
 		else
 		    sudo_fatalx(U_("invalid filter option: %s"), optarg);
 	    }
@@ -308,9 +317,9 @@ main(int argc, char *argv[])
 
     /* By default we replay stdout, stderr and ttyout. */
     if (def_filter) {
-	io_log_files[IOFD_STDOUT].enabled = true;
-	io_log_files[IOFD_STDERR].enabled = true;
-	io_log_files[IOFD_TTYOUT].enabled = true;
+	iolog_files[IOFD_STDOUT].enabled = true;
+	iolog_files[IOFD_STDERR].enabled = true;
+	iolog_files[IOFD_TTYOUT].enabled = true;
     }
 
     /* 6 digit ID in base 36, e.g. 01G712AB or free-form name */
@@ -327,15 +336,22 @@ main(int argc, char *argv[])
 	    sudo_fatalx(U_("%s/timing: %s"), id, strerror(ENAMETOOLONG));
     } else {
 	plen = snprintf(path, sizeof(path), "%s/%s/timing", session_dir, id);
-	if (plen < 0 || plen >= ssizeof(path))
+	if (plen < 0 || plen >= ssizeof(path)) {
 	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir, id,
 		strerror(ENAMETOOLONG));
+	}
     }
     plen -= 7;
 
     /* Open files for replay, applying replay filter for the -f flag. */
     for (i = 0; i < IOFD_MAX; i++) {
-	if (open_io_fd(path, plen, &io_log_files[i]) == -1)
+	path[plen] = '/';
+	path[plen + 1] = '\0';
+	if (strlcat(path, iolog_fd_to_name(i), sizeof(path)) >= sizeof(path)) {
+	    errno = ENAMETOOLONG;
+	    sudo_fatal("%s%s", path, iolog_fd_to_name(i));
+	}
+	if (!iolog_open(&iolog_files[i], path, "r"))
 	    sudo_fatal(U_("unable to open %s"), path);
     }
 
@@ -357,66 +373,16 @@ main(int argc, char *argv[])
     free_iolog_info(li);
     li = NULL;
 
-    /* Replay session corresponding to io_log_files[]. */
-    exitcode = replay_session(max_delay, decimal, interactive, suspend_wait);
+    /* Replay session corresponding to iolog_files[]. */
+    path[plen] = '\0';
+    exitcode = replay_session(path, max_delay, decimal, interactive,
+	suspend_wait);
 
     restore_terminal_size();
     sudo_term_restore(ttyfd, true);
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
-}
-
-/*
- * Call gzread() or fread() for the I/O log file in question.
- * Return 0 for EOF or -1 on error.
- */
-static ssize_t
-io_log_read(union io_fd ifd, char *buf, size_t nbytes)
-{
-    ssize_t nread;
-    debug_decl(io_log_read, SUDO_DEBUG_UTIL)
-
-    if (nbytes > INT_MAX) {
-	errno = EINVAL;
-	debug_return_ssize_t(-1);
-    }
-#ifdef HAVE_ZLIB_H
-    nread = gzread(ifd.g, buf, nbytes);
-#else
-    nread = (ssize_t)fread(buf, 1, nbytes, ifd.f);
-    if (nread == 0 && ferror(ifd.f))
-	nread = -1;
-#endif
-    debug_return_ssize_t(nread);
-}
-
-static int
-io_log_eof(union io_fd ifd)
-{
-    int ret;
-    debug_decl(io_log_eof, SUDO_DEBUG_UTIL)
-
-#ifdef HAVE_ZLIB_H
-    ret = gzeof(ifd.g);
-#else
-    ret = feof(ifd.f);
-#endif
-    debug_return_int(ret);
-}
-
-static char *
-io_log_gets(union io_fd ifd, char *buf, size_t nbytes)
-{
-    char *str;
-    debug_decl(io_log_gets, SUDO_DEBUG_UTIL)
-
-#ifdef HAVE_ZLIB_H
-    str = gzgets(ifd.g, buf, nbytes);
-#else
-    str = fgets(buf, nbytes, ifd.f);
-#endif
-    debug_return_str(str);
 }
 
 /*
@@ -753,18 +719,23 @@ restore_terminal_size(void)
  * Read the next record from the timing file and schedule a delay
  * event with the specified timeout.
  * Return 0 on success, 1 on EOF and -1 on error.
+ * XXX - duplicated in sendlog
  */
 static int
 read_timing_record(struct replay_closure *closure)
 {
     struct timing_closure *timing = &closure->timing;
     char line[LINE_MAX];
+    const char *errstr;
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
-    if (io_log_gets(io_log_files[IOFD_TIMING].fd, line, sizeof(line)) == NULL) {
+    if (iolog_gets(&iolog_files[IOFD_TIMING], line, sizeof(line), &errstr) == NULL) {
 	/* EOF or error reading timing file, we are done. */
-	debug_return_int(io_log_eof(io_log_files[IOFD_TIMING].fd) ? 1 : -1);
+	if (iolog_eof(&iolog_files[IOFD_TIMING]))
+	    debug_return_int(1);
+	sudo_fatalx(U_("error reading timing file: %s"), errstr);
+	debug_return_int(-1);
     }
 
     /* Parse timing file record. */
@@ -773,7 +744,6 @@ read_timing_record(struct replay_closure *closure)
 	sudo_fatalx(U_("invalid timing file line: %s"), line);
 
     /* Record number bytes to read. */
-    /* XXX - remove timing->nbytes? */
     if (timing->event != IO_EVENT_WINSIZE &&
 	timing->event != IO_EVENT_SUSPEND) {
     	closure->iobuf.len = 0;
@@ -828,24 +798,27 @@ fill_iobuf(struct replay_closure *closure)
 {
     const size_t space = sizeof(closure->iobuf.buf) - closure->iobuf.len;
     const struct timing_closure *timing = &closure->timing;
+    const char *errstr;
     debug_decl(fill_iobuf, SUDO_DEBUG_UTIL)
 
     if (closure->iobuf.toread != 0 && space != 0) {
 	const size_t len =
 	    closure->iobuf.toread < space ? closure->iobuf.toread : space;
-	ssize_t nread = io_log_read(timing->fd,
-	    closure->iobuf.buf + closure->iobuf.off, len);
+	ssize_t nread = iolog_read(timing->iol,
+	    closure->iobuf.buf + closure->iobuf.off, len, &errstr);
 	if (nread <= 0) {
 	    if (nread == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "%s: premature EOF, expected %u bytes",
-		    io_log_files[timing->event].suffix, closure->iobuf.toread);
+		    "%s/%s: premature EOF, expected %u bytes",
+		    closure->iolog_dir, iolog_fd_to_name(timing->event),
+		    closure->iobuf.toread);
 	    } else {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		    "%s: read error", io_log_files[timing->event].suffix);
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "%s/%s: read error: %s", closure->iolog_dir,
+		    iolog_fd_to_name(timing->event), errstr);
 	    }
-	    sudo_warnx(U_("unable to read %s"),
-		io_log_files[timing->event].suffix);
+	    sudo_warnx(U_("unable to read %s/%s: %s"),
+		closure->iolog_dir, iolog_fd_to_name(timing->event), errstr);
 	    debug_return_bool(false);
 	}
 	closure->iobuf.toread -= nread;
@@ -872,28 +845,28 @@ delay_cb(int fd, int what, void *v)
 	resize_terminal(timing->u.winsize.lines, timing->u.winsize.cols);
 	break;
     case IO_EVENT_STDIN:
-	if (io_log_files[IOFD_STDIN].enabled)
-	    timing->fd = io_log_files[IOFD_STDIN].fd;
+	if (iolog_files[IOFD_STDIN].enabled)
+	    timing->iol = &iolog_files[IOFD_STDIN];
 	break;
     case IO_EVENT_STDOUT:
-	if (io_log_files[IOFD_STDOUT].enabled)
-	    timing->fd = io_log_files[IOFD_STDOUT].fd;
+	if (iolog_files[IOFD_STDOUT].enabled)
+	    timing->iol = &iolog_files[IOFD_STDOUT];
 	break;
     case IO_EVENT_STDERR:
-	if (io_log_files[IOFD_STDERR].enabled)
-	    timing->fd = io_log_files[IOFD_STDERR].fd;
+	if (iolog_files[IOFD_STDERR].enabled)
+	    timing->iol = &iolog_files[IOFD_STDERR];
 	break;
     case IO_EVENT_TTYIN:
-	if (io_log_files[IOFD_TTYIN].enabled)
-	    timing->fd = io_log_files[IOFD_TTYIN].fd;
+	if (iolog_files[IOFD_TTYIN].enabled)
+	    timing->iol = &iolog_files[IOFD_TTYIN];
 	break;
     case IO_EVENT_TTYOUT:
-	if (io_log_files[IOFD_TTYOUT].enabled)
-	    timing->fd = io_log_files[IOFD_TTYOUT].fd;
+	if (iolog_files[IOFD_TTYOUT].enabled)
+	    timing->iol = &iolog_files[IOFD_TTYOUT];
 	break;
     }
 
-    if (timing->fd.v != NULL) {
+    if (timing->iol != NULL) {
 	/* If the stream is open, enable the write event. */
 	if (sudo_ev_add(closure->evbase, closure->output_ev, NULL, false) == -1)
 	    sudo_fatal(U_("unable to add event to queue"));
@@ -950,8 +923,8 @@ signal_cb(int signo, int what, void *v)
 }
 
 static struct replay_closure *
-replay_closure_alloc(struct timespec *max_delay, const char *decimal,
-    bool interactive, bool suspend_wait)
+replay_closure_alloc(const char *iolog_dir, struct timespec *max_delay,
+    const char *decimal, bool interactive, bool suspend_wait)
 {
     struct replay_closure *closure;
     debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
@@ -959,6 +932,7 @@ replay_closure_alloc(struct timespec *max_delay, const char *decimal,
     if ((closure = calloc(1, sizeof(*closure))) == NULL)
 	debug_return_ptr(NULL);
 
+    closure->iolog_dir = iolog_dir;
     closure->interactive = interactive;
     closure->suspend_wait = suspend_wait;
     closure->max_delay = max_delay;
@@ -1033,15 +1007,15 @@ bad:
 }
 
 static int
-replay_session(struct timespec *max_delay, const char *decimal,
-    bool interactive, bool suspend_wait)
+replay_session(const char *iolog_dir, struct timespec *max_delay,
+    const char *decimal, bool interactive, bool suspend_wait)
 {
     struct replay_closure *closure;
     int ret = 0;
     debug_decl(replay_session, SUDO_DEBUG_UTIL)
 
     /* Allocate the delay closure and read the first timing record. */
-    closure = replay_closure_alloc(max_delay, decimal, interactive,
+    closure = replay_closure_alloc(iolog_dir, max_delay, decimal, interactive,
 	suspend_wait);
     if (read_timing_record(closure) != 0) {
 	ret = 1;
@@ -1057,28 +1031,6 @@ done:
     /* Clean up and return. */
     replay_closure_free(closure);
     debug_return_int(ret);
-}
-
-static int
-open_io_fd(char *path, int len, struct io_log_file *iol)
-{
-    debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
-
-    if (!iol->enabled)
-	debug_return_int(0);
-
-    path[len] = '\0';
-    strlcat(path, iol->suffix, PATH_MAX);
-#ifdef HAVE_ZLIB_H
-    iol->fd.g = gzopen(path, "r");
-#else
-    iol->fd.f = fopen(path, "r");
-#endif
-    if (iol->fd.v == NULL) {
-	iol->enabled = false;
-	debug_return_int(-1);
-    }
-    debug_return_int(0);
 }
 
 /*

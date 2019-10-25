@@ -49,8 +49,8 @@ sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 shlib_mode = @SHLIB_MODE@
 
-SUBDIRS = lib/util @ZLIB_SRC@ logsrvd plugins/group_file plugins/sudoers \
-	  plugins/system_group src include doc examples
+SUBDIRS = lib/util lib/iolog @ZLIB_SRC@ logsrvd plugins/group_file \
+	  plugins/sudoers plugins/system_group src include doc examples
 
 SAMPLES = plugins/sample
 
@@ -188,12 +188,13 @@ siglist.c signame.c:
 
 depend: siglist.c signame.c
 	$(top_srcdir)/mkdep.pl --builddir=`pwd` --srcdir=$(top_srcdir) \
-	    lib/util/Makefile.in lib/zlib/Makefile.in logsrvd/Makefile.in \
-	    plugins/group_file/Makefile.in plugins/sample/Makefile.in \
-	    plugins/sudoers/Makefile.in plugins/system_group/Makefile.in \
-	    src/Makefile.in && \
+	    lib/util/Makefile.in lib/zlib/Makefile.in lib/iolog/Makefile.in \
+	    logsrvd/Makefile.in plugins/group_file/Makefile.in \
+	    plugins/sample/Makefile.in plugins/sudoers/Makefile.in \
+	    plugins/system_group/Makefile.in src/Makefile.in && \
 	$(top_builddir)/config.status --file $(top_builddir)/lib/util/Makefile \
 	    --file $(top_builddir)/lib/zlib/Makefile \
+	    --file $(top_builddir)/lib/iolog/Makefile \
 	    --file $(top_builddir)/logsrvd/Makefile \
 	    --file $(top_builddir)/plugins/sample/Makefile \
 	    --file $(top_builddir)/plugins/group_file/Makefile \

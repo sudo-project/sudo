@@ -26,6 +26,11 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
@@ -44,11 +49,6 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <time.h>
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif /* HAVE_STDBOOL_H */
 
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
@@ -56,7 +56,7 @@
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
-#include "iolog_util.h"
+#include "sudo_iolog.h"
 
 static int timing_event_adj;
 
@@ -311,8 +311,8 @@ parse_timing(const char *line, struct timing_closure *timing)
     char *cp, *ep;
     debug_decl(parse_timing, SUDO_DEBUG_UTIL)
 
-    /* Clear fd. */
-    timing->fd.v = NULL;
+    /* Clear iolog descriptor. */
+    timing->iol = NULL;
 
     /* Parse event type. */
     ulval = strtoul(line, &ep, 10);

@@ -56,12 +56,6 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
-#ifdef __TANDEM
-# define ROOT_UID	65535
-#else
-# define ROOT_UID	0
-#endif
-
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;

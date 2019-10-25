@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +37,7 @@
 #include "sudoers.h"
 #include "def_data.c"		/* for iolog_path.c */
 #include "sudo_plugin.h"
-#include "iolog_util.h"
+#include "sudo_iolog.h"
 
 extern struct io_plugin sudoers_io;
 
@@ -337,7 +337,7 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 int
 main(int argc, char *argv[], char *envp[])
 {
-    struct passwd pw, rpw, *tpw;
+    struct passwd *tpw;
     int tests = 0, errors = 0;
     const char *iolog_dir;
 
@@ -347,21 +347,20 @@ main(int argc, char *argv[], char *envp[])
 	usage();
     iolog_dir = argv[1];
 
-    /* Bare minimum to link. */
-    memset(&pw, 0, sizeof(pw));
-    memset(&rpw, 0, sizeof(rpw));
+    /* Set runas user. */
     if ((tpw = getpwuid(0)) == NULL) {
 	if ((tpw = getpwnam("root")) == NULL)
 	    sudo_fatalx("unable to look up uid 0 or root");
     }
-    rpw.pw_uid = tpw->pw_uid;
-    rpw.pw_gid = tpw->pw_gid;
-    sudo_user.pw = &pw;
-    sudo_user._runas_pw = &rpw;
+    sudo_user._runas_pw = pw_dup(tpw);
+
+    /* Set invoking user. */
+    if ((tpw = getpwuid(geteuid())) == NULL)
+	sudo_fatalx("unable to look up invoking user's uid");
+    sudo_user.pw = pw_dup(tpw);
 
     /* Set iolog uid/gid to invoking user. */
-    iolog_uid = geteuid();
-    iolog_gid = getegid();
+    iolog_set_user(sudo_user.pw);
 
     test_endpoints(&tests, &errors, iolog_dir, envp);
 

@@ -25,6 +25,13 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
+#ifdef __TANDEM
+# define ROOT_UID	65535
+#else
+# define ROOT_UID	0
+#endif
+#define ROOT_GID	0
+
 #ifndef TIME_T_MAX
 # if SIZEOF_TIME_T == 8
 #  define TIME_T_MAX	LLONG_MAX

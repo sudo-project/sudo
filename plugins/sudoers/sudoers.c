@@ -68,6 +68,7 @@
 #include "sudoers.h"
 #include "parse.h"
 #include "auth/sudo_auth.h"
+#include "sudo_iolog.h"
 
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
@@ -472,8 +473,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT))) {
 	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
 	    const char prefix[] = "iolog_path=";
+	    /* Use sudoers locale for strftime() */
+	    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 	    iolog_path = expand_iolog_path(prefix, def_iolog_dir,
-		def_iolog_file, &sudo_user.iolog_file);
+		def_iolog_file, &sudo_user.iolog_file,
+		sudoers_iolog_path_escapes);
+	    sudoers_setlocale(oldlocale, NULL);
 	    if (iolog_path == NULL) {
 		if (!def_ignore_iolog_errors)
 		    goto done;

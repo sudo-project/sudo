@@ -1,8 +1,8 @@
 000001
 nobody
-1
+nogroup
 root
-0
+root
 somehost
 id
 /var/log/sudo-io
@@ -12,9 +12,9 @@ id
 
 000001
 nobody
-1
+nogroup
 root
-0
+wheel
 somehost
 id
 /var/log/sudo-io
@@ -24,9 +24,9 @@ id
 
 000001
 nobody
-1
+nogroup
 root
-0
+wheel
 somehost
 id
 /var/log/sudo-io
@@ -36,9 +36,9 @@ id
 
 000001
 nobody
-1
+nogroup
 root
-0
+wheel
 somehost
 id
 /var/log/sudo-io/%{user}
@@ -48,9 +48,9 @@ id
 
 000001
 nobody
-1
+nogroup
 root
-0
+wheel
 somehost
 su
 /var/log/sudo-io/%{user}/%{runas_user}
@@ -60,9 +60,9 @@ su_%Y%m%s_%H%M
 
 000001
 nobody
-1
+nogroup
 root
-0
+wheel
 somehost
 su
 /var/log/sudo-io/
@@ -72,9 +72,9 @@ nobody/root/su_%Y%m%s_%H%M
 
 000001
 nobody
-1
+nogroup
 root
-0
+wheel
 somehost
 su
 /var/log/sudo-io/%d%m%Y
@@ -84,9 +84,9 @@ nobody/root/su
 
 000001
 nobody
-1
+nogroup
 root
-0
+wheel
 somehost
 su
 ////////

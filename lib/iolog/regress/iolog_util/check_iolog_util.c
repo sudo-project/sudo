@@ -35,7 +35,7 @@
 #include "sudo_compat.h"
 #include "sudo_util.h"
 #include "sudo_fatal.h"
-#include "iolog_util.h"
+#include "sudo_iolog.h"
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -137,14 +137,14 @@ main(int argc, char *argv[])
 {
     int tests = 0, errors = 0;
 
-    initprogname(argc > 0 ? argv[0] : "check_iolog_reader");
+    initprogname(argc > 0 ? argv[0] : "check_iolog_util");
 
     test_parse_delay(&tests, &errors);
 
     test_adjust_delay(&tests, &errors);
 
     if (tests != 0) {
-	printf("check_iolog_reader: %d test%s run, %d errors, %d%% success rate\n",
+	printf("iolog_util: %d test%s run, %d errors, %d%% success rate\n",
 	    tests, tests == 1 ? "" : "s", errors,
 	    (tests - errors) * 100 / tests);
     }

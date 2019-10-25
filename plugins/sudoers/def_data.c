@@ -402,8 +402,8 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Perform PAM account validation management"),
 	NULL,
     }, {
-	"maxseq", T_UINT,
-	N_("Maximum I/O log sequence number: %u"),
+	"maxseq", T_STR,
+	N_("Maximum I/O log sequence number: %s"),
 	NULL,
     }, {
 	"use_netgroups", T_FLAG,

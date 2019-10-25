@@ -237,13 +237,6 @@ struct sudo_user {
 # define SUDOERS_MODE	0600
 #endif
 
-#ifdef __TANDEM
-# define ROOT_UID	65535
-#else
-# define ROOT_UID	0
-#endif
-#define ROOT_GID	0
-
 struct sudo_lbuf;
 struct passwd;
 struct stat;
@@ -350,17 +343,14 @@ char *get_timestr(time_t, int);
 bool get_boottime(struct timespec *);
 
 /* iolog.c */
-bool io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
 bool cb_maxseq(const union sudo_defs_val *sd_un);
 bool cb_iolog_user(const union sudo_defs_val *sd_un);
 bool cb_iolog_group(const union sudo_defs_val *sd_un);
 bool cb_iolog_mode(const union sudo_defs_val *sd_un);
-extern uid_t iolog_uid;
-extern gid_t iolog_gid;
 
-/* iolog_path.c */
-char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
-    char **slashp);
+/* iolog_path_escapes.c */
+struct iolog_path_escape;
+extern const struct iolog_path_escape *sudoers_iolog_path_escapes;
 
 /* env.c */
 char **env_get(void);

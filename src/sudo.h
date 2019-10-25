@@ -50,12 +50,6 @@
 # define NDEBUG
 #endif
 
-#ifdef __TANDEM
-# define ROOT_UID	65535
-#else
-# define ROOT_UID	0
-#endif
-
 /*
  * Various modes sudo can be in (based on arguments) in hex
  */

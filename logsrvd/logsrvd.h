@@ -14,6 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef SUDO_LOGSRVD_H
+#define SUDO_LOGSRVD_H
+
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
 #endif
@@ -27,18 +30,6 @@
 
 /* Shutdown timeout (in seconds) in case client connections time out. */
 #define SHUTDOWN_TIMEO	10
-
-/*
- * Indexes into io_fds[] and iolog_names[]
- * The first five must match the IO_EVENT_ defines in iolog.h.
- */
-#define IOFD_STDIN	0
-#define IOFD_STDOUT	1
-#define IOFD_STDERR	2
-#define IOFD_TTYIN	3
-#define IOFD_TTYOUT	4
-#define IOFD_TIMING	5
-#define IOFD_MAX	6
 
 /*
  * I/O log details from the ExecMessage
@@ -93,19 +84,19 @@ struct connection_closure {
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
     char *iolog_dir;
+    struct iolog_file iolog_files[IOFD_MAX];
     int iolog_dir_fd;
-    int io_fds[IOFD_MAX];
     int sock;
     enum connection_status state;
 };
 
-/* iolog.c */
+/* iolog_writer.c */
 bool iolog_init(ExecMessage *msg, struct connection_closure *closure);
 bool iolog_restart(RestartMessage *msg, struct connection_closure *closure);
 int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);
 int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
-void iolog_close(struct connection_closure *closure);
+void iolog_close_all(struct connection_closure *closure);
 
 /* logsrvd_conf.c */
 bool logsrvd_conf_iolog_compress(void);
@@ -117,3 +108,5 @@ const char *logsrvd_conf_iolog_user(void);
 mode_t logsrvd_conf_iolog_mode(void);
 unsigned int logsrvd_conf_maxseq(void);
 void logsrvd_conf_read(const char *path);
+
+#endif /* SUDO_LOGSRVD_H */

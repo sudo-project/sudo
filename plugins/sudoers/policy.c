@@ -550,8 +550,12 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    if ((command_info[info_len++] = strdup("iolog_compress=true")) == NULL)
 		goto oom;
 	}
-	if (def_maxseq) {
-	    if (asprintf(&command_info[info_len++], "maxseq=%u", def_maxseq) == -1)
+	if (def_iolog_flush) {
+	    if ((command_info[info_len++] = strdup("iolog_flush=true")) == NULL)
+		goto oom;
+	}
+	if (def_maxseq != NULL) {
+	    if (asprintf(&command_info[info_len++], "maxseq=%s", def_maxseq) == -1)
 		goto oom;
 	}
     }
