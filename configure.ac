@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.29], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.0], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -4480,7 +4480,7 @@ if test X"$INIT_SCRIPT" != X""; then
 elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([init.d/sudo.conf])
 fi
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl

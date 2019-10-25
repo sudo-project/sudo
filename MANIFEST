@@ -227,6 +227,17 @@ lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
 log2cl.pl
+logsrvd/Makefile.in
+logsrvd/log_server.pb-c.c
+logsrvd/log_server.pb-c.h
+logsrvd/log_server.proto
+logsrvd/iolog.h
+logsrvd/iolog_reader.c
+logsrvd/iolog_writer.c
+logsrvd/logsrvd.c
+logsrvd/logsrvd.h
+logsrvd/sendlog.c
+logsrvd/sendlog.h
 ltmain.sh
 m4/ax_append_flag.m4
 m4/ax_check_compile_flag.m4

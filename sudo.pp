@@ -284,6 +284,8 @@ still allow people to get their work done."
 	ln -s -f ${bindir}/sudo ${pp_destdir}/usr/bin
 	ln -s -f ${bindir}/sudoedit ${pp_destdir}/usr/bin
 	ln -s -f ${bindir}/sudoreplay ${pp_destdir}/usr/bin
+	ln -s -f ${sbindir}/logsrvd ${pp_destdir}/usr/sbin
+	ln -s -f ${sbindir}/sendlog ${pp_destdir}/usr/sbin
 	ln -s -f ${sbindir}/visudo ${pp_destdir}/usr/sbin
 %endif
 
@@ -331,6 +333,8 @@ still allow people to get their work done."
 	$bindir/sudo        	4755 root:
 	$bindir/sudoedit    	0755 root: symlink sudo
 	$bindir/sudoreplay  	0755
+	$sbindir/logsrvd     	0755
+	$sbindir/sendlog     	0755
 	$sbindir/visudo     	0755
 	$includedir/sudo_plugin.h 0644
 	$libexecdir/sudo/	0755
@@ -363,6 +367,8 @@ still allow people to get their work done."
 	/usr/bin/sudo    	0755 root: symlink $bindir/sudo
 	/usr/bin/sudoedit    	0755 root: symlink $bindir/sudoedit
 	/usr/bin/sudoreplay    	0755 root: symlink $bindir/sudoreplay
+	/usr/sbin/logsrvd    	0755 root: symlink $sbindir/logsrvd
+	/usr/sbin/sendlog    	0755 root: symlink $sbindir/sendlog
 	/usr/sbin/visudo    	0755 root: symlink $sbindir/visudo
 %endif
 %if [rpm]

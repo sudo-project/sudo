@@ -49,7 +49,7 @@ sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 shlib_mode = @SHLIB_MODE@
 
-SUBDIRS = lib/util @ZLIB_SRC@ plugins/group_file plugins/sudoers \
+SUBDIRS = lib/util @ZLIB_SRC@ logsrvd plugins/group_file plugins/sudoers \
 	  plugins/system_group src include doc examples
 
 SAMPLES = plugins/sample
@@ -188,17 +188,18 @@ siglist.c signame.c:
 
 depend: siglist.c signame.c
 	$(top_srcdir)/mkdep.pl --builddir=`pwd` --srcdir=$(top_srcdir) \
-	    lib/util/Makefile.in lib/zlib/Makefile.in \
+	    lib/util/Makefile.in lib/zlib/Makefile.in logsrvd/Makefile.in \
 	    plugins/group_file/Makefile.in plugins/sample/Makefile.in \
 	    plugins/sudoers/Makefile.in plugins/system_group/Makefile.in \
 	    src/Makefile.in && \
 	$(top_builddir)/config.status --file $(top_builddir)/lib/util/Makefile \
+	    --file $(top_builddir)/lib/zlib/Makefile \
+	    --file $(top_builddir)/logsrvd/Makefile \
 	    --file $(top_builddir)/plugins/sample/Makefile \
 	    --file $(top_builddir)/plugins/group_file/Makefile \
 	    --file $(top_builddir)/plugins/sudoers/Makefile \
 	    --file $(top_builddir)/plugins/system_group/Makefile \
-	    --file $(top_builddir)/src/Makefile \
-	    --file $(top_builddir)/lib/zlib/Makefile
+	    --file $(top_builddir)/src/Makefile
 
 ChangeLog:
 	if test -d $(srcdir)/.hg && cd $(srcdir); then \
