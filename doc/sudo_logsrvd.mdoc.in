@@ -1,0 +1,132 @@
+.\"
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd October 3, 2019
+.Dt SUDO_LOGSRVD @mansectsu@
+.Os Sudo @PACKAGE_VERSION@
+.Sh NAME
+.Nm sudo_logsrvd
+.Nd sudo event and I/O log server
+.Sh SYNOPSIS
+.Nm sudo_logsrvd
+.Op Fl hnV
+.Op Fl f Ar file
+.Op Fl R Ar percentage
+.Sh DESCRIPTION
+.Nm
+is a high-performance log server that accepts event and I/O logs from
+.Nm sudo .
+It can be used to implement centralized logging of
+.Nm sudo
+logs.
+Event log entries may be logged either via
+.Xr syslog 3
+or to a file.
+I/O Logs created by
+.Nm
+can be replayed via the
+.Xr sudoreplay @mansectsu@
+utility in the same way as logs generated directly by the
+.Nm sudoers
+plugin.
+.Pp
+The options are as follows:
+.Bl -tag -width Fl
+.It Fl f , -file
+Read configuration from
+.Ar file
+instead of the default,
+.Pa @sysconfdir@/sudo_logsrvd.conf .
+.It Fl h , -help
+Display a short help message to the standard output and exit.
+.It Fl n , -no-fork
+Run
+.Nm
+in the foreground instead of detaching from the terminal and becoming
+a daemon.
+.It Fl R , -random-drop
+For each message, there is a
+.Ar percentage
+chance that the server will drop the connection.
+This is only intended for debugging the ability of a
+client to restart a connection.
+.It Fl V , -version
+Print the
+.Nm
+version and exit.
+.El
+.Pp
+Configuration parameters for
+.Nm
+may be set in the
+.Xr sudo_logsrvd.conf @mansectform@
+file.
+.Ss Debugging sudo_logsrvd
+.Nm
+supports a flexible debugging framework that is configured via
+.Li Debug
+lines in the
+.Xr sudo.conf @mansectform@
+file.
+.Pp
+For more information on configuring
+.Xr sudo.conf @mansectform@ ,
+please refer to its manual.
+.Sh FILES
+.Bl -tag -width 24n
+.It Pa @sysconfdir@/sudo.conf
+Sudo front end configuration
+.It Pa @sysconfdir@/sudo_logsrvd.conf
+Sudo log server configuration file
+.El
+.Sh SEE ALSO
+.Xr sudo.conf @mansectform@ ,
+.Xr sudoers @mansectform@ ,
+.Xr sudo @mansectsu@ ,
+.Xr sudo_sendlog @mansectsu@ ,
+.Xr sudoreplay @mansectsu@
+.Sh AUTHORS
+Many people have worked on
+.Nm sudo
+over the years; this version consists of code written primarily by:
+.Bd -ragged -offset indent
+.An Todd C. Miller
+.Ed
+.Pp
+See the CONTRIBUTORS file in the
+.Nm sudo
+distribution (https://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+.Nm sudo .
+.Sh BUGS
+If you feel you have found a bug in
+.Nm ,
+please submit a bug report at https://bugzilla.sudo.ws/
+.Sh SUPPORT
+Limited free support is available via the sudo-users mailing list,
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+.Sh DISCLAIMER
+.Nm
+is provided
+.Dq AS IS
+and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.
+See the LICENSE file distributed with
+.Nm sudo
+or https://www.sudo.ws/license.html for complete details.

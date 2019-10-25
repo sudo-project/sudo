@@ -1,0 +1,564 @@
+.\" Automatically generated from an mdoc input file.  Do not edit.
+.\"
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "October 3, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.nh
+.if n .ad l
+.SH "NAME"
+\fBsudo_logsrvd.conf\fR
+\- configuration for sudo_logsrvd
+.SH "DESCRIPTION"
+The
+\fBsudo_logsrvd.conf\fR
+file is used to configure the
+\fBsudo_logsrvd\fR
+log server.
+It uses an INI-style format made up of sections in square brackets and
+\(lqkey = value\(rq
+pairs specific to each section below the section name.
+Depending on the key, values may be integers, booleans or strings.
+Section and key names are not case sensitive, but values are.
+.PP
+The pound sign
+(\(oq#\(cq)
+is used to indicate a comment.
+Both the comment character and any text after it, up to the end of
+the line, are ignored.
+Lines beginning with a semi-colon
+(\(oq\&;\(cq)
+are also ignored.
+.PP
+Long lines can be continued with a backslash
+(\(oq\e\(cq)
+as the last character on the line.
+Note that leading white space is removed from the beginning of lines
+even when the continuation character is used.
+.PP
+The
+\fIEXAMPLES\fR
+section contains a copy of the default
+\fBsudo_logsrvd.conf\fR
+file.
+.PP
+The following configuration sections are recognized:
+.PP
+.RS 6n
+.PD 0
+.TP 4n
+\fB\(bu\fR
+server
+.TP 4n
+\fB\(bu\fR
+iolog
+.TP 4n
+\fB\(bu\fR
+eventlog
+.TP 4n
+\fB\(bu\fR
+syslog
+.TP 4n
+\fB\(bu\fR
+logfile
+.RE
+.PD
+.PP
+Each section is described in detail below.
+.SS "server"
+The
+\fIserver\fR
+section configures the address and port the server will listen on.
+The following keys are recognized:
+.TP 10n
+listen_address = host[:port]
+The host name or IP address and optional port to listen on.
+If no port is specified, port 30344 will be used.
+The host may be a host name, an IPv4 address, an IPv6 address
+in square brackets or the wild card entry
+\(oq*\(cq.
+A host setting of
+\(oq*\(cq
+will cause
+\fBsudo_logsrvd\fR
+to listen on all configured network interfaces.
+.sp
+If a port is specified, it may either be a port number or a known
+service name as defined by the system service name database.
+The default value is
+\fRlisten_address = *:30344\fR
+which will listen on all configured network interfaces.
+Multiple
+\fIlisten_address\fR
+lines may be specified to listen on more than one interface.
+.SS "iolog"
+The
+\fIiolog\fR
+section configures I/O log parameters.
+These settings are identical to the I/O configuration in
+sudoers(@mansectform@).
+The following keys are recognized:
+.TP 10n
+iolog_compress = boolean
+If set, I/O logs will be compressed using
+\fBzlib\fR.
+Enabling compression can make it harder to view the logs in real-time as
+the program is executing due to buffering.
+The default value is
+\fRfalse\fR.
+.TP 10n
+iolog_dir = path
+The top-level directory to use when constructing the path
+name for the I/O log directory.
+The session sequence number, if any, is stored in the directory.
+The default value is
+\fI@iolog_dir@\fR.
+.sp
+The following percent
+(\(oq%\(cq)
+escape sequences are supported:
+.PP
+.RS 10n
+.PD 0
+.TP 6n
+\fR%{seq}\fR
+expanded to a monotonically increasing base-36 sequence number, such as 0100A5,
+where every two digits are used to form a new directory, e.g.,
+\fI01/00/A5\fR
+.PD
+.TP 6n
+\fR%{user}\fR
+expanded to the invoking user's login name
+.TP 6n
+\fR%{group}\fR
+expanded to the name of the invoking user's real group-ID
+.TP 6n
+\fR%{runas_user}\fR
+expanded to the login name of the user the command will
+be run as (e.g., root)
+.TP 6n
+\fR%{runas_group}\fR
+expanded to the group name of the user the command will
+be run as (e.g., wheel)
+.TP 6n
+\fR%{hostname}\fR
+expanded to the local host name without the domain name
+.TP 6n
+\fR%{command}\fR
+expanded to the base name of the command being run
+.PP
+In addition, any escape sequences supported by the system's
+strftime(3)
+function will be expanded.
+.sp
+To include a literal
+\(oq%\(cq
+character, the string
+\(oq%%\(cq
+should be used.
+.RE
+.TP 10n
+iolog_file = path
+The path name, relative to
+\fIiolog_dir\fR,
+in which to store I/O logs.
+Note that
+\fIiolog_file\fR
+may contain directory components.
+The default value is
+\fR%{seq}\fR.
+.sp
+See the
+\fIiolog_dir\fR
+setting above for a list of supported percent
+(\(oq%\(cq)
+escape sequences.
+.sp
+In addition to the escape sequences, path names that end in six or
+more
+\fRX\fRs
+will have the
+\fRX\fRs
+replaced with a unique combination of digits and letters, similar to the
+mktemp(3)
+function.
+.sp
+If the path created by concatenating
+\fIiolog_dir\fR
+and
+\fIiolog_file\fR
+already exists, the existing I/O log file will be truncated and
+overwritten unless
+\fIiolog_file\fR
+ends in six or
+more
+\fRX\fRs.
+.TP 10n
+iolog_flush = boolean
+If set, I/O log data is flushed to disk after each write instead of
+buffering it.
+This makes it possible to view the logs in real-time as the program is
+executing but may significantly reduce the effectiveness
+of I/O log compression.
+The default value is
+\fRtrue\fR.
+.TP 10n
+iolog_group = name
+The group name to look up when setting the group-ID on new I/O log
+files and directories.
+If
+\fIiolog_group\fR
+is not set,
+the primary group-ID of the user specified by
+\fIiolog_user is used.\fR
+If neither
+\fIiolog_group\fR
+nor
+\fIiolog_user\fR
+are set, I/O log files and directories are created with group-ID 0.
+.TP 10n
+iolog_mode = mode
+The file mode to use when creating I/O log files.
+Mode bits for read and write permissions for owner, group or other
+are honored, everything else is ignored.
+The file permissions will always include the owner read and
+write bits, even if they are not present in the specified mode.
+When creating I/O log directories, search (execute) bits are added
+to match the read and write bits specified by
+\fIiolog_mode\fR.
+The default value is
+\fR0600\fR.
+.TP 10n
+iolog_user = name
+The user name to look up when setting the owner of new
+I/O log files and directories.
+If
+\fIiolog_group\fR
+is set, it will be used instead of the user's primary group-ID.
+By default, I/O log files and directories are created with user and
+group-ID 0.
+.TP 10n
+maxseq = number
+The maximum sequence number that will be substituted for the
+\(lq\fR%{seq}\fR\(rq
+escape in the I/O log file (see the
+\fIiolog_dir\fR
+description above for more information).
+While the value substituted for
+\(lq\fR%{seq}\fR\(rq
+is in base 36,
+\fImaxseq\fR
+itself should be expressed in decimal.
+Values larger than 2176782336 (which corresponds to the
+base 36 sequence number
+\(lqZZZZZZ\(rq)
+will be silently truncated to 2176782336.
+The default value is 2176782336.
+.SS "eventlog"
+The
+\fIeventlog\fR
+section configures how (and if) security policy events are logged.
+.TP 6n
+log_type = string
+Where to log accept, reject and alert events reported by the policy.
+Supported values are
+\fIsyslog\fR,
+\fIlogfile\fR,
+and
+\fInone\fR.
+The default value is
+\fIsyslog\fR.
+.TP 6n
+log_format = string
+The event log format.
+Currently, only sudo-style event logs are supported.
+Other log formats may be added in the future.
+The default value is
+\fIsudo\fR.
+.SS "syslog"
+The
+\fIsyslog\fR
+section configures how events are logged via
+syslog(3).
+.TP 6n
+facility = string
+Syslog facility if syslog is being used for logging.
+Defaults to
+\fR@logfac@\fR.
+.sp
+The following syslog facilities are supported:
+\fBauthpriv\fR
+(if your
+OS supports it),
+\fBauth\fR,
+\fBdaemon\fR,
+\fBuser\fR,
+\fBlocal0\fR,
+\fBlocal1\fR,
+\fBlocal2\fR,
+\fBlocal3\fR,
+\fBlocal4\fR,
+\fBlocal5\fR,
+\fBlocal6\fR,
+and
+\fBlocal7\fR.
+.TP 6n
+accept_priority = string
+Syslog priority to use when the user is allowed to run a command and
+authentication is successful.
+Defaults to
+\fR@goodpri@\fR.
+.sp
+The following syslog priorities are supported:
+\fBalert\fR,
+\fBcrit\fR,
+\fBdebug\fR,
+\fBemerg\fR,
+\fBerr\fR,
+\fBinfo\fR,
+\fBnotice\fR,
+\fBwarning\fR,
+and
+\fBnone\fR.
+Setting it to a value of
+\fBnone\fR
+will disable logging of successful commands.
+.TP 6n
+reject_priority = string
+Syslog priority to use when the user is not allowed to run a command or
+when authentication is unsuccessful.
+Defaults to
+\fR@badpri@\fR.
+.sp
+See
+\fIaccept_priority\fR
+for the list of supported syslog priorities.
+.TP 6n
+alert_priority = string
+Syslog priority to use for event log alert messages received from the client.
+Defaults to
+\fR@badpri@\fR.
+.sp
+See
+\fIaccept_priority\fR
+for the list of supported syslog priorities.
+.TP 6n
+maxlen = number
+On many systems,
+syslog(3)
+has a relatively small log buffer.
+IETF RFC 5424 states that syslog servers must support messages of
+at least 480 bytes and should support messages up to 2048 bytes.
+By default,
+\fBsudo_logsrvd\fR
+creates log messages up to 980 bytes which corresponds to the
+historic
+BSD
+syslog implementation which used a 1024 byte buffer
+to store the message, date, hostname and program name.
+.sp
+To prevent syslog messages from being truncated,
+\fBsudo_logsrvd\fR
+will split up log messages that are larger than
+\fImaxlen\fR
+bytes.
+When a message is split, additional parts will include the string
+\(lq(command continued)\(rq
+after the user name and before the continued command line arguments.
+.SS "logfile"
+The
+\fIlogfile\fR
+section consists of settings related to logging to a plain file
+(not syslog).
+.TP 6n
+path = string
+The path to the file-based event log.
+This path must be fully-qualified and start with a
+\(oq/\(cq
+character.
+The default value is
+\fI@logpath@\fR.
+.TP 6n
+time_format = string
+The string used when formatting the date and time for file-based event logs.
+Formatting is performed via the system's
+strftime(3)
+function so any escape sequences supported by that function will be expanded.
+The default value is
+\(lq\fR%h %e %T\fR\(rq
+which produces dates like
+\(lqOct 3 07:15:24\(rq
+in the C locale.
+.SH "FILES"
+.TP 26n
+\fI@sysconfdir@/sudo_logsrvd.conf\fR
+Sudo log server configuration file
+.SH "EXAMPLES"
+.nf
+.RS 0n
+#
+# sudo logsrv configuration
+#
+
+[server]
+# The host name or IP address and port to listen on.  If no port is
+# specified, port 30344 will be used.
+# The following forms are accepted:
+#   listen_address = hostname
+#   listen_address = hostname:port
+#   listen_address = IPv4_address
+#   listen_address = IPv4_address:port
+#   listen_address = [IPv6_address]
+#   listen_address = [IPv6_address]:port
+#
+# Multiple listen_address settings may be specified.
+# The default is to listen on all addresses.
+#listen_address = *:30344
+
+[iolog]
+# The top-level directory to use when constructing the path name for the
+# I/O log directory.  The session sequence number, if any, is stored here.
+#iolog_dir = /var/log/sudo-io
+
+# The path name, relative to iolog_dir, in which to store I/O logs.
+# Note that iolog_file may contain directory components.
+#iolog_file = %{seq}
+
+# If set, I/O logs will be compressed using zlib.  Enabling compression can
+# make it harder to view the logs in real-time as the program is executing.
+#iolog_compress = false
+
+# If set, I/O log data is flushed to disk after each write instead of
+# buffering it.  This makes it possible to view the logs in real-time
+# as the program is executing but reduces the effectiveness of compression.
+#iolog_flush = true
+
+# The group to use when creating new I/O log files and directories.
+# If iolog_group is not set, the primary group-ID of the user specified
+# by iolog_user is used.  If neither iolog_group nor iolog_user
+# are set, I/O log files and directories are created with group-ID 0.
+#iolog_group = wheel
+
+# The user to use when setting the user and group-IDs on new I/O log files
+# and directories.  If iolog_group is set, it will be used instead of the
+# user's primary group-ID.  By default, I/O log files and directories are
+# created with user and group-ID 0.
+#iolog_user = root
+
+# The file mode to use when creating I/O log files.  The file permissions
+# will always include the owner read and write bits, even if they are not
+# present in the specified mode.  When creating I/O log directories, search
+# (execute) bits are added to match the read and write bits specified by
+# iolog_mode.
+#iolog_mode = 0600
+
+# The maximum sequence number that will be substituted for the "%{seq}"
+# escape in the I/O log file.  While the value substituted for "%{seq}"
+# is in base 36, maxseq itself should be expressed in decimal.  Values
+# larger than 2176782336 (which corresponds to the base 36 sequence number
+# "ZZZZZZ") will be silently truncated to 2176782336.
+#maxseq = 2176782336
+
+[eventlog]
+# Where to log accept, reject and alert events.
+# Accepted values are syslog, logfile, or none.
+# Defaults to syslog
+#log_type = syslog
+
+# Event log format.
+# Currently only sudo-style event logs are supported.
+#log_format = sudo
+
+[syslog]
+# The maximum length of a syslog payload.
+# On many systems, syslog(3) has a relatively small log buffer.
+# IETF RFC 5424 states that syslog servers must support messages
+# of at least 480 bytes and should support messages up to 2048 bytes.
+# Messages larger than this value will be split into multiple messages.
+#maxlen = 960
+
+# The syslog facility to use for event log messages.
+# The following syslog facilities are supported: authpriv (if your OS
+# supports it), auth, daemon, user, local0, local1, local2, local3, local4,
+# local5, local6, and local7.
+#facility = authpriv
+
+# Syslog priority to use for event log accept messages, when the command
+# is allowed by the security policy.  The following syslog priorities are
+# supported: alert, crit, debug, emerg, err, info, notice, warning, none.
+#accept_priority = notice
+
+# Syslog priority to use for event log reject messages, when the command
+# is not allowed by the security policy.
+#reject_priority = alert
+
+# Syslog priority to use for event log alert messages reported by the client.
+#alert_priority = alert
+
+[logfile]
+# The path to the file-based event log.
+# This path must be fully-qualified and start with a '/' character.
+#path = /var/log/sudo
+
+# The format string used when formatting the date and time for
+# file-based event logs.  Formatting is performed via strftime(3) so
+# any format string supported by that function is allowed.
+#time_format = %h %e %T
+.RE
+.fi
+.SH "SEE ALSO"
+strftime(3),
+sudo.conf(@mansectform@),
+sudoers(@mansectform@),
+sudo(8),
+sudo_logsrvd(8)
+.SH "HISTORY"
+See the HISTORY file in the
+\fBsudo\fR
+distribution (https://www.sudo.ws/history.html) for a brief
+history of sudo.
+.SH "AUTHORS"
+Many people have worked on
+\fBsudo\fR
+over the years; this version consists of code written primarily by:
+.sp
+.RS 6n
+Todd C. Miller
+.RE
+.PP
+See the CONTRIBUTORS file in the
+\fBsudo\fR
+distribution (https://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+\fBsudo\fR.
+.SH "BUGS"
+If you feel you have found a bug in
+\fBsudo\fR,
+please submit a bug report at https://bugzilla.sudo.ws/
+.SH "SUPPORT"
+Limited free support is available via the sudo-users mailing list,
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+.SH "DISCLAIMER"
+\fBsudo\fR
+is provided
+\(lqAS IS\(rq
+and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.
+See the LICENSE file distributed with
+\fBsudo\fR
+or https://www.sudo.ws/license.html for complete details.

@@ -1,0 +1,139 @@
+.\" Automatically generated from an mdoc input file.  Do not edit.
+.\"
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.TH "SUDO_SENDLOG" "@mansectsu@" "October 3, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.nh
+.if n .ad l
+.SH "NAME"
+\fBsudo_sendlog\fR
+\- send sudo I/O log to log server
+.SH "SYNOPSIS"
+.HP 13n
+\fBsudo_sendlog\fR
+[\fB\-V\fR]
+[\fB\-h\fR\ \fIhost\fR]
+[\fB\-i\fR\ \fIiolog-id\fR]
+[\fB\-p\fR\ \fIport\fR]
+[\fB\-r\fR\ \fIrestart-point\fR]
+\fIpath\fR
+.SH "DESCRIPTION"
+\fBsudo_sendlog\fR
+can be used to send the existing
+\fBsudoers\fR
+I/O log
+\fIpath\fR
+to a remote log server such as
+sudo_logsrvd(@mansectsu@)
+for central storage.
+.PP
+The options are as follows:
+.TP 12n
+\fB\--help\fR
+Display a short help message to the standard output and exit.
+.TP 12n
+\fB\-h\fR, \fB\--host\fR
+Connect to the specified
+\fIhost\fR
+instead of localhost.
+.TP 12n
+\fB\-i\fR, \fB\--iolog-id\fR
+Use the specified
+\fIiolog-id\fR
+when restarting a log transfer.
+The
+\fIiolog-id\fR
+is reported by the server when it creates the remote I/O log.
+This option may only be used in conjunction with the
+\fB\-r\fR
+option.
+.TP 12n
+\fB\-p\fR, \fB\--port\fR
+Use the specified network
+\fIport\fR
+when connecting to the log server instead of the
+default, port 30344.
+.TP 12n
+\fB\-r\fR, \fB\--restart\fR
+Restart an interrupted connection to the log server.
+The specified
+\fIrestart-point\fR
+is used to tell the server the point in time at which to continue the log.
+The
+\fIrestart-point\fR
+is specified in the form
+\(lqseconds,nanoseconds\(rq
+and is usually the last commit point received from the server.
+The
+\fB\-i\fR
+option must also be specified when restarting a transfer.
+.TP 12n
+\fB\-V\fR, \fB\--version\fR
+Print the
+\fBsudo_sendlog\fR
+version and exit.
+.SS "Debugging sendlog"
+\fBsudo_sendlog\fR
+supports a flexible debugging framework that is configured via
+\fRDebug\fR
+lines in the
+sudo.conf(@mansectform@)
+file.
+.PP
+For more information on configuring
+sudo.conf(@mansectform@),
+please refer to its manual.
+.SH "FILES"
+.TP 26n
+\fI@sysconfdir@/sudo.conf\fR
+Sudo front end configuration
+.SH "SEE ALSO"
+sudo.conf(@mansectform@),
+sudo(@mansectsu@),
+sudo_logsrvd(@mansectsu@)
+.SH "AUTHORS"
+Many people have worked on
+\fBsudo\fR
+over the years; this version consists of code written primarily by:
+.sp
+.RS 6n
+Todd C. Miller
+.RE
+.PP
+See the CONTRIBUTORS file in the
+\fBsudo\fR
+distribution (https://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+\fBsudo\fR.
+.SH "BUGS"
+If you feel you have found a bug in
+\fBsudo_sendlog\fR,
+please submit a bug report at https://bugzilla.sudo.ws/
+.SH "SUPPORT"
+Limited free support is available via the sudo-users mailing list,
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+.SH "DISCLAIMER"
+\fBsudo_sendlog\fR
+is provided
+\(lqAS IS\(rq
+and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.
+See the LICENSE file distributed with
+\fBsudo\fR
+or https://www.sudo.ws/license.html for complete details.

@@ -1,0 +1,536 @@
+.\"
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd October 3, 2019
+.Dt SUDO_LOGSRVD.CONF @mansectform@
+.Os Sudo @PACKAGE_VERSION@
+.Sh NAME
+.Nm sudo_logsrvd.conf
+.Nd configuration for sudo_logsrvd
+.Sh DESCRIPTION
+The
+.Nm sudo_logsrvd.conf
+file is used to configure the
+.Nm sudo_logsrvd
+log server.
+It uses an INI-style format made up of sections in square brackets and
+.Dq key = value
+pairs specific to each section below the section name.
+Depending on the key, values may be integers, booleans or strings.
+Section and key names are not case sensitive, but values are.
+.Pp
+The pound sign
+.Pq Ql #
+is used to indicate a comment.
+Both the comment character and any text after it, up to the end of
+the line, are ignored.
+Lines beginning with a semi-colon
+.Pq Ql \&;
+are also ignored.
+.Pp
+Long lines can be continued with a backslash
+.Pq Ql \e
+as the last character on the line.
+Note that leading white space is removed from the beginning of lines
+even when the continuation character is used.
+.Pp
+The
+.Sx EXAMPLES
+section contains a copy of the default
+.Nm
+file.
+.Pp
+The following configuration sections are recognized:
+.Pp
+.Bl -bullet -compact -offset indent
+.It
+server
+.It
+iolog
+.It
+eventlog
+.It
+syslog
+.It
+logfile
+.El
+.Pp
+Each section is described in detail below.
+.Ss server
+The
+.Em server
+section configures the address and port the server will listen on.
+The following keys are recognized:
+.Bl -tag -width 8n
+.It listen_address = host Ns Op : Ns port
+The host name or IP address and optional port to listen on.
+If no port is specified, port 30344 will be used.
+The host may be a host name, an IPv4 address, an IPv6 address
+in square brackets or the wild card entry
+.Ql * .
+A host setting of
+.Ql *
+will cause
+.Nm sudo_logsrvd
+to listen on all configured network interfaces.
+.Pp
+If a port is specified, it may either be a port number or a known
+service name as defined by the system service name database.
+The default value is
+.Li listen_address = *:30344
+which will listen on all configured network interfaces.
+Multiple
+.Em listen_address
+lines may be specified to listen on more than one interface.
+.El
+.Ss iolog
+The
+.Em iolog
+section configures I/O log parameters.
+These settings are identical to the I/O configuration in
+.Xr sudoers @mansectform@ .
+The following keys are recognized:
+.Bl -tag -width 8n
+.It iolog_compress = boolean
+If set, I/O logs will be compressed using
+.Sy zlib .
+Enabling compression can make it harder to view the logs in real-time as
+the program is executing due to buffering.
+The default value is
+.Li false .
+.It iolog_dir = path
+The top-level directory to use when constructing the path
+name for the I/O log directory.
+The session sequence number, if any, is stored in the directory.
+The default value is
+.Pa @iolog_dir@ .
+.Pp
+The following percent
+.Pq Ql %
+escape sequences are supported:
+.Bl -tag -width 4n
+.It Li %{seq}
+expanded to a monotonically increasing base-36 sequence number, such as 0100A5,
+where every two digits are used to form a new directory, e.g.,
+.Pa 01/00/A5
+.It Li %{user}
+expanded to the invoking user's login name
+.It Li %{group}
+expanded to the name of the invoking user's real group-ID
+.It Li %{runas_user}
+expanded to the login name of the user the command will
+be run as (e.g., root)
+.It Li %{runas_group}
+expanded to the group name of the user the command will
+be run as (e.g., wheel)
+.It Li %{hostname}
+expanded to the local host name without the domain name
+.It Li %{command}
+expanded to the base name of the command being run
+.El
+.Pp
+In addition, any escape sequences supported by the system's
+.Xr strftime 3
+function will be expanded.
+.Pp
+To include a literal
+.Ql %
+character, the string
+.Ql %%
+should be used.
+.It iolog_file = path
+The path name, relative to
+.Em iolog_dir ,
+in which to store I/O logs.
+Note that
+.Em iolog_file
+may contain directory components.
+The default value is
+.Li %{seq} .
+.Pp
+See the
+.Em iolog_dir
+setting above for a list of supported percent
+.Pq Ql %
+escape sequences.
+.Pp
+In addition to the escape sequences, path names that end in six or
+more
+.Li X Ns s
+will have the
+.Li X Ns s
+replaced with a unique combination of digits and letters, similar to the
+.Xr mktemp 3
+function.
+.Pp
+If the path created by concatenating
+.Em iolog_dir
+and
+.Em iolog_file
+already exists, the existing I/O log file will be truncated and
+overwritten unless
+.Em iolog_file
+ends in six or
+more
+.Li X Ns s .
+.It iolog_flush = boolean
+If set, I/O log data is flushed to disk after each write instead of
+buffering it.
+This makes it possible to view the logs in real-time as the program is
+executing but may significantly reduce the effectiveness
+of I/O log compression.
+The default value is
+.Li true .
+.It iolog_group = name
+The group name to look up when setting the group-ID on new I/O log
+files and directories.
+If
+.Em iolog_group
+is not set,
+the primary group-ID of the user specified by
+.Em iolog_user is used.
+If neither
+.Em iolog_group
+nor
+.Em iolog_user
+are set, I/O log files and directories are created with group-ID 0.
+.It iolog_mode = mode
+The file mode to use when creating I/O log files.
+Mode bits for read and write permissions for owner, group or other
+are honored, everything else is ignored.
+The file permissions will always include the owner read and
+write bits, even if they are not present in the specified mode.
+When creating I/O log directories, search (execute) bits are added
+to match the read and write bits specified by
+.Em iolog_mode .
+The default value is
+.Li 0600 .
+.It iolog_user = name
+The user name to look up when setting the owner of new
+I/O log files and directories.
+If
+.Em iolog_group
+is set, it will be used instead of the user's primary group-ID.
+By default, I/O log files and directories are created with user and
+group-ID 0.
+.It maxseq = number
+The maximum sequence number that will be substituted for the
+.Dq Li %{seq}
+escape in the I/O log file (see the
+.Em iolog_dir
+description above for more information).
+While the value substituted for
+.Dq Li %{seq}
+is in base 36,
+.Em maxseq
+itself should be expressed in decimal.
+Values larger than 2176782336 (which corresponds to the
+base 36 sequence number
+.Dq ZZZZZZ )
+will be silently truncated to 2176782336.
+The default value is 2176782336.
+.El
+.Ss eventlog
+The
+.Em eventlog
+section configures how (and if) security policy events are logged.
+.Bl -tag -width 4n
+.It log_type = string
+Where to log accept, reject and alert events reported by the policy.
+Supported values are
+.Em syslog ,
+.Em logfile ,
+and
+.Em none .
+The default value is
+.Em syslog .
+.It log_format = string
+The event log format.
+Currently, only sudo-style event logs are supported.
+Other log formats may be added in the future.
+The default value is
+.Em sudo .
+.El
+.Ss syslog
+The
+.Em syslog
+section configures how events are logged via
+.Xr syslog 3 .
+.Bl -tag -width 4n
+.It facility = string
+Syslog facility if syslog is being used for logging.
+Defaults to
+.Li @logfac@ .
+.Pp
+The following syslog facilities are supported:
+.Sy authpriv
+(if your
+OS supports it),
+.Sy auth ,
+.Sy daemon ,
+.Sy user ,
+.Sy local0 ,
+.Sy local1 ,
+.Sy local2 ,
+.Sy local3 ,
+.Sy local4 ,
+.Sy local5 ,
+.Sy local6 ,
+and
+.Sy local7 .
+.It accept_priority = string
+Syslog priority to use when the user is allowed to run a command and
+authentication is successful.
+Defaults to
+.Li @goodpri@ .
+.Pp
+The following syslog priorities are supported:
+.Sy alert ,
+.Sy crit ,
+.Sy debug ,
+.Sy emerg ,
+.Sy err ,
+.Sy info ,
+.Sy notice ,
+.Sy warning ,
+and
+.Sy none .
+Setting it to a value of
+.Sy none
+will disable logging of successful commands.
+.It reject_priority = string
+Syslog priority to use when the user is not allowed to run a command or
+when authentication is unsuccessful.
+Defaults to
+.Li @badpri@ .
+.Pp
+See
+.Em accept_priority
+for the list of supported syslog priorities.
+.It alert_priority = string
+Syslog priority to use for event log alert messages received from the client.
+Defaults to
+.Li @badpri@ .
+.Pp
+See
+.Em accept_priority
+for the list of supported syslog priorities.
+.It maxlen = number
+On many systems,
+.Xr syslog 3
+has a relatively small log buffer.
+IETF RFC 5424 states that syslog servers must support messages of
+at least 480 bytes and should support messages up to 2048 bytes.
+By default,
+.Nm sudo_logsrvd
+creates log messages up to 980 bytes which corresponds to the
+historic
+.Bx
+syslog implementation which used a 1024 byte buffer
+to store the message, date, hostname and program name.
+.Pp
+To prevent syslog messages from being truncated,
+.Nm sudo_logsrvd
+will split up log messages that are larger than
+.Em maxlen
+bytes.
+When a message is split, additional parts will include the string
+.Dq Pq command continued
+after the user name and before the continued command line arguments.
+.El
+.Ss logfile
+The
+.Em logfile
+section consists of settings related to logging to a plain file
+(not syslog).
+.Bl -tag -width 4n
+.It path = string
+The path to the file-based event log.
+This path must be fully-qualified and start with a
+.Sq /
+character.
+The default value is
+.Pa @logpath@ .
+.It time_format = string
+The string used when formatting the date and time for file-based event logs.
+Formatting is performed via the system's
+.Xr strftime 3
+function so any escape sequences supported by that function will be expanded.
+The default value is
+.Dq Li "%h %e %T"
+which produces dates like
+.Dq Oct  3 07:15:24
+in the C locale.
+.El
+.Sh FILES
+.Bl -tag -width 24n
+.It Pa @sysconfdir@/sudo_logsrvd.conf
+Sudo log server configuration file
+.El
+.Sh EXAMPLES
+.Bd -literal
+#
+# sudo logsrv configuration
+#
+
+[server]
+# The host name or IP address and port to listen on.  If no port is
+# specified, port 30344 will be used.
+# The following forms are accepted:
+#   listen_address = hostname
+#   listen_address = hostname:port
+#   listen_address = IPv4_address
+#   listen_address = IPv4_address:port
+#   listen_address = [IPv6_address]
+#   listen_address = [IPv6_address]:port
+#
+# Multiple listen_address settings may be specified.
+# The default is to listen on all addresses.
+#listen_address = *:30344
+
+[iolog]
+# The top-level directory to use when constructing the path name for the
+# I/O log directory.  The session sequence number, if any, is stored here.
+#iolog_dir = /var/log/sudo-io
+
+# The path name, relative to iolog_dir, in which to store I/O logs.
+# Note that iolog_file may contain directory components.
+#iolog_file = %{seq}
+
+# If set, I/O logs will be compressed using zlib.  Enabling compression can
+# make it harder to view the logs in real-time as the program is executing.
+#iolog_compress = false
+
+# If set, I/O log data is flushed to disk after each write instead of
+# buffering it.  This makes it possible to view the logs in real-time
+# as the program is executing but reduces the effectiveness of compression.
+#iolog_flush = true
+
+# The group to use when creating new I/O log files and directories.
+# If iolog_group is not set, the primary group-ID of the user specified
+# by iolog_user is used.  If neither iolog_group nor iolog_user
+# are set, I/O log files and directories are created with group-ID 0.
+#iolog_group = wheel
+
+# The user to use when setting the user-ID and group-ID of new I/O log files
+# and directories.  If iolog_group is set, it will be used instead of the
+# user's primary group-ID.  By default, I/O log files and directories are
+# created with user and group-ID 0.
+#iolog_user = root
+
+# The file mode to use when creating I/O log files.  The file permissions
+# will always include the owner read and write bits, even if they are not
+# present in the specified mode.  When creating I/O log directories, search
+# (execute) bits are added to match the read and write bits specified by
+# iolog_mode.
+#iolog_mode = 0600
+
+# The maximum sequence number that will be substituted for the "%{seq}"
+# escape in the I/O log file.  While the value substituted for "%{seq}"
+# is in base 36, maxseq itself should be expressed in decimal.  Values
+# larger than 2176782336 (which corresponds to the base 36 sequence number
+# "ZZZZZZ") will be silently truncated to 2176782336.
+#maxseq = 2176782336
+
+[eventlog]
+# Where to log accept, reject and alert events.
+# Accepted values are syslog, logfile, or none.
+# Defaults to syslog
+#log_type = syslog
+
+# Event log format.
+# Currently only sudo-style event logs are supported.
+#log_format = sudo
+
+[syslog]
+# The maximum length of a syslog payload.
+# On many systems, syslog(3) has a relatively small log buffer.
+# IETF RFC 5424 states that syslog servers must support messages
+# of at least 480 bytes and should support messages up to 2048 bytes.
+# Messages larger than this value will be split into multiple messages.
+#maxlen = 960
+
+# The syslog facility to use for event log messages.
+# The following syslog facilities are supported: authpriv (if your OS
+# supports it), auth, daemon, user, local0, local1, local2, local3, local4,
+# local5, local6, and local7.
+#facility = authpriv
+
+# Syslog priority to use for event log accept messages, when the command
+# is allowed by the security policy.  The following syslog priorities are
+# supported: alert, crit, debug, emerg, err, info, notice, warning, none.
+#accept_priority = notice
+
+# Syslog priority to use for event log reject messages, when the command
+# is not allowed by the security policy.
+#reject_priority = alert
+
+# Syslog priority to use for event log alert messages reported by the client.
+#alert_priority = alert
+
+[logfile]
+# The path to the file-based event log.
+# This path must be fully-qualified and start with a '/' character.
+#path = /var/log/sudo
+
+# The format string used when formatting the date and time for
+# file-based event logs.  Formatting is performed via strftime(3) so
+# any format string supported by that function is allowed.
+#time_format = %h %e %T
+.Ed
+.Sh SEE ALSO
+.Xr strftime 3 ,
+.Xr sudo.conf @mansectform@ ,
+.Xr sudoers @mansectform@ ,
+.Xr sudo @mansectsu@ ,
+.Xr sudo_logsrvd @mansectsu@
+.Sh HISTORY
+See the HISTORY file in the
+.Nm sudo
+distribution (https://www.sudo.ws/history.html) for a brief
+history of sudo.
+.Sh AUTHORS
+Many people have worked on
+.Nm sudo
+over the years; this version consists of code written primarily by:
+.Bd -ragged -offset indent
+.An Todd C. Miller
+.Ed
+.Pp
+See the CONTRIBUTORS file in the
+.Nm sudo
+distribution (https://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+.Nm sudo .
+.Sh BUGS
+If you feel you have found a bug in
+.Nm sudo ,
+please submit a bug report at https://bugzilla.sudo.ws/
+.Sh SUPPORT
+Limited free support is available via the sudo-users mailing list,
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+.Sh DISCLAIMER
+.Nm sudo
+is provided
+.Dq AS IS
+and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.
+See the LICENSE file distributed with
+.Nm sudo
+or https://www.sudo.ws/license.html for complete details.

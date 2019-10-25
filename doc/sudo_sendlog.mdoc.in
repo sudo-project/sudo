@@ -1,0 +1,133 @@
+.\"
+.\" SPDX-License-Identifier: ISC
+.\"
+.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd October 3, 2019
+.Dt SUDO_SENDLOG @mansectsu@
+.Os Sudo @PACKAGE_VERSION@
+.Sh NAME
+.Nm sudo_sendlog
+.Nd send sudo I/O log to log server
+.Sh SYNOPSIS
+.Nm sudo_sendlog
+.Op Fl V
+.Op Fl h Ar host
+.Op Fl i Ar iolog-id
+.Op Fl p Ar port
+.Op Fl r Ar restart-point
+.Ar path
+.Sh DESCRIPTION
+.Nm
+can be used to send the existing
+.Nm sudoers
+I/O log
+.Ar path
+to a remote log server such as
+.Xr sudo_logsrvd @mansectsu@
+for central storage.
+.Pp
+The options are as follows:
+.Bl -tag -width Fl
+.It Fl -help
+Display a short help message to the standard output and exit.
+.It Fl h , -host
+Connect to the specified
+.Ar host
+instead of localhost.
+.It Fl i , -iolog-id
+Use the specified
+.Ar iolog-id
+when restarting a log transfer.
+The
+.Ar iolog-id
+is reported by the server when it creates the remote I/O log.
+This option may only be used in conjunction with the
+.Fl r
+option.
+.It Fl p , -port
+Use the specified network
+.Ar port
+when connecting to the log server instead of the
+default, port 30344.
+.It Fl r , -restart
+Restart an interrupted connection to the log server.
+The specified
+.Ar restart-point
+is used to tell the server the point in time at which to continue the log.
+The
+.Ar restart-point
+is specified in the form
+.Dq seconds,nanoseconds
+and is usually the last commit point received from the server.
+The
+.Fl i
+option must also be specified when restarting a transfer.
+.It Fl V , -version
+Print the
+.Nm
+version and exit.
+.El
+.Ss Debugging sendlog
+.Nm
+supports a flexible debugging framework that is configured via
+.Li Debug
+lines in the
+.Xr sudo.conf @mansectform@
+file.
+.Pp
+For more information on configuring
+.Xr sudo.conf @mansectform@ ,
+please refer to its manual.
+.Sh FILES
+.Bl -tag -width 24n
+.It Pa @sysconfdir@/sudo.conf
+Sudo front end configuration
+.El
+.Sh SEE ALSO
+.Xr sudo.conf @mansectform@ ,
+.Xr sudo @mansectsu@ ,
+.Xr sudo_logsrvd @mansectsu@
+.Sh AUTHORS
+Many people have worked on
+.Nm sudo
+over the years; this version consists of code written primarily by:
+.Bd -ragged -offset indent
+.An Todd C. Miller
+.Ed
+.Pp
+See the CONTRIBUTORS file in the
+.Nm sudo
+distribution (https://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+.Nm sudo .
+.Sh BUGS
+If you feel you have found a bug in
+.Nm ,
+please submit a bug report at https://bugzilla.sudo.ws/
+.Sh SUPPORT
+Limited free support is available via the sudo-users mailing list,
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+.Sh DISCLAIMER
+.Nm
+is provided
+.Dq AS IS
+and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.
+See the LICENSE file distributed with
+.Nm sudo
+or https://www.sudo.ws/license.html for complete details.

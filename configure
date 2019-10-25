@@ -766,6 +766,7 @@ NOEXECFILE
 mansrcdir
 mansectform
 mansectsu
+logpath
 devdir
 SEMAN
 PSMAN
@@ -2958,6 +2959,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -25794,37 +25796,23 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for log file location" >&5
 $as_echo_n "checking for log file location... " >&6; }
 if test -n "$with_logpath"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_logpath" >&5
-$as_echo "$with_logpath" >&6; }
-    cat >>confdefs.h <<EOF
-#define _PATH_SUDO_LOGFILE "$with_logpath"
-EOF
-
+    logpath="$with_logpath"
 elif test -d "/var/log"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /var/log/sudo.log" >&5
-$as_echo "/var/log/sudo.log" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_LOGFILE "/var/log/sudo.log"
-EOF
-
+    logpath="/var/log/sudo.log"
 elif test -d "/var/adm"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /var/adm/sudo.log" >&5
-$as_echo "/var/adm/sudo.log" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_LOGFILE "/var/adm/sudo.log"
-EOF
-
+    logpath="/var/adm/sudo.log"
 elif test -d "/usr/adm"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/adm/sudo.log" >&5
-$as_echo "/usr/adm/sudo.log" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_LOGFILE "/usr/adm/sudo.log"
+    logpath="/usr/adm/sudo.log"
+else
+    # Assume a modern system
+    logpath="/var/log/sudo.log"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $logpath" >&5
+$as_echo "$logpath" >&6; }
+cat >>confdefs.h <<EOF
+#define _PATH_SUDO_LOGFILE "$logpath"
 EOF
 
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: unknown" >&5
-$as_echo "unknown" >&6; }
-fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sudo run dir location" >&5
 $as_echo_n "checking for sudo run dir location... " >&6; }
