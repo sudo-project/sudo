@@ -40,6 +40,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <grp.h>
 
@@ -58,32 +59,46 @@
 bool
 sudo_mkdir_parents_v1(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
 {
-    struct stat sb;
     char *slash = path;
     debug_decl(sudo_mkdir_parents, SUDO_DEBUG_UTIL)
 
     /* cppcheck-suppress nullPointerRedundantCheck */
     while ((slash = strchr(slash + 1, '/')) != NULL) {
+	struct stat sb;
+	int dfd;
+
 	*slash = '\0';
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdir %s, mode 0%o, uid %d, gid %d", path, (unsigned int)mode,
 	    (int)uid, (int)gid);
-	if (mkdir(path, mode) == 0) {
-	    if (uid != (uid_t)-1 && gid != (gid_t)-1) {
-		if (chown(path, uid, gid) != 0) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: unable to chown %d:%d %s", __func__,
-			(int)uid, (int)gid, path);
-		}
+reopen:
+	dfd = open(path, O_RDONLY|O_NONBLOCK);
+	if (dfd == -1) {
+	    if (errno != ENOENT) {
+		if (!quiet)
+		    sudo_warn(U_("unable to open %s"), path);
+		goto bad;
 	    }
-	} else {
-	    if (errno != EEXIST) {
+	    if (mkdir(path, mode) == 0) {
+		if (uid != (uid_t)-1 && gid != (gid_t)-1) {
+		    if (chown(path, uid, gid) != 0) {
+			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			    "%s: unable to chown %d:%d %s", __func__,
+			    (int)uid, (int)gid, path);
+		    }
+		}
+	    } else {
+		if (errno == EEXIST)
+		    goto reopen;
 		if (!quiet)
 		    sudo_warn(U_("unable to mkdir %s"), path);
 		goto bad;
 	    }
+	} else {
 	    /* Already exists, make sure it is a directory. */
-	    if (stat(path, &sb) != 0) {
+	    int rc = fstat(dfd, &sb);
+	    close(dfd);
+	    if (rc != 0) {
 		if (!quiet)
 		    sudo_warn(U_("unable to stat %s"), path);
 		goto bad;
