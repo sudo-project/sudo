@@ -204,7 +204,7 @@ depend: siglist.c signame.c
 
 ChangeLog:
 	if test -d $(srcdir)/.hg && cd $(srcdir); then \
-	    if hg log --style=changelog -b default > $@.tmp; then \
+	    if hg log --style=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
 		mv -f $@.tmp $@; \
 	    else \
 		rm -f $@.tmp; \
