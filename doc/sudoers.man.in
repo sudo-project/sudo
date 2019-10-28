@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 16, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -123,13 +123,13 @@ sudoers_uid=uid
 The
 \fIsudoers_uid\fR
 argument can be used to override the default owner of the sudoers file.
-It should be specified as a numeric user ID.
+It should be specified as a numeric user-ID.
 .TP 10n
 sudoers_gid=gid
 The
 \fIsudoers_gid\fR
 argument can be used to override the default group of the sudoers file.
-It must be specified as a numeric group ID (not a group name).
+It must be specified as a numeric group-ID (not a group name).
 .TP 10n
 sudoers_mode=mode
 The
@@ -191,10 +191,10 @@ flags are enabled.
 This allows users to
 determine for themselves whether or not they are allowed to use
 \fBsudo\fR.
-All attempts to run
+By default, all attempts to run
 \fBsudo\fR
 (successful or not)
-will be logged, regardless of whether or not mail is sent.
+are logged, regardless of whether or not mail is sent.
 .PP
 If
 \fBsudo\fR
@@ -220,7 +220,7 @@ file lookup is still done for root, not the user specified by
 \fBsudoers\fR
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
-containing the user ID that was used to authenticate, the
+containing the user-ID that was used to authenticate, the
 terminal session ID, the start time of the session leader
 (or parent process) and a time stamp
 (using a monotonic clock if one is available).
@@ -242,20 +242,25 @@ option can be used to select the type of time stamp record
 \fBsudoers\fR
 will use.
 .SS "Logging"
-\fBsudoers\fR
-can log both successful and unsuccessful attempts (as well
-as errors) to
-syslog(3),
-a log file, or both.
 By default,
 \fBsudoers\fR
-will log via
+logs both successful and unsuccessful attempts (as well
+as errors).
+The
+\fIlog_allowed\fR
+and
+\fIlog_denied\fR
+flags can be used to control this behavior.
+Messages can be logged to
+syslog(3),
+a log file, or both.
+The default is to log to
 syslog(3)
-but this is changeable via the
+but this is configurable via the
 \fIsyslog\fR
 and
 \fIlogfile\fR
-Defaults settings.
+settings.
 See
 \fILOG FORMAT\fR
 for a description of the log file format.
@@ -290,7 +295,7 @@ can deal with environment variables.
 .PP
 By default, the
 \fIenv_reset\fR
-option is enabled.
+flag is enabled.
 This causes commands
 to be executed with a new, minimal environment.
 On AIX (and Linux
@@ -303,7 +308,7 @@ On
 BSD
 systems, if the
 \fIuse_loginclass\fR
-option is enabled, the environment is initialized
+flag is enabled, the environment is initialized
 based on the
 \fIpath\fR
 and
@@ -369,7 +374,7 @@ Prior to version 1.8.11, such variables were always removed.
 .PP
 If, however, the
 \fIenv_reset\fR
-option is disabled, any variables not
+flag is disabled, any variables not
 explicitly denied by the
 \fIenv_check\fR
 and
@@ -472,7 +477,7 @@ list.
 .PP
 Note that the dynamic linker on most operating systems will remove
 variables that can control dynamic linking from the environment of
-setuid executables, including
+set-user-ID executables, including
 \fBsudo\fR.
 Depending on the operating
 system this may include
@@ -491,8 +496,7 @@ and, as such, it is not possible for
 \fBsudo\fR
 to preserve them.
 .PP
-As a special case, if
-\fBsudo\fR's
+As a special case, if the
 \fB\-i\fR
 option (initial login) is
 specified,
@@ -708,7 +712,7 @@ User ::= '!'* user name |
 .PP
 A
 \fRUser_List\fR
-is made up of one or more user names, user IDs
+is made up of one or more user names, user-IDs
 (prefixed with
 \(oq#\(cq),
 system group names and IDs (prefixed with
@@ -807,10 +811,13 @@ it can contain
 \fRRunas_Alias\fRes.
 Note that
 user names and groups are matched as strings.
-In other words, two
-users (groups) with the same uid (gid) are considered to be distinct.
-If you wish to match all user names with the same uid (e.g.,
-root and toor), you can use a uid instead (#0 in the example given).
+In other words, two users (groups) with the same user (group) ID
+are considered to be distinct.
+If you wish to match all user names with the same user-ID (e.g., root and
+toor), you can use a user-ID instead of a name (#0 in the example given).
+Note that the user-ID or group-ID specified in a
+\fRRunas_Member\fR
+need not be listed in the password or group database.
 .nf
 .sp
 .RS 0n
@@ -852,7 +859,7 @@ but unless the
 command on your machine returns the fully
 qualified host name, you'll need to use the
 \fIfqdn\fR
-option for wildcards to be useful.
+flag for wildcards to be useful.
 Note that
 \fBsudo\fR
 only inspects actual network interfaces; this means that IP address
@@ -1130,13 +1137,10 @@ consists of two
 and enclosed in a set of parentheses.
 The first
 \fRRunas_List\fR
-indicates
-which users the command may be run as via
-\fBsudo\fR's
+indicates which users the command may be run as via the
 \fB\-u\fR
 option.
-The second defines a list of groups that can be specified via
-\fBsudo\fR's
+The second defines a list of groups that can be specified via the
 \fB\-g\fR
 option in addition to any of the target user's groups.
 If both
@@ -1438,7 +1442,7 @@ timeout values:
 \fR30s10m4h\fR,
 \fR1d2d3h\fR.
 .PP
-This option is only supported by version 1.8.20 or higher.
+This setting is only supported by version 1.8.20 or higher.
 .SS "Tag_Spec"
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -1510,7 +1514,7 @@ Starting with version 1.8.15,
 \fBsudoedit\fR
 will not open a file that is a symbolic link unless the
 \fIsudoedit_follow\fR
-option is enabled.
+flag is enabled.
 The
 \fIFOLLOW\fR
 and
@@ -1527,7 +1531,7 @@ command and are ignored for all other commands.
 .sp
 These tags override the value of the
 \fIlog_input\fR
-option on a per-command basis.
+flag on a per-command basis.
 For more information, see the description of
 \fIlog_input\fR
 in the
@@ -1538,7 +1542,7 @@ section below.
 .sp
 These tags override the value of the
 \fIlog_output\fR
-option on a per-command basis.
+flag on a per-command basis.
 For more information, see the description of
 \fIlog_output\fR
 in the
@@ -1551,7 +1555,7 @@ These tags provide fine-grained control over whether
 mail will be sent when a user runs a command by
 overriding the value of the
 \fImail_all_cmnds\fR
-option on a per-command basis.
+flag on a per-command basis.
 They have no effect when
 \fBsudo\fR
 is run with the
@@ -1630,7 +1634,7 @@ Note, however, that the
 \fRPASSWD\fR
 tag has no effect on users who are in the group specified by the
 \fIexempt_group\fR
-option.
+setting.
 .sp
 By default, if the
 \fRNOPASSWD\fR
@@ -1655,12 +1659,12 @@ options.
 .sp
 These tags override the value of the
 \fIsetenv\fR
-option on a per-command basis.
+flag on a per-command basis.
 Note that if
 \fRSETENV\fR
 has been set for a command, the user may disable the
 \fIenv_reset\fR
-option from the command line via the
+flag from the command line via the
 \fB\-E\fR
 option.
 Additionally, environment variables set on the command
@@ -1968,7 +1972,7 @@ The pound sign
 is used to indicate a comment (unless it is part of a #include
 directive or unless it occurs in the context of a user name and is
 followed by one or more digits, in which case it is treated as a
-uid).
+user-ID).
 Both the comment character and any text after it, up to the end of
 the line, are ignored.
 .PP
@@ -2088,13 +2092,12 @@ If enabled,
 will set the
 \fRHOME\fR
 environment variable to the home directory of the target user
-(which is root unless
-\fBsudo\fR's
+(which is the root user unless the
 \fB\-u\fR
 option is used).
-This option is largely obsolete and has no effect unless the
+This flag is largely obsolete and has no effect unless the
 \fIenv_reset\fR
-option has been disabled or
+flag has been disabled or
 \fRHOME\fR
 is present in the
 \fIenv_keep\fR
@@ -2134,8 +2137,7 @@ This flag is
 by default.
 .TP 18n
 closefrom_override
-If set, the user may use
-\fBsudo\fR's
+If set, the user may use the
 \fB\-C\fR
 option which overrides the default starting point at which
 \fBsudo\fR
@@ -2230,7 +2232,7 @@ or
 environment variables before falling back on the default editor list.
 Note that
 \fBvisudo\fR
-is typically run as root so this option may allow a user with
+is typically run as root so this flag may allow a user with
 \fBvisudo\fR
 privileges to run arbitrary commands as root without logging.
 An alternative is to place a colon-separated list of
@@ -2282,14 +2284,14 @@ variables.
 Any variables in the caller's environment or in the file specified
 by the
 \fIrestricted_env_file\fR
-option that match the
+setting that match the
 \fRenv_keep\fR
 and
 \fRenv_check\fR
 lists are then added, followed by any variables present in the file
 specified by the
 \fIenv_file\fR
-option (if any).
+setting (if any).
 The contents of the
 \fRenv_keep\fR
 and
@@ -2303,7 +2305,7 @@ is run by root with the
 option.
 If the
 \fIsecure_path\fR
-option is set, its value will be used for the
+setting is enabled, its value will be used for the
 \fRPATH\fR
 environment variable.
 This flag is
@@ -2323,7 +2325,7 @@ when the pattern references a network file system that is mounted
 on demand (auto mounted).
 The
 \fIfast_glob\fR
-option causes
+flag causes
 \fBsudo\fR
 to use the
 fnmatch(3)
@@ -2338,7 +2340,7 @@ This has security implications when path names that include globbing
 characters are used with the negation operator,
 \(oq!\&\(cq,
 as such rules can be trivially bypassed.
-As such, this option should not be used when the
+As such, this flag should not be used when the
 \fIsudoers\fR
 file contains rules that contain negated path names which include globbing
 characters.
@@ -2354,7 +2356,7 @@ file when the local host name (as returned by the
 command) does not contain the domain name.
 In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
-This option is only effective when the
+This flag is only effective when the
 \(lqcanonical\(rq
 host name, as returned by the
 \fBgetaddrinfo\fR()
@@ -2396,7 +2398,7 @@ host name, and the short version as an alias.
 .sp
 If the machine's hosts file entry is not formatted properly, the
 \fIfqdn\fR
-option will not be effective if it is queried before DNS.
+flag will not be effective if it is queried before DNS.
 .sp
 Beware that when using DNS for host name resolution, turning on
 \fIfqdn\fR
@@ -2469,7 +2471,7 @@ This flag only has an effect when
 \fBsudoers\fR
 is configured to use file-based logging via the
 \fIlogfile\fR
-option.
+setting.
 This flag is
 \fIon\fR
 by default.
@@ -2482,10 +2484,10 @@ This is intended for Enterprises that wish to prevent the usage of local
 sudoers files so that only LDAP is used.
 This thwarts the efforts of rogue operators who would attempt to add roles to
 \fI@sysconfdir@/sudoers\fR.
-When this option is present,
+When this flag is enabled,
 \fI@sysconfdir@/sudoers\fR
 does not even need to exist.
-Since this option tells
+Since this flag tells
 \fBsudo\fR
 how to behave when no specific LDAP entries have been matched, this
 sudoOption is only meaningful for the
@@ -2514,10 +2516,33 @@ This flag is
 \fI@insults@\fR
 by default.
 .TP 18n
+log_allowed
+If set,
+\fBsudoers\fR
+will log commands allowed by the policy to the system audit log
+(where supported) as well as to syslog and/or a log file.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.29 or higher.
+.TP 18n
+log_denied
+If set,
+\fBsudoers\fR
+will log commands denied by the policy to the system audit log
+(where supported) as well as to syslog and/or a log file.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.29 or higher.
+.TP 18n
 log_host
-If set, the host name will be logged in the (non-syslog)
-\fBsudo\fR
-log file.
+If set, the host name will be included in log entries written to
+the file configured by the
+\fIlogfile\fR
+setting.
 This flag is
 \fIoff\fR
 by default.
@@ -2661,7 +2686,7 @@ by default.
 match_group_by_gid
 By default,
 \fBsudoers\fR
-will look up each group the user is a member of by group ID to
+will look up each group the user is a member of by group-ID to
 determine the group name (this is only done once).
 The resulting list of the user's group names is used when matching
 groups listed in the
@@ -2680,21 +2705,21 @@ running commands via
 may take longer than normal.
 On such systems it may be faster to use the
 \fImatch_group_by_gid\fR
-flag to avoid resolving the user's group IDs to group names.
+flag to avoid resolving the user's group-IDs to group names.
 In this case,
 \fBsudoers\fR
 must look up any group name listed in the
 \fIsudoers\fR
-file and use the group ID instead of the group name when determining
+file and use the group-ID instead of the group name when determining
 whether the user is a member of the group.
 .sp
 Note that if
 \fImatch_group_by_gid\fR
 is enabled, group database lookups performed by
 \fBsudoers\fR
-will be keyed by group name as opposed to group ID.
+will be keyed by group name as opposed to group-ID.
 On systems where there are multiple sources for the group database,
-it is possible to have conflicting group names or group IDs in the local
+it is possible to have conflicting group names or group-IDs in the local
 \fI/etc/group\fR
 file and the remote group database.
 On such systems, enabling or disabling
@@ -2850,7 +2875,7 @@ will initialize the group vector to the list of groups the target user is in.
 When
 \fIpreserve_groups\fR
 is set, the user's existing group vector is left unaltered.
-The real and effective group IDs, however, are still set to match the
+The real and effective group-IDs, however, are still set to match the
 target user.
 This flag is
 \fIoff\fR
@@ -2938,13 +2963,12 @@ is invoked with the
 option, the
 \fRHOME\fR
 environment variable will be set to the home directory of the target
-user (which is root unless
-\fBsudo\fR's
+user (which is the root user unless the
 \fB\-u\fR
 option is used).
-This option is largely obsolete and has no effect unless the
+This flag is largely obsolete and has no effect unless the
 \fIenv_reset\fR
-option has been disabled or
+flag has been disabled or
 \fRHOME\fR
 is present in the
 \fIenv_keep\fR
@@ -3042,9 +3066,9 @@ This option changes that behavior such that the real UID is left
 as the invoking user's UID.
 In other words, this makes
 \fBsudo\fR
-act as a setuid wrapper.
+act as a set-user-ID wrapper.
 This can be useful on systems that disable some potentially
-dangerous functionality when a program is run setuid.
+dangerous functionality when a program is run set-user-ID.
 This option is only effective on systems that support either the
 setreuid(2)
 or
@@ -3119,7 +3143,7 @@ option (defaults to
 \fRroot\fR)
 instead of the password of the invoking user
 when running a command or editing a file.
-Note that this flag precludes the use of a uid not listed in the passwd
+Note that this flag precludes the use of a user-ID not listed in the passwd
 database as an argument to the
 \fB\-u\fR
 option.
@@ -3387,20 +3411,35 @@ and
 respectively.
 .TP 18n
 umask
-Umask to use when running the command.
-Negate this option or set it to 0777 to preserve the user's umask.
-The actual umask that is used will be the union of the user's umask
-and the value of the
+File mode creation mask to use when running the command.
+Negate this option or set it to 0777 to prevent
+\fBsudoers\fR
+from changing the umask.
+Unless the
+\fIumask_override\fR
+flag is set, the actual umask will be the union of the
+user's umask and the value of the
 \fIumask\fR
-option, which defaults to
+setting, which defaults to
 \fR@sudo_umask@\fR.
 This guarantees
 that
 \fBsudo\fR
 never lowers the umask when running a command.
-Note: on systems that use PAM, the default PAM configuration may specify
-its own umask which will override the value set in
-\fIsudoers\fR.
+.sp
+If
+\fIumask\fR
+is explicitly set in
+\fIsudoers\fR,
+it will override any umask setting in PAM or login.conf.
+If
+\fIumask\fR
+is not set in
+\fIsudoers\fR,
+the umask specified by PAM or login.conf will take precedence.
+The umask setting in PAM is not used for
+\fBsudoedit\fR,
+which does not create a new PAM session.
 .PP
 \fBStrings\fR:
 .TP 18n
@@ -3493,7 +3532,7 @@ where every two digits are used to form a new directory, e.g.,
 expanded to the invoking user's login name
 .TP 6n
 \fR%{group}\fR
-expanded to the name of the invoking user's real group ID
+expanded to the name of the invoking user's real group-ID
 .TP 6n
 \fR%{runas_user}\fR
 expanded to the login name of the user the command will
@@ -3578,19 +3617,19 @@ by default.
 This setting is only supported by version 1.8.20 or higher.
 .TP 18n
 iolog_group
-The group name to look up when setting the group ID on new I/O log
+The group name to look up when setting the group-ID on new I/O log
 files and directories.
 If
 \fIiolog_group\fR
 is not set,
-the primary group ID of the user specified by
+the primary group-ID of the user specified by
 \fIiolog_user\fR
 is used.
 If neither
 \fIiolog_group\fR
 nor
 \fIiolog_user\fR
-are set, I/O log files and directories are created with group ID 0.
+are set, I/O log files and directories are created with group-ID 0.
 .sp
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
@@ -3608,19 +3647,19 @@ Defaults to 0600 (read and write by user only).
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
 iolog_user
-The user name to look up when setting the user and group IDs on new
+The user name to look up when setting the user and group-IDs on new
 I/O log files and directories.
 If
 \fIiolog_group\fR
-is set, it will be used instead of the user's primary group ID.
+is set, it will be used instead of the user's primary group-ID.
 By default, I/O log files and directories are created with user and
-group ID 0.
+group-ID 0.
 .sp
 This setting can be useful when the I/O logs are stored on a Network
 File System (NFS) share.
 Having a dedicated user own the I/O log files means that
 \fBsudoers\fR
-does not write to the log files as user ID 0, which is usually
+does not write to the log files as user-ID 0, which is usually
 not permitted by NFS.
 .sp
 This setting is only supported by version 1.8.19 or higher.
@@ -4366,7 +4405,7 @@ is run by root with the
 \fB\-V\fR
 option.
 Note that many operating systems will remove potentially dangerous
-variables from the environment of any setuid process (such as
+variables from the environment of any set-user-ID process (such as
 \fBsudo\fR).
 .TP 18n
 env_keep
@@ -4423,7 +4462,7 @@ syntax described earlier.
 .PP
 Group provider plugins are specified via the
 \fIgroup_plugin\fR
-Defaults setting.
+setting.
 The argument to
 \fIgroup_plugin\fR
 should consist of the plugin path, either fully-qualified or relative to the
@@ -4593,7 +4632,7 @@ failed attempts and the value of the
 option.
 .TP 3n
 a password is required
-\fBsudo\fR's
+The
 \fB\-n\fR
 option was specified but a password was required.
 .TP 3n
@@ -4636,7 +4675,7 @@ The
 file could not be opened for reading.
 This can happen when the
 \fIsudoers\fR
-file is located on a remote file system that maps user ID 0 to
+file is located on a remote file system that maps user-ID 0 to
 a different value.
 Normally,
 \fBsudoers\fR
@@ -4649,7 +4688,7 @@ or adding an argument like
 \(lqsudoers_uid=N\(rq
 (where
 \(oqN\(cq
-is the user ID that owns the
+is the user-ID that owns the
 \fIsudoers\fR
 file) to the end of the
 \fBsudoers\fR
@@ -4678,7 +4717,7 @@ file owner, please add
 \(lqsudoers_uid=N\(rq
 (where
 \(oqN\(cq
-is the user ID that owns the
+is the user-ID that owns the
 \fIsudoers\fR
 file) to the
 \fBsudoers\fR
@@ -4714,7 +4753,7 @@ file group ownership, please add
 \(lqsudoers_gid=N\(rq
 (where
 \(oqN\(cq
-is the group ID that owns the
+is the group-ID that owns the
 \fIsudoers\fR
 file) to the
 \fBsudoers\fR

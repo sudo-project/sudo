@@ -119,6 +119,8 @@ lint: all
 	    exit $$rval; \
 	fi
 
+depend:
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file doc/Makefile
 

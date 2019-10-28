@@ -98,7 +98,10 @@ sudo_setgroups_v1
 sudo_strsplit_v1
 sudo_strtobool_v1
 sudo_strtoid_v1
+sudo_strtoid_v2
+sudo_strtoidx_v1
 sudo_strtomode_v1
+sudo_strtonum
 sudo_term_cbreak_v1
 sudo_term_copy_v1
 sudo_term_eof

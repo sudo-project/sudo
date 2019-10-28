@@ -372,9 +372,9 @@ print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	    value.u.string++;
 	    typestr = "nonunixgroup";
 	    if (*value.u.string == '#') {
-		id = sudo_strtoid(value.u.string + 1, NULL, NULL, &errstr);
+		id = sudo_strtoid(value.u.string + 1, &errstr);
 		if (errstr != NULL) {
-		    sudo_warnx("internal error: non-Unix group ID %s: \"%s\"",
+		    sudo_warnx("internal error: non-Unix group-ID %s: \"%s\"",
 			errstr, value.u.string + 1);
 		} else {
 		    value.type = JSON_ID;
@@ -385,9 +385,9 @@ print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	} else {
 	    typestr = "usergroup";
 	    if (*value.u.string == '#') {
-		id = sudo_strtoid(value.u.string + 1, NULL, NULL, &errstr);
+		id = sudo_strtoid(value.u.string + 1, &errstr);
 		if (errstr != NULL) {
-		    sudo_warnx("internal error: group ID %s: \"%s\"",
+		    sudo_warnx("internal error: group-ID %s: \"%s\"",
 			errstr, value.u.string + 1);
 		} else {
 		    value.type = JSON_ID;
@@ -424,9 +424,9 @@ print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	case TYPE_USERNAME:
 	    typestr = "username";
 	    if (*value.u.string == '#') {
-		id = sudo_strtoid(value.u.string + 1, NULL, NULL, &errstr);
+		id = sudo_strtoid(value.u.string + 1, &errstr);
 		if (errstr != NULL) {
-		    sudo_warnx("internal error: user ID %s: \"%s\"",
+		    sudo_warnx("internal error: user-ID %s: \"%s\"",
 			errstr, name);
 		} else {
 		    value.type = JSON_ID;

@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 20, 2019
+.Dd October 20, 2019
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -411,17 +411,17 @@ If there is no terminal device available, a default value of 80 is used.
 .It cwd=string
 The user's current working directory.
 .It egid=gid_t
-The effective group ID of the user invoking
+The effective group-ID of the user invoking
 .Nm sudo .
 .It euid=uid_t
-The effective user ID of the user invoking
+The effective user-ID of the user invoking
 .Nm sudo .
 .It gid=gid_t
-The real group ID of the user invoking
+The real group-ID of the user invoking
 .Nm sudo .
 .It groups=list
 The user's supplementary group list formatted as a string of
-comma-separated group IDs.
+comma-separated group-IDs.
 .It host=string
 The local machine's hostname as returned by the
 .Xr gethostname 2
@@ -491,7 +491,7 @@ If the user has no terminal device associated with the session,
 the value will be empty, as in
 .Dq Li tty= .
 .It uid=uid_t
-The real user ID of the user invoking
+The real user-ID of the user invoking
 .Nm sudo .
 .It umask=octal
 The invoking user's file creation mask.
@@ -877,25 +877,25 @@ will preserve the user's group vector instead of
 initializing the group vector based on
 .Li runas_user .
 .It runas_egid=gid
-Effective group ID to run the command as.
+Effective group-ID to run the command as.
 If not specified, the value of
 .Em runas_gid
 is used.
 .It runas_euid=uid
-Effective user ID to run the command as.
+Effective user-ID to run the command as.
 If not specified, the value of
 .Em runas_uid
 is used.
 .It runas_gid=gid
-Group ID to run the command as.
+Group-ID to run the command as.
 .It runas_groups=list
 The supplementary group vector to use for the command in the form
-of a comma-separated list of group IDs.
+of a comma-separated list of group-IDs.
 If
 .Em preserve_groups
 is set, this option is ignored.
 .It runas_uid=uid
-User ID to run the command as.
+User-ID to run the command as.
 .It selinux_role=string
 SELinux role to use when executing the command.
 .It selinux_type=string
@@ -953,6 +953,14 @@ Command timeout.
 If non-zero then when the timeout expires the command will be killed.
 .It umask=octal
 The file creation mask to use when executing the command.
+This value may be overridden by PAM or login.conf on some systems
+unless the
+.Em umask_override
+option is also set.
+.It umask_override=bool
+Force the value specified by the
+.Em umask
+option to override any umask set by PAM or login.conf.
 .It use_pty=bool
 Allocate a pseudo-terminal to run the command in, regardless of whether
 or not I/O logging is in use.
@@ -2589,6 +2597,12 @@ field was added to the io_plugin struct.
 The
 .Li log_suspend
 field was added to the io_plugin struct.
+.It Version 1.14 (sudo 1.8.29)
+The
+.Em umask_override
+entry was added to the
+.Li command_info
+list.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

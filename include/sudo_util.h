@@ -246,9 +246,16 @@ __dso_public const char *sudo_strsplit_v1(const char *str, const char *endstr, c
 __dso_public int sudo_strtobool_v1(const char *str);
 #define sudo_strtobool(_a) sudo_strtobool_v1((_a))
 
+/* strtonum.c */
+/* Not versioned for historical reasons. */
+__dso_public long long sudo_strtonum(const char *, long long, long long, const char **);
+
 /* strtoid.c */
 __dso_public id_t sudo_strtoid_v1(const char *str, const char *sep, char **endp, const char **errstr);
-#define sudo_strtoid(_a, _b, _c, _d) sudo_strtoid_v1((_a), (_b), (_c), (_d))
+__dso_public id_t sudo_strtoid_v2(const char *str, const char **errstr);
+#define sudo_strtoid(_a, _b) sudo_strtoid_v2((_a), (_b))
+__dso_public id_t sudo_strtoidx_v1(const char *str, const char *sep, char **endp, const char **errstr);
+#define sudo_strtoidx(_a, _b, _c, _d) sudo_strtoidx_v1((_a), (_b), (_c), (_d))
 
 /* strtomode.c */
 __dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);

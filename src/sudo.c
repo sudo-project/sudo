@@ -31,7 +31,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
-#include <sys/resource.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -64,9 +63,6 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
-#ifdef __linux__
-# include <sys/prctl.h>
-#endif
 
 #include <sudo_usage.h>
 #include "sudo.h"
@@ -146,6 +142,11 @@ main(int argc, char *argv[], char *envp[])
     sigset_t mask;
     debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
+    initprogname(argc > 0 ? argv[0] : "sudo");
+
+    /* Crank resource limits to unlimited. */
+    unlimit_sudo();
+
     /* Make sure fds 0-2 are open and do OS-specific initialization. */
     fix_fds();
     os_init(argc, argv, envp);
@@ -192,7 +193,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Disable core dumps if not enabled in sudo.conf. */
     if (sudo_conf_disable_coredump())
-	disable_coredump(false);
+	disable_coredump();
 
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
@@ -314,7 +315,7 @@ main(int argc, char *argv[], char *envp[])
 	struct sigaction sa;
 
 	if (WCOREDUMP(status))
-	    disable_coredump(false);
+	    disable_coredump();
 
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
@@ -332,7 +333,6 @@ main(int argc, char *argv[], char *envp[])
 int
 os_init_common(int argc, char *argv[], char *envp[])
 {
-    initprogname(argc > 0 ? argv[0] : "sudo");
 #ifdef STATIC_SUDOERS_PLUGIN
     preload_static_symbols();
 #endif
@@ -553,12 +553,18 @@ get_user_info(struct user_details *ud)
 	goto oom;
     if (asprintf(&user_info[++i], "ppid=%d", (int)ud->ppid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "pgid=%d", (int)ud->pgid) == -1)
-	goto oom;
-    if (asprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
-	goto oom;
-    if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
-	goto oom;
+    if (ud->pgid != -1) {
+	if (asprintf(&user_info[++i], "pgid=%d", (int)ud->pgid) == -1)
+	    goto oom;
+    }
+    if (ud->tcpgid != -1) {
+	if (asprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
+	    goto oom;
+    }
+    if (ud->sid != -1) {
+	if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
+	    goto oom;
+    }
     if (asprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid) == -1)
 	goto oom;
     if (asprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid) == -1)
@@ -674,7 +680,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("cwd=", cwd)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
 		    cp = info[i] + sizeof("closefrom=") - 1;
-		    details->closefrom = strtonum(cp, 0, INT_MAX, &errstr);
+		    details->closefrom = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    break;
@@ -684,7 +690,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_FLAG("exec_background=", CD_EXEC_BG)
 		if (strncmp("execfd=", info[i], sizeof("execfd=") - 1) == 0) {
 		    cp = info[i] + sizeof("execfd=") - 1;
-		    details->execfd = strtonum(cp, 0, INT_MAX, &errstr);
+		    details->execfd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 #ifdef HAVE_FEXECVE
@@ -704,7 +710,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'n':
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
 		    cp = info[i] + sizeof("nice=") - 1;
-		    details->priority = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+		    details->priority = sudo_strtonum(cp, INT_MIN, INT_MAX,
+			&errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_PRIORITY);
@@ -723,7 +730,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'r':
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
-		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->egid = (gid_t)id;
@@ -732,7 +739,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_euid=", info[i], sizeof("runas_euid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_euid=") - 1;
-		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->euid = (uid_t)id;
@@ -741,7 +748,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_gid=", info[i], sizeof("runas_gid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_gid=") - 1;
-		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->gid = (gid_t)id;
@@ -758,7 +765,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_uid=") - 1;
-		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->uid = (uid_t)id;
@@ -799,7 +806,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
 		    cp = info[i] + sizeof("timeout=") - 1;
-		    details->timeout = strtonum(cp, 0, INT_MAX, &errstr);
+		    details->timeout = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_TIMEOUT);
@@ -815,6 +822,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}
+		SET_FLAG("umask_override=", CD_OVERRIDE_UMASK)
 		SET_FLAG("use_pty=", CD_USE_PTY)
 		SET_STRING("utmp_user=", utmp_user)
 		break;
@@ -825,6 +833,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 	details->euid = details->uid;
     if (!ISSET(details->flags, CD_SET_EGID))
 	details->egid = details->gid;
+    if (!ISSET(details->flags, CD_SET_UMASK))
+	CLR(details->flags, CD_OVERRIDE_UMASK);
 
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(details->euid), NULL);
@@ -893,43 +903,6 @@ sudo_check_suid(const char *sudo)
 		ROOT_UID);
 	}
     }
-    debug_return;
-}
-
-/*
- * Disable core dumps to avoid dropping a core with user password in it.
- * Called with restore set to true before executing the command.
- * Not all operating systems disable core dumps for setuid processes.
- */
-void
-disable_coredump(bool restore)
-{
-    struct rlimit rl;
-    static struct rlimit corelimit;
-#ifdef __linux__
-    static int dumpflag;
-#endif
-    debug_decl(disable_coredump, SUDO_DEBUG_UTIL)
-
-    if (restore) {
-	(void) setrlimit(RLIMIT_CORE, &corelimit);
-#ifdef __linux__
-	(void) prctl(PR_SET_DUMPABLE, dumpflag, 0, 0, 0);
-#endif /* __linux__ */
-	debug_return;
-    }
-
-    (void) getrlimit(RLIMIT_CORE, &corelimit);
-    rl.rlim_cur = 0;
-    rl.rlim_max = 0;
-    (void) setrlimit(RLIMIT_CORE, &rl);
-#ifdef __linux__
-    /* On Linux, also set PR_SET_DUMPABLE to zero (reset by execve). */
-    if ((dumpflag = prctl(PR_GET_DUMPABLE, 0, 0, 0, 0)) == -1)
-	dumpflag = 0;
-    (void) prctl(PR_SET_DUMPABLE, 0, 0, 0, 0);
-#endif /* __linux__ */
-
     debug_return;
 }
 
@@ -1233,6 +1206,10 @@ policy_init_session(struct command_details *details)
 	if (!set_user_groups(details))
 	    goto done;
     }
+
+    /* Session setup may override sudoers umask so set it first. */
+    if (ISSET(details->flags, CD_SET_UMASK))
+	(void) umask(details->umask);
 
     if (policy_plugin.u.policy->init_session) {
 	/*

@@ -41,6 +41,7 @@
 #include <unistd.h>
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 #if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1
 #  define sudo_sys_signame	sys_signame
@@ -96,7 +97,7 @@ sudo_str2sig(const char *signame, int *result)
 
     /* Could be a signal number encoded as a string. */
     if (isdigit((unsigned char)signame[0])) {
-	signo = strtonum(signame, 0, NSIG - 1, &errstr);
+	signo = sudo_strtonum(signame, 0, NSIG - 1, &errstr);
 	if (errstr != NULL)
 	    return -1;
 	*result = signo;

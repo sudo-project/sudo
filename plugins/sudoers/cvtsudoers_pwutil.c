@@ -106,7 +106,7 @@ cvtsudoers_make_pwitem(uid_t uid, const char *name)
 	    if (s->str[0] != '#')
 		continue;
 
-	    filter_uid = sudo_strtoid(s->str + 1, NULL, NULL, &errstr);
+	    filter_uid = sudo_strtoid(s->str + 1, &errstr);
 	    if (errstr == NULL) {
 		if (uid != filter_uid)
 		    continue;
@@ -213,7 +213,7 @@ cvtsudoers_make_gritem(gid_t gid, const char *name)
 	    if (s->str[0] != '#')
 		continue;
 
-	    filter_gid = sudo_strtoid(s->str + 1, NULL, NULL, &errstr);
+	    filter_gid = sudo_strtoid(s->str + 1, &errstr);
 	    if (errstr == NULL) {
 		if (gid != filter_gid)
 		    continue;
@@ -335,7 +335,7 @@ cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
 	STAILQ_FOREACH(s, &filters->groups, entries) {
 	    if (s->str[0] == '#') {
 		const char *errstr;
-		gid_t gid = sudo_strtoid(s->str + 1, NULL, NULL, &errstr);
+		gid_t gid = sudo_strtoid(s->str + 1, &errstr);
 		if (errstr == NULL) {
 		    /* Valid gid. */
 		    gids[ngids++] = gid;
@@ -462,7 +462,7 @@ again:
     STAILQ_FOREACH(s, &filters->groups, entries) {
 	if (s->str[0] == '#') {
 	    const char *errstr;
-	    sudo_strtoid(s->str + 1, NULL, NULL, &errstr);
+	    sudo_strtoid(s->str + 1, &errstr);
 	    if (errstr == NULL) {
 		/* Group ID not name, ignore it. */
 		continue;

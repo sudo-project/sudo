@@ -109,7 +109,7 @@ parse_logfile(const char *logfile)
 	goto bad;
     }
     *ep = '\0';
-    li->tstamp = strtonum(cp, 0, TIME_T_MAX, &errstr);
+    li->tstamp = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_warn(U_("%s: time stamp %s: %s"), logfile, cp, errstr);
 	goto bad;
@@ -155,18 +155,19 @@ parse_logfile(const char *logfile)
 	if ((li->tty = strndup(cp, (size_t)(ep - cp))) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	cp = ep + 1;
-	/* need to NULL out separator to use strtonum() */
+	/* need to NULL out separator to use sudo_strtonum() */
+	/* XXX - use sudo_strtonumx */
 	if ((ep = strchr(cp, ':')) != NULL) {
 	    *ep = '\0';
 	}
-	li->rows = strtonum(cp, 1, INT_MAX, &errstr);
+	li->rows = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: tty rows %s: %s", logfile, cp, errstr);
 	}
 	if (ep != NULL) {
 	    cp = ep + 1;
-	    li->cols = strtonum(cp, 1, INT_MAX, &errstr);
+	    li->cols = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "%s: tty cols %s: %s", logfile, cp, errstr);
@@ -240,7 +241,7 @@ parse_delay(const char *cp, struct timespec *delay, const char *decimal_point)
     }
     memcpy(numbuf, cp, len);
     numbuf[len] = '\0';
-    delay->tv_sec = strtonum(numbuf, 0, TIME_T_MAX, &errstr);
+    delay->tv_sec = sudo_strtonum(numbuf, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: number of seconds is %s", numbuf, errstr);
@@ -266,7 +267,7 @@ parse_delay(const char *cp, struct timespec *delay, const char *decimal_point)
     }
     memcpy(numbuf, cp, len);
     numbuf[len] = '\0';
-    llval = strtonum(numbuf, 0, LLONG_MAX, &errstr);
+    llval = sudo_strtonum(numbuf, 0, LLONG_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: number of nanoseconds is %s", numbuf, errstr);

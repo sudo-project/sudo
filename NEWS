@@ -1,3 +1,30 @@
+What's new in Sudo 1.8.29
+
+ * The cvtsudoers command will now reject non-LDIF input when converting
+   from LDIF format to sudoers or JSON formats.
+
+ * The new log_allowed and log_denied sudoers settings make it possible
+   to disable logging and auditing of allowed and/or denied commands.
+
+ * The umask is now handled differently on systems with PAM or login.conf.
+   If the umask is explicitly set in sudoers, that value is used regardless
+   of what PAM or login.conf may specify.  However, if the umask is not
+   explicitly set in sudoers, PAM or login.conf may now override the default
+   sudoers umask.  Bug #900.
+
+ * For "make install", the sudoers file is no longer checked for syntax
+   errors when DESTDIR is set.  The default sudoers file includes the
+   contents of /etc/sudoers.d which may not be readable as non-root.
+   Bug #902.
+
+ * Sudo now sets most resource limits to their maximum value to avoid
+   problems caused by insufficient resources, such as an inability to
+   allocate memory or open files and pipes.
+
+ * Fixed a regression introduced in sudo 1.8.28 where sudo would refuse
+   to run if the parent process was not associated with a session.
+   This was due to sudo passing a session ID of -1 to the plugin.
+
 What's new in Sudo 1.8.28p1
 
  * The fix for Bug #869 caused "sudo -v" to prompt for a password

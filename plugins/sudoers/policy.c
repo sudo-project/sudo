@@ -104,7 +104,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     char * const *cur;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
-    bool uid_set = false, gid_set = false;
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN)
 
@@ -129,7 +128,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
 		p = *cur + sizeof("sudoers_uid=") - 1;
-		sudoers_uid = (uid_t) sudo_strtoid(p, NULL, NULL, &errstr);
+		sudoers_uid = (uid_t) sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -138,7 +137,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
-		sudoers_gid = (gid_t) sudo_strtoid(p, NULL, NULL, &errstr);
+		sudoers_gid = (gid_t) sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -173,7 +172,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "closefrom=")) {
 	    errno = 0;
 	    p = *cur + sizeof("closefrom=") - 1;
-	    user_closefrom = strtonum(p, 4, INT_MAX, &errstr);
+	    user_closefrom = sudo_strtonum(p, 4, INT_MAX, &errstr);
 	    if (user_closefrom == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -300,7 +299,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "max_groups=")) {
 	    errno = 0;
 	    p = *cur + sizeof("max_groups=") - 1;
-	    sudo_user.max_groups = strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.max_groups = sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.max_groups == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -333,6 +332,9 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 #endif
     }
 
+    user_gid = (gid_t)-1;
+    user_sid = (pid_t)-1;
+    user_uid = (gid_t)-1;
     user_umask = (mode_t)-1;
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
@@ -343,22 +345,20 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "uid=")) {
 	    p = *cur + sizeof("uid=") - 1;
-	    user_uid = (uid_t) sudo_strtoid(p, NULL, NULL, &errstr);
+	    user_uid = (uid_t) sudo_strtoid(p, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
-	    uid_set = true;
 	    continue;
 	}
 	if (MATCHES(*cur, "gid=")) {
 	    p = *cur + sizeof("gid=") - 1;
-	    user_gid = (gid_t) sudo_strtoid(p, NULL, NULL, &errstr);
+	    user_gid = (gid_t) sudo_strtoid(p, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
-	    gid_set = true;
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
@@ -397,7 +397,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "lines=")) {
 	    errno = 0;
 	    p = *cur + sizeof("lines=") - 1;
-	    sudo_user.lines = strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.lines = sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.lines == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -407,7 +407,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "cols=")) {
 	    errno = 0;
 	    p = *cur + sizeof("cols=") - 1;
-	    sudo_user.cols = strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.cols = sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.cols == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -416,7 +416,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "sid=")) {
 	    p = *cur + sizeof("sid=") - 1;
-	    user_sid = (pid_t) sudo_strtoid(p, NULL, NULL, &errstr);
+	    user_sid = (pid_t) sudo_strtoid(p, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -434,17 +434,17 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
     }
 
-    /* User name, user ID, group ID and host name must be specified. */
+    /* User name, user-ID, group-ID and host name must be specified. */
     if (user_name == NULL) {
 	sudo_warnx(U_("user name not set by sudo front-end"));
 	goto bad;
     }
-    if (!uid_set) {
-	sudo_warnx(U_("user ID not set by sudo front-end"));
+    if (user_uid == (uid_t)-1) {
+	sudo_warnx(U_("user-ID not set by sudo front-end"));
 	goto bad;
     }
-    if (!gid_set) {
-	sudo_warnx(U_("group ID not set by sudo front-end"));
+    if (user_gid == (gid_t)-1) {
+	sudo_warnx(U_("group-ID not set by sudo front-end"));
 	goto bad;
     }
     if (user_host == NULL) {
@@ -691,6 +691,10 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     }
     if (cmnd_umask != ACCESSPERMS) {
 	if (asprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask) == -1)
+	    goto oom;
+    }
+    if (force_umask) {
+	if ((command_info[info_len++] = strdup("umask_override=true")) == NULL)
 	    goto oom;
     }
     if (cmnd_fd != -1) {

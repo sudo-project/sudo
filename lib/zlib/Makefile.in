@@ -95,6 +95,11 @@ LTOBJS = adler32.lo compress.lo crc32.lo deflate.lo gzclose.lo gzlib.lo \
 
 all: libsudo_z.la
 
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	    --builddir=`pwd`/$(top_builddir) lib/zlib/Makefile.in
+	cd $(top_builddir) && ./config.status --file lib/zlib/Makefile
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/zlib/Makefile
 

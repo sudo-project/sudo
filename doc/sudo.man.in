@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "May 27, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -98,7 +98,7 @@ as the superuser or another user, as specified by the security
 policy.
 The invoking user's real
 (\fInot\fR effective)
-user ID is used to determine the user name with which
+user-ID is used to determine the user name with which
 to query the security policy.
 .PP
 \fBsudo\fR
@@ -260,7 +260,7 @@ If
 is
 \fB-\fR,
 the default login class of the target user will be used.
-Otherwise, the command must be run as the superuser (user ID 0), or
+Otherwise, the command must be run as the superuser (user-ID 0), or
 \fBsudo\fR
 must be run from a shell that is already running as the superuser.
 If the command is being run as a login shell, additional
@@ -361,7 +361,7 @@ instead of the primary group specified by the target
 user's password database entry.
 The
 \fIgroup\fR
-may be either a group name or a numeric group ID
+may be either a group name or a numeric group-ID
 (GID)
 prefixed with the
 \(oq#\(cq
@@ -504,7 +504,7 @@ By default, the
 \fIsudoers\fR
 policy will initialize the group vector to the list of groups the
 target user is a member of.
-The real and effective group IDs, however, are still set to match
+The real and effective group-IDs, however, are still set to match
 the target user.
 .TP 12n
 \fB\-p\fR \fIprompt\fR, \fB\--prompt\fR=\fIprompt\fR
@@ -629,7 +629,7 @@ Run the command as a user other than the default target user
 \fIroot\fR).
 The
 \fIuser\fR
-may be either a user name or a numeric user ID
+may be either a user name or a numeric user-ID
 (UID)
 prefixed with the
 \(oq#\(cq
@@ -719,13 +719,13 @@ option was specified).
 The following parameters may be specified by security policy:
 .TP 3n
 \fB\(bu\fR
-real and effective user ID
+real and effective user-ID
 .TP 3n
 \fB\(bu\fR
-real and effective group ID
+real and effective group-ID
 .TP 3n
 \fB\(bu\fR
-supplementary group IDs
+supplementary group-IDs
 .TP 3n
 \fB\(bu\fR
 the environment list
@@ -1027,7 +1027,7 @@ To prevent the disclosure of potentially sensitive information,
 disables core dumps by default while it is executing (they are
 re-enabled for the command that is run).
 This historical practice dates from a time when most operating
-systems allowed setuid processes to dump core by default.
+systems allowed set-user-ID processes to dump core by default.
 To aid in debugging
 \fBsudo\fR
 crashes, you may wish to re-enable core dumps by setting
@@ -1138,7 +1138,7 @@ Default editor to use in
 (sudoedit) mode.
 .TP 17n
 \fRSUDO_GID\fR
-Set to the group ID of the user who invoked sudo.
+Set to the group-ID of the user who invoked sudo.
 .TP 17n
 \fRSUDO_PROMPT\fR
 Used as the default password prompt unless
@@ -1152,7 +1152,7 @@ If set,
 will be set to its value for the program being run.
 .TP 17n
 \fRSUDO_UID\fR
-Set to the user ID of the user who invoked sudo.
+Set to the user-ID of the user who invoked sudo.
 .TP 17n
 \fRSUDO_USER\fR
 Set to the login name of the user who invoked sudo.
@@ -1272,7 +1272,7 @@ for more information.
 was not run with root privileges.
 The
 \fBsudo\fR
-binary must be owned by the root user and have the Set-user-ID bit set.
+binary must be owned by the root user and have the set-user-ID bit set.
 Also, it must not be located on a file system mounted with the
 \(oqnosuid\(cq
 option or on an NFS file system that maps uid 0 to an unprivileged uid.
@@ -1338,7 +1338,7 @@ was not run with root privileges.
 The
 \fBsudo\fR
 binary does not have the correct owner or permissions.
-It must be owned by the root user and have the Set-user-ID bit set.
+It must be owned by the root user and have the set-user-ID bit set.
 .TP 6n
 \fRsudoedit is not supported on this platform\fR
 It is only possible to run
@@ -1350,7 +1350,7 @@ The user did not enter a password before the password timeout
 (5 minutes by default) expired.
 .TP 6n
 \fRyou do not exist in the passwd database\fR
-Your user ID does not appear in the system passwd database.
+Your user-ID does not appear in the system passwd database.
 .TP 6n
 \fRyou may not specify environment variables in edit mode\fR
 It is only possible to specify environment variables when running
@@ -1417,9 +1417,9 @@ section for more information.
 .PP
 Running shell scripts via
 \fBsudo\fR
-can expose the same kernel bugs that make setuid shell scripts
+can expose the same kernel bugs that make set-user-ID shell scripts
 unsafe on some operating systems (if your OS has a /dev/fd/ directory,
-setuid shell scripts are generally safe).
+set-user-ID shell scripts are generally safe).
 .SH "BUGS"
 If you feel you have found a bug in
 \fBsudo\fR,

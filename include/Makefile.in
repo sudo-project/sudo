@@ -50,6 +50,8 @@ SHELL = @SHELL@
 
 all:
 
+depend:
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file include/Makefile
 

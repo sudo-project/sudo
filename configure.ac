@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.28p1], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.29], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -2800,10 +2800,6 @@ else
     # Missing or non-compliant v?snprintf(), assume missing/bad v?asprintf()
     SUDO_APPEND_COMPAT_EXP(sudo_snprintf sudo_vsnprintf sudo_asprintf sudo_vasprintf)
 fi
-# We wrap OpenBSD's strtonum() to get translatable error strings.
-AC_CHECK_FUNCS([strtonum])
-AC_LIBOBJ(strtonum)
-SUDO_APPEND_COMPAT_EXP(sudo_strtonum)
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff], [], [], [
 AC_INCLUDES_DEFAULT
 #include <errno.h>

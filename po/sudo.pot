@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.28\n"
+"Project-Id-Version: sudo 1.8.29\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2019-10-10 10:07-0600\n"
+"POT-Creation-Date: 2019-10-21 19:55-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,10 +54,10 @@ msgstr ""
 #: src/parse_args.c:282 src/parse_args.c:583 src/parse_args.c:605
 #: src/preserve_fds.c:54 src/preserve_fds.c:139 src/selinux.c:91
 #: src/selinux.c:337 src/selinux.c:450 src/selinux.c:459 src/sesh.c:117
-#: src/sudo.c:619 src/sudo.c:679 src/sudo.c:689 src/sudo.c:709 src/sudo.c:728
-#: src/sudo.c:737 src/sudo.c:746 src/sudo.c:763 src/sudo.c:804 src/sudo.c:814
-#: src/sudo.c:837 src/sudo.c:1074 src/sudo.c:1095 src/sudo.c:1269
-#: src/sudo.c:1385 src/sudo_edit.c:258 src/sudo_edit.c:794 src/sudo_edit.c:891
+#: src/sudo.c:619 src/sudo.c:679 src/sudo.c:689 src/sudo.c:710 src/sudo.c:729
+#: src/sudo.c:738 src/sudo.c:747 src/sudo.c:764 src/sudo.c:805 src/sudo.c:815
+#: src/sudo.c:841 src/sudo.c:1041 src/sudo.c:1062 src/sudo.c:1240
+#: src/sudo.c:1356 src/sudo_edit.c:258 src/sudo_edit.c:794 src/sudo_edit.c:891
 #: src/sudo_edit.c:1005 src/sudo_edit.c:1025
 #, c-format
 msgid "%s: %s"
@@ -86,8 +86,8 @@ msgstr ""
 #: src/parse_args.c:282 src/parse_args.c:583 src/parse_args.c:605
 #: src/preserve_fds.c:54 src/preserve_fds.c:139 src/selinux.c:91
 #: src/selinux.c:337 src/selinux.c:450 src/selinux.c:459 src/sesh.c:117
-#: src/sudo.c:619 src/sudo.c:837 src/sudo.c:1074 src/sudo.c:1095
-#: src/sudo.c:1269 src/sudo.c:1385 src/sudo_edit.c:258 src/sudo_edit.c:794
+#: src/sudo.c:619 src/sudo.c:841 src/sudo.c:1041 src/sudo.c:1062
+#: src/sudo.c:1240 src/sudo.c:1356 src/sudo_edit.c:258 src/sudo_edit.c:794
 #: src/sudo_edit.c:891 src/sudo_edit.c:1005 src/sudo_edit.c:1025
 msgid "unable to allocate memory"
 msgstr ""
@@ -96,19 +96,17 @@ msgstr ""
 msgid "Unknown signal"
 msgstr ""
 
-#: lib/util/strtoid.c:98 lib/util/strtoid.c:141 lib/util/strtoid.c:164
-#: lib/util/strtomode.c:62 lib/util/strtonum.c:68 lib/util/strtonum.c:195
+#: lib/util/strtoid.c:96 lib/util/strtomode.c:56 lib/util/strtonum.c:161
+#: lib/util/strtonum.c:196
+msgid "invalid value"
+msgstr ""
+
+#: lib/util/strtomode.c:62 lib/util/strtonum.c:173
 msgid "value too large"
 msgstr ""
 
-#: lib/util/strtoid.c:104 lib/util/strtoid.c:147 lib/util/strtomode.c:62
-#: lib/util/strtonum.c:68 lib/util/strtonum.c:189
+#: lib/util/strtomode.c:62 lib/util/strtonum.c:167
 msgid "value too small"
-msgstr ""
-
-#: lib/util/strtoid.c:111 lib/util/strtoid.c:154 lib/util/strtoid.c:171
-#: lib/util/strtomode.c:56 lib/util/strtonum.c:65 lib/util/strtonum.c:183
-msgid "invalid value"
 msgstr ""
 
 #: lib/util/sudo_conf.c:212
@@ -161,35 +159,35 @@ msgstr ""
 msgid "unable to open %s"
 msgstr ""
 
-#: src/exec.c:155
+#: src/exec.c:111
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/exec.c:168
+#: src/exec.c:123
 msgid "unable to set user context"
 msgstr ""
 
-#: src/exec.c:184
+#: src/exec.c:139
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/exec.c:192
+#: src/exec.c:150
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/exec.c:205 src/exec.c:211 src/exec.c:218
+#: src/exec.c:163 src/exec.c:169 src/exec.c:176
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/exec.c:236
+#: src/exec.c:194
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/exec.c:335 src/exec_monitor.c:576 src/exec_monitor.c:578
+#: src/exec.c:293 src/exec_monitor.c:576 src/exec_monitor.c:578
 #: src/exec_nopty.c:538 src/exec_pty.c:530 src/exec_pty.c:1336
 #: src/exec_pty.c:1338 src/signal.c:150 src/signal.c:164
 #, c-format
@@ -249,7 +247,7 @@ msgstr ""
 msgid "unable to restore tty label"
 msgstr ""
 
-#: src/exec_monitor.c:644 src/sesh.c:127 src/sudo.c:1133
+#: src/exec_monitor.c:644 src/sesh.c:127 src/sudo.c:1100
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -699,34 +697,34 @@ msgstr ""
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:203
+#: src/sudo.c:204
 #, c-format
 msgid "Sudo version %s\n"
 msgstr ""
 
-#: src/sudo.c:205
+#: src/sudo.c:206
 #, c-format
 msgid "Configure options: %s\n"
 msgstr ""
 
-#: src/sudo.c:213
+#: src/sudo.c:214
 msgid "fatal error, unable to load plugins"
 msgstr ""
 
-#: src/sudo.c:221
+#: src/sudo.c:222
 msgid "unable to initialize policy plugin"
 msgstr ""
 
-#: src/sudo.c:265
+#: src/sudo.c:266
 msgid "plugin did not return a command to execute"
 msgstr ""
 
-#: src/sudo.c:281
+#: src/sudo.c:282
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr ""
 
-#: src/sudo.c:305
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr ""
@@ -740,58 +738,58 @@ msgstr ""
 msgid "unable to determine tty"
 msgstr ""
 
-#: src/sudo.c:883
+#: src/sudo.c:887
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr ""
 
-#: src/sudo.c:886
+#: src/sudo.c:890
 #, c-format
 msgid ""
 "effective uid is not %d, is %s on a file system with the 'nosuid' option set "
 "or an NFS file system without root privileges?"
 msgstr ""
 
-#: src/sudo.c:892
+#: src/sudo.c:896
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr ""
 
-#: src/sudo.c:945
+#: src/sudo.c:912
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:952
+#: src/sudo.c:919
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:958
+#: src/sudo.c:925
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:1015
+#: src/sudo.c:982
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1161
+#: src/sudo.c:1128
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr ""
 
-#: src/sudo.c:1179
+#: src/sudo.c:1146
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1196
+#: src/sudo.c:1163
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1211
+#: src/sudo.c:1178
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""

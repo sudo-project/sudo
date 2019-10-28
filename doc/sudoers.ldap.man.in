@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "February 26, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -112,7 +112,7 @@ The equivalent of a sudoer in LDAP is a
 It consists of the following attributes:
 .TP 6n
 \fBsudoUser\fR
-A user name, user ID (prefixed with
+A user name, user-ID (prefixed with
 \(oq#\(cq),
 Unix group name or ID (prefixed with
 \(oq%\(cq

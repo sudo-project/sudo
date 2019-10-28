@@ -1210,14 +1210,14 @@ parse_sudoers_options(void)
 		}
 		if (MATCHES(*cur, "sudoers_uid=")) {
 		    p = *cur + sizeof("sudoers_uid=") - 1;
-		    id = sudo_strtoid(p, NULL, NULL, &errstr);
+		    id = sudo_strtoid(p, &errstr);
 		    if (errstr == NULL)
 			sudoers_uid = (uid_t) id;
 		    continue;
 		}
 		if (MATCHES(*cur, "sudoers_gid=")) {
 		    p = *cur + sizeof("sudoers_gid=") - 1;
-		    id = sudo_strtoid(p, NULL, NULL, &errstr);
+		    id = sudo_strtoid(p, &errstr);
 		    if (errstr == NULL)
 			sudoers_gid = (gid_t) id;
 		    continue;

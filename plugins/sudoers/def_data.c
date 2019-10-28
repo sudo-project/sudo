@@ -498,6 +498,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Ignore case when matching group names"),
 	NULL,
     }, {
+	"log_allowed", T_FLAG,
+	N_("Log when a command is allowed by sudoers"),
+	NULL,
+    }, {
+	"log_denied", T_FLAG,
+	N_("Log when a command is denied by sudoers"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

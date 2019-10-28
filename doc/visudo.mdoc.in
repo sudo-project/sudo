@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd June 20, 2019
+.Dd October 20, 2019
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -295,12 +295,12 @@ file.
 The
 .Em sudoers_uid
 argument can be used to override the default owner of the sudoers file.
-It should be specified as a numeric user ID.
+It should be specified as a numeric user-ID.
 .It sudoers_gid=gid
 The
 .Em sudoers_gid
 argument can be used to override the default group of the sudoers file.
-It must be specified as a numeric group ID (not a group name).
+It must be specified as a numeric group-ID (not a group name).
 .It sudoers_mode=mode
 The
 .Em sudoers_mode
@@ -364,7 +364,7 @@ You didn't run
 .Nm
 as root.
 .It Li you do not exist in the passwd database
-Your user ID does not appear in the system passwd database.
+Your user-ID does not appear in the system passwd database.
 .It Li Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
 Either you are trying to use an undeclared {User,Runas,Host,Cmnd}_Alias
 or you have a user or host name listed that consists solely of

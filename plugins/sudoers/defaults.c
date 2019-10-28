@@ -576,6 +576,8 @@ init_defaults(void)
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;
     def_fdexec = digest_only;
+    def_log_allowed = true;
+    def_log_denied = true;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
@@ -834,7 +836,7 @@ store_int(const char *str, union sudo_defs_val *sd_un)
     if (str == NULL) {
 	sd_un->ival = 0;
     } else {
-	i = strtonum(str, INT_MIN, INT_MAX, &errstr);
+	i = sudo_strtonum(str, INT_MIN, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: %s", str, errstr);
@@ -855,7 +857,7 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
     if (str == NULL) {
 	sd_un->uival = 0;
     } else {
-	u = strtonum(str, 0, UINT_MAX, &errstr);
+	u = sudo_strtonum(str, 0, UINT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: %s", str, errstr);

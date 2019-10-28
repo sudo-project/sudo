@@ -261,6 +261,11 @@ $(shlib_opt): $(shlib_exp)
 .y.c:
 	@true
 
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	    --builddir=`pwd`/$(top_builddir) plugins/sudoers/Makefile.in
+	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
 
@@ -384,9 +389,9 @@ sudoers: $(srcdir)/sudoers.in
 	cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@
 
 pre-install:
-	@if test X"$(cross_compiling)" != X"yes" -a -r $(DESTDIR)$(sudoersdir)/sudoers; then \
+	@if test X"$(cross_compiling)" != X"yes" -a X"$(DESTDIR)" = X""; then \
 	    echo "Checking existing sudoers file for syntax errors."; \
-	    ./visudo -c -f $(DESTDIR)$(sudoersdir)/sudoers; \
+	    ./visudo -c -f $(sudoersdir)/sudoers; \
 	fi
 
 install: install-plugin install-binaries install-sudoers install-doc
@@ -453,6 +458,8 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    LC_ALL=C; export LC_ALL; \
 	    unset LANG || LANG=; \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
 	    mkdir -p regress/parser; \
 	    ./check_addr $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \
@@ -566,11 +573,17 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 		    base=`basename $$t .sh`; \
 		    out="regress/$$dir/$${base}.out"; \
 		    err="regress/$$dir/$${base}.err"; \
+		    status=0; \
 		    TESTDIR=$(srcdir)/regress/$$dir \
-			$(SHELL) $$t >$$out 2>$$err; \
+			$(SHELL) $$t >$$out 2>$$err || status=$$?; \
 		    if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
-			passed=`expr $$passed + 1`; \
-			echo "$$dir/$$base: OK"; \
+			if test $$status -ne 0; then \
+			    failed=`expr $$failed + 1`; \
+			    echo "$$dir/$$base (exit $$status): FAIL"; \
+			else \
+			    passed=`expr $$passed + 1`; \
+			    echo "$$dir/$$base: OK"; \
+			fi; \
 		    else \
 			failed=`expr $$failed + 1`; \
 			echo "$$dir/$$base: FAIL"; \

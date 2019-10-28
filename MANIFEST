@@ -124,7 +124,6 @@ lib/util/pipe2.c
 lib/util/progname.c
 lib/util/pw_dup.c
 lib/util/reallocarray.c
-lib/util/regress/atofoo/atofoo_test.c
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
 lib/util/regress/getdelim/getdelim_test.c
@@ -137,6 +136,10 @@ lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c
 lib/util/regress/strsig/strsig_test.c
 lib/util/regress/strsplit/strsplit_test.c
+lib/util/regress/strtofoo/strtobool_test.c
+lib/util/regress/strtofoo/strtoid_test.c
+lib/util/regress/strtofoo/strtomode_test.c
+lib/util/regress/strtofoo/strtonum_test.c
 lib/util/regress/sudo_conf/conf_test.c
 lib/util/regress/sudo_conf/test1.in
 lib/util/regress/sudo_conf/test1.out.ok
@@ -777,6 +780,7 @@ src/exec_nopty.c
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c
+src/limits.c
 src/load_plugins.c
 src/net_ifs.c
 src/openbsd.c

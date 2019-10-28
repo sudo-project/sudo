@@ -120,26 +120,27 @@ struct user_details {
     int ts_cols;
 };
 
-#define CD_SET_UID		0x00001
-#define CD_SET_EUID		0x00002
-#define CD_SET_GID		0x00004
-#define CD_SET_EGID		0x00008
-#define CD_PRESERVE_GROUPS	0x00010
-#define CD_NOEXEC		0x00020
-#define CD_SET_PRIORITY		0x00040
-#define CD_SET_UMASK		0x00080
-#define CD_SET_TIMEOUT		0x00100
-#define CD_SUDOEDIT		0x00200
-#define CD_BACKGROUND		0x00400
-#define CD_RBAC_ENABLED		0x00800
-#define CD_USE_PTY		0x01000
-#define CD_SET_UTMP		0x02000
-#define CD_EXEC_BG		0x04000
-#define CD_SUDOEDIT_COPY	0x08000
-#define CD_SUDOEDIT_FOLLOW	0x10000
-#define CD_SUDOEDIT_CHECKDIR	0x20000
-#define CD_SET_GROUPS		0x40000
-#define CD_LOGIN_SHELL		0x80000
+#define CD_SET_UID		0x000001
+#define CD_SET_EUID		0x000002
+#define CD_SET_GID		0x000004
+#define CD_SET_EGID		0x000008
+#define CD_PRESERVE_GROUPS	0x000010
+#define CD_NOEXEC		0x000020
+#define CD_SET_PRIORITY		0x000040
+#define CD_SET_UMASK		0x000080
+#define CD_SET_TIMEOUT		0x000100
+#define CD_SUDOEDIT		0x000200
+#define CD_BACKGROUND		0x000400
+#define CD_RBAC_ENABLED		0x000800
+#define CD_USE_PTY		0x001000
+#define CD_SET_UTMP		0x002000
+#define CD_EXEC_BG		0x004000
+#define CD_SUDOEDIT_COPY	0x008000
+#define CD_SUDOEDIT_FOLLOW	0x010000
+#define CD_SUDOEDIT_CHECKDIR	0x020000
+#define CD_SET_GROUPS		0x040000
+#define CD_LOGIN_SHELL		0x080000
+#define CD_OVERRIDE_UMASK	0x100000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -222,7 +223,6 @@ int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
-void disable_coredump(bool restore);
 bool set_user_groups(struct command_details *details);
 extern const char *list_user;
 extern struct user_details user_details;
@@ -285,5 +285,12 @@ void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
 
 /* setpgrp_nobg.c */
 int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
+
+/* limits.c */
+void disable_coredump();
+void restore_limits(void);
+void restore_nproc(void);
+void unlimit_nproc(void);
+void unlimit_sudo(void);
 
 #endif /* SUDO_SUDO_H */
