@@ -40,6 +40,9 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 #include "log_server.pb-c.h"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 #include "sudo_compat.h"
@@ -59,6 +62,9 @@
 # else
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
+
+#define LOGSRVD_DEFAULT_CIPHER_LST12 "HIGH:!aNULL"
+#define LOGSRVD_DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"
 
 /*
  * Sudo I/O audit server.
@@ -80,6 +86,12 @@ connection_closure_free(struct connection_closure *closure)
 
     if (closure != NULL) {
 	bool shutting_down = closure->state == SHUTDOWN;
+
+    /* deallocate the connection's ssl object */
+    if (logsrvd_conf_get_tls_opt() == true) {
+        if (closure->ssl)
+            SSL_free(closure->ssl);
+    }
 
 	TAILQ_REMOVE(&connections, closure, entries);
 	close(closure->sock);
@@ -556,6 +568,11 @@ shutdown_cb(int unused, int what, void *v)
     struct sudo_event_base *base = v;
     debug_decl(shutdown_cb, SUDO_DEBUG_UTIL)
 
+    /* deallocate server's SSL context object */
+    if (logsrvd_conf_get_tls_opt() == true) {
+        SSL_CTX_free(logsrvd_get_tls_runtime()->ssl_ctx);
+    }
+
     sudo_ev_loopbreak(base);
 
     debug_return;
@@ -614,7 +631,12 @@ server_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to client",
 	__func__, buf->len - buf->off);
 
-    nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+    if (logsrvd_conf_get_tls_opt() == true) {
+        nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
+    } else {
+        nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+    }
+
     if (nwritten == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to send %u bytes", buf->len - buf->off);
@@ -652,7 +674,11 @@ client_msg_cb(int fd, int what, void *v)
     ssize_t nread;
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
 
-    nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+    if (logsrvd_conf_get_tls_opt() == true) {
+        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
+    } else {
+        nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client",
 	__func__, nread);
     switch (nread) {
@@ -784,6 +810,161 @@ signal_cb(int signo, int what, void *v)
     debug_return;
 }
 
+
+static bool
+init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
+{
+    debug_decl(init_tls_ciphersuites, SUDO_DEBUG_UTIL)
+
+    /* try to set TLS v1.2 ciphersuite list from config if given */
+    if (tls_config->ciphers_v12) {
+        if (SSL_CTX_set_cipher_list(ctx, tls_config->ciphers_v12)) {
+            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+                "TLS v1.2 ciphersuite list is set from config");
+        } else {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to set configured TLS v1.2 ciphersuite list (%s). Falling back to default...",
+                ERR_error_string(ERR_get_error(), NULL));
+                debug_return_bool(false);
+        }
+    /* fallback to default ciphersuites for TLS v1.2 */
+    } else {
+        if (SSL_CTX_set_cipher_list(ctx, LOGSRVD_DEFAULT_CIPHER_LST12) <= 0) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to load default TLS v1.2 ciphersuite list: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            debug_return_bool(false);
+        } else {
+            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+                "TLS v1.2 ciphersuite list is set to default (%s)",
+                LOGSRVD_DEFAULT_CIPHER_LST12);
+        }
+    }
+
+    /* try to set TLSv1.3 ciphersuite list from config */
+    if (tls_config->ciphers_v13) {
+        if (SSL_CTX_set_ciphersuites(ctx, tls_config->ciphers_v13)) {
+            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+                "TLS v1.3 ciphersuite list is set from config");
+        } else {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to load configured TLS v1.3 ciphersuite list (%s). Falling back to default...",
+                ERR_error_string(ERR_get_error(), NULL));        
+                debug_return_bool(false);
+        }
+    /* fallback to default ciphersuites for TLS v1.3 */
+    } else {
+        if (SSL_CTX_set_ciphersuites(ctx, LOGSRVD_DEFAULT_CIPHER_LST13) <= 0) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to load default TLS v1.3 ciphersuite list: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            debug_return_bool(false);
+        } else {
+            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+                "TLS v1.3 ciphersuite list is set to default (%s)",
+                LOGSRVD_DEFAULT_CIPHER_LST13);
+        }
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Calls series of openssl initialization functions in order to
+ * be able to establish configured network connections over TLS
+ */
+static SSL_CTX *
+init_tls_server_context(void)
+{
+    const SSL_METHOD *method;
+    SSL_CTX *ctx = NULL;
+    const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
+
+    debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL)
+
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+
+    if ((method = TLS_server_method()) == NULL) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "creation of SSL_METHOD failed: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+    if ((ctx = SSL_CTX_new(method)) == NULL) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "creation of new SSL_CTX object failed: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    /* verify server certification against the CA bundle file */
+    if (!verify_server_cert(ctx, tls_config)) {
+        goto bad;
+    }
+    if (!SSL_CTX_use_PrivateKey_file(ctx, tls_config->pkey_path, SSL_FILETYPE_PEM)) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to load key file: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+    if (!SSL_CTX_check_private_key(ctx)) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to verify key file: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    /* initialize TLSv1.2 and TLSv1.3 ciphersuites */
+    if (!init_tls_ciphersuites(ctx, tls_config)) {
+        goto bad;
+    }
+
+    /* try to load and set diffie-hellman parameters  */
+    FILE *dhparam_file = fopen(tls_config->dhparams_path, "r");
+    if (dhparam_file != NULL) {
+        DH* dhparams;
+        if ((dhparams = PEM_read_DHparams(dhparam_file, NULL, NULL, NULL)) != NULL) {
+            if (!SSL_CTX_set_tmp_dh(ctx, dhparams)) {
+                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                    "unable to set dh parameters: %s",
+                    ERR_error_string(ERR_get_error(), NULL));
+            } else {
+                sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+                    "diffie-hellman parameters are loaded");
+            }
+        } else {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "dhparam file can't be loaded: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+        }
+        fclose(dhparam_file);
+    } else {
+        sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+            "dhparam file not found, will use default parameters");
+    }
+    
+    /* audit server supports TLS ver1.2 or higher */
+    if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to restrict min. protocol version: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    goto good;
+
+bad:
+    if (ctx) {
+        SSL_CTX_free(ctx);
+        ctx = NULL;
+    }
+
+good:
+    debug_return_ptr(ctx);
+}
+
 /*
  * Allocate a new connection closure.
  */
@@ -795,6 +976,30 @@ connection_closure_alloc(int sock)
 
     if ((closure = calloc(1, sizeof(*closure))) == NULL)
 	debug_return_ptr(NULL);
+
+    if (logsrvd_conf_get_tls_opt() == true) {
+        if ((closure->ssl = SSL_new(logsrvd_get_tls_runtime()->ssl_ctx)) == NULL) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to create new ssl object: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+        
+        if (SSL_set_fd(closure->ssl, sock) != 1) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to set fd for TLS: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
+        if (SSL_accept(closure->ssl) != 1 ) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "TLS handshake was unsuccessful: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+    }
+
 
     closure->iolog_dir_fd = -1;
     closure->sock = sock;
@@ -923,12 +1128,19 @@ register_listener(struct listen_address *addr, struct sudo_event_base *base)
     debug_decl(register_listener, SUDO_DEBUG_UTIL)
 
     sock = create_listener(addr);
+
+    if (logsrvd_conf_get_tls_opt() == true) {
+        struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
+        if ((tls_runtime->ssl_ctx = init_tls_server_context()) == NULL)
+            sudo_fatal(NULL);
+    }
+
     if (sock != -1) {
-	ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, base);
-	if (ev == NULL)
-	    sudo_fatal(NULL);
-	if (sudo_ev_add(base, ev, NULL, false) == -1)
-	    sudo_fatal(U_("unable to add event to queue"));
+        ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, base);
+        if (ev == NULL)
+            sudo_fatal(NULL);
+        if (sudo_ev_add(base, ev, NULL, false) == -1)
+            sudo_fatal(U_("unable to add event to queue"));
     }
 
     debug_return;
