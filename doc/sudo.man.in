@@ -137,12 +137,18 @@ Security policies may support credential caching to allow the user
 to run
 \fBsudo\fR
 again for a period of time without requiring authentication.
-The
+By default, the
 \fIsudoers\fR
-policy caches credentials for
+policy caches credentials on a per-terminal basis for
 \fR@timeout@\fR
-minutes, unless overridden in
-sudoers(@mansectform@).
+minutes.
+See the
+\fItimestamp_type\fR
+and
+\fItimestamp_timeout\fR
+options in
+sudoers(@mansectform@)
+for more information.
 By running
 \fBsudo\fR
 with the
@@ -1364,6 +1370,7 @@ passwd(@mansectform@),
 sudo.conf(@mansectform@),
 sudo_plugin(@mansectform@),
 sudoers(@mansectform@),
+sudoers_timestamp(@mansectform@),
 sudoreplay(@mansectsu@),
 visudo(@mansectsu@)
 .SH "HISTORY"

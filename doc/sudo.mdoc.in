@@ -139,12 +139,18 @@ Security policies may support credential caching to allow the user
 to run
 .Nm
 again for a period of time without requiring authentication.
-The
+By default, the
 .Em sudoers
-policy caches credentials for
+policy caches credentials on a per-terminal basis for
 .Li @timeout@
-minutes, unless overridden in
-.Xr sudoers @mansectform@ .
+minutes.
+See the
+.Em timestamp_type
+and
+.Em timestamp_timeout
+options in
+.Xr sudoers @mansectform@
+for more information.
 By running
 .Nm
 with the
@@ -1256,6 +1262,7 @@ When editing a file, the editor is run with the user's environment unmodified.
 .Xr sudo.conf @mansectform@ ,
 .Xr sudo_plugin @mansectform@ ,
 .Xr sudoers @mansectform@ ,
+.Xr sudoers_timestamp @mansectform@ ,
 .Xr sudoreplay @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh HISTORY
