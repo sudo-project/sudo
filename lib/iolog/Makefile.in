@@ -48,7 +48,7 @@ LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
 LIBS = @LIBS@ @ZLIB@ $(LT_LIBS)
 
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -149,10 +149,10 @@ install-plugin:
 uninstall:
 
 splint:
-	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
+	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) $(srcdir)/*.c
 
 cppcheck:
-	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
+	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) $(srcdir)/*.c
 
 pvs-log-files: $(POBJS)
 

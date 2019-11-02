@@ -47,8 +47,7 @@ CPPDEFS = -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\" \
 	  -DLOCALEDIR=\"$(localedir)\"
 
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) \
-	   $(CPPDEFS) @CPPFLAGS@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(CPPDEFS) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -249,10 +248,10 @@ uninstall:
 	    rm -f $(DESTDIR)$(RC_LINK) $(DESTDIR)$(INIT_DIR)/sudo
 
 splint:
-	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
+	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(srcdir)/*.c
 
 cppcheck:
-	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
+	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(srcdir)/*.c
 
 pvs-log-files: $(POBJS)
 

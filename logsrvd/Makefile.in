@@ -48,7 +48,7 @@ CPPDEFS = -D_PATH_SUDO_LOGSRVD_CONF=\"$(sysconfdir)/sudo_logsrvd.conf\" \
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) \
-	   -I$(top_srcdir) $(CPPDEFS) @CPPFLAGS@
+	   $(CPPDEFS) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -178,10 +178,10 @@ uninstall:
 		  $(DESTDIR)$(sbindir)/sudo_sendlog$(INSTALL_BACKUP)
 
 splint:
-	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
+	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(srcdir)/*.c
 
 cppcheck:
-	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
+	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(srcdir)/*.c
 
 pvs-log-files: $(POBJS)
 

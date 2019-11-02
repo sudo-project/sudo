@@ -71,7 +71,7 @@ CPPDEFS = -DLIBDIR=\"$(libdir)\" -DLOCALEDIR=\"$(localedir)\" \
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) \
-	   -I$(top_srcdir) $(CPPDEFS) @CPPFLAGS@
+	   $(CPPDEFS) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -432,10 +432,10 @@ uninstall:
 	-rm -f $(DESTDIR)$(sudoersdir)/sudoers.dist
 
 splint:
-	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
+	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
 
 cppcheck:
-	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
+	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
 
 pvs-log-files: $(POBJS)
 
