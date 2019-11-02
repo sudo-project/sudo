@@ -303,7 +303,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     sa.sa_handler = SIG_DFL;
     (void) sigaction(SIGCHLD, &sa, &savechld);
 
-    if (pipe(pfd) == -1)
+    if (pipe2(pfd, O_CLOEXEC) == -1)
 	sudo_fatal(U_("unable to create pipe"));
 
     child = sudo_debug_fork();
@@ -311,10 +311,17 @@ sudo_askpass(const char *askpass, const char *prompt)
 	sudo_fatal(U_("unable to fork"));
 
     if (child == 0) {
-	/* child, point stdout to output side of the pipe and exec askpass */
-	if (dup2(pfd[1], STDOUT_FILENO) == -1) {
-	    sudo_warn("dup2");
-	    _exit(255);
+	/* child, set stdout to write side of the pipe or clear FD_CLOEXEC */
+	if (pfd[1] == STDOUT_FILENO) {
+	    if (fcntl(pfd[1], F_SETFD, 0) == -1) {
+		sudo_warn("fcntl");
+		_exit(255);
+	    }
+	} else {
+	    if (dup2(pfd[1], STDOUT_FILENO) == -1) {
+		sudo_warn("dup2");
+		_exit(255);
+	    }
 	}
 	if (setuid(ROOT_UID) == -1)
 	    sudo_warn("setuid(%d)", ROOT_UID);

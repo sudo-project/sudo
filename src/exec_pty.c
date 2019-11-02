@@ -1321,7 +1321,9 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * We communicate with the monitor over a bi-directional pair of sockets.
      * Parent sends signal info to monitor and monitor sends back wait status.
      */
-    if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1)
+    if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1 ||
+	    fcntl(sv[0], F_SETFD, FD_CLOEXEC) == -1 ||
+	    fcntl(sv[1], F_SETFD, FD_CLOEXEC) == -1)
 	sudo_fatal(U_("unable to create sockets"));
 
     /*
@@ -1411,7 +1413,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not a tty, creating a pipe");
 	    pipeline = true;
-	    if (pipe(io_pipe[STDIN_FILENO]) != 0)
+	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal(U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
 		log_stdin, &ec, &iobufs);
@@ -1432,7 +1434,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, creating a pipe");
 	    pipeline = true;
-	    if (pipe(io_pipe[STDOUT_FILENO]) != 0)
+	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal(U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
 		log_stdout, &ec, &iobufs);
@@ -1452,7 +1454,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not a tty, creating a pipe");
-	    if (pipe(io_pipe[STDERR_FILENO]) != 0)
+	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal(U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
 		log_stderr, &ec, &iobufs);
@@ -1496,7 +1498,6 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     case 0:
 	/* child */
 	close(sv[0]);
-	(void)fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	if (io_pipe[STDIN_FILENO][1] != -1)
 	    close(io_pipe[STDIN_FILENO][1]);
