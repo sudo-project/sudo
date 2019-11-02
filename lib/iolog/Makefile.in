@@ -27,21 +27,9 @@ top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
-# Where to install things...
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = @bindir@
-sbindir = @sbindir@
-sysconfdir = @sysconfdir@
-libexecdir = @libexecdir@
-datarootdir = @datarootdir@
-localstatedir = @localstatedir@
-
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
-SED = @SED@
-AWK = @AWK@
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
@@ -110,6 +98,11 @@ pvs-log-files: $(POBJS)
 
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
+
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	    --builddir=`pwd`/$(top_builddir) lib/iolog/Makefile.in
+	cd $(top_builddir) && ./config.status --file lib/iolog/Makefile
 
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/iolog/Makefile

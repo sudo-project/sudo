@@ -122,6 +122,11 @@ VERSION = @PACKAGE_VERSION@
 
 all: $(PROGS)
 
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	    --builddir=`pwd`/$(top_builddir) logsrvd/Makefile.in
+	cd $(top_builddir) && ./config.status --file logsrvd/Makefile
+
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file logsrvd/Makefile
 
