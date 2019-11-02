@@ -2740,6 +2740,10 @@ AC_CHECK_FUNCS([fstatat], [], [
     AC_LIBOBJ(fstatat)
     SUDO_APPEND_COMPAT_EXP(sudo_fstatat)
 ])
+AC_CHECK_FUNCS([dup3], [], [
+    AC_LIBOBJ(dup3)
+    SUDO_APPEND_COMPAT_EXP(sudo_dup3)
+])
 AC_CHECK_FUNCS([pipe2], [], [
     AC_LIBOBJ(pipe2)
     SUDO_APPEND_COMPAT_EXP(sudo_pipe2)

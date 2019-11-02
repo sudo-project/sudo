@@ -221,10 +221,12 @@
 # endif
 #endif
 
-/* For pipe2() emulation. */
-#if !defined(HAVE_PIPE2) && defined(O_NONBLOCK) && (!defined(O_CLOEXEC) || O_CLOEXEC > 0xffffffff)
-# undef O_CLOEXEC
-# define O_CLOEXEC	0x80000000
+/* For dup3() and pipe2() emulation. */
+#if (!defined(HAVE_PIPE2) || !defined(HAVE_DUP3)) && defined(O_NONBLOCK)
+# if !defined(O_CLOEXEC) || O_CLOEXEC > 0xffffffff
+#  undef O_CLOEXEC
+#  define O_CLOEXEC	0x80000000
+# endif
 #endif
 
 /*
@@ -544,6 +546,11 @@ __dso_public void sudo_vsyslog(int pri, const char *fmt, va_list ap);
 # undef vsyslog
 # define vsyslog(_a, _b, _c) sudo_vsyslog((_a), (_b), (_c))
 #endif /* HAVE_VSYSLOG */
+#ifndef HAVE_DUP3
+__dso_public int sudo_dup3(int oldd, int newd, int flags);
+# undef dup3
+# define dup3(_a, _b, _c) sudo_dup3((_a), (_b), (_c))
+#endif /* HAVE_DUP3 */
 #ifndef HAVE_PIPE2
 __dso_public int sudo_pipe2(int fildes[2], int flags);
 # undef pipe2

@@ -107,6 +107,7 @@ lib/util/closefrom.c
 lib/util/digest.c
 lib/util/digest_gcrypt.c
 lib/util/digest_openssl.c
+lib/util/dup3.c
 lib/util/event.c
 lib/util/event_poll.c
 lib/util/event_select.c
