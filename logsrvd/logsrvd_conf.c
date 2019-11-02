@@ -321,38 +321,14 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 	sudo_warn(NULL);
 	debug_return_bool(false);
     }
-    host = copy;
 
-    /* Check for IPv6 address like [::0] followed by optional port */
-    if (*host == '[') {
-	host++;
-	port = strchr(host, ']');
-	if (port == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"invalid IPv6 address %s", str);
-	    goto done;
-	}
-	*port++ = '\0';
-	if (*port == ':') {
-	    port++;
-	} else if (*port == '\0') {
-	    port = NULL;		/* no port specified */
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"invalid IPv6 address %s", str);
-	    goto done;
-	}
-    } else {
-	port = strrchr(host, ':');
-	if (port != NULL)
-	    *port++ = '\0';
-    }
-
-    if (port == NULL)
-	port = DEFAULT_PORT_STR;
+    /* Parse host[:port] */
+    if (!sudo_parse_host_port(copy, &host, &port, DEFAULT_PORT_STR))
+	goto done;
     if (host[0] == '*' && host[1] == '\0')
 	host = NULL;
 
+    /* Resolve host (and port if it is a service). */
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;

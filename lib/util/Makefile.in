@@ -115,8 +115,8 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-LTOBJS = @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
-         gettime.lo getgrouplist.lo gidlist.lo lbuf.lo locking.lo \
+LTOBJS = @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
+	 getgrouplist.lo gidlist.lo host_port.lo lbuf.lo locking.lo \
          logfac.lo logpri.lo mkdir_parents.lo parseln.lo progname.lo \
          roundup.lo secure_path.lo setgroups.lo strsplit.lo strtobool.lo \
          strtoid.lo strtomode.lo strtonum.lo sudo_conf.lo \
@@ -744,6 +744,18 @@ hltq_test.i: $(srcdir)/regress/tailq/hltq_test.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 hltq_test.plog: hltq_test.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/tailq/hltq_test.c --i-file $< --output-file $@
+host_port.lo: $(srcdir)/host_port.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/host_port.c
+host_port.i: $(srcdir)/host_port.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+host_port.plog: host_port.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/host_port.c --i-file $< --output-file $@
 inet_pton.lo: $(srcdir)/inet_pton.c $(incdir)/sudo_compat.h \
               $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/inet_pton.c
