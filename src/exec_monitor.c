@@ -409,18 +409,27 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
 	    sudo_fatal("dup2");
 	if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
 	    close(io_fds[SFD_STDIN]);
+    } else {
+	if (fcntl(io_fds[SFD_STDIN], F_SETFD, 0) == -1)
+	    sudo_fatal("fcntl");
     }
     if (io_fds[SFD_STDOUT] != STDOUT_FILENO) {
 	if (dup2(io_fds[SFD_STDOUT], STDOUT_FILENO) == -1)
 	    sudo_fatal("dup2");
 	if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
 	    close(io_fds[SFD_STDOUT]);
+    } else {
+	if (fcntl(io_fds[SFD_STDOUT], F_SETFD, 0) == -1)
+	    sudo_fatal("fcntl");
     }
     if (io_fds[SFD_STDERR] != STDERR_FILENO) {
 	if (dup2(io_fds[SFD_STDERR], STDERR_FILENO) == -1)
 	    sudo_fatal("dup2");
 	if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
 	    close(io_fds[SFD_STDERR]);
+    } else {
+	if (fcntl(io_fds[SFD_STDERR], F_SETFD, 0) == -1)
+	    sudo_fatal("fcntl");
     }
 
     /* Wait for parent to grant us the tty if we are foreground. */

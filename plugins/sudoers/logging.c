@@ -700,7 +700,7 @@ closefrom_nodebug(int lowfd)
 #define MAX_MAILFLAGS	63
 
 static void __attribute__((__noreturn__))
-exec_mailer(int *pfd)
+exec_mailer(int pipein)
 {
     char *last, *p, *argv[MAX_MAILFLAGS + 1];
     char *mflags, *mpath = def_mailerpath;
@@ -722,18 +722,18 @@ exec_mailer(int *pfd)
 #endif /* NO_ROOT_MAILER */
     debug_decl(exec_mailer, SUDOERS_DEBUG_LOGGING)
 
-    /* Set stdin to output side of the pipe */
-    if (pfd[0] != STDIN_FILENO) {
-	if (dup2(pfd[0], STDIN_FILENO) == -1) {
-	    mysyslog(LOG_ERR, _("unable to dup stdin: %m"));
-	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"unable to dup stdin: %s", strerror(errno));
-	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-	    _exit(127);
-	}
-	(void) close(pfd[0]);
+    /* Set stdin to read side of the pipe or clear FD_CLOEXEC */
+    if (pipein == STDIN_FILENO)
+	i = fcntl(pipein, F_SETFD, 0);
+    else 
+    	i = dup2(pipein, STDIN_FILENO);
+    if (i == -1) {
+	mysyslog(LOG_ERR, _("unable to dup stdin: %m"));
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "unable to dup stdin: %s", strerror(errno));
+	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	_exit(127);
     }
-    (void) close(pfd[1]);
 
     /* Build up an argv based on the mailer path and flags */
     if ((mflags = strdup(def_mailerflags)) == NULL) {
@@ -851,7 +851,7 @@ send_mail(const char *fmt, ...)
     /* Close non-debug fds so we don't leak anything. */
     closefrom_nodebug(STDERR_FILENO + 1);
 
-    if (pipe(pfd) == -1) {
+    if (pipe2(pfd, O_CLOEXEC) == -1) {
 	mysyslog(LOG_ERR, _("unable to open pipe: %m"));
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to open pipe: %s",
 	    strerror(errno));
@@ -870,7 +870,7 @@ send_mail(const char *fmt, ...)
 	    break;
 	case 0:
 	    /* Child. */
-	    exec_mailer(pfd);
+	    exec_mailer(pfd[0]);
 	    /* NOTREACHED */
     }
 
