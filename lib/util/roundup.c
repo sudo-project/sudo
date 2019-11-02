@@ -14,27 +14,30 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef SUDO_LOGSRV_UTIL_H
-#define SUDO_LOGSRV_UTIL_H
+#include "config.h"
 
-/* Default port to listen on */
-#define DEFAULT_PORT_STR	"30344"
+#include <sys/types.h>
 
-/* Maximum message size (2Mb) */
-#define MESSAGE_SIZE_MAX	(2 * 1024 * 1024)
+#include "sudo_compat.h"
+#include "sudo_debug.h"
+#include "sudo_util.h"
 
-struct connection_buffer {
-    uint8_t *data;
-    unsigned int size;
-    unsigned int len;
-    unsigned int off;
-};
-
-/* logsrv_util.c */
-struct iolog_file;
-bool expand_buf(struct connection_buffer *buf, unsigned int needed);
-bool iolog_open_all(int dfd, const char *iolog_dir, struct iolog_file *iolog_files, const char *mode);
-bool iolog_seekto(int iolog_dir_fd, const char *iolog_path, struct iolog_file *iolog_files, struct timespec *elapsed_time, const struct timespec *target);
-
-
-#endif /* SUDO_LOGSRV_UTIL_H */
+/*
+ * Round 32-bit unsigned length to the next highest power of two.
+ * Always returns at least 64.
+ * Algorithm from bit twiddling hacks.
+ */
+unsigned int
+sudo_pow2_roundup_v1(unsigned int len)
+{
+    if (len < 64)
+	return 64;
+    len--;
+    len |= len >> 1;
+    len |= len >> 2;
+    len |= len >> 4;
+    len |= len >> 8;
+    len |= len >> 16;
+    len++;
+    return len;
+}

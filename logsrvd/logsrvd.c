@@ -126,7 +126,7 @@ fmt_server_message(struct connection_buffer *buf, ServerMessage *msg)
     /* Resize buffer as needed. */
     if (len > buf->size) {
 	free(buf->data);
-	buf->size = bufsize_roundup(len);
+	buf->size = sudo_pow2_roundup(len);
 	if ((buf->data = malloc(buf->size)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to malloc %u", buf->size);

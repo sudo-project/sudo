@@ -118,7 +118,7 @@ SHELL = @SHELL@
 LTOBJS = @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
          gettime.lo getgrouplist.lo gidlist.lo lbuf.lo locking.lo \
          logfac.lo logpri.lo mkdir_parents.lo parseln.lo progname.lo \
-         secure_path.lo setgroups.lo strsplit.lo strtobool.lo \
+         roundup.lo secure_path.lo setgroups.lo strsplit.lo strtobool.lo \
          strtoid.lo strtomode.lo strtonum.lo sudo_conf.lo \
 	 sudo_debug.lo sudo_dso.lo term.lo ttyname_dev.lo \
 	 ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
@@ -966,6 +966,18 @@ reallocarray.i: $(srcdir)/reallocarray.c $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 reallocarray.plog: reallocarray.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/reallocarray.c --i-file $< --output-file $@
+roundup.lo: $(srcdir)/roundup.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/roundup.c
+roundup.i: $(srcdir)/roundup.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+roundup.plog: roundup.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/roundup.c --i-file $< --output-file $@
 secure_path.lo: $(srcdir)/secure_path.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \

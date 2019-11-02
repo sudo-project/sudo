@@ -244,6 +244,10 @@ __dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned int *
 /* progname.c */
 __dso_public void initprogname(const char *);
 
+/* roundup.c */
+__dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
+#define sudo_pow2_roundup(_a) sudo_pow2_roundup_v1((_a))
+
 /* secure_path.c */
 #define SUDO_PATH_SECURE		0
 #define SUDO_PATH_MISSING		-1

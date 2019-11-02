@@ -186,7 +186,7 @@ read_io_buf(struct client_closure *closure)
     /* Expand buf as needed. */
     if (timing->u.nbytes > closure->bufsize) {
 	free(closure->buf);
-	closure->bufsize = bufsize_roundup(timing->u.nbytes);
+	closure->bufsize = sudo_pow2_roundup(timing->u.nbytes);
 	if ((closure->buf = malloc(closure->bufsize)) == NULL) {
 	    sudo_warn(NULL);
 	    timing->u.nbytes = 0;
@@ -228,7 +228,7 @@ fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
     /* Resize buffer as needed. */
     if (len > buf->size) {
 	free(buf->data);
-	buf->size = bufsize_roundup(len);
+	buf->size = sudo_pow2_roundup(len);
 	if ((buf->data = malloc(buf->size)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to malloc %u", buf->size);

@@ -44,26 +44,6 @@
 #include "logsrv_util.h"
 
 /*
- * Round 32-bit unsigned length to the next highest power of two.
- * Always returns at least 64.
- * Algorithm from bit twiddling hacks.
- */
-unsigned int
-bufsize_roundup(unsigned int len)
-{
-    if (len < 64)
-	return 64;
-    len--;
-    len |= len >> 1;
-    len |= len >> 2;
-    len |= len >> 4;
-    len |= len >> 8;
-    len |= len >> 16;
-    len++;
-    return len;
-}
-
-/*
  * Expand buf as needed or just reset it.
  */
 bool
@@ -74,7 +54,7 @@ expand_buf(struct connection_buffer *buf, unsigned int needed)
 
     if (buf->size < needed) {
 	/* Expand buffer. */
-	needed = bufsize_roundup(needed);
+	needed = sudo_pow2_roundup(needed);
 	if ((newdata = malloc(needed)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to malloc %u", __func__, needed);
