@@ -318,6 +318,8 @@ sudo_askpass(const char *askpass, const char *prompt)
 	}
 	if (setuid(ROOT_UID) == -1)
 	    sudo_warn("setuid(%d)", ROOT_UID);
+	/* Close fds before uid change to prevent prlimit sabotage on Linux. */
+	closefrom(STDERR_FILENO + 1);
 	if (setgid(user_details.gid)) {
 	    sudo_warn(U_("unable to set gid to %u"), (unsigned int)user_details.gid);
 	    _exit(255);
@@ -326,7 +328,6 @@ sudo_askpass(const char *askpass, const char *prompt)
 	    sudo_warn(U_("unable to set uid to %u"), (unsigned int)user_details.uid);
 	    _exit(255);
 	}
-	closefrom(STDERR_FILENO + 1);
 	execl(askpass, askpass, prompt, (char *)NULL);
 	sudo_warn(U_("unable to run %s"), askpass);
 	_exit(255);
