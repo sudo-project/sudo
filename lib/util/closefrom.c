@@ -42,8 +42,8 @@
 #include "sudo_util.h"
 #include "pathnames.h"
 
-#ifndef _POSIX_OPEN_MAX
-# define _POSIX_OPEN_MAX	20
+#ifndef OPEN_MAX
+# define OPEN_MAX	256
 #endif
 
 /*
@@ -56,13 +56,19 @@ closefrom_fallback(int lowfd)
     long fd, maxfd;
 
     /*
-     * Fall back on sysconf(_SC_OPEN_MAX).  We avoid checking
-     * resource limits since it is possible to open a file descriptor
-     * and then drop the rlimit such that it is below the open fd.
+     * Fall back on sysconf(_SC_OPEN_MAX).  This is equivalent to
+     * checking the RLIMIT_NOFILE soft limit.  It is possible for
+     * there to be open file descriptors past this limit but there's
+     * not much we can do about that since the hard limit may be
+     * RLIM_INFINITY (LLONG_MAX or ULLONG_MAX on modern systems).
      */
     maxfd = sysconf(_SC_OPEN_MAX);
-    if (maxfd < 0)
-	maxfd = _POSIX_OPEN_MAX;
+    if (maxfd < OPEN_MAX)
+	maxfd = OPEN_MAX;
+
+    /* Make sure we didn't get RLIM_INFINITY as the upper limit. */
+    if (maxfd > INT_MAX)
+	madfd = INT_MAX;
 
     for (fd = lowfd; fd < maxfd; fd++) {
 #ifdef __APPLE__
