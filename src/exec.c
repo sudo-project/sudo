@@ -56,13 +56,38 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
+static void
+close_fds(struct command_details *details, int errfd)
+{
+    int fd, maxfd;
+    unsigned char *debug_fds;
+    debug_decl(close_fds, SUDO_DEBUG_EXEC)
+
+    if (details->closefrom < 0)
+	debug_return;
+
+    /* Preserve debug fds and error pipe as needed. */
+    maxfd = sudo_debug_get_fds(&debug_fds);
+    for (fd = 0; fd <= maxfd; fd++) {
+	if (sudo_isset(debug_fds, fd))
+	    add_preserved_fd(&details->preserved_fds, fd);
+    }
+    if (errfd != -1)
+	add_preserved_fd(&details->preserved_fds, errfd);
+
+    /* Close all fds except those explicitly preserved. */
+    closefrom_except(details->closefrom, &details->preserved_fds);
+
+    debug_return;
+}
+
 /*
  * Setup the execution environment immediately prior to the call to execve().
  * Group setup is performed by policy_init_session(), called earlier.
  * Returns true on success and false on failure.
  */
 static bool
-exec_setup(struct command_details *details)
+exec_setup(struct command_details *details, int errfd)
 {
     bool ret = false;
     debug_decl(exec_setup, SUDO_DEBUG_EXEC)
@@ -145,6 +170,9 @@ exec_setup(struct command_details *details)
     if (ISSET(details->flags, CD_OVERRIDE_UMASK))
 	(void) umask(details->umask);
 
+    /* Close fds before chroot (need /dev) or uid change (prlimit on Linux). */
+    close_fds(details, errfd);
+
     if (details->chroot) {
 	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
 	    sudo_warn(U_("unable to change root to %s"), details->chroot);
@@ -215,24 +243,8 @@ exec_cmnd(struct command_details *details, int errfd)
     debug_decl(exec_cmnd, SUDO_DEBUG_EXEC)
 
     restore_signals();
-    if (exec_setup(details) == true) {
+    if (exec_setup(details, errfd) == true) {
 	/* headed for execve() */
-	if (details->closefrom >= 0) {
-	    int fd, maxfd;
-	    unsigned char *debug_fds;
-
-	    /* Preserve debug fds and error pipe as needed. */
-	    maxfd = sudo_debug_get_fds(&debug_fds);
-	    for (fd = 0; fd <= maxfd; fd++) {
-		if (sudo_isset(debug_fds, fd))
-		    add_preserved_fd(&details->preserved_fds, fd);
-	    }
-	    if (errfd != -1)
-		add_preserved_fd(&details->preserved_fds, errfd);
-
-	    /* Close all fds except those explicitly preserved. */
-	    closefrom_except(details->closefrom, &details->preserved_fds);
-	}
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	    selinux_execve(details->execfd, details->command, details->argv,
