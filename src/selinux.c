@@ -227,6 +227,8 @@ relabel_tty(const char *ttyn, int ptyfd)
     }
 
     if (ptyfd != -1) {
+	int oflags, flags = 0;
+
 	/* Reopen pty that was relabeled, std{in,out,err} are reset later. */
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY, 0);
 	if (se_state.ttyfd == -1 || fstat(se_state.ttyfd, &sb) == -1) {
@@ -238,8 +240,21 @@ relabel_tty(const char *ttyn, int ptyfd)
 		ttyn);
 	    goto bad;
 	}
-	if (dup2(se_state.ttyfd, ptyfd) == -1) {
-	    sudo_warn("dup2");
+	/* Preserve O_NONBLOCK and the close-on-exec flags. */
+	if ((oflags = fcntl(ptyfd, F_GETFL)) == -1) {
+	    sudo_warn("F_GETFL");
+	    goto bad;
+	}
+	if (ISSET(oflags, O_NONBLOCK))
+	    flags |= O_NONBLOCK;
+	if ((oflags = fcntl(ptyfd, F_GETFD)) == -1) {
+	    sudo_warn("F_GETFD");
+	    goto bad;
+	}
+	if (ISSET(oflags, FD_CLOEXEC))
+	    flags |= O_CLOEXEC;
+	if (dup3(se_state.ttyfd, ptyfd, flags) == -1) {
+	    sudo_warn("dup3");
 	    goto bad;
 	}
     } else {

@@ -722,12 +722,8 @@ exec_mailer(int pipein)
 #endif /* NO_ROOT_MAILER */
     debug_decl(exec_mailer, SUDOERS_DEBUG_LOGGING)
 
-    /* Set stdin to read side of the pipe or clear FD_CLOEXEC */
-    if (pipein == STDIN_FILENO)
-	i = fcntl(pipein, F_SETFD, 0);
-    else 
-    	i = dup2(pipein, STDIN_FILENO);
-    if (i == -1) {
+    /* Set stdin to read side of the pipe. */
+    if (dup3(pipein, STDIN_FILENO, 0) == -1) {
 	mysyslog(LOG_ERR, _("unable to dup stdin: %m"));
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "unable to dup stdin: %s", strerror(errno));

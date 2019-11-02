@@ -404,33 +404,18 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
     setpgid(0, self);
 
     /* Wire up standard fds, note that stdout/stderr may be pipes. */
-    if (io_fds[SFD_STDIN] != STDIN_FILENO) {
-	if (dup2(io_fds[SFD_STDIN], STDIN_FILENO) == -1)
-	    sudo_fatal("dup2");
-	if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
-	    close(io_fds[SFD_STDIN]);
-    } else {
-	if (fcntl(io_fds[SFD_STDIN], F_SETFD, 0) == -1)
-	    sudo_fatal("fcntl");
-    }
-    if (io_fds[SFD_STDOUT] != STDOUT_FILENO) {
-	if (dup2(io_fds[SFD_STDOUT], STDOUT_FILENO) == -1)
-	    sudo_fatal("dup2");
-	if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
-	    close(io_fds[SFD_STDOUT]);
-    } else {
-	if (fcntl(io_fds[SFD_STDOUT], F_SETFD, 0) == -1)
-	    sudo_fatal("fcntl");
-    }
-    if (io_fds[SFD_STDERR] != STDERR_FILENO) {
-	if (dup2(io_fds[SFD_STDERR], STDERR_FILENO) == -1)
-	    sudo_fatal("dup2");
-	if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
-	    close(io_fds[SFD_STDERR]);
-    } else {
-	if (fcntl(io_fds[SFD_STDERR], F_SETFD, 0) == -1)
-	    sudo_fatal("fcntl");
-    }
+    if (dup3(io_fds[SFD_STDIN], STDIN_FILENO, 0) == -1)
+	sudo_fatal("dup3");
+    if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
+	close(io_fds[SFD_STDIN]);
+    if (dup3(io_fds[SFD_STDOUT], STDOUT_FILENO, 0) == -1)
+	sudo_fatal("dup3");
+    if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
+	close(io_fds[SFD_STDOUT]);
+    if (dup3(io_fds[SFD_STDERR], STDERR_FILENO, 0) == -1)
+	sudo_fatal("dup3");
+    if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
+	close(io_fds[SFD_STDERR]);
 
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
