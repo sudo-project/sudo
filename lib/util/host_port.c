@@ -35,7 +35,7 @@
 /*
  * Parse a string in the form host[:port] where host can also be
  * an IPv4 address or an IPv6 address in square brackets.
- * Modifies str.
+ * Fills in hostp and portp which may point within str, which is modified.
  */
 bool
 sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport)
@@ -71,6 +71,9 @@ sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport)
 
     if (port == NULL)
 	port = defport;
+
+    *hostp = host;
+    *portp = port;
 
     ret = true;
 
