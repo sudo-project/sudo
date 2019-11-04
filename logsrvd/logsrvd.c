@@ -1150,7 +1150,7 @@ static void
 register_signal(int signo, struct sudo_event_base *base)
 {
     struct sudo_event *ev;
-    debug_decl(register_listener, SUDO_DEBUG_UTIL)
+    debug_decl(register_signal, SUDO_DEBUG_UTIL)
 
     ev = sudo_ev_alloc(signo, SUDO_EV_SIGNAL, signal_cb, base);
     if (ev == NULL)
