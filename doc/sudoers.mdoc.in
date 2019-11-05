@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd October 20, 2019
+.Dd November 5, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -911,7 +911,17 @@ is a command built into
 .Nm sudo
 itself and must be specified in the
 .Em sudoers
-file without a leading path.
+file
+.Sy without
+a leading path.
+If a leading path is present, for example
+.Pa /usr/bin/sudoedit ,
+the path name will be silently converted to
+.Dq Li sudoedit .
+A fully-qualified path for
+.Nm sudoedit
+is treated as an error by
+.Nm visudo .
 .Pp
 If a
 .Li command name

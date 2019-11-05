@@ -198,7 +198,7 @@ sudoers_policy_init(void *info, char * const envp[])
      */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
-    init_parser(sudoers_file, false);
+    init_parser(sudoers_file, false, false);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
 	if (nss->open(nss) == -1 || (nss->parse_tree = nss->parse(nss)) == NULL) {
 	    TAILQ_REMOVE(snl, nss, entries);
@@ -516,7 +516,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
     if (def_group_plugin)
 	group_plugin_unload();
-    init_parser(NULL, false);
+    init_parser(NULL, false, false);
 
     if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
 	/* ret already set appropriately */
@@ -864,6 +864,14 @@ set_cmnd(void)
 	user_base++;
     else
 	user_base = user_cmnd;
+
+    /* Convert "sudo sudoedit" -> "sudoedit" */
+    if (ISSET(sudo_mode, MODE_RUN) && strcmp(user_base, "sudoedit") == 0) {
+	CLR(sudo_mode, MODE_RUN);
+	SET(sudo_mode, MODE_EDIT);
+	sudo_warnx(U_("sudoedit doesn't need to be run via sudo"));
+	user_base = user_cmnd = "sudoedit";
+    }
 
     TAILQ_FOREACH(nss, snl, entries) {
 	if (!update_defaults(nss->parse_tree, NULL, SETDEF_CMND, false)) {
