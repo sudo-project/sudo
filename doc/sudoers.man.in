@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "November 5, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -947,7 +947,17 @@ is a command built into
 \fBsudo\fR
 itself and must be specified in the
 \fIsudoers\fR
-file without a leading path.
+file
+\fBwithout\fR
+a leading path.
+If a leading path is present, for example
+\fI/usr/bin/sudoedit\fR,
+the path name will be silently converted to
+\(lq\fRsudoedit\fR\(rq.
+A fully-qualified path for
+\fBsudoedit\fR
+is treated as an error by
+\fBvisudo\fR.
 .PP
 If a
 \fRcommand name\fR

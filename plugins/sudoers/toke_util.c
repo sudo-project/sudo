@@ -124,6 +124,22 @@ fill_cmnd(const char *src, size_t len)
     }
     *dst = '\0';
 
+    /* Check for sudoedit specified as a fully-qualified path. */
+    if ((dst = strrchr(sudoerslval.command.cmnd, '/')) != NULL) {
+	if (strcmp(dst, "/sudoedit") == 0) {
+	    if (sudoers_strict) {
+		sudoerserror(
+		    N_("sudoedit should not be specified with a path"));
+	    }
+	    free(sudoerslval.command.cmnd);
+	    if ((sudoerslval.command.cmnd = strdup("sudoedit")) == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		debug_return_bool(false);
+	    }
+	}
+    }
+
     debug_return_bool(true);
 }
 

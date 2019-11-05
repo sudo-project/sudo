@@ -56,6 +56,7 @@
  * Globals
  */
 bool sudoers_warnings = true;
+bool sudoers_strict = false;
 bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
@@ -1289,7 +1290,7 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *path, bool quiet)
+init_parser(const char *path, bool quiet, bool strict)
 {
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
@@ -1312,6 +1313,7 @@ init_parser(const char *path, bool quiet)
     rcstr_delref(errorfile);
     errorfile = NULL;
     sudoers_warnings = !quiet;
+    sudoers_strict = strict;
 
     debug_return_bool(ret);
 }
