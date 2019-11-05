@@ -347,11 +347,6 @@ fmt_accept_message(struct client_closure *closure)
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
-    accept_msg.info_msgs[n]->key = "cwd";
-    accept_msg.info_msgs[n]->strval = log_info->cwd;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
     accept_msg.info_msgs[n]->key = "lines";
     accept_msg.info_msgs[n]->numval = log_info->lines;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
@@ -371,6 +366,11 @@ fmt_accept_message(struct client_closure *closure)
 
     accept_msg.info_msgs[n]->key = "runuser";
     accept_msg.info_msgs[n]->strval = log_info->runas_user;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    accept_msg.info_msgs[n]->key = "submitcwd";
+    accept_msg.info_msgs[n]->strval = log_info->cwd;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 

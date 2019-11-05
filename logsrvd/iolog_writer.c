@@ -181,20 +181,6 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		}
 		continue;
 	    }
-	    if (strcmp(key, "cwd") == 0) {
-		if (has_strval(info)) {
-		    if ((details->cwd = strdup(info->strval)) == NULL) {
-			sudo_debug_printf(
-			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-			    "strdup");
-			goto done;
-		    }
-		} else {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"cwd specified but not a string");
-		}
-		continue;
-	    }
 	    break;
 	case 'l':
 	    if (strcmp(key, "lines") == 0) {
@@ -253,9 +239,9 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    break;
 	case 's':
-	    if (strcmp(key, "submithost") == 0) {
+	    if (strcmp(key, "submitcwd") == 0) {
 		if (has_strval(info)) {
-		    if ((details->submithost = strdup(info->strval)) == NULL) {
+		    if ((details->cwd = strdup(info->strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -263,7 +249,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"submithost specified but not a string");
+			"submitcwd specified but not a string");
 		}
 		continue;
 	    }
@@ -278,6 +264,20 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"submitgroup specified but not a string");
+		}
+		continue;
+	    }
+	    if (strcmp(key, "submithost") == 0) {
+		if (has_strval(info)) {
+		    if ((details->submithost = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"submithost specified but not a string");
 		}
 		continue;
 	    }
@@ -315,16 +315,6 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	}
     }
 
-    /* TODO: make submitgroup required */
-    if (details->submitgroup == NULL) {
-	if ((details->submitgroup = strdup("unknown")) == NULL) {
-	    sudo_debug_printf(
-		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"strdup");
-	    goto done;
-	}
-    }
-
     /* Check for required settings */
     if (details->submituser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -345,6 +335,33 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing command in AcceptMessage");
 	goto done;
+    }
+
+    /* Other settings that must exist for event logging. */
+    if (details->cwd == NULL) {
+	if ((details->cwd = strdup("unknown")) == NULL) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"strdup");
+	    goto done;
+	}
+    }
+    if (details->submitgroup == NULL) {
+	/* TODO: make submitgroup required */
+	if ((details->submitgroup = strdup("unknown")) == NULL) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"strdup");
+	    goto done;
+	}
+    }
+    if (details->ttyname == NULL) {
+	if ((details->ttyname = strdup("unknown")) == NULL) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"strdup");
+	    goto done;
+	}
     }
 
     ret = true;
