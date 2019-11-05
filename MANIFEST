@@ -156,6 +156,7 @@ lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
+lib/util/regress/host_port/host_port_test.c  
 lib/util/regress/mktemp/mktemp_test.c
 lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c

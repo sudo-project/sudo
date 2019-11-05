@@ -71,6 +71,8 @@ sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport)
 
     if (port == NULL)
 	port = defport;
+    else if (*port == '\0')
+	goto done;
 
     *hostp = host;
     *portp = port;
