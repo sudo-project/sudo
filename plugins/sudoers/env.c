@@ -940,7 +940,8 @@ rebuild_env(void)
 #endif /* HAVE_LOGIN_CAP_H */
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	    /* Insert system-wide environment variables. */
-	    read_env_file(_PATH_ENVIRONMENT, true, false);
+	    if (!read_env_file(_PATH_ENVIRONMENT, true, false))
+		sudo_warn("%s", _PATH_ENVIRONMENT);
 #endif
 	    for (ep = env.envp; *ep; ep++)
 		env_update_didvar(*ep, &didvar);
@@ -1218,8 +1219,10 @@ env_file_open_local(const char *path)
     efl = calloc(1, sizeof(*efl));
     if (efl != NULL) {
 	if ((efl->fp = fopen(path, "r")) == NULL) {
-	    free(efl);
-	    efl = NULL;
+	    if (errno != ENOENT) {
+		free(efl);
+		efl = NULL;
+	    }
 	}
     }
     debug_return_ptr(efl);
@@ -1259,6 +1262,9 @@ env_file_next_local(void *cookie, int *errnum)
     debug_decl(env_file_next_local, SUDOERS_DEBUG_ENV)
 
     *errnum = 0;
+    if (efl->fp == NULL)
+	debug_return_ptr(NULL);
+
     for (;;) {
 	if (sudo_parseln(&efl->line, &efl->linesize, NULL, efl->fp, PARSELN_CONT_IGN) == -1) {
 	    if (!feof(efl->fp))
