@@ -68,7 +68,7 @@ closefrom_fallback(int lowfd)
 
     /* Make sure we didn't get RLIM_INFINITY as the upper limit. */
     if (maxfd > INT_MAX)
-	madfd = INT_MAX;
+	maxfd = INT_MAX;
 
     for (fd = lowfd; fd < maxfd; fd++) {
 #ifdef __APPLE__
