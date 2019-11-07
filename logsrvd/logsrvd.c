@@ -1120,6 +1120,8 @@ connection_closure_alloc(int sock)
     if ((closure = calloc(1, sizeof(*closure))) == NULL)
 	debug_return_ptr(NULL);
 
+    TAILQ_INSERT_TAIL(&connections, closure, entries);
+
     if (logsrvd_conf_get_tls_opt() == true) {
         if ((closure->ssl = SSL_new(logsrvd_get_tls_runtime()->ssl_ctx)) == NULL) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1167,7 +1169,6 @@ connection_closure_alloc(int sock)
     if (closure->write_ev == NULL)
 	goto bad;
 
-    TAILQ_INSERT_TAIL(&connections, closure, entries);
     debug_return_ptr(closure);
 bad:
     connection_closure_free(closure);
