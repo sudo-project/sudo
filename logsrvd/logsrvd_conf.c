@@ -67,10 +67,12 @@ struct logsrvd_config_section {
 
 static struct logsrvd_config {
     struct logsrvd_config_server {
-        bool tls;
         struct listen_address_list addresses;
+#if defined(HAVE_OPENSSL)
+        bool tls;
         struct logsrvd_tls_config tls_config;
         struct logsrvd_tls_runtime tls_runtime;
+#endif
     } server;
     struct logsrvd_config_iolog {
 	bool compress;
@@ -126,6 +128,7 @@ logsrvd_conf_listen_address(void)
     return &logsrvd_config->server.addresses;
 }
 
+#if defined(HAVE_OPENSSL)
 bool
 logsrvd_conf_get_tls_opt(void)
 {
@@ -143,6 +146,7 @@ logsrvd_get_tls_runtime(void)
 {
     return &logsrvd_config->server.tls_runtime;
 }
+#endif
 
 /* eventlog getters */
 enum logsrvd_eventlog_type
@@ -379,6 +383,7 @@ done:
     debug_return_bool(ret);
 }
 
+#if defined(HAVE_OPENSSL)
 static bool
 cb_tls_opt(struct logsrvd_config *config, const char *str)
 {
@@ -482,6 +487,7 @@ cb_tls_checkpeer(struct logsrvd_config *config, const char *str)
     config->server.tls_config.check_peer = val;
     debug_return_bool(true);
 }
+#endif
 
 /* eventlog callbacks */
 static bool
@@ -638,6 +644,7 @@ cb_logfile_time_format(struct logsrvd_config *config, const char *str)
 
 static struct logsrvd_config_entry server_conf_entries[] = {
     { "listen_address", cb_listen_address },
+#if defined(HAVE_OPENSSL)
     { "tls", cb_tls_opt },
     { "tls_key", cb_tls_key },
     { "tls_cacert", cb_tls_cacert },
@@ -646,6 +653,7 @@ static struct logsrvd_config_entry server_conf_entries[] = {
     { "tls_ciphers_v12", cb_tls_ciphers12 },
     { "tls_ciphers_v13", cb_tls_ciphers13 },
     { "tls_checkpeer", cb_tls_checkpeer },
+#endif
     { NULL }
 };
 

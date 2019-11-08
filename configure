@@ -744,6 +744,7 @@ LOCALEDIR_SUFFIX
 SUDO_NLS
 LIBPTHREAD
 LIBMD
+OPENSSL_LIBS
 LIBINTL
 LIBRT
 LIBDL
@@ -3152,6 +3153,7 @@ PSMAN=0
 SEMAN=0
 LIBINTL=
 LIBMD=
+OPENSSL_LIBS=
 ZLIB=
 ZLIB_SRC=
 AUTH_OBJS=
@@ -6428,6 +6430,7 @@ if test "${enable_openssl+set}" = set; then :
   enableval=$enable_openssl;  case $enableval in
     no)		;;
     *)		LIBMD="-lcrypto"
+        OPENSSL_LIBS="-lcrypto -lssl"
 		DIGEST=digest_openssl.lo
 		$as_echo "#define HAVE_OPENSSL 1" >>confdefs.h
 

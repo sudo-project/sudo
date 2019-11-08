@@ -40,8 +40,10 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+#endif
 
 #include "log_server.pb-c.h"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
@@ -63,8 +65,10 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-#define LOGSRVD_DEFAULT_CIPHER_LST12 "HIGH:!aNULL"
-#define LOGSRVD_DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"
+#if defined(HAVE_OPENSSL)
+# define LOGSRVD_DEFAULT_CIPHER_LST12 "HIGH:!aNULL"
+# define LOGSRVD_DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"
+#endif
 
 /*
  * Sudo I/O audit server.
@@ -87,12 +91,13 @@ connection_closure_free(struct connection_closure *closure)
     if (closure != NULL) {
 	bool shutting_down = closure->state == SHUTDOWN;
 
+#if defined(HAVE_OPENSSL)
     /* deallocate the connection's ssl object */
     if (logsrvd_conf_get_tls_opt() == true) {
         if (closure->ssl)
             SSL_free(closure->ssl);
     }
-
+#endif
 	TAILQ_REMOVE(&connections, closure, entries);
 	close(closure->sock);
 	iolog_close_all(closure);
@@ -568,11 +573,12 @@ shutdown_cb(int unused, int what, void *v)
     struct sudo_event_base *base = v;
     debug_decl(shutdown_cb, SUDO_DEBUG_UTIL)
 
+#if defined(HAVE_OPENSSL)
     /* deallocate server's SSL context object */
     if (logsrvd_conf_get_tls_opt() == true) {
         SSL_CTX_free(logsrvd_get_tls_runtime()->ssl_ctx);
     }
-
+#endif
     sudo_ev_loopbreak(base);
 
     debug_return;
@@ -631,11 +637,15 @@ server_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to client",
 	__func__, buf->len - buf->off);
 
+#if defined(HAVE_OPENSSL)
     if (logsrvd_conf_get_tls_opt() == true) {
         nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
     } else {
         nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
     }
+#else
+    nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+#endif
 
     if (nwritten == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -674,11 +684,16 @@ client_msg_cb(int fd, int what, void *v)
     ssize_t nread;
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
 
+#if defined(HAVE_OPENSSL)
     if (logsrvd_conf_get_tls_opt() == true) {
         nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
     } else {
         nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
     }
+#else
+        nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+#endif
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client",
 	__func__, nread);
     switch (nread) {
@@ -810,6 +825,7 @@ signal_cb(int signo, int what, void *v)
     debug_return;
 }
 
+#if defined(HAVE_OPENSSL)
 static X509 *
 load_cert(const char *file)
 {
@@ -1107,6 +1123,7 @@ bad:
 good:
     debug_return_ptr(ctx);
 }
+#endif
 
 /*
  * Allocate a new connection closure.
@@ -1122,6 +1139,7 @@ connection_closure_alloc(int sock)
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
 
+#if defined(HAVE_OPENSSL)
     if (logsrvd_conf_get_tls_opt() == true) {
         if ((closure->ssl = SSL_new(logsrvd_get_tls_runtime()->ssl_ctx)) == NULL) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1144,7 +1162,7 @@ connection_closure_alloc(int sock)
             goto bad;
         }
     }
-
+#endif
 
     closure->iolog_dir_fd = -1;
     closure->sock = sock;
@@ -1272,12 +1290,6 @@ register_listener(struct listen_address *addr, struct sudo_event_base *base)
     debug_decl(register_listener, SUDO_DEBUG_UTIL)
 
     sock = create_listener(addr);
-
-    if (logsrvd_conf_get_tls_opt() == true) {
-        struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
-        if ((tls_runtime->ssl_ctx = init_tls_server_context()) == NULL)
-            sudo_fatal(NULL);
-    }
 
     if (sock != -1) {
         ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, base);
@@ -1459,6 +1471,14 @@ main(int argc, char *argv[])
 
     TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries)
 	register_listener(addr, evbase);
+
+#if defined(HAVE_OPENSSL)
+    if (logsrvd_conf_get_tls_opt() == true) {
+        struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
+        if ((tls_runtime->ssl_ctx = init_tls_server_context()) == NULL)
+            sudo_fatal(NULL);
+    }
+#endif
 
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);

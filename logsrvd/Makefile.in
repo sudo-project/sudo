@@ -72,6 +72,8 @@ PIE_LDFLAGS = @PIE_LDFLAGS@
 SSP_CFLAGS = @SSP_CFLAGS@
 SSP_LDFLAGS = @SSP_LDFLAGS@
 
+OPENSSL_LIBS = @OPENSSL_LIBS@
+
 # cppcheck options, usually set in the top-level Makefile
 CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -Dva_copy=va_copy -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX -U__NBBY -DNSIG=64
 
@@ -145,7 +147,7 @@ Makefile: $(srcdir)/Makefile.in
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
 sudo_logsrvd: $(LOGSRVD_OBJS) $(LT_LIBS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LOGSRVD_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LOGSRVD_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) $(OPENSSL_LIBS)
 
 sudo_sendlog: $(SENDLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SENDLOG_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
