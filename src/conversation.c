@@ -53,8 +53,9 @@ int
 sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
+    int ttyfd = -1;
     char *pass;
-    int fd, n;
+    int n;
     const int conv_debug_instance = sudo_debug_get_active_instance();
 
     sudo_debug_set_active_instance(sudo_debug_instance);
@@ -91,17 +92,29 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		/* FALLTHROUGH */
 	    case SUDO_CONV_INFO_MSG:
 		if (msg->msg != NULL) {
-		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY)) {
-			/* Try writing to /dev/tty first. */
-			if ((fd = open(_PATH_TTY, O_WRONLY)) != -1) {
-			    ssize_t nwritten =
-				write(fd, msg->msg, strlen(msg->msg));
-			    close(fd);
-			    if (nwritten != -1)
-				break;
+		    size_t len = strlen(msg->msg);
+		    const char *crnl = NULL;
+
+		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY))
+			ttyfd = open(_PATH_TTY, O_WRONLY);
+		    if (len != 0 && (ttyfd != -1 || isatty(fileno(fp)))) {
+			/* Convert nl -> cr nl in case tty is in raw mode. */
+			if (msg->msg[len - 1] == '\n') {
+			    if (len == 1 || msg->msg[len - 2] != '\r') {
+				len--;
+				crnl = "\r\n";
+			    }
 			}
 		    }
-		    if (fputs(msg->msg, fp) == EOF)
+		    if (ttyfd != -1) {
+			/* Try writing to tty but fall back to fp on error. */
+			if ((len == 0 || write(ttyfd, msg->msg, len) != -1) &&
+				(crnl == NULL || write(ttyfd, crnl, 2) != -1))
+			    break;
+		    }
+		    if (len != 0 && fwrite(msg->msg, 1, len, fp) == 0)
+			goto err;
+		    if (crnl != NULL && fwrite(crnl, 1, 2, fp) == 0)
 			goto err;
 		}
 		break;
@@ -109,6 +122,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		goto err;
 	}
     }
+    if (ttyfd != -1)
+	close(ttyfd);
 
     sudo_debug_set_active_instance(conv_debug_instance);
     return 0;
@@ -125,6 +140,8 @@ err:
 	    repl->reply = NULL;
 	} while (n--);
     }
+    if (ttyfd != -1)
+	close(ttyfd);
 
     sudo_debug_set_active_instance(conv_debug_instance);
     return -1;
