@@ -36,6 +36,7 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
+#include <unistd.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
@@ -227,7 +228,7 @@ warning(const char *errstr, const char *fmt, va_list ap)
 	    msgs[nmsgs++].msg = errstr;
         }
 	msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
-	msgs[nmsgs++].msg = "\r\n";
+	msgs[nmsgs++].msg = "\n";
 	sudo_warn_conversation(nmsgs, msgs, NULL, NULL);
 	if (buf != static_buf)
 	    free(buf);
@@ -242,7 +243,9 @@ warning(const char *errstr, const char *fmt, va_list ap)
             fputs(": ", stderr);
             fputs(errstr, stderr);
         }
-        fputs("\r\n", stderr);
+        if (isatty(fileno(stderr)))
+            putc('\r', stderr);
+        putc('\n', stderr);
     }
 
     /* Restore old locale as needed. */
