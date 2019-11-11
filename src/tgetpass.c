@@ -327,6 +327,10 @@ sudo_askpass(const char *askpass, const char *prompt)
 	    sudo_warn("setuid(%d)", ROOT_UID);
 	/* Close fds before uid change to prevent prlimit sabotage on Linux. */
 	closefrom(STDERR_FILENO + 1);
+	/* Run the askpass program with the user's original resource limits. */
+	restore_limits();
+	/* But avoid a setuid() failure on Linux due to RLIMIT_NPROC. */
+	unlimit_nproc();
 	if (setgid(user_details.gid)) {
 	    sudo_warn(U_("unable to set gid to %u"), (unsigned int)user_details.gid);
 	    _exit(255);
@@ -335,6 +339,7 @@ sudo_askpass(const char *askpass, const char *prompt)
 	    sudo_warn(U_("unable to set uid to %u"), (unsigned int)user_details.uid);
 	    _exit(255);
 	}
+	restore_nproc();
 	execl(askpass, askpass, prompt, (char *)NULL);
 	sudo_warn(U_("unable to run %s"), askpass);
 	_exit(255);
