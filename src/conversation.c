@@ -76,6 +76,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    SET(flags, TGP_NOECHO_TRY);
 	    read_pass:
 		/* Read the password unless interrupted. */
+		if (replies == NULL)
+		    goto err;
 		pass = tgetpass(msg->msg, msg->timeout, flags, callback);
 		if (pass == NULL)
 		    goto err;
@@ -115,7 +117,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 
 err:
     /* Zero and free allocated memory and return an error. */
-    if (replies != 0) {
+    if (replies != NULL) {
 	do {
 	    struct sudo_conv_reply *repl = &replies[n];
 	    if (repl->reply == NULL)
