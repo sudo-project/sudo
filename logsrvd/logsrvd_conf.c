@@ -68,6 +68,7 @@ struct logsrvd_config_section {
 static struct logsrvd_config {
     struct logsrvd_config_server {
         struct listen_address_list addresses;
+        int timeout;
 #if defined(HAVE_OPENSSL)
         bool tls;
         struct logsrvd_tls_config tls_config;
@@ -126,6 +127,12 @@ struct listen_address_list *
 logsrvd_conf_listen_address(void)
 {
     return &logsrvd_config->server.addresses;
+}
+
+int
+logsrvd_conf_get_sock_timeout(void)
+{
+    return logsrvd_config->server.timeout;
 }
 
 #if defined(HAVE_OPENSSL)
@@ -398,6 +405,22 @@ cb_tls_opt(struct logsrvd_config *config, const char *str)
 }
 
 static bool
+cb_timeout(struct logsrvd_config *config, const char *str)
+{
+    int timeout;
+    const char* errstr;
+    debug_decl(cb_timeout, SUDO_DEBUG_UTIL)
+
+    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+    if (errstr != NULL)
+	debug_return_bool(false);
+
+    config->server.timeout = timeout;
+
+    debug_return_bool(true);
+}
+
+static bool
 cb_tls_key(struct logsrvd_config *config, const char *path)
 {
     debug_decl(cb_tls_key, SUDO_DEBUG_UTIL)
@@ -644,6 +667,7 @@ cb_logfile_time_format(struct logsrvd_config *config, const char *str)
 
 static struct logsrvd_config_entry server_conf_entries[] = {
     { "listen_address", cb_listen_address },
+    { "timeout", cb_timeout },
 #if defined(HAVE_OPENSSL)
     { "tls", cb_tls_opt },
     { "tls_key", cb_tls_key },
@@ -823,6 +847,7 @@ logsrvd_conf_alloc(void)
 
     /* Server defaults */
     TAILQ_INIT(&config->server.addresses);
+    config->server.timeout = DEFAULT_SOCKET_TIMEOUT_SEC;
 
     /* I/O log defaults */
     config->iolog.compress = false;

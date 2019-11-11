@@ -32,6 +32,9 @@
 /* Default listen address (port 30344 on all interfaces). */
 #define DEFAULT_LISTEN_ADDR	"*:" DEFAULT_PORT_STR
 
+/* Default timeout value for server socket */
+#define DEFAULT_SOCKET_TIMEOUT_SEC 30
+
 /* How often to send an ACK to the client (commit point) in seconds */
 #define ACK_FREQUENCY	10
 
@@ -164,6 +167,7 @@ bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct listen_address_list *logsrvd_conf_listen_address(void);
+int logsrvd_conf_get_sock_timeout(void);
 #if defined(HAVE_OPENSSL)
 bool logsrvd_conf_get_tls_opt(void);
 const struct logsrvd_tls_config *logsrvd_get_tls_config(void);

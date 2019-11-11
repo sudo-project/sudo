@@ -1226,6 +1226,7 @@ static int
 create_listener(struct listen_address *addr)
 {
     int flags, i, sock;
+    struct timeval timeout;
     debug_decl(create_listener, SUDO_DEBUG_UTIL)
 
     if ((sock = socket(addr->sa_un.sa.sa_family, SOCK_STREAM, 0)) == -1) {
@@ -1235,6 +1236,12 @@ create_listener(struct listen_address *addr)
     i = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i)) == -1)
 	sudo_warn("SO_REUSEADDR");
+    timeout.tv_sec = logsrvd_conf_get_sock_timeout();
+    timeout.tv_usec = 0;
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1)
+	sudo_warn("SO_RCVTIMEO");
+    if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) == -1)
+	sudo_warn("SO_SNDTIMEO");
     if (bind(sock, &addr->sa_un.sa, addr->sa_len) == -1) {
 	sudo_warn("bind");
 	goto bad;
