@@ -47,27 +47,35 @@
 # define SUDO_OPEN_MAX	256
 #endif
 
+/*
+ * macOS doesn't allow nofile soft limit to be infinite or
+ * the stack hard limit to be infinite.
+ * Linux containers have a problem with an infinite stack soft limit.
+ */
+static struct rlimit nofile_fallback = { SUDO_OPEN_MAX, RLIM_INFINITY };
+static struct rlimit stack_fallback = { 8192 * 1024, 65532 * 1024 };
+
 static struct saved_limit {
     int resource;
     bool saved;
-    rlim_t fallback;
+    struct rlimit *fallback;
     struct rlimit newlimit;
     struct rlimit oldlimit;
 } saved_limits[] = {
 #ifdef RLIMIT_AS
-    { RLIMIT_AS, false, 0, { RLIM_INFINITY, RLIM_INFINITY } },
+    { RLIMIT_AS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { RLIMIT_CPU, false, 0, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_DATA, false, 0, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_FSIZE, false, 0, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_NOFILE, false, SUDO_OPEN_MAX, { RLIM_INFINITY, RLIM_INFINITY } },
+    { RLIMIT_CPU, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { RLIMIT_DATA, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { RLIMIT_FSIZE, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { RLIMIT_NOFILE, false, &nofile_fallback, { RLIM_INFINITY, RLIM_INFINITY } },
 #ifdef RLIMIT_NPROC
-    { RLIMIT_NPROC, false, 0, { RLIM_INFINITY, RLIM_INFINITY } },
+    { RLIMIT_NPROC, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
 #ifdef RLIMIT_RSS
-    { RLIMIT_RSS, false, 0, { RLIM_INFINITY, RLIM_INFINITY } },
+    { RLIMIT_RSS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { RLIMIT_STACK, false, 0, { 8192 * 1024, 65532 * 1024 } }
+    { RLIMIT_STACK, false, &stack_fallback, { 8192 * 1024, RLIM_INFINITY } }
 };
 
 static struct rlimit corelimit;
@@ -192,11 +200,8 @@ unlimit_sudo(void)
 		lim->newlimit.rlim_max = lim->oldlimit.rlim_max;
 	}
 	if ((rc = setrlimit(lim->resource, &lim->newlimit)) == -1) {
-	    if (lim->fallback != 0) {
-		/* macOS won't set rlim_cur to RLIM_INFINITY for NOFILE */
-		lim->newlimit.rlim_cur = lim->fallback;
-		rc = setrlimit(lim->resource, &lim->newlimit);
-	    }
+	    if (lim->fallback != NULL)
+		rc = setrlimit(lim->resource, lim->fallback);
 	    if (rc == -1) {
 		/* Try setting new rlim_cur to old rlim_max. */
 		lim->newlimit.rlim_cur = lim->oldlimit.rlim_max;
