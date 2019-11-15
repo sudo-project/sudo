@@ -236,10 +236,12 @@ sudo_ev_base_free_v1(struct sudo_event_base *base)
     /* Remove any existing events before freeing the base. */
     TAILQ_FOREACH_SAFE(ev, &base->events, entries, next) {
 	sudo_ev_del(base, ev);
+	ev->base = NULL;
     }
     for (i = 0; i < NSIG; i++) {
 	TAILQ_FOREACH_SAFE(ev, &base->signals[i], entries, next) {
 	    sudo_ev_del(base, ev);
+	    ev->base = NULL;
 	}
 	free(base->siginfo[i]);
 	free(base->orig_handlers[i]);
