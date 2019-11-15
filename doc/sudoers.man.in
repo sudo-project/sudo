@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 5, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "November 8, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2463,7 +2463,7 @@ by default.
 ignore_iolog_errors
 Allow commands to be run even if
 \fBsudoers\fR
-cannot write to the I/O log.
+cannot write to the I/O log (local or remote).
 If enabled, an I/O log write failure is not treated as a fatal error.
 If disabled, the command will be terminated if the I/O log cannot be written to.
 This flag is
@@ -3316,6 +3316,16 @@ See the
 section for a description of the timeout syntax.
 .sp
 This setting is only supported by version 1.8.20 or higher.
+.TP 18n
+log_server_timeout
+The maximum amount of time to wait when connecting to a log server
+or waiting for a server response.
+See the
+\fRTimeout_Spec\fR
+section for a description of the timeout syntax.
+The default value is 30 seconds.
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 maxseq
 The maximum sequence number that will be substituted for the
@@ -4460,6 +4470,37 @@ should run
 \fBsudo\fR \fB\-e\fR)
 to get their accustomed editor configuration instead of
 invoking the editor directly.
+.TP 18n
+log_server
+Starting with
+\fBsudo\fR
+1.9, it is possible to send I/O logs to a remote server instead of
+logging them locally.
+The
+\fIlog_server\fR
+setting specifies one or more server addresses to use when storing
+I/O logs remotely.
+Log servers must be running
+\fBsudo_logsrvd\fR
+or another service that implements the protocol described by
+sudo_logsrv.proto(@mansectform@).
+Server addresses should be of the form
+\(lqhost[:port]\(rq.
+If no port is specified, port 30344 will be used.
+The host portion may be a host name, an IPv4 address, or an IPv6 address
+in square brackets.
+.sp
+When
+\fIlog_server\fR
+is enabled, I/O logs will not be logged locally.
+If no log servers are reachable, the user will not be able
+to run a command unless the
+\fIignore_iolog_errors\fR
+flag is set.
+If the connection to the log server is interrupted while
+the command is running, the command will be killed unless
+\fIignore_iolog_errors\fR
+is set.
 .SH "GROUP PROVIDER PLUGINS"
 The
 \fBsudoers\fR
@@ -4872,7 +4913,8 @@ When I/O logging is enabled,
 \fBsudo\fR
 will run the command in a pseudo-terminal and log all user input and/or output,
 depending on which options are enabled.
-I/O is logged to the directory specified by the
+I/O can be logged either to the local machine or to a remote log server.
+For local logs, I/O is logged to the directory specified by the
 \fIiolog_dir\fR
 option
 (\fI@iolog_dir@\fR
@@ -4884,9 +4926,15 @@ log line, prefixed with
 The
 \fIiolog_file\fR
 option may be used to control the format of the session ID.
+For remote logs, the
+\fIlog_server\fR
+setting is used to specify one or more log servers running
+\fBsudo_logsrvd\fR
+or another server that implements the protocol described by
+sudo_logsrv.proto(@mansectform@).
 .PP
-Each I/O log is stored in a separate directory that contains the
-following files:
+For both local and remote I/O logs, each log is stored in a separate
+directory that contains the following files:
 .TP 10n
 \fIlog\fR
 A text file containing information about the command.

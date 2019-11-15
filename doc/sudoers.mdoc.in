@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 5, 2019
+.Dd November 8, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2320,7 +2320,7 @@ by default.
 .It ignore_iolog_errors
 Allow commands to be run even if
 .Nm
-cannot write to the I/O log.
+cannot write to the I/O log (local or remote).
 If enabled, an I/O log write failure is not treated as a fatal error.
 If disabled, the command will be terminated if the I/O log cannot be written to.
 This flag is
@@ -3123,6 +3123,15 @@ See the
 section for a description of the timeout syntax.
 .Pp
 This setting is only supported by version 1.8.20 or higher.
+.It log_server_timeout
+The maximum amount of time to wait when connecting to a log server
+or waiting for a server response.
+See the
+.Li Timeout_Spec
+section for a description of the timeout syntax.
+The default value is 30 seconds.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .It maxseq
 The maximum sequence number that will be substituted for the
 .Dq Li %{seq}
@@ -4163,6 +4172,36 @@ should run
 .Nm sudo Fl e )
 to get their accustomed editor configuration instead of
 invoking the editor directly.
+.It log_server
+Starting with
+.Nm sudo
+1.9, it is possible to send I/O logs to a remote server instead of
+logging them locally.
+The
+.Em log_server
+setting specifies one or more server addresses to use when storing
+I/O logs remotely.
+Log servers must be running
+.Nm sudo_logsrvd
+or another service that implements the protocol described by
+.Xr sudo_logsrv.proto @mansectform@ .
+Server addresses should be of the form
+.Dq host Ns Op : Ns port .
+If no port is specified, port 30344 will be used.
+The host portion may be a host name, an IPv4 address, or an IPv6 address
+in square brackets.
+.Pp
+When
+.Em log_server
+is enabled, I/O logs will not be logged locally.
+If no log servers are reachable, the user will not be able
+to run a command unless the
+.Em ignore_iolog_errors
+flag is set.
+If the connection to the log server is interrupted while
+the command is running, the command will be killed unless
+.Em ignore_iolog_errors
+is set.
 .El
 .Sh GROUP PROVIDER PLUGINS
 The
@@ -4542,7 +4581,8 @@ When I/O logging is enabled,
 .Nm sudo
 will run the command in a pseudo-terminal and log all user input and/or output,
 depending on which options are enabled.
-I/O is logged to the directory specified by the
+I/O can be logged either to the local machine or to a remote log server.
+For local logs, I/O is logged to the directory specified by the
 .Em iolog_dir
 option
 .Po
@@ -4556,9 +4596,15 @@ log line, prefixed with
 The
 .Em iolog_file
 option may be used to control the format of the session ID.
+For remote logs, the
+.Em log_server
+setting is used to specify one or more log servers running
+.Nm sudo_logsrvd
+or another server that implements the protocol described by
+.Xr sudo_logsrv.proto @mansectform@ .
 .Pp
-Each I/O log is stored in a separate directory that contains the
-following files:
+For both local and remote I/O logs, each log is stored in a separate
+directory that contains the following files:
 .Bl -tag -width 8n
 .It Pa log
 A text file containing information about the command.
