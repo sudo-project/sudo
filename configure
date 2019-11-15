@@ -743,8 +743,8 @@ COMPAT_TEST_PROGS
 LOCALEDIR_SUFFIX
 SUDO_NLS
 LIBPTHREAD
+LIBTLS
 LIBMD
-OPENSSL_LIBS
 LIBINTL
 LIBRT
 LIBDL
@@ -3084,6 +3084,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3153,7 +3154,7 @@ PSMAN=0
 SEMAN=0
 LIBINTL=
 LIBMD=
-OPENSSL_LIBS=
+LIBTLS=
 ZLIB=
 ZLIB_SRC=
 AUTH_OBJS=
@@ -6430,8 +6431,7 @@ if test "${enable_openssl+set}" = set; then :
   enableval=$enable_openssl;  case $enableval in
     no)		;;
     *)		LIBMD="-lcrypto"
-        OPENSSL_LIBS="-lcrypto -lssl"
-		DIGEST=digest_openssl.lo
+		LIBTLS="-lssl -lcrypto"
 		$as_echo "#define HAVE_OPENSSL 1" >>confdefs.h
 
 		if test "$enableval" != "yes"; then
@@ -21531,6 +21531,47 @@ _ACEOF
 
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_CTX_set_ciphersuites in -lssl" >&5
+$as_echo_n "checking for SSL_CTX_set_ciphersuites in -lssl... " >&6; }
+if ${ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl crypto $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SSL_CTX_set_ciphersuites ();
+int
+main ()
+{
+return SSL_CTX_set_ciphersuites ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto=yes
+else
+  ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" >&5
+$as_echo "$ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" = xyes; then :
+  $as_echo "#define HAVE_SSL_CTX_SET_CIPHERSUITES 1" >>confdefs.h
+
+fi
+
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
 ac_fn_c_check_func "$LINENO" "socket" "ac_cv_func_socket"
@@ -29313,6 +29354,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

@@ -715,6 +715,9 @@
 /* Define to 1 if you have the <spawn.h> header file. */
 #undef HAVE_SPAWN_H
 
+/* Define to 1 if you have the `SSL_CTX_set_ciphersuites' function. */
+#undef HAVE_SSL_CTX_SET_CIPHERSUITES
+
 /* Define to 1 to enable SSSD support. */
 #undef HAVE_SSSD
 

@@ -974,6 +974,7 @@ init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
         }
     }
 
+# if defined(HAVE_SSL_CTX_SET_CIPHERSUITES)
     if (tls_config->ciphers_v13) {
 	/* try to set TLSv1.3 ciphersuite list from config */
         if (SSL_CTX_set_ciphersuites(ctx, tls_config->ciphers_v13)) {
@@ -998,6 +999,7 @@ init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
                 LOGSRVD_DEFAULT_CIPHER_LST13);
         }
     }
+# endif
 
     debug_return_bool(true);
 }
@@ -1119,7 +1121,7 @@ bad:
 good:
     debug_return_ptr(ctx);
 }
-#endif
+#endif /* HAVE_OPENSSL */
 
 /*
  * Allocate a new connection closure.

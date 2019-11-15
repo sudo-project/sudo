@@ -94,6 +94,7 @@ AC_SUBST([LIBDL])
 AC_SUBST([LIBRT])
 AC_SUBST([LIBINTL])
 AC_SUBST([LIBMD])
+AC_SUBST([LIBTLS])
 AC_SUBST([LIBPTHREAD])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([LOCALEDIR_SUFFIX])
@@ -231,6 +232,7 @@ PSMAN=0
 SEMAN=0
 LIBINTL=
 LIBMD=
+LIBTLS=
 ZLIB=
 ZLIB_SRC=
 AUTH_OBJS=
@@ -1485,11 +1487,11 @@ AC_ARG_ENABLE(werror,
 ])
 
 AC_ARG_ENABLE(openssl,
-[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's message digest functions instead of sudo's])],
+[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
 [ case $enableval in
     no)		;;
     *)		LIBMD="-lcrypto"
-		DIGEST=digest_openssl.lo
+		LIBTLS="-lssl -lcrypto"
 		AC_DEFINE(HAVE_OPENSSL)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
@@ -2889,6 +2891,10 @@ AC_CHECK_MEMBERS([struct dirent.d_type, struct dirent.d_namlen], [], [], [
 AC_INCLUDES_DEFAULT
 #include <$ac_header_dirent>
 ])
+dnl
+dnl Check for SSL_CTX_set_ciphersuites supported by OpenSSL 1.1 and higher
+dnl
+AC_CHECK_LIB(ssl, SSL_CTX_set_ciphersuites, [AC_DEFINE(HAVE_SSL_CTX_SET_CIPHERSUITES)], [], [crypto])
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
@@ -4650,8 +4656,9 @@ AH_TEMPLATE(HAVE_KINFO_PROC_44BSD, [Define to 1 if your system has a 4.4BSD-styl
 AH_TEMPLATE(HAVE_KINFO_PROC_FREEBSD, [Define to 1 if your system has a FreeBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-style kinfo_proc2 struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
-AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's sha2 functions.])
+AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
+AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function.])
 dnl
 dnl Bits to copy verbatim into config.h.in
 dnl
