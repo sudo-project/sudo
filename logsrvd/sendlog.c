@@ -53,6 +53,11 @@
 #include "sudo_iolog.h"
 #include "sendlog.h"
 
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+#endif
+
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
 #endif
@@ -65,10 +70,20 @@
 static struct iolog_file iolog_files[IOFD_MAX];
 static char *iolog_dir;
 
+#if defined(HAVE_OPENSSL)
+static bool tls = false;
+static SSL_CTX *ssl_ctx = NULL;
+static SSL *ssl = NULL;
+#endif
+
 static void
 usage(bool fatal)
 {
+#if defined(HAVE_OPENSSL)
+    fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] [-t -b ca_bundle] [-c cert_file [-k key_file]] "
+#else
     fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] "
+#endif
 	"[-r restart-point] /path/to/iolog\n", getprogname());
     exit(1);
 }
@@ -85,9 +100,77 @@ help(void)
 	"  -i, --iolog_id           remote ID of I/O log to be resumed\n"
 	"  -p, --port               port to use when connecting to host\n"
 	"  -r, --restart            restart previous I/O log transfer\n"
+#if defined(HAVE_OPENSSL)
+	"  -t, --tls                set the communication over TLS with the audit server\n"
+	"  -b, --ca-bundle          certificate bundle file to verify server's cert against\n"
+	"  -c, --cert               certificate file for TLS handshake\n"
+	"  -k, --key                private key file\n"
+#endif
 	"  -V, --version            display version information and exit\n"));
     exit(0);
 }
+
+#if defined(HAVE_OPENSSL)
+static SSL_CTX *
+init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const char *key_file)
+{
+    const SSL_METHOD *method;
+    SSL_CTX *ctx;
+
+    debug_decl(init_tls_client_context, SUDO_DEBUG_UTIL)
+
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+
+    if ((method = TLS_client_method()) == NULL) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "creation of SSL_METHOD failed: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+    if ((ctx = SSL_CTX_new(method)) == NULL) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "creation of new SSL_CTX object failed: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    if (cert_file) {
+        if (!SSL_CTX_use_certificate_chain_file(ctx, cert_file)) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to load cert to the ssl context: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+        if (!SSL_CTX_use_PrivateKey_file(ctx, key_file, X509_FILETYPE_PEM)) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to load key to the ssl context: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+    }
+
+        /* sets the location of the CA bundle file for verification purposes */
+        if (SSL_CTX_load_verify_locations(ctx, ca_bundle_file, NULL) <= 0) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "calling SSL_CTX_load_verify_locations() failed: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+        }
+
+        /* set verify server cert during the handshake */
+        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+
+    goto exit;
+
+bad:
+    if (ctx)
+        SSL_CTX_free(ctx);
+
+exit:
+    return ctx;
+}
+#endif
 
 /*
  * Connect to specified host:port
@@ -128,16 +211,6 @@ connect_server(const char *host, const char *port)
 	    continue;
 	}
 	break;	/* success */
-    }
-    if (sock != -1) {
-	int flags = fcntl(sock, F_GETFL, 0);
-	if (flags == -1 || fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1) {
-	    cause = "fcntl(O_NONBLOCK)";
-	    save_errno = errno;
-	    close(sock);
-	    errno = save_errno;
-	    sock = -1;
-	}
     }
 
     if (sock == -1)
@@ -877,7 +950,15 @@ server_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
 
     /* XXX - make common */
+#if defined(HAVE_OPENSSL)
+    if (tls) {
+        nread = SSL_read(ssl, buf->data + buf->len, buf->size - buf->len);
+    } else {
+        nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+    }
+#else
     nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+#endif
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
 	__func__, nread);
     switch (nread) {
@@ -942,7 +1023,15 @@ client_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO,
     	"%s: sending %u bytes to server", __func__, buf->len - buf->off);
 
+#if defined(HAVE_OPENSSL)
+    if (tls) {
+        nwritten = SSL_write(ssl, buf->data + buf->off, buf->len - buf->off);
+    } else {
+        nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+    }
+#else
     nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+#endif
     if (nwritten == -1) {
 	sudo_warn("send");
 	goto bad;
@@ -1049,13 +1138,23 @@ parse_timespec(struct timespec *ts, const char *strval)
     debug_return_bool(true);
 }
 
+#if defined(HAVE_OPENSSL)
+static const char short_opts[] = "h:i:p:r:tb:c:k:V";
+#else
 static const char short_opts[] = "h:i:p:r:V";
+#endif
 static struct option long_opts[] = {
     { "help",		no_argument,		NULL,	1 },
     { "host",		required_argument,	NULL,	'h' },
     { "iolog-id",	required_argument,	NULL,	'i' },
     { "port",		required_argument,	NULL,	'p' },
     { "restart",	required_argument,	NULL,	'r' },
+#if defined(HAVE_OPENSSL)
+    { "tls",		no_argument,		NULL,	't' },
+    { "ca-bundle",	required_argument,	NULL,	'b' },
+    { "cert",		required_argument,	NULL,	'c' },
+    { "key",		required_argument,	NULL,	'k' },
+#endif
     { "version",	no_argument,		NULL,	'V' },
     { NULL,		no_argument,		NULL,	0 },
 };
@@ -1068,6 +1167,11 @@ main(int argc, char *argv[])
     struct client_closure closure;
     struct sudo_event_base *evbase;
     struct iolog_info *log_info;
+#if defined(HAVE_OPENSSL)
+    const char *ca_bundle = NULL;
+    const char *cert = NULL;
+    const char *key = NULL;
+#endif
     const char *host = "localhost";
     const char *port = DEFAULT_PORT_STR;
     struct timespec restart = { 0, 0 };
@@ -1120,6 +1224,20 @@ main(int argc, char *argv[])
 	case 1:
 	    help();
 	    break;
+#if defined(HAVE_OPENSSL)
+	case 'b':
+	    ca_bundle = optarg;
+	    break;
+	case 'c':
+	    cert = optarg;
+	    break;
+	case 'k':
+	    key = optarg;
+	    break;
+	case 't':
+	    tls = true;
+	    break;
+#endif
 	case 'V':
 	    (void)printf(_("%s version %s\n"), getprogname(),
 		PACKAGE_VERSION);
@@ -1130,6 +1248,21 @@ main(int argc, char *argv[])
     }
     argc -= optind;
     argv += optind;
+
+#if defined(HAVE_OPENSSL)
+    /* if the protocol is tls, the CA bundle file is a required argument
+     * to be able to verify the server's certificate
+     */
+    if (tls && !ca_bundle) {
+        sudo_warnx("%s", U_("with the tls protocol, the CA bundle file must be specified"));
+        usage(true);
+    }
+
+    /* if no key file is given explicitly, try to load the key from the cert */
+    if (cert && !key) {
+        key = cert;
+    }
+#endif
 
     if (sudo_timespecisset(&restart) != (iolog_id != NULL)) {
 	sudo_warnx("%s", U_("both restart point and iolog ID must be specified"));
@@ -1167,7 +1300,39 @@ main(int argc, char *argv[])
     sock = connect_server(host, port);
     if (sock == -1)
 	goto bad;
-    printf("connected to %s:%s\n", host, port);
+#if defined(HAVE_OPENSSL)
+    if (tls) {
+        int ret;
+        if ((ssl_ctx = init_tls_client_context(ca_bundle, cert, key)) == NULL) {
+            sudo_warnx(U_("Unable to initialize ssl context: %s\n"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+        if ((ssl = SSL_new(ssl_ctx)) == NULL) {
+            sudo_warnx(U_("Unable to allocate ssl object: %s\n"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+        if (SSL_set_fd(ssl, sock) <= 0) {
+            sudo_warnx(U_("Unable to attach socket to the ssl object: %s\n"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+        ret = SSL_ERROR_NONE;
+
+        if ((ret = SSL_connect(ssl)) != 1) {
+            sudo_warnx(U_("SSL_connect failed: ret=%d ssl_error=%d, stack=%s\n"),
+                ret,
+                SSL_get_error(ssl, ret),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
+        printf("Protocol version: %s\n", SSL_get_version(ssl));
+        printf("Negotiated ciphersuite: %s\n", SSL_get_cipher(ssl));
+    }
+#endif
+    printf("Connected to %s:%s\n", host, port);
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);

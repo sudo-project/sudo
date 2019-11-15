@@ -67,7 +67,13 @@ struct logsrvd_config_section {
 
 static struct logsrvd_config {
     struct logsrvd_config_server {
-	struct listen_address_list addresses;
+        struct listen_address_list addresses;
+        int timeout;
+#if defined(HAVE_OPENSSL)
+        bool tls;
+        struct logsrvd_tls_config tls_config;
+        struct logsrvd_tls_runtime tls_runtime;
+#endif
     } server;
     struct logsrvd_config_iolog {
 	bool compress;
@@ -122,6 +128,32 @@ logsrvd_conf_listen_address(void)
 {
     return &logsrvd_config->server.addresses;
 }
+
+int
+logsrvd_conf_get_sock_timeout(void)
+{
+    return logsrvd_config->server.timeout;
+}
+
+#if defined(HAVE_OPENSSL)
+bool
+logsrvd_conf_get_tls_opt(void)
+{
+    return logsrvd_config->server.tls;
+}
+
+const struct logsrvd_tls_config *
+logsrvd_get_tls_config(void)
+{
+    return &logsrvd_config->server.tls_config;
+}
+
+struct logsrvd_tls_runtime *
+logsrvd_get_tls_runtime(void)
+{
+    return &logsrvd_config->server.tls_runtime;
+}
+#endif
 
 /* eventlog getters */
 enum logsrvd_eventlog_type
@@ -358,6 +390,128 @@ done:
     debug_return_bool(ret);
 }
 
+#if defined(HAVE_OPENSSL)
+static bool
+cb_tls_opt(struct logsrvd_config *config, const char *str)
+{
+    int val;
+    debug_decl(cb_tls_opt, SUDO_DEBUG_UTIL)
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->server.tls = val;
+    debug_return_bool(true);
+}
+
+static bool
+cb_timeout(struct logsrvd_config *config, const char *str)
+{
+    int timeout;
+    const char* errstr;
+    debug_decl(cb_timeout, SUDO_DEBUG_UTIL)
+
+    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+    if (errstr != NULL)
+	debug_return_bool(false);
+
+    config->server.timeout = timeout;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_tls_key(struct logsrvd_config *config, const char *path)
+{
+    debug_decl(cb_tls_key, SUDO_DEBUG_UTIL)
+
+    free(config->server.tls_config.pkey_path);
+    if ((config->server.tls_config.pkey_path = strdup(path)) == NULL) {
+        sudo_warn(NULL);
+        debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+static bool
+cb_tls_cacert(struct logsrvd_config *config, const char *path)
+{
+    debug_decl(cb_tls_cacert, SUDO_DEBUG_UTIL)
+
+    free(config->server.tls_config.cacert_path);
+    if ((config->server.tls_config.cacert_path = strdup(path)) == NULL) {
+        sudo_warn(NULL);
+        debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+static bool
+cb_tls_cert(struct logsrvd_config *config, const char *path)
+{
+    debug_decl(cb_tls_cert, SUDO_DEBUG_UTIL)
+
+    free(config->server.tls_config.cert_path);
+    if ((config->server.tls_config.cert_path = strdup(path)) == NULL) {
+        sudo_warn(NULL);
+        debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+static bool
+cb_tls_dhparam(struct logsrvd_config *config, const char *path)
+{
+    debug_decl(cb_tls_dhparam, SUDO_DEBUG_UTIL)
+
+    free(config->server.tls_config.dhparams_path);
+    if ((config->server.tls_config.dhparams_path = strdup(path)) == NULL) {
+        sudo_warn(NULL);
+        debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+static bool
+cb_tls_ciphers12(struct logsrvd_config *config, const char *str)
+{
+    debug_decl(cb_tls_ciphers12, SUDO_DEBUG_UTIL)
+
+    free(config->server.tls_config.ciphers_v12);
+    if ((config->server.tls_config.ciphers_v12 = strdup(str)) == NULL) {
+        sudo_warn(NULL);
+        debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+static bool
+cb_tls_ciphers13(struct logsrvd_config *config, const char *str)
+{
+    debug_decl(cb_tls_ciphers13, SUDO_DEBUG_UTIL)
+
+    free(config->server.tls_config.ciphers_v13);
+    if ((config->server.tls_config.ciphers_v13 = strdup(str)) == NULL) {
+        sudo_warn(NULL);
+        debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+static bool
+cb_tls_checkpeer(struct logsrvd_config *config, const char *str)
+{
+    int val;
+    debug_decl(cb_tls_checkpeer, SUDO_DEBUG_UTIL)
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->server.tls_config.check_peer = val;
+    debug_return_bool(true);
+}
+#endif
+
 /* eventlog callbacks */
 static bool
 cb_eventlog_type(struct logsrvd_config *config, const char *str)
@@ -513,6 +667,17 @@ cb_logfile_time_format(struct logsrvd_config *config, const char *str)
 
 static struct logsrvd_config_entry server_conf_entries[] = {
     { "listen_address", cb_listen_address },
+    { "timeout", cb_timeout },
+#if defined(HAVE_OPENSSL)
+    { "tls", cb_tls_opt },
+    { "tls_key", cb_tls_key },
+    { "tls_cacert", cb_tls_cacert },
+    { "tls_cert", cb_tls_cert },
+    { "tls_dhparams", cb_tls_dhparam },
+    { "tls_ciphers_v12", cb_tls_ciphers12 },
+    { "tls_ciphers_v13", cb_tls_ciphers13 },
+    { "tls_checkpeer", cb_tls_checkpeer },
+#endif
     { NULL }
 };
 
@@ -682,6 +847,7 @@ logsrvd_conf_alloc(void)
 
     /* Server defaults */
     TAILQ_INIT(&config->server.addresses);
+    config->server.timeout = DEFAULT_SOCKET_TIMEOUT_SEC;
 
     /* I/O log defaults */
     config->iolog.compress = false;
