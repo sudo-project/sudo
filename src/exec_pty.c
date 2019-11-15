@@ -43,7 +43,6 @@
 #include <termios.h>		/* for struct winsize on HP-UX */
 
 #include "sudo.h"
-#include "sudo_event.h"
 #include "sudo_exec.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
@@ -1160,9 +1159,8 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     TAILQ_INIT(&ec->monitor_messages);
 
     /* Setup event base and events. */
-    ec->evbase = sudo_ev_base_alloc();
-    if (ec->evbase == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    ec->evbase = details->evbase;
+    details->evbase = NULL;
 
     /* Event for command status via backchannel. */
     ec->backchannel_event = sudo_ev_alloc(backchannel,

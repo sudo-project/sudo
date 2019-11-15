@@ -43,7 +43,6 @@
 #include <termios.h>
 
 #include "sudo.h"
-#include "sudo_event.h"
 #include "sudo_exec.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"

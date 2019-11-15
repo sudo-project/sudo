@@ -39,6 +39,7 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_queue.h"
+#include "sudo_event.h"
 #include "sudo_util.h"
 
 #ifdef HAVE_PRIV_SET
@@ -169,6 +170,7 @@ struct command_details {
     const char *tty;
     char **argv;
     char **envp;
+    struct sudo_event_base *evbase;
 #ifdef HAVE_PRIV_SET
     priv_set_t *privs;
     priv_set_t *limitprivs;
@@ -218,6 +220,7 @@ int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
 bool set_user_groups(struct command_details *details);
+struct sudo_plugin_event *sudo_plugin_event_alloc(void);
 extern const char *list_user;
 extern struct user_details user_details;
 extern int sudo_debug_instance;

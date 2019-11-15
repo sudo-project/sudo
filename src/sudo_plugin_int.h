@@ -104,6 +104,14 @@ struct plugin_container {
 };
 TAILQ_HEAD(plugin_container_list, plugin_container);
 
+/*
+ * Private implementation of struct sudo_plugin_event.
+ */
+struct sudo_plugin_event_int {
+    struct sudo_event private;		/* must be first */
+    struct sudo_plugin_event public;
+};
+
 extern struct plugin_container policy_plugin;
 extern struct plugin_container_list io_plugins;
 

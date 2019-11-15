@@ -1003,5 +1003,6 @@ __dso_public struct policy_plugin sudoers_policy = {
     sudoers_policy_validate,
     sudoers_policy_invalidate,
     sudoers_policy_init_session,
-    sudoers_policy_register_hooks
+    sudoers_policy_register_hooks,
+    NULL /* event_alloc() filled in by sudo */
 };

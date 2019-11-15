@@ -828,5 +828,6 @@ __dso_public struct io_plugin sudoers_io = {
     NULL, /* register_hooks */
     NULL, /* deregister_hooks */
     sudoers_io_change_winsize,
-    sudoers_io_suspend
+    sudoers_io_suspend,
+    NULL /* event_alloc() filled in by sudo */
 };

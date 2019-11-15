@@ -52,7 +52,6 @@
 
 #include "sudo.h"
 #include "sudo_exec.h"
-#include "sudo_event.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
@@ -314,7 +313,7 @@ sudo_terminated(struct command_status *cstat)
     debug_return_bool(false);
 }
 
-#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 14)
+#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 15)
 # error "Update sudo_needs_pty() after changing the plugin API"
 #endif
 static bool

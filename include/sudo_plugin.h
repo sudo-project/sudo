@@ -21,7 +21,7 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 14
+#define SUDO_API_VERSION_MINOR 15
 #define SUDO_API_MKVERSION(x, y) (((x) << 16) | (y))
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
@@ -128,7 +128,32 @@ struct sudo_hook {
 #define SUDO_HOOK_PUTENV	3
 #define SUDO_HOOK_GETENV	4
 
-/* Policy plugin type and defines */
+/*
+ * Plugin interface to sudo's main event loop.
+ */
+typedef void (*sudo_plugin_ev_callback_t)(int fd, int what, void *closure);
+
+struct timespec;
+struct sudo_plugin_event {
+    int (*set)(struct sudo_plugin_event *pev, int fd, int events, sudo_plugin_ev_callback_t callback, void *closure);
+    int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
+    int (*del)(struct sudo_plugin_event *pev);
+    int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+    int (*fd)(struct sudo_plugin_event *pev);
+    void (*setbase)(struct sudo_plugin_event *pev, void *base);
+    void (*loopbreak)(struct sudo_plugin_event *pev);
+    void (*free)(struct sudo_plugin_event *pev);
+    /* actually larger... */
+};
+
+/* Sudo plugin Event types */
+#define SUDO_PLUGIN_EV_TIMEOUT	0x01	/* fire after timeout */
+#define SUDO_PLUGIN_EV_READ	0x02	/* fire when readable */
+#define SUDO_PLUGIN_EV_WRITE	0x04	/* fire when writable */
+#define SUDO_PLUGIN_EV_PERSIST	0x08	/* persist until deleted */
+#define SUDO_PLUGIN_EV_SIGNAL	0x10	/* fire on signal receipt */
+
+/* Policy plugin type and defines. */
 struct passwd;
 struct policy_plugin {
 #define SUDO_POLICY_PLUGIN     1
@@ -150,9 +175,10 @@ struct policy_plugin {
     int (*init_session)(struct passwd *pwd, char **user_env_out[]);
     void (*register_hooks)(int version, int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version, int (*deregister_hook)(struct sudo_hook *hook));
+    struct sudo_plugin_event * (*event_alloc)(void);
 };
 
-/* I/O plugin type and defines */
+/* I/O plugin type and defines. */
 struct io_plugin {
 #define SUDO_IO_PLUGIN	    2
     unsigned int type; /* always SUDO_IO_PLUGIN */
@@ -173,6 +199,7 @@ struct io_plugin {
     void (*deregister_hooks)(int version, int (*deregister_hook)(struct sudo_hook *hook));
     int (*change_winsize)(unsigned int line, unsigned int cols);
     int (*log_suspend)(int signo);
+    struct sudo_plugin_event * (*event_alloc)(void);
 };
 
 /* Sudoers group plugin version major/minor */

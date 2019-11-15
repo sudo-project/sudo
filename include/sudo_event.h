@@ -22,7 +22,7 @@
 #include <signal.h>	/* for sigatomic_t and NSIG */
 #include "sudo_queue.h"
 
-/* Event types */
+/* Event types (keep in sync with sudo_plugin.h) */
 #define SUDO_EV_TIMEOUT		0x01	/* fire after timeout */
 #define SUDO_EV_READ		0x02	/* fire when readable */
 #define SUDO_EV_WRITE		0x04	/* fire when writable */
@@ -48,6 +48,7 @@
 #define SUDO_EVBASE_GOT_BREAK	0x20
 #define SUDO_EVBASE_GOT_MASK	0xf0
 
+/* Must match sudo_plugin_ev_callback_t in sudo_plugin.h */
 typedef void (*sudo_ev_callback_t)(int fd, int what, void *closure);
 
 /*
@@ -124,6 +125,10 @@ __dso_public struct sudo_event *sudo_ev_alloc_v1(int fd, short events, sudo_ev_c
 /* Free an event. */
 __dso_public void sudo_ev_free_v1(struct sudo_event *ev);
 #define sudo_ev_free(_a) sudo_ev_free_v1((_a))
+
+/* Set an event struct that was pre-allocated. */
+__dso_public int sudo_ev_set_v1(struct sudo_event *ev, int fd, short events, sudo_ev_callback_t callback, void *closure);
+#define sudo_ev_set(_a, _b, _c, _d, _e) sudo_ev_set_v1((_a), (_b), (_c), (_d), (_e))
 
 /* Add an event, returns 0 on success, -1 on error */
 __dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, struct timeval *timo, bool tohead);

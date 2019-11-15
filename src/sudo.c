@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -79,6 +80,7 @@ const char *list_user; /* extern for parse_args.c */
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static struct command_details command_details;
 static int sudo_mode;
+static struct sudo_event_base *sudo_event_base;
 
 struct sudo_gc_entry {
     SLIST_ENTRY(sudo_gc_entry) entries;
@@ -213,6 +215,10 @@ main(int argc, char *argv[], char *envp[])
     if (!sudo_load_plugins(&policy_plugin, &io_plugins))
 	sudo_fatalx(U_("fatal error, unable to load plugins"));
 
+    /* Allocate event base so plugin can use it. */
+    if ((sudo_event_base = sudo_ev_base_alloc()) == NULL)
+	sudo_fatalx("%s", U_("unable to allocate memory"));
+
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
     if (ok != 1) {
@@ -288,6 +294,7 @@ main(int argc, char *argv[], char *envp[])
 	    command_details.tty = user_details.tty;
 	    command_details.argv = argv_out;
 	    command_details.envp = user_env_out;
+	    command_details.evbase = sudo_event_base;
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 		SET(command_details.flags, CD_LOGIN_SHELL);
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
@@ -1326,6 +1333,158 @@ iolog_unlink(struct plugin_container *plugin)
     free_plugin_container(plugin, true);
 
     debug_return;
+}
+
+/*
+ * Fill in a previously allocated struct sudo_plugin_event.
+ */
+static int
+plugin_event_set(struct sudo_plugin_event *pev, int fd, int events,
+    sudo_ev_callback_t callback, void *closure)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_set, SUDO_DEBUG_PCOMM)
+
+    ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
+    if (sudo_ev_set(&ev_int->private, fd, events, callback, closure) == -1)
+	debug_return_int(-1);
+
+    /* Plugin can only operate on the main event loop. */
+    ev_int->private.base = sudo_event_base;
+
+    debug_return_int(1);
+}
+
+/*
+ * Add a struct sudo_plugin_event to the main event loop.
+ */
+static int
+plugin_event_add(struct sudo_plugin_event *pev, struct timespec *timo)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_add, SUDO_DEBUG_PCOMM)
+
+    ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
+    if (sudo_ev_add(NULL, &ev_int->private, timo, 0) == -1)
+	debug_return_int(-1);
+    debug_return_int(1);
+}
+
+/*
+ * Delete a struct sudo_plugin_event from the main event loop.
+ */
+static int
+plugin_event_del(struct sudo_plugin_event *pev)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_del, SUDO_DEBUG_PCOMM)
+
+    ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
+    if (sudo_ev_del(NULL, &ev_int->private) == -1)
+	debug_return_int(-1);
+    debug_return_int(1);
+}
+
+/*
+ * Get the amount of time remaining in a timeout event.
+ */
+static int
+plugin_event_timeleft(struct sudo_plugin_event *pev, struct timespec *ts)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_timeleft, SUDO_DEBUG_PCOMM)
+
+    ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
+    if (sudo_ev_get_timeleft(&ev_int->private, ts) == -1)
+	debug_return_int(-1);
+    debug_return_int(1);
+}
+
+/*
+ * Get the file descriptor associated with an event.
+ */
+static int
+plugin_event_fd(struct sudo_plugin_event *pev)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_fd, SUDO_DEBUG_PCOMM)
+
+    ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
+    debug_return_int(sudo_ev_get_fd(&ev_int->private));
+}
+
+/*
+ * Break out of the event loop, killing the command if it is running.
+ */
+static void
+plugin_event_loopbreak(struct sudo_plugin_event *pev)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_loopbreak, SUDO_DEBUG_PCOMM)
+
+    ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
+    sudo_ev_loopbreak(ev_int->private.base);
+    debug_return;
+}
+
+/*
+ * Reset the event base of a struct sudo_plugin_event.
+ * The event is removed from the old base (if any) first.
+ */
+static void
+plugin_event_setbase(struct sudo_plugin_event *pev, void *base)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_setbase, SUDO_DEBUG_PCOMM)
+
+    ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
+    if (ev_int->private.base != NULL)
+	sudo_ev_del(ev_int->private.base, &ev_int->private);
+    ev_int->private.base = base;
+    debug_return;
+}
+
+/*
+ * Free a struct sudo_plugin_event allocated by plugin_event_alloc().
+ */
+static void
+plugin_event_free(struct sudo_plugin_event *pev)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_free, SUDO_DEBUG_PCOMM)
+
+    /* The private field is first so sudo_ev_free() can free the struct. */
+    ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
+    sudo_ev_free(&ev_int->private);
+
+    debug_return;
+}
+
+/*
+ * Allocate a struct sudo_plugin_event and fill in the public fields.
+ */
+struct sudo_plugin_event *
+sudo_plugin_event_alloc(void)
+{
+    struct sudo_plugin_event_int *ev_int;
+    debug_decl(plugin_event_alloc, SUDO_DEBUG_PCOMM)
+
+    if ((ev_int = malloc(sizeof(*ev_int))) == NULL)
+	debug_return_ptr(NULL);
+
+    /* Init public fields. */
+    ev_int->public.set = plugin_event_set;
+    ev_int->public.add = plugin_event_add;
+    ev_int->public.del = plugin_event_del;
+    ev_int->public.fd = plugin_event_fd;
+    ev_int->public.timeleft = plugin_event_timeleft;
+    ev_int->public.setbase = plugin_event_setbase;
+    ev_int->public.free = plugin_event_free;
+
+    /* Clear private portion in case caller tries to use us uninitialized. */
+    memset(&ev_int->private, 0, sizeof(ev_int->private));
+
+    debug_return_ptr(&ev_int->public);
 }
 
 static void

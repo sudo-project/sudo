@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 12, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -88,6 +88,7 @@ struct policy_plugin {
        int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
        int (*deregister_hook)(struct sudo_hook *hook));
+    struct sudo_plugin_event * (*event_alloc)(void);
 };
 .RE
 .fi
@@ -1154,17 +1155,9 @@ Privileges should be output via the
 or
 \fBplugin_printf\fR()
 function using
-\fRSUDO_CONV_INFO_MSG\fR,
-.TP 6n
-verbose
-Flag indicating whether to list in verbose mode or not.
-.TP 6n
-list_user
-The name of a different user to list privileges for if the policy
-allows it.
-If
-\fRNULL\fR,
-the plugin should list the privileges of the invoking user.
+\fRSUDO_CONV_INFO_MSG\fR.
+.sp
+The function arguments are as follows:
 .TP 6n
 argc
 The number of elements in
@@ -1183,6 +1176,16 @@ execve(2)
 system call.
 If the command is permitted by the policy, the fully-qualified path
 to the command should be displayed along with any command line arguments.
+.TP 6n
+verbose
+Flag indicating whether to list in verbose mode or not.
+.TP 6n
+list_user
+The name of a different user to list privileges for if the policy
+allows it.
+If
+\fRNULL\fR,
+the plugin should list the privileges of the invoking user.
 .PD 0
 .PP
 .RE
@@ -1442,6 +1445,44 @@ version 1.2 or higher,
 \fRderegister_hooks\fR
 will not be called.
 .RE
+.TP 6n
+event_alloc
+.nf
+.RS 6n
+struct sudo_plugin_event * (*event_alloc)(void);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBevent_alloc\fR()
+function is used to allocate a
+\fRstruct sudo_plugin_event\fR
+which provides access to the main
+\fBsudo\fR
+event loop.
+Unlike the other fields, the
+\fBevent_alloc\fR()
+pointer is filled in by the
+\fBsudo\fR
+front end, not by the plugin.
+.sp
+See the
+\fIEvent API\fR
+section below for more information
+about events.
+.sp
+NOTE: the
+\fBevent_alloc\fR()
+function is only available starting
+with API version 1.15.
+If the
+\fBsudo\fR
+front end doesn't support API
+version 1.15 or higher,
+\fBevent_alloc\fR()
+will not be set.
+.RE
 .PP
 \fIPolicy Plugin Version Macros\fR
 .nf
@@ -1490,6 +1531,7 @@ struct io_plugin {
        int (*deregister_hook)(struct sudo_hook *hook));
     int (*change_winsize)(unsigned int lines, unsigned int cols);
     int (*log_suspend)(int signo);
+    struct sudo_plugin_event * (*event_alloc)(void);
 };
 .RE
 .fi
@@ -2049,6 +2091,44 @@ Returns \-1 if an error occurred, in which case no further calls to
 \fBlog_suspend\fR()
 will be made,
 .RE
+.TP 6n
+event_alloc
+.nf
+.RS 6n
+struct sudo_plugin_event * (*event_alloc)(void);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBevent_alloc\fR()
+function is used to allocate a
+\fRstruct sudo_plugin_event\fR
+which provides access to the main
+\fBsudo\fR
+event loop.
+Unlike the other fields, the
+\fBevent_alloc\fR()
+pointer is filled in by the
+\fBsudo\fR
+front end, not by the plugin.
+.sp
+See the
+\fIEvent API\fR
+section below for more information
+about events.
+.sp
+NOTE: the
+\fBevent_alloc\fR()
+function is only available starting
+with API version 1.15.
+If the
+\fBsudo\fR
+front end doesn't support API
+version 1.15 or higher,
+\fBevent_alloc\fR()
+will not be set.
+.RE
 .PP
 \fII/O Plugin Version Macros\fR
 .PP
@@ -2338,6 +2418,295 @@ return SUDO_HOOK_RET_STOP;
 .PP
 For getters and setters see the
 \fIPolicy plugin API\fR.
+.SS "Event API"
+When
+\fBsudo\fR
+runs a command, it uses an event loop to service signals and I/O.
+Events may be triggered based on time, a file or socket descriptor
+becoming ready, or due to receipt of a signal.
+Starting with API version 1.15, it is possible for a plugin to
+participate in this event loop by calling the
+\fBevent_alloc\fR()
+function.
+.PP
+\fIEvent structure\fR
+.PP
+Events are described by the following structure:
+.nf
+.RS 0n
+typedef void (*sudo_plugin_ev_callback_t)(int fd, int what,
+    void *closure);
+
+struct sudo_plugin_event {
+    int (*set)(struct sudo_plugin_event *pev, int fd, int events,
+        sudo_plugin_ev_callback_t callback, void *closure);
+    int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
+    int (*del)(struct sudo_plugin_event *pev);
+    int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+    int (*fd)(struct sudo_plugin_event *pev);
+    void (*setbase)(struct sudo_plugin_event *pev, void *base);
+    void (*loopbreak)(struct sudo_plugin_event *pev);
+    void (*free)(struct sudo_plugin_event *pev);
+};
+.RE
+.fi
+.PP
+The sudo_plugin_event struct contains the following function pointers:
+.TP 6n
+\fBset\fR()
+.br
+.nf
+.RS 6n
+int (*set)(struct sudo_plugin_event *pev, int fd, int events,
+    sudo_plugin_ev_callback_t callback, void *closure);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBset\fR()
+function takes the following arguments:
+.TP 6n
+struct sudo_plugin_event *\fIpev\fR
+A pointer to the struct sudo_plugin_event itself.
+.TP 6n
+\fIfd\fR
+The file or socket descriptor for I/O-based events or the signal
+number for signal events.
+For time-based events,
+\fIfd\fR
+must be -1.
+.TP 6n
+\fIevents\fR
+The following values determine what will trigger the event callback:
+.PP
+.RS 6n
+.PD 0
+.TP 6n
+SUDO_PLUGIN_EV_TIMEOUT
+callback is run after the specified timeout expires
+.PD
+.TP 6n
+SUDO_PLUGIN_EV_READ
+callback is run when the file descriptor is readable
+.TP 6n
+SUDO_PLUGIN_EV_WRITE
+callback is run when the file descriptor is writable
+.TP 6n
+SUDO_PLUGIN_EV_PERSIST
+event is persistent and remains enabled until explicitly deleted
+.TP 6n
+SUDO_PLUGIN_EV_SIGNAL
+callback is run when the specified signal is received
+.PP
+The
+\fRSUDO_PLUGIN_EV_PERSIST\fR
+flag may be ORed with any of the event types.
+It is also possible to OR
+\fRSUDO_PLUGIN_EV_READ\fR
+and
+\fRSUDO_PLUGIN_EV_WRITE\fR
+together to run the callback when a descriptor is ready to be
+either read from or written to.
+All other event values are mutually exclusive.
+.RE
+.TP 6n
+sudo_plugin_ev_callback_t \fIcallback\fR
+.nf
+.RS 6n
+typedef void (*sudo_plugin_ev_callback_t)(int fd, int what,
+    void *closure);
+.RE
+.fi
+.RS 6n
+.sp
+The function to call when an event is triggered.
+The
+\fBcallback\fR()
+function is run with the following arguments:
+.TP 6n
+\fIfd\fR
+The file or socket descriptor for I/O-based events or the signal
+number for signal events.
+.TP 6n
+\fIwhat\fR
+The event type that triggered that callback.
+For events that have multiple event types (for example
+\fRSUDO_PLUGIN_EV_READ\fR
+and
+\fRSUDO_PLUGIN_EV_WRITE\fR)
+or have an associated timeout,
+\fIwhat\fR
+can be used to determine why the callback was run.
+.TP 6n
+\fIclosure\fR
+The generic pointer that was specified in the
+\fBset\fR()
+function.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+closure
+A generic pointer that will be passed to the callback function.
+.PP
+The
+\fBset\fR()
+function returns 1 on success, and \-1 if a error occurred.
+.RE
+.TP 6n
+\fBadd\fR()
+.br
+.nf
+.RS 6n
+int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBadd\fR()
+function adds the event
+\fIpev\fR
+to
+\fBsudo\fR's
+event loop.
+The event must have previously been initialized via the
+\fBset\fR()
+function.
+If the
+\fItimeout\fR
+argument is not NULL, it should specify a (relative) timeout after
+which the event will be triggered if the main event criteria has
+not been met.
+This is often used to implement an I/O timeout where the event
+will fire if a descriptor is not ready within a certain time
+period.
+If the event is already present in the event loop, its
+\fItimeout\fR
+will be adjusted to match the new value, if any.
+.sp
+The
+\fBadd\fR()
+function returns 1 on success, and \-1 if a error occurred.
+.RE
+.TP 6n
+\fBdel\fR()
+.br
+.nf
+.RS 6n
+int (*del)(struct sudo_plugin_event *pev);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBdel\fR()
+function deletes the event
+\fIpev\fR
+from
+\fBsudo\fR's
+event loop.
+Deleted events can be added back via the
+\fBadd\fR()
+function.
+.sp
+The
+\fBdel\fR()
+function returns 1 on success, and \-1 if a error occurred.
+.RE
+.TP 6n
+\fBtimeleft\fR()
+.nf
+.RS 6n
+int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBtimeleft\fR()
+function can be used to determine how much time remains in an event's
+timeout, if one was specified when the event was added.
+The
+\fIts\fR
+pointer is filled in with the remaining time.
+.sp
+The
+\fBtimeleft\fR()
+function returns 1 on success, and \-1 if the event has no associated timeout.
+.RE
+.TP 6n
+\fBfd\fR()
+.nf
+.RS 6n
+int (*fd)(struct sudo_plugin_event *pev);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBfd\fR()
+function returns the descriptor or signal number associated with
+the event
+\fIpev\fR.
+.RE
+.TP 6n
+\fBsetbase\fR()
+.nf
+.RS 6n
+void (*setbase)(struct sudo_plugin_event *pev, void *base);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBsetbase\fR()
+function sets the underlying event
+\fIbase\fR
+for
+\fIpev\fR
+to the specified value.
+This can be used to move an event created via
+\fBevent_alloc\fR()
+to a new event loop allocated by sudo's event subsystem.
+Using this function requires linking the plugin with the sudo_util
+library.
+It is unlikely to be used outside of the
+\fBsudoers\fR
+plugin.
+.RE
+.TP 6n
+\fBloopbreak\fR()
+.nf
+.RS 6n
+void (*loopbreak)(struct sudo_plugin_event *pev);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBloopbreak\fR()
+function causes
+\fBsudo\fR's
+event loop to exit immediately and the running command to be terminated.
+.RE
+.TP 6n
+\fBfree\fR()
+.nf
+.RS 6n
+void (*free)(struct sudo_plugin_event *pev);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBfree\fR()
+function deletes the event
+\fIpev\fR
+from the event loop and frees the memory associated with it.
+.RE
 .SS "Remote command execution"
 The
 \fBsudo\fR
@@ -2966,6 +3335,11 @@ The
 entry was added to the
 \fRcommand_info\fR
 list.
+.TP 6n
+Version 1.15 (sudo 1.9.0)
+The
+\fIevent_alloc\fR
+field was added to the policy_plugin and io_plugin structs.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

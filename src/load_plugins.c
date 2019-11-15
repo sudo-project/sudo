@@ -368,6 +368,15 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 		container->u.io->register_hooks(SUDO_HOOK_VERSION, register_hook);
 	}
     }
+
+    /* Set event_alloc() in plugins. */
+    if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15))
+	policy_plugin->u.policy->event_alloc = sudo_plugin_event_alloc;
+    TAILQ_FOREACH(container, io_plugins, entries) {
+	if (container->u.io->version >= SUDO_API_MKVERSION(1, 15))
+	    container->u.io->event_alloc = sudo_plugin_event_alloc;
+    }
+
     sudo_debug_set_active_instance(sudo_debug_instance);
 
 done:

@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 20, 2019
+.Dd November 12, 2019
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -85,6 +85,7 @@ struct policy_plugin {
        int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
        int (*deregister_hook)(struct sudo_hook *hook));
+    struct sudo_plugin_event * (*event_alloc)(void);
 };
 .Ed
 .Pp
@@ -1016,16 +1017,10 @@ Privileges should be output via the
 or
 .Fn plugin_printf
 function using
-.Dv SUDO_CONV_INFO_MSG ,
+.Dv SUDO_CONV_INFO_MSG .
+.Pp
+The function arguments are as follows:
 .Bl -tag -width 4n
-.It verbose
-Flag indicating whether to list in verbose mode or not.
-.It list_user
-The name of a different user to list privileges for if the policy
-allows it.
-If
-.Dv NULL ,
-the plugin should list the privileges of the invoking user.
 .It argc
 The number of elements in
 .Em argv ,
@@ -1042,6 +1037,14 @@ be passed to the
 system call.
 If the command is permitted by the policy, the fully-qualified path
 to the command should be displayed along with any command line arguments.
+.It verbose
+Flag indicating whether to list in verbose mode or not.
+.It list_user
+The name of a different user to list privileges for if the policy
+allows it.
+If
+.Dv NULL ,
+the plugin should list the privileges of the invoking user.
 .El
 .It validate
 .Bd -literal -compact
@@ -1273,6 +1276,39 @@ front end doesn't support API
 version 1.2 or higher,
 .Li deregister_hooks
 will not be called.
+.It event_alloc
+.Bd -literal -compact
+struct sudo_plugin_event * (*event_alloc)(void);
+.Ed
+.Pp
+The
+.Fn event_alloc
+function is used to allocate a
+.Li struct sudo_plugin_event
+which provides access to the main
+.Nm sudo
+event loop.
+Unlike the other fields, the
+.Fn event_alloc
+pointer is filled in by the
+.Nm sudo
+front end, not by the plugin.
+.Pp
+See the
+.Sx Event API
+section below for more information
+about events.
+.Pp
+NOTE: the
+.Fn event_alloc
+function is only available starting
+with API version 1.15.
+If the
+.Nm sudo
+front end doesn't support API
+version 1.15 or higher,
+.Fn event_alloc
+will not be set.
 .El
 .Pp
 .Em Policy Plugin Version Macros
@@ -1318,6 +1354,7 @@ struct io_plugin {
        int (*deregister_hook)(struct sudo_hook *hook));
     int (*change_winsize)(unsigned int lines, unsigned int cols);
     int (*log_suspend)(int signo);
+    struct sudo_plugin_event * (*event_alloc)(void);
 };
 .Ed
 .Pp
@@ -1793,6 +1830,39 @@ the command was suspended during playback of a session.
 Returns \-1 if an error occurred, in which case no further calls to
 .Fn log_suspend
 will be made,
+.It event_alloc
+.Bd -literal -compact
+struct sudo_plugin_event * (*event_alloc)(void);
+.Ed
+.Pp
+The
+.Fn event_alloc
+function is used to allocate a
+.Li struct sudo_plugin_event
+which provides access to the main
+.Nm sudo
+event loop.
+Unlike the other fields, the
+.Fn event_alloc
+pointer is filled in by the
+.Nm sudo
+front end, not by the plugin.
+.Pp
+See the
+.Sx Event API
+section below for more information
+about events.
+.Pp
+NOTE: the
+.Fn event_alloc
+function is only available starting
+with API version 1.15.
+If the
+.Nm sudo
+front end doesn't support API
+version 1.15 or higher,
+.Fn event_alloc
+will not be set.
 .El
 .Pp
 .Em I/O Plugin Version Macros
@@ -2028,6 +2098,234 @@ return SUDO_HOOK_RET_STOP;
 .Pp
 For getters and setters see the
 .Sx Policy plugin API .
+.Ss Event API
+When
+.Nm sudo
+runs a command, it uses an event loop to service signals and I/O.
+Events may be triggered based on time, a file or socket descriptor
+becoming ready, or due to receipt of a signal.
+Starting with API version 1.15, it is possible for a plugin to
+participate in this event loop by calling the
+.Fn event_alloc
+function.
+.Pp
+.Em Event structure
+.Pp
+Events are described by the following structure:
+.Pp
+.Bd -literal -compact
+typedef void (*sudo_plugin_ev_callback_t)(int fd, int what,
+    void *closure);
+
+struct sudo_plugin_event {
+    int (*set)(struct sudo_plugin_event *pev, int fd, int events,
+        sudo_plugin_ev_callback_t callback, void *closure);
+    int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
+    int (*del)(struct sudo_plugin_event *pev);
+    int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+    int (*fd)(struct sudo_plugin_event *pev);
+    void (*setbase)(struct sudo_plugin_event *pev, void *base);
+    void (*loopbreak)(struct sudo_plugin_event *pev);
+    void (*free)(struct sudo_plugin_event *pev);
+};
+.Ed
+.Pp
+The sudo_plugin_event struct contains the following function pointers:
+.Bl -tag -width 4n
+.It Fn set
+.Bd -literal -compact
+int (*set)(struct sudo_plugin_event *pev, int fd, int events,
+    sudo_plugin_ev_callback_t callback, void *closure);
+.Ed
+.Pp
+The
+.Fn set
+function takes the following arguments:
+.Bl -tag -width 4n
+.It struct sudo_plugin_event * Ns Fa pev
+A pointer to the struct sudo_plugin_event itself.
+.It Fa fd
+The file or socket descriptor for I/O-based events or the signal
+number for signal events.
+For time-based events,
+.Fa fd
+must be -1.
+.It Fa events
+The following values determine what will trigger the event callback:
+.Bl -tag -width 4n
+.It SUDO_PLUGIN_EV_TIMEOUT
+callback is run after the specified timeout expires
+.It SUDO_PLUGIN_EV_READ
+callback is run when the file descriptor is readable
+.It SUDO_PLUGIN_EV_WRITE
+callback is run when the file descriptor is writable
+.It SUDO_PLUGIN_EV_PERSIST
+event is persistent and remains enabled until explicitly deleted
+.It SUDO_PLUGIN_EV_SIGNAL
+callback is run when the specified signal is received
+.El
+.Pp
+The
+.Ev SUDO_PLUGIN_EV_PERSIST
+flag may be ORed with any of the event types.
+It is also possible to OR
+.Ev SUDO_PLUGIN_EV_READ
+and
+.Ev SUDO_PLUGIN_EV_WRITE
+together to run the callback when a descriptor is ready to be
+either read from or written to.
+All other event values are mutually exclusive.
+.It sudo_plugin_ev_callback_t Fa callback
+.Bd -literal -compact
+typedef void (*sudo_plugin_ev_callback_t)(int fd, int what,
+    void *closure);
+.Ed
+.Pp
+The function to call when an event is triggered.
+The
+.Fn callback
+function is run with the following arguments:
+.Bl -tag -width 4n
+.It Fa fd
+The file or socket descriptor for I/O-based events or the signal
+number for signal events.
+.It Fa what
+The event type that triggered that callback.
+For events that have multiple event types (for example
+.Ev SUDO_PLUGIN_EV_READ
+and
+.Ev SUDO_PLUGIN_EV_WRITE )
+or have an associated timeout,
+.Fa what
+can be used to determine why the callback was run.
+.It Fa closure
+The generic pointer that was specified in the
+.Fn set
+function.
+.El
+.It closure
+A generic pointer that will be passed to the callback function.
+.El
+.Pp
+The
+.Fn set
+function returns 1 on success, and \-1 if a error occurred.
+.It Fn add
+.Bd -literal -compact
+int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
+.Ed
+.Pp
+The
+.Fn add
+function adds the event
+.Fa pev
+to
+.Nm sudo Ns No 's
+event loop.
+The event must have previously been initialized via the
+.Fn set
+function.
+If the
+.Fa timeout
+argument is not NULL, it should specify a (relative) timeout after
+which the event will be triggered if the main event criteria has
+not been met.
+This is often used to implement an I/O timeout where the event
+will fire if a descriptor is not ready within a certain time
+period.
+If the event is already present in the event loop, its
+.Fa timeout
+will be adjusted to match the new value, if any.
+.Pp
+The
+.Fn add
+function returns 1 on success, and \-1 if a error occurred.
+.It Fn del
+.Bd -literal -compact
+int (*del)(struct sudo_plugin_event *pev);
+.Ed
+.Pp
+The
+.Fn del
+function deletes the event
+.Fa pev
+from
+.Nm sudo Ns No 's
+event loop.
+Deleted events can be added back via the
+.Fn add
+function.
+.Pp
+The
+.Fn del
+function returns 1 on success, and \-1 if a error occurred.
+.It Fn timeleft
+.Bd -literal -compact
+int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+.Ed
+.Pp
+The
+.Fn timeleft
+function can be used to determine how much time remains in an event's
+timeout, if one was specified when the event was added.
+The
+.Fa ts
+pointer is filled in with the remaining time.
+.Pp
+The
+.Fn timeleft
+function returns 1 on success, and \-1 if the event has no associated timeout.
+.It Fn fd
+.Bd -literal -compact
+int (*fd)(struct sudo_plugin_event *pev);
+.Ed
+.Pp
+The
+.Fn fd
+function returns the descriptor or signal number associated with
+the event
+.Fa pev .
+.It Fn setbase
+.Bd -literal -compact
+void (*setbase)(struct sudo_plugin_event *pev, void *base);
+.Ed
+.Pp
+The
+.Fn setbase
+function sets the underlying event
+.Fa base
+for
+.Fa pev
+to the specified value.
+This can be used to move an event created via
+.Fn event_alloc
+to a new event loop allocated by sudo's event subsystem.
+Using this function requires linking the plugin with the sudo_util
+library.
+It is unlikely to be used outside of the
+.Nm sudoers
+plugin.
+.It Fn loopbreak
+.Bd -literal -compact
+void (*loopbreak)(struct sudo_plugin_event *pev);
+.Ed
+.Pp
+The
+.Fn loopbreak
+function causes
+.Nm sudo Ns No 's
+event loop to exit immediately and the running command to be terminated.
+.It Fn free
+.Bd -literal -compact
+void (*free)(struct sudo_plugin_event *pev);
+.Ed
+.Pp
+The
+.Fn free
+function deletes the event
+.Fa pev
+from the event loop and frees the memory associated with it.
+.El
 .Ss Remote command execution
 The
 .Nm sudo
@@ -2603,6 +2901,10 @@ The
 entry was added to the
 .Li command_info
 list.
+.It Version 1.15 (sudo 1.9.0)
+The
+.Em event_alloc
+field was added to the policy_plugin and io_plugin structs.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

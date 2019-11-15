@@ -53,8 +53,8 @@ static struct sudo_preload_symbol sudo_rtld_default_symbols[] = {
 
 /* XXX - can we autogenerate these? */
 static struct sudo_preload_symbol sudo_sudoers_plugin_symbols[] = {
-    { "sudoers_policy", (void *)&sudoers_policy},
-    { "sudoers_io", (void *)&sudoers_io},
+    { "sudoers_policy", (void *)&sudoers_policy },
+    { "sudoers_io", (void *)&sudoers_io },
     { (const char *)0, (void *)0 }
 };
 

@@ -284,6 +284,33 @@ sudo_ev_init(struct sudo_event *ev, int fd, short events,
     debug_return;
 }
 
+/*
+ * Set a pre-allocated struct sudo_event.
+ * Allocates space for siginfo_t for SUDO_EV_SIGINFO as needed.
+ */
+int
+sudo_ev_set_v1(struct sudo_event *ev, int fd, short events,
+    sudo_ev_callback_t callback, void *closure)
+{
+    debug_decl(sudo_ev_set, SUDO_DEBUG_EVENT)
+
+    /* For SUDO_EV_SIGINFO we use a container to store closure + siginfo_t */
+    if (ISSET(events, SUDO_EV_SIGINFO)) {
+	struct sudo_ev_siginfo_container *container =
+	    malloc(sizeof(*container) + sizeof(siginfo_t) - 1);
+	if (container == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: unable to allocate siginfo container", __func__);
+	    debug_return_int(-1);
+	}
+	container->closure = closure;
+	closure = container;
+    }
+    sudo_ev_init(ev, fd, events, callback, closure);
+
+    debug_return_int(0);
+}
+
 struct sudo_event *
 sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closure)
 {
@@ -296,21 +323,10 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
 	    "%s: unable to allocate event", __func__);
 	debug_return_ptr(NULL);
     }
-    /* For SUDO_EV_SIGINFO we use a container to store closure + siginfo_t */
-    if (ISSET(events, SUDO_EV_SIGINFO)) {
-	struct sudo_ev_siginfo_container *container =
-	    malloc(sizeof(*container) + sizeof(siginfo_t) - 1);
-	if (container == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: unable to allocate siginfo container", __func__);
-	    free(ev);
-	    debug_return_ptr(NULL);
-	}
-	container->closure = closure;
-	closure = container;
+    if (sudo_ev_set(ev, fd, events, callback, closure) == -1) {
+	free(ev);
+	debug_return_ptr(NULL);
     }
-    sudo_ev_init(ev, fd, events, callback, closure);
-
     debug_return_ptr(ev);
 }
 
