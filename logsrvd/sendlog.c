@@ -80,7 +80,8 @@ static void
 usage(bool fatal)
 {
 #if defined(HAVE_OPENSSL)
-    fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] [-t -b ca_bundle] [-c cert_file [-k key_file]] "
+    fprintf(stderr, "usage: %s [-t] [-b ca_bundle] [-c cert_file] [-h host] "
+	"[-i iolog-id] [-k key_file] [-p port] "
 #else
     fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] "
 #endif
@@ -116,7 +117,6 @@ init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const
 {
     const SSL_METHOD *method;
     SSL_CTX *ctx = NULL;
-
     debug_decl(init_tls_client_context, SUDO_DEBUG_UTIL)
 
     SSL_library_init();

@@ -92,11 +92,11 @@ connection_closure_free(struct connection_closure *closure)
 	bool shutting_down = closure->state == SHUTDOWN;
 
 #if defined(HAVE_OPENSSL)
-    /* deallocate the connection's ssl object */
-    if (logsrvd_conf_get_tls_opt() == true) {
-        if (closure->ssl)
-            SSL_free(closure->ssl);
-    }
+	/* deallocate the connection's ssl object */
+	if (logsrvd_conf_get_tls_opt() == true) {
+	    if (closure->ssl)
+		SSL_free(closure->ssl);
+	}
 #endif
 	TAILQ_REMOVE(&connections, closure, entries);
 	close(closure->sock);
@@ -831,7 +831,6 @@ load_cert(const char *file)
 {
     X509 *x509 = NULL;
     BIO *cert = NULL;
-
     debug_decl(load_cert, SUDO_DEBUG_UTIL)
 
     if ((cert = BIO_new(BIO_s_file())) == NULL) {
@@ -863,7 +862,6 @@ check_cert(X509_STORE *ca_store_ctx, SSL_CTX *ctx, const char *cert_file)
     bool ret = false;
     X509_STORE_CTX *store_ctx = NULL;
     X509 *x509 = NULL;
-
     debug_decl(check_cert, SUDO_DEBUG_UTIL)
 
     if ((x509 = load_cert(cert_file)) == NULL)
@@ -915,7 +913,6 @@ verify_server_cert(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
     bool ret = false;
     X509_STORE *ca_store_ctx = NULL;
     X509_LOOKUP *x509_lookup = NULL;
-
     debug_decl(verify_server_cert, SUDO_DEBUG_UTIL)
 
     if ((ca_store_ctx = X509_STORE_new()) == NULL) {
@@ -932,7 +929,7 @@ verify_server_cert(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
         goto exit;
     }
 
-    if(!X509_LOOKUP_load_file(x509_lookup, tls_config->cacert_path, X509_FILETYPE_PEM)) {
+    if (!X509_LOOKUP_load_file(x509_lookup, tls_config->cacert_path, X509_FILETYPE_PEM)) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "unable to load CA bundle file: %s",
             ERR_error_string(ERR_get_error(), NULL));
@@ -952,8 +949,8 @@ init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
 {
     debug_decl(init_tls_ciphersuites, SUDO_DEBUG_UTIL)
 
-    /* try to set TLS v1.2 ciphersuite list from config if given */
     if (tls_config->ciphers_v12) {
+	/* try to set TLS v1.2 ciphersuite list from config if given */
         if (SSL_CTX_set_cipher_list(ctx, tls_config->ciphers_v12)) {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
                 "TLS v1.2 ciphersuite list is set from config");
@@ -963,8 +960,8 @@ init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
                 ERR_error_string(ERR_get_error(), NULL));
                 debug_return_bool(false);
         }
-    /* fallback to default ciphersuites for TLS v1.2 */
     } else {
+	/* fallback to default ciphersuites for TLS v1.2 */
         if (SSL_CTX_set_cipher_list(ctx, LOGSRVD_DEFAULT_CIPHER_LST12) <= 0) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                 "unable to load default TLS v1.2 ciphersuite list: %s",
@@ -977,8 +974,8 @@ init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
         }
     }
 
-    /* try to set TLSv1.3 ciphersuite list from config */
     if (tls_config->ciphers_v13) {
+	/* try to set TLSv1.3 ciphersuite list from config */
         if (SSL_CTX_set_ciphersuites(ctx, tls_config->ciphers_v13)) {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
                 "TLS v1.3 ciphersuite list is set from config");
@@ -988,8 +985,8 @@ init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
                 ERR_error_string(ERR_get_error(), NULL));        
                 debug_return_bool(false);
         }
-    /* fallback to default ciphersuites for TLS v1.3 */
     } else {
+	/* fallback to default ciphersuites for TLS v1.3 */
         if (SSL_CTX_set_ciphersuites(ctx, LOGSRVD_DEFAULT_CIPHER_LST13) <= 0) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                 "unable to load default TLS v1.3 ciphersuite list: %s",
@@ -1015,7 +1012,6 @@ init_tls_server_context(void)
     const SSL_METHOD *method;
     SSL_CTX *ctx = NULL;
     const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
-
     debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL)
 
     SSL_library_init();
