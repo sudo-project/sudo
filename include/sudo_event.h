@@ -19,6 +19,7 @@
 #ifndef SUDO_EVENT_H
 #define SUDO_EVENT_H
 
+#include <time.h>	/* for struct timespec */
 #include <signal.h>	/* for sigatomic_t and NSIG */
 #include "sudo_queue.h"
 
