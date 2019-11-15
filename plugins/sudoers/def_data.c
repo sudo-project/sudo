@@ -506,6 +506,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Log when a command is denied by sudoers"),
 	NULL,
     }, {
+	"log_server", T_LIST|T_BOOL,
+	N_("Sudo log server(s) to connect to with optional port"),
+	NULL,
+    }, {
+	"log_server_timeout", T_TIMEOUT|T_BOOL,
+	N_("Sudo log server timeout in seconds: %u"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

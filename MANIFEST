@@ -359,7 +359,9 @@ plugins/sudoers/insults.h
 plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
+plugins/sudoers/iolog_client.c
 plugins/sudoers/iolog_path_escapes.c
+plugins/sudoers/iolog_plugin.h
 plugins/sudoers/ldap.c
 plugins/sudoers/ldap_conf.c
 plugins/sudoers/ldap_util.c

@@ -438,6 +438,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
 	/* kill command */
 	terminate_command(ec.cmnd_pid, true);
+	ec.cmnd_pid = -1;
     }
 
 #ifdef HAVE_SELINUX

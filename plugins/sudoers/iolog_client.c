@@ -1,0 +1,1159 @@
+/*
+ * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#include "config.h"
+
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <netdb.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
+
+#include "sudoers.h"
+#include "sudo_event.h"
+#include "iolog_plugin.h"
+
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
+
+static void
+connect_cb(int sock, int what, void *v)
+{
+    int optval, ret, *errnump = v;
+    socklen_t optlen = sizeof(optval);
+    debug_decl(connect_cb, SUDOERS_DEBUG_UTIL)
+
+    if (what == SUDO_PLUGIN_EV_TIMEOUT) {
+	*errnump = ETIMEDOUT;
+    } else {
+	ret = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optval, &optlen);
+	*errnump = ret == 0 ? optval : errno;
+    }
+
+    debug_return;
+}
+
+/*
+ * Like connect(2) but with a timeout.
+ */
+static int
+timed_connect(int sock, const struct sockaddr *addr, socklen_t addrlen,
+    struct timespec *timo)
+{
+    struct sudo_event_base *evbase = NULL;
+    struct sudo_event *connect_event = NULL;
+    int ret, errnum = 0;
+    debug_decl(timed_connect, SUDOERS_DEBUG_UTIL)
+
+    ret = connect(sock, addr, addrlen);
+    if (ret == -1 && errno == EINPROGRESS) {
+	evbase = sudo_ev_base_alloc();
+	connect_event = sudo_ev_alloc(sock, SUDO_PLUGIN_EV_WRITE, connect_cb,
+	    &errnum);
+	if (evbase == NULL || connect_event == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+	if (sudo_ev_add(evbase, connect_event, timo, false) == -1) {
+	    sudo_warnx(U_("unable to add event to queue"));
+	    goto done;
+	}
+	if (sudo_ev_dispatch(evbase) == -1) {
+	    sudo_warn(U_("error in event loop"));
+	    goto done;
+	}
+	if (errnum == 0)
+	    ret = 0;
+	else
+	    errno = errnum;
+    }
+
+done:
+    sudo_ev_base_free(evbase);
+    sudo_ev_free(connect_event);
+
+    debug_return_int(ret);
+}
+
+/*
+ * Connect to specified host:port
+ * If host has multiple addresses, the first one that connects is used.
+ * Returns open socket or -1 on error.
+ */
+static int
+connect_server(const char *host, const char *port, struct timespec *timo,
+    const char **reason)
+{
+    struct addrinfo hints, *res, *res0;
+    const char *cause = NULL;
+    int error, sock = -1;
+    debug_decl(connect_server, SUDOERS_DEBUG_UTIL)
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    error = getaddrinfo(host, port, &hints, &res0);
+    if (error != 0) {
+	sudo_warnx(U_("unable to look up %s:%s: %s"), host, port,
+	    gai_strerror(error));
+	debug_return_int(-1);
+    }
+
+    for (res = res0; res; res = res->ai_next) {
+	int flags, save_errno;
+
+	sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	if (sock == -1) {
+	    cause = "socket";
+	    continue;
+	}
+	flags = fcntl(sock, F_GETFL, 0);
+	if (flags == -1 || fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1) {
+	    cause = "fcntl(O_NONBLOCK)";
+	    save_errno = errno;
+	    close(sock);
+	    errno = save_errno;
+	    sock = -1;
+	    continue;
+	}
+	if (timed_connect(sock, res->ai_addr, res->ai_addrlen, timo) == -1) {
+	    cause = "connect";
+	    save_errno = errno;
+	    close(sock);
+	    errno = save_errno;
+	    sock = -1;
+	    continue;
+	}
+	break;	/* success */
+    }
+    freeaddrinfo(res0);
+
+    if (sock == -1)
+	*reason = cause;
+
+    debug_return_int(sock);
+}
+
+/*
+ * Connect to the first server in the list.
+ * Returns a socket with O_NONBLOCK and close-on-exec flags set.
+ */
+int
+log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
+{
+    struct sudoers_string *server;
+    char *copy, *host, *port;
+    const char *cause = NULL;
+    int sock = -1;
+    debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL)
+
+    STAILQ_FOREACH(server, servers, entries) {
+	copy = strdup(server->str);
+	if (!sudo_parse_host_port(copy, &host, &port, DEFAULT_PORT_STR)) {
+	    free(copy);
+	    continue;
+	}
+	sock = connect_server(host, port, timo, &cause);
+	free(copy);
+	if (sock != -1) {
+	    int flags = fcntl(sock, F_GETFL, 0);
+	    if (flags == -1 || fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1 ||
+		    fcntl(sock, F_SETFD, FD_CLOEXEC) == -1) {
+		close(sock);
+		sock = -1;
+	    }
+	    break;
+	}
+    }
+    if (sock == -1 && cause != NULL)
+	sudo_warn("%s", cause);
+
+    debug_return_int(sock);
+}
+
+/*
+ * Free client closure and contents and initialize to unused state as
+ * per CLIENT_CLOSURE_INITIALIZER.  Log details are not freed.
+ */
+void
+client_closure_free(struct client_closure *closure)
+{
+    struct connection_buffer *buf;
+    debug_decl(client_closure_free, SUDOERS_DEBUG_UTIL)
+
+    if (closure->sock != -1) {
+	close(closure->sock);
+	closure->sock = -1;
+    }
+    closure->state = ERROR;
+    while ((buf = TAILQ_FIRST(&closure->write_bufs)) != NULL) {
+	TAILQ_REMOVE(&closure->write_bufs, buf, entries);
+	free(buf->data);
+	free(buf);
+    }
+    while ((buf = TAILQ_FIRST(&closure->free_bufs)) != NULL) {
+	TAILQ_REMOVE(&closure->free_bufs, buf, entries);
+	free(buf->data);
+	free(buf);
+    }
+    if (closure->read_ev != NULL) {
+	closure->read_ev->free(closure->read_ev);
+	closure->read_ev = NULL;
+    }
+    if (closure->write_ev != NULL) {
+	closure->write_ev->free(closure->write_ev);
+	closure->write_ev = NULL;
+    }
+    free(closure->read_buf.data);
+    memset(&closure->read_buf, 0, sizeof(closure->read_buf));
+    closure->log_details = NULL;
+    memset(&closure->start_time, 0, sizeof(closure->start_time));
+    memset(&closure->elapsed, 0, sizeof(closure->elapsed));
+    memset(&closure->committed, 0, sizeof(closure->committed));
+    free(closure->iolog_id);
+    closure->iolog_id = NULL;
+
+    debug_return;
+}
+
+static struct connection_buffer *
+get_free_buf(struct client_closure *closure)
+{
+    struct connection_buffer *buf;
+    debug_decl(get_free_buf, SUDOERS_DEBUG_UTIL)
+
+    buf = TAILQ_FIRST(&closure->free_bufs);
+    if (buf != NULL)
+	TAILQ_REMOVE(&closure->free_bufs, buf, entries);
+    else
+	buf = calloc(1, sizeof(*buf));
+
+    debug_return_ptr(buf);
+}
+
+/*
+ * Format a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_client_message(struct client_closure *closure, ClientMessage *msg)
+{
+    struct connection_buffer *buf;
+    uint32_t msg_len;
+    bool ret = false;
+    size_t len;
+    debug_decl(fmt_client_message, SUDOERS_DEBUG_UTIL)
+
+    if ((buf = get_free_buf(closure)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+
+    len = client_message__get_packed_size(msg);
+    if (len > MESSAGE_SIZE_MAX) {
+    	sudo_warnx(U_("client message too large: %zu\n"), len);
+        goto done;
+    }
+    /* Wire message size is used for length encoding, precedes message. */
+    msg_len = htonl((uint32_t)len);
+    len += sizeof(msg_len);
+
+    /* Resize buffer as needed. */
+    if (len > buf->size) {
+	free(buf->data);
+	buf->size = sudo_pow2_roundup(len);
+	if ((buf->data = malloc(buf->size)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    buf->size = 0;
+	    goto done;
+	}
+    }
+
+    memcpy(buf->data, &msg_len, sizeof(msg_len));
+    client_message__pack(msg, buf->data + sizeof(msg_len));
+    buf->len = len;
+    TAILQ_INSERT_TAIL(&closure->write_bufs, buf, entries);
+    buf = NULL;
+
+    ret = true;
+
+done:
+    if (buf != NULL) {
+	free(buf->data);
+	free(buf);
+    }
+    debug_return_bool(ret);
+}
+
+/*
+ * Build and format an AcceptMessage wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_accept_message(struct client_closure *closure)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    AcceptMessage accept_msg = ACCEPT_MESSAGE__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
+    InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
+    InfoMessage__StringList submitenv = INFO_MESSAGE__STRING_LIST__INIT;
+    struct iolog_details *details = closure->log_details;
+    struct timespec now;
+    bool ret = false;
+    size_t n;
+    debug_decl(fmt_accept_message, SUDOERS_DEBUG_UTIL)
+
+    /*
+     * Fill in AcceptMessage and add it to ClientMessage.
+     */
+    if (sudo_gettime_real(&now)) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	debug_return_bool(false);
+    }
+    ts.tv_sec = now.tv_sec;
+    ts.tv_nsec = now.tv_nsec;
+    accept_msg.submit_time = &ts;
+
+    /* Client will send IoBuffer messages. */
+    accept_msg.expect_iobufs = true;
+
+    /* Convert NULL-terminated vectors to StringList. */
+    runargv.strings = (char **)details->argv;
+    runargv.n_strings = details->argc;
+    submitenv.strings = (char **)details->user_env;
+    while (submitenv.strings[submitenv.n_strings] != NULL)
+	submitenv.n_strings++;
+
+    /* XXX - realloc as needed instead of preallocating */
+    accept_msg.n_info_msgs = 22;
+    accept_msg.info_msgs = calloc(accept_msg.n_info_msgs, sizeof(InfoMessage *));
+    if (accept_msg.info_msgs == NULL) {
+	accept_msg.n_info_msgs = 0;
+	goto done;
+    }
+    for (n = 0; n < accept_msg.n_info_msgs; n++) {
+	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
+	if (accept_msg.info_msgs[n] == NULL) {
+	    accept_msg.n_info_msgs = n;
+	    goto done;
+	}
+	info_message__init(accept_msg.info_msgs[n]);
+    }
+
+    /* Fill in info_msgs */
+    n = 0;
+
+    /* clientargv (not supported) */
+    /* clientpid */
+    /* clientppid */
+    /* clientsid */
+
+    accept_msg.info_msgs[n]->key = "columns";
+    accept_msg.info_msgs[n]->numval = details->cols;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    n++;
+
+    accept_msg.info_msgs[n]->key = "command";
+    accept_msg.info_msgs[n]->strval = (char *)details->command;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    accept_msg.info_msgs[n]->key = "lines";
+    accept_msg.info_msgs[n]->numval = details->lines;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    n++;
+
+    accept_msg.info_msgs[n]->key = "runargv";
+    accept_msg.info_msgs[n]->strlistval = &runargv;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    n++;
+
+    accept_msg.info_msgs[n]->key = "submitenv";
+    accept_msg.info_msgs[n]->strlistval = &submitenv;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    n++;
+
+    if (details->runas_gr!= NULL) {
+	accept_msg.info_msgs[n]->key = "rungid";
+	accept_msg.info_msgs[n]->numval = details->runas_gr->gr_gid;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+	n++;
+
+	accept_msg.info_msgs[n]->key = "rungroup";
+	accept_msg.info_msgs[n]->strval = details->runas_gr->gr_name;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    /* TODO - rungids */
+    /* TODO - rungroups */
+
+    accept_msg.info_msgs[n]->key = "runuid";
+    accept_msg.info_msgs[n]->numval = details->runas_pw->pw_uid;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    n++;
+
+    accept_msg.info_msgs[n]->key = "runuser";
+    accept_msg.info_msgs[n]->strval = details->runas_pw->pw_name;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    accept_msg.info_msgs[n]->key = "submitcwd";
+    accept_msg.info_msgs[n]->strval = (char *)details->cwd;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    /* TODO - submitenv */
+    /* TODO - submitgid */
+    /* TODO - submitgids */
+    /* TODO - submitgroup */
+    /* TODO - submitgroups */
+
+    accept_msg.info_msgs[n]->key = "submithost";
+    accept_msg.info_msgs[n]->strval = (char *)details->host;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    /* TODO - submituid */
+
+    accept_msg.info_msgs[n]->key = "submituser";
+    accept_msg.info_msgs[n]->strval = (char *)details->user;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    accept_msg.info_msgs[n]->key = "ttyname";
+    accept_msg.info_msgs[n]->strval = (char *)details->tty;
+    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    /* Update n_info_msgs. */
+    accept_msg.n_info_msgs = n;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending AcceptMessage, array length %zu", __func__, n);
+
+    /* Schedule ClientMessage */
+    client_msg.accept_msg = &accept_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
+    ret = fmt_client_message(closure, &client_msg);
+
+done:
+    for (n = 0; n < accept_msg.n_info_msgs; n++)
+	free(accept_msg.info_msgs[n]);
+    free(accept_msg.info_msgs);
+
+    debug_return_bool(ret);
+}
+
+#ifdef notyet
+/*
+ * Build and format a RestartMessage wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_restart_message(struct client_closure *closure)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    RestartMessage restart_msg = RESTART_MESSAGE__INIT;
+    TimeSpec tv = TIME_SPEC__INIT;
+    bool ret = false;
+    debug_decl(fmt_restart_message, SUDOERS_DEBUG_UTIL)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending RestartMessage, [%lld, %ld]", __func__,
+	(long long)closure->restart->tv_sec, closure->restart->tv_nsec);
+
+    tv.tv_sec = closure->restart->tv_sec;
+    tv.tv_nsec = closure->restart->tv_nsec;
+    restart_msg.resume_point = &tv;
+    restart_msg.log_id = (char *)closure->iolog_id;
+
+    /* Schedule ClientMessage */
+    client_msg.restart_msg = &restart_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_RESTART_MSG;
+    ret = fmt_client_message(closure, &client_msg);
+
+    debug_return_bool(ret);
+}
+#endif
+
+/*
+ * Build and format an ExitMessage wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_exit_message(struct client_closure *closure, int exit_status, int error)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    ExitMessage exit_msg = EXIT_MESSAGE__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
+    char signame[SIG2STR_MAX];
+    bool ret = false;
+    struct timespec run_time;
+    debug_decl(fmt_exit_message, SUDOERS_DEBUG_UTIL)
+
+    if (sudo_gettime_awake(&run_time) == -1) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	goto done;
+    }
+    sudo_timespecsub(&run_time, &closure->start_time, &run_time);
+
+    ts.tv_sec = run_time.tv_sec;
+    ts.tv_nsec = run_time.tv_nsec;
+    exit_msg.run_time = &ts;
+
+    if (error != 0) {
+	/* Error executing the command. */
+	exit_msg.error = strerror(error);
+    } else {
+	if (WIFEXITED(exit_status)) {
+	    exit_msg.exit_value = WEXITSTATUS(exit_status);
+	} else if (WIFSIGNALED(exit_status)) {
+	    int signo = WTERMSIG(exit_status);
+	    if (signo <= 0 || sig2str(signo, signame) == -1) {
+		sudo_warnx(U_("%s: internal error, invalid signal %d"),
+		    __func__, signo);
+		goto done;
+	    }
+	    exit_msg.signal = signame;
+	    if (WCOREDUMP(exit_status))
+		exit_msg.dumped_core = true;
+	    exit_msg.exit_value = WTERMSIG(exit_status) | 128;
+	} else {
+	    sudo_warnx(U_("%s: internal error, invalid exit status %d"),
+		__func__, exit_status);
+	    goto done;
+	}
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending ExitMessage, exitval %d, error %s, signal %s, coredump %s",
+	__func__, exit_msg.exit_value, exit_msg.error ? exit_msg.error : "",
+	exit_msg.signal ? exit_msg.signal : "",
+	exit_msg.dumped_core ? "yes" : "no");
+
+    /* Send ClientMessage */
+    client_msg.exit_msg = &exit_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
+    if (!fmt_client_message(closure, &client_msg))
+	goto done;
+
+    closure->state = SEND_EXIT;
+    ret = true;
+
+done:
+    debug_return_bool(ret);
+}
+
+/*
+ * Build and format an IoBuffer wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_io_buf(struct client_closure *closure, int type, const char *buf,
+    unsigned int len, struct timespec *delay)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    IoBuffer iobuf_msg = IO_BUFFER__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
+    bool ret = false;
+    debug_decl(fmt_io_buf, SUDOERS_DEBUG_UTIL)
+
+    /* Fill in IoBuffer. */
+    ts.tv_sec = delay->tv_sec;
+    ts.tv_nsec = delay->tv_nsec;
+    iobuf_msg.delay = &ts;
+    iobuf_msg.data.data = (void *)buf;
+    iobuf_msg.data.len = len;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending IoBuffer length %zu, type %d, size %zu", __func__,
+	iobuf_msg.data.len, type, io_buffer__get_packed_size(&iobuf_msg));
+
+    /* Schedule ClientMessage, it doesn't matter which IoBuffer we set. */
+    client_msg.ttyout_buf = &iobuf_msg;
+    client_msg.type_case = type;
+    if (!fmt_client_message(closure, &client_msg))
+        goto done;
+
+    ret = true;
+
+done:
+    debug_return_bool(ret);
+}
+
+/*
+ * Build and format a ChangeWindowSize message wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_winsize(struct client_closure *closure, unsigned int lines,
+    unsigned int cols, struct timespec *delay)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    ChangeWindowSize winsize_msg = CHANGE_WINDOW_SIZE__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
+    bool ret = false;
+    debug_decl(fmt_winsize, SUDOERS_DEBUG_UTIL)
+
+    /* Fill in ChangeWindowSize message. */
+    ts.tv_sec = delay->tv_sec;
+    ts.tv_nsec = delay->tv_nsec;
+    winsize_msg.delay = &ts;
+    winsize_msg.rows = lines;
+    winsize_msg.cols = cols;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ChangeWindowSize, %dx%d",
+	__func__, winsize_msg.rows, winsize_msg.cols);
+
+    /* Send ClientMessage */
+    client_msg.winsize_event = &winsize_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_WINSIZE_EVENT;
+    if (!fmt_client_message(closure, &client_msg))
+        goto done;
+
+    ret = true;
+
+done:
+    debug_return_bool(ret);
+}
+
+/*
+ * Build and format a CommandSuspend message wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_suspend(struct client_closure *closure, const char *signame, struct timespec *delay)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    CommandSuspend suspend_msg = COMMAND_SUSPEND__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
+    bool ret = false;
+    debug_decl(fmt_suspend, SUDOERS_DEBUG_UTIL)
+
+    /* Fill in CommandSuspend message. */
+    ts.tv_sec = delay->tv_sec;
+    ts.tv_nsec = delay->tv_nsec;
+    suspend_msg.delay = &ts;
+    suspend_msg.signal = (char *)signame;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+    	"%s: sending CommandSuspend, SIG%s", __func__, suspend_msg.signal);
+
+    /* Send ClientMessage */
+    client_msg.suspend_event = &suspend_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_SUSPEND_EVENT;
+    if (!fmt_client_message(closure, &client_msg))
+        goto done;
+
+    ret = true;
+
+done:
+    debug_return_bool(ret);
+}
+
+/*
+ * Additional work to do after a ClientMessage was sent to the server.
+ * Advances state and formats the next ClientMessage (if any).
+ * XXX - better name
+ */
+static bool
+client_message_completion(struct client_closure *closure)
+{
+    debug_decl(client_message_completion, SUDOERS_DEBUG_UTIL)
+
+    switch (closure->state) {
+    case SEND_ACCEPT:
+    case SEND_RESTART:
+	closure->state = SEND_IO;
+	break;
+    case SEND_IO:
+	/* Arbitrary number of I/O log buffers, no state change. */
+	break;
+    case SEND_EXIT:
+	/* Done writing, just waiting for final commit point. */
+	closure->write_ev->del(closure->write_ev);
+	closure->state = CLOSING;
+
+	/* Enable timeout while waiting for final commit point. */
+	if (closure->read_ev->add(closure->read_ev,
+		&closure->log_details->server_timeout) == -1) {
+	    sudo_warn(U_("unable to add event to queue"));
+	    debug_return_bool(false);
+	}
+	break;
+    default:
+	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
+	debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
+/*
+ * Respond to a ServerHello message from the server.
+ * Returns true on success, false on error.
+ */
+static bool
+handle_server_hello(ServerHello *msg, struct client_closure *closure)
+{
+    size_t n;
+    debug_decl(handle_server_hello, SUDOERS_DEBUG_UTIL)
+
+    if (closure->state != RECV_HELLO) {
+	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
+	debug_return_bool(false);
+    }
+
+    /* Sanity check ServerHello message. */
+    if (msg->server_id == NULL || msg->server_id[0] == '\0') {
+	sudo_warnx("%s", U_("invalid ServerHello"));
+	debug_return_bool(false);
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: server ID: %s",
+	__func__, msg->server_id);
+    /* TODO: handle redirect */
+    if (msg->redirect != NULL && msg->redirect[0] != '\0') {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: redirect: %s",
+	    __func__, msg->redirect);
+    }
+    for (n = 0; n < msg->n_servers; n++) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: server %zu: %s",
+	    __func__, n + 1, msg->servers[n]);
+    }
+
+    /*
+     * Disable timeout for read event after have server hello.
+     * Other server messages may happen at arbitrary times.
+     */
+    if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
+        sudo_warn(U_("unable to add event to queue"));
+	debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Respond to a CommitPoint message from the server.
+ * Returns true on success, false on error.
+ */
+static bool
+handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
+{
+    debug_decl(handle_commit_point, SUDOERS_DEBUG_UTIL)
+
+    /* Only valid after we have sent an IO buffer. */
+    if (closure->state < SEND_IO) {
+	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
+	debug_return_bool(false);
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: commit point: [%lld, %d]",
+	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec);
+    closure->committed.tv_sec = commit_point->tv_sec;
+    closure->committed.tv_nsec = commit_point->tv_nsec;
+
+    if (closure->state == CLOSING) {
+	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
+	    /* Last commit point received, exit event loop. */
+	    closure->state = FINISHED;
+	    closure->read_ev->del(closure->read_ev);
+	}
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Respond to a LogId message from the server.
+ * Always returns true.
+ */
+static bool
+handle_log_id(char *id, struct client_closure *closure)
+{
+    debug_decl(handle_log_id, SUDOERS_DEBUG_UTIL)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: remote log ID: %s", __func__, id);
+    if ((closure->iolog_id = strdup(id)) == NULL)
+	sudo_fatal(NULL);
+    debug_return_bool(true);
+}
+
+/*
+ * Respond to a ServerError message from the server.
+ * Always returns false.
+ */
+static bool
+handle_server_error(char *errmsg, struct client_closure *closure)
+{
+    debug_decl(handle_server_error, SUDOERS_DEBUG_UTIL)
+
+    sudo_warnx(U_("error message received from server: %s"), errmsg);
+    debug_return_bool(false);
+}
+
+/*
+ * Respond to a ServerAbort message from the server.
+ * Always returns false.
+ */
+static bool
+handle_server_abort(char *errmsg, struct client_closure *closure)
+{
+    debug_decl(handle_server_abort, SUDOERS_DEBUG_UTIL)
+
+    sudo_warnx(U_("abort message received from server: %s"), errmsg);
+    debug_return_bool(false);
+}
+
+/*
+ * Respond to a ServerMessage from the server.
+ * Returns true on success, false on error.
+ */
+static bool
+handle_server_message(uint8_t *buf, size_t len,
+    struct client_closure *closure)
+{
+    ServerMessage *msg;
+    bool ret = false;
+    debug_decl(handle_server_message, SUDOERS_DEBUG_UTIL)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
+    msg = server_message__unpack(NULL, len, buf);
+    if (msg == NULL) {
+	sudo_warnx("%s", U_("unable to unpack ServerMessage"));
+	debug_return_bool(false);
+    }
+
+    switch (msg->type_case) {
+    case SERVER_MESSAGE__TYPE_HELLO:
+	if (handle_server_hello(msg->hello, closure)) {
+	    /* Format and schedule accept message. */
+	    closure->state = SEND_ACCEPT;
+	    if ((ret = fmt_accept_message(closure))) {
+		if (closure->write_ev->add(closure->write_ev,
+			&closure->log_details->server_timeout) == -1) {
+		    sudo_warn(U_("unable to add event to queue"));
+		    ret = false;
+		}
+	    }
+	}
+	break;
+    case SERVER_MESSAGE__TYPE_COMMIT_POINT:
+	ret = handle_commit_point(msg->commit_point, closure);
+	break;
+    case SERVER_MESSAGE__TYPE_LOG_ID:
+	ret = handle_log_id(msg->log_id, closure);
+	break;
+    case SERVER_MESSAGE__TYPE_ERROR:
+	ret = handle_server_error(msg->error, closure);
+	closure->state = ERROR;
+	break;
+    case SERVER_MESSAGE__TYPE_ABORT:
+	ret = handle_server_abort(msg->abort, closure);
+	closure->state = ERROR;
+	break;
+    default:
+	sudo_warnx(U_("%s: unexpected type_case value %d"),
+	    __func__, msg->type_case);
+	break;
+    }
+
+    server_message__free_unpacked(msg, NULL);
+    debug_return_bool(ret);
+}
+
+/*
+ * Expand buf as needed or just reset it.
+ * XXX - share with logsrvd/sendlog
+ */
+static bool
+expand_buf(struct connection_buffer *buf, unsigned int needed)
+{
+    void *newdata;
+    debug_decl(expand_buf, SUDO_DEBUG_UTIL)
+
+    if (buf->size < needed) {
+	/* Expand buffer. */
+	needed = sudo_pow2_roundup(needed);
+	if ((newdata = malloc(needed)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_bool(false);
+	}
+	if (buf->off > 0)
+	    memcpy(newdata, buf->data + buf->off, buf->len - buf->off);
+	free(buf->data);
+	buf->data = newdata;
+	buf->size = needed;
+    } else {
+	/* Just reset existing buffer. */
+	if (buf->off > 0) {
+	    memmove(buf->data, buf->data + buf->off,
+		buf->len - buf->off);
+	}
+    }
+    buf->len -= buf->off;
+    buf->off = 0;
+
+    debug_return_bool(true);
+}
+
+/*
+ * Read and unpack a ServerMessage (read callback).
+ */
+static void
+server_msg_cb(int fd, int what, void *v)
+{
+    struct client_closure *closure = v;
+    struct connection_buffer *buf = &closure->read_buf;
+    ssize_t nread;
+    uint32_t msg_len;
+    debug_decl(server_msg_cb, SUDOERS_DEBUG_UTIL)
+
+    if (what == SUDO_PLUGIN_EV_TIMEOUT) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out reading from server",
+	    __func__);
+	goto bad;
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
+
+    nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
+	__func__, nread);
+    switch (nread) {
+    case -1:
+	if (errno == EAGAIN)
+	    debug_return;
+	sudo_warn("recv");
+	goto bad;
+    case 0:
+	sudo_warnx("%s", U_("lost connection to log server"));
+	goto bad;
+    default:
+	break;
+    }
+    buf->len += nread;
+
+    while (buf->len - buf->off >= sizeof(msg_len)) {
+	/* Read wire message size (uint32_t in network byte order). */
+	memcpy(&msg_len, buf->data + buf->off, sizeof(msg_len));
+	msg_len = ntohl(msg_len);
+
+	if (msg_len > MESSAGE_SIZE_MAX) {
+	    sudo_warnx(U_("server message too large: %u\n"), msg_len);
+	    goto bad;
+	}
+
+	if (msg_len + sizeof(msg_len) > buf->len - buf->off) {
+	    /* Incomplete message, we'll read the rest next time. */
+	    if (!expand_buf(buf, msg_len + sizeof(msg_len)))
+		    goto bad;
+	    debug_return;
+	}
+
+	/* Parse ServerMessage, could be zero bytes. */
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: parsing ServerMessage, size %u", __func__, msg_len);
+	buf->off += sizeof(msg_len);
+	if (!handle_server_message(buf->data + buf->off, msg_len, closure))
+	    goto bad;
+	buf->off += msg_len;
+    }
+    buf->len -= buf->off;
+    buf->off = 0;
+    debug_return;
+bad:
+    if (closure->log_details->ignore_iolog_errors) {
+	/* Disable plugin, the command continues. */
+	closure->disabled = true;
+	closure->read_ev->del(closure->read_ev);
+    } else {
+	/* Break out of sudo event loop and kill the command. */
+	closure->read_ev->loopbreak(closure->read_ev);
+    }
+    debug_return;
+}
+
+/*
+ * Send a ClientMessage to the server (write callback).
+ */
+static void
+client_msg_cb(int fd, int what, void *v)
+{
+    struct client_closure *closure = v;
+    struct connection_buffer *buf;
+    ssize_t nwritten;
+    debug_decl(client_msg_cb, SUDOERS_DEBUG_UTIL)
+
+    if (what == SUDO_PLUGIN_EV_TIMEOUT) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out writiing to server",
+	    __func__);
+	goto bad;
+    }
+
+    if ((buf = TAILQ_FIRST(&closure->write_bufs)) == NULL) {
+	sudo_warn("%s", U_("missing write buffer"));
+	goto bad;
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+    	"%s: sending %u bytes to server", __func__, buf->len - buf->off);
+
+    nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+    if (nwritten == -1) {
+	sudo_warn("send");
+	goto bad;
+    }
+    buf->off += nwritten;
+
+    if (buf->off == buf->len) {
+	/* sent entire message, move buf to free list */
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: finished sending %u bytes to server", __func__, buf->len);
+	buf->off = 0;
+	buf->len = 0;
+	TAILQ_REMOVE(&closure->write_bufs, buf, entries);
+	TAILQ_INSERT_TAIL(&closure->free_bufs, buf, entries);
+	if (TAILQ_EMPTY(&closure->write_bufs)) {
+	    /* Write queue empty, check for state change. */
+	    closure->write_ev->del(closure->write_ev);
+	    if (!client_message_completion(closure))
+		goto bad;
+	}
+    } else {
+	/* not done yet */
+	TAILQ_INSERT_HEAD(&closure->write_bufs, buf, entries);
+    }
+    debug_return;
+
+bad:
+    if (closure->log_details->ignore_iolog_errors) {
+	/* Disable plugin, the command continues. */
+	closure->disabled = true;
+	closure->write_ev->del(closure->write_ev);
+    } else {
+	/* Break out of sudo event loop and kill the command. */
+	closure->write_ev->loopbreak(closure->write_ev);
+    }
+    debug_return;
+}
+
+/*
+ * Allocate and initialize a new client closure
+ */
+bool
+client_closure_fill(struct client_closure *closure, int sock,
+    struct iolog_details *details, struct io_plugin *sudoers_io)
+{
+    debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL)
+
+    closure->sock = -1;
+    closure->state = RECV_HELLO;
+
+    closure->read_buf.size = 64 * 1024;
+    closure->read_buf.data = malloc(closure->read_buf.size);
+    if (closure->read_buf.data == NULL)
+	goto oom;
+
+    TAILQ_INIT(&closure->write_bufs);
+    TAILQ_INIT(&closure->free_bufs);
+
+    if ((closure->read_ev = sudoers_io->event_alloc()) == NULL)
+	goto oom;
+
+    if ((closure->write_ev = sudoers_io->event_alloc()) == NULL)
+	goto oom;
+
+    if (closure->read_ev->set(closure->read_ev, sock,
+	    SUDO_PLUGIN_EV_READ|SUDO_PLUGIN_EV_PERSIST,
+	    server_msg_cb, closure) == -1)
+	goto oom;
+
+    if (closure->write_ev->set(closure->write_ev, sock,
+	    SUDO_PLUGIN_EV_WRITE|SUDO_PLUGIN_EV_PERSIST,
+	    client_msg_cb, closure) == -1)
+	goto oom;
+
+    closure->log_details = details;
+
+    /* Store sock last to avoid double-close in parent on error. */
+    closure->sock = sock;
+
+    debug_return_ptr(closure);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    client_closure_free(closure);
+    debug_return_ptr(NULL);
+}
+
+/*
+ * Custom event loop called from the plugin close function.
+ * We cannot use the main sudo event loop as it has already exited.
+ */
+bool
+client_loop(struct client_closure *closure)
+{
+    struct sudo_event_base *evbase;
+    debug_decl(client_loop, SUDOERS_DEBUG_UTIL)
+
+    /* Create private event base and reparent the read/write events. */
+    if ((evbase = sudo_ev_base_alloc()) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
+    closure->read_ev->setbase(closure->read_ev, evbase);
+    closure->write_ev->setbase(closure->read_ev, evbase);
+
+    /* Loop until queues are flushed and final commit point received. */
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"flushing buffers and waiting for final commit point");
+    sudo_ev_dispatch(evbase);
+    sudo_ev_base_free(evbase);
+
+    debug_return_bool(true);
+}

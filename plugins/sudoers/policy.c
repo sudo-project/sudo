@@ -507,6 +507,45 @@ bad:
 }
 
 /*
+ * Convert struct list_members to a comma-separated string with
+ * the given variable name.
+ */
+static char *
+serialize_list(const char *varname, struct list_members *members)
+{
+    struct list_member *lm, *next;
+    size_t len, result_size;
+    char *result;
+    debug_decl(serialize_list, SUDOERS_DEBUG_PLUGIN)
+
+    result_size = strlen(varname) + 1;
+    SLIST_FOREACH(lm, members, entries) {
+	result_size += strlen(lm->value) + 1;
+    }
+    if ((result = malloc(result_size)) == NULL)
+	goto bad;
+    /* No need to check len for overflow here. */
+    len = strlcpy(result, varname, result_size);
+    result[len++] = '=';
+    result[len] = '\0';
+    SLIST_FOREACH_SAFE(lm, members, entries, next) {
+	len = strlcat(result, lm->value, result_size);
+	if (len + (next != NULL) >= result_size) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    goto bad;
+	}
+	if (next != NULL) {
+	    result[len++] = ',';
+	    result[len] = '\0';
+	}
+    }
+    debug_return_str(result);
+bad:
+    free(result);
+    debug_return_str(NULL);
+}
+
+/*
  * Setup the execution environment.
  * Builds up the command_info list and sets argv and envp.
  * Consumes iolog_path if not NULL.
@@ -684,6 +723,15 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     }
     if (def_iolog_group != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("iolog_group", def_iolog_group)) == NULL)
+	    goto oom;
+    }
+    if (!SLIST_EMPTY(&def_log_server)) {
+	char *log_servers = serialize_list("log_servers", &def_log_server);
+	if (log_servers == NULL)
+	    goto oom;
+	command_info[info_len++] = log_servers;
+
+	if (asprintf(&command_info[info_len++], "log_server_timeout=%u", def_log_server_timeout) == -1)
 	    goto oom;
     }
     if (def_command_timeout > 0 || user_timeout > 0) {

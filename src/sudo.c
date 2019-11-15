@@ -1479,6 +1479,7 @@ sudo_plugin_event_alloc(void)
     ev_int->public.fd = plugin_event_fd;
     ev_int->public.timeleft = plugin_event_timeleft;
     ev_int->public.setbase = plugin_event_setbase;
+    ev_int->public.loopbreak = plugin_event_loopbreak;
     ev_int->public.free = plugin_event_free;
 
     /* Clear private portion in case caller tries to use us uninitialized. */

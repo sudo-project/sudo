@@ -366,3 +366,9 @@ log_allowed
 log_denied
 	T_FLAG
 	"Log when a command is denied by sudoers"
+log_server
+	T_LIST|T_BOOL
+	"Sudo log server(s) to connect to with optional port"
+log_server_timeout
+	T_TIMEOUT|T_BOOL
+	"Sudo log server timeout in seconds: %u"

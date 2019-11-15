@@ -1581,7 +1581,12 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (sudo_ev_got_break(ec.evbase)) {
 	/* error from callback or monitor died */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
-	/* XXX - may need to terminate command if cmnd_pid != -1 */
+	/* kill command */
+	terminate_command(ec.cmnd_pid, true);
+	ec.cmnd_pid = -1;
+	/* TODO: need way to pass an error to the sudo front end */
+	cstat->type = CMD_WSTATUS;
+	cstat->val = W_EXITCODE(1, SIGKILL);
     }
 
     /* Flush any remaining output, free I/O bufs and events, do logout. */
