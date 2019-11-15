@@ -71,6 +71,8 @@ include/compat/glob.h
 include/compat/nss_dbdefs.h
 include/compat/sha2.h
 include/compat/stdbool.h
+include/log_server.pb-c.h
+include/protobuf-c/protobuf-c.h
 include/sudo_compat.h
 include/sudo_conf.h
 include/sudo_debug.h
@@ -97,6 +99,10 @@ lib/iolog/iolog_util.c
 lib/iolog/regress/iolog_path/check_iolog_path.c
 lib/iolog/regress/iolog_path/data
 lib/iolog/regress/iolog_util/check_iolog_util.c
+lib/logsrv/Makefile.in
+lib/logsrv/log_server.pb-c.c
+lib/logsrv/log_server.proto
+lib/logsrv/protobuf-c.c
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/arc4random.c
@@ -258,16 +264,11 @@ log2cl.pl
 logsrvd/Makefile.in
 logsrvd/eventlog.c
 logsrvd/iolog_writer.c
-logsrvd/log_server.pb-c.c
-logsrvd/log_server.pb-c.h
-logsrvd/log_server.proto
 logsrvd/logsrv_util.c
 logsrvd/logsrv_util.h
 logsrvd/logsrvd.c
 logsrvd/logsrvd.h
 logsrvd/logsrvd_conf.c
-logsrvd/protobuf-c/protobuf-c.c
-logsrvd/protobuf-c/protobuf-c.h
 logsrvd/sendlog.c
 logsrvd/sendlog.h
 ltmain.sh
