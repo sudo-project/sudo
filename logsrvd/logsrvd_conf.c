@@ -390,20 +390,6 @@ done:
     debug_return_bool(ret);
 }
 
-#if defined(HAVE_OPENSSL)
-static bool
-cb_tls_opt(struct logsrvd_config *config, const char *str)
-{
-    int val;
-    debug_decl(cb_tls_opt, SUDO_DEBUG_UTIL)
-
-    if ((val = sudo_strtobool(str)) == -1)
-	debug_return_bool(false);
-
-    config->server.tls = val;
-    debug_return_bool(true);
-}
-
 static bool
 cb_timeout(struct logsrvd_config *config, const char *str)
 {
@@ -417,6 +403,20 @@ cb_timeout(struct logsrvd_config *config, const char *str)
 
     config->server.timeout = timeout;
 
+    debug_return_bool(true);
+}
+
+#if defined(HAVE_OPENSSL)
+static bool
+cb_tls_opt(struct logsrvd_config *config, const char *str)
+{
+    int val;
+    debug_decl(cb_tls_opt, SUDO_DEBUG_UTIL)
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->server.tls = val;
     debug_return_bool(true);
 }
 
