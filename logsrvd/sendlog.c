@@ -115,7 +115,7 @@ static SSL_CTX *
 init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const char *key_file)
 {
     const SSL_METHOD *method;
-    SSL_CTX *ctx;
+    SSL_CTX *ctx = NULL;
 
     debug_decl(init_tls_client_context, SUDO_DEBUG_UTIL)
 
@@ -164,8 +164,7 @@ init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const
     goto exit;
 
 bad:
-    if (ctx)
-        SSL_CTX_free(ctx);
+    SSL_CTX_free(ctx);
 
 exit:
     return ctx;
