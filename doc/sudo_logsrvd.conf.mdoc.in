@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 3, 2019
+.Dd November 15, 2019
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -96,6 +96,86 @@ which will listen on all configured network interfaces.
 Multiple
 .Em listen_address
 lines may be specified to listen on more than one interface.
+.It timeout = number
+The amount of time, in seconds,
+.Nm sudo_logsrvd
+will wait for the client to respond.
+A value of 0 will disable the timeout.
+The default value is 30.
+.It tls = boolean
+If true,
+.Nm sudo_logsrvd
+will secure network connections with Transport Layer Security (TLS)
+version 1.2 or 1.3.
+Versions of TLS prior to 1.2 are not supported.
+The
+.Em tls_cert
+and
+.Em tls_key
+settings are also required when TLS is enabled.
+The default value is false.
+.It tls_cacert = path
+The path to a certificate authority bundle file, in PEM format,
+to use instead of the system's default certificate authority database
+when authenticating clients.
+The default is to use the system's default certificate authority database.
+.It tls_cert = path
+The path to the server's certificate file, in PEM format.
+This setting is required when TLS is enabled.
+.It tls_checkpeer = bool
+If true, client certificates will be validated by the server;
+clients without a valid certificate will be unable to connect.
+If false, no validation of client certificates will be performed.
+It true and client certificates are created using a private certificate
+authority, the
+.Em tls_cacert
+setting must be set to a CA bundle that contains the CA certificate
+used to generate the client certificate.
+The default value is
+.Li false .
+.It tls_ciphers_v12 = string
+A list of ciphers to use for connections secured by TLS version 1.2 only,
+separated by a colon
+.Ql :\& .
+See the
+.Sx CIPHER LIST FORMAT
+section in
+.Xr openssl-ciphers 1
+for full details.
+The default value is
+.Li HIGH:!aNULL
+which consists of encryption cipher suites with key lengths larger than
+128 bits, and some cipher suites with 128-bit keys.
+Cipher suites that offer no authentication are excluded.
+.It tls_ciphers_v13 = string
+A list of ciphers to use for connections secured by TLS version 1.3 only,
+separated by a colon
+.Ql :\& .
+Supported cipher suites depend on the version of OpenSSL used,
+but should include the following:
+.Pp
+.Bl -tag -compact -width 8n -offset indent
+.It TLS_AES_128_GCM_SHA256
+.It TLS_AES_256_GCM_SHA384
+.It TLS_CHACHA20_POLY1305_SHA256
+.It TLS_AES_128_CCM_SHA256
+.It TLS_AES_128_CCM_8_SHA256
+.El
+.Pp
+The default cipher suite is TLS_AES_256_GCM_SHA384.
+.It tls_dhparams = path
+The path to a file containing custom Diffie-Hellman parameters in PEM format.
+This file can be created with the following command:
+.Bd -literal
+openssl dhparam -out /etc/sudo_logsrvd_dhparams.pem 2048
+.Ed
+.Pp
+By default,
+.Nm sudo_logsrvd
+will use the OpenSSL defaults for Diffie-Hellman key generation.
+.It tls_key = path
+The path to the server's private key file, in PEM format.
+This setting is required when TLS is enabled.
 .El
 .Ss iolog
 The
@@ -401,6 +481,43 @@ Sudo log server configuration file
 # Multiple listen_address settings may be specified.
 # The default is to listen on all addresses.
 #listen_address = *:30344
+
+# The amount of time, in seconds, the server will wait for the client to
+# respond.  A value of 0 will disable the timeout.  The default value is 30.
+#timeout = 30
+
+# If set, secure connections with TLS 1.2 or 1.3.
+# By default, server connections are not encrypted.
+#tls = true
+
+# Path to the certificate authority bundle file in PEM format.
+#tls_cacert = /etc/sudo_logsrvd_ca.pem
+
+# Path to the server's certificate file in PEM format.
+# Required for TLS connections.
+#tls_cert = /etc/sudo_logsrvd_cert.pem
+
+# Whether to verify client certificates for TLS connections.
+# By default client certs are not checked.
+#tls_checkpeer = false
+
+# TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
+# NOTE that this setting is only effective if the negotiated protocol
+# is TLS version 1.2.
+# The default cipher list is HIGH:!aNULL.
+#tls_ciphers_v12 = HIGH:!aNULL
+
+# TLS cipher list if the negotiated protocol is TLS version 1.3.
+# The default cipher list is TLS_AES_256_GCM_SHA384.
+#tls_ciphers_v13 = TLS_AES_256_GCM_SHA384
+
+# Path to the Diffie-Hellman parameter file in PEM format.
+# If not set, the server will use the OpenSSL defaults.
+#tls_dhparams = /etc/sudo_logsrvd_dhparams.pem
+
+# Path to the server's private key file in PEM format.
+# Required for TLS connections.
+#tls_key = /etc/sudo_logsrvd_key.pem
 
 [iolog]
 # The top-level directory to use when constructing the path name for the
