@@ -93,10 +93,7 @@ connection_closure_free(struct connection_closure *closure)
 
 #if defined(HAVE_OPENSSL)
 	/* deallocate the connection's ssl object */
-	if (logsrvd_conf_get_tls_opt() == true) {
-	    if (closure->ssl)
-		SSL_free(closure->ssl);
-	}
+	SSL_free(closure->ssl);
 #endif
 	TAILQ_REMOVE(&connections, closure, entries);
 	close(closure->sock);
@@ -638,7 +635,7 @@ server_msg_cb(int fd, int what, void *v)
 	__func__, buf->len - buf->off);
 
 #if defined(HAVE_OPENSSL)
-    if (logsrvd_conf_get_tls_opt() == true) {
+    if (closure->ssl != NULL) {
         nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
     } else {
         nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
@@ -685,7 +682,7 @@ client_msg_cb(int fd, int what, void *v)
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
 
 #if defined(HAVE_OPENSSL)
-    if (logsrvd_conf_get_tls_opt() == true) {
+    if (closure->ssl != NULL) {
         nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
     } else {
         nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
