@@ -232,8 +232,8 @@
 #define def_log_allowed         (sudo_defs_table[I_LOG_ALLOWED].sd_un.flag)
 #define I_LOG_DENIED            116
 #define def_log_denied          (sudo_defs_table[I_LOG_DENIED].sd_un.flag)
-#define I_LOG_SERVER            117
-#define def_log_server          (sudo_defs_table[I_LOG_SERVER].sd_un.list)
+#define I_LOG_SERVERS           117
+#define def_log_servers         (sudo_defs_table[I_LOG_SERVERS].sd_un.list)
 #define I_LOG_SERVER_TIMEOUT    118
 #define def_log_server_timeout  (sudo_defs_table[I_LOG_SERVER_TIMEOUT].sd_un.ival)
 

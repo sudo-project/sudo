@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 8, 2019
+.Dd November 18, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4172,13 +4172,13 @@ should run
 .Nm sudo Fl e )
 to get their accustomed editor configuration instead of
 invoking the editor directly.
-.It log_server
+.It log_servers
 Starting with
 .Nm sudo
 1.9, it is possible to send I/O logs to a remote server instead of
 logging them locally.
 The
-.Em log_server
+.Em log_servers
 setting specifies one or more server addresses to use when storing
 I/O logs remotely.
 Log servers must be running
@@ -4192,7 +4192,7 @@ The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
 .Pp
 When
-.Em log_server
+.Em log_servers
 is enabled, I/O logs will not be logged locally.
 If no log servers are reachable, the user will not be able
 to run a command unless the
@@ -4597,7 +4597,7 @@ The
 .Em iolog_file
 option may be used to control the format of the session ID.
 For remote logs, the
-.Em log_server
+.Em log_servers
 setting is used to specify one or more log servers running
 .Nm sudo_logsrvd
 or another server that implements the protocol described by

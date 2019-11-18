@@ -725,8 +725,8 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if ((command_info[info_len++] = sudo_new_key_val("iolog_group", def_iolog_group)) == NULL)
 	    goto oom;
     }
-    if (!SLIST_EMPTY(&def_log_server)) {
-	char *log_servers = serialize_list("log_servers", &def_log_server);
+    if (!SLIST_EMPTY(&def_log_servers)) {
+	char *log_servers = serialize_list("log_servers", &def_log_servers);
 	if (log_servers == NULL)
 	    goto oom;
 	command_info[info_len++] = log_servers;

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 8, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "November 18, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4471,13 +4471,13 @@ should run
 to get their accustomed editor configuration instead of
 invoking the editor directly.
 .TP 18n
-log_server
+log_servers
 Starting with
 \fBsudo\fR
 1.9, it is possible to send I/O logs to a remote server instead of
 logging them locally.
 The
-\fIlog_server\fR
+\fIlog_servers\fR
 setting specifies one or more server addresses to use when storing
 I/O logs remotely.
 Log servers must be running
@@ -4491,7 +4491,7 @@ The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
 .sp
 When
-\fIlog_server\fR
+\fIlog_servers\fR
 is enabled, I/O logs will not be logged locally.
 If no log servers are reachable, the user will not be able
 to run a command unless the
@@ -4927,7 +4927,7 @@ The
 \fIiolog_file\fR
 option may be used to control the format of the session ID.
 For remote logs, the
-\fIlog_server\fR
+\fIlog_servers\fR
 setting is used to specify one or more log servers running
 \fBsudo_logsrvd\fR
 or another server that implements the protocol described by
