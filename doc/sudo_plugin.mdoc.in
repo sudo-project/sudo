@@ -483,8 +483,7 @@ Only available starting with API version 1.2.
 The ID of the foreground process group associated with the terminal
 device associated with the
 .Nm sudo
-process or \-1 if there is no
-terminal present.
+process or 0 if there is no terminal present.
 Only available starting with API version 1.2.
 .It tty=string
 The path to the user's terminal device.
