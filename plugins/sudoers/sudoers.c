@@ -509,7 +509,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT))) {
+    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && SLIST_EMPTY(&def_log_servers)) {
 	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
 	    if ((iolog_path = format_iolog_path()) == NULL) {
 		if (!def_ignore_iolog_errors)
