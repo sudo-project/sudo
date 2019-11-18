@@ -347,9 +347,9 @@ fmt_accept_message(struct client_closure *closure)
     InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
     InfoMessage__StringList submitenv = INFO_MESSAGE__STRING_LIST__INIT;
     struct iolog_details *details = closure->log_details;
+    size_t info_msgs_size, n;
     struct timespec now;
     bool ret = false;
-    size_t n;
     debug_decl(fmt_accept_message, SUDOERS_DEBUG_UTIL)
 
     /*
@@ -374,13 +374,11 @@ fmt_accept_message(struct client_closure *closure)
 	submitenv.n_strings++;
 
     /* XXX - realloc as needed instead of preallocating */
-    accept_msg.n_info_msgs = 22;
-    accept_msg.info_msgs = calloc(accept_msg.n_info_msgs, sizeof(InfoMessage *));
-    if (accept_msg.info_msgs == NULL) {
-	accept_msg.n_info_msgs = 0;
+    info_msgs_size = 22;
+    accept_msg.info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
+    if (accept_msg.info_msgs == NULL)
 	goto done;
-    }
-    for (n = 0; n < accept_msg.n_info_msgs; n++) {
+    for (n = 0; n < info_msgs_size; n++) {
 	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
 	if (accept_msg.info_msgs[n] == NULL) {
 	    accept_msg.n_info_msgs = n;
@@ -487,7 +485,7 @@ fmt_accept_message(struct client_closure *closure)
     ret = fmt_client_message(closure, &client_msg);
 
 done:
-    for (n = 0; n < accept_msg.n_info_msgs; n++)
+    for (n = 0; n < info_msgs_size; n++)
 	free(accept_msg.info_msgs[n]);
     free(accept_msg.info_msgs);
 
