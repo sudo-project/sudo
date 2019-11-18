@@ -54,7 +54,7 @@ struct iolog_details {
     struct passwd *runas_pw;
     struct group *runas_gr;
     char * const *argv;
-    char * const *user_env;
+    char **user_env;
     struct sudoers_str_list *log_servers;
     struct timespec server_timeout;
     int argc;

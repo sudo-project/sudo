@@ -471,6 +471,30 @@ write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
     debug_return_bool(true);
 }
 
+/*
+ * Make a shallow copy of a NULL-terminated argument or environment vector.
+ * Only the outer array is allocated, the pointers inside are copied.
+ * The caller is responsible for freeing the returned copy.
+ */
+static char **
+copy_vector_shallow(char * const *vec)
+{
+    char **copy;
+    size_t len;
+    debug_decl(copy_vector, SUDOERS_DEBUG_UTIL)
+
+    for (len = 0; vec[len] != NULL; len++)
+	continue;
+
+    if ((copy = reallocarray(NULL, len + 1, sizeof(char *))) != NULL) {
+	for (len = 0; vec[len] != NULL; len++)
+	    copy[len] = vec[len];
+	copy[len] = NULL;
+    }
+
+    debug_return_ptr(copy);
+}
+
 static int
 sudoers_io_open_local(void)
 {
@@ -622,9 +646,19 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     ret = iolog_deserialize_info(&iolog_details, user_info, command_info);
     if (ret != true)
 	goto done;
-    iolog_details.user_env = user_env;
     iolog_details.argv = argv;
     iolog_details.argc = argc;
+
+    /*
+     * Copy user_env, it may be reallocated during policy session init.
+     */
+    if (user_env != NULL) {
+	iolog_details.user_env = copy_vector_shallow(user_env);
+	if (iolog_details.user_env ==  NULL) {
+	    ret = -1;
+	    goto done;
+	}
+    }
 
     /*
      * Create local I/O log file or connect to remote log server.
@@ -661,10 +695,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 done:
     if (ret != true) {
 	client_closure_free(&client_closure);
-	if (iolog_details.runas_pw)
-	    sudo_pw_delref(iolog_details.runas_pw);
-	if (iolog_details.runas_gr)
-	    sudo_gr_delref(iolog_details.runas_gr);
 	sudo_freepwcache();
 	sudo_freegrcache();
     }
@@ -706,10 +736,6 @@ sudoers_io_close(int exit_status, int error)
 
 done:
     client_closure_free(&client_closure);
-    if (iolog_details.runas_pw)
-	sudo_pw_delref(iolog_details.runas_pw);
-    if (iolog_details.runas_gr)
-	sudo_gr_delref(iolog_details.runas_gr);
     sudo_freepwcache();
     sudo_freegrcache();
 

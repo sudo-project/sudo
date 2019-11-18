@@ -243,12 +243,22 @@ client_closure_free(struct client_closure *closure)
     }
     free(closure->read_buf.data);
     memset(&closure->read_buf, 0, sizeof(closure->read_buf));
-    closure->log_details = NULL;
     memset(&closure->start_time, 0, sizeof(closure->start_time));
     memset(&closure->elapsed, 0, sizeof(closure->elapsed));
     memset(&closure->committed, 0, sizeof(closure->committed));
     free(closure->iolog_id);
     closure->iolog_id = NULL;
+
+    /* Most of log_details is const. */
+    if (closure->log_details != NULL) {
+	free(closure->log_details->user_env);
+	closure->log_details->user_env = NULL;
+	if (closure->log_details->runas_pw)
+	    sudo_pw_delref(closure->log_details->runas_pw);
+	if (closure->log_details->runas_gr)
+	    sudo_gr_delref(closure->log_details->runas_gr);
+	closure->log_details = NULL;
+    }
 
     debug_return;
 }
