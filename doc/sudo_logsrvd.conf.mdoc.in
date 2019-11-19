@@ -491,11 +491,11 @@ Sudo log server configuration file
 #tls = true
 
 # Path to the certificate authority bundle file in PEM format.
-#tls_cacert = /etc/ssl/sudo/logsrvd_ca.pem
+#tls_cacert = /etc/ssl/sudo/cacert.pem
 
 # Path to the server's certificate file in PEM format.
 # Required for TLS connections.
-#tls_cert = /etc/ssl/sudo/logsrvd_cert.pem
+#tls_cert = /etc/ssl/sudo/certs/logsrvd_cert.pem
 
 # Whether to verify client certificates for TLS connections.
 # By default client certs are not checked.
