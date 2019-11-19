@@ -122,7 +122,7 @@ group_plugin_load(char *plugin_info)
      */
     if (args != NULL) {
 	int ac = 0, wasblank = 1;
-	char *cp;
+	char *cp, *last;
 
         for (cp = args; *cp != '\0'; cp++) {
             if (isblank((unsigned char)*cp)) {
@@ -133,16 +133,18 @@ group_plugin_load(char *plugin_info)
             }
         }
 	if (ac != 0) 	{
-	    char *last;
-
-	    argv = malloc(ac * sizeof(char *));
+	    argv = malloc((ac + 1) * sizeof(char *));
 	    if (argv == NULL) {
 		perror(NULL);
 		return -1;
 	    }
 	    ac = 0;
-	    for ((cp = strtok_r(args, " \t", &last)); cp != NULL; (cp = strtok_r(NULL, " \t", &last)))
+	    cp = strtok_r(args, " \t", &last);
+	    while (cp != NULL) {
 		argv[ac++] = cp;
+		cp = strtok_r(NULL, " \t", &last);
+	    }
+	    argv[ac] = NULL;
 	}
     }
 
