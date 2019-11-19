@@ -133,14 +133,19 @@ group_plugin_load(char *plugin_info)
             }
         }
 	if (ac != 0) {
-	    argv = reallocarray(NULL, ac, sizeof(char *));
+	    argv = reallocarray(NULL, ac + 1, sizeof(char *));
 	    if (argv == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
 		goto done;
 	    }
 	    ac = 0;
-	    for ((cp = strtok_r(args, " \t", &last)); cp != NULL; (cp = strtok_r(NULL, " \t", &last)))
+	    cp = strtok_r(args, " \t", &last);
+	    while (cp != NULL) {
 		argv[ac++] = cp;
+		cp = strtok_r(NULL, " \t", &last);
+	    }
+	    argv[ac] = NULL;
 	}
     }
 
