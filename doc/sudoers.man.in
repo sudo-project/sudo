@@ -5516,6 +5516,18 @@ Any user may mount or unmount a CD-ROM on the machines in the CDROM
 (orion, perseus, hercules) without entering a password.
 This is a bit tedious for users to type, so it is a prime candidate
 for encapsulating in a shell script.
+.nf
+.sp
+.RS 0n
+%containers ALL = /usr/bin/docker \\
+    m{(run|exec)\\\\s+-it?\\\\s+[^\\\\s]+\\\\s+/bin/bash}
+.RE
+.fi
+.PP
+Any member of
+\fRcontainers\fR
+group may execute docker with run or exec commands, interactively with or without a TTY, providing they use /bin/bash shell. Only non-breaking m{} is understood.
+
 .SH "SECURITY NOTES"
 .SS "Limitations of the \(oq!\&\(cq operator"
 It is generally not effective to

@@ -47,6 +47,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <regex.h>
 
 #include "sudoers.h"
 #include <gram.h>
@@ -501,6 +502,9 @@ bool
 command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest)
 {
     bool rc = false;
+    regex_t re;
+    int status;
+
     debug_decl(command_matches, SUDOERS_DEBUG_MATCH)
 
     /* Check for pseudo-commands */
@@ -531,6 +535,37 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct
 	    rc = command_matches_glob(sudoers_cmnd, sudoers_args, digest);
     } else {
 	rc = command_matches_normal(sudoers_cmnd, sudoers_args, digest);
+    }
+
+    if( rc == false ) {
+        /*
+         * only process regex args, regex on the initial command would
+         * conflict with other checks that visudo parsing performs, m{bash} !=
+         * /bin/bash, 'bash' itself would cause visudo to complain since
+         * there is no initial path. removing this seems a bad idea.
+         */
+        if( user_args && sudoers_args ) {
+            char *ptr;
+            int len = strlen( sudoers_args );
+            if( len > 2
+                    && sudoers_args[0] == 'm'
+                    && sudoers_args[1] == '{'
+                    && sudoers_args[len-1] == '}' ) {
+                rc = false;
+                ptr = strdup( sudoers_args+2 );
+                if( ptr ) {
+                    ptr[len-3] = 0;
+                    if( regcomp( &re, ptr, REG_EXTENDED|REG_NOSUB ) == 0 ) {
+                        status = regexec( &re, user_args, (size_t)0, NULL, 0 );
+                        regfree( &re );
+                        if( status == 0 ) {
+                            rc = true;
+                        }
+                    }
+                    free( ptr );
+                }
+           }
+        }
     }
 done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,

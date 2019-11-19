@@ -37,5 +37,6 @@
     "I've seen penguins that can type better than that.",
     "Have you considered trying to match wits with a rutabaga?",
     "You speak an infinite deal of nothing",
+    "Smart phones make dumb users",
 
 #endif /* SUDOERS_INS_CSOPS_H */
