@@ -376,8 +376,10 @@ fmt_accept_message(struct client_closure *closure)
     /* XXX - realloc as needed instead of preallocating */
     info_msgs_size = 22;
     accept_msg.info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
-    if (accept_msg.info_msgs == NULL)
+    if (accept_msg.info_msgs == NULL) {
+	info_msgs_size = 0;
 	goto done;
+    }
     for (n = 0; n < info_msgs_size; n++) {
 	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
 	if (accept_msg.info_msgs[n] == NULL) {
