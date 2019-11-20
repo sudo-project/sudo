@@ -869,10 +869,14 @@ sudoers_policy_close(int exit_status, int error_code)
 
     /* Free remaining references to password and group entries. */
     /* XXX - move cleanup to function in sudoers.c */
-    sudo_pw_delref(sudo_user.pw);
-    sudo_user.pw = NULL;
-    sudo_pw_delref(runas_pw);
-    runas_pw = NULL;
+    if (sudo_user.pw != NULL) {
+	sudo_pw_delref(sudo_user.pw);
+	sudo_user.pw = NULL;
+    }
+    if (runas_pw != NULL) {
+	sudo_pw_delref(runas_pw);
+	runas_pw = NULL;
+    }
     if (runas_gr != NULL) {
 	sudo_gr_delref(runas_gr);
 	runas_gr = NULL;

@@ -1120,6 +1120,10 @@ policy_show_version(struct plugin_container *plugin, int verbose)
 	debug_return_int(true);
     sudo_debug_set_active_instance(plugin->debug_instance);
     ret = plugin->u.policy->show_version(verbose);
+    if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (plugin->u.policy->close != NULL)
+	    plugin->u.policy->close(0, 0);
+    }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_int(ret);
 }
@@ -1139,6 +1143,13 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
     sudo_debug_set_active_instance(plugin->debug_instance);
     ret = plugin->u.policy->check_policy(argc, argv, env_add, command_info,
 	argv_out, user_env_out);
+    /* On success, the close method will be called by sudo_edit/run_command. */
+    if (ret != 1) {
+	if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	    if (plugin->u.policy->close != NULL)
+		plugin->u.policy->close(0, 0);
+	}
+    }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_int(ret);
 }
@@ -1157,6 +1168,10 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
     }
     sudo_debug_set_active_instance(plugin->debug_instance);
     ret = plugin->u.policy->list(argc, argv, verbose, list_user);
+    if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (plugin->u.policy->close != NULL)
+	    plugin->u.policy->close(0, 0);
+    }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_int(ret);
 }
@@ -1174,6 +1189,10 @@ policy_validate(struct plugin_container *plugin)
     }
     sudo_debug_set_active_instance(plugin->debug_instance);
     ret = plugin->u.policy->validate();
+    if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (plugin->u.policy->close != NULL)
+	    plugin->u.policy->close(0, 0);
+    }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_int(ret);
 }
@@ -1188,6 +1207,10 @@ policy_invalidate(struct plugin_container *plugin, int remove)
     }
     sudo_debug_set_active_instance(plugin->debug_instance);
     plugin->u.policy->invalidate(remove);
+    if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (plugin->u.policy->close != NULL)
+	    plugin->u.policy->close(0, 0);
+    }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return;
 }
@@ -1301,6 +1324,10 @@ iolog_show_version(struct plugin_container *plugin, int verbose)
 
     sudo_debug_set_active_instance(plugin->debug_instance);
     ret = plugin->u.io->show_version(verbose);
+    if (plugin->u.io->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (plugin->u.io->close != NULL)
+	    plugin->u.io->close(0, 0);
+    }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_int(ret);
 }
