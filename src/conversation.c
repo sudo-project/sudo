@@ -53,7 +53,6 @@ int
 sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
-    int ttyfd = -1;
     char *pass;
     int n;
     const int conv_debug_instance = sudo_debug_get_active_instance();
@@ -96,6 +95,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		if (msg->msg != NULL) {
 		    size_t len = strlen(msg->msg);
 		    const char *crnl = NULL;
+		    bool written = false;
+		    int ttyfd = -1;
 
 		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY))
 			ttyfd = open(_PATH_TTY, O_WRONLY);
@@ -111,21 +112,23 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    if (ttyfd != -1) {
 			/* Try writing to tty but fall back to fp on error. */
 			if ((len == 0 || write(ttyfd, msg->msg, len) != -1) &&
-				(crnl == NULL || write(ttyfd, crnl, 2) != -1))
-			    break;
+				(crnl == NULL || write(ttyfd, crnl, 2) != -1)) {
+			    written = true;
+			}
+			close(ttyfd);
 		    }
-		    if (len != 0 && fwrite(msg->msg, 1, len, fp) == 0)
-			goto err;
-		    if (crnl != NULL && fwrite(crnl, 1, 2, fp) == 0)
-			goto err;
+		    if (!written) {
+			if (len != 0 && fwrite(msg->msg, 1, len, fp) == 0)
+			    goto err;
+			if (crnl != NULL && fwrite(crnl, 1, 2, fp) == 0)
+			    goto err;
+		    }
 		}
 		break;
 	    default:
 		goto err;
 	}
     }
-    if (ttyfd != -1)
-	close(ttyfd);
 
     sudo_debug_set_active_instance(conv_debug_instance);
     return 0;
@@ -142,8 +145,6 @@ err:
 	    repl->reply = NULL;
 	} while (n--);
     }
-    if (ttyfd != -1)
-	close(ttyfd);
 
     sudo_debug_set_active_instance(conv_debug_instance);
     return -1;
