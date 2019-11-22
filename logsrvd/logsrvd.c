@@ -92,7 +92,6 @@ connection_closure_free(struct connection_closure *closure)
 	bool shutting_down = closure->state == SHUTDOWN;
 
 #if defined(HAVE_OPENSSL)
-	/* deallocate the connection's ssl object */
 	SSL_free(closure->ssl);
 #endif
 	TAILQ_REMOVE(&connections, closure, entries);
@@ -101,6 +100,9 @@ connection_closure_free(struct connection_closure *closure)
 	sudo_ev_free(closure->commit_ev);
 	sudo_ev_free(closure->read_ev);
 	sudo_ev_free(closure->write_ev);
+#if defined(HAVE_OPENSSL)
+    sudo_ev_free(closure->ssl_accept_ev);
+#endif
 	iolog_details_free(&closure->details);
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
@@ -642,8 +644,36 @@ server_msg_cb(int fd, int what, void *v)
 	__func__, buf->len - buf->off);
 
 #if defined(HAVE_OPENSSL)
-    if (closure->ssl != NULL) {
+    /* The initial ServerHello msg is not encrypted */
+    if ((closure->ssl) != NULL && (closure->state != INITIAL)) {
         nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
+        if (nwritten <= 0) {
+            int err = SSL_get_error(closure->ssl, nwritten);
+            switch (err) {
+                /* ssl wants to read, so schedule the read handler */
+                case SSL_ERROR_WANT_READ:
+                    if (sudo_ev_add(closure->read_ev->base, closure->read_ev, NULL, false) == -1) {
+                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                            "unable to add event to queue");
+                        goto finished;
+                    }
+                    debug_return;
+                /* ssl wants to write more, so re-schedule the write handler */
+                case SSL_ERROR_WANT_WRITE:
+                    if (sudo_ev_add(closure->write_ev->base, closure->write_ev, NULL, false) == -1) {
+                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                            "unable to add event to queue");
+                        goto finished;
+                    }
+                    debug_return;
+                default:
+                    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                        "unexpected error during SSL_write(). SSL error=%d (%s)",
+                        err,
+                        ERR_error_string(ERR_get_error(), NULL));
+                        goto finished;
+            }
+        }
     } else {
         nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
     }
@@ -690,7 +720,34 @@ client_msg_cb(int fd, int what, void *v)
 
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
-        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
+       nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
+        if (nread <= 0) {
+            int err = SSL_get_error(closure->ssl, nread);
+            switch (err) {
+                /* ssl wants to read more, so re-schedule the read handler */
+                case SSL_ERROR_WANT_READ:
+                    if (sudo_ev_add(closure->read_ev->base, closure->read_ev, NULL, false) == -1) {
+                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                            "unable to add event to queue");
+                        goto finished;
+                    }
+                    debug_return;
+                /* ssl wants to write, so schedule the write handler */
+                case SSL_ERROR_WANT_WRITE:
+                    if (sudo_ev_add(closure->write_ev->base, closure->write_ev, NULL, false) == -1) {
+                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                            "unable to add event to queue");
+                        goto finished;
+                    }
+                    debug_return;
+                default:
+                    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                        "unexpected error during SSL_read(). SSL error=%d (%s)",
+                        err,
+                        ERR_error_string(ERR_get_error(), NULL));
+                        goto finished;
+            }
+        }
     } else {
         nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
     }
@@ -1125,6 +1182,51 @@ bad:
 good:
     debug_return_ptr(ctx);
 }
+
+static void
+tls_handshake_cb(int fd, int what, void *v)
+{
+    struct connection_closure *closure = v;
+    struct sudo_event_base *base = closure->ssl_accept_ev->base;
+
+    debug_decl(tls_handshake_cb, SUDO_DEBUG_UTIL)
+
+    int handshake_status = SSL_accept(closure->ssl);
+    int err = SSL_ERROR_NONE;
+    switch(err = SSL_get_error(closure->ssl, handshake_status)) {
+
+        /* ssl handshake was successful */
+        case SSL_ERROR_NONE:
+            break;
+        /* ssl handshake is ongoing, re-schedule the SSL_accept() call */
+        case SSL_ERROR_WANT_READ:
+        case SSL_ERROR_WANT_WRITE:
+            if (sudo_ev_add(base, closure->ssl_accept_ev, NULL, false) == -1) {
+                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                    "unable to add event to queue");
+                goto bad;
+            }
+            debug_return;
+        default:
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unexpected error during TLS handshake: %d (%s)",
+                err,
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+    }
+
+    sudo_ev_del(base, closure->ssl_accept_ev);
+
+    /* Enable reader for ClientMessage */
+    if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1) {
+        sudo_warn(U_("unable to add event to queue"));
+    }
+
+    debug_return;
+bad:
+    connection_closure_free(closure);
+    debug_return;
+}
 #endif /* HAVE_OPENSSL */
 
 /*
@@ -1143,31 +1245,6 @@ connection_closure_alloc(int sock)
     closure->sock = sock;
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
-
-#if defined(HAVE_OPENSSL)
-    if (logsrvd_conf_get_tls_opt() == true) {
-        if ((closure->ssl = SSL_new(logsrvd_get_tls_runtime()->ssl_ctx)) == NULL) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to create new ssl object: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-        
-        if (SSL_set_fd(closure->ssl, sock) != 1) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to set fd for TLS: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-
-        if (SSL_accept(closure->ssl) != 1 ) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "TLS handshake was unsuccessful: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-    }
-#endif
 
     closure->read_buf.size = 64 * 1024;
     closure->read_buf.data = malloc(closure->read_buf.size);
@@ -1188,6 +1265,13 @@ connection_closure_alloc(int sock)
 	server_msg_cb, closure);
     if (closure->write_ev == NULL)
 	goto bad;
+
+#if defined(HAVE_OPENSSL)
+    closure->ssl_accept_ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST,
+	tls_handshake_cb, closure);
+    if (closure->ssl_accept_ev == NULL)
+	goto bad;
+#endif
 
     debug_return_ptr(closure);
 bad:
@@ -1214,9 +1298,42 @@ new_connection(int sock, struct sudo_event_base *base)
     if (sudo_ev_add(base, closure->write_ev, NULL, false) == -1)
 	goto bad;
 
+#if defined(HAVE_OPENSSL)
+    /* if TLS is ON, first we need to do handshake with client,
+     * otherwise just enable the reader
+     */
+    if (logsrvd_conf_get_tls_opt()) {
+
+        /* create the SSL object for the closure and attach it to the socket */
+        if ((closure->ssl = SSL_new(logsrvd_get_tls_runtime()->ssl_ctx)) == NULL) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to create new ssl object: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
+        if (SSL_set_fd(closure->ssl, closure->sock) != 1) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to set fd for TLS: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
+        /* enable SSL_accept to begin handshake with client */
+        if (sudo_ev_add(base, closure->ssl_accept_ev, NULL, false) == -1) {
+            sudo_fatal(U_("unable to add event to queue"));
+            goto bad;
+        }
+    } else {
+        /* Enable reader for ClientMessage*/
+        if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1)
+            goto bad;
+    }
+#else
     /* Enable reader for ClientMessage*/
     if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1)
 	goto bad;
+#endif
 
     debug_return_bool(true);
 bad:
