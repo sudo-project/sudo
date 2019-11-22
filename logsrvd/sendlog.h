@@ -35,12 +35,17 @@ enum client_state {
 };
 
 struct client_closure {
+    int sock;
     struct timespec *restart;
     struct timespec *elapsed;
     struct timespec committed;
     struct timing_closure timing;
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
+#if defined(HAVE_OPENSSL)
+    struct sudo_event *tls_connect_ev;
+    bool tls_connect_state;
+#endif
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
     struct iolog_info *log_info;

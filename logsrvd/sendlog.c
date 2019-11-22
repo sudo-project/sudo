@@ -67,20 +67,28 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
+#if defined(HAVE_OPENSSL)
+# define TLS_HANDSHAKE_TIMEO_SEC 10
+#endif
+
 static struct iolog_file iolog_files[IOFD_MAX];
 static char *iolog_dir;
 
 #if defined(HAVE_OPENSSL)
 static bool tls = false;
+static bool tls_checkpeer = false;
 static SSL_CTX *ssl_ctx = NULL;
 static SSL *ssl = NULL;
+const char *ca_bundle = NULL;
+const char *cert = NULL;
+const char *key = NULL;
 #endif
 
 static void
 usage(bool fatal)
 {
 #if defined(HAVE_OPENSSL)
-    fprintf(stderr, "usage: %s [-t] [-b ca_bundle] [-c cert_file] [-h host] "
+    fprintf(stderr, "usage: %s [-b ca_bundle] [-c cert_file] [-h host] "
 	"[-i iolog-id] [-k key_file] [-p port] "
 #else
     fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] "
@@ -102,7 +110,6 @@ help(void)
 	"  -p, --port               port to use when connecting to host\n"
 	"  -r, --restart            restart previous I/O log transfer\n"
 #if defined(HAVE_OPENSSL)
-	"  -t, --tls                set the communication over TLS with the audit server\n"
 	"  -b, --ca-bundle          certificate bundle file to verify server's cert against\n"
 	"  -c, --cert               certificate file for TLS handshake\n"
 	"  -k, --key                private key file\n"
@@ -151,15 +158,16 @@ init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const
         }
     }
 
-        /* sets the location of the CA bundle file for verification purposes */
-        if (SSL_CTX_load_verify_locations(ctx, ca_bundle_file, NULL) <= 0) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "calling SSL_CTX_load_verify_locations() failed: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-        }
+    /* sets the location of the CA bundle file for verification purposes */
+    if (SSL_CTX_load_verify_locations(ctx, ca_bundle_file, NULL) <= 0) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "calling SSL_CTX_load_verify_locations() failed: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
 
-        /* set verify server cert during the handshake */
-        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+    /* set verify server cert during the handshake */
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 
     goto exit;
 
@@ -169,7 +177,122 @@ bad:
 exit:
     return ctx;
 }
-#endif
+
+static void
+tls_connect_cb(int sock, int what, void *v)
+{
+    struct client_closure *closure = v;
+    struct timespec timeo = { TLS_HANDSHAKE_TIMEO_SEC, 0 };
+    int con_stat, err;
+
+    debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL)
+
+    if (what == SUDO_EV_TIMEOUT) {
+        sudo_warnx(U_("TLS handshake timeout occured"));
+        debug_return;
+    }
+
+    con_stat = SSL_connect(ssl);
+
+    if (con_stat == 1) {
+        closure->tls_connect_state = true;
+    } else {
+        switch ((err = SSL_get_error(ssl, con_stat))) {
+            /* TLS connect successful */
+            case SSL_ERROR_NONE:
+                closure->tls_connect_state = true;
+                break;
+            /* TLS handshake is not finished, reschedule event */
+            case SSL_ERROR_WANT_READ:
+            case SSL_ERROR_WANT_WRITE:
+                if (sudo_ev_add(closure->tls_connect_ev->base,
+                    closure->tls_connect_ev, &timeo, false) == -1) {
+                    sudo_warnx(U_("unable to add event to queue"));
+                }
+                break;
+            default:
+                sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s\n"),
+                    err,
+                    ERR_error_string(ERR_get_error(), NULL));
+                break;
+        }
+    }
+
+    debug_return;
+}
+
+static bool
+tls_connect_async(struct client_closure *closure)
+{
+    struct sudo_event_base *evbase = NULL;
+
+    debug_decl(tls_connect_async, SUDO_DEBUG_UTIL)
+
+	evbase = sudo_ev_base_alloc();
+	closure->tls_connect_ev = sudo_ev_alloc(closure->sock, SUDO_EV_WRITE,
+        tls_connect_cb, closure);
+    closure->tls_connect_state = false;
+	if (evbase == NULL || closure->tls_connect_ev == NULL) {
+        sudo_warnx(U_("unable to allocate memory"));
+	    goto done;
+	}
+	if (sudo_ev_add(evbase, closure->tls_connect_ev, NULL, false) == -1) {
+	    sudo_warnx(U_("unable to add event to queue"));
+	    goto done;
+	}
+	if (sudo_ev_dispatch(evbase) == -1) {
+	    sudo_warn(U_("error in event loop"));
+	    goto done;
+	}
+
+done:
+    sudo_ev_base_free(evbase);
+    sudo_ev_free(closure->tls_connect_ev);
+
+    debug_return_int(closure->tls_connect_state);
+}
+
+static bool
+do_tls_handshake(struct client_closure *closure)
+{
+    debug_decl(do_tls_handshake, SUDO_DEBUG_UTIL)
+
+    if (ca_bundle == NULL) {
+        sudo_warnx("%s", U_("CA bundle file was not specified"));
+        goto bad;
+    }
+    if (tls_checkpeer && (cert == NULL)) {
+        sudo_warnx("%s", U_("Client certificate was not specified"));
+        goto bad;
+    }
+    if ((ssl_ctx = init_tls_client_context(ca_bundle, cert, key)) == NULL) {
+        sudo_warnx(U_("Unable to initialize ssl context: %s"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+    if ((ssl = SSL_new(ssl_ctx)) == NULL) {
+        sudo_warnx(U_("Unable to allocate ssl object: %s\n"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+    if (SSL_set_fd(ssl, closure->sock) <= 0) {
+        sudo_warnx(U_("Unable to attach socket to the ssl object: %s\n"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    if (!tls_connect_async(closure))
+        goto bad;
+
+    printf("Negotiated protocol version: %s\n", SSL_get_version(ssl));
+    printf("Negotiated ciphersuite: %s\n", SSL_get_cipher(ssl));
+
+    debug_return_bool(true);
+
+bad:
+    debug_return_bool(false);
+}
+#endif /* HAVE_OPENSSL */
 
 /*
  * Connect to specified host:port
@@ -210,6 +333,16 @@ connect_server(const char *host, const char *port)
 	    continue;
 	}
 	break;	/* success */
+    }
+    if (sock != -1) {
+	int flags = fcntl(sock, F_GETFL, 0);
+	if (flags == -1 || fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1) {
+	    cause = "fcntl(O_NONBLOCK)";
+	    save_errno = errno;
+	    close(sock);
+	    errno = save_errno;
+	    sock = -1;
+	}
     }
 
     if (sock == -1)
@@ -807,6 +940,16 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	printf("server %zu: %s\n", n + 1, msg->servers[n]);
     }
 
+#if defined(HAVE_OPENSSL)
+    tls = msg->tls;
+    tls_checkpeer = msg->tls_checkpeer;
+    if (tls) {
+        printf("Requested protocol: TLS\n");
+        if (tls_checkpeer)
+            printf("Client auth is required with signed certificate\n");
+    }
+#endif
+
     debug_return_bool(true);
 }
 
@@ -896,12 +1039,20 @@ handle_server_message(uint8_t *buf, size_t len,
     switch (msg->type_case) {
     case SERVER_MESSAGE__TYPE_HELLO:
 	if ((ret = handle_server_hello(msg->hello, closure))) {
+        /* if server wants to communicate over TLS,
+         * we have to initialize tls context and do
+         * a tls connection to the server
+         */
+#if defined(HAVE_OPENSSL)
+        if (tls && !do_tls_handshake(closure))
+            debug_return_bool(false);
+#endif
 	    if (sudo_timespecisset(closure->restart)) {
-		closure->state = SEND_RESTART;
-		ret = fmt_restart_message(closure);
+            closure->state = SEND_RESTART;
+            ret = fmt_restart_message(closure);
 	    } else {
-		closure->state = SEND_ACCEPT;
-		ret = fmt_accept_message(closure);
+            closure->state = SEND_ACCEPT;
+            ret = fmt_accept_message(closure);
 	    }
 	}
 	break;
@@ -950,8 +1101,25 @@ server_msg_cb(int fd, int what, void *v)
 
     /* XXX - make common */
 #if defined(HAVE_OPENSSL)
-    if (tls) {
+    if (tls && closure->state != RECV_HELLO) {
         nread = SSL_read(ssl, buf->data + buf->len, buf->size - buf->len);
+        if (nread <= 0) {
+            int read_status = SSL_get_error(ssl, nread);
+            switch (read_status) {
+                case SSL_ERROR_NONE:
+                    break;
+                case SSL_ERROR_WANT_READ:
+                    /* re-schedule the read handler */
+                    sudo_ev_add(closure->read_ev->base, closure->read_ev, NULL, false);
+                    debug_return;
+                case SSL_ERROR_WANT_WRITE:
+                    /* ssl wants to write, so schedule the write handler */
+                    sudo_ev_add(closure->write_ev->base, closure->write_ev, NULL, false);
+                    debug_return;
+                default:
+                    break;
+            }
+        }
     } else {
         nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
     }
@@ -1025,6 +1193,23 @@ client_msg_cb(int fd, int what, void *v)
 #if defined(HAVE_OPENSSL)
     if (tls) {
         nwritten = SSL_write(ssl, buf->data + buf->off, buf->len - buf->off);
+        if (nwritten <= 0) {
+            int write_status = SSL_get_error(ssl, nwritten);
+            switch (write_status) {
+                case SSL_ERROR_NONE:
+                    break;
+                case SSL_ERROR_WANT_READ:
+                    /* ssl wants to read, so schedule the read handler */
+                    sudo_ev_add(closure->read_ev->base, closure->read_ev, NULL, false);
+                    debug_return;
+                case SSL_ERROR_WANT_WRITE:
+                    /* re-schedule the write handler */
+                    sudo_ev_add(closure->write_ev->base, closure->write_ev, NULL, false);
+                    debug_return;
+                default:
+                    break;
+            }
+        }
     } else {
         nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
     }
@@ -1065,6 +1250,8 @@ client_closure_fill(struct client_closure *closure, int sock,
     debug_decl(client_closure_fill, SUDO_DEBUG_UTIL)
 
     memset(closure, 0, sizeof(*closure));
+
+    closure->sock = sock;
 
     closure->state = RECV_HELLO;
     closure->log_info = log_info;
@@ -1138,7 +1325,7 @@ parse_timespec(struct timespec *ts, const char *strval)
 }
 
 #if defined(HAVE_OPENSSL)
-static const char short_opts[] = "h:i:p:r:tb:c:k:V";
+static const char short_opts[] = "h:i:p:r:b:c:k:V";
 #else
 static const char short_opts[] = "h:i:p:r:V";
 #endif
@@ -1149,7 +1336,6 @@ static struct option long_opts[] = {
     { "port",		required_argument,	NULL,	'p' },
     { "restart",	required_argument,	NULL,	'r' },
 #if defined(HAVE_OPENSSL)
-    { "tls",		no_argument,		NULL,	't' },
     { "ca-bundle",	required_argument,	NULL,	'b' },
     { "cert",		required_argument,	NULL,	'c' },
     { "key",		required_argument,	NULL,	'k' },
@@ -1166,11 +1352,6 @@ main(int argc, char *argv[])
     struct client_closure closure;
     struct sudo_event_base *evbase;
     struct iolog_info *log_info;
-#if defined(HAVE_OPENSSL)
-    const char *ca_bundle = NULL;
-    const char *cert = NULL;
-    const char *key = NULL;
-#endif
     const char *host = "localhost";
     const char *port = DEFAULT_PORT_STR;
     struct timespec restart = { 0, 0 };
@@ -1233,9 +1414,6 @@ main(int argc, char *argv[])
 	case 'k':
 	    key = optarg;
 	    break;
-	case 't':
-	    tls = true;
-	    break;
 #endif
 	case 'V':
 	    (void)printf(_("%s version %s\n"), getprogname(),
@@ -1249,14 +1427,6 @@ main(int argc, char *argv[])
     argv += optind;
 
 #if defined(HAVE_OPENSSL)
-    /* if the protocol is tls, the CA bundle file is a required argument
-     * to be able to verify the server's certificate
-     */
-    if (tls && !ca_bundle) {
-        sudo_warnx("%s", U_("with the tls protocol, the CA bundle file must be specified"));
-        usage(true);
-    }
-
     /* if no key file is given explicitly, try to load the key from the cert */
     if (cert && !key) {
         key = cert;
@@ -1299,38 +1469,7 @@ main(int argc, char *argv[])
     sock = connect_server(host, port);
     if (sock == -1)
 	goto bad;
-#if defined(HAVE_OPENSSL)
-    if (tls) {
-        int ret;
-        if ((ssl_ctx = init_tls_client_context(ca_bundle, cert, key)) == NULL) {
-            sudo_warnx(U_("Unable to initialize ssl context: %s\n"),
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-        if ((ssl = SSL_new(ssl_ctx)) == NULL) {
-            sudo_warnx(U_("Unable to allocate ssl object: %s\n"),
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-        if (SSL_set_fd(ssl, sock) <= 0) {
-            sudo_warnx(U_("Unable to attach socket to the ssl object: %s\n"),
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-        ret = SSL_ERROR_NONE;
 
-        if ((ret = SSL_connect(ssl)) != 1) {
-            sudo_warnx(U_("SSL_connect failed: ret=%d ssl_error=%d, stack=%s\n"),
-                ret,
-                SSL_get_error(ssl, ret),
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-
-        printf("Protocol version: %s\n", SSL_get_version(ssl));
-        printf("Negotiated ciphersuite: %s\n", SSL_get_cipher(ssl));
-    }
-#endif
     printf("Connected to %s:%s\n", host, port);
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
