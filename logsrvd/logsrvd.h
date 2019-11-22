@@ -168,7 +168,7 @@ bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct listen_address_list *logsrvd_conf_listen_address(void);
-int logsrvd_conf_get_sock_timeout(void);
+struct timespec *logsrvd_conf_get_sock_timeout(void);
 #if defined(HAVE_OPENSSL)
 bool logsrvd_conf_get_tls_opt(void);
 const struct logsrvd_tls_config *logsrvd_get_tls_config(void);
