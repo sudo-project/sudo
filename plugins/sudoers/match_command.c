@@ -537,32 +537,34 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct
 	rc = command_matches_normal(sudoers_cmnd, sudoers_args, digest);
     }
 
-    if( rc == false ) {
+    if (rc == false) {
         /*
          * only process regex args, regex on the initial command would
          * conflict with other checks that visudo parsing performs, m{bash} !=
          * /bin/bash, 'bash' itself would cause visudo to complain since
          * there is no initial path. removing this seems a bad idea.
          */
-        if( user_args && sudoers_args ) {
+        if (user_args && sudoers_args) {
             char *ptr;
-            int len = strlen( sudoers_args );
-            if( len > 2
+            int len = strlen(sudoers_args);
+            if (len > 2
                     && sudoers_args[0] == 'm'
                     && sudoers_args[1] == '{'
-                    && sudoers_args[len-1] == '}' ) {
+                    && sudoers_args[len-1] == '}') {
                 rc = false;
-                ptr = strdup( sudoers_args+2 );
-                if( ptr ) {
-                    ptr[len-3] = 0;
-                    if( regcomp( &re, ptr, REG_EXTENDED|REG_NOSUB ) == 0 ) {
-                        status = regexec( &re, user_args, (size_t)0, NULL, 0 );
-                        regfree( &re );
-                        if( status == 0 ) {
+                ptr = strdup(sudoers_args+1);
+                if (ptr) {
+                    ptr[0] = '^';
+                    ptr[len-2] = 0;
+                    ptr[len-3] = '$';
+                    if (regcomp(&re, ptr, REG_EXTENDED|REG_NOSUB) == 0) {
+                        status = regexec(&re, user_args, (size_t)0, NULL, 0);
+                        regfree(&re);
+                        if (status == 0) {
                             rc = true;
                         }
                     }
-                    free( ptr );
+                    free(ptr);
                 }
            }
         }
