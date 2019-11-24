@@ -1821,7 +1821,7 @@ file in a scripting language. An alternative is to use regular
 expression matching such as:
 .sp
 .RS 4n
-%operator ALL = /bin/cat m{/var/log/messages(.[0-9]+|-[0-9]+)?$}
+%operator ALL = /bin/cat m{/var/log/messages(\.[0-9]+|-[0-9]+)?$}
 .SS "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
 .TP 10n
