@@ -23,7 +23,6 @@ Makefile$
 ^doc/.*\.man$
 ^doc/.*\.mdoc$
 ^doc/fixman\.sed$
-^doc/varsub$
 
 ^init.d/.*.sh$
 ^init.d/sudo.conf$
@@ -34,6 +33,8 @@ Makefile$
 ^src/check_(noexec|ttyname)$
 ^src/sudo_usage\.h$
 
+^lib/iolog/check_iolog_(path|util)$
+
 ^lib/util/mksiglist$
 ^lib/util/mksigname$
 ^lib/util/siglist\.c$
@@ -42,6 +43,9 @@ Makefile$
 ^lib/util/[a-z0-9_]+_test$
 ^lib/util/regress/.*\.(out|err)$
 
+^logsrvd/sudo_(logsrvd|sendlog)$
+
 ^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|prologue|check_[a-z0-9_]+)$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
 ^plugins/sudoers/regress/iolog_plugin/iolog$
+^plugins/sudoers/regress/testsudoers/test3.d/root$
