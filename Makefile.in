@@ -386,8 +386,9 @@ distclean: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do \
 	    (cd $$d && exec $(MAKE) $@); \
 	done
-	-rm -rf autom4te.cache config.cache config.h config.log config.status \
-	    init.d/*.sh init.d/sudo.conf libtool Makefile pathnames.h stamp-*
+	-rm -rf autom4te.cache ChangeLog config.cache config.h config.log \
+	    config.status init.d/*.sh init.d/sudo.conf libtool Makefile \
+	    pathnames.h stamp-*
 
 cleandir: distclean
 
