@@ -1462,7 +1462,8 @@ main(int argc, char *argv[])
     }
 
     /* Read sudo_logsrvd.conf */
-    logsrvd_conf_read(conf_file);
+    if (!logsrvd_conf_read(conf_file))
+        exit(EXIT_FAILURE);
 
     signal(SIGPIPE, SIG_IGN);
     daemonize(nofork);
