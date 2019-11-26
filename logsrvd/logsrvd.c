@@ -1248,7 +1248,7 @@ tls_handshake_cb(int fd, int what, void *v)
 
     /* Enable reader for ClientMessage */
     if (sudo_ev_add(base, closure->read_ev,
-        logsrvd_conf_get_sock_timeout(), false) == -1) {
+        NULL, false) == -1) {
         sudo_warn(U_("unable to add event to queue"));
     }
 
@@ -1360,12 +1360,12 @@ new_connection(int sock, struct sudo_event_base *base)
     } else {
         /* Enable reader for ClientMessage*/
         if (sudo_ev_add(base, closure->read_ev,
-            logsrvd_conf_get_sock_timeout(), false) == -1)
+            NULL, false) == -1)
             goto bad;
     }
 #else
     /* Enable reader for ClientMessage*/
-    if (sudo_ev_add(base, closure->read_ev, logsrvd_conf_get_sock_timeout(), false) == -1)
+    if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1)
 	goto bad;
 #endif
 
