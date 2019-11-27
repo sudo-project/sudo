@@ -405,10 +405,18 @@ struct  _ServerHello
    */
   size_t n_servers;
   char **servers;
+  /*
+   * true if server uses tls protocol 
+   */
+  protobuf_c_boolean tls;
+  /*
+   * true if client auth is required with signed cert 
+   */
+  protobuf_c_boolean tls_checkpeer;
 };
 #define SERVER_HELLO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&server_hello__descriptor) \
-    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL }
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL, 0, 0 }
 
 
 /* ClientMessage methods */

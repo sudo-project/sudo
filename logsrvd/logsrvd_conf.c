@@ -68,7 +68,7 @@ struct logsrvd_config_section {
 static struct logsrvd_config {
     struct logsrvd_config_server {
         struct listen_address_list addresses;
-        int timeout;
+        struct timespec timeout;
 #if defined(HAVE_OPENSSL)
         bool tls;
         struct logsrvd_tls_config tls_config;
@@ -129,10 +129,14 @@ logsrvd_conf_listen_address(void)
     return &logsrvd_config->server.addresses;
 }
 
-int
+struct timespec *
 logsrvd_conf_get_sock_timeout(void)
 {
-    return logsrvd_config->server.timeout;
+    if (sudo_timespecisset(&logsrvd_config->server.timeout)) {
+        return &(logsrvd_config->server.timeout);
+    }
+
+    return NULL;
 }
 
 #if defined(HAVE_OPENSSL)
@@ -401,7 +405,7 @@ cb_timeout(struct logsrvd_config *config, const char *str)
     if (errstr != NULL)
 	debug_return_bool(false);
 
-    config->server.timeout = timeout;
+    config->server.timeout.tv_sec = timeout;
 
     debug_return_bool(true);
 }
@@ -847,7 +851,7 @@ logsrvd_conf_alloc(void)
 
     /* Server defaults */
     TAILQ_INIT(&config->server.addresses);
-    config->server.timeout = DEFAULT_SOCKET_TIMEOUT_SEC;
+    config->server.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
 
     /* I/O log defaults */
     config->iolog.compress = false;

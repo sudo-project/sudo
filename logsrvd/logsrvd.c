@@ -92,7 +92,6 @@ connection_closure_free(struct connection_closure *closure)
 	bool shutting_down = closure->state == SHUTDOWN;
 
 #if defined(HAVE_OPENSSL)
-	/* deallocate the connection's ssl object */
 	SSL_free(closure->ssl);
 #endif
 	TAILQ_REMOVE(&connections, closure, entries);
@@ -101,6 +100,9 @@ connection_closure_free(struct connection_closure *closure)
 	sudo_ev_free(closure->commit_ev);
 	sudo_ev_free(closure->read_ev);
 	sudo_ev_free(closure->write_ev);
+#if defined(HAVE_OPENSSL)
+    sudo_ev_free(closure->ssl_accept_ev);
+#endif
 	iolog_details_free(&closure->details);
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
@@ -167,6 +169,13 @@ fmt_hello_message(struct connection_buffer *buf)
 
     /* TODO: implement redirect and servers array.  */
     hello.server_id = (char *)server_id;
+#if defined(HAVE_OPENSSL)
+    hello.tls = logsrvd_conf_get_tls_opt();
+    hello.tls_checkpeer = logsrvd_get_tls_config()->check_peer;
+#else
+    hello.tls = false;
+    hello.tls_checkpeer = false;
+#endif
     msg.hello = &hello;
     msg.type_case = SERVER_MESSAGE__TYPE_HELLO;
 
@@ -253,10 +262,11 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     /* Send log ID to client for restarting connections. */
     if (!fmt_log_id_message(closure->details.iolog_path, &closure->write_buf))
 	debug_return_bool(false);
-    if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to add server write event");
-	debug_return_bool(false);
+    if (sudo_ev_add(NULL, closure->write_ev,
+        logsrvd_conf_get_sock_timeout(), false) == -1) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to add server write event");
+        debug_return_bool(false);
     }
 
     closure->state = RUNNING;
@@ -378,7 +388,8 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 	if (!fmt_error_message(closure->errstr, &closure->write_buf))
 	    debug_return_bool(false);
 	sudo_ev_del(NULL, closure->read_ev);
-	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
+	if (sudo_ev_add(NULL, closure->write_ev,
+        logsrvd_conf_get_sock_timeout(), false) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to add server write event");
 	    debug_return_bool(false);
@@ -631,12 +642,48 @@ server_msg_cb(int fd, int what, void *v)
     ssize_t nwritten;
     debug_decl(server_msg_cb, SUDO_DEBUG_UTIL)
 
+    if (what == SUDO_EV_TIMEOUT) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "Writing to client timed out");
+        goto finished;
+    }
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to client",
 	__func__, buf->len - buf->off);
 
 #if defined(HAVE_OPENSSL)
-    if (closure->ssl != NULL) {
+    /* The initial ServerHello msg is not encrypted */
+    if ((closure->ssl) != NULL && (closure->state != INITIAL)) {
         nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
+        if (nwritten <= 0) {
+            int err = SSL_get_error(closure->ssl, nwritten);
+            switch (err) {
+                /* ssl wants to read, so schedule the read handler */
+                case SSL_ERROR_WANT_READ:
+                    if (sudo_ev_add(closure->read_ev->base, closure->read_ev,
+                        logsrvd_conf_get_sock_timeout(), false) == -1) {
+                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                            "unable to add event to queue");
+                        goto finished;
+                    }
+                    debug_return;
+                /* ssl wants to write more, so re-schedule the write handler */
+                case SSL_ERROR_WANT_WRITE:
+                    if (sudo_ev_add(closure->write_ev->base, closure->write_ev,
+                        logsrvd_conf_get_sock_timeout(), false) == -1) {
+                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                            "unable to add event to queue");
+                        goto finished;
+                    }
+                    debug_return;
+                default:
+                    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                        "unexpected error during SSL_write(). SSL error=%d (%s)",
+                        err,
+                        ERR_error_string(ERR_get_error(), NULL));
+                        goto finished;
+            }
+        }
     } else {
         nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
     }
@@ -679,11 +726,47 @@ client_msg_cb(int fd, int what, void *v)
     struct connection_buffer *buf = &closure->read_buf;
     uint32_t msg_len;
     ssize_t nread;
+
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
+
+    if (what == SUDO_EV_TIMEOUT) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "Reading from client timed out");
+        goto finished;
+    }
 
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
-        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
+       nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
+        if (nread <= 0) {
+            int err = SSL_get_error(closure->ssl, nread);
+            switch (err) {
+                /* ssl wants to read more, so re-schedule the read handler */
+                case SSL_ERROR_WANT_READ:
+                    if (sudo_ev_add(closure->read_ev->base, closure->read_ev,
+                        logsrvd_conf_get_sock_timeout(), false) == -1) {
+                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                            "unable to add event to queue");
+                        goto finished;
+                    }
+                    debug_return;
+                /* ssl wants to write, so schedule the write handler */
+                case SSL_ERROR_WANT_WRITE:
+                    if (sudo_ev_add(closure->write_ev->base, closure->write_ev,
+                        logsrvd_conf_get_sock_timeout(), false) == -1) {
+                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                            "unable to add event to queue");
+                        goto finished;
+                    }
+                    debug_return;
+                default:
+                    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                        "unexpected error during SSL_read(). SSL error=%d (%s)",
+                        err,
+                        ERR_error_string(ERR_get_error(), NULL));
+                        goto finished;
+            }
+        }
     } else {
         nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
     }
@@ -746,7 +829,8 @@ send_error:
 	goto finished;
     if (fmt_error_message(closure->errstr, &closure->write_buf)) {
 	sudo_ev_del(NULL, closure->read_ev);
-	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
+	if (sudo_ev_add(NULL, closure->write_ev,
+        logsrvd_conf_get_sock_timeout(), false) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to add server write event");
 	}
@@ -765,6 +849,7 @@ server_commit_cb(int unused, int what, void *v)
     ServerMessage msg = SERVER_MESSAGE__INIT;
     TimeSpec commit_point = TIME_SPEC__INIT;
     struct connection_closure *closure = v;
+
     debug_decl(server_commit_cb, SUDO_DEBUG_UTIL)
 
     /* Send the client an acknowledgement of what has been committed to disk. */
@@ -783,10 +868,11 @@ server_commit_cb(int unused, int what, void *v)
 	    "unable to format ServerMessage (commit point)");
 	goto bad;
     }
-    if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to add server write event");
-	goto bad;
+    if (sudo_ev_add(NULL, closure->write_ev,
+        logsrvd_conf_get_sock_timeout(), false) == -1) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to add server write event");
+        goto bad;
     }
 
     if (closure->state == EXITED)
@@ -1118,6 +1204,59 @@ bad:
 good:
     debug_return_ptr(ctx);
 }
+
+static void
+tls_handshake_cb(int fd, int what, void *v)
+{
+    struct connection_closure *closure = v;
+    struct sudo_event_base *base = closure->ssl_accept_ev->base;
+
+    debug_decl(tls_handshake_cb, SUDO_DEBUG_UTIL)
+
+    if (what == SUDO_EV_TIMEOUT) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "TLS handshake timed out");
+        goto bad;
+    }
+
+    int handshake_status = SSL_accept(closure->ssl);
+    int err = SSL_ERROR_NONE;
+    switch(err = SSL_get_error(closure->ssl, handshake_status)) {
+
+        /* ssl handshake was successful */
+        case SSL_ERROR_NONE:
+            break;
+        /* ssl handshake is ongoing, re-schedule the SSL_accept() call */
+        case SSL_ERROR_WANT_READ:
+        case SSL_ERROR_WANT_WRITE:
+            if (sudo_ev_add(base, closure->ssl_accept_ev,
+                logsrvd_conf_get_sock_timeout(), false) == -1) {
+                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                    "unable to add event to queue");
+                goto bad;
+            }
+            debug_return;
+        default:
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unexpected error during TLS handshake: %d (%s)",
+                err,
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+    }
+
+    sudo_ev_del(base, closure->ssl_accept_ev);
+
+    /* Enable reader for ClientMessage */
+    if (sudo_ev_add(base, closure->read_ev,
+        NULL, false) == -1) {
+        sudo_warn(U_("unable to add event to queue"));
+    }
+
+    debug_return;
+bad:
+    connection_closure_free(closure);
+    debug_return;
+}
 #endif /* HAVE_OPENSSL */
 
 /*
@@ -1136,31 +1275,6 @@ connection_closure_alloc(int sock)
     closure->sock = sock;
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
-
-#if defined(HAVE_OPENSSL)
-    if (logsrvd_conf_get_tls_opt() == true) {
-        if ((closure->ssl = SSL_new(logsrvd_get_tls_runtime()->ssl_ctx)) == NULL) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to create new ssl object: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-        
-        if (SSL_set_fd(closure->ssl, sock) != 1) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to set fd for TLS: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-
-        if (SSL_accept(closure->ssl) != 1 ) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "TLS handshake was unsuccessful: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-    }
-#endif
 
     closure->read_buf.size = 64 * 1024;
     closure->read_buf.data = malloc(closure->read_buf.size);
@@ -1182,6 +1296,13 @@ connection_closure_alloc(int sock)
     if (closure->write_ev == NULL)
 	goto bad;
 
+#if defined(HAVE_OPENSSL)
+    closure->ssl_accept_ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST,
+	tls_handshake_cb, closure);
+    if (closure->ssl_accept_ev == NULL)
+	goto bad;
+#endif
+
     debug_return_ptr(closure);
 bad:
     connection_closure_free(closure);
@@ -1196,6 +1317,7 @@ static bool
 new_connection(int sock, struct sudo_event_base *base)
 {
     struct connection_closure *closure;
+
     debug_decl(new_connection, SUDO_DEBUG_UTIL)
 
     if ((closure = connection_closure_alloc(sock)) == NULL)
@@ -1204,12 +1326,48 @@ new_connection(int sock, struct sudo_event_base *base)
     /* Format and write ServerHello message. */
     if (!fmt_hello_message(&closure->write_buf))
 	goto bad;
-    if (sudo_ev_add(base, closure->write_ev, NULL, false) == -1)
-	goto bad;
+    if (sudo_ev_add(base, closure->write_ev,
+        logsrvd_conf_get_sock_timeout(), false) == -1)
+        goto bad;
 
+#if defined(HAVE_OPENSSL)
+    /* if TLS is ON, first we need to do handshake with client,
+     * otherwise just enable the reader
+     */
+    if (logsrvd_conf_get_tls_opt()) {
+
+        /* create the SSL object for the closure and attach it to the socket */
+        if ((closure->ssl = SSL_new(logsrvd_get_tls_runtime()->ssl_ctx)) == NULL) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to create new ssl object: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
+        if (SSL_set_fd(closure->ssl, closure->sock) != 1) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unable to set fd for TLS: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
+        /* enable SSL_accept to begin handshake with client */
+        if (sudo_ev_add(base, closure->ssl_accept_ev,
+            logsrvd_conf_get_sock_timeout(), false) == -1) {
+            sudo_fatal(U_("unable to add event to queue"));
+            goto bad;
+        }
+    } else {
+        /* Enable reader for ClientMessage*/
+        if (sudo_ev_add(base, closure->read_ev,
+            NULL, false) == -1)
+            goto bad;
+    }
+#else
     /* Enable reader for ClientMessage*/
     if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1)
 	goto bad;
+#endif
 
     debug_return_bool(true);
 bad:
@@ -1221,7 +1379,6 @@ static int
 create_listener(struct listen_address *addr)
 {
     int flags, i, sock;
-    struct timeval timeout;
     debug_decl(create_listener, SUDO_DEBUG_UTIL)
 
     if ((sock = socket(addr->sa_un.sa.sa_family, SOCK_STREAM, 0)) == -1) {
@@ -1231,12 +1388,6 @@ create_listener(struct listen_address *addr)
     i = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i)) == -1)
 	sudo_warn("SO_REUSEADDR");
-    timeout.tv_sec = logsrvd_conf_get_sock_timeout();
-    timeout.tv_usec = 0;
-    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1)
-	sudo_warn("SO_RCVTIMEO");
-    if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) == -1)
-	sudo_warn("SO_SNDTIMEO");
     if (bind(sock, &addr->sa_un.sa, addr->sa_len) == -1) {
 	sudo_warn("bind");
 	goto bad;
