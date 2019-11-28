@@ -236,6 +236,12 @@
 #define def_log_servers         (sudo_defs_table[I_LOG_SERVERS].sd_un.list)
 #define I_LOG_SERVER_TIMEOUT    118
 #define def_log_server_timeout  (sudo_defs_table[I_LOG_SERVER_TIMEOUT].sd_un.ival)
+#define I_LOG_SERVER_CABUNDLE   119
+#define def_log_server_cabundle (sudo_defs_table[I_LOG_SERVER_CABUNDLE].sd_un.str)
+#define I_LOG_SERVER_PEER_CERT  120
+#define def_log_server_peer_cert (sudo_defs_table[I_LOG_SERVER_PEER_CERT].sd_un.str)
+#define I_LOG_SERVER_PEER_KEY   121
+#define def_log_server_peer_key (sudo_defs_table[I_LOG_SERVER_PEER_KEY].sd_un.str)
 
 enum def_tuple {
 	never,

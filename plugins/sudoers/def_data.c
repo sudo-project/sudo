@@ -514,6 +514,18 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Sudo log server timeout in seconds: %u"),
 	NULL,
     }, {
+	"log_server_cabundle", T_STR|T_BOOL|T_PATH,
+	N_("Path to the audit server's CA bundle file: %s"),
+	NULL,
+    }, {
+	"log_server_peer_cert", T_STR|T_BOOL|T_PATH,
+	N_("Path to the sudoers certificate file: %s"),
+	NULL,
+    }, {
+	"log_server_peer_key", T_STR|T_BOOL|T_PATH,
+	N_("Path to the sudoers private key file: %s"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -372,3 +372,12 @@ log_servers
 log_server_timeout
 	T_TIMEOUT|T_BOOL
 	"Sudo log server timeout in seconds: %u"
+log_server_cabundle
+	T_STR|T_BOOL|T_PATH
+	"Path to the audit server's CA bundle file: %s"
+log_server_peer_cert
+	T_STR|T_BOOL|T_PATH
+	"Path to the sudoers certificate file: %s"
+log_server_peer_key
+	T_STR|T_BOOL|T_PATH
+	"Path to the sudoers private key file: %s"
