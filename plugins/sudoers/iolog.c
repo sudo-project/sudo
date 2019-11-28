@@ -363,6 +363,20 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    TIME_T_MAX, NULL);
 		continue;
 	    }
+#if defined(HAVE_OPENSSL)
+	    if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
+            details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
+            continue;
+        }
+	    if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
+            details->cert_file = *cur + sizeof("log_server_peer_cert=") - 1;
+            continue;
+        }
+	    if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
+            details->key_file = *cur + sizeof("log_server_peer_key=") - 1;
+            continue;
+        }
+#endif /* HAVE_OPENSSL */
 	    break;
 	case 'm':
 	    if (strncmp(*cur, "maxseq=", sizeof("maxseq=") - 1) == 0) {
@@ -583,7 +597,6 @@ sudoers_io_open_remote(void)
 	ret = -1;
 	goto done;
     }
-
     if (!client_closure_fill(&client_closure, sock, &iolog_details, &sudoers_io)) {
 	close(sock);
 	ret = -1;

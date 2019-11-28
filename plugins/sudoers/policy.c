@@ -734,6 +734,20 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if (asprintf(&command_info[info_len++], "log_server_timeout=%u", def_log_server_timeout) == -1)
 	    goto oom;
     }
+
+    if (def_log_server_cabundle != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("log_server_cabundle", def_log_server_cabundle)) == NULL)
+            goto oom;
+    }
+    if (def_log_server_peer_cert != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("log_server_peer_cert", def_log_server_peer_cert)) == NULL)
+            goto oom;
+    }
+    if (def_log_server_peer_key != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("log_server_peer_key", def_log_server_peer_key)) == NULL)
+            goto oom;
+    }
+
     if (def_command_timeout > 0 || user_timeout > 0) {
 	int timeout = user_timeout;
 	if (timeout == 0 || def_command_timeout < timeout)
