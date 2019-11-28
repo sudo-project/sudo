@@ -17,6 +17,10 @@
 #ifndef SUDOERS_IOLOG_CLIENT_H
 #define SUDOERS_IOLOG_CLIENT_H
 
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+#endif /* HAVE_OPENSSL */
+
 #include "log_server.pb-c.h"
 #include "strlist.h"
 
@@ -57,6 +61,11 @@ struct iolog_details {
     char **user_env;
     struct sudoers_str_list *log_servers;
     struct timespec server_timeout;
+#if defined(HAVE_OPENSSL)
+    char *ca_bundle;
+    char *cert_file;
+    char *key_file;
+#endif /* HAVE_OPENSSL */
     int argc;
     int lines;
     int cols;
@@ -77,11 +86,20 @@ enum client_state {
 /* Remote connection closure, non-zero fields must come first. */
 struct client_closure {
     int sock;
+#if defined(HAVE_OPENSSL)
+    bool tls;
+    bool tls_conn_status;
+    SSL_CTX *ssl_ctx;
+    SSL *ssl;
+#endif /* HAVE_OPENSSL */
     enum client_state state;
     bool disabled;
     struct connection_buffer_list write_bufs;
     struct connection_buffer_list free_bufs;
     struct connection_buffer read_buf;
+#if defined(HAVE_OPENSSL)
+    struct sudo_plugin_event *tls_connect_ev;
+#endif /* HAVE_OPENSSL */
     struct sudo_plugin_event *read_ev;
     struct sudo_plugin_event *write_ev;
     struct iolog_details *log_details;
@@ -91,7 +109,21 @@ struct client_closure {
     char *iolog_id;
 };
 
-#define CLIENT_CLOSURE_INITIALIZER(_c)			\
+#if defined(HAVE_OPENSSL)
+# define CLIENT_CLOSURE_INITIALIZER(_c)			\
+    {							\
+	-1,						    \
+    false,                      \
+    false,                      \
+    NULL,						\
+    NULL,						\
+	ERROR,						\
+	false,						\
+	TAILQ_HEAD_INITIALIZER((_c).write_bufs),	\
+	TAILQ_HEAD_INITIALIZER((_c).free_bufs)		\
+    }
+#else
+# define CLIENT_CLOSURE_INITIALIZER(_c)			\
     {							\
 	-1,						\
 	ERROR,						\
@@ -99,6 +131,7 @@ struct client_closure {
 	TAILQ_HEAD_INITIALIZER((_c).write_bufs),	\
 	TAILQ_HEAD_INITIALIZER((_c).free_bufs)		\
     }
+#endif /* HAVE_OPENSSL */
 
 /* iolog_client.c */
 bool client_closure_fill(struct client_closure *closure, int sock, struct iolog_details *details, struct io_plugin *sudoers_io);

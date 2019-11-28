@@ -45,6 +45,11 @@
 #include <pwd.h>
 #include <grp.h>
 
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+#endif /* HAVE_OPENSSL */
+
 #include "sudoers.h"
 #include "sudo_event.h"
 #include "iolog_plugin.h"
@@ -207,6 +212,165 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
 
     debug_return_int(sock);
 }
+
+#if defined(HAVE_OPENSSL)
+static bool
+tls_init(struct client_closure *closure, bool peer_auth)
+{
+    debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN)
+
+    if (closure->log_details->ca_bundle == NULL) {
+        sudo_warnx(U_("CA bundle file is not set in sudoers\n"));
+        goto bad;
+    }
+
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+    
+    /* create the ssl context */
+    if ((closure->ssl_ctx = SSL_CTX_new(TLS_client_method())) == NULL) {
+        sudo_warnx(U_("Creation of new SSL_CTX object failed: %s"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+    /* sets the location of the CA bundle file for verification purposes */
+    if (SSL_CTX_load_verify_locations(closure->ssl_ctx,
+        closure->log_details->ca_bundle, NULL) <= 0) {
+        sudo_warnx(U_("Calling SSL_CTX_load_verify_locations() failed: %s"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    /* turn on server cert verification during the handshake */
+    SSL_CTX_set_verify(closure->ssl_ctx, SSL_VERIFY_PEER, NULL);
+
+    /* if the server requests client authentication with signed certificate */
+    if (peer_auth) {
+        /* if no certificate file is set in sudoers */
+        if (closure->log_details->cert_file == NULL) {
+            sudo_warnx(U_("Signed certificate file is not set in sudoers"));
+            goto bad;
+        }
+        /* load client cert file */
+        if (!SSL_CTX_use_certificate_chain_file(closure->ssl_ctx,
+            closure->log_details->cert_file)) {
+            sudo_warnx(U_("Unable to load cert into the ssl context: %s"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+        /* no explicit key file is set, try to use the cert file */
+        if (closure->log_details->key_file == NULL) {
+            closure->log_details->key_file = closure->log_details->cert_file;
+        }
+        /* load corresponding private key file */
+        if (!SSL_CTX_use_PrivateKey_file(closure->ssl_ctx,
+            closure->log_details->key_file, X509_FILETYPE_PEM)) {
+            sudo_warnx(U_("Unable to load private key into the ssl context: %s"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+    }
+    /* create the ssl object for encrypted communication */
+    if ((closure->ssl = SSL_new(closure->ssl_ctx)) == NULL) {
+        sudo_warnx(U_("Unable to allocate ssl object: %s\n"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+    /* attach the closure socket to the ssl object */
+    if (SSL_set_fd(closure->ssl, closure->sock) <= 0) {
+        sudo_warnx(U_("Unable to attach socket to the ssl object: %s\n"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    closure->tls = true;
+
+    debug_return_bool(true);
+
+bad:
+    SSL_free(closure->ssl);
+    SSL_CTX_free(closure->ssl_ctx);
+    debug_return_bool(false);
+}
+
+static void
+tls_connect_cb(int sock, int what, void *v)
+{
+    struct client_closure *closure = v;
+    struct timespec timeo = { 10, 0 };
+    int tls_con, err;
+
+    debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL)
+
+    if (what == SUDO_PLUGIN_EV_TIMEOUT) {
+        sudo_warnx(U_("TLS handshake timeout occured"));
+        debug_return;
+    }
+
+    tls_con = SSL_connect(closure->ssl);
+
+    if (tls_con == 1) {
+        closure->tls_conn_status = true;
+    } else {
+        switch ((err = SSL_get_error(closure->ssl, tls_con))) {
+            /* TLS connect successful */
+            case SSL_ERROR_NONE:
+                closure->tls_conn_status = true;
+                break;
+            /* TLS handshake is not finished, reschedule event */
+            case SSL_ERROR_WANT_READ:
+            case SSL_ERROR_WANT_WRITE:
+                if (closure->tls_connect_ev->add(closure->tls_connect_ev, &timeo) == -1) {
+                    sudo_warnx(U_("unable to add event to queue"));
+                }
+                debug_return;
+            default:
+                sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s\n"),
+                    err,
+                    ERR_error_string(ERR_get_error(), NULL));
+                break;
+        }
+    }
+
+    closure->tls_connect_ev->del(closure->tls_connect_ev);
+    debug_return;
+}
+
+static bool
+tls_timed_connect(struct client_closure *closure)
+{
+    struct sudo_event_base *evbase = NULL;
+
+    debug_decl(tls_timed_connect, SUDO_DEBUG_UTIL)
+
+	evbase = sudo_ev_base_alloc();
+    closure->tls_conn_status = false;
+	if (evbase == NULL || closure->tls_connect_ev == NULL) {
+        sudo_warnx(U_("unable to allocate memory"));
+	    goto exit;
+	}
+
+    closure->tls_connect_ev->setbase(closure->tls_connect_ev, evbase);
+
+    if (closure->tls_connect_ev->add(closure->tls_connect_ev,
+        &closure->log_details->server_timeout) == -1) {
+	    sudo_warnx(U_("Unable to add event to queue"));
+	    goto exit;
+	}
+
+	if (sudo_ev_dispatch(evbase) == -1) {
+	    sudo_warnx(U_("error in event loop"));
+	    goto exit;
+	}
+
+exit:
+    sudo_ev_base_free(evbase);
+    closure->tls_connect_ev->free(closure->tls_connect_ev);
+
+    debug_return_int(closure->tls_conn_status);
+}
+#endif /* HAVE_OPENSSL */
 
 /*
  * Free client closure and contents and initialize to unused state as
@@ -764,6 +928,20 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
+#if defined(HAVE_OPENSSL)
+    /* if server requested TLS */
+    if (msg->tls) {
+        if (!tls_init(closure, msg->tls_checkpeer)) {
+            sudo_warnx(U_("TLS initialization was unsuccessful"));
+            debug_return_bool(false);
+        }
+        if (!tls_timed_connect(closure)) {
+            sudo_warnx(U_("TLS handshake was unsuccessful"));
+            debug_return_bool(false);
+        }
+    }
+#endif /* HAVE_OPENSSL */
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: server ID: %s",
 	__func__, msg->server_id);
     /* TODO: handle redirect */
@@ -971,8 +1149,37 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
+#if defined(HAVE_OPENSSL)
+    if (closure->tls && closure->state != RECV_HELLO) {
+        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size - buf->len);
+        if (nread <= 0) {
+            int err = SSL_get_error(closure->ssl, nread);
+            switch (err) {
+                case SSL_ERROR_NONE:
+                    break;
+                case SSL_ERROR_WANT_READ:
+                    /* re-schedule the read handler */
+                    closure->read_ev->add(closure->read_ev, NULL);
+                    debug_return;
+                case SSL_ERROR_WANT_WRITE:
+                    /* ssl wants to write, so schedule the write handler */
+                    closure->write_ev->add(closure->write_ev, NULL);
+                    debug_return;
+                default:
+                    sudo_warnx(U_("SSL_read failed: ssl_error=%d, stack=%s\n"),
+                        err,
+                        ERR_error_string(ERR_get_error(), NULL));
+                    goto bad;
+            }
+        }
+    }
+    else {
+        nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+    }
 
+#else
     nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+#endif /* HAVE_OPENSSL */
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
 	__func__, nread);
     switch (nread) {
@@ -1054,7 +1261,36 @@ client_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO,
     	"%s: sending %u bytes to server", __func__, buf->len - buf->off);
 
+#if defined(HAVE_OPENSSL)
+    if (closure->tls) {
+        nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
+        if (nwritten <= 0) {
+            int err = SSL_get_error(closure->ssl, nwritten);
+            switch (err) {
+                case SSL_ERROR_NONE:
+                    break;
+                case SSL_ERROR_WANT_READ:
+                    /* ssl wants to read, so schedule the read handler */
+                    closure->read_ev->add(closure->read_ev, NULL);
+                    debug_return;
+                case SSL_ERROR_WANT_WRITE:
+                    /* re-schedule the write handler */
+                    closure->write_ev->add(closure->write_ev, NULL);
+                    debug_return;
+                default:
+                    sudo_warnx(U_("SSL_write failed: ssl_error=%d, stack=%s\n"),
+                        err,
+                        ERR_error_string(ERR_get_error(), NULL));
+                    goto bad;
+            }
+        }
+    } else {
+        nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+    }
+#else
     nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+#endif /* HAVE_OPENSSL */
+
     if (nwritten == -1) {
 	sudo_warn("send");
 	goto bad;
@@ -1119,6 +1355,11 @@ client_closure_fill(struct client_closure *closure, int sock,
     if ((closure->write_ev = sudoers_io->event_alloc()) == NULL)
 	goto oom;
 
+#if defined(HAVE_OPENSSL)
+    if ((closure->tls_connect_ev = sudoers_io->event_alloc()) == NULL)
+	goto oom;
+#endif /* HAVE_OPENSSL */
+
     if (closure->read_ev->set(closure->read_ev, sock,
 	    SUDO_PLUGIN_EV_READ|SUDO_PLUGIN_EV_PERSIST,
 	    server_msg_cb, closure) == -1)
@@ -1128,6 +1369,13 @@ client_closure_fill(struct client_closure *closure, int sock,
 	    SUDO_PLUGIN_EV_WRITE|SUDO_PLUGIN_EV_PERSIST,
 	    client_msg_cb, closure) == -1)
 	goto oom;
+
+#if defined(HAVE_OPENSSL)
+    if (closure->tls_connect_ev->set(closure->tls_connect_ev, sock,
+	    SUDO_PLUGIN_EV_WRITE|SUDO_PLUGIN_EV_PERSIST,
+	    tls_connect_cb, closure) == -1)
+	goto oom;
+#endif /* HAVE_OPENSSL */
 
     closure->log_details = details;
 
