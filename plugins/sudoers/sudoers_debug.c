@@ -43,6 +43,7 @@
 #include "sudoers.h"
 
 static int sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+static unsigned int sudoers_debug_refcnt;
 
 static const char *const sudoers_subsystem_names[] = {
     "alias",
@@ -127,9 +128,8 @@ sudoers_debug_register(const char *program,
     struct sudo_debug_file *debug_file, *debug_next;
 
     /* Already initialized? */
-    if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
+    if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER)
 	sudo_debug_set_active_instance(sudoers_debug_instance);
-    }
 
     /* Setup debugging if indicated. */
     if (debug_files != NULL && !TAILQ_EMPTY(debug_files)) {
@@ -146,6 +146,7 @@ sudoers_debug_register(const char *program,
 	    free(debug_file);
 	}
     }
+    sudoers_debug_refcnt++;
     return true;
 }
 
@@ -156,9 +157,12 @@ void
 sudoers_debug_deregister(void)
 {
     debug_decl(sudoers_debug_deregister, SUDOERS_DEBUG_PLUGIN)
-    if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
+
+    if (sudoers_debug_refcnt != 0) {
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-        sudo_debug_deregister(sudoers_debug_instance);
-	sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+	if (--sudoers_debug_refcnt == 0) {
+	    if (sudo_debug_deregister(sudoers_debug_instance) < 1)
+		sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+	}
     }
 }
