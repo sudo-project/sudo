@@ -1143,7 +1143,10 @@ init_tls_server_context(void)
         SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
     }
 
-    if (!SSL_CTX_use_PrivateKey_file(ctx, tls_config->pkey_path, SSL_FILETYPE_PEM)) {
+    /* if private key file was not set, assume that the cert file contains the private key */
+    char* pkey = (tls_config->pkey_path == NULL ? tls_config->cert_path : tls_config->pkey_path);
+
+    if (!SSL_CTX_use_PrivateKey_file(ctx, pkey, SSL_FILETYPE_PEM)) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "unable to load key file: %s",
             ERR_error_string(ERR_get_error(), NULL));
