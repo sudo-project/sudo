@@ -106,6 +106,7 @@ struct sudo_debug_instance {
     const char *const *subsystems;
     const unsigned int *subsystem_ids;
     unsigned int max_subsystem;
+    unsigned int refcnt;
     struct sudo_debug_output_list outputs;
 };
 
@@ -328,6 +329,7 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 	instance->subsystems = subsystems;
 	instance->subsystem_ids = ids;
 	instance->max_subsystem = max_id;
+	instance->refcnt = 1;
 	SLIST_INIT(&instance->outputs);
 	sudo_debug_instances[idx] = instance;
 	if (idx != free_idx)
@@ -340,6 +342,7 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 	    for (i = 0; subsystems[i] != NULL; i++)
 		ids[i] = instance->subsystem_ids[i];
 	}
+	instance->refcnt++;
     }
 
     TAILQ_FOREACH(debug_file, debug_files, entries) {
@@ -364,6 +367,7 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 /*
  * De-register the specified instance from the debug subsystem
  * and free up any associated data structures.
+ * Returns the number of remaining references for the instance or -1 on error.
  */
 int
 sudo_debug_deregister_v1(int idx)
@@ -383,7 +387,10 @@ sudo_debug_deregister_v1(int idx)
 
     instance = sudo_debug_instances[idx];
     if (instance == NULL)
-	return -1;		/* already deregistered */
+	return -1;			/* already deregistered */
+
+    if (--instance->refcnt != 0)
+	return instance->refcnt;	/* ref held by other caller */
 
     /* Free up instance data, note that subsystems[] is owned by caller. */
     sudo_debug_instances[idx] = NULL;
