@@ -52,6 +52,11 @@
 #include "pathnames.h"
 #include "logsrvd.h"
 
+#if defined(HAVE_OPENSSL)
+# define DEFAULT_CA_CERT_PATH       "/etc/ssl/sudo/cacert.pem"
+# define DEFAULT_SERVER_CERT_PATH   "/etc/ssl/sudo/logsrvd_cert.pem"
+#endif
+
 struct logsrvd_config;
 typedef bool (*logsrvd_conf_cb_t)(struct logsrvd_config *config, const char *);
 
@@ -852,6 +857,11 @@ logsrvd_conf_alloc(void)
     /* Server defaults */
     TAILQ_INIT(&config->server.addresses);
     config->server.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
+
+#if defined(HAVE_OPENSSL)
+    config->server.tls_config.cacert_path = strdup(DEFAULT_CA_CERT_PATH);
+    config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
+#endif
 
     /* I/O log defaults */
     config->iolog.compress = false;
