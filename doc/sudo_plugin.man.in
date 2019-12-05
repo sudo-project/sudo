@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "November 18, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "December 5, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1279,7 +1279,7 @@ if the plugin does not support credential caching.
 init_session
 .nf
 .RS 6n
-int (*init_session)(struct passwd *pwd, char **user_envp[);
+int (*init_session)(struct passwd *pwd, char **user_env_out[]);
 .RE
 .fi
 .RS 6n
@@ -1310,7 +1310,7 @@ in the password database, otherwise it will be
 \fRNULL\fR.
 .sp
 The
-\fIuser_env\fR
+\fIuser_env_out\fR
 argument points to the environment the command will
 run in, in the form of a
 \fRNULL\fR-terminated
@@ -1325,12 +1325,12 @@ If the
 \fBinit_session\fR()
 function needs to modify the user environment, it should update the
 pointer stored in
-\fIuser_env\fR.
+\fIuser_env_out\fR.
 The expected use case is to merge the contents of the PAM environment
 (if any) with the contents of
-\fIuser_env\fR.
+\fIuser_env_out\fR.
 NOTE: the
-\fIuser_env\fR
+\fIuser_env_out\fR
 parameter is only available
 starting with API version 1.2.
 A plugin
@@ -1339,7 +1339,7 @@ check the API
 version specified by the
 \fBsudo\fR
 front end before using
-\fIuser_env\fR.
+\fIuser_env_out\fR.
 Failure to do so may result in a crash.
 .sp
 Returns 1 on success, 0 on failure and \-1 on error.

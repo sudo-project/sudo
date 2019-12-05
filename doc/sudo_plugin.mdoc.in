@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 18, 2019
+.Dd December 5, 2019
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1123,7 +1123,7 @@ function should be
 if the plugin does not support credential caching.
 .It init_session
 .Bd -literal -compact
-int (*init_session)(struct passwd *pwd, char **user_envp[);
+int (*init_session)(struct passwd *pwd, char **user_env_out[]);
 .Ed
 .Pp
 The
@@ -1152,7 +1152,7 @@ in the password database, otherwise it will be
 .Dv NULL .
 .Pp
 The
-.Em user_env
+.Em user_env_out
 argument points to the environment the command will
 run in, in the form of a
 .Dv NULL Ns -terminated
@@ -1167,12 +1167,12 @@ If the
 .Fn init_session
 function needs to modify the user environment, it should update the
 pointer stored in
-.Em user_env .
+.Em user_env_out .
 The expected use case is to merge the contents of the PAM environment
 (if any) with the contents of
-.Em user_env .
+.Em user_env_out .
 NOTE: the
-.Em user_env
+.Em user_env_out
 parameter is only available
 starting with API version 1.2.
 A plugin
@@ -1181,7 +1181,7 @@ check the API
 version specified by the
 .Nm sudo
 front end before using
-.Em user_env .
+.Em user_env_out .
 Failure to do so may result in a crash.
 .Pp
 Returns 1 on success, 0 on failure and \-1 on error.
