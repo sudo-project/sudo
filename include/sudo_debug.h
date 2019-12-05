@@ -269,7 +269,9 @@ __dso_public int sudo_debug_set_active_instance_v1(int inst);
 __dso_public void sudo_debug_update_fd_v1(int ofd, int nfd);
 __dso_public void sudo_debug_vprintf2_v1(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
 __dso_public void sudo_debug_write2_v1(int fd, const char *func, const char *file, int line, const char *str, int len, int errnum);
+__dso_public bool sudo_debug_needed_v1(int level);
 
+#define sudo_debug_needed(level) sudo_debug_needed_v1((level)|sudo_debug_subsys)
 #define sudo_debug_deregister(_a) sudo_debug_deregister_v1((_a))
 #define sudo_debug_enter(_a, _b, _c, _d) sudo_debug_enter_v1((_a), (_b), (_c), (_d))
 #define sudo_debug_execve2(_a, _b, _c, _d) sudo_debug_execve2_v1((_a), (_b), (_c), (_d))

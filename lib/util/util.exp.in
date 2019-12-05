@@ -37,6 +37,7 @@ sudo_debug_set_active_instance_v1
 sudo_debug_update_fd_v1
 sudo_debug_vprintf2_v1
 sudo_debug_write2_v1
+sudo_debug_needed_v1
 sudo_digest_alloc_v1
 sudo_digest_final_v1
 sudo_digest_free_v1

@@ -623,6 +623,41 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     ignore_result(writev(fd, iov, iovcnt));
 }
 
+bool
+sudo_debug_needed_v1(int level)
+{
+    unsigned int subsys;
+    int pri;
+    struct sudo_debug_instance *instance;
+    struct sudo_debug_output *output;
+    bool result = false;
+
+    if (sudo_debug_active_instance == -1)
+        goto out;
+
+    /* Extract priority and subsystem from level. */
+    pri = SUDO_DEBUG_PRI(level);
+    subsys = (unsigned int)SUDO_DEBUG_SUBSYS(level);
+
+    if (sudo_debug_active_instance > sudo_debug_last_instance)
+        goto out;
+
+    instance = sudo_debug_instances[sudo_debug_active_instance];
+    if (instance == NULL)
+        goto out;
+
+    if (subsys <= instance->max_subsystem) {
+        SLIST_FOREACH(output, &instance->outputs, entries) {
+            if (output->settings[subsys] >= pri) {
+                result = true;
+                break;
+            }
+        }
+    }
+out:
+    return result;
+}
+
 void
 sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level,
     const char *fmt, va_list ap)
