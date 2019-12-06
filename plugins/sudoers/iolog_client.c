@@ -220,7 +220,7 @@ tls_init(struct client_closure *closure, bool peer_auth)
     debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN)
 
     if (closure->log_details->ca_bundle == NULL) {
-        sudo_warnx(U_("CA bundle file is not set in sudoers\n"));
+        sudo_warnx(U_("CA bundle file is not set in sudoers"));
         goto bad;
     }
 
@@ -273,13 +273,13 @@ tls_init(struct client_closure *closure, bool peer_auth)
     }
     /* create the ssl object for encrypted communication */
     if ((closure->ssl = SSL_new(closure->ssl_ctx)) == NULL) {
-        sudo_warnx(U_("Unable to allocate ssl object: %s\n"),
+        sudo_warnx(U_("Unable to allocate ssl object: %s"),
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
     /* attach the closure socket to the ssl object */
     if (SSL_set_fd(closure->ssl, closure->sock) <= 0) {
-        sudo_warnx(U_("Unable to attach socket to the ssl object: %s\n"),
+        sudo_warnx(U_("Unable to attach socket to the ssl object: %s"),
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
@@ -326,7 +326,7 @@ tls_connect_cb(int sock, int what, void *v)
                 }
                 debug_return;
             default:
-                sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s\n"),
+                sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s"),
                     err,
                     ERR_error_string(ERR_get_error(), NULL));
                 break;
@@ -463,7 +463,7 @@ fmt_client_message(struct client_closure *closure, ClientMessage *msg)
 
     len = client_message__get_packed_size(msg);
     if (len > MESSAGE_SIZE_MAX) {
-    	sudo_warnx(U_("client message too large: %zu\n"), len);
+    	sudo_warnx(U_("client message too large: %zu"), len);
         goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
@@ -1166,7 +1166,7 @@ server_msg_cb(int fd, int what, void *v)
                     closure->write_ev->add(closure->write_ev, NULL);
                     debug_return;
                 default:
-                    sudo_warnx(U_("SSL_read failed: ssl_error=%d, stack=%s\n"),
+                    sudo_warnx(U_("SSL_read failed: ssl_error=%d, stack=%s"),
                         err,
                         ERR_error_string(ERR_get_error(), NULL));
                     goto bad;
@@ -1202,7 +1202,7 @@ server_msg_cb(int fd, int what, void *v)
 	msg_len = ntohl(msg_len);
 
 	if (msg_len > MESSAGE_SIZE_MAX) {
-	    sudo_warnx(U_("server message too large: %u\n"), msg_len);
+	    sudo_warnx(U_("server message too large: %u"), msg_len);
 	    goto bad;
 	}
 
@@ -1278,7 +1278,7 @@ client_msg_cb(int fd, int what, void *v)
                     closure->write_ev->add(closure->write_ev, NULL);
                     debug_return;
                 default:
-                    sudo_warnx(U_("SSL_write failed: ssl_error=%d, stack=%s\n"),
+                    sudo_warnx(U_("SSL_write failed: ssl_error=%d, stack=%s"),
                         err,
                         ERR_error_string(ERR_get_error(), NULL));
                     goto bad;
