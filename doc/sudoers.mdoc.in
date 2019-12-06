@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 18, 2019
+.Dd December 6, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3490,6 +3490,24 @@ This option is only available if
 .Nm
 is built on Solaris 10 or higher.
 .\}
+.It log_server_cabundle
+The path to a certificate authority bundle file, in PEM format,
+to use instead of the system's default certificate authority database
+when authenticating the log server.
+The default is to use the system's default certificate authority database.
+This setting has no effect unless the
+.Em log_server
+flag is enabled and the remote log server is secured with TLS.
+.It log_server_peer_cert
+The path to the client's certificate file, in PEM format.
+This setting is required when the
+.Em log_server
+flag is enabled and the remote log server is secured with TLS.
+.It log_server_peer_key
+The path to the client's private key file, in PEM format.
+This setting is required when the
+.Em log_server
+flag is enabled and the remote log server is secured with TLS.
 .It mailsub
 Subject of the mail sent to the
 .Em mailto
