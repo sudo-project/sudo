@@ -909,46 +909,22 @@ signal_cb(int signo, int what, void *v)
 }
 
 #if defined(HAVE_OPENSSL)
-static X509 *
-load_cert(const char *file)
-{
-    X509 *x509 = NULL;
-    BIO *cert = NULL;
-    debug_decl(load_cert, SUDO_DEBUG_UTIL)
-
-    if ((cert = BIO_new(BIO_s_file())) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to allocate new BIO object for certificate: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    if (BIO_read_filename(cert, file) <= 0) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to read certificate file: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    x509 = PEM_read_bio_X509_AUX(cert, NULL, NULL, NULL);
-
-exit:
-    if (cert)
-        BIO_free(cert);
-
-    debug_return_ptr(x509);
-}
-
 static bool
-check_cert(X509_STORE *ca_store_ctx, SSL_CTX *ctx, const char *cert_file)
+verify_server_cert(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
 {
     bool ret = false;
     X509_STORE_CTX *store_ctx = NULL;
-    X509 *x509 = NULL;
-    debug_decl(check_cert, SUDO_DEBUG_UTIL)
+    X509_STORE *ca_store;
+    STACK_OF(X509) *chain_certs;
+    X509 *x509;
+    debug_decl(verify_server_cert, SUDO_DEBUG_UTIL)
 
-    if ((x509 = load_cert(cert_file)) == NULL)
+    if ((x509 = SSL_CTX_get0_certificate(ctx)) == NULL) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to get X509 object from SSL_CTX: %s",
+            ERR_error_string(ERR_get_error(), NULL));
         goto exit;
+    }
 
     if ((store_ctx = X509_STORE_CTX_new()) == NULL) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -957,9 +933,17 @@ check_cert(X509_STORE *ca_store_ctx, SSL_CTX *ctx, const char *cert_file)
         goto exit;
     }
 
-    X509_STORE_set_flags(ca_store_ctx, X509_V_FLAG_X509_STRICT);
+    if (!SSL_CTX_get0_chain_certs(ctx, &chain_certs)) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to get chain certs: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto exit;
+    }
 
-    if (!X509_STORE_CTX_init(store_ctx, ca_store_ctx, x509, 0)) {
+    if ((ca_store = SSL_CTX_get_cert_store(ctx)) != NULL)
+        X509_STORE_set_flags(ca_store, X509_V_FLAG_X509_STRICT);
+
+    if (!X509_STORE_CTX_init(store_ctx, ca_store, x509, chain_certs)) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "unable to initialize X509_STORE_CTX object: %s",
             ERR_error_string(ERR_get_error(), NULL));
@@ -968,61 +952,14 @@ check_cert(X509_STORE *ca_store_ctx, SSL_CTX *ctx, const char *cert_file)
 
     if (X509_verify_cert(store_ctx) <= 0) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to verify cert: %s",
+            "unable to verify cert %s: %s", tls_config->cert_path,
             ERR_error_string(ERR_get_error(), NULL));
         goto exit;
     }
-
-    /* everything is good, use this server certificate during TLS handshakes */
-    if (!SSL_CTX_use_certificate(ctx, x509)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to load cert to the ssl context: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
 
     ret = true;
 exit:
     X509_STORE_CTX_free(store_ctx);
-    X509_free(x509);
-
-    debug_return_bool(ret);
-}
-
-static bool
-verify_server_cert(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
-{
-    bool ret = false;
-    X509_STORE *ca_store_ctx = NULL;
-    X509_LOOKUP *x509_lookup = NULL;
-    debug_decl(verify_server_cert, SUDO_DEBUG_UTIL)
-
-    if ((ca_store_ctx = X509_STORE_new()) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to allocate X509_STORE object for CA bundle: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    if ((x509_lookup = X509_STORE_add_lookup(ca_store_ctx, X509_LOOKUP_file())) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to set lookup method: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    if (!X509_LOOKUP_load_file(x509_lookup, tls_config->cacert_path, X509_FILETYPE_PEM)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to load CA bundle file: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    ret = check_cert(ca_store_ctx, ctx, tls_config->cert_path);
-
-exit:
-    X509_STORE_free(ca_store_ctx);
 
     debug_return_bool(ret);
 }
@@ -1116,30 +1053,40 @@ init_tls_server_context(void)
         goto bad;
     }
 
-    /* verify server certification against the CA bundle file */
+    if (SSL_CTX_use_certificate_chain_file(ctx, tls_config->cert_path) <= 0) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to load cert %s: %s", tls_config->cert_path,
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    if (tls_config->cacert_path != NULL) {
+        STACK_OF(X509_NAME) *cacerts =
+            SSL_load_client_CA_file(tls_config->cacert_path);
+        if (cacerts == NULL) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "calling SSL_load_client_CA_file() failed: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        } else {
+            SSL_CTX_set_client_CA_list(ctx, cacerts);
+
+            /* set the location of the CA bundle file for verification */
+            if (SSL_CTX_load_verify_locations(ctx, tls_config->cacert_path, NULL) <= 0) {
+                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                    "calling SSL_CTX_load_verify_locations() failed: %s",
+                    ERR_error_string(ERR_get_error(), NULL));
+                goto bad;
+            }
+        }
+    }
+
     if (!verify_server_cert(ctx, tls_config)) {
         goto bad;
     }
 
     /* if peer authentication is enabled, verify client cert during TLS handshake */
     if (tls_config->check_peer) {
-        X509 *cacert = load_cert(tls_config->cacert_path);
-
-        /* server will send the name of the CA to the client during the handshake */
-        if (SSL_CTX_add_client_CA(ctx, cacert) <= 0) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "calling SSL_CTX_add_client_CA() failed: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-        }
-
-        /* sets the location of the CA bundle file for verification purposes */
-        if (SSL_CTX_load_verify_locations(ctx, tls_config->cacert_path, NULL) <= 0) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "calling SSL_CTX_load_verify_locations() failed: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-        }
-
-        /* server will send a client certificate request to the peer during the handshake */
         SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
     }
 
@@ -1148,13 +1095,13 @@ init_tls_server_context(void)
 
     if (!SSL_CTX_use_PrivateKey_file(ctx, pkey, SSL_FILETYPE_PEM)) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to load key file: %s",
+            "unable to load key file %s: %s", pkey,
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
     if (!SSL_CTX_check_private_key(ctx)) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to verify key file: %s",
+            "unable to verify key file %s: %s", pkey,
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
