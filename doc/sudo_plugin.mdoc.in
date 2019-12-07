@@ -2139,7 +2139,8 @@ struct sudo_plugin_event {
         sudo_plugin_ev_callback_t callback, void *closure);
     int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
     int (*del)(struct sudo_plugin_event *pev);
-    int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+    int (*pending)(struct sudo_plugin_event *pev, int events,
+	struct timespec *ts);
     int (*fd)(struct sudo_plugin_event *pev);
     void (*setbase)(struct sudo_plugin_event *pev, void *base);
     void (*loopbreak)(struct sudo_plugin_event *pev);
@@ -2276,22 +2277,27 @@ function.
 The
 .Fn del
 function returns 1 on success, and \-1 if a error occurred.
-.It Fn timeleft
+.It Fn pending
 .Bd -literal -compact
-int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+int (*pending)(struct sudo_plugin_event *pev, int events, struct timespec *ts);
 .Ed
 .Pp
 The
-.Fn timeleft
-function can be used to determine how much time remains in an event's
-timeout, if one was specified when the event was added.
+.Fn pending
+function can be used to determine whether one or more events is pending.
 The
+.Fa events
+argument specifies which events to check for.
+See the
+.Fn set
+function for a list of valid event types.
+If
+.Dv SUDO_PLUGIN_EV_TIMEOUT
+is specified in
+.Dv events ,
+the event has an associated timeout and the
 .Fa ts
-pointer is filled in with the remaining time.
-.Pp
-The
-.Fn timeleft
-function returns 1 on success, and \-1 if the event has no associated timeout.
+pointer is non-NULL, it will be filled in with the remaining time.
 .It Fn fd
 .Bd -literal -compact
 int (*fd)(struct sudo_plugin_event *pev);

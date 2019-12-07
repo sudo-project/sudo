@@ -1411,15 +1411,14 @@ plugin_event_del(struct sudo_plugin_event *pev)
  * Get the amount of time remaining in a timeout event.
  */
 static int
-plugin_event_timeleft(struct sudo_plugin_event *pev, struct timespec *ts)
+plugin_event_pending(struct sudo_plugin_event *pev, int events,
+    struct timespec *ts)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_timeleft, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_pending, SUDO_DEBUG_PCOMM)
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
-    if (sudo_ev_get_timeleft(&ev_int->private, ts) == -1)
-	debug_return_int(-1);
-    debug_return_int(1);
+    debug_return_int(sudo_ev_pending(&ev_int->private, events, ts));
 }
 
 /*
@@ -1499,7 +1498,7 @@ sudo_plugin_event_alloc(void)
     ev_int->public.add = plugin_event_add;
     ev_int->public.del = plugin_event_del;
     ev_int->public.fd = plugin_event_fd;
-    ev_int->public.timeleft = plugin_event_timeleft;
+    ev_int->public.pending = plugin_event_pending;
     ev_int->public.setbase = plugin_event_setbase;
     ev_int->public.loopbreak = plugin_event_loopbreak;
     ev_int->public.free = plugin_event_free;

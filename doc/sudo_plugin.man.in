@@ -2459,7 +2459,8 @@ struct sudo_plugin_event {
         sudo_plugin_ev_callback_t callback, void *closure);
     int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
     int (*del)(struct sudo_plugin_event *pev);
-    int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+    int (*pending)(struct sudo_plugin_event *pev, int events,
+	struct timespec *ts);
     int (*fd)(struct sudo_plugin_event *pev);
     void (*setbase)(struct sudo_plugin_event *pev, void *base);
     void (*loopbreak)(struct sudo_plugin_event *pev);
@@ -2634,25 +2635,30 @@ The
 function returns 1 on success, and \-1 if a error occurred.
 .RE
 .TP 6n
-\fBtimeleft\fR()
+\fBpending\fR()
 .nf
 .RS 6n
-int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+int (*pending)(struct sudo_plugin_event *pev, int events, struct timespec *ts);
 .RE
 .fi
 .RS 6n
 .sp
 The
-\fBtimeleft\fR()
-function can be used to determine how much time remains in an event's
-timeout, if one was specified when the event was added.
+\fBpending\fR()
+function can be used to determine whether one or more events is pending.
 The
+\fIevents\fR
+argument specifies which events to check for.
+See the
+\fBset\fR()
+function for a list of valid event types.
+If
+\fRSUDO_PLUGIN_EV_TIMEOUT\fR
+is specified in
+\fRevents\fR,
+the event has an associated timeout and the
 \fIts\fR
-pointer is filled in with the remaining time.
-.sp
-The
-\fBtimeleft\fR()
-function returns 1 on success, and \-1 if the event has no associated timeout.
+pointer is non-NULL, it will be filled in with the remaining time.
 .RE
 .TP 6n
 \fBfd\fR()
