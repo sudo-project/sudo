@@ -1519,8 +1519,7 @@ read_keyboard(int fd, int what, void *v)
 	    break;
 	case '<':
 	    speed_factor /= 2;
-            sudo_ev_get_timeleft(closure->delay_ev, &ts);
-            if (sudo_timespecisset(&ts)) {
+	    if (sudo_ev_pending(closure->delay_ev, SUDO_EV_TIMEOUT, &ts)) {
 		/* Double remaining timeout. */
 		ts.tv_sec *= 2;
 		ts.tv_nsec *= 2;
@@ -1536,8 +1535,7 @@ read_keyboard(int fd, int what, void *v)
 	    break;
 	case '>':
 	    speed_factor *= 2;
-            sudo_ev_get_timeleft(closure->delay_ev, &ts);
-            if (sudo_timespecisset(&ts)) {
+	    if (sudo_ev_pending(closure->delay_ev, SUDO_EV_TIMEOUT, &ts)) {
 		/* Halve remaining timeout. */
 		if (ts.tv_sec & 1)
 		    ts.tv_nsec += 500000000;
