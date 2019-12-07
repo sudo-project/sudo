@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2015, 2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2015, 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -182,7 +182,7 @@ sudo_term_noecho_v1(int fd)
 }
 
 /*
- * Set terminal to raw mode.
+ * Set terminal to raw mode with optional terminal signals.
  * Returns true on success or false on failure.
  */
 bool
@@ -194,12 +194,8 @@ sudo_term_raw_v1(int fd, int isig)
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	debug_return_bool(false);
     (void) memcpy(&term, &oterm, sizeof(term));
-    /* Set terminal to raw mode */
-    term.c_cc[VMIN] = 1;
-    term.c_cc[VTIME] = 0;
-    CLR(term.c_iflag, ICRNL | IGNCR | INLCR | IUCLC | IXON);
-    CLR(term.c_oflag, OPOST);
-    CLR(term.c_lflag, ECHO | ICANON | ISIG | IEXTEN);
+    /* Set terminal to raw mode but optionally enable terminal signals. */
+    cfmakeraw(&term);
     if (isig)
 	SET(term.c_lflag, ISIG);
     if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
