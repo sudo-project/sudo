@@ -148,7 +148,11 @@ __dso_public int sudo_ev_dispatch_v1(struct sudo_event_base *head);
 __dso_public int sudo_ev_loop_v1(struct sudo_event_base *head, int flags);
 #define sudo_ev_loop(_a, _b) sudo_ev_loop_v1((_a), (_b))
 
-/* Return the remaining timeout associated with an event. */
+/* Return pending event types, fills in ts if non-NULL and there is a timeout */
+__dso_public int sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts);
+#define sudo_ev_pending(_a, _b, _c) sudo_ev_pending_v1((_a), (_b), (_c))
+
+/* Return the remaining timeout associated with an event (deprecated). */
 __dso_public int sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timeval *tv);
 __dso_public int sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *tv);
 #define sudo_ev_get_timeleft(_a, _b) sudo_ev_get_timeleft_v2((_a), (_b))
