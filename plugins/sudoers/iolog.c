@@ -727,18 +727,7 @@ sudoers_io_close(int exit_status, int error)
     debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN)
 
     if (iolog_remote) {
-	if (client_closure.disabled)
-	    goto done;
-
-	if (!fmt_exit_message(&client_closure, exit_status, error))
-	    goto done;
-
-	/*
-	 * Main sudo event loop exited, use our own mini event loop
-	 * to flush the write queue and read the final commit messages.
-	 */
-	if (!client_loop(&client_closure))
-	    goto done;
+	client_close(&client_closure, exit_status, error);
     } else {
 	for (i = 0; i < IOFD_MAX; i++) {
 	    if (iolog_files[i].fd.v == NULL)
@@ -747,8 +736,6 @@ sudoers_io_close(int exit_status, int error)
 	}
     }
 
-done:
-    client_closure_free(&client_closure);
     sudo_freepwcache();
     sudo_freegrcache();
 

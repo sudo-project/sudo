@@ -135,7 +135,7 @@ struct client_closure {
 
 /* iolog_client.c */
 bool client_closure_fill(struct client_closure *closure, int sock, struct iolog_details *details, struct io_plugin *sudoers_io);
-bool client_loop(struct client_closure *closure);
+bool client_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);
 bool fmt_exit_message(struct client_closure *closure, int exit_status, int error);

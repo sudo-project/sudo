@@ -1390,28 +1390,61 @@ oom:
 }
 
 /*
- * Custom event loop called from the plugin close function.
- * We cannot use the main sudo event loop as it has already exited.
+ * Send ExitMessage, wait for final commit message and free closure.
  */
 bool
-client_loop(struct client_closure *closure)
+client_close(struct client_closure *closure, int exit_status, int error)
 {
-    struct sudo_event_base *evbase;
-    debug_decl(client_loop, SUDOERS_DEBUG_UTIL)
+    struct sudo_event_base *evbase = NULL;
+    short events;
+    bool ret = false;
+    debug_decl(client_close, SUDOERS_DEBUG_UTIL)
 
-    /* Create private event base and reparent the read/write events. */
+    if (closure->disabled)
+	goto done;
+
+    /*
+     * Create private event base and reparent the read/write events.
+     * We cannot use the main sudo event loop as it has already exited.
+     */
     if ((evbase = sudo_ev_base_alloc()) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_bool(false);
+	goto done;
     }
+
+    events = closure->read_ev->pending(closure->read_ev, SUDO_PLUGIN_EV_READ,
+	NULL);
     closure->read_ev->setbase(closure->read_ev, evbase);
-    closure->write_ev->setbase(closure->read_ev, evbase);
+    if (events == SUDO_PLUGIN_EV_READ) {
+	if (closure->read_ev->add(closure->read_ev,
+		&closure->log_details->server_timeout) == -1) {
+	    sudo_warn(U_("unable to add event to queue"));
+	    goto done;
+	}
+    }
+
+    events = closure->write_ev->pending(closure->write_ev, SUDO_PLUGIN_EV_WRITE,
+	NULL);
+    closure->write_ev->setbase(closure->write_ev, evbase);
+    if (events == SUDO_PLUGIN_EV_WRITE) {
+	if (closure->write_ev->add(closure->write_ev,
+		&closure->log_details->server_timeout) == -1) {
+	    sudo_warn(U_("unable to add event to queue"));
+	    goto done;
+	}
+    }
+
+    /* Format and append an ExitMessage to the write queue. */
+    if (!fmt_exit_message(closure, exit_status, error))
+	goto done;
 
     /* Loop until queues are flushed and final commit point received. */
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"flushing buffers and waiting for final commit point");
-    sudo_ev_dispatch(evbase);
-    sudo_ev_base_free(evbase);
+    ret = sudo_ev_dispatch(evbase) == 0;
 
-    debug_return_bool(true);
+done:
+    sudo_ev_base_free(evbase);
+    client_closure_free(closure);
+    debug_return_bool(ret);
 }
