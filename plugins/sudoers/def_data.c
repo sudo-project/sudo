@@ -526,6 +526,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Path to the sudoers private key file: %s"),
 	NULL,
     }, {
+	"runas_allow_unknown_id", T_FLAG,
+	N_("Allow the use of unknown runas user and/or group ID"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

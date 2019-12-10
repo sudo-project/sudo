@@ -242,6 +242,8 @@
 #define def_log_server_peer_cert (sudo_defs_table[I_LOG_SERVER_PEER_CERT].sd_un.str)
 #define I_LOG_SERVER_PEER_KEY   121
 #define def_log_server_peer_key (sudo_defs_table[I_LOG_SERVER_PEER_KEY].sd_un.str)
+#define I_RUNAS_ALLOW_UNKNOWN_ID 122
+#define def_runas_allow_unknown_id (sudo_defs_table[I_RUNAS_ALLOW_UNKNOWN_ID].sd_un.flag)
 
 enum def_tuple {
 	never,

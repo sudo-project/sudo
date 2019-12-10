@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 6, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "December 8, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2951,6 +2951,23 @@ when running a command or editing a file.
 This flag is
 \fIoff\fR
 by default.
+.TP 18n
+runas_allow_unknown_id
+If enabled, allow matching of runas user and group IDs that are
+not present in the password or group databases.
+In addition to explicitly matching unknown user or group IDs in a
+\fRRunas_List\fR,
+this option also allows the
+\fBALL\fR
+alias to match unknown IDs.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.30 or higher.
+Older versions of
+\fBsudo\fR
+always allowed matching of unknown user and group IDs.
 .TP 18n
 runaspw
 If set,

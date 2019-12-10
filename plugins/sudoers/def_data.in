@@ -381,3 +381,6 @@ log_server_peer_cert
 log_server_peer_key
 	T_STR|T_BOOL|T_PATH
 	"Path to the sudoers private key file: %s"
+runas_allow_unknown_id
+	T_FLAG
+	"Allow the use of unknown runas user and/or group ID"
