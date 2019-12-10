@@ -197,17 +197,25 @@ python_plugin_register_logging(sudo_conv_t conversation,
     py_ctx.sudo_log = sudo_printf;
 
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
+    struct sudo_conf_debug_file_list *debug_files_ptr = &debug_files;
+
+    const char *plugin_path = _lookup_value(settings, "plugin_path");
+    if (plugin_path == NULL)
+        plugin_path = "python_plugin.so";
 
     const char *debug_flags = _lookup_value(settings, "debug_flags");
-    const char *plugin_path = _lookup_value(settings, "plugin_path");
 
-    if (debug_flags != NULL && plugin_path != NULL) {
+    if (debug_flags == NULL) {  // the group plugin does not have this information, so try to look it up
+        debug_files_ptr = sudo_conf_debug_files(plugin_path);
+    } else {
         if (!python_debug_parse_flags(&debug_files, debug_flags))
             goto cleanup;
     }
 
-    if (!python_debug_register(plugin_path, &debug_files))
-        goto cleanup;
+    if (debug_files_ptr != NULL) {
+        if (!python_debug_register(plugin_path, debug_files_ptr))
+            goto cleanup;
+    }
 
     rc = SUDO_RC_OK;
 
