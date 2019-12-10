@@ -105,6 +105,8 @@ static char *prev_user;
 static char *runas_user;
 static char *runas_group;
 static struct sudo_nss_list *snl;
+static bool unknown_runas_uid;
+static bool unknown_runas_gid;
 
 #ifdef __linux__
 static struct rlimit nproclimit;
@@ -332,6 +334,22 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (safe_cmnd == NULL) {
 	if ((safe_cmnd = strdup(user_cmnd)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+    }
+
+    /* Defer uid/gid checks until after defaults have been updated. */
+    if (unknown_runas_uid && !def_runas_allow_unknown_id) {
+	audit_failure(NewArgc, NewArgv, N_("unknown user: %s"),
+	    runas_pw->pw_name);
+	sudo_warnx(U_("unknown user: %s"), runas_pw->pw_name);
+	goto done;
+    }
+    if (runas_gr != NULL) {
+	if (unknown_runas_gid && !def_runas_allow_unknown_id) {
+	    audit_failure(NewArgc, NewArgv, N_("unknown group: %s"),
+		runas_gr->gr_name);
+	    sudo_warnx(U_("unknown group: %s"), runas_gr->gr_name);
 	    goto done;
 	}
     }
@@ -1157,12 +1175,15 @@ set_runaspw(const char *user, bool quiet)
     struct passwd *pw = NULL;
     debug_decl(set_runaspw, SUDOERS_DEBUG_PLUGIN)
 
+    unknown_runas_uid = false;
     if (*user == '#') {
 	const char *errstr;
 	uid_t uid = sudo_strtoid(user + 1, &errstr);
 	if (errstr == NULL) {
-	    if ((pw = sudo_getpwuid(uid)) == NULL)
+	    if ((pw = sudo_getpwuid(uid)) == NULL) {
+		unknown_runas_uid = true;
 		pw = sudo_fakepwnam(user, user_gid);
+	    }
 	}
     }
     if (pw == NULL) {
@@ -1188,12 +1209,15 @@ set_runasgr(const char *group, bool quiet)
     struct group *gr = NULL;
     debug_decl(set_runasgr, SUDOERS_DEBUG_PLUGIN)
 
+    unknown_runas_gid = false;
     if (*group == '#') {
 	const char *errstr;
 	gid_t gid = sudo_strtoid(group + 1, &errstr);
 	if (errstr == NULL) {
-	    if ((gr = sudo_getgrgid(gid)) == NULL)
+	    if ((gr = sudo_getgrgid(gid)) == NULL) {
+		unknown_runas_gid = true;
 		gr = sudo_fakegrnam(group);
+	    }
 	}
     }
     if (gr == NULL) {

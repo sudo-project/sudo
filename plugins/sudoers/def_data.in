@@ -366,3 +366,6 @@ log_allowed
 log_denied
 	T_FLAG
 	"Log when a command is denied by sudoers"
+runas_allow_unknown_id
+	T_FLAG
+	"Allow the use of unknown runas user and/or group ID"

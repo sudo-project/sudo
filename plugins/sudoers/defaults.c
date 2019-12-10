@@ -578,6 +578,7 @@ init_defaults(void)
     def_fdexec = digest_only;
     def_log_allowed = true;
     def_log_denied = true;
+    def_runas_allow_unknown_id = false;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)

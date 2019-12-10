@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 5, 2019
+.Dd December 8, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2778,6 +2778,22 @@ when running a command or editing a file.
 This flag is
 .Em off
 by default.
+.It runas_allow_unknown_id
+If enabled, allow matching of runas user and group IDs that are
+not present in the password or group databases.
+In addition to explicitly matching unknown user or group IDs in a
+.Li Runas_List ,
+this option also allows the
+.Sy ALL
+alias to match unknown IDs.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.8.30 or higher.
+Older versions of
+.Nm sudo
+always allowed matching of unknown user and group IDs.
 .It runaspw
 If set,
 .Nm sudo
