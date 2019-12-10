@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 8, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "December 9, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2968,6 +2968,28 @@ This setting is only supported by version 1.8.30 or higher.
 Older versions of
 \fBsudo\fR
 always allowed matching of unknown user and group IDs.
+.TP 18n
+runas_check_shell
+.br
+If enabled,
+\fBsudo\fR
+will only run commands as a user whose shell appears in the
+\fI/etc/shells\fR
+file, even if the invoking user's
+\fRRunas_List\fR
+would otherwise permit it.
+If no
+\fI/etc/shells\fR
+file is present, a system-dependent list of built-in default shells is used.
+On many operating systems, system users such as
+\(lqbin\(rq,
+do not have a valid shell and this flag can be used to prevent
+commands from being run as those users.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.30 or higher.
 .TP 18n
 runaspw
 If set,

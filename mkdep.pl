@@ -116,7 +116,7 @@ sub mkdep {
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo getspwuid.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid5.lo sia.lo:;
     $makefile =~ s:\@DIGEST\@:digest.lo digest_openssl.lo digest_gcrypt.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:arc4random.lo arc4random_uniform.lo closefrom.lo fnmatch.lo getaddrinfo.lo getcwd.lo getentropy.lo getgrouplist.lo getdelim.lo getopt_long.lo glob.lo inet_ntop_lo inet_pton.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo str2sig.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo utimens.lo vsyslog.lo pipe2.lo:;
+    $makefile =~ s:\@LTLIBOBJS\@:arc4random.lo arc4random_uniform.lo closefrom.lo fnmatch.lo getaddrinfo.lo getcwd.lo getentropy.lo getgrouplist.lo getdelim.lo getopt_long.lo getusershell.lo glob.lo inet_ntop_lo inet_pton.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo str2sig.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo utimens.lo vsyslog.lo pipe2.lo:;
 
     # Parse OBJS lines
     my %objs;

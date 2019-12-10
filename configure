@@ -19395,6 +19395,32 @@ esac
 fi
 done
 
+for ac_func in getusershell
+do :
+  ac_fn_c_check_func "$LINENO" "getusershell" "ac_cv_func_getusershell"
+if test "x$ac_cv_func_getusershell" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETUSERSHELL 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" getusershell.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getusershell.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_getusershell; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
 for ac_func in reallocarray
 do :
   ac_fn_c_check_func "$LINENO" "reallocarray" "ac_cv_func_reallocarray"

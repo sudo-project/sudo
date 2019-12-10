@@ -407,6 +407,17 @@ __dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FIL
 # undef getdelim
 # define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
 #endif /* HAVE_GETDELIM */
+#ifndef HAVE_GETUSERSHELL
+__dso_public char *sudo_getusershell(void);
+# undef getusershell
+# define getusershell() sudo_getusershell()
+__dso_public void sudo_setusershell(void);
+# undef setusershell
+# define setusershell() sudo_setusershell()
+__dso_public void sudo_endusershell(void);
+# undef endusershell
+# define endusershell() sudo_endusershell()
+#endif /* HAVE_GETUSERSHELL */
 #ifndef HAVE_UTIMENSAT
 __dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
 # undef utimensat

@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -2561,6 +2561,10 @@ AC_CHECK_FUNCS([getdelim], [], [
     AC_LIBOBJ(getdelim)
     SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
+])
+AC_CHECK_FUNCS([getusershell], [], [
+    AC_LIBOBJ(getusershell)
+    SUDO_APPEND_COMPAT_EXP(sudo_getusershell)
 ])
 AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
