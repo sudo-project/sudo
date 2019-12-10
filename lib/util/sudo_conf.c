@@ -82,12 +82,14 @@ static struct sudo_conf_table sudo_conf_table[] = {
     { NULL }
 };
 
+static int set_var_developer_mode(const char *entry, const char *conf_file, unsigned int);
 static int set_var_disable_coredump(const char *entry, const char *conf_file, unsigned int);
 static int set_var_group_source(const char *entry, const char *conf_file, unsigned int);
 static int set_var_max_groups(const char *entry, const char *conf_file, unsigned int);
 static int set_var_probe_interfaces(const char *entry, const char *conf_file, unsigned int);
 
 static struct sudo_conf_table sudo_conf_var_table[] = {
+    { "developer_mode", sizeof("developer_mode") - 1, set_var_developer_mode },
     { "disable_coredump", sizeof("disable_coredump") - 1, set_var_disable_coredump },
     { "group_source", sizeof("group_source") - 1, set_var_group_source },
     { "max_groups", sizeof("max_groups") - 1, set_var_max_groups },
@@ -103,6 +105,7 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
 #define SUDO_CONF_PATH_DEVSEARCH	4
 
 static struct sudo_conf_data {
+    bool developer_mode;
     bool disable_coredump;
     bool probe_interfaces;
     int group_source;
@@ -111,6 +114,7 @@ static struct sudo_conf_data {
     struct plugin_info_list plugins;
     struct sudo_conf_path_table path_table[6];
 } sudo_conf_data = {
+    false,
     true,
     true,
     GROUP_SOURCE_ADAPTIVE,
@@ -362,6 +366,22 @@ oom:
 }
 
 static int
+set_var_developer_mode(const char *strval, const char *conf_file,
+    unsigned int lineno)
+{
+    int val = sudo_strtobool(strval);
+    debug_decl(set_var_developer_mode, SUDO_DEBUG_UTIL)
+
+    if (val == -1) {
+        sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
+            "developer_mode", strval, conf_file, lineno);
+        debug_return_bool(false);
+    }
+    sudo_conf_data.developer_mode = val;
+    debug_return_bool(true);
+}
+
+static int
 set_var_disable_coredump(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
@@ -518,6 +538,12 @@ sudo_conf_debug_files_v1(const char *progname)
 	}
     }
     debug_return_ptr(NULL);
+}
+
+bool
+sudo_conf_developer_mode_v1(void)
+{
+    return sudo_conf_data.developer_mode;
 }
 
 bool

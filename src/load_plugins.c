@@ -130,17 +130,20 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 	}
 	goto done;
     }
-    if (sb.st_uid != ROOT_UID) {
-	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	sudo_warnx(U_("%s must be owned by uid %d"), fullpath, ROOT_UID);
-	goto done;
-    }
-    if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	sudo_warnx(U_("%s must be only be writable by owner"), fullpath);
-	goto done;
+
+    if (!sudo_conf_developer_mode()) {
+        if (sb.st_uid != ROOT_UID) {
+            sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
+                _PATH_SUDO_CONF, info->lineno, info->symbol_name);
+            sudo_warnx(U_("%s must be owned by uid %d"), fullpath, ROOT_UID);
+            goto done;
+        }
+        if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
+            sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
+                _PATH_SUDO_CONF, info->lineno, info->symbol_name);
+            sudo_warnx(U_("%s must be only be writable by owner"), fullpath);
+            goto done;
+        }
     }
     ret = true;
 

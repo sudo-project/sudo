@@ -1,0 +1,1 @@
+conf_test: invalid value for developer_mode "foo" in regress/sudo_conf/test8.in, line 1
