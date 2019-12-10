@@ -343,6 +343,9 @@
 /* Define to 1 if you have the `getuserattr' function. */
 #undef HAVE_GETUSERATTR
 
+/* Define to 1 if you have the `getusershell' function. */
+#undef HAVE_GETUSERSHELL
+
 /* Define to 1 if you have the `getutid' function. */
 #undef HAVE_GETUTID
 

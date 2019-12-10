@@ -129,6 +129,7 @@ lib/util/getgrouplist.c
 lib/util/gethostname.c
 lib/util/getopt_long.c
 lib/util/gettime.c
+lib/util/getusershell.c
 lib/util/gidlist.c
 lib/util/glob.c
 lib/util/host_port.c

@@ -384,3 +384,7 @@ log_server_peer_key
 runas_allow_unknown_id
 	T_FLAG
 	"Allow the use of unknown runas user and/or group ID"
+runas_check_shell
+	T_FLAG
+	"Only permit running commands as a user with a valid shell"
+

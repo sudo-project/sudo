@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 8, 2019
+.Dd December 9, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2794,6 +2794,26 @@ This setting is only supported by version 1.8.30 or higher.
 Older versions of
 .Nm sudo
 always allowed matching of unknown user and group IDs.
+.It runas_check_shell
+If enabled,
+.Nm sudo
+will only run commands as a user whose shell appears in the
+.Pa /etc/shells
+file, even if the invoking user's
+.Li Runas_List
+would otherwise permit it.
+If no
+.Pa /etc/shells
+file is present, a system-dependent list of built-in default shells is used.
+On many operating systems, system users such as
+.Dq bin ,
+do not have a valid shell and this flag can be used to prevent
+commands from being run as those users.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.8.30 or higher.
 .It runaspw
 If set,
 .Nm sudo

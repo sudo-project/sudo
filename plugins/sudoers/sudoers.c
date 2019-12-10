@@ -295,7 +295,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	/* Not an audit event. */
 	sudo_warnx(U_("sudoers specifies that root is not allowed to sudo"));
 	goto bad;
-    }    
+    }
 
     if (!set_perms(PERM_INITIAL))
 	goto bad;
@@ -431,6 +431,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (def_requiretty && !tty_present()) {
 	audit_failure(NewArgc, NewArgv, N_("no tty"));
 	sudo_warnx(U_("sorry, you must have a tty to run sudo"));
+	goto bad;
+    }
+
+    /* Check runas user's shell. */
+    if (!check_user_shell(runas_pw)) {
+	log_warningx(SLOG_RAW_MSG, N_("invalid shell for user %s: %s"),
+	    runas_pw->pw_name, runas_pw->pw_shell);
 	goto bad;
     }
 
