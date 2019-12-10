@@ -4,6 +4,7 @@ sudo_conf_clear_paths_v1
 sudo_conf_debug_files_v1
 sudo_conf_debugging_v1
 sudo_conf_devsearch_path_v1
+sudo_conf_developer_mode_v1
 sudo_conf_disable_coredump_v1
 sudo_conf_group_source_v1
 sudo_conf_max_groups_v1

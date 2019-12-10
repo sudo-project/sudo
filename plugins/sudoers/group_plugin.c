@@ -86,13 +86,15 @@ group_plugin_load(char *plugin_info)
 	sudo_warn("%s", path);
 	goto done;
     }
-    if (sb.st_uid != ROOT_UID) {
-	sudo_warnx(U_("%s must be owned by uid %d"), path, ROOT_UID);
-	goto done;
-    }
-    if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-	sudo_warnx(U_("%s must only be writable by owner"), path);
-	goto done;
+    if (!sudo_conf_developer_mode()) {
+        if (sb.st_uid != ROOT_UID) {
+            sudo_warnx(U_("%s must be owned by uid %d"), path, ROOT_UID);
+            goto done;
+        }
+        if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
+            sudo_warnx(U_("%s must only be writable by owner"), path);
+            goto done;
+        }
     }
 
     /* Open plugin and map in symbol. */
