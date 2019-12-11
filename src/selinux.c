@@ -61,8 +61,8 @@
 static struct selinux_state {
     security_context_t old_context;
     security_context_t new_context;
-    security_context_t tty_context;
-    security_context_t new_tty_context;
+    security_context_t tty_con_raw;
+    security_context_t new_tty_con_raw;
     const char *ttyn;
     int ttyfd;
     int enforcing;
@@ -112,39 +112,39 @@ int
 selinux_restore_tty(void)
 {
     int ret = -1;
-    security_context_t chk_tty_context = NULL;
+    security_context_t chk_tty_con_raw = NULL;
     debug_decl(selinux_restore_tty, SUDO_DEBUG_SELINUX)
 
-    if (se_state.ttyfd == -1 || se_state.new_tty_context == NULL) {
+    if (se_state.ttyfd == -1 || se_state.new_tty_con_raw == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no tty, skip relabel",
 	    __func__);
 	debug_return_int(0);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s -> %s",
-	__func__, se_state.new_tty_context, se_state.tty_context);
+	__func__, se_state.new_tty_con_raw, se_state.tty_con_raw);
 
     /* Verify that the tty still has the context set by sudo. */
-    if (fgetfilecon(se_state.ttyfd, &chk_tty_context) == -1) {
+    if (fgetfilecon_raw(se_state.ttyfd, &chk_tty_con_raw) == -1) {
 	sudo_warn(U_("unable to fgetfilecon %s"), se_state.ttyn);
 	goto skip_relabel;
     }
 
-    if (strcmp(chk_tty_context, se_state.new_tty_context) != 0) {
+    if (strcmp(chk_tty_con_raw, se_state.new_tty_con_raw) != 0) {
 	sudo_warnx(U_("%s changed labels"), se_state.ttyn);
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: not restoring tty label, expected %s, have %s",
-	    __func__, se_state.new_tty_context, chk_tty_context);
+	    __func__, se_state.new_tty_con_raw, chk_tty_con_raw);
 	goto skip_relabel;
     }
 
-    if (fsetfilecon(se_state.ttyfd, se_state.tty_context) == -1) {
+    if (fsetfilecon_raw(se_state.ttyfd, se_state.tty_con_raw) == -1) {
 	sudo_warn(U_("unable to restore context for %s"), se_state.ttyn);
 	goto skip_relabel;
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: successfully set tty label to %s",
-	__func__, se_state.tty_context);
+	__func__, se_state.tty_con_raw);
     ret = 0;
 
 skip_relabel:
@@ -152,14 +152,14 @@ skip_relabel:
 	close(se_state.ttyfd);
 	se_state.ttyfd = -1;
     }
-    freecon(chk_tty_context);
+    freecon(chk_tty_con_raw);
     debug_return_int(ret);
 }
 
 /*
  * This function attempts to relabel the tty. If this function fails, then
  * the contexts are free'd and -1 is returned. On success, 0 is returned
- * and tty_context and new_tty_context are set.
+ * and tty_con_raw and new_tty_con_raw are set.
  *
  * This function will not fail if it can not relabel the tty when selinux is
  * in permissive mode.
@@ -268,8 +268,12 @@ relabel_tty(const char *ttyn, int ptyfd)
     (void)fcntl(se_state.ttyfd, F_SETFD, FD_CLOEXEC);
 
     se_state.ttyn = ttyn;
-    se_state.tty_context = tty_con;
-    se_state.new_tty_context = new_tty_con;
+    if (selinux_trans_to_raw_context(tty_con, &se_state.tty_con_raw) == -1)
+	goto bad;
+    if (selinux_trans_to_raw_context(new_tty_con, &se_state.new_tty_con_raw) == -1)
+	goto bad;
+    freecon(tty_con);
+    freecon(new_tty_con);
     debug_return_int(0);
 
 bad:
@@ -277,7 +281,12 @@ bad:
 	close(se_state.ttyfd);
 	se_state.ttyfd = -1;
     }
+    freecon(se_state.tty_con_raw);
+    se_state.tty_con_raw = NULL;
+    freecon(se_state.new_tty_con_raw);
+    se_state.new_tty_con_raw = NULL;
     freecon(tty_con);
+    freecon(new_tty_con);
     debug_return_int(se_state.enforcing ? -1 : 0);
 }
 
