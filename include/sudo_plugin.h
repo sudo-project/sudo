@@ -58,7 +58,7 @@ struct sudo_conv_message {
  * for memset_s() when clearing passwords returned by the conversation
  * function.
  */
-#define SUDO_CONV_REPL_MAX	255
+#define SUDO_CONV_REPL_MAX	1023
 
 struct sudo_conv_reply {
     char *reply;
