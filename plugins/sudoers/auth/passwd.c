@@ -100,9 +100,7 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_c
 }
 
 int
-sudo_passwd_cleanup(pw, auth)
-    struct passwd *pw;
-    sudo_auth *auth;
+sudo_passwd_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     char *pw_epasswd = auth->data;
     debug_decl(sudo_passwd_cleanup, SUDOERS_DEBUG_AUTH)

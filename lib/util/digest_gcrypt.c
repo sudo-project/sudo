@@ -56,16 +56,12 @@ sudo_digest_type_to_gcry(int digest_type)
     switch (digest_type) {
     case SUDO_DIGEST_SHA224:
 	return GCRY_MD_SHA224;
-	break;
     case SUDO_DIGEST_SHA256:
 	return GCRY_MD_SHA256;
-	break;
     case SUDO_DIGEST_SHA384:
 	return GCRY_MD_SHA384;
-	break;
     case SUDO_DIGEST_SHA512:
 	return GCRY_MD_SHA512;
-	break;
     default:
 	return -1;
     }
