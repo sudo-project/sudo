@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2015, 2017-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2015, 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -107,6 +107,15 @@ check pre-install: config.status
 	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
+
+uncrustify.files: Makefile
+	grep '\.[ch]$$' $(top_srcdir)/MANIFEST | egrep -v '(/zlib/|/(arc4random|arc4random_uniform|chacha_private|charclass|fnmatch|getaddrinfo|getcwd|getdate|getentropy|getopt|getopt_long|glob|gram|inet_ntop|inet_pton|log_server.pb-c|mktemp|pw_dup|reallocarray|mktemp_test|protobuf-c|snprintf|stdbool|strlcat|strlcpy|sudo_queue|toke)\.[ch]$$)'  > uncrustify.files
+
+reformat: uncrustify.files
+	( cd $(top_srcdir) && uncrustify -c etc/uncrustify.cfg --replace --no-backup -F $(top_builddir)/uncrustify.files )
+
+check-format: uncrustify.files
+	( cd $(top_srcdir) && uncrustify -c etc/uncrustify.cfg --check -F $(top_builddir)/uncrustify.files )
 
 cppcheck: config.status
 	rval=0; \
@@ -407,4 +416,4 @@ sandwich:
 	    echo "What?  Make it yourself!"; \
 	fi
 
-.PHONY: ChangeLog me a sandwhich
+.PHONY: ChangeLog me a sandwhich check-format reformat
