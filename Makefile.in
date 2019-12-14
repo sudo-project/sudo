@@ -387,7 +387,7 @@ clean: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do \
 	    (cd $$d && exec $(MAKE) $@); \
 	done
-	-rm -rf cov-int cov-int.tgz
+	-rm -rf cov-int cov-int.tgz uncrustify.files
 
 mostlyclean: clean
 
