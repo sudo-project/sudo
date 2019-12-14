@@ -2807,7 +2807,7 @@ struct sudo_conv_message {
     const char *msg;
 };
 
-#define SUDO_CONV_REPL_MAX      255
+#define SUDO_CONV_REPL_MAX      1023
 
 struct sudo_conv_reply {
     char *reply;
@@ -3370,6 +3370,9 @@ function is now is called regardless of whether or not a command
 was actually executed.
 This makes it possible for plugins to perform cleanup even when a
 command was not run.
+.sp
+\fRSUDO_CONV_REPL_MAX\fR
+has increased from 255 to 1023 bytes.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),
