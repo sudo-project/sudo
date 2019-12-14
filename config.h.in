@@ -552,7 +552,7 @@
 /* Define to 1 if you have the `openpty' function. */
 #undef HAVE_OPENPTY
 
-/* Define to 1 if you are using OpenSSL's sha2 functions. */
+/* Define to 1 if you are using OpenSSL's TLS and sha2 functions. */
 #undef HAVE_OPENSSL
 
 /* Define to 1 if you use NRL OPIE. */
