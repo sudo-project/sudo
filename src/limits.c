@@ -56,6 +56,7 @@ static struct rlimit nofile_fallback = { SUDO_OPEN_MAX, RLIM_INFINITY };
 static struct rlimit stack_fallback = { 8192 * 1024, 65532 * 1024 };
 
 static struct saved_limit {
+    const char *name;
     int resource;
     bool saved;
     struct rlimit *fallback;
@@ -63,19 +64,19 @@ static struct saved_limit {
     struct rlimit oldlimit;
 } saved_limits[] = {
 #ifdef RLIMIT_AS
-    { RLIMIT_AS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_AS", RLIMIT_AS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { RLIMIT_CPU, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_DATA, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_FSIZE, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_NOFILE, false, &nofile_fallback, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_CPU", RLIMIT_CPU, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_DATA", RLIMIT_DATA, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_FSIZE", RLIMIT_FSIZE, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_NOFILE", RLIMIT_NOFILE, false, &nofile_fallback, { RLIM_INFINITY, RLIM_INFINITY } },
 #ifdef RLIMIT_NPROC
-    { RLIMIT_NPROC, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_NPROC", RLIMIT_NPROC, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
 #ifdef RLIMIT_RSS
-    { RLIMIT_RSS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_RSS", RLIMIT_RSS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { RLIMIT_STACK, false, &stack_fallback, { 8192 * 1024, RLIM_INFINITY } }
+    { "RLIMIT_STACK", RLIMIT_STACK, false, &stack_fallback, { 8192 * 1024, RLIM_INFINITY } }
 };
 
 static struct rlimit corelimit;
@@ -209,7 +210,7 @@ unlimit_sudo(void)
 		rc = setrlimit(lim->resource, &lim->newlimit);
 	    }
 	    if (rc == -1)
-		sudo_warn("setrlimit(%d)", lim->resource);
+		sudo_warn("setrlimit(%s)", lim->name);
 	}
     }
 
@@ -230,7 +231,7 @@ restore_limits(void)
 	struct saved_limit *lim = &saved_limits[idx];
 	if (lim->saved) {
 	    if (setrlimit(lim->resource, &lim->oldlimit) == -1)
-		sudo_warn("setrlimit(%d)", lim->resource);
+		sudo_warn("setrlimit(%s)", lim->name);
 	}
     }
     restore_coredump();

@@ -130,12 +130,12 @@ unlimit_nproc(void)
     debug_decl(unlimit_nproc, SUDOERS_DEBUG_UTIL)
 
     if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
-	    sudo_warn("getrlimit");
+	    sudo_warn("getrlimit(RLIMIT_NPROC)");
     rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
     if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
 	rl.rlim_cur = rl.rlim_max = nproclimit.rlim_max;
 	if (setrlimit(RLIMIT_NPROC, &rl) != 0)
-	    sudo_warn("setrlimit");
+	    sudo_warn("setrlimit(RLIMIT_NPROC)");
     }
     debug_return;
 #endif /* __linux__ */
@@ -151,7 +151,7 @@ restore_nproc(void)
     debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL)
 
     if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
-	sudo_warn("setrlimit");
+	sudo_warn("setrlimit(RLIMIT_NPROC)");
 
     debug_return;
 #endif /* __linux__ */
