@@ -42,6 +42,8 @@ doc/sudo_logsrvd.man.in
 doc/sudo_logsrvd.mdoc.in
 doc/sudo_plugin.man.in
 doc/sudo_plugin.mdoc.in
+doc/sudo_plugin_python.man.in
+doc/sudo_plugin_python.mdoc.in
 doc/sudo_sendlog.man.in
 doc/sudo_sendlog.mdoc.in
 doc/sudoers.ldap.man.in
