@@ -42,7 +42,7 @@ writeln_wrap(FILE *fp, char *line, size_t linelen, size_t maxlen)
     char *beg = line;
     char *end;
     int len, outlen = 0;
-    debug_decl(writeln_wrap, SUDOERS_DEBUG_LOGGING)
+    debug_decl(writeln_wrap, SUDOERS_DEBUG_LOGGING);
 
     /*
      * Print out line with word wrap around maxlen characters.

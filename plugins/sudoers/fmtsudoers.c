@@ -51,7 +51,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
     struct alias *a;
     struct member *m;
     struct sudo_command *c;
-    debug_decl(sudoers_format_member_int, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_format_member_int, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
 	case ALL:
@@ -140,7 +140,7 @@ sudoers_defaults_to_tags(const char *var, const char *val, int op,
     struct cmndtag *tags)
 {
     bool ret = true;
-    debug_decl(sudoers_defaults_to_tags, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_defaults_to_tags, SUDOERS_DEBUG_UTIL);
 
     if (op == true || op == false) {
 	if (strcmp(var, "authenticate") == 0) {
@@ -176,7 +176,7 @@ sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags)
 {
     bool ret = true;
     struct defaults *d;
-    debug_decl(sudoers_defaults_list_to_tags, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_defaults_list_to_tags, SUDOERS_DEBUG_UTIL);
 
     TAGS_INIT(*tags);
     if (defs != NULL) {
@@ -212,7 +212,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     struct sudoers_parse_tree *parse_tree, struct cmndspec *cs,
     struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases)
 {
-    debug_decl(sudoers_format_cmndspec, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_format_cmndspec, SUDOERS_DEBUG_UTIL);
 
     /* Merge privilege-level tags with cmndspec tags. */
     TAGS_MERGE(tags, cs->tags);
@@ -276,7 +276,7 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf,
     struct cmndspec *cs, *prev_cs;
     struct cmndtag tags;
     struct member *m;
-    debug_decl(sudoers_format_privilege, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_format_privilege, SUDOERS_DEBUG_UTIL);
 
     /* Convert per-privilege defaults to tags. */
     sudoers_defaults_list_to_tags(&priv->defaults, &tags);
@@ -339,7 +339,7 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf,
     struct privilege *priv;
     struct sudoers_comment *comment;
     struct member *m;
-    debug_decl(sudoers_format_userspec, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_format_userspec, SUDOERS_DEBUG_UTIL);
 
     /* Print comments (if any). */
     STAILQ_FOREACH(comment, &us->comments, entries) {
@@ -376,7 +376,7 @@ sudoers_format_userspecs(struct sudo_lbuf *lbuf,
     bool expand_aliases, bool flush)
 {
     struct userspec *us;
-    debug_decl(sudoers_format_userspecs, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_format_userspecs, SUDOERS_DEBUG_UTIL);
 
     TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
 	if (separator != NULL && us != TAILQ_FIRST(&parse_tree->userspecs))
@@ -395,7 +395,7 @@ sudoers_format_userspecs(struct sudo_lbuf *lbuf,
 bool
 sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d)
 {
-    debug_decl(sudoers_format_default, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_format_default, SUDOERS_DEBUG_UTIL);
 
     if (d->val != NULL) {
 	sudo_lbuf_append(lbuf, "%s%s", d->var,
@@ -425,7 +425,7 @@ sudoers_format_default_line( struct sudo_lbuf *lbuf,
 {
     struct member *m;
     int alias_type;
-    debug_decl(sudoers_format_default_line, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_format_default_line, SUDOERS_DEBUG_UTIL);
 
     /* Print Defaults type and binding (if present) */
     switch (d->type) {

@@ -47,7 +47,7 @@ int
 add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 {
     struct preserved_fd *pfd, *pfd_new;
-    debug_decl(add_preserved_fd, SUDO_DEBUG_UTIL)
+    debug_decl(add_preserved_fd, SUDO_DEBUG_UTIL);
 
     pfd_new = malloc(sizeof(*pfd));
     if (pfd_new == NULL)
@@ -96,7 +96,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     int fd, lastfd = -1;
     struct preserved_fd *pfd, *pfd_next;
     unsigned char *fdbits;
-    debug_decl(closefrom_except, SUDO_DEBUG_UTIL)
+    debug_decl(closefrom_except, SUDO_DEBUG_UTIL);
 
     /* First, relocate preserved fds to be as contiguous as possible.  */
     TAILQ_FOREACH_REVERSE_SAFE(pfd, pfds, preserved_fd_list, entries, pfd_next) {
@@ -201,7 +201,7 @@ parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr)
     const char *cp = fdstr;
     long lval;
     char *ep;
-    debug_decl(parse_preserved_fds, SUDO_DEBUG_UTIL)
+    debug_decl(parse_preserved_fds, SUDO_DEBUG_UTIL);
 
     do {
 	errno = 0;

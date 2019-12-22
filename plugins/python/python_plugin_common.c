@@ -188,7 +188,7 @@ python_plugin_register_logging(sudo_conv_t conversation,
                                sudo_printf_t sudo_printf,
                                char * const settings[])
 {
-    debug_decl(python_plugin_register_logging, PYTHON_DEBUG_INTERNAL)
+    debug_decl(python_plugin_register_logging, PYTHON_DEBUG_INTERNAL);
 
     int rc = SUDO_RC_ERROR;
     if (py_ctx.sudo_conv == NULL)

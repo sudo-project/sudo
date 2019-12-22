@@ -65,7 +65,7 @@ static bool
 command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
 {
     int flags = 0;
-    debug_decl(command_args_match, SUDOERS_DEBUG_MATCH)
+    debug_decl(command_args_match, SUDOERS_DEBUG_MATCH);
 
     /*
      * If no args specified in sudoers, any user args are allowed.
@@ -93,7 +93,7 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
 static bool
 do_stat(int fd, const char *path, struct stat *sb)
 {
-    debug_decl(do_stat, SUDOERS_DEBUG_MATCH)
+    debug_decl(do_stat, SUDOERS_DEBUG_MATCH);
 
     if (fd != -1)
 	debug_return_bool(fstat(fd, sb) == 0);
@@ -108,7 +108,7 @@ is_script(int fd)
 {
     bool ret = false;
     char magic[2];
-    debug_decl(is_script, SUDOERS_DEBUG_MATCH)
+    debug_decl(is_script, SUDOERS_DEBUG_MATCH);
 
     if (read(fd, magic, 2) == 2) {
 	if (magic[0] == '#' && magic[1] == '!')
@@ -129,7 +129,7 @@ static bool
 open_cmnd(const char *path, const struct command_digest *digest, int *fdp)
 {
     int fd = -1;
-    debug_decl(open_cmnd, SUDOERS_DEBUG_MATCH)
+    debug_decl(open_cmnd, SUDOERS_DEBUG_MATCH);
 
     /* Only open the file for fdexec or for digest matching. */
     if (def_fdexec != always && digest == NULL)
@@ -155,7 +155,7 @@ open_cmnd(const char *path, const struct command_digest *digest, int *fdp)
 static void
 set_cmnd_fd(int fd)
 {
-    debug_decl(set_cmnd_fd, SUDOERS_DEBUG_MATCH)
+    debug_decl(set_cmnd_fd, SUDOERS_DEBUG_MATCH);
 
     if (cmnd_fd != -1)
 	close(cmnd_fd);
@@ -204,7 +204,7 @@ command_matches_dir(const char *sudoers_dir, size_t dlen,
     char buf[PATH_MAX];
     int fd = -1;
     DIR *dirp;
-    debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH)
+    debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH);
 
     /*
      * Grot through directory entries, looking for user_base.
@@ -269,7 +269,7 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 {
     struct stat sb; /* XXX - unused */
     int fd = -1;
-    debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH)
+    debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH);
 
     /*
      * Return true if fnmatch(3) succeeds AND
@@ -313,7 +313,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
     int fd = -1;
     size_t dlen;
     glob_t gl;
-    debug_decl(command_matches_glob, SUDOERS_DEBUG_MATCH)
+    debug_decl(command_matches_glob, SUDOERS_DEBUG_MATCH);
 
     /*
      * First check to see if we can avoid the call to glob(3).
@@ -439,7 +439,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
     const char *base;
     size_t dlen;
     int fd = -1;
-    debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH)
+    debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH);
 
     /* If it ends in '/' it is a directory spec. */
     dlen = strlen(sudoers_cmnd);
@@ -501,7 +501,7 @@ bool
 command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest)
 {
     bool rc = false;
-    debug_decl(command_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(command_matches, SUDOERS_DEBUG_MATCH);
 
     /* Check for pseudo-commands */
     if (sudoers_cmnd[0] != '/') {

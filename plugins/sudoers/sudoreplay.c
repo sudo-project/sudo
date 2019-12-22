@@ -216,7 +216,7 @@ main(int argc, char *argv[])
     struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
     FILE *fp;
-    debug_decl(main, SUDO_DEBUG_MAIN)
+    debug_decl(main, SUDO_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {
@@ -441,7 +441,7 @@ getsize_cb(int fd, int what, void *v)
 {
     struct getsize_closure *gc = v;
     unsigned char ch = '\0';
-    debug_decl(getsize_cb, SUDO_DEBUG_UTIL)
+    debug_decl(getsize_cb, SUDO_DEBUG_UTIL);
 
     for (;;) {
 	if (gc->cp[0] == '\0') {
@@ -533,7 +533,7 @@ xterm_get_size(int *new_lines, int *new_cols)
     const char getsize_request[] = "\0337\033[r\033[999;999H\033[6n";
     const char getsize_response[] = "\033[%d;%dR";
     bool ret = false;
-    debug_decl(xterm_get_size, SUDO_DEBUG_UTIL)
+    debug_decl(xterm_get_size, SUDO_DEBUG_UTIL);
 
     /* request the terminal's size */
     if (write(ttyfd, getsize_request, strlen(getsize_request)) == -1) {
@@ -593,7 +593,7 @@ xterm_set_size(int lines, int cols)
     int len, new_lines, new_cols;
     bool ret = false;
     char buf[1024];
-    debug_decl(xterm_set_size, SUDO_DEBUG_UTIL)
+    debug_decl(xterm_set_size, SUDO_DEBUG_UTIL);
 
     /* XXX - save cursor and position restore after resizing */
     len = snprintf(buf, sizeof(buf), setsize_fmt, lines, cols);
@@ -622,7 +622,7 @@ static void
 setup_terminal(struct iolog_info *li, bool interactive, bool resize)
 {
     const char *term;
-    debug_decl(check_terminal, SUDO_DEBUG_UTIL)
+    debug_decl(check_terminal, SUDO_DEBUG_UTIL);
 
     fflush(stdout);
 
@@ -691,7 +691,7 @@ setup_terminal(struct iolog_info *li, bool interactive, bool resize)
 static void
 resize_terminal(int lines, int cols)
 {
-    debug_decl(resize_terminal, SUDO_DEBUG_UTIL)
+    debug_decl(resize_terminal, SUDO_DEBUG_UTIL);
 
     if (terminal_can_resize) {
 	if (xterm_set_size(lines, cols))
@@ -706,7 +706,7 @@ resize_terminal(int lines, int cols)
 static void
 restore_terminal_size(void)
 {
-    debug_decl(restore_terminal, SUDO_DEBUG_UTIL)
+    debug_decl(restore_terminal, SUDO_DEBUG_UTIL);
 
     if (terminal_was_resized) {
 	/* We are still in raw mode, hence the carriage return. */
@@ -733,7 +733,7 @@ get_timing_record(struct replay_closure *closure)
 {
     struct timing_closure *timing = &closure->timing;
     int ret;
-    debug_decl(get_timing_record, SUDO_DEBUG_UTIL)
+    debug_decl(get_timing_record, SUDO_DEBUG_UTIL);
 
     if ((ret = iolog_read_timing_record(&iolog_files[IOFD_TIMING], timing)) != 0)
 	debug_return_int(ret);
@@ -764,7 +764,7 @@ get_timing_record(struct replay_closure *closure)
 static void
 next_timing_record(struct replay_closure *closure)
 {
-    debug_decl(next_timing_record, SUDO_DEBUG_UTIL)
+    debug_decl(next_timing_record, SUDO_DEBUG_UTIL);
 
 again:
     switch (get_timing_record(closure)) {
@@ -794,7 +794,7 @@ fill_iobuf(struct replay_closure *closure)
     const size_t space = sizeof(closure->iobuf.buf) - closure->iobuf.len;
     const struct timing_closure *timing = &closure->timing;
     const char *errstr;
-    debug_decl(fill_iobuf, SUDO_DEBUG_UTIL)
+    debug_decl(fill_iobuf, SUDO_DEBUG_UTIL);
 
     if (closure->iobuf.toread != 0 && space != 0) {
 	const size_t len =
@@ -833,7 +833,7 @@ delay_cb(int fd, int what, void *v)
 {
     struct replay_closure *closure = v;
     struct timing_closure *timing = &closure->timing;
-    debug_decl(delay_cb, SUDO_DEBUG_UTIL)
+    debug_decl(delay_cb, SUDO_DEBUG_UTIL);
 
     switch (timing->event) {
     case IO_EVENT_WINSIZE:
@@ -897,7 +897,7 @@ static void
 signal_cb(int signo, int what, void *v)
 {
     struct replay_closure *closure = v;
-    debug_decl(signal_cb, SUDO_DEBUG_UTIL)
+    debug_decl(signal_cb, SUDO_DEBUG_UTIL);
 
     switch (signo) {
     case SIGHUP:
@@ -925,7 +925,7 @@ replay_closure_alloc(int iolog_dir_fd, const char *iolog_dir,
     bool suspend_wait)
 {
     struct replay_closure *closure;
-    debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
+    debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL);
 
     if ((closure = calloc(1, sizeof(*closure))) == NULL)
 	debug_return_ptr(NULL);
@@ -1012,7 +1012,7 @@ replay_session(int iolog_dir_fd, const char *iolog_dir,
 {
     struct replay_closure *closure;
     int ret = 0;
-    debug_decl(replay_session, SUDO_DEBUG_UTIL)
+    debug_decl(replay_session, SUDO_DEBUG_UTIL);
 
     /* Allocate the delay closure and read the first timing record. */
     closure = replay_closure_alloc(iolog_dir_fd, iolog_dir, max_delay, decimal,
@@ -1046,7 +1046,7 @@ write_output(int fd, int what, void *v)
     struct iovec iov[2];
     bool added_cr = false;
     size_t nbytes, nwritten;
-    debug_decl(write_output, SUDO_DEBUG_UTIL)
+    debug_decl(write_output, SUDO_DEBUG_UTIL);
 
     /* Refill iobuf if there is more to read and buf is empty. */
     if (!fill_iobuf(closure)) {
@@ -1138,7 +1138,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
     bool or = false, not = false;
     struct search_node *sn;
     char type, **av;
-    debug_decl(parse_expr, SUDO_DEBUG_UTIL)
+    debug_decl(parse_expr, SUDO_DEBUG_UTIL);
 
     for (av = argv; *av != NULL; av++) {
 	switch (av[0][0]) {
@@ -1255,7 +1255,7 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
     struct search_node *sn;
     bool res = false, matched = last_match;
     int rc;
-    debug_decl(match_expr, SUDO_DEBUG_UTIL)
+    debug_decl(match_expr, SUDO_DEBUG_UTIL);
 
     STAILQ_FOREACH(sn, head, entries) {
 	switch (sn->type) {
@@ -1313,7 +1313,7 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
     const char *timestr;
     int ret = -1;
     FILE *fp;
-    debug_decl(list_session, SUDO_DEBUG_UTIL)
+    debug_decl(list_session, SUDO_DEBUG_UTIL);
 
     if ((fp = fopen(logfile, "r")) == NULL) {
 	sudo_warn("%s", logfile);
@@ -1384,7 +1384,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 #else
     const bool checked_type = false;
 #endif
-    debug_decl(find_sessions, SUDO_DEBUG_UTIL)
+    debug_decl(find_sessions, SUDO_DEBUG_UTIL);
 
     d = opendir(dir);
     if (d == NULL)
@@ -1466,7 +1466,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     const char *tty)
 {
     regex_t rebuf, *re = NULL;
-    debug_decl(list_sessions, SUDO_DEBUG_UTIL)
+    debug_decl(list_sessions, SUDO_DEBUG_UTIL);
 
     /* Parse search expression if present */
     parse_expr(&search_expr, argv, false);
@@ -1493,7 +1493,7 @@ read_keyboard(int fd, int what, void *v)
     struct timespec ts;
     ssize_t nread;
     char ch;
-    debug_decl(read_keyboard, SUDO_DEBUG_UTIL)
+    debug_decl(read_keyboard, SUDO_DEBUG_UTIL);
 
     nread = read(fd, &ch, 1);
     switch (nread) {

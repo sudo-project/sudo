@@ -139,7 +139,7 @@ python_debug_register(const char *program,
 void
 python_debug_deregister(void)
 {
-    debug_decl(python_debug_deregister, PYTHON_DEBUG_INTERNAL)
+    debug_decl(python_debug_deregister, PYTHON_DEBUG_INTERNAL);
 
     if (python_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
         sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);

@@ -104,7 +104,7 @@ get_process_ttyname(char *name, size_t namelen)
     size_t size = sizeof(*ki_proc);
     int mib[6], rc, serrno = errno;
     char *ret = NULL;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
 
     /*
      * Lookup controlling tty for this process via sysctl.
@@ -158,7 +158,7 @@ get_process_ttyname(char *name, size_t namelen)
     struct psinfo psinfo;
     ssize_t nread;
     int fd, serrno = errno;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
 
     /* Try to determine the tty from pr_ttydev in /proc/pid/psinfo. */
     (void)snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)getpid());
@@ -201,7 +201,7 @@ get_process_ttyname(char *name, size_t namelen)
     int serrno = errno;
     ssize_t nread;
     int fd;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
 
     /*
      * Try to determine the tty from tty_nr in /proc/self/stat.
@@ -284,7 +284,7 @@ get_process_ttyname(char *name, size_t namelen)
     struct pst_status pstat;
     char *ret = NULL;
     int rc, serrno = errno;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
 
     /*
      * Determine the tty from psdev in struct pst_status.
@@ -318,7 +318,7 @@ char *
 get_process_ttyname(char *name, size_t namelen)
 {
     char *tty;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
 
     if ((tty = ttyname(STDIN_FILENO)) == NULL) {
 	if ((tty = ttyname(STDOUT_FILENO)) == NULL)

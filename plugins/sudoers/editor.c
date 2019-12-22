@@ -57,7 +57,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     const char *edend = ed + edlen;
     struct stat user_editor_sb;
     int nargc;
-    debug_decl(resolve_editor, SUDOERS_DEBUG_UTIL)
+    debug_decl(resolve_editor, SUDOERS_DEBUG_UTIL);
 
     /*
      * Split editor into an argument vector, including files to edit.
@@ -134,7 +134,7 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
 {
     char *ev[3], *editor_path = NULL;
     unsigned int i;
-    debug_decl(find_editor, SUDOERS_DEBUG_UTIL)
+    debug_decl(find_editor, SUDOERS_DEBUG_UTIL);
 
     /*
      * If any of SUDO_EDITOR, VISUAL or EDITOR are set, choose the first one.

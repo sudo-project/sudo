@@ -71,7 +71,7 @@ static bool
 safe_string(const char *str)
 {
     unsigned int ch = *str++;
-    debug_decl(safe_string, SUDOERS_DEBUG_UTIL)
+    debug_decl(safe_string, SUDOERS_DEBUG_UTIL);
 
     /* Initial char must be <= 127 and not LF, CR, SPACE, ':', '<' */
     switch (ch) {
@@ -103,7 +103,7 @@ print_attribute_ldif(FILE *fp, const char *name, const char *value)
     const unsigned char *uvalue = (unsigned char *)value;
     char *encoded = NULL;
     size_t esize;
-    debug_decl(print_attribute_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_attribute_ldif, SUDOERS_DEBUG_UTIL);
 
     if (!safe_string(value)) {
 	const size_t vlen = strlen(value);
@@ -134,7 +134,7 @@ print_options_ldif(FILE *fp, struct defaults_list *options)
     struct defaults *opt;
     char *attr_val;
     int len;
-    debug_decl(print_options_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_options_ldif, SUDOERS_DEBUG_UTIL);
 
     TAILQ_FOREACH(opt, options, entries) {
 	if (opt->type != DEFAULTS)
@@ -171,7 +171,7 @@ print_global_defaults_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct sudo_lbuf lbuf;
     struct defaults *opt;
     char *dn;
-    debug_decl(print_global_defaults_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_global_defaults_ldif, SUDOERS_DEBUG_UTIL);
 
     sudo_lbuf_init(&lbuf, NULL, 0, NULL, 80);
 
@@ -222,7 +222,7 @@ print_member_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree, char *name,
     struct sudo_command *c;
     char *attr_val;
     int len;
-    debug_decl(print_member_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_member_ldif, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
     case ALL:
@@ -284,7 +284,7 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct tm *tp;
     bool last_one;
     char timebuf[sizeof("20120727121554Z")];
-    debug_decl(print_cmndspec_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_cmndspec_ldif, SUDOERS_DEBUG_UTIL);
 
     /* Print runasuserlist as sudoRunAsUser attributes */
     if (cs->runasuserlist != NULL) {
@@ -471,7 +471,7 @@ user_to_cn(const char *user)
     const char *src;
     char *cn, *dst;
     size_t size;
-    debug_decl(user_to_cn, SUDOERS_DEBUG_UTIL)
+    debug_decl(user_to_cn, SUDOERS_DEBUG_UTIL);
 
     /* Allocate as much as we could possibly need. */
     size = (2 * strlen(user)) + 64 + 1;
@@ -547,7 +547,7 @@ print_userspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct privilege *priv;
     struct member *m;
     struct cmndspec *cs, *next;
-    debug_decl(print_userspec_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_userspec_ldif, SUDOERS_DEBUG_UTIL);
 
     /*
      * Each userspec struct may contain multiple privileges for
@@ -614,7 +614,7 @@ print_userspecs_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct cvtsudoers_config *conf)
 {
     struct userspec *us;
-    debug_decl(print_userspecs_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_userspecs_ldif, SUDOERS_DEBUG_UTIL);
  
     TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
 	if (!print_userspec_ldif(fp, parse_tree, us, conf))
@@ -632,7 +632,7 @@ convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree,
 {
     bool ret = true;
     FILE *output_fp = stdout;
-    debug_decl(convert_sudoers_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(convert_sudoers_ldif, SUDOERS_DEBUG_UTIL);
 
     if (conf->sudoers_base == NULL) {
 	sudo_fatalx(U_("the SUDOERS_BASE environment variable is not set and the -b option was not specified."));

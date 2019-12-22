@@ -86,7 +86,7 @@ static double random_drop;
 static void
 connection_closure_free(struct connection_closure *closure)
 {
-    debug_decl(connection_closure_free, SUDO_DEBUG_UTIL)
+    debug_decl(connection_closure_free, SUDO_DEBUG_UTIL);
 
     if (closure != NULL) {
 	bool shutting_down = closure->state == SHUTDOWN;
@@ -121,7 +121,7 @@ fmt_server_message(struct connection_buffer *buf, ServerMessage *msg)
     uint32_t msg_len;
     bool ret = false;
     size_t len;
-    debug_decl(fmt_server_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_server_message, SUDO_DEBUG_UTIL);
 
     if (buf->len != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -165,7 +165,7 @@ fmt_hello_message(struct connection_buffer *buf)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
     ServerHello hello = SERVER_HELLO__INIT;
-    debug_decl(fmt_hello_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_hello_message, SUDO_DEBUG_UTIL);
 
     /* TODO: implement redirect and servers array.  */
     hello.server_id = (char *)server_id;
@@ -186,7 +186,7 @@ static bool
 fmt_log_id_message(const char *id, struct connection_buffer *buf)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
-    debug_decl(fmt_log_id_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_log_id_message, SUDO_DEBUG_UTIL);
 
     msg.log_id = (char *)id;
     msg.type_case = SERVER_MESSAGE__TYPE_LOG_ID;
@@ -198,7 +198,7 @@ static bool
 fmt_error_message(const char *errstr, struct connection_buffer *buf)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
-    debug_decl(fmt_error_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_error_message, SUDO_DEBUG_UTIL);
 
     msg.error = (char *)errstr;
     msg.type_case = SERVER_MESSAGE__TYPE_ERROR;
@@ -212,7 +212,7 @@ fmt_error_message(const char *errstr, struct connection_buffer *buf)
 static bool
 handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 {
-    debug_decl(handle_accept, SUDO_DEBUG_UTIL)
+    debug_decl(handle_accept, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -279,7 +279,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 static bool
 handle_reject(RejectMessage *msg, struct connection_closure *closure)
 {
-    debug_decl(handle_reject, SUDO_DEBUG_UTIL)
+    debug_decl(handle_reject, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -322,7 +322,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 {
     struct timespec tv = { 0, 0 };
     mode_t mode;
-    debug_decl(handle_exit, SUDO_DEBUG_UTIL)
+    debug_decl(handle_exit, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -371,7 +371,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 static bool
 handle_restart(RestartMessage *msg, struct connection_closure *closure)
 {
-    debug_decl(handle_restart, SUDO_DEBUG_UTIL)
+    debug_decl(handle_restart, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -405,7 +405,7 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 static bool
 handle_alert(AlertMessage *msg, struct connection_closure *closure)
 {
-    debug_decl(handle_alert, SUDO_DEBUG_UTIL)
+    debug_decl(handle_alert, SUDO_DEBUG_UTIL);
 
     if (!log_alert(&closure->details, msg->alert_time, msg->reason)) {
 	closure->errstr = _("error logging alert event");
@@ -418,7 +418,7 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 static bool
 handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 {
-    debug_decl(handle_iobuf, SUDO_DEBUG_UTIL)
+    debug_decl(handle_iobuf, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -463,7 +463,7 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 static bool
 handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 {
-    debug_decl(handle_winsize, SUDO_DEBUG_UTIL)
+    debug_decl(handle_winsize, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -489,7 +489,7 @@ handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 static bool
 handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
 {
-    debug_decl(handle_suspend, SUDO_DEBUG_UTIL)
+    debug_decl(handle_suspend, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -518,7 +518,7 @@ handle_client_message(uint8_t *buf, size_t len,
 {
     ClientMessage *msg;
     bool ret = false;
-    debug_decl(handle_client_message, SUDO_DEBUG_UTIL)
+    debug_decl(handle_client_message, SUDO_DEBUG_UTIL);
 
     msg = client_message__unpack(NULL, len, buf);
     if (msg == NULL) {
@@ -579,7 +579,7 @@ static void
 shutdown_cb(int unused, int what, void *v)
 {
     struct sudo_event_base *base = v;
-    debug_decl(shutdown_cb, SUDO_DEBUG_UTIL)
+    debug_decl(shutdown_cb, SUDO_DEBUG_UTIL);
 
 #if defined(HAVE_OPENSSL)
     /* deallocate server's SSL context object */
@@ -601,7 +601,7 @@ server_shutdown(struct sudo_event_base *base)
     struct connection_closure *closure;
     struct sudo_event *ev;
     struct timespec tv = { 0, 0 };
-    debug_decl(server_shutdown, SUDO_DEBUG_UTIL)
+    debug_decl(server_shutdown, SUDO_DEBUG_UTIL);
 
     if (TAILQ_EMPTY(&connections)) {
 	sudo_ev_loopbreak(base);
@@ -640,7 +640,7 @@ server_msg_cb(int fd, int what, void *v)
     struct connection_closure *closure = v;
     struct connection_buffer *buf = &closure->write_buf;
     ssize_t nwritten;
-    debug_decl(server_msg_cb, SUDO_DEBUG_UTIL)
+    debug_decl(server_msg_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -727,7 +727,7 @@ client_msg_cb(int fd, int what, void *v)
     uint32_t msg_len;
     ssize_t nread;
 
-    debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
+    debug_decl(client_msg_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -850,7 +850,7 @@ server_commit_cb(int unused, int what, void *v)
     TimeSpec commit_point = TIME_SPEC__INIT;
     struct connection_closure *closure = v;
 
-    debug_decl(server_commit_cb, SUDO_DEBUG_UTIL)
+    debug_decl(server_commit_cb, SUDO_DEBUG_UTIL);
 
     /* Send the client an acknowledgement of what has been committed to disk. */
     commit_point.tv_sec = closure->elapsed_time.tv_sec;
@@ -887,7 +887,7 @@ static void
 signal_cb(int signo, int what, void *v)
 {
     struct sudo_event_base *base = v;
-    debug_decl(signal_cb, SUDO_DEBUG_UTIL)
+    debug_decl(signal_cb, SUDO_DEBUG_UTIL);
 
     switch (signo) {
 	case SIGHUP:
@@ -917,7 +917,7 @@ verify_server_cert(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
     X509_STORE *ca_store;
     STACK_OF(X509) *chain_certs;
     X509 *x509;
-    debug_decl(verify_server_cert, SUDO_DEBUG_UTIL)
+    debug_decl(verify_server_cert, SUDO_DEBUG_UTIL);
 
     if ((x509 = SSL_CTX_get0_certificate(ctx)) == NULL) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -967,7 +967,7 @@ exit:
 static bool
 init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
 {
-    debug_decl(init_tls_ciphersuites, SUDO_DEBUG_UTIL)
+    debug_decl(init_tls_ciphersuites, SUDO_DEBUG_UTIL);
 
     if (tls_config->ciphers_v12) {
 	/* try to set TLS v1.2 ciphersuite list from config if given */
@@ -1034,7 +1034,7 @@ init_tls_server_context(void)
     const SSL_METHOD *method;
     SSL_CTX *ctx = NULL;
     const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
-    debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL)
+    debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL);
 
     SSL_library_init();
     OpenSSL_add_all_algorithms();
@@ -1161,7 +1161,7 @@ tls_handshake_cb(int fd, int what, void *v)
     struct connection_closure *closure = v;
     struct sudo_event_base *base = closure->ssl_accept_ev->base;
 
-    debug_decl(tls_handshake_cb, SUDO_DEBUG_UTIL)
+    debug_decl(tls_handshake_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1216,7 +1216,7 @@ static struct connection_closure *
 connection_closure_alloc(int sock)
 {
     struct connection_closure *closure;
-    debug_decl(connection_closure_alloc, SUDO_DEBUG_UTIL)
+    debug_decl(connection_closure_alloc, SUDO_DEBUG_UTIL);
 
     if ((closure = calloc(1, sizeof(*closure))) == NULL)
 	debug_return_ptr(NULL);
@@ -1268,7 +1268,7 @@ new_connection(int sock, struct sudo_event_base *base)
 {
     struct connection_closure *closure;
 
-    debug_decl(new_connection, SUDO_DEBUG_UTIL)
+    debug_decl(new_connection, SUDO_DEBUG_UTIL);
 
     if ((closure = connection_closure_alloc(sock)) == NULL)
 	goto bad;
@@ -1329,7 +1329,7 @@ static int
 create_listener(struct listen_address *addr)
 {
     int flags, i, sock;
-    debug_decl(create_listener, SUDO_DEBUG_UTIL)
+    debug_decl(create_listener, SUDO_DEBUG_UTIL);
 
     if ((sock = socket(addr->sa_un.sa.sa_family, SOCK_STREAM, 0)) == -1) {
 	sudo_warn("socket");
@@ -1366,7 +1366,7 @@ listener_cb(int fd, int what, void *v)
     union sockaddr_union s_un;
     socklen_t salen = sizeof(s_un);
     int sock;
-    debug_decl(listener_cb, SUDO_DEBUG_UTIL)
+    debug_decl(listener_cb, SUDO_DEBUG_UTIL);
 
     sock = accept(fd, &s_un.sa, &salen);
     if (sock != -1) {
@@ -1390,7 +1390,7 @@ register_listener(struct listen_address *addr, struct sudo_event_base *base)
 {
     struct sudo_event *ev;
     int sock;
-    debug_decl(register_listener, SUDO_DEBUG_UTIL)
+    debug_decl(register_listener, SUDO_DEBUG_UTIL);
 
     sock = create_listener(addr);
 
@@ -1409,7 +1409,7 @@ static void
 register_signal(int signo, struct sudo_event_base *base)
 {
     struct sudo_event *ev;
-    debug_decl(register_signal, SUDO_DEBUG_UTIL)
+    debug_decl(register_signal, SUDO_DEBUG_UTIL);
 
     ev = sudo_ev_alloc(signo, SUDO_EV_SIGNAL, signal_cb, base);
     if (ev == NULL)
@@ -1434,7 +1434,7 @@ static void
 daemonize(bool nofork)
 {
     int fd;
-    debug_decl(daemonize, SUDO_DEBUG_UTIL)
+    debug_decl(daemonize, SUDO_DEBUG_UTIL);
 
     if (!nofork) {
 	switch (fork()) {
@@ -1508,7 +1508,7 @@ main(int argc, char *argv[])
     bool nofork = false;
     char *ep;
     int ch;
-    debug_decl_vars(main, SUDO_DEBUG_MAIN)
+    debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {

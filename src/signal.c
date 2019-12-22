@@ -83,7 +83,7 @@ void
 save_signals(void)
 {
     struct signal_state *ss;
-    debug_decl(save_signals, SUDO_DEBUG_MAIN)
+    debug_decl(save_signals, SUDO_DEBUG_MAIN);
 
     for (ss = saved_signals; ss->signo != -1; ss++) {
 	if (sigaction(ss->signo, NULL, &ss->sa) != 0)
@@ -100,7 +100,7 @@ void
 restore_signals(void)
 {
     struct signal_state *ss;
-    debug_decl(restore_signals, SUDO_DEBUG_MAIN)
+    debug_decl(restore_signals, SUDO_DEBUG_MAIN);
 
     for (ss = saved_signals; ss->signo != -1; ss++) {
 	if (ss->restore) {
@@ -129,7 +129,7 @@ init_signals(void)
 {
     struct sigaction sa;
     struct signal_state *ss;
-    debug_decl(init_signals, SUDO_DEBUG_MAIN)
+    debug_decl(init_signals, SUDO_DEBUG_MAIN);
 
     memset(&sa, 0, sizeof(sa));
     sigfillset(&sa.sa_mask);
@@ -176,7 +176,7 @@ sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
 {
     struct signal_state *ss;
     int ret;
-    debug_decl(sudo_sigaction, SUDO_DEBUG_MAIN)
+    debug_decl(sudo_sigaction, SUDO_DEBUG_MAIN);
 
     for (ss = saved_signals; ss->signo > 0; ss++) {
 	if (ss->signo == signo) {

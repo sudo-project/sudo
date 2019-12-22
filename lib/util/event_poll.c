@@ -52,7 +52,7 @@ int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 {
     int i;
-    debug_decl(sudo_ev_base_alloc_impl, SUDO_DEBUG_EVENT)
+    debug_decl(sudo_ev_base_alloc_impl, SUDO_DEBUG_EVENT);
 
     base->pfd_high = -1;
     base->pfd_max = 32;
@@ -73,7 +73,7 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 void
 sudo_ev_base_free_impl(struct sudo_event_base *base)
 {
-    debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT)
+    debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT);
     free(base->pfds);
     debug_return;
 }
@@ -82,7 +82,7 @@ int
 sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 {
     struct pollfd *pfd;
-    debug_decl(sudo_ev_add_impl, SUDO_DEBUG_EVENT)
+    debug_decl(sudo_ev_add_impl, SUDO_DEBUG_EVENT);
 
     /* If out of space in pfds array, realloc. */
     if (base->pfd_free == base->pfd_max) {
@@ -129,7 +129,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 int
 sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
 {
-    debug_decl(sudo_ev_del_impl, SUDO_DEBUG_EVENT)
+    debug_decl(sudo_ev_del_impl, SUDO_DEBUG_EVENT);
 
     /* Mark pfd entry unused, add to free list and adjust high slot. */
     base->pfds[ev->pfd_idx].fd = -1;
@@ -164,7 +164,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
     struct timespec now, ts, *timeout;
     struct sudo_event *ev;
     int nready;
-    debug_decl(sudo_ev_scan_impl, SUDO_DEBUG_EVENT)
+    debug_decl(sudo_ev_scan_impl, SUDO_DEBUG_EVENT);
 
     if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
 	sudo_gettime_mono(&now);

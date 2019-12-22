@@ -67,7 +67,7 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
     const char *errstr;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     struct iolog_info *li = NULL;
-    debug_decl(iolog_parse_loginfo, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_parse_loginfo, SUDO_DEBUG_UTIL);
 
     /*
      * Info file has three lines:
@@ -181,7 +181,7 @@ iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay,
      double scale_factor)
 {
     double seconds;
-    debug_decl(iolog_adjust_delay, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_adjust_delay, SUDO_DEBUG_UTIL);
 
     if (scale_factor != 1.0) {
 	/* Order is important: we don't want to double the remainder. */
@@ -219,7 +219,7 @@ iolog_parse_delay(const char *cp, struct timespec *delay,
     const char *errstr, *ep;
     long long llval;
     size_t len;
-    debug_decl(iolog_parse_delay, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_parse_delay, SUDO_DEBUG_UTIL);
 
     /* Parse seconds (whole number portion). */
     for (ep = cp; isdigit((unsigned char)*ep); ep++)
@@ -300,7 +300,7 @@ iolog_parse_timing(const char *line, struct timing_closure *timing)
 {
     unsigned long ulval;
     char *cp, *ep;
-    debug_decl(iolog_parse_timing, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_parse_timing, SUDO_DEBUG_UTIL);
 
     /* Clear iolog descriptor. */
     timing->iol = NULL;
@@ -372,7 +372,7 @@ iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 {
     char line[LINE_MAX];
     const char *errstr;
-    debug_decl(iolog_read_timing_record, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_read_timing_record, SUDO_DEBUG_UTIL);
 
     /* Read next record from timing file. */
     if (iolog_gets(iol, line, sizeof(line), &errstr) == NULL) {

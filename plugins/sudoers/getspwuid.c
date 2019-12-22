@@ -71,7 +71,7 @@ char *
 sudo_getepw(const struct passwd *pw)
 {
     char *epw = NULL;
-    debug_decl(sudo_getepw, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_getepw, SUDOERS_DEBUG_AUTH);
 
     /* If there is a function to check for shadow enabled, use it... */
 #ifdef HAVE_ISCOMSEC
@@ -118,7 +118,7 @@ done:
 void
 sudo_setspent(void)
 {
-    debug_decl(sudo_setspent, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_setspent, SUDOERS_DEBUG_AUTH);
 
 #ifdef HAVE_GETPRPWNAM
     setprpwent();
@@ -132,7 +132,7 @@ sudo_setspent(void)
 void
 sudo_endspent(void)
 {
-    debug_decl(sudo_endspent, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_endspent, SUDOERS_DEBUG_AUTH);
 
 #ifdef HAVE_GETPRPWNAM
     endprpwent();

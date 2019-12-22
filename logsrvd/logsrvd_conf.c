@@ -225,7 +225,7 @@ logsrvd_conf_logfile_time_format(void)
 static bool
 cb_iolog_dir(struct logsrvd_config *config, const char *path)
 {
-    debug_decl(cb_iolog_dir, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_dir, SUDO_DEBUG_UTIL);
 
     free(config->iolog.iolog_dir);
     if ((config->iolog.iolog_dir = strdup(path)) == NULL) {
@@ -238,7 +238,7 @@ cb_iolog_dir(struct logsrvd_config *config, const char *path)
 static bool
 cb_iolog_file(struct logsrvd_config *config, const char *path)
 {
-    debug_decl(cb_iolog_file, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_file, SUDO_DEBUG_UTIL);
 
     free(config->iolog.iolog_file);
     if ((config->iolog.iolog_file = strdup(path)) == NULL) {
@@ -252,7 +252,7 @@ static bool
 cb_iolog_compress(struct logsrvd_config *config, const char *str)
 {
     int val;
-    debug_decl(cb_iolog_compress, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_compress, SUDO_DEBUG_UTIL);
 
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
@@ -265,7 +265,7 @@ static bool
 cb_iolog_flush(struct logsrvd_config *config, const char *str)
 {
     int val;
-    debug_decl(cb_iolog_flush, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_flush, SUDO_DEBUG_UTIL);
 
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
@@ -278,7 +278,7 @@ static bool
 cb_iolog_user(struct logsrvd_config *config, const char *user)
 {
     struct passwd *pw;
-    debug_decl(cb_iolog_user, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_user, SUDO_DEBUG_UTIL);
 
     if ((pw = getpwnam(user)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -296,7 +296,7 @@ static bool
 cb_iolog_group(struct logsrvd_config *config, const char *group)
 {
     struct group *gr;
-    debug_decl(cb_iolog_group, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_group, SUDO_DEBUG_UTIL);
 
     if ((gr = getgrnam(group)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -314,7 +314,7 @@ cb_iolog_mode(struct logsrvd_config *config, const char *str)
 {
     const char *errstr;
     mode_t mode;
-    debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL);
 
     mode = sudo_strtomode(str, &errstr);
     if (errstr != NULL) {
@@ -331,7 +331,7 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str)
 {
     const char *errstr;
     unsigned int value;
-    debug_decl(cb_iolog_maxseq, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_maxseq, SUDO_DEBUG_UTIL);
 
     value = sudo_strtonum(str, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
@@ -356,7 +356,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
     char *copy, *host, *port;
     bool ret = false;
     int error;
-    debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL)
+    debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL);
 
     if ((copy = strdup(str)) == NULL) {
 	sudo_warn(NULL);
@@ -404,7 +404,7 @@ cb_timeout(struct logsrvd_config *config, const char *str)
 {
     int timeout;
     const char* errstr;
-    debug_decl(cb_timeout, SUDO_DEBUG_UTIL)
+    debug_decl(cb_timeout, SUDO_DEBUG_UTIL);
 
     timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
     if (errstr != NULL)
@@ -420,7 +420,7 @@ static bool
 cb_tls_opt(struct logsrvd_config *config, const char *str)
 {
     int val;
-    debug_decl(cb_tls_opt, SUDO_DEBUG_UTIL)
+    debug_decl(cb_tls_opt, SUDO_DEBUG_UTIL);
 
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
@@ -432,7 +432,7 @@ cb_tls_opt(struct logsrvd_config *config, const char *str)
 static bool
 cb_tls_key(struct logsrvd_config *config, const char *path)
 {
-    debug_decl(cb_tls_key, SUDO_DEBUG_UTIL)
+    debug_decl(cb_tls_key, SUDO_DEBUG_UTIL);
 
     free(config->server.tls_config.pkey_path);
     if ((config->server.tls_config.pkey_path = strdup(path)) == NULL) {
@@ -445,7 +445,7 @@ cb_tls_key(struct logsrvd_config *config, const char *path)
 static bool
 cb_tls_cacert(struct logsrvd_config *config, const char *path)
 {
-    debug_decl(cb_tls_cacert, SUDO_DEBUG_UTIL)
+    debug_decl(cb_tls_cacert, SUDO_DEBUG_UTIL);
 
     free(config->server.tls_config.cacert_path);
     if ((config->server.tls_config.cacert_path = strdup(path)) == NULL) {
@@ -458,7 +458,7 @@ cb_tls_cacert(struct logsrvd_config *config, const char *path)
 static bool
 cb_tls_cert(struct logsrvd_config *config, const char *path)
 {
-    debug_decl(cb_tls_cert, SUDO_DEBUG_UTIL)
+    debug_decl(cb_tls_cert, SUDO_DEBUG_UTIL);
 
     free(config->server.tls_config.cert_path);
     if ((config->server.tls_config.cert_path = strdup(path)) == NULL) {
@@ -471,7 +471,7 @@ cb_tls_cert(struct logsrvd_config *config, const char *path)
 static bool
 cb_tls_dhparam(struct logsrvd_config *config, const char *path)
 {
-    debug_decl(cb_tls_dhparam, SUDO_DEBUG_UTIL)
+    debug_decl(cb_tls_dhparam, SUDO_DEBUG_UTIL);
 
     free(config->server.tls_config.dhparams_path);
     if ((config->server.tls_config.dhparams_path = strdup(path)) == NULL) {
@@ -484,7 +484,7 @@ cb_tls_dhparam(struct logsrvd_config *config, const char *path)
 static bool
 cb_tls_ciphers12(struct logsrvd_config *config, const char *str)
 {
-    debug_decl(cb_tls_ciphers12, SUDO_DEBUG_UTIL)
+    debug_decl(cb_tls_ciphers12, SUDO_DEBUG_UTIL);
 
     free(config->server.tls_config.ciphers_v12);
     if ((config->server.tls_config.ciphers_v12 = strdup(str)) == NULL) {
@@ -497,7 +497,7 @@ cb_tls_ciphers12(struct logsrvd_config *config, const char *str)
 static bool
 cb_tls_ciphers13(struct logsrvd_config *config, const char *str)
 {
-    debug_decl(cb_tls_ciphers13, SUDO_DEBUG_UTIL)
+    debug_decl(cb_tls_ciphers13, SUDO_DEBUG_UTIL);
 
     free(config->server.tls_config.ciphers_v13);
     if ((config->server.tls_config.ciphers_v13 = strdup(str)) == NULL) {
@@ -511,7 +511,7 @@ static bool
 cb_tls_checkpeer(struct logsrvd_config *config, const char *str)
 {
     int val;
-    debug_decl(cb_tls_checkpeer, SUDO_DEBUG_UTIL)
+    debug_decl(cb_tls_checkpeer, SUDO_DEBUG_UTIL);
 
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
@@ -525,7 +525,7 @@ cb_tls_checkpeer(struct logsrvd_config *config, const char *str)
 static bool
 cb_eventlog_type(struct logsrvd_config *config, const char *str)
 {
-    debug_decl(cb_eventlog_type, SUDO_DEBUG_UTIL)
+    debug_decl(cb_eventlog_type, SUDO_DEBUG_UTIL);
 
     if (strcmp(str, "none") == 0)
 	config->eventlog.log_type = EVLOG_NONE;
@@ -542,7 +542,7 @@ cb_eventlog_type(struct logsrvd_config *config, const char *str)
 static bool
 cb_eventlog_format(struct logsrvd_config *config, const char *str)
 {
-    debug_decl(cb_eventlog_format, SUDO_DEBUG_UTIL)
+    debug_decl(cb_eventlog_format, SUDO_DEBUG_UTIL);
 
     if (strcmp(str, "sudo") == 0)
 	config->eventlog.log_format = EVLOG_SUDO;
@@ -558,7 +558,7 @@ cb_syslog_maxlen(struct logsrvd_config *config, const char *str)
 {
     unsigned int maxlen;
     const char *errstr;
-    debug_decl(cb_syslog_maxlen, SUDO_DEBUG_UTIL)
+    debug_decl(cb_syslog_maxlen, SUDO_DEBUG_UTIL);
 
     maxlen = sudo_strtonum(str, 1, UINT_MAX, &errstr);
     if (errstr != NULL)
@@ -573,7 +573,7 @@ static bool
 cb_syslog_facility(struct logsrvd_config *config, const char *str)
 {
     int logfac;
-    debug_decl(cb_syslog_facility, SUDO_DEBUG_UTIL)
+    debug_decl(cb_syslog_facility, SUDO_DEBUG_UTIL);
 
     if (!sudo_str2logfac(str, &logfac)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -590,7 +590,7 @@ static bool
 cb_syslog_acceptpri(struct logsrvd_config *config, const char *str)
 {
     int logpri;
-    debug_decl(cb_syslog_acceptpri, SUDO_DEBUG_UTIL)
+    debug_decl(cb_syslog_acceptpri, SUDO_DEBUG_UTIL);
 
     if (!sudo_str2logpri(str, &logpri)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -607,7 +607,7 @@ static bool
 cb_syslog_rejectpri(struct logsrvd_config *config, const char *str)
 {
     int logpri;
-    debug_decl(cb_syslog_rejectpri, SUDO_DEBUG_UTIL)
+    debug_decl(cb_syslog_rejectpri, SUDO_DEBUG_UTIL);
 
     if (!sudo_str2logpri(str, &logpri))
 	debug_return_bool(false);
@@ -621,7 +621,7 @@ static bool
 cb_syslog_alertpri(struct logsrvd_config *config, const char *str)
 {
     int logpri;
-    debug_decl(cb_syslog_alertpri, SUDO_DEBUG_UTIL)
+    debug_decl(cb_syslog_alertpri, SUDO_DEBUG_UTIL);
 
     if (!sudo_str2logpri(str, &logpri)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -639,7 +639,7 @@ static bool
 cb_logfile_path(struct logsrvd_config *config, const char *str)
 {
     char *copy = NULL;
-    debug_decl(cb_logfile_path, SUDO_DEBUG_UTIL)
+    debug_decl(cb_logfile_path, SUDO_DEBUG_UTIL);
 
     if (*str != '/') {
 	debug_return_bool(false);
@@ -661,7 +661,7 @@ static bool
 cb_logfile_time_format(struct logsrvd_config *config, const char *str)
 {
     char *copy = NULL;
-    debug_decl(cb_logfile_time_format, SUDO_DEBUG_UTIL)
+    debug_decl(cb_logfile_time_format, SUDO_DEBUG_UTIL);
 
     if ((copy = strdup(str)) == NULL) {
 	sudo_warn(NULL);
@@ -740,7 +740,7 @@ logsrvd_conf_parse(struct logsrvd_config *config, FILE *fp, const char *path)
     size_t linesize = 0;
     char *line = NULL;
     bool ret = false;
-    debug_decl(logsrvd_conf_parse, SUDO_DEBUG_UTIL)
+    debug_decl(logsrvd_conf_parse, SUDO_DEBUG_UTIL);
 
     while (sudo_parseln(&line, &linesize, &lineno, fp, 0) != -1) {
 	struct logsrvd_config_entry *entry;
@@ -818,7 +818,7 @@ void
 logsrvd_conf_free(struct logsrvd_config *config)
 {
     struct listen_address *addr;
-    debug_decl(logsrvd_conf_free, SUDO_DEBUG_UTIL)
+    debug_decl(logsrvd_conf_free, SUDO_DEBUG_UTIL);
 
     if (config == NULL)
 	debug_return;
@@ -847,7 +847,7 @@ struct logsrvd_config *
 logsrvd_conf_alloc(void)
 {
     struct logsrvd_config *config;
-    debug_decl(logsrvd_conf_alloc, SUDO_DEBUG_UTIL)
+    debug_decl(logsrvd_conf_alloc, SUDO_DEBUG_UTIL);
 
     if ((config = calloc(1, sizeof(*config))) == NULL) {
 	sudo_warn(NULL);
@@ -914,7 +914,7 @@ bad:
 bool
 logsrvd_conf_apply(struct logsrvd_config *config)
 {
-    debug_decl(logsrvd_conf_apply, SUDO_DEBUG_UTIL)
+    debug_decl(logsrvd_conf_apply, SUDO_DEBUG_UTIL);
 
     /* There can be multiple addresses so we can't set a default earlier. */
     if (TAILQ_EMPTY(&config->server.addresses)) {
@@ -946,7 +946,7 @@ logsrvd_conf_read(const char *path)
     struct logsrvd_config *config;
     bool ret = false;
     FILE *fp = NULL;
-    debug_decl(logsrvd_conf_read, SUDO_DEBUG_UTIL)
+    debug_decl(logsrvd_conf_read, SUDO_DEBUG_UTIL);
 
     config = logsrvd_conf_alloc();
 

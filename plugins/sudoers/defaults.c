@@ -90,7 +90,7 @@ dump_defaults(void)
     struct list_member *item;
     struct def_values *def;
     char *desc;
-    debug_decl(dump_defaults, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(dump_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     for (cur = sudo_defs_table; cur->name; cur++) {
 	if (cur->desc) {
@@ -179,7 +179,7 @@ static int
 find_default(const char *name, const char *file, int lineno, bool quiet)
 {
     int i;
-    debug_decl(find_default, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(find_default, SUDOERS_DEBUG_DEFAULTS);
 
     for (i = 0; sudo_defs_table[i].name != NULL; i++) {
 	if (strcmp(name, sudo_defs_table[i].name) == 0)
@@ -206,7 +206,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     union sudo_defs_val *sd_un, const char *file, int lineno, bool quiet)
 {
     int rc;
-    debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%d %s=%s op=%d",
 	__func__, file, lineno, def->name, val ? val : "", op);
@@ -338,7 +338,7 @@ struct early_default *
 is_early_default(const char *name)
 {
     struct early_default *early;
-    debug_decl(is_early_default, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(is_early_default, SUDOERS_DEBUG_DEFAULTS);
 
     for (early = early_defaults; early->idx != -1; early++) {
 	if (strcmp(name, sudo_defs_table[early->idx].name) == 0)
@@ -350,7 +350,7 @@ is_early_default(const char *name)
 static bool
 run_callback(struct sudo_defs_types *def)
 {
-    debug_decl(run_callback, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(run_callback, SUDOERS_DEBUG_DEFAULTS);
 
     if (def->callback == NULL)
 	debug_return_bool(true);
@@ -366,7 +366,7 @@ set_default(const char *var, const char *val, int op, const char *file,
     int lineno, bool quiet)
 {
     int idx;
-    debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS);
 
     idx = find_default(var, file, lineno, quiet);
     if (idx != -1) {
@@ -387,7 +387,7 @@ set_early_default(const char *var, const char *val, int op, const char *file,
     int lineno, bool quiet, struct early_default *early)
 {
     int idx;
-    debug_decl(set_early_default, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(set_early_default, SUDOERS_DEBUG_DEFAULTS);
 
     idx = find_default(var, file, lineno, quiet);
     if (idx != -1) {
@@ -409,7 +409,7 @@ run_early_defaults(void)
 {
     struct early_default *early;
     bool ret = true;
-    debug_decl(run_early_defaults, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(run_early_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     for (early = early_defaults; early->idx != -1; early++) {
 	if (early->run_callback) {
@@ -444,7 +444,7 @@ init_defaults(void)
 {
     static int firsttime = 1;
     struct sudo_defs_types *def;
-    debug_decl(init_defaults, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(init_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     /* Clear any old settings. */
     if (!firsttime) {
@@ -635,7 +635,7 @@ oom:
 static bool
 default_type_matches(struct defaults *d, int what)
 {
-    debug_decl(default_type_matches, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(default_type_matches, SUDOERS_DEBUG_DEFAULTS);
 
     switch (d->type) {
     case DEFAULTS:
@@ -670,7 +670,7 @@ static bool
 default_binding_matches(struct sudoers_parse_tree *parse_tree,
     struct defaults *d, int what)
 {
-    debug_decl(default_binding_matches, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(default_binding_matches, SUDOERS_DEBUG_DEFAULTS);
 
     switch (d->type) {
     case DEFAULTS:
@@ -706,7 +706,7 @@ update_defaults(struct sudoers_parse_tree *parse_tree,
 {
     struct defaults *d;
     bool ret = true;
-    debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"what: 0x%02x", what);
@@ -766,7 +766,7 @@ check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet)
     struct defaults *d;
     bool ret = true;
     int idx;
-    debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	idx = find_default(d->var, d->file, d->lineno, quiet);
@@ -792,7 +792,7 @@ store_int(const char *str, union sudo_defs_val *sd_un)
 {
     const char *errstr;
     int i;
-    debug_decl(store_int, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_int, SUDOERS_DEBUG_DEFAULTS);
 
     if (str == NULL) {
 	sd_un->ival = 0;
@@ -813,7 +813,7 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
 {
     const char *errstr;
     unsigned int u;
-    debug_decl(store_uint, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_uint, SUDOERS_DEBUG_DEFAULTS);
 
     if (str == NULL) {
 	sd_un->uival = 0;
@@ -835,7 +835,7 @@ store_timespec(const char *str, union sudo_defs_val *sd_un)
     struct timespec ts;
     char sign = '+';
     int i;
-    debug_decl(store_timespec, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_timespec, SUDOERS_DEBUG_DEFAULTS);
 
     sudo_timespecclear(&ts);
     if (str != NULL) {
@@ -885,7 +885,7 @@ store_tuple(const char *str, union sudo_defs_val *sd_un,
     struct def_values *tuple_vals)
 {
     struct def_values *v;
-    debug_decl(store_tuple, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_tuple, SUDOERS_DEBUG_DEFAULTS);
 
     /*
      * Look up tuple value by name to find enum def_tuple value.
@@ -910,7 +910,7 @@ store_tuple(const char *str, union sudo_defs_val *sd_un,
 static int
 store_str(const char *str, union sudo_defs_val *sd_un)
 {
-    debug_decl(store_str, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_str, SUDOERS_DEBUG_DEFAULTS);
 
     free(sd_un->str);
     if (str == NULL) {
@@ -927,7 +927,7 @@ store_str(const char *str, union sudo_defs_val *sd_un)
 static bool
 store_list(const char *str, union sudo_defs_val *sd_un, int op)
 {
-    debug_decl(store_list, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_list, SUDOERS_DEBUG_DEFAULTS);
 
     /* Remove all old members. */
     if (op == false || op == true)
@@ -951,7 +951,7 @@ store_list(const char *str, union sudo_defs_val *sd_un, int op)
 static bool
 store_syslogfac(const char *str, union sudo_defs_val *sd_un)
 {
-    debug_decl(store_syslogfac, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_syslogfac, SUDOERS_DEBUG_DEFAULTS);
 
     if (str == NULL) {
 	sd_un->ival = false;
@@ -963,7 +963,7 @@ store_syslogfac(const char *str, union sudo_defs_val *sd_un)
 static bool
 store_syslogpri(const char *str, union sudo_defs_val *sd_un)
 {
-    debug_decl(store_syslogpri, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_syslogpri, SUDOERS_DEBUG_DEFAULTS);
 
     if (str == NULL) {
 	sd_un->ival = -1;
@@ -977,7 +977,7 @@ store_mode(const char *str, union sudo_defs_val *sd_un)
 {
     mode_t mode;
     const char *errstr;
-    debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS);
 
     if (str == NULL) {
 	sd_un->mode = ACCESSPERMS;
@@ -996,7 +996,7 @@ store_mode(const char *str, union sudo_defs_val *sd_un)
 static bool
 store_timeout(const char *str, union sudo_defs_val *sd_un)
 {
-    debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS);
 
     if (str == NULL) {
 	sd_un->ival = 0;
@@ -1017,7 +1017,7 @@ list_op(const char *str, size_t len, union sudo_defs_val *sd_un,
     enum list_ops op)
 {
     struct list_member *cur, *prev = NULL;
-    debug_decl(list_op, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(list_op, SUDOERS_DEBUG_DEFAULTS);
 
     if (op == freeall) {
 	while ((cur = SLIST_FIRST(&sd_un->list)) != NULL) {

@@ -68,7 +68,7 @@
 int
 sudo_gettime_real_v1(struct timespec *ts)
 {
-    debug_decl(sudo_gettime_real, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_gettime_real, SUDO_DEBUG_UTIL);
 
     if (clock_gettime(CLOCK_REALTIME, ts) == -1) {
 	struct timeval tv;
@@ -86,7 +86,7 @@ int
 sudo_gettime_real_v1(struct timespec *ts)
 {
     struct timeval tv;
-    debug_decl(sudo_gettime_real, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_gettime_real, SUDO_DEBUG_UTIL);
 
     if (gettimeofday(&tv, NULL) == -1)
 	debug_return_int(-1);
@@ -104,7 +104,7 @@ int
 sudo_gettime_mono_v1(struct timespec *ts)
 {
     static int has_monoclock = -1;
-    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL);
 
     /* Check whether the kernel/libc actually supports a monotonic clock. */
 # ifdef _SC_MONOTONIC_CLOCK
@@ -127,7 +127,7 @@ int
 sudo_gettime_mono_v1(struct timespec *ts)
 {
     hrtime_t nsec;
-    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL);
 
     nsec = gethrtime();
     ts->tv_sec = nsec / 1000000000;
@@ -140,7 +140,7 @@ sudo_gettime_mono_v1(struct timespec *ts)
 {
     uint64_t abstime, nsec;
     static mach_timebase_info_data_t timebase_info;
-    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL);
 
     if (timebase_info.denom == 0)
 	(void) mach_timebase_info(&timebase_info);
@@ -172,7 +172,7 @@ int
 sudo_gettime_awake_v1(struct timespec *ts)
 {
     static int has_monoclock = -1;
-    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL);
 
     /* Check whether the kernel/libc actually supports a monotonic clock. */
 # ifdef _SC_MONOTONIC_CLOCK
@@ -195,7 +195,7 @@ int
 sudo_gettime_awake_v1(struct timespec *ts)
 {
     hrtime_t nsec;
-    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL);
 
     /* Currently the same as sudo_gettime_mono() */
     nsec = gethrtime();
@@ -209,7 +209,7 @@ sudo_gettime_awake_v1(struct timespec *ts)
 {
     uint64_t abstime, nsec;
     static mach_timebase_info_data_t timebase_info;
-    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL);
 
     if (timebase_info.denom == 0)
 	(void) mach_timebase_info(&timebase_info);

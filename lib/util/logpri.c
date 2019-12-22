@@ -63,7 +63,7 @@ bool
 sudo_str2logpri_v1(const char *str, int *logpri)
 {
     const struct strmap *pri;
-    debug_decl(sudo_str2logpri, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_str2logpri, SUDO_DEBUG_UTIL);
 
     for (pri = priorities; pri->name != NULL; pri++) {
 	if (strcmp(str, pri->name) == 0) {
@@ -78,7 +78,7 @@ const char *
 sudo_logpri2str_v1(int num)
 {
     const struct strmap *pri;
-    debug_decl(sudo_logpri2str, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_logpri2str, SUDO_DEBUG_UTIL);
 
     for (pri = priorities; pri->name != NULL; pri++) {
 	if (pri->num == num)

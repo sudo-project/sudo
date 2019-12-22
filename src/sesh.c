@@ -67,7 +67,7 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     int ret;
-    debug_decl(main, SUDO_DEBUG_MAIN)
+    debug_decl(main, SUDO_DEBUG_MAIN);
 
     initprogname(argc > 0 ? argv[0] : "sesh");
 
@@ -140,7 +140,7 @@ sesh_sudoedit(int argc, char *argv[])
     struct stat sb;
     struct timespec times[2];
     char buf[BUFSIZ];
-    debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT)
+    debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT);
 
     /* Check for -h flag (don't follow links). */
     if (strcmp(argv[2], "-h") == 0) {

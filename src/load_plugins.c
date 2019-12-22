@@ -50,7 +50,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
     size_t pathsize, struct stat *sb)
 {
     int status = -1;
-    debug_decl(sudo_stat_plugin, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudo_stat_plugin, SUDO_DEBUG_PLUGIN);
 
     if (info->path[0] == '/') {
 	if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
@@ -116,7 +116,7 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
     struct stat sb;
     bool ret = false;
-    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN);
 
     if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
 	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
@@ -154,7 +154,7 @@ done:
 static bool
 sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
-    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN);
     (void)strlcpy(fullpath, info->path, pathsize);
     debug_return_bool(true);
 }
@@ -171,7 +171,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
     struct generic_plugin *plugin;
     char path[PATH_MAX];
     void *handle = NULL;
-    debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN);
 
     /* Sanity check plugin and fill in path */
     if (!sudo_check_plugin(info, path, sizeof(path)))
@@ -295,7 +295,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_info_list *plugins;
     struct plugin_info *info, *next;
     bool ret = false;
-    debug_decl(sudo_load_plugins, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudo_load_plugins, SUDO_DEBUG_PLUGIN);
 
     /* Walk the plugin list from sudo.conf, if any and free it. */
     plugins = sudo_conf_plugins();

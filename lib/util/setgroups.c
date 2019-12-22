@@ -39,7 +39,7 @@ int
 sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)
 {
     int maxgids, ret;
-    debug_decl(sudo_setgroups, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_setgroups, SUDO_DEBUG_UTIL);
 
     ret = setgroups(ngids, (GETGROUPS_T *)gids);
     if (ret == -1 && errno == EINVAL) {

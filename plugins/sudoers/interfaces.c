@@ -63,7 +63,7 @@ set_interfaces(const char *ai)
     char *addrinfo, *addr, *mask, *last;
     struct interface *ifp;
     bool ret = false;
-    debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
+    debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF);
 
     if ((addrinfo = strdup(ai)) == NULL)
 	debug_return_bool(false);
@@ -130,7 +130,7 @@ dump_interfaces(const char *ai)
 {
     const char *cp, *ep;
     const char *ai_end = ai + strlen(ai);
-    debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
+    debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF);
 
     sudo_printf(SUDO_CONV_INFO_MSG,
 	_("Local IP address and netmask pairs:\n"));

@@ -62,7 +62,7 @@ char *
 sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen)
 {
     char *dev;
-    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL);
 
     /* Some versions of devname() return NULL on failure, others do not. */
     dev = devname(tdev, S_IFCHR);
@@ -89,7 +89,7 @@ char *
 sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen)
 {
     int serrno = errno;
-    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL);
 
     /*
      * _ttyname_dev() sets errno to ERANGE if namelen is too small
@@ -128,7 +128,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, char *name, size_t namelen)
     struct stat sb;
     unsigned int i;
     DIR *d = NULL;
-    debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL);
 
     if (dir[0] == '\0') {
 	errno = ENOENT;
@@ -233,7 +233,7 @@ static char *
 sudo_dev_check(dev_t rdev, const char *devname, char *buf, size_t buflen)
 {
     struct stat sb;
-    debug_decl(sudo_dev_check, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_dev_check, SUDO_DEBUG_UTIL);
 
     if (stat(devname, &sb) == 0) {
 	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
@@ -265,7 +265,7 @@ sudo_ttyname_dev_v1(dev_t rdev, char *buf, size_t buflen)
     char path[PATH_MAX], *ret;
     const char *cp, *ep;
     size_t len;
-    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL);
 
     /*
      * First, check /dev/console.

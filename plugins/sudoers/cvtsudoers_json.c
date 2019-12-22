@@ -160,7 +160,7 @@ static void
 print_pair_json(FILE *fp, const char *pre, const char *name,
     const struct json_value *value, const char *post, int indent)
 {
-    debug_decl(print_pair_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_pair_json, SUDOERS_DEBUG_UTIL);
 
     print_indent(fp, indent);
 
@@ -213,7 +213,7 @@ static void
 printstr_json(FILE *fp, const char *pre, const char *str, const char *post,
     int indent)
 {
-    debug_decl(printstr_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(printstr_json, SUDOERS_DEBUG_UTIL);
 
     print_indent(fp, indent);
     if (pre != NULL)
@@ -237,7 +237,7 @@ print_command_json(FILE *fp, const char *name, int type, bool negated, int inden
     struct sudo_command *c = (struct sudo_command *)name;
     struct json_value value;
     const char *digest_name;
-    debug_decl(print_command_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_command_json, SUDOERS_DEBUG_UTIL);
 
     printstr_json(fp, "{", NULL, NULL, indent);
     if (negated || c->digest != NULL) {
@@ -346,7 +346,7 @@ print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
     const char *errstr;
     int alias_type = UNSPEC;
     id_t id;
-    debug_decl(print_member_json_int, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_member_json_int, SUDOERS_DEBUG_UTIL);
 
     /* Most of the time we print a string. */
     value.type = JSON_STRING;
@@ -534,7 +534,7 @@ print_alias_json(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v
 {
     struct json_alias_closure *closure = v;
     struct member *m;
-    debug_decl(print_alias_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_alias_json, SUDOERS_DEBUG_UTIL);
 
     if (a->type != closure->alias_type)
 	debug_return_int(0);
@@ -568,7 +568,7 @@ print_binding_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct member_list *binding, int type, int indent, bool expand_aliases)
 {
     struct member *m;
-    debug_decl(print_binding_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_binding_json, SUDOERS_DEBUG_UTIL);
 
     if (TAILQ_EMPTY(binding))
 	debug_return;
@@ -596,7 +596,7 @@ print_defaults_list_json(FILE *fp, struct defaults *def, int indent)
 {
     char savech, *start, *end = def->val;
     struct json_value value;
-    debug_decl(print_defaults_list_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_defaults_list_json, SUDOERS_DEBUG_UTIL);
 
     fprintf(fp, "%*s{\n", indent, "");
     indent += 4;
@@ -670,7 +670,7 @@ print_defaults_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct json_value value;
     struct defaults *def, *next;
     int type;
-    debug_decl(print_defaults_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_defaults_json, SUDOERS_DEBUG_UTIL);
 
     if (TAILQ_EMPTY(&parse_tree->defaults))
 	debug_return_bool(need_comma);
@@ -749,7 +749,7 @@ print_aliases_by_type_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
     int alias_type, const char *title, int indent, bool need_comma)
 {
     struct json_alias_closure closure;
-    debug_decl(print_aliases_by_type_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_aliases_by_type_json, SUDOERS_DEBUG_UTIL);
 
     closure.fp = fp;
     closure.indent = indent;
@@ -777,7 +777,7 @@ static bool
 print_aliases_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
     int indent, bool need_comma)
 {
-    debug_decl(print_aliases_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_aliases_json, SUDOERS_DEBUG_UTIL);
 
     need_comma = print_aliases_by_type_json(fp, parse_tree, USERALIAS,
 	"User_Aliases", indent, need_comma);
@@ -808,7 +808,7 @@ print_cmndspec_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct tm *tp;
     bool last_one;
     char timebuf[sizeof("20120727121554Z")];
-    debug_decl(print_cmndspec_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_cmndspec_json, SUDOERS_DEBUG_UTIL);
 
     /* Open Cmnd_Spec object. */
     fprintf(fp, "%*s{\n", indent, "");
@@ -1041,7 +1041,7 @@ print_userspec_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct privilege *priv;
     struct member *m;
     struct cmndspec *cs, *next;
-    debug_decl(print_userspec_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_userspec_json, SUDOERS_DEBUG_UTIL);
 
     /*
      * Each userspec struct may contain multiple privileges for
@@ -1097,7 +1097,7 @@ print_userspecs_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
     int indent, bool expand_aliases, bool need_comma)
 {
     struct userspec *us;
-    debug_decl(print_userspecs_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_userspecs_json, SUDOERS_DEBUG_UTIL);
 
     if (TAILQ_EMPTY(&parse_tree->userspecs))
 	debug_return_bool(need_comma);
@@ -1123,7 +1123,7 @@ convert_sudoers_json(struct sudoers_parse_tree *parse_tree,
     bool ret = true, need_comma = false;
     const int indent = 4;
     FILE *output_fp = stdout;
-    debug_decl(convert_sudoers_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(convert_sudoers_json, SUDOERS_DEBUG_UTIL);
 
     if (strcmp(output_file, "-") != 0) {
 	if ((output_fp = fopen(output_file, "w")) == NULL)

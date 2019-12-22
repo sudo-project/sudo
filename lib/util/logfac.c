@@ -68,7 +68,7 @@ bool
 sudo_str2logfac_v1(const char *str, int *logfac)
 {
     const struct strmap *fac;
-    debug_decl(sudo_str2logfac, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_str2logfac, SUDO_DEBUG_UTIL);
 
     for (fac = facilities; fac->name != NULL; fac++) {
 	if (strcmp(str, fac->name) == 0) {
@@ -83,7 +83,7 @@ const char *
 sudo_logfac2str_v1(int num)
 {
     const struct strmap *fac;
-    debug_decl(sudo_logfac2str, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_logfac2str, SUDO_DEBUG_UTIL);
 
     for (fac = facilities; fac->name != NULL; fac++) {
 	if (fac->num == num)

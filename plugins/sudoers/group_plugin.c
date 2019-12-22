@@ -60,7 +60,7 @@ group_plugin_load(char *plugin_info)
     char *args, path[PATH_MAX];
     char **argv = NULL;
     int len, rc = -1;
-    debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL)
+    debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL);
 
     /*
      * Fill in .so path and split out args (if any).
@@ -170,7 +170,7 @@ done:
 void
 group_plugin_unload(void)
 {
-    debug_decl(group_plugin_unload, SUDOERS_DEBUG_UTIL)
+    debug_decl(group_plugin_unload, SUDOERS_DEBUG_UTIL);
 
     if (group_plugin != NULL) {
 	(group_plugin->cleanup)();
@@ -187,7 +187,7 @@ int
 group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
-    debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL)
+    debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL);
 
     if (group_plugin == NULL)
 	debug_return_int(false);
@@ -203,14 +203,14 @@ group_plugin_query(const char *user, const char *group,
 int
 group_plugin_load(char *plugin_info)
 {
-    debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL)
+    debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL);
     debug_return_int(false);
 }
 
 void
 group_plugin_unload(void)
 {
-    debug_decl(group_plugin_unload, SUDOERS_DEBUG_UTIL)
+    debug_decl(group_plugin_unload, SUDOERS_DEBUG_UTIL);
     debug_return;
 }
 
@@ -218,7 +218,7 @@ int
 group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
-    debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL)
+    debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL);
     debug_return_int(false);
 }
 
@@ -231,7 +231,7 @@ bool
 cb_group_plugin(const union sudo_defs_val *sd_un)
 {
     bool rc = true;
-    debug_decl(cb_group_plugin, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(cb_group_plugin, SUDOERS_DEBUG_PLUGIN);
 
     /* Unload any existing group plugin before loading a new one. */
     group_plugin_unload();

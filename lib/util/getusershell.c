@@ -58,7 +58,7 @@ read_shells(void)
     size_t linesize = 0;
     char *line = NULL;
     FILE *fp;
-    debug_decl(read_shells, SUDO_DEBUG_UTIL)
+    debug_decl(read_shells, SUDO_DEBUG_UTIL);
 
     if ((fp = fopen("/etc/shells", "r")) == NULL)
 	goto bad;
@@ -101,7 +101,7 @@ bad:
 void
 sudo_setusershell(void)
 {
-    debug_decl(setusershell, SUDO_DEBUG_UTIL)
+    debug_decl(setusershell, SUDO_DEBUG_UTIL);
 
     current_shell = read_shells();
 
@@ -111,7 +111,7 @@ sudo_setusershell(void)
 void
 sudo_endusershell(void)
 {
-    debug_decl(endusershell, SUDO_DEBUG_UTIL)
+    debug_decl(endusershell, SUDO_DEBUG_UTIL);
 
     if (allowed_shells != NULL) {
 	char **shell;
@@ -129,7 +129,7 @@ sudo_endusershell(void)
 char *
 sudo_getusershell(void)
 {
-    debug_decl(getusershell, SUDO_DEBUG_UTIL)
+    debug_decl(getusershell, SUDO_DEBUG_UTIL);
 
     if (current_shell == NULL)
 	current_shell = read_shells();

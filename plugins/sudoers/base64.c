@@ -69,7 +69,7 @@ base64_decode(const char *in, unsigned char *out, size_t out_size)
     unsigned char *out_end = out + out_size;
     const unsigned char *out0 = out;
     unsigned int rem, v;
-    debug_decl(base64_decode, SUDOERS_DEBUG_MATCH)
+    debug_decl(base64_decode, SUDOERS_DEBUG_MATCH);
 
     for (v = 0, rem = 0; *in != '\0' && *in != '='; in++) {
 	unsigned char ch = base64dec_tab[(unsigned char)*in];
@@ -100,7 +100,7 @@ base64_encode(const unsigned char *in, size_t in_len, char *out, size_t out_len)
 {
     size_t ii, io;
     unsigned int rem, v;
-    debug_decl(base64_encode, SUDOERS_DEBUG_MATCH)
+    debug_decl(base64_encode, SUDOERS_DEBUG_MATCH);
 
     for (io = 0, ii = 0, v = 0, rem = 0; ii < in_len; ii++) {
 	unsigned char ch = in[ii];

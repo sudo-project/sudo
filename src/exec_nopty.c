@@ -118,7 +118,7 @@ signal_cb_nopty(int signo, int what, void *v)
     struct sudo_ev_siginfo_container *sc = v;
     struct exec_closure_nopty *ec = sc->closure;
     char signame[SIG2STR_MAX];
-    debug_decl(signal_cb_nopty, SUDO_DEBUG_EXEC)
+    debug_decl(signal_cb_nopty, SUDO_DEBUG_EXEC);
 
     if (ec->cmnd_pid == -1)
 	debug_return;
@@ -200,7 +200,7 @@ static void
 fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     struct command_status *cstat, struct command_details *details, int errfd)
 {
-    debug_decl(fill_exec_closure_nopty, SUDO_DEBUG_EXEC)
+    debug_decl(fill_exec_closure_nopty, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
     ec->ppgrp = getpgrp();
@@ -319,7 +319,7 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
 static void
 free_exec_closure_nopty(struct exec_closure_nopty *ec)
 {
-    debug_decl(free_exec_closure_nopty, SUDO_DEBUG_EXEC)
+    debug_decl(free_exec_closure_nopty, SUDO_DEBUG_EXEC);
 
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->errpipe_event);
@@ -348,7 +348,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     struct exec_closure_nopty ec = { 0 };
     sigset_t set, oset;
     int errpipe[2];
-    debug_decl(exec_nopty, SUDO_DEBUG_EXEC)
+    debug_decl(exec_nopty, SUDO_DEBUG_EXEC);
 
     /*
      * The policy plugin's session init must be run before we fork
@@ -465,7 +465,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
     pid_t pid;
     int status;
     char signame[SIG2STR_MAX];
-    debug_decl(handle_sigchld_nopty, SUDO_DEBUG_EXEC)
+    debug_decl(handle_sigchld_nopty, SUDO_DEBUG_EXEC);
 
     /* Read command status. */
     do {

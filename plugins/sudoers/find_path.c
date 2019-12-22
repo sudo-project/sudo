@@ -54,7 +54,7 @@ cmnd_allowed(char *cmnd, size_t cmnd_size, struct stat *cmnd_sbp,
 {
     const char *cmnd_base;
     char * const *wl;
-    debug_decl(cmnd_allowed, SUDOERS_DEBUG_UTIL)
+    debug_decl(cmnd_allowed, SUDOERS_DEBUG_UTIL);
 
     if (!sudo_goodpath(cmnd, cmnd_sbp))
 	debug_return_bool(false);
@@ -106,7 +106,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
     bool found = false;
     bool checkdot = false;
     int len;
-    debug_decl(find_path, SUDOERS_DEBUG_UTIL)
+    debug_decl(find_path, SUDOERS_DEBUG_UTIL);
 
     /*
      * If we were given a fully qualified or relative path

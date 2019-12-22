@@ -126,7 +126,7 @@ get_net_ifs(char **addrinfo)
 #endif
     int ailen, len, num_interfaces = 0;
     char *cp;
-    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
+    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
 
     if (!sudo_conf_probe_interfaces())
 	debug_return_int(0);
@@ -235,7 +235,7 @@ get_net_ifs(char **addrinfo)
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
-    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
+    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
 
     if (!sudo_conf_probe_interfaces())
 	debug_return_int(0);
@@ -367,7 +367,7 @@ done:
 int
 get_net_ifs(char **addrinfo)
 {
-    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
+    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
     debug_return_int(0);
 }
 

@@ -108,7 +108,7 @@ get_ipa_hostname(char **shostp, char **lhostp)
     int ret = false;
     ssize_t len;
     FILE *fp;
-    debug_decl(get_ipa_hostname, SUDOERS_DEBUG_SSSD)
+    debug_decl(get_ipa_hostname, SUDOERS_DEBUG_SSSD);
 
     fp = fopen(_PATH_SSSD_CONF, "r");
     if (fp != NULL) {
@@ -247,7 +247,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
     struct userspec *us;
     struct member *m;
     unsigned int i;
-    debug_decl(sss_to_sudoers, SUDOERS_DEBUG_SSSD)
+    debug_decl(sss_to_sudoers, SUDOERS_DEBUG_SSSD);
 
     /* We only have a single userspec */
     if ((us = calloc(1, sizeof(*us))) == NULL)

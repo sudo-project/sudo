@@ -49,7 +49,7 @@
 int
 parse_timeout(const char *timestr)
 {
-    debug_decl(parse_timeout, SUDOERS_DEBUG_PARSER)
+    debug_decl(parse_timeout, SUDOERS_DEBUG_PARSER);
     const char suffixes[] = "dhms";
     const char *cp = timestr;
     int timeout = 0;

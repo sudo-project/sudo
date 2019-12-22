@@ -51,7 +51,7 @@ struct sudo_file_handle {
 static int
 sudo_file_close(struct sudo_nss *nss)
 {
-    debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle = nss->handle;
 
     if (handle != NULL) {
@@ -69,7 +69,7 @@ sudo_file_close(struct sudo_nss *nss)
 static int
 sudo_file_open(struct sudo_nss *nss)
 {
-    debug_decl(sudo_file_open, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_file_open, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle;
 
     if (def_ignore_local_sudoers)
@@ -101,7 +101,7 @@ sudo_file_open(struct sudo_nss *nss)
 static struct sudoers_parse_tree *
 sudo_file_parse(struct sudo_nss *nss)
 {
-    debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle = nss->handle;
 
     if (handle == NULL || handle->fp == NULL) {
@@ -133,7 +133,7 @@ sudo_file_parse(struct sudo_nss *nss)
 static int
 sudo_file_query(struct sudo_nss *nss, struct passwd *pw)
 {
-    debug_decl(sudo_file_query, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_file_query, SUDOERS_DEBUG_NSS);
     debug_return_int(0);
 }
 
@@ -143,7 +143,7 @@ sudo_file_query(struct sudo_nss *nss, struct passwd *pw)
 static int
 sudo_file_getdefs(struct sudo_nss *nss)
 {
-    debug_decl(sudo_file_getdefs, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_file_getdefs, SUDOERS_DEBUG_NSS);
     debug_return_int(0);
 }
 

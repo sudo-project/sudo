@@ -57,7 +57,7 @@ rcstr_dup(const char *src)
 {
     size_t len = strlen(src);
     char *dst;
-    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL)
+    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL);
 
     dst = rcstr_alloc(len);
     memcpy(dst, src, len);
@@ -69,7 +69,7 @@ char *
 rcstr_alloc(size_t len)
 {
     struct rcstr *rcs;
-    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL)
+    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL);
 
     /* Note: sizeof(struct rcstr) includes space for the NUL */
     rcs = malloc(sizeof(struct rcstr) + len);
@@ -86,7 +86,7 @@ char *
 rcstr_addref(const char *s)
 {
     struct rcstr *rcs;
-    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL)
+    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL);
 
     if (s == NULL)
 	debug_return_ptr(NULL);
@@ -100,7 +100,7 @@ void
 rcstr_delref(const char *s)
 {
     struct rcstr *rcs;
-    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL)
+    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL);
 
     if (s != NULL) {
 	rcs = __containerof((const void *)s, struct rcstr, str);

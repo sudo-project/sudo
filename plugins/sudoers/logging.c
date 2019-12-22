@@ -85,7 +85,7 @@ mysyslog(int pri, const char *fmt, ...)
 {
     const int flags = def_syslog_pid ? LOG_PID : 0;
     va_list ap;
-    debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING)
+    debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING);
 
     openlog("sudo", flags, def_syslog);
     va_start(ap, fmt);
@@ -106,7 +106,7 @@ do_syslog(int pri, char *msg)
     char *p, *tmp, save;
     const char *fmt;
     int oldlocale;
-    debug_decl(do_syslog, SUDOERS_DEBUG_LOGGING)
+    debug_decl(do_syslog, SUDOERS_DEBUG_LOGGING);
 
     /* A priority of -1 corresponds to "none". */
     if (pri == -1)
@@ -164,7 +164,7 @@ do_logfile(const char *msg)
     char *full_line;
     mode_t oldmask;
     FILE *fp;
-    debug_decl(do_logfile, SUDOERS_DEBUG_LOGGING)
+    debug_decl(do_logfile, SUDOERS_DEBUG_LOGGING);
 
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
@@ -241,7 +241,7 @@ log_denial(int status, bool inform_user)
     int oldlocale;
     bool uid_changed, ret = true;
     bool mailit;
-    debug_decl(log_denial, SUDOERS_DEBUG_LOGGING)
+    debug_decl(log_denial, SUDOERS_DEBUG_LOGGING);
 
     /* Handle auditing first (audit_failure() handles the locale itself). */
     if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
@@ -328,7 +328,7 @@ bool
 log_failure(int status, int flags)
 {
     bool ret, inform_user = true;
-    debug_decl(log_failure, SUDOERS_DEBUG_LOGGING)
+    debug_decl(log_failure, SUDOERS_DEBUG_LOGGING);
 
     /* The user doesn't always get to see the log message (path info). */
     if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&
@@ -361,7 +361,7 @@ log_auth_failure(int status, unsigned int tries)
 {
     int flags = 0;
     bool ret = true;
-    debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING)
+    debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING);
 
     /* Handle auditing first. */
     audit_failure(NewArgc, NewArgv, N_("authentication failure"));
@@ -405,7 +405,7 @@ log_allowed(int status)
     int oldlocale;
     bool uid_changed, ret = true;
     bool mailit;
-    debug_decl(log_allowed, SUDOERS_DEBUG_LOGGING)
+    debug_decl(log_allowed, SUDOERS_DEBUG_LOGGING);
 
     /* Send mail based on status. */
     mailit = should_mail(status);
@@ -457,7 +457,7 @@ fmt_authfail_message(char **str, va_list ap)
     char *src, *dst0, *dst, *dst_end;
     size_t size;
     int len;
-    debug_decl(fmt_authfail_message, SUDOERS_DEBUG_LOGGING)
+    debug_decl(fmt_authfail_message, SUDOERS_DEBUG_LOGGING);
 
     if (def_authfail_message == NULL) {
 	debug_return_int(asprintf(str, ngettext("%u incorrect password attempt",
@@ -514,7 +514,7 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
     bool uid_changed, ret = true;
     va_list ap2;
     int len;
-    debug_decl(vlog_warning, SUDOERS_DEBUG_LOGGING)
+    debug_decl(vlog_warning, SUDOERS_DEBUG_LOGGING);
 
     /* Need extra copy of ap for sudo_vwarn()/sudo_vwarnx() below. */
     va_copy(ap2, ap);
@@ -625,7 +625,7 @@ log_warning(int flags, const char *fmt, ...)
 {
     va_list ap;
     bool ret;
-    debug_decl(log_warning, SUDOERS_DEBUG_LOGGING)
+    debug_decl(log_warning, SUDOERS_DEBUG_LOGGING);
 
     /* Log the error. */
     va_start(ap, fmt);
@@ -640,7 +640,7 @@ log_warningx(int flags, const char *fmt, ...)
 {
     va_list ap;
     bool ret;
-    debug_decl(log_warningx, SUDOERS_DEBUG_LOGGING)
+    debug_decl(log_warningx, SUDOERS_DEBUG_LOGGING);
 
     /* Log the error. */
     va_start(ap, fmt);
@@ -655,7 +655,7 @@ gai_log_warning(int flags, int errnum, const char *fmt, ...)
 {
     va_list ap;
     bool ret;
-    debug_decl(gai_log_warning, SUDOERS_DEBUG_LOGGING)
+    debug_decl(gai_log_warning, SUDOERS_DEBUG_LOGGING);
 
     /* Log the error. */
     va_start(ap, fmt);
@@ -670,7 +670,7 @@ closefrom_nodebug(int lowfd)
 {
     unsigned char *debug_fds;
     int fd, startfd;
-    debug_decl(closefrom_nodebug, SUDOERS_DEBUG_LOGGING)
+    debug_decl(closefrom_nodebug, SUDOERS_DEBUG_LOGGING);
 
     startfd = sudo_debug_get_fds(&debug_fds) + 1;
     if (lowfd > startfd)
@@ -720,7 +720,7 @@ exec_mailer(int pipein)
 	NULL
     };
 #endif /* NO_ROOT_MAILER */
-    debug_decl(exec_mailer, SUDOERS_DEBUG_LOGGING)
+    debug_decl(exec_mailer, SUDOERS_DEBUG_LOGGING);
 
     /* Set stdin to read side of the pipe. */
     if (dup3(pipein, STDIN_FILENO, 0) == -1) {
@@ -780,7 +780,7 @@ send_mail(const char *fmt, ...)
     pid_t pid, rv;
     struct stat sb;
     va_list ap;
-    debug_decl(send_mail, SUDOERS_DEBUG_LOGGING)
+    debug_decl(send_mail, SUDOERS_DEBUG_LOGGING);
 
     /* If mailer is disabled just return. */
     if (!def_mailerpath || !def_mailto)
@@ -927,7 +927,7 @@ send_mail(const char *fmt, ...)
 static bool
 should_mail(int status)
 {
-    debug_decl(should_mail, SUDOERS_DEBUG_LOGGING)
+    debug_decl(should_mail, SUDOERS_DEBUG_LOGGING);
 
     debug_return_bool(def_mail_always || ISSET(status, VALIDATE_ERROR) ||
 	(def_mail_all_cmnds && ISSET(sudo_mode, (MODE_RUN|MODE_EDIT))) ||
@@ -964,7 +964,7 @@ new_logline(const char *message, const char *errstr)
 #endif
     const char *tsid = NULL;
     size_t len = 0;
-    debug_decl(new_logline, SUDOERS_DEBUG_LOGGING)
+    debug_decl(new_logline, SUDOERS_DEBUG_LOGGING);
 
 #ifndef SUDOERS_NO_SEQ
     /* A TSID may be a sudoers-style session ID or a free-form string. */

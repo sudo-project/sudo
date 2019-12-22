@@ -63,7 +63,7 @@ connect_cb(int sock, int what, void *v)
 {
     int optval, ret, *errnump = v;
     socklen_t optlen = sizeof(optval);
-    debug_decl(connect_cb, SUDOERS_DEBUG_UTIL)
+    debug_decl(connect_cb, SUDOERS_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
 	*errnump = ETIMEDOUT;
@@ -85,7 +85,7 @@ timed_connect(int sock, const struct sockaddr *addr, socklen_t addrlen,
     struct sudo_event_base *evbase = NULL;
     struct sudo_event *connect_event = NULL;
     int ret, errnum = 0;
-    debug_decl(timed_connect, SUDOERS_DEBUG_UTIL)
+    debug_decl(timed_connect, SUDOERS_DEBUG_UTIL);
 
     ret = connect(sock, addr, addrlen);
     if (ret == -1 && errno == EINPROGRESS) {
@@ -129,7 +129,7 @@ connect_server(const char *host, const char *port, struct timespec *timo,
     struct addrinfo hints, *res, *res0;
     const char *cause = NULL;
     int error, sock = -1;
-    debug_decl(connect_server, SUDOERS_DEBUG_UTIL)
+    debug_decl(connect_server, SUDOERS_DEBUG_UTIL);
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
@@ -187,7 +187,7 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
     char *copy, *host, *port;
     const char *cause = NULL;
     int sock = -1;
-    debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL)
+    debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL);
 
     STAILQ_FOREACH(server, servers, entries) {
 	copy = strdup(server->str);
@@ -217,7 +217,7 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
 static bool
 tls_init(struct client_closure *closure, bool peer_auth)
 {
-    debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN);
 
     if (closure->log_details->ca_bundle == NULL) {
         sudo_warnx(U_("CA bundle file is not set in sudoers"));
@@ -301,7 +301,7 @@ tls_connect_cb(int sock, int what, void *v)
     struct timespec timeo = { 10, 0 };
     int tls_con, err;
 
-    debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL)
+    debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
         sudo_warnx(U_("TLS handshake timeout occured"));
@@ -342,7 +342,7 @@ tls_timed_connect(struct client_closure *closure)
 {
     struct sudo_event_base *evbase = NULL;
 
-    debug_decl(tls_timed_connect, SUDO_DEBUG_UTIL)
+    debug_decl(tls_timed_connect, SUDO_DEBUG_UTIL);
 
 	evbase = sudo_ev_base_alloc();
     closure->tls_conn_status = false;
@@ -380,7 +380,7 @@ void
 client_closure_free(struct client_closure *closure)
 {
     struct connection_buffer *buf;
-    debug_decl(client_closure_free, SUDOERS_DEBUG_UTIL)
+    debug_decl(client_closure_free, SUDOERS_DEBUG_UTIL);
 
     if (closure->sock != -1) {
 	close(closure->sock);
@@ -431,7 +431,7 @@ static struct connection_buffer *
 get_free_buf(struct client_closure *closure)
 {
     struct connection_buffer *buf;
-    debug_decl(get_free_buf, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_free_buf, SUDOERS_DEBUG_UTIL);
 
     buf = TAILQ_FIRST(&closure->free_bufs);
     if (buf != NULL)
@@ -454,7 +454,7 @@ fmt_client_message(struct client_closure *closure, ClientMessage *msg)
     uint32_t msg_len;
     bool ret = false;
     size_t len;
-    debug_decl(fmt_client_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_client_message, SUDOERS_DEBUG_UTIL);
 
     if ((buf = get_free_buf(closure)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -514,7 +514,7 @@ fmt_accept_message(struct client_closure *closure)
     size_t info_msgs_size, n;
     struct timespec now;
     bool ret = false;
-    debug_decl(fmt_accept_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_accept_message, SUDOERS_DEBUG_UTIL);
 
     /*
      * Fill in AcceptMessage and add it to ClientMessage.
@@ -671,7 +671,7 @@ fmt_restart_message(struct client_closure *closure)
     RestartMessage restart_msg = RESTART_MESSAGE__INIT;
     TimeSpec tv = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_restart_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_restart_message, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: sending RestartMessage, [%lld, %ld]", __func__,
@@ -705,7 +705,7 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
     char signame[SIG2STR_MAX];
     bool ret = false;
     struct timespec run_time;
-    debug_decl(fmt_exit_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_exit_message, SUDOERS_DEBUG_UTIL);
 
     if (sudo_gettime_awake(&run_time) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
@@ -773,7 +773,7 @@ fmt_io_buf(struct client_closure *closure, int type, const char *buf,
     IoBuffer iobuf_msg = IO_BUFFER__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_io_buf, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_io_buf, SUDOERS_DEBUG_UTIL);
 
     /* Fill in IoBuffer. */
     ts.tv_sec = delay->tv_sec;
@@ -811,7 +811,7 @@ fmt_winsize(struct client_closure *closure, unsigned int lines,
     ChangeWindowSize winsize_msg = CHANGE_WINDOW_SIZE__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_winsize, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_winsize, SUDOERS_DEBUG_UTIL);
 
     /* Fill in ChangeWindowSize message. */
     ts.tv_sec = delay->tv_sec;
@@ -847,7 +847,7 @@ fmt_suspend(struct client_closure *closure, const char *signame, struct timespec
     CommandSuspend suspend_msg = COMMAND_SUSPEND__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_suspend, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_suspend, SUDOERS_DEBUG_UTIL);
 
     /* Fill in CommandSuspend message. */
     ts.tv_sec = delay->tv_sec;
@@ -878,7 +878,7 @@ done:
 static bool
 client_message_completion(struct client_closure *closure)
 {
-    debug_decl(client_message_completion, SUDOERS_DEBUG_UTIL)
+    debug_decl(client_message_completion, SUDOERS_DEBUG_UTIL);
 
     switch (closure->state) {
     case SEND_ACCEPT:
@@ -915,7 +915,7 @@ static bool
 handle_server_hello(ServerHello *msg, struct client_closure *closure)
 {
     size_t n;
-    debug_decl(handle_server_hello, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_server_hello, SUDOERS_DEBUG_UTIL);
 
     if (closure->state != RECV_HELLO) {
 	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
@@ -973,7 +973,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 static bool
 handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 {
-    debug_decl(handle_commit_point, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_commit_point, SUDOERS_DEBUG_UTIL);
 
     /* Only valid after we have sent an IO buffer. */
     if (closure->state < SEND_IO) {
@@ -1004,7 +1004,7 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 static bool
 handle_log_id(char *id, struct client_closure *closure)
 {
-    debug_decl(handle_log_id, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_log_id, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: remote log ID: %s", __func__, id);
     if ((closure->iolog_id = strdup(id)) == NULL)
@@ -1019,7 +1019,7 @@ handle_log_id(char *id, struct client_closure *closure)
 static bool
 handle_server_error(char *errmsg, struct client_closure *closure)
 {
-    debug_decl(handle_server_error, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_server_error, SUDOERS_DEBUG_UTIL);
 
     sudo_warnx(U_("error message received from server: %s"), errmsg);
     debug_return_bool(false);
@@ -1032,7 +1032,7 @@ handle_server_error(char *errmsg, struct client_closure *closure)
 static bool
 handle_server_abort(char *errmsg, struct client_closure *closure)
 {
-    debug_decl(handle_server_abort, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_server_abort, SUDOERS_DEBUG_UTIL);
 
     sudo_warnx(U_("abort message received from server: %s"), errmsg);
     debug_return_bool(false);
@@ -1048,7 +1048,7 @@ handle_server_message(uint8_t *buf, size_t len,
 {
     ServerMessage *msg;
     bool ret = false;
-    debug_decl(handle_server_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_server_message, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
@@ -1103,7 +1103,7 @@ static bool
 expand_buf(struct connection_buffer *buf, unsigned int needed)
 {
     void *newdata;
-    debug_decl(expand_buf, SUDO_DEBUG_UTIL)
+    debug_decl(expand_buf, SUDO_DEBUG_UTIL);
 
     if (buf->size < needed) {
 	/* Expand buffer. */
@@ -1140,7 +1140,7 @@ server_msg_cb(int fd, int what, void *v)
     struct connection_buffer *buf = &closure->read_buf;
     ssize_t nread;
     uint32_t msg_len;
-    debug_decl(server_msg_cb, SUDOERS_DEBUG_UTIL)
+    debug_decl(server_msg_cb, SUDOERS_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out reading from server",
@@ -1245,7 +1245,7 @@ client_msg_cb(int fd, int what, void *v)
     struct client_closure *closure = v;
     struct connection_buffer *buf;
     ssize_t nwritten;
-    debug_decl(client_msg_cb, SUDOERS_DEBUG_UTIL)
+    debug_decl(client_msg_cb, SUDOERS_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out writiing to server",
@@ -1336,7 +1336,7 @@ bool
 client_closure_fill(struct client_closure *closure, int sock,
     struct iolog_details *details, struct io_plugin *sudoers_io)
 {
-    debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL)
+    debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL);
 
     closure->sock = -1;
     closure->state = RECV_HELLO;
@@ -1398,7 +1398,7 @@ client_close(struct client_closure *closure, int exit_status, int error)
     struct sudo_event_base *evbase = NULL;
     short events;
     bool ret = false;
-    debug_decl(client_close, SUDOERS_DEBUG_UTIL)
+    debug_decl(client_close, SUDOERS_DEBUG_UTIL);
 
     if (closure->disabled)
 	goto done;

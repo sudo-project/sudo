@@ -54,7 +54,7 @@ sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len)
     FILE *fp = NULL;
     size_t nread;
     int fd2;
-    debug_decl(sudo_filedigest, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudo_filedigest, SUDOERS_DEBUG_UTIL);
 
     *digest_len = sudo_digest_getlen(digest_type);
     if (*digest_len == (size_t)-1) {

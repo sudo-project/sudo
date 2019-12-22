@@ -124,7 +124,7 @@ init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const
 {
     const SSL_METHOD *method;
     SSL_CTX *ctx = NULL;
-    debug_decl(init_tls_client_context, SUDO_DEBUG_UTIL)
+    debug_decl(init_tls_client_context, SUDO_DEBUG_UTIL);
 
     SSL_library_init();
     OpenSSL_add_all_algorithms();
@@ -185,7 +185,7 @@ tls_connect_cb(int sock, int what, void *v)
     struct timespec timeo = { TLS_HANDSHAKE_TIMEO_SEC, 0 };
     int con_stat, err;
 
-    debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL)
+    debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
         sudo_warnx(U_("TLS handshake timeout occured"));
@@ -226,7 +226,7 @@ tls_connect_async(struct client_closure *closure)
 {
     struct sudo_event_base *evbase = NULL;
 
-    debug_decl(tls_connect_async, SUDO_DEBUG_UTIL)
+    debug_decl(tls_connect_async, SUDO_DEBUG_UTIL);
 
 	evbase = sudo_ev_base_alloc();
 	closure->tls_connect_ev = sudo_ev_alloc(closure->sock, SUDO_EV_WRITE,
@@ -255,7 +255,7 @@ done:
 static bool
 do_tls_handshake(struct client_closure *closure)
 {
-    debug_decl(do_tls_handshake, SUDO_DEBUG_UTIL)
+    debug_decl(do_tls_handshake, SUDO_DEBUG_UTIL);
 
     if (ca_bundle == NULL) {
         sudo_warnx("%s", U_("CA bundle file was not specified"));
@@ -305,7 +305,7 @@ connect_server(const char *host, const char *port)
     struct addrinfo hints, *res, *res0;
     const char *cause = "getaddrinfo";
     int error, sock, save_errno;
-    debug_decl(connect_server, SUDO_DEBUG_UTIL)
+    debug_decl(connect_server, SUDO_DEBUG_UTIL);
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
@@ -358,7 +358,7 @@ connect_server(const char *host, const char *port)
 static void
 client_closure_free(struct client_closure *closure)
 {
-    debug_decl(client_closure_free, SUDO_DEBUG_UTIL)
+    debug_decl(client_closure_free, SUDO_DEBUG_UTIL);
 
     if (closure != NULL) {
 	sudo_ev_free(closure->read_ev);
@@ -380,7 +380,7 @@ read_io_buf(struct client_closure *closure)
     struct timing_closure *timing = &closure->timing;
     const char *errstr = NULL;
     size_t nread;
-    debug_decl(read_io_buf, SUDO_DEBUG_UTIL)
+    debug_decl(read_io_buf, SUDO_DEBUG_UTIL);
 
     if (!iolog_files[timing->event].enabled) {
 	errno = ENOENT;
@@ -419,7 +419,7 @@ fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
     uint32_t msg_len;
     bool ret = false;
     size_t len;
-    debug_decl(fmt_client_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_client_message, SUDO_DEBUG_UTIL);
 
     len = client_message__get_packed_size(msg);
     if (len > MESSAGE_SIZE_MAX) {
@@ -462,7 +462,7 @@ split_command(char *command, size_t *lenp)
     char *cp;
     char **args;
     size_t len;
-    debug_decl(split_command, SUDO_DEBUG_UTIL)
+    debug_decl(split_command, SUDO_DEBUG_UTIL);
 
     for (cp = command, len = 0;;) {
 	len++;
@@ -501,7 +501,7 @@ fmt_accept_message(struct client_closure *closure)
     char *hostname;
     bool ret = false;
     size_t n;
-    debug_decl(fmt_accept_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_accept_message, SUDO_DEBUG_UTIL);
 
     /*
      * Fill in AcceptMessage and add it to ClientMessage.
@@ -631,7 +631,7 @@ fmt_restart_message(struct client_closure *closure)
     RestartMessage restart_msg = RESTART_MESSAGE__INIT;
     TimeSpec tv = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_restart_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_restart_message, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: sending RestartMessage, [%lld, %ld]", __func__,
@@ -665,7 +665,7 @@ fmt_exit_message(struct client_closure *closure)
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     ExitMessage exit_msg = EXIT_MESSAGE__INIT;
     bool ret = false;
-    debug_decl(fmt_exit_message, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_exit_message, SUDO_DEBUG_UTIL);
 
     /*
      * We don't have enough data in a sudo I/O log to create a real
@@ -703,7 +703,7 @@ fmt_io_buf(int type, struct client_closure *closure,
     IoBuffer iobuf_msg = IO_BUFFER__INIT;
     TimeSpec delay = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_io_buf, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_io_buf, SUDO_DEBUG_UTIL);
 
     if (!read_io_buf(closure))
 	goto done;
@@ -745,7 +745,7 @@ fmt_winsize(struct client_closure *closure, struct connection_buffer *buf)
     TimeSpec delay = TIME_SPEC__INIT;
     struct timing_closure *timing = &closure->timing;
     bool ret = false;
-    debug_decl(fmt_winsize, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_winsize, SUDO_DEBUG_UTIL);
 
     /* Fill in ChangeWindowSize message. */
     delay.tv_sec = timing->delay.tv_sec;
@@ -782,7 +782,7 @@ fmt_suspend(struct client_closure *closure, struct connection_buffer *buf)
     TimeSpec delay = TIME_SPEC__INIT;
     struct timing_closure *timing = &closure->timing;
     bool ret = false;
-    debug_decl(fmt_suspend, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_suspend, SUDO_DEBUG_UTIL);
 
     /* Fill in CommandSuspend message. */
     delay.tv_sec = timing->delay.tv_sec;
@@ -818,7 +818,7 @@ fmt_next_iolog(struct client_closure *closure)
     struct timing_closure *timing = &closure->timing;
     struct connection_buffer *buf = &closure->write_buf;
     bool ret = false;
-    debug_decl(fmt_next_iolog, SUDO_DEBUG_UTIL)
+    debug_decl(fmt_next_iolog, SUDO_DEBUG_UTIL);
 
     if (buf->len != 0) {
 	sudo_warnx(U_("%s: write buffer already in use"), __func__);
@@ -887,7 +887,7 @@ again:
 static bool
 client_message_completion(struct client_closure *closure)
 {
-    debug_decl(client_message_completion, SUDO_DEBUG_UTIL)
+    debug_decl(client_message_completion, SUDO_DEBUG_UTIL);
 
     switch (closure->state) {
     case SEND_ACCEPT:
@@ -919,7 +919,7 @@ static bool
 handle_server_hello(ServerHello *msg, struct client_closure *closure)
 {
     size_t n;
-    debug_decl(handle_server_hello, SUDO_DEBUG_UTIL)
+    debug_decl(handle_server_hello, SUDO_DEBUG_UTIL);
 
     if (closure->state != RECV_HELLO) {
 	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
@@ -960,7 +960,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 static bool
 handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 {
-    debug_decl(handle_commit_point, SUDO_DEBUG_UTIL)
+    debug_decl(handle_commit_point, SUDO_DEBUG_UTIL);
 
     /* Only valid after we have sent an IO buffer. */
     if (closure->state < SEND_IO) {
@@ -983,7 +983,7 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 static bool
 handle_log_id(char *id, struct client_closure *closure)
 {
-    debug_decl(handle_log_id, SUDO_DEBUG_UTIL)
+    debug_decl(handle_log_id, SUDO_DEBUG_UTIL);
 
     printf("remote log ID: %s\n", id);
     if ((closure->iolog_id = strdup(id)) == NULL)
@@ -998,7 +998,7 @@ handle_log_id(char *id, struct client_closure *closure)
 static bool
 handle_server_error(char *errmsg, struct client_closure *closure)
 {
-    debug_decl(handle_server_error, SUDO_DEBUG_UTIL)
+    debug_decl(handle_server_error, SUDO_DEBUG_UTIL);
 
     sudo_warnx(U_("error message received from server: %s"), errmsg);
     debug_return_bool(false);
@@ -1011,7 +1011,7 @@ handle_server_error(char *errmsg, struct client_closure *closure)
 static bool
 handle_server_abort(char *errmsg, struct client_closure *closure)
 {
-    debug_decl(handle_server_abort, SUDO_DEBUG_UTIL)
+    debug_decl(handle_server_abort, SUDO_DEBUG_UTIL);
 
     sudo_warnx(U_("abort message received from server: %s"), errmsg);
     debug_return_bool(false);
@@ -1027,7 +1027,7 @@ handle_server_message(uint8_t *buf, size_t len,
 {
     ServerMessage *msg;
     bool ret = false;
-    debug_decl(handle_server_message, SUDO_DEBUG_UTIL)
+    debug_decl(handle_server_message, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
@@ -1095,7 +1095,7 @@ server_msg_cb(int fd, int what, void *v)
     struct connection_buffer *buf = &closure->read_buf;
     ssize_t nread;
     uint32_t msg_len;
-    debug_decl(server_msg_cb, SUDO_DEBUG_UTIL)
+    debug_decl(server_msg_cb, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
 
@@ -1185,7 +1185,7 @@ client_msg_cb(int fd, int what, void *v)
     struct client_closure *closure = v;
     struct connection_buffer *buf = &closure->write_buf;
     ssize_t nwritten;
-    debug_decl(client_msg_cb, SUDO_DEBUG_UTIL)
+    debug_decl(client_msg_cb, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
     	"%s: sending %u bytes to server", __func__, buf->len - buf->off);
@@ -1247,7 +1247,7 @@ client_closure_fill(struct client_closure *closure, int sock,
     struct timespec *elapsed, struct timespec *restart, const char *iolog_id,
     struct iolog_info *log_info)
 {
-    debug_decl(client_closure_fill, SUDO_DEBUG_UTIL)
+    debug_decl(client_closure_fill, SUDO_DEBUG_UTIL);
 
     memset(closure, 0, sizeof(*closure));
 
@@ -1296,7 +1296,7 @@ parse_timespec(struct timespec *ts, const char *strval)
     long long tv_sec;
     long tv_nsec;
     char *ep;
-    debug_decl(parse_timespec, SUDO_DEBUG_UTIL)
+    debug_decl(parse_timespec, SUDO_DEBUG_UTIL);
 
     errno = 0;
     tv_sec = strtoll(strval, &ep, 10);
@@ -1360,7 +1360,7 @@ main(int argc, char *argv[])
     const char *open_mode = "r";
     int ch, sock, iolog_dir_fd, fd;
     FILE *fp;
-    debug_decl_vars(main, SUDO_DEBUG_MAIN)
+    debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {

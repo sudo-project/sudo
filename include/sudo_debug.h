@@ -105,17 +105,17 @@ struct sudo_conf_debug_file_list;
 #ifdef HAVE___FUNC__
 # define debug_decl_func(funcname)
 # define debug_decl_vars(funcname, subsys)				       \
-    const int sudo_debug_subsys = (subsys);
+    const int sudo_debug_subsys = (subsys)
 #else
 # define debug_decl_func(funcname)					       \
     const char __func__[] = #funcname;
 # define debug_decl_vars(funcname, subsys)				       \
-    const int sudo_debug_subsys = (subsys);				       \
-    debug_decl_func(funcname);
+    debug_decl_func(funcname)						       \
+    const int sudo_debug_subsys = (subsys)
 #endif
 #define debug_decl(funcname, subsys)					       \
-    debug_decl_vars((funcname), (subsys))				       \
-    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+    debug_decl_vars((funcname), (subsys));				       \
+    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys)
 
 /*
  * Wrappers for sudo_debug_exit() and friends.

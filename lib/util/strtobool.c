@@ -41,7 +41,7 @@
 int
 sudo_strtobool_v1(const char *str)
 {
-    debug_decl(sudo_strtobool, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_strtobool, SUDO_DEBUG_UTIL);
 
     switch (*str) {
 	case '0':

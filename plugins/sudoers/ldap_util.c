@@ -56,7 +56,7 @@ sudo_ldap_is_negated(char **valp)
 {
     char *val = *valp;
     bool ret = false;
-    debug_decl(sudo_ldap_is_negated, SUDOERS_DEBUG_LDAP)
+    debug_decl(sudo_ldap_is_negated, SUDOERS_DEBUG_LDAP);
 
     while (*val == '!') {
 	ret = !ret;
@@ -78,7 +78,7 @@ sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
     char *cp, *val = NULL;
     char *var = optstr;
     int op;
-    debug_decl(sudo_ldap_parse_option, SUDOERS_DEBUG_LDAP)
+    debug_decl(sudo_ldap_parse_option, SUDOERS_DEBUG_LDAP);
 
     /* check for equals sign past first char */
     cp = strchr(var, '=');
@@ -130,7 +130,7 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
     struct member_list *members;
     struct member *m;
     char *val;
-    debug_decl(bv_to_member_list, SUDOERS_DEBUG_LDAP)
+    debug_decl(bv_to_member_list, SUDOERS_DEBUG_LDAP);
 
     if ((members = calloc(1, sizeof(*members))) == NULL)
 	return NULL;
@@ -199,7 +199,7 @@ is_address(char *host)
     union sudo_in_addr_un addr;
     bool ret = false;
     char *slash;
-    debug_decl(is_address, SUDOERS_DEBUG_LDAP)
+    debug_decl(is_address, SUDOERS_DEBUG_LDAP);
 
     /* Check for mask, not currently parsed. */
     if ((slash = strchr(host, '/')) != NULL)
@@ -222,7 +222,7 @@ static struct member *
 host_to_member(char *host)
 {
     struct member *m;
-    debug_decl(host_to_member, SUDOERS_DEBUG_LDAP)
+    debug_decl(host_to_member, SUDOERS_DEBUG_LDAP);
 
     if ((m = calloc(1, sizeof(*m))) == NULL)
 	goto oom;
@@ -260,7 +260,7 @@ sudo_ldap_add_default(const char *var, const char *val, int op,
     char *source, struct defaults_list *defs)
 {
     struct defaults *def;
-    debug_decl(sudo_ldap_add_default, SUDOERS_DEBUG_LDAP)
+    debug_decl(sudo_ldap_add_default, SUDOERS_DEBUG_LDAP);
 
     if ((def = calloc(1, sizeof(*def))) == NULL)
 	goto oom;
@@ -304,7 +304,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
     struct privilege *priv;
     struct member *m;
     char *cmnd;
-    debug_decl(sudo_ldap_role_to_priv, SUDOERS_DEBUG_LDAP)
+    debug_decl(sudo_ldap_role_to_priv, SUDOERS_DEBUG_LDAP);
 
     if ((priv = calloc(1, sizeof(*priv))) == NULL)
 	goto oom;
@@ -526,7 +526,7 @@ sudo_ldap_extract_digest(char **cmnd, struct command_digest *digest)
 {
     char *ep, *cp = *cmnd;
     int digest_type = SUDO_DIGEST_INVALID;
-    debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP)
+    debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP);
 
     /*
      * Check for and extract a digest prefix, e.g.

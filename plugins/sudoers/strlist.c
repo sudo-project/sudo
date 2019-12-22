@@ -43,7 +43,7 @@ struct sudoers_string *
 sudoers_string_alloc(const char *s)
 {
     struct sudoers_string *cs;
-    debug_decl(sudoers_string_alloc, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_string_alloc, SUDOERS_DEBUG_UTIL);
 
     if ((cs = malloc(sizeof(*cs))) != NULL) {
 	if ((cs->str = strdup(s)) == NULL) {
@@ -68,7 +68,7 @@ struct sudoers_str_list *
 str_list_alloc(void)
 {
     struct sudoers_str_list *strlist;
-    debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL)
+    debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL);
 
     strlist = malloc(sizeof(*strlist));
     if (strlist != NULL) {
@@ -84,7 +84,7 @@ str_list_free(void *v)
 {
     struct sudoers_str_list *strlist = v;
     struct sudoers_string *first;
-    debug_decl(str_list_free, SUDOERS_DEBUG_UTIL)
+    debug_decl(str_list_free, SUDOERS_DEBUG_UTIL);
 
     if (strlist != NULL) {
 	if (--strlist->refcnt == 0) {

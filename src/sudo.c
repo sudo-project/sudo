@@ -142,7 +142,7 @@ main(int argc, char *argv[], char *envp[])
     struct sudo_settings *settings;
     struct plugin_container *plugin, *next;
     sigset_t mask;
-    debug_decl_vars(main, SUDO_DEBUG_MAIN)
+    debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
     initprogname(argc > 0 ? argv[0] : "sudo");
 
@@ -355,7 +355,7 @@ static void
 fix_fds(void)
 {
     int miss[3], devnull = -1;
-    debug_decl(fix_fds, SUDO_DEBUG_UTIL)
+    debug_decl(fix_fds, SUDO_DEBUG_UTIL);
 
     /*
      * stdin, stdout and stderr must be open; set them to /dev/null
@@ -389,7 +389,7 @@ static int
 fill_group_list(struct user_details *ud)
 {
     int ret = -1;
-    debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
+    debug_decl(fill_group_list, SUDO_DEBUG_UTIL);
 
     /*
      * If user specified a max number of groups, use it, otherwise let
@@ -427,7 +427,7 @@ get_user_groups(struct user_details *ud)
     char *cp, *gid_list = NULL;
     size_t glsize;
     int i, len, group_source;
-    debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
+    debug_decl(get_user_groups, SUDO_DEBUG_UTIL);
 
     ud->groups = NULL;
     group_source = sudo_conf_group_source();
@@ -496,7 +496,7 @@ get_user_info(struct user_details *ud)
     mode_t mask;
     struct passwd *pw;
     int fd;
-    debug_decl(get_user_info, SUDO_DEBUG_UTIL)
+    debug_decl(get_user_info, SUDO_DEBUG_UTIL);
 
     /*
      * On BSD systems you can set a hint to keep the password and
@@ -642,7 +642,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     id_t id;
     char *cp;
     const char *errstr;
-    debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM)
+    debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM);
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
@@ -861,7 +861,7 @@ sudo_check_suid(const char *sudo)
     char pathbuf[PATH_MAX];
     struct stat sb;
     bool qualified;
-    debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM)
+    debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM);
 
     if (geteuid() != ROOT_UID) {
 	/* Search for sudo binary in PATH if not fully qualified. */
@@ -912,7 +912,7 @@ bool
 set_user_groups(struct command_details *details)
 {
     bool ret = false;
-    debug_decl(set_user_groups, SUDO_DEBUG_EXEC)
+    debug_decl(set_user_groups, SUDO_DEBUG_EXEC);
 
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
 	if (details->ngroups >= 0) {
@@ -951,7 +951,7 @@ run_command(struct command_details *details)
     struct plugin_container *plugin;
     struct command_status cstat;
     int status = W_EXITCODE(1, 0);
-    debug_decl(run_command, SUDO_DEBUG_EXEC)
+    debug_decl(run_command, SUDO_DEBUG_EXEC);
 
     cstat.type = CMD_INVALID;
     cstat.val = 0;
@@ -1006,7 +1006,7 @@ format_plugin_settings(struct plugin_container *plugin,
     struct sudo_settings *setting;
     char **plugin_settings;
     unsigned int i = 0;
-    debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
+    debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM);
 
     /* Determine sudo_settings array size (including plugin_path and NULL) */
     plugin_settings_size = 2;
@@ -1062,7 +1062,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
 {
     char **plugin_settings;
     int ret;
-    debug_decl(policy_open, SUDO_DEBUG_PCOMM)
+    debug_decl(policy_open, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
@@ -1098,7 +1098,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
 static void
 policy_close(struct plugin_container *plugin, int exit_status, int error_code)
 {
-    debug_decl(policy_close, SUDO_DEBUG_PCOMM)
+    debug_decl(policy_close, SUDO_DEBUG_PCOMM);
     if (plugin->u.policy->close != NULL) {
 	sudo_debug_set_active_instance(plugin->debug_instance);
 	plugin->u.policy->close(exit_status, error_code);
@@ -1114,7 +1114,7 @@ static int
 policy_show_version(struct plugin_container *plugin, int verbose)
 {
     int ret;
-    debug_decl(policy_show_version, SUDO_DEBUG_PCOMM)
+    debug_decl(policy_show_version, SUDO_DEBUG_PCOMM);
 
     if (plugin->u.policy->show_version == NULL)
 	debug_return_int(true);
@@ -1134,7 +1134,7 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
     char **user_env_out[])
 {
     int ret;
-    debug_decl(policy_check, SUDO_DEBUG_PCOMM)
+    debug_decl(policy_check, SUDO_DEBUG_PCOMM);
 
     if (plugin->u.policy->check_policy == NULL) {
 	sudo_fatalx(U_("policy plugin %s is missing the `check_policy' method"),
@@ -1159,7 +1159,7 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
     int verbose, const char *list_user)
 {
     int ret;
-    debug_decl(policy_list, SUDO_DEBUG_PCOMM)
+    debug_decl(policy_list, SUDO_DEBUG_PCOMM);
 
     if (plugin->u.policy->list == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support listing privileges"),
@@ -1180,7 +1180,7 @@ static int
 policy_validate(struct plugin_container *plugin)
 {
     int ret;
-    debug_decl(policy_validate, SUDO_DEBUG_PCOMM)
+    debug_decl(policy_validate, SUDO_DEBUG_PCOMM);
 
     if (plugin->u.policy->validate == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support the -v option"),
@@ -1200,7 +1200,7 @@ policy_validate(struct plugin_container *plugin)
 static void
 policy_invalidate(struct plugin_container *plugin, int remove)
 {
-    debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM)
+    debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM);
     if (plugin->u.policy->invalidate == NULL) {
 	sudo_fatalx(U_("policy plugin %s does not support the -k/-K options"),
 	    plugin->name);
@@ -1219,7 +1219,7 @@ int
 policy_init_session(struct command_details *details)
 {
     int ret = true;
-    debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
+    debug_decl(policy_init_session, SUDO_DEBUG_PCOMM);
 
     /*
      * We set groups, including supplementary group vector,
@@ -1263,7 +1263,7 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 {
     char **plugin_settings;
     int ret;
-    debug_decl(iolog_open, SUDO_DEBUG_PCOMM)
+    debug_decl(iolog_open, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
@@ -1303,7 +1303,7 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 static void
 iolog_close(struct plugin_container *plugin, int exit_status, int error_code)
 {
-    debug_decl(iolog_close, SUDO_DEBUG_PCOMM)
+    debug_decl(iolog_close, SUDO_DEBUG_PCOMM);
 
     if (plugin->u.io->close != NULL) {
 	sudo_debug_set_active_instance(plugin->debug_instance);
@@ -1317,7 +1317,7 @@ static int
 iolog_show_version(struct plugin_container *plugin, int verbose)
 {
     int ret;
-    debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
+    debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM);
 
     if (plugin->u.io->show_version == NULL)
 	debug_return_int(true);
@@ -1339,7 +1339,7 @@ iolog_show_version(struct plugin_container *plugin, int verbose)
 static void
 iolog_unlink(struct plugin_container *plugin)
 {
-    debug_decl(iolog_unlink, SUDO_DEBUG_PCOMM)
+    debug_decl(iolog_unlink, SUDO_DEBUG_PCOMM);
 
     /* Deregister hooks, if any. */
     if (plugin->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
@@ -1365,7 +1365,7 @@ plugin_event_set(struct sudo_plugin_event *pev, int fd, int events,
     sudo_ev_callback_t callback, void *closure)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_set, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_set, SUDO_DEBUG_PCOMM);
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
     if (sudo_ev_set(&ev_int->private, fd, events, callback, closure) == -1)
@@ -1384,7 +1384,7 @@ static int
 plugin_event_add(struct sudo_plugin_event *pev, struct timespec *timo)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_add, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_add, SUDO_DEBUG_PCOMM);
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
     if (sudo_ev_add(NULL, &ev_int->private, timo, 0) == -1)
@@ -1399,7 +1399,7 @@ static int
 plugin_event_del(struct sudo_plugin_event *pev)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_del, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_del, SUDO_DEBUG_PCOMM);
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
     if (sudo_ev_del(NULL, &ev_int->private) == -1)
@@ -1415,7 +1415,7 @@ plugin_event_pending(struct sudo_plugin_event *pev, int events,
     struct timespec *ts)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_pending, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_pending, SUDO_DEBUG_PCOMM);
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
     debug_return_int(sudo_ev_pending(&ev_int->private, events, ts));
@@ -1428,7 +1428,7 @@ static int
 plugin_event_fd(struct sudo_plugin_event *pev)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_fd, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_fd, SUDO_DEBUG_PCOMM);
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
     debug_return_int(sudo_ev_get_fd(&ev_int->private));
@@ -1441,7 +1441,7 @@ static void
 plugin_event_loopbreak(struct sudo_plugin_event *pev)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_loopbreak, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_loopbreak, SUDO_DEBUG_PCOMM);
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
     sudo_ev_loopbreak(ev_int->private.base);
@@ -1456,7 +1456,7 @@ static void
 plugin_event_setbase(struct sudo_plugin_event *pev, void *base)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_setbase, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_setbase, SUDO_DEBUG_PCOMM);
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
     if (ev_int->private.base != NULL)
@@ -1472,7 +1472,7 @@ static void
 plugin_event_free(struct sudo_plugin_event *pev)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_free, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_free, SUDO_DEBUG_PCOMM);
 
     /* The private field is first so sudo_ev_free() can free the struct. */
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
@@ -1488,7 +1488,7 @@ struct sudo_plugin_event *
 sudo_plugin_event_alloc(void)
 {
     struct sudo_plugin_event_int *ev_int;
-    debug_decl(plugin_event_alloc, SUDO_DEBUG_PCOMM)
+    debug_decl(plugin_event_alloc, SUDO_DEBUG_PCOMM);
 
     if ((ev_int = malloc(sizeof(*ev_int))) == NULL)
 	debug_return_ptr(NULL);
@@ -1512,7 +1512,7 @@ sudo_plugin_event_alloc(void)
 static void
 free_plugin_container(struct plugin_container *plugin, bool ioplugin)
 {
-    debug_decl(free_plugin_container, SUDO_DEBUG_PLUGIN)
+    debug_decl(free_plugin_container, SUDO_DEBUG_PLUGIN);
 
     free(plugin->path);
     free(plugin->name);
@@ -1533,7 +1533,7 @@ gc_add(enum sudo_gc_types type, void *v)
 {
 #ifdef NO_LEAKS
     struct sudo_gc_entry *gc;
-    debug_decl(gc_add, SUDO_DEBUG_MAIN)
+    debug_decl(gc_add, SUDO_DEBUG_MAIN);
 
     if (v == NULL)
 	debug_return_bool(false);
@@ -1570,7 +1570,7 @@ gc_run(void)
     struct plugin_container *plugin;
     struct sudo_gc_entry *gc;
     char **cur;
-    debug_decl(gc_run, SUDO_DEBUG_MAIN)
+    debug_decl(gc_run, SUDO_DEBUG_MAIN);
 
     /* Collect garbage. */
     while ((gc = SLIST_FIRST(&sudo_gc_list))) {

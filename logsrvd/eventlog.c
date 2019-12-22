@@ -85,7 +85,7 @@ new_logline(const char *message, const char *errstr,
     const char *tsid = NULL;
     size_t len = 0;
     int i;
-    debug_decl(new_logline, SUDO_DEBUG_UTIL)
+    debug_decl(new_logline, SUDO_DEBUG_UTIL);
 
     /* A TSID may be a sudoers-style session ID or a free-form string. */
     if (iolog_file != NULL) {
@@ -238,7 +238,7 @@ static void
 mysyslog(int pri, const char *fmt, ...)
 {
     va_list ap;
-    debug_decl(mysyslog, SUDO_DEBUG_UTIL)
+    debug_decl(mysyslog, SUDO_DEBUG_UTIL);
 
     openlog("sudo", 0, logsrvd_conf_syslog_facility());
     va_start(ap, fmt);
@@ -258,7 +258,7 @@ do_syslog(int pri, const struct iolog_details *details, char *msg)
     size_t len, maxlen;
     char *p, *tmp, save;
     const char *fmt;
-    debug_decl(do_syslog, SUDO_DEBUG_UTIL)
+    debug_decl(do_syslog, SUDO_DEBUG_UTIL);
 
     /* A priority of -1 corresponds to "none". */
     if (pri == -1)
@@ -314,7 +314,7 @@ do_logfile(const char *logfile, const struct iolog_details *details,
     bool ret = false;
     mode_t oldmask;
     FILE *fp;
-    debug_decl(do_logfile, SUDO_DEBUG_UTIL)
+    debug_decl(do_logfile, SUDO_DEBUG_UTIL);
 
     oldmask = umask(S_IRWXG|S_IRWXO);
     fp = fopen(logfile, "a");
@@ -361,7 +361,7 @@ log_accept(const struct iolog_details *details)
     char *logline;
     bool ret = true;
     int pri;
-    debug_decl(log_accept, SUDO_DEBUG_UTIL)
+    debug_decl(log_accept, SUDO_DEBUG_UTIL);
 
     if (log_type == EVLOG_NONE)
 	debug_return_bool(true);
@@ -395,7 +395,7 @@ log_reject(const struct iolog_details *details, const char *reason)
     char *logline;
     bool ret = true;
     int pri;
-    debug_decl(log_reject, SUDO_DEBUG_UTIL)
+    debug_decl(log_reject, SUDO_DEBUG_UTIL);
 
     if (log_type == EVLOG_NONE)
 	debug_return_bool(true);
@@ -430,7 +430,7 @@ log_alert(const struct iolog_details *details, TimeSpec *alert_time,
     char *logline;
     bool ret = true;
     int pri;
-    debug_decl(log_alert, SUDO_DEBUG_UTIL)
+    debug_decl(log_alert, SUDO_DEBUG_UTIL);
 
     if (log_type == EVLOG_NONE)
 	debug_return_bool(true);

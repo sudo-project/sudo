@@ -47,7 +47,7 @@ sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, stru
 {
     struct stat sb;
     int ret = SUDO_PATH_MISSING;
-    debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL);
 
     if (path != NULL && stat(path, &sb) == 0) {
 	if ((sb.st_mode & _S_IFMT) != type) {

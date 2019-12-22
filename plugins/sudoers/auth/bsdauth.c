@@ -63,7 +63,7 @@ int
 bsdauth_init(struct passwd *pw, sudo_auth *auth)
 {
     static struct bsdauth_state state;
-    debug_decl(bsdauth_init, SUDOERS_DEBUG_AUTH)
+    debug_decl(bsdauth_init, SUDOERS_DEBUG_AUTH);
 
     /* Get login class based on auth user, which may not be invoking user. */
     if (pw->pw_class && *pw->pw_class)
@@ -113,7 +113,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
     int authok = 0;
     struct sigaction sa, osa;
     auth_session_t *as = ((struct bsdauth_state *) auth->data)->as;
-    debug_decl(bsdauth_verify, SUDOERS_DEBUG_AUTH)
+    debug_decl(bsdauth_verify, SUDOERS_DEBUG_AUTH);
 
     /* save old signal handler */
     sigemptyset(&sa.sa_mask);
@@ -178,7 +178,7 @@ int
 bsdauth_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 {
     struct bsdauth_state *state = auth->data;
-    debug_decl(bsdauth_approval, SUDOERS_DEBUG_AUTH)
+    debug_decl(bsdauth_approval, SUDOERS_DEBUG_AUTH);
 
     if (auth_approval(state->as, state->lc, pw->pw_name, "auth-sudo") == 0) {
 	if (auth_getstate(state->as) & AUTH_EXPIRED)
@@ -194,7 +194,7 @@ int
 bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     struct bsdauth_state *state = auth->data;
-    debug_decl(bsdauth_cleanup, SUDOERS_DEBUG_AUTH)
+    debug_decl(bsdauth_cleanup, SUDOERS_DEBUG_AUTH);
 
     if (state != NULL) {
 	auth_close(state->as);

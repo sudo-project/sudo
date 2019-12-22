@@ -103,7 +103,7 @@ static struct conv_filter *conv_filter;
 static void
 conv_filter_init(void)
 {
-    debug_decl(conv_filter_init, SUDOERS_DEBUG_AUTH)
+    debug_decl(conv_filter_init, SUDOERS_DEBUG_AUTH);
 
 #ifdef __hpux__
     /*
@@ -198,7 +198,7 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
     const char *tty = user_ttypath;
     const char *errstr, *pam_service;
     int rc;
-    debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH);
 
     /* Stash pointer to last pam status. */
     auth->data = &pam_status;
@@ -292,7 +292,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 {
     const char *s;
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_verify, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_pam_verify, SUDOERS_DEBUG_AUTH);
 
     def_prompt = prompt;	/* for converse */
     getpass_error = false;	/* set by converse if user presses ^C */
@@ -327,7 +327,7 @@ sudo_pam_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
     const char *s;
     int rc, status = AUTH_SUCCESS;
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_approval, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_pam_approval, SUDOERS_DEBUG_AUTH);
 
     if (def_pam_acct_mgmt) {
 	rc = pam_acct_mgmt(pamh, PAM_SILENT);
@@ -394,7 +394,7 @@ int
 sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_cleanup, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_pam_cleanup, SUDOERS_DEBUG_AUTH);
 
     /* If successful, we can't close the session until sudo_pam_end_session() */
     if (*pam_status != PAM_SUCCESS || auth->end_session == NULL) {
@@ -410,7 +410,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     int rc, status = AUTH_SUCCESS;
     int *pam_status = (int *) auth->data;
     const char *errstr;
-    debug_decl(sudo_pam_begin_session, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_pam_begin_session, SUDOERS_DEBUG_AUTH);
 
     /*
      * If there is no valid user we cannot open a PAM session.
@@ -522,7 +522,7 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 {
     int rc, status = AUTH_SUCCESS;
     const char *errstr;
-    debug_decl(sudo_pam_end_session, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_pam_end_session, SUDOERS_DEBUG_AUTH);
 
     if (pamh != NULL) {
 	/*
@@ -595,7 +595,7 @@ static bool
 use_pam_prompt(const char *pam_prompt)
 {
     size_t user_len;
-    debug_decl(use_pam_prompt, SUDOERS_DEBUG_AUTH)
+    debug_decl(use_pam_prompt, SUDOERS_DEBUG_AUTH);
 
     /* Always use sudo prompt if passprompt_override is set. */
     if (def_passprompt_override)
@@ -656,7 +656,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     char *pass;
     int n, type;
     int ret = PAM_SUCCESS;
-    debug_decl(converse, SUDOERS_DEBUG_AUTH)
+    debug_decl(converse, SUDOERS_DEBUG_AUTH);
 
     if (num_msg <= 0 || num_msg > PAM_MAX_NUM_MSG) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,

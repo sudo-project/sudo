@@ -109,7 +109,7 @@ utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
 {
     const char *line = new->ut_line;
     size_t idlen;
-    debug_decl(utmp_setid, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_setid, SUDO_DEBUG_UTMP);
 
     /* Skip over "tty" in the id if old entry did too. */
     if (old != NULL) {
@@ -141,7 +141,7 @@ static void
 utmp_settime(sudo_utmp_t *ut)
 {
     struct timeval tv;
-    debug_decl(utmp_settime, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_settime, SUDO_DEBUG_UTMP);
 
     if (gettimeofday(&tv, NULL) == 0) {
 #if defined(HAVE_STRUCT_UTMP_UT_TV)
@@ -162,7 +162,7 @@ static void
 utmp_fill(const char *line, const char *user, sudo_utmp_t *ut_old,
     sudo_utmp_t *ut_new)
 {
-    debug_decl(utmp_file, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_file, SUDO_DEBUG_UTMP);
 
     if (ut_old == NULL) {
 	memset(ut_new, 0, sizeof(*ut_new));
@@ -204,7 +204,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
 {
     sudo_utmp_t utbuf, *ut_old = NULL;
     bool ret = false;
-    debug_decl(utmp_login, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_login, SUDO_DEBUG_UTMP);
 
     /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
@@ -232,7 +232,7 @@ utmp_logout(const char *line, int status)
 {
     bool ret = false;
     sudo_utmp_t *ut, utbuf;
-    debug_decl(utmp_logout, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_logout, SUDO_DEBUG_UTMP);
 
     /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
@@ -269,7 +269,7 @@ utmp_slot(const char *line, int ttyfd)
 {
     int slot = 1;
     struct ttyent *tty;
-    debug_decl(utmp_slot, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_slot, SUDO_DEBUG_UTMP);
 
     setttyent();
     while ((tty = getttyent()) != NULL) {
@@ -285,7 +285,7 @@ static int
 utmp_slot(const char *line, int ttyfd)
 {
     int sfd, slot;
-    debug_decl(utmp_slot, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_slot, SUDO_DEBUG_UTMP);
 
     /*
      * Temporarily point stdin to the tty since ttyslot()
@@ -312,7 +312,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     bool ret = false;
     int slot;
     FILE *fp;
-    debug_decl(utmp_login, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_login, SUDO_DEBUG_UTMP);
 
     /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
@@ -364,7 +364,7 @@ utmp_logout(const char *line, int status)
     sudo_utmp_t utbuf;
     bool ret = false;
     FILE *fp;
-    debug_decl(utmp_logout, SUDO_DEBUG_UTMP)
+    debug_decl(utmp_logout, SUDO_DEBUG_UTMP);
 
     if ((fp = fopen(_PATH_UTMP, "r+")) == NULL)
 	debug_return_int(ret);

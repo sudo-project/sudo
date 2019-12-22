@@ -94,7 +94,7 @@ void
 disable_coredump(void)
 {
     struct rlimit rl = { 0, 0 };
-    debug_decl(disable_coredump, SUDO_DEBUG_UTIL)
+    debug_decl(disable_coredump, SUDO_DEBUG_UTIL);
 
     if (getrlimit(RLIMIT_CORE, &corelimit) == -1)
 	sudo_warn("getrlimit(RLIMIT_CORE)");
@@ -117,7 +117,7 @@ disable_coredump(void)
 static void
 restore_coredump(void)
 {
-    debug_decl(restore_coredump, SUDO_DEBUG_UTIL)
+    debug_decl(restore_coredump, SUDO_DEBUG_UTIL);
 
     if (coredump_disabled) {
 	if (setrlimit(RLIMIT_CORE, &corelimit) == -1)
@@ -142,7 +142,7 @@ unlimit_nproc(void)
 {
 #ifdef __linux__
     struct rlimit rl = { RLIM_INFINITY, RLIM_INFINITY };
-    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
+    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL);
 
     if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
 	sudo_warn("getrlimit(RLIMIT_NPROC)");
@@ -162,7 +162,7 @@ void
 restore_nproc(void)
 {
 #ifdef __linux__
-    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
+    debug_decl(restore_nproc, SUDO_DEBUG_UTIL);
 
     if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
 	sudo_warn("setrlimit(RLIMIT_NPROC)");
@@ -180,7 +180,7 @@ unlimit_sudo(void)
 {
     unsigned int idx;
     int rc;
-    debug_decl(unlimit_sudo, SUDO_DEBUG_UTIL)
+    debug_decl(unlimit_sudo, SUDO_DEBUG_UTIL);
 
     /* Set resource limits to unlimited and stash the old values. */
     for (idx = 0; idx < nitems(saved_limits); idx++) {
@@ -224,7 +224,7 @@ void
 restore_limits(void)
 {
     unsigned int idx;
-    debug_decl(restore_limits, SUDO_DEBUG_UTIL)
+    debug_decl(restore_limits, SUDO_DEBUG_UTIL);
 
     /* Restore resource limits to saved values. */
     for (idx = 0; idx < nitems(saved_limits); idx++) {

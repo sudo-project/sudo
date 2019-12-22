@@ -156,7 +156,7 @@ sudoers_debug_register(const char *program,
 void
 sudoers_debug_deregister(void)
 {
-    debug_decl(sudoers_debug_deregister, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_debug_deregister, SUDOERS_DEBUG_PLUGIN);
 
     if (sudoers_debug_refcnt != 0) {
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);

@@ -64,7 +64,7 @@ audit_sudo_selected(int sorf)
 	auditinfo_addr_t ainfo_addr;
 	struct au_mask *mask;
 	int rc;
-	debug_decl(audit_sudo_selected, SUDOERS_DEBUG_AUDIT)
+	debug_decl(audit_sudo_selected, SUDOERS_DEBUG_AUDIT);
 
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) < 0) {
 #ifdef BSM_AUDIT_COMPAT
@@ -114,7 +114,7 @@ bsm_audit_success(char *exec_args[])
 	long au_cond;
 	int aufd, selected;
 	pid_t pid;
-	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT)
+	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT);
 
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.
@@ -206,7 +206,7 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	au_id_t auid;
 	pid_t pid;
 	int aufd;
-	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT)
+	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT);
 
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.

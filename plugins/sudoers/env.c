@@ -242,7 +242,7 @@ env_init(char * const envp[])
 {
     char * const *ep;
     size_t len;
-    debug_decl(env_init, SUDOERS_DEBUG_ENV)
+    debug_decl(env_init, SUDOERS_DEBUG_ENV);
 
     if (envp == NULL) {
 	/* Free the old envp we allocated, if any. */
@@ -400,7 +400,7 @@ static int
 sudo_putenv(char *str, bool dupcheck, bool overwrite)
 {
     int ret;
-    debug_decl(sudo_putenv, SUDOERS_DEBUG_ENV)
+    debug_decl(sudo_putenv, SUDOERS_DEBUG_ENV);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_putenv: %s", str);
 
@@ -425,7 +425,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
     char *estring;
     size_t esize;
     int ret = -1;
-    debug_decl(sudo_setenv2, SUDOERS_DEBUG_ENV)
+    debug_decl(sudo_setenv2, SUDOERS_DEBUG_ENV);
 
     esize = strlen(var) + 1 + strlen(val) + 1;
     if ((estring = malloc(esize)) == NULL) {
@@ -547,7 +547,7 @@ int
 sudo_unsetenv(const char *name)
 {
     int ret;
-    debug_decl(sudo_unsetenv, SUDOERS_DEBUG_ENV)
+    debug_decl(sudo_unsetenv, SUDOERS_DEBUG_ENV);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_unsetenv: %s", name);
 
@@ -587,7 +587,7 @@ char *
 sudo_getenv(const char *name)
 {
     char *val;
-    debug_decl(sudo_getenv, SUDOERS_DEBUG_ENV)
+    debug_decl(sudo_getenv, SUDOERS_DEBUG_ENV);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_getenv: %s", name);
 
@@ -605,7 +605,7 @@ matches_env_list(const char *var, struct list_members *list, bool *full_match)
 {
     struct list_member *cur;
     bool is_logname = false;
-    debug_decl(matches_env_list, SUDOERS_DEBUG_ENV)
+    debug_decl(matches_env_list, SUDOERS_DEBUG_ENV);
 
     switch (*var) {
     case 'L':
@@ -652,7 +652,7 @@ static bool
 matches_env_delete(const char *var)
 {
     bool full_match;	/* unused */
-    debug_decl(matches_env_delete, SUDOERS_DEBUG_ENV)
+    debug_decl(matches_env_delete, SUDOERS_DEBUG_ENV);
 
     /* Skip anything listed in env_delete. */
     debug_return_bool(matches_env_list(var, &def_env_delete, &full_match));
@@ -667,7 +667,7 @@ tz_is_sane(const char *tzval)
 {
     const char *cp;
     char lastch;
-    debug_decl(tz_is_sane, SUDOERS_DEBUG_ENV)
+    debug_decl(tz_is_sane, SUDOERS_DEBUG_ENV);
 
     /* tzcode treats a value beginning with a ':' as a path. */
     if (tzval[0] == ':')
@@ -715,7 +715,7 @@ static int
 matches_env_check(const char *var, bool *full_match)
 {
     int keepit = -1;
-    debug_decl(matches_env_check, SUDOERS_DEBUG_ENV)
+    debug_decl(matches_env_check, SUDOERS_DEBUG_ENV);
 
     /* Skip anything listed in env_check that includes '/' or '%'. */
     if (matches_env_list(var, &def_env_check, full_match)) {
@@ -739,7 +739,7 @@ static bool
 matches_env_keep(const char *var, bool *full_match)
 {
     bool keepit = false;
-    debug_decl(matches_env_keep, SUDOERS_DEBUG_ENV)
+    debug_decl(matches_env_keep, SUDOERS_DEBUG_ENV);
 
     /* Preserve SHELL variable for "sudo -s". */
     if (ISSET(sudo_mode, MODE_SHELL) && strncmp(var, "SHELL=", 6) == 0) {
@@ -780,7 +780,7 @@ env_should_keep(const char *var)
     int keepit;
     bool full_match = false;
     const char *cp;
-    debug_decl(env_should_keep, SUDOERS_DEBUG_ENV)
+    debug_decl(env_should_keep, SUDOERS_DEBUG_ENV);
 
     keepit = matches_env_check(var, &full_match);
     if (keepit == -1)
@@ -810,7 +810,7 @@ env_merge(char * const envp[])
 {
     char * const *ep;
     bool ret = true;
-    debug_decl(env_merge, SUDOERS_DEBUG_ENV)
+    debug_decl(env_merge, SUDOERS_DEBUG_ENV);
 
     for (ep = envp; *ep != NULL; ep++) {
 	/* XXX - avoid checking value here, should only check name */
@@ -887,7 +887,7 @@ rebuild_env(void)
     char idbuf[MAX_UID_T_LEN + 1];
     unsigned int didvar;
     bool reset_home = false;
-    debug_decl(rebuild_env, SUDOERS_DEBUG_ENV)
+    debug_decl(rebuild_env, SUDOERS_DEBUG_ENV);
 
     /*
      * Either clean out the environment or reset to a safe default.
@@ -1144,7 +1144,7 @@ insert_env_vars(char * const envp[])
 {
     char * const *ep;
     bool ret = true;
-    debug_decl(insert_env_vars, SUDOERS_DEBUG_ENV)
+    debug_decl(insert_env_vars, SUDOERS_DEBUG_ENV);
 
     /* Add user-specified environment variables. */
     if (envp != NULL) {
@@ -1171,7 +1171,7 @@ validate_env_vars(char * const env_vars[])
     char * const *ep;
     char *eq, errbuf[4096];
     bool okvar, ret = true;
-    debug_decl(validate_env_vars, SUDOERS_DEBUG_ENV)
+    debug_decl(validate_env_vars, SUDOERS_DEBUG_ENV);
 
     if (env_vars == NULL)
 	debug_return_bool(true);	/* nothing to do */
@@ -1214,7 +1214,7 @@ static void *
 env_file_open_local(const char *path)
 {
     struct env_file_local *efl;
-    debug_decl(env_file_open_local, SUDOERS_DEBUG_ENV)
+    debug_decl(env_file_open_local, SUDOERS_DEBUG_ENV);
 
     efl = calloc(1, sizeof(*efl));
     if (efl != NULL) {
@@ -1232,7 +1232,7 @@ static void
 env_file_close_local(void *cookie)
 {
     struct env_file_local *efl = cookie;
-    debug_decl(env_file_close_local, SUDOERS_DEBUG_ENV)
+    debug_decl(env_file_close_local, SUDOERS_DEBUG_ENV);
 
     if (efl != NULL) {
 	if (efl->fp != NULL)
@@ -1259,7 +1259,7 @@ env_file_next_local(void *cookie, int *errnum)
     struct env_file_local *efl = cookie;
     char *var, *val, *ret = NULL;
     size_t var_len, val_len;
-    debug_decl(env_file_next_local, SUDOERS_DEBUG_ENV)
+    debug_decl(env_file_next_local, SUDOERS_DEBUG_ENV);
 
     *errnum = 0;
     if (efl->fp == NULL)
@@ -1344,7 +1344,7 @@ read_env_file(const char *path, bool overwrite, bool restricted)
     char *envstr;
     void *cookie;
     int errnum;
-    debug_decl(read_env_file, SUDOERS_DEBUG_ENV)
+    debug_decl(read_env_file, SUDOERS_DEBUG_ENV);
 
     /*
      * The environment file may be handled differently depending on
@@ -1393,7 +1393,7 @@ init_envtables(void)
 {
     struct list_member *cur;
     const char **p;
-    debug_decl(init_envtables, SUDOERS_DEBUG_ENV)
+    debug_decl(init_envtables, SUDOERS_DEBUG_ENV);
 
     /* Fill in the "env_delete" list. */
     for (p = initial_badenv_table; *p; p++) {

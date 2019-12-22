@@ -70,7 +70,7 @@ sudo_digest_type_to_gcry(int digest_type)
 struct sudo_digest *
 sudo_digest_alloc_v1(int digest_type)
 {
-    debug_decl(sudo_digest_alloc, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_digest_alloc, SUDO_DEBUG_UTIL);
     struct sudo_digest *dig;
     int gcry_digest_type;
 
@@ -96,7 +96,7 @@ sudo_digest_alloc_v1(int digest_type)
 void
 sudo_digest_free_v1(struct sudo_digest *dig)
 {
-    debug_decl(sudo_digest_free, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_digest_free, SUDO_DEBUG_UTIL);
 
     if (dig != NULL) {
 	gcry_md_close(dig->ctx);
@@ -109,7 +109,7 @@ sudo_digest_free_v1(struct sudo_digest *dig)
 void
 sudo_digest_reset_v1(struct sudo_digest *dig)
 {
-    debug_decl(sudo_digest_reset, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_digest_reset, SUDO_DEBUG_UTIL);
 
     gcry_md_reset(dig->ctx);
 
@@ -119,7 +119,7 @@ sudo_digest_reset_v1(struct sudo_digest *dig)
 int
 sudo_digest_getlen_v1(int digest_type)
 {
-    debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL);
     int gcry_digest_type;
 
     gcry_digest_type = sudo_digest_type_to_gcry(digest_type);
@@ -132,7 +132,7 @@ sudo_digest_getlen_v1(int digest_type)
 void
 sudo_digest_update_v1(struct sudo_digest *dig, const void *data, size_t len)
 {
-    debug_decl(sudo_digest_update, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_digest_update, SUDO_DEBUG_UTIL);
 
     gcry_md_write(dig->ctx, data, len);
 
@@ -142,7 +142,7 @@ sudo_digest_update_v1(struct sudo_digest *dig, const void *data, size_t len)
 void
 sudo_digest_final_v1(struct sudo_digest *dig, unsigned char *md)
 {
-    debug_decl(sudo_digest_final, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_digest_final, SUDO_DEBUG_UTIL);
 
     gcry_md_final(dig->ctx);
     memcpy(md, gcry_md_read(dig->ctx, 0), dig->digest_len);

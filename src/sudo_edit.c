@@ -66,7 +66,7 @@ static void
 switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 {
     int serrno = errno;
-    debug_decl(switch_user, SUDO_DEBUG_EDIT)
+    debug_decl(switch_user, SUDO_DEBUG_EDIT);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"set uid:gid to %u:%u(%u)", (unsigned int)euid, (unsigned int)egid,
@@ -99,7 +99,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 static int
 dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 {
-    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
+    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT);
     int rc;
 
     /* Change uid/gid/groups to invoking user, usually needs root perms. */
@@ -130,7 +130,7 @@ static bool
 group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
 {
     int i;
-    debug_decl(group_matches, SUDO_DEBUG_EDIT)
+    debug_decl(group_matches, SUDO_DEBUG_EDIT);
 
     if (target == gid) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -156,7 +156,7 @@ static int
 dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 {
     struct stat sb;
-    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
+    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT);
 
     if (fstat(dfd, &sb) == -1)
 	debug_return_int(-1);
@@ -208,7 +208,7 @@ set_tmpdir(struct command_details *command_details)
     unsigned int i;
     size_t len;
     int dfd;
-    debug_decl(set_tmpdir, SUDO_DEBUG_EDIT)
+    debug_decl(set_tmpdir, SUDO_DEBUG_EDIT);
 
     for (i = 0; tdir == NULL && i < nitems(tmpdirs); i++) {
 	if ((dfd = open(tmpdirs[i], O_RDONLY)) != -1) {
@@ -241,7 +241,7 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
 {
     const char *cp, *suff;
     int len, tfd;
-    debug_decl(sudo_edit_mktemp, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_mktemp, SUDO_DEBUG_EDIT);
 
     if ((cp = strrchr(ofile, '/')) != NULL)
 	cp++;
@@ -266,7 +266,7 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
-    debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT);
 
     debug_return_int(openat(dfd, path, oflags|O_NOFOLLOW, mode));
 }
@@ -279,7 +279,7 @@ static bool
 sudo_edit_is_symlink(int fd, char *path)
 {
     struct stat sb1, sb2;
-    debug_decl(sudo_edit_is_symlink, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_is_symlink, SUDO_DEBUG_EDIT);
 
     /*
      * Treat [fl]stat() failure like there was a symlink.
@@ -304,7 +304,7 @@ sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
     int fd = -1, odfd = -1;
     struct stat sb;
-    debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT);
 
     /* Save cwd and chdir to dfd */
     if ((odfd = open(".", O_RDONLY)) == -1)
@@ -379,7 +379,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 {
     const int dflags = DIR_OPEN_FLAGS;
     int dfd, fd, is_writable;
-    debug_decl(sudo_edit_open_nonwritable, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_open_nonwritable, SUDO_DEBUG_EDIT);
 
     if (path[0] == '/') {
 	dfd = open("/", dflags);
@@ -447,7 +447,7 @@ sudo_edit_open(char *path, int oflags, mode_t mode,
 {
     const int sflags = command_details ? command_details->flags : 0;
     int fd;
-    debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT);
 
     if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW))
 	oflags |= O_NOFOLLOW;
@@ -469,7 +469,7 @@ sudo_edit_open(char *path, int oflags, mode_t mode,
     const int sflags = command_details ? command_details->flags : 0;
     struct stat sb;
     int fd;
-    debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT);
 
     /*
      * Check if path is a symlink.  This is racey but we detect whether
@@ -524,7 +524,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
     ssize_t nwritten, nread;
     struct timespec times[2];
     struct stat sb;
-    debug_decl(sudo_edit_create_tfiles, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_create_tfiles, SUDO_DEBUG_EDIT);
 
     /*
      * For each file specified by the user, make a temporary version
@@ -652,7 +652,7 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
     struct timespec ts;
     struct stat sb;
     mode_t oldmask;
-    debug_decl(sudo_edit_copy_tfiles, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_copy_tfiles, SUDO_DEBUG_EDIT);
 
     /* Copy contents of temp files to real ones. */
     for (i = 0; i < nfiles; i++) {
@@ -742,7 +742,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     int i, rc, sesh_nargs;
     struct stat sb;
     struct command_details saved_command_details;
-    debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT)
+    debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT);
     
     /* Prepare selinux stuff (setexeccon) */
     if (selinux_setup(command_details->selinux_role,
@@ -839,7 +839,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     struct command_details saved_command_details;
     struct timespec ts;
     struct stat sb;
-    debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT)
+    debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT);
     
     /* Prepare selinux stuff (setexeccon) */
     if (selinux_setup(command_details->selinux_role,
@@ -935,7 +935,7 @@ sudo_edit(struct command_details *command_details)
     int editor_argc = 0, nfiles = 0;
     struct timespec times[2];
     struct tempfile *tf = NULL;
-    debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit, SUDO_DEBUG_EDIT);
 
     if (!set_tmpdir(command_details))
 	goto cleanup;
@@ -1068,7 +1068,7 @@ cleanup:
 int
 sudo_edit(struct command_details *command_details)
 {
-    debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit, SUDO_DEBUG_EDIT);
     debug_return_int(W_EXITCODE(1, 0));
 }
 

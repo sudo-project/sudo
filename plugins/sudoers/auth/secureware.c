@@ -58,7 +58,7 @@ extern int crypt_type;
 int
 sudo_secureware_init(struct passwd *pw, sudo_auth *auth)
 {
-    debug_decl(sudo_secureware_init, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_secureware_init, SUDOERS_DEBUG_AUTH);
 
 #ifdef __alpha
     if (crypt_type == INT_MAX)
@@ -76,7 +76,7 @@ sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct su
 {
     char *pw_epasswd = auth->data;
     char *epass = NULL;
-    debug_decl(sudo_secureware_verify, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_secureware_verify, SUDOERS_DEBUG_AUTH);
 
     /* An empty plain-text password must match an empty encrypted password. */
     if (pass[0] == '\0')
@@ -104,7 +104,7 @@ int
 sudo_secureware_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     char *pw_epasswd = auth->data;
-    debug_decl(sudo_secureware_cleanup, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_secureware_cleanup, SUDOERS_DEBUG_AUTH);
 
     if (pw_epasswd != NULL) {
 	memset_s(pw_epasswd, SUDO_CONV_REPL_MAX, 0, strlen(pw_epasswd));
