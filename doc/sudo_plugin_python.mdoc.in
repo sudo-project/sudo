@@ -421,7 +421,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal
 Plugin python_policy python_plugin.so \e
-    ModulePath=/usr/share/doc/sudo/examples/example_policy_plugin.py \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_policy_plugin.py \e
     ClassName=SudoPolicyPlugin
 .Ed
 .Pp
@@ -655,7 +655,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal
 Plugin python_io python_plugin.so \e
-    ModulePath=/usr/share/doc/sudo/examples/example_io_plugin.py \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_io_plugin.py \e
     ClassName=SudoIOPlugin
 .Ed
 .Ss Sudoers group provider plugin API
@@ -729,7 +729,7 @@ To try it, register it in the
 file by adding the following lines:
 .Bd -literal
 Defaults group_plugin="python_plugin.so \e
-    ModulePath=/usr/share/doc/sudo/examples/example_group_plugin.py \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
 .Ed
 .Pp
@@ -865,7 +865,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal
 Plugin python_io python_plugin.so \e
-    ModulePath=/usr/share/doc/sudo/examples/example_conversation.py \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
 .Ed
 .Ss Information / error display API
@@ -1002,7 +1002,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal
 Plugin python_io python_plugin.so \e
-    ModulePath=/usr/share/doc/sudo/examples/example_debugging.py \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_debugging.py \e
     ClassName=DebugDemoPlugin
 
 Debug python_plugin.so \e
