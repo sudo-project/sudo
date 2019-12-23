@@ -392,7 +392,13 @@ int getdomainname(char *, size_t);
 struct passwd;
 struct stat;
 struct timespec;
+struct termios;
 
+#ifndef HAVE_CFMAKERAW
+__dso_public void sudo_cfmakeraw(struct termios *term);
+# undef cfmakeraw
+# define cfmakeraw(_a) sudo_cfmakeraw((_a))
+#endif /* HAVE_CFMAKERAW */
 #ifndef HAVE_CLOSEFROM
 __dso_public void sudo_closefrom(int);
 # undef closefrom

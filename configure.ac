@@ -2574,6 +2574,10 @@ case "$host_os" in
 	fi
 	;;
 esac
+AC_CHECK_FUNCS([cfmakeraw], [], [
+    AC_LIBOBJ(cfmakeraw)
+    SUDO_APPEND_COMPAT_EXP(sudo_cfmakeraw)
+])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)

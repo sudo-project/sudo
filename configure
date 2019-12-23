@@ -19638,6 +19638,32 @@ done
 	fi
 	;;
 esac
+for ac_func in cfmakeraw
+do :
+  ac_fn_c_check_func "$LINENO" "cfmakeraw" "ac_cv_func_cfmakeraw"
+if test "x$ac_cv_func_cfmakeraw" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CFMAKERAW 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" cfmakeraw.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS cfmakeraw.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_cfmakeraw; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
 for ac_func in getgrouplist
 do :
   ac_fn_c_check_func "$LINENO" "getgrouplist" "ac_cv_func_getgrouplist"

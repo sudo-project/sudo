@@ -82,6 +82,9 @@
 /* Define to 1 to enable BSM audit support. */
 #undef HAVE_BSM_AUDIT
 
+/* Define to 1 if you have the `cfmakeraw' function. */
+#undef HAVE_CFMAKERAW
+
 /* Define to 1 if you have the `clock_gettime' function. */
 #undef HAVE_CLOCK_GETTIME
 
