@@ -208,13 +208,13 @@ install-dirs:
 install-rc: install-dirs
 	# We only create the rc.d link when installing to the actual system dir
 	if [ -n "$(INIT_SCRIPT)" ]; then \
-	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_builddir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_builddir)/etc/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
 	    if test -z "$(DESTDIR)"; then \
 		rm -f $(RC_LINK); \
 		ln -s $(INIT_DIR)/sudo $(RC_LINK); \
 	    fi; \
 	elif test -n "$(tmpfiles_d)"; then \
-	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_builddir)/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_builddir)/etc/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
 	fi
 
 install-binaries: install-dirs $(PROGS)

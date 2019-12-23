@@ -27621,10 +27621,10 @@ test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 if test X"$INIT_SCRIPT" != X""; then
-    ac_config_files="$ac_config_files init.d/$INIT_SCRIPT"
+    ac_config_files="$ac_config_files etc/init.d/$INIT_SCRIPT"
 
 elif test X"$TMPFILES_D" != X""; then
-    ac_config_files="$ac_config_files init.d/sudo.conf"
+    ac_config_files="$ac_config_files etc/init.d/sudo.conf"
 
 fi
 
@@ -28622,8 +28622,8 @@ do
     "$PYTHON_PLUGIN_SRC/Makefile") CONFIG_FILES="$CONFIG_FILES $PYTHON_PLUGIN_SRC/Makefile" ;;
     "lib/zlib/zconf.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/zlib/zconf.h" ;;
     "lib/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/zlib/Makefile" ;;
-    "init.d/$INIT_SCRIPT") CONFIG_FILES="$CONFIG_FILES init.d/$INIT_SCRIPT" ;;
-    "init.d/sudo.conf") CONFIG_FILES="$CONFIG_FILES init.d/sudo.conf" ;;
+    "etc/init.d/$INIT_SCRIPT") CONFIG_FILES="$CONFIG_FILES etc/init.d/$INIT_SCRIPT" ;;
+    "etc/init.d/sudo.conf") CONFIG_FILES="$CONFIG_FILES etc/init.d/sudo.conf" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;

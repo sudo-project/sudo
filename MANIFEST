@@ -57,6 +57,10 @@ doc/sudoreplay.man.in
 doc/sudoreplay.mdoc.in
 doc/visudo.man.in
 doc/visudo.mdoc.in
+etc/init.d/aix.sh.in
+etc/init.d/hpux.sh.in
+etc/init.d/sudo.conf.in
+etc/sudo.pp
 examples/Makefile.in
 examples/pam.conf
 examples/sudo.conf
@@ -89,9 +93,6 @@ include/sudo_plugin.h
 include/sudo_queue.h
 include/sudo_rand.h
 include/sudo_util.h
-init.d/aix.sh.in
-init.d/hpux.sh.in
-init.d/sudo.conf.in
 install-sh
 lib/iolog/Makefile.in
 lib/iolog/iolog_fileio.c
@@ -871,4 +872,3 @@ src/tcsetpgrp_nobg.c
 src/tgetpass.c
 src/ttyname.c
 src/utmp.c
-sudo.pp
