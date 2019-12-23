@@ -23,6 +23,7 @@ libtool
 pathnames.h
 ChangeLog
 PVS-Studio.cfg
+uncrustify.files
 
 doc/*.man
 doc/*.mdoc
