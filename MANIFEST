@@ -89,7 +89,6 @@ include/sudo_plugin.h
 include/sudo_queue.h
 include/sudo_rand.h
 include/sudo_util.h
-indent.pro
 init.d/aix.sh.in
 init.d/hpux.sh.in
 init.d/sudo.conf.in
