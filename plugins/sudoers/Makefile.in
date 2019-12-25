@@ -390,8 +390,10 @@ sudoers: $(srcdir)/sudoers.in
 
 pre-install:
 	@if test X"$(cross_compiling)" != X"yes" -a X"$(DESTDIR)" = X""; then \
-	    echo "Checking existing sudoers file for syntax errors."; \
-	    ./visudo -c -f $(sudoersdir)/sudoers; \
+	    if test -r $(sudoersdir)/sudoers; then \
+		echo "Checking existing sudoers file for syntax errors."; \
+		./visudo -c -f $(sudoersdir)/sudoers; \
+	    fi; \
 	fi
 
 install: install-plugin install-binaries install-sudoers install-doc
