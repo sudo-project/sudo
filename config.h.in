@@ -1286,6 +1286,11 @@
 # undef _BSD_SOURCE
 #endif
 
+/* Enable OpenBSD extensions on NetBSD.  */
+#ifndef _OPENBSD_SOURCE
+# undef _OPENBSD_SOURCE
+#endif
+
 /* Enable BSD types on IRIX.  */
 #ifndef _BSD_TYPES
 # undef _BSD_TYPES

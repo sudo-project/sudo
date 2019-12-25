@@ -2189,6 +2189,9 @@ case "$host" in
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
 
+		# For reallocarray()
+		AC_DEFINE([_OPENBSD_SOURCE])
+
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
@@ -4735,6 +4738,11 @@ AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 /* Enable BSD extensions on systems that have them.  */
 #ifndef _BSD_SOURCE
 # undef _BSD_SOURCE
+#endif
+
+/* Enable OpenBSD extensions on NetBSD.  */
+#ifndef _OPENBSD_SOURCE
+# undef _OPENBSD_SOURCE
 #endif
 
 /* Enable BSD types on IRIX.  */
