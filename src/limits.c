@@ -47,13 +47,19 @@
 # define SUDO_OPEN_MAX	256
 #endif
 
+#ifdef __LP64__
+# define SUDO_STACK_MIN	(4 * 1024 * 1024)
+#else
+# define SUDO_STACK_MIN	(2 * 1024 * 1024)
+#endif
+
 /*
  * macOS doesn't allow nofile soft limit to be infinite or
  * the stack hard limit to be infinite.
  * Linux containers have a problem with an infinite stack soft limit.
  */
 static struct rlimit nofile_fallback = { SUDO_OPEN_MAX, RLIM_INFINITY };
-static struct rlimit stack_fallback = { 8192 * 1024, 65532 * 1024 };
+static struct rlimit stack_fallback = { SUDO_STACK_MIN, 65532 * 1024 };
 
 static struct saved_limit {
     const char *name;
@@ -76,7 +82,7 @@ static struct saved_limit {
 #ifdef RLIMIT_RSS
     { "RLIMIT_RSS", RLIMIT_RSS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { "RLIMIT_STACK", RLIMIT_STACK, false, &stack_fallback, { 8192 * 1024, RLIM_INFINITY } }
+    { "RLIMIT_STACK", RLIMIT_STACK, false, &stack_fallback, { SUDO_STACK_MIN, RLIM_INFINITY } }
 };
 
 static struct rlimit corelimit;
