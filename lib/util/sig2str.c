@@ -65,7 +65,11 @@ sudo_sig2str(int signo, char *signame)
 #if defined(SIGRTMIN) && defined(SIGRTMAX)
     /* Realtime signal support. */
     if (signo >= SIGRTMIN && signo <= SIGRTMAX) {
+# ifdef _SC_RTSIG_MAX
 	const long rtmax = sysconf(_SC_RTSIG_MAX);
+# else
+	const long rtmax = SIGRTMAX - SIGRTMIN;
+# endif
 	if (rtmax > 0) {
 	    if (signo == SIGRTMIN) {
 		strlcpy(signame, "RTMIN", SIG2STR_MAX);

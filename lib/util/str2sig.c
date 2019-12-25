@@ -113,7 +113,11 @@ sudo_str2sig(const char *signame, int *result)
 	}
 	if (signame[5] == '+') {
 	    if (isdigit((unsigned char)signame[6])) {
+# ifdef _SC_RTSIG_MAX
 		const long rtmax = sysconf(_SC_RTSIG_MAX);
+# else
+		const long rtmax = SIGRTMAX - SIGRTMIN;
+# endif
 		const int off = signame[6] - '0';
 
 		if (rtmax > 0 && off < rtmax / 2) {
@@ -132,7 +136,11 @@ sudo_str2sig(const char *signame, int *result)
 	}
 	if (signame[5] == '-') {
 	    if (isdigit((unsigned char)signame[6])) {
+# ifdef _SC_RTSIG_MAX
 		const long rtmax = sysconf(_SC_RTSIG_MAX);
+# else
+		const long rtmax = SIGRTMAX - SIGRTMIN;
+# endif
 		const int off = signame[6] - '0';
 
 		if (rtmax > 0 && off < rtmax / 2) {
