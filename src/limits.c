@@ -54,6 +54,15 @@
 # define SUDO_STACK_MIN	(2 * 1024 * 1024)
 #endif
 
+#ifdef HAVE_SETRLIMIT64
+# define getrlimit(a, b) getrlimit64((a), (b))
+# define setrlimit(a, b) setrlimit64((a), (b))
+# define rlimit rlimit64
+# define rlim_t rlim64_t
+# undef RLIM_INFINITY
+# define RLIM_INFINITY RLIM64_INFINITY
+#endif /* HAVE_SETRLIMIT64 */
+
 /*
  * macOS doesn't allow nofile soft limit to be infinite or
  * the stack hard limit to be infinite.
