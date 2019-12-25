@@ -16254,6 +16254,10 @@ done
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
 
+		# For reallocarray()
+		$as_echo "#define _OPENBSD_SOURCE 1" >>confdefs.h
+
+
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
