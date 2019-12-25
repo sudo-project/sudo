@@ -22,6 +22,8 @@
 #include <signal.h>	/* for sigatomic_t and NSIG */
 #include "sudo_queue.h"
 
+struct timeval;		/* for deprecated APIs */
+
 /* Event types */
 #define SUDO_EV_TIMEOUT		0x01	/* fire after timeout */
 #define SUDO_EV_READ		0x02	/* fire when readable */
