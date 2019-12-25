@@ -317,6 +317,12 @@ extern int errno;
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
 
+/* Older systems may not support WCONTINUED */
+#ifndef WCONTINUED
+# define WCONTINUED	0
+# define WIFCONTINUED(x)	0
+#endif
+
 /* W_EXITCODE is not POSIX but the encoding of wait status is. */
 #ifndef W_EXITCODE
 # define W_EXITCODE(ret, sig)	((ret) << 8 | (sig))
