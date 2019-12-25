@@ -37,6 +37,7 @@
 #ifdef __linux__
 # include <sys/prctl.h>
 #endif
+#include <errno.h>
 #include <limits.h>
 
 #include "sudo.h"
@@ -236,7 +237,34 @@ restore_limits(void)
     for (idx = 0; idx < nitems(saved_limits); idx++) {
 	struct saved_limit *lim = &saved_limits[idx];
 	if (lim->saved) {
-	    if (setrlimit(lim->resource, &lim->oldlimit) == -1)
+	    struct rlimit rl = lim->oldlimit;
+	    int i, rc;
+
+	    for (i = 0; i < 10; i++) {
+		rc = setrlimit(lim->resource, &rl);
+		if (rc != -1 || errno != EINVAL)
+		    break;
+
+		/*
+		 * Soft limit could be lower than current resource usage.
+		 * This can be an issue on NetBSD with RLIMIT_STACK and ASLR.
+		 */
+		if (rl.rlim_cur > LLONG_MAX / 2)
+		    break;
+		rl.rlim_cur *= 2;
+		if (lim->newlimit.rlim_cur != RLIM_INFINITY &&
+			rl.rlim_cur > lim->newlimit.rlim_cur) {
+		    rl.rlim_cur = lim->newlimit.rlim_cur;
+		}
+		if (rl.rlim_max != RLIM_INFINITY &&
+			rl.rlim_cur > rl.rlim_max) {
+		    rl.rlim_max = rl.rlim_cur;
+		}
+		rc = setrlimit(lim->resource, &rl);
+		if (rc != -1 || errno != EINVAL)
+		    break;
+	    }
+	    if (rc == -1)
 		sudo_warn("setrlimit(%s)", lim->name);
 	}
     }
