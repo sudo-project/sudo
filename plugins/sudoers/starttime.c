@@ -31,7 +31,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#if defined(HAVE_KINFO_PROC_44BSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC2_NETBSD2)
+#if defined(HAVE_KINFO_PROC_44BSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC2_NETBSD)
 # include <sys/sysctl.h>
 #elif defined(HAVE_KINFO_PROC_FREEBSD)
 # include <sys/param.h>
