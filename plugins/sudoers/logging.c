@@ -894,10 +894,10 @@ send_mail(const char *fmt, ...)
 	    (void) fputc(*p, mail);
     }
 
-#ifdef HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO) && defined(CODESET)
     if (strcmp(def_sudoers_locale, "C") != 0)
 	(void) fprintf(mail, "\nContent-Type: text/plain; charset=\"%s\"\nContent-Transfer-Encoding: 8bit", nl_langinfo(CODESET));
-#endif /* HAVE_NL_LANGINFO */
+#endif /* HAVE_NL_LANGINFO && CODESET */
 
     if ((timestr = get_timestr(time(NULL), def_log_year)) == NULL)
 	timestr = "invalid date";
