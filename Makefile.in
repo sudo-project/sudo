@@ -341,7 +341,10 @@ install-nls:
 	    done; \
 	fi
 
-check-dist: update-pot compile-po
+mkdefaults:
+	cd plugins/sudoers && exec $(MAKE) DEVEL=1 ./def_data.c ./def_data.h
+
+check-dist: update-pot compile-po mkdefaults
 	@if test -d $(srcdir)/.hg && cd $(srcdir); then \
 	    if test `hg stat -am | wc -l` -ne 0; then \
 		echo "Uncommitted changes" 1>&2; \
