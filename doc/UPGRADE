@@ -1,7 +1,7 @@
 Notes on upgrading from an older release
 ========================================
 
-o Upgrading from a version prior to 1.8.29:
+o Upgrading from a version prior to 1.8.30:
 
     Starting with version 1.8.30, sudo will no longer allow commands
     to be run as a user or group ID that is not in the password or
