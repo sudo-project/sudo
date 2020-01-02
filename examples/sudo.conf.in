@@ -10,7 +10,7 @@
 #
 # Sudo plugins:
 #
-# The plugin_path is relative to ${prefix}/libexec unless fully qualified.
+# The plugin_path is relative to @plugindir@ unless fully qualified.
 # The plugin_name corresponds to a global symbol in the plugin
 #   that contains the plugin interface structure.
 # The plugin_options are optional.
@@ -42,7 +42,7 @@ Plugin sudoers_io sudoers.so
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_noexec.so file.
 #
-#Path noexec /usr/libexec/sudo_noexec.so
+#Path noexec @plugindir@/sudo_noexec.so
 
 #
 # Core dumps:

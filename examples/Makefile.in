@@ -48,7 +48,7 @@ install_gid = 0
 
 SHELL = @SHELL@
 
-EXAMPLES = $(srcdir)/pam.conf $(srcdir)/sudo.conf $(srcdir)/sudoers \
+EXAMPLES = $(srcdir)/pam.conf sudo.conf $(srcdir)/sudoers \
 	   $(srcdir)/syslog.conf
  
 VERSION = @PACKAGE_VERSION@
@@ -60,6 +60,9 @@ depend:
 
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file examples/Makefile
+
+sudo.conf: $(srcdir)/sudo.conf.in
+	cd $(top_builddir) && ./config.status --file examples/sudo.conf
 
 pre-install:
 
