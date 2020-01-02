@@ -116,7 +116,7 @@ plugin it is loading as arguments.
 .Pp
 Example usage in
 .Xr sudo.conf @mansectform@ :
-.Bd -literal
+.Bd -literal -offset indent
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
@@ -124,7 +124,7 @@ Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 Example group provider plugin usage in the
 .Em sudoers
 file:
-.Bd -literal
+.Bd -literal -offset indent
 Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
 .Ed
 .Pp
@@ -139,7 +139,7 @@ The name of the class implementing the sudo Python plugin.
 Policy plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
-.Bd -literal
+.Bd -literal -offset indent
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
@@ -227,7 +227,7 @@ convenience function can be used to convert them to a dictionary.
 .El
 .Pp
 This function should return a result code or a tuple in the following format:
-.Bd -literal -offset 4n
+.Bd -literal -offset indent
 return (rc, command_info_out, argv_out, user_env_out)
 .Ed
 .Pp
@@ -297,7 +297,7 @@ Convertible to pwd.struct_passwd or
 if the user is not present in the password database.
 .Pp
 Example conversion:
-.Bd -literal -compact
+.Bd -literal -compact -offset indent
 user_pwd = pwd.struct_passwd(user_pwd) if user_pwd else None
 .Ed
 .It Fa user_env
@@ -432,7 +432,7 @@ in addition to another policy plugin, such as
 I/O plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
-.Bd -literal
+.Bd -literal -offset indent
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
@@ -653,7 +653,7 @@ system call, otherwise 0.
 Sudo ships a Python I/O plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
-.Bd -literal
+.Bd -literal -offset indent
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_io_plugin.py \e
     ClassName=SudoIOPlugin
@@ -663,7 +663,7 @@ A group provider plugin is registered in the
 .Xr sudoers @mansectform@
 file.
 For example:
-.Bd -literal
+.Bd -literal -offset indent
 Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
 .Ed
 .Pp
@@ -727,7 +727,7 @@ Sudo ships a Python group plugin example.
 To try it, register it in the
 .Em sudoers
 file by adding the following lines:
-.Bd -literal
+.Bd -literal -offset indent
 Defaults group_plugin="python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
@@ -743,7 +743,7 @@ If you add a rule that uses this group, it will affect the
 .Em test
 user.
 For example:
-.Bd -literal
+.Bd -literal -offset indent
 %:mygroup ALL=(ALL) NOPASSWD: ALL
 .Ed
 .Pp
@@ -863,7 +863,7 @@ or the user interrupted the conversation by pressing control-C.
 Sudo ships with an example plugin demonstrating the Python conversation API.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
-.Bd -literal
+.Bd -literal -offset indent
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
@@ -918,7 +918,7 @@ with the program set to
 For example, to store debug output in
 .Pa /var/log/sudo_python_debug ,
 use a line like the following:
-.Bd -literal
+.Bd -literal -offset indent
 Debug python_plugin.so /var/log/sudo_python_debug \e
     plugin@trace,c_calls@trace
 .Ed
@@ -930,7 +930,7 @@ strings, separated by commas
 For example to just see the debug output of
 .Fn sudo.debug
 calls, use:
-.Bd -literal
+.Bd -literal -offset indent
 Debug python_plugin.so /var/log/sudo_python_debug plugin@trace
 .Ed
 .Pp
@@ -1000,7 +1000,7 @@ one or more messages to log
 Sudo ships an example debug plugin by default.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
-.Bd -literal
+.Bd -literal -offset indent
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_debugging.py \e
     ClassName=DebugDemoPlugin

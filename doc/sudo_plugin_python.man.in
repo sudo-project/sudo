@@ -136,7 +136,7 @@ Example usage in
 sudo.conf(@mansectform@):
 .nf
 .sp
-.RS 0n
+.RS 6n
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
@@ -147,7 +147,7 @@ Example group provider plugin usage in the
 file:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
 .RE
 .fi
@@ -165,7 +165,7 @@ sudo.conf(@mansectform@).
 For example:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
@@ -267,7 +267,7 @@ convenience function can be used to convert them to a dictionary.
 This function should return a result code or a tuple in the following format:
 .nf
 .sp
-.RS 10n
+.RS 12n
 return (rc, command_info_out, argv_out, user_env_out)
 .RE
 .fi
@@ -349,7 +349,7 @@ if the user is not present in the password database.
 .sp
 Example conversion:
 .nf
-.RS 6n
+.RS 12n
 user_pwd = pwd.struct_passwd(user_pwd) if user_pwd else None
 .RE
 .fi
@@ -534,7 +534,7 @@ sudo.conf(@mansectform@).
 For example:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
@@ -810,7 +810,7 @@ To try it, register it by adding the following lines to
 \fI@sysconfdir@/sudo.conf\fR:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_io_plugin.py \e
     ClassName=SudoIOPlugin
@@ -823,7 +823,7 @@ file.
 For example:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
 .RE
 .fi
@@ -904,7 +904,7 @@ To try it, register it in the
 file by adding the following lines:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Defaults group_plugin="python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
@@ -923,7 +923,7 @@ user.
 For example:
 .nf
 .sp
-.RS 0n
+.RS 6n
 %:mygroup ALL=(ALL) NOPASSWD: ALL
 .RE
 .fi
@@ -1063,7 +1063,7 @@ To try it, register it by adding the following lines to
 \fI@sysconfdir@/sudo.conf\fR:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
@@ -1124,7 +1124,7 @@ For example, to store debug output in
 use a line like the following:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Debug python_plugin.so /var/log/sudo_python_debug \e
     plugin@trace,c_calls@trace
 .RE
@@ -1139,7 +1139,7 @@ For example to just see the debug output of
 calls, use:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Debug python_plugin.so /var/log/sudo_python_debug plugin@trace
 .RE
 .fi
@@ -1228,7 +1228,7 @@ To try it, register it by adding the following lines to
 \fI@sysconfdir@/sudo.conf\fR:
 .nf
 .sp
-.RS 0n
+.RS 6n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_debugging.py \e
     ClassName=DebugDemoPlugin
