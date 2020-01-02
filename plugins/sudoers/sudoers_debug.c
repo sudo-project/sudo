@@ -138,6 +138,8 @@ sudoers_debug_register(const char *program,
 		sudoers_subsystem_names, sudoers_subsystem_ids, debug_files);
 	    if (sudoers_debug_instance == SUDO_DEBUG_INSTANCE_ERROR)
 		return false;
+
+	    sudoers_debug_refcnt++;
 	}
 	TAILQ_FOREACH_SAFE(debug_file, debug_files, entries, debug_next) {
 	    TAILQ_REMOVE(debug_files, debug_file, entries);
@@ -146,7 +148,6 @@ sudoers_debug_register(const char *program,
 	    free(debug_file);
 	}
     }
-    sudoers_debug_refcnt++;
     return true;
 }
 
