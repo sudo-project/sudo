@@ -323,6 +323,35 @@ command is used to configure core dump behavior.
 This setting is only available in
 .Nm sudo
 version 1.8.4 and higher.
+.It developer_mode
+By default
+.Nm sudo
+refuses to load plugins which can be modified by other than the root user.
+The plugin should be owned by root and write access permissions should be
+disabled for
+.Dq group
+and
+.Sm off
+.Dq other
+\&.
+.Sm on
+To make development of a plugin easier, you can disable that by setting
+.Dq developer_mode
+option to true in
+.Nm sudo.conf
+as follows:
+.Bd -literal -offset indent
+Set developer_mode true
+.Ed
+.Pp
+Please note that this creates a security risk, so it is not recommended
+on critical systems such as a desktop machine for daily use, but is intended
+to be used in development environments (VM, container, etc).
+Before enabling developer mode, ensure you understand the implications.
+.Pp
+This setting is only available in
+.Nm sudo
+version 1.9.0 and higher.
 .It group_source
 .Nm sudo
 passes the invoking user's group list to the policy and I/O plugins.
