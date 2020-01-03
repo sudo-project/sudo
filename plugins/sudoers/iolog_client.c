@@ -341,32 +341,32 @@ static bool
 tls_timed_connect(struct client_closure *closure)
 {
     struct sudo_event_base *evbase = NULL;
-
     debug_decl(tls_timed_connect, SUDO_DEBUG_UTIL);
 
-	evbase = sudo_ev_base_alloc();
+    evbase = sudo_ev_base_alloc();
     closure->tls_conn_status = false;
-	if (evbase == NULL || closure->tls_connect_ev == NULL) {
+    if (evbase == NULL || closure->tls_connect_ev == NULL) {
         sudo_warnx(U_("unable to allocate memory"));
-	    goto exit;
-	}
+	goto exit;
+    }
 
     closure->tls_connect_ev->setbase(closure->tls_connect_ev, evbase);
 
     if (closure->tls_connect_ev->add(closure->tls_connect_ev,
-        &closure->log_details->server_timeout) == -1) {
-	    sudo_warnx(U_("Unable to add event to queue"));
-	    goto exit;
-	}
+	    &closure->log_details->server_timeout) == -1) {
+	sudo_warnx(U_("Unable to add event to queue"));
+	goto exit;
+    }
 
-	if (sudo_ev_dispatch(evbase) == -1) {
-	    sudo_warnx(U_("error in event loop"));
-	    goto exit;
-	}
+    if (sudo_ev_dispatch(evbase) == -1) {
+	sudo_warnx(U_("error in event loop"));
+	goto exit;
+    }
 
 exit:
     sudo_ev_base_free(evbase);
-    closure->tls_connect_ev->free(closure->tls_connect_ev);
+    if (closure->tls_connect_ev != NULL)
+	closure->tls_connect_ev->free(closure->tls_connect_ev);
 
     debug_return_int(closure->tls_conn_status);
 }
