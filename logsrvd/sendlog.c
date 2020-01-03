@@ -1110,11 +1110,13 @@ server_msg_cb(int fd, int what, void *v)
                     break;
                 case SSL_ERROR_WANT_READ:
                     /* re-schedule the read handler */
-                    sudo_ev_add(closure->read_ev->base, closure->read_ev, NULL, false);
+                    if (sudo_ev_add(closure->read_ev->base, closure->read_ev, NULL, false) == -1)
+			sudo_warnx(U_("unable to add event to queue"));
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
                     /* ssl wants to write, so schedule the write handler */
-                    sudo_ev_add(closure->write_ev->base, closure->write_ev, NULL, false);
+                    if (sudo_ev_add(closure->write_ev->base, closure->write_ev, NULL, false) == -1)
+			sudo_warnx(U_("unable to add event to queue"));
                     debug_return;
                 default:
                     break;
@@ -1200,11 +1202,13 @@ client_msg_cb(int fd, int what, void *v)
                     break;
                 case SSL_ERROR_WANT_READ:
                     /* ssl wants to read, so schedule the read handler */
-                    sudo_ev_add(closure->read_ev->base, closure->read_ev, NULL, false);
+                    if (sudo_ev_add(closure->read_ev->base, closure->read_ev, NULL, false) == -1)
+			sudo_warnx(U_("unable to add event to queue"));
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
                     /* re-schedule the write handler */
-                    sudo_ev_add(closure->write_ev->base, closure->write_ev, NULL, false);
+                    if (sudo_ev_add(closure->write_ev->base, closure->write_ev, NULL, false) == -1)
+			sudo_warnx(U_("unable to add event to queue"));
                     debug_return;
                 default:
                     break;
