@@ -323,6 +323,11 @@ plugins/python/sudo_python_debug.c
 plugins/python/sudo_python_debug.h
 plugins/python/sudo_python_module.c
 plugins/python/sudo_python_module.h
+plugins/python/regress/check_python_examples.c
+plugins/python/regress/iohelpers.c
+plugins/python/regress/iohelpers.h
+plugins/python/regress/testhelpers.c
+plugins/python/regress/testhelpers.h
 plugins/sample/Makefile.in
 plugins/sample/README
 plugins/sample/sample_plugin.c
