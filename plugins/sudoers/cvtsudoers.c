@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1038,6 +1038,27 @@ alias_used_by_userspecs(struct sudoers_parse_tree *parse_tree,
 }
 
 /*
+ * For each alias listed in members, remove and free the alias.
+ * Frees the contents of members too.
+ */
+static void
+free_aliases_by_members(struct sudoers_parse_tree *parse_tree,
+    struct member_list *members, int type)
+{
+    struct member *m;
+    struct alias *a;
+    debug_decl(free_aliases_by_members, SUDOERS_DEBUG_ALIAS);
+
+    while ((m = TAILQ_FIRST(members)) != NULL) {
+        TAILQ_REMOVE(members, m, entries);
+	a = alias_remove(parse_tree, m->name, type);
+	alias_free(a);
+	free_member(m);
+    }
+    debug_return;
+}
+
+/*
  * Apply filters to host/user-based Defaults, removing non-matching entries.
  */
 static void
@@ -1051,7 +1072,6 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
     struct member_list *prev_binding = NULL;
     struct defaults *def, *def_next;
     struct member *m, *m_next;
-    struct alias *a;
     int alias_type;
     debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS);
 
@@ -1138,29 +1158,13 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
 	}
     }
 
-    /* Remove now-unreferenced aliases. */
+    /* Determine unreferenced aliases and remove/free them. */
     alias_used_by_userspecs(parse_tree, &user_aliases, &runas_aliases,
 	&host_aliases, &cmnd_aliases);
-    TAILQ_FOREACH_SAFE(m, &user_aliases, entries, m_next) {
-	a = alias_remove(parse_tree, m->name, USERALIAS);
-	alias_free(a);
-	free_member(m);
-    }
-    TAILQ_FOREACH_SAFE(m, &runas_aliases, entries, m_next) {
-	a = alias_remove(parse_tree, m->name, RUNASALIAS);
-	alias_free(a);
-	free_member(m);
-    }
-    TAILQ_FOREACH_SAFE(m, &host_aliases, entries, m_next) {
-	a = alias_remove(parse_tree, m->name, HOSTALIAS);
-	alias_free(a);
-	free_member(m);
-    }
-    TAILQ_FOREACH_SAFE(m, &cmnd_aliases, entries, m_next) {
-	a = alias_remove(parse_tree, m->name, CMNDALIAS);
-	alias_free(a);
-	free_member(m);
-    }
+    free_aliases_by_members(parse_tree, &user_aliases, USERALIAS);
+    free_aliases_by_members(parse_tree, &runas_aliases, RUNASALIAS);
+    free_aliases_by_members(parse_tree, &host_aliases, HOSTALIAS);
+    free_aliases_by_members(parse_tree, &cmnd_aliases, CMNDALIAS);
 
     debug_return;
 }
