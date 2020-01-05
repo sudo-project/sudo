@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -571,6 +571,7 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 	debug_return_bool(false);
     }
 
+    iol->writable = false;
     iol->compressed = false;
     if (iol->enabled) {
 	int fd = iolog_openat(dfd, file, flags);
@@ -597,7 +598,14 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 	    else
 #endif
 		iol->fd.f = fdopen(fd, mode);
-	    if (iol->fd.v == NULL) {
+	    if (iol->fd.v != NULL) {
+		switch ((flags & O_ACCMODE)) {
+		case O_WRONLY:
+		case O_RDWR:
+		    iol->writable = true;
+		    break;
+		}
+	    } else {
 		int save_errno = errno;
 		close(fd);
 		errno = save_errno;
@@ -621,9 +629,14 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 static const char *
 gzstrerror(gzFile file)
 {
+    const char *errstr;
     int errnum;
 
-    return gzerror(file, &errnum);
+    errstr = gzerror(file, &errnum);
+    if (errnum == Z_ERRNO)
+	errstr = strerror(errno);
+
+    return errstr;
 }
 #endif /* HAVE_ZLIB_H */
 
@@ -638,10 +651,21 @@ iolog_close(struct iolog_file *iol, const char **errstr)
 
 #ifdef HAVE_ZLIB_H
     if (iol->compressed) {
-	if (gzclose(iol->fd.g) != Z_OK) {
+	int errnum;
+
+	/* Must check error indicator before closing. */
+	if (iol->writable) {
+	    if (gzflush(iol->fd.g, Z_SYNC_FLUSH) != Z_OK) {
+		ret = false;
+		if (errstr != NULL)
+		    *errstr = gzstrerror(iol->fd.g);
+	    }
+	}
+	errnum = gzclose(iol->fd.g);
+	if (ret && errnum != Z_OK) {
 	    ret = false;
 	    if (errstr != NULL)
-		*errstr = gzstrerror(iol->fd.g);
+		*errstr = errnum == Z_ERRNO ? strerror(errno) : "unknown error";
 	}
     } else
 #endif
