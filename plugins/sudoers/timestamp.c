@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -613,6 +613,25 @@ done:
 }
 
 /*
+ * Write a TS_LOCKEXCL record at the beginning of the time stamp file.
+ */
+bool
+timestamp_lock_write(struct ts_cookie *cookie)
+{
+    struct timestamp_entry entry;
+    bool ret = true;
+    debug_decl(timestamp_lock_write, SUDOERS_DEBUG_AUTH);
+
+    memset(&entry, 0, sizeof(entry));
+    entry.version = TS_VERSION;
+    entry.size = sizeof(entry);
+    entry.type = TS_LOCKEXCL;
+    if (ts_write(cookie->fd, cookie->fname, &entry, -1) == -1)
+	ret = false;
+    debug_return_bool(ret);
+}
+
+/*
  * Lock a record in the time stamp file for exclusive access.
  * If the record does not exist, it is created (as disabled).
  */
@@ -621,6 +640,7 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 {
     struct ts_cookie *cookie = vcookie;
     struct timestamp_entry entry;
+    bool overwrite = false;
     off_t lock_pos;
     ssize_t nread;
     debug_decl(timestamp_lock, SUDOERS_DEBUG_AUTH);
@@ -642,26 +662,39 @@ timestamp_lock(void *vcookie, struct passwd *pw)
     /* Make sure the first record is of type TS_LOCKEXCL. */
     memset(&entry, 0, sizeof(entry));
     nread = read(cookie->fd, &entry, sizeof(entry));
-    if (nread == 0) {
-	/* New file, add TS_LOCKEXCL record. */
-	entry.version = TS_VERSION;
-	entry.size = sizeof(entry);
-	entry.type = TS_LOCKEXCL;
-	if (ts_write(cookie->fd, cookie->fname, &entry, -1) == -1)
-	    debug_return_bool(false);
+    if (nread < ssizeof(struct timestamp_entry_v1)) {
+	/* New or invalid time stamp file. */
+	overwrite = true;
     } else if (entry.type != TS_LOCKEXCL) {
-	/* Old sudo record, convert it to TS_LOCKEXCL. */
-	entry.type = TS_LOCKEXCL;
-	memset((char *)&entry + offsetof(struct timestamp_entry, type), 0,
-	    nread - offsetof(struct timestamp_entry, type));
-	if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
-	    debug_return_bool(false);
+	if (entry.size == sizeof(struct timestamp_entry_v1)) {
+	    /* Old sudo record, convert it to TS_LOCKEXCL. */
+	    entry.type = TS_LOCKEXCL;
+	    memset((char *)&entry + offsetof(struct timestamp_entry, type), 0,
+		nread - offsetof(struct timestamp_entry, type));
+	    if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
+		debug_return_bool(false);
+	} else {
+	    /* Corrupted time stamp file?  Just overwrite it. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"corrupt initial record, type: %hu, size: %hu (expected %zu)",
+		entry.type, entry.size, sizeof(struct timestamp_entry_v1));
+	    overwrite = true;
+	}
     }
-    if (entry.size != sizeof(entry)) {
+    if (overwrite) {
+	/* Rewrite existing time stamp file or create new one. */
+	if (ftruncate(cookie->fd, 0) != 0) {
+	    sudo_warn(U_("unable to truncate time stamp file to %lld bytes"),
+		0LL);
+	    debug_return_bool(false);
+	}
+	if (!timestamp_lock_write(cookie))
+	    debug_return_bool(false);
+    } else if (entry.size != sizeof(entry)) {
 	/* Reset position if the lock record has an unexpected size. */
 	if (lseek(cookie->fd, entry.size, SEEK_SET) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		"unable to seek to %lld", (long long)entry.size);
+		"unable to seek to %hu", entry.size);
 	    debug_return_bool(false);
 	}
     }
