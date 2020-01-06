@@ -40,6 +40,8 @@
 #include <signal.h>
 #include <pwd.h>
 #include <grp.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 #include "sudoers.h"
 #include "sudo_iolog.h"
@@ -586,17 +588,28 @@ static int
 sudoers_io_open_remote(void)
 {
     int sock, ret = -1;
+    struct sudoers_string *connected_server = NULL;
+
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
     /* Connect to log server. */
     sock = log_server_connect(iolog_details.log_servers,
-	&iolog_details.server_timeout);
+	&iolog_details.server_timeout, &connected_server);
     if (sock == -1) {
 	/* TODO: support offline logs if server unreachable */
 	sudo_warnx(U_("unable to connect to log server"));
 	ret = -1;
 	goto done;
     }
+
+    /* save the name of the server we are successfully connected to */
+    client_closure.host = connected_server;
+
+    struct sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+    getpeername(sock, (struct sockaddr *) &addr, &addr_len);
+    inet_ntop(addr.sin_family, &(addr.sin_addr), client_closure.ipaddr, INET6_ADDRSTRLEN);
+
     if (!client_closure_fill(&client_closure, sock, &iolog_details, &sudoers_io)) {
 	close(sock);
 	ret = -1;

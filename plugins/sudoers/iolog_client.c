@@ -181,7 +181,8 @@ connect_server(const char *host, const char *port, struct timespec *timo,
  * Returns a socket with O_NONBLOCK and close-on-exec flags set.
  */
 int
-log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
+log_server_connect(struct sudoers_str_list *servers, struct timespec *timo,
+    struct sudoers_string **connected_server)
 {
     struct sudoers_string *server;
     char *copy, *host, *port;
@@ -204,6 +205,8 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
 		close(sock);
 		sock = -1;
 	    }
+        /* this is the server we successfully connected to */
+        *connected_server = server;
 	    break;
 	}
     }

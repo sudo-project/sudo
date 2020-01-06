@@ -86,6 +86,12 @@ enum client_state {
 /* Remote connection closure, non-zero fields must come first. */
 struct client_closure {
     int sock;
+    struct sudoers_string *host;
+#if defined(HAVE_STRUCT_IN6_ADDR)
+    char ipaddr[INET6_ADDRSTRLEN];
+#else
+    char ipaddr[INET_ADDRSTRLEN];
+#endif
 #if defined(HAVE_OPENSSL)
     bool tls;
     bool tls_conn_status;
@@ -113,6 +119,8 @@ struct client_closure {
 # define CLIENT_CLOSURE_INITIALIZER(_c)			\
     {							\
 	-1,						    \
+	NULL,					    \
+	"", 					    \
     false,                      \
     false,                      \
     NULL,						\
@@ -126,6 +134,8 @@ struct client_closure {
 # define CLIENT_CLOSURE_INITIALIZER(_c)			\
     {							\
 	-1,						\
+	NULL,					    \
+	"", 					    \
 	ERROR,						\
 	false,						\
 	TAILQ_HEAD_INITIALIZER((_c).write_bufs),	\
@@ -142,7 +152,7 @@ bool fmt_exit_message(struct client_closure *closure, int exit_status, int error
 bool fmt_io_buf(struct client_closure *closure, int type, const char *buf, unsigned int len, struct timespec *delay);
 bool fmt_suspend(struct client_closure *closure, const char *signame, struct timespec *delay);
 bool fmt_winsize(struct client_closure *closure, unsigned int lines, unsigned int cols, struct timespec *delay);
-int log_server_connect(struct sudoers_str_list *servers, struct timespec *timo);
+int log_server_connect(struct sudoers_str_list *servers, struct timespec *timo, struct sudoers_string **connected_server);
 void client_closure_free(struct client_closure *closure);
 
 #endif /* SUDOERS_IOLOG_CLIENT_H */
