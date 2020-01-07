@@ -83,7 +83,7 @@ _import_module(const char *path)
 {
     debug_decl(_import_module, PYTHON_DEBUG_PLUGIN_LOAD);
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "importing module: %s\n", path);
+    sudo_debug_printf(SUDO_DEBUG_DIAG, "importing module: %s\n", path);
 
     char path_copy[PATH_MAX];
     if (strlcpy(path_copy, path, sizeof(path_copy)) >= sizeof(path_copy))
