@@ -1497,7 +1497,7 @@ AC_ARG_ENABLE(openssl,
 		AC_DEFINE(HAVE_OPENSSL)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
-		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
+		    SUDO_APPEND_LIBPATH(LDFLAGS, [${enableval}/lib])
 		fi
 		;;
  esac
@@ -1512,7 +1512,7 @@ AC_ARG_ENABLE(gcrypt,
 		AC_DEFINE(HAVE_GCRYPT)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
-		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
+		    SUDO_APPEND_LIBPATH(LDFLAGS, [${enableval}/lib])
 		fi
 		;;
  esac
