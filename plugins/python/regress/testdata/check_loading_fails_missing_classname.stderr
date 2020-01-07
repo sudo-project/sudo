@@ -1,0 +1,2 @@
+No plugin class is specified for python module 'SRC_DIR/example_debugging.py'. Use 'ClassName' configuration option in 'sudo.conf'
+Failed during loading plugin class
