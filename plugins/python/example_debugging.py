@@ -41,7 +41,7 @@ class DebugDemoPlugin(sudo.Plugin):
     def __init__(self, plugin_options, **kwargs):
         # Specify: "py_calls@info" debug option to show the call to this constructor and the arguments passed in
 
-        # Specifying "plugin@error" debug option will show this message (or any more verbose level)
+        # Specifying "plugin@err" debug option will show this message (or any more verbose level)
         sudo.debug(sudo.DEBUG_ERROR, "My demo purpose plugin shows this ERROR level debug message")
 
         # Specifying "plugin@info" debug option will show this message (or any more verbose level)
@@ -53,6 +53,6 @@ class DebugDemoPlugin(sudo.Plugin):
         #   Dec  5 15:19:19 sudo[123040] My demo purpose plugin shows this ERROR level debug message
 
         # Specify: "c_calls@diag" debug option to show this call and its arguments
-        # If you specify info debug level instead ("c_call@info"),
+        # If you specify info debug level instead ("c_calls@info"),
         # you will also see the python function and line from which you called the 'options_as_dict' function.
         self.plugin_options = sudo.options_as_dict(plugin_options)
