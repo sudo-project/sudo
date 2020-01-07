@@ -61,7 +61,8 @@ class SudoIOPlugin(sudo.Plugin):
         self._log("", "-- Plugin STARTED --")
 
     def __del__(self):
-        self._log("", "-- Plugin DESTROYED --")
+        if hasattr(self, "_log_file"):
+            self._log("", "-- Plugin DESTROYED --")
 
     def open(self, argv: Tuple[str, ...], command_info: Tuple[str, ...]) -> int:
         """Receives the command the user wishes to run.
