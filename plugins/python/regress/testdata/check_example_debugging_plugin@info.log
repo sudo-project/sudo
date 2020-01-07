@@ -1,0 +1,4 @@
+__init__ @ SRC_DIR/example_debugging.py:45 debugs:
+My demo purpose plugin shows this ERROR level debug message
+__init__ @ SRC_DIR/example_debugging.py:48 debugs:
+My demo purpose plugin shows this INFO level debug message
