@@ -118,13 +118,13 @@ static int policy_validate(void);
 static void policy_invalidate(int remove);
 
 /* I/O log plugin convenience functions. */
-static int iolog_open(struct plugin_container *plugin,
-    struct sudo_settings *settings, char * const user_info[],
+static void iolog_open(struct sudo_settings *settings, char * const user_info[],
     char * const command_details[], int argc, char * const argv[],
     char * const user_env[]);
-static void iolog_close(struct plugin_container *plugin, int exit_status,
-    int error);
-static int iolog_show_version(struct plugin_container *plugin, int verbose);
+static void iolog_close(int exit_status, int error);
+static void iolog_show_version(int verbose, struct sudo_settings *settings,
+    char * const user_info[], int argc, char * const argv[],
+    char * const user_env[]);
 static void iolog_unlink(struct plugin_container *plugin);
 static void free_plugin_container(struct plugin_container *plugin, bool ioplugin);
 
@@ -137,7 +137,6 @@ main(int argc, char *argv[], char *envp[])
     char **nargv, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct sudo_settings *settings;
-    struct plugin_container *plugin, *next;
     sigset_t mask;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -228,12 +227,8 @@ main(int argc, char *argv[], char *envp[])
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
 	    policy_show_version(!user_details.uid);
-	    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-		ok = iolog_open(plugin, settings, user_info, NULL,
-		    nargc, nargv, envp);
-		if (ok != -1)
-		    iolog_show_version(plugin, !user_details.uid);
-	    }
+	    iolog_show_version(!user_details.uid, settings, user_info,
+		nargc, nargv, envp);
 	    break;
 	case MODE_VALIDATE:
 	case MODE_VALIDATE|MODE_INVALIDATE:
@@ -261,31 +256,18 @@ main(int argc, char *argv[], char *envp[])
 		    usage(1);
 		exit(EXIT_FAILURE); /* plugin printed error message */
 	    }
+
 	    /* Reset nargv/nargc based on argv_out. */
 	    /* XXX - leaks old nargv in shell mode */
 	    for (nargv = argv_out, nargc = 0; nargv[nargc] != NULL; nargc++)
 		continue;
 	    if (nargc == 0)
 		sudo_fatalx(U_("plugin did not return a command to execute"));
+
 	    /* Open I/O plugins once policy plugin succeeds. */
-	    TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
-		ok = iolog_open(plugin, settings, user_info,
-		    command_info, nargc, nargv, user_env_out);
-		switch (ok) {
-		case 1:
-		    break;
-		case 0:
-		    /* I/O plugin asked to be disabled, remove and free. */
-		    iolog_unlink(plugin);
-		    break;
-		case -2:
-		    usage(1);
-		    break;
-		default:
-		    sudo_fatalx(U_("error initializing I/O plugin %s"),
-			plugin->name);
-		}
-	    }
+	    iolog_open(settings, user_info, command_info, nargc, nargv,
+		user_env_out);
+
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
 	    command_details.tty = user_details.tty;
@@ -945,7 +927,6 @@ done:
 int
 run_command(struct command_details *details)
 {
-    struct plugin_container *plugin;
     struct command_status cstat;
     int status = W_EXITCODE(1, 0);
     debug_decl(run_command, SUDO_DEBUG_EXEC);
@@ -958,14 +939,8 @@ run_command(struct command_details *details)
     switch (cstat.type) {
     case CMD_ERRNO:
 	/* exec_setup() or execve() returned an error. */
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "calling policy close with errno %d", cstat.val);
 	policy_close(0, cstat.val);
-	TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-		"calling I/O close with errno %d", cstat.val);
-	    iolog_close(plugin, 0, cstat.val);
-	}
+	iolog_close(0, cstat.val);
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
@@ -974,14 +949,8 @@ run_command(struct command_details *details)
 	if (ISSET(details->flags, CD_SUDOEDIT_COPY))
 	    break;
 #endif
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "calling policy close with wait status %d", status);
 	policy_close(status, 0);
-	TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-		"calling I/O close with wait status %d", status);
-	    iolog_close(plugin, status, 0);
-	}
+	iolog_close(status, 0);
 	break;
     default:
 	sudo_warnx(U_("unexpected child termination condition: %d"), cstat.type);
@@ -1096,6 +1065,16 @@ static void
 policy_close(int exit_status, int error_code)
 {
     debug_decl(policy_close, SUDO_DEBUG_PCOMM);
+
+    if (error_code != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: calling policy close with errno %d",
+	    policy_plugin.name, error_code);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: calling policy close with wait status %d",
+	    policy_plugin.name, exit_status);
+    }
     if (policy_plugin.u.policy->close != NULL) {
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	policy_plugin.u.policy->close(exit_status, error_code);
@@ -1253,13 +1232,13 @@ done:
 }
 
 static int
-iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
+iolog_open_int(struct plugin_container *plugin, struct sudo_settings *settings,
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[])
 {
     char **plugin_settings;
     int ret;
-    debug_decl(iolog_open, SUDO_DEBUG_PCOMM);
+    debug_decl(iolog_open_int, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
@@ -1297,35 +1276,87 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 }
 
 static void
-iolog_close(struct plugin_container *plugin, int exit_status, int error_code)
+iolog_open(struct sudo_settings *settings, char * const user_info[],
+    char * const command_info[], int argc, char * const argv[],
+    char * const user_env[])
 {
-    debug_decl(iolog_close, SUDO_DEBUG_PCOMM);
+    struct plugin_container *plugin, *next;
+    debug_decl(iolog_open, SUDO_DEBUG_PCOMM);
 
-    if (plugin->u.io->close != NULL) {
-	sudo_debug_set_active_instance(plugin->debug_instance);
-	plugin->u.io->close(exit_status, error_code);
-	sudo_debug_set_active_instance(sudo_debug_instance);
+    TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
+	int ok = iolog_open_int(plugin, settings, user_info,
+	    command_info, argc, argv, user_env);
+	switch (ok) {
+	case 1:
+	    break;
+	case 0:
+	    /* I/O plugin asked to be disabled, remove and free. */
+	    iolog_unlink(plugin);
+	    break;
+	case -2:
+	    usage(1);
+	    break;
+	default:
+	    sudo_fatalx(U_("error initializing I/O plugin %s"),
+		plugin->name);
+	}
     }
+
     debug_return;
 }
 
-static int
-iolog_show_version(struct plugin_container *plugin, int verbose)
+static void
+iolog_close(int exit_status, int error_code)
 {
-    int ret;
+    struct plugin_container *plugin;
+    debug_decl(iolog_close, SUDO_DEBUG_PCOMM);
+
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
+	if (plugin->u.io->close != NULL) {
+	    if (error_code != 0) {
+		sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		    "%s: calling I/O close with errno %d",
+		    plugin->name, error_code);
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		    "%s: calling I/O close with wait status %d",
+			plugin->name, exit_status);
+	    }
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    plugin->u.io->close(exit_status, error_code);
+	    sudo_debug_set_active_instance(sudo_debug_instance);
+	}
+    }
+
+    debug_return;
+}
+
+static void
+iolog_show_version(int verbose, struct sudo_settings *settings,
+    char * const user_info[], int argc, char * const argv[],
+    char * const user_env[])
+{
+    struct plugin_container *plugin;
     debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM);
 
-    if (plugin->u.io->show_version == NULL)
-	debug_return_int(true);
-
-    sudo_debug_set_active_instance(plugin->debug_instance);
-    ret = plugin->u.io->show_version(verbose);
-    if (plugin->u.io->version >= SUDO_API_MKVERSION(1, 15)) {
-	if (plugin->u.io->close != NULL)
-	    plugin->u.io->close(0, 0);
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
+	int ok = iolog_open_int(plugin, settings, user_info, NULL,
+	    argc, argv, user_env);
+	if (ok != -1) {
+	    if (plugin->u.io->show_version != NULL) {
+		sudo_debug_set_active_instance(plugin->debug_instance);
+		/* Return value of show_version currently ignored. */
+		plugin->u.io->show_version(verbose);
+		if (plugin->u.io->version >= SUDO_API_MKVERSION(1, 15)) {
+		    if (plugin->u.io->close != NULL)
+			plugin->u.io->close(0, 0);
+		}
+		sudo_debug_set_active_instance(sudo_debug_instance);
+	    }
+	}
     }
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_int(ret);
+
+    debug_return;
 }
 
 /*
