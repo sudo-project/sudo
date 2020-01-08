@@ -1,5 +1,6 @@
 import sudo
 import signal
+from os import path
 
 class ReasonLoggerIOPlugin(sudo.Plugin):
     """
@@ -41,7 +42,7 @@ class ReasonLoggerIOPlugin(sudo.Plugin):
                                        on_suspend=self.on_conversation_suspend,
                                        on_resume=self.on_conversation_resume)
 
-            with open("/tmp/sudo_reasons.txt", "a") as file:
+            with open(self._log_file_path(), "a") as file:
                 print("Executed", ' '.join(argv), file=file)
                 print("Reason:", reply1, file=file)
                 print("Hidden reason:", reply2, file=file)
@@ -67,3 +68,7 @@ class ReasonLoggerIOPlugin(sudo.Plugin):
             return "{} ({})".format(signal.Signals(signum).name, signum)
         except Exception:
             return "{}".format(signum)
+
+    def _log_file_path(self):
+        log_path = sudo.options_as_dict(self.plugin_options).get("LogPath", "/tmp")
+        return path.join(log_path, "sudo_reasons.txt")
