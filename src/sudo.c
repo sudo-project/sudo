@@ -106,19 +106,16 @@ static void command_info_to_details(char * const info[],
 static void gc_init(void);
 
 /* Policy plugin convenience functions. */
-static int policy_open(struct plugin_container *plugin,
-    struct sudo_settings *settings,
+static int policy_open(struct sudo_settings *settings,
     char * const user_info[], char * const user_env[]);
-static void policy_close(struct plugin_container *plugin, int exit_status,
-    int error);
-static int policy_show_version(struct plugin_container *plugin, int verbose);
-static int policy_check(struct plugin_container *plugin, int argc,
-    char * const argv[], char *env_add[], char **command_info[],
-    char **argv_out[], char **user_env_out[]);
-static int policy_list(struct plugin_container *plugin, int argc,
-    char * const argv[], int verbose, const char *list_user);
-static int policy_validate(struct plugin_container *plugin);
-static void policy_invalidate(struct plugin_container *plugin, int remove);
+static void policy_close(int exit_status, int error);
+static int policy_show_version(int verbose);
+static int policy_check(int argc, char * const argv[], char *env_add[],
+    char **command_info[], char **argv_out[], char **user_env_out[]);
+static int policy_list(int argc, char * const argv[], int verbose,
+    const char *list_user);
+static int policy_validate(void);
+static void policy_invalidate(int remove);
 
 /* I/O log plugin convenience functions. */
 static int iolog_open(struct plugin_container *plugin,
@@ -220,7 +217,7 @@ main(int argc, char *argv[], char *envp[])
 	sudo_fatalx("%s", U_("unable to allocate memory"));
 
     /* Open policy plugin. */
-    ok = policy_open(&policy_plugin, settings, user_info, envp);
+    ok = policy_open(settings, user_info, envp);
     if (ok != 1) {
 	if (ok == -2)
 	    usage(1);
@@ -230,7 +227,7 @@ main(int argc, char *argv[], char *envp[])
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
-	    policy_show_version(&policy_plugin, !user_details.uid);
+	    policy_show_version(!user_details.uid);
 	    TAILQ_FOREACH(plugin, &io_plugins, entries) {
 		ok = iolog_open(plugin, settings, user_info, NULL,
 		    nargc, nargv, envp);
@@ -240,24 +237,24 @@ main(int argc, char *argv[], char *envp[])
 	    break;
 	case MODE_VALIDATE:
 	case MODE_VALIDATE|MODE_INVALIDATE:
-	    ok = policy_validate(&policy_plugin);
+	    ok = policy_validate();
 	    exit(ok != 1);
 	case MODE_KILL:
 	case MODE_INVALIDATE:
-	    policy_invalidate(&policy_plugin, sudo_mode == MODE_KILL);
+	    policy_invalidate(sudo_mode == MODE_KILL);
 	    exit(0);
 	    break;
 	case MODE_CHECK:
 	case MODE_CHECK|MODE_INVALIDATE:
 	case MODE_LIST:
 	case MODE_LIST|MODE_INVALIDATE:
-	    ok = policy_list(&policy_plugin, nargc, nargv,
-		ISSET(sudo_mode, MODE_LONG_LIST), list_user);
+	    ok = policy_list(nargc, nargv, ISSET(sudo_mode, MODE_LONG_LIST),
+		list_user);
 	    exit(ok != 1);
 	case MODE_EDIT:
 	case MODE_RUN:
-	    ok = policy_check(&policy_plugin, nargc, nargv, env_add,
-		&command_info, &argv_out, &user_env_out);
+	    ok = policy_check(nargc, nargv, env_add, &command_info, &argv_out,
+		&user_env_out);
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "policy plugin returns %d", ok);
 	    if (ok != 1) {
 		if (ok == -2)
@@ -963,7 +960,7 @@ run_command(struct command_details *details)
 	/* exec_setup() or execve() returned an error. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "calling policy close with errno %d", cstat.val);
-	policy_close(&policy_plugin, 0, cstat.val);
+	policy_close(0, cstat.val);
 	TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"calling I/O close with errno %d", cstat.val);
@@ -979,7 +976,7 @@ run_command(struct command_details *details)
 #endif
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "calling policy close with wait status %d", status);
-	policy_close(&policy_plugin, status, 0);
+	policy_close(status, 0);
 	TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"calling I/O close with wait status %d", status);
@@ -1057,15 +1054,15 @@ bad:
 }
 
 static int
-policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
-    char * const user_info[], char * const user_env[])
+policy_open(struct sudo_settings *settings, char * const user_info[],
+    char * const user_env[])
 {
     char **plugin_settings;
     int ret;
     debug_decl(policy_open, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
-    plugin_settings = format_plugin_settings(plugin, settings);
+    plugin_settings = format_plugin_settings(&policy_plugin, settings);
     if (plugin_settings == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
@@ -1075,33 +1072,33 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
      * Backwards compatibility for older API versions
      */
     sudo_debug_set_active_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
-    switch (plugin->u.generic->version) {
+    switch (policy_plugin.u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
     case SUDO_API_MKVERSION(1, 1):
-	ret = plugin->u.policy_1_0->open(plugin->u.io_1_0->version,
+	ret = policy_plugin.u.policy_1_0->open(policy_plugin.u.io_1_0->version,
 	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
 	    user_info, user_env);
 	break;
     default:
-	ret = plugin->u.policy->open(SUDO_API_VERSION, sudo_conversation,
+	ret = policy_plugin.u.policy->open(SUDO_API_VERSION, sudo_conversation,
 	    sudo_conversation_printf, plugin_settings, user_info, user_env,
-	    plugin->options);
+	    policy_plugin.options);
     }
 
     /* Stash plugin debug instance ID if set in open() function. */
-    plugin->debug_instance = sudo_debug_get_active_instance();
+    policy_plugin.debug_instance = sudo_debug_get_active_instance();
     sudo_debug_set_active_instance(sudo_debug_instance);
 
     debug_return_int(ret);
 }
 
 static void
-policy_close(struct plugin_container *plugin, int exit_status, int error_code)
+policy_close(int exit_status, int error_code)
 {
     debug_decl(policy_close, SUDO_DEBUG_PCOMM);
-    if (plugin->u.policy->close != NULL) {
-	sudo_debug_set_active_instance(plugin->debug_instance);
-	plugin->u.policy->close(exit_status, error_code);
+    if (policy_plugin.u.policy->close != NULL) {
+	sudo_debug_set_active_instance(policy_plugin.debug_instance);
+	policy_plugin.u.policy->close(exit_status, error_code);
 	sudo_debug_set_active_instance(sudo_debug_instance);
     } else if (error_code) {
 	errno = error_code;
@@ -1111,43 +1108,43 @@ policy_close(struct plugin_container *plugin, int exit_status, int error_code)
 }
 
 static int
-policy_show_version(struct plugin_container *plugin, int verbose)
+policy_show_version(int verbose)
 {
     int ret;
     debug_decl(policy_show_version, SUDO_DEBUG_PCOMM);
 
-    if (plugin->u.policy->show_version == NULL)
+    if (policy_plugin.u.policy->show_version == NULL)
 	debug_return_int(true);
-    sudo_debug_set_active_instance(plugin->debug_instance);
-    ret = plugin->u.policy->show_version(verbose);
-    if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
-	if (plugin->u.policy->close != NULL)
-	    plugin->u.policy->close(0, 0);
+    sudo_debug_set_active_instance(policy_plugin.debug_instance);
+    ret = policy_plugin.u.policy->show_version(verbose);
+    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (policy_plugin.u.policy->close != NULL)
+	    policy_plugin.u.policy->close(0, 0);
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_int(ret);
 }
 
 static int
-policy_check(struct plugin_container *plugin, int argc, char * const argv[],
+policy_check(int argc, char * const argv[],
     char *env_add[], char **command_info[], char **argv_out[],
     char **user_env_out[])
 {
     int ret;
     debug_decl(policy_check, SUDO_DEBUG_PCOMM);
 
-    if (plugin->u.policy->check_policy == NULL) {
+    if (policy_plugin.u.policy->check_policy == NULL) {
 	sudo_fatalx(U_("policy plugin %s is missing the `check_policy' method"),
-	    plugin->name);
+	    policy_plugin.name);
     }
-    sudo_debug_set_active_instance(plugin->debug_instance);
-    ret = plugin->u.policy->check_policy(argc, argv, env_add, command_info,
-	argv_out, user_env_out);
+    sudo_debug_set_active_instance(policy_plugin.debug_instance);
+    ret = policy_plugin.u.policy->check_policy(argc, argv, env_add,
+	command_info, argv_out, user_env_out);
     /* On success, the close method will be called by sudo_edit/run_command. */
     if (ret != 1) {
-	if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
-	    if (plugin->u.policy->close != NULL)
-		plugin->u.policy->close(0, 0);
+	if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	    if (policy_plugin.u.policy->close != NULL)
+		policy_plugin.u.policy->close(0, 0);
 	}
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
@@ -1155,61 +1152,60 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
 }
 
 static int
-policy_list(struct plugin_container *plugin, int argc, char * const argv[],
-    int verbose, const char *list_user)
+policy_list(int argc, char * const argv[], int verbose, const char *list_user)
 {
     int ret;
     debug_decl(policy_list, SUDO_DEBUG_PCOMM);
 
-    if (plugin->u.policy->list == NULL) {
+    if (policy_plugin.u.policy->list == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support listing privileges"),
-	    plugin->name);
+	    policy_plugin.name);
 	debug_return_int(false);
     }
-    sudo_debug_set_active_instance(plugin->debug_instance);
-    ret = plugin->u.policy->list(argc, argv, verbose, list_user);
-    if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
-	if (plugin->u.policy->close != NULL)
-	    plugin->u.policy->close(0, 0);
+    sudo_debug_set_active_instance(policy_plugin.debug_instance);
+    ret = policy_plugin.u.policy->list(argc, argv, verbose, list_user);
+    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (policy_plugin.u.policy->close != NULL)
+	    policy_plugin.u.policy->close(0, 0);
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_int(ret);
 }
 
 static int
-policy_validate(struct plugin_container *plugin)
+policy_validate(void)
 {
     int ret;
     debug_decl(policy_validate, SUDO_DEBUG_PCOMM);
 
-    if (plugin->u.policy->validate == NULL) {
+    if (policy_plugin.u.policy->validate == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support the -v option"),
-	    plugin->name);
+	    policy_plugin.name);
 	debug_return_int(false);
     }
-    sudo_debug_set_active_instance(plugin->debug_instance);
-    ret = plugin->u.policy->validate();
-    if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
-	if (plugin->u.policy->close != NULL)
-	    plugin->u.policy->close(0, 0);
+    sudo_debug_set_active_instance(policy_plugin.debug_instance);
+    ret = policy_plugin.u.policy->validate();
+    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (policy_plugin.u.policy->close != NULL)
+	    policy_plugin.u.policy->close(0, 0);
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_int(ret);
 }
 
 static void
-policy_invalidate(struct plugin_container *plugin, int remove)
+policy_invalidate(int remove)
 {
     debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM);
-    if (plugin->u.policy->invalidate == NULL) {
+    if (policy_plugin.u.policy->invalidate == NULL) {
 	sudo_fatalx(U_("policy plugin %s does not support the -k/-K options"),
-	    plugin->name);
+	    policy_plugin.name);
     }
-    sudo_debug_set_active_instance(plugin->debug_instance);
-    plugin->u.policy->invalidate(remove);
-    if (plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
-	if (plugin->u.policy->close != NULL)
-	    plugin->u.policy->close(0, 0);
+    sudo_debug_set_active_instance(policy_plugin.debug_instance);
+    policy_plugin.u.policy->invalidate(remove);
+    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
+	if (policy_plugin.u.policy->close != NULL)
+	    policy_plugin.u.policy->close(0, 0);
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return;
