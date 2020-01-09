@@ -73,8 +73,6 @@ static bool should_mail(int);
 static void mysyslog(int, const char *, ...);
 static char *new_logline(const char *, const char *);
 
-#define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
-
 /*
  * We do an openlog(3)/closelog(3) for each message because some
  * authentication methods (notably PAM) use syslog(3) for their
