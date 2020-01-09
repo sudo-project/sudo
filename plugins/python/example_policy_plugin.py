@@ -41,7 +41,7 @@ class SudoPolicyPlugin(sudo.Plugin):
     not acceptable, catch it.
     """
 
-    _allowed_commands = {"id", "whoami"}
+    _allowed_commands = ("id", "whoami")
     _safe_password = "12345"
 
     # -- Plugin API functions --
