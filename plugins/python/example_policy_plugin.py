@@ -122,7 +122,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         pass  # we have no cache
 
     def show_version(self, is_verbose: int):
-        sudo.log_info("Python Policy Plugin version: {}".format(VERSION))
+        sudo.log_info("Python Example Policy Plugin version: {}".format(VERSION))
         if is_verbose:
             sudo.log_info("Python interpreter version:", sys.version)
 

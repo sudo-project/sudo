@@ -401,7 +401,6 @@ python_plugin_show_version(struct PluginContext *plugin_ctx, const char *python_
 {
     debug_decl(python_plugin_show_version, PYTHON_DEBUG_CALLBACKS);
 
-    py_sudo_log(SUDO_CONV_INFO_MSG, "Python language plugin version %s\n", PACKAGE_VERSION);
     debug_return_int(python_plugin_api_rc_call(plugin_ctx, python_callback_name,
                                                Py_BuildValue("(i)", is_verbose)));
 }

@@ -129,6 +129,13 @@ int
 python_plugin_io_show_version(int verbose)
 {
     debug_decl(python_plugin_io_show_version, PYTHON_DEBUG_CALLBACKS);
+
+    if (verbose) {
+        py_sudo_log(SUDO_CONV_INFO_MSG, "Python io plugin API version %d.%d\n", "%d.%d",
+                    SUDO_API_VERSION_GET_MAJOR(PY_IO_PLUGIN_VERSION),
+                    SUDO_API_VERSION_GET_MINOR(PY_IO_PLUGIN_VERSION));
+    }
+
     debug_return_int(python_plugin_show_version(&plugin_ctx, CALLBACK_PYNAME(show_version), verbose));
 }
 
