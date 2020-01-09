@@ -342,7 +342,9 @@ python_plugin_api_call(struct PluginContext *plugin_ctx, const char *func_name, 
 {
     debug_decl(python_plugin_api_call, PYTHON_DEBUG_PY_CALLS);
 
-    if (py_args == NULL) {
+    // Note: call fails if py_args is an empty tuple. Passing no arguments works passing NULL
+    // instead. So having such must be handled as valid. (See policy_plugin.validate())
+    if (py_args == NULL && PyErr_Occurred()) {
         py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to build arguments for python plugin API call '%s'\n", func_name);
         py_log_last_error(NULL);
         debug_return_ptr(NULL);

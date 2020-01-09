@@ -200,8 +200,7 @@ int
 python_plugin_policy_validate(void)
 {
     debug_decl(python_plugin_policy_validate, PYTHON_DEBUG_CALLBACKS);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(validate),
-                                               Py_BuildValue("")));
+    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(validate), NULL));
 }
 
 void
