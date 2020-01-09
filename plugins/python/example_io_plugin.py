@@ -107,7 +107,7 @@ class SudoIOPlugin(sudo.Plugin):
         self._log("SUSPEND", signal_description)
 
     def show_version(self, is_verbose: int) -> int:
-        sudo.log_info("Python IO Plugin version: {}".format(VERSION))
+        sudo.log_info("Python Example IO Plugin version: {}".format(VERSION))
         if is_verbose:
             sudo.log_info("Python interpreter version:", sys.version)
 
