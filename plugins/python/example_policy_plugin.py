@@ -97,7 +97,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         user_pwd = pwd.struct_passwd(user_pwd) if user_pwd else None
 
         # This is how you change the user_env:
-        return (sudo.RC_OK, user_env)
+        return (sudo.RC_OK, user_env + ("PLUGIN_EXAMPLE_ENV=1",))
 
         # If you do not want to change user_env, you can also just return (or None):
         # return sudo.RC_OK
