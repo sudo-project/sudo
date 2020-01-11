@@ -94,13 +94,25 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 
 #ifdef HAVE_FACCESSAT
 /*
- * Returns true if the open directory fd is writable by the user.
+ * Returns true if the open directory fd is owned or writable by the user.
  */
 static int
 dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 {
-    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
+    struct stat sb;
     int rc;
+    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
+
+    if (fstat(dfd, &sb) == -1)
+	debug_return_int(-1);
+
+    /* If the user owns the dir we always consider it writable. */
+    if (sb.st_uid == ud->uid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user uid %u matches directory uid %u", (unsigned int)ud->uid,
+	    (unsigned int)sb.st_uid);
+	debug_return_int(true);
+    }
 
     /* Change uid/gid/groups to invoking user, usually needs root perms. */
     if (cd->euid != ROOT_UID) {
@@ -150,7 +162,7 @@ group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
 }
 
 /*
- * Returns true if the open directory fd is writable by the user.
+ * Returns true if the open directory fd is owned or writable by the user.
  */
 static int
 dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
