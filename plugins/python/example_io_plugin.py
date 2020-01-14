@@ -99,8 +99,7 @@ class SudoIOPlugin(sudo.Plugin):
 
     def log_suspend(self, signo: int) -> int:
         try:
-            signal_name = signal.Signals(signo).name
-            signal_description = "{} ({})".format(signal_name, signo)
+            signal_description = signal.Signals(signo).name
         except (AttributeError, ValueError):
             signal_description = "signal {}".format(signo)
 
