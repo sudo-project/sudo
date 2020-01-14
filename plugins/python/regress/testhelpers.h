@@ -16,8 +16,6 @@
 extern const char *sudo_conf_developer_mode;
 extern const char *sudo_conf_normal_mode;
 
-extern struct passwd example_pwd;
-
 #define TEMP_PATH_TEMPLATE "/tmp/sudo_check_python_exampleXXXXXX"
 
 extern struct TestData {

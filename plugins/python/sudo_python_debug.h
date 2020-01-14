@@ -19,6 +19,7 @@
 #ifndef SUDO_PYTHON_DEBUG_H
 #define SUDO_PYTHON_DEBUG_H
 
+#include <sys/types.h>
 #include "sudo_debug.h"
 
 /*
