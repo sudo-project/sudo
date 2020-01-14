@@ -65,7 +65,7 @@ class ReasonLoggerIOPlugin(sudo.Plugin):
     @classmethod
     def _signal_name(cls, signum):
         try:
-            return "{} ({})".format(signal.Signals(signum).name, signum)
+            return signal.Signals(signum).name
         except Exception:
             return "{}".format(signum)
 
