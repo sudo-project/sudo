@@ -2546,13 +2546,13 @@ if test ${USE_PYTHON-'no'} = "yes"; then
 
     AS_IF([test -z "$PYTHON_INCLUDE"], [
       AC_MSG_CHECKING([python include flags])
-      PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
+      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags`
       AC_MSG_RESULT([$PYTHON_INCLUDE])
     ])
 
     AS_IF([test -z "$PYTHON_LIBS"], [
       AC_MSG_CHECKING([python linker flags])
-      PYTHON_LIBS=`$PYTHON_CONFIG --libs`
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags`
       AC_MSG_RESULT([$PYTHON_LIBS])
     ])
 

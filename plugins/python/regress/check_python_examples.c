@@ -6,6 +6,8 @@ static struct io_plugin *python_io = NULL;
 static struct policy_plugin *python_policy = NULL;
 static struct sudoers_group_plugin *group_plugin = NULL;
 
+static struct passwd example_pwd;
+
 void
 create_io_plugin_options(const char *log_path)
 {
@@ -80,12 +82,22 @@ init(void)
     // always start each test from clean state
     memset(&data, 0, sizeof(data));
 
+    memset(&example_pwd, 0, sizeof(example_pwd));
+    example_pwd.pw_name = "pw_name";
+    example_pwd.pw_passwd = "pw_passwd";
+    example_pwd.pw_gecos = "pw_gecos";
+    example_pwd.pw_shell ="pw_shell";
+    example_pwd.pw_dir = "pw_dir";
+    example_pwd.pw_uid = (uid_t)1001;
+    example_pwd.pw_gid = (gid_t)101;
+
     VERIFY_TRUE(asprintf(&data.tmp_dir, TEMP_PATH_TEMPLATE) >= 0);
     VERIFY_NOT_NULL(mkdtemp(data.tmp_dir));
 
     // by default we test in developer mode, so the python plugin can be loaded
     sudo_conf_clear_paths();
     VERIFY_INT(sudo_conf_read(sudo_conf_developer_mode, SUDO_CONF_ALL), true);
+    VERIFY_TRUE(sudo_conf_developer_mode());
 
     // some default values for the plugin open:
     data.settings = create_str_array(1, NULL);

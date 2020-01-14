@@ -3,16 +3,6 @@
 const char *sudo_conf_developer_mode = TESTDATA_DIR "sudo.conf.developer_mode";
 const char *sudo_conf_normal_mode = TESTDATA_DIR "sudo.conf.normal_mode";
 
-struct passwd example_pwd = {
-    "pw_name",
-    "pw_passwd",
-    (uid_t)1001,
-    (gid_t)101,
-    "pw_gecos",
-    "pw_dir",
-    "pw_shell"
-};
-
 struct TestData data;
 
 static void
