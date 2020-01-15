@@ -254,18 +254,20 @@ logsrv_util.i: $(srcdir)/logsrv_util.c $(incdir)/compat/stdbool.h \
 logsrv_util.plog: logsrv_util.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrv_util.c --i-file $< --output-file $@
 logsrvd.o: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
-           $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
-           $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
-           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/compat/stdbool.h $(incdir)/hostcheck.h \
+           $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd.c
 logsrvd.i: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
-           $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
-           $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
-           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/compat/stdbool.h $(incdir)/hostcheck.h \
+           $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \

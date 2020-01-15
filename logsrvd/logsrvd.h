@@ -98,6 +98,11 @@ struct connection_closure {
     struct iolog_file iolog_files[IOFD_MAX];
     int iolog_dir_fd;
     int sock;
+#ifdef HAVE_STRUCT_IN6_ADDR
+    char ipaddr[INET6_ADDRSTRLEN];
+#else
+    char ipaddr[INET_ADDRSTRLEN];
+#endif
     enum connection_status state;
 };
 

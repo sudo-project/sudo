@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -43,6 +44,7 @@
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
 # include <openssl/err.h>
+# include "hostcheck.h"
 #endif
 
 #include "log_server.pb-c.h"
@@ -909,6 +911,45 @@ signal_cb(int signo, int what, void *v)
 }
 
 #if defined(HAVE_OPENSSL)
+static int
+verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
+{
+    HostnameValidationResult result;
+    struct connection_closure *closure;
+    SSL *ssl;
+    X509 *current_cert;
+    X509 *peer_cert;
+
+    /* if pre-verification of the cert failed, just propagate that result back */
+    if (preverify_ok != 1) {
+        return 0;
+    }
+
+    /* since this callback is called for each cert in the chain,
+     * check that current cert is the peer's certificate
+     */
+    current_cert = X509_STORE_CTX_get_current_cert(ctx);
+    peer_cert = X509_STORE_CTX_get0_cert(ctx);
+
+    if (current_cert != peer_cert) {
+        return 1;
+    }
+
+    /* read out the attached object (closure) from the ssl connection object */
+    ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+    closure = (struct connection_closure *)SSL_get_ex_data(ssl, 1);
+
+    result = validate_hostname(peer_cert, closure->ipaddr, closure->ipaddr, 1);
+
+    switch(result)
+    {
+        case MatchFound:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 static bool
 verify_server_cert(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
 {
@@ -1085,9 +1126,12 @@ init_tls_server_context(void)
         goto bad;
     }
 
-    /* if peer authentication is enabled, verify client cert during TLS handshake */
+    /* if peer authentication is enabled, verify client cert during TLS handshake
+     * The last parameter is a callback, where identity validation (hostname/ip)
+     * will be performed, because it is not automatically done by openssl.
+     */
     if (tls_config->check_peer) {
-        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
+        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, verify_peer_identity);
     }
 
     /* if private key file was not set, assume that the cert file contains the private key */
@@ -1289,7 +1333,7 @@ bad:
  * Allocate a connection closure and send a server hello message.
  */
 static bool
-new_connection(int sock, struct sudo_event_base *base)
+new_connection(int sock, const struct sockaddr *sa, struct sudo_event_base *base)
 {
     struct connection_closure *closure;
 
@@ -1326,6 +1370,15 @@ new_connection(int sock, struct sudo_event_base *base)
             goto bad;
         }
 
+        /* attach the closure object to the ssl connection object to make it
+        available during hostname matching
+        */
+        if (SSL_set_ex_data(closure->ssl, 1, closure) <= 0) {
+            sudo_warnx(U_("Unable to attach user data to the ssl object: %s"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
         /* enable SSL_accept to begin handshake with client */
         if (sudo_ev_add(base, closure->ssl_accept_ev,
             logsrvd_conf_get_sock_timeout(), false) == -1) {
@@ -1343,6 +1396,24 @@ new_connection(int sock, struct sudo_event_base *base)
     if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1)
 	goto bad;
 #endif
+
+    /* store the peer's IP address in the closure object*/
+    if (sa->sa_family == AF_INET) {
+        struct sockaddr_in *sin = (struct sockaddr_in *)sa;
+        inet_ntop(AF_INET, &sin->sin_addr, closure->ipaddr,
+            sizeof(closure->ipaddr));
+    }
+#if defined(HAVE_STRUCT_IN6_ADDR)
+    else if (sa->sa_family == AF_INET6){
+        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sa;
+        inet_ntop(AF_INET6, &sin6->sin6_addr, closure->ipaddr,
+            sizeof(closure->ipaddr));
+    }
+#endif /* HAVE_STRUCT_IN6_ADDR */
+    else {
+        sudo_fatal(U_("unable to get remote IP addr"));
+        goto bad;
+    }
 
     debug_return_bool(true);
 bad:
@@ -1395,7 +1466,7 @@ listener_cb(int fd, int what, void *v)
 
     sock = accept(fd, &s_un.sa, &salen);
     if (sock != -1) {
-	if (!new_connection(sock, base)) {
+	if (!new_connection(sock, &s_un.sa, base)) {
 	    /* TODO: pause accepting on ENOMEM */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to start new connection");
