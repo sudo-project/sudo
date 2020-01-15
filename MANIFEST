@@ -79,6 +79,7 @@ include/compat/sha2.h
 include/compat/stdbool.h
 include/log_server.pb-c.h
 include/protobuf-c/protobuf-c.h
+lib/iolog/hostcheck.h
 include/sudo_compat.h
 include/sudo_conf.h
 include/sudo_debug.h
@@ -95,6 +96,7 @@ include/sudo_rand.h
 include/sudo_util.h
 install-sh
 lib/iolog/Makefile.in
+lib/iolog/hostcheck.c
 lib/iolog/iolog_fileio.c
 lib/iolog/iolog_path.c
 lib/iolog/iolog_util.c
