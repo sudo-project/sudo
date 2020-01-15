@@ -37,7 +37,7 @@ __dso_public int main(int argc, char *argv[]);
 
 /*
  * Note: we do not test SIGUNUSED as it may not appear in sys_sigabbrev[]
- *       on Linux.
+ *       on Linux.  FreeBSD is missing SIGLWP (aka SIGTHR) in sys_signame[].
  */
 static struct signal_data {
     int rval;
@@ -159,7 +159,7 @@ static struct signal_data {
 #ifdef SIGWAITING
     { 0, SIGWAITING, "WAITING", NULL },
 #endif
-#ifdef SIGLWP
+#if defined(SIGLWP) && !defined(__FreeBSD__)
     { 0, SIGLWP, "LWP", NULL },
 #endif
 #ifdef SIGFREEZE
