@@ -845,6 +845,9 @@ sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts)
     int ret = 0;
     debug_decl(sudo_ev_pending, SUDO_DEBUG_EVENT);
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: event %p, flags 0x%x, events 0x%x",
+	__func__, ev, ev->flags, ev->events);
+
     if (!ISSET(ev->flags, SUDO_EVQ_INSERTED))
 	debug_return_int(0);
 
