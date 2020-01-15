@@ -301,7 +301,7 @@ tls_connect_cb(int sock, int what, void *v)
     struct timespec timeo = { 10, 0 };
     int tls_con, err;
 
-    debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
+    debug_decl(tls_connect_cb, SUDOERS_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
         sudo_warnx(U_("TLS handshake timeout occured"));
@@ -341,7 +341,7 @@ static bool
 tls_timed_connect(struct client_closure *closure)
 {
     struct sudo_event_base *evbase = NULL;
-    debug_decl(tls_timed_connect, SUDO_DEBUG_UTIL);
+    debug_decl(tls_timed_connect, SUDOERS_DEBUG_UTIL);
 
     evbase = sudo_ev_base_alloc();
     closure->tls_conn_status = false;
@@ -1103,7 +1103,7 @@ static bool
 expand_buf(struct connection_buffer *buf, unsigned int needed)
 {
     void *newdata;
-    debug_decl(expand_buf, SUDO_DEBUG_UTIL);
+    debug_decl(expand_buf, SUDOERS_DEBUG_UTIL);
 
     if (buf->size < needed) {
 	/* Expand buffer. */

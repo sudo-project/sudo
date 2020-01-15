@@ -72,7 +72,7 @@ cb_maxseq(const union sudo_defs_val *sd_un)
 {
     const char *errstr;
     unsigned int value;
-    debug_decl(cb_maxseq, SUDO_DEBUG_UTIL);
+    debug_decl(cb_maxseq, SUDOERS_DEBUG_UTIL);
 
     value = sudo_strtonum(sd_un->str, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
