@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <arpa/inet.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -48,6 +49,8 @@
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
 # include <openssl/err.h>
+# include <openssl/x509v3.h>
+# include "hostcheck.h"
 #endif /* HAVE_OPENSSL */
 
 #include "sudoers.h"
@@ -217,6 +220,45 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo,
 }
 
 #if defined(HAVE_OPENSSL)
+static int
+verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
+{
+    HostnameValidationResult result;
+    struct client_closure *closure;
+    SSL *ssl;
+    X509 *current_cert;
+    X509 *peer_cert;
+
+    /* if pre-verification of the cert failed, just propagate that result back */
+    if (preverify_ok != 1) {
+        return 0;
+    }
+
+    /* since this callback is called for each cert in the chain,
+     * check that current cert is the peer's certificate
+     */
+    current_cert = X509_STORE_CTX_get_current_cert(ctx);
+    peer_cert = X509_STORE_CTX_get0_cert(ctx);
+
+    if (current_cert != peer_cert) {
+        return 1;
+    }
+
+    /* read out the attached object (closure) from the ssl connection object */
+    ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+    closure = (struct client_closure*)SSL_get_ex_data(ssl, 1);
+
+    result = validate_hostname(peer_cert, closure->host->str, closure->ipaddr, 0);
+
+    switch(result)
+    {
+        case MatchFound:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 static bool
 tls_init(struct client_closure *closure, bool peer_auth)
 {
@@ -245,8 +287,10 @@ tls_init(struct client_closure *closure, bool peer_auth)
         goto bad;
     }
 
-    /* turn on server cert verification during the handshake */
-    SSL_CTX_set_verify(closure->ssl_ctx, SSL_VERIFY_PEER, NULL);
+    /* turn on server cert verification during the handshake.
+       hostname matching will be done in a custom callback (verify_peer_identity).
+     */
+    SSL_CTX_set_verify(closure->ssl_ctx, SSL_VERIFY_PEER, verify_peer_identity);
 
     /* if the server requests client authentication with signed certificate */
     if (peer_auth) {
@@ -283,6 +327,15 @@ tls_init(struct client_closure *closure, bool peer_auth)
     /* attach the closure socket to the ssl object */
     if (SSL_set_fd(closure->ssl, closure->sock) <= 0) {
         sudo_warnx(U_("Unable to attach socket to the ssl object: %s"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    /* attach the closure object to the ssl connection object to make it
+       available during hostname matching
+     */
+    if (SSL_set_ex_data(closure->ssl, 1, closure) <= 0) {
+        sudo_warnx(U_("Unable to attach user data to the ssl object: %s"),
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
