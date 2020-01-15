@@ -1357,6 +1357,21 @@ iolog_unlink(struct plugin_container *plugin)
     debug_return;
 }
 
+static void
+plugin_event_callback(int fd, int what, void *v)
+{
+    struct sudo_plugin_event_int *ev_int = v;
+    int old_instance;
+    debug_decl(plugin_event_callback, SUDO_DEBUG_PCOMM);
+
+    /* Run the real callback using the plugin's debug instance. */
+    old_instance = sudo_debug_set_active_instance(ev_int->debug_instance);
+    ev_int->callback(fd, what, ev_int->closure);
+    sudo_debug_set_active_instance(old_instance);
+
+    debug_return;
+}
+
 /*
  * Fill in a previously allocated struct sudo_plugin_event.
  */
@@ -1368,8 +1383,15 @@ plugin_event_set(struct sudo_plugin_event *pev, int fd, int events,
     debug_decl(plugin_event_set, SUDO_DEBUG_PCOMM);
 
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
-    if (sudo_ev_set(&ev_int->private, fd, events, callback, closure) == -1)
+    if (sudo_ev_set(&ev_int->private, fd, events, plugin_event_callback, ev_int) == -1)
 	debug_return_int(-1);
+
+    /* Stash active instance so we can restore it when callback runs. */
+    ev_int->debug_instance = sudo_debug_get_active_instance();
+
+    /* Actual user-specified callback and closure. */
+    ev_int->callback = callback;
+    ev_int->closure = closure;
 
     /* Plugin can only operate on the main event loop. */
     ev_int->private.base = sudo_event_base;
@@ -1502,6 +1524,9 @@ sudo_plugin_event_alloc(void)
     ev_int->public.setbase = plugin_event_setbase;
     ev_int->public.loopbreak = plugin_event_loopbreak;
     ev_int->public.free = plugin_event_free;
+
+    /* Debug instance to use with the callback. */
+    ev_int->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 
     /* Clear private portion in case caller tries to use us uninitialized. */
     memset(&ev_int->private, 0, sizeof(ev_int->private));

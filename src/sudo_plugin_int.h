@@ -109,7 +109,10 @@ TAILQ_HEAD(plugin_container_list, plugin_container);
  */
 struct sudo_plugin_event_int {
     struct sudo_event private;		/* must be first */
-    struct sudo_plugin_event public;
+    int debug_instance;			/* plugin's debug instance */
+    void *closure;			/* actual user closure */
+    sudo_ev_callback_t callback;	/* actual user callback */
+    struct sudo_plugin_event public;	/* user-visible portion */
 };
 
 extern struct plugin_container policy_plugin;
