@@ -4171,6 +4171,19 @@ if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes" -a -n "$GCC"; then
 fi
 
 dnl
+dnl We want to use DT_RUNPATH in preference to DT_RPATH in ELF binaries.
+dnl Otherwise, LD_LIBRARY_PATH does not work when running the tests.
+dnl We don't do this on NetBSD where RPATH already supports LD_LIBRARY_PATH.
+dnl
+case "$OS" in
+    netbsd)
+	;;
+    *)
+	AX_CHECK_LINK_FLAG([-Wl,--enable-new-dtags], [AX_APPEND_FLAG([-Wl,--enable-new-dtags], [LDFLAGS])])
+	;;
+esac
+
+dnl
 dnl Check for symbol visibility support.
 dnl This test relies on AC_LANG_WERROR
 dnl

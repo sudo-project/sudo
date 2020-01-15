@@ -26631,6 +26631,80 @@ fi
 
 fi
 
+case "$OS" in
+    netbsd)
+	;;
+    *)
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--enable-new-dtags" >&5
+$as_echo_n "checking whether the linker accepts -Wl,--enable-new-dtags... " >&6; }
+if ${ax_cv_check_ldflags___Wl___enable_new_dtags+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,--enable-new-dtags"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___Wl___enable_new_dtags=yes
+else
+  ax_cv_check_ldflags___Wl___enable_new_dtags=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl___enable_new_dtags" >&5
+$as_echo "$ax_cv_check_ldflags___Wl___enable_new_dtags" >&6; }
+if test x"$ax_cv_check_ldflags___Wl___enable_new_dtags" = xyes; then :
+
+if ${LDFLAGS+:} false; then :
+
+  case " $LDFLAGS " in #(
+  *" -Wl,--enable-new-dtags "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,--enable-new-dtags"; } >&5
+  (: LDFLAGS already contains -Wl,--enable-new-dtags) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -Wl,--enable-new-dtags"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LDFLAGS=-Wl,--enable-new-dtags
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+else
+  :
+fi
+
+	;;
+esac
+
 if test -n "$GCC"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fvisibility=hidden" >&5
 $as_echo_n "checking whether C compiler accepts -fvisibility=hidden... " >&6; }
