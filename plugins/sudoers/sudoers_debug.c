@@ -125,21 +125,14 @@ bool
 sudoers_debug_register(const char *program,
     struct sudo_conf_debug_file_list *debug_files)
 {
+    int instance = sudoers_debug_instance;
     struct sudo_debug_file *debug_file, *debug_next;
-
-    /* Already initialized? */
-    if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER)
-	sudo_debug_set_active_instance(sudoers_debug_instance);
 
     /* Setup debugging if indicated. */
     if (debug_files != NULL && !TAILQ_EMPTY(debug_files)) {
 	if (program != NULL) {
-	    sudoers_debug_instance = sudo_debug_register(program,
-		sudoers_subsystem_names, sudoers_subsystem_ids, debug_files);
-	    if (sudoers_debug_instance == SUDO_DEBUG_INSTANCE_ERROR)
-		return false;
-
-	    sudoers_debug_refcnt++;
+	    instance = sudo_debug_register(program, sudoers_subsystem_names,
+		sudoers_subsystem_ids, debug_files);
 	}
 	TAILQ_FOREACH_SAFE(debug_file, debug_files, entries, debug_next) {
 	    TAILQ_REMOVE(debug_files, debug_file, entries);
@@ -148,6 +141,21 @@ sudoers_debug_register(const char *program,
 	    free(debug_file);
 	}
     }
+
+    switch (instance) {
+    case SUDO_DEBUG_INSTANCE_ERROR:
+	return false;
+    case SUDO_DEBUG_INSTANCE_INITIALIZER:
+	/* Nothing to do */
+	break;
+    default:
+	/* New debug instance or additional reference on existing one. */
+	sudoers_debug_instance = instance;
+	sudo_debug_set_active_instance(sudoers_debug_instance);
+	sudoers_debug_refcnt++;
+	break;
+    }
+
     return true;
 }
 
