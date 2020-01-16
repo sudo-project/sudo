@@ -133,7 +133,7 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 
     if (rc == 0)
 	debug_return_int(true);
-    if (errno == EACCES)
+    if (errno == EACCES || errno == EROFS)
 	debug_return_int(false);
     debug_return_int(-1);
 }
