@@ -587,12 +587,13 @@ iolog_details_write(struct iolog_details *details,
 
     /* Convert to iolog_info */
     memset(&log_info, 0, sizeof(log_info));
+    log_info.cwd = details->cwd;
     log_info.user = details->submituser;
     log_info.runas_user = details->runuser;
     log_info.runas_group = details->rungroup;
     log_info.tty = details->ttyname;
-    log_info.cwd = details->cwd;
     log_info.cmd = details->command;
+    log_info.tstamp = details->submit_time;
     log_info.lines = details->lines;
     log_info.cols = details->columns;
 
