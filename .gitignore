@@ -29,6 +29,8 @@ doc/*.man
 doc/*.mdoc
 doc/fixman.sed
 
+examples/sudo.conf
+
 init.d/*.sh
 init.d/sudo.conf
 
