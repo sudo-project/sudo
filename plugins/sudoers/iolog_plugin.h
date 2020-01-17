@@ -88,7 +88,6 @@ struct client_closure {
     int sock;
 #if defined(HAVE_OPENSSL)
     bool tls;
-    bool tls_conn_status;
     SSL_CTX *ssl_ctx;
     SSL *ssl;
 #endif /* HAVE_OPENSSL */
@@ -97,9 +96,6 @@ struct client_closure {
     struct connection_buffer_list write_bufs;
     struct connection_buffer_list free_bufs;
     struct connection_buffer read_buf;
-#if defined(HAVE_OPENSSL)
-    struct sudo_plugin_event *tls_connect_ev;
-#endif /* HAVE_OPENSSL */
     struct sudo_plugin_event *read_ev;
     struct sudo_plugin_event *write_ev;
     struct iolog_details *log_details;
@@ -113,7 +109,6 @@ struct client_closure {
 # define CLIENT_CLOSURE_INITIALIZER(_c)			\
     {							\
 	-1,						    \
-    false,                      \
     false,                      \
     NULL,						\
     NULL,						\

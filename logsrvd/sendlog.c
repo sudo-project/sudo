@@ -182,14 +182,15 @@ static void
 tls_connect_cb(int sock, int what, void *v)
 {
     struct client_closure *closure = v;
+    struct sudo_event_base *evbase = closure->tls_connect_ev->base;
     struct timespec timeo = { TLS_HANDSHAKE_TIMEO_SEC, 0 };
     int con_stat, err;
 
     debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_warnx(U_("TLS handshake timeout occured"));
-        debug_return;
+        sudo_warnx(U_("TLS handshake timeout occurred"));
+        goto bad;
     }
 
     con_stat = SSL_connect(ssl);
@@ -204,46 +205,71 @@ tls_connect_cb(int sock, int what, void *v)
                 break;
             /* TLS handshake is not finished, reschedule event */
             case SSL_ERROR_WANT_READ:
-            case SSL_ERROR_WANT_WRITE:
-                if (sudo_ev_add(closure->tls_connect_ev->base,
-                    closure->tls_connect_ev, &timeo, false) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+		    "SSL_connect returns SSL_ERROR_WANT_READ");
+		if (what != SUDO_EV_READ) {
+		    if (sudo_ev_set(closure->tls_connect_ev, closure->sock,
+			    SUDO_EV_READ, tls_connect_cb, closure) == -1) {
+			sudo_warnx(U_("unable to set event"));
+			goto bad;
+		    }
+		}
+                if (sudo_ev_add(evbase, closure->tls_connect_ev, &timeo, false) == -1) {
                     sudo_warnx(U_("unable to add event to queue"));
+		    goto bad;
                 }
-                break;
+		break;
+            case SSL_ERROR_WANT_WRITE:
+		sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+		    "SSL_connect returns SSL_ERROR_WANT_WRITE");
+		if (what != SUDO_EV_WRITE) {
+		    if (sudo_ev_set(closure->tls_connect_ev, closure->sock,
+			    SUDO_EV_WRITE, tls_connect_cb, closure) == -1) {
+			sudo_warnx(U_("unable to set event"));
+			goto bad;
+		    }
+		}
+                if (sudo_ev_add(evbase, closure->tls_connect_ev, &timeo, false) == -1) {
+                    sudo_warnx(U_("unable to add event to queue"));
+		    goto bad;
+                }
+		break;
             default:
                 sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s\n"),
-                    err,
-                    ERR_error_string(ERR_get_error(), NULL));
+                    err, ERR_error_string(ERR_get_error(), NULL));
                 break;
         }
     }
 
+    debug_return;
+
+bad:
+    sudo_ev_loopbreak(evbase);
     debug_return;
 }
 
 static bool
 tls_connect_async(struct client_closure *closure)
 {
-    struct sudo_event_base *evbase = NULL;
-
+    struct sudo_event_base *evbase;
     debug_decl(tls_connect_async, SUDO_DEBUG_UTIL);
 
-	evbase = sudo_ev_base_alloc();
-	closure->tls_connect_ev = sudo_ev_alloc(closure->sock, SUDO_EV_WRITE,
-        tls_connect_cb, closure);
     closure->tls_connect_state = false;
-	if (evbase == NULL || closure->tls_connect_ev == NULL) {
-        sudo_warnx(U_("unable to allocate memory"));
-	    goto done;
-	}
-	if (sudo_ev_add(evbase, closure->tls_connect_ev, NULL, false) == -1) {
-	    sudo_warnx(U_("unable to add event to queue"));
-	    goto done;
-	}
-	if (sudo_ev_dispatch(evbase) == -1) {
-	    sudo_warn(U_("error in event loop"));
-	    goto done;
-	}
+    evbase = sudo_ev_base_alloc();
+    closure->tls_connect_ev = sudo_ev_alloc(closure->sock, SUDO_EV_WRITE,
+        tls_connect_cb, closure);
+    if (evbase == NULL || closure->tls_connect_ev == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	goto done;
+    }
+    if (sudo_ev_add(evbase, closure->tls_connect_ev, NULL, false) == -1) {
+	sudo_warnx(U_("unable to add event to queue"));
+	goto done;
+    }
+    if (sudo_ev_dispatch(evbase) == -1 || sudo_ev_got_break(evbase)) {
+	sudo_warn(U_("error in event loop"));
+	goto done;
+    }
 
 done:
     sudo_ev_base_free(evbase);
