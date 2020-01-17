@@ -994,9 +994,7 @@ one or more messages to log
 .It trace Ta sudo.DEBUG_TRACE Ta
 .It debug Ta sudo.DEBUG_DEBUG Ta very extreme verbose debugging
 .El
-.Pp
 .Ss Debug example
-.Pp
 Sudo ships an example debug plugin by default.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
