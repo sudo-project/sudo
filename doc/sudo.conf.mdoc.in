@@ -664,7 +664,7 @@ Plugin sudoers_io sudoers.so
 #   Path plugin_dir /path/to/plugins
 #
 # The default directory to use when searching for plugins that are
-# specified without a fully qualified path name.  
+# specified without a fully qualified path name.
 #
 #Path plugin_dir @plugindir@
 
@@ -713,7 +713,7 @@ Plugin sudoers_io sudoers.so
 # pass the IP address of each enabled interface to the policy plugin.
 # On systems with a large number of virtual interfaces this may take
 # a noticeable amount of time.
-# 
+#
 #Set probe_interfaces false
 
 #
@@ -722,7 +722,7 @@ Plugin sudoers_io sudoers.so
 #
 # Sudo and related programs support logging debug information to a file.
 # The program is typically sudo, sudoers.so, sudoreplay or visudo.
-# 
+#
 # Subsystems vary based on the program; "all" matches all subsystems.
 # Priority may be crit, err, warn, notice, diag, info, trace or debug.
 # Multiple subsystem@priority may be specified, separated by a comma.
