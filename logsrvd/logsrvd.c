@@ -1171,18 +1171,46 @@ tls_handshake_cb(int fd, int what, void *v)
 
     int handshake_status = SSL_accept(closure->ssl);
     int err = SSL_ERROR_NONE;
-    switch(err = SSL_get_error(closure->ssl, handshake_status)) {
-
+    switch (err = SSL_get_error(closure->ssl, handshake_status)) {
         /* ssl handshake was successful */
         case SSL_ERROR_NONE:
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"TLS handshake successful");
             break;
         /* ssl handshake is ongoing, re-schedule the SSL_accept() call */
         case SSL_ERROR_WANT_READ:
-        case SSL_ERROR_WANT_WRITE:
+	    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+		"SSL_accept returns SSL_ERROR_WANT_READ");
+	    if (what != SUDO_EV_READ) {
+		if (sudo_ev_set(closure->ssl_accept_ev, closure->sock,
+			SUDO_EV_READ, tls_handshake_cb, closure) == -1) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unable to set ssl_accept_ev to SUDO_EV_READ");
+		    goto bad;
+		}
+	    }
             if (sudo_ev_add(base, closure->ssl_accept_ev,
                 logsrvd_conf_get_sock_timeout(), false) == -1) {
                 sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                    "unable to add event to queue");
+                    "unable to add ssl_accept_ev to queue");
+                goto bad;
+            }
+            debug_return;
+        case SSL_ERROR_WANT_WRITE:
+	    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+		"SSL_accept returns SSL_ERROR_WANT_WRITE");
+	    if (what != SUDO_EV_WRITE) {
+		if (sudo_ev_set(closure->ssl_accept_ev, closure->sock,
+			SUDO_EV_WRITE, tls_handshake_cb, closure) == -1) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unable to set ssl_accept_ev to SUDO_EV_WRITE");
+		    goto bad;
+		}
+	    }
+            if (sudo_ev_add(base, closure->ssl_accept_ev,
+		    logsrvd_conf_get_sock_timeout(), false) == -1) {
+                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                    "unable to add ssl_accept_ev to queue");
                 goto bad;
             }
             debug_return;
@@ -1194,11 +1222,8 @@ tls_handshake_cb(int fd, int what, void *v)
             goto bad;
     }
 
-    sudo_ev_del(base, closure->ssl_accept_ev);
-
     /* Enable reader for ClientMessage */
-    if (sudo_ev_add(base, closure->read_ev,
-        NULL, false) == -1) {
+    if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1) {
         sudo_warn(U_("unable to add event to queue"));
     }
 
@@ -1247,7 +1272,7 @@ connection_closure_alloc(int sock)
 	goto bad;
 
 #if defined(HAVE_OPENSSL)
-    closure->ssl_accept_ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST,
+    closure->ssl_accept_ev = sudo_ev_alloc(sock, SUDO_EV_READ,
 	tls_handshake_cb, closure);
     if (closure->ssl_accept_ev == NULL)
 	goto bad;
