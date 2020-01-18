@@ -20,7 +20,6 @@
 #if defined(HAVE_OPENSSL)
 
 # include <openssl/x509v3.h>
-# include "sudo_compat.h"
 
 typedef enum {
 	MatchFound,

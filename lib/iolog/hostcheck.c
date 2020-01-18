@@ -14,15 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include "config.h"
 
 #if defined(HAVE_OPENSSL)
-# include <string.h>
-# include <netdb.h>
 # include <sys/socket.h>
 # include <arpa/inet.h>
-# include <openssl/x509v3.h>
+# include <string.h>
+# include <netdb.h>
 
+# include  "sudo_compat.h"
+# include  "sudo_debug.h"
+# include  "sudo_util.h"
 # include  "hostcheck.h"
 
 /**
@@ -30,14 +37,14 @@
  *
  * @param hostname  hostname to be resolved
  * @param ipaddr    ip address to be checked
- * 
+ *
  * @return  1 if hostname resolves to the given IP address
  *          0 otherwise
  */
 static int
 forward_lookup_match(const char *hostname, const char *ipaddr)
 {
-    int ret = 0;
+    int rc, ret = 0;
     struct addrinfo *res = NULL, *p;
     void *addr;
     struct sockaddr_in *ipv4;
@@ -47,17 +54,23 @@ forward_lookup_match(const char *hostname, const char *ipaddr)
 #else
     char ipstr[INET_ADDRSTRLEN];
 #endif
+    debug_decl(forward_lookup_match, SUDO_DEBUG_UTIL);
 
-    if (getaddrinfo(hostname, NULL, NULL, &res) != 0) {
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"verify %s resolves to %s", hostname, ipaddr);
+
+    if ((rc = getaddrinfo(hostname, NULL, NULL, &res)) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to resolve %s: %s", hostname, gai_strerror(rc));
         goto exit;
     }
 
-    for(p = res ;p != NULL; p = p->ai_next) {
-        if(p->ai_family == AF_INET) {
+    for (p = res; p != NULL; p = p->ai_next) {
+        if (p->ai_family == AF_INET) {
             ipv4 = (struct sockaddr_in *)p->ai_addr;
             addr = &(ipv4->sin_addr);
 #if defined(HAVE_STRUCT_IN6_ADDR)
-        } else if(p->ai_family == AF_INET6) {
+        } else if (p->ai_family == AF_INET6) {
             ipv6 = (struct sockaddr_in6 *)p->ai_addr;
             addr = &(ipv6->sin6_addr);
 #endif
@@ -66,6 +79,8 @@ forward_lookup_match(const char *hostname, const char *ipaddr)
         }
 
         if (inet_ntop(p->ai_family, addr, ipstr, sizeof(ipstr)) != 0) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"comparing %s to %s", ipstr, ipaddr);
             if (strcmp(ipaddr, ipstr) == 0) {
                 ret = 1;
                 break;
@@ -77,7 +92,7 @@ exit:
     if (res != NULL) {
         freeaddrinfo(res);
     }
-    return ret;
+    debug_return_int(ret);
 }
 
 /**
@@ -89,23 +104,29 @@ exit:
  *  - foo.bar.example.com
  *  - *.example.com
  *  - *.bar.example.com
- * 
+ *
  * @param hostname          peer's name
  * @param certname_asn1     hostname in the certificate
- * 
+ *
  * @return  MatchFound
  *          MatchNotFound
  */
 static HostnameValidationResult
-validate_name(const char *hostname, ASN1_STRING *certname_asn1) {
-	char *certname_s = (char *) ASN1_STRING_get0_data(certname_asn1);
-	int certname_len = ASN1_STRING_length(certname_asn1);
+validate_name(const char *hostname, ASN1_STRING *certname_asn1)
+{
+    char *certname_s = (char *) ASN1_STRING_get0_data(certname_asn1);
+    int certname_len = ASN1_STRING_length(certname_asn1);
     int hostname_len = strlen(hostname);
+    debug_decl(validate_name, SUDO_DEBUG_UTIL);
 
 	/* remove last '.' from hostname if exists */
 	if (hostname_len != 0 && hostname[hostname_len - 1] == '.') {
 		--hostname_len;
     }
+
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "comparing %.*s to %.*s in cert", hostname_len, hostname,
+	    certname_len, certname_s);
 
 	/* skip the first label if wildcard */
 	if (certname_len > 2 && certname_s[0] == '*' && certname_s[1] == '.') {
@@ -122,18 +143,18 @@ validate_name(const char *hostname, ASN1_STRING *certname_asn1) {
 	}
 	/* Compare expected hostname with the DNS name */
 	if (certname_len != hostname_len) {
-		return MatchNotFound;
+		debug_return_int(MatchNotFound);
 	}
     if (strncasecmp(hostname, certname_s, hostname_len) != 0) {
-        return MatchNotFound;
+        debug_return_int(MatchNotFound);
     }
 
-    return MatchFound;
+    debug_return_int(MatchFound);
 }
 
 /**
  * @brief Matches a hostname with the cert's CN.
- * 
+ *
  * @param hostname  peer's name
  *                  on client side: it is the name where the client is connected to
  *                  on server side, it is in fact an IP address of the remote client
@@ -141,7 +162,7 @@ validate_name(const char *hostname, ASN1_STRING *certname_asn1) {
  * @param cert      peer's X509 certificate
  * @param resolve   if the value is not 0, the function checks that the value of the CN
  *                  resolves to the given ipaddr or not.
- * 
+ *
  * @return  MatchFound
  *          MatchNotFound
  *          MalformedCertificate
@@ -153,41 +174,42 @@ matches_common_name(const char *hostname, const char *ipaddr, const X509 *cert, 
 	X509_NAME_ENTRY *common_name_entry = NULL;
 	ASN1_STRING *common_name_asn1 = NULL;
  	int common_name_loc = -1;
+	debug_decl(matches_common_name, SUDO_DEBUG_UTIL);
 
 	/* Find the position of the CN field in the Subject field of the certificate */
 	common_name_loc = X509_NAME_get_index_by_NID(X509_get_subject_name((X509 *) cert), NID_commonName, -1);
 	if (common_name_loc < 0) {
-		return Error;
+		debug_return_int(Error);
 	}
 
 	/* Extract the CN field */
 	common_name_entry = X509_NAME_get_entry(X509_get_subject_name((X509 *) cert), common_name_loc);
 	if (common_name_entry == NULL) {
-		return Error;
+		debug_return_int(Error);
 	}
 
 	/* Convert the CN field to a C string */
 	common_name_asn1 = X509_NAME_ENTRY_get_data(common_name_entry);
 	if (common_name_asn1 == NULL) {
-		return Error;
+		debug_return_int(Error);
 	}			
 	const unsigned char *common_name_str = ASN1_STRING_get0_data(common_name_asn1);
 
 	/* Make sure there isn't an embedded NUL character in the CN */
     if (memchr(common_name_str, '\0', ASN1_STRING_length(common_name_asn1)) != NULL) {
-		return MalformedCertificate;
+		debug_return_int(MalformedCertificate);
 	}
 
 	/* Compare expected hostname with the CN */
     if (validate_name(hostname, common_name_asn1) == MatchFound) {
-		return MatchFound;
+		debug_return_int(MatchFound);
 	}
 
     int common_name_length = ASN1_STRING_length(common_name_asn1);
     unsigned char *nullterm_common_name = malloc(common_name_length + 1);
 
     if (nullterm_common_name == NULL) {
-        return Error;
+	debug_return_int(Error);
     }
 
     memcpy(nullterm_common_name, common_name_str, common_name_length);
@@ -197,11 +219,11 @@ matches_common_name(const char *hostname, const char *ipaddr, const X509 *cert, 
     /* check if hostname in the CN field resolves to the given ip address */
     if (resolve && forward_lookup_match(nullterm_common_name, ipaddr)) {
         free(nullterm_common_name);
-		return MatchFound;
+		debug_return_int(MatchFound);
     }
 
     free(nullterm_common_name);
-    return MatchNotFound;
+    debug_return_int(MatchNotFound);
 }
 
 /**
@@ -211,7 +233,7 @@ matches_common_name(const char *hostname, const char *ipaddr, const X509 *cert, 
  * for IP address matching, the GEN_IPADD field is used.
  * Since SAN is an X503 v3 extension, it can happen that the cert does
  * not contain SAN at all.
- * 
+ *
  * @param hostname  remote peer's name
  *                  on client side: it is the name where the client is connected to
  *                  on server side, it is in fact an IP address of the remote client
@@ -219,7 +241,7 @@ matches_common_name(const char *hostname, const char *ipaddr, const X509 *cert, 
  * @param cert      peer's X509 certificate
  * @param resolve   if the value is not 0, the function checks that the value of the
  *                  SAN GEN_DNS resolves to the given ipaddr or not.
- * 
+ *
  * @return  MatchFound
  *          MatchNotFound
  *          NoSANPresent
@@ -233,11 +255,12 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
     int i;
     int san_names_nb = -1;
     STACK_OF(GENERAL_NAME) *san_names = NULL;
+    debug_decl(matches_subject_alternative_name, SUDO_DEBUG_UTIL);
 
     /* Try to extract the names within the SAN extension from the certificate */
     san_names = X509_get_ext_d2i((X509 *) cert, NID_subject_alt_name, NULL, NULL);
     if (san_names == NULL) {
-        return NoSANPresent;
+        debug_return_int(NoSANPresent);
     }
     san_names_nb = sk_GENERAL_NAME_num(san_names);
 
@@ -263,7 +286,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
                 unsigned char *nullterm_dns_name = malloc(dns_name_length + 1);
 
                 if (nullterm_dns_name == NULL) {
-                    return Error;
+                    debug_return_int(Error);
                 }
 
                 memcpy(nullterm_dns_name, dns_name, dns_name_length);
@@ -311,7 +334,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
     }
     sk_GENERAL_NAME_pop_free(san_names, GENERAL_NAME_free);
 
-    return result;
+    debug_return_int(result);
 }
 
 /**
@@ -320,7 +343,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
  * According to RFC 6125 section 6.4.4, first the certificate's SAN field
  * has to be checked. If there is no SAN field, the certificate's CN field
  * has to be checked.
- * 
+ *
  * @param cert      X509 certificate
  * @param hostname  remote peer's name
  *                  on client side: it is the name where the client is connected to
@@ -328,7 +351,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
  * @param ipaddr    remote peer's IP address
  * @param resolve   if the value is not 0, the function checks that the value of the
  *                  SAN GEN_DNS or the value of CN resolves to the given ipaddr or not.
- * 
+ *
  * @return  MatchFound
  *          MatchNotFound
  *          MalformedCertificate
@@ -338,12 +361,13 @@ HostnameValidationResult
 validate_hostname(const X509 *cert, const char *hostname, const char *ipaddr, int resolve)
 {
     HostnameValidationResult res = MatchFound;
+    debug_decl(validate_hostname, SUDO_DEBUG_UTIL);
 
     /* hostname can be also an ip address, if client connects
      * to ip instead of FQDN
      */
     if((ipaddr == NULL) || (cert == NULL)) {
-        return Error;
+        debug_return_int(Error);
     }
 
     /* check SAN first if exists */
@@ -356,6 +380,6 @@ validate_hostname(const X509 *cert, const char *hostname, const char *ipaddr, in
         res = matches_common_name(hostname, ipaddr, cert, resolve);
     }
 
-    return res;
+    debug_return_int(res);
 }
 #endif /* HAVE_OPENSSL */

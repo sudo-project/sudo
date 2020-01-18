@@ -228,10 +228,11 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     SSL *ssl;
     X509 *current_cert;
     X509 *peer_cert;
+    debug_decl(verify_peer_identity, SUDOERS_DEBUG_UTIL);
 
     /* if pre-verification of the cert failed, just propagate that result back */
     if (preverify_ok != 1) {
-        return 0;
+        debug_return_int(0);
     }
 
     /* since this callback is called for each cert in the chain,
@@ -241,7 +242,7 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     peer_cert = X509_STORE_CTX_get0_cert(ctx);
 
     if (current_cert != peer_cert) {
-        return 1;
+        debug_return_int(1);
     }
 
     /* read out the attached object (closure) from the ssl connection object */
@@ -253,9 +254,9 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     switch(result)
     {
         case MatchFound:
-            return 1;
+            debug_return_int(1);
         default:
-            return 0;
+            debug_return_int(0);
     }
 }
 
