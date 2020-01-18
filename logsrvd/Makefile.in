@@ -185,8 +185,8 @@ pvs-studio: $(POBJS)
 check:
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) \
-	    *.lo *.o *.la *.a *.i *.plog stamp-* core *.core core.* nohup.out
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) *.lo *.o *.la
+	-rm -f *.i *.plog stamp-* core *.core core.*
 
 mostlyclean: clean
 

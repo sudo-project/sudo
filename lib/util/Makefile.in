@@ -410,8 +410,8 @@ check: $(TEST_PROGS)
 	fi
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) *.lo *.o \
-	    *.la *.a *.i *.plog stamp-* core *.core core.* regress/*/*.out \
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) *.lo *.o *.la
+	-rm -f *.i *.plog stamp-* core *.core core.* regress/*/*.out \
 	    regress/*/*.err
 
 mostlyclean: clean

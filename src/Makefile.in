@@ -270,7 +270,8 @@ check: $(TEST_PROGS)
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
-	    *.lo *.o *.la *.a *.i *.plog stamp-* core *.core core.* nohup.out
+	    *.lo *.o *.la
+	-rm -f *.i *.plog stamp-* core *.core core.*
 
 mostlyclean: clean
 
