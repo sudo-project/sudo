@@ -201,11 +201,15 @@ check_iolog_util.i: $(srcdir)/regress/iolog_util/check_iolog_util.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_iolog_util.plog: check_iolog_util.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_util/check_iolog_util.c --i-file $< --output-file $@
-hostcheck.lo: $(srcdir)/hostcheck.c $(incdir)/hostcheck.h \
-              $(incdir)/sudo_compat.h $(top_builddir)/config.h
+hostcheck.lo: $(srcdir)/hostcheck.c $(incdir)/compat/stdbool.h \
+              $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/hostcheck.c
-hostcheck.i: $(srcdir)/hostcheck.c $(incdir)/hostcheck.h \
-              $(incdir)/sudo_compat.h $(top_builddir)/config.h
+hostcheck.i: $(srcdir)/hostcheck.c $(incdir)/compat/stdbool.h \
+              $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 hostcheck.plog: hostcheck.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/hostcheck.c --i-file $< --output-file $@
