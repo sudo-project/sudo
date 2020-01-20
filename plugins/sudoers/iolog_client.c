@@ -50,12 +50,14 @@
 # include <openssl/ssl.h>
 # include <openssl/err.h>
 # include <openssl/x509v3.h>
-# include "hostcheck.h"
 #endif /* HAVE_OPENSSL */
+
+#define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
 #include "sudoers.h"
 #include "sudo_event.h"
 #include "iolog_plugin.h"
+#include "hostcheck.h"
 
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
@@ -252,7 +254,8 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
     closure = (struct client_closure*)SSL_get_ex_data(ssl, 1);
 
-    result = validate_hostname(peer_cert, closure->host->str, closure->ipaddr, 0);
+    result = validate_hostname(peer_cert, closure->server_name->str,
+	closure->server_ip, 0);
 
     switch(result)
     {
@@ -1465,8 +1468,17 @@ bad:
  */
 bool
 client_closure_fill(struct client_closure *closure, int sock,
-    struct iolog_details *details, struct io_plugin *sudoers_io)
+    const struct sudoers_string *host, struct iolog_details *details,
+    struct io_plugin *sudoers_io)
 {
+    union {
+	struct sockaddr sa;
+	struct sockaddr_in sin;
+#ifdef HAVE_STRUCT_IN6_ADDR
+	struct sockaddr_in6 sin6;
+#endif
+    } addr;
+    socklen_t addr_len = sizeof(addr);
     debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL);
 
     closure->sock = -1;
@@ -1498,14 +1510,43 @@ client_closure_fill(struct client_closure *closure, int sock,
 
     closure->log_details = details;
 
+    /* Save the name and IP of the server we are successfully connected to. */
+    closure->server_name = host;
+    if (getpeername(sock, (struct sockaddr *)&addr, &addr_len) == -1) {
+	sudo_warn("getpeername");
+	goto bad;
+    }
+    switch (addr.sa.sa_family) {
+    case AF_INET:
+	if (inet_ntop(AF_INET, &addr.sin.sin_addr, closure->server_ip,
+		sizeof(closure->server_ip)) == NULL) {
+	    sudo_warnx(U_("unable to get remote IP addr"));
+	    goto bad;
+	}
+	break;
+#ifdef HAVE_STRUCT_IN6_ADDR
+    case AF_INET6:
+	if (inet_ntop(AF_INET6, &addr.sin6.sin6_addr, closure->server_ip,
+		sizeof(closure->server_ip)) == NULL) {
+	    sudo_warnx(U_("unable to get remote IP addr"));
+	    goto bad;
+	}
+	break;
+#endif
+    default:
+	sudo_warnx(U_("unknown address family: %d"), (int)addr.sa.sa_family);
+	goto bad;
+    }
+
     /* Store sock last to avoid double-close in parent on error. */
     closure->sock = sock;
 
-    debug_return_ptr(closure);
+    debug_return_bool(true);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+bad:
     client_closure_free(closure);
-    debug_return_ptr(NULL);
+    debug_return_bool(false);
 }
 
 /*

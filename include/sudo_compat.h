@@ -544,7 +544,7 @@ __dso_public int sudo_str2sig(const char *signame, int *signum);
 # undef str2sig
 # define str2sig(_a, _b) sudo_str2sig((_a), (_b))
 #endif /* HAVE_STR2SIG */
-#if !defined(HAVE_INET_NTOP) && defined(SUDO_NET_IFS_C)
+#if !defined(HAVE_INET_NTOP) && defined(NEED_INET_NTOP)
 __dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
 # undef inet_ntop
 # define inet_ntop(_a, _b, _c, _d) sudo_inet_ntop((_a), (_b), (_c), (_d))

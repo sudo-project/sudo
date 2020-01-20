@@ -44,8 +44,9 @@
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
 # include <openssl/err.h>
-# include "hostcheck.h"
 #endif
+
+#define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
 #include "log_server.pb-c.h"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
@@ -59,6 +60,7 @@
 #include "sudo_fatal.h"
 #include "sudo_iolog.h"
 #include "pathnames.h"
+#include "hostcheck.h"
 #include "logsrvd.h"
 
 #ifdef HAVE_GETOPT_LONG

@@ -603,15 +603,8 @@ sudoers_io_open_remote(void)
 	goto done;
     }
 
-    /* save the name of the server we are successfully connected to */
-    client_closure.host = connected_server;
-
-    struct sockaddr_in addr;
-    socklen_t addr_len = sizeof(addr);
-    getpeername(sock, (struct sockaddr *) &addr, &addr_len);
-    inet_ntop(addr.sin_family, &(addr.sin_addr), client_closure.ipaddr, INET6_ADDRSTRLEN);
-
-    if (!client_closure_fill(&client_closure, sock, &iolog_details, &sudoers_io)) {
+    if (!client_closure_fill(&client_closure, sock, connected_server,
+	    &iolog_details, &sudoers_io)) {
 	close(sock);
 	ret = -1;
 	goto done;

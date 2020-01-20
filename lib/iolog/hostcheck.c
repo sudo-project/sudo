@@ -27,6 +27,8 @@
 # include <string.h>
 # include <netdb.h>
 
+# define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
+
 # include  "sudo_compat.h"
 # include  "sudo_debug.h"
 # include  "sudo_util.h"

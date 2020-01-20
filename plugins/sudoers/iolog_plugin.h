@@ -89,11 +89,11 @@ struct client_closure {
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
-    struct sudoers_string *host;
+    const struct sudoers_string *server_name;
 #if defined(HAVE_STRUCT_IN6_ADDR)
-    char ipaddr[INET6_ADDRSTRLEN];
+    char server_ip[INET6_ADDRSTRLEN];
 #else
-    char ipaddr[INET_ADDRSTRLEN];
+    char server_ip[INET_ADDRSTRLEN];
 #endif
 #if defined(HAVE_OPENSSL)
     bool tls;
@@ -148,7 +148,7 @@ struct client_closure {
 #endif /* HAVE_OPENSSL */
 
 /* iolog_client.c */
-bool client_closure_fill(struct client_closure *closure, int sock, struct iolog_details *details, struct io_plugin *sudoers_io);
+bool client_closure_fill(struct client_closure *closure, int sock, const struct sudoers_string *host, struct iolog_details *details, struct io_plugin *sudoers_io);
 bool client_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);
