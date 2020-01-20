@@ -173,7 +173,7 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
-depend:
+depend: siglist.c signame.c
 	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/util/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/util/Makefile
