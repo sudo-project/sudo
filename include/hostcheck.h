@@ -22,15 +22,15 @@
 # include <openssl/x509v3.h>
 
 typedef enum {
-	MatchFound,
-	MatchNotFound,
-	NoSANPresent,
-	MalformedCertificate,
-	Error
+    MatchFound,
+    MatchNotFound,
+    NoSANPresent,
+    MalformedCertificate,
+    Error
 } HostnameValidationResult;
 
-__dso_public HostnameValidationResult
-validate_hostname(const X509 *cert, const char *hostname, const char *ipaddr, int resolve);
+HostnameValidationResult validate_hostname(const X509 *cert,
+	const char *hostname, const char *ipaddr, int resolve);
 
 #endif /* HAVE_OPENSSL */
 
