@@ -113,7 +113,7 @@ install_gid = 0
 
 SHELL = @SHELL@
 
-EXAMPLES = $(srcdir)/example_conversation.py  $(srcdir)/example_debugging.py  $(srcdir)/example_group_plugin.py  $(srcdir)/example_io_plugin.py  $(srcdir)/example_policy_plugin.py
+EXAMPLES = example_conversation.py  example_debugging.py  example_group_plugin.py  example_io_plugin.py  example_policy_plugin.py
 
 OBJS =	python_plugin_common.lo python_plugin_policy.lo python_plugin_io.lo python_plugin_group.lo pyhelpers.lo \
 	python_importblocker.lo python_convmessage.lo sudo_python_module.lo sudo_python_debug.lo \
