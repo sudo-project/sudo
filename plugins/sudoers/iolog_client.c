@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -60,6 +60,9 @@
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
 #endif
+
+/* Server callback may redirect to client callback for TLS. */
+static void client_msg_cb(int fd, int what, void *v);
 
 static void
 connect_cb(int sock, int what, void *v)
@@ -1237,6 +1240,13 @@ server_msg_cb(int fd, int what, void *v)
     uint32_t msg_len;
     debug_decl(server_msg_cb, SUDOERS_DEBUG_UTIL);
 
+    /* For TLS we may need to read as part of SSL_write(). */
+    if (closure->write_instead_of_read) {
+	closure->write_instead_of_read = false;
+        client_msg_cb(fd, what, v);
+        debug_return;
+    }
+
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out reading from server",
 	    __func__);
@@ -1250,15 +1260,29 @@ server_msg_cb(int fd, int what, void *v)
         if (nread <= 0) {
             int err = SSL_get_error(closure->ssl, nread);
             switch (err) {
-                case SSL_ERROR_NONE:
-                    break;
+		case SSL_ERROR_ZERO_RETURN:
+		    /* ssl connection shutdown cleanly */
+		    nread = 0;
+		    break;
                 case SSL_ERROR_WANT_READ:
-                    /* re-schedule the read handler */
-                    closure->read_ev->add(closure->read_ev, NULL);
+		    /* ssl wants to read more, read event is always active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_read returns SSL_ERROR_WANT_READ");
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
                     /* ssl wants to write, so schedule the write handler */
-                    closure->write_ev->add(closure->write_ev, NULL);
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_read returns SSL_ERROR_WANT_WRITE");
+		    if (!closure->write_ev->pending(closure->write_ev,
+			    SUDO_PLUGIN_EV_WRITE, NULL)) {
+			/* Enable a temporary write event. */
+			if (closure->write_ev->add(closure->write_ev, NULL) == -1) {
+			    sudo_warn(U_("unable to add event to queue"));
+			    goto bad;
+			}
+			closure->temporary_write_event = true;
+		    }
+		    closure->write_instead_of_read = true;
                     debug_return;
                 default:
                     sudo_warnx(U_("SSL_read failed: ssl_error=%d, stack=%s"),
@@ -1342,6 +1366,18 @@ client_msg_cb(int fd, int what, void *v)
     ssize_t nwritten;
     debug_decl(client_msg_cb, SUDOERS_DEBUG_UTIL);
 
+    /* For TLS we may need to write as part of SSL_read(). */
+    if (closure->read_instead_of_write) {
+	closure->read_instead_of_write = false;
+	/* Delete write event if it was only due to SSL_read(). */
+	if (closure->temporary_write_event) {
+            closure->temporary_write_event = false;
+	    closure->write_ev->del(closure->write_ev);
+	}
+	server_msg_cb(fd, what, v);
+	debug_return;
+    }
+
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out writiing to server",
 	    __func__);
@@ -1362,20 +1398,20 @@ client_msg_cb(int fd, int what, void *v)
         if (nwritten <= 0) {
             int err = SSL_get_error(closure->ssl, nwritten);
             switch (err) {
-                case SSL_ERROR_NONE:
-                    break;
                 case SSL_ERROR_WANT_READ:
-                    /* ssl wants to read, so schedule the read handler */
-                    closure->read_ev->add(closure->read_ev, NULL);
+		    /* ssl wants to read, read event always active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_write returns SSL_ERROR_WANT_READ");
+		    closure->write_instead_of_read = true;
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
-                    /* re-schedule the write handler */
-                    closure->write_ev->add(closure->write_ev, NULL);
+		    /* ssl wants to write more, write event remains active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_write returns SSL_ERROR_WANT_WRITE");
                     debug_return;
                 default:
                     sudo_warnx(U_("SSL_write failed: ssl_error=%d, stack=%s"),
-                        err,
-                        ERR_error_string(ERR_get_error(), NULL));
+                        err, ERR_error_string(ERR_get_error(), NULL));
                     goto bad;
             }
         }

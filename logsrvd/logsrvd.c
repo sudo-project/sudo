@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -75,12 +75,14 @@
 /*
  * Sudo I/O audit server.
  */
-
 TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static const char server_id[] = "Sudo Audit Server 0.1";
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
 static double random_drop;
+
+/* Server callback may redirect to client callback for TLS. */
+static void client_msg_cb(int fd, int what, void *v);
 
 /*
  * Free a struct connection_closure container and its contents.
@@ -644,6 +646,18 @@ server_msg_cb(int fd, int what, void *v)
     ssize_t nwritten;
     debug_decl(server_msg_cb, SUDO_DEBUG_UTIL);
 
+    /* For TLS we may need to write as part of SSL_read(). */
+    if (closure->read_instead_of_write) {
+	closure->read_instead_of_write = false;
+	/* Delete write event if it was only due to SSL_read(). */
+	if (closure->temporary_write_event) {
+	    closure->temporary_write_event = false;
+	    sudo_ev_del(NULL, closure->write_ev);
+	}
+	client_msg_cb(fd, what, v);
+	debug_return;
+    }
+
     if (what == SUDO_EV_TIMEOUT) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "Writing to client timed out");
@@ -660,29 +674,22 @@ server_msg_cb(int fd, int what, void *v)
         if (nwritten <= 0) {
             int err = SSL_get_error(closure->ssl, nwritten);
             switch (err) {
-                /* ssl wants to read, so schedule the read handler */
                 case SSL_ERROR_WANT_READ:
-                    if (sudo_ev_add(closure->read_ev->base, closure->read_ev,
-                        logsrvd_conf_get_sock_timeout(), false) == -1) {
-                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                            "unable to add event to queue");
-                        goto finished;
-                    }
+		    /* ssl wants to read, read event always active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_write returns SSL_ERROR_WANT_READ");
+		    /* Redirect persistent read event to finish SSL_write() */
+		    closure->write_instead_of_read = true;
                     debug_return;
-                /* ssl wants to write more, so re-schedule the write handler */
                 case SSL_ERROR_WANT_WRITE:
-                    if (sudo_ev_add(closure->write_ev->base, closure->write_ev,
-                        logsrvd_conf_get_sock_timeout(), false) == -1) {
-                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                            "unable to add event to queue");
-                        goto finished;
-                    }
+		    /* ssl wants to write more, write event remains active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_write returns SSL_ERROR_WANT_WRITE");
                     debug_return;
                 default:
                     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                         "unexpected error during SSL_write(). SSL error=%d (%s)",
-                        err,
-                        ERR_error_string(ERR_get_error(), NULL));
+                        err, ERR_error_string(ERR_get_error(), NULL));
                         goto finished;
             }
         }
@@ -728,8 +735,14 @@ client_msg_cb(int fd, int what, void *v)
     struct connection_buffer *buf = &closure->read_buf;
     uint32_t msg_len;
     ssize_t nread;
-
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL);
+
+    /* For TLS we may need to read as part of SSL_write(). */
+    if (closure->write_instead_of_read) {
+	closure->write_instead_of_read = false;
+	server_msg_cb(fd, what, v);
+	debug_return;
+    }
 
     if (what == SUDO_EV_TIMEOUT) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -743,23 +756,32 @@ client_msg_cb(int fd, int what, void *v)
         if (nread <= 0) {
             int err = SSL_get_error(closure->ssl, nread);
             switch (err) {
-                /* ssl wants to read more, so re-schedule the read handler */
+		case SSL_ERROR_ZERO_RETURN:
+		    /* ssl connection shutdown cleanly */
+		    nread = 0;
+		    break;
                 case SSL_ERROR_WANT_READ:
-                    if (sudo_ev_add(closure->read_ev->base, closure->read_ev,
-                        logsrvd_conf_get_sock_timeout(), false) == -1) {
-                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                            "unable to add event to queue");
-                        goto finished;
-                    }
+		    /* ssl wants to read more, read event is always active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_read returns SSL_ERROR_WANT_READ");
+		    /* Read event is always active. */
                     debug_return;
-                /* ssl wants to write, so schedule the write handler */
                 case SSL_ERROR_WANT_WRITE:
-                    if (sudo_ev_add(closure->write_ev->base, closure->write_ev,
-                        logsrvd_conf_get_sock_timeout(), false) == -1) {
-                        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                            "unable to add event to queue");
-                        goto finished;
-                    }
+		    /* ssl wants to write, schedule a write if not pending */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_read returns SSL_ERROR_WANT_WRITE");
+		    if (!sudo_ev_pending(closure->write_ev, SUDO_EV_WRITE, NULL)) {
+			/* Enable a temporary write event. */
+			if (sudo_ev_add(NULL, closure->write_ev,
+			    logsrvd_conf_get_sock_timeout(), false) == -1) {
+			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+				"unable to add event to queue");
+			    goto finished;
+			}
+			closure->temporary_write_event = true;
+		    }
+		    /* Redirect write event to finish SSL_read() */
+		    closure->read_instead_of_write = true;
                     debug_return;
                 default:
                     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1217,13 +1239,13 @@ tls_handshake_cb(int fd, int what, void *v)
     int handshake_status = SSL_accept(closure->ssl);
     int err = SSL_ERROR_NONE;
     switch (err = SSL_get_error(closure->ssl, handshake_status)) {
-        /* ssl handshake was successful */
         case SSL_ERROR_NONE:
+	    /* ssl handshake was successful */
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"TLS handshake successful");
             break;
-        /* ssl handshake is ongoing, re-schedule the SSL_accept() call */
         case SSL_ERROR_WANT_READ:
+	    /* ssl handshake is ongoing, re-schedule the SSL_accept() call */
 	    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
 		"SSL_accept returns SSL_ERROR_WANT_READ");
 	    if (what != SUDO_EV_READ) {
@@ -1242,6 +1264,7 @@ tls_handshake_cb(int fd, int what, void *v)
             }
             debug_return;
         case SSL_ERROR_WANT_WRITE:
+	    /* ssl handshake is ongoing, re-schedule the SSL_accept() call */
 	    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
 		"SSL_accept returns SSL_ERROR_WANT_WRITE");
 	    if (what != SUDO_EV_WRITE) {
@@ -1382,14 +1405,13 @@ new_connection(int sock, const struct sockaddr *sa, struct sudo_event_base *base
 
         /* enable SSL_accept to begin handshake with client */
         if (sudo_ev_add(base, closure->ssl_accept_ev,
-            logsrvd_conf_get_sock_timeout(), false) == -1) {
+		logsrvd_conf_get_sock_timeout(), false) == -1) {
             sudo_fatal(U_("unable to add event to queue"));
             goto bad;
         }
     } else {
         /* Enable reader for ClientMessage*/
-        if (sudo_ev_add(base, closure->read_ev,
-            NULL, false) == -1)
+        if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1)
             goto bad;
     }
 #else

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -86,6 +86,9 @@ enum client_state {
 /* Remote connection closure, non-zero fields must come first. */
 struct client_closure {
     int sock;
+    bool read_instead_of_write;
+    bool write_instead_of_read;
+    bool temporary_write_event;
     struct sudoers_string *host;
 #if defined(HAVE_STRUCT_IN6_ADDR)
     char ipaddr[INET6_ADDRSTRLEN];
@@ -114,7 +117,10 @@ struct client_closure {
 #if defined(HAVE_OPENSSL)
 # define CLIENT_CLOSURE_INITIALIZER(_c)			\
     {							\
-	-1,						    \
+	-1,						\
+	false,						\
+	false,						\
+	false,						\
 	NULL,					    \
 	"", 					    \
     false,                      \
@@ -129,6 +135,9 @@ struct client_closure {
 # define CLIENT_CLOSURE_INITIALIZER(_c)			\
     {							\
 	-1,						\
+	false,						\
+	false,						\
+	false,						\
 	NULL,					    \
 	"", 					    \
 	ERROR,						\
