@@ -21,9 +21,12 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-devdir = @devdir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+devdir = @devdir@
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -117,8 +120,8 @@ VERSION = @PACKAGE_VERSION@
 all: system_group.la
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) plugins/system_group/Makefile.in
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) plugins/system_group/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/system_group/Makefile
 
 Makefile: $(srcdir)/Makefile.in

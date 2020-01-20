@@ -21,8 +21,11 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
 includedir = @includedir@
 cross_compiling = @CROSS_COMPILING@
 

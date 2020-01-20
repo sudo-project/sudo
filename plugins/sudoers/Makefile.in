@@ -26,10 +26,13 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
+abs_srcdir = @abs_srcdir@
+top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
 authdir = $(srcdir)/auth
-top_builddir = @top_builddir@
-top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 docdir = @docdir@
 libdir = @libdir@
@@ -258,8 +261,8 @@ $(shlib_opt): $(shlib_exp)
 	@true
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) plugins/sudoers/Makefile.in
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) plugins/sudoers/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
 
 Makefile: $(srcdir)/Makefile.in

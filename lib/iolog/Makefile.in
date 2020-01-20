@@ -21,9 +21,12 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-devdir = @devdir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+devdir = @devdir@
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -100,8 +103,8 @@ pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) lib/iolog/Makefile.in
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) lib/iolog/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/iolog/Makefile
 
 Makefile: $(srcdir)/Makefile.in

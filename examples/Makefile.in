@@ -21,10 +21,13 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-docdir = @docdir@
-exampledir = @exampledir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+exampledir = @exampledir@
+docdir = @docdir@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c

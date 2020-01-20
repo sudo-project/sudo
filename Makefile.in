@@ -17,9 +17,12 @@
 #
 
 srcdir = @srcdir@
-devdir = @devdir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+devdir = @devdir@
 
 # Installation paths for package building
 prefix = @prefix@
@@ -197,9 +200,10 @@ siglist.c signame.c:
 	cd lib/util && exec $(MAKE) $@
 
 depend: siglist.c signame.c
-	$(top_srcdir)/mkdep.pl --builddir=`pwd` --srcdir=$(top_srcdir) \
-	    lib/util/Makefile.in lib/zlib/Makefile.in lib/iolog/Makefile.in \
-	    lib/logsrv/Makefile.in logsrvd/Makefile.in \
+	$(top_srcdir)/mkdep.pl \
+	    --srcdir=$(abs_top_srcdir) --builddir=$(abs_top_builddir) \
+	    lib/util/Makefile.in lib/zlib/Makefile.in \
+	    lib/iolog/Makefile.in lib/logsrv/Makefile.in logsrvd/Makefile.in \
 	    plugins/group_file/Makefile.in plugins/sample/Makefile.in \
 	    plugins/sudoers/Makefile.in plugins/system_group/Makefile.in \
 	    plugins/python/Makefile.in \
@@ -364,7 +368,7 @@ force-dist: ChangeLog $(srcdir)/MANIFEST
 	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
 package: $(srcdir)/etc/sudo.pp
-	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
+	DESTDIR=$(abs_top_builddir)/destdir; rm -rf $$DESTDIR; \
 	$(MAKE) install INSTALL_OWNER= DESTDIR=$$DESTDIR && \
 	$(SHELL) $(srcdir)/pp $(PPFLAGS) \
 	    --destdir=$$DESTDIR \

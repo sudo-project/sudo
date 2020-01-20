@@ -23,10 +23,12 @@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 srcdir = @srcdir@
-devdir = @devdir@
-top_builddir = @top_builddir@
-top_srcdir = @top_srcdir@
 abs_srcdir = @abs_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+devdir = @devdir@
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -130,6 +132,11 @@ TEST_PROGS = check_python_examples
 CHECK_PYTHON_EXAMPLES_OBJS = check_python_examples.o iohelpers.o testhelpers.o
 
 all: python_plugin.la
+
+depend:
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) plugins/python/Makefile.in
+	cd $(top_builddir) && ./config.status --file plugins/python/Makefile
 
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/python/Makefile
