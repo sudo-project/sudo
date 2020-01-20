@@ -208,7 +208,7 @@ matches_common_name(const char *hostname, const char *ipaddr, const X509 *cert, 
 	}
 
     int common_name_length = ASN1_STRING_length(common_name_asn1);
-    unsigned char *nullterm_common_name = malloc(common_name_length + 1);
+    char *nullterm_common_name = malloc(common_name_length + 1);
 
     if (nullterm_common_name == NULL) {
 	debug_return_int(Error);
@@ -285,7 +285,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
                 }
 
                 int dns_name_length = ASN1_STRING_length(current_name->d.dNSName);
-                unsigned char *nullterm_dns_name = malloc(dns_name_length + 1);
+                char *nullterm_dns_name = malloc(dns_name_length + 1);
 
                 if (nullterm_dns_name == NULL) {
                     debug_return_int(Error);
