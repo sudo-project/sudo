@@ -23,33 +23,35 @@
 
 #include "python_plugin_common.h"
 
+struct IOPluginContext
+{
+    struct PluginContext base_ctx;
+    struct io_plugin *io_plugin;
+};
 
-static struct PluginContext plugin_ctx;
-
-extern struct io_plugin python_io;
+#define BASE_CTX(io_ctx) (&(io_ctx->base_ctx))
 
 #define PY_IO_PLUGIN_VERSION SUDO_API_MKVERSION(1, 0)
 
-#define CALLBACK_PLUGINFUNC(func_name) python_io.func_name
-#define CALLBACK_CFUNC(func_name) python_plugin_io_ ## func_name
+#define CALLBACK_PLUGINFUNC(func_name) io_ctx->io_plugin->func_name
 
 // This also verifies compile time that the name matches the sudo plugin API.
 #define CALLBACK_PYNAME(func_name) ((void)CALLBACK_PLUGINFUNC(func_name), #func_name)
 
 #define MARK_CALLBACK_OPTIONAL(function_name) \
     do { \
-        python_plugin_mark_callback_optional(&plugin_ctx, CALLBACK_PYNAME(function_name), \
+        python_plugin_mark_callback_optional(plugin_ctx, CALLBACK_PYNAME(function_name), \
             (void **)&CALLBACK_PLUGINFUNC(function_name)); \
     } while(0)
 
-
 static int
-_call_plugin_open(int argc, char * const argv[], char * const command_info[])
+_call_plugin_open(struct IOPluginContext *io_ctx, int argc, char * const argv[], char * const command_info[])
 {
     debug_decl(_call_plugin_open, PYTHON_DEBUG_CALLBACKS);
-    plugin_ctx.call_close = 1;
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    plugin_ctx->call_close = 1;
 
-    if (!PyObject_HasAttrString(plugin_ctx.py_instance, CALLBACK_PYNAME(open))) {
+    if (!PyObject_HasAttrString(plugin_ctx->py_instance, CALLBACK_PYNAME(open))) {
         debug_return_int(SUDO_RC_OK);
     }
 
@@ -58,14 +60,14 @@ _call_plugin_open(int argc, char * const argv[], char * const command_info[])
     PyObject *py_command_info = py_str_array_to_tuple(command_info);
 
     if (py_argv != NULL && py_command_info != NULL) {
-        rc = python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(open),
+        rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(open),
                                        Py_BuildValue("(OO)", py_argv, py_command_info));
     } else {
         rc = SUDO_RC_ERROR;
     }
 
     if (rc != SUDO_RC_OK)
-        plugin_ctx.call_close = 0;
+        plugin_ctx->call_close = 0;
 
     Py_XDECREF(py_argv);
     Py_XDECREF(py_command_info);
@@ -73,7 +75,8 @@ _call_plugin_open(int argc, char * const argv[], char * const command_info[])
 }
 
 int
-python_plugin_io_open(unsigned int version, sudo_conv_t conversation,
+python_plugin_io_open(struct IOPluginContext *io_ctx,
+    unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[],
@@ -91,11 +94,12 @@ python_plugin_io_open(unsigned int version, sudo_conv_t conversation,
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 
-    rc = python_plugin_init(&plugin_ctx, plugin_options);
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    rc = python_plugin_init(plugin_ctx, plugin_options);
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 
-    rc = python_plugin_construct(&plugin_ctx, PY_IO_PLUGIN_VERSION,
+    rc = python_plugin_construct(plugin_ctx, PY_IO_PLUGIN_VERSION,
                                  settings, user_info, user_env, plugin_options);
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
@@ -112,21 +116,21 @@ python_plugin_io_open(unsigned int version, sudo_conv_t conversation,
     // open and close are mandatory
 
     if (argc > 0)  // we only call open if there is request for running sg
-        rc = _call_plugin_open(argc, argv, command_info);
+        rc = _call_plugin_open(io_ctx, argc, argv, command_info);
 
     debug_return_int(rc);
 }
 
 void
-python_plugin_io_close(int exit_status, int error)
+python_plugin_io_close(struct IOPluginContext *io_ctx, int exit_status, int error)
 {
     debug_decl(python_plugin_io_close, PYTHON_DEBUG_CALLBACKS);
-    python_plugin_close(&plugin_ctx, CALLBACK_PYNAME(close), exit_status, error);
+    python_plugin_close(BASE_CTX(io_ctx), CALLBACK_PYNAME(close), exit_status, error);
     debug_return;
 }
 
 int
-python_plugin_io_show_version(int verbose)
+python_plugin_io_show_version(struct IOPluginContext *io_ctx, int verbose)
 {
     debug_decl(python_plugin_io_show_version, PYTHON_DEBUG_CALLBACKS);
 
@@ -136,79 +140,108 @@ python_plugin_io_show_version(int verbose)
                     SUDO_API_VERSION_GET_MINOR(PY_IO_PLUGIN_VERSION));
     }
 
-    debug_return_int(python_plugin_show_version(&plugin_ctx, CALLBACK_PYNAME(show_version), verbose));
+    debug_return_int(python_plugin_show_version(BASE_CTX(io_ctx), CALLBACK_PYNAME(show_version), verbose));
 }
 
 int
-python_plugin_io_log_ttyin(const char *buf, unsigned int len)
+python_plugin_io_log_ttyin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
 {
     debug_decl(python_plugin_io_log_ttyin, PYTHON_DEBUG_CALLBACKS);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(log_ttyin),
+    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_ttyin),
                                      Py_BuildValue("(s#)", buf, len)));
 }
 
 int
-python_plugin_io_log_ttyout(const char *buf, unsigned int len)
+python_plugin_io_log_ttyout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
 {
     debug_decl(python_plugin_io_log_ttyout, PYTHON_DEBUG_CALLBACKS);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(log_ttyout),
+    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_ttyout),
                                      Py_BuildValue("(s#)", buf, len)));
 }
 
 int
-python_plugin_io_log_stdin(const char *buf, unsigned int len)
+python_plugin_io_log_stdin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
 {
     debug_decl(python_plugin_io_log_stdin, PYTHON_DEBUG_CALLBACKS);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(log_stdin),
+    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_stdin),
                                                Py_BuildValue("(s#)", buf, len)));
 }
 
 int
-python_plugin_io_log_stdout(const char *buf, unsigned int len)
+python_plugin_io_log_stdout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
 {
     debug_decl(python_plugin_io_log_stdout, PYTHON_DEBUG_CALLBACKS);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(log_stdout),
+    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_stdout),
                                                Py_BuildValue("(s#)", buf, len)));
 }
 
 int
-python_plugin_io_log_stderr(const char *buf, unsigned int len)
+python_plugin_io_log_stderr(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
 {
     debug_decl(python_plugin_io_log_stderr, PYTHON_DEBUG_CALLBACKS);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(log_stderr),
+    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_stderr),
                                                Py_BuildValue("(s#)", buf, len)));
 }
 
 int
-python_plugin_io_change_winsize(unsigned int line, unsigned int cols)
+python_plugin_io_change_winsize(struct IOPluginContext *io_ctx, unsigned int line, unsigned int cols)
 {
     debug_decl(python_plugin_io_change_winsize, PYTHON_DEBUG_CALLBACKS);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(change_winsize),
+    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(change_winsize),
                                                Py_BuildValue("(ii)", line, cols)));
 }
 
 int
-python_plugin_io_log_suspend(int signo)
+python_plugin_io_log_suspend(struct IOPluginContext *io_ctx, int signo)
 {
     debug_decl(python_plugin_io_log_suspend, PYTHON_DEBUG_CALLBACKS);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(log_suspend),
+    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_suspend),
                                      Py_BuildValue("(i)", signo)));
 }
 
-__dso_public struct io_plugin python_io = {
-    SUDO_IO_PLUGIN,
-    SUDO_API_VERSION,
-    CALLBACK_CFUNC(open),
-    CALLBACK_CFUNC(close),
-    CALLBACK_CFUNC(show_version),
-    CALLBACK_CFUNC(log_ttyin),
-    CALLBACK_CFUNC(log_ttyout),
-    CALLBACK_CFUNC(log_stdin),
-    CALLBACK_CFUNC(log_stdout),
-    CALLBACK_CFUNC(log_stderr),
-    NULL, // register_hooks,
-    NULL, // deregister_hooks,
-    CALLBACK_CFUNC(change_winsize),
-    CALLBACK_CFUNC(log_suspend),
-    NULL // event_alloc
+// generate symbols for loading multiple io plugins:
+__dso_public struct io_plugin python_io;
+#define IO_SYMBOL_NAME(symbol) symbol
+#include "python_plugin_io_multi.inc"
+#define IO_SYMBOL_NAME(symbol) symbol##1
+#include "python_plugin_io_multi.inc"
+#define IO_SYMBOL_NAME(symbol) symbol##2
+#include "python_plugin_io_multi.inc"
+#define IO_SYMBOL_NAME(symbol) symbol##3
+#include "python_plugin_io_multi.inc"
+#define IO_SYMBOL_NAME(symbol) symbol##4
+#include "python_plugin_io_multi.inc"
+#define IO_SYMBOL_NAME(symbol) symbol##5
+#include "python_plugin_io_multi.inc"
+#define IO_SYMBOL_NAME(symbol) symbol##6
+#include "python_plugin_io_multi.inc"
+#define IO_SYMBOL_NAME(symbol) symbol##7
+#include "python_plugin_io_multi.inc"
+
+static struct io_plugin *extra_io_plugins[] = {
+    &python_io1,
+    &python_io2,
+    &python_io3,
+    &python_io4,
+    &python_io5,
+    &python_io6,
+    &python_io7
 };
+
+__dso_public struct io_plugin *
+python_io_clone(void)
+{
+    static size_t counter = 0;
+    struct io_plugin *next_plugin = NULL;
+
+    size_t max = sizeof(extra_io_plugins) / sizeof(*extra_io_plugins);
+    if (counter < max) {
+        next_plugin = extra_io_plugins[counter];
+        ++counter;
+    } else if (counter == max) {
+        ++counter;
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "sudo: loading more than %d sudo python IO plugins is not supported\n", counter);
+    }
+
+    return next_plugin;
+}
