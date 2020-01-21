@@ -564,6 +564,7 @@ init_defaults(void)
     def_compress_io = true;
 #endif
     def_log_server_timeout = 30;
+    def_log_server_keepalive = true;
     def_ignore_audit_errors = true;
     def_ignore_iolog_errors = false;
     def_ignore_logfile_errors = true;

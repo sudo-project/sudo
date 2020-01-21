@@ -372,6 +372,9 @@ log_servers
 log_server_timeout
 	T_TIMEOUT|T_BOOL
 	"Sudo log server timeout in seconds: %u"
+log_server_keepalive
+	T_FLAG
+	"Enable SO_KEEPALIVE socket option on the socket connected to the logserver"
 log_server_cabundle
 	T_STR|T_BOOL|T_PATH
 	"Path to the audit server's CA bundle file: %s"

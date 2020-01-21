@@ -735,6 +735,10 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    goto oom;
     }
 
+    if ((command_info[info_len++] = sudo_new_key_val("log_server_keepalive",
+        def_log_server_keepalive ? "true" : "false")) == NULL)
+        goto oom;
+
     if (def_log_server_cabundle != NULL) {
         if ((command_info[info_len++] = sudo_new_key_val("log_server_cabundle", def_log_server_cabundle)) == NULL)
             goto oom;

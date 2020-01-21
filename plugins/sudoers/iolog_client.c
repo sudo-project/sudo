@@ -131,8 +131,8 @@ done:
  * Returns open socket or -1 on error.
  */
 static int
-connect_server(const char *host, const char *port, struct timespec *timo,
-    const char **reason)
+connect_server(const char *host, const char *port, bool tcp_keepalive,
+    struct timespec *timo, const char **reason)
 {
     struct addrinfo hints, *res, *res0;
     const char *cause = NULL;
@@ -166,6 +166,20 @@ connect_server(const char *host, const char *port, struct timespec *timo,
 	    sock = -1;
 	    continue;
 	}
+
+    if (tcp_keepalive) {
+        int keepalive = 1;
+        if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
+            sizeof(keepalive)) == -1) {
+            cause = "setsockopt(SO_KEEPALIVE)";
+            save_errno = errno;
+            close(sock);
+            errno = save_errno;
+            sock = -1;
+            continue;
+        }
+    }
+
 	if (timed_connect(sock, res->ai_addr, res->ai_addrlen, timo) == -1) {
 	    cause = "connect";
 	    save_errno = errno;
@@ -189,8 +203,8 @@ connect_server(const char *host, const char *port, struct timespec *timo,
  * Returns a socket with O_NONBLOCK and close-on-exec flags set.
  */
 int
-log_server_connect(struct sudoers_str_list *servers, struct timespec *timo,
-    struct sudoers_string **connected_server)
+log_server_connect(struct sudoers_str_list *servers, bool tcp_keepalive,
+    struct timespec *timo, struct sudoers_string **connected_server)
 {
     struct sudoers_string *server;
     char *copy, *host, *port;
@@ -204,7 +218,7 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo,
 	    free(copy);
 	    continue;
 	}
-	sock = connect_server(host, port, timo, &cause);
+	sock = connect_server(host, port, tcp_keepalive, timo, &cause);
 	free(copy);
 	if (sock != -1) {
 	    int flags = fcntl(sock, F_GETFL, 0);
