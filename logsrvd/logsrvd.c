@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 
 #include <errno.h>
@@ -1503,6 +1504,17 @@ listener_cb(int fd, int what, void *v)
 	}
 	/* TODO: pause accepting on ENFILE and EMFILE */
     }
+
+    /* set keepalive socket option on socket returned by accept */
+    if (logsrvd_conf_tcp_keepalive()) {
+        int keepalive = 1;
+        if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
+            sizeof(keepalive)) == -1) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+                "unable to set SO_KEEPALIVE option");
+        }
+    }
+
     debug_return;
 }
 
