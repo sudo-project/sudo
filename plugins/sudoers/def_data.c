@@ -514,6 +514,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Sudo log server timeout in seconds: %u"),
 	NULL,
     }, {
+	"log_server_keepalive", T_FLAG,
+	N_("Enable SO_KEEPALIVE socket option on the socket connected to the logserver"),
+	NULL,
+    }, {
 	"log_server_cabundle", T_STR|T_BOOL|T_PATH,
 	N_("Path to the audit server's CA bundle file: %s"),
 	NULL,

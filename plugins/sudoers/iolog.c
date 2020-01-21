@@ -366,6 +366,15 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    TIME_T_MAX, NULL);
 		continue;
 	    }
+        if (strncmp(*cur, "log_server_keepalive=", sizeof("log_server_keepalive=") - 1) == 0) {
+            int val = sudo_strtobool(*cur + sizeof("log_server_keepalive=") - 1);
+            if (val != -1) {
+                details->tcp_keepalive = val;
+            } else {
+                details->tcp_keepalive = true;
+            }
+            continue;
+        }
 #if defined(HAVE_OPENSSL)
 	    if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
             details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
@@ -594,7 +603,7 @@ sudoers_io_open_remote(void)
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
     /* Connect to log server. */
-    sock = log_server_connect(iolog_details.log_servers,
+    sock = log_server_connect(iolog_details.log_servers, iolog_details.tcp_keepalive,
 	&iolog_details.server_timeout, &connected_server);
     if (sock == -1) {
 	/* TODO: support offline logs if server unreachable */
