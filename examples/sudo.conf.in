@@ -1,5 +1,5 @@
 #
-# Sample @sysconfdir@/sudo.conf file
+# Default @sysconfdir@/sudo.conf file
 #
 # Sudo plugins:
 #   Plugin plugin_name plugin_path plugin_options ...

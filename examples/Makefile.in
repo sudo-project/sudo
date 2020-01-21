@@ -80,6 +80,8 @@ install-includes:
 
 install-doc: install-dirs
 	for f in $(EXAMPLES); do $(INSTALL) $(INSTALL_OWNER) -m 0644 $$f $(DESTDIR)$(exampledir); done
+	test -r $(DESTDIR)$(sysconfdir)/sudo.conf || \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0644 sudo.conf $(DESTDIR)$(sysconfdir)
 
 install-plugin:
 
