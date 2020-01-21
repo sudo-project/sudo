@@ -286,6 +286,18 @@ tls_init(struct client_closure *closure, bool peer_auth)
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
+#ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
+    if (!SSL_CTX_set_min_proto_version(closure->ssl_ctx, TLS1_2_VERSION)) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to restrict min. protocol version: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+#else
+    SSL_CTX_set_options(closure->ssl_ctx,
+        SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1);
+#endif
+
     /* sets the location of the CA bundle file for verification purposes */
     if (SSL_CTX_load_verify_locations(closure->ssl_ctx,
         closure->log_details->ca_bundle, NULL) <= 0) {

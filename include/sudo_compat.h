@@ -391,6 +391,24 @@ int getdomainname(char *, size_t);
 #endif /* __hpux && !__LP64__ */
 
 /*
+ * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)
+ */
+#if defined(HAVE_OPENSSL)
+# ifndef HAVE_X509_STORE_CTX_GET0_CERT
+#  define X509_STORE_CTX_get0_cert(x)   ((x)->cert)
+# endif
+# ifndef HAVE_ASN1_STRING_GET0_DATA
+#  define ASN1_STRING_get0_data(x)      ASN1_STRING_data(x)
+# endif
+# ifndef HAVE_TLS_CLIENT_METHOD
+#  define TLS_client_method()           SSLv23_client_method()
+# endif
+# ifndef HAVE_TLS_SERVER_METHOD
+#  define TLS_server_method()           SSLv23_server_method()
+# endif
+#endif /* HAVE_OPENSSL */
+
+/*
  * Functions "missing" from libc.
  * All libc replacements are prefixed with "sudo_" to avoid namespace issues.
  */

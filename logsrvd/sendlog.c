@@ -145,6 +145,17 @@ init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
+#ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
+    if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to restrict min. protocol version: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+#else
+    SSL_CTX_set_options(ctx,
+        SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1);
+#endif
 
     if (cert_file) {
         if (!SSL_CTX_use_certificate_chain_file(ctx, cert_file)) {

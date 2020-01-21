@@ -21985,13 +21985,96 @@ _ACEOF
 
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_CTX_set_ciphersuites in -lssl" >&5
-$as_echo_n "checking for SSL_CTX_set_ciphersuites in -lssl... " >&6; }
-if ${ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto+:} false; then :
+if test "${enable_openssl-no}" != no; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for X509_STORE_CTX_get0_cert in -lcrypto" >&5
+$as_echo_n "checking for X509_STORE_CTX_get0_cert in -lcrypto... " >&6; }
+if ${ac_cv_lib_crypto_X509_STORE_CTX_get0_cert+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lssl crypto $LIBS"
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char X509_STORE_CTX_get0_cert ();
+int
+main ()
+{
+return X509_STORE_CTX_get0_cert ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_crypto_X509_STORE_CTX_get0_cert=yes
+else
+  ac_cv_lib_crypto_X509_STORE_CTX_get0_cert=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_X509_STORE_CTX_get0_cert" >&5
+$as_echo "$ac_cv_lib_crypto_X509_STORE_CTX_get0_cert" >&6; }
+if test "x$ac_cv_lib_crypto_X509_STORE_CTX_get0_cert" = xyes; then :
+  $as_echo "#define HAVE_X509_STORE_CTX_GET0_CERT 1" >>confdefs.h
+
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ASN1_STRING_get0_data in -lcrypto" >&5
+$as_echo_n "checking for ASN1_STRING_get0_data in -lcrypto... " >&6; }
+if ${ac_cv_lib_crypto_ASN1_STRING_get0_data+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ASN1_STRING_get0_data ();
+int
+main ()
+{
+return ASN1_STRING_get0_data ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_crypto_ASN1_STRING_get0_data=yes
+else
+  ac_cv_lib_crypto_ASN1_STRING_get0_data=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_ASN1_STRING_get0_data" >&5
+$as_echo "$ac_cv_lib_crypto_ASN1_STRING_get0_data" >&6; }
+if test "x$ac_cv_lib_crypto_ASN1_STRING_get0_data" = xyes; then :
+  $as_echo "#define HAVE_ASN1_STRING_GET0_DATA 1" >>confdefs.h
+
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_CTX_set_ciphersuites in -lssl" >&5
+$as_echo_n "checking for SSL_CTX_set_ciphersuites in -lssl... " >&6; }
+if ${ac_cv_lib_ssl_SSL_CTX_set_ciphersuites_lcrypto+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl -lcrypto $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -22011,21 +22094,145 @@ return SSL_CTX_set_ciphersuites ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto=yes
+  ac_cv_lib_ssl_SSL_CTX_set_ciphersuites_lcrypto=yes
 else
-  ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto=no
+  ac_cv_lib_ssl_SSL_CTX_set_ciphersuites_lcrypto=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" >&5
-$as_echo "$ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" >&6; }
-if test "x$ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_CTX_set_ciphersuites_lcrypto" >&5
+$as_echo "$ac_cv_lib_ssl_SSL_CTX_set_ciphersuites_lcrypto" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_CTX_set_ciphersuites_lcrypto" = xyes; then :
   $as_echo "#define HAVE_SSL_CTX_SET_CIPHERSUITES 1" >>confdefs.h
 
 fi
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_CTX_set_min_proto_version in -lssl" >&5
+$as_echo_n "checking for SSL_CTX_set_min_proto_version in -lssl... " >&6; }
+if ${ac_cv_lib_ssl_SSL_CTX_set_min_proto_version_lcrypto+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl -lcrypto $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SSL_CTX_set_min_proto_version ();
+int
+main ()
+{
+return SSL_CTX_set_min_proto_version ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ssl_SSL_CTX_set_min_proto_version_lcrypto=yes
+else
+  ac_cv_lib_ssl_SSL_CTX_set_min_proto_version_lcrypto=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_CTX_set_min_proto_version_lcrypto" >&5
+$as_echo "$ac_cv_lib_ssl_SSL_CTX_set_min_proto_version_lcrypto" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_CTX_set_min_proto_version_lcrypto" = xyes; then :
+  $as_echo "#define HAVE_SSL_CTX_SET_MIN_PROTO_VERSION 1" >>confdefs.h
+
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for TLS_client_method in -lssl" >&5
+$as_echo_n "checking for TLS_client_method in -lssl... " >&6; }
+if ${ac_cv_lib_ssl_TLS_client_method_lcrypto+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl -lcrypto $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char TLS_client_method ();
+int
+main ()
+{
+return TLS_client_method ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ssl_TLS_client_method_lcrypto=yes
+else
+  ac_cv_lib_ssl_TLS_client_method_lcrypto=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_TLS_client_method_lcrypto" >&5
+$as_echo "$ac_cv_lib_ssl_TLS_client_method_lcrypto" >&6; }
+if test "x$ac_cv_lib_ssl_TLS_client_method_lcrypto" = xyes; then :
+  $as_echo "#define HAVE_TLS_CLIENT_METHOD 1" >>confdefs.h
+
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for TLS_server_method in -lssl" >&5
+$as_echo_n "checking for TLS_server_method in -lssl... " >&6; }
+if ${ac_cv_lib_ssl_TLS_server_method_lcrypto+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl -lcrypto $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char TLS_server_method ();
+int
+main ()
+{
+return TLS_server_method ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ssl_TLS_server_method_lcrypto=yes
+else
+  ac_cv_lib_ssl_TLS_server_method_lcrypto=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_TLS_server_method_lcrypto" >&5
+$as_echo "$ac_cv_lib_ssl_TLS_server_method_lcrypto" >&6; }
+if test "x$ac_cv_lib_ssl_TLS_server_method_lcrypto" = xyes; then :
+  $as_echo "#define HAVE_TLS_SERVER_METHOD 1" >>confdefs.h
+
+fi
+
+fi
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
 ac_fn_c_check_func "$LINENO" "socket" "ac_cv_func_socket"
@@ -29887,6 +30094,12 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
+
+
+
+
+
 
 
 
