@@ -38,6 +38,7 @@ extern const char *sudo_conf_normal_mode;
 
 extern struct TestData {
     char *tmp_dir;
+    char *tmp_dir2;
     char stdout_str[MAX_OUTPUT];
     char stderr_str[MAX_OUTPUT];
 
@@ -141,10 +142,10 @@ int verify_content(char *actual_content, const char *reference_path);
 #define VERIFY_CONV(reference_name) \
     VERIFY_CONTENT(data.conv_str, reference_name)
 
-int verify_file(const char *actual_file_name, const char *reference_path);
+int verify_file(const char *actual_dir, const char *actual_file_name, const char *reference_path);
 
 #define VERIFY_FILE(actual_file_name, reference_path) \
-    VERIFY_TRUE(verify_file(actual_file_name, reference_path))
+    VERIFY_TRUE(verify_file(data.tmp_dir, actual_file_name, reference_path))
 
 int fake_conversation(int num_msgs, const struct sudo_conv_message msgs[],
                       struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);

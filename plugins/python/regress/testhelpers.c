@@ -33,6 +33,10 @@ clean_output(char *output)
 {
     // we replace some output which otherwise would be test run dependant
     str_replace_in_place(output, MAX_OUTPUT, data.tmp_dir, TEMP_PATH_TEMPLATE);
+
+    if (data.tmp_dir2)
+        str_replace_in_place(output, MAX_OUTPUT, data.tmp_dir2, TEMP_PATH_TEMPLATE "2");
+
     str_replace_in_place(output, MAX_OUTPUT, SRC_DIR, "SRC_DIR");
 }
 
@@ -98,10 +102,10 @@ verify_content(char *actual_content, const char *reference_path)
 }
 
 int
-verify_file(const char *actual_file_name, const char *reference_path)
+verify_file(const char *actual_dir, const char *actual_file_name, const char *reference_path)
 {
     char actual_path[PATH_MAX];
-    snprintf(actual_path, sizeof(actual_path), "%s/%s", data.tmp_dir, actual_file_name);
+    snprintf(actual_path, sizeof(actual_path), "%s/%s", actual_dir, actual_file_name);
 
     char actual_str[MAX_OUTPUT];
     if (!freadall(actual_path, actual_str, sizeof(actual_str))) {

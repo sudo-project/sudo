@@ -25,7 +25,8 @@
 
 #include "sudo_dso.h"
 
-static struct io_plugin *python_io = NULL;
+static void *python_plugin_handle = NULL;
+static struct io_plugin *python_io;
 static struct policy_plugin *python_policy = NULL;
 static struct sudoers_group_plugin *group_plugin = NULL;
 
@@ -143,6 +144,9 @@ cleanup(int success)
     }
 
     VERIFY_TRUE(rmdir_recursive(data.tmp_dir));
+    if (data.tmp_dir2) {
+        VERIFY_TRUE(rmdir_recursive(data.tmp_dir2));
+    }
 
     free(data.settings);
     free(data.user_info);
@@ -210,6 +214,82 @@ check_example_io_plugin_command_log(void)
     VERIFY_STDOUT(expected_path("check_example_io_plugin_command_log.stdout"));
     VERIFY_STDERR(expected_path("check_example_io_plugin_command_log.stderr"));
     VERIFY_FILE("sudo.log", expected_path("check_example_io_plugin_command_log.stored"));
+
+    return true;
+}
+
+typedef struct io_plugin * (io_clone_func)(void);
+
+int
+check_example_io_plugin_command_log_multiple(void)
+{
+    // verify multiple python io plugin symbols are available
+    io_clone_func *python_io_clone = (io_clone_func *)sudo_dso_findsym(python_plugin_handle, "python_io_clone");
+    VERIFY_PTR_NE(python_io_clone, NULL);
+
+    struct io_plugin *python_io2 = NULL;
+
+    for (int i = 0; i < 7; ++i) {
+        python_io2 = (*python_io_clone)();
+        VERIFY_PTR_NE(python_io2, NULL);
+        VERIFY_PTR_NE(python_io2, python_io);
+    }
+    VERIFY_PTR((*python_io_clone)(), NULL);  // no more available
+
+    // open the first plugin and let it log to tmp_dir
+    create_io_plugin_options(data.tmp_dir);
+
+    free(data.plugin_argv);
+    data.plugin_argc = 2;
+    data.plugin_argv = create_str_array(3, "id", "--help", NULL);
+
+    free(data.command_info);
+    data.command_info = create_str_array(3, "command=/bin/id", "runas_uid=0", NULL);
+
+    VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
+                              data.user_env, data.plugin_options), SUDO_RC_OK);
+
+    // open the second plugin with another log directory
+    VERIFY_TRUE(asprintf(&data.tmp_dir2, TEMP_PATH_TEMPLATE) >= 0);
+    VERIFY_NOT_NULL(mkdtemp(data.tmp_dir2));
+    create_io_plugin_options(data.tmp_dir2);
+
+    free(data.plugin_argv);
+    data.plugin_argc = 1;
+    data.plugin_argv = create_str_array(2, "whoami", NULL);
+
+    free(data.command_info);
+    data.command_info = create_str_array(3, "command=/bin/whoami", "runas_uid=1", NULL);
+
+    VERIFY_INT(python_io2->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
+                              data.user_env, data.plugin_options), SUDO_RC_OK);
+
+    VERIFY_INT(python_io->log_stdin("stdin for plugin 1", strlen("stdin for plugin 1")), SUDO_RC_OK);
+    VERIFY_INT(python_io2->log_stdin("stdin for plugin 2", strlen("stdin for plugin 2")), SUDO_RC_OK);
+    VERIFY_INT(python_io->log_stdout("stdout for plugin 1", strlen("stdout for plugin 1")), SUDO_RC_OK);
+    VERIFY_INT(python_io2->log_stdout("stdout for plugin 2", strlen("stdout for plugin 2")), SUDO_RC_OK);
+    VERIFY_INT(python_io->log_stderr("stderr for plugin 1", strlen("stderr for plugin 1")), SUDO_RC_OK);
+    VERIFY_INT(python_io2->log_stderr("stderr for plugin 2", strlen("stderr for plugin 2")), SUDO_RC_OK);
+    VERIFY_INT(python_io->log_suspend(SIGTSTP), SUDO_RC_OK);
+    VERIFY_INT(python_io2->log_suspend(SIGSTOP), SUDO_RC_OK);
+    VERIFY_INT(python_io->log_suspend(SIGCONT), SUDO_RC_OK);
+    VERIFY_INT(python_io2->log_suspend(SIGCONT), SUDO_RC_OK);
+    VERIFY_INT(python_io->change_winsize(20, 10), SUDO_RC_OK);
+    VERIFY_INT(python_io2->change_winsize(30, 40), SUDO_RC_OK);
+    VERIFY_INT(python_io->log_ttyin("tty input for plugin 1", strlen("tty input for plugin 1")), SUDO_RC_OK);
+    VERIFY_INT(python_io2->log_ttyin("tty input for plugin 2", strlen("tty input for plugin 2")), SUDO_RC_OK);
+    VERIFY_INT(python_io->log_ttyout("tty output for plugin 1", strlen("tty output for plugin 1")), SUDO_RC_OK);
+    VERIFY_INT(python_io2->log_ttyout("tty output for plugin 2", strlen("tty output for plugin 2")), SUDO_RC_OK);
+
+    python_io->close(1, 0);  // successful execution, command returned 1
+    python_io2->close(2, 0);  //                      command returned 2
+
+    VERIFY_STDOUT(expected_path("check_example_io_plugin_command_log_multiple.stdout"));
+    VERIFY_STDERR(expected_path("check_example_io_plugin_command_log_multiple.stderr"));
+    VERIFY_FILE("sudo.log", expected_path("check_example_io_plugin_command_log_multiple1.stored"));
+    VERIFY_TRUE(verify_file(data.tmp_dir2, "sudo.log", expected_path("check_example_io_plugin_command_log_multiple2.stored")));
 
     return true;
 }
@@ -710,7 +790,7 @@ int
 check_python_plugin_can_be_loaded(const char *python_plugin_path)
 {
     printf("Loading python plugin from '%s'\n", python_plugin_path);
-    void *python_plugin_handle = sudo_dso_load(python_plugin_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
+    python_plugin_handle = sudo_dso_load(python_plugin_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     VERIFY_PTR_NE(python_plugin_handle, NULL);
 
     python_io = sudo_dso_findsym(python_plugin_handle, "python_io");
@@ -737,6 +817,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_io_plugin_version_display(true));
     RUN_TEST(check_example_io_plugin_version_display(false));
     RUN_TEST(check_example_io_plugin_command_log());
+    RUN_TEST(check_example_io_plugin_command_log_multiple());
     RUN_TEST(check_example_io_plugin_failed_to_start_command());
     RUN_TEST(check_example_io_plugin_fails_with_python_backtrace());
     RUN_TEST(check_io_plugin_callbacks_are_optional());
