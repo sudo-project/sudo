@@ -160,6 +160,59 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 }
 #endif /* ENABLE_SUDO_PLUGIN_API */
 
+static bool
+fill_container(struct plugin_container *container, void *handle, char *path,
+    struct generic_plugin *plugin, struct plugin_info *info)
+{
+    debug_decl(fill_container, SUDO_DEBUG_PLUGIN);
+
+    if ((container->path = strdup(path)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
+    container->handle = handle;
+    container->name = info->symbol_name;
+    container->options = info->options;
+    container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+    container->u.generic = plugin;
+    container->debug_files = sudo_conf_debug_files(path);
+
+    debug_return_bool(true);
+}
+
+static struct plugin_container *
+new_container(void *handle, char *path, struct generic_plugin *plugin,
+    struct plugin_info *info)
+{
+    struct plugin_container *container = NULL;
+    debug_decl(new_container, SUDO_DEBUG_PLUGIN);
+
+    if ((container = calloc(1, sizeof(*container))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
+    if (!fill_container(container, handle, path, plugin, info))
+	goto bad;
+
+    debug_return_ptr(container);
+bad:
+    free(container);
+    debug_return_ptr(NULL);
+}
+
+static bool
+plugin_exists(struct plugin_container_list *plugins, struct plugin_info *info)
+{
+    struct plugin_container *container;
+    debug_decl(find_plugin, SUDO_DEBUG_PLUGIN);
+
+    TAILQ_FOREACH(container, plugins, entries) {
+	if (strcmp(container->name, info->symbol_name) == 0)
+	    debug_return_bool(true);
+    }
+    debug_return_bool(false);
+}
+
 /*
  * Load the plugin specified by "info".
  */
@@ -196,12 +249,6 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	goto done;
     }
 
-    if (plugin->type != SUDO_POLICY_PLUGIN && plugin->type != SUDO_IO_PLUGIN) {
-	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	sudo_warnx(U_("unknown policy type %d found in %s"), plugin->type, path);
-	goto done;
-    }
     if (SUDO_API_VERSION_GET_MAJOR(plugin->version) != SUDO_API_VERSION_MAJOR) {
 	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
@@ -210,7 +257,9 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    SUDO_API_VERSION_MAJOR, path);
 	goto done;
     }
-    if (plugin->type == SUDO_POLICY_PLUGIN) {
+
+    switch (plugin->type) {
+    case SUDO_POLICY_PLUGIN:
 	if (policy_plugin->handle != NULL) {
 	    /* Ignore duplicate entries. */
 	    if (strcmp(policy_plugin->name, info->symbol_name) == 0) {
@@ -225,40 +274,25 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    ret = true;
 	    goto done;
 	}
-	policy_plugin->handle = handle;
-	policy_plugin->path = strdup(path);
-	if (policy_plugin->path == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if (!fill_container(policy_plugin, handle, path, plugin, info))
+	    goto done;
+	break;
+    case SUDO_IO_PLUGIN:
+	if (plugin_exists(io_plugins, info)) {
+	    sudo_warnx(U_("ignoring duplicate I/O plugin \"%s\" in %s, line %d"),
+		info->symbol_name, _PATH_SUDO_CONF, info->lineno);
+	    ret = true;
 	    goto done;
 	}
-	policy_plugin->name = info->symbol_name;
-	policy_plugin->options = info->options;
-	policy_plugin->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-	policy_plugin->u.generic = plugin;
-	policy_plugin->debug_files = sudo_conf_debug_files(path);
-    } else if (plugin->type == SUDO_IO_PLUGIN) {
-	/* Check for duplicate entries. */
-	TAILQ_FOREACH(container, io_plugins, entries) {
-	    if (strcmp(container->name, info->symbol_name) == 0) {
-		sudo_warnx(U_("ignoring duplicate I/O plugin \"%s\" in %s, line %d"),
-		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-		ret = true;
-		goto done;
-	    }
-	}
-	container = calloc(1, sizeof(*container));
-	if (container == NULL || (container->path = strdup(path)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    free(container);
+	if ((container = new_container(handle, path, plugin, info)) == NULL)
 	    goto done;
-	}
-	container->handle = handle;
-	container->name = info->symbol_name;
-	container->options = info->options;
-	container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-	container->u.generic = plugin;
-	container->debug_files = sudo_conf_debug_files(path);
 	TAILQ_INSERT_TAIL(io_plugins, container, entries);
+	break;
+    default:
+	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
+	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
+	sudo_warnx(U_("unknown plugin type %d found in %s"), plugin->type, path);
+	goto done;
     }
 
     /* Zero out info strings that we now own (see above). */
