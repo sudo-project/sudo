@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 16, 2019
+.Dd January 22, 2020
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -96,6 +96,12 @@ which will listen on all configured network interfaces.
 Multiple
 .Em listen_address
 lines may be specified to listen on more than one interface.
+.It tcp_keepalive = boolean
+If true,
+.Nm sudo_logsrvd
+will enable the TCP keepalive socket option on the client connection.
+This enables the periodic transmission of keepalive messages to the client.
+If the client does not respond to a message, the connection will be closed.
 .It timeout = number
 The amount of time, in seconds,
 .Nm sudo_logsrvd
@@ -481,6 +487,9 @@ Sudo log server configuration file
 # Multiple listen_address settings may be specified.
 # The default is to listen on all addresses.
 #listen_address = *:30344
+
+# If set, enable the SO_KEEPALIVE socket option on the connected socket.
+#tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.

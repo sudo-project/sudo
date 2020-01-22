@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 9, 2019
+.Dd January 22, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2438,6 +2438,18 @@ For more information about I/O logging, see the
 section.
 This flag is
 .Em off
+by default.
+.It log_server_keepalive
+If set,
+.Nm sudo
+will enable the TCP keepalive socket option on the connection to the log server.
+This enables the periodic transmission of keepalive messages to the server.
+If the server does not respond to a message, the connection will
+be closed and the running command will be killed unless the
+.Em ignore_iolog_errors
+flag is set.
+This flag is
+.Em on
 by default.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
