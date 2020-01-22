@@ -412,7 +412,7 @@ struct  _ServerHello
   /*
    * true if client auth is required with signed cert 
    */
-  protobuf_c_boolean tls_checkpeer;
+  protobuf_c_boolean tls_reqcert;
 };
 #define SERVER_HELLO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&server_hello__descriptor) \

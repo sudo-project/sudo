@@ -126,5 +126,5 @@ message ServerHello {
   string redirect = 2;		/* optional redirect if busy */
   repeated string servers = 3;	/* optional list of known servers */
   bool tls = 4;             /* true if server uses tls protocol */
-  bool tls_checkpeer = 5;   /* true if client auth is required with signed cert */
+  bool tls_reqcert = 5;   /* true if client auth is required with signed cert */
 }

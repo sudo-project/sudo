@@ -281,7 +281,7 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
 }
 
 static bool
-tls_init(struct client_closure *closure, bool peer_auth)
+tls_init(struct client_closure *closure, bool cert_required)
 {
     debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN);
 
@@ -326,7 +326,7 @@ tls_init(struct client_closure *closure, bool peer_auth)
     SSL_CTX_set_verify(closure->ssl_ctx, SSL_VERIFY_PEER, verify_peer_identity);
 
     /* if the server requests client authentication with signed certificate */
-    if (peer_auth) {
+    if (cert_required) {
         /* if no certificate file is set in sudoers */
         if (closure->log_details->cert_file == NULL) {
             sudo_warnx(U_("Signed certificate file is not set in sudoers"));
@@ -1057,7 +1057,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 #if defined(HAVE_OPENSSL)
     /* if server requested TLS */
     if (msg->tls) {
-        if (!tls_init(closure, msg->tls_checkpeer)) {
+        if (!tls_init(closure, msg->tls_reqcert)) {
             sudo_warnx(U_("TLS initialization was unsuccessful"));
             debug_return_bool(false);
         }

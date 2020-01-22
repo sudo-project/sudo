@@ -76,7 +76,7 @@ static char *iolog_dir;
 
 #if defined(HAVE_OPENSSL)
 static bool tls = false;
-static bool tls_checkpeer = false;
+static bool tls_reqcert = false;
 static SSL_CTX *ssl_ctx = NULL;
 static SSL *ssl = NULL;
 const char *ca_bundle = NULL;
@@ -301,7 +301,7 @@ do_tls_handshake(struct client_closure *closure)
         sudo_warnx("%s", U_("CA bundle file was not specified"));
         goto bad;
     }
-    if (tls_checkpeer && (cert == NULL)) {
+    if (tls_reqcert && (cert == NULL)) {
         sudo_warnx("%s", U_("Client certificate was not specified"));
         goto bad;
     }
@@ -982,10 +982,10 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 
 #if defined(HAVE_OPENSSL)
     tls = msg->tls;
-    tls_checkpeer = msg->tls_checkpeer;
+    tls_reqcert = msg->tls_reqcert;
     if (tls) {
         printf("Requested protocol: TLS\n");
-        if (tls_checkpeer)
+        if (tls_reqcert)
             printf("Client auth is required with signed certificate\n");
     }
 #endif
