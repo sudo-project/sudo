@@ -1629,12 +1629,12 @@ static const ProtobufCFieldDescriptor server_hello__field_descriptors[5] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "tls_checkpeer",
+    "tls_reqcert",
     5,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
-    offsetof(ServerHello, tls_checkpeer),
+    offsetof(ServerHello, tls_reqcert),
     NULL,
     NULL,
     0,             /* flags */
@@ -1646,7 +1646,7 @@ static const unsigned server_hello__field_indices_by_name[] = {
   0,   /* field[0] = server_id */
   2,   /* field[2] = servers */
   3,   /* field[3] = tls */
-  4,   /* field[4] = tls_checkpeer */
+  4,   /* field[4] = tls_reqcert */
 };
 static const ProtobufCIntRange server_hello__number_ranges[1 + 1] =
 {

@@ -178,10 +178,10 @@ fmt_hello_message(struct connection_buffer *buf)
     hello.server_id = (char *)server_id;
 #if defined(HAVE_OPENSSL)
     hello.tls = logsrvd_conf_get_tls_opt();
-    hello.tls_checkpeer = logsrvd_get_tls_config()->check_peer;
+    hello.tls_reqcert = logsrvd_get_tls_config()->check_peer;
 #else
     hello.tls = false;
-    hello.tls_checkpeer = false;
+    hello.tls_reqcert = false;
 #endif
     msg.hello = &hello;
     msg.type_case = SERVER_MESSAGE__TYPE_HELLO;
