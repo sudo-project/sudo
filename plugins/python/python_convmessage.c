@@ -113,7 +113,7 @@ sudo_module_register_conv_message(PyObject *py_module)
 
 cleanup:
     Py_CLEAR(py_class);
-    debug_return_int(SUDO_RC_OK);
+    debug_return_int(rc);
 }
 
 int
