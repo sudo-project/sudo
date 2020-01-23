@@ -234,7 +234,6 @@ check_example_io_plugin_command_log_multiple(void)
         VERIFY_PTR_NE(python_io2, NULL);
         VERIFY_PTR_NE(python_io2, python_io);
     }
-    VERIFY_PTR((*python_io_clone)(), NULL);  // no more available
 
     // open the first plugin and let it log to tmp_dir
     create_io_plugin_options(data.tmp_dir);
@@ -249,6 +248,10 @@ check_example_io_plugin_command_log_multiple(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options), SUDO_RC_OK);
+
+    // For verifying the error message of no more plugin. It should be displayed only once.
+    VERIFY_PTR((*python_io_clone)(), NULL);
+    VERIFY_PTR((*python_io_clone)(), NULL);
 
     // open the second plugin with another log directory
     VERIFY_TRUE(asprintf(&data.tmp_dir2, TEMP_PATH_TEMPLATE) >= 0);
