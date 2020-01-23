@@ -136,6 +136,7 @@ struct logsrvd_tls_config {
     char *dhparams_path;
     char *ciphers_v12;
     char *ciphers_v13;
+    bool verify;
     bool check_peer;
 };
 

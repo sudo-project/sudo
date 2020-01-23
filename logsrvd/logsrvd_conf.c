@@ -527,6 +527,19 @@ cb_tls_ciphers13(struct logsrvd_config *config, const char *str)
 }
 
 static bool
+cb_tls_verify(struct logsrvd_config *config, const char *str)
+{
+    int val;
+    debug_decl(cb_tls_verify, SUDO_DEBUG_UTIL);
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->server.tls_config.verify = val;
+    debug_return_bool(true);
+}
+
+static bool
 cb_tls_checkpeer(struct logsrvd_config *config, const char *str)
 {
     int val;
@@ -706,6 +719,7 @@ static struct logsrvd_config_entry server_conf_entries[] = {
     { "tls_ciphers_v12", cb_tls_ciphers12 },
     { "tls_ciphers_v13", cb_tls_ciphers13 },
     { "tls_checkpeer", cb_tls_checkpeer },
+    { "tls_verify", cb_tls_verify },
 #endif
     { NULL }
 };
@@ -882,6 +896,8 @@ logsrvd_conf_alloc(void)
 #if defined(HAVE_OPENSSL)
     config->server.tls_config.cacert_path = strdup(DEFAULT_CA_CERT_PATH);
     config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
+    config->server.tls_config.verify = true;
+    config->server.tls_config.check_peer = false;
 #endif
 
     /* I/O log defaults */

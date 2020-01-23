@@ -1578,7 +1578,7 @@ const ProtobufCMessageDescriptor server_message__descriptor =
   (ProtobufCMessageInit) server_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor server_hello__field_descriptors[5] =
+static const ProtobufCFieldDescriptor server_hello__field_descriptors[6] =
 {
   {
     "server_id",
@@ -1629,8 +1629,20 @@ static const ProtobufCFieldDescriptor server_hello__field_descriptors[5] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "tls_reqcert",
+    "tls_server_auth",
     5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(ServerHello, tls_server_auth),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "tls_reqcert",
+    6,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -1646,12 +1658,13 @@ static const unsigned server_hello__field_indices_by_name[] = {
   0,   /* field[0] = server_id */
   2,   /* field[2] = servers */
   3,   /* field[3] = tls */
-  4,   /* field[4] = tls_reqcert */
+  5,   /* field[5] = tls_reqcert */
+  4,   /* field[4] = tls_server_auth */
 };
 static const ProtobufCIntRange server_hello__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 5 }
+  { 0, 6 }
 };
 const ProtobufCMessageDescriptor server_hello__descriptor =
 {
@@ -1661,7 +1674,7 @@ const ProtobufCMessageDescriptor server_hello__descriptor =
   "ServerHello",
   "",
   sizeof(ServerHello),
-  5,
+  6,
   server_hello__field_descriptors,
   server_hello__field_indices_by_name,
   1,  server_hello__number_ranges,
