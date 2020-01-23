@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 22, 2020
+.Dd January 23, 2020
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -182,6 +182,15 @@ will use the OpenSSL defaults for Diffie-Hellman key generation.
 .It tls_key = path
 The path to the server's private key file, in PEM format.
 This setting is required when TLS is enabled.
+.It tls_verify = bool
+If true, the server certificate will be verified at startup and
+clients will authenticate the server by verifying its certificate
+and identity.
+If false, no verification is performed of the server certificate
+by the server or the client.
+When using self-signed certificates without a certificate authority,
+this setting should be set to false.
+The default value is true.
 .El
 .Ss iolog
 The
@@ -499,16 +508,26 @@ Sudo log server configuration file
 # By default, server connections are not encrypted.
 #tls = true
 
+# If set, server certificate will be verified at server startup and
+# also connecting clients will perform server authentication by
+# verifying the server's certificate and identity.
+#tls_verify = true
+
+# Whether to verify client certificates for TLS connections.
+# By default client certs are not checked.
+#tls_checkpeer = false
+
 # Path to the certificate authority bundle file in PEM format.
+# Required if 'tls_verify' or 'tls_checkpeer' is set.
 #tls_cacert = /etc/ssl/sudo/cacert.pem
 
 # Path to the server's certificate file in PEM format.
 # Required for TLS connections.
 #tls_cert = /etc/ssl/sudo/certs/logsrvd_cert.pem
 
-# Whether to verify client certificates for TLS connections.
-# By default client certs are not checked.
-#tls_checkpeer = false
+# Path to the server's private key file in PEM format.
+# Required for TLS connections.
+#tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
 
 # TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
 # NOTE that this setting is only effective if the negotiated protocol
@@ -523,10 +542,6 @@ Sudo log server configuration file
 # Path to the Diffie-Hellman parameter file in PEM format.
 # If not set, the server will use the OpenSSL defaults.
 #tls_dhparams = /etc/ssl/sudo/logsrvd_dhparams.pem
-
-# Path to the server's private key file in PEM format.
-# Required for TLS connections.
-#tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
 
 [iolog]
 # The top-level directory to use when constructing the path name for the
