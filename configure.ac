@@ -2958,12 +2958,15 @@ dnl
 dnl Check for functions only present in OpenSSL 1.1 and above
 dnl
 if test "${enable_openssl-no}" != no; then
-    AC_CHECK_LIB(crypto, X509_STORE_CTX_get0_cert, [AC_DEFINE(HAVE_X509_STORE_CTX_GET0_CERT)])
-    AC_CHECK_LIB(crypto, ASN1_STRING_get0_data, [AC_DEFINE(HAVE_ASN1_STRING_GET0_DATA)])
-    AC_CHECK_LIB(ssl, SSL_CTX_set_ciphersuites, [AC_DEFINE(HAVE_SSL_CTX_SET_CIPHERSUITES)], [], [-lcrypto])
-    AC_CHECK_LIB(ssl, SSL_CTX_set_min_proto_version, [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [-lcrypto])
-    AC_CHECK_LIB(ssl, TLS_client_method, [AC_DEFINE(HAVE_TLS_CLIENT_METHOD)], [], [-lcrypto])
-    AC_CHECK_LIB(ssl, TLS_server_method, [AC_DEFINE(HAVE_TLS_SERVER_METHOD)], [], [-lcrypto])
+    OLIBS="$LIBS"
+    LIBS="$LIBS $LIBTLS"
+    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method])
+    # SSL_CTX_set_min_proto_version may be a macro
+    AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <openssl/ssl.h>
+    ])
+    LIBS="$OLIBS"
 fi
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
@@ -4743,12 +4746,7 @@ AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-st
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
-AH_TEMPLATE(HAVE_X509_STORE_CTX_GET0_CERT, [Define to 1 if you have the `X509_STORE_CTX_get0_cert' function.])
-AH_TEMPLATE(HAVE_ASN1_STRING_GET0_DATA, [Define to 1 if you have the `ASN1_STRING_get0_data' function.])
-AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function.])
-AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function.])
-AH_TEMPLATE(HAVE_TLS_CLIENT_METHOD, [Define to 1 if you have the `TLS_client_method' function.])
-AH_TEMPLATE(HAVE_TLS_SERVER_METHOD, [Define to 1 if you have the `TLS_server_method' function.])
+AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
