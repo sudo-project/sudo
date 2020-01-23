@@ -410,13 +410,17 @@ struct  _ServerHello
    */
   protobuf_c_boolean tls;
   /*
+   * true if server auth has to be performed 
+   */
+  protobuf_c_boolean tls_server_auth;
+  /*
    * true if client auth is required with signed cert 
    */
   protobuf_c_boolean tls_reqcert;
 };
 #define SERVER_HELLO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&server_hello__descriptor) \
-    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL, 0, 0 }
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL, 0, 0, 0 }
 
 
 /* ClientMessage methods */

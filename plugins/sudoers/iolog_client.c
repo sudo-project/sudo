@@ -281,14 +281,9 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
 }
 
 static bool
-tls_init(struct client_closure *closure, bool cert_required)
+tls_init(struct client_closure *closure, bool verify, bool cert_required)
 {
     debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN);
-
-    if (closure->log_details->ca_bundle == NULL) {
-        sudo_warnx(U_("CA bundle file is not set in sudoers"));
-        goto bad;
-    }
 
     SSL_library_init();
     OpenSSL_add_all_algorithms();
@@ -312,18 +307,27 @@ tls_init(struct client_closure *closure, bool cert_required)
         SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1);
 #endif
 
-    /* sets the location of the CA bundle file for verification purposes */
-    if (SSL_CTX_load_verify_locations(closure->ssl_ctx,
-        closure->log_details->ca_bundle, NULL) <= 0) {
-        sudo_warnx(U_("Calling SSL_CTX_load_verify_locations() failed: %s"),
-            ERR_error_string(ERR_get_error(), NULL));
-        goto bad;
-    }
 
-    /* turn on server cert verification during the handshake.
-       hostname matching will be done in a custom callback (verify_peer_identity).
+    /* if server explicitly requests it, turn on server cert verification
+       during the handshake. Hostname matching will be done in a custom
+       callback (verify_peer_identity).
      */
-    SSL_CTX_set_verify(closure->ssl_ctx, SSL_VERIFY_PEER, verify_peer_identity);
+    if (verify) {
+        if (closure->log_details->ca_bundle == NULL) {
+            sudo_warnx(U_("CA bundle file is not set in sudoers"));
+            goto bad;
+        }
+
+        /* sets the location of the CA bundle file for verification purposes */
+        if (SSL_CTX_load_verify_locations(closure->ssl_ctx,
+            closure->log_details->ca_bundle, NULL) <= 0) {
+            sudo_warnx(U_("Calling SSL_CTX_load_verify_locations() failed: %s"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
+        SSL_CTX_set_verify(closure->ssl_ctx, SSL_VERIFY_PEER, verify_peer_identity);
+    }
 
     /* if the server requests client authentication with signed certificate */
     if (cert_required) {
@@ -1057,7 +1061,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 #if defined(HAVE_OPENSSL)
     /* if server requested TLS */
     if (msg->tls) {
-        if (!tls_init(closure, msg->tls_reqcert)) {
+        if (!tls_init(closure, msg->tls_server_auth, msg->tls_reqcert)) {
             sudo_warnx(U_("TLS initialization was unsuccessful"));
             debug_return_bool(false);
         }

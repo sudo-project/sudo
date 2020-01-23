@@ -178,9 +178,11 @@ fmt_hello_message(struct connection_buffer *buf)
     hello.server_id = (char *)server_id;
 #if defined(HAVE_OPENSSL)
     hello.tls = logsrvd_conf_get_tls_opt();
+    hello.tls_server_auth = logsrvd_get_tls_config()->verify;
     hello.tls_reqcert = logsrvd_get_tls_config()->check_peer;
 #else
     hello.tls = false;
+    hello.tls_server_auth = false;
     hello.tls_reqcert = false;
 #endif
     msg.hello = &hello;
@@ -970,9 +972,11 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     switch(result)
     {
         case MatchFound:
-	    debug_return_int(1);
+            debug_return_int(1);
         default:
-	    debug_return_int(0);
+            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+                "hostname validation failed");
+            debug_return_int(0);
     }
 }
 
@@ -1101,6 +1105,7 @@ init_tls_server_context(void)
     const SSL_METHOD *method;
     SSL_CTX *ctx = NULL;
     const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
+    bool ca_bundle_required = tls_config->verify | tls_config->check_peer;
     debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL);
 
     SSL_library_init();
@@ -1127,29 +1132,39 @@ init_tls_server_context(void)
         goto bad;
     }
 
-    if (tls_config->cacert_path != NULL) {
-        STACK_OF(X509_NAME) *cacerts =
-            SSL_load_client_CA_file(tls_config->cacert_path);
-        if (cacerts == NULL) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "calling SSL_load_client_CA_file() failed: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        } else {
-            SSL_CTX_set_client_CA_list(ctx, cacerts);
-
-            /* set the location of the CA bundle file for verification */
-            if (SSL_CTX_load_verify_locations(ctx, tls_config->cacert_path, NULL) <= 0) {
+    /* if server or client authentication is required, CA bundle file has to be prepared */
+    if (ca_bundle_required) {
+        if (tls_config->cacert_path != NULL) {
+            STACK_OF(X509_NAME) *cacerts =
+                SSL_load_client_CA_file(tls_config->cacert_path);
+            if (cacerts == NULL) {
                 sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                    "calling SSL_CTX_load_verify_locations() failed: %s",
+                    "calling SSL_load_client_CA_file() failed: %s",
                     ERR_error_string(ERR_get_error(), NULL));
                 goto bad;
+            } else {
+                SSL_CTX_set_client_CA_list(ctx, cacerts);
+
+                /* set the location of the CA bundle file for verification */
+                if (SSL_CTX_load_verify_locations(ctx, tls_config->cacert_path, NULL) <= 0) {
+                    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                        "calling SSL_CTX_load_verify_locations() failed: %s",
+                        ERR_error_string(ERR_get_error(), NULL));
+                    goto bad;
+                }
             }
         }
-    }
 
-    if (!verify_server_cert(ctx, tls_config)) {
-        goto bad;
+        /* only verify server cert if it is set in the configuration */
+        if (tls_config->verify) {
+
+            if (!verify_server_cert(ctx, tls_config)) {
+                goto bad;
+            }
+        } else {
+            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+                "skipping server cert check");
+        }
     }
 
     /* if peer authentication is enabled, verify client cert during TLS handshake
@@ -1302,6 +1317,11 @@ tls_handshake_cb(int fd, int what, void *v)
     if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1) {
         sudo_warn(U_("unable to add event to queue"));
     }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+        "TLS version: %s, negotiated cipher suite: %s",
+        SSL_get_version(closure->ssl),
+        SSL_get_cipher(closure->ssl));
 
     debug_return;
 bad:
