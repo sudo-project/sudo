@@ -25,16 +25,45 @@
 
 #include <pwd.h>
 #include <signal.h>
+#include "pathnames.h"
 
-static int _sudo_printf_noop(int msg_type, const char *fmt, ...)
+static int
+_sudo_printf_default(int msg_type, const char *fmt, ...)
 {
-    (void) msg_type;
-    (void) fmt;
-    return 0;
+    FILE *fp = stdout;
+    FILE *ttyfp = NULL;
+    va_list ap;
+    int len;
+
+    if (ISSET(msg_type, SUDO_CONV_PREFER_TTY)) {
+	/* Try writing to /dev/tty first. */
+	ttyfp = fopen(_PATH_TTY, "w");
+    }
+
+    switch (msg_type & 0xff) {
+    case SUDO_CONV_ERROR_MSG:
+	fp = stderr;
+	/* FALLTHROUGH */
+    case SUDO_CONV_INFO_MSG:
+	va_start(ap, fmt);
+	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);
+	va_end(ap);
+	break;
+    default:
+	len = -1;
+	errno = EINVAL;
+	break;
+    }
+
+    if (ttyfp != NULL)
+	fclose(ttyfp);
+
+    return len;
 }
 
+
 struct PythonContext py_ctx = {
-    &_sudo_printf_noop,
+    &_sudo_printf_default,
     NULL,
     0,
     NULL
@@ -45,7 +74,7 @@ int
 py_is_sudo_log_available(void)
 {
     debug_decl(py_is_sudo_log_available, PYTHON_DEBUG_INTERNAL);
-    debug_return_int(py_ctx.sudo_log != &_sudo_printf_noop);
+    debug_return_int(py_ctx.sudo_log != &_sudo_printf_default);
 }
 
 char *
@@ -408,7 +437,7 @@ void
 py_ctx_reset()
 {
     memset(&py_ctx, 0, sizeof(py_ctx));
-    py_ctx.sudo_log = &_sudo_printf_noop;
+    py_ctx.sudo_log = &_sudo_printf_default;
 }
 
 int

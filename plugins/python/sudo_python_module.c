@@ -113,11 +113,6 @@ python_sudo_log(int msg_type, PyObject *Py_UNUSED(py_self), PyObject *py_args, P
     if (_parse_log_function_args(py_args, py_kwargs, &args_joined, &end) != SUDO_RC_OK)
         goto cleanup;
 
-    if (!py_is_sudo_log_available()) {
-        PyErr_Format(sudo_exc_SudoException, "sudo.log: Message displaying is unavailable");
-        goto cleanup;
-    }
-
     rc = py_ctx.sudo_log(msg_type, "%s%s", args_joined, end);
     if (rc < 0) {
         PyErr_Format(sudo_exc_SudoException, "sudo.log: Error displaying message");

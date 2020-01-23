@@ -194,7 +194,8 @@ python_plugin_register_logging(sudo_conv_t conversation,
     if (py_ctx.sudo_conv == NULL)
         py_ctx.sudo_conv = conversation;
 
-    py_ctx.sudo_log = sudo_printf;
+    if (sudo_printf)
+        py_ctx.sudo_log = sudo_printf;
 
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     struct sudo_conf_debug_file_list *debug_files_ptr = &debug_files;

@@ -59,8 +59,6 @@ int py_sudo_conv(int num_msgs, const struct sudo_conv_message msgs[],
 
 void py_log_last_error(const char *context_message);
 
-int py_is_sudo_log_available(void);
-
 char *py_create_string_rep(PyObject *py_object);
 
 char *py_join_str_list(PyObject *py_str_list, const char *separator);
