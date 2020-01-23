@@ -436,8 +436,7 @@ For example:
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
-Sudo supports loading multiple I/O plugins, but currently only one
-of them can be written in Python.
+Sudo supports loading multiple I/O plugins. Currently only 8 python I/O plugins can be loaded at once.
 .Pp
 An I/O plugin may have the following member functions:
 .Bl -tag -width 4n
@@ -1061,14 +1060,11 @@ This is how the plugin API accepts options and settings.
 .Sh PLUGIN API CHANGELOG (Python)
 None yet
 .Sh LIMITATIONS
-Sudo supports using multiple I/O plugins, but currently only one I/O
-plugin can be written in Python.
+Only a maximum number of 8 python I/O plugins can be loaded at once. If
+.Pa @sysconfdir@/sudo.conf
+contains more, those will be rejected with a warning message.
 .Pp
-The hook function API is currently not accessible for Python plugins.
-.Pp
-I/O and Group plugins written in Python do not support the
-.Fn event_alloc
-callback.
+The Event API and the hook function API is currently not accessible for Python plugins.
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,
 .Xr sudo_plugin @mansectform@ ,
