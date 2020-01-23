@@ -213,6 +213,30 @@ plugin_exists(struct plugin_container_list *plugins, struct plugin_info *info)
     debug_return_bool(false);
 }
 
+typedef struct generic_plugin * (plugin_clone_func)(void);
+
+struct generic_plugin *
+sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
+{
+    debug_decl(sudo_plugin_clone, SUDO_DEBUG_PLUGIN);
+    struct generic_plugin * plugin = NULL;
+    char *clone_func_name = NULL;
+
+    if (asprintf(&clone_func_name, "%s_clone", symbol_name) < 0) {
+        sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+        goto cleanup;
+    }
+
+    plugin_clone_func *clone_func = (plugin_clone_func *)sudo_dso_findsym(so_handle, clone_func_name);
+    if (clone_func) {
+        plugin = (*clone_func)();
+    }
+
+cleanup:
+    free(clone_func_name);
+    debug_return_ptr(plugin);
+}
+
 /*
  * Load the plugin specified by "info".
  */
@@ -279,10 +303,13 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	break;
     case SUDO_IO_PLUGIN:
 	if (plugin_exists(io_plugins, info)) {
-	    sudo_warnx(U_("ignoring duplicate I/O plugin \"%s\" in %s, line %d"),
-		info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-	    ret = true;
-	    goto done;
+	    plugin = sudo_plugin_try_to_clone(handle, info->symbol_name);
+	    if (plugin == NULL) {
+		sudo_warnx(U_("ignoring duplicate I/O plugin \"%s\" in %s, line %d"),
+		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
+		ret = true;
+		goto done;
+	    }
 	}
 	if ((container = new_container(handle, path, plugin, info)) == NULL)
 	    goto done;
