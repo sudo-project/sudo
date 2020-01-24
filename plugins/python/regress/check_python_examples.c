@@ -790,6 +790,44 @@ check_io_plugin_callbacks_are_optional(void)
 }
 
 int
+check_python_plugins_do_not_affect_each_other(void)
+{
+    // We test here that one plugin is not able to effect the environment of another
+    // This is important so they do not ruin or depend on each other's state.
+    free(data.plugin_options);
+    data.plugin_options = create_str_array(
+        4,
+        "ModulePath=" SRC_DIR "/regress/plugin_conflict.py",
+        "ClassName=ConflictPlugin",
+        "Path=path_for_first_plugin",
+        NULL
+    );
+
+    VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
+                              data.user_env, data.plugin_options), SUDO_RC_OK);
+
+    free(data.plugin_options);
+    data.plugin_options = create_str_array(
+        4,
+        "ModulePath=" SRC_DIR "/regress/plugin_conflict.py",
+        "ClassName=ConflictPlugin",
+        "Path=path_for_second_plugin",
+        NULL
+    );
+
+    VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.user_env, data.plugin_options), SUDO_RC_OK);
+
+    python_io->close(0, 0);
+    python_policy->close(0, 0);
+
+    VERIFY_STDOUT(expected_path("check_python_plugins_do_not_affect_each_other.stdout"));
+    VERIFY_STR(data.stderr_str, "");
+    return true;
+}
+
+int
 check_python_plugin_can_be_loaded(const char *python_plugin_path)
 {
     printf("Loading python plugin from '%s'\n", python_plugin_path);
@@ -846,6 +884,8 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_policy_plugin_list());
     RUN_TEST(check_example_policy_plugin_validate_invalidate());
     RUN_TEST(check_policy_plugin_callbacks_are_optional());
+
+    RUN_TEST(check_python_plugins_do_not_affect_each_other());
 
     RUN_TEST(check_example_debugging("plugin@err"));
     RUN_TEST(check_example_debugging("plugin@info"));
