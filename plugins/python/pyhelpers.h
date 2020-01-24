@@ -43,8 +43,7 @@ struct PythonContext
     sudo_printf_t sudo_log;
     sudo_conv_t sudo_conv;
     int open_plugin_count;
-
-    PyObject *py_traceback_module;
+    PyThreadState *py_main_interpreter;
 };
 
 extern struct PythonContext py_ctx;

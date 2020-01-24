@@ -116,13 +116,19 @@ py_create_traceback_string(PyObject *py_traceback)
 
     char* traceback = NULL;
 
-    if (py_ctx.py_traceback_module != NULL) {
-        PyObject *py_traceback_str_list = PyObject_CallMethod(py_ctx.py_traceback_module, "format_tb", "(O)", py_traceback);
+
+    PyObject *py_traceback_module = PyImport_ImportModule("traceback");
+    if (py_traceback_module == NULL) {
+        PyErr_Clear(); // do not care, we just won't show backtrace
+    } else {
+        PyObject *py_traceback_str_list = PyObject_CallMethod(py_traceback_module, "format_tb", "(O)", py_traceback);
 
         if (py_traceback_str_list != NULL) {
             traceback = py_join_str_list(py_traceback_str_list, "");
             Py_DECREF(py_traceback_str_list);
         }
+
+        Py_CLEAR(py_traceback_module);
     }
 
     debug_return_str(traceback ? traceback : strdup(""));

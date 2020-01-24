@@ -242,15 +242,9 @@ _python_plugin_register_plugin_in_py_ctx(void)
 
         PyImport_AppendInittab("sudo", sudo_module_init);
         Py_InitializeEx(0);
-
-        if (!sudo_conf_developer_mode() && sudo_module_register_importblocker() < 0) {
-            py_log_last_error(NULL);
-            debug_return_int(SUDO_RC_ERROR);
-        }
-
-        py_ctx.py_traceback_module = PyImport_ImportModule("traceback");
-        // if getting the traceback module fails, we just don't show tracebacks
-        PyErr_Clear();
+        py_ctx.py_main_interpreter = PyThreadState_Get();
+    } else {
+        PyThreadState_Swap(py_ctx.py_main_interpreter);
     }
 
     ++py_ctx.open_plugin_count;
@@ -266,6 +260,17 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
 
     if (_python_plugin_register_plugin_in_py_ctx() != SUDO_RC_OK)
         goto cleanup;
+
+    plugin_ctx->py_interpreter = Py_NewInterpreter();
+    if (plugin_ctx->py_interpreter == NULL) {
+        goto cleanup;
+    }
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
+
+    if (!sudo_conf_developer_mode() && sudo_module_register_importblocker() < 0) {
+        py_log_last_error(NULL);
+        debug_return_int(SUDO_RC_ERROR);
+    }
 
     const char *module_path = _lookup_value(plugin_options, "ModulePath");
     if (module_path == NULL) {
@@ -321,13 +326,21 @@ python_plugin_deinit(struct PluginContext *plugin_ctx)
     Py_CLEAR(plugin_ctx->py_instance);
     Py_CLEAR(plugin_ctx->py_class);
     Py_CLEAR(plugin_ctx->py_module);
+
+    if (plugin_ctx->py_interpreter != NULL) {
+        sudo_debug_printf(SUDO_DEBUG_TRACE, "deinit python interpreter for plugin\n");
+        Py_EndInterpreter(plugin_ctx->py_interpreter);
+    }
+
     memset(plugin_ctx, 0, sizeof(*plugin_ctx));
 
     if (py_ctx.open_plugin_count <= 0) {
-        Py_CLEAR(py_ctx.py_traceback_module);
-
         if (Py_IsInitialized()) {
             sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python interpreter\n");
+
+            // we need to call finalize from the main interpreter
+            PyThreadState_Swap(py_ctx.py_main_interpreter);
+
             Py_Finalize();
         }
 
@@ -412,6 +425,8 @@ void
 python_plugin_close(struct PluginContext *plugin_ctx, const char *python_callback_name, int exit_status, int error)
 {
     debug_decl(python_plugin_close, PYTHON_DEBUG_CALLBACKS);
+
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
 
     if (!plugin_ctx->call_close) {
         sudo_debug_printf(SUDO_DEBUG_INFO, "Skipping close call, because there was no command run\n");
