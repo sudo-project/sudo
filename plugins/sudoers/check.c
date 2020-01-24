@@ -108,7 +108,7 @@ check_user_interactive(int validated, int mode, struct getpass_closure *closure)
 	/* Construct callback for getpass function. */
 	memset(&cb, 0, sizeof(cb));
 	cb.version = SUDO_CONV_CALLBACK_VERSION;
-	cb.closure = &closure;
+	cb.closure = closure;
 	cb.on_suspend = getpass_suspend;
 	cb.on_resume = getpass_resume;
 	callback = &cb;
