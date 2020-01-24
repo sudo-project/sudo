@@ -83,6 +83,7 @@ void
 python_plugin_group_cleanup(void)
 {
     debug_decl(python_plugin_group_cleanup, PYTHON_DEBUG_CALLBACKS);
+    PyThreadState_Swap(plugin_ctx.py_interpreter);
     python_plugin_deinit(&plugin_ctx);
 }
 
@@ -90,6 +91,8 @@ int
 python_plugin_group_query(const char *user, const char *group, const struct passwd *pwd)
 {
     debug_decl(python_plugin_group_query, PYTHON_DEBUG_CALLBACKS);
+
+    PyThreadState_Swap(plugin_ctx.py_interpreter);
 
     PyObject *py_pwd = py_from_passwd(pwd);
     if (py_pwd == NULL) {

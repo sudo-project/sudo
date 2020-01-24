@@ -22,6 +22,7 @@
 #include "pyhelpers.h"
 
 struct PluginContext {
+    PyThreadState *py_interpreter;
     PyObject *py_module;
     PyObject *py_class;
     PyObject *py_instance;

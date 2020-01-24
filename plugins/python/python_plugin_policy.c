@@ -96,6 +96,8 @@ python_plugin_policy_check(int argc, char * const argv[],
     debug_decl(python_plugin_policy_check, PYTHON_DEBUG_CALLBACKS);
     int rc = SUDO_RC_ERROR;
 
+    PyThreadState_Swap(plugin_ctx.py_interpreter);
+
     *command_info_out = *argv_out = *user_env_out = NULL;
 
     PyObject *py_argv = py_str_array_to_tuple_with_count(argc, argv);
@@ -169,6 +171,8 @@ python_plugin_policy_list(int argc, char * const argv[], int verbose, const char
 {
     debug_decl(python_plugin_policy_list, PYTHON_DEBUG_CALLBACKS);
 
+    PyThreadState_Swap(plugin_ctx.py_interpreter);
+
     PyObject *py_argv = py_str_array_to_tuple_with_count(argc, argv);
     if (py_argv == NULL) {
         sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: Failed to create argv argument for the python call\n", __PRETTY_FUNCTION__);
@@ -187,6 +191,8 @@ python_plugin_policy_version(int verbose)
 {
     debug_decl(python_plugin_policy_version, PYTHON_DEBUG_CALLBACKS);
 
+    PyThreadState_Swap(plugin_ctx.py_interpreter);
+
     if (verbose) {
         py_sudo_log(SUDO_CONV_INFO_MSG, "Python policy plugin API version %d.%d\n", "%d.%d",
                     SUDO_API_VERSION_GET_MAJOR(PY_POLICY_PLUGIN_VERSION),
@@ -200,6 +206,7 @@ int
 python_plugin_policy_validate(void)
 {
     debug_decl(python_plugin_policy_validate, PYTHON_DEBUG_CALLBACKS);
+    PyThreadState_Swap(plugin_ctx.py_interpreter);
     debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(validate), NULL));
 }
 
@@ -207,6 +214,7 @@ void
 python_plugin_policy_invalidate(int remove)
 {
     debug_decl(python_plugin_policy_invalidate, PYTHON_DEBUG_CALLBACKS);
+    PyThreadState_Swap(plugin_ctx.py_interpreter);
     python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(invalidate),
                               Py_BuildValue("(i)", remove));
     debug_return;
@@ -217,6 +225,7 @@ python_plugin_policy_init_session(struct passwd *pwd, char **user_env[])
 {
     debug_decl(python_plugin_policy_init_session, PYTHON_DEBUG_CALLBACKS);
     int rc = SUDO_RC_ERROR;
+    PyThreadState_Swap(plugin_ctx.py_interpreter);
     PyObject *py_pwd = NULL, *py_user_env = NULL, *py_result = NULL;
 
     py_pwd = py_from_passwd(pwd);
