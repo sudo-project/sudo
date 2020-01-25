@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "November 12, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "December 5, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -601,16 +601,29 @@ void (*close)(int exit_status, int error);
 .sp
 The
 \fBclose\fR()
-function is called when the command being run by
+function is called when
 \fBsudo\fR
-finishes.
+is finished, shortly before it exits.
+Starting with API version 1.15,
+\fBclose\fR()
+is called regardless of whether or not a command was actually executed.
+This makes it possible for plugins to perform cleanup even when a
+command was not run.
+It is not possible to tell whether a command was run based solely
+on the arguments passed to the
+\fBclose\fR()
+function.
+To determine if a command was actually run,
+the plugin must keep track of whether or not the
+\fBcheck_policy\fR()
+function returned successfully.
 .sp
 The function arguments are as follows:
 .TP 6n
 exit_status
 The command's exit status, as returned by the
 wait(2)
-system call.
+system call, or zero if no command was run.
 The value of
 \fRexit_status\fR
 is undefined if
@@ -631,7 +644,7 @@ or
 function.
 If the command was successfully executed, the value of
 \fRerror\fR
-is 0.
+is zero.
 .PP
 If no
 \fBclose\fR()
@@ -1266,7 +1279,7 @@ if the plugin does not support credential caching.
 init_session
 .nf
 .RS 6n
-int (*init_session)(struct passwd *pwd, char **user_envp[);
+int (*init_session)(struct passwd *pwd, char **user_env_out[]);
 .RE
 .fi
 .RS 6n
@@ -1297,7 +1310,7 @@ in the password database, otherwise it will be
 \fRNULL\fR.
 .sp
 The
-\fIuser_env\fR
+\fIuser_env_out\fR
 argument points to the environment the command will
 run in, in the form of a
 \fRNULL\fR-terminated
@@ -1312,12 +1325,12 @@ If the
 \fBinit_session\fR()
 function needs to modify the user environment, it should update the
 pointer stored in
-\fIuser_env\fR.
+\fIuser_env_out\fR.
 The expected use case is to merge the contents of the PAM environment
 (if any) with the contents of
-\fIuser_env\fR.
+\fIuser_env_out\fR.
 NOTE: the
-\fIuser_env\fR
+\fIuser_env_out\fR
 parameter is only available
 starting with API version 1.2.
 A plugin
@@ -1326,7 +1339,7 @@ check the API
 version specified by the
 \fBsudo\fR
 front end before using
-\fIuser_env\fR.
+\fIuser_env_out\fR.
 Failure to do so may result in a crash.
 .sp
 Returns 1 on success, 0 on failure and \-1 on error.
@@ -1815,16 +1828,21 @@ void (*close)(int exit_status, int error);
 .sp
 The
 \fBclose\fR()
-function is called when the command being run by
+function is called when
 \fBsudo\fR
-finishes.
+is finished, shortly before it exits.
+Starting with API version 1.15,
+\fBclose\fR()
+is called regardless of whether or not a command was actually executed.
+This makes it possible for plugins to perform cleanup even when a
+command was not run.
 .sp
 The function arguments are as follows:
 .TP 6n
 exit_status
 The command's exit status, as returned by the
 wait(2)
-system call.
+system call, or zero if no command was run.
 The value of
 \fRexit_status\fR
 is undefined if
@@ -1840,7 +1858,7 @@ execve(2)
 system call.
 If the command was successfully executed, the value of
 \fRerror\fR
-is 0.
+is zero.
 .PD 0
 .PP
 .RE
@@ -2441,7 +2459,8 @@ struct sudo_plugin_event {
         sudo_plugin_ev_callback_t callback, void *closure);
     int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
     int (*del)(struct sudo_plugin_event *pev);
-    int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+    int (*pending)(struct sudo_plugin_event *pev, int events,
+	struct timespec *ts);
     int (*fd)(struct sudo_plugin_event *pev);
     void (*setbase)(struct sudo_plugin_event *pev, void *base);
     void (*loopbreak)(struct sudo_plugin_event *pev);
@@ -2616,25 +2635,30 @@ The
 function returns 1 on success, and \-1 if a error occurred.
 .RE
 .TP 6n
-\fBtimeleft\fR()
+\fBpending\fR()
 .nf
 .RS 6n
-int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+int (*pending)(struct sudo_plugin_event *pev, int events, struct timespec *ts);
 .RE
 .fi
 .RS 6n
 .sp
 The
-\fBtimeleft\fR()
-function can be used to determine how much time remains in an event's
-timeout, if one was specified when the event was added.
+\fBpending\fR()
+function can be used to determine whether one or more events is pending.
 The
+\fIevents\fR
+argument specifies which events to check for.
+See the
+\fBset\fR()
+function for a list of valid event types.
+If
+\fRSUDO_PLUGIN_EV_TIMEOUT\fR
+is specified in
+\fRevents\fR,
+the event has an associated timeout and the
 \fIts\fR
-pointer is filled in with the remaining time.
-.sp
-The
-\fBtimeleft\fR()
-function returns 1 on success, and \-1 if the event has no associated timeout.
+pointer is non-NULL, it will be filled in with the remaining time.
 .RE
 .TP 6n
 \fBfd\fR()
@@ -2783,7 +2807,7 @@ struct sudo_conv_message {
     const char *msg;
 };
 
-#define SUDO_CONV_REPL_MAX      255
+#define SUDO_CONV_REPL_MAX      1023
 
 struct sudo_conv_reply {
     char *reply;
@@ -3339,6 +3363,16 @@ Version 1.15 (sudo 1.9.0)
 The
 \fIevent_alloc\fR
 field was added to the policy_plugin and io_plugin structs.
+.sp
+The
+\fBclose\fR()
+function is now is called regardless of whether or not a command
+was actually executed.
+This makes it possible for plugins to perform cleanup even when a
+command was not run.
+.sp
+\fRSUDO_CONV_REPL_MAX\fR
+has increased from 255 to 1023 bytes.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

@@ -59,7 +59,7 @@ preload_dso(char *envp[], const char *dso_file)
 # else
     const bool enabled = true;
 # endif
-    debug_decl(preload_dso, SUDO_DEBUG_UTIL)
+    debug_decl(preload_dso, SUDO_DEBUG_UTIL);
 
     /*
      * Preload a DSO file.  For a list of LD_PRELOAD-alikes, see
@@ -161,7 +161,7 @@ preload_dso(char *envp[], const char *dso_file)
 char **
 disable_execute(char *envp[], const char *dso)
 {
-    debug_decl(disable_execute, SUDO_DEBUG_UTIL)
+    debug_decl(disable_execute, SUDO_DEBUG_UTIL);
 
 #ifdef HAVE_PRIV_SET
     /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
@@ -188,7 +188,7 @@ disable_execute(char *envp[], const char *dso)
 int
 sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec)
 {
-    debug_decl(sudo_execve, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_execve, SUDO_DEBUG_UTIL);
 
     sudo_debug_execve(SUDO_DEBUG_INFO, path, argv, envp);
 

@@ -68,7 +68,7 @@ sudo_aix_authtype(void)
     bool in_stanza = false;
     int authtype = AIX_AUTH_UNKNOWN;
     FILE *fp;
-    debug_decl(sudo_aix_authtype, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_aix_authtype, SUDOERS_DEBUG_AUTH);
 
     if ((fp = fopen("/etc/security/login.cfg", "r")) == NULL)
 	debug_return_int(AIX_AUTH_UNKNOWN);
@@ -136,7 +136,7 @@ sudo_aix_authtype(void)
 int
 sudo_aix_init(struct passwd *pw, sudo_auth *auth)
 {
-    debug_decl(sudo_aix_init, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_aix_init, SUDOERS_DEBUG_AUTH);
 
 #ifdef HAVE_PAM
     /* Check auth_type in /etc/security/login.cfg. */
@@ -156,7 +156,7 @@ sudo_aix_valid_message(const char *message)
 {
     const char *cp;
     const char badpass_msgid[] = "3004-300";
-    debug_decl(sudo_aix_valid_message, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_aix_valid_message, SUDOERS_DEBUG_AUTH);
 
     if (message == NULL || message[0] == '\0')
 	debug_return_bool(false);
@@ -188,7 +188,7 @@ sudo_aix_change_password(const char *user)
     bool ret = false;
     sigset_t mask;
     int status;
-    debug_decl(sudo_aix_change_password, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_aix_change_password, SUDOERS_DEBUG_AUTH);
 
     /* Set SIGCHLD handler to default since we call waitpid() below. */
     memset(&sa, 0, sizeof(sa));                
@@ -239,7 +239,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
     char *pass, *message = NULL;
     int result = 1, reenter = 0;
     int ret = AUTH_SUCCESS;
-    debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH);
 
     do {
 	pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
@@ -302,7 +302,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 int
 sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth)
 {
-    debug_decl(sudo_aix_cleanup, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_aix_cleanup, SUDOERS_DEBUG_AUTH);
 
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
     if (sudo_unsetenv("AUTHSTATE") == -1)

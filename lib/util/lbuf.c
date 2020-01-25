@@ -43,7 +43,7 @@ void
 sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
     int indent, const char *continuation, int cols)
 {
-    debug_decl(sudo_lbuf_init, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_init, SUDO_DEBUG_UTIL);
 
     lbuf->output = output;
     lbuf->continuation = continuation;
@@ -60,7 +60,7 @@ sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
 void
 sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
 {
-    debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL);
 
     free(lbuf->buf);
     lbuf->buf = NULL;
@@ -71,7 +71,7 @@ sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
 static bool
 sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 {
-    debug_decl(sudo_lbuf_expand, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_expand, SUDO_DEBUG_UTIL);
 
     if (lbuf->len + extra + 1 >= lbuf->size) {
 	char *new_buf;
@@ -103,7 +103,7 @@ sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *
     bool ret = false;
     char *cp, *s;
     va_list ap;
-    debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))
 	debug_return_bool(false);
@@ -161,7 +161,7 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
     bool ret = false;
     va_list ap;
     char *s;
-    debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))
 	debug_return_bool(false);
@@ -203,7 +203,7 @@ sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
     int i, have, contlen = 0;
     int indent = lbuf->indent;
     bool is_comment = false;
-    debug_decl(sudo_lbuf_println, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_println, SUDO_DEBUG_UTIL);
 
     /* Comment lines don't use continuation and only indent is for "# " */
     if (line[0] == '#' && isblank((unsigned char)line[1])) {
@@ -276,7 +276,7 @@ sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
 {
     char *cp, *ep;
     int len;
-    debug_decl(sudo_lbuf_print, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_print, SUDO_DEBUG_UTIL);
 
     if (lbuf->buf == NULL || lbuf->len == 0)
 	goto done;

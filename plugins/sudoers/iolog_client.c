@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <arpa/inet.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -45,20 +46,32 @@
 #include <pwd.h>
 #include <grp.h>
 
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+# include <openssl/x509v3.h>
+#endif /* HAVE_OPENSSL */
+
+#define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
+
 #include "sudoers.h"
 #include "sudo_event.h"
 #include "iolog_plugin.h"
+#include "hostcheck.h"
 
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
 #endif
+
+/* Server callback may redirect to client callback for TLS. */
+static void client_msg_cb(int fd, int what, void *v);
 
 static void
 connect_cb(int sock, int what, void *v)
 {
     int optval, ret, *errnump = v;
     socklen_t optlen = sizeof(optval);
-    debug_decl(connect_cb, SUDOERS_DEBUG_UTIL)
+    debug_decl(connect_cb, SUDOERS_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
 	*errnump = ETIMEDOUT;
@@ -80,7 +93,7 @@ timed_connect(int sock, const struct sockaddr *addr, socklen_t addrlen,
     struct sudo_event_base *evbase = NULL;
     struct sudo_event *connect_event = NULL;
     int ret, errnum = 0;
-    debug_decl(timed_connect, SUDOERS_DEBUG_UTIL)
+    debug_decl(timed_connect, SUDOERS_DEBUG_UTIL);
 
     ret = connect(sock, addr, addrlen);
     if (ret == -1 && errno == EINPROGRESS) {
@@ -118,13 +131,13 @@ done:
  * Returns open socket or -1 on error.
  */
 static int
-connect_server(const char *host, const char *port, struct timespec *timo,
-    const char **reason)
+connect_server(const char *host, const char *port, bool tcp_keepalive,
+    struct timespec *timo, const char **reason)
 {
     struct addrinfo hints, *res, *res0;
     const char *cause = NULL;
     int error, sock = -1;
-    debug_decl(connect_server, SUDOERS_DEBUG_UTIL)
+    debug_decl(connect_server, SUDOERS_DEBUG_UTIL);
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
@@ -153,6 +166,20 @@ connect_server(const char *host, const char *port, struct timespec *timo,
 	    sock = -1;
 	    continue;
 	}
+
+    if (tcp_keepalive) {
+        int keepalive = 1;
+        if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
+            sizeof(keepalive)) == -1) {
+            cause = "setsockopt(SO_KEEPALIVE)";
+            save_errno = errno;
+            close(sock);
+            errno = save_errno;
+            sock = -1;
+            continue;
+        }
+    }
+
 	if (timed_connect(sock, res->ai_addr, res->ai_addrlen, timo) == -1) {
 	    cause = "connect";
 	    save_errno = errno;
@@ -176,13 +203,14 @@ connect_server(const char *host, const char *port, struct timespec *timo,
  * Returns a socket with O_NONBLOCK and close-on-exec flags set.
  */
 int
-log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
+log_server_connect(struct sudoers_str_list *servers, bool tcp_keepalive,
+    struct timespec *timo, struct sudoers_string **connected_server)
 {
     struct sudoers_string *server;
     char *copy, *host, *port;
     const char *cause = NULL;
     int sock = -1;
-    debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL)
+    debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL);
 
     STAILQ_FOREACH(server, servers, entries) {
 	copy = strdup(server->str);
@@ -190,7 +218,7 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
 	    free(copy);
 	    continue;
 	}
-	sock = connect_server(host, port, timo, &cause);
+	sock = connect_server(host, port, tcp_keepalive, timo, &cause);
 	free(copy);
 	if (sock != -1) {
 	    int flags = fcntl(sock, F_GETFL, 0);
@@ -199,6 +227,8 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
 		close(sock);
 		sock = -1;
 	    }
+        /* this is the server we successfully connected to */
+        *connected_server = server;
 	    break;
 	}
     }
@@ -208,6 +238,270 @@ log_server_connect(struct sudoers_str_list *servers, struct timespec *timo)
     debug_return_int(sock);
 }
 
+#if defined(HAVE_OPENSSL)
+static int
+verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
+{
+    HostnameValidationResult result;
+    struct client_closure *closure;
+    SSL *ssl;
+    X509 *current_cert;
+    X509 *peer_cert;
+    debug_decl(verify_peer_identity, SUDOERS_DEBUG_UTIL);
+
+    /* if pre-verification of the cert failed, just propagate that result back */
+    if (preverify_ok != 1) {
+        debug_return_int(0);
+    }
+
+    /* since this callback is called for each cert in the chain,
+     * check that current cert is the peer's certificate
+     */
+    current_cert = X509_STORE_CTX_get_current_cert(ctx);
+    peer_cert = X509_STORE_CTX_get0_cert(ctx);
+
+    if (current_cert != peer_cert) {
+        debug_return_int(1);
+    }
+
+    /* read out the attached object (closure) from the ssl connection object */
+    ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+    closure = (struct client_closure*)SSL_get_ex_data(ssl, 1);
+
+    result = validate_hostname(peer_cert, closure->server_name->str,
+	closure->server_ip, 0);
+
+    switch(result)
+    {
+        case MatchFound:
+            debug_return_int(1);
+        default:
+            debug_return_int(0);
+    }
+}
+
+static bool
+tls_init(struct client_closure *closure, bool verify, bool cert_required)
+{
+    debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN);
+
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+    
+    /* create the ssl context */
+    if ((closure->ssl_ctx = SSL_CTX_new(TLS_client_method())) == NULL) {
+        sudo_warnx(U_("Creation of new SSL_CTX object failed: %s"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+#ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
+    if (!SSL_CTX_set_min_proto_version(closure->ssl_ctx, TLS1_2_VERSION)) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+            "unable to restrict min. protocol version: %s",
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+#else
+    SSL_CTX_set_options(closure->ssl_ctx,
+        SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1);
+#endif
+
+
+    /* if server explicitly requests it, turn on server cert verification
+       during the handshake. Hostname matching will be done in a custom
+       callback (verify_peer_identity).
+     */
+    if (verify) {
+        if (closure->log_details->ca_bundle == NULL) {
+            sudo_warnx(U_("CA bundle file is not set in sudoers"));
+            goto bad;
+        }
+
+        /* sets the location of the CA bundle file for verification purposes */
+        if (SSL_CTX_load_verify_locations(closure->ssl_ctx,
+            closure->log_details->ca_bundle, NULL) <= 0) {
+            sudo_warnx(U_("Calling SSL_CTX_load_verify_locations() failed: %s"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+
+        SSL_CTX_set_verify(closure->ssl_ctx, SSL_VERIFY_PEER, verify_peer_identity);
+    }
+
+    /* if the server requests client authentication with signed certificate */
+    if (cert_required) {
+        /* if no certificate file is set in sudoers */
+        if (closure->log_details->cert_file == NULL) {
+            sudo_warnx(U_("Signed certificate file is not set in sudoers"));
+            goto bad;
+        }
+        /* load client cert file */
+        if (!SSL_CTX_use_certificate_chain_file(closure->ssl_ctx,
+            closure->log_details->cert_file)) {
+            sudo_warnx(U_("Unable to load cert into the ssl context: %s"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+        /* no explicit key file is set, try to use the cert file */
+        if (closure->log_details->key_file == NULL) {
+            closure->log_details->key_file = closure->log_details->cert_file;
+        }
+        /* load corresponding private key file */
+        if (!SSL_CTX_use_PrivateKey_file(closure->ssl_ctx,
+            closure->log_details->key_file, X509_FILETYPE_PEM)) {
+            sudo_warnx(U_("Unable to load private key into the ssl context: %s"),
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
+    }
+    /* create the ssl object for encrypted communication */
+    if ((closure->ssl = SSL_new(closure->ssl_ctx)) == NULL) {
+        sudo_warnx(U_("Unable to allocate ssl object: %s"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+    /* attach the closure socket to the ssl object */
+    if (SSL_set_fd(closure->ssl, closure->sock) <= 0) {
+        sudo_warnx(U_("Unable to attach socket to the ssl object: %s"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    /* attach the closure object to the ssl connection object to make it
+       available during hostname matching
+     */
+    if (SSL_set_ex_data(closure->ssl, 1, closure) <= 0) {
+        sudo_warnx(U_("Unable to attach user data to the ssl object: %s"),
+            ERR_error_string(ERR_get_error(), NULL));
+        goto bad;
+    }
+
+    closure->tls = true;
+
+    debug_return_bool(true);
+
+bad:
+    SSL_free(closure->ssl);
+    SSL_CTX_free(closure->ssl_ctx);
+    debug_return_bool(false);
+}
+
+struct tls_connect_closure {
+    bool tls_conn_status;
+    SSL *ssl;
+    struct sudo_event_base *evbase;
+    struct sudo_event *tls_connect_ev;
+};
+
+static void
+tls_connect_cb(int sock, int what, void *v)
+{
+    struct tls_connect_closure *closure = v;
+    struct timespec timeo = { 10, 0 };
+    int tls_con, err;
+    debug_decl(tls_connect_cb, SUDOERS_DEBUG_UTIL);
+
+    if (what == SUDO_PLUGIN_EV_TIMEOUT) {
+        sudo_warnx(U_("TLS handshake timeout occurred"));
+        goto bad;
+    }
+
+    tls_con = SSL_connect(closure->ssl);
+
+    if (tls_con == 1) {
+        closure->tls_conn_status = true;
+    } else {
+        switch ((err = SSL_get_error(closure->ssl, tls_con))) {
+            /* TLS connect successful */
+            case SSL_ERROR_NONE:
+                closure->tls_conn_status = true;
+                break;
+	    /* TLS handshake is not finished, reschedule event */
+            case SSL_ERROR_WANT_READ:
+		sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+		    "SSL_connect returns SSL_ERROR_WANT_READ");
+		if (what != SUDO_EV_READ) {
+		    if (sudo_ev_set(closure->tls_connect_ev, sock,
+			    SUDO_EV_READ, tls_connect_cb, closure) == -1) {
+			sudo_warnx(U_("unable to set event"));
+			goto bad;
+		    }
+		}
+		if (sudo_ev_add(closure->evbase, closure->tls_connect_ev,
+			&timeo, false) == -1) {
+                    sudo_warnx(U_("unable to add event to queue"));
+		    goto bad;
+                }
+		break;
+            case SSL_ERROR_WANT_WRITE:
+		sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+		    "SSL_connect returns SSL_ERROR_WANT_WRITE");
+		if (what != SUDO_EV_WRITE) {
+		    if (sudo_ev_set(closure->tls_connect_ev, sock,
+			    SUDO_EV_WRITE, tls_connect_cb, closure) == -1) {
+			sudo_warnx(U_("unable to set event"));
+			goto bad;
+		    }
+		}
+		if (sudo_ev_add(closure->evbase, closure->tls_connect_ev,
+			&timeo, false) == -1) {
+                    sudo_warnx(U_("unable to add event to queue"));
+		    goto bad;
+                }
+                break;
+            default:
+                sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s"),
+                    err, ERR_error_string(ERR_get_error(), NULL));
+                goto bad;
+        }
+    }
+
+    debug_return;
+
+bad:
+    /* Break out of tls connect event loop with an error. */
+    sudo_ev_loopbreak(closure->evbase);
+
+    debug_return;
+}
+
+static bool
+tls_timed_connect(int sock, SSL *ssl, struct timespec *timo)
+{
+    struct tls_connect_closure closure;
+    debug_decl(tls_timed_connect, SUDOERS_DEBUG_UTIL);
+
+    memset(&closure, 0, sizeof(closure));
+    closure.ssl = ssl;
+    closure.evbase = sudo_ev_base_alloc();
+    closure.tls_connect_ev = sudo_ev_alloc(sock, SUDO_PLUGIN_EV_WRITE,
+	tls_connect_cb, &closure);
+
+    if (closure.evbase == NULL || closure.tls_connect_ev == NULL) {
+        sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+
+    if (sudo_ev_add(closure.evbase, closure.tls_connect_ev, timo, false) == -1) {
+	sudo_warnx(U_("unable to add event to queue"));
+	goto done;
+    }
+
+    if (sudo_ev_dispatch(closure.evbase) == -1 || sudo_ev_got_break(closure.evbase)) {
+	sudo_warnx(U_("error in event loop"));
+	goto done;
+    }
+
+done:
+    if (closure.tls_connect_ev != NULL)
+	sudo_ev_free(closure.tls_connect_ev);
+    sudo_ev_base_free(closure.evbase);
+
+    debug_return_bool(closure.tls_conn_status);
+}
+#endif /* HAVE_OPENSSL */
+
 /*
  * Free client closure and contents and initialize to unused state as
  * per CLIENT_CLOSURE_INITIALIZER.  Log details are not freed.
@@ -216,7 +510,7 @@ void
 client_closure_free(struct client_closure *closure)
 {
     struct connection_buffer *buf;
-    debug_decl(client_closure_free, SUDOERS_DEBUG_UTIL)
+    debug_decl(client_closure_free, SUDOERS_DEBUG_UTIL);
 
     if (closure->sock != -1) {
 	close(closure->sock);
@@ -267,7 +561,7 @@ static struct connection_buffer *
 get_free_buf(struct client_closure *closure)
 {
     struct connection_buffer *buf;
-    debug_decl(get_free_buf, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_free_buf, SUDOERS_DEBUG_UTIL);
 
     buf = TAILQ_FIRST(&closure->free_bufs);
     if (buf != NULL)
@@ -290,7 +584,7 @@ fmt_client_message(struct client_closure *closure, ClientMessage *msg)
     uint32_t msg_len;
     bool ret = false;
     size_t len;
-    debug_decl(fmt_client_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_client_message, SUDOERS_DEBUG_UTIL);
 
     if ((buf = get_free_buf(closure)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -299,7 +593,7 @@ fmt_client_message(struct client_closure *closure, ClientMessage *msg)
 
     len = client_message__get_packed_size(msg);
     if (len > MESSAGE_SIZE_MAX) {
-    	sudo_warnx(U_("client message too large: %zu\n"), len);
+    	sudo_warnx(U_("client message too large: %zu"), len);
         goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
@@ -350,7 +644,7 @@ fmt_accept_message(struct client_closure *closure)
     size_t info_msgs_size, n;
     struct timespec now;
     bool ret = false;
-    debug_decl(fmt_accept_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_accept_message, SUDOERS_DEBUG_UTIL);
 
     /*
      * Fill in AcceptMessage and add it to ClientMessage.
@@ -376,8 +670,10 @@ fmt_accept_message(struct client_closure *closure)
     /* XXX - realloc as needed instead of preallocating */
     info_msgs_size = 22;
     accept_msg.info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
-    if (accept_msg.info_msgs == NULL)
+    if (accept_msg.info_msgs == NULL) {
+	info_msgs_size = 0;
 	goto done;
+    }
     for (n = 0; n < info_msgs_size; n++) {
 	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
 	if (accept_msg.info_msgs[n] == NULL) {
@@ -505,7 +801,7 @@ fmt_restart_message(struct client_closure *closure)
     RestartMessage restart_msg = RESTART_MESSAGE__INIT;
     TimeSpec tv = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_restart_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_restart_message, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: sending RestartMessage, [%lld, %ld]", __func__,
@@ -539,7 +835,7 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
     char signame[SIG2STR_MAX];
     bool ret = false;
     struct timespec run_time;
-    debug_decl(fmt_exit_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_exit_message, SUDOERS_DEBUG_UTIL);
 
     if (sudo_gettime_awake(&run_time) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
@@ -607,7 +903,7 @@ fmt_io_buf(struct client_closure *closure, int type, const char *buf,
     IoBuffer iobuf_msg = IO_BUFFER__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_io_buf, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_io_buf, SUDOERS_DEBUG_UTIL);
 
     /* Fill in IoBuffer. */
     ts.tv_sec = delay->tv_sec;
@@ -645,7 +941,7 @@ fmt_winsize(struct client_closure *closure, unsigned int lines,
     ChangeWindowSize winsize_msg = CHANGE_WINDOW_SIZE__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_winsize, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_winsize, SUDOERS_DEBUG_UTIL);
 
     /* Fill in ChangeWindowSize message. */
     ts.tv_sec = delay->tv_sec;
@@ -681,7 +977,7 @@ fmt_suspend(struct client_closure *closure, const char *signame, struct timespec
     CommandSuspend suspend_msg = COMMAND_SUSPEND__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
-    debug_decl(fmt_suspend, SUDOERS_DEBUG_UTIL)
+    debug_decl(fmt_suspend, SUDOERS_DEBUG_UTIL);
 
     /* Fill in CommandSuspend message. */
     ts.tv_sec = delay->tv_sec;
@@ -712,7 +1008,7 @@ done:
 static bool
 client_message_completion(struct client_closure *closure)
 {
-    debug_decl(client_message_completion, SUDOERS_DEBUG_UTIL)
+    debug_decl(client_message_completion, SUDOERS_DEBUG_UTIL);
 
     switch (closure->state) {
     case SEND_ACCEPT:
@@ -749,7 +1045,7 @@ static bool
 handle_server_hello(ServerHello *msg, struct client_closure *closure)
 {
     size_t n;
-    debug_decl(handle_server_hello, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_server_hello, SUDOERS_DEBUG_UTIL);
 
     if (closure->state != RECV_HELLO) {
 	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
@@ -761,6 +1057,21 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	sudo_warnx("%s", U_("invalid ServerHello"));
 	debug_return_bool(false);
     }
+
+#if defined(HAVE_OPENSSL)
+    /* if server requested TLS */
+    if (msg->tls) {
+        if (!tls_init(closure, msg->tls_server_auth, msg->tls_reqcert)) {
+            sudo_warnx(U_("TLS initialization was unsuccessful"));
+            debug_return_bool(false);
+        }
+        if (!tls_timed_connect(closure->sock, closure->ssl,
+		&closure->log_details->server_timeout)) {
+            sudo_warnx(U_("TLS handshake was unsuccessful"));
+            debug_return_bool(false);
+        }
+    }
+#endif /* HAVE_OPENSSL */
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: server ID: %s",
 	__func__, msg->server_id);
@@ -793,7 +1104,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 static bool
 handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 {
-    debug_decl(handle_commit_point, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_commit_point, SUDOERS_DEBUG_UTIL);
 
     /* Only valid after we have sent an IO buffer. */
     if (closure->state < SEND_IO) {
@@ -824,7 +1135,7 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 static bool
 handle_log_id(char *id, struct client_closure *closure)
 {
-    debug_decl(handle_log_id, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_log_id, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: remote log ID: %s", __func__, id);
     if ((closure->iolog_id = strdup(id)) == NULL)
@@ -839,7 +1150,7 @@ handle_log_id(char *id, struct client_closure *closure)
 static bool
 handle_server_error(char *errmsg, struct client_closure *closure)
 {
-    debug_decl(handle_server_error, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_server_error, SUDOERS_DEBUG_UTIL);
 
     sudo_warnx(U_("error message received from server: %s"), errmsg);
     debug_return_bool(false);
@@ -852,7 +1163,7 @@ handle_server_error(char *errmsg, struct client_closure *closure)
 static bool
 handle_server_abort(char *errmsg, struct client_closure *closure)
 {
-    debug_decl(handle_server_abort, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_server_abort, SUDOERS_DEBUG_UTIL);
 
     sudo_warnx(U_("abort message received from server: %s"), errmsg);
     debug_return_bool(false);
@@ -868,7 +1179,7 @@ handle_server_message(uint8_t *buf, size_t len,
 {
     ServerMessage *msg;
     bool ret = false;
-    debug_decl(handle_server_message, SUDOERS_DEBUG_UTIL)
+    debug_decl(handle_server_message, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
@@ -923,7 +1234,7 @@ static bool
 expand_buf(struct connection_buffer *buf, unsigned int needed)
 {
     void *newdata;
-    debug_decl(expand_buf, SUDO_DEBUG_UTIL)
+    debug_decl(expand_buf, SUDOERS_DEBUG_UTIL);
 
     if (buf->size < needed) {
 	/* Expand buffer. */
@@ -960,7 +1271,14 @@ server_msg_cb(int fd, int what, void *v)
     struct connection_buffer *buf = &closure->read_buf;
     ssize_t nread;
     uint32_t msg_len;
-    debug_decl(server_msg_cb, SUDOERS_DEBUG_UTIL)
+    debug_decl(server_msg_cb, SUDOERS_DEBUG_UTIL);
+
+    /* For TLS we may need to read as part of SSL_write(). */
+    if (closure->write_instead_of_read) {
+	closure->write_instead_of_read = false;
+        client_msg_cb(fd, what, v);
+        debug_return;
+    }
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out reading from server",
@@ -969,8 +1287,51 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
+#if defined(HAVE_OPENSSL)
+    if (closure->tls && closure->state != RECV_HELLO) {
+        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size - buf->len);
+        if (nread <= 0) {
+            int err = SSL_get_error(closure->ssl, nread);
+            switch (err) {
+		case SSL_ERROR_ZERO_RETURN:
+		    /* ssl connection shutdown cleanly */
+		    nread = 0;
+		    break;
+                case SSL_ERROR_WANT_READ:
+		    /* ssl wants to read more, read event is always active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_read returns SSL_ERROR_WANT_READ");
+                    debug_return;
+                case SSL_ERROR_WANT_WRITE:
+                    /* ssl wants to write, so schedule the write handler */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_read returns SSL_ERROR_WANT_WRITE");
+		    if (!closure->write_ev->pending(closure->write_ev,
+			    SUDO_PLUGIN_EV_WRITE, NULL)) {
+			/* Enable a temporary write event. */
+			if (closure->write_ev->add(closure->write_ev, NULL) == -1) {
+			    sudo_warn(U_("unable to add event to queue"));
+			    goto bad;
+			}
+			closure->temporary_write_event = true;
+		    }
+		    closure->write_instead_of_read = true;
+                    debug_return;
+                default:
+                    sudo_warnx(U_("SSL_read failed: ssl_error=%d, stack=%s"),
+                        err,
+                        ERR_error_string(ERR_get_error(), NULL));
+                    goto bad;
+            }
+        }
+    }
+    else {
+        nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+    }
 
+#else
     nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+#endif /* HAVE_OPENSSL */
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
 	__func__, nread);
     switch (nread) {
@@ -993,7 +1354,7 @@ server_msg_cb(int fd, int what, void *v)
 	msg_len = ntohl(msg_len);
 
 	if (msg_len > MESSAGE_SIZE_MAX) {
-	    sudo_warnx(U_("server message too large: %u\n"), msg_len);
+	    sudo_warnx(U_("server message too large: %u"), msg_len);
 	    goto bad;
 	}
 
@@ -1036,7 +1397,19 @@ client_msg_cb(int fd, int what, void *v)
     struct client_closure *closure = v;
     struct connection_buffer *buf;
     ssize_t nwritten;
-    debug_decl(client_msg_cb, SUDOERS_DEBUG_UTIL)
+    debug_decl(client_msg_cb, SUDOERS_DEBUG_UTIL);
+
+    /* For TLS we may need to write as part of SSL_read(). */
+    if (closure->read_instead_of_write) {
+	closure->read_instead_of_write = false;
+	/* Delete write event if it was only due to SSL_read(). */
+	if (closure->temporary_write_event) {
+            closure->temporary_write_event = false;
+	    closure->write_ev->del(closure->write_ev);
+	}
+	server_msg_cb(fd, what, v);
+	debug_return;
+    }
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out writiing to server",
@@ -1052,7 +1425,36 @@ client_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO,
     	"%s: sending %u bytes to server", __func__, buf->len - buf->off);
 
+#if defined(HAVE_OPENSSL)
+    if (closure->tls) {
+        nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
+        if (nwritten <= 0) {
+            int err = SSL_get_error(closure->ssl, nwritten);
+            switch (err) {
+                case SSL_ERROR_WANT_READ:
+		    /* ssl wants to read, read event always active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_write returns SSL_ERROR_WANT_READ");
+		    closure->write_instead_of_read = true;
+                    debug_return;
+                case SSL_ERROR_WANT_WRITE:
+		    /* ssl wants to write more, write event remains active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_write returns SSL_ERROR_WANT_WRITE");
+                    debug_return;
+                default:
+                    sudo_warnx(U_("SSL_write failed: ssl_error=%d, stack=%s"),
+                        err, ERR_error_string(ERR_get_error(), NULL));
+                    goto bad;
+            }
+        }
+    } else {
+        nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+    }
+#else
     nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+#endif /* HAVE_OPENSSL */
+
     if (nwritten == -1) {
 	sudo_warn("send");
 	goto bad;
@@ -1096,9 +1498,18 @@ bad:
  */
 bool
 client_closure_fill(struct client_closure *closure, int sock,
-    struct iolog_details *details, struct io_plugin *sudoers_io)
+    const struct sudoers_string *host, struct iolog_details *details,
+    struct io_plugin *sudoers_io)
 {
-    debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL)
+    union {
+	struct sockaddr sa;
+	struct sockaddr_in sin;
+#ifdef HAVE_STRUCT_IN6_ADDR
+	struct sockaddr_in6 sin6;
+#endif
+    } addr;
+    socklen_t addr_len = sizeof(addr);
+    debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL);
 
     closure->sock = -1;
     closure->state = RECV_HELLO;
@@ -1129,39 +1540,99 @@ client_closure_fill(struct client_closure *closure, int sock,
 
     closure->log_details = details;
 
+    /* Save the name and IP of the server we are successfully connected to. */
+    closure->server_name = host;
+    if (getpeername(sock, (struct sockaddr *)&addr, &addr_len) == -1) {
+	sudo_warn("getpeername");
+	goto bad;
+    }
+    switch (addr.sa.sa_family) {
+    case AF_INET:
+	if (inet_ntop(AF_INET, &addr.sin.sin_addr, closure->server_ip,
+		sizeof(closure->server_ip)) == NULL) {
+	    sudo_warnx(U_("unable to get remote IP addr"));
+	    goto bad;
+	}
+	break;
+#ifdef HAVE_STRUCT_IN6_ADDR
+    case AF_INET6:
+	if (inet_ntop(AF_INET6, &addr.sin6.sin6_addr, closure->server_ip,
+		sizeof(closure->server_ip)) == NULL) {
+	    sudo_warnx(U_("unable to get remote IP addr"));
+	    goto bad;
+	}
+	break;
+#endif
+    default:
+	sudo_warnx(U_("unknown address family: %d"), (int)addr.sa.sa_family);
+	goto bad;
+    }
+
     /* Store sock last to avoid double-close in parent on error. */
     closure->sock = sock;
 
-    debug_return_ptr(closure);
+    debug_return_bool(true);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+bad:
     client_closure_free(closure);
-    debug_return_ptr(NULL);
+    debug_return_bool(false);
 }
 
 /*
- * Custom event loop called from the plugin close function.
- * We cannot use the main sudo event loop as it has already exited.
+ * Send ExitMessage, wait for final commit message and free closure.
  */
 bool
-client_loop(struct client_closure *closure)
+client_close(struct client_closure *closure, int exit_status, int error)
 {
-    struct sudo_event_base *evbase;
-    debug_decl(client_loop, SUDOERS_DEBUG_UTIL)
+    struct sudo_event_base *evbase = NULL;
+    bool ret = false;
+    debug_decl(client_close, SUDOERS_DEBUG_UTIL);
 
-    /* Create private event base and reparent the read/write events. */
+    if (closure->disabled)
+	goto done;
+
+    /* Format and append an ExitMessage to the write queue. */
+    if (!fmt_exit_message(closure, exit_status, error))
+	goto done;
+
+    /*
+     * Create private event base and reparent the read/write events.
+     * We cannot use the main sudo event loop as it has already exited.
+     */
     if ((evbase = sudo_ev_base_alloc()) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_bool(false);
+	goto done;
     }
+
+    /* Enable read event to receive server messages. */
     closure->read_ev->setbase(closure->read_ev, evbase);
-    closure->write_ev->setbase(closure->read_ev, evbase);
+    if (closure->read_ev->add(closure->read_ev,
+	    &closure->log_details->server_timeout) == -1) {
+	sudo_warn(U_("unable to add event to queue"));
+	goto done;
+    }
+
+    /* Enable the write event to write the ExitMessage. */
+    closure->write_ev->setbase(closure->write_ev, evbase);
+    if (closure->write_ev->add(closure->write_ev,
+	    &closure->log_details->server_timeout) == -1) {
+	sudo_warn(U_("unable to add event to queue"));
+	goto done;
+    }
 
     /* Loop until queues are flushed and final commit point received. */
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"flushing buffers and waiting for final commit point");
-    sudo_ev_dispatch(evbase);
-    sudo_ev_base_free(evbase);
+    if (sudo_ev_dispatch(evbase) == -1 || sudo_ev_got_break(evbase)) {
+	sudo_warnx(U_("error in event loop"));
+	goto done;
+    }
 
-    debug_return_bool(true);
+    ret = true;
+
+done:
+    sudo_ev_base_free(evbase);
+    client_closure_free(closure);
+    debug_return_bool(ret);
 }

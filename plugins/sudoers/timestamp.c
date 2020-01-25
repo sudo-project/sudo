@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -81,7 +81,7 @@ static bool
 ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry,
     unsigned int recno)
 {
-    debug_decl(ts_match_record, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_match_record, SUDOERS_DEBUG_AUTH);
 
     if (entry->version != key->version) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
@@ -155,7 +155,7 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 {
     struct timestamp_entry cur;
     unsigned int recno = 0;
-    debug_decl(ts_find_record, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_find_record, SUDOERS_DEBUG_AUTH);
 
     /*
      * Find a matching record (does not match sid or time stamp value).
@@ -197,7 +197,7 @@ ts_mkdirs(char *path, uid_t owner, gid_t group, mode_t mode,
 {
     bool ret;
     mode_t omask;
-    debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH);
 
     /* umask must not be more restrictive than the file modes. */
     omask = umask(ACCESSPERMS & ~(mode|parent_mode));
@@ -234,7 +234,7 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 {
     struct stat sb;
     bool ret = false;
-    debug_decl(ts_secure_dir, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_secure_dir, SUDOERS_DEBUG_AUTH);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "checking %s", path);
     switch (sudo_secure_dir(path, timestamp_uid, -1, &sb)) {
@@ -282,7 +282,7 @@ ts_open(const char *path, int flags)
 {
     bool uid_changed = false;
     int fd;
-    debug_decl(ts_open, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_open, SUDOERS_DEBUG_AUTH);
 
     if (timestamp_uid != 0)
 	uid_changed = set_perms(PERM_TIMESTAMP);
@@ -307,7 +307,7 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
 {
     ssize_t nwritten;
     off_t old_eof;
-    debug_decl(ts_write, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_write, SUDOERS_DEBUG_AUTH);
 
     if (offset == -1) {
 	old_eof = lseek(fd, 0, SEEK_CUR);
@@ -358,7 +358,7 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
     enum def_tuple ticket_type)
 {
     struct stat sb;
-    debug_decl(ts_init_key, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_init_key, SUDOERS_DEBUG_AUTH);
 
     memset(entry, 0, sizeof(*entry));
     entry->version = TS_VERSION;
@@ -422,7 +422,7 @@ timestamp_open(const char *user, pid_t sid)
     struct ts_cookie *cookie;
     char *fname = NULL;
     int tries, fd = -1;
-    debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH)
+    debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH);
 
     /* Zero timeout means don't use the time stamp file. */
     if (!sudo_timespecisset(&def_timestamp_timeout)) {
@@ -513,7 +513,7 @@ timestamp_lock_record(int fd, off_t pos, off_t len)
     struct sigaction sa, saveint, savequit;
     sigset_t mask, omask;
     bool ret;
-    debug_decl(timestamp_lock_record, SUDOERS_DEBUG_AUTH)
+    debug_decl(timestamp_lock_record, SUDOERS_DEBUG_AUTH);
 
     if (pos >= 0 && lseek(fd, pos, SEEK_SET) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
@@ -556,7 +556,7 @@ timestamp_lock_record(int fd, off_t pos, off_t len)
 static bool
 timestamp_unlock_record(int fd, off_t pos, off_t len)
 {
-    debug_decl(timestamp_unlock_record, SUDOERS_DEBUG_AUTH)
+    debug_decl(timestamp_unlock_record, SUDOERS_DEBUG_AUTH);
 
     if (pos >= 0 && lseek(fd, pos, SEEK_SET) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
@@ -574,7 +574,7 @@ ts_read(struct ts_cookie *cookie, struct timestamp_entry *entry)
 {
     ssize_t nread = -1;
     bool should_unlock = false;
-    debug_decl(ts_read, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_read, SUDOERS_DEBUG_AUTH);
 
     /* If the record is not already locked, lock it now.  */
     if (!cookie->locked) {
@@ -613,6 +613,25 @@ done:
 }
 
 /*
+ * Write a TS_LOCKEXCL record at the beginning of the time stamp file.
+ */
+bool
+timestamp_lock_write(struct ts_cookie *cookie)
+{
+    struct timestamp_entry entry;
+    bool ret = true;
+    debug_decl(timestamp_lock_write, SUDOERS_DEBUG_AUTH);
+
+    memset(&entry, 0, sizeof(entry));
+    entry.version = TS_VERSION;
+    entry.size = sizeof(entry);
+    entry.type = TS_LOCKEXCL;
+    if (ts_write(cookie->fd, cookie->fname, &entry, -1) == -1)
+	ret = false;
+    debug_return_bool(ret);
+}
+
+/*
  * Lock a record in the time stamp file for exclusive access.
  * If the record does not exist, it is created (as disabled).
  */
@@ -621,9 +640,10 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 {
     struct ts_cookie *cookie = vcookie;
     struct timestamp_entry entry;
+    bool overwrite = false;
     off_t lock_pos;
     ssize_t nread;
-    debug_decl(timestamp_lock, SUDOERS_DEBUG_AUTH)
+    debug_decl(timestamp_lock, SUDOERS_DEBUG_AUTH);
 
     if (cookie == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
@@ -642,26 +662,39 @@ timestamp_lock(void *vcookie, struct passwd *pw)
     /* Make sure the first record is of type TS_LOCKEXCL. */
     memset(&entry, 0, sizeof(entry));
     nread = read(cookie->fd, &entry, sizeof(entry));
-    if (nread == 0) {
-	/* New file, add TS_LOCKEXCL record. */
-	entry.version = TS_VERSION;
-	entry.size = sizeof(entry);
-	entry.type = TS_LOCKEXCL;
-	if (ts_write(cookie->fd, cookie->fname, &entry, -1) == -1)
-	    debug_return_bool(false);
+    if (nread < ssizeof(struct timestamp_entry_v1)) {
+	/* New or invalid time stamp file. */
+	overwrite = true;
     } else if (entry.type != TS_LOCKEXCL) {
-	/* Old sudo record, convert it to TS_LOCKEXCL. */
-	entry.type = TS_LOCKEXCL;
-	memset((char *)&entry + offsetof(struct timestamp_entry, type), 0,
-	    nread - offsetof(struct timestamp_entry, type));
-	if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
-	    debug_return_bool(false);
+	if (entry.size == sizeof(struct timestamp_entry_v1)) {
+	    /* Old sudo record, convert it to TS_LOCKEXCL. */
+	    entry.type = TS_LOCKEXCL;
+	    memset((char *)&entry + offsetof(struct timestamp_entry, type), 0,
+		nread - offsetof(struct timestamp_entry, type));
+	    if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
+		debug_return_bool(false);
+	} else {
+	    /* Corrupted time stamp file?  Just overwrite it. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"corrupt initial record, type: %hu, size: %hu (expected %zu)",
+		entry.type, entry.size, sizeof(struct timestamp_entry_v1));
+	    overwrite = true;
+	}
     }
-    if (entry.size != sizeof(entry)) {
+    if (overwrite) {
+	/* Rewrite existing time stamp file or create new one. */
+	if (ftruncate(cookie->fd, 0) != 0) {
+	    sudo_warn(U_("unable to truncate time stamp file to %lld bytes"),
+		0LL);
+	    debug_return_bool(false);
+	}
+	if (!timestamp_lock_write(cookie))
+	    debug_return_bool(false);
+    } else if (entry.size != sizeof(entry)) {
 	/* Reset position if the lock record has an unexpected size. */
 	if (lseek(cookie->fd, entry.size, SEEK_SET) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		"unable to seek to %lld", (long long)entry.size);
+		"unable to seek to %hu", entry.size);
 	    debug_return_bool(false);
 	}
     }
@@ -732,7 +765,7 @@ void
 timestamp_close(void *vcookie)
 {
     struct ts_cookie *cookie = vcookie;
-    debug_decl(timestamp_close, SUDOERS_DEBUG_AUTH)
+    debug_decl(timestamp_close, SUDOERS_DEBUG_AUTH);
 
     if (cookie != NULL) {
 	close(cookie->fd);
@@ -758,7 +791,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
     struct timespec diff, now;
     int status = TS_ERROR;		/* assume the worst */
     ssize_t nread;
-    debug_decl(timestamp_status, SUDOERS_DEBUG_AUTH)
+    debug_decl(timestamp_status, SUDOERS_DEBUG_AUTH);
 
     /* Zero timeout means don't use time stamp files. */
     if (!sudo_timespecisset(&def_timestamp_timeout)) {
@@ -884,7 +917,7 @@ timestamp_update(void *vcookie, struct passwd *pw)
 {
     struct ts_cookie *cookie = vcookie;
     int ret = false;
-    debug_decl(timestamp_update, SUDOERS_DEBUG_AUTH)
+    debug_decl(timestamp_update, SUDOERS_DEBUG_AUTH);
 
     /* Zero timeout means don't use time stamp files. */
     if (!sudo_timespecisset(&def_timestamp_timeout)) {
@@ -944,7 +977,7 @@ timestamp_remove(bool unlink_it)
     struct timestamp_entry key, entry;
     int fd = -1, ret = true;
     char *fname = NULL;
-    debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH)
+    debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH);
 
 #ifdef TIOCCLRVERAUTH
     if (def_timestamp_type == kernel) {
@@ -1018,7 +1051,7 @@ already_lectured(int unused)
     char status_file[PATH_MAX];
     struct stat sb;
     int len;
-    debug_decl(already_lectured, SUDOERS_DEBUG_AUTH)
+    debug_decl(already_lectured, SUDOERS_DEBUG_AUTH);
 
     if (ts_secure_dir(def_lecture_status_dir, false, true)) {
 	len = snprintf(status_file, sizeof(status_file), "%s/%s",
@@ -1041,7 +1074,7 @@ set_lectured(void)
 {
     char lecture_status[PATH_MAX];
     int len, fd, ret = false;
-    debug_decl(set_lectured, SUDOERS_DEBUG_AUTH)
+    debug_decl(set_lectured, SUDOERS_DEBUG_AUTH);
 
     len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
 	def_lecture_status_dir, user_name);

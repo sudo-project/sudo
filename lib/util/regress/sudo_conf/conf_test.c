@@ -72,6 +72,8 @@ sudo_conf_dump(void)
     struct sudo_debug_file *debug_file;
     struct plugin_info *info;
 
+    printf("Set developer_mode %s\n",
+	sudo_conf_developer_mode() ? "true" : "false");
     printf("Set disable_coredump %s\n",
 	sudo_conf_disable_coredump() ? "true" : "false");
     printf("Set group_source %s\n",

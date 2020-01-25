@@ -51,6 +51,7 @@ static bool display_lecture(int);
 static struct passwd *get_authpw(int);
 
 struct getpass_closure {
+    int tstat;
     void *cookie;
     struct passwd *auth_pw;
 };
@@ -89,38 +90,31 @@ getpass_resume(int signo, void *vclosure)
  * or -1 on fatal error.
  */
 static int
-check_user_interactive(int validated, int mode, struct passwd *auth_pw)
+check_user_interactive(int validated, int mode, struct getpass_closure *closure)
 {
     struct sudo_conv_callback cb, *callback = NULL;
-    struct getpass_closure closure;
-    int status = TS_ERROR;
     int ret = -1;
     char *prompt;
     bool lectured;
-    debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH)
-
-    /* Setup closure for getpass_{suspend,resume} */
-    closure.auth_pw = auth_pw;
-    closure.cookie = NULL;
-    sudo_pw_addref(closure.auth_pw);
+    debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH);
 
     /* Open, lock and read time stamp file if we are using it. */
     if (!ISSET(mode, MODE_IGNORE_TICKET)) {
 	/* Open time stamp file and check its status. */
-	closure.cookie = timestamp_open(user_name, user_sid);
-	if (timestamp_lock(closure.cookie, closure.auth_pw))
-	    status = timestamp_status(closure.cookie, closure.auth_pw);
+	closure->cookie = timestamp_open(user_name, user_sid);
+	if (timestamp_lock(closure->cookie, closure->auth_pw))
+	    closure->tstat = timestamp_status(closure->cookie, closure->auth_pw);
 
 	/* Construct callback for getpass function. */
 	memset(&cb, 0, sizeof(cb));
 	cb.version = SUDO_CONV_CALLBACK_VERSION;
-	cb.closure = &closure;
+	cb.closure = closure;
 	cb.on_suspend = getpass_suspend;
 	cb.on_resume = getpass_resume;
 	callback = &cb;
     }
 
-    switch (status) {
+    switch (closure->tstat) {
     case TS_FATAL:
 	/* Fatal error (usually setuid failure), unsafe to proceed. */
 	goto done;
@@ -144,32 +138,22 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	}
 
 	/* XXX - should not lecture if askpass helper is being used. */
-	lectured = display_lecture(status);
+	lectured = display_lecture(closure->tstat);
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
-	    closure.auth_pw->pw_name);
+	    closure->auth_pw->pw_name);
 	if (prompt == NULL)
 	    goto done;
 
-	ret = verify_user(closure.auth_pw, prompt, validated, callback);
+	ret = verify_user(closure->auth_pw, prompt, validated, callback);
 	if (ret == true && lectured)
 	    (void)set_lectured();	/* lecture error not fatal */
 	free(prompt);
 	break;
     }
 
-    /*
-     * Only update time stamp if user was validated.
-     * Failure to update the time stamp is not a fatal error.
-     */
-    if (ret == true && ISSET(validated, VALIDATE_SUCCESS) && status != TS_ERROR)
-	(void)timestamp_update(closure.cookie, closure.auth_pw);
 done:
-    if (closure.cookie != NULL)
-	timestamp_close(closure.cookie);
-    sudo_pw_delref(closure.auth_pw);
-
     debug_return_int(ret);
 }
 
@@ -180,18 +164,18 @@ done:
 int
 check_user(int validated, int mode)
 {
-    struct passwd *auth_pw;
+    struct getpass_closure closure = { TS_ERROR };
     int ret = -1;
     bool exempt = false;
-    debug_decl(check_user, SUDOERS_DEBUG_AUTH)
+    debug_decl(check_user, SUDOERS_DEBUG_AUTH);
 
     /*
      * Init authentication system regardless of whether we need a password.
      * Required for proper PAM session support.
      */
-    if ((auth_pw = get_authpw(mode)) == NULL)
+    if ((closure.auth_pw = get_authpw(mode)) == NULL)
 	goto done;
-    if (sudo_auth_init(auth_pw) == -1)
+    if (sudo_auth_init(closure.auth_pw) == -1)
 	goto done;
 
     /*
@@ -222,15 +206,26 @@ check_user(int validated, int mode)
 	}
     }
 
-    ret = check_user_interactive(validated, mode, auth_pw);
+    ret = check_user_interactive(validated, mode, &closure);
 
 done:
     if (ret == true) {
 	/* The approval function may disallow a user post-authentication. */
-	ret = sudo_auth_approval(auth_pw, validated, exempt);
+	ret = sudo_auth_approval(closure.auth_pw, validated, exempt);
+
+	/*
+	 * Only update time stamp if user validated and was approved.
+	 * Failure to update the time stamp is not a fatal error.
+	 */
+	if (ret == true && closure.tstat != TS_ERROR) {
+	    if (ISSET(validated, VALIDATE_SUCCESS))
+		(void)timestamp_update(closure.cookie, closure.auth_pw);
+	}
     }
-    sudo_auth_cleanup(auth_pw);
-    sudo_pw_delref(auth_pw);
+    timestamp_close(closure.cookie);
+    sudo_auth_cleanup(closure.auth_pw);
+    if (closure.auth_pw != NULL)
+	sudo_pw_delref(closure.auth_pw);
 
     debug_return_int(ret);
 }
@@ -247,7 +242,7 @@ display_lecture(int status)
     ssize_t nread;
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
-    debug_decl(lecture, SUDOERS_DEBUG_AUTH)
+    debug_decl(lecture, SUDOERS_DEBUG_AUTH);
 
     if (def_lecture == never ||
 	(def_lecture == once && already_lectured(status)))
@@ -284,7 +279,7 @@ bool
 user_is_exempt(void)
 {
     bool ret = false;
-    debug_decl(user_is_exempt, SUDOERS_DEBUG_AUTH)
+    debug_decl(user_is_exempt, SUDOERS_DEBUG_AUTH);
 
     if (def_exempt_group)
 	ret = user_in_group(sudo_user.pw, def_exempt_group);
@@ -300,7 +295,7 @@ static struct passwd *
 get_authpw(int mode)
 {
     struct passwd *pw = NULL;
-    debug_decl(get_authpw, SUDOERS_DEBUG_AUTH)
+    debug_decl(get_authpw, SUDOERS_DEBUG_AUTH);
 
     if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
 	/* In list mode we always prompt for the user's password. */
@@ -332,4 +327,29 @@ get_authpw(int mode)
     }
 
     debug_return_ptr(pw);
+}
+
+/*
+ * Returns true if the specified shell is allowed by /etc/shells, else false.
+ */
+bool
+check_user_shell(const struct passwd *pw)
+{
+    const char *shell;
+    debug_decl(check_user_shell, SUDOERS_DEBUG_AUTH);
+
+    if (!def_runas_check_shell)
+	debug_return_bool(true);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: checking /etc/shells for %s", __func__, pw->pw_shell);
+
+    setusershell();
+    while ((shell = getusershell()) != NULL) {
+	if (strcmp(shell, pw->pw_shell) == 0)
+	    debug_return_bool(true);
+    }
+    endusershell();
+
+    debug_return_bool(false);
 }

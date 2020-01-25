@@ -49,7 +49,7 @@ bool
 sudo_goodpath(const char *path, struct stat *sbp)
 {
     bool ret = false;
-    debug_decl(sudo_goodpath, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudo_goodpath, SUDOERS_DEBUG_UTIL);
 
     if (path != NULL) {
 	struct stat sb;

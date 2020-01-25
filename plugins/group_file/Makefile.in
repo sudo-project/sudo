@@ -21,9 +21,12 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-devdir = @devdir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+devdir = @devdir@
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -117,8 +120,8 @@ VERSION = @PACKAGE_VERSION@
 all: group_file.la
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) plugins/group_file/Makefile.in
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) plugins/group_file/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/group_file/Makefile
 
 Makefile: $(srcdir)/Makefile.in
@@ -181,8 +184,8 @@ pvs-studio: $(POBJS)
 check:
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la *.a *.i *.plog \
-	    stamp-* core *.core core.*
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la
+	-rm -f *.i *.plog stamp-* core *.core core.*
 
 mostlyclean: clean
 

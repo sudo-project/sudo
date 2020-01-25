@@ -173,7 +173,7 @@ static struct option long_opts[] = {
 static void
 env_insert(struct environment *e, char *pair)
 {
-    debug_decl(env_insert, SUDO_DEBUG_ARGS)
+    debug_decl(env_insert, SUDO_DEBUG_ARGS);
 
     /* Make sure we have at least two slots free (one for NULL). */
     if (e->env_len + 1 >= e->env_size) {
@@ -200,7 +200,7 @@ static void
 env_set(struct environment *e, char *var, char *val)
 {
     char *pair;
-    debug_decl(env_set, SUDO_DEBUG_ARGS)
+    debug_decl(env_set, SUDO_DEBUG_ARGS);
 
     pair = sudo_new_key_val(var, val);
     if (pair == NULL) {
@@ -220,7 +220,7 @@ static void
 parse_env_list(struct environment *e, char *list)
 {
     char *cp, *last, *val;
-    debug_decl(parse_env_list, SUDO_DEBUG_ARGS)
+    debug_decl(parse_env_list, SUDO_DEBUG_ARGS);
 
     for ((cp = strtok_r(list, ",", &last)); cp != NULL;
 	(cp = strtok_r(NULL, ",", &last))) {
@@ -253,7 +253,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     const char *runas_group = NULL;
     const char *progname;
     int proglen;
-    debug_decl(parse_args, SUDO_DEBUG_ARGS)
+    debug_decl(parse_args, SUDO_DEBUG_ARGS);
 
     /* Is someone trying something funny? */
     if (argc <= 0)
@@ -695,7 +695,7 @@ usage(int fatal)
 static void
 usage_excl(int fatal)
 {
-    debug_decl(usage_excl, SUDO_DEBUG_ARGS)
+    debug_decl(usage_excl, SUDO_DEBUG_ARGS);
 
     sudo_warnx(U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
     usage(fatal);
@@ -707,7 +707,7 @@ help(void)
     struct sudo_lbuf lbuf;
     const int indent = 32;
     const char *pname = getprogname();
-    debug_decl(help, SUDO_DEBUG_ARGS)
+    debug_decl(help, SUDO_DEBUG_ARGS);
 
     sudo_lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
     if (strcmp(pname, "sudoedit") == 0)

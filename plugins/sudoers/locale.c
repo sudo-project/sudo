@@ -54,14 +54,14 @@ static char *sudoers_locale;
 int
 sudoers_getlocale(void)
 {
-    debug_decl(sudoers_getlocale, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_getlocale, SUDOERS_DEBUG_UTIL);
     debug_return_int(current_locale);
 }
 
 bool
 sudoers_initlocale(const char *ulocale, const char *slocale)
 {
-    debug_decl(sudoers_initlocale, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_initlocale, SUDOERS_DEBUG_UTIL);
 
     if (ulocale != NULL) {
 	free(user_locale);
@@ -88,7 +88,7 @@ bool
 sudoers_setlocale(int newlocale, int *prevlocale)
 {
     char *res = NULL;
-    debug_decl(sudoers_setlocale, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_setlocale, SUDOERS_DEBUG_UTIL);
 
     switch (newlocale) {
 	case SUDOERS_LOCALE_USER:
@@ -135,7 +135,7 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 bool
 sudoers_warn_setlocale(bool restore, int *cookie)
 {
-    debug_decl(sudoers_warn_setlocale, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_warn_setlocale, SUDOERS_DEBUG_UTIL);
 
     if (restore)
 	debug_return_bool(sudoers_setlocale(*cookie, NULL));
@@ -148,7 +148,7 @@ sudoers_warn_setlocale(bool restore, int *cookie)
 bool
 sudoers_locale_callback(const union sudo_defs_val *sd_un)
 {
-    debug_decl(sudoers_locale_callback, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_locale_callback, SUDOERS_DEBUG_UTIL);
 
     if (sudoers_initlocale(NULL, sd_un->str)) {
 	if (setlocale(LC_ALL, sd_un->str) != NULL)

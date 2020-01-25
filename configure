@@ -639,6 +639,18 @@ ac_c_werror_flag=
 ac_subst_vars='LTLIBOBJS
 KRB5CONFIG
 LIBOBJS
+PYTHON_CONFIG
+PYTHON_LIBS
+PYTHON_INCLUDE
+pkgpyexecdir
+pyexecdir
+pkgpythondir
+pythondir
+PYTHON_PLATFORM
+PYTHON_EXEC_PREFIX
+PYTHON_PREFIX
+PYTHON_VERSION
+PYTHON
 FLEX
 YFLAGS
 YACC
@@ -722,6 +734,7 @@ timeout
 vardir
 rundir
 iolog_dir
+PYTHON_PLUGIN_SRC
 SIGNAME
 devsearch
 DIGEST
@@ -986,6 +999,7 @@ with_noexec
 with_netsvc
 enable_sia
 enable_largefile
+enable_python
 with_pam_login
 enable_pam_session
 enable_kerb5_instance
@@ -1005,7 +1019,11 @@ CPPFLAGS
 CPP
 LT_SYS_LIBRARY_PATH
 YACC
-YFLAGS'
+YFLAGS
+PYTHON
+PYTHON_INCLUDE
+PYTHON_LIBS
+PYTHON_CONFIG'
 
 
 # Initialize some variables set by options.
@@ -1636,8 +1654,7 @@ Optional Features:
   --enable-env-reset      Whether to enable environment resetting by default.
   --enable-warnings       Whether to enable compiler warnings
   --enable-werror         Whether to enable the -Werror compiler option
-  --enable-openssl        Use OpenSSL's message digest functions instead of
-                          sudo's
+  --enable-openssl        Use OpenSSL's TLS and sha2 functions
   --enable-gcrypt         Use GNU crypt's message digest functions instead of
                           sudo's
   --disable-hardening     Do not use compiler/linker exploit mitigation
@@ -1671,6 +1688,7 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-sia           Disable SIA on Digital UNIX
   --disable-largefile     omit support for large files
+  --enable-python         Compile python plugin support
   --disable-pam-session   Disable PAM session support
   --enable-kerb5-instance instance string to append to the username (separated
                           by a slash)
@@ -1810,6 +1828,12 @@ Some influential environment variables:
   YFLAGS      The list of arguments that will be passed by default to $YACC.
               This script will default YFLAGS to the empty string to avoid a
               default value of `-d' given by some make applications.
+  PYTHON      the Python interpreter
+  PYTHON_INCLUDE
+              Include flags for python, bypassing python-config
+  PYTHON_LIBS Linker flags for python, bypassing python-config
+  PYTHON_CONFIG
+              Path to python-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -2960,6 +2984,8 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
+
 
 
 
@@ -6469,20 +6495,20 @@ fi
 
 
 
-if ${SUDOERS_LDFLAGS+:} false; then :
+if ${LDFLAGS+:} false; then :
 
-  case " $SUDOERS_LDFLAGS " in #(
+  case " $LDFLAGS " in #(
   *" -L${enableval}/lib "*) :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${enableval}/lib"; } >&5
-  (: SUDOERS_LDFLAGS already contains -L${enableval}/lib) 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -L\${enableval}/lib"; } >&5
+  (: LDFLAGS already contains -L${enableval}/lib) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SUDOERS_LDFLAGS " -L${enableval}/lib"
-     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
-  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+     as_fn_append LDFLAGS " -L${enableval}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -6491,9 +6517,9 @@ esac
 
 else
 
-  SUDOERS_LDFLAGS=-L${enableval}/lib
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
-  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  LDFLAGS=-L${enableval}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -6502,20 +6528,20 @@ fi
 
     if test X"$enable_rpath" = X"yes"; then
 
-if ${SUDOERS_LDFLAGS_R+:} false; then :
+if ${LDFLAGS_R+:} false; then :
 
-  case " $SUDOERS_LDFLAGS_R " in #(
+  case " $LDFLAGS_R " in #(
   *" -R${enableval}/lib "*) :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${enableval}/lib"; } >&5
-  (: SUDOERS_LDFLAGS_R already contains -R${enableval}/lib) 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R already contains -R\${enableval}/lib"; } >&5
+  (: LDFLAGS_R already contains -R${enableval}/lib) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SUDOERS_LDFLAGS_R " -R${enableval}/lib"
-     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
-  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+     as_fn_append LDFLAGS_R " -R${enableval}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
+  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -6524,9 +6550,9 @@ esac
 
 else
 
-  SUDOERS_LDFLAGS_R=-R${enableval}/lib
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
-  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  LDFLAGS_R=-R${enableval}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
+  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -6585,20 +6611,20 @@ fi
 
 
 
-if ${SUDOERS_LDFLAGS+:} false; then :
+if ${LDFLAGS+:} false; then :
 
-  case " $SUDOERS_LDFLAGS " in #(
+  case " $LDFLAGS " in #(
   *" -L${enableval}/lib "*) :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${enableval}/lib"; } >&5
-  (: SUDOERS_LDFLAGS already contains -L${enableval}/lib) 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -L\${enableval}/lib"; } >&5
+  (: LDFLAGS already contains -L${enableval}/lib) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SUDOERS_LDFLAGS " -L${enableval}/lib"
-     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
-  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+     as_fn_append LDFLAGS " -L${enableval}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -6607,9 +6633,9 @@ esac
 
 else
 
-  SUDOERS_LDFLAGS=-L${enableval}/lib
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
-  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  LDFLAGS=-L${enableval}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -6618,20 +6644,20 @@ fi
 
     if test X"$enable_rpath" = X"yes"; then
 
-if ${SUDOERS_LDFLAGS_R+:} false; then :
+if ${LDFLAGS_R+:} false; then :
 
-  case " $SUDOERS_LDFLAGS_R " in #(
+  case " $LDFLAGS_R " in #(
   *" -R${enableval}/lib "*) :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${enableval}/lib"; } >&5
-  (: SUDOERS_LDFLAGS_R already contains -R${enableval}/lib) 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R already contains -R\${enableval}/lib"; } >&5
+  (: LDFLAGS_R already contains -R${enableval}/lib) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SUDOERS_LDFLAGS_R " -R${enableval}/lib"
-     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
-  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+     as_fn_append LDFLAGS_R " -R${enableval}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
+  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -6640,9 +6666,9 @@ esac
 
 else
 
-  SUDOERS_LDFLAGS_R=-R${enableval}/lib
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
-  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  LDFLAGS_R=-R${enableval}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
+  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -16258,6 +16284,10 @@ done
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
 
+		# For reallocarray()
+		$as_echo "#define _OPENBSD_SOURCE 1" >>confdefs.h
+
+
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
@@ -19007,6 +19037,378 @@ fi
 
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to compile python plugin support" >&5
+$as_echo_n "checking whether to compile python plugin support... " >&6; }
+# Check whether --enable-python was given.
+if test "${enable_python+set}" = set; then :
+  enableval=$enable_python;  case "$enableval" in
+    yes|no)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
+$as_echo "$enableval" >&6; }
+        USE_PYTHON=$enableval
+        ;;
+    *)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-python: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-python: $enableval" >&2;}
+        ;;
+  esac
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test ${USE_PYTHON-'no'} = "yes"; then
+
+
+
+
+
+
+        if test -n "$PYTHON"; then
+      # If the user set $PYTHON, use it and don't search something else.
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $PYTHON version is >= 3" >&5
+$as_echo_n "checking whether $PYTHON version is >= 3... " >&6; }
+      prog="import sys
+# split strings by '.' and convert to numeric.  Append some zeros
+# because we need at least 4 digits for the hex conversion.
+# map returns an iterator in Python 3.0 and a list in 2.x
+minver = list(map(int, '3'.split('.'))) + [0, 0, 0]
+minverhex = 0
+# xrange is not present in Python 3.0 and range returns an iterator
+for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[i]
+sys.exit(sys.hexversion < minverhex)"
+  if { echo "$as_me:$LINENO: $PYTHON -c "$prog"" >&5
+   ($PYTHON -c "$prog") >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); }; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+			       as_fn_error $? "Python interpreter is too old" "$LINENO" 5
+fi
+      am_display_PYTHON=$PYTHON
+    else
+      # Otherwise, try each interpreter until we find one that satisfies
+      # VERSION.
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a Python interpreter with version >= 3" >&5
+$as_echo_n "checking for a Python interpreter with version >= 3... " >&6; }
+if ${am_cv_pathless_PYTHON+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+	for am_cv_pathless_PYTHON in python python2 python3  python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3  python3.2 python3.1 python3.0  python2.7 python2.6 python2.5 python2.4 python2.3 python2.2 python2.1  python2.0 none; do
+	  test "$am_cv_pathless_PYTHON" = none && break
+	  prog="import sys
+# split strings by '.' and convert to numeric.  Append some zeros
+# because we need at least 4 digits for the hex conversion.
+# map returns an iterator in Python 3.0 and a list in 2.x
+minver = list(map(int, '3'.split('.'))) + [0, 0, 0]
+minverhex = 0
+# xrange is not present in Python 3.0 and range returns an iterator
+for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[i]
+sys.exit(sys.hexversion < minverhex)"
+  if { echo "$as_me:$LINENO: $am_cv_pathless_PYTHON -c "$prog"" >&5
+   ($am_cv_pathless_PYTHON -c "$prog") >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); }; then :
+  break
+fi
+	done
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_pathless_PYTHON" >&5
+$as_echo "$am_cv_pathless_PYTHON" >&6; }
+      # Set $PYTHON to the absolute path of $am_cv_pathless_PYTHON.
+      if test "$am_cv_pathless_PYTHON" = none; then
+	PYTHON=:
+      else
+        # Extract the first word of "$am_cv_pathless_PYTHON", so it can be a program name with args.
+set dummy $am_cv_pathless_PYTHON; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_PYTHON+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PYTHON in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PYTHON="$PYTHON" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PYTHON="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PYTHON=$ac_cv_path_PYTHON
+if test -n "$PYTHON"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON" >&5
+$as_echo "$PYTHON" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+      fi
+      am_display_PYTHON=$am_cv_pathless_PYTHON
+    fi
+
+
+  if test "$PYTHON" = :; then
+      as_fn_error $? "no suitable Python interpreter found" "$LINENO" 5
+  else
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $am_display_PYTHON version" >&5
+$as_echo_n "checking for $am_display_PYTHON version... " >&6; }
+if ${am_cv_python_version+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  am_cv_python_version=`$PYTHON -c "import sys; sys.stdout.write(sys.version[:3])"`
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_version" >&5
+$as_echo "$am_cv_python_version" >&6; }
+  PYTHON_VERSION=$am_cv_python_version
+
+
+
+  PYTHON_PREFIX='${prefix}'
+
+  PYTHON_EXEC_PREFIX='${exec_prefix}'
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $am_display_PYTHON platform" >&5
+$as_echo_n "checking for $am_display_PYTHON platform... " >&6; }
+if ${am_cv_python_platform+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  am_cv_python_platform=`$PYTHON -c "import sys; sys.stdout.write(sys.platform)"`
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_platform" >&5
+$as_echo "$am_cv_python_platform" >&6; }
+  PYTHON_PLATFORM=$am_cv_python_platform
+
+
+  # Just factor out some code duplication.
+  am_python_setup_sysconfig="\
+import sys
+# Prefer sysconfig over distutils.sysconfig, for better compatibility
+# with python 3.x.  See automake bug#10227.
+try:
+    import sysconfig
+except ImportError:
+    can_use_sysconfig = 0
+else:
+    can_use_sysconfig = 1
+# Can't use sysconfig in CPython 2.7, since it's broken in virtualenvs:
+# <https://github.com/pypa/virtualenv/issues/118>
+try:
+    from platform import python_implementation
+    if python_implementation() == 'CPython' and sys.version[:3] == '2.7':
+        can_use_sysconfig = 0
+except ImportError:
+    pass"
+
+
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $am_display_PYTHON script directory" >&5
+$as_echo_n "checking for $am_display_PYTHON script directory... " >&6; }
+if ${am_cv_python_pythondir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$prefix" = xNONE
+     then
+       am_py_prefix=$ac_default_prefix
+     else
+       am_py_prefix=$prefix
+     fi
+     am_cv_python_pythondir=`$PYTHON -c "
+$am_python_setup_sysconfig
+if can_use_sysconfig:
+    sitedir = sysconfig.get_path('purelib', vars={'base':'$am_py_prefix'})
+else:
+    from distutils import sysconfig
+    sitedir = sysconfig.get_python_lib(0, 0, prefix='$am_py_prefix')
+sys.stdout.write(sitedir)"`
+     case $am_cv_python_pythondir in
+     $am_py_prefix*)
+       am__strip_prefix=`echo "$am_py_prefix" | sed 's|.|.|g'`
+       am_cv_python_pythondir=`echo "$am_cv_python_pythondir" | sed "s,^$am__strip_prefix,$PYTHON_PREFIX,"`
+       ;;
+     *)
+       case $am_py_prefix in
+         /usr|/System*) ;;
+         *)
+	  am_cv_python_pythondir=$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages
+	  ;;
+       esac
+       ;;
+     esac
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_pythondir" >&5
+$as_echo "$am_cv_python_pythondir" >&6; }
+  pythondir=$am_cv_python_pythondir
+
+
+
+  pkgpythondir=\${pythondir}/$PACKAGE
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $am_display_PYTHON extension module directory" >&5
+$as_echo_n "checking for $am_display_PYTHON extension module directory... " >&6; }
+if ${am_cv_python_pyexecdir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$exec_prefix" = xNONE
+     then
+       am_py_exec_prefix=$am_py_prefix
+     else
+       am_py_exec_prefix=$exec_prefix
+     fi
+     am_cv_python_pyexecdir=`$PYTHON -c "
+$am_python_setup_sysconfig
+if can_use_sysconfig:
+    sitedir = sysconfig.get_path('platlib', vars={'platbase':'$am_py_prefix'})
+else:
+    from distutils import sysconfig
+    sitedir = sysconfig.get_python_lib(1, 0, prefix='$am_py_prefix')
+sys.stdout.write(sitedir)"`
+     case $am_cv_python_pyexecdir in
+     $am_py_exec_prefix*)
+       am__strip_prefix=`echo "$am_py_exec_prefix" | sed 's|.|.|g'`
+       am_cv_python_pyexecdir=`echo "$am_cv_python_pyexecdir" | sed "s,^$am__strip_prefix,$PYTHON_EXEC_PREFIX,"`
+       ;;
+     *)
+       case $am_py_exec_prefix in
+         /usr|/System*) ;;
+         *)
+	   am_cv_python_pyexecdir=$PYTHON_EXEC_PREFIX/lib/python$PYTHON_VERSION/site-packages
+	   ;;
+       esac
+       ;;
+     esac
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_pyexecdir" >&5
+$as_echo "$am_cv_python_pyexecdir" >&6; }
+  pyexecdir=$am_cv_python_pyexecdir
+
+
+
+  pkgpyexecdir=\${pyexecdir}/$PACKAGE
+
+
+
+  fi
+
+
+
+
+
+
+
+    if test -z "$PYTHON_INCLUDE" || test -z "$PYTHON_LIBS"; then :
+
+      if test -z "$PYTHON_CONFIG"; then :
+
+        for ac_prog in python$PYTHON_VERSION-config python-config
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_PYTHON_CONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PYTHON_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PYTHON_CONFIG="$PYTHON_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in `dirname $PYTHON`
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PYTHON_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PYTHON_CONFIG=$ac_cv_path_PYTHON_CONFIG
+if test -n "$PYTHON_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON_CONFIG" >&5
+$as_echo "$PYTHON_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$PYTHON_CONFIG" && break
+done
+test -n "$PYTHON_CONFIG" || PYTHON_CONFIG="no"
+
+        if test "$PYTHON_CONFIG" = no; then :
+  as_fn_error $? "cannot find python-config for $PYTHON." "$LINENO" 5
+fi
+
+fi
+
+fi
+
+    if test -z "$PYTHON_INCLUDE"; then :
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking python include flags" >&5
+$as_echo_n "checking python include flags... " >&6; }
+      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags`
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON_INCLUDE" >&5
+$as_echo "$PYTHON_INCLUDE" >&6; }
+
+fi
+
+    if test -z "$PYTHON_LIBS"; then :
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking python linker flags" >&5
+$as_echo_n "checking python linker flags... " >&6; }
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags`
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON_LIBS" >&5
+$as_echo "$PYTHON_LIBS" >&6; }
+
+fi
+
+    PYTHON_PLUGIN_SRC=plugins/python
+    ac_config_files="$ac_config_files $PYTHON_PLUGIN_SRC/Makefile"
+
+fi
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking type of array argument to getgroups" >&5
 $as_echo_n "checking type of array argument to getgroups... " >&6; }
 if ${ac_cv_type_getgroups+:} false; then :
@@ -19240,6 +19642,32 @@ done
 	fi
 	;;
 esac
+for ac_func in cfmakeraw
+do :
+  ac_fn_c_check_func "$LINENO" "cfmakeraw" "ac_cv_func_cfmakeraw"
+if test "x$ac_cv_func_cfmakeraw" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CFMAKERAW 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" cfmakeraw.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS cfmakeraw.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_cfmakeraw; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
 for ac_func in getgrouplist
 do :
   ac_fn_c_check_func "$LINENO" "getgrouplist" "ac_cv_func_getgrouplist"
@@ -19393,6 +19821,32 @@ esac
     done
 
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
+
+fi
+done
+
+for ac_func in getusershell
+do :
+  ac_fn_c_check_func "$LINENO" "getusershell" "ac_cv_func_getusershell"
+if test "x$ac_cv_func_getusershell" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETUSERSHELL 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" getusershell.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getusershell.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_getusershell; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
 
 fi
 done
@@ -21531,47 +21985,34 @@ _ACEOF
 
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_CTX_set_ciphersuites in -lssl" >&5
-$as_echo_n "checking for SSL_CTX_set_ciphersuites in -lssl... " >&6; }
-if ${ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lssl crypto $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char SSL_CTX_set_ciphersuites ();
-int
-main ()
-{
-return SSL_CTX_set_ciphersuites ();
-  ;
-  return 0;
-}
+if test "${enable_openssl-no}" != no; then
+    OLIBS="$LIBS"
+    LIBS="$LIBS $LIBTLS"
+    for ac_func in X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto=yes
-else
-  ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto=no
+
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" >&5
-$as_echo "$ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" >&6; }
-if test "x$ac_cv_lib_ssl_SSL_CTX_set_ciphersuitescrypto" = xyes; then :
-  $as_echo "#define HAVE_SSL_CTX_SET_CIPHERSUITES 1" >>confdefs.h
+done
+
+    # SSL_CTX_set_min_proto_version may be a macro
+    ac_fn_c_check_decl "$LINENO" "SSL_CTX_set_min_proto_version" "ac_cv_have_decl_SSL_CTX_set_min_proto_version" "
+	$ac_includes_default
+	#include <openssl/ssl.h>
+
+"
+if test "x$ac_cv_have_decl_SSL_CTX_set_min_proto_version" = xyes; then :
+  $as_echo "#define HAVE_SSL_CTX_SET_MIN_PROTO_VERSION 1" >>confdefs.h
 
 fi
 
+    LIBS="$OLIBS"
+fi
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
 ac_fn_c_check_func "$LINENO" "socket" "ac_cv_func_socket"
@@ -26177,6 +26618,80 @@ fi
 
 fi
 
+case "$OS" in
+    netbsd)
+	;;
+    *)
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--enable-new-dtags" >&5
+$as_echo_n "checking whether the linker accepts -Wl,--enable-new-dtags... " >&6; }
+if ${ax_cv_check_ldflags___Wl___enable_new_dtags+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,--enable-new-dtags"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___Wl___enable_new_dtags=yes
+else
+  ax_cv_check_ldflags___Wl___enable_new_dtags=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl___enable_new_dtags" >&5
+$as_echo "$ax_cv_check_ldflags___Wl___enable_new_dtags" >&6; }
+if test x"$ax_cv_check_ldflags___Wl___enable_new_dtags" = xyes; then :
+
+if ${LDFLAGS+:} false; then :
+
+  case " $LDFLAGS " in #(
+  *" -Wl,--enable-new-dtags "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,--enable-new-dtags"; } >&5
+  (: LDFLAGS already contains -Wl,--enable-new-dtags) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -Wl,--enable-new-dtags"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LDFLAGS=-Wl,--enable-new-dtags
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+else
+  :
+fi
+
+	;;
+esac
+
 if test -n "$GCC"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fvisibility=hidden" >&5
 $as_echo_n "checking whether C compiler accepts -fvisibility=hidden... " >&6; }
@@ -27171,13 +27686,15 @@ test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 if test X"$INIT_SCRIPT" != X""; then
-    ac_config_files="$ac_config_files init.d/$INIT_SCRIPT"
+    ac_config_files="$ac_config_files etc/init.d/$INIT_SCRIPT"
 
 elif test X"$TMPFILES_D" != X""; then
-    ac_config_files="$ac_config_files init.d/sudo.conf"
+    ac_config_files="$ac_config_files etc/init.d/sudo.conf"
 
 fi
-ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+
+ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -28167,13 +28684,15 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "pathnames.h") CONFIG_HEADERS="$CONFIG_HEADERS pathnames.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
+    "$PYTHON_PLUGIN_SRC/Makefile") CONFIG_FILES="$CONFIG_FILES $PYTHON_PLUGIN_SRC/Makefile" ;;
     "lib/zlib/zconf.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/zlib/zconf.h" ;;
     "lib/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/zlib/Makefile" ;;
-    "init.d/$INIT_SCRIPT") CONFIG_FILES="$CONFIG_FILES init.d/$INIT_SCRIPT" ;;
-    "init.d/sudo.conf") CONFIG_FILES="$CONFIG_FILES init.d/sudo.conf" ;;
+    "etc/init.d/$INIT_SCRIPT") CONFIG_FILES="$CONFIG_FILES etc/init.d/$INIT_SCRIPT" ;;
+    "etc/init.d/sudo.conf") CONFIG_FILES="$CONFIG_FILES etc/init.d/sudo.conf" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
+    "examples/sudo.conf") CONFIG_FILES="$CONFIG_FILES examples/sudo.conf" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
     "lib/iolog/Makefile") CONFIG_FILES="$CONFIG_FILES lib/iolog/Makefile" ;;
     "lib/logsrv/Makefile") CONFIG_FILES="$CONFIG_FILES lib/logsrv/Makefile" ;;
@@ -29355,6 +29874,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

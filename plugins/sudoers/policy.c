@@ -77,7 +77,7 @@ extern char *login_style;
 static int
 parse_bool(const char *line, int varlen, int *flags, int fval)
 {
-    debug_decl(parse_bool, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(parse_bool, SUDOERS_DEBUG_PLUGIN);
 
     switch (sudo_strtobool(line + varlen + 1)) {
     case true:
@@ -105,7 +105,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
     int flags = 0;
-    debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN);
 
 #define MATCHES(s, v)	\
     (strncmp((s), (v), sizeof(v) - 1) == 0)
@@ -516,7 +516,7 @@ serialize_list(const char *varname, struct list_members *members)
     struct list_member *lm, *next;
     size_t len, result_size;
     char *result;
-    debug_decl(serialize_list, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(serialize_list, SUDOERS_DEBUG_PLUGIN);
 
     result_size = strlen(varname) + 1;
     SLIST_FOREACH(lm, members, entries) {
@@ -558,7 +558,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     struct sudoers_exec_args *exec_args = v;
     char **command_info;
     int info_len = 0;
-    debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN);
 
     /* Increase the length of command_info as needed, it is *not* checked. */
     command_info = calloc(48, sizeof(char *));
@@ -734,6 +734,24 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if (asprintf(&command_info[info_len++], "log_server_timeout=%u", def_log_server_timeout) == -1)
 	    goto oom;
     }
+
+    if ((command_info[info_len++] = sudo_new_key_val("log_server_keepalive",
+        def_log_server_keepalive ? "true" : "false")) == NULL)
+        goto oom;
+
+    if (def_log_server_cabundle != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("log_server_cabundle", def_log_server_cabundle)) == NULL)
+            goto oom;
+    }
+    if (def_log_server_peer_cert != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("log_server_peer_cert", def_log_server_peer_cert)) == NULL)
+            goto oom;
+    }
+    if (def_log_server_peer_key != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("log_server_peer_key", def_log_server_peer_key)) == NULL)
+            goto oom;
+    }
+
     if (def_command_timeout > 0 || user_timeout > 0) {
 	int timeout = user_timeout;
 	if (timeout == 0 || def_command_timeout < timeout)
@@ -816,7 +834,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     struct sudoers_policy_open_info info;
     const char *cp, *plugin_path = NULL;
     char * const *cur;
-    debug_decl(sudoers_policy_open, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_open, SUDOERS_DEBUG_PLUGIN);
 
     sudo_version = version;
     sudo_conv = conversation;
@@ -852,7 +870,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 static void
 sudoers_policy_close(int exit_status, int error_code)
 {
-    debug_decl(sudoers_policy_close, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_close, SUDOERS_DEBUG_PLUGIN);
 
     /* We do not currently log the exit status. */
     if (error_code) {
@@ -869,10 +887,14 @@ sudoers_policy_close(int exit_status, int error_code)
 
     /* Free remaining references to password and group entries. */
     /* XXX - move cleanup to function in sudoers.c */
-    sudo_pw_delref(sudo_user.pw);
-    sudo_user.pw = NULL;
-    sudo_pw_delref(runas_pw);
-    runas_pw = NULL;
+    if (sudo_user.pw != NULL) {
+	sudo_pw_delref(sudo_user.pw);
+	sudo_user.pw = NULL;
+    }
+    if (runas_pw != NULL) {
+	sudo_pw_delref(runas_pw);
+	runas_pw = NULL;
+    }
     if (runas_gr != NULL) {
 	sudo_gr_delref(runas_gr);
 	runas_gr = NULL;
@@ -897,7 +919,7 @@ sudoers_policy_close(int exit_status, int error_code)
 static int
 sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
 {
-    debug_decl(sudoers_policy_init_session, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_init_session, SUDOERS_DEBUG_PLUGIN);
 
     /* user_env is only specified for API version 1.2 and higher. */
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
@@ -912,7 +934,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 {
     struct sudoers_exec_args exec_args;
     int ret;
-    debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN);
 
     if (!ISSET(sudo_mode, MODE_EDIT))
 	SET(sudo_mode, MODE_RUN);
@@ -934,7 +956,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(void)
 {
-    debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
 
     user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
@@ -945,7 +967,7 @@ sudoers_policy_validate(void)
 static void
 sudoers_policy_invalidate(int remove)
 {
-    debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN);
 
     user_cmnd = "kill";
     /* XXX - plugin API should support a return value for fatal errors. */
@@ -960,7 +982,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
     int ret;
-    debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
 
     user_cmnd = "list";
     if (argc)
@@ -986,7 +1008,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 static int
 sudoers_policy_version(int verbose)
 {
-    debug_decl(sudoers_policy_version, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_version, SUDOERS_DEBUG_PLUGIN);
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Sudoers policy plugin version %s\n"),
 	PACKAGE_VERSION);

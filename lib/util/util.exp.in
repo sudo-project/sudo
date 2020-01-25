@@ -4,6 +4,7 @@ sudo_conf_clear_paths_v1
 sudo_conf_debug_files_v1
 sudo_conf_debugging_v1
 sudo_conf_devsearch_path_v1
+sudo_conf_developer_mode_v1
 sudo_conf_disable_coredump_v1
 sudo_conf_group_source_v1
 sudo_conf_max_groups_v1
@@ -37,6 +38,7 @@ sudo_debug_set_active_instance_v1
 sudo_debug_update_fd_v1
 sudo_debug_vprintf2_v1
 sudo_debug_write2_v1
+sudo_debug_needed_v1
 sudo_digest_alloc_v1
 sudo_digest_final_v1
 sudo_digest_free_v1
@@ -65,6 +67,7 @@ sudo_ev_loop_v1
 sudo_ev_loopbreak_v1
 sudo_ev_loopcontinue_v1
 sudo_ev_loopexit_v1
+sudo_ev_pending_v1
 sudo_ev_set_v1
 sudo_fatal_callback_deregister_v1
 sudo_fatal_callback_register_v1

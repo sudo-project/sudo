@@ -45,13 +45,13 @@ static size_t
 fill_seq(char *str, size_t strsize, void *v)
 {
 #ifdef SUDOERS_NO_SEQ
-    debug_decl(fill_seq, SUDO_DEBUG_UTIL)
+    debug_decl(fill_seq, SUDOERS_DEBUG_UTIL);
     debug_return_size_t(strlcpy(str, "%{seq}", strsize));
 #else
     char *logdir = v;
     static char sessid[7];
     int len;
-    debug_decl(fill_seq, SUDO_DEBUG_UTIL)
+    debug_decl(fill_seq, SUDOERS_DEBUG_UTIL);
 
     if (sessid[0] == '\0') {
 	if (!iolog_nextid(logdir, sessid))
@@ -70,7 +70,7 @@ fill_seq(char *str, size_t strsize, void *v)
 static size_t
 fill_user(char *str, size_t strsize, void *unused)
 {
-    debug_decl(fill_user, SUDO_DEBUG_UTIL)
+    debug_decl(fill_user, SUDOERS_DEBUG_UTIL);
     debug_return_size_t(strlcpy(str, user_name, strsize));
 }
 
@@ -79,7 +79,7 @@ fill_group(char *str, size_t strsize, void *unused)
 {
     struct group *grp;
     size_t len;
-    debug_decl(fill_group, SUDO_DEBUG_UTIL)
+    debug_decl(fill_group, SUDOERS_DEBUG_UTIL);
 
     if ((grp = sudo_getgrgid(user_gid)) != NULL) {
 	len = strlcpy(str, grp->gr_name, strsize);
@@ -95,7 +95,7 @@ fill_group(char *str, size_t strsize, void *unused)
 static size_t
 fill_runas_user(char *str, size_t strsize, void *unused)
 {
-    debug_decl(fill_runas_user, SUDO_DEBUG_UTIL)
+    debug_decl(fill_runas_user, SUDOERS_DEBUG_UTIL);
     debug_return_size_t(strlcpy(str, runas_pw->pw_name, strsize));
 }
 
@@ -104,7 +104,7 @@ fill_runas_group(char *str, size_t strsize, void *unused)
 {
     struct group *grp;
     size_t len;
-    debug_decl(fill_runas_group, SUDO_DEBUG_UTIL)
+    debug_decl(fill_runas_group, SUDOERS_DEBUG_UTIL);
 
     if (runas_gr != NULL) {
 	len = strlcpy(str, runas_gr->gr_name, strsize);
@@ -124,14 +124,14 @@ fill_runas_group(char *str, size_t strsize, void *unused)
 static size_t
 fill_hostname(char *str, size_t strsize, void *unused)
 {
-    debug_decl(fill_hostname, SUDO_DEBUG_UTIL)
+    debug_decl(fill_hostname, SUDOERS_DEBUG_UTIL);
     debug_return_size_t(strlcpy(str, user_shost, strsize));
 }
 
 static size_t
 fill_command(char *str, size_t strsize, void *unused)
 {
-    debug_decl(fill_command, SUDO_DEBUG_UTIL)
+    debug_decl(fill_command, SUDOERS_DEBUG_UTIL);
     debug_return_size_t(strlcpy(str, user_base, strsize));
 }
 

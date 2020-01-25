@@ -64,7 +64,7 @@ bool
 sudo_lock_region_v1(int fd, int type, off_t len)
 {
     int op;
-    debug_decl(sudo_lock_region, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lock_region, SUDO_DEBUG_UTIL);
 
     switch (type) {
 	case SUDO_LOCK:
@@ -94,7 +94,7 @@ sudo_lock_region_v1(int fd, int type, off_t len)
 {
     struct flock lock;
     int func;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL);
 
     switch (type) {
 	case SUDO_LOCK:

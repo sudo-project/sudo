@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -110,7 +110,7 @@ main(int argc, char *argv[])
     const char *output_file = "-";
     const char *conf_file = _PATH_CVTSUDOERS_CONF;
     const char *errstr;
-    debug_decl(main, SUDOERS_DEBUG_MAIN)
+    debug_decl(main, SUDOERS_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {
@@ -404,7 +404,7 @@ cvtsudoers_parse_keyword(const char *conf_file, const char *keyword,
 {
     struct cvtsudoers_conf_table *cur;
     const char *errstr;
-    debug_decl(sudo_ldap_parse_keyword, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudo_ldap_parse_keyword, SUDOERS_DEBUG_UTIL);
 
     /* Look up keyword in config tables */
     for (cur = table; cur->conf_str != NULL; cur++) {
@@ -449,7 +449,7 @@ cvtsudoers_conf_read(const char *conf_file)
     char *line = NULL;
     size_t linesize = 0;
     FILE *fp;
-    debug_decl(cvtsudoers_conf_read, SUDOERS_DEBUG_UTIL)
+    debug_decl(cvtsudoers_conf_read, SUDOERS_DEBUG_UTIL);
 
     if ((fp = fopen(conf_file, "r")) == NULL)
 	debug_return_ptr(&cvtsudoers_config);
@@ -488,7 +488,7 @@ cvtsudoers_conf_read(const char *conf_file)
 static void
 cvtsudoers_conf_free(struct cvtsudoers_config *conf)
 {
-    debug_decl(cvtsudoers_conf_free, SUDOERS_DEBUG_UTIL)
+    debug_decl(cvtsudoers_conf_free, SUDOERS_DEBUG_UTIL);
 
     if (conf != NULL) {
 	free(conf->sudoers_base);
@@ -507,7 +507,7 @@ cvtsudoers_parse_defaults(char *expression)
 {
     char *last, *cp = expression;
     int flags = 0;
-    debug_decl(cvtsudoers_parse_defaults, SUDOERS_DEBUG_UTIL)
+    debug_decl(cvtsudoers_parse_defaults, SUDOERS_DEBUG_UTIL);
 
     for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
 	if (strcasecmp(cp, "all") == 0) {
@@ -536,7 +536,7 @@ cvtsudoers_parse_suppression(char *expression)
 {
     char *last, *cp = expression;
     int flags = 0;
-    debug_decl(cvtsudoers_parse_suppression, SUDOERS_DEBUG_UTIL)
+    debug_decl(cvtsudoers_parse_suppression, SUDOERS_DEBUG_UTIL);
 
     for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
 	if (strcasecmp(cp, "defaults") == 0) {
@@ -558,7 +558,7 @@ static bool
 cvtsudoers_parse_filter(char *expression)
 {
     char *last, *cp = expression;
-    debug_decl(cvtsudoers_parse_filter, SUDOERS_DEBUG_UTIL)
+    debug_decl(cvtsudoers_parse_filter, SUDOERS_DEBUG_UTIL);
 
     if (filters == NULL) {
 	if ((filters = malloc(sizeof(*filters))) == NULL) {
@@ -614,7 +614,7 @@ parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file,
     struct cvtsudoers_config *conf)
 {
     FILE *fp = stdin;
-    debug_decl(parse_ldif, SUDOERS_DEBUG_UTIL)
+    debug_decl(parse_ldif, SUDOERS_DEBUG_UTIL);
 
     /* Open LDIF file and parse it. */
     if (strcmp(input_file, "-") != 0) {
@@ -629,7 +629,7 @@ parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file,
 static bool
 parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
 {
-    debug_decl(parse_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(parse_sudoers, SUDOERS_DEBUG_UTIL);
 
     /* Open sudoers file and parse it. */
     if (strcmp(input_file, "-") == 0) {
@@ -669,7 +669,7 @@ userlist_matches_filter(struct sudoers_parse_tree *parse_tree,
     struct sudoers_string *s;
     struct member *m, *next;
     bool ret = false;
-    debug_decl(userlist_matches_filter, SUDOERS_DEBUG_UTIL)
+    debug_decl(userlist_matches_filter, SUDOERS_DEBUG_UTIL);
 
     if (filters == NULL ||
 	(STAILQ_EMPTY(&filters->users) && STAILQ_EMPTY(&filters->groups)))
@@ -747,7 +747,7 @@ hostlist_matches_filter(struct sudoers_parse_tree *parse_tree,
     bool ret = false;
     char **shosts;
     int n = 0;
-    debug_decl(hostlist_matches_filter, SUDOERS_DEBUG_UTIL)
+    debug_decl(hostlist_matches_filter, SUDOERS_DEBUG_UTIL);
 
     if (filters == NULL || STAILQ_EMPTY(&filters->hosts))
 	debug_return_bool(true);
@@ -827,7 +827,7 @@ print_defaults_sudoers(struct sudoers_parse_tree *parse_tree,
     struct sudo_lbuf *lbuf, bool expand_aliases)
 {
     struct defaults *def, *next;
-    debug_decl(print_defaults_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_defaults_sudoers, SUDOERS_DEBUG_UTIL);
 
     TAILQ_FOREACH_SAFE(def, &parse_tree->defaults, entries, next) {
 	sudoers_format_default_line(lbuf, parse_tree, def, &next,
@@ -843,7 +843,7 @@ print_alias_sudoers(struct sudoers_parse_tree *parse_tree, struct alias *a,
 {
     struct sudo_lbuf *lbuf = v;
     struct member *m;
-    debug_decl(print_alias_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_alias_sudoers, SUDOERS_DEBUG_UTIL);
 
     sudo_lbuf_append(lbuf, "%s %s = ", alias_type_to_string(a->type),
 	a->name);
@@ -864,7 +864,7 @@ static bool
 print_aliases_sudoers(struct sudoers_parse_tree *parse_tree,
     struct sudo_lbuf *lbuf)
 {
-    debug_decl(print_aliases_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_aliases_sudoers, SUDOERS_DEBUG_UTIL);
 
     alias_apply(parse_tree, print_alias_sudoers, lbuf);
 
@@ -888,7 +888,7 @@ filter_userspecs(struct sudoers_parse_tree *parse_tree,
 {
     struct userspec *us, *next_us;
     struct privilege *priv, *next_priv;
-    debug_decl(filter_userspecs, SUDOERS_DEBUG_UTIL)
+    debug_decl(filter_userspecs, SUDOERS_DEBUG_UTIL);
 
     if (filters == NULL)
 	debug_return;
@@ -931,7 +931,7 @@ alias_matches(struct sudoers_parse_tree *parse_tree, const char *name,
     struct alias *a;
     struct member *m;
     bool ret = false;
-    debug_decl(alias_matches, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_matches, SUDOERS_DEBUG_ALIAS);
 
     if (strcmp(name, alias_name) == 0)
 	debug_return_bool(true);
@@ -967,7 +967,7 @@ alias_used_by_userspecs(struct sudoers_parse_tree *parse_tree,
     struct cmndspec *cs, *cs_next;
     struct member *m, *m_next;
     struct member *am, *am_next;
-    debug_decl(alias_used_by_userspecs, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_used_by_userspecs, SUDOERS_DEBUG_ALIAS);
 
     /* Iterate over the policy, checking for aliases. */
     TAILQ_FOREACH_SAFE(us, &parse_tree->userspecs, entries, us_next) {
@@ -1038,6 +1038,27 @@ alias_used_by_userspecs(struct sudoers_parse_tree *parse_tree,
 }
 
 /*
+ * For each alias listed in members, remove and free the alias.
+ * Frees the contents of members too.
+ */
+static void
+free_aliases_by_members(struct sudoers_parse_tree *parse_tree,
+    struct member_list *members, int type)
+{
+    struct member *m;
+    struct alias *a;
+    debug_decl(free_aliases_by_members, SUDOERS_DEBUG_ALIAS);
+
+    while ((m = TAILQ_FIRST(members)) != NULL) {
+        TAILQ_REMOVE(members, m, entries);
+	a = alias_remove(parse_tree, m->name, type);
+	alias_free(a);
+	free_member(m);
+    }
+    debug_return;
+}
+
+/*
  * Apply filters to host/user-based Defaults, removing non-matching entries.
  */
 static void
@@ -1051,9 +1072,8 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
     struct member_list *prev_binding = NULL;
     struct defaults *def, *def_next;
     struct member *m, *m_next;
-    struct alias *a;
     int alias_type;
-    debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     if (filters == NULL && conf->defaults == CVT_DEFAULTS_ALL)
 	debug_return;
@@ -1138,29 +1158,13 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
 	}
     }
 
-    /* Remove now-unreferenced aliases. */
+    /* Determine unreferenced aliases and remove/free them. */
     alias_used_by_userspecs(parse_tree, &user_aliases, &runas_aliases,
 	&host_aliases, &cmnd_aliases);
-    TAILQ_FOREACH_SAFE(m, &user_aliases, entries, m_next) {
-	a = alias_remove(parse_tree, m->name, USERALIAS);
-	alias_free(a);
-	free_member(m);
-    }
-    TAILQ_FOREACH_SAFE(m, &runas_aliases, entries, m_next) {
-	a = alias_remove(parse_tree, m->name, RUNASALIAS);
-	alias_free(a);
-	free_member(m);
-    }
-    TAILQ_FOREACH_SAFE(m, &host_aliases, entries, m_next) {
-	a = alias_remove(parse_tree, m->name, HOSTALIAS);
-	alias_free(a);
-	free_member(m);
-    }
-    TAILQ_FOREACH_SAFE(m, &cmnd_aliases, entries, m_next) {
-	a = alias_remove(parse_tree, m->name, CMNDALIAS);
-	alias_free(a);
-	free_member(m);
-    }
+    free_aliases_by_members(parse_tree, &user_aliases, USERALIAS);
+    free_aliases_by_members(parse_tree, &runas_aliases, RUNASALIAS);
+    free_aliases_by_members(parse_tree, &host_aliases, HOSTALIAS);
+    free_aliases_by_members(parse_tree, &cmnd_aliases, CMNDALIAS);
 
     debug_return;
 }
@@ -1172,7 +1176,7 @@ static void
 alias_remove_unused(struct sudoers_parse_tree *parse_tree)
 {
     struct rbtree *used_aliases;
-    debug_decl(alias_remove_unused, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_remove_unused, SUDOERS_DEBUG_ALIAS);
 
     used_aliases = alloc_aliases();
     if (used_aliases == NULL)
@@ -1220,7 +1224,7 @@ static void
 alias_prune(struct sudoers_parse_tree *parse_tree,
     struct cvtsudoers_config *conf)
 {
-    debug_decl(alias_prune, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_prune, SUDOERS_DEBUG_ALIAS);
 
     alias_apply(parse_tree, alias_prune_helper, conf);
 
@@ -1236,7 +1240,7 @@ convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree,
 {
     bool ret = true;
     struct sudo_lbuf lbuf;
-    debug_decl(convert_sudoers_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(convert_sudoers_sudoers, SUDOERS_DEBUG_UTIL);
 
     if (strcmp(output_file, "-") == 0) {
 	output_fp = stdout;

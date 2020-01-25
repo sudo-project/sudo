@@ -55,7 +55,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SIAENTITY *siah;
     int i;
-    debug_decl(sudo_sia_setup, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_sia_setup, SUDOERS_DEBUG_AUTH);
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
@@ -86,7 +86,7 @@ sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth,
     SIAENTITY *siah = auth->data;
     char *pass;
     int rc;
-    debug_decl(sudo_sia_verify, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_sia_verify, SUDOERS_DEBUG_AUTH);
 
     /* Get password, return AUTH_INTR if we got ^C */
     pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
@@ -109,7 +109,7 @@ int
 sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     SIAENTITY *siah = auth->data;
-    debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH);
 
     (void) sia_ses_release(&siah);
     auth->data = NULL;
@@ -122,7 +122,7 @@ sudo_sia_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
     SIAENTITY *siah;
     int status = AUTH_FATAL;
-    debug_decl(sudo_sia_begin_session, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_sia_begin_session, SUDOERS_DEBUG_AUTH);
 
     /* Re-init sia for the target user's session. */
     if (sia_ses_init(&siah, NewArgc, NewArgv, NULL, pw->pw_name, user_ttypath, 0, NULL) != SIASUCCESS) {

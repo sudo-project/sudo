@@ -57,6 +57,9 @@
 /* Define to 1 if you have the `arc4random_uniform' function. */
 #undef HAVE_ARC4RANDOM_UNIFORM
 
+/* Define to 1 if you have the `ASN1_STRING_get0_data' function. */
+#undef HAVE_ASN1_STRING_GET0_DATA
+
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
@@ -81,6 +84,9 @@
 
 /* Define to 1 to enable BSM audit support. */
 #undef HAVE_BSM_AUDIT
+
+/* Define to 1 if you have the `cfmakeraw' function. */
+#undef HAVE_CFMAKERAW
 
 /* Define to 1 if you have the `clock_gettime' function. */
 #undef HAVE_CLOCK_GETTIME
@@ -343,6 +349,9 @@
 /* Define to 1 if you have the `getuserattr' function. */
 #undef HAVE_GETUSERATTR
 
+/* Define to 1 if you have the `getusershell' function. */
+#undef HAVE_GETUSERSHELL
+
 /* Define to 1 if you have the `getutid' function. */
 #undef HAVE_GETUTID
 
@@ -549,7 +558,7 @@
 /* Define to 1 if you have the `openpty' function. */
 #undef HAVE_OPENPTY
 
-/* Define to 1 if you are using OpenSSL's sha2 functions. */
+/* Define to 1 if you are using OpenSSL's TLS and sha2 functions. */
 #undef HAVE_OPENSSL
 
 /* Define to 1 if you use NRL OPIE. */
@@ -718,6 +727,10 @@
 /* Define to 1 if you have the `SSL_CTX_set_ciphersuites' function. */
 #undef HAVE_SSL_CTX_SET_CIPHERSUITES
 
+/* Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or
+   macro. */
+#undef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
+
 /* Define to 1 to enable SSSD support. */
 #undef HAVE_SSSD
 
@@ -867,6 +880,12 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define to 1 if you have the `TLS_client_method' function. */
+#undef HAVE_TLS_CLIENT_METHOD
+
+/* Define to 1 if you have the `TLS_server_method' function. */
+#undef HAVE_TLS_SERVER_METHOD
+
 /* Define to 1 if you have the `ttyslot' function. */
 #undef HAVE_TTYSLOT
 
@@ -911,6 +930,9 @@
 
 /* Define to 1 if you have the <wordexp.h> header file. */
 #undef HAVE_WORDEXP_H
+
+/* Define to 1 if you have the `X509_STORE_CTX_get0_cert' function. */
+#undef HAVE_X509_STORE_CTX_GET0_CERT
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
@@ -1278,6 +1300,11 @@
 /* Enable BSD extensions on systems that have them.  */
 #ifndef _BSD_SOURCE
 # undef _BSD_SOURCE
+#endif
+
+/* Enable OpenBSD extensions on NetBSD.  */
+#ifndef _OPENBSD_SOURCE
+# undef _OPENBSD_SOURCE
 #endif
 
 /* Enable BSD types on IRIX.  */

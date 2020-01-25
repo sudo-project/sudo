@@ -21,9 +21,12 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-devdir = @devdir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+devdir = @devdir@
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -170,9 +173,9 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
-depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) lib/util/Makefile.in
+depend: siglist.c signame.c
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) lib/util/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/util/Makefile
 
 Makefile: $(srcdir)/Makefile.in
@@ -410,8 +413,8 @@ check: $(TEST_PROGS)
 	fi
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) *.lo *.o \
-	    *.la *.a *.i *.plog stamp-* core *.core core.* regress/*/*.out \
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) *.lo *.o *.la
+	-rm -f *.i *.plog stamp-* core *.core core.* regress/*/*.out \
 	    regress/*/*.err
 
 mostlyclean: clean
@@ -706,6 +709,18 @@ gettime.i: $(srcdir)/gettime.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 gettime.plog: gettime.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/gettime.c --i-file $< --output-file $@
+getusershell.lo: $(srcdir)/getusershell.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getusershell.c
+getusershell.i: $(srcdir)/getusershell.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+getusershell.plog: getusershell.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getusershell.c --i-file $< --output-file $@
 gidlist.lo: $(srcdir)/gidlist.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \

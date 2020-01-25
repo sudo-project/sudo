@@ -43,7 +43,7 @@ int
 audit_success(int argc, char *argv[])
 {
     int rc = 0;
-    debug_decl(audit_success, SUDOERS_DEBUG_AUDIT)
+    debug_decl(audit_success, SUDOERS_DEBUG_AUDIT);
 
     if (!def_log_allowed)
 	debug_return_int(0);
@@ -70,7 +70,7 @@ int
 audit_failure(int argc, char *argv[], char const *const fmt, ...)
 {
     int rc = 0;
-    debug_decl(audit_success, SUDOERS_DEBUG_AUDIT)
+    debug_decl(audit_success, SUDOERS_DEBUG_AUDIT);
 
     if (!def_log_denied)
 	debug_return_int(0);

@@ -37,6 +37,7 @@
 #ifdef __linux__
 # include <sys/prctl.h>
 #endif
+#include <errno.h>
 #include <limits.h>
 
 #include "sudo.h"
@@ -47,15 +48,31 @@
 # define SUDO_OPEN_MAX	256
 #endif
 
+#ifdef __LP64__
+# define SUDO_STACK_MIN	(4 * 1024 * 1024)
+#else
+# define SUDO_STACK_MIN	(2 * 1024 * 1024)
+#endif
+
+#ifdef HAVE_SETRLIMIT64
+# define getrlimit(a, b) getrlimit64((a), (b))
+# define setrlimit(a, b) setrlimit64((a), (b))
+# define rlimit rlimit64
+# define rlim_t rlim64_t
+# undef RLIM_INFINITY
+# define RLIM_INFINITY RLIM64_INFINITY
+#endif /* HAVE_SETRLIMIT64 */
+
 /*
  * macOS doesn't allow nofile soft limit to be infinite or
  * the stack hard limit to be infinite.
  * Linux containers have a problem with an infinite stack soft limit.
  */
 static struct rlimit nofile_fallback = { SUDO_OPEN_MAX, RLIM_INFINITY };
-static struct rlimit stack_fallback = { 8192 * 1024, 65532 * 1024 };
+static struct rlimit stack_fallback = { SUDO_STACK_MIN, 65532 * 1024 };
 
 static struct saved_limit {
+    const char *name;
     int resource;
     bool saved;
     struct rlimit *fallback;
@@ -63,19 +80,19 @@ static struct saved_limit {
     struct rlimit oldlimit;
 } saved_limits[] = {
 #ifdef RLIMIT_AS
-    { RLIMIT_AS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_AS", RLIMIT_AS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { RLIMIT_CPU, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_DATA, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_FSIZE, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { RLIMIT_NOFILE, false, &nofile_fallback, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_CPU", RLIMIT_CPU, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_DATA", RLIMIT_DATA, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_FSIZE", RLIMIT_FSIZE, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_NOFILE", RLIMIT_NOFILE, false, &nofile_fallback, { RLIM_INFINITY, RLIM_INFINITY } },
 #ifdef RLIMIT_NPROC
-    { RLIMIT_NPROC, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_NPROC", RLIMIT_NPROC, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
 #ifdef RLIMIT_RSS
-    { RLIMIT_RSS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "RLIMIT_RSS", RLIMIT_RSS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { RLIMIT_STACK, false, &stack_fallback, { 8192 * 1024, RLIM_INFINITY } }
+    { "RLIMIT_STACK", RLIMIT_STACK, false, &stack_fallback, { SUDO_STACK_MIN, RLIM_INFINITY } }
 };
 
 static struct rlimit corelimit;
@@ -93,7 +110,7 @@ void
 disable_coredump(void)
 {
     struct rlimit rl = { 0, 0 };
-    debug_decl(disable_coredump, SUDO_DEBUG_UTIL)
+    debug_decl(disable_coredump, SUDO_DEBUG_UTIL);
 
     if (getrlimit(RLIMIT_CORE, &corelimit) == -1)
 	sudo_warn("getrlimit(RLIMIT_CORE)");
@@ -116,7 +133,7 @@ disable_coredump(void)
 static void
 restore_coredump(void)
 {
-    debug_decl(restore_coredump, SUDO_DEBUG_UTIL)
+    debug_decl(restore_coredump, SUDO_DEBUG_UTIL);
 
     if (coredump_disabled) {
 	if (setrlimit(RLIMIT_CORE, &corelimit) == -1)
@@ -141,7 +158,7 @@ unlimit_nproc(void)
 {
 #ifdef __linux__
     struct rlimit rl = { RLIM_INFINITY, RLIM_INFINITY };
-    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
+    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL);
 
     if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
 	sudo_warn("getrlimit(RLIMIT_NPROC)");
@@ -161,7 +178,7 @@ void
 restore_nproc(void)
 {
 #ifdef __linux__
-    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
+    debug_decl(restore_nproc, SUDO_DEBUG_UTIL);
 
     if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
 	sudo_warn("setrlimit(RLIMIT_NPROC)");
@@ -179,7 +196,7 @@ unlimit_sudo(void)
 {
     unsigned int idx;
     int rc;
-    debug_decl(unlimit_sudo, SUDO_DEBUG_UTIL)
+    debug_decl(unlimit_sudo, SUDO_DEBUG_UTIL);
 
     /* Set resource limits to unlimited and stash the old values. */
     for (idx = 0; idx < nitems(saved_limits); idx++) {
@@ -209,7 +226,7 @@ unlimit_sudo(void)
 		rc = setrlimit(lim->resource, &lim->newlimit);
 	    }
 	    if (rc == -1)
-		sudo_warn("setrlimit(%d)", lim->resource);
+		sudo_warn("setrlimit(%s)", lim->name);
 	}
     }
 
@@ -223,14 +240,41 @@ void
 restore_limits(void)
 {
     unsigned int idx;
-    debug_decl(restore_limits, SUDO_DEBUG_UTIL)
+    debug_decl(restore_limits, SUDO_DEBUG_UTIL);
 
     /* Restore resource limits to saved values. */
     for (idx = 0; idx < nitems(saved_limits); idx++) {
 	struct saved_limit *lim = &saved_limits[idx];
 	if (lim->saved) {
-	    if (setrlimit(lim->resource, &lim->oldlimit) == -1)
-		sudo_warn("setrlimit(%d)", lim->resource);
+	    struct rlimit rl = lim->oldlimit;
+	    int i, rc;
+
+	    for (i = 0; i < 10; i++) {
+		rc = setrlimit(lim->resource, &rl);
+		if (rc != -1 || errno != EINVAL)
+		    break;
+
+		/*
+		 * Soft limit could be lower than current resource usage.
+		 * This can be an issue on NetBSD with RLIMIT_STACK and ASLR.
+		 */
+		if (rl.rlim_cur > LLONG_MAX / 2)
+		    break;
+		rl.rlim_cur *= 2;
+		if (lim->newlimit.rlim_cur != RLIM_INFINITY &&
+			rl.rlim_cur > lim->newlimit.rlim_cur) {
+		    rl.rlim_cur = lim->newlimit.rlim_cur;
+		}
+		if (rl.rlim_max != RLIM_INFINITY &&
+			rl.rlim_cur > rl.rlim_max) {
+		    rl.rlim_max = rl.rlim_cur;
+		}
+		rc = setrlimit(lim->resource, &rl);
+		if (rc != -1 || errno != EINVAL)
+		    break;
+	    }
+	    if (rc == -1)
+		sudo_warn("setrlimit(%s)", lim->name);
 	}
     }
     restore_coredump();

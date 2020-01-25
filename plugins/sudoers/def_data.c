@@ -514,6 +514,30 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Sudo log server timeout in seconds: %u"),
 	NULL,
     }, {
+	"log_server_keepalive", T_FLAG,
+	N_("Enable SO_KEEPALIVE socket option on the socket connected to the logserver"),
+	NULL,
+    }, {
+	"log_server_cabundle", T_STR|T_BOOL|T_PATH,
+	N_("Path to the audit server's CA bundle file: %s"),
+	NULL,
+    }, {
+	"log_server_peer_cert", T_STR|T_BOOL|T_PATH,
+	N_("Path to the sudoers certificate file: %s"),
+	NULL,
+    }, {
+	"log_server_peer_key", T_STR|T_BOOL|T_PATH,
+	N_("Path to the sudoers private key file: %s"),
+	NULL,
+    }, {
+	"runas_allow_unknown_id", T_FLAG,
+	N_("Allow the use of unknown runas user and/or group ID"),
+	NULL,
+    }, {
+	"runas_check_shell", T_FLAG,
+	N_("Only permit running commands as a user with a valid shell"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

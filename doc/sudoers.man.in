@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 18, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "January 22, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2596,6 +2596,19 @@ This flag is
 \fIoff\fR
 by default.
 .TP 18n
+log_server_keepalive
+If set,
+\fBsudo\fR
+will enable the TCP keepalive socket option on the connection to the log server.
+This enables the periodic transmission of keepalive messages to the server.
+If the server does not respond to a message, the connection will
+be closed and the running command will be killed unless the
+\fIignore_iolog_errors\fR
+flag is set.
+This flag is
+\fIon\fR
+by default.
+.TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
 \fBsudo\fR
@@ -2955,6 +2968,45 @@ when running a command or editing a file.
 This flag is
 \fIoff\fR
 by default.
+.TP 18n
+runas_allow_unknown_id
+If enabled, allow matching of runas user and group IDs that are
+not present in the password or group databases.
+In addition to explicitly matching unknown user or group IDs in a
+\fRRunas_List\fR,
+this option also allows the
+\fBALL\fR
+alias to match unknown IDs.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.30 or higher.
+Older versions of
+\fBsudo\fR
+always allowed matching of unknown user and group IDs.
+.TP 18n
+runas_check_shell
+.br
+If enabled,
+\fBsudo\fR
+will only run commands as a user whose shell appears in the
+\fI/etc/shells\fR
+file, even if the invoking user's
+\fRRunas_List\fR
+would otherwise permit it.
+If no
+\fI/etc/shells\fR
+file is present, a system-dependent list of built-in default shells is used.
+On many operating systems, system users such as
+\(lqbin\(rq,
+do not have a valid shell and this flag can be used to prevent
+commands from being run as those users.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.30 or higher.
 .TP 18n
 runaspw
 If set,
@@ -3713,6 +3765,27 @@ This option is only available if
 \fBsudoers\fR
 is built on Solaris 10 or higher.
 .\}
+.TP 18n
+log_server_cabundle
+The path to a certificate authority bundle file, in PEM format,
+to use instead of the system's default certificate authority database
+when authenticating the log server.
+The default is to use the system's default certificate authority database.
+This setting has no effect unless the
+\fIlog_server\fR
+flag is enabled and the remote log server is secured with TLS.
+.TP 18n
+log_server_peer_cert
+The path to the client's certificate file, in PEM format.
+This setting is required when the
+\fIlog_server\fR
+flag is enabled and the remote log server is secured with TLS.
+.TP 18n
+log_server_peer_key
+The path to the client's private key file, in PEM format.
+This setting is required when the
+\fIlog_server\fR
+flag is enabled and the remote log server is secured with TLS.
 .TP 18n
 mailsub
 Subject of the mail sent to the

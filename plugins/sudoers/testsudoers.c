@@ -121,7 +121,7 @@ main(int argc, char *argv[])
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = EXIT_FAILURE;
     struct sudo_lbuf lbuf;
-    debug_decl(main, SUDOERS_DEBUG_MAIN)
+    debug_decl(main, SUDOERS_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     malloc_options = "S";
@@ -385,7 +385,7 @@ static void
 set_runaspw(const char *user)
 {
     struct passwd *pw = NULL;
-    debug_decl(set_runaspw, SUDOERS_DEBUG_UTIL)
+    debug_decl(set_runaspw, SUDOERS_DEBUG_UTIL);
 
     if (*user == '#') {
 	const char *errstr;
@@ -409,7 +409,7 @@ static void
 set_runasgr(const char *group)
 {
     struct group *gr = NULL;
-    debug_decl(set_runasgr, SUDOERS_DEBUG_UTIL)
+    debug_decl(set_runasgr, SUDOERS_DEBUG_UTIL);
 
     if (*group == '#') {
 	const char *errstr;
@@ -459,7 +459,7 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
     struct stat sb;
     FILE *fp = NULL;
     char *sudoers_base;
-    debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
 
     sudoers_base = strrchr(sudoers, '/');
     if (sudoers_base != NULL)
@@ -516,7 +516,7 @@ static bool
 print_defaults(struct sudo_lbuf *lbuf)
 {
     struct defaults *def, *next;
-    debug_decl(print_defaults, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_defaults, SUDOERS_DEBUG_UTIL);
 
     TAILQ_FOREACH_SAFE(def, &parsed_policy.defaults, entries, next)
 	sudoers_format_default_line(lbuf, &parsed_policy, def, &next, false);
@@ -529,7 +529,7 @@ print_alias(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 {
     struct sudo_lbuf *lbuf = v;
     struct member *m;
-    debug_decl(print_alias, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_alias, SUDOERS_DEBUG_UTIL);
 
     sudo_lbuf_append(lbuf, "%s %s = ", alias_type_to_string(a->type),
 	a->name);
@@ -546,7 +546,7 @@ print_alias(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 static bool
 print_aliases(struct sudo_lbuf *lbuf)
 {
-    debug_decl(print_aliases, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_aliases, SUDOERS_DEBUG_UTIL);
 
     alias_apply(&parsed_policy, print_alias, lbuf);
 
@@ -556,7 +556,7 @@ print_aliases(struct sudo_lbuf *lbuf)
 static void
 dump_sudoers(struct sudo_lbuf *lbuf)
 {
-    debug_decl(dump_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(dump_sudoers, SUDOERS_DEBUG_UTIL);
 
     /* Print Defaults */
     if (!print_defaults(lbuf))

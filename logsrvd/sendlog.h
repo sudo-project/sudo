@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,12 +35,20 @@ enum client_state {
 };
 
 struct client_closure {
+    int sock;
+    bool read_instead_of_write;
+    bool write_instead_of_read;
+    bool temporary_write_event;
     struct timespec *restart;
     struct timespec *elapsed;
     struct timespec committed;
     struct timing_closure timing;
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
+#if defined(HAVE_OPENSSL)
+    struct sudo_event *tls_connect_ev;
+    bool tls_connect_state;
+#endif
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
     struct iolog_info *log_info;

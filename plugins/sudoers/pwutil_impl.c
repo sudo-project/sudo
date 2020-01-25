@@ -87,7 +87,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
     size_t nsize, psize, csize, gsize, dsize, ssize, total;
     struct cache_item_pw *pwitem;
     struct passwd *pw, *newpw;
-    debug_decl(sudo_make_pwitem, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_make_pwitem, SUDOERS_DEBUG_NSS);
 
     /* Look up by name or uid. */
     pw = name ? getpwnam(name) : getpwuid(uid);
@@ -169,7 +169,7 @@ sudo_make_gritem(gid_t gid, const char *name)
     size_t nsize, psize, nmem, total, len;
     struct cache_item_gr *gritem;
     struct group *gr, *newgr;
-    debug_decl(sudo_make_gritem, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_make_gritem, SUDOERS_DEBUG_NSS);
 
     /* Look up by name or gid. */
     gr = name ? getgrnam(name) : getgrgid(gid);
@@ -247,7 +247,7 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1,
     struct gid_list *gidlist;
     GETGROUPS_T *gids;
     int i, ngids;
-    debug_decl(sudo_make_gidlist_item, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_make_gidlist_item, SUDOERS_DEBUG_NSS);
 
     /* Don't use user_gids if the entry type says we must query the db. */
     if (type != ENTRY_TYPE_QUERIED && pw == sudo_user.pw && sudo_user.gids != NULL) {
@@ -336,7 +336,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
     struct gid_list *gidlist;
     struct group *grp = NULL;
     int i, groupname_len;
-    debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS);
 
     gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_ANY);
     if (gidlist == NULL) {

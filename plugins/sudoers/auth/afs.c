@@ -53,7 +53,7 @@ sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv
 {
     struct ktc_encryptionKey afs_key;
     struct ktc_token afs_token;
-    debug_decl(sudo_afs_verify, SUDOERS_DEBUG_AUTH)
+    debug_decl(sudo_afs_verify, SUDOERS_DEBUG_AUTH);
 
     /* Try to just check the password */
     ka_StringToKey(pass, NULL, &afs_key);

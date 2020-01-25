@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -87,6 +87,7 @@ struct timing_closure {
 struct iolog_file {
     bool enabled;
     bool compressed;
+    bool writable;
     union {
 	FILE *f;
 #ifdef HAVE_ZLIB_H

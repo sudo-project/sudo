@@ -1,0 +1,4 @@
+sudo.debug was called with arguments: (2, 'My demo purpose plugin shows this ERROR level debug message') 
+sudo.debug was called with arguments: (6, 'My demo purpose plugin shows this INFO level debug message') 
+sudo.options_as_dict was called with arguments: (('ModulePath=SRC_DIR/example_debugging.py', 'ClassName=DebugDemoPlugin'),) 
+sudo.options_as_dict returned result: {'ModulePath': 'SRC_DIR/example_debugging.py', 'ClassName': 'DebugDemoPlugin'} 

@@ -37,7 +37,7 @@ hexchar(const char *s)
 {
     unsigned char result[2];
     int i;
-    debug_decl(hexchar, SUDOERS_DEBUG_UTIL)
+    debug_decl(hexchar, SUDOERS_DEBUG_UTIL);
 
     for (i = 0; i < 2; i++) {
 	switch (s[i]) {

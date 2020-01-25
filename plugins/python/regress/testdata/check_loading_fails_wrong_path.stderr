@@ -1,0 +1,1 @@
+Failed during loading plugin class: (ModuleNotFoundError) No module named 'wrong_path'

@@ -66,6 +66,7 @@ __dso_public struct sudo_conf_debug_list *sudo_conf_debugging_v1(void);
 __dso_public struct sudo_conf_debug_file_list *sudo_conf_debug_files_v1(const char *progname);
 __dso_public struct plugin_info_list *sudo_conf_plugins_v1(void);
 __dso_public bool sudo_conf_disable_coredump_v1(void);
+__dso_public bool sudo_conf_developer_mode_v1(void);
 __dso_public bool sudo_conf_probe_interfaces_v1(void);
 __dso_public int sudo_conf_group_source_v1(void);
 __dso_public int sudo_conf_max_groups_v1(void);
@@ -79,6 +80,7 @@ __dso_public void sudo_conf_clear_paths_v1(void);
 #define sudo_conf_debug_files(_a) sudo_conf_debug_files_v1((_a))
 #define sudo_conf_plugins() sudo_conf_plugins_v1()
 #define sudo_conf_disable_coredump() sudo_conf_disable_coredump_v1()
+#define sudo_conf_developer_mode() sudo_conf_developer_mode_v1()
 #define sudo_conf_probe_interfaces() sudo_conf_probe_interfaces_v1()
 #define sudo_conf_group_source() sudo_conf_group_source_v1()
 #define sudo_conf_max_groups() sudo_conf_max_groups_v1()

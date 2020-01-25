@@ -26,10 +26,13 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
+abs_srcdir = @abs_srcdir@
+top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
 authdir = $(srcdir)/auth
-top_builddir = @top_builddir@
-top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 docdir = @docdir@
 libdir = @libdir@
@@ -57,7 +60,7 @@ LIBIOLOG = $(top_builddir)/lib/iolog/libsudo_iolog.la
 LIBLOGSRV = $(top_builddir)/lib/logsrv/liblogsrv.la
 LIBS = $(LIBUTIL)
 NET_LIBS = @NET_LIBS@
-SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(NET_LIBS) $(LIBIOLOG) $(LIBLOGSRV)
+SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ @LIBTLS@ $(NET_LIBS) $(LIBIOLOG) $(LIBLOGSRV)
 REPLAY_LIBS = @REPLAY_LIBS@ $(LIBIOLOG)
 VISUDO_LIBS = $(NET_LIBS)
 CVTSUDOERS_LIBS = $(NET_LIBS)
@@ -258,8 +261,8 @@ $(shlib_opt): $(shlib_exp)
 	@true
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) plugins/sudoers/Makefile.in
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) plugins/sudoers/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
 
 Makefile: $(srcdir)/Makefile.in
@@ -313,7 +316,7 @@ check_hexchar: $(CHECK_HEXCHAR_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_HEXCHAR_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_iolog_plugin: $(CHECK_IOLOG_PLUGIN_OBJS) $(LIBUTIL) $(LIBIOLOG) $(LIBLOGSRV)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PLUGIN_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBIOLOG) $(LIBLOGSRV)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PLUGIN_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBIOLOG) $(LIBLOGSRV) @LIBTLS@
 
 check_starttime: $(CHECK_STARTTIME_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_STARTTIME_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
@@ -380,8 +383,10 @@ sudoers: $(srcdir)/sudoers.in
 
 pre-install:
 	@if test X"$(cross_compiling)" != X"yes" -a X"$(DESTDIR)" = X""; then \
-	    echo "Checking existing sudoers file for syntax errors."; \
-	    ./visudo -c -f $(sudoersdir)/sudoers; \
+	    if test -r $(sudoersdir)/sudoers; then \
+		echo "Checking existing sudoers file for syntax errors."; \
+		./visudo -c -f $(sudoersdir)/sudoers; \
+	    fi; \
 	fi
 
 install: install-plugin install-binaries install-sudoers install-doc
@@ -604,9 +609,11 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
-	    *.lo *.o *.la *.a *.i *.plog stamp-* core *.core core.* \
-	    prologue regress/*/*.out regress/*/*.toke regress/*/*.err \
-	    regress/*/*.json regress/*/*.ldif regress/*/*.sudo
+	    *.lo *.o *.la
+	-rm -f *.i *.plog stamp-* core *.core core.* prologue regress/*/*.out \
+	    regress/*/*.toke regress/*/*.err regress/*/*.json \
+	    regress/*/*.ldif regress/*/*.ldif2sudo regress/*/*.sudo
+	-rm -rf regress/iolog_plugin/iolog
 
 mostlyclean: clean
 
@@ -1521,29 +1528,31 @@ iolog.plog: iolog.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog.c --i-file $< --output-file $@
 iolog_client.lo: $(srcdir)/iolog_client.c $(devdir)/def_data.h \
                  $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
-                 $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
-                 $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-                 $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-                 $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-                 $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                 $(srcdir)/iolog_plugin.h $(srcdir)/logging.h \
-                 $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
-                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                 $(incdir)/hostcheck.h $(incdir)/log_server.pb-c.h \
+                 $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
+                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_client.c
 iolog_client.i: $(srcdir)/iolog_client.c $(devdir)/def_data.h \
                  $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
-                 $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
-                 $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-                 $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-                 $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-                 $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                 $(srcdir)/iolog_plugin.h $(srcdir)/logging.h \
-                 $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
-                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                 $(incdir)/hostcheck.h $(incdir)/log_server.pb-c.h \
+                 $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
+                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog_client.plog: iolog_client.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_client.c --i-file $< --output-file $@

@@ -62,7 +62,7 @@ expand_iolog_path(const char *inpath, char *path, size_t pathlen,
     const char *endbrace, *src;
     bool strfit = false;
     size_t len;
-    debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL)
+    debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL);
 
     /* Collapse multiple leading slashes. */
     while (inpath[0] == '/' && inpath[1] == '/')

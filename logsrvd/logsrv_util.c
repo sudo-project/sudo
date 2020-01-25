@@ -50,7 +50,7 @@ bool
 expand_buf(struct connection_buffer *buf, unsigned int needed)
 {
     void *newdata;
-    debug_decl(expand_buf, SUDO_DEBUG_UTIL)
+    debug_decl(expand_buf, SUDO_DEBUG_UTIL);
 
     if (buf->size < needed) {
 	/* Expand buffer. */
@@ -87,7 +87,7 @@ iolog_open_all(int dfd, const char *iolog_dir, struct iolog_file *iolog_files,
     const char *mode)
 {
     int iofd;
-    debug_decl(iolog_open_all, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_open_all, SUDO_DEBUG_UTIL);
 
     for (iofd = 0; iofd < IOFD_MAX; iofd++) {
 	iolog_files[iofd].enabled = true;
@@ -117,7 +117,7 @@ iolog_seekto(int iolog_dir_fd, const char *iolog_path,
 {
     struct timing_closure timing;
     off_t pos;
-    debug_decl(iolog_seekto, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_seekto, SUDO_DEBUG_UTIL);
 
     /* Parse timing file until we reach the target point. */
     for (;;) {

@@ -1,0 +1,7 @@
+__init__ @ SRC_DIR/example_debugging.py:45 calls C function:
+sudo.debug was called with arguments: (2, 'My demo purpose plugin shows this ERROR level debug message') 
+__init__ @ SRC_DIR/example_debugging.py:48 calls C function:
+sudo.debug was called with arguments: (6, 'My demo purpose plugin shows this INFO level debug message') 
+__init__ @ SRC_DIR/example_debugging.py:58 calls C function:
+sudo.options_as_dict was called with arguments: (('ModulePath=SRC_DIR/example_debugging.py', 'ClassName=DebugDemoPlugin'),) 
+sudo.options_as_dict returned result: {'ModulePath': 'SRC_DIR/example_debugging.py', 'ClassName': 'DebugDemoPlugin'} 

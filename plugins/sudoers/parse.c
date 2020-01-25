@@ -59,7 +59,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     struct defaults *def;
     int nopass;
     enum def_tuple pwcheck;
-    debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER)
+    debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER);
 
     pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
     nopass = (pwcheck == never || pwcheck == all) ? true : false;
@@ -128,7 +128,7 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
     struct privilege *priv;
     struct userspec *us;
     struct member *matching_user;
-    debug_decl(sudoers_lookup_check, SUDOERS_DEBUG_PARSER)
+    debug_decl(sudoers_lookup_check, SUDOERS_DEBUG_PARSER);
 
     TAILQ_FOREACH_REVERSE(us, &nss->parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(nss->parse_tree, pw, &us->users) != ALLOW)
@@ -187,7 +187,7 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 static bool
 apply_cmndspec(struct cmndspec *cs)
 {
-    debug_decl(apply_cmndspec, SUDOERS_DEBUG_PARSER)
+    debug_decl(apply_cmndspec, SUDOERS_DEBUG_PARSER);
 
     if (cs != NULL) {
 #ifdef HAVE_SELINUX
@@ -286,7 +286,7 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated,
     struct sudo_nss *nss;
     int m, match = UNSPEC;
     time_t now;
-    debug_decl(sudoers_lookup, SUDOERS_DEBUG_PARSER)
+    debug_decl(sudoers_lookup, SUDOERS_DEBUG_PARSER);
 
     /*
      * Special case checking the "validate", "list" and "kill" pseudo-commands.
@@ -337,7 +337,7 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 {
     struct privilege *priv;
     int nfound = 0;
-    debug_decl(display_priv_short, SUDOERS_DEBUG_PARSER)
+    debug_decl(display_priv_short, SUDOERS_DEBUG_PARSER);
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	struct cmndspec *cs, *prev_cs = NULL;
@@ -397,7 +397,7 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 static bool
 new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
 {
-    debug_decl(new_long_entry, SUDOERS_DEBUG_PARSER)
+    debug_decl(new_long_entry, SUDOERS_DEBUG_PARSER);
 
     if (prev_cs == NULL)
 	debug_return_bool(true);
@@ -430,7 +430,7 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 {
     struct privilege *priv;
     int nfound = 0;
-    debug_decl(display_priv_long, SUDOERS_DEBUG_PARSER)
+    debug_decl(display_priv_long, SUDOERS_DEBUG_PARSER);
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	struct cmndspec *cs, *prev_cs;
@@ -545,7 +545,7 @@ sudo_display_userspecs(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 {
     struct userspec *us;
     int nfound = 0;
-    debug_decl(sudo_display_userspecs, SUDOERS_DEBUG_PARSER)
+    debug_decl(sudo_display_userspecs, SUDOERS_DEBUG_PARSER);
 
     TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
 	if (userlist_matches(parse_tree, pw, &us->users) != ALLOW)
@@ -571,7 +571,7 @@ display_defaults(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     struct defaults *d;
     char *prefix;
     int nfound = 0;
-    debug_decl(display_defaults, SUDOERS_DEBUG_PARSER)
+    debug_decl(display_defaults, SUDOERS_DEBUG_PARSER);
 
     if (lbuf->len == 0 || isspace((unsigned char)lbuf->buf[lbuf->len - 1]))
 	prefix = "    ";
@@ -614,7 +614,7 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
     struct member *m;
     char *dsep;
     int atype, nfound = 0;
-    debug_decl(display_bound_defaults_by_type, SUDOERS_DEBUG_PARSER)
+    debug_decl(display_bound_defaults_by_type, SUDOERS_DEBUG_PARSER);
 
     switch (deftype) {
 	case DEFAULTS_HOST:
@@ -670,7 +670,7 @@ display_bound_defaults(struct sudoers_parse_tree *parse_tree,
     struct passwd *pw, struct sudo_lbuf *lbuf)
 {
     int nfound = 0;
-    debug_decl(display_bound_defaults, SUDOERS_DEBUG_PARSER)
+    debug_decl(display_bound_defaults, SUDOERS_DEBUG_PARSER);
 
     /* XXX - should only print ones that match what the user can do. */
     nfound += display_bound_defaults_by_type(parse_tree, DEFAULTS_RUNAS, lbuf);
@@ -686,7 +686,7 @@ output(const char *buf)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
-    debug_decl(output, SUDOERS_DEBUG_NSS)
+    debug_decl(output, SUDOERS_DEBUG_NSS);
 
     /* Call conversation function */
     memset(&msg, 0, sizeof(msg));
@@ -709,7 +709,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     struct sudo_lbuf def_buf, priv_buf;
     struct stat sb;
     int cols, count, olen, n;
-    debug_decl(display_privs, SUDOERS_DEBUG_PARSER)
+    debug_decl(display_privs, SUDOERS_DEBUG_PARSER);
 
     cols = sudo_user.cols;
     if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
@@ -796,7 +796,7 @@ display_cmnd_check(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
-    debug_decl(display_cmnd_check, SUDOERS_DEBUG_PARSER)
+    debug_decl(display_cmnd_check, SUDOERS_DEBUG_PARSER);
 
     TAILQ_FOREACH_REVERSE(us, &parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(parse_tree, pw, &us->users) != ALLOW)
@@ -839,7 +839,7 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
     int m, match = UNSPEC;
     int ret = false;
     time_t now;
-    debug_decl(display_cmnd, SUDOERS_DEBUG_PARSER)
+    debug_decl(display_cmnd, SUDOERS_DEBUG_PARSER);
 
     /* Iterate over each source, checking for the command. */
     time(&now);

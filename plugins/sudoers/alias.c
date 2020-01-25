@@ -55,7 +55,7 @@ alias_compare(const void *v1, const void *v2)
     const struct alias *a1 = (const struct alias *)v1;
     const struct alias *a2 = (const struct alias *)v2;
     int res;
-    debug_decl(alias_compare, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_compare, SUDOERS_DEBUG_ALIAS);
 
     if (a1 == NULL)
 	res = -1;
@@ -78,7 +78,7 @@ alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type)
     struct alias key;
     struct rbnode *node;
     struct alias *a = NULL;
-    debug_decl(alias_get, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_get, SUDOERS_DEBUG_ALIAS);
 
     if (parse_tree->aliases == NULL)
 	debug_return_ptr(NULL);
@@ -109,7 +109,7 @@ alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type)
 void
 alias_put(struct alias *a)
 {
-    debug_decl(alias_put, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_put, SUDOERS_DEBUG_ALIAS);
     a->used = false;
     debug_return;
 }
@@ -125,7 +125,7 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
 {
     static char errbuf[512];
     struct alias *a;
-    debug_decl(alias_add, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_add, SUDOERS_DEBUG_ALIAS);
 
     if (parse_tree->aliases == NULL) {
 	if ((parse_tree->aliases = alloc_aliases()) == NULL) {
@@ -187,7 +187,7 @@ alias_apply(struct sudoers_parse_tree *parse_tree,
     void *cookie)
 {
     struct alias_apply_closure closure;
-    debug_decl(alias_apply, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_apply, SUDOERS_DEBUG_ALIAS);
 
     if (parse_tree->aliases != NULL) {
 	closure.parse_tree = parse_tree;
@@ -205,7 +205,7 @@ alias_apply(struct sudoers_parse_tree *parse_tree,
 bool
 no_aliases(struct sudoers_parse_tree *parse_tree)
 {
-    debug_decl(no_aliases, SUDOERS_DEBUG_ALIAS)
+    debug_decl(no_aliases, SUDOERS_DEBUG_ALIAS);
     debug_return_bool(parse_tree->aliases == NULL ||
 	rbisempty(parse_tree->aliases));
 }
@@ -217,7 +217,7 @@ void
 alias_free(void *v)
 {
     struct alias *a = (struct alias *)v;
-    debug_decl(alias_free, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_free, SUDOERS_DEBUG_ALIAS);
 
     if (a != NULL) {
 	free(a->name);
@@ -237,7 +237,7 @@ alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type)
 {
     struct rbnode *node;
     struct alias key;
-    debug_decl(alias_remove, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_remove, SUDOERS_DEBUG_ALIAS);
 
     if (parse_tree->aliases != NULL) {
 	key.name = name;
@@ -252,7 +252,7 @@ alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type)
 struct rbtree *
 alloc_aliases(void)
 {
-    debug_decl(alloc_aliases, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alloc_aliases, SUDOERS_DEBUG_ALIAS);
 
     debug_return_ptr(rbcreate(alias_compare));
 }
@@ -260,7 +260,7 @@ alloc_aliases(void)
 void
 free_aliases(struct rbtree *aliases)
 {
-    debug_decl(free_aliases, SUDOERS_DEBUG_ALIAS)
+    debug_decl(free_aliases, SUDOERS_DEBUG_ALIAS);
 
     if (aliases != NULL)
 	rbdestroy(aliases, alias_free);
@@ -287,7 +287,7 @@ alias_remove_recursive(struct sudoers_parse_tree *parse_tree, char *name,
     struct member *m;
     struct alias *a;
     bool ret = true;
-    debug_decl(alias_remove_recursive, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_remove_recursive, SUDOERS_DEBUG_ALIAS);
 
     if ((a = alias_remove(parse_tree, name, type)) != NULL) {
 	TAILQ_FOREACH(m, &a->members, entries) {
@@ -308,7 +308,7 @@ alias_find_used_members(struct sudoers_parse_tree *parse_tree,
 {
     struct member *m;
     int errors = 0;
-    debug_decl(alias_find_used_members, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_find_used_members, SUDOERS_DEBUG_ALIAS);
 
     if (members != NULL) {
 	TAILQ_FOREACH(m, members, entries) {
@@ -334,7 +334,7 @@ alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_alias
     struct defaults *d;
     struct member *m;
     int errors = 0;
-    debug_decl(alias_find_used, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alias_find_used, SUDOERS_DEBUG_ALIAS);
 
     /* Move referenced aliases to used_aliases. */
     TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {

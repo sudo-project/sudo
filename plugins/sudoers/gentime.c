@@ -60,7 +60,7 @@ parse_gentime(const char *timestr)
     size_t len;
     int items, tzoff = 0;
     bool islocal = false;
-    debug_decl(parse_gentime, SUDOERS_DEBUG_PARSER)
+    debug_decl(parse_gentime, SUDOERS_DEBUG_PARSER);
 
     /* Make a copy of the time without time zone for easy parsing. */
     len = strspn(timestr, "0123456789.,");

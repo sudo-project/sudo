@@ -21,9 +21,12 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-devdir = @devdir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+devdir = @devdir@
 incdir = $(top_srcdir)/include
 rundir = @rundir@
 cross_compiling = @CROSS_COMPILING@
@@ -141,8 +144,8 @@ VERSION = @PACKAGE_VERSION@
 all: $(PROGS)
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) src/Makefile.in
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) src/Makefile.in
 	cd $(top_builddir) && ./config.status --file src/Makefile
 
 Makefile: $(srcdir)/Makefile.in
@@ -208,13 +211,13 @@ install-dirs:
 install-rc: install-dirs
 	# We only create the rc.d link when installing to the actual system dir
 	if [ -n "$(INIT_SCRIPT)" ]; then \
-	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_builddir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_builddir)/etc/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
 	    if test -z "$(DESTDIR)"; then \
 		rm -f $(RC_LINK); \
 		ln -s $(INIT_DIR)/sudo $(RC_LINK); \
 	    fi; \
 	elif test -n "$(tmpfiles_d)"; then \
-	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_builddir)/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_builddir)/etc/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
 	fi
 
 install-binaries: install-dirs $(PROGS)
@@ -270,7 +273,8 @@ check: $(TEST_PROGS)
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
-	    *.lo *.o *.la *.a *.i *.plog stamp-* core *.core core.* nohup.out
+	    *.lo *.o *.la
+	-rm -f *.i *.plog stamp-* core *.core core.*
 
 mostlyclean: clean
 

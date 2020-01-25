@@ -43,7 +43,7 @@ matches_env_pattern(const char *pattern, const char *var, bool *full_match)
     bool iswild = false, match = false;
     bool saw_sep = false;
     const char *cp;
-    debug_decl(matches_env_pattern, SUDOERS_DEBUG_ENV)
+    debug_decl(matches_env_pattern, SUDOERS_DEBUG_ENV);
 
     /* Locate position of the '=' separator in var=value. */
     sep_pos = strcspn(var, "=");

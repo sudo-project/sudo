@@ -73,7 +73,7 @@ static struct aix_limit aix_limits[] = {
 static int
 aix_getlimit(char *user, char *lim, int *valp)
 {
-    debug_decl(aix_getlimit, SUDO_DEBUG_UTIL)
+    debug_decl(aix_getlimit, SUDO_DEBUG_UTIL);
 
     if (getuserattr(user, lim, valp, SEC_INT) != 0)
 	debug_return_int(-1);
@@ -86,7 +86,7 @@ aix_setlimits(char *user)
     struct rlimit64 rlim;
     int val;
     size_t n;
-    debug_decl(aix_setlimits, SUDO_DEBUG_UTIL)
+    debug_decl(aix_setlimits, SUDO_DEBUG_UTIL);
 
     if (setuserdb(S_READ) != 0) {
 	sudo_warn(U_("unable to open userdb"));
@@ -162,7 +162,7 @@ aix_getauthregistry_v1(char *user, char *saved_registry)
 {
     int serrno = errno;
     int ret = -1;
-    debug_decl(aix_getauthregistry, SUDO_DEBUG_UTIL)
+    debug_decl(aix_getauthregistry, SUDO_DEBUG_UTIL);
 
     saved_registry[0] = '\0';
     if (user != NULL) {
@@ -213,7 +213,7 @@ aix_setauthdb_v2(char *user, char *registry)
     authdb_t regbuf;
     int serrno = errno;
     int ret = -1;
-    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
+    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL);
 
     if (user != NULL) {
 	/* Look up authentication registry if one is not provided. */
@@ -246,7 +246,7 @@ aix_restoreauthdb_v1(void)
 {
     int serrno = errno;
     int ret = 0;
-    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
+    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL);
 
     if (setauthdb(old_registry, NULL) != 0) {
 	sudo_warn(U_("unable to restore registry"));
@@ -266,7 +266,7 @@ aix_prep_user_v1(char *user, const char *tty)
 {
     char *info;
     int len;
-    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
+    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL);
 
     /* set usrinfo, like login(1) does */
     len = asprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",

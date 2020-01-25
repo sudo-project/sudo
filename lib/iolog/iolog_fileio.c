@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -76,7 +76,7 @@ io_swapids(bool restore)
 #ifdef HAVE_SETEUID
     static uid_t user_euid = (uid_t)-1;
     static gid_t user_egid = (gid_t)-1;
-    debug_decl(io_swapids, SUDO_DEBUG_UTIL)
+    debug_decl(io_swapids, SUDO_DEBUG_UTIL);
 
     if (user_euid == (uid_t)-1)
 	user_euid = geteuid();
@@ -129,7 +129,7 @@ iolog_mkdirs(char *path)
     struct stat sb;
     int dfd;
     bool ok = false, uid_changed = false;
-    debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL);
 
     if ((dfd = open(path, O_RDONLY|O_NONBLOCK)) != -1)
 	ok = true;
@@ -220,7 +220,7 @@ bool
 iolog_mkdtemp(char *path)
 {
     bool ok, uid_changed = false;
-    debug_decl(iolog_mkdtemp, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_mkdtemp, SUDO_DEBUG_UTIL);
 
     ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
     if (!ok && errno == EACCES) {
@@ -261,7 +261,7 @@ bool
 iolog_rename(const char *from, const char *to)
 {
     bool ok, uid_changed = false;
-    debug_decl(iolog_rename, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_rename, SUDO_DEBUG_UTIL);
 
     ok = rename(from, to) == 0;
     if (!ok && errno == EACCES) {
@@ -299,7 +299,7 @@ iolog_set_defaults(void)
 void
 iolog_set_maxseq(unsigned int newval)
 {
-    debug_decl(iolog_set_maxseq, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_set_maxseq, SUDO_DEBUG_UTIL);
 
     /* Clamp to SESSID_MAX as documented. */
     if (newval > SESSID_MAX)
@@ -315,7 +315,7 @@ iolog_set_maxseq(unsigned int newval)
 void
 iolog_set_owner(uid_t uid, gid_t gid)
 {
-    debug_decl(iolog_set_owner, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_set_owner, SUDO_DEBUG_UTIL);
 
     iolog_uid = uid;
     if (!iolog_gid_set)
@@ -330,7 +330,7 @@ iolog_set_owner(uid_t uid, gid_t gid)
 void
 iolog_set_gid(gid_t gid)
 {
-    debug_decl(iolog_set_gid, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_set_gid, SUDO_DEBUG_UTIL);
 
     iolog_gid = gid;
     iolog_gid_set = true;
@@ -344,7 +344,7 @@ iolog_set_gid(gid_t gid)
 void
 iolog_set_mode(mode_t mode)
 {
-    debug_decl(iolog_set_mode, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_set_mode, SUDO_DEBUG_UTIL);
 
     /* I/O log files must be readable and writable by owner. */
     iolog_filemode = S_IRUSR|S_IWUSR;
@@ -368,7 +368,7 @@ iolog_set_mode(mode_t mode)
 void
 iolog_set_compress(bool newval)
 {
-    debug_decl(iolog_set_compress, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_set_compress, SUDO_DEBUG_UTIL);
     iolog_compress = newval;
     debug_return;
 }
@@ -379,7 +379,7 @@ iolog_set_compress(bool newval)
 void
 iolog_set_flush(bool newval)
 {
-    debug_decl(iolog_set_flush, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_set_flush, SUDO_DEBUG_UTIL);
     iolog_flush = newval;
     debug_return;
 }
@@ -393,7 +393,7 @@ iolog_openat(int dfd, const char *path, int flags)
 {
     int fd;
     mode_t omask = S_IRWXG|S_IRWXO;
-    debug_decl(iolog_openat, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_openat, SUDO_DEBUG_UTIL);
 
     if (ISSET(flags, O_CREAT)) {
 	/* umask must not be more restrictive than the file modes. */
@@ -433,7 +433,7 @@ iolog_nextid(char *iolog_dir, char sessid[7])
     bool ret = false;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    debug_decl(iolog_nextid, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_nextid, SUDO_DEBUG_UTIL);
 
     /*
      * Create I/O log directory if it doesn't already exist.
@@ -525,7 +525,7 @@ iolog_mkpath(char *path)
 {
     size_t len;
     bool ret;
-    debug_decl(iolog_mkpath, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_mkpath, SUDO_DEBUG_UTIL);
 
     /*
      * Create path and intermediate subdirs as needed.
@@ -553,7 +553,7 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
     int flags;
     const char *file;
     unsigned char magic[2];
-    debug_decl(iolog_open, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_open, SUDO_DEBUG_UTIL);
 
     if (mode[0] == 'r') {
 	flags = mode[1] == '+' ? O_RDWR : O_RDONLY;
@@ -571,6 +571,7 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 	debug_return_bool(false);
     }
 
+    iol->writable = false;
     iol->compressed = false;
     if (iol->enabled) {
 	int fd = iolog_openat(dfd, file, flags);
@@ -597,7 +598,14 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 	    else
 #endif
 		iol->fd.f = fdopen(fd, mode);
-	    if (iol->fd.v == NULL) {
+	    if (iol->fd.v != NULL) {
+		switch ((flags & O_ACCMODE)) {
+		case O_WRONLY:
+		case O_RDWR:
+		    iol->writable = true;
+		    break;
+		}
+	    } else {
 		int save_errno = errno;
 		close(fd);
 		errno = save_errno;
@@ -621,9 +629,14 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 static const char *
 gzstrerror(gzFile file)
 {
+    const char *errstr;
     int errnum;
 
-    return gzerror(file, &errnum);
+    errstr = gzerror(file, &errnum);
+    if (errnum == Z_ERRNO)
+	errstr = strerror(errno);
+
+    return errstr;
 }
 #endif /* HAVE_ZLIB_H */
 
@@ -634,14 +647,25 @@ bool
 iolog_close(struct iolog_file *iol, const char **errstr)
 {
     bool ret = true;
-    debug_decl(iolog_close, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_close, SUDO_DEBUG_UTIL);
 
 #ifdef HAVE_ZLIB_H
     if (iol->compressed) {
-	if (gzclose(iol->fd.g) != Z_OK) {
+	int errnum;
+
+	/* Must check error indicator before closing. */
+	if (iol->writable) {
+	    if (gzflush(iol->fd.g, Z_SYNC_FLUSH) != Z_OK) {
+		ret = false;
+		if (errstr != NULL)
+		    *errstr = gzstrerror(iol->fd.g);
+	    }
+	}
+	errnum = gzclose(iol->fd.g);
+	if (ret && errnum != Z_OK) {
 	    ret = false;
 	    if (errstr != NULL)
-		*errstr = gzstrerror(iol->fd.g);
+		*errstr = errnum == Z_ERRNO ? strerror(errno) : "unknown error";
 	}
     } else
 #endif
@@ -661,7 +685,7 @@ off_t
 iolog_seek(struct iolog_file *iol, off_t offset, int whence)
 {
     off_t ret;
-    //debug_decl(iolog_seek, SUDO_DEBUG_UTIL)
+    //debug_decl(iolog_seek, SUDO_DEBUG_UTIL);
 
 #ifdef HAVE_ZLIB_H
     if (iol->compressed)
@@ -684,7 +708,7 @@ iolog_seek(struct iolog_file *iol, off_t offset, int whence)
 void
 iolog_rewind(struct iolog_file *iol)
 {
-    debug_decl(iolog_rewind, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_rewind, SUDO_DEBUG_UTIL);
 
 #ifdef HAVE_ZLIB_H
     if (iol->compressed)
@@ -704,7 +728,7 @@ iolog_read(struct iolog_file *iol, void *buf, size_t nbytes,
     const char **errstr)
 {
     ssize_t nread;
-    debug_decl(iolog_read, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_read, SUDO_DEBUG_UTIL);
 
     if (nbytes > UINT_MAX) {
 	errno = EINVAL;
@@ -740,7 +764,7 @@ iolog_write(struct iolog_file *iol, const void *buf, size_t len,
     const char **errstr)
 {
     ssize_t ret;
-    debug_decl(iolog_write, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_write, SUDO_DEBUG_UTIL);
 
     if (len > UINT_MAX) {
 	errno = EINVAL;
@@ -797,7 +821,7 @@ bool
 iolog_eof(struct iolog_file *iol)
 {
     bool ret;
-    debug_decl(iolog_eof, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_eof, SUDO_DEBUG_UTIL);
 
 #ifdef HAVE_ZLIB_H
     if (iol->compressed)
@@ -816,7 +840,7 @@ iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes,
     const char **errstr)
 {
     char *str;
-    debug_decl(iolog_gets, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_gets, SUDO_DEBUG_UTIL);
 
     if (nbytes > UINT_MAX) {
 	errno = EINVAL;
@@ -853,7 +877,7 @@ iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info,
     char * const *av;
     FILE *fp;
     int error, fd;
-    debug_decl(iolog_info_write_log, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_info_write_log, SUDO_DEBUG_UTIL);
 
     fd = iolog_openat(dfd, "log", O_CREAT|O_TRUNC|O_WRONLY);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
@@ -900,7 +924,7 @@ const char *
 iolog_fd_to_name(int iofd)
 {
     const char *ret;
-    debug_decl(iolog_fd_to_name, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_fd_to_name, SUDO_DEBUG_UTIL);
 
     switch (iofd) {
     case IOFD_STDIN:

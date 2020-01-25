@@ -68,7 +68,7 @@ static int
 suspend(int signo, struct sudo_conv_callback *callback)
 {
     int ret = 0;
-    debug_decl(suspend, SUDO_DEBUG_CONV)
+    debug_decl(suspend, SUDO_DEBUG_CONV);
 
     if (callback != NULL && SUDO_API_VERSION_GET_MAJOR(callback->version) != SUDO_CONV_CALLBACK_VERSION_MAJOR) {
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
@@ -93,7 +93,7 @@ suspend(int signo, struct sudo_conv_callback *callback)
 static void
 tgetpass_display_error(enum tgetpass_errval errval)
 {
-    debug_decl(tgetpass_display_error, SUDO_DEBUG_CONV)
+    debug_decl(tgetpass_display_error, SUDO_DEBUG_CONV);
 
     switch (errval) {
     case TGP_ERRVAL_NOERROR:
@@ -126,7 +126,7 @@ tgetpass(const char *prompt, int timeout, int flags,
     int i, input, output, save_errno, ttyfd;
     bool need_restart, neednl = false;
     enum tgetpass_errval errval;
-    debug_decl(tgetpass, SUDO_DEBUG_CONV)
+    debug_decl(tgetpass, SUDO_DEBUG_CONV);
 
     (void) fflush(stdout);
 
@@ -294,7 +294,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     enum tgetpass_errval errval;
     int pfd[2], status;
     pid_t child;
-    debug_decl(sudo_askpass, SUDO_DEBUG_CONV)
+    debug_decl(sudo_askpass, SUDO_DEBUG_CONV);
 
     /* Set SIGCHLD handler to default since we call waitpid() below. */
     memset(&sa, 0, sizeof(sa));
@@ -373,7 +373,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback,
     ssize_t nr = -1;
     char *cp = buf;
     char c = '\0';
-    debug_decl(getln, SUDO_DEBUG_CONV)
+    debug_decl(getln, SUDO_DEBUG_CONV);
 
     *errval = TGP_ERRVAL_NOERROR;
 

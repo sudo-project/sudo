@@ -31,7 +31,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#if defined(HAVE_KINFO_PROC_44BSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC2_NETBSD2)
+#if defined(HAVE_KINFO_PROC_44BSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC2_NETBSD)
 # include <sys/sysctl.h>
 #elif defined(HAVE_KINFO_PROC_FREEBSD)
 # include <sys/param.h>
@@ -92,7 +92,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
     int mib[6], rc;
-    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL);
 
     /*
      * Lookup start time for pid via sysctl.
@@ -145,7 +145,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     char path[PATH_MAX];
     ssize_t nread;
     int fd, ret = -1;
-    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL);
 
     /* Determine the start time from pr_start in /proc/pid/psinfo. */
     (void)snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)pid);
@@ -178,7 +178,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     int ret = -1;
     int fd = -1;
     long tps;
-    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL);
 
     /*
      * Start time is in ticks per second on Linux.
@@ -275,7 +275,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
 {
     struct pst_status pstat;
     int rc;
-    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL);
 
     /*
      * Determine the start time from pst_start in struct pst_status.
@@ -302,7 +302,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
 int
 get_starttime(pid_t pid, struct timespec *starttime)
 {
-    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
 	"process start time not supported by sudo on this system");

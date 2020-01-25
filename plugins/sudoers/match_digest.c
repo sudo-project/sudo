@@ -50,7 +50,7 @@ digest_matches(int fd, const char *file, const struct command_digest *digest)
     unsigned char *sudoers_digest = NULL;
     bool matched = false;
     size_t digest_len;
-    debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
 
     if (fd == -1)
 	goto done;

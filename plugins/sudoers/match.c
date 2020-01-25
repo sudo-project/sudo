@@ -76,7 +76,7 @@ user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
     const char *shost = parse_tree->shost ? parse_tree->shost : user_srunhost;
     int matched = UNSPEC;
     struct alias *a;
-    debug_decl(user_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(user_matches, SUDOERS_DEBUG_MATCH);
 
     switch (m->type) {
 	case ALL:
@@ -120,7 +120,7 @@ userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 {
     struct member *m;
     int matched = UNSPEC;
-    debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH);
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	if ((matched = user_matches(parse_tree, pw, m)) != UNSPEC)
@@ -133,7 +133,7 @@ struct gid_list *
 runas_getgroups(void)
 {
     const struct passwd *pw;
-    debug_decl(runas_getgroups, SUDOERS_DEBUG_MATCH)
+    debug_decl(runas_getgroups, SUDOERS_DEBUG_MATCH);
 
     if (def_preserve_groups) {
 	sudo_gidlist_addref(user_gid_list);
@@ -162,7 +162,7 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
     struct member *m;
     struct alias *a;
     int rc;
-    debug_decl(runaslist_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(runaslist_matches, SUDOERS_DEBUG_MATCH);
 
     if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) || !ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED)) {
 	/* If no runas user or runas group listed in sudoers, use default. */
@@ -295,7 +295,7 @@ hostlist_matches_int(struct sudoers_parse_tree *parse_tree,
 {
     struct member *m;
     int matched = UNSPEC;
-    debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH);
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	matched = host_matches(parse_tree, pw, lhost, shost, m);
@@ -329,7 +329,7 @@ host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 {
     struct alias *a;
     int matched = UNSPEC;
-    debug_decl(host_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(host_matches, SUDOERS_DEBUG_MATCH);
 
     switch (m->type) {
 	case ALL:
@@ -374,7 +374,7 @@ cmndlist_matches(struct sudoers_parse_tree *parse_tree,
 {
     struct member *m;
     int matched = UNSPEC;
-    debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH);
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	matched = cmnd_matches(parse_tree, m);
@@ -394,7 +394,7 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
     struct alias *a;
     struct sudo_command *c;
     int rc, matched = UNSPEC;
-    debug_decl(cmnd_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(cmnd_matches, SUDOERS_DEBUG_MATCH);
 
     switch (m->type) {
 	case ALL:
@@ -426,7 +426,7 @@ hostname_matches(const char *shost, const char *lhost, const char *pattern)
 {
     const char *host;
     bool rc;
-    debug_decl(hostname_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(hostname_matches, SUDOERS_DEBUG_MATCH);
 
     host = strchr(pattern, '.') != NULL ? lhost : shost;
     if (has_meta(pattern)) {
@@ -450,7 +450,7 @@ userpw_matches(const char *sudoers_user, const char *user, const struct passwd *
     const char *errstr;
     uid_t uid;
     bool rc;
-    debug_decl(userpw_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(userpw_matches, SUDOERS_DEBUG_MATCH);
 
     if (pw != NULL && *sudoers_user == '#') {
 	uid = (uid_t) sudo_strtoid(sudoers_user + 1, &errstr);
@@ -480,7 +480,7 @@ group_matches(const char *sudoers_group, const struct group *gr)
     const char *errstr;
     gid_t gid;
     bool rc;
-    debug_decl(group_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(group_matches, SUDOERS_DEBUG_MATCH);
 
     if (*sudoers_group == '#') {
 	gid = (gid_t) sudo_strtoid(sudoers_group + 1, &errstr);
@@ -509,7 +509,7 @@ usergr_matches(const char *group, const char *user, const struct passwd *pw)
 {
     bool matched = false;
     struct passwd *pw0 = NULL;
-    debug_decl(usergr_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(usergr_matches, SUDOERS_DEBUG_MATCH);
 
     /* Make sure we have a valid usergroup, sudo style */
     if (*group++ != '%') {
@@ -566,7 +566,7 @@ static bool
 valid_domain(const char *domain)
 {
     const char *cp;
-    debug_decl(valid_domain, SUDOERS_DEBUG_MATCH)
+    debug_decl(valid_domain, SUDOERS_DEBUG_MATCH);
 
     for (cp = domain; *cp != '\0'; cp++) {
 	/* Check for illegal characters, Linux may use "(none)". */
@@ -586,7 +586,7 @@ sudo_getdomainname(void)
 {
     static char *domain;
     static bool initialized;
-    debug_decl(sudo_getdomainname, SUDOERS_DEBUG_MATCH)
+    debug_decl(sudo_getdomainname, SUDOERS_DEBUG_MATCH);
 
     if (!initialized) {
 	size_t host_name_max;
@@ -624,7 +624,7 @@ sudo_getdomainname(void)
 const char *
 sudo_getdomainname(void)
 {
-    debug_decl(sudo_getdomainname, SUDOERS_DEBUG_MATCH)
+    debug_decl(sudo_getdomainname, SUDOERS_DEBUG_MATCH);
     debug_return_ptr(NULL);
 }
 #endif /* HAVE_GETDOMAINNAME || SI_SRPC_DOMAIN */
@@ -641,7 +641,7 @@ netgr_matches(const char *netgr, const char *lhost, const char *shost, const cha
     const char *domain;
 #endif
     bool rc = false;
-    debug_decl(netgr_matches, SUDOERS_DEBUG_MATCH)
+    debug_decl(netgr_matches, SUDOERS_DEBUG_MATCH);
 
     if (!def_use_netgroups) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "netgroups are disabled");

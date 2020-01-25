@@ -52,6 +52,16 @@ still allow people to get their work done."
 	    sudoersdir="/private${sudoersdir}"
 	    ;;
 	esac
+	case "$sysconfdir" in
+	/etc|/etc/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/etc; then
+		mv ${pp_destdir}/etc ${pp_destdir}/private/etc
+	    fi
+	    sysconfdir="/private${sysconfdir}"
+	    ;;
+	esac
 	case "$vardir" in
 	/var|/var/*)
 	    mkdir -p ${pp_destdir}/private
@@ -90,6 +100,8 @@ still allow people to get their work done."
 %else
 	# For all but RPM and Debian we copy sudoers in a post-install script.
 	rm -f ${pp_destdir}$sudoersdir/sudoers
+	# We install sudo.conf from the example dir in a post-install script.
+	rm -f ${pp_destdir}$sysconfdir/sudo.conf
 %endif
 
 %if [deb]
@@ -358,6 +370,7 @@ still allow people to get their work done."
 	/etc/pam.d/*		0644 volatile,optional
 %if [rpm,deb]
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
+	$sysconfdir/sudo.conf 0644 root: volatile
 %else
 	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid
 %endif
@@ -413,17 +426,26 @@ still allow people to get their work done."
 	fi
 
 %post [!rpm,deb]
-	# Don't overwrite an existing sudoers file
+	# Don't overwrite existing sudoers or sudo.conf files
 %if [solaris]
 	sudoersdir=${PKG_INSTALL_ROOT}%{sudoersdir}
+	sysconfdir=${PKG_INSTALL_ROOT}%{sysconfdir}
+	exampledir=${PKG_INSTALL_ROOT}%{exampledir}
 %else
 	sudoersdir=%{sudoersdir}
+	sysconfdir=%{sysconfdir}
+	exampledir=%{exampledir}
 %endif
 	if test ! -r $sudoersdir/sudoers; then
 		cp $sudoersdir/sudoers.dist $sudoersdir/sudoers
 		chmod %{sudoers_mode} $sudoersdir/sudoers
 		chown %{sudoers_uid} $sudoersdir/sudoers
 		chgrp %{sudoers_gid} $sudoersdir/sudoers
+	fi
+	if test ! -r $sysconfdir/sudo.conf; then
+		cp $exampledir/sudo.conf $sysconfdir/sudo.conf
+		chmod 644 $sysconfdir/sudo.conf
+		chown root $sysconfdir/sudo.conf
 	fi
 
 %post [deb]

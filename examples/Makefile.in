@@ -21,10 +21,13 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-docdir = @docdir@
-exampledir = @exampledir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+exampledir = @exampledir@
+docdir = @docdir@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
@@ -48,7 +51,7 @@ install_gid = 0
 
 SHELL = @SHELL@
 
-EXAMPLES = $(srcdir)/pam.conf $(srcdir)/sudo.conf $(srcdir)/sudoers \
+EXAMPLES = $(srcdir)/pam.conf sudo.conf $(srcdir)/sudoers \
 	   $(srcdir)/syslog.conf
  
 VERSION = @PACKAGE_VERSION@
@@ -60,6 +63,9 @@ depend:
 
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file examples/Makefile
+
+sudo.conf: $(srcdir)/sudo.conf.in
+	cd $(top_builddir) && ./config.status --file examples/sudo.conf
 
 pre-install:
 
@@ -74,6 +80,8 @@ install-includes:
 
 install-doc: install-dirs
 	for f in $(EXAMPLES); do $(INSTALL) $(INSTALL_OWNER) -m 0644 $$f $(DESTDIR)$(exampledir); done
+	test -r $(DESTDIR)$(sysconfdir)/sudo.conf || \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0644 sudo.conf $(DESTDIR)$(sysconfdir)
 
 install-plugin:
 

@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -116,6 +116,8 @@ AC_SUBST([exampledir])
 AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
 AC_SUBST([SIGNAME])
+AC_SUBST([PYTHON_PLUGIN_SRC])
+
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -1495,7 +1497,7 @@ AC_ARG_ENABLE(openssl,
 		AC_DEFINE(HAVE_OPENSSL)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
-		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
+		    SUDO_APPEND_LIBPATH(LDFLAGS, [${enableval}/lib])
 		fi
 		;;
  esac
@@ -1510,7 +1512,7 @@ AC_ARG_ENABLE(gcrypt,
 		AC_DEFINE(HAVE_GCRYPT)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
-		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
+		    SUDO_APPEND_LIBPATH(LDFLAGS, [${enableval}/lib])
 		fi
 		;;
  esac
@@ -2187,6 +2189,9 @@ case "$host" in
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
 
+		# For reallocarray()
+		AC_DEFINE([_OPENBSD_SOURCE])
+
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
@@ -2506,6 +2511,56 @@ else
 fi
 
 dnl
+dnl Python plugin support
+dnl
+AC_MSG_CHECKING(whether to compile python plugin support)
+AC_ARG_ENABLE(python,
+[AS_HELP_STRING([--enable-python], [Compile python plugin support])],
+[ case "$enableval" in
+    yes|no)
+        AC_MSG_RESULT($enableval)
+        USE_PYTHON=$enableval
+        ;;
+    *)
+        AC_MSG_WARN([Ignoring unknown argument to --enable-python: $enableval])
+        ;;
+  esac
+], AC_MSG_RESULT(no))
+
+if test ${USE_PYTHON-'no'} = "yes"; then
+    AM_PATH_PYTHON([3])
+
+    AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
+    AC_ARG_VAR([PYTHON_LIBS], [Linker flags for python, bypassing python-config])
+    AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
+
+    AS_IF([test -z "$PYTHON_INCLUDE" || test -z "$PYTHON_LIBS"], [
+      AS_IF([test -z "$PYTHON_CONFIG"], [
+        AC_PATH_PROGS([PYTHON_CONFIG],
+                      [python$PYTHON_VERSION-config python-config],
+                      [no],
+                      [`dirname $PYTHON`])
+        AS_IF([test "$PYTHON_CONFIG" = no], [AC_MSG_ERROR([cannot find python-config for $PYTHON.])])
+      ])
+    ])
+
+    AS_IF([test -z "$PYTHON_INCLUDE"], [
+      AC_MSG_CHECKING([python include flags])
+      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags`
+      AC_MSG_RESULT([$PYTHON_INCLUDE])
+    ])
+
+    AS_IF([test -z "$PYTHON_LIBS"], [
+      AC_MSG_CHECKING([python linker flags])
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags`
+      AC_MSG_RESULT([$PYTHON_LIBS])
+    ])
+
+    PYTHON_PLUGIN_SRC=plugins/python
+    AC_CONFIG_FILES([$PYTHON_PLUGIN_SRC/Makefile])
+fi
+
+dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
@@ -2522,6 +2577,10 @@ case "$host_os" in
 	fi
 	;;
 esac
+AC_CHECK_FUNCS([cfmakeraw], [], [
+    AC_LIBOBJ(cfmakeraw)
+    SUDO_APPEND_COMPAT_EXP(sudo_cfmakeraw)
+])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
@@ -2564,6 +2623,10 @@ AC_CHECK_FUNCS([getdelim], [], [
     AC_LIBOBJ(getdelim)
     SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
+])
+AC_CHECK_FUNCS([getusershell], [], [
+    AC_LIBOBJ(getusershell)
+    SUDO_APPEND_COMPAT_EXP(sudo_getusershell)
 ])
 AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
@@ -2892,9 +2955,19 @@ AC_INCLUDES_DEFAULT
 #include <$ac_header_dirent>
 ])
 dnl
-dnl Check for SSL_CTX_set_ciphersuites supported by OpenSSL 1.1 and higher
+dnl Check for functions only present in OpenSSL 1.1 and above
 dnl
-AC_CHECK_LIB(ssl, SSL_CTX_set_ciphersuites, [AC_DEFINE(HAVE_SSL_CTX_SET_CIPHERSUITES)], [], [crypto])
+if test "${enable_openssl-no}" != no; then
+    OLIBS="$LIBS"
+    LIBS="$LIBS $LIBTLS"
+    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method])
+    # SSL_CTX_set_min_proto_version may be a macro
+    AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <openssl/ssl.h>
+    ])
+    LIBS="$OLIBS"
+fi
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
@@ -4108,6 +4181,19 @@ if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes" -a -n "$GCC"; then
 fi
 
 dnl
+dnl We want to use DT_RUNPATH in preference to DT_RPATH in ELF binaries.
+dnl Otherwise, LD_LIBRARY_PATH does not work when running the tests.
+dnl We don't do this on NetBSD where RPATH already supports LD_LIBRARY_PATH.
+dnl
+case "$OS" in
+    netbsd)
+	;;
+    *)
+	AX_CHECK_LINK_FLAG([-Wl,--enable-new-dtags], [AX_APPEND_FLAG([-Wl,--enable-new-dtags], [LDFLAGS])])
+	;;
+esac
+
+dnl
 dnl Check for symbol visibility support.
 dnl This test relies on AC_LANG_WERROR
 dnl
@@ -4506,11 +4592,13 @@ dnl
 dnl Substitute into the Makefile and man pages
 dnl
 if test X"$INIT_SCRIPT" != X""; then
-    AC_CONFIG_FILES([init.d/$INIT_SCRIPT])
+    AC_CONFIG_FILES([etc/init.d/$INIT_SCRIPT])
 elif test X"$TMPFILES_D" != X""; then
-    AC_CONFIG_FILES([init.d/sudo.conf])
+    AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+
 AC_OUTPUT
 
 dnl
@@ -4658,7 +4746,8 @@ AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-st
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
-AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function.])
+AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
+
 dnl
 dnl Bits to copy verbatim into config.h.in
 dnl
@@ -4673,6 +4762,11 @@ AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 /* Enable BSD extensions on systems that have them.  */
 #ifndef _BSD_SOURCE
 # undef _BSD_SOURCE
+#endif
+
+/* Enable OpenBSD extensions on NetBSD.  */
+#ifndef _OPENBSD_SOURCE
+# undef _OPENBSD_SOURCE
 #endif
 
 /* Enable BSD types on IRIX.  */

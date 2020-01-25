@@ -845,7 +845,7 @@ static void
 send_command_status(struct exec_closure_pty *ec, int type, int val)
 {
     struct monitor_message *msg;
-    debug_decl(send_command, SUDO_DEBUG_EXEC)
+    debug_decl(send_command, SUDO_DEBUG_EXEC);
 
     if ((msg = calloc(1, sizeof(*msg))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -869,7 +869,7 @@ static void
 schedule_signal(struct exec_closure_pty *ec, int signo)
 {
     char signame[SIG2STR_MAX];
-    debug_decl(schedule_signal, SUDO_DEBUG_EXEC)
+    debug_decl(schedule_signal, SUDO_DEBUG_EXEC);
 
     if (signo == SIGCONT_FG)
 	strlcpy(signame, "CONT_FG", sizeof(signame));
@@ -890,7 +890,7 @@ backchannel_cb(int fd, int what, void *v)
     struct exec_closure_pty *ec = v;
     struct command_status cstat;
     ssize_t nread;
-    debug_decl(backchannel_cb, SUDO_DEBUG_EXEC)
+    debug_decl(backchannel_cb, SUDO_DEBUG_EXEC);
 
     /*
      * Read command status from the monitor.
@@ -985,7 +985,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
 {
     int n, status;
     pid_t pid;
-    debug_decl(handle_sigchld_pty, SUDO_DEBUG_EXEC)
+    debug_decl(handle_sigchld_pty, SUDO_DEBUG_EXEC);
 
     /*
      * Monitor process was signaled; wait for it as needed.
@@ -1037,7 +1037,7 @@ signal_cb_pty(int signo, int what, void *v)
     struct sudo_ev_siginfo_container *sc = v;
     struct exec_closure_pty *ec = sc->closure;
     char signame[SIG2STR_MAX];
-    debug_decl(signal_cb_pty, SUDO_DEBUG_EXEC)
+    debug_decl(signal_cb_pty, SUDO_DEBUG_EXEC);
 
     if (ec->monitor_pid == -1)
 	debug_return;
@@ -1090,7 +1090,7 @@ fwdchannel_cb(int sock, int what, void *v)
     char signame[SIG2STR_MAX];
     struct monitor_message *msg;
     ssize_t nsent;
-    debug_decl(fwdchannel_cb, SUDO_DEBUG_EXEC)
+    debug_decl(fwdchannel_cb, SUDO_DEBUG_EXEC);
 
     while ((msg = TAILQ_FIRST(&ec->monitor_messages)) != NULL) {
 	switch (msg->cstat.type) {
@@ -1147,7 +1147,7 @@ static void
 fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     struct command_details *details, pid_t ppgrp, int backchannel)
 {
-    debug_decl(fill_exec_closure_pty, SUDO_DEBUG_EXEC)
+    debug_decl(fill_exec_closure_pty, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
     ec->cmnd_pid = -1;
@@ -1261,7 +1261,7 @@ static void
 free_exec_closure_pty(struct exec_closure_pty *ec)
 {
     struct monitor_message *msg;
-    debug_decl(free_exec_closure_pty, SUDO_DEBUG_EXEC)
+    debug_decl(free_exec_closure_pty, SUDO_DEBUG_EXEC);
 
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->backchannel_event);
@@ -1303,7 +1303,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     struct stat sb;
     pid_t ppgrp;
     int sv[2];
-    debug_decl(exec_pty, SUDO_DEBUG_EXEC)
+    debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /*
      * Allocate a pty.

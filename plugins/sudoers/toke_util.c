@@ -52,7 +52,7 @@ fill_txt(const char *src, size_t len, size_t olen)
 {
     char *dst;
     int h;
-    debug_decl(fill_txt, SUDOERS_DEBUG_PARSER)
+    debug_decl(fill_txt, SUDOERS_DEBUG_PARSER);
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
@@ -87,7 +87,7 @@ bool
 append(const char *src, size_t len)
 {
     int olen = 0;
-    debug_decl(append, SUDOERS_DEBUG_PARSER)
+    debug_decl(append, SUDOERS_DEBUG_PARSER);
 
     if (sudoerslval.string != NULL)
 	olen = strlen(sudoerslval.string);
@@ -103,7 +103,7 @@ fill_cmnd(const char *src, size_t len)
 {
     char *dst;
     size_t i;
-    debug_decl(fill_cmnd, SUDOERS_DEBUG_PARSER)
+    debug_decl(fill_cmnd, SUDOERS_DEBUG_PARSER);
 
     arg_len = arg_size = 0;
 
@@ -148,7 +148,7 @@ fill_args(const char *s, size_t len, int addspace)
 {
     unsigned int new_len;
     char *p;
-    debug_decl(fill_args, SUDOERS_DEBUG_PARSER)
+    debug_decl(fill_args, SUDOERS_DEBUG_PARSER);
 
     if (arg_size == 0) {
 	addspace = 0;
@@ -196,7 +196,7 @@ bool
 ipv6_valid(const char *s)
 {
     int nmatch = 0;
-    debug_decl(ipv6_valid, SUDOERS_DEBUG_PARSER)
+    debug_decl(ipv6_valid, SUDOERS_DEBUG_PARSER);
 
     for (; *s != '\0'; s++) {
 	if (s[0] == ':' && s[1] == ':') {

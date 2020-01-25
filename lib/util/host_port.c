@@ -42,7 +42,7 @@ sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport)
 {
     char *port, *host = str;
     bool ret = false;
-    debug_decl(sudo_parse_host_port, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_parse_host_port, SUDO_DEBUG_UTIL);
 
     /* Check for IPv6 address like [::0] followed by optional port */
     if (*host == '[') {

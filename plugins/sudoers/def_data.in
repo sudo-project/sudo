@@ -372,3 +372,22 @@ log_servers
 log_server_timeout
 	T_TIMEOUT|T_BOOL
 	"Sudo log server timeout in seconds: %u"
+log_server_keepalive
+	T_FLAG
+	"Enable SO_KEEPALIVE socket option on the socket connected to the logserver"
+log_server_cabundle
+	T_STR|T_BOOL|T_PATH
+	"Path to the audit server's CA bundle file: %s"
+log_server_peer_cert
+	T_STR|T_BOOL|T_PATH
+	"Path to the sudoers certificate file: %s"
+log_server_peer_key
+	T_STR|T_BOOL|T_PATH
+	"Path to the sudoers private key file: %s"
+runas_allow_unknown_id
+	T_FLAG
+	"Allow the use of unknown runas user and/or group ID"
+runas_check_shell
+	T_FLAG
+	"Only permit running commands as a user with a valid shell"
+

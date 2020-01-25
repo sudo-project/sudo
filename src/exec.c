@@ -60,7 +60,7 @@ close_fds(struct command_details *details, int errfd)
 {
     int fd, maxfd;
     unsigned char *debug_fds;
-    debug_decl(close_fds, SUDO_DEBUG_EXEC)
+    debug_decl(close_fds, SUDO_DEBUG_EXEC);
 
     if (details->closefrom < 0)
 	debug_return;
@@ -89,7 +89,7 @@ static bool
 exec_setup(struct command_details *details, int errfd)
 {
     bool ret = false;
-    debug_decl(exec_setup, SUDO_DEBUG_EXEC)
+    debug_decl(exec_setup, SUDO_DEBUG_EXEC);
 
     if (details->pw != NULL) {
 #ifdef HAVE_PROJECT_H
@@ -239,7 +239,7 @@ done:
 void
 exec_cmnd(struct command_details *details, int errfd)
 {
-    debug_decl(exec_cmnd, SUDO_DEBUG_EXEC)
+    debug_decl(exec_cmnd, SUDO_DEBUG_EXEC);
 
     restore_signals();
     if (exec_setup(details, errfd) == true) {
@@ -270,7 +270,7 @@ sudo_terminated(struct command_status *cstat)
 {
     int signo;
     bool sigtstp = false;
-    debug_decl(sudo_terminated, SUDO_DEBUG_EXEC)
+    debug_decl(sudo_terminated, SUDO_DEBUG_EXEC);
 
     for (signo = 0; signo < NSIG; signo++) {
 	if (signal_pending(signo)) {
@@ -346,7 +346,7 @@ sudo_needs_pty(struct command_details *details)
 int
 sudo_execute(struct command_details *details, struct command_status *cstat)
 {
-    debug_decl(sudo_execute, SUDO_DEBUG_EXEC)
+    debug_decl(sudo_execute, SUDO_DEBUG_EXEC);
 
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {

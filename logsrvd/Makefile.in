@@ -21,9 +21,12 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-devdir = @devdir@
-top_builddir = @top_builddir@
+abs_srcdir = @abs_srcdir@
 top_srcdir = @top_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
+devdir = @devdir@
 incdir = $(top_srcdir)/include
 rundir = @rundir@
 cross_compiling = @CROSS_COMPILING@
@@ -120,8 +123,8 @@ VERSION = @PACKAGE_VERSION@
 all: $(PROGS)
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) logsrvd/Makefile.in
+	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	    --builddir=$(abs_top_builddir) logsrvd/Makefile.in
 	cd $(top_builddir) && ./config.status --file logsrvd/Makefile
 
 Makefile: $(srcdir)/Makefile.in
@@ -185,8 +188,8 @@ pvs-studio: $(POBJS)
 check:
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) \
-	    *.lo *.o *.la *.a *.i *.plog stamp-* core *.core core.* nohup.out
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) *.lo *.o *.la
+	-rm -f *.i *.plog stamp-* core *.core core.*
 
 mostlyclean: clean
 
@@ -254,18 +257,20 @@ logsrv_util.i: $(srcdir)/logsrv_util.c $(incdir)/compat/stdbool.h \
 logsrv_util.plog: logsrv_util.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrv_util.c --i-file $< --output-file $@
 logsrvd.o: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
-           $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
-           $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
-           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/compat/stdbool.h $(incdir)/hostcheck.h \
+           $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd.c
 logsrvd.i: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
-           $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
-           $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
-           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/compat/stdbool.h $(incdir)/hostcheck.h \
+           $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \

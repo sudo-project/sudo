@@ -73,7 +73,7 @@ strlist_copy(InfoMessage__StringList *strlist)
 {
     char **dst, **src = strlist->strings;
     size_t i, len = strlist->n_strings;
-    debug_decl(strlist_copy, SUDO_DEBUG_UTIL)
+    debug_decl(strlist_copy, SUDO_DEBUG_UTIL);
 
     dst = reallocarray(NULL, len + 1, sizeof(char *));
     if (dst == NULL) {
@@ -107,7 +107,7 @@ void
 iolog_details_free(struct iolog_details *details)
 {
     int i;
-    debug_decl(iolog_details_free, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_details_free, SUDO_DEBUG_UTIL);
 
     if (details != NULL) {
 	free(details->iolog_path);
@@ -138,7 +138,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 {
     size_t idx;
     bool ret = false;
-    debug_decl(iolog_details_fill, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_details_fill, SUDO_DEBUG_UTIL);
 
     memset(details, 0, sizeof(*details));
 
@@ -383,7 +383,7 @@ fill_seq(char *str, size_t strsize, void *v)
     struct iolog_path_closure *closure = v;
     char *sessid = closure->details->sessid;
     int len;
-    debug_decl(fill_seq, SUDO_DEBUG_UTIL)
+    debug_decl(fill_seq, SUDO_DEBUG_UTIL);
 
     if (sessid[0] == '\0') {
 	if (!iolog_nextid(closure->iolog_dir, sessid))
@@ -406,7 +406,7 @@ fill_user(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
     const struct iolog_details *details = closure->details;
-    debug_decl(fill_user, SUDO_DEBUG_UTIL)
+    debug_decl(fill_user, SUDO_DEBUG_UTIL);
 
     if (details->submituser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -421,7 +421,7 @@ fill_group(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
     const struct iolog_details *details = closure->details;
-    debug_decl(fill_group, SUDO_DEBUG_UTIL)
+    debug_decl(fill_group, SUDO_DEBUG_UTIL);
 
     if (details->submitgroup == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -436,7 +436,7 @@ fill_runas_user(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
     const struct iolog_details *details = closure->details;
-    debug_decl(fill_runas_user, SUDO_DEBUG_UTIL)
+    debug_decl(fill_runas_user, SUDO_DEBUG_UTIL);
 
     if (details->runuser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -451,7 +451,7 @@ fill_runas_group(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
     const struct iolog_details *details = closure->details;
-    debug_decl(fill_runas_group, SUDO_DEBUG_UTIL)
+    debug_decl(fill_runas_group, SUDO_DEBUG_UTIL);
 
     /* FIXME: rungroup not guaranteed to be set */
     if (details->rungroup == NULL) {
@@ -467,7 +467,7 @@ fill_hostname(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
     const struct iolog_details *details = closure->details;
-    debug_decl(fill_hostname, SUDO_DEBUG_UTIL)
+    debug_decl(fill_hostname, SUDO_DEBUG_UTIL);
 
     if (details->submithost == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -482,7 +482,7 @@ fill_command(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
     const struct iolog_details *details = closure->details;
-    debug_decl(fill_command, SUDO_DEBUG_UTIL)
+    debug_decl(fill_command, SUDO_DEBUG_UTIL);
 
     if (details->command == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -515,7 +515,7 @@ create_iolog_path(struct connection_closure *closure)
     struct iolog_path_closure path_closure;
     char expanded_dir[PATH_MAX], expanded_file[PATH_MAX], pathbuf[PATH_MAX];
     size_t len;
-    debug_decl(create_iolog_path, SUDO_DEBUG_UTIL)
+    debug_decl(create_iolog_path, SUDO_DEBUG_UTIL);
 
     path_closure.details = details;
     path_closure.iolog_dir = expanded_dir;
@@ -583,16 +583,17 @@ iolog_details_write(struct iolog_details *details,
      struct connection_closure *closure)
 {
     struct iolog_info log_info;
-    debug_decl(iolog_details_write, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_details_write, SUDO_DEBUG_UTIL);
 
     /* Convert to iolog_info */
     memset(&log_info, 0, sizeof(log_info));
+    log_info.cwd = details->cwd;
     log_info.user = details->submituser;
     log_info.runas_user = details->runuser;
     log_info.runas_group = details->rungroup;
     log_info.tty = details->ttyname;
-    log_info.cwd = details->cwd;
     log_info.cmd = details->command;
+    log_info.tstamp = details->submit_time;
     log_info.lines = details->lines;
     log_info.cols = details->columns;
 
@@ -603,7 +604,7 @@ iolog_details_write(struct iolog_details *details,
 static bool
 iolog_create(int iofd, struct connection_closure *closure)
 {
-    debug_decl(iolog_create, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_create, SUDO_DEBUG_UTIL);
 
     if (iofd < 0 || iofd >= IOFD_MAX) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -621,7 +622,7 @@ iolog_close_all(struct connection_closure *closure)
 {
     const char *errstr;
     int i;
-    debug_decl(iolog_close, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_close, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!closure->iolog_files[i].enabled)
@@ -640,7 +641,7 @@ iolog_close_all(struct connection_closure *closure)
 bool
 iolog_init(AcceptMessage *msg, struct connection_closure *closure)
 {
-    debug_decl(iolog_init, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_init, SUDO_DEBUG_UTIL);
 
     /* Create I/O log path */
     if (!create_iolog_path(closure))
@@ -673,7 +674,7 @@ iolog_copy(struct iolog_file *src, struct iolog_file *dst, off_t remainder,
 {
     char buf[64 * 1024];
     ssize_t nread;
-    debug_decl(iolog_copy, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_copy, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"copying %lld bytes", (long long)remainder);
@@ -706,7 +707,7 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
     const char *name, *errstr;
     char tmpdir[PATH_MAX];
     bool ret = false;
-    debug_decl(iolog_rewrite, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_rewrite, SUDO_DEBUG_UTIL);
 
     /* Parse timing file until we reach the target point. */
     /* TODO: use iolog_seekto with a callback? */
@@ -853,7 +854,7 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     struct timespec target;
     struct stat sb;
     int iofd;
-    debug_decl(iolog_restart, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_restart, SUDO_DEBUG_UTIL);
 
     target.tv_sec = msg->resume_point->tv_sec;
     target.tv_nsec = msg->resume_point->tv_nsec;
@@ -924,7 +925,7 @@ bad:
 static void
 update_elapsed_time(TimeSpec *delta, struct timespec *elapsed)
 {
-    debug_decl(update_elapsed_time, SUDO_DEBUG_UTIL)
+    debug_decl(update_elapsed_time, SUDO_DEBUG_UTIL);
 
     /* Cannot use timespecadd since msg doesn't use struct timespec. */
     elapsed->tv_sec += delta->tv_sec;
@@ -943,7 +944,7 @@ store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     const char *errstr;
     char tbuf[1024];
     int len;
-    debug_decl(store_iobuf, SUDO_DEBUG_UTIL)
+    debug_decl(store_iobuf, SUDO_DEBUG_UTIL);
 
     /* Open log file as needed. */
     if (!closure->iolog_files[iofd].enabled) {
@@ -991,7 +992,7 @@ store_suspend(CommandSuspend *msg, struct connection_closure *closure)
     const char *errstr;
     char tbuf[1024];
     int len;
-    debug_decl(store_suspend, SUDO_DEBUG_UTIL)
+    debug_decl(store_suspend, SUDO_DEBUG_UTIL);
 
     /* Format timing data including suspend signal. */
     len = snprintf(tbuf, sizeof(tbuf), "%d %lld.%09d %s\n", IO_EVENT_SUSPEND,
@@ -1024,7 +1025,7 @@ store_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
     const char *errstr;
     char tbuf[1024];
     int len;
-    debug_decl(store_winsize, SUDO_DEBUG_UTIL)
+    debug_decl(store_winsize, SUDO_DEBUG_UTIL);
 
     /* Format timing data including new window size. */
     len = snprintf(tbuf, sizeof(tbuf), "%d %lld.%09d %d %d\n", IO_EVENT_WINSIZE,

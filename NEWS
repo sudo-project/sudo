@@ -1,3 +1,52 @@
+What's new in Sudo 1.8.30
+
+ * Fixed a warning on macOS introduced in sudo 1.8.29 when sudo
+   attempts to set the open file limit to unlimited.  Bug #904.
+
+ * Sudo now closes file descriptors before changing uids.  This
+   prevents a non-root process from interfering with sudo's ability
+   to close file descriptors on systems that support the prlimit(2)
+   system call.
+
+ * Sudo now treats an attempt to run "sudo sudoedit" as simply
+   "sudoedit".  If the sudoers file contains a fully-qualified path
+   to sudoedit, sudo will now treat it simply as "sudoedit" (with
+   no path).  Visudo will will now treat a fully-qualified path
+   to sudoedit as an error.  Bug #871.
+
+ * Fixed a bug introduced in sudo 1.8.28 where sudo would warn about
+   a missing /etc/environment file on AIX and Linux when PAM is not
+   enabled.  Bug #907
+
+ * Fixed a bug on Linux introduced in sudo 1.8.29 that prevented
+   the askpass program from running due to an unlimited stack size
+   resource limit.  Bug #908.
+
+ * If a group provider plugin has optional arguments, the argument list
+   passed to the plugin is now NULL terminated as per the documentation.
+
+ * The user's time stamp file is now only updated if both authentication
+   and approval phases succeed.  This is consistent with the behavior
+   of sudo prior to version 1.8.23.  Bug #910
+
+ * The new allow_unknown_runas_id sudoers setting can be used to
+   enable or disable the use of unknown user or group IDs.  Previously,
+   sudo would always allow unknown user or group IDs if the sudoers
+   entry permitted it, including via the "ALL" alias.  As of sudo
+   1.8.30, the admin must explicitly enable support for unknown IDs.
+
+ * The new runas_check_shell sudoers setting can be used to require
+   that the runas user have a shell listed in the /etc/shells file.
+   On many systems, users such as "bin", do not have a valid shell
+   and this flag can be used to prevent commands from being run as
+   those users.
+
+ * Fixed a problem restoring the SELinux tty context during reboot
+   if mctransd is killed before sudo finishes.  GitHub Issue #17.
+
+ * Fixed an intermittent warning on NetBSD when sudo restores the
+   initial stack size limit.
+
 What's new in Sudo 1.8.29
 
  * The cvtsudoers command will now reject non-LDIF input when converting

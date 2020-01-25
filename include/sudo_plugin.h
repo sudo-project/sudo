@@ -58,7 +58,7 @@ struct sudo_conv_message {
  * for memset_s() when clearing passwords returned by the conversation
  * function.
  */
-#define SUDO_CONV_REPL_MAX	255
+#define SUDO_CONV_REPL_MAX	1023
 
 struct sudo_conv_reply {
     char *reply;
@@ -138,7 +138,7 @@ struct sudo_plugin_event {
     int (*set)(struct sudo_plugin_event *pev, int fd, int events, sudo_plugin_ev_callback_t callback, void *closure);
     int (*add)(struct sudo_plugin_event *pev, struct timespec *timeout);
     int (*del)(struct sudo_plugin_event *pev);
-    int (*timeleft)(struct sudo_plugin_event *pev, struct timespec *ts);
+    int (*pending)(struct sudo_plugin_event *pev, int events, struct timespec *ts);
     int (*fd)(struct sudo_plugin_event *pev);
     void (*setbase)(struct sudo_plugin_event *pev, void *base);
     void (*loopbreak)(struct sudo_plugin_event *pev);

@@ -317,6 +317,12 @@ extern int errno;
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
 
+/* Older systems may not support WCONTINUED */
+#ifndef WCONTINUED
+# define WCONTINUED	0
+# define WIFCONTINUED(x)	0
+#endif
+
 /* W_EXITCODE is not POSIX but the encoding of wait status is. */
 #ifndef W_EXITCODE
 # define W_EXITCODE(ret, sig)	((ret) << 8 | (sig))
@@ -385,6 +391,24 @@ int getdomainname(char *, size_t);
 #endif /* __hpux && !__LP64__ */
 
 /*
+ * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)
+ */
+#if defined(HAVE_OPENSSL)
+# ifndef HAVE_X509_STORE_CTX_GET0_CERT
+#  define X509_STORE_CTX_get0_cert(x)   ((x)->cert)
+# endif
+# ifndef HAVE_ASN1_STRING_GET0_DATA
+#  define ASN1_STRING_get0_data(x)      ASN1_STRING_data(x)
+# endif
+# ifndef HAVE_TLS_CLIENT_METHOD
+#  define TLS_client_method()           SSLv23_client_method()
+# endif
+# ifndef HAVE_TLS_SERVER_METHOD
+#  define TLS_server_method()           SSLv23_server_method()
+# endif
+#endif /* HAVE_OPENSSL */
+
+/*
  * Functions "missing" from libc.
  * All libc replacements are prefixed with "sudo_" to avoid namespace issues.
  */
@@ -392,7 +416,13 @@ int getdomainname(char *, size_t);
 struct passwd;
 struct stat;
 struct timespec;
+struct termios;
 
+#ifndef HAVE_CFMAKERAW
+__dso_public void sudo_cfmakeraw(struct termios *term);
+# undef cfmakeraw
+# define cfmakeraw(_a) sudo_cfmakeraw((_a))
+#endif /* HAVE_CFMAKERAW */
 #ifndef HAVE_CLOSEFROM
 __dso_public void sudo_closefrom(int);
 # undef closefrom
@@ -413,6 +443,17 @@ __dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FIL
 # undef getdelim
 # define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
 #endif /* HAVE_GETDELIM */
+#ifndef HAVE_GETUSERSHELL
+__dso_public char *sudo_getusershell(void);
+# undef getusershell
+# define getusershell() sudo_getusershell()
+__dso_public void sudo_setusershell(void);
+# undef setusershell
+# define setusershell() sudo_setusershell()
+__dso_public void sudo_endusershell(void);
+# undef endusershell
+# define endusershell() sudo_endusershell()
+#endif /* HAVE_GETUSERSHELL */
 #ifndef HAVE_UTIMENSAT
 __dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
 # undef utimensat
@@ -521,7 +562,7 @@ __dso_public int sudo_str2sig(const char *signame, int *signum);
 # undef str2sig
 # define str2sig(_a, _b) sudo_str2sig((_a), (_b))
 #endif /* HAVE_STR2SIG */
-#if !defined(HAVE_INET_NTOP) && defined(SUDO_NET_IFS_C)
+#if !defined(HAVE_INET_NTOP) && defined(NEED_INET_NTOP)
 __dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
 # undef inet_ntop
 # define inet_ntop(_a, _b, _c, _d) sudo_inet_ntop((_a), (_b), (_c), (_d))

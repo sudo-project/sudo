@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +41,8 @@
 #include <signal.h>
 #include <pwd.h>
 #include <grp.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 #include "sudoers.h"
 #include "sudo_iolog.h"
@@ -72,7 +75,7 @@ cb_maxseq(const union sudo_defs_val *sd_un)
 {
     const char *errstr;
     unsigned int value;
-    debug_decl(cb_maxseq, SUDO_DEBUG_UTIL)
+    debug_decl(cb_maxseq, SUDOERS_DEBUG_UTIL);
 
     value = sudo_strtonum(sd_un->str, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
@@ -96,7 +99,7 @@ cb_iolog_user(const union sudo_defs_val *sd_un)
 {
     const char *name = sd_un->str;
     struct passwd *pw;
-    debug_decl(cb_iolog_user, SUDOERS_DEBUG_UTIL)
+    debug_decl(cb_iolog_user, SUDOERS_DEBUG_UTIL);
 
     /* NULL name means reset to default. */
     if (name == NULL) {
@@ -121,7 +124,7 @@ cb_iolog_group(const union sudo_defs_val *sd_un)
 {
     const char *name = sd_un->str;
     struct group *gr;
-    debug_decl(cb_iolog_group, SUDOERS_DEBUG_UTIL)
+    debug_decl(cb_iolog_group, SUDOERS_DEBUG_UTIL);
 
     /* NULL name means reset to default. */
     if (name == NULL) {
@@ -158,7 +161,7 @@ deserialize_stringlist(const char *s)
     struct sudoers_string *str;
     const char *s_end = s + strlen(s);
     const char *cp, *ep;
-    debug_decl(deserialize_stringlist, SUDOERS_DEBUG_UTIL)
+    debug_decl(deserialize_stringlist, SUDOERS_DEBUG_UTIL);
 
     if ((strlist = str_list_alloc()) == NULL)
 	debug_return_ptr(NULL);
@@ -201,7 +204,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     id_t id;
     uid_t runas_uid = 0;
     gid_t runas_gid = 0;
-    debug_decl(iolog_deserialize_info, SUDOERS_DEBUG_UTIL)
+    debug_decl(iolog_deserialize_info, SUDOERS_DEBUG_UTIL);
 
     details->lines = 24;
     details->cols = 80;
@@ -363,6 +366,29 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    TIME_T_MAX, NULL);
 		continue;
 	    }
+        if (strncmp(*cur, "log_server_keepalive=", sizeof("log_server_keepalive=") - 1) == 0) {
+            int val = sudo_strtobool(*cur + sizeof("log_server_keepalive=") - 1);
+            if (val != -1) {
+                details->tcp_keepalive = val;
+            } else {
+                details->tcp_keepalive = true;
+            }
+            continue;
+        }
+#if defined(HAVE_OPENSSL)
+	    if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
+            details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
+            continue;
+        }
+	    if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
+            details->cert_file = *cur + sizeof("log_server_peer_cert=") - 1;
+            continue;
+        }
+	    if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
+            details->key_file = *cur + sizeof("log_server_peer_key=") - 1;
+            continue;
+        }
+#endif /* HAVE_OPENSSL */
 	    break;
 	case 'm':
 	    if (strncmp(*cur, "maxseq=", sizeof("maxseq=") - 1) == 0) {
@@ -448,7 +474,7 @@ static bool
 write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
 {
     struct iolog_info iolog_info;
-    debug_decl(write_info_log, SUDOERS_DEBUG_UTIL)
+    debug_decl(write_info_log, SUDOERS_DEBUG_UTIL);
 
     /* XXX - just use iolog_info in the first place? */
     memset(&iolog_info, 0, sizeof(iolog_info));
@@ -481,7 +507,7 @@ copy_vector_shallow(char * const *vec)
 {
     char **copy;
     size_t len;
-    debug_decl(copy_vector, SUDOERS_DEBUG_UTIL)
+    debug_decl(copy_vector, SUDOERS_DEBUG_UTIL);
 
     for (len = 0; vec[len] != NULL; len++)
 	continue;
@@ -502,7 +528,7 @@ sudoers_io_open_local(void)
     size_t len;
     int iolog_dir_fd = -1;
     int i, ret = -1;
-    debug_decl(sudoers_io_open_local, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_open_local, SUDOERS_DEBUG_PLUGIN);
 
     /* If no I/O log path defined we need to figure it out ourselves. */
     if (iolog_details.iolog_path == NULL) {
@@ -572,11 +598,13 @@ static int
 sudoers_io_open_remote(void)
 {
     int sock, ret = -1;
-    debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN)
+    struct sudoers_string *connected_server = NULL;
+
+    debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
     /* Connect to log server. */
-    sock = log_server_connect(iolog_details.log_servers,
-	&iolog_details.server_timeout);
+    sock = log_server_connect(iolog_details.log_servers, iolog_details.tcp_keepalive,
+	&iolog_details.server_timeout, &connected_server);
     if (sock == -1) {
 	/* TODO: support offline logs if server unreachable */
 	sudo_warnx(U_("unable to connect to log server"));
@@ -584,7 +612,8 @@ sudoers_io_open_remote(void)
 	goto done;
     }
 
-    if (!client_closure_fill(&client_closure, sock, &iolog_details, &sudoers_io)) {
+    if (!client_closure_fill(&client_closure, sock, connected_server,
+	    &iolog_details, &sudoers_io)) {
 	close(sock);
 	ret = -1;
 	goto done;
@@ -610,7 +639,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char * const *cur;
     const char *cp, *plugin_path = NULL;
     int ret = -1;
-    debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN);
 
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
@@ -711,21 +740,10 @@ sudoers_io_close(int exit_status, int error)
 {
     const char *errstr = NULL;
     int i;
-    debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN);
 
     if (iolog_remote) {
-	if (client_closure.disabled)
-	    goto done;
-
-	if (!fmt_exit_message(&client_closure, exit_status, error))
-	    goto done;
-
-	/*
-	 * Main sudo event loop exited, use our own mini event loop
-	 * to flush the write queue and read the final commit messages.
-	 */
-	if (!client_loop(&client_closure))
-	    goto done;
+	client_close(&client_closure, exit_status, error);
     } else {
 	for (i = 0; i < IOFD_MAX; i++) {
 	    if (iolog_files[i].fd.v == NULL)
@@ -734,8 +752,6 @@ sudoers_io_close(int exit_status, int error)
 	}
     }
 
-done:
-    client_closure_free(&client_closure);
     sudo_freepwcache();
     sudo_freegrcache();
 
@@ -754,7 +770,7 @@ done:
 static int
 sudoers_io_version(int verbose)
 {
-    debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN);
 
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
@@ -774,7 +790,7 @@ sudoers_io_log_local(int event, const char *buf, unsigned int len,
     struct iolog_file *iol;
     char tbuf[1024];
     int ret = -1;
-    debug_decl(sudoers_io_log_local, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_log_local, SUDOERS_DEBUG_PLUGIN);
 
     if (event < 0 || event >= IOFD_MAX) {
 	*errstr = NULL;
@@ -821,7 +837,7 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
     struct timespec *delay, const char **errstr)
 {
     int type, ret = -1;
-    debug_decl(sudoers_io_log_remote, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_log_remote, SUDOERS_DEBUG_PLUGIN);
 
     if (client_closure.disabled)
 	debug_return_int(1);
@@ -870,7 +886,7 @@ sudoers_io_log(const char *buf, unsigned int len, int event)
     struct timespec now, delay;
     const char *errstr = NULL;
     int ret = -1;
-    debug_decl(sudoers_io_log, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_log, SUDOERS_DEBUG_PLUGIN);
 
     if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
@@ -941,7 +957,7 @@ sudoers_io_change_winsize_local(unsigned int lines, unsigned int cols,
 {
     char tbuf[1024];
     int len, ret = -1;
-    debug_decl(sudoers_io_change_winsize_local, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_change_winsize_local, SUDOERS_DEBUG_PLUGIN);
 
     /* Write window change event to the timing file. */
     len = snprintf(tbuf, sizeof(tbuf), "%d %lld.%09ld %u %u\n",
@@ -967,7 +983,7 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
     struct timespec *delay, const char **errstr)
 {
     int ret = -1;
-    debug_decl(sudoers_io_change_winsize_remote, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_change_winsize_remote, SUDOERS_DEBUG_PLUGIN);
 
     if (client_closure.disabled)
 	debug_return_int(1);
@@ -991,7 +1007,7 @@ sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
     struct timespec now, delay;
     const char *errstr = NULL;
     int ret = -1;
-    debug_decl(sudoers_io_change_winsize, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_change_winsize, SUDOERS_DEBUG_PLUGIN);
 
     if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
@@ -1033,7 +1049,7 @@ sudoers_io_suspend_local(const char *signame, struct timespec *delay,
     unsigned int len;
     char tbuf[1024];
     int ret = -1;
-    debug_decl(sudoers_io_suspend_local, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_suspend_local, SUDOERS_DEBUG_PLUGIN);
 
     /* Write suspend event to the timing file. */
     len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%09ld %s\n",
@@ -1058,7 +1074,7 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
     const char **errstr)
 {
     int ret = -1;
-    debug_decl(sudoers_io_suspend_remote, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_suspend_remote, SUDOERS_DEBUG_PLUGIN);
 
     if (client_closure.disabled)
 	debug_return_int(1);
@@ -1083,7 +1099,7 @@ sudoers_io_suspend(int signo)
     char signame[SIG2STR_MAX];
     const char *errstr = NULL;
     int ret = -1;
-    debug_decl(sudoers_io_suspend, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_suspend, SUDOERS_DEBUG_PLUGIN);
 
     if (signo <= 0 || sig2str(signo, signame) == -1) {
 	sudo_warnx(U_("%s: internal error, invalid signal %d"),

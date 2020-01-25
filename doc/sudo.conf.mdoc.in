@@ -323,6 +323,35 @@ command is used to configure core dump behavior.
 This setting is only available in
 .Nm sudo
 version 1.8.4 and higher.
+.It developer_mode
+By default
+.Nm sudo
+refuses to load plugins which can be modified by other than the root user.
+The plugin should be owned by root and write access permissions should be
+disabled for
+.Dq group
+and
+.Sm off
+.Dq other
+\&.
+.Sm on
+To make development of a plugin easier, you can disable that by setting
+.Dq developer_mode
+option to true in
+.Nm sudo.conf
+as follows:
+.Bd -literal -offset indent
+Set developer_mode true
+.Ed
+.Pp
+Please note that this creates a security risk, so it is not recommended
+on critical systems such as a desktop machine for daily use, but is intended
+to be used in development environments (VM, container, etc).
+Before enabling developer mode, ensure you understand the implications.
+.Pp
+This setting is only available in
+.Nm sudo
+version 1.9.0 and higher.
 .It group_source
 .Nm sudo
 passes the invoking user's group list to the policy and I/O plugins.
@@ -580,12 +609,8 @@ front end configuration
 #
 # Default @sysconfdir@/sudo.conf file
 #
-# Format:
+# Sudo plugins:
 #   Plugin plugin_name plugin_path plugin_options ...
-#   Path askpass /path/to/askpass
-#   Path noexec /path/to/sudo_noexec.so
-#   Debug sudo /var/log/sudo_debug all@warn
-#   Set disable_coredump true
 #
 # The plugin_path is relative to @plugindir@ unless
 #   fully qualified.
@@ -593,17 +618,17 @@ front end configuration
 #   that contains the plugin interface structure.
 # The plugin_options are optional.
 #
-# The sudoers plugin is used by default if no Plugin lines are
-# present.
+# The sudoers plugin is used by default if no Plugin lines are present.
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 
 #
 # Sudo askpass:
+#   Path askpass /path/to/askpass
 #
 # An askpass helper program may be specified to provide a graphical
-# password prompt for "sudo -A" support.  Sudo does not ship with
-# its own askpass program but can use the OpenSSH askpass.
+# password prompt for "sudo -A" support.  Sudo does not ship with its
+# own askpass program but can use the OpenSSH askpass.
 #
 # Use the OpenSSH askpass
 #Path askpass /usr/X11R6/bin/ssh-askpass
@@ -612,22 +637,51 @@ Plugin sudoers_io sudoers.so
 #Path askpass /usr/libexec/openssh/gnome-ssh-askpass
 
 #
+# Sudo device search path:
+#   Path devsearch /dev/path1:/dev/path2:/dev
+#
+# A colon-separated list of paths to check when searching for a user's
+# terminal device.
+#
+#Path devsearch /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
+
+#
 # Sudo noexec:
+#   Path noexec /path/to/sudo_noexec.so
 #
 # Path to a shared library containing dummy versions of the execv(),
 # execve() and fexecve() library functions that just return an error.
 # This is used to implement the "noexec" functionality on systems that
-# support C<LD_PRELOAD> or its equivalent.
-# The compiled-in value is usually sufficient and should only be
-# changed if you rename or move the sudo_noexec.so file.
+# support LD_PRELOAD or its equivalent.
 #
-#Path noexec @noexec_file@
+# The compiled-in value is usually sufficient and should only be changed
+# if you rename or move the sudo_noexec.so file.
+#
+#Path noexec @plugindir@/sudo_noexec.so
+
+#
+# Sudo plugin directory:
+#   Path plugin_dir /path/to/plugins
+#
+# The default directory to use when searching for plugins that are
+# specified without a fully qualified path name.
+#
+#Path plugin_dir @plugindir@
+
+#
+# Sudo developer mode:
+#   Set developer_mode true|false
+#
+# Allow loading of plugins that are owned by non-root or are writable
+# by "group" or "other".  Should only be used during plugin development.
+#Set developer_mode true
 
 #
 # Core dumps:
+#   Set disable_coredump true|false
 #
-# By default, sudo disables core dumps while it is executing
-# (they are re-enabled for the command that is run).
+# By default, sudo disables core dumps while it is executing (they
+# are re-enabled for the command that is run).
 # To aid in debugging sudo problems, you may wish to enable core
 # dumps by setting "disable_coredump" to false.
 #
@@ -635,6 +689,7 @@ Plugin sudoers_io sudoers.so
 
 #
 # User groups:
+#   Set group_source static|dynamic|adaptive
 #
 # Sudo passes the user's group list to the policy plugin.
 # If the user is a member of the maximum number of groups (usually 16),
@@ -646,9 +701,34 @@ Plugin sudoers_io sudoers.so
 #   static   - use the user's list of groups returned by the kernel.
 #   dynamic  - query the group database to find the list of groups.
 #   adaptive - if user is in less than the maximum number of groups.
-#              use the kernel list, else query the group database.
+#	       use the kernel list, else query the group database.
 #
 #Set group_source static
+
+#
+# Sudo interface probing:
+#   Set probe_interfaces true|false
+#
+# By default, sudo will probe the system's network interfaces and
+# pass the IP address of each enabled interface to the policy plugin.
+# On systems with a large number of virtual interfaces this may take
+# a noticeable amount of time.
+#
+#Set probe_interfaces false
+
+#
+# Sudo debug files:
+#   Debug program /path/to/debug_log subsystem@priority[,subsyste@priority]
+#
+# Sudo and related programs support logging debug information to a file.
+# The program is typically sudo, sudoers.so, sudoreplay or visudo.
+#
+# Subsystems vary based on the program; "all" matches all subsystems.
+# Priority may be crit, err, warn, notice, diag, info, trace or debug.
+# Multiple subsystem@priority may be specified, separated by a comma.
+#
+#Debug sudo /var/log/sudo_debug all@debug
+#Debug sudoers.so /var/log/sudoers_debug all@debug
 .Ed
 .Sh SEE ALSO
 .Xr sudo_plugin @mansectform@ ,

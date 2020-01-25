@@ -138,7 +138,7 @@ main(int argc, char *argv[])
     const char *export_path = NULL;
     int ch, oldlocale, editor_argc, exitcode = 0;
     bool quiet, strict, fflag;
-    debug_decl(main, SUDOERS_DEBUG_MAIN)
+    debug_decl(main, SUDOERS_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {
@@ -311,7 +311,7 @@ get_editor(int *editor_argc, char ***editor_argv)
     const char *env_editor;
     static char *files[] = { "+1", "sudoers" };
     unsigned int whitelist_len = 0;
-    debug_decl(get_editor, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_editor, SUDOERS_DEBUG_UTIL);
 
     /* Build up editor whitelist from def_editor unless env_editor is set. */
     if (!def_env_editor) {
@@ -390,7 +390,7 @@ editor_supports_plus(const char *editor)
     const char *editor_base = strrchr(editor, '/');
     const char *cp;
     char **av;
-    debug_decl(editor_supports_plus, SUDOERS_DEBUG_UTIL)
+    debug_decl(editor_supports_plus, SUDOERS_DEBUG_UTIL);
 
     if (editor_base != NULL)
 	editor_base++;
@@ -431,7 +431,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     off_t orig_size;			/* starting size of sudoers file */
     struct stat sb;			/* stat buffer */
     bool ret = false;			/* return value */
-    debug_decl(edit_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(edit_sudoers, SUDOERS_DEBUG_UTIL);
 
     if (fstat(sp->fd, &sb) == -1)
 	sudo_fatal(U_("unable to stat %s"), sp->path);
@@ -557,7 +557,7 @@ done:
 static void
 check_defaults_and_aliases(bool strict, bool quiet)
 {
-    debug_decl(check_defaults_and_aliases, SUDOERS_DEBUG_UTIL)
+    debug_decl(check_defaults_and_aliases, SUDOERS_DEBUG_UTIL);
 
     if (!check_defaults(&parsed_policy, quiet)) {
 	struct defaults *d;
@@ -593,7 +593,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
     struct sudoersfile *sp, *last;
     FILE *fp;
     int ch, oldlocale;
-    debug_decl(reparse_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(reparse_sudoers, SUDOERS_DEBUG_UTIL);
 
     /*
      * Parse the edited sudoers files and do sanity checking
@@ -693,7 +693,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 {
     struct stat sb;
     bool ret = false;
-    debug_decl(install_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(install_sudoers, SUDOERS_DEBUG_UTIL);
 
     if (sp->tpath == NULL)
 	goto done;
@@ -806,7 +806,7 @@ static int
 whatnow(void)
 {
     int choice, c;
-    debug_decl(whatnow, SUDOERS_DEBUG_UTIL)
+    debug_decl(whatnow, SUDOERS_DEBUG_UTIL);
 
     for (;;) {
 	(void) fputs(_("What now? "), stdout);
@@ -838,7 +838,7 @@ static void
 setup_signals(void)
 {
     struct sigaction sa;
-    debug_decl(setup_signals, SUDOERS_DEBUG_UTIL)
+    debug_decl(setup_signals, SUDOERS_DEBUG_UTIL);
 
     /*
      * Setup signal handlers to cleanup nicely.
@@ -860,7 +860,7 @@ run_command(char *path, char **argv)
 {
     int status;
     pid_t pid, rv;
-    debug_decl(run_command, SUDOERS_DEBUG_UTIL)
+    debug_decl(run_command, SUDOERS_DEBUG_UTIL);
 
     switch (pid = sudo_debug_fork()) {
 	case -1:
@@ -892,7 +892,7 @@ check_owner(const char *path, bool quiet)
 {
     struct stat sb;
     bool ok = true;
-    debug_decl(check_owner, SUDOERS_DEBUG_UTIL)
+    debug_decl(check_owner, SUDOERS_DEBUG_UTIL);
 
     if (stat(path, &sb) == 0) {
 	if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
@@ -919,7 +919,7 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 {
     bool ok = false;
     int oldlocale;
-    debug_decl(check_syntax, SUDOERS_DEBUG_UTIL)
+    debug_decl(check_syntax, SUDOERS_DEBUG_UTIL);
 
     if (strcmp(sudoers_file, "-") == 0) {
 	sudoersin = stdin;
@@ -985,7 +985,7 @@ static bool
 lock_sudoers(struct sudoersfile *entry)
 {
     int ch;
-    debug_decl(lock_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(lock_sudoers, SUDOERS_DEBUG_UTIL);
 
     if (!sudo_lock_file(entry->fd, SUDO_TLOCK)) {
 	if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -1011,7 +1011,7 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
     struct sudoersfile *entry;
     FILE *fp;
     int open_flags;
-    debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL)
+    debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
 
     if (checkonly)
 	open_flags = O_RDONLY;
@@ -1063,7 +1063,7 @@ check_alias(char *name, int type, char *file, int lineno, bool strict, bool quie
     struct member *m;
     struct alias *a;
     int errors = 0;
-    debug_decl(check_alias, SUDOERS_DEBUG_ALIAS)
+    debug_decl(check_alias, SUDOERS_DEBUG_ALIAS);
 
     if ((a = alias_get(&parsed_policy, name, type)) != NULL) {
 	/* check alias contents */
@@ -1111,7 +1111,7 @@ check_aliases(bool strict, bool quiet)
     struct privilege *priv;
     struct userspec *us;
     int errors = 0;
-    debug_decl(check_aliases, SUDOERS_DEBUG_ALIAS)
+    debug_decl(check_aliases, SUDOERS_DEBUG_ALIAS);
 
     used_aliases = alloc_aliases();
     if (used_aliases == NULL) {
@@ -1184,7 +1184,7 @@ static void
 parse_sudoers_options(void)
 {
     struct plugin_info_list *plugins;
-    debug_decl(parse_sudoers_options, SUDOERS_DEBUG_UTIL)
+    debug_decl(parse_sudoers_options, SUDOERS_DEBUG_UTIL);
 
     plugins = sudo_conf_plugins();
     if (plugins) {

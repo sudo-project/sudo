@@ -1,3 +1,4 @@
+Set developer_mode false
 Set disable_coredump true
 Set group_source adaptive
 Set max_groups -1

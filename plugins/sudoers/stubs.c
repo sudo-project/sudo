@@ -94,7 +94,7 @@ void
 get_hostname(void)
 {
     char *cp;
-    debug_decl(get_hostname, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_hostname, SUDOERS_DEBUG_UTIL);
 
     if ((user_host = sudo_gethostname()) != NULL) {
 	if ((cp = strchr(user_host, '.'))) {

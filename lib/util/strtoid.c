@@ -84,7 +84,7 @@ sudo_strtoidx_v1(const char *p, const char *sep, char **endp, const char **errst
     const char *errstr;
     char *ep;
     id_t ret;
-    debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL);
 
     ret = sudo_strtonumx(p, INT_MIN, UINT_MAX, &ep, &errstr);
     if (errstr == NULL) {

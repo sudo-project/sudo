@@ -69,7 +69,7 @@ get_boottime(struct timespec *ts)
     long long llval;
     ssize_t len;
     FILE *fp;
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL);
 
     /* read btime from /proc/stat */
     fp = fopen("/proc/stat", "r");
@@ -107,7 +107,7 @@ get_boottime(struct timespec *ts)
     size_t size;
     int mib[2];
     struct timeval tv;
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL);
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
@@ -130,7 +130,7 @@ bool
 get_boottime(struct timespec *ts)
 {
     struct utmpx *ut, key;
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL);
 
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
@@ -151,7 +151,7 @@ bool
 get_boottime(struct timespec *ts)
 {
     struct utmp *ut, key;
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL);
 
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
@@ -171,7 +171,7 @@ get_boottime(struct timespec *ts)
 bool
 get_boottime(struct timespec *ts)
 {
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL);
     debug_return_bool(false);
 }
 #endif

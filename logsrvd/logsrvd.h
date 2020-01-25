@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -91,12 +91,21 @@ struct connection_closure {
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
 #if defined(HAVE_OPENSSL)
+    struct sudo_event *ssl_accept_ev;
     SSL *ssl;
 #endif
     const char *errstr;
     struct iolog_file iolog_files[IOFD_MAX];
+    bool read_instead_of_write;
+    bool write_instead_of_read;
+    bool temporary_write_event;
     int iolog_dir_fd;
     int sock;
+#ifdef HAVE_STRUCT_IN6_ADDR
+    char ipaddr[INET6_ADDRSTRLEN];
+#else
+    char ipaddr[INET_ADDRSTRLEN];
+#endif
     enum connection_status state;
 };
 
@@ -127,6 +136,7 @@ struct logsrvd_tls_config {
     char *dhparams_path;
     char *ciphers_v12;
     char *ciphers_v13;
+    bool verify;
     bool check_peer;
 };
 
@@ -167,7 +177,8 @@ bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct listen_address_list *logsrvd_conf_listen_address(void);
-int logsrvd_conf_get_sock_timeout(void);
+bool logsrvd_conf_tcp_keepalive(void);
+struct timespec *logsrvd_conf_get_sock_timeout(void);
 #if defined(HAVE_OPENSSL)
 bool logsrvd_conf_get_tls_opt(void);
 const struct logsrvd_tls_config *logsrvd_get_tls_config(void);

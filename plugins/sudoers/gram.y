@@ -911,7 +911,7 @@ group		:	ALIAS {
 void
 sudoerserror(const char *s)
 {
-    debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER)
+    debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER);
 
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
@@ -941,7 +941,7 @@ static struct defaults *
 new_default(char *var, char *val, short op)
 {
     struct defaults *d;
-    debug_decl(new_default, SUDOERS_DEBUG_PARSER)
+    debug_decl(new_default, SUDOERS_DEBUG_PARSER);
 
     if ((d = calloc(1, sizeof(struct defaults))) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -965,7 +965,7 @@ static struct member *
 new_member(char *name, int type)
 {
     struct member *m;
-    debug_decl(new_member, SUDOERS_DEBUG_PARSER)
+    debug_decl(new_member, SUDOERS_DEBUG_PARSER);
 
     if ((m = calloc(1, sizeof(struct member))) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -984,7 +984,7 @@ static struct command_digest *
 new_digest(int digest_type, char *digest_str)
 {
     struct command_digest *digest;
-    debug_decl(new_digest, SUDOERS_DEBUG_PARSER)
+    debug_decl(new_digest, SUDOERS_DEBUG_PARSER);
 
     if ((digest = malloc(sizeof(*digest))) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1015,7 +1015,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
     struct defaults *d, *next;
     struct member_list *binding;
     bool ret = true;
-    debug_decl(add_defaults, SUDOERS_DEBUG_PARSER)
+    debug_decl(add_defaults, SUDOERS_DEBUG_PARSER);
 
     if (defs != NULL) {
 	/*
@@ -1054,7 +1054,7 @@ static bool
 add_userspec(struct member *members, struct privilege *privs)
 {
     struct userspec *u;
-    debug_decl(add_userspec, SUDOERS_DEBUG_PARSER)
+    debug_decl(add_userspec, SUDOERS_DEBUG_PARSER);
 
     if ((u = calloc(1, sizeof(*u))) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1077,7 +1077,7 @@ add_userspec(struct member *members, struct privilege *privs)
 void
 free_member(struct member *m)
 {
-    debug_decl(free_member, SUDOERS_DEBUG_PARSER)
+    debug_decl(free_member, SUDOERS_DEBUG_PARSER);
 
     if (m->type == COMMAND) {
 	    struct sudo_command *c = (struct sudo_command *)m->name;
@@ -1101,7 +1101,7 @@ void
 free_members(struct member_list *members)
 {
     struct member *m;
-    debug_decl(free_members, SUDOERS_DEBUG_PARSER)
+    debug_decl(free_members, SUDOERS_DEBUG_PARSER);
 
     while ((m = TAILQ_FIRST(members)) != NULL) {
 	TAILQ_REMOVE(members, m, entries);
@@ -1116,7 +1116,7 @@ free_defaults(struct defaults_list *defs)
 {
     struct member_list *prev_binding = NULL;
     struct defaults *def;
-    debug_decl(free_defaults, SUDOERS_DEBUG_PARSER)
+    debug_decl(free_defaults, SUDOERS_DEBUG_PARSER);
 
     while ((def = TAILQ_FIRST(defs)) != NULL) {
 	TAILQ_REMOVE(defs, def, entries);
@@ -1129,7 +1129,7 @@ free_defaults(struct defaults_list *defs)
 void
 free_default(struct defaults *def, struct member_list **binding)
 {
-    debug_decl(free_default, SUDOERS_DEBUG_PARSER)
+    debug_decl(free_default, SUDOERS_DEBUG_PARSER);
 
     if (def->binding != *binding) {
 	*binding = def->binding;
@@ -1159,7 +1159,7 @@ free_privilege(struct privilege *priv)
 #ifdef HAVE_PRIV_SET
     char *privs = NULL, *limitprivs = NULL;
 #endif /* HAVE_PRIV_SET */
-    debug_decl(free_privilege, SUDOERS_DEBUG_PARSER)
+    debug_decl(free_privilege, SUDOERS_DEBUG_PARSER);
 
     free(priv->ldap_role);
     free_members(&priv->hostlist);
@@ -1214,7 +1214,7 @@ void
 free_userspecs(struct userspec_list *usl)
 {
     struct userspec *us;
-    debug_decl(free_userspecs, SUDOERS_DEBUG_PARSER)
+    debug_decl(free_userspecs, SUDOERS_DEBUG_PARSER);
 
     while ((us = TAILQ_FIRST(usl)) != NULL) {
 	TAILQ_REMOVE(usl, us, entries);
@@ -1229,7 +1229,7 @@ free_userspec(struct userspec *us)
 {
     struct privilege *priv;
     struct sudoers_comment *comment;
-    debug_decl(free_userspec, SUDOERS_DEBUG_PARSER)
+    debug_decl(free_userspec, SUDOERS_DEBUG_PARSER);
 
     free_members(&us->users);
     while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
@@ -1293,7 +1293,7 @@ bool
 init_parser(const char *path, bool quiet, bool strict)
 {
     bool ret = true;
-    debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
+    debug_decl(init_parser, SUDOERS_DEBUG_PARSER);
 
     free_parse_tree(&parsed_policy);
     init_lexer();

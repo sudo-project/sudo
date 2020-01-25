@@ -47,7 +47,7 @@ sudo_strtomode_v1(const char *cp, const char **errstr)
 {
     char *ep;
     long lval;
-    debug_decl(sudo_strtomode, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_strtomode, SUDO_DEBUG_UTIL);
 
     errno = 0;
     lval = strtol(cp, &ep, 8);
