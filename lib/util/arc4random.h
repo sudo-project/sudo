@@ -45,8 +45,12 @@ static pthread_mutex_t arc4random_mtx = PTHREAD_MUTEX_INITIALIZER;
 # define _ARC4_ATFORK(f)
 #endif
 
-#if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
-# define MAP_ANON MAP_ANONYMOUS
+#if !defined(MAP_ANON)
+# if defined(MAP_ANONYMOUS)
+#  define MAP_ANON MAP_ANONYMOUS
+# elif defined(MAP_SGI_ANYADDR)
+#  define MAP_ANON MAP_SGI_ANYADDR
+# endif
 #endif
 
 static inline void
