@@ -83,7 +83,6 @@ install-sh
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/arc4random.c
-lib/util/arc4random.h
 lib/util/arc4random_uniform.c
 lib/util/chacha_private.h
 lib/util/closefrom.c
