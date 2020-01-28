@@ -1146,6 +1146,7 @@ static bool
 cb_fqdn(const union sudo_defs_val *sd_un)
 {
     bool remote;
+    int rc;
     char *lhost, *shost;
     debug_decl(cb_fqdn, SUDOERS_DEBUG_PLUGIN);
 
@@ -1158,8 +1159,7 @@ cb_fqdn(const union sudo_defs_val *sd_un)
 
     /* First resolve user_host, setting user_host and user_shost. */
     if (resolve_host(user_host, &lhost, &shost) != 0) {
-	int rc = resolve_host(user_runhost, &lhost, &shost);
-	if (rc != 0) {
+	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
 	    gai_log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG, rc,
 		N_("unable to resolve host %s"), user_host);
 	    debug_return_bool(false);
@@ -1174,8 +1174,10 @@ cb_fqdn(const union sudo_defs_val *sd_un)
     /* Next resolve user_runhost, setting user_runhost and user_srunhost. */
     lhost = shost = NULL;
     if (remote) {
-	if (!resolve_host(user_runhost, &lhost, &shost)) {
-	    sudo_warnx(U_("unable to resolve host %s"), user_runhost);
+	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
+	    gai_log_warning(SLOG_NO_LOG|SLOG_RAW_MSG, rc,
+		N_("unable to resolve host %s"), user_runhost);
+	    debug_return_bool(false);
 	}
     } else {
 	/* Not remote, just use user_host. */
