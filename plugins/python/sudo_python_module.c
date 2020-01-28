@@ -183,7 +183,6 @@ python_sudo_options_as_dict(PyObject *py_self, PyObject *py_args)
     }
 
 cleanup:
-    Py_CLEAR(py_config_tuple);
     Py_CLEAR(py_config_tuple_iterator);
     Py_CLEAR(py_config);
     Py_CLEAR(py_splitted);
