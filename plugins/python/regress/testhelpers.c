@@ -64,7 +64,8 @@ create_str_array(size_t count, ...)
 
     char ** result = calloc(count, sizeof(char *));
     for (size_t i = 0; i < count; ++i) {
-        result[i] = va_arg(args, char *);
+        const char *str = va_arg(args, char *);
+        result[i] = (str == NULL ? NULL : strdup(str));
     }
 
     va_end(args);

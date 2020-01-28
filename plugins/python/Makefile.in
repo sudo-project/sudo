@@ -130,7 +130,7 @@ VERSION = @PACKAGE_VERSION@
 
 TEST_PROGS = check_python_examples
 
-CHECK_PYTHON_EXAMPLES_OBJS = check_python_examples.o iohelpers.o testhelpers.o
+CHECK_PYTHON_EXAMPLES_OBJS = check_python_examples.o iohelpers.o testhelpers.o pyhelpers.lo sudo_python_debug.lo
 
 all: python_plugin.la
 

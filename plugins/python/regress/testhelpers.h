@@ -166,7 +166,7 @@ int verify_str_set(char **actual_set, char **expected_set, const char *actual_va
     do { \
         char **expected_set = create_str_array(__VA_ARGS__); \
         VERIFY_TRUE(verify_str_set(actual_set, expected_set, #actual_set)); \
-        free(expected_set); \
+        str_array_free(&expected_set); \
     } while(false)
 
 #endif // PYTHON_TESTHELPERS
