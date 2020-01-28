@@ -21,6 +21,12 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
+#include "config.h"
+
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+#endif
+
 #include "logsrv_util.h"
 
 enum client_state {
@@ -35,6 +41,7 @@ enum client_state {
 };
 
 struct client_closure {
+    TAILQ_ENTRY(client_closure) entries;
     int sock;
     bool read_instead_of_write;
     bool write_instead_of_read;
@@ -46,12 +53,14 @@ struct client_closure {
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
 #if defined(HAVE_OPENSSL)
+    SSL *ssl;
     struct sudo_event *tls_connect_ev;
     bool tls_connect_state;
 #endif
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
     struct iolog_info *log_info;
+    struct iolog_file iolog_files[IOFD_MAX];
     const char *iolog_id;
     char *buf; /* XXX */
     size_t bufsize; /* XXX */
