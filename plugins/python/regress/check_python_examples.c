@@ -38,7 +38,7 @@ create_io_plugin_options(const char *log_path)
     static char logpath_keyvalue[PATH_MAX + 16];
     snprintf(logpath_keyvalue, sizeof(logpath_keyvalue), "LogPath=%s", log_path);
 
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         4,
         "ModulePath=" SRC_DIR "/example_io_plugin.py",
@@ -51,7 +51,7 @@ create_io_plugin_options(const char *log_path)
 void
 create_group_plugin_options(void)
 {
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         3,
         "ModulePath=" SRC_DIR "/example_group_plugin.py",
@@ -63,7 +63,7 @@ create_group_plugin_options(void)
 void
 create_debugging_plugin_options(void)
 {
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         3,
         "ModulePath=" SRC_DIR "/example_debugging.py",
@@ -78,7 +78,7 @@ create_conversation_plugin_options(void)
     static char logpath_keyvalue[PATH_MAX + 16];
     snprintf(logpath_keyvalue, sizeof(logpath_keyvalue), "LogPath=%s", data.tmp_dir);
 
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         4,
         "ModulePath=" SRC_DIR "/example_conversation.py",
@@ -91,7 +91,7 @@ create_conversation_plugin_options(void)
 void
 create_policy_plugin_options(void)
 {
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         3,
         "ModulePath=" SRC_DIR "/example_policy_plugin.py",
@@ -127,7 +127,6 @@ init(void)
     data.settings = create_str_array(1, NULL);
     data.user_info = create_str_array(1, NULL);
     data.command_info = create_str_array(1, NULL);
-    data.command_info = create_str_array(1, NULL);
     data.plugin_argc = 0;
     data.plugin_argv = create_str_array(1, NULL);
     data.user_env = create_str_array(1, NULL);
@@ -148,12 +147,15 @@ cleanup(int success)
         VERIFY_TRUE(rmdir_recursive(data.tmp_dir2));
     }
 
-    free(data.settings);
-    free(data.user_info);
-    free(data.command_info);
-    free(data.plugin_argv);
-    free(data.user_env);
-    free(data.plugin_options);
+    free(data.tmp_dir);
+    free(data.tmp_dir2);
+
+    str_array_free(&data.settings);
+    str_array_free(&data.user_info);
+    str_array_free(&data.command_info);
+    str_array_free(&data.plugin_argv);
+    str_array_free(&data.user_env);
+    str_array_free(&data.plugin_options);
 
     VERIFY_FALSE(Py_IsInitialized());
     return true;
@@ -192,11 +194,11 @@ check_example_io_plugin_command_log(void)
     const char *errstr = NULL;
     create_io_plugin_options(data.tmp_dir);
 
-    free(data.plugin_argv);
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 2;
     data.plugin_argv = create_str_array(3, "id", "--help", NULL);
 
-    free(data.command_info);
+    str_array_free(&data.command_info);
     data.command_info = create_str_array(3, "command=/bin/id", "runas_uid=0", NULL);
 
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
@@ -242,11 +244,11 @@ check_example_io_plugin_command_log_multiple(void)
     // open the first plugin and let it log to tmp_dir
     create_io_plugin_options(data.tmp_dir);
 
-    free(data.plugin_argv);
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 2;
     data.plugin_argv = create_str_array(3, "id", "--help", NULL);
 
-    free(data.command_info);
+    str_array_free(&data.command_info);
     data.command_info = create_str_array(3, "command=/bin/id", "runas_uid=0", NULL);
 
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
@@ -262,11 +264,11 @@ check_example_io_plugin_command_log_multiple(void)
     VERIFY_NOT_NULL(mkdtemp(data.tmp_dir2));
     create_io_plugin_options(data.tmp_dir2);
 
-    free(data.plugin_argv);
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 1;
     data.plugin_argv = create_str_array(2, "whoami", NULL);
 
-    free(data.command_info);
+    str_array_free(&data.command_info);
     data.command_info = create_str_array(3, "command=/bin/whoami", "runas_uid=1", NULL);
 
     VERIFY_INT(python_io2->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
@@ -308,11 +310,11 @@ check_example_io_plugin_failed_to_start_command(void)
 
     create_io_plugin_options(data.tmp_dir);
 
-    free(data.plugin_argv);
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 1;
     data.plugin_argv = create_str_array(2, "cmd", NULL);
 
-    free(data.command_info);
+    str_array_free(&data.command_info);
     data.command_info = create_str_array(3, "command=/usr/share/cmd", "runas_uid=0", NULL);
 
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
@@ -427,7 +429,7 @@ check_example_debugging(const char *debug_spec)
 
     create_debugging_plugin_options();
 
-    free(data.settings);
+    str_array_free(&data.settings);
     char *debug_flags_setting = NULL;
     VERIFY_TRUE(asprintf(&debug_flags_setting, "debug_flags=%s/debug.log %s", data.tmp_dir, debug_spec) >= 0);
 
@@ -466,7 +468,7 @@ check_loading_fails(const char *name)
 int
 check_loading_fails_with_missing_path(void)
 {
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(2, "ClassName=DebugDemoPlugin", NULL);
     return check_loading_fails("missing_path");
 }
@@ -474,7 +476,7 @@ check_loading_fails_with_missing_path(void)
 int
 check_loading_fails_with_missing_classname(void)
 {
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(2, "ModulePath=" SRC_DIR "/example_debugging.py", NULL);
     return check_loading_fails("missing_classname");
 }
@@ -482,7 +484,7 @@ check_loading_fails_with_missing_classname(void)
 int
 check_loading_fails_with_wrong_classname(void)
 {
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(3, "ModulePath=" SRC_DIR "/example_debugging.py",
                                               "ClassName=MispelledPluginName", NULL);
     return check_loading_fails("wrong_classname");
@@ -491,7 +493,7 @@ check_loading_fails_with_wrong_classname(void)
 int
 check_loading_fails_with_wrong_path(void)
 {
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(3, "ModulePath=/wrong_path.py", "ClassName=PluginName", NULL);
     return check_loading_fails("wrong_path");
 }
@@ -513,7 +515,7 @@ check_example_conversation_plugin_reason_log(int simulate_suspend, const char *d
 
     create_conversation_plugin_options();
 
-    free(data.plugin_argv); // have a command run
+    str_array_free(&data.plugin_argv); // have a command run
     data.plugin_argc = 1;
     data.plugin_argv = create_str_array(2, "/bin/whoami", NULL);
 
@@ -541,7 +543,7 @@ check_example_conversation_plugin_user_interrupts(void)
 
     create_conversation_plugin_options();
 
-    free(data.plugin_argv); // have a command run
+    str_array_free(&data.plugin_argv); // have a command run
     data.plugin_argc = 1;
     data.plugin_argv = create_str_array(2, "/bin/whoami", NULL);
 
@@ -592,10 +594,11 @@ check_example_policy_plugin_accepted_execution(void)
 
     create_policy_plugin_options();
 
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 2;
     data.plugin_argv = create_str_array(3, "/bin/whoami", "--help", NULL);
 
-    free(data.user_env);
+    str_array_free(&data.user_env);
     data.user_env = create_str_array(3, "USER_ENV1=VALUE1", "USER_ENV2=value2", NULL);
 
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
@@ -626,10 +629,10 @@ check_example_policy_plugin_accepted_execution(void)
     VERIFY_STDOUT(expected_path("check_example_policy_plugin_accepted_execution.stdout"));
     VERIFY_STDERR(expected_path("check_example_policy_plugin_accepted_execution.stderr"));
 
-    free(env_add);
-    free(user_env_out);
-    free(command_info_out);
-    free(argv_out);
+    str_array_free(&env_add);
+    str_array_free(&user_env_out);
+    str_array_free(&command_info_out);
+    str_array_free(&argv_out);
     return true;
 }
 
@@ -640,6 +643,7 @@ check_example_policy_plugin_failed_execution(void)
 
     create_policy_plugin_options();
 
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 2;
     data.plugin_argv = create_str_array(3, "/bin/id", "--help", NULL);
 
@@ -661,9 +665,9 @@ check_example_policy_plugin_failed_execution(void)
     VERIFY_STDOUT(expected_path("check_example_policy_plugin_failed_execution.stdout"));
     VERIFY_STDERR(expected_path("check_example_policy_plugin_failed_execution.stderr"));
 
-    free(user_env_out);
-    free(command_info_out);
-    free(argv_out);
+    str_array_free(&user_env_out);
+    str_array_free(&command_info_out);
+    str_array_free(&argv_out);
     return true;
 }
 
@@ -674,6 +678,7 @@ check_example_policy_plugin_denied_execution(void)
 
     create_policy_plugin_options();
 
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 1;
     data.plugin_argv = create_str_array(2, "/bin/passwd", NULL);
 
@@ -723,7 +728,7 @@ check_example_policy_plugin_list(void)
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, true, "testuser", &errstr), SUDO_RC_OK);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- with allowed program --\n");
-    free(data.plugin_argv);
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 3;
     data.plugin_argv = create_str_array(4, "/bin/id", "some", "arguments", NULL);
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, false, NULL, &errstr), SUDO_RC_OK);
@@ -732,7 +737,7 @@ check_example_policy_plugin_list(void)
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, true, NULL, &errstr), SUDO_RC_OK);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- with denied program --\n");
-    free(data.plugin_argv);
+    str_array_free(&data.plugin_argv);
     data.plugin_argc = 1;
     data.plugin_argv = create_str_array(2, "/bin/passwd", NULL);
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, false, NULL, &errstr), SUDO_RC_OK);
@@ -827,7 +832,7 @@ check_python_plugins_do_not_affect_each_other(void)
 
     // We test here that one plugin is not able to effect the environment of another
     // This is important so they do not ruin or depend on each other's state.
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         4,
         "ModulePath=" SRC_DIR "/regress/plugin_conflict.py",
@@ -840,7 +845,7 @@ check_python_plugins_do_not_affect_each_other(void)
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
 
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         4,
         "ModulePath=" SRC_DIR "/regress/plugin_conflict.py",
