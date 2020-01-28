@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 
@@ -71,14 +72,19 @@
 # define TLS_HANDSHAKE_TIMEO_SEC 10
 #endif
 
-static struct iolog_file iolog_files[IOFD_MAX];
+TAILQ_HEAD(connection_list, client_closure);
+static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
+
 static char *iolog_dir;
+static bool testrun = false;
+static int nr_of_conns = 1;
+static int finished_transmissions = 0;
 
 #if defined(HAVE_OPENSSL)
 static bool tls = false;
 static bool tls_reqcert = false;
+static bool tls_server_auth = false;
 static SSL_CTX *ssl_ctx = NULL;
-static SSL *ssl = NULL;
 const char *ca_bundle = NULL;
 const char *cert = NULL;
 const char *key = NULL;
@@ -86,6 +92,7 @@ const char *key = NULL;
 
 /* Server callback may redirect to client callback for TLS. */
 static void client_msg_cb(int fd, int what, void *v);
+static void server_msg_cb(int fd, int what, void *v);
 
 static void
 usage(bool fatal)
@@ -112,6 +119,7 @@ help(void)
 	"  -i, --iolog_id           remote ID of I/O log to be resumed\n"
 	"  -p, --port               port to use when connecting to host\n"
 	"  -r, --restart            restart previous I/O log transfer\n"
+	"  -t, --test               test audit server by sending selected I/O log n times in parallel\n"
 #if defined(HAVE_OPENSSL)
 	"  -b, --ca-bundle          certificate bundle file to verify server's cert against\n"
 	"  -c, --cert               certificate file for TLS handshake\n"
@@ -172,16 +180,18 @@ init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const
         }
     }
 
-    /* sets the location of the CA bundle file for verification purposes */
-    if (SSL_CTX_load_verify_locations(ctx, ca_bundle_file, NULL) <= 0) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "calling SSL_CTX_load_verify_locations() failed: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto bad;
-    }
+    if (tls_server_auth) {
+        /* sets the location of the CA bundle file for verification purposes */
+        if (SSL_CTX_load_verify_locations(ctx, ca_bundle_file, NULL) <= 0) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "calling SSL_CTX_load_verify_locations() failed: %s",
+                ERR_error_string(ERR_get_error(), NULL));
+            goto bad;
+        }
 
-    /* set verify server cert during the handshake */
-    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+        /* set verify server cert during the handshake */
+        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+    }
 
     goto exit;
 
@@ -207,12 +217,12 @@ tls_connect_cb(int sock, int what, void *v)
         goto bad;
     }
 
-    con_stat = SSL_connect(ssl);
+    con_stat = SSL_connect(closure->ssl);
 
     if (con_stat == 1) {
         closure->tls_connect_state = true;
     } else {
-        switch ((err = SSL_get_error(ssl, con_stat))) {
+        switch ((err = SSL_get_error(closure->ssl, con_stat))) {
             /* TLS connect successful */
             case SSL_ERROR_NONE:
                 closure->tls_connect_state = true;
@@ -310,12 +320,12 @@ do_tls_handshake(struct client_closure *closure)
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
-    if ((ssl = SSL_new(ssl_ctx)) == NULL) {
+    if ((closure->ssl = SSL_new(ssl_ctx)) == NULL) {
         sudo_warnx(U_("Unable to allocate ssl object: %s\n"),
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
     }
-    if (SSL_set_fd(ssl, closure->sock) <= 0) {
+    if (SSL_set_fd(closure->ssl, closure->sock) <= 0) {
         sudo_warnx(U_("Unable to attach socket to the ssl object: %s\n"),
             ERR_error_string(ERR_get_error(), NULL));
         goto bad;
@@ -324,8 +334,10 @@ do_tls_handshake(struct client_closure *closure)
     if (!tls_connect_async(closure))
         goto bad;
 
-    printf("Negotiated protocol version: %s\n", SSL_get_version(ssl));
-    printf("Negotiated ciphersuite: %s\n", SSL_get_cipher(ssl));
+    if (!testrun) {
+        printf("Negotiated protocol version: %s\n", SSL_get_version(closure->ssl));
+        printf("Negotiated ciphersuite: %s\n", SSL_get_cipher(closure->ssl));
+    }
 
     debug_return_bool(true);
 
@@ -398,17 +410,85 @@ connect_server(const char *host, const char *port)
 static void
 client_closure_free(struct client_closure *closure)
 {
-    debug_decl(client_closure_free, SUDO_DEBUG_UTIL);
+    debug_decl(connection_closure_free, SUDO_DEBUG_UTIL);
 
     if (closure != NULL) {
-	sudo_ev_free(closure->read_ev);
-	sudo_ev_free(closure->write_ev);
-	free(closure->read_buf.data);
-	free(closure->write_buf.data);
-	free(closure->buf);
+#if defined(HAVE_OPENSSL)
+        SSL_free(closure->ssl);
+#endif
+        TAILQ_REMOVE(&connections, closure, entries);
+        close(closure->sock);
+        free(closure->elapsed);
+        free(closure->restart);
+        sudo_ev_free(closure->read_ev);
+        sudo_ev_free(closure->write_ev);
+#if defined(HAVE_OPENSSL)
+        sudo_ev_free(closure->tls_connect_ev);
+#endif
+        free(closure->read_buf.data);
+        free(closure->write_buf.data);
+        free(closure);
     }
 
     debug_return;
+}
+
+/*
+ * Initialize a new client closure
+ */
+static struct client_closure *
+client_closure_alloc(int sock,
+    struct timespec *elapsed, struct timespec *restart, const char *iolog_id,
+    struct iolog_info *log_info)
+{
+    struct client_closure *closure;
+    debug_decl(client_closure_alloc, SUDO_DEBUG_UTIL);
+
+    if ((closure = calloc(1, sizeof(*closure))) == NULL)
+	debug_return_ptr(NULL);
+
+    closure->sock = sock;
+
+    TAILQ_INSERT_TAIL(&connections, closure, entries);
+
+    closure->state = RECV_HELLO;
+    closure->log_info = log_info;
+
+    closure->elapsed = malloc(sizeof(struct timespec));
+    closure->restart = malloc(sizeof(struct timespec));
+    closure->elapsed->tv_sec = elapsed->tv_sec;
+    closure->elapsed->tv_nsec = elapsed->tv_nsec;
+    closure->restart->tv_sec = restart->tv_sec;
+    closure->restart->tv_nsec = restart->tv_nsec;
+
+    closure->iolog_id = iolog_id;
+
+    closure->read_buf.size = 8 * 1024;
+    closure->read_buf.data = malloc(closure->read_buf.size);
+    if (closure->read_buf.data == NULL)
+	goto bad;
+
+    closure->read_ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST,
+	server_msg_cb, closure);
+    if (closure->read_ev == NULL)
+	goto bad;
+
+    closure->write_ev = sudo_ev_alloc(sock, SUDO_EV_WRITE|SUDO_EV_PERSIST,
+	client_msg_cb, closure);
+    if (closure->write_ev == NULL)
+	goto bad;
+
+#if defined(HAVE_OPENSSL)
+    closure->tls_connect_ev = sudo_ev_alloc(sock, SUDO_EV_WRITE,
+	tls_connect_cb, closure);
+    if (closure->tls_connect_ev == NULL)
+	goto bad;
+#endif
+
+    debug_return_ptr(closure);
+bad:
+    client_closure_free(closure);
+    debug_return_ptr(NULL);
 }
 
 /*
@@ -422,7 +502,7 @@ read_io_buf(struct client_closure *closure)
     size_t nread;
     debug_decl(read_io_buf, SUDO_DEBUG_UTIL);
 
-    if (!iolog_files[timing->event].enabled) {
+    if (!closure->iolog_files[timing->event].enabled) {
 	errno = ENOENT;
 	sudo_warn("%s/%s", iolog_dir, iolog_fd_to_name(timing->event));
 	debug_return_bool(false);
@@ -439,7 +519,7 @@ read_io_buf(struct client_closure *closure)
 	}
     }
 
-    nread = iolog_read(&iolog_files[timing->event], closure->buf,
+    nread = iolog_read(&closure->iolog_files[timing->event], closure->buf,
 	timing->u.nbytes, &errstr);
     if (nread != timing->u.nbytes) {
 	sudo_warnx(U_("unable to read %s/%s: %s"), iolog_dir,
@@ -867,7 +947,7 @@ fmt_next_iolog(struct client_closure *closure)
 
     /* TODO: fill write buffer with multiple messages */
 again:
-    switch (iolog_read_timing_record(&iolog_files[IOFD_TIMING], timing)) {
+    switch (iolog_read_timing_record(&closure->iolog_files[IOFD_TIMING], timing)) {
     case 0:
 	/* OK */
 	break;
@@ -972,23 +1052,29 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
-    printf("server ID: %s\n", msg->server_id);
-    /* TODO: handle redirect */
-    if (msg->redirect != NULL && msg->redirect[0] != '\0')
-	printf("redirect: %s\n", msg->redirect);
-    for (n = 0; n < msg->n_servers; n++) {
-	printf("server %zu: %s\n", n + 1, msg->servers[n]);
-    }
-
 #if defined(HAVE_OPENSSL)
     tls = msg->tls;
     tls_reqcert = msg->tls_reqcert;
-    if (tls) {
-        printf("Requested protocol: TLS\n");
-        if (tls_reqcert)
-            printf("Client auth is required with signed certificate\n");
-    }
+    tls_server_auth = msg->tls_server_auth;
 #endif
+
+    if (!testrun) {
+        printf("server ID: %s\n", msg->server_id);
+        /* TODO: handle redirect */
+        if (msg->redirect != NULL && msg->redirect[0] != '\0')
+            printf("redirect: %s\n", msg->redirect);
+        for (n = 0; n < msg->n_servers; n++) {
+            printf("server %zu: %s\n", n + 1, msg->servers[n]);
+        }
+
+        if (tls) {
+            printf("Requested protocol: TLS\n");
+            printf("Server authentication: %s\n", tls_server_auth ? "Required":"Not Required");
+            printf("Client authentication: %s\n", tls_reqcert ? "Required":"Not Required");
+        } else {
+            printf("Requested protocol: ClearText\n");
+        }
+    }
 
     debug_return_bool(true);
 }
@@ -1025,7 +1111,9 @@ handle_log_id(char *id, struct client_closure *closure)
 {
     debug_decl(handle_log_id, SUDO_DEBUG_UTIL);
 
-    printf("remote log ID: %s\n", id);
+    if (!testrun)
+        printf("remote log ID: %s\n", id);
+
     if ((closure->iolog_id = strdup(id)) == NULL)
 	sudo_fatal(NULL);
     debug_return_bool(true);
@@ -1100,9 +1188,10 @@ handle_server_message(uint8_t *buf, size_t len,
 	ret = handle_commit_point(msg->commit_point, closure);
 	if (sudo_timespeccmp(closure->elapsed, &closure->committed, ==)) {
 	    sudo_ev_del(NULL, closure->read_ev);
-	    sudo_ev_loopexit(NULL);
 	    closure->state = FINISHED;
-	}
+        if (++finished_transmissions == nr_of_conns)
+	        sudo_ev_loopexit(NULL);
+    }
 	break;
     case SERVER_MESSAGE__TYPE_LOG_ID:
 	ret = handle_log_id(msg->log_id, closure);
@@ -1153,9 +1242,9 @@ server_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
 #if defined(HAVE_OPENSSL)
     if (tls && closure->state != RECV_HELLO) {
-        nread = SSL_read(ssl, buf->data + buf->len, buf->size - buf->len);
+        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size - buf->len);
         if (nread <= 0) {
-            int read_status = SSL_get_error(ssl, nread);
+            int read_status = SSL_get_error(closure->ssl, nread);
             switch (read_status) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
@@ -1275,9 +1364,9 @@ client_msg_cb(int fd, int what, void *v)
 
 #if defined(HAVE_OPENSSL)
     if (tls) {
-        nwritten = SSL_write(ssl, buf->data + buf->off, buf->len - buf->off);
+        nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
         if (nwritten <= 0) {
-            int write_status = SSL_get_error(ssl, nwritten);
+            int write_status = SSL_get_error(closure->ssl, nwritten);
             switch (write_status) {
                 case SSL_ERROR_WANT_READ:
                     /* ssl wants to read, read event always active */
@@ -1325,53 +1414,6 @@ bad:
 }
 
 /*
- * Initialize a new client closure
- */
-static bool
-client_closure_fill(struct client_closure *closure, int sock,
-    struct timespec *elapsed, struct timespec *restart, const char *iolog_id,
-    struct iolog_info *log_info)
-{
-    debug_decl(client_closure_fill, SUDO_DEBUG_UTIL);
-
-    memset(closure, 0, sizeof(*closure));
-
-    closure->sock = sock;
-
-    closure->state = RECV_HELLO;
-    closure->log_info = log_info;
-
-    closure->elapsed = elapsed;
-    closure->restart = restart;
-    closure->iolog_id = iolog_id;
-
-    closure->bufsize = 8 * 1024;
-    closure->buf = malloc(closure->bufsize);
-    if (closure->buf == NULL)
-	goto bad;
-
-    closure->read_buf.size = 64 * 1024;
-    closure->read_buf.data = malloc(closure->read_buf.size);
-    if (closure->read_buf.data == NULL)
-	goto bad;
-
-    closure->read_ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST,
-	server_msg_cb, closure);
-    if (closure->read_ev == NULL)
-	goto bad;
-
-    closure->write_ev = sudo_ev_alloc(sock, SUDO_EV_WRITE|SUDO_EV_PERSIST,
-	client_msg_cb, closure);
-    if (closure->write_ev == NULL)
-	goto bad;
-
-    debug_return_bool(true);
-bad:
-    client_closure_free(closure);
-    debug_return_bool(false);
-}
-
-/*
  * Parse a timespec on the command line of the form
  * seconds[,nanoseconds]
  */
@@ -1410,7 +1452,7 @@ parse_timespec(struct timespec *ts, const char *strval)
 }
 
 #if defined(HAVE_OPENSSL)
-static const char short_opts[] = "h:i:p:r:b:c:k:V";
+static const char short_opts[] = "h:i:p:r:t:b:c:k:V";
 #else
 static const char short_opts[] = "h:i:p:r:V";
 #endif
@@ -1420,6 +1462,7 @@ static struct option long_opts[] = {
     { "iolog-id",	required_argument,	NULL,	'i' },
     { "port",		required_argument,	NULL,	'p' },
     { "restart",	required_argument,	NULL,	'r' },
+    { "test",	    optional_argument,	NULL,	't' },
 #if defined(HAVE_OPENSSL)
     { "ca-bundle",	required_argument,	NULL,	'b' },
     { "cert",		required_argument,	NULL,	'c' },
@@ -1434,7 +1477,7 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    struct client_closure closure;
+    struct client_closure *closure = NULL;
     struct sudo_event_base *evbase;
     struct iolog_info *log_info;
     const char *host = "localhost";
@@ -1486,6 +1529,11 @@ main(int argc, char *argv[])
 		goto bad;
 	    open_mode = "r+";
 	    break;
+    case 't':
+        if (sscanf(optarg, "%d", &nr_of_conns) != 1)
+            goto bad;
+        testrun = true;
+        break;
 	case 1:
 	    help();
 	    break;
@@ -1541,44 +1589,64 @@ main(int argc, char *argv[])
     if ((log_info = iolog_parse_loginfo(fp, iolog_dir)) == NULL)
 	goto bad;
 
-    /* Open the I/O log files and seek to restart point if there is one. */
-    if (!iolog_open_all(iolog_dir_fd, iolog_dir, iolog_files, open_mode))
-	goto bad;
-    if (sudo_timespecisset(&restart)) {
-	if (!iolog_seekto(iolog_dir_fd, iolog_dir, iolog_files, &elapsed,
-		&restart))
-	    goto bad;
-    }
-
-    /* Connect to server, setup events. */
-    sock = connect_server(host, port);
-    if (sock == -1)
-	goto bad;
-
-    printf("Connected to %s:%s\n", host, port);
-
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);
     sudo_ev_base_setdef(evbase);
 
-    if (!client_closure_fill(&closure, sock, &elapsed, &restart, iolog_id, log_info))
-	goto bad;
+    if (testrun)
+        printf("connecting clients...\n");
 
-    /* Add read event for the server hello message and enter event loop. */
-    if (sudo_ev_add(evbase, closure.read_ev, NULL, false) == -1)
-	goto bad;
+    for (int i = 0; i < nr_of_conns; i++) {
+        sock = connect_server(host, port);
+        if (sock == -1)
+            goto bad;
+        
+        if (!testrun)
+            printf("Connected to %s:%s\n", host, port);
+
+        closure = client_closure_alloc(sock, &elapsed, &restart, iolog_id, log_info);
+        if (!closure)
+            goto bad;
+
+        /* Open the I/O log files and seek to restart point if there is one. */
+        if (!iolog_open_all(iolog_dir_fd, iolog_dir, closure->iolog_files, open_mode))
+            goto bad;
+        if (sudo_timespecisset(&restart)) {
+            if (!iolog_seekto(iolog_dir_fd, iolog_dir, closure->iolog_files, &elapsed,
+                &restart))
+                goto bad;
+        }
+
+        if (sudo_ev_add(evbase, closure->read_ev, NULL, false) == -1)
+            goto bad;
+    }  
+
+    if (testrun)
+        printf("sending logs...\n");
+
+    struct timespec t_start, t_end, t_result;
+    sudo_gettime_real(&t_start);
+
     sudo_ev_dispatch(evbase);
 
-    if (closure.state != FINISHED) {
-	sudo_warnx(U_("exited prematurely with state %d"), closure.state);
-	sudo_warnx(U_("elapsed time sent to server [%lld, %ld]"),
-	    (long long)closure.elapsed->tv_sec, closure.elapsed->tv_nsec);
-	sudo_warnx(U_("commit point received from server [%lld, %ld]"),
-	    (long long)closure.committed.tv_sec, closure.committed.tv_nsec);
-	goto bad;
-    }
-    printf("I/O log transmitted successfully\n");
+    sudo_gettime_real(&t_end);
+    sudo_timespecsub(&t_end, &t_start, &t_result);
 
+    TAILQ_FOREACH(closure, &connections, entries) {
+        if (closure->state != FINISHED) {
+        sudo_warnx(U_("exited prematurely with state %d"), closure->state);
+        sudo_warnx(U_("elapsed time sent to server [%lld, %ld]"),
+            (long long)closure->elapsed->tv_sec, closure->elapsed->tv_nsec);
+        sudo_warnx(U_("commit point received from server [%lld, %ld]"),
+            (long long)closure->committed.tv_sec, closure->committed.tv_nsec);
+        goto bad;
+        }
+    }
+
+    printf("I/O log%s transmitted successfully in %lld.%.9ld seconds\n",
+        nr_of_conns > 1 ? "s":"",
+        (long long)t_result.tv_sec, t_result.tv_nsec);
+        
     debug_return_int(EXIT_SUCCESS);
 bad:
     debug_return_int(EXIT_FAILURE);
