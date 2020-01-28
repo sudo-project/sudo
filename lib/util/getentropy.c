@@ -69,12 +69,8 @@
 #include "sudo_digest.h"
 #include "sudo_rand.h"
 
-#if !defined(MAP_ANON)
-# if defined(MAP_ANONYMOUS)
-#  define MAP_ANON MAP_ANONYMOUS
-# elif defined(MAP_SGI_ANYADDR)
-#  define MAP_ANON MAP_SGI_ANYADDR
-# endif
+#if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
+# define MAP_ANON MAP_ANONYMOUS
 #endif
 
 #define REPEAT 5
