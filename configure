@@ -2910,6 +2910,7 @@ as_fn_append ac_func_list " pwrite"
 as_fn_append ac_func_list " faccessat"
 as_fn_append ac_func_list " wordexp"
 as_fn_append ac_func_list " getauxval"
+as_fn_append ac_func_list " fseeko"
 as_fn_append ac_func_list " seteuid"
 # Check that the precious variables saved in the cache have kept the same
 # value.
@@ -19617,6 +19618,8 @@ done
 
 
 
+
+
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -20065,17 +20068,6 @@ if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
  break
-fi
-done
-
-    for ac_func in fseeko
-do :
-  ac_fn_c_check_func "$LINENO" "fseeko" "ac_cv_func_fseeko"
-if test "x$ac_cv_func_fseeko" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FSEEKO 1
-_ACEOF
-
 fi
 done
 

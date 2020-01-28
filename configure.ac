@@ -2564,7 +2564,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite faccessat wordexp getauxval])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite faccessat wordexp getauxval fseeko])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -2660,7 +2660,6 @@ utmp_style=LEGACY
 AC_CHECK_FUNCS([getutsid getutxid getutid], [utmp_style=POSIX; break])
 if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS([getttyent ttyslot], [break])
-    AC_CHECK_FUNCS([fseeko])
 fi
 
 AC_CHECK_FUNCS([sysctl], [AC_CHECK_FUNCS([devname])
