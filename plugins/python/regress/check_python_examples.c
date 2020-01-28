@@ -764,7 +764,7 @@ check_policy_plugin_callbacks_are_optional(void)
     VERIFY_PTR(python_policy->init_session, NULL);
     VERIFY_PTR(python_policy->show_version, NULL);
 
-    python_io->close(0, 0);
+    python_policy->close(0, 0);
     return true;
 }
 
