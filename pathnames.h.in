@@ -116,6 +116,14 @@
 #endif /* _PATH_SUDO_IO_LOGDIR */
 
 /*
+ * Where to put the audit and other log files.  Defaults to /var/log,
+ * /var/adm or /usr/adm depending on what exists.
+ */
+#ifndef _PATH_SUDO_LOGDIR
+# undef _PATH_SUDO_LOGDIR
+#endif /* _PATH_SUDO_LOGDIR */
+
+/*
  * Where to put the sudo log file when logging to a file.  Defaults to
  * /var/log/sudo.log if /var/log exists, else /var/adm/sudo.log.
  */

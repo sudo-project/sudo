@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -70,7 +70,6 @@ AC_SUBST([LCMAN])
 AC_SUBST([PSMAN])
 AC_SUBST([SEMAN])
 AC_SUBST([devdir])
-AC_SUBST([logpath])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
 AC_SUBST([mansrcdir])
@@ -122,6 +121,8 @@ dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
 AC_SUBST([iolog_dir])dnl real initial value from SUDO_IO_LOGDIR
+AC_SUBST([log_dir])dnl real initial value from SUDO_LOGDIR
+AC_SUBST([logpath])dnl real initial value from SUDO_LOGFILE
 AC_SUBST([rundir])dnl real initial value from SUDO_RUNDIR
 AC_SUBST([vardir])dnl real initial value from SUDO_VARDIR
 AC_SUBST([timeout])
@@ -165,6 +166,8 @@ AC_SUBST([plugindir])
 # Begin initial values for man page substitution
 #
 iolog_dir=/var/log/sudo-io
+log_dir=/var/log
+logpath=/var/log/sudo.log
 rundir=/var/run/sudo
 vardir=/var/adm/sudo
 timeout=5
@@ -338,7 +341,7 @@ esac])
 
 AC_ARG_WITH(CC, [AS_HELP_STRING([--with-CC], [C compiler to use])],
 [case $with_CC in
-    *)		AC_MSG_ERROR([the --with-CC option is no longer supported, please set the CC environment variable instead.])
+    *)		AC_MSG_ERROR([the --with-CC option is no longer supported, please pass CC=$with_CC to configure instead.])
 		;;
 esac])
 
@@ -4133,6 +4136,7 @@ dnl
 if test "$utmp_style" = "LEGACY"; then
     SUDO_PATH_UTMP
 fi
+SUDO_LOGDIR
 SUDO_LOGFILE
 SUDO_RUNDIR
 SUDO_VARDIR
@@ -4601,7 +4605,7 @@ elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
 
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 
 AC_OUTPUT
 

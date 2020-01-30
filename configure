@@ -733,6 +733,8 @@ password_timeout
 timeout
 vardir
 rundir
+logpath
+log_dir
 iolog_dir
 PYTHON_PLUGIN_SRC
 SIGNAME
@@ -780,7 +782,6 @@ NOEXECFILE
 mansrcdir
 mansectform
 mansectsu
-logpath
 devdir
 SEMAN
 PSMAN
@@ -3111,11 +3112,12 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
-
 #
 # Begin initial values for man page substitution
 #
 iolog_dir=/var/log/sudo-io
+log_dir=/var/log
+logpath=/var/log/sudo.log
 rundir=/var/run/sudo
 vardir=/var/adm/sudo
 timeout=5
@@ -4570,7 +4572,7 @@ fi
 # Check whether --with-CC was given.
 if test "${with_CC+set}" = set; then :
   withval=$with_CC; case $with_CC in
-    *)		as_fn_error $? "the --with-CC option is no longer supported, please set the CC environment variable instead." "$LINENO" 5
+    *)		as_fn_error $? "the --with-CC option is no longer supported, please pass CC=$with_CC to configure instead." "$LINENO" 5
 		;;
 esac
 fi
@@ -26380,23 +26382,45 @@ $as_echo "not found" >&6; }
 fi
 
 fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for log dir location" >&5
+$as_echo_n "checking for log dir location... " >&6; }
+    if test "${with_logdir-yes}" != "yes"; then
+	log_dir="$with_logdir"
+    else
+	# Default value of log_dir set in configure.ac
+	for d in /var/log /var/adm /usr/adm; do
+	    if test -d "$d"; then
+		log_dir="$d"
+		break
+	    fi
+	done
+    fi
+    if test "${with_logdir}" != "no"; then
+	cat >>confdefs.h <<EOF
+#define _PATH_SUDO_LOGDIR "$log_dir"
+EOF
+
+    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $log_dir" >&5
+$as_echo "$log_dir" >&6; }
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for log file location" >&5
 $as_echo_n "checking for log file location... " >&6; }
-if test -n "$with_logpath"; then
-    logpath="$with_logpath"
-elif test -d "/var/log"; then
-    logpath="/var/log/sudo.log"
-elif test -d "/var/adm"; then
-    logpath="/var/adm/sudo.log"
-elif test -d "/usr/adm"; then
-    logpath="/usr/adm/sudo.log"
-else
-    # Assume a modern system
-    logpath="/var/log/sudo.log"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $logpath" >&5
+    if test "${with_logpath-yes}" != "yes"; then
+	logpath="$with_logpath"
+    else
+	# Default value of logpath set in configure.ac
+	for d in /var/log /var/adm /usr/adm; do
+	    if test -d "$d"; then
+		logpath="$d/sudo.log"
+		break
+	    fi
+	done
+    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $logpath" >&5
 $as_echo "$logpath" >&6; }
-cat >>confdefs.h <<EOF
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_LOGFILE "$logpath"
 EOF
 
@@ -26442,12 +26466,14 @@ EOF
 $as_echo_n "checking for I/O log dir location... " >&6; }
     if test "${with_iologdir-yes}" != "yes"; then
 	iolog_dir="$with_iologdir"
-    elif test -d "/var/log"; then
-	iolog_dir="/var/log/sudo-io"
-    elif test -d "/var/adm"; then
-	iolog_dir="/var/adm/sudo-io"
     else
-	iolog_dir="/usr/adm/sudo-io"
+	# Default value of iolog_dir set in configure.ac
+	for d in /var/log /var/adm /usr/adm; do
+	    if test -d "$d"; then
+		iolog_dir="$d/sudo-io"
+		break
+	    fi
+	done
     fi
     if test "${with_iologdir}" != "no"; then
 	cat >>confdefs.h <<EOF
@@ -27717,7 +27743,7 @@ elif test X"$TMPFILES_D" != X""; then
 
 fi
 
-ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 
 cat >confcache <<\_ACEOF
@@ -28725,6 +28751,7 @@ do
     "logsrvd/Makefile") CONFIG_FILES="$CONFIG_FILES logsrvd/Makefile" ;;
     "src/sudo_usage.h") CONFIG_FILES="$CONFIG_FILES src/sudo_usage.h" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+    "plugins/audit_json/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/audit_json/Makefile" ;;
     "plugins/sample/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sample/Makefile" ;;
     "plugins/group_file/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/group_file/Makefile" ;;
     "plugins/system_group/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/system_group/Makefile" ;;
