@@ -19914,6 +19914,32 @@ esac
 fi
 done
 
+    for ac_func in arc4random_buf
+do :
+  ac_fn_c_check_func "$LINENO" "arc4random_buf" "ac_cv_func_arc4random_buf"
+if test "x$ac_cv_func_arc4random_buf" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ARC4RANDOM_BUF 1
+_ACEOF
+
+else
+
+	case " $LIBOBJS " in
+  *" arc4random_buf.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS arc4random_buf.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_arc4random_buf; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
 
 else
 
@@ -19925,6 +19951,12 @@ esac
 
 
     for _sym in sudo_arc4random; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+    for _sym in sudo_arc4random_buf; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
