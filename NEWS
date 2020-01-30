@@ -1,3 +1,22 @@
+What's new in Sudo 1.8.31
+
+ * Fixed CVE-2019-18634, a buffer overflow when the "pwfeedback"
+   sudoers option is enabled on systems with uni-directional pipes.
+
+ * The "sudoedit_checkdir" option now treats a user-owned directory
+   as writable, even if it does not have the write bit set at the
+   time of check.  Symbolic links will no longer be followed by
+   sudoedit in any user-owned directory.  Bug #912
+
+ * Fixed sudoedit on macOS 10.15 and above where the root file system
+   is mounted read-only.  Bug #913.
+
+ * Fixed a crash introduced in sudo 1.8.30 when suspending sudo
+   at the password prompt.  Bug #914.
+
+ * Fixed compilation on systems where the mmap MAP_ANON flag
+   is not available.  Bug #915.
+
 What's new in Sudo 1.8.30
 
  * Fixed a warning on macOS introduced in sudo 1.8.29 when sudo
