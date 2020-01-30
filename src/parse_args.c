@@ -240,7 +240,7 @@ parse_env_list(struct environment *e, char *list)
  * for the command to be run (if we are running one).
  */
 int
-parse_args(int argc, char **argv, int *nargc, char ***nargv,
+parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     struct sudo_settings **settingsp, char ***env_addp)
 {
     struct environment extra_env;
@@ -501,6 +501,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 
     argc -= optind;
     argv += optind;
+    *old_optind = optind;
 
     if (!mode) {
 	/* Defer -k mode setting until we know whether it is a flag or not */
@@ -617,12 +618,29 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	argc = ac;
     }
 
+    /*
+     * For sudoedit we need to rewrite argv
+     */
     if (mode == MODE_EDIT) {
 #if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
+	char **av;
+	int ac;
+
+	av = reallocarray(NULL, argc + 2, sizeof(char *));
+	if (av == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if (!gc_add(GC_PTR, av))
+	    exit(1);
+
 	/* Must have the command in argv[0]. */
-	argc++;
-	argv--;
-	argv[0] = "sudoedit";
+	av[0] = "sudoedit";
+	for (ac = 0; argv[ac] != NULL; ac++) {
+	    av[ac + 1] = argv[ac];
+	}
+	av[++ac] = NULL;
+
+	argv = av;
+	argc = ac;
 #else
 	sudo_fatalx(U_("sudoedit is not supported on this platform"));
 #endif

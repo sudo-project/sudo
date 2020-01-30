@@ -242,7 +242,8 @@ cleanup:
  */
 static bool
 sudo_load_plugin(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins, struct plugin_info *info)
+    struct plugin_container_list *io_plugins,
+    struct plugin_container_list *audit_plugins, struct plugin_info *info)
 {
     struct plugin_container *container = NULL;
     struct generic_plugin *plugin;
@@ -315,6 +316,20 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    goto done;
 	TAILQ_INSERT_TAIL(io_plugins, container, entries);
 	break;
+    case SUDO_AUDIT_PLUGIN:
+	if (plugin_exists(audit_plugins, info)) {
+	    plugin = sudo_plugin_try_to_clone(handle, info->symbol_name);
+	    if (plugin == NULL) {
+		sudo_warnx(U_("ignoring duplicate audit plugin \"%s\" in %s, line %d"),
+		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
+		ret = true;
+		goto done;
+	    }
+	}
+	if ((container = new_container(handle, path, plugin, info)) == NULL)
+	    goto done;
+	TAILQ_INSERT_TAIL(audit_plugins, container, entries);
+	break;
     default:
 	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
@@ -354,7 +369,8 @@ free_plugin_info(struct plugin_info *info)
  */
 bool
 sudo_load_plugins(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins)
+    struct plugin_container_list *io_plugins,
+    struct plugin_container_list *audit_plugins)
 {
     struct plugin_container *container;
     struct plugin_info_list *plugins;
@@ -365,7 +381,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     /* Walk the plugin list from sudo.conf, if any and free it. */
     plugins = sudo_conf_plugins();
     TAILQ_FOREACH_SAFE(info, plugins, entries, next) {
-	ret = sudo_load_plugin(policy_plugin, io_plugins, info);
+	ret = sudo_load_plugin(policy_plugin, io_plugins, audit_plugins, info);
 	if (!ret)
 	    goto done;
 	free_plugin_info(info);
@@ -391,7 +407,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	    goto done;
 	}
 	/* info->options = NULL; */
-	ret = sudo_load_plugin(policy_plugin, io_plugins, info);
+	ret = sudo_load_plugin(policy_plugin, io_plugins, audit_plugins, info);
 	free_plugin_info(info);
 	if (!ret)
 	    goto done;
@@ -411,7 +427,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 		goto done;
 	    }
 	    /* info->options = NULL; */
-	    ret = sudo_load_plugin(policy_plugin, io_plugins, info);
+	    ret = sudo_load_plugin(policy_plugin, io_plugins, audit_plugins, info);
 	    free_plugin_info(info);
 	    if (!ret)
 		goto done;

@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd December 5, 2019
+.Dd Januarry 28, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -70,17 +70,19 @@ struct policy_plugin {
     int (*open)(unsigned int version, sudo_conv_t conversation,
                 sudo_printf_t plugin_printf, char * const settings[],
                 char * const user_info[], char * const user_env[],
-                char * const plugin_options[]);
+                char * const plugin_options[], const char **errstr);
     void (*close)(int exit_status, int error);
-    int (*show_version)(int verbose);
+    int (*show_version)(int verbose, const char **errstr);
     int (*check_policy)(int argc, char * const argv[],
                         char *env_add[], char **command_info[],
-                        char **argv_out[], char **user_env_out[]);
+                        char **argv_out[], char **user_env_out[],
+			const char **errstr);
     int (*list)(int argc, char * const argv[], int verbose,
-                const char *list_user);
-    int (*validate)(void);
+                const char *list_user, const char **errstr);
+    int (*validate)(const char **errstr);
     void (*invalidate)(int remove);
-    int (*init_session)(struct passwd *pwd, char **user_env[]);
+    int (*init_session)(struct passwd *pwd, char **user_env[],
+			const char **errstr);
     void (*register_hooks)(int version,
        int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
@@ -110,7 +112,7 @@ built against.
 int (*open)(unsigned int version, sudo_conv_t conversation,
             sudo_printf_t plugin_printf, char * const settings[],
             char * const user_info[], char * const user_env[],
-            char * const plugin_options[]);
+            char * const plugin_options[], const char **errstr);
 .Ed
 .Pp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
@@ -441,32 +443,6 @@ The process ID of the running
 .Nm sudo
 process.
 Only available starting with API version 1.2.
-.It plugin_options
-Any (non-comment) strings immediately after the plugin path are
-passed as arguments to the plugin.
-These arguments are split on a white space boundary and are passed to
-the plugin in the form of a
-.Dv NULL Ns -terminated
-array of strings.
-If no arguments were
-specified,
-.Em plugin_options
-will be the
-.Dv NULL
-pointer.
-.Pp
-NOTE: the
-.Em plugin_options
-parameter is only available starting with
-API version 1.2.
-A plugin
-.Sy must
-check the API version specified
-by the
-.Nm sudo
-front end before using
-.Em plugin_options .
-Failure to do so may result in a crash.
 .It ppid=int
 The parent process ID of the running
 .Nm sudo
@@ -518,6 +494,53 @@ field will never include one
 itself but the
 .Em value
 might.
+.It plugin_options
+Any (non-comment) strings immediately after the plugin path are
+passed as arguments to the plugin.
+These arguments are split on a white space boundary and are passed to
+the plugin in the form of a
+.Dv NULL Ns -terminated
+array of strings.
+If no arguments were
+specified,
+.Em plugin_options
+will be the
+.Dv NULL
+pointer.
+.Pp
+NOTE: the
+.Em plugin_options
+parameter is only available starting with
+API version 1.2.
+A plugin
+.Sy must
+check the API version specified
+by the
+.Nm sudo
+front end before using
+.Em plugin_options .
+Failure to do so may result in a crash.
+.It errstr
+If the
+.Fn open
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It close
 .Bd -literal -compact
@@ -585,7 +608,7 @@ front end may execute the command directly instead of running
 it as a child process.
 .It show_version
 .Bd -literal -compact
-int (*show_version)(int verbose);
+int (*show_version)(int verbose, const char **errstr);
 .Ed
 .Pp
 The
@@ -602,16 +625,45 @@ or
 .Fn plugin_printf
 function using
 .Dv SUDO_CONV_INFO_MSG .
-If the user requests detailed version information, the verbose flag will be set.
 .Pp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error, although the return value is currently
 ignored.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It verbose
+If the user requests detailed version information, the
+.Em verbose
+flag will be set to 1.
+.It errstr
+If the
+.Fn show_version
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
+.El
 .It check_policy
 .Bd -literal -compact
 int (*check_policy)(int argc, char * const argv[],
                     char *env_add[], char **command_info[],
-                    char **argv_out[], char **user_env_out[]);
+                    char **argv_out[], char **user_env_out[],
+                    const char **errstr);
 .Ed
 .Pp
 The
@@ -1006,11 +1058,32 @@ The
 .Dv NULL Ns -terminated
 environment vector to use when executing the command.
 The plugin is responsible for allocating and populating the vector.
+.It errstr
+If the
+.Fn check_policy
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It list
 .Bd -literal -compact
 int (*list)(int argc, char * const argv[],
-            int verbose, const char *list_user);
+            int verbose, const char *list_user, const char **errstr);
 .Ed
 .Pp
 List available privileges for the invoking user.
@@ -1057,10 +1130,31 @@ allows it.
 If
 .Dv NULL ,
 the plugin should list the privileges of the invoking user.
+.It errstr
+If the
+.Fn list
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It validate
 .Bd -literal -compact
-int (*validate)(void);
+int (*validate)(const char **errstr);
 .Ed
 .Pp
 The
@@ -1091,6 +1185,31 @@ function with
 .Dv SUDO_CONF_ERROR_MSG
 to present additional
 error information to the user.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It errstr
+If the
+.Fn validate
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
+.El
 .It invalidate
 .Bd -literal -compact
 void (*invalidate)(int remove);
@@ -1100,8 +1219,7 @@ The
 .Fn invalidate
 function is called when
 .Nm sudo
-is called with
-the
+is run with the
 .Fl k
 or
 .Fl K
@@ -1321,6 +1439,27 @@ front end doesn't support API
 version 1.15 or higher,
 .Fn event_alloc
 will not be set.
+.It errstr
+If the
+.Fn init_session
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .Pp
 .Em Policy Plugin Version Macros
@@ -1352,20 +1491,26 @@ struct io_plugin {
                 sudo_printf_t plugin_printf, char * const settings[],
                 char * const user_info[], char * const command_info[],
                 int argc, char * const argv[], char * const user_env[],
-                char * const plugin_options[]);
+                char * const plugin_options[], const char **errstr);
     void (*close)(int exit_status, int error); /* wait status or error */
-    int (*show_version)(int verbose);
-    int (*log_ttyin)(const char *buf, unsigned int len);
-    int (*log_ttyout)(const char *buf, unsigned int len);
-    int (*log_stdin)(const char *buf, unsigned int len);
-    int (*log_stdout)(const char *buf, unsigned int len);
-    int (*log_stderr)(const char *buf, unsigned int len);
+    int (*show_version)(int verbose, const char **errstr);
+    int (*log_ttyin)(const char *buf, unsigned int len,
+	const char **errstr);
+    int (*log_ttyout)(const char *buf, unsigned int len,
+	const char **errstr);
+    int (*log_stdin)(const char *buf, unsigned int len,
+	const char **errstr);
+    int (*log_stdout)(const char *buf, unsigned int len,
+	const char **errstr);
+    int (*log_stderr)(const char *buf, unsigned int len,
+	const char **errstr);
     void (*register_hooks)(int version,
        int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
        int (*deregister_hook)(struct sudo_hook *hook));
-    int (*change_winsize)(unsigned int lines, unsigned int cols);
-    int (*log_suspend)(int signo);
+    int (*change_winsize)(unsigned int lines, unsigned int cols,
+	const char **errstr);
+    int (*log_suspend)(int signo, const char **errstr);
     struct sudo_plugin_event * (*event_alloc)(void);
 };
 .Ed
@@ -1621,6 +1766,27 @@ by the
 front end before using
 .Em plugin_options .
 Failure to do so may result in a crash.
+.It errstr
+If the
+.Fn open
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It close
 .Bd -literal -compact
@@ -1678,14 +1844,43 @@ or
 .Fn plugin_printf
 function using
 .Dv SUDO_CONV_INFO_MSG .
-If the user requests detailed version information, the verbose flag will be set.
 .Pp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error, although the return value is currently
 ignored.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It verbose
+If the user requests detailed version information, the
+.Em verbose
+flag will be set to 1.
+.It errstr
+If the
+.Fn show_version
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
+.El
 .It log_ttyin
 .Bd -literal -compact
-int (*log_ttyin)(const char *buf, unsigned int len);
+int (*log_ttyin)(const char *buf, unsigned int len,
+    const char **errstr);
 .Ed
 .Pp
 The
@@ -1706,10 +1901,32 @@ The buffer containing user input.
 The length of
 .Em buf
 in bytes.
+.It errstr
+If the
+.Fn log_ttyin
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It log_ttyout
 .Bd -literal -compact
-int (*log_ttyout)(const char *buf, unsigned int len);
+int (*log_ttyout)(const char *buf, unsigned int len,
+    const char **errstr);
 .Ed
 .Pp
 The
@@ -1729,10 +1946,32 @@ The buffer containing command output.
 The length of
 .Em buf
 in bytes.
+.It errstr
+If the
+.Fn log_ttyout
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It log_stdin
 .Bd -literal -compact
-int (*log_stdin)(const char *buf, unsigned int len);
+int (*log_stdin)(const char *buf, unsigned int len,
+    const char **errstr);
 .Ed
 .Pp
 The
@@ -1754,10 +1993,32 @@ The buffer containing user input.
 The length of
 .Em buf
 in bytes.
+.It errstr
+If the
+.Fn log_stdin
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It log_stdout
 .Bd -literal -compact
-int (*log_stdout)(const char *buf, unsigned int len);
+int (*log_stdout)(const char *buf, unsigned int len,
+    const char **errstr);
 .Ed
 .Pp
 The
@@ -1779,10 +2040,32 @@ The buffer containing command output.
 The length of
 .Em buf
 in bytes.
+.It errstr
+If the
+.Fn log_stdout
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It log_stderr
 .Bd -literal -compact
-int (*log_stderr)(const char *buf, unsigned int len);
+int (*log_stderr)(const char *buf, unsigned int len,
+    const char **errstr);
 .Ed
 .Pp
 The
@@ -1804,6 +2087,27 @@ The buffer containing command output.
 The length of
 .Em buf
 in bytes.
+.It errstr
+If the
+.Fn log_stderr
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .El
 .It register_hooks
 See the
@@ -1817,7 +2121,8 @@ section for a description of
 .Li deregister_hooks .
 .It change_winsize
 .Bd -literal -compact
-int (*change_winsize)(unsigned int lines, unsigned int cols);
+int (*change_winsize)(unsigned int lines, unsigned int cols,
+    const char **errstr);
 .Ed
 .Pp
 The
@@ -1829,24 +2134,76 @@ list.
 Returns \-1 if an error occurred, in which case no further calls to
 .Fn change_winsize
 will be made,
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It lines
+The number of lines (rows) in the resized terminal.
+.It cols
+The number of columns in the resized terminal.
+.It errstr
+If the
+.Fn change_winsize
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
+.El
 .It log_suspend
 .Bd -literal -compact
-int (*log_suspend)(int signo);
+int (*log_suspend)(int signo, const char **errstr);
 .Ed
 .Pp
 The
 .Fn log_suspend
 function is called whenever a command is suspended or resumed.
-The
-.Fa signo
-argument is either the signal that caused the command to be suspended or
-.Dv SIGCONT
-if the command was resumed.
 Logging this information makes it possible to skip the period of time when
 the command was suspended during playback of a session.
 Returns \-1 if an error occurred, in which case no further calls to
 .Fn log_suspend
 will be made,
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It signo
+The signal that caused the command to be suspended, or
+.Dv SIGCONT
+if the command was resumed.
+.It errstr
+If the
+.Fn log_suspend
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Em errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+.Pp
+NOTE: the
+.Em errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front end before using
+.Em errstr .
+Failure to do so may result in a crash.
 .It event_alloc
 .Bd -literal -compact
 struct sudo_plugin_event * (*event_alloc)(void);
@@ -2928,6 +3285,13 @@ list.
 The
 .Em event_alloc
 field was added to the policy_plugin and io_plugin structs.
+.Pp
+The
+.Fa errstr
+argument was added to the policy and I/O plugin functions
+which the plugin function can use to return an error string.
+This string may be used by the audit plugin to report failure or
+error conditions set by the other plugins.
 .Pp
 The
 .Fn close

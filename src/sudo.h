@@ -207,8 +207,8 @@ char *tgetpass(const char *prompt, int timeout, int flags,
 int sudo_execute(struct command_details *details, struct command_status *cstat);
 
 /* parse_args.c */
-int parse_args(int argc, char **argv, int *nargc, char ***nargv,
-    struct sudo_settings **settingsp, char ***env_addp);
+int parse_args(int argc, char **argv, int *old_optind, int *nargc,
+    char ***nargv, struct sudo_settings **settingsp, char ***env_addp);
 extern int tgetpass_flags;
 
 /* get_pty.c */
@@ -221,6 +221,10 @@ int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
 bool set_user_groups(struct command_details *details);
 struct sudo_plugin_event *sudo_plugin_event_alloc(void);
+void audit_reject(const char *plugin_name, unsigned int plugin_type,
+    const char *audit_msg, char * const command_info[]);
+void audit_error(const char *plugin_name, unsigned int plugin_type,
+    const char *audit_msg, char * const command_info[]);
 extern const char *list_user;
 extern struct user_details user_details;
 extern int sudo_debug_instance;

@@ -201,6 +201,7 @@ static bool
 log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
@@ -211,11 +212,17 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_ttyin(buf, n);
+	    rc = plugin->u.io->log_ttyin(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyin = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -233,6 +240,7 @@ static bool
 log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_stdin, SUDO_DEBUG_EXEC);
@@ -243,11 +251,17 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stdin(buf, n);
+	    rc = plugin->u.io->log_stdin(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdin = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -265,6 +279,7 @@ static bool
 log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
@@ -275,11 +290,17 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_ttyout(buf, n);
+	    rc = plugin->u.io->log_ttyout(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyout = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -308,6 +329,7 @@ static bool
 log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_stdout, SUDO_DEBUG_EXEC);
@@ -318,11 +340,17 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stdout(buf, n);
+	    rc = plugin->u.io->log_stdout(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdout = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -351,6 +379,7 @@ static bool
 log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_stderr, SUDO_DEBUG_EXEC);
@@ -361,11 +390,17 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stderr(buf, n);
+	    rc = plugin->u.io->log_stderr(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stderr = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -394,6 +429,7 @@ static void
 log_suspend(int signo)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     debug_decl(log_suspend, SUDO_DEBUG_EXEC);
 
@@ -405,12 +441,12 @@ log_suspend(int signo)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_suspend(signo);
+	    rc = plugin->u.io->log_suspend(signo, &errstr);
 	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->log_suspend = NULL;
-		}
+		/* Error: disable plugin's I/O function. */
+		plugin->u.io->log_suspend = NULL;
+		audit_error(plugin->name, SUDO_IO_PLUGIN,
+		    errstr ? errstr : _("error logging suspend"), NULL);
 		break;
 	    }
 	}
@@ -426,6 +462,7 @@ static void
 log_winchange(unsigned int rows, unsigned int cols)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     debug_decl(log_winchange, SUDO_DEBUG_EXEC);
 
@@ -437,12 +474,12 @@ log_winchange(unsigned int rows, unsigned int cols)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->change_winsize(rows, cols);
+	    rc = plugin->u.io->change_winsize(rows, cols, &errstr);
 	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->change_winsize = NULL;
-		}
+		/* Error: disable plugin's I/O function. */
+		plugin->u.io->change_winsize = NULL;
+		audit_error(plugin->name, SUDO_IO_PLUGIN,
+		    errstr ? errstr : _("error changing window size"), NULL);
 		break;
 	    }
 	}

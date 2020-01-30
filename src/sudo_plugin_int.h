@@ -100,6 +100,7 @@ struct plugin_container {
 	struct io_plugin *io;
 	struct io_plugin_1_0 *io_1_0;
 	struct io_plugin_1_1 *io_1_1;
+	struct audit_plugin *audit;
     } u;
 };
 TAILQ_HEAD(plugin_container_list, plugin_container);
@@ -117,6 +118,7 @@ struct sudo_plugin_event_int {
 
 extern struct plugin_container policy_plugin;
 extern struct plugin_container_list io_plugins;
+extern struct plugin_container_list audit_plugins;
 
 int sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
@@ -125,6 +127,7 @@ int sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
 int sudo_conversation_printf(int msg_type, const char *fmt, ...);
 
 bool sudo_load_plugins(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins);
+    struct plugin_container_list *io_plugins,
+    struct plugin_container_list *audit_plugins);
 
 #endif /* SUDO_PLUGIN_INT_H */
