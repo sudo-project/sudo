@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -292,7 +292,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
-	/* Not an audit event. */
+	/* Not an audit event (should it be?). */
 	sudo_warnx(U_("sudoers specifies that root is not allowed to sudo"));
 	goto bad;
     }
@@ -350,7 +350,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
-	    /* XXX - audit? */
+	    audit_failure(NewArgc, NewArgv,
+		N_("user not allowed to override closefrom limit"));
 	    sudo_warnx(U_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
@@ -413,6 +414,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    timestamp_gid = pw->pw_gid;
 	    sudo_pw_delref(pw);
 	} else {
+	    /* XXX - audit too? */
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("timestamp owner (%s): No such user"), def_timestampowner);
 	    timestamp_uid = ROOT_UID;
@@ -436,6 +438,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Check runas user's shell. */
     if (!check_user_shell(runas_pw)) {
+	audit_failure(NewArgc, NewArgv, N_("invalid shell for user %s: %s"),
+	    runas_pw->pw_name, runas_pw->pw_shell);
 	log_warningx(SLOG_RAW_MSG, N_("invalid shell for user %s: %s"),
 	    runas_pw->pw_name, runas_pw->pw_shell);
 	goto bad;
@@ -517,7 +521,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If user specified a timeout make sure sudoers allows it. */
     if (!def_user_command_timeouts && user_timeout > 0) {
-	/* XXX - audit/log? */
+	audit_failure(NewArgc, NewArgv,
+	    N_("user not allowed to set a command timeout"));
 	sudo_warnx(U_("sorry, you are not allowed set a command timeout"));
 	goto bad;
     }
@@ -525,7 +530,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    /* XXX - audit/log? */
+	    audit_failure(NewArgc, NewArgv,
+		N_("user not allowed to set a preserve the environment"));
 	    sudo_warnx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {
@@ -557,12 +563,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw, verbose);
 	    break;
 	case MODE_VALIDATE:
-	    /* Nothing to do. */
-	    ret = true;
-	    break;
 	case MODE_RUN:
 	case MODE_EDIT:
-	    /* ret set by sudoers_policy_exec_setup() below. */
+	    /* ret may be overridden by "goto bad" later */
+	    ret = true;
 	    break;
 	default:
 	    /* Should not happen. */
@@ -676,19 +680,20 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto done;
     }
 
-    /* Setup execution environment to pass back to front-end. */
-    ret = sudoers_policy_exec_setup(edit_argv ? edit_argv : NewArgv,
-	env_get(), cmnd_umask, iolog_path, closure);
-
-    /* Zero out stashed copy of environment, it is owned by the front-end. */
-    (void)env_init(NULL);
-
     goto done;
 
 bad:
     ret = false;
 
 done:
+    /* Setup execution environment to pass back to front-end. */
+    if (!sudoers_policy_exec_setup(edit_argv ? edit_argv : NewArgv,
+	    env_get(), cmnd_umask, iolog_path, closure))
+	ret = -1;
+
+    /* Zero out stashed copy of environment, it is owned by the front-end. */
+    (void)env_init(NULL);
+
     if (!rewind_perms())
 	ret = -1;
 
@@ -871,8 +876,9 @@ set_cmnd(void)
 		    debug_return_int(-1);
 	    }
 	    if (ret == NOT_FOUND_ERROR) {
-		if (errno == ENAMETOOLONG)
+		if (errno == ENAMETOOLONG) {
 		    audit_failure(NewArgc, NewArgv, N_("command too long"));
+		}
 		log_warning(0, "%s", NewArgv[0]);
 		debug_return_int(ret);
 	    }

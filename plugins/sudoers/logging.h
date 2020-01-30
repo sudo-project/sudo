@@ -63,6 +63,7 @@
 /* XXX - needed for auditing */
 extern int NewArgc;
 extern char **NewArgv;
+extern char *audit_msg;
 
 union sudo_defs_val;
 

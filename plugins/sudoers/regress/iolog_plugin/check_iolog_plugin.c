@@ -206,6 +206,7 @@ void
 test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 {
     int rc, cmnd_argc = 1;
+    const char *errstr = NULL;
     char buf[1024], iolog_path[PATH_MAX];
     char runas_gid[64], runas_uid[64];
     FILE *fp;
@@ -251,7 +252,7 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 
     /* Test open endpoint. */
     rc = sudoers_io.open(SUDO_API_VERSION, NULL, sudo_printf_int, settings,
-	user_info, command_info, cmnd_argc, cmnd_argv, envp, NULL);
+	user_info, command_info, cmnd_argc, cmnd_argv, envp, NULL, &errstr);
     (*ntests)++;
     if (rc != 1) {
 	sudo_warnx("I/O log open endpoint failed");
@@ -266,7 +267,7 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 	(*nerrors)++;
 
     /* Test log_ttyout endpoint. */
-    rc = sudoers_io.log_ttyout(output, strlen(output));
+    rc = sudoers_io.log_ttyout(output, strlen(output), &errstr);
     (*ntests)++;
     if (rc != 1) {
 	sudo_warnx("I/O log_ttyout endpoint failed");
@@ -275,14 +276,14 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
     }
 
     /* Test change_winsize endpoint (twice). */
-    rc = sudoers_io.change_winsize(32, 128);
+    rc = sudoers_io.change_winsize(32, 128, &errstr);
     (*ntests)++;
     if (rc != 1) {
 	sudo_warnx("I/O change_winsize endpoint failed");
 	(*nerrors)++;
 	return;
     }
-    rc = sudoers_io.change_winsize(24, 80);
+    rc = sudoers_io.change_winsize(24, 80, &errstr);
     (*ntests)++;
     if (rc != 1) {
 	sudo_warnx("I/O change_winsize endpoint failed");

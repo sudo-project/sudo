@@ -633,7 +633,8 @@ static int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
-    int argc, char * const argv[], char * const user_env[], char * const args[])
+    int argc, char * const argv[], char * const user_env[], char * const args[],
+    const char **errstr)
 {
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     char * const *cur;
@@ -881,36 +882,44 @@ done:
  * Returns 1 on success and -1 on error.
  */
 static int
-sudoers_io_log(const char *buf, unsigned int len, int event)
+sudoers_io_log(const char *buf, unsigned int len, int event, const char **errstr)
 {
     struct timespec now, delay;
-    const char *errstr = NULL;
+    const char *ioerror = NULL;
     int ret = -1;
     debug_decl(sudoers_io_log, SUDOERS_DEBUG_PLUGIN);
 
     if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
-	errstr = strerror(errno);
+	ioerror = N_("unable to read the clock");
 	goto bad;
     }
     sudo_timespecsub(&now, &last_time, &delay);
 
     if (iolog_remote)
-	ret = sudoers_io_log_remote(event, buf, len, &delay, &errstr);
+	ret = sudoers_io_log_remote(event, buf, len, &delay, &ioerror);
     else
-	ret = sudoers_io_log_local(event, buf, len, &delay, &errstr);
+	ret = sudoers_io_log_local(event, buf, len, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
 
 bad:
     if (ret == -1) {
-	if (errstr != NULL && !warned) {
-	    /* Only warn about I/O log file errors once. */
-	    log_warning(SLOG_SEND_MAIL,
-		N_("unable to write to I/O log file: %s"), errstr);
-	    warned = true;
+	if (ioerror != NULL) {
+	    char *cp;
+
+	    if (asprintf(&cp, N_("unable to write to I/O log file: %s"),
+		    ioerror) != -1) {
+		*errstr = cp;
+	    }
+	    if (!warned) {
+		/* Only warn about I/O log file errors once. */
+		log_warning(SLOG_SEND_MAIL,
+		    N_("unable to write to I/O log file: %s"), ioerror);
+		warned = true;
+	    }
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
@@ -922,33 +931,33 @@ bad:
 }
 
 static int
-sudoers_io_log_stdin(const char *buf, unsigned int len)
+sudoers_io_log_stdin(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_STDIN);
+    return sudoers_io_log(buf, len, IO_EVENT_STDIN, errstr);
 }
 
 static int
-sudoers_io_log_stdout(const char *buf, unsigned int len)
+sudoers_io_log_stdout(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_STDOUT);
+    return sudoers_io_log(buf, len, IO_EVENT_STDOUT, errstr);
 }
 
 static int
-sudoers_io_log_stderr(const char *buf, unsigned int len)
+sudoers_io_log_stderr(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_STDERR);
+    return sudoers_io_log(buf, len, IO_EVENT_STDERR, errstr);
 }
 
 static int
-sudoers_io_log_ttyin(const char *buf, unsigned int len)
+sudoers_io_log_ttyin(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_TTYIN);
+    return sudoers_io_log(buf, len, IO_EVENT_TTYIN, errstr);
 }
 
 static int
-sudoers_io_log_ttyout(const char *buf, unsigned int len)
+sudoers_io_log_ttyout(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_TTYOUT);
+    return sudoers_io_log(buf, len, IO_EVENT_TTYOUT, errstr);
 }
 
 static int
@@ -1002,36 +1011,44 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
 }
 
 static int
-sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
+sudoers_io_change_winsize(unsigned int lines, unsigned int cols, const char **errstr)
 {
     struct timespec now, delay;
-    const char *errstr = NULL;
+    const char *ioerror = NULL;
     int ret = -1;
     debug_decl(sudoers_io_change_winsize, SUDOERS_DEBUG_PLUGIN);
 
     if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
-	errstr = strerror(errno);
+	ioerror = N_("unable to read the clock");
 	goto bad;
     }
     sudo_timespecsub(&now, &last_time, &delay);
 
     if (iolog_remote)
-	ret = sudoers_io_change_winsize_remote(lines, cols, &delay, &errstr);
+	ret = sudoers_io_change_winsize_remote(lines, cols, &delay, &ioerror);
     else
-	ret = sudoers_io_change_winsize_local(lines, cols, &delay, &errstr);
+	ret = sudoers_io_change_winsize_local(lines, cols, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
 
 bad:
     if (ret == -1) {
-	if (errstr != NULL && !warned) {
-	    /* Only warn about I/O log file errors once. */
-	    log_warning(SLOG_SEND_MAIL,
-		N_("unable to write to I/O log file: %s"), errstr);
-	    warned = true;
+	if (ioerror != NULL && !warned) {
+	    char *cp;
+
+	    if (asprintf(&cp, N_("unable to write to I/O log file: %s"),
+		    ioerror) != -1) {
+		*errstr = cp;
+	    }
+	    if (!warned) {
+		/* Only warn about I/O log file errors once. */
+		log_warning(SLOG_SEND_MAIL,
+		    N_("unable to write to I/O log file: %s"), ioerror);
+		warned = true;
+	    }
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
@@ -1093,11 +1110,11 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
 }
 
 static int
-sudoers_io_suspend(int signo)
+sudoers_io_suspend(int signo, const char **errstr)
 {
     struct timespec now, delay;
     char signame[SIG2STR_MAX];
-    const char *errstr = NULL;
+    const char *ioerror = NULL;
     int ret = -1;
     debug_decl(sudoers_io_suspend, SUDOERS_DEBUG_PLUGIN);
 
@@ -1110,27 +1127,35 @@ sudoers_io_suspend(int signo)
     if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
-	errstr = strerror(errno);
+	ioerror = N_("unable to read the clock");
 	goto bad;
     }
     sudo_timespecsub(&now, &last_time, &delay);
 
     /* Write suspend event to the timing file. */
     if (iolog_remote)
-	ret = sudoers_io_suspend_remote(signame, &delay, &errstr);
+	ret = sudoers_io_suspend_remote(signame, &delay, &ioerror);
     else
-	ret = sudoers_io_suspend_local(signame, &delay, &errstr);
+	ret = sudoers_io_suspend_local(signame, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
 
 bad:
     if (ret == -1) {
-	if (errstr != NULL && !warned) {
-	    /* Only warn about I/O log file errors once. */
-	    log_warning(SLOG_SEND_MAIL,
-		N_("unable to write to I/O log file: %s"), errstr);
-	    warned = true;
+	if (ioerror != NULL && !warned) {
+	    char *cp;
+
+	    if (asprintf(&cp, N_("unable to write to I/O log file: %s"),
+		    ioerror) != -1) {
+		*errstr = cp;
+	    }
+	    if (!warned) {
+		/* Only warn about I/O log file errors once. */
+		log_warning(SLOG_SEND_MAIL,
+		    N_("unable to write to I/O log file: %s"), ioerror);
+		warned = true;
+	    }
 	}
 
 	/* Ignore errors if they occur if the policy says so. */

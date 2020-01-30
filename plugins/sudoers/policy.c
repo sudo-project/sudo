@@ -551,7 +551,7 @@ bad:
  * Consumes iolog_path if not NULL.
  * Returns 1 on success and -1 on error.
  */
-int
+bool
 sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     char *iolog_path, void *v)
 {
@@ -560,14 +560,19 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     int info_len = 0;
     debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN);
 
+    if (exec_args == NULL)
+	debug_return_bool(true);	/* nothing to do */
+
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(48, sizeof(char *));
+    command_info = calloc(50, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
-    command_info[info_len] = sudo_new_key_val("command", safe_cmnd);
-    if (command_info[info_len++] == NULL)
-	goto oom;
+    if (safe_cmnd != NULL) {
+	command_info[info_len] = sudo_new_key_val("command", safe_cmnd);
+	if (command_info[info_len++] == NULL)
+	    goto oom;
+    }
     if (def_log_input || def_log_output) {
 	if (iolog_path)
 	    command_info[info_len++] = iolog_path;	/* now owned */
@@ -814,26 +819,30 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     *(exec_args->envp) = envp;
     *(exec_args->info) = command_info;
 
-    debug_return_int(true);
+    debug_return_bool(true);
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
+    free(audit_msg);
+    audit_msg = NULL;
     while (info_len--)
 	free(command_info[info_len]);
     free(command_info);
-    debug_return_int(-1);
+    debug_return_bool(false);
 }
 
 static int
 sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
-    char * const user_info[], char * const envp[], char * const args[])
+    char * const user_info[], char * const envp[], char * const args[],
+    const char **errstr)
 {
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     struct sudoers_policy_open_info info;
     const char *cp, *plugin_path = NULL;
     char * const *cur;
+    int ret;
     debug_decl(sudoers_policy_open, SUDOERS_DEBUG_PLUGIN);
 
     sudo_version = version;
@@ -864,7 +873,12 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     info.settings = settings;
     info.user_info = user_info;
     info.plugin_args = args;
-    debug_return_int(sudoers_policy_init(&info, envp));
+    ret = sudoers_policy_init(&info, envp);
+
+    /* The audit functions set audit_msg on failure. */
+    if (ret != 1 && audit_msg != NULL)
+	*errstr = audit_msg;
+    debug_return_int(ret);
 }
 
 static void
@@ -905,6 +919,8 @@ sudoers_policy_close(int exit_status, int error_code)
     }
     free(user_gids);
     user_gids = NULL;
+    free(audit_msg);
+    audit_msg = NULL;
 
     sudoers_debug_deregister();
 
@@ -917,20 +933,28 @@ sudoers_policy_close(int exit_status, int error_code)
  * Returns 1 on success, 0 on failure and -1 on error.
  */
 static int
-sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
+sudoers_policy_init_session(struct passwd *pwd, char **user_env[],
+    const char **errstr)
 {
+    int ret;
     debug_decl(sudoers_policy_init_session, SUDOERS_DEBUG_PLUGIN);
 
     /* user_env is only specified for API version 1.2 and higher. */
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	user_env = NULL;
 
-    debug_return_int(sudo_auth_begin_session(pwd, user_env));
+    ret = sudo_auth_begin_session(pwd, user_env);
+
+    /* The audit functions set audit_msg on failure. */
+    if (ret != 1 && audit_msg != NULL)
+	*errstr = audit_msg;
+    debug_return_int(ret);
 }
 
 static int
 sudoers_policy_check(int argc, char * const argv[], char *env_add[],
-    char **command_infop[], char **argv_out[], char **user_env_out[])
+    char **command_infop[], char **argv_out[], char **user_env_out[],
+    const char **errstr)
 {
     struct sudoers_exec_args exec_args;
     int ret;
@@ -950,18 +974,28 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 	    !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
+
+    /* The audit functions set audit_msg on failure. */
+    if (ret != 1 && audit_msg != NULL)
+	*errstr = audit_msg;
     debug_return_int(ret);
 }
 
 static int
-sudoers_policy_validate(void)
+sudoers_policy_validate(const char **errstr)
 {
+    int ret;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
 
     user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
 
-    debug_return_int(sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, false, NULL));
+    ret = sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, false, NULL);
+
+    /* The audit functions set audit_msg on failure. */
+    if (ret != 1 && audit_msg != NULL)
+	*errstr = audit_msg;
+    debug_return_int(ret);
 }
 
 static void
@@ -979,7 +1013,7 @@ sudoers_policy_invalidate(int remove)
 
 static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
-    const char *list_user)
+    const char *list_user, const char **errstr)
 {
     int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
@@ -1002,6 +1036,9 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	list_pw = NULL;
     }
 
+    /* The audit functions set audit_msg on failure. */
+    if (ret != 1 && audit_msg != NULL)
+	*errstr = audit_msg;
     debug_return_int(ret);
 }
 
