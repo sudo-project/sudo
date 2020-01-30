@@ -16,10 +16,10 @@ CALLBACK_CFUNC(open)(
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[],
-    char * const plugin_options[])
+    char * const plugin_options[], const char **errstr)
 {
     return python_plugin_io_open(&PLUGIN_CTX, version, conversation,
-        sudo_printf, settings, user_info, command_info, argc, argv, user_env, plugin_options);
+        sudo_printf, settings, user_info, command_info, argc, argv, user_env, plugin_options, errstr);
 }
 
 void
@@ -35,45 +35,45 @@ CALLBACK_CFUNC(show_version)(int verbose)
 }
 
 int
-CALLBACK_CFUNC(log_ttyin)(const char *buf, unsigned int len)
+CALLBACK_CFUNC(log_ttyin)(const char *buf, unsigned int len, const char **errstr)
 {
-    return python_plugin_io_log_ttyin(&PLUGIN_CTX, buf, len);
+    return python_plugin_io_log_ttyin(&PLUGIN_CTX, buf, len, errstr);
 }
 
 int
-CALLBACK_CFUNC(log_ttyout)(const char *buf, unsigned int len)
+CALLBACK_CFUNC(log_ttyout)(const char *buf, unsigned int len, const char **errstr)
 {
-    return python_plugin_io_log_ttyout(&PLUGIN_CTX, buf, len);
+    return python_plugin_io_log_ttyout(&PLUGIN_CTX, buf, len, errstr);
 }
 
 int
-CALLBACK_CFUNC(log_stdin)(const char *buf, unsigned int len)
+CALLBACK_CFUNC(log_stdin)(const char *buf, unsigned int len, const char **errstr)
 {
-    return python_plugin_io_log_stdin(&PLUGIN_CTX, buf, len);
+    return python_plugin_io_log_stdin(&PLUGIN_CTX, buf, len, errstr);
 }
 
 int
-CALLBACK_CFUNC(log_stdout)(const char *buf, unsigned int len)
+CALLBACK_CFUNC(log_stdout)(const char *buf, unsigned int len, const char **errstr)
 {
-    return python_plugin_io_log_stdout(&PLUGIN_CTX, buf, len);
+    return python_plugin_io_log_stdout(&PLUGIN_CTX, buf, len, errstr);
 }
 
 int
-CALLBACK_CFUNC(log_stderr)(const char *buf, unsigned int len)
+CALLBACK_CFUNC(log_stderr)(const char *buf, unsigned int len, const char **errstr)
 {
-    return python_plugin_io_log_stderr(&PLUGIN_CTX, buf, len);
+    return python_plugin_io_log_stderr(&PLUGIN_CTX, buf, len, errstr);
 }
 
 int
-CALLBACK_CFUNC(change_winsize)(unsigned int line, unsigned int cols)
+CALLBACK_CFUNC(change_winsize)(unsigned int line, unsigned int cols, const char **errstr)
 {
-    return python_plugin_io_change_winsize(&PLUGIN_CTX, line, cols);
+    return python_plugin_io_change_winsize(&PLUGIN_CTX, line, cols, errstr);
 }
 
 int
-CALLBACK_CFUNC(log_suspend)(int signo)
+CALLBACK_CFUNC(log_suspend)(int signo, const char **errstr)
 {
-    return python_plugin_io_log_suspend(&PLUGIN_CTX, signo);
+    return python_plugin_io_log_suspend(&PLUGIN_CTX, signo, errstr);
 }
 
 struct io_plugin IO_SYMBOL_NAME(python_io) = {

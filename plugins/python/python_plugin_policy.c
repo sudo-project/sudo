@@ -46,7 +46,7 @@ static int
 python_plugin_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], char * const user_env[],
-    char * const plugin_options[])
+    char * const plugin_options[], const char **errstr)
 {
     debug_decl(python_plugin_policy_open, PYTHON_DEBUG_CALLBACKS);
 
@@ -91,7 +91,7 @@ python_plugin_policy_close(int exit_status, int error)
 static int 
 python_plugin_policy_check(int argc, char * const argv[],
     char *env_add[], char **command_info_out[],
-    char **argv_out[], char **user_env_out[])
+    char **argv_out[], char **user_env_out[], const char **errstr)
 {
     debug_decl(python_plugin_policy_check, PYTHON_DEBUG_CALLBACKS);
     int rc = SUDO_RC_ERROR;
@@ -167,7 +167,7 @@ cleanup:
 }
 
 static int
-python_plugin_policy_list(int argc, char * const argv[], int verbose, const char *list_user)
+python_plugin_policy_list(int argc, char * const argv[], int verbose, const char *list_user, const char **errstr)
 {
     debug_decl(python_plugin_policy_list, PYTHON_DEBUG_CALLBACKS);
 
@@ -203,7 +203,7 @@ python_plugin_policy_version(int verbose)
 }
 
 int
-python_plugin_policy_validate(void)
+python_plugin_policy_validate(const char **errstr)
 {
     debug_decl(python_plugin_policy_validate, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(plugin_ctx.py_interpreter);
@@ -221,7 +221,7 @@ python_plugin_policy_invalidate(int remove)
 }
 
 int
-python_plugin_policy_init_session(struct passwd *pwd, char **user_env[])
+python_plugin_policy_init_session(struct passwd *pwd, char **user_env[], const char **errstr)
 {
     debug_decl(python_plugin_policy_init_session, PYTHON_DEBUG_CALLBACKS);
     int rc = SUDO_RC_ERROR;

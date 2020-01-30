@@ -80,7 +80,7 @@ python_plugin_io_open(struct IOPluginContext *io_ctx,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[],
-    char * const plugin_options[])
+    char * const plugin_options[], const char **errstr)
 {
     debug_decl(python_plugin_io_open, PYTHON_DEBUG_CALLBACKS);
 
@@ -146,7 +146,7 @@ python_plugin_io_show_version(struct IOPluginContext *io_ctx, int verbose)
 }
 
 int
-python_plugin_io_log_ttyin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_ttyin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_ttyin, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
@@ -155,7 +155,7 @@ python_plugin_io_log_ttyin(struct IOPluginContext *io_ctx, const char *buf, unsi
 }
 
 int
-python_plugin_io_log_ttyout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_ttyout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_ttyout, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
@@ -164,7 +164,7 @@ python_plugin_io_log_ttyout(struct IOPluginContext *io_ctx, const char *buf, uns
 }
 
 int
-python_plugin_io_log_stdin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_stdin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_stdin, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
@@ -173,7 +173,7 @@ python_plugin_io_log_stdin(struct IOPluginContext *io_ctx, const char *buf, unsi
 }
 
 int
-python_plugin_io_log_stdout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_stdout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_stdout, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
@@ -182,7 +182,7 @@ python_plugin_io_log_stdout(struct IOPluginContext *io_ctx, const char *buf, uns
 }
 
 int
-python_plugin_io_log_stderr(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_stderr(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_stderr, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
@@ -191,7 +191,7 @@ python_plugin_io_log_stderr(struct IOPluginContext *io_ctx, const char *buf, uns
 }
 
 int
-python_plugin_io_change_winsize(struct IOPluginContext *io_ctx, unsigned int line, unsigned int cols)
+python_plugin_io_change_winsize(struct IOPluginContext *io_ctx, unsigned int line, unsigned int cols, const char **errstr)
 {
     debug_decl(python_plugin_io_change_winsize, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
@@ -200,7 +200,7 @@ python_plugin_io_change_winsize(struct IOPluginContext *io_ctx, unsigned int lin
 }
 
 int
-python_plugin_io_log_suspend(struct IOPluginContext *io_ctx, int signo)
+python_plugin_io_log_suspend(struct IOPluginContext *io_ctx, int signo, const char **errstr)
 {
     debug_decl(python_plugin_io_log_suspend, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
