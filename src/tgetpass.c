@@ -61,7 +61,7 @@ enum tgetpass_errval {
 static volatile sig_atomic_t signo[NSIG];
 
 static void tgetpass_handler(int);
-static char *getln(int, char *, size_t, int, enum tgetpass_errval *);
+static char *getln(int, char *, size_t, bool, enum tgetpass_errval *);
 static char *sudo_askpass(const char *, const char *);
 
 static int
@@ -125,6 +125,7 @@ tgetpass(const char *prompt, int timeout, int flags,
     static char buf[SUDO_CONV_REPL_MAX + 1];
     int i, input, output, save_errno, ttyfd;
     bool need_restart, neednl = false;
+    bool feedback = ISSET(flags, TGP_MASK);
     enum tgetpass_errval errval;
     debug_decl(tgetpass, SUDO_DEBUG_CONV);
 
@@ -180,7 +181,7 @@ restart:
      */
     if (!ISSET(flags, TGP_ECHO)) {
 	for (;;) {
-	    if (ISSET(flags, TGP_MASK))
+	    if (feedback)
 		neednl = sudo_term_cbreak(input);
 	    else
 		neednl = sudo_term_noecho(input);
@@ -194,6 +195,9 @@ restart:
 	    }
 	}
     }
+    /* Only use feedback mode when we can disable echo. */
+    if (!neednl)
+	feedback = false;
 
     /*
      * Catch signals that would otherwise cause the user to end
@@ -224,7 +228,7 @@ restart:
 
     if (timeout > 0)
 	alarm(timeout);
-    pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_MASK), &errval);
+    pass = getln(input, buf, sizeof(buf), feedback, &errval);
     alarm(0);
     save_errno = errno;
 
@@ -366,7 +370,7 @@ sudo_askpass(const char *askpass, const char *prompt)
 extern int sudo_term_eof, sudo_term_erase, sudo_term_kill;
 
 static char *
-getln(int fd, char *buf, size_t bufsiz, int feedback,
+getln(int fd, char *buf, size_t bufsiz, bool feedback,
     enum tgetpass_errval *errval)
 {
     size_t left = bufsiz;
@@ -395,15 +399,15 @@ getln(int fd, char *buf, size_t bufsiz, int feedback,
 		while (cp > buf) {
 		    if (write(fd, "\b \b", 3) == -1)
 			break;
-		    --cp;
+		    cp--;
 		}
+		cp = buf;
 		left = bufsiz;
 		continue;
 	    } else if (c == sudo_term_erase) {
 		if (cp > buf) {
-		    if (write(fd, "\b \b", 3) == -1)
-			break;
-		    --cp;
+		    ignore_result(write(fd, "\b \b", 3));
+		    cp--;
 		    left++;
 		}
 		continue;
