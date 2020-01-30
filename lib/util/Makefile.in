@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -119,7 +119,7 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 LTOBJS = @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
-	 getgrouplist.lo gidlist.lo host_port.lo lbuf.lo locking.lo \
+	 getgrouplist.lo gidlist.lo host_port.lo json.lo lbuf.lo locking.lo \
          logfac.lo logpri.lo mkdir_parents.lo parseln.lo progname.lo \
          roundup.lo secure_path.lo setgroups.lo strsplit.lo strtobool.lo \
          strtoid.lo strtomode.lo strtonum.lo sudo_conf.lo \
@@ -803,6 +803,16 @@ isblank.i: $(srcdir)/isblank.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 isblank.plog: isblank.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/isblank.c --i-file $< --output-file $@
+json.lo: $(srcdir)/json.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+         $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h $(incdir)/sudo_json.h \
+         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/json.c
+json.i: $(srcdir)/json.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+         $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h $(incdir)/sudo_json.h \
+         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+json.plog: json.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/json.c --i-file $< --output-file $@
 key_val.lo: $(srcdir)/key_val.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \

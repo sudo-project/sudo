@@ -89,6 +89,7 @@ include/sudo_event.h
 include/sudo_fatal.h
 include/sudo_gettext.h
 include/sudo_iolog.h
+include/sudo_json.h
 include/sudo_lbuf.h
 include/sudo_plugin.h
 include/sudo_queue.h
@@ -141,6 +142,7 @@ lib/util/host_port.c
 lib/util/inet_ntop.c
 lib/util/inet_pton.c
 lib/util/isblank.c
+lib/util/json.c
 lib/util/key_val.c
 lib/util/lbuf.c
 lib/util/locking.c
