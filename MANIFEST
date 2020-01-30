@@ -240,6 +240,7 @@ lib/util/ttysize.c
 lib/util/unlinkat.c
 lib/util/util.exp.in
 lib/util/utimens.c
+lib/util/uuid.c
 lib/util/vsyslog.c
 lib/zlib/Makefile.in
 lib/zlib/adler32.c

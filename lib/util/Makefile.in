@@ -124,7 +124,7 @@ LTOBJS = @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
          roundup.lo secure_path.lo setgroups.lo strsplit.lo strtobool.lo \
          strtoid.lo strtomode.lo strtonum.lo sudo_conf.lo \
 	 sudo_debug.lo sudo_dso.lo term.lo ttyname_dev.lo \
-	 ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
+	 ttysize.lo uuid.lo @COMMON_OBJS@ @LTLIBOBJS@
 
 IOBJS = $(LTOBJS:.lo=.i)
 
@@ -1347,6 +1347,14 @@ utimens.i: $(srcdir)/utimens.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 utimens.plog: utimens.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/utimens.c --i-file $< --output-file $@
+uuid.lo: $(srcdir)/uuid.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+         $(incdir)/sudo_rand.h $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/uuid.c
+uuid.i: $(srcdir)/uuid.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+         $(incdir)/sudo_rand.h $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+uuid.plog: uuid.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/uuid.c --i-file $< --output-file $@
 vsyslog.lo: $(srcdir)/vsyslog.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/vsyslog.c
 vsyslog.i: $(srcdir)/vsyslog.c $(incdir)/sudo_compat.h $(top_builddir)/config.h

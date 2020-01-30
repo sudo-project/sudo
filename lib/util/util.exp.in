@@ -122,6 +122,8 @@ sudo_term_noecho_v1
 sudo_term_raw_v1
 sudo_term_restore_v1
 sudo_ttyname_dev_v1
+sudo_uuid_create_v1
+sudo_uuid_to_string_v1
 sudo_vfatal_nodebug_v1
 sudo_vfatalx_nodebug_v1
 sudo_vwarn_nodebug_v1

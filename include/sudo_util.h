@@ -315,4 +315,10 @@ __dso_public char *sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen);
 __dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
 #define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
 
+/* uuid.c */
+__dso_public void sudo_uuid_create_v1(unsigned char uuid_out[16]);
+#define sudo_uuid_create(_a) sudo_uuid_create_v1((_a))
+__dso_public char *sudo_uuid_to_string_v1(unsigned char uuid[16], char *dst, size_t dstsiz);
+#define sudo_uuid_to_string(_a, _b, _c) sudo_uuid_to_string_v1((_a), (_b), (_c))
+
 #endif /* SUDO_UTIL_H */
