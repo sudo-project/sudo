@@ -206,6 +206,12 @@ struct io_plugin {
     struct sudo_plugin_event * (*event_alloc)(void);
 };
 
+/* Differ audit plugin close status types. */
+#define SUDO_PLUGIN_NO_STATUS		0
+#define SUDO_PLUGIN_WAIT_STATUS		1
+#define SUDO_PLUGIN_EXEC_ERROR		2
+#define SUDO_PLUGIN_SUDO_ERROR		3
+
 /* Audit plugin type and defines */
 struct audit_plugin {
 #define SUDO_AUDIT_PLUGIN	    3
@@ -216,7 +222,7 @@ struct audit_plugin {
 	char * const user_info[], int submit_optind,
 	char * const submit_argv[], char * const submit_envp[],
 	char * const plugin_options[], const char **errstr);
-    void (*close)(int exit_status, int error);
+    void (*close)(int status_type, int status);
     int (*accept)(const char *plugin_name, unsigned int plugin_type,
 	char * const command_info[], char * const run_argv[],
 	char * const run_envp[], const char **errstr);

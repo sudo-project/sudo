@@ -947,7 +947,7 @@ run_command(struct command_details *details)
 	/* exec_setup() or execve() returned an error. */
 	policy_close(0, cstat.val);
 	iolog_close(0, cstat.val);
-	audit_close(0, cstat.val);
+	audit_close(SUDO_PLUGIN_EXEC_ERROR, cstat.val);
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
@@ -958,9 +958,10 @@ run_command(struct command_details *details)
 #endif
 	policy_close(status, 0);
 	iolog_close(status, 0);
-	audit_close(status, 0);
+	audit_close(SUDO_PLUGIN_WAIT_STATUS, status);
 	break;
     default:
+	/* TODO: handle front end error conditions. */
 	sudo_warnx(U_("unexpected child termination condition: %d"), cstat.type);
 	break;
     }
@@ -1162,6 +1163,7 @@ policy_check(int argc, char * const argv[],
 	/* Policy must be closed after auditing to avoid use after free. */
 	if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
 	    policy_close(0, 0);
+	audit_close(SUDO_PLUGIN_NO_STATUS, 0);
 	exit(EXIT_FAILURE); /* policy plugin printed error message */
     }
 
@@ -1209,6 +1211,7 @@ policy_list(int argc, char * const argv[], int verbose,
     /* Policy must be closed after auditing to avoid use after free. */
     if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
 	policy_close(0, 0);
+    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
 
     exit(ok != 1);
 }
@@ -1252,6 +1255,7 @@ policy_validate(char * const argv[], char * const envp[])
     /* Policy must be closed after auditing to avoid use after free. */
     if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
 	policy_close(0, 0);
+    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
 
     exit(ok != 1);
 }
@@ -1272,6 +1276,8 @@ policy_invalidate(int remove)
 	    policy_plugin.u.policy->close(0, 0);
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
+
+    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
 
     exit(EXIT_SUCCESS);
 }
@@ -1552,7 +1558,7 @@ audit_open(struct sudo_settings *settings, char * const user_info[],
 }
 
 static void
-audit_close(int exit_status, int error_code)
+audit_close(int status_type, int status)
 {
     struct plugin_container *plugin;
     debug_decl(audit_close, SUDO_DEBUG_PCOMM);
@@ -1560,7 +1566,7 @@ audit_close(int exit_status, int error_code)
     TAILQ_FOREACH(plugin, &audit_plugins, entries) {
 	if (plugin->u.audit->close != NULL) {
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    plugin->u.audit->close(exit_status, error_code);
+	    plugin->u.audit->close(status_type, status);
 	    sudo_debug_set_active_instance(sudo_debug_instance);
 	}
     }
@@ -1581,7 +1587,7 @@ audit_show_version(int verbose)
 	    plugin->u.audit->show_version(verbose);
 	}
 	if (plugin->u.audit->close != NULL)
-	    plugin->u.audit->close(0, 0);
+	    plugin->u.audit->close(SUDO_PLUGIN_NO_STATUS, 0);
 	sudo_debug_set_active_instance(sudo_debug_instance);
     }
 

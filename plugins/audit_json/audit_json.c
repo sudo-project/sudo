@@ -489,23 +489,6 @@ done:
     debug_return_int(ret);
 }
 
-static void
-audit_close(int exit_status, int error)
-{
-    debug_decl(audit_close, SUDO_DEBUG_PLUGIN);
-
-    if (state.accepted) {
-	/* Write log entry for exit_status, or error. */
-	audit_write_exit_record(exit_status, error);
-    }
-
-    free(state.logfile);
-    if (state.log_fp != NULL)
-	fclose(state.log_fp);
-
-    debug_return;
-}
-
 static int
 audit_write_record(const char *audit_str, const char *plugin_name,
     unsigned int plugin_type, const char *reason, char * const command_info[],
@@ -547,6 +530,9 @@ audit_write_record(const char *audit_str, const char *plugin_name,
     sudo_json_add_value(&json, "plugin_name", &json_value);
 
     switch (plugin_type) {
+    case 0:
+	json_value.u.string = "front-end";
+	break;
     case SUDO_POLICY_PLUGIN:
 	json_value.u.string = "policy";
 	break;
@@ -646,6 +632,31 @@ audit_error(const char *plugin_name, unsigned int plugin_type,
 	reason, command_info, NULL, NULL);
 
     debug_return_int(ret);
+}
+
+static void
+audit_close(int status_type, int status)
+{
+    debug_decl(audit_close, SUDO_DEBUG_PLUGIN);
+
+    switch (status_type) {
+    case SUDO_PLUGIN_WAIT_STATUS:
+	audit_write_exit_record(status, 0);
+	break;
+    case SUDO_PLUGIN_EXEC_ERROR:
+	audit_write_exit_record(0, status);
+	break;
+    case SUDO_PLUGIN_SUDO_ERROR:
+	audit_write_record("error", "sudo", 0, strerror(status),
+	    NULL, NULL, NULL);
+	break;
+    }
+
+    free(state.logfile);
+    if (state.log_fp != NULL)
+	fclose(state.log_fp);
+
+    debug_return;
 }
 
 static int
