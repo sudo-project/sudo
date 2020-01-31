@@ -143,7 +143,7 @@ py_log_last_error(const char *context_message)
         debug_return;
     }
 
-    PyObject *py_type, *py_message, *py_traceback;
+    PyObject *py_type = NULL, *py_message = NULL, *py_traceback = NULL;
     PyErr_Fetch(&py_type, &py_message, &py_traceback);
 
     char *message = py_message ? py_create_string_rep(py_message) : strdup("(NULL)");
@@ -398,7 +398,7 @@ py_get_current_execution_frame(char **file_name, long *line_number, char **funct
     PyObject *py_err_type = NULL, *py_err_value = NULL, *py_err_traceback = NULL;
     PyErr_Fetch(&py_err_type, &py_err_value, &py_err_traceback);
 
-    PyObject *py_frame = NULL, *py_lineno = NULL, *py_f_code = NULL,
+    PyObject *py_frame = NULL, *py_f_code = NULL,
               *py_filename = NULL, *py_function_name = NULL;
 
     PyObject *py_getframe = PySys_GetObject("_getframe");
@@ -409,25 +409,21 @@ py_get_current_execution_frame(char **file_name, long *line_number, char **funct
     if (py_frame == NULL)
         goto cleanup;
 
-    py_lineno = PyObject_GetAttrString(py_frame, "f_lineno");
-    if (py_lineno != NULL) {
-        *line_number = PyLong_AsLong(py_lineno);
-    }
+    *line_number = py_object_get_optional_attr_number(py_frame, "f_lineno");
 
-    py_f_code = PyObject_GetAttrString(py_frame, "f_code");
+    py_f_code = py_object_get_optional_attr(py_frame, "f_code", NULL);
     if (py_f_code != NULL) {
-        py_filename = PyObject_GetAttrString(py_f_code, "co_filename");
+        py_filename = py_object_get_optional_attr(py_f_code, "co_filename", NULL);
         if (py_filename != NULL)
             *file_name = strdup(PyUnicode_AsUTF8(py_filename));
 
-        py_function_name = PyObject_GetAttrString(py_f_code, "co_name");
+        py_function_name = py_object_get_optional_attr(py_f_code, "co_name", NULL);
         if (py_function_name != NULL)
             *function_name = strdup(PyUnicode_AsUTF8(py_function_name));
     }
 
 cleanup:
     Py_CLEAR(py_frame);
-    Py_CLEAR(py_lineno);
     Py_CLEAR(py_f_code);
     Py_CLEAR(py_filename);
     Py_CLEAR(py_function_name);
@@ -447,7 +443,8 @@ py_ctx_reset()
 }
 
 int
-py_sudo_conv(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+py_sudo_conv(int num_msgs, const struct sudo_conv_message msgs[],
+             struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
     /* Enable suspend during password entry. */
     struct sigaction sa, saved_sigtstp;
@@ -464,4 +461,60 @@ py_sudo_conv(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_co
     (void) sigaction(SIGTSTP, &saved_sigtstp, NULL);
 
     return rc;
+}
+
+PyObject *
+py_object_get_optional_attr(PyObject *py_object, const char *attr, PyObject *py_default)
+{
+    if (PyObject_HasAttrString(py_object, attr)) {
+        return PyObject_GetAttrString(py_object, attr);
+    }
+    Py_XINCREF(py_default);  // whatever we return will have its refcount incremented
+    return py_default;
+}
+
+const char *
+py_object_get_optional_attr_string(PyObject *py_object, const char *attr_name)
+{
+    PyObject *py_value = py_object_get_optional_attr(py_object, attr_name, NULL);
+    if (py_value == NULL)
+        return NULL;
+
+    const char *value = PyUnicode_AsUTF8(py_value);
+    Py_CLEAR(py_value); // Note, the object still has reference to the attribute
+    return value;
+}
+
+long long
+py_object_get_optional_attr_number(PyObject *py_object, const char *attr_name)
+{
+    PyObject *py_value = py_object_get_optional_attr(py_object, attr_name, NULL);
+    if (py_value == NULL)
+        return -1;
+
+    long long value = PyLong_AsLongLong(py_value);
+    Py_CLEAR(py_value);
+    return value;
+}
+
+void
+py_object_set_attr_number(PyObject *py_object, const char *attr_name, long long number)
+{
+    PyObject *py_number = PyLong_FromLong(number);
+    if (py_number == NULL)
+        return;
+
+    PyObject_SetAttrString(py_object, attr_name, py_number);
+    Py_CLEAR(py_number);
+}
+
+void
+py_object_set_attr_string(PyObject *py_object, const char *attr_name, const char *value)
+{
+    PyObject *py_value = PyUnicode_FromString(value);
+    if (py_value == NULL)
+        return;
+
+    PyObject_SetAttrString(py_object, attr_name, py_value);
+    Py_CLEAR(py_value);
 }

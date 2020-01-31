@@ -35,7 +35,6 @@ _sudo_ConvMessage__Init(PyObject *py_self, PyObject *py_args, PyObject *py_kwarg
     PyObject *py_empty = PyTuple_New(0);
 
     struct sudo_conv_message conv_message = { 0, 0, NULL };
-    PyObject *py_msg_type = NULL, *py_timeout = NULL, *py_msg = NULL;  // borrowed references
 
     static char *keywords[] = { "self", "msg_type", "msg", "timeout", NULL };
     if (!PyArg_ParseTupleAndKeywords(py_args ? py_args : py_empty, py_kwargs, "Ois|i:sudo.ConvMessage", keywords,
@@ -46,31 +45,19 @@ _sudo_ConvMessage__Init(PyObject *py_self, PyObject *py_args, PyObject *py_kwarg
     sudo_debug_printf(SUDO_DEBUG_TRACE, "Parsed arguments: self='%p' msg_type='%d' timeout='%d' msg='%s'",
                       (void *)py_self, conv_message.msg_type, conv_message.timeout, conv_message.msg);
 
-    py_msg_type = PyLong_FromLong(conv_message.msg_type);
-    if (py_msg_type == NULL)
+    py_object_set_attr_number(py_self, "msg_type", conv_message.msg_type);
+    if (PyErr_Occurred())
         goto cleanup;
 
-    py_timeout = PyLong_FromLong(conv_message.timeout);
-    if (py_timeout == NULL)
+    py_object_set_attr_number(py_self, "timeout", conv_message.timeout);
+    if (PyErr_Occurred())
         goto cleanup;
 
-    py_msg = PyUnicode_FromString(conv_message.msg);
-    if (py_msg == NULL)
-        goto cleanup;
-
-    if (PyObject_SetAttrString(py_self, "msg_type", py_msg_type) != 0)
-        goto cleanup;
-
-    if (PyObject_SetAttrString(py_self, "timeout", py_timeout) != 0)
-        goto cleanup;
-
-    if (PyObject_SetAttrString(py_self, "msg", py_msg) != 0)
+    py_object_set_attr_string(py_self, "msg", conv_message.msg);
+    if (PyErr_Occurred())
         goto cleanup;
 
 cleanup:
-    Py_CLEAR(py_msg_type);
-    Py_CLEAR(py_timeout);
-    Py_CLEAR(py_msg);
     Py_CLEAR(py_empty);
 
     if (PyErr_Occurred())
@@ -121,31 +108,19 @@ sudo_module_ConvMessage_to_c(PyObject *py_conv_message, struct sudo_conv_message
 {
     debug_decl(sudo_module_ConvMessage_to_c, PYTHON_DEBUG_C_CALLS);
 
-    int rc = SUDO_RC_ERROR;
-    PyObject *py_msg_type = NULL, *py_timeout = NULL, *py_msg = NULL;
+    conv_message->msg_type = (int)py_object_get_optional_attr_number(py_conv_message, "msg_type");
+    if (PyErr_Occurred())
+        debug_return_int(SUDO_RC_ERROR);
 
-    if ((py_msg_type = PyObject_GetAttrString(py_conv_message, "msg_type")) == NULL)
-        goto cleanup;
-    conv_message->msg_type = (int)PyLong_AsLong(py_msg_type);
+    conv_message->timeout = (int)py_object_get_optional_attr_number(py_conv_message, "timeout");
+    if (PyErr_Occurred())
+        debug_return_int(SUDO_RC_ERROR);
 
-    if ((py_timeout = PyObject_GetAttrString(py_conv_message, "timeout")) == NULL)
-        goto cleanup;
-    conv_message->timeout = (int)PyLong_AsLong(py_timeout);
+    conv_message->msg = py_object_get_optional_attr_string(py_conv_message, "msg");
+    if (PyErr_Occurred())
+        debug_return_int(SUDO_RC_ERROR);
 
-    if ((py_msg = PyObject_GetAttrString(py_conv_message, "msg")) == NULL)
-        goto cleanup;
-
-    conv_message->msg = PyUnicode_AsUTF8(py_msg);
-    if (conv_message->msg == NULL)
-        goto cleanup;
-
-    rc = SUDO_RC_OK;
-
-cleanup:
-    Py_CLEAR(py_msg_type);
-    Py_CLEAR(py_timeout);
-    Py_CLEAR(py_msg);
-    debug_return_int(rc);
+    debug_return_int(SUDO_RC_OK);
 }
 
 int
