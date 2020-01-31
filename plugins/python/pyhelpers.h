@@ -71,6 +71,13 @@ char **py_str_array_from_tuple(PyObject *py_tuple);
 CPYCHECKER_RETURNS_BORROWED_REF
 PyObject *py_tuple_get(PyObject *py_tuple, Py_ssize_t index, PyTypeObject *expected_type);
 
+PyObject *py_object_get_optional_attr(PyObject *py_object, const char *attr, PyObject *py_default);
+long long py_object_get_optional_attr_number(PyObject *py_object, const char *attr_name);
+const char *py_object_get_optional_attr_string(PyObject *py_object, const char *attr_name);
+
+void py_object_set_attr_number(PyObject *py_object, const char *attr_name, long long number);
+void py_object_set_attr_string(PyObject *py_object, const char *attr_name, const char *value);
+
 PyObject *py_create_version(unsigned int version);
 
 void py_debug_python_call(const char *class_name, const char *function_name,
