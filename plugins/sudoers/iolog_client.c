@@ -489,7 +489,7 @@ tls_timed_connect(int sock, SSL *ssl, struct timespec *timo)
 	goto done;
     }
 
-    if (sudo_ev_dispatch(closure.evbase) == -1 || sudo_ev_got_break(closure.evbase)) {
+    if (sudo_ev_dispatch(closure.evbase) == -1) {
 	sudo_warnx(U_("error in event loop"));
 	goto done;
     }
@@ -1059,14 +1059,15 @@ read_server_hello(int sock, struct client_closure *closure)
 	sudo_warnx(U_("unable to add event to queue"));
 	goto done;
     }
-    if (sudo_ev_dispatch(evbase) == -1 || sudo_ev_got_break(evbase)) {
+    if (sudo_ev_dispatch(evbase) == -1) {
 	sudo_warnx(U_("error in event loop"));
 	goto done;
     }
 
-    /* Note: handle_server_hello() reset the event back to sudo's event loop. */
+    if (!sudo_ev_got_break(evbase))
+	ret = true;
 
-    ret = true;
+    /* Note: handle_server_hello() reset the event back to sudo's event loop. */
 
 done:
     sudo_ev_base_free(evbase);
