@@ -173,7 +173,7 @@ check_example_io_plugin_version_display(int is_verbose)
     python_io->close(0, 0);  // this should not call the python plugin close as there was no command run invocation
 
     if (is_verbose) {
-        // Note: the exact python version is environment dependant
+        // Note: the exact python version is environment dependent
         VERIFY_STR_CONTAINS(data.stdout_str, "Python interpreter version:");
         VERIFY_STR_CONTAINS(data.stdout_str, "Python io plugin API version");
     } else {
@@ -573,7 +573,7 @@ check_example_policy_plugin_version_display(int is_verbose)
     python_policy->close(0, 0);  // this should not call the python plugin close as there was no command run invocation
 
     if (is_verbose) {
-        // Note: the exact python version is environment dependant
+        // Note: the exact python version is environment dependent
         VERIFY_STR_CONTAINS(data.stdout_str, "Python interpreter version:");
         VERIFY_STR_CONTAINS(data.stdout_str, "Python policy plugin API version");
     } else {

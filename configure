@@ -1672,7 +1672,7 @@ Optional Features:
                           Disable use of the libsudo_util shared library.
   --enable-tmpfiles.d=DIR Set the path to the systemd tmpfiles.d directory.
   --enable-devsearch=PATH The colon-delimited path to search for device nodes
-                          when determing the tty name.
+                          when determining the tty name.
   --enable-sasl           Enable/disable LDAP SASL support
   --timestamp-type=TYPE   Set the default time stamp record type to global,
                           ppid or tty.
@@ -14165,7 +14165,7 @@ fi
   # before this can be enabled.
   hardcode_into_libs=yes
 
-  # Ideally, we could use ldconfig to report *all* directores which are
+  # Ideally, we could use ldconfig to report *all* directories which are
   # searched for libraries, however this is still not possible.  Aside from not
   # being certain /sbin/ldconfig is available, command
   # 'ldconfig -N -X -v | grep ^/' on 64bit Fedora does not report /usr/lib64,

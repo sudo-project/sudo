@@ -7904,20 +7904,20 @@ pp_backend_bsd_init () {
     pp_bsd_desc=
     pp_bsd_message=
 
-    # pp_bsd_category must be in array format comma seperated
+    # pp_bsd_category must be in array format comma separated
     # pp_bsd_category=[security,network]
     pp_bsd_category=
 
     # pp_bsd_licenselogic can be one of the following: single, and, or unset
     pp_bsd_licenselogic=
 
-    # pp_bsd_licenses must be in array format comma seperated
+    # pp_bsd_licenses must be in array format comma separated
     # pp_bsd_licenses=[GPLv2,MIT]
     pp_bsd_licenses=
 
     # pp_bsd_annotations. These can be any key: value pair
-    # key must be seperated by a :
-    # keyvalue pairs must be comma seperated
+    # key must be separated by a :
+    # keyvalue pairs must be comma separated
     # pp_bsd_annotations="repo_type: binary, somekey: somevalue"
     # since all packages created by PolyPackage will be of type binary
     # let's just set it now.
@@ -8001,8 +8001,8 @@ pp_bsd_make_annotations () {
     manifest=$1
 
     # Add annotations. These can be any key: value pair
-    # key must be seperated by a :
-    # key:value pairs must be comma seperated.
+    # key must be separated by a :
+    # key:value pairs must be comma separated.
     if test -n "$pp_bsd_annotations"; then
         pp_debug "Processing annotations:"
         pp_bsd_label "annotations" "{" >> $manifest
@@ -8046,7 +8046,7 @@ pp_bsd_make_messages () {
     test -z $1 && pp_die "pp_bsd_make_messages requires a parameter"
     manifest=$1
    
-    pp_debug "Processing messsages"
+    pp_debug "Processing messages"
 
     # Empty messages: [ ] is OK in the manifest
     pp_bsd_label "messages" "[" >> $manifest

@@ -1586,7 +1586,7 @@ logsrvd_cleanup(void)
 }
 
 /*
- * Fork and detatch from the terminal.
+ * Fork and detach from the terminal.
  */
 static void
 daemonize(bool nofork)

@@ -1323,7 +1323,7 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
 }
 
 /*
- * Execute a command in a pty, potentially with I/O loggging, and
+ * Execute a command in a pty, potentially with I/O logging, and
  * wait for it to finish.
  * This is a little bit tricky due to how POSIX job control works and
  * we fact that we have two different controlling terminals to deal with.

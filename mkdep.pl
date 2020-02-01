@@ -171,8 +171,8 @@ sub mkdep {
 	    # We have both .lo and .o files, only the .lo should be used
 	    warn "$file: $obj should be $1.lo\n";
 	} else {
-	    # Use old depenencies when mapping objects to their source.
-	    # If no old depenency, use the MANIFEST file to find the source.
+	    # Use old dependencies when mapping objects to their source.
+	    # If no old dependency, use the MANIFEST file to find the source.
 	    my $src = $1 . '.c';
 	    my $ext = $2;
 	    if (exists $old_deps{$obj}) {

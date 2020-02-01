@@ -161,7 +161,7 @@
 #define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
 
 /* sudo_parseln() flags */
-#define PARSELN_COMM_BOL	0x01	/* comments only at begining of line */
+#define PARSELN_COMM_BOL	0x01	/* comments only at beginning of line */
 #define PARSELN_CONT_IGN	0x02	/* ignore line continuation char */
 
 /*
