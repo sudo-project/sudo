@@ -65,6 +65,7 @@
 
 /* Server callback may redirect to client callback for TLS. */
 static void client_msg_cb(int fd, int what, void *v);
+static void server_msg_cb(int fd, int what, void *v);
 
 static void
 connect_cb(int sock, int what, void *v)
@@ -1037,6 +1038,41 @@ client_message_completion(struct client_closure *closure)
     debug_return_bool(true);
 }
 
+bool
+read_server_hello(int sock, struct client_closure *closure)
+{
+    struct sudo_event_base *evbase;
+    bool ret = false;
+    debug_decl(read_server_hello, SUDOERS_DEBUG_UTIL);
+
+    /* Get new event base so we can read ServerHello syncronously. */
+    evbase = sudo_ev_base_alloc();
+    if (evbase == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    closure->read_ev->setbase(closure->read_ev, evbase);
+
+    /* Read ServerHello synchronously and optionally perform TLS handshake. */
+    if (closure->read_ev->add(closure->read_ev,
+	    &closure->log_details->server_timeout) == -1) {
+	sudo_warnx(U_("unable to add event to queue"));
+	goto done;
+    }
+    if (sudo_ev_dispatch(evbase) == -1 || sudo_ev_got_break(evbase)) {
+	sudo_warnx(U_("error in event loop"));
+	goto done;
+    }
+
+    /* Note: handle_server_hello() reset the event back to sudo's event loop. */
+
+    ret = true;
+
+done:
+    sudo_ev_base_free(evbase);
+    debug_return_bool(ret);
+}
+
 /*
  * Respond to a ServerHello message from the server.
  * Returns true on success, false on error.
@@ -1085,10 +1121,16 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	    __func__, n + 1, msg->servers[n]);
     }
 
-    /*
-     * Disable timeout for read event after have server hello.
-     * Other server messages may happen at arbitrary times.
-     */
+    /* Move read event back to main sudo event loop. */
+    closure->read_ev->del(closure->read_ev);
+    if (closure->read_ev->set(closure->read_ev, closure->sock,
+	    SUDO_PLUGIN_EV_READ|SUDO_PLUGIN_EV_PERSIST,
+	    server_msg_cb, closure) == -1) {
+        sudo_warn(U_("unable to add event to queue"));
+	debug_return_bool(false);
+    }
+
+    /* Server messages may occur at arbitrary times so no timeout. */
     if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
         sudo_warn(U_("unable to add event to queue"));
 	debug_return_bool(false);

@@ -159,5 +159,6 @@ bool fmt_suspend(struct client_closure *closure, const char *signame, struct tim
 bool fmt_winsize(struct client_closure *closure, unsigned int lines, unsigned int cols, struct timespec *delay);
 int log_server_connect(struct sudoers_str_list *servers, bool tcp_keepalive, struct timespec *timo, struct sudoers_string **connected_server);
 void client_closure_free(struct client_closure *closure);
+bool read_server_hello(int sock, struct client_closure *closure);
 
 #endif /* SUDOERS_IOLOG_CLIENT_H */

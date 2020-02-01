@@ -608,22 +608,18 @@ sudoers_io_open_remote(void)
     if (sock == -1) {
 	/* TODO: support offline logs if server unreachable */
 	sudo_warnx(U_("unable to connect to log server"));
-	ret = -1;
 	goto done;
     }
 
     if (!client_closure_fill(&client_closure, sock, connected_server,
 	    &iolog_details, &sudoers_io)) {
 	close(sock);
-	ret = -1;
 	goto done;
     }
 
-    /* Enable reader for server hello */
-    ret = client_closure.read_ev->add(client_closure.read_ev,
-	&iolog_details.server_timeout);
-    if (ret == -1)
-	sudo_warn(U_("unable to add event to queue"));
+    /* Read ServerHello and perform TLS handshake (optional). */
+    if (read_server_hello(sock, &client_closure))
+	ret = 1;
 
 done:
     debug_return_int(ret);
