@@ -221,7 +221,7 @@ clients will authenticate the server by verifying its certificate
 and identity.
 If false, no verification is performed of the server certificate
 by the server or the client.
-If using self-signed certificates without a certificate authority,
+When using self-signed certificates without a certificate authority,
 this setting should be set to false.
 The default value is true.
 .SS "iolog"
