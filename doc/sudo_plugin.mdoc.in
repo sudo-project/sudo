@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 30, 2020
+.Dd February 2, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3225,6 +3225,14 @@ to the specified value.
 This can be used to move an event created via
 .Fn event_alloc
 to a new event loop allocated by sudo's event subsystem.
+If
+.Fa base
+is
+.Dv NULL ,
+.Fa pev Ns 's
+event base is reset to the default value, which corresponds to
+.Nm sudo Ns 's
+main event loop.
 Using this function requires linking the plugin with the sudo_util
 library.
 It is unlikely to be used outside of the
