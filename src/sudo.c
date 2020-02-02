@@ -1807,6 +1807,7 @@ plugin_event_loopbreak(struct sudo_plugin_event *pev)
 /*
  * Reset the event base of a struct sudo_plugin_event.
  * The event is removed from the old base (if any) first.
+ * A NULL base can be used to set the default sudo event base.
  */
 static void
 plugin_event_setbase(struct sudo_plugin_event *pev, void *base)
@@ -1817,7 +1818,7 @@ plugin_event_setbase(struct sudo_plugin_event *pev, void *base)
     ev_int = __containerof(pev, struct sudo_plugin_event_int, public);
     if (ev_int->private.base != NULL)
 	sudo_ev_del(ev_int->private.base, &ev_int->private);
-    ev_int->private.base = base;
+    ev_int->private.base = base ? base : sudo_event_base;
     debug_return;
 }
 

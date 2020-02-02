@@ -1122,16 +1122,11 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	    __func__, n + 1, msg->servers[n]);
     }
 
-    /* Move read event back to main sudo event loop. */
-    closure->read_ev->del(closure->read_ev);
-    if (closure->read_ev->set(closure->read_ev, closure->sock,
-	    SUDO_PLUGIN_EV_READ|SUDO_PLUGIN_EV_PERSIST,
-	    server_msg_cb, closure) == -1) {
-        sudo_warn(U_("unable to add event to queue"));
-	debug_return_bool(false);
-    }
-
-    /* Server messages may occur at arbitrary times so no timeout. */
+    /*
+     * Move read event back to main sudo event loop.
+     * Server messages may occur at any time, so no timeout.
+     */
+    closure->read_ev->setbase(closure->read_ev, NULL);
     if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
         sudo_warn(U_("unable to add event to queue"));
 	debug_return_bool(false);
