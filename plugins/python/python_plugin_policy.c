@@ -86,6 +86,7 @@ python_plugin_policy_close(int exit_status, int error)
 {
     debug_decl(python_plugin_policy_close, PYTHON_DEBUG_CALLBACKS);
     python_plugin_close(&plugin_ctx, CALLBACK_PYNAME(close), exit_status, error);
+    debug_return;
 }
 
 static int 
