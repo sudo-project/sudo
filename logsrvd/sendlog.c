@@ -1067,6 +1067,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
             printf("server %zu: %s\n", n + 1, msg->servers[n]);
         }
 
+#if defined(HAVE_OPENSSL)
         if (tls) {
             printf("Requested protocol: TLS\n");
             printf("Server authentication: %s\n", tls_server_auth ? "Required":"Not Required");
@@ -1074,6 +1075,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
         } else {
             printf("Requested protocol: ClearText\n");
         }
+#endif
     }
 
     debug_return_bool(true);
