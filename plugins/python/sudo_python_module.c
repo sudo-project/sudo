@@ -504,7 +504,7 @@ void
 sudo_module_register_enum(PyObject *py_module, const char *enum_name, PyObject *py_constants_dict)
 {
     // pseudo code:
-    // return IntEnum('MyEnum', {'DEFINITION_NAME': DEFINITION_VALUE, ...})
+    // return enum.IntEnum('MyEnum', {'DEFINITION_NAME': DEFINITION_VALUE, ...})
 
     debug_decl(sudo_module_register_enum, PYTHON_DEBUG_INTERNAL);
 
@@ -601,6 +601,21 @@ sudo_module_init(void)
         {"DEBUG", SUDO_DEBUG_DEBUG}
     };
     MODULE_REGISTER_ENUM("DEBUG", constants_debug);
+
+    struct key_value_str_int constants_exit_reason[] = {
+        {"NO_STATUS", SUDO_PLUGIN_NO_STATUS},
+        {"WAIT_STATUS", SUDO_PLUGIN_WAIT_STATUS},
+        {"EXEC_ERROR", SUDO_PLUGIN_EXEC_ERROR},
+        {"SUDO_ERROR", SUDO_PLUGIN_SUDO_ERROR}
+    };
+    MODULE_REGISTER_ENUM("EXIT_REASON", constants_exit_reason);
+
+    struct key_value_str_int constants_plugin_types[] = {
+        {"POLICY", SUDO_POLICY_PLUGIN},
+        {"AUDIT", SUDO_AUDIT_PLUGIN},
+        {"IO", SUDO_IO_PLUGIN},
+    };
+    MODULE_REGISTER_ENUM("PLUGIN_TYPE", constants_plugin_types);
 
     // classes
     if (sudo_module_register_conv_message(py_module) != SUDO_RC_OK)
