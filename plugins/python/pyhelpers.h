@@ -62,6 +62,14 @@ char *py_create_string_rep(PyObject *py_object);
 
 char *py_join_str_list(PyObject *py_str_list, const char *separator);
 
+struct key_value_str_int
+{
+    const char *key;
+    int value;
+};
+
+PyObject *py_dict_create_string_int(size_t count, struct key_value_str_int *key_values);
+
 PyObject *py_from_passwd(const struct passwd *pwd);
 
 PyObject *py_str_array_to_tuple_with_count(Py_ssize_t count, char * const strings[]);

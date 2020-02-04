@@ -12,20 +12,20 @@ class ReasonLoggerIOPlugin(sudo.Plugin):
 
     sudo.ConvMessage has the following fields (see help(sudo.ConvMessage)):
         msg_type: int  Specifies the type of the conversation.
-                       See sudo.CONV_* constants below.
+                       See sudo.CONV.* constants below.
         timeout: int   The maximum amount of time for the conversation in seconds.
                        After the timeout exceeds, the "sudo.conv" function will
                        raise sudo.ConversationInterrupted exception.
         msg: str       The message to display for the user.
 
     To specify the conversion type you can use the following constants:
-        sudo.CONV_PROMPT_ECHO_OFF
-        sudo.CONV_PROMPT_ECHO_ON
-        sudo.CONV_ERROR_MSG
-        sudo.CONV_INFO_MSG
-        sudo.CONV_PROMPT_MASK
-        sudo.CONV_PROMPT_ECHO_OK
-        sudo.CONV_PREFER_TTY
+        sudo.CONV.PROMPT_ECHO_OFF
+        sudo.CONV.PROMPT_ECHO_ON
+        sudo.CONV.ERROR_MSG
+        sudo.CONV.INFO_MSG
+        sudo.CONV.PROMPT_MASK
+        sudo.CONV.PROMPT_ECHO_OK
+        sudo.CONV.PREFER_TTY
     """
     def open(self, argv, command_info):
         try:
@@ -36,8 +36,8 @@ class ReasonLoggerIOPlugin(sudo.Plugin):
             # can hide a hidden message in case of criminals are forcing him for
             # running the command.
             # You can either specify the arguments in strict order (timeout being optional), or use named arguments.
-            message1 = sudo.ConvMessage(sudo.CONV_PROMPT_ECHO_ON, "Reason: ", conv_timeout)
-            message2 = sudo.ConvMessage(msg="Secret reason: ", timeout=conv_timeout, msg_type=sudo.CONV_PROMPT_MASK)
+            message1 = sudo.ConvMessage(sudo.CONV.PROMPT_ECHO_ON, "Reason: ", conv_timeout)
+            message2 = sudo.ConvMessage(msg="Secret reason: ", timeout=conv_timeout, msg_type=sudo.CONV.PROMPT_MASK)
             reply1, reply2 = sudo.conv(message1, message2,
                                        on_suspend=self.on_conversation_suspend,
                                        on_resume=self.on_conversation_resume)
@@ -49,7 +49,7 @@ class ReasonLoggerIOPlugin(sudo.Plugin):
 
         except sudo.ConversationInterrupted:
             sudo.log_error("You did not answer in time")
-            return sudo.RC_REJECT
+            return sudo.RC.REJECT
 
     def on_conversation_suspend(self, signum):
         # This is just an example of how to do something on conversation suspend.

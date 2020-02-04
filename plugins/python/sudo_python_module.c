@@ -498,6 +498,44 @@ cleanup:
     debug_return_ptr(py_class);
 }
 
+void
+sudo_module_register_enum(PyObject *py_module, const char *enum_name, PyObject *py_constants_dict)
+{
+    // pseudo code:
+    // return IntEnum('MyEnum', {'DEFINITION_NAME': DEFINITION_VALUE, ...})
+
+    debug_decl(sudo_module_register_enum, PYTHON_DEBUG_INTERNAL);
+
+    if (py_constants_dict == NULL)
+        return;
+
+    PyObject *py_enum_class = NULL;
+    {
+        PyObject *py_enum_module = PyImport_ImportModule("enum");
+        if (py_enum_module == NULL) {
+            Py_CLEAR(py_constants_dict);
+            debug_return;
+        }
+
+        py_enum_class = PyObject_CallMethod(py_enum_module,
+                                            "IntEnum", "sO", enum_name,
+                                            py_constants_dict);
+
+        Py_CLEAR(py_constants_dict);
+        Py_CLEAR(py_enum_module);
+    }
+
+    if (py_enum_class == NULL) {
+        debug_return;
+    }
+
+    if (PyModule_AddObject(py_module, enum_name, py_enum_class) < 0) {
+        Py_CLEAR(py_enum_class);
+        debug_return;
+    }
+
+    debug_return;
+}
 
 PyMODINIT_FUNC
 sudo_module_init(void)
@@ -525,35 +563,41 @@ sudo_module_init(void)
     MODULE_ADD_EXCEPTION(SudoException, NULL);
     MODULE_ADD_EXCEPTION(ConversationInterrupted, EXC_VAR(SudoException));
 
+    #define MODULE_REGISTER_ENUM(name, key_values) \
+        sudo_module_register_enum(py_module, name, py_dict_create_string_int(\
+            sizeof(key_values) / sizeof(struct key_value_str_int), key_values))
+
     // constants
-    #define MODULE_ADD_INT_CONSTANT(constant) \
-        do { \
-            if (PyModule_AddIntConstant(py_module, #constant, SUDO_ ## constant) != 0) \
-                goto cleanup; \
-        } while(0)
+    struct key_value_str_int constants_rc[] = {
+        {"OK", SUDO_RC_OK},
+        {"ACCEPT", SUDO_RC_ACCEPT},
+        {"REJECT", SUDO_RC_REJECT},
+        {"ERROR", SUDO_RC_ERROR},
+        {"USAGE_ERROR", SUDO_RC_USAGE_ERROR}
+    };
+    MODULE_REGISTER_ENUM("RC", constants_rc);
 
-    MODULE_ADD_INT_CONSTANT(RC_OK);
-    MODULE_ADD_INT_CONSTANT(RC_ACCEPT);
-    MODULE_ADD_INT_CONSTANT(RC_REJECT);
-    MODULE_ADD_INT_CONSTANT(RC_ERROR);
-    MODULE_ADD_INT_CONSTANT(RC_USAGE_ERROR);
+    struct key_value_str_int constants_conv[] = {
+        {"PROMPT_ECHO_OFF", SUDO_CONV_PROMPT_ECHO_OFF},
+        {"PROMPT_ECHO_ON", SUDO_CONV_PROMPT_ECHO_ON},
+        {"INFO_MSG", SUDO_CONV_INFO_MSG},
+        {"PROMPT_MASK", SUDO_CONV_PROMPT_MASK},
+        {"PROMPT_ECHO_OK", SUDO_CONV_PROMPT_ECHO_OK},
+        {"PREFER_TTY", SUDO_CONV_PREFER_TTY}
+    };
+    MODULE_REGISTER_ENUM("CONV", constants_conv);
 
-    MODULE_ADD_INT_CONSTANT(CONV_PROMPT_ECHO_OFF);
-    MODULE_ADD_INT_CONSTANT(CONV_PROMPT_ECHO_ON);
-    MODULE_ADD_INT_CONSTANT(CONV_ERROR_MSG);
-    MODULE_ADD_INT_CONSTANT(CONV_INFO_MSG);
-    MODULE_ADD_INT_CONSTANT(CONV_PROMPT_MASK);
-    MODULE_ADD_INT_CONSTANT(CONV_PROMPT_ECHO_OK);
-    MODULE_ADD_INT_CONSTANT(CONV_PREFER_TTY);
-
-    MODULE_ADD_INT_CONSTANT(DEBUG_CRIT);
-    MODULE_ADD_INT_CONSTANT(DEBUG_ERROR);
-    MODULE_ADD_INT_CONSTANT(DEBUG_WARN);
-    MODULE_ADD_INT_CONSTANT(DEBUG_NOTICE);
-    MODULE_ADD_INT_CONSTANT(DEBUG_DIAG);
-    MODULE_ADD_INT_CONSTANT(DEBUG_INFO);
-    MODULE_ADD_INT_CONSTANT(DEBUG_TRACE);
-    MODULE_ADD_INT_CONSTANT(DEBUG_DEBUG);
+    struct key_value_str_int constants_debug[] = {
+        {"CRIT", SUDO_DEBUG_CRIT},
+        {"ERROR", SUDO_DEBUG_ERROR},
+        {"WARN", SUDO_DEBUG_WARN},
+        {"NOTICE", SUDO_DEBUG_NOTICE},
+        {"DIAG", SUDO_DEBUG_DIAG},
+        {"INFO", SUDO_DEBUG_INFO},
+        {"TRACE", SUDO_DEBUG_TRACE},
+        {"DEBUG", SUDO_DEBUG_DEBUG}
+    };
+    MODULE_REGISTER_ENUM("DEBUG", constants_debug);
 
     // classes
     if (sudo_module_register_conv_message(py_module) != SUDO_RC_OK)
