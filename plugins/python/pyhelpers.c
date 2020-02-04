@@ -518,3 +518,33 @@ py_object_set_attr_string(PyObject *py_object, const char *attr_name, const char
     PyObject_SetAttrString(py_object, attr_name, py_value);
     Py_CLEAR(py_value);
 }
+
+PyObject *
+py_dict_create_string_int(size_t count, struct key_value_str_int *key_values)
+{
+    debug_decl(py_dict_create_string_int, PYTHON_DEBUG_INTERNAL);
+
+    PyObject *py_value = NULL;
+    PyObject *py_dict = PyDict_New();
+    if (py_dict == NULL)
+        goto cleanup;
+
+    for (size_t i = 0; i < count; ++i) {
+        py_value = PyLong_FromLong(key_values[i].value);
+        if (py_value == NULL)
+            goto cleanup;
+
+        if (PyDict_SetItemString(py_dict, key_values[i].key, py_value) < 0)
+            goto cleanup;
+
+        Py_CLEAR(py_value);
+    }
+
+cleanup:
+    if (PyErr_Occurred()) {
+        Py_CLEAR(py_dict);
+    }
+    Py_CLEAR(py_value);
+
+    debug_return_ptr(py_dict);
+}

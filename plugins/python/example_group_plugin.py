@@ -15,14 +15,14 @@ class SudoGroupPlugin(sudo.Plugin):
 
     Most functions can express error or reject through their "int" return value
     as documented in the manual. The sudo module also has constants for these:
-        sudo.RC_ACCEPT / sudo.RC_OK  1
-        sudo.RC_REJECT               0
-        sudo.RC_ERROR               -1
-        sudo.RC_USAGE_ERROR         -2
+        sudo.RC.ACCEPT / sudo.RC.OK  1
+        sudo.RC.REJECT               0
+        sudo.RC.ERROR               -1
+        sudo.RC.USAGE_ERROR         -2
 
     If the function returns "None" (for example does not call return), it will
-    be considered sudo.RC_OK. If an exception is raised, its backtrace will be
-    shown to the user and the plugin function returns sudo.RC_ERROR. If that is
+    be considered sudo.RC.OK. If an exception is raised, its backtrace will be
+    shown to the user and the plugin function returns sudo.RC.ERROR. If that is
     not acceptable, catch it.
     """
 
@@ -39,4 +39,4 @@ class SudoGroupPlugin(sudo.Plugin):
         }
 
         group_has_user = user in hardcoded_user_groups.get(group, [])
-        return sudo.RC_ACCEPT if group_has_user else sudo.RC_REJECT
+        return sudo.RC.ACCEPT if group_has_user else sudo.RC.REJECT

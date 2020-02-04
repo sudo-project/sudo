@@ -243,6 +243,15 @@ _python_plugin_register_plugin_in_py_ctx(void)
         PyImport_AppendInittab("sudo", sudo_module_init);
         Py_InitializeEx(0);
         py_ctx.py_main_interpreter = PyThreadState_Get();
+
+        // This ensures we import "sudo" module in the main interpreter,
+        // each subinterpreter will have a shallow copy.
+        // (This makes the C sudo module able to eg. import other modules.)
+        PyObject *py_sudo = NULL;
+        if ((py_sudo = PyImport_ImportModule("sudo")) == NULL) {
+            debug_return_int(SUDO_RC_ERROR);
+        }
+        Py_CLEAR(py_sudo);
     } else {
         PyThreadState_Swap(py_ctx.py_main_interpreter);
     }

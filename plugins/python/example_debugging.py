@@ -26,14 +26,14 @@ class DebugDemoPlugin(sudo.Plugin):
         load        logs python plugin loading / unloading
 
     Log levels
-        crit      sudo.DEBUG_CRIT       --> only cricital messages
-        err       sudo.DEBUG_ERROR
-        warn      sudo.DEBUG_WARN
-        notice    sudo.DEBUG_NOTICE
-        diag      sudo.DEBUG_DIAG
-        info      sudo.DEBUG_INFO
-        trace     sudo.DEBUG_TRACE
-        debug     sudo.DEBUG_DEBUG      --> very extreme verbose debugging
+        crit      sudo.DEBUG.CRIT       --> only cricital messages
+        err       sudo.DEBUG.ERROR
+        warn      sudo.DEBUG.WARN
+        notice    sudo.DEBUG.NOTICE
+        diag      sudo.DEBUG.DIAG
+        info      sudo.DEBUG.INFO
+        trace     sudo.DEBUG.TRACE
+        debug     sudo.DEBUG.DEBUG      --> very extreme verbose debugging
 
     See the sudo.conf manual for more details ("man sudo.conf").
 
@@ -42,10 +42,10 @@ class DebugDemoPlugin(sudo.Plugin):
         # Specify: "py_calls@info" debug option to show the call to this constructor and the arguments passed in
 
         # Specifying "plugin@err" debug option will show this message (or any more verbose level)
-        sudo.debug(sudo.DEBUG_ERROR, "My demo purpose plugin shows this ERROR level debug message")
+        sudo.debug(sudo.DEBUG.ERROR, "My demo purpose plugin shows this ERROR level debug message")
 
         # Specifying "plugin@info" debug option will show this message (or any more verbose level)
-        sudo.debug(sudo.DEBUG_INFO, "My demo purpose plugin shows this INFO level debug message")
+        sudo.debug(sudo.DEBUG.INFO, "My demo purpose plugin shows this INFO level debug message")
 
         # If you raise the level to info or below, the call of the debug will also be logged.
         # An example output you will see in the debug log file:

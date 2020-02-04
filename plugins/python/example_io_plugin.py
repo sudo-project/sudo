@@ -24,14 +24,14 @@ class SudoIOPlugin(sudo.Plugin):
 
     Most functions can express error or reject through their "int" return value
     as documented in the manual. The sudo module also has constants for these:
-        sudo.RC_ACCEPT / sudo.RC_OK  1
-        sudo.RC_REJECT               0
-        sudo.RC_ERROR               -1
-        sudo.RC_USAGE_ERROR         -2
+        sudo.RC.ACCEPT / sudo.RC.OK  1
+        sudo.RC.REJECT               0
+        sudo.RC.ERROR               -1
+        sudo.RC.USAGE_ERROR         -2
 
     If the function returns "None" (for example does not call return), it will
-    be considered sudo.RC_OK. If an exception is raised, its backtrace will be
-    shown to the user and the plugin function returns sudo.RC_ERROR. If that is
+    be considered sudo.RC.OK. If an exception is raised, its backtrace will be
+    shown to the user and the plugin function returns sudo.RC.ERROR. If that is
     not acceptable, catch it.
     """
 
@@ -78,7 +78,7 @@ class SudoIOPlugin(sudo.Plugin):
         self._log("EXEC", " ".join(argv))
         self._log("EXEC info", json.dumps(command_info, indent=4))
 
-        return sudo.RC_ACCEPT
+        return sudo.RC.ACCEPT
 
     def log_ttyout(self, buf: str) -> int:
         return self._log("TTY OUT", buf.strip())
@@ -116,7 +116,7 @@ class SudoIOPlugin(sudo.Plugin):
 
         Works the same as close() from C API (see sudo_plugin manual), except
         that it only gets called if there was a command execution trial (open()
-        returned with sudo.RC_ACCEPT).
+        returned with sudo.RC.ACCEPT).
         """
         if error == 0:
             self._log("CLOSE", "Command returned {}".format(exit_status))
@@ -133,4 +133,4 @@ class SudoIOPlugin(sudo.Plugin):
 
     def _log(self, type, message):
         print(type, message, file=self._log_file)
-        return sudo.RC_ACCEPT
+        return sudo.RC.ACCEPT

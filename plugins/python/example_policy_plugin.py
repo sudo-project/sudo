@@ -30,14 +30,14 @@ class SudoPolicyPlugin(sudo.Plugin):
 
     Most functions can express error or reject through their "int" return value
     as documented in the manual. The sudo module also has constants for these:
-        sudo.RC_ACCEPT / sudo.RC_OK  1
-        sudo.RC_REJECT               0
-        sudo.RC_ERROR               -1
-        sudo.RC_USAGE_ERROR         -2
+        sudo.RC.ACCEPT / sudo.RC.OK  1
+        sudo.RC.REJECT               0
+        sudo.RC.ERROR               -1
+        sudo.RC.USAGE_ERROR         -2
 
     If the function returns "None" (for example does not call return), it will
-    be considered sudo.RC_OK. If an exception is raised, its backtrace will be
-    shown to the user and the plugin function returns sudo.RC_ERROR. If that is
+    be considered sudo.RC.OK. If an exception is raised, its backtrace will be
+    shown to the user and the plugin function returns sudo.RC.ERROR. If that is
     not acceptable, catch it.
     """
 
@@ -70,7 +70,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         # Example for a simple reject:
         if not self._is_command_allowed(cmd):
             sudo.log_error("You are not allowed to run this command!")
-            return sudo.RC_REJECT
+            return sudo.RC.REJECT
 
         # The environment the command will be executed with (we allow any here)
         user_env_out = sudo.options_from_dict(self.user_env) + env_add
@@ -83,9 +83,9 @@ class SudoPolicyPlugin(sudo.Plugin):
             })
         except SudoPluginError as error:
             sudo.log_error(str(error))
-            return sudo.RC_ERROR
+            return sudo.RC.ERROR
 
-        return (sudo.RC_ACCEPT, command_info_out, argv, user_env_out)
+        return (sudo.RC.ACCEPT, command_info_out, argv, user_env_out)
 
     def init_session(self, user_pwd: Tuple, user_env: Tuple[str, ...]):
         """Perform session setup
@@ -97,10 +97,10 @@ class SudoPolicyPlugin(sudo.Plugin):
         user_pwd = pwd.struct_passwd(user_pwd) if user_pwd else None
 
         # This is how you change the user_env:
-        return (sudo.RC_OK, user_env + ("PLUGIN_EXAMPLE_ENV=1",))
+        return (sudo.RC.OK, user_env + ("PLUGIN_EXAMPLE_ENV=1",))
 
         # If you do not want to change user_env, you can also just return (or None):
-        # return sudo.RC_OK
+        # return sudo.RC.OK
 
     def list(self, argv: Tuple[str, ...], is_verbose: int, user: str):
         cmd = argv[0] if argv else None
