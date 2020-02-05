@@ -110,6 +110,37 @@ _import_module(const char *path)
     debug_return_ptr(PyImport_ImportModule(module_name));
 }
 
+void
+python_plugin_handle_plugin_error_exception(struct PluginContext *plugin_ctx)
+{
+    debug_decl(python_plugin_handle_plugin_error_exception, PYTHON_DEBUG_INTERNAL);
+
+    free(plugin_ctx->callback_error);
+    plugin_ctx->callback_error = NULL;
+
+    if (PyErr_Occurred() && PyErr_ExceptionMatches(sudo_exc_PluginError)) {
+        PyObject *py_type = NULL, *py_message = NULL, *py_traceback = NULL;
+        PyErr_Fetch(&py_type, &py_message, &py_traceback);
+
+        char *message = py_message ? py_create_string_rep(py_message) : NULL;
+        sudo_debug_printf(SUDO_DEBUG_INFO, "received sudo.PluginError exception with message '%s'",
+                          message == NULL ? "(null)" : message);
+
+        if (message != NULL && plugin_ctx->sudo_api_version < SUDO_API_MKVERSION(1, 15)) {
+            py_sudo_log(SUDO_CONV_ERROR_MSG, "%s", message);
+            free(message);
+        } else {
+            plugin_ctx->callback_error = message;
+        }
+
+        Py_CLEAR(py_type);
+        Py_CLEAR(py_message);
+        Py_CLEAR(py_traceback);
+    }
+
+    debug_return;
+}
+
 int
 python_plugin_construct_custom(struct PluginContext *plugin_ctx, PyObject *py_kwargs)
 {
@@ -124,15 +155,18 @@ python_plugin_construct_custom(struct PluginContext *plugin_ctx, PyObject *py_kw
                          py_args, py_kwargs, PYTHON_DEBUG_PY_CALLS);
 
     plugin_ctx->py_instance = PyObject_Call(plugin_ctx->py_class, py_args, py_kwargs);
+    python_plugin_handle_plugin_error_exception(plugin_ctx);
 
     py_debug_python_result(python_plugin_name(plugin_ctx), "__init__",
                            plugin_ctx->py_instance, PYTHON_DEBUG_PY_CALLS);
 
-    rc = SUDO_RC_OK;
+    if (plugin_ctx->py_instance)
+        rc = SUDO_RC_OK;
 
 cleanup:
-    if (plugin_ctx->py_instance == NULL) {
+    if (PyErr_Occurred()) {
         py_log_last_error("Failed to construct plugin instance");
+        Py_CLEAR(plugin_ctx->py_instance);
         rc = SUDO_RC_ERROR;
     }
 
@@ -261,7 +295,8 @@ _python_plugin_register_plugin_in_py_ctx(void)
 }
 
 int
-python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options[])
+python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options[],
+                   unsigned int version)
 {
     debug_decl(python_plugin_init, PYTHON_DEBUG_PLUGIN_LOAD);
 
@@ -269,6 +304,8 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
 
     if (_python_plugin_register_plugin_in_py_ctx() != SUDO_RC_OK)
         goto cleanup;
+
+    plugin_ctx->sudo_api_version = version;
 
     plugin_ctx->py_interpreter = Py_NewInterpreter();
     if (plugin_ctx->py_interpreter == NULL) {
@@ -341,6 +378,7 @@ python_plugin_deinit(struct PluginContext *plugin_ctx)
         Py_EndInterpreter(plugin_ctx->py_interpreter);
     }
 
+    free(plugin_ctx->callback_error);
     memset(plugin_ctx, 0, sizeof(*plugin_ctx));
 
     if (py_ctx.open_plugin_count <= 0) {
@@ -390,7 +428,10 @@ python_plugin_api_call(struct PluginContext *plugin_ctx, const char *func_name, 
 
     py_debug_python_result(python_plugin_name(plugin_ctx), func_name,
                            py_result, PYTHON_DEBUG_PY_CALLS);
-    if (py_result == NULL) {
+
+    python_plugin_handle_plugin_error_exception(plugin_ctx);
+
+    if (PyErr_Occurred()) {
         py_log_last_error(NULL);
     }
 

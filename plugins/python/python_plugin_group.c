@@ -53,7 +53,7 @@ python_plugin_group_init(int version, sudo_printf_t sudo_printf, char *const plu
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 
-    rc = python_plugin_init(&plugin_ctx, plugin_options);
+    rc = python_plugin_init(&plugin_ctx, plugin_options, (unsigned int)version);
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 

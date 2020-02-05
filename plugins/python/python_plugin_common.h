@@ -27,11 +27,16 @@ struct PluginContext {
     PyObject *py_class;
     PyObject *py_instance;
     int call_close;
+    unsigned int sudo_api_version;
+
+    // We use this to let the error string live until sudo and the audit plugins
+    // are using it. Only set for sudo API >= 1.15, otherwise NULL
+    char *callback_error;
 };
 
 int python_plugin_register_logging(sudo_conv_t conversation, sudo_printf_t sudo_printf, char * const settings[]);
 
-int python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options[]);
+int python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options[], unsigned int version);
 
 int python_plugin_construct_custom(struct PluginContext *plugin_ctx, PyObject *py_kwargs);
 
