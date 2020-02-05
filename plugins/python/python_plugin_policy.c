@@ -195,7 +195,7 @@ python_plugin_policy_version(int verbose)
     PyThreadState_Swap(plugin_ctx.py_interpreter);
 
     if (verbose) {
-        py_sudo_log(SUDO_CONV_INFO_MSG, "Python policy plugin API version %d.%d\n", "%d.%d",
+        py_sudo_log(SUDO_CONV_INFO_MSG, "Python policy plugin API version %d.%d\n",
                     SUDO_API_VERSION_GET_MAJOR(PY_POLICY_PLUGIN_VERSION),
                     SUDO_API_VERSION_GET_MINOR(PY_POLICY_PLUGIN_VERSION));
     }
