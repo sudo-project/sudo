@@ -42,6 +42,14 @@ extern struct policy_plugin python_policy;
             (void **)&CALLBACK_PLUGINFUNC(function_name)); \
     } while(0)
 
+#define CB_SET_ERROR(errstr) \
+    do { \
+        const char *cb_error = plugin_ctx.callback_error; \
+        if (cb_error != NULL && errstr != NULL) { \
+            *errstr = cb_error; \
+        } \
+    } while(0)
+
 static int
 python_plugin_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
@@ -60,12 +68,13 @@ python_plugin_policy_open(unsigned int version, sudo_conv_t conversation,
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 
-    rc = python_plugin_init(&plugin_ctx, plugin_options);
+    rc = python_plugin_init(&plugin_ctx, plugin_options, version);
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 
     rc = python_plugin_construct(&plugin_ctx, PY_POLICY_PLUGIN_VERSION, settings,
                                  user_info, user_env, plugin_options);
+    CB_SET_ERROR(errstr);
     if (rc != SUDO_RC_OK) {
         debug_return_int(rc);
     }
@@ -147,6 +156,7 @@ python_plugin_policy_check(int argc, char * const argv[],
         *user_env_out = py_str_array_from_tuple(py_user_env_out);
 
     rc = python_plugin_rc_to_int(py_rc);
+    CB_SET_ERROR(errstr);
 
 cleanup:
     if (PyErr_Occurred()) {
@@ -185,6 +195,8 @@ python_plugin_policy_list(int argc, char * const argv[], int verbose, const char
         Py_BuildValue("(Oiz)", py_argv, verbose, list_user));
 
     Py_XDECREF(py_argv);
+
+    CB_SET_ERROR(errstr);
     debug_return_int(rc);
 }
 
@@ -209,7 +221,9 @@ python_plugin_policy_validate(const char **errstr)
 {
     debug_decl(python_plugin_policy_validate, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(plugin_ctx.py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(validate), NULL));
+    int rc = python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(validate), NULL);
+    CB_SET_ERROR(errstr);
+    debug_return_int(rc);
 }
 
 void
@@ -262,6 +276,7 @@ python_plugin_policy_init_session(struct passwd *pwd, char **user_env[], const c
     }
 
     rc = python_plugin_rc_to_int(py_rc);
+    CB_SET_ERROR(errstr);
 
 cleanup:
     Py_XDECREF(py_pwd);

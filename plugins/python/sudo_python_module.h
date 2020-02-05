@@ -21,7 +21,11 @@
 
 #include "pyhelpers.h"
 
-extern PyObject *sudo_exc_SudoException;
+extern PyObject *sudo_exc_SudoException;  // Base exception for the sudo module problems
+
+// This is for the python plugins to report errors for us
+extern PyObject *sudo_exc_PluginError;
+
 extern PyTypeObject *sudo_type_Plugin;
 extern PyTypeObject *sudo_type_ConvMessage;
 
