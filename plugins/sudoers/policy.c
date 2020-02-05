@@ -564,7 +564,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	debug_return_bool(true);	/* nothing to do */
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(50, sizeof(char *));
+    command_info = calloc(52, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -618,6 +618,12 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Set cwd to run user's homedir. */
 	if ((command_info[info_len++] = sudo_new_key_val("cwd", runas_pw->pw_dir)) == NULL)
+	    goto oom;
+    }
+    if ((command_info[info_len++] = sudo_new_key_val("runas_user", runas_pw->pw_name)) == NULL)
+	goto oom;
+    if (runas_gr != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("runas_group", runas_gr->gr_name)) == NULL)
 	    goto oom;
     }
     if (def_stay_setuid) {
