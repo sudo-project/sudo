@@ -124,8 +124,7 @@ tgetpass(const char *prompt, int timeout, int flags,
     static const char *askpass;
     static char buf[SUDO_CONV_REPL_MAX + 1];
     int i, input, output, save_errno, ttyfd;
-    bool need_restart, neednl = false;
-    bool feedback = ISSET(flags, TGP_MASK);
+    bool feedback, need_restart, neednl;
     enum tgetpass_errval errval;
     debug_decl(tgetpass, SUDO_DEBUG_CONV);
 
@@ -141,8 +140,8 @@ restart:
     /* Try to open /dev/tty if we are going to be using it for I/O. */
     ttyfd = -1;
     if (!ISSET(flags, TGP_STDIN|TGP_ASKPASS)) {
-	ttyfd = open(_PATH_TTY, O_RDWR);
 	/* If no tty present and we need to disable echo, try askpass. */
+	ttyfd = open(_PATH_TTY, O_RDWR);
 	if (ttyfd == -1 && !ISSET(flags, TGP_ECHO|TGP_NOECHO_TRY)) {
 	    if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
 		sudo_warnx(U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
@@ -164,12 +163,16 @@ restart:
 	signo[i] = 0;
     pass = NULL;
     save_errno = 0;
+    neednl = false;
     need_restart = false;
+    feedback = false;
 
     /* Use tty for reading/writing if available else use stdin/stderr. */
     if (ttyfd == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
+	/* Don't try to mask password if /dev/tty is not available. */
+	CLR(flags, TGP_MASK);
     } else {
 	input = ttyfd;
 	output = ttyfd;
@@ -181,23 +184,20 @@ restart:
      */
     if (!ISSET(flags, TGP_ECHO)) {
 	for (;;) {
-	    if (feedback)
-		neednl = sudo_term_cbreak(input);
+	    if (ISSET(flags, TGP_MASK))
+		neednl = feedback = sudo_term_cbreak(input);
 	    else
 		neednl = sudo_term_noecho(input);
 	    if (neednl || errno != EINTR)
 		break;
 	    /* Received SIGTTOU, suspend the process. */
 	    if (suspend(SIGTTOU, callback) == -1) {
-		if (input != STDIN_FILENO)
-		    (void) close(input);
+		if (ttyfd != -1)
+		    (void) close(ttyfd);
 		debug_return_ptr(NULL);
 	    }
 	}
     }
-    /* Only use feedback mode when we can disable echo. */
-    if (!neednl)
-	feedback = false;
 
     /*
      * Catch signals that would otherwise cause the user to end
@@ -254,8 +254,8 @@ restore:
 	/* Restore old tty settings if possible. */
 	(void) sudo_term_restore(input, true);
     }
-    if (input != STDIN_FILENO)
-	(void) close(input);
+    if (ttyfd != -1)
+	(void) close(ttyfd);
 
     /*
      * If we were interrupted by a signal, resend it to ourselves
