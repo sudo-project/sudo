@@ -25,12 +25,16 @@
 
 #include "sudo_dso.h"
 
+static const char *python_plugin_so_path = NULL;
 static void *python_plugin_handle = NULL;
 static struct io_plugin *python_io;
 static struct policy_plugin *python_policy = NULL;
 static struct sudoers_group_plugin *group_plugin = NULL;
 
 static struct passwd example_pwd;
+
+static int _load_symbols(void);
+static int _unload_symbols(void);
 
 void
 create_io_plugin_options(const char *log_path)
@@ -131,6 +135,7 @@ init(void)
     data.plugin_argv = create_str_array(1, NULL);
     data.user_env = create_str_array(1, NULL);
 
+    VERIFY_TRUE(_load_symbols());
     return true;
 }
 
@@ -158,6 +163,8 @@ cleanup(int success)
     str_array_free(&data.plugin_options);
 
     VERIFY_FALSE(Py_IsInitialized());
+
+    VERIFY_TRUE(_unload_symbols());
     return true;
 }
 
@@ -865,11 +872,10 @@ check_python_plugins_do_not_affect_each_other(void)
     return true;
 }
 
-int
-check_python_plugin_can_be_loaded(const char *python_plugin_path)
+static int
+_load_symbols(void)
 {
-    printf("Loading python plugin from '%s'\n", python_plugin_path);
-    python_plugin_handle = sudo_dso_load(python_plugin_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
+    python_plugin_handle = sudo_dso_load(python_plugin_so_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     VERIFY_PTR_NE(python_plugin_handle, NULL);
 
     python_io = sudo_dso_findsym(python_plugin_handle, "python_io");
@@ -883,6 +889,17 @@ check_python_plugin_can_be_loaded(const char *python_plugin_path)
     return true;
 }
 
+static int
+_unload_symbols(void)
+{
+    python_io = NULL;
+    group_plugin = NULL;
+    python_policy = NULL;
+    VERIFY_INT(sudo_dso_unload(python_plugin_handle), 0);
+    return true;
+}
+
+
 int
 main(int argc, char *argv[])
 {
@@ -890,9 +907,8 @@ main(int argc, char *argv[])
         printf("Please specify the python_plugin.so as argument!\n");
         return EXIT_FAILURE;
     }
-    const char *python_plugin_so_path = argv[1];
+    python_plugin_so_path = argv[1];
 
-    RUN_TEST(check_python_plugin_can_be_loaded(python_plugin_so_path));
     RUN_TEST(check_example_io_plugin_version_display(true));
     RUN_TEST(check_example_io_plugin_version_display(false));
     RUN_TEST(check_example_io_plugin_command_log());
