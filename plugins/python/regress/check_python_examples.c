@@ -356,6 +356,68 @@ check_example_io_plugin_fails_with_python_backtrace(void)
 }
 
 int
+check_io_plugin_reports_error(void)
+{
+    const char *errstr = NULL;
+    free(data.plugin_options);
+    data.plugin_options = create_str_array(
+        3,
+        "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
+        "ClassName=ConstructErrorPlugin",
+        NULL
+    );
+
+    VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
+                              data.user_env, data.plugin_options, &errstr), SUDO_RC_ERROR);
+
+    VERIFY_STR(errstr, "Something wrong in plugin constructor");
+    errstr = NULL;
+
+    python_io->close(0, 0);
+
+    free(data.plugin_options);
+    data.plugin_options = create_str_array(
+        3,
+        "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
+        "ClassName=ErrorMsgPlugin",
+        NULL
+    );
+
+    VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
+                              data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    VERIFY_INT(python_io->log_stdin("", 0, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in log_stdin");
+
+    VERIFY_INT(python_io->log_stdout("", 0, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in log_stdout");
+
+    VERIFY_INT(python_io->log_stderr("", 0, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in log_stderr");
+
+    VERIFY_INT(python_io->log_ttyin("", 0, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in log_ttyin");
+
+    VERIFY_INT(python_io->log_ttyout("", 0, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in log_ttyout");
+
+    VERIFY_INT(python_io->log_suspend(SIGTSTP, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in log_suspend");
+
+    VERIFY_INT(python_io->change_winsize(200, 100, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in change_winsize");
+
+    python_io->close(0, 0);
+
+    VERIFY_STR(data.stderr_str, "");
+    VERIFY_STR(data.stdout_str, "");
+    return true;
+}
+
+int
 check_example_group_plugin(void)
 {
     create_group_plugin_options();
@@ -810,6 +872,67 @@ check_policy_plugin_callbacks_are_optional(void)
 }
 
 int
+check_policy_plugin_reports_error(void)
+{
+    const char *errstr = NULL;
+    free(data.plugin_options);
+    data.plugin_options = create_str_array(
+        3,
+        "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
+        "ClassName=ConstructErrorPlugin",
+        NULL
+    );
+
+    VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.user_env, data.plugin_options, &errstr), SUDO_RC_ERROR);
+
+    VERIFY_STR(errstr, "Something wrong in plugin constructor");
+    errstr = NULL;
+
+    python_policy->close(0, 0);
+
+    free(data.plugin_options);
+    data.plugin_options = create_str_array(
+        3,
+        "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
+        "ClassName=ErrorMsgPlugin",
+        NULL
+    );
+
+    data.plugin_argc = 1;
+    free(data.plugin_argv);
+    data.plugin_argv = create_str_array(2, "id", NULL);
+
+    VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    char **command_info_out = NULL;
+    char **argv_out = NULL;
+    char **user_env_out = NULL;
+
+    VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, true, NULL, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in list");
+
+    VERIFY_INT(python_policy->validate(&errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in validate");
+
+    VERIFY_INT(python_policy->check_policy(data.plugin_argc, data.plugin_argv, data.user_env,
+                                           &command_info_out, &argv_out, &user_env_out, &errstr),
+               SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in check_policy");
+
+    VERIFY_INT(python_policy->init_session(&example_pwd, &user_env_out, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in init_session");
+
+    python_policy->close(0, 0);
+
+    VERIFY_STR(data.stderr_str, "");
+    VERIFY_STR(data.stdout_str, "");
+    return true;
+}
+
+int
 check_io_plugin_callbacks_are_optional(void)
 {
     const char *errstr = NULL;
@@ -916,6 +1039,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_io_plugin_failed_to_start_command());
     RUN_TEST(check_example_io_plugin_fails_with_python_backtrace());
     RUN_TEST(check_io_plugin_callbacks_are_optional());
+    RUN_TEST(check_io_plugin_reports_error());
 
     RUN_TEST(check_example_group_plugin());
     RUN_TEST(check_example_group_plugin_is_able_to_debug());
@@ -938,6 +1062,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_policy_plugin_list());
     RUN_TEST(check_example_policy_plugin_validate_invalidate());
     RUN_TEST(check_policy_plugin_callbacks_are_optional());
+    RUN_TEST(check_policy_plugin_reports_error());
 
     RUN_TEST(check_python_plugins_do_not_affect_each_other());
 
