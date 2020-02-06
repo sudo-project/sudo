@@ -171,6 +171,7 @@ python_sudo_options_as_dict(PyObject *py_self, PyObject *py_args)
         if (py_value == NULL) {  // skip values without a key
             Py_CLEAR(py_config);
             Py_CLEAR(py_splitted);
+            PyErr_Clear();
             continue;
         }
 
