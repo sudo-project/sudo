@@ -88,9 +88,10 @@ while test $# -gt 0; do
     shift
 done
 
-top_srcdir=`dirname $0`
+scriptdir=`dirname $0`
+configure="${scriptdir}/../configure"
 
-: ${osversion="`$top_srcdir/pp --probe`"}
+: ${osversion="`$scriptdir/pp --probe`"}
 test -n "$osversion" || exit 1
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 : ${MAKE=make}
@@ -317,7 +318,7 @@ case "$osversion" in
 		ARCH_FLAGS="-arch i386 -arch x86_64"
 		;;
 	esac
-	if test "${osversion}" != "`$top_srcdir/pp --probe`"; then
+	if test "${osversion}" != "`$scriptdir/pp --probe`"; then
 	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
 	    # SDKs may be under Xcode.app or CommandLineTools (for non-Xcode)
 	    if [ -d "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs" ]; then
@@ -413,6 +414,6 @@ IFS="$OIFS"
 if [ -r Makefile ]; then
     ${MAKE} $make_opts distclean
 fi
-$top_srcdir/configure "$@" || exit 1
+${configure} "$@" || exit 1
 ${MAKE} $make_opts && ${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
 test $debug -eq 0 && rm -rf destdir

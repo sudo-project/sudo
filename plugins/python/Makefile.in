@@ -29,6 +29,7 @@ abs_top_builddir = @abs_top_builddir@
 top_srcdir = @top_srcdir@
 abs_top_srcdir = @abs_top_srcdir@
 devdir = @devdir@
+scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -134,7 +135,7 @@ CHECK_PYTHON_EXAMPLES_OBJS = check_python_examples.o iohelpers.o testhelpers.o
 all: python_plugin.la
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) plugins/python/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/python/Makefile
 
@@ -169,7 +170,7 @@ pre-install:
 install: install-plugin install-doc
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) $(DESTDIR)$(exampledir)
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(plugindir) $(DESTDIR)$(exampledir)
 
 install-binaries:
 

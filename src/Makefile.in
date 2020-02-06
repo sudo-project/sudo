@@ -27,6 +27,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
+scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
 rundir = @rundir@
 cross_compiling = @CROSS_COMPILING@
@@ -144,7 +145,7 @@ VERSION = @PACKAGE_VERSION@
 all: $(PROGS)
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) src/Makefile.in
 	cd $(top_builddir) && ./config.status --file src/Makefile
 
@@ -196,16 +197,16 @@ install: install-binaries install-rc @INSTALL_NOEXEC@
 
 install-dirs:
 	# We only create the rc.d dir when installing to the actual system dir
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(bindir) \
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(bindir) \
 	    $(DESTDIR)$(libexecdir)/sudo $(DESTDIR)$(noexecdir)
 	if test -n "$(INIT_SCRIPT)"; then \
-	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR); \
+	    $(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR); \
 	    if test -z "$(DESTDIR)"; then \
-		$(SHELL) $(top_srcdir)/mkinstalldirs \
+		$(SHELL) $(scriptdir)/mkinstalldirs \
 		    `echo $(RC_LINK) | $(SED) 's,/[^/]*$$,,'`; \
 	    fi; \
 	elif test -n "$(tmpfiles_d)"; then \
-	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(tmpfiles_d); \
+	    $(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(tmpfiles_d); \
 	fi
 
 install-rc: install-dirs

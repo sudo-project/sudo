@@ -24,6 +24,7 @@ srcdir = @srcdir@
 devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -117,7 +118,7 @@ VERSION = @PACKAGE_VERSION@
 all: sample_approval.la
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(top_srcdir) \
 	    --builddir=`pwd`/$(top_builddir) plugins/sample_approval/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sample_approval/Makefile
 
@@ -149,7 +150,7 @@ pre-install:
 install: install-plugin
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir)
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(plugindir)
 
 install-binaries:
 

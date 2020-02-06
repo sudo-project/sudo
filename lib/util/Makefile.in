@@ -27,6 +27,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
+scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -174,7 +175,7 @@ pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
 depend: siglist.c signame.c
-	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/util/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/util/Makefile
 
@@ -293,7 +294,7 @@ install: install-dirs
 	esac
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(libexecdir)/sudo
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(libexecdir)/sudo
 
 install-binaries:
 

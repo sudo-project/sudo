@@ -32,6 +32,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
+scriptdir = $(top_srcdir)/scripts
 authdir = $(srcdir)/auth
 incdir = $(top_srcdir)/include
 docdir = @docdir@
@@ -261,7 +262,7 @@ $(shlib_opt): $(shlib_exp)
 	@true
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) plugins/sudoers/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
 
@@ -392,7 +393,7 @@ pre-install:
 install: install-plugin install-binaries install-sudoers install-doc
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
 	    $(DESTDIR)$(sbindir) $(DESTDIR)$(bindir) \
 	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
 	    `echo $(DESTDIR)$(rundir)|$(SED) 's,/[^/]*$$,,'` \

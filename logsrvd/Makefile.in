@@ -27,6 +27,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
+scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
 rundir = @rundir@
 cross_compiling = @CROSS_COMPILING@
@@ -123,7 +124,7 @@ VERSION = @PACKAGE_VERSION@
 all: $(PROGS)
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) logsrvd/Makefile.in
 	cd $(top_builddir) && ./config.status --file logsrvd/Makefile
 
@@ -155,7 +156,7 @@ pre-install:
 install: install-binaries
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(sbindir)
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(sbindir)
 
 install-binaries: install-dirs $(PROGS)
 	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudo_logsrvd $(DESTDIR)$(sbindir)/sudo_logsrvd

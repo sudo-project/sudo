@@ -27,6 +27,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 includedir = @includedir@
+scriptdir = $(top_srcdir)/scripts
 cross_compiling = @CROSS_COMPILING@
 
 # Our install program supports extra flags...
@@ -65,7 +66,7 @@ pre-install:
 install: install-includes
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(includedir)
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(includedir)
 
 install-binaries:
 

@@ -272,7 +272,6 @@ lib/zlib/zlib.exp
 lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
-log2cl.pl
 logsrvd/Makefile.in
 logsrvd/eventlog.c
 logsrvd/iolog_writer.c
@@ -295,9 +294,6 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
 m4/sudo.m4
-mkdep.pl
-mkinstalldirs
-mkpkg
 pathnames.h.in
 plugins/audit_json/Makefile.in
 plugins/audit_json/audit_json.c
@@ -853,7 +849,12 @@ po/zh_CN.mo
 po/zh_CN.po
 po/zh_TW.mo
 po/zh_TW.po
-pp
+scripts/generate_test_coverage.sh
+scripts/log2cl.pl
+scripts/mkdep.pl
+scripts/mkinstalldirs
+scripts/mkpkg
+scripts/pp
 src/Makefile.in
 src/conversation.c
 src/env_hooks.c
