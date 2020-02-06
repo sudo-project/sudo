@@ -53,8 +53,8 @@ sudoers_mode = @SUDOERS_MODE@
 shlib_mode = @SHLIB_MODE@
 
 SUBDIRS = lib/util @ZLIB_SRC@ lib/iolog lib/logsrv logsrvd plugins/audit_json \
-	  plugins/group_file plugins/sudoers plugins/system_group \
-	  @PYTHON_PLUGIN_SRC@ src include doc examples
+	  plugins/group_file plugins/sample_approval plugins/sudoers \
+	  plugins/system_group @PYTHON_PLUGIN_SRC@ src include doc examples
 
 SAMPLES = plugins/sample
 
