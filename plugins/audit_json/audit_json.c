@@ -539,6 +539,9 @@ audit_write_record(const char *audit_str, const char *plugin_name,
     case SUDO_IO_PLUGIN:
 	json_value.u.string = "io";
 	break;
+    case SUDO_APPROVAL_PLUGIN:
+	json_value.u.string = "approval";
+	break;
     case SUDO_AUDIT_PLUGIN:
 	json_value.u.string = "audit";
 	break;
@@ -640,6 +643,8 @@ audit_close(int status_type, int status)
     debug_decl(audit_close, SUDO_DEBUG_PLUGIN);
 
     switch (status_type) {
+    case SUDO_PLUGIN_NO_STATUS:
+	break;
     case SUDO_PLUGIN_WAIT_STATUS:
 	audit_write_exit_record(status, 0);
 	break;
@@ -649,6 +654,10 @@ audit_close(int status_type, int status)
     case SUDO_PLUGIN_SUDO_ERROR:
 	audit_write_record("error", "sudo", 0, strerror(status),
 	    NULL, NULL, NULL);
+	break;
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected status type %d, value %d", status_type, status);
 	break;
     }
 
