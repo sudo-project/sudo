@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 2, 2020
+.Dd February 5, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -68,21 +68,20 @@ struct policy_plugin {
     unsigned int type; /* always SUDO_POLICY_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-                sudo_printf_t plugin_printf, char * const settings[],
-                char * const user_info[], char * const user_env[],
-                char * const plugin_options[], const char **errstr);
+        sudo_printf_t plugin_printf, char * const settings[],
+        char * const user_info[], char * const user_env[],
+        char * const plugin_options[], const char **errstr);
     void (*close)(int exit_status, int error);
-    int (*show_version)(int verbose, const char **errstr);
+    int (*show_version)(int verbose);
     int (*check_policy)(int argc, char * const argv[],
-                        char *env_add[], char **command_info[],
-                        char **argv_out[], char **user_env_out[],
-                	const char **errstr);
+        char *env_add[], char **command_info[],
+        char **argv_out[], char **user_env_out[], const char **errstr);
     int (*list)(int argc, char * const argv[], int verbose,
-                const char *list_user, const char **errstr);
+        const char *list_user, const char **errstr);
     int (*validate)(const char **errstr);
     void (*invalidate)(int remove);
     int (*init_session)(struct passwd *pwd, char **user_env[],
-                	const char **errstr);
+        const char **errstr);
     void (*register_hooks)(int version,
        int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
@@ -110,9 +109,9 @@ built against.
 .It open
 .Bd -literal -compact
 int (*open)(unsigned int version, sudo_conv_t conversation,
-            sudo_printf_t plugin_printf, char * const settings[],
-            char * const user_info[], char * const user_env[],
-            char * const plugin_options[], const char **errstr);
+    sudo_printf_t plugin_printf, char * const settings[],
+    char * const user_info[], char * const user_env[],
+    char * const plugin_options[], const char **errstr);
 .Ed
 .Pp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
@@ -139,13 +138,16 @@ major and minor version number of the plugin API supported by
 .It conversation
 A pointer to the
 .Fn conversation
-function that can be used by the plugin to interact with the user (see below).
+function that can be used by the plugin to interact with the user (see
+.Sx Conversation API
+for details).
 Returns 0 on success and \-1 on failure.
 .It plugin_printf
 A pointer to a
 .Fn printf Ns -style
-function that may be used to display informational or error messages
-(see below).
+function that may be used to display informational or error messages (see
+.Sx Conversation API
+for details).
 Returns the number of characters printed on success and \-1 on failure.
 .It settings
 A vector of user-supplied
@@ -173,6 +175,9 @@ field will never include one
 itself but the
 .Em value
 might.
+.Pp
+The following values may be set by
+.Nm sudo :
 .Bl -tag -width 4n
 .It bsdauth_type=string
 Authentication type, if specified by the
@@ -407,6 +412,9 @@ field will never include one
 itself but the
 .Em value
 might.
+.Pp
+The following values may be set by
+.Nm sudo :
 .Bl -tag -width 4n
 .It cols=int
 The number of columns the user's terminal supports.
@@ -608,7 +616,7 @@ front end may execute the command directly instead of running
 it as a child process.
 .It show_version
 .Bd -literal -compact
-int (*show_version)(int verbose, const char **errstr);
+int (*show_version)(int verbose);
 .Ed
 .Pp
 The
@@ -625,45 +633,16 @@ or
 .Fn plugin_printf
 function using
 .Dv SUDO_CONV_INFO_MSG .
+If the user requests detailed version information, the verbose flag will be set.
 .Pp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error, although the return value is currently
 ignored.
-.Pp
-The function arguments are as follows:
-.Bl -tag -width 4n
-.It verbose
-If the user requests detailed version information, the
-.Em verbose
-flag will be set to 1.
-.It errstr
-If the
-.Fn show_version
-function returns a value other than 1, the plugin may
-store a message describing the failure or error in
-.Em errstr .
-The
-.Nm sudo
-front end will then pass this value to any registered audit plugins.
-.Pp
-NOTE: the
-.Em errstr
-parameter is only available starting with
-API version 1.15.
-A plugin
-.Sy must
-check the API version specified by the
-.Nm sudo
-front end before using
-.Em errstr .
-Failure to do so may result in a crash.
-.El
 .It check_policy
 .Bd -literal -compact
-int (*check_policy)(int argc, char * const argv[],
-                    char *env_add[], char **command_info[],
-                    char **argv_out[], char **user_env_out[],
-                    const char **errstr);
+int (*check_policy)(int argc, char * const argv[], char *env_add[],
+    char **command_info[], char **argv_out[], char **user_env_out[],
+    const char **errstr);
 .Ed
 .Pp
 The
@@ -953,6 +932,18 @@ If not specified, the value of
 is used.
 .It runas_gid=gid
 Group-ID to run the command as.
+.It runas_group=string
+The name of the group the command will run as, if it is different
+from the
+.Em runas_user Ns 's
+default group.
+This value is provided for auditing purposes only, the
+.Nm sudo
+front-end uses
+.Em runas_egid
+and
+.Em runas_gid
+when executing the command.
 .It runas_groups=list
 The supplementary group vector to use for the command in the form
 of a comma-separated list of group-IDs.
@@ -961,6 +952,21 @@ If
 is set, this option is ignored.
 .It runas_uid=uid
 User-ID to run the command as.
+.It runas_user=string
+The name of the user the command will run as, which should correspond to
+.Em runas_euid
+(or
+.Em runas_uid
+if
+.Em runas_euid
+is not set).
+This value is provided for auditing purposes only, the
+.Nm sudo
+front-end uses
+.Em runas_euid
+and
+.Em runas_uid
+when executing the command.
 .It selinux_role=string
 SELinux role to use when executing the command.
 .It selinux_type=string
@@ -1082,8 +1088,8 @@ Failure to do so may result in a crash.
 .El
 .It list
 .Bd -literal -compact
-int (*list)(int argc, char * const argv[],
-            int verbose, const char *list_user, const char **errstr);
+int (*list)(int argc, char * const argv[], int verbose,
+    const char *list_user, const char **errstr);
 .Ed
 .Pp
 List available privileges for the invoking user.
@@ -1488,12 +1494,12 @@ struct io_plugin {
     unsigned int type; /* always SUDO_IO_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-                sudo_printf_t plugin_printf, char * const settings[],
-                char * const user_info[], char * const command_info[],
-                int argc, char * const argv[], char * const user_env[],
-                char * const plugin_options[], const char **errstr);
+        sudo_printf_t plugin_printf, char * const settings[],
+        char * const user_info[], char * const command_info[],
+        int argc, char * const argv[], char * const user_env[],
+        char * const plugin_options[], const char **errstr);
     void (*close)(int exit_status, int error); /* wait status or error */
-    int (*show_version)(int verbose, const char **errstr);
+    int (*show_version)(int verbose);
     int (*log_ttyin)(const char *buf, unsigned int len,
         const char **errstr);
     int (*log_ttyout)(const char *buf, unsigned int len,
@@ -1579,10 +1585,10 @@ built against.
 .It open
 .Bd -literal -compact
 int (*open)(unsigned int version, sudo_conv_t conversation,
-            sudo_printf_t plugin_printf, char * const settings[],
-            char * const user_info[], char * const command_info[],
-            int argc, char * const argv[], char * const user_env[],
-            char * const plugin_options[]);
+    sudo_printf_t plugin_printf, char * const settings[],
+    char * const user_info[], char * const command_info[],
+    int argc, char * const argv[], char * const user_env[],
+    char * const plugin_options[]);
 .Ed
 .Pp
 The
@@ -1613,8 +1619,7 @@ or
 .Fn plugin_printf
 function with
 .Dv SUDO_CONF_ERROR_MSG
-to present
-additional error information to the user.
+to present additional error information to the user.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -1867,35 +1872,6 @@ function using
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error, although the return value is currently
 ignored.
-.Pp
-The function arguments are as follows:
-.Bl -tag -width 4n
-.It verbose
-If the user requests detailed version information, the
-.Em verbose
-flag will be set to 1.
-.It errstr
-If the
-.Fn show_version
-function returns a value other than 1, the plugin may
-store a message describing the failure or error in
-.Em errstr .
-The
-.Nm sudo
-front end will then pass this value to any registered audit plugins.
-.Pp
-NOTE: the
-.Em errstr
-parameter is only available starting with
-API version 1.15.
-A plugin
-.Sy must
-check the API version specified by the
-.Nm sudo
-front end before using
-.Em errstr .
-Failure to do so may result in a crash.
-.El
 .It log_ttyin
 .Bd -literal -compact
 int (*log_ttyin)(const char *buf, unsigned int len,
@@ -2262,6 +2238,7 @@ will not be set.
 .Pp
 Same as for the
 .Sx Policy plugin API .
+.El
 .Ss Audit plugin API
 .Bd -literal
 /* Audit plugin close function status types. */
@@ -2305,7 +2282,7 @@ independent of the policy or any I/O plugins.
 Multiple audit plugins may be specified in
 .Xr sudo.conf @mansectform@ .
 .Pp
-The io_plugin struct has the following fields:
+The audit_plugin struct has the following fields:
 .Bl -tag -width 4n
 .It type
 The
@@ -2348,8 +2325,7 @@ or
 .Fn plugin_printf
 function with
 .Dv SUDO_CONF_ERROR_MSG
-to present
-additional error information to the user.
+to present additional error information to the user.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -2756,27 +2732,11 @@ or
 .Fn plugin_printf
 function using
 .Dv SUDO_CONV_INFO_MSG .
+If the user requests detailed version information, the verbose flag will be set.
 .Pp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error, although the return value is currently
 ignored.
-.Pp
-The function arguments are as follows:
-.Bl -tag -width 4n
-.It verbose
-If the user requests detailed version information, the
-.Em verbose
-flag will be set to 1.
-.It errstr
-If the
-.Fn show_version
-function returns a value other than 1, the plugin may
-store a message describing the failure or error in
-.Em errstr .
-The
-.Nm sudo
-front end will then pass this value to any registered audit plugins.
-.El
 .It register_hooks
 See the
 .Sx Policy plugin API
