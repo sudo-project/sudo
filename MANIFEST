@@ -338,6 +338,9 @@ plugins/sample/Makefile.in
 plugins/sample/README
 plugins/sample/sample_plugin.c
 plugins/sample/sample_plugin.exp
+plugins/sample_approval/Makefile.in
+plugins/sample_approval/sample_approval.c
+plugins/sample_approval/sample_approval.exp
 plugins/sudoers/Makefile.in
 plugins/sudoers/alias.c
 plugins/sudoers/audit.c
