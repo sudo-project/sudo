@@ -5,7 +5,7 @@ import errno
 import signal
 import sys
 import json
-from typing import Tuple, Dict
+from typing import Tuple
 
 
 VERSION = 1.0
@@ -30,14 +30,15 @@ class SudoIOPlugin(sudo.Plugin):
         sudo.RC.USAGE_ERROR         -2
 
     If the function returns "None" (for example does not call return), it will
-    be considered sudo.RC.OK. If an exception is raised, its backtrace will be
-    shown to the user and the plugin function returns sudo.RC.ERROR. If that is
-    not acceptable, catch it.
+    be considered sudo.RC.OK. If an exception other than sudo.PluginError is
+    raised, its backtrace will be shown to the user and the plugin function
+    returns sudo.RC.ERROR. If that is not acceptable, catch it.
     """
 
     # -- Plugin API functions --
 
-    def __init__(self, version: str, plugin_options: Tuple[str, ...], **kwargs):
+    def __init__(self, version: str,
+                 plugin_options: Tuple[str, ...], **kwargs):
         """The constructor of the IO plugin.
 
         Other variables you can currently use as arguments are:
@@ -65,7 +66,8 @@ class SudoIOPlugin(sudo.Plugin):
             self._log("", "-- Plugin DESTROYED --")
             self._log_file.close()
 
-    def open(self, argv: Tuple[str, ...], command_info: Tuple[str, ...]) -> int:
+    def open(self, argv: Tuple[str, ...],
+             command_info: Tuple[str, ...]) -> int:
         """Receives the command the user wishes to run.
 
         This function works the same as open() call of the C IO plugin API (see

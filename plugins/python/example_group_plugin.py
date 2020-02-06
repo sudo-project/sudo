@@ -1,7 +1,6 @@
 import sudo
 
 from typing import Tuple
-import pwd
 
 
 class SudoGroupPlugin(sudo.Plugin):
@@ -21,9 +20,9 @@ class SudoGroupPlugin(sudo.Plugin):
         sudo.RC.USAGE_ERROR         -2
 
     If the function returns "None" (for example does not call return), it will
-    be considered sudo.RC.OK. If an exception is raised, its backtrace will be
-    shown to the user and the plugin function returns sudo.RC.ERROR. If that is
-    not acceptable, catch it.
+    be considered sudo.RC.OK. If an exception other than sudo.PluginError is
+    raised, its backtrace will be shown to the user and the plugin function
+    returns sudo.RC.ERROR. If that is not acceptable, catch it.
     """
 
     # -- Plugin API functions --
@@ -34,8 +33,8 @@ class SudoGroupPlugin(sudo.Plugin):
         database. Otherwise it is a tuple convertible to pwd.struct_passwd.
         """
         hardcoded_user_groups = {
-            "testgroup": [ "testuser1", "testuser2" ],
-            "mygroup": [ "test" ]
+            "testgroup": ["testuser1", "testuser2"],
+            "mygroup": ["test"]
         }
 
         group_has_user = user in hardcoded_user_groups.get(group, [])
