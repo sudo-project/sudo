@@ -431,22 +431,30 @@ python_plugin_show_version(struct PluginContext *plugin_ctx, const char *python_
 }
 
 void
-python_plugin_close(struct PluginContext *plugin_ctx, const char *python_callback_name, int exit_status, int error)
+python_plugin_close(struct PluginContext *plugin_ctx, const char *callback_name,
+                    PyObject *py_args)
 {
     debug_decl(python_plugin_close, PYTHON_DEBUG_CALLBACKS);
 
     PyThreadState_Swap(plugin_ctx->py_interpreter);
 
-    if (!plugin_ctx->call_close) {
-        sudo_debug_printf(SUDO_DEBUG_INFO, "Skipping close call, because there was no command run\n");
+    // Note, this should handle the case when init has failed
+    if (plugin_ctx->py_instance != NULL) {
+        if (!plugin_ctx->call_close) {
+            sudo_debug_printf(SUDO_DEBUG_INFO, "Skipping close call, because there was no command run\n");
 
-    } else if (!PyObject_HasAttrString(plugin_ctx->py_instance, python_callback_name)) {
-        sudo_debug_printf(SUDO_DEBUG_INFO, "Python plugin function 'close' is skipped (not present)\n");
-    } else {
-        PyObject *py_result = python_plugin_api_call(plugin_ctx, python_callback_name,
-                                                     Py_BuildValue("(ii)", error == 0 ? exit_status : -1, error));
-        Py_XDECREF(py_result);
+        } else if (!PyObject_HasAttrString(plugin_ctx->py_instance, callback_name)) {
+            sudo_debug_printf(SUDO_DEBUG_INFO, "Python plugin function 'close' is skipped (not present)\n");
+        } else {
+            PyObject *py_result = python_plugin_api_call(plugin_ctx, callback_name, py_args);
+            Py_XDECREF(py_result);
+        }
     }
+
+    if (PyErr_Occurred()) {
+        py_log_last_error(NULL);
+    }
+
     python_plugin_deinit(plugin_ctx);
 
     debug_return;

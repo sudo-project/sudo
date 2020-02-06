@@ -125,7 +125,8 @@ void
 python_plugin_io_close(struct IOPluginContext *io_ctx, int exit_status, int error)
 {
     debug_decl(python_plugin_io_close, PYTHON_DEBUG_CALLBACKS);
-    python_plugin_close(BASE_CTX(io_ctx), CALLBACK_PYNAME(close), exit_status, error);
+    python_plugin_close(BASE_CTX(io_ctx), CALLBACK_PYNAME(close),
+                        Py_BuildValue("(ii)", error == 0 ? exit_status : -1, error));
     debug_return;
 }
 
