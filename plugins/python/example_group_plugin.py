@@ -19,6 +19,12 @@ class SudoGroupPlugin(sudo.Plugin):
         sudo.RC.ERROR               -1
         sudo.RC.USAGE_ERROR         -2
 
+    If the plugin encounters an error, instead of just returning sudo.RC.ERROR
+    result code it can also add a message describing the problem.
+    This can be done by raising the special exception:
+        raise sudo.PluginError("Message")
+    This added message will be used by the audit plugins.
+
     If the function returns "None" (for example does not call return), it will
     be considered sudo.RC.OK. If an exception other than sudo.PluginError is
     raised, its backtrace will be shown to the user and the plugin function

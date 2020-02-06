@@ -12,10 +12,6 @@ from typing import Tuple
 VERSION = 1.0
 
 
-class SudoPluginError(Exception):
-    pass
-
-
 class SudoPolicyPlugin(sudo.Plugin):
     """Example sudo policy plugin
 
@@ -33,6 +29,12 @@ class SudoPolicyPlugin(sudo.Plugin):
         sudo.RC.REJECT               0
         sudo.RC.ERROR               -1
         sudo.RC.USAGE_ERROR         -2
+
+    If the plugin encounters an error, instead of just returning sudo.RC.ERROR
+    result code it can also add a message describing the problem.
+    This can be done by raising the special exception:
+        raise sudo.PluginError("Message")
+    This added message will be used by the audit plugins.
 
     If the function returns "None" (for example does not call return), it will
     be considered sudo.RC.OK. If an exception other than sudo.PluginError is
@@ -57,7 +59,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         in the sudo manual ("man sudo").
         """
         if not version.startswith("1."):
-            raise sudo.SudoException(
+            raise sudo.PluginError(
                 "This plugin plugin is not compatible with python plugin"
                 "API version {}".format(version))
 
@@ -71,18 +73,16 @@ class SudoPolicyPlugin(sudo.Plugin):
             sudo.log_error("You are not allowed to run this command!")
             return sudo.RC.REJECT
 
+            raise sudo.PluginError("You are not allowed to run this command!")
+
         # The environment the command will be executed with (we allow any here)
         user_env_out = sudo.options_from_dict(self.user_env) + env_add
 
-        try:
-            command_info_out = sudo.options_from_dict({
-                "command": self._find_on_path(cmd),  # Absolute path of command
-                "runas_uid": self._runas_uid(),      # The user id
-                "runas_gid": self._runas_gid(),      # The group id
-            })
-        except SudoPluginError as error:
-            sudo.log_error(str(error))
-            return sudo.RC.ERROR
+        command_info_out = sudo.options_from_dict({
+            "command": self._find_on_path(cmd),  # Absolute path of command
+            "runas_uid": self._runas_uid(),      # The user id
+            "runas_gid": self._runas_gid(),      # The group id
+        })
 
         return (sudo.RC.ACCEPT, command_info_out, argv, user_env_out)
 
@@ -156,7 +156,8 @@ class SudoPolicyPlugin(sudo.Plugin):
         try:
             return pwd.getpwnam(runas_user)
         except KeyError:
-            raise SudoPluginError("Could not find user '{}'".format(runas_user))
+            raise sudo.PluginError("Could not find user "
+                                   "'{}'".format(runas_user))
 
     def _runas_uid(self):
         return self._runas_pwd().pw_uid
@@ -169,5 +170,5 @@ class SudoPolicyPlugin(sudo.Plugin):
         try:
             return grp.getgrnam(runas_group).gr_gid
         except KeyError:
-            raise SudoPluginError(
+            raise sudo.PluginError(
                 "Could not find group '{}'".format(runas_group))
