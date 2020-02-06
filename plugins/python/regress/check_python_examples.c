@@ -27,9 +27,10 @@
 
 static const char *python_plugin_so_path = NULL;
 static void *python_plugin_handle = NULL;
-static struct io_plugin *python_io;
+static struct io_plugin *python_io = NULL;
 static struct policy_plugin *python_policy = NULL;
 static struct sudoers_group_plugin *group_plugin = NULL;
+static struct audit_plugin *python_audit = NULL;
 
 static struct passwd example_pwd;
 
@@ -72,6 +73,19 @@ create_debugging_plugin_options(void)
         3,
         "ModulePath=" SRC_DIR "/example_debugging.py",
         "ClassName=DebugDemoPlugin",
+        NULL
+    );
+}
+
+void
+create_audit_plugin_options(const char *extra_argument)
+{
+    str_array_free(&data.plugin_options);
+    data.plugin_options = create_str_array(
+        4,
+        "ModulePath=" SRC_DIR "/example_audit_plugin.py",
+        "ClassName=SudoAuditPlugin",
+        extra_argument,
         NULL
     );
 }
@@ -995,6 +1009,281 @@ check_python_plugins_do_not_affect_each_other(void)
     return true;
 }
 
+int
+check_example_audit_plugin_receives_accept(void)
+{
+    create_audit_plugin_options("");
+    const char *errstr = NULL;
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(6, "sudo", "-u", "user", "id", "--help", NULL);
+
+    str_array_free(&data.user_env);
+    data.user_env = create_str_array(3, "KEY1=VALUE1", "KEY2=VALUE2", NULL);
+
+    str_array_free(&data.user_info);
+    data.user_info = create_str_array(3, "user=testuser1", "uid=123", NULL);
+
+    VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 3, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    str_array_free(&data.command_info);
+    data.command_info = create_str_array(2, "command=/sbin/id", NULL);
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(3, "id", "--help", NULL);
+
+    VERIFY_INT(python_audit->accept("accepter plugin name", SUDO_POLICY_PLUGIN,
+                                    data.command_info, data.plugin_argv,
+                                    data.user_env, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    python_audit->close(SUDO_PLUGIN_WAIT_STATUS, W_EXITCODE(2, 0));  // process exited with 2
+
+    VERIFY_STDOUT(expected_path("check_example_audit_plugin_receives_accept.stdout"));
+    VERIFY_STR(data.stderr_str, "");
+
+    return true;
+}
+
+int
+check_example_audit_plugin_receives_reject(void)
+{
+    create_audit_plugin_options("");
+    const char *errstr = NULL;
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(3, "sudo", "passwd", NULL);
+
+    str_array_free(&data.user_info);
+    data.user_info = create_str_array(3, "user=root", "uid=0", NULL);
+
+    VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 1, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    VERIFY_INT(python_audit->reject("rejecter plugin name", SUDO_IO_PLUGIN,
+                                    "Rejected just because!", data.command_info,
+                                    &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    python_audit->close(SUDO_PLUGIN_NO_STATUS, 0);  // program was not run
+
+    VERIFY_STDOUT(expected_path("check_example_audit_plugin_receives_reject.stdout"));
+    VERIFY_STR(data.stderr_str, "");
+
+    return true;
+}
+
+int
+check_example_audit_plugin_receives_error(void)
+{
+    create_audit_plugin_options("");
+    const char *errstr = NULL;
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(5, "sudo", "-u", "user", "id", NULL);
+
+    VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 3, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    str_array_free(&data.command_info);
+    data.command_info = create_str_array(2, "command=/sbin/id", NULL);
+
+    VERIFY_INT(python_audit->error("errorer plugin name", SUDO_AUDIT_PLUGIN,
+                                   "Some error has happened", data.command_info,
+                                   &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    python_audit->close(SUDO_PLUGIN_SUDO_ERROR, 222);
+
+    VERIFY_STDOUT(expected_path("check_example_audit_plugin_receives_error.stdout"));
+    VERIFY_STR(data.stderr_str, "");
+
+    return true;
+}
+
+typedef struct audit_plugin * (audit_clone_func)(void);
+
+int
+check_example_audit_plugin_workflow_multiple(void)
+{
+    // verify multiple python audit plugins are available
+    audit_clone_func *python_audit_clone = (audit_clone_func *)sudo_dso_findsym(
+                python_plugin_handle, "python_audit_clone");
+    VERIFY_PTR_NE(python_audit_clone, NULL);
+
+    struct audit_plugin *python_audit2 = NULL;
+
+    for (int i = 0; i < 7; ++i) {
+        python_audit2 = (*python_audit_clone)();
+        VERIFY_PTR_NE(python_audit2, NULL);
+        VERIFY_PTR_NE(python_audit2, python_audit);
+    }
+
+    const char *errstr = NULL;
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(6, "sudo", "-u", "user", "id", "--help", NULL);
+
+    str_array_free(&data.user_env);
+    data.user_env = create_str_array(3, "KEY1=VALUE1", "KEY2=VALUE2", NULL);
+
+    str_array_free(&data.user_info);
+    data.user_info = create_str_array(3, "user=default", "uid=1000", NULL);
+
+    create_audit_plugin_options("Id=1");
+    VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 3, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    // For verifying the error message of no more plugin. It should be displayed only once.
+    VERIFY_PTR((*python_audit_clone)(), NULL);
+    VERIFY_PTR((*python_audit_clone)(), NULL);
+
+    create_audit_plugin_options("Id=2");
+    VERIFY_INT(python_audit2->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 3, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    str_array_free(&data.command_info);
+    data.command_info = create_str_array(2, "command=/sbin/id", NULL);
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(3, "id", "--help", NULL);
+
+    VERIFY_INT(python_audit->accept("accepter plugin name", SUDO_POLICY_PLUGIN,
+                                    data.command_info, data.plugin_argv,
+                                    data.user_env, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    VERIFY_INT(python_audit2->accept("accepter plugin name", SUDO_POLICY_PLUGIN,
+                                    data.command_info, data.plugin_argv,
+                                    data.user_env, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    python_audit->close(SUDO_PLUGIN_WAIT_STATUS, W_EXITCODE(0, 11));  // process got signal 11
+    python_audit2->close(SUDO_PLUGIN_WAIT_STATUS, W_EXITCODE(0, 11));
+
+    VERIFY_STDOUT(expected_path("check_example_audit_plugin_workflow_multiple.stdout"));
+    VERIFY_STDERR(expected_path("check_example_audit_plugin_workflow_multiple.stderr"));
+
+    return true;
+}
+
+int
+check_example_audit_plugin_version_display(void)
+{
+    create_audit_plugin_options("");
+    const char *errstr = NULL;
+
+    str_array_free(&data.user_info);
+    data.user_info = create_str_array(3, "user=root", "uid=0", NULL);
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(3, "sudo", "-V", NULL);
+
+    VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 2, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    VERIFY_INT(python_audit->show_version(false), SUDO_RC_OK);
+    VERIFY_INT(python_audit->show_version(true), SUDO_RC_OK);
+
+    python_audit->close(SUDO_PLUGIN_SUDO_ERROR, 222);
+
+    VERIFY_STDOUT(expected_path("check_example_audit_plugin_version_display.stdout"));
+    VERIFY_STR(data.stderr_str, "");
+
+    return true;
+}
+
+int
+check_audit_plugin_callbacks_are_optional(void)
+{
+    const char *errstr = NULL;
+
+    create_debugging_plugin_options();
+
+    VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 2, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr),
+               SUDO_RC_OK);
+
+    VERIFY_PTR(python_audit->accept, NULL);
+    VERIFY_PTR(python_audit->reject, NULL);
+    VERIFY_PTR(python_audit->error, NULL);
+    VERIFY_PTR(python_audit->show_version, NULL);
+
+    python_audit->close(SUDO_PLUGIN_NO_STATUS, 0);
+    return true;
+}
+
+int
+check_audit_plugin_reports_error(void)
+{
+    const char *errstr = NULL;
+    str_array_free(&data.plugin_options);
+    data.plugin_options = create_str_array(
+        3,
+        "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
+        "ClassName=ConstructErrorPlugin",
+        NULL
+    );
+
+    VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 0, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr), SUDO_RC_ERROR);
+
+    VERIFY_STR(errstr, "Something wrong in plugin constructor");
+    errstr = NULL;
+
+    python_audit->close(SUDO_PLUGIN_NO_STATUS, 0);
+
+    str_array_free(&data.plugin_options);
+    data.plugin_options = create_str_array(
+        3,
+        "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
+        "ClassName=ErrorMsgPlugin",
+        NULL
+    );
+
+    VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                  data.settings, data.user_info, 0, data.plugin_argv,
+                                  data.user_env, data.plugin_options, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in open");
+
+    VERIFY_INT(python_audit->accept("plugin name", SUDO_POLICY_PLUGIN,
+                                    data.command_info, data.plugin_argv,
+                                    data.user_env, &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in accept");
+
+    VERIFY_INT(python_audit->reject("plugin name", SUDO_POLICY_PLUGIN,
+                                    "audit message", data.command_info,
+                                    &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in reject");
+
+    VERIFY_INT(python_audit->error("plugin name", SUDO_POLICY_PLUGIN,
+                                    "audit message", data.command_info,
+                                    &errstr), SUDO_RC_ERROR);
+    VERIFY_STR(errstr, "Something wrong in error");
+
+    python_audit->close(SUDO_PLUGIN_NO_STATUS, 0);
+
+    VERIFY_STR(data.stderr_str, "");
+    VERIFY_STR(data.stdout_str, "");
+    return true;
+}
+
+
 static int
 _load_symbols(void)
 {
@@ -1009,6 +1298,10 @@ _load_symbols(void)
 
     python_policy = sudo_dso_findsym(python_plugin_handle, "python_policy");
     VERIFY_PTR_NE(python_policy, NULL);
+
+    python_audit = sudo_dso_findsym(python_plugin_handle, "python_audit");
+    VERIFY_PTR_NE(python_audit, NULL);
+
     return true;
 }
 
@@ -1018,6 +1311,7 @@ _unload_symbols(void)
     python_io = NULL;
     group_plugin = NULL;
     python_policy = NULL;
+    python_audit = NULL;
     VERIFY_INT(sudo_dso_unload(python_plugin_handle), 0);
     return true;
 }
@@ -1063,6 +1357,14 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_policy_plugin_validate_invalidate());
     RUN_TEST(check_policy_plugin_callbacks_are_optional());
     RUN_TEST(check_policy_plugin_reports_error());
+
+    RUN_TEST(check_example_audit_plugin_receives_accept());
+    RUN_TEST(check_example_audit_plugin_receives_reject());
+    RUN_TEST(check_example_audit_plugin_receives_error());
+    RUN_TEST(check_example_audit_plugin_workflow_multiple());
+    RUN_TEST(check_example_audit_plugin_version_display());
+    RUN_TEST(check_audit_plugin_callbacks_are_optional());
+    RUN_TEST(check_audit_plugin_reports_error());
 
     RUN_TEST(check_python_plugins_do_not_affect_each_other());
 
