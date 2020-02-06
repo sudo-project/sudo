@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -101,6 +101,7 @@ struct plugin_container {
 	struct io_plugin_1_0 *io_1_0;
 	struct io_plugin_1_1 *io_1_1;
 	struct audit_plugin *audit;
+	struct approval_plugin *approval;
     } u;
 };
 TAILQ_HEAD(plugin_container_list, plugin_container);
@@ -119,6 +120,7 @@ struct sudo_plugin_event_int {
 extern struct plugin_container policy_plugin;
 extern struct plugin_container_list io_plugins;
 extern struct plugin_container_list audit_plugins;
+extern struct plugin_container_list approval_plugins;
 
 int sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
@@ -128,6 +130,7 @@ int sudo_conversation_printf(int msg_type, const char *fmt, ...);
 
 bool sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_container_list *io_plugins,
-    struct plugin_container_list *audit_plugins);
+    struct plugin_container_list *audit_plugins,
+    struct plugin_container_list *approval_plugins);
 
 #endif /* SUDO_PLUGIN_INT_H */

@@ -76,6 +76,7 @@
 struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins = TAILQ_HEAD_INITIALIZER(io_plugins);
 struct plugin_container_list audit_plugins = TAILQ_HEAD_INITIALIZER(audit_plugins);
+struct plugin_container_list approval_plugins = TAILQ_HEAD_INITIALIZER(approval_plugins);
 struct user_details user_details;
 const char *list_user; /* extern for parse_args.c */
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
@@ -137,6 +138,13 @@ static void audit_show_version(int verbose);
 static void audit_accept(const char *plugin_name,
     unsigned int plugin_type, char * const command_info[],
     char * const run_argv[], char * const run_envp[]);
+
+/* Approval plugin convenience functions. */
+static void approval_check(struct sudo_settings *settings,
+    char * const user_info[], int submit_optind, char * const submit_argv[],
+    char * const submit_envp[], char * const command_info[],
+    char * const run_argv[], char * const run_envp[]);
+static void approval_show_version(int verbose);
 
 __dso_public int main(int argc, char *argv[], char *envp[]);
 
@@ -220,7 +228,8 @@ main(int argc, char *argv[], char *envp[])
     sudo_warn_set_conversation(sudo_conversation);
 
     /* Load plugins. */
-    if (!sudo_load_plugins(&policy_plugin, &io_plugins, &audit_plugins))
+    if (!sudo_load_plugins(&policy_plugin, &io_plugins, &audit_plugins,
+	    &approval_plugins))
 	sudo_fatalx(U_("fatal error, unable to load plugins"));
 
     /* Allocate event base so plugin can use it. */
@@ -237,6 +246,7 @@ main(int argc, char *argv[], char *envp[])
 	    policy_show_version(!user_details.uid);
 	    iolog_show_version(!user_details.uid, settings, user_info,
 		nargc, nargv, envp);
+	    approval_show_version(!user_details.uid);
 	    audit_show_version(!user_details.uid);
 	    break;
 	case MODE_VALIDATE:
@@ -266,13 +276,13 @@ main(int argc, char *argv[], char *envp[])
 	    if (nargc == 0)
 		sudo_fatalx(U_("plugin did not return a command to execute"));
 
-	    /* Open I/O plugin once policy plugin succeeds. */
+	    /* Approval plugins run after policy plugin accepts the command. */
+	    approval_check(settings, user_info, submit_optind, argv, envp,
+		command_info, nargv, user_env_out);
+
+	    /* Open I/O plugin once policy and approval plugins succeed. */
 	    iolog_open(settings, user_info, command_info, nargc, nargv,
 		user_env_out);
-
-	    /* Audit command we are going to run. */
-	    audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, command_info,
-		nargv, user_env_out);
 
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
@@ -958,7 +968,6 @@ run_command(struct command_details *details)
 #endif
 	policy_close(status, 0);
 	iolog_close(status, 0);
-	audit_close(SUDO_PLUGIN_WAIT_STATUS, status);
 	break;
     default:
 	/* TODO: handle front end error conditions. */
@@ -1166,6 +1175,8 @@ policy_check(int argc, char * const argv[],
 	audit_close(SUDO_PLUGIN_NO_STATUS, 0);
 	exit(EXIT_FAILURE); /* policy plugin printed error message */
     }
+    audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, *command_info,
+	*argv_out, *user_env_out);
 
     debug_return;
 }
@@ -1686,6 +1697,105 @@ audit_error(const char *plugin_name, unsigned int plugin_type,
 		plugin->name, ok);
 	}
 	sudo_debug_set_active_instance(sudo_debug_instance);
+    }
+
+    debug_return;
+}
+
+static int
+approval_check_int(struct plugin_container *plugin,
+    struct sudo_settings *settings, char * const user_info[],
+    int submit_optind, char * const submit_argv[], char * const submit_envp[],
+    char * const command_info[], char * const run_argv[],
+    char * const run_envp[], const char **errstr)
+{
+    char **plugin_settings;
+    int ret;
+    debug_decl(approval_check_int, SUDO_DEBUG_PCOMM);
+
+    /* Convert struct sudo_settings to plugin_settings[] */
+    plugin_settings = format_plugin_settings(plugin, settings);
+    if (plugin_settings == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
+
+    sudo_debug_set_active_instance(plugin->debug_instance);
+    ret = plugin->u.approval->check(SUDO_API_VERSION, sudo_conversation,
+	sudo_conversation_printf, plugin_settings, user_info,
+	submit_optind, submit_argv, submit_envp, command_info, run_argv,
+	    run_envp, plugin->options, errstr);
+    sudo_debug_set_active_instance(sudo_debug_instance);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "approval plugin %s returns %d (%s)",
+	plugin->name, ret, *errstr ? *errstr : "");
+
+    debug_return_int(ret);
+}
+
+/*
+ * Run approval checks (there may be more than one).
+ * This is a "one-shot" plugin that has no open/close and is only
+ * called if the policy plugin accepts the command first.
+ */
+static void
+approval_check(struct sudo_settings *settings, char * const user_info[],
+    int submit_optind, char * const submit_argv[], char * const submit_envp[],
+    char * const command_info[], char * const run_argv[],
+    char * const run_envp[])
+{
+    struct plugin_container *plugin, *next;
+    const char *errstr = NULL;
+    debug_decl(approval_check, SUDO_DEBUG_PCOMM);
+
+    TAILQ_FOREACH_SAFE(plugin, &approval_plugins, entries, next) {
+	int ok = approval_check_int(plugin, settings, user_info,
+	    submit_optind, submit_argv, submit_envp, command_info, run_argv,
+	    run_envp, &errstr);
+
+	switch (ok) {
+	case 0:
+	    audit_reject(plugin->name, SUDO_APPROVAL_PLUGIN,
+		errstr ? errstr : _("command rejected by approver"),
+		command_info);
+	    break;
+	case 1:
+	    audit_accept(plugin->name, SUDO_APPROVAL_PLUGIN, command_info,
+		run_argv, run_envp);
+	    continue;
+	case -1:
+	    audit_error(plugin->name, SUDO_APPROVAL_PLUGIN,
+		errstr ? errstr : _("approval plugin error"),
+		command_info);
+	    break;
+	case -2:
+	    usage(1);
+	    break;
+	}
+
+	if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
+	    policy_close(0, EPERM);
+	audit_close(SUDO_PLUGIN_NO_STATUS, 0);
+	exit(EXIT_FAILURE); /* approval plugin printed error message */
+    }
+
+    debug_return;
+}
+
+static void
+approval_show_version(int verbose)
+{
+    struct plugin_container *plugin;
+    debug_decl(approval_show_version, SUDO_DEBUG_PCOMM);
+
+    TAILQ_FOREACH(plugin, &approval_plugins, entries) {
+	if (plugin->u.approval->show_version != NULL) {
+	    /* Return value of show_version currently ignored. */
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    plugin->u.approval->show_version(SUDO_API_VERSION,
+		sudo_conversation, sudo_conversation_printf, verbose);
+	    sudo_debug_set_active_instance(sudo_debug_instance);
+	}
     }
 
     debug_return;

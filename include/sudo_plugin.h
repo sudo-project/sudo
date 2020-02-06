@@ -237,6 +237,22 @@ struct audit_plugin {
     void (*deregister_hooks)(int version, int (*deregister_hook)(struct sudo_hook *hook));
 };
 
+/* Approval plugin type and defines */
+struct approval_plugin {
+#define SUDO_APPROVAL_PLUGIN	    4
+    unsigned int type; /* always SUDO_APPROVAL_PLUGIN */
+    unsigned int version; /* always SUDO_API_VERSION */
+    int (*check)(unsigned int version, sudo_conv_t conversation,
+	sudo_printf_t sudo_printf, char * const settings[],
+	char * const user_info[], int submit_optind,
+	char * const submit_argv[], char * const submit_envp[],
+	char * const command_info[], char * const run_argv[],
+	char * const run_envp[], char * const plugin_options[],
+	const char **errstr);
+    int (*show_version)(unsigned int version, sudo_conv_t conversation,
+        sudo_printf_t sudo_printf, int verbose);
+};
+
 /* Sudoers group plugin version major/minor */
 #define GROUP_API_VERSION_MAJOR 1
 #define GROUP_API_VERSION_MINOR 0
