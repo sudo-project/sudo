@@ -539,7 +539,8 @@ Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
 .PP
-Sudo supports loading multiple I/O plugins. Currently only 8 python I/O plugins can be loaded at once.
+Sudo supports loading multiple I/O plugins.
+Currently only 8 python I/O plugins can be loaded at once.
 .PP
 An I/O plugin may have the following member functions:
 .TP 6n
@@ -1297,7 +1298,8 @@ This is how the plugin API accepts options and settings.
 .SH "PLUGIN API CHANGELOG (Python)"
 None yet
 .SH "LIMITATIONS"
-Only a maximum number of 8 python I/O plugins can be loaded at once. If
+Only a maximum number of 8 python I/O plugins can be loaded at once.
+If
 \fI@sysconfdir@/sudo.conf\fR
 contains more, those will be rejected with a warning message.
 .PP
