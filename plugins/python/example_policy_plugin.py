@@ -6,8 +6,7 @@ import os
 import pwd
 import grp
 import shutil
-from copy import copy
-from typing import Tuple, Dict
+from typing import Tuple
 
 
 VERSION = 1.0
@@ -36,9 +35,9 @@ class SudoPolicyPlugin(sudo.Plugin):
         sudo.RC.USAGE_ERROR         -2
 
     If the function returns "None" (for example does not call return), it will
-    be considered sudo.RC.OK. If an exception is raised, its backtrace will be
-    shown to the user and the plugin function returns sudo.RC.ERROR. If that is
-    not acceptable, catch it.
+    be considered sudo.RC.OK. If an exception other than sudo.PluginError is
+    raised, its backtrace will be shown to the user and the plugin function
+    returns sudo.RC.ERROR. If that is not acceptable, catch it.
     """
 
     _allowed_commands = ("id", "whoami")
@@ -99,7 +98,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         # This is how you change the user_env:
         return (sudo.RC.OK, user_env + ("PLUGIN_EXAMPLE_ENV=1",))
 
-        # If you do not want to change user_env, you can also just return (or None):
+        # If you do not want to change user_env, you can just return (or None):
         # return sudo.RC.OK
 
     def list(self, argv: Tuple[str, ...], is_verbose: int, user: str):
@@ -122,7 +121,8 @@ class SudoPolicyPlugin(sudo.Plugin):
         pass  # we have no cache
 
     def show_version(self, is_verbose: int):
-        sudo.log_info("Python Example Policy Plugin version: {}".format(VERSION))
+        sudo.log_info("Python Example Policy Plugin "
+                      "version: {}".format(VERSION))
         if is_verbose:
             sudo.log_info("Python interpreter version:", sys.version)
 
@@ -148,7 +148,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         path = self.user_env.get("PATH", "/usr/bin:/bin")
         absolute_cmd = shutil.which(cmd, path=path)
         if not absolute_cmd:
-            raise SudoPluginError("Can not find cmd '{}' on PATH".format(cmd))
+            raise sudo.PluginError("Can not find cmd '{}' on PATH".format(cmd))
         return absolute_cmd
 
     def _runas_pwd(self):
