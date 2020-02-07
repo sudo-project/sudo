@@ -138,8 +138,8 @@ approval_check(unsigned int version, sudo_conv_t conversation,
      * which are 9am - 5pm local time.  Does not check holidays.
      */
     ret = 0;
-    time(&now);
-    tm = localtime(&now);
+    if (time(&now) == -1 || (tm = localtime(&now)) == NULL)
+	goto bad;
     if (tm->tm_wday < 1 || tm->tm_wday > 5) {
 	/* bad weekday */
 	goto bad;
@@ -164,7 +164,7 @@ bad:
     }
 
 done:
-    while ((debug_file = TAILQ_FIRST(&debug_files))) {
+    while ((debug_file = TAILQ_FIRST(&debug_files)) != NULL) {
 	TAILQ_REMOVE(&debug_files, debug_file, entries);
 	free(debug_file->debug_file);
 	free(debug_file->debug_flags);
