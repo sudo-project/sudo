@@ -418,8 +418,6 @@ client_closure_free(struct client_closure *closure)
 #endif
         TAILQ_REMOVE(&connections, closure, entries);
         close(closure->sock);
-        free(closure->elapsed);
-        free(closure->restart);
         sudo_ev_free(closure->read_ev);
         sudo_ev_free(closure->write_ev);
 #if defined(HAVE_OPENSSL)
@@ -454,12 +452,10 @@ client_closure_alloc(int sock,
     closure->state = RECV_HELLO;
     closure->log_info = log_info;
 
-    closure->elapsed = malloc(sizeof(struct timespec));
-    closure->restart = malloc(sizeof(struct timespec));
-    closure->elapsed->tv_sec = elapsed->tv_sec;
-    closure->elapsed->tv_nsec = elapsed->tv_nsec;
-    closure->restart->tv_sec = restart->tv_sec;
-    closure->restart->tv_nsec = restart->tv_nsec;
+    closure->elapsed.tv_sec = elapsed->tv_sec;
+    closure->elapsed.tv_nsec = elapsed->tv_nsec;
+    closure->restart.tv_sec = restart->tv_sec;
+    closure->restart.tv_nsec = restart->tv_nsec;
 
     closure->iolog_id = iolog_id;
 
@@ -755,10 +751,10 @@ fmt_restart_message(struct client_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: sending RestartMessage, [%lld, %ld]", __func__,
-	(long long)closure->restart->tv_sec, closure->restart->tv_nsec);
+	(long long)closure->restart.tv_sec, closure->restart.tv_nsec);
 
-    tv.tv_sec = closure->restart->tv_sec;
-    tv.tv_nsec = closure->restart->tv_nsec;
+    tv.tv_sec = closure->restart.tv_sec;
+    tv.tv_nsec = closure->restart.tv_nsec;
     restart_msg.resume_point = &tv;
     restart_msg.log_id = (char *)closure->iolog_id;
 
@@ -961,13 +957,13 @@ again:
     }
 
     /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(&timing->delay, closure->elapsed, closure->elapsed);
+    sudo_timespecadd(&timing->delay, &closure->elapsed, &closure->elapsed);
 
     /* If we have a restart point, ignore records until we hit it. */
-    if (closure->restart != NULL) {
-	if (sudo_timespeccmp(closure->restart, closure->elapsed, >=))
+    if (sudo_timespecisset(&closure->restart)) {
+	if (sudo_timespeccmp(&closure->restart, &closure->elapsed, >=))
 	    goto again;
-	closure->restart = NULL;	/* caught up */
+	sudo_timespecclear(&closure->restart);	/* caught up */
     }
 
     switch (timing->event) {
@@ -1177,7 +1173,7 @@ handle_server_message(uint8_t *buf, size_t len,
         if (tls && !do_tls_handshake(closure))
             debug_return_bool(false);
 #endif
-	    if (sudo_timespecisset(closure->restart)) {
+	    if (sudo_timespecisset(&closure->restart)) {
             closure->state = SEND_RESTART;
             ret = fmt_restart_message(closure);
 	    } else {
@@ -1188,7 +1184,7 @@ handle_server_message(uint8_t *buf, size_t len,
 	break;
     case SERVER_MESSAGE__TYPE_COMMIT_POINT:
 	ret = handle_commit_point(msg->commit_point, closure);
-	if (sudo_timespeccmp(closure->elapsed, &closure->committed, ==)) {
+	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
 	    sudo_ev_del(NULL, closure->read_ev);
 	    closure->state = FINISHED;
         if (++finished_transmissions == nr_of_conns)
@@ -1613,9 +1609,9 @@ main(int argc, char *argv[])
         /* Open the I/O log files and seek to restart point if there is one. */
         if (!iolog_open_all(iolog_dir_fd, iolog_dir, closure->iolog_files, open_mode))
             goto bad;
-        if (sudo_timespecisset(&restart)) {
-            if (!iolog_seekto(iolog_dir_fd, iolog_dir, closure->iolog_files, &elapsed,
-                &restart))
+        if (sudo_timespecisset(&closure->restart)) {
+            if (!iolog_seekto(iolog_dir_fd, iolog_dir, closure->iolog_files,
+		    &closure->elapsed, &closure->restart))
                 goto bad;
         }
 
@@ -1638,7 +1634,7 @@ main(int argc, char *argv[])
         if (closure->state != FINISHED) {
         sudo_warnx(U_("exited prematurely with state %d"), closure->state);
         sudo_warnx(U_("elapsed time sent to server [%lld, %ld]"),
-            (long long)closure->elapsed->tv_sec, closure->elapsed->tv_nsec);
+            (long long)closure->elapsed.tv_sec, closure->elapsed.tv_nsec);
         sudo_warnx(U_("commit point received from server [%lld, %ld]"),
             (long long)closure->committed.tv_sec, closure->committed.tv_nsec);
         goto bad;

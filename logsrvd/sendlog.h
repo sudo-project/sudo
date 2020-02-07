@@ -46,8 +46,8 @@ struct client_closure {
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
-    struct timespec *restart;
-    struct timespec *elapsed;
+    struct timespec restart;
+    struct timespec elapsed;
     struct timespec committed;
     struct timing_closure timing;
     struct connection_buffer read_buf;
