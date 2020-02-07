@@ -1517,6 +1517,15 @@ listener_cb(int fd, int what, void *v)
 
     sock = accept(fd, &s_un.sa, &salen);
     if (sock != -1) {
+	/* set keepalive socket option on socket returned by accept */
+	if (logsrvd_conf_tcp_keepalive()) {
+	    int keepalive = 1;
+	    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
+		sizeof(keepalive)) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to set SO_KEEPALIVE option");
+	    }
+	}
 	if (!new_connection(sock, &s_un.sa, base)) {
 	    /* TODO: pause accepting on ENOMEM */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1528,16 +1537,6 @@ listener_cb(int fd, int what, void *v)
 		"unable to accept new connection");
 	}
 	/* TODO: pause accepting on ENFILE and EMFILE */
-    }
-
-    /* set keepalive socket option on socket returned by accept */
-    if (logsrvd_conf_tcp_keepalive()) {
-        int keepalive = 1;
-        if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
-            sizeof(keepalive)) == -1) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-                "unable to set SO_KEEPALIVE option");
-        }
     }
 
     debug_return;
