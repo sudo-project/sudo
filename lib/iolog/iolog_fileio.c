@@ -457,7 +457,11 @@ iolog_nextid(char *iolog_dir, char sessid[7])
 	    "%s: unable to open %s", __func__, pathbuf);
 	goto done;
     }
-    sudo_lock_file(fd, SUDO_LOCK);
+    if (!sudo_lock_file(fd, SUDO_LOCK)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to lock %s", pathbuf);
+	goto done;
+    }
     if (fchown(fd, iolog_uid, iolog_gid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to fchown %d:%d %s", __func__,
