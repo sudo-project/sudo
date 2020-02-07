@@ -62,7 +62,6 @@
 
 #ifndef HAVE_FSEEKO
 # define fseeko(f, o, w)	fseek((f), (o), (w))
-# define ftello(f)		ftell(f)
 #endif
 
 static int audit_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
@@ -403,9 +402,10 @@ print_timestamp(struct json_container *json, struct timespec *ts)
 static int
 audit_write_exit_record(int exit_status, int error)
 {
-    struct timespec now;
     struct json_container json;
     struct json_value json_value;
+    struct timespec now;
+    struct stat sb;
     int ret = -1;
     debug_decl(audit_write_exit_record, SUDO_DEBUG_PLUGIN);
 
@@ -415,20 +415,27 @@ audit_write_exit_record(int exit_status, int error)
     }
 
     if (!sudo_lock_file(fileno(state.log_fp), SUDO_LOCK)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 	    "unable to lock %s", state.logfile);
 	goto done;
     }
 
     /* Note: assumes file ends in "\n}\n" */
-    fseeko(state.log_fp, 0, SEEK_END);
-    if (ftello(state.log_fp) == 0) {
+    if (fstat(fileno(state.log_fp), &sb) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to stat %s", state.logfile);
+	goto done;
+    }
+    if (sb.st_size == 0) {
 	/* New file */
 	putc('{', state.log_fp);
-    } else {
+    } else if (fseeko(state.log_fp, -3, SEEK_END) == 0) {
 	/* Continue file, overwrite the final "\n}\n" */
-	fseeko(state.log_fp, -3, SEEK_END);
 	putc(',', state.log_fp);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to seek %s", state.logfile);
+	goto done;
     }
 
     sudo_json_init(&json, state.log_fp, 4);
@@ -494,9 +501,10 @@ audit_write_record(const char *audit_str, const char *plugin_name,
     unsigned int plugin_type, const char *reason, char * const command_info[],
     char * const run_argv[], char * const run_envp[])
 {
-    struct timespec now;
     struct json_container json;
     struct json_value json_value;
+    struct timespec now;
+    struct stat sb;
     int ret = -1;
     debug_decl(audit_write_record, SUDO_DEBUG_PLUGIN);
 
@@ -506,20 +514,27 @@ audit_write_record(const char *audit_str, const char *plugin_name,
     }
 
     if (!sudo_lock_file(fileno(state.log_fp), SUDO_LOCK)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 	    "unable to lock %s", state.logfile);
 	goto done;
     }
 
     /* Note: assumes file ends in "\n}\n" */
-    fseeko(state.log_fp, 0, SEEK_END);
-    if (ftello(state.log_fp) == 0) {
+    if (fstat(fileno(state.log_fp), &sb) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to stat %s", state.logfile);
+	goto done;
+    }
+    if (sb.st_size == 0) {
 	/* New file */
 	putc('{', state.log_fp);
-    } else {
+    } else if (fseeko(state.log_fp, -3, SEEK_END) == 0) {
 	/* Continue file, overwrite the final "\n}\n" */
-	fseeko(state.log_fp, -3, SEEK_END);
 	putc(',', state.log_fp);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to seek %s", state.logfile);
+	goto done;
     }
 
     sudo_json_init(&json, state.log_fp, 4);
