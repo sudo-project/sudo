@@ -583,7 +583,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	    if (cmnd == NULL)
 		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    if (!gc_add(GC_PTR, cmnd))
-		exit(1);
+		exit(EXIT_FAILURE);
 
 	    for (av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
@@ -605,7 +605,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	if (av == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	if (!gc_add(GC_PTR, av))
-	    exit(1);
+	    exit(EXIT_FAILURE);
 
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
@@ -630,7 +630,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	if (av == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	if (!gc_add(GC_PTR, av))
-	    exit(1);
+	    exit(EXIT_FAILURE);
 
 	/* Must have the command in argv[0]. */
 	av[0] = "sudoedit";
@@ -712,7 +712,7 @@ void
 usage(void)
 {
     display_usage(usage_err);
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 /*
@@ -816,5 +816,5 @@ help(void)
     sudo_lbuf_print(&lbuf);
     sudo_lbuf_destroy(&lbuf);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 0);
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

@@ -263,7 +263,7 @@ main(int argc, char *argv[])
      * errors and to pull in editor and env_editor conf values.
      */
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
-	exit(1);
+	exit(EXIT_FAILURE);
     init_parser(sudoers_file, quiet, true);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
@@ -1283,7 +1283,7 @@ usage(int fatal)
     (void) fprintf(fatal ? stderr : stdout,
 	"usage: %s [-chqsV] [[-f] sudoers ]\n", getprogname());
     if (fatal)
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -1298,5 +1298,5 @@ help(void)
 	"  -q, --quiet              less verbose (quiet) syntax error messages\n"
 	"  -s, --strict             strict syntax checking\n"
 	"  -V, --version            display version information and exit\n"));
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

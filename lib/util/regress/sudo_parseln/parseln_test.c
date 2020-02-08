@@ -56,5 +56,5 @@ main(int argc, char *argv[])
     while (sudo_parseln(&line, &linesize, &lineno, stdin, 0) != -1)
 	printf("%6u\t%s\n", lineno, line);
     free(line);
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

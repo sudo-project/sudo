@@ -1604,7 +1604,7 @@ daemonize(bool nofork)
 	    break;
 	default:
 	    /* parent, exit */
-	    _exit(0);
+	    _exit(EXIT_SUCCESS);
 	}
     }
 
@@ -1627,7 +1627,7 @@ usage(bool fatal)
     fprintf(stderr, "usage: %s [-n] [-f conf_file] [-R percentage]\n",
 	getprogname());
     if (fatal)
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -1642,7 +1642,7 @@ help(void)
 	"  -n, --no-fork            do not fork, run in the foreground\n"
 	"  -R, --random-drop        percent chance connections will drop\n"
 	"  -V, --version            display version information and exit\n"));
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 static const char short_opts[] = "f:hnR:V";

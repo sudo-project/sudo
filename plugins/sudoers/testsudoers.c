@@ -606,5 +606,5 @@ static void
 usage(void)
 {
     (void) fprintf(stderr, "usage: %s [-dt] [-G sudoers_gid] [-g group] [-h host] [-i input_format] [-P grfile] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
-    exit(1);
+    exit(EXIT_FAILURE);
 }

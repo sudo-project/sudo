@@ -44,7 +44,7 @@ static void
 usage(void)
 {
     fprintf(stderr, "usage: %s inputfile\n", getprogname());
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 int

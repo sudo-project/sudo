@@ -87,7 +87,7 @@ main(int argc, char *argv[])
 	free(gidlist);
 	ngids = sudo_parse_gids(test_data[i].gids, test_data[i].baseptr, &gidlist);
 	if (ngids == -1)
-	    exit(1);	/* out of memory? */
+	    exit(EXIT_FAILURE);	/* out of memory? */
 	ntests++;
 	if (ngids != test_data[i].ngids) {
 	    sudo_warnx_nodebug("test #%d: expected %d gids, got %d",

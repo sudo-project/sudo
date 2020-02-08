@@ -54,7 +54,7 @@ static void
 usage(void)
 {
     fprintf(stderr, "usage: %s datafile\n", getprogname());
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 static void

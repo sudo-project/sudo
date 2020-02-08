@@ -124,7 +124,7 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	killpg(mc->cmnd_pid, SIGCONT);
 	break;
     case SIGKILL:
-	_exit(1); /* XXX */
+	_exit(EXIT_FAILURE); /* XXX */
 	/* NOTREACHED */
     default:
 	/* Relay signal to command. */
@@ -635,7 +635,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	exec_cmnd_pty(details, foreground, errpipe[1]);
 	if (write(errpipe[1], &errno, sizeof(int)) == -1)
 	    sudo_warn(U_("unable to execute %s"), details->command);
-	_exit(1);
+	_exit(EXIT_FAILURE);
     }
     close(errpipe[1]);
 
@@ -721,7 +721,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     }
 #endif
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
-    _exit(1);
+    _exit(EXIT_FAILURE);
 
 bad:
     debug_return_int(-1);

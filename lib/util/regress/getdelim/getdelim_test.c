@@ -87,7 +87,7 @@ runtests(char **buf, size_t *buflen)
 		sudo_warn_nodebug("send");
 		_exit(127);
 	    }
-	    _exit(0);
+	    _exit(EXIT_SUCCESS);
 	    break;
 	default:
 	    /* parent */

@@ -801,14 +801,14 @@ send_mail(const char *fmt, ...)
 		    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
 			strerror(errno));
 		    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-		    _exit(1);
+		    _exit(EXIT_FAILURE);
 		case 0:
 		    /* Grandchild continues below. */
 		    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 		    break;
 		default:
 		    /* Parent will wait for us. */
-		    _exit(0);
+		    _exit(EXIT_SUCCESS);
 	    }
 	    break;
 	default:
@@ -847,7 +847,7 @@ send_mail(const char *fmt, ...)
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to open pipe: %s",
 	    strerror(errno));
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-	_exit(1);
+	_exit(EXIT_FAILURE);
     }
 
     switch (pid = sudo_debug_fork()) {
@@ -857,7 +857,7 @@ send_mail(const char *fmt, ...)
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
 		strerror(errno));
 	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-	    _exit(1);
+	    _exit(EXIT_FAILURE);
 	    break;
 	case 0:
 	    /* Child. */
@@ -913,7 +913,7 @@ send_mail(const char *fmt, ...)
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"child (%d) exit value %d", (int)rv, status);
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    _exit(0);
+    _exit(EXIT_SUCCESS);
 }
 
 /*

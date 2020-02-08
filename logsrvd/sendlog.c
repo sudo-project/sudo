@@ -104,7 +104,7 @@ usage(bool fatal)
     fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] "
 #endif
 	"[-r restart-point] /path/to/iolog\n", getprogname());
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 static void
@@ -126,7 +126,7 @@ help(void)
 	"  -k, --key                private key file\n"
 #endif
 	"  -V, --version            display version information and exit\n"));
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 #if defined(HAVE_OPENSSL)

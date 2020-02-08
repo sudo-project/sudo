@@ -60,8 +60,8 @@ main(int argc, char *argv[])
     if (strcmp(getprogname(), progbase) != 0) {
 	printf("%s: FAIL: incorrect program name \"%s\"\n",
 	    progbase, getprogname());
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

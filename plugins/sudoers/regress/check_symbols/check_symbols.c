@@ -41,7 +41,7 @@ static void
 usage(void)
 {
     fprintf(stderr, "usage: %s plugin.so symbols_file\n", getprogname());
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 int

@@ -1572,7 +1572,7 @@ usage(int fatal)
 	_("usage: %s [-h] [-d dir] -l [search expression]\n"),
 	getprogname());
     if (fatal)
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -1591,7 +1591,7 @@ help(void)
 	"  -S, --suspend-wait     wait while the command was suspended\n"
 	"  -s, --speed=num        speed up or slow down output\n"
 	"  -V, --version          display version information and exit"));
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 /*

@@ -46,7 +46,7 @@ main(int argc, char *argv[])
     if (argc > 1) {
 	if ((fp = fopen(argv[1], "r")) == NULL) {
 	    perror(argv[1]);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
     }
 

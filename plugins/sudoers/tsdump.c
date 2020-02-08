@@ -314,5 +314,5 @@ usage(void)
 {
     fprintf(stderr, "usage: %s [-f timestamp_file] | [-u username]\n",
 	getprogname());
-    exit(1);
+    exit(EXIT_FAILURE);
 }

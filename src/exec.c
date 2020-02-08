@@ -363,7 +363,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		/* parent exits (but does not flush buffers) */
 		sudo_debug_exit_int(__func__, __FILE__, __LINE__,
 		    sudo_debug_subsys, 0);
-		_exit(0);
+		_exit(EXIT_SUCCESS);
 	}
     }
 

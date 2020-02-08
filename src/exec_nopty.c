@@ -402,7 +402,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 		break;
 	}
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
-	_exit(1);
+	_exit(EXIT_FAILURE);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
 	(int)ec.cmnd_pid);

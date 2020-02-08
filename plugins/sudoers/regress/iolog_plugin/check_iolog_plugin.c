@@ -52,7 +52,7 @@ static void
 usage(void)
 {
     fprintf(stderr, "usage: %s pathname\n", getprogname());
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 static int

@@ -1310,7 +1310,7 @@ usage(int fatal)
 	"[-I increment] [-m filter] [-o output_file] [-O start_point] "
 	"[-P padding] [-s sections] [input_file]\n", getprogname());
     if (fatal)
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -1335,5 +1335,5 @@ help(void)
 	"  -P, --padding=num          base padding for sudoOrder increment\n"
 	"  -s, --suppress=sections    suppress output of certain sections\n"
 	"  -V, --version              display version information and exit"));
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

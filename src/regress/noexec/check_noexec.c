@@ -184,7 +184,7 @@ main(int argc, char *argv[], char *envp[])
 
     if (argc != 2) {
 	fprintf(stderr, "usage: %s regress | /path/to/sudo_noexec.so\n", getprogname());
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     /* Disable execution for post-exec and re-exec ourself. */

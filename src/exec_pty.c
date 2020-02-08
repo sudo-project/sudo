@@ -1553,7 +1553,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
                 "%s: unable to send status to parent", __func__);
 	}
-	_exit(1);
+	_exit(EXIT_FAILURE);
     }
 
     /*
