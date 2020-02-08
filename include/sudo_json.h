@@ -68,3 +68,6 @@ __dso_public bool sudo_json_close_array_v1(struct json_container *json);
 
 __dso_public bool sudo_json_add_value_v1(struct json_container *json, const char *name, struct json_value *value);
 #define sudo_json_add_value(_a, _b, _c) sudo_json_add_value_v1((_a), (_b), (_c))
+
+__dso_public bool sudo_json_add_value_as_object_v1(struct json_container *json, const char *name, struct json_value *value);
+#define sudo_json_add_value_as_object(_a, _b, _c) sudo_json_add_value_as_object_v1((_a), (_b), (_c))

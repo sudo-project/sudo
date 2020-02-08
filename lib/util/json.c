@@ -125,9 +125,11 @@ sudo_json_open_object_v1(struct json_container *json, const char *name)
 
     print_indent(json->fp, json->indent_level);
 
-    json_print_string(json, name);
-    putc(':', json->fp);
-    putc(' ', json->fp);
+    if (name != NULL) {
+	json_print_string(json, name);
+	putc(':', json->fp);
+	putc(' ', json->fp);
+    }
     putc('{', json->fp);
 
     json->indent_level += json->indent_increment;
@@ -186,8 +188,8 @@ sudo_json_close_array_v1(struct json_container *json)
 }
 
 bool
-sudo_json_add_value_v1(struct json_container *json, const char *name,
-    struct json_value *value)
+sudo_json_add_value_int(struct json_container *json, const char *name,
+    struct json_value *value, bool as_object)
 {
     unsigned int i;
     debug_decl(sudo_json_add_value, SUDO_DEBUG_UTIL);
@@ -200,10 +202,17 @@ sudo_json_add_value_v1(struct json_container *json, const char *name,
 
     print_indent(json->fp, json->indent_level);
 
+    if (as_object) {
+	putc('{', json->fp);
+	putc(' ', json->fp);
+    }
+
     /* name */
-    json_print_string(json, name);
-    putc(':', json->fp);
-    putc(' ', json->fp);
+    if (name != NULL) {
+	json_print_string(json, name);
+	putc(':', json->fp);
+	putc(' ', json->fp);
+    }
 
     /* value */
     switch (value->type) {
@@ -254,5 +263,24 @@ sudo_json_add_value_v1(struct json_container *json, const char *name,
 	break;
     }
 
+    if (as_object) {
+	putc(' ', json->fp);
+	putc('}', json->fp);
+    }
+
     debug_return_bool(true);
+}
+
+bool
+sudo_json_add_value_v1(struct json_container *json, const char *name,
+    struct json_value *value)
+{
+    return sudo_json_add_value_int(json, name, value, false);
+}
+
+bool
+sudo_json_add_value_as_object_v1(struct json_container *json, const char *name,
+    struct json_value *value)
+{
+    return sudo_json_add_value_int(json, name, value, true);
 }
