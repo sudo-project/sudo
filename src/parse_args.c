@@ -59,7 +59,7 @@ int tgetpass_flags;
  * Local functions.
  */
 static void help(void) __attribute__((__noreturn__));
-static void usage_excl(int);
+static void usage_excl(void) __attribute__((__noreturn__));
 
 /*
  * Mapping of command line flags to name/value settings.
@@ -226,7 +226,7 @@ parse_env_list(struct environment *e, char *list)
 	(cp = strtok_r(NULL, ",", &last))) {
 	if (strchr(cp, '=') != NULL) {
 	    sudo_warnx(U_("invalid environment variable name: %s"), cp);
-	    usage(1);
+	    usage();
 	}
 	if ((val = getenv(cp)) != NULL)
 	    env_set(e, cp, val);
@@ -257,7 +257,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
     /* Is someone trying something funny? */
     if (argc <= 0)
-	usage(1);
+	usage();
 
     /* Pass progname to plugin so it can call initprogname() */
     progname = getprogname();
@@ -313,7 +313,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'a':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
-			usage(1);
+			usage();
 		    sudo_settings[ARG_BSDAUTH_TYPE].value = optarg;
 		    break;
 #endif
@@ -327,7 +327,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    assert(optarg != NULL);
 		    if (sudo_strtonum(optarg, 3, INT_MAX, NULL) == 0) {
 			sudo_warnx(U_("the argument to -C must be a number greater than or equal to 3"));
-			usage(1);
+			usage();
 		    }
 		    sudo_settings[ARG_CLOSEFROM].value = optarg;
 		    break;
@@ -335,7 +335,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'c':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
-			usage(1);
+			usage();
 		    sudo_settings[ARG_LOGIN_CLASS].value = optarg;
 		    break;
 #endif
@@ -357,7 +357,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    break;
 		case 'e':
 		    if (mode && mode != MODE_EDIT)
-			usage_excl(1);
+			usage_excl();
 		    mode = MODE_EDIT;
 		    sudo_settings[ARG_SUDOEDIT].value = "true";
 		    valid_flags = MODE_NONINTERACTIVE;
@@ -365,7 +365,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'g':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
-			usage(1);
+			usage();
 		    runas_group = optarg;
 		    sudo_settings[ARG_RUNAS_GROUP].value = optarg;
 		    break;
@@ -386,7 +386,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 			}
 			if (mode && mode != MODE_HELP) {
 			    if (strcmp(progname, "sudoedit") != 0)
-				usage_excl(1);
+				usage_excl();
 			}
 			mode = MODE_HELP;
 			valid_flags = 0;
@@ -396,7 +396,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case OPT_HOSTNAME:
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
-			usage(1);
+			usage();
 		    sudo_settings[ARG_REMOTE_HOST].value = optarg;
 		    break;
 		case 'i':
@@ -409,7 +409,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'K':
 		    sudo_settings[ARG_IGNORE_TICKET].value = "true";
 		    if (mode && mode != MODE_KILL)
-			usage_excl(1);
+			usage_excl();
 		    mode = MODE_KILL;
 		    valid_flags = 0;
 		    break;
@@ -418,7 +418,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 			if (mode == MODE_LIST)
 			    SET(flags, MODE_LONG_LIST);
 			else
-			    usage_excl(1);
+			    usage_excl();
 		    }
 		    mode = MODE_LIST;
 		    valid_flags = MODE_NONINTERACTIVE|MODE_LONG_LIST;
@@ -439,13 +439,13 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'r':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
-			usage(1);
+			usage();
 		    sudo_settings[ARG_SELINUX_ROLE].value = optarg;
 		    break;
 		case 't':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
-			usage(1);
+			usage();
 		    sudo_settings[ARG_SELINUX_TYPE].value = optarg;
 		    break;
 #endif
@@ -464,30 +464,30 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'U':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
-			usage(1);
+			usage();
 		    list_user = optarg;
 		    break;
 		case 'u':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
-			usage(1);
+			usage();
 		    runas_user = optarg;
 		    sudo_settings[ARG_RUNAS_USER].value = optarg;
 		    break;
 		case 'v':
 		    if (mode && mode != MODE_VALIDATE)
-			usage_excl(1);
+			usage_excl();
 		    mode = MODE_VALIDATE;
 		    valid_flags = MODE_NONINTERACTIVE;
 		    break;
 		case 'V':
 		    if (mode && mode != MODE_VERSION)
-			usage_excl(1);
+			usage_excl();
 		    mode = MODE_VERSION;
 		    valid_flags = 0;
 		    break;
 		default:
-		    usage(1);
+		    usage();
 	    }
 	} else if (!got_end_of_args && is_envar) {
 	    /* Insert key=value pair, crank optind and resume getopt. */
@@ -522,39 +522,39 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     if (ISSET(flags, MODE_LOGIN_SHELL)) {
 	if (ISSET(flags, MODE_SHELL)) {
 	    sudo_warnx(U_("you may not specify both the `-i' and `-s' options"));
-	    usage(1);
+	    usage();
 	}
 	if (ISSET(flags, MODE_PRESERVE_ENV)) {
 	    sudo_warnx(U_("you may not specify both the `-i' and `-E' options"));
-	    usage(1);
+	    usage();
 	}
 	SET(flags, MODE_SHELL);
     }
     if ((flags & valid_flags) != flags)
-	usage(1);
+	usage();
     if (mode == MODE_EDIT &&
        (ISSET(flags, MODE_PRESERVE_ENV) || extra_env.env_len != 0)) {
 	if (ISSET(mode, MODE_PRESERVE_ENV))
 	    sudo_warnx(U_("the `-E' option is not valid in edit mode"));
 	if (extra_env.env_len != 0)
 	    sudo_warnx(U_("you may not specify environment variables in edit mode"));
-	usage(1);
+	usage();
     }
     if ((runas_user != NULL || runas_group != NULL) &&
 	!ISSET(mode, MODE_EDIT | MODE_RUN | MODE_CHECK | MODE_VALIDATE)) {
-	usage(1);
+	usage();
     }
     if (list_user != NULL && mode != MODE_LIST && mode != MODE_CHECK) {
 	sudo_warnx(U_("the `-U' option may only be used with the `-l' option"));
-	usage(1);
+	usage();
     }
     if (ISSET(tgetpass_flags, TGP_STDIN) && ISSET(tgetpass_flags, TGP_ASKPASS)) {
 	sudo_warnx(U_("the `-A' and `-S' options may not be used together"));
-	usage(1);
+	usage();
     }
     if ((argc == 0 && mode == MODE_EDIT) ||
 	(argc > 0 && !ISSET(mode, MODE_RUN | MODE_EDIT | MODE_CHECK)))
-	usage(1);
+	usage();
     if (argc == 0 && mode == MODE_RUN && !ISSET(flags, MODE_SHELL)) {
 	SET(flags, (MODE_IMPLIED_SHELL | MODE_SHELL));
 	sudo_settings[ARG_IMPLIED_SHELL].value = "true";
@@ -666,11 +666,11 @@ usage_out(const char *buf)
 }
 
 /*
- * Give usage message and exit.
+ * Display usage message.
  * The actual usage strings are in sudo_usage.h for configure substitution.
  */
-void
-usage(int fatal)
+static void
+display_usage(int (*output)(const char *))
 {
     struct sudo_lbuf lbuf;
     char *uvec[6];
@@ -696,27 +696,35 @@ usage(int fatal)
      * tty width.
      */
     ulen = (int)strlen(getprogname()) + 8;
-    sudo_lbuf_init(&lbuf, fatal ? usage_err : usage_out, ulen, NULL,
+    sudo_lbuf_init(&lbuf, output, ulen, NULL,
 	user_details.ts_cols);
     for (i = 0; uvec[i] != NULL; i++) {
 	sudo_lbuf_append(&lbuf, "usage: %s%s", getprogname(), uvec[i]);
 	sudo_lbuf_print(&lbuf);
     }
     sudo_lbuf_destroy(&lbuf);
-    if (fatal)
-	exit(1);
+}
+
+/*
+ * Display usage message and exit.
+ */
+void
+usage(void)
+{
+    display_usage(usage_err);
+    exit(1);
 }
 
 /*
  * Tell which options are mutually exclusive and exit.
  */
 static void
-usage_excl(int fatal)
+usage_excl(void)
 {
     debug_decl(usage_excl, SUDO_DEBUG_ARGS);
 
     sudo_warnx(U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
-    usage(fatal);
+    usage();
 }
 
 static void
@@ -734,7 +742,7 @@ help(void)
 	sudo_lbuf_append(&lbuf, _("%s - execute a command as another user\n\n"), pname);
     sudo_lbuf_print(&lbuf);
 
-    usage(0);
+    display_usage(usage_out);
 
     sudo_lbuf_append(&lbuf, _("\nOptions:\n"));
     sudo_lbuf_append(&lbuf, "  -A, --askpass                 %s\n",

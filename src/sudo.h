@@ -233,7 +233,7 @@ extern int sudo_debug_instance;
 int sudo_edit(struct command_details *details);
 
 /* parse_args.c */
-void usage(int);
+void usage(void) __attribute__((__noreturn__));
 
 /* openbsd.c */
 int os_init_openbsd(int argc, char *argv[], char *envp[]);

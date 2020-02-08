@@ -1077,7 +1077,7 @@ policy_open(struct sudo_settings *settings, char * const user_info[],
 
     if (ok != 1) {
 	if (ok == -2)
-	    usage(1);
+	    usage();
 	else {
 	    /* XXX - audit */
 	    sudo_fatalx(U_("unable to initialize policy plugin"));
@@ -1165,7 +1165,7 @@ policy_check(int argc, char * const argv[],
 		*command_info);
 	    break;
 	case -2:
-	    usage(1);
+	    usage();
 	    break;
 	}
 
@@ -1402,7 +1402,7 @@ iolog_open(struct sudo_settings *settings, char * const user_info[],
 	    unlink_plugin(&io_plugins, plugin);
 	    break;
 	case -2:
-	    usage(1);
+	    usage();
 	    break;
 	default:
 	    /* XXX - audit error */
@@ -1556,7 +1556,7 @@ audit_open(struct sudo_settings *settings, char * const user_info[],
 	    unlink_plugin(&audit_plugins, plugin);
 	    break;
 	case -2:
-	    usage(1);
+	    usage();
 	    break;
 	default:
 	    /* TODO: pass error message to other audit plugins */
@@ -1769,7 +1769,7 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
 		command_info);
 	    break;
 	case -2:
-	    usage(1);
+	    usage();
 	    break;
 	}
 
