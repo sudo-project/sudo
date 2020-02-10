@@ -85,23 +85,23 @@ result code, as documented in
 .Xr sudo_plugin @mansctsu@ ,
 that indicates whether or not the method was successful.
 The Python sudo module defines the following constants to improve readability:
-.Bl -column "sudo.RC_USAGE_ERROR" "XXX" -offset 4n
+.Bl -column "sudo.RC.USAGE_ERROR" "XXX" -offset 4n
 .It Sy Define Ta Sy Value
-.It Dv sudo.RC_OK Ta 1
-.It Dv sudo.RC_ACCEPT Ta 1
-.It Dv sudo.RC_REJECT Ta 0
-.It Dv sudo.RC_ERROR Ta -1
-.It Dv sudo.RC_USAGE_ERROR Ta -2
+.It Dv sudo.RC.OK Ta 1
+.It Dv sudo.RC.ACCEPT Ta 1
+.It Dv sudo.RC.REJECT Ta 0
+.It Dv sudo.RC.ERROR Ta -1
+.It Dv sudo.RC.USAGE_ERROR Ta -2
 .El
 .Pp
 If a function returns
 .Em None
 (for example, if it does not call return),
 it will be considered to have returned
-.Dv sudo.RC_OK .
+.Dv sudo.RC.OK .
 If an exception is raised, the backtrace will be shown to the user and
 the plugin function will return
-.Dv sudo.RC_ERROR .
+.Dv sudo.RC.ERROR .
 If that is not acceptable, you must catch the exception and handle it yourself.
 .Ss Python Plugin Loader
 Running the Python interpreter and bridging between C and Python is
@@ -235,15 +235,15 @@ The tuple values are as follows:
 .Bl -tag -width 4n
 .It Fa rc
 The result of the policy check, one of the
-.Dv sudo.RC_*
+.Dv sudo.RC.*
 constants.
-.Dv sudo.RC_ACCEPT
+.Dv sudo.RC.ACCEPT
 if the command is allowed,
-.Dv sudo.RC_REJECT
+.Dv sudo.RC.REJECT
 if not allowed,
-.Dv sudo.RC_ERROR
+.Dv sudo.RC.ERROR
 for a general error, or
-.Dv sudo.RC_USAGE_ERROR
+.Dv sudo.RC.USAGE_ERROR
 for a usage error.
 .It Fa command_info_out
 Optional (only required when the command is accepted).
@@ -316,11 +316,11 @@ The tuple values are as follows:
 .Bl -tag -width 4n
 .It Fa rc
 The result of the session init, one of the
-.Dv sudo.RC_*
+.Dv sudo.RC.*
 constants.
-.Dv sudo.RC_OK
+.Dv sudo.RC.OK
 on success, 0 on failure, or
-.Dv sudo.RC_ERROR
+.Dv sudo.RC.ERROR
 if an error occurred.
 .It Fa user_env_out
 Optional.
@@ -469,7 +469,7 @@ settings in the form of
 .Dq key=value
 strings.
 .It Fa version
-The version of the Python Policy Plugin API.
+The version of the Python I/O Plugin API.
 .It Fa user_info
 A tuple of information about the user running the command in the form of
 .Dq key=value
@@ -539,10 +539,10 @@ documentation in
 The
 .Fn open
 function should return a result code, one of the
-.Dv sudo.RC_*
+.Dv sudo.RC.*
 constants.
 If the function returns
-.Dv sudo.REJECT ,
+.Dv sudo.RC.REJECT ,
 no I/O will be sent to the plugin.
 .It Sy log_ttyin , log_ttyout , log_stdin , log_stdout , log_stderr
 .Bd -literal -compact
@@ -565,22 +565,22 @@ The input (or output) buffer in the form of a string.
 .El
 .Pp
 The function should return a result code, one of the
-.Dv sudo.RC_*
+.Dv sudo.RC.*
 constants.
 .Pp
 If
-.Dv sudo.RC_ERROR
+.Dv sudo.RC.ERROR
 is returned, the running command will be terminated and all of the plugin's logging
 functions will be disabled.
 Other I/O logging plugins will still receive any remaining
 input or output that has not yet been processed.
 .Pp
 If an input logging function rejects the data by returning
-.Dv sudo.RC_REJECT ,
+.Dv sudo.RC.REJECT ,
 the command will be terminated and the data will not be passed to the
 command, though it will still be sent to any other I/O logging plugins.
 If an output logging function rejects the data by returning
-.Dv sudo.RC_REJECT ,
+.Dv sudo.RC.REJECT ,
 the command will be terminated and the data will not be written to the
 terminal, though it will still be sent to any other I/O logging plugins.
 .It Sy change_winsize
@@ -780,7 +780,7 @@ member variables:
 .It Fa msg_type
 Specifies the type of the conversation.
 See the
-.Dv sudo.CONV_*
+.Dv sudo.CONV.*
 constants below.
 .It Fa msg
 The message to display to the user.
@@ -802,19 +802,19 @@ To specify the message type, the following constants are available:
 .Pp
 .Bl -bullet -compact -offset 4n -width 1n
 .It
-sudo.CONV_PROMPT_ECHO_OFF
+sudo.CONV.PROMPT_ECHO_OFF
 .It
-sudo.CONV_PROMPT_ECHO_ON
+sudo.CONV.PROMPT_ECHO_ON
 .It
-sudo.CONV_ERROR_MSG
+sudo.CONV.ERROR_MSG
 .It
-sudo.CONV_INFO_MSG
+sudo.CONV.INFO_MSG
 .It
-sudo.CONV_PROMPT_MASK
+sudo.CONV.PROMPT_MASK
 .It
-sudo.CONV_PROMPT_ECHO_OK
+sudo.CONV.PROMPT_ECHO_OK
 .It
-sudo.CONV_PREFER_TTY
+sudo.CONV.PREFER_TTY
 .El
 .Pp
 See the
@@ -985,14 +985,14 @@ one or more messages to log
 .Em Available log levels:
 .Bl -column "name in sudo.conf" "Python constant" "only cricital messages"
 .It Sy sudo.conf name Ta Sy Python constant Ta Sy description
-.It crit Ta sudo.DEBUG_CRIT Ta only cricital messages
-.It err Ta sudo.DEBUG_ERROR Ta
-.It warn Ta sudo.DEBUG_WARN Ta
-.It notice Ta sudo.DEBUG_NOTICE Ta
-.It diag Ta sudo.DEBUG_DIAG Ta
-.It info Ta sudo.DEBUG_INFO Ta
-.It trace Ta sudo.DEBUG_TRACE Ta
-.It debug Ta sudo.DEBUG_DEBUG Ta very extreme verbose debugging
+.It crit Ta sudo.DEBUG.CRIT Ta only cricital messages
+.It err Ta sudo.DEBUG.ERROR Ta
+.It warn Ta sudo.DEBUG.WARN Ta
+.It notice Ta sudo.DEBUG.NOTICE Ta
+.It diag Ta sudo.DEBUG.DIAG Ta
+.It info Ta sudo.DEBUG.INFO Ta
+.It trace Ta sudo.DEBUG.TRACE Ta
+.It debug Ta sudo.DEBUG.DEBUG Ta very extreme verbose debugging
 .El
 .Ss Debug example
 Sudo ships an example debug plugin by default.
