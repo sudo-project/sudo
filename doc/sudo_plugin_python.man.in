@@ -117,10 +117,24 @@ If a function returns
 (for example, if it does not call return),
 it will be considered to have returned
 \fRsudo.RC.OK\fR.
-If an exception is raised, the backtrace will be shown to the user and
-the plugin function will return
+If an exception is raised (other than sudo.PluginError), the backtrace will be
+shown to the user and the plugin function will return
 \fRsudo.RC.ERROR\fR.
 If that is not acceptable, you must catch the exception and handle it yourself.
+.sp
+Instead of just returning
+\fRsudo.RC.ERROR\fR
+result code the plugin can also provide a message describing the problem.
+This can be done by raising the special exception:
+.nf
+.sp
+.RS 6n
+raise sudo.PluginError("Message")
+.RE
+.fi
+.PP
+This added message will be used by the audit plugins.
+.sp
 .SS "Python Plugin Loader"
 Running the Python interpreter and bridging between C and Python is
 handled by the
