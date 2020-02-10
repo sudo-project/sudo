@@ -20,6 +20,7 @@
 # The goal is to emulate "hg log --style=changelog" via perl format.
 
 use Getopt::Std;
+use Text::Wrap;
 use strict;
 use warnings;
 
@@ -44,6 +45,9 @@ my @files;
 my $key_date = "";
 my $log_size = 0;
 my @lines;
+
+# Wrap like "hg log --style=changelog"
+$Text::Wrap::columns = 77;
 
 while (<LOG>) {
     chomp;
@@ -76,14 +80,17 @@ while (<LOG>) {
 	$hash = shift(@lines);
 
 	# Commit message body (multi-line)
+	my $sep = "";
 	foreach (@lines) {
 	    last if $_ eq "--HG--";
-	    if (defined($body)) {
-		$_ = "\r" if $_ eq "";
-		$body .= " $_";
-	    } else {
-		$body = $_;
+	    if ($_ eq "") {
+		$sep = "\n\n";
+		next;
 	    }
+	    s/^\s+//;
+	    s/\s+$//;
+	    $body .= ${sep} . $_;
+	    $sep = " ";
 	}
     } else {
 	# Not a log entry, must be the file list
@@ -98,20 +105,11 @@ exit(0);
 
 sub print_entry
 {
-    my $hash = '[' . shift . ']';
+    my $hash = shift;
     my $body = shift;
     my $files = "* " . join(", ", @_) . ":";
 
-    local $= = 9999;	# to silence warning (hack)
-
-    format =
-	^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ~~
-	$files
-	^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ~~
-	$body
-	@*
-	$hash
-
-.
-    write;
+    print wrap("\t", "\t", $files) . "\n";
+    print wrap("\t", "\t", $body) . "\n";
+    print "\t[$hash]\n\n";
 }
