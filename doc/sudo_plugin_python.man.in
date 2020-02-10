@@ -43,6 +43,9 @@ Policy plugin
 I/O plugin
 .TP 3n
 \fB\(bu\fR
+Audit plugin
+.TP 3n
+\fB\(bu\fR
 Group provider plugin
 .RE
 .PD
@@ -121,7 +124,7 @@ If an exception is raised (other than sudo.PluginError), the backtrace will be
 shown to the user and the plugin function will return
 \fRsudo.RC.ERROR\fR.
 If that is not acceptable, you must catch the exception and handle it yourself.
-.sp
+.PP
 Instead of just returning
 \fRsudo.RC.ERROR\fR
 result code the plugin can also provide a message describing the problem.
@@ -134,7 +137,6 @@ raise sudo.PluginError("Message")
 .fi
 .PP
 This added message will be used by the audit plugins.
-.sp
 .SS "Python Plugin Loader"
 Running the Python interpreter and bridging between C and Python is
 handled by the
@@ -153,6 +155,7 @@ sudo.conf(@mansectform@):
 .RS 6n
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
 .PP
@@ -830,6 +833,278 @@ Plugin python_io python_plugin.so \e
     ClassName=SudoIOPlugin
 .RE
 .fi
+.SS "Audit plugin API"
+Audit plugins must be registered in
+sudo.conf(@mansectform@).
+For example:
+.nf
+.sp
+.RS 6n
+Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
+.RE
+.fi
+.PP
+Sudo supports loading multiple audit plugins.
+Currently only 8 python audit plugins can be loaded at once.
+.PP
+An audit plugin may have the following member functions (all of them are optional):
+.TP 6n
+\fBconstructor\fR
+.nf
+.RS 6n
+__init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
+    version: str, user_info: Tuple[str, ...], plugin_options: Tuple[str, ...])
+.RE
+.fi
+.RS 6n
+.sp
+The default constructor will set the keyword arguments it receives
+as member variables in the object.
+.sp
+The constructor matches the
+\fBopen\fR()
+function in the C sudo plugin API.
+.sp
+The function arguments are as follows:
+.TP 6n
+\fIuser_env\fR
+The user's environment as a tuple of strings in
+\(lqkey=value\(rq
+format.
+.TP 6n
+\fIsettings\fR
+A tuple of user-supplied
+\fIsudo\fR
+settings in the form of
+\(lqkey=value\(rq
+strings.
+.TP 6n
+\fIversion\fR
+The version of the Python Audit Plugin API.
+.TP 6n
+\fIuser_info\fR
+A tuple of information about the user running the command in the form of
+\(lqkey=value\(rq
+strings.
+.TP 6n
+\fIplugin_options\fR
+The plugin options passed as arguments in the
+sudo.conf(@mansectform@)
+plugin registration.
+This is a tuple of strings, usually (but not necessarily) in
+\(lqkey=value\(rq
+format.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+\fBopen\fR
+.nf
+.RS 6n
+open(self, submit_optind: int,
+    submit_argv: Tuple[str, ...]) -> int
+.RE
+.fi
+.RS 6n
+.sp
+The function arguments are as follows:
+.TP 6n
+\fIsubmit_optind\fR
+The index into
+\fIsubmit_argv\fR
+that corresponds to the first entry that is not a command line option.
+.TP 6n
+\fIsubmit_argv\fR
+The argument vector sudo was invoked with, including all command line options.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+\fBclose\fR
+.br
+.nf
+.RS 6n
+close(self, status_type: int, status: int) -> None
+.RE
+.fi
+.RS 6n
+.sp
+Called when sudo is finished, shortly before it exits.
+.sp
+The function arguments are as follows:
+.TP 6n
+\fIstatus_type\fR
+The type of status being passed.
+One of the sudo.EXIT_REASON.* constants.
+.TP 6n
+\fIstatus\fR
+Depending on the value of
+\fIstatus_type\fR,
+this value is either
+ignored, the command's exit status as returned by the
+wait(2)
+system call, the value of
+\fRerrno\fR
+set by the
+execve(2)
+system call, or the value of
+\fRerrno\fR
+resulting from an error in the
+\fBsudo\fR
+front end.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+\fBshow_version\fR
+.nf
+.RS 6n
+show_version(self, is_verbose: int) -> int
+.RE
+.fi
+.RS 6n
+.sp
+Display the plugin version information to the user.
+The
+\fBsudo.log_info\fR()
+function should be used.
+.sp
+The function arguments are as follows:
+.TP 6n
+\fIis_verbose\fR
+A flag to indicate displaying more verbose information.
+Currently this is 1 if
+\(oqsudo -V\(cq
+is run as the root user.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+\fBaccept\fR
+.nf
+.RS 6n
+accept(self, plugin_name: str, plugin_type: int, command_info: Tuple[str, ...],
+       run_argv: Tuple[str, ...], run_envp: Tuple[str, ...]) -> int
+.RE
+.fi
+.RS 6n
+.sp
+This function is called when a command or action is accepted by the policy
+plugin.
+The function arguments are as follows:
+.TP 6n
+plugin_name
+The name of the plugin that accepted the command.
+.TP 6n
+plugin_type
+The type of plugin that accepted the command, currently always
+\fRsudo.PLUGIN_TYPE.POLICY\fR.
+.TP 6n
+command_info
+A vector of information describing the command being run.
+See the
+sudo_plugin(@mansectform@)
+manual for possible values.
+.TP 6n
+run_argv
+Argument vector describing a command that will be run.
+.TP 6n
+run_envp
+The environment the command will be run with.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+\fBreject\fR
+.nf
+.RS 6n
+reject(self, plugin_name: str, plugin_type: int, audit_msg: str,
+       command_info: Tuple[str, ...]) -> int
+.RE
+.fi
+.RS 6n
+.sp
+This function is called when a command or action is rejected by the policy
+plugin.
+The function arguments are as follows:
+.TP 6n
+plugin_name
+The name of the plugin that accepted the command.
+.TP 6n
+plugin_type
+The type of plugin that accepted the command, currently always
+\fRsudo.PLUGIN_TYPE.POLICY\fR.
+.TP 6n
+audit_msg
+An optional string describing the reason the command was rejected by the plugin.
+If the plugin did not provide a reason, audit_msg will be
+\fINone\fR
+.TP 6n
+command_info
+A vector of information describing the rejected command.
+See the
+sudo_plugin(@mansectform@)
+manual for possible values.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+\fBerror\fR
+.br
+.nf
+.RS 6n
+error(self, plugin_name: str, plugin_type: int, audit_msg: str,
+      command_info: Tuple[str, ...]) -> int
+.RE
+.fi
+.RS 6n
+.sp
+This function is called when a plugin returns an error.
+The function arguments are as follows:
+.TP 6n
+plugin_name
+The name of the plugin that accepted the command.
+.TP 6n
+plugin_type
+The type of plugin that accepted the command, currently
+\fRsudo.PLUGIN_TYPE.POLICY\fR
+or
+\fRsudo.PLUGIN_TYPE.IO\fR
+.TP 6n
+audit_msg
+An optional string describing the plugin error.
+If the plugin did not provide a description, it will be
+\fINone\fR
+.TP 6n
+command_info
+A vector of information describing the command.
+See the
+sudo_plugin(@mansectform@)
+manual for possible values.
+.PD 0
+.PP
+.RE
+.PD
+.SS "Audit plugin example"
+Sudo ships a Python Audit plugin example.
+To try it, register it by adding the following lines to
+\fI@sysconfdir@/sudo.conf\fR:
+.nf
+.sp
+.RS 6n
+Plugin python_audit python_plugin.so \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_audit_plugin.py \e
+    ClassName=SudoAuditPlugin
+.RE
+.fi
+.PP
+It will log the plugin accept / reject / error results to the output.
 .SS "Sudoers group provider plugin API"
 A group provider plugin is registered in the
 sudoers(@mansectform@)
