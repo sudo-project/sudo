@@ -38,6 +38,8 @@ Policy plugin
 .It
 I/O plugin
 .It
+Audit plugin
+.It
 Group provider plugin
 .El
 .Pp
@@ -103,7 +105,7 @@ If an exception is raised (other than sudo.PluginError), the backtrace will be
 shown to the user and the plugin function will return
 .Dv sudo.RC.ERROR .
 If that is not acceptable, you must catch the exception and handle it yourself.
-
+.Pp
 Instead of just returning
 .Dv sudo.RC.ERROR
 result code the plugin can also provide a message describing the problem.
@@ -113,7 +115,6 @@ raise sudo.PluginError("Message")
 .Ed
 .Pp
 This added message will be used by the audit plugins.
-
 .Ss Python Plugin Loader
 Running the Python interpreter and bridging between C and Python is
 handled by the
@@ -130,6 +131,7 @@ Example usage in
 .Bd -literal -offset indent
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
 Example group provider plugin usage in the
@@ -669,6 +671,210 @@ Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_io_plugin.py \e
     ClassName=SudoIOPlugin
 .Ed
+.Ss Audit plugin API
+Audit plugins must be registered in
+.Xr sudo.conf @mansectform@ .
+For example:
+.Bd -literal -offset indent
+Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
+.Ed
+.Pp
+Sudo supports loading multiple audit plugins.
+Currently only 8 python audit plugins can be loaded at once.
+.Pp
+An audit plugin may have the following member functions (all of them are optional):
+.Bl -tag -width 4n
+.It Sy constructor
+.Bd -literal -compact
+__init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
+    version: str, user_info: Tuple[str, ...], plugin_options: Tuple[str, ...])
+.Ed
+.Pp
+The default constructor will set the keyword arguments it receives
+as member variables in the object.
+.Pp
+The constructor matches the
+.Fn open
+function in the C sudo plugin API.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It Fa user_env
+The user's environment as a tuple of strings in
+.Dq key=value
+format.
+.It Fa settings
+A tuple of user-supplied
+.Em sudo
+settings in the form of
+.Dq key=value
+strings.
+.It Fa version
+The version of the Python Audit Plugin API.
+.It Fa user_info
+A tuple of information about the user running the command in the form of
+.Dq key=value
+strings.
+.It Fa plugin_options
+The plugin options passed as arguments in the
+.Xr sudo.conf @mansectform@
+plugin registration.
+This is a tuple of strings, usually (but not necessarily) in
+.Dq key=value
+format.
+.El
+.It Sy open
+.Bd -literal -compact
+open(self, submit_optind: int,
+    submit_argv: Tuple[str, ...]) -> int
+.Ed
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It Fa submit_optind
+The index into
+.Fa submit_argv
+that corresponds to the first entry that is not a command line option.
+.It Fa submit_argv
+The argument vector sudo was invoked with, including all command line options.
+.El
+.It Sy close
+.Bd -literal -compact
+close(self, status_type: int, status: int) -> None
+.Ed
+.Pp
+Called when sudo is finished, shortly before it exits.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It Fa status_type
+The type of status being passed.
+One of the sudo.EXIT_REASON.* constants.
+.It Fa status
+Depending on the value of
+.Fa status_type ,
+this value is either
+ignored, the command's exit status as returned by the
+.Xr wait 2
+system call, the value of
+.Li errno
+set by the
+.Xr execve 2
+system call, or the value of
+.Li errno
+resulting from an error in the
+.Nm sudo
+front end.
+.El
+.It Sy show_version
+.Bd -literal -compact
+show_version(self, is_verbose: int) -> int
+.Ed
+.Pp
+Display the plugin version information to the user.
+The
+.Fn sudo.log_info
+function should be used.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It Fa is_verbose
+A flag to indicate displaying more verbose information.
+Currently this is 1 if
+.Ql sudo -V
+is run as the root user.
+.El
+.It Sy accept
+.Bd -literal -compact
+accept(self, plugin_name: str, plugin_type: int, command_info: Tuple[str, ...],
+       run_argv: Tuple[str, ...], run_envp: Tuple[str, ...]) -> int
+.Ed
+.Pp
+This function is called when a command or action is accepted by the policy
+plugin.
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It plugin_name
+The name of the plugin that accepted the command.
+.It plugin_type
+The type of plugin that accepted the command, currently always
+.Dv sudo.PLUGIN_TYPE.POLICY .
+.It command_info
+A vector of information describing the command being run.
+See the
+.Xr sudo_plugin @mansectform@
+manual for possible values.
+.It run_argv
+Argument vector describing a command that will be run.
+.It run_envp
+The environment the command will be run with.
+.El
+.It Sy reject
+.Bd -literal -compact
+reject(self, plugin_name: str, plugin_type: int, audit_msg: str,
+       command_info: Tuple[str, ...]) -> int
+.Ed
+.Pp
+This function is called when a command or action is rejected by the policy
+plugin.
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It plugin_name
+The name of the plugin that accepted the command.
+.It plugin_type
+The type of plugin that accepted the command, currently always
+.Dv sudo.PLUGIN_TYPE.POLICY .
+.It audit_msg
+An optional string describing the reason the command was rejected by the plugin.
+If the plugin did not provide a reason, audit_msg will be
+.Em None
+.
+.It command_info
+A vector of information describing the rejected command.
+See the
+.Xr sudo_plugin @mansectform@
+manual for possible values.
+.El
+.It Sy error
+.Bd -literal -compact
+error(self, plugin_name: str, plugin_type: int, audit_msg: str,
+      command_info: Tuple[str, ...]) -> int
+.Ed
+.Pp
+This function is called when a plugin returns an error.
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It plugin_name
+The name of the plugin that accepted the command.
+.It plugin_type
+The type of plugin that accepted the command, currently
+.Dv sudo.PLUGIN_TYPE.POLICY
+or
+.Dv sudo.PLUGIN_TYPE.IO
+.
+.It audit_msg
+An optional string describing the plugin error.
+If the plugin did not provide a description, it will be
+.Em None
+.
+.It command_info
+A vector of information describing the command.
+See the
+.Xr sudo_plugin @mansectform@
+manual for possible values.
+.El
+.El
+.Ss Audit plugin example
+Sudo ships a Python Audit plugin example.
+To try it, register it by adding the following lines to
+.Pa @sysconfdir@/sudo.conf :
+.Bd -literal -offset indent
+Plugin python_audit python_plugin.so \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_audit_plugin.py \e
+    ClassName=SudoAuditPlugin
+.Ed
+.Pp
+It will log the plugin accept / reject / error results to the output.
 .Ss Sudoers group provider plugin API
 A group provider plugin is registered in the
 .Xr sudoers @mansectform@
