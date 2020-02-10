@@ -968,6 +968,7 @@ run_command(struct command_details *details)
 #endif
 	policy_close(status, 0);
 	iolog_close(status, 0);
+	audit_close(SUDO_PLUGIN_WAIT_STATUS, cstat.val);
 	break;
     default:
 	/* TODO: handle front end error conditions. */
