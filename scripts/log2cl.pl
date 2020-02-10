@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2017 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2017, 2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,10 +19,23 @@
 # Simple script to massage "git log" output into a GNU style ChangeLog.
 # The goal is to emulate "hg log --style=changelog" via perl format.
 
+use Getopt::Std;
+use strict;
 use warnings;
 
+# Git log format: author date, author name, author email
+#                 abbreviated commit hash
+#		  raw commit body
 my $format="%ad  %aN  <%aE>%n%h%n%B%n";
-my @cmd = ("git", "log", "--log-size", "--name-only", "--date=short", "--format=$format", @ARGV);
+
+# Parse options and build up "git log" command
+my @cmd = ( "git" );
+my %opts;
+getopts('b:R:', \%opts);
+push(@cmd, "-b", $opts{"b"}) if exists $opts{"b"};
+push(@cmd, "--git-dir", $opts{"R"}) if exists $opts{"R"};
+push(@cmd, "log", "--log-size", "--name-only", "--date=short", "--format=$format", @ARGV);
+
 open(LOG, '-|', @cmd) || die "$0: unable to run git log: $!";
 
 my $hash;
