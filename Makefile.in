@@ -23,7 +23,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
-scriptdir = $(top_srcdir)/scripts
+scriptdir = $(abs_top_srcdir)/scripts
 
 # Installation paths for package building
 prefix = @prefix@
