@@ -100,15 +100,15 @@ l l.
 .PP
 \fBDefine\fR	\fBValue\fR
 .PP
-\fRsudo.RC_OK\fR	1
+\fRsudo.RC.OK\fR	1
 .PP
-\fRsudo.RC_ACCEPT\fR	1
+\fRsudo.RC.ACCEPT\fR	1
 .PP
-\fRsudo.RC_REJECT\fR	0
+\fRsudo.RC.REJECT\fR	0
 .PP
-\fRsudo.RC_ERROR\fR	-1
+\fRsudo.RC.ERROR\fR	-1
 .PP
-\fRsudo.RC_USAGE_ERROR\fR	-2
+\fRsudo.RC.USAGE_ERROR\fR	-2
 .TE
 .RE
 .PP
@@ -116,10 +116,10 @@ If a function returns
 \fINone\fR
 (for example, if it does not call return),
 it will be considered to have returned
-\fRsudo.RC_OK\fR.
+\fRsudo.RC.OK\fR.
 If an exception is raised, the backtrace will be shown to the user and
 the plugin function will return
-\fRsudo.RC_ERROR\fR.
+\fRsudo.RC.ERROR\fR.
 If that is not acceptable, you must catch the exception and handle it yourself.
 .SS "Python Plugin Loader"
 Running the Python interpreter and bridging between C and Python is
@@ -276,15 +276,15 @@ The tuple values are as follows:
 .TP 6n
 \fIrc\fR
 The result of the policy check, one of the
-\fRsudo.RC_*\fR
+\fRsudo.RC.*\fR
 constants.
-\fRsudo.RC_ACCEPT\fR
+\fRsudo.RC.ACCEPT\fR
 if the command is allowed,
-\fRsudo.RC_REJECT\fR
+\fRsudo.RC.REJECT\fR
 if not allowed,
-\fRsudo.RC_ERROR\fR
+\fRsudo.RC.ERROR\fR
 for a general error, or
-\fRsudo.RC_USAGE_ERROR\fR
+\fRsudo.RC.USAGE_ERROR\fR
 for a usage error.
 .TP 6n
 \fIcommand_info_out\fR
@@ -372,11 +372,11 @@ The tuple values are as follows:
 .TP 6n
 \fIrc\fR
 The result of the session init, one of the
-\fRsudo.RC_*\fR
+\fRsudo.RC.*\fR
 constants.
-\fRsudo.RC_OK\fR
+\fRsudo.RC.OK\fR
 on success, 0 on failure, or
-\fRsudo.RC_ERROR\fR
+\fRsudo.RC.ERROR\fR
 if an error occurred.
 .TP 6n
 \fIuser_env_out\fR
@@ -577,7 +577,7 @@ settings in the form of
 strings.
 .TP 6n
 \fIversion\fR
-The version of the Python Policy Plugin API.
+The version of the Python I/O Plugin API.
 .TP 6n
 \fIuser_info\fR
 A tuple of information about the user running the command in the form of
@@ -657,10 +657,10 @@ sudo_plugin(@mansectform@).
 The
 \fBopen\fR()
 function should return a result code, one of the
-\fRsudo.RC_*\fR
+\fRsudo.RC.*\fR
 constants.
 If the function returns
-\fRsudo.REJECT\fR,
+\fRsudo.RC.REJECT\fR,
 no I/O will be sent to the plugin.
 .RE
 .TP 6n
@@ -687,22 +687,22 @@ The function arguments are as follows:
 The input (or output) buffer in the form of a string.
 .PP
 The function should return a result code, one of the
-\fRsudo.RC_*\fR
+\fRsudo.RC.*\fR
 constants.
 .sp
 If
-\fRsudo.RC_ERROR\fR
+\fRsudo.RC.ERROR\fR
 is returned, the running command will be terminated and all of the plugin's logging
 functions will be disabled.
 Other I/O logging plugins will still receive any remaining
 input or output that has not yet been processed.
 .sp
 If an input logging function rejects the data by returning
-\fRsudo.RC_REJECT\fR,
+\fRsudo.RC.REJECT\fR,
 the command will be terminated and the data will not be passed to the
 command, though it will still be sent to any other I/O logging plugins.
 If an output logging function rejects the data by returning
-\fRsudo.RC_REJECT\fR,
+\fRsudo.RC.REJECT\fR,
 the command will be terminated and the data will not be written to the
 terminal, though it will still be sent to any other I/O logging plugins.
 .RE
@@ -964,7 +964,7 @@ member variables:
 \fImsg_type\fR
 Specifies the type of the conversation.
 See the
-\fRsudo.CONV_*\fR
+\fRsudo.CONV.*\fR
 constants below.
 .TP 6n
 \fImsg\fR
@@ -989,25 +989,25 @@ To specify the message type, the following constants are available:
 .PD 0
 .TP 3n
 \fB\(bu\fR
-sudo.CONV_PROMPT_ECHO_OFF
+sudo.CONV.PROMPT_ECHO_OFF
 .TP 3n
 \fB\(bu\fR
-sudo.CONV_PROMPT_ECHO_ON
+sudo.CONV.PROMPT_ECHO_ON
 .TP 3n
 \fB\(bu\fR
-sudo.CONV_ERROR_MSG
+sudo.CONV.ERROR_MSG
 .TP 3n
 \fB\(bu\fR
-sudo.CONV_INFO_MSG
+sudo.CONV.INFO_MSG
 .TP 3n
 \fB\(bu\fR
-sudo.CONV_PROMPT_MASK
+sudo.CONV.PROMPT_MASK
 .TP 3n
 \fB\(bu\fR
-sudo.CONV_PROMPT_ECHO_OK
+sudo.CONV.PROMPT_ECHO_OK
 .TP 3n
 \fB\(bu\fR
-sudo.CONV_PREFER_TTY
+sudo.CONV.PREFER_TTY
 .RE
 .PD
 .PP
@@ -1206,21 +1206,21 @@ l l l.
 .PP
 \fBsudo.conf name\fR	\fBPython constant\fR	\fBdescription\fR
 .PP
-crit	sudo.DEBUG_CRIT	only cricital messages
+crit	sudo.DEBUG.CRIT	only cricital messages
 .PP
-err	sudo.DEBUG_ERROR	
+err	sudo.DEBUG.ERROR	
 .PP
-warn	sudo.DEBUG_WARN	
+warn	sudo.DEBUG.WARN	
 .PP
-notice	sudo.DEBUG_NOTICE	
+notice	sudo.DEBUG.NOTICE	
 .PP
-diag	sudo.DEBUG_DIAG	
+diag	sudo.DEBUG.DIAG	
 .PP
-info	sudo.DEBUG_INFO	
+info	sudo.DEBUG.INFO	
 .PP
-trace	sudo.DEBUG_TRACE	
+trace	sudo.DEBUG.TRACE	
 .PP
-debug	sudo.DEBUG_DEBUG	very extreme verbose debugging
+debug	sudo.DEBUG.DEBUG	very extreme verbose debugging
 .TE
 .SS "Debug example"
 Sudo ships an example debug plugin by default.
