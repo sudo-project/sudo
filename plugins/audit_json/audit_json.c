@@ -131,7 +131,7 @@ oom:
 }
 
 static int
-audit_open(unsigned int version, sudo_conv_t conversation,
+audit_json_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], int submit_optind, char * const submit_argv[],
     char * const submit_envp[], char * const plugin_options[],
@@ -145,7 +145,7 @@ audit_open(unsigned int version, sudo_conv_t conversation,
     char * const *cur;
     mode_t oldmask;
     int fd, ret = -1;
-    debug_decl(audit_open, SUDO_DEBUG_PLUGIN);
+    debug_decl_vars(audit_json_open, SUDO_DEBUG_PLUGIN);
 
     audit_conv = conversation;
     audit_printf = plugin_printf;
@@ -180,6 +180,7 @@ audit_open(unsigned int version, sudo_conv_t conversation,
 	    *errstr = U_("unable to initialize debugging");
 	    goto bad;
 	}
+	sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     }
 
     /* Create a UUID for this command for use with audit records. */
@@ -611,12 +612,12 @@ done:
 }
 
 static int
-audit_accept(const char *plugin_name, unsigned int plugin_type,
+audit_json_accept(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
     char * const run_envp[], const char **errstr)
 {
     int ret;
-    debug_decl(audit_accept, SUDO_DEBUG_PLUGIN);
+    debug_decl(audit_json_accept, SUDO_DEBUG_PLUGIN);
 
     state.accepted = true;
 
@@ -627,11 +628,11 @@ audit_accept(const char *plugin_name, unsigned int plugin_type,
 }
 
 static int
-audit_reject(const char *plugin_name, unsigned int plugin_type,
+audit_json_reject(const char *plugin_name, unsigned int plugin_type,
     const char *reason, char * const command_info[], const char **errstr)
 {
     int ret;
-    debug_decl(audit_reject, SUDO_DEBUG_PLUGIN);
+    debug_decl(audit_json_reject, SUDO_DEBUG_PLUGIN);
 
     ret = audit_write_record("reject", plugin_name, plugin_type,
 	reason, command_info, NULL, NULL);
@@ -640,11 +641,11 @@ audit_reject(const char *plugin_name, unsigned int plugin_type,
 }
 
 static int
-audit_error(const char *plugin_name, unsigned int plugin_type,
+audit_json_error(const char *plugin_name, unsigned int plugin_type,
     const char *reason, char * const command_info[], const char **errstr)
 {
     int ret;
-    debug_decl(audit_error, SUDO_DEBUG_PLUGIN);
+    debug_decl(audit_json_error, SUDO_DEBUG_PLUGIN);
 
     ret = audit_write_record("error", plugin_name, plugin_type,
 	reason, command_info, NULL, NULL);
@@ -653,9 +654,9 @@ audit_error(const char *plugin_name, unsigned int plugin_type,
 }
 
 static void
-audit_close(int status_type, int status)
+audit_json_close(int status_type, int status)
 {
-    debug_decl(audit_close, SUDO_DEBUG_PLUGIN);
+    debug_decl(audit_json_close, SUDO_DEBUG_PLUGIN);
 
     switch (status_type) {
     case SUDO_PLUGIN_NO_STATUS:
@@ -684,9 +685,9 @@ audit_close(int status_type, int status)
 }
 
 static int
-audit_show_version(int verbose)
+audit_json_show_version(int verbose)
 {
-    debug_decl(audit_show_version, SUDO_DEBUG_PLUGIN);
+    debug_decl(audit_json_show_version, SUDO_DEBUG_PLUGIN);
 
     audit_printf(SUDO_CONV_INFO_MSG, "JSON audit plugin version %s\n",
         PACKAGE_VERSION);
@@ -697,12 +698,12 @@ audit_show_version(int verbose)
 __dso_public struct audit_plugin audit_json = {
     SUDO_AUDIT_PLUGIN,
     SUDO_API_VERSION,
-    audit_open,
-    audit_close,
-    audit_accept,
-    audit_reject,
-    audit_error,
-    audit_show_version,
+    audit_json_open,
+    audit_json_close,
+    audit_json_accept,
+    audit_json_reject,
+    audit_json_error,
+    audit_json_show_version,
     NULL, /* register_hooks */
     NULL /* deregister_hooks */
 };
