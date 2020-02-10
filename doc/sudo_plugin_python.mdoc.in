@@ -99,10 +99,21 @@ If a function returns
 (for example, if it does not call return),
 it will be considered to have returned
 .Dv sudo.RC.OK .
-If an exception is raised, the backtrace will be shown to the user and
-the plugin function will return
+If an exception is raised (other than sudo.PluginError), the backtrace will be
+shown to the user and the plugin function will return
 .Dv sudo.RC.ERROR .
 If that is not acceptable, you must catch the exception and handle it yourself.
+
+Instead of just returning
+.Dv sudo.RC.ERROR
+result code the plugin can also provide a message describing the problem.
+This can be done by raising the special exception:
+.Bd -literal -offset indent
+raise sudo.PluginError("Message")
+.Ed
+.Pp
+This added message will be used by the audit plugins.
+
 .Ss Python Plugin Loader
 Running the Python interpreter and bridging between C and Python is
 handled by the
