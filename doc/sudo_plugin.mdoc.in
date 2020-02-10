@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 5, 2020
+.Dd February 10, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -533,13 +533,18 @@ If the
 .Fn open
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -547,7 +552,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It close
@@ -1069,13 +1074,18 @@ If the
 .Fn check_policy
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -1083,7 +1093,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It list
@@ -1141,13 +1151,18 @@ If the
 .Fn list
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -1155,7 +1170,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It validate
@@ -1199,13 +1214,18 @@ If the
 .Fn validate
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -1213,7 +1233,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It invalidate
@@ -1450,13 +1470,18 @@ If the
 .Fn init_session
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -1464,7 +1489,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .Pp
@@ -1800,13 +1825,18 @@ If the
 .Fn open
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -1814,7 +1844,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It close
@@ -1901,13 +1931,18 @@ If the
 .Fn log_ttyin
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -1915,7 +1950,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It log_ttyout
@@ -1946,13 +1981,18 @@ If the
 .Fn log_ttyout
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -1960,7 +2000,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It log_stdin
@@ -1993,13 +2033,18 @@ If the
 .Fn log_stdin
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -2007,7 +2052,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It log_stdout
@@ -2040,13 +2085,18 @@ If the
 .Fn log_stdout
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -2054,7 +2104,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It log_stderr
@@ -2087,13 +2137,18 @@ If the
 .Fn log_stderr
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -2101,7 +2156,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It register_hooks
@@ -2141,13 +2196,18 @@ If the
 .Fn change_winsize
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -2155,7 +2215,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .El
 .It log_suspend
@@ -2183,13 +2243,18 @@ If the
 .Fn log_suspend
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
 NOTE: the
-.Em errstr
+.Fa errstr
 parameter is only available starting with
 API version 1.15.
 A plugin
@@ -2197,7 +2262,7 @@ A plugin
 check the API version specified by the
 .Nm sudo
 front end before using
-.Em errstr .
+.Fa errstr .
 Failure to do so may result in a crash.
 .It event_alloc
 .Bd -literal -compact
@@ -2472,10 +2537,15 @@ If the
 .Fn open
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .El
 .It close
 .Bd -literal -compact
@@ -2587,10 +2657,15 @@ If the
 .Fn accept
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .El
 .It reject
 .Bd -literal -compact
@@ -2648,10 +2723,15 @@ If the
 .Fn reject
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .El
 .It error
 .Bd -literal -compact
@@ -2708,10 +2788,15 @@ If the
 .Fn error
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .El
 .It show_version
 .Bd -literal -compact
@@ -2754,25 +2839,27 @@ struct approval_plugin {
 #define SUDO_APPROVAL_PLUGIN 4
     unsigned int type; /* always SUDO_APPROVAL_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
-    int (*check)(unsigned int version, sudo_conv_t conversation,
+    int (*open)(unsigned int version, sudo_conv_t conversation,
         sudo_printf_t sudo_printf, char * const settings[],
         char * const user_info[], int submit_optind,
         char * const submit_argv[], char * const submit_envp[],
-        char * const command_info[], char * const run_argv[],
-        char * const run_envp[], char * const plugin_options[],
-        const char **errstr);
-    int (*show_version)(unsigned int version, sudo_conv_t conversation,
-        sudo_printf_t sudo_printf, int verbose);
+        char * const plugin_options[], const char **errstr);
+    void (*close)(void);
+    int (*check)(char * const command_info[], char * const run_argv[],
+        char * const run_envp[], const char **errstr);
+    int (*show_version)(int verbose);
 };
 .Ed
 .Pp
 An approval plugin can be used to apply extra constraints after a
 command has been accepted by the policy plugin.
-Unlike the other plugin types, there are no
-.Fn open
+Unlike the other plugin types, it does not remain open until the command
+completes.
+The plugin is opened before a call to
+.Fn check
 or
-.Fn close
-functions; functions in an approval function are stand-alone.
+.Fn show_version
+and closed immediately after.
 Multiple approval plugins may be specified in
 .Xr sudo.conf @mansectform@ .
 .Pp
@@ -2793,24 +2880,26 @@ This allows
 .Nm sudo
 to determine the API version the plugin was
 built against.
-.It check
+.It open
 .Bd -literal -compact
-int (*check)(unsigned int version, sudo_conv_t conversation,
+int (*open)(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], int submit_optind,
     char * const submit_argv[], char * const submit_envp[],
-    char * const command_info[], char * const run_argv[],
-    char * const run_envp[], char * const plugin_options[],
-    const char **errstr);
+    char * const plugin_options[], const char **errstr);
 .Ed
 .Pp
 The approval
+.Fn open
+function is run immediately before a call to the plugin's
 .Fn check
-function is run after the policy plugin
-.Fn check
-function and before any I/O logging plugins.
-If multiple approval plugins are loaded, they must all succeeed for
-the command to be allowed.
+or
+.Fn show_version
+functions.
+It is only called if the version is being requested or if the
+policy plugin's
+.Fn check_policy
+function has returned successfully.
 It returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error.
 In the latter case,
@@ -2939,6 +3028,83 @@ field will never include one
 itself but the
 .Em value
 might.
+.It plugin_options
+Any (non-comment) strings immediately after the plugin path are
+treated as arguments to the plugin.
+These arguments are split on a white space boundary and are passed to
+the plugin in the form of a
+.Dv NULL Ns -terminated
+array of strings.
+If no arguments were specified,
+.Em plugin_options
+will be the
+.Dv NULL
+pointer.
+.It errstr
+If the
+.Fn open
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Fa errstr .
+The
+.Nm sudo
+front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
+.El
+.It close
+.Bd -literal -compact
+void (*close)(void);
+.Ed
+.Pp
+The
+.Fn close
+function is called after the approval plugin's
+.Fn check
+or
+.Fn show_version
+functions have been called.
+It takes no arguments.
+The
+.Fn close
+function is typically used to perform plugin-specific cleanup,
+such as the freeing of memory objects allocated by the plugin.
+If the plugin does not need to perform any cleanup,
+.Fn close
+may be set to the
+.Dv NULL
+pointer.
+.It check
+.Bd -literal -compact
+int (*check)(char * const command_info[], char * const run_argv[],
+    char * const run_envp[], const char **errstr);
+.Ed
+.Pp
+The approval
+.Fn check
+function is run after the policy plugin
+.Fn check_policy
+function and before any I/O logging plugins.
+If multiple approval plugins are loaded, they must all succeeed for
+the command to be allowed.
+It returns 1 on success, 0 on failure, \-1 if a general error occurred,
+or \-2 if there was a usage error.
+In the latter case,
+.Nm sudo
+will print a usage message before it exits.
+If an error occurs, the plugin may optionally call the
+.Fn conversation
+or
+.Fn plugin_printf
+function with
+.Dv SUDO_CONF_ERROR_MSG
+to present additional error information to the user.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
 .It command_info
 A vector of information describing the command being run in the form of
 .Dq name=value
@@ -2989,27 +3155,20 @@ field will never include one
 itself but the
 .Em value
 might.
-.It plugin_options
-Any (non-comment) strings immediately after the plugin path are
-treated as arguments to the plugin.
-These arguments are split on a white space boundary and are passed to
-the plugin in the form of a
-.Dv NULL Ns -terminated
-array of strings.
-If no arguments were specified,
-.Em plugin_options
-will be the
-.Dv NULL
-pointer.
 .It errstr
 If the
 .Fn open
 function returns a value other than 1, the plugin may
 store a message describing the failure or error in
-.Em errstr .
+.Fa errstr .
 The
 .Nm sudo
 front end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .El
 .It show_version
 .Bd -literal -compact

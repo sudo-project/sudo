@@ -144,7 +144,9 @@ static void approval_check(struct sudo_settings *settings,
     char * const user_info[], int submit_optind, char * const submit_argv[],
     char * const submit_envp[], char * const command_info[],
     char * const run_argv[], char * const run_envp[]);
-static void approval_show_version(int verbose);
+static void approval_show_version(int verbose, struct sudo_settings *settings,
+    char * const user_info[], int submit_optind, char * const submit_argv[],
+    char * const submit_envp[]);
 
 __dso_public int main(int argc, char *argv[], char *envp[]);
 
@@ -246,7 +248,8 @@ main(int argc, char *argv[], char *envp[])
 	    policy_show_version(!user_details.uid);
 	    iolog_show_version(!user_details.uid, settings, user_info,
 		nargc, nargv, envp);
-	    approval_show_version(!user_details.uid);
+	    approval_show_version(!user_details.uid, settings, user_info,
+		submit_optind, argv, envp);
 	    audit_show_version(!user_details.uid);
 	    break;
 	case MODE_VALIDATE:
@@ -1704,34 +1707,77 @@ audit_error(const char *plugin_name, unsigned int plugin_type,
 }
 
 static int
-approval_check_int(struct plugin_container *plugin,
+approval_open_int(struct plugin_container *plugin,
     struct sudo_settings *settings, char * const user_info[],
-    int submit_optind, char * const submit_argv[], char * const submit_envp[],
-    char * const command_info[], char * const run_argv[],
-    char * const run_envp[], const char **errstr)
+    int submit_optind, char * const submit_argv[], char * const submit_envp[])
 {
     char **plugin_settings;
+    const char *errstr = NULL;
     int ret;
-    debug_decl(approval_check_int, SUDO_DEBUG_PCOMM);
+    debug_decl(approval_open_int, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
-    if (plugin_settings == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
+    if (plugin_settings == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
-    sudo_debug_set_active_instance(plugin->debug_instance);
-    ret = plugin->u.approval->check(SUDO_API_VERSION, sudo_conversation,
-	sudo_conversation_printf, plugin_settings, user_info,
-	submit_optind, submit_argv, submit_envp, command_info, run_argv,
-	    run_envp, plugin->options, errstr);
+    sudo_debug_set_active_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
+    ret = plugin->u.approval->open(SUDO_API_VERSION, sudo_conversation,
+	sudo_conversation_printf, plugin_settings, user_info, submit_optind,
+	submit_argv, submit_envp, plugin->options, &errstr);
+
+    /* Stash plugin debug instance ID if set in open() function. */
+    plugin->debug_instance = sudo_debug_get_active_instance();
     sudo_debug_set_active_instance(sudo_debug_instance);
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "approval plugin %s returns %d (%s)",
-	plugin->name, ret, *errstr ? *errstr : "");
+    switch (ret) {
+    case 1:
+	break;
+    case 0:
+	/* approval plugin asked to be disabled, remove and free. */
+	unlink_plugin(&approval_plugins, plugin);
+	break;
+    case -2:
+	usage();
+	break;
+    default:
+	/* XXX - audit */
+	sudo_fatalx(U_("error initializing approval plugin %s"),
+	    plugin->name);
+    }
 
     debug_return_int(ret);
+}
+
+static void
+approval_show_version(int verbose, struct sudo_settings *settings,
+    char * const user_info[], int submit_optind, char * const submit_argv[],
+    char * const submit_envp[])
+{
+    struct plugin_container *plugin, *next;
+    int ok;
+    debug_decl(approval_show_version, SUDO_DEBUG_PCOMM);
+
+    /*
+     * Approval plugin us only open for the life of the show_version() call.
+     */
+    TAILQ_FOREACH_SAFE(plugin, &approval_plugins, entries, next) {
+	if (plugin->u.approval->show_version == NULL)
+	    continue;
+
+	ok = approval_open_int(plugin, settings, user_info, submit_optind,
+	    submit_argv, submit_envp);
+	if (ok == 1) {
+	    /* Return value of show_version currently ignored. */
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    plugin->u.approval->show_version(verbose);
+	    if (plugin->u.approval->close != NULL)
+		plugin->u.approval->close();
+	    sudo_debug_set_active_instance(sudo_debug_instance);
+	}
+    }
+
+    debug_return;
 }
 
 /*
@@ -1747,12 +1793,27 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
 {
     struct plugin_container *plugin, *next;
     const char *errstr = NULL;
+    int ok;
     debug_decl(approval_check, SUDO_DEBUG_PCOMM);
 
+    /*
+     * Approval plugin us only open for the life of the check() call.
+     */
     TAILQ_FOREACH_SAFE(plugin, &approval_plugins, entries, next) {
-	int ok = approval_check_int(plugin, settings, user_info,
-	    submit_optind, submit_argv, submit_envp, command_info, run_argv,
-	    run_envp, &errstr);
+	if (plugin->u.approval->check == NULL)
+	    continue;
+
+	ok = approval_open_int(plugin, settings, user_info, submit_optind,
+	    submit_argv, submit_envp);
+	if (ok != 1)
+	    continue;
+
+	sudo_debug_set_active_instance(plugin->debug_instance);
+	ok = plugin->u.approval->check(command_info, run_argv, run_envp,
+	    &errstr);
+	sudo_debug_set_active_instance(sudo_debug_instance);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "approval plugin %s returns %d (%s)",
+	    plugin->name, ok, errstr ? errstr : "");
 
 	switch (ok) {
 	case 0:
@@ -1763,7 +1824,7 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
 	case 1:
 	    audit_accept(plugin->name, SUDO_APPROVAL_PLUGIN, command_info,
 		run_argv, run_envp);
-	    continue;
+	    break;
 	case -1:
 	    audit_error(plugin->name, SUDO_APPROVAL_PLUGIN,
 		errstr ? errstr : _("approval plugin error"),
@@ -1774,28 +1835,19 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
 	    break;
 	}
 
-	if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
-	    policy_close(0, EPERM);
-	audit_close(SUDO_PLUGIN_NO_STATUS, 0);
-	exit(EXIT_FAILURE); /* approval plugin printed error message */
-    }
-
-    debug_return;
-}
-
-static void
-approval_show_version(int verbose)
-{
-    struct plugin_container *plugin;
-    debug_decl(approval_show_version, SUDO_DEBUG_PCOMM);
-
-    TAILQ_FOREACH(plugin, &approval_plugins, entries) {
-	if (plugin->u.approval->show_version != NULL) {
-	    /* Return value of show_version currently ignored. */
+	/* Close approval plugin now that errstr has been consumed. */
+	if (plugin->u.approval->close != NULL) {
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    plugin->u.approval->show_version(SUDO_API_VERSION,
-		sudo_conversation, sudo_conversation_printf, verbose);
+	    plugin->u.approval->close();
 	    sudo_debug_set_active_instance(sudo_debug_instance);
+	}
+
+	/* On error, close policy and audit plugins then exit. */
+	if (ok != 1) {
+	    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
+		policy_close(0, EPERM);
+	    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
+	    exit(EXIT_FAILURE); /* approval plugin printed error message */
 	}
     }
 

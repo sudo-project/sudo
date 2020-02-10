@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "February 5, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "February 10, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -605,6 +605,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -1208,6 +1213,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -1291,6 +1301,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -1356,6 +1371,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -1636,6 +1656,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2005,6 +2030,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2130,6 +2160,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2184,6 +2219,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2240,6 +2280,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2296,6 +2341,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2352,6 +2402,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2418,6 +2473,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2469,6 +2529,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
 NOTE: the
 \fIerrstr\fR
@@ -2778,6 +2843,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .PD 0
 .PP
 .RE
@@ -2914,6 +2984,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .PD 0
 .PP
 .RE
@@ -2986,6 +3061,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .PD 0
 .PP
 .RE
@@ -3058,6 +3138,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .PD 0
 .PP
 .RE
@@ -3110,26 +3195,28 @@ struct approval_plugin {
 #define SUDO_APPROVAL_PLUGIN 4
     unsigned int type; /* always SUDO_APPROVAL_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
-    int (*check)(unsigned int version, sudo_conv_t conversation,
+    int (*open)(unsigned int version, sudo_conv_t conversation,
         sudo_printf_t sudo_printf, char * const settings[],
         char * const user_info[], int submit_optind,
         char * const submit_argv[], char * const submit_envp[],
-        char * const command_info[], char * const run_argv[],
-        char * const run_envp[], char * const plugin_options[],
-        const char **errstr);
-    int (*show_version)(unsigned int version, sudo_conv_t conversation,
-        sudo_printf_t sudo_printf, int verbose);
+        char * const plugin_options[], const char **errstr);
+    void (*close)(void);
+    int (*check)(char * const command_info[], char * const run_argv[],
+        char * const run_envp[], const char **errstr);
+    int (*show_version)(int verbose);
 };
 .RE
 .fi
 .PP
 An approval plugin can be used to apply extra constraints after a
 command has been accepted by the policy plugin.
-Unlike the other plugin types, there are no
-\fBopen\fR()
+Unlike the other plugin types, it does not remain open until the command
+completes.
+The plugin is opened before a call to
+\fBcheck\fR()
 or
-\fBclose\fR()
-functions; functions in an approval function are stand-alone.
+\fBshow_version\fR()
+and closed immediately after.
 Multiple approval plugins may be specified in
 sudo.conf(@mansectform@).
 .PP
@@ -3152,28 +3239,29 @@ This allows
 to determine the API version the plugin was
 built against.
 .TP 6n
-check
-.br
+open
 .nf
 .RS 6n
-int (*check)(unsigned int version, sudo_conv_t conversation,
+int (*open)(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], int submit_optind,
     char * const submit_argv[], char * const submit_envp[],
-    char * const command_info[], char * const run_argv[],
-    char * const run_envp[], char * const plugin_options[],
-    const char **errstr);
+    char * const plugin_options[], const char **errstr);
 .RE
 .fi
 .RS 6n
 .sp
 The approval
+\fBopen\fR()
+function is run immediately before a call to the plugin's
 \fBcheck\fR()
-function is run after the policy plugin
-\fBcheck\fR()
-function and before any I/O logging plugins.
-If multiple approval plugins are loaded, they must all succeeed for
-the command to be allowed.
+or
+\fBshow_version\fR()
+functions.
+It is only called if the version is being requested or if the
+policy plugin's
+\fBcheck_policy\fR()
+function has returned successfully.
 It returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error.
 In the latter case,
@@ -3310,6 +3398,98 @@ itself but the
 \fIvalue\fR
 might.
 .TP 6n
+plugin_options
+Any (non-comment) strings immediately after the plugin path are
+treated as arguments to the plugin.
+These arguments are split on a white space boundary and are passed to
+the plugin in the form of a
+\fRNULL\fR-terminated
+array of strings.
+If no arguments were specified,
+\fIplugin_options\fR
+will be the
+\fRNULL\fR
+pointer.
+.TP 6n
+errstr
+If the
+\fBopen\fR()
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+\fIerrstr\fR.
+The
+\fBsudo\fR
+front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+close
+.br
+.nf
+.RS 6n
+void (*close)(void);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBclose\fR()
+function is called after the approval plugin's
+\fBcheck\fR()
+or
+\fBshow_version\fR()
+functions have been called.
+It takes no arguments.
+The
+\fBclose\fR()
+function is typically used to perform plugin-specific cleanup,
+such as the freeing of memory objects allocated by the plugin.
+If the plugin does not need to perform any cleanup,
+\fBclose\fR()
+may be set to the
+\fRNULL\fR
+pointer.
+.RE
+.TP 6n
+check
+.br
+.nf
+.RS 6n
+int (*check)(char * const command_info[], char * const run_argv[],
+    char * const run_envp[], const char **errstr);
+.RE
+.fi
+.RS 6n
+.sp
+The approval
+\fBcheck\fR()
+function is run after the policy plugin
+\fBcheck_policy\fR()
+function and before any I/O logging plugins.
+If multiple approval plugins are loaded, they must all succeeed for
+the command to be allowed.
+It returns 1 on success, 0 on failure, \-1 if a general error occurred,
+or \-2 if there was a usage error.
+In the latter case,
+\fBsudo\fR
+will print a usage message before it exits.
+If an error occurs, the plugin may optionally call the
+\fBconversation\fR()
+or
+\fBplugin_printf\fR()
+function with
+\fRSUDO_CONF_ERROR_MSG\fR
+to present additional error information to the user.
+.sp
+The function arguments are as follows:
+.TP 6n
 command_info
 A vector of information describing the command being run in the form of
 \(lqname=value\(rq
@@ -3363,19 +3543,6 @@ itself but the
 \fIvalue\fR
 might.
 .TP 6n
-plugin_options
-Any (non-comment) strings immediately after the plugin path are
-treated as arguments to the plugin.
-These arguments are split on a white space boundary and are passed to
-the plugin in the form of a
-\fRNULL\fR-terminated
-array of strings.
-If no arguments were specified,
-\fIplugin_options\fR
-will be the
-\fRNULL\fR
-pointer.
-.TP 6n
 errstr
 If the
 \fBopen\fR()
@@ -3385,6 +3552,11 @@ store a message describing the failure or error in
 The
 \fBsudo\fR
 front end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .PD 0
 .PP
 .RE
