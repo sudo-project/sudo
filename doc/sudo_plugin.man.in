@@ -2459,10 +2459,10 @@ The function arguments are as follows:
 .TP 6n
 lines
 .br
-The number of lines (rows) in the resized terminal.
+The number of lines (rows) in the re-sized terminal.
 .TP 6n
 cols
-The number of columns in the resized terminal.
+The number of columns in the re-sized terminal.
 .TP 6n
 errstr
 If the
@@ -3216,7 +3216,8 @@ The plugin is opened before a call to
 \fBcheck\fR()
 or
 \fBshow_version\fR()
-and closed immediately after.
+and closed shortly thereafter (audit plugin functions must be called
+before the plugin is closed).
 Multiple approval plugins may be specified in
 sudo.conf(@mansectform@).
 .PP
@@ -3473,7 +3474,7 @@ The approval
 function is run after the policy plugin
 \fBcheck_policy\fR()
 function and before any I/O logging plugins.
-If multiple approval plugins are loaded, they must all succeeed for
+If multiple approval plugins are loaded, they must all succeed for
 the command to be allowed.
 It returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error.
