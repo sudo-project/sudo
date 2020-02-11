@@ -23,8 +23,10 @@
 
 extern PyObject *sudo_exc_SudoException;  // Base exception for the sudo module problems
 
-// This is for the python plugins to report errors for us
-extern PyObject *sudo_exc_PluginError;
+// This is for the python plugins to report error messages for us
+extern PyObject *sudo_exc_PluginException;  // base exception of the following:
+extern PyObject *sudo_exc_PluginReject;  // a reject with message
+extern PyObject *sudo_exc_PluginError;   // an error with message
 
 extern PyTypeObject *sudo_type_Plugin;
 extern PyTypeObject *sudo_type_ConvMessage;
