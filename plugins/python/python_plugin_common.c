@@ -181,14 +181,11 @@ cleanup:
     debug_return_int(rc);
 }
 
-int
-python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
+PyObject *
+python_plugin_construct_args(unsigned int version,
                         char *const settings[], char *const user_info[],
                         char *const user_env[], char *const plugin_options[])
 {
-    debug_decl(python_plugin_construct, PYTHON_DEBUG_PLUGIN_LOAD);
-
-    int rc = SUDO_RC_ERROR;
     PyObject *py_settings = NULL;
     PyObject *py_user_info = NULL;
     PyObject *py_user_env = NULL;
@@ -208,18 +205,36 @@ python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
         PyDict_SetItemString(py_kwargs, "user_info", py_user_info) != 0 ||
         PyDict_SetItemString(py_kwargs, "plugin_options", py_plugin_options) != 0)
     {
+        Py_CLEAR(py_kwargs);
+    }
+
+    Py_CLEAR(py_settings);
+    Py_CLEAR(py_user_info);
+    Py_CLEAR(py_user_env);
+    Py_CLEAR(py_plugin_options);
+    Py_CLEAR(py_version);
+    return py_kwargs;
+}
+
+int
+python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
+                        char *const settings[], char *const user_info[],
+                        char *const user_env[], char *const plugin_options[])
+{
+    debug_decl(python_plugin_construct, PYTHON_DEBUG_PLUGIN_LOAD);
+
+    int rc = SUDO_RC_ERROR;
+    PyObject *py_kwargs = python_plugin_construct_args(
+        version, settings, user_info, user_env, plugin_options);
+
+    if (py_kwargs == NULL) {
         py_log_last_error("Failed to construct plugin instance");
         rc = SUDO_RC_ERROR;
     } else {
         rc = python_plugin_construct_custom(plugin_ctx, py_kwargs);
     }
 
-    Py_XDECREF(py_settings);
-    Py_XDECREF(py_user_info);
-    Py_XDECREF(py_user_env);
-    Py_XDECREF(py_plugin_options);
-    Py_XDECREF(py_version);
-    Py_XDECREF(py_kwargs);
+    Py_CLEAR(py_kwargs);
 
     debug_return_int(rc);
 }

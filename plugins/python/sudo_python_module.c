@@ -620,6 +620,7 @@ sudo_module_init(void)
         {"POLICY", SUDO_POLICY_PLUGIN},
         {"AUDIT", SUDO_AUDIT_PLUGIN},
         {"IO", SUDO_IO_PLUGIN},
+        {"APPROVAL", SUDO_APPROVAL_PLUGIN}
     };
     MODULE_REGISTER_ENUM("PLUGIN_TYPE", constants_plugin_types);
 
