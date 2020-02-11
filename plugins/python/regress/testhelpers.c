@@ -252,3 +252,19 @@ verify_str_set(char **actual_set, char **expected_set, const char *actual_variab
 
     return true;
 }
+
+int
+mock_python_datetime_now(const char *plugin_name, const char *date_str)
+{
+    char *cmd = NULL;
+    asprintf(&cmd, "import %s\n"                      // the plugin has its own submodule
+                   "from datetime import datetime\n"  // store the real datetime
+                   "from unittest.mock import Mock\n"
+                   "%s.datetime = Mock()\n"           // replace plugin's datetime
+                   "%s.datetime.now = lambda: datetime.fromisoformat('%s')\n",
+             plugin_name, plugin_name, plugin_name, date_str);
+    VERIFY_PTR_NE(cmd, NULL);
+    VERIFY_INT(PyRun_SimpleString(cmd), 0);
+    free(cmd);
+    return true;
+}

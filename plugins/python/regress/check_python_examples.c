@@ -29,6 +29,7 @@ static const char *python_plugin_so_path = NULL;
 static void *python_plugin_handle = NULL;
 static struct io_plugin *python_io = NULL;
 static struct policy_plugin *python_policy = NULL;
+static struct approval_plugin *python_approval = NULL;
 static struct sudoers_group_plugin *group_plugin = NULL;
 static struct audit_plugin *python_audit = NULL;
 
@@ -1294,6 +1295,112 @@ check_audit_plugin_reports_error(void)
     return true;
 }
 
+static int
+check_example_approval_plugin(const char *date_str, const char *expected_error)
+{
+    const char *errstr = NULL;
+
+    create_plugin_options("example_approval_plugin", "BusinessHoursApprovalPlugin", NULL);
+
+    VERIFY_INT(python_approval->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                     data.settings, data.user_info, 0, data.plugin_argv,
+                                     data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+
+    VERIFY_TRUE(mock_python_datetime_now("example_approval_plugin", date_str));
+
+    int expected_rc = (expected_error == NULL) ? SUDO_RC_ACCEPT : SUDO_RC_REJECT;
+
+    VERIFY_INT(python_approval->check(data.command_info, data.plugin_argv, data.user_env, &errstr),
+               expected_rc);
+
+    if (expected_error == NULL) {
+        VERIFY_PTR(errstr, NULL);
+        VERIFY_STR(data.stdout_str, "");
+    } else {
+        VERIFY_STR(errstr, expected_error);
+        VERIFY_STR_CONTAINS(data.stdout_str, expected_error);  // (ends with \n)
+    }
+    VERIFY_STR(data.stderr_str, "");
+
+    python_approval->close();
+
+    return true;
+}
+
+typedef struct approval_plugin * (approval_clone_func)(void);
+
+static int
+check_multiple_approval_plugin_and_arguments(void)
+{
+    // verify multiple python approval plugins are available
+    approval_clone_func *python_approval_clone = (approval_clone_func *)sudo_dso_findsym(
+                python_plugin_handle, "python_approval_clone");
+    VERIFY_PTR_NE(python_approval_clone, NULL);
+
+    struct approval_plugin *python_approval2 = NULL;
+
+    for (int i = 0; i < 7; ++i) {
+        python_approval2 = (*python_approval_clone)();
+        VERIFY_PTR_NE(python_approval2, NULL);
+        VERIFY_PTR_NE(python_approval2, python_approval);
+    }
+
+    const char *errstr = NULL;
+    create_plugin_options("regress/plugin_approval_test", "ApprovalTestPlugin", "Id=1");
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(6, "sudo", "-u", "user", "whoami", "--help", NULL);
+
+    str_array_free(&data.user_env);
+    data.user_env = create_str_array(3, "USER_ENV1=VALUE1", "USER_ENV2=value2", NULL);
+
+    str_array_free(&data.user_info);
+    data.user_info = create_str_array(3, "INFO1=VALUE1", "info2=value2", NULL);
+
+    str_array_free(&data.settings);
+    data.settings = create_str_array(3, "SETTING1=VALUE1", "setting2=value2", NULL);
+
+    VERIFY_INT(python_approval->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                     data.settings, data.user_info, 3, data.plugin_argv,
+                                     data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    // For verifying the error message of no more plugin. It should be displayed only once.
+    VERIFY_PTR((*python_approval_clone)(), NULL);
+    VERIFY_PTR((*python_approval_clone)(), NULL);
+
+    create_plugin_options("regress/plugin_approval_test", "ApprovalTestPlugin", "Id=2");
+    VERIFY_INT(python_approval2->open(SUDO_API_VERSION, fake_conversation, fake_printf,
+                                      data.settings, data.user_info, 3, data.plugin_argv,
+                                      data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    VERIFY_INT(python_approval->show_version(false), SUDO_RC_OK);
+    VERIFY_INT(python_approval2->show_version(true), SUDO_RC_OK);
+
+    str_array_free(&data.command_info);
+    data.command_info = create_str_array(3, "CMDINFO1=value1", "CMDINFO2=VALUE2", NULL);
+
+    str_array_free(&data.plugin_argv);
+    data.plugin_argv = create_str_array(3, "whoami", "--help", NULL);
+
+    VERIFY_INT(python_approval->check(data.command_info, data.plugin_argv, data.user_env, &errstr),
+               SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    VERIFY_INT(python_approval2->check(data.command_info, data.plugin_argv, data.user_env, &errstr),
+               SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
+    python_approval->close();
+    python_approval2->close();
+
+    VERIFY_STDOUT(expected_path("check_multiple_approval_plugin_and_arguments.stdout"));
+    VERIFY_STDERR(expected_path("check_multiple_approval_plugin_and_arguments.stderr"));
+
+    return true;
+}
+
 
 static int
 _load_symbols(void)
@@ -1313,6 +1420,9 @@ _load_symbols(void)
     python_audit = sudo_dso_findsym(python_plugin_handle, "python_audit");
     VERIFY_PTR_NE(python_audit, NULL);
 
+    python_approval = sudo_dso_findsym(python_plugin_handle, "python_approval");
+    VERIFY_PTR_NE(python_approval, NULL);
+
     return true;
 }
 
@@ -1322,6 +1432,7 @@ _unload_symbols(void)
     python_io = NULL;
     group_plugin = NULL;
     python_policy = NULL;
+    python_approval = NULL;
     python_audit = NULL;
     VERIFY_INT(sudo_dso_unload(python_plugin_handle), 0);
     return true;
@@ -1376,6 +1487,21 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_audit_plugin_version_display());
     RUN_TEST(check_audit_plugin_callbacks_are_optional());
     RUN_TEST(check_audit_plugin_reports_error());
+
+    // Monday, too early
+    RUN_TEST(check_example_approval_plugin(
+        "2020-02-10T07:55:23", "That is not allowed outside the business hours!"));
+    // Monday, good time
+    RUN_TEST(check_example_approval_plugin("2020-02-10T08:05:23", NULL));
+    // Friday, good time
+    RUN_TEST(check_example_approval_plugin("2020-02-14T17:59:23", NULL));
+    // Friday, too late
+    RUN_TEST(check_example_approval_plugin(
+        "2020-02-10T18:05:23", "That is not allowed outside the business hours!"));
+    // Saturday
+    RUN_TEST(check_example_approval_plugin(
+        "2020-02-15T08:05:23", "That is not allowed on the weekend!"));
+    RUN_TEST(check_multiple_approval_plugin_and_arguments());
 
     RUN_TEST(check_python_plugins_do_not_affect_each_other());
 

@@ -157,6 +157,8 @@ int fake_printf(int msg_type, const char *fmt, ...);
 
 int verify_log_lines(const char *reference_path);
 
+int mock_python_datetime_now(const char *plugin_name, const char *date_str);
+
 #define VERIFY_LOG_LINES(reference_path) \
     VERIFY_TRUE(verify_log_lines(reference_path))
 
