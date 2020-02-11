@@ -305,6 +305,7 @@ plugins/group_file/group_file.exp
 plugins/group_file/plugin_test.c
 plugins/python
 plugins/python/Makefile.in
+plugins/python/example_approval_plugin.py
 plugins/python/example_audit_plugin.py
 plugins/python/example_conversation.py
 plugins/python/example_debugging.py
