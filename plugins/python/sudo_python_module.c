@@ -31,7 +31,9 @@ PyAPI_FUNC(PyObject *) PyStructSequence_GetItem(PyObject *, Py_ssize_t);
 
 // exceptions:
 PyObject *sudo_exc_SudoException;
+PyObject *sudo_exc_PluginException;
 PyObject *sudo_exc_PluginError;
+PyObject *sudo_exc_PluginReject;
 static PyObject *sudo_exc_ConversationInterrupted;
 
 // the methods exposed in the "sudo" python module
@@ -563,7 +565,11 @@ sudo_module_init(void)
         } while(0);
 
     MODULE_ADD_EXCEPTION(SudoException, NULL);
-    MODULE_ADD_EXCEPTION(PluginError, NULL);
+
+    MODULE_ADD_EXCEPTION(PluginException, NULL);
+    MODULE_ADD_EXCEPTION(PluginError, EXC_VAR(PluginException));
+    MODULE_ADD_EXCEPTION(PluginReject, EXC_VAR(PluginException));
+
     MODULE_ADD_EXCEPTION(ConversationInterrupted, EXC_VAR(SudoException));
 
     #define MODULE_REGISTER_ENUM(name, key_values) \

@@ -111,14 +111,26 @@ _import_module(const char *path)
 }
 
 void
-python_plugin_handle_plugin_error_exception(struct PluginContext *plugin_ctx)
+python_plugin_handle_plugin_error_exception(PyObject **py_result, struct PluginContext *plugin_ctx)
 {
     debug_decl(python_plugin_handle_plugin_error_exception, PYTHON_DEBUG_INTERNAL);
 
     free(plugin_ctx->callback_error);
     plugin_ctx->callback_error = NULL;
 
-    if (PyErr_Occurred() && PyErr_ExceptionMatches(sudo_exc_PluginError)) {
+    if (PyErr_Occurred()) {
+        int rc = SUDO_RC_ERROR;
+        if (PyErr_ExceptionMatches(sudo_exc_PluginReject)) {
+            rc = SUDO_RC_REJECT;
+        } else if (!PyErr_ExceptionMatches(sudo_exc_PluginError)) {
+            debug_return;
+        }
+
+        if (py_result != NULL) {
+            Py_CLEAR(*py_result);
+            *py_result = PyLong_FromLong(rc);
+        }
+
         PyObject *py_type = NULL, *py_message = NULL, *py_traceback = NULL;
         PyErr_Fetch(&py_type, &py_message, &py_traceback);
 
@@ -155,7 +167,7 @@ python_plugin_construct_custom(struct PluginContext *plugin_ctx, PyObject *py_kw
                          py_args, py_kwargs, PYTHON_DEBUG_PY_CALLS);
 
     plugin_ctx->py_instance = PyObject_Call(plugin_ctx->py_class, py_args, py_kwargs);
-    python_plugin_handle_plugin_error_exception(plugin_ctx);
+    python_plugin_handle_plugin_error_exception(NULL, plugin_ctx);
 
     py_debug_python_result(python_plugin_name(plugin_ctx), "__init__",
                            plugin_ctx->py_instance, PYTHON_DEBUG_PY_CALLS);
@@ -429,7 +441,7 @@ python_plugin_api_call(struct PluginContext *plugin_ctx, const char *func_name, 
     py_debug_python_result(python_plugin_name(plugin_ctx), func_name,
                            py_result, PYTHON_DEBUG_PY_CALLS);
 
-    python_plugin_handle_plugin_error_exception(plugin_ctx);
+    python_plugin_handle_plugin_error_exception(&py_result, plugin_ctx);
 
     if (PyErr_Occurred()) {
         py_log_last_error(NULL);
