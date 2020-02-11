@@ -314,10 +314,14 @@ plugins/python/example_policy_plugin.py
 plugins/python/pyhelpers.c
 plugins/python/pyhelpers.h
 plugins/python/pyhelpers_cpychecker.h
+plugins/python/python_plugin_io_multi.inc
+plugins/python/python_plugin_audit_multi.inc
+plugins/python/python_plugin_approval_multi.inc
 plugins/python/python_baseplugin.c
 plugins/python/python_convmessage.c
 plugins/python/python_importblocker.c
 plugins/python/python_plugin_audit.c
+plugins/python/python_plugin_approval.c
 plugins/python/python_plugin_common.c
 plugins/python/python_plugin_common.h
 plugins/python/python_plugin_group.c

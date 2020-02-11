@@ -40,6 +40,9 @@ int python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_opt
 
 int python_plugin_construct_custom(struct PluginContext *plugin_ctx, PyObject *py_kwargs);
 
+PyObject *python_plugin_construct_args(unsigned int version, char *const settings[],
+    char *const user_info[], char *const user_env[], char *const plugin_options[]);
+
 int python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
     char *const settings[], char *const user_info[],
     char *const user_env[], char *const plugin_options[]);
