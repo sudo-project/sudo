@@ -80,40 +80,11 @@ bool
 sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files,
     const char *entry)
 {
-    struct sudo_debug_file *debug_file;
-    const char *filename, *flags;
-    size_t namelen;
-
     /* Already initialized? */
     if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER)
 	return true;
 
-    /* Only process new-style debug flags: filename flags,... */
-    filename = entry;
-    if (*filename != '/' || (flags = strpbrk(filename, " \t")) == NULL)
-	return true;
-    namelen = (size_t)(flags - filename);
-    while (isblank((unsigned char)*flags))
-	flags++;
-    if (*flags != '\0') {
-	if ((debug_file = calloc(1, sizeof(*debug_file))) == NULL)
-	    goto oom;
-	if ((debug_file->debug_file = strndup(filename, namelen)) == NULL)
-	    goto oom;
-	if ((debug_file->debug_flags = strdup(flags)) == NULL)
-	    goto oom;
-	TAILQ_INSERT_TAIL(debug_files, debug_file, entries);
-    }
-    return true;
-oom:
-    if (debug_file != NULL) {
-	free(debug_file->debug_file);
-	free(debug_file->debug_flags);
-	free(debug_file);
-    }
-    sudo_warnx_nodebug(U_("%s: %s"), "sudoers_debug_parse_flags",
-	U_("unable to allocate memory"));
-    return false;
+    return sudo_debug_parse_flags(debug_files, entry) != -1;
 }
 
 /*

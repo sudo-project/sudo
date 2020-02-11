@@ -33,6 +33,7 @@ sudo_debug_get_active_instance_v1
 sudo_debug_get_fds_v1
 sudo_debug_get_instance_v1
 sudo_debug_needed_v1
+sudo_debug_parse_flags_v1
 sudo_debug_printf2_v1
 sudo_debug_register_v1
 sudo_debug_set_active_instance_v1
@@ -63,10 +64,10 @@ sudo_ev_get_timeleft_v1
 sudo_ev_get_timeleft_v2
 sudo_ev_got_break_v1
 sudo_ev_got_exit_v1
+sudo_ev_loop_v1
 sudo_ev_loopbreak_v1
 sudo_ev_loopcontinue_v1
 sudo_ev_loopexit_v1
-sudo_ev_loop_v1
 sudo_ev_pending_v1
 sudo_ev_set_v1
 sudo_fatal_callback_deregister_v1
@@ -77,12 +78,12 @@ sudo_gai_fatal_nodebug_v1
 sudo_gai_vfatal_nodebug_v1
 sudo_gai_vwarn_nodebug_v1
 sudo_gai_warn_nodebug_v1
+sudo_get_ttysize_v1
 sudo_getgrouplist2_v1
 sudo_gethostname_v1
 sudo_gettime_awake_v1
 sudo_gettime_mono_v1
 sudo_gettime_real_v1
-sudo_get_ttysize_v1
 sudo_json_add_value_as_object_v1
 sudo_json_add_value_v1
 sudo_json_close_array_v1

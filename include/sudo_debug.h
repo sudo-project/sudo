@@ -262,6 +262,7 @@ __dso_public pid_t sudo_debug_fork_v1(void);
 __dso_public int sudo_debug_get_active_instance_v1(void);
 __dso_public int sudo_debug_get_fds_v1(unsigned char **fds);
 __dso_public int sudo_debug_get_instance_v1(const char *program);
+__dso_public int sudo_debug_parse_flags_v1(struct sudo_conf_debug_file_list *debug_files, const char *entry);
 __dso_public void sudo_debug_printf2_v1(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
 __dso_public void sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...) __printf0like(2, 3);
 __dso_public int sudo_debug_register_v1(const char *program, const char *const subsystems[], unsigned int ids[], struct sudo_conf_debug_file_list *debug_files);
@@ -290,6 +291,7 @@ __dso_public bool sudo_debug_needed_v1(int level);
 #define sudo_debug_get_active_instance() sudo_debug_get_active_instance_v1()
 #define sudo_debug_get_fds(_a) sudo_debug_get_fds_v1((_a))
 #define sudo_debug_get_instance(_a) sudo_debug_get_instance_v1((_a))
+#define sudo_debug_parse_flags(_a, _b) sudo_debug_parse_flags_v1((_a), (_b))
 #define sudo_debug_printf2 sudo_debug_printf2_v1
 #define sudo_debug_printf_nvm sudo_debug_printf_nvm_v1
 #define sudo_debug_register(_a, _b, _c, _d) sudo_debug_register_v1((_a), (_b), (_c), (_d))

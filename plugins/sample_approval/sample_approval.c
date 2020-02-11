@@ -54,45 +54,6 @@
 static int approval_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 sudo_printf_t sudo_printf;
 
-/*
- * Parse the "filename flags,..." debug_flags entry and insert a new
- * sudo_debug_file struct into debug_files.
- * XXX - move to libsudoutil
- */
-static bool
-sudo_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files,
-    const char *entry)
-{
-    struct sudo_debug_file *debug_file;
-    const char *filename, *flags;
-    size_t namelen;
-
-    /* Only process new-style debug flags: filename flags,... */
-    filename = entry;
-    if (*filename != '/' || (flags = strpbrk(filename, " \t")) == NULL)
-	return true;
-    namelen = (size_t)(flags - filename);
-    while (isblank((unsigned char)*flags))
-	flags++;
-    if (*flags != '\0') {
-	if ((debug_file = calloc(1, sizeof(*debug_file))) == NULL)
-	    goto oom;
-	if ((debug_file->debug_file = strndup(filename, namelen)) == NULL)
-	    goto oom;
-	if ((debug_file->debug_flags = strdup(flags)) == NULL)
-	    goto oom;
-	TAILQ_INSERT_TAIL(debug_files, debug_file, entries);
-    }
-    return true;
-oom:
-    if (debug_file != NULL) {
-	free(debug_file->debug_file);
-	free(debug_file->debug_flags);
-	free(debug_file);
-    }
-    return false;
-}
-
 static int
 sample_approval_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
@@ -114,9 +75,8 @@ sample_approval_open(unsigned int version, sudo_conv_t conversation,
     for (cur = settings; (cp = *cur) != NULL; cur++) {
         if (strncmp(cp, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
             cp += sizeof("debug_flags=") - 1;
-            if (!sudo_debug_parse_flags(&debug_files, cp)) {
+            if (sudo_debug_parse_flags(&debug_files, cp) == -1)
                 goto oom;
-	    }
             continue;
         }
         if (strncmp(cp, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
