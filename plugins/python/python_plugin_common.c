@@ -138,12 +138,7 @@ python_plugin_handle_plugin_error_exception(PyObject **py_result, struct PluginC
         sudo_debug_printf(SUDO_DEBUG_INFO, "received sudo.PluginError exception with message '%s'",
                           message == NULL ? "(null)" : message);
 
-        if (message != NULL && plugin_ctx->sudo_api_version < SUDO_API_MKVERSION(1, 15)) {
-            py_sudo_log(SUDO_CONV_ERROR_MSG, "%s", message);
-            free(message);
-        } else {
-            plugin_ctx->callback_error = message;
-        }
+        plugin_ctx->callback_error = message;
 
         Py_CLEAR(py_type);
         Py_CLEAR(py_message);

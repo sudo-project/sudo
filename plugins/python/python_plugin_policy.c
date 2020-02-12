@@ -42,13 +42,6 @@ extern struct policy_plugin python_policy;
             (void **)&CALLBACK_PLUGINFUNC(function_name)); \
     } while(0)
 
-#define CB_SET_ERROR(errstr) \
-    do { \
-        const char *cb_error = plugin_ctx.callback_error; \
-        if (cb_error != NULL && errstr != NULL) { \
-            *errstr = cb_error; \
-        } \
-    } while(0)
 
 static int
 python_plugin_policy_open(unsigned int version, sudo_conv_t conversation,
@@ -74,7 +67,7 @@ python_plugin_policy_open(unsigned int version, sudo_conv_t conversation,
 
     rc = python_plugin_construct(&plugin_ctx, PY_POLICY_PLUGIN_VERSION, settings,
                                  user_info, user_env, plugin_options);
-    CB_SET_ERROR(errstr);
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     if (rc != SUDO_RC_OK) {
         debug_return_int(rc);
     }
@@ -124,6 +117,7 @@ python_plugin_policy_check(int argc, char * const argv[],
 
     py_result = python_plugin_api_call(&plugin_ctx, CALLBACK_PYNAME(check_policy),
                                       Py_BuildValue("(OO)", py_argv, py_env_add));
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     if (py_result == NULL)
         goto cleanup;
 
@@ -156,7 +150,6 @@ python_plugin_policy_check(int argc, char * const argv[],
         *user_env_out = py_str_array_from_tuple(py_user_env_out);
 
     rc = python_plugin_rc_to_int(py_rc);
-    CB_SET_ERROR(errstr);
 
 cleanup:
     if (PyErr_Occurred()) {
@@ -196,7 +189,7 @@ python_plugin_policy_list(int argc, char * const argv[], int verbose, const char
 
     Py_XDECREF(py_argv);
 
-    CB_SET_ERROR(errstr);
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     debug_return_int(rc);
 }
 
@@ -222,7 +215,7 @@ python_plugin_policy_validate(const char **errstr)
     debug_decl(python_plugin_policy_validate, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(plugin_ctx.py_interpreter);
     int rc = python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(validate), NULL);
-    CB_SET_ERROR(errstr);
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     debug_return_int(rc);
 }
 
@@ -254,6 +247,7 @@ python_plugin_policy_init_session(struct passwd *pwd, char **user_env[], const c
 
     py_result = python_plugin_api_call(&plugin_ctx, CALLBACK_PYNAME(init_session),
         Py_BuildValue("(OO)", py_pwd, py_user_env));
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     if (py_result == NULL)
         goto cleanup;
 
@@ -276,7 +270,6 @@ python_plugin_policy_init_session(struct passwd *pwd, char **user_env[], const c
     }
 
     rc = python_plugin_rc_to_int(py_rc);
-    CB_SET_ERROR(errstr);
 
 cleanup:
     Py_XDECREF(py_pwd);

@@ -44,13 +44,6 @@ struct AuditPluginContext
             (void **)&CALLBACK_PLUGINFUNC(function_name)); \
     } while(0)
 
-#define CB_SET_ERROR(errstr) \
-    do { \
-        const char *cb_error = audit_ctx->base_ctx.callback_error; \
-        if (cb_error != NULL && errstr != NULL) { \
-            *errstr = cb_error; \
-        } \
-    } while(0)
 
 static int
 _call_plugin_open(struct AuditPluginContext *audit_ctx, int submit_optind, char * const submit_argv[])
@@ -101,8 +94,8 @@ python_plugin_audit_open(struct AuditPluginContext *audit_ctx,
 
     rc = python_plugin_construct(plugin_ctx, PY_AUDIT_PLUGIN_VERSION, settings,
                                  user_info, submit_envp, plugin_options);
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
     if (rc != SUDO_RC_OK) {
-        CB_SET_ERROR(errstr);
         debug_return_int(rc);
     }
 
@@ -114,8 +107,7 @@ python_plugin_audit_open(struct AuditPluginContext *audit_ctx,
 
     plugin_ctx->call_close = 1;
     rc = _call_plugin_open(audit_ctx, submit_optind, submit_argv);
-
-    CB_SET_ERROR(errstr);
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
 
     if (PyErr_Occurred()) {
         py_log_last_error("Error during calling audit open");
@@ -163,8 +155,7 @@ python_plugin_audit_accept(struct AuditPluginContext *audit_ctx,
 
     PyObject *py_args = Py_BuildValue("(ziOOO)", plugin_name, plugin_type, py_command_info, py_run_argv, py_run_envp);
     rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(accept), py_args);
-
-    CB_SET_ERROR(errstr);
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
 
 cleanup:
     Py_CLEAR(py_command_info);
@@ -194,7 +185,7 @@ python_plugin_audit_reject(struct AuditPluginContext *audit_ctx,
     PyObject *py_args = Py_BuildValue("(zizO)", plugin_name, plugin_type, audit_msg, py_command_info);
     rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(reject), py_args);
 
-    CB_SET_ERROR(errstr);
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
 
 cleanup:
     Py_CLEAR(py_command_info);
@@ -223,7 +214,7 @@ python_plugin_audit_error(struct AuditPluginContext *audit_ctx,
 
     PyObject *py_args = Py_BuildValue("(zizO)", plugin_name, plugin_type, audit_msg, py_command_info);
     rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(error), py_args);
-    CB_SET_ERROR(errstr);
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
 
 cleanup:
     Py_CLEAR(py_command_info);
