@@ -373,7 +373,7 @@ int
 check_io_plugin_reports_error(void)
 {
     const char *errstr = NULL;
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         3,
         "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
@@ -390,7 +390,7 @@ check_io_plugin_reports_error(void)
 
     python_io->close(0, 0);
 
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         3,
         "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
@@ -889,7 +889,7 @@ int
 check_policy_plugin_reports_error(void)
 {
     const char *errstr = NULL;
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         3,
         "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
@@ -905,7 +905,7 @@ check_policy_plugin_reports_error(void)
 
     python_policy->close(0, 0);
 
-    free(data.plugin_options);
+    str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(
         3,
         "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
@@ -914,7 +914,7 @@ check_policy_plugin_reports_error(void)
     );
 
     data.plugin_argc = 1;
-    free(data.plugin_argv);
+    str_array_free(&data.plugin_argv);
     data.plugin_argv = create_str_array(2, "id", NULL);
 
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
