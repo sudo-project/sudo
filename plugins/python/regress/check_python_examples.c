@@ -194,14 +194,23 @@ check_example_io_plugin_command_log(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_stdin("some standard input", strlen("some standard input"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_stdout("some standard output", strlen("some standard output"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_stderr("some standard error", strlen("some standard error"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_suspend(SIGTSTP, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_suspend(SIGCONT, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->change_winsize(200, 100, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_ttyin("some tty input", strlen("some tty input"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_ttyout("some tty output", strlen("some tty output"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     python_io->close(1, 0);  // successful execution, command returned 1
 
@@ -244,6 +253,7 @@ check_example_io_plugin_command_log_multiple(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     // For verifying the error message of no more plugin. It should be displayed only once.
     VERIFY_PTR((*python_io_clone)(), NULL);
@@ -264,23 +274,40 @@ check_example_io_plugin_command_log_multiple(void)
     VERIFY_INT(python_io2->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     VERIFY_INT(python_io->log_stdin("stdin for plugin 1", strlen("stdin for plugin 1"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io2->log_stdin("stdin for plugin 2", strlen("stdin for plugin 2"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_stdout("stdout for plugin 1", strlen("stdout for plugin 1"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io2->log_stdout("stdout for plugin 2", strlen("stdout for plugin 2"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_stderr("stderr for plugin 1", strlen("stderr for plugin 1"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io2->log_stderr("stderr for plugin 2", strlen("stderr for plugin 2"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_suspend(SIGTSTP, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io2->log_suspend(SIGSTOP, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_suspend(SIGCONT, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io2->log_suspend(SIGCONT, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->change_winsize(20, 10, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io2->change_winsize(30, 40, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_ttyin("tty input for plugin 1", strlen("tty input for plugin 1"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io2->log_ttyin("tty input for plugin 2", strlen("tty input for plugin 2"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io->log_ttyout("tty output for plugin 1", strlen("tty output for plugin 1"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_io2->log_ttyout("tty output for plugin 2", strlen("tty output for plugin 2"), &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     python_io->close(1, 0);  // successful execution, command returned 1
     python_io2->close(2, 0);  //                      command returned 2
@@ -310,6 +337,7 @@ check_example_io_plugin_failed_to_start_command(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     python_io->close(0, EPERM);  // execve returned with error
 
@@ -330,6 +358,7 @@ check_example_io_plugin_fails_with_python_backtrace(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_ERROR);
+    VERIFY_PTR(errstr, NULL);
 
     VERIFY_STDOUT(expected_path("check_example_io_plugin_fails_with_python_backtrace.stdout"));
     VERIFY_STDERR(expected_path("check_example_io_plugin_fails_with_python_backtrace.stderr"));
@@ -375,21 +404,27 @@ check_io_plugin_reports_error(void)
     VERIFY_INT(python_io->log_stdin("", 0, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in log_stdin");
 
+    errstr = (void *)13;
     VERIFY_INT(python_io->log_stdout("", 0, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in log_stdout");
 
+    errstr = NULL;
     VERIFY_INT(python_io->log_stderr("", 0, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in log_stderr");
 
+    errstr = NULL;
     VERIFY_INT(python_io->log_ttyin("", 0, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in log_ttyin");
 
+    errstr = NULL;
     VERIFY_INT(python_io->log_ttyout("", 0, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in log_ttyout");
 
+    errstr = NULL;
     VERIFY_INT(python_io->log_suspend(SIGTSTP, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in log_suspend");
 
+    errstr = NULL;
     VERIFY_INT(python_io->change_winsize(200, 100, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in change_winsize");
 
@@ -490,6 +525,7 @@ check_example_debugging(const char *debug_spec)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     python_io->close(0, 0);
 
     VERIFY_STR(data.stderr_str, "");
@@ -509,6 +545,7 @@ check_loading_fails(const char *name)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_ERROR);
+    VERIFY_PTR(errstr, NULL);
     python_io->close(0, 0);
 
     VERIFY_STDOUT(expected_path("check_loading_fails_%s.stdout", name));
@@ -577,6 +614,7 @@ check_example_conversation_plugin_reason_log(int simulate_suspend, const char *d
     VERIFY_INT(python_io->open(SUDO_API_VERSION, conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     python_io->close(0, 0);
 
     VERIFY_STDOUT(expected_path("check_example_conversation_plugin_reason_log_%s.stdout", description));
@@ -602,6 +640,7 @@ check_example_conversation_plugin_user_interrupts(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_REJECT);
+    VERIFY_PTR(errstr, NULL);
     python_io->close(0, 0);
 
     VERIFY_STDOUT(expected_path("check_example_conversation_plugin_user_interrupts.stdout"));
@@ -620,6 +659,7 @@ check_example_policy_plugin_version_display(int is_verbose)
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                                   data.user_info, data.user_env, data.plugin_options, &errstr),
                SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
     VERIFY_INT(python_policy->show_version(is_verbose), SUDO_RC_OK);
 
     python_policy->close(0, 0);  // this should not call the python plugin close as there was no command run invocation
@@ -654,6 +694,7 @@ check_example_policy_plugin_accepted_execution(void)
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                                   data.user_info, data.user_env, data.plugin_options, &errstr),
                SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     char **env_add = create_str_array(3, "REQUESTED_ENV1=VALUE1", "REQUESTED_ENV2=value2", NULL);
 
@@ -662,6 +703,7 @@ check_example_policy_plugin_accepted_execution(void)
     VERIFY_INT(python_policy->check_policy(data.plugin_argc, data.plugin_argv, env_add,
                                           &command_info_out, &argv_out, &user_env_out, &errstr),
                SUDO_RC_ACCEPT);
+    VERIFY_PTR(errstr, NULL);
 
     VERIFY_STR_SET(command_info_out, 4, "command=/bin/whoami", "runas_uid=0", "runas_gid=0", NULL);
     VERIFY_STR_SET(user_env_out, 5, "USER_ENV1=VALUE1", "USER_ENV2=value2",
@@ -669,6 +711,7 @@ check_example_policy_plugin_accepted_execution(void)
     VERIFY_STR_SET(argv_out, 3, "/bin/whoami", "--help", NULL);
 
     VERIFY_INT(python_policy->init_session(&example_pwd, &user_env_out, &errstr), SUDO_RC_ACCEPT);
+    VERIFY_PTR(errstr, NULL);
 
     // init session is able to modify the user env:
     VERIFY_STR_SET(user_env_out, 6, "USER_ENV1=VALUE1", "USER_ENV2=value2",
@@ -700,15 +743,18 @@ check_example_policy_plugin_failed_execution(void)
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                                   data.user_info, data.user_env, data.plugin_options, &errstr),
                SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     char **argv_out, **user_env_out, **command_info_out;  // free to contain garbage
 
     VERIFY_INT(python_policy->check_policy(data.plugin_argc, data.plugin_argv, NULL,
                                           &command_info_out, &argv_out, &user_env_out, &errstr),
                SUDO_RC_ACCEPT);
+    VERIFY_PTR(errstr, NULL);
 
     // pwd is unset (user is not part of /etc/passwd)
     VERIFY_INT(python_policy->init_session(NULL, &user_env_out, &errstr), SUDO_RC_ACCEPT);
+    VERIFY_PTR(errstr, NULL);
 
     python_policy->close(12345, ENOENT);  // failed to execute
 
@@ -735,12 +781,14 @@ check_example_policy_plugin_denied_execution(void)
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                                   data.user_info, data.user_env, data.plugin_options, &errstr),
                SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     char **argv_out, **user_env_out, **command_info_out;  // free to contain garbage
 
     VERIFY_INT(python_policy->check_policy(data.plugin_argc, data.plugin_argv, NULL,
                                           &command_info_out, &argv_out, &user_env_out, &errstr),
                SUDO_RC_REJECT);
+    VERIFY_PTR(errstr, NULL);
 
     VERIFY_PTR(command_info_out, NULL);
     VERIFY_PTR(argv_out, NULL);
@@ -764,36 +812,45 @@ check_example_policy_plugin_list(void)
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                                   data.user_info, data.user_env, data.plugin_options, &errstr),
                SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "-- minimal --\n");
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, false, NULL, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- minimal (verbose) --\n");
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, true, NULL, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- with user --\n");
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, false, "testuser", &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- with user (verbose) --\n");
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, true, "testuser", &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- with allowed program --\n");
     str_array_free(&data.plugin_argv);
     data.plugin_argc = 3;
     data.plugin_argv = create_str_array(4, "/bin/id", "some", "arguments", NULL);
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, false, NULL, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- with allowed program (verbose) --\n");
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, true, NULL, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- with denied program --\n");
     str_array_free(&data.plugin_argv);
     data.plugin_argc = 1;
     data.plugin_argv = create_str_array(2, "/bin/passwd", NULL);
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, false, NULL, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     snprintf_append(data.stdout_str, MAX_OUTPUT, "\n-- with denied program (verbose) --\n");
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, true, NULL, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     python_policy->close(0, 0);  // there was no execution
 
@@ -818,7 +875,11 @@ check_example_policy_plugin_validate_invalidate(void)
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                                   data.user_info, data.user_env, data.plugin_options, &errstr),
                SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
     VERIFY_INT(python_policy->validate(&errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+
     python_policy->invalidate(true);
     python_policy->invalidate(false);
 
@@ -840,6 +901,7 @@ check_policy_plugin_callbacks_are_optional(void)
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                                   data.user_info, data.user_env, data.plugin_options, &errstr),
                SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     VERIFY_PTR(python_policy->list, NULL);
     VERIFY_PTR(python_policy->validate, NULL);
@@ -866,7 +928,6 @@ check_policy_plugin_reports_error(void)
 
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.user_env, data.plugin_options, &errstr), SUDO_RC_ERROR);
-
     VERIFY_STR(errstr, "Something wrong in plugin constructor");
     errstr = NULL;
 
@@ -895,14 +956,17 @@ check_policy_plugin_reports_error(void)
     VERIFY_INT(python_policy->list(data.plugin_argc, data.plugin_argv, true, NULL, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in list");
 
+    errstr = NULL;
     VERIFY_INT(python_policy->validate(&errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in validate");
 
+    errstr = NULL;
     VERIFY_INT(python_policy->check_policy(data.plugin_argc, data.plugin_argv, data.user_env,
                                            &command_info_out, &argv_out, &user_env_out, &errstr),
                SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in check_policy");
 
+    errstr = NULL;
     VERIFY_INT(python_policy->init_session(&example_pwd, &user_env_out, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in init_session");
 
@@ -923,6 +987,7 @@ check_io_plugin_callbacks_are_optional(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     VERIFY_PTR(python_io->log_stdin, NULL);
     VERIFY_PTR(python_io->log_stdout, NULL);
@@ -948,10 +1013,12 @@ check_python_plugins_do_not_affect_each_other(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     create_plugin_options("regress/plugin_conflict", "ConflictPlugin", "Path=path_for_second_plugin");
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     python_io->close(0, 0);
     python_policy->close(0, 0);
@@ -1169,6 +1236,7 @@ check_audit_plugin_callbacks_are_optional(void)
                                   data.settings, data.user_info, 2, data.plugin_argv,
                                   data.user_env, data.plugin_options, &errstr),
                SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
 
     VERIFY_PTR(python_audit->accept, NULL);
     VERIFY_PTR(python_audit->reject, NULL);
@@ -1201,16 +1269,19 @@ check_audit_plugin_reports_error(void)
                                   data.user_env, data.plugin_options, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in open");
 
+    errstr = NULL;
     VERIFY_INT(python_audit->accept("plugin name", SUDO_POLICY_PLUGIN,
                                     data.command_info, data.plugin_argv,
                                     data.user_env, &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in accept");
 
+    errstr = NULL;
     VERIFY_INT(python_audit->reject("plugin name", SUDO_POLICY_PLUGIN,
                                     "audit message", data.command_info,
                                     &errstr), SUDO_RC_ERROR);
     VERIFY_STR(errstr, "Something wrong in reject");
 
+    errstr = NULL;
     VERIFY_INT(python_audit->error("plugin name", SUDO_POLICY_PLUGIN,
                                     "audit message", data.command_info,
                                     &errstr), SUDO_RC_ERROR);
