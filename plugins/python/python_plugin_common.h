@@ -30,7 +30,7 @@ struct PluginContext {
     unsigned int sudo_api_version;
 
     // We use this to let the error string live until sudo and the audit plugins
-    // are using it. Only set for sudo API >= 1.15, otherwise NULL
+    // are using it.
     char *callback_error;
 };
 
@@ -66,5 +66,15 @@ void python_plugin_mark_callback_optional(struct PluginContext *plugin_ctx,
                                           const char *function_name, void **function);
 
 const char *python_plugin_name(struct PluginContext *plugin_ctx);
+
+// sets the callback error stored in plugin_ctx into "errstr" but only if API
+// version is enough and "errstr" is valid
+#define CALLBACK_SET_ERROR(plugin_ctx, errstr) \
+    do { \
+        if ((plugin_ctx)->sudo_api_version >= SUDO_API_MKVERSION(1, 15) && errstr != NULL) { \
+            if (errstr != NULL) \
+                *errstr = (plugin_ctx)->callback_error; \
+        } \
+    } while(0)
 
 #endif // SUDO_PYTHON_PLUGIN_COMMON_H
