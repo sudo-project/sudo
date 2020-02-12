@@ -38,84 +38,53 @@ static int _load_symbols(void);
 static int _unload_symbols(void);
 
 void
-create_io_plugin_options(const char *log_path)
+create_plugin_options(const char *module_name, const char *class_name, const char *extra_option)
 {
-    static char logpath_keyvalue[PATH_MAX + 16];
-    snprintf(logpath_keyvalue, sizeof(logpath_keyvalue), "LogPath=%s", log_path);
+    char opt_module_path[PATH_MAX + 256];
+    char opt_classname[PATH_MAX + 256];
+    snprintf(opt_module_path, sizeof(opt_module_path),
+             "ModulePath=" SRC_DIR "/%s.py", module_name);
+
+    snprintf(opt_classname, sizeof(opt_classname), "ClassName=%s", class_name);
 
     str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        4,
-        "ModulePath=" SRC_DIR "/example_io_plugin.py",
-        "ClassName=SudoIOPlugin",
-        logpath_keyvalue,
-        NULL
-    );
+    size_t count = 3 + (extra_option != NULL);
+    data.plugin_options = create_str_array(count, opt_module_path,
+                                           opt_classname, extra_option, NULL);
 }
 
 void
-create_group_plugin_options(void)
+create_io_plugin_options(const char *log_path)
 {
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        3,
-        "ModulePath=" SRC_DIR "/example_group_plugin.py",
-        "ClassName=SudoGroupPlugin",
-        NULL
-    );
+    char opt_logpath[PATH_MAX + 16];
+    snprintf(opt_logpath, sizeof(opt_logpath), "LogPath=%s", log_path);
+    create_plugin_options("example_io_plugin", "SudoIOPlugin", opt_logpath);
 }
 
 void
 create_debugging_plugin_options(void)
 {
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        3,
-        "ModulePath=" SRC_DIR "/example_debugging.py",
-        "ClassName=DebugDemoPlugin",
-        NULL
-    );
+    create_plugin_options("example_debugging", "DebugDemoPlugin", NULL);
 }
 
 void
 create_audit_plugin_options(const char *extra_argument)
 {
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        4,
-        "ModulePath=" SRC_DIR "/example_audit_plugin.py",
-        "ClassName=SudoAuditPlugin",
-        extra_argument,
-        NULL
-    );
+    create_plugin_options("example_audit_plugin", "SudoAuditPlugin", extra_argument);
 }
 
 void
 create_conversation_plugin_options(void)
 {
-    static char logpath_keyvalue[PATH_MAX + 16];
-    snprintf(logpath_keyvalue, sizeof(logpath_keyvalue), "LogPath=%s", data.tmp_dir);
-
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        4,
-        "ModulePath=" SRC_DIR "/example_conversation.py",
-        "ClassName=ReasonLoggerIOPlugin",
-        logpath_keyvalue,
-        NULL
-    );
+    char opt_logpath[PATH_MAX + 16];
+    snprintf(opt_logpath, sizeof(opt_logpath), "LogPath=%s", data.tmp_dir);
+    create_plugin_options("example_conversation", "ReasonLoggerIOPlugin", opt_logpath);
 }
 
 void
 create_policy_plugin_options(void)
 {
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        3,
-        "ModulePath=" SRC_DIR "/example_policy_plugin.py",
-        "ClassName=SudoPolicyPlugin",
-        NULL
-    );
+    create_plugin_options("example_policy_plugin", "SudoPolicyPlugin", NULL);
 }
 
 int
@@ -434,7 +403,7 @@ check_io_plugin_reports_error(void)
 int
 check_example_group_plugin(void)
 {
-    create_group_plugin_options();
+    create_plugin_options("example_group_plugin", "SudoGroupPlugin", NULL);
 
     VERIFY_INT(group_plugin->init(GROUP_API_VERSION, fake_printf, data.plugin_options), SUDO_RC_OK);
 
@@ -486,7 +455,7 @@ check_example_group_plugin_is_able_to_debug(void)
     VERIFY_NOT_NULL(config_path);
     VERIFY_INT(sudo_conf_read(config_path, SUDO_CONF_ALL), true);
 
-    create_group_plugin_options();
+    create_plugin_options("example_group_plugin", "SudoGroupPlugin", NULL);
 
     group_plugin->init(GROUP_API_VERSION, fake_printf, data.plugin_options);
 
@@ -567,9 +536,7 @@ check_loading_fails_with_missing_classname(void)
 int
 check_loading_fails_with_wrong_classname(void)
 {
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(3, "ModulePath=" SRC_DIR "/example_debugging.py",
-                                              "ClassName=MispelledPluginName", NULL);
+    create_plugin_options("example_debugging", "MispelledPluginName", NULL);
     return check_loading_fails("wrong_classname");
 }
 
@@ -976,28 +943,13 @@ check_python_plugins_do_not_affect_each_other(void)
 
     // We test here that one plugin is not able to effect the environment of another
     // This is important so they do not ruin or depend on each other's state.
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        4,
-        "ModulePath=" SRC_DIR "/regress/plugin_conflict.py",
-        "ClassName=ConflictPlugin",
-        "Path=path_for_first_plugin",
-        NULL
-    );
+    create_plugin_options("regress/plugin_conflict", "ConflictPlugin", "Path=path_for_first_plugin");
 
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
 
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        4,
-        "ModulePath=" SRC_DIR "/regress/plugin_conflict.py",
-        "ClassName=ConflictPlugin",
-        "Path=path_for_second_plugin",
-        NULL
-    );
-
+    create_plugin_options("regress/plugin_conflict", "ConflictPlugin", "Path=path_for_second_plugin");
     VERIFY_INT(python_policy->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
 
@@ -1051,7 +1003,7 @@ check_example_audit_plugin_receives_accept(void)
 int
 check_example_audit_plugin_receives_reject(void)
 {
-    create_audit_plugin_options("");
+    create_audit_plugin_options(NULL);
     const char *errstr = NULL;
 
     str_array_free(&data.plugin_argv);
@@ -1181,7 +1133,7 @@ check_example_audit_plugin_workflow_multiple(void)
 int
 check_example_audit_plugin_version_display(void)
 {
-    create_audit_plugin_options("");
+    create_audit_plugin_options(NULL);
     const char *errstr = NULL;
 
     str_array_free(&data.user_info);
@@ -1231,13 +1183,7 @@ int
 check_audit_plugin_reports_error(void)
 {
     const char *errstr = NULL;
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        3,
-        "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
-        "ClassName=ConstructErrorPlugin",
-        NULL
-    );
+    create_plugin_options("regress/plugin_errorstr", "ConstructErrorPlugin", NULL);
 
     VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
                                   data.settings, data.user_info, 0, data.plugin_argv,
@@ -1248,13 +1194,7 @@ check_audit_plugin_reports_error(void)
 
     python_audit->close(SUDO_PLUGIN_NO_STATUS, 0);
 
-    str_array_free(&data.plugin_options);
-    data.plugin_options = create_str_array(
-        3,
-        "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py",
-        "ClassName=ErrorMsgPlugin",
-        NULL
-    );
+    create_plugin_options("regress/plugin_errorstr", "ErrorMsgPlugin", NULL);
 
     VERIFY_INT(python_audit->open(SUDO_API_VERSION, fake_conversation, fake_printf,
                                   data.settings, data.user_info, 0, data.plugin_argv,
