@@ -510,9 +510,12 @@ python_plugin_close(struct PluginContext *plugin_ctx, const char *callback_name,
             sudo_debug_printf(SUDO_DEBUG_INFO, "Python plugin function 'close' is skipped (not present)\n");
         } else {
             PyObject *py_result = python_plugin_api_call(plugin_ctx, callback_name, py_args);
+            py_args = NULL;  // api call already freed it
             Py_XDECREF(py_result);
         }
     }
+
+    Py_CLEAR(py_args);
 
     if (PyErr_Occurred()) {
         py_log_last_error(NULL);
