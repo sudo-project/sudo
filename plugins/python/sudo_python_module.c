@@ -502,6 +502,7 @@ cleanup:
     debug_return_ptr(py_class);
 }
 
+CPYCHECKER_STEALS_REFERENCE_TO_ARG(3)
 void
 sudo_module_register_enum(PyObject *py_module, const char *enum_name, PyObject *py_constants_dict)
 {
