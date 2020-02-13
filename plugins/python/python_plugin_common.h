@@ -52,6 +52,7 @@ void python_plugin_deinit(struct PluginContext *plugin_ctx);
 int python_plugin_show_version(struct PluginContext *plugin_ctx,
                                const char *python_callback_name, int isVerbose);
 
+CPYCHECKER_STEALS_REFERENCE_TO_ARG(3)
 void python_plugin_close(struct PluginContext *plugin_ctx, const char *callback_name,
                          PyObject *py_args);
 
