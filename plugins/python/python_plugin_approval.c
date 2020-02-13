@@ -131,10 +131,10 @@ python_plugin_approval_check(struct ApprovalPluginContext *approval_ctx,
         py_args = Py_BuildValue("(OOO)", py_command_info, py_run_argv, py_run_envp);
     }
 
+    // Note, py_args gets cleared by api_rc_call
     rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(check), py_args);
     CALLBACK_SET_ERROR(plugin_ctx, errstr);
 
-    Py_CLEAR(py_args);
     Py_CLEAR(py_command_info);
     Py_CLEAR(py_run_argv);
     Py_CLEAR(py_run_envp);
