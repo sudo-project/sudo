@@ -259,9 +259,10 @@ mock_python_datetime_now(const char *plugin_name, const char *date_str)
     char *cmd = NULL;
     asprintf(&cmd, "import %s\n"                      // the plugin has its own submodule
                    "from datetime import datetime\n"  // store the real datetime
+                   "import time\n"
                    "from unittest.mock import Mock\n"
                    "%s.datetime = Mock()\n"           // replace plugin's datetime
-                   "%s.datetime.now = lambda: datetime.fromisoformat('%s')\n",
+                   "%s.datetime.now = lambda: datetime.fromtimestamp(time.mktime(time.strptime('%s', '%%Y-%%m-%%dT%%H:%%M:%%S')))\n",
              plugin_name, plugin_name, plugin_name, date_str);
     VERIFY_PTR_NE(cmd, NULL);
     VERIFY_INT(PyRun_SimpleString(cmd), 0);
