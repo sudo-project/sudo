@@ -285,7 +285,7 @@ DEFVAR			[a-z_]+
 			    yyless(sudoersleng);
 			} /* base64 digest */
 
-<INITIAL>^#include[[:blank:]]+.*\r?\n {
+<INITIAL>^#include[[:blank:]]+.*(\r\n|\n)? {
 			    char *path;
 
 			    if (continued) {
@@ -303,7 +303,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			}
 
-<INITIAL>^#includedir[[:blank:]]+.*\r?\n {
+<INITIAL>^#includedir[[:blank:]]+.*(\r\n|\n)? {
 			    char *path;
 
 			    if (continued) {
