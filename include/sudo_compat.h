@@ -391,6 +391,13 @@ int getdomainname(char *, size_t);
 #endif /* __hpux && !__LP64__ */
 
 /*
+ * Older systems may lack fseeko(3), just use fseek(3) instead.
+ */
+#ifndef HAVE_FSEEKO
+# define fseeko(f, o, w)	fseek((f), (long)(o), (w))
+#endif
+
+/*
  * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)
  */
 #if defined(HAVE_OPENSSL)

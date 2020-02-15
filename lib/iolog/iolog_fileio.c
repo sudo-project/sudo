@@ -696,11 +696,7 @@ iolog_seek(struct iolog_file *iol, off_t offset, int whence)
 	ret = gzseek(iol->fd.g, offset, whence);
     else
 #endif
-#ifdef HAVE_FSEEKO
 	ret = fseeko(iol->fd.f, offset, whence);
-#else
-	ret = fseek(iol->fd.f, offset, whence);
-#endif
 
     //debug_return_off_t(ret);
     return ret;

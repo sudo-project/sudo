@@ -60,10 +60,6 @@
 #include "sudo_util.h"
 #include "pathnames.h"
 
-#ifndef HAVE_FSEEKO
-# define fseeko(f, o, w)	fseek((f), (o), (w))
-#endif
-
 static int audit_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static sudo_conv_t audit_conv;
 static sudo_printf_t audit_printf;
