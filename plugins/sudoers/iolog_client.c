@@ -640,7 +640,7 @@ fmt_accept_message(struct client_closure *closure)
     AcceptMessage accept_msg = ACCEPT_MESSAGE__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
     InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
-    InfoMessage__StringList submitenv = INFO_MESSAGE__STRING_LIST__INIT;
+    InfoMessage__StringList runenv = INFO_MESSAGE__STRING_LIST__INIT;
     struct iolog_details *details = closure->log_details;
     size_t info_msgs_size, n;
     struct timespec now;
@@ -664,9 +664,9 @@ fmt_accept_message(struct client_closure *closure)
     /* Convert NULL-terminated vectors to StringList. */
     runargv.strings = (char **)details->argv;
     runargv.n_strings = details->argc;
-    submitenv.strings = (char **)details->user_env;
-    while (submitenv.strings[submitenv.n_strings] != NULL)
-	submitenv.n_strings++;
+    runenv.strings = (char **)details->user_env;
+    while (runenv.strings[runenv.n_strings] != NULL)
+	runenv.n_strings++;
 
     /* XXX - realloc as needed instead of preallocating */
     info_msgs_size = 22;
@@ -712,8 +712,8 @@ fmt_accept_message(struct client_closure *closure)
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     n++;
 
-    accept_msg.info_msgs[n]->key = "submitenv";
-    accept_msg.info_msgs[n]->strlistval = &submitenv;
+    accept_msg.info_msgs[n]->key = "runenv";
+    accept_msg.info_msgs[n]->strlistval = &runenv;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     n++;
 
