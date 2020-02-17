@@ -38,12 +38,15 @@ enum SudoPluginFunctionReturnCode {
     SUDO_RC_USAGE_ERROR = -2,
 };
 
+#define INTERPRETER_MAX 32
+
 struct PythonContext
 {
     sudo_printf_t sudo_log;
     sudo_conv_t sudo_conv;
-    int open_plugin_count;
     PyThreadState *py_main_interpreter;
+    size_t interpreter_count;
+    PyThreadState *py_subinterpreters[INTERPRETER_MAX];
 };
 
 extern struct PythonContext py_ctx;

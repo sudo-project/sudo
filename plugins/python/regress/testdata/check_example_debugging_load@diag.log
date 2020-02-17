@@ -1,4 +1,3 @@
 importing module: SRC_DIR/example_debugging.py
 Extending python 'path' with 'SRC_DIR'
-Closing: 0 python plugins left open
-Closing: deinit python interpreter
+Deinit was called for a python plugin
