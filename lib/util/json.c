@@ -42,6 +42,9 @@
 #include <time.h>
 #include <ctype.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
+
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_fatal.h"
@@ -49,68 +52,165 @@
 #include "sudo_json.h"
 
 /*
- * Print "indent" number of blank characters.
+ * Double the size of the json buffer.
+ * Returns true on success, false if out of memory.
  */
-static void
-print_indent(FILE *fp, int indent)
+static bool
+json_expand_buf(struct json_container *json)
 {
-    while (indent--)
-	putc(' ', fp);
+    char *newbuf;
+    debug_decl(json_expand_buf, SUDO_DEBUG_UTIL);
+
+    if ((newbuf = reallocarray(json->buf, 2, json->bufsize)) == NULL) {
+	if (json->memfatal) {
+	    sudo_fatalx(U_("%s: %s"),
+		__func__, U_("unable to allocate memory"));
+	}
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "%s: %s", __func__, "unable to allocate memory");
+	debug_return_bool(false);
+    }
+    json->buf = newbuf;
+    json->bufsize *= 2;
+
+    debug_return_bool(true);
 }
 
 /*
- * Print a quoted JSON string, escaping special characters.
+ * Append "indent" number of blank characters.
+ */
+static bool
+json_append_indent(struct json_container *json, int indent)
+{
+    debug_decl(json_append_indent, SUDO_DEBUG_UTIL);
+
+    /* No indentation in compact mode. */
+    if (json->compact)
+	debug_return_bool(true);
+
+    while (json->buflen + indent >= json->bufsize) {
+	if (!json_expand_buf(json))
+	    debug_return_bool(false);
+    }
+    while (indent--) {
+	json->buf[json->buflen++] = ' ';
+    }
+    json->buf[json->buflen] = '\0';
+
+    debug_return_bool(true);
+}
+
+/*
+ * Append a string to the JSON buffer, expanding as needed.
+ * Does not perform any quoting.
+ */
+static bool
+json_append_buf(struct json_container *json, const char *str)
+{
+    size_t len;
+    debug_decl(json_append_buf, SUDO_DEBUG_UTIL);
+
+    len = strlen(str);
+    while (json->buflen + len >= json->bufsize) {
+	if (!json_expand_buf(json))
+	    debug_return_bool(false);
+    }
+
+    memcpy(json->buf + json->buflen, str, len);
+    json->buflen += len;
+    json->buf[json->buflen] = '\0';
+
+    debug_return_bool(true);
+}
+
+/*
+ * Append a quoted JSON string, escaping special chars and expanding as needed.
  * Does not support unicode escapes.
  */
-static void
-json_print_string(struct json_container *json, const char *str)
+static bool
+json_append_string(struct json_container *json, const char *str)
 {
     char ch;
+    debug_decl(json_append_string, SUDO_DEBUG_UTIL);
 
-    putc('\"', json->fp);
+    if (!json_append_buf(json, "\""))
+	    debug_return_bool(false);
     while ((ch = *str++) != '\0') {
+	char buf[3], *cp = buf;
+
 	switch (ch) {
 	case '"':
 	case '\\':
-	    putc('\\', json->fp);
+	    *cp++ = '\\';
 	    break;
 	case '\b':
+	    *cp++ = '\\';
 	    ch = 'b';
-	    putc('\\', json->fp);
 	    break;
 	case '\f':
+	    *cp++ = '\\';
 	    ch = 'f';
-	    putc('\\', json->fp);
 	    break;
 	case '\n':
+	    *cp++ = '\\';
 	    ch = 'n';
-	    putc('\\', json->fp);
 	    break;
 	case '\r':
+	    *cp++ = '\\';
 	    ch = 'r';
-	    putc('\\', json->fp);
 	    break;
 	case '\t':
+	    *cp++ = '\\';
 	    ch = 't';
-	    putc('\\', json->fp);
 	    break;
 	}
-	putc(ch, json->fp);
+	*cp++ = ch;
+	*cp++ = '\0';
+	if (!json_append_buf(json, buf))
+		debug_return_bool(false);
     }
-    putc('\"', json->fp);
+    if (!json_append_buf(json, "\""))
+	    debug_return_bool(false);
+
+    debug_return_bool(true);
 }
 
 bool
-sudo_json_init_v1(struct json_container *json, FILE *fp, int indent)
+sudo_json_init_v1(struct json_container *json, int indent, bool compact,
+    bool memfatal)
 {
     debug_decl(sudo_json_init, SUDO_DEBUG_UTIL);
 
     memset(json, 0, sizeof(*json));
-    json->fp = fp;
     json->indent_level = indent;
     json->indent_increment = indent;
+    json->compact = compact;
+    json->memfatal = memfatal;
+    json->buf = malloc(64 * 1024);
+    if (json->buf == NULL) {
+	if (json->memfatal) {
+	    sudo_fatalx(U_("%s: %s"),
+		__func__, U_("unable to allocate memory"));
+	}
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "%s: %s", __func__, "unable to allocate memory");
+	debug_return_bool(false);
+    }
+    *json->buf = '\0';
+    json->bufsize = 64 * 1024;
 
     debug_return_bool(true);
+}
+
+void
+sudo_json_free_v1(struct json_container *json)
+{
+    debug_decl(sudo_json_free, SUDO_DEBUG_UTIL);
+
+    free(json->buf);
+    memset(json, 0, sizeof(*json));
+
+    debug_return;
 }
 
 bool
@@ -119,18 +219,23 @@ sudo_json_open_object_v1(struct json_container *json, const char *name)
     debug_decl(sudo_json_open_object, SUDO_DEBUG_UTIL);
 
     /* Add comma if we are continuing an object/array. */
-    if (json->need_comma)
-	putc(',', json->fp);
-    putc('\n', json->fp);
+    if (json->need_comma) {
+	if (!json_append_buf(json, ","))
+	    debug_return_bool(false);
+    }
+    if (!json_append_buf(json, json->compact ? " " : "\n"))
+	debug_return_bool(false);
 
-    print_indent(json->fp, json->indent_level);
+    json_append_indent(json, json->indent_level);
 
     if (name != NULL) {
-	json_print_string(json, name);
-	putc(':', json->fp);
-	putc(' ', json->fp);
+	json_append_string(json, name);
+	if (!json_append_buf(json, ": {"))
+	    debug_return_bool(false);
+    } else {
+	if (!json_append_buf(json, "{"))
+	    debug_return_bool(false);
     }
-    putc('{', json->fp);
 
     json->indent_level += json->indent_increment;
     json->need_comma = false;
@@ -144,9 +249,12 @@ sudo_json_close_object_v1(struct json_container *json)
     debug_decl(sudo_json_close_object, SUDO_DEBUG_UTIL);
 
     json->indent_level -= json->indent_increment;
-    putc('\n', json->fp);
-    print_indent(json->fp, json->indent_level);
-    putc('}', json->fp);
+    if (!json_append_buf(json, json->compact ? " " : "\n"))
+	debug_return_bool(false);
+    if (!json_append_indent(json, json->indent_level))
+	debug_return_bool(false);
+    if (!json_append_buf(json, "}"))
+	debug_return_bool(false);
 
     debug_return_bool(true);
 }
@@ -157,16 +265,18 @@ sudo_json_open_array_v1(struct json_container *json, const char *name)
     debug_decl(sudo_json_open_array, SUDO_DEBUG_UTIL);
 
     /* Add comma if we are continuing an object/array. */
-    if (json->need_comma)
-	putc(',', json->fp);
-    putc('\n', json->fp);
+    if (json->need_comma) {
+	if (!json_append_buf(json, ","))
+	    debug_return_bool(false);
+    }
+    if (!json_append_buf(json, json->compact ? " " : "\n"))
+	debug_return_bool(false);
 
-    print_indent(json->fp, json->indent_level);
+    json_append_indent(json, json->indent_level);
 
-    json_print_string(json, name);
-    putc(':', json->fp);
-    putc(' ', json->fp);
-    putc('[', json->fp);
+    json_append_string(json, name);
+    if (!json_append_buf(json, ": ["))
+	debug_return_bool(false);
 
     json->indent_level += json->indent_increment;
     json->need_comma = false;
@@ -180,9 +290,12 @@ sudo_json_close_array_v1(struct json_container *json)
     debug_decl(sudo_json_close_array, SUDO_DEBUG_UTIL);
 
     json->indent_level -= json->indent_increment;
-    putc('\n', json->fp);
-    print_indent(json->fp, json->indent_level);
-    putc(']', json->fp);
+    if (!json_append_buf(json, json->compact ? " " : "\n"))
+	debug_return_bool(false);
+    if (!json_append_indent(json, json->indent_level))
+	debug_return_bool(false);
+    if (!json_append_buf(json, "]"))
+	debug_return_bool(false);
 
     debug_return_bool(true);
 }
@@ -191,71 +304,92 @@ bool
 sudo_json_add_value_int(struct json_container *json, const char *name,
     struct json_value *value, bool as_object)
 {
+    char numbuf[(((sizeof(long long) * 8) + 2) / 3) + 2];
     unsigned int i;
     debug_decl(sudo_json_add_value, SUDO_DEBUG_UTIL);
 
     /* Add comma if we are continuing an object/array. */
-    if (json->need_comma)
-	putc(',', json->fp);
-    putc('\n', json->fp);
+    if (json->need_comma) {
+	if (!json_append_buf(json, ","))
+	    debug_return_bool(false);
+    }
+    if (!json_append_buf(json, json->compact ? " " : "\n"))
+	debug_return_bool(false);
     json->need_comma = true;
 
-    print_indent(json->fp, json->indent_level);
+    if (!json_append_indent(json, json->indent_level))
+	debug_return_bool(false);
 
     if (as_object) {
-	putc('{', json->fp);
-	putc(' ', json->fp);
+	if (!json_append_buf(json, "{ "))
+	    debug_return_bool(false);
     }
 
     /* name */
     if (name != NULL) {
-	json_print_string(json, name);
-	putc(':', json->fp);
-	putc(' ', json->fp);
+	if (!json_append_string(json, name) || !json_append_buf(json, ": "))
+	    debug_return_bool(false);
     }
 
     /* value */
     switch (value->type) {
     case JSON_STRING:
-	json_print_string(json, value->u.string);
+	if (!json_append_string(json, value->u.string))
+	    debug_return_bool(false);
 	break;
     case JSON_ID:
-	fprintf(json->fp, "%u", (unsigned int)value->u.id);
+	snprintf(numbuf, sizeof(numbuf), "%u", (unsigned int)value->u.id);
+	if (!json_append_buf(json, numbuf))
+	    debug_return_bool(false);
 	break;
     case JSON_NUMBER:
-	fprintf(json->fp, "%lld", value->u.number);
+	snprintf(numbuf, sizeof(numbuf), "%lld", value->u.number);
+	if (!json_append_buf(json, numbuf))
+	    debug_return_bool(false);
 	break;
     case JSON_NULL:
-	fputs("null", json->fp);
+	if (!json_append_buf(json, "null"))
+	    debug_return_bool(false);
 	break;
     case JSON_BOOL:
-	fputs(value->u.boolean ? "true" : "false", json->fp);
+	if (!json_append_buf(json, value->u.boolean ? "true" : "false"))
+	    debug_return_bool(false);
 	break;
     case JSON_ARRAY:
 	if (value->u.array[0] == NULL || value->u.array[1] == NULL) {
-	    putc('[', json->fp);
-	    putc(' ', json->fp);
+	    if (!json_append_buf(json, "[ "))
+		debug_return_bool(false);
 	    if (value->u.array[0] != NULL) {
-		json_print_string(json, value->u.array[0]);
-		putc(' ', json->fp);
+		if (!json_append_string(json, value->u.array[0]))
+		    debug_return_bool(false);
+		if (!json_append_buf(json, " "))
+		    debug_return_bool(false);
 	    }
-	    putc(']', json->fp);
+	    if (!json_append_buf(json, "]"))
+		debug_return_bool(false);
 	} else  {
-	    putc('[', json->fp);
-	    putc('\n', json->fp);
+	    if (!json_append_buf(json, "["))
+		debug_return_bool(false);
+	    if (!json_append_buf(json, json->compact ? " " : "\n"))
+		debug_return_bool(false);
 	    json->indent_level += json->indent_increment;
 	    for (i = 0; value->u.array[i] != NULL; i++) {
-		print_indent(json->fp, json->indent_level);
-		json_print_string(json, value->u.array[i]);
+		if (!json_append_indent(json, json->indent_level))
+		    debug_return_bool(false);
+		if (!json_append_string(json, value->u.array[i]))
+		    debug_return_bool(false);
 		if (value->u.array[i + 1] != NULL) {
-		    putc(',', json->fp);
-		    putc(' ', json->fp);
+		    if (!json_append_buf(json, ","))
+			debug_return_bool(false);
 		}
-		putc('\n', json->fp);
+		if (!json_append_buf(json, json->compact ? " " : "\n"))
+		    debug_return_bool(false);
 	    }
 	    json->indent_level -= json->indent_increment;
-	    print_indent(json->fp, json->indent_level);
-	    putc(']', json->fp);
+	    if (!json_append_indent(json, json->indent_level))
+		debug_return_bool(false);
+	    if (!json_append_buf(json, "]"))
+		debug_return_bool(false);
 	}
 	break;
     case JSON_OBJECT:
@@ -264,8 +398,8 @@ sudo_json_add_value_int(struct json_container *json, const char *name,
     }
 
     if (as_object) {
-	putc(' ', json->fp);
-	putc('}', json->fp);
+	if (!json_append_buf(json, " }"))
+	    debug_return_bool(false);
     }
 
     debug_return_bool(true);
@@ -283,4 +417,16 @@ sudo_json_add_value_as_object_v1(struct json_container *json, const char *name,
     struct json_value *value)
 {
     return sudo_json_add_value_int(json, name, value, true);
+}
+
+const char *
+sudo_json_get_buf_v1(struct json_container *json)
+{
+    return json->buf;
+}
+
+unsigned int
+sudo_json_get_len_v1(struct json_container *json)
+{
+    return json->buflen;
 }

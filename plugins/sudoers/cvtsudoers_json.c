@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -864,9 +864,8 @@ convert_sudoers_json(struct sudoers_parse_tree *parse_tree,
 	    sudo_fatal(U_("unable to open %s"), output_file);
     }
 
-    /* Open JSON output. */
-    sudo_json_init(&json, output_fp, 4);
-    putc('{', output_fp);
+    /* 4 space indent, non-compact, exit on memory allocation failure. */
+    sudo_json_init(&json, 4, false, true);
 
     /* Dump Defaults in JSON format. */
     if (!ISSET(conf->suppress, SUPPRESS_DEFAULTS)) {
@@ -883,11 +882,16 @@ convert_sudoers_json(struct sudoers_parse_tree *parse_tree,
 	print_userspecs_json(&json, parse_tree, conf->expand_aliases);
     }
 
-    /* Close JSON output. */
-    fputs("\n}\n", output_fp);
-    (void)fflush(output_fp);
-    if (ferror(output_fp))
-	ret = false;
+    /* Write JSON output. */
+    if (sudo_json_get_len(&json) != 0) {
+	putc('{', output_fp);
+	fputs(sudo_json_get_buf(&json), output_fp);
+	fputs("\n}\n", output_fp);
+	(void)fflush(output_fp);
+	if (ferror(output_fp))
+	    ret = false;
+    }
+    sudo_json_free(&json);
     if (output_fp != stdout)
 	fclose(output_fp);
 

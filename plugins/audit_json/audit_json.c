@@ -198,13 +198,13 @@ done:
 }
 
 static bool
-print_key_value(struct json_container *json, const char *str)
+add_key_value(struct json_container *json, const char *str)
 {
     struct json_value json_value;
     const char *cp, *errstr;
     char name[256];
     size_t len;
-    debug_decl(print_key_value, SUDO_DEBUG_PLUGIN);
+    debug_decl(add_key_value, SUDO_DEBUG_PLUGIN);
 
     if ((cp = strchr(str, '=')) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -252,22 +252,18 @@ print_key_value(struct json_container *json, const char *str)
 	json_value.u.string = cp;
     }
 
-    sudo_json_add_value(json, name, &json_value);
-
-    debug_return_bool(true);
+    debug_return_bool(sudo_json_add_value(json, name, &json_value));
 }
 
-static void
-print_array(struct json_container *json, const char *name, char * const * array)
+static bool
+add_array(struct json_container *json, const char *name, char * const * array)
 {
     struct json_value json_value;
-    debug_decl(print_array, SUDO_DEBUG_PLUGIN);
+    debug_decl(add_array, SUDO_DEBUG_PLUGIN);
 
     json_value.type = JSON_ARRAY;
     json_value.u.array = array;
-    sudo_json_add_value(json, name, &json_value);
-
-    debug_return;
+    debug_return_bool(sudo_json_add_value(json, name, &json_value));
 }
 
 static bool
@@ -287,14 +283,14 @@ filter_key_value(const char *kv, char * const * filter)
     return false;
 }
 
-static void
-print_key_value_object(struct json_container *json, const char *name,
+static bool
+add_key_value_object(struct json_container *json, const char *name,
 	char * const * array, char * const * filter)
 {
     char * const *cur;
     const char *cp;
     bool empty = false;
-    debug_decl(print_key_value_object, SUDO_DEBUG_PLUGIN);
+    debug_decl(add_key_value_object, SUDO_DEBUG_PLUGIN);
 
     if (filter != NULL) {
 	/* Avoid printing an empty object if everything is filtered. */
@@ -307,26 +303,31 @@ print_key_value_object(struct json_container *json, const char *name,
 	}
     }
     if (!empty) {
-	sudo_json_open_object(json, name);
+	if (!sudo_json_open_object(json, name))
+	    goto bad;
 	for (cur = array; (cp = *cur) != NULL; cur++) {
 	    if (filter_key_value(cp, filter))
 		continue;
-	    print_key_value(json, cp);
+	    if (!add_key_value(json, cp))
+		goto bad;
 	}
-	sudo_json_close_object(json);
+	if (!sudo_json_close_object(json))
+	    goto bad;
     }
 
-    debug_return;
+    debug_return_bool(true);
+bad:
+    debug_return_bool(false);
 }
 
 static bool
-print_timestamp(struct json_container *json, struct timespec *ts)
+add_timestamp(struct json_container *json, struct timespec *ts)
 {
     struct json_value json_value;
     time_t secs = ts->tv_sec;
     char timebuf[1024];
     struct tm *tm;
-    debug_decl(print_timestamp, SUDO_DEBUG_PLUGIN);
+    debug_decl(add_timestamp, SUDO_DEBUG_PLUGIN);
 
     if ((tm = gmtime(&secs)) == NULL)
 	debug_return_bool(false);
@@ -357,19 +358,11 @@ print_timestamp(struct json_container *json, struct timespec *ts)
 }
 
 static int
-audit_write_exit_record(int exit_status, int error)
+audit_write_json(struct json_container *json)
 {
-    struct json_container json;
-    struct json_value json_value;
-    struct timespec now;
     struct stat sb;
     int ret = -1;
-    debug_decl(audit_write_exit_record, SUDO_DEBUG_PLUGIN);
-
-    if (sudo_gettime_real(&now) == -1) {
-	sudo_warn(U_("unable to read the clock"));
-	goto done;
-    }
+    debug_decl(audit_write_json, SUDO_DEBUG_PLUGIN);
 
     if (!sudo_lock_file(fileno(state.log_fp), SUDO_LOCK)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
@@ -395,29 +388,61 @@ audit_write_exit_record(int exit_status, int error)
 	goto done;
     }
 
-    sudo_json_init(&json, state.log_fp, 4);
-    sudo_json_open_object(&json, "exit");
+    fputs(sudo_json_get_buf(json), state.log_fp);
+    fputs("\n}\n", state.log_fp);
+    fflush(state.log_fp);
+    (void)sudo_lock_file(fileno(state.log_fp), SUDO_UNLOCK);
+
+    /* TODO: undo partial record on error */
+    if (!ferror(state.log_fp))
+	ret = true;
+
+done:
+    debug_return_int(ret);
+}
+
+static int
+audit_write_exit_record(int exit_status, int error)
+{
+    struct json_container json;
+    struct json_value json_value;
+    struct timespec now;
+    int ret = -1;
+    debug_decl(audit_write_exit_record, SUDO_DEBUG_PLUGIN);
+
+    if (sudo_gettime_real(&now) == -1) {
+	sudo_warn(U_("unable to read the clock"));
+	goto done;
+    }
+
+    if (!sudo_json_init(&json, 4, false, false))
+	goto oom;
+    if (!sudo_json_open_object(&json, "exit"))
+	goto oom;
 
     /* Write UUID */
     json_value.type = JSON_STRING;
     json_value.u.string = state.uuid_str;
-    sudo_json_add_value(&json, "uuid", &json_value);
+    if (!sudo_json_add_value(&json, "uuid", &json_value))
+	goto oom;
 
     /* Write time stamp */
-    if (!print_timestamp(&json, &now))
-	sudo_warnx(U_("unable to format timestamp"));
+    if (!add_timestamp(&json, &now))
+	goto oom;
 
     if (error != 0) {
 	/* Error executing command */
 	json_value.type = JSON_STRING;
 	json_value.u.string = strerror(error);
-	sudo_json_add_value(&json, "error", &json_value);
+	if (!sudo_json_add_value(&json, "error", &json_value))
+	    goto oom;
     } else {
         if (WIFEXITED(exit_status)) {
 	    /* Command exited normally. */
 	    json_value.type = JSON_NUMBER;
 	    json_value.u.number = WEXITSTATUS(exit_status);
-	    sudo_json_add_value(&json, "exit_value", &json_value);
+	    if (!sudo_json_add_value(&json, "exit_value", &json_value))
+		goto oom;
         } else if (WIFSIGNALED(exit_status)) {
 	    /* Command killed by signal. */
 	    char signame[SIG2STR_MAX];
@@ -425,32 +450,38 @@ audit_write_exit_record(int exit_status, int error)
             if (signo <= 0 || sig2str(signo, signame) == -1) {
 		json_value.type = JSON_NUMBER;
 		json_value.u.number = signo;
-		sudo_json_add_value(&json, "signal", &json_value);
+		if (!sudo_json_add_value(&json, "signal", &json_value))
+		    goto oom;
             } else {
 		json_value.type = JSON_STRING;
 		json_value.u.string = signame;
-		sudo_json_add_value(&json, "signal", &json_value);
+		if (!sudo_json_add_value(&json, "signal", &json_value))
+		    goto oom;
 	    }
 	    /* Core dump? */
 	    json_value.type = JSON_BOOL;
 	    json_value.u.boolean = WCOREDUMP(exit_status);
-	    sudo_json_add_value(&json, "dumped_core", &json_value);
+	    if (!sudo_json_add_value(&json, "dumped_core", &json_value))
+		goto oom;
 	    /* Exit value */
 	    json_value.type = JSON_NUMBER;
 	    json_value.u.number = WTERMSIG(exit_status) | 128;
-	    sudo_json_add_value(&json, "exit_value", &json_value);
+	    if (!sudo_json_add_value(&json, "exit_value", &json_value))
+		goto oom;
         }
     }
 
-    sudo_json_close_object(&json);	/* close record */
-    fputs("\n}\n", state.log_fp);	/* close JSON */
-    fflush(state.log_fp);
+    if (!sudo_json_close_object(&json))
+	goto oom;
 
-    (void)sudo_lock_file(fileno(state.log_fp), SUDO_UNLOCK);
-
-    ret = true;
+    ret = audit_write_json(&json);
+    sudo_json_free(&json);
 done:
     debug_return_int(ret);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudo_json_free(&json);
+    debug_return_int(-1);
 }
 
 static int
@@ -461,7 +492,6 @@ audit_write_record(const char *audit_str, const char *plugin_name,
     struct json_container json;
     struct json_value json_value;
     struct timespec now;
-    struct stat sb;
     int ret = -1;
     debug_decl(audit_write_record, SUDO_DEBUG_PLUGIN);
 
@@ -470,36 +500,15 @@ audit_write_record(const char *audit_str, const char *plugin_name,
 	goto done;
     }
 
-    if (!sudo_lock_file(fileno(state.log_fp), SUDO_LOCK)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to lock %s", state.logfile);
-	goto done;
-    }
-
-    /* Note: assumes file ends in "\n}\n" */
-    if (fstat(fileno(state.log_fp), &sb) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to stat %s", state.logfile);
-	goto done;
-    }
-    if (sb.st_size == 0) {
-	/* New file */
-	putc('{', state.log_fp);
-    } else if (fseeko(state.log_fp, -3, SEEK_END) == 0) {
-	/* Continue file, overwrite the final "\n}\n" */
-	putc(',', state.log_fp);
-    } else {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to seek %s", state.logfile);
-	goto done;
-    }
-
-    sudo_json_init(&json, state.log_fp, 4);
-    sudo_json_open_object(&json, audit_str);
+    if (!sudo_json_init(&json, 4, false, false))
+	goto oom;
+    if (!sudo_json_open_object(&json, audit_str))
+	goto oom;
 
     json_value.type = JSON_STRING;
     json_value.u.string = plugin_name;
-    sudo_json_add_value(&json, "plugin_name", &json_value);
+    if (!sudo_json_add_value(&json, "plugin_name", &json_value))
+	goto oom;
 
     switch (plugin_type) {
     case 0:
@@ -522,49 +531,66 @@ audit_write_record(const char *audit_str, const char *plugin_name,
 	break;
     }
     json_value.type = JSON_STRING;
-    sudo_json_add_value(&json, "plugin_type", &json_value);
+    if (!sudo_json_add_value(&json, "plugin_type", &json_value))
+	goto oom;
 
     /* error and reject audit events usually contain a reason. */
     if (reason != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = reason;
-	sudo_json_add_value(&json, "reason", &json_value);
+	if (!sudo_json_add_value(&json, "reason", &json_value))
+	    goto oom;
     }
 
     json_value.type = JSON_STRING;
     json_value.u.string = state.uuid_str;
-    sudo_json_add_value(&json, "uuid", &json_value);
+    if (!sudo_json_add_value(&json, "uuid", &json_value))
+	goto oom;
 
-    if (!print_timestamp(&json, &now))
-	sudo_warnx(U_("unable to format timestamp"));
+    if (!add_timestamp(&json, &now))
+	goto oom;
 
     /* Write key=value objects. */
-    print_key_value_object(&json, "options", state.settings, settings_filter);
-    print_key_value_object(&json, "user_info", state.user_info, NULL);
-    if (command_info != NULL)
-	print_key_value_object(&json, "command_info", command_info, NULL);
+    if (!add_key_value_object(&json, "options", state.settings, settings_filter))
+	goto oom;
+    if (!add_key_value_object(&json, "user_info", state.user_info, NULL))
+	goto oom;
+    if (command_info != NULL) {
+	if (!add_key_value_object(&json, "command_info", command_info, NULL))
+	    goto oom;
+    }
 
     /* Write submit_optind before submit_argv */
     json_value.type = JSON_NUMBER;
     json_value.u.number = state.submit_optind;
-    sudo_json_add_value(&json, "submit_optind", &json_value);
+    if (!sudo_json_add_value(&json, "submit_optind", &json_value))
+	goto oom;
 
-    print_array(&json, "submit_argv", state.submit_argv);
-    print_array(&json, "submit_envp", state.submit_envp);
-    if (run_argv != NULL)
-	print_array(&json, "run_argv", run_argv);
-    if (run_envp != NULL)
-	print_array(&json, "run_envp", run_envp);
+    if (!add_array(&json, "submit_argv", state.submit_argv))
+	goto oom;
+    if (!add_array(&json, "submit_envp", state.submit_envp))
+	goto oom;
+    if (run_argv != NULL) {
+	if (!add_array(&json, "run_argv", run_argv))
+	    goto oom;
+    }
+    if (run_envp != NULL) {
+	if (!add_array(&json, "run_envp", run_envp))
+	    goto oom;
+    }
 
-    sudo_json_close_object(&json);	/* close audit_str */
-    fputs("\n}\n", state.log_fp);	/* close JSON */
-    fflush(state.log_fp);
+    if (!sudo_json_close_object(&json))
+	goto oom;
 
-    (void)sudo_lock_file(fileno(state.log_fp), SUDO_UNLOCK);
+    ret = audit_write_json(&json);
+    sudo_json_free(&json);
 
-    ret = true;
 done:
     debug_return_int(ret);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudo_json_free(&json);
+    debug_return_int(-1);
 }
 
 static int
