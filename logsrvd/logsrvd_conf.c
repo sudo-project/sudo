@@ -576,7 +576,9 @@ cb_eventlog_format(struct logsrvd_config *config, const char *str)
 {
     debug_decl(cb_eventlog_format, SUDO_DEBUG_UTIL);
 
-    if (strcmp(str, "sudo") == 0)
+    if (strcmp(str, "json") == 0)
+	config->eventlog.log_format = EVLOG_JSON;
+    else if (strcmp(str, "sudo") == 0)
 	config->eventlog.log_format = EVLOG_SUDO;
     else
 	debug_return_bool(false);
@@ -683,6 +685,7 @@ cb_logfile_path(struct logsrvd_config *config, const char *str)
 	debug_return_bool(false);
     }
 
+    /* TODO: open log file */
     free(config->logfile.path);
     config->logfile.path = copy;
 

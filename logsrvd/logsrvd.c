@@ -260,7 +260,8 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	}
     }
 
-    if (!log_accept(&closure->details)) {
+    if (!log_accept(&closure->details, msg->submit_time, msg->info_msgs,
+	    msg->n_info_msgs)) {
 	closure->errstr = _("error logging accept event");
 	debug_return_bool(false);
     }
@@ -319,7 +320,8 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    if (!log_reject(&closure->details, msg->reason)) {
+    if (!log_reject(&closure->details, msg->reason, msg->submit_time,
+	    msg->info_msgs, msg->n_info_msgs)) {
 	closure->errstr = _("error logging reject event");
 	debug_return_bool(false);
     }
@@ -512,7 +514,7 @@ handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend",
 	__func__);
 
-    /* Store suspend siganl in log. */
+    /* Store suspend signal in log. */
     if (store_suspend(msg, closure) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "failed to store CommandSuspend");

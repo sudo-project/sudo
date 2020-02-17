@@ -154,12 +154,13 @@ enum logsrvd_eventlog_type {
 
 /* Supported eventlog formats (currently just sudo) */
 enum logsrvd_eventlog_format {
-    EVLOG_SUDO
+    EVLOG_SUDO,
+    EVLOG_JSON
 };
 
 /* eventlog.c */
-bool log_accept(const struct iolog_details *details);
-bool log_reject(const struct iolog_details *details, const char *reason);
+bool log_accept(const struct iolog_details *details, TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen);
+bool log_reject(const struct iolog_details *details, const char *reason, TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen);
 bool log_alert(const struct iolog_details *details, TimeSpec *alert_time, const char *reason);
 
 /* iolog_writer.c */
@@ -171,6 +172,7 @@ int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
 void iolog_details_free(struct iolog_details *details);
+char ** strlist_copy(InfoMessage__StringList *strlist);
 
 /* logsrvd_conf.c */
 bool logsrvd_conf_read(const char *path);
