@@ -25,18 +25,28 @@
 
 #include "sudo_dso.h"
 
+#define DECL_PLUGIN(type, variable_name) \
+    static struct type *variable_name = NULL; \
+    static struct type variable_name ## _original
+
+#define RESTORE_PYTHON_PLUGIN(variable_name) \
+    memcpy(variable_name, &(variable_name ## _original), sizeof(variable_name ## _original))
+
+#define SAVE_PYTHON_PLUGIN(variable_name) \
+    memcpy(&(variable_name ## _original), variable_name, sizeof(variable_name ## _original))
+
 static const char *python_plugin_so_path = NULL;
 static void *python_plugin_handle = NULL;
-static struct io_plugin *python_io = NULL;
-static struct policy_plugin *python_policy = NULL;
-static struct approval_plugin *python_approval = NULL;
-static struct sudoers_group_plugin *group_plugin = NULL;
-static struct audit_plugin *python_audit = NULL;
+DECL_PLUGIN(io_plugin, python_io);
+DECL_PLUGIN(policy_plugin, python_policy);
+DECL_PLUGIN(approval_plugin, python_approval);
+DECL_PLUGIN(audit_plugin, python_audit);
+DECL_PLUGIN(sudoers_group_plugin, group_plugin);
 
 static struct passwd example_pwd;
 
-static int _load_symbols(void);
-static int _unload_symbols(void);
+static int _init_symbols(void);
+static int _unlink_symbols(void);
 
 void
 create_plugin_options(const char *module_name, const char *class_name, const char *extra_option)
@@ -119,7 +129,7 @@ init(void)
     data.plugin_argv = create_str_array(1, NULL);
     data.user_env = create_str_array(1, NULL);
 
-    VERIFY_TRUE(_load_symbols());
+    VERIFY_TRUE(_init_symbols());
     return true;
 }
 
@@ -146,9 +156,6 @@ cleanup(int success)
     str_array_free(&data.user_env);
     str_array_free(&data.plugin_options);
 
-    VERIFY_FALSE(Py_IsInitialized());
-
-    VERIFY_TRUE(_unload_symbols());
     return true;
 }
 
@@ -504,6 +511,18 @@ check_example_group_plugin_is_able_to_debug(void)
 
     VERIFY_LOG_LINES(expected_path("check_example_group_plugin_is_able_to_debug.log"));
 
+    return true;
+}
+
+int
+check_plugin_unload(void)
+{
+    // You can call this test to avoid having a lot of subinterpreters
+    // (each plugin->open starts one, and only plugin unlink closes)
+    // It only verifies that python was shut down correctly.
+    VERIFY_TRUE(Py_IsInitialized());
+    VERIFY_TRUE(_unlink_symbols());
+    VERIFY_FALSE(Py_IsInitialized());  // python interpreter could be stopped
     return true;
 }
 
@@ -1403,8 +1422,19 @@ check_multiple_approval_plugin_and_arguments(void)
 
 
 static int
-_load_symbols(void)
+_init_symbols(void)
 {
+    if (python_plugin_handle != NULL) {
+        // symbols are already loaded, we just restore
+        RESTORE_PYTHON_PLUGIN(python_io);
+        RESTORE_PYTHON_PLUGIN(python_policy);
+        RESTORE_PYTHON_PLUGIN(python_approval);
+        RESTORE_PYTHON_PLUGIN(python_audit);
+        RESTORE_PYTHON_PLUGIN(group_plugin);
+        return true;
+    }
+
+    // we load the symbols
     python_plugin_handle = sudo_dso_load(python_plugin_so_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     VERIFY_PTR_NE(python_plugin_handle, NULL);
 
@@ -1423,11 +1453,17 @@ _load_symbols(void)
     python_approval = sudo_dso_findsym(python_plugin_handle, "python_approval");
     VERIFY_PTR_NE(python_approval, NULL);
 
+    SAVE_PYTHON_PLUGIN(python_io);
+    SAVE_PYTHON_PLUGIN(python_policy);
+    SAVE_PYTHON_PLUGIN(python_approval);
+    SAVE_PYTHON_PLUGIN(python_audit);
+    SAVE_PYTHON_PLUGIN(group_plugin);
+
     return true;
 }
 
 static int
-_unload_symbols(void)
+_unlink_symbols(void)
 {
     python_io = NULL;
     group_plugin = NULL;
@@ -1435,9 +1471,10 @@ _unload_symbols(void)
     python_approval = NULL;
     python_audit = NULL;
     VERIFY_INT(sudo_dso_unload(python_plugin_handle), 0);
+    python_plugin_handle = NULL;
+    VERIFY_FALSE(Py_IsInitialized());
     return true;
 }
-
 
 int
 main(int argc, char *argv[])
@@ -1456,19 +1493,23 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_io_plugin_fails_with_python_backtrace());
     RUN_TEST(check_io_plugin_callbacks_are_optional());
     RUN_TEST(check_io_plugin_reports_error());
+    RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_example_group_plugin());
     RUN_TEST(check_example_group_plugin_is_able_to_debug());
+    RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_loading_fails_with_missing_path());
     RUN_TEST(check_loading_fails_with_missing_classname());
     RUN_TEST(check_loading_fails_with_wrong_classname());
     RUN_TEST(check_loading_fails_with_wrong_path());
     RUN_TEST(check_loading_fails_plugin_is_not_owned_by_root());
+    RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_example_conversation_plugin_reason_log(false, "without_suspend"));
     RUN_TEST(check_example_conversation_plugin_reason_log(true, "with_suspend"));
     RUN_TEST(check_example_conversation_plugin_user_interrupts());
+    RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_example_policy_plugin_version_display(true));
     RUN_TEST(check_example_policy_plugin_version_display(false));
@@ -1479,6 +1520,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_policy_plugin_validate_invalidate());
     RUN_TEST(check_policy_plugin_callbacks_are_optional());
     RUN_TEST(check_policy_plugin_reports_error());
+    RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_example_audit_plugin_receives_accept());
     RUN_TEST(check_example_audit_plugin_receives_reject());
@@ -1487,6 +1529,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_audit_plugin_version_display());
     RUN_TEST(check_audit_plugin_callbacks_are_optional());
     RUN_TEST(check_audit_plugin_reports_error());
+    RUN_TEST(check_plugin_unload());
 
     // Monday, too early
     RUN_TEST(check_example_approval_plugin(
@@ -1504,6 +1547,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_multiple_approval_plugin_and_arguments());
 
     RUN_TEST(check_python_plugins_do_not_affect_each_other());
+    RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_example_debugging("plugin@err"));
     RUN_TEST(check_example_debugging("plugin@info"));
@@ -1514,6 +1558,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_debugging("py_calls@diag"));
     RUN_TEST(check_example_debugging("py_calls@info"));
     RUN_TEST(check_example_debugging("plugin@err"));
+    RUN_TEST(check_plugin_unload());
 
     return EXIT_SUCCESS;
 }

@@ -110,6 +110,24 @@ _import_module(const char *path)
     debug_return_ptr(PyImport_ImportModule(module_name));
 }
 
+static PyThreadState *
+_python_plugin_new_interpreter(void)
+{
+    debug_decl(_python_plugin_new_interpreter, PYTHON_DEBUG_INTERNAL);
+    if (py_ctx.interpreter_count >= INTERPRETER_MAX) {
+        PyErr_Format(PyExc_Exception, "Too many interpreters");
+        debug_return_ptr(NULL);
+    }
+
+    PyThreadState *py_interpreter = Py_NewInterpreter();
+    if (py_interpreter != NULL) {
+        py_ctx.py_subinterpreters[py_ctx.interpreter_count] = py_interpreter;
+        ++py_ctx.interpreter_count;
+    }
+
+    debug_return_ptr(py_interpreter);
+}
+
 void
 python_plugin_handle_plugin_error_exception(PyObject **py_result, struct PluginContext *plugin_ctx)
 {
@@ -247,7 +265,7 @@ python_plugin_register_logging(sudo_conv_t conversation,
     debug_decl(python_plugin_register_logging, PYTHON_DEBUG_INTERNAL);
 
     int rc = SUDO_RC_ERROR;
-    if (py_ctx.sudo_conv == NULL)
+    if (conversation != NULL)
         py_ctx.sudo_conv = conversation;
 
     if (sudo_printf)
@@ -287,8 +305,6 @@ _python_plugin_register_plugin_in_py_ctx(void)
     debug_decl(_python_plugin_register_plugin_in_py_ctx, PYTHON_DEBUG_PLUGIN_LOAD);
 
     if (!Py_IsInitialized()) {
-        py_ctx.open_plugin_count = 0;
-
         // Disable environment variables effecting the python interpreter
         // This is important since we are running code here as root, the
         // user should not be able to alter what is running any how.
@@ -312,7 +328,6 @@ _python_plugin_register_plugin_in_py_ctx(void)
         PyThreadState_Swap(py_ctx.py_main_interpreter);
     }
 
-    ++py_ctx.open_plugin_count;
     debug_return_int(SUDO_RC_OK);
 }
 
@@ -329,7 +344,7 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
 
     plugin_ctx->sudo_api_version = version;
 
-    plugin_ctx->py_interpreter = Py_NewInterpreter();
+    plugin_ctx->py_interpreter = _python_plugin_new_interpreter();
     if (plugin_ctx->py_interpreter == NULL) {
         goto cleanup;
     }
@@ -388,36 +403,22 @@ void
 python_plugin_deinit(struct PluginContext *plugin_ctx)
 {
     debug_decl(python_plugin_deinit, PYTHON_DEBUG_PLUGIN_LOAD);
-    --py_ctx.open_plugin_count;
-    sudo_debug_printf(SUDO_DEBUG_DIAG, "Closing: %d python plugins left open\n", py_ctx.open_plugin_count);
+    sudo_debug_printf(SUDO_DEBUG_DIAG, "Deinit was called for a python plugin\n");
 
     Py_CLEAR(plugin_ctx->py_instance);
     Py_CLEAR(plugin_ctx->py_class);
     Py_CLEAR(plugin_ctx->py_module);
 
-    if (plugin_ctx->py_interpreter != NULL) {
-        sudo_debug_printf(SUDO_DEBUG_TRACE, "deinit python interpreter for plugin\n");
-        Py_EndInterpreter(plugin_ctx->py_interpreter);
-    }
+    // Note: we are preserving the interpreters here until the unlink because
+    // of bugs like (strptime does not work after python interpreter reinit):
+    // https://bugs.python.org/issue27400
+    // These potentially effect a lot more python functions, simply because
+    // it is a rare tested scenario.
 
     free(plugin_ctx->callback_error);
     memset(plugin_ctx, 0, sizeof(*plugin_ctx));
 
-    if (py_ctx.open_plugin_count <= 0) {
-        if (Py_IsInitialized()) {
-            sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python interpreter\n");
-
-            // we need to call finalize from the main interpreter
-            PyThreadState_Swap(py_ctx.py_main_interpreter);
-
-            Py_Finalize();
-        }
-
-        py_ctx_reset();
-    }
-
     python_debug_deregister();
-
     debug_return;
 }
 
@@ -550,4 +551,36 @@ python_plugin_name(struct PluginContext *plugin_ctx)
         debug_return_const_str(name);
 
     debug_return_const_str(((PyTypeObject *)(plugin_ctx->py_class))->tp_name);
+}
+
+void python_plugin_unlink(void) __attribute__((destructor));
+
+// this gets run only when sudo unlinks the python_plugin.so
+void
+python_plugin_unlink(void)
+{
+    debug_decl(python_plugin_unlink, PYTHON_DEBUG_INTERNAL);
+    if (py_ctx.py_main_interpreter == NULL)
+        return;
+
+    if (Py_IsInitialized()) {
+        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python %lu subinterpreters\n",
+                          py_ctx.interpreter_count);
+        for (size_t i = 0; i < py_ctx.interpreter_count; ++i) {
+            PyThreadState *py_interpreter = py_ctx.py_subinterpreters[i];
+            PyThreadState_Swap(py_interpreter);
+            Py_EndInterpreter(py_interpreter);
+        }
+
+        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit main interpreter\n");
+
+        // we need to call finalize from the main interpreter
+        PyThreadState_Swap(py_ctx.py_main_interpreter);
+
+        if (Py_FinalizeEx() != 0) {
+            sudo_debug_printf(SUDO_DEBUG_WARN, "Closing: failed to deinit python interpreter\n");
+        }
+    }
+    py_ctx_reset();
+    debug_return;
 }

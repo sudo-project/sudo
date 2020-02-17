@@ -63,10 +63,7 @@ _sudo_printf_default(int msg_type, const char *fmt, ...)
 
 
 struct PythonContext py_ctx = {
-    &_sudo_printf_default,
-    NULL,
-    0,
-    NULL
+    .sudo_log = &_sudo_printf_default,
 };
 
 
