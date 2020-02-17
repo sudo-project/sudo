@@ -87,6 +87,8 @@ static double random_drop;
 /* Server callback may redirect to client callback for TLS. */
 static void client_msg_cb(int fd, int what, void *v);
 
+static SSL_CTX *init_tls_server_context(void);
+
 /*
  * Free a struct connection_closure container and its contents.
  */
@@ -913,6 +915,24 @@ bad:
 }
 
 static void
+server_reload(struct sudo_event_base *base)
+{
+    debug_decl(server_reload, SUDO_DEBUG_UTIL);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "reloading server config");
+    if (logsrvd_conf_read(conf_file)) {
+	/* Re-initialize TLS server context on reload. */
+	if (logsrvd_conf_get_tls_opt() == true) {
+	    struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
+	    if ((tls_runtime->ssl_ctx = init_tls_server_context()) == NULL)
+		sudo_fatal(NULL);
+	}
+    }
+
+    debug_return;
+}
+
+static void
 signal_cb(int signo, int what, void *v)
 {
     struct sudo_event_base *base = v;
@@ -920,8 +940,7 @@ signal_cb(int signo, int what, void *v)
 
     switch (signo) {
 	case SIGHUP:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "received SIGHUP");
-	    logsrvd_conf_read(conf_file);
+	    server_reload(base);
 	    break;
 	case SIGINT:
 	case SIGTERM:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -870,6 +870,18 @@ logsrvd_conf_free(struct logsrvd_config *config)
     /* struct logsrvd_config_logfile */
     free(config->logfile.path);
     free(config->logfile.time_format);
+
+#if defined(HAVE_OPENSSL)
+    free(config->server.tls_config.pkey_path);
+    free(config->server.tls_config.cert_path);
+    free(config->server.tls_config.cacert_path);
+    free(config->server.tls_config.dhparams_path);
+    free(config->server.tls_config.ciphers_v12);
+    free(config->server.tls_config.ciphers_v13);
+
+    if (config->server.tls_runtime.ssl_ctx != NULL)
+	SSL_CTX_free(config->server.tls_runtime.ssl_ctx);
+#endif
 
     free(config);
 
