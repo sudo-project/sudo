@@ -419,7 +419,7 @@ sudo_json_add_value_as_object_v1(struct json_container *json, const char *name,
     return sudo_json_add_value_int(json, name, value, true);
 }
 
-const char *
+char *
 sudo_json_get_buf_v1(struct json_container *json)
 {
     return json->buf;

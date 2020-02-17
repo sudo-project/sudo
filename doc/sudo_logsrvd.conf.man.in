@@ -489,7 +489,7 @@ IETF RFC 5424 states that syslog servers must support messages of
 at least 480 bytes and should support messages up to 2048 bytes.
 By default,
 \fBsudo_logsrvd\fR
-creates log messages up to 980 bytes which corresponds to the
+creates log messages up to 960 bytes which corresponds to the
 historic
 BSD
 syslog implementation which used a 1024 byte buffer
@@ -497,12 +497,14 @@ to store the message, date, hostname and program name.
 .sp
 To prevent syslog messages from being truncated,
 \fBsudo_logsrvd\fR
-will split up log messages that are larger than
+will split up sudo-style log messages that are larger than
 \fImaxlen\fR
 bytes.
 When a message is split, additional parts will include the string
 \(lq(command continued)\(rq
 after the user name and before the continued command line arguments.
+JSON-format log entries are never split and are not affected by
+\fImaxlen\fR.
 .SS "logfile"
 The
 \fIlogfile\fR

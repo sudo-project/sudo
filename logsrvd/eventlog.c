@@ -229,6 +229,174 @@ toobig:
     debug_return_str(NULL);
 }
 
+static bool
+json_add_timestamp(struct json_container *json, const char *name,
+    struct timespec *ts)
+{
+    const char *timefmt = logsrvd_conf_logfile_time_format();
+    struct json_value json_value;
+    time_t secs = ts->tv_sec;
+    char timebuf[1024];
+    struct tm *tm;
+    debug_decl(json_add_timestamp, SUDO_DEBUG_PLUGIN);
+
+    if ((tm = gmtime(&secs)) == NULL)
+	debug_return_bool(false);
+
+    if (!sudo_json_open_object(json, name))
+	goto oom;
+
+    json_value.type = JSON_NUMBER;
+    json_value.u.number = ts->tv_sec;
+    if (!sudo_json_add_value(json, "seconds", &json_value))
+	goto oom;
+
+    json_value.type = JSON_NUMBER;
+    json_value.u.number = ts->tv_nsec;
+    if (!sudo_json_add_value(json, "nanoseconds", &json_value))
+	goto oom;
+
+    strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tm);
+    json_value.type = JSON_STRING;
+    json_value.u.string = timebuf;
+    if (!sudo_json_add_value(json, "iso8601", &json_value))
+	goto oom;
+
+    strftime(timebuf, sizeof(timebuf), timefmt, tm);
+    json_value.type = JSON_STRING;
+    json_value.u.string = timebuf;
+    if (!sudo_json_add_value(json, "localtime", &json_value))
+	goto oom;
+
+    if (!sudo_json_close_object(json))
+	goto oom;
+
+    debug_return_bool(true);
+oom:
+    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	"%s: %s", __func__, "unable to allocate memory");
+    debug_return_bool(false);
+}
+
+static char *
+format_json(ClientMessage__TypeCase event_type,
+    const char *reason, TimeSpec *event_time, InfoMessage **info_msgs,
+    size_t infolen, bool compact)
+{
+    const char *type_str;
+    const char *time_str;
+    struct json_container json = { 0 };
+    struct json_value json_value;
+    struct timespec ts;
+    char **strvec;
+    size_t idx;
+    debug_decl(format_json, SUDO_DEBUG_UTIL);
+
+    if (sudo_gettime_real(&ts) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to read the clock");
+	debug_return_str(NULL);
+    }
+
+    switch (event_type) {
+    case CLIENT_MESSAGE__TYPE_ACCEPT_MSG:
+	type_str = "accept";
+	time_str = "submit_time";
+	break;
+    case CLIENT_MESSAGE__TYPE_REJECT_MSG:
+	type_str = "reject";
+	time_str = "submit_time";
+	break;
+    case CLIENT_MESSAGE__TYPE_ALERT_MSG:
+	type_str = "alert";
+	time_str = "alert_time";
+	break;
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected event type %d", event_type);
+	debug_return_str(NULL);
+    }
+
+    if (!sudo_json_init(&json, 4, compact, false))
+	goto bad;
+    if (!sudo_json_open_object(&json, type_str))
+	goto bad;
+
+    /* Reject and Alert events include a reason */
+    if (reason != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = reason;
+	if (!sudo_json_add_value(&json, "reason", &json_value))
+	    goto bad;
+    }
+
+    /* XXX - create and log uuid? */
+
+    /* Log event time on server (set earlier) */
+    if (!json_add_timestamp(&json, "server_time", &ts)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable format timestamp");
+	goto bad;
+    }
+
+    /* Log event time from client */
+    ts.tv_sec = event_time->tv_sec;
+    ts.tv_nsec = event_time->tv_nsec;
+    if (!json_add_timestamp(&json, time_str, &ts)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable format timestamp");
+	goto bad;
+    }
+
+    /* Dump details */
+    for (idx = 0; idx < infolen; idx++) {
+	InfoMessage *info = info_msgs[idx];
+
+	switch (info->value_case) {
+	case INFO_MESSAGE__VALUE_NUMVAL:
+	    json_value.type = JSON_NUMBER;
+	    json_value.u.number = info->numval;
+	    if (!sudo_json_add_value(&json, info->key, &json_value))
+		goto bad;
+	    break;
+	case INFO_MESSAGE__VALUE_STRVAL:
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = info->strval;
+	    if (!sudo_json_add_value(&json, info->key, &json_value))
+		goto bad;
+	    break;
+	case INFO_MESSAGE__VALUE_STRLISTVAL:
+	    /* Must convert to NULL-terminated string vector. */
+	    strvec = strlist_copy(info->strlistval);
+	    if (strvec == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		    "%s: %s", __func__, "unable to allocate memory");
+		goto bad;
+	    }
+	    json_value.type = JSON_ARRAY;
+	    json_value.u.array = strvec;
+	    if (!sudo_json_add_value(&json, info->key, &json_value))
+		goto bad;
+	    free(strvec);
+	    break;
+	default:
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected value case %d", info->value_case);
+	    goto bad;
+	}
+    }
+
+    if (!sudo_json_close_object(&json))
+	goto bad;
+
+    /* Caller is responsible for freeing the buffer. */
+    debug_return_str(sudo_json_get_buf(&json));
+
+bad:
+    sudo_json_free(&json);
+    debug_return_str(NULL);
+}
+
 /*
  * We do an openlog(3)/closelog(3) for each message because some
  * authentication methods (notably PAM) use syslog(3) for their
@@ -254,12 +422,12 @@ mysyslog(int pri, const char *fmt, ...)
  * message into parts if it is longer than syslog_maxlen.
  */
 static bool
-do_syslog(int pri, const char *reason, const struct iolog_details *details)
+do_syslog_sudo(int pri, const char *reason, const struct iolog_details *details)
 {
     size_t len, maxlen;
     char *logline, *p, *tmp, save;
     const char *fmt;
-    debug_decl(do_syslog, SUDO_DEBUG_UTIL);
+    debug_decl(do_syslog_sudo, SUDO_DEBUG_UTIL);
 
     /* A priority of -1 corresponds to "none". */
     if (pri == -1)
@@ -307,6 +475,80 @@ do_syslog(int pri, const char *reason, const struct iolog_details *details)
     free(logline);
 
     debug_return_bool(true);
+}
+
+static bool
+do_syslog_json(int pri, ClientMessage__TypeCase event_type, const char *reason,
+    TimeSpec *event_time, InfoMessage **info_msgs, size_t infolen)
+{
+    char *json_str;
+    debug_decl(do_syslog_json, SUDO_DEBUG_UTIL);
+
+    /* A priority of -1 corresponds to "none". */
+    if (pri == -1)
+	debug_return_bool(true);
+
+    /* Format as a compact JSON message (no newlines) */
+    json_str = format_json(event_type, reason, event_time, info_msgs,
+	infolen, true);
+    if (json_str == NULL)
+	debug_return_bool(false);
+
+    /* Syslog it with a @cee: prefix */
+    /* TODO: use logsrvd_conf_syslog_maxlen() to break up long messages. */
+    mysyslog(pri, "@cee:{%s }", json_str);
+    free(json_str);
+    debug_return_bool(true);
+}
+
+/*
+ * Log a message to syslog in either sudo or JSON format.
+ */
+static bool
+do_syslog(ClientMessage__TypeCase event_type, const char *reason,
+    const struct iolog_details *details, TimeSpec *event_time,
+    InfoMessage **info_msgs, size_t infolen)
+{
+    int pri;
+    bool ret = false;
+    debug_decl(do_syslog, SUDO_DEBUG_UTIL);
+
+    switch (event_type) {
+    case CLIENT_MESSAGE__TYPE_ACCEPT_MSG:
+	pri = logsrvd_conf_syslog_acceptpri();
+	break;
+    case CLIENT_MESSAGE__TYPE_REJECT_MSG:
+	pri = logsrvd_conf_syslog_rejectpri();
+	break;
+    case CLIENT_MESSAGE__TYPE_ALERT_MSG:
+	pri = logsrvd_conf_syslog_alertpri();
+	break;
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected event type %d", event_type);
+	pri = -1;
+	break;
+    }
+    if (pri == -1) {
+	/* syslog disabled for this message type */
+	debug_return_bool(true);
+    }
+
+    switch (logsrvd_conf_eventlog_format()) {
+    case EVLOG_SUDO:
+	ret = do_syslog_sudo(pri, reason, details);
+	break;
+    case EVLOG_JSON:
+	ret = do_syslog_json(pri, event_type, reason, event_time,
+	    info_msgs, infolen);
+	break;
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected eventlog format %d", logsrvd_conf_eventlog_format());
+	break;
+    }
+
+    debug_return_bool(ret);
 }
 
 static bool
@@ -364,167 +606,20 @@ done:
 }
 
 static bool
-json_add_timestamp(struct json_container *json, const char *name,
-    struct timespec *ts)
-{
-    const char *timefmt = logsrvd_conf_logfile_time_format();
-    struct json_value json_value;
-    time_t secs = ts->tv_sec;
-    char timebuf[1024];
-    struct tm *tm;
-    debug_decl(json_add_timestamp, SUDO_DEBUG_PLUGIN);
-
-    if ((tm = gmtime(&secs)) == NULL)
-	debug_return_bool(false);
-
-    if (!sudo_json_open_object(json, name))
-	goto oom;
-
-    json_value.type = JSON_NUMBER;
-    json_value.u.number = ts->tv_sec;
-    if (!sudo_json_add_value(json, "seconds", &json_value))
-	goto oom;
-
-    json_value.type = JSON_NUMBER;
-    json_value.u.number = ts->tv_nsec;
-    if (!sudo_json_add_value(json, "nanoseconds", &json_value))
-	goto oom;
-
-    strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tm);
-    json_value.type = JSON_STRING;
-    json_value.u.string = timebuf;
-    if (!sudo_json_add_value(json, "iso8601", &json_value))
-	goto oom;
-
-    strftime(timebuf, sizeof(timebuf), timefmt, tm);
-    json_value.type = JSON_STRING;
-    json_value.u.string = timebuf;
-    if (!sudo_json_add_value(json, "localtime", &json_value))
-	goto oom;
-
-    if (!sudo_json_close_object(json))
-	goto oom;
-
-    debug_return_bool(true);
-oom:
-    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	"%s: %s", __func__, "unable to allocate memory");
-    debug_return_bool(false);
-}
-
-static bool
 do_logfile_json(ClientMessage__TypeCase event_type, const char *reason,
     TimeSpec *event_time, InfoMessage **info_msgs, size_t infolen)
 {
     const char *logfile = logsrvd_conf_logfile_path();
-    const char *type_str;
-    const char *time_str;
-    struct json_container json;
-    struct json_value json_value;
-    struct timespec ts;
     struct stat sb;
-    char **strvec;
+    char *json_str;
     mode_t oldmask;
     FILE *fp = NULL;
     int fd, ret = false;
-    size_t idx;
     debug_decl(do_logfile_json, SUDO_DEBUG_UTIL);
 
-    if (sudo_gettime_real(&ts) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to read the clock");
-	debug_return_bool(ret);
-    }
-
-    switch (event_type) {
-    case CLIENT_MESSAGE__TYPE_ACCEPT_MSG:
-	type_str = "accept";
-	time_str = "submit_time";
-	break;
-    case CLIENT_MESSAGE__TYPE_REJECT_MSG:
-	type_str = "reject";
-	time_str = "submit_time";
-	break;
-    case CLIENT_MESSAGE__TYPE_ALERT_MSG:
-	type_str = "alert";
-	time_str = "alert_time";
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected event type %d", event_type);
-	debug_return_bool(ret);
-    }
-
-    if (!sudo_json_init(&json, 4, false, false))
-	goto done;
-    if (!sudo_json_open_object(&json, type_str))
-	goto done;
-
-    /* Reject and Alert events include a reason */
-    if (reason != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = reason;
-	if (!sudo_json_add_value(&json, "reason", &json_value))
-	    goto done;
-    }
-
-    /* XXX - create and log uuid? */
-
-    /* Log event time on server (set earlier) */
-    if (!json_add_timestamp(&json, "server_time", &ts)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable format timestamp");
-	goto done;
-    }
-
-    /* Log event time from client */
-    ts.tv_sec = event_time->tv_sec;
-    ts.tv_nsec = event_time->tv_nsec;
-    if (!json_add_timestamp(&json, time_str, &ts)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable format timestamp");
-	goto done;
-    }
-
-    /* Dump details */
-    for (idx = 0; idx < infolen; idx++) {
-	InfoMessage *info = info_msgs[idx];
-
-	switch (info->value_case) {
-	case INFO_MESSAGE__VALUE_NUMVAL:
-	    json_value.type = JSON_NUMBER;
-	    json_value.u.number = info->numval;
-	    if (!sudo_json_add_value(&json, info->key, &json_value))
-		goto done;
-	    break;
-	case INFO_MESSAGE__VALUE_STRVAL:
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = info->strval;
-	    if (!sudo_json_add_value(&json, info->key, &json_value))
-		goto done;
-	    break;
-	case INFO_MESSAGE__VALUE_STRLISTVAL:
-	    /* Must convert to NULL-terminated string vector. */
-	    strvec = strlist_copy(info->strlistval);
-	    if (strvec == NULL) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		    "%s: %s", __func__, "unable to allocate memory");
-		goto done;
-	    }
-	    json_value.type = JSON_ARRAY;
-	    json_value.u.array = strvec;
-	    if (!sudo_json_add_value(&json, info->key, &json_value))
-		goto done;
-	    free(strvec);
-	    break;
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected value case %d", info->value_case);
-	    goto done;
-	}
-    }
-
-    if (!sudo_json_close_object(&json))
+    json_str = format_json(event_type, reason, event_time, info_msgs,
+	infolen, false);
+    if (json_str == NULL)
 	goto done;
 
     oldmask = umask(S_IRWXG|S_IRWXO);
@@ -560,7 +655,7 @@ do_logfile_json(ClientMessage__TypeCase event_type, const char *reason,
 	    "unable to seek %s", logfile);
 	goto done;
     }
-    fputs(sudo_json_get_buf(&json), fp);
+    fputs(json_str, fp);
     fputs("\n}\n", fp);			/* close JSON */
     fclose(fp);
     /* XXX - check for file error and recover */
@@ -568,7 +663,7 @@ do_logfile_json(ClientMessage__TypeCase event_type, const char *reason,
     ret = true;
 
 done:
-    sudo_json_free(&json);
+    free(json_str);
     if (fp != NULL)
 	fclose(fp);
     debug_return_bool(ret);
@@ -604,8 +699,7 @@ log_accept(const struct iolog_details *details, TimeSpec *submit_time,
     InfoMessage **info_msgs, size_t infolen)
 {
     const enum logsrvd_eventlog_type log_type = logsrvd_conf_eventlog_type();
-    bool ret = true;
-    int pri;
+    bool ret;
     debug_decl(log_accept, SUDO_DEBUG_UTIL);
 
     if (log_type == EVLOG_NONE)
@@ -613,9 +707,8 @@ log_accept(const struct iolog_details *details, TimeSpec *submit_time,
 
     switch (log_type) {
     case EVLOG_SYSLOG:
-	pri = logsrvd_conf_syslog_acceptpri();
-	if (pri != -1)
-	    ret = do_syslog(pri, NULL, details);
+	ret = do_syslog(CLIENT_MESSAGE__TYPE_ACCEPT_MSG, NULL, details,
+	    submit_time, info_msgs, infolen);
 	break;
     case EVLOG_FILE:
 	ret = do_logfile(CLIENT_MESSAGE__TYPE_ACCEPT_MSG, NULL, details,
@@ -635,8 +728,7 @@ log_reject(const struct iolog_details *details, const char *reason,
     TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen)
 {
     const enum logsrvd_eventlog_type log_type = logsrvd_conf_eventlog_type();
-    bool ret = true;
-    int pri;
+    bool ret;
     debug_decl(log_reject, SUDO_DEBUG_UTIL);
 
     if (log_type == EVLOG_NONE)
@@ -644,9 +736,8 @@ log_reject(const struct iolog_details *details, const char *reason,
 
     switch (log_type) {
     case EVLOG_SYSLOG:
-	pri = logsrvd_conf_syslog_rejectpri();
-	if (pri != -1)
-	    do_syslog(pri, reason, details);
+	ret = do_syslog(CLIENT_MESSAGE__TYPE_REJECT_MSG, NULL, details,
+	    submit_time, info_msgs, infolen);
 	break;
     case EVLOG_FILE:
 	ret = do_logfile(CLIENT_MESSAGE__TYPE_REJECT_MSG, reason, details,
@@ -666,8 +757,7 @@ log_alert(const struct iolog_details *details, TimeSpec *alert_time,
     const char *reason)
 {
     const enum logsrvd_eventlog_type log_type = logsrvd_conf_eventlog_type();
-    bool ret = true;
-    int pri;
+    bool ret;
     debug_decl(log_alert, SUDO_DEBUG_UTIL);
 
     if (log_type == EVLOG_NONE)
@@ -676,9 +766,8 @@ log_alert(const struct iolog_details *details, TimeSpec *alert_time,
     /* TODO: log alert_time */
     switch (log_type) {
     case EVLOG_SYSLOG:
-	pri = logsrvd_conf_syslog_alertpri();
-	if (pri != -1)
-	    do_syslog(pri, reason, details);
+	ret = do_syslog(CLIENT_MESSAGE__TYPE_REJECT_MSG, NULL, details,
+	    alert_time, NULL, 0);
 	break;
     case EVLOG_FILE:
 	ret = do_logfile(CLIENT_MESSAGE__TYPE_ALERT_MSG, reason, details,

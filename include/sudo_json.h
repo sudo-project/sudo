@@ -79,7 +79,7 @@ __dso_public bool sudo_json_add_value_v1(struct json_container *json, const char
 __dso_public bool sudo_json_add_value_as_object_v1(struct json_container *json, const char *name, struct json_value *value);
 #define sudo_json_add_value_as_object(_a, _b, _c) sudo_json_add_value_as_object_v1((_a), (_b), (_c))
 
-__dso_public const char *sudo_json_get_buf_v1(struct json_container *json);
+__dso_public char *sudo_json_get_buf_v1(struct json_container *json);
 #define sudo_json_get_buf(_a) sudo_json_get_buf_v1((_a))
 
 __dso_public unsigned int sudo_json_get_len_v1(struct json_container *json);
