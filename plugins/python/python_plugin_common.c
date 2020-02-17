@@ -413,9 +413,10 @@ python_plugin_deinit(struct PluginContext *plugin_ctx)
             Py_Finalize();
         }
 
-        python_debug_deregister();
         py_ctx_reset();
     }
+
+    python_debug_deregister();
 
     debug_return;
 }
