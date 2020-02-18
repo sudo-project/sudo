@@ -87,8 +87,6 @@ static double random_drop;
 /* Server callback may redirect to client callback for TLS. */
 static void client_msg_cb(int fd, int what, void *v);
 
-static SSL_CTX *init_tls_server_context(void);
-
 /*
  * Free a struct connection_closure container and its contents.
  */
@@ -916,48 +914,6 @@ bad:
     debug_return;
 }
 
-static void
-server_reload(struct sudo_event_base *base)
-{
-    debug_decl(server_reload, SUDO_DEBUG_UTIL);
-
-    sudo_debug_printf(SUDO_DEBUG_INFO, "reloading server config");
-    if (logsrvd_conf_read(conf_file)) {
-	/* Re-initialize TLS server context on reload. */
-	if (logsrvd_conf_get_tls_opt() == true) {
-	    struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
-	    if ((tls_runtime->ssl_ctx = init_tls_server_context()) == NULL)
-		sudo_fatal(NULL);
-	}
-    }
-
-    debug_return;
-}
-
-static void
-signal_cb(int signo, int what, void *v)
-{
-    struct sudo_event_base *base = v;
-    debug_decl(signal_cb, SUDO_DEBUG_UTIL);
-
-    switch (signo) {
-	case SIGHUP:
-	    server_reload(base);
-	    break;
-	case SIGINT:
-	case SIGTERM:
-	    /* Shut down active connections. */
-	    server_shutdown(base);
-	    break;
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected signal %d", signo);
-	    break;
-    }
-
-    debug_return;
-}
-
 #if defined(HAVE_OPENSSL)
 static int
 verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
@@ -1578,6 +1534,50 @@ register_listener(struct listen_address *addr, struct sudo_event_base *base)
             sudo_fatal(NULL);
         if (sudo_ev_add(base, ev, NULL, false) == -1)
             sudo_fatal(U_("unable to add event to queue"));
+    }
+
+    debug_return;
+}
+
+static void
+server_reload(struct sudo_event_base *base)
+{
+    debug_decl(server_reload, SUDO_DEBUG_UTIL);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "reloading server config");
+    if (logsrvd_conf_read(conf_file)) {
+#if defined(HAVE_OPENSSL)
+	/* Re-initialize TLS server context on reload. */
+	if (logsrvd_conf_get_tls_opt() == true) {
+	    struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
+	    if ((tls_runtime->ssl_ctx = init_tls_server_context()) == NULL)
+		sudo_fatal(NULL);
+	}
+#endif
+    }
+
+    debug_return;
+}
+
+static void
+signal_cb(int signo, int what, void *v)
+{
+    struct sudo_event_base *base = v;
+    debug_decl(signal_cb, SUDO_DEBUG_UTIL);
+
+    switch (signo) {
+	case SIGHUP:
+	    server_reload(base);
+	    break;
+	case SIGINT:
+	case SIGTERM:
+	    /* Shut down active connections. */
+	    server_shutdown(base);
+	    break;
+	default:
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected signal %d", signo);
+	    break;
     }
 
     debug_return;
