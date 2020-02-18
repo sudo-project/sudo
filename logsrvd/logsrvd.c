@@ -80,6 +80,7 @@
  */
 TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
+static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
 static const char server_id[] = "Sudo Audit Server 0.1";
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
 static double random_drop;
@@ -594,7 +595,7 @@ shutdown_cb(int unused, int what, void *v)
 
 #if defined(HAVE_OPENSSL)
     /* deallocate server's SSL context object */
-    if (logsrvd_conf_get_tls_opt() == true) {
+    if (logsrvd_conf_get_tls_opt()) {
         SSL_CTX_free(logsrvd_get_tls_runtime()->ssl_ctx);
     }
 #endif
@@ -1076,11 +1077,12 @@ init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
  * Calls series of openssl initialization functions in order to
  * be able to establish configured network connections over TLS
  */
-static SSL_CTX *
+static bool
 init_tls_server_context(void)
 {
     const SSL_METHOD *method;
     SSL_CTX *ctx = NULL;
+    struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
     const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
     bool ca_bundle_required = tls_config->verify | tls_config->check_peer;
     debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL);
@@ -1210,16 +1212,14 @@ init_tls_server_context(void)
 	SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1);
 #endif
 
-    goto good;
+    tls_runtime->ssl_ctx = ctx;
+
+    debug_return_bool(true);
 
 bad:
-    if (ctx) {
-        SSL_CTX_free(ctx);
-        ctx = NULL;
-    }
+    SSL_CTX_free(ctx);
 
-good:
-    debug_return_ptr(ctx);
+    debug_return_bool(false);
 }
 
 static void
@@ -1522,6 +1522,7 @@ listener_cb(int fd, int what, void *v)
 static void
 register_listener(struct listen_address *addr, struct sudo_event_base *base)
 {
+    struct listener *l;
     struct sudo_event *ev;
     int sock;
     debug_decl(register_listener, SUDO_DEBUG_UTIL);
@@ -1529,16 +1530,55 @@ register_listener(struct listen_address *addr, struct sudo_event_base *base)
     sock = create_listener(addr);
 
     if (sock != -1) {
+	/* TODO: make non-fatal */
         ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, base);
         if (ev == NULL)
             sudo_fatal(NULL);
         if (sudo_ev_add(base, ev, NULL, false) == -1)
             sudo_fatal(U_("unable to add event to queue"));
+	if ((l = malloc(sizeof(*l))) == NULL)
+            sudo_fatal(NULL);
+	l->sock = sock;
+	l->ev = ev;
+	TAILQ_INSERT_TAIL(&listeners, l, entries);
     }
 
     debug_return;
 }
 
+/*
+ * Register listeners and init the TLS context.
+ */
+static void
+server_setup(struct sudo_event_base *base)
+{
+    struct listen_address *addr;
+    struct listener *l;
+    debug_decl(server_setup, SUDO_DEBUG_UTIL);
+
+    /* Free old listeners (if any) and register new ones. */
+    while ((l = TAILQ_FIRST(&listeners)) != NULL) {
+	TAILQ_REMOVE(&listeners, l, entries);
+	sudo_ev_free(l->ev);
+	close(l->sock);
+	free(l);
+    }
+    TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries)
+	register_listener(addr, base);
+
+#if defined(HAVE_OPENSSL)
+    if (logsrvd_conf_get_tls_opt()) {
+	if (!init_tls_server_context())
+	    sudo_fatal(NULL);
+    }
+#endif
+
+    debug_return;
+}
+
+/*
+ * Reload config and re-initialize listeners and TLS context.
+ */
 static void
 server_reload(struct sudo_event_base *base)
 {
@@ -1546,14 +1586,8 @@ server_reload(struct sudo_event_base *base)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "reloading server config");
     if (logsrvd_conf_read(conf_file)) {
-#if defined(HAVE_OPENSSL)
-	/* Re-initialize TLS server context on reload. */
-	if (logsrvd_conf_get_tls_opt() == true) {
-	    struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
-	    if ((tls_runtime->ssl_ctx = init_tls_server_context()) == NULL)
-		sudo_fatal(NULL);
-	}
-#endif
+	/* Re-initialize listeners and TLS context. */
+	server_setup(base);
     }
 
     debug_return;
@@ -1681,7 +1715,6 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    struct listen_address *addr;
     struct sudo_event_base *evbase;
     bool nofork = false;
     char *ep;
@@ -1751,16 +1784,8 @@ main(int argc, char *argv[])
 	sudo_fatal(NULL);
     sudo_ev_base_setdef(evbase);
 
-    TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries)
-	register_listener(addr, evbase);
-
-#if defined(HAVE_OPENSSL)
-    if (logsrvd_conf_get_tls_opt() == true) {
-        struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
-        if ((tls_runtime->ssl_ctx = init_tls_server_context()) == NULL)
-            sudo_fatal(NULL);
-    }
-#endif
+    /* Initialize listeners and TLS context. */
+    server_setup(evbase);
 
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);

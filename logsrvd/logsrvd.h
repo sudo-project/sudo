@@ -127,6 +127,16 @@ struct listen_address {
 };
 TAILQ_HEAD(listen_address_list, listen_address);
 
+/*
+ * List of active network listeners.
+ */
+struct listener {
+    TAILQ_ENTRY(listener) entries;
+    struct sudo_event *ev;
+    int sock;
+};
+TAILQ_HEAD(listener_list, listener);
+
 #if defined(HAVE_OPENSSL)
 /* parameters to configure tls */
 struct logsrvd_tls_config {
