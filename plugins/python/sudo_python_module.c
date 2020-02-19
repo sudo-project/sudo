@@ -23,9 +23,6 @@
 
 #include "sudo_python_module.h"
 
-CPYCHECKER_RETURNS_BORROWED_REF
-PyAPI_FUNC(PyObject *) PyStructSequence_GetItem(PyObject *, Py_ssize_t);
-
 #define EXC_VAR(exception_name) sudo_exc_ ## exception_name
 #define TYPE_VAR(type_name) &sudo_type_ ## type_name
 
