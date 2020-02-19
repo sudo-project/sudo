@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd December 21, 2019
+.Dd February 19, 2020
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -101,20 +101,25 @@ If a function returns
 (for example, if it does not call return),
 it will be considered to have returned
 .Dv sudo.RC.OK .
-If an exception is raised (other than sudo.PluginError), the backtrace will be
+If an exception is raised (other than sudo.PluginException), the backtrace will be
 shown to the user and the plugin function will return
 .Dv sudo.RC.ERROR .
 If that is not acceptable, you must catch the exception and handle it yourself.
 .Pp
 Instead of just returning
 .Dv sudo.RC.ERROR
+or
+.Dv sudo.RC.REJECT
 result code the plugin can also provide a message describing the problem.
-This can be done by raising the special exception:
+This can be done by raising one of the special exceptions:
 .Bd -literal -offset indent
 raise sudo.PluginError("Message")
+raise sudo.PluginReject("Message")
 .Ed
 .Pp
 This added message will be used by the audit plugins.
+Both exceptions inherit from
+.Dv sudo.PluginException
 .Ss Python Plugin Loader
 Running the Python interpreter and bridging between C and Python is
 handled by the
@@ -132,6 +137,7 @@ Example usage in
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
 Example group provider plugin usage in the
@@ -875,6 +881,113 @@ Plugin python_audit python_plugin.so \e
 .Ed
 .Pp
 It will log the plugin accept / reject / error results to the output.
+.Ss Approval plugin API
+Approval plugins must be registered in
+.Xr sudo.conf @mansectform@ .
+For example:
+.Bd -literal -offset indent
+Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
+.Ed
+.Pp
+Sudo supports loading multiple approval plugins.
+Currently only 8 python approval plugins can be loaded at once.
+.Pp
+An approval plugin may have the following member functions:
+.Bl -tag -width 4n
+.It Sy constructor
+.Bd -literal -compact
+__init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
+    version: str, user_info: Tuple[str, ...], plugin_options: Tuple[str, ...],
+    submit_optind: int, submit_argv: Tuple[str, ...])
+.Ed
+.Pp
+Optional.
+The default constructor will set the keyword arguments it receives
+as member variables in the object.
+.Pp
+The constructor matches the
+.Fn open
+function in the C sudo plugin API.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It Fa user_env
+The user's environment as a tuple of strings in
+.Dq key=value
+format.
+.It Fa settings
+A tuple of user-supplied
+.Em sudo
+settings in the form of
+.Dq key=value
+strings.
+.It Fa version
+The version of the Python Approval Plugin API.
+.It Fa user_info
+A tuple of information about the user running the command in the form of
+.Dq key=value
+strings.
+.It Fa plugin_options
+The plugin options passed as arguments in the
+.Xr sudo.conf @mansectform@
+plugin registration.
+This is a tuple of strings, usually (but not necessarily) in
+.Dq key=value
+format.
+.It Fa submit_optind
+The index into
+.Fa submit_argv
+that corresponds to the first entry that is not a command line option.
+.It Fa submit_argv
+The argument vector sudo was invoked with, including all command line options.
+.El
+.It Sy show_version
+.Bd -literal -compact
+show_version(self, is_verbose: int) -> int
+.Ed
+.Pp
+Display the version. (Same as for all the other plugins.)
+.It Sy check
+.Bd -literal -compact
+check(self, command_info: Tuple[str, ...], run_argv: Tuple[str, ...],
+      run_env: Tuple[str, ...]) -> int
+.Ed
+.Pp
+This function is called after policy plugin's check_policy has succeeded.
+It can reject execution of the command by returning sudo.RC.REJECT or
+raising the special exception:
+.Bd -literal -offset indent
+raise sudo.PluginReject("some message")
+.Ed
+.Pp
+with the message describing the problem.
+In the latter case, the audit plugins will get the description.
+.Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It command_info
+A vector of information describing the command that will run.
+See the
+.Xr sudo_plugin @mansectform@
+manual for possible values.
+.It run_argv
+Argument vector describing a command that will be run.
+.It run_env
+The environment the command will be run with.
+.El
+.El
+.Ss Approval plugin example
+Sudo ships a Python Approval plugin example.
+To try it, register it by adding the following lines to
+.Pa @sysconfdir@/sudo.conf :
+.Bd -literal -offset indent
+Plugin python_approval python_plugin.so \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_approval_plugin.py \e
+    ClassName=BusinessHoursApprovalPlugin
+.Ed
+.Pp
+It will only allow execution of commands in the "business hours" (from Monday
+to Friday between 8:00 and 17:59:59).
 .Ss Sudoers group provider plugin API
 A group provider plugin is registered in the
 .Xr sudoers @mansectform@
