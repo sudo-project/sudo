@@ -17,6 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .TH "SUDO_PLUGIN_PYTHON" "5" "December 21, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "February 19, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -120,23 +121,28 @@ If a function returns
 (for example, if it does not call return),
 it will be considered to have returned
 \fRsudo.RC.OK\fR.
-If an exception is raised (other than sudo.PluginError), the backtrace will be
+If an exception is raised (other than sudo.PluginException), the backtrace will be
 shown to the user and the plugin function will return
 \fRsudo.RC.ERROR\fR.
 If that is not acceptable, you must catch the exception and handle it yourself.
 .PP
 Instead of just returning
 \fRsudo.RC.ERROR\fR
+or
+\fRsudo.RC.REJECT\fR
 result code the plugin can also provide a message describing the problem.
-This can be done by raising the special exception:
+This can be done by raising one of the special exceptions:
 .nf
 .sp
 .RS 6n
 raise sudo.PluginError("Message")
+raise sudo.PluginReject("Message")
 .RE
 .fi
 .PP
 This added message will be used by the audit plugins.
+Both exceptions inherit from
+\fRsudo.PluginException\fR
 .SS "Python Plugin Loader"
 Running the Python interpreter and bridging between C and Python is
 handled by the
@@ -156,6 +162,7 @@ sudo.conf(@mansectform@):
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
 .PP
@@ -1105,6 +1112,148 @@ Plugin python_audit python_plugin.so \e
 .fi
 .PP
 It will log the plugin accept / reject / error results to the output.
+.SS "Approval plugin API"
+Approval plugins must be registered in
+sudo.conf(@mansectform@).
+For example:
+.nf
+.sp
+.RS 6n
+Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
+.RE
+.fi
+.PP
+Sudo supports loading multiple approval plugins.
+Currently only 8 python approval plugins can be loaded at once.
+.PP
+An approval plugin may have the following member functions:
+.TP 6n
+\fBconstructor\fR
+.nf
+.RS 6n
+__init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
+    version: str, user_info: Tuple[str, ...], plugin_options: Tuple[str, ...],
+    submit_optind: int, submit_argv: Tuple[str, ...])
+.RE
+.fi
+.RS 6n
+.sp
+Optional.
+The default constructor will set the keyword arguments it receives
+as member variables in the object.
+.sp
+The constructor matches the
+\fBopen\fR()
+function in the C sudo plugin API.
+.sp
+The function arguments are as follows:
+.TP 6n
+\fIuser_env\fR
+The user's environment as a tuple of strings in
+\(lqkey=value\(rq
+format.
+.TP 6n
+\fIsettings\fR
+A tuple of user-supplied
+\fIsudo\fR
+settings in the form of
+\(lqkey=value\(rq
+strings.
+.TP 6n
+\fIversion\fR
+The version of the Python Approval Plugin API.
+.TP 6n
+\fIuser_info\fR
+A tuple of information about the user running the command in the form of
+\(lqkey=value\(rq
+strings.
+.TP 6n
+\fIplugin_options\fR
+The plugin options passed as arguments in the
+sudo.conf(@mansectform@)
+plugin registration.
+This is a tuple of strings, usually (but not necessarily) in
+\(lqkey=value\(rq
+format.
+.TP 6n
+\fIsubmit_optind\fR
+The index into
+\fIsubmit_argv\fR
+that corresponds to the first entry that is not a command line option.
+.TP 6n
+\fIsubmit_argv\fR
+The argument vector sudo was invoked with, including all command line options.
+.PD 0
+.PP
+.RE
+.PD
+.TP 6n
+\fBshow_version\fR
+.nf
+.RS 6n
+show_version(self, is_verbose: int) -> int
+.RE
+.fi
+.RS 6n
+.sp
+Display the version. (Same as for all the other plugins.)
+.RE
+.TP 6n
+\fBcheck\fR
+.br
+.nf
+.RS 6n
+check(self, command_info: Tuple[str, ...], run_argv: Tuple[str, ...],
+      run_env: Tuple[str, ...]) -> int
+.RE
+.fi
+.RS 6n
+.sp
+This function is called after policy plugin's check_policy has succeeded.
+It can reject execution of the command by returning sudo.RC.REJECT or
+raising the special exception:
+.nf
+.sp
+.RS 12n
+raise sudo.PluginReject("some message")
+.RE
+.fi
+.sp
+with the message describing the problem.
+In the latter case, the audit plugins will get the description.
+.sp
+The function arguments are as follows:
+.TP 6n
+command_info
+A vector of information describing the command that will run.
+See the
+sudo_plugin(@mansectform@)
+manual for possible values.
+.TP 6n
+run_argv
+Argument vector describing a command that will be run.
+.TP 6n
+run_env
+The environment the command will be run with.
+.PD 0
+.PP
+.RE
+.PD
+.SS "Approval plugin example"
+Sudo ships a Python Approval plugin example.
+To try it, register it by adding the following lines to
+\fI@sysconfdir@/sudo.conf\fR:
+.nf
+.sp
+.RS 6n
+Plugin python_approval python_plugin.so \e
+    ModulePath=@prefix@/share/doc/sudo/examples/example_approval_plugin.py \e
+    ClassName=BusinessHoursApprovalPlugin
+.RE
+.fi
+.PP
+It will only allow execution of commands in the "business hours" (from Monday
+to Friday between 8:00 and 17:59:59).
 .SS "Sudoers group provider plugin API"
 A group provider plugin is registered in the
 sudoers(@mansectform@)
