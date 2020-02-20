@@ -138,6 +138,9 @@ sudo_module_ConvMessages_to_c(PyObject *py_tuple, Py_ssize_t *num_msgs, struct s
     }
 
     *msgs = calloc(Py_SSIZE2SIZE(*num_msgs), sizeof(struct sudo_conv_message));
+    if (*msgs == NULL) {
+        debug_return_int(SUDO_RC_ERROR);
+    }
 
     for (Py_ssize_t i = 0; i < *num_msgs; ++i) {
         PyObject *py_msg = py_tuple_get(py_tuple, i, sudo_type_ConvMessage);
