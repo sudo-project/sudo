@@ -40,6 +40,8 @@ I/O plugin
 .It
 Audit plugin
 .It
+Approval plugin
+.It
 Group provider plugin
 .El
 .Pp
