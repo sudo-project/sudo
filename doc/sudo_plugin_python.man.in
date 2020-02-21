@@ -47,6 +47,9 @@ I/O plugin
 Audit plugin
 .TP 3n
 \fB\(bu\fR
+Approval plugin
+.TP 3n
+\fB\(bu\fR
 Group provider plugin
 .RE
 .PD
