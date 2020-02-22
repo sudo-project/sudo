@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 #include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
@@ -106,6 +107,7 @@ static struct logsrvd_config {
     struct logsrvd_config_logfile {
 	char *path;
 	char *time_format;
+	FILE *stream;
     } logfile;
 } *logsrvd_config;
 
@@ -219,6 +221,12 @@ const char *
 logsrvd_conf_logfile_path(void)
 {
     return logsrvd_config->logfile.path;
+}
+
+FILE *
+logsrvd_conf_logfile_stream(void)
+{
+    return logsrvd_config->logfile.stream;
 }
 
 const char *
@@ -685,7 +693,6 @@ cb_logfile_path(struct logsrvd_config *config, const char *str)
 	debug_return_bool(false);
     }
 
-    /* TODO: open log file */
     free(config->logfile.path);
     config->logfile.path = copy;
 
@@ -850,6 +857,36 @@ done:
     debug_return_bool(ret);
 }
 
+static FILE *
+logsrvd_open_eventlog(struct logsrvd_config *config)
+{
+    mode_t oldmask;
+    FILE *fp = NULL;
+    const char *omode;
+    int fd, flags;
+    debug_decl(logsrvd_open_eventlog, SUDO_DEBUG_UTIL);
+
+    /* Cannot append to a JSON file. */
+    if (config->eventlog.log_format == EVLOG_JSON) {
+	flags = O_RDWR|O_CREAT;
+	omode = "w";
+    } else {
+	flags = O_WRONLY|O_APPEND|O_CREAT;
+	omode = "a";
+    }
+    oldmask = umask(S_IRWXG|S_IRWXO);
+    fd = open(config->logfile.path, flags, S_IRUSR|S_IWUSR);
+    (void)umask(oldmask);
+    if (fd == -1 || (fp = fdopen(fd, omode)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to open log file %s", config->logfile.path);
+	if (fd != -1)
+	    close(fd);
+    }
+
+    debug_return_ptr(fp);
+}
+
 /* Free the specified struct logsrvd_config and its contents. */
 void
 logsrvd_conf_free(struct logsrvd_config *config)
@@ -873,6 +910,8 @@ logsrvd_conf_free(struct logsrvd_config *config)
     /* struct logsrvd_config_logfile */
     free(config->logfile.path);
     free(config->logfile.time_format);
+    if (config->logfile.stream != NULL)
+	fclose(config->logfile.stream);
 
 #if defined(HAVE_OPENSSL)
     free(config->server.tls_config.pkey_path);
@@ -972,6 +1011,24 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     if (TAILQ_EMPTY(&config->server.addresses)) {
 	if (!cb_listen_address(config, "*:30344"))
 	    debug_return_bool(false);
+    }
+
+    /* Open event log if specified. */
+    switch (config->eventlog.log_type) {
+    case EVLOG_SYSLOG:
+	openlog("sudo", 0, config->syslog.facility);
+	break;
+    case EVLOG_FILE:
+	config->logfile.stream = logsrvd_open_eventlog(config);
+	if (config->logfile.stream == NULL)
+	    debug_return_bool(false);
+	break;
+    case EVLOG_NONE:
+	break;
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "cannot open unknown log type %d", config->eventlog.log_type);
+	break;
     }
 
     /* Set I/O log library settings */

@@ -398,26 +398,6 @@ bad:
 }
 
 /*
- * We do an openlog(3)/closelog(3) for each message because some
- * authentication methods (notably PAM) use syslog(3) for their
- * own nefarious purposes and may call openlog(3) and closelog(3).
- * XXX - no longer need openlog/closelog dance, move openlog call
- */
-static void
-mysyslog(int pri, const char *fmt, ...)
-{
-    va_list ap;
-    debug_decl(mysyslog, SUDO_DEBUG_UTIL);
-
-    openlog("sudo", 0, logsrvd_conf_syslog_facility());
-    va_start(ap, fmt);
-    vsyslog(pri, fmt, ap);
-    va_end(ap);
-    closelog();
-    debug_return;
-}
-
-/*
  * Log a message to syslog, pre-pending the username and splitting the
  * message into parts if it is longer than syslog_maxlen.
  */
@@ -457,7 +437,7 @@ do_syslog_sudo(int pri, const char *reason, const struct iolog_details *details)
 	    save = *tmp;
 	    *tmp = '\0';
 
-	    mysyslog(pri, fmt, details->submituser, p);
+	    syslog(pri, fmt, details->submituser, p);
 
 	    *tmp = save;			/* restore saved character */
 
@@ -465,7 +445,7 @@ do_syslog_sudo(int pri, const char *reason, const struct iolog_details *details)
 	    for (p = tmp; *p == ' '; p++)
 		continue;
 	} else {
-	    mysyslog(pri, fmt, details->submituser, p);
+	    syslog(pri, fmt, details->submituser, p);
 	    p += len;
 	}
 	fmt = _("%8s : (command continued) %s");
@@ -496,7 +476,7 @@ do_syslog_json(int pri, ClientMessage__TypeCase event_type, const char *reason,
 
     /* Syslog it with a @cee: prefix */
     /* TODO: use logsrvd_conf_syslog_maxlen() to break up long messages. */
-    mysyslog(pri, "@cee:{%s }", json_str);
+    syslog(pri, "@cee:{%s }", json_str);
     free(json_str);
     debug_return_bool(true);
 }
@@ -556,24 +536,16 @@ do_logfile_sudo(const char *reason, const struct iolog_details *details)
 {
     const char *timefmt = logsrvd_conf_logfile_time_format();
     const char *logfile = logsrvd_conf_logfile_path();
+    FILE *fp = logsrvd_conf_logfile_stream();
     char *logline, timebuf[8192], *timestr = NULL;
     struct tm *timeptr;
     bool ret = false;
-    mode_t oldmask;
-    FILE *fp;
+
     debug_decl(do_logfile_sudo, SUDO_DEBUG_UTIL);
 
     if ((logline = new_logline(reason, NULL, details)) == NULL)
 	debug_return_bool(false);
 
-    oldmask = umask(S_IRWXG|S_IRWXO);
-    fp = fopen(logfile, "a");
-    (void) umask(oldmask);
-    if (fp == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to open log file %s", logfile);
-	goto done;
-    }
     if (!sudo_lock_file(fileno(fp), SUDO_LOCK)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to lock log file %s", logfile);
@@ -599,9 +571,8 @@ do_logfile_sudo(const char *reason, const struct iolog_details *details)
     ret = true;
 
 done:
-    if (fp != NULL)
-	(void) fclose(fp);
     free(logline);
+    (void)sudo_lock_file(fileno(fp), SUDO_UNLOCK);
     debug_return_bool(ret);
 }
 
@@ -610,11 +581,10 @@ do_logfile_json(ClientMessage__TypeCase event_type, const char *reason,
     TimeSpec *event_time, InfoMessage **info_msgs, size_t infolen)
 {
     const char *logfile = logsrvd_conf_logfile_path();
+    FILE *fp = logsrvd_conf_logfile_stream();
     struct stat sb;
     char *json_str;
-    mode_t oldmask;
-    FILE *fp = NULL;
-    int fd, ret = false;
+    int ret = false;
     debug_decl(do_logfile_json, SUDO_DEBUG_UTIL);
 
     json_str = format_json(event_type, reason, event_time, info_msgs,
@@ -622,16 +592,6 @@ do_logfile_json(ClientMessage__TypeCase event_type, const char *reason,
     if (json_str == NULL)
 	goto done;
 
-    oldmask = umask(S_IRWXG|S_IRWXO);
-    fd = open(logfile, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
-    (void)umask(oldmask);
-    if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to open log file %s", logfile);
-	if (fd != -1)
-	    close(fd);
-	goto done;
-    }
     if (!sudo_lock_file(fileno(fp), SUDO_LOCK)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to lock log file %s", logfile);
@@ -657,15 +617,14 @@ do_logfile_json(ClientMessage__TypeCase event_type, const char *reason,
     }
     fputs(json_str, fp);
     fputs("\n}\n", fp);			/* close JSON */
-    fclose(fp);
+    fflush(fp);
     /* XXX - check for file error and recover */
 
     ret = true;
 
 done:
     free(json_str);
-    if (fp != NULL)
-	fclose(fp);
+    (void)sudo_lock_file(fileno(fp), SUDO_UNLOCK);
     debug_return_bool(ret);
 }
 
