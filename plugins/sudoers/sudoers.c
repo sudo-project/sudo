@@ -278,7 +278,6 @@ int
 sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     bool verbose, void *closure)
 {
-    char **edit_argv = NULL;
     char *iolog_path = NULL;
     mode_t cmnd_umask = ACCESSPERMS;
     struct sudo_nss *nss;
@@ -315,6 +314,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
+	sudoers_gc_add(GC_VECTOR, NewArgv);
 	NewArgv[0] = user_cmnd;
 	NewArgv[1] = NULL;
     } else {
@@ -325,6 +325,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
+	sudoers_gc_add(GC_VECTOR, NewArgv);
 	NewArgv++;	/* reserve an extra slot for --login */
 	memcpy(NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
@@ -332,9 +333,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    NewArgv[0] = strdup(runas_pw->pw_shell);
 	    if (NewArgv[0] == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		free(NewArgv);
 		goto done;
 	    }
+	    sudoers_gc_add(GC_PTR, NewArgv[0]);
 	}
     }
 
@@ -655,6 +656,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Note: must call audit before uid change. */
     if (ISSET(sudo_mode, MODE_EDIT)) {
+	char **edit_argv;
 	int edit_argc;
 	const char *env_editor;
 
@@ -670,7 +672,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		env_editor ? env_editor : def_editor);
 	    goto bad;
 	}
-	if (audit_success(edit_argc, edit_argv) != 0 && !def_ignore_audit_errors)
+	sudoers_gc_add(GC_VECTOR, edit_argv);
+	NewArgv = edit_argv;
+	NewArgc = edit_argc;
+	if (audit_success(NewArgc, NewArgv) != 0 && !def_ignore_audit_errors)
 	    goto done;
 
 	/* We want to run the editor with the unmodified environment. */
@@ -687,9 +692,11 @@ bad:
 
 done:
     /* Setup execution environment to pass back to front-end. */
-    if (!sudoers_policy_exec_setup(edit_argv ? edit_argv : NewArgv,
-	    env_get(), cmnd_umask, iolog_path, closure))
-	ret = -1;
+    if (ret != -1) {
+	if (!sudoers_policy_exec_setup(NewArgv, env_get(), cmnd_umask,
+		iolog_path, closure))
+	    ret = -1;
+    }
 
     /* Zero out stashed copy of environment, it is owned by the front-end. */
     (void)env_init(NULL);
