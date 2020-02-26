@@ -116,6 +116,9 @@ AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
 AC_SUBST([SIGNAME])
 AC_SUBST([PYTHON_PLUGIN_SRC])
+AC_SUBST([LOGSRV])
+AC_SUBST([LIBLOGSRV])
+AC_SUBST([LOGSRVD])
 
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -264,6 +267,9 @@ shadow_funcs=
 shadow_libs=
 TMPFILES_D=
 CONFIGURE_ARGS="$@"
+LOGSRVD=logsrvd
+LOGSRV=lib/logsrv
+LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
 
 dnl
 dnl LD_PRELOAD equivalents
@@ -1643,6 +1649,38 @@ AC_ARG_ENABLE(gss_krb5_ccache_name,
 
 AC_ARG_ENABLE(pvs-studio,
 [AS_HELP_STRING([--enable-pvs-studio], [Create a PVS-Studio.cfg file.])])
+
+AC_ARG_ENABLE(log-server,
+[AS_HELP_STRING([--disable-log-server], [Disable building the sudo_logsrvd log server.])],
+[ case "$enableval" in
+    yes)
+	    ;;
+    no)
+	    LOGSRVD=
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-log-server: $enableval])
+	    ;;
+  esac
+])
+
+AC_ARG_ENABLE(log-client,
+[AS_HELP_STRING([--disable-log-client], [Disable sudoers support for using the sudo_logsrvd log server.])],
+[ case "$enableval" in
+    yes)
+	    AC_DEFINE([SUDOERS_IOLOG_CLIENT])
+	    ;;
+    no)
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-log-client: $enableval])
+	    ;;
+  esac
+], [AC_DEFINE([SUDOERS_IOLOG_CLIENT])])
+
+if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
+    # No need for liblogsrv.la
+    LOGSRV=
+    LIBLOGSRV=
+fi
 
 dnl
 dnl C compiler checks
@@ -4755,6 +4793,7 @@ AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
+AH_TEMPLATE(SUDOERS_IOLOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers I/O log plugin.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

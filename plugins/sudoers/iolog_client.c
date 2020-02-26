@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#ifdef SUDOERS_IOLOG_CLIENT
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -1536,8 +1538,8 @@ bad:
  */
 bool
 client_closure_fill(struct client_closure *closure, int sock,
-    const struct sudoers_string *host, struct iolog_details *details,
-    struct io_plugin *sudoers_io)
+    const struct sudoers_string *host, struct timespec *now,
+    struct iolog_details *details, struct io_plugin *sudoers_io)
 {
     union {
 	struct sockaddr sa;
@@ -1551,6 +1553,9 @@ client_closure_fill(struct client_closure *closure, int sock,
 
     closure->sock = -1;
     closure->state = RECV_HELLO;
+
+    closure->start_time.tv_sec = now->tv_sec;
+    closure->start_time.tv_nsec = now->tv_nsec;
 
     closure->read_buf.size = 64 * 1024;
     closure->read_buf.data = malloc(closure->read_buf.size);
@@ -1674,3 +1679,5 @@ done:
     client_closure_free(closure);
     debug_return_bool(ret);
 }
+
+#endif /* SUDOERS_IOLOG_CLIENT */

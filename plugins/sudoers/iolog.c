@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -57,15 +57,27 @@ static struct iolog_file iolog_files[] = {
     { true, },	/* IOFD_TIMING */
 };
 
+static struct sudoers_io_operations {
+    int (*open)(struct timespec *now);
+    void (*close)(int exit_status, int error, const char **errstr);
+    int (*log)(int event, const char *buf, unsigned int len,
+	struct timespec *delay, const char **errstr);
+    int (*change_winsize)(unsigned int lines, unsigned int cols,
+	struct timespec *delay, const char **errstr);
+    int (*suspend)(const char *signame, struct timespec *delay,
+	const char **errstr);
+} io_operations;
+
+#ifdef SUDOERS_IOLOG_CLIENT
 static struct client_closure client_closure = CLIENT_CLOSURE_INITIALIZER(client_closure);
+#endif
 static struct iolog_details iolog_details;
 static bool warned = false;
 static struct timespec last_time;
+static void sudoers_io_setops(void);
 
 /* sudoers_io is declared at the end of this file. */
 extern __dso_public struct io_plugin sudoers_io;
-
-#define iolog_remote	(client_closure.sock != -1)
 
 /*
  * Sudoers callback for maxseq Defaults setting.
@@ -522,7 +534,7 @@ copy_vector_shallow(char * const *vec)
 }
 
 static int
-sudoers_io_open_local(void)
+sudoers_io_open_local(struct timespec *now)
 {
     char iolog_path[PATH_MAX], sessid[7];
     size_t len;
@@ -594,12 +606,12 @@ done:
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_IOLOG_CLIENT
 static int
-sudoers_io_open_remote(void)
+sudoers_io_open_remote(struct timespec *now)
 {
     int sock, ret = -1;
     struct sudoers_string *connected_server = NULL;
-
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
     /* Connect to log server. */
@@ -611,7 +623,7 @@ sudoers_io_open_remote(void)
 	goto done;
     }
 
-    if (!client_closure_fill(&client_closure, sock, connected_server,
+    if (!client_closure_fill(&client_closure, sock, connected_server, now,
 	    &iolog_details, &sudoers_io)) {
 	close(sock);
 	goto done;
@@ -622,8 +634,11 @@ sudoers_io_open_remote(void)
 	ret = 1;
 
 done:
+    if (ret != 1)
+	client_closure_free(&client_closure);
     debug_return_int(ret);
 }
+#endif /* SUDOERS_IOLOG_CLIENT */
 
 static int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
@@ -686,14 +701,17 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	}
     }
 
+    if (sudo_gettime_awake(&last_time) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
+	goto done;
+    }
+
     /*
      * Create local I/O log file or connect to remote log server.
      */
-    if (sudoers_io.event_alloc != NULL && iolog_details.log_servers != NULL)
-	ret = sudoers_io_open_remote();
-    else
-	ret = sudoers_io_open_local();
-    if (ret != true)
+    sudoers_io_setops();
+    if ((ret = io_operations.open(&last_time)) != true)
 	goto done;
 
     /*
@@ -710,17 +728,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (!iolog_files[IOFD_TTYOUT].enabled)
 	sudoers_io.log_ttyout = NULL;
 
-    if (sudo_gettime_awake(&last_time) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "%s: unable to get time of day", __func__);
-	goto done;
-    }
-    if (iolog_remote)
-	client_closure.start_time = last_time;
-
 done:
     if (ret != true) {
-	client_closure_free(&client_closure);
 	sudo_freepwcache();
 	sudo_freegrcache();
     }
@@ -733,21 +742,39 @@ done:
 }
 
 static void
+sudoers_io_close_local(int exit_status, int error, const char **errstr)
+{
+    int i;
+    debug_decl(sudoers_io_close_local, SUDOERS_DEBUG_PLUGIN);
+
+    for (i = 0; i < IOFD_MAX; i++) {
+	if (iolog_files[i].fd.v == NULL)
+	    continue;
+	iolog_close(&iolog_files[i], errstr);
+    }
+
+    debug_return;
+}
+
+#ifdef SUDOERS_IOLOG_CLIENT
+static void
+sudoers_io_close_remote(int exit_status, int error, const char **errstr)
+{
+    debug_decl(sudoers_io_close_remote, SUDOERS_DEBUG_PLUGIN);
+
+    client_close(&client_closure, exit_status, error);
+
+    debug_return;
+}
+#endif
+
+static void
 sudoers_io_close(int exit_status, int error)
 {
     const char *errstr = NULL;
-    int i;
     debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN);
 
-    if (iolog_remote) {
-	client_close(&client_closure, exit_status, error);
-    } else {
-	for (i = 0; i < IOFD_MAX; i++) {
-	    if (iolog_files[i].fd.v == NULL)
-		continue;
-	    iolog_close(&iolog_files[i], &errstr);
-	}
-    }
+    io_operations.close(exit_status, error, &errstr);
 
     sudo_freepwcache();
     sudo_freegrcache();
@@ -824,6 +851,7 @@ done:
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_IOLOG_CLIENT
 /*
  * Schedule an I/O log entry to be written to the log server.
  * Returns 1 on success and -1 on error.
@@ -872,6 +900,7 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
 done:
     debug_return_int(ret);
 }
+#endif /* SUDOERS_IOLOG_CLIENT */
 
 /*
  * Generic I/O logging function.  Called by the I/O logging entry points.
@@ -893,10 +922,7 @@ sudoers_io_log(const char *buf, unsigned int len, int event, const char **errstr
     }
     sudo_timespecsub(&now, &last_time, &delay);
 
-    if (iolog_remote)
-	ret = sudoers_io_log_remote(event, buf, len, &delay, &ioerror);
-    else
-	ret = sudoers_io_log_local(event, buf, len, &delay, &ioerror);
+    ret = io_operations.log(event, buf, len, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
@@ -983,6 +1009,7 @@ done:
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_IOLOG_CLIENT
 static int
 sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
     struct timespec *delay, const char **errstr)
@@ -1005,6 +1032,7 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
 
     debug_return_int(ret);
 }
+#endif /* SUDOERS_IOLOG_CLIENT */
 
 static int
 sudoers_io_change_winsize(unsigned int lines, unsigned int cols, const char **errstr)
@@ -1022,10 +1050,7 @@ sudoers_io_change_winsize(unsigned int lines, unsigned int cols, const char **er
     }
     sudo_timespecsub(&now, &last_time, &delay);
 
-    if (iolog_remote)
-	ret = sudoers_io_change_winsize_remote(lines, cols, &delay, &ioerror);
-    else
-	ret = sudoers_io_change_winsize_local(lines, cols, &delay, &ioerror);
+    ret = io_operations.change_winsize(lines, cols, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
@@ -1082,6 +1107,7 @@ done:
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_IOLOG_CLIENT
 static int
 sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
     const char **errstr)
@@ -1104,6 +1130,7 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
 
     debug_return_int(ret);
 }
+#endif /* SUDOERS_IOLOG_CLIENT */
 
 static int
 sudoers_io_suspend(int signo, const char **errstr)
@@ -1129,10 +1156,7 @@ sudoers_io_suspend(int signo, const char **errstr)
     sudo_timespecsub(&now, &last_time, &delay);
 
     /* Write suspend event to the timing file. */
-    if (iolog_remote)
-	ret = sudoers_io_suspend_remote(signame, &delay, &ioerror);
-    else
-	ret = sudoers_io_suspend_local(signame, &delay, &ioerror);
+    ret = io_operations.suspend(signame, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
@@ -1160,6 +1184,34 @@ bad:
     }
 
     debug_return_int(ret);
+}
+
+/*
+ * Fill in the contents of io_operations, either local or remote.
+ */
+static void
+sudoers_io_setops(void)
+{
+    debug_decl(sudoers_io_setops, SUDOERS_DEBUG_PLUGIN);
+
+#ifdef SUDOERS_IOLOG_CLIENT
+    if (sudoers_io.event_alloc != NULL && iolog_details.log_servers != NULL) {
+	io_operations.open = sudoers_io_open_remote;
+	io_operations.close = sudoers_io_close_remote;
+	io_operations.log = sudoers_io_log_remote;
+	io_operations.change_winsize = sudoers_io_change_winsize_remote;
+	io_operations.suspend = sudoers_io_suspend_remote;
+    } else
+#endif /* SUDOERS_IOLOG_CLIENT */
+    {
+	io_operations.open = sudoers_io_open_local;
+	io_operations.close = sudoers_io_close_local;
+	io_operations.log = sudoers_io_log_local;
+	io_operations.change_winsize = sudoers_io_change_winsize_local;
+	io_operations.suspend = sudoers_io_suspend_local;
+    }
+
+    debug_return;
 }
 
 __dso_public struct io_plugin sudoers_io = {

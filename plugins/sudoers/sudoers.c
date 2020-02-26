@@ -117,6 +117,12 @@ static struct rlimit nproclimit;
 int NewArgc;
 char **NewArgv;
 
+#ifdef SUDOERS_IOLOG_CLIENT
+# define remote_iologs	(!SLIST_EMPTY(&def_log_servers))
+#else
+# define remote_iologs	0
+#endif
+
 /*
  * Unlimit the number of processes since Linux's setuid() will
  * apply resource limits when changing uid and return EAGAIN if
@@ -541,7 +547,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && SLIST_EMPTY(&def_log_servers)) {
+    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && !remote_iologs) {
 	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
 	    if ((iolog_path = format_iolog_path()) == NULL) {
 		if (!def_ignore_iolog_errors)

@@ -58,7 +58,7 @@ INSTALL_BACKUP = @INSTALL_BACKUP@
 # Libraries
 LIBUTIL = $(top_builddir)/lib/util/libsudo_util.la
 LIBIOLOG = $(top_builddir)/lib/iolog/libsudo_iolog.la
-LIBLOGSRV = $(top_builddir)/lib/logsrv/liblogsrv.la
+LIBLOGSRV = @LIBLOGSRV@
 LIBS = $(LIBUTIL)
 NET_LIBS = @NET_LIBS@
 SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ @LIBTLS@ $(NET_LIBS) $(LIBIOLOG) $(LIBLOGSRV)

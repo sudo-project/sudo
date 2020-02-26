@@ -149,7 +149,7 @@ struct client_closure {
 #endif /* HAVE_OPENSSL */
 
 /* iolog_client.c */
-bool client_closure_fill(struct client_closure *closure, int sock, const struct sudoers_string *host, struct iolog_details *details, struct io_plugin *sudoers_io);
+bool client_closure_fill(struct client_closure *closure, int sock, const struct sudoers_string *host, struct timespec *now, struct iolog_details *details, struct io_plugin *sudoers_io);
 bool client_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);

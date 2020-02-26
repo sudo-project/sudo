@@ -736,6 +736,9 @@ rundir
 logpath
 log_dir
 iolog_dir
+LOGSRVD
+LIBLOGSRV
+LOGSRV
 PYTHON_PLUGIN_SRC
 SIGNAME
 devsearch
@@ -987,6 +990,8 @@ enable_offensive_insults
 enable_package_build
 enable_gss_krb5_ccache_name
 enable_pvs_studio
+enable_log_server
+enable_log_client
 enable_shared
 enable_static
 with_pic
@@ -1682,6 +1687,9 @@ Optional Features:
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-pvs-studio     Create a PVS-Studio.cfg file.
+  --disable-log-server    Disable building the sudo_logsrvd log server.
+  --disable-log-client    Disable sudoers support for using the sudo_logsrvd
+                          log server.
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -3112,6 +3120,9 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
+
+
 #
 # Begin initial values for man page substitution
 #
@@ -3207,6 +3218,9 @@ shadow_funcs=
 shadow_libs=
 TMPFILES_D=
 CONFIGURE_ARGS="$@"
+LOGSRVD=logsrvd
+LOGSRV=lib/logsrv
+LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
 
 RTLD_PRELOAD_VAR="LD_PRELOAD"
 RTLD_PRELOAD_ENABLE_VAR=
@@ -6920,6 +6934,48 @@ if test "${enable_pvs_studio+set}" = set; then :
   enableval=$enable_pvs_studio;
 fi
 
+
+# Check whether --enable-log-server was given.
+if test "${enable_log_server+set}" = set; then :
+  enableval=$enable_log_server;  case "$enableval" in
+    yes)
+	    ;;
+    no)
+	    LOGSRVD=
+	    ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-log-server: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-log-server: $enableval" >&2;}
+	    ;;
+  esac
+
+fi
+
+
+# Check whether --enable-log-client was given.
+if test "${enable_log_client+set}" = set; then :
+  enableval=$enable_log_client;  case "$enableval" in
+    yes)
+	    $as_echo "#define SUDOERS_IOLOG_CLIENT 1" >>confdefs.h
+
+	    ;;
+    no)
+	    ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-log-client: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-log-client: $enableval" >&2;}
+	    ;;
+  esac
+
+else
+  $as_echo "#define SUDOERS_IOLOG_CLIENT 1" >>confdefs.h
+
+fi
+
+
+if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
+    # No need for liblogsrv.la
+    LOGSRV=
+    LIBLOGSRV=
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing strerror" >&5
 $as_echo_n "checking for library containing strerror... " >&6; }
@@ -29926,6 +29982,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

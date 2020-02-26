@@ -370,6 +370,17 @@ Optional features:
 	platform type.	The "pvs-studio" Makefile target can then be
 	used if PVS-Studio is installed.
 
+  --enable-python
+	Enable support for sudo plugins written in Python 3.
+        This requires a Python 3 development environment (including
+        Python 3 header files).
+
+  --disable-log-server
+	Disable building the sudo_logsrvd log server.
+
+  --disable-log-client
+	Disable sudoers support for using the sudo_logsrvd log server.
+
 Operating system-specific options:
   --disable-setreuid
 	Disable use of the setreuid() function for operating systems

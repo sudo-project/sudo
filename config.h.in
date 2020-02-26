@@ -1149,6 +1149,10 @@
 /* Define to 1 if the code in interfaces.c does not compile for you. */
 #undef STUB_LOAD_INTERFACES
 
+/* Define to 1 to compile support for sudo_logsrvd in the sudoers I/O log
+   plugin. */
+#undef SUDOERS_IOLOG_CLIENT
+
 /* An instance string to append to the username (separated by a slash) for
    Kerberos V authentication. */
 #undef SUDO_KRB5_INSTANCE

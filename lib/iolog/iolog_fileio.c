@@ -542,6 +542,8 @@ iolog_mkpath(char *path)
     else
 	ret = iolog_mkdirs(path);
 
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "iolog path %s", path);
+
     debug_return_bool(ret);
 }
 
