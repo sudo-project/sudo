@@ -33,6 +33,10 @@
 static struct _inittab * python_inittab_copy = NULL;
 static size_t python_inittab_copy_len = 0;
 
+#ifndef PLUGIN_DIR
+#define PLUGIN_DIR ""
+#endif
+
 const char *
 _lookup_value(char * const keyvalues[], const char *key)
 {
@@ -372,6 +376,30 @@ _python_plugin_register_plugin_in_py_ctx(void)
 }
 
 int
+_python_plugin_set_path(struct PluginContext *plugin_ctx, const char *path)
+{
+    if (path == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "No python module path is specified. "
+                                         "Use 'ModulePath' plugin config option in 'sudo.conf'\n");
+        return SUDO_RC_ERROR;
+    }
+
+    if (*path == '/') { // absolute path
+        plugin_ctx->plugin_path = strdup(path);
+    } else {
+        if (asprintf(&plugin_ctx->plugin_path, PLUGIN_DIR "/python/%s", path) < 0)
+            plugin_ctx->plugin_path = NULL;
+    }
+
+    if (plugin_ctx->plugin_path == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to allocate memory");
+        return SUDO_RC_ERROR;
+    }
+
+    return SUDO_RC_OK;
+}
+
+int
 python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options[],
                    unsigned int version)
 {
@@ -395,20 +423,12 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
         debug_return_int(SUDO_RC_ERROR);
     }
 
-    const char *module_path = _lookup_value(plugin_options, "ModulePath");
-    if (module_path == NULL) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "No python module path is specified. "
-                                         "Use 'ModulePath' plugin config option in 'sudo.conf'\n", module_path);
-        goto cleanup;
-    }
-    plugin_ctx->plugin_path = strdup(module_path);
-    if (plugin_ctx->plugin_path == NULL) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to allocate memory");
+    if (_python_plugin_set_path(plugin_ctx, _lookup_value(plugin_options, "ModulePath")) != SUDO_RC_OK) {
         goto cleanup;
     }
 
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "Loading python module from path '%s'", module_path);
-    plugin_ctx->py_module = _import_module(module_path);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "Loading python module from path '%s'", plugin_ctx->plugin_path);
+    plugin_ctx->py_module = _import_module(plugin_ctx->plugin_path);
     if (plugin_ctx->py_module == NULL) {
         goto cleanup;
     }
@@ -416,7 +436,7 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
     const char *plugin_class = _lookup_value(plugin_options, "ClassName");
     if (plugin_class == NULL) {
         py_sudo_log(SUDO_CONV_ERROR_MSG, "No plugin class is specified for python module '%s'. "
-                    "Use 'ClassName' configuration option in 'sudo.conf'\n", module_path);
+                    "Use 'ClassName' configuration option in 'sudo.conf'\n", plugin_ctx->plugin_path);
         goto cleanup;
     }
 

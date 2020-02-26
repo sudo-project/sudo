@@ -51,7 +51,7 @@ LIBS = $(LT_LIBS)
 LIBPYTHONPLUGIN = python_plugin.la
 
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(top_srcdir) -DSRC_DIR=\"$(abs_srcdir)\" @CPPFLAGS@ @PYTHON_INCLUDE@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(top_srcdir) -DPLUGIN_DIR=\"$(plugindir)\" -DSRC_DIR=\"$(abs_srcdir)\" @CPPFLAGS@ @PYTHON_INCLUDE@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@

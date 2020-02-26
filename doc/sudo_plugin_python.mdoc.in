@@ -153,6 +153,8 @@ The plugin arguments are as follows:
 .Bl -tag -width 4n
 .It ModulePath
 The path of a python file which contains the class of the sudo Python plugin.
+It must be either an absolute path or a path relative to the sudo Python plugin
+directory: "@plugindir@/python".
 .It ClassName
 The name of the class implementing the sudo Python plugin.
 .El
