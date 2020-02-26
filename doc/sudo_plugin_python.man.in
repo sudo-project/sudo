@@ -186,7 +186,11 @@ It must be either an absolute path or a path relative to the sudo Python plugin
 directory: "@plugindir@/python".
 .TP 6n
 ClassName
-The name of the class implementing the sudo Python plugin.
+(Optional.) The name of the class implementing the sudo Python plugin.
+If not supplied, the one and only sudo.Plugin that is present in the module
+will be used.
+If there are multiple such plugins in the module (or none), it
+will result in an error.
 .SS "Policy plugin API"
 Policy plugins must be registered in
 sudo.conf(@mansectform@).

@@ -584,10 +584,31 @@ check_loading_fails_with_missing_path(void)
 }
 
 int
-check_loading_fails_with_missing_classname(void)
+check_loading_succeeds_with_missing_classname(void)
 {
     str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(2, "ModulePath=" SRC_DIR "/example_debugging.py", NULL);
+
+    const char *errstr = NULL;
+
+    VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
+                              data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
+                              data.user_env, data.plugin_options, &errstr), SUDO_RC_OK);
+    VERIFY_PTR(errstr, NULL);
+    VERIFY_INT(python_io->show_version(1), SUDO_RC_OK);
+    python_io->close(0, 0);
+
+    VERIFY_STDOUT(expected_path("check_loading_succeeds_with_missing_classname.stdout"));
+    VERIFY_STR(data.stderr_str, "");
+
+    return true;
+}
+
+int
+check_loading_fails_with_missing_classname(void)
+{
+    str_array_free(&data.plugin_options);
+    data.plugin_options = create_str_array(2, "ModulePath=" SRC_DIR "/regress/plugin_errorstr.py", NULL);
     return check_loading_fails("missing_classname");
 }
 
@@ -1511,6 +1532,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_loading_fails_with_missing_path());
+    RUN_TEST(check_loading_succeeds_with_missing_classname());
     RUN_TEST(check_loading_fails_with_missing_classname());
     RUN_TEST(check_loading_fails_with_wrong_classname());
     RUN_TEST(check_loading_fails_with_wrong_path());
