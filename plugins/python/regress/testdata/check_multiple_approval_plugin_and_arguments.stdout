@@ -59,7 +59,7 @@
     "_id": "(APPROVAL 2)"
 }
 (APPROVAL 1) Show version was called with arguments: (0,)
-Python approval plugin API version 1.0
+Python approval plugin (API 1.0): ApprovalTestPlugin (loaded from 'SRC_DIR/regress/plugin_approval_test.py')
 (APPROVAL 2) Show version was called with arguments: (1,)
 (APPROVAL 1) Check was called with arguments: (('CMDINFO1=value1', 'CMDINFO2=VALUE2'), ('whoami', '--help'), ('USER_ENV1=VALUE1', 'USER_ENV2=value2'))
 (APPROVAL 2) Check was called with arguments: (('CMDINFO1=value1', 'CMDINFO2=VALUE2'), ('whoami', '--help'), ('USER_ENV1=VALUE1', 'USER_ENV2=value2'))

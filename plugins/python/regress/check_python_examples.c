@@ -175,7 +175,8 @@ check_example_io_plugin_version_display(int is_verbose)
     if (is_verbose) {
         // Note: the exact python version is environment dependant
         VERIFY_STR_CONTAINS(data.stdout_str, "Python interpreter version:");
-        VERIFY_STR_CONTAINS(data.stdout_str, "Python io plugin API version");
+        *strstr(data.stdout_str, "Python interpreter version:") = '\0';
+        VERIFY_STDOUT(expected_path("check_example_io_plugin_version_display_full.stdout"));
     } else {
         VERIFY_STDOUT(expected_path("check_example_io_plugin_version_display.stdout"));
     }
@@ -687,7 +688,8 @@ check_example_policy_plugin_version_display(int is_verbose)
     if (is_verbose) {
         // Note: the exact python version is environment dependant
         VERIFY_STR_CONTAINS(data.stdout_str, "Python interpreter version:");
-        VERIFY_STR_CONTAINS(data.stdout_str, "Python policy plugin API version");
+        *strstr(data.stdout_str, "Python interpreter version:") = '\0';
+        VERIFY_STDOUT(expected_path("check_example_policy_plugin_version_display_full.stdout"));
     } else {
         VERIFY_STDOUT(expected_path("check_example_policy_plugin_version_display.stdout"));
     }
@@ -928,7 +930,10 @@ check_policy_plugin_callbacks_are_optional(void)
     VERIFY_PTR(python_policy->invalidate, NULL);
     VERIFY_PTR_NE(python_policy->check_policy, NULL); // (not optional)
     VERIFY_PTR(python_policy->init_session, NULL);
-    VERIFY_PTR(python_policy->show_version, NULL);
+
+    // show_version always displays the plugin, but it is optional in the python layer
+    VERIFY_PTR_NE(python_policy->show_version, NULL);
+    VERIFY_INT(python_policy->show_version(1), SUDO_RC_OK);
 
     python_policy->close(0, 0);
     return true;
@@ -1014,8 +1019,11 @@ check_io_plugin_callbacks_are_optional(void)
     VERIFY_PTR(python_io->log_stderr, NULL);
     VERIFY_PTR(python_io->log_ttyin, NULL);
     VERIFY_PTR(python_io->log_ttyout, NULL);
-    VERIFY_PTR(python_io->show_version, NULL);
     VERIFY_PTR(python_io->change_winsize, NULL);
+
+    // show_version always displays the plugin, but it is optional in the python layer
+    VERIFY_PTR_NE(python_io->show_version, NULL);
+    VERIFY_INT(python_io->show_version(1), SUDO_RC_OK);
 
     python_io->close(0, 0);
     return true;
@@ -1261,7 +1269,10 @@ check_audit_plugin_callbacks_are_optional(void)
     VERIFY_PTR(python_audit->accept, NULL);
     VERIFY_PTR(python_audit->reject, NULL);
     VERIFY_PTR(python_audit->error, NULL);
-    VERIFY_PTR(python_audit->show_version, NULL);
+
+    // show_version always displays the plugin, but it is optional in the python layer
+    VERIFY_PTR_NE(python_audit->show_version, NULL);
+    VERIFY_INT(python_audit->show_version(1), SUDO_RC_OK);
 
     python_audit->close(SUDO_PLUGIN_NO_STATUS, 0);
     return true;
