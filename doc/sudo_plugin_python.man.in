@@ -16,7 +16,6 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "December 21, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .TH "SUDO_PLUGIN_PYTHON" "5" "February 19, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
@@ -183,6 +182,8 @@ The plugin arguments are as follows:
 .TP 6n
 ModulePath
 The path of a python file which contains the class of the sudo Python plugin.
+It must be either an absolute path or a path relative to the sudo Python plugin
+directory: "@plugindir@/python".
 .TP 6n
 ClassName
 The name of the class implementing the sudo Python plugin.
