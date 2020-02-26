@@ -531,8 +531,13 @@ python_plugin_show_version(struct PluginContext *plugin_ctx, const char *python_
 {
     debug_decl(python_plugin_show_version, PYTHON_DEBUG_CALLBACKS);
 
-    debug_return_int(python_plugin_api_rc_call(plugin_ctx, python_callback_name,
-                                               Py_BuildValue("(i)", is_verbose)));
+    int rc = SUDO_RC_OK;
+    if (PyObject_HasAttrString(plugin_ctx->py_instance, python_callback_name)) {
+        rc = python_plugin_api_rc_call(plugin_ctx, python_callback_name,
+                                       Py_BuildValue("(i)", is_verbose));
+    }
+
+    debug_return_int(rc);
 }
 
 void
