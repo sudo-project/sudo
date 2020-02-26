@@ -103,7 +103,6 @@ python_plugin_audit_open(struct AuditPluginContext *audit_ctx,
     MARK_CALLBACK_OPTIONAL(accept);
     MARK_CALLBACK_OPTIONAL(reject);
     MARK_CALLBACK_OPTIONAL(error);
-    MARK_CALLBACK_OPTIONAL(show_version);
 
     plugin_ctx->call_close = 1;
     rc = _call_plugin_open(audit_ctx, submit_optind, submit_argv);
@@ -230,14 +229,8 @@ python_plugin_audit_show_version(struct AuditPluginContext *audit_ctx, int verbo
     struct PluginContext *plugin_ctx = BASE_CTX(audit_ctx);
     PyThreadState_Swap(plugin_ctx->py_interpreter);
 
-    if (verbose) {
-        py_sudo_log(SUDO_CONV_INFO_MSG, "Python audit plugin API version %d.%d\n",
-                    SUDO_API_VERSION_GET_MAJOR(PY_AUDIT_PLUGIN_VERSION),
-                    SUDO_API_VERSION_GET_MINOR(PY_AUDIT_PLUGIN_VERSION));
-    }
-
     debug_return_int(python_plugin_show_version(plugin_ctx,
-        CALLBACK_PYNAME(show_version), verbose));
+        CALLBACK_PYNAME(show_version), verbose, PY_AUDIT_PLUGIN_VERSION, "audit"));
 }
 
 __dso_public struct audit_plugin python_audit;

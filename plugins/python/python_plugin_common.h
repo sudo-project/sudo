@@ -28,6 +28,7 @@ struct PluginContext {
     PyObject *py_instance;
     int call_close;
     unsigned int sudo_api_version;
+    char *plugin_path;
 
     // We use this to let the error string live until sudo and the audit plugins
     // are using it.
@@ -50,7 +51,7 @@ int python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int versi
 void python_plugin_deinit(struct PluginContext *plugin_ctx);
 
 int python_plugin_show_version(struct PluginContext *plugin_ctx,
-                               const char *python_callback_name, int isVerbose);
+                               const char *python_callback_name, int isVerbose, unsigned int plugin_api_version, const char *plugin_api_name);
 
 CPYCHECKER_STEALS_REFERENCE_TO_ARG(3)
 void python_plugin_close(struct PluginContext *plugin_ctx, const char *callback_name,

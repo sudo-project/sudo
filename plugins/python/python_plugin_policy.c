@@ -73,7 +73,6 @@ python_plugin_policy_open(unsigned int version, sudo_conv_t conversation,
     }
 
     // skip plugin callbacks which are not mandatory
-    MARK_CALLBACK_OPTIONAL(show_version);
     MARK_CALLBACK_OPTIONAL(list);
     MARK_CALLBACK_OPTIONAL(validate);
     MARK_CALLBACK_OPTIONAL(invalidate);
@@ -200,13 +199,8 @@ python_plugin_policy_version(int verbose)
 
     PyThreadState_Swap(plugin_ctx.py_interpreter);
 
-    if (verbose) {
-        py_sudo_log(SUDO_CONV_INFO_MSG, "Python policy plugin API version %d.%d\n",
-                    SUDO_API_VERSION_GET_MAJOR(PY_POLICY_PLUGIN_VERSION),
-                    SUDO_API_VERSION_GET_MINOR(PY_POLICY_PLUGIN_VERSION));
-    }
-
-    debug_return_int(python_plugin_show_version(&plugin_ctx, CALLBACK_PYNAME(show_version), verbose));
+    debug_return_int(python_plugin_show_version(&plugin_ctx, CALLBACK_PYNAME(show_version),
+                                                verbose, PY_POLICY_PLUGIN_VERSION, "policy"));
 }
 
 int
