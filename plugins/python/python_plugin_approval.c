@@ -141,14 +141,8 @@ python_plugin_approval_show_version(struct ApprovalPluginContext *approval_ctx, 
     struct PluginContext *plugin_ctx = BASE_CTX(approval_ctx);
     PyThreadState_Swap(plugin_ctx->py_interpreter);
 
-    if (verbose) {
-        py_sudo_log(SUDO_CONV_INFO_MSG, "Python approval plugin API version %d.%d\n",
-                    SUDO_API_VERSION_GET_MAJOR(PY_APPROVAL_PLUGIN_VERSION),
-                    SUDO_API_VERSION_GET_MINOR(PY_APPROVAL_PLUGIN_VERSION));
-    }
-
     debug_return_int(python_plugin_show_version(plugin_ctx,
-        CALLBACK_PYNAME(show_version), verbose));
+        CALLBACK_PYNAME(show_version), verbose, PY_APPROVAL_PLUGIN_VERSION, "approval"));
 }
 
 __dso_public struct approval_plugin python_approval;

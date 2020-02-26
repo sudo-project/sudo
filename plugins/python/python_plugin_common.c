@@ -401,6 +401,11 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
                                          "Use 'ModulePath' plugin config option in 'sudo.conf'\n", module_path);
         goto cleanup;
     }
+    plugin_ctx->plugin_path = strdup(module_path);
+    if (plugin_ctx->plugin_path == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to allocate memory");
+        goto cleanup;
+    }
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "Loading python module from path '%s'", module_path);
     plugin_ctx->py_module = _import_module(module_path);
@@ -456,6 +461,7 @@ python_plugin_deinit(struct PluginContext *plugin_ctx)
     // it is a rare tested scenario.
 
     free(plugin_ctx->callback_error);
+    free(plugin_ctx->plugin_path);
     memset(plugin_ctx, 0, sizeof(*plugin_ctx));
 
     python_debug_deregister();
@@ -527,9 +533,19 @@ python_plugin_api_rc_call(struct PluginContext *plugin_ctx, const char *func_nam
 }
 
 int
-python_plugin_show_version(struct PluginContext *plugin_ctx, const char *python_callback_name, int is_verbose)
+python_plugin_show_version(struct PluginContext *plugin_ctx, const char *python_callback_name,
+                           int is_verbose, unsigned int plugin_api_version, const char *plugin_api_name)
 {
     debug_decl(python_plugin_show_version, PYTHON_DEBUG_CALLBACKS);
+
+    if (is_verbose) {
+        py_sudo_log(SUDO_CONV_INFO_MSG, "Python %s plugin (API %d.%d): %s (loaded from '%s')\n",
+                    plugin_api_name,
+                    SUDO_API_VERSION_GET_MAJOR(plugin_api_version),
+                    SUDO_API_VERSION_GET_MINOR(plugin_api_version),
+                    python_plugin_name(plugin_ctx),
+                    plugin_ctx->plugin_path);
+    }
 
     int rc = SUDO_RC_OK;
     if (PyObject_HasAttrString(plugin_ctx->py_instance, python_callback_name)) {

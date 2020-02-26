@@ -109,7 +109,6 @@ python_plugin_io_open(struct IOPluginContext *io_ctx,
     }
 
     // skip plugin callbacks which are not mandatory
-    MARK_CALLBACK_OPTIONAL(show_version);
     MARK_CALLBACK_OPTIONAL(log_ttyin);
     MARK_CALLBACK_OPTIONAL(log_ttyout);
     MARK_CALLBACK_OPTIONAL(log_stdin);
@@ -142,13 +141,8 @@ python_plugin_io_show_version(struct IOPluginContext *io_ctx, int verbose)
 
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
 
-    if (verbose) {
-        py_sudo_log(SUDO_CONV_INFO_MSG, "Python io plugin API version %d.%d\n",
-                    SUDO_API_VERSION_GET_MAJOR(PY_IO_PLUGIN_VERSION),
-                    SUDO_API_VERSION_GET_MINOR(PY_IO_PLUGIN_VERSION));
-    }
-
-    debug_return_int(python_plugin_show_version(BASE_CTX(io_ctx), CALLBACK_PYNAME(show_version), verbose));
+    debug_return_int(python_plugin_show_version(BASE_CTX(io_ctx), CALLBACK_PYNAME(show_version),
+                                                verbose, PY_IO_PLUGIN_VERSION, "io"));
 }
 
 int
