@@ -38,12 +38,6 @@ struct ApprovalPluginContext
 // This also verifies compile time that the name matches the sudo plugin API.
 #define CALLBACK_PYNAME(func_name) ((void)CALLBACK_PLUGINFUNC(func_name), #func_name)
 
-#define MARK_CALLBACK_OPTIONAL(function_name) \
-    do { \
-        python_plugin_mark_callback_optional(plugin_ctx, CALLBACK_PYNAME(function_name), \
-            (void **)&CALLBACK_PLUGINFUNC(function_name)); \
-    } while(0)
-
 
 static int
 python_plugin_approval_open(struct ApprovalPluginContext *approval_ctx,
@@ -92,9 +86,6 @@ python_plugin_approval_open(struct ApprovalPluginContext *approval_ctx,
     if (rc != SUDO_RC_OK) {
         debug_return_int(rc);
     }
-
-    // skip plugin callbacks which are not mandatory
-    MARK_CALLBACK_OPTIONAL(show_version);
 
     debug_return_int(rc);
 }
