@@ -1,2 +1,3 @@
-No plugin class is specified for python module 'SRC_DIR/example_debugging.py'. Use 'ClassName' configuration option in 'sudo.conf'
+No plugin class is specified for python module 'SRC_DIR/regress/plugin_errorstr.py'. Use 'ClassName' configuration option in 'sudo.conf'
+Possible plugins: ErrorMsgPlugin, ConstructErrorPlugin
 Failed during loading plugin class

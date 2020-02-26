@@ -399,6 +399,82 @@ _python_plugin_set_path(struct PluginContext *plugin_ctx, const char *path)
     return SUDO_RC_OK;
 }
 
+/* Returns the list of sudo.Plugins in a module */
+static PyObject *
+_python_plugin_class_list(PyObject *py_module) {
+    PyObject *py_module_dict = PyModule_GetDict(py_module);  // Note: borrowed
+    PyObject *key, *value; // Note: borrowed
+    Py_ssize_t pos = 0;
+    PyObject *py_plugin_list = PyList_New(0);
+
+    while (PyDict_Next(py_module_dict, &pos, &key, &value)) {
+        if (PyObject_IsSubclass(value, (PyObject *)sudo_type_Plugin) == 1) {
+            if (PyList_Append(py_plugin_list, key) != 0)
+                goto cleanup;
+        } else {
+            PyErr_Clear();
+        }
+    }
+
+cleanup:
+    if (PyErr_Occurred()) {
+        Py_CLEAR(py_plugin_list);
+    }
+    return py_plugin_list;
+}
+
+/* Gets a sudo.Plugin class from the specified module. The argument "plugin_class"
+ * can be NULL in which case it loads the one and only "sudo.Plugin" present
+ * in the module (if so), or displays helpful error message. */
+static PyObject *
+_python_plugin_get_class(const char *plugin_path, PyObject *py_module, const char *plugin_class)
+{
+    debug_decl(python_plugin_init, PYTHON_DEBUG_PLUGIN_LOAD);
+    PyObject *py_plugin_list = NULL, *py_class = NULL;
+
+    if (plugin_class == NULL) {
+        py_plugin_list = _python_plugin_class_list(py_module);
+        if (py_plugin_list == NULL) {
+            goto cleanup;
+        }
+
+        if (PyList_Size(py_plugin_list) == 1) {
+            PyObject *py_plugin_name = PyList_GetItem(py_plugin_list, 0); // Note: borrowed
+            plugin_class = PyUnicode_AsUTF8(py_plugin_name);
+        }
+    }
+
+    if (plugin_class == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "No plugin class is specified for python module '%s'. "
+                    "Use 'ClassName' configuration option in 'sudo.conf'\n", plugin_path);
+        if (py_plugin_list != NULL) {
+            char *possible_plugins = py_join_str_list(py_plugin_list, ", ");
+            if (possible_plugins != NULL) {
+                py_sudo_log(SUDO_CONV_ERROR_MSG, "Possible plugins: %s\n", possible_plugins);
+                free(possible_plugins);
+            }
+        }
+        goto cleanup;
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "Using plugin class '%s'", plugin_class);
+    py_class = PyObject_GetAttrString(py_module, plugin_class);
+    if (py_class == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to find plugin class '%s'\n", plugin_class);
+        goto cleanup;
+    }
+
+    if (!PyObject_IsSubclass(py_class, (PyObject *)sudo_type_Plugin)) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "Plugin class '%s' does not inherit from 'sudo.Plugin'\n", plugin_class);
+        Py_CLEAR(py_class);
+        goto cleanup;
+    }
+
+cleanup:
+    Py_CLEAR(py_plugin_list);
+    debug_return_ptr(py_class);
+}
+
 int
 python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options[],
                    unsigned int version)
@@ -419,8 +495,7 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
     PyThreadState_Swap(plugin_ctx->py_interpreter);
 
     if (!sudo_conf_developer_mode() && sudo_module_register_importblocker() < 0) {
-        py_log_last_error(NULL);
-        debug_return_int(SUDO_RC_ERROR);
+        goto cleanup;
     }
 
     if (_python_plugin_set_path(plugin_ctx, _lookup_value(plugin_options, "ModulePath")) != SUDO_RC_OK) {
@@ -433,23 +508,9 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
         goto cleanup;
     }
 
-    const char *plugin_class = _lookup_value(plugin_options, "ClassName");
-    if (plugin_class == NULL) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "No plugin class is specified for python module '%s'. "
-                    "Use 'ClassName' configuration option in 'sudo.conf'\n", plugin_ctx->plugin_path);
-        goto cleanup;
-    }
-
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "Using plugin class '%s'", plugin_class);
-    plugin_ctx->py_class = PyObject_GetAttrString(plugin_ctx->py_module, plugin_class);
+    plugin_ctx->py_class = _python_plugin_get_class(plugin_ctx->plugin_path, plugin_ctx->py_module,
+                                                    _lookup_value(plugin_options, "ClassName"));
     if (plugin_ctx->py_class == NULL) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to find plugin class '%s'\n", plugin_class);
-        goto cleanup;
-    }
-
-    if (!PyObject_IsSubclass(plugin_ctx->py_class, (PyObject *)sudo_type_Plugin)) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "Plugin class '%s' does not inherit from 'sudo.Plugin'\n", plugin_class);
-        Py_CLEAR(plugin_ctx->py_class);
         goto cleanup;
     }
 
