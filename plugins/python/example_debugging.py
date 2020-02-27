@@ -1,5 +1,7 @@
 import sudo
 
+import logging
+
 
 class DebugDemoPlugin(sudo.Plugin):
     """
@@ -60,6 +62,15 @@ class DebugDemoPlugin(sudo.Plugin):
         # (or any more verbose level)
         sudo.debug(sudo.DEBUG.INFO, "My demo purpose plugin shows "
                    "this INFO level debug message")
+
+        # You can also use python log system, because sudo sets its log handler
+        # on the root logger.
+        # Note that the level of python logging is separate than the one set in
+        # sudo.conf. If using the python logger, each will have effect.
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+        logger.error("Python log system shows this ERROR level debug message")
+        logger.info("Python log system shows this INFO level debug message")
 
         # If you raise the level to info or below, the call of the debug
         # will also be logged.
