@@ -689,10 +689,10 @@ fmt_accept_message(struct client_closure *closure)
     /* Fill in info_msgs */
     n = 0;
 
-    /* clientargv (not supported) */
-    /* clientpid */
-    /* clientppid */
-    /* clientsid */
+    /* TODO: clientargv (not currently supported by API) */
+    /* TODO: clientpid */
+    /* TODO: clientppid */
+    /* TODO: clientsid */
 
     accept_msg.info_msgs[n]->key = "columns";
     accept_msg.info_msgs[n]->numval = details->cols;
