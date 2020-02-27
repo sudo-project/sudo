@@ -318,6 +318,7 @@ plugins/python/pyhelpers_cpychecker.h
 plugins/python/python_baseplugin.c
 plugins/python/python_convmessage.c
 plugins/python/python_importblocker.c
+plugins/python/python_loghandler.c
 plugins/python/python_plugin_approval.c
 plugins/python/python_plugin_approval_multi.inc
 plugins/python/python_plugin_audit.c

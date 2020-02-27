@@ -1332,6 +1332,20 @@ one or more messages to log
 .It trace Ta sudo.DEBUG.TRACE Ta
 .It debug Ta sudo.DEBUG.DEBUG Ta very extreme verbose debugging
 .El
+.Pp
+.Em Using the logging module
+.Pp
+Alternatively, a plugin can use the built in logging module of Python as well.
+Sudo adds its log handler to the root logger, so by default all output of a
+logger will get forwarded to sudo log system, as it would call sudo.debug.
+.Pp
+The log handler of sudo will map each Python log level of a message to
+the appropriate sudo debug level.
+Note however, that sudo debug system will only get the messages not filtered
+out by the Python loggers.
+For example, the log level of the python logger will be an additional filter
+for the log messages, and is usually very different from what level is set in sudo.conf
+for the sudo debug system.
 .Ss Debug example
 Sudo ships an example debug plugin by default.
 To try it, register it by adding the following lines to
