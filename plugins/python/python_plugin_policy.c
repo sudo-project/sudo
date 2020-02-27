@@ -179,7 +179,7 @@ python_plugin_policy_list(int argc, char * const argv[], int verbose, const char
 
     PyObject *py_argv = py_str_array_to_tuple_with_count(argc, argv);
     if (py_argv == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: Failed to create argv argument for the python call\n", __PRETTY_FUNCTION__);
+        sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: Failed to create argv argument for the python call\n", __func__);
         debug_return_int(SUDO_RC_ERROR);
     }
 

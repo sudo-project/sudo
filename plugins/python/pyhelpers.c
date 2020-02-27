@@ -208,7 +208,7 @@ py_str_array_from_tuple(PyObject *py_tuple)
 
     if (!PyTuple_Check(py_tuple)) {
         PyErr_Format(PyExc_ValueError, "%s: value error, argument should be a tuple but it is '%s'",
-                     __PRETTY_FUNCTION__, Py_TYPENAME(py_tuple));
+                     __func__, Py_TYPENAME(py_tuple));
         debug_return_ptr(NULL);
     }
 

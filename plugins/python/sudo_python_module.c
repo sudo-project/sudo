@@ -399,14 +399,14 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
 
     if (py_ctx.sudo_conv == NULL) {
         PyErr_Format(sudo_exc_SudoException, "%s: conversation is unavailable",
-                     __PRETTY_FUNCTION__);
+                     __func__);
         goto cleanup;
     }
 
     int rc = py_sudo_conv((int)num_msgs, msgs, replies, &callback);
     if (rc != 0) {
         PyErr_Format(sudo_exc_ConversationInterrupted,
-                     "%s: conversation was interrupted", __PRETTY_FUNCTION__, rc);
+                     "%s: conversation was interrupted", __func__, rc);
         goto cleanup;
     }
 
@@ -419,7 +419,7 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
             }
 
             if (PyTuple_SetItem(py_result, i, py_reply) != 0) {  // this steals a reference even on error
-                PyErr_Format(sudo_exc_SudoException, "%s: failed to set tuple item", __PRETTY_FUNCTION__);
+                PyErr_Format(sudo_exc_SudoException, "%s: failed to set tuple item", __func__);
                 goto cleanup;
             }
 
