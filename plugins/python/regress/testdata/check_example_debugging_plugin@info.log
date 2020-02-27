@@ -1,4 +1,8 @@
-__init__ @ SRC_DIR/example_debugging.py:56 debugs:
+__init__ @ SRC_DIR/example_debugging.py:58 debugs:
 My demo purpose plugin shows this ERROR level debug message
-__init__ @ SRC_DIR/example_debugging.py:61 debugs:
+__init__ @ SRC_DIR/example_debugging.py:63 debugs:
 My demo purpose plugin shows this INFO level debug message
+handle @ /usr/lib/python3.7/logging/__init__.py:894 debugs:
+Python log system shows this ERROR level debug message
+handle @ /usr/lib/python3.7/logging/__init__.py:894 debugs:
+Python log system shows this INFO level debug message
