@@ -178,7 +178,7 @@ sudo_module_register_importblocker(void)
     }
     Py_INCREF(py_meta_path);
 
-    py_import_blocker_cls = sudo_module_create_class("sudo.ImportBlocker", _sudo_ImportBlocker_class_methods);
+    py_import_blocker_cls = sudo_module_create_class("sudo.ImportBlocker", _sudo_ImportBlocker_class_methods, NULL);
     if (py_import_blocker_cls == NULL)
         goto cleanup;
 

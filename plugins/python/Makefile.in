@@ -118,6 +118,7 @@ EXAMPLES = example_conversation.py  example_debugging.py  example_group_plugin.p
            example_audit_plugin.py example_approval_plugin.py
 
 OBJS =	python_plugin_common.lo python_plugin_policy.lo python_plugin_io.lo python_plugin_group.lo pyhelpers.lo \
+	python_loghandler.lo \
 	python_importblocker.lo python_convmessage.lo sudo_python_module.lo sudo_python_debug.lo \
 	python_baseplugin.lo python_plugin_audit.lo python_plugin_approval.lo
 
@@ -266,6 +267,12 @@ python_importblocker.i: $(srcdir)/python_importblocker.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 python_importblocker.plog: python_importblocker.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_importblocker.c --i-file $< --output-file $@
+python_loghandler.lo: $(srcdir)/python_loghandler.c 
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/python_loghandler.c
+python_loghandler.i: $(srcdir)/python_loghandler.c 
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+python_loghandler.plog: python_loghandler.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_loghandler.c --i-file $< --output-file $@
 python_plugin_approval.lo: $(srcdir)/python_plugin_approval.c 
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/python_plugin_approval.c
 python_plugin_approval.i: $(srcdir)/python_plugin_approval.c 

@@ -31,7 +31,10 @@ extern PyObject *sudo_exc_PluginError;   // an error with message
 extern PyTypeObject *sudo_type_Plugin;
 extern PyTypeObject *sudo_type_ConvMessage;
 
-PyObject *sudo_module_create_class(const char *class_name, PyMethodDef *class_methods);
+extern PyObject *sudo_type_LogHandler;
+
+PyObject *sudo_module_create_class(const char *class_name, PyMethodDef *class_methods,
+                                   PyObject *base_class);
 
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 int sudo_module_register_importblocker(void);
@@ -47,6 +50,14 @@ int sudo_module_ConvMessages_to_c(PyObject *py_tuple, Py_ssize_t *num_msgs, stru
 
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 int sudo_module_register_baseplugin(PyObject *py_module);
+
+CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
+int sudo_module_register_loghandler(PyObject *py_module);
+
+CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
+int sudo_module_set_default_loghandler(void);
+
+PyObject *python_sudo_debug(PyObject *py_self, PyObject *py_args);
 
 PyMODINIT_FUNC sudo_module_init(void);
 

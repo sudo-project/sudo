@@ -38,7 +38,6 @@ static PyObject *sudo_exc_ConversationInterrupted;
 // "kwargs" is a dict of the keyword arguments or NULL if there are none
 static PyObject *python_sudo_log_info(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs);
 static PyObject *python_sudo_log_error(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs);
-static PyObject *python_sudo_debug(PyObject *py_self, PyObject *py_args);
 static PyObject *python_sudo_conversation(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs);
 static PyObject *python_sudo_options_as_dict(PyObject *py_self, PyObject *py_args);
 static PyObject *python_sudo_options_from_dict(PyObject *py_self, PyObject *py_args);
@@ -250,46 +249,6 @@ python_sudo_log_error(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs)
     return python_sudo_log(SUDO_CONV_ERROR_MSG, py_self, py_args, py_kwargs);
 }
 
-static void
-_debug_plugin(int log_level, const char *log_message)
-{
-    debug_decl_vars(python_sudo_debug, PYTHON_DEBUG_PLUGIN);
-
-    if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
-        // at trace level we output the position for the python log as well
-        char *func_name = NULL, *file_name = NULL;
-        long line_number = -1;
-
-        if (py_get_current_execution_frame(&file_name, &line_number, &func_name) == SUDO_RC_OK) {
-            sudo_debug_printf(SUDO_DEBUG_INFO, "%s @ %s:%ld debugs:\n",
-                              func_name, file_name, line_number);
-        }
-
-        free(func_name);
-        free(file_name);
-    }
-
-    sudo_debug_printf(log_level, "%s\n", log_message);
-}
-
-static PyObject *
-python_sudo_debug(PyObject *Py_UNUSED(py_self), PyObject *py_args)
-{
-    debug_decl(python_sudo_debug, PYTHON_DEBUG_C_CALLS);
-    py_debug_python_call("sudo", "debug", py_args, NULL, PYTHON_DEBUG_C_CALLS);
-
-    int log_level = SUDO_DEBUG_DEBUG;
-    const char *log_message = NULL;
-    if (!PyArg_ParseTuple(py_args, "is:sudo.debug", &log_level, &log_message)) {
-        debug_return_ptr(NULL);
-    }
-
-    _debug_plugin(log_level, log_message);
-
-    debug_return_ptr_pynone;
-}
-
-
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 static int py_expect_arg_callable(PyObject *py_callable,
     const char *func_name, const char *arg_name)
@@ -451,13 +410,19 @@ cleanup:
  * The resulting class object can be added to a module using PyModule_AddObject.
  */
 PyObject *
-sudo_module_create_class(const char *class_name, PyMethodDef *class_methods)
+sudo_module_create_class(const char *class_name, PyMethodDef *class_methods,
+                         PyObject *base_class)
 {
     debug_decl(sudo_module_create_class, PYTHON_DEBUG_INTERNAL);
 
     PyObject *py_base_classes = NULL, *py_class = NULL, *py_member_dict = NULL;
 
-    py_base_classes = PyTuple_New(0);
+    if (base_class == NULL) {
+        py_base_classes = PyTuple_New(0);
+    } else {
+        py_base_classes = Py_BuildValue("(O)", base_class);
+    }
+
     if (py_base_classes == NULL)
         goto cleanup;
 
@@ -627,6 +592,9 @@ sudo_module_init(void)
         goto cleanup;
 
     if (sudo_module_register_baseplugin(py_module) != SUDO_RC_OK)
+        goto cleanup;
+
+    if (sudo_module_register_loghandler(py_module) != SUDO_RC_OK)
         goto cleanup;
 
 cleanup:
