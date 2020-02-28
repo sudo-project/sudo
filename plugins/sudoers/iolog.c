@@ -656,6 +656,9 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
 
+    /* Initialize io_operations. */
+    sudoers_io_setops();
+
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
 	debug_return_int(true);
@@ -710,7 +713,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /*
      * Create local I/O log file or connect to remote log server.
      */
-    sudoers_io_setops();
     if ((ret = io_operations.open(&last_time)) != true)
 	goto done;
 
