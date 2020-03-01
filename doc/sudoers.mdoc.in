@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 22, 2020
+.Dd March 1, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2639,6 +2639,39 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.28 or higher.
+.It pam_rhost
+On systems that use PAM for authentication,
+.Nm sudo
+will set the PAM remote host value to the name of the local host
+when the
+.Em pam_rhost
+flag is enabled.
+On Linux systems, enabling
+.Em pam_rhost
+may result in DNS lookups of the local host name when PAM is initialized.
+On Solaris versions prior to Solaris 8,
+.Em pam_rhost
+must be enabled if
+.Em pam_ruser
+is also enabled to avoid a crash in the Solaris PAM implementation.
+.Pp
+This flag is
+.Em off
+by default on systems other than Solaris.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
+.It pam_ruser
+On systems that use PAM for authentication,
+.Nm sudo
+will set the PAM remote user value to the name of the user that invoked sudo
+when the
+.Em pam_ruser
+flag is enabled.
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .It pam_session
 On systems that use PAM for authentication,
 .Nm sudo

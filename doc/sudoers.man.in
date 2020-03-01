@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "January 22, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "March 1, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2804,6 +2804,41 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.8.28 or higher.
+.TP 18n
+pam_rhost
+On systems that use PAM for authentication,
+\fBsudo\fR
+will set the PAM remote host value to the name of the local host
+when the
+\fIpam_rhost\fR
+flag is enabled.
+On Linux systems, enabling
+\fIpam_rhost\fR
+may result in DNS lookups of the local host name when PAM is initialized.
+On Solaris versions prior to Solaris 8,
+\fIpam_rhost\fR
+must be enabled if
+\fIpam_ruser\fR
+is also enabled to avoid a crash in the Solaris PAM implementation.
+.sp
+This flag is
+\fIoff\fR
+by default on systems other than Solaris.
+.sp
+This setting is only supported by version 1.9.0 or higher.
+.TP 18n
+pam_ruser
+On systems that use PAM for authentication,
+\fBsudo\fR
+will set the PAM remote user value to the name of the user that invoked sudo
+when the
+\fIpam_ruser\fR
+flag is enabled.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 pam_session
 On systems that use PAM for authentication,

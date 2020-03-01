@@ -538,6 +538,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Only permit running commands as a user with a valid shell"),
 	NULL,
     }, {
+	"pam_ruser", T_FLAG,
+	N_("Set the pam remote user to the user running sudo"),
+	NULL,
+    }, {
+	"pam_rhost", T_FLAG,
+	N_("Set the pam remote host to the local host name"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

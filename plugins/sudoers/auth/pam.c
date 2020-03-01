@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2007-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1999-2005, 2007-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -229,22 +229,25 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 
     /*
      * Set PAM_RUSER to the invoking user (the "from" user).
-     * We set PAM_RHOST to avoid a bug in Solaris 7 and below.
+     * Solaris 7 and below require PAM_RHOST to be set if PAM_RUSER is.
+     * Note: PAM_RHOST may cause a DNS lookup on Linux in libaudit.
      */
-    rc = pam_set_item(pamh, PAM_RUSER, user_name);
-    if (rc != PAM_SUCCESS) {
-	errstr = sudo_pam_strerror(pamh, rc);
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "pam_set_item(pamh, PAM_RUSER, %s): %s", user_name, errstr);
+    if (def_pam_ruser) {
+	rc = pam_set_item(pamh, PAM_RUSER, user_name);
+	if (rc != PAM_SUCCESS) {
+	    errstr = sudo_pam_strerror(pamh, rc);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"pam_set_item(pamh, PAM_RUSER, %s): %s", user_name, errstr);
+	}
     }
-#ifdef __sun__
-    rc = pam_set_item(pamh, PAM_RHOST, user_host);
-    if (rc != PAM_SUCCESS) {
-	errstr = sudo_pam_strerror(pamh, rc);
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "pam_set_item(pamh, PAM_RHOST, %s): %s", user_host, errstr);
+    if (def_pam_rhost) {
+	rc = pam_set_item(pamh, PAM_RHOST, user_host);
+	if (rc != PAM_SUCCESS) {
+	    errstr = sudo_pam_strerror(pamh, rc);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"pam_set_item(pamh, PAM_RHOST, %s): %s", user_host, errstr);
+	}
     }
-#endif
 
 #if defined(__LINUX_PAM__) || defined(__sun__)
     /*

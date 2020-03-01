@@ -248,6 +248,10 @@
 #define def_runas_allow_unknown_id (sudo_defs_table[I_RUNAS_ALLOW_UNKNOWN_ID].sd_un.flag)
 #define I_RUNAS_CHECK_SHELL     124
 #define def_runas_check_shell   (sudo_defs_table[I_RUNAS_CHECK_SHELL].sd_un.flag)
+#define I_PAM_RUSER             125
+#define def_pam_ruser           (sudo_defs_table[I_PAM_RUSER].sd_un.flag)
+#define I_PAM_RHOST             126
+#define def_pam_rhost           (sudo_defs_table[I_PAM_RHOST].sd_un.flag)
 
 enum def_tuple {
 	never,

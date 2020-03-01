@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2007-2018
+ * Copyright (c) 1999-2005, 2007-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -514,6 +514,10 @@ init_defaults(void)
     def_env_reset = ENV_RESET;
     def_set_logname = true;
     def_closefrom = STDERR_FILENO + 1;
+    def_pam_ruser = true;
+#ifdef __sun__
+    def_pam_rhost = true;
+#endif
     if ((def_pam_service = strdup("sudo")) == NULL)
 	goto oom;
 #ifdef HAVE_PAM_LOGIN

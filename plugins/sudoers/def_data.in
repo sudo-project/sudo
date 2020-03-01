@@ -390,4 +390,9 @@ runas_allow_unknown_id
 runas_check_shell
 	T_FLAG
 	"Only permit running commands as a user with a valid shell"
-
+pam_ruser
+	T_FLAG
+	"Set the pam remote user to the user running sudo"
+pam_rhost
+	T_FLAG
+	"Set the pam remote host to the local host name"
