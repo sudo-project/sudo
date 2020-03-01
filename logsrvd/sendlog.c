@@ -435,7 +435,7 @@ client_closure_free(struct client_closure *closure)
  * Initialize a new client closure
  */
 static struct client_closure *
-client_closure_alloc(int sock,
+client_closure_alloc(int sock, struct sudo_event_base *base,
     struct timespec *elapsed, struct timespec *restart, const char *iolog_id,
     struct iolog_info *log_info)
 {
@@ -446,6 +446,7 @@ client_closure_alloc(int sock,
 	debug_return_ptr(NULL);
 
     closure->sock = sock;
+    closure->evbase = base;
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
 
@@ -721,7 +722,7 @@ fmt_accept_message(struct client_closure *closure)
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
-	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1)
+	if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1)
 	    ret = false;
     }
 
@@ -763,7 +764,7 @@ fmt_restart_message(struct client_closure *closure)
     client_msg.type_case = CLIENT_MESSAGE__TYPE_RESTART_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
-	if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1)
+	if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1)
 	    ret = false;
     }
 
@@ -1017,7 +1018,7 @@ client_message_completion(struct client_closure *closure)
 	break;
     case SEND_EXIT:
 	/* Done writing, just waiting for final commit point. */
-	sudo_ev_del(NULL, closure->write_ev);
+	sudo_ev_del(closure->evbase, closure->write_ev);
 	closure->state = CLOSING;
 	break;
     default:
@@ -1185,10 +1186,10 @@ handle_server_message(uint8_t *buf, size_t len,
     case SERVER_MESSAGE__TYPE_COMMIT_POINT:
 	ret = handle_commit_point(msg->commit_point, closure);
 	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
-	    sudo_ev_del(NULL, closure->read_ev);
+	    sudo_ev_del(closure->evbase, closure->read_ev);
 	    closure->state = FINISHED;
         if (++finished_transmissions == nr_of_conns)
-	        sudo_ev_loopexit(NULL);
+	        sudo_ev_loopexit(closure->evbase);
     }
 	break;
     case SERVER_MESSAGE__TYPE_LOG_ID:
@@ -1259,7 +1260,7 @@ server_msg_cb(int fd, int what, void *v)
 			"SSL_read returns SSL_ERROR_WANT_WRITE");
 		    if (!sudo_ev_pending(closure->write_ev, SUDO_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
-			if (sudo_ev_add(NULL, closure->write_ev, NULL, false) == -1) {
+			if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1) {
 			    sudo_warnx(U_("unable to add event to queue"));
 			    goto bad;
 			}
@@ -1345,7 +1346,7 @@ client_msg_cb(int fd, int what, void *v)
         /* Delete write event if it was only due to SSL_read(). */
         if (closure->temporary_write_event) {
             closure->temporary_write_event = false;
-            sudo_ev_del(NULL, closure->write_ev);
+            sudo_ev_del(closure->evbase, closure->write_ev);
         }
         server_msg_cb(fd, what, v);
         debug_return;
@@ -1589,7 +1590,6 @@ main(int argc, char *argv[])
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);
-    sudo_ev_base_setdef(evbase);
 
     if (testrun)
         printf("connecting clients...\n");
@@ -1602,8 +1602,9 @@ main(int argc, char *argv[])
         if (!testrun)
             printf("Connected to %s:%s\n", host, port);
 
-        closure = client_closure_alloc(sock, &elapsed, &restart, iolog_id, log_info);
-        if (!closure)
+        closure = client_closure_alloc(sock, evbase, &elapsed, &restart,
+	    iolog_id, log_info);
+        if (closure == NULL)
             goto bad;
 
         /* Open the I/O log files and seek to restart point if there is one. */

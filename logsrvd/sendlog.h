@@ -50,6 +50,7 @@ struct client_closure {
     struct timespec elapsed;
     struct timespec committed;
     struct timing_closure timing;
+    struct sudo_event_base *evbase;
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
 #if defined(HAVE_OPENSSL)

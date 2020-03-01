@@ -87,6 +87,7 @@ struct connection_closure {
     struct timespec elapsed_time;
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
+    struct sudo_event_base *evbase;
     struct sudo_event *commit_ev;
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;

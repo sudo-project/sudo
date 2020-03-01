@@ -109,7 +109,7 @@ connection_closure_free(struct connection_closure *closure)
 	sudo_ev_free(closure->read_ev);
 	sudo_ev_free(closure->write_ev);
 #if defined(HAVE_OPENSSL)
-    sudo_ev_free(closure->ssl_accept_ev);
+	sudo_ev_free(closure->ssl_accept_ev);
 #endif
 	iolog_details_free(&closure->details);
 	free(closure->read_buf.data);
@@ -117,7 +117,7 @@ connection_closure_free(struct connection_closure *closure)
 	free(closure);
 
 	if (shutting_down && TAILQ_EMPTY(&connections))
-	    sudo_ev_loopbreak(NULL);
+	    sudo_ev_loopbreak(closure->evbase);
     }
 
     debug_return;
@@ -273,7 +273,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     /* Send log ID to client for restarting connections. */
     if (!fmt_log_id_message(closure->details.iolog_path, &closure->write_buf))
 	debug_return_bool(false);
-    if (sudo_ev_add(NULL, closure->write_ev,
+    if (sudo_ev_add(closure->evbase, closure->write_ev,
         logsrvd_conf_get_sock_timeout(), false) == -1) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "unable to add server write event");
@@ -356,7 +356,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 
     /* No more data, command exited. */
     closure->state = EXITED;
-    sudo_ev_del(NULL, closure->read_ev);
+    sudo_ev_del(closure->evbase, closure->read_ev);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: elapsed time: %lld, %ld",
 	__func__, (long long)closure->elapsed_time.tv_sec,
@@ -371,7 +371,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
     }
 
     /* Schedule the final commit point event immediately. */
-    if (sudo_ev_add(NULL, closure->commit_ev, &tv, false) == -1) {
+    if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to add commit point event");
 	debug_return_bool(false);
@@ -399,9 +399,9 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 	/* XXX - structured error message so client can send from beginning */
 	if (!fmt_error_message(closure->errstr, &closure->write_buf))
 	    debug_return_bool(false);
-	sudo_ev_del(NULL, closure->read_ev);
-	if (sudo_ev_add(NULL, closure->write_ev,
-        logsrvd_conf_get_sock_timeout(), false) == -1) {
+	sudo_ev_del(closure->evbase, closure->read_ev);
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_get_sock_timeout(), false) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to add server write event");
 	    debug_return_bool(false);
@@ -462,7 +462,7 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     /* Schedule a commit point in 10 sec if one is not already pending. */
     if (!ISSET(closure->commit_ev->flags, SUDO_EVQ_INSERTED)) {
 	struct timespec tv = { ACK_FREQUENCY, 0 };
-	if (sudo_ev_add(NULL, closure->commit_ev, &tv, false) == -1) {
+	if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to add commit point event");
 	    debug_return_bool(false);
@@ -660,7 +660,7 @@ server_msg_cb(int fd, int what, void *v)
 	/* Delete write event if it was only due to SSL_read(). */
 	if (closure->temporary_write_event) {
 	    closure->temporary_write_event = false;
-	    sudo_ev_del(NULL, closure->write_ev);
+	    sudo_ev_del(closure->evbase, closure->write_ev);
 	}
 	client_msg_cb(fd, what, v);
 	debug_return;
@@ -721,7 +721,7 @@ server_msg_cb(int fd, int what, void *v)
 	    "%s: finished sending %u bytes to client", __func__, buf->len);
 	buf->off = 0;
 	buf->len = 0;
-	sudo_ev_del(NULL, closure->write_ev);
+	sudo_ev_del(closure->evbase, closure->write_ev);
 	if (closure->state == FLUSHED || closure->state == SHUTDOWN ||
 		closure->state == ERROR)
 	    goto finished;
@@ -780,7 +780,7 @@ client_msg_cb(int fd, int what, void *v)
 			"SSL_read returns SSL_ERROR_WANT_WRITE");
 		    if (!sudo_ev_pending(closure->write_ev, SUDO_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
-			if (sudo_ev_add(NULL, closure->write_ev,
+			if (sudo_ev_add(closure->evbase, closure->write_ev,
 			    logsrvd_conf_get_sock_timeout(), false) == -1) {
 			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 				"unable to add event to queue");
@@ -860,9 +860,9 @@ send_error:
     if (closure->errstr == NULL)
 	goto finished;
     if (fmt_error_message(closure->errstr, &closure->write_buf)) {
-	sudo_ev_del(NULL, closure->read_ev);
-	if (sudo_ev_add(NULL, closure->write_ev,
-        logsrvd_conf_get_sock_timeout(), false) == -1) {
+	sudo_ev_del(closure->evbase, closure->read_ev);
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_get_sock_timeout(), false) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to add server write event");
 	}
@@ -900,7 +900,7 @@ server_commit_cb(int unused, int what, void *v)
 	    "unable to format ServerMessage (commit point)");
 	goto bad;
     }
-    if (sudo_ev_add(NULL, closure->write_ev,
+    if (sudo_ev_add(closure->evbase, closure->write_ev,
         logsrvd_conf_get_sock_timeout(), false) == -1) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "unable to add server write event");
@@ -1226,7 +1226,6 @@ static void
 tls_handshake_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
-    struct sudo_event_base *base = closure->ssl_accept_ev->base;
 
     debug_decl(tls_handshake_cb, SUDO_DEBUG_UTIL);
 
@@ -1256,7 +1255,7 @@ tls_handshake_cb(int fd, int what, void *v)
 		    goto bad;
 		}
 	    }
-            if (sudo_ev_add(base, closure->ssl_accept_ev,
+            if (sudo_ev_add(closure->evbase, closure->ssl_accept_ev,
                 logsrvd_conf_get_sock_timeout(), false) == -1) {
                 sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                     "unable to add ssl_accept_ev to queue");
@@ -1275,7 +1274,7 @@ tls_handshake_cb(int fd, int what, void *v)
 		    goto bad;
 		}
 	    }
-            if (sudo_ev_add(base, closure->ssl_accept_ev,
+            if (sudo_ev_add(closure->evbase, closure->ssl_accept_ev,
 		    logsrvd_conf_get_sock_timeout(), false) == -1) {
                 sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                     "unable to add ssl_accept_ev to queue");
@@ -1291,7 +1290,7 @@ tls_handshake_cb(int fd, int what, void *v)
     }
 
     /* Enable reader for ClientMessage */
-    if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1) {
+    if (sudo_ev_add(closure->evbase, closure->read_ev, NULL, false) == -1) {
         sudo_warn(U_("unable to add event to queue"));
     }
 
@@ -1311,7 +1310,7 @@ bad:
  * Allocate a new connection closure.
  */
 static struct connection_closure *
-connection_closure_alloc(int sock)
+connection_closure_alloc(int sock, struct sudo_event_base *base)
 {
     struct connection_closure *closure;
     debug_decl(connection_closure_alloc, SUDO_DEBUG_UTIL);
@@ -1321,6 +1320,7 @@ connection_closure_alloc(int sock)
 
     closure->iolog_dir_fd = -1;
     closure->sock = sock;
+    closure->evbase = base;
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
 
@@ -1368,7 +1368,7 @@ new_connection(int sock, const struct sockaddr *sa, struct sudo_event_base *base
 
     debug_decl(new_connection, SUDO_DEBUG_UTIL);
 
-    if ((closure = connection_closure_alloc(sock)) == NULL)
+    if ((closure = connection_closure_alloc(sock, base)) == NULL)
 	goto bad;
 
     /* Format and write ServerHello message. */
@@ -1782,7 +1782,6 @@ main(int argc, char *argv[])
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);
-    sudo_ev_base_setdef(evbase);
 
     /* Initialize listeners and TLS context. */
     server_setup(evbase);
