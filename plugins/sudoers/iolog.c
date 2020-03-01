@@ -656,13 +656,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
 
-    /* Initialize io_operations. */
-    sudoers_io_setops();
-
-    /* If we have no command (because -V was specified) just return. */
-    if (argc == 0)
-	debug_return_int(true);
-
     bindtextdomain("sudoers", LOCALEDIR);
 
     /* Initialize the debug subsystem.  */
@@ -684,6 +677,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
     }
 
+    /* If we have no command (because -V was specified) just return. */
+    if (argc == 0)
+	debug_return_int(true);
+
     /*
      * Pull iolog settings out of command_info.
      */
@@ -703,6 +700,9 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	    goto done;
 	}
     }
+
+    /* Initialize io_operations. */
+    sudoers_io_setops();
 
     if (sudo_gettime_awake(&last_time) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
@@ -776,7 +776,8 @@ sudoers_io_close(int exit_status, int error)
     const char *errstr = NULL;
     debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN);
 
-    io_operations.close(exit_status, error, &errstr);
+    if (io_operations.close != NULL)
+	io_operations.close(exit_status, error, &errstr);
 
     sudo_freepwcache();
     sudo_freegrcache();
