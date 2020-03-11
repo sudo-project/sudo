@@ -1,3 +1,65 @@
+What's new in Sudo 1.9.0
+
+ * Fixed a test failure in the strsig_test regress test on FreeBSD.
+
+ * Sudo now includes a logging daemon, sudo_logsrvd, which can be
+   used to implement centralized logging of I/O logs.  TLS connections
+   are supported when sudo is configured with the --enable-openssl
+   option.  For more information, see the sudo_logsrvd, logsrvd.conf
+   and sudo_logsrv.proto manuals as well as the log_servers setting
+   in the sudoers manual.
+
+   The --disable-log-server and --disable-log-client configure
+   options can be used to disable building the I/O log server and/or
+   remote I/O log support in the sudoers plugin.
+
+ * The new sudo_sendlog utility can be used to test sudo_logsrvd
+   or send existing sudo I/O logs to a centralized server.
+
+ * It is now possible to write sudo plugins in Python 3 when sudo
+   is configured with the --enable-python> option.  See the
+   sudo_plugin_python.man.html manual for details.
+
+   Sudo 1.9.0 comes with several Python example plugins that get
+   installed sudo's examples directory.
+
+   The sudo blog article "What's new in sudo 1.9: Python"
+   (https://blog.sudo.ws/posts/2020/01/whats-new-in-sudo-1.9-python/)
+   includes a simple tutorial on writing python plugins.
+
+ * Sudo now supports an "audit" plugin type.  An audit plugin
+   receives accept, reject, exit and error messages and can be used
+   to implement custom logging that is independent of the underlying
+   security policy.   Multiple audit plugins may be specified in
+   the sudo.conf file.  A sample audit plugin is included that
+   writes logs in JSON format.
+
+ * Sudo now supports an "approval" plugin type.  An approval plugin
+   is run only after the main security policy (such as sudoers) accepts
+   a command to be run.  The approval policy may perform additional
+   checks, potentially interacting with the user.  Multiple approval
+   plugins may be specified in the sudo.conf file.  Only if all
+   approval plugins succeed will the command be allowed.
+
+ * Sudo's -S command line option now causes the sudo conversation
+   function to write to the standard output or standard error instead
+   of the terminal device.
+
+ * It is now possible to use "Cmd_Alias" instead of "Cmnd_Alias" for
+   people who find the former more natural.
+
+ * The new "pam_ruser" and "pam_rhost" sudoers settings can be used
+   to enable or disable setting the PAM remote user and/or host
+   values during PAM session setup.
+
+ * More than one SHA-2 digest may now be specified for a single
+   command.  Multiple digests must be separated by a comma.
+
+ * It is now possible to specify a SHA-2 digest in conjunction with
+   the "ALL" reserved word in a command specification.  This allows
+   one to give permission to run any command that matches the
+   specified digest, regardless of its path.
+
 What's new in Sudo 1.8.31
 
  * Fixed CVE-2019-18634, a buffer overflow when the "pwfeedback"
