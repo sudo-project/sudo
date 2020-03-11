@@ -51,6 +51,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
     struct alias *a;
     struct member *m;
     struct sudo_command *c;
+    struct command_digest *digest;
     debug_decl(sudoers_format_member_int, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
@@ -63,10 +64,10 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 	    break;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
-	    if (c->digest != NULL) {
-		sudo_lbuf_append(lbuf, "%s:%s ",
-		    digest_type_to_name(c->digest->digest_type),
-		    c->digest->digest_str);
+	    TAILQ_FOREACH(digest, &c->digests, entries) {
+		sudo_lbuf_append(lbuf, "%s:%s%s ",
+		    digest_type_to_name(digest->digest_type),
+		    digest->digest_str, TAILQ_NEXT(digest, entries) ? "," : "");
 	    }
 	    if (negated)
 		sudo_lbuf_append(lbuf, "!");

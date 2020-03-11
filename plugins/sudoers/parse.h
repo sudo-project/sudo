@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2018
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -105,18 +105,9 @@
      (cs1)->runasgrouplist != (cs2)->runasgrouplist)
 
 struct command_digest {
+    TAILQ_ENTRY(command_digest) entries;
     unsigned int digest_type;
     char *digest_str;
-};
-
-/*
- * A command with option args and digest.
- * XXX - merge into struct member
- */
-struct sudo_command {
-    char *cmnd;
-    char *args;
-    struct command_digest *digest;
 };
 
 /*
@@ -164,13 +155,14 @@ struct command_options {
  */
 
 /*
- * Tail queue list head structure.
+ * Tail queue list head structures.
  */
 TAILQ_HEAD(defaults_list, defaults);
 TAILQ_HEAD(userspec_list, userspec);
 TAILQ_HEAD(member_list, member);
 TAILQ_HEAD(privilege_list, privilege);
 TAILQ_HEAD(cmndspec_list, cmndspec);
+TAILQ_HEAD(command_digest_list, command_digest);
 STAILQ_HEAD(comment_list, sudoers_comment);
 
 /*
@@ -194,6 +186,16 @@ struct privilege {
     struct member_list hostlist;	/* list of hosts */
     struct cmndspec_list cmndlist;	/* list of Cmnd_Specs */
     struct defaults_list defaults;	/* list of sudoOptions */
+};
+
+/*
+ * A command with option args and digest.
+ * XXX - merge into struct member
+ */
+struct sudo_command {
+    char *cmnd;
+    char *args;
+    struct command_digest_list digests;
 };
 
 /*
@@ -306,10 +308,10 @@ void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 bool addr_matches(char *n);
 
 /* match_command.c */
-bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
+bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest_list *digests);
 
 /* match_digest.c */
-bool digest_matches(int fd, const char *file, const struct command_digest *digest);
+bool digest_matches(int fd, const char *file, const struct command_digest_list *digests);
 
 /* match.c */
 struct group;

@@ -887,6 +887,9 @@ Digest_Spec ::= "sha224" ':' digest |
 		"sha384" ':' digest |
 		"sha512" ':' digest
 
+Digest_List ::= Digest_Spec |
+                Digest_Spec ',' Digest_List
+
 Cmnd_List ::= Cmnd |
               Cmnd ',' Cmnd_List
 
@@ -894,7 +897,7 @@ command name ::= file name |
                  file name args |
                  file name '""'
 
-Cmnd ::= Digest_Spec? '!'* command name |
+Cmnd ::= Digest_List? '!'* command name |
          '!'* directory |
          '!'* "sudoedit" |
          '!'* Cmnd_Alias
@@ -967,12 +970,17 @@ A fully-qualified path for
 is treated as an error by
 \fBvisudo\fR.
 .PP
-If a
+A
 \fRcommand name\fR
-is prefixed with a
-\fRDigest_Spec\fR,
-the command will only match successfully if it can be verified
-using the specified SHA-2 digest.
+may be preceded by a
+\fRDigest_List\fR,
+a comma-separated list of one or more
+\fRDigest_Spec\fR
+entries.
+If a
+\fRDigest_List\fR
+is present, the command will only match successfully if it can be verified
+using one of the SHA-2 digests in the list.
 The following digest formats are supported: sha224, sha256, sha384 and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).

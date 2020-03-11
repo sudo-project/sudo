@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2018
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -174,7 +174,8 @@ static struct command_digest *new_digest(int, char *);
 %type <string>	  timeoutspec
 %type <string>	  notbeforespec
 %type <string>	  notafterspec
-%type <digest>	  digest
+%type <digest>	  digestspec
+%type <digest>	  digestlist
 
 %%
 
@@ -451,7 +452,7 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			}
 		;
 
-digest		:	SHA224_TOK ':' DIGEST {
+digestspec	:	SHA224_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA224, $3);
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -481,16 +482,25 @@ digest		:	SHA224_TOK ':' DIGEST {
 			}
 		;
 
+digestlist	:	digestspec
+		|	digestlist ',' digestspec {
+			    HLTQ_CONCAT($1, $3, entries);
+			    $$ = $1;
+			}
+		;
+
 digcmnd		:	opcmnd {
 			    $$ = $1;
 			}
-		|	digest opcmnd {
+		|	digestlist opcmnd {
+			    struct sudo_command *c =
+				(struct sudo_command *) $2->name;
+
 			    if ($2->type != COMMAND) {
 				sudoerserror(N_("a digest requires a path name"));
 				YYERROR;
 			    }
-			    /* XXX - yuck */
-			    ((struct sudo_command *) $2->name)->digest = $1;
+			    HLTQ_TO_TAILQ(&c->digests, $1, entries);
 			    $$ = $2;
 			}
 		;
@@ -730,6 +740,7 @@ cmnd		:	ALL {
 			    }
 			    c->cmnd = $1.cmnd;
 			    c->args = $1.args;
+			    TAILQ_INIT(&c->digests);
 			    $$ = new_member((char *)c, COMMAND);
 			    if ($$ == NULL) {
 				free(c);
@@ -992,6 +1003,7 @@ new_digest(int digest_type, char *digest_str)
 	debug_return_ptr(NULL);
     }
 
+    HLTQ_INIT(digest, entries);
     digest->digest_type = digest_type;
     digest->digest_str = digest_str;
     if (digest->digest_str == NULL) {
@@ -1080,13 +1092,15 @@ free_member(struct member *m)
     debug_decl(free_member, SUDOERS_DEBUG_PARSER);
 
     if (m->type == COMMAND) {
-	    struct sudo_command *c = (struct sudo_command *)m->name;
-	    free(c->cmnd);
-	    free(c->args);
-	    if (c->digest != NULL) {
-		free(c->digest->digest_str);
-		free(c->digest);
-	    }
+	struct command_digest *digest;
+	struct sudo_command *c = (struct sudo_command *)m->name;
+	free(c->cmnd);
+	free(c->args);
+	while ((digest = TAILQ_FIRST(&c->digests)) != NULL) {
+	    TAILQ_REMOVE(&c->digests, digest, entries);
+	    free(digest->digest_str);
+	    free(digest);
+	}
     }
     free(m->name);
     free(m);

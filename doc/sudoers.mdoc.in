@@ -852,6 +852,9 @@ Digest_Spec ::= "sha224" ':' digest |
 		"sha384" ':' digest |
 		"sha512" ':' digest
 
+Digest_List ::= Digest_Spec |
+                Digest_Spec ',' Digest_List
+
 Cmnd_List ::= Cmnd |
               Cmnd ',' Cmnd_List
 
@@ -859,7 +862,7 @@ command name ::= file name |
                  file name args |
                  file name '""'
 
-Cmnd ::= Digest_Spec? '!'* command name |
+Cmnd ::= Digest_List? '!'* command name |
          '!'* directory |
          '!'* "sudoedit" |
          '!'* Cmnd_Alias
@@ -931,12 +934,17 @@ A fully-qualified path for
 is treated as an error by
 .Nm visudo .
 .Pp
-If a
+A
 .Li command name
-is prefixed with a
-.Li Digest_Spec ,
-the command will only match successfully if it can be verified
-using the specified SHA-2 digest.
+may be preceded by a
+.Li Digest_List ,
+a comma-separated list of one or more
+.Li Digest_Spec
+entries.
+If a
+.Li Digest_List
+is present, the command will only match successfully if it can be verified
+using one of the SHA-2 digests in the list.
 The following digest formats are supported: sha224, sha256, sha384 and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).

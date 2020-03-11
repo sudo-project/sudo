@@ -411,7 +411,7 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
 	    break;
 	case COMMAND:
 	    c = (struct sudo_command *)m->name;
-	    if (command_matches(c->cmnd, c->args, c->digest))
+	    if (command_matches(c->cmnd, c->args, &c->digests))
 		matched = !m->negated;
 	    break;
     }

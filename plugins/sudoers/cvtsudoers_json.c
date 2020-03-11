@@ -70,6 +70,7 @@ static void
 print_command_json(struct json_container *json, const char *name, bool negated)
 {
     struct sudo_command *c = (struct sudo_command *)name;
+    struct command_digest *digest;
     struct json_value value;
     char *cmnd = c->cmnd;
     const char *digest_name;
@@ -85,7 +86,7 @@ print_command_json(struct json_container *json, const char *name, bool negated)
     value.type = JSON_STRING;
     value.u.string = cmnd;
 
-    if (!negated && c->digest == NULL) {
+    if (!negated && TAILQ_EMPTY(&c->digests)) {
 	/* Print as { "command": "command and args" } */
 	sudo_json_add_value_as_object(json, "command", &value);
     } else {
@@ -93,11 +94,11 @@ print_command_json(struct json_container *json, const char *name, bool negated)
 	sudo_json_open_object(json, NULL);
 	sudo_json_add_value(json, "command", &value);
 
-	/* Optional digest. */
-	if (c->digest != NULL) {
-	    digest_name = digest_type_to_name(c->digest->digest_type);
+	/* Optional digest list. */
+	TAILQ_FOREACH(digest, &c->digests, entries) {
+	    digest_name = digest_type_to_name(digest->digest_type);
 	    value.type = JSON_STRING;
-	    value.u.string = c->digest->digest_str;
+	    value.u.string = digest->digest_str;
 	    sudo_json_add_value(json, digest_name, &value);
 	}
 

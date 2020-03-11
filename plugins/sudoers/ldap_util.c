@@ -289,6 +289,110 @@ oom:
 }
 
 /*
+ * If a digest prefix is present, add it to struct command_digest_list
+ * and update cmnd to point to the command after the digest.
+ * Returns 1 if a digest was parsed, 0 if not and -1 on error.
+ */
+static int
+sudo_ldap_extract_digest(char **cmnd, struct command_digest_list *digests)
+{
+    char *ep, *cp = *cmnd;
+    struct command_digest *digest;
+    int digest_type = SUDO_DIGEST_INVALID;
+    debug_decl(sudo_ldap_extract_digest, SUDOERS_DEBUG_LDAP);
+
+    /*
+     * Check for and extract a digest prefix, e.g.
+     * sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1 /bin/ls
+     */
+    if (cp[0] == 's' && cp[1] == 'h' && cp[2] == 'a') {
+	switch (cp[3]) {
+	case '2':
+	    if (cp[4] == '2' && cp[5] == '4')
+		digest_type = SUDO_DIGEST_SHA224;
+	    else if (cp[4] == '5' && cp[5] == '6')
+		digest_type = SUDO_DIGEST_SHA256;
+	    break;
+	case '3':
+	    if (cp[4] == '8' && cp[5] == '4')
+		digest_type = SUDO_DIGEST_SHA384;
+	    break;
+	case '5':
+	    if (cp[4] == '1' && cp[5] == '2')
+		digest_type = SUDO_DIGEST_SHA512;
+	    break;
+	}
+	if (digest_type != SUDO_DIGEST_INVALID) {
+	    cp += 6;
+	    while (isblank((unsigned char)*cp))
+		cp++;
+	    if (*cp == ':') {
+		cp++;
+		while (isblank((unsigned char)*cp))
+		    cp++;
+		ep = cp;
+		while (*ep != '\0' && !isblank((unsigned char)*ep) && *ep != ',')
+		    ep++;
+		if (isblank((unsigned char)*ep) || *ep == ',') {
+		    if ((digest = malloc(sizeof(*digest))) == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+			debug_return_int(-1);
+		    }
+		    digest->digest_type = digest_type;
+		    digest->digest_str = strndup(cp, (size_t)(ep - cp));
+		    if (digest->digest_str == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+			free(digest);
+			debug_return_int(-1);
+		    }
+		    while (isblank((unsigned char)*ep))
+			ep++;
+		    *cmnd = ep;
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"%s digest %s for %s",
+			digest_type_to_name(digest_type),
+			digest->digest_str, cp);
+		    TAILQ_INSERT_TAIL(digests, digest, entries);
+		    debug_return_int(1);
+		}
+	    }
+	}
+    }
+    debug_return_int(0);
+}
+
+/*
+ * If a digest list is present, fill in struct command_digest_list
+ * and update cmnd to point to the command after the digest.
+ * Returns false on error, else true.
+ */
+static bool
+sudo_ldap_extract_digests(char **cmnd, struct command_digest_list *digests)
+{
+    char *cp = *cmnd;
+    int rc;
+    debug_decl(sudo_ldap_extract_digests, SUDOERS_DEBUG_LDAP);
+
+    for (;;) {
+	rc = sudo_ldap_extract_digest(&cp, digests);
+	if (rc != 1)
+	    break;
+
+	/* Check for additional digestspecs, separated by a comma. */
+	if (*cp != ',')
+	    break;
+	do {
+	    cp++;
+	} while (isblank((unsigned char)*cp));
+    }
+    *cmnd = cp;
+
+    debug_return_bool(rc != -1);
+}
+
+/*
  * Convert an LDAP sudoRole to a sudoers privilege.
  * Pass in struct berval ** for LDAP or char *** for SSSD.
  */
@@ -358,6 +462,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		goto oom;
 	    }
 	    m->name = (char *)c;
+	    TAILQ_INIT(&c->digests);
 	}
 
 	/* Negated commands have precedence so insert them at the end. */
@@ -481,17 +586,13 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    if (cmndspec->tags.setenv == UNSPEC)
 		cmndspec->tags.setenv = IMPLIED;
 	} else {
-	    struct command_digest digest;
 	    char *args;
 
 	    m->type = COMMAND;
 
-	    /* Fill in command with optional digest. */
-	    if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
-		if ((c->digest = malloc(sizeof(*c->digest))) == NULL)
-		    goto oom;
-		*c->digest = digest;
-	    }
+	    /* Fill in command with optional digests. */
+	    if (!sudo_ldap_extract_digests(&cmnd, &c->digests))
+		goto oom;
 	    if ((args = strpbrk(cmnd, " \t")) != NULL) {
 		*args++ = '\0';
 		if ((c->args = strdup(args)) == NULL)
@@ -512,73 +613,6 @@ oom:
 	TAILQ_CONCAT(&priv->hostlist, &negated_hosts, entries);
 	TAILQ_CONCAT(&priv->cmndlist, &negated_cmnds, entries);
 	free_privilege(priv);
-    }
-    debug_return_ptr(NULL);
-}
-
-/*
- * If a digest prefix is present, fills in struct command_digest
- * and returns a pointer to it, updating cmnd to point to the
- * command after the digest.
- */
-struct command_digest *
-sudo_ldap_extract_digest(char **cmnd, struct command_digest *digest)
-{
-    char *ep, *cp = *cmnd;
-    int digest_type = SUDO_DIGEST_INVALID;
-    debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP);
-
-    /*
-     * Check for and extract a digest prefix, e.g.
-     * sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1 /bin/ls
-     */
-    if (cp[0] == 's' && cp[1] == 'h' && cp[2] == 'a') {
-	switch (cp[3]) {
-	case '2':
-	    if (cp[4] == '2' && cp[5] == '4')
-		digest_type = SUDO_DIGEST_SHA224;
-	    else if (cp[4] == '5' && cp[5] == '6')
-		digest_type = SUDO_DIGEST_SHA256;
-	    break;
-	case '3':
-	    if (cp[4] == '8' && cp[5] == '4')
-		digest_type = SUDO_DIGEST_SHA384;
-	    break;
-	case '5':
-	    if (cp[4] == '1' && cp[5] == '2')
-		digest_type = SUDO_DIGEST_SHA512;
-	    break;
-	}
-	if (digest_type != SUDO_DIGEST_INVALID) {
-	    cp += 6;
-	    while (isblank((unsigned char)*cp))
-		cp++;
-	    if (*cp == ':') {
-		cp++;
-		while (isblank((unsigned char)*cp))
-		    cp++;
-		ep = cp;
-		while (*ep != '\0' && !isblank((unsigned char)*ep))
-		    ep++;
-		if (*ep != '\0') {
-		    digest->digest_type = digest_type;
-		    digest->digest_str = strndup(cp, (size_t)(ep - cp));
-		    if (digest->digest_str == NULL) {
-			sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-			debug_return_ptr(NULL);
-		    }
-		    cp = ep + 1;
-		    while (isblank((unsigned char)*cp))
-			cp++;
-		    *cmnd = cp;
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"%s digest %s for %s",
-			digest_type_to_name(digest_type),
-			digest->digest_str, cp);
-		    debug_return_ptr(digest);
-		}
-	    }
-	}
     }
     debug_return_ptr(NULL);
 }
