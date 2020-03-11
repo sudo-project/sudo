@@ -35,6 +35,28 @@
                     ]
                 }
             ]
+        },
+        {
+            "User_List": [
+                { "username": "operator" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Options": [
+                        { "setenv": true }
+                    ],
+                    "Commands": [
+                        {
+                            "command": "ALL",
+                            "sha256": "hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=",
+                            "sha256": "1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4="
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

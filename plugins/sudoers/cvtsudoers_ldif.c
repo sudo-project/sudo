@@ -217,12 +217,13 @@ static char *
 format_cmnd(struct sudo_command *c, bool negated)
 {
     struct command_digest *digest;
-    char *buf, *cp;
+    char *buf, *cp, *cmnd;
     size_t bufsiz;
     int len;
     debug_decl(format_cmnd, SUDOERS_DEBUG_UTIL);
 
-    bufsiz = negated + strlen(c->cmnd) + 1;
+    cmnd = c->cmnd ? c->cmnd : "ALL";
+    bufsiz = negated + strlen(cmnd) + 1;
     if (c->args != NULL)
 	bufsiz += 1 + strlen(c->args);
     TAILQ_FOREACH(digest, &c->digests, entries) {
@@ -248,7 +249,7 @@ format_cmnd(struct sudo_command *c, bool negated)
     }
 
     len = snprintf(cp, bufsiz - (cp - buf), "%s%s%s%s", negated ? "!" : "",
-	c->cmnd, c->args ? " " : "", c->args ? c->args : "");
+	cmnd, c->args ? " " : "", c->args ? c->args : "");
     if (len < 0 || len >= (int)bufsiz - (cp - buf))
 	sudo_fatalx(U_("internal error, %s overflow"), __func__);
 
@@ -270,13 +271,16 @@ print_member_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree, char *name,
     debug_decl(print_member_ldif, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
-    case ALL:
-	print_attribute_ldif(fp, attr_name, negated ? "!ALL" : "ALL");
-	break;
     case MYSELF:
 	/* Only valid for sudoRunasUser */
 	print_attribute_ldif(fp, attr_name, "");
 	break;
+    case ALL:
+	if (name == NULL) {
+	    print_attribute_ldif(fp, attr_name, negated ? "!ALL" : "ALL");
+	    break;
+	}
+	/* FALLTHROUGH */
     case COMMAND:
 	attr_val = format_cmnd((struct sudo_command *)name, negated);
 	print_attribute_ldif(fp, attr_name, attr_val);

@@ -9,3 +9,12 @@ sudoCommand: sha256:hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=, sha256:1IXHRCx
 sudoCommand: sha512:srzYEQ2aqzm+it3f74opTMkIImZRLxBARVpb0g9RSouJYdLt7DTRMEY4Ry9NyaOiDoUIplpNjqYH0JMYPVdFnw /bin/kill
 sudoOrder: 1
 
+dn: cn=operator,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: operator
+sudoUser: operator
+sudoHost: ALL
+sudoCommand: sha256:hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= ALL
+sudoOrder: 2
+

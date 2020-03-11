@@ -398,7 +398,15 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
 
     switch (m->type) {
 	case ALL:
-	    matched = !m->negated;
+	    if (m->name == NULL) {
+		matched = !m->negated;
+		break;
+	    }
+	    /* FALLTHROUGH */
+	case COMMAND:
+	    c = (struct sudo_command *)m->name;
+	    if (command_matches(c->cmnd, c->args, &c->digests))
+		matched = !m->negated;
 	    break;
 	case ALIAS:
 	    a = alias_get(parse_tree, m->name, CMNDALIAS);
@@ -408,11 +416,6 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);
 	    }
-	    break;
-	case COMMAND:
-	    c = (struct sudo_command *)m->name;
-	    if (command_matches(c->cmnd, c->args, &c->digests))
-		matched = !m->negated;
 	    break;
     }
     debug_return_int(matched);

@@ -55,13 +55,16 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
     debug_decl(sudoers_format_member_int, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
-	case ALL:
-	    sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
-	    break;
 	case MYSELF:
 	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "",
 		user_name ? user_name : "");
 	    break;
+	case ALL:
+	    if (name == NULL) {
+		sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
+		break;
+	    }
+	    /* FALLTHROUGH */
 	case COMMAND:
 	    c = (struct sudo_command *) name;
 	    TAILQ_FOREACH(digest, &c->digests, entries) {
@@ -71,7 +74,8 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 	    }
 	    if (negated)
 		sudo_lbuf_append(lbuf, "!");
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s", c->cmnd);
+	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s",
+		c->cmnd ? c->cmnd : "ALL");
 	    if (c->args) {
 		sudo_lbuf_append(lbuf, " ");
 		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);

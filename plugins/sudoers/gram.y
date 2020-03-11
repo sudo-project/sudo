@@ -496,9 +496,17 @@ digcmnd		:	opcmnd {
 			    struct sudo_command *c =
 				(struct sudo_command *) $2->name;
 
-			    if ($2->type != COMMAND) {
+			    if ($2->type != COMMAND && $2->type != ALL) {
 				sudoerserror(N_("a digest requires a path name"));
 				YYERROR;
+			    }
+			    if (c == NULL) {
+				/* lazy-allocate sudo_command for ALL */
+				if ((c = new_command(NULL, NULL)) == NULL) {
+				    sudoerserror(N_("unable to allocate memory"));
+				    YYERROR;
+				}
+				$2->name = (char *)c;
 			    }
 			    HLTQ_TO_TAILQ(&c->digests, $1, entries);
 			    $$ = $2;
@@ -733,14 +741,12 @@ cmnd		:	ALL {
 			    }
 			}
 		|	COMMAND {
-			    struct sudo_command *c = calloc(1, sizeof(*c));
-			    if (c == NULL) {
+			    struct sudo_command *c;
+
+			    if ((c = new_command($1.cmnd, $1.args)) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
-			    c->cmnd = $1.cmnd;
-			    c->args = $1.args;
-			    TAILQ_INIT(&c->digests);
 			    $$ = new_member((char *)c, COMMAND);
 			    if ($$ == NULL) {
 				free(c);
@@ -990,6 +996,24 @@ new_member(char *name, int type)
 
     debug_return_ptr(m);
 }
+static struct sudo_command *
+new_command(char *cmnd, char *args)
+{
+    struct sudo_command *c;
+    debug_decl(new_command, SUDOERS_DEBUG_PARSER);
+
+    if ((c = calloc(1, sizeof(*c))) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	debug_return_ptr(NULL);
+    }
+
+    c->cmnd = cmnd;
+    c->args = args;
+    TAILQ_INIT(&c->digests);
+
+    debug_return_ptr(c);
+}
 
 static struct command_digest *
 new_digest(int digest_type, char *digest_str)
@@ -1091,7 +1115,7 @@ free_member(struct member *m)
 {
     debug_decl(free_member, SUDOERS_DEBUG_PARSER);
 
-    if (m->type == COMMAND) {
+    if (m->type == COMMAND || (m->type == ALL && m->name != NULL)) {
 	struct command_digest *digest;
 	struct sudo_command *c = (struct sudo_command *)m->name;
 	free(c->cmnd);

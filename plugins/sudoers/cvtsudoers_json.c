@@ -84,7 +84,7 @@ print_command_json(struct json_container *json, const char *name, bool negated)
 	}
     }
     value.type = JSON_STRING;
-    value.u.string = cmnd;
+    value.u.string = cmnd ? cmnd : "ALL";
 
     if (!negated && TAILQ_EMPTY(&c->digests)) {
 	/* Print as { "command": "command and args" } */
@@ -175,19 +175,22 @@ print_member_json_int(struct json_container *json,
 
     /* Most of the time we print a string. */
     value.type = JSON_STRING;
-    if (name != NULL) {
-	value.u.string = name;
-    } else {
-	switch (type) {
-	case ALL:
+    switch (type) {
+    case ALL:
+	if (name == NULL) {
 	    value.u.string = "ALL";
-	    break;
-	case MYSELF:
-	    value.u.string = "";
-	    break;
-	default:
-	    sudo_fatalx("missing member name for type %d", type);
+	} else {
+	    /* ALL used with digest, print as a command. */
+	    type = COMMAND;
 	}
+	break;
+    case MYSELF:
+	value.u.string = "";
+	break;
+    default:
+	if (name == NULL)
+	    sudo_fatalx("missing member name for type %d", type);
+	value.u.string = name;
     }
 
     switch (type) {

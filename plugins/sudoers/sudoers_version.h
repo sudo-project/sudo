@@ -67,11 +67,12 @@
  * 44	sudo 1.8.13, added MAIL/NOMAIL tags.
  * 45	sudo 1.8.15, added FOLLOW/NOFOLLOW tags as well as sudoedit_follow and sudoedit_checkdir Defaults.
  * 46	sudo 1.8.20, added TIMEOUT, NOTBEFORE and NOTAFTER options.
+ * 47	sudo 1.9.0, Cmd_Alias treated as Cmnd_Alias, support for multiple digests per command and for ALL.
  */
 
 #ifndef SUDOERS_VERSION_H
 #define	SUDOERS_VERSION_H
 
-#define SUDOERS_GRAMMAR_VERSION	46
+#define SUDOERS_GRAMMAR_VERSION	47
 
 #endif /* SUDOERS_VERSION_H */

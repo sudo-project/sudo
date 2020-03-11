@@ -264,6 +264,36 @@ command_matches_dir(const char *sudoers_dir, size_t dlen,
 }
 
 static bool
+command_matches_all(const struct command_digest_list *digests)
+{
+    struct stat sb; /* XXX - unused */
+    int fd = -1;
+    debug_decl(command_matches_all, SUDOERS_DEBUG_MATCH);
+
+    if (user_cmnd[0] == '/') {
+	/* Open the file for fdexec or for digest matching. */
+	if (!open_cmnd(user_cmnd, digests, &fd))
+	    goto bad;
+	if (!do_stat(fd, user_cmnd, &sb))
+	    goto bad;
+    }
+
+    /* Check digest of user_cmnd since we have no sudoers_cmnd for ALL. */
+    if (!digest_matches(fd, user_cmnd, digests))
+	goto bad;
+    set_cmnd_fd(fd);
+
+    /* No need to set safe_cmnd for ALL. */
+    debug_return_bool(true);
+bad:
+    if (fd != -1) {
+	close(fd);
+	fd = -1;
+    }
+    debug_return_bool(false);
+}
+
+static bool
 command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
     const struct command_digest_list *digests)
 {
@@ -502,6 +532,11 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct
 {
     bool rc = false;
     debug_decl(command_matches, SUDOERS_DEBUG_MATCH);
+
+    if (sudoers_cmnd == NULL) {
+	rc = command_matches_all(digests);
+	goto done;
+    }
 
     /* Check for pseudo-commands */
     if (sudoers_cmnd[0] != '/') {

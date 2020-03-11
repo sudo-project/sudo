@@ -945,6 +945,10 @@ If a
 .Li Digest_List
 is present, the command will only match successfully if it can be verified
 using one of the SHA-2 digests in the list.
+Starting with version 1.9.0, the
+.Sy ALL
+reserved word can be used in conjunction with a
+.Li Digest_List .
 The following digest formats are supported: sha224, sha256, sha384 and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).
