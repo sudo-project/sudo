@@ -137,7 +137,7 @@ open_cmnd(const char *path, const struct command_digest_list *digests, int *fdp)
 
     fd = open(path, O_RDONLY|O_NONBLOCK);
 # ifdef O_EXEC
-    if (fd == -1 && errno == EACCES && TAILQ_EMPTY(digests))
+    if (fd == -1 && errno == EACCES && TAILQ_EMPTY(digests)) {
 	/* Try again with O_EXEC if no digest is specified. */
 	const int saved_errno = errno;
 	if ((fd = open(path, O_EXEC)) == -1)
