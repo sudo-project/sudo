@@ -191,9 +191,25 @@ verify_log_lines(const char *reference_path)
     char line[1024] = "";
     char stored_str[MAX_OUTPUT] = "";
     while(fgets(line, sizeof(line), file) != NULL) {
-        const char *line_data = strstr(line, "] "); // this skips the timestamp and pid at the beginning
+        char *line_data = strstr(line, "] "); // this skips the timestamp and pid at the beginning
         VERIFY_NOT_NULL(line_data); // malformed log line
         line_data += 2;
+
+	/* handle @ /usr/lib/python3.7/logging/__init__.py:894 ... */
+	if (strncmp(line_data, "handle @ /", sizeof("handle @ /") - 1) == 0) {
+	    /* Remove python path and line number */
+	    char *cp = line_data + sizeof("handle @ ") - 1;
+	    char *ep = strstr(cp, "logging/");
+	    if (ep != NULL) {
+		memmove(cp, ep, strlen(ep) + 1);
+		if ((cp = strstr(cp, "py:")) != NULL) {
+		    cp += 2;
+		    for (ep = cp + 1; isdigit((unsigned char)*ep); ep++)
+			continue;
+		    memmove(cp, ep, strlen(ep) + 1);
+		}
+	    }
+	}
 
         char *line_end = strstr(line_data, " object at "); // this skips checking the pointer hex
         if (line_end)
