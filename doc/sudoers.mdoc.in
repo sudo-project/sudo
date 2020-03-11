@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd March 1, 2020
+.Dd March 10, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -603,11 +603,19 @@ There are four kinds of aliases:
 .Li Host_Alias
 and
 .Li Cmnd_Alias .
+Beginning with
+.Nm sudo
+1.9.0,
+.Li Cmd_Alias
+may be used in place of
+.Li Cmnd_Alias
+if desired.
 .Bd -literal
 Alias ::= 'User_Alias'  User_Alias_Spec (':' User_Alias_Spec)* |
           'Runas_Alias' Runas_Alias_Spec (':' Runas_Alias_Spec)* |
           'Host_Alias'  Host_Alias_Spec (':' Host_Alias_Spec)* |
-          'Cmnd_Alias'  Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)*
+          'Cmnd_Alias'  Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)* |
+          'Cmd_Alias'   Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)*
 
 User_Alias ::= NAME
 

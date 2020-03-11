@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2017
+ * Copyright (c) 1996, 1998-2005, 2007-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -364,7 +364,7 @@ DEFVAR			[a-z_]+
 			    }
 			}
 
-<INITIAL>^[[:blank:]]*(Host|Cmnd|User|Runas)_Alias	{
+<INITIAL>^[[:blank:]]*(Host|Cmnd|Cmd|User|Runas)_Alias	{
 			    int n;
 
 			    if (continued) {
