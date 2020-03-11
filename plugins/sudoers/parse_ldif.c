@@ -355,19 +355,32 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 		    U_("unable to allocate memory"));
 	    }
 	    m->negated = sudo_ldap_is_negated(&user);
-	    m->name = strdup(user);
-	    if (m->name == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
-	    if (strcmp(user, "ALL") == 0) {
-		m->type = ALL;
-	    } else if (*user == '+') {
+	    switch (*user) {
+	    case '\0':
+		/* Empty RunAsUser means run as the invoking user. */
+		m->type = MYSELF;
+		break;
+	    case '+':
 		m->type = NETGROUP;
-	    } else if (*user == '%') {
+		break;
+	    case '%':
 		m->type = USERGROUP;
-	    } else {
+		break;
+	    case 'A':
+		if (strcmp(user, "ALL") == 0) {
+		    m->type = ALL;
+		    break;
+		}
+		/* FALLTHROUGH */
+	    default:
 		m->type = WORD;
+		break;
+	    }
+	    if (m->type != ALL && m->type != MYSELF) {
+		if ((m->name = strdup(user)) == NULL) {
+		    sudo_fatalx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		}
 	    }
 	    TAILQ_INSERT_TAIL(&us->users, m, entries);
 	}

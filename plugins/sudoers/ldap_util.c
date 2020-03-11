@@ -148,19 +148,9 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 	    break;
 	case '+':
 	    m->type = NETGROUP;
-	    m->name = strdup(val);
-	    if (m->name == NULL) {
-		free(m);
-		goto bad;
-	    }
 	    break;
 	case '%':
 	    m->type = USERGROUP;
-	    m->name = strdup(val);
-	    if (m->name == NULL) {
-		free(m);
-		goto bad;
-	    }
 	    break;
 	case 'A':
 	    if (strcmp(val, "ALL") == 0) {
@@ -170,12 +160,13 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 	    /* FALLTHROUGH */
 	default:
 	    m->type = WORD;
-	    m->name = strdup(val);
-	    if (m->name == NULL) {
+	    break;
+	}
+	if (m->type != ALL && m->type != MYSELF) {
+	    if ((m->name = strdup(val)) == NULL) {
 		free(m);
 		goto bad;
 	    }
-	    break;
 	}
 	if (m->negated)
 	    TAILQ_INSERT_TAIL(&negated_members, m, entries);
@@ -227,9 +218,6 @@ host_to_member(char *host)
     if ((m = calloc(1, sizeof(*m))) == NULL)
 	goto oom;
     m->negated = sudo_ldap_is_negated(&host);
-    m->name = strdup(host);
-    if (m->name == NULL)
-	goto oom;
     switch (*host) {
     case '+':
 	m->type = NETGROUP;
@@ -247,6 +235,10 @@ host_to_member(char *host)
 	    m->type = WORD;
 	}
 	break;
+    }
+    if (m->type != ALL) {
+	if ((m->name = strdup(host)) == NULL)
+	    goto oom;
     }
 
     debug_return_ptr(m);
