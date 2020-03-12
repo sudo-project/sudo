@@ -33,6 +33,9 @@ struct timeval;		/* for deprecated APIs */
 #define SUDO_EV_SIGNAL		0x10	/* fire on signal receipt */
 #define SUDO_EV_SIGINFO		0x20	/* fire on signal receipt (siginfo) */
 
+/* User-settable events for sudo_ev_init() (SUDO_EV_TIMEOUT not valid here) */
+#define SUDO_EV_MASK		(SUDO_EV_READ|SUDO_EV_WRITE|SUDO_EV_PERSIST|SUDO_EV_SIGNAL|SUDO_EV_SIGINFO)
+
 /* Event flags (internal) */
 #define SUDO_EVQ_INSERTED	0x01	/* event is on the event queue */
 #define SUDO_EVQ_ACTIVE		0x02	/* event is on the active queue */

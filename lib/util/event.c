@@ -273,10 +273,9 @@ sudo_ev_init(struct sudo_event *ev, int fd, short events,
 {
     debug_decl(sudo_ev_init, SUDO_DEBUG_EVENT);
 
-    /* XXX - sanity check events value */
     memset(ev, 0, sizeof(*ev));
     ev->fd = fd;
-    ev->events = events;
+    ev->events = events & SUDO_EV_MASK;
     ev->pfd_idx = -1;
     ev->callback = callback;
     ev->closure = closure;
@@ -842,7 +841,7 @@ sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *ts)
 int
 sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts)
 {
-    int ret = 0;
+    int ret;
     debug_decl(sudo_ev_pending, SUDO_DEBUG_EVENT);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: event %p, flags 0x%x, events 0x%x",
