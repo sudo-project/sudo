@@ -98,6 +98,7 @@ connection_closure_free(struct connection_closure *closure)
 
     if (closure != NULL) {
 	bool shutting_down = closure->state == SHUTDOWN;
+	struct sudo_event_base *evbase = closure->evbase;
 
 #if defined(HAVE_OPENSSL)
 	SSL_free(closure->ssl);
@@ -117,7 +118,7 @@ connection_closure_free(struct connection_closure *closure)
 	free(closure);
 
 	if (shutting_down && TAILQ_EMPTY(&connections))
-	    sudo_ev_loopbreak(closure->evbase);
+	    sudo_ev_loopbreak(evbase);
     }
 
     debug_return;
