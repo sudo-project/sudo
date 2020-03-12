@@ -51,8 +51,8 @@ digest_matches(int fd, const char *file, const struct command_digest_list *diges
     unsigned char *file_digest = NULL;
     unsigned char *sudoers_digest = NULL;
     struct command_digest *digest;
+    size_t digest_len = (size_t)-1;
     bool matched = false;
-    size_t digest_len;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
 
     if (TAILQ_EMPTY(digests)) {
@@ -75,11 +75,11 @@ digest_matches(int fd, const char *file, const struct command_digest_list *diges
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 		    "unable to rewind digest fd");
 	    }
-	    if (file_digest == NULL) {
-		/* Warning (if any) printed by sudo_filedigest() */
-		goto done;
-	    }
 	    digest_type = digest->digest_type;
+	}
+	if (file_digest == NULL) {
+	    /* Warning (if any) printed by sudo_filedigest() */
+	    goto done;
 	}
 
 	/* Convert the command digest from ascii to binary. */
