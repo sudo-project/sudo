@@ -44,12 +44,11 @@ const char *
 expected_path(const char *format, ...)
 {
     static char expected_output_file[PATH_MAX];
-    int count = snprintf(expected_output_file, PATH_MAX, TESTDATA_DIR);
-    char *filename = expected_output_file + count;
+    size_t dirlen = strlcpy(expected_output_file, TESTDATA_DIR, sizeof(expected_output_file));
 
     va_list args;
     va_start(args, format);
-    vsprintf(filename, format, args);
+    vsnprintf(expected_output_file + dirlen, PATH_MAX - dirlen, format, args);
     va_end(args);
 
     return expected_output_file;
@@ -213,10 +212,9 @@ verify_log_lines(const char *reference_path)
 
         char *line_end = strstr(line_data, " object at "); // this skips checking the pointer hex
         if (line_end)
-            sprintf(line_end, " object>\n");
+            snprintf(line_end, sizeof(line) - (line_end - line), " object>\n");
 
-        VERIFY_TRUE(strlen(stored_str) + strlen(line_data) + 1 < sizeof(stored_str));  // we have enough space in buffer
-        strcat(stored_str, line_data);
+        VERIFY_TRUE(strlcat(stored_str, line_data, sizeof(stored_str)) < sizeof(stored_str));  // we have enough space in buffer
     }
 
     clean_output(stored_str);
