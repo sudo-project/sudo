@@ -60,6 +60,14 @@ What's new in Sudo 1.9.0
    one to give permission to run any command that matches the
    specified digest, regardless of its path.
 
+What's new in Sudo 1.8.31p1
+
+ * Sudo once again ignores a failure to restore the RLIMIT_CORE
+   resource limit, as it did prior to version 1.8.29.  Linux
+   containers don't allow RLIMIT_CORE to be set back to RLIM_INFINITY
+   if we set the limit to zero, even for root, which resulted in a
+   warning from sudo.
+
 What's new in Sudo 1.8.31
 
  * Fixed CVE-2019-18634, a buffer overflow when the "pwfeedback"
