@@ -881,8 +881,10 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     ret = sudoers_policy_init(&info, envp);
 
     /* The audit functions set audit_msg on failure. */
-    if (ret != 1 && audit_msg != NULL)
-	*errstr = audit_msg;
+    if (ret != 1 && audit_msg != NULL) {
+	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
+	    *errstr = audit_msg;
+    }
     debug_return_int(ret);
 }
 
@@ -951,8 +953,10 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[],
     ret = sudo_auth_begin_session(pwd, user_env);
 
     /* The audit functions set audit_msg on failure. */
-    if (ret != 1 && audit_msg != NULL)
-	*errstr = audit_msg;
+    if (ret != 1 && audit_msg != NULL) {
+	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
+	    *errstr = audit_msg;
+    }
     debug_return_int(ret);
 }
 
@@ -981,8 +985,10 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     }
 
     /* The audit functions set audit_msg on failure. */
-    if (ret != 1 && audit_msg != NULL)
-	*errstr = audit_msg;
+    if (ret != 1 && audit_msg != NULL) {
+	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
+	    *errstr = audit_msg;
+    }
     debug_return_int(ret);
 }
 
@@ -998,8 +1004,10 @@ sudoers_policy_validate(const char **errstr)
     ret = sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, false, NULL);
 
     /* The audit functions set audit_msg on failure. */
-    if (ret != 1 && audit_msg != NULL)
-	*errstr = audit_msg;
+    if (ret != 1 && audit_msg != NULL) {
+	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
+	    *errstr = audit_msg;
+    }
     debug_return_int(ret);
 }
 
@@ -1042,8 +1050,10 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     }
 
     /* The audit functions set audit_msg on failure. */
-    if (ret != 1 && audit_msg != NULL)
-	*errstr = audit_msg;
+    if (ret != 1 && audit_msg != NULL) {
+	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
+	    *errstr = audit_msg;
+    }
     debug_return_int(ret);
 }
 
