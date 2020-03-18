@@ -962,6 +962,7 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
 static bool
 verify_server_cert(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
 {
+#ifdef HAVE_SSL_CTX_GET0_CERTIFICATE
     bool ret = false;
     X509_STORE_CTX *store_ctx = NULL;
     X509_STORE *ca_store;
@@ -1012,6 +1013,10 @@ exit:
     X509_STORE_CTX_free(store_ctx);
 
     debug_return_bool(ret);
+#else
+    /* TODO: verify server cert with old OpenSSL */
+    return true;
+#endif /* HAVE_SSL_CTX_GET0_CERTIFICATE */
 }
 
 static bool
