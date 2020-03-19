@@ -154,6 +154,9 @@ fi
 # Some libc functions are only available on certain OS revisions.
 configure_opts="${configure_opts}${configure_opts+$tab}--enable-package-build"
 
+# Some systems don't have a recent enough OpenSSL for the I/O log server.
+with_openssl=false
+
 # Choose configure options by osversion.
 # We use the same configure options as vendor packages when possible.
 case "$osversion" in
@@ -175,6 +178,10 @@ case "$osversion" in
 			    # RHEL 6 and above use /etc/sudo-ldap.conf
 			    with_sudo_ldap_conf=true
 			fi
+			if [ $osmajor -ge 7 ]; then
+			    # Encrypted remote I/O log support.
+			    with_openssl=true
+			fi
 		    fi
 		fi
 		;;
@@ -184,6 +191,7 @@ case "$osversion" in
 		with_linux_audit=true
 		with_pam_login=true
 		with_sssd=true
+		with_openssl=true
 		;;
 	esac
 
@@ -228,6 +236,10 @@ case "$osversion" in
 	    if [ $osrelease -ge 11 ]; then
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
 	    fi
+	    # SLES 12 and higher has recent enough OpenSSL for remote I/O log.
+	    if [ $osrelease -ge 12 ]; then
+		with_openssl=true
+	    fi
 	fi
 	# SuSE doesn't have /usr/libexec
 	libexec=lib
@@ -257,6 +269,8 @@ case "$osversion" in
 	make_opts="${make_opts}${make_opts+ }"'docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
+	# Encrypted remote I/O log support.
+	with_openssl=true
 	# Man pages should be compressed in .deb files
 	export MANCOMPRESS='gzip -9'
 	export MANCOMPRESSEXT='.gz'
@@ -312,6 +326,7 @@ case "$osversion" in
 	PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
 	;;
     macos*)
+	# TODO: openssl (homebrew?)
 	case "$osversion" in
 	    macos10[0-6]-i386|macos10[0-6]-x86_64)
 		# Build intel universal binaries for 10.6 and below
@@ -353,6 +368,7 @@ case "$osversion" in
 		$configure_opts"
 	;;
     aix*)
+	# TODO: openssl (AIX freeware?)
 	# Use -gxcoff with gcc instead of -g for dbx-style debugging symbols.
 	if test -z "$CC" && gcc -v >/dev/null 2>&1; then
 	    CFLAGS="-O2 -gxcoff"; export CFLAGS
@@ -383,9 +399,12 @@ case "$osversion" in
 
 		if [ $osrelease -ge 11 ]; then
 		    configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
+		    # Encrypted remote I/O log support.
+		    with_openssl=true
 		fi
 		;;
 	    *)
+		# TODO: openssl
 		configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls"
 		;;
 	esac
@@ -402,6 +421,14 @@ case "$osversion" in
 		$configure_opts"
 	;;
 esac
+
+# Don't enable OpenSSL if user disabled it.
+case "$configure_opts" in
+    *--disable-openssl*) with_openssl=false;;
+esac
+if [ X"$with_openssl" = X"true" ]; then
+    configure_opts="${configure_opts}${configure_opts+$tab}--enable-openssl"
+fi
 
 # The postinstall script will create tmpfiles.d/sudo.conf for us
 configure_opts="${configure_opts}${configure_opts+$tab}--disable-tmpfiles.d"
