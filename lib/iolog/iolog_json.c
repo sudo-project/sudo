@@ -549,13 +549,14 @@ json_stack_push(struct json_stack *stack, struct json_item_list *items,
     debug_return_ptr(&item->u.child);
 }
 
+/* Only expect a value if a name is defined or we are in an array. */
+#define expect_value (name != NULL || (frame->parent != NULL && frame->parent->type == JSON_ARRAY))
+
 bool
 iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 {
-    struct json_object *curobj = root;
-    struct json_object *curarray = NULL;
-    struct json_stack objstack = JSON_STACK_INTIALIZER(objstack);
-    struct json_stack arrstack = JSON_STACK_INTIALIZER(arrstack);
+    struct json_object *frame = root;
+    struct json_stack stack = JSON_STACK_INTIALIZER(stack);
     unsigned int lineno = 0;
     char *name = NULL;
     char *buf = NULL;
@@ -600,63 +601,52 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    switch (*cp) {
 	    case '{':
 		cp++;
-		curobj = json_stack_push(&objstack, &curobj->items, curobj,
+		frame = json_stack_push(&stack, &frame->items, frame,
 		    JSON_OBJECT, name, lineno);
-		if (curobj == NULL)
+		if (frame == NULL)
 		    goto parse_error;
 		name = NULL;
 		break;
 	    case '}':
 		cp++;
-		if (curobj->parent == NULL || curobj->parent->type != JSON_OBJECT) {
+		if (stack.depth == 0 || frame->parent == NULL ||
+			frame->parent->type != JSON_OBJECT) {
 		    sudo_warnx(U_("unmatched close brace"));
 		    goto parse_error;
 		}
-		curobj = objstack.frames[--objstack.depth];
+		frame = stack.frames[--stack.depth];
 		break;
 	    case '[':
 		cp++;
-		if (curobj->parent == NULL) {
+		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
 		    sudo_warnx(U_("unexpected array"));
 		    goto parse_error;
 		}
-		if (curarray != NULL) {
-		    curarray = json_stack_push(&arrstack, &curarray->items,
-			curarray, JSON_ARRAY, name, lineno);
-		} else {
-		    curarray = json_stack_push(&arrstack, &curobj->items,
-			NULL, JSON_ARRAY, name, lineno);
-		}
-		if (curarray == NULL)
+		frame = json_stack_push(&stack, &frame->items, frame,
+		    JSON_ARRAY, name, lineno);
+		if (frame == NULL)
 		    goto parse_error;
 		name = NULL;
 		break;
 	    case ']':
 		cp++;
-		if (curarray == NULL || curarray->parent == NULL ||
-			curarray->parent->type != JSON_ARRAY) {
+		if (stack.depth == 0 || frame->parent == NULL ||
+			frame->parent->type != JSON_ARRAY) {
 		    sudo_warnx(U_("unmatched close bracket"));
 		    goto parse_error;
 		}
-		curarray = arrstack.frames[--arrstack.depth];
+		frame = stack.frames[--stack.depth];
 		break;
 	    case '"':
-		if (curobj->parent == NULL) {
+		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
 		    sudo_warnx(U_("unexpected string"));
 		    goto parse_error;
 		}
 
-		if (curarray != NULL) {
-		    if (!json_insert_str(&curarray->items, NULL, &cp, lineno))
-			goto parse_error;
-		} else if (name != NULL) {
-		    if (!json_insert_str(&curobj->items, name, &cp, lineno))
-			goto parse_error;
-		    name = NULL;
-		} else {
-		    /* Parsing "name": */
+		if (!expect_value) {
+		    /* Parse "name": */
 		    if ((name = json_parse_string(&cp)) == NULL)
 			goto parse_error;
 		    /* TODO: allow colon on next line? */
@@ -664,10 +654,14 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 			sudo_warnx(U_("missing colon after name"));
 			goto parse_error;
 		    }
+		} else {
+		    if (!json_insert_str(&frame->items, name, &cp, lineno))
+			goto parse_error;
+		    name = NULL;
 		}
 		break;
 	    case 't':
-		if (name == NULL && curarray == NULL) {
+		if (!expect_value) {
 		    sudo_warnx(U_("unexpected boolean"));
 		    goto parse_error;
 		}
@@ -677,17 +671,12 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 
-		if (curarray != NULL) {
-		    if (!json_insert_bool(&curarray->items, NULL, true, lineno))
-			goto parse_error;
-		} else {
-		    if (!json_insert_bool(&curobj->items, name, true, lineno))
-			goto parse_error;
-		    name = NULL;
-		}
+		if (!json_insert_bool(&frame->items, name, true, lineno))
+		    goto parse_error;
+		name = NULL;
 		break;
 	    case 'f':
-		if (name == NULL && curarray == NULL) {
+		if (!expect_value) {
 		    sudo_warnx(U_("unexpected boolean"));
 		    goto parse_error;
 		}
@@ -697,17 +686,12 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 
-		if (curarray != NULL) {
-		    if (!json_insert_bool(&curarray->items, NULL, false, lineno))
-			goto parse_error;
-		} else {
-		    if (!json_insert_bool(&curobj->items, name, false, lineno))
-			goto parse_error;
-		    name = NULL;
-		}
+		if (!json_insert_bool(&frame->items, name, false, lineno))
+		    goto parse_error;
+		name = NULL;
 		break;
 	    case 'n':
-		if (name == NULL && curarray == NULL) {
+		if (!expect_value) {
 		    sudo_warnx(U_("unexpected boolean"));
 		    goto parse_error;
 		}
@@ -717,18 +701,13 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 
-		if (curarray != NULL) {
-		    if (!json_insert_null(&curarray->items, NULL, lineno))
-			goto parse_error;
-		} else {
-		    if (!json_insert_null(&curobj->items, name, lineno))
-			goto parse_error;
-		    name = NULL;
-		}
+		if (!json_insert_null(&frame->items, name, lineno))
+		    goto parse_error;
+		name = NULL;
 		break;
 	    case '+': case '-': case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7': case '8': case '9':
-		if (name == NULL && curarray == NULL) {
+		if (!expect_value) {
 		    sudo_warnx(U_("unexpected number"));
 		    goto parse_error;
 		}
@@ -744,26 +723,21 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		cp += len;
 		*cp = ch;
 
-		if (curarray != NULL) {
-		    if (!json_insert_num(&curarray->items, NULL, num, lineno))
-			goto parse_error;
-		} else {
-		    if (!json_insert_num(&curobj->items, name, num, lineno))
-			goto parse_error;
-		    name = NULL;
-		}
+		if (!json_insert_num(&frame->items, name, num, lineno))
+		    goto parse_error;
+		name = NULL;
 		break;
 	    default:
 		goto parse_error;
 	    }
 	}
     }
-    if (objstack.depth != 0) {
-	sudo_warnx(U_("unmatched close brace"));
-	goto parse_error;
-    }
-    if (arrstack.depth != 0) {
-	sudo_warnx(U_("unmatched close bracket"));
+    if (stack.depth != 0) {
+	frame = stack.frames[stack.depth - 1];
+	if (frame->parent == NULL || frame->parent->type == JSON_OBJECT)
+	    sudo_warnx(U_("unmatched close brace"));
+	else
+	    sudo_warnx(U_("unmatched close bracket"));
 	goto parse_error;
     }
 
