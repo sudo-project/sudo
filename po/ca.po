@@ -1,12 +1,12 @@
 # translation of sudo to Catalan
 # This file is put in the public domain.
-# Walter Garcia-Fontes <walter.garcia@upf.edu>, 2016.
+# Walter Garcia-Fontes <walter.garcia@upf.edu>, 2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.19b1\n"
+"Project-Id-Version: sudo 1.8.29rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2016-11-21 17:45-0700\n"
-"PO-Revision-Date: 2016-12-29 15:48+0100\n"
+"POT-Creation-Date: 2019-10-21 19:55-0600\n"
+"PO-Revision-Date: 2020-03-03 12:42+0100\n"
 "Last-Translator: Walter Garcia-Fontes <walter.garcia@upf.edu>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
 "Language: ca\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 
-#: lib/util/aix.c:85 lib/util/aix.c:172
+#: lib/util/aix.c:92 lib/util/aix.c:172
 msgid "unable to open userdb"
 msgstr "no s'ha pogut obrir userdb"
 
@@ -28,300 +28,368 @@ msgstr "no s'ha pogut passar al registre \"%s\" per a %s"
 msgid "unable to restore registry"
 msgstr "no s'ha pogut restaurar el registre"
 
-#: lib/util/aix.c:275 lib/util/gidlist.c:64 lib/util/gidlist.c:74
-#: lib/util/sudo_conf.c:184 lib/util/sudo_conf.c:270 lib/util/sudo_conf.c:347
-#: lib/util/sudo_conf.c:545 src/conversation.c:75 src/exec.c:867
-#: src/exec_common.c:107 src/exec_common.c:123 src/exec_common.c:132
-#: src/exec_pty.c:692 src/exec_pty.c:700 src/exec_pty.c:1163
-#: src/load_plugins.c:52 src/load_plugins.c:65 src/load_plugins.c:215
-#: src/load_plugins.c:238 src/load_plugins.c:303 src/load_plugins.c:318
-#: src/parse_args.c:180 src/parse_args.c:202 src/parse_args.c:370
-#: src/parse_args.c:466 src/parse_args.c:488 src/preserve_fds.c:47
-#: src/preserve_fds.c:130 src/selinux.c:83 src/selinux.c:292 src/selinux.c:415
-#: src/selinux.c:424 src/sesh.c:115 src/sudo.c:397 src/sudo.c:416
-#: src/sudo.c:480 src/sudo.c:602 src/sudo.c:662 src/sudo.c:672 src/sudo.c:692
-#: src/sudo.c:711 src/sudo.c:720 src/sudo.c:729 src/sudo.c:746 src/sudo.c:787
-#: src/sudo.c:797 src/sudo.c:817 src/sudo.c:1238 src/sudo.c:1259
-#: src/sudo.c:1433 src/sudo.c:1527 src/sudo_edit.c:151 src/sudo_edit.c:775
-#: src/sudo_edit.c:872 src/sudo_edit.c:985 src/sudo_edit.c:1005
+#: lib/util/aix.c:275 lib/util/gidlist.c:71 lib/util/gidlist.c:81
+#: lib/util/sudo_conf.c:193 lib/util/sudo_conf.c:279 lib/util/sudo_conf.c:356
+#: lib/util/sudo_conf.c:560 src/conversation.c:84 src/exec_common.c:114
+#: src/exec_common.c:130 src/exec_common.c:139 src/exec_monitor.c:212
+#: src/exec_monitor.c:467 src/exec_monitor.c:473 src/exec_monitor.c:481
+#: src/exec_monitor.c:489 src/exec_monitor.c:496 src/exec_monitor.c:503
+#: src/exec_monitor.c:510 src/exec_monitor.c:517 src/exec_monitor.c:524
+#: src/exec_monitor.c:531 src/exec_monitor.c:538 src/exec_nopty.c:214
+#: src/exec_nopty.c:220 src/exec_nopty.c:229 src/exec_nopty.c:236
+#: src/exec_nopty.c:243 src/exec_nopty.c:250 src/exec_nopty.c:257
+#: src/exec_nopty.c:264 src/exec_nopty.c:271 src/exec_nopty.c:278
+#: src/exec_nopty.c:285 src/exec_nopty.c:292 src/exec_nopty.c:299
+#: src/exec_nopty.c:307 src/exec_nopty.c:480 src/exec_pty.c:786
+#: src/exec_pty.c:795 src/exec_pty.c:852 src/exec_pty.c:1002
+#: src/exec_pty.c:1165 src/exec_pty.c:1171 src/exec_pty.c:1180
+#: src/exec_pty.c:1187 src/exec_pty.c:1194 src/exec_pty.c:1201
+#: src/exec_pty.c:1208 src/exec_pty.c:1215 src/exec_pty.c:1222
+#: src/exec_pty.c:1229 src/exec_pty.c:1236 src/exec_pty.c:1243
+#: src/exec_pty.c:1251 src/exec_pty.c:1668 src/load_plugins.c:59
+#: src/load_plugins.c:72 src/load_plugins.c:225 src/load_plugins.c:246
+#: src/load_plugins.c:315 src/load_plugins.c:321 src/load_plugins.c:335
+#: src/load_plugins.c:341 src/parse_args.c:186 src/parse_args.c:207
+#: src/parse_args.c:282 src/parse_args.c:583 src/parse_args.c:605
+#: src/preserve_fds.c:54 src/preserve_fds.c:139 src/selinux.c:91
+#: src/selinux.c:337 src/selinux.c:450 src/selinux.c:459 src/sesh.c:117
+#: src/sudo.c:619 src/sudo.c:679 src/sudo.c:689 src/sudo.c:710 src/sudo.c:729
+#: src/sudo.c:738 src/sudo.c:747 src/sudo.c:764 src/sudo.c:805 src/sudo.c:815
+#: src/sudo.c:841 src/sudo.c:1041 src/sudo.c:1062 src/sudo.c:1240
+#: src/sudo.c:1356 src/sudo_edit.c:258 src/sudo_edit.c:794 src/sudo_edit.c:891
+#: src/sudo_edit.c:1005 src/sudo_edit.c:1025
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: lib/util/aix.c:275 lib/util/gidlist.c:64 lib/util/sudo_conf.c:185
-#: lib/util/sudo_conf.c:270 lib/util/sudo_conf.c:347 lib/util/sudo_conf.c:545
-#: src/conversation.c:76 src/exec.c:867 src/exec_common.c:107
-#: src/exec_common.c:124 src/exec_common.c:133 src/exec_pty.c:692
-#: src/exec_pty.c:700 src/load_plugins.c:215 src/load_plugins.c:238
-#: src/load_plugins.c:303 src/load_plugins.c:318 src/parse_args.c:180
-#: src/parse_args.c:202 src/parse_args.c:370 src/parse_args.c:466
-#: src/parse_args.c:488 src/preserve_fds.c:47 src/preserve_fds.c:130
-#: src/selinux.c:83 src/selinux.c:292 src/selinux.c:415 src/selinux.c:424
-#: src/sesh.c:115 src/sudo.c:397 src/sudo.c:416 src/sudo.c:480 src/sudo.c:602
-#: src/sudo.c:817 src/sudo.c:1238 src/sudo.c:1259 src/sudo.c:1433
-#: src/sudo.c:1527 src/sudo_edit.c:151 src/sudo_edit.c:775 src/sudo_edit.c:872
-#: src/sudo_edit.c:985 src/sudo_edit.c:1005
+#: lib/util/aix.c:275 lib/util/gidlist.c:71 lib/util/sudo_conf.c:194
+#: lib/util/sudo_conf.c:279 lib/util/sudo_conf.c:356 lib/util/sudo_conf.c:560
+#: src/conversation.c:85 src/exec_common.c:114 src/exec_common.c:131
+#: src/exec_common.c:140 src/exec_monitor.c:467 src/exec_monitor.c:473
+#: src/exec_monitor.c:481 src/exec_monitor.c:489 src/exec_monitor.c:496
+#: src/exec_monitor.c:503 src/exec_monitor.c:510 src/exec_monitor.c:517
+#: src/exec_monitor.c:524 src/exec_monitor.c:531 src/exec_monitor.c:538
+#: src/exec_nopty.c:214 src/exec_nopty.c:220 src/exec_nopty.c:229
+#: src/exec_nopty.c:236 src/exec_nopty.c:243 src/exec_nopty.c:250
+#: src/exec_nopty.c:257 src/exec_nopty.c:264 src/exec_nopty.c:271
+#: src/exec_nopty.c:278 src/exec_nopty.c:285 src/exec_nopty.c:292
+#: src/exec_nopty.c:299 src/exec_nopty.c:307 src/exec_pty.c:786
+#: src/exec_pty.c:795 src/exec_pty.c:852 src/exec_pty.c:1165
+#: src/exec_pty.c:1171 src/exec_pty.c:1180 src/exec_pty.c:1187
+#: src/exec_pty.c:1194 src/exec_pty.c:1201 src/exec_pty.c:1208
+#: src/exec_pty.c:1215 src/exec_pty.c:1222 src/exec_pty.c:1229
+#: src/exec_pty.c:1236 src/exec_pty.c:1243 src/exec_pty.c:1251
+#: src/exec_pty.c:1668 src/load_plugins.c:225 src/load_plugins.c:246
+#: src/load_plugins.c:315 src/load_plugins.c:321 src/load_plugins.c:335
+#: src/load_plugins.c:341 src/parse_args.c:186 src/parse_args.c:208
+#: src/parse_args.c:282 src/parse_args.c:583 src/parse_args.c:605
+#: src/preserve_fds.c:54 src/preserve_fds.c:139 src/selinux.c:91
+#: src/selinux.c:337 src/selinux.c:450 src/selinux.c:459 src/sesh.c:117
+#: src/sudo.c:619 src/sudo.c:841 src/sudo.c:1041 src/sudo.c:1062
+#: src/sudo.c:1240 src/sudo.c:1356 src/sudo_edit.c:258 src/sudo_edit.c:794
+#: src/sudo_edit.c:891 src/sudo_edit.c:1005 src/sudo_edit.c:1025
 msgid "unable to allocate memory"
 msgstr "no s'ha pogut assignar memòria"
 
-#: lib/util/strsignal.c:48
+#: lib/util/strsignal.c:55
 msgid "Unknown signal"
 msgstr "Senyal desconegut"
 
-#: lib/util/strtoid.c:76 lib/util/strtoid.c:104 lib/util/strtomode.c:49
-#: lib/util/strtonum.c:58 lib/util/strtonum.c:176
+#: lib/util/strtoid.c:96 lib/util/strtomode.c:56 lib/util/strtonum.c:161
+#: lib/util/strtonum.c:196
 msgid "invalid value"
 msgstr "valor no vàlid"
 
-#: lib/util/strtoid.c:83 lib/util/strtoid.c:111 lib/util/strtomode.c:55
-#: lib/util/strtonum.c:61 lib/util/strtonum.c:188
+#: lib/util/strtomode.c:62 lib/util/strtonum.c:173
 msgid "value too large"
 msgstr "valor massa gran"
 
-#: lib/util/strtoid.c:89 lib/util/strtomode.c:55 lib/util/strtonum.c:61
-#: lib/util/strtonum.c:182
+#: lib/util/strtomode.c:62 lib/util/strtonum.c:167
 msgid "value too small"
 msgstr "valor massa petit"
 
-#: lib/util/sudo_conf.c:203
+#: lib/util/sudo_conf.c:212
 #, c-format
 msgid "invalid Path value \"%s\" in %s, line %u"
 msgstr "valor Path no vàlid «%s» a %s, línia %u"
 
-#: lib/util/sudo_conf.c:369 lib/util/sudo_conf.c:422
+#: lib/util/sudo_conf.c:378 lib/util/sudo_conf.c:431
 #, c-format
 msgid "invalid value for %s \"%s\" in %s, line %u"
 msgstr "valor no vàlid per a %s «%s» a %s, línia %u"
 
-#: lib/util/sudo_conf.c:390
+#: lib/util/sudo_conf.c:399
 #, c-format
 msgid "unsupported group source \"%s\" in %s, line %u"
 msgstr "font de grup no suportat «%s» a %s, línia %u"
 
-#: lib/util/sudo_conf.c:406
+#: lib/util/sudo_conf.c:415
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
 msgstr "grups «%s» max no vàlids a %s, línia %u"
 
-#: lib/util/sudo_conf.c:561
+#: lib/util/sudo_conf.c:576
 #, c-format
 msgid "unable to stat %s"
 msgstr "no es pot obrir %s"
 
-#: lib/util/sudo_conf.c:564
+#: lib/util/sudo_conf.c:579
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s no és un fitxer regular"
 
-#: lib/util/sudo_conf.c:567
+#: lib/util/sudo_conf.c:582
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s és propietat de l'uid %u, hauria de ser %u"
 
-#: lib/util/sudo_conf.c:571
+#: lib/util/sudo_conf.c:586
 #, c-format
 msgid "%s is world writable"
 msgstr "%s és escrivible per tothom"
 
-#: lib/util/sudo_conf.c:574
+#: lib/util/sudo_conf.c:589
 #, c-format
 msgid "%s is group writable"
 msgstr "%s és escrivible pel grup"
 
-#: lib/util/sudo_conf.c:584 src/selinux.c:201 src/selinux.c:213 src/sudo.c:366
+#: lib/util/sudo_conf.c:599 src/selinux.c:233 src/selinux.c:250 src/sudo.c:363
 #, c-format
 msgid "unable to open %s"
 msgstr "no s'ha pogut obrir %s"
 
-#: src/exec.c:115 src/exec.c:117 src/exec.c:122 src/exec.c:408 src/exec.c:410
-#: src/exec.c:412 src/exec.c:414 src/exec.c:416 src/exec.c:418 src/exec.c:421
-#: src/exec.c:437 src/exec.c:439 src/exec.c:600 src/exec.c:794
-#: src/exec_pty.c:464 src/exec_pty.c:730 src/exec_pty.c:800 src/exec_pty.c:802
-#: src/exec_pty.c:814 src/exec_pty.c:816 src/exec_pty.c:1347
-#: src/exec_pty.c:1349 src/exec_pty.c:1354 src/exec_pty.c:1356
-#: src/exec_pty.c:1370 src/exec_pty.c:1381 src/exec_pty.c:1383
-#: src/exec_pty.c:1385 src/exec_pty.c:1387 src/exec_pty.c:1389
-#: src/exec_pty.c:1391 src/exec_pty.c:1393 src/signal.c:148 src/signal.c:162
+#: src/exec.c:111
+#, c-format
+msgid "unknown login class %s"
+msgstr "classe d'inici de sessió %s desconeguda"
+
+#: src/exec.c:123
+msgid "unable to set user context"
+msgstr "no s'ha pogut establir el context d'usuari"
+
+#: src/exec.c:139
+msgid "unable to set process priority"
+msgstr "no s'ha pogut establir la prioritat del procés"
+
+#: src/exec.c:150
+#, c-format
+msgid "unable to change root to %s"
+msgstr "no s'ha pogut canviar l'usuari primari a %s"
+
+#: src/exec.c:163 src/exec.c:169 src/exec.c:176
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "no s'ha pogut canviar a runas uid (%u, %u)"
+
+#: src/exec.c:194
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "no s'ha pogut canviar el directori a %s"
+
+#: src/exec.c:293 src/exec_monitor.c:576 src/exec_monitor.c:578
+#: src/exec_nopty.c:538 src/exec_pty.c:530 src/exec_pty.c:1336
+#: src/exec_pty.c:1338 src/signal.c:150 src/signal.c:164
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "no es pot establir el gestor per al senyal %d"
 
-#: src/exec.c:127 src/exec_pty.c:846 src/exec_pty.c:1431 src/tgetpass.c:250
-msgid "unable to fork"
-msgstr "no s'ha pogut bifurcar"
-
-#: src/exec.c:303 src/exec.c:311 src/exec.c:872 src/exec_pty.c:585
-#: src/exec_pty.c:590 src/exec_pty.c:660 src/exec_pty.c:667 src/exec_pty.c:954
-#: src/exec_pty.c:964 src/exec_pty.c:1009 src/exec_pty.c:1016
-#: src/exec_pty.c:1041 src/exec_pty.c:1496 src/exec_pty.c:1503
-#: src/exec_pty.c:1510
-msgid "unable to add event to queue"
-msgstr "no s'ha pogut afegir un esdeveniment a la cua"
-
-#: src/exec.c:391
-msgid "unable to create sockets"
-msgstr "no s'ha pogut crear el sòcol"
-
-#: src/exec.c:446
-msgid "policy plugin failed session initialization"
-msgstr "el connector de política ha fallat la inicialització de la sessió"
-
-#: src/exec.c:491
-msgid "error in event loop"
-msgstr "error al bucle d'esdeveniment"
-
-#: src/exec.c:509
-msgid "unable to restore tty label"
-msgstr "no s'ha pogut restaurar l'etiqueta tty"
-
-#: src/exec.c:608 src/exec_pty.c:496 src/signal.c:87
-#, c-format
-msgid "unable to restore handler for signal %d"
-msgstr "no s'ha pogut restaurar el gestor per al senyal %d"
-
-#: src/exec.c:726 src/exec_pty.c:1236
-msgid "error reading from signal pipe"
-msgstr "error en llegir del conducte del senyal"
-
-#: src/exec_common.c:166
+#: src/exec_common.c:173
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "no s'ha pogut remoure PRIV_PROC_EXEC de PRIV_LIMIT"
 
-#: src/exec_pty.c:188
-msgid "unable to allocate pty"
-msgstr "no s'ha pogut assignar pty"
-
-#: src/exec_pty.c:774 src/exec_pty.c:783 src/exec_pty.c:791
-#: src/exec_pty.c:1339 src/exec_pty.c:1428 src/signal.c:129 src/tgetpass.c:246
-msgid "unable to create pipe"
-msgstr "no s'ha pogut crear un conducte"
-
-#: src/exec_pty.c:1269
-msgid "error reading from pipe"
-msgstr "error en llegir del conducte"
-
-#: src/exec_pty.c:1296
+#: src/exec_monitor.c:366
 msgid "error reading from socketpair"
 msgstr "error en llegir del parell de sòcols"
 
-#: src/exec_pty.c:1305
+#: src/exec_monitor.c:383
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "tipus de resposta inesperada al canal posterior: %d"
 
-#: src/exec_pty.c:1407
+#: src/exec_monitor.c:475 src/exec_monitor.c:483 src/exec_monitor.c:491
+#: src/exec_monitor.c:498 src/exec_monitor.c:505 src/exec_monitor.c:512
+#: src/exec_monitor.c:519 src/exec_monitor.c:526 src/exec_monitor.c:533
+#: src/exec_monitor.c:540 src/exec_nopty.c:222 src/exec_nopty.c:231
+#: src/exec_nopty.c:238 src/exec_nopty.c:245 src/exec_nopty.c:252
+#: src/exec_nopty.c:259 src/exec_nopty.c:266 src/exec_nopty.c:273
+#: src/exec_nopty.c:280 src/exec_nopty.c:287 src/exec_nopty.c:294
+#: src/exec_nopty.c:301 src/exec_nopty.c:309 src/exec_pty.c:652
+#: src/exec_pty.c:657 src/exec_pty.c:754 src/exec_pty.c:761 src/exec_pty.c:858
+#: src/exec_pty.c:1173 src/exec_pty.c:1182 src/exec_pty.c:1189
+#: src/exec_pty.c:1196 src/exec_pty.c:1203 src/exec_pty.c:1210
+#: src/exec_pty.c:1217 src/exec_pty.c:1224 src/exec_pty.c:1231
+#: src/exec_pty.c:1238 src/exec_pty.c:1245 src/exec_pty.c:1621
+#: src/exec_pty.c:1631 src/exec_pty.c:1676 src/exec_pty.c:1683
+#: src/exec_pty.c:1710
+msgid "unable to add event to queue"
+msgstr "no s'ha pogut afegir un esdeveniment a la cua"
+
+#: src/exec_monitor.c:594
 msgid "unable to set controlling tty"
 msgstr "no s'ha pogut configurar la tty controladora"
 
-#: src/load_plugins.c:50 src/load_plugins.c:63 src/load_plugins.c:85
-#: src/load_plugins.c:115 src/load_plugins.c:123 src/load_plugins.c:129
-#: src/load_plugins.c:170 src/load_plugins.c:178 src/load_plugins.c:185
-#: src/load_plugins.c:191
+#: src/exec_monitor.c:602 src/exec_nopty.c:366 src/exec_pty.c:1415
+#: src/exec_pty.c:1436 src/exec_pty.c:1456 src/tgetpass.c:307
+msgid "unable to create pipe"
+msgstr "no s'ha pogut crear un conducte"
+
+#: src/exec_monitor.c:610
+msgid "unable to receive message from parent"
+msgstr "no s'ha pogut enviar el missatge del pare"
+
+#: src/exec_monitor.c:624 src/exec_nopty.c:395 src/exec_pty.c:1494
+#: src/tgetpass.c:311
+msgid "unable to fork"
+msgstr "no s'ha pogut bifurcar"
+
+#: src/exec_monitor.c:628 src/exec_monitor.c:727 src/exec_nopty.c:448
+msgid "unable to restore tty label"
+msgstr "no s'ha pogut restaurar l'etiqueta tty"
+
+#: src/exec_monitor.c:644 src/sesh.c:127 src/sudo.c:1100
+#, c-format
+msgid "unable to execute %s"
+msgstr "no s'ha pogut executar %s"
+
+#: src/exec_nopty.c:360 src/exec_pty.c:1345
+msgid "policy plugin failed session initialization"
+msgstr "el connector de política ha fallat la inicialització de la sessió"
+
+#: src/exec_nopty.c:437 src/exec_pty.c:1581
+msgid "error in event loop"
+msgstr "error al bucle d'esdeveniment"
+
+#: src/exec_nopty.c:546 src/exec_pty.c:565 src/signal.c:112
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr "no s'ha pogut restaurar el gestor per al senyal %d"
+
+#: src/exec_pty.c:158
+msgid "unable to allocate pty"
+msgstr "no s'ha pogut assignar pty"
+
+#: src/exec_pty.c:1325
+msgid "unable to create sockets"
+msgstr "no s'ha pogut crear el sòcol"
+
+#: src/exec_pty.c:1538
+msgid "unable to send message to monitor process"
+msgstr "no s'ha pogut enviar el missatge per monitorar el procés"
+
+#: src/load_plugins.c:57 src/load_plugins.c:70 src/load_plugins.c:92
+#: src/load_plugins.c:122 src/load_plugins.c:134 src/load_plugins.c:140
+#: src/load_plugins.c:181 src/load_plugins.c:189 src/load_plugins.c:196
+#: src/load_plugins.c:202
 #, c-format
 msgid "error in %s, line %d while loading plugin \"%s\""
 msgstr "error a %s, línia %d quan s'estava carregant el connector «%s»"
 
-#: src/load_plugins.c:87
+#: src/load_plugins.c:94
 #, c-format
 msgid "%s%s: %s"
 msgstr "%s%s: %s"
 
-#: src/load_plugins.c:125
+#: src/load_plugins.c:136
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s ha de ser propietat de l'uid %d"
 
-#: src/load_plugins.c:131
+#: src/load_plugins.c:142
 #, c-format
 msgid "%s must be only be writable by owner"
 msgstr "%s ha de ser escrivible únicament pel propietari"
 
-#: src/load_plugins.c:172
+#: src/load_plugins.c:183
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "no s'ha pogut carregar %s: %s"
 
-#: src/load_plugins.c:180
+#: src/load_plugins.c:191
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "no s'ha pogut trobar el símbol «%s» a %s"
 
-#: src/load_plugins.c:187
+#: src/load_plugins.c:198
 #, c-format
 msgid "unknown policy type %d found in %s"
 msgstr "s'ha trobat un tipus desconegut de política %d a %s"
 
-#: src/load_plugins.c:193
+#: src/load_plugins.c:204
 #, c-format
 msgid "incompatible plugin major version %d (expected %d) found in %s"
 msgstr "s'ha trobat una versió major %d incompatible de connector (s'esperava %d) a %s"
 
-#: src/load_plugins.c:202
+#: src/load_plugins.c:213
 #, c-format
 msgid "ignoring policy plugin \"%s\" in %s, line %d"
 msgstr "s'ignorarà el connector de política «%s» a %s, línia %d"
 
-#: src/load_plugins.c:204
+#: src/load_plugins.c:215
 msgid "only a single policy plugin may be specified"
 msgstr "sols es pot especificar un únic connector de política"
 
-#: src/load_plugins.c:207
+#: src/load_plugins.c:218
 #, c-format
 msgid "ignoring duplicate policy plugin \"%s\" in %s, line %d"
 msgstr "s'ignorarà el connector entrada/sortida duplicat «%s» a %s, línia %d"
 
-#: src/load_plugins.c:228
+#: src/load_plugins.c:237
 #, c-format
 msgid "ignoring duplicate I/O plugin \"%s\" in %s, line %d"
 msgstr "s'ignorarà el connector entrada/sortida duplica «%s» a %s, línia %d"
 
-#: src/load_plugins.c:331
+#: src/load_plugins.c:353
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "el connector de política %s no inclou un mètode check_policy"
 
-#: src/net_ifs.c:173 src/net_ifs.c:190 src/net_ifs.c:335 src/sudo.c:475
+#: src/net_ifs.c:183 src/net_ifs.c:200 src/net_ifs.c:345 src/sudo.c:473
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "error intern, sobreeiximent de %s"
 
-#: src/parse_args.c:239
+#: src/parse_args.c:228
+#, c-format
+msgid "invalid environment variable name: %s"
+msgstr "nom no vàlid de variable d'entorn: %s"
+
+#: src/parse_args.c:329
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "l'argument per a -C ha de ser un número més gran o igual a 3"
 
-#: src/parse_args.c:406
+#: src/parse_args.c:523
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr "no podeu especificar a l'hora les opcions `-i' i `-s'"
 
-#: src/parse_args.c:410
+#: src/parse_args.c:527
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr "no podeu especificar a l'hora les opcons `-i' i `-E'"
 
-#: src/parse_args.c:420
+#: src/parse_args.c:537
 msgid "the `-E' option is not valid in edit mode"
 msgstr "l'opció `-E' no és vàlida al mode editar"
 
-#: src/parse_args.c:422
+#: src/parse_args.c:539
 msgid "you may not specify environment variables in edit mode"
 msgstr "no podeu especificar variables d'entorn al mode editar"
 
-#: src/parse_args.c:430
+#: src/parse_args.c:547
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr "l'opció `-U' sols es pot usar amb l'opció `-l'"
 
-#: src/parse_args.c:434
+#: src/parse_args.c:551
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "no es poden usar a l'hora les opcions `-A' i `-S'"
 
-#: src/parse_args.c:510
+#: src/parse_args.c:627
 msgid "sudoedit is not supported on this platform"
 msgstr "aquesta plataforma no dóna suport a sudoedit"
 
-#: src/parse_args.c:583
+#: src/parse_args.c:700
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Sols es pot especificar una de les opcions  -e, -h, -i, -K, -l, -s, -v o -V"
 
-#: src/parse_args.c:597
+#: src/parse_args.c:714
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -330,7 +398,7 @@ msgstr ""
 "%s - edita fitxers com un altre usuari\n"
 "\n"
 
-#: src/parse_args.c:599
+#: src/parse_args.c:716
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -339,7 +407,7 @@ msgstr ""
 "%s - executa una ordre com un altre usuari\n"
 "\n"
 
-#: src/parse_args.c:604
+#: src/parse_args.c:721
 #, c-format
 msgid ""
 "\n"
@@ -348,519 +416,534 @@ msgstr ""
 "\n"
 "Opcions:\n"
 
-#: src/parse_args.c:606
+#: src/parse_args.c:723
 msgid "use a helper program for password prompting"
 msgstr "usa un programa auxiliar per a la pregunta de la contrasenya"
 
-#: src/parse_args.c:609
+#: src/parse_args.c:726
 msgid "use specified BSD authentication type"
 msgstr "usa el tipus d'autenticació BSD especificat"
 
-#: src/parse_args.c:612
+#: src/parse_args.c:729
 msgid "run command in the background"
 msgstr "executa l'ordre en el segon pla"
 
-#: src/parse_args.c:614
+#: src/parse_args.c:731
+msgid "ring bell when prompting"
+msgstr "fer un avís sonor quan es pregunti"
+
+#: src/parse_args.c:733
 msgid "close all file descriptors >= num"
 msgstr "tanca tots els descriptors de fitxer >= num"
 
-#: src/parse_args.c:617
+#: src/parse_args.c:736
 msgid "run command with the specified BSD login class"
 msgstr "executa l'ordre amb la classe d'inici de sesssió BSD especificada"
 
-#: src/parse_args.c:620
+#: src/parse_args.c:739
 msgid "preserve user environment when running command"
 msgstr "preserva l'entorn de l'usuari quan s'executi l'ordre"
 
-#: src/parse_args.c:622
+#: src/parse_args.c:741
+msgid "preserve specific environment variables"
+msgstr "preserva les variables específiques d'entorn"
+
+#: src/parse_args.c:743
 msgid "edit files instead of running a command"
 msgstr "edita els fitxers en comptes d'executar una ordre"
 
-#: src/parse_args.c:624
+#: src/parse_args.c:745
 msgid "run command as the specified group name or ID"
 msgstr "executa l'ordre com el nom o ID especificats de grup"
 
-#: src/parse_args.c:626
+#: src/parse_args.c:747
 msgid "set HOME variable to target user's home dir"
 msgstr "estableix la variable HOME per apuntar al directori de l'usuari"
 
-#: src/parse_args.c:628
+#: src/parse_args.c:749
 msgid "display help message and exit"
 msgstr "mostra el missatge d'ajuda i surt"
 
-#: src/parse_args.c:630
+#: src/parse_args.c:751
 msgid "run command on host (if supported by plugin)"
 msgstr "executa l'ordre a l'amfitrió (si està suportat pel connector)"
 
-#: src/parse_args.c:632
+#: src/parse_args.c:753
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "executa l'intèrpret d'ordres de l'inici de sessió com a usuari de destinació; també es pot especificar una ordre"
 
-#: src/parse_args.c:634
+#: src/parse_args.c:755
 msgid "remove timestamp file completely"
 msgstr "suprimeix completament el fitxer de marca de temps"
 
-#: src/parse_args.c:636
+#: src/parse_args.c:757
 msgid "invalidate timestamp file"
 msgstr "fitxer de marca de temps no vàlid"
 
-#: src/parse_args.c:638
+#: src/parse_args.c:759
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "fes una llista dels privilegis de l'usuari o verifica una ordre específica; usueu-lo dues vegades per a formats més llargs"
 
-#: src/parse_args.c:640
+#: src/parse_args.c:761
 msgid "non-interactive mode, no prompts are used"
 msgstr "mode no interactiu, no es preguntarà res"
 
-#: src/parse_args.c:642
+#: src/parse_args.c:763
 msgid "preserve group vector instead of setting to target's"
 msgstr "preserva el vector de grup en comptes d'establir-lo d'acord amb la destinació"
 
-#: src/parse_args.c:644
+#: src/parse_args.c:765
 msgid "use the specified password prompt"
 msgstr "usa la pregunta específica de contrasenya"
 
-#: src/parse_args.c:647
+#: src/parse_args.c:768
 msgid "create SELinux security context with specified role"
 msgstr "crea un context de seguretat SELinux amb el rol especificat"
 
-#: src/parse_args.c:650
+#: src/parse_args.c:771
 msgid "read password from standard input"
 msgstr "llegeix la contrasenya des de l'entrada estàndard"
 
-#: src/parse_args.c:652
+#: src/parse_args.c:773
 msgid "run shell as the target user; a command may also be specified"
 msgstr "executa l'intèrpret d'ordres com a usuari de destinació; també es pot especificar una ordre"
 
-#: src/parse_args.c:655
+#: src/parse_args.c:776
 msgid "create SELinux security context with specified type"
 msgstr "crea el context de seguretat SELinux amb el tipus especificat"
 
-#: src/parse_args.c:658
+#: src/parse_args.c:779
+msgid "terminate command after the specified time limit"
+msgstr "finalitza l'ordre després del límit especificat de temps"
+
+#: src/parse_args.c:781
 msgid "in list mode, display privileges for user"
 msgstr "en mode llista, mostra els privilegis per a l'usuari"
 
-#: src/parse_args.c:660
+#: src/parse_args.c:783
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "executa l'ordre (o edita el fitxer) com el nom o ID especificats d'usuari"
 
-#: src/parse_args.c:662
+#: src/parse_args.c:785
 msgid "display version information and exit"
 msgstr "mostra la informació de versió i surt"
 
-#: src/parse_args.c:664
+#: src/parse_args.c:787
 msgid "update user's timestamp without running a command"
 msgstr "actualitza la marca de temps de l'usuari sense executar una ordre"
 
-#: src/parse_args.c:666
+#: src/parse_args.c:789
 msgid "stop processing command line arguments"
 msgstr "deixa de processar els arguments de línia d'ordres"
 
-#: src/selinux.c:77
+#: src/selinux.c:85
 msgid "unable to open audit system"
 msgstr "no s'ha pogut obrir el sistema d'auditoria"
 
-#: src/selinux.c:87
+#: src/selinux.c:95
 msgid "unable to send audit message"
 msgstr "no s'ha pogut enviar el missatge d'auditoria"
 
-#: src/selinux.c:115
+#: src/selinux.c:129
 #, c-format
 msgid "unable to fgetfilecon %s"
 msgstr "no s'ha pogut fgetfilecon %s"
 
-#: src/selinux.c:120
+#: src/selinux.c:134
 #, c-format
 msgid "%s changed labels"
 msgstr "%s ha canviat les etiquetes"
 
-#: src/selinux.c:125
+#: src/selinux.c:142
 #, c-format
 msgid "unable to restore context for %s"
 msgstr "no s'ha pogut restaurar el context per a %s"
 
-#: src/selinux.c:165
+#: src/selinux.c:190
 #, c-format
 msgid "unable to open %s, not relabeling tty"
 msgstr "no s'ha pogut obrir %s, no es canviaran les etiquetes per a la tty"
 
-#: src/selinux.c:173
+#: src/selinux.c:194 src/selinux.c:237 src/selinux.c:254
+#, c-format
+msgid "%s is not a character device, not relabeling tty"
+msgstr "%s no es un dispositiu de caràcters, no es canviarà l'etiqueta del tty"
+
+#: src/selinux.c:203
 msgid "unable to get current tty context, not relabeling tty"
 msgstr "no s'ha pogut obtenir el context tty actual, no es canviaran les etiquetes per a la tty"
 
-#: src/selinux.c:180
+#: src/selinux.c:210
 msgid "unknown security class \"chr_file\", not relabeling tty"
 msgstr "classe de seguretat «char_file» desconeguda, no es canviaran les etiquetes de la tty"
 
-#: src/selinux.c:185
+#: src/selinux.c:215
 msgid "unable to get new tty context, not relabeling tty"
 msgstr "no s'ha pogut obtenir el nou context tty, no es canviaran les etiquetes tty"
 
-#: src/selinux.c:192
+#: src/selinux.c:224
 msgid "unable to set new tty context"
 msgstr "no s'ha pogut establir el nou context tty"
 
-#: src/selinux.c:256
+#: src/selinux.c:298
 #, c-format
 msgid "you must specify a role for type %s"
 msgstr "heu d'especificar un rol per al tipus %s"
 
-#: src/selinux.c:262
+#: src/selinux.c:304
 #, c-format
 msgid "unable to get default type for role %s"
 msgstr "no s'ha pogut obtenir un tipus predeterminat per al rol %s"
 
-#: src/selinux.c:280
+#: src/selinux.c:316
+msgid "failed to get new context"
+msgstr "no s'ha pogut obtenir el context nou"
+
+#: src/selinux.c:325
 #, c-format
 msgid "failed to set new role %s"
 msgstr "no s'ha pogut establir el nou rol %s"
 
-#: src/selinux.c:284
+#: src/selinux.c:329
 #, c-format
 msgid "failed to set new type %s"
 msgstr "no s'ha pogut establir el nou tipus %s"
 
-#: src/selinux.c:296
+#: src/selinux.c:341
 #, c-format
 msgid "%s is not a valid context"
 msgstr "%s no és un context vàlid"
 
-#: src/selinux.c:331
-msgid "failed to get old_context"
-msgstr "no s'ha pogut obtenir old_context"
+#: src/selinux.c:373
+msgid "failed to get old context"
+msgstr "no s'ha pogut obtenir el context vell"
 
-#: src/selinux.c:337
+#: src/selinux.c:379
 msgid "unable to determine enforcing mode."
 msgstr "no s'ha pogut determinar el mode de fer complir"
 
-#: src/selinux.c:354
+#: src/selinux.c:396
 #, c-format
 msgid "unable to set tty context to %s"
 msgstr "no s'ha pogut establir el context tty a %s"
 
-#: src/selinux.c:393
+#: src/selinux.c:428
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "no s'ha pogut establir el context exec a %s"
 
-#: src/selinux.c:400
+#: src/selinux.c:435
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "no s'ha pogut establir el context de creació de clau a %s"
 
-#: src/sesh.c:77
+#: src/sesh.c:79
 msgid "requires at least one argument"
 msgstr "es requereix almenys un argument"
 
-#: src/sesh.c:106
+#: src/sesh.c:108
 #, c-format
 msgid "invalid file descriptor number: %s"
 msgstr "número no vàlid de descriptor de fitxer: %s"
 
-#: src/sesh.c:120
+#: src/sesh.c:122
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr "no s'ha pogut executar %s com a intèrpret d'ordres d'inici de sessió"
 
-#: src/sesh.c:125 src/sudo.c:1297
-#, c-format
-msgid "unable to execute %s"
-msgstr "no s'ha pogut executar %s"
-
-#: src/signal.c:69
+#: src/signal.c:90
 #, c-format
 msgid "unable to save handler for signal %d"
 msgstr "no s'ha pogut desar el gestorper al senyal %d"
 
-#: src/solaris.c:76
+#: src/solaris.c:83
 msgid "resource control limit has been reached"
 msgstr "s'ha assolit el límit de control de recursos"
 
-#: src/solaris.c:79
+#: src/solaris.c:86
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "l'usuari \"%s\" no és un membre del projecte \"%s\""
 
-#: src/solaris.c:83
+#: src/solaris.c:90
 msgid "the invoking task is final"
 msgstr "la tasca invocant és final"
 
-#: src/solaris.c:86
+#: src/solaris.c:93
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "no es pot fer la incorporació al projecte \"%s\""
 
-#: src/solaris.c:91
+#: src/solaris.c:98
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "no hi ha vinculacions predeterminades d'acceptació de conjunt de recursos per al projecte \"%s\""
 
-#: src/solaris.c:95
+#: src/solaris.c:102
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "no existeix el conjunt de recursos especifica per al projecte \"%s\""
 
-#: src/solaris.c:99
+#: src/solaris.c:106
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "no s'ha pogut vincular al conjunt de recursos predeterminats per al projecte \"%s\""
 
-#: src/solaris.c:105
+#: src/solaris.c:112
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "ha fallat setproject per al projecte \"%s\""
 
-#: src/solaris.c:107
+#: src/solaris.c:114
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "advertiment, l'assignació de control de recursos ha fallat per al projecte \"%s\""
 
-#: src/sudo.c:212
+#: src/sudo.c:204
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Versió de sudo %s\n"
 
-#: src/sudo.c:214
+#: src/sudo.c:206
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Opcions de configuració: %s\n"
 
-#: src/sudo.c:222
+#: src/sudo.c:214
 msgid "fatal error, unable to load plugins"
 msgstr "error fatal, no s'han pogut carregar els connectors"
 
-#: src/sudo.c:230
+#: src/sudo.c:222
 msgid "unable to initialize policy plugin"
 msgstr "no s'ha pogut inicialitzar el connector de polítiques"
 
-#: src/sudo.c:274
+#: src/sudo.c:266
 msgid "plugin did not return a command to execute"
 msgstr "el connector no ha retornat una ordre a executar"
 
-#: src/sudo.c:290
+#: src/sudo.c:282
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "no se pogut iniciliatzar el connector %s entrada/sortida"
 
-#: src/sudo.c:316
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "mode 0x%x inesperat de sudo"
 
-#: src/sudo.c:460
-msgid "unable to get group vector"
-msgstr "no s'ha pogut obtenir el vector de grup"
-
-#: src/sudo.c:522
+#: src/sudo.c:538
 #, c-format
-msgid "unknown uid %u: who are you?"
-msgstr "uid %u desconegut: qui sou?"
+msgid "you do not exist in the %s database"
+msgstr "no existiu a la base de dades %s"
 
-#: src/sudo.c:578
+#: src/sudo.c:595
 msgid "unable to determine tty"
 msgstr "no s'ha pogut determinar la tty"
 
-#: src/sudo.c:866
+#: src/sudo.c:887
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s ha de ser propietat de l'uid %d i tenir el bit setuid establert"
 
-#: src/sudo.c:869
+#: src/sudo.c:890
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr ""
 "l'uid efectiu no és %d, és %s a un sistema de fitxers amb l'opció\n"
 "'nosuid' establarta o un sistema de fitxers NFS sense d'usuari primari? "
 
-#: src/sudo.c:875
+#: src/sudo.c:896
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "l'uid efectiu no és %d, és el sudo instal·lat com a setuid root?"
 
-#: src/sudo.c:956
+#: src/sudo.c:912
 msgid "unable to set supplementary group IDs"
 msgstr "no s'han pogut establir els IDs de grup suplementaris"
 
-#: src/sudo.c:963
+#: src/sudo.c:919
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "no s'ha pogut establir el gid efectiu per a runas gid %u"
 
-#: src/sudo.c:969
+#: src/sudo.c:925
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "no s'ha pogut establir el gid a runas gid %u"
 
-#: src/sudo.c:1040
-#, c-format
-msgid "unknown login class %s"
-msgstr "classe d'inici de sessió %s desconeguda"
-
-#: src/sudo.c:1053
-msgid "unable to set user context"
-msgstr "no s'ha pogut establir el context d'usuari"
-
-#: src/sudo.c:1069
-msgid "unable to set process priority"
-msgstr "no s'ha pogut establir la prioritat del procés"
-
-#: src/sudo.c:1077
-#, c-format
-msgid "unable to change root to %s"
-msgstr "no s'ha pogut canviar l'usuari primari a %s"
-
-#: src/sudo.c:1090 src/sudo.c:1096 src/sudo.c:1103
-#, c-format
-msgid "unable to change to runas uid (%u, %u)"
-msgstr "no s'ha pogut canviar a runas uid (%u, %u)"
-
-#: src/sudo.c:1121
-#, c-format
-msgid "unable to change directory to %s"
-msgstr "no s'ha pogut canviar el directori a %s"
-
-#: src/sudo.c:1179
+#: src/sudo.c:982
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "condició de terminació del fill inesperada: %d"
 
-#: src/sudo.c:1325
+#: src/sudo.c:1128
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "no hi ha el mètode `check_policy' al connector de polítiques %s"
 
-#: src/sudo.c:1343
+#: src/sudo.c:1146
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "el connector de política %s no dóna suport a llistar privilegis"
 
-#: src/sudo.c:1360
+#: src/sudo.c:1163
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "el connector de polítiques %s no dóna suport a l'opció -v"
 
-#: src/sudo.c:1375
+#: src/sudo.c:1178
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "el connector de polítiques %s no dóna suport a les opcions -k/-K"
 
-#: src/sudo_edit.c:181 src/sudo_edit.c:270
+#: src/sudo_edit.c:221
+msgid "no writable temporary directory found"
+msgstr "no s'ha trobat un directori temporari amb permís d'escriptura"
+
+#: src/sudo_edit.c:288 src/sudo_edit.c:377
 msgid "unable to restore current working directory"
 msgstr "no s'ha pogut restaurar el directori actual de treball"
 
-#: src/sudo_edit.c:577 src/sudo_edit.c:689
+#: src/sudo_edit.c:594 src/sudo_edit.c:707
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: no és un fitxer regular"
 
-#: src/sudo_edit.c:584
+#: src/sudo_edit.c:601
 #, c-format
 msgid "%s: editing symbolic links is not permitted"
 msgstr "%s: no es permet l'edició de enllaços simbòlics"
 
-#: src/sudo_edit.c:587
+#: src/sudo_edit.c:604
 #, c-format
 msgid "%s: editing files in a writable directory is not permitted"
 msgstr "%s: no es permet l'edició de fitxers a un directori amb permís d'escriptura"
 
-#: src/sudo_edit.c:620 src/sudo_edit.c:728
+#: src/sudo_edit.c:637 src/sudo_edit.c:747
 #, c-format
 msgid "%s: short write"
 msgstr "%s: escriptura breu"
 
-#: src/sudo_edit.c:690
+#: src/sudo_edit.c:708
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s s'ha deixat sense modificar"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:889
+#: src/sudo_edit.c:721 src/sudo_edit.c:908
 #, c-format
 msgid "%s unchanged"
 msgstr "%s sense canviar"
 
-#: src/sudo_edit.c:717 src/sudo_edit.c:739
+#: src/sudo_edit.c:736 src/sudo_edit.c:758
 #, c-format
 msgid "unable to write to %s"
 msgstr "no s'ha pogut escriure a %s"
 
-#: src/sudo_edit.c:718 src/sudo_edit.c:737 src/sudo_edit.c:740
-#: src/sudo_edit.c:914 src/sudo_edit.c:918
+#: src/sudo_edit.c:737 src/sudo_edit.c:756 src/sudo_edit.c:759
+#: src/sudo_edit.c:933 src/sudo_edit.c:937
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "els continguts de la sessió d'edició s'han deixat a %s"
 
-#: src/sudo_edit.c:736
+#: src/sudo_edit.c:755
 msgid "unable to read temporary file"
 msgstr "no s'ha pogut llegir el fitxer temporal"
 
-#: src/sudo_edit.c:819
+#: src/sudo_edit.c:838
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: error intern: nombre imparell de camins"
 
-#: src/sudo_edit.c:821
+#: src/sudo_edit.c:840
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: no es poden crear fitxers temporal"
 
-#: src/sudo_edit.c:823 src/sudo_edit.c:921
+#: src/sudo_edit.c:842 src/sudo_edit.c:940
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: error desconegut %d"
 
-#: src/sudo_edit.c:913
+#: src/sudo_edit.c:932
 msgid "unable to copy temporary files back to their original location"
 msgstr "no es poden copiar els fitxers temporals un altre cop a la seva ubicació original"
 
-#: src/sudo_edit.c:917
+#: src/sudo_edit.c:936
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "no es poden copiar alguns dels fitxers temporals un altre cop a la seva ubicació original"
 
-#: src/sudo_edit.c:961
+#: src/sudo_edit.c:981
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "no s'ha pogut canviar l'uid a l'usuari primari (%u)"
 
-#: src/sudo_edit.c:978
+#: src/sudo_edit.c:998
 msgid "plugin error: missing file list for sudoedit"
 msgstr "error de connector: no hi ha la llista de fitxers per a sudoedit"
 
-#: src/sudo_edit.c:1019 src/sudo_edit.c:1032
+#: src/sudo_edit.c:1039 src/sudo_edit.c:1052
 msgid "unable to read the clock"
 msgstr "no es pot llegir el rellotge"
 
-#: src/tgetpass.c:107
-msgid "no tty present and no askpass program specified"
-msgstr "no hi ha un tty present i no s'ha especificat un programa askpass"
+#: src/tgetpass.c:102
+msgid "timed out reading password"
+msgstr "s'exhaurit el temps d'espera quan es llegia la contrasenya"
 
-#: src/tgetpass.c:116
+#: src/tgetpass.c:105
+msgid "no password was provided"
+msgstr "no s'ha donat una contrasenya"
+
+#: src/tgetpass.c:108
+msgid "unable to read password"
+msgstr "no s'ha pogut llegir la contrasenya"
+
+#: src/tgetpass.c:147
+msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
+msgstr "cal una terminal per llegir la contrasenya; o bé useu l'opció -S per llegir de l'entrada estàndard o configureu un assistent askpass"
+
+#: src/tgetpass.c:157
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "no s'ha especificat un programa askpass, proveu d'establir SUDO_ASKPASS"
 
-#: src/tgetpass.c:261
+#: src/tgetpass.c:322
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "no s'ha pogut establir el gid a %u"
 
-#: src/tgetpass.c:265
+#: src/tgetpass.c:326
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "no s'ha pogut establir el uid a %u"
 
-#: src/tgetpass.c:270
+#: src/tgetpass.c:331
 #, c-format
 msgid "unable to run %s"
 msgstr "no s'ha pogut executar %s"
 
-#: src/utmp.c:268
+#: src/utmp.c:295
 msgid "unable to save stdin"
 msgstr "no s'ha pogut desar el stdin"
 
-#: src/utmp.c:270
+#: src/utmp.c:297
 msgid "unable to dup2 stdin"
 msgstr "no s'ha pogut fer dup2 stdin"
 
-#: src/utmp.c:273
+#: src/utmp.c:300
 msgid "unable to restore stdin"
 msgstr "no s'ha pogut restaurar stdin"
+
+#~ msgid "error reading from signal pipe"
+#~ msgstr "error en llegir del conducte del senyal"
+
+#~ msgid "error reading from pipe"
+#~ msgstr "error en llegir del conducte"
+
+#~ msgid "unable to get group vector"
+#~ msgstr "no s'ha pogut obtenir el vector de grup"
+
+#~ msgid "unknown uid %u: who are you?"
+#~ msgstr "uid %u desconegut: qui sou?"
+
+#~ msgid "no tty present and no askpass program specified"
+#~ msgstr "no hi ha un tty present i no s'ha especificat un programa askpass"
 
 #~ msgid "internal error, tried allocate zero bytes"
 #~ msgstr "error intern, s'han intentat assignar zero bytes"
