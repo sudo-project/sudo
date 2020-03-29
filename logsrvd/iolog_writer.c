@@ -70,7 +70,7 @@ has_strlistval(InfoMessage *info)
  * The input string list need not be NULL-terminated.
  * Returns a NULL-terminated string vector.
  */
-char **
+static char **
 strlist_copy(InfoMessage__StringList *strlist)
 {
     char **dst, **src = strlist->strings;

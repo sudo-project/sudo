@@ -288,7 +288,6 @@ format_json(ClientMessage__TypeCase event_type,
     struct json_container json = { 0 };
     struct json_value json_value;
     struct timespec ts;
-    char **strvec;
     size_t idx;
     debug_decl(format_json, SUDO_DEBUG_UTIL);
 
@@ -365,20 +364,22 @@ format_json(ClientMessage__TypeCase event_type,
 	    if (!sudo_json_add_value(&json, info->key, &json_value))
 		goto bad;
 	    break;
-	case INFO_MESSAGE__VALUE_STRLISTVAL:
-	    /* Must convert to NULL-terminated string vector. */
-	    strvec = strlist_copy(info->strlistval);
-	    if (strvec == NULL) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		    "%s: %s", __func__, "unable to allocate memory");
+	case INFO_MESSAGE__VALUE_STRLISTVAL: {
+	    InfoMessage__StringList *strlist = info->strlistval;
+	    size_t n;
+
+	    if (!sudo_json_open_array(&json, info->key))
 		goto bad;
+	    for (n = 0; n < strlist->n_strings; n++) {
+		json_value.type = JSON_STRING;
+		json_value.u.string = strlist->strings[n];
+		if (!sudo_json_add_value(&json, NULL, &json_value))
+		    goto bad;
 	    }
-	    json_value.type = JSON_ARRAY;
-	    json_value.u.array = strvec;
-	    if (!sudo_json_add_value(&json, info->key, &json_value))
+	    if (!sudo_json_close_array(&json))
 		goto bad;
-	    free(strvec);
 	    break;
+	}
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unexpected value case %d", info->value_case);

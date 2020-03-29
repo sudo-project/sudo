@@ -188,7 +188,6 @@ int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
 void iolog_details_free(struct iolog_details *details);
-char ** strlist_copy(InfoMessage__StringList *strlist);
 
 /* logsrvd_conf.c */
 bool logsrvd_conf_read(const char *path);

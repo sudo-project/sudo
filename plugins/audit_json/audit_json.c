@@ -258,12 +258,23 @@ add_key_value(struct json_container *json, const char *str)
 static bool
 add_array(struct json_container *json, const char *name, char * const * array)
 {
+    const char *cp;
     struct json_value json_value;
     debug_decl(add_array, SUDO_DEBUG_PLUGIN);
 
-    json_value.type = JSON_ARRAY;
-    json_value.u.array = array;
-    debug_return_bool(sudo_json_add_value(json, name, &json_value));
+    if (!sudo_json_open_array(json, name))
+	debug_return_bool(false);
+    while ((cp = *array) != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = cp;
+	if (!sudo_json_add_value(json, name, &json_value))
+	    debug_return_bool(false);
+	array++;
+    }
+    if (!sudo_json_close_array(json))
+	debug_return_bool(false);
+
+    debug_return_bool(true);
 }
 
 static bool

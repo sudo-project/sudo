@@ -932,6 +932,8 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
     bool ret = false;
     FILE *fp = NULL;
     int fd = -1;
+    size_t i;
+    char *cp;
     debug_decl(iolog_write_info_file_json, SUDO_DEBUG_UTIL);
 
     if (info->cmd == NULL || info->user == NULL || info->runas_user == NULL)
@@ -974,16 +976,28 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
         goto oom;
 
     if (info->argv != NULL) {
-	json_value.type = JSON_ARRAY;
-	json_value.u.array = info->argv;
-	if (!sudo_json_add_value(&json, "runargv", &json_value))
+	if (!sudo_json_open_array(&json, "runargv"))
+	    goto oom;
+	for (i = 0; (cp = info->argv[i]) != NULL; i++) {
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = cp;
+	    if (!sudo_json_add_value(&json, NULL, &json_value))
+		goto oom;
+	}
+	if (!sudo_json_close_array(&json))
 	    goto oom;
     }
 
     if (info->envp != NULL) {
-	json_value.type = JSON_ARRAY;
-	json_value.u.array = info->envp;
-	if (!sudo_json_add_value(&json, "runenv", &json_value))
+	if (!sudo_json_open_array(&json, "runenv"))
+	    goto oom;
+	for (i = 0; (cp = info->envp[i]) != NULL; i++) {
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = cp;
+	    if (!sudo_json_add_value(&json, NULL, &json_value))
+		goto oom;
+	}
+	if (!sudo_json_close_array(&json))
 	    goto oom;
     }
 

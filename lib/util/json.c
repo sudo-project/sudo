@@ -305,7 +305,6 @@ sudo_json_add_value_int(struct json_container *json, const char *name,
     struct json_value *value, bool as_object)
 {
     char numbuf[(((sizeof(long long) * 8) + 2) / 3) + 2];
-    unsigned int i;
     debug_decl(sudo_json_add_value, SUDO_DEBUG_UTIL);
 
     /* Add comma if we are continuing an object/array. */
@@ -356,41 +355,7 @@ sudo_json_add_value_int(struct json_container *json, const char *name,
 	    debug_return_bool(false);
 	break;
     case JSON_ARRAY:
-	if (value->u.array[0] == NULL || value->u.array[1] == NULL) {
-	    if (!json_append_buf(json, "[ "))
-		debug_return_bool(false);
-	    if (value->u.array[0] != NULL) {
-		if (!json_append_string(json, value->u.array[0]))
-		    debug_return_bool(false);
-		if (!json_append_buf(json, " "))
-		    debug_return_bool(false);
-	    }
-	    if (!json_append_buf(json, "]"))
-		debug_return_bool(false);
-	} else  {
-	    if (!json_append_buf(json, "["))
-		debug_return_bool(false);
-	    if (!json_append_buf(json, json->compact ? " " : "\n"))
-		debug_return_bool(false);
-	    json->indent_level += json->indent_increment;
-	    for (i = 0; value->u.array[i] != NULL; i++) {
-		if (!json_append_indent(json, json->indent_level))
-		    debug_return_bool(false);
-		if (!json_append_string(json, value->u.array[i]))
-		    debug_return_bool(false);
-		if (value->u.array[i + 1] != NULL) {
-		    if (!json_append_buf(json, ","))
-			debug_return_bool(false);
-		}
-		if (!json_append_buf(json, json->compact ? " " : "\n"))
-		    debug_return_bool(false);
-	    }
-	    json->indent_level -= json->indent_increment;
-	    if (!json_append_indent(json, json->indent_level))
-		debug_return_bool(false);
-	    if (!json_append_buf(json, "]"))
-		debug_return_bool(false);
-	}
+	sudo_fatalx("internal error: can't print JSON_ARRAY");
 	break;
     case JSON_OBJECT:
 	sudo_fatalx("internal error: can't print JSON_OBJECT");

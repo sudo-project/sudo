@@ -37,7 +37,6 @@ struct json_value {
     enum json_value_type type;
     union {
 	const char *string;
-	char * const * array;
 	long long number;
 	id_t id;
 	bool boolean;
