@@ -81,8 +81,8 @@ sudo_printf_int(int msg_type, const char *fmt, ...)
     return len;
 }
 
-bool
-validate_iolog_info(const char *log_dir)
+static bool
+validate_iolog_info(const char *log_dir, bool legacy)
 {
     struct iolog_info *info;
     time_t now;
@@ -93,33 +93,48 @@ validate_iolog_info(const char *log_dir)
     if ((info = iolog_parse_loginfo(-1, log_dir)) == NULL)
 	return false;
 
-    if (strcmp(info->cwd, "/") != 0) {
-	sudo_warnx("bad cwd: want \"/\", got \"%s\"", info->cwd);
+    if (info->cwd == NULL || strcmp(info->cwd, "/") != 0) {
+	sudo_warnx("bad cwd: want \"/\", got \"%s\"",
+	    info->cwd ? info->cwd : "NULL");
 	return false;
     }
 
-    if (strcmp(info->user, "nobody") != 0) {
-	sudo_warnx("bad user: want \"nobody\" got \"%s\"", info->user);
+    /* No host in the legacy log file. */
+    if (!legacy) {
+	if (info->host == NULL || strcmp(info->host, "localhost") != 0) {
+	    sudo_warnx("bad host: want \"localhost\", got \"%s\"",
+		info->host ? info->host : "NULL");
+	    return false;
+	}
+    }
+
+    if (info->user == NULL || strcmp(info->user, "nobody") != 0) {
+	sudo_warnx("bad user: want \"nobody\" got \"%s\"",
+	    info->user ? info->user : "NULL");
 	return false;
     }
 
-    if (strcmp(info->runas_user, "root") != 0) {
-	sudo_warnx("bad runas_user: want \"root\" got \"%s\"", info->runas_user);
+    if (info->runas_user == NULL || strcmp(info->runas_user, "root") != 0) {
+	sudo_warnx("bad runas_user: want \"root\" got \"%s\"",
+	    info->runas_user ? info->runas_user : "NULL");
 	return false;
     }
 
+    /* No runas group specified, should be NULL. */
     if (info->runas_group != NULL) {
-	sudo_warnx("bad runas_group: want \"\" got \"%s\"", info->runas_user);
+	sudo_warnx("bad runas_group: want \"\" got \"%s\"", info->runas_group);
 	return false;
     }
 
-    if (strcmp(info->tty, "/dev/console") != 0) {
-	sudo_warnx("bad tty: want \"/dev/console\" got \"%s\"", info->tty);
+    if (info->tty == NULL || strcmp(info->tty, "/dev/console") != 0) {
+	sudo_warnx("bad tty: want \"/dev/console\" got \"%s\"",
+	    info->tty ? info->tty : "NULL");
 	return false;
     }
 
-    if (strcmp(info->cmd, "/usr/bin/id") != 0) {
-	sudo_warnx("bad command: want \"/usr/bin/id\" got \"%s\"", info->cmd);
+    if (info->cmd == NULL || strcmp(info->cmd, "/usr/bin/id") != 0) {
+	sudo_warnx("bad command: want \"/usr/bin/id\" got \"%s\"",
+	    info->cmd ? info->cmd : "NULL");
 	return false;
     }
 
@@ -211,6 +226,7 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 	"cols=80",
 	"lines=24",
 	"cwd=/",
+	"host=localhost",
 	"tty=/dev/console",
 	"user=nobody",
 	NULL
@@ -253,9 +269,16 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 	return;
     }
 
-    /* Validate I/O log info file. */
+    /* Validate I/O log info file (json). */
     (*ntests)++;
-    if (!validate_iolog_info(iolog_dir))
+    if (!validate_iolog_info(iolog_dir, false))
+	(*nerrors)++;
+
+    /* Validate I/O log info file (legacy). */
+    snprintf(iolog_path, sizeof(iolog_path), "%s/log.json", iolog_dir);
+    unlink(iolog_path);
+    (*ntests)++;
+    if (!validate_iolog_info(iolog_dir, true))
 	(*nerrors)++;
 
     /* Test log_ttyout endpoint. */

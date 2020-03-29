@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 1996, 1998-2005, 2007-2018
+# Copyright (c) 1996, 1998-2005, 2007-2020
 #       Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -468,7 +468,8 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 	    ./check_fill || rval=`expr $$rval + $$?`; \
 	    ./check_gentime || rval=`expr $$rval + $$?`; \
 	    ./check_hexchar || rval=`expr $$rval + $$?`; \
-	    ./check_iolog_plugin $(srcdir)/regress/iolog_plugin/iolog || rval=`expr $$rval + $$?`; \
+	    mkdir -p regress/iolog_plugin; \
+	    ./check_iolog_plugin regress/iolog_plugin/iolog || rval=`expr $$rval + $$?`; \
 	    ./check_starttime || rval=`expr $$rval + $$?`; \
 	    if test -f check_symbols; then \
 		./check_symbols .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`; \
