@@ -401,16 +401,16 @@ still allow people to get their work done."
 	/sbin/init.d/		ignore
 	/sbin/init.d/sudo	0755 root:
 %endif
-
-%files [!aix]
 	$mandir/man*/*		0644
 	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
 
-%files [aix]
-	# Some versions use catpages, some use manpages.
-	$mandir/cat*/*		0644 optional
-	$mandir/man*/*		0644 optional
-	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
+%service sudo_logsrvd
+%if [aix,macos]
+	cmd="${sbindir}/sudo_logsrvd -n"
+%else
+	cmd=${sbindir}/sudo_logsrvd
+	pidfile=${rundir}/sudo_logsrvd.pid
+%endif
 
 %pre [aix]
 	if rpm -q %{name} >/dev/null 2>&1; then
