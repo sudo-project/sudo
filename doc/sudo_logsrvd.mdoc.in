@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 16, 2019
+.Dd March 28, 2020
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -114,6 +114,9 @@ Sudo front end configuration
 Sudo log server configuration file
 .It Pa @iolog_dir@
 Default I/O log file location
+.It Pa @rundir@/sudo_logsrvd.pid
+Process ID file for
+.Nm
 .El
 .Sh EXAMPLES
 .Ss Creating self-signed certificates

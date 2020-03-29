@@ -1651,7 +1651,7 @@ logsrvd_cleanup(void)
 }
 
 /*
- * Fork and detatch from the terminal.
+ * Fork, detatch from the terminal and write pid file unless nofork set.
  */
 static void
 daemonize(bool nofork)
@@ -1660,17 +1660,28 @@ daemonize(bool nofork)
     debug_decl(daemonize, SUDO_DEBUG_UTIL);
 
     if (!nofork) {
+	FILE *fp;
+
 	switch (fork()) {
 	case -1:
 	    sudo_fatal("fork");
 	case 0:
-	    /* child, detach from terminal */
-	    if (setsid() == -1)
-	    sudo_fatal("setsid");
+	    /* child */
 	    break;
 	default:
 	    /* parent, exit */
 	    _exit(EXIT_SUCCESS);
+	}
+
+	/* detach from terminal and write pid file. */
+	if (setsid() == -1)
+	    sudo_fatal("setsid");
+	fp = fopen(logsrvd_conf_pid_file(), "w");
+	if (fp == NULL) {
+	    sudo_warn("%s", logsrvd_conf_pid_file());
+	} else {
+	    fprintf(fp, "%d\n", getpid());
+	    fclose(fp);
 	}
     }
 
@@ -1804,7 +1815,8 @@ main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     sudo_ev_dispatch(evbase);
+    if (!nofork)
+	unlink(logsrvd_conf_pid_file());
 
-    /* NOTREACHED */
     debug_return_int(1);
 }

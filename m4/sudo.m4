@@ -129,6 +129,7 @@ if test -z "$rundir"; then
 fi
 AC_MSG_RESULT([$rundir])
 SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$rundir/ts")
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGSRVD_PID, "$rundir/sudo_logsrvd.pid")
 ])dnl
 
 dnl

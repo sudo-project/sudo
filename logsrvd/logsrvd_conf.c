@@ -78,6 +78,7 @@ static struct logsrvd_config {
         struct listen_address_list addresses;
         struct timespec timeout;
         bool tcp_keepalive;
+	char *pid_file;
 #if defined(HAVE_OPENSSL)
         bool tls;
         struct logsrvd_tls_config tls_config;
@@ -144,6 +145,13 @@ logsrvd_conf_tcp_keepalive(void)
 {
     return logsrvd_config->server.tcp_keepalive;
 }
+
+const char *
+logsrvd_conf_pid_file(void)
+{
+    return logsrvd_config->server.pid_file;
+}
+
 struct timespec *
 logsrvd_conf_get_sock_timeout(void)
 {
@@ -444,6 +452,28 @@ cb_keepalive(struct logsrvd_config *config, const char *str)
     debug_return_bool(true);
 }
 
+static bool
+cb_pid_file(struct logsrvd_config *config, const char *str)
+{
+    char *copy = NULL;
+    debug_decl(cb_pid_file, SUDO_DEBUG_UTIL);
+
+    if (*str != '/') {
+	debug_return_bool(false);
+	sudo_warnx(U_("%s: not a fully qualified path"), str);
+	debug_return_bool(false);
+    }
+    if ((copy = strdup(str)) == NULL) {
+	sudo_warn(NULL);
+	debug_return_bool(false);
+    }
+
+    free(config->server.pid_file);
+    config->server.pid_file = copy;
+
+    debug_return_bool(true);
+}
+
 #if defined(HAVE_OPENSSL)
 static bool
 cb_tls_opt(struct logsrvd_config *config, const char *str)
@@ -722,6 +752,7 @@ static struct logsrvd_config_entry server_conf_entries[] = {
     { "listen_address", cb_listen_address },
     { "timeout", cb_timeout },
     { "tcp_keepalive", cb_keepalive },
+    { "pid_file", cb_pid_file },
 #if defined(HAVE_OPENSSL)
     { "tls", cb_tls_opt },
     { "tls_key", cb_tls_key },
@@ -904,6 +935,7 @@ logsrvd_conf_free(struct logsrvd_config *config)
 	TAILQ_REMOVE(&config->server.addresses, addr, entries);
 	free(addr);
     }
+    free(config->server.pid_file);
 
     /* struct logsrvd_config_iolog */
     free(config->iolog.iolog_dir);
@@ -948,10 +980,23 @@ logsrvd_conf_alloc(void)
     TAILQ_INIT(&config->server.addresses);
     config->server.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->server.tcp_keepalive = true;
+    config->server.pid_file = strdup(_PATH_SUDO_LOGSRVD_PID);
+    if (config->server.pid_file == NULL) {
+	sudo_warn(NULL);
+	goto bad;
+    }
 
 #if defined(HAVE_OPENSSL)
     config->server.tls_config.cacert_path = strdup(DEFAULT_CA_CERT_PATH);
+    if (config->server.tls_config.cacert_path == NULL) {
+	sudo_warn(NULL);
+	goto bad;
+    }
     config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
+    if (config->server.tls_config.cert_path == NULL) {
+	sudo_warn(NULL);
+	goto bad;
+    }
     config->server.tls_config.verify = true;
     config->server.tls_config.check_peer = false;
 #endif

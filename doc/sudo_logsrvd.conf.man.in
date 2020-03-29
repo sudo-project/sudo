@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "February 15, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "March 28, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -104,6 +104,17 @@ which will listen on all configured network interfaces.
 Multiple
 \fIlisten_address\fR
 lines may be specified to listen on more than one interface.
+.TP 10n
+pid_file = path
+The path to the file containing the process ID of the running
+\fBsudo_logsrvd\fR.
+This file is not created when
+\fBsudo_logsrvd\fR
+is run with the
+\fB\-n\fR
+option.
+The default value is
+\fI@rundir@/sudo_logsrvd.pid\fR.
 .TP 10n
 tcp_keepalive = boolean
 If true,
@@ -554,6 +565,9 @@ Sudo log server configuration file
 # Multiple listen_address settings may be specified.
 # The default is to listen on all addresses.
 #listen_address = *:30344
+
+# The file containing the ID of the running sudo_logsrvd process.
+#pid_file = @rundir@/sudo_logsrvd.pid
 
 # If set, enable the SO_KEEPALIVE socket option on the connected socket.
 #tcp_keepalive = true

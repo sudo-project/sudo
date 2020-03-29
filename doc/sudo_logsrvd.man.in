@@ -121,6 +121,11 @@ Sudo log server configuration file
 .TP 26n
 \fI@iolog_dir@\fR
 Default I/O log file location
+.TP 26n
+\fI@rundir@/sudo_logsrvd.pid\fR
+.br
+Process ID file for
+\fBsudo_logsrvd\fR
 .SH "EXAMPLES"
 .SS "Creating self-signed certificates"
 Unless you are using certificates signed by a well-known Certificate
