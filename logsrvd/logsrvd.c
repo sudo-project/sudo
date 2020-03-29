@@ -1680,7 +1680,7 @@ daemonize(bool nofork)
 	if (fp == NULL) {
 	    sudo_warn("%s", logsrvd_conf_pid_file());
 	} else {
-	    fprintf(fp, "%d\n", getpid());
+	    fprintf(fp, "%u\n", (unsigned int)getpid());
 	    fclose(fp);
 	}
     }
