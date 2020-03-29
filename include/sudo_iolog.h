@@ -64,9 +64,14 @@ struct iolog_info {
     char *runas_group;
     char *tty;
     char *cmd;
-    time_t tstamp;
+    char *host;
+    struct timespec tstamp;
     int lines;
     int cols;
+    uid_t runas_uid;
+    gid_t runas_gid;
+    char **argv;
+    char **envp;
 };
 
 struct timing_closure {
@@ -123,7 +128,7 @@ bool iolog_mkpath(char *path);
 bool iolog_nextid(char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
 bool iolog_rename(const char *from, const char *to);
-bool iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info, char * const argv[]);
+bool iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info);
 char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
 const char *iolog_fd_to_name(int iofd);
 int iolog_openat(int fdf, const char *path, int flags);

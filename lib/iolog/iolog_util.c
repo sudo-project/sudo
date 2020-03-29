@@ -95,6 +95,8 @@ iolog_parse_loginfo(int dfd, const char *iolog_dir)
      */
     if ((li = calloc(1, sizeof(*li))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    li->runas_uid = (uid_t)-1;
+    li->runas_gid = (gid_t)-1;
     if (getdelim(&buf, &bufsize, '\n', fp) == -1 ||
 	getdelim(&li->cwd, &cwdsize, '\n', fp) == -1 ||
 	getdelim(&li->cmd, &cmdsize, '\n', fp) == -1) {
@@ -122,7 +124,7 @@ iolog_parse_loginfo(int dfd, const char *iolog_dir)
 	goto bad;
     }
     *ep = '\0';
-    li->tstamp = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
+    li->tstamp.tv_sec = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_warn(U_("%s: time stamp %s: %s"), iolog_dir, cp, errstr);
 	goto bad;
@@ -427,6 +429,7 @@ iolog_free_loginfo(struct iolog_info *li)
 	free(li->runas_group);
 	free(li->tty);
 	free(li->cmd);
+	free(li->host);
 	free(li);
     }
 }

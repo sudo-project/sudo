@@ -124,7 +124,7 @@ struct search_node {
     bool or;
     union {
 	regex_t cmdre;
-	time_t tstamp;
+	struct timespec tstamp;
 	char *cwd;
 	char *tty;
 	char *user;
@@ -1224,8 +1224,9 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 		if (regcomp(&sn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
 		    sudo_fatalx(U_("invalid regular expression: %s"), *av);
 	    } else if (type == ST_TODATE || type == ST_FROMDATE) {
-		sn->u.tstamp = get_date(*av);
-		if (sn->u.tstamp == -1)
+		sn->u.tstamp.tv_sec = get_date(*av);
+		sn->u.tstamp.tv_nsec = 0;
+		if (sn->u.tstamp.tv_sec == -1)
 		    sudo_fatalx(U_("could not parse date \"%s\""), *av);
 	    } else {
 		sn->u.ptr = *av;
@@ -1283,10 +1284,10 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
 	    res = rc == REG_NOMATCH ? 0 : 1;
 	    break;
 	case ST_FROMDATE:
-	    res = log->tstamp >= sn->u.tstamp;
+	    res = sudo_timespeccmp(&log->tstamp, &sn->u.tstamp, >=);
 	    break;
 	case ST_TODATE:
-	    res = log->tstamp <= sn->u.tstamp;
+	    res = sudo_timespeccmp(&log->tstamp, &sn->u.tstamp, <=);
 	    break;
 	default:
 	    sudo_fatalx(U_("unknown search type %d"), sn->type);
@@ -1332,7 +1333,7 @@ list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
 	idstr = cp;
     }
     /* XXX - print lines + cols? */
-    timestr = get_timestr(li->tstamp, 1);
+    timestr = get_timestr(li->tstamp.tv_sec, 1);
     printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
 	timestr ? timestr : "invalid date",
 	li->user, li->tty, li->cwd, li->runas_user);

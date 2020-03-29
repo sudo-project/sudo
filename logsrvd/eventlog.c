@@ -552,7 +552,7 @@ do_logfile_sudo(const char *reason, const struct iolog_details *details)
 	goto done;
     }
 
-    if ((timeptr = localtime(&details->submit_time)) != NULL) {
+    if ((timeptr = localtime(&details->submit_time.tv_sec)) != NULL) {
 	/* strftime() does not guarantee to NUL-terminate so we must check. */
 	timebuf[sizeof(timebuf) - 1] = '\0';
 	if (strftime(timebuf, sizeof(timebuf), timefmt, timeptr) != 0 &&

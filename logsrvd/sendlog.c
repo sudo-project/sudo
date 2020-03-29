@@ -631,8 +631,8 @@ fmt_accept_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = log_info->tstamp;
-    tv.tv_nsec = 0;
+    tv.tv_sec = log_info->tstamp.tv_sec;
+    tv.tv_nsec = log_info->tstamp.tv_nsec;
     accept_msg.submit_time = &tv;
 
     /* Client will send IoBuffer messages. */

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -133,9 +133,9 @@ validate_iolog_info(const char *log_dir)
 	return false;
     }
 
-    if (info->tstamp < now - 10 || info->tstamp > now + 10) {
+    if (info->tstamp.tv_sec < now - 10 || info->tstamp.tv_sec > now + 10) {
 	sudo_warnx("bad tstamp: want %lld got %lld", (long long)now,
-	    (long long)info->tstamp);
+	    (long long)info->tstamp.tv_sec);
 	return false;
     }
 

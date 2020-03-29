@@ -145,11 +145,14 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
     memset(details, 0, sizeof(*details));
 
     /* Submit time. */
-    details->submit_time = submit_time->tv_sec;
+    details->submit_time.tv_sec = submit_time->tv_sec;
+    details->submit_time.tv_nsec = submit_time->tv_nsec;
 
     /* Default values */
     details->lines = 24;
     details->columns = 80;
+    details->runuid = (uid_t)-1;
+    details->rungid = (gid_t)-1;
 
     /* Pull out values by key from info array. */
     for (idx = 0; idx < infolen; idx++) {
@@ -211,6 +214,18 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		}
 		continue;
 	    }
+	    if (strcmp(key, "rungid") == 0) {
+		if (!has_numval(info)) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"rungid specified but not a number");
+		} else if (info->numval <= 0 || info->numval > INT_MAX) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"rungid (%" PRId64 ") out of range", info->numval);
+		} else {
+		    details->rungid = info->numval;
+		}
+		continue;
+	    }
 	    if (strcmp(key, "rungroup") == 0) {
 		if (has_strval(info)) {
 		    if ((details->rungroup = strdup(info->strval)) == NULL) {
@@ -222,6 +237,18 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"rungroup specified but not a string");
+		}
+		continue;
+	    }
+	    if (strcmp(key, "runuid") == 0) {
+		if (!has_numval(info)) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"runuid specified but not a number");
+		} else if (info->numval <= 0 || info->numval > INT_MAX) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"runuid (%" PRId64 ") out of range", info->numval);
+		} else {
+		    details->runuid = info->numval;
 		}
 		continue;
 	    }
@@ -595,12 +622,16 @@ iolog_details_write(struct iolog_details *details,
     log_info.runas_group = details->rungroup;
     log_info.tty = details->ttyname;
     log_info.cmd = details->command;
+    log_info.host = details->submithost;
     log_info.tstamp = details->submit_time;
     log_info.lines = details->lines;
     log_info.cols = details->columns;
+    log_info.runas_uid = details->runuid;
+    log_info.runas_gid = details->rungid;
+    log_info.argv = details->argv;
 
     debug_return_bool(iolog_write_info_file(closure->iolog_dir_fd,
-	 details->iolog_path, &log_info, details->argv));
+	 details->iolog_path, &log_info));
 }
 
 static bool

@@ -490,17 +490,22 @@ write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
 
     /* XXX - just use iolog_info in the first place? */
     memset(&iolog_info, 0, sizeof(iolog_info));
-    time(&iolog_info.tstamp);
+    iolog_info.cwd = (char *)details->cwd;
     iolog_info.user = (char *)details->user;
     iolog_info.runas_user = details->runas_pw->pw_name;
     iolog_info.runas_group = details->runas_gr ? details->runas_gr->gr_name: NULL;
     iolog_info.tty = (char *)details->tty;
-    iolog_info.cwd = (char *)details->cwd;
     iolog_info.cmd = (char *)details->command;
+    iolog_info.host = (char *)details->host;
+    sudo_gettime_real(&iolog_info.tstamp);
     iolog_info.lines = details->lines;
     iolog_info.cols = details->cols;
+    iolog_info.runas_uid = details->runas_pw->pw_uid;
+    iolog_info.runas_gid = details->runas_gr ? details->runas_gr->gr_gid: (gid_t)-1;
+    iolog_info.argv = (char **)details->argv;
+    iolog_info.envp = (char **)details->user_env;
 
-    if (!iolog_write_info_file(dfd, iolog_dir, &iolog_info, details->argv)) {
+    if (!iolog_write_info_file(dfd, iolog_dir, &iolog_info)) {
 	log_warning(SLOG_SEND_MAIL,
 	    N_("unable to write to I/O log file: %s"), strerror(errno));
 	warned = true;
