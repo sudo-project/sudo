@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 27, 2019
+.Dd March 26, 2019
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -168,6 +168,9 @@ Note that unless a
 was explicitly specified when
 .Nm sudo
 was run this field will be empty in the log.
+.It host Ar hostname
+Evaluates to true if the command was run on the specified
+.Ar hostname .
 .It runas Ar runas_user
 Evaluates to true if the command was run as the specified
 .Ar runas_user .
@@ -358,6 +361,8 @@ Debugging framework configuration
 The default I/O log directory.
 .It Pa @iolog_dir@/00/00/01/log
 Example session log info.
+.It Pa @iolog_dir@/00/00/01/log.json
+Example session log info (JSON format).
 .It Pa @iolog_dir@/00/00/01/stdin
 Example session standard input log.
 .It Pa @iolog_dir@/00/00/01/stdout

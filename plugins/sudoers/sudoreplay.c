@@ -119,6 +119,7 @@ struct search_node {
 #define ST_FROMDATE	7
 #define ST_TODATE	8
 #define ST_CWD		9
+#define ST_HOST		10
     char type;
     bool negated;
     bool or;
@@ -126,6 +127,7 @@ struct search_node {
 	regex_t cmdre;
 	struct timespec tstamp;
 	char *cwd;
+	char *host;
 	char *tty;
 	char *user;
 	char *runas_group;
@@ -199,8 +201,7 @@ static void setup_terminal(struct iolog_info *li, bool interactive, bool resize)
     isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
     (s)[5] == '/' && \
     isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
-    (s)[8] == '/' && (s)[9] == 'l' && (s)[10] == 'o' && (s)[11] == 'g' && \
-    (s)[12] == '\0')
+    (s)[8] == '\0')
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -1171,6 +1172,11 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 		goto bad;
 	    type = ST_RUNASGROUP;
 	    break;
+	case 'h': /* host */
+	    if (strncmp(*av, "host", strlen(*av)) != 0)
+		goto bad;
+	    type = ST_HOST;
+	    break;
 	case 'r': /* runas user */
 	    if (strncmp(*av, "runas", strlen(*av)) != 0)
 		goto bad;
@@ -1259,20 +1265,28 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
 	    res = match_expr(&sn->u.expr, log, matched);
 	    break;
 	case ST_CWD:
-	    res = strcmp(sn->u.cwd, log->cwd) == 0;
+	    if (log->cwd != NULL)
+		res = strcmp(sn->u.cwd, log->cwd) == 0;
+	    break;
+	case ST_HOST:
+	    if (log->host != NULL)
+		res = strcmp(sn->u.host, log->host) == 0;
 	    break;
 	case ST_TTY:
-	    res = strcmp(sn->u.tty, log->tty) == 0;
+	    if (log->tty != NULL)
+		res = strcmp(sn->u.tty, log->tty) == 0;
 	    break;
 	case ST_RUNASGROUP:
 	    if (log->runas_group != NULL)
 		res = strcmp(sn->u.runas_group, log->runas_group) == 0;
 	    break;
 	case ST_RUNASUSER:
-	    res = strcmp(sn->u.runas_user, log->runas_user) == 0;
+	    if (log->runas_user != NULL)
+		res = strcmp(sn->u.runas_user, log->runas_user) == 0;
 	    break;
 	case ST_USER:
-	    res = strcmp(sn->u.user, log->user) == 0;
+	    if (log->user != NULL)
+		res = strcmp(sn->u.user, log->user) == 0;
 	    break;
 	case ST_PATTERN:
 	    rc = regexec(&sn->u.cmdre, log->cmd, 0, NULL, 0);
@@ -1339,6 +1353,8 @@ list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
 	li->user, li->tty, li->cwd, li->runas_user);
     if (li->runas_group)
 	printf("GROUP=%s ; ", li->runas_group);
+    if (li->host)
+	printf("HOST=%s ; ", li->host);
     printf("TSID=%s ; COMMAND=%s\n", idstr, li->cmd);
 
     ret = 0;

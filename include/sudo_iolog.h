@@ -115,6 +115,7 @@ bool iolog_parse_timing(const char *line, struct timing_closure *timing);
 char *iolog_parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
 int iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing);
 struct iolog_info *iolog_parse_loginfo(int dfd, const char *iolog_dir);
+bool iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li);
 void iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
 void iolog_free_loginfo(struct iolog_info *li);
 

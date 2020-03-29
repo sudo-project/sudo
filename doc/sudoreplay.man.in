@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "August 27, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "March 26, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -182,6 +182,10 @@ Note that unless a
 was explicitly specified when
 \fBsudo\fR
 was run this field will be empty in the log.
+.TP 8n
+host \fIhostname\fR
+Evaluates to true if the command was run on the specified
+\fIhostname\fR.
 .TP 8n
 runas \fIrunas_user\fR
 Evaluates to true if the command was run as the specified
@@ -395,6 +399,9 @@ The default I/O log directory.
 .TP 26n
 \fI@iolog_dir@/00/00/01/log\fR
 Example session log info.
+.TP 26n
+\fI@iolog_dir@/00/00/01/log.json\fR
+Example session log info (JSON format).
 .TP 26n
 \fI@iolog_dir@/00/00/01/stdin\fR
 Example session standard input log.

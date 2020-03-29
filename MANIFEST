@@ -99,6 +99,7 @@ install-sh
 lib/iolog/Makefile.in
 lib/iolog/hostcheck.c
 lib/iolog/iolog_fileio.c
+lib/iolog/iolog_json.c
 lib/iolog/iolog_path.c
 lib/iolog/iolog_util.c
 lib/iolog/regress/iolog_path/check_iolog_path.c

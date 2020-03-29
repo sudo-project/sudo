@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -86,7 +86,8 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-LIBIOLOG_OBJS = iolog_fileio.lo iolog_path.lo iolog_util.lo hostcheck.lo
+LIBIOLOG_OBJS = iolog_fileio.lo iolog_json.lo iolog_path.lo iolog_util.lo \
+		hostcheck.lo
 
 IOBJS = $(LIBIOLOG_OBJS:.lo=.i)
 
@@ -94,7 +95,7 @@ POBJS = $(IOBJS:.i=.plog)
 
 CHECK_IOLOG_PATH_OBJS = check_iolog_path.lo iolog_path.lo
 
-CHECK_IOLOG_UTIL_OBJS = check_iolog_util.lo iolog_util.lo
+CHECK_IOLOG_UTIL_OBJS = check_iolog_util.lo iolog_json.lo iolog_util.lo
 
 all: libsudo_iolog.la
 
@@ -235,6 +236,22 @@ iolog_fileio.i: $(srcdir)/iolog_fileio.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog_fileio.plog: iolog_fileio.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_fileio.c --i-file $< --output-file $@
+iolog_json.lo: $(srcdir)/iolog_json.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_iolog.h $(incdir)/sudo_json.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_json.c
+iolog_json.i: $(srcdir)/iolog_json.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_iolog.h $(incdir)/sudo_json.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+iolog_json.plog: iolog_json.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_json.c --i-file $< --output-file $@
 iolog_path.lo: $(srcdir)/iolog_path.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \

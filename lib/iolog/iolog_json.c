@@ -1,0 +1,760 @@
+/*
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+#include <config.h>
+
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
+#include <unistd.h>
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <fcntl.h>
+#include <time.h>
+
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
+
+#include "sudo_compat.h"
+#include "sudo_fatal.h"
+#include "sudo_debug.h"
+#include "sudo_queue.h"
+#include "sudo_json.h"
+#include "sudo_util.h"
+#include "sudo_iolog.h"
+
+TAILQ_HEAD(json_item_list, json_item);
+
+struct json_object {
+    struct json_item *parent;
+    struct json_item_list items;
+};
+
+struct json_item {
+    TAILQ_ENTRY(json_item) entries;
+    char *name;		/* may be NULL for first brace */
+    unsigned int lineno;
+    enum json_value_type type;
+    union {
+	struct json_object child;
+	char *string;
+	long long number;
+	id_t id;
+	bool boolean;
+    } u;
+};
+
+struct json_stack {
+    unsigned int depth;
+    unsigned int maxdepth;
+    struct json_object *frames[64];
+};
+#define JSON_STACK_INTIALIZER(s) { 0, nitems((s).frames) };
+
+static bool
+json_store_columns(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_columns, SUDO_DEBUG_UTIL);
+
+    if (item->u.number < 1 || item->u.number > INT_MAX) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "tty cols %lld: out of range", item->u.number);
+	li->cols = 0;
+	debug_return_bool(false);
+    }
+
+    li->cols = item->u.number;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_command(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_command, SUDO_DEBUG_UTIL);
+
+    /*
+     * Note: struct iolog_info must store command + args.
+     *       We don't have argv yet so we append the args later.
+     */
+    li->cmd = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_lines(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_lines, SUDO_DEBUG_UTIL);
+
+    if (item->u.number < 1 || item->u.number > INT_MAX) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "tty lines %lld: out of range", item->u.number);
+	li->lines = 0;
+	debug_return_bool(false);
+    }
+
+    li->lines = item->u.number;
+    debug_return_bool(true);
+}
+
+static char **
+json_array_to_strvec(struct json_object *array)
+{
+    struct json_item *item;
+    int len = 0;
+    char **ret;
+    debug_decl(json_array_to_strvec, SUDO_DEBUG_UTIL);
+
+    TAILQ_FOREACH(item, &array->items, entries) {
+	if (item->type != JSON_STRING) {
+	    sudo_warnx(U_("expected JSON_STRING, got %d"), item->type);
+	    debug_return_ptr(NULL);
+	}
+	len++;
+    }
+    if ((ret = reallocarray(NULL, len + 1, sizeof(char *))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_ptr(NULL);
+    }
+    len = 0;
+    TAILQ_FOREACH(item, &array->items, entries) {
+	ret[len++] = item->u.string;
+	item->u.string = NULL;
+    }
+    ret[len] = NULL;
+
+    debug_return_ptr(ret);
+}
+
+static bool
+json_store_runargv(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_runargv, SUDO_DEBUG_UTIL);
+
+    li->argv = json_array_to_strvec(&item->u.child);
+
+    debug_return_bool(li->argv != NULL);
+}
+
+static bool
+json_store_runenv(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_runenv, SUDO_DEBUG_UTIL);
+
+    li->envp = json_array_to_strvec(&item->u.child);
+
+    debug_return_bool(li->envp != NULL);
+}
+
+static bool
+json_store_rungid(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_rungid, SUDO_DEBUG_UTIL);
+
+    li->runas_gid = (gid_t)item->u.number;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_rungroup(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_rungroup, SUDO_DEBUG_UTIL);
+
+    li->runas_group = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_runuid(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_runuid, SUDO_DEBUG_UTIL);
+
+    li->runas_uid = (uid_t)item->u.number;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_runuser(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_runuser, SUDO_DEBUG_UTIL);
+
+    li->runas_user = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_submitcwd(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_submitcwd, SUDO_DEBUG_UTIL);
+
+    li->cwd = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_submithost(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_submithost, SUDO_DEBUG_UTIL);
+
+    li->host = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_submituser(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_submituser, SUDO_DEBUG_UTIL);
+
+    li->user = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_timestamp(struct json_item *item, struct iolog_info *li)
+{
+    struct json_object *object;
+    debug_decl(json_store_timestamp, SUDO_DEBUG_UTIL);
+
+    object = &item->u.child;
+    TAILQ_FOREACH(item, &object->items, entries) {
+	if (item->type != JSON_NUMBER)
+	    continue;
+	if (strcmp(item->name, "seconds") == 0) {
+	    li->tstamp.tv_sec = item->u.number;
+	    continue;
+	}
+	if (strcmp(item->name, "nanoseconds") == 0) {
+	    li->tstamp.tv_nsec = item->u.number;
+	    continue;
+	}
+    }
+    debug_return_bool(true);
+}
+
+static bool
+json_store_ttyname(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_ttyname, SUDO_DEBUG_UTIL);
+
+    li->tty = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static struct iolog_json_key {
+    const char *name;
+    enum json_value_type type;
+    bool (*setter)(struct json_item *, struct iolog_info *);
+} iolog_json_keys[] = {
+    { "columns", JSON_NUMBER, json_store_columns },
+    { "command", JSON_STRING, json_store_command },
+    { "lines", JSON_NUMBER, json_store_lines },
+    { "runargv", JSON_ARRAY, json_store_runargv },
+    { "runenv", JSON_ARRAY, json_store_runenv },
+    { "rungid", JSON_ID, json_store_rungid },
+    { "rungroup", JSON_STRING, json_store_rungroup },
+    { "runuid", JSON_ID, json_store_runuid },
+    { "runuser", JSON_STRING, json_store_runuser },
+    { "submitcwd", JSON_STRING, json_store_submitcwd },
+    { "submithost", JSON_STRING, json_store_submithost },
+    { "submituser", JSON_STRING, json_store_submituser },
+    { "timestamp", JSON_OBJECT, json_store_timestamp },
+    { "ttyname", JSON_STRING, json_store_ttyname },
+    { NULL }
+};
+
+static struct json_item *
+new_json_item(enum json_value_type type, char *name, unsigned int lineno)
+{
+    struct json_item *item;
+    debug_decl(new_json_item, SUDO_DEBUG_UTIL);
+
+    if ((item = malloc(sizeof(*item))) == NULL)  {
+	sudo_warnx(U_("%s: %s"), __func__,
+	    U_("unable to allocate memory"));
+	debug_return_ptr(NULL);
+    }
+    item->name = name;
+    item->type = type;
+    item->lineno = lineno;
+
+    debug_return_ptr(item);
+}
+
+static char *
+json_parse_string(char **strp)
+{
+    char *dst, *end, *ret, *src = *strp + 1;
+    size_t len;
+    debug_decl(json_parse_string, SUDO_DEBUG_UTIL);
+
+    for (end = src; *end != '"' && *end != '\0'; end++) {
+	if (end[0] == '\\' && end[1] == '"')
+	    end++;
+    }
+    if (*end != '"') {
+	sudo_warnx(U_("missing double quote in name"));
+	debug_return_str(NULL);
+    }
+    len = (size_t)(end - src);
+
+    /* Copy string, flattening escaped chars. */
+    dst = ret = malloc(len + 1);
+    if (ret == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    while (src < end) {
+	char ch = *src++;
+	/* TODO: handle unicode escapes */
+	if (ch == '\\') {
+	    switch (*src) {
+	    case 'b':
+		ch = '\b';
+		break;
+	    case 'f':
+		ch = '\f';
+		break;
+	    case 'n':
+		ch = '\n';
+		break;
+	    case 'r':
+		ch = '\r';
+		break;
+	    case 't':
+		ch = '\t';
+		break;
+	    case '"':
+	    case '\\':
+	    default:
+		/* Note: a bare \ at the end of a string will be removed. */
+		ch = *src;
+		break;
+	    }
+	    src++;
+	}
+	*dst++ = ch;
+    }
+    *dst = '\0';
+
+    /* Trim trailing whitespace. */
+    do {
+	end++;
+    } while (isspace((unsigned char)*end));
+    *strp = end;
+
+    debug_return_str(ret);
+}
+
+static void
+free_json_items(struct json_item_list *items)
+{
+    struct json_item *item;
+    debug_decl(free_json_items, SUDO_DEBUG_UTIL);
+
+    while ((item = TAILQ_FIRST(items)) != NULL) {
+	TAILQ_REMOVE(items, item, entries);
+	switch (item->type) {
+	case JSON_STRING:
+	    free(item->u.string);
+	    break;
+	case JSON_ARRAY:
+	case JSON_OBJECT:
+	    free_json_items(&item->u.child.items);
+	    break;
+	default:
+	    break;
+	}
+	free(item->name);
+	free(item);
+    }
+
+    debug_return;
+}
+
+static bool
+iolog_parse_json_object(struct json_object *object, struct iolog_info *li)
+{
+    struct json_item *item;
+    bool ret = false;
+    debug_decl(iolog_parse_json_object, SUDO_DEBUG_UTIL);
+
+    /* First object holds all the actual data. */
+    item = TAILQ_FIRST(&object->items);
+    if (item->type != JSON_OBJECT) {
+	sudo_warnx(U_("expected JSON_OBJECT, got %d"), item->type);
+	goto done;
+    }
+    object = &item->u.child;
+
+    TAILQ_FOREACH(item, &object->items, entries) {
+	struct iolog_json_key *key;
+
+	/* lookup name */
+	for (key = iolog_json_keys; key->name != NULL; key++) {
+	    if (strcmp(item->name, key->name) == 0)
+		break;
+	}
+	if (key->name == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"%s: unknown key %s", __func__, item->name);
+	} else if (key->type != item->type &&
+		(key->type != JSON_ID || item->type != JSON_NUMBER)) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"%s: key mismatch %s type %d, expected %d", __func__,
+		item->name, item->type, key->type);
+	    goto done;
+	} else {
+	    /* Matched name and type. */
+	    if (!key->setter(item, li)) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to store %s", key->name);
+		goto done;
+	    }
+	}
+    }
+
+    /* Merge cmd and argv as sudoreplay expects. */
+    if (li->cmd != NULL && li->argv != NULL) {
+	size_t len = strlen(li->cmd) + 1;
+	char *newcmd;
+	int ac;
+
+	/* Skip argv[0], we use li->cmd instead. */
+	for (ac = 1; li->argv[ac] != NULL; ac++)
+	    len += strlen(li->argv[ac]) + 1;
+
+	if ((newcmd = malloc(len)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+
+	/* TODO: optimize this. */
+	if (strlcpy(newcmd, li->cmd, len) >= len)
+	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
+	for (ac = 1; li->argv[ac] != NULL; ac++) {
+	    if (strlcat(newcmd, " ", len) >= len)
+		sudo_fatalx(U_("internal error, %s overflow"), __func__);
+	    if (strlcat(newcmd, li->argv[ac], len) >= len)
+		sudo_fatalx(U_("internal error, %s overflow"), __func__);
+	}
+
+	free(li->cmd);
+	li->cmd = newcmd;
+    }
+
+    ret = true;
+
+done:
+    debug_return_bool(ret);
+}
+
+static bool
+json_insert_bool(struct json_item_list *items, char *name, bool value,
+    unsigned int lineno)
+{
+    struct json_item *item;
+    debug_decl(json_insert_bool, SUDO_DEBUG_UTIL);
+
+    if ((item = new_json_item(JSON_BOOL, name, lineno)) == NULL)
+	debug_return_bool(false);
+    item->u.boolean = value;
+    TAILQ_INSERT_TAIL(items, item, entries);
+
+    debug_return_bool(true);
+}
+
+static bool
+json_insert_num(struct json_item_list *items, char *name, long long value,
+    unsigned int lineno)
+{
+    struct json_item *item;
+    debug_decl(json_insert_num, SUDO_DEBUG_UTIL);
+
+    if ((item = new_json_item(JSON_NUMBER, name, lineno)) == NULL)
+	debug_return_bool(false);
+    item->u.number = value;
+    TAILQ_INSERT_TAIL(items, item, entries);
+
+    debug_return_bool(true);
+}
+
+static bool
+json_insert_str(struct json_item_list *items, char *name, char **strp,
+    unsigned int lineno)
+{
+    struct json_item *item;
+    debug_decl(json_insert_str, SUDO_DEBUG_UTIL);
+
+    if ((item = new_json_item(JSON_STRING, name, lineno)) == NULL)
+	debug_return_bool(false);
+    item->u.string = json_parse_string(strp);
+    if (item->u.string == NULL) {
+	free(item);
+	debug_return_bool(false);
+    }
+    TAILQ_INSERT_TAIL(items, item, entries);
+
+    debug_return_bool(true);
+}
+
+static struct json_object *
+json_stack_push(struct json_stack *stack, struct json_item_list *items,
+    struct json_object *frame, enum json_value_type type, char *name,
+    unsigned int lineno)
+{
+    struct json_item *item;
+    debug_decl(iolog_parse_loginfo_json, SUDO_DEBUG_UTIL);
+
+    /* Allocate a new item and insert it into the list. */
+    if ((item = new_json_item(type, name, lineno)) == NULL)
+	debug_return_ptr(NULL);
+    TAILQ_INIT(&item->u.child.items);
+    item->u.child.parent = item;
+    TAILQ_INSERT_TAIL(items, item, entries);
+
+    /* Push the current frame onto the stack. */
+    if (stack->depth == stack->maxdepth)
+	sudo_fatalx(U_("internal error, %s overflow"), __func__);
+    stack->frames[stack->depth++] = frame;
+
+    /* Return the new frame */
+    debug_return_ptr(&item->u.child);
+}
+
+bool
+iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
+{
+    struct json_object root = { NULL, TAILQ_HEAD_INITIALIZER(root.items) };
+    struct json_object *curobj = &root;
+    struct json_object *curarray = NULL;
+    struct json_stack objstack = JSON_STACK_INTIALIZER(objstack);
+    struct json_stack arrstack = JSON_STACK_INTIALIZER(arrstack);
+    unsigned int lineno = 0;
+    char *name = NULL;
+    char *buf = NULL;
+    size_t bufsize = 0;
+    ssize_t len;
+    long long num;
+    bool ret = false;
+    debug_decl(iolog_parse_loginfo_json, SUDO_DEBUG_UTIL);
+
+    while ((len = getdelim(&buf, &bufsize, '\n', fp)) != -1) {
+	char *cp = buf;
+	char *ep = buf + len - 1;
+
+	lineno++;
+
+	/* Trim trailing whitespace. */
+	while (ep > cp && isspace((unsigned char)*ep))
+	    ep--;
+	ep[1] = '\0';
+
+	for (;;) {
+	    const char *errstr;
+
+	    /* Trim leading whitespace, skip blank lines. */
+	    while (isspace((unsigned char)*cp))
+		cp++;
+
+	    /* Strip out commas.  TODO: require commas between values. */
+	    if (*cp == ',') {
+		cp++;
+		while (isspace((unsigned char)*cp))
+		    cp++;
+	    }
+
+	    if (*cp == '\0')
+		break;
+
+	    switch (*cp) {
+	    case '{':
+		cp++;
+		curobj = json_stack_push(&objstack, &curobj->items, curobj,
+		    JSON_OBJECT, name, lineno);
+		if (curobj == NULL)
+		    goto parse_error;
+		name = NULL;
+		break;
+	    case '}':
+		cp++;
+		if (curobj->parent == NULL || curobj->parent->type != JSON_OBJECT) {
+		    sudo_warnx(U_("unmatched close brace"));
+		    goto parse_error;
+		}
+		curobj = objstack.frames[--objstack.depth];
+		break;
+	    case '[':
+		cp++;
+		if (curobj->parent == NULL) {
+		    /* Must have an enclosing object. */
+		    sudo_warnx(U_("unexpected array"));
+		    goto parse_error;
+		}
+		curarray = json_stack_push(&arrstack, &curobj->items, curarray,
+		    JSON_ARRAY, name, lineno);
+		if (curarray == NULL)
+		    goto parse_error;
+		name = NULL;
+		break;
+	    case ']':
+		cp++;
+		if (curarray == NULL || curarray->parent == NULL ||
+			curarray->parent->type != JSON_ARRAY) {
+		    sudo_warnx(U_("unmatched close bracket"));
+		    goto parse_error;
+		}
+		curarray = arrstack.frames[--arrstack.depth];
+		break;
+	    case '"':
+		if (curobj->parent == NULL) {
+		    /* Must have an enclosing object. */
+		    sudo_warnx(U_("unexpected string"));
+		    goto parse_error;
+		}
+
+		if (curarray != NULL) {
+		    if (!json_insert_str(&curarray->items, NULL, &cp, lineno))
+			goto parse_error;
+		} else if (name != NULL) {
+		    if (!json_insert_str(&curobj->items, name, &cp, lineno))
+			goto parse_error;
+		    name = NULL;
+		} else {
+		    /* Parsing "name": */
+		    if ((name = json_parse_string(&cp)) == NULL)
+			goto parse_error;
+		    /* TODO: allow colon on next line? */
+		    if (*cp++ != ':') {
+			sudo_warnx(U_("missing colon after name"));
+			goto parse_error;
+		    }
+		}
+		break;
+	    case 't':
+		if (name == NULL) {
+		    sudo_warnx(U_("unexpected boolean"));
+		    goto parse_error;
+		}
+		if (strcmp(cp, "true") != 0)
+		    goto parse_error;
+		cp += sizeof("true") - 1;
+
+		if (curarray != NULL) {
+		    if (!json_insert_bool(&curarray->items, NULL, true, lineno))
+			goto parse_error;
+		} else {
+		    if (!json_insert_bool(&curobj->items, name, true, lineno))
+			goto parse_error;
+		    name = NULL;
+		}
+		break;
+	    case 'f':
+		if (name == NULL) {
+		    sudo_warnx(U_("unexpected boolean"));
+		    goto parse_error;
+		}
+		if (strcmp(cp, "false") != 0)
+		    goto parse_error;
+		cp += sizeof("false") - 1;
+
+		if (curarray != NULL) {
+		    if (!json_insert_bool(&curarray->items, NULL, false, lineno))
+			goto parse_error;
+		} else {
+		    if (!json_insert_bool(&curobj->items, name, false, lineno))
+			goto parse_error;
+		    name = NULL;
+		}
+		break;
+	    case 'n':
+		if (strcmp(cp, "null") == 0)
+		    sudo_warnx(U_("null not allowed"));
+		goto parse_error;
+	    case '+': case '-': case '0': case '1': case '2': case '3':
+	    case '4': case '5': case '6': case '7': case '8': case '9':
+		if (name == NULL) {
+		    sudo_warnx(U_("unexpected number"));
+		    goto parse_error;
+		}
+		len = strcspn(cp, " \t\r\n,");
+		cp[len] = '\0';
+		num = sudo_strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
+		if (errstr != NULL) {
+		    sudo_warnx(U_("%s: %s"), cp, U_(errstr));
+		    goto parse_error;
+		}
+		cp += len;
+
+		if (curarray != NULL) {
+		    if (!json_insert_num(&curarray->items, NULL, num, lineno))
+			goto parse_error;
+		} else {
+		    if (!json_insert_num(&curobj->items, name, num, lineno))
+			goto parse_error;
+		    name = NULL;
+		}
+		break;
+	    default:
+		goto parse_error;
+	    }
+	}
+    }
+    if (objstack.depth != 0) {
+	sudo_warnx(U_("unmatched close brace"));
+	goto parse_error;
+    }
+    if (arrstack.depth != 0) {
+	sudo_warnx(U_("unmatched close bracket"));
+	goto parse_error;
+    }
+
+    /* Walk the stack and parse entries. */
+    ret = iolog_parse_json_object(&root, li);
+
+    goto done;
+
+parse_error:
+    sudo_warnx(U_("%s/%s:%u unable to parse \"%s\""), iolog_dir,
+	"log.json", lineno, buf);
+done:
+    free(buf);
+    free(name);
+    free_json_items(&root.items);
+
+    debug_return_bool(ret);
+}
