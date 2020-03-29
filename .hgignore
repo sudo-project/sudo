@@ -52,3 +52,6 @@ Makefile$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
 ^plugins/sudoers/regress/iolog_plugin/iolog$
 ^plugins/sudoers/regress/testsudoers/test3.d/root$
+
+^plugins/python/__pycache__
+^plugins/python/regress/__pycache__
