@@ -60,6 +60,15 @@ What's new in Sudo 1.9.0
    one to give permission to run any command that matches the
    specified digest, regardless of its path.
 
+ * Sudo and sudo_logsrvd now create an extended I/O log info file
+   in JSON format that contains additional infomation about the
+   command that was run, such as the host name.  The sudoreplay
+   utility uses this file in preference to the legacy log file.
+
+ * The sudoreplay utility can now match on a host name in list mode.
+   The list output also now includes the host name if one is present
+   in the log file.
+
 What's new in Sudo 1.8.31p1
 
  * Sudo once again ignores a failure to restore the RLIMIT_CORE
