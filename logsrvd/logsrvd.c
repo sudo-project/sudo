@@ -1460,15 +1460,15 @@ bad:
 static int
 create_listener(struct listen_address *addr)
 {
-    int flags, i, sock;
+    int flags, on, sock;
     debug_decl(create_listener, SUDO_DEBUG_UTIL);
 
     if ((sock = socket(addr->sa_un.sa.sa_family, SOCK_STREAM, 0)) == -1) {
 	sudo_warn("socket");
 	goto bad;
     }
-    i = 1;
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i)) == -1)
+    on = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
 	sudo_warn("SO_REUSEADDR");
     if (bind(sock, &addr->sa_un.sa, addr->sa_len) == -1) {
 	sudo_warn("bind");
@@ -1527,7 +1527,7 @@ listener_cb(int fd, int what, void *v)
     debug_return;
 }
 
-static void
+static bool
 register_listener(struct listen_address *addr, struct sudo_event_base *base)
 {
     struct listener *l;
@@ -1536,32 +1536,33 @@ register_listener(struct listen_address *addr, struct sudo_event_base *base)
     debug_decl(register_listener, SUDO_DEBUG_UTIL);
 
     sock = create_listener(addr);
+    if (sock == -1)
+	debug_return_bool(false);
 
-    if (sock != -1) {
-	/* TODO: make non-fatal */
-        ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, base);
-        if (ev == NULL)
-            sudo_fatal(NULL);
-        if (sudo_ev_add(base, ev, NULL, false) == -1)
-            sudo_fatal(U_("unable to add event to queue"));
-	if ((l = malloc(sizeof(*l))) == NULL)
-            sudo_fatal(NULL);
-	l->sock = sock;
-	l->ev = ev;
-	TAILQ_INSERT_TAIL(&listeners, l, entries);
-    }
+    /* TODO: make non-fatal */
+    ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, base);
+    if (ev == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(base, ev, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+    if ((l = malloc(sizeof(*l))) == NULL)
+	sudo_fatal(NULL);
+    l->sock = sock;
+    l->ev = ev;
+    TAILQ_INSERT_TAIL(&listeners, l, entries);
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
  * Register listeners and init the TLS context.
  */
-static void
+static bool
 server_setup(struct sudo_event_base *base)
 {
     struct listen_address *addr;
     struct listener *l;
+    int nlisteners = 0;
     debug_decl(server_setup, SUDO_DEBUG_UTIL);
 
     /* Free old listeners (if any) and register new ones. */
@@ -1571,8 +1572,9 @@ server_setup(struct sudo_event_base *base)
 	close(l->sock);
 	free(l);
     }
-    TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries)
-	register_listener(addr, base);
+    TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries) {
+	nlisteners += register_listener(addr, base);
+    }
 
 #if defined(HAVE_OPENSSL)
     if (logsrvd_conf_get_tls_opt()) {
@@ -1581,7 +1583,7 @@ server_setup(struct sudo_event_base *base)
     }
 #endif
 
-    debug_return;
+    debug_return_bool(nlisteners > 0);
 }
 
 /*
@@ -1595,7 +1597,8 @@ server_reload(struct sudo_event_base *base)
     sudo_debug_printf(SUDO_DEBUG_INFO, "reloading server config");
     if (logsrvd_conf_read(conf_file)) {
 	/* Re-initialize listeners and TLS context. */
-	server_setup(base);
+	if (!server_setup(base))
+	    sudo_fatalx(U_("unable setup listen socket"));
     }
 
     debug_return;
@@ -1785,18 +1788,20 @@ main(int argc, char *argv[])
     if (!logsrvd_conf_read(conf_file))
         exit(EXIT_FAILURE);
 
-    signal(SIGPIPE, SIG_IGN);
-    daemonize(nofork);
-
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);
 
     /* Initialize listeners and TLS context. */
-    server_setup(evbase);
+    if (!server_setup(evbase))
+	sudo_fatalx(U_("unable setup listen socket"));
 
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);
     register_signal(SIGTERM, evbase);
+
+    /* Point of no return. */
+    daemonize(nofork);
+    signal(SIGPIPE, SIG_IGN);
 
     sudo_ev_dispatch(evbase);
 
