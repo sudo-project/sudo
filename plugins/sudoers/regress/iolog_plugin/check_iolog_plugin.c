@@ -82,22 +82,15 @@ sudo_printf_int(int msg_type, const char *fmt, ...)
 }
 
 bool
-validate_iolog_info(const char *logfile)
+validate_iolog_info(const char *log_dir)
 {
     struct iolog_info *info;
     time_t now;
-    FILE *fp;
 
     time(&now);
 
     /* Parse log file. */
-    if ((fp = fopen(logfile, "r")) == NULL) {
-	sudo_warn("%s", logfile);
-	return false;
-    }
-    info = iolog_parse_loginfo(fp, logfile);
-    fclose(fp);
-    if (info == NULL)
+    if ((info = iolog_parse_loginfo(-1, log_dir)) == NULL)
 	return false;
 
     if (strcmp(info->cwd, "/") != 0) {
@@ -262,8 +255,7 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 
     /* Validate I/O log info file. */
     (*ntests)++;
-    snprintf(iolog_path, sizeof(iolog_path), "%s/log", iolog_dir);
-    if (!validate_iolog_info(iolog_path))
+    if (!validate_iolog_info(iolog_dir))
 	(*nerrors)++;
 
     /* Test log_ttyout endpoint. */

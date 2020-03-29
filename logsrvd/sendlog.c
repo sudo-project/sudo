@@ -1487,8 +1487,7 @@ main(int argc, char *argv[])
     struct timespec elapsed = { 0, 0 };
     const char *iolog_id = NULL;
     const char *open_mode = "r";
-    int ch, sock, iolog_dir_fd, fd;
-    FILE *fp;
+    int ch, sock, iolog_dir_fd;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -1582,12 +1581,7 @@ main(int argc, char *argv[])
     }
 
     /* Parse I/O log info file. */
-    fd = openat(iolog_dir_fd, "log", O_RDONLY, 0);
-    if (fd == -1 || (fp = fdopen(fd, "r")) == NULL) {
-	sudo_warn("%s/log", iolog_dir);
-	goto bad;
-    }
-    if ((log_info = iolog_parse_loginfo(fp, iolog_dir)) == NULL)
+    if ((log_info = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
 	goto bad;
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)

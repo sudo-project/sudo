@@ -61,13 +61,31 @@
 static int timing_event_adj;
 
 struct iolog_info *
-iolog_parse_loginfo(FILE *fp, const char *logfile)
+iolog_parse_loginfo(int dfd, const char *iolog_dir)
 {
     char *buf = NULL, *cp, *ep;
     const char *errstr;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     struct iolog_info *li = NULL;
+    FILE *fp = NULL;
+    int fd = -1;
     debug_decl(iolog_parse_loginfo, SUDO_DEBUG_UTIL);
+
+    if (dfd == -1) {
+	if ((dfd = open(iolog_dir, O_RDONLY)) == -1) {
+	    sudo_warn("%s", iolog_dir);
+	    goto bad;
+	}
+	fd = openat(dfd, "log", O_RDONLY, 0);
+	close(dfd);
+    } else {
+	fd = openat(dfd, "log", O_RDONLY, 0);
+    }
+    if (fd == -1 || (fp = fdopen(fd, "r")) == NULL) {
+	sudo_warn("%s/log", iolog_dir);
+	goto bad;
+    }
+    fd = -1;
 
     /*
      * Info file has three lines:
@@ -80,9 +98,11 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
     if (getdelim(&buf, &bufsize, '\n', fp) == -1 ||
 	getdelim(&li->cwd, &cwdsize, '\n', fp) == -1 ||
 	getdelim(&li->cmd, &cmdsize, '\n', fp) == -1) {
-	sudo_warn(U_("%s: invalid log file"), logfile);
+	sudo_warn(U_("%s: invalid log file"), iolog_dir);
 	goto bad;
     }
+    fclose(fp);
+    fp = NULL;
 
     /* Strip the newline from the cwd and command. */
     li->cwd[strcspn(li->cwd, "\n")] = '\0';
@@ -98,20 +118,20 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
 
     /* timestamp */
     if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: time stamp field is missing"), logfile);
+	sudo_warn(U_("%s: time stamp field is missing"), iolog_dir);
 	goto bad;
     }
     *ep = '\0';
     li->tstamp = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
-	sudo_warn(U_("%s: time stamp %s: %s"), logfile, cp, errstr);
+	sudo_warn(U_("%s: time stamp %s: %s"), iolog_dir, cp, errstr);
 	goto bad;
     }
 
     /* submit user */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: user field is missing"), logfile);
+	sudo_warn(U_("%s: user field is missing"), iolog_dir);
 	goto bad;
     }
     if ((li->user = strndup(cp, (size_t)(ep - cp))) == NULL)
@@ -120,7 +140,7 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
     /* runas user */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: runas user field is missing"), logfile);
+	sudo_warn(U_("%s: runas user field is missing"), iolog_dir);
 	goto bad;
     }
     if ((li->runas_user = strndup(cp, (size_t)(ep - cp))) == NULL)
@@ -129,7 +149,7 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
     /* runas group */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: runas group field is missing"), logfile);
+	sudo_warn(U_("%s: runas group field is missing"), iolog_dir);
 	goto bad;
     }
     if (cp != ep) {
@@ -156,14 +176,14 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
 	li->lines = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: tty lines %s: %s", logfile, cp, errstr);
+		"%s: tty lines %s: %s", iolog_dir, cp, errstr);
 	}
 	if (ep != NULL) {
 	    cp = ep + 1;
 	    li->cols = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "%s: tty cols %s: %s", logfile, cp, errstr);
+		    "%s: tty cols %s: %s", iolog_dir, cp, errstr);
 	    }
 	}
     }
@@ -171,6 +191,10 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
     debug_return_ptr(li);
 
 bad:
+    if (fd != -1)
+	close(fd);
+    if (fp != NULL)
+	fclose(fp);
     free(buf);
     iolog_free_loginfo(li);
     debug_return_ptr(NULL);

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -207,7 +207,7 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    int ch, fd, i, iolog_dir_fd, len, exitcode = EXIT_FAILURE;
+    int ch, i, iolog_dir_fd, len, exitcode = EXIT_FAILURE;
     bool def_filter = true, listonly = false;
     bool interactive = true, suspend_wait = false, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
@@ -215,7 +215,6 @@ main(int argc, char *argv[])
     struct iolog_info *li;
     struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
-    FILE *fp;
     debug_decl(main, SUDO_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -363,12 +362,8 @@ main(int argc, char *argv[])
     }
 
     /* Parse log file. */
-    fd = openat(iolog_dir_fd, "log", O_RDONLY, 0);
-    if (fd == -1 || (fp = fdopen(fd, "r")) == NULL)
-	sudo_fatal(U_("unable to open %s/%s"), iolog_dir, "log");
-    if ((li = iolog_parse_loginfo(fp, iolog_dir)) == NULL)
+    if ((li = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
 	goto done;
-    fclose(fp);
     printf(_("Replaying sudo session: %s"), li->cmd);
 
     /* Setup terminal if appropriate. */
@@ -1306,28 +1301,23 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
 }
 
 static int
-list_session(char *logfile, regex_t *re, const char *user, const char *tty)
+list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
     struct iolog_info *li = NULL;
     const char *timestr;
     int ret = -1;
-    FILE *fp;
     debug_decl(list_session, SUDO_DEBUG_UTIL);
 
-    if ((fp = fopen(logfile, "r")) == NULL) {
-	sudo_warn("%s", logfile);
-	goto done;
-    }
-    if ((li = iolog_parse_loginfo(fp, logfile)) == NULL)
+    if ((li = iolog_parse_loginfo(-1, log_dir)) == NULL)
 	goto done;
 
     /* Match on search expression if there is one. */
     if (!STAILQ_EMPTY(&search_expr) && !match_expr(&search_expr, li, true))
 	goto done;
 
-    /* Convert from /var/log/sudo-sessions/00/00/01/log to 000001 */
-    cp = logfile + strlen(session_dir) + 1;
+    /* Convert from /var/log/sudo-sessions/00/00/01 to 000001 */
+    cp = log_dir + strlen(session_dir) + 1;
     if (IS_IDLOG(cp)) {
 	idbuf[0] = cp[0];
 	idbuf[1] = cp[1];
@@ -1338,8 +1328,7 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 	idbuf[6] = '\0';
 	idstr = idbuf;
     } else {
-	/* Not an id, just use the iolog_file portion. */
-	cp[strlen(cp) - 4] = '\0';
+	/* Not an id, use as-is. */
 	idstr = cp;
     }
     /* XXX - print lines + cols? */
@@ -1354,8 +1343,6 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
     ret = 0;
 
 done:
-    if (fp != NULL)
-	fclose(fp);
     iolog_free_loginfo(li);
     debug_return_int(ret);
 }
@@ -1445,9 +1432,10 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 
 	    /* Check for dir with a log file. */
 	    if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
+		pathbuf[sdlen + len - 4] = '\0';
 		list_session(pathbuf, re, user, tty);
 	    } else {
-		/* Strip off "/log" and recurse if a dir. */
+		/* Strip off "/log" and recurse if a non-log dir. */
 		pathbuf[sdlen + len - 4] = '\0';
 		if (checked_type ||
 		    (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
