@@ -274,9 +274,14 @@ sudo_json_open_array_v1(struct json_container *json, const char *name)
 
     json_append_indent(json, json->indent_level);
 
-    json_append_string(json, name);
-    if (!json_append_buf(json, ": ["))
-	debug_return_bool(false);
+    if (name != NULL) {
+	json_append_string(json, name);
+	if (!json_append_buf(json, ": ["))
+	    debug_return_bool(false);
+    } else {
+	if (!json_append_buf(json, "["))
+	    debug_return_bool(false);
+    }
 
     json->indent_level += json->indent_increment;
     json->need_comma = false;
@@ -300,7 +305,7 @@ sudo_json_close_array_v1(struct json_container *json)
     debug_return_bool(true);
 }
 
-bool
+static bool
 sudo_json_add_value_int(struct json_container *json, const char *name,
     struct json_value *value, bool as_object)
 {

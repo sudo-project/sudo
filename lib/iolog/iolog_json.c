@@ -49,31 +49,10 @@
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
-#include "sudo_queue.h"
-#include "sudo_json.h"
 #include "sudo_util.h"
 #include "sudo_iolog.h"
 
-TAILQ_HEAD(json_item_list, json_item);
-
-struct json_object {
-    struct json_item *parent;
-    struct json_item_list items;
-};
-
-struct json_item {
-    TAILQ_ENTRY(json_item) entries;
-    char *name;		/* may be NULL for first brace */
-    unsigned int lineno;
-    enum json_value_type type;
-    union {
-	struct json_object child;
-	char *string;
-	long long number;
-	id_t id;
-	bool boolean;
-    } u;
-};
+#include "iolog_json.h"
 
 struct json_stack {
     unsigned int depth;
@@ -128,7 +107,7 @@ json_store_lines(struct json_item *item, struct iolog_info *li)
     debug_return_bool(true);
 }
 
-static char **
+char **
 json_array_to_strvec(struct json_object *array)
 {
     struct json_item *item;
@@ -137,6 +116,7 @@ json_array_to_strvec(struct json_object *array)
     debug_decl(json_array_to_strvec, SUDO_DEBUG_UTIL);
 
     TAILQ_FOREACH(item, &array->items, entries) {
+	/* Can only convert arrays of string. */
 	if (item->type != JSON_STRING) {
 	    sudo_warnx(U_("expected JSON_STRING, got %d"), item->type);
 	    debug_return_ptr(NULL);
@@ -380,7 +360,7 @@ json_parse_string(char **strp)
     debug_return_str(ret);
 }
 
-static void
+void
 free_json_items(struct json_item_list *items)
 {
     struct json_item *item;
@@ -499,6 +479,19 @@ json_insert_bool(struct json_item_list *items, char *name, bool value,
 }
 
 static bool
+json_insert_null(struct json_item_list *items, char *name, unsigned int lineno)
+{
+    struct json_item *item;
+    debug_decl(json_insert_null, SUDO_DEBUG_UTIL);
+
+    if ((item = new_json_item(JSON_NULL, name, lineno)) == NULL)
+	debug_return_bool(false);
+    TAILQ_INSERT_TAIL(items, item, entries);
+
+    debug_return_bool(true);
+}
+
+static bool
 json_insert_num(struct json_item_list *items, char *name, long long value,
     unsigned int lineno)
 {
@@ -557,10 +550,9 @@ json_stack_push(struct json_stack *stack, struct json_item_list *items,
 }
 
 bool
-iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
+iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 {
-    struct json_object root = { NULL, TAILQ_HEAD_INITIALIZER(root.items) };
-    struct json_object *curobj = &root;
+    struct json_object *curobj = root;
     struct json_object *curarray = NULL;
     struct json_stack objstack = JSON_STACK_INTIALIZER(objstack);
     struct json_stack arrstack = JSON_STACK_INTIALIZER(arrstack);
@@ -569,9 +561,13 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
     char *buf = NULL;
     size_t bufsize = 0;
     ssize_t len;
-    long long num;
     bool ret = false;
-    debug_decl(iolog_parse_loginfo_json, SUDO_DEBUG_UTIL);
+    long long num;
+    char ch;
+    debug_decl(iolog_parse_json, SUDO_DEBUG_UTIL);
+
+    root->parent = NULL;
+    TAILQ_INIT(&root->items);
 
     while ((len = getdelim(&buf, &bufsize, '\n', fp)) != -1) {
 	char *cp = buf;
@@ -625,8 +621,13 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
 		    sudo_warnx(U_("unexpected array"));
 		    goto parse_error;
 		}
-		curarray = json_stack_push(&arrstack, &curobj->items, curarray,
-		    JSON_ARRAY, name, lineno);
+		if (curarray != NULL) {
+		    curarray = json_stack_push(&arrstack, &curarray->items,
+			curarray, JSON_ARRAY, name, lineno);
+		} else {
+		    curarray = json_stack_push(&arrstack, &curobj->items,
+			NULL, JSON_ARRAY, name, lineno);
+		}
 		if (curarray == NULL)
 		    goto parse_error;
 		name = NULL;
@@ -666,13 +667,15 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
 		}
 		break;
 	    case 't':
-		if (name == NULL) {
+		if (name == NULL && curarray == NULL) {
 		    sudo_warnx(U_("unexpected boolean"));
 		    goto parse_error;
 		}
-		if (strcmp(cp, "true") != 0)
+		if (strncmp(cp, "true", sizeof("true") - 1) != 0)
 		    goto parse_error;
 		cp += sizeof("true") - 1;
+		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
+		    goto parse_error;
 
 		if (curarray != NULL) {
 		    if (!json_insert_bool(&curarray->items, NULL, true, lineno))
@@ -684,13 +687,15 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
 		}
 		break;
 	    case 'f':
-		if (name == NULL) {
+		if (name == NULL && curarray == NULL) {
 		    sudo_warnx(U_("unexpected boolean"));
 		    goto parse_error;
 		}
-		if (strcmp(cp, "false") != 0)
+		if (strncmp(cp, "false", sizeof("false") - 1) != 0)
 		    goto parse_error;
 		cp += sizeof("false") - 1;
+		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
+		    goto parse_error;
 
 		if (curarray != NULL) {
 		    if (!json_insert_bool(&curarray->items, NULL, false, lineno))
@@ -702,16 +707,34 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
 		}
 		break;
 	    case 'n':
-		if (strcmp(cp, "null") == 0)
-		    sudo_warnx(U_("null not allowed"));
-		goto parse_error;
+		if (name == NULL && curarray == NULL) {
+		    sudo_warnx(U_("unexpected boolean"));
+		    goto parse_error;
+		}
+		if (strncmp(cp, "null", sizeof("null") - 1) != 0)
+		    goto parse_error;
+		cp += sizeof("null") - 1;
+		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
+		    goto parse_error;
+
+		if (curarray != NULL) {
+		    if (!json_insert_null(&curarray->items, NULL, lineno))
+			goto parse_error;
+		} else {
+		    if (!json_insert_null(&curobj->items, name, lineno))
+			goto parse_error;
+		    name = NULL;
+		}
+		break;
 	    case '+': case '-': case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7': case '8': case '9':
-		if (name == NULL) {
+		if (name == NULL && curarray == NULL) {
 		    sudo_warnx(U_("unexpected number"));
 		    goto parse_error;
 		}
-		len = strcspn(cp, " \t\r\n,");
+		/* XXX - strtonumx() would be simpler here. */
+		len = strcspn(cp, " \f\n\r\t\v,");
+		ch = cp[len];
 		cp[len] = '\0';
 		num = sudo_strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
 		if (errstr != NULL) {
@@ -719,6 +742,7 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
 		    goto parse_error;
 		}
 		cp += len;
+		*cp = ch;
 
 		if (curarray != NULL) {
 		    if (!json_insert_num(&curarray->items, NULL, num, lineno))
@@ -743,18 +767,34 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
 	goto parse_error;
     }
 
-    /* Walk the stack and parse entries. */
-    ret = iolog_parse_json_object(&root, li);
-
+    ret = true;
     goto done;
 
 parse_error:
-    sudo_warnx(U_("%s/%s:%u unable to parse \"%s\""), iolog_dir,
-	"log.json", lineno, buf);
+    sudo_warnx(U_("%s:%u unable to parse \"%s\""), filename, lineno, buf);
 done:
     free(buf);
     free(name);
-    free_json_items(&root.items);
+    if (!ret)
+	free_json_items(&root->items);
+
+    debug_return_bool(ret);
+}
+
+bool
+iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
+{
+    struct json_object root;
+    bool ret = false;
+    debug_decl(iolog_parse_loginfo_json, SUDO_DEBUG_UTIL);
+
+    if (iolog_parse_json(fp, iolog_dir, &root)) {
+	/* Walk the stack and parse entries. */
+	ret = iolog_parse_json_object(&root, li);
+
+	/* Cleanup. */
+	free_json_items(&root.items);
+    }
 
     debug_return_bool(ret);
 }
