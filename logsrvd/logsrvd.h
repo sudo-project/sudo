@@ -59,6 +59,7 @@ struct iolog_details {
     char *ttyname;
     char **argv;
     char **env_add;
+    char **envp;
     struct timespec submit_time;
     int argc;
     int lines;

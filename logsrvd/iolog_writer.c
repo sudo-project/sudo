@@ -124,6 +124,11 @@ iolog_details_free(struct iolog_details *details)
 	for (i = 0; i < details->argc; i++)
 	    free(details->argv[i]);
 	free(details->argv);
+	if (details->envp != NULL) {
+	    for (i = 0; details->envp[i] != NULL; i++)
+		free(details->envp[i]);
+	    free(details->envp);
+	}
     }
 
     debug_return;
@@ -211,6 +216,17 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runargv specified but not a string list");
+		}
+		continue;
+	    }
+	    if (strcmp(key, "runenv") == 0) {
+		if (has_strlistval(info)) {
+		    details->envp = strlist_copy(info->strlistval);
+		    if (details->envp == NULL)
+			goto done;
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"runenv specified but not a string list");
 		}
 		continue;
 	    }
@@ -629,6 +645,7 @@ iolog_details_write(struct iolog_details *details,
     log_info.runas_uid = details->runuid;
     log_info.runas_gid = details->rungid;
     log_info.argv = details->argv;
+    log_info.envp = details->envp;
 
     debug_return_bool(iolog_write_info_file(closure->iolog_dir_fd,
 	 details->iolog_path, &log_info));
