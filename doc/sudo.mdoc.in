@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd October 20, 2019
+.Dd March 31, 2020
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -776,6 +776,10 @@ Note that
 and
 .Em pam_setcred
 are enabled by default on systems using PAM.
+.Pp
+On systems that use PAM, the security policy's close function
+is responsible for closing the PAM session.
+It may also log the command's exit status.
 .Ss Signal handling
 When the command is run as a child of the
 .Nm
