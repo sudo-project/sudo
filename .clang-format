@@ -1,0 +1,41 @@
+---
+Language:        Cpp
+BasedOnStyle:  WebKit
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortFunctionsOnASingleLine: None
+AlwaysBreakAfterReturnType: AllDefinitions
+BreakBeforeBinaryOperators: None
+ColumnLimit:     80
+IndentWidth: 4
+ContinuationIndentWidth: 8
+ForEachMacros:   
+  - HLTQ_FOREACH
+  - HLTQ_FOREACH_REVERSE
+  - HLTQ_FOREACH_REVERSE_SAFE
+  - HLTQ_FOREACH_SAFE
+  - LIST_FOREACH
+  - LIST_FOREACH_FROM
+  - LIST_FOREACH_FROM_SAFE
+  - LIST_FOREACH_SAFE
+  - SLIST_FOREACH
+  - SLIST_FOREACH_FROM
+  - SLIST_FOREACH_FROM_SAFE
+  - SLIST_FOREACH_PREVPTR
+  - SLIST_FOREACH_SAFE
+  - STAILQ_FOREACH
+  - STAILQ_FOREACH_FROM
+  - STAILQ_FOREACH_FROM_SAFE
+  - STAILQ_FOREACH_SAFE
+  - TAILQ_FOREACH
+  - TAILQ_FOREACH_FROM
+  - TAILQ_FOREACH_FROM_SAFE
+  - TAILQ_FOREACH_REVERSE
+  - TAILQ_FOREACH_REVERSE_FROM
+  - TAILQ_FOREACH_REVERSE_FROM_SAFE
+  - TAILQ_FOREACH_REVERSE_SAFE
+  - TAILQ_FOREACH_SAFE
+IndentPPDirectives: AfterHash
+KeepEmptyLinesAtTheStartOfBlocks: false
+PointerAlignment: Right
+ReflowComments:  false
+...
