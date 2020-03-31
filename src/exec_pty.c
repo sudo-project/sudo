@@ -1195,6 +1195,10 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     ec->cols = user_details.ts_cols;
     TAILQ_INIT(&ec->monitor_messages);
 
+    /* Reset cstat for running the command. */
+    cstat->type = CMD_INVALID;
+    cstat->val = 0;
+
     /* Setup event base and events. */
     ec->evbase = details->evbase;
     details->evbase = NULL;
@@ -1618,12 +1622,15 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (sudo_ev_got_break(ec.evbase)) {
 	/* error from callback or monitor died */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
-	/* kill command */
-	terminate_command(ec.cmnd_pid, true);
-	ec.cmnd_pid = -1;
-	/* TODO: need way to pass an error to the sudo front end */
-	cstat->type = CMD_WSTATUS;
-	cstat->val = W_EXITCODE(1, SIGKILL);
+	/* XXX: no good way to know if we should terminate the command. */
+	if (cstat->val == CMD_INVALID && ec.cmnd_pid != -1) {
+	    /* no status message, kill command */
+	    terminate_command(ec.cmnd_pid, true);
+	    ec.cmnd_pid = -1;
+	    /* TODO: need way to pass an error to the sudo front end */
+	    cstat->type = CMD_WSTATUS;
+	    cstat->val = W_EXITCODE(1, SIGKILL);
+	}
     }
 
     /* Flush any remaining output, free I/O bufs and events, do logout. */
