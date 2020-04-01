@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 31, 2020
+.Dd April 1, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4255,6 +4255,12 @@ entry was added to the
 .Li command_info
 list.
 .It Version 1.15 (sudo 1.9.0)
+The
+.Em cwd_optional
+entry was added to the
+.Li command_info
+list.
+.Pp
 The
 .Em event_alloc
 field was added to the policy_plugin and io_plugin structs.
