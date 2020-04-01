@@ -197,7 +197,7 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 	    return false;
 	}
     }
-    if (timing.delay.tv_sec != 0 || timing.delay.tv_nsec > 10000000) {
+    if (timing.delay.tv_sec != 0 || timing.delay.tv_nsec > 50000000) {
 	sudo_warnx("record %d: got excessive delay %lld.%09ld", recno,
 	    (long long)timing.delay.tv_sec, timing.delay.tv_nsec);
 	return false;
