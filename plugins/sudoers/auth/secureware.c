@@ -101,7 +101,7 @@ sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct su
 }
 
 int
-sudo_secureware_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_secureware_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     char *pw_epasswd = auth->data;
     debug_decl(sudo_secureware_cleanup, SUDOERS_DEBUG_AUTH);

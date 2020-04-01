@@ -106,7 +106,7 @@ sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth,
 }
 
 int
-sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     SIAENTITY *siah = auth->data;
     debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH);

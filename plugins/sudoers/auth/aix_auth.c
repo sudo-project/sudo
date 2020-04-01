@@ -300,7 +300,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 }
 
 int
-sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     debug_decl(sudo_aix_cleanup, SUDOERS_DEBUG_AUTH);
 

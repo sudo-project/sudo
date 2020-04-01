@@ -145,7 +145,7 @@ done:
 }
 
 int
-sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     debug_decl(sudo_fwtk_cleanup, SUDOERS_DEBUG_AUTH);
 

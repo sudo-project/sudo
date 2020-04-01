@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2008-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1999-2005, 2008-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -199,7 +199,7 @@ sudo_auth_approval(struct passwd *pw, int validated, bool exempt)
  * Returns 0 on success and -1 on error.
  */
 int
-sudo_auth_cleanup(struct passwd *pw)
+sudo_auth_cleanup(struct passwd *pw, bool force)
 {
     sudo_auth *auth;
     debug_decl(sudo_auth_cleanup, SUDOERS_DEBUG_AUTH);
@@ -207,7 +207,7 @@ sudo_auth_cleanup(struct passwd *pw)
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->cleanup && !IS_DISABLED(auth)) {
-	    int status = (auth->cleanup)(pw, auth);
+	    int status = (auth->cleanup)(pw, auth, force);
 	    if (status == AUTH_FATAL) {
 		/* Assume error msg already printed. */
 		debug_return_int(-1);

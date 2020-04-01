@@ -16,7 +16,7 @@ typedef struct sudo_auth {
     int (*setup)(struct passwd *pw, char **prompt, sudo_auth *auth);
     int (*verify)(struct passwd *pw, char *p, sudo_auth *auth, struct sudo_conv_callback *callback);
     int (*approval)(struct passwd *pw, sudo_auth *auth);
-    int (*cleanup)(struct passwd *pw, sudo_auth *auth);
+    int (*cleanup)(struct passwd *pw, sudo_auth *auth, bool force);
     int (*begin_session)(struct passwd *pw, char **user_env[], struct sudo_auth *auth);
     int (*end_session)(struct passwd *pw, struct sudo_auth *auth);
 } sudo_auth;
@@ -88,12 +88,13 @@ The functions in the struct are as follows:
 	For PAM, this calls pam_acct_mgmt().  For BSD auth, it calls
 	auth_approval().
 
-    int cleanup(struct passwd *pw, sudo_auth *auth)
+    int cleanup(struct passwd *pw, sudo_auth *auth, bool force)
         Function to do per-auth method cleanup.  This is only run
         at the end of the authentication process, after the user
         has completely failed or succeeded to authenticate.
 	The ``auth->status'' variable contains the result of the
 	last authentication attempt which may be interesting.
+	If the force flag is set, cleanup should happen immediately.
 
     int begin_session(struct passwd *pw, char **user_env[], struct sudo_auth *auth)
 	Function to begin a user session.  This is used for session handling

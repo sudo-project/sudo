@@ -268,7 +268,7 @@ done:
 #endif
 
 int
-sudo_krb5_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_krb5_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;

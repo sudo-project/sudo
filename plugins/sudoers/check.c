@@ -223,7 +223,7 @@ done:
 	}
     }
     timestamp_close(closure.cookie);
-    sudo_auth_cleanup(closure.auth_pw);
+    sudo_auth_cleanup(closure.auth_pw, !ISSET(validated, VALIDATE_SUCCESS));
     if (closure.auth_pw != NULL)
 	sudo_pw_delref(closure.auth_pw);
 

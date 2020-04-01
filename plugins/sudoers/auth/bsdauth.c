@@ -191,7 +191,7 @@ bsdauth_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 }
 
 int
-bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
+bsdauth_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     struct bsdauth_state *state = auth->data;
     debug_decl(bsdauth_cleanup, SUDOERS_DEBUG_AUTH);

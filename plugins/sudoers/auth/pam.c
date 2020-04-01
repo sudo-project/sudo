@@ -394,13 +394,13 @@ sudo_pam_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 }
 
 int
-sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     int *pam_status = (int *) auth->data;
     debug_decl(sudo_pam_cleanup, SUDOERS_DEBUG_AUTH);
 
     /* If successful, we can't close the session until sudo_pam_end_session() */
-    if (*pam_status != PAM_SUCCESS || auth->end_session == NULL) {
+    if (force || *pam_status != PAM_SUCCESS || auth->end_session == NULL) {
 	*pam_status = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
 	pamh = NULL;
     }
