@@ -157,6 +157,7 @@ struct command_details {
     int closefrom;
     int flags;
     int execfd;
+    int cwd_optional;
     struct preserved_fd_list preserved_fds;
     struct passwd *pw;
     GETGROUPS_T *groups;

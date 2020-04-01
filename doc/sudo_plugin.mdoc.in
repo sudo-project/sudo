@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 10, 2020
+.Dd March 31, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -789,6 +789,20 @@ or higher.
 Fully qualified path to the command to be executed.
 .It cwd=string
 The current working directory to change to when executing the command.
+If
+.Nm sudo
+is unable to change to the new working directory, the command will
+not be run unless
+.Em cwd_optional
+is also set (see below).
+.It cwd_optional=bool
+If enabled,
+.Nm sudo
+will treat an inability to change to the new working directory as a
+non-fatal error.
+This setting has no effect unless
+.Em cwd
+is also set.
 .It exec_background=bool
 By default,
 .Nm sudo

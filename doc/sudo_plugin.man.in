@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "February 10, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "March 31, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -886,6 +886,21 @@ Fully qualified path to the command to be executed.
 .TP 6n
 cwd=string
 The current working directory to change to when executing the command.
+If
+\fBsudo\fR
+is unable to change to the new working directory, the command will
+not be run unless
+\fIcwd_optional\fR
+is also set (see below).
+.TP 6n
+cwd_optional=bool
+If enabled,
+\fBsudo\fR
+will treat an inability to change to the new working directory as a
+non-fatal error.
+This setting has no effect unless
+\fIcwd\fR
+is also set.
 .TP 6n
 exec_background=bool
 By default,

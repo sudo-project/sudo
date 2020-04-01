@@ -69,6 +69,11 @@ What's new in Sudo 1.9.0
    The list output also now includes the host name if one is present
    in the log file.
 
+ * For "sudo -i", if the target user's home directory does not
+   exist, sudo will now warn about the problem but run the command
+   in the current working directory.  Previously, this was a fatal
+   error.  Debian bug #598519
+
 What's new in Sudo 1.8.31p1
 
  * Sudo once again ignores a failure to restore the RLIMIT_CORE

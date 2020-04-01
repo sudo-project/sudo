@@ -214,12 +214,15 @@ exec_setup(struct command_details *details, int errfd)
      * specifies a different cwd.  Must be done after uid change.
      */
     if (details->cwd != NULL) {
-	if (details->chroot || user_details.cwd == NULL ||
+	if (details->chroot != NULL || user_details.cwd == NULL ||
 	    strcmp(details->cwd, user_details.cwd) != 0) {
 	    /* Note: cwd is relative to the new root, if any. */
-	    if (chdir(details->cwd) != 0) {
+	    if (chdir(details->cwd) == -1) {
 		sudo_warn(U_("unable to change directory to %s"), details->cwd);
-		goto done;
+		if (!details->cwd_optional)
+		    goto done;
+		if (details->chroot != NULL)
+		    sudo_warnx(U_("starting from %s"), "/");
 	    }
 	}
     }
