@@ -458,6 +458,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	    errstr = sudo_pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"pam_setcred: %s", errstr);
+	    def_pam_setcred = false;
 	}
     }
 
