@@ -61,7 +61,7 @@ What's new in Sudo 1.9.0
    specified digest, regardless of its path.
 
  * Sudo and sudo_logsrvd now create an extended I/O log info file
-   in JSON format that contains additional infomation about the
+   in JSON format that contains additional information about the
    command that was run, such as the host name.  The sudoreplay
    utility uses this file in preference to the legacy log file.
 
@@ -72,7 +72,19 @@ What's new in Sudo 1.9.0
  * For "sudo -i", if the target user's home directory does not
    exist, sudo will now warn about the problem but run the command
    in the current working directory.  Previously, this was a fatal
-   error.  Debian bug #598519
+   error.  Debian bug #598519.
+
+ * The command line arguments in the SUDO_COMMAND environment
+   variable are now truncated at 4096 characters.  This avoids an
+   "Argument list too long" error when executing a command with a
+   large number of arguments.  Debian bug #596631.
+
+ * Sudo now properly ends the PAM transaction when the user
+   authenticates successfully but sudoers denies the command.
+   Debian bug #669687.
+
+ * The sudoers grammar in the manual now indicates that "sudoedit"
+   requires one or more arguments.  Debian bug #571621.
 
 What's new in Sudo 1.8.31p1
 
