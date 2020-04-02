@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd March 31, 2020
+.Dd April 2, 2020
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1071,7 +1071,9 @@ if no terminal is available or if the
 .Fl A
 option is specified.
 .It Ev SUDO_COMMAND
-Set to the command run by sudo.
+Set to the command run by sudo, including command line arguments.
+The command line arguments are truncated at 4096 characters to
+prevent a potential execution error.
 .It Ev SUDO_EDITOR
 Default editor to use in
 .Fl e

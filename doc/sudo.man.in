@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "March 31, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "April 2, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1140,7 +1140,9 @@ if no terminal is available or if the
 option is specified.
 .TP 17n
 \fRSUDO_COMMAND\fR
-Set to the command run by sudo.
+Set to the command run by sudo, including command line arguments.
+The command line arguments are truncated at 4096 characters to
+prevent a potential execution error.
 .TP 17n
 \fRSUDO_EDITOR\fR
 Default editor to use in

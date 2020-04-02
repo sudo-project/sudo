@@ -1109,7 +1109,12 @@ rebuild_env(void)
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args) {
-	if (asprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args) == -1)
+	/*
+	 * We limit user_args to 4096 bytes to avoid an execve() failure
+	 * for very long argument vectors.  The command's environment also
+	 * counts against the ARG_MAX limit.
+	 */
+	if (asprintf(&cp, "SUDO_COMMAND=%s %.*s", user_cmnd, 4096, user_args) == -1)
 	    goto bad;
 	if (sudo_putenv(cp, true, true) == -1) {
 	    free(cp);
