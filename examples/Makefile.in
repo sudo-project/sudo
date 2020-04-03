@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2014, 2017-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2014, 2017-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -52,8 +52,8 @@ install_gid = 0
 
 SHELL = @SHELL@
 
-EXAMPLES = $(srcdir)/pam.conf sudo.conf $(srcdir)/sudoers \
-	   $(srcdir)/syslog.conf
+EXAMPLES = $(srcdir)/pam.conf sudo.conf $(srcdir)/sudo_logsrvd.conf \
+	   $(srcdir)/sudoers $(srcdir)/syslog.conf
  
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
