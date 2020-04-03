@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "March 10, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "April 3, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -897,9 +897,11 @@ command name ::= file name |
                  file name args |
                  file name '""'
 
+Edit_Spec ::= "sudoedit" file name+
+
 Cmnd ::= Digest_List? '!'* command name |
          '!'* directory |
-         '!'* "sudoedit" |
+         '!'* Edit_Spec |
          '!'* Cmnd_Alias
 .RE
 .fi
