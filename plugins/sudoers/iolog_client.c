@@ -746,10 +746,12 @@ fmt_accept_message(struct client_closure *closure)
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    accept_msg.info_msgs[n]->key = "submitcwd";
-    accept_msg.info_msgs[n]->strval = (char *)details->cwd;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
+    if (details->cwd != NULL) {
+	accept_msg.info_msgs[n]->key = "submitcwd";
+	accept_msg.info_msgs[n]->strval = (char *)details->cwd;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
 
     /* TODO - submitenv */
     /* TODO - submitgid */
@@ -769,10 +771,12 @@ fmt_accept_message(struct client_closure *closure)
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    accept_msg.info_msgs[n]->key = "ttyname";
-    accept_msg.info_msgs[n]->strval = (char *)details->tty;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
+    if (details->tty != NULL) {
+	accept_msg.info_msgs[n]->key = "ttyname";
+	accept_msg.info_msgs[n]->strval = (char *)details->tty;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
 
     /* Update n_info_msgs. */
     accept_msg.n_info_msgs = n;
