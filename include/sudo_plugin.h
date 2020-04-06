@@ -90,6 +90,10 @@ typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
  * Hooks allow a plugin to hook into specific sudo and/or libc functions.
  */
 
+#if defined(__GNUC__) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 4) || __GNUC__ > 4)
+# pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#endif
+
 /* Hook functions typedefs. */
 typedef int (*sudo_hook_fn_t)();
 typedef int (*sudo_hook_fn_setenv_t)(const char *name, const char *value, int overwrite, void *closure);
