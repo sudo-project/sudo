@@ -561,7 +561,7 @@ do_logfile_sudo(const char *reason, const struct iolog_details *details)
 	    timestr = timebuf;
 	}
     }
-    (void)fprintf(fp, "%s : %s : %s", timestr ? timestr : "invalid date",
+    (void)fprintf(fp, "%s : %s : %s\n", timestr ? timestr : "invalid date",
 	details->submituser, logline);
     (void)fflush(fp);
     if (ferror(fp)) {
