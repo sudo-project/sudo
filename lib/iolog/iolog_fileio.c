@@ -1061,12 +1061,13 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
             "unable to open %s/log.json", parent);
         goto done;
     }
-    fd = -1;
+
     if (fchown(fd, iolog_uid, iolog_gid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to fchown %d:%d %s/log", __func__,
 	    (int)iolog_uid, (int)iolog_gid, parent);
     }
+    fd = -1;
 
     fprintf(fp, "{%s\n}\n", sudo_json_get_buf(&json));
     fflush(fp);
