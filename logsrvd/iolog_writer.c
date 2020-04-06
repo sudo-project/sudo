@@ -234,7 +234,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		if (!has_numval(info)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"rungid specified but not a number");
-		} else if (info->numval <= 0 || info->numval > INT_MAX) {
+		} else if (info->numval < 0 || info->numval > INT_MAX) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"rungid (%" PRId64 ") out of range", info->numval);
 		} else {
@@ -260,7 +260,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		if (!has_numval(info)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runuid specified but not a number");
-		} else if (info->numval <= 0 || info->numval > INT_MAX) {
+		} else if (info->numval < 0 || info->numval > INT_MAX) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runuid (%" PRId64 ") out of range", info->numval);
 		} else {
