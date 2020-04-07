@@ -28,7 +28,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <signal.h>
-#include <ctype.h>
 #include <pwd.h>
 
 #include <stdbool.h>
