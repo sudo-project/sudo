@@ -1,7 +1,6 @@
 import sudo
 
 import os
-from typing import Tuple
 
 
 VERSION = 1.0
@@ -22,7 +21,7 @@ class SudoAuditPlugin(sudo.Plugin):
     def __del__(self):
         self._log("-- Finished --")
 
-    def open(self, submit_optind: int, submit_argv: Tuple[str, ...]) -> int:
+    def open(self, submit_optind: int, submit_argv: tuple) -> int:
         # To cut out the sudo options, use "submit_optind":
         program_args = submit_argv[submit_optind:]
         if program_args:

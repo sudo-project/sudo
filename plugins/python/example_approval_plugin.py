@@ -1,12 +1,11 @@
 import sudo
 
 from datetime import datetime
-from typing import Tuple
 
 
 class BusinessHoursApprovalPlugin(sudo.Plugin):
-    def check(self, command_info: Tuple[str, ...], run_argv: Tuple[str, ...],
-              run_env: Tuple[str, ...]) -> int:
+    def check(self, command_info: tuple, run_argv: tuple,
+              run_env: tuple) -> int:
         error_msg = ""
         now = datetime.now()
         if now.weekday() >= 5:

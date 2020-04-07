@@ -1,7 +1,5 @@
 import sudo
 
-from typing import Tuple
-
 
 class SudoGroupPlugin(sudo.Plugin):
     """Example sudo input/output plugin
@@ -32,7 +30,7 @@ class SudoGroupPlugin(sudo.Plugin):
     """
 
     # -- Plugin API functions --
-    def query(self, user: str, group: str, user_pwd: Tuple):
+    def query(self, user: str, group: str, user_pwd: tuple):
         """Query if user is part of the specified group.
 
         Beware that user_pwd can be None if user is not present in the password

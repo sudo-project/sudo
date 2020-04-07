@@ -5,7 +5,6 @@ import errno
 import signal
 import sys
 import json
-from typing import Tuple
 
 
 VERSION = 1.0
@@ -15,9 +14,7 @@ class SudoIOPlugin(sudo.Plugin):
     """Example sudo input/output plugin
 
     Demonstrates how to use the sudo IO plugin API. All functions are added as
-    an example on their syntax, but note that all of them are optional. Also
-    typing annotations are just here for the help on the syntax (requires
-    python >= 3.5).
+    an example on their syntax, but note that all of them are optional.
 
     On detailed description of the functions refer to sudo_plugin manual (man
     sudo_plugin).
@@ -44,13 +41,13 @@ class SudoIOPlugin(sudo.Plugin):
     # -- Plugin API functions --
 
     def __init__(self, version: str,
-                 plugin_options: Tuple[str, ...], **kwargs):
+                 plugin_options: tuple, **kwargs):
         """The constructor of the IO plugin.
 
         Other variables you can currently use as arguments are:
-            user_env: Tuple[str, ...]
-            settings: Tuple[str, ...]
-            user_info: Tuple[str, ...]
+            user_env: tuple
+            settings: tuple
+            user_info: tuple
 
         For their detailed description, see the open() call of the C plugin API
         in the sudo manual ("man sudo").
@@ -72,8 +69,8 @@ class SudoIOPlugin(sudo.Plugin):
             self._log("", "-- Plugin DESTROYED --")
             self._log_file.close()
 
-    def open(self, argv: Tuple[str, ...],
-             command_info: Tuple[str, ...]) -> int:
+    def open(self, argv: tuple,
+             command_info: tuple) -> int:
         """Receives the command the user wishes to run.
 
         This function works the same as open() call of the C IO plugin API (see

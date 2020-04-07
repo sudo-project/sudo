@@ -6,7 +6,6 @@ import os
 import pwd
 import grp
 import shutil
-from typing import Tuple
 
 
 VERSION = 1.0
@@ -17,8 +16,7 @@ class SudoPolicyPlugin(sudo.Plugin):
 
     Demonstrates how to use the sudo policy plugin API. All functions are added
     as an example on their syntax, but note that most of them are optional
-    (except check_policy). Also typing annotations are just here for the help
-    on the syntax (requires python >= 3.5).
+    (except check_policy).
 
     On detailed description of the functions refer to sudo_plugin manual (man
     sudo_plugin).
@@ -47,13 +45,13 @@ class SudoPolicyPlugin(sudo.Plugin):
 
     # -- Plugin API functions --
 
-    def __init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
+    def __init__(self, user_env: tuple, settings: tuple,
                  version: str, **kwargs):
         """The constructor matches the C sudo plugin API open() call
 
         Other variables you can currently use as arguments are:
-            user_info: Tuple[str, ...]
-            plugin_options: Tuple[str, ...]
+            user_info: tuple
+            plugin_options: tuple
 
         For their detailed description, see the open() call of the C plugin API
         in the sudo manual ("man sudo").
@@ -66,7 +64,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         self.user_env = sudo.options_as_dict(user_env)
         self.settings = sudo.options_as_dict(settings)
 
-    def check_policy(self, argv: Tuple[str, ...], env_add: Tuple[str, ...]):
+    def check_policy(self, argv: tuple, env_add: tuple):
         cmd = argv[0]
         # Example for a simple reject:
         if not self._is_command_allowed(cmd):
@@ -86,7 +84,7 @@ class SudoPolicyPlugin(sudo.Plugin):
 
         return (sudo.RC.ACCEPT, command_info_out, argv, user_env_out)
 
-    def init_session(self, user_pwd: Tuple, user_env: Tuple[str, ...]):
+    def init_session(self, user_pwd: tuple, user_env: tuple):
         """Perform session setup
 
         Beware that user_pwd can be None if user is not present in the password
@@ -101,7 +99,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         # If you do not want to change user_env, you can just return (or None):
         # return sudo.RC.OK
 
-    def list(self, argv: Tuple[str, ...], is_verbose: int, user: str):
+    def list(self, argv: tuple, is_verbose: int, user: str):
         cmd = argv[0] if argv else None
         as_user_text = "as user '{}'".format(user) if user else ""
 
