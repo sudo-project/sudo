@@ -119,6 +119,7 @@ AC_SUBST([PYTHON_PLUGIN_SRC])
 AC_SUBST([LOGSRV])
 AC_SUBST([LIBLOGSRV])
 AC_SUBST([LOGSRVD])
+AC_SUBST([PPFILES])
 
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -213,6 +214,7 @@ pam_login_service=sudo
 plugindir="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
+PPFILES='$(srcdir)/etc/sudo.pp'
 #
 # End initial values for man page substitution
 #
@@ -1681,6 +1683,9 @@ if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
     LOGSRV=
     LIBLOGSRV=
 fi
+if test X"$LOGSRVD" != X""; then
+    PPFILES="$PPFILES "'$(srcdir)/etc/sudo-logsrvd.pp'
+fi
 
 dnl
 dnl C compiler checks
@@ -2597,6 +2602,7 @@ if test ${USE_PYTHON-'no'} = "yes"; then
       AC_MSG_RESULT([$PYTHON_LIBS])
     ])
 
+    PPFILES="$PPFILES "'$(srcdir)/etc/sudo-python.pp'
     PYTHON_PLUGIN_SRC=plugins/python
     AC_CONFIG_FILES([$PYTHON_PLUGIN_SRC/Makefile])
 fi

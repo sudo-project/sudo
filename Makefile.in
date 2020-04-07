@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2015, 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2015, 2017-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -369,30 +369,30 @@ force-dist: ChangeLog $(srcdir)/MANIFEST
 	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar && \
 	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
-package: $(srcdir)/etc/sudo.pp
+package: @PPFILES@
 	DESTDIR=$(abs_top_builddir)/destdir; rm -rf $$DESTDIR; \
 	$(MAKE) install INSTALL_OWNER= DESTDIR=$$DESTDIR && \
-	$(SHELL) $(scriptdir)/pp $(PPFLAGS) \
-	    --destdir=$$DESTDIR \
-	    $(srcdir)/etc/sudo.pp \
-	    prefix=$(prefix) \
-	    bindir=$(bindir) \
-	    sbindir=$(sbindir) \
-	    libexecdir=$(libexecdir) \
-	    includedir=$(includedir) \
-	    vardir=$(vardir) \
-	    rundir=$(rundir) \
-	    mandir=$(mandir) \
-	    localedir=$(localedir) \
-	    docdir=$(docdir) \
-	    exampledir=$(exampledir) \
-	    sysconfdir=$(sysconfdir) \
-	    sudoersdir=$(sudoersdir) \
-	    sudoers_uid=$(sudoers_uid) \
-	    sudoers_gid=$(sudoers_gid) \
-	    sudoers_mode=$(sudoers_mode) \
-	    shlib_mode=$(shlib_mode) \
-	    version=$(VERSION) $(PPVARS)
+	for p in @PPFILES@; do \
+	    $(SHELL) $(scriptdir)/pp $(PPFLAGS) --destdir=$$DESTDIR $$p \
+		prefix=$(prefix) \
+		bindir=$(bindir) \
+		sbindir=$(sbindir) \
+		libexecdir=$(libexecdir) \
+		includedir=$(includedir) \
+		vardir=$(vardir) \
+		rundir=$(rundir) \
+		mandir=$(mandir) \
+		localedir=$(localedir) \
+		docdir=$(docdir) \
+		exampledir=$(exampledir) \
+		sysconfdir=$(sysconfdir) \
+		sudoersdir=$(sudoersdir) \
+		sudoers_uid=$(sudoers_uid) \
+		sudoers_gid=$(sudoers_gid) \
+		sudoers_mode=$(sudoers_mode) \
+		shlib_mode=$(shlib_mode) \
+		version=$(VERSION) $(PPVARS); \
+	    done
 
 clean: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do \

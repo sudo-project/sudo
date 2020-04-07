@@ -736,6 +736,7 @@ rundir
 logpath
 log_dir
 iolog_dir
+PPFILES
 LOGSRVD
 LIBLOGSRV
 LOGSRV
@@ -3123,6 +3124,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3171,6 +3173,7 @@ pam_login_service=sudo
 plugindir="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
+PPFILES='$(srcdir)/etc/sudo.pp'
 #
 # End initial values for man page substitution
 #
@@ -6975,6 +6978,9 @@ if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
     # No need for liblogsrv.la
     LOGSRV=
     LIBLOGSRV=
+fi
+if test X"$LOGSRVD" != X""; then
+    PPFILES="$PPFILES "'$(srcdir)/etc/sudo-logsrvd.pp'
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing strerror" >&5
@@ -19463,6 +19469,7 @@ $as_echo "$PYTHON_LIBS" >&6; }
 
 fi
 
+    PPFILES="$PPFILES "'$(srcdir)/etc/sudo-python.pp'
     PYTHON_PLUGIN_SRC=plugins/python
     ac_config_files="$ac_config_files $PYTHON_PLUGIN_SRC/Makefile"
 

@@ -61,6 +61,8 @@ etc/init.d/aix.sh.in
 etc/init.d/hpux.sh.in
 etc/init.d/sudo.conf.in
 etc/sudo.pp
+etc/sudo-logsrvd.pp
+etc/sudo-python.pp
 examples/Makefile.in
 examples/pam.conf
 examples/sudo.conf.in
