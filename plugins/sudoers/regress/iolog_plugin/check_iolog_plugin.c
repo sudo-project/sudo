@@ -197,7 +197,7 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 	    return false;
 	}
     }
-    if (timing.delay.tv_sec != 0 || timing.delay.tv_nsec > 50000000) {
+    if (timing.delay.tv_sec != 0) {
 	sudo_warnx("record %d: got excessive delay %lld.%09ld", recno,
 	    (long long)timing.delay.tv_sec, timing.delay.tv_nsec);
 	return false;
@@ -269,18 +269,6 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 	return;
     }
 
-    /* Validate I/O log info file (json). */
-    (*ntests)++;
-    if (!validate_iolog_info(iolog_dir, false))
-	(*nerrors)++;
-
-    /* Validate I/O log info file (legacy). */
-    snprintf(iolog_path, sizeof(iolog_path), "%s/log.json", iolog_dir);
-    unlink(iolog_path);
-    (*ntests)++;
-    if (!validate_iolog_info(iolog_dir, true))
-	(*nerrors)++;
-
     /* Test log_ttyout endpoint. */
     rc = sudoers_io.log_ttyout(output, strlen(output), &errstr);
     (*ntests)++;
@@ -308,6 +296,18 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 
     /* Close the plugin. */
     sudoers_io.close(0, 0);
+
+    /* Validate I/O log info file (json). */
+    (*ntests)++;
+    if (!validate_iolog_info(iolog_dir, false))
+	(*nerrors)++;
+
+    /* Validate I/O log info file (legacy). */
+    snprintf(iolog_path, sizeof(iolog_path), "%s/log.json", iolog_dir);
+    unlink(iolog_path);
+    (*ntests)++;
+    if (!validate_iolog_info(iolog_dir, true))
+	(*nerrors)++;
 
     /* Validate the timing file. */
     snprintf(iolog_path, sizeof(iolog_path), "%s/timing", iolog_dir);
