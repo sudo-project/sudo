@@ -1,10 +1,8 @@
 %set
 	if test -n "$flavor"; then
 		name="sudo-$flavor"
-		pp_kit_package="sudo_$flavor"
 	else
 		name="sudo"
-		pp_kit_package="sudo"
 	fi
 	summary="Provide limited super-user privileges to specific users"
 	description="Sudo is a program designed to allow a sysadmin to give \
@@ -22,12 +20,6 @@ still allow people to get their work done."
 
 	# Convert to 4 part version for AIX, including patch level
 	pp_aix_version=`echo $version|sed -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)p\([0-9]*\)$/\1.\2/' -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)[^0-9\.].*$/\1/' -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)$/\1.0/'`
-%endif
-
-%if [kit]
-	# Strip off patchlevel for kit which only supports xyz versions
-	pp_kit_version="`echo $version|sed -e 's/\.//g' -e 's/[^0-9][^0-9]*[0-9][0-9]*$//'`"
-	pp_kit_name="TCM"
 %endif
 
 %if [sd]
