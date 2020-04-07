@@ -453,6 +453,9 @@ _python_plugin_get_class(const char *plugin_path, PyObject *py_module, const cha
         py_sudo_log(SUDO_CONV_ERROR_MSG, "No plugin class is specified for python module '%s'. "
                     "Use 'ClassName' configuration option in 'sudo.conf'\n", plugin_path);
         if (py_plugin_list != NULL) {
+            /* Sorting the plugin list makes regress test output consistent. */
+            PyObject *py_obj = PyObject_CallMethod(py_plugin_list, "sort", "");
+            Py_CLEAR(py_obj);
             char *possible_plugins = py_join_str_list(py_plugin_list, ", ");
             if (possible_plugins != NULL) {
                 py_sudo_log(SUDO_CONV_ERROR_MSG, "Possible plugins: %s\n", possible_plugins);
