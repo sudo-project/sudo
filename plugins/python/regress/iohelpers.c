@@ -82,7 +82,7 @@ freadall(const char *file_path, char *output, size_t max_len)
     }
 
     if (!feof(file)) {
-        printf("File '%s' was bigger than allocated buffer %lu", file_path, max_len);
+        printf("File '%s' was bigger than allocated buffer %zu", file_path, max_len);
         goto cleanup;
     }
 

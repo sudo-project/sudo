@@ -8,7 +8,7 @@ class ApprovalTestPlugin(sudo.Plugin):
         super().__init__(plugin_options=plugin_options, **kwargs)
         self._id = "(APPROVAL {})".format(id)
         sudo.log_info("{} Constructed:".format(self._id))
-        sudo.log_info(json.dumps(self.__dict__, indent=4))
+        sudo.log_info(json.dumps(self.__dict__, indent=4, sort_keys=True))
 
     def __del__(self):
         sudo.log_info("{} Destructed successfully".format(self._id))

@@ -1,4 +1,4 @@
-SudoPolicyPlugin.__init__ was called with arguments: () {'version': '1.0', 'settings': (), 'user_env': (), 'user_info': (), 'plugin_options': ('ModulePath=SRC_DIR/example_policy_plugin.py', 'ClassName=SudoPolicyPlugin')}
+SudoPolicyPlugin.__init__ was called with arguments: () \[('plugin_options', ('ModulePath=SRC_DIR/example_policy_plugin.py', 'ClassName=SudoPolicyPlugin')), ('settings', ()), ('user_env', ()), ('user_info', ()), ('version', '1.0')\]
 SudoPolicyPlugin.__init__ returned result: <example_policy_plugin.SudoPolicyPlugin object>
 SudoPolicyPlugin.validate was called with arguments: () 
 SudoPolicyPlugin.validate returned result: None 

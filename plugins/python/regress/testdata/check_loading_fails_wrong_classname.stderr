@@ -1,2 +1,2 @@
 Failed to find plugin class 'MispelledPluginName'
-Failed during loading plugin class: (AttributeError) module 'example_debugging' has no attribute 'MispelledPluginName'
+Failed during loading plugin class: (AttributeError) .* has no attribute 'MispelledPluginName'

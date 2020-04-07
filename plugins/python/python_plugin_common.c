@@ -62,7 +62,7 @@ CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 int
 _append_python_path(const char *module_dir)
 {
-    debug_decl(_py_debug_python_function, PYTHON_DEBUG_PLUGIN_LOAD);
+    debug_decl(_append_python_path, PYTHON_DEBUG_PLUGIN_LOAD);
     int rc = -1;
     PyObject *py_sys_path = PySys_GetObject("path");
     if (py_sys_path == NULL) {
@@ -717,7 +717,7 @@ python_plugin_unlink(void)
         return;
 
     if (Py_IsInitialized()) {
-        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python %lu subinterpreters\n",
+        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python %zu subinterpreters\n",
                           py_ctx.interpreter_count);
         for (size_t i = 0; i < py_ctx.interpreter_count; ++i) {
             PyThreadState *py_interpreter = py_ctx.py_subinterpreters[i];

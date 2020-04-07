@@ -61,22 +61,22 @@ char ** create_str_array(size_t count, ...);
 
 #define RUN_TEST(testcase) \
     do { \
+        int success = 1; \
         printf("Running test " #testcase " ... \n"); \
-        int rc = EXIT_SUCCESS; \
         if (!init()) { \
             printf("FAILED: initialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
-            rc = EXIT_FAILURE; \
+            success = 0; \
         } else \
         if (!testcase) { \
             printf("FAILED: testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
-            rc = EXIT_FAILURE; \
+            success = 0; \
         } \
-        if (!cleanup(rc == EXIT_SUCCESS)) { \
+        if (!cleanup(success)) { \
             printf("FAILED: deitialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
-            rc = EXIT_FAILURE; \
+            success = 0; \
         } \
-        if (rc != EXIT_SUCCESS) \
-            return rc; \
+        if (!success) \
+            errors++; \
     } while(false)
 
 #define VERIFY_PRINT_MSG(fmt, actual_str, actual, expected_str, expected, expected_to_be_message) \

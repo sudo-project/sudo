@@ -1511,6 +1511,8 @@ _unlink_symbols(void)
 int
 main(int argc, char *argv[])
 {
+    int errors = 0;
+
     if (argc != 2) {
         printf("Please specify the python_plugin.so as argument!\n");
         return EXIT_FAILURE;
@@ -1546,6 +1548,7 @@ main(int argc, char *argv[])
 
     RUN_TEST(check_example_policy_plugin_version_display(true));
     RUN_TEST(check_example_policy_plugin_version_display(false));
+    // FIXME - sudo.options_from_dict fails for these two on python 3.4
     RUN_TEST(check_example_policy_plugin_accepted_execution());
     RUN_TEST(check_example_policy_plugin_failed_execution());
     RUN_TEST(check_example_policy_plugin_denied_execution());
@@ -1593,5 +1596,5 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_debugging("plugin@err"));
     RUN_TEST(check_plugin_unload());
 
-    return EXIT_SUCCESS;
+    return errors;
 }

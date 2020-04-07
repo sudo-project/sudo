@@ -312,10 +312,35 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
     if (sudo_debug_needed(SUDO_DEBUG_DIAG)) {
         char *args_str = NULL;
         char *kwargs_str = NULL;
-        if (py_args != NULL)
+        if (py_args != NULL) {
+            /* Sort by key for consistent output on Python < 3.6 */
+	    PyObject *py_args_sorted = NULL;
+	    if (PyDict_Check(py_args)) {
+		py_args_sorted = PyDict_Items(py_args);
+		if (py_args_sorted != NULL) {
+		    if (PyList_Sort(py_args_sorted) == 0) {
+			py_args = py_args_sorted;
+		    }
+		}
+	    }
             args_str = py_create_string_rep(py_args);
+            if (py_args_sorted != NULL)
+                Py_DECREF(py_args_sorted);
+        }
         if (py_kwargs != NULL) {
+            /* Sort by key for consistent output on Python < 3.6 */
+            PyObject *py_kwargs_sorted = NULL;
+	    if (PyDict_Check(py_kwargs)) {
+		py_kwargs_sorted = PyDict_Items(py_kwargs);
+		if (py_kwargs_sorted != NULL) {
+		    if (PyList_Sort(py_kwargs_sorted) == 0) {
+			py_kwargs = py_kwargs_sorted;
+		    }
+		}
+	    }
             kwargs_str = py_create_string_rep(py_kwargs);
+            if (py_kwargs_sorted != NULL)
+                Py_DECREF(py_kwargs_sorted);
         }
 
         if (args_str == NULL)
@@ -334,7 +359,7 @@ void
 py_debug_python_call(const char *class_name, const char *function_name,
                      PyObject *py_args, PyObject *py_kwargs, int subsystem_id)
 {
-    debug_decl_vars(_py_debug_python_function, subsystem_id);
+    debug_decl_vars(py_debug_python_call, subsystem_id);
 
     if (subsystem_id == PYTHON_DEBUG_C_CALLS && sudo_debug_needed(SUDO_DEBUG_INFO)) {
         // at this level we also output the callee python script
