@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -181,6 +181,8 @@ case "$osversion" in
 			if [ $osmajor -ge 7 ]; then
 			    # Encrypted remote I/O log support.
 			    with_openssl=true
+			    # Python plugins
+			    with_python=true
 			fi
 		    fi
 		fi
@@ -232,13 +234,15 @@ case "$osversion" in
 	;;
     sles*)
 	if [ $osrelease -ge 10 ]; then
-	    # SLES 11 and higher has SELinux
 	    if [ $osrelease -ge 11 ]; then
+		# SLES 11 and higher have SELinux
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
 	    fi
-	    # SLES 12 and higher has recent enough OpenSSL for remote I/O log.
 	    if [ $osrelease -ge 12 ]; then
+		# Encrypted remote I/O log support.
 		with_openssl=true
+		# Python plugins
+		with_python=true
 	    fi
 	fi
 	# SuSE doesn't have /usr/libexec
@@ -271,6 +275,8 @@ case "$osversion" in
     deb*|ubu*)
 	# Encrypted remote I/O log support.
 	with_openssl=true
+	# Python plugins
+	with_python=true
 	# Man pages should be compressed in .deb files
 	export MANCOMPRESS='gzip -9'
 	export MANCOMPRESSEXT='.gz'
@@ -428,6 +434,9 @@ case "$configure_opts" in
 esac
 if [ X"$with_openssl" = X"true" ]; then
     configure_opts="${configure_opts}${configure_opts+$tab}--enable-openssl"
+fi
+if [ X"$with_python" = X"true" ]; then
+    configure_opts="${configure_opts}${configure_opts+$tab}--enable-python"
 fi
 
 # The postinstall script will create tmpfiles.d/sudo.conf for us
