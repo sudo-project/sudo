@@ -1606,6 +1606,12 @@ server_reload(struct sudo_event_base *base)
 	/* Re-initialize listeners and TLS context. */
 	if (!server_setup(base))
 	    sudo_fatalx(U_("unable setup listen socket"));
+
+	/* Re-initialize debugging. */
+	if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
+	    sudo_debug_register(getprogname(), NULL, NULL,
+		sudo_conf_debug_files(getprogname()));
+	}
     }
 
     debug_return;
