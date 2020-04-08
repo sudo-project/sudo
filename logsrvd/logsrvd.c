@@ -1651,6 +1651,36 @@ logsrvd_cleanup(void)
 }
 
 /*
+ * Write the process ID into a file, typically /var/run/sudo/sudo_logsrvd.pid.
+ * If the parent directory doesn't exist, it will be created.
+ */
+static void
+write_pidfile(void)
+{
+    FILE *fp;
+    bool success;
+    char *pid_file = (char *)logsrvd_conf_pid_file();
+    debug_decl(write_pidfile, SUDO_DEBUG_UTIL);
+
+    /* sudo_mkdir_parents() modifies the path but restores it before return. */
+    success = sudo_mkdir_parents(pid_file, ROOT_UID, ROOT_GID,
+	S_IRWXU|S_IXGRP|S_IXOTH, false);
+    if (success) {
+	fp = fopen(logsrvd_conf_pid_file(), "w");
+	if (fp == NULL) {
+	    sudo_warn("%s", pid_file);
+	} else {
+	    fprintf(fp, "%u\n", (unsigned int)getpid());
+	    fflush(fp);
+	    if (ferror(fp))
+		sudo_warn("%s", pid_file);
+	    fclose(fp);
+	}
+    }
+    debug_return;
+}
+
+/*
  * Fork, detatch from the terminal and write pid file unless nofork set.
  */
 static void
@@ -1660,8 +1690,6 @@ daemonize(bool nofork)
     debug_decl(daemonize, SUDO_DEBUG_UTIL);
 
     if (!nofork) {
-	FILE *fp;
-
 	switch (fork()) {
 	case -1:
 	    sudo_fatal("fork");
@@ -1676,13 +1704,7 @@ daemonize(bool nofork)
 	/* detach from terminal and write pid file. */
 	if (setsid() == -1)
 	    sudo_fatal("setsid");
-	fp = fopen(logsrvd_conf_pid_file(), "w");
-	if (fp == NULL) {
-	    sudo_warn("%s", logsrvd_conf_pid_file());
-	} else {
-	    fprintf(fp, "%u\n", (unsigned int)getpid());
-	    fclose(fp);
-	}
+	write_pidfile();
     }
 
     if (chdir("/") == -1)

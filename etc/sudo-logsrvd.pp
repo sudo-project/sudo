@@ -111,7 +111,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}${mandir}/[mc]* | sed "s#${pp_destdir}##g"`
-	    extradirs="$extradirs `dirname $docdir`"
+	    extradirs="$extradirs `dirname $docdir` `dirname $rundir`"
 	    test "`dirname $exampledir`" != "$docdir" && extradirs="$extradirs `dirname $exampledir`"
 	    for dir in $sbindir $extradirs; do
 		    while test "$dir" != "/"; do
@@ -148,6 +148,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 %endif
 	$sbindir/sudo_logsrvd   0755 ignore-others
 	$mandir/man*/*logsrv*	0644 ignore-others
+	$rundir/		0711 root: ignore-others
 	$docdir/		0755 ignore-others
 	$exampledir/		0755 ignore-others
 	$exampledir/*logsrv*	0644 ignore-others
