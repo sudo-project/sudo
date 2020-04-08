@@ -288,6 +288,7 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
 static bool
 tls_init(struct client_closure *closure, bool verify, bool cert_required)
 {
+    const char *errstr;
     debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN);
 
     SSL_library_init();
@@ -296,15 +297,15 @@ tls_init(struct client_closure *closure, bool verify, bool cert_required)
     
     /* create the ssl context */
     if ((closure->ssl_ctx = SSL_CTX_new(TLS_client_method())) == NULL) {
-        sudo_warnx(U_("Creation of new SSL_CTX object failed: %s"),
-            ERR_error_string(ERR_get_error(), NULL));
+        errstr = ERR_reason_error_string(ERR_get_error());
+        sudo_warnx(U_("Creation of new SSL_CTX object failed: %s"), errstr);
         goto bad;
     }
 #ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
     if (!SSL_CTX_set_min_proto_version(closure->ssl_ctx, TLS1_2_VERSION)) {
+        errstr = ERR_reason_error_string(ERR_get_error());
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to restrict min. protocol version: %s",
-            ERR_error_string(ERR_get_error(), NULL));
+            "unable to restrict min. protocol version: %s", errstr);
         goto bad;
     }
 #else
@@ -326,8 +327,9 @@ tls_init(struct client_closure *closure, bool verify, bool cert_required)
         /* sets the location of the CA bundle file for verification purposes */
         if (SSL_CTX_load_verify_locations(closure->ssl_ctx,
             closure->log_details->ca_bundle, NULL) <= 0) {
+            errstr = ERR_reason_error_string(ERR_get_error());
             sudo_warnx(U_("Calling SSL_CTX_load_verify_locations() failed: %s"),
-                ERR_error_string(ERR_get_error(), NULL));
+                errstr);
             goto bad;
         }
 
@@ -344,8 +346,9 @@ tls_init(struct client_closure *closure, bool verify, bool cert_required)
         /* load client cert file */
         if (!SSL_CTX_use_certificate_chain_file(closure->ssl_ctx,
             closure->log_details->cert_file)) {
+            errstr = ERR_reason_error_string(ERR_get_error());
             sudo_warnx(U_("Unable to load cert into the ssl context: %s"),
-                ERR_error_string(ERR_get_error(), NULL));
+                errstr);
             goto bad;
         }
         /* no explicit key file is set, try to use the cert file */
@@ -355,21 +358,22 @@ tls_init(struct client_closure *closure, bool verify, bool cert_required)
         /* load corresponding private key file */
         if (!SSL_CTX_use_PrivateKey_file(closure->ssl_ctx,
             closure->log_details->key_file, X509_FILETYPE_PEM)) {
+            errstr = ERR_reason_error_string(ERR_get_error());
             sudo_warnx(U_("Unable to load private key into the ssl context: %s"),
-                ERR_error_string(ERR_get_error(), NULL));
+                errstr);
             goto bad;
         }
     }
     /* create the ssl object for encrypted communication */
     if ((closure->ssl = SSL_new(closure->ssl_ctx)) == NULL) {
-        sudo_warnx(U_("Unable to allocate ssl object: %s"),
-            ERR_error_string(ERR_get_error(), NULL));
+        errstr = ERR_reason_error_string(ERR_get_error());
+        sudo_warnx(U_("Unable to allocate ssl object: %s"), errstr);
         goto bad;
     }
     /* attach the closure socket to the ssl object */
     if (SSL_set_fd(closure->ssl, closure->sock) <= 0) {
-        sudo_warnx(U_("Unable to attach socket to the ssl object: %s"),
-            ERR_error_string(ERR_get_error(), NULL));
+        errstr = ERR_reason_error_string(ERR_get_error());
+        sudo_warnx(U_("Unable to attach socket to the ssl object: %s"), errstr);
         goto bad;
     }
 
@@ -377,8 +381,9 @@ tls_init(struct client_closure *closure, bool verify, bool cert_required)
        available during hostname matching
      */
     if (SSL_set_ex_data(closure->ssl, 1, closure) <= 0) {
+        errstr = ERR_reason_error_string(ERR_get_error());
         sudo_warnx(U_("Unable to attach user data to the ssl object: %s"),
-            ERR_error_string(ERR_get_error(), NULL));
+            errstr);
         goto bad;
     }
 
@@ -404,6 +409,7 @@ tls_connect_cb(int sock, int what, void *v)
 {
     struct tls_connect_closure *closure = v;
     struct timespec timeo = { 10, 0 };
+    const char *errstr;
     int tls_con, err;
     debug_decl(tls_connect_cb, SUDOERS_DEBUG_UTIL);
 
@@ -456,8 +462,9 @@ tls_connect_cb(int sock, int what, void *v)
                 }
                 break;
             default:
+                errstr = ERR_error_string(ERR_get_error(), NULL);
                 sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s"),
-                    err, ERR_error_string(ERR_get_error(), NULL));
+                    err, errstr);
                 goto bad;
         }
     }
@@ -1337,6 +1344,7 @@ server_msg_cb(int fd, int what, void *v)
     if (closure->tls && closure->state != RECV_HELLO) {
         nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size - buf->len);
         if (nread <= 0) {
+	    const char *errstr;
             int err = SSL_get_error(closure->ssl, nread);
             switch (err) {
 		case SSL_ERROR_ZERO_RETURN:
@@ -1364,9 +1372,9 @@ server_msg_cb(int fd, int what, void *v)
 		    closure->write_instead_of_read = true;
                     debug_return;
                 default:
+                    errstr = ERR_error_string(ERR_get_error(), NULL);
                     sudo_warnx(U_("SSL_read failed: ssl_error=%d, stack=%s"),
-                        err,
-                        ERR_error_string(ERR_get_error(), NULL));
+                        err, errstr);
                     goto bad;
             }
         }
@@ -1475,6 +1483,7 @@ client_msg_cb(int fd, int what, void *v)
     if (closure->tls) {
         nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
         if (nwritten <= 0) {
+	    const char *errstr;
             int err = SSL_get_error(closure->ssl, nwritten);
             switch (err) {
                 case SSL_ERROR_WANT_READ:
@@ -1489,8 +1498,9 @@ client_msg_cb(int fd, int what, void *v)
 			"SSL_write returns SSL_ERROR_WANT_WRITE");
                     debug_return;
                 default:
+                    errstr = ERR_error_string(ERR_get_error(), NULL);
                     sudo_warnx(U_("SSL_write failed: ssl_error=%d, stack=%s"),
-                        err, ERR_error_string(ERR_get_error(), NULL));
+                        err, errstr);
                     goto bad;
             }
         }

@@ -797,8 +797,7 @@ client_msg_cb(int fd, int what, void *v)
                 default:
                     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                         "unexpected error during SSL_read(). SSL error=%d (%s)",
-                        err,
-                        ERR_error_string(ERR_get_error(), NULL));
+                        err, ERR_error_string(ERR_get_error(), NULL));
                         goto finished;
             }
         }
@@ -1292,8 +1291,7 @@ tls_handshake_cb(int fd, int what, void *v)
         default:
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                 "unexpected error during TLS handshake: %d (%s)",
-                err,
-                ERR_error_string(ERR_get_error(), NULL));
+                err, ERR_error_string(ERR_get_error(), NULL));
             goto bad;
     }
 

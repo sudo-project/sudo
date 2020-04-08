@@ -210,6 +210,7 @@ tls_connect_cb(int sock, int what, void *v)
     struct client_closure *closure = v;
     struct sudo_event_base *evbase = closure->tls_connect_ev->base;
     struct timespec timeo = { TLS_HANDSHAKE_TIMEO_SEC, 0 };
+    const char *errstr;
     int con_stat, err;
 
     debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
@@ -261,8 +262,9 @@ tls_connect_cb(int sock, int what, void *v)
                 }
 		break;
             default:
+		errstr = ERR_error_string(ERR_get_error(), NULL);
                 sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s\n"),
-                    err, ERR_error_string(ERR_get_error(), NULL));
+                    err, errstr);
                 break;
         }
     }
@@ -307,6 +309,7 @@ done:
 static bool
 do_tls_handshake(struct client_closure *closure)
 {
+    const char *errstr;
     debug_decl(do_tls_handshake, SUDO_DEBUG_UTIL);
 
     if (ca_bundle == NULL) {
@@ -318,18 +321,19 @@ do_tls_handshake(struct client_closure *closure)
         goto bad;
     }
     if ((ssl_ctx = init_tls_client_context(ca_bundle, cert, key)) == NULL) {
-        sudo_warnx(U_("Unable to initialize ssl context: %s"),
-            ERR_error_string(ERR_get_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+        sudo_warnx(U_("Unable to initialize ssl context: %s"), errstr);
         goto bad;
     }
     if ((closure->ssl = SSL_new(ssl_ctx)) == NULL) {
-        sudo_warnx(U_("Unable to allocate ssl object: %s\n"),
-            ERR_error_string(ERR_get_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+        sudo_warnx(U_("Unable to allocate ssl object: %s\n"), errstr);
         goto bad;
     }
     if (SSL_set_fd(closure->ssl, closure->sock) <= 0) {
+	errstr = ERR_reason_error_string(ERR_get_error());
         sudo_warnx(U_("Unable to attach socket to the ssl object: %s\n"),
-            ERR_error_string(ERR_get_error(), NULL));
+	    errstr);
         goto bad;
     }
 
