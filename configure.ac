@@ -119,6 +119,7 @@ AC_SUBST([PYTHON_PLUGIN_SRC])
 AC_SUBST([LOGSRV])
 AC_SUBST([LIBLOGSRV])
 AC_SUBST([LOGSRVD])
+AC_SUBST([LOGSRVD_CONF])
 AC_SUBST([PPFILES])
 
 dnl
@@ -214,7 +215,6 @@ pam_login_service=sudo
 plugindir="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
-PPFILES='$(srcdir)/etc/sudo.pp'
 #
 # End initial values for man page substitution
 #
@@ -270,8 +270,10 @@ shadow_libs=
 TMPFILES_D=
 CONFIGURE_ARGS="$@"
 LOGSRVD=logsrvd
+LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
 LOGSRV=lib/logsrv
 LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
+PPFILES='$(srcdir)/etc/sudo.pp'
 
 dnl
 dnl LD_PRELOAD equivalents
@@ -1659,6 +1661,7 @@ AC_ARG_ENABLE(log-server,
 	    ;;
     no)
 	    LOGSRVD=
+	    LOGSRVD_CONF=
 	    ;;
     *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-log-server: $enableval])
 	    ;;

@@ -737,6 +737,7 @@ logpath
 log_dir
 iolog_dir
 PPFILES
+LOGSRVD_CONF
 LOGSRVD
 LIBLOGSRV
 LOGSRV
@@ -3125,6 +3126,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3173,7 +3175,6 @@ pam_login_service=sudo
 plugindir="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
-PPFILES='$(srcdir)/etc/sudo.pp'
 #
 # End initial values for man page substitution
 #
@@ -3222,8 +3223,10 @@ shadow_libs=
 TMPFILES_D=
 CONFIGURE_ARGS="$@"
 LOGSRVD=logsrvd
+LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
 LOGSRV=lib/logsrv
 LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
+PPFILES='$(srcdir)/etc/sudo.pp'
 
 RTLD_PRELOAD_VAR="LD_PRELOAD"
 RTLD_PRELOAD_ENABLE_VAR=
@@ -6945,6 +6948,7 @@ if test "${enable_log_server+set}" = set; then :
 	    ;;
     no)
 	    LOGSRVD=
+	    LOGSRVD_CONF=
 	    ;;
     *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-log-server: $enableval" >&5
 $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-log-server: $enableval" >&2;}
