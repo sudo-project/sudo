@@ -1468,10 +1468,17 @@ create_listener(struct listen_address *addr)
 	goto bad;
     }
     on = 1;
+#ifdef IPV6_V6ONLY
+    if (addr->sa_un.sa.sa_family == AF_INET6) {
+	/* Disable IPv4-mapped IPv6 addresses. */
+	if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1)
+	    sudo_warn("IPV6_V6ONLY");
+    }
+#endif
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
 	sudo_warn("SO_REUSEADDR");
     if (bind(sock, &addr->sa_un.sa, addr->sa_len) == -1) {
-	sudo_warn("bind");
+	sudo_warn("%s", addr->sa_str);
 	goto bad;
     }
     if (listen(sock, SOMAXCONN) == -1) {
@@ -1483,6 +1490,8 @@ create_listener(struct listen_address *addr)
 	sudo_warn("fcntl(O_NONBLOCK)");
 	goto bad;
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "listening on %s (AF_INET%s)",
+	addr->sa_str, addr->sa_un.sa.sa_family == AF_INET6 ? "6" : "");
 
     debug_return_int(sock);
 bad:

@@ -410,6 +410,11 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 	    sudo_warn(NULL);
 	    goto done;
 	}
+	if ((addr->sa_str = strdup(str)) == NULL) {
+	    sudo_warn(NULL);
+	    free(addr);
+	    goto done;
+	}
 	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
 	addr->sa_len = res->ai_addrlen;
 	TAILQ_INSERT_TAIL(&config->server.addresses, addr, entries);
@@ -933,6 +938,7 @@ logsrvd_conf_free(struct logsrvd_config *config)
     /* struct logsrvd_config_server */
     while ((addr = TAILQ_FIRST(&config->server.addresses))) {
 	TAILQ_REMOVE(&config->server.addresses, addr, entries);
+	free(addr->sa_str);
 	free(addr);
     }
     free(config->server.pid_file);
