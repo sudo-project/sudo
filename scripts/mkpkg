@@ -140,11 +140,16 @@ if [ "$crossbuild" = "false" ]; then
 	    ;;
 	sol[0-9]*)
 	    # Use the Sun Studio C compiler on Solaris if possible
-	    if [ -z "$CC" -a -x /usr/bin/cc ]; then
-		CC=/usr/bin/cc; export CC
-		if [ -z "$CFLAGS" ]; then
-		    CFLAGS=-O; export CFLAGS
-		fi
+	    if [ -z "$CC" ]; then
+		for f in /opt/developerstudio12.[9876]/bin/cc /opt/solarisstudio12.[43]/bin/cc; do
+		    if [ -x $f ]; then
+			CC=$f; export CC
+			if [ -z "$CFLAGS" ]; then
+			    CFLAGS=-O; export CFLAGS
+			fi
+			break
+		    fi
+		done
 	    fi
 	    ;;
     esac
@@ -156,6 +161,9 @@ configure_opts="${configure_opts}${configure_opts+$tab}--enable-package-build"
 
 # Some systems don't have a recent enough OpenSSL for the I/O log server.
 with_openssl=false
+
+# Not all systems have Python 3.
+with_python=false
 
 # Choose configure options by osversion.
 # We use the same configure options as vendor packages when possible.
