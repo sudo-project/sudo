@@ -24,6 +24,41 @@ This makes it possible to have all sudo I/O logs on a central server."
 	pp_solaris_pstamp=`/usr/bin/date "+%B %d, %Y"`
 %endif
 
+%if [macos]
+	# System Integrity Protection on macOS won't allow us to write
+	# directly to /etc or /var.  We must install in /private instead.
+	case "$sysconfdir" in
+	/etc|/etc/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/etc; then
+		mv ${pp_destdir}/etc ${pp_destdir}/private/etc
+	    fi
+	    sysconfdir="/private${sysconfdir}"
+	    ;;
+	esac
+	case "$vardir" in
+	/var|/var/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/var; then
+		mv ${pp_destdir}/var ${pp_destdir}/private/var
+	    fi
+	    vardir="/private${vardir}"
+	    ;;
+	esac
+	case "$rundir" in
+	/var|/var/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/var; then
+		mv ${pp_destdir}/var ${pp_destdir}/private/var
+	    fi
+	    rundir="/private${rundir}"
+	    ;;
+	esac
+%endif
+
 %if [rpm,deb]
 	# Convert patch level into release and remove from version
 	pp_rpm_release="`expr \( $version : '.*p\([0-9][0-9]*\)$' \| 0 \) + 1`"
@@ -32,6 +67,9 @@ This makes it possible to have all sudo I/O logs on a central server."
 	pp_rpm_url="https://www.sudo.ws"
 	pp_rpm_group="Applications/System"
 	pp_rpm_packager="Todd C. Miller <Todd.Miller@sudo.ws>"
+%else
+	# We install sudo_logsrvd.conf from the example dir during post-install
+	rm -f ${pp_destdir}$sysconfdir/sudo_logsrvd.conf
 %endif
 
 	# Stash original docdir and exampledir
@@ -152,10 +190,28 @@ This makes it possible to have all sudo I/O logs on a central server."
 	$docdir/		0755 ignore-others
 	$exampledir/		0755 ignore-others
 	$exampledir/*logsrv*	0644 ignore-others
+%if [rpm,deb]
+	$sysconfdir/sudo_logsrvd.conf 0644 root: volatile,ignore-others
+%endif
 %if X"$aix_freeware" = X"true"
 	# Links for binaries from /opt/freeware to /usr
 	/usr/sbin/sudo_logsrvd  0755 root: symlink,ignore-others $sbindir/logsrvd
 %endif
+
+%post [!rpm,deb]
+	# Don't overwrite existing sudo_logsrvd.conf files
+%if [solaris]
+	sysconfdir=${PKG_INSTALL_ROOT}%{sysconfdir}
+	exampledir=${PKG_INSTALL_ROOT}%{exampledir}
+%else
+	sysconfdir=%{sysconfdir}
+	exampledir=%{exampledir}
+%endif
+	if test ! -r $sysconfdir/sudo_logsrvd.conf; then
+		cp $exampledir/sudo_logsrvd.conf $sysconfdir/sudo_logsrvd.conf
+		chmod 644 $sysconfdir/sudo_logsrvd.conf
+		chown root $sysconfdir/sudo_logsrvd.conf
+	fi
 
 %service sudo_logsrvd
 %if [aix,macos]
