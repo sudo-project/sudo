@@ -215,14 +215,13 @@ python_sudo_options_from_dict(PyObject *py_self, PyObject *py_args)
         goto cleanup;
 
     PyObject *py_key = NULL, *py_value = NULL; // -> borrowed references
-    Py_ssize_t pos = 0;
-    while (PyDict_Next(py_config_dict, &pos, &py_key, &py_value)) {
-        Py_ssize_t i = pos - 1; // python counts from 1, terrible :(
-
+    Py_ssize_t i, pos = 0;
+    for (i = 0; PyDict_Next(py_config_dict, &pos, &py_key, &py_value); i++) {
         PyObject *py_config = PyUnicode_FromFormat("%S%s%S", py_key, "=", py_value);
         if (py_config == NULL)
             goto cleanup;
 
+        /* Dictionaries are sparse so we cannot use pos as an index. */
         if (PyTuple_SetItem(py_result, i, py_config) != 0) { // this steals a reference, even on error
             goto cleanup;
         }

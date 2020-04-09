@@ -1548,7 +1548,6 @@ main(int argc, char *argv[])
 
     RUN_TEST(check_example_policy_plugin_version_display(true));
     RUN_TEST(check_example_policy_plugin_version_display(false));
-    // FIXME - sudo.options_from_dict fails for these two on python 3.4
     RUN_TEST(check_example_policy_plugin_accepted_execution());
     RUN_TEST(check_example_policy_plugin_failed_execution());
     RUN_TEST(check_example_policy_plugin_denied_execution());
