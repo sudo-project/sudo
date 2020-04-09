@@ -75,11 +75,21 @@ class ReasonLoggerIOPlugin(sudo.Plugin):
                       self._signal_name(signum))
 
     # helper functions:
-    @classmethod
-    def _signal_name(cls, signum):
-        try:
-            return signal.Signals(signum).name
-        except Exception:
+    if hasattr(signal, "Signals"):
+        @classmethod
+        def _signal_name(cls, signum: int):
+            try:
+                return signal.Signals(signum).name
+            except Exception:
+                return "{}".format(signum)
+    else:
+        @classmethod
+        def _signal_name(cls, signum: int):
+            for n, v in sorted(signal.__dict__.items()):
+                if v != signum:
+                    continue
+                if n.startswith("SIG") and not n.startswith("SIG_"):
+                    return n
             return "{}".format(signum)
 
     def _log_file_path(self):

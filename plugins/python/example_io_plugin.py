@@ -104,10 +104,7 @@ class SudoIOPlugin(sudo.Plugin):
         self._log("WINSIZE", "{}x{}".format(line, cols))
 
     def log_suspend(self, signo: int) -> int:
-        try:
-            signal_description = signal.Signals(signo).name
-        except (AttributeError, ValueError):
-            signal_description = "signal {}".format(signo)
+        signal_description = self._signal_name(signo)
 
         self._log("SUSPEND", signal_description)
 
@@ -139,3 +136,18 @@ class SudoIOPlugin(sudo.Plugin):
     def _log(self, type, message):
         print(type, message, file=self._log_file)
         return sudo.RC.ACCEPT
+
+    if hasattr(signal, "Signals"):
+        def _signal_name(cls, signo: int):
+            try:
+                return signal.Signals(signo).name
+            except ValueError:
+                return "signal {}".format(signo)
+    else:
+        def _signal_name(cls, signo: int):
+            for n, v in sorted(signal.__dict__.items()):
+                if v != signo:
+                    continue;
+                if n.startswith("SIG") and not n.startswith("SIG_"):
+                    return n
+            return "signal {}".format(signo)
