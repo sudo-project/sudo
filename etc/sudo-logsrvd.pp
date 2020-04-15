@@ -220,3 +220,22 @@ This makes it possible to have all sudo I/O logs on a central server."
 	cmd=${sbindir}/sudo_logsrvd
 	pidfile=${rundir}/sudo_logsrvd.pid
 %endif
+%if [rpm,deb]
+	pp_systemd_service_description="Sudo central log server"
+	pp_systemd_service_exec="${cmd}"
+	pp_systemd_service_exec_args="-n"
+	pp_systemd_service_dir=`pkg-config systemd --variable=systemdsystemunitdir 2>/dev/null`
+	if test X"$pp_systemd_service_dir" = X""; then
+	    if test -d /lib/systemd/system; then
+		pp_systemd_service_dir=/lib/systemd/system
+	    else
+		pp_systemd_service_dir=/usr/lib/systemd/system
+	    fi
+	fi
+	pp_systemd_service_man="man:sudo_logsrvd(8) man:sudo_logsrvd.conf(5)"
+	pp_systemd_service_documentation="https://www.sudo.ws/man.html"
+	pp_systemd_service_after="syslog.target network.target auditd.service"
+	pp_systemd_service_killmode="process"
+	pp_systemd_service_type="exec"
+	pp_systemd_system_target="multi-user.target"
+%endif
