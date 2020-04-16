@@ -221,21 +221,27 @@ This makes it possible to have all sudo I/O logs on a central server."
 	pidfile=${rundir}/sudo_logsrvd.pid
 %endif
 %if [rpm,deb]
-	pp_systemd_service_description="Sudo central log server"
-	pp_systemd_service_exec="${cmd}"
-	pp_systemd_service_exec_args="-n"
-	pp_systemd_service_dir=`pkg-config systemd --variable=systemdsystemunitdir 2>/dev/null`
-	if test X"$pp_systemd_service_dir" = X""; then
-	    if test -d /lib/systemd/system; then
-		pp_systemd_service_dir=/lib/systemd/system
-	    else
-		pp_systemd_service_dir=/usr/lib/systemd/system
-	    fi
+	# Only include systemd support if we find systemctl on the build
+	# machine.  This assumes that we are building on the same distro
+	# that the package will be installed on.
+	if command -v systemctl >/dev/null; then
+	    for d in `pkg-config systemd --variable=systemdsystemunitdir 2>/dev/null` /lib/systemd/system /usr/lib/systemd/system; do
+		if test -d "$d"; then
+		    break
+		fi
+	    done
+	    pp_systemd_service_description="Sudo central log server"
+	    pp_systemd_service_dir="$d"
+	    pp_systemd_service_exec="${cmd}"
+	    pp_systemd_service_exec_args="-n"
+	    pp_systemd_service_man="man:sudo_logsrvd(8) man:sudo_logsrvd.conf(5)"
+	    pp_systemd_service_documentation="https://www.sudo.ws/man.html"
+	    pp_systemd_service_after="syslog.target network.target auditd.service"
+	    pp_systemd_service_killmode="process"
+	    pp_systemd_service_type="exec"
+	    pp_systemd_system_target="multi-user.target"
+	else
+	    # No systemd support
+	    pp_systemd_disabled=true
 	fi
-	pp_systemd_service_man="man:sudo_logsrvd(8) man:sudo_logsrvd.conf(5)"
-	pp_systemd_service_documentation="https://www.sudo.ws/man.html"
-	pp_systemd_service_after="syslog.target network.target auditd.service"
-	pp_systemd_service_killmode="process"
-	pp_systemd_service_type="exec"
-	pp_systemd_system_target="multi-user.target"
 %endif

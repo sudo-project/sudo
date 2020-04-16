@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2020 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20200414"
+pp_revision="20200416"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -8805,11 +8805,14 @@ pp_backend_bsd_function() {
     esac
 }
 pp_systemd_make_service_file() {
-
     local svc f
 
+    if [ "${pp_systemd_disabled}:-false" = "true" ]; then
+	return
+    fi
+
     svc="$1"
-    f="${pp_systemd_service_dir:-'/opt/quest/libexec/vas'}/$svc.service"
+    f="${pp_systemd_service_dir:-/opt/quest/libexec/vas}/$svc.service"
     pp_add_file_if_missing $f run 644 v || return 0
 
     cat <<. >$pp_destdir$f
@@ -8838,7 +8841,7 @@ pp_systemd_service_init_common () {
     cat <<.
 
         _pp_systemd_init () {
-	    systemd_service_dir=${pp_systemd_service_dir:-'/opt/quest/libexec/vas'}
+	    systemd_service_dir=${pp_systemd_service_dir:-/opt/quest/libexec/vas}
             systemd_target=${pp_systemd_system_target:-"multi-user.target"}
             systemd_target_wants="\${systemd_target}.wants"
 
@@ -8881,6 +8884,25 @@ pp_systemd_service_init_common () {
 }
 
 pp_systemd_service_install_common () {
+    if [ "${pp_systemd_disabled}:-false" = "true" ]; then
+	cat<<'.'
+
+        # systemd support disabled
+        _pp_systemd_init () {
+            return
+        }
+
+        _pp_systemd_install () {
+            return
+        }
+
+        _pp_systemd_enable () {
+            return
+        }
+.
+	return
+    fi
+
     pp_systemd_service_init_common
 
     cat<<'.'
@@ -8949,6 +8971,25 @@ pp_systemd_service_install_common () {
 }
 
 pp_systemd_service_remove_common () {
+    if [ "${pp_systemd_disabled}:-false" = "true" ]; then
+	cat<<'.'
+
+        # systemd support disabled
+        _pp_systemd_init () {
+            return
+        }
+
+        _pp_systemd_disable () {
+            return
+        }
+
+        _pp_systemd_remove () {
+            return
+        }
+.
+	return
+    fi
+
     pp_systemd_service_init_common
 
     cat<<'.'
