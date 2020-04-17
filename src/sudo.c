@@ -967,8 +967,8 @@ run_command(struct command_details *details)
     switch (cstat.type) {
     case CMD_ERRNO:
 	/* exec_setup() or execve() returned an error. */
-	policy_close(0, cstat.val);
 	iolog_close(0, cstat.val);
+	policy_close(0, cstat.val);
 	audit_close(SUDO_PLUGIN_EXEC_ERROR, cstat.val);
 	break;
     case CMD_WSTATUS:
@@ -978,8 +978,8 @@ run_command(struct command_details *details)
 	if (ISSET(details->flags, CD_SUDOEDIT_COPY))
 	    break;
 #endif
-	policy_close(status, 0);
 	iolog_close(status, 0);
+	policy_close(status, 0);
 	audit_close(SUDO_PLUGIN_WAIT_STATUS, cstat.val);
 	break;
     default:
