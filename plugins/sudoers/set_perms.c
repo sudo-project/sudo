@@ -1538,7 +1538,7 @@ bad:
     debug_return_bool(false);
 }
 
-boll
+bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
