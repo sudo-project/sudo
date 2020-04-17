@@ -506,7 +506,7 @@ write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
     iolog_info.envp = (char **)details->user_env;
 
     if (!iolog_write_info_file(dfd, iolog_dir, &iolog_info)) {
-	log_warning(SLOG_SEND_MAIL,
+	log_warningx(SLOG_SEND_MAIL,
 	    N_("unable to write to I/O log file: %s"), strerror(errno));
 	warned = true;
 	debug_return_bool(false);
@@ -786,7 +786,7 @@ sudoers_io_close(int exit_status, int error)
 
     if (errstr != NULL && !warned) {
 	/* Only warn about I/O log file errors once. */
-	log_warning(SLOG_SEND_MAIL,
+	log_warningx(SLOG_SEND_MAIL,
 	    N_("unable to write to I/O log file: %s"), errstr);
 	warned = true;
     }
@@ -945,7 +945,7 @@ bad:
 	    }
 	    if (!warned) {
 		/* Only warn about I/O log file errors once. */
-		log_warning(SLOG_SEND_MAIL,
+		log_warningx(SLOG_SEND_MAIL,
 		    N_("unable to write to I/O log file: %s"), ioerror);
 		warned = true;
 	    }
@@ -1073,7 +1073,7 @@ bad:
 	    }
 	    if (!warned) {
 		/* Only warn about I/O log file errors once. */
-		log_warning(SLOG_SEND_MAIL,
+		log_warningx(SLOG_SEND_MAIL,
 		    N_("unable to write to I/O log file: %s"), ioerror);
 		warned = true;
 	    }
@@ -1179,7 +1179,7 @@ bad:
 	    }
 	    if (!warned) {
 		/* Only warn about I/O log file errors once. */
-		log_warning(SLOG_SEND_MAIL,
+		log_warningx(SLOG_SEND_MAIL,
 		    N_("unable to write to I/O log file: %s"), ioerror);
 		warned = true;
 	    }
