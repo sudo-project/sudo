@@ -784,9 +784,6 @@ sudoers_io_close(int exit_status, int error)
     if (io_operations.close != NULL)
 	io_operations.close(exit_status, error, &errstr);
 
-    sudo_freepwcache();
-    sudo_freegrcache();
-
     if (errstr != NULL && !warned) {
 	/* Only warn about I/O log file errors once. */
 	log_warning(SLOG_SEND_MAIL,
@@ -794,9 +791,11 @@ sudoers_io_close(int exit_status, int error)
 	warned = true;
     }
 
-    sudoers_debug_deregister();
+    sudo_freepwcache();
+    sudo_freegrcache();
 
-    return;
+    /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
+    sudoers_debug_deregister();
 }
 
 static int

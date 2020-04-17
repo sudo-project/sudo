@@ -931,9 +931,8 @@ sudoers_policy_close(int exit_status, int error_code)
     free(audit_msg);
     audit_msg = NULL;
 
+    /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
     sudoers_debug_deregister();
-
-    return;
 }
 
 /*
