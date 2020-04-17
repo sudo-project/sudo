@@ -103,7 +103,10 @@ connection_closure_free(struct connection_closure *closure)
 	struct sudo_event_base *evbase = closure->evbase;
 
 #if defined(HAVE_OPENSSL)
-	SSL_free(closure->ssl);
+    if (logsrvd_conf_get_tls_opt()) {
+        SSL_shutdown(closure->ssl);
+        SSL_free(closure->ssl);
+    }
 #endif
 	TAILQ_REMOVE(&connections, closure, entries);
 	close(closure->sock);
