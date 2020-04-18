@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2008, 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2008, 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -682,6 +682,51 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 }
 
 /*
+ * Extend the given fd to the specified size in bytes.
+ * We do this to allocate disk space up-front before overwriting
+ * the original file with the temporary.  Otherwise, we could
+ * we run out of disk space after truncating the original file.
+ */
+static int
+sudo_edit_extend_file(int fd, off_t new_size)
+{
+    off_t old_size, size;
+    ssize_t nwritten;
+    char zeroes[1024] = { '\0' };
+    debug_decl(sudo_edit_extend_file, SUDO_DEBUG_EDIT);
+
+    if ((old_size = lseek(fd, 0, SEEK_END)) == -1) {
+	sudo_warn("lseek");
+	debug_return_int(-1);
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: extending file from %lld to %lld",
+	__func__, (long long)old_size, (long long)new_size);
+
+    for (size = old_size; size < new_size; size += nwritten) {
+	size_t len = new_size - size;
+	if (len > sizeof(zeroes))
+	    len = sizeof(zeroes);
+	nwritten = write(fd, zeroes, len);
+	if (nwritten == -1) {
+	    int serrno = errno;
+	    if (ftruncate(fd, old_size) == -1) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to truncate to %lld", (long long)old_size);
+	    }
+	    errno = serrno;
+	    debug_return_int(-1);
+	}
+    }
+    if (lseek(fd, 0, SEEK_SET) == -1) {
+	sudo_warn("lseek");
+	debug_return_int(-1);
+    }
+
+    debug_return_int(0);
+}
+
+/*
  * Copy the temporary files specified in tf to the originals.
  * Returns the number of copy errors or 0 if completely successful.
  */
@@ -739,38 +784,53 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
 	oldmask = umask(command_details->umask);
-	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT,
+	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_CREAT,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details);
 	umask(oldmask);
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
-	if (ofd == -1) {
-	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
-	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
-	    close(tfd);
-	    errors++;
-	    continue;
+	if (ofd == -1)
+	    goto write_error;
+	/* Extend the file to the new size if larger before copying. */
+	if (tf[i].osize > 0 && sb.st_size > tf[i].osize) {
+	    if (sudo_edit_extend_file(ofd, sb.st_size) == -1)
+		goto write_error;
 	}
+	/* Overwrite the old file with the new contents. */
 	while ((nread = read(tfd, buf, sizeof(buf))) > 0) {
-	    if ((nwritten = write(ofd, buf, nread)) != nread) {
+	    ssize_t off = 0;
+	    do {
+		nwritten = write(ofd, buf + off, nread - off);
 		if (nwritten == -1)
-		    sudo_warn("%s", tf[i].ofile);
-		else
-		    sudo_warnx(U_("%s: short write"), tf[i].ofile);
-		break;
-	    }
+		    goto write_error;
+		off += nwritten;
+	    } while (nread > off);
 	}
 	if (nread == 0) {
-	    /* success, got EOF */
+	    /* success, read to EOF */
+	    if (tf[i].osize > 0 && sb.st_size < tf[i].osize) {
+		/* We don't open with O_TRUNC so must truncate manually. */
+		if (ftruncate(ofd, sb.st_size)  == -1) {
+		    sudo_debug_printf(
+			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			"unable to truncate %s to %lld", tf[i].ofile,
+			(long long)sb.st_size);
+		    goto write_error;
+		}
+	    }
 	    unlink(tf[i].tfile);
 	} else if (nread < 0) {
 	    sudo_warn(U_("unable to read temporary file"));
 	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
+	    errors++;
 	} else {
+write_error:
 	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
 	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
+	    errors++;
 	}
-	close(ofd);
+	if (ofd != -1)
+	    close(ofd);
 	close(tfd);
     }
     debug_return_int(errors);
@@ -1096,6 +1156,7 @@ cleanup:
 	for (i = 0; i < nfiles; i++) {
 	    if (tf[i].tfile != NULL)
 		unlink(tf[i].tfile);
+	    free(tf[i].tfile);
 	}
     }
     free(tf);
