@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "October 6, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "April 20, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -438,6 +438,9 @@ message ServerHello {
   string server_id = 1;
   string redirect = 2;
   repeated string servers = 3;
+  bool tls = 4;
+  bool tls_server_auth = 5;
+  bool tls_reqcert = 6;
 }
 .RE
 .fi
@@ -472,6 +475,22 @@ This can be used to implement log server redundancy and allows the
 client to discover all other log servers simply by connecting to
 one known server.
 This member may be omitted when there is only a single log server.
+.TP 8n
+tls
+If set to true, the connection between the client and the server
+must be secured via Transport Layer Security (TLS) version 1.2 or
+higher.
+.TP 8n
+tls_server_auth
+If set to true, the client should validate the server's certificate
+and only proceed if the certificate can be verified.
+.TP 8n
+tls_reqcert
+If set to true, the client must present its own certificate to the server.
+If the server is unable to verify the client's certificate, the TLS
+handshake will fail.
+This can be used by the server to only allow connections from authorized
+clients.
 .SS "TimeSpec commit_point"
 A periodic time stamp sent by the server to indicate when I/O log
 buffers have been committed to storage.
