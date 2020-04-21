@@ -974,10 +974,6 @@ run_command(struct command_details *details)
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
 	status = cstat.val;
-#ifdef HAVE_SELINUX
-	if (ISSET(details->flags, CD_SUDOEDIT_COPY))
-	    break;
-#endif
 	iolog_close(status, 0);
 	policy_close(status, 0);
 	audit_close(SUDO_PLUGIN_WAIT_STATUS, cstat.val);

@@ -719,28 +719,54 @@ bad:
 
 #ifdef HAVE_SELINUX
 static int
+selinux_run_helper(char *argv[], char *envp[])
+{
+    int status, ret = SESH_ERR_FAILURE;
+    const char *sesh;
+    pid_t child, pid;
+    debug_decl(selinux_run_helper, SUDO_DEBUG_EDIT);
+
+    sesh = sudo_conf_sesh_path();
+    if (sesh == NULL) {
+	sudo_warnx("internal error: sesh path not set");
+	debug_return_int(-1);
+    }
+
+    child = sudo_debug_fork();
+    switch (child) {
+    case -1:
+	sudo_warn(U_("unable to fork"));
+	break;
+    case 0:
+	/* child runs sesh in new context */
+	if (selinux_setcon() == 0)
+	    execve(sesh, argv, envp);
+	_exit(SESH_ERR_FAILURE);
+    default:
+	/* parent waits */
+	do {
+	    pid = waitpid(child, &status, 0);
+	} while (pid == -1 && errno == EINTR);
+
+	ret = WIFSIGNALED(status) ? SESH_ERR_KILLED : WEXITSTATUS(status);
+    }
+
+    debug_return_int(ret);
+}
+
+static int
 selinux_edit_create_tfiles(struct command_details *command_details,
     struct tempfile *tf, char *files[], int nfiles)
 {
     char **sesh_args, **sesh_ap;
     int i, rc, sesh_nargs;
     struct stat sb;
-    struct command_details saved_command_details;
     debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT);
     
-    /* Prepare selinux stuff (setexeccon) */
-    if (selinux_setup(command_details->selinux_role,
-	command_details->selinux_type, NULL, -1) != 0)
-	debug_return_int(-1);
-
     if (nfiles < 1)
 	debug_return_int(0);
 
     /* Construct common args for sesh */
-    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
-    command_details->command = _PATH_SUDO_SESH;
-    command_details->flags |= CD_SUDOEDIT_COPY;
-    
     sesh_nargs = 4 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
@@ -753,6 +779,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	*sesh_ap++ = "-h";
     *sesh_ap++ = "0";
 
+    /* XXX - temp files should be created with user's context */
     for (i = 0; i < nfiles; i++) {
 	char *tfile, *ofile = files[i];
 	int tfd;
@@ -782,8 +809,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     *sesh_ap = NULL;
 
     /* Run sesh -e [-h] 0 <o1> <t1> ... <on> <tn> */
-    command_details->argv = sesh_args;
-    rc = run_command(command_details);
+    rc = selinux_run_helper(sesh_args, command_details->envp);
     switch (rc) {
     case SESH_SUCCESS:
 	break;
@@ -791,15 +817,12 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	sudo_fatalx(U_("sesh: internal error: odd number of paths"));
     case SESH_ERR_NO_FILES:
 	sudo_fatalx(U_("sesh: unable to create temporary files"));
+    case SESH_ERR_KILLED:
+	sudo_fatalx(U_("sesh: killed by a signal"));
     default:
 	sudo_fatalx(U_("sesh: unknown error %d"), rc);
     }
 
-    /* Restore saved command_details. */
-    command_details->command = saved_command_details.command;
-    command_details->flags = saved_command_details.flags;
-    command_details->argv = saved_command_details.argv;
-    
     /* Chown to user's UID so they can edit the temporary files. */
     for (i = 0; i < nfiles; i++) {
 	if (chown(tf[i].tfile, user_details.uid, user_details.gid) != 0) {
@@ -820,24 +843,14 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 {
     char **sesh_args, **sesh_ap;
     int i, rc, sesh_nargs, ret = 1;
-    struct command_details saved_command_details;
     struct timespec ts;
     struct stat sb;
     debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT);
     
-    /* Prepare selinux stuff (setexeccon) */
-    if (selinux_setup(command_details->selinux_role,
-	command_details->selinux_type, NULL, -1) != 0)
-	debug_return_int(1);
-
     if (nfiles < 1)
 	debug_return_int(0);
 
     /* Construct common args for sesh */
-    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
-    command_details->command = _PATH_SUDO_SESH;
-    command_details->flags |= CD_SUDOEDIT_COPY;
-    
     sesh_nargs = 3 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
@@ -875,31 +888,28 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 
     if (sesh_ap - sesh_args > 3) {
 	/* Run sesh -e 1 <t1> <o1> ... <tn> <on> */
-	command_details->argv = sesh_args;
-	rc = run_command(command_details);
+	rc = selinux_run_helper(sesh_args, command_details->envp);
 	switch (rc) {
 	case SESH_SUCCESS:
 	    ret = 0;
 	    break;
 	case SESH_ERR_NO_FILES:
 	    sudo_warnx(U_("unable to copy temporary files back to their original location"));
-	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
 	    break;
 	case SESH_ERR_SOME_FILES:
 	    sudo_warnx(U_("unable to copy some of the temporary files back to their original location"));
-	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
+	    break;
+	case SESH_ERR_KILLED:
+	    sudo_warnx(U_("sesh: killed by a signal"));
 	    break;
 	default:
 	    sudo_warnx(U_("sesh: unknown error %d"), rc);
 	    break;
 	}
+	if (ret != 0)
+	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
     }
     free(sesh_args);
-
-    /* Restore saved command_details. */
-    command_details->command = saved_command_details.command;
-    command_details->flags = saved_command_details.flags;
-    command_details->argv = saved_command_details.argv;
 
     debug_return_int(ret);
 }
@@ -952,6 +962,15 @@ sudo_edit(struct command_details *command_details)
 	goto cleanup;
     }
 
+#ifdef HAVE_SELINUX
+    /* Compute new SELinux security context. */
+    if (ISSET(command_details->flags, CD_RBAC_ENABLED)) {
+	if (selinux_setup(command_details->selinux_role,
+		command_details->selinux_type, NULL, -1, false) != 0)
+	    goto cleanup;
+    }
+#endif
+
     /* Copy editor files to temporaries. */
     tf = calloc(nfiles, sizeof(*tf));
     if (tf == NULL) {
@@ -987,6 +1006,7 @@ sudo_edit(struct command_details *command_details)
     /*
      * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
+     * XXX - should run editor with user's context
      */
     if (sudo_gettime_real(&times[0]) == -1) {
 	sudo_warn(U_("unable to read the clock"));

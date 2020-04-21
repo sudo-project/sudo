@@ -387,7 +387,7 @@ bad:
  */
 int
 selinux_setup(const char *role, const char *type, const char *ttyn,
-    int ptyfd)
+    int ptyfd, bool label_tty)
 {
     int ret = -1;
     debug_decl(selinux_setup, SUDO_DEBUG_SELINUX);
@@ -416,7 +416,7 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: new context %s", __func__,
 	se_state.new_context);
     
-    if (relabel_tty(ttyn, ptyfd) == -1) {
+    if (label_tty && relabel_tty(ttyn, ptyfd) == -1) {
 	sudo_warn(U_("unable to set tty context to %s"), se_state.new_context);
 	goto done;
     }
@@ -430,6 +430,28 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 
 done:
     debug_return_int(ret);
+}
+
+int
+selinux_setcon(void)
+{
+    debug_decl(selinux_setcon, SUDO_DEBUG_SELINUX);
+
+    if (setexeccon(se_state.new_context)) {
+	sudo_warn(U_("unable to set exec context to %s"), se_state.new_context);
+	if (se_state.enforcing)
+	    debug_return_int(-1);
+    }
+
+#ifdef HAVE_SETKEYCREATECON
+    if (setkeycreatecon(se_state.new_context)) {
+	sudo_warn(U_("unable to set key creation context to %s"), se_state.new_context);
+	if (se_state.enforcing)
+	    debug_return_int(-1);
+    }
+#endif /* HAVE_SETKEYCREATECON */
+
+    debug_return_int(0);
 }
 
 void
@@ -448,19 +470,9 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	debug_return;
     }
 
-    if (setexeccon(se_state.new_context)) {
-	sudo_warn(U_("unable to set exec context to %s"), se_state.new_context);
-	if (se_state.enforcing)
-	    debug_return;
-    }
-
-#ifdef HAVE_SETKEYCREATECON
-    if (setkeycreatecon(se_state.new_context)) {
-	sudo_warn(U_("unable to set key creation context to %s"), se_state.new_context);
-	if (se_state.enforcing)
-	    debug_return;
-    }
-#endif /* HAVE_SETKEYCREATECON */
+    /* Set SELinux exec and keycreate contexts. */
+    if (selinux_setcon() == -1)
+	debug_return;
 
     /*
      * Build new argv with sesh as argv[0].

@@ -606,7 +606,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
         if (selinux_setup(details->selinux_role, details->selinux_type,
-            details->tty, io_fds[SFD_SLAVE]) == -1)
+            details->tty, io_fds[SFD_SLAVE], true) == -1)
             goto bad;
     }
 #endif

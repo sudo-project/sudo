@@ -130,12 +130,11 @@ struct user_details {
 #define CD_USE_PTY		0x001000
 #define CD_SET_UTMP		0x002000
 #define CD_EXEC_BG		0x004000
-#define CD_SUDOEDIT_COPY	0x008000
-#define CD_SUDOEDIT_FOLLOW	0x010000
-#define CD_SUDOEDIT_CHECKDIR	0x020000
-#define CD_SET_GROUPS		0x040000
-#define CD_LOGIN_SHELL		0x080000
-#define CD_OVERRIDE_UMASK	0x100000
+#define CD_SUDOEDIT_FOLLOW	0x008000
+#define CD_SUDOEDIT_CHECKDIR	0x010000
+#define CD_SET_GROUPS		0x020000
+#define CD_LOGIN_SHELL		0x040000
+#define CD_OVERRIDE_UMASK	0x080000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -242,7 +241,8 @@ int os_init_openbsd(int argc, char *argv[], char *envp[]);
 /* selinux.c */
 int selinux_restore_tty(void);
 int selinux_setup(const char *role, const char *type, const char *ttyn,
-    int ttyfd);
+    int ttyfd, bool label_tty);
+int selinux_setcon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
     char *envp[], bool noexec);
 
