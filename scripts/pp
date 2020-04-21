@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2020 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20200416"
+pp_revision="20200421"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -8920,9 +8920,7 @@ pp_systemd_service_install_common () {
             if test -x "$systemctl_cmd" && test -d "$systemd_system_conf_dir/$systemd_target_wants"; then
                 # If our service file still exists (upgrade) remove the link/file and systemctl
                 # will recreate it if/when we enable the $svc service.
-                if test -e "$systemd_system_conf_dir/$systemd_target_wants/$svc.service" ; then
-                    rm -f "$systemd_system_conf_dir/$systemd_target_wants/$svc.service"
-                fi
+                rm -f "$systemd_system_conf_dir/$systemd_target_wants/$svc.service"
 
                 # Copy the $svc.service file to the correct systemd_system_unit_dir location
                 if [ "x$systemd_service_dir" != "x$systemd_system_unit_dir" ]; then
@@ -9030,7 +9028,7 @@ pp_systemd_service_remove_common () {
             fi
 
             # Remove the systemd unit service file
-            if test -e "$systemd_system_unit_dir/$svc.service"; then
+            if [ "x$systemd_service_dir" != "x$systemd_system_unit_dir" ]; then
                 rm -f "$systemd_system_unit_dir/$svc.service"
             fi
 
