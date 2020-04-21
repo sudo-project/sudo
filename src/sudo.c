@@ -971,10 +971,6 @@ run_command(struct command_details *details)
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
 	status = cstat.val;
-#ifdef HAVE_SELINUX
-	if (ISSET(details->flags, CD_SUDOEDIT_COPY))
-	    break;
-#endif
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "calling policy close with wait status %d", status);
 	policy_close(&policy_plugin, status, 0);
