@@ -524,6 +524,17 @@ client_closure_free(struct client_closure *closure)
     struct connection_buffer *buf;
     debug_decl(client_closure_free, SUDOERS_DEBUG_UTIL);
 
+#if defined(HAVE_OPENSSL)
+    if (closure->tls) {
+	/* Shut down the TLS connection cleanly and free SSL data. */
+	if (closure->ssl != NULL) {
+	    SSL_shutdown(closure->ssl);
+	    SSL_free(closure->ssl);
+	}
+	SSL_CTX_free(closure->ssl_ctx);
+    }
+#endif
+
     if (closure->sock != -1) {
 	close(closure->sock);
 	closure->sock = -1;
