@@ -42,7 +42,6 @@
 #include <grp.h>
 #include <pwd.h>
 #include <signal.h>
-#include <errno.h>
 #include <fcntl.h>
 
 #include "sudo.h"
@@ -532,8 +531,6 @@ sudo_edit_create_tfiles(struct command_details *command_details,
     struct tempfile *tf, char *files[], int nfiles)
 {
     int i, j, tfd, ofd, rc;
-    char buf[BUFSIZ];
-    ssize_t nwritten, nread;
     struct timespec times[2];
     struct stat sb;
     debug_decl(sudo_edit_create_tfiles, SUDO_DEBUG_EDIT);
@@ -610,18 +607,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    debug_return_int(-1);
 	}
 	if (ofd != -1) {
-	    while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
-		if ((nwritten = write(tfd, buf, nread)) != nread) {
-		    if (nwritten == -1)
-			sudo_warn("%s", tf[j].tfile);
-		    else
-			sudo_warnx(U_("%s: short write"), tf[j].tfile);
-		    break;
-		}
-	    }
-	    if (nread != 0) {
-		if (nread < 0)
-		    sudo_warn("%s", files[i]);
+	    if (sudo_copy_file(tf[j].ofile, ofd, tf[j].osize, tf[j].tfile, tfd, -1) == -1) {
 		close(ofd);
 		close(tfd);
 		debug_return_int(-1);
@@ -651,51 +637,6 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 }
 
 /*
- * Extend the given fd to the specified size in bytes.
- * We do this to allocate disk space up-front before overwriting
- * the original file with the temporary.  Otherwise, we could
- * we run out of disk space after truncating the original file.
- */
-static int
-sudo_edit_extend_file(int fd, off_t new_size)
-{
-    off_t old_size, size;
-    ssize_t nwritten;
-    char zeroes[1024] = { '\0' };
-    debug_decl(sudo_edit_extend_file, SUDO_DEBUG_EDIT);
-
-    if ((old_size = lseek(fd, 0, SEEK_END)) == -1) {
-	sudo_warn("lseek");
-	debug_return_int(-1);
-    }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: extending file from %lld to %lld",
-	__func__, (long long)old_size, (long long)new_size);
-
-    for (size = old_size; size < new_size; size += nwritten) {
-	size_t len = new_size - size;
-	if (len > sizeof(zeroes))
-	    len = sizeof(zeroes);
-	nwritten = write(fd, zeroes, len);
-	if (nwritten == -1) {
-	    int serrno = errno;
-	    if (ftruncate(fd, old_size) == -1) {
-		sudo_debug_printf(
-		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "unable to truncate to %lld", (long long)old_size);
-	    }
-	    errno = serrno;
-	    debug_return_int(-1);
-	}
-    }
-    if (lseek(fd, 0, SEEK_SET) == -1) {
-	sudo_warn("lseek");
-	debug_return_int(-1);
-    }
-
-    debug_return_int(0);
-}
-
-/*
  * Copy the temporary files specified in tf to the originals.
  * Returns the number of copy errors or 0 if completely successful.
  */
@@ -703,9 +644,7 @@ static int
 sudo_edit_copy_tfiles(struct command_details *command_details,
     struct tempfile *tf, int nfiles, struct timespec *times)
 {
-    int i, tfd, ofd, rc, errors = 0;
-    char buf[BUFSIZ];
-    ssize_t nwritten, nread;
+    int i, tfd, ofd, errors = 0;
     struct timespec ts;
     struct stat sb;
     mode_t oldmask;
@@ -713,7 +652,7 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 
     /* Copy contents of temp files to real ones. */
     for (i = 0; i < nfiles; i++) {
-	rc = -1;
+	int rc = -1;
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", (unsigned int)user_details.uid);
 	if (seteuid(user_details.uid) != 0)
@@ -726,8 +665,8 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	    "seteuid(%u)", ROOT_UID);
 	if (seteuid(ROOT_UID) != 0)
 	    sudo_fatal("seteuid(ROOT_UID)");
-	if (rc || !S_ISREG(sb.st_mode)) {
-	    if (rc)
+	if (rc == -1 || !S_ISREG(sb.st_mode)) {
+	    if (rc == -1)
 		sudo_warn("%s", tf[i].tfile);
 	    else
 		sudo_warnx(U_("%s: not a regular file"), tf[i].tfile);
@@ -758,46 +697,19 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	umask(oldmask);
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
-	if (ofd == -1)
-	    goto write_error;
-	/* Extend the file to the new size if larger before copying. */
-	if (tf[i].osize > 0 && sb.st_size > tf[i].osize) {
-	    if (sudo_edit_extend_file(ofd, sb.st_size) == -1)
-		goto write_error;
-	}
-	/* Overwrite the old file with the new contents. */
-	while ((nread = read(tfd, buf, sizeof(buf))) > 0) {
-	    ssize_t off = 0;
-	    do {
-		nwritten = write(ofd, buf + off, nread - off);
-		if (nwritten == -1)
-		    goto write_error;
-		off += nwritten;
-	    } while (nread > off);
-	}
-	if (nread == 0) {
-	    /* success, read to EOF */
-	    if (tf[i].osize > 0 && sb.st_size < tf[i].osize) {
-		/* We don't open with O_TRUNC so must truncate manually. */
-		if (ftruncate(ofd, sb.st_size)  == -1) {
-		    sudo_debug_printf(
-			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-			"unable to truncate %s to %lld", tf[i].ofile,
-			(long long)sb.st_size);
-		    goto write_error;
-		}
-	    }
-	    unlink(tf[i].tfile);
-	} else if (nread < 0) {
-	    sudo_warn(U_("unable to read temporary file"));
-	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
-	    errors++;
-	} else {
-write_error:
+	if (ofd == -1) {
 	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
+	    goto bad;
+	}
+
+	/* Overwrite the old file with the new contents. */
+	if (sudo_copy_file(tf[i].tfile, tfd, sb.st_size, tf[i].ofile, ofd,
+	    tf[i].osize) == -1) {
+bad:
 	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
 	    errors++;
 	}
+
 	if (ofd != -1)
 	    close(ofd);
 	close(tfd);
