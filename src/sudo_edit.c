@@ -1141,8 +1141,10 @@ sudo_edit(struct command_details *command_details)
     else
 #endif
 	errors = sudo_edit_copy_tfiles(command_details, tf, nfiles, times);
-    if (errors)
-	goto cleanup;
+    if (errors) {
+	/* Preserve the edited temporary files. */
+	rc = W_EXITCODE(1, 0);
+    }
 
     for (i = 0; i < nfiles; i++)
 	free(tf[i].tfile);
