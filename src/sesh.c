@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2008, 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2008, 2010-2018, 2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -136,10 +136,8 @@ sesh_sudoedit(int argc, char *argv[])
 {
     int i, oflags_dst, post, ret = SESH_ERR_FAILURE;
     int fd_src = -1, fd_dst = -1, follow = 0;
-    ssize_t nread, nwritten;
     struct stat sb;
     struct timespec times[2];
-    char buf[BUFSIZ];
     debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT)
 
     /* Check for -h flag (don't follow links). */
@@ -182,7 +180,7 @@ sesh_sudoedit(int argc, char *argv[])
      * so that it's ensured that the temporary files are
      * created by us and that we are not opening any symlinks.
      */
-    oflags_dst = O_WRONLY|O_TRUNC|O_CREAT|(post ? follow : O_EXCL);
+    oflags_dst = O_WRONLY|O_CREAT|(post ? follow : O_EXCL);
     for (i = 0; i < argc - 1; i += 2) {
 	const char *path_src = argv[i];
 	const char *path_dst = argv[i + 1];
@@ -214,14 +212,29 @@ sesh_sudoedit(int argc, char *argv[])
 	}
 
 	if (fd_src != -1) {
-	    while ((nread = read(fd_src, buf, sizeof(buf))) > 0) {
-		if ((nwritten = write(fd_dst, buf, nread)) != nread) {
-		    sudo_warn("%s", path_src);
-		    if (post) {
-			ret = SESH_ERR_SOME_FILES;
-			goto nocleanup;
-		    } else
-			goto cleanup_0;
+	    off_t len_src = -1;
+	    off_t len_dst = -1;
+
+	    if (post) {
+		if (fstat(fd_src, &sb) != 0) {
+		    ret = SESH_ERR_SOME_FILES;
+		    goto nocleanup;
+		}
+		len_src = sb.st_size;
+		if (fstat(fd_dst, &sb) != 0) {
+		    ret = SESH_ERR_SOME_FILES;
+		    goto nocleanup;
+		}
+		len_dst = sb.st_size;
+	    }
+
+	    if (sudo_copy_file(path_src, fd_src, len_src, path_dst, fd_dst,
+		    len_dst) == -1) {
+		if (post) {
+		    ret = SESH_ERR_SOME_FILES;
+		    goto nocleanup;
+		} else {
+		    goto cleanup_0;
 		}
 	    }
 	}

@@ -84,6 +84,9 @@
 struct command_details;
 struct command_status;
 
+/* copy_file.c */
+int sudo_copy_file(const char *src, int src_fd, off_t src_len, const char *dst, int dst_fd, off_t dst_len);
+
 /* exec.c */
 void exec_cmnd(struct command_details *details, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);

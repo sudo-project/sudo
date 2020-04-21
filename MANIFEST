@@ -772,6 +772,7 @@ po/zh_TW.po
 pp
 src/Makefile.in
 src/conversation.c
+src/copy_file.c
 src/env_hooks.c
 src/exec.c
 src/exec_common.c
