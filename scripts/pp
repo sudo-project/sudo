@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2020 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20200421"
+pp_revision="20200422"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -7340,7 +7340,8 @@ pp_backend_macos_flat () {
 
     # build the flat package layout
     pkgdir=$pp_wrkdir/pkg
-    bundledir=$pp_wrkdir/pkg/$name-${version}.pkg
+    pkgfile=$name-$version.pkg
+    bundledir=$pp_wrkdir/pkg/$pkgfile
     Resources=$pkgdir/Resources
     lprojdir=$Resources/en.lproj
     mkdir $pkgdir $bundledir $Resources $lprojdir ||
@@ -7389,7 +7390,7 @@ pp_backend_macos_flat () {
 	    <choice id="choice0" title="$name $version">
 	        <pkg-ref id="${pp_macos_bundle_id}"/>
 	    </choice>
-	    <pkg-ref id="${pp_macos_bundle_id}" installKBytes="$size" version="$version" auth="Root">#$name.pkg</pkg-ref>
+	    <pkg-ref id="${pp_macos_bundle_id}" installKBytes="$size" version="$version" auth="Root">#$pkgfile</pkg-ref>
 	</installer-script>
 .
 
@@ -7504,7 +7505,7 @@ pp_backend_macos_flat () {
         "10.5"*) ;;
 	*)	 xar_flags="$xar_flags --distribution";;
     esac
-    (cd $pkgdir && /usr/bin/xar $xar_flags -cf "../$name-$version.pkg" *)
+    (cd $pkgdir && /usr/bin/xar $xar_flags -cf "../$pkgfile" *)
 
     echo "version=$version" > $name.uninstall
 }
