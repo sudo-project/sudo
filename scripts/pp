@@ -4079,8 +4079,8 @@ pp_deb_handle_services() {
             pp_load_service_vars $svc
 
             # Create init script and systemd service file (unless they exists)
-            pp_deb_service_make_init_script $svc ||
-		pp_error "could not create init script for service $svc"
+            pp_deb_service_make_service_files $svc ||
+		pp_error "could not create service files for $svc"
 
             #-- append %post code to install the svc
 	    test x"yes" = x"$enable" &&
@@ -4511,7 +4511,7 @@ pp_backend_deb_init_svc_vars () {
     stop_priority=50            #-- stop_priority = 100 - start_priority
 }
 
-pp_deb_service_make_init_script () {
+pp_deb_service_make_service_files () {
     local svc=${svc_init_filename:-$1}
     local script="${svc_init_filepath:-"/etc/init.d"}/$svc"
     local out=$pp_destdir$script
@@ -5883,8 +5883,8 @@ pp_backend_rpm () {
             for svc in $pp_services; do
                 pp_load_service_vars $svc
 
-                pp_rpm_service_make_init_script $svc ||
-		    pp_error "could not create init script for service $svc"
+                pp_rpm_service_make_service_files $svc ||
+		    pp_error "could not create service files for $svc"
 
                 #-- append %post code to install the svc
                 pp_rpm_service_install $svc >> $pp_wrkdir/%post.run
@@ -6412,7 +6412,7 @@ pp_rpm_service_group_make_init_script () {
     chmod 755 $out
 }
 
-pp_rpm_service_make_init_script () {
+pp_rpm_service_make_service_files () {
     local svc=${svc_init_filename:-$1}
     local script="${svc_init_filepath:-"/etc/init.d"}/$svc"
     local out=$pp_destdir$script
@@ -8808,7 +8808,7 @@ pp_backend_bsd_function() {
 pp_systemd_make_service_file() {
     local svc f
 
-    if [ "${pp_systemd_disabled}:-false" = "true" ]; then
+    if [ "${pp_systemd_disabled:-false}" = "true" ]; then
 	return
     fi
 
@@ -8885,7 +8885,7 @@ pp_systemd_service_init_common () {
 }
 
 pp_systemd_service_install_common () {
-    if [ "${pp_systemd_disabled}:-false" = "true" ]; then
+    if [ "${pp_systemd_disabled:-false}" = "true" ]; then
 	cat<<'.'
 
         # systemd support disabled
@@ -8970,7 +8970,7 @@ pp_systemd_service_install_common () {
 }
 
 pp_systemd_service_remove_common () {
-    if [ "${pp_systemd_disabled}:-false" = "true" ]; then
+    if [ "${pp_systemd_disabled:-false}" = "true" ]; then
 	cat<<'.'
 
         # systemd support disabled

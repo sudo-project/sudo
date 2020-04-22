@@ -224,10 +224,10 @@ This makes it possible to have all sudo I/O logs on a central server."
 	pp_macos_service_id=ws.sudo.sudo_logsrvd
 %endif
 %if [rpm,deb]
-	# Only include systemd support if we find systemctl on the build
-	# machine.  This assumes that we are building on the same distro
-	# that the package will be installed on.
-	if command -v systemctl >/dev/null; then
+	# Only include systemd support if it exists on the build machine.
+	# This assumes that we are building on the same distro that the
+	# package will be installed on (which is the case for sudo).
+	if test -d /etc/systemd; then
 	    for d in `pkg-config systemd --variable=systemdsystemunitdir 2>/dev/null` /lib/systemd/system /usr/lib/systemd/system; do
 		if test -d "$d"; then
 		    break
