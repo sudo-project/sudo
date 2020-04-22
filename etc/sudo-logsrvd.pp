@@ -134,7 +134,6 @@ This makes it possible to have all sudo I/O logs on a central server."
 
 %if [macos]
 	pp_macos_bundle_id=ws.sudo.pkg.sudo
-	pp_macos_default_service_id_prefix=ws.sudo.
 	pp_macos_pkg_license=${pp_destdir}$docdir/LICENSE
 	pp_macos_pkg_readme=${pp_wrkdir}/ReadMe.txt
 	pp_macos_pkg_type=flat
@@ -220,6 +219,9 @@ This makes it possible to have all sudo I/O logs on a central server."
 %else
 	cmd=${sbindir}/sudo_logsrvd
 	pidfile=${rundir}/sudo_logsrvd.pid
+%endif
+%if [macos]
+	pp_macos_service_id=ws.sudo.sudo_logsrvd
 %endif
 %if [rpm,deb]
 	# Only include systemd support if we find systemctl on the build
