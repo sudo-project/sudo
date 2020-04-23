@@ -105,7 +105,7 @@ usage(bool fatal)
 #else
     fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] "
 #endif
-	"[-r restart-point] /path/to/iolog\n", getprogname());
+	"[-r restart-point] [-t number] /path/to/iolog\n", getprogname());
     exit(EXIT_FAILURE);
 }
 
@@ -1455,7 +1455,7 @@ parse_timespec(struct timespec *ts, char *strval)
 #if defined(HAVE_OPENSSL)
 static const char short_opts[] = "h:i:p:r:t:b:c:k:V";
 #else
-static const char short_opts[] = "h:i:p:r:V";
+static const char short_opts[] = "h:i:p:r:t:V";
 #endif
 static struct option long_opts[] = {
     { "help",		no_argument,		NULL,	1 },
@@ -1463,7 +1463,7 @@ static struct option long_opts[] = {
     { "iolog-id",	required_argument,	NULL,	'i' },
     { "port",		required_argument,	NULL,	'p' },
     { "restart",	required_argument,	NULL,	'r' },
-    { "test",	    optional_argument,	NULL,	't' },
+    { "test",	    	optional_argument,	NULL,	't' },
 #if defined(HAVE_OPENSSL)
     { "ca-bundle",	required_argument,	NULL,	'b' },
     { "cert",		required_argument,	NULL,	'c' },
