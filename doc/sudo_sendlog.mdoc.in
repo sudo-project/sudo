@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 3, 2019
+.Dd April 23, 2020
 .Dt SUDO_SENDLOG @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -24,10 +24,14 @@
 .Sh SYNOPSIS
 .Nm sudo_sendlog
 .Op Fl V
+.Op Fl b Ar ca_bundle
+.Op Fl c Ar cert_file
 .Op Fl h Ar host
 .Op Fl i Ar iolog-id
+.Op Fl k Ar key_file
 .Op Fl p Ar port
 .Op Fl r Ar restart-point
+.Op Fl t Ar number
 .Ar path
 .Sh DESCRIPTION
 .Nm
@@ -41,6 +45,19 @@ for central storage.
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
+.It Fl b , -ca-bundle
+The path to a certificate authority bundle file, in PEM format,
+to use instead of the system's default certificate authority database
+when authenticating the log server.
+The default is to use the system's default certificate authority database.
+.It Fl c , -cert
+The path to the client's certificate file, in PEM format.
+This setting is required when the connection to the remote log server
+is secured with TLS.
+.It Fl k , -key
+The path to the client's private key file, in PEM format.
+This setting is required when the connection to the remote log server
+is secured with TLS.
 .It Fl -help
 Display a short help message to the standard output and exit.
 .It Fl h , -host
@@ -75,6 +92,12 @@ and is usually the last commit point received from the server.
 The
 .Fl i
 option must also be specified when restarting a transfer.
+.It Fl t , -test
+Open
+.Ar number
+simultaneous connections to the log server and send the specified
+I/O log file on each one.
+This option is useful for performance testing.
 .It Fl V , -version
 Print the
 .Nm

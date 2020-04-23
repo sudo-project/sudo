@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_SENDLOG" "@mansectsu@" "October 3, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_SENDLOG" "@mansectsu@" "April 23, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -26,10 +26,14 @@
 .HP 13n
 \fBsudo_sendlog\fR
 [\fB\-V\fR]
+[\fB\-b\fR\ \fIca_bundle\fR]
+[\fB\-c\fR\ \fIcert_file\fR]
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-i\fR\ \fIiolog-id\fR]
+[\fB\-k\fR\ \fIkey_file\fR]
 [\fB\-p\fR\ \fIport\fR]
 [\fB\-r\fR\ \fIrestart-point\fR]
+[\fB\-t\fR\ \fInumber\fR]
 \fIpath\fR
 .SH "DESCRIPTION"
 \fBsudo_sendlog\fR
@@ -42,6 +46,23 @@ sudo_logsrvd(@mansectsu@)
 for central storage.
 .PP
 The options are as follows:
+.TP 12n
+\fB\-b\fR, \fB\--ca-bundle\fR
+The path to a certificate authority bundle file, in PEM format,
+to use instead of the system's default certificate authority database
+when authenticating the log server.
+The default is to use the system's default certificate authority database.
+.TP 12n
+\fB\-c\fR, \fB\--cert\fR
+The path to the client's certificate file, in PEM format.
+This setting is required when the connection to the remote log server
+is secured with TLS.
+.TP 12n
+\fB\-k\fR, \fB\--key\fR
+.br
+The path to the client's private key file, in PEM format.
+This setting is required when the connection to the remote log server
+is secured with TLS.
 .TP 12n
 \fB\--help\fR
 Display a short help message to the standard output and exit.
@@ -81,6 +102,13 @@ and is usually the last commit point received from the server.
 The
 \fB\-i\fR
 option must also be specified when restarting a transfer.
+.TP 12n
+\fB\-t\fR, \fB\--test\fR
+Open
+\fInumber\fR
+simultaneous connections to the log server and send the specified
+I/O log file on each one.
+This option is useful for performance testing.
 .TP 12n
 \fB\-V\fR, \fB\--version\fR
 Print the
