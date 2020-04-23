@@ -199,7 +199,7 @@ size_t foo__bar__baz_bah__pack_to_buffer
 #include <assert.h>
 #include <limits.h>
 #include <stddef.h>
-#include <stdint.h>
+#include <inttypes.h>	/* stdint.h not present on older systems */
 
 #ifdef __cplusplus
 # define PROTOBUF_C__BEGIN_DECLS	extern "C" {
