@@ -1423,36 +1423,32 @@ bad:
  * seconds[,nanoseconds]
  */
 static bool
-parse_timespec(struct timespec *ts, const char *strval)
+parse_timespec(struct timespec *ts, char *strval)
 {
-    long long tv_sec;
-    long tv_nsec;
-    char *ep;
+    const char *errstr;
+    char *nsecstr;
     debug_decl(parse_timespec, SUDO_DEBUG_UTIL);
 
-    errno = 0;
-    tv_sec = strtoll(strval, &ep, 10);
-    if (strval == ep || (*ep != ',' && *ep != '\0'))
-	debug_return_bool(false);
-#if TIME_T_MAX != LLONG_MAX
-    if (tv_sec > TIME_T_MAX)
-	debug_return_bool(false);
-#endif
-    if (tv_sec < 0 || (errno == ERANGE && tv_sec == LLONG_MAX))
-	debug_return_bool(false);
-    strval = ep + 1;
+    if ((nsecstr = strchr(strval, ',')) != NULL)
+	*nsecstr++ = '\0';
 
-    errno = 0;
-    tv_nsec = strtol(strval, &ep, 10);
-    if (strval == ep || *ep != '\0')
+    ts->tv_nsec = 0;
+    ts->tv_sec = sudo_strtonum(strval, 0, TIME_T_MAX, &errstr);
+    if (errstr != NULL) {
+	sudo_warnx(U_("%s: %s"), strval, U_(errstr));
 	debug_return_bool(false);
-    if (tv_nsec < 0 || (errno == ERANGE && tv_nsec == LONG_MAX))
-	debug_return_bool(false);
+    }
+
+    if (nsecstr != NULL) {
+	ts->tv_nsec = sudo_strtonum(nsecstr, 0, LONG_MAX, &errstr);
+	if (errstr != NULL) {
+	    sudo_warnx(U_("%s: %s"), nsecstr, U_(errstr));
+	    debug_return_bool(false);
+	}
+    }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: parsed timespec [%lld, %ld]",
-	__func__, tv_sec, tv_nsec);
-    ts->tv_sec = (time_t)tv_sec;
-    ts->tv_nsec = tv_nsec;
+	__func__, (long long)ts->tv_sec, ts->tv_nsec);
     debug_return_bool(true);
 }
 
@@ -1491,6 +1487,7 @@ main(int argc, char *argv[])
     struct timespec elapsed = { 0, 0 };
     const char *iolog_id = NULL;
     const char *open_mode = "r";
+    const char *errstr;
     int ch, sock, iolog_dir_fd;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -1533,11 +1530,14 @@ main(int argc, char *argv[])
 		goto bad;
 	    open_mode = "r+";
 	    break;
-    case 't':
-        if (sscanf(optarg, "%d", &nr_of_conns) != 1)
-            goto bad;
-        testrun = true;
-        break;
+	case 't':
+	    nr_of_conns = sudo_strtonum(optarg, 1, INT_MAX, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), optarg, U_(errstr));
+		goto bad;
+	    }
+	    testrun = true;
+	    break;
 	case 1:
 	    help();
 	    break;
