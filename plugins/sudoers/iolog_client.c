@@ -392,8 +392,6 @@ tls_init(struct client_closure *closure, bool verify, bool cert_required)
     debug_return_bool(true);
 
 bad:
-    SSL_free(closure->ssl);
-    SSL_CTX_free(closure->ssl_ctx);
     debug_return_bool(false);
 }
 
