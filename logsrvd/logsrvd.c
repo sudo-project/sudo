@@ -1091,6 +1091,7 @@ static bool
 init_tls_server_context(void)
 {
     const SSL_METHOD *method;
+    FILE *dhparam_file = NULL;
     SSL_CTX *ctx = NULL;
     struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
     const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
@@ -1186,7 +1187,8 @@ init_tls_server_context(void)
     }
 
     /* try to load and set diffie-hellman parameters  */
-    FILE *dhparam_file = fopen(tls_config->dhparams_path, "r");
+    if (tls_config->dhparams_path != NULL)
+	dhparam_file = fopen(tls_config->dhparams_path, "r");
     if (dhparam_file != NULL) {
         DH* dhparams;
         if ((dhparams = PEM_read_DHparams(dhparam_file, NULL, NULL, NULL)) != NULL) {
