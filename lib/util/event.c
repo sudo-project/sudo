@@ -454,7 +454,7 @@ sudo_ev_add_signal(struct sudo_event_base *base, struct sudo_event *ev,
 
 int
 sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
-    struct timeval *timo, bool tohead)
+    const struct timeval *timo, bool tohead)
 {
     struct timespec tsbuf, *ts = NULL;
 
@@ -468,7 +468,7 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
 
 int
 sudo_ev_add_v2(struct sudo_event_base *base, struct sudo_event *ev,
-    struct timespec *timo, bool tohead)
+    const struct timespec *timo, bool tohead)
 {
     debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT);
 

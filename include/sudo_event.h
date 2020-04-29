@@ -137,8 +137,8 @@ __dso_public int sudo_ev_set_v1(struct sudo_event *ev, int fd, short events, sud
 #define sudo_ev_set(_a, _b, _c, _d, _e) sudo_ev_set_v1((_a), (_b), (_c), (_d), (_e))
 
 /* Add an event, returns 0 on success, -1 on error */
-__dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, struct timeval *timo, bool tohead);
-__dso_public int sudo_ev_add_v2(struct sudo_event_base *head, struct sudo_event *ev, struct timespec *timo, bool tohead);
+__dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, const struct timeval *timo, bool tohead);
+__dso_public int sudo_ev_add_v2(struct sudo_event_base *head, struct sudo_event *ev, const struct timespec *timo, bool tohead);
 #define sudo_ev_add(_a, _b, _c, _d) sudo_ev_add_v2((_a), (_b), (_c), (_d))
 
 /* Delete an event, returns 0 on success, -1 on error */
