@@ -1475,7 +1475,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out writiing to server",
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timed out writing to server",
 	    __func__);
 	goto bad;
     }

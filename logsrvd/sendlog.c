@@ -1239,8 +1239,7 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "Reading from server timed out");
+        sudo_warnx(U_("timeout reading from server"));
         goto bad;
     }
 
@@ -1330,8 +1329,7 @@ server_msg_cb(int fd, int what, void *v)
     buf->off = 0;
     debug_return;
 bad:
-    close(fd);
-    client_closure_free(closure);
+    sudo_ev_del(closure->evbase, closure->read_ev);
     debug_return;
 }
 
@@ -1359,8 +1357,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "Writing to server timed out");
+        sudo_warnx(U_("timeout writing to server"));
         goto bad;
     }
 
@@ -1413,8 +1410,7 @@ client_msg_cb(int fd, int what, void *v)
     debug_return;
 
 bad:
-    close(fd);
-    client_closure_free(closure);
+    sudo_ev_del(closure->evbase, closure->read_ev);
     debug_return;
 }
 
@@ -1488,7 +1484,7 @@ main(int argc, char *argv[])
     const char *iolog_id = NULL;
     const char *open_mode = "r";
     const char *errstr;
-    int ch, sock, iolog_dir_fd;
+    int ch, sock, iolog_dir_fd, finished;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -1631,22 +1627,27 @@ main(int argc, char *argv[])
     sudo_gettime_real(&t_end);
     sudo_timespecsub(&t_end, &t_start, &t_result);
 
-    TAILQ_FOREACH(closure, &connections, entries) {
-        if (closure->state != FINISHED) {
-        sudo_warnx(U_("exited prematurely with state %d"), closure->state);
-        sudo_warnx(U_("elapsed time sent to server [%lld, %ld]"),
-            (long long)closure->elapsed.tv_sec, closure->elapsed.tv_nsec);
-        sudo_warnx(U_("commit point received from server [%lld, %ld]"),
-            (long long)closure->committed.tv_sec, closure->committed.tv_nsec);
-        goto bad;
+    finished = 0;
+    while ((closure = TAILQ_FIRST(&connections)) != NULL) {
+        if (closure->state == FINISHED) {
+	    finished++;
+	} else {
+            sudo_warnx(U_("exited prematurely with state %d"), closure->state);
+            sudo_warnx(U_("elapsed time sent to server [%lld, %ld]"),
+                (long long)closure->elapsed.tv_sec, closure->elapsed.tv_nsec);
+            sudo_warnx(U_("commit point received from server [%lld, %ld]"),
+                (long long)closure->committed.tv_sec, closure->committed.tv_nsec);
         }
+        client_closure_free(closure);
     }
 
-    printf("I/O log%s transmitted successfully in %lld.%.9ld seconds\n",
-        nr_of_conns > 1 ? "s":"",
-        (long long)t_result.tv_sec, t_result.tv_nsec);
-        
-    debug_return_int(EXIT_SUCCESS);
+    if (finished != 0) {
+        printf("%d I/O log%s transmitted successfully in %lld.%.9ld seconds\n",
+	    finished, nr_of_conns > 1 ? "s" : "",
+            (long long)t_result.tv_sec, t_result.tv_nsec);
+        debug_return_int(EXIT_SUCCESS);
+    }
+
 bad:
     debug_return_int(EXIT_FAILURE);
 }
