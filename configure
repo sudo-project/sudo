@@ -19465,9 +19465,15 @@ fi
 
     if test -z "$PYTHON_LIBS"; then :
 
+      # Newer versions of python3-config need --embed to include libpython
+      if $PYTHON_CONFIG 2>&1 | grep embed >/dev/null; then
+        PY_EMBED=--embed
+      else
+        PY_EMBED=
+      fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking python linker flags" >&5
 $as_echo_n "checking python linker flags... " >&6; }
-      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags`
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED`
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON_LIBS" >&5
 $as_echo "$PYTHON_LIBS" >&6; }
 

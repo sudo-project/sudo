@@ -2600,8 +2600,14 @@ if test ${USE_PYTHON-'no'} = "yes"; then
     ])
 
     AS_IF([test -z "$PYTHON_LIBS"], [
+      # Newer versions of python3-config need --embed to include libpython
+      if $PYTHON_CONFIG 2>&1 | grep embed >/dev/null; then
+        PY_EMBED=--embed
+      else
+        PY_EMBED=
+      fi
       AC_MSG_CHECKING([python linker flags])
-      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags`
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED`
       AC_MSG_RESULT([$PYTHON_LIBS])
     ])
 
