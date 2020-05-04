@@ -661,7 +661,7 @@ rescan:
 	nready = sudo_ev_scan_impl(base, flags);
 	switch (nready) {
 	case -1:
-	    if (errno == ENOMEM)
+	    if (errno == ENOMEM || errno == EAGAIN)
 		continue;
 	    if (errno == EINTR) {
 		/* Interrupted by signal, check for sigevents. */

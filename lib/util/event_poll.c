@@ -211,7 +211,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	/* Error: EINTR (signal) or EINVAL (nfds > RLIMIT_NOFILE) */
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "sudo_ev_poll");
-	debug_return_int(-1);
+	break;
     case 0:
 	/* Front end will activate timeout events. */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timeout", __func__);

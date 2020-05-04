@@ -234,7 +234,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
     switch (nready) {
     case -1:
 	/* Error or interrupted by signal. */
-	debug_return_int(-1);
+	break;
     case 0:
 	/* Front end will activate timeout events. */
 	break;
