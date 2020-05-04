@@ -208,8 +208,8 @@ __dso_public int sudo_getgrouplist2_v1(const char *name, gid_t basegid, GETGROUP
 #define sudo_getgrouplist2(_a, _b, _c, _d) sudo_getgrouplist2_v1((_a), (_b), (_c), (_d))
 
 /* host_port.c */
-__dso_public bool sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport);
-#define sudo_parse_host_port(_a, _b, _c, _d) sudo_parse_host_port_v1((_a), (_b), (_c), (_d))
+__dso_public bool sudo_parse_host_port_v1(char *str, char **hostp, char **portp, bool *tlsp, char *defport, char *defport_tls);
+#define sudo_parse_host_port(_a, _b, _c, _d, _e, _f) sudo_parse_host_port_v1((_a), (_b), (_c), (_d), (_e), (_f))
 
 /* key_val.c */
 __dso_public char *sudo_new_key_val_v1(const char *key, const char *value);

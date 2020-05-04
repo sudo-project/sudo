@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,22 +47,34 @@ struct host_port_test {
     const char *str;		/* input string */
     const char *host;		/* parsed host */
     const char *port;		/* parsed port */
+    bool tls;			/* parsed TLS flag */
     char *defport;		/* default port */
+    char *defport_tls;		/* default port */
     bool ret;			/* return value */
 };
 
 static struct host_port_test test_data[] = {
-    { "xerxes", "xerxes", "12345", "12345", true },
-    { "xerxes:12345", "xerxes", "12345", "67890", true },
-    { "127.0.0.1", "127.0.0.1", "12345", "12345", true },
-    { "127.0.0.1:12345", "127.0.0.1", "12345", "67890", true },
-    { "[::1]", "::1", "12345", "12345", true },
-    { "[::1]:12345", "::1", "12345", "67890", true },
+    /* No TLS */
+    { "xerxes", "xerxes", "12345", false, "12345", NULL, true },
+    { "xerxes:12345", "xerxes", "12345", false, "67890", NULL, true },
+    { "127.0.0.1", "127.0.0.1", "12345", false, "12345", NULL, true },
+    { "127.0.0.1:12345", "127.0.0.1", "12345", false, "67890", NULL, true },
+    { "[::1]", "::1", "12345", false, "12345", NULL, true },
+    { "[::1]:12345", "::1", "12345", false, "67890", NULL, true },
 
-    { "xerxes:", NULL, NULL, "12345", false },		/* missing port */
-    { "127.0.0.1:", NULL, NULL, "12345", false },	/* missing port */
-    { "[::1:12345", NULL, NULL, "67890", false },	/* missing bracket */
-    { "[::1]:", NULL, NULL, "12345", false },		/* missing port */
+    /* With TLS */
+    { "xerxes(tls)", "xerxes", "12345", true, "5678", "12345", true },
+    { "xerxes:12345(tls)", "xerxes", "12345", true, "5678", "67890", true },
+    { "127.0.0.1(tls)", "127.0.0.1", "12345", true, "5678", "12345", true },
+    { "127.0.0.1:12345(tls)", "127.0.0.1", "12345", true, "5678", "67890", true },
+    { "[::1](tls)", "::1", "12345", true, "5678", "12345", true },
+    { "[::1]:12345(tls)", "::1", "12345", true, "5678", "67890", true },
+
+    /* Errors */
+    { "xerxes:", NULL, NULL, false, "12345", NULL, false },	/* missing port */
+    { "127.0.0.1:", NULL, NULL, false, "12345", NULL, false },	/* missing port */
+    { "[::1:12345", NULL, NULL, false, "67890", NULL, false },	/* missing bracket */
+    { "[::1]:", NULL, NULL, false, "12345", NULL, false },	/* missing port */
     { NULL }
 };
 
@@ -71,18 +83,20 @@ main(int argc, char *argv[])
 {
     int i, errors = 0, ntests = 0;
     char *host, *port, *copy = NULL;
-    bool ret;
+    bool ret, tls;
 
     initprogname(argc > 0 ? argv[0] : "host_port_test");
 
     for (i = 0; test_data[i].str != NULL; i++) {
 	host = port = NULL;
+	tls = false;
 	free(copy);
 	if ((copy = strdup(test_data[i].str)) == NULL)
 	    sudo_fatal_nodebug(NULL);
 
 	ntests++;
-	ret = sudo_parse_host_port(copy, &host, &port, test_data[i].defport);
+	ret = sudo_parse_host_port(copy, &host, &port, &tls,
+	    test_data[i].defport, test_data[i].defport_tls);
 	if (ret != test_data[i].ret) {
 	    sudo_warnx_nodebug("test #%d: %s: returned %s, expected %s",
 		ntests, test_data[i].str, ret ? "true" : "false",
@@ -114,6 +128,13 @@ main(int argc, char *argv[])
 	if (strcmp(port, test_data[i].port) != 0) {
 	    sudo_warnx_nodebug("test #%d: %s: bad port, expected %s, got %s",
 		ntests, test_data[i].str, test_data[i].port, port);
+	    errors++;
+	    continue;
+	}
+	if (tls != test_data[i].tls) {
+	    sudo_warnx_nodebug("test #%d: %s: bad tls, expected %s, got %s",
+		ntests, test_data[i].str, test_data[i].tls ? "true" : "false",
+		tls ? "true" : "false");
 	    errors++;
 	    continue;
 	}

@@ -379,7 +379,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 {
     struct addrinfo hints, *res, *res0 = NULL;
     char *copy, *host, *port;
-    bool ret = false;
+    bool tls, ret = false;
     int error;
     debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL);
 
@@ -389,7 +389,8 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
     }
 
     /* Parse host[:port] */
-    if (!sudo_parse_host_port(copy, &host, &port, DEFAULT_PORT_STR))
+    if (!sudo_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT_STR,
+	    DEFAULT_PORT_STR))
 	goto done;
     if (host[0] == '*' && host[1] == '\0')
 	host = NULL;
