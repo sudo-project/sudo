@@ -525,6 +525,26 @@ handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
 }
 
 static bool
+handle_client_hello(ClientHello *msg, struct connection_closure *closure)
+{
+    debug_decl(handle_client_hello, SUDO_DEBUG_UTIL);
+
+    if (closure->state != INITIAL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d", closure->state);
+	closure->errstr = _("state machine error");
+	debug_return_bool(false);
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ClientHello",
+	__func__);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: client ID %s",
+	__func__, msg->client_id);
+
+    debug_return_bool(true);
+}
+
+static bool
 handle_client_message(uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
@@ -575,6 +595,9 @@ handle_client_message(uint8_t *buf, size_t len,
 	break;
     case CLIENT_MESSAGE__TYPE_SUSPEND_EVENT:
 	ret = handle_suspend(msg->suspend_event, closure);
+	break;
+    case CLIENT_MESSAGE__TYPE_HELLO_MSG:
+	ret = handle_client_hello(msg->hello_msg, closure);
 	break;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,

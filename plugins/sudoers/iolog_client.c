@@ -714,6 +714,32 @@ done:
 }
 
 /*
+ * Build and format a ClientHello wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_client_hello(struct client_closure *closure)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    ClientHello hello_msg = CLIENT_HELLO__INIT;
+    bool ret = false;
+    debug_decl(fmt_client_hello, SUDOERS_DEBUG_UTIL);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ClientHello", __func__);
+
+    /* Client name + version */
+    hello_msg.client_id = "sudoers " PACKAGE_VERSION;
+
+    /* Schedule ClientMessage */
+    client_msg.hello_msg = &hello_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;
+    ret = fmt_client_message(closure, &client_msg);
+
+    debug_return_bool(ret);
+}
+
+/*
  * Build and format an AcceptMessage wrapped in a ClientMessage.
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
@@ -1101,6 +1127,9 @@ client_message_completion(struct client_closure *closure)
     debug_decl(client_message_completion, SUDOERS_DEBUG_UTIL);
 
     switch (closure->state) {
+    case RECV_HELLO:
+	/* Waiting for ServerHello, nothing else to do. */
+	break;
     case SEND_ACCEPT:
     case SEND_RESTART:
 	closure->state = SEND_IO;
@@ -1145,14 +1174,26 @@ read_server_hello(struct client_closure *closure)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    closure->read_ev->setbase(closure->read_ev, evbase);
+
+    /* Write ClientHello. */
+    if (!fmt_client_hello(closure))
+	goto done;
+    closure->write_ev->setbase(closure->write_ev, evbase);
+    if (closure->write_ev->add(closure->write_ev,
+	    &closure->log_details->server_timeout) == -1) {
+	sudo_warnx(U_("unable to add event to queue"));
+	goto done;
+    }
 
     /* Read ServerHello synchronously. */
+    closure->read_ev->setbase(closure->read_ev, evbase);
     if (closure->read_ev->add(closure->read_ev,
 	    &closure->log_details->server_timeout) == -1) {
 	sudo_warnx(U_("unable to add event to queue"));
 	goto done;
     }
+
+    /* Read/write hello messages synchronously. */
     if (sudo_ev_dispatch(evbase) == -1) {
 	sudo_warnx(U_("error in event loop"));
 	goto done;
@@ -1202,14 +1243,16 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
     }
 
     /*
-     * Move read event back to main sudo event loop.
+     * Move read/write events back to main sudo event loop.
      * Server messages may occur at any time, so no timeout.
+     * Write event will be re-enabled later.
      */
     closure->read_ev->setbase(closure->read_ev, NULL);
     if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
         sudo_warn(U_("unable to add event to queue"));
 	debug_return_bool(false);
     }
+    closure->write_ev->setbase(closure->write_ev, NULL);
 
     debug_return_bool(true);
 }
@@ -1629,6 +1672,7 @@ bad:
     if (closure->log_details->ignore_iolog_errors) {
 	/* Disable plugin, the command continues. */
 	closure->disabled = true;
+	closure->write_ev->del(closure->read_ev);
 	closure->write_ev->del(closure->write_ev);
     } else {
 	/* Break out of sudo event loop and kill the command. */
