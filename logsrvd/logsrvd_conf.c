@@ -57,7 +57,8 @@
 
 #if defined(HAVE_OPENSSL)
 # define DEFAULT_CA_CERT_PATH       "/etc/ssl/sudo/cacert.pem"
-# define DEFAULT_SERVER_CERT_PATH   "/etc/ssl/sudo/logsrvd_cert.pem"
+# define DEFAULT_SERVER_CERT_PATH   "/etc/ssl/sudo/certs/logsrvd_cert.pem"
+# define DEFAULT_SERVER_KEY_PATH    "/etc/ssl/sudo/private/logsrvd_key.pem"
 #endif
 
 struct logsrvd_config;
@@ -1000,6 +1001,11 @@ logsrvd_conf_alloc(void)
     }
     config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
     if (config->server.tls_config.cert_path == NULL) {
+	sudo_warn(NULL);
+	goto bad;
+    }
+    config->server.tls_config.pkey_path = strdup(DEFAULT_SERVER_KEY_PATH);
+    if (config->server.tls_config.pkey_path == NULL) {
 	sudo_warn(NULL);
 	goto bad;
     }

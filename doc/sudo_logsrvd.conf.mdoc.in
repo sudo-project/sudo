@@ -124,11 +124,9 @@ If true,
 will secure network connections with Transport Layer Security (TLS)
 version 1.2 or 1.3.
 Versions of TLS prior to 1.2 are not supported.
-The
-.Em tls_cert
-and
-.Em tls_key
-settings are also required when TLS is enabled.
+See
+.Xr sudo_logsrvd @mansectsu@
+for details on generating TLS keys and certificates.
 The default value is false.
 .It tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
@@ -137,7 +135,8 @@ when authenticating clients.
 The default is to use the system's default certificate authority database.
 .It tls_cert = path
 The path to the server's certificate file, in PEM format.
-This setting is required when TLS is enabled.
+The default value is
+.Pa /etc/ssl/sudo/certs/logsrvd_cert.pem .
 .It tls_checkpeer = bool
 If true, client certificates will be validated by the server;
 clients without a valid certificate will be unable to connect.
@@ -191,7 +190,8 @@ By default,
 will use the OpenSSL defaults for Diffie-Hellman key generation.
 .It tls_key = path
 The path to the server's private key file, in PEM format.
-This setting is required when TLS is enabled.
+The default value is
+.Pa /etc/ssl/sudo/private/logsrvd_key.pem .
 .It tls_verify = bool
 If true, the server certificate will be verified at startup and
 clients will authenticate the server by verifying its certificate
