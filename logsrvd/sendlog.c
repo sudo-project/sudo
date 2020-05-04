@@ -253,7 +253,7 @@ tls_connect_cb(int sock, int what, void *v)
     struct sudo_event_base *evbase = closure->evbase;
     struct timespec timeo = { TLS_HANDSHAKE_TIMEO_SEC, 0 };
     const char *errstr;
-    int con_stat, err;
+    int con_stat;
     debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
@@ -268,13 +268,7 @@ tls_connect_cb(int sock, int what, void *v)
 	    "SSL_connect successful");
         closure->tls_connect_state = true;
     } else {
-        switch ((err = SSL_get_error(closure->ssl, con_stat))) {
-            /* TLS connect successful */
-            case SSL_ERROR_NONE:
-		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "SSL_connect successful");
-                closure->tls_connect_state = true;
-                break;
+        switch (SSL_get_error(closure->ssl, con_stat)) {
             /* TLS handshake is not finished, reschedule event */
             case SSL_ERROR_WANT_READ:
 		sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
@@ -306,11 +300,13 @@ tls_connect_cb(int sock, int what, void *v)
 		    goto bad;
                 }
 		break;
+	    case SSL_ERROR_SYSCALL:
+                sudo_warnx(U_("TLS connection failed: %s"), strerror(errno));
+		goto bad;
             default:
-		errstr = ERR_error_string(ERR_get_error(), NULL);
-                sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s\n"),
-                    err, errstr);
-                break;
+		errstr = ERR_reason_error_string(ERR_get_error());
+                sudo_warnx(U_("TLS connection failed: %s"), errstr);
+                goto bad;
         }
     }
 
@@ -347,12 +343,12 @@ tls_setup(struct client_closure *closure)
     }
     if ((closure->ssl = SSL_new(ssl_ctx)) == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
-        sudo_warnx(U_("Unable to allocate ssl object: %s\n"), errstr);
+        sudo_warnx(U_("Unable to allocate ssl object: %s"), errstr);
         goto bad;
     }
     if (SSL_set_fd(closure->ssl, closure->sock) <= 0) {
 	errstr = ERR_reason_error_string(ERR_get_error());
-        sudo_warnx(U_("Unable to attach socket to the ssl object: %s\n"),
+        sudo_warnx(U_("Unable to attach socket to the ssl object: %s"),
 	    errstr);
         goto bad;
     }
@@ -573,7 +569,7 @@ fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
 
     len = client_message__get_packed_size(msg);
     if (len > MESSAGE_SIZE_MAX) {
-    	sudo_warnx(U_("client message too large: %zu\n"), len);
+    	sudo_warnx(U_("client message too large: %zu"), len);
         goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
@@ -1250,8 +1246,10 @@ server_msg_cb(int fd, int what, void *v)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage (TLS)", __func__);
         nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size - buf->len);
         if (nread <= 0) {
-            int read_status = SSL_get_error(closure->ssl, nread);
-            switch (read_status) {
+	    const char *errstr;
+	    int err;
+
+            switch (SSL_get_error(closure->ssl, nread)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
 		    nread = 0;
@@ -1276,8 +1274,29 @@ server_msg_cb(int fd, int what, void *v)
 		    /* Redirect write event to finish SSL_read() */
 		    closure->read_instead_of_write = true;
                     debug_return;
+                case SSL_ERROR_SSL:
+                    /*
+                     * For TLS 1.3, if the cert verify function on the server
+                     * returns an error, OpenSSL will send an internal error
+                     * alert when we read ServerHello.  Convert to a more useful
+                     * message and hope that no actual internal error occurs.
+                     */
+                    err = ERR_get_error();
+                    if (closure->state == RECV_HELLO &&
+                        ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
+                        errstr = "host name does not match certificate";
+                    } else {
+                        errstr = ERR_reason_error_string(err);
+                    }
+                    sudo_warnx("%s", errstr);
+                    goto bad;
+                case SSL_ERROR_SYSCALL:
+                    sudo_warn("recv");
+                    goto bad;
                 default:
-                    break;
+                    errstr = ERR_reason_error_string(ERR_get_error());
+                    sudo_warnx("recv: %s", errstr);
+                    goto bad;
             }
         }
     } else
@@ -1308,7 +1327,7 @@ server_msg_cb(int fd, int what, void *v)
 	msg_len = ntohl(msg_len);
 
 	if (msg_len > MESSAGE_SIZE_MAX) {
-	    sudo_warnx(U_("server message too large: %u\n"), msg_len);
+	    sudo_warnx(U_("server message too large: %u"), msg_len);
 	    goto bad;
 	}
 
@@ -1370,8 +1389,12 @@ client_msg_cb(int fd, int what, void *v)
     if (cert != NULL) {
         nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
         if (nwritten <= 0) {
-            int write_status = SSL_get_error(closure->ssl, nwritten);
-            switch (write_status) {
+	    const char *errstr;
+
+            switch (SSL_get_error(closure->ssl, nwritten)) {
+		case SSL_ERROR_ZERO_RETURN:
+		    /* ssl connection shutdown */
+		    goto bad;
                 case SSL_ERROR_WANT_READ:
                     /* ssl wants to read, read event always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
@@ -1384,8 +1407,13 @@ client_msg_cb(int fd, int what, void *v)
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
 			"SSL_write returns SSL_ERROR_WANT_WRITE");
                     debug_return;
+                case SSL_ERROR_SYSCALL:
+                    sudo_warn("recv");
+                    goto bad;
                 default:
-                    break;
+		    errstr = ERR_reason_error_string(ERR_get_error());
+		    sudo_warnx("send: %s", errstr);
+                    goto bad;
             }
         }
     } else
