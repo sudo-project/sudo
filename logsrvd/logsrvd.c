@@ -1053,55 +1053,60 @@ exit:
 static bool
 init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
 {
+    const char *errstr;
+    int success = 0;
     debug_decl(init_tls_ciphersuites, SUDO_DEBUG_UTIL);
 
     if (tls_config->ciphers_v12) {
 	/* try to set TLS v1.2 ciphersuite list from config if given */
-        if (SSL_CTX_set_cipher_list(ctx, tls_config->ciphers_v12)) {
+        success = SSL_CTX_set_cipher_list(ctx, tls_config->ciphers_v12);
+	if (success) {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "TLS v1.2 ciphersuite list is set from config");
+                "TLS 1.2 ciphersuite list set to %s", tls_config->ciphers_v12);
         } else {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to set configured TLS v1.2 ciphersuite list (%s). Falling back to default...",
-                ERR_error_string(ERR_get_error(), NULL));
-                debug_return_bool(false);
+	    errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("unable to set TLS 1.2 ciphersuite to %s: %s"),
+		tls_config->ciphers_v12, errstr);
         }
-    } else {
+    }
+    if (!success) {
 	/* fallback to default ciphersuites for TLS v1.2 */
         if (SSL_CTX_set_cipher_list(ctx, LOGSRVD_DEFAULT_CIPHER_LST12) <= 0) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to load default TLS v1.2 ciphersuite list: %s",
-                ERR_error_string(ERR_get_error(), NULL));
+	    errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("unable to set TLS 1.2 ciphersuite to %s: %s"),
+		LOGSRVD_DEFAULT_CIPHER_LST12, errstr);
             debug_return_bool(false);
         } else {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "TLS v1.2 ciphersuite list is set to default (%s)",
+                "TLS v1.2 ciphersuite list set to %s (default)",
                 LOGSRVD_DEFAULT_CIPHER_LST12);
         }
     }
 
 # if defined(HAVE_SSL_CTX_SET_CIPHERSUITES)
+    success = 0;
     if (tls_config->ciphers_v13) {
 	/* try to set TLSv1.3 ciphersuite list from config */
-        if (SSL_CTX_set_ciphersuites(ctx, tls_config->ciphers_v13)) {
+        success = SSL_CTX_set_ciphersuites(ctx, tls_config->ciphers_v13);
+	if (success) {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "TLS v1.3 ciphersuite list is set from config");
+                "TLS v1.3 ciphersuite list set to %s", tls_config->ciphers_v13);
         } else {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to load configured TLS v1.3 ciphersuite list (%s). Falling back to default...",
-                ERR_error_string(ERR_get_error(), NULL));        
-                debug_return_bool(false);
+	    errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("unable to set TLS 1.3 ciphersuite to %s: %s"),
+		tls_config->ciphers_v13, errstr);
         }
-    } else {
+    }
+    if (!success) {
 	/* fallback to default ciphersuites for TLS v1.3 */
         if (SSL_CTX_set_ciphersuites(ctx, LOGSRVD_DEFAULT_CIPHER_LST13) <= 0) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to load default TLS v1.3 ciphersuite list: %s",
-                ERR_error_string(ERR_get_error(), NULL));
+	    errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("unable to set TLS 1.3 ciphersuite to %s: %s"),
+		LOGSRVD_DEFAULT_CIPHER_LST13, errstr);
             debug_return_bool(false);
         } else {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "TLS v1.3 ciphersuite list is set to default (%s)",
+                "TLS v1.3 ciphersuite list set to %s (default)",
                 LOGSRVD_DEFAULT_CIPHER_LST13);
         }
     }
@@ -1123,6 +1128,7 @@ init_tls_server_context(void)
     struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
     const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
     bool ca_bundle_required = tls_config->verify | tls_config->check_peer;
+    const char *errstr;
     debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL);
 
     SSL_library_init();
@@ -1130,22 +1136,20 @@ init_tls_server_context(void)
     SSL_load_error_strings();
 
     if ((method = TLS_server_method()) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "creation of SSL_METHOD failed: %s",
-            ERR_error_string(ERR_get_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx(U_("unable to get TLS server method: %s"), errstr);
         goto bad;
     }
     if ((ctx = SSL_CTX_new(method)) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "creation of new SSL_CTX object failed: %s",
-            ERR_error_string(ERR_get_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx(U_("unable to create TLS context: %s"), errstr);
         goto bad;
     }
 
     if (SSL_CTX_use_certificate_chain_file(ctx, tls_config->cert_path) <= 0) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to load cert %s: %s", tls_config->cert_path,
-            ERR_error_string(ERR_get_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx(U_("%s: %s"), tls_config->cert_path, errstr);
+	sudo_warnx(U_("unable to load certificate %s"), tls_config->cert_path);
         goto bad;
     }
 
@@ -1154,30 +1158,28 @@ init_tls_server_context(void)
         if (tls_config->cacert_path != NULL) {
             STACK_OF(X509_NAME) *cacerts =
                 SSL_load_client_CA_file(tls_config->cacert_path);
-            if (cacerts == NULL) {
-                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                    "calling SSL_load_client_CA_file() failed: %s",
-                    ERR_error_string(ERR_get_error(), NULL));
-                goto bad;
-            } else {
-                SSL_CTX_set_client_CA_list(ctx, cacerts);
 
-                /* set the location of the CA bundle file for verification */
-                if (SSL_CTX_load_verify_locations(ctx, tls_config->cacert_path, NULL) <= 0) {
-                    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                        "calling SSL_CTX_load_verify_locations() failed: %s",
-                        ERR_error_string(ERR_get_error(), NULL));
-                    goto bad;
-                }
+            if (cacerts == NULL) {
+		errstr = ERR_reason_error_string(ERR_get_error());
+		sudo_warnx(U_("%s: %s"), tls_config->cacert_path, errstr);
+		sudo_warnx(U_("unable to load certificate authority bundle %s"),
+		    tls_config->cacert_path);
+                goto bad;
+            }
+            SSL_CTX_set_client_CA_list(ctx, cacerts);
+
+            /* set the location of the CA bundle file for verification */
+            if (SSL_CTX_load_verify_locations(ctx, tls_config->cacert_path, NULL) <= 0) {
+		errstr = ERR_reason_error_string(ERR_get_error());
+                sudo_warnx("SSL_CTX_load_verify_locations: %s", errstr);
+                goto bad;
             }
         }
 
         /* only verify server cert if it is set in the configuration */
         if (tls_config->verify) {
-
-            if (!verify_server_cert(ctx, tls_config)) {
+            if (!verify_server_cert(ctx, tls_config))
                 goto bad;
-            }
         } else {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
                 "skipping server cert check");
@@ -1195,16 +1197,11 @@ init_tls_server_context(void)
     /* if private key file was not set, assume that the cert file contains the private key */
     char* pkey = (tls_config->pkey_path == NULL ? tls_config->cert_path : tls_config->pkey_path);
 
-    if (!SSL_CTX_use_PrivateKey_file(ctx, pkey, SSL_FILETYPE_PEM)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to load key file %s: %s", pkey,
-            ERR_error_string(ERR_get_error(), NULL));
-        goto bad;
-    }
-    if (!SSL_CTX_check_private_key(ctx)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to verify key file %s: %s", pkey,
-            ERR_error_string(ERR_get_error(), NULL));
+    if (!SSL_CTX_use_PrivateKey_file(ctx, pkey, SSL_FILETYPE_PEM) ||
+	    !SSL_CTX_check_private_key(ctx)) {
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx(U_("%s: %s"), pkey, errstr);
+	sudo_warnx(U_("unable to load private key %s"), pkey);
         goto bad;
     }
 
@@ -1217,20 +1214,21 @@ init_tls_server_context(void)
     if (tls_config->dhparams_path != NULL)
 	dhparam_file = fopen(tls_config->dhparams_path, "r");
     if (dhparam_file != NULL) {
-        DH* dhparams;
-        if ((dhparams = PEM_read_DHparams(dhparam_file, NULL, NULL, NULL)) != NULL) {
+        DH *dhparams = PEM_read_DHparams(dhparam_file, NULL, NULL, NULL);
+        if (dhparams != NULL) {
             if (!SSL_CTX_set_tmp_dh(ctx, dhparams)) {
-                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                    "unable to set dh parameters: %s",
-                    ERR_error_string(ERR_get_error(), NULL));
+		errstr = ERR_reason_error_string(ERR_get_error());
+		sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
+                    errstr);
+                DH_free(dhparams);
             } else {
                 sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
                     "diffie-hellman parameters are loaded");
             }
         } else {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "dhparam file can't be loaded: %s",
-                ERR_error_string(ERR_get_error(), NULL));
+	    errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
+                errstr);
         }
         fclose(dhparam_file);
     } else {
@@ -1238,12 +1236,12 @@ init_tls_server_context(void)
             "dhparam file not found, will use default parameters");
     }
     
-    /* audit server supports TLS ver1.2 or higher */
+    /* audit server supports TLS version 1.2 or higher */
 #ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
     if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to restrict min. protocol version: %s",
-            ERR_error_string(ERR_get_error(), NULL));
+        errstr = ERR_reason_error_string(ERR_get_error());
+        sudo_warnx(U_("unable to set minimum protocol version to TLS 1.2: %s"),
+            errstr);
         goto bad;
     }
 #else
@@ -1600,7 +1598,7 @@ server_setup(struct sudo_event_base *base)
     struct listen_address *addr;
     struct listener *l;
     int nlisteners = 0;
-    bool config_tls = false;
+    bool ret, config_tls = false;
     debug_decl(server_setup, SUDO_DEBUG_UTIL);
 
     /* Free old listeners (if any) and register new ones. */
@@ -1615,15 +1613,16 @@ server_setup(struct sudo_event_base *base)
 	if (addr->tls)
 	    config_tls = true;
     }
+    ret = nlisteners > 0;
 
-    if (config_tls) {
+    if (ret && config_tls) {
 #if defined(HAVE_OPENSSL)
 	if (!init_tls_server_context())
-	    sudo_fatal(NULL);
+	    ret = false;
 #endif
     }
 
-    debug_return_bool(nlisteners > 0);
+    debug_return_bool(ret);
 }
 
 /*

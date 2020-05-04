@@ -216,8 +216,10 @@ tls_init(struct client_closure *closure)
             if (SSL_CTX_load_verify_locations(closure->ssl_ctx,
                 closure->log_details->ca_bundle, NULL) <= 0) {
                 errstr = ERR_reason_error_string(ERR_get_error());
-                sudo_warnx(U_("Calling SSL_CTX_load_verify_locations() failed: %s"),
-                    errstr);
+                sudo_warnx(U_("%s: %s"), closure->log_details->ca_bundle,
+		    errstr);
+		sudo_warnx(U_("unable to load certificate authority bundle %s"),
+		    closure->log_details->ca_bundle);
                 goto bad;
             }
         }
@@ -229,8 +231,9 @@ tls_init(struct client_closure *closure)
         if (!SSL_CTX_use_certificate_chain_file(closure->ssl_ctx,
                 closure->log_details->cert_file)) {
             errstr = ERR_reason_error_string(ERR_get_error());
-            sudo_warnx(U_("Unable to load cert into the ssl context: %s"),
-                errstr);
+	    sudo_warnx(U_("%s: %s"), closure->log_details->cert_file, errstr);
+	    sudo_warnx(U_("unable to load certificate %s"),
+		closure->log_details->cert_file);
             goto bad;
         }
         if (closure->log_details->key_file == NULL) {
@@ -238,10 +241,12 @@ tls_init(struct client_closure *closure)
             closure->log_details->key_file = closure->log_details->cert_file;
         }
         if (!SSL_CTX_use_PrivateKey_file(closure->ssl_ctx,
-                closure->log_details->key_file, X509_FILETYPE_PEM)) {
+                closure->log_details->key_file, SSL_FILETYPE_PEM) ||
+                !SSL_CTX_check_private_key(closure->ssl_ctx)) {
             errstr = ERR_reason_error_string(ERR_get_error());
-            sudo_warnx(U_("Unable to load private key into the ssl context: %s"),
-                errstr);
+	    sudo_warnx(U_("%s: %s"), closure->log_details->key_file, errstr);
+	    sudo_warnx(U_("unable to load private key %s"),
+		closure->log_details->key_file);
             goto bad;
         }
     }
