@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "April 3, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "April 30, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2627,6 +2627,18 @@ This flag is
 \fIon\fR
 by default.
 .TP 18n
+log_server_verify
+.br
+If set, the server certificate received during the TLS handshake
+must be valid and it must contain either the server name (from
+\fIlog_servers\fR)
+or its IP address.
+If either of these conditions is not met, the TLS handshake will fail.
+This flag is
+\fIon\fR
+by default.
+\fBsudo\fR
+.TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
 \fBsudo\fR
@@ -4608,21 +4620,32 @@ Starting with
 logging them locally.
 The
 \fIlog_servers\fR
-setting specifies one or more server addresses to use when storing
-I/O logs remotely.
+setting specifies one or more hosts to connect to for
+remote I/O log storage.
 Log servers must be running
 \fBsudo_logsrvd\fR
 or another service that implements the protocol described by
 sudo_logsrv.proto(@mansectform@).
+.sp
 Server addresses should be of the form
-\(lqhost[:port]\(rq.
-If no port is specified, port 30344 will be used.
+\(lqhost[:port][(tls)]\(rq.
 The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
+If the tls flag is present, the connection will be secured
+with Transport Layer Security (TLS) version 1.2 or 1.3.
+Versions of TLS prior to 1.2 are not supported.
+.sp
+If a port is specified, it may either be a port number or a known
+service name as defined by the system service name database.
+If no port is specified, port 30343 will be used for plaintext
+connections and port 30344 will be used for TLS connections.
 .sp
 When
 \fIlog_servers\fR
 is enabled, I/O logs will not be logged locally.
+If multiple hosts are specified,
+\fBsudoers\fR
+will try them in reverse order until it connects successfully.
 If no log servers are reachable, the user will not be able
 to run a command unless the
 \fIignore_iolog_errors\fR
