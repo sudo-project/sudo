@@ -530,6 +530,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Path to the sudoers private key file: %s"),
 	NULL,
     }, {
+	"log_server_verify", T_FLAG,
+	N_("Verify that the log server's certificate is valid"),
+	NULL,
+    }, {
 	"runas_allow_unknown_id", T_FLAG,
 	N_("Allow the use of unknown runas user and/or group ID"),
 	NULL,

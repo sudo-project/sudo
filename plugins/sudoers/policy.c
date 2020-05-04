@@ -564,7 +564,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	debug_return_bool(true);	/* nothing to do */
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(53, sizeof(char *));
+    command_info = calloc(54, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -749,7 +749,11 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     }
 
     if ((command_info[info_len++] = sudo_new_key_val("log_server_keepalive",
-        def_log_server_keepalive ? "true" : "false")) == NULL)
+	    def_log_server_keepalive ? "true" : "false")) == NULL)
+        goto oom;
+
+    if ((command_info[info_len++] = sudo_new_key_val("log_server_verify",
+	    def_log_server_verify ? "true" : "false")) == NULL)
         goto oom;
 
     if (def_log_server_cabundle != NULL) {

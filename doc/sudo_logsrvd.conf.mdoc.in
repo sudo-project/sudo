@@ -89,7 +89,7 @@ will cause
 .Nm sudo_logsrvd
 to listen on all configured network interfaces.
 .Pp
-If the tls flag is set,
+If the tls flag is present,
 .Nm sudo_logsrvd
 will secure the connection with TLS version 1.2 or 1.3.
 Versions of TLS prior to 1.2 are not supported.

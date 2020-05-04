@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd April 3, 2020
+.Dd April 30, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2473,6 +2473,16 @@ flag is set.
 This flag is
 .Em on
 by default.
+.It log_server_verify
+If set, the server certificate received during the TLS handshake
+must be valid and it must contain either the server name (from
+.Em log_servers )
+or its IP address.
+If either of these conditions is not met, the TLS handshake will fail.
+This flag is
+.Em on
+by default.
+.Nm sudo
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -4300,21 +4310,32 @@ Starting with
 logging them locally.
 The
 .Em log_servers
-setting specifies one or more server addresses to use when storing
-I/O logs remotely.
+setting specifies one or more hosts to connect to for
+remote I/O log storage.
 Log servers must be running
 .Nm sudo_logsrvd
 or another service that implements the protocol described by
 .Xr sudo_logsrv.proto @mansectform@ .
+.Pp
 Server addresses should be of the form
-.Dq host Ns Op : Ns port .
-If no port is specified, port 30344 will be used.
+.Dq host Ns Oo : Ns port Oc Ns Op (tls) .
 The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
+If the tls flag is present, the connection will be secured
+with Transport Layer Security (TLS) version 1.2 or 1.3.
+Versions of TLS prior to 1.2 are not supported.
+.Pp
+If a port is specified, it may either be a port number or a known
+service name as defined by the system service name database.
+If no port is specified, port 30343 will be used for plaintext
+connections and port 30344 will be used for TLS connections.
 .Pp
 When
 .Em log_servers
 is enabled, I/O logs will not be logged locally.
+If multiple hosts are specified,
+.Nm
+will try them in reverse order until it connects successfully.
 If no log servers are reachable, the user will not be able
 to run a command unless the
 .Em ignore_iolog_errors

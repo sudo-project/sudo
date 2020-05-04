@@ -69,7 +69,7 @@ static struct sudoers_io_operations {
 } io_operations;
 
 #ifdef SUDOERS_IOLOG_CLIENT
-static struct client_closure client_closure = CLIENT_CLOSURE_INITIALIZER(client_closure);
+static struct client_closure *client_closure;
 #endif
 static struct iolog_details iolog_details;
 static bool warned = false;
@@ -378,28 +378,39 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    TIME_T_MAX, NULL);
 		continue;
 	    }
-        if (strncmp(*cur, "log_server_keepalive=", sizeof("log_server_keepalive=") - 1) == 0) {
-            int val = sudo_strtobool(*cur + sizeof("log_server_keepalive=") - 1);
-            if (val != -1) {
-                details->tcp_keepalive = val;
-            } else {
-                details->tcp_keepalive = true;
+            if (strncmp(*cur, "log_server_keepalive=", sizeof("log_server_keepalive=") - 1) == 0) {
+                int val = sudo_strtobool(*cur + sizeof("log_server_keepalive=") - 1);
+                if (val != -1) {
+                    details->keepalive = val;
+                } else {
+                    sudo_debug_printf(SUDO_DEBUG_WARN,
+                        "%s: unable to parse %s", __func__, *cur);
+                }
+                continue;
             }
-            continue;
-        }
 #if defined(HAVE_OPENSSL)
-	    if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
-            details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
-            continue;
-        }
-	    if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
-            details->cert_file = *cur + sizeof("log_server_peer_cert=") - 1;
-            continue;
-        }
-	    if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
-            details->key_file = *cur + sizeof("log_server_peer_key=") - 1;
-            continue;
-        }
+            if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
+                details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
+                continue;
+            }
+            if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
+                details->cert_file = *cur + sizeof("log_server_peer_cert=") - 1;
+                continue;
+            }
+            if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
+                details->key_file = *cur + sizeof("log_server_peer_key=") - 1;
+                continue;
+            }
+            if (strncmp(*cur, "log_server_verify=", sizeof("log_server_verify=") - 1) == 0) {
+                int val = sudo_strtobool(*cur + sizeof("log_server_verify=") - 1);
+                if (val != -1) {
+                    details->keepalive = val;
+                } else {
+                    sudo_debug_printf(SUDO_DEBUG_WARN,
+                        "%s: unable to parse %s", __func__, *cur);
+                }
+                continue;
+            }
 #endif /* HAVE_OPENSSL */
 	    break;
 	case 'm':
@@ -615,32 +626,27 @@ done:
 static int
 sudoers_io_open_remote(struct timespec *now)
 {
-    int sock, ret = -1;
-    struct sudoers_string *connected_server = NULL;
+    int ret = -1;
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
+    client_closure = client_closure_alloc(&iolog_details, &sudoers_io, now);
+    if (client_closure == NULL)
+	goto done;
+
     /* Connect to log server. */
-    sock = log_server_connect(iolog_details.log_servers, iolog_details.tcp_keepalive,
-	&iolog_details.server_timeout, &connected_server);
-    if (sock == -1) {
+    if (!log_server_connect(client_closure)) {
 	/* TODO: support offline logs if server unreachable */
 	sudo_warnx(U_("unable to connect to log server"));
 	goto done;
     }
 
-    if (!client_closure_fill(&client_closure, sock, connected_server, now,
-	    &iolog_details, &sudoers_io)) {
-	close(sock);
-	goto done;
-    }
-
-    /* Read ServerHello and perform TLS handshake (optional). */
-    if (read_server_hello(sock, &client_closure))
+    /* Read ServerHello syncronously or fail. */
+    if (read_server_hello(client_closure))
 	ret = 1;
 
 done:
     if (ret != 1)
-	client_closure_free(&client_closure);
+	client_closure_free(client_closure);
     debug_return_int(ret);
 }
 #endif /* SUDOERS_IOLOG_CLIENT */
@@ -769,7 +775,7 @@ sudoers_io_close_remote(int exit_status, int error, const char **errstr)
 {
     debug_decl(sudoers_io_close_remote, SUDOERS_DEBUG_PLUGIN);
 
-    client_close(&client_closure, exit_status, error);
+    client_close(client_closure, exit_status, error);
 
     debug_return;
 }
@@ -871,11 +877,11 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
     int type, ret = -1;
     debug_decl(sudoers_io_log_remote, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure.disabled)
+    if (client_closure->disabled)
 	debug_return_int(1);
 
     /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(delay, &client_closure.elapsed, &client_closure.elapsed);
+    sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);
 
     switch (event) {
     case IO_EVENT_STDIN:
@@ -897,8 +903,8 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
 	sudo_warnx(U_("unexpected I/O event %d"), event);
 	goto done;
     }
-    if (fmt_io_buf(&client_closure, type, buf, len, delay)) {
-	ret = client_closure.write_ev->add(client_closure.write_ev,
+    if (fmt_io_buf(client_closure, type, buf, len, delay)) {
+	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
 	    sudo_warn(U_("unable to add event to queue"));
@@ -1024,14 +1030,14 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
     int ret = -1;
     debug_decl(sudoers_io_change_winsize_remote, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure.disabled)
+    if (client_closure->disabled)
 	debug_return_int(1);
 
     /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(delay, &client_closure.elapsed, &client_closure.elapsed);
+    sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);
 
-    if (fmt_winsize(&client_closure, lines, cols, delay)) {
-	ret = client_closure.write_ev->add(client_closure.write_ev,
+    if (fmt_winsize(client_closure, lines, cols, delay)) {
+	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
 	    sudo_warn(U_("unable to add event to queue"));
@@ -1122,14 +1128,14 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
     int ret = -1;
     debug_decl(sudoers_io_suspend_remote, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure.disabled)
+    if (client_closure->disabled)
 	debug_return_int(1);
 
     /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(delay, &client_closure.elapsed, &client_closure.elapsed);
+    sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);
 
-    if (fmt_suspend(&client_closure, signame, delay)) {
-	ret = client_closure.write_ev->add(client_closure.write_ev,
+    if (fmt_suspend(client_closure, signame, delay)) {
+	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
 	    sudo_warn(U_("unable to add event to queue"));
