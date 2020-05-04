@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 30, 2020
+.Dd May 4, 2020
 .Dt SUDO_LOGSRV.PROTO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -68,6 +68,7 @@ message ClientMessage {
     IoBuffer stderr_buf = 10;
     ChangeWindowSize winsize_event = 11;
     CommandSuspend suspend_event = 12;
+    ClientHello hello_msg = 13;
   }
 }
 .Ed
@@ -122,6 +123,22 @@ entries.
 See the
 .Sx EVENT LOG VARIABLES
 section for more information.
+.Ss ClientHello hello_msg
+.Bd -literal
+message ClientHello {
+  string client_id = 1;
+}
+.Ed
+.Pp
+A
+.Em ClientHello
+message consists of client information that may be sent to the
+server when the client first connects.
+.Bl -tag -width Ds
+.It client_id
+A free-form client description.
+This usually includes the name and version of the client implementation.
+.El
 .Ss AcceptMessage accept_msg
 .Bd -literal
 message AcceptMessage {
@@ -476,6 +493,11 @@ The expected protocol flow is as follows:
 Client connects to the first available server.
 If the client is configured to use TLS, a TLS handshake will be
 attempted.
+.It
+Client sends
+.Em ClientHello .
+This is currently optional but allows the server to detect a
+non-TLS connection on the TLS port.
 .It
 Server sends
 .Em ServerHello .

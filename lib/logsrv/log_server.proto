@@ -18,6 +18,7 @@ message ClientMessage {
     IoBuffer stderr_buf = 10;
     ChangeWindowSize winsize_event = 11;
     CommandSuspend suspend_event = 12;
+    ClientHello hello_msg = 13;
   }
 }
 
@@ -104,6 +105,11 @@ message ChangeWindowSize {
 message CommandSuspend {
   TimeSpec delay = 1;		/* elapsed time since last record */
   string signal = 2;		/* signal that caused suspend/resume */
+}
+
+/* Hello message from client when connecting to server. */
+message ClientHello {
+  string client_id = 1;		/* free-form client description */
 }
 
 /*

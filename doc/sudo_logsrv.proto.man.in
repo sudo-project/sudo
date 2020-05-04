@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "April 30, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "May 4, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -71,6 +71,7 @@ message ClientMessage {
     IoBuffer stderr_buf = 10;
     ChangeWindowSize winsize_event = 11;
     CommandSuspend suspend_event = 12;
+    ClientHello hello_msg = 13;
   }
 }
 .RE
@@ -130,6 +131,23 @@ entries.
 See the
 \fIEVENT LOG VARIABLES\fR
 section for more information.
+.SS "ClientHello hello_msg"
+.nf
+.RS 0n
+message ClientHello {
+  string client_id = 1;
+}
+.RE
+.fi
+.PP
+A
+\fIClientHello\fR
+message consists of client information that may be sent to the
+server when the client first connects.
+.TP 8n
+client_id
+A free-form client description.
+This usually includes the name and version of the client implementation.
 .SS "AcceptMessage accept_msg"
 .nf
 .RS 0n
@@ -515,17 +533,23 @@ If the client is configured to use TLS, a TLS handshake will be
 attempted.
 .TP 5n
 2.\&
+Client sends
+\fIClientHello\fR.
+This is currently optional but allows the server to detect a
+non-TLS connection on the TLS port.
+.TP 5n
+3.\&
 Server sends
 \fIServerHello\fR.
 .TP 5n
-3.\&
+4.\&
 Client responds with either
 \fIAcceptMessage\fR,
 \fIRejectMessage\fR,
 or
 \fIRestartMessage\fR.
 .TP 5n
-4.\&
+5.\&
 If client sent a
 \fIAcceptMessage\fR
 with
@@ -533,35 +557,35 @@ with
 set, server creates a new I/O log and responds with a
 \fIlog_id\fR.
 .TP 5n
-5.\&
+6.\&
 Client sends zero or more
 \fIIoBuffer\fR
 messages.
 .TP 5n
-6.\&
+7.\&
 Server periodically responds to
 \fIIoBuffer\fR
 messages with a
 \fIcommit_point\fR.
 .TP 5n
-7.\&
+8.\&
 Client sends an
 \fIExitMessage\fR
 when the command exits or is killed.
 .TP 5n
-8.\&
+9.\&
 Server sends the final
 \fIcommit_point\fR
 if one is pending.
 .TP 5n
-9.\&
+10.\&
 Server closes the connection.
 After receiving the final
 \fIcommit_point\fR,
 the client client shuts down its side of the TLS connection if TLS
 is in use, and closes the connection.
 .TP 5n
-10.\&
+11.\&
 Server shuts down its side of the TLS connection if TLS is in use,
 and closes the connection.
 .PP
