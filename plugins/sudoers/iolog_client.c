@@ -215,11 +215,13 @@ log_server_connect(struct sudoers_str_list *servers, bool tcp_keepalive,
     char *copy, *host, *port;
     const char *cause = NULL;
     int sock = -1;
+    bool tls;
     debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL);
 
     STAILQ_FOREACH(server, servers, entries) {
 	copy = strdup(server->str);
-	if (!sudo_parse_host_port(copy, &host, &port, DEFAULT_PORT_STR)) {
+	if (!sudo_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT_STR,
+		DEFAULT_PORT_STR)) {
 	    free(copy);
 	    continue;
 	}
