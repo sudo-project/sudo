@@ -102,13 +102,13 @@ connection_closure_free(struct connection_closure *closure)
 	bool shutting_down = closure->state == SHUTDOWN;
 	struct sudo_event_base *evbase = closure->evbase;
 
-#if defined(HAVE_OPENSSL)
-    if (logsrvd_conf_get_tls_opt()) {
-        SSL_shutdown(closure->ssl);
-        SSL_free(closure->ssl);
-    }
-#endif
 	TAILQ_REMOVE(&connections, closure, entries);
+#if defined(HAVE_OPENSSL)
+	if (closure->tls) {
+	    SSL_shutdown(closure->ssl);
+	    SSL_free(closure->ssl);
+	}
+#endif
 	close(closure->sock);
 	iolog_close_all(closure);
 	sudo_ev_free(closure->commit_ev);
@@ -149,6 +149,7 @@ fmt_server_message(struct connection_buffer *buf, ServerMessage *msg)
 	    "server message too large: %zu", len);
         goto done;
     }
+
     /* Wire message size is used for length encoding, precedes message. */
     msg_len = htonl((uint32_t)len);
     len += sizeof(msg_len);
@@ -164,6 +165,8 @@ fmt_server_message(struct connection_buffer *buf, ServerMessage *msg)
 	    goto done;
 	}
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"size + server message %zu bytes", len);
 
     memcpy(buf->data, &msg_len, sizeof(msg_len));
     server_message__pack(msg, buf->data + sizeof(msg_len));
@@ -175,7 +178,7 @@ done:
 }
 
 static bool
-fmt_hello_message(struct connection_buffer *buf)
+fmt_hello_message(struct connection_buffer *buf, bool tls)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
     ServerHello hello = SERVER_HELLO__INIT;
@@ -184,14 +187,17 @@ fmt_hello_message(struct connection_buffer *buf)
     /* TODO: implement redirect and servers array.  */
     hello.server_id = (char *)server_id;
 #if defined(HAVE_OPENSSL)
-    hello.tls = logsrvd_conf_get_tls_opt();
-    hello.tls_server_auth = logsrvd_get_tls_config()->verify;
-    hello.tls_reqcert = logsrvd_get_tls_config()->check_peer;
-#else
-    hello.tls = false;
-    hello.tls_server_auth = false;
-    hello.tls_reqcert = false;
+    if (tls) {
+	hello.tls = true;
+	hello.tls_server_auth = logsrvd_get_tls_config()->verify;
+	hello.tls_reqcert = logsrvd_get_tls_config()->check_peer;
+    } else
 #endif
+    {
+	hello.tls = false;
+	hello.tls_server_auth = false;
+	hello.tls_reqcert = false;
+    }
     msg.hello = &hello;
     msg.type_case = SERVER_MESSAGE__TYPE_HELLO;
 
@@ -601,8 +607,9 @@ shutdown_cb(int unused, int what, void *v)
 
 #if defined(HAVE_OPENSSL)
     /* deallocate server's SSL context object */
-    if (logsrvd_conf_get_tls_opt()) {
-        SSL_CTX_free(logsrvd_get_tls_runtime()->ssl_ctx);
+    struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
+    if (tls_runtime != NULL) {
+        SSL_CTX_free(tls_runtime->ssl_ctx);
     }
 #endif
     sudo_ev_loopbreak(base);
@@ -682,9 +689,9 @@ server_msg_cb(int fd, int what, void *v)
 	__func__, buf->len - buf->off);
 
 #if defined(HAVE_OPENSSL)
-    /* The initial ServerHello msg is not encrypted */
-    if ((closure->ssl) != NULL && (closure->state != INITIAL)) {
-        nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
+    if (closure->tls) {
+        nwritten = SSL_write(closure->ssl, buf->data + buf->off,
+	    buf->len - buf->off);
         if (nwritten <= 0) {
             int err = SSL_get_error(closure->ssl, nwritten);
             switch (err) {
@@ -700,19 +707,23 @@ server_msg_cb(int fd, int what, void *v)
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
 			"SSL_write returns SSL_ERROR_WANT_WRITE");
                     debug_return;
+		case SSL_ERROR_SYSCALL:
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unexpected error during SSL_write(): %d (%s)",
+			err, strerror(errno));
+		    goto finished;
                 default:
                     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                        "unexpected error during SSL_write(). SSL error=%d (%s)",
+                        "unexpected error during SSL_write(): %d (%s)",
                         err, ERR_error_string(ERR_get_error(), NULL));
-                        goto finished;
+                    goto finished;
             }
         }
-    } else {
-        nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
-    }
-#else
-    nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+    } else
 #endif
+    {
+	nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+    }
 
     if (nwritten == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -765,7 +776,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
 #if defined(HAVE_OPENSSL)
-    if (closure->ssl != NULL) {
+    if (closure->tls) {
        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
         if (nread <= 0) {
             int err = SSL_get_error(closure->ssl, nread);
@@ -797,19 +808,23 @@ client_msg_cb(int fd, int what, void *v)
 		    /* Redirect write event to finish SSL_read() */
 		    closure->read_instead_of_write = true;
                     debug_return;
+		case SSL_ERROR_SYSCALL:
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unexpected error during SSL_read(): %d (%s)",
+			err, strerror(errno));
+		    goto finished;
                 default:
                     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                        "unexpected error during SSL_read(). SSL error=%d (%s)",
+                        "unexpected error during SSL_read(): %d (%s)",
                         err, ERR_error_string(ERR_get_error(), NULL));
                         goto finished;
             }
         }
-    } else {
+    } else
+#endif
+    {
         nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
     }
-#else
-        nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
-#endif
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client",
 	__func__, nread);
@@ -918,6 +933,30 @@ server_commit_cb(int unused, int what, void *v)
 bad:
     connection_closure_free(closure);
     debug_return;
+}
+
+/*
+ * Begin the sudo logserver protocol.
+ * When we enter the event loop the ServerHello message will be written
+ * and any pending ClientMessage will be read.
+ */
+static bool
+start_protocol(struct connection_closure *closure)
+{
+    const struct timespec *timeout = logsrvd_conf_get_sock_timeout();
+    debug_decl(start_protocol, SUDO_DEBUG_UTIL);
+
+    if (!fmt_hello_message(&closure->write_buf, closure->tls))
+	debug_return_bool(false);
+
+    if (sudo_ev_add(closure->evbase, closure->write_ev, timeout, false) == -1)
+	debug_return_bool(false);
+
+    /* No read timeout, client messages may happen at arbitrary times. */
+    if (sudo_ev_add(closure->evbase, closure->read_ev, NULL, false) == -1)
+	debug_return_bool(false);
+
+    debug_return_bool(true);
 }
 
 #if defined(HAVE_OPENSSL)
@@ -1238,7 +1277,6 @@ static void
 tls_handshake_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
-
     debug_decl(tls_handshake_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
@@ -1293,6 +1331,11 @@ tls_handshake_cb(int fd, int what, void *v)
                 goto bad;
             }
             debug_return;
+	case SSL_ERROR_SYSCALL:
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                "unexpected error during TLS handshake: %d (%s)",
+                err, strerror(errno));
+            goto bad;
         default:
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                 "unexpected error during TLS handshake: %d (%s)",
@@ -1300,15 +1343,14 @@ tls_handshake_cb(int fd, int what, void *v)
             goto bad;
     }
 
-    /* Enable reader for ClientMessage */
-    if (sudo_ev_add(closure->evbase, closure->read_ev, NULL, false) == -1) {
-        sudo_warn(U_("unable to add event to queue"));
-    }
-
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
         "TLS version: %s, negotiated cipher suite: %s",
         SSL_get_version(closure->ssl),
         SSL_get_cipher(closure->ssl));
+
+    /* Start the actual protocol now that the TLS handshake is complete. */
+    if (!start_protocol(closure))
+	goto bad;
 
     debug_return;
 bad:
@@ -1321,7 +1363,7 @@ bad:
  * Allocate a new connection closure.
  */
 static struct connection_closure *
-connection_closure_alloc(int sock, struct sudo_event_base *base)
+connection_closure_alloc(int sock, bool tls, struct sudo_event_base *base)
 {
     struct connection_closure *closure;
     debug_decl(connection_closure_alloc, SUDO_DEBUG_UTIL);
@@ -1331,6 +1373,7 @@ connection_closure_alloc(int sock, struct sudo_event_base *base)
 
     closure->iolog_dir_fd = -1;
     closure->sock = sock;
+    closure->tls = tls;
     closure->evbase = base;
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
@@ -1356,10 +1399,12 @@ connection_closure_alloc(int sock, struct sudo_event_base *base)
 	goto bad;
 
 #if defined(HAVE_OPENSSL)
-    closure->ssl_accept_ev = sudo_ev_alloc(sock, SUDO_EV_READ,
-	tls_handshake_cb, closure);
-    if (closure->ssl_accept_ev == NULL)
-	goto bad;
+    if (tls) {
+	closure->ssl_accept_ev = sudo_ev_alloc(sock, SUDO_EV_READ,
+	    tls_handshake_cb, closure);
+	if (closure->ssl_accept_ev == NULL)
+	    goto bad;
+    }
 #endif
 
     debug_return_ptr(closure);
@@ -1370,32 +1415,40 @@ bad:
 
 /*
  * New connection.
- * Allocate a connection closure and send a server hello message.
+ * Allocate a connection closure and optionally perform TLS handshake.
  */
 static bool
-new_connection(int sock, const struct sockaddr *sa, struct sudo_event_base *base)
+new_connection(int sock, bool tls, const struct sockaddr *sa,
+    struct sudo_event_base *evbase)
 {
     struct connection_closure *closure;
-
     debug_decl(new_connection, SUDO_DEBUG_UTIL);
 
-    if ((closure = connection_closure_alloc(sock, base)) == NULL)
+    if ((closure = connection_closure_alloc(sock, tls, evbase)) == NULL)
 	goto bad;
 
-    /* Format and write ServerHello message. */
-    if (!fmt_hello_message(&closure->write_buf))
-	goto bad;
-    if (sudo_ev_add(base, closure->write_ev,
-        logsrvd_conf_get_sock_timeout(), false) == -1)
+    /* store the peer's IP address in the closure object */
+    if (sa->sa_family == AF_INET) {
+        struct sockaddr_in *sin = (struct sockaddr_in *)sa;
+        inet_ntop(AF_INET, &sin->sin_addr, closure->ipaddr,
+            sizeof(closure->ipaddr));
+#if defined(HAVE_STRUCT_IN6_ADDR)
+    } else if (sa->sa_family == AF_INET6) {
+        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sa;
+        inet_ntop(AF_INET6, &sin6->sin6_addr, closure->ipaddr,
+            sizeof(closure->ipaddr));
+#endif /* HAVE_STRUCT_IN6_ADDR */
+    } else {
+        sudo_fatal(U_("unable to get remote IP addr"));
         goto bad;
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"connection from %s", closure->ipaddr);
 
 #if defined(HAVE_OPENSSL)
-    /* if TLS is ON, first we need to do handshake with client,
-     * otherwise just enable the reader
-     */
-    if (logsrvd_conf_get_tls_opt()) {
-
-        /* create the SSL object for the closure and attach it to the socket */
+    /* If TLS is enabled, perform the TLS handshake first. */
+    if (tls) {
+        /* Create the SSL object for the closure and attach it to the socket */
         if ((closure->ssl = SSL_new(logsrvd_get_tls_runtime()->ssl_ctx)) == NULL) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                 "unable to create new ssl object: %s",
@@ -1419,39 +1472,18 @@ new_connection(int sock, const struct sockaddr *sa, struct sudo_event_base *base
             goto bad;
         }
 
-        /* enable SSL_accept to begin handshake with client */
-        if (sudo_ev_add(base, closure->ssl_accept_ev,
+        /* Enable SSL_accept to begin handshake with client. */
+        if (sudo_ev_add(evbase, closure->ssl_accept_ev,
 		logsrvd_conf_get_sock_timeout(), false) == -1) {
             sudo_fatal(U_("unable to add event to queue"));
             goto bad;
         }
-    } else {
-        /* Enable reader for ClientMessage*/
-        if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1)
-            goto bad;
     }
-#else
-    /* Enable reader for ClientMessage*/
-    if (sudo_ev_add(base, closure->read_ev, NULL, false) == -1)
-	goto bad;
 #endif
-
-    /* store the peer's IP address in the closure object*/
-    if (sa->sa_family == AF_INET) {
-        struct sockaddr_in *sin = (struct sockaddr_in *)sa;
-        inet_ntop(AF_INET, &sin->sin_addr, closure->ipaddr,
-            sizeof(closure->ipaddr));
-    }
-#if defined(HAVE_STRUCT_IN6_ADDR)
-    else if (sa->sa_family == AF_INET6){
-        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sa;
-        inet_ntop(AF_INET6, &sin6->sin6_addr, closure->ipaddr,
-            sizeof(closure->ipaddr));
-    }
-#endif /* HAVE_STRUCT_IN6_ADDR */
-    else {
-        sudo_fatal(U_("unable to get remote IP addr"));
-        goto bad;
+    /* If no TLS handshake, start the protocol immediately. */
+    if (!tls) {
+	if (!start_protocol(closure))
+	    goto bad;
     }
 
     debug_return_bool(true);
@@ -1464,6 +1496,7 @@ static int
 create_listener(struct listen_address *addr)
 {
     int flags, on, sock;
+    const char *family = "inet4";
     debug_decl(create_listener, SUDO_DEBUG_UTIL);
 
     if ((sock = socket(addr->sa_un.sa.sa_family, SOCK_STREAM, 0)) == -1) {
@@ -1471,17 +1504,21 @@ create_listener(struct listen_address *addr)
 	goto bad;
     }
     on = 1;
-#ifdef IPV6_V6ONLY
+#ifdef HAVE_STRUCT_IN6_ADDR
     if (addr->sa_un.sa.sa_family == AF_INET6) {
+	family = "inet6";
+# ifdef IPV6_V6ONLY
 	/* Disable IPv4-mapped IPv6 addresses. */
 	if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1)
 	    sudo_warn("IPV6_V6ONLY");
+# endif
     }
 #endif
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
 	sudo_warn("SO_REUSEADDR");
     if (bind(sock, &addr->sa_un.sa, addr->sa_len) == -1) {
-	sudo_warn("%s", addr->sa_str);
+	/* TODO: only warn once for IPv4 and IPv6 or disambiguate */
+	sudo_warn("%s (%s)", addr->sa_str, family);
 	goto bad;
     }
     if (listen(sock, SOMAXCONN) == -1) {
@@ -1493,8 +1530,8 @@ create_listener(struct listen_address *addr)
 	sudo_warn("fcntl(O_NONBLOCK)");
 	goto bad;
     }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "listening on %s (AF_INET%s)",
-	addr->sa_str, addr->sa_un.sa.sa_family == AF_INET6 ? "6" : "");
+    sudo_debug_printf(SUDO_DEBUG_INFO, "listening on %s (%s)", addr->sa_str,
+	family);
 
     debug_return_int(sock);
 bad:
@@ -1506,7 +1543,8 @@ bad:
 static void
 listener_cb(int fd, int what, void *v)
 {
-    struct sudo_event_base *base = v;
+    struct listener *l = v;
+    struct sudo_event_base *evbase = sudo_ev_get_base(l->ev);
     union sockaddr_union s_un;
     socklen_t salen = sizeof(s_un);
     int sock;
@@ -1523,7 +1561,7 @@ listener_cb(int fd, int what, void *v)
 		    "unable to set SO_KEEPALIVE option");
 	    }
 	}
-	if (!new_connection(sock, &s_un.sa, base)) {
+	if (!new_connection(sock, l->tls, &s_un.sa, evbase)) {
 	    /* TODO: pause accepting on ENOMEM */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to start new connection");
@@ -1540,10 +1578,9 @@ listener_cb(int fd, int what, void *v)
 }
 
 static bool
-register_listener(struct listen_address *addr, struct sudo_event_base *base)
+register_listener(struct listen_address *addr, struct sudo_event_base *evbase)
 {
     struct listener *l;
-    struct sudo_event *ev;
     int sock;
     debug_decl(register_listener, SUDO_DEBUG_UTIL);
 
@@ -1552,15 +1589,15 @@ register_listener(struct listen_address *addr, struct sudo_event_base *base)
 	debug_return_bool(false);
 
     /* TODO: make non-fatal */
-    ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, base);
-    if (ev == NULL)
-	sudo_fatal(NULL);
-    if (sudo_ev_add(base, ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
     if ((l = malloc(sizeof(*l))) == NULL)
 	sudo_fatal(NULL);
     l->sock = sock;
-    l->ev = ev;
+    l->tls = addr->tls;
+    l->ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, l);
+    if (l->ev == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(evbase, l->ev, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
     TAILQ_INSERT_TAIL(&listeners, l, entries);
 
     debug_return_bool(true);
@@ -1575,6 +1612,7 @@ server_setup(struct sudo_event_base *base)
     struct listen_address *addr;
     struct listener *l;
     int nlisteners = 0;
+    bool config_tls = false;
     debug_decl(server_setup, SUDO_DEBUG_UTIL);
 
     /* Free old listeners (if any) and register new ones. */
@@ -1586,14 +1624,16 @@ server_setup(struct sudo_event_base *base)
     }
     TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries) {
 	nlisteners += register_listener(addr, base);
+	if (addr->tls)
+	    config_tls = true;
     }
 
+    if (config_tls) {
 #if defined(HAVE_OPENSSL)
-    if (logsrvd_conf_get_tls_opt()) {
 	if (!init_tls_server_context())
 	    sudo_fatal(NULL);
-    }
 #endif
+    }
 
     debug_return_bool(nlisteners > 0);
 }

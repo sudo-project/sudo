@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 20, 2020
+.Dd April 30, 2020
 .Dt SUDO_LOGSRV.PROTO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -404,9 +404,6 @@ message ServerHello {
   string server_id = 1;
   string redirect = 2;
   repeated string servers = 3;
-  bool tls = 4;
-  bool tls_server_auth = 5;
-  bool tls_reqcert = 6;
 }
 .Ed
 .Pp
@@ -437,19 +434,6 @@ This can be used to implement log server redundancy and allows the
 client to discover all other log servers simply by connecting to
 one known server.
 This member may be omitted when there is only a single log server.
-.It tls
-If set to true, the connection between the client and the server
-must be secured via Transport Layer Security (TLS) version 1.2 or
-higher.
-.It tls_server_auth
-If set to true, the client should validate the server's certificate
-and only proceed if the certificate can be verified.
-.It tls_reqcert
-If set to true, the client must present its own certificate to the server.
-If the server is unable to verify the client's certificate, the TLS
-handshake will fail.
-This can be used by the server to only allow connections from authorized
-clients.
 .El
 .Ss TimeSpec commit_point
 A periodic time stamp sent by the server to indicate when I/O log
@@ -489,7 +473,9 @@ message.
 The expected protocol flow is as follows:
 .Bl -enum
 .It
-Client connect to server.
+Client connects to the first available server.
+If the client is configured to use TLS, a TLS handshake will be
+attempted.
 .It
 Server sends
 .Em ServerHello .
@@ -525,6 +511,13 @@ Server sends the final
 if one is pending.
 .It
 Server closes the connection.
+After receiving the final
+.Em commit_point ,
+the client client shuts down its side of the TLS connection if TLS
+is in use, and closes the connection.
+.It
+Server shuts down its side of the TLS connection if TLS is in use,
+and closes the connection.
 .El
 .Pp
 At any point, the server may send an

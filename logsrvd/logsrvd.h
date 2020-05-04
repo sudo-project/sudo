@@ -31,9 +31,6 @@
 
 #include "logsrv_util.h"
 
-/* Default listen address (port 30344 on all interfaces). */
-#define DEFAULT_LISTEN_ADDR	"*:" DEFAULT_PORT_STR
-
 /* Default timeout value for server socket */
 #define DEFAULT_SOCKET_TIMEOUT_SEC 30
 
@@ -102,6 +99,7 @@ struct connection_closure {
 #endif
     const char *errstr;
     struct iolog_file iolog_files[IOFD_MAX];
+    bool tls;
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
@@ -131,6 +129,7 @@ struct listen_address {
     char *sa_str;
     union sockaddr_union sa_un;
     socklen_t sa_len;
+    bool tls;
 };
 TAILQ_HEAD(listen_address_list, listen_address);
 
@@ -141,6 +140,7 @@ struct listener {
     TAILQ_ENTRY(listener) entries;
     struct sudo_event *ev;
     int sock;
+    bool tls;
 };
 TAILQ_HEAD(listener_list, listener);
 
@@ -199,7 +199,6 @@ bool logsrvd_conf_tcp_keepalive(void);
 const char *logsrvd_conf_pid_file(void);
 struct timespec *logsrvd_conf_get_sock_timeout(void);
 #if defined(HAVE_OPENSSL)
-bool logsrvd_conf_get_tls_opt(void);
 const struct logsrvd_tls_config *logsrvd_get_tls_config(void);
 struct logsrvd_tls_runtime *logsrvd_get_tls_runtime(void);
 #endif
