@@ -164,12 +164,6 @@ logsrvd_conf_get_sock_timeout(void)
 }
 
 #if defined(HAVE_OPENSSL)
-bool
-logsrvd_conf_get_tls_opt(void)
-{
-    return logsrvd_config->server.tls;
-}
-
 const struct logsrvd_tls_config *
 logsrvd_get_tls_config(void)
 {
@@ -373,7 +367,6 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str)
 }
 
 /* Server callbacks */
-/* TODO: unit test */
 static bool
 cb_listen_address(struct logsrvd_config *config, const char *str)
 {
@@ -389,11 +382,18 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
     }
 
     /* Parse host[:port] */
-    if (!sudo_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT_STR,
-	    DEFAULT_PORT_STR))
+    if (!sudo_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
+	    DEFAULT_PORT_TLS))
 	goto done;
     if (host[0] == '*' && host[1] == '\0')
 	host = NULL;
+
+#if !defined(HAVE_OPENSSL)
+    if (tls) {
+	sudo_warn("%s", U_("TLS not supported"));
+	goto done;
+    }
+#endif
 
     /* Resolve host (and port if it is a service). */
     memset(&hints, 0, sizeof(hints));
@@ -402,7 +402,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
     hints.ai_flags = AI_PASSIVE;
     error = getaddrinfo(host, port, &hints, &res0);
     if (error != 0) {
-	sudo_warnx("%s", gai_strerror(error));
+	sudo_gai_warn(error, U_("%s:%s"), host ? host : "*", port);
 	goto done;
     }
     for (res = res0; res != NULL; res = res->ai_next) {
@@ -419,6 +419,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 	}
 	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
 	addr->sa_len = res->ai_addrlen;
+	addr->tls = tls;
 	TAILQ_INSERT_TAIL(&config->server.addresses, addr, entries);
     }
 
@@ -482,19 +483,6 @@ cb_pid_file(struct logsrvd_config *config, const char *str)
 }
 
 #if defined(HAVE_OPENSSL)
-static bool
-cb_tls_opt(struct logsrvd_config *config, const char *str)
-{
-    int val;
-    debug_decl(cb_tls_opt, SUDO_DEBUG_UTIL);
-
-    if ((val = sudo_strtobool(str)) == -1)
-	debug_return_bool(false);
-
-    config->server.tls = val;
-    debug_return_bool(true);
-}
-
 static bool
 cb_tls_key(struct logsrvd_config *config, const char *path)
 {
@@ -761,7 +749,6 @@ static struct logsrvd_config_entry server_conf_entries[] = {
     { "tcp_keepalive", cb_keepalive },
     { "pid_file", cb_pid_file },
 #if defined(HAVE_OPENSSL)
-    { "tls", cb_tls_opt },
     { "tls_key", cb_tls_key },
     { "tls_cacert", cb_tls_cacert },
     { "tls_cert", cb_tls_cert },
@@ -1069,8 +1056,12 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 
     /* There can be multiple addresses so we can't set a default earlier. */
     if (TAILQ_EMPTY(&config->server.addresses)) {
-	if (!cb_listen_address(config, "*:30344"))
+	if (!cb_listen_address(config, "*:" DEFAULT_PORT))
 	    debug_return_bool(false);
+#if defined(HAVE_OPENSSL)
+	if (!cb_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)"))
+	    debug_return_bool(false);
+#endif
     }
 
     /* Open event log if specified. */

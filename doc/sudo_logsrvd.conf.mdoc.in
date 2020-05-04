@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 28, 2020
+.Dd April 30, 2020
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -76,9 +76,10 @@ The
 section configures the address and port the server will listen on.
 The following keys are recognized:
 .Bl -tag -width 8n
-.It listen_address = host Ns Op : Ns port
-The host name or IP address and optional port to listen on.
-If no port is specified, port 30344 will be used.
+.It listen_address = host Ns Oo : Ns port Oc Ns Op (tls)
+The host name or IP address, optional port to listen on and
+an optional Transport Layer Security (TLS) flag in parentheses.
+.Pp
 The host may be a host name, an IPv4 address, an IPv6 address
 in square brackets or the wild card entry
 .Ql * .
@@ -88,14 +89,29 @@ will cause
 .Nm sudo_logsrvd
 to listen on all configured network interfaces.
 .Pp
+If the tls flag is set,
+.Nm sudo_logsrvd
+will secure the connection with TLS version 1.2 or 1.3.
+Versions of TLS prior to 1.2 are not supported.
+See
+.Xr sudo_logsrvd @mansectsu@
+for details on generating TLS keys and certificates.
+.Pp
 If a port is specified, it may either be a port number or a known
 service name as defined by the system service name database.
-The default value is
-.Li listen_address = *:30344
-which will listen on all configured network interfaces.
+If no port is specified, port 30343 will be used for plaintext
+connections and port 30344 will be used for TLS connections.
+.Pp
+The default value is:
+.Bd -literal -compact -offset indent
+listen_address = *:30343
+listen_address = *:30344(tls)
+.Ed
+which will listen on all configured network interfaces for both
+plaintext and TLS connections.
 Multiple
 .Em listen_address
-lines may be specified to listen on more than one interface.
+lines may be specified to listen on more than one port or interface.
 .It pid_file = path
 The path to the file containing the process ID of the running
 .Nm sudo_logsrvd .
@@ -118,16 +134,6 @@ The amount of time, in seconds,
 will wait for the client to respond.
 A value of 0 will disable the timeout.
 The default value is 30.
-.It tls = boolean
-If true,
-.Nm sudo_logsrvd
-will secure network connections with Transport Layer Security (TLS)
-version 1.2 or 1.3.
-Versions of TLS prior to 1.2 are not supported.
-See
-.Xr sudo_logsrvd @mansectsu@
-for details on generating TLS keys and certificates.
-The default value is false.
 .It tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
@@ -500,19 +506,23 @@ Sudo log server configuration file
 #
 
 [server]
-# The host name or IP address and port to listen on.  If no port is
-# specified, port 30344 will be used.
+# The host name or IP address and port to listen on with an optional TLS
+# flag.  If no port is specified, port 30343 will be used for plaintext
+# connections and port 30344 will be used to TLS connections.
 # The following forms are accepted:
-#   listen_address = hostname
-#   listen_address = hostname:port
-#   listen_address = IPv4_address
-#   listen_address = IPv4_address:port
-#   listen_address = [IPv6_address]
-#   listen_address = [IPv6_address]:port
+#   listen_address = hostname(tls)
+#   listen_address = hostname:port(tls)
+#   listen_address = IPv4_address(tls)
+#   listen_address = IPv4_address:port(tls)
+#   listen_address = [IPv6_address](tls)
+#   listen_address = [IPv6_address]:port(tls)
+#
+# The (tls) suffix should be omitted for plaintext connections.
 #
 # Multiple listen_address settings may be specified.
 # The default is to listen on all addresses.
-#listen_address = *:30344
+#listen_address = *:30343
+#listen_address = *:30344(tls)
 
 # The file containing the ID of the running sudo_logsrvd process.
 #pid_file = @rundir@/sudo_logsrvd.pid
@@ -523,10 +533,6 @@ Sudo log server configuration file
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 #timeout = 30
-
-# If set, secure connections with TLS 1.2 or 1.3.
-# By default, server connections are not encrypted.
-#tls = true
 
 # If set, server certificate will be verified at server startup and
 # also connecting clients will perform server authentication by
