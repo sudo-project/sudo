@@ -302,6 +302,7 @@ tls_connect_async(struct client_closure *closure)
 done:
     sudo_ev_base_free(evbase);
     sudo_ev_free(closure->tls_connect_ev);
+    closure->tls_connect_ev = NULL;
 
     debug_return_int(closure->tls_connect_state);
 }
@@ -420,7 +421,10 @@ client_closure_free(struct client_closure *closure)
 
     if (closure != NULL) {
 #if defined(HAVE_OPENSSL)
-        SSL_free(closure->ssl);
+        if (closure->ssl != NULL) {
+            SSL_shutdown(closure->ssl);
+            SSL_free(closure->ssl);
+        }
 #endif
         TAILQ_REMOVE(&connections, closure, entries);
         close(closure->sock);
@@ -431,6 +435,7 @@ client_closure_free(struct client_closure *closure)
 #endif
         free(closure->read_buf.data);
         free(closure->write_buf.data);
+        free(closure->buf);
         free(closure);
     }
 
@@ -623,7 +628,7 @@ fmt_accept_message(struct client_closure *closure)
     struct iolog_info *log_info = closure->log_info;
     char *hostname;
     bool ret = false;
-    size_t n;
+    size_t info_msgs_size, n;
     debug_decl(fmt_accept_message, SUDO_DEBUG_UTIL);
 
     /*
@@ -648,16 +653,16 @@ fmt_accept_message(struct client_closure *closure)
 	sudo_fatal(NULL);
 
     /* The sudo I/O log info file has limited info. */
-    accept_msg.n_info_msgs = 10;
-    accept_msg.info_msgs = calloc(accept_msg.n_info_msgs, sizeof(InfoMessage *));
+    info_msgs_size = 10;
+    accept_msg.info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
     if (accept_msg.info_msgs == NULL) {
-	accept_msg.n_info_msgs = 0;
+	info_msgs_size = 0;
 	goto done;
     }
-    for (n = 0; n < accept_msg.n_info_msgs; n++) {
+    for (n = 0; n < info_msgs_size; n++) {
 	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
 	if (accept_msg.info_msgs[n] == NULL) {
-	    accept_msg.n_info_msgs = n;
+	    info_msgs_size = n;
 	    goto done;
 	}
 	info_message__init(accept_msg.info_msgs[n]);
@@ -733,11 +738,12 @@ fmt_accept_message(struct client_closure *closure)
     }
 
 done:
-    for (n = 0; n < accept_msg.n_info_msgs; n++) {
+    for (n = 0; n < info_msgs_size; n++) {
 	free(accept_msg.info_msgs[n]);
     }
     free(accept_msg.info_msgs);
     free(hostname);
+    free(runargv.strings);
 
     debug_return_bool(ret);
 }
@@ -1119,8 +1125,6 @@ handle_log_id(char *id, struct client_closure *closure)
     if (!testrun)
         printf("remote log ID: %s\n", id);
 
-    if ((closure->iolog_id = strdup(id)) == NULL)
-	sudo_fatal(NULL);
     debug_return_bool(true);
 }
 
@@ -1623,6 +1627,7 @@ main(int argc, char *argv[])
     sudo_gettime_real(&t_start);
 
     sudo_ev_dispatch(evbase);
+    sudo_ev_base_free(evbase);
 
     sudo_gettime_real(&t_end);
     sudo_timespecsub(&t_end, &t_start, &t_result);
@@ -1640,6 +1645,10 @@ main(int argc, char *argv[])
         }
         client_closure_free(closure);
     }
+    iolog_free_loginfo(log_info);
+#if defined(HAVE_OPENSSL)
+    SSL_CTX_free(ssl_ctx);
+#endif
 
     if (finished != 0) {
         printf("%d I/O log%s transmitted successfully in %lld.%.9ld seconds\n",

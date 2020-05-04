@@ -698,7 +698,7 @@ fmt_accept_message(struct client_closure *closure)
     for (n = 0; n < info_msgs_size; n++) {
 	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
 	if (accept_msg.info_msgs[n] == NULL) {
-	    accept_msg.n_info_msgs = n;
+	    info_msgs_size = n;
 	    goto done;
 	}
 	info_message__init(accept_msg.info_msgs[n]);
