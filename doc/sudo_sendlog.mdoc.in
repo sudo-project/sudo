@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 23, 2020
+.Dd April 30, 2020
 .Dt SUDO_SENDLOG @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -23,7 +23,7 @@
 .Nd send sudo I/O log to log server
 .Sh SYNOPSIS
 .Nm sudo_sendlog
-.Op Fl V
+.Op Fl nV
 .Op Fl b Ar ca_bundle
 .Op Fl c Ar cert_file
 .Op Fl h Ar host
@@ -51,11 +51,7 @@ to use instead of the system's default certificate authority database
 when authenticating the log server.
 The default is to use the system's default certificate authority database.
 .It Fl c , -cert
-The path to the client's certificate file, in PEM format.
-This setting is required when the connection to the remote log server
-is secured with TLS.
-.It Fl k , -key
-The path to the client's private key file, in PEM format.
+The path to the client's certificate file in PEM format.
 This setting is required when the connection to the remote log server
 is secured with TLS.
 .It Fl -help
@@ -74,6 +70,19 @@ is reported by the server when it creates the remote I/O log.
 This option may only be used in conjunction with the
 .Fl r
 option.
+.It Fl k , -key
+The path to the client's private key file in PEM format.
+This setting is required when the connection to the remote log server
+is secured with TLS.
+.It Fl n , -no-verify
+If specified, the server's certificate will not be verified during
+the TLS handshake.
+By default,
+.Nm
+verifies that the server's certificate is valid and that it contains either
+the server's host name or its IP address.
+This setting is only supported when the connection to the remote log server
+is secured with TLS.
 .It Fl p , -port
 Use the specified network
 .Ar port
