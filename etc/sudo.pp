@@ -340,10 +340,12 @@ still allow people to get their work done."
 	    echo "Conflicts: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Provides: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
-	    DEPENDS="${DEPENDS}, libldap-2.4-2"
+	    DEPENDS="${DEPENDS:+, }libldap-2.4-2"
 	fi
 	cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
-	sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	if test -n "${DEPENDS}"; then
+	    sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	fi
 	rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	echo "Homepage: https://www.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	echo "Bugs: https://bugzilla.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
