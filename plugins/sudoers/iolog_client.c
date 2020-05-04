@@ -277,6 +277,8 @@ bad:
 struct tls_connect_closure {
     bool tls_conn_status;
     SSL *ssl;
+    const char *host;
+    const char *port;
     struct sudo_event_base *evbase;
     struct sudo_event *tls_connect_ev;
 };
@@ -286,8 +288,7 @@ tls_connect_cb(int sock, int what, void *v)
 {
     struct tls_connect_closure *closure = v;
     struct timespec timeo = { 10, 0 };
-    const char *errstr;
-    int tls_con, err;
+    int tls_con;
     debug_decl(tls_connect_cb, SUDOERS_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
@@ -303,14 +304,9 @@ tls_connect_cb(int sock, int what, void *v)
             SSL_get_version(closure->ssl), SSL_get_cipher(closure->ssl));
         closure->tls_conn_status = true;
     } else {
-        switch ((err = SSL_get_error(closure->ssl, tls_con))) {
-            /* TLS connect successful */
-            case SSL_ERROR_NONE:
-                sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                    "TLS version: %s, negotiated cipher suite: %s",
-                    SSL_get_version(closure->ssl), SSL_get_cipher(closure->ssl));
-                closure->tls_conn_status = true;
-                break;
+	const char *errstr;
+
+        switch (SSL_get_error(closure->ssl, tls_con)) {
 	    /* TLS handshake is not finished, reschedule event */
             case SSL_ERROR_WANT_READ:
 		sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
@@ -344,11 +340,14 @@ tls_connect_cb(int sock, int what, void *v)
 		    goto bad;
                 }
                 break;
+	    case SSL_ERROR_SYSCALL:
+		sudo_warnx(U_("TLS connection to %s:%s failed: %s"),
+		    closure->host, closure->port, strerror(errno));
+		goto bad;
             default:
-                errstr = err == SSL_ERROR_SYSCALL ? strerror(errno) :
-                    ERR_error_string(ERR_get_error(), NULL);
-                sudo_warnx(U_("SSL_connect failed: ssl_error=%d, stack=%s"),
-                    err, errstr);
+                errstr = ERR_reason_error_string(ERR_get_error());
+		sudo_warnx(U_("TLS connection to %s:%s failed: %s"),
+		    closure->host, closure->port, errstr);
                 goto bad;
         }
     }
@@ -363,13 +362,16 @@ bad:
 }
 
 static bool
-tls_timed_connect(SSL *ssl, const struct timespec *timo)
+tls_timed_connect(SSL *ssl, const char *host, const char *port,
+    const struct timespec *timo)
 {
     struct tls_connect_closure closure;
     debug_decl(tls_timed_connect, SUDOERS_DEBUG_UTIL);
 
     memset(&closure, 0, sizeof(closure));
     closure.ssl = ssl;
+    closure.host = host;
+    closure.port = port;
     closure.evbase = sudo_ev_base_alloc();
     closure.tls_connect_ev = sudo_ev_alloc(SSL_get_fd(ssl),
         SUDO_PLUGIN_EV_WRITE, tls_connect_cb, &closure);
@@ -497,7 +499,7 @@ connect_server(const char *host, const char *port, bool tls,
                 continue;
             }
             /* Perform TLS handshake. */
-            if (!tls_timed_connect(closure->ssl, timo)) {
+            if (!tls_timed_connect(closure->ssl, host, port, timo)) {
                 cause = U_("TLS handshake was unsuccessful");
                 save_errno = errno;
                 close(sock);
@@ -1407,8 +1409,9 @@ server_msg_cb(int fd, int what, void *v)
         nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size - buf->len);
         if (nread <= 0) {
 	    const char *errstr;
-            int err = SSL_get_error(closure->ssl, nread);
-            switch (err) {
+            int err;
+
+            switch (SSL_get_error(closure->ssl, nread)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
 		    nread = 0;
@@ -1433,11 +1436,28 @@ server_msg_cb(int fd, int what, void *v)
 		    }
 		    closure->write_instead_of_read = true;
                     debug_return;
+                case SSL_ERROR_SSL:
+                    /*
+                     * For TLS 1.3, if the cert verify function on the server
+                     * returns an error, OpenSSL will send an internal error
+                     * alert when we read ServerHello.  Convert to a more useful
+                     * message and hope that no actual internal error occurs.
+                     */
+                    err = ERR_get_error();
+                    if (closure->state == RECV_HELLO &&
+                        ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
+                        errstr = "host name does not match certificate";
+                    } else {
+                        errstr = ERR_reason_error_string(err);
+                    }
+                    sudo_warnx("%s", errstr);
+                    goto bad;
+                case SSL_ERROR_SYSCALL:
+                    sudo_warn("recv");
+                    goto bad;
                 default:
-                    errstr = err == SSL_ERROR_SYSCALL ? strerror(errno) :
-                        ERR_error_string(ERR_get_error(), NULL);
-                    sudo_warnx(U_("SSL_read failed: ssl_error=%d, stack=%s"),
-                        err, errstr);
+                    errstr = ERR_reason_error_string(ERR_get_error());
+                    sudo_warnx("recv: %s", errstr);
                     goto bad;
             }
         }
@@ -1544,8 +1564,11 @@ client_msg_cb(int fd, int what, void *v)
         nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
         if (nwritten <= 0) {
 	    const char *errstr;
-            int err = SSL_get_error(closure->ssl, nwritten);
-            switch (err) {
+
+            switch (SSL_get_error(closure->ssl, nwritten)) {
+		case SSL_ERROR_ZERO_RETURN:
+		    /* ssl connection shutdown */
+		    goto bad;
                 case SSL_ERROR_WANT_READ:
 		    /* ssl wants to read, read event always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
@@ -1557,11 +1580,16 @@ client_msg_cb(int fd, int what, void *v)
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
 			"SSL_write returns SSL_ERROR_WANT_WRITE");
                     debug_return;
+                case SSL_ERROR_SSL:
+                    errstr = ERR_reason_error_string(ERR_get_error());
+                    sudo_warnx("%s", errstr);
+                    goto bad;
+                case SSL_ERROR_SYSCALL:
+                    sudo_warn("send");
+                    goto bad;
                 default:
-                    errstr = err == SSL_ERROR_SYSCALL ? strerror(errno) :
-                        ERR_error_string(ERR_get_error(), NULL);
-                    sudo_warnx(U_("SSL_write failed: ssl_error=%d, stack=%s"),
-                        err, errstr);
+                    errstr = ERR_reason_error_string(ERR_get_error());
+                    sudo_warnx("send: %s", errstr);
                     goto bad;
             }
         }
