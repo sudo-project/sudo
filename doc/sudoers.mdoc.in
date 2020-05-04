@@ -4321,7 +4321,8 @@ Server addresses should be of the form
 .Dq host Ns Oo : Ns port Oc Ns Op (tls) .
 The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
-If the tls flag is present, the connection will be secured
+.Pp
+If the optional tls flag is present, the connection will be secured
 with Transport Layer Security (TLS) version 1.2 or 1.3.
 Versions of TLS prior to 1.2 are not supported.
 .Pp

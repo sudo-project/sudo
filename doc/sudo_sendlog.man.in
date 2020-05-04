@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_SENDLOG" "@mansectsu@" "April 23, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_SENDLOG" "@mansectsu@" "April 30, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -25,7 +25,7 @@
 .SH "SYNOPSIS"
 .HP 13n
 \fBsudo_sendlog\fR
-[\fB\-V\fR]
+[\fB\-nV\fR]
 [\fB\-b\fR\ \fIca_bundle\fR]
 [\fB\-c\fR\ \fIcert_file\fR]
 [\fB\-h\fR\ \fIhost\fR]
@@ -54,13 +54,7 @@ when authenticating the log server.
 The default is to use the system's default certificate authority database.
 .TP 12n
 \fB\-c\fR, \fB\--cert\fR
-The path to the client's certificate file, in PEM format.
-This setting is required when the connection to the remote log server
-is secured with TLS.
-.TP 12n
-\fB\-k\fR, \fB\--key\fR
-.br
-The path to the client's private key file, in PEM format.
+The path to the client's certificate file in PEM format.
 This setting is required when the connection to the remote log server
 is secured with TLS.
 .TP 12n
@@ -82,6 +76,22 @@ is reported by the server when it creates the remote I/O log.
 This option may only be used in conjunction with the
 \fB\-r\fR
 option.
+.TP 12n
+\fB\-k\fR, \fB\--key\fR
+.br
+The path to the client's private key file in PEM format.
+This setting is required when the connection to the remote log server
+is secured with TLS.
+.TP 12n
+\fB\-n\fR, \fB\--no-verify\fR
+If specified, the server's certificate will not be verified during
+the TLS handshake.
+By default,
+\fBsudo_sendlog\fR
+verifies that the server's certificate is valid and that it contains either
+the server's host name or its IP address.
+This setting is only supported when the connection to the remote log server
+is secured with TLS.
 .TP 12n
 \fB\-p\fR, \fB\--port\fR
 Use the specified network

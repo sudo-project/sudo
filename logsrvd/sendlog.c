@@ -92,10 +92,10 @@ static int finished_transmissions = 0;
 
 #if defined(HAVE_OPENSSL)
 static SSL_CTX *ssl_ctx = NULL;
-static const char *server_cert_error = NULL;
 static const char *ca_bundle = NULL;
 static const char *cert = NULL;
 static const char *key = NULL;
+static bool verify_server = true;
 #endif
 
 /* Server callback may redirect to client callback for TLS. */
@@ -106,13 +106,14 @@ static void
 usage(bool fatal)
 {
 #if defined(HAVE_OPENSSL)
-    fprintf(stderr, "usage: %s [-b ca_bundle] [-c cert_file] [-h host] "
+    fprintf(stderr, "usage: %s [-V] [-b ca_bundle] [-c cert_file] [-h host] "
 	"[-i iolog-id] [-k key_file] [-p port] "
 #else
-    fprintf(stderr, "usage: %s [-h host] [-i iolog-id] [-p port] "
+    fprintf(stderr, "usage: %s [-V] [-h host] [-i iolog-id] [-p port] "
 #endif
 	"[-r restart-point] [-t number] /path/to/iolog\n", getprogname());
-    exit(EXIT_FAILURE);
+    if (fatal)
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -139,24 +140,20 @@ help(void)
 
 #if defined(HAVE_OPENSSL)
 /*
- * Check the server's certificate.  If there is a problem, stores an error
- * string in server_cert_error.  The TLS handshake is allowed to proceed
- * even if the server's cert does not validate.  Checking of the server's
- * cert status is deferred until after the ServerHello message is parsed.
+ * Check that the server's certificate is valid that it contains the
+ * server name or IP address.
+ * Returns 0 if the cert is invalid, else 1.
  */
 static int
 verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
 {
-    HostnameValidationResult result;
     X509 *current_cert;
     X509 *peer_cert;
     debug_decl(verify_peer_identity, SUDO_DEBUG_UTIL);
 
-    /* if pre-verification of the cert failed, store the error string. */
+    /* if pre-verification of the cert failed, just propagate that result back */
     if (preverify_ok != 1) {
-	int err = X509_STORE_CTX_get_error(ctx);
-	server_cert_error = X509_verify_cert_error_string(err);
-        debug_return_int(1);
+        debug_return_int(0);
     }
 
     /* since this callback is called for each cert in the chain,
@@ -168,12 +165,11 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
         debug_return_int(1);
     }
 
-    result = validate_hostname(peer_cert, server_name, server_ip, 0);
-    if (result != MatchFound) {
-	server_cert_error = "server certificate does not match host name";
+    if (validate_hostname(peer_cert, server_name, server_ip, 0) == MatchFound) {
+        debug_return_int(1);
     }
 
-    debug_return_int(1);
+    debug_return_int(0);
 }
 
 static SSL_CTX *
@@ -236,16 +232,18 @@ init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const
         }
     }
 
-    /* verify server cert during the handshake */
-    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_peer_identity);
+    if (verify_server) {
+        /* verify server cert during the handshake */
+        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_peer_identity);
+    }
 
-    goto exit;
+    goto done;
 
 bad:
     SSL_CTX_free(ctx);
 
-exit:
-    return ctx;
+done:
+    debug_return_ptr(ctx);
 }
 
 static void
@@ -342,10 +340,6 @@ tls_setup(struct client_closure *closure)
     const char *errstr;
     debug_decl(tls_setup, SUDO_DEBUG_UTIL);
 
-    if (ca_bundle == NULL) {
-        sudo_warnx("%s", U_("CA bundle file was not specified"));
-        goto bad;
-    }
     if ((ssl_ctx = init_tls_client_context(ca_bundle, cert, key)) == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
         sudo_warnx(U_("Unable to initialize ssl context: %s"), errstr);
@@ -1089,18 +1083,6 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
-#if defined(HAVE_OPENSSL)
-    if (msg->tls_reqcert && cert == NULL) {
-        sudo_warnx("%s", U_("Client certificate was not specified"));
-	debug_return_bool(false);
-    }
-
-    if (msg->tls_server_auth && server_cert_error != NULL) {
-	sudo_warnx("%s", server_cert_error);
-	debug_return_bool(false);
-    }
-#endif
-
     if (!testrun) {
         printf("Server ID: %s\n", msg->server_id);
         /* TODO: handle redirect */
@@ -1109,16 +1091,6 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
         for (n = 0; n < msg->n_servers; n++) {
             printf("Server %zu: %s\n", n + 1, msg->servers[n]);
         }
-
-#if defined(HAVE_OPENSSL)
-        if (msg->tls) {
-            printf("Requested protocol: TLS\n");
-            printf("Server authentication: %s\n", msg->tls_server_auth ? "Required":"Not Required");
-            printf("Client authentication: %s\n", msg->tls_reqcert ? "Required":"Not Required");
-        } else {
-            printf("Requested protocol: ClearText\n");
-        }
-#endif
     }
 
     debug_return_bool(true);
@@ -1478,7 +1450,7 @@ parse_timespec(struct timespec *ts, char *strval)
 }
 
 #if defined(HAVE_OPENSSL)
-static const char short_opts[] = "h:i:p:r:t:b:c:k:V";
+static const char short_opts[] = "h:i:np:r:t:b:c:k:V";
 #else
 static const char short_opts[] = "h:i:p:r:t:V";
 #endif
@@ -1493,6 +1465,7 @@ static struct option long_opts[] = {
     { "ca-bundle",	required_argument,	NULL,	'b' },
     { "cert",		required_argument,	NULL,	'c' },
     { "key",		required_argument,	NULL,	'k' },
+    { "no-verify",	no_argument,		NULL,	'n' },
 #endif
     { "version",	no_argument,		NULL,	'V' },
     { NULL,		no_argument,		NULL,	0 },
@@ -1574,6 +1547,9 @@ main(int argc, char *argv[])
 	    break;
 	case 'k':
 	    key = optarg;
+	    break;
+	case 'n':
+	    verify_server = false;
 	    break;
 #endif
 	case 'V':

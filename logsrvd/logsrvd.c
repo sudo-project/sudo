@@ -186,18 +186,6 @@ fmt_hello_message(struct connection_buffer *buf, bool tls)
 
     /* TODO: implement redirect and servers array.  */
     hello.server_id = (char *)server_id;
-#if defined(HAVE_OPENSSL)
-    if (tls) {
-	hello.tls = true;
-	hello.tls_server_auth = logsrvd_get_tls_config()->verify;
-	hello.tls_reqcert = logsrvd_get_tls_config()->check_peer;
-    } else
-#endif
-    {
-	hello.tls = false;
-	hello.tls_server_auth = false;
-	hello.tls_reqcert = false;
-    }
     msg.hello = &hello;
     msg.type_case = SERVER_MESSAGE__TYPE_HELLO;
 
