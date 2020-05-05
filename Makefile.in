@@ -53,6 +53,9 @@ sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 shlib_mode = @SHLIB_MODE@
 
+# Version of python detected by configure (major.minor)
+python_version = @PYTHON_VERSION@
+
 SUBDIRS = lib/util @ZLIB_SRC@ lib/iolog @LOGSRV@ @LOGSRVD@ \
 	  plugins/audit_json plugins/group_file plugins/sample_approval \
 	  plugins/sudoers plugins/system_group @PYTHON_PLUGIN_SRC@ src \
@@ -391,6 +394,7 @@ package: @PPFILES@
 		sudoers_gid=$(sudoers_gid) \
 		sudoers_mode=$(sudoers_mode) \
 		shlib_mode=$(shlib_mode) \
+		python_version=$(python_version) \
 		version=$(VERSION) $(PPVARS); \
 	    done
 

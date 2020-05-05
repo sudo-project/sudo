@@ -115,9 +115,12 @@
 	fi
 
 %depend [deb]
-	libc6, libpython3.6, sudo
+	libc6, libpython@PYTHON_VERSION@, sudo
 
 %fixup [deb]
+	cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	sed "s/@PYTHON_VERSION@/%{python_version}/g" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	echo "Homepage: https://www.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	echo "Bugs: https://bugzilla.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
