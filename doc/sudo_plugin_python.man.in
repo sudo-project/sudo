@@ -1474,7 +1474,7 @@ sudo.conv(message(s), on_suspend=suspend_function,
 .PP
 The function arguments are as follows:
 .TP 6n
-\fImesssage(s)\fR
+\fImessage(s)\fR
 One of more messages (of type
 \fBsudo.ConvMessage\fR),
 each describing a conversation.
@@ -1643,7 +1643,7 @@ The function arguments are as follows:
 .br
 an integer, use one of the log level constants below
 .TP 6n
-\fImesssage(s)\fR
+\fImessage(s)\fR
 one or more messages to log
 .PP
 \fIAvailable log levels:\fR
@@ -1652,7 +1652,7 @@ l l l.
 .PP
 \fBsudo.conf name\fR	\fBPython constant\fR	\fBdescription\fR
 .PP
-crit	sudo.DEBUG.CRIT	only cricital messages
+crit	sudo.DEBUG.CRIT	only critical messages
 .PP
 err	sudo.DEBUG.ERROR	
 .PP

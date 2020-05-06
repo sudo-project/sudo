@@ -640,7 +640,7 @@ sudoers_io_open_remote(struct timespec *now)
 	goto done;
     }
 
-    /* Read ServerHello syncronously or fail. */
+    /* Read ServerHello synchronously or fail. */
     if (read_server_hello(client_closure))
 	ret = 1;
 

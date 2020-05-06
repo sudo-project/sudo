@@ -1749,7 +1749,7 @@ write_pidfile(void)
 }
 
 /*
- * Fork, detatch from the terminal and write pid file unless nofork set.
+ * Fork, detach from the terminal and write pid file unless nofork set.
  */
 static void
 daemonize(bool nofork)

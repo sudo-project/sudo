@@ -331,7 +331,7 @@ still allow people to get their work done."
 	libc6, libpam0g, libpam-modules, zlib1g, libselinux1, libssl1.1
 
 %fixup [deb]
-	# Add Conflicts, Replaces headers and add libldap depedency as needed.
+	# Add Conflicts, Replaces headers and add libldap dependency as needed.
 	DEPENDS="%{linux_audit}"
 	if test -z "%{flavor}"; then
 	    echo "Conflicts: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control

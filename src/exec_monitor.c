@@ -144,7 +144,7 @@ handle_winch(struct monitor_closure *mc, unsigned int wsize_packed)
     struct winsize wsize, owsize;
     debug_decl(handle_winch, SUDO_DEBUG_EXEC);
 
-    /* Rows and colums are stored as two shorts packed into a single int. */
+    /* Rows and columns are stored as two shorts packed into a single int. */
     wsize.ws_row = wsize_packed & 0xffff;
     wsize.ws_col = (wsize_packed >> 16) & 0xffff;
 

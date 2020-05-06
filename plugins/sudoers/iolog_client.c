@@ -528,7 +528,7 @@ connect_server(const char *host, const char *port, bool tls,
 /*
  * Connect to the first server in the list.
  * Stores socket in closure with O_NONBLOCK and close-on-exec flags set.
- * Retuns true on success, else false.
+ * Returns true on success, else false.
  */
 bool
 log_server_connect(struct client_closure *closure)
@@ -1158,7 +1158,7 @@ client_message_completion(struct client_closure *closure)
 
 /*
  * Read the ServerHello message from the log server.
- * We do this syncronously, since we don't want the command to run
+ * We do this synchronously, since we don't want the command to run
  * before the log server connection is completely established.
  */
 bool
@@ -1168,7 +1168,7 @@ read_server_hello(struct client_closure *closure)
     bool ret = false;
     debug_decl(read_server_hello, SUDOERS_DEBUG_UTIL);
 
-    /* Get new event base so we can read ServerHello syncronously. */
+    /* Get new event base so we can read ServerHello synchronously. */
     evbase = sudo_ev_base_alloc();
     if (evbase == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));

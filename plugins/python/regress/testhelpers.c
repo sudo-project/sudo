@@ -31,7 +31,7 @@ struct TestData data;
 static void
 clean_output(char *output)
 {
-    // we replace some output which otherwise would be test run dependant
+    // we replace some output which otherwise would be test run dependent
     str_replace_in_place(output, MAX_OUTPUT, data.tmp_dir, TEMP_PATH_TEMPLATE);
 
     if (data.tmp_dir2)

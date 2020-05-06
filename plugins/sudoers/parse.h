@@ -147,7 +147,7 @@ struct command_options {
  * the data structure used is a doubly-linked tail queue.  While sudoers
  * is being parsed, a headless tail queue is used where the first entry
  * acts as the head and the prev pointer does double duty as the tail pointer.
- * This makes it possible to trivally append sub-lists.  In addition, the prev
+ * This makes it possible to trivially append sub-lists.  In addition, the prev
  * pointer is always valid (even if it points to itself).  Unlike a circle
  * queue, the next pointer of the last entry is NULL and does not point back
  * to the head.  When the tail queue is finalized, it is converted to a
@@ -200,7 +200,7 @@ struct sudo_command {
 
 /*
  * Structure describing a linked list of Cmnd_Specs.
- * XXX - include struct command_options instad of its contents inline
+ * XXX - include struct command_options instead of its contents inline
  */
 struct cmndspec {
     TAILQ_ENTRY(cmndspec) entries;

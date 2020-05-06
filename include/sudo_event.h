@@ -95,7 +95,7 @@ struct sudo_event_base {
     sig_atomic_t signal_pending[NSIG]; /* pending signals */
     sig_atomic_t signal_caught;	/* at least one signal caught */
     int num_handlers;		/* number of installed handlers */
-    int signal_pipe[2];		/* so we can wake up on singal */
+    int signal_pipe[2];		/* so we can wake up on signal */
 #if defined(HAVE_POLL) || defined(HAVE_PPOLL)
     struct pollfd *pfds;	/* array of struct pollfd */
     int pfd_max;		/* size of the pfds array */

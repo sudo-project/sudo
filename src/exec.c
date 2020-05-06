@@ -341,7 +341,7 @@ sudo_needs_pty(struct command_details *details)
 }
 
 /*
- * Execute a command, potentially in a pty with I/O loggging, and
+ * Execute a command, potentially in a pty with I/O logging, and
  * wait for it to finish.
  * This is a little bit tricky due to how POSIX job control works and
  * we fact that we have two different controlling terminals to deal with.

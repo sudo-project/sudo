@@ -36,7 +36,7 @@ class DebugDemoPlugin(sudo.Plugin):
         load        logs python plugin loading / unloading
 
     Log levels
-        crit      sudo.DEBUG.CRIT       --> only cricital messages
+        crit      sudo.DEBUG.CRIT       --> only critical messages
         err       sudo.DEBUG.ERROR
         warn      sudo.DEBUG.WARN
         notice    sudo.DEBUG.NOTICE

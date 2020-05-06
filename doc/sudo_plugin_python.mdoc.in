@@ -1169,7 +1169,7 @@ sudo.conv(message(s), on_suspend=suspend_function,
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
-.It Fa messsage(s)
+.It Fa message(s)
 One of more messages (of type
 .Sy sudo.ConvMessage ) ,
 each describing a conversation.
@@ -1316,14 +1316,14 @@ The function arguments are as follows:
 .Bl -tag -width 4n
 .It Fa level
 an integer, use one of the log level constants below
-.It Fa messsage(s)
+.It Fa message(s)
 one or more messages to log
 .El
 .Pp
 .Em Available log levels:
-.Bl -column "name in sudo.conf" "Python constant" "only cricital messages"
+.Bl -column "name in sudo.conf" "Python constant" "only critical messages"
 .It Sy sudo.conf name Ta Sy Python constant Ta Sy description
-.It crit Ta sudo.DEBUG.CRIT Ta only cricital messages
+.It crit Ta sudo.DEBUG.CRIT Ta only critical messages
 .It err Ta sudo.DEBUG.ERROR Ta
 .It warn Ta sudo.DEBUG.WARN Ta
 .It notice Ta sudo.DEBUG.NOTICE Ta

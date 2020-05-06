@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Test alias expasion when converting to JSON.
+# Test alias expansion when converting to JSON.
 # See https://bugzilla.sudo.ws/show_bug.cgi?id=853
 #
 

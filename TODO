@@ -19,7 +19,7 @@ TODO list (most will be addressed in sudo 2.0)
 07) Should be able to mix Cmnd_Alias's and command args.  Ie:
 	pete   ALL=PASSWD [A-z]*,!PASSWD root
     where PASSWD was defined to be /usr/bin/passwd.
-    This requires the arg parsing to happen in the yacc grammer.
+    This requires the arg parsing to happen in the yacc grammar.
     At the very least, commands and args have to become separate
     tokens in the lexer.
 
@@ -64,7 +64,7 @@ TODO list (most will be addressed in sudo 2.0)
     http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf2/setpenv.htm
     http://publib16.boulder.ibm.com/pseries/en_US/libs/basetrf2/setpcred.htm
 
-22) Add an insult_path variable that is intialized to "builtin" but that
+22) Add an insult_path variable that is initialized to "builtin" but that
     can point to other files containing an insult count as the first
     line and that have a constant record length (sparse files) for
     easy seeking.

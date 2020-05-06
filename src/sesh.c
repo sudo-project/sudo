@@ -164,7 +164,7 @@ sesh_sudoedit(int argc, char *argv[])
     else /* invalid value */
 	debug_return_int(SESH_ERR_INVALID);
 
-    /* Align argv & argc to the beggining of the file list. */
+    /* Align argv & argc to the begining of the file list. */
     argv += 3;
     argc -= 3;
 

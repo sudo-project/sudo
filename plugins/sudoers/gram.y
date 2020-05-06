@@ -70,7 +70,7 @@ struct sudoers_parse_tree parsed_policy = {
 };
 
 /*
- * Local protoypes
+ * Local prototypes
  */
 static void init_options(struct command_options *opts);
 static bool add_defaults(int, struct member *, struct defaults *);

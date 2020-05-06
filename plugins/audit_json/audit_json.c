@@ -162,7 +162,7 @@ audit_json_open(unsigned int version, sudo_conv_t conversation,
     }
 
     /* open log file */
-    /* TODO: suport pipe */
+    /* TODO: support pipe */
     oldmask = umask(S_IRWXG|S_IRWXO);
     fd = open(state.logfile, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     (void)umask(oldmask);

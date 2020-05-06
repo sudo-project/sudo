@@ -310,7 +310,7 @@ int sudo_fnmatch(const char *pattern, const char *string, int flags)
     const char *dummyptr;
     const char *matchptr;
     int wild;
-    /* For '*' wild processing only; surpress 'used before initialization'
+    /* For '*' wild processing only; suppress 'used before initialization'
      * warnings with dummy initialization values;
      */
     const char *strstartseg = NULL;
