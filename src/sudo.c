@@ -803,6 +803,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 #endif /* HAVE_PRIV_SET */
+		SET_STRING("runas_user=", runas_user)
 		break;
 	    case 's':
 		SET_STRING("selinux_role=", selinux_role)
@@ -848,7 +849,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(details->euid), NULL);
 #endif
-    details->pw = getpwuid(details->euid);
+    if (details->runas_user != NULL)
+	details->pw = getpwnam(details->runas_user);
+    if (details->pw == NULL)
+	details->pw = getpwuid(details->euid);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif

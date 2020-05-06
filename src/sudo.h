@@ -161,6 +161,7 @@ struct command_details {
     struct passwd *pw;
     GETGROUPS_T *groups;
     const char *command;
+    const char *runas_user;
     const char *cwd;
     const char *login_class;
     const char *chroot;
