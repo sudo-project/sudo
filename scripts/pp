@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2020 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20200422"
+pp_revision="20200506"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -3785,15 +3785,11 @@ pp_solaris_remove_service () {
 if [ "x${PKG_INSTALL_ROOT}" = 'x' ]; then
     if [ -x /usr/sbin/svcadm ] ; then
         /usr/sbin/svcadm disable -s '$svc' 2>/dev/null
-	case "`uname -r`-$pp_svc_xml_file" in
-	  5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
-	    # Use manifest-import if > 5.10 and manifest in default location
-	    /usr/sbin/svcadm restart manifest-import 2>/dev/null
-	    ;;
-	  *)
-	    /usr/sbin/svccfg delete '$svc' 2>/dev/null
-	    ;;
-	esac
+        if [ `uname -r` = 5.10 ] || [ "'${pp_svc_xml_file%/*/*}'" != "/var/svc/manifest" ]; then
+          /usr/sbin/svccfg delete '$svc' 2>/dev/null
+        else
+          /usr/sbin/svcadm restart manifest-import 2>/dev/null
+        fi
     else
         '$file' stop >/dev/null 2>/dev/null
     fi
@@ -3813,15 +3809,11 @@ pp_solaris_install_service () {
     echo '
 if [ "x${PKG_INSTALL_ROOT}" != "x" ]; then
   if [ -x ${PKG_INSTALL_ROOT}/usr/sbin/svcadm ]; then
-    case "`uname -r`-$pp_svc_xml_file" in
-      5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
-	# Use manifest-import if > 5.10 and manifest in default location
-	echo "/usr/sbin/svcadm restart manifest-import 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
-	;;
-      *)
-	echo "/usr/sbin/svccfg import '$pp_svc_xml_file' 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
-	;;
-    esac
+    if [ `uname -r` = 5.10 ] || [ "'${pp_svc_xml_file%/*/*}'" != "/var/svc/manifest" ]; then
+      echo "/usr/sbin/svccfg import '$pp_svc_xml_file' 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
+    else
+      echo "/usr/sbin/svcadm restart manifest-import 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
+    fi
   else'
     test -n "${solaris_sysv_init_start_states}" &&
         for state in ${solaris_sysv_init_start_states}; do
@@ -3843,30 +3835,26 @@ else
     if [ -x /usr/sbin/svcadm ]; then
         echo "Registering '$svc' with SMF"
         /usr/sbin/svcadm disable -s '$svc' 2>/dev/null
-	case "`uname -r`-$pp_svc_xml_file" in
-	  5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
-	    # Use manifest-import if > 5.10 and manifest in default location
-	    /usr/sbin/svcadm restart manifest-import
-	    # Wait for import to complete, otherwise it will not know
-	    # about our service until after we try to start it
-	    echo Waiting for manifest-import...
-	    typeset waited
-	    waited=0
-	    while [ $waited -lt 15 ] && ! /usr/bin/svcs -l '$svc' >/dev/null 2>&1; do
-		sleep 1
-		waited=`expr $waited + 1`
-	    done
-	    if /usr/bin/svcs -l '$svc' >/dev/null 2>&1; then
-		echo OK
-	    else
-		echo manifest-import took to long, you might have to control '$svc' manually.
-	    fi
-	    ;;
-	  *)
-	    /usr/sbin/svccfg delete '$svc' 2>/dev/null
-	    /usr/sbin/svccfg import '$pp_svc_xml_file'
-	    ;;
-	esac
+        if [ `uname -r` = 5.10 ] || [ "'${pp_svc_xml_file%/*/*}'" != "/var/svc/manifest" ]; then
+          /usr/sbin/svccfg delete '$svc' 2>/dev/null
+          /usr/sbin/svccfg import '$pp_svc_xml_file'
+        else
+          /usr/sbin/svcadm restart manifest-import
+          # Wait for import to complete, otherwise it will not know
+          # about our service until after we try to start it
+          echo Waiting for manifest-import...
+          typeset waited
+          waited=0
+          while [ $waited -lt 15 ] && ! /usr/bin/svcs -l '$svc' >/dev/null 2>&1; do
+              sleep 1
+              waited=`expr $waited + 1`
+          done
+          if /usr/bin/svcs -l '$svc' >/dev/null 2>&1; then
+              echo OK
+          else
+              echo manifest-import took to long, you might have to control '$svc' manually.
+          fi
+        fi
     else'
     test -n "${solaris_sysv_init_start_states}" &&
         for state in ${solaris_sysv_init_start_states}; do
@@ -7950,20 +7938,20 @@ pp_backend_bsd_init () {
     pp_bsd_desc=
     pp_bsd_message=
 
-    # pp_bsd_category must be in array format comma seperated
+    # pp_bsd_category must be in array format comma separated
     # pp_bsd_category=[security,network]
     pp_bsd_category=
 
     # pp_bsd_licenselogic can be one of the following: single, and, or unset
     pp_bsd_licenselogic=
 
-    # pp_bsd_licenses must be in array format comma seperated
+    # pp_bsd_licenses must be in array format comma separated
     # pp_bsd_licenses=[GPLv2,MIT]
     pp_bsd_licenses=
 
     # pp_bsd_annotations. These can be any key: value pair
-    # key must be seperated by a :
-    # keyvalue pairs must be comma seperated
+    # key must be separated by a :
+    # keyvalue pairs must be comma separated
     # pp_bsd_annotations="repo_type: binary, somekey: somevalue"
     # since all packages created by PolyPackage will be of type binary
     # let's just set it now.
@@ -8047,8 +8035,8 @@ pp_bsd_make_annotations () {
     manifest=$1
 
     # Add annotations. These can be any key: value pair
-    # key must be seperated by a :
-    # key:value pairs must be comma seperated.
+    # key must be separated by a :
+    # key:value pairs must be comma separated.
     if test -n "$pp_bsd_annotations"; then
         pp_debug "Processing annotations:"
         pp_bsd_label "annotations" "{" >> $manifest
@@ -8092,7 +8080,7 @@ pp_bsd_make_messages () {
     test -z $1 && pp_die "pp_bsd_make_messages requires a parameter"
     manifest=$1
    
-    pp_debug "Processing messsages"
+    pp_debug "Processing messages"
 
     # Empty messages: [ ] is OK in the manifest
     pp_bsd_label "messages" "[" >> $manifest
@@ -8832,6 +8820,7 @@ ${pp_systemd_service_conflicts:+"Conflicts=$pp_systemd_service_conflicts"}
 ExecStart=${pp_systemd_service_exec:-"/opt/quest/sbin/$svc"} ${pp_systemd_service_exec_args}
 KillMode=${pp_systemd_service_killmode:-process}
 Type=${pp_systemd_service_type:-forking}
+${pp_systemd_service_pidfile:+"PIDFile=$pp_systemd_service_pidfile"}
 
 [Install]
 WantedBy=${pp_systemd_system_target:-"multi-user.target"}
