@@ -535,7 +535,7 @@ if one is pending.
 Server closes the connection.
 After receiving the final
 .Em commit_point ,
-the client client shuts down its side of the TLS connection if TLS
+the client shuts down its side of the TLS connection if TLS
 is in use, and closes the connection.
 .It
 Server shuts down its side of the TLS connection if TLS is in use,

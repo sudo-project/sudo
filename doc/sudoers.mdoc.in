@@ -4304,14 +4304,12 @@ should run
 to get their accustomed editor configuration instead of
 invoking the editor directly.
 .It log_servers
+A list of one or more remote servers to use for I/O log storage, separated
+by white space.
 Starting with
 .Nm sudo
 1.9, it is possible to send I/O logs to a remote server instead of
 logging them locally.
-The
-.Em log_servers
-setting specifies one or more hosts to connect to for
-remote I/O log storage.
 Log servers must be running
 .Nm sudo_logsrvd
 or another service that implements the protocol described by

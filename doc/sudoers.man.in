@@ -4614,14 +4614,12 @@ to get their accustomed editor configuration instead of
 invoking the editor directly.
 .TP 18n
 log_servers
+A list of one or more remote servers to use for I/O log storage, separated
+by white space.
 Starting with
 \fBsudo\fR
 1.9, it is possible to send I/O logs to a remote server instead of
 logging them locally.
-The
-\fIlog_servers\fR
-setting specifies one or more hosts to connect to for
-remote I/O log storage.
 Log servers must be running
 \fBsudo_logsrvd\fR
 or another service that implements the protocol described by

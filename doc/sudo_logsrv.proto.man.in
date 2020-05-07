@@ -582,7 +582,7 @@ if one is pending.
 Server closes the connection.
 After receiving the final
 \fIcommit_point\fR,
-the client client shuts down its side of the TLS connection if TLS
+the client shuts down its side of the TLS connection if TLS
 is in use, and closes the connection.
 .TP 5n
 11.\&
