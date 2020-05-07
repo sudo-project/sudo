@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.0rc1\n"
+"Project-Id-Version: sudo 1.9.0\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-04-08 12:49-0600\n"
+"POT-Creation-Date: 2020-05-07 12:22-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,15 +51,15 @@ msgstr ""
 #: src/load_plugins.c:170 src/load_plugins.c:195 src/load_plugins.c:230
 #: src/load_plugins.c:470 src/load_plugins.c:476 src/load_plugins.c:491
 #: src/load_plugins.c:497 src/parse_args.c:186 src/parse_args.c:207
-#: src/parse_args.c:282 src/parse_args.c:584 src/parse_args.c:606
-#: src/parse_args.c:631 src/preserve_fds.c:54 src/preserve_fds.c:139
-#: src/selinux.c:91 src/selinux.c:361 src/selinux.c:474 src/selinux.c:483
+#: src/parse_args.c:280 src/parse_args.c:603 src/parse_args.c:625
+#: src/parse_args.c:650 src/preserve_fds.c:54 src/preserve_fds.c:139
+#: src/selinux.c:91 src/selinux.c:361 src/selinux.c:486 src/selinux.c:495
 #: src/sesh.c:117 src/sudo.c:625 src/sudo.c:694 src/sudo.c:704 src/sudo.c:725
-#: src/sudo.c:744 src/sudo.c:753 src/sudo.c:762 src/sudo.c:779 src/sudo.c:820
-#: src/sudo.c:830 src/sudo.c:856 src/sudo.c:1046 src/sudo.c:1068
+#: src/sudo.c:744 src/sudo.c:753 src/sudo.c:762 src/sudo.c:779 src/sudo.c:821
+#: src/sudo.c:831 src/sudo.c:860 src/sudo.c:1046 src/sudo.c:1068
 #: src/sudo.c:1364 src/sudo.c:1537 src/sudo.c:1731 src/sudo.c:2075
-#: src/sudo_edit.c:270 src/sudo_edit.c:775 src/sudo_edit.c:872
-#: src/sudo_edit.c:986 src/sudo_edit.c:1006
+#: src/sudo_edit.c:269 src/sudo_edit.c:773 src/sudo_edit.c:857
+#: src/sudo_edit.c:977 src/sudo_edit.c:997
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -84,13 +84,13 @@ msgstr ""
 #: src/load_plugins.c:170 src/load_plugins.c:195 src/load_plugins.c:230
 #: src/load_plugins.c:470 src/load_plugins.c:476 src/load_plugins.c:491
 #: src/load_plugins.c:497 src/parse_args.c:186 src/parse_args.c:208
-#: src/parse_args.c:282 src/parse_args.c:584 src/parse_args.c:606
-#: src/parse_args.c:631 src/preserve_fds.c:54 src/preserve_fds.c:139
-#: src/selinux.c:91 src/selinux.c:361 src/selinux.c:474 src/selinux.c:483
-#: src/sesh.c:117 src/sudo.c:239 src/sudo.c:625 src/sudo.c:856 src/sudo.c:1046
+#: src/parse_args.c:280 src/parse_args.c:603 src/parse_args.c:625
+#: src/parse_args.c:650 src/preserve_fds.c:54 src/preserve_fds.c:139
+#: src/selinux.c:91 src/selinux.c:361 src/selinux.c:486 src/selinux.c:495
+#: src/sesh.c:117 src/sudo.c:239 src/sudo.c:625 src/sudo.c:860 src/sudo.c:1046
 #: src/sudo.c:1068 src/sudo.c:1364 src/sudo.c:1537 src/sudo.c:1731
-#: src/sudo.c:2075 src/sudo_edit.c:270 src/sudo_edit.c:775 src/sudo_edit.c:872
-#: src/sudo_edit.c:986 src/sudo_edit.c:1006
+#: src/sudo.c:2075 src/sudo_edit.c:269 src/sudo_edit.c:773 src/sudo_edit.c:857
+#: src/sudo_edit.c:977 src/sudo_edit.c:997
 msgid "unable to allocate memory"
 msgstr ""
 
@@ -170,6 +170,16 @@ msgstr ""
 #: lib/util/sudo_conf.c:609
 #, c-format
 msgid "%s is group writable"
+msgstr ""
+
+#: src/copy_file.c:121
+#, c-format
+msgid "unable to read from %s"
+msgstr ""
+
+#: src/copy_file.c:125 src/sudo_edit.c:701
+#, c-format
+msgid "unable to write to %s"
 msgstr ""
 
 #: src/exec.c:135
@@ -257,7 +267,7 @@ msgid "unable to receive message from parent"
 msgstr ""
 
 #: src/exec_monitor.c:617 src/exec_nopty.c:393 src/exec_pty.c:1535
-#: src/tgetpass.c:315
+#: src/sudo_edit.c:738 src/tgetpass.c:315
 msgid "unable to fork"
 msgstr ""
 
@@ -389,179 +399,179 @@ msgstr ""
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr ""
 
-#: src/parse_args.c:524
+#: src/parse_args.c:542
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr ""
 
-#: src/parse_args.c:528
+#: src/parse_args.c:546
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr ""
 
-#: src/parse_args.c:538
+#: src/parse_args.c:556
 msgid "the `-E' option is not valid in edit mode"
 msgstr ""
 
-#: src/parse_args.c:540
+#: src/parse_args.c:558
 msgid "you may not specify environment variables in edit mode"
 msgstr ""
 
-#: src/parse_args.c:548
+#: src/parse_args.c:567
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr ""
 
-#: src/parse_args.c:552
+#: src/parse_args.c:571
 msgid "the `-A' and `-S' options may not be used together"
 msgstr ""
 
-#: src/parse_args.c:645
+#: src/parse_args.c:664
 msgid "sudoedit is not supported on this platform"
 msgstr ""
 
-#: src/parse_args.c:726
+#: src/parse_args.c:745
 msgid ""
 "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr ""
 
-#: src/parse_args.c:740
+#: src/parse_args.c:759
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
 "\n"
 msgstr ""
 
-#: src/parse_args.c:742
+#: src/parse_args.c:761
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
 "\n"
 msgstr ""
 
-#: src/parse_args.c:747
+#: src/parse_args.c:766
 #, c-format
 msgid ""
 "\n"
 "Options:\n"
 msgstr ""
 
-#: src/parse_args.c:749
+#: src/parse_args.c:768
 msgid "use a helper program for password prompting"
 msgstr ""
 
-#: src/parse_args.c:752
+#: src/parse_args.c:771
 msgid "use specified BSD authentication type"
 msgstr ""
 
-#: src/parse_args.c:755
+#: src/parse_args.c:774
 msgid "run command in the background"
 msgstr ""
 
-#: src/parse_args.c:757
+#: src/parse_args.c:776
 msgid "ring bell when prompting"
 msgstr ""
 
-#: src/parse_args.c:759
+#: src/parse_args.c:778
 msgid "close all file descriptors >= num"
 msgstr ""
 
-#: src/parse_args.c:762
+#: src/parse_args.c:781
 msgid "run command with the specified BSD login class"
 msgstr ""
 
-#: src/parse_args.c:765
+#: src/parse_args.c:784
 msgid "preserve user environment when running command"
 msgstr ""
 
-#: src/parse_args.c:767
+#: src/parse_args.c:786
 msgid "preserve specific environment variables"
 msgstr ""
 
-#: src/parse_args.c:769
+#: src/parse_args.c:788
 msgid "edit files instead of running a command"
 msgstr ""
 
-#: src/parse_args.c:771
+#: src/parse_args.c:790
 msgid "run command as the specified group name or ID"
 msgstr ""
 
-#: src/parse_args.c:773
+#: src/parse_args.c:792
 msgid "set HOME variable to target user's home dir"
 msgstr ""
 
-#: src/parse_args.c:775
+#: src/parse_args.c:794
 msgid "display help message and exit"
 msgstr ""
 
-#: src/parse_args.c:777
+#: src/parse_args.c:796
 msgid "run command on host (if supported by plugin)"
 msgstr ""
 
-#: src/parse_args.c:779
+#: src/parse_args.c:798
 msgid "run login shell as the target user; a command may also be specified"
 msgstr ""
 
-#: src/parse_args.c:781
+#: src/parse_args.c:800
 msgid "remove timestamp file completely"
 msgstr ""
 
-#: src/parse_args.c:783
+#: src/parse_args.c:802
 msgid "invalidate timestamp file"
 msgstr ""
 
-#: src/parse_args.c:785
+#: src/parse_args.c:804
 msgid ""
 "list user's privileges or check a specific command; use twice for longer "
 "format"
 msgstr ""
 
-#: src/parse_args.c:787
+#: src/parse_args.c:806
 msgid "non-interactive mode, no prompts are used"
 msgstr ""
 
-#: src/parse_args.c:789
+#: src/parse_args.c:808
 msgid "preserve group vector instead of setting to target's"
 msgstr ""
 
-#: src/parse_args.c:791
+#: src/parse_args.c:810
 msgid "use the specified password prompt"
 msgstr ""
 
-#: src/parse_args.c:794
+#: src/parse_args.c:813
 msgid "create SELinux security context with specified role"
 msgstr ""
 
-#: src/parse_args.c:797
+#: src/parse_args.c:816
 msgid "read password from standard input"
 msgstr ""
 
-#: src/parse_args.c:799
+#: src/parse_args.c:818
 msgid "run shell as the target user; a command may also be specified"
 msgstr ""
 
-#: src/parse_args.c:802
+#: src/parse_args.c:821
 msgid "create SELinux security context with specified type"
 msgstr ""
 
-#: src/parse_args.c:805
+#: src/parse_args.c:824
 msgid "terminate command after the specified time limit"
 msgstr ""
 
-#: src/parse_args.c:807
+#: src/parse_args.c:826
 msgid "in list mode, display privileges for user"
 msgstr ""
 
-#: src/parse_args.c:809
+#: src/parse_args.c:828
 msgid "run command (or edit file) as specified user name or ID"
 msgstr ""
 
-#: src/parse_args.c:811
+#: src/parse_args.c:830
 msgid "display version information and exit"
 msgstr ""
 
-#: src/parse_args.c:813
+#: src/parse_args.c:832
 msgid "update user's timestamp without running a command"
 msgstr ""
 
-#: src/parse_args.c:815
+#: src/parse_args.c:834
 msgid "stop processing command line arguments"
 msgstr ""
 
@@ -656,12 +666,12 @@ msgstr ""
 msgid "unable to set tty context to %s"
 msgstr ""
 
-#: src/selinux.c:452
+#: src/selinux.c:441
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr ""
 
-#: src/selinux.c:459
+#: src/selinux.c:448
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr ""
@@ -760,33 +770,33 @@ msgstr ""
 msgid "unable to determine tty"
 msgstr ""
 
-#: src/sudo.c:902
+#: src/sudo.c:906
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr ""
 
-#: src/sudo.c:905
+#: src/sudo.c:909
 #, c-format
 msgid ""
 "effective uid is not %d, is %s on a file system with the 'nosuid' option set "
 "or an NFS file system without root privileges?"
 msgstr ""
 
-#: src/sudo.c:911
+#: src/sudo.c:915
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr ""
 
-#: src/sudo.c:927
+#: src/sudo.c:931
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:934
+#: src/sudo.c:938
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:940
+#: src/sudo.c:944
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
@@ -851,91 +861,80 @@ msgstr ""
 msgid "approval plugin error"
 msgstr ""
 
-#: src/sudo_edit.c:233
+#: src/sudo_edit.c:232
 msgid "no writable temporary directory found"
 msgstr ""
 
-#: src/sudo_edit.c:358
+#: src/sudo_edit.c:357
 msgid "unable to restore current working directory"
 msgstr ""
 
-#: src/sudo_edit.c:575 src/sudo_edit.c:688
+#: src/sudo_edit.c:572 src/sudo_edit.c:672
 #, c-format
 msgid "%s: not a regular file"
 msgstr ""
 
-#: src/sudo_edit.c:582
+#: src/sudo_edit.c:579
 #, c-format
 msgid "%s: editing symbolic links is not permitted"
 msgstr ""
 
-#: src/sudo_edit.c:585
+#: src/sudo_edit.c:582
 #, c-format
 msgid "%s: editing files in a writable directory is not permitted"
 msgstr ""
 
-#: src/sudo_edit.c:618 src/sudo_edit.c:728
-#, c-format
-msgid "%s: short write"
-msgstr ""
-
-#: src/sudo_edit.c:689
+#: src/sudo_edit.c:673
 #, c-format
 msgid "%s left unmodified"
 msgstr ""
 
-#: src/sudo_edit.c:702 src/sudo_edit.c:889
+#: src/sudo_edit.c:686 src/sudo_edit.c:874
 #, c-format
 msgid "%s unchanged"
 msgstr ""
 
-#: src/sudo_edit.c:717 src/sudo_edit.c:739
-#, c-format
-msgid "unable to write to %s"
-msgstr ""
-
-#: src/sudo_edit.c:718 src/sudo_edit.c:737 src/sudo_edit.c:740
-#: src/sudo_edit.c:914 src/sudo_edit.c:918
+#: src/sudo_edit.c:709 src/sudo_edit.c:910
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr ""
 
-#: src/sudo_edit.c:736
-msgid "unable to read temporary file"
-msgstr ""
-
-#: src/sudo_edit.c:819
+#: src/sudo_edit.c:817
 msgid "sesh: internal error: odd number of paths"
 msgstr ""
 
-#: src/sudo_edit.c:821
+#: src/sudo_edit.c:819
 msgid "sesh: unable to create temporary files"
 msgstr ""
 
-#: src/sudo_edit.c:823 src/sudo_edit.c:921
+#: src/sudo_edit.c:821 src/sudo_edit.c:903
+msgid "sesh: killed by a signal"
+msgstr ""
+
+#: src/sudo_edit.c:823 src/sudo_edit.c:906
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr ""
 
-#: src/sudo_edit.c:913
+#: src/sudo_edit.c:897
 msgid "unable to copy temporary files back to their original location"
 msgstr ""
 
-#: src/sudo_edit.c:917
+#: src/sudo_edit.c:900
 msgid ""
 "unable to copy some of the temporary files back to their original location"
 msgstr ""
 
-#: src/sudo_edit.c:962
+#: src/sudo_edit.c:944
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr ""
 
-#: src/sudo_edit.c:979
+#: src/sudo_edit.c:961
 msgid "plugin error: missing file list for sudoedit"
 msgstr ""
 
-#: src/sudo_edit.c:1020 src/sudo_edit.c:1033
+#: src/sudo_edit.c:1012 src/sudo_edit.c:1025
 msgid "unable to read the clock"
 msgstr ""
 
