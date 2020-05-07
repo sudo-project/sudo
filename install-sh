@@ -191,7 +191,7 @@ if [ $# -ne 2 ] ; then
     exit 1
 fi
 
-##  Get the destination and a temp file in the destination diretory.
+##  Get the destination and a temp file in the destination directory.
 if [ -d "$2" ] ; then
     DEST="$2/`basename $1`"
     TEMP="$2/$$.tmp"

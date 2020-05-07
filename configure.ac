@@ -261,7 +261,7 @@ RC_LINK=
 COMPAT_EXP=
 SIGNAME=
 dnl
-dnl Other vaiables
+dnl Other variables
 dnl
 WEAK_ALIAS=no
 CHECKSHADOW=true
@@ -1051,7 +1051,7 @@ AC_ARG_WITH(passwd-tries, [AS_HELP_STRING([--with-passwd-tries], [number of trie
 		;;
     [[1-9]]*)	passwd_tries=$with_passwd_tries
 		;;
-    *)		AC_MSG_ERROR(["you must enter the numer of tries, > 0"])
+    *)		AC_MSG_ERROR(["you must enter the number of tries, > 0"])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $passwd_tries, [The number of tries a user gets to enter their password.])
@@ -1065,7 +1065,7 @@ AC_ARG_WITH(timeout, [AS_HELP_STRING([--with-timeout], [minutes before sudo asks
 		;;
     [[0-9]]*)	timeout=$with_timeout
 		;;
-    *)		AC_MSG_ERROR(["you must enter the numer of minutes."])
+    *)		AC_MSG_ERROR(["you must enter the number of minutes."])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(TIMEOUT, $timeout, [The number of minutes before sudo asks for a password again.])
@@ -1079,7 +1079,7 @@ AC_ARG_WITH(password-timeout, [AS_HELP_STRING([--with-password-timeout], [passwd
 		;;
     [[0-9]]*)	password_timeout=$with_password_timeout
 		;;
-    *)		AC_MSG_ERROR(["you must enter the numer of minutes."])
+    *)		AC_MSG_ERROR(["you must enter the number of minutes."])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout, [The passwd prompt timeout (in minutes).])
@@ -1584,7 +1584,7 @@ esac], [
 ])
 
 AC_ARG_ENABLE(devsearch,
-[AS_HELP_STRING([--enable-devsearch=PATH], [The colon-delimited path to search for device nodes when determing the tty name.])],
+[AS_HELP_STRING([--enable-devsearch=PATH], [The colon-delimited path to search for device nodes when determining the tty name.])],
 [case $enableval in
     yes)	# use default value
 		;;

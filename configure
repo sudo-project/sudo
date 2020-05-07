@@ -1679,7 +1679,7 @@ Optional Features:
                           Disable use of the libsudo_util shared library.
   --enable-tmpfiles.d=DIR Set the path to the systemd tmpfiles.d directory.
   --enable-devsearch=PATH The colon-delimited path to search for device nodes
-                          when determing the tty name.
+                          when determining the tty name.
   --enable-sasl           Enable/disable LDAP SASL support
   --timestamp-type=TYPE   Set the default time stamp record type to global,
                           ppid or tty.
@@ -5725,7 +5725,7 @@ if test "${with_passwd_tries+set}" = set; then :
 		;;
     [1-9]*)	passwd_tries=$with_passwd_tries
 		;;
-    *)		as_fn_error $? "\"you must enter the numer of tries, > 0\"" "$LINENO" 5
+    *)		as_fn_error $? "\"you must enter the number of tries, > 0\"" "$LINENO" 5
 		;;
 esac
 fi
@@ -5749,7 +5749,7 @@ if test "${with_timeout+set}" = set; then :
 		;;
     [0-9]*)	timeout=$with_timeout
 		;;
-    *)		as_fn_error $? "\"you must enter the numer of minutes.\"" "$LINENO" 5
+    *)		as_fn_error $? "\"you must enter the number of minutes.\"" "$LINENO" 5
 		;;
 esac
 fi
@@ -5773,7 +5773,7 @@ if test "${with_password_timeout+set}" = set; then :
 		;;
     [0-9]*)	password_timeout=$with_password_timeout
 		;;
-    *)		as_fn_error $? "\"you must enter the numer of minutes.\"" "$LINENO" 5
+    *)		as_fn_error $? "\"you must enter the number of minutes.\"" "$LINENO" 5
 		;;
 esac
 fi
