@@ -57,12 +57,15 @@ doc/sudoreplay.man.in
 doc/sudoreplay.mdoc.in
 doc/visudo.man.in
 doc/visudo.mdoc.in
+etc/codespell.exclude
+etc/codespell.ignore
+etc/codespell.skip
 etc/init.d/aix.sh.in
 etc/init.d/hpux.sh.in
 etc/init.d/sudo.conf.in
-etc/sudo.pp
 etc/sudo-logsrvd.pp
 etc/sudo-python.pp
+etc/sudo.pp
 examples/Makefile.in
 examples/pam.conf
 examples/sudo.conf.in

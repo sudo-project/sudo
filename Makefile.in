@@ -125,6 +125,9 @@ reformat: uncrustify.files
 check-format: uncrustify.files
 	( cd $(top_srcdir) && uncrustify -c etc/uncrustify.cfg --check -F $(top_builddir)/uncrustify.files )
 
+spell:
+	( cd $(top_srcdir) && codespell -I etc/codespell.ignore -x etc/codespell.exclude `egrep -v -f etc/codespell.skip MANIFEST` )
+
 cppcheck: config.status
 	rval=0; \
 	for d in $(SUBDIRS); do \
