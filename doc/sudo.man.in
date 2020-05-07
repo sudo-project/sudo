@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "May 6, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -685,6 +685,12 @@ The
 option indicates that
 \fBsudo\fR
 should stop processing command line arguments.
+.PP
+Options that take a value may only be specified once.
+This is to help guard against problems caused by poorly written
+scripts that invoke
+\fBsudo\fR
+with user-controlled input.
 .PP
 Environment variables to be set for the command may also be passed
 on the command line in the form of

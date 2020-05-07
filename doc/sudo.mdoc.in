@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd October 20, 2019
+.Dd May 6, 2020
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -637,6 +637,12 @@ option indicates that
 .Nm
 should stop processing command line arguments.
 .El
+.Pp
+Options that take a value may only be specified once.
+This is to help guard against problems caused by poorly written
+scripts that invoke
+.Nm sudo
+with user-controlled input.
 .Pp
 Environment variables to be set for the command may also be passed
 on the command line in the form of
