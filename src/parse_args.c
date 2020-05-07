@@ -356,8 +356,6 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 			sudo_settings[ARG_PRESERVE_ENVIRONMENT].value = "true";
 			SET(flags, MODE_PRESERVE_ENV);
 		    } else {
-			if (extra_env.env_len != 0)
-			    usage();
 			parse_env_list(&extra_env, optarg);
 		    }
 		    break;

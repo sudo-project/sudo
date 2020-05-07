@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 6, 2020
+.Dd May 7, 2020
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -280,6 +280,7 @@ comma-separated list of environment variables to those preserved
 from the user's environment.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
+This option may be specified multiple times.
 .It Fl e , -edit
 Edit one or more files instead of running a command.
 In lieu of a path name, the string "sudoedit" is used when consulting
@@ -638,7 +639,8 @@ option indicates that
 should stop processing command line arguments.
 .El
 .Pp
-Options that take a value may only be specified once.
+Options that take a value may only be specified once unless
+otherwise indicated in the description.
 This is to help guard against problems caused by poorly written
 scripts that invoke
 .Nm sudo
