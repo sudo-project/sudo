@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -249,8 +249,6 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     int valid_flags = DEFAULT_VALID_FLAGS;
     int ch, i;
     char *cp;
-    const char *runas_user = NULL;
-    const char *runas_group = NULL;
     const char *progname;
     int proglen;
     debug_decl(parse_args, SUDO_DEBUG_ARGS);
@@ -314,6 +312,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage();
+		    if (sudo_settings[ARG_BSDAUTH_TYPE].value != NULL)
+			usage();
 		    sudo_settings[ARG_BSDAUTH_TYPE].value = optarg;
 		    break;
 #endif
@@ -329,12 +329,16 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 			sudo_warnx(U_("the argument to -C must be a number greater than or equal to 3"));
 			usage();
 		    }
+		    if (sudo_settings[ARG_CLOSEFROM].value != NULL)
+			usage();
 		    sudo_settings[ARG_CLOSEFROM].value = optarg;
 		    break;
 #ifdef HAVE_LOGIN_CAP_H
 		case 'c':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
+			usage();
+		    if (sudo_settings[ARG_LOGIN_CLASS].value != NULL)
 			usage();
 		    sudo_settings[ARG_LOGIN_CLASS].value = optarg;
 		    break;
@@ -352,6 +356,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 			sudo_settings[ARG_PRESERVE_ENVIRONMENT].value = "true";
 			SET(flags, MODE_PRESERVE_ENV);
 		    } else {
+			if (extra_env.env_len != 0)
+			    usage();
 			parse_env_list(&extra_env, optarg);
 		    }
 		    break;
@@ -366,7 +372,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage();
-		    runas_group = optarg;
+		    if (sudo_settings[ARG_RUNAS_GROUP].value != NULL)
+			usage();
 		    sudo_settings[ARG_RUNAS_GROUP].value = optarg;
 		    break;
 		case 'H':
@@ -381,6 +388,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 			 */
 			if (got_host_flag && !is_envar &&
 			    argv[optind] != NULL && argv[optind][0] != '-') {
+			    if (sudo_settings[ARG_REMOTE_HOST].value != NULL)
+				usage();
 			    sudo_settings[ARG_REMOTE_HOST].value = argv[optind++];
 			    continue;
 			}
@@ -396,6 +405,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case OPT_HOSTNAME:
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
+			usage();
+		    if (sudo_settings[ARG_REMOTE_HOST].value != NULL)
 			usage();
 		    sudo_settings[ARG_REMOTE_HOST].value = optarg;
 		    break;
@@ -433,6 +444,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'p':
 		    /* An empty prompt is allowed. */
 		    assert(optarg != NULL);
+		    if (sudo_settings[ARG_PROMPT].value != NULL)
+			usage();
 		    sudo_settings[ARG_PROMPT].value = optarg;
 		    break;
 #ifdef HAVE_SELINUX
@@ -440,11 +453,15 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage();
+		    if (sudo_settings[ARG_SELINUX_ROLE].value != NULL)
+			usage();
 		    sudo_settings[ARG_SELINUX_ROLE].value = optarg;
 		    break;
 		case 't':
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
+			usage();
+		    if (sudo_settings[ARG_SELINUX_TYPE].value != NULL)
 			usage();
 		    sudo_settings[ARG_SELINUX_TYPE].value = optarg;
 		    break;
@@ -452,6 +469,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'T':
 		    /* Plugin determines whether empty timeout is allowed. */
 		    assert(optarg != NULL);
+		    if (sudo_settings[ARG_TIMEOUT].value != NULL)
+			usage();
 		    sudo_settings[ARG_TIMEOUT].value = optarg;
 		    break;
 		case 'S':
@@ -463,7 +482,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    break;
 		case 'U':
 		    assert(optarg != NULL);
-		    if (*optarg == '\0')
+		    if (list_user != NULL || *optarg == '\0')
 			usage();
 		    list_user = optarg;
 		    break;
@@ -471,7 +490,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')
 			usage();
-		    runas_user = optarg;
+		    if (sudo_settings[ARG_RUNAS_USER].value != NULL)
+			usage();
 		    sudo_settings[ARG_RUNAS_USER].value = optarg;
 		    break;
 		case 'v':
@@ -540,7 +560,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	    sudo_warnx(U_("you may not specify environment variables in edit mode"));
 	usage();
     }
-    if ((runas_user != NULL || runas_group != NULL) &&
+    if ((sudo_settings[ARG_RUNAS_USER].value != NULL ||
+	 sudo_settings[ARG_RUNAS_GROUP].value != NULL) &&
 	!ISSET(mode, MODE_EDIT | MODE_RUN | MODE_CHECK | MODE_VALIDATE)) {
 	usage();
     }

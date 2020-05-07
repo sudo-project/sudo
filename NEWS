@@ -95,6 +95,11 @@ What's new in Sudo 1.9.0
    the wrong user name when multiple users in the passwd database
    share the the same user-ID.  Debian bug #734752.
 
+ * Sudo command line options that take a value may only be specified
+   once.  This is to help guard against problems caused by poorly
+   written scripts that invoke sudo with user-controlled input.
+   Bug #924.
+
 What's new in Sudo 1.8.31p1
 
  * Sudo once again ignores a failure to restore the RLIMIT_CORE
