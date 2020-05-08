@@ -982,15 +982,23 @@ logsrvd_conf_alloc(void)
     }
 
 #if defined(HAVE_OPENSSL)
-    config->server.tls_config.cacert_path = strdup(DEFAULT_CA_CERT_PATH);
-    if (config->server.tls_config.cacert_path == NULL) {
-	sudo_warn(NULL);
-	goto bad;
+    /*
+     * Only set default CA and cert paths if the files actually exist.
+     * This ensures we don't enable TLS by default when it is not configured.
+     */
+    if (access(DEFAULT_CA_CERT_PATH, R_OK) == 0) {
+	config->server.tls_config.cacert_path = strdup(DEFAULT_CA_CERT_PATH);
+	if (config->server.tls_config.cacert_path == NULL) {
+	    sudo_warn(NULL);
+	    goto bad;
+	}
     }
-    config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
-    if (config->server.tls_config.cert_path == NULL) {
-	sudo_warn(NULL);
-	goto bad;
+    if (access(DEFAULT_SERVER_CERT_PATH, R_OK) == 0) {
+	config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
+	if (config->server.tls_config.cert_path == NULL) {
+	    sudo_warn(NULL);
+	    goto bad;
+	}
     }
     config->server.tls_config.pkey_path = strdup(DEFAULT_SERVER_KEY_PATH);
     if (config->server.tls_config.pkey_path == NULL) {
@@ -1056,11 +1064,36 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 
     /* There can be multiple addresses so we can't set a default earlier. */
     if (TAILQ_EMPTY(&config->server.addresses)) {
+	/* Enable plaintext listender. */
 	if (!cb_listen_address(config, "*:" DEFAULT_PORT))
 	    debug_return_bool(false);
 #if defined(HAVE_OPENSSL)
-	if (!cb_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)"))
-	    debug_return_bool(false);
+	/* If a certificate was specified, enable the TLS listener too. */
+	if (config->server.tls_config.cert_path != NULL) {
+	    if (!cb_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)"))
+		debug_return_bool(false);
+	}
+    } else {
+	struct listen_address *addr;
+
+	/* Sanity check the TLS configuration. */
+	TAILQ_FOREACH(addr, &config->server.addresses, entries) {
+	    if (!addr->tls)
+		continue;
+	    /*
+	     * If a TLS listener was explicitly enabled but the cert path
+	     * was not, use the default.
+	     */
+	    if (config->server.tls_config.cert_path == NULL) {
+		config->server.tls_config.cert_path =
+		    strdup(DEFAULT_SERVER_CERT_PATH);
+		if (config->server.tls_config.cert_path == NULL) {
+		    sudo_warn(NULL);
+		    debug_return_bool(false);
+		}
+	    }
+	    break;
+	}
 #endif
     }
 

@@ -1193,11 +1193,17 @@ init_tls_server_context(void)
 
             /* set the location of the CA bundle file for verification */
             if (SSL_CTX_load_verify_locations(ctx, tls_config->cacert_path, NULL) <= 0) {
-		errstr = ERR_reason_error_string(ERR_get_error());
+                errstr = ERR_reason_error_string(ERR_get_error());
                 sudo_warnx("SSL_CTX_load_verify_locations: %s", errstr);
                 goto bad;
             }
-        }
+        } else {
+	    if (!SSL_CTX_set_default_verify_paths(ctx)) {
+                errstr = ERR_reason_error_string(ERR_get_error());
+                sudo_warnx("SSL_CTX_set_default_verify_paths: %s", errstr);
+                goto bad;
+	    }
+	}
 
         /* only verify server cert if it is set in the configuration */
         if (tls_config->verify) {

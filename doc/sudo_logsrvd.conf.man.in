@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "April 30, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "May 8, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -154,7 +154,10 @@ tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
 when authenticating clients.
-The default is to use the system's default certificate authority database.
+The default is to use
+\fI/etc/ssl/sudo/cacert.pem\fR
+if it exists, otherwise the system's default certificate authority
+database is used.
 .TP 10n
 tls_cert = path
 The path to the server's certificate file, in PEM format.

@@ -217,9 +217,15 @@ tls_init(struct client_closure *closure)
                 closure->log_details->ca_bundle, NULL) <= 0) {
                 errstr = ERR_reason_error_string(ERR_get_error());
                 sudo_warnx(U_("%s: %s"), closure->log_details->ca_bundle,
-		    errstr);
-		sudo_warnx(U_("unable to load certificate authority bundle %s"),
-		    closure->log_details->ca_bundle);
+                    errstr);
+                sudo_warnx(U_("unable to load certificate authority bundle %s"),
+                    closure->log_details->ca_bundle);
+                goto bad;
+            }
+        } else {
+            if (!SSL_CTX_set_default_verify_paths(closure->ssl_ctx)) {
+                errstr = ERR_reason_error_string(ERR_get_error());
+                sudo_warnx("SSL_CTX_set_default_verify_paths: %s", errstr);
                 goto bad;
             }
         }

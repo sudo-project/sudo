@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 30, 2020
+.Dd May 8, 2020
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -138,7 +138,10 @@ The default value is 30.
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
 when authenticating clients.
-The default is to use the system's default certificate authority database.
+The default is to use
+.Pa /etc/ssl/sudo/cacert.pem
+if it exists, otherwise the system's default certificate authority
+database is used.
 .It tls_cert = path
 The path to the server's certificate file, in PEM format.
 The default value is
