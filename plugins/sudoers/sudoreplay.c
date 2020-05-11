@@ -55,7 +55,6 @@
 #endif /* HAVE_STDBOOL_H */
 #include <regex.h>
 #include <signal.h>
-#include <time.h>
 
 #include <pathnames.h>
 
