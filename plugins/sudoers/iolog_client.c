@@ -60,6 +60,7 @@
 
 #include "sudoers.h"
 #include "sudo_event.h"
+#include "sudo_iolog.h"
 #include "iolog_plugin.h"
 #include "hostcheck.h"
 
@@ -549,7 +550,7 @@ log_server_connect(struct client_closure *closure)
     STAILQ_FOREACH(server, closure->log_details->log_servers, entries) {
         free(copy);
 	copy = strdup(server->str);
-	if (!sudo_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
+	if (!iolog_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
 		DEFAULT_PORT_TLS)) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                 "unable to parse %s", copy);

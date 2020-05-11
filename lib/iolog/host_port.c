@@ -41,13 +41,13 @@
  * Fills in hostp and portp which may point within str, which is modified.
  */
 bool
-sudo_parse_host_port_v1(char *str, char **hostp, char **portp, bool *tlsp,
+iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp,
      char *defport, char *defport_tls)
 {
     char *flags, *port, *host = str;
     bool ret = false;
     bool tls = false;
-    debug_decl(sudo_parse_host_port, SUDO_DEBUG_UTIL);
+    debug_decl(iolog_parse_host_port, SUDO_DEBUG_UTIL);
 
     /* Check for IPv6 address like [::0] followed by optional port */
     if (*host == '[') {

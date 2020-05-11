@@ -382,7 +382,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
     }
 
     /* Parse host[:port] */
-    if (!sudo_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
+    if (!iolog_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
 	    DEFAULT_PORT_TLS))
 	goto done;
     if (host[0] == '*' && host[1] == '\0')

@@ -107,6 +107,9 @@ struct iolog_path_escape {
     size_t (*copy_fn)(char *, size_t, void *);
 };
 
+/* host_port.c */
+bool iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp, char *defport, char *defport_tls);
+
 /* iolog_path.c */
 bool expand_iolog_path(const char *inpath, char *path, size_t pathlen, const struct iolog_path_escape *escapes, void *closure);
 

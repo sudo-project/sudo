@@ -102,12 +102,14 @@ include/sudo_rand.h
 include/sudo_util.h
 install-sh
 lib/iolog/Makefile.in
+lib/iolog/host_port.c
 lib/iolog/hostcheck.c
 lib/iolog/iolog_fileio.c
 lib/iolog/iolog_json.c
 lib/iolog/iolog_json.h
 lib/iolog/iolog_path.c
 lib/iolog/iolog_util.c
+lib/iolog/regress/host_port/host_port_test.c  
 lib/iolog/regress/iolog_json/check_iolog_json.c
 lib/iolog/regress/iolog_json/test1.in
 lib/iolog/regress/iolog_json/test2.in
@@ -150,7 +152,6 @@ lib/util/gettime.c
 lib/util/getusershell.c
 lib/util/gidlist.c
 lib/util/glob.c
-lib/util/host_port.c
 lib/util/inet_ntop.c
 lib/util/inet_pton.c
 lib/util/isblank.c
@@ -182,7 +183,6 @@ lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
-lib/util/regress/host_port/host_port_test.c  
 lib/util/regress/mktemp/mktemp_test.c
 lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c

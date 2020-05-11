@@ -32,15 +32,18 @@
 #else
 # include "compat/stdbool.h"
 #endif
+#include <time.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
+#include "sudo_iolog.h"
 #include "sudo_util.h"
 
 __dso_public int main(int argc, char *argv[]);
 
 /*
- * Test that sudo_parse_host_port() works as expected.
+ * Test that iolog_parse_host_port() works as expected.
  */
 
 struct host_port_test {
@@ -95,7 +98,7 @@ main(int argc, char *argv[])
 	    sudo_fatal_nodebug(NULL);
 
 	ntests++;
-	ret = sudo_parse_host_port(copy, &host, &port, &tls,
+	ret = iolog_parse_host_port(copy, &host, &port, &tls,
 	    test_data[i].defport, test_data[i].defport_tls);
 	if (ret != test_data[i].ret) {
 	    sudo_warnx_nodebug("test #%d: %s: returned %s, expected %s",
