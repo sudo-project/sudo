@@ -36,6 +36,7 @@ enum client_state {
     RECV_HELLO,
     SEND_RESTART,
     SEND_ACCEPT,
+    SEND_REJECT,
     SEND_IO,
     SEND_EXIT,
     CLOSING,
@@ -45,6 +46,7 @@ enum client_state {
 struct client_closure {
     TAILQ_ENTRY(client_closure) entries;
     int sock;
+    bool accept_only;
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
@@ -65,6 +67,7 @@ struct client_closure {
     struct iolog_info *log_info;
     struct iolog_file iolog_files[IOFD_MAX];
     const char *iolog_id;
+    char *reject_reason;
     char *buf; /* XXX */
     size_t bufsize; /* XXX */
     enum client_state state;

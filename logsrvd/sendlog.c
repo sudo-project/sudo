@@ -106,12 +106,13 @@ static void
 usage(bool fatal)
 {
 #if defined(HAVE_OPENSSL)
-    fprintf(stderr, "usage: %s [-V] [-b ca_bundle] [-c cert_file] [-h host] "
+    fprintf(stderr, "usage: %s [-AnV] [-b ca_bundle] [-c cert_file] [-h host] "
 	"[-i iolog-id] [-k key_file] [-p port] "
 #else
-    fprintf(stderr, "usage: %s [-V] [-h host] [-i iolog-id] [-p port] "
+    fprintf(stderr, "usage: %s [-AnV] [-h host] [-i iolog-id] [-p port] "
 #endif
-	"[-r restart-point] [-t number] /path/to/iolog\n", getprogname());
+	"[-r restart-point] [-R reject-reason] [-t number] /path/to/iolog\n",
+        getprogname());
     if (fatal)
 	exit(EXIT_FAILURE);
 }
@@ -124,16 +125,19 @@ help(void)
     usage(false);
     (void)puts(_("\nOptions:\n"
 	"      --help               display help message and exit\n"
+	"  -A, --accept             only send an accept event (no I/O)\n"
 	"  -h, --host               host to send logs to\n"
 	"  -i, --iolog_id           remote ID of I/O log to be resumed\n"
 	"  -p, --port               port to use when connecting to host\n"
 	"  -r, --restart            restart previous I/O log transfer\n"
-	"  -t, --test               test audit server by sending selected I/O log n times in parallel\n"
+	"  -R, --reject             reject the command with the given reason\n"
 #if defined(HAVE_OPENSSL)
 	"  -b, --ca-bundle          certificate bundle file to verify server's cert against\n"
 	"  -c, --cert               certificate file for TLS handshake\n"
 	"  -k, --key                private key file\n"
+	"  -n, --no-verify          do not verify server certificate\n"
 #endif
+	"  -t, --test               test audit server by sending selected I/O log n times in parallel\n"
 	"  -V, --version            display version information and exit\n"));
     exit(EXIT_SUCCESS);
 }
@@ -341,6 +345,179 @@ fmt_client_hello(struct client_closure *closure)
     debug_return_bool(ret);
 }
 
+static InfoMessage **
+fmt_info_messages(struct iolog_info *log_info, char *hostname,
+    size_t *n_info_msgs)
+{
+    InfoMessage **info_msgs;
+    InfoMessage__StringList *runargv = NULL;
+    size_t info_msgs_size, n = 0;
+    debug_decl(fmt_info_messages, SUDO_DEBUG_UTIL);
+
+    /* Split command into a StringList. */
+    runargv = malloc(sizeof(*runargv));
+    if (runargv == NULL)
+        goto oom;
+    info_message__string_list__init(runargv);
+    runargv->strings = split_command(log_info->cmd, &runargv->n_strings);
+    if (runargv->strings == NULL)
+	goto oom;
+
+    /* The sudo I/O log info file has limited info. */
+    info_msgs_size = 10;
+    info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
+    if (info_msgs == NULL)
+	goto oom;
+    for (n = 0; n < info_msgs_size; n++) {
+	info_msgs[n] = malloc(sizeof(InfoMessage));
+	if (info_msgs[n] == NULL)
+            goto oom;
+	info_message__init(info_msgs[n]);
+    }
+
+    /* Fill in info_msgs */
+    n = 0;
+    info_msgs[n]->key = "command";
+    info_msgs[n]->strval = log_info->cmd;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    info_msgs[n]->key = "columns";
+    info_msgs[n]->numval = log_info->cols;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    n++;
+
+    info_msgs[n]->key = "lines";
+    info_msgs[n]->numval = log_info->lines;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    n++;
+
+    info_msgs[n]->key = "runargv";
+    info_msgs[n]->strlistval = runargv;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    n++;
+
+    if (log_info->runas_group != NULL) {
+	info_msgs[n]->key = "rungroup";
+	info_msgs[n]->strval = log_info->runas_group;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    info_msgs[n]->key = "runuser";
+    info_msgs[n]->strval = log_info->runas_user;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    info_msgs[n]->key = "submitcwd";
+    info_msgs[n]->strval = log_info->cwd;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    info_msgs[n]->key = "submithost";
+    info_msgs[n]->strval = hostname;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    info_msgs[n]->key = "submituser";
+    info_msgs[n]->strval = log_info->user;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    info_msgs[n]->key = "ttyname";
+    info_msgs[n]->strval = log_info->tty;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    /* Update n_info_msgs. */
+    *n_info_msgs = n;
+
+    /* Avoid leaking unused info_msg structs. */
+    while (n < info_msgs_size) {
+        free(info_msgs[n++]);
+    }
+
+    debug_return_ptr(info_msgs);
+
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    while (n-- > 0)
+	free(info_msgs[n]);
+    if (runargv != NULL) {
+        free(runargv->strings);
+        free(runargv);
+    }
+    *n_info_msgs = 0;
+    debug_return_ptr(NULL);
+}
+
+/*
+ * Build and format a RejectMessage wrapped in a ClientMessage.
+ * Stores the wire format message in the closure's write buffer.
+ * Returns true on success, false on failure.
+ */
+static bool
+fmt_reject_message(struct client_closure *closure)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    RejectMessage reject_msg = REJECT_MESSAGE__INIT;
+    TimeSpec tv = TIME_SPEC__INIT;
+    size_t n_info_msgs;
+    bool ret = false;
+    char *hostname;
+    debug_decl(fmt_reject_message, SUDO_DEBUG_UTIL);
+
+    /*
+     * Fill in RejectMessage and add it to ClientMessage.
+     */
+    if ((hostname = sudo_gethostname()) == NULL) {
+	sudo_warn("gethostname");
+	debug_return_bool(false);
+    }
+
+    /* Sudo I/O logs only store start time in seconds. */
+    tv.tv_sec = closure->log_info->tstamp.tv_sec;
+    tv.tv_nsec = closure->log_info->tstamp.tv_nsec;
+    reject_msg.submit_time = &tv;
+
+    /* Why the command was rejected. */
+    reject_msg.reason = closure->reject_reason;
+
+    reject_msg.info_msgs = fmt_info_messages(closure->log_info, hostname,
+        &n_info_msgs);
+    if (reject_msg.info_msgs == NULL)
+	goto done;
+
+    /* Update n_info_msgs. */
+    reject_msg.n_info_msgs = n_info_msgs;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending RejectMessage, array length %zu", __func__, n_info_msgs);
+
+    /* Schedule ClientMessage */
+    client_msg.reject_msg = &reject_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_REJECT_MSG;
+    ret = fmt_client_message(&closure->write_buf, &client_msg);
+    if (ret) {
+	if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1)
+	    ret = false;
+    }
+
+done:
+    while (n_info_msgs-- > 0) {
+        if (reject_msg.info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
+            /* strlistval was dynamically allocated */
+            free(reject_msg.info_msgs[n_info_msgs]->strlistval->strings);
+            free(reject_msg.info_msgs[n_info_msgs]->strlistval);
+        }
+	free(reject_msg.info_msgs[n_info_msgs]);
+    }
+    free(reject_msg.info_msgs);
+    free(hostname);
+
+    debug_return_bool(ret);
+}
+
 /*
  * Build and format an AcceptMessage wrapped in a ClientMessage.
  * Stores the wire format message in the closure's write buffer.
@@ -352,11 +529,9 @@ fmt_accept_message(struct client_closure *closure)
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     AcceptMessage accept_msg = ACCEPT_MESSAGE__INIT;
     TimeSpec tv = TIME_SPEC__INIT;
-    InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
-    struct iolog_info *log_info = closure->log_info;
-    char *hostname;
+    size_t n_info_msgs;
     bool ret = false;
-    size_t info_msgs_size, n;
+    char *hostname;
     debug_decl(fmt_accept_message, SUDO_DEBUG_UTIL);
 
     /*
@@ -368,93 +543,23 @@ fmt_accept_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = log_info->tstamp.tv_sec;
-    tv.tv_nsec = log_info->tstamp.tv_nsec;
+    tv.tv_sec = closure->log_info->tstamp.tv_sec;
+    tv.tv_nsec = closure->log_info->tstamp.tv_nsec;
     accept_msg.submit_time = &tv;
 
     /* Client will send IoBuffer messages. */
     accept_msg.expect_iobufs = true;
 
-    /* Split command into a StringList. */
-    runargv.strings = split_command(log_info->cmd, &runargv.n_strings);
-    if (runargv.strings == NULL)
-	sudo_fatal(NULL);
-
-    /* The sudo I/O log info file has limited info. */
-    info_msgs_size = 10;
-    accept_msg.info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
-    if (accept_msg.info_msgs == NULL) {
-	info_msgs_size = 0;
+    accept_msg.info_msgs = fmt_info_messages(closure->log_info, hostname,
+        &n_info_msgs);
+    if (accept_msg.info_msgs == NULL)
 	goto done;
-    }
-    for (n = 0; n < info_msgs_size; n++) {
-	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
-	if (accept_msg.info_msgs[n] == NULL) {
-	    info_msgs_size = n;
-	    goto done;
-	}
-	info_message__init(accept_msg.info_msgs[n]);
-    }
-
-    /* Fill in info_msgs */
-    n = 0;
-    accept_msg.info_msgs[n]->key = "command";
-    accept_msg.info_msgs[n]->strval = log_info->cmd;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "columns";
-    accept_msg.info_msgs[n]->numval = log_info->cols;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "lines";
-    accept_msg.info_msgs[n]->numval = log_info->lines;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "runargv";
-    accept_msg.info_msgs[n]->strlistval = &runargv;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
-    n++;
-
-    if (log_info->runas_group != NULL) {
-	accept_msg.info_msgs[n]->key = "rungroup";
-	accept_msg.info_msgs[n]->strval = log_info->runas_group;
-	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
-
-    accept_msg.info_msgs[n]->key = "runuser";
-    accept_msg.info_msgs[n]->strval = log_info->runas_user;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "submitcwd";
-    accept_msg.info_msgs[n]->strval = log_info->cwd;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "submithost";
-    accept_msg.info_msgs[n]->strval = hostname;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "submituser";
-    accept_msg.info_msgs[n]->strval = log_info->user;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "ttyname";
-    accept_msg.info_msgs[n]->strval = log_info->tty;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
 
     /* Update n_info_msgs. */
-    accept_msg.n_info_msgs = n;
+    accept_msg.n_info_msgs = n_info_msgs;
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: sending AcceptMessage, array length %zu", __func__, n);
+	"%s: sending AcceptMessage, array length %zu", __func__, n_info_msgs);
 
     /* Schedule ClientMessage */
     client_msg.accept_msg = &accept_msg;
@@ -466,12 +571,16 @@ fmt_accept_message(struct client_closure *closure)
     }
 
 done:
-    for (n = 0; n < info_msgs_size; n++) {
-	free(accept_msg.info_msgs[n]);
+    while (n_info_msgs-- > 0) {
+        if (accept_msg.info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
+            /* strlistval was dynamically allocated */
+            free(accept_msg.info_msgs[n_info_msgs]->strlistval->strings);
+            free(accept_msg.info_msgs[n_info_msgs]->strlistval);
+        }
+	free(accept_msg.info_msgs[n_info_msgs]);
     }
     free(accept_msg.info_msgs);
     free(hostname);
-    free(runargv.strings);
 
     debug_return_bool(ret);
 }
@@ -752,6 +861,11 @@ client_message_completion(struct client_closure *closure)
 	sudo_ev_del(closure->evbase, closure->write_ev);
 	break;
     case SEND_ACCEPT:
+	if (closure->accept_only) {
+	    closure->state = SEND_EXIT;
+	    debug_return_bool(fmt_exit_message(closure));
+	}
+	/* FALLTHROUGH */
     case SEND_RESTART:
 	closure->state = SEND_IO;
 	/* FALLTHROUGH */
@@ -760,6 +874,7 @@ client_message_completion(struct client_closure *closure)
 	if (!fmt_next_iolog(closure))
 	    debug_return_bool(false);
 	break;
+    case SEND_REJECT:
     case SEND_EXIT:
 	/* Done writing, just waiting for final commit point. */
 	sudo_ev_del(closure->evbase, closure->write_ev);
@@ -895,7 +1010,10 @@ handle_server_message(uint8_t *buf, size_t len,
 	    if (sudo_timespecisset(&closure->restart)) {
 		closure->state = SEND_RESTART;
 		ret = fmt_restart_message(closure);
-	    } else {
+	    } else if (closure->reject_reason != NULL) {
+		closure->state = SEND_REJECT;
+		ret = fmt_reject_message(closure);
+            } else {
 		closure->state = SEND_ACCEPT;
 		ret = fmt_accept_message(closure);
 	    }
@@ -1454,7 +1572,7 @@ client_closure_free(struct client_closure *closure)
 static struct client_closure *
 client_closure_alloc(int sock, struct sudo_event_base *base,
     struct timespec *elapsed, struct timespec *restart, const char *iolog_id,
-    struct iolog_info *log_info)
+    char *reject_reason, bool accept_only, struct iolog_info *log_info)
 {
     struct client_closure *closure;
     debug_decl(client_closure_alloc, SUDO_DEBUG_UTIL);
@@ -1468,6 +1586,8 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
     TAILQ_INSERT_TAIL(&connections, closure, entries);
 
     closure->state = RECV_HELLO;
+    closure->accept_only = accept_only;
+    closure->reject_reason = reject_reason;
     closure->log_info = log_info;
 
     closure->elapsed.tv_sec = elapsed->tv_sec;
@@ -1508,16 +1628,18 @@ bad:
 }
 
 #if defined(HAVE_OPENSSL)
-static const char short_opts[] = "h:i:np:r:t:b:c:k:V";
+static const char short_opts[] = "Ah:i:np:r:R:t:b:c:k:V";
 #else
-static const char short_opts[] = "h:i:p:r:t:V";
+static const char short_opts[] = "Ah:i:Ip:r:R:t:V";
 #endif
 static struct option long_opts[] = {
+    { "accept",		no_argument,		NULL,	'A' },
     { "help",		no_argument,		NULL,	1 },
     { "host",		required_argument,	NULL,	'h' },
     { "iolog-id",	required_argument,	NULL,	'i' },
     { "port",		required_argument,	NULL,	'p' },
     { "restart",	required_argument,	NULL,	'r' },
+    { "reject",		required_argument,	NULL,	'R' },
     { "test",	    	optional_argument,	NULL,	't' },
 #if defined(HAVE_OPENSSL)
     { "ca-bundle",	required_argument,	NULL,	'b' },
@@ -1540,6 +1662,8 @@ main(int argc, char *argv[])
     const char *port = NULL;
     struct timespec restart = { 0, 0 };
     struct timespec elapsed = { 0, 0 };
+    bool accept_only = false;
+    char *reject_reason = NULL;
     const char *iolog_id = NULL;
     const char *open_mode = "r";
     const char *errstr;
@@ -1571,11 +1695,17 @@ main(int argc, char *argv[])
 
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
+	case 'A':
+	    accept_only = true;
+	    break;
 	case 'h':
 	    server_name = optarg;
 	    break;
 	case 'i':
 	    iolog_id = optarg;
+	    break;
+	case 'R':
+	    reject_reason = optarg;
 	    break;
 	case 'p':
 	    port = optarg;
@@ -1637,6 +1767,10 @@ main(int argc, char *argv[])
 	sudo_warnx("%s", U_("both restart point and iolog ID must be specified"));
 	usage(true);
     }
+    if (sudo_timespecisset(&restart) && (accept_only || reject_reason)) {
+	sudo_warnx("%s", U_("a restart point may not be set when no I/O is sent"));
+	usage(true);
+    }
 
     /* Remaining arg should be to I/O log dir to send. */
     if (argc != 1)
@@ -1666,7 +1800,7 @@ main(int argc, char *argv[])
             printf("Connected to %s:%s\n", server_name, port);
 
         closure = client_closure_alloc(sock, evbase, &elapsed, &restart,
-	    iolog_id, log_info);
+	    iolog_id, reject_reason, accept_only, log_info);
         if (closure == NULL)
             goto bad;
 
