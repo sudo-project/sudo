@@ -17,8 +17,8 @@ What's new in Sudo 1.9.0
    or send existing sudo I/O logs to a centralized server.
 
  * It is now possible to write sudo plugins in Python 3 when sudo
-   is configured with the --enable-python> option.  See the
-   sudo_plugin_python.man.html manual for details.
+   is configured with the --enable-python option.  See the
+   sudo_plugin_python manual for details.
 
    Sudo 1.9.0 comes with several Python example plugins that get
    installed sudo's examples directory.
