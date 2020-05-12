@@ -1894,6 +1894,9 @@ case "$host" in
 		    *)		RTLD_PRELOAD_VAR="LDR_PRELOAD";;
 		esac
 
+		# cfmakeraw is broken on AIX (and is not documented)
+		: ${ac_cv_func_cfmakeraw='no'}
+
 		# strnlen/strndup may be broken on AIX < 6 depending
 		# on the libc version, use our own.
 		if test $OSMAJOR -lt 6; then
