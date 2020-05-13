@@ -326,7 +326,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    closure->state = FLUSHED;
+    closure->state = FINISHED;
     debug_return_bool(true);
 }
 
@@ -381,7 +381,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 	}
     } else {
 	/* Command exited, no I/O logs to flush. */
-	closure->state = FLUSHED;
+	closure->state = FINISHED;
     }
 
     debug_return_bool(true);
@@ -777,7 +777,7 @@ server_msg_cb(int fd, int what, void *v)
 	buf->off = 0;
 	buf->len = 0;
 	sudo_ev_del(closure->evbase, closure->write_ev);
-	if (closure->state == FLUSHED || closure->state == SHUTDOWN ||
+	if (closure->state == FINISHED || closure->state == SHUTDOWN ||
 		closure->state == ERROR)
 	    goto finished;
     }
@@ -874,7 +874,7 @@ client_msg_cb(int fd, int what, void *v)
 	    "unable to receive %u bytes", buf->size - buf->len);
 	goto finished;
     case 0:
-        if (closure->state != FLUSHED) {
+        if (closure->state != FINISHED) {
             sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
                 "unexpected EOF");
         }
@@ -917,7 +917,7 @@ client_msg_cb(int fd, int what, void *v)
     buf->len -= buf->off;
     buf->off = 0;
 
-    if (closure->state == FLUSHED)
+    if (closure->state == FINISHED)
 	goto finished;
 
     debug_return;
@@ -973,7 +973,7 @@ server_commit_cb(int unused, int what, void *v)
     }
 
     if (closure->state == EXITED)
-	closure->state = FLUSHED;
+	closure->state = FINISHED;
     debug_return;
 bad:
     connection_closure_free(closure);

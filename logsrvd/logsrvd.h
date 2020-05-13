@@ -75,7 +75,7 @@ enum connection_status {
     RUNNING,
     EXITED,
     SHUTDOWN,
-    FLUSHED,
+    FINISHED,
     ERROR
 };
 
