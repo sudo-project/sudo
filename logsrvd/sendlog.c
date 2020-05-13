@@ -548,7 +548,7 @@ fmt_accept_message(struct client_closure *closure)
     accept_msg.submit_time = &tv;
 
     /* Client will send IoBuffer messages. */
-    accept_msg.expect_iobufs = true;
+    accept_msg.expect_iobufs = !closure->accept_only;
 
     accept_msg.info_msgs = fmt_info_messages(closure->log_info, hostname,
         &n_info_msgs);
@@ -875,10 +875,14 @@ client_message_completion(struct client_closure *closure)
 	    debug_return_bool(false);
 	break;
     case SEND_REJECT:
-    case SEND_EXIT:
-	/* Done writing, just waiting for final commit point. */
+	/* Done writing, wait for server to close connection. */
 	sudo_ev_del(closure->evbase, closure->write_ev);
-	closure->state = CLOSING;
+	closure->state = FINISHED;
+	break;
+    case SEND_EXIT:
+	/* Done writing, wait for final commit point if sending I/O. */
+	sudo_ev_del(closure->evbase, closure->write_ev);
+	closure->state = closure->accept_only ? FINISHED : CLOSING;
 	break;
     default:
 	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
@@ -1024,9 +1028,9 @@ handle_server_message(uint8_t *buf, size_t len,
 	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
 	    sudo_ev_del(closure->evbase, closure->read_ev);
 	    closure->state = FINISHED;
-        if (++finished_transmissions == nr_of_conns)
+	    if (++finished_transmissions == nr_of_conns)
 	        sudo_ev_loopexit(closure->evbase);
-    }
+	}
 	break;
     case SERVER_MESSAGE__TYPE_LOG_ID:
 	ret = handle_log_id(msg->log_id, closure);
@@ -1146,7 +1150,8 @@ server_msg_cb(int fd, int what, void *v)
 	sudo_warn("recv");
 	goto bad;
     case 0:
-	sudo_warnx("%s", U_("premature EOF"));
+	if (closure->state != FINISHED)
+	    sudo_warnx("%s", U_("premature EOF"));
 	goto bad;
     default:
 	break;
