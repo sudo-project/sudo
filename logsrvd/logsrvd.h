@@ -100,6 +100,7 @@ struct connection_closure {
     const char *errstr;
     struct iolog_file iolog_files[IOFD_MAX];
     bool tls;
+    bool log_io;
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
