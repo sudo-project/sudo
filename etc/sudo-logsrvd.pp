@@ -133,7 +133,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 %endif
 
 %if [macos]
-	pp_macos_bundle_id=ws.sudo.pkg.sudo
+	pp_macos_bundle_id=ws.sudo.pkg.sudo-logsrvd
 	pp_macos_pkg_license=${pp_destdir}$docdir/LICENSE
 	pp_macos_pkg_readme=${pp_wrkdir}/ReadMe.txt
 	pp_macos_pkg_type=flat
