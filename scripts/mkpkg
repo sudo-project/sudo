@@ -185,10 +185,10 @@ case "$osversion" in
 			    with_sssd=true
 			    # RHEL 6 and above use /etc/sudo-ldap.conf
 			    with_sudo_ldap_conf=true
-			fi
-			if [ $osmajor -ge 7 ]; then
 			    # Encrypted remote I/O log support.
 			    with_openssl=true
+			fi
+			if [ $osmajor -ge 7 ]; then
 			    # Python plugins
 			    with_python=true
 			fi
