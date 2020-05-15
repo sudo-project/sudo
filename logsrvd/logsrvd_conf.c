@@ -390,7 +390,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 
 #if !defined(HAVE_OPENSSL)
     if (tls) {
-	sudo_warn("%s", U_("TLS not supported"));
+	sudo_warnx("%s", U_("TLS not supported"));
 	goto done;
     }
 #endif
