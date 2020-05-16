@@ -25,6 +25,7 @@
 #else
 # include "compat/stdbool.h"
 #endif
+#include <sys/types.h>
 #include "sudo_queue.h"
 
 /*
