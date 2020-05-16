@@ -318,8 +318,8 @@ extern int errno;
 #endif
 
 /* Older systems may not support WCONTINUED */
-#ifndef WCONTINUED
-# define WCONTINUED	0
+#if !defined(WCONTINUED) && !defined(WIFCONTINUED)
+# define WCONTINUED		0
 # define WIFCONTINUED(x)	0
 #endif
 
