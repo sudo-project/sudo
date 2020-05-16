@@ -614,7 +614,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	sudoersrestart(fp);
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 	if (sudoersparse() && !parse_error) {
-	    sudo_warnx(U_("unabled to parse temporary file (%s), unknown error"),
+	    sudo_warnx(U_("unable to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = true;
 	    rcstr_delref(errorfile);
