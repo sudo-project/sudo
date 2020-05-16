@@ -40,10 +40,6 @@
     if (sudo_sys_siglist[SIGKILL] == NULL)
 	sudo_sys_siglist[SIGKILL] = "Killed";
 #endif
-#ifdef SIGUNUSED
-    if (sudo_sys_siglist[SIGUNUSED] == NULL)
-	sudo_sys_siglist[SIGUNUSED] = "Unused";
-#endif
 #ifdef SIGBUS
     if (sudo_sys_siglist[SIGBUS] == NULL)
 	sudo_sys_siglist[SIGBUS] = "Bus error";
@@ -55,6 +51,10 @@
 #ifdef SIGSYS
     if (sudo_sys_siglist[SIGSYS] == NULL)
 	sudo_sys_siglist[SIGSYS] = "Bad system call";
+#endif
+#ifdef SIGUNUSED
+    if (sudo_sys_siglist[SIGUNUSED] == NULL)
+	sudo_sys_siglist[SIGUNUSED] = "Unused";
 #endif
 #ifdef SIGPIPE
     if (sudo_sys_siglist[SIGPIPE] == NULL)
