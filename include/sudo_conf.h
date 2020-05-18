@@ -19,6 +19,12 @@
 #ifndef SUDO_CONF_H
 #define SUDO_CONF_H
 
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
+
 #include "sudo_queue.h"
 
 /* Flags for sudo_conf_read() */

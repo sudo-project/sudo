@@ -24,6 +24,7 @@
 #ifndef SUDOERS_SUDOERS_H
 #define SUDOERS_SUDOERS_H
 
+#include <sys/types.h>		/* for gid_t, mode_t, pid_t, size_t, uid_t */
 #include <limits.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>

@@ -19,6 +19,7 @@
 #ifndef SUDO_UTIL_H
 #define SUDO_UTIL_H
 
+#include <sys/types.h>	/* for dev_t, mode_t, gid_t, size_t, ssize_t, uid_t */
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else

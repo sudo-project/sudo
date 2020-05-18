@@ -19,6 +19,8 @@
 #ifndef SUDO_IOLOG_H
 #define SUDO_IOLOG_H
 
+#include <sys/types.h>	/* for gid_t, mode_t, size_t, ssize_t, uid_t */
+
 #ifdef HAVE_ZLIB_H
 # include <zlib.h>	/* for gzFile */
 #endif
