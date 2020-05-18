@@ -827,6 +827,20 @@ iolog_eof(struct iolog_file *iol)
     debug_return_int(ret);
 }
 
+void
+iolog_clearerr(struct iolog_file *iol)
+{
+    debug_decl(iolog_eof, SUDO_DEBUG_UTIL);
+
+#ifdef HAVE_ZLIB_H
+    if (iol->compressed)
+	gzclearerr(iol->fd.g);
+    else
+#endif
+	clearerr(iol->fd.f);
+    debug_return;
+}
+
 /*
  * Like gets() but for struct iolog_file.
  */
