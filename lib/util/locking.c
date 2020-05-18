@@ -28,7 +28,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -41,7 +40,6 @@
 #else
 # include "compat/stdbool.h"
 #endif
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>

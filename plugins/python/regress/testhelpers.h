@@ -19,8 +19,6 @@
 #ifndef PYTHON_TESTHELPERS
 #define PYTHON_TESTHELPERS
 
-#include <sys/wait.h>
-
 #include "iohelpers.h"
 
 #include "../pyhelpers.h"

@@ -27,7 +27,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -38,7 +37,6 @@
 #endif /* HAVE_STRINGS_H */
 #include <fcntl.h>
 #include <limits.h>
-#include <pwd.h>
 #include <grp.h>
 
 #include "sudo_compat.h"

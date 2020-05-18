@@ -30,9 +30,6 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
-#include <errno.h>
-#include <grp.h>
-#include <pwd.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>

@@ -33,7 +33,6 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <unistd.h>
 #include <netinet/in.h>  
 #include <arpa/inet.h>
 #ifdef NEED_RESOLV_H

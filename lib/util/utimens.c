@@ -25,10 +25,8 @@
 
 #if !defined(HAVE_FUTIMENS) || !defined(HAVE_UTIMENSAT)
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <stdio.h>
 #include <errno.h>
 #include <time.h>
 #if !defined(HAVE_UTIMES) || defined(HAVE_FUTIME)

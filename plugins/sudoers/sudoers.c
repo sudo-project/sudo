@@ -47,9 +47,7 @@
 #include <pwd.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <grp.h>
-#include <time.h>
 #include <netdb.h>
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>

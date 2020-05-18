@@ -37,7 +37,6 @@
 #include <sys/stat.h>
 
 #include <errno.h>
-#include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -45,8 +44,8 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <unistd.h>
 #include <dirent.h>
+#include <limits.h>
 
 #include "sudo_compat.h"
 
@@ -133,7 +132,7 @@ sudo_getcwd(char *pt, size_t size)
 			 * path to the beginning of the buffer, but it's always
 			 * been that way and stuff would probably break.
 			 */
-			bcopy(bpt, pt, ept - bpt);
+			memcpy(pt, bpt, ept - bpt);
 			free(up);
 			return pt;
 		}
@@ -183,7 +182,7 @@ sudo_getcwd(char *pt, size_t size)
 					goto notfound;
 				if (ISDOT(dp))
 					continue;
-				bcopy(dp->d_name, bup, NAMLEN(dp) + 1);
+				memcpy(bup, dp->d_name, NAMLEN(dp) + 1);
 
 				/* Save the first error for later. */
 				if (lstat(up, &s)) {
@@ -216,13 +215,13 @@ sudo_getcwd(char *pt, size_t size)
 			pt = npt;
 			bpt = pt + off;
 			ept = pt + ptsize;
-			bcopy(bpt, ept - len, len);
+			memcpy(ept - len, bpt, len);
 			bpt = ept - len;
 		}
 		if (!first)
 			*--bpt = '/';
 		bpt -= NAMLEN(dp);
-		bcopy(dp->d_name, bpt, NAMLEN(dp));
+		memcpy(bpt, dp->d_name, NAMLEN(dp));
 		(void)closedir(dir);
 
 		/* Truncate any file name. */

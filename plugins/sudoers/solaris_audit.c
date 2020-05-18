@@ -25,11 +25,11 @@
 
 #ifdef HAVE_SOLARIS_AUDIT
 
-#include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <unistd.h>
 
 #include <bsm/adt.h>
 #include <bsm/adt_event.h>

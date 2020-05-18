@@ -23,15 +23,8 @@
 
 #include <config.h>
 
-#include <sys/types.h>
+#include <sys/types.h>			/* for id_t */
 
-#include <stdio.h>
-#include <stdlib.h>
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#elif defined(HAVE_INTTYPES_H)
-# include <inttypes.h>
-#endif
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else

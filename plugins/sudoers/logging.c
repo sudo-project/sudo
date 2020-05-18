@@ -31,9 +31,7 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,7 +48,6 @@
 #include <netdb.h>
 #include <pwd.h>
 #include <grp.h>
-#include <signal.h>
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>

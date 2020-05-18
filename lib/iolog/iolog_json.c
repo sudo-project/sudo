@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
@@ -39,7 +38,6 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <ctype.h>
-#include <errno.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <time.h>

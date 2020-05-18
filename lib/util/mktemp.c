@@ -26,8 +26,6 @@
 
 #if !defined(HAVE_MKSTEMPS) || !defined(HAVE_MKDTEMP)
 
-#include <sys/types.h>
-#include <sys/time.h>
 #include <sys/stat.h>
 
 #include <errno.h>
@@ -50,7 +48,6 @@
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 #include <unistd.h>
-#include <time.h>
 
 #include "sudo_compat.h"
 #include "sudo_rand.h"

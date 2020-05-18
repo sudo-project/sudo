@@ -25,9 +25,7 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/time.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -37,7 +35,6 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
-#include <time.h>
 #include <ctype.h>
 #include <fcntl.h>
 #ifdef HAVE_LBER_H

@@ -23,9 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-#include <stdio.h>
-
 #include "sudoers.h"
 
 /*

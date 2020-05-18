@@ -31,13 +31,7 @@
 #ifdef HAVE_SYS_SELECT_H
 # include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
-#include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -45,8 +39,6 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <time.h>
-#include <unistd.h>
-#include <errno.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"

@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 
@@ -42,8 +41,6 @@
 #endif /* HAVE_STRINGS_H */
 #include <signal.h>
 #include <unistd.h>
-#include <ctype.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <time.h>

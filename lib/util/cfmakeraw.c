@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <termios.h>
 
 #include "sudo_compat.h"

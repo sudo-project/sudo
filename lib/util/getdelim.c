@@ -25,8 +25,6 @@
 
 #ifndef HAVE_GETDELIM
 
-#include <sys/types.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H

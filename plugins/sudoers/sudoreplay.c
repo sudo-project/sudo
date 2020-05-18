@@ -26,8 +26,8 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 #include <sys/ioctl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(HAVE_STDINT_H)

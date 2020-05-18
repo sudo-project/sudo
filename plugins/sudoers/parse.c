@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,9 +34,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <ctype.h>
-#include <grp.h>
 #include <pwd.h>
-#include <time.h>
 
 #include "sudoers.h"
 #include "sudo_lbuf.h"

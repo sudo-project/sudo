@@ -47,7 +47,6 @@
     !defined(HAVE_VASPRINTF) || !defined(HAVE_ASPRINTF) || \
     defined(PREFER_PORTABLE_SNPRINTF)
 
-#include <sys/types.h>
 #include <sys/mman.h>
 
 #include <errno.h>

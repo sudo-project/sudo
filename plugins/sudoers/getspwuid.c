@@ -28,8 +28,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -40,7 +38,6 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <pwd.h>
-#include <grp.h>
 #ifdef HAVE_GETSPNAM
 # include <shadow.h>
 #endif /* HAVE_GETSPNAM */

@@ -25,7 +25,6 @@
 
 #ifndef HAVE_ARC4RANDOM_BUF
 
-#include <sys/types.h>
 #include <stdlib.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>

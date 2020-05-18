@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include <stdio.h>
@@ -40,12 +39,9 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <limits.h>
 #include <grp.h>
-#include <pwd.h>
 
 #include "sudo_plugin.h"
 #include "sudo_compat.h"

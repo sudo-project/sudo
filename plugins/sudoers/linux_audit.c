@@ -25,7 +25,6 @@
 
 #ifdef HAVE_LINUX_AUDIT
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

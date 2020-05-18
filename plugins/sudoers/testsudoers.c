@@ -30,7 +30,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -40,14 +41,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
-#ifdef HAVE_NETGROUP_H
-# include <netgroup.h>
-#endif /* HAVE_NETGROUP_H */
-#include <time.h>
-#include <ctype.h>
 #include <errno.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include "tsgetgrpw.h"
 #include "sudoers.h"

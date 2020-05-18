@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
@@ -37,10 +36,6 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <unistd.h>
-#include <stdarg.h>
-#include <time.h>
-#include <ctype.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */

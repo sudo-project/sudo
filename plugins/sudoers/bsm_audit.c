@@ -26,16 +26,14 @@
 
 #ifdef HAVE_BSM_AUDIT
 
-#include <sys/types.h>
+#include <sys/types.h>		/* for pid_t */
 
 #include <bsm/audit.h>
 #include <bsm/libbsm.h>
 #include <bsm/audit_uevents.h>
 
 #include <stdio.h>
-#include <string.h>
 #include <stdarg.h>
-#include <pwd.h>
 #include <errno.h>
 #include <unistd.h>
 

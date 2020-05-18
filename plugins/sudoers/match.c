@@ -28,7 +28,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #ifdef HAVE_SYS_SYSTEMINFO_H
 # include <sys/systeminfo.h>

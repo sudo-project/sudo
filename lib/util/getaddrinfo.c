@@ -37,7 +37,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>

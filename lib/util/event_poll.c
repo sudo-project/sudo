@@ -23,25 +23,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/resource.h>
-#include <stdio.h>
+
 #include <stdlib.h>
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
-#include <time.h>
-#include <unistd.h>
-#include <errno.h>
 #include <poll.h>
+#include <time.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"

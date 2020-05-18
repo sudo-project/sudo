@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -33,8 +32,6 @@
 # include <strings.h>
 #endif /* HAVE_STRING_H */
 #include <ctype.h>
-#include <unistd.h>
-#include <fcntl.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else

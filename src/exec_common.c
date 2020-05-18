@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -37,8 +36,6 @@
 # include <priv.h>
 #endif
 #include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
 
 #include "sudo.h"
 #include "sudo_exec.h"

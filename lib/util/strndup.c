@@ -27,8 +27,6 @@
 
 #ifndef HAVE_STRNDUP
 
-#include <sys/types.h>
-
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>

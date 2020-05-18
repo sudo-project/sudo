@@ -27,7 +27,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -38,7 +37,6 @@
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <pwd.h>
 #include <unistd.h>
 

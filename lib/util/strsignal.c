@@ -25,9 +25,6 @@
 
 #ifndef HAVE_STRSIGNAL
 
-#include <sys/types.h>
-
-#include <stdio.h>
 #include <signal.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"

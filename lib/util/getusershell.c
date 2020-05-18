@@ -23,13 +23,9 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
 
 #define DEFAULT_TEXT_DOMAIN     "sudo"
 #include "sudo_gettext.h"       /* must be included before sudo_compat.h */
