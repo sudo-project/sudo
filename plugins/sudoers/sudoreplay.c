@@ -137,7 +137,7 @@ static double speed_factor = 1.0;
 
 static const char *session_dir = _PATH_SUDO_IO_LOGDIR;
 
-static bool terminal_can_resize, terminal_was_resized;
+static bool terminal_can_resize, terminal_was_resized, follow_mode;
 
 static int terminal_lines, terminal_cols;
 
@@ -152,10 +152,11 @@ static struct iolog_file iolog_files[] = {
     { true, },	/* IOFD_TIMING */
 };
 
-static const char short_opts[] =  "d:f:hlm:nRSs:V";
+static const char short_opts[] =  "d:f:Fhlm:nRSs:V";
 static struct option long_opts[] = {
     { "directory",	required_argument,	NULL,	'd' },
     { "filter",		required_argument,	NULL,	'f' },
+    { "follow",		no_argument,		NULL,	'F' },
     { "help",		no_argument,		NULL,	'h' },
     { "list",		no_argument,		NULL,	'l' },
     { "max-wait",	required_argument,	NULL,	'm' },
@@ -256,6 +257,9 @@ main(int argc, char *argv[])
 		else
 		    sudo_fatalx(U_("invalid filter option: %s"), optarg);
 	    }
+	    break;
+	case 'F':
+	    follow_mode = true;
 	    break;
 	case 'h':
 	    help();
@@ -713,32 +717,75 @@ restore_terminal_size(void)
     debug_return;
 }
 
+static bool
+iolog_complete(struct replay_closure *closure)
+{
+    struct stat sb;
+    debug_decl(iolog_complete, SUDO_DEBUG_UTIL);
+
+    if (fstatat(closure->iolog_dir_fd, "timing", &sb, 0) != -1) {
+	if (ISSET(sb.st_mode, S_IWUSR|S_IWGRP|S_IWOTH))
+	    debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
 /*
  * Read the next record from the timing file and schedule a delay
  * event with the specified timeout.
+ * In follow mode, ignore EOF and just delay for a short time.
  * Return 0 on success, 1 on EOF and -1 on error.
  */
 static int
 get_timing_record(struct replay_closure *closure)
 {
     struct timing_closure *timing = &closure->timing;
-    int ret;
+    bool nodelay = false;
     debug_decl(get_timing_record, SUDO_DEBUG_UTIL);
 
-    if ((ret = iolog_read_timing_record(&iolog_files[IOFD_TIMING], timing)) != 0)
-	debug_return_int(ret);
-
-    /* Record number bytes to read. */
-    if (timing->event != IO_EVENT_WINSIZE &&
-	timing->event != IO_EVENT_SUSPEND) {
-    	closure->iobuf.len = 0;
-    	closure->iobuf.off = 0;
-    	closure->iobuf.lastc = '\0';
-    	closure->iobuf.toread = timing->u.nbytes;
+    if (follow_mode && timing->event == IO_EVENT_COUNT) {
+	/* In follow mode, we already waited. */
+	nodelay = true;
     }
 
-    /* Adjust delay using speed factor and max_delay. */
-    iolog_adjust_delay(&timing->delay, closure->max_delay, speed_factor);
+    switch (iolog_read_timing_record(&iolog_files[IOFD_TIMING], timing)) {
+    case -1:
+	/* error */
+	debug_return_int(-1);
+    case 1:
+	/* EOF */
+	if (!follow_mode || iolog_complete(closure)) {
+	    debug_return_int(1);
+	}
+	/* Follow mode, keep reading until done. */
+	iolog_clearerr(&iolog_files[IOFD_TIMING]);
+	timing->delay.tv_sec = 0;
+	timing->delay.tv_nsec = 1000000;
+	timing->iol = NULL;
+	timing->event = IO_EVENT_COUNT;
+	break;
+    default:
+	/* Record number bytes to read. */
+	if (timing->event != IO_EVENT_WINSIZE &&
+		timing->event != IO_EVENT_SUSPEND) {
+	    closure->iobuf.len = 0;
+	    closure->iobuf.off = 0;
+	    closure->iobuf.lastc = '\0';
+	    closure->iobuf.toread = timing->u.nbytes;
+	}
+
+	if (nodelay) {
+	    /* Already waited, fire immediately. */
+	    timing->delay.tv_sec = 0;
+	    timing->delay.tv_nsec = 0;
+	} else {
+	    /* Adjust delay using speed factor and max_delay. */
+	    iolog_adjust_delay(&timing->delay, closure->max_delay,
+		speed_factor);
+	}
+	break;
+    }
 
     /* Schedule the delay event. */
     if (sudo_ev_add(closure->evbase, closure->delay_ev, &timing->delay, false) == -1)
