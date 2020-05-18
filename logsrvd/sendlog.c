@@ -329,7 +329,7 @@ fmt_client_hello(struct client_closure *closure)
     debug_decl(fmt_client_hello, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ClientHello", __func__);
-    hello_msg.client_id = "Sendlog Version 0.1";
+    hello_msg.client_id = "Sudo Sendlog " PACKAGE_VERSION;
 
     /* Schedule ClientMessage */
     client_msg.hello_msg = &hello_msg;

@@ -83,7 +83,7 @@
 TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
-static const char server_id[] = "Sudo Audit Server 0.1";
+static const char server_id[] = "Sudo Audit Server " PACKAGE_VERSION;
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
 static double random_drop;
 
