@@ -183,7 +183,7 @@ static const char *initial_badenv_table[] = {
     "BASHOPTS",			/* bash, initial "shopt -s" options */
     "SHELLOPTS",		/* bash, initial "set -o" options */
     "JAVA_TOOL_OPTIONS",	/* java, extra command line options */
-    "PERLIO_DEBUG ",		/* perl, debugging output file */
+    "PERLIO_DEBUG",		/* perl, debugging output file */
     "PERLLIB",			/* perl, search path for modules/includes */
     "PERL5LIB",			/* perl 5, search path for modules/includes */
     "PERL5OPT",			/* perl 5, extra command line options */
