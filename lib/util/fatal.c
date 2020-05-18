@@ -36,11 +36,9 @@
 #endif /* HAVE_STDBOOL_H */
 #include <unistd.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"
 #include "sudo_plugin.h"

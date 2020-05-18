@@ -27,11 +27,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_TEXT_DOMAIN     "sudo"
-#include "sudo_gettext.h"       /* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
 #include "sudo_debug.h"
+#include "sudo_gettext.h"
 #include "sudo_util.h"
 
 static char **allowed_shells, **current_shell;

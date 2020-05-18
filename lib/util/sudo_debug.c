@@ -37,14 +37,12 @@
 #include <fcntl.h>
 #include <time.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_plugin.h"
-#include "sudo_debug.h"
 #include "sudo_conf.h"
+#include "sudo_debug.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_plugin.h"
 #include "sudo_util.h"
 
 /*
