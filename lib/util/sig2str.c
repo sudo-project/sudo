@@ -26,12 +26,7 @@
 #ifndef HAVE_SIG2STR
 
 #include <errno.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <ctype.h>
 #include <signal.h>
 #include <unistd.h>

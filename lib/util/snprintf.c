@@ -63,12 +63,7 @@
 # include <inttypes.h>
 #endif
 #include <stdio.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #ifdef PRINTF_WIDE_CHAR
 # include <wchar.h>
