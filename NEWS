@@ -1,3 +1,24 @@
+What's new in Sudo 1.9.1
+
+ * Correct handling of sudo_logsrvd connections without associated
+   I/O log data.  This fixes support for RejectMessage as well as
+   AcceptMessage when the expect_iobufs flag is not set.
+
+ * Added an "iolog_path" entry to the JSON-format event log produced
+   by sudo_logsrvd.  Previously, it was only possible to determine
+   the I/O log file an event belonged to using sudo-format logs.
+
+ * Fixed the bundle IDs for sudo-logsrvd and sudo-python macOS packages.
+
+ * I/O log files produced by the sudoers plugin now clear the write
+   bits on the I/O log timing file when the log is complete.  This
+   is consistent with how sudo_logsrvd indicates that a log is
+   complete.
+
+ * The sudoreplay utility has a new "-F" (follow) command line
+   option to allow replaying a session that is still in progress,
+   similar to "tail -f".
+
 What's new in Sudo 1.9.0
 
  * Fixed a test failure in the strsig_test regress test on FreeBSD.
