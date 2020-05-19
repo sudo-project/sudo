@@ -933,6 +933,7 @@ push_include_int(char *path, bool isdir)
 
 	if (idepth > MAX_SUDOERS_DEPTH) {
 	    sudoerserror(N_("too many levels of includes"));
+	    rcstr_delref(path);
 	    debug_return_bool(false);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
@@ -940,6 +941,7 @@ push_include_int(char *path, bool isdir)
 	if (new_istack == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudoerserror(NULL);
+	    rcstr_delref(path);
 	    debug_return_bool(false);
 	}
 	istack = new_istack;
@@ -975,6 +977,7 @@ push_include_int(char *path, bool isdir)
 		}
 	    }
 	    /* A missing or insecure include dir is not a fatal error. */
+	    rcstr_delref(path);
 	    debug_return_bool(true);
 	}
 	count = switch_dir(&istack[idepth], path);
@@ -999,6 +1002,7 @@ push_include_int(char *path, bool isdir)
 	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
 	    /* The error was already printed by open_sudoers() */
 	    sudoerserror(NULL);
+	    rcstr_delref(path);
 	    debug_return_bool(false);
 	}
     }
