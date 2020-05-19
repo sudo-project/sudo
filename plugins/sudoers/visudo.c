@@ -1003,6 +1003,7 @@ FILE *
 open_sudoers(const char *path, bool doedit, bool *keepopen)
 {
     struct sudoersfile *entry;
+    struct stat sb;
     FILE *fp;
     int open_flags;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
@@ -1025,8 +1026,16 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	/* entry->modified = false; */
 	entry->doedit = doedit;
 	entry->fd = open(entry->path, open_flags, sudoers_mode);
-	if (entry->fd == -1) {
+	if (entry->fd == -1 || fstat(entry->fd, &sb) == -1) {
 	    sudo_warn("%s", entry->path);
+	    if (entry->fd != -1)
+		close(entry->fd);
+	    free(entry);
+	    debug_return_ptr(NULL);
+	}
+	if (!S_ISREG(sb.st_mode)) {
+	    sudo_warnx(U_("%s is not a regular file"), entry->path);
+	    close(entry->fd);
 	    free(entry);
 	    debug_return_ptr(NULL);
 	}
