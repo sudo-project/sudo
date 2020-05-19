@@ -394,6 +394,17 @@ iolog_openat(int dfd, const char *path, int flags)
     }
     fd = openat(dfd, path, flags, iolog_filemode);
     if (fd == -1 && errno == EACCES) {
+	/* Enable write bit if it is missing. */
+	struct stat sb;
+	if (fstatat(dfd, path, &sb, 0) == 0) {
+	    mode_t write_bits = iolog_filemode & (S_IWUSR|S_IWGRP|S_IWOTH);
+	    if ((sb.st_mode & write_bits) != write_bits) {
+		if (fchmodat(dfd, path, iolog_filemode, 0) == 0)
+		    fd = openat(dfd, path, flags, iolog_filemode);
+	    }
+	}
+    }
+    if (fd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (io_swapids(false)) {
 	    fd = openat(dfd, path, flags, iolog_filemode);
