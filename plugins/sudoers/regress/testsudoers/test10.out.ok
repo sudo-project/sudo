@@ -1,4 +1,4 @@
-Testing @includedir of an unquoted path
+Testing @include of a path with escaped white space
 
 Parses OK.
 
@@ -11,7 +11,7 @@ ALL = ALL
 
 Command allowed
 
-Testing @includedir of a double-quoted path
+Testing @include of a double-quoted path with white space
 
 Parses OK.
 
@@ -24,7 +24,7 @@ ALL = ALL
 
 Command allowed
 
-Testing #includedir of an unquoted path
+Testing #include of a path with escaped white space
 
 Parses OK.
 
@@ -37,7 +37,7 @@ ALL = ALL
 
 Command allowed
 
-Testing #includedir of a double-quoted path
+Testing #include of a double-quoted path with white space
 
 Parses OK.
 

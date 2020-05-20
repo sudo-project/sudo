@@ -68,11 +68,12 @@
  * 45	sudo 1.8.15, added FOLLOW/NOFOLLOW tags as well as sudoedit_follow and sudoedit_checkdir Defaults.
  * 46	sudo 1.8.20, added TIMEOUT, NOTBEFORE and NOTAFTER options.
  * 47	sudo 1.9.0, Cmd_Alias treated as Cmnd_Alias, support for multiple digests per command and for ALL.
+ * 48	sudo 1.9.1, @include and @includedir, include path escaping/quoting.
  */
 
 #ifndef SUDOERS_VERSION_H
 #define	SUDOERS_VERSION_H
 
-#define SUDOERS_GRAMMAR_VERSION	47
+#define SUDOERS_GRAMMAR_VERSION	48
 
 #endif /* SUDOERS_VERSION_H */

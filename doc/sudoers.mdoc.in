@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd April 30, 2020
+.Dd May 19, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1753,12 +1753,17 @@ It is possible to include other
 files from within the
 .Em sudoers
 file currently being parsed using the
+.Li @include
+and
+.Li @includedir
+directives.
+For compatibility with sudo versions prior to 1.9.1,
 .Li #include
 and
 .Li #includedir
-directives.
+are also accepted.
 .Pp
-This can be used, for example, to keep a site-wide
+An include file can be used, for example, to keep a site-wide
 .Em sudoers
 file in addition to a local, per-machine file.
 For the sake of this example the site-wide
@@ -1771,11 +1776,10 @@ To include
 .Pa /etc/sudoers.local
 from within
 .Pa /etc/sudoers
-we would use the
-following line in
+one would use the following line in
 .Pa /etc/sudoers :
 .Bd -literal -offset 4n
-#include /etc/sudoers.local
+@include /etc/sudoers.local
 .Ed
 .Pp
 When
@@ -1793,6 +1797,16 @@ Files that are included may themselves include other files.
 A hard limit of 128 nested include files is enforced to prevent include
 file loops.
 .Pp
+The path to the include file may contain white space if it is
+escaped with a backslash
+.Pq Ql \e .
+Alternately, the entire path may be enclosed in double quotes
+.Pq \&"" ,
+in which case no escaping is necessary.
+To include a literal backslash in the path,
+.Ql \e\e
+should be used.
+.Pp
 If the path to the include file is not fully-qualified (does not
 begin with a
 .Ql / ) ,
@@ -1802,7 +1816,7 @@ For example, if
 .Pa /etc/sudoers
 contains the line:
 .Bd -literal -offset 4n
-.Li #include sudoers.local
+.Li @include sudoers.local
 .Ed
 .Pp
 the file that will be included is
@@ -1815,7 +1829,7 @@ In other words, if the machine's host name is
 .Dq xerxes ,
 then
 .Bd -literal -offset 4n
-#include /etc/sudoers.%h
+@include /etc/sudoers.%h
 .Ed
 .Pp
 will cause
@@ -1824,7 +1838,7 @@ to include the file
 .Pa /etc/sudoers.xerxes .
 .Pp
 The
-.Li #includedir
+.Li @includedir
 directive can be used to create a
 .Pa sudoers.d
 directory that the system package manager can drop
@@ -1832,7 +1846,7 @@ directory that the system package manager can drop
 file rules into as part of package installation.
 For example, given:
 .Bd -literal -offset 4n
-#includedir /etc/sudoers.d
+@includedir /etc/sudoers.d
 .Ed
 .Pp
 .Nm sudo
@@ -1858,14 +1872,14 @@ Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
 After parsing the files in the directory, control returns to the
 file that contained the
-.Li #includedir
+.Li @includedir
 directive.
 .Pp
 Note that unlike files included via
-.Li #include ,
+.Li @include ,
 .Nm visudo
 will not edit the files in a
-.Li #includedir
+.Li @includedir
 directory unless one of them contains a syntax error.
 It is still possible to run
 .Nm visudo
@@ -3849,7 +3863,7 @@ Entries in this file should either be of the form
 .Dq Li VARIABLE=value
 or
 .Dq Li export VARIABLE=value .
-The value may optionally be surrounded by single or double quotes.
+The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 This file is considered to be part of the security policy,
@@ -4045,7 +4059,7 @@ Entries in this file should either be of the form
 .Dq Li VARIABLE=value
 or
 .Dq Li export VARIABLE=value .
-The value may optionally be surrounded by single or double quotes.
+The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 Unlike

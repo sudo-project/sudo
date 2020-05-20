@@ -64,9 +64,7 @@ static bool continued, sawspace;
 static int prev_state;
 static int digest_type = -1;
 
-static bool push_include_int(char *, bool);
 static bool pop_include(void);
-static char *parse_include_int(const char *, bool);
 
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
@@ -76,11 +74,6 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 } while (0)
 
 #define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
-
-#define	parse_include(_p)	(parse_include_int((_p), false))
-#define	parse_includedir(_p)	(parse_include_int((_p), true))
-#define	push_include(_p)	(push_include_int((_p), false))
-#define	push_includedir(_p)	(push_include_int((_p), true))
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
@@ -106,6 +99,7 @@ DEFVAR			[a-z_]+
 %x	INDEFS
 %x	INSTR
 %s	WANTDIGEST
+%x	GOTINC
 
 %%
 <GOTDEFS>[[:blank:]]*,[[:blank:]]* {
@@ -280,43 +274,54 @@ DEFVAR			[a-z_]+
 			    yyless(sudoersleng);
 			} /* base64 digest */
 
-<INITIAL>^#include[[:blank:]]+.*(\r\n|\n)? {
-			    char *path;
-
+<INITIAL>@include	{
 			    if (continued) {
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
 
-			    if ((path = parse_include(sudoerstext)) == NULL)
-				yyterminate();
+			    BEGIN GOTINC;
+			    LEXTRACE("INCLUDE ");
+			    LEXRETURN(INCLUDE);
+			}
 
-			    LEXTRACE("INCLUDE\n");
+<INITIAL>@includedir	{
+			    if (continued) {
+				LEXTRACE("ERROR ");
+				LEXRETURN(ERROR);
+			    }
 
-			    /* Push current buffer and switch to include file */
-			    if (!push_include(path))
-				yyterminate();
+			    BEGIN GOTINC;
+			    LEXTRACE("INCLUDEDIR ");
+			    LEXRETURN(INCLUDEDIR);
+			}
+
+<INITIAL>^#include[[:blank:]]+.*(\r\n|\n)? {
+			    if (continued) {
+				LEXTRACE("ERROR ");
+				LEXRETURN(ERROR);
+			    }
+
+			    /* only consume #include */
+			    yyless(sizeof("#include") - 1);
+
+			    BEGIN GOTINC;
+			    LEXTRACE("INCLUDE ");
+			    LEXRETURN(INCLUDE);
 			}
 
 <INITIAL>^#includedir[[:blank:]]+.*(\r\n|\n)? {
-			    char *path;
-
 			    if (continued) {
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
 
-			    if ((path = parse_includedir(sudoerstext)) == NULL)
-				yyterminate();
+			    /* only consume #includedir */
+			    yyless(sizeof("#includedir") - 1);
 
-			    LEXTRACE("INCLUDEDIR\n");
-
-			    /*
-			     * Push current buffer and switch to include file,
-			     * ignoring missing or empty directories.
-			     */
-			    if (!push_includedir(path))
-				yyterminate();
+			    BEGIN GOTINC;
+			    LEXTRACE("INCLUDEDIR ");
+			    LEXRETURN(INCLUDEDIR);
 			}
 
 <INITIAL>^[[:blank:]]*Defaults([:@>\!][[:blank:]]*\!*\"?({ID}|{WORD}))? {
@@ -638,7 +643,7 @@ sudoedit		{
 			    }
 			}			/* a pathname */
 
-<INITIAL,GOTDEFS>\" {
+<INITIAL,GOTDEFS>\"	{
 			    LEXTRACE("BEGINSTR ");
 			    sudoerslval.string = NULL;
 			    prev_state = YY_START;
@@ -652,6 +657,24 @@ sudoedit		{
 			    LEXTRACE("WORD(5) ");
 			    LEXRETURN(WORD);
 			}
+
+<GOTINC>{
+    [^\"[:space:]]([^[:space:]]|\\[[:blank:]])*	{
+			    /* include file/directory */
+			    if (!fill(sudoerstext, sudoersleng))
+				yyterminate();
+			    BEGIN INITIAL;
+			    LEXTRACE("WORD(6) ");
+			    LEXRETURN(WORD);
+			}
+
+    \"			{
+			    LEXTRACE("BEGINSTR ");
+			    sudoerslval.string = NULL;
+			    prev_state = INITIAL;
+			    BEGIN INSTR;
+			}
+}
 
 \(			{
 			    LEXTRACE("( ");
@@ -915,17 +938,90 @@ init_lexer(void)
 }
 
 /*
+ * Expand any embedded %h (host) escapes in the given path and makes
+ * a relative path fully-qualified based on the current sudoers file.
+ * Returns a reference-counted string.
+ */
+static char *
+expand_include(const char *opath, size_t olen)
+{
+    const char *cp, *ep;
+    char *path, *pp;
+    int dirlen = 0, len;
+    size_t shost_len = 0;
+    bool subst = false;
+    debug_decl(expand_include, SUDOERS_DEBUG_PARSER);
+
+    /* Strip double quotes if present. */
+    if (*opath == '"') {
+	opath++;
+	olen -= 2;
+    }
+
+    /* Relative paths are located in the same dir as the sudoers file. */
+    if (*opath != '/') {
+	char *dirend = strrchr(sudoers, '/');
+	if (dirend != NULL)
+	    dirlen = (int)(dirend - sudoers) + 1;
+    }
+
+    len = olen;
+    for (cp = opath, ep = opath + olen; cp < ep; cp++) {
+	if (cp[0] == '%' && cp[1] == 'h') {
+	    shost_len = strlen(user_shost);
+	    len += shost_len - 2;
+	    subst = true;
+	}
+    }
+
+    /* Make a copy of the fully-qualified path and return it. */
+    path = pp = rcstr_alloc(len + dirlen);
+    if (path == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	sudoerserror(NULL);
+	debug_return_str(NULL);
+    }
+    if (dirlen) {
+	memcpy(path, sudoers, dirlen);
+	pp += dirlen;
+    }
+    if (subst) {
+	/* substitute for %h */
+	cp = opath;
+	while (cp < ep) {
+	    if (cp[0] == '%' && cp[1] == 'h') {
+		memcpy(pp, user_shost, shost_len);
+		pp += shost_len;
+		cp += 2;
+		continue;
+	    }
+	    *pp++ = *cp++;
+	}
+	*pp = '\0';
+    } else {
+	memcpy(pp, opath, len);
+	pp[len] = '\0';
+    }
+
+    debug_return_str(path);
+}
+
+/*
  * Open an include file (or file from a directory), push the old
  * sudoers file buffer and switch to the new one.
  * A missing or insecure include dir is simply ignored.
  * Returns false on error, else true.
  */
-static bool
-push_include_int(char *path, bool isdir)
+bool
+push_include(const char *opath, bool isdir)
 {
     struct path_list *pl;
+    char *path;
     FILE *fp;
-    debug_decl(push_include_int, SUDOERS_DEBUG_PARSER);
+    debug_decl(push_include, SUDOERS_DEBUG_PARSER);
+
+    if ((path = expand_include(opath, strlen(opath))) == NULL)
+	debug_return_bool(false);
 
     /* push current state onto stack */
     if (idepth >= istacksize) {
@@ -1063,72 +1159,6 @@ pop_include(void)
 	keepopen = istack[idepth].keepopen;
     }
     debug_return_bool(true);
-}
-
-static char *
-parse_include_int(const char *base, bool isdir)
-{
-    const char *cp, *ep;
-    char *path, *pp;
-    int dirlen = 0, len = 0, subst = 0;
-    size_t shost_len = 0;
-    debug_decl(parse_include, SUDOERS_DEBUG_PARSER);
-
-    /* Pull out path from #include line. */
-    cp = base + (isdir ? sizeof("#includedir") : sizeof("#include"));
-    while (isblank((unsigned char) *cp))
-	cp++;
-    ep = cp;
-    while (*ep != '\0' && !isspace((unsigned char) *ep)) {
-	if (ep[0] == '%' && ep[1] == 'h') {
-	    shost_len = strlen(user_shost);
-	    len += shost_len - 2;
-	    subst = 1;
-	}
-	ep++;
-    }
-
-    /* Relative paths are located in the same dir as the sudoers file. */
-    if (*cp != '/') {
-	char *dirend = strrchr(sudoers, '/');
-	if (dirend != NULL)
-	    dirlen = (int)(dirend - sudoers) + 1;
-    }
-
-    /* Make a copy of the fully-qualified path and return it. */
-    len += (int)(ep - cp);
-    path = pp = rcstr_alloc(len + dirlen);
-    if (path == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	sudoerserror(NULL);
-	debug_return_str(NULL);
-    }
-    if (dirlen) {
-	memcpy(path, sudoers, dirlen);
-	pp += dirlen;
-    }
-    if (subst) {
-	/* substitute for %h */
-	while (cp < ep) {
-	    if (cp[0] == '%' && cp[1] == 'h') {
-		memcpy(pp, user_shost, shost_len);
-		pp += shost_len;
-		cp += 2;
-		continue;
-	    }
-	    *pp++ = *cp++;
-	}
-	*pp = '\0';
-    } else {
-	memcpy(pp, cp, len);
-	pp[len] = '\0';
-    }
-
-    /* Push any excess characters (e.g. comment, newline) back to the lexer */
-    if (*ep != '\0')
-	yyless((int)(ep - base));
-
-    debug_return_str(path);
 }
 
 #ifdef TRACELEXER

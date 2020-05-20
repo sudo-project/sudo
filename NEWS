@@ -19,6 +19,11 @@ What's new in Sudo 1.9.1
    option to allow replaying a session that is still in progress,
    similar to "tail -f".
 
+ * The @include and @includedir directives can be used in sudoers
+   instead of #include and #includedir.  In addition, include paths
+   may now have embedded white space by either using a double-quoted
+   string or escaping the space characters with a backslash.
+
 What's new in Sudo 1.9.0
 
  * Fixed a test failure in the strsig_test regress test on FreeBSD.

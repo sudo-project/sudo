@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "April 30, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "May 19, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1864,12 +1864,17 @@ It is possible to include other
 files from within the
 \fIsudoers\fR
 file currently being parsed using the
+\fR@include\fR
+and
+\fR@includedir\fR
+directives.
+For compatibility with sudo versions prior to 1.9.1,
 \fR#include\fR
 and
 \fR#includedir\fR
-directives.
+are also accepted.
 .PP
-This can be used, for example, to keep a site-wide
+An include file can be used, for example, to keep a site-wide
 \fIsudoers\fR
 file in addition to a local, per-machine file.
 For the sake of this example the site-wide
@@ -1882,13 +1887,12 @@ To include
 \fI/etc/sudoers.local\fR
 from within
 \fI/etc/sudoers\fR
-we would use the
-following line in
+one would use the following line in
 \fI/etc/sudoers\fR:
 .nf
 .sp
 .RS 4n
-#include /etc/sudoers.local
+@include /etc/sudoers.local
 .RE
 .fi
 .PP
@@ -1907,6 +1911,16 @@ Files that are included may themselves include other files.
 A hard limit of 128 nested include files is enforced to prevent include
 file loops.
 .PP
+The path to the include file may contain white space if it is
+escaped with a backslash
+(\(oq\e\(cq).
+Alternately, the entire path may be enclosed in double quotes
+(\&""),
+in which case no escaping is necessary.
+To include a literal backslash in the path,
+\(oq\e\e\(cq
+should be used.
+.PP
 If the path to the include file is not fully-qualified (does not
 begin with a
 \(oq/\(cq),
@@ -1918,7 +1932,7 @@ contains the line:
 .nf
 .sp
 .RS 4n
-\fR#include sudoers.local\fR
+\fR@include sudoers.local\fR
 .RE
 .fi
 .PP
@@ -1934,7 +1948,7 @@ then
 .nf
 .sp
 .RS 4n
-#include /etc/sudoers.%h
+@include /etc/sudoers.%h
 .RE
 .fi
 .PP
@@ -1944,7 +1958,7 @@ to include the file
 \fI/etc/sudoers.xerxes\fR.
 .PP
 The
-\fR#includedir\fR
+\fR@includedir\fR
 directive can be used to create a
 \fIsudoers.d\fR
 directory that the system package manager can drop
@@ -1954,7 +1968,7 @@ For example, given:
 .nf
 .sp
 .RS 4n
-#includedir /etc/sudoers.d
+@includedir /etc/sudoers.d
 .RE
 .fi
 .PP
@@ -1981,14 +1995,14 @@ Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
 After parsing the files in the directory, control returns to the
 file that contained the
-\fR#includedir\fR
+\fR@includedir\fR
 directive.
 .PP
 Note that unlike files included via
-\fR#include\fR,
+\fR@include\fR,
 \fBvisudo\fR
 will not edit the files in a
-\fR#includedir\fR
+\fR@includedir\fR
 directory unless one of them contains a syntax error.
 It is still possible to run
 \fBvisudo\fR
@@ -4105,7 +4119,7 @@ Entries in this file should either be of the form
 \(lq\fRVARIABLE=value\fR\(rq
 or
 \(lq\fRexport VARIABLE=value\fR\(rq.
-The value may optionally be surrounded by single or double quotes.
+The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 This file is considered to be part of the security policy,
@@ -4332,7 +4346,7 @@ Entries in this file should either be of the form
 \(lq\fRVARIABLE=value\fR\(rq
 or
 \(lq\fRexport VARIABLE=value\fR\(rq.
-The value may optionally be surrounded by single or double quotes.
+The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 Unlike

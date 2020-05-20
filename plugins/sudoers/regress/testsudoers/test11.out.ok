@@ -1,0 +1,27 @@
+Testing @include with garbage after the path name
+
+>>> sudoers: syntax error near line 1 <<<
+Parse error in sudoers near line 1.
+
+Entries for user root:
+
+ALL = ALL
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed
+
+Testing #include with garbage after the path name
+
+>>> sudoers: syntax error near line 1 <<<
+Parse error in sudoers near line 1.
+
+Entries for user root:
+
+ALL = ALL
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed

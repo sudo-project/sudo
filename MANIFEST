@@ -809,6 +809,10 @@ plugins/sudoers/regress/sudoers/test9.toke.ok
 plugins/sudoers/regress/testsudoers/group
 plugins/sudoers/regress/testsudoers/test1.out.ok
 plugins/sudoers/regress/testsudoers/test1.sh
+plugins/sudoers/regress/testsudoers/test10.out.ok
+plugins/sudoers/regress/testsudoers/test10.sh
+plugins/sudoers/regress/testsudoers/test11.out.ok
+plugins/sudoers/regress/testsudoers/test11.sh
 plugins/sudoers/regress/testsudoers/test2.inc
 plugins/sudoers/regress/testsudoers/test2.out.ok
 plugins/sudoers/regress/testsudoers/test2.sh
@@ -824,6 +828,8 @@ plugins/sudoers/regress/testsudoers/test7.out.ok
 plugins/sudoers/regress/testsudoers/test7.sh
 plugins/sudoers/regress/testsudoers/test8.out.ok
 plugins/sudoers/regress/testsudoers/test8.sh
+plugins/sudoers/regress/testsudoers/test9.out.ok
+plugins/sudoers/regress/testsudoers/test9.sh
 plugins/sudoers/regress/visudo/test1.out.ok
 plugins/sudoers/regress/visudo/test1.sh
 plugins/sudoers/regress/visudo/test10.out.ok

@@ -450,12 +450,14 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
-    char *sudoers_base;
+    const char *sudoers_base;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
 
     sudoers_base = strrchr(sudoers, '/');
     if (sudoers_base != NULL)
 	sudoers_base++;
+    else
+	sudoers_base = sudoers;
 
     switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
