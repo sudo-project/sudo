@@ -1,6 +1,10 @@
 What's new in Sudo 1.9.1
 
- * Correct handling of sudo_logsrvd connections without associated
+ * Fixed an AIX-specific problem when I/O logging was enabled.
+   The terminal device was not being properly set to raw mode.
+   Bug #927.
+
+ * Corrected handling of sudo_logsrvd connections without associated
    I/O log data.  This fixes support for RejectMessage as well as
    AcceptMessage when the expect_iobufs flag is not set.
 
