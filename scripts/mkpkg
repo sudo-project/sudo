@@ -412,9 +412,11 @@ case "$osversion" in
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-project"
 
 		if [ $osrelease -ge 11 ]; then
-		    configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
+		    configure_opts="${configure_opts}${configure_opts+$tab}--with-solaris-audit"
 		    # Encrypted remote I/O log support.
 		    with_openssl=true
+		elif [ $osrelease -ge 10 ]; then
+		    configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
 		fi
 		;;
 	    *)
