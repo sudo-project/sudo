@@ -36,13 +36,16 @@
 #include <fcntl.h>
 #include <grp.h>
 
-#if defined(HAVE_LIBUTIL_H)
-# include <libutil.h>
-#elif defined(HAVE_UTIL_H)
-# include <util.h>
-#endif
-#ifdef HAVE_PTY_H
-# include <pty.h>
+#if defined(HAVE_OPENPTY)
+# if defined(HAVE_LIBUTIL_H)
+#  include <libutil.h>		/* *BSD */
+# elif defined(HAVE_UTIL_H)
+#  include <util.h>		/* macOS */
+# elif defined(HAVE_PTY_H)
+#  include <pty.h>		/* Linux */
+# else
+#  include <termios.h>		/* Solaris */
+# endif
 #endif
 
 #include "sudo.h"
