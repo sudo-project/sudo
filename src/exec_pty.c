@@ -110,7 +110,7 @@ static void del_io_events(bool nonblocking);
 static void sync_ttysize(struct exec_closure_pty *ec);
 static int safe_close(int fd);
 static void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
-static void check_foreground(struct exec_closure_pty *ec);
+static pid_t check_foreground(struct exec_closure_pty *ec);
 static void add_io_events(struct sudo_event_base *evbase);
 static void schedule_signal(struct exec_closure_pty *ec, int signo);
 
@@ -487,22 +487,25 @@ log_winchange(unsigned int rows, unsigned int cols)
 
 /*
  * Check whether we are running in the foregroup.
- * Updates the foreground global and does lazy init of the
- * the pty slave as needed.
+ * Updates the foreground global and updates the window size.
+ * Returns 0 if there is no tty, the foreground process group ID
+ * on success, or -1 on failure (tty revoked).
  */
-static void
+static pid_t
 check_foreground(struct exec_closure_pty *ec)
 {
+    int ret = 0;
     debug_decl(check_foreground, SUDO_DEBUG_EXEC);
 
     if (io_fds[SFD_USERTTY] != -1) {
-	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ec->ppgrp;
+	if ((ret = tcgetpgrp(io_fds[SFD_USERTTY])) != -1) {
+	    foreground = ret == ec->ppgrp;
 
-	/* Also check for window size changes. */
-	sync_ttysize(ec);
+	    /* Also check for window size changes. */
+	    sync_ttysize(ec);
+	}
     }
-
-    debug_return;
+    debug_return_int(ret);
 }
 
 /*
@@ -525,8 +528,12 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	 * If sudo is already the foreground process, just resume the command
 	 * in the foreground.  If not, we'll suspend sudo and resume later.
 	 */
-	if (!foreground)
-	    check_foreground(ec);
+	if (!foreground) {
+	    if (check_foreground(ec) == -1) {
+		/* User's tty was revoked. */
+		break;
+	    }
+	}
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
@@ -568,7 +575,10 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	log_suspend(SIGCONT);
 
 	/* Check foreground/background status on resume. */
-	check_foreground(ec);
+	if (check_foreground(ec) == -1) {
+	    /* User's tty was revoked. */
+	    break;
+	}
 
 	/*
 	 * We always resume the command in the foreground if sudo itself
@@ -902,6 +912,9 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
 {
     char signame[SIG2STR_MAX];
     debug_decl(schedule_signal, SUDO_DEBUG_EXEC);
+
+    if (signo == 0)
+	debug_return;
 
     if (signo == SIGCONT_FG)
 	strlcpy(signame, "CONT_FG", sizeof(signame));
