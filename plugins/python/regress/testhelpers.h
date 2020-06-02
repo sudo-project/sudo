@@ -61,22 +61,22 @@ char ** create_str_array(size_t count, ...);
 
 #define RUN_TEST(testcase) \
     do { \
+        int success = 1; \
         printf("Running test " #testcase " ... \n"); \
-        int rc = EXIT_SUCCESS; \
         if (!init()) { \
             printf("FAILED: initialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
-            rc = EXIT_FAILURE; \
+            success = 0; \
         } else \
         if (!testcase) { \
             printf("FAILED: testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
-            rc = EXIT_FAILURE; \
+            success = 0; \
         } \
-        if (!cleanup(rc == EXIT_SUCCESS)) { \
+        if (!cleanup(success)) { \
             printf("FAILED: deitialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
-            rc = EXIT_FAILURE; \
+            success = 0; \
         } \
-        if (rc != EXIT_SUCCESS) \
-            return rc; \
+        if (!success) \
+            errors++; \
     } while(false)
 
 #define VERIFY_PRINT_MSG(fmt, actual_str, actual, expected_str, expected, expected_to_be_message) \
@@ -111,10 +111,27 @@ char ** create_str_array(size_t count, ...);
 #define VERIFY_STR(actual, expected) \
     do { \
         const char *actual_str = actual; \
-        if (!actual_str || strcmp(actual_str, expected) != 0) { \
-            VERIFY_PRINT_MSG("%s", #actual, actual_str ? actual_str : "(null)", #expected, expected, "expected to be"); \
-            return false; \
-        } \
+	regex_t regex; \
+	int result = 0; \
+        if (!actual_str) { \
+            result = -1; \
+	} else if (*expected == '\0') { \
+	    result = strcmp(actual_str, expected); \
+	} else { \
+	    if ((result = regcomp(&regex, expected, REG_NOSUB)) != 0) { \
+		char errbuf[1024]; \
+		regerror(result, &regex, errbuf, sizeof(errbuf)); \
+		fprintf(stderr, "regcomp failed at %s:%d: %s\npattern: %s\n", \
+		    __FILE__, __LINE__, errbuf, expected); \
+	    } else { \
+		result = regexec(&regex, actual_str, 0, NULL, 0); \
+		regfree(&regex); \
+	    } \
+	} \
+	if (result != 0) { \
+	    VERIFY_PRINT_MSG("%s", #actual, actual_str ? actual_str : "(null)", #expected, expected, "expected to be"); \
+	    return false; \
+	} \
     } while(false)
 
 #define VERIFY_STR_CONTAINS(actual, expected) \
@@ -157,6 +174,8 @@ int fake_printf(int msg_type, const char *fmt, ...);
 
 int verify_log_lines(const char *reference_path);
 
+int mock_python_datetime_now(const char *plugin_name, const char *date_str);
+
 #define VERIFY_LOG_LINES(reference_path) \
     VERIFY_TRUE(verify_log_lines(reference_path))
 
@@ -166,7 +185,7 @@ int verify_str_set(char **actual_set, char **expected_set, const char *actual_va
     do { \
         char **expected_set = create_str_array(__VA_ARGS__); \
         VERIFY_TRUE(verify_str_set(actual_set, expected_set, #actual_set)); \
-        free(expected_set); \
+        str_array_free(&expected_set); \
     } while(false)
 
 #endif // PYTHON_TESTHELPERS

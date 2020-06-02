@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
@@ -31,17 +30,7 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#elif defined(HAVE_INTTYPES_H)
-# include <inttypes.h>
-#endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <signal.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -60,14 +49,15 @@
 
 static int timing_event_adj;
 
-struct iolog_info *
-iolog_parse_loginfo(FILE *fp, const char *logfile)
+static bool
+iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
+    struct iolog_info *li)
 {
     char *buf = NULL, *cp, *ep;
     const char *errstr;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
-    struct iolog_info *li = NULL;
-    debug_decl(iolog_parse_loginfo, SUDO_DEBUG_UTIL);
+    bool ret = false;
+    debug_decl(iolog_parse_loginfo_legacy, SUDO_DEBUG_UTIL);
 
     /*
      * Info file has three lines:
@@ -75,13 +65,11 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
      *  2) cwd
      *  3) command with args
      */
-    if ((li = calloc(1, sizeof(*li))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (getdelim(&buf, &bufsize, '\n', fp) == -1 ||
 	getdelim(&li->cwd, &cwdsize, '\n', fp) == -1 ||
 	getdelim(&li->cmd, &cmdsize, '\n', fp) == -1) {
-	sudo_warn(U_("%s: invalid log file"), logfile);
-	goto bad;
+	sudo_warn(U_("%s: invalid log file"), iolog_dir);
+	goto done;
     }
 
     /* Strip the newline from the cwd and command. */
@@ -98,21 +86,21 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
 
     /* timestamp */
     if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: time stamp field is missing"), logfile);
-	goto bad;
+	sudo_warn(U_("%s: time stamp field is missing"), iolog_dir);
+	goto done;
     }
     *ep = '\0';
-    li->tstamp = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
+    li->tstamp.tv_sec = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
-	sudo_warn(U_("%s: time stamp %s: %s"), logfile, cp, errstr);
-	goto bad;
+	sudo_warn(U_("%s: time stamp %s: %s"), iolog_dir, cp, errstr);
+	goto done;
     }
 
     /* submit user */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: user field is missing"), logfile);
-	goto bad;
+	sudo_warn(U_("%s: user field is missing"), iolog_dir);
+	goto done;
     }
     if ((li->user = strndup(cp, (size_t)(ep - cp))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -120,8 +108,8 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
     /* runas user */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: runas user field is missing"), logfile);
-	goto bad;
+	sudo_warn(U_("%s: runas user field is missing"), iolog_dir);
+	goto done;
     }
     if ((li->runas_user = strndup(cp, (size_t)(ep - cp))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -129,8 +117,8 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
     /* runas group */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: runas group field is missing"), logfile);
-	goto bad;
+	sudo_warn(U_("%s: runas group field is missing"), iolog_dir);
+	goto done;
     }
     if (cp != ep) {
 	if ((li->runas_group = strndup(cp, (size_t)(ep - cp))) == NULL)
@@ -156,22 +144,71 @@ iolog_parse_loginfo(FILE *fp, const char *logfile)
 	li->lines = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: tty lines %s: %s", logfile, cp, errstr);
+		"%s: tty lines %s: %s", iolog_dir, cp, errstr);
 	}
 	if (ep != NULL) {
 	    cp = ep + 1;
 	    li->cols = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "%s: tty cols %s: %s", logfile, cp, errstr);
+		    "%s: tty cols %s: %s", iolog_dir, cp, errstr);
 	    }
 	}
     }
+
+    ret = true;
+
+done:
     free(buf);
-    debug_return_ptr(li);
+    debug_return_bool(ret);
+}
+
+struct iolog_info *
+iolog_parse_loginfo(int dfd, const char *iolog_dir)
+{
+    struct iolog_info *li = NULL;
+    FILE *fp = NULL;
+    int fd = -1;
+    int tmpfd = -1;
+    bool ok, legacy = false;
+    debug_decl(iolog_parse_loginfo, SUDO_DEBUG_UTIL);
+
+    if (dfd == -1) {
+	if ((tmpfd = open(iolog_dir, O_RDONLY)) == -1) {
+	    sudo_warn("%s", iolog_dir);
+	    goto bad;
+	}
+	dfd = tmpfd;
+    }
+    if ((fd = openat(dfd, "log.json", O_RDONLY, 0)) == -1) {
+	fd = openat(dfd, "log", O_RDONLY, 0);
+	legacy = true;
+    }
+    if (tmpfd != -1)
+	close(tmpfd);
+    if (fd == -1 || (fp = fdopen(fd, "r")) == NULL) {
+	sudo_warn("%s/log", iolog_dir);
+	goto bad;
+    }
+    fd = -1;
+
+    if ((li = calloc(1, sizeof(*li))) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    li->runas_uid = (uid_t)-1;
+    li->runas_gid = (gid_t)-1;
+
+    ok = legacy ? iolog_parse_loginfo_legacy(fp, iolog_dir, li) :
+	iolog_parse_loginfo_json(fp, iolog_dir, li);
+    if (ok) {
+	fclose(fp);
+	debug_return_ptr(li);
+    }
 
 bad:
-    free(buf);
+    if (fd != -1)
+	close(fd);
+    if (fp != NULL)
+	fclose(fp);
     iolog_free_loginfo(li);
     debug_return_ptr(NULL);
 }
@@ -396,13 +433,26 @@ iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 void
 iolog_free_loginfo(struct iolog_info *li)
 {
+    char **p;
+
     if (li != NULL) {
+	if (li->argv != NULL) {
+	    for (p = li->argv; *p != NULL; p++)
+		free(*p);
+	    free(li->argv);
+	}
+	if (li->envp != NULL) {
+	    for (p = li->envp; *p != NULL; p++)
+		free(*p);
+	    free(li->envp);
+	}
 	free(li->cwd);
 	free(li->user);
 	free(li->runas_user);
 	free(li->runas_group);
 	free(li->tty);
 	free(li->cmd);
+	free(li->host);
 	free(li);
     }
 }

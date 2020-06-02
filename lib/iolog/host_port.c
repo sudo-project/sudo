@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,15 +18,12 @@
 
 #include "config.h"
 
-#include <sys/types.h>
-
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
@@ -38,11 +37,13 @@
  * Fills in hostp and portp which may point within str, which is modified.
  */
 bool
-sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport)
+iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp,
+     char *defport, char *defport_tls)
 {
-    char *port, *host = str;
+    char *flags, *port, *host = str;
     bool ret = false;
-    debug_decl(sudo_parse_host_port, SUDO_DEBUG_UTIL);
+    bool tls = false;
+    debug_decl(iolog_parse_host_port, SUDO_DEBUG_UTIL);
 
     /* Check for IPv6 address like [::0] followed by optional port */
     if (*host == '[') {
@@ -54,11 +55,17 @@ sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport)
 	    goto done;
 	}
 	*port++ = '\0';
-	if (*port == ':') {
-	    port++;
-	} else if (*port == '\0') {
-	    port = NULL;		/* no port specified */
-	} else {
+        switch (*port) {
+        case ':':
+            port++;
+            break;
+        case '\0':
+            port = NULL;		/* no port specified */
+            break;
+        case '(':
+            /* flag, handled below */
+            break;
+        default:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"invalid IPv6 address %s", str);
 	    goto done;
@@ -69,13 +76,24 @@ sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport)
 	    *port++ = '\0';
     }
 
+    /* Check for optional tls flag at the end. */
+    flags = strchr(port ? port : host, '(');
+    if (flags != NULL) {
+	if (strcasecmp(flags, "(tls)") == 0)
+	    tls = true;
+	*flags = '\0';
+	if (port == flags)
+	    port = NULL;
+    }
+
     if (port == NULL)
-	port = defport;
+	port = tls ? defport_tls : defport;
     else if (*port == '\0')
 	goto done;
 
     *hostp = host;
     *portp = port;
+    *tlsp = tls;
 
     ret = true;
 

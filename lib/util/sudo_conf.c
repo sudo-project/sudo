@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,9 +31,7 @@
 #else
 # include "compat/stdbool.h"
 #endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
+#include <string.h>
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
@@ -43,18 +40,16 @@
 #include <errno.h>
 #include <limits.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #define SUDO_ERROR_WRAP	0
 
 #include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "pathnames.h"
-#include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_plugin.h"
 #include "sudo_util.h"
+#include "pathnames.h"
 
 struct sudo_conf_table {
     const char *name;

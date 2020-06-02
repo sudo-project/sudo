@@ -23,22 +23,12 @@
 
 #include <config.h>
 
-#include <sys/types.h>
+#include <sys/types.h>		/* for size_t, ssize_t */
 #include <sys/time.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <errno.h>
 #include <limits.h>
 #include <time.h>

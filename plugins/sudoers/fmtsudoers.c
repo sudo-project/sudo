@@ -23,15 +23,9 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <time.h>
 
 #include "sudoers.h"
@@ -51,26 +45,31 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
     struct alias *a;
     struct member *m;
     struct sudo_command *c;
+    struct command_digest *digest;
     debug_decl(sudoers_format_member_int, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
-	case ALL:
-	    sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
-	    break;
 	case MYSELF:
 	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "",
 		user_name ? user_name : "");
 	    break;
+	case ALL:
+	    if (name == NULL) {
+		sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
+		break;
+	    }
+	    /* FALLTHROUGH */
 	case COMMAND:
 	    c = (struct sudo_command *) name;
-	    if (c->digest != NULL) {
-		sudo_lbuf_append(lbuf, "%s:%s ",
-		    digest_type_to_name(c->digest->digest_type),
-		    c->digest->digest_str);
+	    TAILQ_FOREACH(digest, &c->digests, entries) {
+		sudo_lbuf_append(lbuf, "%s:%s%s ",
+		    digest_type_to_name(digest->digest_type),
+		    digest->digest_str, TAILQ_NEXT(digest, entries) ? "," : "");
 	    }
 	    if (negated)
 		sudo_lbuf_append(lbuf, "!");
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s", c->cmnd);
+	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s",
+		c->cmnd ? c->cmnd : "ALL");
 	    if (c->args) {
 		sudo_lbuf_append(lbuf, " ");
 		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);

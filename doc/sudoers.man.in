@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "January 22, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "May 19, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -617,13 +617,21 @@ There are four kinds of aliases:
 \fRHost_Alias\fR
 and
 \fRCmnd_Alias\fR.
+Beginning with
+\fBsudo\fR
+1.9.0,
+\fRCmd_Alias\fR
+may be used in place of
+\fRCmnd_Alias\fR
+if desired.
 .nf
 .sp
 .RS 0n
 Alias ::= 'User_Alias'  User_Alias_Spec (':' User_Alias_Spec)* |
           'Runas_Alias' Runas_Alias_Spec (':' Runas_Alias_Spec)* |
           'Host_Alias'  Host_Alias_Spec (':' Host_Alias_Spec)* |
-          'Cmnd_Alias'  Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)*
+          'Cmnd_Alias'  Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)* |
+          'Cmd_Alias'   Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)*
 
 User_Alias ::= NAME
 
@@ -879,6 +887,9 @@ Digest_Spec ::= "sha224" ':' digest |
 		"sha384" ':' digest |
 		"sha512" ':' digest
 
+Digest_List ::= Digest_Spec |
+                Digest_Spec ',' Digest_List
+
 Cmnd_List ::= Cmnd |
               Cmnd ',' Cmnd_List
 
@@ -886,9 +897,11 @@ command name ::= file name |
                  file name args |
                  file name '""'
 
-Cmnd ::= Digest_Spec? '!'* command name |
+Edit_Spec ::= "sudoedit" file name+
+
+Cmnd ::= Digest_List? '!'* command name |
          '!'* directory |
-         '!'* "sudoedit" |
+         '!'* Edit_Spec |
          '!'* Cmnd_Alias
 .RE
 .fi
@@ -959,12 +972,21 @@ A fully-qualified path for
 is treated as an error by
 \fBvisudo\fR.
 .PP
-If a
+A
 \fRcommand name\fR
-is prefixed with a
-\fRDigest_Spec\fR,
-the command will only match successfully if it can be verified
-using the specified SHA-2 digest.
+may be preceded by a
+\fRDigest_List\fR,
+a comma-separated list of one or more
+\fRDigest_Spec\fR
+entries.
+If a
+\fRDigest_List\fR
+is present, the command will only match successfully if it can be verified
+using one of the SHA-2 digests in the list.
+Starting with version 1.9.0, the
+\fBALL\fR
+reserved word can be used in conjunction with a
+\fRDigest_List\fR.
 The following digest formats are supported: sha224, sha256, sha384 and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).
@@ -1846,12 +1868,17 @@ It is possible to include other
 files from within the
 \fIsudoers\fR
 file currently being parsed using the
+\fR@include\fR
+and
+\fR@includedir\fR
+directives.
+For compatibility with sudo versions prior to 1.9.1,
 \fR#include\fR
 and
 \fR#includedir\fR
-directives.
+are also accepted.
 .PP
-This can be used, for example, to keep a site-wide
+An include file can be used, for example, to keep a site-wide
 \fIsudoers\fR
 file in addition to a local, per-machine file.
 For the sake of this example the site-wide
@@ -1864,13 +1891,12 @@ To include
 \fI/etc/sudoers.local\fR
 from within
 \fI/etc/sudoers\fR
-we would use the
-following line in
+one would use the following line in
 \fI/etc/sudoers\fR:
 .nf
 .sp
 .RS 4n
-#include /etc/sudoers.local
+@include /etc/sudoers.local
 .RE
 .fi
 .PP
@@ -1889,6 +1915,16 @@ Files that are included may themselves include other files.
 A hard limit of 128 nested include files is enforced to prevent include
 file loops.
 .PP
+The path to the include file may contain white space if it is
+escaped with a backslash
+(\(oq\e\(cq).
+Alternately, the entire path may be enclosed in double quotes
+(\&""),
+in which case no escaping is necessary.
+To include a literal backslash in the path,
+\(oq\e\e\(cq
+should be used.
+.PP
 If the path to the include file is not fully-qualified (does not
 begin with a
 \(oq/\(cq),
@@ -1900,7 +1936,7 @@ contains the line:
 .nf
 .sp
 .RS 4n
-\fR#include sudoers.local\fR
+\fR@include sudoers.local\fR
 .RE
 .fi
 .PP
@@ -1916,7 +1952,7 @@ then
 .nf
 .sp
 .RS 4n
-#include /etc/sudoers.%h
+@include /etc/sudoers.%h
 .RE
 .fi
 .PP
@@ -1926,7 +1962,7 @@ to include the file
 \fI/etc/sudoers.xerxes\fR.
 .PP
 The
-\fR#includedir\fR
+\fR@includedir\fR
 directive can be used to create a
 \fIsudoers.d\fR
 directory that the system package manager can drop
@@ -1936,7 +1972,7 @@ For example, given:
 .nf
 .sp
 .RS 4n
-#includedir /etc/sudoers.d
+@includedir /etc/sudoers.d
 .RE
 .fi
 .PP
@@ -1963,14 +1999,14 @@ Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
 After parsing the files in the directory, control returns to the
 file that contained the
-\fR#includedir\fR
+\fR@includedir\fR
 directive.
 .PP
 Note that unlike files included via
-\fR#include\fR,
+\fR@include\fR,
 \fBvisudo\fR
 will not edit the files in a
-\fR#includedir\fR
+\fR@includedir\fR
 directory unless one of them contains a syntax error.
 It is still possible to run
 \fBvisudo\fR
@@ -2609,6 +2645,18 @@ This flag is
 \fIon\fR
 by default.
 .TP 18n
+log_server_verify
+.br
+If set, the server certificate received during the TLS handshake
+must be valid and it must contain either the server name (from
+\fIlog_servers\fR)
+or its IP address.
+If either of these conditions is not met, the TLS handshake will fail.
+This flag is
+\fIon\fR
+by default.
+\fBsudo\fR
+.TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
 \fBsudo\fR
@@ -2808,6 +2856,41 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.8.28 or higher.
+.TP 18n
+pam_rhost
+On systems that use PAM for authentication,
+\fBsudo\fR
+will set the PAM remote host value to the name of the local host
+when the
+\fIpam_rhost\fR
+flag is enabled.
+On Linux systems, enabling
+\fIpam_rhost\fR
+may result in DNS lookups of the local host name when PAM is initialized.
+On Solaris versions prior to Solaris 8,
+\fIpam_rhost\fR
+must be enabled if
+\fIpam_ruser\fR
+is also enabled to avoid a crash in the Solaris PAM implementation.
+.sp
+This flag is
+\fIoff\fR
+by default on systems other than Solaris.
+.sp
+This setting is only supported by version 1.9.0 or higher.
+.TP 18n
+pam_ruser
+On systems that use PAM for authentication,
+\fBsudo\fR
+will set the PAM remote user value to the name of the user that invoked sudo
+when the
+\fIpam_ruser\fR
+flag is enabled.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 pam_session
 On systems that use PAM for authentication,
@@ -4040,7 +4123,7 @@ Entries in this file should either be of the form
 \(lq\fRVARIABLE=value\fR\(rq
 or
 \(lq\fRexport VARIABLE=value\fR\(rq.
-The value may optionally be surrounded by single or double quotes.
+The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 This file is considered to be part of the security policy,
@@ -4267,7 +4350,7 @@ Entries in this file should either be of the form
 \(lq\fRVARIABLE=value\fR\(rq
 or
 \(lq\fRexport VARIABLE=value\fR\(rq.
-The value may optionally be surrounded by single or double quotes.
+The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 Unlike
@@ -4549,27 +4632,37 @@ to get their accustomed editor configuration instead of
 invoking the editor directly.
 .TP 18n
 log_servers
+A list of one or more remote servers to use for I/O log storage, separated
+by white space.
 Starting with
 \fBsudo\fR
 1.9, it is possible to send I/O logs to a remote server instead of
 logging them locally.
-The
-\fIlog_servers\fR
-setting specifies one or more server addresses to use when storing
-I/O logs remotely.
 Log servers must be running
 \fBsudo_logsrvd\fR
 or another service that implements the protocol described by
 sudo_logsrv.proto(@mansectform@).
+.sp
 Server addresses should be of the form
-\(lqhost[:port]\(rq.
-If no port is specified, port 30344 will be used.
+\(lqhost[:port][(tls)]\(rq.
 The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
+.sp
+If the optional tls flag is present, the connection will be secured
+with Transport Layer Security (TLS) version 1.2 or 1.3.
+Versions of TLS prior to 1.2 are not supported.
+.sp
+If a port is specified, it may either be a port number or a known
+service name as defined by the system service name database.
+If no port is specified, port 30343 will be used for plaintext
+connections and port 30344 will be used for TLS connections.
 .sp
 When
 \fIlog_servers\fR
 is enabled, I/O logs will not be logged locally.
+If multiple hosts are specified,
+\fBsudoers\fR
+will try them in reverse order until it connects successfully.
 If no log servers are reachable, the user will not be able
 to run a command unless the
 \fIignore_iolog_errors\fR

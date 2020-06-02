@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,8 +30,9 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
-/* Default port to listen on */
-#define DEFAULT_PORT_STR	"30344"
+/* Default ports to listen on */
+#define DEFAULT_PORT		"30343"
+#define DEFAULT_PORT_TLS	"30344"
 
 /* Maximum message size (2Mb) */
 #define MESSAGE_SIZE_MAX	(2 * 1024 * 1024)
@@ -61,7 +64,6 @@ struct iolog_details {
     char **user_env;
     struct sudoers_str_list *log_servers;
     struct timespec server_timeout;
-    bool tcp_keepalive;
 #if defined(HAVE_OPENSSL)
     char *ca_bundle;
     char *cert_file;
@@ -70,6 +72,8 @@ struct iolog_details {
     int argc;
     int lines;
     int cols;
+    bool keepalive;
+    bool verify_server;
     bool ignore_iolog_errors;
 };
 
@@ -90,14 +94,13 @@ struct client_closure {
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
-    const struct sudoers_string *server_name;
+    char *server_name;
 #if defined(HAVE_STRUCT_IN6_ADDR)
     char server_ip[INET6_ADDRSTRLEN];
 #else
     char server_ip[INET_ADDRSTRLEN];
 #endif
 #if defined(HAVE_OPENSSL)
-    bool tls;
     SSL_CTX *ssl_ctx;
     SSL *ssl;
 #endif /* HAVE_OPENSSL */
@@ -115,41 +118,8 @@ struct client_closure {
     char *iolog_id;
 };
 
-#if defined(HAVE_OPENSSL)
-# define CLIENT_CLOSURE_INITIALIZER(_c)			\
-    {							\
-	-1,						\
-	false,						\
-	false,						\
-	false,						\
-	NULL,					    \
-	"", 					    \
-    false,                      \
-    NULL,						\
-    NULL,						\
-	ERROR,						\
-	false,						\
-	TAILQ_HEAD_INITIALIZER((_c).write_bufs),	\
-	TAILQ_HEAD_INITIALIZER((_c).free_bufs)		\
-    }
-#else
-# define CLIENT_CLOSURE_INITIALIZER(_c)			\
-    {							\
-	-1,						\
-	false,						\
-	false,						\
-	false,						\
-	NULL,					    \
-	"", 					    \
-	ERROR,						\
-	false,						\
-	TAILQ_HEAD_INITIALIZER((_c).write_bufs),	\
-	TAILQ_HEAD_INITIALIZER((_c).free_bufs)		\
-    }
-#endif /* HAVE_OPENSSL */
-
 /* iolog_client.c */
-bool client_closure_fill(struct client_closure *closure, int sock, const struct sudoers_string *host, struct iolog_details *details, struct io_plugin *sudoers_io);
+struct client_closure *client_closure_alloc(struct iolog_details *details, struct io_plugin *sudoers_io, struct timespec *now);
 bool client_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);
@@ -157,7 +127,8 @@ bool fmt_exit_message(struct client_closure *closure, int exit_status, int error
 bool fmt_io_buf(struct client_closure *closure, int type, const char *buf, unsigned int len, struct timespec *delay);
 bool fmt_suspend(struct client_closure *closure, const char *signame, struct timespec *delay);
 bool fmt_winsize(struct client_closure *closure, unsigned int lines, unsigned int cols, struct timespec *delay);
-int log_server_connect(struct sudoers_str_list *servers, bool tcp_keepalive, struct timespec *timo, struct sudoers_string **connected_server);
+bool log_server_connect(struct client_closure *closure);
 void client_closure_free(struct client_closure *closure);
+bool read_server_hello(struct client_closure *closure);
 
 #endif /* SUDOERS_IOLOG_CLIENT_H */

@@ -44,6 +44,7 @@ struct IOPluginContext
             (void **)&CALLBACK_PLUGINFUNC(function_name)); \
     } while(0)
 
+
 static int
 _call_plugin_open(struct IOPluginContext *io_ctx, int argc, char * const argv[], char * const command_info[])
 {
@@ -80,7 +81,7 @@ python_plugin_io_open(struct IOPluginContext *io_ctx,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[],
-    char * const plugin_options[])
+    char * const plugin_options[], const char **errstr)
 {
     debug_decl(python_plugin_io_open, PYTHON_DEBUG_CALLBACKS);
 
@@ -95,17 +96,19 @@ python_plugin_io_open(struct IOPluginContext *io_ctx,
         debug_return_int(rc);
 
     struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
-    rc = python_plugin_init(plugin_ctx, plugin_options);
+    rc = python_plugin_init(plugin_ctx, plugin_options, version);
+
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 
     rc = python_plugin_construct(plugin_ctx, PY_IO_PLUGIN_VERSION,
                                  settings, user_info, user_env, plugin_options);
-    if (rc != SUDO_RC_OK)
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
+    if (rc != SUDO_RC_OK) {
         debug_return_int(rc);
+    }
 
     // skip plugin callbacks which are not mandatory
-    MARK_CALLBACK_OPTIONAL(show_version);
     MARK_CALLBACK_OPTIONAL(log_ttyin);
     MARK_CALLBACK_OPTIONAL(log_ttyout);
     MARK_CALLBACK_OPTIONAL(log_stdin);
@@ -118,6 +121,7 @@ python_plugin_io_open(struct IOPluginContext *io_ctx,
     if (argc > 0)  // we only call open if there is request for running sg
         rc = _call_plugin_open(io_ctx, argc, argv, command_info);
 
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
     debug_return_int(rc);
 }
 
@@ -125,7 +129,8 @@ void
 python_plugin_io_close(struct IOPluginContext *io_ctx, int exit_status, int error)
 {
     debug_decl(python_plugin_io_close, PYTHON_DEBUG_CALLBACKS);
-    python_plugin_close(BASE_CTX(io_ctx), CALLBACK_PYNAME(close), exit_status, error);
+    python_plugin_close(BASE_CTX(io_ctx), CALLBACK_PYNAME(close),
+                        Py_BuildValue("(ii)", error == 0 ? exit_status : -1, error));
     debug_return;
 }
 
@@ -136,76 +141,92 @@ python_plugin_io_show_version(struct IOPluginContext *io_ctx, int verbose)
 
     PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
 
-    if (verbose) {
-        py_sudo_log(SUDO_CONV_INFO_MSG, "Python io plugin API version %d.%d\n", "%d.%d",
-                    SUDO_API_VERSION_GET_MAJOR(PY_IO_PLUGIN_VERSION),
-                    SUDO_API_VERSION_GET_MINOR(PY_IO_PLUGIN_VERSION));
-    }
-
-    debug_return_int(python_plugin_show_version(BASE_CTX(io_ctx), CALLBACK_PYNAME(show_version), verbose));
+    debug_return_int(python_plugin_show_version(BASE_CTX(io_ctx), CALLBACK_PYNAME(show_version),
+                                                verbose, PY_IO_PLUGIN_VERSION, "io"));
 }
 
 int
-python_plugin_io_log_ttyin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_ttyin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_ttyin, PYTHON_DEBUG_CALLBACKS);
-    PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_ttyin),
-                                     Py_BuildValue("(s#)", buf, len)));
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
+    int rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(log_ttyin),
+                                       Py_BuildValue("(s#)", buf, len));
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
+    debug_return_int(rc);
 }
 
 int
-python_plugin_io_log_ttyout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_ttyout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_ttyout, PYTHON_DEBUG_CALLBACKS);
-    PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_ttyout),
-                                     Py_BuildValue("(s#)", buf, len)));
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
+    int rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(log_ttyout),
+                                       Py_BuildValue("(s#)", buf, len));
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
+    debug_return_int(rc);
 }
 
 int
-python_plugin_io_log_stdin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_stdin(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_stdin, PYTHON_DEBUG_CALLBACKS);
-    PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_stdin),
-                                               Py_BuildValue("(s#)", buf, len)));
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
+    int rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(log_stdin),
+                                               Py_BuildValue("(s#)", buf, len));
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
+    debug_return_int(rc);
 }
 
 int
-python_plugin_io_log_stdout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_stdout(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_stdout, PYTHON_DEBUG_CALLBACKS);
-    PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_stdout),
-                                               Py_BuildValue("(s#)", buf, len)));
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
+    int rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(log_stdout),
+                                               Py_BuildValue("(s#)", buf, len));
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
+    debug_return_int(rc);
 }
 
 int
-python_plugin_io_log_stderr(struct IOPluginContext *io_ctx, const char *buf, unsigned int len)
+python_plugin_io_log_stderr(struct IOPluginContext *io_ctx, const char *buf, unsigned int len, const char **errstr)
 {
     debug_decl(python_plugin_io_log_stderr, PYTHON_DEBUG_CALLBACKS);
-    PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_stderr),
-                                               Py_BuildValue("(s#)", buf, len)));
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
+    int rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(log_stderr),
+                                               Py_BuildValue("(s#)", buf, len));
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
+    debug_return_int(rc);
 }
 
 int
-python_plugin_io_change_winsize(struct IOPluginContext *io_ctx, unsigned int line, unsigned int cols)
+python_plugin_io_change_winsize(struct IOPluginContext *io_ctx, unsigned int line, unsigned int cols, const char **errstr)
 {
     debug_decl(python_plugin_io_change_winsize, PYTHON_DEBUG_CALLBACKS);
-    PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(change_winsize),
-                                               Py_BuildValue("(ii)", line, cols)));
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
+    int rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(change_winsize),
+                                       Py_BuildValue("(ii)", line, cols));
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
+    debug_return_int(rc);
 }
 
 int
-python_plugin_io_log_suspend(struct IOPluginContext *io_ctx, int signo)
+python_plugin_io_log_suspend(struct IOPluginContext *io_ctx, int signo, const char **errstr)
 {
     debug_decl(python_plugin_io_log_suspend, PYTHON_DEBUG_CALLBACKS);
-    PyThreadState_Swap(BASE_CTX(io_ctx)->py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(BASE_CTX(io_ctx), CALLBACK_PYNAME(log_suspend),
-                                     Py_BuildValue("(i)", signo)));
+    struct PluginContext *plugin_ctx = BASE_CTX(io_ctx);
+    PyThreadState_Swap(plugin_ctx->py_interpreter);
+    int rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(log_suspend),
+                                       Py_BuildValue("(i)", signo));
+    CALLBACK_SET_ERROR(plugin_ctx, errstr);
+    debug_return_int(rc);
 }
 
 // generate symbols for loading multiple io plugins:

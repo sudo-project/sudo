@@ -24,33 +24,28 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_STROPTS_H
 #include <sys/stropts.h>
 #endif /* HAVE_SYS_STROPTS_H */
-#include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <grp.h>
-#include <pwd.h>
 
-#if defined(HAVE_LIBUTIL_H)
-# include <libutil.h>
-#elif defined(HAVE_UTIL_H)
-# include <util.h>
-#endif
-#ifdef HAVE_PTY_H
-# include <pty.h>
+#if defined(HAVE_OPENPTY)
+# if defined(HAVE_LIBUTIL_H)
+#  include <libutil.h>		/* *BSD */
+# elif defined(HAVE_UTIL_H)
+#  include <util.h>		/* macOS */
+# elif defined(HAVE_PTY_H)
+#  include <pty.h>		/* Linux */
+# else
+#  include <termios.h>		/* Solaris */
+# endif
 #endif
 
 #include "sudo.h"

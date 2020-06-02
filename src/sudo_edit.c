@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2008, 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2008, 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,15 +26,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -42,7 +36,6 @@
 #include <grp.h>
 #include <pwd.h>
 #include <signal.h>
-#include <errno.h>
 #include <fcntl.h>
 
 #include "sudo.h"
@@ -532,8 +525,6 @@ sudo_edit_create_tfiles(struct command_details *command_details,
     struct tempfile *tf, char *files[], int nfiles)
 {
     int i, j, tfd, ofd, rc;
-    char buf[BUFSIZ];
-    ssize_t nwritten, nread;
     struct timespec times[2];
     struct stat sb;
     debug_decl(sudo_edit_create_tfiles, SUDO_DEBUG_EDIT);
@@ -610,18 +601,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    debug_return_int(-1);
 	}
 	if (ofd != -1) {
-	    while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
-		if ((nwritten = write(tfd, buf, nread)) != nread) {
-		    if (nwritten == -1)
-			sudo_warn("%s", tf[j].tfile);
-		    else
-			sudo_warnx(U_("%s: short write"), tf[j].tfile);
-		    break;
-		}
-	    }
-	    if (nread != 0) {
-		if (nread < 0)
-		    sudo_warn("%s", files[i]);
+	    if (sudo_copy_file(tf[j].ofile, ofd, tf[j].osize, tf[j].tfile, tfd, -1) == -1) {
 		close(ofd);
 		close(tfd);
 		debug_return_int(-1);
@@ -658,9 +638,7 @@ static int
 sudo_edit_copy_tfiles(struct command_details *command_details,
     struct tempfile *tf, int nfiles, struct timespec *times)
 {
-    int i, tfd, ofd, rc, errors = 0;
-    char buf[BUFSIZ];
-    ssize_t nwritten, nread;
+    int i, tfd, ofd, errors = 0;
     struct timespec ts;
     struct stat sb;
     mode_t oldmask;
@@ -668,7 +646,7 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 
     /* Copy contents of temp files to real ones. */
     for (i = 0; i < nfiles; i++) {
-	rc = -1;
+	int rc = -1;
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", (unsigned int)user_details.uid);
 	if (seteuid(user_details.uid) != 0)
@@ -681,8 +659,8 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	    "seteuid(%u)", ROOT_UID);
 	if (seteuid(ROOT_UID) != 0)
 	    sudo_fatal("seteuid(ROOT_UID)");
-	if (rc || !S_ISREG(sb.st_mode)) {
-	    if (rc)
+	if (rc == -1 || !S_ISREG(sb.st_mode)) {
+	    if (rc == -1)
 		sudo_warn("%s", tf[i].tfile);
 	    else
 		sudo_warnx(U_("%s: not a regular file"), tf[i].tfile);
@@ -708,38 +686,26 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
 	oldmask = umask(command_details->umask);
-	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT,
+	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_CREAT,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details);
 	umask(oldmask);
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
 	if (ofd == -1) {
 	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
+	    goto bad;
+	}
+
+	/* Overwrite the old file with the new contents. */
+	if (sudo_copy_file(tf[i].tfile, tfd, sb.st_size, tf[i].ofile, ofd,
+	    tf[i].osize) == -1) {
+bad:
 	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
-	    close(tfd);
 	    errors++;
-	    continue;
 	}
-	while ((nread = read(tfd, buf, sizeof(buf))) > 0) {
-	    if ((nwritten = write(ofd, buf, nread)) != nread) {
-		if (nwritten == -1)
-		    sudo_warn("%s", tf[i].ofile);
-		else
-		    sudo_warnx(U_("%s: short write"), tf[i].ofile);
-		break;
-	    }
-	}
-	if (nread == 0) {
-	    /* success, got EOF */
-	    unlink(tf[i].tfile);
-	} else if (nread < 0) {
-	    sudo_warn(U_("unable to read temporary file"));
-	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
-	} else {
-	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
-	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
-	}
-	close(ofd);
+
+	if (ofd != -1)
+	    close(ofd);
 	close(tfd);
     }
     debug_return_int(errors);
@@ -747,28 +713,54 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 
 #ifdef HAVE_SELINUX
 static int
+selinux_run_helper(char *argv[], char *envp[])
+{
+    int status, ret = SESH_ERR_FAILURE;
+    const char *sesh;
+    pid_t child, pid;
+    debug_decl(selinux_run_helper, SUDO_DEBUG_EDIT);
+
+    sesh = sudo_conf_sesh_path();
+    if (sesh == NULL) {
+	sudo_warnx("internal error: sesh path not set");
+	debug_return_int(-1);
+    }
+
+    child = sudo_debug_fork();
+    switch (child) {
+    case -1:
+	sudo_warn(U_("unable to fork"));
+	break;
+    case 0:
+	/* child runs sesh in new context */
+	if (selinux_setcon() == 0)
+	    execve(sesh, argv, envp);
+	_exit(SESH_ERR_FAILURE);
+    default:
+	/* parent waits */
+	do {
+	    pid = waitpid(child, &status, 0);
+	} while (pid == -1 && errno == EINTR);
+
+	ret = WIFSIGNALED(status) ? SESH_ERR_KILLED : WEXITSTATUS(status);
+    }
+
+    debug_return_int(ret);
+}
+
+static int
 selinux_edit_create_tfiles(struct command_details *command_details,
     struct tempfile *tf, char *files[], int nfiles)
 {
     char **sesh_args, **sesh_ap;
     int i, rc, sesh_nargs;
     struct stat sb;
-    struct command_details saved_command_details;
     debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT);
     
-    /* Prepare selinux stuff (setexeccon) */
-    if (selinux_setup(command_details->selinux_role,
-	command_details->selinux_type, NULL, -1) != 0)
-	debug_return_int(-1);
-
     if (nfiles < 1)
 	debug_return_int(0);
 
     /* Construct common args for sesh */
-    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
-    command_details->command = _PATH_SUDO_SESH;
-    command_details->flags |= CD_SUDOEDIT_COPY;
-    
     sesh_nargs = 4 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
@@ -781,6 +773,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	*sesh_ap++ = "-h";
     *sesh_ap++ = "0";
 
+    /* XXX - temp files should be created with user's context */
     for (i = 0; i < nfiles; i++) {
 	char *tfile, *ofile = files[i];
 	int tfd;
@@ -810,8 +803,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     *sesh_ap = NULL;
 
     /* Run sesh -e [-h] 0 <o1> <t1> ... <on> <tn> */
-    command_details->argv = sesh_args;
-    rc = run_command(command_details);
+    rc = selinux_run_helper(sesh_args, command_details->envp);
     switch (rc) {
     case SESH_SUCCESS:
 	break;
@@ -819,15 +811,12 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	sudo_fatalx(U_("sesh: internal error: odd number of paths"));
     case SESH_ERR_NO_FILES:
 	sudo_fatalx(U_("sesh: unable to create temporary files"));
+    case SESH_ERR_KILLED:
+	sudo_fatalx(U_("sesh: killed by a signal"));
     default:
 	sudo_fatalx(U_("sesh: unknown error %d"), rc);
     }
 
-    /* Restore saved command_details. */
-    command_details->command = saved_command_details.command;
-    command_details->flags = saved_command_details.flags;
-    command_details->argv = saved_command_details.argv;
-    
     /* Chown to user's UID so they can edit the temporary files. */
     for (i = 0; i < nfiles; i++) {
 	if (chown(tf[i].tfile, user_details.uid, user_details.gid) != 0) {
@@ -848,24 +837,14 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 {
     char **sesh_args, **sesh_ap;
     int i, rc, sesh_nargs, ret = 1;
-    struct command_details saved_command_details;
     struct timespec ts;
     struct stat sb;
     debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT);
     
-    /* Prepare selinux stuff (setexeccon) */
-    if (selinux_setup(command_details->selinux_role,
-	command_details->selinux_type, NULL, -1) != 0)
-	debug_return_int(1);
-
     if (nfiles < 1)
 	debug_return_int(0);
 
     /* Construct common args for sesh */
-    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
-    command_details->command = _PATH_SUDO_SESH;
-    command_details->flags |= CD_SUDOEDIT_COPY;
-    
     sesh_nargs = 3 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
@@ -903,31 +882,28 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 
     if (sesh_ap - sesh_args > 3) {
 	/* Run sesh -e 1 <t1> <o1> ... <tn> <on> */
-	command_details->argv = sesh_args;
-	rc = run_command(command_details);
+	rc = selinux_run_helper(sesh_args, command_details->envp);
 	switch (rc) {
 	case SESH_SUCCESS:
 	    ret = 0;
 	    break;
 	case SESH_ERR_NO_FILES:
 	    sudo_warnx(U_("unable to copy temporary files back to their original location"));
-	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
 	    break;
 	case SESH_ERR_SOME_FILES:
 	    sudo_warnx(U_("unable to copy some of the temporary files back to their original location"));
-	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
+	    break;
+	case SESH_ERR_KILLED:
+	    sudo_warnx(U_("sesh: killed by a signal"));
 	    break;
 	default:
 	    sudo_warnx(U_("sesh: unknown error %d"), rc);
 	    break;
 	}
+	if (ret != 0)
+	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
     }
     free(sesh_args);
-
-    /* Restore saved command_details. */
-    command_details->command = saved_command_details.command;
-    command_details->flags = saved_command_details.flags;
-    command_details->argv = saved_command_details.argv;
 
     debug_return_int(ret);
 }
@@ -980,6 +956,15 @@ sudo_edit(struct command_details *command_details)
 	goto cleanup;
     }
 
+#ifdef HAVE_SELINUX
+    /* Compute new SELinux security context. */
+    if (ISSET(command_details->flags, CD_RBAC_ENABLED)) {
+	if (selinux_setup(command_details->selinux_role,
+		command_details->selinux_type, NULL, -1, false) != 0)
+	    goto cleanup;
+    }
+#endif
+
     /* Copy editor files to temporaries. */
     tf = calloc(nfiles, sizeof(*tf));
     if (tf == NULL) {
@@ -1015,6 +1000,7 @@ sudo_edit(struct command_details *command_details)
     /*
      * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
+     * XXX - should run editor with user's context
      */
     if (sudo_gettime_real(&times[0]) == -1) {
 	sudo_warn(U_("unable to read the clock"));
@@ -1050,8 +1036,10 @@ sudo_edit(struct command_details *command_details)
     else
 #endif
 	errors = sudo_edit_copy_tfiles(command_details, tf, nfiles, times);
-    if (errors)
-	goto cleanup;
+    if (errors) {
+	/* Preserve the edited temporary files. */
+	rc = W_EXITCODE(1, 0);
+    }
 
     for (i = 0; i < nfiles; i++)
 	free(tf[i].tfile);
@@ -1065,6 +1053,7 @@ cleanup:
 	for (i = 0; i < nfiles; i++) {
 	    if (tf[i].tfile != NULL)
 		unlink(tf[i].tfile);
+	    free(tf[i].tfile);
 	}
     }
     free(tf);

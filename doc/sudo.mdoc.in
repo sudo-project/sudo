@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd October 20, 2019
+.Dd May 7, 2020
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -280,6 +280,7 @@ comma-separated list of environment variables to those preserved
 from the user's environment.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
+This option may be specified multiple times.
 .It Fl e , -edit
 Edit one or more files instead of running a command.
 In lieu of a path name, the string "sudoedit" is used when consulting
@@ -638,6 +639,13 @@ option indicates that
 should stop processing command line arguments.
 .El
 .Pp
+Options that take a value may only be specified once unless
+otherwise indicated in the description.
+This is to help guard against problems caused by poorly written
+scripts that invoke
+.Nm sudo
+with user-controlled input.
+.Pp
 Environment variables to be set for the command may also be passed
 on the command line in the form of
 .Ar VAR Ns = Ns Ar value ,
@@ -776,6 +784,10 @@ Note that
 and
 .Em pam_setcred
 are enabled by default on systems using PAM.
+.Pp
+On systems that use PAM, the security policy's close function
+is responsible for closing the PAM session.
+It may also log the command's exit status.
 .Ss Signal handling
 When the command is run as a child of the
 .Nm
@@ -1067,7 +1079,9 @@ if no terminal is available or if the
 .Fl A
 option is specified.
 .It Ev SUDO_COMMAND
-Set to the command run by sudo.
+Set to the command run by sudo, including command line arguments.
+The command line arguments are truncated at 4096 characters to
+prevent a potential execution error.
 .It Ev SUDO_EDITOR
 Default editor to use in
 .Fl e

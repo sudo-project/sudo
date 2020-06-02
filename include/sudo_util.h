@@ -19,6 +19,7 @@
 #ifndef SUDO_UTIL_H
 #define SUDO_UTIL_H
 
+#include <sys/types.h>	/* for dev_t, mode_t, gid_t, size_t, ssize_t, uid_t */
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -161,7 +162,7 @@
 #define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
 
 /* sudo_parseln() flags */
-#define PARSELN_COMM_BOL	0x01	/* comments only at begining of line */
+#define PARSELN_COMM_BOL	0x01	/* comments only at beginning of line */
 #define PARSELN_CONT_IGN	0x02	/* ignore line continuation char */
 
 /*
@@ -206,10 +207,6 @@ __dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GE
 /* getgrouplist.c */
 __dso_public int sudo_getgrouplist2_v1(const char *name, gid_t basegid, GETGROUPS_T **groupsp, int *ngroupsp);
 #define sudo_getgrouplist2(_a, _b, _c, _d) sudo_getgrouplist2_v1((_a), (_b), (_c), (_d))
-
-/* host_port.c */
-__dso_public bool sudo_parse_host_port_v1(char *str, char **hostp, char **portp, char *defport);
-#define sudo_parse_host_port(_a, _b, _c, _d) sudo_parse_host_port_v1((_a), (_b), (_c), (_d))
 
 /* key_val.c */
 __dso_public char *sudo_new_key_val_v1(const char *key, const char *value);
@@ -314,5 +311,11 @@ __dso_public char *sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen);
 /* ttysize.c */
 __dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
 #define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
+
+/* uuid.c */
+__dso_public void sudo_uuid_create_v1(unsigned char uuid_out[16]);
+#define sudo_uuid_create(_a) sudo_uuid_create_v1((_a))
+__dso_public char *sudo_uuid_to_string_v1(unsigned char uuid[16], char *dst, size_t dstsiz);
+#define sudo_uuid_to_string(_a, _b, _c) sudo_uuid_to_string_v1((_a), (_b), (_c))
 
 #endif /* SUDO_UTIL_H */

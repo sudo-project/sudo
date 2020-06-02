@@ -31,7 +31,7 @@ struct TestData data;
 static void
 clean_output(char *output)
 {
-    // we replace some output which otherwise would be test run dependant
+    // we replace some output which otherwise would be test run dependent
     str_replace_in_place(output, MAX_OUTPUT, data.tmp_dir, TEMP_PATH_TEMPLATE);
 
     if (data.tmp_dir2)
@@ -44,12 +44,11 @@ const char *
 expected_path(const char *format, ...)
 {
     static char expected_output_file[PATH_MAX];
-    int count = snprintf(expected_output_file, PATH_MAX, TESTDATA_DIR);
-    char *filename = expected_output_file + count;
+    size_t dirlen = strlcpy(expected_output_file, TESTDATA_DIR, sizeof(expected_output_file));
 
     va_list args;
     va_start(args, format);
-    vsprintf(filename, format, args);
+    vsnprintf(expected_output_file + dirlen, PATH_MAX - dirlen, format, args);
     va_end(args);
 
     return expected_output_file;
@@ -64,7 +63,8 @@ create_str_array(size_t count, ...)
 
     char ** result = calloc(count, sizeof(char *));
     for (size_t i = 0; i < count; ++i) {
-        result[i] = va_arg(args, char *);
+        const char *str = va_arg(args, char *);
+        result[i] = (str == NULL ? NULL : strdup(str));
     }
 
     va_end(args);
@@ -196,10 +196,9 @@ verify_log_lines(const char *reference_path)
 
         char *line_end = strstr(line_data, " object at "); // this skips checking the pointer hex
         if (line_end)
-            sprintf(line_end, " object>\n");
+            snprintf(line_end, sizeof(line) - (line_end - line), " object>\n");
 
-        VERIFY_TRUE(strlen(stored_str) + strlen(line_data) + 1 < sizeof(stored_str));  // we have enough space in buffer
-        strcat(stored_str, line_data);
+        VERIFY_TRUE(strlcat(stored_str, line_data, sizeof(stored_str)) < sizeof(stored_str));  // we have enough space in buffer
     }
 
     clean_output(stored_str);
@@ -249,5 +248,22 @@ verify_str_set(char **actual_set, char **expected_set, const char *actual_variab
         return false;
     }
 
+    return true;
+}
+
+int
+mock_python_datetime_now(const char *plugin_name, const char *date_str)
+{
+    char *cmd = NULL;
+    asprintf(&cmd, "import %s\n"                      // the plugin has its own submodule
+                   "from datetime import datetime\n"  // store the real datetime
+                   "import time\n"
+                   "from unittest.mock import Mock\n"
+                   "%s.datetime = Mock()\n"           // replace plugin's datetime
+                   "%s.datetime.now = lambda: datetime.strptime('%s', '%%Y-%%m-%%dT%%H:%%M:%%S')\n",
+             plugin_name, plugin_name, plugin_name, date_str);
+    VERIFY_PTR_NE(cmd, NULL);
+    VERIFY_INT(PyRun_SimpleString(cmd), 0);
+    free(cmd);
     return true;
 }

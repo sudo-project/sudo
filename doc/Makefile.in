@@ -27,6 +27,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 docdir = @docdir@
+scriptdir = $(top_srcdir)/scripts
 
 # Tools to use
 SED = @SED@
@@ -341,7 +342,7 @@ pre-install:
 install: install-doc
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(docdir) \
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(docdir) \
 	    $(DESTDIR)$(mandirexe) $(DESTDIR)$(mandirform) $(DESTDIR)$(mandirsu)
 
 install-binaries:

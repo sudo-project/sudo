@@ -56,17 +56,11 @@
 
 #ifndef HAVE_GLOB
 
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -144,7 +138,7 @@ struct glob_lim {
 };
 
 static int	 compare(const void *, const void *);
-static int	 g_Ctoc(const Char *, char *, unsigned int);
+static int	 g_Ctoc(const Char *, char *, size_t);
 static int	 g_lstat(Char *, struct stat *, glob_t *);
 static DIR	*g_opendir(Char *, glob_t *);
 static Char	*g_strchr(const Char *, int);
@@ -188,9 +182,8 @@ sudo_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
 	pglob->gl_errfunc = errfunc;
 	pglob->gl_matchc = 0;
 
-	if (pglob->gl_offs < 0 || pglob->gl_pathc < 0 ||
-	    pglob->gl_offs >= INT_MAX || pglob->gl_pathc >= INT_MAX ||
-	    pglob->gl_pathc >= INT_MAX - pglob->gl_offs - 1)
+	if (pglob->gl_offs >= SSIZE_MAX || pglob->gl_pathc >= SSIZE_MAX ||
+	    pglob->gl_pathc >= SSIZE_MAX - pglob->gl_offs - 1)
 		return GLOB_NOSPACE;
 
 	if (strnlen(pattern, PATH_MAX) == PATH_MAX)
@@ -457,7 +450,8 @@ static int
 glob0(const Char *pattern, glob_t *pglob, struct glob_lim *limitp)
 {
 	const Char *qpatnext;
-	int c, err, oldpathc;
+	int c, err;
+	size_t oldpathc;
 	Char *bufnext, patbuf[PATH_MAX];
 
 	qpatnext = globtilde(pattern, patbuf, PATH_MAX, pglob);
@@ -731,18 +725,17 @@ globextend(const Char *path, glob_t *pglob, struct glob_lim *limitp,
     struct stat *sb)
 {
 	char **pathv;
-	ssize_t i;
-	size_t newn, len;
+	size_t i, newn, len;
 	char *copy = NULL;
 	const Char *p;
 
 	newn = 2 + pglob->gl_pathc + pglob->gl_offs;
-	if (pglob->gl_offs >= INT_MAX ||
-	    pglob->gl_pathc >= INT_MAX ||
-	    newn >= INT_MAX ||
+	if (pglob->gl_offs >= SSIZE_MAX ||
+	    pglob->gl_pathc >= SSIZE_MAX ||
+	    newn >= SSIZE_MAX ||
 	    SIZE_MAX / sizeof(*pathv) <= newn) {
  nospace:
-		for (i = pglob->gl_offs; i < (ssize_t)(newn - 2); i++) {
+		for (i = pglob->gl_offs; i < newn - 2; i++) {
 			if (pglob->gl_pathv && pglob->gl_pathv[i])
 				free(pglob->gl_pathv[i]);
 		}
@@ -759,7 +752,7 @@ globextend(const Char *path, glob_t *pglob, struct glob_lim *limitp,
 	if (pglob->gl_pathv == NULL && pglob->gl_offs > 0) {
 		/* first time around -- clear initial gl_offs items */
 		pathv += pglob->gl_offs;
-		for (i = pglob->gl_offs; --i >= 0; )
+		for (i = pglob->gl_offs; i > 0; i--)
 			*--pathv = NULL;
 	}
 	pglob->gl_pathv = pathv;
@@ -869,7 +862,7 @@ fail:
 void
 sudo_globfree(glob_t *pglob)
 {
-	int i;
+	size_t i;
 	char **pp;
 
 	if (pglob->gl_pathv != NULL) {
@@ -929,7 +922,7 @@ g_strchr(const Char *str, int ch)
 }
 
 static int
-g_Ctoc(const Char *str, char *buf, unsigned int len)
+g_Ctoc(const Char *str, char *buf, size_t len)
 {
 
 	while (len--) {

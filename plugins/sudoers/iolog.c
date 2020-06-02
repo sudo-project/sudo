@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,12 +28,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -57,15 +52,28 @@ static struct iolog_file iolog_files[] = {
     { true, },	/* IOFD_TIMING */
 };
 
-static struct client_closure client_closure = CLIENT_CLOSURE_INITIALIZER(client_closure);
+static struct sudoers_io_operations {
+    int (*open)(struct timespec *now);
+    void (*close)(int exit_status, int error, const char **errstr);
+    int (*log)(int event, const char *buf, unsigned int len,
+	struct timespec *delay, const char **errstr);
+    int (*change_winsize)(unsigned int lines, unsigned int cols,
+	struct timespec *delay, const char **errstr);
+    int (*suspend)(const char *signame, struct timespec *delay,
+	const char **errstr);
+} io_operations;
+
+#ifdef SUDOERS_IOLOG_CLIENT
+static struct client_closure *client_closure;
+#endif
 static struct iolog_details iolog_details;
 static bool warned = false;
+static int iolog_dir_fd = -1;
 static struct timespec last_time;
+static void sudoers_io_setops(void);
 
 /* sudoers_io is declared at the end of this file. */
 extern __dso_public struct io_plugin sudoers_io;
-
-#define iolog_remote	(client_closure.sock != -1)
 
 /*
  * Sudoers callback for maxseq Defaults setting.
@@ -366,28 +374,39 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    TIME_T_MAX, NULL);
 		continue;
 	    }
-        if (strncmp(*cur, "log_server_keepalive=", sizeof("log_server_keepalive=") - 1) == 0) {
-            int val = sudo_strtobool(*cur + sizeof("log_server_keepalive=") - 1);
-            if (val != -1) {
-                details->tcp_keepalive = val;
-            } else {
-                details->tcp_keepalive = true;
+            if (strncmp(*cur, "log_server_keepalive=", sizeof("log_server_keepalive=") - 1) == 0) {
+                int val = sudo_strtobool(*cur + sizeof("log_server_keepalive=") - 1);
+                if (val != -1) {
+                    details->keepalive = val;
+                } else {
+                    sudo_debug_printf(SUDO_DEBUG_WARN,
+                        "%s: unable to parse %s", __func__, *cur);
+                }
+                continue;
             }
-            continue;
-        }
 #if defined(HAVE_OPENSSL)
-	    if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
-            details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
-            continue;
-        }
-	    if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
-            details->cert_file = *cur + sizeof("log_server_peer_cert=") - 1;
-            continue;
-        }
-	    if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
-            details->key_file = *cur + sizeof("log_server_peer_key=") - 1;
-            continue;
-        }
+            if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
+                details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
+                continue;
+            }
+            if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
+                details->cert_file = *cur + sizeof("log_server_peer_cert=") - 1;
+                continue;
+            }
+            if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
+                details->key_file = *cur + sizeof("log_server_peer_key=") - 1;
+                continue;
+            }
+            if (strncmp(*cur, "log_server_verify=", sizeof("log_server_verify=") - 1) == 0) {
+                int val = sudo_strtobool(*cur + sizeof("log_server_verify=") - 1);
+                if (val != -1) {
+                    details->keepalive = val;
+                } else {
+                    sudo_debug_printf(SUDO_DEBUG_WARN,
+                        "%s: unable to parse %s", __func__, *cur);
+                }
+                continue;
+            }
 #endif /* HAVE_OPENSSL */
 	    break;
 	case 'm':
@@ -478,18 +497,23 @@ write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
 
     /* XXX - just use iolog_info in the first place? */
     memset(&iolog_info, 0, sizeof(iolog_info));
-    time(&iolog_info.tstamp);
+    iolog_info.cwd = (char *)details->cwd;
     iolog_info.user = (char *)details->user;
     iolog_info.runas_user = details->runas_pw->pw_name;
     iolog_info.runas_group = details->runas_gr ? details->runas_gr->gr_name: NULL;
     iolog_info.tty = (char *)details->tty;
-    iolog_info.cwd = (char *)details->cwd;
     iolog_info.cmd = (char *)details->command;
+    iolog_info.host = (char *)details->host;
+    sudo_gettime_real(&iolog_info.tstamp);
     iolog_info.lines = details->lines;
     iolog_info.cols = details->cols;
+    iolog_info.runas_uid = details->runas_pw->pw_uid;
+    iolog_info.runas_gid = details->runas_gr ? details->runas_gr->gr_gid: (gid_t)-1;
+    iolog_info.argv = (char **)details->argv;
+    iolog_info.envp = (char **)details->user_env;
 
-    if (!iolog_write_info_file(dfd, iolog_dir, &iolog_info, details->argv)) {
-	log_warning(SLOG_SEND_MAIL,
+    if (!iolog_write_info_file(dfd, iolog_dir, &iolog_info)) {
+	log_warningx(SLOG_SEND_MAIL,
 	    N_("unable to write to I/O log file: %s"), strerror(errno));
 	warned = true;
 	debug_return_bool(false);
@@ -522,11 +546,10 @@ copy_vector_shallow(char * const *vec)
 }
 
 static int
-sudoers_io_open_local(void)
+sudoers_io_open_local(struct timespec *now)
 {
     char iolog_path[PATH_MAX], sessid[7];
     size_t len;
-    int iolog_dir_fd = -1;
     int i, ret = -1;
     debug_decl(sudoers_io_open_local, SUDOERS_DEBUG_PLUGIN);
 
@@ -588,52 +611,44 @@ sudoers_io_open_local(void)
     ret = true;
 
 done:
-    if (iolog_dir_fd != -1)
-	close(iolog_dir_fd);
-
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_IOLOG_CLIENT
 static int
-sudoers_io_open_remote(void)
+sudoers_io_open_remote(struct timespec *now)
 {
-    int sock, ret = -1;
-    struct sudoers_string *connected_server = NULL;
-
+    int ret = -1;
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
+    client_closure = client_closure_alloc(&iolog_details, &sudoers_io, now);
+    if (client_closure == NULL)
+	goto done;
+
     /* Connect to log server. */
-    sock = log_server_connect(iolog_details.log_servers, iolog_details.tcp_keepalive,
-	&iolog_details.server_timeout, &connected_server);
-    if (sock == -1) {
+    if (!log_server_connect(client_closure)) {
 	/* TODO: support offline logs if server unreachable */
 	sudo_warnx(U_("unable to connect to log server"));
-	ret = -1;
 	goto done;
     }
 
-    if (!client_closure_fill(&client_closure, sock, connected_server,
-	    &iolog_details, &sudoers_io)) {
-	close(sock);
-	ret = -1;
-	goto done;
-    }
-
-    /* Enable reader for server hello */
-    ret = client_closure.read_ev->add(client_closure.read_ev,
-	&iolog_details.server_timeout);
-    if (ret == -1)
-	sudo_warn(U_("unable to add event to queue"));
+    /* Read ServerHello synchronously or fail. */
+    if (read_server_hello(client_closure))
+	ret = 1;
 
 done:
+    if (ret != 1)
+	client_closure_free(client_closure);
     debug_return_int(ret);
 }
+#endif /* SUDOERS_IOLOG_CLIENT */
 
 static int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
-    int argc, char * const argv[], char * const user_env[], char * const args[])
+    int argc, char * const argv[], char * const user_env[], char * const args[],
+    const char **errstr)
 {
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     char * const *cur;
@@ -643,10 +658,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
-
-    /* If we have no command (because -V was specified) just return. */
-    if (argc == 0)
-	debug_return_int(true);
 
     bindtextdomain("sudoers", LOCALEDIR);
 
@@ -669,6 +680,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
     }
 
+    /* If we have no command (because -V was specified) just return. */
+    if (argc == 0)
+	debug_return_int(true);
+
     /*
      * Pull iolog settings out of command_info.
      */
@@ -689,14 +704,19 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	}
     }
 
+    /* Initialize io_operations. */
+    sudoers_io_setops();
+
+    if (sudo_gettime_awake(&last_time) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
+	goto done;
+    }
+
     /*
      * Create local I/O log file or connect to remote log server.
      */
-    if (sudoers_io.event_alloc != NULL && iolog_details.log_servers != NULL)
-	ret = sudoers_io_open_remote();
-    else
-	ret = sudoers_io_open_local();
-    if (ret != true)
+    if ((ret = io_operations.open(&last_time)) != true)
 	goto done;
 
     /*
@@ -713,17 +733,12 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (!iolog_files[IOFD_TTYOUT].enabled)
 	sudoers_io.log_ttyout = NULL;
 
-    if (sudo_gettime_awake(&last_time) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "%s: unable to get time of day", __func__);
-	goto done;
-    }
-    if (iolog_remote)
-	client_closure.start_time = last_time;
-
 done:
     if (ret != true) {
-	client_closure_free(&client_closure);
+	if (iolog_dir_fd != -1) {
+	    close(iolog_dir_fd);
+	    iolog_dir_fd = -1;
+	}
 	sudo_freepwcache();
 	sudo_freegrcache();
     }
@@ -736,35 +751,68 @@ done:
 }
 
 static void
+sudoers_io_close_local(int exit_status, int error, const char **errstr)
+{
+    int i;
+    debug_decl(sudoers_io_close_local, SUDOERS_DEBUG_PLUGIN);
+
+    /* Close the files. */
+    for (i = 0; i < IOFD_MAX; i++) {
+	if (iolog_files[i].fd.v == NULL)
+	    continue;
+	iolog_close(&iolog_files[i], errstr);
+    }
+
+    /* Clear write bits from I/O timing file to indicate completion. */
+    if (iolog_dir_fd != -1) {
+	struct stat sb;
+	if (fstatat(iolog_dir_fd, "timing", &sb, 0) != -1) {
+	    CLR(sb.st_mode, S_IWUSR|S_IWGRP|S_IWOTH);
+	    if (fchmodat(iolog_dir_fd, "timing", sb.st_mode, 0) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to fchmodat timing file", __func__);
+	    }
+	}
+	close(iolog_dir_fd);
+	iolog_dir_fd = -1;
+    }
+
+    debug_return;
+}
+
+#ifdef SUDOERS_IOLOG_CLIENT
+static void
+sudoers_io_close_remote(int exit_status, int error, const char **errstr)
+{
+    debug_decl(sudoers_io_close_remote, SUDOERS_DEBUG_PLUGIN);
+
+    client_close(client_closure, exit_status, error);
+
+    debug_return;
+}
+#endif
+
+static void
 sudoers_io_close(int exit_status, int error)
 {
     const char *errstr = NULL;
-    int i;
     debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN);
 
-    if (iolog_remote) {
-	client_close(&client_closure, exit_status, error);
-    } else {
-	for (i = 0; i < IOFD_MAX; i++) {
-	    if (iolog_files[i].fd.v == NULL)
-		continue;
-	    iolog_close(&iolog_files[i], &errstr);
-	}
+    if (io_operations.close != NULL)
+	io_operations.close(exit_status, error, &errstr);
+
+    if (errstr != NULL && !warned) {
+	/* Only warn about I/O log file errors once. */
+	log_warningx(SLOG_SEND_MAIL,
+	    N_("unable to write to I/O log file: %s"), errstr);
+	warned = true;
     }
 
     sudo_freepwcache();
     sudo_freegrcache();
 
-    if (errstr != NULL && !warned) {
-	/* Only warn about I/O log file errors once. */
-	log_warning(SLOG_SEND_MAIL,
-	    N_("unable to write to I/O log file: %s"), errstr);
-	warned = true;
-    }
-
+    /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
     sudoers_debug_deregister();
-
-    return;
 }
 
 static int
@@ -827,6 +875,7 @@ done:
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_IOLOG_CLIENT
 /*
  * Schedule an I/O log entry to be written to the log server.
  * Returns 1 on success and -1 on error.
@@ -839,11 +888,11 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
     int type, ret = -1;
     debug_decl(sudoers_io_log_remote, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure.disabled)
+    if (client_closure->disabled)
 	debug_return_int(1);
 
     /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(delay, &client_closure.elapsed, &client_closure.elapsed);
+    sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);
 
     switch (event) {
     case IO_EVENT_STDIN:
@@ -865,8 +914,8 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
 	sudo_warnx(U_("unexpected I/O event %d"), event);
 	goto done;
     }
-    if (fmt_io_buf(&client_closure, type, buf, len, delay)) {
-	ret = client_closure.write_ev->add(client_closure.write_ev,
+    if (fmt_io_buf(client_closure, type, buf, len, delay)) {
+	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
 	    sudo_warn(U_("unable to add event to queue"));
@@ -875,42 +924,48 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
 done:
     debug_return_int(ret);
 }
+#endif /* SUDOERS_IOLOG_CLIENT */
 
 /*
  * Generic I/O logging function.  Called by the I/O logging entry points.
  * Returns 1 on success and -1 on error.
  */
 static int
-sudoers_io_log(const char *buf, unsigned int len, int event)
+sudoers_io_log(const char *buf, unsigned int len, int event, const char **errstr)
 {
     struct timespec now, delay;
-    const char *errstr = NULL;
+    const char *ioerror = NULL;
     int ret = -1;
     debug_decl(sudoers_io_log, SUDOERS_DEBUG_PLUGIN);
 
     if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
-	errstr = strerror(errno);
+	ioerror = N_("unable to read the clock");
 	goto bad;
     }
     sudo_timespecsub(&now, &last_time, &delay);
 
-    if (iolog_remote)
-	ret = sudoers_io_log_remote(event, buf, len, &delay, &errstr);
-    else
-	ret = sudoers_io_log_local(event, buf, len, &delay, &errstr);
+    ret = io_operations.log(event, buf, len, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
 
 bad:
     if (ret == -1) {
-	if (errstr != NULL && !warned) {
-	    /* Only warn about I/O log file errors once. */
-	    log_warning(SLOG_SEND_MAIL,
-		N_("unable to write to I/O log file: %s"), errstr);
-	    warned = true;
+	if (ioerror != NULL) {
+	    char *cp;
+
+	    if (asprintf(&cp, N_("unable to write to I/O log file: %s"),
+		    ioerror) != -1) {
+		*errstr = cp;
+	    }
+	    if (!warned) {
+		/* Only warn about I/O log file errors once. */
+		log_warningx(SLOG_SEND_MAIL,
+		    N_("unable to write to I/O log file: %s"), ioerror);
+		warned = true;
+	    }
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
@@ -922,33 +977,33 @@ bad:
 }
 
 static int
-sudoers_io_log_stdin(const char *buf, unsigned int len)
+sudoers_io_log_stdin(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_STDIN);
+    return sudoers_io_log(buf, len, IO_EVENT_STDIN, errstr);
 }
 
 static int
-sudoers_io_log_stdout(const char *buf, unsigned int len)
+sudoers_io_log_stdout(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_STDOUT);
+    return sudoers_io_log(buf, len, IO_EVENT_STDOUT, errstr);
 }
 
 static int
-sudoers_io_log_stderr(const char *buf, unsigned int len)
+sudoers_io_log_stderr(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_STDERR);
+    return sudoers_io_log(buf, len, IO_EVENT_STDERR, errstr);
 }
 
 static int
-sudoers_io_log_ttyin(const char *buf, unsigned int len)
+sudoers_io_log_ttyin(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_TTYIN);
+    return sudoers_io_log(buf, len, IO_EVENT_TTYIN, errstr);
 }
 
 static int
-sudoers_io_log_ttyout(const char *buf, unsigned int len)
+sudoers_io_log_ttyout(const char *buf, unsigned int len, const char **errstr)
 {
-    return sudoers_io_log(buf, len, IO_EVENT_TTYOUT);
+    return sudoers_io_log(buf, len, IO_EVENT_TTYOUT, errstr);
 }
 
 static int
@@ -978,6 +1033,7 @@ done:
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_IOLOG_CLIENT
 static int
 sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
     struct timespec *delay, const char **errstr)
@@ -985,14 +1041,14 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
     int ret = -1;
     debug_decl(sudoers_io_change_winsize_remote, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure.disabled)
+    if (client_closure->disabled)
 	debug_return_int(1);
 
     /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(delay, &client_closure.elapsed, &client_closure.elapsed);
+    sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);
 
-    if (fmt_winsize(&client_closure, lines, cols, delay)) {
-	ret = client_closure.write_ev->add(client_closure.write_ev,
+    if (fmt_winsize(client_closure, lines, cols, delay)) {
+	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
 	    sudo_warn(U_("unable to add event to queue"));
@@ -1000,38 +1056,44 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
 
     debug_return_int(ret);
 }
+#endif /* SUDOERS_IOLOG_CLIENT */
 
 static int
-sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
+sudoers_io_change_winsize(unsigned int lines, unsigned int cols, const char **errstr)
 {
     struct timespec now, delay;
-    const char *errstr = NULL;
+    const char *ioerror = NULL;
     int ret = -1;
     debug_decl(sudoers_io_change_winsize, SUDOERS_DEBUG_PLUGIN);
 
     if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
-	errstr = strerror(errno);
+	ioerror = N_("unable to read the clock");
 	goto bad;
     }
     sudo_timespecsub(&now, &last_time, &delay);
 
-    if (iolog_remote)
-	ret = sudoers_io_change_winsize_remote(lines, cols, &delay, &errstr);
-    else
-	ret = sudoers_io_change_winsize_local(lines, cols, &delay, &errstr);
+    ret = io_operations.change_winsize(lines, cols, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
 
 bad:
     if (ret == -1) {
-	if (errstr != NULL && !warned) {
-	    /* Only warn about I/O log file errors once. */
-	    log_warning(SLOG_SEND_MAIL,
-		N_("unable to write to I/O log file: %s"), errstr);
-	    warned = true;
+	if (ioerror != NULL && !warned) {
+	    char *cp;
+
+	    if (asprintf(&cp, N_("unable to write to I/O log file: %s"),
+		    ioerror) != -1) {
+		*errstr = cp;
+	    }
+	    if (!warned) {
+		/* Only warn about I/O log file errors once. */
+		log_warningx(SLOG_SEND_MAIL,
+		    N_("unable to write to I/O log file: %s"), ioerror);
+		warned = true;
+	    }
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
@@ -1069,6 +1131,7 @@ done:
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_IOLOG_CLIENT
 static int
 sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
     const char **errstr)
@@ -1076,14 +1139,14 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
     int ret = -1;
     debug_decl(sudoers_io_suspend_remote, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure.disabled)
+    if (client_closure->disabled)
 	debug_return_int(1);
 
     /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(delay, &client_closure.elapsed, &client_closure.elapsed);
+    sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);
 
-    if (fmt_suspend(&client_closure, signame, delay)) {
-	ret = client_closure.write_ev->add(client_closure.write_ev,
+    if (fmt_suspend(client_closure, signame, delay)) {
+	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
 	    sudo_warn(U_("unable to add event to queue"));
@@ -1091,13 +1154,14 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
 
     debug_return_int(ret);
 }
+#endif /* SUDOERS_IOLOG_CLIENT */
 
 static int
-sudoers_io_suspend(int signo)
+sudoers_io_suspend(int signo, const char **errstr)
 {
     struct timespec now, delay;
     char signame[SIG2STR_MAX];
-    const char *errstr = NULL;
+    const char *ioerror = NULL;
     int ret = -1;
     debug_decl(sudoers_io_suspend, SUDOERS_DEBUG_PLUGIN);
 
@@ -1110,27 +1174,32 @@ sudoers_io_suspend(int signo)
     if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
-	errstr = strerror(errno);
+	ioerror = N_("unable to read the clock");
 	goto bad;
     }
     sudo_timespecsub(&now, &last_time, &delay);
 
     /* Write suspend event to the timing file. */
-    if (iolog_remote)
-	ret = sudoers_io_suspend_remote(signame, &delay, &errstr);
-    else
-	ret = sudoers_io_suspend_local(signame, &delay, &errstr);
+    ret = io_operations.suspend(signame, &delay, &ioerror);
 
     last_time.tv_sec = now.tv_sec;
     last_time.tv_nsec = now.tv_nsec;
 
 bad:
     if (ret == -1) {
-	if (errstr != NULL && !warned) {
-	    /* Only warn about I/O log file errors once. */
-	    log_warning(SLOG_SEND_MAIL,
-		N_("unable to write to I/O log file: %s"), errstr);
-	    warned = true;
+	if (ioerror != NULL && !warned) {
+	    char *cp;
+
+	    if (asprintf(&cp, N_("unable to write to I/O log file: %s"),
+		    ioerror) != -1) {
+		*errstr = cp;
+	    }
+	    if (!warned) {
+		/* Only warn about I/O log file errors once. */
+		log_warningx(SLOG_SEND_MAIL,
+		    N_("unable to write to I/O log file: %s"), ioerror);
+		warned = true;
+	    }
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
@@ -1139,6 +1208,34 @@ bad:
     }
 
     debug_return_int(ret);
+}
+
+/*
+ * Fill in the contents of io_operations, either local or remote.
+ */
+static void
+sudoers_io_setops(void)
+{
+    debug_decl(sudoers_io_setops, SUDOERS_DEBUG_PLUGIN);
+
+#ifdef SUDOERS_IOLOG_CLIENT
+    if (sudoers_io.event_alloc != NULL && iolog_details.log_servers != NULL) {
+	io_operations.open = sudoers_io_open_remote;
+	io_operations.close = sudoers_io_close_remote;
+	io_operations.log = sudoers_io_log_remote;
+	io_operations.change_winsize = sudoers_io_change_winsize_remote;
+	io_operations.suspend = sudoers_io_suspend_remote;
+    } else
+#endif /* SUDOERS_IOLOG_CLIENT */
+    {
+	io_operations.open = sudoers_io_open_local;
+	io_operations.close = sudoers_io_close_local;
+	io_operations.log = sudoers_io_log_local;
+	io_operations.change_winsize = sudoers_io_change_winsize_local;
+	io_operations.suspend = sudoers_io_suspend_local;
+    }
+
+    debug_return;
 }
 
 __dso_public struct io_plugin sudoers_io = {

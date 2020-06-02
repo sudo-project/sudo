@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 27, 2019
+.Dd May 18, 2020
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -23,7 +23,7 @@
 .Nd replay sudo session logs
 .Sh SYNOPSIS
 .Nm sudoreplay
-.Op Fl hnRS
+.Op Fl FhnRS
 .Op Fl d Ar dir
 .Op Fl f Ar filter
 .Op Fl m Ar num
@@ -132,6 +132,20 @@ argument is a comma-separated list, consisting of one or more of following:
 .Em ttyin ,
 and
 .Em ttyout .
+.It Fl F , -follow
+Enable
+.Dq follow mode .
+When replaying a session,
+.Nm
+will ignore end-of-file and keep replaying until the log is complete.
+This can be used to replay a session that is still in progress,
+similar to
+.Dq tail -f .
+An I/O log file is considered to be complete when the write bits
+have been cleared on the session's timing file.
+Note that versions of
+.Nm sudo
+prior to 1.9.1 do not clear the write bits upon completion.
 .It Fl h , -help
 Display a short help message to the standard output and exit.
 .It Fl l , -list Op Ar search expression
@@ -168,6 +182,9 @@ Note that unless a
 was explicitly specified when
 .Nm sudo
 was run this field will be empty in the log.
+.It host Ar hostname
+Evaluates to true if the command was run on the specified
+.Ar hostname .
 .It runas Ar runas_user
 Evaluates to true if the command was run as the specified
 .Ar runas_user .
@@ -358,6 +375,8 @@ Debugging framework configuration
 The default I/O log directory.
 .It Pa @iolog_dir@/00/00/01/log
 Example session log info.
+.It Pa @iolog_dir@/00/00/01/log.json
+Example session log info (JSON format).
 .It Pa @iolog_dir@/00/00/01/stdin
 Example session standard input log.
 .It Pa @iolog_dir@/00/00/01/stdout

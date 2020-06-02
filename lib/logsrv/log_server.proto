@@ -18,6 +18,7 @@ message ClientMessage {
     IoBuffer stderr_buf = 10;
     ChangeWindowSize winsize_event = 11;
     CommandSuspend suspend_event = 12;
+    ClientHello hello_msg = 13;
   }
 }
 
@@ -106,6 +107,11 @@ message CommandSuspend {
   string signal = 2;		/* signal that caused suspend/resume */
 }
 
+/* Hello message from client when connecting to server. */
+message ClientHello {
+  string client_id = 1;		/* free-form client description */
+}
+
 /*
  * Server messages to the client.  Messages on the wire are
  * prefixed with a 32-bit size in network byte order.
@@ -125,7 +131,4 @@ message ServerHello {
   string server_id = 1;		/* free-form server description */
   string redirect = 2;		/* optional redirect if busy */
   repeated string servers = 3;	/* optional list of known servers */
-  bool tls = 4;             /* true if server uses tls protocol */
-  bool tls_server_auth = 5; /* true if server auth has to be performed */
-  bool tls_reqcert = 6;     /* true if client auth is required with signed cert */
 }

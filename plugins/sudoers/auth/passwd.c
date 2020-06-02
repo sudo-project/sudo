@@ -30,12 +30,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <pwd.h>
 
@@ -100,7 +95,7 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_c
 }
 
 int
-sudo_passwd_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_passwd_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     char *pw_epasswd = auth->data;
     debug_decl(sudo_passwd_cleanup, SUDOERS_DEBUG_AUTH);

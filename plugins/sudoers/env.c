@@ -28,16 +28,9 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -183,7 +176,7 @@ static const char *initial_badenv_table[] = {
     "BASHOPTS",			/* bash, initial "shopt -s" options */
     "SHELLOPTS",		/* bash, initial "set -o" options */
     "JAVA_TOOL_OPTIONS",	/* java, extra command line options */
-    "PERLIO_DEBUG ",		/* perl, debugging output file */
+    "PERLIO_DEBUG",		/* perl, debugging output file */
     "PERLLIB",			/* perl, search path for modules/includes */
     "PERL5LIB",			/* perl 5, search path for modules/includes */
     "PERL5OPT",			/* perl 5, extra command line options */
@@ -1109,7 +1102,12 @@ rebuild_env(void)
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args) {
-	if (asprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args) == -1)
+	/*
+	 * We limit user_args to 4096 bytes to avoid an execve() failure
+	 * for very long argument vectors.  The command's environment also
+	 * counts against the ARG_MAX limit.
+	 */
+	if (asprintf(&cp, "SUDO_COMMAND=%s %.*s", user_cmnd, 4096, user_args) == -1)
 	    goto bad;
 	if (sudo_putenv(cp, true, true) == -1) {
 	    free(cp);

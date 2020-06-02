@@ -35,6 +35,12 @@ __dso_public uint32_t sudo_arc4random(void);
 # define arc4random() sudo_arc4random()
 #endif /* ARC4RANDOM */
 
+#ifndef HAVE_ARC4RANDOM_BUF
+__dso_public void sudo_arc4random_buf(void *buf, size_t n);
+# undef arc4random_buf
+# define arc4random_buf(a, b) sudo_arc4random_buf((a), (b))
+#endif /* ARC4RANDOM_BUF */
+
 #ifndef HAVE_ARC4RANDOM_UNIFORM
 __dso_public uint32_t sudo_arc4random_uniform(uint32_t upper_bound);
 # undef arc4random_uniform

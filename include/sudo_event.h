@@ -33,6 +33,9 @@ struct timeval;		/* for deprecated APIs */
 #define SUDO_EV_SIGNAL		0x10	/* fire on signal receipt */
 #define SUDO_EV_SIGINFO		0x20	/* fire on signal receipt (siginfo) */
 
+/* User-settable events for sudo_ev_init() (SUDO_EV_TIMEOUT not valid here) */
+#define SUDO_EV_MASK		(SUDO_EV_READ|SUDO_EV_WRITE|SUDO_EV_PERSIST|SUDO_EV_SIGNAL|SUDO_EV_SIGINFO)
+
 /* Event flags (internal) */
 #define SUDO_EVQ_INSERTED	0x01	/* event is on the event queue */
 #define SUDO_EVQ_ACTIVE		0x02	/* event is on the active queue */
@@ -92,7 +95,7 @@ struct sudo_event_base {
     sig_atomic_t signal_pending[NSIG]; /* pending signals */
     sig_atomic_t signal_caught;	/* at least one signal caught */
     int num_handlers;		/* number of installed handlers */
-    int signal_pipe[2];		/* so we can wake up on singal */
+    int signal_pipe[2];		/* so we can wake up on signal */
 #if defined(HAVE_POLL) || defined(HAVE_PPOLL)
     struct pollfd *pfds;	/* array of struct pollfd */
     int pfd_max;		/* size of the pfds array */
@@ -134,8 +137,8 @@ __dso_public int sudo_ev_set_v1(struct sudo_event *ev, int fd, short events, sud
 #define sudo_ev_set(_a, _b, _c, _d, _e) sudo_ev_set_v1((_a), (_b), (_c), (_d), (_e))
 
 /* Add an event, returns 0 on success, -1 on error */
-__dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, struct timeval *timo, bool tohead);
-__dso_public int sudo_ev_add_v2(struct sudo_event_base *head, struct sudo_event *ev, struct timespec *timo, bool tohead);
+__dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, const struct timeval *timo, bool tohead);
+__dso_public int sudo_ev_add_v2(struct sudo_event_base *head, struct sudo_event *ev, const struct timespec *timo, bool tohead);
 #define sudo_ev_add(_a, _b, _c, _d) sudo_ev_add_v2((_a), (_b), (_c), (_d))
 
 /* Delete an event, returns 0 on success, -1 on error */

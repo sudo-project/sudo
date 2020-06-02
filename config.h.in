@@ -54,6 +54,9 @@
 /* Define to 1 if you have the `arc4random' function. */
 #undef HAVE_ARC4RANDOM
 
+/* Define to 1 if you have the `arc4random_buf' function. */
+#undef HAVE_ARC4RANDOM_BUF
+
 /* Define to 1 if you have the `arc4random_uniform' function. */
 #undef HAVE_ARC4RANDOM_UNIFORM
 
@@ -724,6 +727,9 @@
 /* Define to 1 if you have the <spawn.h> header file. */
 #undef HAVE_SPAWN_H
 
+/* Define to 1 if you have the `SSL_CTX_get0_certificate' function. */
+#undef HAVE_SSL_CTX_GET0_CERTIFICATE
+
 /* Define to 1 if you have the `SSL_CTX_set_ciphersuites' function. */
 #undef HAVE_SSL_CTX_SET_CIPHERSUITES
 
@@ -1029,7 +1035,7 @@
 /* Define to 1 if you don't want to use sudo's PAM session support. */
 #undef NO_PAM_SESSION
 
-/* Define to avoid runing the mailer as root. */
+/* Define to avoid running the mailer as root. */
 #undef NO_ROOT_MAILER
 
 /* Define to 1 if root should not be allowed to use sudo. */
@@ -1145,6 +1151,10 @@
 
 /* Define to 1 if the code in interfaces.c does not compile for you. */
 #undef STUB_LOAD_INTERFACES
+
+/* Define to 1 to compile support for sudo_logsrvd in the sudoers I/O log
+   plugin. */
+#undef SUDOERS_IOLOG_CLIENT
 
 /* An instance string to append to the username (separated by a slash) for
    Kerberos V authentication. */

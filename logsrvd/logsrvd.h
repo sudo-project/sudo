@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,9 +31,6 @@
 
 #include "logsrv_util.h"
 
-/* Default listen address (port 30344 on all interfaces). */
-#define DEFAULT_LISTEN_ADDR	"*:" DEFAULT_PORT_STR
-
 /* Default timeout value for server socket */
 #define DEFAULT_SOCKET_TIMEOUT_SEC 30
 
@@ -57,10 +56,13 @@ struct iolog_details {
     char *ttyname;
     char **argv;
     char **env_add;
-    time_t submit_time;
+    char **envp;
+    struct timespec submit_time;
     int argc;
     int lines;
     int columns;
+    uid_t runuid;
+    gid_t rungid;
     char sessid[7];
 };
 
@@ -73,7 +75,7 @@ enum connection_status {
     RUNNING,
     EXITED,
     SHUTDOWN,
-    FLUSHED,
+    FINISHED,
     ERROR
 };
 
@@ -87,6 +89,7 @@ struct connection_closure {
     struct timespec elapsed_time;
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
+    struct sudo_event_base *evbase;
     struct sudo_event *commit_ev;
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
@@ -96,6 +99,8 @@ struct connection_closure {
 #endif
     const char *errstr;
     struct iolog_file iolog_files[IOFD_MAX];
+    bool tls;
+    bool log_io;
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
@@ -122,10 +127,23 @@ union sockaddr_union {
  */
 struct listen_address {
     TAILQ_ENTRY(listen_address) entries;
+    char *sa_str;
     union sockaddr_union sa_un;
     socklen_t sa_len;
+    bool tls;
 };
 TAILQ_HEAD(listen_address_list, listen_address);
+
+/*
+ * List of active network listeners.
+ */
+struct listener {
+    TAILQ_ENTRY(listener) entries;
+    struct sudo_event *ev;
+    int sock;
+    bool tls;
+};
+TAILQ_HEAD(listener_list, listener);
 
 #if defined(HAVE_OPENSSL)
 /* parameters to configure tls */
@@ -154,12 +172,13 @@ enum logsrvd_eventlog_type {
 
 /* Supported eventlog formats (currently just sudo) */
 enum logsrvd_eventlog_format {
-    EVLOG_SUDO
+    EVLOG_SUDO,
+    EVLOG_JSON
 };
 
 /* eventlog.c */
-bool log_accept(const struct iolog_details *details);
-bool log_reject(const struct iolog_details *details, const char *reason);
+bool log_accept(const struct iolog_details *details, TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen);
+bool log_reject(const struct iolog_details *details, const char *reason, TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen);
 bool log_alert(const struct iolog_details *details, TimeSpec *alert_time, const char *reason);
 
 /* iolog_writer.c */
@@ -178,9 +197,9 @@ const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct listen_address_list *logsrvd_conf_listen_address(void);
 bool logsrvd_conf_tcp_keepalive(void);
+const char *logsrvd_conf_pid_file(void);
 struct timespec *logsrvd_conf_get_sock_timeout(void);
 #if defined(HAVE_OPENSSL)
-bool logsrvd_conf_get_tls_opt(void);
 const struct logsrvd_tls_config *logsrvd_get_tls_config(void);
 struct logsrvd_tls_runtime *logsrvd_get_tls_runtime(void);
 #endif
@@ -193,6 +212,7 @@ int logsrvd_conf_syslog_rejectpri(void);
 int logsrvd_conf_syslog_alertpri(void);
 mode_t logsrvd_conf_iolog_mode(void);
 const char *logsrvd_conf_logfile_path(void);
+FILE *logsrvd_conf_logfile_stream(void);
 const char *logsrvd_conf_logfile_time_format(void);
 
 #endif /* SUDO_LOGSRVD_H */

@@ -23,14 +23,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
+#include <string.h>
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
@@ -40,14 +37,12 @@
 #include <fcntl.h>
 #include <time.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_plugin.h"
-#include "sudo_debug.h"
 #include "sudo_conf.h"
+#include "sudo_debug.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_plugin.h"
 #include "sudo_util.h"
 
 /*
@@ -407,6 +402,45 @@ sudo_debug_deregister_v1(int idx)
 	sudo_debug_last_instance--;
 
     return 0;
+}
+
+/*
+ * Parse the "filename flags,..." debug_flags entry from sudo.conf
+ * and insert a new sudo_debug_file struct into the list.
+ * Returns 0 on success, 1 on parse error or -1 on malloc failure.
+ */
+int
+sudo_debug_parse_flags_v1(struct sudo_conf_debug_file_list *debug_files,
+    const char *entry)
+{
+    struct sudo_debug_file *debug_file;
+    const char *filename, *flags;
+    size_t namelen;
+
+    /* Only process new-style debug flags: filename flags,... */
+    filename = entry;
+    if (*filename != '/' || (flags = strpbrk(filename, " \t")) == NULL)
+	return 1;
+    namelen = (size_t)(flags - filename);
+    while (isblank((unsigned char)*flags))
+	flags++;
+    if (*flags != '\0') {
+	if ((debug_file = calloc(1, sizeof(*debug_file))) == NULL)
+	    goto oom;
+	if ((debug_file->debug_file = strndup(filename, namelen)) == NULL)
+	    goto oom;
+	if ((debug_file->debug_flags = strdup(flags)) == NULL)
+	    goto oom;
+	TAILQ_INSERT_TAIL(debug_files, debug_file, entries);
+    }
+    return 0;
+oom:
+    if (debug_file != NULL) {
+	free(debug_file->debug_file);
+	free(debug_file->debug_flags);
+	free(debug_file);
+    }
+    return -1;
 }
 
 int

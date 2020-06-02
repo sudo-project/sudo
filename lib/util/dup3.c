@@ -25,8 +25,6 @@
 
 #ifndef HAVE_DUP3
 
-#include <sys/types.h>
-
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>

@@ -100,6 +100,22 @@ static int gotdata(char *buf, size_t len);
 static int getentropy_phdr(struct dl_phdr_info *info, size_t size, void *data);
 #endif
 
+static void *
+mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)
+{
+#ifdef MAP_ANON
+	return mmap(addr, len, prot, flags | MAP_ANON, -1, offset);
+#else
+	int fd;
+
+	if ((fd = open("/dev/zero", O_RDWR)) == -1)
+		return MAP_FAILED;
+	addr = mmap(addr, len, prot, flags, fd, offset);
+	close(fd);
+	return addr;
+#endif
+}
+
 int
 sudo_getentropy(void *buf, size_t len)
 {
@@ -470,10 +486,10 @@ getentropy_fallback(void *buf, size_t len)
 				};
 
 				for (m = 0; m < sizeof mm/sizeof(mm[0]); m++) {
-					HX(mm[m].p = mmap(NULL,
+					HX(mm[m].p = mmap_anon(NULL,
 					    mm[m].npg * pgs,
 					    PROT_READ|PROT_WRITE,
-					    MAP_PRIVATE|MAP_ANON, -1,
+					    MAP_PRIVATE,
 					    (off_t)0), mm[m].p);
 					if (mm[m].p != MAP_FAILED) {
 						size_t mo;

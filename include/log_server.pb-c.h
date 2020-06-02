@@ -28,6 +28,7 @@ typedef struct _AlertMessage AlertMessage;
 typedef struct _RestartMessage RestartMessage;
 typedef struct _ChangeWindowSize ChangeWindowSize;
 typedef struct _CommandSuspend CommandSuspend;
+typedef struct _ClientHello ClientHello;
 typedef struct _ServerMessage ServerMessage;
 typedef struct _ServerHello ServerHello;
 
@@ -50,7 +51,8 @@ typedef enum {
   CLIENT_MESSAGE__TYPE_STDOUT_BUF = 9,
   CLIENT_MESSAGE__TYPE_STDERR_BUF = 10,
   CLIENT_MESSAGE__TYPE_WINSIZE_EVENT = 11,
-  CLIENT_MESSAGE__TYPE_SUSPEND_EVENT = 12
+  CLIENT_MESSAGE__TYPE_SUSPEND_EVENT = 12,
+  CLIENT_MESSAGE__TYPE_HELLO_MSG = 13
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(CLIENT_MESSAGE__TYPE)
 } ClientMessage__TypeCase;
 
@@ -75,6 +77,7 @@ struct  _ClientMessage
     IoBuffer *stderr_buf;
     ChangeWindowSize *winsize_event;
     CommandSuspend *suspend_event;
+    ClientHello *hello_msg;
   };
 };
 #define CLIENT_MESSAGE__INIT \
@@ -340,6 +343,22 @@ struct  _CommandSuspend
     , NULL, (char *)protobuf_c_empty_string }
 
 
+/*
+ * Hello message from client when connecting to server. 
+ */
+struct  _ClientHello
+{
+  ProtobufCMessage base;
+  /*
+   * free-form client description 
+   */
+  char *client_id;
+};
+#define CLIENT_HELLO__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&client_hello__descriptor) \
+    , (char *)protobuf_c_empty_string }
+
+
 typedef enum {
   SERVER_MESSAGE__TYPE__NOT_SET = 0,
   SERVER_MESSAGE__TYPE_HELLO = 1,
@@ -405,22 +424,10 @@ struct  _ServerHello
    */
   size_t n_servers;
   char **servers;
-  /*
-   * true if server uses tls protocol 
-   */
-  protobuf_c_boolean tls;
-  /*
-   * true if server auth has to be performed 
-   */
-  protobuf_c_boolean tls_server_auth;
-  /*
-   * true if client auth is required with signed cert 
-   */
-  protobuf_c_boolean tls_reqcert;
 };
 #define SERVER_HELLO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&server_hello__descriptor) \
-    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL }
 
 
 /* ClientMessage methods */
@@ -638,6 +645,25 @@ CommandSuspend *
 void   command_suspend__free_unpacked
                      (CommandSuspend *message,
                       ProtobufCAllocator *allocator);
+/* ClientHello methods */
+void   client_hello__init
+                     (ClientHello         *message);
+size_t client_hello__get_packed_size
+                     (const ClientHello   *message);
+size_t client_hello__pack
+                     (const ClientHello   *message,
+                      uint8_t             *out);
+size_t client_hello__pack_to_buffer
+                     (const ClientHello   *message,
+                      ProtobufCBuffer     *buffer);
+ClientHello *
+       client_hello__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   client_hello__free_unpacked
+                     (ClientHello *message,
+                      ProtobufCAllocator *allocator);
 /* ServerMessage methods */
 void   server_message__init
                      (ServerMessage         *message);
@@ -717,6 +743,9 @@ typedef void (*ChangeWindowSize_Closure)
 typedef void (*CommandSuspend_Closure)
                  (const CommandSuspend *message,
                   void *closure_data);
+typedef void (*ClientHello_Closure)
+                 (const ClientHello *message,
+                  void *closure_data);
 typedef void (*ServerMessage_Closure)
                  (const ServerMessage *message,
                   void *closure_data);
@@ -742,6 +771,7 @@ extern const ProtobufCMessageDescriptor alert_message__descriptor;
 extern const ProtobufCMessageDescriptor restart_message__descriptor;
 extern const ProtobufCMessageDescriptor change_window_size__descriptor;
 extern const ProtobufCMessageDescriptor command_suspend__descriptor;
+extern const ProtobufCMessageDescriptor client_hello__descriptor;
 extern const ProtobufCMessageDescriptor server_message__descriptor;
 extern const ProtobufCMessageDescriptor server_hello__descriptor;
 

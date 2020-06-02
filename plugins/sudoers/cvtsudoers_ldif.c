@@ -23,12 +23,9 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
+#include <string.h>
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
@@ -210,6 +207,53 @@ print_global_defaults_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 }
 
 /*
+ * Format a sudo_command as a string.
+ * Returns the formatted, dynamically allocated string or dies on error.
+ */
+static char *
+format_cmnd(struct sudo_command *c, bool negated)
+{
+    struct command_digest *digest;
+    char *buf, *cp, *cmnd;
+    size_t bufsiz;
+    int len;
+    debug_decl(format_cmnd, SUDOERS_DEBUG_UTIL);
+
+    cmnd = c->cmnd ? c->cmnd : "ALL";
+    bufsiz = negated + strlen(cmnd) + 1;
+    if (c->args != NULL)
+	bufsiz += 1 + strlen(c->args);
+    TAILQ_FOREACH(digest, &c->digests, entries) {
+	bufsiz += strlen(digest_type_to_name(digest->digest_type)) + 1 +
+	    strlen(digest->digest_str) + 1;
+	if (TAILQ_NEXT(digest, entries) != NULL)
+	    bufsiz += 2;
+    }
+
+    if ((buf = malloc(bufsiz)) == NULL) {
+	sudo_fatalx(U_("%s: %s"), __func__,
+	    U_("unable to allocate memory"));
+    }
+
+    cp = buf;
+    TAILQ_FOREACH(digest, &c->digests, entries) {
+	len = snprintf(cp, bufsiz - (cp - buf), "%s:%s%s ", 
+	    digest_type_to_name(digest->digest_type), digest->digest_str,
+	    TAILQ_NEXT(digest, entries) ? "," : "");
+	if (len < 0 || len >= (int)bufsiz - (cp - buf))
+	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
+	cp += len;
+    }
+
+    len = snprintf(cp, bufsiz - (cp - buf), "%s%s%s%s", negated ? "!" : "",
+	cmnd, c->args ? " " : "", c->args ? c->args : "");
+    if (len < 0 || len >= (int)bufsiz - (cp - buf))
+	sudo_fatalx(U_("internal error, %s overflow"), __func__);
+
+    debug_return_str(buf);
+}
+
+/*
  * Print struct member in LDIF format as the specified attribute.
  * See print_member_int() in parse.c.
  */
@@ -219,30 +263,23 @@ print_member_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree, char *name,
 {
     struct alias *a;
     struct member *m;
-    struct sudo_command *c;
     char *attr_val;
     int len;
     debug_decl(print_member_ldif, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
-    case ALL:
-	print_attribute_ldif(fp, attr_name, negated ? "!ALL" : "ALL");
-	break;
     case MYSELF:
 	/* Only valid for sudoRunasUser */
 	print_attribute_ldif(fp, attr_name, "");
 	break;
-    case COMMAND:
-	c = (struct sudo_command *)name;
-	len = asprintf(&attr_val, "%s%s%s%s%s%s%s%s",
-	    c->digest ? digest_type_to_name(c->digest->digest_type) : "",
-	    c->digest ? ":" : "", c->digest ? c->digest->digest_str : "",
-	    c->digest ? " " : "", negated ? "!" : "", c->cmnd,
-	    c->args ? " " : "", c->args ? c->args : "");
-	if (len == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
+    case ALL:
+	if (name == NULL) {
+	    print_attribute_ldif(fp, attr_name, negated ? "!ALL" : "ALL");
+	    break;
 	}
+	/* FALLTHROUGH */
+    case COMMAND:
+	attr_val = format_cmnd((struct sudo_command *)name, negated);
 	print_attribute_ldif(fp, attr_name, attr_val);
 	free(attr_val);
 	break;

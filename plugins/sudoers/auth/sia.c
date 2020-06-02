@@ -33,12 +33,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <signal.h>
@@ -106,7 +101,7 @@ sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth,
 }
 
 int
-sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     SIAENTITY *siah = auth->data;
     debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH);

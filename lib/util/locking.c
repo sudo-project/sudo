@@ -28,20 +28,13 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRING_H */
+#include <string.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -50,45 +43,64 @@
 #include "sudo_util.h"
 #include "sudo_debug.h"
 
+bool
+sudo_lock_file_v1(int fd, int type)
+{
+    return sudo_lock_region_v1(fd, type, 0);
+}
+
 /*
  * Lock/unlock all or part of a file.
  */
 #ifdef HAVE_LOCKF
 bool
-sudo_lock_file_v1(int fd, int type)
-{
-    return sudo_lock_region_v1(fd, type, 0);
-}
-
-bool
 sudo_lock_region_v1(int fd, int type, off_t len)
 {
-    int op;
+    int op, rc;
+    off_t oldpos = -1;
     debug_decl(sudo_lock_region, SUDO_DEBUG_UTIL);
 
     switch (type) {
 	case SUDO_LOCK:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: lock %d:%lld",
+		__func__, fd, (long long)len);
 	    op = F_LOCK;
 	    break;
 	case SUDO_TLOCK:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: tlock %d:%lld",
+		__func__, fd, (long long)len);
 	    op = F_TLOCK;
 	    break;
 	case SUDO_UNLOCK:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unlock %d:%lld",
+		__func__, fd, (long long)len);
 	    op = F_ULOCK;
+	    /* Must seek to start of file to unlock the entire thing. */
+	    if (len == 0 && (oldpos = lseek(fd, 0, SEEK_CUR)) != -1) {
+		if (lseek(fd, 0, SEEK_SET) == -1) {
+		    sudo_debug_printf(
+			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			"unable to seek to beginning");
+		}
+	    }
 	    break;
 	default:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: bad lock type %d",
+		__func__, type);
 	    errno = EINVAL;
 	    debug_return_bool(false);
     }
-    debug_return_bool(lockf(fd, op, len) == 0);
+    rc = lockf(fd, op, len);
+    if (oldpos != -1) {
+	if (lseek(fd, oldpos, SEEK_SET) == -1) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to restore offset");
+	}
+    }
+    debug_return_bool(rc == 0);
 }
 #else
-bool
-sudo_lock_file_v1(int fd, int type)
-{
-    return sudo_lock_region_v1(fd, type, 0);
-}
-
 bool
 sudo_lock_region_v1(int fd, int type, off_t len)
 {
@@ -98,18 +110,26 @@ sudo_lock_region_v1(int fd, int type, off_t len)
 
     switch (type) {
 	case SUDO_LOCK:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: lock %d:%lld",
+		__func__, fd, (long long)len);
 	    lock.l_type = F_WRLCK;
 	    func = F_SETLKW;
 	    break;
 	case SUDO_TLOCK:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: tlock %d:%lld",
+		__func__, fd, (long long)len);
 	    lock.l_type = F_WRLCK;
 	    func = F_SETLK;
 	    break;
 	case SUDO_UNLOCK:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unlock %d:%lld",
+		__func__, fd, (long long)len);
 	    lock.l_type = F_UNLCK;
 	    func = F_SETLK;
 	    break;
 	default:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: bad lock type %d",
+		__func__, type);
 	    errno = EINVAL;
 	    debug_return_bool(false);
     }

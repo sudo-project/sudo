@@ -29,12 +29,7 @@
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -124,7 +119,7 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	killpg(mc->cmnd_pid, SIGCONT);
 	break;
     case SIGKILL:
-	_exit(1); /* XXX */
+	_exit(EXIT_FAILURE); /* XXX */
 	/* NOTREACHED */
     default:
 	/* Relay signal to command. */
@@ -144,7 +139,7 @@ handle_winch(struct monitor_closure *mc, unsigned int wsize_packed)
     struct winsize wsize, owsize;
     debug_decl(handle_winch, SUDO_DEBUG_EXEC);
 
-    /* Rows and colums are stored as two shorts packed into a single int. */
+    /* Rows and columns are stored as two shorts packed into a single int. */
     wsize.ws_row = wsize_packed & 0xffff;
     wsize.ws_col = (wsize_packed >> 16) & 0xffff;
 
@@ -606,7 +601,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
         if (selinux_setup(details->selinux_role, details->selinux_type,
-            details->tty, io_fds[SFD_SLAVE]) == -1)
+            details->tty, io_fds[SFD_SLAVE], true) == -1)
             goto bad;
     }
 #endif
@@ -635,7 +630,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	exec_cmnd_pty(details, foreground, errpipe[1]);
 	if (write(errpipe[1], &errno, sizeof(int)) == -1)
 	    sudo_warn(U_("unable to execute %s"), details->command);
-	_exit(1);
+	_exit(EXIT_FAILURE);
     }
     close(errpipe[1]);
 
@@ -721,7 +716,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     }
 #endif
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
-    _exit(1);
+    _exit(EXIT_FAILURE);
 
 bad:
     debug_return_int(-1);

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2019
+ * Copyright (c) 1996, 1998-2005, 2007-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -28,74 +28,87 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 
 #include "sudoers.h"
+#include "sudo_digest.h"
 #include <gram.h>
 
 bool
-digest_matches(int fd, const char *file, const struct command_digest *digest)
+digest_matches(int fd, const char *file, const struct command_digest_list *digests)
 {
+    unsigned int digest_type = SUDO_DIGEST_INVALID;
     unsigned char *file_digest = NULL;
     unsigned char *sudoers_digest = NULL;
+    struct command_digest *digest;
+    size_t digest_len = (size_t)-1;
     bool matched = false;
-    size_t digest_len;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
 
-    if (fd == -1)
-	goto done;
-
-    file_digest = sudo_filedigest(fd, file, digest->digest_type, &digest_len);
-    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to rewind digest fd");
+    if (TAILQ_EMPTY(digests)) {
+	/* No digest, no problem. */
+	debug_return_bool(true);
     }
-    if (file_digest == NULL) {
-	/* Warning (if any) printed by sudo_filedigest() */
+
+    if (fd == -1) {
+	/* No file, no match. */
 	goto done;
     }
 
-    /* Convert the command digest from ascii to binary. */
-    if ((sudoers_digest = malloc(digest_len)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto done;
-    }
-    if (strlen(digest->digest_str) == digest_len * 2) {
-	/* Convert ascii hex to binary. */
-	unsigned int i;
-	for (i = 0; i < digest_len; i++) {
-	    const int h = hexchar(&digest->digest_str[i + i]);
-	    if (h == -1)
+    TAILQ_FOREACH(digest, digests, entries) {
+	/* Compute file digest if needed. */
+	if (digest->digest_type != digest_type) {
+	    free(file_digest);
+	    file_digest = sudo_filedigest(fd, file, digest->digest_type,
+		&digest_len);
+	    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		    "unable to rewind digest fd");
+	    }
+	    digest_type = digest->digest_type;
+	}
+	if (file_digest == NULL) {
+	    /* Warning (if any) printed by sudo_filedigest() */
+	    goto done;
+	}
+
+	/* Convert the command digest from ascii to binary. */
+	if ((sudoers_digest = malloc(digest_len)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+	if (strlen(digest->digest_str) == digest_len * 2) {
+	    /* Convert ascii hex to binary. */
+	    unsigned int i;
+	    for (i = 0; i < digest_len; i++) {
+		const int h = hexchar(&digest->digest_str[i + i]);
+		if (h == -1)
+		    goto bad_format;
+		sudoers_digest[i] = (unsigned char)h;
+	    }
+	} else {
+	    /* Convert base64 to binary. */
+	    size_t len = base64_decode(digest->digest_str, sudoers_digest, digest_len);
+	    if (len != digest_len) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "incorrect length for digest, expected %zu, got %zu",
+		    digest_len, len);
 		goto bad_format;
-	    sudoers_digest[i] = (unsigned char)h;
+	    }
 	}
-    } else {
-	/* Convert base64 to binary. */
-	size_t len = base64_decode(digest->digest_str, sudoers_digest, digest_len);
-	if (len != digest_len) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"incorrect length for digest, expected %zu, got %zu",
-		digest_len, len);
-	    goto bad_format;
+	if (memcmp(file_digest, sudoers_digest, digest_len) == 0) {
+	    matched = true;
+	    break;
 	}
-    }
 
-    if (memcmp(file_digest, sudoers_digest, digest_len) == 0) {
-	matched = true;
-    } else {
 	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 	    "%s digest mismatch for %s, expecting %s",
 	    digest_type_to_name(digest->digest_type), file, digest->digest_str);
+	free(sudoers_digest);
+	sudoers_digest = NULL;
     }
     goto done;
 

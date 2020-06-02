@@ -38,12 +38,15 @@ enum SudoPluginFunctionReturnCode {
     SUDO_RC_USAGE_ERROR = -2,
 };
 
+#define INTERPRETER_MAX 32
+
 struct PythonContext
 {
     sudo_printf_t sudo_log;
     sudo_conv_t sudo_conv;
-    int open_plugin_count;
     PyThreadState *py_main_interpreter;
+    size_t interpreter_count;
+    PyThreadState *py_subinterpreters[INTERPRETER_MAX];
 };
 
 extern struct PythonContext py_ctx;
@@ -62,6 +65,14 @@ char *py_create_string_rep(PyObject *py_object);
 
 char *py_join_str_list(PyObject *py_str_list, const char *separator);
 
+struct key_value_str_int
+{
+    const char *key;
+    int value;
+};
+
+PyObject *py_dict_create_string_int(size_t count, struct key_value_str_int *key_values);
+
 PyObject *py_from_passwd(const struct passwd *pwd);
 
 PyObject *py_str_array_to_tuple_with_count(Py_ssize_t count, char * const strings[]);
@@ -70,6 +81,13 @@ char **py_str_array_from_tuple(PyObject *py_tuple);
 
 CPYCHECKER_RETURNS_BORROWED_REF
 PyObject *py_tuple_get(PyObject *py_tuple, Py_ssize_t index, PyTypeObject *expected_type);
+
+PyObject *py_object_get_optional_attr(PyObject *py_object, const char *attr, PyObject *py_default);
+long long py_object_get_optional_attr_number(PyObject *py_object, const char *attr_name);
+const char *py_object_get_optional_attr_string(PyObject *py_object, const char *attr_name);
+
+void py_object_set_attr_number(PyObject *py_object, const char *attr_name, long long number);
+void py_object_set_attr_string(PyObject *py_object, const char *attr_name, const char *value);
 
 PyObject *py_create_version(unsigned int version);
 

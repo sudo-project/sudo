@@ -32,12 +32,7 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
@@ -273,10 +268,9 @@ sudo_ev_init(struct sudo_event *ev, int fd, short events,
 {
     debug_decl(sudo_ev_init, SUDO_DEBUG_EVENT);
 
-    /* XXX - sanity check events value */
     memset(ev, 0, sizeof(*ev));
     ev->fd = fd;
-    ev->events = events;
+    ev->events = events & SUDO_EV_MASK;
     ev->pfd_idx = -1;
     ev->callback = callback;
     ev->closure = closure;
@@ -455,7 +449,7 @@ sudo_ev_add_signal(struct sudo_event_base *base, struct sudo_event *ev,
 
 int
 sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
-    struct timeval *timo, bool tohead)
+    const struct timeval *timo, bool tohead)
 {
     struct timespec tsbuf, *ts = NULL;
 
@@ -469,7 +463,7 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
 
 int
 sudo_ev_add_v2(struct sudo_event_base *base, struct sudo_event *ev,
-    struct timespec *timo, bool tohead)
+    const struct timespec *timo, bool tohead)
 {
     debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT);
 
@@ -662,7 +656,7 @@ rescan:
 	nready = sudo_ev_scan_impl(base, flags);
 	switch (nready) {
 	case -1:
-	    if (errno == ENOMEM)
+	    if (errno == ENOMEM || errno == EAGAIN)
 		continue;
 	    if (errno == EINTR) {
 		/* Interrupted by signal, check for sigevents. */
@@ -842,7 +836,7 @@ sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *ts)
 int
 sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts)
 {
-    int ret = 0;
+    int ret;
     debug_decl(sudo_ev_pending, SUDO_DEBUG_EVENT);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: event %p, flags 0x%x, events 0x%x",

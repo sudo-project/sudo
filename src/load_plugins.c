@@ -23,17 +23,10 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
-#include <unistd.h>
+#include <string.h>
 #include <errno.h>
 
 #include "sudo.h"
@@ -161,8 +154,8 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 #endif /* ENABLE_SUDO_PLUGIN_API */
 
 static bool
-fill_container(struct plugin_container *container, void *handle, char *path,
-    struct generic_plugin *plugin, struct plugin_info *info)
+fill_container(struct plugin_container *container, void *handle,
+     const char *path, struct generic_plugin *plugin, struct plugin_info *info)
 {
     debug_decl(fill_container, SUDO_DEBUG_PLUGIN);
 
@@ -177,11 +170,15 @@ fill_container(struct plugin_container *container, void *handle, char *path,
     container->u.generic = plugin;
     container->debug_files = sudo_conf_debug_files(path);
 
+    /* Zero out info strings that the container now owns. */
+    info->symbol_name = NULL;
+    info->options = NULL;
+
     debug_return_bool(true);
 }
 
 static struct plugin_container *
-new_container(void *handle, char *path, struct generic_plugin *plugin,
+new_container(void *handle, const char *path, struct generic_plugin *plugin,
     struct plugin_info *info)
 {
     struct plugin_container *container = NULL;
@@ -237,14 +234,41 @@ cleanup:
     debug_return_ptr(plugin);
 }
 
+static bool
+sudo_insert_plugin(struct plugin_container_list *plugin_list, void *handle,
+     const char *path, struct generic_plugin *plugin, struct plugin_info *info)
+{
+    struct plugin_container *container;
+    debug_decl(sudo_insert_plugin, SUDO_DEBUG_PLUGIN);
+
+    if (plugin_exists(plugin_list, info)) {
+	plugin = sudo_plugin_try_to_clone(handle, info->symbol_name);
+	if (plugin == NULL) {
+	    sudo_warnx(U_("ignoring duplicate plugin \"%s\" in %s, line %d"),
+		info->symbol_name, _PATH_SUDO_CONF, info->lineno);
+	    sudo_dso_unload(handle);
+	    goto done;
+	}
+    }
+
+    if ((container = new_container(handle, path, plugin, info)) == NULL)
+	debug_return_bool(false);
+    TAILQ_INSERT_TAIL(plugin_list, container, entries);
+
+done:
+    debug_return_bool(true);
+}
+
 /*
  * Load the plugin specified by "info".
  */
 static bool
 sudo_load_plugin(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins, struct plugin_info *info)
+    struct plugin_container_list *io_plugins,
+    struct plugin_container_list *audit_plugins,
+    struct plugin_container_list *approval_plugins,
+    struct plugin_info *info)
 {
-    struct plugin_container *container = NULL;
     struct generic_plugin *plugin;
     char path[PATH_MAX];
     void *handle = NULL;
@@ -287,7 +311,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	if (policy_plugin->handle != NULL) {
 	    /* Ignore duplicate entries. */
 	    if (strcmp(policy_plugin->name, info->symbol_name) == 0) {
-		sudo_warnx(U_("ignoring duplicate policy plugin \"%s\" in %s, line %d"),
+		sudo_warnx(U_("ignoring duplicate plugin \"%s\" in %s, line %d"),
 		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
 	    } else {
 		sudo_warnx(U_("ignoring policy plugin \"%s\" in %s, line %d"),
@@ -302,18 +326,16 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    goto done;
 	break;
     case SUDO_IO_PLUGIN:
-	if (plugin_exists(io_plugins, info)) {
-	    plugin = sudo_plugin_try_to_clone(handle, info->symbol_name);
-	    if (plugin == NULL) {
-		sudo_warnx(U_("ignoring duplicate I/O plugin \"%s\" in %s, line %d"),
-		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-		ret = true;
-		goto done;
-	    }
-	}
-	if ((container = new_container(handle, path, plugin, info)) == NULL)
+	if (!sudo_insert_plugin(io_plugins, handle, path, plugin, info))
 	    goto done;
-	TAILQ_INSERT_TAIL(io_plugins, container, entries);
+	break;
+    case SUDO_AUDIT_PLUGIN:
+	if (!sudo_insert_plugin(audit_plugins, handle, path, plugin, info))
+	    goto done;
+	break;
+    case SUDO_APPROVAL_PLUGIN:
+	if (!sudo_insert_plugin(approval_plugins, handle, path, plugin, info))
+	    goto done;
 	break;
     default:
 	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
@@ -322,9 +344,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	goto done;
     }
 
-    /* Zero out info strings that we now own (see above). */
-    info->symbol_name = NULL;
-    info->options = NULL;
+    /* Handle is either in use or has been closed. */
     handle = NULL;
 
     ret = true;
@@ -349,14 +369,73 @@ free_plugin_info(struct plugin_info *info)
     free(info);
 }
 
+static void
+sudo_register_hooks(struct plugin_container *policy_plugin,
+    struct plugin_container_list *io_plugins,
+    struct plugin_container_list *audit_plugins)
+{
+    struct plugin_container *container;
+    debug_decl(sudo_register_hooks, SUDO_DEBUG_PLUGIN);
+
+    if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
+	if (policy_plugin->u.policy->register_hooks != NULL) {
+	    sudo_debug_set_active_instance(policy_plugin->debug_instance);
+	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION,
+		register_hook);
+	    sudo_debug_set_active_instance(sudo_debug_instance);
+	}
+    }
+
+    TAILQ_FOREACH(container, io_plugins, entries) {
+	if (container->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
+	    if (container->u.io->register_hooks != NULL) {
+		sudo_debug_set_active_instance(container->debug_instance);
+		container->u.io->register_hooks(SUDO_HOOK_VERSION,
+		    register_hook);
+		sudo_debug_set_active_instance(sudo_debug_instance);
+	    }
+	}
+    }
+
+    TAILQ_FOREACH(container, audit_plugins, entries) {
+	if (container->u.audit->register_hooks != NULL) {
+	    sudo_debug_set_active_instance(container->debug_instance);
+	    container->u.audit->register_hooks(SUDO_HOOK_VERSION,
+		register_hook);
+	    sudo_debug_set_active_instance(sudo_debug_instance);
+	}
+    }
+
+    debug_return;
+}
+
+static void
+sudo_init_event_alloc(struct plugin_container *policy_plugin,
+    struct plugin_container_list *io_plugins)
+{
+    struct plugin_container *container;
+    debug_decl(sudo_init_event_alloc, SUDO_DEBUG_PLUGIN);
+
+    if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15))
+	policy_plugin->u.policy->event_alloc = sudo_plugin_event_alloc;
+
+    TAILQ_FOREACH(container, io_plugins, entries) {
+	if (container->u.io->version >= SUDO_API_MKVERSION(1, 15))
+	    container->u.io->event_alloc = sudo_plugin_event_alloc;
+    }
+
+    debug_return;
+}
+
 /*
  * Load the plugins listed in sudo.conf.
  */
 bool
 sudo_load_plugins(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins)
+    struct plugin_container_list *io_plugins,
+    struct plugin_container_list *audit_plugins,
+    struct plugin_container_list *approval_plugins)
 {
-    struct plugin_container *container;
     struct plugin_info_list *plugins;
     struct plugin_info *info, *next;
     bool ret = false;
@@ -365,7 +444,8 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     /* Walk the plugin list from sudo.conf, if any and free it. */
     plugins = sudo_conf_plugins();
     TAILQ_FOREACH_SAFE(info, plugins, entries, next) {
-	ret = sudo_load_plugin(policy_plugin, io_plugins, info);
+	ret = sudo_load_plugin(policy_plugin, io_plugins, audit_plugins,
+	    approval_plugins, info);
 	if (!ret)
 	    goto done;
 	free_plugin_info(info);
@@ -391,7 +471,8 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	    goto done;
 	}
 	/* info->options = NULL; */
-	ret = sudo_load_plugin(policy_plugin, io_plugins, info);
+	ret = sudo_load_plugin(policy_plugin, io_plugins, audit_plugins,
+	    approval_plugins, info);
 	free_plugin_info(info);
 	if (!ret)
 	    goto done;
@@ -411,12 +492,14 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 		goto done;
 	    }
 	    /* info->options = NULL; */
-	    ret = sudo_load_plugin(policy_plugin, io_plugins, info);
+	    ret = sudo_load_plugin(policy_plugin, io_plugins, audit_plugins,
+		approval_plugins, info);
 	    free_plugin_info(info);
 	    if (!ret)
 		goto done;
 	}
     }
+    /* TODO: check all plugins for open function too */
     if (policy_plugin->u.policy->check_policy == NULL) {
 	sudo_warnx(U_("policy plugin %s does not include a check_policy method"),
 	    policy_plugin->name);
@@ -424,28 +507,11 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	goto done;
     }
 
-    /* Install hooks (XXX - later). */
-    sudo_debug_set_active_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
-    if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
-	if (policy_plugin->u.policy->register_hooks != NULL)
-	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION, register_hook);
-    }
-    TAILQ_FOREACH(container, io_plugins, entries) {
-	if (container->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
-	    if (container->u.io->register_hooks != NULL)
-		container->u.io->register_hooks(SUDO_HOOK_VERSION, register_hook);
-	}
-    }
-
     /* Set event_alloc() in plugins. */
-    if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15))
-	policy_plugin->u.policy->event_alloc = sudo_plugin_event_alloc;
-    TAILQ_FOREACH(container, io_plugins, entries) {
-	if (container->u.io->version >= SUDO_API_MKVERSION(1, 15))
-	    container->u.io->event_alloc = sudo_plugin_event_alloc;
-    }
+    sudo_init_event_alloc(policy_plugin, io_plugins);
 
-    sudo_debug_set_active_instance(sudo_debug_instance);
+    /* Install hooks (XXX - later, after open). */
+    sudo_register_hooks(policy_plugin, io_plugins, audit_plugins);
 
 done:
     debug_return_bool(ret);

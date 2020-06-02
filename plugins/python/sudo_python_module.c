@@ -23,14 +23,14 @@
 
 #include "sudo_python_module.h"
 
-CPYCHECKER_RETURNS_BORROWED_REF
-PyAPI_FUNC(PyObject *) PyStructSequence_GetItem(PyObject *, Py_ssize_t);
-
 #define EXC_VAR(exception_name) sudo_exc_ ## exception_name
 #define TYPE_VAR(type_name) &sudo_type_ ## type_name
 
 // exceptions:
 PyObject *sudo_exc_SudoException;
+PyObject *sudo_exc_PluginException;
+PyObject *sudo_exc_PluginError;
+PyObject *sudo_exc_PluginReject;
 static PyObject *sudo_exc_ConversationInterrupted;
 
 // the methods exposed in the "sudo" python module
@@ -38,7 +38,6 @@ static PyObject *sudo_exc_ConversationInterrupted;
 // "kwargs" is a dict of the keyword arguments or NULL if there are none
 static PyObject *python_sudo_log_info(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs);
 static PyObject *python_sudo_log_error(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs);
-static PyObject *python_sudo_debug(PyObject *py_self, PyObject *py_args);
 static PyObject *python_sudo_conversation(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs);
 static PyObject *python_sudo_options_as_dict(PyObject *py_self, PyObject *py_args);
 static PyObject *python_sudo_options_from_dict(PyObject *py_self, PyObject *py_args);
@@ -171,6 +170,7 @@ python_sudo_options_as_dict(PyObject *py_self, PyObject *py_args)
         if (py_value == NULL) {  // skip values without a key
             Py_CLEAR(py_config);
             Py_CLEAR(py_splitted);
+            PyErr_Clear();
             continue;
         }
 
@@ -183,7 +183,6 @@ python_sudo_options_as_dict(PyObject *py_self, PyObject *py_args)
     }
 
 cleanup:
-    Py_CLEAR(py_config_tuple);
     Py_CLEAR(py_config_tuple_iterator);
     Py_CLEAR(py_config);
     Py_CLEAR(py_splitted);
@@ -216,14 +215,13 @@ python_sudo_options_from_dict(PyObject *py_self, PyObject *py_args)
         goto cleanup;
 
     PyObject *py_key = NULL, *py_value = NULL; // -> borrowed references
-    Py_ssize_t pos = 0;
-    while (PyDict_Next(py_config_dict, &pos, &py_key, &py_value)) {
-        Py_ssize_t i = pos - 1; // python counts from 1, terrible :(
-
+    Py_ssize_t i, pos = 0;
+    for (i = 0; PyDict_Next(py_config_dict, &pos, &py_key, &py_value); i++) {
         PyObject *py_config = PyUnicode_FromFormat("%S%s%S", py_key, "=", py_value);
         if (py_config == NULL)
             goto cleanup;
 
+        /* Dictionaries are sparse so we cannot use pos as an index. */
         if (PyTuple_SetItem(py_result, i, py_config) != 0) { // this steals a reference, even on error
             goto cleanup;
         }
@@ -249,46 +247,6 @@ python_sudo_log_error(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs)
 {
     return python_sudo_log(SUDO_CONV_ERROR_MSG, py_self, py_args, py_kwargs);
 }
-
-static void
-_debug_plugin(int log_level, const char *log_message)
-{
-    debug_decl_vars(python_sudo_debug, PYTHON_DEBUG_PLUGIN);
-
-    if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
-        // at trace level we output the position for the python log as well
-        char *func_name = NULL, *file_name = NULL;
-        long line_number = -1;
-
-        if (py_get_current_execution_frame(&file_name, &line_number, &func_name) == SUDO_RC_OK) {
-            sudo_debug_printf(SUDO_DEBUG_INFO, "%s @ %s:%ld debugs:\n",
-                              func_name, file_name, line_number);
-        }
-
-        free(func_name);
-        free(file_name);
-    }
-
-    sudo_debug_printf(log_level, "%s\n", log_message);
-}
-
-static PyObject *
-python_sudo_debug(PyObject *Py_UNUSED(py_self), PyObject *py_args)
-{
-    debug_decl(python_sudo_debug, PYTHON_DEBUG_C_CALLS);
-    py_debug_python_call("sudo", "debug", py_args, NULL, PYTHON_DEBUG_C_CALLS);
-
-    int log_level = SUDO_DEBUG_DEBUG;
-    const char *log_message = NULL;
-    if (!PyArg_ParseTuple(py_args, "is:sudo.debug", &log_level, &log_message)) {
-        debug_return_ptr(NULL);
-    }
-
-    _debug_plugin(log_level, log_message);
-
-    debug_return_ptr_pynone;
-}
-
 
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 static int py_expect_arg_callable(PyObject *py_callable,
@@ -399,14 +357,14 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
 
     if (py_ctx.sudo_conv == NULL) {
         PyErr_Format(sudo_exc_SudoException, "%s: conversation is unavailable",
-                     __PRETTY_FUNCTION__);
+                     __func__);
         goto cleanup;
     }
 
     int rc = py_sudo_conv((int)num_msgs, msgs, replies, &callback);
     if (rc != 0) {
         PyErr_Format(sudo_exc_ConversationInterrupted,
-                     "%s: conversation was interrupted", __PRETTY_FUNCTION__, rc);
+                     "%s: conversation was interrupted", __func__, rc);
         goto cleanup;
     }
 
@@ -419,7 +377,7 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
             }
 
             if (PyTuple_SetItem(py_result, i, py_reply) != 0) {  // this steals a reference even on error
-                PyErr_Format(sudo_exc_SudoException, "%s: failed to set tuple item", __PRETTY_FUNCTION__);
+                PyErr_Format(sudo_exc_SudoException, "%s: failed to set tuple item", __func__);
                 goto cleanup;
             }
 
@@ -451,13 +409,19 @@ cleanup:
  * The resulting class object can be added to a module using PyModule_AddObject.
  */
 PyObject *
-sudo_module_create_class(const char *class_name, PyMethodDef *class_methods)
+sudo_module_create_class(const char *class_name, PyMethodDef *class_methods,
+                         PyObject *base_class)
 {
     debug_decl(sudo_module_create_class, PYTHON_DEBUG_INTERNAL);
 
     PyObject *py_base_classes = NULL, *py_class = NULL, *py_member_dict = NULL;
 
-    py_base_classes = PyTuple_New(0);
+    if (base_class == NULL) {
+        py_base_classes = PyTuple_New(0);
+    } else {
+        py_base_classes = Py_BuildValue("(O)", base_class);
+    }
+
     if (py_base_classes == NULL)
         goto cleanup;
 
@@ -499,6 +463,45 @@ cleanup:
     debug_return_ptr(py_class);
 }
 
+CPYCHECKER_STEALS_REFERENCE_TO_ARG(3)
+void
+sudo_module_register_enum(PyObject *py_module, const char *enum_name, PyObject *py_constants_dict)
+{
+    // pseudo code:
+    // return enum.IntEnum('MyEnum', {'DEFINITION_NAME': DEFINITION_VALUE, ...})
+
+    debug_decl(sudo_module_register_enum, PYTHON_DEBUG_INTERNAL);
+
+    if (py_constants_dict == NULL)
+        return;
+
+    PyObject *py_enum_class = NULL;
+    {
+        PyObject *py_enum_module = PyImport_ImportModule("enum");
+        if (py_enum_module == NULL) {
+            Py_CLEAR(py_constants_dict);
+            debug_return;
+        }
+
+        py_enum_class = PyObject_CallMethod(py_enum_module,
+                                            "IntEnum", "sO", enum_name,
+                                            py_constants_dict);
+
+        Py_CLEAR(py_constants_dict);
+        Py_CLEAR(py_enum_module);
+    }
+
+    if (py_enum_class == NULL) {
+        debug_return;
+    }
+
+    if (PyModule_AddObject(py_module, enum_name, py_enum_class) < 0) {
+        Py_CLEAR(py_enum_class);
+        debug_return;
+    }
+
+    debug_return;
+}
 
 PyMODINIT_FUNC
 sudo_module_init(void)
@@ -524,37 +527,64 @@ sudo_module_init(void)
         } while(0);
 
     MODULE_ADD_EXCEPTION(SudoException, NULL);
+
+    MODULE_ADD_EXCEPTION(PluginException, NULL);
+    MODULE_ADD_EXCEPTION(PluginError, EXC_VAR(PluginException));
+    MODULE_ADD_EXCEPTION(PluginReject, EXC_VAR(PluginException));
+
     MODULE_ADD_EXCEPTION(ConversationInterrupted, EXC_VAR(SudoException));
 
+    #define MODULE_REGISTER_ENUM(name, key_values) \
+        sudo_module_register_enum(py_module, name, py_dict_create_string_int(\
+            sizeof(key_values) / sizeof(struct key_value_str_int), key_values))
+
     // constants
-    #define MODULE_ADD_INT_CONSTANT(constant) \
-        do { \
-            if (PyModule_AddIntConstant(py_module, #constant, SUDO_ ## constant) != 0) \
-                goto cleanup; \
-        } while(0)
+    struct key_value_str_int constants_rc[] = {
+        {"OK", SUDO_RC_OK},
+        {"ACCEPT", SUDO_RC_ACCEPT},
+        {"REJECT", SUDO_RC_REJECT},
+        {"ERROR", SUDO_RC_ERROR},
+        {"USAGE_ERROR", SUDO_RC_USAGE_ERROR}
+    };
+    MODULE_REGISTER_ENUM("RC", constants_rc);
 
-    MODULE_ADD_INT_CONSTANT(RC_OK);
-    MODULE_ADD_INT_CONSTANT(RC_ACCEPT);
-    MODULE_ADD_INT_CONSTANT(RC_REJECT);
-    MODULE_ADD_INT_CONSTANT(RC_ERROR);
-    MODULE_ADD_INT_CONSTANT(RC_USAGE_ERROR);
+    struct key_value_str_int constants_conv[] = {
+        {"PROMPT_ECHO_OFF", SUDO_CONV_PROMPT_ECHO_OFF},
+        {"PROMPT_ECHO_ON", SUDO_CONV_PROMPT_ECHO_ON},
+        {"INFO_MSG", SUDO_CONV_INFO_MSG},
+        {"PROMPT_MASK", SUDO_CONV_PROMPT_MASK},
+        {"PROMPT_ECHO_OK", SUDO_CONV_PROMPT_ECHO_OK},
+        {"PREFER_TTY", SUDO_CONV_PREFER_TTY}
+    };
+    MODULE_REGISTER_ENUM("CONV", constants_conv);
 
-    MODULE_ADD_INT_CONSTANT(CONV_PROMPT_ECHO_OFF);
-    MODULE_ADD_INT_CONSTANT(CONV_PROMPT_ECHO_ON);
-    MODULE_ADD_INT_CONSTANT(CONV_ERROR_MSG);
-    MODULE_ADD_INT_CONSTANT(CONV_INFO_MSG);
-    MODULE_ADD_INT_CONSTANT(CONV_PROMPT_MASK);
-    MODULE_ADD_INT_CONSTANT(CONV_PROMPT_ECHO_OK);
-    MODULE_ADD_INT_CONSTANT(CONV_PREFER_TTY);
+    struct key_value_str_int constants_debug[] = {
+        {"CRIT", SUDO_DEBUG_CRIT},
+        {"ERROR", SUDO_DEBUG_ERROR},
+        {"WARN", SUDO_DEBUG_WARN},
+        {"NOTICE", SUDO_DEBUG_NOTICE},
+        {"DIAG", SUDO_DEBUG_DIAG},
+        {"INFO", SUDO_DEBUG_INFO},
+        {"TRACE", SUDO_DEBUG_TRACE},
+        {"DEBUG", SUDO_DEBUG_DEBUG}
+    };
+    MODULE_REGISTER_ENUM("DEBUG", constants_debug);
 
-    MODULE_ADD_INT_CONSTANT(DEBUG_CRIT);
-    MODULE_ADD_INT_CONSTANT(DEBUG_ERROR);
-    MODULE_ADD_INT_CONSTANT(DEBUG_WARN);
-    MODULE_ADD_INT_CONSTANT(DEBUG_NOTICE);
-    MODULE_ADD_INT_CONSTANT(DEBUG_DIAG);
-    MODULE_ADD_INT_CONSTANT(DEBUG_INFO);
-    MODULE_ADD_INT_CONSTANT(DEBUG_TRACE);
-    MODULE_ADD_INT_CONSTANT(DEBUG_DEBUG);
+    struct key_value_str_int constants_exit_reason[] = {
+        {"NO_STATUS", SUDO_PLUGIN_NO_STATUS},
+        {"WAIT_STATUS", SUDO_PLUGIN_WAIT_STATUS},
+        {"EXEC_ERROR", SUDO_PLUGIN_EXEC_ERROR},
+        {"SUDO_ERROR", SUDO_PLUGIN_SUDO_ERROR}
+    };
+    MODULE_REGISTER_ENUM("EXIT_REASON", constants_exit_reason);
+
+    struct key_value_str_int constants_plugin_types[] = {
+        {"POLICY", SUDO_POLICY_PLUGIN},
+        {"AUDIT", SUDO_AUDIT_PLUGIN},
+        {"IO", SUDO_IO_PLUGIN},
+        {"APPROVAL", SUDO_APPROVAL_PLUGIN}
+    };
+    MODULE_REGISTER_ENUM("PLUGIN_TYPE", constants_plugin_types);
 
     // classes
     if (sudo_module_register_conv_message(py_module) != SUDO_RC_OK)
@@ -563,10 +593,14 @@ sudo_module_init(void)
     if (sudo_module_register_baseplugin(py_module) != SUDO_RC_OK)
         goto cleanup;
 
+    if (sudo_module_register_loghandler(py_module) != SUDO_RC_OK)
+        goto cleanup;
+
 cleanup:
     if (PyErr_Occurred()) {
         Py_CLEAR(py_module);
         Py_CLEAR(sudo_exc_SudoException);
+        Py_CLEAR(sudo_exc_PluginError);
         Py_CLEAR(sudo_exc_ConversationInterrupted);
     }
 

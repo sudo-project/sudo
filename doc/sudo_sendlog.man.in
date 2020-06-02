@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_SENDLOG" "@mansectsu@" "October 3, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_SENDLOG" "@mansectsu@" "May 12, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -25,11 +25,16 @@
 .SH "SYNOPSIS"
 .HP 13n
 \fBsudo_sendlog\fR
-[\fB\-V\fR]
+[\fB\-AnV\fR]
+[\fB\-b\fR\ \fIca_bundle\fR]
+[\fB\-c\fR\ \fIcert_file\fR]
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-i\fR\ \fIiolog-id\fR]
+[\fB\-k\fR\ \fIkey_file\fR]
 [\fB\-p\fR\ \fIport\fR]
 [\fB\-r\fR\ \fIrestart-point\fR]
+[\fB\-R\fR\ \fIreject-reason\fR]
+[\fB\-t\fR\ \fInumber\fR]
 \fIpath\fR
 .SH "DESCRIPTION"
 \fBsudo_sendlog\fR
@@ -42,6 +47,22 @@ sudo_logsrvd(@mansectsu@)
 for central storage.
 .PP
 The options are as follows:
+.TP 12n
+\fB\-A\fR, \fB\--accept-only\fR
+Only send the accept event, not the I/O associated with the log.
+This can be used to test the logging of accept events without
+any associated I/O.
+.TP 12n
+\fB\-b\fR, \fB\--ca-bundle\fR
+The path to a certificate authority bundle file, in PEM format,
+to use instead of the system's default certificate authority database
+when authenticating the log server.
+The default is to use the system's default certificate authority database.
+.TP 12n
+\fB\-c\fR, \fB\--cert\fR
+The path to the client's certificate file in PEM format.
+This setting is required when the connection to the remote log server
+is secured with TLS.
 .TP 12n
 \fB\--help\fR
 Display a short help message to the standard output and exit.
@@ -62,6 +83,22 @@ This option may only be used in conjunction with the
 \fB\-r\fR
 option.
 .TP 12n
+\fB\-k\fR, \fB\--key\fR
+.br
+The path to the client's private key file in PEM format.
+This setting is required when the connection to the remote log server
+is secured with TLS.
+.TP 12n
+\fB\-n\fR, \fB\--no-verify\fR
+If specified, the server's certificate will not be verified during
+the TLS handshake.
+By default,
+\fBsudo_sendlog\fR
+verifies that the server's certificate is valid and that it contains either
+the server's host name or its IP address.
+This setting is only supported when the connection to the remote log server
+is secured with TLS.
+.TP 12n
 \fB\-p\fR, \fB\--port\fR
 Use the specified network
 \fIport\fR
@@ -81,6 +118,20 @@ and is usually the last commit point received from the server.
 The
 \fB\-i\fR
 option must also be specified when restarting a transfer.
+.TP 12n
+\fB\-R\fR, \fB\--reject\fR
+Send a reject event for the command using the specified
+\fIreject-reason\fR,
+even though it was actually accepted locally.
+This can be used to test the logging of reject events; no I/O
+will be sent.
+.TP 12n
+\fB\-t\fR, \fB\--test\fR
+Open
+\fInumber\fR
+simultaneous connections to the log server and send the specified
+I/O log file on each one.
+This option is useful for performance testing.
 .TP 12n
 \fB\-V\fR, \fB\--version\fR
 Print the

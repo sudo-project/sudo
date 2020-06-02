@@ -23,17 +23,9 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/time.h>
 #include <sys/wait.h>
-#include <stdio.h>
-#include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 #if defined(HAVE_UTMPS_H)
@@ -344,11 +336,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
 	}
     }
     utmp_fill(to_line, user, ut_old, &utbuf);
-# ifdef HAVE_FSEEKO
     if (fseeko(fp, slot * (off_t)sizeof(utbuf), SEEK_SET) == 0) {
-# else
-    if (fseek(fp, slot * (long)sizeof(utbuf), SEEK_SET) == 0) {
-# endif
 	if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
 	    ret = true;
     }
@@ -381,11 +369,7 @@ utmp_logout(const char *line, int status)
 # endif
 	    utmp_settime(&utbuf);
 	    /* Back up and overwrite record. */
-# ifdef HAVE_FSEEKO
 	    if (fseeko(fp, (off_t)0 - (off_t)sizeof(utbuf), SEEK_CUR) == 0) {
-# else
-	    if (fseek(fp, 0L - (long)sizeof(utbuf), SEEK_CUR) == 0) {
-# endif
 		if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
 		    ret = true;
 	    }

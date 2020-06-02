@@ -30,6 +30,17 @@
 #include <limits.h>
 #include <string.h>
 
+static struct _inittab * python_inittab_copy = NULL;
+static size_t python_inittab_copy_len = 0;
+
+#ifndef PLUGIN_DIR
+#define PLUGIN_DIR ""
+#endif
+
+/* Py_FinalizeEx is new in version 3.6 */
+#if PY_MAJOR_VERSION > 3 || PY_MINOR_VERSION < 6
+# define Py_FinalizeEx()	(Py_Finalize(), 0)
+#endif
 
 const char *
 _lookup_value(char * const keyvalues[], const char *key)
@@ -51,7 +62,7 @@ CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 int
 _append_python_path(const char *module_dir)
 {
-    debug_decl(_py_debug_python_function, PYTHON_DEBUG_PLUGIN_LOAD);
+    debug_decl(_append_python_path, PYTHON_DEBUG_PLUGIN_LOAD);
     int rc = -1;
     PyObject *py_sys_path = PySys_GetObject("path");
     if (py_sys_path == NULL) {
@@ -110,6 +121,97 @@ _import_module(const char *path)
     debug_return_ptr(PyImport_ImportModule(module_name));
 }
 
+static PyThreadState *
+_python_plugin_new_interpreter(void)
+{
+    debug_decl(_python_plugin_new_interpreter, PYTHON_DEBUG_INTERNAL);
+    if (py_ctx.interpreter_count >= INTERPRETER_MAX) {
+        PyErr_Format(PyExc_Exception, "Too many interpreters");
+        debug_return_ptr(NULL);
+    }
+
+    PyThreadState *py_interpreter = Py_NewInterpreter();
+    if (py_interpreter != NULL) {
+        py_ctx.py_subinterpreters[py_ctx.interpreter_count] = py_interpreter;
+        ++py_ctx.interpreter_count;
+    }
+
+    debug_return_ptr(py_interpreter);
+}
+
+static int
+_save_inittab(void)
+{
+    debug_decl(_save_inittab, PYTHON_DEBUG_INTERNAL);
+    free(python_inittab_copy);  // just to be sure (it is always NULL)
+
+    for (python_inittab_copy_len = 0;
+         PyImport_Inittab[python_inittab_copy_len].name != NULL;
+         ++python_inittab_copy_len) {
+    }
+    ++python_inittab_copy_len;  // for the null mark
+
+    python_inittab_copy = malloc(sizeof(struct _inittab) * python_inittab_copy_len);
+    if (python_inittab_copy == NULL) {
+        debug_return_int(SUDO_RC_ERROR);
+    }
+
+    memcpy(python_inittab_copy, PyImport_Inittab, python_inittab_copy_len * sizeof(struct _inittab));
+    debug_return_int(SUDO_RC_OK);
+}
+
+static void
+_restore_inittab(void)
+{
+    debug_decl(_restore_inittab, PYTHON_DEBUG_INTERNAL);
+
+    if (python_inittab_copy != NULL)
+        memcpy(PyImport_Inittab, python_inittab_copy, python_inittab_copy_len * sizeof(struct _inittab));
+
+    free(python_inittab_copy);
+    python_inittab_copy = NULL;
+    python_inittab_copy_len = 0;
+    debug_return;
+}
+
+void
+python_plugin_handle_plugin_error_exception(PyObject **py_result, struct PluginContext *plugin_ctx)
+{
+    debug_decl(python_plugin_handle_plugin_error_exception, PYTHON_DEBUG_INTERNAL);
+
+    free(plugin_ctx->callback_error);
+    plugin_ctx->callback_error = NULL;
+
+    if (PyErr_Occurred()) {
+        int rc = SUDO_RC_ERROR;
+        if (PyErr_ExceptionMatches(sudo_exc_PluginReject)) {
+            rc = SUDO_RC_REJECT;
+        } else if (!PyErr_ExceptionMatches(sudo_exc_PluginError)) {
+            debug_return;
+        }
+
+        if (py_result != NULL) {
+            Py_CLEAR(*py_result);
+            *py_result = PyLong_FromLong(rc);
+        }
+
+        PyObject *py_type = NULL, *py_message = NULL, *py_traceback = NULL;
+        PyErr_Fetch(&py_type, &py_message, &py_traceback);
+
+        char *message = py_message ? py_create_string_rep(py_message) : NULL;
+        sudo_debug_printf(SUDO_DEBUG_INFO, "received sudo.PluginError exception with message '%s'",
+                          message == NULL ? "(null)" : message);
+
+        plugin_ctx->callback_error = message;
+
+        Py_CLEAR(py_type);
+        Py_CLEAR(py_message);
+        Py_CLEAR(py_traceback);
+    }
+
+    debug_return;
+}
+
 int
 python_plugin_construct_custom(struct PluginContext *plugin_ctx, PyObject *py_kwargs)
 {
@@ -124,15 +226,18 @@ python_plugin_construct_custom(struct PluginContext *plugin_ctx, PyObject *py_kw
                          py_args, py_kwargs, PYTHON_DEBUG_PY_CALLS);
 
     plugin_ctx->py_instance = PyObject_Call(plugin_ctx->py_class, py_args, py_kwargs);
+    python_plugin_handle_plugin_error_exception(NULL, plugin_ctx);
 
     py_debug_python_result(python_plugin_name(plugin_ctx), "__init__",
                            plugin_ctx->py_instance, PYTHON_DEBUG_PY_CALLS);
 
-    rc = SUDO_RC_OK;
+    if (plugin_ctx->py_instance)
+        rc = SUDO_RC_OK;
 
 cleanup:
-    if (plugin_ctx->py_instance == NULL) {
+    if (PyErr_Occurred()) {
         py_log_last_error("Failed to construct plugin instance");
+        Py_CLEAR(plugin_ctx->py_instance);
         rc = SUDO_RC_ERROR;
     }
 
@@ -140,14 +245,11 @@ cleanup:
     debug_return_int(rc);
 }
 
-int
-python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
+PyObject *
+python_plugin_construct_args(unsigned int version,
                         char *const settings[], char *const user_info[],
                         char *const user_env[], char *const plugin_options[])
 {
-    debug_decl(python_plugin_construct, PYTHON_DEBUG_PLUGIN_LOAD);
-
-    int rc = SUDO_RC_ERROR;
     PyObject *py_settings = NULL;
     PyObject *py_user_info = NULL;
     PyObject *py_user_env = NULL;
@@ -167,18 +269,36 @@ python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
         PyDict_SetItemString(py_kwargs, "user_info", py_user_info) != 0 ||
         PyDict_SetItemString(py_kwargs, "plugin_options", py_plugin_options) != 0)
     {
+        Py_CLEAR(py_kwargs);
+    }
+
+    Py_CLEAR(py_settings);
+    Py_CLEAR(py_user_info);
+    Py_CLEAR(py_user_env);
+    Py_CLEAR(py_plugin_options);
+    Py_CLEAR(py_version);
+    return py_kwargs;
+}
+
+int
+python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
+                        char *const settings[], char *const user_info[],
+                        char *const user_env[], char *const plugin_options[])
+{
+    debug_decl(python_plugin_construct, PYTHON_DEBUG_PLUGIN_LOAD);
+
+    int rc = SUDO_RC_ERROR;
+    PyObject *py_kwargs = python_plugin_construct_args(
+        version, settings, user_info, user_env, plugin_options);
+
+    if (py_kwargs == NULL) {
         py_log_last_error("Failed to construct plugin instance");
         rc = SUDO_RC_ERROR;
     } else {
         rc = python_plugin_construct_custom(plugin_ctx, py_kwargs);
     }
 
-    Py_XDECREF(py_settings);
-    Py_XDECREF(py_user_info);
-    Py_XDECREF(py_user_env);
-    Py_XDECREF(py_plugin_options);
-    Py_XDECREF(py_version);
-    Py_XDECREF(py_kwargs);
+    Py_CLEAR(py_kwargs);
 
     debug_return_int(rc);
 }
@@ -191,7 +311,7 @@ python_plugin_register_logging(sudo_conv_t conversation,
     debug_decl(python_plugin_register_logging, PYTHON_DEBUG_INTERNAL);
 
     int rc = SUDO_RC_ERROR;
-    if (py_ctx.sudo_conv == NULL)
+    if (conversation != NULL)
         py_ctx.sudo_conv = conversation;
 
     if (sudo_printf)
@@ -231,8 +351,6 @@ _python_plugin_register_plugin_in_py_ctx(void)
     debug_decl(_python_plugin_register_plugin_in_py_ctx, PYTHON_DEBUG_PLUGIN_LOAD);
 
     if (!Py_IsInitialized()) {
-        py_ctx.open_plugin_count = 0;
-
         // Disable environment variables effecting the python interpreter
         // This is important since we are running code here as root, the
         // user should not be able to alter what is running any how.
@@ -240,19 +358,134 @@ _python_plugin_register_plugin_in_py_ctx(void)
         Py_IsolatedFlag = 1;
         Py_NoUserSiteDirectory = 1;
 
+        if (_save_inittab() != SUDO_RC_OK)
+            debug_return_int(SUDO_RC_ERROR);
+
         PyImport_AppendInittab("sudo", sudo_module_init);
         Py_InitializeEx(0);
         py_ctx.py_main_interpreter = PyThreadState_Get();
+
+        // This ensures we import "sudo" module in the main interpreter,
+        // each subinterpreter will have a shallow copy.
+        // (This makes the C sudo module able to eg. import other modules.)
+        PyObject *py_sudo = NULL;
+        if ((py_sudo = PyImport_ImportModule("sudo")) == NULL) {
+            debug_return_int(SUDO_RC_ERROR);
+        }
+        Py_CLEAR(py_sudo);
     } else {
         PyThreadState_Swap(py_ctx.py_main_interpreter);
     }
 
-    ++py_ctx.open_plugin_count;
     debug_return_int(SUDO_RC_OK);
 }
 
 int
-python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options[])
+_python_plugin_set_path(struct PluginContext *plugin_ctx, const char *path)
+{
+    if (path == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "No python module path is specified. "
+                                         "Use 'ModulePath' plugin config option in 'sudo.conf'\n");
+        return SUDO_RC_ERROR;
+    }
+
+    if (*path == '/') { // absolute path
+        plugin_ctx->plugin_path = strdup(path);
+    } else {
+        if (asprintf(&plugin_ctx->plugin_path, PLUGIN_DIR "/python/%s", path) < 0)
+            plugin_ctx->plugin_path = NULL;
+    }
+
+    if (plugin_ctx->plugin_path == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to allocate memory");
+        return SUDO_RC_ERROR;
+    }
+
+    return SUDO_RC_OK;
+}
+
+/* Returns the list of sudo.Plugins in a module */
+static PyObject *
+_python_plugin_class_list(PyObject *py_module) {
+    PyObject *py_module_dict = PyModule_GetDict(py_module);  // Note: borrowed
+    PyObject *key, *value; // Note: borrowed
+    Py_ssize_t pos = 0;
+    PyObject *py_plugin_list = PyList_New(0);
+
+    while (PyDict_Next(py_module_dict, &pos, &key, &value)) {
+        if (PyObject_IsSubclass(value, (PyObject *)sudo_type_Plugin) == 1) {
+            if (PyList_Append(py_plugin_list, key) != 0)
+                goto cleanup;
+        } else {
+            PyErr_Clear();
+        }
+    }
+
+cleanup:
+    if (PyErr_Occurred()) {
+        Py_CLEAR(py_plugin_list);
+    }
+    return py_plugin_list;
+}
+
+/* Gets a sudo.Plugin class from the specified module. The argument "plugin_class"
+ * can be NULL in which case it loads the one and only "sudo.Plugin" present
+ * in the module (if so), or displays helpful error message. */
+static PyObject *
+_python_plugin_get_class(const char *plugin_path, PyObject *py_module, const char *plugin_class)
+{
+    debug_decl(python_plugin_init, PYTHON_DEBUG_PLUGIN_LOAD);
+    PyObject *py_plugin_list = NULL, *py_class = NULL;
+
+    if (plugin_class == NULL) {
+        py_plugin_list = _python_plugin_class_list(py_module);
+        if (py_plugin_list == NULL) {
+            goto cleanup;
+        }
+
+        if (PyList_Size(py_plugin_list) == 1) {
+            PyObject *py_plugin_name = PyList_GetItem(py_plugin_list, 0); // Note: borrowed
+            plugin_class = PyUnicode_AsUTF8(py_plugin_name);
+        }
+    }
+
+    if (plugin_class == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "No plugin class is specified for python module '%s'. "
+                    "Use 'ClassName' configuration option in 'sudo.conf'\n", plugin_path);
+        if (py_plugin_list != NULL) {
+            /* Sorting the plugin list makes regress test output consistent. */
+            PyObject *py_obj = PyObject_CallMethod(py_plugin_list, "sort", "");
+            Py_CLEAR(py_obj);
+            char *possible_plugins = py_join_str_list(py_plugin_list, ", ");
+            if (possible_plugins != NULL) {
+                py_sudo_log(SUDO_CONV_ERROR_MSG, "Possible plugins: %s\n", possible_plugins);
+                free(possible_plugins);
+            }
+        }
+        goto cleanup;
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "Using plugin class '%s'", plugin_class);
+    py_class = PyObject_GetAttrString(py_module, plugin_class);
+    if (py_class == NULL) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to find plugin class '%s'\n", plugin_class);
+        goto cleanup;
+    }
+
+    if (!PyObject_IsSubclass(py_class, (PyObject *)sudo_type_Plugin)) {
+        py_sudo_log(SUDO_CONV_ERROR_MSG, "Plugin class '%s' does not inherit from 'sudo.Plugin'\n", plugin_class);
+        Py_CLEAR(py_class);
+        goto cleanup;
+    }
+
+cleanup:
+    Py_CLEAR(py_plugin_list);
+    debug_return_ptr(py_class);
+}
+
+int
+python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options[],
+                   unsigned int version)
 {
     debug_decl(python_plugin_init, PYTHON_DEBUG_PLUGIN_LOAD);
 
@@ -261,47 +494,34 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
     if (_python_plugin_register_plugin_in_py_ctx() != SUDO_RC_OK)
         goto cleanup;
 
-    plugin_ctx->py_interpreter = Py_NewInterpreter();
+    plugin_ctx->sudo_api_version = version;
+
+    plugin_ctx->py_interpreter = _python_plugin_new_interpreter();
     if (plugin_ctx->py_interpreter == NULL) {
         goto cleanup;
     }
     PyThreadState_Swap(plugin_ctx->py_interpreter);
 
     if (!sudo_conf_developer_mode() && sudo_module_register_importblocker() < 0) {
-        py_log_last_error(NULL);
-        debug_return_int(SUDO_RC_ERROR);
-    }
-
-    const char *module_path = _lookup_value(plugin_options, "ModulePath");
-    if (module_path == NULL) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "No python module path is specified. "
-                                         "Use 'ModulePath' plugin config option in 'sudo.conf'\n", module_path);
         goto cleanup;
     }
 
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "Loading python module from path '%s'", module_path);
-    plugin_ctx->py_module = _import_module(module_path);
+    if (sudo_module_set_default_loghandler() < 0)
+        goto cleanup;
+
+    if (_python_plugin_set_path(plugin_ctx, _lookup_value(plugin_options, "ModulePath")) != SUDO_RC_OK) {
+        goto cleanup;
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "Loading python module from path '%s'", plugin_ctx->plugin_path);
+    plugin_ctx->py_module = _import_module(plugin_ctx->plugin_path);
     if (plugin_ctx->py_module == NULL) {
         goto cleanup;
     }
 
-    const char *plugin_class = _lookup_value(plugin_options, "ClassName");
-    if (plugin_class == NULL) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "No plugin class is specified for python module '%s'. "
-                    "Use 'ClassName' configuration option in 'sudo.conf'\n", module_path);
-        goto cleanup;
-    }
-
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "Using plugin class '%s'", plugin_class);
-    plugin_ctx->py_class = PyObject_GetAttrString(plugin_ctx->py_module, plugin_class);
+    plugin_ctx->py_class = _python_plugin_get_class(plugin_ctx->plugin_path, plugin_ctx->py_module,
+                                                    _lookup_value(plugin_options, "ClassName"));
     if (plugin_ctx->py_class == NULL) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to find plugin class '%s'\n", plugin_class);
-        goto cleanup;
-    }
-
-    if (!PyObject_IsSubclass(plugin_ctx->py_class, (PyObject *)sudo_type_Plugin)) {
-        py_sudo_log(SUDO_CONV_ERROR_MSG, "Plugin class '%s' does not inherit from 'sudo.Plugin'\n", plugin_class);
-        Py_CLEAR(plugin_ctx->py_class);
         goto cleanup;
     }
 
@@ -320,34 +540,23 @@ void
 python_plugin_deinit(struct PluginContext *plugin_ctx)
 {
     debug_decl(python_plugin_deinit, PYTHON_DEBUG_PLUGIN_LOAD);
-    --py_ctx.open_plugin_count;
-    sudo_debug_printf(SUDO_DEBUG_DIAG, "Closing: %d python plugins left open\n", py_ctx.open_plugin_count);
+    sudo_debug_printf(SUDO_DEBUG_DIAG, "Deinit was called for a python plugin\n");
 
     Py_CLEAR(plugin_ctx->py_instance);
     Py_CLEAR(plugin_ctx->py_class);
     Py_CLEAR(plugin_ctx->py_module);
 
-    if (plugin_ctx->py_interpreter != NULL) {
-        sudo_debug_printf(SUDO_DEBUG_TRACE, "deinit python interpreter for plugin\n");
-        Py_EndInterpreter(plugin_ctx->py_interpreter);
-    }
+    // Note: we are preserving the interpreters here until the unlink because
+    // of bugs like (strptime does not work after python interpreter reinit):
+    // https://bugs.python.org/issue27400
+    // These potentially effect a lot more python functions, simply because
+    // it is a rare tested scenario.
 
+    free(plugin_ctx->callback_error);
+    free(plugin_ctx->plugin_path);
     memset(plugin_ctx, 0, sizeof(*plugin_ctx));
 
-    if (py_ctx.open_plugin_count <= 0) {
-        if (Py_IsInitialized()) {
-            sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python interpreter\n");
-
-            // we need to call finalize from the main interpreter
-            PyThreadState_Swap(py_ctx.py_main_interpreter);
-
-            Py_Finalize();
-        }
-
-        python_debug_deregister();
-        py_ctx_reset();
-    }
-
+    python_debug_deregister();
     debug_return;
 }
 
@@ -381,7 +590,10 @@ python_plugin_api_call(struct PluginContext *plugin_ctx, const char *func_name, 
 
     py_debug_python_result(python_plugin_name(plugin_ctx), func_name,
                            py_result, PYTHON_DEBUG_PY_CALLS);
-    if (py_result == NULL) {
+
+    python_plugin_handle_plugin_error_exception(&py_result, plugin_ctx);
+
+    if (PyErr_Occurred()) {
         py_log_last_error(NULL);
     }
 
@@ -413,31 +625,57 @@ python_plugin_api_rc_call(struct PluginContext *plugin_ctx, const char *func_nam
 }
 
 int
-python_plugin_show_version(struct PluginContext *plugin_ctx, const char *python_callback_name, int is_verbose)
+python_plugin_show_version(struct PluginContext *plugin_ctx, const char *python_callback_name,
+                           int is_verbose, unsigned int plugin_api_version, const char *plugin_api_name)
 {
     debug_decl(python_plugin_show_version, PYTHON_DEBUG_CALLBACKS);
 
-    debug_return_int(python_plugin_api_rc_call(plugin_ctx, python_callback_name,
-                                               Py_BuildValue("(i)", is_verbose)));
+    if (is_verbose) {
+        py_sudo_log(SUDO_CONV_INFO_MSG, "Python %s plugin (API %d.%d): %s (loaded from '%s')\n",
+                    plugin_api_name,
+                    SUDO_API_VERSION_GET_MAJOR(plugin_api_version),
+                    SUDO_API_VERSION_GET_MINOR(plugin_api_version),
+                    python_plugin_name(plugin_ctx),
+                    plugin_ctx->plugin_path);
+    }
+
+    int rc = SUDO_RC_OK;
+    if (PyObject_HasAttrString(plugin_ctx->py_instance, python_callback_name)) {
+        rc = python_plugin_api_rc_call(plugin_ctx, python_callback_name,
+                                       Py_BuildValue("(i)", is_verbose));
+    }
+
+    debug_return_int(rc);
 }
 
 void
-python_plugin_close(struct PluginContext *plugin_ctx, const char *python_callback_name, int exit_status, int error)
+python_plugin_close(struct PluginContext *plugin_ctx, const char *callback_name,
+                    PyObject *py_args)
 {
     debug_decl(python_plugin_close, PYTHON_DEBUG_CALLBACKS);
 
     PyThreadState_Swap(plugin_ctx->py_interpreter);
 
-    if (!plugin_ctx->call_close) {
-        sudo_debug_printf(SUDO_DEBUG_INFO, "Skipping close call, because there was no command run\n");
+    // Note, this should handle the case when init has failed
+    if (plugin_ctx->py_instance != NULL) {
+        if (!plugin_ctx->call_close) {
+            sudo_debug_printf(SUDO_DEBUG_INFO, "Skipping close call, because there was no command run\n");
 
-    } else if (!PyObject_HasAttrString(plugin_ctx->py_instance, python_callback_name)) {
-        sudo_debug_printf(SUDO_DEBUG_INFO, "Python plugin function 'close' is skipped (not present)\n");
-    } else {
-        PyObject *py_result = python_plugin_api_call(plugin_ctx, python_callback_name,
-                                                     Py_BuildValue("(ii)", error == 0 ? exit_status : -1, error));
-        Py_XDECREF(py_result);
+        } else if (!PyObject_HasAttrString(plugin_ctx->py_instance, callback_name)) {
+            sudo_debug_printf(SUDO_DEBUG_INFO, "Python plugin function 'close' is skipped (not present)\n");
+        } else {
+            PyObject *py_result = python_plugin_api_call(plugin_ctx, callback_name, py_args);
+            py_args = NULL;  // api call already freed it
+            Py_XDECREF(py_result);
+        }
     }
+
+    Py_CLEAR(py_args);
+
+    if (PyErr_Occurred()) {
+        py_log_last_error(NULL);
+    }
+
     python_plugin_deinit(plugin_ctx);
 
     debug_return;
@@ -466,4 +704,39 @@ python_plugin_name(struct PluginContext *plugin_ctx)
         debug_return_const_str(name);
 
     debug_return_const_str(((PyTypeObject *)(plugin_ctx->py_class))->tp_name);
+}
+
+void python_plugin_unlink(void) __attribute__((destructor));
+
+// this gets run only when sudo unlinks the python_plugin.so
+void
+python_plugin_unlink(void)
+{
+    debug_decl(python_plugin_unlink, PYTHON_DEBUG_INTERNAL);
+    if (py_ctx.py_main_interpreter == NULL)
+        return;
+
+    if (Py_IsInitialized()) {
+        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python %zu subinterpreters\n",
+                          py_ctx.interpreter_count);
+        for (size_t i = 0; i < py_ctx.interpreter_count; ++i) {
+            PyThreadState *py_interpreter = py_ctx.py_subinterpreters[i];
+            PyThreadState_Swap(py_interpreter);
+            Py_EndInterpreter(py_interpreter);
+        }
+
+        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit main interpreter\n");
+
+        // we need to call finalize from the main interpreter
+        PyThreadState_Swap(py_ctx.py_main_interpreter);
+
+        if (Py_FinalizeEx() != 0) {
+            sudo_debug_printf(SUDO_DEBUG_WARN, "Closing: failed to deinit python interpreter\n");
+        }
+
+        // Restore inittab so "sudo" module does not remain there (as garbage)
+        _restore_inittab();
+    }
+    py_ctx_reset();
+    debug_return;
 }

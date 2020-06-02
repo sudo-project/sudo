@@ -27,15 +27,9 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -98,7 +92,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    bool written = false;
 		    int ttyfd = -1;
 
-		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY))
+		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY) &&
+			    !ISSET(tgetpass_flags, TGP_STDIN))
 			ttyfd = open(_PATH_TTY, O_WRONLY);
 		    if (len != 0 && (ttyfd != -1 || isatty(fileno(fp)))) {
 			/* Convert nl -> cr nl in case tty is in raw mode. */
@@ -168,7 +163,8 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 
     sudo_debug_set_active_instance(sudo_debug_instance);
 
-    if (ISSET(msg_type, SUDO_CONV_PREFER_TTY)) {
+    if (ISSET(msg_type, SUDO_CONV_PREFER_TTY) &&
+	    !ISSET(tgetpass_flags, TGP_STDIN)) {
 	/* Try writing to /dev/tty first. */
 	ttyfp = fopen(_PATH_TTY, "w");
     }

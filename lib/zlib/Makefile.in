@@ -26,6 +26,7 @@ top_srcdir = @top_srcdir@
 abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
+scriptdir = $(top_srcdir)/scripts
 cross_compiling = @CROSS_COMPILING@
 
 # Where to install things...
@@ -99,7 +100,7 @@ LTOBJS = adler32.lo compress.lo crc32.lo deflate.lo gzclose.lo gzlib.lo \
 all: libsudo_z.la
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/zlib/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/zlib/Makefile
 

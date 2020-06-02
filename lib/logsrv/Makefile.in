@@ -27,6 +27,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
+scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
 
 # Compiler & tools to use
@@ -88,7 +89,7 @@ pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/logsrv/Makefile.in
 	cd $(top_builddir) && ./config.status --file lib/logsrv/Makefile
 

@@ -27,6 +27,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
+scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
 cross_compiling = @CROSS_COMPILING@
 
@@ -120,7 +121,7 @@ VERSION = @PACKAGE_VERSION@
 all: group_file.la
 
 depend:
-	$(top_srcdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
+	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) plugins/group_file/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/group_file/Makefile
 
@@ -152,7 +153,7 @@ pre-install:
 install: install-plugin
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir)
+	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(plugindir)
 
 install-binaries:
 

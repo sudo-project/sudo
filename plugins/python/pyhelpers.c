@@ -63,10 +63,7 @@ _sudo_printf_default(int msg_type, const char *fmt, ...)
 
 
 struct PythonContext py_ctx = {
-    &_sudo_printf_default,
-    NULL,
-    0,
-    NULL
+    .sudo_log = &_sudo_printf_default,
 };
 
 
@@ -143,7 +140,7 @@ py_log_last_error(const char *context_message)
         debug_return;
     }
 
-    PyObject *py_type, *py_message, *py_traceback;
+    PyObject *py_type = NULL, *py_message = NULL, *py_traceback = NULL;
     PyErr_Fetch(&py_type, &py_message, &py_traceback);
 
     char *message = py_message ? py_create_string_rep(py_message) : strdup("(NULL)");
@@ -211,7 +208,7 @@ py_str_array_from_tuple(PyObject *py_tuple)
 
     if (!PyTuple_Check(py_tuple)) {
         PyErr_Format(PyExc_ValueError, "%s: value error, argument should be a tuple but it is '%s'",
-                     __PRETTY_FUNCTION__, Py_TYPENAME(py_tuple));
+                     __func__, Py_TYPENAME(py_tuple));
         debug_return_ptr(NULL);
     }
 
@@ -315,10 +312,35 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
     if (sudo_debug_needed(SUDO_DEBUG_DIAG)) {
         char *args_str = NULL;
         char *kwargs_str = NULL;
-        if (py_args != NULL)
+        if (py_args != NULL) {
+            /* Sort by key for consistent output on Python < 3.6 */
+	    PyObject *py_args_sorted = NULL;
+	    if (PyDict_Check(py_args)) {
+		py_args_sorted = PyDict_Items(py_args);
+		if (py_args_sorted != NULL) {
+		    if (PyList_Sort(py_args_sorted) == 0) {
+			py_args = py_args_sorted;
+		    }
+		}
+	    }
             args_str = py_create_string_rep(py_args);
+            if (py_args_sorted != NULL)
+                Py_DECREF(py_args_sorted);
+        }
         if (py_kwargs != NULL) {
+            /* Sort by key for consistent output on Python < 3.6 */
+            PyObject *py_kwargs_sorted = NULL;
+	    if (PyDict_Check(py_kwargs)) {
+		py_kwargs_sorted = PyDict_Items(py_kwargs);
+		if (py_kwargs_sorted != NULL) {
+		    if (PyList_Sort(py_kwargs_sorted) == 0) {
+			py_kwargs = py_kwargs_sorted;
+		    }
+		}
+	    }
             kwargs_str = py_create_string_rep(py_kwargs);
+            if (py_kwargs_sorted != NULL)
+                Py_DECREF(py_kwargs_sorted);
         }
 
         if (args_str == NULL)
@@ -337,7 +359,7 @@ void
 py_debug_python_call(const char *class_name, const char *function_name,
                      PyObject *py_args, PyObject *py_kwargs, int subsystem_id)
 {
-    debug_decl_vars(_py_debug_python_function, subsystem_id);
+    debug_decl_vars(py_debug_python_call, subsystem_id);
 
     if (subsystem_id == PYTHON_DEBUG_C_CALLS && sudo_debug_needed(SUDO_DEBUG_INFO)) {
         // at this level we also output the callee python script
@@ -398,7 +420,7 @@ py_get_current_execution_frame(char **file_name, long *line_number, char **funct
     PyObject *py_err_type = NULL, *py_err_value = NULL, *py_err_traceback = NULL;
     PyErr_Fetch(&py_err_type, &py_err_value, &py_err_traceback);
 
-    PyObject *py_frame = NULL, *py_lineno = NULL, *py_f_code = NULL,
+    PyObject *py_frame = NULL, *py_f_code = NULL,
               *py_filename = NULL, *py_function_name = NULL;
 
     PyObject *py_getframe = PySys_GetObject("_getframe");
@@ -409,25 +431,21 @@ py_get_current_execution_frame(char **file_name, long *line_number, char **funct
     if (py_frame == NULL)
         goto cleanup;
 
-    py_lineno = PyObject_GetAttrString(py_frame, "f_lineno");
-    if (py_lineno != NULL) {
-        *line_number = PyLong_AsLong(py_lineno);
-    }
+    *line_number = py_object_get_optional_attr_number(py_frame, "f_lineno");
 
-    py_f_code = PyObject_GetAttrString(py_frame, "f_code");
+    py_f_code = py_object_get_optional_attr(py_frame, "f_code", NULL);
     if (py_f_code != NULL) {
-        py_filename = PyObject_GetAttrString(py_f_code, "co_filename");
+        py_filename = py_object_get_optional_attr(py_f_code, "co_filename", NULL);
         if (py_filename != NULL)
             *file_name = strdup(PyUnicode_AsUTF8(py_filename));
 
-        py_function_name = PyObject_GetAttrString(py_f_code, "co_name");
+        py_function_name = py_object_get_optional_attr(py_f_code, "co_name", NULL);
         if (py_function_name != NULL)
             *function_name = strdup(PyUnicode_AsUTF8(py_function_name));
     }
 
 cleanup:
     Py_CLEAR(py_frame);
-    Py_CLEAR(py_lineno);
     Py_CLEAR(py_f_code);
     Py_CLEAR(py_filename);
     Py_CLEAR(py_function_name);
@@ -447,7 +465,8 @@ py_ctx_reset()
 }
 
 int
-py_sudo_conv(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+py_sudo_conv(int num_msgs, const struct sudo_conv_message msgs[],
+             struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
     /* Enable suspend during password entry. */
     struct sigaction sa, saved_sigtstp;
@@ -464,4 +483,90 @@ py_sudo_conv(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_co
     (void) sigaction(SIGTSTP, &saved_sigtstp, NULL);
 
     return rc;
+}
+
+PyObject *
+py_object_get_optional_attr(PyObject *py_object, const char *attr, PyObject *py_default)
+{
+    if (PyObject_HasAttrString(py_object, attr)) {
+        return PyObject_GetAttrString(py_object, attr);
+    }
+    Py_XINCREF(py_default);  // whatever we return will have its refcount incremented
+    return py_default;
+}
+
+const char *
+py_object_get_optional_attr_string(PyObject *py_object, const char *attr_name)
+{
+    PyObject *py_value = py_object_get_optional_attr(py_object, attr_name, NULL);
+    if (py_value == NULL)
+        return NULL;
+
+    const char *value = PyUnicode_AsUTF8(py_value);
+    Py_CLEAR(py_value); // Note, the object still has reference to the attribute
+    return value;
+}
+
+long long
+py_object_get_optional_attr_number(PyObject *py_object, const char *attr_name)
+{
+    PyObject *py_value = py_object_get_optional_attr(py_object, attr_name, NULL);
+    if (py_value == NULL)
+        return -1;
+
+    long long value = PyLong_AsLongLong(py_value);
+    Py_CLEAR(py_value);
+    return value;
+}
+
+void
+py_object_set_attr_number(PyObject *py_object, const char *attr_name, long long number)
+{
+    PyObject *py_number = PyLong_FromLong(number);
+    if (py_number == NULL)
+        return;
+
+    PyObject_SetAttrString(py_object, attr_name, py_number);
+    Py_CLEAR(py_number);
+}
+
+void
+py_object_set_attr_string(PyObject *py_object, const char *attr_name, const char *value)
+{
+    PyObject *py_value = PyUnicode_FromString(value);
+    if (py_value == NULL)
+        return;
+
+    PyObject_SetAttrString(py_object, attr_name, py_value);
+    Py_CLEAR(py_value);
+}
+
+PyObject *
+py_dict_create_string_int(size_t count, struct key_value_str_int *key_values)
+{
+    debug_decl(py_dict_create_string_int, PYTHON_DEBUG_INTERNAL);
+
+    PyObject *py_value = NULL;
+    PyObject *py_dict = PyDict_New();
+    if (py_dict == NULL)
+        goto cleanup;
+
+    for (size_t i = 0; i < count; ++i) {
+        py_value = PyLong_FromLong(key_values[i].value);
+        if (py_value == NULL)
+            goto cleanup;
+
+        if (PyDict_SetItemString(py_dict, key_values[i].key, py_value) < 0)
+            goto cleanup;
+
+        Py_CLEAR(py_value);
+    }
+
+cleanup:
+    if (PyErr_Occurred()) {
+        Py_CLEAR(py_dict);
+    }
+    Py_CLEAR(py_value);
+
+    debug_return_ptr(py_dict);
 }

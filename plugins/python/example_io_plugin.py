@@ -5,7 +5,6 @@ import errno
 import signal
 import sys
 import json
-from typing import Tuple, Dict
 
 
 VERSION = 1.0
@@ -15,35 +14,40 @@ class SudoIOPlugin(sudo.Plugin):
     """Example sudo input/output plugin
 
     Demonstrates how to use the sudo IO plugin API. All functions are added as
-    an example on their syntax, but note that all of them are optional. Also
-    typing annotations are just here for the help on the syntax (requires
-    python >= 3.5).
+    an example on their syntax, but note that all of them are optional.
 
     On detailed description of the functions refer to sudo_plugin manual (man
     sudo_plugin).
 
     Most functions can express error or reject through their "int" return value
     as documented in the manual. The sudo module also has constants for these:
-        sudo.RC_ACCEPT / sudo.RC_OK  1
-        sudo.RC_REJECT               0
-        sudo.RC_ERROR               -1
-        sudo.RC_USAGE_ERROR         -2
+        sudo.RC.ACCEPT / sudo.RC.OK  1
+        sudo.RC.REJECT               0
+        sudo.RC.ERROR               -1
+        sudo.RC.USAGE_ERROR         -2
+
+    If the plugin encounters an error, instead of just returning sudo.RC.ERROR
+    result code it can also add a message describing the problem.
+    This can be done by raising the special exception:
+        raise sudo.PluginError("Message")
+    This added message will be used by the audit plugins.
 
     If the function returns "None" (for example does not call return), it will
-    be considered sudo.RC_OK. If an exception is raised, its backtrace will be
-    shown to the user and the plugin function returns sudo.RC_ERROR. If that is
-    not acceptable, catch it.
+    be considered sudo.RC.OK. If an exception other than sudo.PluginError is
+    raised, its backtrace will be shown to the user and the plugin function
+    returns sudo.RC.ERROR. If that is not acceptable, catch it.
     """
 
     # -- Plugin API functions --
 
-    def __init__(self, version: str, plugin_options: Tuple[str, ...], **kwargs):
+    def __init__(self, version: str,
+                 plugin_options: tuple, **kwargs):
         """The constructor of the IO plugin.
 
         Other variables you can currently use as arguments are:
-            user_env: Tuple[str, ...]
-            settings: Tuple[str, ...]
-            user_info: Tuple[str, ...]
+            user_env: tuple
+            settings: tuple
+            user_info: tuple
 
         For their detailed description, see the open() call of the C plugin API
         in the sudo manual ("man sudo").
@@ -63,8 +67,10 @@ class SudoIOPlugin(sudo.Plugin):
     def __del__(self):
         if hasattr(self, "_log_file"):
             self._log("", "-- Plugin DESTROYED --")
+            self._log_file.close()
 
-    def open(self, argv: Tuple[str, ...], command_info: Tuple[str, ...]) -> int:
+    def open(self, argv: tuple,
+             command_info: tuple) -> int:
         """Receives the command the user wishes to run.
 
         This function works the same as open() call of the C IO plugin API (see
@@ -77,7 +83,7 @@ class SudoIOPlugin(sudo.Plugin):
         self._log("EXEC", " ".join(argv))
         self._log("EXEC info", json.dumps(command_info, indent=4))
 
-        return sudo.RC_ACCEPT
+        return sudo.RC.ACCEPT
 
     def log_ttyout(self, buf: str) -> int:
         return self._log("TTY OUT", buf.strip())
@@ -98,10 +104,7 @@ class SudoIOPlugin(sudo.Plugin):
         self._log("WINSIZE", "{}x{}".format(line, cols))
 
     def log_suspend(self, signo: int) -> int:
-        try:
-            signal_description = signal.Signals(signo).name
-        except (AttributeError, ValueError):
-            signal_description = "signal {}".format(signo)
+        signal_description = self._signal_name(signo)
 
         self._log("SUSPEND", signal_description)
 
@@ -115,7 +118,7 @@ class SudoIOPlugin(sudo.Plugin):
 
         Works the same as close() from C API (see sudo_plugin manual), except
         that it only gets called if there was a command execution trial (open()
-        returned with sudo.RC_ACCEPT).
+        returned with sudo.RC.ACCEPT).
         """
         if error == 0:
             self._log("CLOSE", "Command returned {}".format(exit_status))
@@ -132,4 +135,19 @@ class SudoIOPlugin(sudo.Plugin):
 
     def _log(self, type, message):
         print(type, message, file=self._log_file)
-        return sudo.RC_ACCEPT
+        return sudo.RC.ACCEPT
+
+    if hasattr(signal, "Signals"):
+        def _signal_name(cls, signo: int):
+            try:
+                return signal.Signals(signo).name
+            except ValueError:
+                return "signal {}".format(signo)
+    else:
+        def _signal_name(cls, signo: int):
+            for n, v in sorted(signal.__dict__.items()):
+                if v != signo:
+                    continue;
+                if n.startswith("SIG") and not n.startswith("SIG_"):
+                    return n
+            return "signal {}".format(signo)

@@ -28,7 +28,6 @@
 
 #ifndef HAVE_STRLCAT
 
-#include <sys/types.h>
 #include <string.h>
 
 #include "sudo_compat.h"

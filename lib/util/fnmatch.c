@@ -99,16 +99,8 @@
 
 #ifndef HAVE_FNMATCH
 
-#include <sys/types.h>
-
-#include <stdio.h>
 #include <ctype.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 
 #include "sudo_compat.h"
 #include "compat/charclass.h"
@@ -310,7 +302,7 @@ int sudo_fnmatch(const char *pattern, const char *string, int flags)
     const char *dummyptr;
     const char *matchptr;
     int wild;
-    /* For '*' wild processing only; surpress 'used before initialization'
+    /* For '*' wild processing only; suppress 'used before initialization'
      * warnings with dummy initialization values;
      */
     const char *strstartseg = NULL;

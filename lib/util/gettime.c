@@ -23,13 +23,8 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <time.h>
-#include <errno.h>
 
 #if defined(__MACH__) && !defined(HAVE_CLOCK_GETTIME)
 # include <mach/mach.h>

@@ -130,12 +130,11 @@ struct user_details {
 #define CD_USE_PTY		0x001000
 #define CD_SET_UTMP		0x002000
 #define CD_EXEC_BG		0x004000
-#define CD_SUDOEDIT_COPY	0x008000
-#define CD_SUDOEDIT_FOLLOW	0x010000
-#define CD_SUDOEDIT_CHECKDIR	0x020000
-#define CD_SET_GROUPS		0x040000
-#define CD_LOGIN_SHELL		0x080000
-#define CD_OVERRIDE_UMASK	0x100000
+#define CD_SUDOEDIT_FOLLOW	0x008000
+#define CD_SUDOEDIT_CHECKDIR	0x010000
+#define CD_SET_GROUPS		0x020000
+#define CD_LOGIN_SHELL		0x040000
+#define CD_OVERRIDE_UMASK	0x080000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -157,10 +156,12 @@ struct command_details {
     int closefrom;
     int flags;
     int execfd;
+    int cwd_optional;
     struct preserved_fd_list preserved_fds;
     struct passwd *pw;
     GETGROUPS_T *groups;
     const char *command;
+    const char *runas_user;
     const char *cwd;
     const char *login_class;
     const char *chroot;
@@ -207,8 +208,8 @@ char *tgetpass(const char *prompt, int timeout, int flags,
 int sudo_execute(struct command_details *details, struct command_status *cstat);
 
 /* parse_args.c */
-int parse_args(int argc, char **argv, int *nargc, char ***nargv,
-    struct sudo_settings **settingsp, char ***env_addp);
+int parse_args(int argc, char **argv, int *old_optind, int *nargc,
+    char ***nargv, struct sudo_settings **settingsp, char ***env_addp);
 extern int tgetpass_flags;
 
 /* get_pty.c */
@@ -221,6 +222,10 @@ int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
 bool set_user_groups(struct command_details *details);
 struct sudo_plugin_event *sudo_plugin_event_alloc(void);
+void audit_reject(const char *plugin_name, unsigned int plugin_type,
+    const char *audit_msg, char * const command_info[]);
+void audit_error(const char *plugin_name, unsigned int plugin_type,
+    const char *audit_msg, char * const command_info[]);
 extern const char *list_user;
 extern struct user_details user_details;
 extern int sudo_debug_instance;
@@ -229,7 +234,7 @@ extern int sudo_debug_instance;
 int sudo_edit(struct command_details *details);
 
 /* parse_args.c */
-void usage(int);
+void usage(void) __attribute__((__noreturn__));
 
 /* openbsd.c */
 int os_init_openbsd(int argc, char *argv[], char *envp[]);
@@ -237,7 +242,8 @@ int os_init_openbsd(int argc, char *argv[], char *envp[]);
 /* selinux.c */
 int selinux_restore_tty(void);
 int selinux_setup(const char *role, const char *type, const char *ttyn,
-    int ttyfd);
+    int ttyfd, bool label_tty);
+int selinux_setcon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
     char *envp[], bool noexec);
 

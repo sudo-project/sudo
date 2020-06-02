@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@courtesan.com>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +23,12 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
+#include "config.h"
+
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+#endif
+
 #include "logsrv_util.h"
 
 enum client_state {
@@ -28,6 +36,7 @@ enum client_state {
     RECV_HELLO,
     SEND_RESTART,
     SEND_ACCEPT,
+    SEND_REJECT,
     SEND_IO,
     SEND_EXIT,
     CLOSING,
@@ -35,24 +44,30 @@ enum client_state {
 };
 
 struct client_closure {
+    TAILQ_ENTRY(client_closure) entries;
     int sock;
+    bool accept_only;
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
-    struct timespec *restart;
-    struct timespec *elapsed;
+    struct timespec restart;
+    struct timespec elapsed;
     struct timespec committed;
     struct timing_closure timing;
+    struct sudo_event_base *evbase;
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
 #if defined(HAVE_OPENSSL)
+    SSL *ssl;
     struct sudo_event *tls_connect_ev;
     bool tls_connect_state;
 #endif
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
     struct iolog_info *log_info;
+    struct iolog_file iolog_files[IOFD_MAX];
     const char *iolog_id;
+    char *reject_reason;
     char *buf; /* XXX */
     size_t bufsize; /* XXX */
     enum client_state state;

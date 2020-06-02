@@ -18,15 +18,9 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <limits.h>
 
 #define SUDO_ERROR_WRAP 0
@@ -44,7 +38,7 @@ static void
 usage(void)
 {
     fprintf(stderr, "usage: %s inputfile\n", getprogname());
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 int

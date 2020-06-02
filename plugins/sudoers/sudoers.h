@@ -24,6 +24,7 @@
 #ifndef SUDOERS_SUDOERS_H
 #define SUDOERS_SUDOERS_H
 
+#include <sys/types.h>		/* for gid_t, mode_t, pid_t, size_t, uid_t */
 #include <limits.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
@@ -272,7 +273,7 @@ int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
 int sudo_auth_approval(struct passwd *pw, int validated, bool exempt);
-int sudo_auth_cleanup(struct passwd *pw);
+int sudo_auth_cleanup(struct passwd *pw, bool force);
 
 /* set_perms.c */
 bool rewind_perms(void);
@@ -397,7 +398,7 @@ void sudoers_debug_deregister(void);
 
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);
-int sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
+bool sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 extern const char *path_ldap_conf;
 extern const char *path_ldap_secret;
 

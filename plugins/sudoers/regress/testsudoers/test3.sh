@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Test #include facility
+# Test @includedir facility
 #
 
 parentdir="`echo $0 | sed 's:/[^/]*$::'`"
@@ -15,9 +15,35 @@ if [ -d "$parentdir" ]; then
 	MYUID=`\ls -lnd $TESTDIR/test3.d | awk '{print $3}'`
 	MYGID=`\ls -lnd $TESTDIR/test3.d | awk '{print $4}'`
 	exec 2>&1
+
+	echo "Testing @includedir of an unquoted path"
+	echo ""
+	./testsudoers -U $MYUID -G $MYGID root id <<-EOF
+		@includedir $TESTDIR/test3.d
+	EOF
+
+	echo ""
+	echo "Testing @includedir of a double-quoted path"
+	echo ""
+	./testsudoers -U $MYUID -G $MYGID root id <<-EOF
+		@includedir "$TESTDIR/test3.d"
+	EOF
+
+	echo ""
+	echo "Testing #includedir of an unquoted path"
+	echo ""
 	./testsudoers -U $MYUID -G $MYGID root id <<-EOF
 		#includedir $TESTDIR/test3.d
 	EOF
+
+	echo ""
+	echo "Testing #includedir of a double-quoted path"
+	echo ""
+	./testsudoers -U $MYUID -G $MYGID root id <<-EOF
+		#includedir "$TESTDIR/test3.d"
+	EOF
+
+	rm -rf "${parentdir}/test3.d"
 	exit 0
 fi
 

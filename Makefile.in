@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2015, 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2015, 2017-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +23,7 @@ abs_top_srcdir = @abs_top_srcdir@
 top_builddir = @top_builddir@
 abs_top_builddir = @abs_top_builddir@
 devdir = @devdir@
+scriptdir = $(top_srcdir)/scripts
 
 # Installation paths for package building
 prefix = @prefix@
@@ -52,9 +53,13 @@ sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 shlib_mode = @SHLIB_MODE@
 
-SUBDIRS = lib/util @ZLIB_SRC@ lib/iolog lib/logsrv logsrvd \
-	  plugins/group_file plugins/sudoers plugins/system_group \
-	  @PYTHON_PLUGIN_SRC@ src include doc examples
+# Version of python detected by configure (major.minor)
+python_version = @PYTHON_VERSION@
+
+SUBDIRS = lib/util @ZLIB_SRC@ lib/iolog @LOGSRV@ @LOGSRVD@ \
+	  plugins/audit_json plugins/group_file plugins/sample_approval \
+	  plugins/sudoers plugins/system_group @PYTHON_PLUGIN_SRC@ src \
+	  include doc examples
 
 SAMPLES = plugins/sample
 
@@ -119,6 +124,9 @@ reformat: uncrustify.files
 
 check-format: uncrustify.files
 	( cd $(top_srcdir) && uncrustify -c etc/uncrustify.cfg --check -F $(top_builddir)/uncrustify.files )
+
+spell:
+	( cd $(top_srcdir) && codespell -I etc/codespell.ignore -x etc/codespell.exclude `egrep -v -f etc/codespell.skip MANIFEST` )
 
 cppcheck: config.status
 	rval=0; \
@@ -200,7 +208,7 @@ siglist.c signame.c:
 	cd lib/util && exec $(MAKE) $@
 
 depend: siglist.c signame.c
-	$(top_srcdir)/mkdep.pl \
+	$(scriptdir)/mkdep.pl \
 	    --srcdir=$(abs_top_srcdir) --builddir=$(abs_top_builddir) \
 	    lib/util/Makefile.in lib/zlib/Makefile.in \
 	    lib/iolog/Makefile.in lib/logsrv/Makefile.in logsrvd/Makefile.in \
@@ -221,16 +229,16 @@ depend: siglist.c signame.c
 	    --file $(top_builddir)/src/Makefile
 
 ChangeLog:
-	if test -d $(srcdir)/.hg && cd $(srcdir); then \
-	    if hg log --style=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
-		mv -f $@.tmp $@; \
+	if test -d $(srcdir)/.hg; then \
+	    if hg log -R $(srcdir) --style=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
+		mv -f $@.tmp $(srcdir)/$@; \
 	    else \
 		rm -f $@.tmp; \
 	    fi; \
-	elif test -d $(srcdir)/.git && cd $(srcdir); then \
-	    ./log2cl.pl -b master > $@; \
+	elif test -d $(srcdir)/.git; then \
+	    $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $(srcdir)/$@; \
 	else \
-	    echo "ChangeLog data not available" > $@; \
+	    echo "ChangeLog data not available" > $(srcdir)/$@; \
 	fi
 
 config.status:
@@ -261,7 +269,7 @@ update-pot:
 		    sudo) tmpfiles=; cfiles="src/*.c lib/util/*.c";; \
 		    sudoers) \
 			echo "gettext \"syntax error\"" > confstr.sh; \
-			$(SED) -n 's/^.*--with-passprompt=\(.*\)$$/gettext \"\1\"/p' mkpkg | sort -u >> confstr.sh; \
+			$(SED) -n 's/^.*--with-passprompt=\(.*\)$$/gettext \"\1\"/p' $(scriptdir)/mkpkg | sort -u >> confstr.sh; \
 			$(SED) -n -e 's/^badpass_message="/gettext "/p' \
 			    -e 's/^passprompt="/gettext "/p' \
 			    -e 's/^mailsub="/gettext "/p' configure.ac \
@@ -333,7 +341,7 @@ install-nls:
 		for lang in $$SUDO_LINGUAS; do \
 		    test -s $$podir/$$lang.mo || continue; \
 		    echo $(ECHO_N) " $$lang$(ECHO_C)"; \
-		    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES; \
+		    $(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES; \
 		    if test -n "$(LOCALEDIR_SUFFIX)"; then \
 			if test ! -d $(DESTDIR)$(localedir)/$$lang$(LOCALEDIR_SUFFIX); then \
 			    ln -s $$lang $(DESTDIR)$(localedir)/$$lang$(LOCALEDIR_SUFFIX); \
@@ -367,30 +375,31 @@ force-dist: ChangeLog $(srcdir)/MANIFEST
 	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar && \
 	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
-package: $(srcdir)/etc/sudo.pp
+package: @PPFILES@
 	DESTDIR=$(abs_top_builddir)/destdir; rm -rf $$DESTDIR; \
 	$(MAKE) install INSTALL_OWNER= DESTDIR=$$DESTDIR && \
-	$(SHELL) $(srcdir)/pp $(PPFLAGS) \
-	    --destdir=$$DESTDIR \
-	    $(srcdir)/etc/sudo.pp \
-	    prefix=$(prefix) \
-	    bindir=$(bindir) \
-	    sbindir=$(sbindir) \
-	    libexecdir=$(libexecdir) \
-	    includedir=$(includedir) \
-	    vardir=$(vardir) \
-	    rundir=$(rundir) \
-	    mandir=$(mandir) \
-	    localedir=$(localedir) \
-	    docdir=$(docdir) \
-	    exampledir=$(exampledir) \
-	    sysconfdir=$(sysconfdir) \
-	    sudoersdir=$(sudoersdir) \
-	    sudoers_uid=$(sudoers_uid) \
-	    sudoers_gid=$(sudoers_gid) \
-	    sudoers_mode=$(sudoers_mode) \
-	    shlib_mode=$(shlib_mode) \
-	    version=$(VERSION) $(PPVARS)
+	for p in @PPFILES@; do \
+	    $(SHELL) $(scriptdir)/pp $(PPFLAGS) --destdir=$$DESTDIR $$p \
+		prefix=$(prefix) \
+		bindir=$(bindir) \
+		sbindir=$(sbindir) \
+		libexecdir=$(libexecdir) \
+		includedir=$(includedir) \
+		vardir=$(vardir) \
+		rundir=$(rundir) \
+		mandir=$(mandir) \
+		localedir=$(localedir) \
+		docdir=$(docdir) \
+		exampledir=$(exampledir) \
+		sysconfdir=$(sysconfdir) \
+		sudoersdir=$(sudoersdir) \
+		sudoers_uid=$(sudoers_uid) \
+		sudoers_gid=$(sudoers_gid) \
+		sudoers_mode=$(sudoers_mode) \
+		shlib_mode=$(shlib_mode) \
+		python_version=$(python_version) \
+		version=$(VERSION) $(PPVARS); \
+	    done
 
 clean: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do \

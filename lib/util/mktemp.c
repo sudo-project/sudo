@@ -26,8 +26,6 @@
 
 #if !defined(HAVE_MKSTEMPS) || !defined(HAVE_MKDTEMP)
 
-#include <sys/types.h>
-#include <sys/time.h>
 #include <sys/stat.h>
 
 #include <errno.h>
@@ -42,15 +40,9 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <time.h>
 
 #include "sudo_compat.h"
 #include "sudo_rand.h"

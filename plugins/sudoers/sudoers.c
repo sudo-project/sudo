@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,19 +37,12 @@
 #include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <grp.h>
-#include <time.h>
 #include <netdb.h>
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
@@ -116,6 +109,12 @@ static struct rlimit nproclimit;
 /* XXX - must be extern for audit bits of sudo_auth.c */
 int NewArgc;
 char **NewArgv;
+
+#ifdef SUDOERS_IOLOG_CLIENT
+# define remote_iologs	(!SLIST_EMPTY(&def_log_servers))
+#else
+# define remote_iologs	0
+#endif
 
 /*
  * Unlimit the number of processes since Linux's setuid() will
@@ -278,7 +277,6 @@ int
 sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     bool verbose, void *closure)
 {
-    char **edit_argv = NULL;
     char *iolog_path = NULL;
     mode_t cmnd_umask = ACCESSPERMS;
     struct sudo_nss *nss;
@@ -292,7 +290,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
-	/* Not an audit event. */
+	/* Not an audit event (should it be?). */
 	sudo_warnx(U_("sudoers specifies that root is not allowed to sudo"));
 	goto bad;
     }
@@ -315,6 +313,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
+	sudoers_gc_add(GC_VECTOR, NewArgv);
 	NewArgv[0] = user_cmnd;
 	NewArgv[1] = NULL;
     } else {
@@ -325,6 +324,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
+	sudoers_gc_add(GC_VECTOR, NewArgv);
 	NewArgv++;	/* reserve an extra slot for --login */
 	memcpy(NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
@@ -332,9 +332,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    NewArgv[0] = strdup(runas_pw->pw_shell);
 	    if (NewArgv[0] == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		free(NewArgv);
 		goto done;
 	    }
+	    sudoers_gc_add(GC_PTR, NewArgv[0]);
 	}
     }
 
@@ -350,7 +350,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
-	    /* XXX - audit? */
+	    audit_failure(NewArgc, NewArgv,
+		N_("user not allowed to override closefrom limit"));
 	    sudo_warnx(U_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
@@ -413,6 +414,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    timestamp_gid = pw->pw_gid;
 	    sudo_pw_delref(pw);
 	} else {
+	    /* XXX - audit too? */
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("timestamp owner (%s): No such user"), def_timestampowner);
 	    timestamp_uid = ROOT_UID;
@@ -436,6 +438,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Check runas user's shell. */
     if (!check_user_shell(runas_pw)) {
+	audit_failure(NewArgc, NewArgv, N_("invalid shell for user %s: %s"),
+	    runas_pw->pw_name, runas_pw->pw_shell);
 	log_warningx(SLOG_RAW_MSG, N_("invalid shell for user %s: %s"),
 	    runas_pw->pw_name, runas_pw->pw_shell);
 	goto bad;
@@ -517,7 +521,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If user specified a timeout make sure sudoers allows it. */
     if (!def_user_command_timeouts && user_timeout > 0) {
-	/* XXX - audit/log? */
+	audit_failure(NewArgc, NewArgv,
+	    N_("user not allowed to set a command timeout"));
 	sudo_warnx(U_("sorry, you are not allowed set a command timeout"));
 	goto bad;
     }
@@ -525,7 +530,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    /* XXX - audit/log? */
+	    audit_failure(NewArgc, NewArgv,
+		N_("user not allowed to set a preserve the environment"));
 	    sudo_warnx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {
@@ -534,7 +540,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && SLIST_EMPTY(&def_log_servers)) {
+    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && !remote_iologs) {
 	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
 	    if ((iolog_path = format_iolog_path()) == NULL) {
 		if (!def_ignore_iolog_errors)
@@ -557,12 +563,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw, verbose);
 	    break;
 	case MODE_VALIDATE:
-	    /* Nothing to do. */
-	    ret = true;
-	    break;
 	case MODE_RUN:
 	case MODE_EDIT:
-	    /* ret set by sudoers_policy_exec_setup() below. */
+	    /* ret may be overridden by "goto bad" later */
+	    ret = true;
 	    break;
 	default:
 	    /* Should not happen. */
@@ -651,6 +655,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Note: must call audit before uid change. */
     if (ISSET(sudo_mode, MODE_EDIT)) {
+	char **edit_argv;
 	int edit_argc;
 	const char *env_editor;
 
@@ -666,7 +671,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		env_editor ? env_editor : def_editor);
 	    goto bad;
 	}
-	if (audit_success(edit_argc, edit_argv) != 0 && !def_ignore_audit_errors)
+	sudoers_gc_add(GC_VECTOR, edit_argv);
+	NewArgv = edit_argv;
+	NewArgc = edit_argc;
+	if (audit_success(NewArgc, NewArgv) != 0 && !def_ignore_audit_errors)
 	    goto done;
 
 	/* We want to run the editor with the unmodified environment. */
@@ -676,19 +684,22 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto done;
     }
 
-    /* Setup execution environment to pass back to front-end. */
-    ret = sudoers_policy_exec_setup(edit_argv ? edit_argv : NewArgv,
-	env_get(), cmnd_umask, iolog_path, closure);
-
-    /* Zero out stashed copy of environment, it is owned by the front-end. */
-    (void)env_init(NULL);
-
     goto done;
 
 bad:
     ret = false;
 
 done:
+    /* Setup execution environment to pass back to front-end. */
+    if (ret != -1) {
+	if (!sudoers_policy_exec_setup(NewArgv, env_get(), cmnd_umask,
+		iolog_path, closure))
+	    ret = -1;
+    }
+
+    /* Zero out stashed copy of environment, it is owned by the front-end. */
+    (void)env_init(NULL);
+
     if (!rewind_perms())
 	ret = -1;
 
@@ -871,8 +882,9 @@ set_cmnd(void)
 		    debug_return_int(-1);
 	    }
 	    if (ret == NOT_FOUND_ERROR) {
-		if (errno == ENAMETOOLONG)
+		if (errno == ENAMETOOLONG) {
 		    audit_failure(NewArgc, NewArgv, N_("command too long"));
+		}
 		log_warning(0, "%s", NewArgv[0]);
 		debug_return_int(ret);
 	    }
@@ -1146,6 +1158,7 @@ static bool
 cb_fqdn(const union sudo_defs_val *sd_un)
 {
     bool remote;
+    int rc;
     char *lhost, *shost;
     debug_decl(cb_fqdn, SUDOERS_DEBUG_PLUGIN);
 
@@ -1158,8 +1171,7 @@ cb_fqdn(const union sudo_defs_val *sd_un)
 
     /* First resolve user_host, setting user_host and user_shost. */
     if (resolve_host(user_host, &lhost, &shost) != 0) {
-	int rc = resolve_host(user_runhost, &lhost, &shost);
-	if (rc != 0) {
+	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
 	    gai_log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG, rc,
 		N_("unable to resolve host %s"), user_host);
 	    debug_return_bool(false);
@@ -1174,8 +1186,10 @@ cb_fqdn(const union sudo_defs_val *sd_un)
     /* Next resolve user_runhost, setting user_runhost and user_srunhost. */
     lhost = shost = NULL;
     if (remote) {
-	if (!resolve_host(user_runhost, &lhost, &shost)) {
-	    sudo_warnx(U_("unable to resolve host %s"), user_runhost);
+	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
+	    gai_log_warning(SLOG_NO_LOG|SLOG_RAW_MSG, rc,
+		N_("unable to resolve host %s"), user_runhost);
+	    debug_return_bool(false);
 	}
     } else {
 	/* Not remote, just use user_host. */

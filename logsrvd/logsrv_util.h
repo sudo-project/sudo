@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,8 +19,9 @@
 #ifndef SUDO_LOGSRV_UTIL_H
 #define SUDO_LOGSRV_UTIL_H
 
-/* Default port to listen on */
-#define DEFAULT_PORT_STR	"30344"
+/* Default ports to listen on */
+#define DEFAULT_PORT		"30343"
+#define DEFAULT_PORT_TLS	"30344"
 
 /* Maximum message size (2Mb) */
 #define MESSAGE_SIZE_MAX	(2 * 1024 * 1024)

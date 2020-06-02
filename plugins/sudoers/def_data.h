@@ -244,10 +244,16 @@
 #define def_log_server_peer_cert (sudo_defs_table[I_LOG_SERVER_PEER_CERT].sd_un.str)
 #define I_LOG_SERVER_PEER_KEY   122
 #define def_log_server_peer_key (sudo_defs_table[I_LOG_SERVER_PEER_KEY].sd_un.str)
-#define I_RUNAS_ALLOW_UNKNOWN_ID 123
+#define I_LOG_SERVER_VERIFY     123
+#define def_log_server_verify   (sudo_defs_table[I_LOG_SERVER_VERIFY].sd_un.flag)
+#define I_RUNAS_ALLOW_UNKNOWN_ID 124
 #define def_runas_allow_unknown_id (sudo_defs_table[I_RUNAS_ALLOW_UNKNOWN_ID].sd_un.flag)
-#define I_RUNAS_CHECK_SHELL     124
+#define I_RUNAS_CHECK_SHELL     125
 #define def_runas_check_shell   (sudo_defs_table[I_RUNAS_CHECK_SHELL].sd_un.flag)
+#define I_PAM_RUSER             126
+#define def_pam_ruser           (sudo_defs_table[I_PAM_RUSER].sd_un.flag)
+#define I_PAM_RHOST             127
+#define def_pam_rhost           (sudo_defs_table[I_PAM_RHOST].sd_un.flag)
 
 enum def_tuple {
 	never,

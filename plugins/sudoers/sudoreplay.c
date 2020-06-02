@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,8 +26,8 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 #include <sys/ioctl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(HAVE_STDINT_H)
@@ -35,12 +35,7 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 #include <ctype.h>
@@ -55,7 +50,6 @@
 #endif /* HAVE_STDBOOL_H */
 #include <regex.h>
 #include <signal.h>
-#include <time.h>
 
 #include <pathnames.h>
 
@@ -119,13 +113,15 @@ struct search_node {
 #define ST_FROMDATE	7
 #define ST_TODATE	8
 #define ST_CWD		9
+#define ST_HOST		10
     char type;
     bool negated;
     bool or;
     union {
 	regex_t cmdre;
-	time_t tstamp;
+	struct timespec tstamp;
 	char *cwd;
+	char *host;
 	char *tty;
 	char *user;
 	char *runas_group;
@@ -141,7 +137,7 @@ static double speed_factor = 1.0;
 
 static const char *session_dir = _PATH_SUDO_IO_LOGDIR;
 
-static bool terminal_can_resize, terminal_was_resized;
+static bool terminal_can_resize, terminal_was_resized, follow_mode;
 
 static int terminal_lines, terminal_cols;
 
@@ -156,10 +152,11 @@ static struct iolog_file iolog_files[] = {
     { true, },	/* IOFD_TIMING */
 };
 
-static const char short_opts[] =  "d:f:hlm:nRSs:V";
+static const char short_opts[] =  "d:f:Fhlm:nRSs:V";
 static struct option long_opts[] = {
     { "directory",	required_argument,	NULL,	'd' },
     { "filter",		required_argument,	NULL,	'f' },
+    { "follow",		no_argument,		NULL,	'F' },
     { "help",		no_argument,		NULL,	'h' },
     { "list",		no_argument,		NULL,	'l' },
     { "max-wait",	required_argument,	NULL,	'm' },
@@ -199,15 +196,14 @@ static void setup_terminal(struct iolog_info *li, bool interactive, bool resize)
     isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
     (s)[5] == '/' && \
     isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
-    (s)[8] == '/' && (s)[9] == 'l' && (s)[10] == 'o' && (s)[11] == 'g' && \
-    (s)[12] == '\0')
+    (s)[8] == '\0')
 
 __dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])
 {
-    int ch, fd, i, iolog_dir_fd, len, exitcode = EXIT_FAILURE;
+    int ch, i, iolog_dir_fd, len, exitcode = EXIT_FAILURE;
     bool def_filter = true, listonly = false;
     bool interactive = true, suspend_wait = false, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
@@ -215,7 +211,6 @@ main(int argc, char *argv[])
     struct iolog_info *li;
     struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
-    FILE *fp;
     debug_decl(main, SUDO_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -262,6 +257,9 @@ main(int argc, char *argv[])
 		else
 		    sudo_fatalx(U_("invalid filter option: %s"), optarg);
 	    }
+	    break;
+	case 'F':
+	    follow_mode = true;
 	    break;
 	case 'h':
 	    help();
@@ -363,12 +361,8 @@ main(int argc, char *argv[])
     }
 
     /* Parse log file. */
-    fd = openat(iolog_dir_fd, "log", O_RDONLY, 0);
-    if (fd == -1 || (fp = fdopen(fd, "r")) == NULL)
-	sudo_fatal(U_("unable to open %s/%s"), iolog_dir, "log");
-    if ((li = iolog_parse_loginfo(fp, iolog_dir)) == NULL)
+    if ((li = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
 	goto done;
-    fclose(fp);
     printf(_("Replaying sudo session: %s"), li->cmd);
 
     /* Setup terminal if appropriate. */
@@ -723,32 +717,75 @@ restore_terminal_size(void)
     debug_return;
 }
 
+static bool
+iolog_complete(struct replay_closure *closure)
+{
+    struct stat sb;
+    debug_decl(iolog_complete, SUDO_DEBUG_UTIL);
+
+    if (fstatat(closure->iolog_dir_fd, "timing", &sb, 0) != -1) {
+	if (ISSET(sb.st_mode, S_IWUSR|S_IWGRP|S_IWOTH))
+	    debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
 /*
  * Read the next record from the timing file and schedule a delay
  * event with the specified timeout.
+ * In follow mode, ignore EOF and just delay for a short time.
  * Return 0 on success, 1 on EOF and -1 on error.
  */
 static int
 get_timing_record(struct replay_closure *closure)
 {
     struct timing_closure *timing = &closure->timing;
-    int ret;
+    bool nodelay = false;
     debug_decl(get_timing_record, SUDO_DEBUG_UTIL);
 
-    if ((ret = iolog_read_timing_record(&iolog_files[IOFD_TIMING], timing)) != 0)
-	debug_return_int(ret);
-
-    /* Record number bytes to read. */
-    if (timing->event != IO_EVENT_WINSIZE &&
-	timing->event != IO_EVENT_SUSPEND) {
-    	closure->iobuf.len = 0;
-    	closure->iobuf.off = 0;
-    	closure->iobuf.lastc = '\0';
-    	closure->iobuf.toread = timing->u.nbytes;
+    if (follow_mode && timing->event == IO_EVENT_COUNT) {
+	/* In follow mode, we already waited. */
+	nodelay = true;
     }
 
-    /* Adjust delay using speed factor and max_delay. */
-    iolog_adjust_delay(&timing->delay, closure->max_delay, speed_factor);
+    switch (iolog_read_timing_record(&iolog_files[IOFD_TIMING], timing)) {
+    case -1:
+	/* error */
+	debug_return_int(-1);
+    case 1:
+	/* EOF */
+	if (!follow_mode || iolog_complete(closure)) {
+	    debug_return_int(1);
+	}
+	/* Follow mode, keep reading until done. */
+	iolog_clearerr(&iolog_files[IOFD_TIMING]);
+	timing->delay.tv_sec = 0;
+	timing->delay.tv_nsec = 1000000;
+	timing->iol = NULL;
+	timing->event = IO_EVENT_COUNT;
+	break;
+    default:
+	/* Record number bytes to read. */
+	if (timing->event != IO_EVENT_WINSIZE &&
+		timing->event != IO_EVENT_SUSPEND) {
+	    closure->iobuf.len = 0;
+	    closure->iobuf.off = 0;
+	    closure->iobuf.lastc = '\0';
+	    closure->iobuf.toread = timing->u.nbytes;
+	}
+
+	if (nodelay) {
+	    /* Already waited, fire immediately. */
+	    timing->delay.tv_sec = 0;
+	    timing->delay.tv_nsec = 0;
+	} else {
+	    /* Adjust delay using speed factor and max_delay. */
+	    iolog_adjust_delay(&timing->delay, closure->max_delay,
+		speed_factor);
+	}
+	break;
+    }
 
     /* Schedule the delay event. */
     if (sudo_ev_add(closure->evbase, closure->delay_ev, &timing->delay, false) == -1)
@@ -1176,6 +1213,11 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 		goto bad;
 	    type = ST_RUNASGROUP;
 	    break;
+	case 'h': /* host */
+	    if (strncmp(*av, "host", strlen(*av)) != 0)
+		goto bad;
+	    type = ST_HOST;
+	    break;
 	case 'r': /* runas user */
 	    if (strncmp(*av, "runas", strlen(*av)) != 0)
 		goto bad;
@@ -1229,8 +1271,9 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 		if (regcomp(&sn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
 		    sudo_fatalx(U_("invalid regular expression: %s"), *av);
 	    } else if (type == ST_TODATE || type == ST_FROMDATE) {
-		sn->u.tstamp = get_date(*av);
-		if (sn->u.tstamp == -1)
+		sn->u.tstamp.tv_sec = get_date(*av);
+		sn->u.tstamp.tv_nsec = 0;
+		if (sn->u.tstamp.tv_sec == -1)
 		    sudo_fatalx(U_("could not parse date \"%s\""), *av);
 	    } else {
 		sn->u.ptr = *av;
@@ -1263,20 +1306,28 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
 	    res = match_expr(&sn->u.expr, log, matched);
 	    break;
 	case ST_CWD:
-	    res = strcmp(sn->u.cwd, log->cwd) == 0;
+	    if (log->cwd != NULL)
+		res = strcmp(sn->u.cwd, log->cwd) == 0;
+	    break;
+	case ST_HOST:
+	    if (log->host != NULL)
+		res = strcmp(sn->u.host, log->host) == 0;
 	    break;
 	case ST_TTY:
-	    res = strcmp(sn->u.tty, log->tty) == 0;
+	    if (log->tty != NULL)
+		res = strcmp(sn->u.tty, log->tty) == 0;
 	    break;
 	case ST_RUNASGROUP:
 	    if (log->runas_group != NULL)
 		res = strcmp(sn->u.runas_group, log->runas_group) == 0;
 	    break;
 	case ST_RUNASUSER:
-	    res = strcmp(sn->u.runas_user, log->runas_user) == 0;
+	    if (log->runas_user != NULL)
+		res = strcmp(sn->u.runas_user, log->runas_user) == 0;
 	    break;
 	case ST_USER:
-	    res = strcmp(sn->u.user, log->user) == 0;
+	    if (log->user != NULL)
+		res = strcmp(sn->u.user, log->user) == 0;
 	    break;
 	case ST_PATTERN:
 	    rc = regexec(&sn->u.cmdre, log->cmd, 0, NULL, 0);
@@ -1288,10 +1339,10 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
 	    res = rc == REG_NOMATCH ? 0 : 1;
 	    break;
 	case ST_FROMDATE:
-	    res = log->tstamp >= sn->u.tstamp;
+	    res = sudo_timespeccmp(&log->tstamp, &sn->u.tstamp, >=);
 	    break;
 	case ST_TODATE:
-	    res = log->tstamp <= sn->u.tstamp;
+	    res = sudo_timespeccmp(&log->tstamp, &sn->u.tstamp, <=);
 	    break;
 	default:
 	    sudo_fatalx(U_("unknown search type %d"), sn->type);
@@ -1306,28 +1357,23 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
 }
 
 static int
-list_session(char *logfile, regex_t *re, const char *user, const char *tty)
+list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
     struct iolog_info *li = NULL;
     const char *timestr;
     int ret = -1;
-    FILE *fp;
     debug_decl(list_session, SUDO_DEBUG_UTIL);
 
-    if ((fp = fopen(logfile, "r")) == NULL) {
-	sudo_warn("%s", logfile);
-	goto done;
-    }
-    if ((li = iolog_parse_loginfo(fp, logfile)) == NULL)
+    if ((li = iolog_parse_loginfo(-1, log_dir)) == NULL)
 	goto done;
 
     /* Match on search expression if there is one. */
     if (!STAILQ_EMPTY(&search_expr) && !match_expr(&search_expr, li, true))
 	goto done;
 
-    /* Convert from /var/log/sudo-sessions/00/00/01/log to 000001 */
-    cp = logfile + strlen(session_dir) + 1;
+    /* Convert from /var/log/sudo-sessions/00/00/01 to 000001 */
+    cp = log_dir + strlen(session_dir) + 1;
     if (IS_IDLOG(cp)) {
 	idbuf[0] = cp[0];
 	idbuf[1] = cp[1];
@@ -1338,24 +1384,23 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 	idbuf[6] = '\0';
 	idstr = idbuf;
     } else {
-	/* Not an id, just use the iolog_file portion. */
-	cp[strlen(cp) - 4] = '\0';
+	/* Not an id, use as-is. */
 	idstr = cp;
     }
     /* XXX - print lines + cols? */
-    timestr = get_timestr(li->tstamp, 1);
+    timestr = get_timestr(li->tstamp.tv_sec, 1);
     printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
 	timestr ? timestr : "invalid date",
 	li->user, li->tty, li->cwd, li->runas_user);
     if (li->runas_group)
 	printf("GROUP=%s ; ", li->runas_group);
+    if (li->host)
+	printf("HOST=%s ; ", li->host);
     printf("TSID=%s ; COMMAND=%s\n", idstr, li->cmd);
 
     ret = 0;
 
 done:
-    if (fp != NULL)
-	fclose(fp);
     iolog_free_loginfo(li);
     debug_return_int(ret);
 }
@@ -1445,9 +1490,10 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 
 	    /* Check for dir with a log file. */
 	    if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
+		pathbuf[sdlen + len - 4] = '\0';
 		list_session(pathbuf, re, user, tty);
 	    } else {
-		/* Strip off "/log" and recurse if a dir. */
+		/* Strip off "/log" and recurse if a non-log dir. */
 		pathbuf[sdlen + len - 4] = '\0';
 		if (checked_type ||
 		    (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
@@ -1572,7 +1618,7 @@ usage(int fatal)
 	_("usage: %s [-h] [-d dir] -l [search expression]\n"),
 	getprogname());
     if (fatal)
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -1591,7 +1637,7 @@ help(void)
 	"  -S, --suspend-wait     wait while the command was suspended\n"
 	"  -s, --speed=num        speed up or slow down output\n"
 	"  -V, --version          display version information and exit"));
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 /*

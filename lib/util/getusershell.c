@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,19 +23,13 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
-#define DEFAULT_TEXT_DOMAIN     "sudo"
-#include "sudo_gettext.h"       /* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
+#include "sudo_gettext.h"
 #include "sudo_util.h"
 
 static char **allowed_shells, **current_shell;

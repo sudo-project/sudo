@@ -82,7 +82,7 @@ freadall(const char *file_path, char *output, size_t max_len)
     }
 
     if (!feof(file)) {
-        printf("File '%s' was bigger than allocated buffer %lu", file_path, max_len);
+        printf("File '%s' was bigger than allocated buffer %zu", file_path, max_len);
         goto cleanup;
     }
 
@@ -141,31 +141,23 @@ char *
 str_replaced(const char *source, size_t dest_len, const char *old, const char *new)
 {
     char *result = calloc(1, dest_len);
+    char *dest = result;
     char *pos = NULL;
     size_t old_len = strlen(old);
-    size_t new_len = strlen(new);
-    size_t available_len = dest_len;
 
     while ((pos = strstr(source, old)) != NULL) {
-        size_t skipped_len = (size_t)(pos - source);
-        if (available_len <= skipped_len + 1)
+        size_t len = snprintf(dest, dest_len,
+            "%.*s%s", (int)(pos - source), source, new);
+        if (len >= dest_len)
             goto fail;
 
-        available_len -= skipped_len;
-        strncat(result, source, skipped_len);
-
-        if (available_len <= new_len + 1)
-            goto fail;
-
-        available_len -= new_len;
-        strcat(result, new);
-
+        dest_len -= len;
+        dest += len;
         source = pos + old_len;
     }
 
-    if (available_len <= strlen(source) + 1)
+    if (strlcpy(dest, source, dest_len) >= dest_len)
         goto fail;
-    strcat(result, source);
 
     return result;
 

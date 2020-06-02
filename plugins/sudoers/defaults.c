@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2007-2018
+ * Copyright (c) 1999-2005, 2007-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -28,18 +28,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
-#include <pwd.h>
 #include <ctype.h>
 #include <syslog.h>
 
@@ -514,6 +507,10 @@ init_defaults(void)
     def_env_reset = ENV_RESET;
     def_set_logname = true;
     def_closefrom = STDERR_FILENO + 1;
+    def_pam_ruser = true;
+#ifdef __sun__
+    def_pam_rhost = true;
+#endif
     if ((def_pam_service = strdup("sudo")) == NULL)
 	goto oom;
 #ifdef HAVE_PAM_LOGIN
@@ -564,6 +561,7 @@ init_defaults(void)
     def_compress_io = true;
 #endif
     def_log_server_timeout = 30;
+    def_log_server_verify = true;
     def_log_server_keepalive = true;
     def_ignore_audit_errors = true;
     def_ignore_iolog_errors = false;

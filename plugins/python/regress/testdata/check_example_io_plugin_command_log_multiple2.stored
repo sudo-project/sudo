@@ -1,9 +1,9 @@
  -- Plugin STARTED --
 EXEC whoami
-EXEC info [
+EXEC info \[
     "command=/bin/whoami",
     "runas_uid=1"
-]
+\]
 STD IN stdin for plugin 2
 STD OUT stdout for plugin 2
 STD ERR stderr for plugin 2

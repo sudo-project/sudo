@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -171,8 +171,8 @@ sub mkdep {
 	    # We have both .lo and .o files, only the .lo should be used
 	    warn "$file: $obj should be $1.lo\n";
 	} else {
-	    # Use old depenencies when mapping objects to their source.
-	    # If no old depenency, use the MANIFEST file to find the source.
+	    # Use old dependencies when mapping objects to their source.
+	    # If no old dependency, use the MANIFEST file to find the source.
 	    my $src = $1 . '.c';
 	    my $ext = $2;
 	    if (exists $old_deps{$obj}) {
@@ -250,8 +250,8 @@ sub find_depends {
     close(FILE);
 
     # find all headers
-    while ($code =~ /^#\s*include\s+["<](\S+)[">]/mg) {
-	my ($hdr, $hdr_path) = find_header($1);
+    while ($code =~ /^\s*#\s*include\s+["<](\S+)[">]/mg) {
+	my ($hdr, $hdr_path) = find_header($src, $1);
 	if (defined($hdr)) {
 	    $headers{$hdr} = 1;
 	    # Look for other includes in the .h file
@@ -267,7 +267,8 @@ sub find_depends {
 # find the path to a header file
 # returns path or undef if not found
 sub find_header {
-    my $hdr = $_[0];
+    my $src = $_[0];
+    my $hdr = $_[1];
 
     # Look for .h.in files in top_builddir and build dir
     return ("\$(top_builddir\)/$hdr", "./${hdr}.in") if -r "./${hdr}.in";
@@ -285,6 +286,17 @@ sub find_header {
 	    $hdr_path =~ s/\$[\(\{]$_[\)\}]/$dir_vars{$_}/g;
 	}
 	return ("$inc/$hdr", $hdr_path) if -r $hdr_path;
+    }
+    # Check path relative to src dir (XXX - should be for "include" only)
+    if ($src =~ m#^(.*)/[^/]+$# && -r "$1/$hdr") {
+	my $hdr_path = "$1/$hdr";
+	$hdr_path =~ s#/[^/]+/\.\.##g;	# resolve ..
+	my $hdr_pretty = $hdr_path;
+	foreach (sort { length($dir_vars{$b}) <=> length($dir_vars{$a}) } keys %dir_vars) {
+	    next if $_ eq "devdir";
+	    $hdr_pretty =~ s/$dir_vars{$_}/\$($_)/;
+	}
+	return ($hdr_pretty, $hdr_path);
     }
 
     undef;

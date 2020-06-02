@@ -23,24 +23,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-#include <stdio.h>
+#include <sys/resource.h>
+
 #include <stdlib.h>
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
-#include <time.h>
-#include <unistd.h>
-#include <errno.h>
 #include <poll.h>
+#include <time.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"
@@ -81,29 +68,49 @@ sudo_ev_base_free_impl(struct sudo_event_base *base)
 int
 sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 {
+    static int nofile_max = -1;
     struct pollfd *pfd;
     debug_decl(sudo_ev_add_impl, SUDO_DEBUG_EVENT);
+
+    if (nofile_max == -1) {
+	struct rlimit rlim;
+	if (getrlimit(RLIMIT_NOFILE, &rlim) == 0) {
+	    nofile_max = rlim.rlim_cur;
+	}
+    }
 
     /* If out of space in pfds array, realloc. */
     if (base->pfd_free == base->pfd_max) {
 	struct pollfd *pfds;
-	int i;
+	int i, new_max;
 
-	pfds =
-	    reallocarray(base->pfds, base->pfd_max, 2 * sizeof(struct pollfd));
+	/* Don't allow pfd_max to go over RLIM_NOFILE */
+	new_max = base->pfd_max * 2;
+	if (new_max > nofile_max)
+	    new_max = nofile_max;
+	if (base->pfd_free == new_max) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: out of fds (max %d)", __func__, nofile_max);
+	    debug_return_int(-1);
+	}
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "%s: pfd_max %d -> %d", __func__, base->pfd_max, new_max);
+	pfds = reallocarray(base->pfds, new_max, sizeof(struct pollfd));
 	if (pfds == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: unable to allocate %d pollfds", __func__, base->pfd_max * 2);
+		"%s: unable to allocate %d pollfds", __func__, new_max);
 	    debug_return_int(-1);
 	}
 	base->pfds = pfds;
-	base->pfd_max *= 2;
+	base->pfd_max = new_max;
 	for (i = base->pfd_free; i < base->pfd_max; i++) {
 	    base->pfds[i].fd = -1;
 	}
     }
 
     /* Fill in pfd entry. */
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"%s: choosing free slot %d", __func__, base->pfd_free);
     ev->pfd_idx = base->pfd_free;
     pfd = &base->pfds[ev->pfd_idx];
     pfd->fd = ev->fd;
@@ -133,8 +140,11 @@ sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
 
     /* Mark pfd entry unused, add to free list and adjust high slot. */
     base->pfds[ev->pfd_idx].fd = -1;
-    if (ev->pfd_idx < base->pfd_free)
+    if (ev->pfd_idx < base->pfd_free) {
 	base->pfd_free = ev->pfd_idx;
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "%s: new free slot %d", __func__, base->pfd_free);
+    }
     while (base->pfd_high >= 0 && base->pfds[base->pfd_high].fd == -1)
 	base->pfd_high--;
 
@@ -182,16 +192,20 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
     }
 
     nready = sudo_ev_poll(base->pfds, base->pfd_high + 1, timeout);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready", __func__, nready);
     switch (nready) {
     case -1:
-	/* Error or interrupted by signal. */
-	debug_return_int(-1);
+	/* Error: EINTR (signal) or EINVAL (nfds > RLIMIT_NOFILE) */
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "sudo_ev_poll");
+	break;
     case 0:
 	/* Front end will activate timeout events. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: timeout", __func__);
 	break;
     default:
 	/* Activate each I/O event that fired. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready", __func__,
+	    nready);
 	TAILQ_FOREACH(ev, &base->events, entries) {
 	    if (ev->pfd_idx != -1 && base->pfds[ev->pfd_idx].revents) {
 		int what = 0;

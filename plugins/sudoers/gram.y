@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2018
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -24,22 +24,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#elif defined(HAVE_INTTYPES_H)
-# include <inttypes.h>
-#endif
 #if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
 # include <alloca.h>
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
@@ -70,7 +59,7 @@ struct sudoers_parse_tree parsed_policy = {
 };
 
 /*
- * Local protoypes
+ * Local prototypes
  */
 static void init_options(struct command_options *opts);
 static bool add_defaults(int, struct member *, struct defaults *);
@@ -103,6 +92,8 @@ static struct command_digest *new_digest(int, char *);
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  WORD			/* a word */
 %token <string>  DIGEST			/* a SHA-2 digest */
+%token <tok>	 INCLUDE		/* @include */
+%token <tok>	 INCLUDEDIR		/* @includedir */
 %token <tok>	 DEFAULTS		/* Defaults entry */
 %token <tok>	 DEFAULTS_HOST		/* Host-specific defaults entry */
 %token <tok>	 DEFAULTS_USER		/* User-specific defaults entry */
@@ -174,7 +165,8 @@ static struct command_digest *new_digest(int, char *);
 %type <string>	  timeoutspec
 %type <string>	  notbeforespec
 %type <string>	  notafterspec
-%type <digest>	  digest
+%type <digest>	  digestspec
+%type <digest>	  digestlist
 
 %%
 
@@ -191,6 +183,20 @@ entry		:	COMMENT {
 			}
                 |       error COMMENT {
 			    yyerrok;
+			}
+		|	INCLUDE WORD {
+			    if (!push_include($2, false)) {
+				free($2);
+				YYERROR;
+			    }
+			    free($2);
+			}
+		|	INCLUDEDIR WORD {
+			    if (!push_include($2, true)) {
+				free($2);
+				YYERROR;
+			    }
+			    free($2);
 			}
 		|	userlist privileges {
 			    if (!add_userspec($1, $2)) {
@@ -451,7 +457,7 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			}
 		;
 
-digest		:	SHA224_TOK ':' DIGEST {
+digestspec	:	SHA224_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA224, $3);
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -481,16 +487,33 @@ digest		:	SHA224_TOK ':' DIGEST {
 			}
 		;
 
+digestlist	:	digestspec
+		|	digestlist ',' digestspec {
+			    HLTQ_CONCAT($1, $3, entries);
+			    $$ = $1;
+			}
+		;
+
 digcmnd		:	opcmnd {
 			    $$ = $1;
 			}
-		|	digest opcmnd {
-			    if ($2->type != COMMAND) {
+		|	digestlist opcmnd {
+			    struct sudo_command *c =
+				(struct sudo_command *) $2->name;
+
+			    if ($2->type != COMMAND && $2->type != ALL) {
 				sudoerserror(N_("a digest requires a path name"));
 				YYERROR;
 			    }
-			    /* XXX - yuck */
-			    ((struct sudo_command *) $2->name)->digest = $1;
+			    if (c == NULL) {
+				/* lazy-allocate sudo_command for ALL */
+				if ((c = new_command(NULL, NULL)) == NULL) {
+				    sudoerserror(N_("unable to allocate memory"));
+				    YYERROR;
+				}
+				$2->name = (char *)c;
+			    }
+			    HLTQ_TO_TAILQ(&c->digests, $1, entries);
 			    $$ = $2;
 			}
 		;
@@ -723,13 +746,12 @@ cmnd		:	ALL {
 			    }
 			}
 		|	COMMAND {
-			    struct sudo_command *c = calloc(1, sizeof(*c));
-			    if (c == NULL) {
+			    struct sudo_command *c;
+
+			    if ((c = new_command($1.cmnd, $1.args)) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
-			    c->cmnd = $1.cmnd;
-			    c->args = $1.args;
 			    $$ = new_member((char *)c, COMMAND);
 			    if ($$ == NULL) {
 				free(c);
@@ -979,6 +1001,24 @@ new_member(char *name, int type)
 
     debug_return_ptr(m);
 }
+static struct sudo_command *
+new_command(char *cmnd, char *args)
+{
+    struct sudo_command *c;
+    debug_decl(new_command, SUDOERS_DEBUG_PARSER);
+
+    if ((c = calloc(1, sizeof(*c))) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	debug_return_ptr(NULL);
+    }
+
+    c->cmnd = cmnd;
+    c->args = args;
+    TAILQ_INIT(&c->digests);
+
+    debug_return_ptr(c);
+}
 
 static struct command_digest *
 new_digest(int digest_type, char *digest_str)
@@ -992,6 +1032,7 @@ new_digest(int digest_type, char *digest_str)
 	debug_return_ptr(NULL);
     }
 
+    HLTQ_INIT(digest, entries);
     digest->digest_type = digest_type;
     digest->digest_str = digest_str;
     if (digest->digest_str == NULL) {
@@ -1079,14 +1120,16 @@ free_member(struct member *m)
 {
     debug_decl(free_member, SUDOERS_DEBUG_PARSER);
 
-    if (m->type == COMMAND) {
-	    struct sudo_command *c = (struct sudo_command *)m->name;
-	    free(c->cmnd);
-	    free(c->args);
-	    if (c->digest != NULL) {
-		free(c->digest->digest_str);
-		free(c->digest);
-	    }
+    if (m->type == COMMAND || (m->type == ALL && m->name != NULL)) {
+	struct command_digest *digest;
+	struct sudo_command *c = (struct sudo_command *)m->name;
+	free(c->cmnd);
+	free(c->args);
+	while ((digest = TAILQ_FIRST(&c->digests)) != NULL) {
+	    TAILQ_REMOVE(&c->digests, digest, entries);
+	    free(digest->digest_str);
+	    free(digest);
+	}
     }
     free(m->name);
     free(m);

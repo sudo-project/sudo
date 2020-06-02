@@ -25,11 +25,12 @@
 
 #ifdef HAVE_SOLARIS_AUDIT
 
-#include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <unistd.h>
 
 #include <bsm/adt.h>
 #include <bsm/adt_event.h>
@@ -130,7 +131,7 @@ solaris_audit_failure(int argc, char *argv[], char const *const fmt, va_list ap)
 	adt_free_event(event);
 	(void) adt_end_session(ah);
 
-	return 0;
+	return rc;
 }
 
 #endif /* HAVE_SOLARIS_AUDIT */

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,17 +23,10 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
-#include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -214,12 +207,15 @@ exec_setup(struct command_details *details, int errfd)
      * specifies a different cwd.  Must be done after uid change.
      */
     if (details->cwd != NULL) {
-	if (details->chroot || user_details.cwd == NULL ||
+	if (details->chroot != NULL || user_details.cwd == NULL ||
 	    strcmp(details->cwd, user_details.cwd) != 0) {
 	    /* Note: cwd is relative to the new root, if any. */
-	    if (chdir(details->cwd) != 0) {
+	    if (chdir(details->cwd) == -1) {
 		sudo_warn(U_("unable to change directory to %s"), details->cwd);
-		goto done;
+		if (!details->cwd_optional)
+		    goto done;
+		if (details->chroot != NULL)
+		    sudo_warnx(U_("starting from %s"), "/");
 	    }
 	}
     }
@@ -338,7 +334,31 @@ sudo_needs_pty(struct command_details *details)
 }
 
 /*
- * Execute a command, potentially in a pty with I/O loggging, and
+ * If we are not running the command in a pty, we were not invoked as
+ * sudoedit, there is no command timeout and there is no close function,
+ * sudo can exec the command directly (and not wait).
+ */
+static bool
+direct_exec_allowed(struct command_details *details)
+{
+    struct plugin_container *plugin;
+    debug_decl(direct_exec_allowed, SUDO_DEBUG_EXEC);
+
+    /* Assumes sudo_needs_pty() was already checked. */
+    if (ISSET(details->flags, CD_SET_TIMEOUT|CD_SUDOEDIT) ||
+	    policy_plugin.u.policy->close != NULL)
+	debug_return_bool(false);
+
+    TAILQ_FOREACH(plugin, &audit_plugins, entries) {
+	if (plugin->u.audit->close != NULL)
+	    debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Execute a command, potentially in a pty with I/O logging, and
  * wait for it to finish.
  * This is a little bit tricky due to how POSIX job control works and
  * we fact that we have two different controlling terminals to deal with.
@@ -363,7 +383,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		/* parent exits (but does not flush buffers) */
 		sudo_debug_exit_int(__func__, __FILE__, __LINE__,
 		    sudo_debug_subsys, 0);
-		_exit(0);
+		_exit(EXIT_SUCCESS);
 	}
     }
 
@@ -384,12 +404,10 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     }
 
     /*
-     * If we are not running the command in a pty, we were not invoked
-     * as sudoedit, there is no command timeout and there is no close
-     * function, just exec directly.  Only returns on error.
+     * If we are not running the command in a pty, we may be able to
+     * exec directly, depending on the plugins used.
      */
-    if (!ISSET(details->flags, CD_SET_TIMEOUT|CD_SUDOEDIT) &&
-	policy_plugin.u.policy->close == NULL) {
+    if (direct_exec_allowed(details)) {
 	if (!sudo_terminated(cstat)) {
 	    exec_cmnd(details, -1);
 	    cstat->type = CMD_ERRNO;

@@ -31,22 +31,9 @@
 #ifdef HAVE_SYS_SELECT_H
 # include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
-#include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <time.h>
-#include <unistd.h>
-#include <errno.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"
@@ -234,7 +221,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
     switch (nready) {
     case -1:
 	/* Error or interrupted by signal. */
-	debug_return_int(-1);
+	break;
     case 0:
 	/* Front end will activate timeout events. */
 	break;

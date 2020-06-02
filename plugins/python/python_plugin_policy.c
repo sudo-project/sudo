@@ -42,11 +42,12 @@ extern struct policy_plugin python_policy;
             (void **)&CALLBACK_PLUGINFUNC(function_name)); \
     } while(0)
 
+
 static int
 python_plugin_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], char * const user_env[],
-    char * const plugin_options[])
+    char * const plugin_options[], const char **errstr)
 {
     debug_decl(python_plugin_policy_open, PYTHON_DEBUG_CALLBACKS);
 
@@ -60,18 +61,18 @@ python_plugin_policy_open(unsigned int version, sudo_conv_t conversation,
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 
-    rc = python_plugin_init(&plugin_ctx, plugin_options);
+    rc = python_plugin_init(&plugin_ctx, plugin_options, version);
     if (rc != SUDO_RC_OK)
         debug_return_int(rc);
 
     rc = python_plugin_construct(&plugin_ctx, PY_POLICY_PLUGIN_VERSION, settings,
                                  user_info, user_env, plugin_options);
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     if (rc != SUDO_RC_OK) {
         debug_return_int(rc);
     }
 
     // skip plugin callbacks which are not mandatory
-    MARK_CALLBACK_OPTIONAL(show_version);
     MARK_CALLBACK_OPTIONAL(list);
     MARK_CALLBACK_OPTIONAL(validate);
     MARK_CALLBACK_OPTIONAL(invalidate);
@@ -85,13 +86,15 @@ static void
 python_plugin_policy_close(int exit_status, int error)
 {
     debug_decl(python_plugin_policy_close, PYTHON_DEBUG_CALLBACKS);
-    python_plugin_close(&plugin_ctx, CALLBACK_PYNAME(close), exit_status, error);
+    python_plugin_close(&plugin_ctx, CALLBACK_PYNAME(close),
+                        Py_BuildValue("(ii)", error == 0 ? exit_status : -1, error));
+    debug_return;
 }
 
 static int 
 python_plugin_policy_check(int argc, char * const argv[],
     char *env_add[], char **command_info_out[],
-    char **argv_out[], char **user_env_out[])
+    char **argv_out[], char **user_env_out[], const char **errstr)
 {
     debug_decl(python_plugin_policy_check, PYTHON_DEBUG_CALLBACKS);
     int rc = SUDO_RC_ERROR;
@@ -113,6 +116,7 @@ python_plugin_policy_check(int argc, char * const argv[],
 
     py_result = python_plugin_api_call(&plugin_ctx, CALLBACK_PYNAME(check_policy),
                                       Py_BuildValue("(OO)", py_argv, py_env_add));
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     if (py_result == NULL)
         goto cleanup;
 
@@ -167,7 +171,7 @@ cleanup:
 }
 
 static int
-python_plugin_policy_list(int argc, char * const argv[], int verbose, const char *list_user)
+python_plugin_policy_list(int argc, char * const argv[], int verbose, const char *list_user, const char **errstr)
 {
     debug_decl(python_plugin_policy_list, PYTHON_DEBUG_CALLBACKS);
 
@@ -175,7 +179,7 @@ python_plugin_policy_list(int argc, char * const argv[], int verbose, const char
 
     PyObject *py_argv = py_str_array_to_tuple_with_count(argc, argv);
     if (py_argv == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: Failed to create argv argument for the python call\n", __PRETTY_FUNCTION__);
+        sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: Failed to create argv argument for the python call\n", __func__);
         debug_return_int(SUDO_RC_ERROR);
     }
 
@@ -183,6 +187,8 @@ python_plugin_policy_list(int argc, char * const argv[], int verbose, const char
         Py_BuildValue("(Oiz)", py_argv, verbose, list_user));
 
     Py_XDECREF(py_argv);
+
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     debug_return_int(rc);
 }
 
@@ -193,21 +199,18 @@ python_plugin_policy_version(int verbose)
 
     PyThreadState_Swap(plugin_ctx.py_interpreter);
 
-    if (verbose) {
-        py_sudo_log(SUDO_CONV_INFO_MSG, "Python policy plugin API version %d.%d\n", "%d.%d",
-                    SUDO_API_VERSION_GET_MAJOR(PY_POLICY_PLUGIN_VERSION),
-                    SUDO_API_VERSION_GET_MINOR(PY_POLICY_PLUGIN_VERSION));
-    }
-
-    debug_return_int(python_plugin_show_version(&plugin_ctx, CALLBACK_PYNAME(show_version), verbose));
+    debug_return_int(python_plugin_show_version(&plugin_ctx, CALLBACK_PYNAME(show_version),
+                                                verbose, PY_POLICY_PLUGIN_VERSION, "policy"));
 }
 
 int
-python_plugin_policy_validate(void)
+python_plugin_policy_validate(const char **errstr)
 {
     debug_decl(python_plugin_policy_validate, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(plugin_ctx.py_interpreter);
-    debug_return_int(python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(validate), NULL));
+    int rc = python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(validate), NULL);
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
+    debug_return_int(rc);
 }
 
 void
@@ -221,7 +224,7 @@ python_plugin_policy_invalidate(int remove)
 }
 
 int
-python_plugin_policy_init_session(struct passwd *pwd, char **user_env[])
+python_plugin_policy_init_session(struct passwd *pwd, char **user_env[], const char **errstr)
 {
     debug_decl(python_plugin_policy_init_session, PYTHON_DEBUG_CALLBACKS);
     int rc = SUDO_RC_ERROR;
@@ -238,6 +241,7 @@ python_plugin_policy_init_session(struct passwd *pwd, char **user_env[])
 
     py_result = python_plugin_api_call(&plugin_ctx, CALLBACK_PYNAME(init_session),
         Py_BuildValue("(OO)", py_pwd, py_user_env));
+    CALLBACK_SET_ERROR(&plugin_ctx, errstr);
     if (py_result == NULL)
         goto cleanup;
 

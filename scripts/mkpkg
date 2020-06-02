@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -88,9 +88,10 @@ while test $# -gt 0; do
     shift
 done
 
-top_srcdir=`dirname $0`
+scriptdir=`dirname $0`
+configure="${scriptdir}/../configure"
 
-: ${osversion="`$top_srcdir/pp --probe`"}
+: ${osversion="`$scriptdir/pp --probe`"}
 test -n "$osversion" || exit 1
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 : ${MAKE=make}
@@ -139,11 +140,16 @@ if [ "$crossbuild" = "false" ]; then
 	    ;;
 	sol[0-9]*)
 	    # Use the Sun Studio C compiler on Solaris if possible
-	    if [ -z "$CC" -a -x /usr/bin/cc ]; then
-		CC=/usr/bin/cc; export CC
-		if [ -z "$CFLAGS" ]; then
-		    CFLAGS=-O; export CFLAGS
-		fi
+	    if [ -z "$CC" ]; then
+		for f in /opt/developerstudio12.[9876]/bin/cc /opt/solarisstudio12.[43]/bin/cc; do
+		    if [ -x $f ]; then
+			CC=$f; export CC
+			if [ -z "$CFLAGS" ]; then
+			    CFLAGS=-O; export CFLAGS
+			fi
+			break
+		    fi
+		done
 	    fi
 	    ;;
     esac
@@ -152,6 +158,12 @@ fi
 # Give configure a hint that we are building a package.
 # Some libc functions are only available on certain OS revisions.
 configure_opts="${configure_opts}${configure_opts+$tab}--enable-package-build"
+
+# Some systems don't have a recent enough OpenSSL for the I/O log server.
+with_openssl=false
+
+# Not all systems have Python 3.
+with_python=false
 
 # Choose configure options by osversion.
 # We use the same configure options as vendor packages when possible.
@@ -173,6 +185,12 @@ case "$osversion" in
 			    with_sssd=true
 			    # RHEL 6 and above use /etc/sudo-ldap.conf
 			    with_sudo_ldap_conf=true
+			    # Encrypted remote I/O log support.
+			    with_openssl=true
+			fi
+			if [ $osmajor -ge 7 ]; then
+			    # Python plugins
+			    with_python=true
 			fi
 		    fi
 		fi
@@ -183,6 +201,7 @@ case "$osversion" in
 		with_linux_audit=true
 		with_pam_login=true
 		with_sssd=true
+		with_openssl=true
 		;;
 	esac
 
@@ -223,9 +242,15 @@ case "$osversion" in
 	;;
     sles*)
 	if [ $osrelease -ge 10 ]; then
-	    # SLES 11 and higher has SELinux
 	    if [ $osrelease -ge 11 ]; then
+		# SLES 11 and higher have SELinux
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
+	    fi
+	    if [ $osrelease -ge 12 ]; then
+		# Encrypted remote I/O log support.
+		with_openssl=true
+		# Python plugins
+		with_python=true
 	    fi
 	fi
 	# SuSE doesn't have /usr/libexec
@@ -256,6 +281,10 @@ case "$osversion" in
 	make_opts="${make_opts}${make_opts+ }"'docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
+	# Encrypted remote I/O log support.
+	with_openssl=true
+	# Python plugins
+	with_python=true
 	# Man pages should be compressed in .deb files
 	export MANCOMPRESS='gzip -9'
 	export MANCOMPRESSEXT='.gz'
@@ -311,13 +340,14 @@ case "$osversion" in
 	PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
 	;;
     macos*)
+	# TODO: openssl (homebrew?)
 	case "$osversion" in
 	    macos10[0-6]-i386|macos10[0-6]-x86_64)
 		# Build intel universal binaries for 10.6 and below
 		ARCH_FLAGS="-arch i386 -arch x86_64"
 		;;
 	esac
-	if test "${osversion}" != "`$top_srcdir/pp --probe`"; then
+	if test "${osversion}" != "`$scriptdir/pp --probe`"; then
 	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
 	    # SDKs may be under Xcode.app or CommandLineTools (for non-Xcode)
 	    if [ -d "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs" ]; then
@@ -352,6 +382,7 @@ case "$osversion" in
 		$configure_opts"
 	;;
     aix*)
+	# TODO: openssl (AIX freeware?)
 	# Use -gxcoff with gcc instead of -g for dbx-style debugging symbols.
 	if test -z "$CC" && gcc -v >/dev/null 2>&1; then
 	    CFLAGS="-O2 -gxcoff"; export CFLAGS
@@ -381,10 +412,13 @@ case "$osversion" in
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-project"
 
 		if [ $osrelease -ge 11 ]; then
-		    configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
+		    configure_opts="${configure_opts}${configure_opts+$tab}--with-solaris-audit"
+		    # Encrypted remote I/O log support.
+		    with_openssl=true
 		fi
 		;;
 	    *)
+		# TODO: openssl
 		configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls"
 		;;
 	esac
@@ -402,6 +436,17 @@ case "$osversion" in
 	;;
 esac
 
+# Don't enable OpenSSL if user disabled it.
+case "$configure_opts" in
+    *--disable-openssl*) with_openssl=false;;
+esac
+if [ X"$with_openssl" = X"true" ]; then
+    configure_opts="${configure_opts}${configure_opts+$tab}--enable-openssl"
+fi
+if [ X"$with_python" = X"true" ]; then
+    configure_opts="${configure_opts}${configure_opts+$tab}--enable-python"
+fi
+
 # The postinstall script will create tmpfiles.d/sudo.conf for us
 configure_opts="${configure_opts}${configure_opts+$tab}--disable-tmpfiles.d"
 
@@ -413,6 +458,6 @@ IFS="$OIFS"
 if [ -r Makefile ]; then
     ${MAKE} $make_opts distclean
 fi
-$top_srcdir/configure "$@" || exit 1
+${configure} "$@" || exit 1
 ${MAKE} $make_opts && ${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
 test $debug -eq 0 && rm -rf destdir

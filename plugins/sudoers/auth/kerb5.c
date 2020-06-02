@@ -33,12 +33,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRING_H */
+#include <string.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <krb5.h>
@@ -268,7 +263,7 @@ done:
 #endif
 
 int
-sudo_krb5_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_krb5_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;

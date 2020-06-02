@@ -2,7 +2,7 @@
  * Replacement for a missing getaddrinfo.
  *
  * This is an implementation of getaddrinfo for systems that don't have one so
- * that networking code can use a consistant interface without #ifdef.  It is
+ * that networking code can use a consistent interface without #ifdef.  It is
  * a fairly minimal implementation, with the following limitations:
  *
  *   - IPv4 support only.  IPv6 is not supported.
@@ -37,14 +37,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <limits.h>
 #include <netdb.h>
 #include <errno.h>

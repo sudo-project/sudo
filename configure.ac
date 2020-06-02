@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.9.0], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -70,7 +70,6 @@ AC_SUBST([LCMAN])
 AC_SUBST([PSMAN])
 AC_SUBST([SEMAN])
 AC_SUBST([devdir])
-AC_SUBST([logpath])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
 AC_SUBST([mansrcdir])
@@ -117,11 +116,18 @@ AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
 AC_SUBST([SIGNAME])
 AC_SUBST([PYTHON_PLUGIN_SRC])
+AC_SUBST([LOGSRV])
+AC_SUBST([LIBLOGSRV])
+AC_SUBST([LOGSRVD])
+AC_SUBST([LOGSRVD_CONF])
+AC_SUBST([PPFILES])
 
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
 AC_SUBST([iolog_dir])dnl real initial value from SUDO_IO_LOGDIR
+AC_SUBST([log_dir])dnl real initial value from SUDO_LOGDIR
+AC_SUBST([logpath])dnl real initial value from SUDO_LOGFILE
 AC_SUBST([rundir])dnl real initial value from SUDO_RUNDIR
 AC_SUBST([vardir])dnl real initial value from SUDO_VARDIR
 AC_SUBST([timeout])
@@ -165,6 +171,8 @@ AC_SUBST([plugindir])
 # Begin initial values for man page substitution
 #
 iolog_dir=/var/log/sudo-io
+log_dir=/var/log
+logpath=/var/log/sudo.log
 rundir=/var/run/sudo
 vardir=/var/adm/sudo
 timeout=5
@@ -253,7 +261,7 @@ RC_LINK=
 COMPAT_EXP=
 SIGNAME=
 dnl
-dnl Other vaiables
+dnl Other variables
 dnl
 WEAK_ALIAS=no
 CHECKSHADOW=true
@@ -261,6 +269,11 @@ shadow_funcs=
 shadow_libs=
 TMPFILES_D=
 CONFIGURE_ARGS="$@"
+LOGSRVD=logsrvd
+LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
+LOGSRV=lib/logsrv
+LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
+PPFILES='$(srcdir)/etc/sudo.pp'
 
 dnl
 dnl LD_PRELOAD equivalents
@@ -338,7 +351,7 @@ esac])
 
 AC_ARG_WITH(CC, [AS_HELP_STRING([--with-CC], [C compiler to use])],
 [case $with_CC in
-    *)		AC_MSG_ERROR([the --with-CC option is no longer supported, please set the CC environment variable instead.])
+    *)		AC_MSG_ERROR([the --with-CC option is no longer supported, please pass CC=$with_CC to configure instead.])
 		;;
 esac])
 
@@ -1038,7 +1051,7 @@ AC_ARG_WITH(passwd-tries, [AS_HELP_STRING([--with-passwd-tries], [number of trie
 		;;
     [[1-9]]*)	passwd_tries=$with_passwd_tries
 		;;
-    *)		AC_MSG_ERROR(["you must enter the numer of tries, > 0"])
+    *)		AC_MSG_ERROR(["you must enter the number of tries, > 0"])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $passwd_tries, [The number of tries a user gets to enter their password.])
@@ -1052,7 +1065,7 @@ AC_ARG_WITH(timeout, [AS_HELP_STRING([--with-timeout], [minutes before sudo asks
 		;;
     [[0-9]]*)	timeout=$with_timeout
 		;;
-    *)		AC_MSG_ERROR(["you must enter the numer of minutes."])
+    *)		AC_MSG_ERROR(["you must enter the number of minutes."])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(TIMEOUT, $timeout, [The number of minutes before sudo asks for a password again.])
@@ -1066,7 +1079,7 @@ AC_ARG_WITH(password-timeout, [AS_HELP_STRING([--with-password-timeout], [passwd
 		;;
     [[0-9]]*)	password_timeout=$with_password_timeout
 		;;
-    *)		AC_MSG_ERROR(["you must enter the numer of minutes."])
+    *)		AC_MSG_ERROR(["you must enter the number of minutes."])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout, [The passwd prompt timeout (in minutes).])
@@ -1571,7 +1584,7 @@ esac], [
 ])
 
 AC_ARG_ENABLE(devsearch,
-[AS_HELP_STRING([--enable-devsearch=PATH], [The colon-delimited path to search for device nodes when determing the tty name.])],
+[AS_HELP_STRING([--enable-devsearch=PATH], [The colon-delimited path to search for device nodes when determining the tty name.])],
 [case $enableval in
     yes)	# use default value
 		;;
@@ -1640,6 +1653,42 @@ AC_ARG_ENABLE(gss_krb5_ccache_name,
 
 AC_ARG_ENABLE(pvs-studio,
 [AS_HELP_STRING([--enable-pvs-studio], [Create a PVS-Studio.cfg file.])])
+
+AC_ARG_ENABLE(log-server,
+[AS_HELP_STRING([--disable-log-server], [Disable building the sudo_logsrvd log server.])],
+[ case "$enableval" in
+    yes)
+	    ;;
+    no)
+	    LOGSRVD=
+	    LOGSRVD_CONF=
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-log-server: $enableval])
+	    ;;
+  esac
+])
+
+AC_ARG_ENABLE(log-client,
+[AS_HELP_STRING([--disable-log-client], [Disable sudoers support for using the sudo_logsrvd log server.])],
+[ case "$enableval" in
+    yes)
+	    AC_DEFINE([SUDOERS_IOLOG_CLIENT])
+	    ;;
+    no)
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-log-client: $enableval])
+	    ;;
+  esac
+], [AC_DEFINE([SUDOERS_IOLOG_CLIENT])])
+
+if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
+    # No need for liblogsrv.la
+    LOGSRV=
+    LIBLOGSRV=
+fi
+if test X"$LOGSRVD" != X""; then
+    PPFILES="$PPFILES "'$(srcdir)/etc/sudo-logsrvd.pp'
+fi
 
 dnl
 dnl C compiler checks
@@ -1844,6 +1893,9 @@ case "$host" in
 		    5.[[1-2]]*)	with_noexec=no;;
 		    *)		RTLD_PRELOAD_VAR="LDR_PRELOAD";;
 		esac
+
+		# cfmakeraw is broken on AIX (and is not documented)
+		: ${ac_cv_func_cfmakeraw='no'}
 
 		# strnlen/strndup may be broken on AIX < 6 depending
 		# on the libc version, use our own.
@@ -2551,11 +2603,18 @@ if test ${USE_PYTHON-'no'} = "yes"; then
     ])
 
     AS_IF([test -z "$PYTHON_LIBS"], [
+      # Newer versions of python3-config need --embed to include libpython
+      if $PYTHON_CONFIG 2>&1 | grep embed >/dev/null; then
+        PY_EMBED=--embed
+      else
+        PY_EMBED=
+      fi
       AC_MSG_CHECKING([python linker flags])
-      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags`
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED`
       AC_MSG_RESULT([$PYTHON_LIBS])
     ])
 
+    PPFILES="$PPFILES "'$(srcdir)/etc/sudo-python.pp'
     PYTHON_PLUGIN_SRC=plugins/python
     AC_CONFIG_FILES([$PYTHON_PLUGIN_SRC/Makefile])
 fi
@@ -2564,7 +2623,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite faccessat wordexp getauxval])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite faccessat wordexp getauxval fseeko])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -2637,9 +2696,14 @@ AC_CHECK_FUNCS([arc4random], [
 	AC_LIBOBJ(arc4random_uniform)
 	SUDO_APPEND_COMPAT_EXP(sudo_arc4random_uniform)
     ])
+    AC_CHECK_FUNCS([arc4random_buf], [], [
+	AC_LIBOBJ(arc4random_buf)
+	SUDO_APPEND_COMPAT_EXP(sudo_arc4random_buf)
+    ])
 ], [
     AC_LIBOBJ(arc4random)
     SUDO_APPEND_COMPAT_EXP(sudo_arc4random)
+    SUDO_APPEND_COMPAT_EXP(sudo_arc4random_buf)
     AC_LIBOBJ(arc4random_uniform)
     SUDO_APPEND_COMPAT_EXP(sudo_arc4random_uniform)
     # arc4random.c needs getentropy()
@@ -2660,7 +2724,6 @@ utmp_style=LEGACY
 AC_CHECK_FUNCS([getutsid getutxid getutid], [utmp_style=POSIX; break])
 if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS([getttyent ttyslot], [break])
-    AC_CHECK_FUNCS([fseeko])
 fi
 
 AC_CHECK_FUNCS([sysctl], [AC_CHECK_FUNCS([devname])
@@ -2960,7 +3023,7 @@ dnl
 if test "${enable_openssl-no}" != no; then
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
-    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method])
+    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method])
     # SSL_CTX_set_min_proto_version may be a macro
     AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
 	AC_INCLUDES_DEFAULT
@@ -4129,6 +4192,7 @@ dnl
 if test "$utmp_style" = "LEGACY"; then
     SUDO_PATH_UTMP
 fi
+SUDO_LOGDIR
 SUDO_LOGFILE
 SUDO_RUNDIR
 SUDO_VARDIR
@@ -4586,6 +4650,7 @@ test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
 test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
+test "$runstatedir" = '${localstatedir}/run' && runstatedir='$(localstatedir)/run'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 dnl
@@ -4597,7 +4662,7 @@ elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
 
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 
 AC_OUTPUT
 
@@ -4702,7 +4767,7 @@ AH_TEMPLATE(NO_AUTHENTICATION, [Define to 1 if you don't want sudo to prompt for
 AH_TEMPLATE(NO_LEAKS, [Define to 1 if you want sudo to free up memory before exiting.])
 AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture the first they user sudo.])
 AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM session support.])
-AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
+AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid running the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
 AH_TEMPLATE(TIMESTAMP_TYPE, [Define to global, ppid or tty to set the default timestamp record type.])
 AH_TEMPLATE(OFFENSIVE_INSULTS, [Define to 1 to include offensive insults from the classic version of sudo.])
@@ -4747,6 +4812,7 @@ AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
+AH_TEMPLATE(SUDOERS_IOLOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers I/O log plugin.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

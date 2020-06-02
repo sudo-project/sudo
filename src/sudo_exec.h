@@ -73,6 +73,7 @@
  */
 #define SESH_SUCCESS	    0		/* successful operation */
 #define SESH_ERR_FAILURE    1		/* unspecified error */
+#define SESH_ERR_KILLED     2		/* killed by a signal */
 #define SESH_ERR_INVALID    30		/* invalid -e arg value */
 #define SESH_ERR_BAD_PATHS  31		/* odd number of paths */
 #define SESH_ERR_NO_FILES   32		/* copy error, no files copied */
@@ -83,6 +84,9 @@
  */
 struct command_details;
 struct command_status;
+
+/* copy_file.c */
+int sudo_copy_file(const char *src, int src_fd, off_t src_len, const char *dst, int dst_fd, off_t dst_len);
 
 /* exec.c */
 void exec_cmnd(struct command_details *details, int errfd);

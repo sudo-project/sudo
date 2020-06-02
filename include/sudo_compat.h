@@ -24,6 +24,7 @@
 #ifndef SUDO_COMPAT_H
 #define SUDO_COMPAT_H
 
+#include <sys/types.h>	/* for gid_t, mode_t, size_t, ssize_t, uid_t */
 #include <stdio.h>
 #if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \
     !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
@@ -318,8 +319,8 @@ extern int errno;
 #endif
 
 /* Older systems may not support WCONTINUED */
-#ifndef WCONTINUED
-# define WCONTINUED	0
+#if !defined(WCONTINUED) && !defined(WIFCONTINUED)
+# define WCONTINUED		0
 # define WIFCONTINUED(x)	0
 #endif
 
@@ -389,6 +390,13 @@ int getdomainname(char *, size_t);
 #  define pwrite(_a, _b, _c, _d) pwrite64((_a), (_b), (_c), (_d))
 # endif
 #endif /* __hpux && !__LP64__ */
+
+/*
+ * Older systems may lack fseeko(3), just use fseek(3) instead.
+ */
+#ifndef HAVE_FSEEKO
+# define fseeko(f, o, w)	fseek((f), (long)(o), (w))
+#endif
 
 /*
  * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)

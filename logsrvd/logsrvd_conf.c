@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +36,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 #include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
@@ -54,7 +57,8 @@
 
 #if defined(HAVE_OPENSSL)
 # define DEFAULT_CA_CERT_PATH       "/etc/ssl/sudo/cacert.pem"
-# define DEFAULT_SERVER_CERT_PATH   "/etc/ssl/sudo/logsrvd_cert.pem"
+# define DEFAULT_SERVER_CERT_PATH   "/etc/ssl/sudo/certs/logsrvd_cert.pem"
+# define DEFAULT_SERVER_KEY_PATH    "/etc/ssl/sudo/private/logsrvd_key.pem"
 #endif
 
 struct logsrvd_config;
@@ -75,6 +79,7 @@ static struct logsrvd_config {
         struct listen_address_list addresses;
         struct timespec timeout;
         bool tcp_keepalive;
+	char *pid_file;
 #if defined(HAVE_OPENSSL)
         bool tls;
         struct logsrvd_tls_config tls_config;
@@ -106,6 +111,7 @@ static struct logsrvd_config {
     struct logsrvd_config_logfile {
 	char *path;
 	char *time_format;
+	FILE *stream;
     } logfile;
 } *logsrvd_config;
 
@@ -140,6 +146,13 @@ logsrvd_conf_tcp_keepalive(void)
 {
     return logsrvd_config->server.tcp_keepalive;
 }
+
+const char *
+logsrvd_conf_pid_file(void)
+{
+    return logsrvd_config->server.pid_file;
+}
+
 struct timespec *
 logsrvd_conf_get_sock_timeout(void)
 {
@@ -151,12 +164,6 @@ logsrvd_conf_get_sock_timeout(void)
 }
 
 #if defined(HAVE_OPENSSL)
-bool
-logsrvd_conf_get_tls_opt(void)
-{
-    return logsrvd_config->server.tls;
-}
-
 const struct logsrvd_tls_config *
 logsrvd_get_tls_config(void)
 {
@@ -219,6 +226,12 @@ const char *
 logsrvd_conf_logfile_path(void)
 {
     return logsrvd_config->logfile.path;
+}
+
+FILE *
+logsrvd_conf_logfile_stream(void)
+{
+    return logsrvd_config->logfile.stream;
 }
 
 const char *
@@ -354,13 +367,12 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str)
 }
 
 /* Server callbacks */
-/* TODO: unit test */
 static bool
 cb_listen_address(struct logsrvd_config *config, const char *str)
 {
     struct addrinfo hints, *res, *res0 = NULL;
     char *copy, *host, *port;
-    bool ret = false;
+    bool tls, ret = false;
     int error;
     debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL);
 
@@ -370,10 +382,18 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
     }
 
     /* Parse host[:port] */
-    if (!sudo_parse_host_port(copy, &host, &port, DEFAULT_PORT_STR))
+    if (!iolog_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
+	    DEFAULT_PORT_TLS))
 	goto done;
     if (host[0] == '*' && host[1] == '\0')
 	host = NULL;
+
+#if !defined(HAVE_OPENSSL)
+    if (tls) {
+	sudo_warnx("%s", U_("TLS not supported"));
+	goto done;
+    }
+#endif
 
     /* Resolve host (and port if it is a service). */
     memset(&hints, 0, sizeof(hints));
@@ -382,7 +402,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
     hints.ai_flags = AI_PASSIVE;
     error = getaddrinfo(host, port, &hints, &res0);
     if (error != 0) {
-	sudo_warnx("%s", gai_strerror(error));
+	sudo_gai_warn(error, U_("%s:%s"), host ? host : "*", port);
 	goto done;
     }
     for (res = res0; res != NULL; res = res->ai_next) {
@@ -392,8 +412,14 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 	    sudo_warn(NULL);
 	    goto done;
 	}
+	if ((addr->sa_str = strdup(str)) == NULL) {
+	    sudo_warn(NULL);
+	    free(addr);
+	    goto done;
+	}
 	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
 	addr->sa_len = res->ai_addrlen;
+	addr->tls = tls;
 	TAILQ_INSERT_TAIL(&config->server.addresses, addr, entries);
     }
 
@@ -434,20 +460,29 @@ cb_keepalive(struct logsrvd_config *config, const char *str)
     debug_return_bool(true);
 }
 
-#if defined(HAVE_OPENSSL)
 static bool
-cb_tls_opt(struct logsrvd_config *config, const char *str)
+cb_pid_file(struct logsrvd_config *config, const char *str)
 {
-    int val;
-    debug_decl(cb_tls_opt, SUDO_DEBUG_UTIL);
+    char *copy = NULL;
+    debug_decl(cb_pid_file, SUDO_DEBUG_UTIL);
 
-    if ((val = sudo_strtobool(str)) == -1)
+    if (*str != '/') {
 	debug_return_bool(false);
+	sudo_warnx(U_("%s: not a fully qualified path"), str);
+	debug_return_bool(false);
+    }
+    if ((copy = strdup(str)) == NULL) {
+	sudo_warn(NULL);
+	debug_return_bool(false);
+    }
 
-    config->server.tls = val;
+    free(config->server.pid_file);
+    config->server.pid_file = copy;
+
     debug_return_bool(true);
 }
 
+#if defined(HAVE_OPENSSL)
 static bool
 cb_tls_key(struct logsrvd_config *config, const char *path)
 {
@@ -576,7 +611,9 @@ cb_eventlog_format(struct logsrvd_config *config, const char *str)
 {
     debug_decl(cb_eventlog_format, SUDO_DEBUG_UTIL);
 
-    if (strcmp(str, "sudo") == 0)
+    if (strcmp(str, "json") == 0)
+	config->eventlog.log_format = EVLOG_JSON;
+    else if (strcmp(str, "sudo") == 0)
 	config->eventlog.log_format = EVLOG_SUDO;
     else
 	debug_return_bool(false);
@@ -710,8 +747,8 @@ static struct logsrvd_config_entry server_conf_entries[] = {
     { "listen_address", cb_listen_address },
     { "timeout", cb_timeout },
     { "tcp_keepalive", cb_keepalive },
+    { "pid_file", cb_pid_file },
 #if defined(HAVE_OPENSSL)
-    { "tls", cb_tls_opt },
     { "tls_key", cb_tls_key },
     { "tls_cacert", cb_tls_cacert },
     { "tls_cert", cb_tls_cert },
@@ -847,6 +884,36 @@ done:
     debug_return_bool(ret);
 }
 
+static FILE *
+logsrvd_open_eventlog(struct logsrvd_config *config)
+{
+    mode_t oldmask;
+    FILE *fp = NULL;
+    const char *omode;
+    int fd, flags;
+    debug_decl(logsrvd_open_eventlog, SUDO_DEBUG_UTIL);
+
+    /* Cannot append to a JSON file. */
+    if (config->eventlog.log_format == EVLOG_JSON) {
+	flags = O_RDWR|O_CREAT;
+	omode = "w";
+    } else {
+	flags = O_WRONLY|O_APPEND|O_CREAT;
+	omode = "a";
+    }
+    oldmask = umask(S_IRWXG|S_IRWXO);
+    fd = open(config->logfile.path, flags, S_IRUSR|S_IWUSR);
+    (void)umask(oldmask);
+    if (fd == -1 || (fp = fdopen(fd, omode)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to open log file %s", config->logfile.path);
+	if (fd != -1)
+	    close(fd);
+    }
+
+    debug_return_ptr(fp);
+}
+
 /* Free the specified struct logsrvd_config and its contents. */
 void
 logsrvd_conf_free(struct logsrvd_config *config)
@@ -860,8 +927,10 @@ logsrvd_conf_free(struct logsrvd_config *config)
     /* struct logsrvd_config_server */
     while ((addr = TAILQ_FIRST(&config->server.addresses))) {
 	TAILQ_REMOVE(&config->server.addresses, addr, entries);
+	free(addr->sa_str);
 	free(addr);
     }
+    free(config->server.pid_file);
 
     /* struct logsrvd_config_iolog */
     free(config->iolog.iolog_dir);
@@ -870,6 +939,20 @@ logsrvd_conf_free(struct logsrvd_config *config)
     /* struct logsrvd_config_logfile */
     free(config->logfile.path);
     free(config->logfile.time_format);
+    if (config->logfile.stream != NULL)
+	fclose(config->logfile.stream);
+
+#if defined(HAVE_OPENSSL)
+    free(config->server.tls_config.pkey_path);
+    free(config->server.tls_config.cert_path);
+    free(config->server.tls_config.cacert_path);
+    free(config->server.tls_config.dhparams_path);
+    free(config->server.tls_config.ciphers_v12);
+    free(config->server.tls_config.ciphers_v13);
+
+    if (config->server.tls_runtime.ssl_ctx != NULL)
+	SSL_CTX_free(config->server.tls_runtime.ssl_ctx);
+#endif
 
     free(config);
 
@@ -892,10 +975,36 @@ logsrvd_conf_alloc(void)
     TAILQ_INIT(&config->server.addresses);
     config->server.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->server.tcp_keepalive = true;
+    config->server.pid_file = strdup(_PATH_SUDO_LOGSRVD_PID);
+    if (config->server.pid_file == NULL) {
+	sudo_warn(NULL);
+	goto bad;
+    }
 
 #if defined(HAVE_OPENSSL)
-    config->server.tls_config.cacert_path = strdup(DEFAULT_CA_CERT_PATH);
-    config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
+    /*
+     * Only set default CA and cert paths if the files actually exist.
+     * This ensures we don't enable TLS by default when it is not configured.
+     */
+    if (access(DEFAULT_CA_CERT_PATH, R_OK) == 0) {
+	config->server.tls_config.cacert_path = strdup(DEFAULT_CA_CERT_PATH);
+	if (config->server.tls_config.cacert_path == NULL) {
+	    sudo_warn(NULL);
+	    goto bad;
+	}
+    }
+    if (access(DEFAULT_SERVER_CERT_PATH, R_OK) == 0) {
+	config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
+	if (config->server.tls_config.cert_path == NULL) {
+	    sudo_warn(NULL);
+	    goto bad;
+	}
+    }
+    config->server.tls_config.pkey_path = strdup(DEFAULT_SERVER_KEY_PATH);
+    if (config->server.tls_config.pkey_path == NULL) {
+	sudo_warn(NULL);
+	goto bad;
+    }
     config->server.tls_config.verify = true;
     config->server.tls_config.check_peer = false;
 #endif
@@ -955,8 +1064,55 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 
     /* There can be multiple addresses so we can't set a default earlier. */
     if (TAILQ_EMPTY(&config->server.addresses)) {
-	if (!cb_listen_address(config, "*:30344"))
+	/* Enable plaintext listender. */
+	if (!cb_listen_address(config, "*:" DEFAULT_PORT))
 	    debug_return_bool(false);
+#if defined(HAVE_OPENSSL)
+	/* If a certificate was specified, enable the TLS listener too. */
+	if (config->server.tls_config.cert_path != NULL) {
+	    if (!cb_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)"))
+		debug_return_bool(false);
+	}
+    } else {
+	struct listen_address *addr;
+
+	/* Sanity check the TLS configuration. */
+	TAILQ_FOREACH(addr, &config->server.addresses, entries) {
+	    if (!addr->tls)
+		continue;
+	    /*
+	     * If a TLS listener was explicitly enabled but the cert path
+	     * was not, use the default.
+	     */
+	    if (config->server.tls_config.cert_path == NULL) {
+		config->server.tls_config.cert_path =
+		    strdup(DEFAULT_SERVER_CERT_PATH);
+		if (config->server.tls_config.cert_path == NULL) {
+		    sudo_warn(NULL);
+		    debug_return_bool(false);
+		}
+	    }
+	    break;
+	}
+#endif
+    }
+
+    /* Open event log if specified. */
+    switch (config->eventlog.log_type) {
+    case EVLOG_SYSLOG:
+	openlog("sudo", 0, config->syslog.facility);
+	break;
+    case EVLOG_FILE:
+	config->logfile.stream = logsrvd_open_eventlog(config);
+	if (config->logfile.stream == NULL)
+	    debug_return_bool(false);
+	break;
+    case EVLOG_NONE:
+	break;
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "cannot open unknown log type %d", config->eventlog.log_type);
+	break;
     }
 
     /* Set I/O log library settings */

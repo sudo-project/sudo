@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,18 +31,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #ifdef HAVE_NL_LANGINFO
 # include <langinfo.h>
@@ -50,7 +43,6 @@
 #include <netdb.h>
 #include <pwd.h>
 #include <grp.h>
-#include <signal.h>
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
@@ -241,28 +233,25 @@ log_denial(int status, bool inform_user)
     bool mailit;
     debug_decl(log_denial, SUDOERS_DEBUG_LOGGING);
 
-    /* Handle auditing first (audit_failure() handles the locale itself). */
-    if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
-	audit_failure(NewArgc, NewArgv, N_("No user or host"));
-    else
-	audit_failure(NewArgc, NewArgv, N_("validation failure"));
-
     /* Send mail based on status. */
     mailit = should_mail(status);
+
+    /* Set error message. */
+    if (ISSET(status, FLAG_NO_USER))
+	message = N_("user NOT in sudoers");
+    else if (ISSET(status, FLAG_NO_HOST))
+	message = N_("user NOT authorized on host");
+    else
+	message = N_("command not allowed");
+
+    /* Do auditing first (audit_failure() handles the locale itself). */
+    audit_failure(NewArgc, NewArgv, "%s", message);
 
     if (def_log_denied || mailit) {
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	/* Set error message. */
-	if (ISSET(status, FLAG_NO_USER))
-	    message = _("user NOT in sudoers");
-	else if (ISSET(status, FLAG_NO_HOST))
-	    message = _("user NOT authorized on host");
-	else
-	    message = _("command not allowed");
-
-	logline = new_logline(message, NULL);
+	logline = new_logline(_(message), NULL);
 	if (logline == NULL)
 	    debug_return_bool(false);
 
@@ -361,8 +350,8 @@ log_auth_failure(int status, unsigned int tries)
     bool ret = true;
     debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING);
 
-    /* Handle auditing first. */
-    audit_failure(NewArgc, NewArgv, N_("authentication failure"));
+    /* Do auditing first (audit_failure() handles the locale itself). */
+    audit_failure(NewArgc, NewArgv, "%s", N_("authentication failure"));
 
     /*
      * Do we need to send mail?
@@ -804,14 +793,14 @@ send_mail(const char *fmt, ...)
 		    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
 			strerror(errno));
 		    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-		    _exit(1);
+		    _exit(EXIT_FAILURE);
 		case 0:
 		    /* Grandchild continues below. */
 		    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 		    break;
 		default:
 		    /* Parent will wait for us. */
-		    _exit(0);
+		    _exit(EXIT_SUCCESS);
 	    }
 	    break;
 	default:
@@ -850,7 +839,7 @@ send_mail(const char *fmt, ...)
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to open pipe: %s",
 	    strerror(errno));
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-	_exit(1);
+	_exit(EXIT_FAILURE);
     }
 
     switch (pid = sudo_debug_fork()) {
@@ -860,7 +849,7 @@ send_mail(const char *fmt, ...)
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
 		strerror(errno));
 	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-	    _exit(1);
+	    _exit(EXIT_FAILURE);
 	    break;
 	case 0:
 	    /* Child. */
@@ -916,7 +905,7 @@ send_mail(const char *fmt, ...)
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"child (%d) exit value %d", (int)rv, status);
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    _exit(0);
+    _exit(EXIT_SUCCESS);
 }
 
 /*

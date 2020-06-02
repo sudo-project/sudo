@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2015, 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#include <sys/types.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,6 +38,8 @@
 #ifdef HAVE_SOLARIS_AUDIT
 # include "solaris_audit.h"
 #endif
+
+char *audit_msg = NULL;
 
 int
 audit_success(int argc, char *argv[])
@@ -70,14 +72,22 @@ int
 audit_failure(int argc, char *argv[], char const *const fmt, ...)
 {
     int rc = 0;
+    va_list ap;
     debug_decl(audit_success, SUDOERS_DEBUG_AUDIT);
+
+    /* Set audit_msg for audit plugin.  */
+    free(audit_msg);
+    audit_msg = NULL;
+    va_start(ap, fmt);
+    if (vasprintf(&audit_msg, fmt, ap) == -1)
+	rc = -1;
+    va_end(ap);
 
     if (!def_log_denied)
 	debug_return_int(0);
 
 #if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
     if (argv != NULL) {
-	va_list ap;
 	int oldlocale;
 
 	/* Audit error messages should be in the sudoers locale. */

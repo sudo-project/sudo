@@ -66,7 +66,7 @@ sudo_module_register_baseplugin(PyObject *py_module)
     int rc = SUDO_RC_ERROR;
     PyObject *py_class = NULL;
 
-    py_class = sudo_module_create_class("sudo.Plugin", _sudo_Plugin_class_methods);
+    py_class = sudo_module_create_class("sudo.Plugin", _sudo_Plugin_class_methods, NULL);
     if (py_class == NULL)
         goto cleanup;
 

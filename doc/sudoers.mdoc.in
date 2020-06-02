@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 22, 2020
+.Dd May 19, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -603,11 +603,19 @@ There are four kinds of aliases:
 .Li Host_Alias
 and
 .Li Cmnd_Alias .
+Beginning with
+.Nm sudo
+1.9.0,
+.Li Cmd_Alias
+may be used in place of
+.Li Cmnd_Alias
+if desired.
 .Bd -literal
 Alias ::= 'User_Alias'  User_Alias_Spec (':' User_Alias_Spec)* |
           'Runas_Alias' Runas_Alias_Spec (':' Runas_Alias_Spec)* |
           'Host_Alias'  Host_Alias_Spec (':' Host_Alias_Spec)* |
-          'Cmnd_Alias'  Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)*
+          'Cmnd_Alias'  Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)* |
+          'Cmd_Alias'   Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)*
 
 User_Alias ::= NAME
 
@@ -844,6 +852,9 @@ Digest_Spec ::= "sha224" ':' digest |
 		"sha384" ':' digest |
 		"sha512" ':' digest
 
+Digest_List ::= Digest_Spec |
+                Digest_Spec ',' Digest_List
+
 Cmnd_List ::= Cmnd |
               Cmnd ',' Cmnd_List
 
@@ -851,9 +862,11 @@ command name ::= file name |
                  file name args |
                  file name '""'
 
-Cmnd ::= Digest_Spec? '!'* command name |
+Edit_Spec ::= "sudoedit" file name+
+
+Cmnd ::= Digest_List? '!'* command name |
          '!'* directory |
-         '!'* "sudoedit" |
+         '!'* Edit_Spec |
          '!'* Cmnd_Alias
 .Ed
 .Pp
@@ -923,12 +936,21 @@ A fully-qualified path for
 is treated as an error by
 .Nm visudo .
 .Pp
-If a
+A
 .Li command name
-is prefixed with a
-.Li Digest_Spec ,
-the command will only match successfully if it can be verified
-using the specified SHA-2 digest.
+may be preceded by a
+.Li Digest_List ,
+a comma-separated list of one or more
+.Li Digest_Spec
+entries.
+If a
+.Li Digest_List
+is present, the command will only match successfully if it can be verified
+using one of the SHA-2 digests in the list.
+Starting with version 1.9.0, the
+.Sy ALL
+reserved word can be used in conjunction with a
+.Li Digest_List .
 The following digest formats are supported: sha224, sha256, sha384 and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).
@@ -1731,12 +1753,17 @@ It is possible to include other
 files from within the
 .Em sudoers
 file currently being parsed using the
+.Li @include
+and
+.Li @includedir
+directives.
+For compatibility with sudo versions prior to 1.9.1,
 .Li #include
 and
 .Li #includedir
-directives.
+are also accepted.
 .Pp
-This can be used, for example, to keep a site-wide
+An include file can be used, for example, to keep a site-wide
 .Em sudoers
 file in addition to a local, per-machine file.
 For the sake of this example the site-wide
@@ -1749,11 +1776,10 @@ To include
 .Pa /etc/sudoers.local
 from within
 .Pa /etc/sudoers
-we would use the
-following line in
+one would use the following line in
 .Pa /etc/sudoers :
 .Bd -literal -offset 4n
-#include /etc/sudoers.local
+@include /etc/sudoers.local
 .Ed
 .Pp
 When
@@ -1771,6 +1797,16 @@ Files that are included may themselves include other files.
 A hard limit of 128 nested include files is enforced to prevent include
 file loops.
 .Pp
+The path to the include file may contain white space if it is
+escaped with a backslash
+.Pq Ql \e .
+Alternately, the entire path may be enclosed in double quotes
+.Pq \&"" ,
+in which case no escaping is necessary.
+To include a literal backslash in the path,
+.Ql \e\e
+should be used.
+.Pp
 If the path to the include file is not fully-qualified (does not
 begin with a
 .Ql / ) ,
@@ -1780,7 +1816,7 @@ For example, if
 .Pa /etc/sudoers
 contains the line:
 .Bd -literal -offset 4n
-.Li #include sudoers.local
+.Li @include sudoers.local
 .Ed
 .Pp
 the file that will be included is
@@ -1793,7 +1829,7 @@ In other words, if the machine's host name is
 .Dq xerxes ,
 then
 .Bd -literal -offset 4n
-#include /etc/sudoers.%h
+@include /etc/sudoers.%h
 .Ed
 .Pp
 will cause
@@ -1802,7 +1838,7 @@ to include the file
 .Pa /etc/sudoers.xerxes .
 .Pp
 The
-.Li #includedir
+.Li @includedir
 directive can be used to create a
 .Pa sudoers.d
 directory that the system package manager can drop
@@ -1810,7 +1846,7 @@ directory that the system package manager can drop
 file rules into as part of package installation.
 For example, given:
 .Bd -literal -offset 4n
-#includedir /etc/sudoers.d
+@includedir /etc/sudoers.d
 .Ed
 .Pp
 .Nm sudo
@@ -1836,14 +1872,14 @@ Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
 After parsing the files in the directory, control returns to the
 file that contained the
-.Li #includedir
+.Li @includedir
 directive.
 .Pp
 Note that unlike files included via
-.Li #include ,
+.Li @include ,
 .Nm visudo
 will not edit the files in a
-.Li #includedir
+.Li @includedir
 directory unless one of them contains a syntax error.
 It is still possible to run
 .Nm visudo
@@ -2451,6 +2487,16 @@ flag is set.
 This flag is
 .Em on
 by default.
+.It log_server_verify
+If set, the server certificate received during the TLS handshake
+must be valid and it must contain either the server name (from
+.Em log_servers )
+or its IP address.
+If either of these conditions is not met, the TLS handshake will fail.
+This flag is
+.Em on
+by default.
+.Nm sudo
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -2639,6 +2685,39 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.28 or higher.
+.It pam_rhost
+On systems that use PAM for authentication,
+.Nm sudo
+will set the PAM remote host value to the name of the local host
+when the
+.Em pam_rhost
+flag is enabled.
+On Linux systems, enabling
+.Em pam_rhost
+may result in DNS lookups of the local host name when PAM is initialized.
+On Solaris versions prior to Solaris 8,
+.Em pam_rhost
+must be enabled if
+.Em pam_ruser
+is also enabled to avoid a crash in the Solaris PAM implementation.
+.Pp
+This flag is
+.Em off
+by default on systems other than Solaris.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
+.It pam_ruser
+On systems that use PAM for authentication,
+.Nm sudo
+will set the PAM remote user value to the name of the user that invoked sudo
+when the
+.Em pam_ruser
+flag is enabled.
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .It pam_session
 On systems that use PAM for authentication,
 .Nm sudo
@@ -3784,7 +3863,7 @@ Entries in this file should either be of the form
 .Dq Li VARIABLE=value
 or
 .Dq Li export VARIABLE=value .
-The value may optionally be surrounded by single or double quotes.
+The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 This file is considered to be part of the security policy,
@@ -3980,7 +4059,7 @@ Entries in this file should either be of the form
 .Dq Li VARIABLE=value
 or
 .Dq Li export VARIABLE=value .
-The value may optionally be surrounded by single or double quotes.
+The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 Unlike
@@ -4239,27 +4318,37 @@ should run
 to get their accustomed editor configuration instead of
 invoking the editor directly.
 .It log_servers
+A list of one or more remote servers to use for I/O log storage, separated
+by white space.
 Starting with
 .Nm sudo
 1.9, it is possible to send I/O logs to a remote server instead of
 logging them locally.
-The
-.Em log_servers
-setting specifies one or more server addresses to use when storing
-I/O logs remotely.
 Log servers must be running
 .Nm sudo_logsrvd
 or another service that implements the protocol described by
 .Xr sudo_logsrv.proto @mansectform@ .
+.Pp
 Server addresses should be of the form
-.Dq host Ns Op : Ns port .
-If no port is specified, port 30344 will be used.
+.Dq host Ns Oo : Ns port Oc Ns Op (tls) .
 The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
+.Pp
+If the optional tls flag is present, the connection will be secured
+with Transport Layer Security (TLS) version 1.2 or 1.3.
+Versions of TLS prior to 1.2 are not supported.
+.Pp
+If a port is specified, it may either be a port number or a known
+service name as defined by the system service name database.
+If no port is specified, port 30343 will be used for plaintext
+connections and port 30344 will be used for TLS connections.
 .Pp
 When
 .Em log_servers
 is enabled, I/O logs will not be logged locally.
+If multiple hosts are specified,
+.Nm
+will try them in reverse order until it connects successfully.
 If no log servers are reachable, the user will not be able
 to run a command unless the
 .Em ignore_iolog_errors

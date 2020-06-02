@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 23, 2020
+.Dd May 8, 2020
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -76,9 +76,10 @@ The
 section configures the address and port the server will listen on.
 The following keys are recognized:
 .Bl -tag -width 8n
-.It listen_address = host Ns Op : Ns port
-The host name or IP address and optional port to listen on.
-If no port is specified, port 30344 will be used.
+.It listen_address = host Ns Oo : Ns port Oc Ns Op (tls)
+The host name or IP address, optional port to listen on and
+an optional Transport Layer Security (TLS) flag in parentheses.
+.Pp
 The host may be a host name, an IPv4 address, an IPv6 address
 in square brackets or the wild card entry
 .Ql * .
@@ -88,14 +89,39 @@ will cause
 .Nm sudo_logsrvd
 to listen on all configured network interfaces.
 .Pp
+If the optional tls flag is present,
+.Nm sudo_logsrvd
+will secure the connection with TLS version 1.2 or 1.3.
+Versions of TLS prior to 1.2 are not supported.
+See
+.Xr sudo_logsrvd @mansectsu@
+for details on generating TLS keys and certificates.
+.Pp
 If a port is specified, it may either be a port number or a known
 service name as defined by the system service name database.
-The default value is
-.Li listen_address = *:30344
-which will listen on all configured network interfaces.
+If no port is specified, port 30343 will be used for plaintext
+connections and port 30344 will be used for TLS connections.
+.Pp
+The default value is:
+.Bd -literal -compact -offset indent
+listen_address = *:30343
+listen_address = *:30344(tls)
+.Ed
+which will listen on all configured network interfaces for both
+plaintext and TLS connections.
 Multiple
 .Em listen_address
-lines may be specified to listen on more than one interface.
+lines may be specified to listen on more than one port or interface.
+.It pid_file = path
+The path to the file containing the process ID of the running
+.Nm sudo_logsrvd .
+This file is not created when
+.Nm sudo_logsrvd
+is run with the
+.Fl n
+option.
+The default value is
+.Pa @rundir@/sudo_logsrvd.pid .
 .It tcp_keepalive = boolean
 If true,
 .Nm sudo_logsrvd
@@ -108,26 +134,18 @@ The amount of time, in seconds,
 will wait for the client to respond.
 A value of 0 will disable the timeout.
 The default value is 30.
-.It tls = boolean
-If true,
-.Nm sudo_logsrvd
-will secure network connections with Transport Layer Security (TLS)
-version 1.2 or 1.3.
-Versions of TLS prior to 1.2 are not supported.
-The
-.Em tls_cert
-and
-.Em tls_key
-settings are also required when TLS is enabled.
-The default value is false.
 .It tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
 when authenticating clients.
-The default is to use the system's default certificate authority database.
+The default is to use
+.Pa /etc/ssl/sudo/cacert.pem
+if it exists, otherwise the system's default certificate authority
+database is used.
 .It tls_cert = path
 The path to the server's certificate file, in PEM format.
-This setting is required when TLS is enabled.
+The default value is
+.Pa /etc/ssl/sudo/certs/logsrvd_cert.pem .
 .It tls_checkpeer = bool
 If true, client certificates will be validated by the server;
 clients without a valid certificate will be unable to connect.
@@ -181,7 +199,8 @@ By default,
 will use the OpenSSL defaults for Diffie-Hellman key generation.
 .It tls_key = path
 The path to the server's private key file, in PEM format.
-This setting is required when TLS is enabled.
+The default value is
+.Pa /etc/ssl/sudo/private/logsrvd_key.pem .
 .It tls_verify = bool
 If true, the server certificate will be verified at startup and
 clients will authenticate the server by verifying its certificate
@@ -355,8 +374,13 @@ The default value is
 .Em syslog .
 .It log_format = string
 The event log format.
-Currently, only sudo-style event logs are supported.
-Other log formats may be added in the future.
+Supported log formats are
+.Dq sudo
+for traditional sudo-style logs and
+.Dq json
+for JSON-format logs.
+The JSON log entries contain the full contents of the accept, reject
+and alert messages.
 The default value is
 .Em sudo .
 .El
@@ -432,7 +456,7 @@ IETF RFC 5424 states that syslog servers must support messages of
 at least 480 bytes and should support messages up to 2048 bytes.
 By default,
 .Nm sudo_logsrvd
-creates log messages up to 980 bytes which corresponds to the
+creates log messages up to 960 bytes which corresponds to the
 historic
 .Bx
 syslog implementation which used a 1024 byte buffer
@@ -440,12 +464,14 @@ to store the message, date, hostname and program name.
 .Pp
 To prevent syslog messages from being truncated,
 .Nm sudo_logsrvd
-will split up log messages that are larger than
+will split up sudo-style log messages that are larger than
 .Em maxlen
 bytes.
 When a message is split, additional parts will include the string
 .Dq Pq command continued
 after the user name and before the continued command line arguments.
+JSON-format log entries are never split and are not affected by
+.Em maxlen .
 .El
 .Ss logfile
 The
@@ -483,19 +509,26 @@ Sudo log server configuration file
 #
 
 [server]
-# The host name or IP address and port to listen on.  If no port is
-# specified, port 30344 will be used.
+# The host name or IP address and port to listen on with an optional TLS
+# flag.  If no port is specified, port 30343 will be used for plaintext
+# connections and port 30344 will be used to TLS connections.
 # The following forms are accepted:
-#   listen_address = hostname
-#   listen_address = hostname:port
-#   listen_address = IPv4_address
-#   listen_address = IPv4_address:port
-#   listen_address = [IPv6_address]
-#   listen_address = [IPv6_address]:port
+#   listen_address = hostname(tls)
+#   listen_address = hostname:port(tls)
+#   listen_address = IPv4_address(tls)
+#   listen_address = IPv4_address:port(tls)
+#   listen_address = [IPv6_address](tls)
+#   listen_address = [IPv6_address]:port(tls)
+#
+# The (tls) suffix should be omitted for plaintext connections.
 #
 # Multiple listen_address settings may be specified.
 # The default is to listen on all addresses.
-#listen_address = *:30344
+#listen_address = *:30343
+#listen_address = *:30344(tls)
+
+# The file containing the ID of the running sudo_logsrvd process.
+#pid_file = @rundir@/sudo_logsrvd.pid
 
 # If set, enable the SO_KEEPALIVE socket option on the connected socket.
 #tcp_keepalive = true
@@ -503,10 +536,6 @@ Sudo log server configuration file
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 #timeout = 30
-
-# If set, secure connections with TLS 1.2 or 1.3.
-# By default, server connections are not encrypted.
-#tls = true
 
 # If set, server certificate will be verified at server startup and
 # also connecting clients will perform server authentication by

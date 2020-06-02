@@ -24,9 +24,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-
-#include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 
@@ -56,5 +53,5 @@ main(int argc, char *argv[])
     }
     printf("};\n");
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

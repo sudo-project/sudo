@@ -23,16 +23,10 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -379,7 +373,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
         if (selinux_setup(details->selinux_role, details->selinux_type,
-		details->tty, -1) == -1) {
+		details->tty, -1, true) == -1) {
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
 	    debug_return;
@@ -402,7 +396,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 		break;
 	}
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
-	_exit(1);
+	_exit(EXIT_FAILURE);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
 	(int)ec.cmnd_pid);

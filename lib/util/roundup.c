@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@courtesan.com>
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +17,6 @@
  */
 
 #include "config.h"
-
-#include <sys/types.h>
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"

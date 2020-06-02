@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "May 7, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -290,6 +290,7 @@ comma-separated list of environment variables to those preserved
 from the user's environment.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
+This option may be specified multiple times.
 .TP 12n
 \fB\-e\fR, \fB\--edit\fR
 Edit one or more files instead of running a command.
@@ -686,6 +687,13 @@ option indicates that
 \fBsudo\fR
 should stop processing command line arguments.
 .PP
+Options that take a value may only be specified once unless
+otherwise indicated in the description.
+This is to help guard against problems caused by poorly written
+scripts that invoke
+\fBsudo\fR
+with user-controlled input.
+.PP
 Environment variables to be set for the command may also be passed
 on the command line in the form of
 \fIVAR\fR=\fIvalue\fR,
@@ -835,6 +843,10 @@ Note that
 and
 \fIpam_setcred\fR
 are enabled by default on systems using PAM.
+.PP
+On systems that use PAM, the security policy's close function
+is responsible for closing the PAM session.
+It may also log the command's exit status.
 .SS "Signal handling"
 When the command is run as a child of the
 \fBsudo\fR
@@ -1136,7 +1148,9 @@ if no terminal is available or if the
 option is specified.
 .TP 17n
 \fRSUDO_COMMAND\fR
-Set to the command run by sudo.
+Set to the command run by sudo, including command line arguments.
+The command line arguments are truncated at 4096 characters to
+prevent a potential execution error.
 .TP 17n
 \fRSUDO_EDITOR\fR
 Default editor to use in

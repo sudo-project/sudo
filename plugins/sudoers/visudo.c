@@ -38,7 +38,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
 #include <sys/uio.h>
 #ifndef __TANDEM
 # include <sys/file.h>
@@ -46,12 +45,7 @@
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -263,7 +257,7 @@ main(int argc, char *argv[])
      * errors and to pull in editor and env_editor conf values.
      */
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
-	exit(1);
+	exit(EXIT_FAILURE);
     init_parser(sudoers_file, quiet, true);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
@@ -614,7 +608,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	sudoersrestart(fp);
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 	if (sudoersparse() && !parse_error) {
-	    sudo_warnx(U_("unabled to parse temporary file (%s), unknown error"),
+	    sudo_warnx(U_("unable to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = true;
 	    rcstr_delref(errorfile);
@@ -1009,6 +1003,7 @@ FILE *
 open_sudoers(const char *path, bool doedit, bool *keepopen)
 {
     struct sudoersfile *entry;
+    struct stat sb;
     FILE *fp;
     int open_flags;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
@@ -1031,8 +1026,16 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	/* entry->modified = false; */
 	entry->doedit = doedit;
 	entry->fd = open(entry->path, open_flags, sudoers_mode);
-	if (entry->fd == -1) {
+	if (entry->fd == -1 || fstat(entry->fd, &sb) == -1) {
 	    sudo_warn("%s", entry->path);
+	    if (entry->fd != -1)
+		close(entry->fd);
+	    free(entry);
+	    debug_return_ptr(NULL);
+	}
+	if (!S_ISREG(sb.st_mode)) {
+	    sudo_warnx(U_("%s is not a regular file"), entry->path);
+	    close(entry->fd);
 	    free(entry);
 	    debug_return_ptr(NULL);
 	}
@@ -1283,7 +1286,7 @@ usage(int fatal)
     (void) fprintf(fatal ? stderr : stdout,
 	"usage: %s [-chqsV] [[-f] sudoers ]\n", getprogname());
     if (fatal)
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -1298,5 +1301,5 @@ help(void)
 	"  -q, --quiet              less verbose (quiet) syntax error messages\n"
 	"  -s, --strict             strict syntax checking\n"
 	"  -V, --version            display version information and exit\n"));
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

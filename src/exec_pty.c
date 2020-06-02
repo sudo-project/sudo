@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,12 +30,7 @@
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -115,7 +110,7 @@ static void del_io_events(bool nonblocking);
 static void sync_ttysize(struct exec_closure_pty *ec);
 static int safe_close(int fd);
 static void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
-static void check_foreground(struct exec_closure_pty *ec);
+static pid_t check_foreground(struct exec_closure_pty *ec);
 static void add_io_events(struct sudo_event_base *evbase);
 static void schedule_signal(struct exec_closure_pty *ec, int signo);
 
@@ -201,6 +196,7 @@ static bool
 log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
@@ -211,11 +207,17 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_ttyin(buf, n);
+	    rc = plugin->u.io->log_ttyin(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyin = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -233,6 +235,7 @@ static bool
 log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_stdin, SUDO_DEBUG_EXEC);
@@ -243,11 +246,17 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stdin(buf, n);
+	    rc = plugin->u.io->log_stdin(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdin = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -265,6 +274,7 @@ static bool
 log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
@@ -275,11 +285,17 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_ttyout(buf, n);
+	    rc = plugin->u.io->log_ttyout(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyout = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -308,6 +324,7 @@ static bool
 log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_stdout, SUDO_DEBUG_EXEC);
@@ -318,11 +335,17 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stdout(buf, n);
+	    rc = plugin->u.io->log_stdout(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdout = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -351,6 +374,7 @@ static bool
 log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     bool ret = true;
     debug_decl(log_stderr, SUDO_DEBUG_EXEC);
@@ -361,11 +385,17 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stderr(buf, n);
+	    rc = plugin->u.io->log_stderr(buf, n, &errstr);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stderr = NULL;
+		    audit_error(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("I/O plugin error"), NULL);
+		} else {
+		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
+			errstr ? errstr : _("command rejected by I/O plugin"),
+			NULL);
 		}
 		ret = false;
 		break;
@@ -394,6 +424,7 @@ static void
 log_suspend(int signo)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     debug_decl(log_suspend, SUDO_DEBUG_EXEC);
 
@@ -405,12 +436,12 @@ log_suspend(int signo)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_suspend(signo);
+	    rc = plugin->u.io->log_suspend(signo, &errstr);
 	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->log_suspend = NULL;
-		}
+		/* Error: disable plugin's I/O function. */
+		plugin->u.io->log_suspend = NULL;
+		audit_error(plugin->name, SUDO_IO_PLUGIN,
+		    errstr ? errstr : _("error logging suspend"), NULL);
 		break;
 	    }
 	}
@@ -426,6 +457,7 @@ static void
 log_winchange(unsigned int rows, unsigned int cols)
 {
     struct plugin_container *plugin;
+    const char *errstr = NULL;
     sigset_t omask;
     debug_decl(log_winchange, SUDO_DEBUG_EXEC);
 
@@ -437,12 +469,12 @@ log_winchange(unsigned int rows, unsigned int cols)
 	    int rc;
 
 	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->change_winsize(rows, cols);
+	    rc = plugin->u.io->change_winsize(rows, cols, &errstr);
 	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->change_winsize = NULL;
-		}
+		/* Error: disable plugin's I/O function. */
+		plugin->u.io->change_winsize = NULL;
+		audit_error(plugin->name, SUDO_IO_PLUGIN,
+		    errstr ? errstr : _("error changing window size"), NULL);
 		break;
 	    }
 	}
@@ -455,22 +487,25 @@ log_winchange(unsigned int rows, unsigned int cols)
 
 /*
  * Check whether we are running in the foregroup.
- * Updates the foreground global and does lazy init of the
- * the pty slave as needed.
+ * Updates the foreground global and updates the window size.
+ * Returns 0 if there is no tty, the foreground process group ID
+ * on success, or -1 on failure (tty revoked).
  */
-static void
+static pid_t
 check_foreground(struct exec_closure_pty *ec)
 {
+    int ret = 0;
     debug_decl(check_foreground, SUDO_DEBUG_EXEC);
 
     if (io_fds[SFD_USERTTY] != -1) {
-	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ec->ppgrp;
+	if ((ret = tcgetpgrp(io_fds[SFD_USERTTY])) != -1) {
+	    foreground = ret == ec->ppgrp;
 
-	/* Also check for window size changes. */
-	sync_ttysize(ec);
+	    /* Also check for window size changes. */
+	    sync_ttysize(ec);
+	}
     }
-
-    debug_return;
+    debug_return_int(ret);
 }
 
 /*
@@ -493,8 +528,12 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	 * If sudo is already the foreground process, just resume the command
 	 * in the foreground.  If not, we'll suspend sudo and resume later.
 	 */
-	if (!foreground)
-	    check_foreground(ec);
+	if (!foreground) {
+	    if (check_foreground(ec) == -1) {
+		/* User's tty was revoked. */
+		break;
+	    }
+	}
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
@@ -536,7 +575,10 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	log_suspend(SIGCONT);
 
 	/* Check foreground/background status on resume. */
-	check_foreground(ec);
+	if (check_foreground(ec) == -1) {
+	    /* User's tty was revoked. */
+	    break;
+	}
 
 	/*
 	 * We always resume the command in the foreground if sudo itself
@@ -613,7 +655,7 @@ read_callback(int fd, int what, void *v)
     switch (n) {
 	case -1:
 	    if (got_sigttin) {
-		/* Schedule SIGTTIN to be forwared to the command. */
+		/* Schedule SIGTTIN to be forwarded to the command. */
 		schedule_signal(iob->ec, SIGTTIN);
 	    }
 	    if (errno == EAGAIN || errno == EINTR)
@@ -718,7 +760,7 @@ write_callback(int fd, int what, void *v)
 	    break;
 	case EINTR:
 	    if (got_sigttou) {
-		/* Schedule SIGTTOU to be forwared to the command. */
+		/* Schedule SIGTTOU to be forwarded to the command. */
 		schedule_signal(iob->ec, SIGTTOU);
 	    }
 	    /* FALLTHROUGH */
@@ -870,6 +912,9 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
 {
     char signame[SIG2STR_MAX];
     debug_decl(schedule_signal, SUDO_DEBUG_EXEC);
+
+    if (signo == 0)
+	debug_return;
 
     if (signo == SIGCONT_FG)
 	strlcpy(signame, "CONT_FG", sizeof(signame));
@@ -1071,7 +1116,7 @@ signal_cb_pty(int signo, int what, void *v)
 		debug_return;
 	    }
 	}
-	/* Schedule signal to be forwared to the command. */
+	/* Schedule signal to be forwarded to the command. */
 	schedule_signal(ec, signo);
 	break;
     }
@@ -1157,6 +1202,10 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     ec->rows = user_details.ts_rows;
     ec->cols = user_details.ts_cols;
     TAILQ_INIT(&ec->monitor_messages);
+
+    /* Reset cstat for running the command. */
+    cstat->type = CMD_INVALID;
+    cstat->val = 0;
 
     /* Setup event base and events. */
     ec->evbase = details->evbase;
@@ -1286,7 +1335,7 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
 }
 
 /*
- * Execute a command in a pty, potentially with I/O loggging, and
+ * Execute a command in a pty, potentially with I/O logging, and
  * wait for it to finish.
  * This is a little bit tricky due to how POSIX job control works and
  * we fact that we have two different controlling terminals to deal with.
@@ -1298,6 +1347,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     bool interpose[3] = { false, false, false };
     struct exec_closure_pty ec = { 0 };
     struct plugin_container *plugin;
+    int evloop_retries = -1;
     sigset_t set, oset;
     struct sigaction sa;
     struct stat sb;
@@ -1516,7 +1566,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
                 "%s: unable to send status to parent", __func__);
 	}
-	_exit(1);
+	_exit(EXIT_FAILURE);
     }
 
     /*
@@ -1574,20 +1624,38 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /*
      * In the event loop we pass input from user tty to master
      * and pass output from master to stdout and IO plugin.
+     * Try to recover on ENXIO, it means the tty was revoked.
      */
     add_io_events(ec.evbase);
-    if (sudo_ev_dispatch(ec.evbase) == -1)
-	sudo_warn(U_("error in event loop"));
-    if (sudo_ev_got_break(ec.evbase)) {
-	/* error from callback or monitor died */
-	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
-	/* kill command */
-	terminate_command(ec.cmnd_pid, true);
-	ec.cmnd_pid = -1;
-	/* TODO: need way to pass an error to the sudo front end */
-	cstat->type = CMD_WSTATUS;
-	cstat->val = W_EXITCODE(1, SIGKILL);
-    }
+    do {
+	if (sudo_ev_dispatch(ec.evbase) == -1)
+	    sudo_warn(U_("error in event loop"));
+	if (sudo_ev_got_break(ec.evbase)) {
+	    /* error from callback or monitor died */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
+	    /* XXX: no good way to know if we should terminate the command. */
+	    if (cstat->val == CMD_INVALID && ec.cmnd_pid != -1) {
+		/* no status message, kill command */
+		terminate_command(ec.cmnd_pid, true);
+		ec.cmnd_pid = -1;
+		/* TODO: need way to pass an error to the sudo front end */
+		cstat->type = CMD_WSTATUS;
+		cstat->val = W_EXITCODE(1, SIGKILL);
+	    }
+	} else if (!sudo_ev_got_exit(ec.evbase)) {
+	    switch (errno) {
+	    case ENXIO:
+	    case EIO:
+	    case EBADF:
+		/* /dev/tty was revoked, remove tty events and retry (once) */
+		if (evloop_retries == -1 && io_fds[SFD_USERTTY] != -1) {
+		    ev_free_by_fd(ec.evbase, io_fds[SFD_USERTTY]);
+		    evloop_retries = 1;
+		}
+		break;
+	    }
+	}
+    } while (evloop_retries-- > 0);
 
     /* Flush any remaining output, free I/O bufs and events, do logout. */
     pty_finish(cstat);

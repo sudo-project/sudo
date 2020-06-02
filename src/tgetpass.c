@@ -32,18 +32,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
-#include <pwd.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -61,7 +54,7 @@ enum tgetpass_errval {
 static volatile sig_atomic_t signo[NSIG];
 
 static void tgetpass_handler(int);
-static char *getln(int, char *, size_t, int, enum tgetpass_errval *);
+static char *getln(int, char *, size_t, bool, enum tgetpass_errval *);
 static char *sudo_askpass(const char *, const char *);
 
 static int
@@ -124,7 +117,7 @@ tgetpass(const char *prompt, int timeout, int flags,
     static const char *askpass;
     static char buf[SUDO_CONV_REPL_MAX + 1];
     int i, input, output, save_errno, ttyfd;
-    bool need_restart, neednl = false;
+    bool feedback, need_restart, neednl;
     enum tgetpass_errval errval;
     debug_decl(tgetpass, SUDO_DEBUG_CONV);
 
@@ -140,8 +133,8 @@ restart:
     /* Try to open /dev/tty if we are going to be using it for I/O. */
     ttyfd = -1;
     if (!ISSET(flags, TGP_STDIN|TGP_ASKPASS)) {
-	ttyfd = open(_PATH_TTY, O_RDWR);
 	/* If no tty present and we need to disable echo, try askpass. */
+	ttyfd = open(_PATH_TTY, O_RDWR);
 	if (ttyfd == -1 && !ISSET(flags, TGP_ECHO|TGP_NOECHO_TRY)) {
 	    if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
 		sudo_warnx(U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
@@ -163,12 +156,16 @@ restart:
 	signo[i] = 0;
     pass = NULL;
     save_errno = 0;
+    neednl = false;
     need_restart = false;
+    feedback = false;
 
     /* Use tty for reading/writing if available else use stdin/stderr. */
     if (ttyfd == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
+	/* Don't try to mask password if /dev/tty is not available. */
+	CLR(flags, TGP_MASK);
     } else {
 	input = ttyfd;
 	output = ttyfd;
@@ -181,15 +178,15 @@ restart:
     if (!ISSET(flags, TGP_ECHO)) {
 	for (;;) {
 	    if (ISSET(flags, TGP_MASK))
-		neednl = sudo_term_cbreak(input);
+		neednl = feedback = sudo_term_cbreak(input);
 	    else
 		neednl = sudo_term_noecho(input);
 	    if (neednl || errno != EINTR)
 		break;
 	    /* Received SIGTTOU, suspend the process. */
 	    if (suspend(SIGTTOU, callback) == -1) {
-		if (input != STDIN_FILENO)
-		    (void) close(input);
+		if (ttyfd != -1)
+		    (void) close(ttyfd);
 		debug_return_ptr(NULL);
 	    }
 	}
@@ -224,7 +221,7 @@ restart:
 
     if (timeout > 0)
 	alarm(timeout);
-    pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_MASK), &errval);
+    pass = getln(input, buf, sizeof(buf), feedback, &errval);
     alarm(0);
     save_errno = errno;
 
@@ -250,8 +247,8 @@ restore:
 	/* Restore old tty settings if possible. */
 	(void) sudo_term_restore(input, true);
     }
-    if (input != STDIN_FILENO)
-	(void) close(input);
+    if (ttyfd != -1)
+	(void) close(ttyfd);
 
     /*
      * If we were interrupted by a signal, resend it to ourselves
@@ -366,7 +363,7 @@ sudo_askpass(const char *askpass, const char *prompt)
 extern int sudo_term_eof, sudo_term_erase, sudo_term_kill;
 
 static char *
-getln(int fd, char *buf, size_t bufsiz, int feedback,
+getln(int fd, char *buf, size_t bufsiz, bool feedback,
     enum tgetpass_errval *errval)
 {
     size_t left = bufsiz;
@@ -395,15 +392,15 @@ getln(int fd, char *buf, size_t bufsiz, int feedback,
 		while (cp > buf) {
 		    if (write(fd, "\b \b", 3) == -1)
 			break;
-		    --cp;
+		    cp--;
 		}
+		cp = buf;
 		left = bufsiz;
 		continue;
 	    } else if (c == sudo_term_erase) {
 		if (cp > buf) {
-		    if (write(fd, "\b \b", 3) == -1)
-			break;
-		    --cp;
+		    ignore_result(write(fd, "\b \b", 3));
+		    cp--;
 		    left++;
 		}
 		continue;

@@ -79,20 +79,19 @@ dnl
 dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
 dnl
 AC_DEFUN([SUDO_LOGFILE], [AC_MSG_CHECKING(for log file location)
-if test -n "$with_logpath"; then
-    logpath="$with_logpath"
-elif test -d "/var/log"; then
-    logpath="/var/log/sudo.log"
-elif test -d "/var/adm"; then
-    logpath="/var/adm/sudo.log"
-elif test -d "/usr/adm"; then
-    logpath="/usr/adm/sudo.log"
-else
-    # Assume a modern system
-    logpath="/var/log/sudo.log"
-fi
-AC_MSG_RESULT($logpath)
-SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGFILE, "$logpath")
+    if test "${with_logpath-yes}" != "yes"; then
+	logpath="$with_logpath"
+    else
+	# Default value of logpath set in configure.ac
+	for d in /var/log /var/adm /usr/adm; do
+	    if test -d "$d"; then
+		logpath="$d/sudo.log"
+		break
+	    fi
+	done
+    fi
+    AC_MSG_RESULT($logpath)
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGFILE, "$logpath")
 ])dnl
 
 dnl
@@ -119,8 +118,12 @@ dnl
 dnl Parent directory for time stamp dir.
 dnl
 AC_DEFUN([SUDO_RUNDIR], [AC_MSG_CHECKING(for sudo run dir location)
-rundir="$with_rundir"
-if test -z "$rundir"; then
+if test -n "$with_rundir"; then
+    rundir="$with_rundir"
+elif test "$runstatedir" != '${localstatedir}/run'; then
+    rundir="$runstatedir/sudo"
+else
+    # No --with-rundir or --runstatedir specified
     for d in /run /var/run /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
 	    rundir="$d/sudo"
@@ -130,6 +133,7 @@ if test -z "$rundir"; then
 fi
 AC_MSG_RESULT([$rundir])
 SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$rundir/ts")
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGSRVD_PID, "$rundir/sudo_logsrvd.pid")
 ])dnl
 
 dnl
@@ -157,17 +161,41 @@ AC_DEFUN([SUDO_IO_LOGDIR], [
     AC_MSG_CHECKING(for I/O log dir location)
     if test "${with_iologdir-yes}" != "yes"; then
 	iolog_dir="$with_iologdir"
-    elif test -d "/var/log"; then
-	iolog_dir="/var/log/sudo-io"
-    elif test -d "/var/adm"; then
-	iolog_dir="/var/adm/sudo-io"
     else
-	iolog_dir="/usr/adm/sudo-io"
+	# Default value of iolog_dir set in configure.ac
+	for d in /var/log /var/adm /usr/adm; do
+	    if test -d "$d"; then
+		iolog_dir="$d/sudo-io"
+		break
+	    fi
+	done
     fi
     if test "${with_iologdir}" != "no"; then
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_IO_LOGDIR, "$iolog_dir")
     fi
     AC_MSG_RESULT($iolog_dir)
+])dnl
+
+dnl
+dnl Where the log files go, use /var/log if it exists, else /{var,usr}/adm
+dnl
+AC_DEFUN([SUDO_LOGDIR], [
+    AC_MSG_CHECKING(for log dir location)
+    if test "${with_logdir-yes}" != "yes"; then
+	log_dir="$with_logdir"
+    else
+	# Default value of log_dir set in configure.ac
+	for d in /var/log /var/adm /usr/adm; do
+	    if test -d "$d"; then
+		log_dir="$d"
+		break
+	    fi
+	done
+    fi
+    if test "${with_logdir}" != "no"; then
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGDIR, "$log_dir")
+    fi
+    AC_MSG_RESULT($log_dir)
 ])dnl
 
 dnl

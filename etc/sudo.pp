@@ -1,10 +1,8 @@
 %set
 	if test -n "$flavor"; then
 		name="sudo-$flavor"
-		pp_kit_package="sudo_$flavor"
 	else
 		name="sudo"
-		pp_kit_package="sudo"
 	fi
 	summary="Provide limited super-user privileges to specific users"
 	description="Sudo is a program designed to allow a sysadmin to give \
@@ -12,7 +10,7 @@ limited root privileges to users and log root activity.  \
 The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
-	copyright="(c) 1993-1996,1998-2019 Todd C. Miller"
+	copyright="(c) 1993-1996,1998-2020 Todd C. Miller"
 	sudoedit_man=`echo ${pp_destdir}$mandir/*/sudoedit.*|sed "s:^${pp_destdir}::"`
 	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
@@ -22,12 +20,9 @@ still allow people to get their work done."
 
 	# Convert to 4 part version for AIX, including patch level
 	pp_aix_version=`echo $version|sed -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)p\([0-9]*\)$/\1.\2/' -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)[^0-9\.].*$/\1/' -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)$/\1.0/'`
-%endif
 
-%if [kit]
-	# Strip off patchlevel for kit which only supports xyz versions
-	pp_kit_version="`echo $version|sed -e 's/\.//g' -e 's/[^0-9][^0-9]*[0-9][0-9]*$//'`"
-	pp_kit_name="TCM"
+	# Don't allow sudo to prompt for a password
+	pp_aix_sudo="sudo -n"
 %endif
 
 %if [sd]
@@ -104,6 +99,35 @@ still allow people to get their work done."
 	rm -f ${pp_destdir}$sysconfdir/sudo.conf
 %endif
 
+	# Stash original docdir and exampledir
+	odocdir="${docdir}"
+	oexampledir="${exampledir}"
+
+	# For RedHat the doc dir is expected to include version and release
+	case "$pp_rpm_distro" in
+	centos*|rhel*|f[0-9]*)
+		docdir="${docdir}-${pp_rpm_version}-${pp_rpm_release}"
+		exampledir="${docdir}/examples"
+		;;
+	esac
+
+	if test -n "$flavor"; then
+	    # docdir and exampledir are installed with "sudo" as the package
+	    # name which is not be correct for flavors.
+	    docdir="`echo \"${docdir}\" | sed \"s#/sudo#/${name}#g\"`"
+	    exampledir="`echo \"${exampledir}\" | sed \"s#/sudo#/${name}#g\"`"
+	fi
+
+	# Copy docdir and exampledir to new names if needed
+	if test ! -d "${pp_destdir}${docdir}"; then
+	    cp -R ${pp_destdir}${odocdir} ${pp_destdir}${docdir}
+	    find ${pp_destdir}${docdir} -depth | sed "s#^${pp_destdir}##" >> ${pp_wrkdir}/pp_cleanup
+	fi
+	if test ! -d "${pp_destdir}${exampledir}"; then
+	    cp -R ${pp_destdir}${oexampledir} ${pp_destdir}${exampledir}
+	    find ${pp_destdir}${exampledir} -depth | sed "s#^${pp_destdir}##" >> ${pp_wrkdir}/pp_cleanup
+	fi
+
 %if [deb]
 	pp_deb_maintainer="$pp_rpm_packager"
 	pp_deb_release="$pp_rpm_release"
@@ -167,18 +191,6 @@ still allow people to get their work done."
 		q
 		EOF
 		chmod u-w ${pp_destdir}${sudoersdir}/sudoers
-		;;
-	esac
-
-	# For RedHat the doc dir is expected to include version and release
-	case "$pp_rpm_distro" in
-	centos*|rhel*|f[0-9]*)
-		rhel_docdir="${docdir}-${pp_rpm_version}-${pp_rpm_release}"
-		if test "`dirname ${exampledir}`" = "${docdir}"; then
-		    exampledir="${rhel_docdir}/`basename ${exampledir}`"
-		fi
-		mv "${pp_destdir}/${docdir}" "${pp_destdir}/${rhel_docdir}"
-		docdir="${rhel_docdir}"
 		;;
 	esac
 
@@ -290,20 +302,19 @@ still allow people to get their work done."
 %endif
 
 %if X"$aix_freeware" = X"true"
-	# Create links from /opt/freeware/{bin,sbin} -> /usr/{bin.sbin}
+	# Create links from /opt/freeware/{bin,sbin} -> /usr/{bin,sbin}
 	mkdir -p ${pp_destdir}/usr/bin ${pp_destdir}/usr/sbin
 	ln -s -f ${bindir}/cvtsudoers ${pp_destdir}/usr/bin
 	ln -s -f ${bindir}/sudo ${pp_destdir}/usr/bin
 	ln -s -f ${bindir}/sudoedit ${pp_destdir}/usr/bin
 	ln -s -f ${bindir}/sudoreplay ${pp_destdir}/usr/bin
-	ln -s -f ${sbindir}/sudo_logsrvd ${pp_destdir}/usr/sbin
 	ln -s -f ${sbindir}/sudo_sendlog ${pp_destdir}/usr/sbin
 	ln -s -f ${sbindir}/visudo ${pp_destdir}/usr/sbin
 %endif
 
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
-	    extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
+	    extradirs=`echo ${pp_destdir}${mandir}/[mc]* | sed "s#${pp_destdir}##g"`
 	    extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
 	    test "`dirname $exampledir`" != "$docdir" && extradirs="$extradirs `dirname $exampledir`"
 	    test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
@@ -317,10 +328,10 @@ still allow people to get their work done."
 	fi
 
 %depend [deb]
-	libc6, libpam0g, libpam-modules, zlib1g, libselinux1
+	libc6, libpam0g, libpam-modules, zlib1g, libselinux1, libssl1.1
 
 %fixup [deb]
-	# Add Conflicts, Replaces headers and add libldap depedency as needed.
+	# Add Conflicts, Replaces headers and add libldap dependency as needed.
 	DEPENDS="%{linux_audit}"
 	if test -z "%{flavor}"; then
 	    echo "Conflicts: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
@@ -329,41 +340,68 @@ still allow people to get their work done."
 	    echo "Conflicts: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Provides: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
-	    DEPENDS="${DEPENDS}, libldap-2.4-2"
+	    DEPENDS="${DEPENDS}${DEPENDS:+, }libldap-2.4-2"
 	fi
 	cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
-	sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	if test -n "${DEPENDS}"; then
+	    sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	fi
 	rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	echo "Homepage: https://www.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	echo "Bugs: https://bugzilla.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+
+%fixup [rpm]
+	cat > %{pp_wrkdir}/${name}.spec.sed <<-'EOF'
+		/^%files/ {
+			i\
+			%clean\
+			:\
+
+		}
+	EOF
+	mv %{pp_wrkdir}/${name}.spec %{pp_wrkdir}/${name}.spec.bak
+	sed -f %{pp_wrkdir}/${name}.spec.sed %{pp_wrkdir}/${name}.spec.bak > %{pp_wrkdir}/${name}.spec
 
 %files
 %if X"$parentdirs" != X""
 	$parentdirs		-
 %endif
+%if X"$odocdir" != X"$docdir"
+	$odocdir/		ignore
+	$odocdir/**		ignore
+%endif
+%if X"$oexampledir" != X"$exampledir" -a X"$exampledir" != X"$docdir/examples"
+	$oexampledir/		ignore
+	$oexampledir/**		ignore
+%endif
 	$bindir/cvtsudoers  	0755 root:
 	$bindir/sudo        	4755 root:
 	$bindir/sudoedit    	0755 root: symlink sudo
 	$bindir/sudoreplay  	0755
-	$sbindir/sudo_logsrvd   0755
 	$sbindir/sudo_sendlog   0755
+	$sbindir/sudo_logsrvd        optional,ignore
 	$sbindir/visudo     	0755
 	$includedir/sudo_plugin.h 0644
 	$libexecdir/sudo/	0755
 	$libexecdir/sudo/sesh	0755 optional,ignore-others
+	$libexecdir/sudo/python*     optional,ignore,ignore-others
 	$libexecdir/sudo/*	$shlib_mode optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$rundir/		0711 root:
 	$vardir/		0711 root: ignore-others
 	$vardir/lectured/	0700 root:
 	$docdir/		0755
+	$docdir/**		0644
 %if [deb]
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
+%if X"$exampledir" != X"$docdir/examples"
 	$exampledir/		0755 ignore-others
-	$exampledir/*		0644 ignore-others
-	$docdir/**		0644
+	$exampledir/*		0644
+%endif
+	$exampledir/sudo_logsrv*     optional,ignore,ignore-others
+	$exampledir/*.py             optional,ignore,ignore-others
 	$localedir/*/		-    optional
 	$localedir/*/LC_MESSAGES/ -    optional
 	$localedir/*/LC_MESSAGES/* 0644    optional
@@ -380,7 +418,6 @@ still allow people to get their work done."
 	/usr/bin/sudo    	0755 root: symlink $bindir/sudo
 	/usr/bin/sudoedit    	0755 root: symlink $bindir/sudoedit
 	/usr/bin/sudoreplay    	0755 root: symlink $bindir/sudoreplay
-	/usr/sbin/sudo_logsrvd  0755 root: symlink $sbindir/logsrvd
 	/usr/sbin/sudo_sendlog  0755 root: symlink $sbindir/sendlog
 	/usr/sbin/visudo    	0755 root: symlink $sbindir/visudo
 %endif
@@ -401,15 +438,9 @@ still allow people to get their work done."
 	/sbin/init.d/		ignore
 	/sbin/init.d/sudo	0755 root:
 %endif
-
-%files [!aix]
 	$mandir/man*/*		0644
-	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
-
-%files [aix]
-	# Some versions use catpages, some use manpages.
-	$mandir/cat*/*		0644 optional
-	$mandir/man*/*		0644 optional
+	$mandir/man*/sudo_logsrv*    ignore,ignore-others
+	$mandir/man*/*python*        ignore,ignore-others
 	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
 
 %pre [aix]
