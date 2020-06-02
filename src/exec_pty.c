@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1317,6 +1317,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     bool interpose[3] = { false, false, false };
     struct exec_closure_pty ec = { 0 };
     struct plugin_container *plugin;
+    int evloop_retries = -1;
     sigset_t set, oset;
     struct sigaction sa;
     struct stat sb;
@@ -1593,23 +1594,38 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /*
      * In the event loop we pass input from user tty to master
      * and pass output from master to stdout and IO plugin.
+     * Try to recover on ENXIO, it means the tty was revoked.
      */
     add_io_events(ec.evbase);
-    if (sudo_ev_dispatch(ec.evbase) == -1)
-	sudo_warn(U_("error in event loop"));
-    if (sudo_ev_got_break(ec.evbase)) {
-	/* error from callback or monitor died */
-	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
-	/* XXX: no good way to know if we should terminate the command. */
-	if (cstat->val == CMD_INVALID && ec.cmnd_pid != -1) {
-	    /* no status message, kill command */
-	    terminate_command(ec.cmnd_pid, true);
-	    ec.cmnd_pid = -1;
-	    /* TODO: need way to pass an error to the sudo front end */
-	    cstat->type = CMD_WSTATUS;
-	    cstat->val = W_EXITCODE(1, SIGKILL);
+    do {
+	if (sudo_ev_dispatch(ec.evbase) == -1)
+	    sudo_warn(U_("error in event loop"));
+	if (sudo_ev_got_break(ec.evbase)) {
+	    /* error from callback or monitor died */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
+	    /* XXX: no good way to know if we should terminate the command. */
+	    if (cstat->val == CMD_INVALID && ec.cmnd_pid != -1) {
+		/* no status message, kill command */
+		terminate_command(ec.cmnd_pid, true);
+		ec.cmnd_pid = -1;
+		/* TODO: need way to pass an error to the sudo front end */
+		cstat->type = CMD_WSTATUS;
+		cstat->val = W_EXITCODE(1, SIGKILL);
+	    }
+	} else if (!sudo_ev_got_exit(ec.evbase)) {
+	    switch (errno) {
+	    case ENXIO:
+	    case EIO:
+	    case EBADF:
+		/* /dev/tty was revoked, remove tty events and retry (once) */
+		if (evloop_retries == -1 && io_fds[SFD_USERTTY] != -1) {
+		    ev_free_by_fd(ec.evbase, io_fds[SFD_USERTTY]);
+		    evloop_retries = 1;
+		}
+		break;
+	    }
 	}
-    }
+    } while (evloop_retries-- > 0);
 
     /* Flush any remaining output, free I/O bufs and events, do logout. */
     pty_finish(cstat);
