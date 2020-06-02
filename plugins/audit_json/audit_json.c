@@ -514,7 +514,7 @@ audit_write_record(const char *audit_str, const char *plugin_name,
 	goto oom;
 
     switch (plugin_type) {
-    case 0:
+    case SUDO_FRONT_END:
 	json_value.u.string = "front-end";
 	break;
     case SUDO_POLICY_PLUGIN:
@@ -603,6 +603,10 @@ audit_json_accept(const char *plugin_name, unsigned int plugin_type,
 {
     int ret;
     debug_decl(audit_json_accept, SUDO_DEBUG_PLUGIN);
+
+    /* Ignore the extra accept event from the sudo front-end. */
+    if (plugin_type == SUDO_FRONT_END)
+	debug_return_int(true);
 
     state.accepted = true;
 

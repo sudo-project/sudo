@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 1, 2020
+.Dd May 26, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2607,15 +2607,43 @@ int (*accept)(const char *plugin_name, unsigned int plugin_type,
 .Pp
 The
 .Fn accept
-function is called when a command or action is accepted by the policy
-plugin.
+function is called when a command or action is accepted by a policy
+or approval plugin.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that accepted the command or
+.Dq sudo
+for the
+.Nm sudo
+front-end.
 .It plugin_type
-The type of plugin that accepted the command, currently always
-.Dv SUDO_POLICY_PLUGIN .
+The type of plugin that accepted the command, currently either
+.Dv SUDO_POLICY_PLUGIN ,
+.Dv SUDO_POLICY_APPROVAL
+or
+.Dv SUDO_FRONT_END .
+The
+.Fn accept
+function is called multiple times--once for each policy or approval
+plugin that succeeds and once for the sudo front-end.
+When called on behalf of the sudo front-end,
+.Fa command_info
+may include information from an I/O logging plugin as well.
+.Pp
+Typically, an audit plugin is interested in either the accept status from
+the
+.Nm sudo
+front-end or from the various policy and approval plugins, but not both.
+It is possible for the policy plugin to accept a command that is
+later rejected by an approval plugin, in which case the audit
+plugin's
+.Fn accept
+and
+.Fn reject
+functions will
+.Em both
+be called.
 .It command_info
 A vector of information describing the command being run in the form of
 .Dq name=value
@@ -2694,12 +2722,21 @@ function is called when a command or action is rejected by a plugin.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that rejected the command.
 .It plugin_type
-The type of plugin that accepted the command, currently either
-.Dv SUDO_POLICY_PLUGIN
+The type of plugin that rejected the command, currently either
+.Dv SUDO_POLICY_PLUGIN ,
+.Dv SUDO_APPROVAL_PLUGIN
 or
 .Dv SUDO_IO_PLUGIN .
+.Pp
+Unlike the
+.Fn accept
+function, the
+.Fn reject
+function is not called on behalf of the
+.Nm sudo
+front-end.
 .It audit_msg
 An optional string describing the reason the command was rejected
 by the plugin.
@@ -2756,16 +2793,23 @@ int (*error)(const char *plugin_name, unsigned int plugin_type,
 .Pp
 The
 .Fn error
-function is called when a plugin returns an error.
+function is called when a plugin or the
+.Nm sudo
+front-end returns an error.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that generated the error or
+.Dq sudo
+for the
+.Nm sudo
+front-end.
 .It plugin_type
-The type of plugin that accepted the command, currently either
-.Dv SUDO_POLICY_PLUGIN
-or
-.Dv SUDO_IO_PLUGIN .
+The type of plugin that generated the error, or
+.Dv SUDO_FRONT_END
+for the
+.Nm sudo
+front-end.
 .It audit_msg
 An optional string describing the plugin error.
 If the plugin did not provide a description,

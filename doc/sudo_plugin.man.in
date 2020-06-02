@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "April 1, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "May 26, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2926,16 +2926,44 @@ int (*accept)(const char *plugin_name, unsigned int plugin_type,
 .sp
 The
 \fBaccept\fR()
-function is called when a command or action is accepted by the policy
-plugin.
+function is called when a command or action is accepted by a policy
+or approval plugin.
 The function arguments are as follows:
 .TP 6n
 plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that accepted the command or
+\(lqsudo\(rq
+for the
+\fBsudo\fR
+front-end.
 .TP 6n
 plugin_type
-The type of plugin that accepted the command, currently always
-\fRSUDO_POLICY_PLUGIN\fR.
+The type of plugin that accepted the command, currently either
+\fRSUDO_POLICY_PLUGIN\fR,
+\fRSUDO_POLICY_APPROVAL\fR
+or
+\fRSUDO_FRONT_END\fR.
+The
+\fBaccept\fR()
+function is called multiple times--once for each policy or approval
+plugin that succeeds and once for the sudo front-end.
+When called on behalf of the sudo front-end,
+\fIcommand_info\fR
+may include information from an I/O logging plugin as well.
+.sp
+Typically, an audit plugin is interested in either the accept status from
+the
+\fBsudo\fR
+front-end or from the various policy and approval plugins, but not both.
+It is possible for the policy plugin to accept a command that is
+later rejected by an approval plugin, in which case the audit
+plugin's
+\fBaccept\fR()
+and
+\fBreject\fR()
+functions will
+\fIboth\fR
+be called.
 .TP 6n
 command_info
 A vector of information describing the command being run in the form of
@@ -3025,13 +3053,22 @@ function is called when a command or action is rejected by a plugin.
 The function arguments are as follows:
 .TP 6n
 plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that rejected the command.
 .TP 6n
 plugin_type
-The type of plugin that accepted the command, currently either
-\fRSUDO_POLICY_PLUGIN\fR
+The type of plugin that rejected the command, currently either
+\fRSUDO_POLICY_PLUGIN\fR,
+\fRSUDO_APPROVAL_PLUGIN\fR
 or
 \fRSUDO_IO_PLUGIN\fR.
+.sp
+Unlike the
+\fBaccept\fR()
+function, the
+\fBreject\fR()
+function is not called on behalf of the
+\fBsudo\fR
+front-end.
 .TP 6n
 audit_msg
 An optional string describing the reason the command was rejected
@@ -3099,17 +3136,24 @@ int (*error)(const char *plugin_name, unsigned int plugin_type,
 .sp
 The
 \fBerror\fR()
-function is called when a plugin returns an error.
+function is called when a plugin or the
+\fBsudo\fR
+front-end returns an error.
 The function arguments are as follows:
 .TP 6n
 plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that generated the error or
+\(lqsudo\(rq
+for the
+\fBsudo\fR
+front-end.
 .TP 6n
 plugin_type
-The type of plugin that accepted the command, currently either
-\fRSUDO_POLICY_PLUGIN\fR
-or
-\fRSUDO_IO_PLUGIN\fR.
+The type of plugin that generated the error, or
+\fRSUDO_FRONT_END\fR
+for the
+\fBsudo\fR
+front-end.
 .TP 6n
 audit_msg
 An optional string describing the plugin error.

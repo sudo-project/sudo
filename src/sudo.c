@@ -282,6 +282,10 @@ main(int argc, char *argv[], char *envp[])
 	    iolog_open(settings, user_info, command_info, nargc, nargv,
 		user_env_out);
 
+	    /* Audit the accept event on behalf of the sudo front-end. */
+	    audit_accept("sudo", SUDO_FRONT_END, command_info,
+		nargv, user_env_out);
+
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
 	    command_details.tty = user_details.tty;
