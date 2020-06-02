@@ -245,7 +245,7 @@ log_denial(int status, bool inform_user)
 	message = N_("command not allowed");
 
     /* Do auditing first (audit_failure() handles the locale itself). */
-    audit_failure(NewArgc, NewArgv, "%s", message);
+    audit_failure(NewArgv, "%s", message);
 
     if (def_log_denied || mailit) {
 	/* Log and mail messages should be in the sudoers locale. */
@@ -351,7 +351,7 @@ log_auth_failure(int status, unsigned int tries)
     debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING);
 
     /* Do auditing first (audit_failure() handles the locale itself). */
-    audit_failure(NewArgc, NewArgv, "%s", N_("authentication failure"));
+    audit_failure(NewArgv, "%s", N_("authentication failure"));
 
     /*
      * Do we need to send mail?

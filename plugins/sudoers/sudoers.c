@@ -157,12 +157,15 @@ restore_nproc(void)
 }
 
 int
-sudoers_policy_init(void *info, char * const envp[])
+sudoers_init(void *info, char * const envp[])
 {
     struct sudo_nss *nss, *nss_next;
     int oldlocale, sources = 0;
-    int ret = -1;
-    debug_decl(sudoers_policy_init, SUDOERS_DEBUG_PLUGIN);
+    static int ret = -1;
+    debug_decl(sudoers_init, SUDOERS_DEBUG_PLUGIN);
+
+    if (ret == true)
+	debug_return_int(true);
 
     bindtextdomain("sudoers", LOCALEDIR);
 
@@ -350,7 +353,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
-	    audit_failure(NewArgc, NewArgv,
+	    audit_failure(NewArgv,
 		N_("user not allowed to override closefrom limit"));
 	    sudo_warnx(U_("you are not permitted to use the -C option"));
 	    goto bad;
@@ -381,15 +384,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Defer uid/gid checks until after defaults have been updated. */
     if (unknown_runas_uid && !def_runas_allow_unknown_id) {
-	audit_failure(NewArgc, NewArgv, N_("unknown user: %s"),
-	    runas_pw->pw_name);
+	audit_failure(NewArgv, N_("unknown user: %s"), runas_pw->pw_name);
 	sudo_warnx(U_("unknown user: %s"), runas_pw->pw_name);
 	goto done;
     }
     if (runas_gr != NULL) {
 	if (unknown_runas_gid && !def_runas_allow_unknown_id) {
-	    audit_failure(NewArgc, NewArgv, N_("unknown group: %s"),
-		runas_gr->gr_name);
+	    audit_failure(NewArgv, N_("unknown group: %s"), runas_gr->gr_name);
 	    sudo_warnx(U_("unknown group: %s"), runas_gr->gr_name);
 	    goto done;
 	}
@@ -431,14 +432,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty && !tty_present()) {
-	audit_failure(NewArgc, NewArgv, N_("no tty"));
+	audit_failure(NewArgv, N_("no tty"));
 	sudo_warnx(U_("sorry, you must have a tty to run sudo"));
 	goto bad;
     }
 
     /* Check runas user's shell. */
     if (!check_user_shell(runas_pw)) {
-	audit_failure(NewArgc, NewArgv, N_("invalid shell for user %s: %s"),
+	audit_failure(NewArgv, N_("invalid shell for user %s: %s"),
 	    runas_pw->pw_name, runas_pw->pw_shell);
 	log_warningx(SLOG_RAW_MSG, N_("invalid shell for user %s: %s"),
 	    runas_pw->pw_name, runas_pw->pw_shell);
@@ -503,16 +504,16 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
-	audit_failure(NewArgc, NewArgv, N_("command in current directory"));
+	audit_failure(NewArgv, N_("command in current directory"));
 	sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
-	    audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
+	    audit_failure(NewArgv, N_("%s: command not found"),
 		NewArgv[0]);
 	    sudo_warnx(U_("%s: command not found"), NewArgv[0]);
 	} else {
-	    audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
+	    audit_failure(NewArgv, N_("%s: command not found"),
 		user_cmnd);
 	    sudo_warnx(U_("%s: command not found"), user_cmnd);
 	}
@@ -521,8 +522,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If user specified a timeout make sure sudoers allows it. */
     if (!def_user_command_timeouts && user_timeout > 0) {
-	audit_failure(NewArgc, NewArgv,
-	    N_("user not allowed to set a command timeout"));
+	audit_failure(NewArgv, N_("user not allowed to set a command timeout"));
 	sudo_warnx(U_("sorry, you are not allowed set a command timeout"));
 	goto bad;
     }
@@ -530,7 +530,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    audit_failure(NewArgc, NewArgv,
+	    audit_failure(NewArgv,
 		N_("user not allowed to set a preserve the environment"));
 	    sudo_warnx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
@@ -551,9 +551,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    }
 	}
     }
-
-    if (!log_allowed(validated) && !def_ignore_logfile_errors)
-	goto bad;
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_CHECK:
@@ -665,7 +662,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (safe_cmnd == NULL) {
 	    if (errno != ENOENT)
 		goto done;
-	    audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
+	    audit_failure(NewArgv, N_("%s: command not found"),
 		env_editor ? env_editor : def_editor);
 	    sudo_warnx(U_("%s: command not found"),
 		env_editor ? env_editor : def_editor);
@@ -674,14 +671,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	sudoers_gc_add(GC_VECTOR, edit_argv);
 	NewArgv = edit_argv;
 	NewArgc = edit_argc;
-	if (audit_success(NewArgc, NewArgv) != 0 && !def_ignore_audit_errors)
-	    goto done;
 
 	/* We want to run the editor with the unmodified environment. */
 	env_swap_old();
-    } else {
-	if (audit_success(NewArgc, NewArgv) != 0 && !def_ignore_audit_errors)
-	    goto done;
     }
 
     goto done;
@@ -883,7 +875,7 @@ set_cmnd(void)
 	    }
 	    if (ret == NOT_FOUND_ERROR) {
 		if (errno == ENAMETOOLONG) {
-		    audit_failure(NewArgc, NewArgv, N_("command too long"));
+		    audit_failure(NewArgv, N_("command too long"));
 		}
 		log_warning(0, "%s", NewArgv[0]);
 		debug_return_int(ret);

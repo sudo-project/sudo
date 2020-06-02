@@ -129,8 +129,7 @@ sudo_auth_init(struct passwd *pw)
 	    if (IS_DISABLED(auth))
 		continue;
 	    if (!IS_STANDALONE(auth)) {
-		audit_failure(NewArgc, NewArgv,
-		    N_("invalid authentication methods"));
+		audit_failure(NewArgv, N_("invalid authentication methods"));
 		log_warningx(SLOG_SEND_MAIL,
 		    N_("Invalid authentication methods compiled into sudo!  "
 		    "You may not mix standalone and non-standalone authentication."));
@@ -253,7 +252,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 
     /* Make sure we have at least one auth method. */
     if (auth_switch[0].name == NULL) {
-	audit_failure(NewArgc, NewArgv, N_("no authentication methods"));
+	audit_failure(NewArgv, N_("no authentication methods"));
     	log_warningx(SLOG_SEND_MAIL,
 	    N_("There are no authentication methods compiled into sudo!  "
 	    "If you want to turn off authentication, use the "
@@ -303,7 +302,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 	    }
 	}
 	if (num_methods == 0) {
-	    audit_failure(NewArgc, NewArgv, N_("no authentication methods"));
+	    audit_failure(NewArgv, N_("no authentication methods"));
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("Unable to initialize authentication methods."));
 	    debug_return_int(-1);

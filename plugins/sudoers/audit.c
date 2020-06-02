@@ -26,6 +26,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sudoers.h"
 
@@ -41,14 +42,11 @@
 
 char *audit_msg = NULL;
 
-int
-audit_success(int argc, char *argv[])
+static int
+audit_success(char *const argv[])
 {
     int rc = 0;
     debug_decl(audit_success, SUDOERS_DEBUG_AUDIT);
-
-    if (!def_log_allowed)
-	debug_return_int(0);
 
     if (argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
@@ -60,7 +58,7 @@ audit_success(int argc, char *argv[])
 	    rc = -1;
 #endif
 #ifdef HAVE_SOLARIS_AUDIT
-	if (solaris_audit_success(argc, argv) == -1)
+	if (solaris_audit_success(argv) == -1)
 	    rc = -1;
 #endif
     }
@@ -69,52 +67,130 @@ audit_success(int argc, char *argv[])
 }
 
 int
-audit_failure(int argc, char *argv[], char const *const fmt, ...)
+audit_failure(char *const argv[], char const *const fmt, ...)
 {
-    int rc = 0;
+    int oldlocale, rc = 0;
     va_list ap;
-    debug_decl(audit_success, SUDOERS_DEBUG_AUDIT);
+    debug_decl(audit_failure, SUDOERS_DEBUG_AUDIT);
+
+    /* Audit messages should be in the sudoers locale. */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
     /* Set audit_msg for audit plugin.  */
     free(audit_msg);
     audit_msg = NULL;
     va_start(ap, fmt);
-    if (vasprintf(&audit_msg, fmt, ap) == -1)
+    if (vasprintf(&audit_msg, _(fmt), ap) == -1)
 	rc = -1;
     va_end(ap);
 
-    if (!def_log_denied)
-	debug_return_int(0);
-
 #if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
-    if (argv != NULL) {
-	int oldlocale;
-
-	/* Audit error messages should be in the sudoers locale. */
-	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-
+    if (def_log_denied && argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	va_start(ap, fmt);
-	if (bsm_audit_failure(argv, _(fmt), ap) == -1)
+	if (bsm_audit_failure(argv, audit_msg) == -1)
 	    rc = -1;
-	va_end(ap);
 #endif
 #ifdef HAVE_LINUX_AUDIT
-	va_start(ap, fmt);
 	if (linux_audit_command(argv, 0) == -1)
 	    rc = -1;
-	va_end(ap);
 #endif
 #ifdef HAVE_SOLARIS_AUDIT
-	va_start(ap, fmt);
-	if (solaris_audit_failure(argc, argv, _(fmt), ap) == -1)
+	if (solaris_audit_failure(argv, audit_msg) == -1)
 	    rc = -1;
-	va_end(ap);
 #endif
-
-	sudoers_setlocale(oldlocale, NULL);
     }
 #endif /* HAVE_BSM_AUDIT || HAVE_LINUX_AUDIT */
 
+    sudoers_setlocale(oldlocale, NULL);
+
     debug_return_int(rc);
 }
+
+static int
+sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
+    sudo_printf_t plugin_printf, char * const settings[],
+    char * const user_info[], int submit_optind, char * const submit_argv[],
+    char * const submit_envp[], char * const plugin_options[],
+    const char **errstr)
+{
+    struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
+    struct sudoers_open_info info;
+    const char *cp, *plugin_path = NULL;
+    char * const *cur;
+    int ret;
+    debug_decl(sudoers_audit_open, SUDOERS_DEBUG_PLUGIN);
+
+    /* Initialize the debug subsystem.  */
+    for (cur = settings; (cp = *cur) != NULL; cur++) {
+	if (strncmp(cp, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
+	    cp += sizeof("debug_flags=") - 1;
+	    if (!sudoers_debug_parse_flags(&debug_files, cp))
+		debug_return_int(-1);
+	    continue;
+	}
+	if (strncmp(cp, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
+	    plugin_path = cp + sizeof("plugin_path=") - 1;
+	    continue;
+	}
+    }
+    if (!sudoers_debug_register(plugin_path, &debug_files))
+	debug_return_int(-1);
+
+    /* Call the sudoers init function. */
+    info.settings = settings;
+    info.user_info = user_info;
+    info.plugin_args = plugin_options;
+    ret = sudoers_init(&info, submit_envp);
+
+    /* The audit functions set audit_msg on failure. */
+    if (ret != 1 && audit_msg != NULL)
+	*errstr = audit_msg;
+
+    debug_return_int(ret);
+}
+
+static int
+sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
+    char * const command_info[], char * const run_argv[],
+    char * const run_envp[], const char **errstr)
+{
+    debug_decl(sudoers_audit_accept, SUDOERS_DEBUG_PLUGIN);
+
+    /* Only log the accept event from the sudo front-end */
+    if (plugin_type != SUDO_FRONT_END)
+	debug_return_bool(true);
+
+    if (!def_log_allowed)
+	debug_return_bool(true);
+
+    if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
+	debug_return_bool(false);
+
+    if (!log_allowed(VALIDATE_SUCCESS) && !def_ignore_logfile_errors)
+	debug_return_bool(false);
+    debug_return_bool(true);
+}
+
+static int
+sudoers_audit_version(int verbose)
+{
+    debug_decl(sudoers_audit_version, SUDOERS_DEBUG_PLUGIN);
+
+    sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers audit plugin version %s\n",
+        PACKAGE_VERSION);
+
+    debug_return_int(true);
+}
+
+__dso_public struct audit_plugin sudoers_audit = {
+    SUDO_AUDIT_PLUGIN,
+    SUDO_API_VERSION,
+    sudoers_audit_open,
+    NULL, /* audit_close */
+    sudoers_audit_accept,
+    NULL, /* audit_reject */
+    NULL, /* audit_error */
+    sudoers_audit_version,
+    NULL, /* register_hooks */
+    NULL /* deregister_hooks */
+};

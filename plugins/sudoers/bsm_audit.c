@@ -195,16 +195,15 @@ bsm_audit_success(char *exec_args[])
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
+bsm_audit_failure(char *exec_args[], const char *errmsg)
 {
 	auditinfo_addr_t ainfo_addr;
-	char text[256];
 	token_t *tok;
 	long au_cond;
 	au_id_t auid;
 	pid_t pid;
 	int aufd;
-	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT);
+	debug_decl(bsm_audit_failure, SUDOERS_DEBUG_AUDIT);
 
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.
@@ -257,8 +256,7 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-	(void) vsnprintf(text, sizeof(text), fmt, ap);
-	tok = au_to_text(text);
+	tok = au_to_text(errmsg);
 	if (tok == NULL) {
 		sudo_warn("au_to_text");
 		debug_return_int(-1);

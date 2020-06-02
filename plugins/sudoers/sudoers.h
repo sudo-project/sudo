@@ -49,6 +49,15 @@
 #include "sudoers_debug.h"
 
 /*
+ * Info passed in from the sudo front-end.
+ */
+struct sudoers_open_info {
+    char * const *settings;
+    char * const *user_info;
+    char * const *plugin_args;
+};
+
+/*
  * Supplementary group IDs for a user.
  */
 struct gid_list {
@@ -379,7 +388,7 @@ bool matches_env_pattern(const char *pattern, const char *var, bool *full_match)
 
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
-int sudoers_policy_init(void *info, char * const envp[]);
+int sudoers_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
 extern struct sudo_user sudo_user;

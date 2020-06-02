@@ -39,15 +39,6 @@
 #include "interfaces.h"
 
 /*
- * Info passed in from the sudo front-end.
- */
-struct sudoers_policy_open_info {
-    char * const *settings;
-    char * const *user_info;
-    char * const *plugin_args;
-};
-
-/*
  * Command execution args to be filled in: argv, envp and command info.
  */
 struct sudoers_exec_args {
@@ -95,7 +86,7 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 int
 sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 {
-    struct sudoers_policy_open_info *info = v;
+    struct sudoers_open_info *info = v;
     char * const *cur;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
@@ -845,7 +836,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     const char **errstr)
 {
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
-    struct sudoers_policy_open_info info;
+    struct sudoers_open_info info;
     const char *cp, *plugin_path = NULL;
     char * const *cur;
     int ret;
@@ -879,7 +870,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     info.settings = settings;
     info.user_info = user_info;
     info.plugin_args = args;
-    ret = sudoers_policy_init(&info, envp);
+    ret = sudoers_init(&info, envp);
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
