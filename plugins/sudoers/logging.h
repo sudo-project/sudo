@@ -67,6 +67,9 @@ extern char *audit_msg;
 
 union sudo_defs_val;
 
+bool do_logfile(const char *msg);
+bool do_syslog(int pri, const char *msg);
+char *new_logline(const char *, const char *);
 bool sudoers_warn_setlocale(bool restore, int *cookie);
 bool sudoers_setlocale(int newlocale, int *prevlocale);
 int sudoers_getlocale(void);

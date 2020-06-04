@@ -66,44 +66,59 @@ audit_success(char *const argv[])
     debug_return_int(rc);
 }
 
+static int
+audit_failure_int(char *const argv[], const char *message)
+{
+    int ret = 0;
+    debug_decl(audit_failure_int, SUDOERS_DEBUG_AUDIT);
+
+#if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
+    if (def_log_denied && argv != NULL) {
+#ifdef HAVE_BSM_AUDIT
+	if (bsm_audit_failure(argv, message) == -1)
+	    ret = -1;
+#endif
+#ifdef HAVE_LINUX_AUDIT
+	if (linux_audit_command(argv, 0) == -1)
+	    ret = -1;
+#endif
+#ifdef HAVE_SOLARIS_AUDIT
+	if (solaris_audit_failure(argv, message) == -1)
+	    ret = -1;
+#endif
+    }
+#endif /* HAVE_BSM_AUDIT || HAVE_LINUX_AUDIT */
+
+    debug_return_int(ret);
+}
+
 int
 audit_failure(char *const argv[], char const *const fmt, ...)
 {
-    int oldlocale, rc = 0;
+    int oldlocale, ret;
+    char *message;
     va_list ap;
     debug_decl(audit_failure, SUDOERS_DEBUG_AUDIT);
 
     /* Audit messages should be in the sudoers locale. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-    /* Set audit_msg for audit plugin.  */
-    free(audit_msg);
-    audit_msg = NULL;
     va_start(ap, fmt);
-    if (vasprintf(&audit_msg, _(fmt), ap) == -1)
-	rc = -1;
+    if ((ret = vasprintf(&message, _(fmt), ap)) == -1)
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     va_end(ap);
 
-#if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
-    if (def_log_denied && argv != NULL) {
-#ifdef HAVE_BSM_AUDIT
-	if (bsm_audit_failure(argv, audit_msg) == -1)
-	    rc = -1;
-#endif
-#ifdef HAVE_LINUX_AUDIT
-	if (linux_audit_command(argv, 0) == -1)
-	    rc = -1;
-#endif
-#ifdef HAVE_SOLARIS_AUDIT
-	if (solaris_audit_failure(argv, audit_msg) == -1)
-	    rc = -1;
-#endif
+    if (ret != -1) {
+	/* Set audit_msg for audit plugins.  */
+	free(audit_msg);
+	audit_msg = message;
+
+	ret = audit_failure_int(argv, audit_msg);
     }
-#endif /* HAVE_BSM_AUDIT || HAVE_LINUX_AUDIT */
 
     sudoers_setlocale(oldlocale, NULL);
 
-    debug_return_int(rc);
+    debug_return_int(ret);
 }
 
 static int
@@ -154,21 +169,97 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
     char * const run_envp[], const char **errstr)
 {
+    int ret = true;
     debug_decl(sudoers_audit_accept, SUDOERS_DEBUG_PLUGIN);
 
     /* Only log the accept event from the sudo front-end */
     if (plugin_type != SUDO_FRONT_END)
-	debug_return_bool(true);
+	debug_return_int(true);
 
-    if (!def_log_allowed)
-	debug_return_bool(true);
+    if (def_log_allowed) {
+	if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
+	    ret = false;
 
-    if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
-	debug_return_bool(false);
+	if (!log_allowed(VALIDATE_SUCCESS) && !def_ignore_logfile_errors)
+	    ret = false;
+    }
 
-    if (!log_allowed(VALIDATE_SUCCESS) && !def_ignore_logfile_errors)
-	debug_return_bool(false);
-    debug_return_bool(true);
+    debug_return_int(ret);
+}
+
+static int
+sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
+    const char *message, char * const command_info[], const char **errstr)
+{
+    int ret = true;
+    char *logline;
+    debug_decl(sudoers_audit_reject, SUDOERS_DEBUG_PLUGIN);
+
+    /* Skip reject events that sudoers generated itself. */
+    if (strncmp(plugin_name, "sudoers_", 8) == 0)
+	debug_return_int(true);
+
+    if (!def_log_denied)
+	debug_return_int(true);
+
+    if (audit_failure_int(NewArgv, message) != 0) {
+	if (!def_ignore_audit_errors)
+	    ret = false;
+    }
+
+    logline = new_logline(message, NULL);
+    if (logline == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	ret = false;
+	goto done;
+    }
+    if (def_syslog) {
+	if (!do_syslog(def_syslog_badpri, logline)) {
+	    if (!def_ignore_logfile_errors)
+		ret = false;
+	}
+    }
+    if (def_logfile) {
+	if (!do_logfile(logline)) {
+	    if (!def_ignore_logfile_errors)
+		ret = false;
+	}
+    }
+    free(logline);
+
+done:
+    debug_return_int(ret);
+}
+
+static int
+sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
+    const char *message, char * const command_info[], const char **errstr)
+{
+    int ret = true;
+    debug_decl(sudoers_audit_error, SUDOERS_DEBUG_PLUGIN);
+
+    /* Skip error events that sudoers generated itself. */
+    if (strncmp(plugin_name, "sudoers_", 8) == 0)
+	debug_return_int(true);
+
+    if (audit_failure_int(NewArgv, message) != 0) {
+	if (!def_ignore_audit_errors)
+	    ret = false;
+    }
+    if (def_syslog) {
+	if (!do_syslog(def_syslog_badpri, message)) {
+	    if (!def_ignore_logfile_errors)
+		ret = false;
+	}
+    }
+    if (def_logfile) {
+	if (!do_logfile(message)) {
+	    if (!def_ignore_logfile_errors)
+		ret = false;
+	}
+    }
+
+    debug_return_int(ret);
 }
 
 static int
@@ -188,8 +279,8 @@ __dso_public struct audit_plugin sudoers_audit = {
     sudoers_audit_open,
     NULL, /* audit_close */
     sudoers_audit_accept,
-    NULL, /* audit_reject */
-    NULL, /* audit_error */
+    sudoers_audit_reject,
+    sudoers_audit_error,
     sudoers_audit_version,
     NULL, /* register_hooks */
     NULL /* deregister_hooks */
