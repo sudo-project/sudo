@@ -1117,9 +1117,11 @@ policy_close(int exit_status, int error_code)
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	policy_plugin.u.policy->close(exit_status, error_code);
 	sudo_debug_set_active_instance(sudo_debug_instance);
-    } else if (error_code) {
-	errno = error_code;
-	sudo_warn(U_("unable to execute %s"), command_details.command);
+    } else if (error_code != 0) {
+	if (command_details.command != NULL) {
+	    errno = error_code;
+	    sudo_warn(U_("unable to execute %s"), command_details.command);
+	}
     }
 
     debug_return;
