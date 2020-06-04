@@ -104,7 +104,7 @@ audit_sudo_selected(int sorf)
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_success(char *exec_args[])
+bsm_audit_success(char *const exec_args[])
 {
 	auditinfo_addr_t ainfo_addr;
 	token_t *tok;
@@ -167,7 +167,7 @@ bsm_audit_success(char *exec_args[])
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-	tok = au_to_exec_args(exec_args);
+	tok = au_to_exec_args((char **)exec_args);
 	if (tok == NULL) {
 		sudo_warn("au_to_exec_args");
 		debug_return_int(-1);
@@ -195,7 +195,7 @@ bsm_audit_success(char *exec_args[])
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_failure(char *exec_args[], const char *errmsg)
+bsm_audit_failure(char *const exec_args[], const char *errmsg)
 {
 	auditinfo_addr_t ainfo_addr;
 	token_t *tok;
@@ -250,13 +250,13 @@ bsm_audit_failure(char *exec_args[], const char *errmsg)
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-	tok = au_to_exec_args(exec_args);
+	tok = au_to_exec_args((char **)exec_args);
 	if (tok == NULL) {
 		sudo_warn("au_to_exec_args");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-	tok = au_to_text(errmsg);
+	tok = au_to_text((char *)errmsg);
 	if (tok == NULL) {
 		sudo_warn("au_to_text");
 		debug_return_int(-1);

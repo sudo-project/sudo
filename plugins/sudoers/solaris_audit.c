@@ -44,7 +44,7 @@ static char		cwd[PATH_MAX];
 static char		cmdpath[PATH_MAX];
 
 static int
-adt_sudo_common(char *argv[])
+adt_sudo_common(char *const argv[])
 {
 	int argc;
 
@@ -70,7 +70,7 @@ adt_sudo_common(char *argv[])
 			    user_cmnd);
 		}
 	} else {
-		if (strlcpy(cmdpath, (const char *)argv[0],
+		if (strlcpy(cmdpath, argv[0],
 		    sizeof(cmdpath)) >= sizeof(cmdpath)) {
 			log_warningx(SLOG_NO_STDERR,
 			    _("truncated audit path argv[0]: %s"),
@@ -83,7 +83,7 @@ adt_sudo_common(char *argv[])
 
 	event->adt_sudo.cmdpath = cmdpath;
 	event->adt_sudo.argc = argc - 1;
-	event->adt_sudo.argv = &argv[1];
+	event->adt_sudo.argv = (char **)&argv[1];
 	event->adt_sudo.envp = env_get();
 
 	return 0;
@@ -94,7 +94,7 @@ adt_sudo_common(char *argv[])
  * Returns 0 on success or -1 on error.
  */
 int
-solaris_audit_success(char *argv[])
+solaris_audit_success(char *const argv[])
 {
 	int rc = -1;
 
@@ -116,7 +116,7 @@ solaris_audit_success(char *argv[])
  * Returns 0 on success or -1 on error.
  */
 int
-solaris_audit_failure(char *argv[], const char *errmsg)
+solaris_audit_failure(char *const argv[], const char *errmsg)
 {
 	int rc = -1;
 
@@ -124,7 +124,7 @@ solaris_audit_failure(char *argv[], const char *errmsg)
 		return -1;
 	}
 
-	event->adt_sudo.errmsg = errmsg;
+	event->adt_sudo.errmsg = (char *)errmsg;
 	if (adt_put_event(event, ADT_FAILURE, ADT_FAIL_VALUE_PROGRAM) != 0) {
 		log_warning(SLOG_NO_STDERR, "adt_put_event(ADT_FAILURE)");
 	} else {
