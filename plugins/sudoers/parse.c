@@ -161,7 +161,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 			*matching_cs = cs;
 			*defs = &priv->defaults;
 			sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-			    "userspec matched @ %s:%d %s", us->file, us->lineno,
+			    "userspec matched @ %s:%d %s",
+			    us->file ? us->file : "???", us->lineno,
 			    cmnd_match ? "allowed" : "denied");
 			debug_return_int(cmnd_match);
 		    }
