@@ -372,6 +372,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
     /* We only have a single userspec */
     if ((us = calloc(1, sizeof(*us))) == NULL)
 	goto oom;
+    us->file = rcstr_dup("SSSD");
     TAILQ_INIT(&us->users);
     TAILQ_INIT(&us->privileges);
     STAILQ_INIT(&us->comments);

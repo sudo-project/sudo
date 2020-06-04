@@ -1250,6 +1250,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     /* We only have a single userspec */
     if ((us = calloc(1, sizeof(*us))) == NULL)
 	goto oom;
+    us->file = rcstr_dup("LDAP");
     TAILQ_INIT(&us->users);
     TAILQ_INIT(&us->privileges);
     STAILQ_INIT(&us->comments);
