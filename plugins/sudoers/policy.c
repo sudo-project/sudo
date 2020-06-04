@@ -53,6 +53,7 @@ sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
+static bool session_opened;
 
 extern __dso_public struct policy_plugin sudoers_policy;
 
@@ -885,15 +886,16 @@ sudoers_policy_close(int exit_status, int error_code)
 {
     debug_decl(sudoers_policy_close, SUDOERS_DEBUG_PLUGIN);
 
-    /* We do not currently log the exit status. */
-    if (error_code) {
-	errno = error_code;
-	sudo_warn(U_("unable to execute %s"), safe_cmnd);
-    }
-
-    /* Close the session we opened in sudoers_policy_init_session(). */
-    if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))
+    if (session_opened) {
+	/* Close the session we opened in sudoers_policy_init_session(). */
 	(void)sudo_auth_end_session(runas_pw);
+
+	/* We do not currently log the exit status. */
+	if (error_code) {
+	    errno = error_code;
+	    sudo_warn(U_("unable to execute %s"), safe_cmnd);
+	}
+    }
 
     /* Deregister the callback for sudo_fatal()/sudo_fatalx(). */
     sudo_fatal_callback_deregister(sudoers_cleanup);
@@ -943,8 +945,10 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[],
 
     ret = sudo_auth_begin_session(pwd, user_env);
 
-    /* The audit functions set audit_msg on failure. */
-    if (ret != 1 && audit_msg != NULL) {
+    if (ret == 1) {
+	session_opened = true;
+    } else if (audit_msg != NULL) {
+	/* The audit functions set audit_msg on failure. */
 	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
 	    *errstr = audit_msg;
     }
