@@ -349,7 +349,7 @@ static InfoMessage **
 fmt_info_messages(struct iolog_info *log_info, char *hostname,
     size_t *n_info_msgs)
 {
-    InfoMessage **info_msgs;
+    InfoMessage **info_msgs = NULL;
     InfoMessage__StringList *runargv = NULL;
     size_t info_msgs_size, n = 0;
     debug_decl(fmt_info_messages, SUDO_DEBUG_UTIL);
@@ -443,6 +443,7 @@ oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     while (n-- > 0)
 	free(info_msgs[n]);
+    free(info_msgs);
     if (runargv != NULL) {
         free(runargv->strings);
         free(runargv);
