@@ -28,6 +28,34 @@ What's new in Sudo 1.9.1
    may now have embedded white space by either using a double-quoted
    string or escaping the space characters with a backslash.
 
+ * Fixed some Solaris 11.4 compilation errors.
+
+ * When running a command in a pty, sudo will no longer try to
+   suspend itself if the user's tty has been revoked (for instance
+   when the parent ssh daemon is killed).  This fixes a bug where
+   sudo would continuously suspend the command (which would succeed),
+   then suspend itself (which would fail due to the missing tty)
+   and then resume the command.
+
+ * If sudo's event loop fails due to the tty being revoked, remove
+   the user's tty events and restart the event loop (once).  This
+   fixes a problem when running "sudo reboot" in a pty on some
+   systems.  When the event loop exited unexpectedly, sudo would
+   kill the command running in the pty, which in the case of "reboot",
+   could lead to the system being in a half-rebooted state.
+
+ * The audit plugin API has been changed slightly.  The sudo front-end
+   now audits an accept event itself after all approval plugins are
+   run and the I/O logging plugins (if any) are opened.  This makes
+   it possible for an audit plugin to only log a single overall
+   accept event if desired.
+
+ * The sudoers plugin can now be loaded as an audit plugin.  Logging
+   of successful commands is now performed in the audit plugin's
+   accept function.  As a result, commands are now only logged if
+   allowed by sudoers and all approval plugins.  Commands rejected
+   by an approval plugin are now also logged by the sudoers plugin.
+
 What's new in Sudo 1.9.0
 
  * Fixed a test failure in the strsig_test regress test on FreeBSD.
