@@ -138,20 +138,6 @@ if [ "$crossbuild" = "false" ]; then
 		CC=/usr/bin/clang; export CC
 	    fi
 	    ;;
-	sol[0-9]*)
-	    # Use the Sun Studio C compiler on Solaris if possible
-	    if [ -z "$CC" ]; then
-		for f in /opt/developerstudio12.[9876]/bin/cc /opt/solarisstudio12.[43]/bin/cc; do
-		    if [ -x $f ]; then
-			CC=$f; export CC
-			if [ -z "$CFLAGS" ]; then
-			    CFLAGS=-O; export CFLAGS
-			fi
-			break
-		    fi
-		done
-	    fi
-	    ;;
     esac
 fi
 
@@ -412,6 +398,10 @@ case "$osversion" in
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-project"
 
 		if [ $osrelease -ge 11 ]; then
+		    # Build 64-bit binaries on Solaris 11 and above.
+		    CFLAGS="-O2 -g -m64"; export CFLAGS
+		    LDFLAGS="-m64"; export LDFLAGS
+		    # Solaris audit is not supported by Illumos
 		    if test X"`uname -o 2>/dev/null`" = X"illumos"; then
 			configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
 		    else
@@ -419,6 +409,8 @@ case "$osversion" in
 		    fi
 		    # Encrypted remote I/O log support.
 		    with_openssl=true
+		    # Python plugins
+		    with_python=true
 		fi
 		;;
 	    *)
