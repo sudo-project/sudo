@@ -2598,7 +2598,8 @@ if test ${USE_PYTHON-'no'} = "yes"; then
 
     AS_IF([test -z "$PYTHON_INCLUDE"], [
       AC_MSG_CHECKING([python include flags])
-      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags`
+      # Pull out python include path, ignore other flags
+      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags | tr " " "\n" | grep "^-I" | sort -u | tr "\n" " "`
       AC_MSG_RESULT([$PYTHON_INCLUDE])
     ])
 
@@ -2611,6 +2612,7 @@ if test ${USE_PYTHON-'no'} = "yes"; then
       fi
       AC_MSG_CHECKING([python linker flags])
       PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED`
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED | tr " " "\n" | grep "^-[[lL]]" | tr "\n" " "`
       AC_MSG_RESULT([$PYTHON_LIBS])
     ])
 

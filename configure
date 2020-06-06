@@ -19472,7 +19472,8 @@ fi
 
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking python include flags" >&5
 $as_echo_n "checking python include flags... " >&6; }
-      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags`
+      # Pull out python include path, ignore other flags
+      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags | tr " " "\n" | grep "^-I" | sort -u | tr "\n" " "`
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON_INCLUDE" >&5
 $as_echo "$PYTHON_INCLUDE" >&6; }
 
@@ -19489,6 +19490,7 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking python linker flags" >&5
 $as_echo_n "checking python linker flags... " >&6; }
       PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED`
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED | tr " " "\n" | grep "^-[lL]" | tr "\n" " "`
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON_LIBS" >&5
 $as_echo "$PYTHON_LIBS" >&6; }
 
