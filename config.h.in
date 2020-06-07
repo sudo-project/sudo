@@ -98,6 +98,10 @@
    */
 #undef HAVE_DECL_ERRNO
 
+/* Define to 1 if you have the declaration of `getdelim', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETDELIM
+
 /* Define to 1 if you have the declaration of `getdomainname', and to 0 if you
    don't. */
 #undef HAVE_DECL_GETDOMAINNAME
