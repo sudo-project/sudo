@@ -411,6 +411,22 @@ case "$osversion" in
 		    with_openssl=true
 		    # Python plugins
 		    with_python=true
+
+		    # We prefer the system version of python3 to the
+		    # csw one (which may be 32-bit)
+		    if [ -z "$PYTHON" ]; then
+			if [ -x /usr/bin/python3 ]; then
+			    PYTHON="/usr/bin/python3"; export PYTHON
+			else
+			    # Sometimes the /usr/bin/python3 is missing
+			    for f in /usr/bin/python3.9 /usr/bin/python3.8 /usr/bin/python3.7 /usr/bin/python3.6 /usr/bin/python3.5 /usr/bin/python3.4 /usr/bin/python3.3 /usr/bin/python3.2 /usr/bin/python3.1 /usr/bin/python3.0; do
+				if [ -x $f ]; then
+				    PYTHON="$f"; export PYTHON
+				    break
+				fi
+			    done
+			fi
+		    fi
 		fi
 		;;
 	    *)
