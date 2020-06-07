@@ -446,10 +446,13 @@ __dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GETGRO
 # undef getgrouplist
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
-#ifndef HAVE_GETDELIM
+#if !defined(HAVE_GETDELIM)
 __dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
 # undef getdelim
 # define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
+#elif defined(HAVE_DECL_GETDELIM) && !HAVE_DECL_GETDELIM
+/* getdelim present in libc but missing prototype (old gcc fixed includes?) */
+ssize_t getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
 #endif /* HAVE_GETDELIM */
 #ifndef HAVE_GETUSERSHELL
 __dso_public char *sudo_getusershell(void);

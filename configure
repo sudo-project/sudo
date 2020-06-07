@@ -19901,6 +19901,19 @@ if test "x$ac_cv_func_getdelim" = xyes; then :
 #define HAVE_GETDELIM 1
 _ACEOF
 
+    # Out of date gcc fixed includes may result in missing getdelim() prototype
+    ac_fn_c_check_decl "$LINENO" "getdelim" "ac_cv_have_decl_getdelim" "$ac_includes_default"
+if test "x$ac_cv_have_decl_getdelim" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETDELIM $ac_have_decl
+_ACEOF
+
+
 else
 
     case " $LIBOBJS " in

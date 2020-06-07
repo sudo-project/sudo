@@ -2680,7 +2680,10 @@ AC_CHECK_FUNCS([getgrouplist], [], [
     esac
     SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
-AC_CHECK_FUNCS([getdelim], [], [
+AC_CHECK_FUNCS([getdelim], [
+    # Out of date gcc fixed includes may result in missing getdelim() prototype
+    AC_CHECK_DECLS([getdelim])
+], [
     AC_LIBOBJ(getdelim)
     SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
