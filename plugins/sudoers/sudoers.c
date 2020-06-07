@@ -531,7 +531,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
 	    audit_failure(NewArgv,
-		N_("user not allowed to set a preserve the environment"));
+		N_("user not allowed to preserve the environment"));
 	    sudo_warnx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {
