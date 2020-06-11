@@ -44,6 +44,11 @@ What's new in Sudo 1.9.1
    kill the command running in the pty, which in the case of "reboot",
    could lead to the system being in a half-rebooted state.
 
+ * Fixed a regression introduced in sudo 1.8.23 in the LDAP and
+   SSSD back-ends where a missing sudoHost attribute was treated
+   as an "ALL" wildcard value.  A sudoRole with no sudoHost attribute
+   is now ignored as it was prior to version 1.8.23.
+
  * The audit plugin API has been changed slightly.  The sudo front-end
    now audits an accept event itself after all approval plugins are
    run and the I/O logging plugins (if any) are opened.  This makes
