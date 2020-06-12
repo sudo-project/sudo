@@ -1,3 +1,29 @@
+What's new in Sudo 1.8.31p2
+
+ * Sudo command line options that take a value may only be specified
+   once.  This is to help guard against problems caused by poorly
+   written scripts that invoke sudo with user-controlled input.
+   Bug #924.
+
+ * When running a command in a pty, sudo will no longer try to
+   suspend itself if the user's tty has been revoked (for instance
+   when the parent ssh daemon is killed).  This fixes a bug where
+   sudo would continuously suspend the command (which would succeed),
+   then suspend itself (which would fail due to the missing tty)
+   and then resume the command.
+
+ * If sudo's event loop fails due to the tty being revoked, remove
+   the user's tty events and restart the event loop (once).  This
+   fixes a problem when running "sudo reboot" in a pty on some
+   systems.  When the event loop exited unexpectedly, sudo would
+   kill the command running in the pty, which in the case of "reboot",
+   could lead to the system being in a half-rebooted state.
+
+ * Fixed a regression introduced in sudo 1.8.23 in the LDAP and
+   SSSD back-ends where a missing sudoHost attribute was treated
+   as an "ALL" wildcard value.  A sudoRole with no sudoHost attribute
+   is now ignored as it was prior to version 1.8.23.
+
 What's new in Sudo 1.8.31p1
 
  * Sudo once again ignores a failure to restore the RLIMIT_CORE

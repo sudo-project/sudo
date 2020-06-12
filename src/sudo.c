@@ -217,7 +217,7 @@ main(int argc, char *argv[], char *envp[])
     ok = policy_open(&policy_plugin, settings, user_info, envp);
     if (ok != 1) {
 	if (ok == -2)
-	    usage(1);
+	    usage();
 	else
 	    sudo_fatalx(U_("unable to initialize policy plugin"));
     }
@@ -255,7 +255,7 @@ main(int argc, char *argv[], char *envp[])
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "policy plugin returns %d", ok);
 	    if (ok != 1) {
 		if (ok == -2)
-		    usage(1);
+		    usage();
 		exit(EXIT_FAILURE); /* plugin printed error message */
 	    }
 	    /* Reset nargv/nargc based on argv_out. */
@@ -276,7 +276,7 @@ main(int argc, char *argv[], char *envp[])
 		    iolog_unlink(plugin);
 		    break;
 		case -2:
-		    usage(1);
+		    usage();
 		    break;
 		default:
 		    sudo_fatalx(U_("error initializing I/O plugin %s"),
