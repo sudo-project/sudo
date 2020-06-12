@@ -61,6 +61,8 @@ What's new in Sudo 1.9.1
    allowed by sudoers and all approval plugins.  Commands rejected
    by an approval plugin are now also logged by the sudoers plugin.
 
+ * Romanian translation for sudo and sudoers from translationproject.org.
+
 What's new in Sudo 1.9.0
 
  * Fixed a test failure in the strsig_test regress test on FreeBSD.
