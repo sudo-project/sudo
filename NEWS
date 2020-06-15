@@ -63,6 +63,9 @@ What's new in Sudo 1.9.1
 
  * Romanian translation for sudo and sudoers from translationproject.org.
 
+ * Fixed a regression introduced in sudo 1.9.0 where sudoedit did
+   not remove its temporary files after installing them.  Bug #929.
+
 What's new in Sudo 1.9.0
 
  * Fixed a test failure in the strsig_test regress test on FreeBSD.
