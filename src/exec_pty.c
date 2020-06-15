@@ -132,7 +132,7 @@ pty_cleanup(void)
 
 /*
  * Allocate a pty if /dev/tty is a tty.
- * Fills in io_fds[SFD_USERTTY], io_fds[SFD_MASTER], io_fds[SFD_SLAVE]
+ * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER], io_fds[SFD_FOLLOWER]
  * and ptyname globals.
  */
 static bool
@@ -147,7 +147,7 @@ pty_setup(struct command_details *details, const char *tty)
 	debug_return_bool(false);
     }
 
-    if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
+    if (!get_pty(&io_fds[SFD_LEADER], &io_fds[SFD_FOLLOWER],
 	ptyname, sizeof(ptyname), details->euid))
 	sudo_fatal(U_("unable to allocate pty"));
 
@@ -158,30 +158,30 @@ pty_setup(struct command_details *details, const char *tty)
     if (ISSET(details->flags, CD_SET_UTMP)) {
 	utmp_user =
 	    details->utmp_user ? details->utmp_user : user_details.username;
-	utmp_login(tty, ptyname, io_fds[SFD_SLAVE], utmp_user);
+	utmp_login(tty, ptyname, io_fds[SFD_FOLLOWER], utmp_user);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: %s fd %d, pty master fd %d, pty slave fd %d",
-	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
-	io_fds[SFD_SLAVE]);
+	"%s: %s fd %d, pty leader fd %d, pty follower fd %d",
+	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
+	io_fds[SFD_FOLLOWER]);
 
     debug_return_bool(true);
 }
 
 /*
- * Make the tty slave the controlling tty.
+ * Make the tty follower the controlling tty.
  * This is only used by the monitor but ptyname[] is static.
  */
 int
 pty_make_controlling(void)
 {
-    if (io_fds[SFD_SLAVE] != -1) {
+    if (io_fds[SFD_FOLLOWER] != -1) {
 #ifdef TIOCSCTTY
-	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
+	if (ioctl(io_fds[SFD_FOLLOWER], TIOCSCTTY, NULL) != 0)
 	    return -1;
 #else
-	/* Set controlling tty by reopening pty slave. */
+	/* Set controlling tty by reopening pty follower. */
 	int fd = open(ptyname, O_RDWR);
 	if (fd == -1)
 	    return -1;
@@ -840,7 +840,7 @@ io_buf_new(int rfd, int wfd,
 }
 
 /*
- * We already closed the slave pty so reads from the master will not block.
+ * We already closed the follower so reads from the leader will not block.
  */
 static void
 pty_finish(struct command_status *cstat)
@@ -1424,19 +1424,19 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * In background mode there is no stdin.
      */
     if (!ISSET(details->flags, CD_BACKGROUND))
-	io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
-    io_fds[SFD_STDOUT] = io_fds[SFD_SLAVE];
-    io_fds[SFD_STDERR] = io_fds[SFD_SLAVE];
+	io_fds[SFD_STDIN] = io_fds[SFD_FOLLOWER];
+    io_fds[SFD_STDOUT] = io_fds[SFD_FOLLOWER];
+    io_fds[SFD_STDERR] = io_fds[SFD_FOLLOWER];
 
     if (io_fds[SFD_USERTTY] != -1) {
-	/* Read from /dev/tty, write to pty master */
+	/* Read from /dev/tty, write to pty leader */
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
-	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
 		log_ttyin, &ec, &iobufs);
 	}
 
-	/* Read from pty master, write to /dev/tty */
-	io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
+	/* Read from pty leader, write to /dev/tty */
+	io_buf_new(io_fds[SFD_LEADER], io_fds[SFD_USERTTY],
 	    log_ttyout, &ec, &iobufs);
 
 	/* Are we the foreground process? */
@@ -1511,8 +1511,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     }
 
     if (foreground) {
-	/* Copy terminal attrs from user tty -> pty slave. */
-	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
+	/* Copy terminal attrs from user tty -> pty follower. */
+	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER])) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
                 "%s: unable to copy terminal settings to pty", __func__);
 	    foreground = false;
@@ -1570,16 +1570,16 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     }
 
     /*
-     * We close the pty slave so only the monitor and command have a
+     * We close the pty follower so only the monitor and command have a
      * reference to it.  This ensures that we can don't block reading
-     * from the master when the command and monitor have exited.
+     * from the leader when the command and monitor have exited.
      */
-    if (io_fds[SFD_SLAVE] != -1) {
-	close(io_fds[SFD_SLAVE]);
-	io_fds[SFD_SLAVE] = -1;
+    if (io_fds[SFD_FOLLOWER] != -1) {
+	close(io_fds[SFD_FOLLOWER]);
+	io_fds[SFD_FOLLOWER] = -1;
     }
 
-    /* Tell the monitor to continue now that the slave is closed. */
+    /* Tell the monitor to continue now that the follower is closed. */
     cstat->type = CMD_SIGNO;
     cstat->val = 0;
     while (send(sv[0], cstat, sizeof(*cstat), 0) == -1) {
@@ -1622,8 +1622,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     setlocale(LC_ALL, "C");
 
     /*
-     * In the event loop we pass input from user tty to master
-     * and pass output from master to stdout and IO plugin.
+     * In the event loop we pass input from user tty to leader
+     * and pass output from leader to stdout and IO plugin.
      * Try to recover on ENXIO, it means the tty was revoked.
      */
     add_io_events(ec.evbase);
