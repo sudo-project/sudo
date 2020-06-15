@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 19, 2020
+.Dd June 15, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -369,13 +369,8 @@ explicitly denied by the
 .Em env_check
 and
 .Em env_delete
-options are
+options are allowed and their values are
 inherited from the invoking process.
-In this case,
-.Em env_check
-and
-.Em env_delete
-behave like a blacklist.
 Prior to version 1.8.21, environment variables with a value beginning with
 .Li ()
 were always removed.
@@ -385,7 +380,7 @@ is used to match
 .Sy bash
 shell functions instead.
 Since it is not possible
-to blacklist all potentially dangerous environment variables, use
+to block all potentially dangerous environment variables, use
 of the default
 .Em env_reset
 behavior is encouraged.
@@ -4902,7 +4897,7 @@ Defaults env_keep += "DISPLAY HOME"
 # User alias specification
 User_Alias	FULLTIMERS = millert, mikef, dowdy
 User_Alias	PARTTIMERS = bostley, jwfox, crawl
-User_Alias	WEBMASTERS = will, wendy, wim
+User_Alias	WEBADMIN = will, wendy, wim
 
 # Runas alias specification
 Runas_Alias	OP = root, operator
@@ -4916,7 +4911,7 @@ Host_Alias	SPARC = bigtime, eclipse, moet, anchor :\e
 		HPPA = boa, nag, python
 Host_Alias	CUNETS = 128.138.0.0/255.255.0.0
 Host_Alias	CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
-Host_Alias	SERVERS = master, mail, www, ns
+Host_Alias	SERVERS = primary, mail, www, ns
 Host_Alias	CDROM = orion, perseus, hercules
 
 # Cmnd alias specification
@@ -5198,7 +5193,7 @@ The user
 may run any command on any machine except for those in the
 .Em SERVERS
 .Li Host_Alias
-(master, mail, www and ns).
+(primary, mail, www and ns).
 .Bd -literal
 jill		SERVERS = /usr/bin/, !SU, !SHELLS
 .Ed
@@ -5240,11 +5235,11 @@ On his personal workstation, valkyrie,
 .Sy matt
 needs to be able to kill hung processes.
 .Bd -literal
-WEBMASTERS	www = (www) ALL, (root) /usr/bin/su www
+WEBADMIN	www = (www) ALL, (root) /usr/bin/su www
 .Ed
 .Pp
 On the host www, any user in the
-.Em WEBMASTERS
+.Em WEBADMIN
 .Li User_Alias
 (will, wendy, and wim), may run any command as user www (which owns the
 web pages) or simply
