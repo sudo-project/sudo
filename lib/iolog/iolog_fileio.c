@@ -74,7 +74,7 @@ io_swapids(bool restore)
     if (user_euid == (uid_t)-1)
 	user_euid = geteuid();
     if (user_egid == (gid_t)-1)
-	user_euid = getegid();
+	user_egid = getegid();
 
     if (restore) {
 	if (seteuid(user_euid) == -1) {

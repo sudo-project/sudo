@@ -66,6 +66,10 @@ What's new in Sudo 1.9.1
  * Fixed a regression introduced in sudo 1.9.0 where sudoedit did
    not remove its temporary files after installing them.  Bug #929.
 
+ * Fixed a regression introduced in sudo 1.9.0 where the iolog_file
+   setting in sudoers and sudo_logsrvd.conf caused an error if the
+   file name ended in six or more X's.
+
 What's new in Sudo 1.9.0
 
  * Fixed a test failure in the strsig_test regress test on FreeBSD.
