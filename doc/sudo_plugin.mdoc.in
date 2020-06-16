@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 26, 2020
+.Dd June 16, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3984,6 +3984,49 @@ escape sequences.
 See the sample plugin for an example of the
 .Fn conversation
 function usage.
+.Ss Plugin invocation order
+As of
+.Nm sudo
+1.9.0, the plugin
+.Fn open
+and
+.Fn close
+functions are called in the
+following order:
+.Bl -enum
+.It
+audit open
+.It
+policy open
+.It
+approval open
+.It
+approval close
+.It
+I/O log open
+.It
+command runs
+.It
+command exits
+.It
+I/O log close
+.It
+policy close
+.It
+audit close
+.It
+sudo exits
+.El
+.Pp
+Prior to
+.Nm sudo
+1.9.0, the I/O log
+.Fn close
+function was called
+.Em after
+the policy
+.Fn close
+function.
 .Ss Sudoers group plugin API
 The
 .Nm sudoers

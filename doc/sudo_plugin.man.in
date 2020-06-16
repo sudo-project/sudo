@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "May 26, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "June 16, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4505,6 +4505,58 @@ escape sequences.
 See the sample plugin for an example of the
 \fBconversation\fR()
 function usage.
+.SS "Plugin invocation order"
+As of
+\fBsudo\fR
+1.9.0, the plugin
+\fBopen\fR()
+and
+\fBclose\fR()
+functions are called in the
+following order:
+.TP 5n
+1.\&
+audit open
+.TP 5n
+2.\&
+policy open
+.TP 5n
+3.\&
+approval open
+.TP 5n
+4.\&
+approval close
+.TP 5n
+5.\&
+I/O log open
+.TP 5n
+6.\&
+command runs
+.TP 5n
+7.\&
+command exits
+.TP 5n
+8.\&
+I/O log close
+.TP 5n
+9.\&
+policy close
+.TP 5n
+10.\&
+audit close
+.TP 5n
+11.\&
+sudo exits
+.PP
+Prior to
+\fBsudo\fR
+1.9.0, the I/O log
+\fBclose\fR()
+function was called
+\fIafter\fR
+the policy
+\fBclose\fR()
+function.
 .SS "Sudoers group plugin API"
 The
 \fBsudoers\fR
