@@ -31,18 +31,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #ifdef HAVE_NL_LANGINFO
 # include <langinfo.h>
@@ -50,7 +43,6 @@
 #include <netdb.h>
 #include <pwd.h>
 #include <grp.h>
-#include <signal.h>
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
@@ -66,12 +58,9 @@
 /* Special message for log_warning() so we know to use ngettext() */
 #define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
 
-static void do_syslog(int, char *);
-static bool do_logfile(const char *);
 static bool send_mail(const char *fmt, ...);
 static bool should_mail(int);
 static void mysyslog(int, const char *, ...);
-static char *new_logline(const char *, const char *);
 
 /*
  * We do an openlog(3)/closelog(3) for each message because some
@@ -97,18 +86,23 @@ mysyslog(int pri, const char *fmt, ...)
  * Log a message to syslog, pre-pending the username and splitting the
  * message into parts if it is longer than syslog_maxlen.
  */
-static void
-do_syslog(int pri, char *msg)
+bool
+do_syslog(int pri, const char *msg)
 {
-    size_t len, maxlen;
-    char *p, *tmp, save;
+    size_t maxlen;
+    char *copy, *cp, *ep;
     const char *fmt;
     int oldlocale;
     debug_decl(do_syslog, SUDOERS_DEBUG_LOGGING);
 
     /* A priority of -1 corresponds to "none". */
     if (pri == -1)
-	debug_return;
+	debug_return_bool(true);
+
+    if ((copy = strdup(msg)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
 
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
@@ -117,42 +111,40 @@ do_syslog(int pri, char *msg)
      */
     fmt = _("%8s : %s");
     maxlen = def_syslog_maxlen - (strlen(fmt) - 5 + strlen(user_name));
-    for (p = msg; *p != '\0'; ) {
-	len = strlen(p);
+    for (cp = copy; *cp != '\0'; ) {
+	size_t len = strlen(cp);
 	if (len > maxlen) {
 	    /*
 	     * Break up the line into what will fit on one syslog(3) line
 	     * Try to avoid breaking words into several lines if possible.
 	     */
-	    tmp = memrchr(p, ' ', maxlen);
-	    if (tmp == NULL)
-		tmp = p + maxlen;
+	    ep = memrchr(cp, ' ', maxlen);
+	    if (ep != NULL)
+		*ep++ = '\0';
+	    else
+		ep = cp + maxlen;
 
-	    /* NULL terminate line, but save the char to restore later */
-	    save = *tmp;
-	    *tmp = '\0';
+	    mysyslog(pri, fmt, user_name, cp);
 
-	    mysyslog(pri, fmt, user_name, p);
-
-	    *tmp = save;			/* restore saved character */
-
-	    /* Advance p and eliminate leading whitespace */
-	    for (p = tmp; *p == ' '; p++)
+	    /* Advance cp and eliminate leading whitespace */
+	    for (cp = ep; *cp == ' '; cp++)
 		continue;
 	} else {
-	    mysyslog(pri, fmt, user_name, p);
-	    p += len;
+	    mysyslog(pri, fmt, user_name, cp);
+	    cp += len;
 	}
 	fmt = _("%8s : (command continued) %s");
 	maxlen = def_syslog_maxlen - (strlen(fmt) - 5 + strlen(user_name));
     }
 
+    free(copy);
+
     sudoers_setlocale(oldlocale, NULL);
 
-    debug_return;
+    debug_return_bool(true);
 }
 
-static bool
+bool
 do_logfile(const char *msg)
 {
     static bool warned = false;
@@ -253,7 +245,7 @@ log_denial(int status, bool inform_user)
 	message = N_("command not allowed");
 
     /* Do auditing first (audit_failure() handles the locale itself). */
-    audit_failure(NewArgc, NewArgv, "%s", message);
+    audit_failure(NewArgv, "%s", message);
 
     if (def_log_denied || mailit) {
 	/* Log and mail messages should be in the sudoers locale. */
@@ -271,8 +263,8 @@ log_denial(int status, bool inform_user)
 
 	/* Log via syslog and/or a file. */
 	if (def_log_denied) {
-	    if (def_syslog)
-		do_syslog(def_syslog_badpri, logline);
+	    if (def_syslog && !do_syslog(def_syslog_badpri, logline))
+		ret = false;
 	    if (def_logfile && !do_logfile(logline))
 		ret = false;
 	}
@@ -359,7 +351,7 @@ log_auth_failure(int status, unsigned int tries)
     debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING);
 
     /* Do auditing first (audit_failure() handles the locale itself). */
-    audit_failure(NewArgc, NewArgv, "%s", N_("authentication failure"));
+    audit_failure(NewArgv, "%s", N_("authentication failure"));
 
     /*
      * Do we need to send mail?
@@ -422,8 +414,8 @@ log_allowed(int status)
 	 * Log via syslog and/or a file.
 	 */
 	if (def_log_allowed) {
-	    if (def_syslog)
-		do_syslog(def_syslog_goodpri, logline);
+	    if (def_syslog && !do_syslog(def_syslog_goodpri, logline))
+		ret = false;
 	    if (def_logfile && !do_logfile(logline))
 		ret = false;
 	}
@@ -569,8 +561,8 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
      * Log to syslog and/or a file.
      */
     if (!ISSET(flags, SLOG_NO_LOG)) {
-	if (def_syslog)
-	    do_syslog(def_syslog_badpri, logline);
+	if (def_syslog && !do_syslog(def_syslog_badpri, logline))
+	    ret = false;
 	if (def_logfile && !do_logfile(logline))
 	    ret = false;
     }
@@ -950,7 +942,7 @@ should_mail(int status)
 /*
  * Allocate and fill in a new logline.
  */
-static char *
+char *
 new_logline(const char *message, const char *errstr)
 {
     char *line = NULL, *evstr = NULL;

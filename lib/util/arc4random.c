@@ -34,8 +34,6 @@
 
 #ifndef HAVE_ARC4RANDOM
 
-#include <sys/types.h>
-#include <sys/time.h>
 #ifdef HAVE_SYS_RANDOM_H
 # include <sys/random.h>
 #endif

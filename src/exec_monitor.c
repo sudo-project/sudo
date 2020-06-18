@@ -29,12 +29,7 @@
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -102,21 +97,21 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	break;
     case SIGCONT_FG:
 	/* Continue in foreground, grant it controlling tty. */
-	if (tcsetpgrp(io_fds[SFD_SLAVE], mc->cmnd_pgrp) == -1) {
+	if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc->cmnd_pgrp) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to set foreground pgrp to %d (command)",
 		__func__, (int)mc->cmnd_pgrp);
 	}
 	/* Lazily initialize the pty if needed. */
 	if (!tty_initialized) {
-	    if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]))
+	    if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER]))
 		    tty_initialized = true;
 	}
 	killpg(mc->cmnd_pid, SIGCONT);
 	break;
     case SIGCONT_BG:
 	/* Continue in background, I take controlling tty. */
-	if (tcsetpgrp(io_fds[SFD_SLAVE], mc->mon_pgrp) == -1) {
+	if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc->mon_pgrp) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to set foreground pgrp to %d (monitor)",
 		__func__, (int)mc->mon_pgrp);
@@ -136,7 +131,7 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 
 /*
  * Unpack rows and cols from a CMD_TTYWINCH value, set the new window
- * size on the pty slave and inform the command of the change.
+ * size on the pty follower and inform the command of the change.
  */
 static void
 handle_winch(struct monitor_closure *mc, unsigned int wsize_packed)
@@ -148,14 +143,14 @@ handle_winch(struct monitor_closure *mc, unsigned int wsize_packed)
     wsize.ws_row = wsize_packed & 0xffff;
     wsize.ws_col = (wsize_packed >> 16) & 0xffff;
 
-    if (ioctl(io_fds[SFD_SLAVE], TIOCGWINSZ, &owsize) == 0 &&
+    if (ioctl(io_fds[SFD_FOLLOWER], TIOCGWINSZ, &owsize) == 0 &&
 	(wsize.ws_row != owsize.ws_row || wsize.ws_col != owsize.ws_col)) {
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "window size change %dx%d -> %dx%d",
 	    owsize.ws_col, owsize.ws_row, wsize.ws_col, wsize.ws_row);
 
-	(void)ioctl(io_fds[SFD_SLAVE], TIOCSWINSZ, &wsize);
+	(void)ioctl(io_fds[SFD_FOLLOWER], TIOCSWINSZ, &wsize);
 	deliver_signal(mc, SIGWINCH, true);
     }
 
@@ -247,7 +242,7 @@ mon_handle_sigchld(struct monitor_closure *mc)
 	    mc->cstat->val = status;
 	    if (WIFSTOPPED(status)) {
 		/* Save the foreground pgid so we can restore it later. */
-		pid = tcgetpgrp(io_fds[SFD_SLAVE]);
+		pid = tcgetpgrp(io_fds[SFD_FOLLOWER]);
 		if (pid != mc->mon_pgrp)
 		    mc->cmnd_pgrp = pid;
 		send_status(mc->backchannel, mc->cstat);
@@ -405,15 +400,15 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
     /* Wire up standard fds, note that stdout/stderr may be pipes. */
     if (dup3(io_fds[SFD_STDIN], STDIN_FILENO, 0) == -1)
 	sudo_fatal("dup3");
-    if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDIN] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDIN]);
     if (dup3(io_fds[SFD_STDOUT], STDOUT_FILENO, 0) == -1)
 	sudo_fatal("dup3");
-    if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDOUT] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDOUT]);
     if (dup3(io_fds[SFD_STDERR], STDERR_FILENO, 0) == -1)
 	sudo_fatal("dup3");
-    if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDERR] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDERR]);
 
     /* Wait for parent to grant us the tty if we are foreground. */
@@ -421,15 +416,15 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
 	struct timespec ts = { 0, 1000 };  /* 1us */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: waiting for controlling tty",
 	    __func__);
-	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
+	while (tcgetpgrp(io_fds[SFD_FOLLOWER]) != self)
 	    nanosleep(&ts, NULL);
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: got controlling tty",
 	    __func__);
     }
 
-    /* Done with the pty slave, don't leak it. */
-    if (io_fds[SFD_SLAVE] != -1)
-	close(io_fds[SFD_SLAVE]);
+    /* Done with the pty follower, don't leak it. */
+    if (io_fds[SFD_FOLLOWER] != -1)
+	close(io_fds[SFD_FOLLOWER]);
 
     /* Execute command; only returns on error. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "executing %s in the %s",
@@ -556,9 +551,9 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     int errpipe[2];
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
-    /* The pty master is not used by the monitor. */
-    if (io_fds[SFD_MASTER] != -1)
-	close(io_fds[SFD_MASTER]);
+    /* The pty leader is not used by the monitor. */
+    if (io_fds[SFD_LEADER] != -1)
+	close(io_fds[SFD_LEADER]);
 
     /* Ignore any SIGTTIN or SIGTTOU we receive (shouldn't be possible). */
     memset(&sa, 0, sizeof(sa));
@@ -576,7 +571,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 
     /*
      * Start a new session with the parent as the session leader
-     * and the slave pty as the controlling terminal.
+     * and the follower device as the controlling terminal.
      * This allows us to be notified when the command has been suspended.
      */
     if (setsid() == -1) {
@@ -606,7 +601,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
         if (selinux_setup(details->selinux_role, details->selinux_type,
-            details->tty, io_fds[SFD_SLAVE], true) == -1)
+            details->tty, io_fds[SFD_FOLLOWER], true) == -1)
             goto bad;
     }
 #endif
@@ -660,20 +655,20 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     sigprocmask(SIG_SETMASK, oset, NULL);
 
     /* If any of stdin/stdout/stderr are pipes, close them in parent. */
-    if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDIN] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDIN]);
-    if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDOUT] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDOUT]);
-    if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDERR] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDERR]);
 
     /* Put command in its own process group. */
     mc.cmnd_pgrp = mc.cmnd_pid;
     setpgid(mc.cmnd_pid, mc.cmnd_pgrp);
 
-    /* Make the command the foreground process for the pty slave. */
+    /* Make the command the foreground process for the pty follower. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
-	if (tcsetpgrp(io_fds[SFD_SLAVE], mc.cmnd_pgrp) == -1) {
+	if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc.cmnd_pgrp) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to set foreground pgrp to %d (command)",
 		__func__, (int)mc.cmnd_pgrp);
@@ -705,7 +700,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * Take the controlling tty.  This prevents processes spawned by the
      * command from receiving SIGHUP when the session leader (us) exits.
      */
-    if (tcsetpgrp(io_fds[SFD_SLAVE], mc.mon_pgrp) == -1) {
+    if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc.mon_pgrp) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to set foreground pgrp to %d (monitor)",
 	    __func__, (int)mc.mon_pgrp);

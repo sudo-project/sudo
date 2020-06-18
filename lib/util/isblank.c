@@ -26,8 +26,6 @@
 
 #ifndef HAVE_ISBLANK
 
-#include <sys/types.h>
-
 #include "sudo_compat.h"
 
 #undef isblank

@@ -118,8 +118,12 @@ dnl
 dnl Parent directory for time stamp dir.
 dnl
 AC_DEFUN([SUDO_RUNDIR], [AC_MSG_CHECKING(for sudo run dir location)
-rundir="$with_rundir"
-if test -z "$rundir"; then
+if test -n "$with_rundir"; then
+    rundir="$with_rundir"
+elif test "$runstatedir" != '${localstatedir}/run'; then
+    rundir="$runstatedir/sudo"
+else
+    # No --with-rundir or --runstatedir specified
     for d in /run /var/run /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
 	    rundir="$d/sudo"

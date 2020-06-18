@@ -279,9 +279,9 @@ oom:
 }
 
 static char *
-format_json(ClientMessage__TypeCase event_type,
-    const char *reason, TimeSpec *event_time, InfoMessage **info_msgs,
-    size_t infolen, bool compact)
+format_json(ClientMessage__TypeCase event_type, const char *reason,
+    const struct iolog_details *details, TimeSpec *event_time,
+    InfoMessage **info_msgs, size_t infolen, bool compact)
 {
     const char *type_str;
     const char *time_str;
@@ -345,6 +345,13 @@ format_json(ClientMessage__TypeCase event_type,
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 	    "unable format timestamp");
 	goto bad;
+    }
+
+    if (details->iolog_path != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = details->iolog_path;
+	if (!sudo_json_add_value(&json, "iolog_path", &json_value))
+	    goto bad;
     }
 
     /* Dump details */
@@ -460,7 +467,8 @@ do_syslog_sudo(int pri, const char *reason, const struct iolog_details *details)
 
 static bool
 do_syslog_json(int pri, ClientMessage__TypeCase event_type, const char *reason,
-    TimeSpec *event_time, InfoMessage **info_msgs, size_t infolen)
+    const struct iolog_details *details, TimeSpec *event_time,
+    InfoMessage **info_msgs, size_t infolen)
 {
     char *json_str;
     debug_decl(do_syslog_json, SUDO_DEBUG_UTIL);
@@ -470,8 +478,8 @@ do_syslog_json(int pri, ClientMessage__TypeCase event_type, const char *reason,
 	debug_return_bool(true);
 
     /* Format as a compact JSON message (no newlines) */
-    json_str = format_json(event_type, reason, event_time, info_msgs,
-	infolen, true);
+    json_str = format_json(event_type, reason, details, event_time,
+	info_msgs, infolen, true);
     if (json_str == NULL)
 	debug_return_bool(false);
 
@@ -520,7 +528,7 @@ do_syslog(ClientMessage__TypeCase event_type, const char *reason,
 	ret = do_syslog_sudo(pri, reason, details);
 	break;
     case EVLOG_JSON:
-	ret = do_syslog_json(pri, event_type, reason, event_time,
+	ret = do_syslog_json(pri, event_type, reason, details, event_time,
 	    info_msgs, infolen);
 	break;
     default:
@@ -579,7 +587,8 @@ done:
 
 static bool
 do_logfile_json(ClientMessage__TypeCase event_type, const char *reason,
-    TimeSpec *event_time, InfoMessage **info_msgs, size_t infolen)
+    const struct iolog_details *details, TimeSpec *event_time,
+    InfoMessage **info_msgs, size_t infolen)
 {
     const char *logfile = logsrvd_conf_logfile_path();
     FILE *fp = logsrvd_conf_logfile_stream();
@@ -588,8 +597,8 @@ do_logfile_json(ClientMessage__TypeCase event_type, const char *reason,
     int ret = false;
     debug_decl(do_logfile_json, SUDO_DEBUG_UTIL);
 
-    json_str = format_json(event_type, reason, event_time, info_msgs,
-	infolen, false);
+    json_str = format_json(event_type, reason, details, event_time,
+	info_msgs, infolen, false);
     if (json_str == NULL)
 	goto done;
 
@@ -642,7 +651,7 @@ do_logfile(ClientMessage__TypeCase event_type, const char *reason,
 	ret = do_logfile_sudo(reason, details);
 	break;
     case EVLOG_JSON:
-	ret = do_logfile_json(event_type, reason, event_time,
+	ret = do_logfile_json(event_type, reason, details, event_time,
 	    info_msgs, infolen);
 	break;
     default:

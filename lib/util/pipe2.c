@@ -25,8 +25,6 @@
 
 #ifndef HAVE_PIPE2
 
-#include <sys/types.h>
-
 #include <fcntl.h>
 #include <unistd.h>
 

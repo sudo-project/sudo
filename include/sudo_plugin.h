@@ -35,6 +35,9 @@
     *(vp) = (*(vp) & 0xffff0000U) | (n); \
 } while(0)
 
+/* "plugin type" for the sudo front end, as passed to an audit plugin */
+#define SUDO_FRONT_END		0
+
 /* Conversation function types and defines */
 struct sudo_conv_message {
 #define SUDO_CONV_PROMPT_ECHO_OFF   0x0001  /* do not echo user input */

@@ -23,21 +23,13 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <grp.h>
 #include <pwd.h>
-#include <time.h>
 
 #include "sudoers.h"
 #include "sudo_lbuf.h"
@@ -169,7 +161,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 			*matching_cs = cs;
 			*defs = &priv->defaults;
 			sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-			    "userspec matched @ %s:%d %s", us->file, us->lineno,
+			    "userspec matched @ %s:%d %s",
+			    us->file ? us->file : "???", us->lineno,
 			    cmnd_match ? "allowed" : "denied");
 			debug_return_int(cmnd_match);
 		    }

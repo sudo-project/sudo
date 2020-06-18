@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2010-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "June 1, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -105,10 +105,15 @@ to the dynamic shared object that contains the plugin.
 The
 \fIsymbol_name\fR
 is the name of the
-\fRstruct policy_plugin\fR
+\fRapproval_plugin\fR,
+\fRaudit_plugin\fR,
+\fRio_plugin\fR,
 or
-\fRstruct io_plugin\fR
-symbol contained in the plugin.
+\fRpolicy_plugin\fR
+struct contained in the plugin.
+If a plugin implements multiple plugin types, there must be a
+\fRPlugin\fR
+line for each unique symbol name.
 The
 \fIpath\fR
 may be fully qualified or relative.
@@ -180,16 +185,34 @@ file is present, or if it contains no
 \fRPlugin\fR
 lines, the
 \fBsudoers\fR
-plugin will be used as the default security policy and for I/O logging
-(if enabled by the policy).
+plugin will be used as the default security policy, for I/O logging
+(if enabled by the policy) and for auditing.
 This is equivalent to the following:
 .nf
 .sp
 .RS 6n
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
+Plugin sudoers_audit sudoers.so
 .RE
 .fi
+.PP
+Starting with
+\fBsudo\fR
+version 1.9.1, some of the logging functionality of the
+\fBsudoers\fR
+plugin has been moved from the policy plugin to an audit plugin.
+To maintain compatibility with
+\fBsudo.conf\fR
+files from older
+\fBsudo\fR
+versions, if
+\fBsudoers\fR
+is configured as the security policy, it will be used as an audit
+plugin as well.
+This guarantees that the logging behavior will be consistnet with that of
+\fBsudo\fR
+versions 1.9.0 and below.
 .PP
 For more information on the
 \fBsudo\fR
@@ -687,6 +710,7 @@ front end configuration
 # The sudoers plugin is used by default if no Plugin lines are present.
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
+Plugin sudoers_audit sudoers.so
 
 #
 # Sudo askpass:

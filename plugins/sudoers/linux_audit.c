@@ -25,7 +25,6 @@
 
 #ifdef HAVE_LINUX_AUDIT
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -64,10 +63,11 @@ linux_audit_open(void)
 }
 
 int
-linux_audit_command(char *argv[], int result)
+linux_audit_command(char *const argv[], int result)
 {
     int au_fd, rc = -1;
-    char *command, *cp, **av;
+    char *command, *cp;
+    char * const *av;
     size_t size, n;
     debug_decl(linux_audit_command, SUDOERS_DEBUG_AUDIT);
 

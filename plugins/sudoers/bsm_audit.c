@@ -26,16 +26,14 @@
 
 #ifdef HAVE_BSM_AUDIT
 
-#include <sys/types.h>
+#include <sys/types.h>		/* for pid_t */
 
 #include <bsm/audit.h>
 #include <bsm/libbsm.h>
 #include <bsm/audit_uevents.h>
 
 #include <stdio.h>
-#include <string.h>
 #include <stdarg.h>
-#include <pwd.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -106,7 +104,7 @@ audit_sudo_selected(int sorf)
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_success(char *exec_args[])
+bsm_audit_success(char *const exec_args[])
 {
 	auditinfo_addr_t ainfo_addr;
 	token_t *tok;
@@ -169,7 +167,7 @@ bsm_audit_success(char *exec_args[])
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-	tok = au_to_exec_args(exec_args);
+	tok = au_to_exec_args((char **)exec_args);
 	if (tok == NULL) {
 		sudo_warn("au_to_exec_args");
 		debug_return_int(-1);
@@ -197,16 +195,15 @@ bsm_audit_success(char *exec_args[])
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
+bsm_audit_failure(char *const exec_args[], const char *errmsg)
 {
 	auditinfo_addr_t ainfo_addr;
-	char text[256];
 	token_t *tok;
 	long au_cond;
 	au_id_t auid;
 	pid_t pid;
 	int aufd;
-	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT);
+	debug_decl(bsm_audit_failure, SUDOERS_DEBUG_AUDIT);
 
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.
@@ -253,14 +250,13 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-	tok = au_to_exec_args(exec_args);
+	tok = au_to_exec_args((char **)exec_args);
 	if (tok == NULL) {
 		sudo_warn("au_to_exec_args");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-	(void) vsnprintf(text, sizeof(text), fmt, ap);
-	tok = au_to_text(text);
+	tok = au_to_text((char *)errmsg);
 	if (tok == NULL) {
 		sudo_warn("au_to_text");
 		debug_return_int(-1);

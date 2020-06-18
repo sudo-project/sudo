@@ -83,7 +83,7 @@
 TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
-static const char server_id[] = "Sudo Audit Server 0.1";
+static const char server_id[] = "Sudo Audit Server " PACKAGE_VERSION;
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
 static double random_drop;
 
@@ -257,6 +257,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	    closure->errstr = _("error creating I/O log");
 	    debug_return_bool(false);
 	}
+	closure->log_io = true;
     }
 
     if (!log_accept(&closure->details, msg->submit_time, msg->info_msgs,
@@ -266,7 +267,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
 
     if (!msg->expect_iobufs) {
-	closure->state = FLUSHED;
+	closure->state = RUNNING;
 	debug_return_bool(true);
     }
 
@@ -325,7 +326,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    closure->state = FLUSHED;
+    closure->state = FINISHED;
     debug_return_bool(true);
 }
 
@@ -342,6 +343,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExitMessage", __func__);
 
     /* Sudo I/O logs don't store this info. */
@@ -354,27 +356,32 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 	    "command exited with %d", msg->exit_value);
     }
 
-    /* No more data, command exited. */
-    closure->state = EXITED;
-    sudo_ev_del(closure->evbase, closure->read_ev);
+    if (closure->log_io) {
+	/* No more data, command exited. */
+	closure->state = EXITED;
+	sudo_ev_del(closure->evbase, closure->read_ev);
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: elapsed time: %lld, %ld",
-	__func__, (long long)closure->elapsed_time.tv_sec,
-	closure->elapsed_time.tv_nsec);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: elapsed time: %lld, %ld",
+	    __func__, (long long)closure->elapsed_time.tv_sec,
+	    closure->elapsed_time.tv_nsec);
 
-    /* Clear write bits from I/O timing file to indicate completion. */
-    mode = logsrvd_conf_iolog_mode();
-    CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
-    if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to fchmodat timing file");
-    }
+	/* Clear write bits from I/O timing file to indicate completion. */
+	mode = logsrvd_conf_iolog_mode();
+	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
+	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to fchmodat timing file");
+	}
 
-    /* Schedule the final commit point event immediately. */
-    if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to add commit point event");
-	debug_return_bool(false);
+	/* Schedule the final commit point event immediately. */
+	if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add commit point event");
+	    debug_return_bool(false);
+	}
+    } else {
+	/* Command exited, no I/O logs to flush. */
+	closure->state = FINISHED;
     }
 
     debug_return_bool(true);
@@ -438,6 +445,12 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
+    if (!closure->log_io) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "not logging I/O");
+	closure->errstr = _("protocol error");
+	debug_return_bool(false);
+    }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received IoBuffer", __func__);
 
@@ -483,6 +496,12 @@ handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
+    if (!closure->log_io) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "not logging I/O");
+	closure->errstr = _("protocol error");
+	debug_return_bool(false);
+    }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize",
 	__func__);
@@ -507,6 +526,12 @@ handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
 	closure->errstr = _("state machine error");
+	debug_return_bool(false);
+    }
+    if (!closure->log_io) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "not logging I/O");
+	closure->errstr = _("protocol error");
 	debug_return_bool(false);
     }
 
@@ -648,9 +673,11 @@ server_shutdown(struct sudo_event_base *base)
     TAILQ_FOREACH(closure, &connections, entries) {
 	closure->state = SHUTDOWN;
 	sudo_ev_del(base, closure->read_ev);
-	if (sudo_ev_add(base, closure->commit_ev, &tv, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add commit point event");
+	if (closure->log_io) {
+	    if (sudo_ev_add(base, closure->commit_ev, &tv, false) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to add commit point event");
+	    }
 	}
     }
 
@@ -750,7 +777,7 @@ server_msg_cb(int fd, int what, void *v)
 	buf->off = 0;
 	buf->len = 0;
 	sudo_ev_del(closure->evbase, closure->write_ev);
-	if (closure->state == FLUSHED || closure->state == SHUTDOWN ||
+	if (closure->state == FINISHED || closure->state == SHUTDOWN ||
 		closure->state == ERROR)
 	    goto finished;
     }
@@ -847,8 +874,11 @@ client_msg_cb(int fd, int what, void *v)
 	    "unable to receive %u bytes", buf->size - buf->len);
 	goto finished;
     case 0:
-	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO, "unexpected EOF");
-	goto finished;
+        if (closure->state != FINISHED) {
+            sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+                "unexpected EOF");
+        }
+        goto finished;
     default:
 	break;
     }
@@ -886,6 +916,10 @@ client_msg_cb(int fd, int what, void *v)
     }
     buf->len -= buf->off;
     buf->off = 0;
+
+    if (closure->state == FINISHED)
+	goto finished;
+
     debug_return;
 send_error:
     if (closure->errstr == NULL)
@@ -939,7 +973,7 @@ server_commit_cb(int unused, int what, void *v)
     }
 
     if (closure->state == EXITED)
-	closure->state = FLUSHED;
+	closure->state = FINISHED;
     debug_return;
 bad:
     connection_closure_free(closure);

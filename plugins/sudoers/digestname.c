@@ -23,9 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-#include <stdio.h>
-
 #include "sudo_compat.h"
 #include "sudo_digest.h"
 #include "sudoers_debug.h"

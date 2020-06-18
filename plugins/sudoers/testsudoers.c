@@ -30,24 +30,16 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
+#include <string.h>
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
-#ifdef HAVE_NETGROUP_H
-# include <netgroup.h>
-#endif /* HAVE_NETGROUP_H */
-#include <time.h>
-#include <ctype.h>
 #include <errno.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include "tsgetgrpw.h"
 #include "sudoers.h"
@@ -458,12 +450,14 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
-    char *sudoers_base;
+    const char *sudoers_base;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
 
     sudoers_base = strrchr(sudoers, '/');
     if (sudoers_base != NULL)
 	sudoers_base++;
+    else
+	sudoers_base = sudoers;
 
     switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:

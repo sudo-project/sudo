@@ -24,22 +24,11 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#elif defined(HAVE_INTTYPES_H)
-# include <inttypes.h>
-#endif
 #if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
 # include <alloca.h>
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
@@ -103,6 +92,8 @@ static struct command_digest *new_digest(int, char *);
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  WORD			/* a word */
 %token <string>  DIGEST			/* a SHA-2 digest */
+%token <tok>	 INCLUDE		/* @include */
+%token <tok>	 INCLUDEDIR		/* @includedir */
 %token <tok>	 DEFAULTS		/* Defaults entry */
 %token <tok>	 DEFAULTS_HOST		/* Host-specific defaults entry */
 %token <tok>	 DEFAULTS_USER		/* User-specific defaults entry */
@@ -192,6 +183,20 @@ entry		:	COMMENT {
 			}
                 |       error COMMENT {
 			    yyerrok;
+			}
+		|	INCLUDE WORD {
+			    if (!push_include($2, false)) {
+				free($2);
+				YYERROR;
+			    }
+			    free($2);
+			}
+		|	INCLUDEDIR WORD {
+			    if (!push_include($2, true)) {
+				free($2);
+				YYERROR;
+			    }
+			    free($2);
 			}
 		|	userlist privileges {
 			    if (!add_userspec($1, $2)) {

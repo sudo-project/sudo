@@ -41,10 +41,6 @@ sudo_sys_signame[0] = "Signal 0";
     if (sudo_sys_signame[SIGKILL] == NULL)
 	sudo_sys_signame[SIGKILL] = "KILL";
 #endif
-#ifdef SIGUNUSED
-    if (sudo_sys_signame[SIGUNUSED] == NULL)
-	sudo_sys_signame[SIGUNUSED] = "UNUSED";
-#endif
 #ifdef SIGBUS
     if (sudo_sys_signame[SIGBUS] == NULL)
 	sudo_sys_signame[SIGBUS] = "BUS";
@@ -56,6 +52,10 @@ sudo_sys_signame[0] = "Signal 0";
 #ifdef SIGSYS
     if (sudo_sys_signame[SIGSYS] == NULL)
 	sudo_sys_signame[SIGSYS] = "SYS";
+#endif
+#ifdef SIGUNUSED
+    if (sudo_sys_signame[SIGUNUSED] == NULL)
+	sudo_sys_signame[SIGUNUSED] = "UNUSED";
 #endif
 #ifdef SIGPIPE
     if (sudo_sys_signame[SIGPIPE] == NULL)

@@ -28,12 +28,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -73,6 +68,7 @@ static struct client_closure *client_closure;
 #endif
 static struct iolog_details iolog_details;
 static bool warned = false;
+static int iolog_dir_fd = -1;
 static struct timespec last_time;
 static void sudoers_io_setops(void);
 
@@ -554,7 +550,6 @@ sudoers_io_open_local(struct timespec *now)
 {
     char iolog_path[PATH_MAX], sessid[7];
     size_t len;
-    int iolog_dir_fd = -1;
     int i, ret = -1;
     debug_decl(sudoers_io_open_local, SUDOERS_DEBUG_PLUGIN);
 
@@ -616,9 +611,6 @@ sudoers_io_open_local(struct timespec *now)
     ret = true;
 
 done:
-    if (iolog_dir_fd != -1)
-	close(iolog_dir_fd);
-
     debug_return_int(ret);
 }
 
@@ -743,6 +735,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
 done:
     if (ret != true) {
+	if (iolog_dir_fd != -1) {
+	    close(iolog_dir_fd);
+	    iolog_dir_fd = -1;
+	}
 	sudo_freepwcache();
 	sudo_freegrcache();
     }
@@ -760,10 +756,25 @@ sudoers_io_close_local(int exit_status, int error, const char **errstr)
     int i;
     debug_decl(sudoers_io_close_local, SUDOERS_DEBUG_PLUGIN);
 
+    /* Close the files. */
     for (i = 0; i < IOFD_MAX; i++) {
 	if (iolog_files[i].fd.v == NULL)
 	    continue;
 	iolog_close(&iolog_files[i], errstr);
+    }
+
+    /* Clear write bits from I/O timing file to indicate completion. */
+    if (iolog_dir_fd != -1) {
+	struct stat sb;
+	if (fstatat(iolog_dir_fd, "timing", &sb, 0) != -1) {
+	    CLR(sb.st_mode, S_IWUSR|S_IWGRP|S_IWOTH);
+	    if (fchmodat(iolog_dir_fd, "timing", sb.st_mode, 0) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to fchmodat timing file", __func__);
+	    }
+	}
+	close(iolog_dir_fd);
+	iolog_dir_fd = -1;
     }
 
     debug_return;

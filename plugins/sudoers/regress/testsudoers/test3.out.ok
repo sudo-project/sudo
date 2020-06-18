@@ -1,3 +1,44 @@
+Testing @includedir of an unquoted path
+
+Parses OK.
+
+Entries for user root:
+
+ALL = ALL
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed
+
+Testing @includedir of a double-quoted path
+
+Parses OK.
+
+Entries for user root:
+
+ALL = ALL
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed
+
+Testing #includedir of an unquoted path
+
+Parses OK.
+
+Entries for user root:
+
+ALL = ALL
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed
+
+Testing #includedir of a double-quoted path
+
 Parses OK.
 
 Entries for user root:

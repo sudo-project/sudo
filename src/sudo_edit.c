@@ -26,15 +26,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -704,7 +698,10 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 
 	/* Overwrite the old file with the new contents. */
 	if (sudo_copy_file(tf[i].tfile, tfd, sb.st_size, tf[i].ofile, ofd,
-	    tf[i].osize) == -1) {
+		tf[i].osize) == 0) {
+	    /* success, remove temporary file. */
+	    unlink(tf[i].tfile);
+	} else {
 bad:
 	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
 	    errors++;

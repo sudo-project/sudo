@@ -21,8 +21,6 @@
  * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
-#include <sys/types.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -32,7 +30,6 @@
 #include <dlfcn.h>
 #include <errno.h>
 #include <limits.h>
-#include <pwd.h>
 
 #include "sudo_plugin.h"
 

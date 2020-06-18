@@ -1,3 +1,75 @@
+What's new in Sudo 1.9.1
+
+ * Fixed an AIX-specific problem when I/O logging was enabled.
+   The terminal device was not being properly set to raw mode.
+   Bug #927.
+
+ * Corrected handling of sudo_logsrvd connections without associated
+   I/O log data.  This fixes support for RejectMessage as well as
+   AcceptMessage when the expect_iobufs flag is not set.
+
+ * Added an "iolog_path" entry to the JSON-format event log produced
+   by sudo_logsrvd.  Previously, it was only possible to determine
+   the I/O log file an event belonged to using sudo-format logs.
+
+ * Fixed the bundle IDs for sudo-logsrvd and sudo-python macOS packages.
+
+ * I/O log files produced by the sudoers plugin now clear the write
+   bits on the I/O log timing file when the log is complete.  This
+   is consistent with how sudo_logsrvd indicates that a log is
+   complete.
+
+ * The sudoreplay utility has a new "-F" (follow) command line
+   option to allow replaying a session that is still in progress,
+   similar to "tail -f".
+
+ * The @include and @includedir directives can be used in sudoers
+   instead of #include and #includedir.  In addition, include paths
+   may now have embedded white space by either using a double-quoted
+   string or escaping the space characters with a backslash.
+
+ * Fixed some Solaris 11.4 compilation errors.
+
+ * When running a command in a pty, sudo will no longer try to
+   suspend itself if the user's tty has been revoked (for instance
+   when the parent ssh daemon is killed).  This fixes a bug where
+   sudo would continuously suspend the command (which would succeed),
+   then suspend itself (which would fail due to the missing tty)
+   and then resume the command.
+
+ * If sudo's event loop fails due to the tty being revoked, remove
+   the user's tty events and restart the event loop (once).  This
+   fixes a problem when running "sudo reboot" in a pty on some
+   systems.  When the event loop exited unexpectedly, sudo would
+   kill the command running in the pty, which in the case of "reboot",
+   could lead to the system being in a half-rebooted state.
+
+ * Fixed a regression introduced in sudo 1.8.23 in the LDAP and
+   SSSD back-ends where a missing sudoHost attribute was treated
+   as an "ALL" wildcard value.  A sudoRole with no sudoHost attribute
+   is now ignored as it was prior to version 1.8.23.
+
+ * The audit plugin API has been changed slightly.  The sudo front-end
+   now audits an accept event itself after all approval plugins are
+   run and the I/O logging plugins (if any) are opened.  This makes
+   it possible for an audit plugin to only log a single overall
+   accept event if desired.
+
+ * The sudoers plugin can now be loaded as an audit plugin.  Logging
+   of successful commands is now performed in the audit plugin's
+   accept function.  As a result, commands are now only logged if
+   allowed by sudoers and all approval plugins.  Commands rejected
+   by an approval plugin are now also logged by the sudoers plugin.
+
+ * Romanian translation for sudo and sudoers from translationproject.org.
+
+ * Fixed a regression introduced in sudo 1.9.0 where sudoedit did
+   not remove its temporary files after installing them.  Bug #929.
+
+ * Fixed a regression introduced in sudo 1.9.0 where the iolog_file
+   setting in sudoers and sudo_logsrvd.conf caused an error if the
+   file name ended in six or more X's.
+
 What's new in Sudo 1.9.0
 
  * Fixed a test failure in the strsig_test regress test on FreeBSD.
@@ -17,8 +89,8 @@ What's new in Sudo 1.9.0
    or send existing sudo I/O logs to a centralized server.
 
  * It is now possible to write sudo plugins in Python 3 when sudo
-   is configured with the --enable-python> option.  See the
-   sudo_plugin_python.man.html manual for details.
+   is configured with the --enable-python option.  See the
+   sudo_plugin_python manual for details.
 
    Sudo 1.9.0 comes with several Python example plugins that get
    installed sudo's examples directory.
@@ -412,10 +484,10 @@ What's new in Sudo 1.8.25
  * Fixed a bug introduced in sudo 1.8.24 where sudoNotAfter in the LDAP
    back-end was not being properly parsed.  Bug #845.
 
- * When sudo runs a command in a pseudo-tty, the slave device is
-   now closed in the main process immediately after starting the
-   monitor process.  This removes the need for an AIX-specific
-   workaround that was added in sudo 1.8.24.
+ * When sudo runs a command in a pseudo-terminal, the follower
+   device is now closed in the main process immediately after
+   starting the monitor process.  This removes the need for an
+   AIX-specific workaround that was added in sudo 1.8.24.
 
  * Added support for monotonic timers on HP-UX.
 

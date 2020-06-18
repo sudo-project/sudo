@@ -28,18 +28,10 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
-#include <unistd.h>
+#include <string.h>
 #ifdef HAVE_SETAUTHDB
 # include <usersec.h>
 #endif /* HAVE_SETAUTHDB */

@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,18 +31,11 @@
 #else
 # include "compat/stdbool.h"
 #endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <pwd.h>
-#include <grp.h>
 
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 #include "sudo_compat.h"
@@ -82,7 +74,7 @@ io_swapids(bool restore)
     if (user_euid == (uid_t)-1)
 	user_euid = geteuid();
     if (user_egid == (gid_t)-1)
-	user_euid = getegid();
+	user_egid = getegid();
 
     if (restore) {
 	if (seteuid(user_euid) == -1) {
@@ -401,6 +393,17 @@ iolog_openat(int dfd, const char *path, int flags)
 	omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
     }
     fd = openat(dfd, path, flags, iolog_filemode);
+    if (fd == -1 && errno == EACCES) {
+	/* Enable write bit if it is missing. */
+	struct stat sb;
+	if (fstatat(dfd, path, &sb, 0) == 0) {
+	    mode_t write_bits = iolog_filemode & (S_IWUSR|S_IWGRP|S_IWOTH);
+	    if ((sb.st_mode & write_bits) != write_bits) {
+		if (fchmodat(dfd, path, iolog_filemode, 0) == 0)
+		    fd = openat(dfd, path, flags, iolog_filemode);
+	    }
+	}
+    }
     if (fd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (io_swapids(false)) {
@@ -833,6 +836,20 @@ iolog_eof(struct iolog_file *iol)
 #endif
 	ret = feof(iol->fd.f) == 1;
     debug_return_int(ret);
+}
+
+void
+iolog_clearerr(struct iolog_file *iol)
+{
+    debug_decl(iolog_eof, SUDO_DEBUG_UTIL);
+
+#ifdef HAVE_ZLIB_H
+    if (iol->compressed)
+	gzclearerr(iol->fd.g);
+    else
+#endif
+	clearerr(iol->fd.f);
+    debug_return;
 }
 
 /*

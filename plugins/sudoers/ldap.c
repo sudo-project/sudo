@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -31,9 +31,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
+#include <string.h>
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
@@ -363,16 +361,21 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
  * Extract the dn from an entry and return the first rdn from it.
  */
 static char *
-sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
+sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry, int *rc)
 {
 #ifdef HAVE_LDAP_STR2DN
     char *dn, *rdn = NULL;
     LDAPDN tmpDN;
     debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP);
 
-    if ((dn = ldap_get_dn(ld, entry)) == NULL)
+    if ((dn = ldap_get_dn(ld, entry)) == NULL) {
+	int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, rc);
+	if (optrc != LDAP_OPT_SUCCESS)
+	    *rc = optrc;
 	debug_return_str(NULL);
-    if (ldap_str2dn(dn, &tmpDN, LDAP_DN_FORMAT_LDAP) == LDAP_SUCCESS) {
+    }
+    *rc = ldap_str2dn(dn, &tmpDN, LDAP_DN_FORMAT_LDAP);
+    if (*rc == LDAP_SUCCESS) {
 	ldap_rdn2str(tmpDN[0], &rdn, LDAP_DN_FORMAT_UFN);
 	ldap_dnfree(tmpDN);
     }
@@ -382,11 +385,20 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
     char *dn, **edn;
     debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP);
 
-    if ((dn = ldap_get_dn(ld, entry)) == NULL)
+    if ((dn = ldap_get_dn(ld, entry)) == NULL) {
+	int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, rc);
+	if (optrc != LDAP_OPT_SUCCESS)
+	    *rc = optrc;
 	debug_return_str(NULL);
+    }
     edn = ldap_explode_dn(dn, 1);
     ldap_memfree(dn);
-    debug_return_str(edn ? edn[0] : NULL);
+    if (edn == NULL) {
+	*rc = LDAP_NO_MEMORY;
+	debug_return_str(NULL);
+    }
+    *rc = LDAP_SUCCESS;
+    debug_return_str(edn[0]);
 #endif
 }
 
@@ -405,13 +417,21 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs
 
     bv = sudo_ldap_get_values_len(ld, entry, "sudoOption", &rc);
     if (bv == NULL) {
-	if (rc == LDAP_NO_MEMORY)
+	if (rc == LDAP_NO_MEMORY) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
+	}
 	debug_return_bool(true);
     }
 
     /* Use sudoRole in place of file name in defaults. */
-    cn = sudo_ldap_get_first_rdn(ld, entry);
+    cn = sudo_ldap_get_first_rdn(ld, entry, &rc);
+    if (cn == NULL) {
+	if (rc == LDAP_NO_MEMORY) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+    }
     if (asprintf(&cp, "sudoRole %s", cn ? cn : "UNKNOWN") == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
@@ -1133,6 +1153,88 @@ berval_iter(void **vp)
     return *bv ? (*bv)->bv_val : NULL;
 }
 
+/*
+ * Wrapper for sudo_ldap_role_to_priv() that takes an LDAPMessage.
+ * Returns a struct privilege on success or NULL on failure.
+ */
+static struct privilege *
+ldap_entry_to_priv(LDAP *ld, LDAPMessage *entry, int *rc_out)
+{
+    struct berval **cmnds = NULL, **hosts = NULL;
+    struct berval **runasusers = NULL, **runasgroups = NULL;
+    struct berval **opts = NULL, **notbefore = NULL, **notafter = NULL;
+    struct privilege *priv = NULL;
+    char *cn = NULL;
+    int rc;
+    debug_decl(ldap_entry_to_priv, SUDOERS_DEBUG_LDAP);
+
+    /* Ignore sudoRole without sudoCommand or sudoHost. */
+    cmnds = sudo_ldap_get_values_len(ld, entry, "sudoCommand", &rc);
+    if (cmnds == NULL)
+	goto cleanup;
+    hosts = sudo_ldap_get_values_len(ld, entry, "sudoHost", &rc);
+    if (hosts == NULL)
+	goto cleanup;
+
+    /* Get the entry's dn for long format printing. */
+    if ((cn = sudo_ldap_get_first_rdn(ld, entry, &rc)) == NULL)
+	goto cleanup;
+
+    /* Get sudoRunAsUser / sudoRunAsGroup */
+    runasusers = sudo_ldap_get_values_len(ld, entry, "sudoRunAsUser", &rc);
+    if (runasusers == NULL) {
+	if (rc != LDAP_NO_MEMORY)
+	    runasusers = sudo_ldap_get_values_len(ld, entry, "sudoRunAs", &rc);
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
+    }
+    runasgroups = sudo_ldap_get_values_len(ld, entry, "sudoRunAsGroup", &rc);
+    if (rc == LDAP_NO_MEMORY)
+	goto cleanup;
+
+    /* Get sudoNotBefore / sudoNotAfter */
+    notbefore = sudo_ldap_get_values_len(ld, entry, "sudoNotBefore", &rc);
+    if (rc == LDAP_NO_MEMORY)
+	goto cleanup;
+    notafter = sudo_ldap_get_values_len(ld, entry, "sudoNotAfter", &rc);
+    if (rc == LDAP_NO_MEMORY)
+	goto cleanup;
+
+    /* Parse sudoOptions. */
+    opts = sudo_ldap_get_values_len(ld, entry, "sudoOption", &rc);
+    if (rc == LDAP_NO_MEMORY)
+	goto cleanup;
+
+    priv = sudo_ldap_role_to_priv(cn, hosts, runasusers, runasgroups,
+	cmnds, opts, notbefore ? notbefore[0]->bv_val : NULL,
+	notafter ? notafter[0]->bv_val : NULL, false, true, berval_iter);
+    if (priv == NULL) {
+	rc = LDAP_NO_MEMORY;
+	goto cleanup;
+    }
+
+cleanup:
+    if (cn != NULL)
+	ldap_memfree(cn);
+    if (cmnds != NULL)
+	ldap_value_free_len(cmnds);
+    if (hosts != NULL)
+	ldap_value_free_len(hosts);
+    if (runasusers != NULL)
+	ldap_value_free_len(runasusers);
+    if (runasgroups != NULL)
+	ldap_value_free_len(runasgroups);
+    if (opts != NULL)
+	ldap_value_free_len(opts);
+    if (notbefore != NULL)
+	ldap_value_free_len(notbefore);
+    if (notafter != NULL)
+	ldap_value_free_len(notafter);
+
+    *rc_out = rc;
+    debug_return_ptr(priv);
+}
+
 static bool
 ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     struct userspec_list *ldap_userspecs)
@@ -1146,6 +1248,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     /* We only have a single userspec */
     if ((us = calloc(1, sizeof(*us))) == NULL)
 	goto oom;
+    us->file = rcstr_dup("LDAP");
     TAILQ_INIT(&us->users);
     TAILQ_INIT(&us->privileges);
     STAILQ_INIT(&us->comments);
@@ -1157,81 +1260,16 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     m->type = ALL;
     TAILQ_INSERT_TAIL(&us->users, m, entries);
 
-    /* Treat each sudoRole as a separate privilege. */
+    /* Treat each entry as a separate privilege. */
     for (i = 0; i < lres->nentries; i++) {
-	LDAPMessage *entry = lres->entries[i].entry;
-	struct berval **cmnds = NULL, **hosts = NULL;
-	struct berval **runasusers = NULL, **runasgroups = NULL;
-	struct berval **opts = NULL, **notbefore = NULL, **notafter = NULL;
-	struct privilege *priv = NULL;
-	char *cn = NULL;
+	struct privilege *priv;
 
-	/* Ignore sudoRole without sudoCommand. */
-	cmnds = sudo_ldap_get_values_len(ld, entry, "sudoCommand", &rc);
-	if (cmnds == NULL) {
+	priv = ldap_entry_to_priv(ld, lres->entries[i].entry, &rc);
+	if (priv == NULL) {
 	    if (rc == LDAP_NO_MEMORY)
-		goto cleanup;
+		goto oom;
 	    continue;
 	}
-
-	/* Get the entry's dn for long format printing. */
-	if ((cn = sudo_ldap_get_first_rdn(ld, entry)) == NULL)
-	    goto cleanup;
-
-	/* Get sudoHost */
-	hosts = sudo_ldap_get_values_len(ld, entry, "sudoHost", &rc);
-	if (rc == LDAP_NO_MEMORY)
-	    goto cleanup;
-
-	/* Get sudoRunAsUser / sudoRunAsGroup */
-	runasusers = sudo_ldap_get_values_len(ld, entry, "sudoRunAsUser", &rc);
-	if (runasusers == NULL) {
-	    if (rc != LDAP_NO_MEMORY)
-		runasusers = sudo_ldap_get_values_len(ld, entry, "sudoRunAs", &rc);
-	    if (rc == LDAP_NO_MEMORY)
-		goto cleanup;
-	}
-	runasgroups = sudo_ldap_get_values_len(ld, entry, "sudoRunAsGroup", &rc);
-	if (rc == LDAP_NO_MEMORY)
-	    goto cleanup;
-
-	/* Get sudoNotBefore / sudoNotAfter */
-	notbefore = sudo_ldap_get_values_len(ld, entry, "sudoNotBefore", &rc);
-	if (rc == LDAP_NO_MEMORY)
-	    goto cleanup;
-	notafter = sudo_ldap_get_values_len(ld, entry, "sudoNotAfter", &rc);
-	if (rc == LDAP_NO_MEMORY)
-	    goto cleanup;
-
-	/* Parse sudoOptions. */
-	opts = sudo_ldap_get_values_len(ld, entry, "sudoOption", &rc);
-	if (rc == LDAP_NO_MEMORY)
-	    goto cleanup;
-
-	priv = sudo_ldap_role_to_priv(cn, hosts, runasusers, runasgroups,
-	    cmnds, opts, notbefore ? notbefore[0]->bv_val : NULL,
-	    notafter ? notafter[0]->bv_val : NULL, false, true, berval_iter);
-
-    cleanup:
-	if (cn != NULL)
-	    ldap_memfree(cn);
-	if (cmnds != NULL)
-	    ldap_value_free_len(cmnds);
-	if (hosts != NULL)
-	    ldap_value_free_len(hosts);
-	if (runasusers != NULL)
-	    ldap_value_free_len(runasusers);
-	if (runasgroups != NULL)
-	    ldap_value_free_len(runasgroups);
-	if (opts != NULL)
-	    ldap_value_free_len(opts);
-	if (notbefore != NULL)
-	    ldap_value_free_len(notbefore);
-	if (notafter != NULL)
-	    ldap_value_free_len(notafter);
-
-	if (priv == NULL)
-	    goto oom;
 	TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
     }
 

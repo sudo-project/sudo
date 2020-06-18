@@ -26,12 +26,10 @@
 
 #ifndef HAVE_CLOSEFROM
 
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <unistd.h>
 #ifdef HAVE_PSTAT_GETPROC
 # include <sys/pstat.h>
 #else

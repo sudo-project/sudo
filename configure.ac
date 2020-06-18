@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.9.0], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -1894,6 +1894,9 @@ case "$host" in
 		    *)		RTLD_PRELOAD_VAR="LDR_PRELOAD";;
 		esac
 
+		# cfmakeraw is broken on AIX (and is not documented)
+		: ${ac_cv_func_cfmakeraw='no'}
+
 		# strnlen/strndup may be broken on AIX < 6 depending
 		# on the libc version, use our own.
 		if test $OSMAJOR -lt 6; then
@@ -2595,7 +2598,8 @@ if test ${USE_PYTHON-'no'} = "yes"; then
 
     AS_IF([test -z "$PYTHON_INCLUDE"], [
       AC_MSG_CHECKING([python include flags])
-      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags`
+      # Pull out python include path, ignore other flags
+      PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags | tr " " "\n" | grep "^-I" | sort -u | tr "\n" " "`
       AC_MSG_RESULT([$PYTHON_INCLUDE])
     ])
 
@@ -2608,6 +2612,7 @@ if test ${USE_PYTHON-'no'} = "yes"; then
       fi
       AC_MSG_CHECKING([python linker flags])
       PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED`
+      PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED | tr " " "\n" | grep "^-[[lL]]" | tr "\n" " "`
       AC_MSG_RESULT([$PYTHON_LIBS])
     ])
 
@@ -2675,7 +2680,10 @@ AC_CHECK_FUNCS([getgrouplist], [], [
     esac
     SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
-AC_CHECK_FUNCS([getdelim], [], [
+AC_CHECK_FUNCS([getdelim], [
+    # Out of date gcc fixed includes may result in missing getdelim() prototype
+    AC_CHECK_DECLS([getdelim])
+], [
     AC_LIBOBJ(getdelim)
     SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
@@ -4647,6 +4655,7 @@ test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
 test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
+test "$runstatedir" = '${localstatedir}/run' && runstatedir='$(localstatedir)/run'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 dnl

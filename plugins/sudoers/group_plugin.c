@@ -23,21 +23,13 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
-#include <time.h>
 #include <ctype.h>
 #include <errno.h>
-#include <pwd.h>
 
 #include "sudoers.h"
 #include "sudo_dso.h"

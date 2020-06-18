@@ -16,6 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef SUDO_JSON_H
+#define SUDO_JSON_H
+
+#include <sys/types.h>	/* for id_t */
+
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
+
 /*
  * JSON values may be of the following types.
  */
@@ -83,3 +94,5 @@ __dso_public char *sudo_json_get_buf_v1(struct json_container *json);
 
 __dso_public unsigned int sudo_json_get_len_v1(struct json_container *json);
 #define sudo_json_get_len(_a) sudo_json_get_len_v1((_a))
+
+#endif /* SUDO_JSON_H */

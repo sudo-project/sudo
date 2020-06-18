@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
@@ -31,25 +30,14 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
-#include <unistd.h>
-#include <stdarg.h>
-#include <time.h>
-#include <ctype.h>
-
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
+#include <string.h>
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_fatal.h"
-#include "sudo_util.h"
+#include "sudo_gettext.h"
 #include "sudo_json.h"
+#include "sudo_util.h"
 
 /*
  * Double the size of the json buffer.

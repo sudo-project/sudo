@@ -24,8 +24,9 @@ bool fill_args(const char *, size_t, int);
 bool fill_cmnd(const char *, size_t);
 bool fill_txt(const char *, size_t, size_t);
 bool ipv6_valid(const char *s);
-int sudoers_trace_print(const char *msg);
+int sudoers_trace_print(const char *);
 void sudoerserror(const char *);
+bool push_include(const char *, bool);
 
 #ifndef FLEX_SCANNER
 extern int (*trace_print)(const char *msg);

@@ -28,12 +28,7 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <grp.h>
@@ -42,15 +37,6 @@
 #include "sudoers.h"
 #include "sudoers_version.h"
 #include "interfaces.h"
-
-/*
- * Info passed in from the sudo front-end.
- */
-struct sudoers_policy_open_info {
-    char * const *settings;
-    char * const *user_info;
-    char * const *plugin_args;
-};
 
 /*
  * Command execution args to be filled in: argv, envp and command info.
@@ -67,6 +53,7 @@ sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
+static bool session_opened;
 
 extern __dso_public struct policy_plugin sudoers_policy;
 
@@ -100,7 +87,7 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 int
 sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 {
-    struct sudoers_policy_open_info *info = v;
+    struct sudoers_open_info *info = v;
     char * const *cur;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
@@ -850,7 +837,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     const char **errstr)
 {
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
-    struct sudoers_policy_open_info info;
+    struct sudoers_open_info info;
     const char *cp, *plugin_path = NULL;
     char * const *cur;
     int ret;
@@ -884,7 +871,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     info.settings = settings;
     info.user_info = user_info;
     info.plugin_args = args;
-    ret = sudoers_policy_init(&info, envp);
+    ret = sudoers_init(&info, envp);
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
@@ -899,15 +886,16 @@ sudoers_policy_close(int exit_status, int error_code)
 {
     debug_decl(sudoers_policy_close, SUDOERS_DEBUG_PLUGIN);
 
-    /* We do not currently log the exit status. */
-    if (error_code) {
-	errno = error_code;
-	sudo_warn(U_("unable to execute %s"), safe_cmnd);
-    }
-
-    /* Close the session we opened in sudoers_policy_init_session(). */
-    if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))
+    if (session_opened) {
+	/* Close the session we opened in sudoers_policy_init_session(). */
 	(void)sudo_auth_end_session(runas_pw);
+
+	/* We do not currently log the exit status. */
+	if (error_code) {
+	    errno = error_code;
+	    sudo_warn(U_("unable to execute %s"), safe_cmnd);
+	}
+    }
 
     /* Deregister the callback for sudo_fatal()/sudo_fatalx(). */
     sudo_fatal_callback_deregister(sudoers_cleanup);
@@ -957,8 +945,10 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[],
 
     ret = sudo_auth_begin_session(pwd, user_env);
 
-    /* The audit functions set audit_msg on failure. */
-    if (ret != 1 && audit_msg != NULL) {
+    if (ret == 1) {
+	session_opened = true;
+    } else if (audit_msg != NULL) {
+	/* The audit functions set audit_msg on failure. */
 	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
 	    *errstr = audit_msg;
     }

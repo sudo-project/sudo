@@ -19,6 +19,7 @@
 #ifndef SUDO_DEBUG_H
 #define SUDO_DEBUG_H
 
+#include <sys/types.h>		/* for id_t, size_t, ssize_t, time_t */
 #include <stdarg.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>

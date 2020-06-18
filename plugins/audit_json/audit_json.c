@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 
@@ -34,16 +33,9 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <signal.h>
 #include <unistd.h>
-#include <ctype.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <time.h>
@@ -522,7 +514,7 @@ audit_write_record(const char *audit_str, const char *plugin_name,
 	goto oom;
 
     switch (plugin_type) {
-    case 0:
+    case SUDO_FRONT_END:
 	json_value.u.string = "front-end";
 	break;
     case SUDO_POLICY_PLUGIN:
@@ -611,6 +603,10 @@ audit_json_accept(const char *plugin_name, unsigned int plugin_type,
 {
     int ret;
     debug_decl(audit_json_accept, SUDO_DEBUG_PLUGIN);
+
+    /* Ignore the extra accept event from the sudo front-end. */
+    if (plugin_type == SUDO_FRONT_END)
+	debug_return_int(true);
 
     state.accepted = true;
 

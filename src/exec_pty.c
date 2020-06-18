@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,12 +30,7 @@
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -115,7 +110,7 @@ static void del_io_events(bool nonblocking);
 static void sync_ttysize(struct exec_closure_pty *ec);
 static int safe_close(int fd);
 static void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
-static void check_foreground(struct exec_closure_pty *ec);
+static pid_t check_foreground(struct exec_closure_pty *ec);
 static void add_io_events(struct sudo_event_base *evbase);
 static void schedule_signal(struct exec_closure_pty *ec, int signo);
 
@@ -137,7 +132,7 @@ pty_cleanup(void)
 
 /*
  * Allocate a pty if /dev/tty is a tty.
- * Fills in io_fds[SFD_USERTTY], io_fds[SFD_MASTER], io_fds[SFD_SLAVE]
+ * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER], io_fds[SFD_FOLLOWER]
  * and ptyname globals.
  */
 static bool
@@ -152,7 +147,7 @@ pty_setup(struct command_details *details, const char *tty)
 	debug_return_bool(false);
     }
 
-    if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
+    if (!get_pty(&io_fds[SFD_LEADER], &io_fds[SFD_FOLLOWER],
 	ptyname, sizeof(ptyname), details->euid))
 	sudo_fatal(U_("unable to allocate pty"));
 
@@ -163,30 +158,30 @@ pty_setup(struct command_details *details, const char *tty)
     if (ISSET(details->flags, CD_SET_UTMP)) {
 	utmp_user =
 	    details->utmp_user ? details->utmp_user : user_details.username;
-	utmp_login(tty, ptyname, io_fds[SFD_SLAVE], utmp_user);
+	utmp_login(tty, ptyname, io_fds[SFD_FOLLOWER], utmp_user);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: %s fd %d, pty master fd %d, pty slave fd %d",
-	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
-	io_fds[SFD_SLAVE]);
+	"%s: %s fd %d, pty leader fd %d, pty follower fd %d",
+	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
+	io_fds[SFD_FOLLOWER]);
 
     debug_return_bool(true);
 }
 
 /*
- * Make the tty slave the controlling tty.
+ * Make the tty follower the controlling tty.
  * This is only used by the monitor but ptyname[] is static.
  */
 int
 pty_make_controlling(void)
 {
-    if (io_fds[SFD_SLAVE] != -1) {
+    if (io_fds[SFD_FOLLOWER] != -1) {
 #ifdef TIOCSCTTY
-	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
+	if (ioctl(io_fds[SFD_FOLLOWER], TIOCSCTTY, NULL) != 0)
 	    return -1;
 #else
-	/* Set controlling tty by reopening pty slave. */
+	/* Set controlling tty by reopening pty follower. */
 	int fd = open(ptyname, O_RDWR);
 	if (fd == -1)
 	    return -1;
@@ -492,22 +487,25 @@ log_winchange(unsigned int rows, unsigned int cols)
 
 /*
  * Check whether we are running in the foregroup.
- * Updates the foreground global and does lazy init of the
- * the pty slave as needed.
+ * Updates the foreground global and updates the window size.
+ * Returns 0 if there is no tty, the foreground process group ID
+ * on success, or -1 on failure (tty revoked).
  */
-static void
+static pid_t
 check_foreground(struct exec_closure_pty *ec)
 {
+    int ret = 0;
     debug_decl(check_foreground, SUDO_DEBUG_EXEC);
 
     if (io_fds[SFD_USERTTY] != -1) {
-	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ec->ppgrp;
+	if ((ret = tcgetpgrp(io_fds[SFD_USERTTY])) != -1) {
+	    foreground = ret == ec->ppgrp;
 
-	/* Also check for window size changes. */
-	sync_ttysize(ec);
+	    /* Also check for window size changes. */
+	    sync_ttysize(ec);
+	}
     }
-
-    debug_return;
+    debug_return_int(ret);
 }
 
 /*
@@ -530,8 +528,12 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	 * If sudo is already the foreground process, just resume the command
 	 * in the foreground.  If not, we'll suspend sudo and resume later.
 	 */
-	if (!foreground)
-	    check_foreground(ec);
+	if (!foreground) {
+	    if (check_foreground(ec) == -1) {
+		/* User's tty was revoked. */
+		break;
+	    }
+	}
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
@@ -573,7 +575,10 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	log_suspend(SIGCONT);
 
 	/* Check foreground/background status on resume. */
-	check_foreground(ec);
+	if (check_foreground(ec) == -1) {
+	    /* User's tty was revoked. */
+	    break;
+	}
 
 	/*
 	 * We always resume the command in the foreground if sudo itself
@@ -835,7 +840,7 @@ io_buf_new(int rfd, int wfd,
 }
 
 /*
- * We already closed the slave pty so reads from the master will not block.
+ * We already closed the follower so reads from the leader will not block.
  */
 static void
 pty_finish(struct command_status *cstat)
@@ -907,6 +912,9 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
 {
     char signame[SIG2STR_MAX];
     debug_decl(schedule_signal, SUDO_DEBUG_EXEC);
+
+    if (signo == 0)
+	debug_return;
 
     if (signo == SIGCONT_FG)
 	strlcpy(signame, "CONT_FG", sizeof(signame));
@@ -1339,6 +1347,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     bool interpose[3] = { false, false, false };
     struct exec_closure_pty ec = { 0 };
     struct plugin_container *plugin;
+    int evloop_retries = -1;
     sigset_t set, oset;
     struct sigaction sa;
     struct stat sb;
@@ -1415,19 +1424,19 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * In background mode there is no stdin.
      */
     if (!ISSET(details->flags, CD_BACKGROUND))
-	io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
-    io_fds[SFD_STDOUT] = io_fds[SFD_SLAVE];
-    io_fds[SFD_STDERR] = io_fds[SFD_SLAVE];
+	io_fds[SFD_STDIN] = io_fds[SFD_FOLLOWER];
+    io_fds[SFD_STDOUT] = io_fds[SFD_FOLLOWER];
+    io_fds[SFD_STDERR] = io_fds[SFD_FOLLOWER];
 
     if (io_fds[SFD_USERTTY] != -1) {
-	/* Read from /dev/tty, write to pty master */
+	/* Read from /dev/tty, write to pty leader */
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
-	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
 		log_ttyin, &ec, &iobufs);
 	}
 
-	/* Read from pty master, write to /dev/tty */
-	io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
+	/* Read from pty leader, write to /dev/tty */
+	io_buf_new(io_fds[SFD_LEADER], io_fds[SFD_USERTTY],
 	    log_ttyout, &ec, &iobufs);
 
 	/* Are we the foreground process? */
@@ -1502,8 +1511,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     }
 
     if (foreground) {
-	/* Copy terminal attrs from user tty -> pty slave. */
-	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
+	/* Copy terminal attrs from user tty -> pty follower. */
+	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER])) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
                 "%s: unable to copy terminal settings to pty", __func__);
 	    foreground = false;
@@ -1561,16 +1570,16 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     }
 
     /*
-     * We close the pty slave so only the monitor and command have a
+     * We close the pty follower so only the monitor and command have a
      * reference to it.  This ensures that we can don't block reading
-     * from the master when the command and monitor have exited.
+     * from the leader when the command and monitor have exited.
      */
-    if (io_fds[SFD_SLAVE] != -1) {
-	close(io_fds[SFD_SLAVE]);
-	io_fds[SFD_SLAVE] = -1;
+    if (io_fds[SFD_FOLLOWER] != -1) {
+	close(io_fds[SFD_FOLLOWER]);
+	io_fds[SFD_FOLLOWER] = -1;
     }
 
-    /* Tell the monitor to continue now that the slave is closed. */
+    /* Tell the monitor to continue now that the follower is closed. */
     cstat->type = CMD_SIGNO;
     cstat->val = 0;
     while (send(sv[0], cstat, sizeof(*cstat), 0) == -1) {
@@ -1613,25 +1622,40 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     setlocale(LC_ALL, "C");
 
     /*
-     * In the event loop we pass input from user tty to master
-     * and pass output from master to stdout and IO plugin.
+     * In the event loop we pass input from user tty to leader
+     * and pass output from leader to stdout and IO plugin.
+     * Try to recover on ENXIO, it means the tty was revoked.
      */
     add_io_events(ec.evbase);
-    if (sudo_ev_dispatch(ec.evbase) == -1)
-	sudo_warn(U_("error in event loop"));
-    if (sudo_ev_got_break(ec.evbase)) {
-	/* error from callback or monitor died */
-	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
-	/* XXX: no good way to know if we should terminate the command. */
-	if (cstat->val == CMD_INVALID && ec.cmnd_pid != -1) {
-	    /* no status message, kill command */
-	    terminate_command(ec.cmnd_pid, true);
-	    ec.cmnd_pid = -1;
-	    /* TODO: need way to pass an error to the sudo front end */
-	    cstat->type = CMD_WSTATUS;
-	    cstat->val = W_EXITCODE(1, SIGKILL);
+    do {
+	if (sudo_ev_dispatch(ec.evbase) == -1)
+	    sudo_warn(U_("error in event loop"));
+	if (sudo_ev_got_break(ec.evbase)) {
+	    /* error from callback or monitor died */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
+	    /* XXX: no good way to know if we should terminate the command. */
+	    if (cstat->val == CMD_INVALID && ec.cmnd_pid != -1) {
+		/* no status message, kill command */
+		terminate_command(ec.cmnd_pid, true);
+		ec.cmnd_pid = -1;
+		/* TODO: need way to pass an error to the sudo front end */
+		cstat->type = CMD_WSTATUS;
+		cstat->val = W_EXITCODE(1, SIGKILL);
+	    }
+	} else if (!sudo_ev_got_exit(ec.evbase)) {
+	    switch (errno) {
+	    case ENXIO:
+	    case EIO:
+	    case EBADF:
+		/* /dev/tty was revoked, remove tty events and retry (once) */
+		if (evloop_retries == -1 && io_fds[SFD_USERTTY] != -1) {
+		    ev_free_by_fd(ec.evbase, io_fds[SFD_USERTTY]);
+		    evloop_retries = 1;
+		}
+		break;
+	    }
 	}
-    }
+    } while (evloop_retries-- > 0);
 
     /* Flush any remaining output, free I/O bufs and events, do logout. */
     pty_finish(cstat);

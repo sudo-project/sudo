@@ -23,15 +23,8 @@
 
 #include <config.h>
 
-#include <sys/types.h>
+#include <sys/types.h>			/* for id_t */
 
-#include <stdio.h>
-#include <stdlib.h>
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#elif defined(HAVE_INTTYPES_H)
-# include <inttypes.h>
-#endif
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -41,11 +34,9 @@
 #include <errno.h>
 #include <limits.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
 #include "sudo_debug.h"
+#include "sudo_gettext.h"
 #include "sudo_util.h"
 
 /* strtoid.c (not exported) */

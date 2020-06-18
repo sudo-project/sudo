@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "March 26, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "May 18, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -25,7 +25,7 @@
 .SH "SYNOPSIS"
 .HP 11n
 \fBsudoreplay\fR
-[\fB\-hnRS\fR]
+[\fB\-FhnRS\fR]
 [\fB\-d\fR\ \fIdir\fR]
 [\fB\-f\fR\ \fIfilter\fR]
 [\fB\-m\fR\ \fInum\fR]
@@ -137,6 +137,21 @@ argument is a comma-separated list, consisting of one or more of following:
 \fIttyin\fR,
 and
 \fIttyout\fR.
+.TP 12n
+\fB\-F\fR, \fB\--follow\fR
+Enable
+\(lqfollow mode\(rq.
+When replaying a session,
+\fBsudoreplay\fR
+will ignore end-of-file and keep replaying until the log is complete.
+This can be used to replay a session that is still in progress,
+similar to
+\(lqtail -f\(rq.
+An I/O log file is considered to be complete when the write bits
+have been cleared on the session's timing file.
+Note that versions of
+\fBsudo\fR
+prior to 1.9.1 do not clear the write bits upon completion.
 .TP 12n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.

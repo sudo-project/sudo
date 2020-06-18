@@ -28,7 +28,7 @@
 
 #ifndef HAVE_STRLCPY
 
-#include <sys/types.h>
+#include <string.h>
 
 #include "sudo_compat.h"
 

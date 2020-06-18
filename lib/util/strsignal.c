@@ -25,15 +25,10 @@
 
 #ifndef HAVE_STRSIGNAL
 
-#include <sys/types.h>
-
-#include <stdio.h>
 #include <signal.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
+#include "sudo_gettext.h"
 
 #if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
 # define sudo_sys_siglist	sys_siglist

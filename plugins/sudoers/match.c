@@ -28,16 +28,13 @@
 
 #include <config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #ifdef HAVE_SYS_SYSTEMINFO_H
 # include <sys/systeminfo.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
+#include <string.h>
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */

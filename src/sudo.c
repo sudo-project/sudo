@@ -34,12 +34,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <errno.h>
@@ -286,6 +281,10 @@ main(int argc, char *argv[], char *envp[])
 	    /* Open I/O plugin once policy and approval plugins succeed. */
 	    iolog_open(settings, user_info, command_info, nargc, nargv,
 		user_env_out);
+
+	    /* Audit the accept event on behalf of the sudo front-end. */
+	    audit_accept("sudo", SUDO_FRONT_END, command_info,
+		nargv, user_env_out);
 
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
@@ -1118,9 +1117,11 @@ policy_close(int exit_status, int error_code)
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	policy_plugin.u.policy->close(exit_status, error_code);
 	sudo_debug_set_active_instance(sudo_debug_instance);
-    } else if (error_code) {
-	errno = error_code;
-	sudo_warn(U_("unable to execute %s"), command_details.command);
+    } else if (error_code != 0) {
+	if (command_details.command != NULL) {
+	    errno = error_code;
+	    sudo_warn(U_("unable to execute %s"), command_details.command);
+	}
     }
 
     debug_return;

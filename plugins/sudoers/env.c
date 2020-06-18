@@ -28,16 +28,9 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <unistd.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -183,7 +176,7 @@ static const char *initial_badenv_table[] = {
     "BASHOPTS",			/* bash, initial "shopt -s" options */
     "SHELLOPTS",		/* bash, initial "set -o" options */
     "JAVA_TOOL_OPTIONS",	/* java, extra command line options */
-    "PERLIO_DEBUG ",		/* perl, debugging output file */
+    "PERLIO_DEBUG",		/* perl, debugging output file */
     "PERLLIB",			/* perl, search path for modules/includes */
     "PERL5LIB",			/* perl 5, search path for modules/includes */
     "PERL5OPT",			/* perl 5, extra command line options */
