@@ -4547,6 +4547,35 @@ dnl
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
 	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith"
+	dnl
+	dnl Check whether -Wimplicit-fallthrough is available and
+	dnl recognizes /* FALLTHROUGH */ comments.  Clang 10 requires
+	dnl the "fallthrough" attribute which we don't use.
+	dnl
+	_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS -Wimplicit-fallthrough -Werror"
+	AC_MSG_CHECKING([whether C compiler acceptd -Wimplicit-fallthrough])
+	AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	    int main(int argc, char *argv[])
+	    {
+		int num = argc + 1;
+		switch (num) {
+		    case 1:
+			num = 0;
+			/* FALLTHROUGH */
+		    case 0:
+			num++;
+		}
+		return num;
+	    }
+	]])], [
+	    AC_MSG_RESULT([yes])
+	    CFLAGS="$_CFLAGS -Wimplicit-fallthrough"
+	], [
+	    AC_MSG_RESULT([no])
+	    CFLAGS="$_CFLAGS"
+	])
+
     fi
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"

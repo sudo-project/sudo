@@ -27682,6 +27682,42 @@ _ACEOF
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
 	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith"
+						_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS -Wimplicit-fallthrough -Werror"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler acceptd -Wimplicit-fallthrough" >&5
+$as_echo_n "checking whether C compiler acceptd -Wimplicit-fallthrough... " >&6; }
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+	    int main(int argc, char *argv[])
+	    {
+		int num = argc + 1;
+		switch (num) {
+		    case 1:
+			num = 0;
+			/* FALLTHROUGH */
+		    case 0:
+			num++;
+		}
+		return num;
+	    }
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	    CFLAGS="$_CFLAGS -Wimplicit-fallthrough"
+
+else
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	    CFLAGS="$_CFLAGS"
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
     fi
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
