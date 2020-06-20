@@ -15856,7 +15856,7 @@ $as_echo_n "checking for broken prot.h... " >&6; }
 int
 main ()
 {
-exit(0);
+return(0);
   ;
   return 0;
 }
@@ -18535,21 +18535,22 @@ else
 /* end confdefs.h.  */
 
 #include <stdio.h>
+#include <string.h>
 #include <pwd.h>
 #include <limits.h>
 #include <sys/types.h>
-main() {
+int main() {
   FILE *f;
   char b[1024];
   uid_t u = (uid_t) -1;
 
   if ((f = fopen("conftestdata", "w")) == NULL)
-    exit(1);
+    return(1);
 
   (void) sprintf(b, "%lu", (unsigned long) u);
-  (void) fprintf(f, "%d\n", strlen(b));
+  (void) fprintf(f, "%d\n", (int)strlen(b));
   (void) fclose(f);
-  exit(0);
+  return(0);
 }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -20265,7 +20266,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <fnmatch.h>
-main() { exit(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", FNM_CASEFOLD)); }
+int main() { return(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", FNM_CASEFOLD)); }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
   sudo_cv_func_fnmatch=yes
@@ -21003,6 +21004,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <stdio.h>
+#include <string.h>
 
 int main(void)
 {
@@ -21010,12 +21012,12 @@ int main(void)
     char bufd[5] = { 'x', 'x', 'x', '\0', '\0' };
     int i;
     i = snprintf (bufs, 2, "%s", "111");
-    if (strcmp (bufs, "1")) exit (1);
-    if (i != 3) exit (1);
+    if (strcmp (bufs, "1")) return (1);
+    if (i != 3) return (1);
     i = snprintf (bufd, 2, "%d", 111);
-    if (strcmp (bufd, "1")) exit (1);
-    if (i != 3) exit (1);
-    exit(0);
+    if (strcmp (bufd, "1")) return (1);
+    if (i != 3) return (1);
+    return(0);
 }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -21043,6 +21045,7 @@ else
 /* end confdefs.h.  */
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 int my_vsnprintf (char *buf, const char *tmpl, ...)
 {
@@ -21060,12 +21063,12 @@ int main(void)
     char bufd[5] = { 'x', 'x', 'x', '\0', '\0' };
     int i;
     i = my_vsnprintf (bufs, "%s", "111");
-    if (strcmp (bufs, "1")) exit (1);
-    if (i != 3) exit (1);
+    if (strcmp (bufs, "1")) return (1);
+    if (i != 3) return (1);
     i = my_vsnprintf (bufd, "%d", 111);
-    if (strcmp (bufd, "1")) exit (1);
-    if (i != 3) exit (1);
-    exit(0);
+    if (strcmp (bufd, "1")) return (1);
+    if (i != 3) return (1);
+    return(0);
 }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -22094,7 +22097,7 @@ else
 int
 main ()
 {
-extern char *__progname; (void)puts(__progname);
+extern char *__progname; if (__progname[0] == '\0') return 1;
   ;
   return 0;
 }
@@ -22142,7 +22145,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 int
 main ()
 {
-(void)puts(__func__);
+if (__func__[0] == '\0') return 1;
   ;
   return 0;
 }
@@ -22174,7 +22177,7 @@ else
 int
 main ()
 {
-(void)puts(__FUNCTION__);
+if(__FUNCTION__[0] == '\0') return 1;
   ;
   return 0;
 }
@@ -26683,7 +26686,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
-main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }
+int main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
   sudo_cv_working_pie=yes

@@ -179,7 +179,7 @@ AC_DEFUN([SUDO_FUNC_FNMATCH],
 AC_CACHE_VAL(sudo_cv_func_fnmatch,
 [rm -f conftestdata; > conftestdata
 AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <fnmatch.h>
-main() { exit(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", FNM_CASEFOLD)); }]])], [sudo_cv_func_fnmatch=yes], [sudo_cv_func_fnmatch=no],
+int main() { return(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", FNM_CASEFOLD)); }]])], [sudo_cv_func_fnmatch=yes], [sudo_cv_func_fnmatch=no],
   [sudo_cv_func_fnmatch=no])
 rm -f core core.* *.core])
 AC_MSG_RESULT($sudo_cv_func_fnmatch)
@@ -196,7 +196,7 @@ AC_DEFUN([SUDO_WORKING_PIE],
 AC_CACHE_VAL(sudo_cv_working_pie,
 [rm -f conftestdata; > conftestdata
 AC_RUN_IFELSE([AC_LANG_SOURCE([AC_INCLUDES_DEFAULT
-main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }])], [sudo_cv_working_pie=yes], [sudo_cv_working_pie=no],
+int main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }])], [sudo_cv_working_pie=yes], [sudo_cv_working_pie=no],
   [sudo_cv_working_pie=no])
 rm -f core core.* *.core])
 AC_MSG_RESULT($sudo_cv_working_pie)
@@ -353,21 +353,22 @@ AC_CACHE_VAL(sudo_cv_uid_t_len,
 [rm -f conftestdata
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
+#include <string.h>
 #include <pwd.h>
 #include <limits.h>
 #include <sys/types.h>
-main() {
+int main() {
   FILE *f;
   char b[1024];
   uid_t u = (uid_t) -1;
 
   if ((f = fopen("conftestdata", "w")) == NULL)
-    exit(1);
+    return(1);
 
   (void) sprintf(b, "%lu", (unsigned long) u);
-  (void) fprintf(f, "%d\n", strlen(b));
+  (void) fprintf(f, "%d\n", (int)strlen(b));
   (void) fclose(f);
-  exit(0);
+  return(0);
 }]])], [sudo_cv_uid_t_len=`cat conftestdata`], [sudo_cv_uid_t_len=10], [sudo_cv_uid_t_len=10])
 ])
 rm -f conftestdata
