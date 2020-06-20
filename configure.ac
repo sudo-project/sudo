@@ -1693,7 +1693,6 @@ fi
 dnl
 dnl C compiler checks
 dnl
-AC_SEARCH_LIBS([strerror], [cposix])
 AC_PROG_CPP
 AC_CHECK_TOOL(AR, ar, false)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
