@@ -2080,7 +2080,7 @@ case "$host" in
 #include <sys/types.h>
 #include <sys/security.h>
 #include <prot.h>
-		]], [[exit(0);]])], [AC_MSG_RESULT(no)], [AC_MSG_RESULT([yes, fixing locally])
+		]], [[return(0);]])], [AC_MSG_RESULT(no)], [AC_MSG_RESULT([yes, fixing locally])
 		sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		])
 		# ":DEFAULT" must be appended to _RLD_LIST
@@ -3225,7 +3225,7 @@ dnl
 AC_CHECK_FUNCS([getprogname], [AC_CHECK_FUNCS([setprogname])], [
     AC_MSG_CHECKING([for __progname])
     AC_CACHE_VAL(sudo_cv___progname, [
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; (void)puts(__progname);]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; if (__progname[0] == '\0') return 1;]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
     if test "$sudo_cv___progname" = "yes"; then
 	AC_DEFINE(HAVE___PROGNAME)
     fi
@@ -3237,14 +3237,14 @@ dnl Check for __func__ or __FUNCTION__
 dnl
 AC_MSG_CHECKING([for __func__])
 AC_CACHE_VAL(sudo_cv___func__, [
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[(void)puts(__func__);]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__func__[0] == '\0') return 1;]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])])
 AC_MSG_RESULT($sudo_cv___func__)
 if test "$sudo_cv___func__" = "yes"; then
     AC_DEFINE(HAVE___FUNC__)
 elif test -n "$GCC"; then
     AC_MSG_CHECKING([for __FUNCTION__])
     AC_CACHE_VAL(sudo_cv___FUNCTION__, [
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[(void)puts(__FUNCTION__);]])], [sudo_cv___FUNCTION__=yes], [sudo_cv___FUNCTION__=no])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if(__FUNCTION__[0] == '\0') return 1;]])], [sudo_cv___FUNCTION__=yes], [sudo_cv___FUNCTION__=no])])
     AC_MSG_RESULT($sudo_cv___FUNCTION__)
     if test "$sudo_cv___FUNCTION__" = "yes"; then
 	AC_DEFINE(HAVE___FUNC__)
