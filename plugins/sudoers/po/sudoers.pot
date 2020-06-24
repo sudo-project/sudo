@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1rc2\n"
+"Project-Id-Version: sudo 1.9.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-18 15:23-0600\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1476,7 +1476,8 @@ msgid "File descriptors >= %d will be closed before executing a command"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:278
-msgid "If set, users may override the value of `closefrom' with the -C option"
+msgid ""
+"If set, users may override the value of \"closefrom\" with the -C option"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:282
