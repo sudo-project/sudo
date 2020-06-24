@@ -529,11 +529,11 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
     if (ISSET(flags, MODE_LOGIN_SHELL)) {
 	if (ISSET(flags, MODE_SHELL)) {
-	    sudo_warnx(U_("you may not specify both the `-i' and `-s' options"));
+	    sudo_warnx(U_("you may not specify both the -i and -s options"));
 	    usage();
 	}
 	if (ISSET(flags, MODE_PRESERVE_ENV)) {
-	    sudo_warnx(U_("you may not specify both the `-i' and `-E' options"));
+	    sudo_warnx(U_("you may not specify both the -i and -E options"));
 	    usage();
 	}
 	SET(flags, MODE_SHELL);
@@ -543,7 +543,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     if (mode == MODE_EDIT &&
        (ISSET(flags, MODE_PRESERVE_ENV) || extra_env.env_len != 0)) {
 	if (ISSET(mode, MODE_PRESERVE_ENV))
-	    sudo_warnx(U_("the `-E' option is not valid in edit mode"));
+	    sudo_warnx(U_("the -E option is not valid in edit mode"));
 	if (extra_env.env_len != 0)
 	    sudo_warnx(U_("you may not specify environment variables in edit mode"));
 	usage();
@@ -554,11 +554,11 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	usage();
     }
     if (list_user != NULL && mode != MODE_LIST && mode != MODE_CHECK) {
-	sudo_warnx(U_("the `-U' option may only be used with the `-l' option"));
+	sudo_warnx(U_("the -U option may only be used with the -l option"));
 	usage();
     }
     if (ISSET(tgetpass_flags, TGP_STDIN) && ISSET(tgetpass_flags, TGP_ASKPASS)) {
-	sudo_warnx(U_("the `-A' and `-S' options may not be used together"));
+	sudo_warnx(U_("the -A and -S options may not be used together"));
 	usage();
     }
     if ((argc == 0 && mode == MODE_EDIT) ||
