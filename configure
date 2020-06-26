@@ -3202,6 +3202,7 @@ PROGS="sudo"
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
+: ${PKG_CONFIG='pkg-config'}
 DEVEL=
 LDAP="#"
 BAMAN=0
@@ -6491,113 +6492,8 @@ fi
 if test "${enable_openssl+set}" = set; then :
   enableval=$enable_openssl;  case $enableval in
     no)		;;
-    *)		LIBMD="-lcrypto"
-		LIBTLS="-lssl -lcrypto"
-		$as_echo "#define HAVE_OPENSSL 1" >>confdefs.h
-
-		if test "$enableval" != "yes"; then
-
-if ${CPPFLAGS+:} false; then :
-
-  case " $CPPFLAGS " in #(
-  *" -I${enableval}/include "*) :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${enableval}/include"; } >&5
-  (: CPPFLAGS already contains -I${enableval}/include) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } ;; #(
-  *) :
-
-     as_fn_append CPPFLAGS " -I${enableval}/include"
-     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
-  (: CPPFLAGS="$CPPFLAGS") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-     ;;
-esac
-
-else
-
-  CPPFLAGS=-I${enableval}/include
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
-  (: CPPFLAGS="$CPPFLAGS") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-
-fi
-
-
-
-if ${LDFLAGS+:} false; then :
-
-  case " $LDFLAGS " in #(
-  *" -L${enableval}/lib "*) :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -L\${enableval}/lib"; } >&5
-  (: LDFLAGS already contains -L${enableval}/lib) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } ;; #(
-  *) :
-
-     as_fn_append LDFLAGS " -L${enableval}/lib"
-     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
-  (: LDFLAGS="$LDFLAGS") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-     ;;
-esac
-
-else
-
-  LDFLAGS=-L${enableval}/lib
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
-  (: LDFLAGS="$LDFLAGS") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-
-fi
-
-    if test X"$enable_rpath" = X"yes"; then
-
-if ${LDFLAGS_R+:} false; then :
-
-  case " $LDFLAGS_R " in #(
-  *" -R${enableval}/lib "*) :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R already contains -R\${enableval}/lib"; } >&5
-  (: LDFLAGS_R already contains -R${enableval}/lib) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } ;; #(
-  *) :
-
-     as_fn_append LDFLAGS_R " -R${enableval}/lib"
-     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
-  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-     ;;
-esac
-
-else
-
-  LDFLAGS_R=-R${enableval}/lib
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
-  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-
-fi
-
-    fi
-
-		fi
-		;;
+    *)		$as_echo "#define HAVE_OPENSSL 1" >>confdefs.h
+;;
  esac
 
 fi
@@ -22062,6 +21958,275 @@ _ACEOF
 fi
 
 if test "${enable_openssl-no}" != no; then
+    # Use pkg-config to find the openssl cflags and libs if possible.
+    if test "$enable_openssl" != "yes"; then
+	PKG_CONFIG_LIBDIR="${enable_openssl}/lib/pkgconfig:${enable_openssl}/lib64/pkgconfig:${enable_openssl}/share/pkgconfig"
+	export PKG_CONFIG_LIBDIR
+    fi
+    if $PKG_CONFIG --exists openssl >/dev/null 2>&1; then
+	# Check whether --static is needed
+	O_LDFLAGS="$LDFLAGS"
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
+$as_echo_n "checking for SSL_library_init in -lssl... " >&6; }
+if ${ac_cv_lib_ssl_SSL_library_init_lcrypto+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl -lcrypto $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SSL_library_init ();
+int
+main ()
+{
+return SSL_library_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ssl_SSL_library_init_lcrypto=yes
+else
+  ac_cv_lib_ssl_SSL_library_init_lcrypto=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_library_init_lcrypto" >&5
+$as_echo "$ac_cv_lib_ssl_SSL_library_init_lcrypto" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_library_init_lcrypto" = xyes; then :
+  STATIC=""
+else
+  STATIC="--static"
+fi
+
+	LDFLAGS="$O_LDFLAGS"
+
+	# Use pkg-config to determine OpenSSL libs and cflags
+	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
+	LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
+
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" $f "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains \$f"; } >&5
+  (: CPPFLAGS already contains $f) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " $f"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=$f
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	done
+    else
+	# No pkg-config file present, try to do it manually
+	if test "$enable_openssl" != "yes"; then
+
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${enable_openssl}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${enable_openssl}/include"; } >&5
+  (: CPPFLAGS already contains -I${enable_openssl}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${enable_openssl}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${enable_openssl}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+
+if ${LIBMD+:} false; then :
+
+  case " $LIBMD " in #(
+  *" -L${enable_openssl}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBMD already contains -L\${enable_openssl}/lib"; } >&5
+  (: LIBMD already contains -L${enable_openssl}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBMD " -L${enable_openssl}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBMD=\"\$LIBMD\""; } >&5
+  (: LIBMD="$LIBMD") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LIBMD=-L${enable_openssl}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBMD=\"\$LIBMD\""; } >&5
+  (: LIBMD="$LIBMD") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${LIBMD_R+:} false; then :
+
+  case " $LIBMD_R " in #(
+  *" -R${enable_openssl}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBMD_R already contains -R\${enable_openssl}/lib"; } >&5
+  (: LIBMD_R already contains -R${enable_openssl}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBMD_R " -R${enable_openssl}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBMD_R=\"\$LIBMD_R\""; } >&5
+  (: LIBMD_R="$LIBMD_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LIBMD_R=-R${enable_openssl}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBMD_R=\"\$LIBMD_R\""; } >&5
+  (: LIBMD_R="$LIBMD_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
+
+
+
+if ${LIBTLS+:} false; then :
+
+  case " $LIBTLS " in #(
+  *" -L${enable_openssl}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBTLS already contains -L\${enable_openssl}/lib"; } >&5
+  (: LIBTLS already contains -L${enable_openssl}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBTLS " -L${enable_openssl}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBTLS=\"\$LIBTLS\""; } >&5
+  (: LIBTLS="$LIBTLS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LIBTLS=-L${enable_openssl}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBTLS=\"\$LIBTLS\""; } >&5
+  (: LIBTLS="$LIBTLS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${LIBTLS_R+:} false; then :
+
+  case " $LIBTLS_R " in #(
+  *" -R${enable_openssl}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBTLS_R already contains -R\${enable_openssl}/lib"; } >&5
+  (: LIBTLS_R already contains -R${enable_openssl}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBTLS_R " -R${enable_openssl}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBTLS_R=\"\$LIBTLS_R\""; } >&5
+  (: LIBTLS_R="$LIBTLS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LIBTLS_R=-R${enable_openssl}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBTLS_R=\"\$LIBTLS_R\""; } >&5
+  (: LIBTLS_R="$LIBTLS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
+
+	fi
+	LIBMD="${LIBMD} -lcrypto"
+	LIBTLS="${LIBTLS} -lcrypto -lssl"
+    fi
+    if test "$enable_openssl" != "yes"; then
+	unset PKG_CONFIG_LIBDIR
+    fi
+
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
     for ac_func in X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method

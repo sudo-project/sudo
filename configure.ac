@@ -234,6 +234,7 @@ PROGS="sudo"
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
+: ${PKG_CONFIG='pkg-config'}
 DEVEL=
 LDAP="#"
 BAMAN=0
@@ -1505,14 +1506,7 @@ AC_ARG_ENABLE(openssl,
 [AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
 [ case $enableval in
     no)		;;
-    *)		LIBMD="-lcrypto"
-		LIBTLS="-lssl -lcrypto"
-		AC_DEFINE(HAVE_OPENSSL)
-		if test "$enableval" != "yes"; then
-		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
-		    SUDO_APPEND_LIBPATH(LDFLAGS, [${enableval}/lib])
-		fi
-		;;
+    *)		AC_DEFINE(HAVE_OPENSSL);;
  esac
 ])
 
@@ -3025,6 +3019,38 @@ dnl
 dnl Check for functions only present in OpenSSL 1.1 and above
 dnl
 if test "${enable_openssl-no}" != no; then
+    # Use pkg-config to find the openssl cflags and libs if possible.
+    if test "$enable_openssl" != "yes"; then
+	PKG_CONFIG_LIBDIR="${enable_openssl}/lib/pkgconfig:${enable_openssl}/lib64/pkgconfig:${enable_openssl}/share/pkgconfig"
+	export PKG_CONFIG_LIBDIR
+    fi
+    if $PKG_CONFIG --exists openssl >/dev/null 2>&1; then
+	# Check whether --static is needed
+	O_LDFLAGS="$LDFLAGS"
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
+	AC_CHECK_LIB([ssl], [SSL_library_init], [STATIC=""], [STATIC="--static"], [-lcrypto])
+	LDFLAGS="$O_LDFLAGS"
+
+	# Use pkg-config to determine OpenSSL libs and cflags
+	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
+	LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
+	    AX_APPEND_FLAG([$f], [CPPFLAGS])
+	done
+    else
+	# No pkg-config file present, try to do it manually
+	if test "$enable_openssl" != "yes"; then
+	    AX_APPEND_FLAG([-I${enable_openssl}/include], [CPPFLAGS])
+	    SUDO_APPEND_LIBPATH(LIBMD, [${enable_openssl}/lib])
+	    SUDO_APPEND_LIBPATH(LIBTLS, [${enable_openssl}/lib])
+	fi
+	LIBMD="${LIBMD} -lcrypto"
+	LIBTLS="${LIBTLS} -lcrypto -lssl"
+    fi
+    if test "$enable_openssl" != "yes"; then
+	unset PKG_CONFIG_LIBDIR
+    fi
+
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
     AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method])
