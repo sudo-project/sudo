@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd June 15, 2020
+.Dd July 5, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4769,6 +4769,71 @@ was run from, and the number of lines and columns of the terminal.
 The second and third lines contain the working directory the command
 was run from and the path name of the command itself (with arguments
 if present).
+.It Pa log.json
+A JSON-formatted file containing information about the command.
+This is similar to the
+.Pa log
+file but contains additional information and is easily extensible.
+The
+.Pa log.json
+file will be used by
+.Xr sudoreplay @mansectsu@
+in preference to the
+.Pa log
+file if it exists.
+The file may contain the following elements:
+.Bl -tag -width 8n
+.It timestamp
+A JSON object containing time the command was run.
+It consists of two values,
+.Em seconds
+and
+.Em nanoseconds .
+.It columns
+The number of columns of the terminal the command ran on, or zero
+if no terminal was present.
+.It command
+The fully-qualified path of the command that was run.
+.It lines
+The number of lines of the terminal the command ran on, or zero
+if no terminal was present.
+.It runargv
+A JSON array representing the command's argument vector as passed to the
+.Xr execve 2
+system call.
+.It runenv
+A JSON array representing the command's environment as passed to the
+.Xr execve 2
+system call.
+.It rungid
+The group ID the command ran as.
+This element is only present when the user specifies a group on the
+command line.
+.It rungroup
+The name of the group the command ran as.
+This element is only present when the user specifies a group on the
+command line.
+.It runuid
+The user ID the command ran as.
+.It runuser
+The name of the user the command ran as.
+.It submitcwd
+The current working directory at the time
+.Nm sudo
+was run.
+.It submithost
+The name of the host the command was run on.
+.It submituser
+The name of the user who ran the command via
+.Nm sudo .
+.It ttyname
+The path name of the terminal the user invoked
+.Nm sudo
+from.
+If the command was run in a pseudo-terminal,
+.Em ttyname
+will be different from the terminal the command actually ran in.
+.El
 .It Pa timing
 Timing information used to replay the session.
 Each line consists of the I/O log entry type and amount of time
