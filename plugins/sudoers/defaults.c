@@ -186,6 +186,9 @@ find_default(const char *name, const char *file, int lineno, bool quiet)
 	    sudo_warnx(U_("%s: unknown defaults entry \"%s\""),
 		file, name);
 	}
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: unknown defaults entry \"%s\"", __func__, name);
     }
     debug_return_int(-1);
 }
@@ -360,6 +363,9 @@ set_default(const char *var, const char *val, int op, const char *file,
 {
     int idx;
     debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"%s: setting Defaults %s -> %s", __func__, var, val ? val : "false");
 
     idx = find_default(var, file, lineno, quiet);
     if (idx != -1) {
