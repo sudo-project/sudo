@@ -1019,7 +1019,7 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
     }
 
     if (info->runas_group!= NULL) {
-	if (info->runas_uid != (uid_t)-1) {
+	if (info->runas_gid != (gid_t)-1) {
 	    json_value.type = JSON_ID;
 	    json_value.u.id = info->runas_gid;
 	    if (!sudo_json_add_value(&json, "rungid", &json_value))
