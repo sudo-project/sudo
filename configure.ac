@@ -19,7 +19,7 @@ dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
 AC_INIT([sudo], [1.9.1], [https://bugzilla.sudo.ws/], [sudo])
-AC_CONFIG_HEADER([config.h pathnames.h])
+AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
 dnl Note: this must come after AC_INIT
@@ -3373,7 +3373,7 @@ case "$enable_zlib" in
 	CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
 	ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libsudo_z.la'
 	ZLIB_SRC=lib/zlib
-	AC_CONFIG_HEADER([lib/zlib/zconf.h])
+	AC_CONFIG_HEADERS([lib/zlib/zconf.h])
 	AC_CONFIG_FILES([lib/zlib/Makefile])
 	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"; then
 	    if test "$enable_zlib" = "shared"; then
@@ -3972,7 +3972,7 @@ if test ${with_passwd-'no'} != "no"; then
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
 	found=no
-	AC_CHECK_FUNCS($shadow_funcs, [found=yes])
+	AC_CHECK_FUNCS([$shadow_funcs], [found=yes])
 	if test "$found" = "yes"; then
 	    case "$shadow_funcs" in
 		*getprpwnam*) SECUREWARE=1;;
@@ -4124,14 +4124,25 @@ if test ${with_ldap-'no'} != "no"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
 	    test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <gssapi/gssapi.h>]])], [found="gssapi/gssapi.h"; break], [AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <gssapi.h>]])], [found="gssapi.h"; break])])
+	    # Use AC_PREPROC_IFELSE to check existence to avoid caching
+	    # since we test with multiple values of CPPFLAGS
+	    AC_PREPROC_IFELSE([
+		AC_LANG_PROGRAM([[#include <gssapi/gssapi.h>]])
+	    ], [
+		AC_CHECK_HEADERS([gssapi/gssapi.h])
+		break
+	    ], [
+		AC_PREPROC_IFELSE([
+		    AC_LANG_PROGRAM([[#include <gssapi.h>]])
+		], [
+		    AC_CHECK_HEADERS([gssapi.h])
+		    break
+		])
+	    ])
 	done
-	if test X"$found" != X"no"; then
-	    AC_CHECK_HEADERS([$found])
-	    if test X"$found" = X"gssapi/gssapi.h"; then
-		AC_CHECK_HEADERS([gssapi/gssapi_krb5.h])
-	    fi
-	else
+	if test X"$ac_cv_header_gssapi_gssapi_h" != X"no"; then
+	    AC_CHECK_HEADERS([gssapi/gssapi_krb5.h])
+	elif test X"$ac_cv_header_gssapi_h" = X"no"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	    AC_MSG_WARN([Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS])
 	fi

@@ -26252,9 +26252,12 @@ fi
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
 	    test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
+	    # Use AC_PREPROC_IFELSE to check existence to avoid caching
+	    # since we test with multiple values of CPPFLAGS
 	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <gssapi/gssapi.h>
+
+		#include <gssapi/gssapi.h>
 int
 main ()
 {
@@ -26262,44 +26265,63 @@ main ()
   ;
   return 0;
 }
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
-  found="gssapi/gssapi.h"; break
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <gssapi.h>
-int
-main ()
-{
 
-  ;
-  return 0;
-}
 _ACEOF
 if ac_fn_c_try_cpp "$LINENO"; then :
-  found="gssapi.h"; break
-fi
-rm -f conftest.err conftest.i conftest.$ac_ext
-fi
-rm -f conftest.err conftest.i conftest.$ac_ext
-	done
-	if test X"$found" != X"no"; then
-	    for ac_header in $found
+
+		for ac_header in gssapi/gssapi.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "gssapi/gssapi.h" "ac_cv_header_gssapi_gssapi_h" "$ac_includes_default"
+if test "x$ac_cv_header_gssapi_gssapi_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_GSSAPI_GSSAPI_H 1
 _ACEOF
 
 fi
 
 done
 
-	    if test X"$found" = X"gssapi/gssapi.h"; then
-		for ac_header in gssapi/gssapi_krb5.h
+		break
+
+else
+
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+		    #include <gssapi.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+
+		    for ac_header in gssapi.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "gssapi.h" "ac_cv_header_gssapi_h" "$ac_includes_default"
+if test "x$ac_cv_header_gssapi_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GSSAPI_H 1
+_ACEOF
+
+fi
+
+done
+
+		    break
+
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+	done
+	if test X"$ac_cv_header_gssapi_gssapi_h" != X"no"; then
+	    for ac_header in gssapi/gssapi_krb5.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "gssapi/gssapi_krb5.h" "ac_cv_header_gssapi_gssapi_krb5_h" "$ac_includes_default"
 if test "x$ac_cv_header_gssapi_gssapi_krb5_h" = xyes; then :
@@ -26311,8 +26333,7 @@ fi
 
 done
 
-	    fi
-	else
+	elif test X"$ac_cv_header_gssapi_h" = X"no"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&5
 $as_echo "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&2;}
