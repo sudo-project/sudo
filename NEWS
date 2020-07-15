@@ -1,3 +1,21 @@
+What's new in Sudo 1.9.2
+
+ * Fixed package builds on RedHat Enterprise Linux 8.
+
+ * The configure script now uses pkg-config to find the openssl
+   cflags and libs where possible.
+
+ * The contents of the log.json I/O log file is now documented in
+   the sudoers manual.
+
+ * The sudoers plugin now properly exports the sudoers_audit symbol
+   on systems where the compiler lacks symbol visibility controls.
+   This caused a regression in 1.9.1 where a successful sudo command
+   was not logged due to the missing audit plugin.  Bug #931.
+
+ * Fixed a regression introduced in 1.9.1 that can result in crash
+   when there is a syntax error in the sudoers file.  Bug #934.
+
 What's new in Sudo 1.9.1
 
  * Fixed an AIX-specific problem when I/O logging was enabled.
