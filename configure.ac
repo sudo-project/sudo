@@ -3003,7 +3003,12 @@ if test "${enable_openssl-no}" != no; then
 
 	# Use pkg-config to determine OpenSSL libs and cflags
 	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
-	LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
+	    LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	else
+	    # No separate pkg config for libcrypto
+	    LIBMD="$LIBTLS"
+	fi
 	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
 	    AX_APPEND_FLAG([$f], [CPPFLAGS])
 	done
