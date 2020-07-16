@@ -1503,26 +1503,14 @@ AC_ARG_ENABLE(werror,
 ])
 
 AC_ARG_ENABLE(openssl,
-[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
-[ case $enableval in
-    no)		;;
-    *)		AC_DEFINE(HAVE_OPENSSL);;
- esac
-])
+[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])])
 
 AC_ARG_ENABLE(gcrypt,
-[AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's message digest functions instead of sudo's])],
-[ case $enableval in
-    no)		;;
-    *)		LIBMD="-lgcrypt"
-		DIGEST=digest_gcrypt.lo
-		AC_DEFINE(HAVE_GCRYPT)
-		if test "$enableval" != "yes"; then
-		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
-		    SUDO_APPEND_LIBPATH(LDFLAGS, [${enableval}/lib])
-		fi
-		;;
- esac
+[AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
+    if test "${enable_openssl-no}" != no; then
+	AC_MSG_WARN([Ignoring --enable-gcrypt when OpenSSL is enabled.])
+	enable_gcrypt=no
+    fi
 ])
 
 AC_ARG_ENABLE(hardening,
@@ -2962,28 +2950,6 @@ AC_CHECK_MEMBER([struct stat.st_mtim],
 	[AC_CHECK_MEMBER([struct stat.st_nmtime], AC_DEFINE(HAVE_ST_NMTIME))])
     ]
 )
-# Look for sha2 functions if not using openssl
-if test "$DIGEST" = "digest.lo"; then
-    FOUND_SHA2=no
-    AC_CHECK_HEADER([sha2.h], [
-	FOUND_SHA2=yes
-	AC_CHECK_FUNCS([SHA224Update], [SUDO_FUNC_SHA2_VOID_PTR], [
-	    # On some systems, SHA224Update is in libmd
-	    AC_CHECK_LIB(md, SHA224Update, [
-		AC_DEFINE(HAVE_SHA224UPDATE)
-		SUDO_FUNC_SHA2_VOID_PTR
-		LIBMD="-lmd"
-	    ], [
-		# Does not have SHA224Update
-		FOUND_SHA2=no
-	    ])
-	])
-    ])
-    if test X"$FOUND_SHA2" = X"no"; then
-	AC_LIBOBJ(sha2)
-	SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
-    fi
-fi
 AC_CHECK_FUNCS([vsyslog], [], [
     AC_LIBOBJ(vsyslog)
     SUDO_APPEND_COMPAT_EXP(sudo_vsyslog)
@@ -3019,6 +2985,10 @@ dnl
 dnl Check for functions only present in OpenSSL 1.1 and above
 dnl
 if test "${enable_openssl-no}" != no; then
+    # Use OpenSSL's sha2 functions
+    AC_DEFINE(HAVE_OPENSSL)
+    DIGEST=digest_openssl.lo
+
     # Use pkg-config to find the openssl cflags and libs if possible.
     if test "$enable_openssl" != "yes"; then
 	PKG_CONFIG_LIBDIR="${enable_openssl}/lib/pkgconfig:${enable_openssl}/lib64/pkgconfig:${enable_openssl}/share/pkgconfig"
@@ -3060,6 +3030,39 @@ if test "${enable_openssl-no}" != no; then
 	#include <openssl/ssl.h>
     ])
     LIBS="$OLIBS"
+elif test "${enable_gcrypt-no}" != no; then
+    # Use gcrypt's sha2 functions
+    AC_DEFINE(HAVE_GCRYPT)
+    DIGEST=digest_gcrypt.lo
+    LIBMD="-lgcrypt"
+    if test "$enable_gcrypt" != "yes"; then
+	AX_APPEND_FLAG([-I${enable_gcrypt}/include], [CPPFLAGS])
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${enable_gcrypt}/lib])
+    fi
+fi
+dnl
+dnl Check for sha2 functions if not using openssl or gcrypt
+dnl
+if test "$DIGEST" = "digest.lo"; then
+    FOUND_SHA2=no
+    AC_CHECK_HEADER([sha2.h], [
+	FOUND_SHA2=yes
+	AC_CHECK_FUNCS([SHA224Update], [SUDO_FUNC_SHA2_VOID_PTR], [
+	    # On some systems, SHA224Update is in libmd
+	    AC_CHECK_LIB(md, SHA224Update, [
+		AC_DEFINE(HAVE_SHA224UPDATE)
+		SUDO_FUNC_SHA2_VOID_PTR
+		LIBMD="-lmd"
+	    ], [
+		# Does not have SHA224Update
+		FOUND_SHA2=no
+	    ])
+	])
+    ])
+    if test X"$FOUND_SHA2" = X"no"; then
+	AC_LIBOBJ(sha2)
+	SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
+    fi
 fi
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
