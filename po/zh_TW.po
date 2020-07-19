@@ -5,10 +5,10 @@
 # Yi-Jyun Pan <pan93412@gmail.com>, 2019, 2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1b1\n"
+"Project-Id-Version: sudo 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-07 20:36+0800\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-16 19:01+0800\n"
 "Last-Translator: Yi-Jyun Pan <pan93412@gmail.com>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@lists.linux.org.tw>\n"
 "Language: zh_TW\n"
@@ -61,8 +61,8 @@ msgstr "無法還原登錄表"
 #: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
 #: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
 #: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
 #, c-format
 msgid "%s: %s"
 msgstr "%s：%s"
@@ -92,8 +92,8 @@ msgstr "%s：%s"
 #: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
 #: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
 #: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
 msgid "unable to allocate memory"
 msgstr "無法分配記憶體"
 
@@ -270,7 +270,7 @@ msgid "unable to receive message from parent"
 msgstr "無法自上層接收訊息"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:308
 msgid "unable to fork"
 msgstr "無法複製 (fork) 出新行程"
 
@@ -403,15 +403,15 @@ msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "傳入 -C 的參數數字應該要等於或大於 3"
 
 #: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
+msgid "you may not specify both the -i and -s options"
 msgstr "不能同時指定 -i 跟 -s 指令列選項"
 
 #: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
+msgid "you may not specify both the -i and -E options"
 msgstr "不能同時指定 -i 跟 -E 指令列選項"
 
 #: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
+msgid "the -E option is not valid in edit mode"
 msgstr "-E 指令列選項在編輯模式中無效"
 
 #: src/parse_args.c:548
@@ -419,11 +419,11 @@ msgid "you may not specify environment variables in edit mode"
 msgstr "不能在編輯模式中指定環境變數"
 
 #: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
+msgid "the -U option may only be used with the -l option"
 msgstr "-U 指令列選項只能跟 -l 選項一起使用"
 
 #: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
+msgid "the -A and -S options may not be used together"
 msgstr "不能同時使用 -A 跟 -S 指令列選項"
 
 #: src/parse_args.c:654
@@ -719,27 +719,27 @@ msgstr "觸發的作業已經完成 (final)"
 msgid "could not join project \"%s\""
 msgstr "無法加入「%s」專案"
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "專案「%s」不存在接受預設繫結的資源集區"
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "專案「%s」不存在指定的資源集區"
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "無法將專案「%s」繫結到預設資源集區"
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "對專案「%s」進行專案設定程序 (setproject) 失敗"
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "警告：對專案「%s」執行資源控制指派失敗"
@@ -816,8 +816,8 @@ msgstr "無法初始化 Sudo 政策外掛程式"
 
 #: src/sudo.c:1158
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
-msgstr "%s 政策外掛程式缺少 check_policy 方法"
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "%s 政策外掛程式缺少 \"check_policy\" 方法"
 
 #: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
 msgid "command rejected by policy"
@@ -893,51 +893,51 @@ msgstr "%s：不允許在可寫目錄編輯檔案"
 msgid "%s left unmodified"
 msgstr "%s 保持未變更狀態"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s 未變更"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "編輯階段的內容被留在 %s"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh：內部錯誤：只有奇數個路徑"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh：無法建立暫存檔案"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
 msgid "sesh: killed by a signal"
 msgstr "sesh：被信號中止"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh：未知錯誤代碼 %d"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:894
 msgid "unable to copy temporary files back to their original location"
 msgstr "無法將暫存檔複製回暫存檔的原始位置"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:897
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "無法將部份的暫存檔複製回其原始位置"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:941
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "無法將使用者 ID 變更為 root (%u)"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:958
 msgid "plugin error: missing file list for sudoedit"
 msgstr "外掛程式錯誤：缺少可用於 sudoedit 的檔案清單"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
 msgid "unable to read the clock"
 msgstr "無法讀取時間"
 
@@ -955,7 +955,7 @@ msgstr "無法讀取密碼"
 
 #: src/tgetpass.c:140
 msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
-msgstr "需要終端器才能讀取密碼；可以使用 -S 選項，從標準輸入讀取，或是設定 askpass 協助工具。"
+msgstr "需要終端器才能讀取密碼；可以使用 -S 選項，從標準輸入讀取，或是設定 askpass 協助工具"
 
 #: src/tgetpass.c:150
 msgid "no askpass program specified, try setting SUDO_ASKPASS"

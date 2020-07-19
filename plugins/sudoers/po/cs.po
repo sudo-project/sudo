@@ -9,10 +9,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.1b1\n"
+"Project-Id-Version: sudoers 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-17 20:21+02:00\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-18 13:18+02:00\n"
 "Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -177,8 +177,8 @@ msgstr "neplatná hodnota časového limitu"
 #: lib/iolog/iolog_util.c:125 lib/iolog/iolog_util.c:133
 #: lib/iolog/iolog_util.c:137 lib/iolog/iolog_util.c:196
 #: logsrvd/eventlog.c:223 logsrvd/logsrvd.c:1208 logsrvd/logsrvd.c:1221
-#: logsrvd/logsrvd.c:1266 logsrvd/sendlog.c:443 logsrvd/sendlog.c:1301
-#: logsrvd/sendlog.c:1308 logsrvd/sendlog.c:1726 plugins/sudoers/audit.c:108
+#: logsrvd/logsrvd.c:1266 logsrvd/sendlog.c:443 logsrvd/sendlog.c:1302
+#: logsrvd/sendlog.c:1309 logsrvd/sendlog.c:1727 plugins/sudoers/audit.c:108
 #: plugins/sudoers/audit.c:212 plugins/sudoers/auth/pam.c:482
 #: plugins/sudoers/auth/pam.c:669 plugins/sudoers/auth/rfc1938.c:111
 #: plugins/sudoers/cvtsudoers.c:120 plugins/sudoers/cvtsudoers.c:160
@@ -557,8 +557,8 @@ msgid "Unable to attach user data to the ssl object: %s"
 msgstr "K objektu SSL nelze připojit uživatelská data: %s"
 
 #: logsrvd/logsrvd.c:1527 logsrvd/logsrvd.c:1649 logsrvd/logsrvd.c:1749
-#: logsrvd/sendlog.c:1105 logsrvd/sendlog.c:1461 logsrvd/sendlog.c:1476
-#: logsrvd/sendlog.c:1534 plugins/sudoers/iolog.c:921
+#: logsrvd/sendlog.c:1106 logsrvd/sendlog.c:1462 logsrvd/sendlog.c:1477
+#: logsrvd/sendlog.c:1535 plugins/sudoers/iolog.c:921
 #: plugins/sudoers/iolog.c:1054 plugins/sudoers/iolog.c:1152
 #: plugins/sudoers/iolog_client.c:109 plugins/sudoers/iolog_client.c:325
 #: plugins/sudoers/iolog_client.c:341 plugins/sudoers/iolog_client.c:387
@@ -607,7 +607,7 @@ msgstr ""
 "  -R, --random-drop        procentuální pravděpodobnost, že se spojení ztratí\n"
 "  -V, --version            zobrazí údaje o verzi a skončí\n"
 
-#: logsrvd/logsrvd.c:1898 logsrvd/sendlog.c:1699
+#: logsrvd/logsrvd.c:1898 logsrvd/sendlog.c:1700
 msgid "Protobuf-C version 1.3 or higher required"
 msgstr "Je vyžadována knihovna Protobuf-C verze 1.3 nebo vyšší"
 
@@ -616,7 +616,7 @@ msgstr "Je vyžadována knihovna Protobuf-C verze 1.3 nebo vyšší"
 msgid "invalid random drop value: %s"
 msgstr "neplatná hodnota pravděpodobnosti ztráty: %s"
 
-#: logsrvd/logsrvd.c:1920 logsrvd/sendlog.c:1749
+#: logsrvd/logsrvd.c:1920 logsrvd/sendlog.c:1750
 #: plugins/sudoers/cvtsudoers.c:229 plugins/sudoers/sudoreplay.c:300
 #: plugins/sudoers/visudo.c:178
 #, c-format
@@ -735,112 +735,112 @@ msgstr "%s/%s nelze přečíst: %s"
 msgid "client message too large: %zu"
 msgstr "zpráva od klienta je příliš velká: %zu"
 
-#: logsrvd/sendlog.c:790
+#: logsrvd/sendlog.c:791
 #, c-format
 msgid "%s: write buffer already in use"
 msgstr "%s: vyrovnávací paměť pro zápis se již používá"
 
-#: logsrvd/sendlog.c:842 plugins/sudoers/iolog.c:845
+#: logsrvd/sendlog.c:843 plugins/sudoers/iolog.c:845
 #: plugins/sudoers/iolog.c:914
 #, c-format
 msgid "unexpected I/O event %d"
 msgstr "nečekaná I/O událost %d"
 
-#: logsrvd/sendlog.c:888 logsrvd/sendlog.c:905 logsrvd/sendlog.c:939
+#: logsrvd/sendlog.c:889 logsrvd/sendlog.c:906 logsrvd/sendlog.c:940
 #: plugins/sudoers/iolog_client.c:1155 plugins/sudoers/iolog_client.c:1225
 #: plugins/sudoers/iolog_client.c:1273
 #, c-format
 msgid "%s: unexpected state %d"
 msgstr "%s: nečekaný stav %d"
 
-#: logsrvd/sendlog.c:911 plugins/sudoers/iolog_client.c:1231
+#: logsrvd/sendlog.c:912 plugins/sudoers/iolog_client.c:1231
 msgid "invalid ServerHello"
 msgstr "neplatná správa ServerHello"
 
-#: logsrvd/sendlog.c:975 plugins/sudoers/iolog_client.c:1317
+#: logsrvd/sendlog.c:976 plugins/sudoers/iolog_client.c:1317
 #, c-format
 msgid "error message received from server: %s"
 msgstr "od serveru byla přijata chybová zpráva: %s"
 
-#: logsrvd/sendlog.c:988 plugins/sudoers/iolog_client.c:1330
+#: logsrvd/sendlog.c:989 plugins/sudoers/iolog_client.c:1330
 #, c-format
 msgid "abort message received from server: %s"
 msgstr "od serveru byla přijata zpráva o zrušení: %s"
 
-#: logsrvd/sendlog.c:1007 plugins/sudoers/iolog_client.c:1349
+#: logsrvd/sendlog.c:1008 plugins/sudoers/iolog_client.c:1349
 msgid "unable to unpack ServerMessage"
 msgstr "zprávu ServerMessage nelze rozbalit"
 
-#: logsrvd/sendlog.c:1047 plugins/sudoers/iolog_client.c:1382
+#: logsrvd/sendlog.c:1048 plugins/sudoers/iolog_client.c:1382
 #, c-format
 msgid "%s: unexpected type_case value %d"
 msgstr "%s: nečekaná hodnota type_case %d"
 
-#: logsrvd/sendlog.c:1076
+#: logsrvd/sendlog.c:1077
 msgid "timeout reading from server"
 msgstr "při čtení ze serveru vypršel časový limit"
 
-#: logsrvd/sendlog.c:1154
+#: logsrvd/sendlog.c:1155
 msgid "premature EOF"
 msgstr "předčasný konec souboru"
 
-#: logsrvd/sendlog.c:1167 plugins/sudoers/iolog_client.c:1536
+#: logsrvd/sendlog.c:1168 plugins/sudoers/iolog_client.c:1536
 #, c-format
 msgid "server message too large: %u"
 msgstr "správa od serveru je příliš velká: %u"
 
-#: logsrvd/sendlog.c:1218
+#: logsrvd/sendlog.c:1219
 msgid "timeout writing to server"
 msgstr "při zapisování do serveru vypršel časový limit"
 
-#: logsrvd/sendlog.c:1437 plugins/sudoers/iolog_client.c:297
+#: logsrvd/sendlog.c:1438 plugins/sudoers/iolog_client.c:297
 msgid "TLS handshake timeout occurred"
 msgstr "Při navazování spojení TLS vypršel časový limit"
 
-#: logsrvd/sendlog.c:1456 logsrvd/sendlog.c:1471
+#: logsrvd/sendlog.c:1457 logsrvd/sendlog.c:1472
 #: plugins/sudoers/iolog_client.c:319 plugins/sudoers/iolog_client.c:335
 msgid "unable to set event"
 msgstr "událost nelze nastavit"
 
-#: logsrvd/sendlog.c:1481 logsrvd/sendlog.c:1485
+#: logsrvd/sendlog.c:1482 logsrvd/sendlog.c:1486
 #, c-format
 msgid "TLS connection failed: %s"
 msgstr "spojení TLS selhalo: %s"
 
-#: logsrvd/sendlog.c:1518
+#: logsrvd/sendlog.c:1519
 #, c-format
 msgid "Unable to initialize ssl context: %s"
 msgstr "Kontext SSL nelze inicializovat: %s"
 
-#: logsrvd/sendlog.c:1523 plugins/sudoers/iolog_client.c:259
+#: logsrvd/sendlog.c:1524 plugins/sudoers/iolog_client.c:259
 #, c-format
 msgid "Unable to allocate ssl object: %s"
 msgstr "Objekt SSL nelze alokovat: %s"
 
-#: logsrvd/sendlog.c:1528
+#: logsrvd/sendlog.c:1529
 #, c-format
 msgid "Unable to attach socket to the ssl object: %s"
 msgstr "K objektu SSL nelze připojit socket: %s"
 
-#: logsrvd/sendlog.c:1772
+#: logsrvd/sendlog.c:1773
 msgid "both restart point and iolog ID must be specified"
 msgstr "musí být zadán jak bod navázání, tak i identifikátor iolog"
 
-#: logsrvd/sendlog.c:1776
+#: logsrvd/sendlog.c:1777
 msgid "a restart point may not be set when no I/O is sent"
 msgstr "bod navázání nelze nastavit, když žádný vstup/výstup nebyl odeslán"
 
-#: logsrvd/sendlog.c:1851
+#: logsrvd/sendlog.c:1852
 #, c-format
 msgid "exited prematurely with state %d"
 msgstr "ukončeno předčasně ve stavu %d"
 
-#: logsrvd/sendlog.c:1852
+#: logsrvd/sendlog.c:1853
 #, c-format
 msgid "elapsed time sent to server [%lld, %ld]"
 msgstr "uplynulý čas zaslaný serveru [%lld, %ld]"
 
-#: logsrvd/sendlog.c:1854
+#: logsrvd/sendlog.c:1855
 #, c-format
 msgid "commit point received from server [%lld, %ld]"
 msgstr "od server byl přijat bod zápisu [%lld, %ld]"
@@ -1533,7 +1533,7 @@ msgid "File descriptors >= %d will be closed before executing a command"
 msgstr "Souborové deskriptory >= %d budou před spuštěním příkazu uzavřeny"
 
 #: plugins/sudoers/def_data.c:278
-msgid "If set, users may override the value of `closefrom' with the -C option"
+msgid "If set, users may override the value of \"closefrom\" with the -C option"
 msgstr "Je-li nastaveno, uživatelé mohou přebít hodnotu „closefrom“ přepínačem -C"
 
 #: plugins/sudoers/def_data.c:282
@@ -2532,7 +2532,7 @@ msgid "sorry, you are not allowed set a command timeout"
 msgstr "je nám líto, ale nastavit časový limit nemáte dovoleno"
 
 #: plugins/sudoers/sudoers.c:534
-msgid "user not allowed to set a preserve the environment"
+msgid "user not allowed to preserve the environment"
 msgstr "uživatel nemá dovoleno zachovat prostředí"
 
 #: plugins/sudoers/sudoers.c:535

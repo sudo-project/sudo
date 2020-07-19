@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.1b1\n"
+"Project-Id-Version: sudoers 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-07 11:01-0400\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-19 12:35-0400\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -174,8 +174,8 @@ msgstr "无效的超时值"
 #: lib/iolog/iolog_util.c:125 lib/iolog/iolog_util.c:133
 #: lib/iolog/iolog_util.c:137 lib/iolog/iolog_util.c:196
 #: logsrvd/eventlog.c:223 logsrvd/logsrvd.c:1208 logsrvd/logsrvd.c:1221
-#: logsrvd/logsrvd.c:1266 logsrvd/sendlog.c:443 logsrvd/sendlog.c:1301
-#: logsrvd/sendlog.c:1308 logsrvd/sendlog.c:1726 plugins/sudoers/audit.c:108
+#: logsrvd/logsrvd.c:1266 logsrvd/sendlog.c:443 logsrvd/sendlog.c:1302
+#: logsrvd/sendlog.c:1309 logsrvd/sendlog.c:1727 plugins/sudoers/audit.c:108
 #: plugins/sudoers/audit.c:212 plugins/sudoers/auth/pam.c:482
 #: plugins/sudoers/auth/pam.c:669 plugins/sudoers/auth/rfc1938.c:111
 #: plugins/sudoers/cvtsudoers.c:120 plugins/sudoers/cvtsudoers.c:160
@@ -415,19 +415,18 @@ msgstr ""
 
 #: logsrvd/iolog_writer.c:967
 msgid "unable to restart log"
-msgstr "无法 stat %s"
+msgstr "无法重新启动 log"
 
 #: logsrvd/logsrv_util.c:98 logsrvd/logsrv_util.c:105
 #: plugins/sudoers/sudoreplay.c:353 plugins/sudoers/sudoreplay.c:359
-#, fuzzy, c-format
-#| msgid "unable to open %s"
+#, c-format
 msgid "unable to open %s/%s"
-msgstr "无法打开 %s"
+msgstr "无法打开 %s/%s"
 
 #: logsrvd/logsrv_util.c:132
 #, c-format
 msgid "missing I/O log file %s/%s"
-msgstr ""
+msgstr "缺失 I/O 日志文件 %s/%s"
 
 #: logsrvd/logsrv_util.c:139
 #, fuzzy, c-format
@@ -465,7 +464,7 @@ msgstr ""
 
 #: logsrvd/logsrvd.c:308
 msgid "invalid RejectMessage"
-msgstr ""
+msgstr "无效的 RejectMessage"
 
 #: logsrvd/logsrvd.c:319
 msgid "error parsing RejectMessage"
@@ -497,7 +496,7 @@ msgstr ""
 
 #: logsrvd/logsrvd.c:630
 msgid "unrecognized ClientMessage type"
-msgstr ""
+msgstr "无法识别的 ClientMessage 类型"
 
 #: logsrvd/logsrvd.c:895
 msgid "client message too large"
@@ -565,8 +564,8 @@ msgid "Unable to attach user data to the ssl object: %s"
 msgstr ""
 
 #: logsrvd/logsrvd.c:1527 logsrvd/logsrvd.c:1649 logsrvd/logsrvd.c:1749
-#: logsrvd/sendlog.c:1105 logsrvd/sendlog.c:1461 logsrvd/sendlog.c:1476
-#: logsrvd/sendlog.c:1534 plugins/sudoers/iolog.c:921
+#: logsrvd/sendlog.c:1106 logsrvd/sendlog.c:1462 logsrvd/sendlog.c:1477
+#: logsrvd/sendlog.c:1535 plugins/sudoers/iolog.c:921
 #: plugins/sudoers/iolog.c:1054 plugins/sudoers/iolog.c:1152
 #: plugins/sudoers/iolog_client.c:109 plugins/sudoers/iolog_client.c:325
 #: plugins/sudoers/iolog_client.c:341 plugins/sudoers/iolog_client.c:387
@@ -615,9 +614,9 @@ msgstr ""
 "  -R, --random-drop        指定丢弃连接的百分比概率\n"
 "  -V, --version          显示版本信息并退出\n"
 
-#: logsrvd/logsrvd.c:1898 logsrvd/sendlog.c:1699
+#: logsrvd/logsrvd.c:1898 logsrvd/sendlog.c:1700
 msgid "Protobuf-C version 1.3 or higher required"
-msgstr ""
+msgstr "需要 Protobuf-C 1.3 版或更高版本"
 
 #: logsrvd/logsrvd.c:1916
 #, fuzzy, c-format
@@ -625,7 +624,7 @@ msgstr ""
 msgid "invalid random drop value: %s"
 msgstr "无效的 notafter 值"
 
-#: logsrvd/logsrvd.c:1920 logsrvd/sendlog.c:1749
+#: logsrvd/logsrvd.c:1920 logsrvd/sendlog.c:1750
 #: plugins/sudoers/cvtsudoers.c:229 plugins/sudoers/sudoreplay.c:300
 #: plugins/sudoers/visudo.c:178
 #, c-format
@@ -639,7 +638,7 @@ msgstr "不支持 TLS"
 #: logsrvd/logsrvd_conf.c:405
 #, c-format
 msgid "%s:%s"
-msgstr ""
+msgstr "%s:%s"
 
 #: logsrvd/logsrvd_conf.c:471 logsrvd/logsrvd_conf.c:715
 #, c-format
@@ -719,134 +718,125 @@ msgid "unable to look up %s:%s: %s"
 msgstr "无法加载 %s：%s"
 
 #: logsrvd/sendlog.c:186
-#, fuzzy
-#| msgid "unable to parse IP address \"%s\""
 msgid "unable to get server IP addr"
-msgstr "无法解析 IP 地址列表“%s”"
+msgstr "无法获取服务器 IP 地址"
 
 #: logsrvd/sendlog.c:240 plugins/sudoers/sudoreplay.c:852
-#, fuzzy, c-format
-#| msgid "unable to load %s: %s"
+#, c-format
 msgid "unable to read %s/%s: %s"
-msgstr "无法加载 %s：%s"
+msgstr "无法读取 %s/%s：%s"
 
 #: logsrvd/sendlog.c:261 plugins/sudoers/iolog_client.c:684
-#, fuzzy, c-format
-#| msgid "timeout value too large"
+#, c-format
 msgid "client message too large: %zu"
-msgstr "超时值过大"
+msgstr "客户端消息过大：%zu"
 
-#: logsrvd/sendlog.c:790
+#: logsrvd/sendlog.c:791
 #, c-format
 msgid "%s: write buffer already in use"
 msgstr ""
 
-#: logsrvd/sendlog.c:842 plugins/sudoers/iolog.c:845
+#: logsrvd/sendlog.c:843 plugins/sudoers/iolog.c:845
 #: plugins/sudoers/iolog.c:914
 #, c-format
 msgid "unexpected I/O event %d"
 msgstr ""
 
-#: logsrvd/sendlog.c:888 logsrvd/sendlog.c:905 logsrvd/sendlog.c:939
+#: logsrvd/sendlog.c:889 logsrvd/sendlog.c:906 logsrvd/sendlog.c:940
 #: plugins/sudoers/iolog_client.c:1155 plugins/sudoers/iolog_client.c:1225
 #: plugins/sudoers/iolog_client.c:1273
 #, c-format
 msgid "%s: unexpected state %d"
 msgstr ""
 
-#: logsrvd/sendlog.c:911 plugins/sudoers/iolog_client.c:1231
+#: logsrvd/sendlog.c:912 plugins/sudoers/iolog_client.c:1231
 msgid "invalid ServerHello"
 msgstr "无效的 ServerHello"
 
-#: logsrvd/sendlog.c:975 plugins/sudoers/iolog_client.c:1317
+#: logsrvd/sendlog.c:976 plugins/sudoers/iolog_client.c:1317
 #, c-format
 msgid "error message received from server: %s"
 msgstr "从服务器收到了错误消息：%s"
 
-#: logsrvd/sendlog.c:988 plugins/sudoers/iolog_client.c:1330
+#: logsrvd/sendlog.c:989 plugins/sudoers/iolog_client.c:1330
 #, c-format
 msgid "abort message received from server: %s"
 msgstr "从服务器收到了中止消息：%s"
 
-#: logsrvd/sendlog.c:1007 plugins/sudoers/iolog_client.c:1349
-#, fuzzy
-#| msgid "unable to send audit message"
+#: logsrvd/sendlog.c:1008 plugins/sudoers/iolog_client.c:1349
 msgid "unable to unpack ServerMessage"
-msgstr "无法发送审核消息"
+msgstr "无法解包 ServerMessage"
 
-#: logsrvd/sendlog.c:1047 plugins/sudoers/iolog_client.c:1382
+#: logsrvd/sendlog.c:1048 plugins/sudoers/iolog_client.c:1382
 #, c-format
 msgid "%s: unexpected type_case value %d"
 msgstr ""
 
-#: logsrvd/sendlog.c:1076
+#: logsrvd/sendlog.c:1077
 msgid "timeout reading from server"
 msgstr "从服务器读取超时"
 
-#: logsrvd/sendlog.c:1154
+#: logsrvd/sendlog.c:1155
 msgid "premature EOF"
 msgstr "过早的文件结束"
 
-#: logsrvd/sendlog.c:1167 plugins/sudoers/iolog_client.c:1536
+#: logsrvd/sendlog.c:1168 plugins/sudoers/iolog_client.c:1536
 #, c-format
 msgid "server message too large: %u"
-msgstr ""
+msgstr "服务器消息过大：%u"
 
-#: logsrvd/sendlog.c:1218
+#: logsrvd/sendlog.c:1219
 msgid "timeout writing to server"
 msgstr "写入服务器时超时"
 
-#: logsrvd/sendlog.c:1437 plugins/sudoers/iolog_client.c:297
+#: logsrvd/sendlog.c:1438 plugins/sudoers/iolog_client.c:297
 msgid "TLS handshake timeout occurred"
-msgstr ""
+msgstr "TLS 握手超时"
 
-#: logsrvd/sendlog.c:1456 logsrvd/sendlog.c:1471
+#: logsrvd/sendlog.c:1457 logsrvd/sendlog.c:1472
 #: plugins/sudoers/iolog_client.c:319 plugins/sudoers/iolog_client.c:335
 msgid "unable to set event"
 msgstr "无法设置事件"
 
-#: logsrvd/sendlog.c:1481 logsrvd/sendlog.c:1485
-#, fuzzy, c-format
-#| msgid "SecurID communication failed"
+#: logsrvd/sendlog.c:1482 logsrvd/sendlog.c:1486
+#, c-format
 msgid "TLS connection failed: %s"
-msgstr "SecurID 通讯失败"
+msgstr "TLS 连接失败：%s"
 
-#: logsrvd/sendlog.c:1518
-#, fuzzy, c-format
-#| msgid "unable to initialize PAM: %s"
+#: logsrvd/sendlog.c:1519
+#, c-format
 msgid "Unable to initialize ssl context: %s"
-msgstr "无法初始化 PAM：%s"
+msgstr "无法初始化 ssl 上下文：%s"
 
-#: logsrvd/sendlog.c:1523 plugins/sudoers/iolog_client.c:259
-#, fuzzy, c-format
-#| msgid "%s: unable to allocate options: %s"
+#: logsrvd/sendlog.c:1524 plugins/sudoers/iolog_client.c:259
+#, c-format
 msgid "Unable to allocate ssl object: %s"
-msgstr "%s：无法分配选项：%s"
+msgstr "无法分配 ssl 对象：%s"
 
-#: logsrvd/sendlog.c:1528
+#: logsrvd/sendlog.c:1529
 #, c-format
 msgid "Unable to attach socket to the ssl object: %s"
 msgstr ""
 
-#: logsrvd/sendlog.c:1772
+#: logsrvd/sendlog.c:1773
 msgid "both restart point and iolog ID must be specified"
 msgstr ""
 
-#: logsrvd/sendlog.c:1776
+#: logsrvd/sendlog.c:1777
 msgid "a restart point may not be set when no I/O is sent"
-msgstr ""
-
-#: logsrvd/sendlog.c:1851
-#, c-format
-msgid "exited prematurely with state %d"
 msgstr ""
 
 #: logsrvd/sendlog.c:1852
 #, c-format
+msgid "exited prematurely with state %d"
+msgstr ""
+
+#: logsrvd/sendlog.c:1853
+#, c-format
 msgid "elapsed time sent to server [%lld, %ld]"
 msgstr ""
 
-#: logsrvd/sendlog.c:1854
+#: logsrvd/sendlog.c:1855
 #, c-format
 msgid "commit point received from server [%lld, %ld]"
 msgstr ""
@@ -1537,7 +1527,9 @@ msgid "File descriptors >= %d will be closed before executing a command"
 msgstr ">= %d 的文件描述符将会在执行命令前关闭"
 
 #: plugins/sudoers/def_data.c:278
-msgid "If set, users may override the value of `closefrom' with the -C option"
+#, fuzzy
+#| msgid "If set, users may override the value of `closefrom' with the -C option"
+msgid "If set, users may override the value of \"closefrom\" with the -C option"
 msgstr "如果设置，用户可以通过 -C 选项覆盖“closefrom”的值"
 
 #: plugins/sudoers/def_data.c:282
@@ -1995,16 +1987,13 @@ msgid "unable to update sequence file"
 msgstr "无法打开日志文件：%s"
 
 #: plugins/sudoers/iolog.c:605
-#, fuzzy, c-format
-#| msgid "unable to create %s"
+#, c-format
 msgid "unable to create %s/%s"
-msgstr "无法创建 %s"
+msgstr "无法创建 %s/%s"
 
 #: plugins/sudoers/iolog.c:631
-#, fuzzy
-#| msgid "unable to connect to authentication server"
 msgid "unable to connect to log server"
-msgstr "无法连接到认证服务器"
+msgstr "无法连接到日志服务器"
 
 #: plugins/sudoers/iolog.c:851
 #, c-format
@@ -2026,7 +2015,7 @@ msgstr "%s：内部错误，信号 %d 无效"
 #: plugins/sudoers/iolog_client.c:113 plugins/sudoers/iolog_client.c:392
 #: plugins/sudoers/iolog_client.c:1200 plugins/sudoers/iolog_client.c:1775
 msgid "error in event loop"
-msgstr ""
+msgstr "事件循环中出错"
 
 #: plugins/sudoers/iolog_client.c:194
 #, c-format
@@ -2040,29 +2029,24 @@ msgstr ""
 
 #: plugins/sudoers/iolog_client.c:496
 msgid "TLS initialization was unsuccessful"
-msgstr ""
+msgstr "TLS 初始化不成功"
 
 #: plugins/sudoers/iolog_client.c:505
 msgid "TLS handshake was unsuccessful"
-msgstr ""
+msgstr "TLS 握手不成功"
 
 #: plugins/sudoers/iolog_client.c:767 plugins/sudoers/iolog_client.c:959
-#, fuzzy
-#| msgid "unable to get GMT time"
 msgid "unable to get time of day"
-msgstr "无法获取 GMT 时间"
+msgstr "无法获取时间"
 
 #: plugins/sudoers/iolog_client.c:986
-#, fuzzy, c-format
-#| msgid "%s: internal error, invalid signal %d"
+#, c-format
 msgid "%s: internal error, invalid exit status %d"
-msgstr "%s：内部错误，信号 %d 无效"
+msgstr "%s：内部错误，无效的退出状态 %d"
 
 #: plugins/sudoers/iolog_client.c:1523
-#, fuzzy
-#| msgid "lost connection to authentication server"
 msgid "lost connection to log server"
-msgstr "丢失了到认证服务器的连接"
+msgstr "丢失了到日志服务器的连接"
 
 #: plugins/sudoers/iolog_client.c:1600
 msgid "missing write buffer"
@@ -2553,7 +2537,7 @@ msgstr "抱歉，您无权设置超时时间"
 #: plugins/sudoers/sudoers.c:534
 #, fuzzy
 #| msgid "sorry, you are not allowed to preserve the environment"
-msgid "user not allowed to set a preserve the environment"
+msgid "user not allowed to preserve the environment"
 msgstr "抱歉，您无权保留环境"
 
 #: plugins/sudoers/sudoers.c:535
@@ -2566,7 +2550,7 @@ msgstr "命令过长"
 
 #: plugins/sudoers/sudoers.c:936
 msgid "sudoedit doesn't need to be run via sudo"
-msgstr ""
+msgstr "sudoedit 无需经由 sudo 运行"
 
 #: plugins/sudoers/sudoers.c:990 plugins/sudoers/sudoreplay.c:1548
 #: plugins/sudoers/tsdump.c:138
@@ -2642,10 +2626,9 @@ msgid "%s/timing: %s"
 msgstr "%s/时序：%s"
 
 #: plugins/sudoers/sudoreplay.c:342
-#, fuzzy, c-format
-#| msgid "%s: %s"
+#, c-format
 msgid "%s/%s: %s"
-msgstr "%s：%s"
+msgstr "%s/%s：%s"
 
 #: plugins/sudoers/sudoreplay.c:366
 #, c-format
@@ -2873,7 +2856,7 @@ msgstr "%s 未更改"
 #: plugins/sudoers/visudo.c:599
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
-msgstr "无法重新打开临时文件(%s)，%s 未更改"
+msgstr "无法重新打开临时文件(%s)，%s 未更改。"
 
 #: plugins/sudoers/visudo.c:611
 #, c-format

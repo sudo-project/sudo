@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1b1\n"
+"Project-Id-Version: sudo 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-07-11 22:37+0900\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-17 23:13+0900\n"
 "Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>\n"
 "Language-Team: Korean <translation-team-ko@googlegroups.com>\n"
 "Language: ko\n"
@@ -61,8 +61,8 @@ msgstr "레지스트리를 복원할 수 없습니다"
 #: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
 #: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
 #: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -92,8 +92,8 @@ msgstr "%s: %s"
 #: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
 #: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
 #: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
 msgid "unable to allocate memory"
 msgstr "메모리를 할당할 수 없습니다"
 
@@ -271,7 +271,7 @@ msgid "unable to receive message from parent"
 msgstr "상위로부터 메시지를 받을 수 없습니다"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:308
 msgid "unable to fork"
 msgstr "포킹할 수 없습니다"
 
@@ -404,28 +404,28 @@ msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "-C의 인자 값은 3보다 크거나 같아야 합니다"
 
 #: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "`-i' 및 `-s' 옵션을 함께 지정할 수 없습니다"
+msgid "you may not specify both the -i and -s options"
+msgstr "-i 와 -s 옵션을 함께 지정할 수 없습니다"
 
 #: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "`-i' 및 `-E' 옵션을 함께 지정할 수 없습니다"
+msgid "you may not specify both the -i and -E options"
+msgstr "-i 와 -E 옵션을 함께 지정할 수 없습니다"
 
 #: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
-msgstr "`-E' 옵션은 편집 모드에서 유효하지 않습니다"
+msgid "the -E option is not valid in edit mode"
+msgstr "-E 옵션은 편집 모드에서 유효하지 않습니다"
 
 #: src/parse_args.c:548
 msgid "you may not specify environment variables in edit mode"
 msgstr "편집 모드에서 환경 변수를 지정할 수 없습니다"
 
 #: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
-msgstr "`-U' 옵션은 `-l' 옵션만 함께 사용할 수 있습니다"
+msgid "the -U option may only be used with the -l option"
+msgstr "-U 옵션은 -l 옵션만 함께 사용할 수 있습니다"
 
 #: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "`-A' 및 `-S' 옵션을 함께 사용할 수 없습니다"
+msgid "the -A and -S options may not be used together"
+msgstr "-A 와 -S 옵션을 함께 사용할 수 없습니다"
 
 #: src/parse_args.c:654
 msgid "sudoedit is not supported on this platform"
@@ -720,27 +720,27 @@ msgstr "실행 작업이 마지막입니다"
 msgid "could not join project \"%s\""
 msgstr "\"%s\" 프로젝트에 참여할 수 없습니다"
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "어떤 자원 풀에서도 \"%s\" 프로젝트에 있는 기본 바인딩을 수용하지 않습니다"
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "\"%s\" 프로젝트에 지정한 자원 풀이 없습니다"
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "\"%s\" 프로젝트에 기본 자원 풀을 바인딩할 수 없습니다"
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "\"%s\" 프로젝트에서 setproject에 실패했습니다"
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "경고! \"%s\" 프로젝트에 자원 처리 할당에 실패했습니다"
@@ -817,8 +817,8 @@ msgstr "정책 플러그인을 초기화할 수 없습니다"
 
 #: src/sudo.c:1158
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
-msgstr "%s 정책 플러그인에 `check_policy' 메서드가 빠졌습니다"
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "%s 정책 플러그인에 \"check_policy\" 메서드가 빠졌습니다"
 
 #: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
 msgid "command rejected by policy"
@@ -894,51 +894,51 @@ msgstr "%s: 기록 가능한 디렉터리에서 파일 편집을 허용하지 �
 msgid "%s left unmodified"
 msgstr "%s 수정하지 않은 상태로 남음"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s 바꾸지 않음"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "%s에 편집 세션 내용 남음"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: 내부 오류: 경로에 잘못된 파일"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: 임시 파일을 만들 수 없습니다"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
 msgid "sesh: killed by a signal"
 msgstr "sesh: 시그널을 받아 죽음"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: 잘못된 오류 %d"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:894
 msgid "unable to copy temporary files back to their original location"
 msgstr "원위치에 임시 파일을 복사할 수 없습니다"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:897
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "원 위치에 임시 파일 일부를 복사할 수 없습니다"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:941
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "uid를 루트로 바꿀 수 없습니다(%u)"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:958
 msgid "plugin error: missing file list for sudoedit"
 msgstr "플러그인 오류: sudoedit에 파일 목록이 빠짐"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
 msgid "unable to read the clock"
 msgstr "클록을 읽을 수 없습니다"
 
