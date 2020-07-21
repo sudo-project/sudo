@@ -1038,7 +1038,7 @@
 /* Define to 1 if you want sudo to free up memory before exiting. */
 #undef NO_LEAKS
 
-/* Define to 1 if you don't want users to get the lecture the first they user
+/* Define to 1 if you don't want users to get the lecture the first time they use
    sudo. */
 #undef NO_LECTURE
 
