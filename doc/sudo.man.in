@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "May 7, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "July 22, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -354,6 +354,8 @@ If the specified file does not exist, it will be created.
 Note that unlike most commands run by
 \fIsudo\fR,
 the editor is run with the invoking user's environment unmodified.
+If the temporary file becomes empty after editing, the user will
+be prompted before it is installed.
 If, for some reason,
 \fBsudo\fR
 is unable to update a file with its edited version, the user will

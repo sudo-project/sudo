@@ -86,6 +86,17 @@ sudo_copy_file(const char *src, int src_fd, off_t src_len, const char *dst,
     ssize_t nwritten, nread;
     debug_decl(sudo_copy_file, SUDO_DEBUG_UTIL);
 
+    /* Prompt the user before zeroing out an existing file. */
+    if (dst_len > 0 && src_len == 0) {
+	fprintf(stderr, U_("%s: truncate %s to zero bytes? (y/n) [n] "),
+	    getprogname(), dst);
+	if (fgets(buf, sizeof(buf), stdin) == NULL ||
+		(buf[0] != 'y' && buf[0] != 'Y')) {
+	    sudo_warnx(U_("not overwriting %s"), dst);
+	    debug_return_int(0);
+	}
+    }
+
     /* Extend the file to the new size if larger before copying. */
     if (dst_len > 0 && src_len > dst_len) {
 	if (sudo_extend_file(dst_fd, dst, src_len) == -1)
