@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "June 15, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "July 5, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -5110,6 +5110,94 @@ was run from, and the number of lines and columns of the terminal.
 The second and third lines contain the working directory the command
 was run from and the path name of the command itself (with arguments
 if present).
+.TP 10n
+\fIlog.json\fR
+A JSON-formatted file containing information about the command.
+This is similar to the
+\fIlog\fR
+file but contains additional information and is easily extensible.
+The
+\fIlog.json\fR
+file will be used by
+sudoreplay(@mansectsu@)
+in preference to the
+\fIlog\fR
+file if it exists.
+The file may contain the following elements:
+.PP
+.RS 10n
+.PD 0
+.TP 10n
+timestamp
+.br
+A JSON object containing time the command was run.
+It consists of two values,
+\fIseconds\fR
+and
+\fInanoseconds\fR.
+.PD
+.TP 10n
+columns
+The number of columns of the terminal the command ran on, or zero
+if no terminal was present.
+.TP 10n
+command
+The fully-qualified path of the command that was run.
+.TP 10n
+lines
+The number of lines of the terminal the command ran on, or zero
+if no terminal was present.
+.TP 10n
+runargv
+A JSON array representing the command's argument vector as passed to the
+execve(2)
+system call.
+.TP 10n
+runenv
+A JSON array representing the command's environment as passed to the
+execve(2)
+system call.
+.TP 10n
+rungid
+The group ID the command ran as.
+This element is only present when the user specifies a group on the
+command line.
+.TP 10n
+rungroup
+The name of the group the command ran as.
+This element is only present when the user specifies a group on the
+command line.
+.TP 10n
+runuid
+The user ID the command ran as.
+.TP 10n
+runuser
+The name of the user the command ran as.
+.TP 10n
+submitcwd
+.br
+The current working directory at the time
+\fBsudo\fR
+was run.
+.TP 10n
+submithost
+The name of the host the command was run on.
+.TP 10n
+submituser
+The name of the user who ran the command via
+\fBsudo\fR.
+.TP 10n
+ttyname
+The path name of the terminal the user invoked
+\fBsudo\fR
+from.
+If the command was run in a pseudo-terminal,
+\fIttyname\fR
+will be different from the terminal the command actually ran in.
+.PD 0
+.PP
+.RE
+.PD
 .TP 10n
 \fItiming\fR
 Timing information used to replay the session.

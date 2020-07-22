@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.9.1b1\n"
+"Project-Id-Version: sudo-1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-07 10:49-0400\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-19 12:26-0400\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -61,8 +61,8 @@ msgstr "无法恢复注册表"
 #: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
 #: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
 #: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
 #, c-format
 msgid "%s: %s"
 msgstr "%s：%s"
@@ -92,8 +92,8 @@ msgstr "%s：%s"
 #: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
 #: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
 #: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
 msgid "unable to allocate memory"
 msgstr "无法分配内存"
 
@@ -270,7 +270,7 @@ msgid "unable to receive message from parent"
 msgstr "无法从父(进程)接收消息"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:308
 msgid "unable to fork"
 msgstr "无法执行 fork"
 
@@ -403,28 +403,28 @@ msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "-C 选项的参数必须是一个大于等于 3 的数字"
 
 #: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "您不能同时指定“-i”和“-s”选项"
+msgid "you may not specify both the -i and -s options"
+msgstr "您不能同时指定 -i 和 -s 选项"
 
 #: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "您不能同时指定“-i”和“-E”选项"
+msgid "you may not specify both the -i and -E options"
+msgstr "您不能同时指定 -i 和 -E 选项"
 
 #: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
-msgstr "“-E”选项在编辑模式中无效"
+msgid "the -E option is not valid in edit mode"
+msgstr "-E 选项在编辑模式中无效"
 
 #: src/parse_args.c:548
 msgid "you may not specify environment variables in edit mode"
 msgstr "在编辑模式中您不能指定环境变量"
 
 #: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
-msgstr "“-U”选项只能与“-l”选项一起使用"
+msgid "the -U option may only be used with the -l option"
+msgstr "-U 选项只能与 -l 选项一起使用"
 
 #: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "“-A”和“-S”选项不可同时使用"
+msgid "the -A and -S options may not be used together"
+msgstr "-A 和 -S 选项不可同时使用"
 
 #: src/parse_args.c:654
 msgid "sudoedit is not supported on this platform"
@@ -719,27 +719,27 @@ msgstr "调用的任务是最终的(final)"
 msgid "could not join project \"%s\""
 msgstr "无法加入项目“%s”"
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "不存在对应于项目“%s”的、接受默认绑定的资源池"
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "指定的对应于项目“%s”的资源池不存在"
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "无法为项目“%s”绑定到默认的资源池"
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "对项目“%s”执行 setproject 失败"
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "警告，对项目“%s”的资源控制分配失败"
@@ -816,8 +816,8 @@ msgstr "无法初始化策略插件"
 
 #: src/sudo.c:1158
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
-msgstr "“check_policy”方法中缺少策略插件 %s"
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "check_policy 方法中缺少策略插件 %s"
 
 #: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
 msgid "command rejected by policy"
@@ -893,51 +893,51 @@ msgstr "%s：不允许编辑可写目录中的文件"
 msgid "%s left unmodified"
 msgstr "%s 并未修改"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s 已更改"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "编辑会话的内容留在了 %s 中"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh：内部错误：路径数量异常"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh：无法创建临时文件"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
 msgid "sesh: killed by a signal"
 msgstr "sesh：被信号杀死"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh：未知错误 %d"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:894
 msgid "unable to copy temporary files back to their original location"
 msgstr "无法将临时文件复制回其原位置"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:897
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "无法将某些临时文件复制回其原位置"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:941
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "无法将用户 ID 切换到 root(%u)"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:958
 msgid "plugin error: missing file list for sudoedit"
 msgstr "插件错误：缺少 sudoedit 的文件列表"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
 msgid "unable to read the clock"
 msgstr "无法读取时钟"
 

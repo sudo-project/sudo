@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers-1.9.1b1\n"
+"Project-Id-Version: sudoers-1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-08 06:47+0100\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-17 09:48+0100\n"
 "Last-Translator: Pedro Albuquerque <pmra@protonmail.com>\n"
 "Language-Team: Portuguese <translation-team-pt@lists.sourceforge.net>\n"
 "Language: pt\n"
@@ -175,8 +175,8 @@ msgstr "valor de inacção inválido"
 #: lib/iolog/iolog_util.c:125 lib/iolog/iolog_util.c:133
 #: lib/iolog/iolog_util.c:137 lib/iolog/iolog_util.c:196
 #: logsrvd/eventlog.c:223 logsrvd/logsrvd.c:1208 logsrvd/logsrvd.c:1221
-#: logsrvd/logsrvd.c:1266 logsrvd/sendlog.c:443 logsrvd/sendlog.c:1301
-#: logsrvd/sendlog.c:1308 logsrvd/sendlog.c:1726 plugins/sudoers/audit.c:108
+#: logsrvd/logsrvd.c:1266 logsrvd/sendlog.c:443 logsrvd/sendlog.c:1302
+#: logsrvd/sendlog.c:1309 logsrvd/sendlog.c:1727 plugins/sudoers/audit.c:108
 #: plugins/sudoers/audit.c:212 plugins/sudoers/auth/pam.c:482
 #: plugins/sudoers/auth/pam.c:669 plugins/sudoers/auth/rfc1938.c:111
 #: plugins/sudoers/cvtsudoers.c:120 plugins/sudoers/cvtsudoers.c:160
@@ -555,8 +555,8 @@ msgid "Unable to attach user data to the ssl object: %s"
 msgstr "impossível anexar dados do utilizador ao objecto ssl: %s"
 
 #: logsrvd/logsrvd.c:1527 logsrvd/logsrvd.c:1649 logsrvd/logsrvd.c:1749
-#: logsrvd/sendlog.c:1105 logsrvd/sendlog.c:1461 logsrvd/sendlog.c:1476
-#: logsrvd/sendlog.c:1534 plugins/sudoers/iolog.c:921
+#: logsrvd/sendlog.c:1106 logsrvd/sendlog.c:1462 logsrvd/sendlog.c:1477
+#: logsrvd/sendlog.c:1535 plugins/sudoers/iolog.c:921
 #: plugins/sudoers/iolog.c:1054 plugins/sudoers/iolog.c:1152
 #: plugins/sudoers/iolog_client.c:109 plugins/sudoers/iolog_client.c:325
 #: plugins/sudoers/iolog_client.c:341 plugins/sudoers/iolog_client.c:387
@@ -605,7 +605,7 @@ msgstr ""
 "  -R, --random-drop        percentagem de hipóteses das ligações caírem\n"
 "  -V, --version            mostrar informação da versão e sair\n"
 
-#: logsrvd/logsrvd.c:1898 logsrvd/sendlog.c:1699
+#: logsrvd/logsrvd.c:1898 logsrvd/sendlog.c:1700
 msgid "Protobuf-C version 1.3 or higher required"
 msgstr "Requerida a versão Protobuf-C 1.3 ou superior"
 
@@ -614,7 +614,7 @@ msgstr "Requerida a versão Protobuf-C 1.3 ou superior"
 msgid "invalid random drop value: %s"
 msgstr "valor de queda aleatório inválido: %s"
 
-#: logsrvd/logsrvd.c:1920 logsrvd/sendlog.c:1749
+#: logsrvd/logsrvd.c:1920 logsrvd/sendlog.c:1750
 #: plugins/sudoers/cvtsudoers.c:229 plugins/sudoers/sudoreplay.c:300
 #: plugins/sudoers/visudo.c:178
 #, c-format
@@ -729,112 +729,112 @@ msgstr "impossível ler %s/%s: %s"
 msgid "client message too large: %zu"
 msgstr "mensagem do cliente muito grande: %zu"
 
-#: logsrvd/sendlog.c:790
+#: logsrvd/sendlog.c:791
 #, c-format
 msgid "%s: write buffer already in use"
 msgstr "%s: buffer de escrita já em uso"
 
-#: logsrvd/sendlog.c:842 plugins/sudoers/iolog.c:845
+#: logsrvd/sendlog.c:843 plugins/sudoers/iolog.c:845
 #: plugins/sudoers/iolog.c:914
 #, c-format
 msgid "unexpected I/O event %d"
 msgstr "evento de E/S %d inesperado"
 
-#: logsrvd/sendlog.c:888 logsrvd/sendlog.c:905 logsrvd/sendlog.c:939
+#: logsrvd/sendlog.c:889 logsrvd/sendlog.c:906 logsrvd/sendlog.c:940
 #: plugins/sudoers/iolog_client.c:1155 plugins/sudoers/iolog_client.c:1225
 #: plugins/sudoers/iolog_client.c:1273
 #, c-format
 msgid "%s: unexpected state %d"
 msgstr "%s: estado %d inesperado"
 
-#: logsrvd/sendlog.c:911 plugins/sudoers/iolog_client.c:1231
+#: logsrvd/sendlog.c:912 plugins/sudoers/iolog_client.c:1231
 msgid "invalid ServerHello"
 msgstr "ServerHello inválido"
 
-#: logsrvd/sendlog.c:975 plugins/sudoers/iolog_client.c:1317
+#: logsrvd/sendlog.c:976 plugins/sudoers/iolog_client.c:1317
 #, c-format
 msgid "error message received from server: %s"
 msgstr "recebida mensagem de erro do servidos: %s"
 
-#: logsrvd/sendlog.c:988 plugins/sudoers/iolog_client.c:1330
+#: logsrvd/sendlog.c:989 plugins/sudoers/iolog_client.c:1330
 #, c-format
 msgid "abort message received from server: %s"
 msgstr "recebida mensagem de aborto do servidos: %s"
 
-#: logsrvd/sendlog.c:1007 plugins/sudoers/iolog_client.c:1349
+#: logsrvd/sendlog.c:1008 plugins/sudoers/iolog_client.c:1349
 msgid "unable to unpack ServerMessage"
 msgstr "impossível desempacotar ServerMessage"
 
-#: logsrvd/sendlog.c:1047 plugins/sudoers/iolog_client.c:1382
+#: logsrvd/sendlog.c:1048 plugins/sudoers/iolog_client.c:1382
 #, c-format
 msgid "%s: unexpected type_case value %d"
 msgstr "%s: valor type_case %d inesperado"
 
-#: logsrvd/sendlog.c:1076
+#: logsrvd/sendlog.c:1077
 msgid "timeout reading from server"
 msgstr "leitura do servidor expirou"
 
-#: logsrvd/sendlog.c:1154
+#: logsrvd/sendlog.c:1155
 msgid "premature EOF"
 msgstr "EOF prematuro"
 
-#: logsrvd/sendlog.c:1167 plugins/sudoers/iolog_client.c:1536
+#: logsrvd/sendlog.c:1168 plugins/sudoers/iolog_client.c:1536
 #, c-format
 msgid "server message too large: %u"
 msgstr "mensagem do servidor muito grande: %u"
 
-#: logsrvd/sendlog.c:1218
+#: logsrvd/sendlog.c:1219
 msgid "timeout writing to server"
 msgstr "escrita no servidor expirou"
 
-#: logsrvd/sendlog.c:1437 plugins/sudoers/iolog_client.c:297
+#: logsrvd/sendlog.c:1438 plugins/sudoers/iolog_client.c:297
 msgid "TLS handshake timeout occurred"
 msgstr "handshake TLS expirou"
 
-#: logsrvd/sendlog.c:1456 logsrvd/sendlog.c:1471
+#: logsrvd/sendlog.c:1457 logsrvd/sendlog.c:1472
 #: plugins/sudoers/iolog_client.c:319 plugins/sudoers/iolog_client.c:335
 msgid "unable to set event"
 msgstr "impossível definir o evento"
 
-#: logsrvd/sendlog.c:1481 logsrvd/sendlog.c:1485
+#: logsrvd/sendlog.c:1482 logsrvd/sendlog.c:1486
 #, c-format
 msgid "TLS connection failed: %s"
 msgstr "falha na ligação TLS: %s"
 
-#: logsrvd/sendlog.c:1518
+#: logsrvd/sendlog.c:1519
 #, c-format
 msgid "Unable to initialize ssl context: %s"
 msgstr "impossível inicializar contexto ssl: %s"
 
-#: logsrvd/sendlog.c:1523 plugins/sudoers/iolog_client.c:259
+#: logsrvd/sendlog.c:1524 plugins/sudoers/iolog_client.c:259
 #, c-format
 msgid "Unable to allocate ssl object: %s"
 msgstr "Impossível alocar objecto ssl: %s"
 
-#: logsrvd/sendlog.c:1528
+#: logsrvd/sendlog.c:1529
 #, c-format
 msgid "Unable to attach socket to the ssl object: %s"
 msgstr "Impossível anexar socket ao objecto ssl: %s"
 
-#: logsrvd/sendlog.c:1772
+#: logsrvd/sendlog.c:1773
 msgid "both restart point and iolog ID must be specified"
 msgstr "tem de especificar o ponto de reinício e a ID iolog"
 
-#: logsrvd/sendlog.c:1776
+#: logsrvd/sendlog.c:1777
 msgid "a restart point may not be set when no I/O is sent"
 msgstr "impossível definir um ponto de reinício sem E/S enviada"
 
-#: logsrvd/sendlog.c:1851
+#: logsrvd/sendlog.c:1852
 #, c-format
 msgid "exited prematurely with state %d"
 msgstr "saída prematura com o estado %d"
 
-#: logsrvd/sendlog.c:1852
+#: logsrvd/sendlog.c:1853
 #, c-format
 msgid "elapsed time sent to server [%lld, %ld]"
 msgstr "tempo decorrido de envio para o servidor [%lld, %ld]"
 
-#: logsrvd/sendlog.c:1854
+#: logsrvd/sendlog.c:1855
 #, c-format
 msgid "commit point received from server [%lld, %ld]"
 msgstr "ponto de submissão recebido do servidor [%lld, %ld]"
@@ -1525,7 +1525,7 @@ msgid "File descriptors >= %d will be closed before executing a command"
 msgstr "Descritores de ficheiro >= %d será fechado antes de executar um comando"
 
 #: plugins/sudoers/def_data.c:278
-msgid "If set, users may override the value of `closefrom' with the -C option"
+msgid "If set, users may override the value of \"closefrom\" with the -C option"
 msgstr "Se definido, os utilizadores podem sobrepor o valor de \"closefrom\" com a opção -C"
 
 #: plugins/sudoers/def_data.c:282
@@ -2523,7 +2523,7 @@ msgid "sorry, you are not allowed set a command timeout"
 msgstr "desculpe, não tem permissão para definir um tempo de inacção"
 
 #: plugins/sudoers/sudoers.c:534
-msgid "user not allowed to set a preserve the environment"
+msgid "user not allowed to preserve the environment"
 msgstr "utilizador sem permissão para definir preservar o ambiente"
 
 #: plugins/sudoers/sudoers.c:535

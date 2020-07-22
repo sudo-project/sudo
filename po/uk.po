@@ -4,10 +4,10 @@
 # Yuri Chornoivan <yurchor@ukr.net>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1b1\n"
+"Project-Id-Version: sudo 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-07 13:29+0300\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-16 15:26+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
-"X-Generator: Lokalize 20.07.70\n"
+"X-Generator: Lokalize 20.03.70\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: lib/util/aix.c:89 lib/util/aix.c:169
@@ -60,8 +60,8 @@ msgstr "не вдалося відновити регістр"
 #: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
 #: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
 #: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -91,8 +91,8 @@ msgstr "%s: %s"
 #: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
 #: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
 #: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
 msgid "unable to allocate memory"
 msgstr "не вдалося отримати потрібний об’єм пам’яті"
 
@@ -269,7 +269,7 @@ msgid "unable to receive message from parent"
 msgstr "не вдалося отримати повідомлення від батьківського процесу"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:308
 msgid "unable to fork"
 msgstr "не вдалося створити відгалуження"
 
@@ -402,28 +402,28 @@ msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "аргументом параметра -C mмає бути число не менше за 3"
 
 #: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "не можна одночасно вказувати параметри «-i» і «-s»"
+msgid "you may not specify both the -i and -s options"
+msgstr "не можна одночасно вказувати параметри -i і -s"
 
 #: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "не можна одночасно вказувати параметри «-i» і «-E»"
+msgid "you may not specify both the -i and -E options"
+msgstr "не можна одночасно вказувати параметри -i і -E"
 
 #: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
-msgstr "не можна використовувати «-E» у режимі редагування"
+msgid "the -E option is not valid in edit mode"
+msgstr "не можна використовувати -E у режимі редагування"
 
 #: src/parse_args.c:548
 msgid "you may not specify environment variables in edit mode"
 msgstr "не можна вказувати змінні середовища у режимі редагування"
 
 #: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
-msgstr "параметр «-U» можна використовувати лише разом з параметром «-l»"
+msgid "the -U option may only be used with the -l option"
+msgstr "параметр -U можна використовувати лише разом з параметром -l"
 
 #: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "параметри «-A» і «-S» не можна використовувати одночасно"
+msgid "the -A and -S options may not be used together"
+msgstr "параметри -A і -S не можна використовувати одночасно"
 
 #: src/parse_args.c:654
 msgid "sudoedit is not supported on this platform"
@@ -718,27 +718,27 @@ msgstr "викликане завдання є завершальним"
 msgid "could not join project \"%s\""
 msgstr "не вдалося приєднатися до проекту «%s»"
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "для проекту «%s» не існує сховища ресурсів, яке приймає типові прив’язки"
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "у проекті «%s» не існує вказаного сховища ресурсів"
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "не вдалося виконати прив’язку до типового сховища ресурсів проекту «%s»"
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "помилка під час виконання setproject для проекту «%s»"
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "попередження, помилка призначення керування ресурсами проекту «%s»"
@@ -815,8 +815,8 @@ msgstr "не вдалося ініціалізувати додаток прав
 
 #: src/sudo.c:1158
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
-msgstr "до додатка правил %s не включено метод «check_policy»"
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "до додатка правил %s не включено метод check_policy"
 
 #: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
 msgid "command rejected by policy"
@@ -892,51 +892,51 @@ msgstr "%s: не можна редагувати файли у непридат�
 msgid "%s left unmodified"
 msgstr "%s залишено без змін"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s не змінено"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "дані сеансу редагування залишилися у %s"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: внутрішня помилка: непарна кількість шляхів"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: не вдалося створити тимчасові файли"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
 msgid "sesh: killed by a signal"
 msgstr "sesh: завершено надсиланням сигналу"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: невідома помилка %d"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:894
 msgid "unable to copy temporary files back to their original location"
 msgstr "не вдалося скопіювати тимчасові файли назад до початкового місця зберігання"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:897
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "не вдалося скопіювати деякі з тимчасових файлів назад до початкового місця зберігання"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:941
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "не вдалося змінити значення uid на значення root (%u)"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:958
 msgid "plugin error: missing file list for sudoedit"
 msgstr "помилка додатка: не вистачає списку файлів для sudoedit"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
 msgid "unable to read the clock"
 msgstr "не вдалося прочитати час на годиннику"
 

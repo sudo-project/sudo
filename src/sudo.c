@@ -1155,7 +1155,7 @@ policy_check(int argc, char * const argv[],
     debug_decl(policy_check, SUDO_DEBUG_PCOMM);
 
     if (policy_plugin.u.policy->check_policy == NULL) {
-	sudo_fatalx(U_("policy plugin %s is missing the `check_policy' method"),
+	sudo_fatalx(U_("policy plugin %s is missing the \"check_policy\" method"),
 	    policy_plugin.name);
     }
     sudo_debug_set_active_instance(policy_plugin.debug_instance);

@@ -1,14 +1,14 @@
 # Esperanto translations for sudo package.
 # This file is distributed under the same license as the sudo package.
-# Keith Bowes <zooplah@gmail.com>, 2012, 2019.
+# Keith Bowes <zooplah@gmail.com>, 2012.
 # Felipe Castro <fefcas@gmail.com>, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1b1\n"
+"Project-Id-Version: sudo 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-09 15:06-0400\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-16 21:41-0400\n"
 "Last-Translator: Felipe Castro <fefcas@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -61,8 +61,8 @@ msgstr "ne eblas restarigi registrejon"
 #: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
 #: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
 #: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -92,8 +92,8 @@ msgstr "%s: %s"
 #: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
 #: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
 #: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
 msgid "unable to allocate memory"
 msgstr "ne eblas generi memoron"
 
@@ -270,7 +270,7 @@ msgid "unable to receive message from parent"
 msgstr "ne eblas ricevi mesaĝon el supre"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:308
 msgid "unable to fork"
 msgstr "ne eblas forki"
 
@@ -403,28 +403,28 @@ msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "la parametro de -C devas esti nombron almenaŭ 3"
 
 #: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "specifi kaj '-i' kaj '-s' vi ne rajtas"
+msgid "you may not specify both the -i and -s options"
+msgstr "vi ne rajtas specifi ambaŭ parametrojn -i kaj -s"
 
 #: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "specifi kaj '-i' kaj '-E' vi ne rajtas"
+msgid "you may not specify both the -i and -E options"
+msgstr "vi ne rajtas specifi ambaŭ parametrojn -i kaj -E"
 
 #: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
-msgstr "la parametro '-E' ne validas en redakta reĝimo"
+msgid "the -E option is not valid in edit mode"
+msgstr "la parametro -E ne validas en redakta reĝimo"
 
 #: src/parse_args.c:548
 msgid "you may not specify environment variables in edit mode"
 msgstr "vi ne rajtas specifi medivariablojn en redakta reĝimo"
 
 #: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
+msgid "the -U option may only be used with the -l option"
 msgstr "la parametro '-U' nur povas esti uzata kun '-l'"
 
 #: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "'-A' kaj '-S' ne eblas uziĝi kune"
+msgid "the -A and -S options may not be used together"
+msgstr "vi ne rajtas kune uzi la parametrojn '-A' kaj '-S'"
 
 #: src/parse_args.c:654
 msgid "sudoedit is not supported on this platform"
@@ -719,27 +719,27 @@ msgstr "la voka tasko estas nenuligebla"
 msgid "could not join project \"%s\""
 msgstr "ne eblis aliĝi al projekto \"%s\""
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "neniu rimedujo akceptanta aŭtomatajn bindaĵojn ekzistas por projekto \"%s\""
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "specifita rimedujo ne ekzistas por projekto \"%s\""
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "ne eblis bindi al aprioran rimedujo por projekto \"%s\""
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "setproject malsukcesis por projekto \"%s\""
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "averto, rimedo-rega asigno malsukcesis por projekto \"%s\""
@@ -808,7 +808,7 @@ msgstr "ne eblas elekti gid-on kiel plenumigkielan gid-on %u"
 #: src/sudo.c:986
 #, c-format
 msgid "unexpected child termination condition: %d"
-msgstr "neatendita ido ekzekutiĝis laŭ la kondiĉo: %d"
+msgstr "neatendita ido finiĝis laŭ la kondiĉo: %d"
 
 #: src/sudo.c:1095
 msgid "unable to initialize policy plugin"
@@ -816,8 +816,8 @@ msgstr "ne eblas komenci konduktan kromprogramon"
 
 #: src/sudo.c:1158
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
-msgstr "konduta kromprogramo %s ne inkluzivas la metodon 'check_policy'"
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "konduta kromprogramo %s ne inkluzivas la metodon \"check_policy\""
 
 #: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
 msgid "command rejected by policy"
@@ -893,51 +893,51 @@ msgstr "%s: redakto de dosieroj en skribebla dosierujo ne estas permesata"
 msgid "%s left unmodified"
 msgstr "%s restas ne modifita"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s ne ŝanĝita"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "enhavo de redakta seanco restas en %s"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: interna eraro: malpara nombro da vojoj"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: ne eblas krei provizorajn dosierojn"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
 msgid "sesh: killed by a signal"
 msgstr "sesh: mortigita de signalo"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: nekonata eraro %d"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:894
 msgid "unable to copy temporary files back to their original location"
 msgstr "ne eblas retrokopii provizorajn dosierojn al ilia originala loko"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:897
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "ne eblas retrokopii kelkajn el la provizoraj dosieroj al ilia originala loko"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:941
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "ne eblas ŝanĝi uid-on al ĉefuzanto (%u)"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:958
 msgid "plugin error: missing file list for sudoedit"
 msgstr "kromprograma eraro: malhavas dosieran liston por sudoedit"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
 msgid "unable to read the clock"
 msgstr "ne eblas legi la horloĝon"
 

@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1b1\n"
+"Project-Id-Version: sudo 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-07 20:17+02:00\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-18 13:06+02:00\n"
 "Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -60,8 +60,8 @@ msgstr "registr nelze obnovit"
 #: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
 #: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
 #: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -91,8 +91,8 @@ msgstr "%s: %s"
 #: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
 #: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
 #: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
 msgid "unable to allocate memory"
 msgstr "nelze alokovat paměť"
 
@@ -270,7 +270,7 @@ msgid "unable to receive message from parent"
 msgstr "od rodiče nelze přijmout zprávu"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:308
 msgid "unable to fork"
 msgstr "nelze vytvořit potomka"
 
@@ -403,28 +403,28 @@ msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "argument u -C musí být číslo větší nebo rovno 3"
 
 #: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "nesmíte zadávat přepínače „-i“ a „-s“ spolu"
+msgid "you may not specify both the -i and -s options"
+msgstr "nesmíte zadávat přepínače -i a -s spolu"
 
 #: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "nesmíte zadávat přepínače „-i“ a „-E“ spolu"
+msgid "you may not specify both the -i and -E options"
+msgstr "nesmíte zadávat přepínače -i a -E spolu"
 
 #: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
-msgstr "přepínač „-E“ není platný v režimu úprav"
+msgid "the -E option is not valid in edit mode"
+msgstr "přepínač -E není platný v režimu úprav"
 
 #: src/parse_args.c:548
 msgid "you may not specify environment variables in edit mode"
 msgstr "v režimu úprav nesmíte zadávat proměnné prostředí"
 
 #: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
-msgstr "přepínač „-U“ smí být použit jen s přepínačem „-l“"
+msgid "the -U option may only be used with the -l option"
+msgstr "přepínač -U smí být použit jen s přepínačem -l"
 
 #: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "přepínače „-A“ a „-S“ smí nesmí být použity spolu"
+msgid "the -A and -S options may not be used together"
+msgstr "přepínače -A a -S smí nesmí být použity spolu"
 
 #: src/parse_args.c:654
 msgid "sudoedit is not supported on this platform"
@@ -719,27 +719,27 @@ msgstr "volaná úloha je konečná"
 msgid "could not join project \"%s\""
 msgstr "nebylo možné se připojit k projektu „%s“"
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "pro projekt „%s“ neexistuje žádná množina zdrojů přijímající výchozí vazbu"
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "pro projekt „%s“ neexistuje zadaná množina zdrojů"
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "u projektu „%s“ se nebylo možné navázat na výchozí množinu zdrojů"
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "volání setproject selhalo u projektu „%s“"
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "pozor, nepodařilo se přiřadit řízení zdrojů projektu „%s“"
@@ -816,7 +816,7 @@ msgstr "modul s politikami nelze inicializovat"
 
 #: src/sudo.c:1158
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
+msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "modulu s politikami %s chybí metoda „check_policy“"
 
 #: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
@@ -893,51 +893,51 @@ msgstr "%s: úprava souborů v adresáři, do kterého lze zapisovat, není dov
 msgid "%s left unmodified"
 msgstr "%s ponechán nezměněn"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s nezměněn"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "obsah relace s úpravami ponechán v %s"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: vnitřní chyba: lichý počet cest"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: nelze vytvořit dočasné soubory"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
 msgid "sesh: killed by a signal"
 msgstr "sesh: zabit signálem"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: neznámá chyba %d"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:894
 msgid "unable to copy temporary files back to their original location"
 msgstr "dočasné soubory nelze zkopírovat zpět na jejich původní místo"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:897
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "některé z dočasných souborů nelze zkopírovat zpět na jejich původní místo"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:941
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "UID nelze změnit na roota (%u)"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:958
 msgid "plugin error: missing file list for sudoedit"
 msgstr "chyba modulu: programu sudoedit chybí seznam souborů"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
 msgid "unable to read the clock"
 msgstr "nelze přečíst hodiny"
 

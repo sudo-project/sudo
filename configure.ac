@@ -18,8 +18,8 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.9.1], [https://bugzilla.sudo.ws/], [sudo])
-AC_CONFIG_HEADER([config.h pathnames.h])
+AC_INIT([sudo], [1.9.2], [https://bugzilla.sudo.ws/], [sudo])
+AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
 dnl Note: this must come after AC_INIT
@@ -234,6 +234,7 @@ PROGS="sudo"
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
+: ${PKG_CONFIG='pkg-config'}
 DEVEL=
 LDAP="#"
 BAMAN=0
@@ -1502,33 +1503,14 @@ AC_ARG_ENABLE(werror,
 ])
 
 AC_ARG_ENABLE(openssl,
-[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
-[ case $enableval in
-    no)		;;
-    *)		LIBMD="-lcrypto"
-		LIBTLS="-lssl -lcrypto"
-		AC_DEFINE(HAVE_OPENSSL)
-		if test "$enableval" != "yes"; then
-		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
-		    SUDO_APPEND_LIBPATH(LDFLAGS, [${enableval}/lib])
-		fi
-		;;
- esac
-])
+[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])])
 
 AC_ARG_ENABLE(gcrypt,
-[AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's message digest functions instead of sudo's])],
-[ case $enableval in
-    no)		;;
-    *)		LIBMD="-lgcrypt"
-		DIGEST=digest_gcrypt.lo
-		AC_DEFINE(HAVE_GCRYPT)
-		if test "$enableval" != "yes"; then
-		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
-		    SUDO_APPEND_LIBPATH(LDFLAGS, [${enableval}/lib])
-		fi
-		;;
- esac
+[AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
+    if test "${enable_openssl-no}" != no; then
+	AC_MSG_WARN([Ignoring --enable-gcrypt when OpenSSL is enabled.])
+	enable_gcrypt=no
+    fi
 ])
 
 AC_ARG_ENABLE(hardening,
@@ -1693,7 +1675,6 @@ fi
 dnl
 dnl C compiler checks
 dnl
-AC_SEARCH_LIBS([strerror], [cposix])
 AC_PROG_CPP
 AC_CHECK_TOOL(AR, ar, false)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
@@ -2081,7 +2062,7 @@ case "$host" in
 #include <sys/types.h>
 #include <sys/security.h>
 #include <prot.h>
-		]], [[exit(0);]])], [AC_MSG_RESULT(no)], [AC_MSG_RESULT([yes, fixing locally])
+		]], [[return(0);]])], [AC_MSG_RESULT(no)], [AC_MSG_RESULT([yes, fixing locally])
 		sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		])
 		# ":DEFAULT" must be appended to _RLD_LIST
@@ -2969,28 +2950,6 @@ AC_CHECK_MEMBER([struct stat.st_mtim],
 	[AC_CHECK_MEMBER([struct stat.st_nmtime], AC_DEFINE(HAVE_ST_NMTIME))])
     ]
 )
-# Look for sha2 functions if not using openssl
-if test "$DIGEST" = "digest.lo"; then
-    FOUND_SHA2=no
-    AC_CHECK_HEADER([sha2.h], [
-	FOUND_SHA2=yes
-	AC_CHECK_FUNCS([SHA224Update], [SUDO_FUNC_SHA2_VOID_PTR], [
-	    # On some systems, SHA224Update is in libmd
-	    AC_CHECK_LIB(md, SHA224Update, [
-		AC_DEFINE(HAVE_SHA224UPDATE)
-		SUDO_FUNC_SHA2_VOID_PTR
-		LIBMD="-lmd"
-	    ], [
-		# Does not have SHA224Update
-		FOUND_SHA2=no
-	    ])
-	])
-    ])
-    if test X"$FOUND_SHA2" = X"no"; then
-	AC_LIBOBJ(sha2)
-	SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
-    fi
-fi
 AC_CHECK_FUNCS([vsyslog], [], [
     AC_LIBOBJ(vsyslog)
     SUDO_APPEND_COMPAT_EXP(sudo_vsyslog)
@@ -3026,6 +2985,47 @@ dnl
 dnl Check for functions only present in OpenSSL 1.1 and above
 dnl
 if test "${enable_openssl-no}" != no; then
+    # Use OpenSSL's sha2 functions
+    AC_DEFINE(HAVE_OPENSSL)
+    DIGEST=digest_openssl.lo
+
+    # Use pkg-config to find the openssl cflags and libs if possible.
+    if test "$enable_openssl" != "yes"; then
+	PKG_CONFIG_LIBDIR="${enable_openssl}/lib/pkgconfig:${enable_openssl}/lib64/pkgconfig:${enable_openssl}/share/pkgconfig"
+	export PKG_CONFIG_LIBDIR
+    fi
+    if $PKG_CONFIG --exists openssl >/dev/null 2>&1; then
+	# Check whether --static is needed
+	O_LDFLAGS="$LDFLAGS"
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
+	AC_CHECK_LIB([ssl], [SSL_library_init], [STATIC=""], [STATIC="--static"], [-lcrypto])
+	LDFLAGS="$O_LDFLAGS"
+
+	# Use pkg-config to determine OpenSSL libs and cflags
+	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
+	if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
+	    LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	else
+	    # No separate pkg config for libcrypto
+	    LIBMD="$LIBTLS"
+	fi
+	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
+	    AX_APPEND_FLAG([$f], [CPPFLAGS])
+	done
+    else
+	# No pkg-config file present, try to do it manually
+	if test "$enable_openssl" != "yes"; then
+	    AX_APPEND_FLAG([-I${enable_openssl}/include], [CPPFLAGS])
+	    SUDO_APPEND_LIBPATH(LIBMD, [${enable_openssl}/lib])
+	    SUDO_APPEND_LIBPATH(LIBTLS, [${enable_openssl}/lib])
+	fi
+	LIBMD="${LIBMD} -lcrypto"
+	LIBTLS="${LIBTLS} -lcrypto -lssl"
+    fi
+    if test "$enable_openssl" != "yes"; then
+	unset PKG_CONFIG_LIBDIR
+    fi
+
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
     AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method])
@@ -3035,6 +3035,39 @@ if test "${enable_openssl-no}" != no; then
 	#include <openssl/ssl.h>
     ])
     LIBS="$OLIBS"
+elif test "${enable_gcrypt-no}" != no; then
+    # Use gcrypt's sha2 functions
+    AC_DEFINE(HAVE_GCRYPT)
+    DIGEST=digest_gcrypt.lo
+    LIBMD="-lgcrypt"
+    if test "$enable_gcrypt" != "yes"; then
+	AX_APPEND_FLAG([-I${enable_gcrypt}/include], [CPPFLAGS])
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${enable_gcrypt}/lib])
+    fi
+fi
+dnl
+dnl Check for sha2 functions if not using openssl or gcrypt
+dnl
+if test "$DIGEST" = "digest.lo"; then
+    FOUND_SHA2=no
+    AC_CHECK_HEADER([sha2.h], [
+	FOUND_SHA2=yes
+	AC_CHECK_FUNCS([SHA224Update], [SUDO_FUNC_SHA2_VOID_PTR], [
+	    # On some systems, SHA224Update is in libmd
+	    AC_CHECK_LIB(md, SHA224Update, [
+		AC_DEFINE(HAVE_SHA224UPDATE)
+		SUDO_FUNC_SHA2_VOID_PTR
+		LIBMD="-lmd"
+	    ], [
+		# Does not have SHA224Update
+		FOUND_SHA2=no
+	    ])
+	])
+    ])
+    if test X"$FOUND_SHA2" = X"no"; then
+	AC_LIBOBJ(sha2)
+	SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
+    fi
 fi
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
@@ -3226,7 +3259,7 @@ dnl
 AC_CHECK_FUNCS([getprogname], [AC_CHECK_FUNCS([setprogname])], [
     AC_MSG_CHECKING([for __progname])
     AC_CACHE_VAL(sudo_cv___progname, [
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; (void)puts(__progname);]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; if (__progname[0] == '\0') return 1;]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
     if test "$sudo_cv___progname" = "yes"; then
 	AC_DEFINE(HAVE___PROGNAME)
     fi
@@ -3238,14 +3271,14 @@ dnl Check for __func__ or __FUNCTION__
 dnl
 AC_MSG_CHECKING([for __func__])
 AC_CACHE_VAL(sudo_cv___func__, [
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[(void)puts(__func__);]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__func__[0] == '\0') return 1;]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])])
 AC_MSG_RESULT($sudo_cv___func__)
 if test "$sudo_cv___func__" = "yes"; then
     AC_DEFINE(HAVE___FUNC__)
 elif test -n "$GCC"; then
     AC_MSG_CHECKING([for __FUNCTION__])
     AC_CACHE_VAL(sudo_cv___FUNCTION__, [
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[(void)puts(__FUNCTION__);]])], [sudo_cv___FUNCTION__=yes], [sudo_cv___FUNCTION__=no])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if(__FUNCTION__[0] == '\0') return 1;]])], [sudo_cv___FUNCTION__=yes], [sudo_cv___FUNCTION__=no])])
     AC_MSG_RESULT($sudo_cv___FUNCTION__)
     if test "$sudo_cv___FUNCTION__" = "yes"; then
 	AC_DEFINE(HAVE___FUNC__)
@@ -3348,7 +3381,7 @@ case "$enable_zlib" in
 	CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
 	ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libsudo_z.la'
 	ZLIB_SRC=lib/zlib
-	AC_CONFIG_HEADER([lib/zlib/zconf.h])
+	AC_CONFIG_HEADERS([lib/zlib/zconf.h])
 	AC_CONFIG_FILES([lib/zlib/Makefile])
 	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"; then
 	    if test "$enable_zlib" = "shared"; then
@@ -3947,7 +3980,7 @@ if test ${with_passwd-'no'} != "no"; then
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
 	found=no
-	AC_CHECK_FUNCS($shadow_funcs, [found=yes])
+	AC_CHECK_FUNCS([$shadow_funcs], [found=yes])
 	if test "$found" = "yes"; then
 	    case "$shadow_funcs" in
 		*getprpwnam*) SECUREWARE=1;;
@@ -4099,14 +4132,25 @@ if test ${with_ldap-'no'} != "no"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
 	    test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <gssapi/gssapi.h>]])], [found="gssapi/gssapi.h"; break], [AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <gssapi.h>]])], [found="gssapi.h"; break])])
+	    # Use AC_PREPROC_IFELSE to check existence to avoid caching
+	    # since we test with multiple values of CPPFLAGS
+	    AC_PREPROC_IFELSE([
+		AC_LANG_PROGRAM([[#include <gssapi/gssapi.h>]])
+	    ], [
+		AC_CHECK_HEADERS([gssapi/gssapi.h])
+		break
+	    ], [
+		AC_PREPROC_IFELSE([
+		    AC_LANG_PROGRAM([[#include <gssapi.h>]])
+		], [
+		    AC_CHECK_HEADERS([gssapi.h])
+		    break
+		])
+	    ])
 	done
-	if test X"$found" != X"no"; then
-	    AC_CHECK_HEADERS([$found])
-	    if test X"$found" = X"gssapi/gssapi.h"; then
-		AC_CHECK_HEADERS([gssapi/gssapi_krb5.h])
-	    fi
-	else
+	if test X"$ac_cv_header_gssapi_gssapi_h" != X"no"; then
+	    AC_CHECK_HEADERS([gssapi/gssapi_krb5.h])
+	elif test X"$ac_cv_header_gssapi_h" = X"no"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	    AC_MSG_WARN([Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS])
 	fi
@@ -4548,6 +4592,35 @@ dnl
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
 	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith"
+	dnl
+	dnl Check whether -Wimplicit-fallthrough is available and
+	dnl recognizes /* FALLTHROUGH */ comments.  Clang 10 requires
+	dnl the "fallthrough" attribute which we don't use.
+	dnl
+	_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS -Wimplicit-fallthrough -Werror"
+	AC_MSG_CHECKING([whether C compiler acceptd -Wimplicit-fallthrough])
+	AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	    int main(int argc, char *argv[])
+	    {
+		int num = argc + 1;
+		switch (num) {
+		    case 1:
+			num = 0;
+			/* FALLTHROUGH */
+		    case 0:
+			num++;
+		}
+		return num;
+	    }
+	]])], [
+	    AC_MSG_RESULT([yes])
+	    CFLAGS="$_CFLAGS -Wimplicit-fallthrough"
+	], [
+	    AC_MSG_RESULT([no])
+	    CFLAGS="$_CFLAGS"
+	])
+
     fi
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
@@ -4770,7 +4843,7 @@ AH_TEMPLATE(LOGGING, [Define to SLOG_SYSLOG, SLOG_FILE, or SLOG_BOTH.])
 AH_TEMPLATE(LONG_OTP_PROMPT, [Define to 1 if you want a two line OTP (S/Key or OPIE) prompt.])
 AH_TEMPLATE(NO_AUTHENTICATION, [Define to 1 if you don't want sudo to prompt for a password by default.])
 AH_TEMPLATE(NO_LEAKS, [Define to 1 if you want sudo to free up memory before exiting.])
-AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture the first they user sudo.])
+AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture the first time they use sudo.])
 AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM session support.])
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid running the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])

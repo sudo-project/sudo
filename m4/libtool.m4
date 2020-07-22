@@ -3510,21 +3510,7 @@ haiku*)
   ;;
 
 hpux10.20* | hpux11*)
-  lt_cv_file_magic_cmd=/usr/bin/file
-  case $host_cpu in
-  ia64*)
-    lt_cv_deplibs_check_method='file_magic (s[[0-9]][[0-9]][[0-9]]|ELF-[[0-9]][[0-9]]) shared object file - IA64'
-    lt_cv_file_magic_test_file=/usr/lib/hpux32/libc.so
-    ;;
-  hppa*64*)
-    [lt_cv_deplibs_check_method='file_magic (s[0-9][0-9][0-9]|ELF[ -][0-9][0-9])(-bit)?( [LM]SB)? shared object( file)?[, -]* PA-RISC [0-9]\.[0-9]']
-    lt_cv_file_magic_test_file=/usr/lib/pa20_64/libc.sl
-    ;;
-  *)
-    lt_cv_deplibs_check_method='file_magic (s[[0-9]][[0-9]][[0-9]]|PA-RISC[[0-9]]\.[[0-9]]) shared library'
-    lt_cv_file_magic_test_file=/usr/lib/libc.sl
-    ;;
-  esac
+  lt_cv_deplibs_check_method=pass_all
   ;;
 
 interix[[3-9]]*)

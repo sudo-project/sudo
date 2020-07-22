@@ -4,10 +4,10 @@
 # Mehmet Kececi <mkececi@mehmetkececi.com>, 2016, 2017, 2018, 2019, 2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1b1\n"
+"Project-Id-Version: sudo 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-07 20:18+0300\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-16 17:09+0300\n"
 "Last-Translator: Mehmet Kececi <mkececi@mehmetkececi.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
 "Language: tr\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 
 #: lib/util/aix.c:89 lib/util/aix.c:169
@@ -60,8 +60,8 @@ msgstr "kayıt geri yüklenemiyor"
 #: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
 #: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
 #: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -91,8 +91,8 @@ msgstr "%s: %s"
 #: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
 #: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
 #: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
 msgid "unable to allocate memory"
 msgstr "bellek ayırma başarısız"
 
@@ -269,7 +269,7 @@ msgid "unable to receive message from parent"
 msgstr "ebeveynden mesaj alamıyor"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:308
 msgid "unable to fork"
 msgstr "çatallanamıyor"
 
@@ -402,28 +402,28 @@ msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "-C argümanı 3 veya daha büyük bir sayı olmalıdır"
 
 #: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "`-i' ve `-s' seçeneklerini aynı anda belirtemezsiniz"
+msgid "you may not specify both the -i and -s options"
+msgstr "-i ve -s seçeneklerini aynı anda belirtemezsiniz"
 
 #: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "`-i' ve `-E' seçeneklerini aynı anda belirtemezsiniz"
+msgid "you may not specify both the -i and -E options"
+msgstr "-i ve -E seçeneklerini aynı anda belirtemezsiniz"
 
 #: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
-msgstr "düzenleme kipinde `-E' seçeneği geçerli değil"
+msgid "the -E option is not valid in edit mode"
+msgstr "düzenleme kipinde -E seçeneği geçerli değil"
 
 #: src/parse_args.c:548
 msgid "you may not specify environment variables in edit mode"
 msgstr "düzenleme kipinde ortam değişkenlerini belirtemezsiniz"
 
 #: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
-msgstr "`-U' seçeneği sadece `-l' seçeneği ile kullanılabilir"
+msgid "the -U option may only be used with the -l option"
+msgstr "-U seçeneği sadece -l seçeneği ile kullanılabilir"
 
 #: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "`-A' ve `-S' seçenekleri birlikte kullanılamaz"
+msgid "the -A and -S options may not be used together"
+msgstr "-A ve -S seçenekleri birlikte kullanılamaz"
 
 #: src/parse_args.c:654
 msgid "sudoedit is not supported on this platform"
@@ -718,27 +718,27 @@ msgstr "çağırılan görev son"
 msgid "could not join project \"%s\""
 msgstr "\"%s\" projesine katılamadı"
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "\"%s\" projesi için hiçbir kaynak havuzu varsayılan atamaları kabul etmiyor"
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "belirtilen kaynak havuzu \"%s\" projesi için mevcut değil"
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "\"%s\" projesi için öntanımlı kaynak havuzu atanamadı"
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "\"%s\" projesi için setproject başarısız"
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "uyarı, \"%s\" projesi için kaynak denetim ataması başarısız"
@@ -815,8 +815,8 @@ msgstr "ilke eklentisi başlatılamıyor"
 
 #: src/sudo.c:1158
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
-msgstr "%s ilke eklentisi, bir `check_policy' yöntemi içermiyor"
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "%s ilke eklentisi, bir \"check_policy\" yöntemi içermiyor"
 
 #: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
 msgid "command rejected by policy"
@@ -892,51 +892,51 @@ msgstr "%s: yazılabilir klasördeki düzenleme dosyalarına izin verilmemiştir
 msgid "%s left unmodified"
 msgstr "%s düzenlenmemiş olarak bırakıldı"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s değiştirilmemiş"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "düzenleme oturumu içerikleri %s içinde bırakıldı"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: iç hata: yolların tek sayısı"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: geçici dosyalar oluşturulamıyor"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
 msgid "sesh: killed by a signal"
 msgstr "sesh: bir sinyal tarafından ortadan kaldırıldı"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: bilinmeyen hata %d"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:894
 msgid "unable to copy temporary files back to their original location"
 msgstr "geçici dosyalar onların özgün konumlarına kopyalanamıyor"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:897
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "bazı geçici dosyalar onların özgün konumlarına kopyalanamıyor"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:941
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "kullanıcı kimliği yetkili (%u) olarak değiştirilemiyor"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:958
 msgid "plugin error: missing file list for sudoedit"
 msgstr "eklenti hatası: sudoedit için eksik dosya listesi"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
 msgid "unable to read the clock"
 msgstr "saat okunamıyor"
 

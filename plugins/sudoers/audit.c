@@ -135,6 +135,11 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     int ret;
     debug_decl(sudoers_audit_open, SUDOERS_DEBUG_PLUGIN);
 
+    sudo_conv = conversation;
+    sudo_printf = plugin_printf;
+
+    bindtextdomain("sudoers", LOCALEDIR);
+
     /* Initialize the debug subsystem.  */
     for (cur = settings; (cp = *cur) != NULL; cur++) {
 	if (strncmp(cp, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
