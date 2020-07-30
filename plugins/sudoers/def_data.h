@@ -1,3 +1,5 @@
+/* generated file, do not edit */
+
 #define I_SYSLOG                0
 #define def_syslog              (sudo_defs_table[I_SYSLOG].sd_un.ival)
 #define I_SYSLOG_GOODPRI        1

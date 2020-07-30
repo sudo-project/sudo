@@ -48,7 +48,6 @@ FLEX = @FLEX@
 YACC = @YACC@
 SED = @SED@
 AWK = @AWK@
-PERL = perl
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
@@ -375,7 +374,7 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y prologue
 
 $(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
 	@if [ -n "$(DEVEL)" ]; then \
-	    cmd='$(PERL) $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in'; \
+	    cmd='AWK=$(AWK) $(SHELL) $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
