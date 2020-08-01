@@ -9,6 +9,7 @@
 #define ZCONF_H
 
 /* The following four defines are enabled by sudo's configure script. */
+#undef HAVE_FALLTHROUGH_ATTRIBUTE
 #undef HAVE_DSO_VISIBILITY
 #undef HAVE_MEMCPY
 #undef HAVE_UNISTD_H
@@ -28,6 +29,12 @@
 # else
 #  define ZEXTERN extern __declspec(dllimport)
 # endif
+#endif
+
+#ifdef HAVE_FALLTHROUGH_ATTRIBUTE
+# define ZFALLTHROUGH	__attribute__((__fallthrough__))
+#else
+# define ZFALLTHROUGH	do { } while (0)
 #endif
 
 /*
