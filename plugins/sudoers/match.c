@@ -98,7 +98,7 @@ user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 		alias_put(a);
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case WORD:
 	    if (userpw_matches(m->name, pw->pw_name, pw))
 		matched = !m->negated;
@@ -195,7 +195,7 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 			    alias_put(a);
 			    break;
 			}
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		    case WORD:
 			if (userpw_matches(m->name, runas_pw->pw_name, runas_pw))
 			    user_matched = !m->negated;
@@ -239,7 +239,7 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 			    alias_put(a);
 			    break;
 			}
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		    case WORD:
 			if (group_matches(m->name, runas_gr))
 			    group_matched = !m->negated;
@@ -352,7 +352,7 @@ host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 		alias_put(a);
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case WORD:
 	    if (hostname_matches(shost, lhost, m->name))
 		matched = !m->negated;
@@ -399,7 +399,7 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
 		matched = !m->negated;
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case COMMAND:
 	    c = (struct sudo_command *)m->name;
 	    if (command_matches(c->cmnd, c->args, &c->digests))

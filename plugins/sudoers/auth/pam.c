@@ -681,7 +681,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
 		type = SUDO_CONV_PROMPT_ECHO_ON;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	    case PAM_PROMPT_ECHO_OFF:
 		/* Error out if the last password read was interrupted. */
 		if (getpass_error)

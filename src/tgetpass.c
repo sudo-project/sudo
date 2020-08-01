@@ -435,7 +435,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 	    *errval = TGP_ERRVAL_NOPASSWORD;
 	    debug_return_str(NULL);
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	debug_return_str_masked(buf);
     }

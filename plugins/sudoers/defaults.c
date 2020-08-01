@@ -218,7 +218,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	case T_TUPLE:
 	    if (ISSET(def->type, T_BOOL))
 		break;
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case T_LOGFAC:
 	    if (op == true) {
 		/* Use default syslog facility if none specified. */

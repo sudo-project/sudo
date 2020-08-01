@@ -542,7 +542,7 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	    ret = SIGCONT_FG; /* resume command in foreground */
 	    break;
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case SIGSTOP:
     case SIGTSTP:
 	/* Flush any remaining output and deschedule I/O events. */
@@ -663,7 +663,7 @@ read_callback(int fd, int what, void *v)
 	    /* treat read error as fatal and close the fd */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"error reading fd %d: %s", fd, strerror(errno));
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case 0:
 	    /* got EOF or pty has gone away */
 	    if (n == 0) {
@@ -763,7 +763,7 @@ write_callback(int fd, int what, void *v)
 		/* Schedule SIGTTOU to be forwarded to the command. */
 		schedule_signal(iob->ec, SIGTTOU);
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case EAGAIN:
 	    /* not an error */
 	    break;
@@ -1041,7 +1041,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
     switch (pid) {
     case 0:
 	errno = ECHILD;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case -1:
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;

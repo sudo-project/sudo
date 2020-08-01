@@ -48,7 +48,7 @@ sudo_printf_int(int msg_type, const char *fmt, ...)
     switch (msg_type & 0xff) {
     case SUDO_CONV_ERROR_MSG:
 	fp = stderr;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case SUDO_CONV_INFO_MSG:
 	va_start(ap, fmt);
 	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);

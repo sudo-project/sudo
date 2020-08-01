@@ -69,7 +69,7 @@ sudo_strtonumx(const char *str, long long minval, long long maxval, char **endp,
 	break;
     case '+':
 	ch = *cp++;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	sign = '+';
 	break;

@@ -80,6 +80,12 @@
 # endif
 #endif
 
+#ifdef HAVE_FALLTHROUGH_ATTRIBUTE
+# define FALLTHROUGH 	__attribute__((__fallthrough__))
+#else
+# define FALLTHROUGH 	do { } while (0)
+#endif
+
 /*
  * Given the pointer x to the member m of the struct s, return
  * a pointer to the containing structure.

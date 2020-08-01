@@ -389,7 +389,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 			valid_flags = 0;
 			break;
 		    }
-		    /* FALLTHROUGH */
+		    FALLTHROUGH;
 		case OPT_HOSTNAME:
 		    assert(optarg != NULL);
 		    if (*optarg == '\0')

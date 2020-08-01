@@ -811,7 +811,7 @@ whatnow(void)
 	switch (choice) {
 	    case EOF:
 		choice = 'x';
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	    case 'e':
 	    case 'x':
 	    case 'Q':

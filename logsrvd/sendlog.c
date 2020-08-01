@@ -866,10 +866,10 @@ client_message_completion(struct client_closure *closure)
 	    closure->state = SEND_EXIT;
 	    debug_return_bool(fmt_exit_message(closure));
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case SEND_RESTART:
 	closure->state = SEND_IO;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case SEND_IO:
 	/* fmt_next_iolog() will advance state on EOF. */
 	if (!fmt_next_iolog(closure))

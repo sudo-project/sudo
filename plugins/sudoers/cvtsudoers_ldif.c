@@ -277,7 +277,7 @@ print_member_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree, char *name,
 	    print_attribute_ldif(fp, attr_name, negated ? "!ALL" : "ALL");
 	    break;
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case COMMAND:
 	attr_val = format_cmnd((struct sudo_command *)name, negated);
 	print_attribute_ldif(fp, attr_name, attr_val);
@@ -292,7 +292,7 @@ print_member_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree, char *name,
 	    alias_put(a);
 	    break;
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	len = asprintf(&attr_val, "%s%s", negated ? "!" : "", name);
 	if (len == -1) {

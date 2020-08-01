@@ -448,7 +448,7 @@ getsize_cb(int fd, int what, void *v)
 	    case -1:
 		if (errno == EAGAIN)
 		    goto another;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	    case 0:
 		goto done;
 	    default:
@@ -487,7 +487,7 @@ getsize_cb(int fd, int what, void *v)
 		goto done;
 	    gc->nums[gc->nums_depth] = 0;
 	    gc->state = NUMBER;
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case NUMBER:
 	    if (!isdigit(ch)) {
 		/* done with number, reparse ch */

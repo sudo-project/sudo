@@ -58,7 +58,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 		sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
 	    TAILQ_FOREACH(digest, &c->digests, entries) {
@@ -100,7 +100,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 		    break;
 		}
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	default:
 	print_word:
 	    /* Do not quote UID/GID, all others get quoted. */

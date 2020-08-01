@@ -152,7 +152,7 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 		m->type = ALL;
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	default:
 	    m->type = WORD;
 	    break;
@@ -222,7 +222,7 @@ host_to_member(char *host)
 	    m->type = ALL;
 	    break;
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	if (is_address(host)) {
 	    m->type = NTWKADDR;

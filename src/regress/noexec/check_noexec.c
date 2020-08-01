@@ -161,7 +161,7 @@ try_wordexp(void)
 	    break;
 	}
 	wordfree(&we);
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	printf("%s: FAIL (wordexp) [%d]\n", getprogname(), rc);
 	break;

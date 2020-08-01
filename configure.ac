@@ -4591,36 +4591,41 @@ dnl We add -Wall and -Werror after all tests so they don't cause failures
 dnl
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
+	dnl
+	dnl Default warnings for development use.
+	dnl
 	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith"
 	dnl
-	dnl Check whether -Wimplicit-fallthrough is available and
-	dnl recognizes /* FALLTHROUGH */ comments.  Clang 10 requires
-	dnl the "fallthrough" attribute which we don't use.
+	dnl The fallthrough attribute is supported by gcc 7.0 and clang 10.
+	dnl This test relies on AC_LANG_WERROR.
 	dnl
-	_CFLAGS="$CFLAGS"
-	CFLAGS="$CFLAGS -Wimplicit-fallthrough -Werror"
-	AC_MSG_CHECKING([whether C compiler acceptd -Wimplicit-fallthrough])
-	AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-	    int main(int argc, char *argv[])
-	    {
-		int num = argc + 1;
-		switch (num) {
-		    case 1:
-			num = 0;
-			/* FALLTHROUGH */
-		    case 0:
-			num++;
+	AC_CACHE_CHECK([whether $CC supports the fallthrough attribute],
+	    [sudo_cv_var_fallthrough_attribute],
+	    [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+		int main(int argc, char *argv[])
+		{
+		    int num = argc + 1;
+		    switch (num) {
+			case 1:
+			    num = 0;
+			    __attribute__((__fallthrough__));
+			case 0:
+			    num++;
+		    }
+		    return num;
 		}
-		return num;
-	    }
-	]])], [
-	    AC_MSG_RESULT([yes])
-	    CFLAGS="$_CFLAGS -Wimplicit-fallthrough"
-	], [
-	    AC_MSG_RESULT([no])
-	    CFLAGS="$_CFLAGS"
-	])
-
+	    ]])],
+	    [
+		sudo_cv_var_fallthrough_attribute=yes
+	    ],
+	    [
+		sudo_cv_var_fallthrough_attribute=no]
+	    )]
+	)
+	if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
+	    AC_DEFINE(HAVE_FALLTHROUGH_ATTRIBUTE)
+	    CFLAGS="$CFLAGS -Wimplicit-fallthrough"
+	fi
     fi
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
@@ -4891,6 +4896,7 @@ AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 f
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
 AH_TEMPLATE(SUDOERS_IOLOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers I/O log plugin.])
+AH_TEMPLATE(HAVE_FALLTHROUGH_ATTRIBUTE, [Define to 1 if the compiler supports the fallthrough attribute.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

@@ -368,7 +368,7 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 		    m->type = ALL;
 		    break;
 		}
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	    default:
 		m->type = WORD;
 		break;

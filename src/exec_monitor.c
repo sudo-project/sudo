@@ -201,7 +201,7 @@ mon_handle_sigchld(struct monitor_closure *mc)
     switch (pid) {
     case 0:
 	errno = ECHILD;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case -1:
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;
