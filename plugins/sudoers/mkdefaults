@@ -88,7 +88,7 @@ BEGIN {
 		    # Add to tuple_values as necessary
 		    n = split(values, vals)
 		    for (i = 1; i <= n; i++) {
-			if (tuple_keys[vals[i]] == "") {
+			if (!(vals[i] in tuple_keys)) {
 			    tuple_keys[vals[i]] = ++tuple_last
 			    tuple_values[tuple_last] = vals[i]
 			}
@@ -153,7 +153,7 @@ function print_record(rec, recnum) {
     split(rec, fields, "\n")
     type = fields[2]
     sub(/\|.*/, "", type)
-    if (!type_map[type])
+    if (!(type in type_map))
     	die("unknown defaults type: " fields[2])
 
     # each variable gets a macro to access its value
