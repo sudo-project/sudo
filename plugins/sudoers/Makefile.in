@@ -356,7 +356,7 @@ $(devdir)/toke.c: $(srcdir)/toke.l prologue
 	    else \
 		toke_l="$(srcdir)/toke.l"; \
 	    fi; \
-	    cmd='$(FLEX) '"$$toke_l"'; cp prologue $(devdir)/toke.c; $(SED) "s/^\\(#line .*\\) \"lex\\.sudoers\\.c\"/\1 \"toke.c\"/" lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
+	    cmd='$(FLEX) '"$$toke_l"'; cp prologue $(devdir)/toke.c; $(SED) -e "s/^\\(#line .*\\) \"lex\\.sudoers\\.c\"/\1 \"toke.c\"/" -e "s:/\* *FALLTHROUGH *\*/:FALLTHROUGH;:" lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 

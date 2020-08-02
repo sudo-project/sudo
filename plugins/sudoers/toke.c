@@ -3803,7 +3803,7 @@ static int yy_get_next_buffer (void)
 					/* Reset buffer status. */
 					sudoersrestart(sudoersin );
 
-					/*FALLTHROUGH*/
+					FALLTHROUGH;
 
 				case EOB_ACT_END_OF_FILE:
 					{
