@@ -4339,89 +4339,89 @@ else
 fi
 
 dnl
-dnl If the compiler doesn't have symbol visibility support, it may
-dnl support version scripts (only GNU and Solaris ld).
+dnl Check whether ld supports version scripts (only GNU and Solaris ld).
+dnl If possible, we use this even if the compiler has symbol visibility
+dnl support so we will notice mismatches between the exports file and
+dnl __dso_public annotations in the source code.
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test -n "$LT_LDEXPORTS"; then
-    if test "$lt_cv_prog_gnu_ld" = "yes"; then
-	AC_CACHE_CHECK([whether ld supports anonymous map files],
-	    [sudo_cv_var_gnu_ld_anon_map],
-	    [
-		sudo_cv_var_gnu_ld_anon_map=no
-		cat > conftest.map <<-EOF
-		{
-		    global: foo;
-		    local:  *;
-		};
+if test "$lt_cv_prog_gnu_ld" = "yes"; then
+    AC_CACHE_CHECK([whether ld supports anonymous map files],
+	[sudo_cv_var_gnu_ld_anon_map],
+	[
+	    sudo_cv_var_gnu_ld_anon_map=no
+	    cat > conftest.map <<-EOF
+	    {
+		global: foo;
+		local:  *;
+	    };
 EOF
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
-		_LDFLAGS="$LDFLAGS"
-		LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
-		AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
-		    [sudo_cv_var_gnu_ld_anon_map=yes])
-		CFLAGS="$_CFLAGS"
-		LDFLAGS="$_LDFLAGS"
-	    ]
-	)
-	if test "$sudo_cv_var_gnu_ld_anon_map" = "yes"; then
-	    LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,--version-script,\$(shlib_map)"
-	fi
-    else
-	case "$host_os" in
-	    solaris2*)
-		AC_CACHE_CHECK([whether ld supports anonymous map files],
-		    [sudo_cv_var_solaris_ld_anon_map],
-		    [
-			sudo_cv_var_solaris_ld_anon_map=no
-			cat > conftest.map <<-EOF
-			{
-			    global: foo;
-			    local:  *;
-			};
-EOF
-			_CFLAGS="$CFLAGS"
-			CFLAGS="$CFLAGS $lt_prog_compiler_pic"
-			_LDFLAGS="$LDFLAGS"
-			LDFLAGS="$LDFLAGS -shared -Wl,-M,./conftest.map"
-			AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
-			    [sudo_cv_var_solaris_ld_anon_map=yes])
-			CFLAGS="$_CFLAGS"
-			LDFLAGS="$_LDFLAGS"
-		    ]
-		)
-		if test "$sudo_cv_var_solaris_ld_anon_map" = "yes"; then
-		    LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,-M,\$(shlib_map)"
-		fi
-		;;
-	    hpux*)
-		AC_CACHE_CHECK([whether ld supports controlling exported symbols],
-		    [sudo_cv_var_hpux_ld_symbol_export],
-		    [
-			sudo_cv_var_hpux_ld_symbol_export=no
-			echo "+e foo" > conftest.opt
-			_CFLAGS="$CFLAGS"
-			CFLAGS="$CFLAGS $lt_prog_compiler_pic"
-			_LDFLAGS="$LDFLAGS"
-			if test -n "$GCC"; then
-			    LDFLAGS="$LDFLAGS -shared -Wl,-c,./conftest.opt"
-			else
-			    LDFLAGS="$LDFLAGS -Wl,-b -Wl,-c,./conftest.opt"
-			fi
-			AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
-			    [sudo_cv_var_hpux_ld_symbol_export=yes])
-			CFLAGS="$_CFLAGS"
-			LDFLAGS="$_LDFLAGS"
-			rm -f conftest.opt
-		    ]
-		)
-		if test "$sudo_cv_var_hpux_ld_symbol_export" = "yes"; then
-		    LT_LDDEP="\$(shlib_opt)"; LT_LDEXPORTS="-Wl,-c,\$(shlib_opt)"
-		fi
-		;;
-	esac
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+	    _LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
+	    AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
+		[sudo_cv_var_gnu_ld_anon_map=yes])
+	    CFLAGS="$_CFLAGS"
+	    LDFLAGS="$_LDFLAGS"
+	]
+    )
+    if test "$sudo_cv_var_gnu_ld_anon_map" = "yes"; then
+	LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,--version-script,\$(shlib_map)"
     fi
+else
+    case "$host_os" in
+	solaris2*)
+	    AC_CACHE_CHECK([whether ld supports anonymous map files],
+		[sudo_cv_var_solaris_ld_anon_map],
+		[
+		    sudo_cv_var_solaris_ld_anon_map=no
+		    cat > conftest.map <<-EOF
+		    {
+			global: foo;
+			local:  *;
+		    };
+EOF
+		    _CFLAGS="$CFLAGS"
+		    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+		    _LDFLAGS="$LDFLAGS"
+		    LDFLAGS="$LDFLAGS -shared -Wl,-M,./conftest.map"
+		    AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
+			[sudo_cv_var_solaris_ld_anon_map=yes])
+		    CFLAGS="$_CFLAGS"
+		    LDFLAGS="$_LDFLAGS"
+		]
+	    )
+	    if test "$sudo_cv_var_solaris_ld_anon_map" = "yes"; then
+		LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,-M,\$(shlib_map)"
+	    fi
+	    ;;
+	hpux*)
+	    AC_CACHE_CHECK([whether ld supports controlling exported symbols],
+		[sudo_cv_var_hpux_ld_symbol_export],
+		[
+		    sudo_cv_var_hpux_ld_symbol_export=no
+		    echo "+e foo" > conftest.opt
+		    _CFLAGS="$CFLAGS"
+		    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+		    _LDFLAGS="$LDFLAGS"
+		    if test -n "$GCC"; then
+			LDFLAGS="$LDFLAGS -shared -Wl,-c,./conftest.opt"
+		    else
+			LDFLAGS="$LDFLAGS -Wl,-b -Wl,-c,./conftest.opt"
+		    fi
+		    AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
+			[sudo_cv_var_hpux_ld_symbol_export=yes])
+		    CFLAGS="$_CFLAGS"
+		    LDFLAGS="$_LDFLAGS"
+		    rm -f conftest.opt
+		]
+	    )
+	    if test "$sudo_cv_var_hpux_ld_symbol_export" = "yes"; then
+		LT_LDDEP="\$(shlib_opt)"; LT_LDEXPORTS="-Wl,-c,\$(shlib_opt)"
+	    fi
+	    ;;
+    esac
 fi
 
 dnl
