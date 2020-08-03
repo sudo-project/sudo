@@ -19215,7 +19215,7 @@ fi
 
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-python.pp'
     PYTHON_PLUGIN_SRC=plugins/python
-    ac_config_files="$ac_config_files $PYTHON_PLUGIN_SRC/Makefile"
+    ac_config_files="$ac_config_files $PYTHON_PLUGIN_SRC/Makefile $PYTHON_PLUGIN_SRC/python_plugin.exp"
 
 fi
 
@@ -29014,6 +29014,7 @@ do
     "pathnames.h") CONFIG_HEADERS="$CONFIG_HEADERS pathnames.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "$PYTHON_PLUGIN_SRC/Makefile") CONFIG_FILES="$CONFIG_FILES $PYTHON_PLUGIN_SRC/Makefile" ;;
+    "$PYTHON_PLUGIN_SRC/python_plugin.exp") CONFIG_FILES="$CONFIG_FILES $PYTHON_PLUGIN_SRC/python_plugin.exp" ;;
     "lib/zlib/zconf.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/zlib/zconf.h" ;;
     "lib/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/zlib/Makefile" ;;
     "etc/init.d/$INIT_SCRIPT") CONFIG_FILES="$CONFIG_FILES etc/init.d/$INIT_SCRIPT" ;;

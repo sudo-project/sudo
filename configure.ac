@@ -2599,7 +2599,7 @@ if test ${USE_PYTHON-'no'} = "yes"; then
 
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-python.pp'
     PYTHON_PLUGIN_SRC=plugins/python
-    AC_CONFIG_FILES([$PYTHON_PLUGIN_SRC/Makefile])
+    AC_CONFIG_FILES([$PYTHON_PLUGIN_SRC/Makefile $PYTHON_PLUGIN_SRC/python_plugin.exp])
 fi
 
 dnl
