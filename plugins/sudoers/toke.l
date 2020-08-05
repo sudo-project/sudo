@@ -226,6 +226,7 @@ DEFVAR			[a-z_]+
     [#:\,=\r\n]		{
 			    BEGIN INITIAL;
 			    yyless(0);
+			    yy_set_bol(0);
 			    LEXRETURN(COMMAND);
 			}			/* end of command line args */
 
@@ -304,6 +305,7 @@ DEFVAR			[a-z_]+
 
 			    /* only consume #include */
 			    yyless(sizeof("#include") - 1);
+			    yy_set_bol(0);
 
 			    BEGIN GOTINC;
 			    LEXTRACE("INCLUDE ");
@@ -318,6 +320,7 @@ DEFVAR			[a-z_]+
 
 			    /* only consume #includedir */
 			    yyless(sizeof("#includedir") - 1);
+			    yy_set_bol(0);
 
 			    BEGIN GOTINC;
 			    LEXTRACE("INCLUDEDIR ");
