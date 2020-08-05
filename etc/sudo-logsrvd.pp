@@ -161,9 +161,15 @@ This makes it possible to have all sudo I/O logs on a central server."
 	fi
 
 %depend [deb]
-	libc6, zlib1g, libssl1.1, sudo
+	libc6, zlib1g, sudo
 
 %fixup [deb]
+	if test -n "%{libssl_dep}"; then
+	    DEPENDS="%{libssl_dep}"
+	    cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	    sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	    rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	fi
 	echo "Homepage: https://www.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	echo "Bugs: https://bugzilla.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
