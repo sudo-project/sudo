@@ -53,6 +53,7 @@
 int sudolineno;			/* current sudoers line number. */
 int last_token;			/* last token that was parsed. */
 char *sudoers;			/* sudoers file being parsed. */
+struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
 const char *sudoers_file = _PATH_SUDOERS;
@@ -65,6 +66,7 @@ static int prev_state;
 static int digest_type = -1;
 
 static bool pop_include(void);
+static yy_size_t sudoers_input(char *buf, yy_size_t max_size);
 
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
@@ -74,6 +76,9 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 } while (0)
 
 #define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
+
+#define YY_INPUT(buf, result, max_size)	(result) = sudoers_input(buf, max_size)
+
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
@@ -713,6 +718,7 @@ sudoedit		{
 
 <*>\r?\n		{
 			    if (YY_START == INSTR) {
+				/* XXX - better error message */
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);	/* line break in string */
 			    }
@@ -739,7 +745,7 @@ sudoedit		{
 				BEGIN INITIAL;
 				sudolineno++;
 				continued = false;
-			    } else if (!feof(yyin)) {
+			    } else if (!feof(sudoersin)) {
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -771,6 +777,7 @@ struct path_list {
 SLIST_HEAD(path_list_head, path_list);
 
 struct include_stack {
+    struct sudolinebuf line;
     YY_BUFFER_STATE bs;
     char *path;
     struct path_list_head more; /* more files in case of includedir */
@@ -926,10 +933,13 @@ init_lexer(void)
 	if (idepth && !istack[idepth].keepopen)
 	    fclose(istack[idepth].bs->yy_input_file);
 	sudoers_delete_buffer(istack[idepth].bs);
+	free(istack[idepth].line.buf);
     }
     free(istack);
     istack = NULL;
     istacksize = idepth = 0;
+    free(sudolinebuf.buf);
+    memset(&sudolinebuf, 0, sizeof(sudolinebuf));
     sudolineno = 1;
     keepopen = false;
     sawspace = false;
@@ -1107,6 +1117,7 @@ push_include(const char *opath, bool isdir)
     }
     /* Push the old (current) file and open the new one. */
     istack[idepth].path = sudoers; /* push old path (and its ref) */
+    istack[idepth].line = sudolinebuf;
     istack[idepth].bs = YY_CURRENT_BUFFER;
     istack[idepth].lineno = sudolineno;
     istack[idepth].keepopen = keepopen;
@@ -1114,6 +1125,7 @@ push_include(const char *opath, bool isdir)
     sudolineno = 1;
     sudoers = path;
     sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
+    memset(&sudolinebuf, 0, sizeof(sudolinebuf));
 
     debug_return_bool(true);
 }
@@ -1141,6 +1153,7 @@ pop_include(void)
 	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
 	fp = open_sudoers(pl->path, false, &keepopen);
 	if (fp != NULL) {
+	    sudolinebuf.len = sudolinebuf.off = 0;
 	    rcstr_delref(sudoers);
 	    sudoers = pl->path;
 	    sudolineno = 1;
@@ -1156,6 +1169,8 @@ pop_include(void)
     if (pl == NULL) {
 	idepth--;
 	sudoers_switch_to_buffer(istack[idepth].bs);
+	free(sudolinebuf.buf);
+	sudolinebuf = istack[idepth].line;
 	rcstr_delref(sudoers);
 	sudoers = istack[idepth].path;
 	sudolineno = istack[idepth].lineno;
@@ -1193,3 +1208,30 @@ sudoers_trace_print(const char *msg)
     return 0;
 }
 #endif /* TRACELEXER */
+
+static yy_size_t
+sudoers_input(char *buf, yy_size_t max_size)
+{
+    size_t avail = sudolinebuf.len - sudolinebuf.off;
+
+    /* Refill line buffer if needed. */
+    if (avail == 0) {
+	sudolinebuf.off = 0;
+	sudolinebuf.len = getdelim(&sudolinebuf.buf, &sudolinebuf.size,
+	    '\n', sudoersin);
+	if (sudolinebuf.len == (size_t)-1) {
+	    if (ferror(sudoersin) && errno != EINTR)
+		YY_FATAL_ERROR("input in flex scanner failed");
+	    sudolinebuf.len = 0;
+	    return 0;
+	}
+	avail = sudolinebuf.len;
+    }
+
+    if (avail > max_size)
+	avail = max_size;
+    memcpy(buf, sudolinebuf.buf + sudolinebuf.off, avail);
+    sudolinebuf.off += avail;
+
+    return avail;
+}

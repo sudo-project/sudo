@@ -952,6 +952,12 @@ sudoerserror(const char *s)
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), this_lineno);
 	    sudoers_setlocale(oldlocale, NULL);
+
+	    /* Display the offending line if possible. */
+	    if (sudolinebuf.len != 0) {
+		sudo_printf(SUDO_CONV_ERROR_MSG, "%s%s", sudolinebuf.buf,
+		    sudolinebuf.buf[sudolinebuf.len - 1] == '\n' ? "" : "\n");
+	    }
 	}
 #endif
     }

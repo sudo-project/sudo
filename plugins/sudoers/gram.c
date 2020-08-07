@@ -738,6 +738,12 @@ sudoerserror(const char *s)
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), this_lineno);
 	    sudoers_setlocale(oldlocale, NULL);
+
+	    /* Display the offending line if possible. */
+	    if (sudolinebuf.len != 0) {
+		sudo_printf(SUDO_CONV_ERROR_MSG, "%s%s", sudolinebuf.buf,
+		    sudolinebuf.buf[sudolinebuf.len - 1] == '\n' ? "" : "\n");
+	    }
 	}
 #endif
     }
@@ -1165,7 +1171,7 @@ init_options(struct command_options *opts)
     opts->limitprivs = NULL;
 #endif
 }
-#line 1111 "gram.c"
+#line 1117 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2332,7 +2338,7 @@ case 120:
 			    }
 			}
 break;
-#line 2278 "gram.c"
+#line 2284 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

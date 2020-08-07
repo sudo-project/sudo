@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2013, 2015-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2013, 2015-2016, 2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,14 @@
 
 #ifndef SUDOERS_TOKE_H
 #define SUDOERS_TOKE_H
+
+struct sudolinebuf {
+    char *buf;			/* line buffer */
+    size_t size;		/* size of buffer */
+    size_t len;			/* used length */
+    size_t off;			/* consumed length */
+};
+extern struct sudolinebuf sudolinebuf;
 
 bool append(const char *, size_t);
 bool fill_args(const char *, size_t, int);
