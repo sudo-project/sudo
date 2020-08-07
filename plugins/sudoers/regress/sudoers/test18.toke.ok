@@ -6,5 +6,5 @@ WORD(5) ALL = CMND_TIMEOUT = WORD(5) <*> COMMAND
 WORD(5) ALL = CMND_TIMEOUT = WORD(5) <*> COMMAND 
 WORD(5) ALL = CMND_TIMEOUT = WORD(5) <*> COMMAND 
 WORD(5) ALL = CMND_TIMEOUT = WORD(5) <*> COMMAND 
-testsudoers: sudoers:2 value "2d8h10m59ss" is invalid for option "command_timeout"
-testsudoers: sudoers:3 value "15f" is invalid for option "command_timeout"
+testsudoers: sudoers:2: value "2d8h10m59ss" is invalid for option "command_timeout"
+testsudoers: sudoers:3: value "15f" is invalid for option "command_timeout"

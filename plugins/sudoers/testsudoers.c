@@ -290,30 +290,23 @@ main(int argc, char *argv[])
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
     switch (input_format) {
     case format_ldif:
-        if (!sudoers_parse_ldif(&parsed_policy, stdin, NULL, true))
-	    (void) printf("Parse error in LDIF");
-	else
-	    (void) fputs("Parses OK", stdout);
+        if (!sudoers_parse_ldif(&parsed_policy, stdin, NULL, true)) {
+	    (void) puts("Parse error in LDIF");
+	    parse_error = true;
+	}
         break;
     case format_sudoers:
-	if (sudoersparse() != 0 || parse_error) {
+	if (sudoersparse() != 0 || parse_error)
 	    parse_error = true;
-	    if (errorlineno != -1)
-		(void) printf("Parse error in %s near line %d",
-		    errorfile, errorlineno);
-	    else
-		(void) printf("Parse error in %s", errorfile);
-	} else {
-	    (void) fputs("Parses OK", stdout);
-	}
         break;
     default:
         sudo_fatalx("error: unhandled input %d", input_format);
     }
+    if (!parse_error)
+	(void) puts("Parses OK");
 
     if (!update_defaults(&parsed_policy, NULL, SETDEF_ALL, false))
-	(void) fputs(" (problem with defaults entries)", stdout);
-    puts(".");
+	(void) puts("Problem with defaults entries");
 
     if (dflag) {
 	(void) putchar('\n');

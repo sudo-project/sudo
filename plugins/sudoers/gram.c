@@ -719,7 +719,15 @@ int yyparse(void);
 void
 sudoerserror(const char *s)
 {
+    static int last_error_line = -1;
+    static char *last_error_file = NULL;
     debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER);
+
+    /* Avoid displaying a generic error after a more specific one. */
+    if (last_error_file == sudoers && last_error_line == this_lineno)
+	debug_return;
+    last_error_file = sudoers;
+    last_error_line = this_lineno;
 
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
@@ -731,12 +739,12 @@ sudoerserror(const char *s)
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
-	    const char fmt[] = ">>> %s: %s near line %d <<<\n";
 	    int oldlocale;
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), this_lineno);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d: %s\n"), sudoers,
+		this_lineno, _(s));
 	    sudoers_setlocale(oldlocale, NULL);
 
 	    /* Display the offending line and token if possible. */
@@ -1183,7 +1191,7 @@ init_options(struct command_options *opts)
     opts->limitprivs = NULL;
 #endif
 }
-#line 1129 "gram.c"
+#line 1137 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack(void)
 {
@@ -2332,7 +2340,7 @@ case 120:
 			    }
 			}
 break;
-#line 2278 "gram.c"
+#line 2286 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -1,4 +1,4 @@
-Parses OK.
+Parses OK
 
 user1 ALL = LOG_INPUT: LOG_OUTPUT: /usr/bin/su - : ALL = NOLOG_INPUT: NOLOG_OUTPUT: /usr/bin/id
 user2 ALL = SETENV: NOEXEC: NOPASSWD: /usr/bin/vi : ALL = NOSETENV: EXEC: PASSWD: /usr/bin/echo

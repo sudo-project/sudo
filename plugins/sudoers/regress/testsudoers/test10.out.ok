@@ -1,6 +1,6 @@
 Testing @include of a path with escaped white space
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 
@@ -13,7 +13,7 @@ Command allowed
 
 Testing @include of a double-quoted path with white space
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 
@@ -26,7 +26,7 @@ Command allowed
 
 Testing #include of a path with escaped white space
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 
@@ -39,7 +39,7 @@ Command allowed
 
 Testing #include of a double-quoted path with white space
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 

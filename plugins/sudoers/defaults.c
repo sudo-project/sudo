@@ -180,7 +180,7 @@ find_default(const char *name, const char *file, int lineno, bool quiet)
     }
     if (!quiet && !def_ignore_unknown_defaults) {
 	if (lineno > 0) {
-	    sudo_warnx(U_("%s:%d unknown defaults entry \"%s\""),
+	    sudo_warnx(U_("%s:%d: unknown defaults entry \"%s\""),
 		file, lineno, name);
 	} else {
 	    sudo_warnx(U_("%s: unknown defaults entry \"%s\""),
@@ -204,7 +204,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     int rc;
     debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS);
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%d %s=%s op=%d",
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%d: %s=%s op=%d",
 	__func__, file, lineno, def->name, val ? val : "", op);
 
     /*
@@ -229,7 +229,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    if (!ISSET(def->type, T_BOOL) || op != false) {
 		if (!quiet) {
 		    if (lineno > 0) {
-			sudo_warnx(U_("%s:%d no value specified for \"%s\""),
+			sudo_warnx(U_("%s:%d: no value specified for \"%s\""),
 			    file, lineno, def->name);
 		    } else {
 			sudo_warnx(U_("%s: no value specified for \"%s\""),
@@ -252,7 +252,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/') {
 		if (!quiet) {
 		    if (lineno > 0) {
-			sudo_warnx(U_("%s:%d values for \"%s\" must start with a '/'"),
+			sudo_warnx(U_("%s:%d: values for \"%s\" must start with a '/'"),
 			    file, lineno, def->name);
 		    } else {
 			sudo_warnx(U_("%s: values for \"%s\" must start with a '/'"),
@@ -277,7 +277,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    if (val != NULL) {
 		if (!quiet) {
 		    if (lineno > 0) {
-			sudo_warnx(U_("%s:%d option \"%s\" does not take a value"),
+			sudo_warnx(U_("%s:%d: option \"%s\" does not take a value"),
 			    file, lineno, def->name);
 		    } else {
 			sudo_warnx(U_("%s: option \"%s\" does not take a value"),
@@ -305,7 +305,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	default:
 	    if (!quiet) {
 		if (lineno > 0) {
-		    sudo_warnx(U_("%s:%d invalid Defaults type 0x%x for option \"%s\""),
+		    sudo_warnx(U_("%s:%d: invalid Defaults type 0x%x for option \"%s\""),
 			file, lineno, def->type, def->name);
 		} else {
 		    sudo_warnx(U_("%s: invalid Defaults type 0x%x for option \"%s\""),
@@ -318,7 +318,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     if (rc == false) {
 	if (!quiet) {
 	    if (lineno > 0) {
-		sudo_warnx(U_("%s:%d value \"%s\" is invalid for option \"%s\""),
+		sudo_warnx(U_("%s:%d: value \"%s\" is invalid for option \"%s\""),
 		    file, lineno, val, def->name);
 	    } else {
 		sudo_warnx(U_("%s: value \"%s\" is invalid for option \"%s\""),

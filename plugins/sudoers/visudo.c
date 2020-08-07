@@ -1080,13 +1080,13 @@ check_alias(char *name, int type, char *file, int lineno, bool strict, bool quie
 	if (!quiet) {
 	    if (errno == ELOOP) {
 		fprintf(stderr, strict ?
-		    U_("Error: %s:%d cycle in %s \"%s\"") :
-		    U_("Warning: %s:%d cycle in %s \"%s\""),
+		    U_("Error: %s:%d: cycle in %s \"%s\"") :
+		    U_("Warning: %s:%d: cycle in %s \"%s\""),
 		    file, lineno, alias_type_to_string(type), name);
 	    } else {
 		fprintf(stderr, strict ?
-		    U_("Error: %s:%d %s \"%s\" referenced but not defined") :
-		    U_("Warning: %s:%d %s \"%s\" referenced but not defined"),
+		    U_("Error: %s:%d: %s \"%s\" referenced but not defined") :
+		    U_("Warning: %s:%d: %s \"%s\" referenced but not defined"),
 		    file, lineno, alias_type_to_string(type), name);
 	    }
 	    fputc('\n', stderr);
@@ -1177,7 +1177,7 @@ check_aliases(bool strict, bool quiet)
 static int
 print_unused(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 {
-    fprintf(stderr, U_("Warning: %s:%d unused %s \"%s\""),
+    fprintf(stderr, U_("Warning: %s:%d: unused %s \"%s\""),
 	a->file, a->lineno, alias_type_to_string(a->type), a->name);
     fputc('\n', stderr);
     return 0;

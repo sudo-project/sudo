@@ -181,7 +181,8 @@ DEFVAR			[a-z_]+
 			    BEGIN prev_state;
 
 			    if (sudoerslval.string == NULL) {
-				LEXTRACE("ERROR "); /* empty string */
+				sudoerserror("empty string");
+				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
 			    if (prev_state == INITIAL || prev_state == GOTDEFS) {
@@ -190,14 +191,16 @@ DEFVAR			[a-z_]+
 				    if (sudoerslval.string[1] == '\0' ||
 					(sudoerslval.string[1] == ':' &&
 					sudoerslval.string[2] == '\0')) {
-					LEXTRACE("ERROR "); /* empty group */
+					sudoerserror("empty group");
+					LEXTRACE("ERROR ");
 					LEXRETURN(ERROR);
 				    }
 				    LEXTRACE("USERGROUP ");
 				    LEXRETURN(USERGROUP);
 				case '+':
 				    if (sudoerslval.string[1] == '\0') {
-					LEXTRACE("ERROR "); /* empty netgroup */
+					sudoerserror("empty netgroup");
+					LEXTRACE("ERROR ");
 					LEXRETURN(ERROR);
 				    }
 				    LEXTRACE("NETGROUP ");
@@ -292,6 +295,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>@include	{
 			    if (continued) {
+				sudoerserror("invalid line continuation");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -303,6 +307,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>@includedir	{
 			    if (continued) {
+				sudoerserror("invalid line continuation");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -314,6 +319,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^#include[[:blank:]]+.*(\r\n|\n)? {
 			    if (continued) {
+				sudoerserror("invalid line continuation");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -329,6 +335,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^#includedir[[:blank:]]+.*(\r\n|\n)? {
 			    if (continued) {
+				sudoerserror("invalid line continuation");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -347,6 +354,7 @@ DEFVAR			[a-z_]+
 			    int n;
 
 			    if (continued) {
+				sudoerserror("invalid line continuation");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -361,14 +369,10 @@ DEFVAR			[a-z_]+
 			    BEGIN GOTDEFS;
 			    switch (deftype) {
 				case ':':
-				    sudolinebuf.toke_end =
-					sudolinebuf.toke_start + n;
 				    sudoersless(n);
 				    LEXTRACE("DEFAULTS_USER ");
 				    LEXRETURN(DEFAULTS_USER);
 				case '>':
-				    sudolinebuf.toke_end =
-					sudolinebuf.toke_start + n;
 				    sudoersless(n);
 				    LEXTRACE("DEFAULTS_RUNAS ");
 				    LEXRETURN(DEFAULTS_RUNAS);
@@ -390,6 +394,7 @@ DEFVAR			[a-z_]+
 			    int n;
 
 			    if (continued) {
+				sudoerserror("invalid line continuation");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -485,7 +490,10 @@ NOFOLLOW[[:blank:]]*:	{
 			}
 
 <INITIAL,GOTDEFS>(\+|\%|\%:) {
-			    /* empty group or netgroup */
+			    if (sudoerstext[0] == '+')
+				sudoerserror("empty netgroup");
+			    else
+				sudoerserror("empty group");
 			    LEXTRACE("ERROR ");
 			    LEXRETURN(ERROR);
 			}
@@ -522,6 +530,7 @@ NOFOLLOW[[:blank:]]*:	{
 
 {IPV6ADDR}(\/{IPV6ADDR})? {
 			    if (!ipv6_valid(sudoerstext)) {
+				sudoerserror("invalid IPv6 address");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -533,6 +542,7 @@ NOFOLLOW[[:blank:]]*:	{
 
 {IPV6ADDR}\/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8]) {
 			    if (!ipv6_valid(sudoerstext)) {
+				sudoerserror("invalid IPv6 address");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -732,9 +742,9 @@ sudoedit		{
 
 <*>\r?\n		{
 			    if (YY_START == INSTR) {
-				/* XXX - better error message */
+				sudoerserror("unexpected line break in string");
 				LEXTRACE("ERROR ");
-				LEXRETURN(ERROR);	/* line break in string */
+				LEXRETURN(ERROR);
 			    }
 			    BEGIN INITIAL;
 			    sudolineno++;
@@ -760,6 +770,7 @@ sudoedit		{
 				sudolineno++;
 				continued = false;
 			    } else if (!feof(sudoersin)) {
+				sudoerserror(strerror(errno));
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -1167,8 +1178,8 @@ pop_include(void)
 	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
 	fp = open_sudoers(pl->path, false, &keepopen);
 	if (fp != NULL) {
-	    sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
 	    sudolinebuf.len = sudolinebuf.off = 0;
+	    sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
 	    rcstr_delref(sudoers);
 	    sudoers = pl->path;
 	    sudolineno = 1;
@@ -1217,7 +1228,7 @@ sudoers_trace_print(const char *msg)
     if (strchr(msg, '\n') != NULL)
     {
 	sudo_debug_printf2(NULL, NULL, 0, SUDOERS_DEBUG_PARSER|SUDO_DEBUG_DEBUG,
-	    "%s:%d %s", sudoers, sudolineno, lbuf.buf);
+	    "%s:%d: %s", sudoers, sudolineno, lbuf.buf);
 	lbuf.len = 0;
     }
     return 0;
@@ -1231,17 +1242,16 @@ sudoers_input(char *buf, yy_size_t max_size)
 
     /* Refill line buffer if needed. */
     if (avail == 0) {
-	sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
-	sudolinebuf.off = 0;
-	sudolinebuf.len = getdelim(&sudolinebuf.buf, &sudolinebuf.size,
-	    '\n', sudoersin);
-	if (sudolinebuf.len == (size_t)-1) {
+	avail = getdelim(&sudolinebuf.buf, &sudolinebuf.size, '\n', sudoersin);
+	if (avail == (size_t)-1) {
+	    /* EOF or error. */
 	    if (ferror(sudoersin) && errno != EINTR)
 		YY_FATAL_ERROR("input in flex scanner failed");
-	    sudolinebuf.len = 0;
 	    return 0;
 	}
-	avail = sudolinebuf.len;
+	sudolinebuf.len = avail;
+	sudolinebuf.off = 0;
+	sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
     }
 
     if (avail > max_size)

@@ -1,4 +1,4 @@
-Parses OK.
+Parses OK
 
 Cmnd_Alias EDIT = sudoedit /etc/motd
 
