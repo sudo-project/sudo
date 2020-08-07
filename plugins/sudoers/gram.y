@@ -84,6 +84,7 @@ static struct command_digest *new_digest(int, char *);
 }
 
 %start file				/* special start symbol */
+%token		 END 0			/* end of file from lexer */
 %token <command> COMMAND		/* absolute pathname w/ optional args */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
 %token <string>	 DEFVAR			/* a Defaults variable name */
@@ -121,7 +122,7 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 RUNASALIAS		/* Runas_Alias keyword */
 %token <tok>	 ':' '=' ',' '!' '+' '-' /* union member tokens */
 %token <tok>	 '(' ')'		/* runas tokens */
-%token <tok>	 ERROR
+%token <tok>	 ERROR			/* error from lexer */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
 %token <tok>	 PRIVS			/* Solaris privileges */
@@ -165,6 +166,8 @@ static struct command_digest *new_digest(int, char *);
 %type <string>	  timeoutspec
 %type <string>	  notbeforespec
 %type <string>	  notafterspec
+%type <string>	  include
+%type <string>	  includedir
 %type <digest>	  digestspec
 %type <digest>	  digestlist
 
@@ -184,19 +187,19 @@ entry		:	COMMENT {
                 |       error COMMENT {
 			    yyerrok;
 			}
-		|	INCLUDE WORD {
-			    if (!push_include($2, false)) {
-				free($2);
+		|	include {
+			    if (!push_include($1, false)) {
+				free($1);
 				YYERROR;
 			    }
-			    free($2);
+			    free($1);
 			}
-		|	INCLUDEDIR WORD {
-			    if (!push_include($2, true)) {
-				free($2);
+		|	includedir {
+			    if (!push_include($1, true)) {
+				free($1);
 				YYERROR;
 			    }
-			    free($2);
+			    free($1);
 			}
 		|	userlist privileges {
 			    if (!add_userspec($1, $2)) {
@@ -235,6 +238,22 @@ entry		:	COMMENT {
 		|	DEFAULTS_CMND cmndlist defaults_list {
 			    if (!add_defaults(DEFAULTS_CMND, $2, $3))
 				YYERROR;
+			}
+		;
+
+include		:	INCLUDE WORD COMMENT {
+			    $$ = $2;
+			}
+		|	INCLUDE WORD END {
+			    $$ = $2;
+			}
+		;
+
+includedir	:	INCLUDEDIR WORD COMMENT {
+			    $$ = $2;
+			}
+		|	INCLUDEDIR WORD END {
+			    $$ = $2;
 			}
 		;
 

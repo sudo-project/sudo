@@ -1,29 +1,19 @@
 Testing @include with garbage after the path name
 
 sudoers:1: syntax error
-@include ../../../trunk/plugins/sudoers/regress/testsudoers/test2.inc womp womp
-                                                                               ^
+@include sudoers.local womp womp
+                       ^~~~
 
 Entries for user root:
 
-ALL = ALL
-	host  matched
-	runas matched
-	cmnd  allowed
-
-Command allowed
+Command unmatched
 
 Testing #include with garbage after the path name
 
 sudoers:1: syntax error
-#include ../../../trunk/plugins/sudoers/regress/testsudoers/test2.inc womp womp
-                                                                               ^
+#include sudoers.local womp womp
+                       ^~~~
 
 Entries for user root:
 
-ALL = ALL
-	host  matched
-	runas matched
-	cmnd  allowed
-
-Command allowed
+Command unmatched

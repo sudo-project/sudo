@@ -13,14 +13,14 @@ exec 2>&1
 echo "Testing @include with garbage after the path name"
 echo ""
 ./testsudoers -U $MYUID -G $MYGID root id <<EOF
-@include $TESTDIR/test2.inc womp womp
+@include sudoers.local womp womp
 EOF
 
 echo ""
 echo "Testing #include with garbage after the path name"
 echo ""
 ./testsudoers -U $MYUID -G $MYGID root id <<EOF
-#include $TESTDIR/test2.inc womp womp
+#include sudoers.local womp womp
 EOF
 
 exit 0

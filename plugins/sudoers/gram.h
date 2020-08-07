@@ -1,3 +1,4 @@
+#define END 0
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
