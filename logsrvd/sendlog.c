@@ -345,6 +345,26 @@ fmt_client_hello(struct client_closure *closure)
     debug_return_bool(ret);
 }
 
+static void
+free_info_messages(InfoMessage **info_msgs, size_t n_info_msgs)
+{
+    debug_decl(free_info_messages, SUDO_DEBUG_UTIL);
+
+    if (info_msgs != NULL) {
+	while (n_info_msgs-- > 0) {
+	    if (info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
+		/* Only strlistval was dynamically allocated */
+		free(info_msgs[n_info_msgs]->strlistval->strings);
+		free(info_msgs[n_info_msgs]->strlistval);
+	    }
+	    free(info_msgs[n_info_msgs]);
+	}
+	free(info_msgs);
+    }
+
+    debug_return;
+}
+
 static InfoMessage **
 fmt_info_messages(struct iolog_info *log_info, char *hostname,
     size_t *n_info_msgs)
@@ -395,6 +415,7 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
     info_msgs[n]->key = "runargv";
     info_msgs[n]->strlistval = runargv;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    runargv = NULL;
     n++;
 
     if (log_info->runas_group != NULL) {
@@ -441,9 +462,7 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    while (n-- > 0)
-	free(info_msgs[n]);
-    free(info_msgs);
+    free_info_messages(info_msgs, n);
     if (runargv != NULL) {
         free(runargv->strings);
         free(runargv);
@@ -505,15 +524,7 @@ fmt_reject_message(struct client_closure *closure)
     }
 
 done:
-    while (n_info_msgs-- > 0) {
-        if (reject_msg.info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
-            /* strlistval was dynamically allocated */
-            free(reject_msg.info_msgs[n_info_msgs]->strlistval->strings);
-            free(reject_msg.info_msgs[n_info_msgs]->strlistval);
-        }
-	free(reject_msg.info_msgs[n_info_msgs]);
-    }
-    free(reject_msg.info_msgs);
+    free_info_messages(reject_msg.info_msgs, n_info_msgs);
     free(hostname);
 
     debug_return_bool(ret);
@@ -572,15 +583,7 @@ fmt_accept_message(struct client_closure *closure)
     }
 
 done:
-    while (n_info_msgs-- > 0) {
-        if (accept_msg.info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
-            /* strlistval was dynamically allocated */
-            free(accept_msg.info_msgs[n_info_msgs]->strlistval->strings);
-            free(accept_msg.info_msgs[n_info_msgs]->strlistval);
-        }
-	free(accept_msg.info_msgs[n_info_msgs]);
-    }
-    free(accept_msg.info_msgs);
+    free_info_messages(accept_msg.info_msgs, n_info_msgs);
     free(hostname);
 
     debug_return_bool(ret);
