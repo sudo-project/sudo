@@ -786,7 +786,7 @@ send_mail(const char *fmt, ...)
 	    break;
 	case 0:
 	    /* Child. */
-	    switch (pid = fork()) {
+	    switch (fork()) {
 		case -1:
 		    /* Error. */
 		    mysyslog(LOG_ERR, _("unable to fork: %m"));

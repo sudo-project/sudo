@@ -856,7 +856,6 @@ int
 sudo_set_grlist(struct passwd *pw, char * const *groups)
 {
     struct cache_item key, *item;
-    struct rbnode *node;
     debug_decl(sudo_set_grlist, SUDOERS_DEBUG_NSS);
 
     if (grlist_cache == NULL) {
@@ -872,7 +871,7 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
      */
     key.k.name = pw->pw_name;
     getauthregistry(NULL, key.registry);
-    if ((node = rbfind(grlist_cache, &key)) == NULL) {
+    if (rbfind(grlist_cache, &key) == NULL) {
 	if ((item = make_grlist_item(pw, groups)) == NULL) {
 	    sudo_warnx(U_("unable to parse groups for %s"), pw->pw_name);
 	    debug_return_int(-1);
@@ -958,7 +957,6 @@ int
 sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
 {
     struct cache_item key, *item;
-    struct rbnode *node;
     debug_decl(sudo_set_gidlist, SUDOERS_DEBUG_NSS);
 
     if (gidlist_cache == NULL) {
@@ -975,7 +973,7 @@ sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
     key.k.name = pw->pw_name;
     key.type = type;
     getauthregistry(NULL, key.registry);
-    if ((node = rbfind(gidlist_cache, &key)) == NULL) {
+    if (rbfind(gidlist_cache, &key) == NULL) {
 	if ((item = make_gidlist_item(pw, gids, type)) == NULL) {
 	    sudo_warnx(U_("unable to parse gids for %s"), pw->pw_name);
 	    debug_return_int(-1);

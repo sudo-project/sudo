@@ -480,6 +480,10 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
      */
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;
+    if (argc == 0) {
+	errno = EINVAL;
+	debug_return;
+    }
     nargv = reallocarray(NULL, argc + 3, sizeof(char *));
     if (nargv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));

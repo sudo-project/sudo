@@ -66,7 +66,7 @@ int
 linux_audit_command(char *const argv[], int result)
 {
     int au_fd, rc = -1;
-    char *command, *cp;
+    char *cp, *command = NULL;
     char * const *av;
     size_t size, n;
     debug_decl(linux_audit_command, SUDOERS_DEBUG_AUDIT);
@@ -78,7 +78,8 @@ linux_audit_command(char *const argv[], int result)
     /* Convert argv to a flat string. */
     for (size = 0, av = argv; *av != NULL; av++)
 	size += strlen(*av) + 1;
-    command = malloc(size);
+    if (size != 0)
+	command = malloc(size);
     if (command == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;

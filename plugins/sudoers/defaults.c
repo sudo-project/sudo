@@ -199,7 +199,7 @@ find_default(const char *name, const char *file, int lineno, bool quiet)
  */
 static bool
 parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
-    union sudo_defs_val *sd_un, const char *file, int lineno, bool quiet)
+    const char *file, int lineno, bool quiet)
 {
     int rc;
     debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS);
@@ -243,10 +243,10 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 
     switch (def->type & T_MASK) {
 	case T_LOGFAC:
-	    rc = store_syslogfac(val, sd_un);
+	    rc = store_syslogfac(val, &def->sd_un);
 	    break;
 	case T_LOGPRI:
-	    rc = store_syslogpri(val, sd_un);
+	    rc = store_syslogpri(val, &def->sd_un);
 	    break;
 	case T_STR:
 	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/') {
@@ -262,16 +262,16 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 		rc = -1;
 		break;
 	    }
-	    rc =  store_str(val, sd_un);
+	    rc =  store_str(val, &def->sd_un);
 	    break;
 	case T_INT:
-	    rc = store_int(val, sd_un);
+	    rc = store_int(val, &def->sd_un);
 	    break;
 	case T_UINT:
-	    rc = store_uint(val, sd_un);
+	    rc = store_uint(val, &def->sd_un);
 	    break;
 	case T_MODE:
-	    rc = store_mode(val, sd_un);
+	    rc = store_mode(val, &def->sd_un);
 	    break;
 	case T_FLAG:
 	    if (val != NULL) {
@@ -287,20 +287,20 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 		rc = -1;
 		break;
 	    }
-	    sd_un->flag = op;
+	    def->sd_un.flag = op;
 	    rc = true;
 	    break;
 	case T_LIST:
-	    rc = store_list(val, sd_un, op);
+	    rc = store_list(val, &def->sd_un, op);
 	    break;
 	case T_TIMEOUT:
-	    rc = store_timeout(val, sd_un);
+	    rc = store_timeout(val, &def->sd_un);
 	    break;
 	case T_TUPLE:
-	    rc = store_tuple(val, sd_un, def->values);
+	    rc = store_tuple(val, &def->sd_un, def->values);
 	    break;
 	case T_TIMESPEC:
-	    rc = store_timespec(val, sd_un);
+	    rc = store_timespec(val, &def->sd_un);
 	    break;
 	default:
 	    if (!quiet) {
@@ -371,7 +371,7 @@ set_default(const char *var, const char *val, int op, const char *file,
     if (idx != -1) {
 	/* Set parsed value in sudo_defs_table and run callback (if any). */
 	struct sudo_defs_types *def = &sudo_defs_table[idx];
-	if (parse_default_entry(def, val, op, &def->sd_un, file, lineno, quiet))
+	if (parse_default_entry(def, val, op, file, lineno, quiet))
 	    debug_return_bool(run_callback(def));
     }
     debug_return_bool(false);
@@ -392,7 +392,7 @@ set_early_default(const char *var, const char *val, int op, const char *file,
     if (idx != -1) {
 	/* Set parsed value in sudo_defs_table but defer callback (if any). */
 	struct sudo_defs_types *def = &sudo_defs_table[idx];
-	if (parse_default_entry(def, val, op, &def->sd_un, file, lineno, quiet)) {
+	if (parse_default_entry(def, val, op, file, lineno, quiet)) {
 	    early->run_callback = true;
 	    debug_return_bool(true);
 	}
@@ -776,12 +776,11 @@ check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet)
     TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	idx = find_default(d->var, d->file, d->lineno, quiet);
 	if (idx != -1) {
-	    struct sudo_defs_types *def = &sudo_defs_table[idx];
-	    union sudo_defs_val sd_un;
-	    memset(&sd_un, 0, sizeof(sd_un));
-	    if (parse_default_entry(def, d->val, d->op, &sd_un, d->file,
+	    struct sudo_defs_types def = sudo_defs_table[idx];
+	    memset(&def.sd_un, 0, sizeof(def.sd_un));
+	    if (parse_default_entry(&def, d->val, d->op, d->file,
 		d->lineno, quiet)) {
-		free_defs_val(def->type, &sd_un);
+		free_defs_val(def.type, &def.sd_un);
 		continue;
 	    }
 	}
