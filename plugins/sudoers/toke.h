@@ -24,6 +24,8 @@ struct sudolinebuf {
     size_t size;		/* size of buffer */
     size_t len;			/* used length */
     size_t off;			/* consumed length */
+    size_t toke_start;		/* starting column of current token */
+    size_t toke_end;		/* ending column of current token */
 };
 extern struct sudolinebuf sudolinebuf;
 

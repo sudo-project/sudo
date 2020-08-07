@@ -953,10 +953,22 @@ sudoerserror(const char *s)
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), this_lineno);
 	    sudoers_setlocale(oldlocale, NULL);
 
-	    /* Display the offending line if possible. */
+	    /* Display the offending line and token if possible. */
 	    if (sudolinebuf.len != 0) {
+		char tildes[128];
+		size_t tlen = 0;
+
 		sudo_printf(SUDO_CONV_ERROR_MSG, "%s%s", sudolinebuf.buf,
 		    sudolinebuf.buf[sudolinebuf.len - 1] == '\n' ? "" : "\n");
+		if (sudolinebuf.toke_end > sudolinebuf.toke_start) {
+		    tlen = sudolinebuf.toke_end - sudolinebuf.toke_start - 1;
+		    if (tlen >= sizeof(tildes))
+			tlen = sizeof(tildes) - 1;
+		    memset(tildes, '~', tlen);
+		}
+		tildes[tlen] = '\0';
+		sudo_printf(SUDO_CONV_ERROR_MSG, "%*s^%s\n",
+		    (int)sudolinebuf.toke_start, "", tildes);
 	    }
 	}
 #endif

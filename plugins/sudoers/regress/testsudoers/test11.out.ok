@@ -2,6 +2,7 @@ Testing @include with garbage after the path name
 
 >>> sudoers: syntax error near line 1 <<<
 @include ../../../trunk/plugins/sudoers/regress/testsudoers/test2.inc womp womp
+                                                                               ^
 Parse error in sudoers near line 1.
 
 Entries for user root:
@@ -17,6 +18,7 @@ Testing #include with garbage after the path name
 
 >>> sudoers: syntax error near line 1 <<<
 #include ../../../trunk/plugins/sudoers/regress/testsudoers/test2.inc womp womp
+                                                                               ^
 Parse error in sudoers near line 1.
 
 Entries for user root:

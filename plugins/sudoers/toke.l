@@ -79,6 +79,16 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define YY_INPUT(buf, result, max_size)	(result) = sudoers_input(buf, max_size)
 
+#define YY_USER_ACTION do {					\
+	sudolinebuf.toke_start = sudolinebuf.toke_end;		\
+	sudolinebuf.toke_end += sudoersleng;			\
+} while (0);
+
+#define sudoersless(n) do {					\
+	sudolinebuf.toke_end = sudolinebuf.toke_start + (n);	\
+	yyless(n);						\
+} while (0);
+
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
@@ -230,7 +240,7 @@ DEFVAR			[a-z_]+
 
     [#:\,=\r\n]		{
 			    BEGIN INITIAL;
-			    yyless(0);
+			    sudoersless(0);
 			    yy_set_bol(0);
 			    LEXRETURN(COMMAND);
 			}			/* end of command line args */
@@ -255,7 +265,7 @@ DEFVAR			[a-z_]+
 				LEXRETURN(DIGEST);
 			    }
 			    BEGIN INITIAL;
-			    yyless(sudoersleng);
+			    sudoersless(sudoersleng);
 			} /* hex digest */
 
 <WANTDIGEST>[A-Za-z0-9\+/=]+ {
@@ -277,7 +287,7 @@ DEFVAR			[a-z_]+
 				LEXRETURN(DIGEST);
 			    }
 			    BEGIN INITIAL;
-			    yyless(sudoersleng);
+			    sudoersless(sudoersleng);
 			} /* base64 digest */
 
 <INITIAL>@include	{
@@ -309,7 +319,7 @@ DEFVAR			[a-z_]+
 			    }
 
 			    /* only consume #include */
-			    yyless(sizeof("#include") - 1);
+			    sudoersless(sizeof("#include") - 1);
 			    yy_set_bol(0);
 
 			    BEGIN GOTINC;
@@ -324,7 +334,7 @@ DEFVAR			[a-z_]+
 			    }
 
 			    /* only consume #includedir */
-			    yyless(sizeof("#includedir") - 1);
+			    sudoersless(sizeof("#includedir") - 1);
 			    yy_set_bol(0);
 
 			    BEGIN GOTINC;
@@ -351,19 +361,23 @@ DEFVAR			[a-z_]+
 			    BEGIN GOTDEFS;
 			    switch (deftype) {
 				case ':':
-				    yyless(n);
+				    sudolinebuf.toke_end =
+					sudolinebuf.toke_start + n;
+				    sudoersless(n);
 				    LEXTRACE("DEFAULTS_USER ");
 				    LEXRETURN(DEFAULTS_USER);
 				case '>':
-				    yyless(n);
+				    sudolinebuf.toke_end =
+					sudolinebuf.toke_start + n;
+				    sudoersless(n);
 				    LEXTRACE("DEFAULTS_RUNAS ");
 				    LEXRETURN(DEFAULTS_RUNAS);
 				case '@':
-				    yyless(n);
+				    sudoersless(n);
 				    LEXTRACE("DEFAULTS_HOST ");
 				    LEXRETURN(DEFAULTS_HOST);
 				case '!':
-				    yyless(n);
+				    sudoersless(n);
 				    LEXTRACE("DEFAULTS_CMND ");
 				    LEXRETURN(DEFAULTS_CMND);
 				default:
@@ -1153,6 +1167,7 @@ pop_include(void)
 	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
 	fp = open_sudoers(pl->path, false, &keepopen);
 	if (fp != NULL) {
+	    sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
 	    sudolinebuf.len = sudolinebuf.off = 0;
 	    rcstr_delref(sudoers);
 	    sudoers = pl->path;
@@ -1216,6 +1231,7 @@ sudoers_input(char *buf, yy_size_t max_size)
 
     /* Refill line buffer if needed. */
     if (avail == 0) {
+	sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
 	sudolinebuf.off = 0;
 	sudolinebuf.len = getdelim(&sudolinebuf.buf, &sudolinebuf.size,
 	    '\n', sudoersin);

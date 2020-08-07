@@ -739,10 +739,22 @@ sudoerserror(const char *s)
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), this_lineno);
 	    sudoers_setlocale(oldlocale, NULL);
 
-	    /* Display the offending line if possible. */
+	    /* Display the offending line and token if possible. */
 	    if (sudolinebuf.len != 0) {
+		char tildes[128];
+		size_t tlen = 0;
+
 		sudo_printf(SUDO_CONV_ERROR_MSG, "%s%s", sudolinebuf.buf,
 		    sudolinebuf.buf[sudolinebuf.len - 1] == '\n' ? "" : "\n");
+		if (sudolinebuf.toke_end > sudolinebuf.toke_start) {
+		    tlen = sudolinebuf.toke_end - sudolinebuf.toke_start - 1;
+		    if (tlen >= sizeof(tildes))
+			tlen = sizeof(tildes) - 1;
+		    memset(tildes, '~', tlen);
+		}
+		tildes[tlen] = '\0';
+		sudo_printf(SUDO_CONV_ERROR_MSG, "%*s^%s\n",
+		    (int)sudolinebuf.toke_start, "", tildes);
 	    }
 	}
 #endif
@@ -1171,13 +1183,9 @@ init_options(struct command_options *opts)
     opts->limitprivs = NULL;
 #endif
 }
-#line 1117 "gram.c"
+#line 1129 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
-#if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
-#else
-static int yygrowstack()
-#endif
 {
     unsigned int newsize;
     long sslen;
@@ -1193,23 +1201,19 @@ static int yygrowstack()
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
-#ifdef __STDC__
 #define YY_SIZE_MAX 0xffffffffU
-#else
-#define YY_SIZE_MAX (unsigned int)0xffffffff
-#endif
 #endif
     if (YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
     sslen = yyssp - yyss;
-    newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
-      (short *)malloc(newsize * sizeof *newss); /* overflow check above */
+    newss = yyss ? realloc(yyss, newsize * sizeof *newss) :
+      malloc(newsize * sizeof *newss); /* overflow check above */
     if (newss == NULL)
         goto bail;
     yyss = newss;
     yyssp = newss + sslen;
-    newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
-      (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
+    newvs = yyvs ? realloc(yyvs, newsize * sizeof *newvs) :
+      malloc(newsize * sizeof *newvs); /* overflow check above */
     if (newvs == NULL)
         goto bail;
     yyvs = newvs;
@@ -1218,10 +1222,8 @@ static int yygrowstack()
     yysslim = yyss + newsize - 1;
     return 0;
 bail:
-    if (yyss)
-            free(yyss);
-    if (yyvs)
-            free(yyvs);
+    free(yyss);
+    free(yyvs);
     yyss = yyssp = NULL;
     yyvs = yyvsp = NULL;
     yystacksize = 0;
@@ -1233,19 +1235,11 @@ bail:
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
 int
-#if defined(__cplusplus) || defined(__STDC__)
 yyparse(void)
-#else
-yyparse()
-#endif
 {
     int yym, yyn, yystate;
 #if YYDEBUG
-#if defined(__cplusplus) || defined(__STDC__)
     const char *yys;
-#else /* !(defined(__cplusplus) || defined(__STDC__)) */
-    char *yys;
-#endif /* !(defined(__cplusplus) || defined(__STDC__)) */
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -2338,7 +2332,7 @@ case 120:
 			    }
 			}
 break;
-#line 2284 "gram.c"
+#line 2278 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
@@ -2391,19 +2385,15 @@ to state %d\n", YYPREFIX, *yyssp, yystate);
 yyoverflow:
     yyerror("yacc stack overflow");
 yyabort:
-    if (yyss)
-            free(yyss);
-    if (yyvs)
-            free(yyvs);
+    free(yyss);
+    free(yyvs);
     yyss = yyssp = NULL;
     yyvs = yyvsp = NULL;
     yystacksize = 0;
     return (1);
 yyaccept:
-    if (yyss)
-            free(yyss);
-    if (yyvs)
-            free(yyvs);
+    free(yyss);
+    free(yyvs);
     yyss = yyssp = NULL;
     yyvs = yyvsp = NULL;
     yystacksize = 0;
