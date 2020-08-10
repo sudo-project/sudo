@@ -750,7 +750,7 @@ sudoedit		{
 			    sudolineno++;
 			    continued = false;
 			    LEXTRACE("\n");
-			    LEXRETURN(COMMENT);
+			    LEXRETURN('\n');
 			}			/* return newline */
 
 <*>[[:blank:]]+		{			/* throw away space/tabs */
@@ -775,7 +775,7 @@ sudoedit		{
 				LEXRETURN(ERROR);
 			    }
 			    LEXTRACE("#\n");
-			    LEXRETURN(COMMENT);
+			    LEXRETURN('\n');
 			}			/* comment, not uid/gid */
 
 <*>.			{

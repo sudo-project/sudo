@@ -38,8 +38,12 @@
 #include "sudo_digest.h"
 #include "toke.h"
 
+#ifdef YYBISON
+# define YYERROR_VERBOSE
+#endif
+
 /* If we last saw a newline the entry is on the preceding line. */
-#define this_lineno	(last_token == COMMENT ? sudolineno - 1 : sudolineno)
+#define this_lineno	(last_token == '\n' ? sudolineno - 1 : sudolineno)
 
 /*
  * Globals
@@ -66,6 +70,7 @@ static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
+static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(int, char *);
 %}
 
@@ -115,13 +120,13 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 FOLLOWLNK		/* follow symbolic links */
 %token <tok>	 NOFOLLOWLNK		/* don't follow symbolic links */
 %token <tok>	 ALL			/* ALL keyword */
-%token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
 %token <tok>	 USERALIAS		/* User_Alias keyword */
 %token <tok>	 RUNASALIAS		/* Runas_Alias keyword */
 %token <tok>	 ':' '=' ',' '!' '+' '-' /* union member tokens */
 %token <tok>	 '(' ')'		/* runas tokens */
+%token <tok>	 '\n'			/* newline (with optional comment) */
 %token <tok>	 ERROR			/* error from lexer */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
@@ -181,10 +186,10 @@ line		:	entry
 		|	line entry
 		;
 
-entry		:	COMMENT {
+entry		:	'\n' {
 			    ;
 			}
-                |       error COMMENT {
+                |       error '\n' {
 			    yyerrok;
 			}
 		|	include {
@@ -241,7 +246,7 @@ entry		:	COMMENT {
 			}
 		;
 
-include		:	INCLUDE WORD COMMENT {
+include		:	INCLUDE WORD '\n' {
 			    $$ = $2;
 			}
 		|	INCLUDE WORD END {
@@ -249,7 +254,7 @@ include		:	INCLUDE WORD COMMENT {
 			}
 		;
 
-includedir	:	INCLUDEDIR WORD COMMENT {
+includedir	:	INCLUDEDIR WORD '\n' {
 			    $$ = $2;
 			}
 		|	INCLUDEDIR WORD END {
@@ -1046,6 +1051,7 @@ new_member(char *name, int type)
 
     debug_return_ptr(m);
 }
+
 static struct sudo_command *
 new_command(char *cmnd, char *args)
 {
