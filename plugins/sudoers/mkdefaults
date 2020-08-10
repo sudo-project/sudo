@@ -29,10 +29,9 @@ fi
 
 ${AWK-awk} -f - -v outfile=$OUTFILE $INFILE <<'EOF'
 BEGIN {
-    count = 0
     tuple_values[0] = "never"
     tuple_keys["never"] = 0
-    tuple_last = 0
+    ntuples = 1
     header = outfile ".h"
     cfile = outfile ".c"
 
@@ -74,8 +73,7 @@ BEGIN {
 		desc = "NULL"
 	    } else {
 		# Strip leading and trailing double quote and escape the rest
-		sub(/^"/, "")
-		sub(/"$/, "")
+		gsub(/^"|"$/, "")
 		gsub(/"/, "\\\"")
 		desc = sprintf("N_(\"%s\")", $0)
 	    }
@@ -89,8 +87,8 @@ BEGIN {
 		    n = split(values, vals)
 		    for (i = 1; i <= n; i++) {
 			if (!(vals[i] in tuple_keys)) {
-			    tuple_keys[vals[i]] = ++tuple_last
-			    tuple_values[tuple_last] = vals[i]
+			    tuple_keys[vals[i]] = ntuples
+			    tuple_values[ntuples++] = vals[i]
 			}
 		    }
 		}
@@ -131,17 +129,10 @@ END {
     print "\tNULL, 0, NULL\n    }\n};" > cfile
 
     # Print out def_tuple
-    if (tuple_last > 0) {
-	print "\nenum def_tuple {" > header
-	for (i = 0; i <= tuple_last; i++) {
-	    printf("\t%s%s\n", tuple_values[i],
-		i != tuple_last ? "," : "") > header
-	}
-	print "};" > header
-    }
-
-    close(header)
-    close(cfile)
+    print "\nenum def_tuple {" > header
+    for (i = 0; i < ntuples; i++)
+	printf "%s\t%s", i ? ",\n" : "", tuple_values[i] > header
+    print "\n};" > header
 }
 
 function die(msg) {
@@ -163,11 +154,7 @@ function print_record(rec, recnum) {
 	fields[1], defname, type_map[type] > header
 
     printf "\t\"%s\", %s,\n\t%s,\n", fields[1], fields[2], fields[3] > cfile
-    if (fields[4]) {
-	printf "\tdef_data_%s,\n", fields[1] > cfile
-    } else {
-	printf "\tNULL,\n" > cfile
-    }
+    printf "\t%s,\n", fields[4] ? "def_data_" fields[1] : "NULL" > cfile
     if (fields[5]) {
 	printf "\t%s,\n", fields[5] > cfile
     }
