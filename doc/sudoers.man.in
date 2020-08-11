@@ -6245,15 +6245,23 @@ file should
 \fBalways\fR
 be edited by the
 \fBvisudo\fR
-command which locks the file and does grammatical checking.
-It is
-imperative that the
+utility which locks the file and checks for syntax errors.
+If
 \fIsudoers\fR
-file be free of syntax errors since
+contains syntax errors,
 \fBsudo\fR
-will not run with a syntactically incorrect
+may refuse to run, which is a serious problem if
+\fBsudo\fR
+is your only method of obtaining superuser privileges.
+Recent versions of
+\fBsudoers\fR
+will attempt to recover after a syntax error by ignoring the rest of
+the line after encountering an error.
+Older versions of
+\fBsudo\fR
+will not run if
 \fIsudoers\fR
-file.
+contains a syntax error.
 .PP
 When using netgroups of machines (as opposed to users), if you
 store fully qualified host name in the netgroup (as is usually the

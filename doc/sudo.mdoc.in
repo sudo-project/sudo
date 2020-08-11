@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd July 22, 2020
+.Dd August 11, 2020
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -157,6 +157,16 @@ with the
 .Fl v
 option, a user can update the cached credentials without running a
 .Ar command .
+.Pp
+On systems where
+.Nm
+is the primary method of gaining superuser privileges, it is imperative
+to avoid syntax errors in the security policy configuration files.
+For the default security policy,
+.Xr sudoers @mansectform@ ,
+changes to the configuration files should be made using the
+.Xr visudo @mansectsu@
+utility which will ensure that no syntax errors are introduced.
 .Pp
 When invoked as
 .Nm sudoedit ,
@@ -873,13 +883,13 @@ or compiled directly into the
 binary.
 If no
 .Xr sudo.conf @mansectform@
-file is present, or it contains no
+file is present, or if it doesn't contain any
 .Li Plugin
 lines,
 .Nm
-will use the traditional
-.Em sudoers
-security policy and I/O logging.
+will use
+.Xr sudoers @mansectform@
+for the policy, auditing and I/O logging plugins.
 See the
 .Xr sudo.conf @mansectform@
 manual for details of the

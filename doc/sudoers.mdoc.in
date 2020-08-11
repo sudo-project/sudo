@@ -5762,15 +5762,23 @@ file should
 .Sy always
 be edited by the
 .Nm visudo
-command which locks the file and does grammatical checking.
-It is
-imperative that the
+utility which locks the file and checks for syntax errors.
+If
 .Em sudoers
-file be free of syntax errors since
+contains syntax errors,
 .Nm sudo
-will not run with a syntactically incorrect
+may refuse to run, which is a serious problem if
+.Nm sudo
+is your only method of obtaining superuser privileges.
+Recent versions of
+.Nm
+will attempt to recover after a syntax error by ignoring the rest of
+the line after encountering an error.
+Older versions of
+.Nm sudo
+will not run if
 .Em sudoers
-file.
+contains a syntax error.
 .Pp
 When using netgroups of machines (as opposed to users), if you
 store fully qualified host name in the netgroup (as is usually the
