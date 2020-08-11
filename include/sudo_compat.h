@@ -441,6 +441,11 @@ __dso_public void sudo_explicit_bzero(void *s, size_t n);
 # undef explicit_bzero
 # define explicit_bzero(_a, _b) sudo_explicit_bzero((_a), (_b))
 #endif /* HAVE_EXPLICIT_BZERO */
+#ifndef HAVE_FREEZERO
+__dso_public void sudo_freezero(void *p, size_t n);
+# undef freezero
+# define freezero(_a, _b) sudo_freezero((_a), (_b))
+#endif /* HAVE_FREEZERO */
 #ifdef PREFER_PORTABLE_GETCWD
 __dso_public char *sudo_getcwd(char *, size_t size);
 # undef getcwd

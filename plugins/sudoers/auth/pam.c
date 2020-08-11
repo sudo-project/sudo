@@ -732,8 +732,7 @@ done:
 	    struct pam_response *pr = &reply[n];
 
 	    if (pr->resp != NULL) {
-		explicit_bzero(pr->resp, strlen(pr->resp));
-		free(pr->resp);
+		freezero(pr->resp, strlen(pr->resp));
 		pr->resp = NULL;
 	    }
 	}

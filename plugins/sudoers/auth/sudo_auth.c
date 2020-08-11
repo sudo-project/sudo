@@ -325,10 +325,8 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 	    if (success != AUTH_FAILURE)
 		break;
 	}
-	if (pass != NULL) {
-	    explicit_bzero(pass, strlen(pass));
-	    free(pass);
-	}
+	if (pass != NULL)
+	    freezero(pass, strlen(pass));
 
 	if (success != AUTH_FAILURE)
 	    goto done;

@@ -2825,6 +2825,10 @@ AC_CHECK_FUNCS([memrchr], [], [
     AC_LIBOBJ(memrchr)
     SUDO_APPEND_COMPAT_EXP(sudo_memrchr)
 ])
+AC_CHECK_FUNCS([freezero], [], [
+    AC_LIBOBJ(freezero)
+    SUDO_APPEND_COMPAT_EXP(sudo_freezero)
+])
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [

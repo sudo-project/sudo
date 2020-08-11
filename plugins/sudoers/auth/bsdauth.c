@@ -151,8 +151,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
 
     if (pass) {
 	authok = auth_userresponse(as, pass, 1);
-	explicit_bzero(pass, strlen(pass));
-	free(pass);
+	freezero(pass, strlen(pass));
     }
 
     /* restore old signal handler */

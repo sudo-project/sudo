@@ -101,10 +101,8 @@ sudo_secureware_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
     char *pw_epasswd = auth->data;
     debug_decl(sudo_secureware_cleanup, SUDOERS_DEBUG_AUTH);
 
-    if (pw_epasswd != NULL) {
-	explicit_bzero(pw_epasswd, strlen(pw_epasswd));
-	free(pw_epasswd);
-    }
+    if (pw_epasswd != NULL)
+	freezero(pw_epasswd, strlen(pw_epasswd));
     debug_return_int(AUTH_SUCCESS);
 }
 

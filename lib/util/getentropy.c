@@ -613,10 +613,8 @@ getentropy_fallback(void *buf, size_t len)
 	}
 done:
 	sudo_digest_free(ctx);
-	if (results != NULL) {
-		explicit_bzero(results, sizeof(results));
-		free(results);
-	}
+	if (results != NULL)
+		freezero(results, sizeof(results));
 	return (ret);
 }
 

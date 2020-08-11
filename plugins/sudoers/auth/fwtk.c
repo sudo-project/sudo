@@ -134,8 +134,7 @@ restart:
     error = AUTH_FAILURE;
 done:
     explicit_bzero(buf, sizeof(buf));
-    explicit_bzero(pass, strlen(pass));
-    free(pass);
+    freezero(pass, strlen(pass));
     debug_return_int(error);
 }
 

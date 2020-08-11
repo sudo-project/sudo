@@ -135,8 +135,7 @@ err:
 	    struct sudo_conv_reply *repl = &replies[n];
 	    if (repl->reply == NULL)
 		continue;
-	    explicit_bzero(repl->reply, strlen(repl->reply));
-	    free(repl->reply);
+	    freezero(repl->reply, strlen(repl->reply));
 	    repl->reply = NULL;
 	} while (n--);
     }

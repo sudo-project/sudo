@@ -20676,6 +20676,32 @@ esac
 fi
 done
 
+for ac_func in freezero
+do :
+  ac_fn_c_check_func "$LINENO" "freezero" "ac_cv_func_freezero"
+if test "x$ac_cv_func_freezero" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FREEZERO 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" freezero.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS freezero.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_freezero; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
 for ac_func in nanosleep
 do :
   ac_fn_c_check_func "$LINENO" "nanosleep" "ac_cv_func_nanosleep"

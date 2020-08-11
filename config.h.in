@@ -285,6 +285,9 @@
 /* Define to 1 if you have the `freeifaddrs' function. */
 #undef HAVE_FREEIFADDRS
 
+/* Define to 1 if you have the `freezero' function. */
+#undef HAVE_FREEZERO
+
 /* Define to 1 if you have the `fseeko' function. */
 #undef HAVE_FSEEKO
 
