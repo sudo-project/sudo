@@ -30,12 +30,6 @@
     !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
 # include <stdarg.h>
 #endif
-#if !defined(HAVE_MEMSET_S) && !defined(rsize_t)
-# include <stddef.h>	/* for rsize_t */
-# ifdef HAVE_STRING_H
-#  include <string.h>	/* for rsize_t on AIX */
-# endif /* HAVE_STRING_H */
-#endif /* HAVE_MEMSET_S && rsize_t */
 
 /*
  * Macros and functions that may be missing on some operating systems.
@@ -442,6 +436,11 @@ __dso_public void sudo_closefrom(int);
 # undef closefrom
 # define closefrom(_a) sudo_closefrom((_a))
 #endif /* HAVE_CLOSEFROM */
+#ifndef HAVE_EXPLICIT_BZERO
+__dso_public void sudo_explicit_bzero(void *s, size_t n);
+# undef explicit_bzero
+# define explicit_bzero(_a, _b) sudo_explicit_bzero((_a), (_b))
+#endif /* HAVE_EXPLICIT_BZERO */
 #ifdef PREFER_PORTABLE_GETCWD
 __dso_public char *sudo_getcwd(char *, size_t size);
 # undef getcwd
@@ -536,11 +535,6 @@ __dso_public void *sudo_memrchr(const void *s, int c, size_t n);
 # undef memrchr
 # define memrchr(_a, _b, _c) sudo_memrchr((_a), (_b), (_c))
 #endif /* HAVE_MEMRCHR */
-#ifndef HAVE_MEMSET_S
-__dso_public errno_t sudo_memset_s(void *v, rsize_t smax, int c, rsize_t n);
-# undef memset_s
-# define memset_s(_a, _b, _c, _d) sudo_memset_s((_a), (_b), (_c), (_d))
-#endif /* HAVE_MEMSET_S */
 #if !defined(HAVE_MKDTEMP) || !defined(HAVE_MKSTEMPS)
 __dso_public char *sudo_mkdtemp(char *path);
 # undef mkdtemp

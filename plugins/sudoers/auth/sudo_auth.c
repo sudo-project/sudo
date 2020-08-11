@@ -326,7 +326,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 		break;
 	}
 	if (pass != NULL) {
-	    memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+	    explicit_bzero(pass, strlen(pass));
 	    free(pass);
 	}
 

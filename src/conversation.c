@@ -80,7 +80,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    sudo_fatalx_nodebug(U_("%s: %s"), "sudo_conversation",
 			U_("unable to allocate memory"));
 		}
-		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+		explicit_bzero(pass, strlen(pass));
 		break;
 	    case SUDO_CONV_ERROR_MSG:
 		fp = stderr;
@@ -135,7 +135,7 @@ err:
 	    struct sudo_conv_reply *repl = &replies[n];
 	    if (repl->reply == NULL)
 		continue;
-	    memset_s(repl->reply, SUDO_CONV_REPL_MAX, 0, strlen(repl->reply));
+	    explicit_bzero(repl->reply, strlen(repl->reply));
 	    free(repl->reply);
 	    repl->reply = NULL;
 	} while (n--);

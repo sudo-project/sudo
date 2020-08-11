@@ -18057,8 +18057,6 @@ fi
 
 
 fi
-$as_echo "#define __STDC_WANT_LIB_EXT1__ 1" >>confdefs.h
-
 ac_fn_c_check_type "$LINENO" "mode_t" "ac_cv_type_mode_t" "$ac_includes_default"
 if test "x$ac_cv_type_mode_t" = xyes; then :
 
@@ -18315,28 +18313,6 @@ if test "x$ac_cv_type_socklen_t" = xyes; then :
 
 else
   $as_echo "#define socklen_t unsigned int" >>confdefs.h
-
-fi
-
-ac_fn_c_check_type "$LINENO" "rsize_t" "ac_cv_type_rsize_t" "$ac_includes_default"
-if test "x$ac_cv_type_rsize_t" = xyes; then :
-
-else
-
-cat >>confdefs.h <<_ACEOF
-#define rsize_t size_t
-_ACEOF
-
-fi
-
-ac_fn_c_check_type "$LINENO" "errno_t" "ac_cv_type_errno_t" "$ac_includes_default"
-if test "x$ac_cv_type_errno_t" = xyes; then :
-
-else
-
-cat >>confdefs.h <<_ACEOF
-#define errno_t int
-_ACEOF
 
 fi
 
@@ -20516,6 +20492,44 @@ done
 fi
 done
 
+for ac_func in explicit_bzero
+do :
+  ac_fn_c_check_func "$LINENO" "explicit_bzero" "ac_cv_func_explicit_bzero"
+if test "x$ac_cv_func_explicit_bzero" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_EXPLICIT_BZERO 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" explicit_bzero.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS explicit_bzero.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_explicit_bzero; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+    for ac_func in explicit_memset memset_explicit memset_s bzero
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+ break
+fi
+done
+
+
+fi
+done
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working fnmatch with FNM_CASEFOLD" >&5
 $as_echo_n "checking for working fnmatch with FNM_CASEFOLD... " >&6; }
 if ${sudo_cv_func_fnmatch+:} false; then :
@@ -20654,32 +20668,6 @@ esac
 
 
     for _sym in sudo_memrchr; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
-
-fi
-done
-
-for ac_func in memset_s
-do :
-  ac_fn_c_check_func "$LINENO" "memset_s" "ac_cv_func_memset_s"
-if test "x$ac_cv_func_memset_s" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_MEMSET_S 1
-_ACEOF
-
-else
-
-    case " $LIBOBJS " in
-  *" memset_s.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS memset_s.$ac_objext"
- ;;
-esac
-
-
-    for _sym in sudo_memset_s; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done

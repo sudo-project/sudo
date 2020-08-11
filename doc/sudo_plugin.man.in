@@ -4481,9 +4481,6 @@ the trailing NUL character).
 In practical terms, this is the longest password
 \fBsudo\fR
 will support.
-It is also useful as a maximum value for the
-\fBmemset_s\fR()
-function when clearing passwords filled in by the conversation function.
 .PP
 The
 \fBprintf\fR()-style

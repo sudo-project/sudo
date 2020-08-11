@@ -133,8 +133,8 @@ restart:
 	sudo_warnx("%s", resp);
     error = AUTH_FAILURE;
 done:
-    memset_s(buf, sizeof(buf), 0, sizeof(buf));
-    memset_s(pass, SUDO_PASS_MAX, 0, strlen(pass));
+    explicit_bzero(buf, sizeof(buf));
+    explicit_bzero(pass, strlen(pass));
     free(pass);
     debug_return_int(error);
 }

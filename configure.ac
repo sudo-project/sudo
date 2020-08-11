@@ -2504,9 +2504,7 @@ if test ${with_project-'no'} != "no"; then
 fi
 dnl
 dnl typedef checks
-dnl We need to define __STDC_WANT_LIB_EXT1__ for errno_t and rsize_t
 dnl
-AC_DEFINE([__STDC_WANT_LIB_EXT1__])
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_CHECK_TYPE([clockid_t], [], [AC_DEFINE(clockid_t, int)], [#include <sys/types.h>
@@ -2527,8 +2525,6 @@ AC_CHECK_TYPE(uint64_t, unsigned long long)
 AC_CHECK_TYPE(socklen_t, [], [AC_DEFINE(socklen_t, unsigned int)], [
 AC_INCLUDES_DEFAULT
 #include <sys/socket.h>])
-AC_CHECK_TYPE(rsize_t, size_t)
-AC_CHECK_TYPE(errno_t, int)
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
 SUDO_SOCK_SIN_LEN
@@ -2810,6 +2806,11 @@ AC_CHECK_FUNCS([futimens], [], [
     SUDO_APPEND_COMPAT_EXP(sudo_futimens)
     AC_CHECK_FUNCS([futimes futimesat futime], [break])
 ])
+AC_CHECK_FUNCS([explicit_bzero], [], [
+    AC_LIBOBJ(explicit_bzero)
+    SUDO_APPEND_COMPAT_EXP(sudo_explicit_bzero)
+    AC_CHECK_FUNCS([explicit_memset memset_explicit memset_s bzero], [break])
+])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [
     AC_LIBOBJ(fnmatch)
     SUDO_APPEND_COMPAT_EXP(sudo_fnmatch)
@@ -2823,10 +2824,6 @@ AC_CHECK_FUNCS([glob], [], [
 AC_CHECK_FUNCS([memrchr], [], [
     AC_LIBOBJ(memrchr)
     SUDO_APPEND_COMPAT_EXP(sudo_memrchr)
-])
-AC_CHECK_FUNCS([memset_s], [], [
-    AC_LIBOBJ(memset_s)
-    SUDO_APPEND_COMPAT_EXP(sudo_memset_s)
 ])
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt

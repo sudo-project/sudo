@@ -3960,9 +3960,6 @@ the trailing NUL character).
 In practical terms, this is the longest password
 .Nm sudo
 will support.
-It is also useful as a maximum value for the
-.Fn memset_s
-function when clearing passwords filled in by the conversation function.
 .Pp
 The
 .Fn printf Ns -style

@@ -177,7 +177,7 @@ sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_
                    ACE challenges for the next token displayed
                    (entered without the PIN) */
 		if (pass != NULL) {
-		    memset_s(pass, SUDO_PASS_MAX, 0, strlen(pass));
+		    explicit_bzero(pass, strlen(pass));
 		    free(pass);
 		}
         	pass = auth_getpass("\
@@ -218,7 +218,7 @@ then enter the new token code.\n", \
     SD_Close(*sd);
 
     if (pass != NULL) {
-	memset_s(pass, SUDO_PASS_MAX, 0, strlen(pass));
+	explicit_bzero(pass, strlen(pass));
 	free(pass);
     }
 

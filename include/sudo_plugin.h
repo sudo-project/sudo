@@ -57,9 +57,7 @@ struct sudo_conv_message {
  * conversing with the user.  In practical terms, this is the longest
  * password sudo will support.  This means that a buffer of size
  * SUDO_CONV_REPL_MAX+1 is guaranteed to be able to hold any reply
- * from the conversation function.  It is also useful as a max value
- * for memset_s() when clearing passwords returned by the conversation
- * function.
+ * from the conversation function.
  */
 #define SUDO_CONV_REPL_MAX	1023
 

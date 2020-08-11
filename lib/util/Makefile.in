@@ -559,6 +559,14 @@ event_select.i: $(srcdir)/event_select.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 event_select.plog: event_select.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/event_select.c --i-file $< --output-file $@
+explicit_bzero.lo: $(srcdir)/explicit_bzero.c $(incdir)/sudo_compat.h \
+                   $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/explicit_bzero.c
+explicit_bzero.i: $(srcdir)/explicit_bzero.c $(incdir)/sudo_compat.h \
+                   $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+explicit_bzero.plog: explicit_bzero.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/explicit_bzero.c --i-file $< --output-file $@
 fatal.lo: $(srcdir)/fatal.c $(incdir)/compat/getaddrinfo.h \
           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -847,14 +855,6 @@ memrchr.i: $(srcdir)/memrchr.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 memrchr.plog: memrchr.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/memrchr.c --i-file $< --output-file $@
-memset_s.lo: $(srcdir)/memset_s.c $(incdir)/sudo_compat.h \
-             $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/memset_s.c
-memset_s.i: $(srcdir)/memset_s.c $(incdir)/sudo_compat.h \
-             $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-memset_s.plog: memset_s.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/memset_s.c --i-file $< --output-file $@
 mkdir_parents.lo: $(srcdir)/mkdir_parents.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \

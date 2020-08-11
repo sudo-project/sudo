@@ -243,7 +243,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 	free(message);
 	message = NULL;
 	result = authenticate(pw->pw_name, pass, &reenter, &message);
-	memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+	explicit_bzero(pass, strlen(pass));
 	free(pass);
 	prompt = message;
     } while (reenter);

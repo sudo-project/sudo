@@ -138,6 +138,7 @@ lib/util/dup3.c
 lib/util/event.c
 lib/util/event_poll.c
 lib/util/event_select.c
+lib/util/explicit_bzero.c
 lib/util/fatal.c
 lib/util/fchmodat.c
 lib/util/fnmatch.c
@@ -163,7 +164,6 @@ lib/util/locking.c
 lib/util/logfac.c
 lib/util/logpri.c
 lib/util/memrchr.c
-lib/util/memset_s.c
 lib/util/mkdir_parents.c
 lib/util/mksiglist.c
 lib/util/mksiglist.h
