@@ -36,10 +36,10 @@
 
 #include "sudoers.h"
 #include "interfaces.h"
-#include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
 #include "sudo_digest.h"
+#include <gram.h>
 
 /*
  * Returns true if the string pointed to by valp begins with an

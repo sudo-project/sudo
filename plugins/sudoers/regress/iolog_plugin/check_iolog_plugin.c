@@ -28,9 +28,10 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "sudoers.h"
-#include "def_data.c"		/* for iolog_path.c */
 #include "sudo_plugin.h"
 #include "sudo_iolog.h"
+
+#include <def_data.c>		/* for iolog_path.c */
 
 extern struct io_plugin sudoers_io;
 

@@ -60,11 +60,11 @@
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
 #include "sudoers.h"
-#include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
 #include "sudo_ldap_conf.h"
 #include "sudo_dso.h"
+#include <gram.h>
 
 #ifndef LDAP_OPT_RESULT_CODE
 # define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
