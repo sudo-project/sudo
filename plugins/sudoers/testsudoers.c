@@ -255,7 +255,7 @@ main(int argc, char *argv[])
 
     /* Initialize default values. */
     if (!init_defaults())
-	sudo_fatalx(U_("unable to initialize sudoers default values"));
+	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     /* Set group_plugin callback. */
     sudo_defs_table[I_GROUP_PLUGIN].callback = cb_group_plugin;
@@ -269,7 +269,7 @@ main(int argc, char *argv[])
     /* Load ip addr/mask for each interface. */
     if (get_net_ifs(&p) > 0) {
 	if (!set_interfaces(p))
-	    sudo_fatal(U_("unable to parse network address list"));
+	    sudo_fatal("%s", U_("unable to parse network address list"));
     }
 
     /* Allocate space for data structures in the parser. */

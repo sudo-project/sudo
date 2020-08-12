@@ -120,7 +120,7 @@ bsm_audit_success(char *const exec_args[])
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
 			debug_return_int(0);
-		sudo_warn(U_("Could not determine audit condition"));
+		sudo_warn("%s", U_("Could not determine audit condition"));
 		debug_return_int(-1);
 	}
 	if (au_cond == AUC_NOAUDIT)
@@ -185,7 +185,7 @@ bsm_audit_success(char *const exec_args[])
 	if (au_close(aufd, 1, sudo_audit_event) == -1)
 #endif
 	{
-		sudo_warn(U_("unable to commit audit record"));
+		sudo_warn("%s", U_("unable to commit audit record"));
 		debug_return_int(-1);
 	}
 	debug_return_int(0);
@@ -211,7 +211,7 @@ bsm_audit_failure(char *const exec_args[], const char *errmsg)
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
 			debug_return_int(0);
-		sudo_warn(U_("Could not determine audit condition"));
+		sudo_warn("%s", U_("Could not determine audit condition"));
 		debug_return_int(-1);
 	}
 	if (au_cond == AUC_NOAUDIT)
@@ -274,7 +274,7 @@ bsm_audit_failure(char *const exec_args[], const char *errmsg)
 	if (au_close(aufd, 1, sudo_audit_event) == -1)
 #endif
 	{
-		sudo_warn(U_("unable to commit audit record"));
+		sudo_warn("%s", U_("unable to commit audit record"));
 		debug_return_int(-1);
 	}
 	debug_return_int(0);

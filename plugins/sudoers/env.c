@@ -400,8 +400,10 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
     ret = sudo_putenv_nodebug(str, dupcheck, overwrite);
     if (ret == -1) {
 #ifdef ENV_DEBUG
-	if (env.envp[env.env_len] != NULL)
-	    sudo_warnx(U_("sudo_putenv: corrupted envp, length mismatch"));
+	if (env.envp[env.env_len] != NULL) {
+	    sudo_warnx("%s",
+		U_("sudo_putenv: corrupted envp, length mismatch"));
+	}
 #endif
     }
     debug_return_int(ret);
@@ -1128,7 +1130,7 @@ rebuild_env(void)
     debug_return_bool(true);
 
 bad:
-    sudo_warn(U_("unable to rebuild the environment"));
+    sudo_warn("%s", U_("unable to rebuild the environment"));
     debug_return_bool(false);
 }
 

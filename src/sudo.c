@@ -227,7 +227,7 @@ main(int argc, char *argv[], char *envp[])
     /* Load plugins. */
     if (!sudo_load_plugins(&policy_plugin, &io_plugins, &audit_plugins,
 	    &approval_plugins))
-	sudo_fatalx(U_("fatal error, unable to load plugins"));
+	sudo_fatalx("%s", U_("fatal error, unable to load plugins"));
 
     /* Allocate event base so plugin can use it. */
     if ((sudo_event_base = sudo_ev_base_alloc()) == NULL)
@@ -272,7 +272,8 @@ main(int argc, char *argv[], char *envp[])
 	    for (nargv = argv_out, nargc = 0; nargv[nargc] != NULL; nargc++)
 		continue;
 	    if (nargc == 0)
-		sudo_fatalx(U_("plugin did not return a command to execute"));
+		sudo_fatalx("%s",
+		    U_("plugin did not return a command to execute"));
 
 	    /* Approval plugins run after policy plugin accepts the command. */
 	    approval_check(settings, user_info, submit_optind, argv, envp,
@@ -597,7 +598,7 @@ get_user_info(struct user_details *ud)
     } else {
 	/* tty may not always be present */
 	if (errno != ENOENT)
-	    sudo_warn(U_("unable to determine tty"));
+	    sudo_warn("%s", U_("unable to determine tty"));
     }
 
     cp = sudo_gethostname();
@@ -927,7 +928,7 @@ set_user_groups(struct command_details *details)
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
 	if (details->ngroups >= 0) {
 	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		sudo_warn(U_("unable to set supplementary group IDs"));
+		sudo_warn("%s", U_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
@@ -1092,7 +1093,7 @@ policy_open(struct sudo_settings *settings, char * const user_info[],
 	    usage();
 	else {
 	    /* XXX - audit */
-	    sudo_fatalx(U_("unable to initialize policy plugin"));
+	    sudo_fatalx("%s", U_("unable to initialize policy plugin"));
 	}
     }
 

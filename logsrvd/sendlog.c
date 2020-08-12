@@ -183,7 +183,7 @@ connect_server(const char *host, const char *port)
 	if (*server_ip == '\0') {
 	    if (inet_ntop(res->ai_family, res->ai_addr, server_ip,
 		    sizeof(server_ip)) == NULL) {
-		sudo_warnx(U_("unable to get server IP addr"));
+		sudo_warnx("%s", U_("unable to get server IP addr"));
 	    }
 	}
 	break;	/* success */
@@ -1077,7 +1077,7 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_warnx(U_("timeout reading from server"));
+        sudo_warnx("%s", U_("timeout reading from server"));
         goto bad;
     }
 
@@ -1106,7 +1106,7 @@ server_msg_cb(int fd, int what, void *v)
 		    if (!sudo_ev_pending(closure->write_ev, SUDO_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
 			if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1) {
-			    sudo_warnx(U_("unable to add event to queue"));
+			    sudo_warnx("%s", U_("unable to add event to queue"));
 			    goto bad;
 			}
 			closure->temporary_write_event = true;
@@ -1219,7 +1219,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_warnx(U_("timeout writing to server"));
+        sudo_warnx("%s", U_("timeout writing to server"));
         goto bad;
     }
 
@@ -1438,7 +1438,7 @@ tls_connect_cb(int sock, int what, void *v)
     debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_warnx(U_("TLS handshake timeout occurred"));
+        sudo_warnx("%s", U_("TLS handshake timeout occurred"));
         goto bad;
     }
 
@@ -1457,12 +1457,12 @@ tls_connect_cb(int sock, int what, void *v)
 		if (what != SUDO_EV_READ) {
 		    if (sudo_ev_set(closure->tls_connect_ev, closure->sock,
 			    SUDO_EV_READ, tls_connect_cb, closure) == -1) {
-			sudo_warnx(U_("unable to set event"));
+			sudo_warnx("%s", U_("unable to set event"));
 			goto bad;
 		    }
 		}
                 if (sudo_ev_add(evbase, closure->tls_connect_ev, &timeo, false) == -1) {
-                    sudo_warnx(U_("unable to add event to queue"));
+                    sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
 		break;
@@ -1472,12 +1472,12 @@ tls_connect_cb(int sock, int what, void *v)
 		if (what != SUDO_EV_WRITE) {
 		    if (sudo_ev_set(closure->tls_connect_ev, closure->sock,
 			    SUDO_EV_WRITE, tls_connect_cb, closure) == -1) {
-			sudo_warnx(U_("unable to set event"));
+			sudo_warnx("%s", U_("unable to set event"));
 			goto bad;
 		    }
 		}
                 if (sudo_ev_add(evbase, closure->tls_connect_ev, &timeo, false) == -1) {
-                    sudo_warnx(U_("unable to add event to queue"));
+                    sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
 		break;
@@ -1535,7 +1535,7 @@ tls_setup(struct client_closure *closure)
     }
 
     if (sudo_ev_add(closure->evbase, closure->tls_connect_ev, NULL, false) == -1) {
-	sudo_warnx(U_("unable to add event to queue"));
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto bad;
     }
 

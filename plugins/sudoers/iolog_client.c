@@ -105,11 +105,11 @@ timed_connect(int sock, const struct sockaddr *addr, socklen_t addrlen,
 	    goto done;
 	}
 	if (sudo_ev_add(evbase, connect_event, timo, false) == -1) {
-	    sudo_warnx(U_("unable to add event to queue"));
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    goto done;
 	}
 	if (sudo_ev_dispatch(evbase) == -1) {
-	    sudo_warn(U_("error in event loop"));
+	    sudo_warn("%s", U_("error in event loop"));
 	    goto done;
 	}
 	if (errnum == 0)
@@ -293,7 +293,7 @@ tls_connect_cb(int sock, int what, void *v)
     debug_decl(tls_connect_cb, SUDOERS_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
-        sudo_warnx(U_("TLS handshake timeout occurred"));
+        sudo_warnx("%s", U_("TLS handshake timeout occurred"));
         goto bad;
     }
 
@@ -315,13 +315,13 @@ tls_connect_cb(int sock, int what, void *v)
 		if (what != SUDO_EV_READ) {
 		    if (sudo_ev_set(closure->tls_connect_ev, sock,
 			    SUDO_EV_READ, tls_connect_cb, closure) == -1) {
-			sudo_warnx(U_("unable to set event"));
+			sudo_warnx("%s", U_("unable to set event"));
 			goto bad;
 		    }
 		}
 		if (sudo_ev_add(closure->evbase, closure->tls_connect_ev,
 			&timeo, false) == -1) {
-                    sudo_warnx(U_("unable to add event to queue"));
+                    sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
 		break;
@@ -331,13 +331,13 @@ tls_connect_cb(int sock, int what, void *v)
 		if (what != SUDO_EV_WRITE) {
 		    if (sudo_ev_set(closure->tls_connect_ev, sock,
 			    SUDO_EV_WRITE, tls_connect_cb, closure) == -1) {
-			sudo_warnx(U_("unable to set event"));
+			sudo_warnx("%s", U_("unable to set event"));
 			goto bad;
 		    }
 		}
 		if (sudo_ev_add(closure->evbase, closure->tls_connect_ev,
 			&timeo, false) == -1) {
-                    sudo_warnx(U_("unable to add event to queue"));
+                    sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
                 break;
@@ -383,12 +383,12 @@ tls_timed_connect(SSL *ssl, const char *host, const char *port,
     }
 
     if (sudo_ev_add(closure.evbase, closure.tls_connect_ev, timo, false) == -1) {
-	sudo_warnx(U_("unable to add event to queue"));
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
     if (sudo_ev_dispatch(closure.evbase) == -1) {
-	sudo_warnx(U_("error in event loop"));
+	sudo_warnx("%s", U_("error in event loop"));
 	goto done;
     }
 
@@ -1146,7 +1146,7 @@ client_message_completion(struct client_closure *closure)
 	/* Enable timeout while waiting for final commit point. */
 	if (closure->read_ev->add(closure->read_ev,
 		&closure->log_details->server_timeout) == -1) {
-	    sudo_warn(U_("unable to add event to queue"));
+	    sudo_warn("%s", U_("unable to add event to queue"));
 	    debug_return_bool(false);
 	}
 	break;
@@ -1182,7 +1182,7 @@ read_server_hello(struct client_closure *closure)
     closure->write_ev->setbase(closure->write_ev, evbase);
     if (closure->write_ev->add(closure->write_ev,
 	    &closure->log_details->server_timeout) == -1) {
-	sudo_warnx(U_("unable to add event to queue"));
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
@@ -1190,13 +1190,13 @@ read_server_hello(struct client_closure *closure)
     closure->read_ev->setbase(closure->read_ev, evbase);
     if (closure->read_ev->add(closure->read_ev,
 	    &closure->log_details->server_timeout) == -1) {
-	sudo_warnx(U_("unable to add event to queue"));
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
     /* Read/write hello messages synchronously. */
     if (sudo_ev_dispatch(evbase) == -1) {
-	sudo_warnx(U_("error in event loop"));
+	sudo_warnx("%s", U_("error in event loop"));
 	goto done;
     }
 
@@ -1250,7 +1250,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
      */
     closure->read_ev->setbase(closure->read_ev, NULL);
     if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
-        sudo_warn(U_("unable to add event to queue"));
+        sudo_warn("%s", U_("unable to add event to queue"));
 	debug_return_bool(false);
     }
     closure->write_ev->setbase(closure->write_ev, NULL);
@@ -1357,7 +1357,7 @@ handle_server_message(uint8_t *buf, size_t len,
 	    if ((ret = fmt_accept_message(closure))) {
 		if (closure->write_ev->add(closure->write_ev,
 			&closure->log_details->server_timeout) == -1) {
-		    sudo_warn(U_("unable to add event to queue"));
+		    sudo_warn("%s", U_("unable to add event to queue"));
 		    ret = false;
 		}
 	    }
@@ -1473,7 +1473,7 @@ server_msg_cb(int fd, int what, void *v)
 			    SUDO_PLUGIN_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
 			if (closure->write_ev->add(closure->write_ev, NULL) == -1) {
-			    sudo_warn(U_("unable to add event to queue"));
+			    sudo_warn("%s", U_("unable to add event to queue"));
 			    goto bad;
 			}
 			closure->temporary_write_event = true;
@@ -1755,7 +1755,7 @@ client_close(struct client_closure *closure, int exit_status, int error)
     closure->read_ev->setbase(closure->read_ev, evbase);
     if (closure->read_ev->add(closure->read_ev,
 	    &closure->log_details->server_timeout) == -1) {
-	sudo_warn(U_("unable to add event to queue"));
+	sudo_warn("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
@@ -1763,7 +1763,7 @@ client_close(struct client_closure *closure, int exit_status, int error)
     closure->write_ev->setbase(closure->write_ev, evbase);
     if (closure->write_ev->add(closure->write_ev,
 	    &closure->log_details->server_timeout) == -1) {
-	sudo_warn(U_("unable to add event to queue"));
+	sudo_warn("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
@@ -1771,7 +1771,7 @@ client_close(struct client_closure *closure, int exit_status, int error)
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"flushing buffers and waiting for final commit point");
     if (sudo_ev_dispatch(evbase) == -1 || sudo_ev_got_break(evbase)) {
-	sudo_warnx(U_("error in event loop"));
+	sudo_warnx("%s", U_("error in event loop"));
 	goto done;
     }
 

@@ -628,7 +628,7 @@ sudoers_io_open_remote(struct timespec *now)
     /* Connect to log server. */
     if (!log_server_connect(client_closure)) {
 	/* TODO: support offline logs if server unreachable */
-	sudo_warnx(U_("unable to connect to log server"));
+	sudo_warnx("%s", U_("unable to connect to log server"));
 	goto done;
     }
 
@@ -918,7 +918,7 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
 	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
-	    sudo_warn(U_("unable to add event to queue"));
+	    sudo_warn("%s", U_("unable to add event to queue"));
     }
 
 done:
@@ -1051,7 +1051,7 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
 	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
-	    sudo_warn(U_("unable to add event to queue"));
+	    sudo_warn("%s", U_("unable to add event to queue"));
     }
 
     debug_return_int(ret);
@@ -1149,7 +1149,7 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
 	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
-	    sudo_warn(U_("unable to add event to queue"));
+	    sudo_warn("%s", U_("unable to add event to queue"));
     }
 
     debug_return_int(ret);

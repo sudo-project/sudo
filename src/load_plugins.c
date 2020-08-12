@@ -326,7 +326,8 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 		if (!quiet) {
 		    sudo_warnx(U_("ignoring policy plugin \"%s\" in %s, line %d"),
 			info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-		    sudo_warnx(U_("only a single policy plugin may be specified"));
+		    sudo_warnx("%s",
+			U_("only a single policy plugin may be specified"));
 		}
 		goto done;
 	    }

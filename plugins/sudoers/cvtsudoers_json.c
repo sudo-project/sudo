@@ -637,10 +637,10 @@ print_cmndspec_json(struct json_container *json,
 	}
 	if (cs->notbefore != UNSPEC) {
 	    if ((tp = gmtime(&cs->notbefore)) == NULL) {
-		sudo_warn(U_("unable to get GMT time"));
+		sudo_warn("%s", U_("unable to get GMT time"));
 	    } else {
 		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
-		    sudo_warnx(U_("unable to format timestamp"));
+		    sudo_warnx("%s", U_("unable to format timestamp"));
 		} else {
 		    value.type = JSON_STRING;
 		    value.u.string = timebuf;
@@ -650,10 +650,10 @@ print_cmndspec_json(struct json_container *json,
 	}
 	if (cs->notafter != UNSPEC) {
 	    if ((tp = gmtime(&cs->notafter)) == NULL) {
-		sudo_warn(U_("unable to get GMT time"));
+		sudo_warn("%s", U_("unable to get GMT time"));
 	    } else {
 		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
-		    sudo_warnx(U_("unable to format timestamp"));
+		    sudo_warnx("%s", U_("unable to format timestamp"));
 		} else {
 		    value.type = JSON_STRING;
 		    value.u.string = timebuf;

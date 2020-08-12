@@ -81,7 +81,7 @@ audit_role_change(const security_context_t old_context,
         /* Kernel may not have audit support. */
         if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT
 )
-            sudo_fatal(U_("unable to open audit system"));
+            sudo_fatal("%s", U_("unable to open audit system"));
     } else {
 	/* audit role change using the same format as newrole(1) */
 	rc = asprintf(&message, "newrole: old-context=%s new-context=%s",
@@ -91,7 +91,7 @@ audit_role_change(const security_context_t old_context,
 	rc = audit_log_user_message(au_fd, AUDIT_USER_ROLE_CHANGE,
 	    message, NULL, NULL, ttyn, result);
 	if (rc <= 0)
-	    sudo_warn(U_("unable to send audit message"));
+	    sudo_warn("%s", U_("unable to send audit message"));
 	free(message);
 	close(au_fd);
     }
@@ -199,7 +199,7 @@ relabel_tty(const char *ttyn, int ptyfd)
     }
 
     if (fgetfilecon(se_state.ttyfd, &tty_con) == -1) {
-	sudo_warn(U_("unable to get current tty context, not relabeling tty"));
+	sudo_warn("%s", U_("unable to get current tty context, not relabeling tty"));
 	goto bad;
     }
 
@@ -211,7 +211,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 	}
 	if (security_compute_relabel(se_state.new_context, tty_con,
 	    tclass, &new_tty_con) == -1) {
-	    sudo_warn(U_("unable to get new tty context, not relabeling tty"));
+	    sudo_warn("%s", U_("unable to get new tty context, not relabeling tty"));
 	    goto bad;
 	}
     }
@@ -220,7 +220,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: tty context %s -> %s",
 	    __func__, tty_con, new_tty_con);
 	if (fsetfilecon(se_state.ttyfd, new_tty_con) == -1) {
-	    sudo_warn(U_("unable to set new tty context"));
+	    sudo_warn("%s", U_("unable to set new tty context"));
 	    goto bad;
 	}
     }
@@ -336,7 +336,7 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
      * its components easily. 
      */
     if ((context = context_new(old_context)) == NULL) {
-	sudo_warn(U_("failed to get new context"));
+	sudo_warn("%s", U_("failed to get new context"));
 	goto bad;
     }
     
@@ -393,13 +393,13 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 
     /* Store the caller's SID in old_context. */
     if (getprevcon(&se_state.old_context)) {
-	sudo_warn(U_("failed to get old context"));
+	sudo_warn("%s", U_("failed to get old context"));
 	goto done;
     }
 
     se_state.enforcing = security_getenforce();
     if (se_state.enforcing == -1) {
-	sudo_warn(U_("unable to determine enforcing mode."));
+	sudo_warn("%s", U_("unable to determine enforcing mode."));
 	goto done;
     }
 

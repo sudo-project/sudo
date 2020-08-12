@@ -327,7 +327,7 @@ main(int argc, char *argv[])
 
     /* Setup defaults data structures. */
     if (!init_defaults())
-	sudo_fatalx(U_("unable to initialize sudoers default values"));
+	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     switch (input_format) {
     case format_ldif:

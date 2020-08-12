@@ -278,7 +278,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "network_addrs=")) {
 	    interfaces_string = *cur + sizeof("network_addrs=") - 1;
 	    if (!set_interfaces(interfaces_string)) {
-		sudo_warn(U_("unable to parse network address list"));
+		sudo_warn("%s", U_("unable to parse network address list"));
 		goto bad;
 	    }
 	    continue;
@@ -423,19 +423,19 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 
     /* User name, user-ID, group-ID and host name must be specified. */
     if (user_name == NULL) {
-	sudo_warnx(U_("user name not set by sudo front-end"));
+	sudo_warnx("%s", U_("user name not set by sudo front-end"));
 	goto bad;
     }
     if (user_uid == (uid_t)-1) {
-	sudo_warnx(U_("user-ID not set by sudo front-end"));
+	sudo_warnx("%s", U_("user-ID not set by sudo front-end"));
 	goto bad;
     }
     if (user_gid == (gid_t)-1) {
-	sudo_warnx(U_("group-ID not set by sudo front-end"));
+	sudo_warnx("%s", U_("group-ID not set by sudo front-end"));
 	goto bad;
     }
     if (user_host == NULL) {
-	sudo_warnx(U_("host name not set by sudo front-end"));
+	sudo_warnx("%s", U_("host name not set by sudo front-end"));
 	goto bad;
     }
 

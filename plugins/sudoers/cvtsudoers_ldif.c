@@ -342,10 +342,10 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     /* Print sudoNotBefore and sudoNotAfter attributes */
     if (cs->notbefore != UNSPEC) {
 	if ((tp = gmtime(&cs->notbefore)) == NULL) {
-	    sudo_warn(U_("unable to get GMT time"));
+	    sudo_warn("%s", U_("unable to get GMT time"));
 	} else {
 	    if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
-		sudo_warnx(U_("unable to format timestamp"));
+		sudo_warnx("%s", U_("unable to format timestamp"));
 	    } else {
 		print_attribute_ldif(fp, "sudoNotBefore", timebuf);
 	    }
@@ -353,10 +353,10 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     }
     if (cs->notafter != UNSPEC) {
 	if ((tp = gmtime(&cs->notafter)) == NULL) {
-	    sudo_warn(U_("unable to get GMT time"));
+	    sudo_warn("%s", U_("unable to get GMT time"));
 	} else {
 	    if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
-		sudo_warnx(U_("unable to format timestamp"));
+		sudo_warnx("%s", U_("unable to format timestamp"));
 	    } else {
 		print_attribute_ldif(fp, "sudoNotAfter", timebuf);
 	    }
@@ -672,7 +672,7 @@ convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree,
     debug_decl(convert_sudoers_ldif, SUDOERS_DEBUG_UTIL);
 
     if (conf->sudoers_base == NULL) {
-	sudo_fatalx(U_("the SUDOERS_BASE environment variable is not set and the -b option was not specified."));
+	sudo_fatalx("%s", U_("the SUDOERS_BASE environment variable is not set and the -b option was not specified."));
     }
 
     if (output_file != NULL && strcmp(output_file, "-") != 0) {

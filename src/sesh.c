@@ -74,7 +74,7 @@ main(int argc, char *argv[], char *envp[])
     textdomain(PACKAGE_NAME);
 
     if (argc < 2)
-	sudo_fatalx(U_("requires at least one argument"));
+	sudo_fatalx("%s", U_("requires at least one argument"));
 
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)

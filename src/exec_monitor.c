@@ -357,7 +357,7 @@ mon_backchannel_cb(int fd, int what, void *v)
 	if (n == -1) {
 	    if (errno == EINTR || errno == EAGAIN)
 		debug_return;
-	    sudo_warn(U_("error reading from socketpair"));
+	    sudo_warn("%s", U_("error reading from socketpair"));
 	} else {
 	    /* short read or EOF, parent process died? */
 	}
@@ -460,7 +460,7 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     if (mc->errpipe_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->errpipe_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Event for forwarded signals via backchannel. */
     mc->backchannel_event = sudo_ev_alloc(backchannel,
@@ -468,7 +468,7 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     if (mc->backchannel_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->backchannel_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Events for local signals. */
     mc->sigint_event = sudo_ev_alloc(SIGINT,
@@ -476,56 +476,56 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     if (mc->sigint_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigint_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigquit_event = sudo_ev_alloc(SIGQUIT,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigquit_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigquit_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigtstp_event = sudo_ev_alloc(SIGTSTP,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigtstp_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigtstp_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigterm_event = sudo_ev_alloc(SIGTERM,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigterm_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigterm_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sighup_event = sudo_ev_alloc(SIGHUP,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sighup_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sighup_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigusr1_event = sudo_ev_alloc(SIGUSR1,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigusr1_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigusr1_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigusr2_event = sudo_ev_alloc(SIGUSR2,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigusr2_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigusr2_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigchld_event = sudo_ev_alloc(SIGCHLD,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigchld_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigchld_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Clear the default event base. */
     sudo_ev_base_setdef(NULL);
@@ -579,7 +579,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	goto bad;
     }
     if (pty_make_controlling() == -1) {
-	sudo_warn(U_("unable to set controlling tty"));
+	sudo_warn("%s", U_("unable to set controlling tty"));
 	goto bad;
     }
 
@@ -587,7 +587,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * We use a pipe to get errno if execve(2) fails in the child.
      */
     if (pipe2(errpipe, O_CLOEXEC) != 0)
-	sudo_fatal(U_("unable to create pipe"));
+	sudo_fatal("%s", U_("unable to create pipe"));
 
     /*
      * Before forking, wait for the main sudo process to tell us to go.
@@ -595,7 +595,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      */
     while (recv(backchannel, &cstat, sizeof(cstat), MSG_WAITALL) == -1) {
 	if (errno != EINTR && errno != EAGAIN)
-	    sudo_fatal(U_("unable to receive message from parent"));
+	    sudo_fatal("%s", U_("unable to receive message from parent"));
     }
 
 #ifdef HAVE_SELINUX
@@ -609,11 +609,11 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     mc.cmnd_pid = sudo_debug_fork();
     switch (mc.cmnd_pid) {
     case -1:
-	sudo_warn(U_("unable to fork"));
+	sudo_warn("%s", U_("unable to fork"));
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	    if (selinux_restore_tty() != 0)
-		sudo_warnx(U_("unable to restore tty label"));
+		sudo_warnx("%s", U_("unable to restore tty label"));
 	}
 #endif
 	goto bad;
@@ -712,7 +712,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	if (selinux_restore_tty() != 0)
-	    sudo_warnx(U_("unable to restore tty label"));
+	    sudo_warnx("%s", U_("unable to restore tty label"));
     }
 #endif
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);

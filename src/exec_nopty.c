@@ -211,7 +211,7 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     if (ec->errpipe_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->errpipe_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
     sudo_debug_printf(SUDO_DEBUG_INFO, "error pipe fd %d\n", errfd);
 
     /* Events for local signals. */
@@ -220,77 +220,77 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     if (ec->sigint_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigint_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigquit_event = sudo_ev_alloc(SIGQUIT,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigquit_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigquit_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigtstp_event = sudo_ev_alloc(SIGTSTP,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigtstp_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigtstp_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigterm_event = sudo_ev_alloc(SIGTERM,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigterm_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigterm_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sighup_event = sudo_ev_alloc(SIGHUP,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sighup_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sighup_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigalrm_event = sudo_ev_alloc(SIGALRM,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigalrm_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigalrm_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigpipe_event = sudo_ev_alloc(SIGPIPE,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigpipe_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigpipe_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigusr1_event = sudo_ev_alloc(SIGUSR1,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigusr1_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigusr1_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigusr2_event = sudo_ev_alloc(SIGUSR2,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigusr2_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigusr2_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigchld_event = sudo_ev_alloc(SIGCHLD,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigchld_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigchld_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigcont_event = sudo_ev_alloc(SIGCONT,
 	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
     if (ec->sigcont_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigcont_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
 #ifdef SIGINFO
     ec->siginfo_event = sudo_ev_alloc(SIGINFO,
@@ -298,7 +298,7 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     if (ec->siginfo_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->siginfo_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 #endif
 
     /* Set the default event base. */
@@ -349,13 +349,13 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      * or certain pam modules won't be able to track their state.
      */
     if (policy_init_session(details) != true)
-	sudo_fatalx(U_("policy plugin failed session initialization"));
+	sudo_fatalx("%s", U_("policy plugin failed session initialization"));
 
     /*
      * We use a pipe to get errno if execve(2) fails in the child.
      */
     if (pipe2(errpipe, O_CLOEXEC) != 0)
-	sudo_fatal(U_("unable to create pipe"));
+	sudo_fatal("%s", U_("unable to create pipe"));
 
     /*
      * Block signals until we have our handlers setup in the parent so
@@ -384,7 +384,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     ec.cmnd_pid = sudo_debug_fork();
     switch (ec.cmnd_pid) {
     case -1:
-	sudo_fatal(U_("unable to fork"));
+	sudo_fatal("%s", U_("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -426,7 +426,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      * Wait for command to exit, handles signals and the error pipe.
      */
     if (sudo_ev_dispatch(ec.evbase) == -1)
-	sudo_warn(U_("error in event loop"));
+	sudo_warn("%s", U_("error in event loop"));
     if (sudo_ev_got_break(ec.evbase)) {
 	/* error from callback */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
@@ -438,7 +438,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	if (selinux_restore_tty() != 0)
-	    sudo_warnx(U_("unable to restore tty label"));
+	    sudo_warnx("%s", U_("unable to restore tty label"));
     }
 #endif
 

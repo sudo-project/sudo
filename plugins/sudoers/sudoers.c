@@ -177,7 +177,7 @@ sudoers_init(void *info, char * const envp[])
 
     /* Setup defaults data structures. */
     if (!init_defaults()) {
-	sudo_warnx(U_("unable to initialize sudoers default values"));
+	sudo_warnx("%s", U_("unable to initialize sudoers default values"));
 	debug_return_int(-1);
     }
 
@@ -217,7 +217,7 @@ sudoers_init(void *info, char * const envp[])
 	}
     }
     if (sources == 0) {
-	sudo_warnx(U_("no valid sudoers sources found, quitting"));
+	sudo_warnx("%s", U_("no valid sudoers sources found, quitting"));
 	goto cleanup;
     }
 
@@ -293,7 +293,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
 	/* Not an audit event (should it be?). */
-	sudo_warnx(U_("sudoers specifies that root is not allowed to sudo"));
+	sudo_warnx("%s",
+	    U_("sudoers specifies that root is not allowed to sudo"));
 	goto bad;
     }
 
@@ -354,7 +355,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (!def_closefrom_override) {
 	    audit_failure(NewArgv,
 		N_("user not allowed to override closefrom limit"));
-	    sudo_warnx(U_("you are not permitted to use the -C option"));
+	    sudo_warnx("%s", U_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
 	def_closefrom = user_closefrom;
@@ -432,7 +433,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty && !tty_present()) {
 	audit_failure(NewArgv, N_("no tty"));
-	sudo_warnx(U_("sorry, you must have a tty to run sudo"));
+	sudo_warnx("%s", U_("sorry, you must have a tty to run sudo"));
 	goto bad;
     }
 
@@ -522,7 +523,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified a timeout make sure sudoers allows it. */
     if (!def_user_command_timeouts && user_timeout > 0) {
 	audit_failure(NewArgv, N_("user not allowed to set a command timeout"));
-	sudo_warnx(U_("sorry, you are not allowed set a command timeout"));
+	sudo_warnx("%s",
+	    U_("sorry, you are not allowed set a command timeout"));
 	goto bad;
     }
 
@@ -531,7 +533,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
 	    audit_failure(NewArgv,
 		N_("user not allowed to preserve the environment"));
-	    sudo_warnx(U_("sorry, you are not allowed to preserve the environment"));
+	    sudo_warnx("%s",
+		U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {
 	    if (!validate_env_vars(sudo_user.env_vars))
@@ -932,7 +935,7 @@ set_cmnd(void)
     if (ISSET(sudo_mode, MODE_RUN) && strcmp(user_base, "sudoedit") == 0) {
 	CLR(sudo_mode, MODE_RUN);
 	SET(sudo_mode, MODE_EDIT);
-	sudo_warnx(U_("sudoedit doesn't need to be run via sudo"));
+	sudo_warnx("%s", U_("sudoedit doesn't need to be run via sudo"));
 	user_base = user_cmnd = "sudoedit";
     }
 

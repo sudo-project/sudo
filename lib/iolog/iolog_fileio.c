@@ -121,23 +121,21 @@ iolog_mkdirs(char *path)
     mode_t omask;
     struct stat sb;
     int dfd;
-    bool ok = false, uid_changed = false;
+    bool ok = true, uid_changed = false;
     debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL);
 
-    if ((dfd = open(path, O_RDONLY|O_NONBLOCK)) != -1)
-	ok = true;
-    if (!ok && errno == EACCES) {
+    dfd = open(path, O_RDONLY|O_NONBLOCK);
+    if (dfd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (io_swapids(false)) {
-	    if ((dfd = open(path, O_RDONLY|O_NONBLOCK)) != -1)
-		ok = true;
-	    if (!io_swapids(true))
+	    dfd = open(path, O_RDONLY|O_NONBLOCK);
+	    if (!io_swapids(true)) {
 		ok = false;
+		goto done;
+	    }
 	}
     }
-    if (ok && fstat(dfd, &sb) == -1)
-	ok = false;
-    if (ok) {
+    if (dfd != -1 && fstat(dfd, &sb) != -1) {
 	if (S_ISDIR(sb.st_mode)) {
 	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid) {
 		if (fchown(dfd, iolog_uid, iolog_gid) != 0) {
@@ -473,21 +471,19 @@ iolog_nextid(char *iolog_dir, char sessid[7])
     }
 
     /* Read current seq number (base 36). */
-    if (id == 0) {
-	nread = read(fd, buf, sizeof(buf) - 1);
-	if (nread != 0) {
-	    if (nread == -1) {
-		goto done;
-	    }
-	    if (buf[nread - 1] == '\n')
-		nread--;
-	    buf[nread] = '\0';
-	    id = strtoul(buf, &ep, 36);
-	    if (ep == buf || *ep != '\0' || id >= sessid_max) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "%s: bad sequence number: %s", pathbuf, buf);
-		id = 0;
-	    }
+    nread = read(fd, buf, sizeof(buf) - 1);
+    if (nread != 0) {
+	if (nread == -1) {
+	    goto done;
+	}
+	if (buf[nread - 1] == '\n')
+	    nread--;
+	buf[nread] = '\0';
+	id = strtoul(buf, &ep, 36);
+	if (ep == buf || *ep != '\0' || id >= sessid_max) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: bad sequence number: %s", pathbuf, buf);
+	    id = 0;
 	}
     }
     id++;

@@ -1488,7 +1488,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
             sizeof(closure->ipaddr));
 #endif /* HAVE_STRUCT_IN6_ADDR */
     } else {
-        sudo_fatal(U_("unable to get remote IP addr"));
+        sudo_fatal("%s", U_("unable to get remote IP addr"));
         goto bad;
     }
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -1524,7 +1524,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
         /* Enable SSL_accept to begin handshake with client. */
         if (sudo_ev_add(evbase, closure->ssl_accept_ev,
 		logsrvd_conf_get_sock_timeout(), false) == -1) {
-            sudo_fatal(U_("unable to add event to queue"));
+            sudo_fatal("%s", U_("unable to add event to queue"));
             goto bad;
         }
     }
@@ -1646,7 +1646,7 @@ register_listener(struct listen_address *addr, struct sudo_event_base *evbase)
     if (l->ev == NULL)
 	sudo_fatal(NULL);
     if (sudo_ev_add(evbase, l->ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
     TAILQ_INSERT_TAIL(&listeners, l, entries);
 
     debug_return_bool(true);
@@ -1700,7 +1700,7 @@ server_reload(struct sudo_event_base *base)
     if (logsrvd_conf_read(conf_file)) {
 	/* Re-initialize listeners and TLS context. */
 	if (!server_setup(base))
-	    sudo_fatalx(U_("unable setup listen socket"));
+	    sudo_fatalx("%s", U_("unable setup listen socket"));
 
 	/* Re-initialize debugging. */
 	if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
@@ -1746,7 +1746,7 @@ register_signal(int signo, struct sudo_event_base *base)
     if (ev == NULL)
 	sudo_fatal(NULL);
     if (sudo_ev_add(base, ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     debug_return;
 }
@@ -1895,7 +1895,7 @@ main(int argc, char *argv[])
         sudo_conf_debug_files(getprogname()));
 
     if (protobuf_c_version_number() < 1003000)
-	sudo_fatalx(U_("Protobuf-C version 1.3 or higher required"));
+	sudo_fatalx("%s", U_("Protobuf-C version 1.3 or higher required"));
 
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
@@ -1934,7 +1934,7 @@ main(int argc, char *argv[])
 
     /* Initialize listeners and TLS context. */
     if (!server_setup(evbase))
-	sudo_fatalx(U_("unable setup listen socket"));
+	sudo_fatalx("%s", U_("unable setup listen socket"));
 
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);

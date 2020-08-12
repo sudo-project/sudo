@@ -69,7 +69,7 @@ sudo_securid_init(struct passwd *pw, sudo_auth *auth)
     if (AceInitialize() != SD_FALSE)
 	debug_return_int(AUTH_SUCCESS);
 
-    sudo_warnx(U_("failed to initialise the ACE API library"));
+    sudo_warnx("%s", U_("failed to initialise the ACE API library"));
     debug_return_int(AUTH_FATAL);
 }
 
@@ -95,7 +95,7 @@ sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     /* Re-initialize SecurID every time. */
     if (SD_Init(sd) != ACM_OK) {
-	sudo_warnx(U_("unable to contact the SecurID server"));
+	sudo_warnx("%s", U_("unable to contact the SecurID server"));
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -104,23 +104,23 @@ sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     switch (retval) {
 	case ACM_OK:
-		sudo_warnx(U_("User ID locked for SecurID Authentication"));
+		sudo_warnx("%s", U_("User ID locked for SecurID Authentication"));
 		debug_return_int(AUTH_SUCCESS);
 
         case ACE_UNDEFINED_USERNAME:
-		sudo_warnx(U_("invalid username length for SecurID"));
+		sudo_warnx("%s", U_("invalid username length for SecurID"));
 		debug_return_int(AUTH_FATAL);
 
 	case ACE_ERR_INVALID_HANDLE:
-		sudo_warnx(U_("invalid Authentication Handle for SecurID"));
+		sudo_warnx("%s", U_("invalid Authentication Handle for SecurID"));
 		debug_return_int(AUTH_FATAL);
 
 	case ACM_ACCESS_DENIED:
-		sudo_warnx(U_("SecurID communication failed"));
+		sudo_warnx("%s", U_("SecurID communication failed"));
 		debug_return_int(AUTH_FATAL);
 
 	default:
-		sudo_warnx(U_("unknown SecurID error"));
+		sudo_warnx("%s", U_("unknown SecurID error"));
 		debug_return_int(AUTH_FATAL);
 	}
 }
@@ -154,17 +154,17 @@ sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_
 		break;
 
 	case ACE_UNDEFINED_PASSCODE:
-		sudo_warnx(U_("invalid passcode length for SecurID"));
+		sudo_warnx("%s", U_("invalid passcode length for SecurID"));
 		ret = AUTH_FATAL;
 		break;
 
 	case ACE_UNDEFINED_USERNAME:
-		sudo_warnx(U_("invalid username length for SecurID"));
+		sudo_warnx("%s", U_("invalid username length for SecurID"));
 		ret = AUTH_FATAL;
 		break;
 
 	case ACE_ERR_INVALID_HANDLE:
-		sudo_warnx(U_("invalid Authentication Handle for SecurID"));
+		sudo_warnx("%s", U_("invalid Authentication Handle for SecurID"));
 		ret = AUTH_FATAL;
 		break;
 
@@ -207,7 +207,7 @@ then enter the new token code.\n", \
 		break;
 
 	default:
-		sudo_warnx(U_("unknown SecurID error"));
+		sudo_warnx("%s", U_("unknown SecurID error"));
 		ret = AUTH_FATAL;
 		break;
     }

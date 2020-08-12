@@ -315,7 +315,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		case 'C':
 		    assert(optarg != NULL);
 		    if (sudo_strtonum(optarg, 3, INT_MAX, NULL) == 0) {
-			sudo_warnx(U_("the argument to -C must be a number greater than or equal to 3"));
+			sudo_warnx("%s",
+			    U_("the argument to -C must be a number greater than or equal to 3"));
 			usage();
 		    }
 		    if (sudo_settings[ARG_CLOSEFROM].value != NULL)
@@ -528,11 +529,13 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
     if (ISSET(flags, MODE_LOGIN_SHELL)) {
 	if (ISSET(flags, MODE_SHELL)) {
-	    sudo_warnx(U_("you may not specify both the -i and -s options"));
+	    sudo_warnx("%s",
+		U_("you may not specify both the -i and -s options"));
 	    usage();
 	}
 	if (ISSET(flags, MODE_PRESERVE_ENV)) {
-	    sudo_warnx(U_("you may not specify both the -i and -E options"));
+	    sudo_warnx("%s",
+		U_("you may not specify both the -i and -E options"));
 	    usage();
 	}
 	SET(flags, MODE_SHELL);
@@ -542,9 +545,10 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     if (mode == MODE_EDIT &&
        (ISSET(flags, MODE_PRESERVE_ENV) || extra_env.env_len != 0)) {
 	if (ISSET(mode, MODE_PRESERVE_ENV))
-	    sudo_warnx(U_("the -E option is not valid in edit mode"));
+	    sudo_warnx("%s", U_("the -E option is not valid in edit mode"));
 	if (extra_env.env_len != 0)
-	    sudo_warnx(U_("you may not specify environment variables in edit mode"));
+	    sudo_warnx("%s",
+		U_("you may not specify environment variables in edit mode"));
 	usage();
     }
     if ((sudo_settings[ARG_RUNAS_USER].value != NULL ||
@@ -553,11 +557,12 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	usage();
     }
     if (list_user != NULL && mode != MODE_LIST && mode != MODE_CHECK) {
-	sudo_warnx(U_("the -U option may only be used with the -l option"));
+	sudo_warnx("%s",
+	    U_("the -U option may only be used with the -l option"));
 	usage();
     }
     if (ISSET(tgetpass_flags, TGP_STDIN) && ISSET(tgetpass_flags, TGP_ASKPASS)) {
-	sudo_warnx(U_("the -A and -S options may not be used together"));
+	sudo_warnx("%s", U_("the -A and -S options may not be used together"));
 	usage();
     }
     if ((argc == 0 && mode == MODE_EDIT) ||
@@ -650,7 +655,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	argv = av;
 	argc = ac;
 #else
-	sudo_fatalx(U_("sudoedit is not supported on this platform"));
+	sudo_fatalx("%s", U_("sudoedit is not supported on this platform"));
 #endif
     }
 
@@ -731,7 +736,8 @@ usage_excl(void)
 {
     debug_decl(usage_excl, SUDO_DEBUG_ARGS);
 
-    sudo_warnx(U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
+    sudo_warnx("%s",
+	U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
     usage();
 }
 
@@ -752,7 +758,7 @@ help(void)
 
     display_usage(usage_out);
 
-    sudo_lbuf_append(&lbuf, _("\nOptions:\n"));
+    sudo_lbuf_append(&lbuf, "%s", _("\nOptions:\n"));
     sudo_lbuf_append(&lbuf, "  -A, --askpass                 %s\n",
 	_("use a helper program for password prompting"));
 #ifdef HAVE_BSD_AUTH_H

@@ -173,7 +173,7 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
     STAILQ_FOREACH(uri, uri_list, entries) {
 	if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
 	    if (strncasecmp(uri->val, "ldaps://", 8) == 0) {
-		sudo_warnx(U_("starttls not supported when using ldaps"));
+		sudo_warnx("%s", U_("starttls not supported when using ldaps"));
 		ldap_conf.ssl_mode = SUDO_LDAP_SSL;
 	    }
 	}
@@ -499,13 +499,13 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     /* Make sure we have a formatted timestamp for __now__. */
     time(&now);
     if ((tp = gmtime(&now)) == NULL) {
-	sudo_warn(U_("unable to get GMT time"));
+	sudo_warn("%s", U_("unable to get GMT time"));
 	goto done;
     }
 
     /* Format the timestamp according to the RFC. */
     if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", tp) == 0) {
-	sudo_warnx(U_("unable to format timestamp"));
+	sudo_warnx("%s", U_("unable to format timestamp"));
 	goto done;
     }
 
@@ -1691,7 +1691,8 @@ sudo_ldap_open(struct sudo_nss *nss)
 	}
 	DPRINTF1("ldap_start_tls_s_np() ok");
 #else
-	sudo_warnx(U_("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"));
+	sudo_warnx("%s",
+	    U_("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"));
 #endif /* !HAVE_LDAP_START_TLS_S && !HAVE_LDAP_START_TLS_S_NP */
     }
 

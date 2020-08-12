@@ -222,8 +222,10 @@ main(int argc, char *argv[])
 
     if (export_path != NULL) {
 	/* Backwards compatibility for the time being. */
-	sudo_warnx(U_("the -x option will be removed in a future release"));
-	sudo_warnx(U_("please consider using the cvtsudoers utility instead"));
+	sudo_warnx("%s",
+	    U_("the -x option will be removed in a future release"));
+	sudo_warnx("%s",
+	    U_("please consider using the cvtsudoers utility instead"));
 	execlp("cvtsudoers", "cvtsudoers", "-f", "json", "-o", export_path,
 	    sudoers_file, (char *)0);
 	sudo_fatal(U_("unable to execute %s"), "cvtsudoers");
@@ -244,7 +246,7 @@ main(int argc, char *argv[])
 
     /* Setup defaults data structures. */
     if (!init_defaults())
-	sudo_fatalx(U_("unable to initialize sudoers default values"));
+	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     if (checkonly) {
 	exitcode = check_syntax(sudoers_file, quiet, strict, fflag) ? 0 : 1;
@@ -447,7 +449,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    (void) lseek(sp->fd, (off_t)0, SEEK_SET);
 	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0) {
 		if (write(tfd, buf, nread) != nread)
-		    sudo_fatal(U_("write error"));
+		    sudo_fatal("%s", U_("write error"));
 		lastch = buf[nread - 1];
 	    }
 
@@ -455,7 +457,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    if (lastch != '\n') {
 		lastch = '\n';
 		if (write(tfd, &lastch, 1) != 1)
-		    sudo_fatal(U_("write error"));
+		    sudo_fatal("%s", U_("write error"));
 	    }
 	}
 	(void) close(tfd);
@@ -488,13 +490,13 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
      *  number of errors during editing (?!?!).
      */
     if (sudo_gettime_real(&times[0]) == -1) {
-	sudo_warn(U_("unable to read the clock"));
+	sudo_warn("%s", U_("unable to read the clock"));
 	goto done;
     }
 
     if (run_command(editor, editor_argv) != -1) {
 	if (sudo_gettime_real(&times[1]) == -1) {
-	    sudo_warn(U_("unable to read the clock"));
+	    sudo_warn("%s", U_("unable to read the clock"));
 	    goto done;
 	}
 	/*
@@ -600,7 +602,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 
 	/* Clean slate for each parse */
 	if (!init_defaults())
-	    sudo_fatalx(U_("unable to initialize sudoers default values"));
+	    sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 	init_parser(sp->path, quiet, true);
 
 	/* Parse the sudoers temp file(s) */
@@ -923,7 +925,7 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	goto done;
     }
     if (!init_defaults())
-	sudo_fatalx(U_("unable to initialize sudoers default values"));
+	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
     init_parser(sudoers_file, quiet, true);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {

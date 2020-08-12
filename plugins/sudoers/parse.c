@@ -442,9 +442,9 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    sudo_lbuf_append(lbuf, _("\nLDAP Role: %s\n"),
 			priv->ldap_role);
 		} else {
-		    sudo_lbuf_append(lbuf, _("\nSudoers entry:\n"));
+		    sudo_lbuf_append(lbuf, "%s", _("\nSudoers entry:\n"));
 		}
-		sudo_lbuf_append(lbuf, _("    RunAsUsers: "));
+		sudo_lbuf_append(lbuf, "%s", _("    RunAsUsers: "));
 		if (cs->runasuserlist != NULL) {
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m != TAILQ_FIRST(cs->runasuserlist))
@@ -459,7 +459,7 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		}
 		sudo_lbuf_append(lbuf, "\n");
 		if (cs->runasgrouplist != NULL) {
-		    sudo_lbuf_append(lbuf, _("    RunAsGroups: "));
+		    sudo_lbuf_append(lbuf, "%s", _("    RunAsGroups: "));
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m != TAILQ_FIRST(cs->runasgrouplist))
 			    sudo_lbuf_append(lbuf, ", ");
@@ -469,7 +469,7 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    sudo_lbuf_append(lbuf, "\n");
 		}
 		olen = lbuf->len;
-		sudo_lbuf_append(lbuf, _("    Options: "));
+		sudo_lbuf_append(lbuf, "%s", _("    Options: "));
 		TAILQ_FOREACH(d, &priv->defaults, entries) {
 		    sudoers_format_default(lbuf, d);
 		    sudo_lbuf_append(lbuf, ", ");
@@ -519,7 +519,7 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
 			sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
 		}
-		sudo_lbuf_append(lbuf, _("    Commands:\n"));
+		sudo_lbuf_append(lbuf, "%s", _("    Commands:\n"));
 	    }
 	    sudo_lbuf_append(lbuf, "\t");
 	    sudoers_format_member(lbuf, parse_tree, cs->cmnd, "\n\t",

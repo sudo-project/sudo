@@ -413,7 +413,7 @@ audit_write_exit_record(int exit_status, int error)
     debug_decl(audit_write_exit_record, SUDO_DEBUG_PLUGIN);
 
     if (sudo_gettime_real(&now) == -1) {
-	sudo_warn(U_("unable to read the clock"));
+	sudo_warn("%s", U_("unable to read the clock"));
 	goto done;
     }
 
@@ -498,7 +498,7 @@ audit_write_record(const char *audit_str, const char *plugin_name,
     debug_decl(audit_write_record, SUDO_DEBUG_PLUGIN);
 
     if (sudo_gettime_real(&now) == -1) {
-	sudo_warn(U_("unable to read the clock"));
+	sudo_warn("%s", U_("unable to read the clock"));
 	goto done;
     }
 
