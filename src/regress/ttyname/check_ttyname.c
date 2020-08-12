@@ -31,7 +31,7 @@
 #include "sudo_util.h"
 #include "sudo_debug.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 extern char *get_process_ttyname(char *name, size_t namelen);

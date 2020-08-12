@@ -278,7 +278,7 @@ sudoers_audit_version(int verbose)
     debug_return_int(true);
 }
 
-__dso_public struct audit_plugin sudoers_audit = {
+sudo_dso_public struct audit_plugin sudoers_audit = {
     SUDO_AUDIT_PLUGIN,
     SUDO_API_VERSION,
     sudoers_audit_open,

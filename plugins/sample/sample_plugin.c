@@ -459,7 +459,7 @@ io_log_output(const char *buf, unsigned int len)
     return ret;
 }
 
-__dso_public struct policy_plugin sample_policy = {
+sudo_dso_public struct policy_plugin sample_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
     policy_open,
@@ -478,7 +478,7 @@ __dso_public struct policy_plugin sample_policy = {
  * Note: This plugin does not differentiate between tty and pipe I/O.
  *       It all gets logged to the same file.
  */
-__dso_public struct io_plugin sample_io = {
+sudo_dso_public struct io_plugin sample_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
     io_open,

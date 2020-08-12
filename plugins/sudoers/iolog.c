@@ -73,7 +73,7 @@ static struct timespec last_time;
 static void sudoers_io_setops(void);
 
 /* sudoers_io is declared at the end of this file. */
-extern __dso_public struct io_plugin sudoers_io;
+extern sudo_dso_public struct io_plugin sudoers_io;
 
 /*
  * Sudoers callback for maxseq Defaults setting.
@@ -1238,7 +1238,7 @@ sudoers_io_setops(void)
     debug_return;
 }
 
-__dso_public struct io_plugin sudoers_io = {
+sudo_dso_public struct io_plugin sudoers_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
     sudoers_io_open,

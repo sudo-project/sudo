@@ -31,7 +31,7 @@
 #include "sudo_fatal.h"
 #include "sudo_iolog.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 static struct parse_delay_test {
     const char *input;

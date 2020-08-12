@@ -48,7 +48,7 @@
 #include "sudo_plugin.h"
 #include "sudo_util.h"
 
-__dso_public int main(int argc, char *argv[], char *envp[]);
+sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
 static int sesh_sudoedit(int argc, char *argv[]);
 

@@ -197,7 +197,7 @@ static void setup_terminal(struct iolog_info *li, bool interactive, bool resize)
     isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
     (s)[8] == '\0')
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])

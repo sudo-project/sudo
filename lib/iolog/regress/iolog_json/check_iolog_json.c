@@ -32,7 +32,7 @@
 
 #include "iolog_json.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 bool
 json_print_object(struct json_container *json, struct json_object *object)

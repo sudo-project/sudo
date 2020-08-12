@@ -48,7 +48,7 @@ union timestamp_entry_storage {
     struct timestamp_entry v2;
 };
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 static void usage(void) __attribute__((__noreturn__));
 static void dump_entry(struct timestamp_entry *entry, off_t pos);

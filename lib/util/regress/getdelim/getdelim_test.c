@@ -35,7 +35,7 @@
 #include "sudo_fatal.h"
 #include "sudo_util.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 /*
  * Test that sudo_getdelim() works as expected.

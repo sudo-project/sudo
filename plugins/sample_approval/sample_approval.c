@@ -159,7 +159,7 @@ sample_approval_show_version(int verbose)
     debug_return_int(true);
 }
 
-__dso_public struct approval_plugin sample_approval = {
+sudo_dso_public struct approval_plugin sample_approval = {
     SUDO_APPROVAL_PLUGIN,
     SUDO_API_VERSION,
     sample_approval_open,

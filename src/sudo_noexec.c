@@ -88,31 +88,31 @@ typedef struct interpose_s {
 }
 
 #define DUMMY1(fn, t1)				\
-__dso_public int				\
+sudo_dso_public int				\
 FN_NAME(fn)(t1 a1)				\
 DUMMY_BODY					\
 INTERPOSE(fn)
 
 #define DUMMY2(fn, t1, t2)			\
-__dso_public int				\
+sudo_dso_public int				\
 FN_NAME(fn)(t1 a1, t2 a2)			\
 DUMMY_BODY					\
 INTERPOSE(fn)
 
 #define DUMMY3(fn, t1, t2, t3)			\
-__dso_public int				\
+sudo_dso_public int				\
 FN_NAME(fn)(t1 a1, t2 a2, t3 a3)		\
 DUMMY_BODY					\
 INTERPOSE(fn)
 
 #define DUMMY6(fn, t1, t2, t3, t4, t5, t6)	\
-__dso_public int				\
+sudo_dso_public int				\
 FN_NAME(fn)(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6)	\
 DUMMY_BODY					\
 INTERPOSE(fn)
 
 #define DUMMY_VA(fn, t1, t2)			\
-__dso_public int				\
+sudo_dso_public int				\
 FN_NAME(fn)(t1 a1, t2 a2, ...)			\
 DUMMY_BODY					\
 INTERPOSE(fn)
@@ -159,7 +159,7 @@ DUMMY6(posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *, 
  */
 DUMMY1(system, const char *)
 
-__dso_public FILE *
+sudo_dso_public FILE *
 FN_NAME(popen)(const char *c, const char *t)
 {
     errno = EACCES;
@@ -174,7 +174,7 @@ INTERPOSE(popen)
  */
 typedef int (*sudo_fn_wordexp_t)(const char *, wordexp_t *, int);
 
-__dso_public int
+sudo_dso_public int
 FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags)
 {
 #if defined(HAVE___INTERPOSE)

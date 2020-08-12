@@ -1324,6 +1324,19 @@
    code using `volatile' can become incorrect without. Disable with care. */
 #undef volatile
 
+/* Symbol visibility controls */
+#ifdef HAVE_DSO_VISIBILITY
+# if defined(__GNUC__)
+#  define sudo_dso_public __attribute__((__visibility__("default")))
+# elif defined(__SUNPRO_C)
+#  define sudo_dso_public __global
+# else
+#  define sudo_dso_public __declspec(dllexport)
+# endif
+#else
+# define sudo_dso_public
+#endif
+
 /* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP

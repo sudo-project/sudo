@@ -39,7 +39,7 @@ struct passwd *list_pw;
 sudo_printf_t sudo_printf;
 sudo_conv_t sudo_conv;
 
-__dso_public int main(int argc, char *argv[], char *envp[]);
+sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
 static void
 usage(void)

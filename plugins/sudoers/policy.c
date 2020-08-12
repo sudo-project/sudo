@@ -55,7 +55,7 @@ const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
 static bool session_opened;
 
-extern __dso_public struct policy_plugin sudoers_policy;
+extern sudo_dso_public struct policy_plugin sudoers_policy;
 
 #ifdef HAVE_BSD_AUTH_H
 extern char *login_style;
@@ -1109,7 +1109,7 @@ sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook
     }
 }
 
-__dso_public struct policy_plugin sudoers_policy = {
+sudo_dso_public struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
     sudoers_policy_open,

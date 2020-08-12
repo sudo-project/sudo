@@ -25,7 +25,7 @@
 #include "sudo_compat.h"
 #include "sudo_util.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 /*
  * Simple test driver for sudo_parseln().

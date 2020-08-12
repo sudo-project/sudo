@@ -140,7 +140,7 @@ sysgroup_query(const char *user, const char *group, const struct passwd *pwd)
     return false;
 }
 
-__dso_public struct sudoers_group_plugin group_plugin = {
+sudo_dso_public struct sudoers_group_plugin group_plugin = {
     GROUP_API_VERSION,
     sysgroup_init,
     sysgroup_cleanup,

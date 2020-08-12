@@ -32,7 +32,7 @@
 
 extern void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 static void
 usage(void)

@@ -29,12 +29,12 @@
 struct sudo_digest;
 
 /* Public functions. */
-__dso_public struct sudo_digest *sudo_digest_alloc_v1(int digest_type);
-__dso_public void sudo_digest_free_v1(struct sudo_digest *dig);
-__dso_public void sudo_digest_reset_v1(struct sudo_digest *dig);
-__dso_public int sudo_digest_getlen_v1(int digest_type);
-__dso_public void sudo_digest_update_v1(struct sudo_digest *dig, const void *data, size_t len);
-__dso_public void sudo_digest_final_v1(struct sudo_digest *dig, unsigned char *md);
+sudo_dso_public struct sudo_digest *sudo_digest_alloc_v1(int digest_type);
+sudo_dso_public void sudo_digest_free_v1(struct sudo_digest *dig);
+sudo_dso_public void sudo_digest_reset_v1(struct sudo_digest *dig);
+sudo_dso_public int sudo_digest_getlen_v1(int digest_type);
+sudo_dso_public void sudo_digest_update_v1(struct sudo_digest *dig, const void *data, size_t len);
+sudo_dso_public void sudo_digest_final_v1(struct sudo_digest *dig, unsigned char *md);
 
 #define sudo_digest_alloc(_a) sudo_digest_alloc_v1((_a))
 #define sudo_digest_free(_a) sudo_digest_free_v1((_a))

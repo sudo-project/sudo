@@ -4343,7 +4343,7 @@ dnl
 dnl Check whether ld supports version scripts (only GNU and Solaris ld).
 dnl If possible, we use this even if the compiler has symbol visibility
 dnl support so we will notice mismatches between the exports file and
-dnl __dso_public annotations in the source code.
+dnl sudo_dso_public annotations in the source code.
 dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$lt_cv_prog_gnu_ld" = "yes"; then
@@ -4905,7 +4905,20 @@ dnl
 AH_TOP([#ifndef SUDO_CONFIG_H
 #define SUDO_CONFIG_H])
 
-AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
+AH_BOTTOM([/* Symbol visibility controls */
+#ifdef HAVE_DSO_VISIBILITY
+# if defined(__GNUC__)
+#  define sudo_dso_public __attribute__((__visibility__("default")))
+# elif defined(__SUNPRO_C)
+#  define sudo_dso_public __global
+# else
+#  define sudo_dso_public __declspec(dllexport)
+# endif
+#else
+# define sudo_dso_public
+#endif
+
+/* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP
 #endif

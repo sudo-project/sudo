@@ -32,7 +32,7 @@
 #include "sudo_fatal.h"
 #include "sudo_iolog.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 static const char *test_paths[] = {
     "testdir/a/b/c/user",		/* create new */

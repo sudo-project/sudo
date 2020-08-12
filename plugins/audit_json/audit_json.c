@@ -683,7 +683,7 @@ audit_json_show_version(int verbose)
     debug_return_int(true);
 }
 
-__dso_public struct audit_plugin audit_json = {
+sudo_dso_public struct audit_plugin audit_json = {
     SUDO_AUDIT_PLUGIN,
     SUDO_API_VERSION,
     audit_json_open,

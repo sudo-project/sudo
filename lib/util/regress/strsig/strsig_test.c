@@ -27,7 +27,7 @@
 #include "sudo_util.h"
 #include "sudo_fatal.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 /*
  * Note: we do not test SIGUNUSED as it may not appear in sys_sigabbrev[]

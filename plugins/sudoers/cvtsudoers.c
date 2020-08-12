@@ -78,7 +78,7 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	'\0' },
 };
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static bool convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);

@@ -143,7 +143,7 @@ static void approval_show_version(int verbose, struct sudo_settings *settings,
     char * const user_info[], int submit_optind, char * const submit_argv[],
     char * const submit_envp[]);
 
-__dso_public int main(int argc, char *argv[], char *envp[]);
+sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
 int
 main(int argc, char *argv[], char *envp[])

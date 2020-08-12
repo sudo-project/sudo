@@ -30,7 +30,7 @@
 #include "sudo_util.h"
 #include "parse.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 #define NUM_TESTS	8
 static const char *test_strings[NUM_TESTS] = {

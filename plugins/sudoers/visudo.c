@@ -122,7 +122,7 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	'\0' },
 };
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])

@@ -273,7 +273,7 @@ cleanup:
     debug_return_int(rc);
 }
 
-__dso_public struct policy_plugin python_policy = {
+sudo_dso_public struct policy_plugin python_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
     CALLBACK_CFUNC(open),
