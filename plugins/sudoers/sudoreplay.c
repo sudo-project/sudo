@@ -51,20 +51,19 @@
 #include <regex.h>
 #include <signal.h>
 
-#include <pathnames.h>
-
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
+#include "pathnames.h"
 #include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "logging.h"
-#include "sudo_iolog.h"
-#include "sudo_queue.h"
-#include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_iolog.h"
+#include "sudo_plugin.h"
+#include "sudo_queue.h"
 #include "sudo_util.h"
+
+#include "logging.h"
 
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>

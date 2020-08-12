@@ -33,20 +33,21 @@
 #endif /* HAVE_STDBOOL_H */
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
-#include <pathnames.h>
+#include "pathnames.h"
 #include "sudo_compat.h"
+#include "sudo_conf.h"
 #include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_nss.h"
+#include "sudo_plugin.h"
 #include "sudo_queue.h"
+#include "sudo_util.h"
+#include "sudoers_debug.h"
+
 #include "defaults.h"
 #include "logging.h"
 #include "parse.h"
-#include "sudo_nss.h"
-#include "sudo_plugin.h"
-#include "sudo_conf.h"
-#include "sudo_util.h"
-#include "sudoers_debug.h"
 
 /*
  * Info passed in from the sudo front-end.

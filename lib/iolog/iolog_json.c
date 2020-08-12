@@ -37,13 +37,12 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
-#include "sudo_fatal.h"
 #include "sudo_debug.h"
-#include "sudo_util.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_iolog.h"
+#include "sudo_util.h"
 
 #include "iolog_json.h"
 

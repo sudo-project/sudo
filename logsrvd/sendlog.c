@@ -46,22 +46,23 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "log_server.pb-c.h"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
-#include "sudo_event.h"
-#include "sudo_fatal.h"
-#include "sudo_iolog.h"
-#include "hostcheck.h"
-#include "sendlog.h"
-
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
 # include <openssl/err.h>
 #endif
+
+#include "sudo_compat.h"
+#include "sudo_conf.h"
+#include "sudo_debug.h"
+#include "sudo_event.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_iolog.h"
+#include "sudo_util.h"
+
+#include "hostcheck.h"
+#include "log_server.pb-c.h"
+#include "sendlog.h"
 
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"

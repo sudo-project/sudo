@@ -44,7 +44,7 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include <pathnames.h>
+#include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_plugin.h"
 #include "sudo_util.h"
