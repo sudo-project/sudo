@@ -48,12 +48,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <syslog.h>
-
-#include "sudoers.h"
-
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
 #endif
+
+#include "sudoers.h"
 
 /* Special message for log_warning() so we know to use ngettext() */
 #define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)

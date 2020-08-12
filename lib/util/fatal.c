@@ -35,6 +35,9 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 #include <unistd.h>
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
 
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
@@ -42,10 +45,6 @@
 #include "sudo_queue.h"
 #include "sudo_util.h"
 #include "sudo_plugin.h"
-
-#ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
-#endif
 
 struct sudo_fatal_callback {
     SLIST_ENTRY(sudo_fatal_callback) entries;

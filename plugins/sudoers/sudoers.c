@@ -57,15 +57,14 @@
 # include <selinux/selinux.h>
 #endif
 #include <ctype.h>
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
 
 #include "sudoers.h"
 #include "parse.h"
 #include "auth/sudo_auth.h"
 #include "sudo_iolog.h"
-
-#ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
-#endif
 
 /*
  * Prototypes

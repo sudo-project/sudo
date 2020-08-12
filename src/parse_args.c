@@ -32,16 +32,15 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-
-#include <sudo_usage.h>
-#include "sudo.h"
-#include "sudo_lbuf.h"
-
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
+
+#include <sudo_usage.h>
+#include "sudo.h"
+#include "sudo_lbuf.h"
 
 int tgetpass_flags;
 

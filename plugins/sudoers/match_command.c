@@ -41,15 +41,14 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
-
-#include "sudoers.h"
-#include <gram.h>
-
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
+
+#include "sudoers.h"
+#include <gram.h>
 
 #if !defined(O_EXEC) && defined(O_PATH)
 # define O_EXEC O_PATH

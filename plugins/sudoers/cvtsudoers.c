@@ -37,6 +37,11 @@
 #include <errno.h>
 #include <pwd.h>
 #include <unistd.h>
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #include "sudoers.h"
 #include "sudoers_version.h"
@@ -44,12 +49,6 @@
 #include "redblack.h"
 #include "cvtsudoers.h"
 #include <gram.h>
-
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 
 /*
  * Globals

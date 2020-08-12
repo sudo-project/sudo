@@ -40,6 +40,9 @@
 #include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
 
 #include "pathnames.h"
 #include "sudo_compat.h"
@@ -51,10 +54,6 @@
 
 #include "log_server.pb-c.h"
 #include "logsrvd.h"
-
-#ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
-#endif
 
 #if defined(HAVE_OPENSSL)
 # define DEFAULT_CA_CERT_PATH       "/etc/ssl/sudo/cacert.pem"

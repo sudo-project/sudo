@@ -44,6 +44,9 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
 
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
@@ -58,10 +61,6 @@
 #include "sudo_iolog.h"
 #include "iolog_plugin.h"
 #include "hostcheck.h"
-
-#ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
-#endif
 
 /* Server callback may redirect to client callback for TLS. */
 static void client_msg_cb(int fd, int what, void *v);

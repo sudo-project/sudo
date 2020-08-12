@@ -50,6 +50,11 @@
 #endif /* HAVE_STDBOOL_H */
 #include <regex.h>
 #include <signal.h>
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #include "pathnames.h"
 #include "sudo_compat.h"
@@ -64,12 +69,6 @@
 #include "sudo_util.h"
 
 #include "logging.h"
-
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 
 struct replay_closure {
     const char *iolog_dir;

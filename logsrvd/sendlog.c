@@ -45,6 +45,14 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
@@ -63,15 +71,6 @@
 #include "hostcheck.h"
 #include "log_server.pb-c.h"
 #include "sendlog.h"
-
-#ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
-#endif
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 
 #if defined(HAVE_OPENSSL)
 # define TLS_HANDSHAKE_TIMEO_SEC 10

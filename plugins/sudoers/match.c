@@ -49,15 +49,14 @@
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
-
-#include "sudoers.h"
-#include <gram.h>
-
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
+
+#include "sudoers.h"
+#include <gram.h>
 
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
 

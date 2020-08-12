@@ -43,6 +43,11 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
@@ -66,12 +71,6 @@
 #include "log_server.pb-c.h"
 #include "hostcheck.h"
 #include "logsrvd.h"
-
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 
 #if defined(HAVE_OPENSSL)
 # define LOGSRVD_DEFAULT_CIPHER_LST12 "HIGH:!aNULL"
