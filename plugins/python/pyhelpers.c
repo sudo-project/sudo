@@ -143,15 +143,13 @@ py_log_last_error(const char *context_message)
     PyObject *py_type = NULL, *py_message = NULL, *py_traceback = NULL;
     PyErr_Fetch(&py_type, &py_message, &py_traceback);
 
-    char *message = py_message ? py_create_string_rep(py_message) : strdup("(NULL)");
-    if (message == NULL)
-        message = strdup("?");
+    char *message = py_message ? py_create_string_rep(py_message) : NULL;
 
     py_sudo_log(SUDO_CONV_ERROR_MSG, "%s%s(%s) %s\n",
                 context_message ? context_message : "",
                 context_message && *context_message ? ": " : "",
                 py_type ? ((PyTypeObject *)py_type)->tp_name : "None",
-                message);
+                message ? message : "(NULL)");
     free(message);
 
     if (py_traceback != NULL) {
@@ -216,6 +214,9 @@ py_str_array_from_tuple(PyObject *py_tuple)
 
     // we need an extra 0 at the end
     char **result = calloc(Py_SSIZE2SIZE(tuple_size) + 1, sizeof(char*));
+    if (result == NULL) {
+        debug_return_ptr(NULL);
+    }
 
     for (int i = 0; i < tuple_size; ++i) {
         PyObject *py_value = PyTuple_GetItem(py_tuple, i);
@@ -343,13 +344,9 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
                 Py_DECREF(py_kwargs_sorted);
         }
 
-        if (args_str == NULL)
-            args_str = strdup("()");
-        if (kwargs_str == NULL)
-            kwargs_str = strdup("");
-
         sudo_debug_printf(SUDO_DEBUG_DIAG, "%s.%s %s: %s %s\n", class_name,
-                          function_name, message, args_str, kwargs_str);
+                          function_name, message, args_str ? args_str : "()",
+                          kwargs_str ? kwargs_str : "");
         free(args_str);
         free(kwargs_str);
     }

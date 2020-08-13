@@ -351,6 +351,8 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
     }
 
     replies = calloc(Py_SSIZE2SIZE(num_msgs), sizeof(struct sudo_conv_reply));
+    if (replies == NULL)
+        goto cleanup;
     py_result = PyTuple_New(num_msgs);
     if (py_result == NULL)
         goto cleanup;

@@ -374,8 +374,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 			 * If we see a non-option after the -h flag, treat as
 			 * remote host and bump optind to skip over it.
 			 */
-			if (got_host_flag && !is_envar &&
-			    argv[optind] != NULL && argv[optind][0] != '-') {
+			if (got_host_flag && argv[optind] != NULL &&
+			    argv[optind][0] != '-' && !is_envar) {
 			    if (sudo_settings[ARG_REMOTE_HOST].value != NULL)
 				usage();
 			    sudo_settings[ARG_REMOTE_HOST].value = argv[optind++];

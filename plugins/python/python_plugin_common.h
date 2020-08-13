@@ -76,7 +76,7 @@ const char *python_plugin_name(struct PluginContext *plugin_ctx);
 // version is enough and "errstr" is valid
 #define CALLBACK_SET_ERROR(plugin_ctx, errstr) \
     do { \
-        if ((plugin_ctx)->sudo_api_version >= SUDO_API_MKVERSION(1, 15) && errstr != NULL) { \
+        if ((plugin_ctx)->sudo_api_version >= SUDO_API_MKVERSION(1, 15)) { \
             if (errstr != NULL) \
                 *errstr = (plugin_ctx)->callback_error; \
         } \
