@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2020 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20200813"
+pp_revision="20200814"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -7686,7 +7686,7 @@ pp_backend_macos_probe () {
          "Mac OS X") name="macos";;
 	 *)          name="unknown";;
     esac
-    vers=`sw_vers -productVersion | sed -e 's/^\([^.]*\)\.\([^.]*\).*/\1\2/'`
+    vers=`sw_vers -productVersion | awk -F. '{ printf "%d%02d\n", $1, $2 }'`
     arch=`arch`
     echo "$name$vers-$arch"
 }
