@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2020 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20200624"
+pp_revision="20200813"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -7486,7 +7486,7 @@ pp_backend_macos_flat () {
     test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 
     # Create the flat package with xar (like pkgutil --flatten does)
-    # Note that --distribution is only supported by Mac OS X 10.6 and above
+    # Note that --distribution is only supported by macOS 10.6 and above
     xar_flags="--compression=bzip2 --no-compress Scripts --no-compress Payload"
     case $mac_version in
         "10.5"*) ;;
@@ -7682,6 +7682,7 @@ pp_macos_add_service () {
 pp_backend_macos_probe () {
     typeset name vers arch
     case `sw_vers -productName` in
+         "macOS")    name="macos";;
          "Mac OS X") name="macos";;
 	 *)          name="unknown";;
     esac
