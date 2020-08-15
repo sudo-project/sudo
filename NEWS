@@ -1,3 +1,33 @@
+What's new in Sudo 1.9.3
+
+ * sudoedit will now prompt the user before overwriting an existing
+   file with one that is zero-length after editing.  Bug #922.
+
+ * Fixed building the Python plugin on systems with a compiler that
+   doesn't support symbol hiding.
+
+ * Sudo now uses a linker script to hide symbols even when the
+   compiler has native symbol hiding support.  This should make is
+   easier to detect omissions in the symbol exports file, regardless
+   of the platform.
+
+ * Fixed the libssl dependency in Debian packages on older releases
+   that use libssl1.0.0.
+
+ * Sudo (and visudo) now provide more detailed messages when there
+   is a syntax error in sudoers.  The offending line and token
+   is now displayed.  If bison is used to generate the parser,
+   information about what token was expected is also displayed.
+
+ * Sudo no longer refuses to run if a syntax error in the sudoers
+   file is encountered.  The entry with the syntax error will be
+   discarded and sudo will continue to parse the file.  This makes
+   recovery from a syntax error less painful on systems where sudo
+   is the primary method of superuser access.
+
+ * Fixed the sample_approval plugin's symbol exports file for systems
+   where the compiler doesn't support symbol hiding.
+
 What's new in Sudo 1.9.2
 
  * Fixed package builds on RedHat Enterprise Linux 8.
