@@ -249,7 +249,15 @@ entry		:	'\n' {
 include		:	INCLUDE WORD '\n' {
 			    $$ = $2;
 			}
+		|	INCLUDE WORD error '\n' {
+			    yyerrok;
+			    $$ = $2;
+			}
 		|	INCLUDE WORD END {
+			    $$ = $2;
+			}
+		|	INCLUDE WORD error END {
+			    yyerrok;
 			    $$ = $2;
 			}
 		;
@@ -257,7 +265,15 @@ include		:	INCLUDE WORD '\n' {
 includedir	:	INCLUDEDIR WORD '\n' {
 			    $$ = $2;
 			}
+		|	INCLUDEDIR WORD error '\n' {
+			    yyerrok;
+			    $$ = $2;
+			}
 		|	INCLUDEDIR WORD END {
+			    $$ = $2;
+			}
+		|	INCLUDEDIR WORD error END {
+			    yyerrok;
 			    $$ = $2;
 			}
 		;
