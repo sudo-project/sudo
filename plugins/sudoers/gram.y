@@ -192,6 +192,9 @@ entry		:	'\n' {
                 |       error '\n' {
 			    yyerrok;
 			}
+                |       error END {
+			    yyerrok;
+			}
 		|	include {
 			    if (!push_include($1, false)) {
 				free($1);
