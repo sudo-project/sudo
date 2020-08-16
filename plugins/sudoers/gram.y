@@ -316,6 +316,10 @@ privileges	:	privilege
 			    HLTQ_CONCAT($1, $3, entries);
 			    $$ = $1;
 			}
+		|	privileges ':' error eol {
+			    yyerrok;
+			    $$ = $1;
+			}
 		;
 
 privilege	:	hostlist '=' cmndspeclist {
