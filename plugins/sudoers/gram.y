@@ -179,7 +179,9 @@ static struct command_digest *new_digest(int, char *);
 
 %%
 
-file		:	{ ; }
+file		:	{
+			    ; /* empty file */
+			}
 		|	line
 		;
 
@@ -188,12 +190,9 @@ line		:	entry
 		;
 
 entry		:	'\n' {
-			    ;
+			    ; /* blank line */
 			}
-                |       error '\n' {
-			    yyerrok;
-			}
-                |       error END {
+                |       error eol {
 			    yyerrok;
 			}
 		|	include {
@@ -210,73 +209,59 @@ entry		:	'\n' {
 			    }
 			    free($1);
 			}
-		|	userlist privileges {
+		|	userlist privileges eol {
 			    if (!add_userspec($1, $2)) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-		|	USERALIAS useraliases {
+		|	USERALIAS useraliases eol {
 			    ;
 			}
-		|	HOSTALIAS hostaliases {
+		|	HOSTALIAS hostaliases eol {
 			    ;
 			}
-		|	CMNDALIAS cmndaliases {
+		|	CMNDALIAS cmndaliases eol {
 			    ;
 			}
-		|	RUNASALIAS runasaliases {
+		|	RUNASALIAS runasaliases eol {
 			    ;
 			}
-		|	DEFAULTS defaults_list {
+		|	DEFAULTS defaults_list eol {
 			    if (!add_defaults(DEFAULTS, NULL, $2))
 				YYERROR;
 			}
-		|	DEFAULTS_USER userlist defaults_list {
+		|	DEFAULTS_USER userlist defaults_list eol {
 			    if (!add_defaults(DEFAULTS_USER, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_RUNAS userlist defaults_list {
+		|	DEFAULTS_RUNAS userlist defaults_list eol {
 			    if (!add_defaults(DEFAULTS_RUNAS, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_HOST hostlist defaults_list {
+		|	DEFAULTS_HOST hostlist defaults_list eol {
 			    if (!add_defaults(DEFAULTS_HOST, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_CMND cmndlist defaults_list {
+		|	DEFAULTS_CMND cmndlist defaults_list eol {
 			    if (!add_defaults(DEFAULTS_CMND, $2, $3))
 				YYERROR;
 			}
 		;
 
-include		:	INCLUDE WORD '\n' {
+include		:	INCLUDE WORD eol {
 			    $$ = $2;
 			}
-		|	INCLUDE WORD error '\n' {
-			    yyerrok;
-			    $$ = $2;
-			}
-		|	INCLUDE WORD END {
-			    $$ = $2;
-			}
-		|	INCLUDE WORD error END {
+		|	INCLUDE WORD error eol {
 			    yyerrok;
 			    $$ = $2;
 			}
 		;
 
-includedir	:	INCLUDEDIR WORD '\n' {
+includedir	:	INCLUDEDIR WORD eol {
 			    $$ = $2;
 			}
-		|	INCLUDEDIR WORD error '\n' {
-			    yyerrok;
-			    $$ = $2;
-			}
-		|	INCLUDEDIR WORD END {
-			    $$ = $2;
-			}
-		|	INCLUDEDIR WORD error END {
+		|	INCLUDEDIR WORD error eol {
 			    yyerrok;
 			    $$ = $2;
 			}
@@ -970,6 +955,14 @@ group		:	ALIAS {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
+			}
+		;
+
+eol		:	'\n' {
+			    ;
+			}
+		|	END {
+			    ; /* EOF */
 			}
 		;
 
