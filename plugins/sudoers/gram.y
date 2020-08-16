@@ -128,6 +128,7 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 '(' ')'		/* runas tokens */
 %token <tok>	 '\n'			/* newline (with optional comment) */
 %token <tok>	 ERROR			/* error from lexer */
+%token <tok>	 NOMATCH		/* no match from lexer */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
 %token <tok>	 PRIVS			/* Solaris privileges */
@@ -976,15 +977,11 @@ group		:	ALIAS {
 void
 sudoerserror(const char *s)
 {
-    static int last_error_line = -1;
-    static char *last_error_file = NULL;
     debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER);
 
-    /* Avoid displaying a generic error after a more specific one. */
-    if (last_error_file == sudoers && last_error_line == this_lineno)
+    /* The lexer displays more detailed messages for ERROR tokens. */
+    if (last_token == ERROR)
 	debug_return;
-    last_error_file = sudoers;
-    last_error_line = this_lineno;
 
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {

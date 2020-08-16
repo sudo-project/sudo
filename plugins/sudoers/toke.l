@@ -779,13 +779,14 @@ sudoedit		{
 			}			/* comment, not uid/gid */
 
 <*>.			{
-			    LEXTRACE("ERROR ");
-			    LEXRETURN(ERROR);
-			}	/* parse error */
+			    LEXTRACE("NOMATCH ");
+			    LEXRETURN(NOMATCH);
+			}	/* parse error, no matching token */
 
 <*><<EOF>>		{
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
+				sudoerserror("unexpected state at EOF");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }

@@ -3437,9 +3437,9 @@ case 77:
 YY_RULE_SETUP
 #line 781 "toke.l"
 {
-			    LEXTRACE("ERROR ");
-			    LEXRETURN(ERROR);
-			}	/* parse error */
+			    LEXTRACE("NOMATCH ");
+			    LEXRETURN(NOMATCH);
+			}	/* parse error, no matching token */
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(GOTDEFS):
@@ -3453,6 +3453,7 @@ case YY_STATE_EOF(GOTINC):
 {
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
+				sudoerserror("unexpected state at EOF");
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
@@ -3462,10 +3463,10 @@ case YY_STATE_EOF(GOTINC):
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 796 "toke.l"
+#line 797 "toke.l"
 ECHO;
 	YY_BREAK
-#line 3463 "toke.c"
+#line 3464 "toke.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -4426,7 +4427,7 @@ void sudoersfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 796 "toke.l"
+#line 797 "toke.l"
 
 
 struct path_list {

@@ -34,18 +34,19 @@
 #define USERALIAS 289
 #define RUNASALIAS 290
 #define ERROR 291
-#define TYPE 292
-#define ROLE 293
-#define PRIVS 294
-#define LIMITPRIVS 295
-#define CMND_TIMEOUT 296
-#define NOTBEFORE 297
-#define NOTAFTER 298
-#define MYSELF 299
-#define SHA224_TOK 300
-#define SHA256_TOK 301
-#define SHA384_TOK 302
-#define SHA512_TOK 303
+#define NOMATCH 292
+#define TYPE 293
+#define ROLE 294
+#define PRIVS 295
+#define LIMITPRIVS 296
+#define CMND_TIMEOUT 297
+#define NOTBEFORE 298
+#define NOTAFTER 299
+#define MYSELF 300
+#define SHA224_TOK 301
+#define SHA256_TOK 302
+#define SHA384_TOK 303
+#define SHA512_TOK 304
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
