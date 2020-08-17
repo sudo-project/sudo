@@ -72,6 +72,7 @@ plugin, the following configuration can be used.
 .nf
 .sp
 .RS 6n
+Plugin sudoers_audit sudoers.so
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 .RE
@@ -84,15 +85,27 @@ Starting with
 plugin in the
 sudo.conf(@mansectform@)
 file.
-These arguments, if present, should be listed after the path to the plugin
+Plugin arguments, if any, should be listed after the path to the plugin
 (i.e., after
 \fIsudoers.so\fR).
+The arguments are only effective for the plugin that opens (and parses) the
+\fIsudoers\fR
+file.
+.PP
+For
+\fBsudo\fR
+version 1.9.1 and higher, this is the
+\fIsudoers_audit\fR
+plugin.
+For older versions, it is the
+\fIsudoers_policy\fR
+plugin.
 Multiple arguments may be specified, separated by white space.
 For example:
 .nf
 .sp
 .RS 6n
-Plugin sudoers_policy sudoers.so sudoers_mode=0400
+Plugin sudoers_audit sudoers.so sudoers_mode=0400 error_recovery=false
 .RE
 .fi
 .PP

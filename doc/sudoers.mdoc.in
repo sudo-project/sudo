@@ -69,6 +69,7 @@ to use the
 .Nm
 plugin, the following configuration can be used.
 .Bd -literal -offset indent
+Plugin sudoers_audit sudoers.so
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 .Ed
@@ -80,13 +81,25 @@ Starting with
 plugin in the
 .Xr sudo.conf @mansectform@
 file.
-These arguments, if present, should be listed after the path to the plugin
+Plugin arguments, if any, should be listed after the path to the plugin
 (i.e., after
 .Pa sudoers.so ) .
+The arguments are only effective for the plugin that opens (and parses) the
+.Em sudoers
+file.
+.Pp
+For
+.Nm sudo
+version 1.9.1 and higher, this is the
+.Em sudoers_audit
+plugin.
+For older versions, it is the
+.Em sudoers_policy
+plugin.
 Multiple arguments may be specified, separated by white space.
 For example:
 .Bd -literal -offset indent
-Plugin sudoers_policy sudoers.so sudoers_mode=0400
+Plugin sudoers_audit sudoers.so sudoers_mode=0400 error_recovery=false
 .Ed
 .Pp
 The following plugin arguments are supported:
