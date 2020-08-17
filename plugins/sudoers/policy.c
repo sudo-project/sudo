@@ -49,6 +49,7 @@ struct sudoers_exec_args {
 
 static unsigned int sudo_version;
 static const char *interfaces_string;
+bool sudoers_recovery = true;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 const char *path_ldap_conf = _PATH_LDAP_CONF;
@@ -97,10 +98,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 #define MATCHES(s, v)	\
     (strncmp((s), (v), sizeof(v) - 1) == 0)
 
+#define INVALID(v) do {	\
+    sudo_warn(U_("invalid %.*s set by sudo front-end"), \
+	(int)(sizeof(v) - 2), (v)); \
+} while (0)
+
 #define CHECK(s, v) do {	\
     if ((s)[sizeof(v) - 1] == '\0') { \
-	sudo_warn(U_("invalid %.*s set by sudo front-end"), \
-	    (int)(sizeof(v) - 2), v); \
+	INVALID(v); \
 	goto bad; \
     } \
 } while (0)
@@ -108,6 +113,15 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     /* Parse sudo.conf plugin args. */
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
+	    if (MATCHES(*cur, "error_recovery=")) {
+		int val = sudo_strtobool(*cur + sizeof("error_recovery=") - 1);
+		if (val == -1) {
+		    INVALID("error_recovery=");	/* Not a fatal error. */
+		} else {
+		    sudoers_recovery = val;
+		}
+		continue;
+	    }
 	    if (MATCHES(*cur, "sudoers_file=")) {
 		CHECK(*cur, "sudoers_file=");
 		sudoers_file = *cur + sizeof("sudoers_file=") - 1;
@@ -485,6 +499,8 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "user_info: %s", *cur);
 
 #undef MATCHES
+#undef INVALID
+#undef CHECK
     debug_return_int(flags);
 
 oom:

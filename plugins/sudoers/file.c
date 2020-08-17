@@ -109,7 +109,7 @@ sudo_file_parse(struct sudo_nss *nss)
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("parse error in %s"), errorfile);
 	}
-	if (error) {
+	if (error || !sudoers_recovery) {
 	    /* unrecoverable error */
 	    debug_return_ptr(NULL);
 	}

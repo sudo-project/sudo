@@ -298,6 +298,7 @@ extern char *errorfile;
 extern int errorlineno;
 extern bool parse_error;
 extern bool sudoers_warnings;
+extern bool sudoers_recovery;
 extern bool sudoers_strict;
 
 /* toke.l */
