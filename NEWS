@@ -29,7 +29,9 @@ What's new in Sudo 1.9.3
    file is encountered.  The entry with the syntax error will be
    discarded and sudo will continue to parse the file.  This makes
    recovery from a syntax error less painful on systems where sudo
-   is the primary method of superuser access.
+   is the primary method of superuser access.  The historic behavior
+   can be restored by add "error_recovery=false" to the sudoers
+   plugin's optional arguments in sudo.conf.
 
  * Fixed the sample_approval plugin's symbol exports file for systems
    where the compiler doesn't support symbol hiding.
