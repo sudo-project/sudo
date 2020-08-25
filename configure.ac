@@ -3498,29 +3498,32 @@ dnl Check for sys_signame or sys_sigabbrev if missing sig2str() or str2sig().
 dnl Also enable unit tests for sig2str() and str2sig().
 dnl
 if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
-    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
-    HAVE_SIGNAME="false"
-    AC_CHECK_DECLS([sys_signame, _sys_signame, sys_sigabbrev], [
-	HAVE_SIGNAME="true"
-    ], [ ], [
+    AC_CHECK_FUNCS([sigabbrev_np])
+    if test x"${ac_cv_func_sigabbrev_np}" != x"yes"; then
+	COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
+	HAVE_SIGNAME="false"
+	AC_CHECK_DECLS([sys_signame, _sys_signame, sys_sigabbrev], [
+	    HAVE_SIGNAME="true"
+	], [ ], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
-    ])
-    if test "$HAVE_SIGNAME" != "true"; then
-	AC_CACHE_CHECK([for undeclared sys_sigabbrev],
-	    [sudo_cv_var_sys_sigabbrev],
-	    [AC_LINK_IFELSE(
-		[AC_LANG_PROGRAM([[extern char **sys_sigabbrev;]], [[return sys_sigabbrev[1];]])],
-		    [sudo_cv_var_sys_sigabbrev=yes],
-		    [sudo_cv_var_sys_sigabbrev=no]
-		)
-	    ]
-	)
-	if test "$sudo_cv_var_sys_sigabbrev" = yes; then
-	    AC_DEFINE(HAVE_SYS_SIGABBREV)
-	else
-	    AC_LIBOBJ(signame)
-	    SIGNAME=signame.lo
+	])
+	if test "$HAVE_SIGNAME" != "true"; then
+	    AC_CACHE_CHECK([for undeclared sys_sigabbrev],
+		[sudo_cv_var_sys_sigabbrev],
+		[AC_LINK_IFELSE(
+		    [AC_LANG_PROGRAM([[extern char **sys_sigabbrev;]], [[return sys_sigabbrev[1];]])],
+			[sudo_cv_var_sys_sigabbrev=yes],
+			[sudo_cv_var_sys_sigabbrev=no]
+		    )
+		]
+	    )
+	    if test "$sudo_cv_var_sys_sigabbrev" = yes; then
+		AC_DEFINE(HAVE_SYS_SIGABBREV)
+	    else
+		AC_LIBOBJ(signame)
+		SIGNAME=signame.lo
+	    fi
 	fi
     fi
 fi

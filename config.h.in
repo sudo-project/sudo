@@ -740,6 +740,9 @@
 /* Define to 1 if you have the `sig2str' function. */
 #undef HAVE_SIG2STR
 
+/* Define to 1 if you have the `sigabbrev_np' function. */
+#undef HAVE_SIGABBREV_NP
+
 /* Define to 1 if you use S/Key. */
 #undef HAVE_SKEY
 

@@ -23687,9 +23687,21 @@ done
 
 
 if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
-    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
-    HAVE_SIGNAME="false"
-    ac_fn_c_check_decl "$LINENO" "sys_signame" "ac_cv_have_decl_sys_signame" "
+    for ac_func in sigabbrev_np
+do :
+  ac_fn_c_check_func "$LINENO" "sigabbrev_np" "ac_cv_func_sigabbrev_np"
+if test "x$ac_cv_func_sigabbrev_np" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SIGABBREV_NP 1
+_ACEOF
+
+fi
+done
+
+    if test x"${ac_cv_func_sigabbrev_np}" != x"yes"; then
+	COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
+	HAVE_SIGNAME="false"
+	ac_fn_c_check_decl "$LINENO" "sys_signame" "ac_cv_have_decl_sys_signame" "
 $ac_includes_default
 #include <signal.h>
 
@@ -23705,7 +23717,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 if test $ac_have_decl = 1; then :
 
-	HAVE_SIGNAME="true"
+	    HAVE_SIGNAME="true"
 
 fi
 ac_fn_c_check_decl "$LINENO" "_sys_signame" "ac_cv_have_decl__sys_signame" "
@@ -23724,7 +23736,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 if test $ac_have_decl = 1; then :
 
-	HAVE_SIGNAME="true"
+	    HAVE_SIGNAME="true"
 
 fi
 ac_fn_c_check_decl "$LINENO" "sys_sigabbrev" "ac_cv_have_decl_sys_sigabbrev" "
@@ -23743,12 +23755,12 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 if test $ac_have_decl = 1; then :
 
-	HAVE_SIGNAME="true"
+	    HAVE_SIGNAME="true"
 
 fi
 
-    if test "$HAVE_SIGNAME" != "true"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for undeclared sys_sigabbrev" >&5
+	if test "$HAVE_SIGNAME" != "true"; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for undeclared sys_sigabbrev" >&5
 $as_echo_n "checking for undeclared sys_sigabbrev... " >&6; }
 if ${sudo_cv_var_sys_sigabbrev+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -23777,17 +23789,18 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_sys_sigabbrev" >&5
 $as_echo "$sudo_cv_var_sys_sigabbrev" >&6; }
-	if test "$sudo_cv_var_sys_sigabbrev" = yes; then
-	    $as_echo "#define HAVE_SYS_SIGABBREV 1" >>confdefs.h
+	    if test "$sudo_cv_var_sys_sigabbrev" = yes; then
+		$as_echo "#define HAVE_SYS_SIGABBREV 1" >>confdefs.h
 
-	else
-	    case " $LIBOBJS " in
+	    else
+		case " $LIBOBJS " in
   *" signame.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS signame.$ac_objext"
  ;;
 esac
 
-	    SIGNAME=signame.lo
+		SIGNAME=signame.lo
+	    fi
 	fi
     fi
 fi
