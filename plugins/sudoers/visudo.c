@@ -942,15 +942,7 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
     sudoers_setlocale(oldlocale, NULL);
     ok = !parse_error;
 
-    if (parse_error) {
-	if (!quiet) {
-	    if (errorlineno != -1)
-		(void) printf(_("parse error in %s near line %d\n"),
-		    errorfile, errorlineno);
-	    else if (errorfile != NULL)
-		(void) printf(_("parse error in %s\n"), errorfile);
-	}
-    } else {
+    if (!parse_error) {
 	struct sudoersfile *sp;
 
 	/* Parsed OK, check mode and owner. */
