@@ -569,10 +569,8 @@ check_defaults_and_aliases(bool strict, bool quiet)
 	    }
 	}
 	parse_error = true;
-    } else if (check_aliases(strict, quiet) != 0) {
-	rcstr_delref(errorfile);
-	errorfile = NULL;	/* don't know which file */
-	errorlineno = -1;
+    }
+    if (check_aliases(strict, quiet) != 0) {
 	parse_error = true;
     }
     debug_return;
