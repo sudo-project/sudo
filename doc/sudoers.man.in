@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 17, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "August 27, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -116,14 +116,14 @@ The
 \fIerror_recovery\fR
 argument can be used to control whether
 \fBsudoers\fR
-should attempt to recover from parse errors in the
+should attempt to recover from syntax errors in the
 \fIsudoers\fR
 file.
 If set to
 \fItrue\fR
 (the default),
 \fBsudoers\fR
-will try to recover from a parse error by discarding the portion
+will try to recover from a syntax error by discarding the portion
 of the line that contains the error until the end of the line.
 A value of
 \fIfalse\fR

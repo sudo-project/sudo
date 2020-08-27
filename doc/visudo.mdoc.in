@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2019
+.\" Copyright (c) 1996,1998-2005, 2007-2020
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 20, 2019
+.Dd August 27, 2020
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -40,7 +40,7 @@ file in a safe fashion, analogous to
 locks the
 .Em sudoers
 file against multiple simultaneous edits, provides basic sanity checks,
-and checks for parse errors before installing the edited file.
+and checks for syntax errors before installing the edited file.
 If the
 .Em sudoers
 file is currently being edited you will receive a message to try again later.
@@ -68,7 +68,7 @@ The
 .Ql Q
 option should be used with extreme caution because if
 .Nm
-believes there to be a parse error, so will
+believes there to be a syntax error, so will
 .Nm sudo
 and no one will be able to run
 .Nm sudo
@@ -77,7 +77,7 @@ If
 .Ql e
 is typed to edit the
 .Em sudoers
-file after a parse error has been detected, the cursor will be placed on
+file after a syntax error has been detected, the cursor will be placed on
 the line where the error occurred (if the editor supports this feature).
 .Pp
 There are two
@@ -222,7 +222,7 @@ file.
 If an alias is referenced but not actually defined
 or if there is a cycle in an alias,
 .Nm
-will consider this a parse error.
+will consider this a syntax error.
 Note that it is not possible to differentiate between an
 alias and a host name or user name that consists solely of uppercase
 letters, digits, and the underscore
@@ -351,7 +351,7 @@ Default temporary file used by visudo
 .Sh DIAGNOSTICS
 In addition to reporting
 .Em sudoers
-parse errors,
+syntax errors,
 .Nm
 may produce the following messages:
 .Bl -tag -width 4n

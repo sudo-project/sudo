@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 17, 2020
+.Dd August 27, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -109,14 +109,14 @@ The
 .Em error_recovery
 argument can be used to control whether
 .Nm
-should attempt to recover from parse errors in the
+should attempt to recover from syntax errors in the
 .Em sudoers
 file.
 If set to
 .Em true
 (the default),
 .Nm
-will try to recover from a parse error by discarding the portion
+will try to recover from a syntax error by discarding the portion
 of the line that contains the error until the end of the line.
 A value of
 .Em false
