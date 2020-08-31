@@ -293,5 +293,6 @@ void restore_limits(void);
 void restore_nproc(void);
 void unlimit_nproc(void);
 void unlimit_sudo(void);
+int serialize_limits(char **info, size_t info_max);
 
 #endif /* SUDO_SUDO_H */

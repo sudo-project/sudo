@@ -44,6 +44,11 @@ What's new in Sudo 1.9.3
    for "sudoers_policy" but "sudoers_audit" is not listed, those
    arguments will be applied to "sudoers_audit" instead.
 
+ * The user's resource limits are now passed to sudo plugins in
+   the user_info[] list.  A plugin cannot determine the limits
+   itself because sudo changes the limits while it runs to prevent
+   resource starvation.
+
 What's new in Sudo 1.9.2
 
  * Fixed package builds on RedHat Enterprise Linux 8.

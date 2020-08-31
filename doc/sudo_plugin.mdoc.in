@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 16, 2020
+.Dd August 31, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -456,6 +456,86 @@ The parent process ID of the running
 .Nm sudo
 process.
 Only available starting with API version 1.2.
+.It rlimit_as=soft,hard
+The maximum size to which the process's address space may grow (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_core=soft,hard
+The largest size core dump file that may be created (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_cpu=soft,hard
+The maximum amount of CPU time that the process may use (in seconds).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_data=soft,hard
+The maximum size of the data segment for the process (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_fsize=soft,hard
+The largest size file that the process may create (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_locks=soft,hard
+The maximum number of locks that the process may establish,
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_memlock=soft,hard
+The maximum size that the process may lock in memory (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_nofile=soft,hard
+The maximum number of files that the process may have open.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_nproc=soft,hard
+The maximum number of processes that the user may run simultaneously.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_rss=soft,hard
+The maximum size to which the process's resident set size may grow (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_stack=soft,hard
+The maximum size to which the process's stack may grow (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
 .It sid=int
 The session ID of the running
 .Nm sudo
@@ -4367,6 +4447,10 @@ command was not run.
 has increased from 255 to 1023 bytes.
 .Pp
 Support for audit and approval plugins was added.
+.It Version 1.16 (sudo 1.9.3)
+Initial resource limit values were added to the
+.Li user_info
+list.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

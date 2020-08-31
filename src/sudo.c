@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -490,10 +491,11 @@ static char **
 get_user_info(struct user_details *ud)
 {
     char *cp, **user_info, path[PATH_MAX];
+    size_t user_info_max = 32 + RLIM_NLIMITS;
     unsigned int i = 0;
     mode_t mask;
     struct passwd *pw;
-    int fd;
+    int fd, n;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL);
 
     /*
@@ -512,7 +514,7 @@ get_user_info(struct user_details *ud)
     memset(ud, 0, sizeof(*ud));
 
     /* XXX - bound check number of entries */
-    user_info = reallocarray(NULL, 32, sizeof(char *));
+    user_info = reallocarray(NULL, user_info_max, sizeof(char *));
     if (user_info == NULL)
 	goto oom;
 
@@ -613,6 +615,11 @@ get_user_info(struct user_details *ud)
 	goto oom;
     if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
 	goto oom;
+
+    n = serialize_limits(&user_info[i + 1], user_info_max - (i + 1));
+    if (n == -1)
+	goto oom;
+    i += n;
 
     user_info[++i] = NULL;
 

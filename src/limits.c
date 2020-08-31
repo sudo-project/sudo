@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <sys/resource.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #ifdef __linux__
@@ -55,6 +56,11 @@
 # define RLIM_INFINITY RLIM64_INFINITY
 #endif /* HAVE_SETRLIMIT64 */
 
+/* Older BSD systems have RLIMIT_VMEM, not RLIMIT_AS. */
+#if !defined(RLIMIT_AS) && defined(RLIMIT_VMEM)
+# define RLIMIT_AS RLIMIT_VMEM
+#endif
+
 /*
  * macOS doesn't allow nofile soft limit to be infinite or
  * the stack hard limit to be infinite.
@@ -64,27 +70,35 @@ static struct rlimit nofile_fallback = { SUDO_OPEN_MAX, RLIM_INFINITY };
 static struct rlimit stack_fallback = { SUDO_STACK_MIN, 65532 * 1024 };
 
 static struct saved_limit {
-    const char *name;
-    int resource;
-    bool saved;
-    struct rlimit *fallback;
-    struct rlimit newlimit;
-    struct rlimit oldlimit;
+    const char *name;		/* rlimit_foo in lower case */
+    int resource;		/* RLIMIT_FOO definition */
+    bool override;		/* override limit while sudo executes? */
+    bool saved;			/* true if we were able to get the value */
+    struct rlimit *fallback;	/* fallback if we fail to set to newlimit */
+    struct rlimit newlimit;	/* new limit to use if override is true */
+    struct rlimit oldlimit;	/* original limit, valid if saved is true */
 } saved_limits[] = {
 #ifdef RLIMIT_AS
-    { "RLIMIT_AS", RLIMIT_AS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "rlimit_as", RLIMIT_AS, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { "RLIMIT_CPU", RLIMIT_CPU, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { "RLIMIT_DATA", RLIMIT_DATA, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { "RLIMIT_FSIZE", RLIMIT_FSIZE, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { "RLIMIT_NOFILE", RLIMIT_NOFILE, false, &nofile_fallback, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "rlimit_core", RLIMIT_CORE, false },
+    { "rlimit_cpu", RLIMIT_CPU, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "rlimit_data", RLIMIT_DATA, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "rlimit_fsize", RLIMIT_FSIZE, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+#ifdef RLIMIT_LOCKS
+    { "rlimit_locks", RLIMIT_LOCKS, false },
+#endif
+#ifdef RLIMIT_MEMLOCK
+    { "rlimit_memlock", RLIMIT_MEMLOCK, false },
+#endif
+    { "rlimit_nofile", RLIMIT_NOFILE, true, false, &nofile_fallback, { RLIM_INFINITY, RLIM_INFINITY } },
 #ifdef RLIMIT_NPROC
-    { "RLIMIT_NPROC", RLIMIT_NPROC, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "rlimit_nproc", RLIMIT_NPROC, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
 #ifdef RLIMIT_RSS
-    { "RLIMIT_RSS", RLIMIT_RSS, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    { "rlimit_rss", RLIMIT_RSS, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
 #endif
-    { "RLIMIT_STACK", RLIMIT_STACK, false, &stack_fallback, { SUDO_STACK_MIN, RLIM_INFINITY } }
+    { "rlimit_stack", RLIMIT_STACK, true, false, &stack_fallback, { SUDO_STACK_MIN, RLIM_INFINITY } }
 };
 
 static struct rlimit corelimit;
@@ -228,6 +242,9 @@ unlimit_sudo(void)
 	    (long long)lim->oldlimit.rlim_max);
 
 	lim->saved = true;
+	if (!lim->override)
+	    continue;
+
 	if (lim->newlimit.rlim_cur != RLIM_INFINITY) {
 	    /* Don't reduce the soft resource limit. */
 	    if (lim->oldlimit.rlim_cur == RLIM_INFINITY ||
@@ -284,7 +301,7 @@ restore_limits(void)
     /* Restore resource limits to saved values. */
     for (idx = 0; idx < nitems(saved_limits); idx++) {
 	struct saved_limit *lim = &saved_limits[idx];
-	if (lim->saved) {
+	if (lim->override && lim->saved) {
 	    struct rlimit rl = lim->oldlimit;
 	    int i, rc;
 
@@ -323,4 +340,46 @@ restore_limits(void)
     restore_coredump();
 
     debug_return;
+}
+
+int
+serialize_limits(char **info, size_t info_max)
+{
+    char *str;
+    unsigned int idx, nstored = 0;
+    debug_decl(serialize_limits, SUDO_DEBUG_UTIL);
+
+    for (idx = 0; idx < nitems(saved_limits); idx++) {
+	const struct saved_limit *lim = &saved_limits[idx];
+	const struct rlimit *rl = &lim->oldlimit;
+	char curlim[(((sizeof(int) * 8) + 2) / 3) + 2];
+	char maxlim[(((sizeof(int) * 8) + 2) / 3) + 2];
+
+	if (!lim->saved)
+	    continue;
+
+	if (nstored == info_max)
+	    goto oom;
+
+	if (rl->rlim_cur == RLIM_INFINITY) {
+	    strlcpy(curlim, "infinity", sizeof(curlim));
+	} else {
+	    snprintf(curlim, sizeof(curlim), "%llu",
+		(unsigned long long)rl->rlim_cur);
+	}
+	if (rl->rlim_max == RLIM_INFINITY) {
+	    strlcpy(maxlim, "infinity", sizeof(maxlim));
+	} else {
+	    snprintf(maxlim, sizeof(maxlim), "%llu",
+		(unsigned long long)rl->rlim_max);
+	}
+	if (asprintf(&str, "%s=%s,%s", lim->name, curlim, maxlim) == -1)
+	    goto oom;
+	info[nstored++] = str;
+    }
+    debug_return_int(nstored);
+oom:
+    while (nstored--)
+	free(info[nstored]);
+    debug_return_int(-1);
 }
