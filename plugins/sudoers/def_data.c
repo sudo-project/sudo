@@ -552,6 +552,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Set the pam remote host to the local host name"),
 	NULL,
     }, {
+	"runcwd", T_STR|T_BOOL|T_PATH|T_TILDE,
+	N_("Working directory to change to before executing the command: %s"),
+	NULL,
+    }, {
+	"runchroot", T_STR|T_BOOL|T_PATH|T_TILDE,
+	N_("Root directory to change to before executing the command: %s"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -131,6 +131,8 @@ struct command_options {
     time_t notbefore;			/* time restriction */
     time_t notafter;			/* time restriction */
     int timeout;			/* command timeout */
+    char *runcwd;			/* working directory */
+    char *runchroot;			/* root directory */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
 #endif
@@ -211,6 +213,8 @@ struct cmndspec {
     int timeout;			/* command timeout */
     time_t notbefore;			/* time restriction */
     time_t notafter;			/* time restriction */
+    char *runcwd;			/* working directory */
+    char *runchroot;			/* root directory */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
 #endif

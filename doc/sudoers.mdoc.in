@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 27, 2020
+.Dd August 28, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1096,12 +1096,12 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
 .ie \n(SL \{\
-.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
-.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec)
+.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
 .\}
 .el \{\
-.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
-.el Option_Spec ::= (Date_Spec | Timeout_Spec)
+.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
 .\}
 
 .if \n(SL \{\
@@ -1115,6 +1115,10 @@ Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
 Timeout_Spec ::= 'TIMEOUT=timeout'
+
+Chdir_Spec ::= 'CWD=directory'
+
+Chroot_Spec ::= 'CHROOT=directory'
 
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
@@ -1422,6 +1426,54 @@ timeout values:
 .Li 1d2d3h .
 .Pp
 This setting is only supported by version 1.8.20 or higher.
+.Ss Chdir_Spec
+The working directory that the command will be run in can be specified
+using the
+.Li CWD
+setting.
+The
+.Fa directory
+must be a fully-qualified path name beginning with a
+.Sq /
+or
+.Sq ~
+character.
+By default, commands are run from the invoking user's current working
+directory, unless the
+.Fl i
+option is given.
+Path names of the form
+.Li ~user/path/name
+are interpreted as being relative to the named user's home directory.
+If the user name is omitted, the path will be relative to the runas
+user's home directory.
+.Pp
+This setting is only supported by version 1.9.3 or higher.
+.Ss Chroot_Spec
+The root directory that the command will be run in can be specified
+using the
+.Li CHROOT
+setting.
+The
+.Fa directory
+must be a fully-qualified path name beginning with a
+.Sq /
+or
+.Sq ~
+character.
+This setting can be used to run the command in a
+.Xr chroot 2
+.Dq sandbox
+similar to the
+.Xr chroot @mansectsu@
+utility.
+Path names of the form
+.Li ~user/path/name
+are interpreted as being relative to the named user's home directory.
+If the user name is omitted, the path will be relative to the runas
+user's home directory.
+.Pp
+This setting is only supported by version 1.9.3 or higher.
 .Ss Tag_Spec
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -4110,6 +4162,24 @@ In either case, the contents of
 .Em restricted_env_file
 are processed before the contents of
 .Em env_file .
+.It runchroot
+If set,
+.Nm sudo
+will use this value for the root directory when running a command.
+See the
+.Sx Chroot_Spec
+section for more details.
+.Pp
+This setting is only supported by version 1.9.3 or higher.
+.It runcwd
+If set,
+.Nm sudo
+will use this value for the working directory when running a command.
+See the
+.Sx Chdir_Spec
+section for more details.
+.Pp
+This setting is only supported by version 1.9.3 or higher.
 .It secure_path
 If set,
 .Nm sudo

@@ -129,6 +129,8 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 '\n'			/* newline (with optional comment) */
 %token <tok>	 ERROR			/* error from lexer */
 %token <tok>	 NOMATCH		/* no match from lexer */
+%token <tok>	 CHROOT			/* root directory for command */
+%token <tok>	 CWD			/* working directory for command */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
 %token <tok>	 PRIVS			/* Solaris privileges */
@@ -165,6 +167,8 @@ static struct command_digest *new_digest(int, char *);
 %type <privilege> privileges
 %type <tag>	  cmndtag
 %type <options>	  options
+%type <string>	  chdirspec
+%type <string>	  chrootspec
 %type <string>	  rolespec
 %type <string>	  typespec
 %type <string>	  privsspec
@@ -388,6 +392,12 @@ cmndspeclist	:	cmndspec
 			    struct cmndspec *prev;
 			    prev = HLTQ_LAST($1, cmndspec, entries);
 			    HLTQ_CONCAT($1, $3, entries);
+
+			    /* propagate runcwd and runchroot */
+			    if ($3->runcwd == NULL)
+				$3->runcwd = prev->runcwd;
+			    if ($3->runchroot == NULL)
+				$3->runchroot = prev->runchroot;
 #ifdef HAVE_SELINUX
 			    /* propagate role and type */
 			    if ($3->role == NULL && $3->type == NULL) {
@@ -479,6 +489,8 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			    cs->notbefore = $2.notbefore;
 			    cs->notafter = $2.notafter;
 			    cs->timeout = $2.timeout;
+			    cs->runcwd = $2.runcwd;
+			    cs->runchroot = $2.runchroot;
 			    cs->tags = $3;
 			    cs->cmnd = $4;
 			    HLTQ_INIT(cs, entries);
@@ -558,6 +570,16 @@ opcmnd		:	cmnd {
 		|	'!' cmnd {
 			    $$ = $2;
 			    $$->negated = true;
+			}
+		;
+
+chdirspec	:	CWD '=' WORD {
+			    $$ = $3;
+			}
+		;
+
+chrootspec	:	CHROOT '=' WORD {
+			    $$ = $3;
 			}
 		;
 
@@ -663,6 +685,14 @@ runaslist	:	/* empty */ {
 
 options		:	/* empty */ {
 			    init_options(&$$);
+			}
+		|	options chdirspec {
+			    free($$.runcwd);
+			    $$.runcwd = $2;
+			}
+		|	options chrootspec {
+			    free($$.runchroot);
+			    $$.runchroot = $2;
 			}
 		|	options notbeforespec {
 			    $$.notbefore = parse_gentime($2);
@@ -1260,6 +1290,7 @@ free_privilege(struct privilege *priv)
     struct member_list *prev_binding = NULL;
     struct cmndspec *cs;
     struct defaults *def;
+    char *runcwd = NULL, *runchroot = NULL;
 #ifdef HAVE_SELINUX
     char *role = NULL, *type = NULL;
 #endif /* HAVE_SELINUX */
@@ -1272,6 +1303,15 @@ free_privilege(struct privilege *priv)
     free_members(&priv->hostlist);
     while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
 	TAILQ_REMOVE(&priv->cmndlist, cs, entries);
+	/* Only free the first instance of runcwd/runchroot. */
+	if (cs->runcwd != runcwd) {
+	    runcwd = cs->runcwd;
+	    free(cs->runcwd);
+	}
+	if (cs->runchroot != runchroot) {
+	    runcwd = cs->runchroot;
+	    free(cs->runchroot);
+	}
 #ifdef HAVE_SELINUX
 	/* Only free the first instance of a role/type. */
 	if (cs->role != role) {

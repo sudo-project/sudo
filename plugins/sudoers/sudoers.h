@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2017
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -424,6 +424,9 @@ extern const char *path_plugin_dir;
 /* editor.c */
 char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
      char * const *whitelist, const char **env_editor, bool env_error);
+
+/* exptilde.c */
+bool expand_tilde(char **path, const char *user);
 
 /* gc.c */
 enum sudoers_gc_types {

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 27, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "August 28, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1163,6 +1163,10 @@ Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
 Timeout_Spec ::= 'TIMEOUT=timeout'
 
+Chdir_Spec ::= 'CWD=directory'
+
+Chroot_Spec ::= 'CHROOT=directory'
+
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
               'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
@@ -1502,6 +1506,54 @@ timeout values:
 \fR1d2d3h\fR.
 .PP
 This setting is only supported by version 1.8.20 or higher.
+.SS "Chdir_Spec"
+The working directory that the command will be run in can be specified
+using the
+\fRCWD\fR
+setting.
+The
+\fIdirectory\fR
+must be a fully-qualified path name beginning with a
+\(oq/\(cq
+or
+\(oq~\(cq
+character.
+By default, commands are run from the invoking user's current working
+directory, unless the
+\fB\-i\fR
+option is given.
+Path names of the form
+\fR~user/path/name\fR
+are interpreted as being relative to the named user's home directory.
+If the user name is omitted, the path will be relative to the runas
+user's home directory.
+.PP
+This setting is only supported by version 1.9.3 or higher.
+.SS "Chroot_Spec"
+The root directory that the command will be run in can be specified
+using the
+\fRCHROOT\fR
+setting.
+The
+\fIdirectory\fR
+must be a fully-qualified path name beginning with a
+\(oq/\(cq
+or
+\(oq~\(cq
+character.
+This setting can be used to run the command in a
+chroot(2)
+\(lqsandbox\(rq
+similar to the
+chroot(@mansectsu@)
+utility.
+Path names of the form
+\fR~user/path/name\fR
+are interpreted as being relative to the named user's home directory.
+If the user name is omitted, the path will be relative to the runas
+user's home directory.
+.PP
+This setting is only supported by version 1.9.3 or higher.
 .SS "Tag_Spec"
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -4398,6 +4450,26 @@ In either case, the contents of
 \fIrestricted_env_file\fR
 are processed before the contents of
 \fIenv_file\fR.
+.TP 14n
+runchroot
+If set,
+\fBsudo\fR
+will use this value for the root directory when running a command.
+See the
+\fIChroot_Spec\fR
+section for more details.
+.sp
+This setting is only supported by version 1.9.3 or higher.
+.TP 14n
+runcwd
+If set,
+\fBsudo\fR
+will use this value for the working directory when running a command.
+See the
+\fIChdir_Spec\fR
+section for more details.
+.sp
+This setting is only supported by version 1.9.3 or higher.
 .TP 14n
 secure_path
 If set,

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -567,7 +567,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	debug_return_bool(true);	/* nothing to do */
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(54, sizeof(char *));
+    command_info = calloc(55, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -618,7 +618,15 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 		goto oom;
 	}
     }
-    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+    if (def_runcwd) {
+	/* Set cwd to explicit value in sudoers. */
+	if (!expand_tilde(&def_runcwd, runas_pw->pw_name)) {
+	    sudo_warnx(U_("invalid working directory: %s"), def_runcwd);
+	    goto bad;
+	}
+	if ((command_info[info_len++] = sudo_new_key_val("cwd", def_runcwd)) == NULL)
+	    goto oom;
+    } else if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Set cwd to run user's homedir. */
 	if ((command_info[info_len++] = sudo_new_key_val("cwd", runas_pw->pw_dir)) == NULL)
 	    goto oom;
@@ -778,6 +786,14 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    timeout = def_command_timeout;
 	if (asprintf(&command_info[info_len++], "timeout=%u", timeout) == -1)
 	    goto oom;
+    }
+    if (def_runchroot != NULL) {
+	if (!expand_tilde(&def_runchroot, runas_pw->pw_name)) {
+	    sudo_warnx(U_("invalid chroot directory: %s"), def_runchroot);
+	    goto bad;
+	}
+        if ((command_info[info_len++] = sudo_new_key_val("chroot", def_runchroot)) == NULL)
+            goto oom;
     }
     if (cmnd_umask != ACCESSPERMS) {
 	if (asprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask) == -1)

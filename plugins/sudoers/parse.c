@@ -239,6 +239,24 @@ apply_cmndspec(struct cmndspec *cs)
 #endif /* HAVE_PRIV_SET */
 	if (cs->timeout > 0)
 	    def_command_timeout = cs->timeout;
+	if (cs->runcwd != NULL) {
+	    free(def_runcwd);
+	    def_runcwd = strdup(cs->runcwd);
+	    if (def_runcwd == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		debug_return_bool(false);
+	    }
+	}
+	if (cs->runchroot != NULL) {
+	    free(def_runchroot);
+	    def_runchroot = strdup(cs->runchroot);
+	    if (def_runchroot == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		debug_return_bool(false);
+	    }
+	}
 	if (cs->tags.nopasswd != UNSPEC)
 	    def_authenticate = !cs->tags.nopasswd;
 	if (cs->tags.noexec != UNSPEC)

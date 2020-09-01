@@ -159,11 +159,11 @@ TEST_PROGS = check_addr check_base64 check_digest check_env_pattern check_fill \
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo digestname.lo \
-		       filedigest.lo gentime.lo gmtoff.lo gram.lo hexchar.lo \
-		       match.lo match_addr.lo match_command.lo match_digest.lo \
-		       pwutil.lo pwutil_impl.lo rcstr.lo redblack.lo \
-		       strlist.lo sudoers_debug.lo timeout.lo timestr.lo \
-		       toke.lo toke_util.lo
+		       exptilde.lo filedigest.lo gentime.lo gmtoff.lo gram.lo \
+		       hexchar.lo match.lo match_addr.lo match_command.lo \
+		       match_digest.lo pwutil.lo pwutil_impl.lo rcstr.lo \
+		       redblack.lo strlist.lo sudoers_debug.lo timeout.lo \
+		       timestr.lo toke.lo toke_util.lo
 
 LIBPARSESUDOERS_IOBJS = $(LIBPARSESUDOERS_OBJS:.lo=.i) passwd.i
 
@@ -1217,6 +1217,28 @@ env_pattern.i: $(srcdir)/env_pattern.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 env_pattern.plog: env_pattern.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/env_pattern.c --i-file $< --output-file $@
+exptilde.lo: $(srcdir)/exptilde.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+             $(srcdir)/parse.h $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exptilde.c
+exptilde.i: $(srcdir)/exptilde.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+             $(srcdir)/parse.h $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+exptilde.plog: exptilde.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exptilde.c --i-file $< --output-file $@
 file.lo: $(srcdir)/file.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \

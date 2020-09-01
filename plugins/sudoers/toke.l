@@ -115,6 +115,7 @@ DEFVAR			[a-z_]+
 %x	INSTR
 %s	WANTDIGEST
 %x	GOTINC
+%s	EXPECTPATH
 
 %%
 <GOTDEFS>[[:blank:]]*,[[:blank:]]* {
@@ -573,6 +574,20 @@ ALL {
 			    LEXRETURN(NOTAFTER);
 			}
 
+<INITIAL>CWD {
+			    LEXTRACE("CWD ");
+			    prev_state = YY_START;
+			    BEGIN EXPECTPATH;
+			    LEXRETURN(CWD);
+			}
+
+<INITIAL>CHROOT {
+			    LEXTRACE("CHROOT ");
+			    prev_state = YY_START;
+			    BEGIN EXPECTPATH;
+			    LEXRETURN(CHROOT);
+			}
+
 <INITIAL>ROLE {
 #ifdef HAVE_SELINUX
 			    LEXTRACE("ROLE ");
@@ -660,6 +675,14 @@ sudoedit		{
 				yyterminate();
 			}			/* sudo -e */
 
+<EXPECTPATH>({PATH}|{WORD}) {
+				BEGIN prev_state;
+				if (!fill(sudoerstext, sudoersleng))
+				    yyterminate();
+				LEXTRACE("WORD(5) ");
+				LEXRETURN(WORD);
+			}
+
 {PATH}			{
 			    /* directories can't have args... */
 			    if (sudoerstext[sudoersleng - 1] == '/') {
@@ -667,12 +690,11 @@ sudoedit		{
 				if (!fill_cmnd(sudoerstext, sudoersleng))
 				    yyterminate();
 				LEXRETURN(COMMAND);
-			    } else {
-				BEGIN GOTCMND;
-				LEXTRACE("COMMAND ");
-				if (!fill_cmnd(sudoerstext, sudoersleng))
-				    yyterminate();
 			    }
+			    BEGIN GOTCMND;
+			    LEXTRACE("COMMAND ");
+			    if (!fill_cmnd(sudoerstext, sudoersleng))
+				yyterminate();
 			}			/* a pathname */
 
 <INITIAL,GOTDEFS>\"	{
@@ -686,7 +708,7 @@ sudoedit		{
 			    /* a word */
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    LEXTRACE("WORD(5) ");
+			    LEXTRACE("WORD(6) ");
 			    LEXRETURN(WORD);
 			}
 
@@ -696,7 +718,7 @@ sudoedit		{
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    BEGIN INITIAL;
-			    LEXTRACE("WORD(6) ");
+			    LEXTRACE("WORD(7) ");
 			    LEXRETURN(WORD);
 			}
 

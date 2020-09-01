@@ -249,7 +249,8 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    rc = store_syslogpri(val, &def->sd_un);
 	    break;
 	case T_STR:
-	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/') {
+	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/' &&
+		    (!ISSET(def->type, T_TILDE) || *val != '~')) {
 		if (!quiet) {
 		    if (lineno > 0) {
 			sudo_warnx(U_("%s:%d: values for \"%s\" must start with a '/'"),
