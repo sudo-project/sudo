@@ -67,6 +67,7 @@ static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_
 static bool store_uint(const char *str, union sudo_defs_val *sd_un);
 static bool store_timespec(const char *str, union sudo_defs_val *sd_un);
 static bool list_op(const char *str, size_t, union sudo_defs_val *sd_un, enum list_ops op);
+static bool valid_path(struct sudo_defs_types *def, const char *val, const char *file, int lineno, bool quiet);
 
 /*
  * Table describing compile-time and run-time options.
@@ -249,21 +250,13 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    rc = store_syslogpri(val, &def->sd_un);
 	    break;
 	case T_STR:
-	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/' &&
-		    (!ISSET(def->type, T_TILDE) || *val != '~')) {
-		if (!quiet) {
-		    if (lineno > 0) {
-			sudo_warnx(U_("%s:%d: values for \"%s\" must start with a '/'"),
-			    file, lineno, def->name);
-		    } else {
-			sudo_warnx(U_("%s: values for \"%s\" must start with a '/'"),
-			    file, def->name);
-		    }
+	    if (val != NULL && ISSET(def->type, T_PATH|T_CHPATH)) {
+		if (!valid_path(def, val, file, lineno, quiet)) {
+		    rc = -1;
+		    break;
 		}
-		rc = -1;
-		break;
 	    }
-	    rc =  store_str(val, &def->sd_un);
+	    rc = store_str(val, &def->sd_un);
 	    break;
 	case T_INT:
 	    rc = store_int(val, &def->sd_un);
@@ -1015,6 +1008,48 @@ store_timeout(const char *str, union sudo_defs_val *sd_un)
 	sd_un->ival = seconds;
     }
     debug_return_bool(true);
+}
+
+static bool
+valid_path(struct sudo_defs_types *def, const char *val,
+    const char *file, int lineno, bool quiet)
+{
+    bool ret = true;
+    debug_decl(valid_path, SUDOERS_DEBUG_DEFAULTS);
+
+    if (ISSET(def->type, T_CHPATH)) {
+	if (val[0] != '/' && val[0] != '~' && (val[0] != '*' || val[1] != '\0')) {
+	    if (!quiet) {
+		if (lineno > 0) {
+		    sudo_warnx(
+			U_("%s:%d: values for \"%s\" must start with a '/', '*', or '*'"),
+			file, lineno, def->name);
+		} else {
+		    sudo_warnx(
+			U_("%s: values for \"%s\" must start with a '/', '*', or '*'"),
+			file, def->name);
+		}
+	    }
+	    ret = false;
+	}
+    } else {
+	if (val[0] != '/') {
+	    if (!quiet) {
+		if (lineno > 0) {
+		    sudo_warnx(
+			U_("%s:%d: values for \"%s\" must start with a '/'"),
+			file, lineno, def->name);
+		} else {
+		    sudo_warnx(
+			U_("%s: values for \"%s\" must start with a '/'"),
+			file, def->name);
+		}
+	    }
+	    ret = false;
+	}
+
+    }
+    debug_return_bool(ret);
 }
 
 static bool

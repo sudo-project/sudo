@@ -197,6 +197,22 @@ or higher.
 The plugin may optionally pass this, or another value, back in the
 .Em command_info
 list.
+.It cmnd_chroot=string
+The root directory (see
+.Xr chroot 2 )
+to run the command in, as specified by the user via the
+.Fl R
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+root directory.
+Only available starting with API version 1.16.
+.It cmnd_cwd=string
+The working directory to run the command in, as specified by the user via the
+.Fl D
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+working directory.
+Only available starting with API version 1.16.
 .It debug_flags=string
 A debug file path name followed by a space and a comma-separated
 list of debug flags that correspond to the plugin's
@@ -231,9 +247,6 @@ if
 contains a plugin-specific
 .Li Debug
 entry.
-.It debug_level=number
-This setting has been deprecated in favor of
-.Em debug_flags .
 .It ignore_ticket=bool
 Set to true if the user specified the
 .Fl k
@@ -384,8 +397,10 @@ For more information, see the
 .Em check_policy
 section.
 .It timeout=string
-User-specified command timeout.
-Not all plugins support command timeouts and the ability for the
+Command timeout specified by the user via the
+.Fl T
+option.
+Not all plugins support command timeouts and the ability of the
 user to set a timeout may be restricted by policy.
 The format of the timeout string is plugin-specific.
 .El
@@ -4450,6 +4465,14 @@ Support for audit and approval plugins was added.
 .It Version 1.16 (sudo 1.9.3)
 Initial resource limit values were added to the
 .Li user_info
+list.
+.Pp
+The
+.Em cmnd_chroot
+and
+.Em cmnd_cwd
+enties were added to the
+.Li settings
 list.
 .El
 .Sh SEE ALSO

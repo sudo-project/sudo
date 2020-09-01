@@ -574,11 +574,25 @@ opcmnd		:	cmnd {
 		;
 
 chdirspec	:	CWD '=' WORD {
+			    if ($3[0] != '/' && $3[0] != '~') {
+				if (strcmp($3, "*") != 0) {
+				    sudoerserror(N_("values for \"CWD\" must"
+					" start with a '/', '~', or '*'"));
+				    YYERROR;
+				}
+			    }
 			    $$ = $3;
 			}
 		;
 
 chrootspec	:	CHROOT '=' WORD {
+			    if ($3[0] != '/' && $3[0] != '~') {
+				if (strcmp($3, "*") != 0) {
+				    sudoerserror(N_("values for \"CHROOT\" must"
+					" start with a '/', '~', or '*'"));
+				    YYERROR;
+				}
+			    }
 			    $$ = $3;
 			}
 		;

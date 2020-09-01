@@ -215,6 +215,24 @@ The plugin may optionally pass this, or another value, back in the
 \fIcommand_info\fR
 list.
 .TP 6n
+cmnd_chroot=string
+The root directory (see
+chroot(2))
+to run the command in, as specified by the user via the
+\fB\-R\fR
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+root directory.
+Only available starting with API version 1.16.
+.TP 6n
+cmnd_cwd=string
+The working directory to run the command in, as specified by the user via the
+\fB\-D\fR
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+working directory.
+Only available starting with API version 1.16.
+.TP 6n
 debug_flags=string
 A debug file path name followed by a space and a comma-separated
 list of debug flags that correspond to the plugin's
@@ -249,10 +267,6 @@ sudo.conf(@mansectform@)
 contains a plugin-specific
 \fRDebug\fR
 entry.
-.TP 6n
-debug_level=number
-This setting has been deprecated in favor of
-\fIdebug_flags\fR.
 .TP 6n
 ignore_ticket=bool
 Set to true if the user specified the
@@ -425,8 +439,10 @@ For more information, see the
 section.
 .TP 6n
 timeout=string
-User-specified command timeout.
-Not all plugins support command timeouts and the ability for the
+Command timeout specified by the user via the
+\fB\-T\fR
+option.
+Not all plugins support command timeouts and the ability of the
 user to set a timeout may be restricted by policy.
 The format of the timeout string is plugin-specific.
 .PP
@@ -5037,6 +5053,14 @@ Support for audit and approval plugins was added.
 Version 1.16 (sudo 1.9.3)
 Initial resource limit values were added to the
 \fRuser_info\fR
+list.
+.sp
+The
+\fIcmnd_chroot\fR
+and
+\fIcmnd_cwd\fR
+enties were added to the
+\fRsettings\fR
 list.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),

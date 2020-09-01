@@ -180,6 +180,16 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    continue;
 	}
+	if (MATCHES(*cur, "cmnd_chroot=")) {
+	    CHECK(*cur, "cmnd_chroot=");
+	    user_runchroot = *cur + sizeof("cmnd_chroot=") - 1;
+	    continue;
+	}
+	if (MATCHES(*cur, "cmnd_cwd=")) {
+	    CHECK(*cur, "cmnd_cwd=");
+	    user_runcwd = *cur + sizeof("cmnd_cwd=") - 1;
+	    continue;
+	}
 	if (MATCHES(*cur, "runas_user=")) {
 	    CHECK(*cur, "runas_user=");
 	    *runas_user = *cur + sizeof("runas_user=") - 1;
@@ -618,7 +628,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 		goto oom;
 	}
     }
-    if (def_runcwd) {
+    if (def_runcwd && strcmp(def_runcwd, "*") != 0) {
 	/* Set cwd to explicit value in sudoers. */
 	if (!expand_tilde(&def_runcwd, runas_pw->pw_name)) {
 	    sudo_warnx(U_("invalid working directory: %s"), def_runcwd);
@@ -787,7 +797,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if (asprintf(&command_info[info_len++], "timeout=%u", timeout) == -1)
 	    goto oom;
     }
-    if (def_runchroot != NULL) {
+    if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
 	if (!expand_tilde(&def_runchroot, runas_pw->pw_name)) {
 	    sudo_warnx(U_("invalid chroot directory: %s"), def_runchroot);
 	    goto bad;

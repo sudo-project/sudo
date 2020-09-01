@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 28, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 1, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1517,7 +1517,15 @@ must be a fully-qualified path name beginning with a
 \(oq/\(cq
 or
 \(oq~\(cq
-character.
+character, or the special value
+\(lq*\(rq.
+A value of
+\(lq*\(rq
+indicates that the user may specify the working directory by running
+\fBsudo\fR
+with the
+\fB\-D\fR
+option.
 By default, commands are run from the invoking user's current working
 directory, unless the
 \fB\-i\fR
@@ -1540,7 +1548,15 @@ must be a fully-qualified path name beginning with a
 \(oq/\(cq
 or
 \(oq~\(cq
-character.
+character, or the special value
+\(lq*\(rq.
+A value of
+\(lq*\(rq
+indicates that the user may specify the root directory by running
+\fBsudo\fR
+with the
+\fB\-R\fR
+option .
 This setting can be used to run the command in a
 chroot(2)
 \(lqsandbox\(rq
@@ -4455,6 +4471,12 @@ runchroot
 If set,
 \fBsudo\fR
 will use this value for the root directory when running a command.
+The special value
+\(lq*\(rq
+will allow the user to specify the root directory via
+\fBsudo\fR's
+\fB\-R\fR
+option.
 See the
 \fIChroot_Spec\fR
 section for more details.
@@ -4465,6 +4487,12 @@ runcwd
 If set,
 \fBsudo\fR
 will use this value for the working directory when running a command.
+The special value
+\(lq*\(rq
+will allow the user to specify the working directory via
+\fBsudo\fR's
+\fB\-D\fR
+option.
 See the
 \fIChdir_Spec\fR
 section for more details.

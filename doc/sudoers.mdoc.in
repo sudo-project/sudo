@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 28, 2020
+.Dd September 1, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1437,7 +1437,15 @@ must be a fully-qualified path name beginning with a
 .Sq /
 or
 .Sq ~
-character.
+character, or the special value
+.Dq * .
+A value of
+.Dq *
+indicates that the user may specify the working directory by running
+.Nm sudo
+with the
+.Fl D
+option.
 By default, commands are run from the invoking user's current working
 directory, unless the
 .Fl i
@@ -1460,7 +1468,15 @@ must be a fully-qualified path name beginning with a
 .Sq /
 or
 .Sq ~
-character.
+character, or the special value
+.Dq * .
+A value of
+.Dq *
+indicates that the user may specify the root directory by running
+.Nm sudo
+with the
+.Fl R
+option .
 This setting can be used to run the command in a
 .Xr chroot 2
 .Dq sandbox
@@ -4166,6 +4182,12 @@ are processed before the contents of
 If set,
 .Nm sudo
 will use this value for the root directory when running a command.
+The special value
+.Dq *
+will allow the user to specify the root directory via
+.Nm sudo Ns 's
+.Fl R
+option.
 See the
 .Sx Chroot_Spec
 section for more details.
@@ -4175,6 +4197,12 @@ This setting is only supported by version 1.9.3 or higher.
 If set,
 .Nm sudo
 will use this value for the working directory when running a command.
+The special value
+.Dq *
+will allow the user to specify the working directory via
+.Nm sudo Ns 's
+.Fl D
+option.
 See the
 .Sx Chdir_Spec
 section for more details.

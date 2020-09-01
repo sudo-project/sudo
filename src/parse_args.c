@@ -100,7 +100,11 @@ static struct sudo_settings sudo_settings[] = {
     { "remote_host" },
 #define ARG_TIMEOUT 22
     { "timeout" },
-#define NUM_SETTINGS 23
+#define ARG_CHROOT 23
+    { "cmnd_chroot" },
+#define ARG_CWD 24
+    { "cmnd_cwd" },
+#define NUM_SETTINGS 25
     { NULL }
 };
 
@@ -123,7 +127,7 @@ struct environment {
  * Note that we must disable arg permutation to support setting environment
  * variables and to better support the optional arg of the -h flag.
  */
-static const char short_opts[] =  "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:r:SsT:t:U:u:Vv";
+static const char short_opts[] =  "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:R:r:SsT:t:U:u:Vv";
 static struct option long_opts[] = {
     { "askpass",	no_argument,		NULL,	'A' },
     { "auth-type",	required_argument,	NULL,	'a' },
@@ -131,6 +135,7 @@ static struct option long_opts[] = {
     { "bell",	        no_argument,		NULL,	'B' },
     { "close-from",	required_argument,	NULL,	'C' },
     { "login-class",	required_argument,	NULL,	'c' },
+    { "chdir",		required_argument,	NULL,	'D' },
     { "preserve-env",	optional_argument,	NULL,	'E' },
     { "edit",		no_argument,		NULL,	'e' },
     { "group",		required_argument,	NULL,	'g' },
@@ -144,6 +149,7 @@ static struct option long_opts[] = {
     { "non-interactive", no_argument,		NULL,	'n' },
     { "preserve-groups", no_argument,		NULL,	'P' },
     { "prompt",		required_argument,	NULL,	'p' },
+    { "chroot",		required_argument,	NULL,	'R' },
     { "role",		required_argument,	NULL,	'r' },
     { "stdin",		no_argument,		NULL,	'S' },
     { "shell",		no_argument,		NULL,	's' },
@@ -334,7 +340,12 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    break;
 #endif
 		case 'D':
-		    /* Ignored for backwards compatibility. */
+		    assert(optarg != NULL);
+		    if (*optarg == '\0')
+			usage();
+		    if (sudo_settings[ARG_CWD].value != NULL)
+			usage();
+		    sudo_settings[ARG_CWD].value = optarg;
 		    break;
 		case 'E':
 		    /*
@@ -435,6 +446,14 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    if (sudo_settings[ARG_PROMPT].value != NULL)
 			usage();
 		    sudo_settings[ARG_PROMPT].value = optarg;
+		    break;
+		case 'R':
+		    assert(optarg != NULL);
+		    if (*optarg == '\0')
+			usage();
+		    if (sudo_settings[ARG_CHROOT].value != NULL)
+			usage();
+		    sudo_settings[ARG_CHROOT].value = optarg;
 		    break;
 #ifdef HAVE_SELINUX
 		case 'r':
@@ -775,6 +794,8 @@ help(void)
     sudo_lbuf_append(&lbuf, "  -c, --login-class=class       %s\n",
 	_("run command with the specified BSD login class"));
 #endif
+    sudo_lbuf_append(&lbuf, "  -D, --chdir=directory         %s\n",
+	_("change the working directory before running command"));
     sudo_lbuf_append(&lbuf, "  -E, --preserve-env            %s\n",
 	_("preserve user environment when running command"));
     sudo_lbuf_append(&lbuf, "      --preserve-env=list       %s\n",
@@ -803,6 +824,8 @@ help(void)
 	_("preserve group vector instead of setting to target's"));
     sudo_lbuf_append(&lbuf, "  -p, --prompt=prompt           %s\n",
 	_("use the specified password prompt"));
+    sudo_lbuf_append(&lbuf, "  -R, --chroot=directory        %s\n",
+	_("change the root directory before running command"));
 #ifdef HAVE_SELINUX
     sudo_lbuf_append(&lbuf, "  -r, --role=role               %s\n",
 	_("create SELinux security context with specified role"));

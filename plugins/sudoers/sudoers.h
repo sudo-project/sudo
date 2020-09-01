@@ -90,6 +90,8 @@ struct sudo_user {
     char *shost;
     char *runhost;
     char *srunhost;
+    char *runchroot;
+    char *runcwd;
     char *prompt;
     char *cmnd;
     char *cmnd_args;
@@ -236,6 +238,8 @@ struct sudo_user {
 #define	runas_privs		(sudo_user.privs)
 #define	runas_limitprivs	(sudo_user.limitprivs)
 #define user_timeout		(sudo_user.timeout)
+#define user_runchroot		(sudo_user.runchroot)
+#define user_runcwd		(sudo_user.runcwd)
 
 /* Default sudoers uid/gid/mode if not set by the Makefile. */
 #ifndef SUDOERS_UID

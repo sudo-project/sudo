@@ -111,8 +111,8 @@ struct early_default {
 #define T_BOOL		0x100
 #undef T_PATH
 #define T_PATH		0x200
-#undef T_TILDE
-#define T_TILDE		0x400
+#undef T_CHPATH
+#define T_CHPATH	0x400
 
 /*
  * Argument to update_defaults()

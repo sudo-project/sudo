@@ -396,6 +396,28 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
+    if (user_runchroot != NULL) {
+	if (def_runchroot == NULL || strcmp(def_runchroot, "*") != 0) {
+	    audit_failure(NewArgv,
+		N_("user not allowed to change root directory to %s"),
+		user_runchroot);
+	    sudo_warnx("%s", U_("you are not permitted to use the -R option"));
+	    goto bad;
+	}
+	free(def_runchroot);
+	def_runchroot = user_runchroot;
+    }
+    if (user_runcwd != NULL) {
+	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
+	    audit_failure(NewArgv,
+		N_("user not allowed to change directory to %s"), user_runcwd);
+	    sudo_warnx("%s", U_("you are not permitted to use the -D option"));
+	    goto bad;
+	}
+	free(def_runcwd);
+	def_runcwd = user_runcwd;
+    }
+
     /*
      * Look up the timestamp dir owner if one is specified.
      */
