@@ -1047,9 +1047,13 @@ sha2.i: $(srcdir)/sha2.c $(incdir)/compat/endian.h $(incdir)/compat/sha2.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sha2.plog: sha2.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sha2.c --i-file $< --output-file $@
-sig2str.lo: $(srcdir)/sig2str.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+sig2str.lo: $(srcdir)/sig2str.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sig2str.c
-sig2str.i: $(srcdir)/sig2str.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+sig2str.i: $(srcdir)/sig2str.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sig2str.plog: sig2str.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sig2str.c --i-file $< --output-file $@
