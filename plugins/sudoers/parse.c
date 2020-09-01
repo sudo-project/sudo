@@ -426,6 +426,10 @@ new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
     if (cs->type && (!prev_cs->type || strcmp(cs->type, prev_cs->type) != 0))
 	debug_return_bool(true);
 #endif /* HAVE_SELINUX */
+    if (cs->runchroot && (!prev_cs->runchroot || strcmp(cs->runchroot, prev_cs->runchroot) != 0))
+	debug_return_bool(true);
+    if (cs->runcwd && (!prev_cs->runcwd || strcmp(cs->runcwd, prev_cs->runcwd) != 0))
+	debug_return_bool(true);
     if (cs->timeout != prev_cs->timeout)
 	debug_return_bool(true);
     if (cs->notbefore != prev_cs->notbefore)
@@ -520,6 +524,10 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		if (cs->type)
 		    sudo_lbuf_append(lbuf, "    Type: %s\n", cs->type);
 #endif /* HAVE_SELINUX */
+		if (cs->runchroot != NULL)
+		    sudo_lbuf_append(lbuf, "    Chroot: %s\n", cs->runchroot);
+		if (cs->runcwd != NULL)
+		    sudo_lbuf_append(lbuf, "    Cwd: %s\n", cs->runcwd);
 		if (cs->timeout > 0) {
 		    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
 		    (void)snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);

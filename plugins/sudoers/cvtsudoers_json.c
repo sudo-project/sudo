@@ -579,7 +579,7 @@ cmndspec_continues(struct cmndspec *cs, struct cmndspec *next)
 #ifdef HAVE_SELINUX
 	&& cs->role == next->role && cs->type == next->type
 #endif /* HAVE_SELINUX */
-	;
+	&& cs->runchroot == next->runchroot && cs->runcwd == next->runcwd;
     return ret;
 }
 
@@ -626,10 +626,21 @@ print_cmndspec_json(struct json_container *json,
 
     /* Print options and tags */
     if (cs->timeout > 0 || cs->notbefore != UNSPEC || cs->notafter != UNSPEC ||
-	TAGS_SET(cs->tags) || !TAILQ_EMPTY(options)) {
+	cs->runchroot != NULL || cs->runcwd != NULL || TAGS_SET(cs->tags) ||
+	!TAILQ_EMPTY(options)) {
 	struct cmndtag tag = cs->tags;
 
 	sudo_json_open_array(json, "Options");
+	if (cs->runchroot != NULL) {
+	    value.type = JSON_STRING;
+	    value.u.string = cs->runchroot;
+	    sudo_json_add_value(json, "runchroot", &value);
+	}
+	if (cs->runcwd != NULL) {
+	    value.type = JSON_STRING;
+	    value.u.string = cs->runcwd;
+	    sudo_json_add_value(json, "runcwd", &value);
+	}
 	if (cs->timeout > 0) {
 	    value.type = JSON_NUMBER;
 	    value.u.number = cs->timeout;

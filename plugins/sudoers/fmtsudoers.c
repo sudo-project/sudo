@@ -228,6 +228,10 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     if (cs->type != NULL && FIELD_CHANGED(prev_cs, cs, type))
 	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
+    if (cs->runchroot != NULL && FIELD_CHANGED(prev_cs, cs, runchroot))
+	sudo_lbuf_append(lbuf, "CHROOT=%s ", cs->runchroot);
+    if (cs->runcwd != NULL && FIELD_CHANGED(prev_cs, cs, runcwd))
+	sudo_lbuf_append(lbuf, "CWD=%s ", cs->runcwd);
     if (cs->timeout > 0 && FIELD_CHANGED(prev_cs, cs, timeout)) {
 	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
 	(void)snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);

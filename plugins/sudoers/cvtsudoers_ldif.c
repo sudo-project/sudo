@@ -319,6 +319,7 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct cmndspec *next = *nextp;
     struct member *m;
     struct tm *tp;
+    char *attr_val;
     bool last_one;
     char timebuf[sizeof("20120727121554Z")];
     debug_decl(print_cmndspec_ldif, SUDOERS_DEBUG_UTIL);
@@ -365,7 +366,6 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 
     /* Print timeout as a sudoOption. */
     if (cs->timeout > 0) {
-	char *attr_val;
 	if (asprintf(&attr_val, "command_timeout=%d", cs->timeout) == -1) {
 	    sudo_fatalx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
@@ -414,22 +414,35 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     }
     print_options_ldif(fp, options);
 
+    /* Print runchroot and runcwd. */
+    if (cs->runchroot != NULL) {
+	if (asprintf(&attr_val, "runchroot=%s", cs->runchroot) == -1) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+	print_attribute_ldif(fp, "sudoOption", attr_val);
+	free(attr_val);
+    }
+    if (cs->runcwd != NULL) {
+	if (asprintf(&attr_val, "runcwd=%s", cs->runcwd) == -1) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+	print_attribute_ldif(fp, "sudoOption", attr_val);
+	free(attr_val);
+    }
+
 #ifdef HAVE_SELINUX
     /* Print SELinux role/type */
     if (cs->role != NULL && cs->type != NULL) {
-	char *attr_val;
-	int len;
-
-	len = asprintf(&attr_val, "role=%s", cs->role);
-	if (len == -1) {
+	if (asprintf(&attr_val, "role=%s", cs->role) == -1) {
 	    sudo_fatalx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	}
 	print_attribute_ldif(fp, "sudoOption", attr_val);
 	free(attr_val);
 
-	len = asprintf(&attr_val, "type=%s", cs->type);
-	if (len == -1) {
+	if (asprintf(&attr_val, "type=%s", cs->type) == -1) {
 	    sudo_fatalx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	}
@@ -441,12 +454,8 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 #ifdef HAVE_PRIV_SET
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {
-	char *attr_val;
-	int len;
-
 	if (cs->privs != NULL) {
-	    len = asprintf(&attr_val, "privs=%s", cs->privs);
-	    if (len == -1) {
+	    if (asprintf(&attr_val, "privs=%s", cs->privs) == -1) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 	    }
@@ -454,8 +463,7 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	    free(attr_val);
 	}
 	if (cs->limitprivs != NULL) {
-	    len = asprintf(&attr_val, "limitprivs=%s", cs->limitprivs);
-	    if (len == -1) {
+	    if (asprintf(&attr_val, "limitprivs=%s", cs->limitprivs) == -1) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 	    }
@@ -481,7 +489,7 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 #ifdef HAVE_SELINUX
 	    || cs->role != next->role || cs->type != next->type
 #endif /* HAVE_SELINUX */
-	    ;
+	    || cs->runchroot != next->runchroot || cs->runcwd != next->runcwd;
 
 	print_member_ldif(fp, parse_tree, cs->cmnd->name, cs->cmnd->type,
 	    cs->cmnd->negated, CMNDALIAS, "sudoCommand");
