@@ -188,6 +188,26 @@ json_store_runuser(struct json_item *item, struct iolog_info *li)
 }
 
 static bool
+json_store_runchroot(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_runchroot, SUDO_DEBUG_UTIL);
+
+    li->runchroot = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_runcwd(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_runcwd, SUDO_DEBUG_UTIL);
+
+    li->runcwd = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
 json_store_submitcwd(struct json_item *item, struct iolog_info *li)
 {
     debug_decl(json_store_submitcwd, SUDO_DEBUG_UTIL);
@@ -263,6 +283,8 @@ static struct iolog_json_key {
     { "rungroup", JSON_STRING, json_store_rungroup },
     { "runuid", JSON_ID, json_store_runuid },
     { "runuser", JSON_STRING, json_store_runuser },
+    { "runchroot", JSON_STRING, json_store_runchroot },
+    { "runcwd", JSON_STRING, json_store_runcwd },
     { "submitcwd", JSON_STRING, json_store_submitcwd },
     { "submithost", JSON_STRING, json_store_submithost },
     { "submituser", JSON_STRING, json_store_submituser },

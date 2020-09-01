@@ -116,6 +116,8 @@ iolog_details_free(struct iolog_details *details)
 	free(details->iolog_path);
 	free(details->command);
 	free(details->cwd);
+	free(details->runchroot);
+	free(details->runcwd);
 	free(details->rungroup);
 	free(details->runuser);
 	free(details->submithost);
@@ -217,6 +219,34 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runargv specified but not a string list");
+		}
+		continue;
+	    }
+	    if (strcmp(key, "runchroot") == 0) {
+		if (has_strval(info)) {
+		    if ((details->runchroot = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"runchroot specified but not a string");
+		}
+		continue;
+	    }
+	    if (strcmp(key, "runcwd") == 0) {
+		if (has_strval(info)) {
+		    if ((details->runcwd = strdup(info->strval)) == NULL) {
+			sudo_debug_printf(
+			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			    "strdup");
+			goto done;
+		    }
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"runcwd specified but not a string");
 		}
 		continue;
 	    }
@@ -635,6 +665,8 @@ iolog_details_write(struct iolog_details *details,
     memset(&log_info, 0, sizeof(log_info));
     log_info.cwd = details->cwd;
     log_info.user = details->submituser;
+    log_info.runchroot = details->runchroot;
+    log_info.runcwd = details->runcwd;
     log_info.runas_user = details->runuser;
     log_info.runas_group = details->rungroup;
     log_info.tty = details->ttyname;

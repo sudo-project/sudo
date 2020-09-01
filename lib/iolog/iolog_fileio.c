@@ -1035,6 +1035,20 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
 	    goto oom;
     }
 
+    if (info->runchroot != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = info->runchroot;
+	if (!sudo_json_add_value(&json, "runchroot", &json_value))
+	    goto oom;
+    }
+
+    if (info->runcwd != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = info->runcwd;
+	if (!sudo_json_add_value(&json, "runcwd", &json_value))
+	    goto oom;
+    }
+
     /* Required */
     json_value.type = JSON_STRING;
     json_value.u.string = info->runas_user;

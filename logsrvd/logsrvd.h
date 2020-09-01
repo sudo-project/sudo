@@ -48,6 +48,8 @@ struct iolog_details {
     char *iolog_file;		/* substring of iolog_path, do not free */
     char *command;
     char *cwd;
+    char *runchroot;
+    char *runcwd;
     char *rungroup;
     char *runuser;
     char *submithost;

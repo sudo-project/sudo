@@ -269,6 +269,10 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		details->command = *cur + sizeof("command=") - 1;
 		continue;
 	    }
+	    if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
+		details->runchroot = *cur + sizeof("chroot=") - 1;
+		continue;
+	    }
 	    break;
 	case 'i':
 	    if (strncmp(*cur, "ignore_iolog_errors=", sizeof("ignore_iolog_errors=") - 1) == 0) {
@@ -434,6 +438,10 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		runas_euid_str = *cur + sizeof("runas_euid=") - 1;
 		continue;
 	    }
+	    if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
+		details->runcwd = *cur + sizeof("runcwd=") - 1;
+		continue;
+	    }
 	    break;
 	}
     }
@@ -499,6 +507,8 @@ write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
     memset(&iolog_info, 0, sizeof(iolog_info));
     iolog_info.cwd = (char *)details->cwd;
     iolog_info.user = (char *)details->user;
+    iolog_info.runchroot = (char *)details->runchroot;
+    iolog_info.runcwd = (char *)details->runcwd;
     iolog_info.runas_user = details->runas_pw->pw_name;
     iolog_info.runas_group = details->runas_gr ? details->runas_gr->gr_name: NULL;
     iolog_info.tty = (char *)details->tty;

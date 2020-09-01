@@ -449,6 +449,8 @@ iolog_free_loginfo(struct iolog_info *li)
 	free(li->user);
 	free(li->runas_user);
 	free(li->runas_group);
+	free(li->runchroot);
+	free(li->runcwd);
 	free(li->tty);
 	free(li->cmd);
 	free(li->host);

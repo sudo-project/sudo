@@ -781,7 +781,7 @@ fmt_accept_message(struct client_closure *closure)
 	runenv.n_strings++;
 
     /* XXX - realloc as needed instead of preallocating */
-    info_msgs_size = 22;
+    info_msgs_size = 24;
     accept_msg.info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
     if (accept_msg.info_msgs == NULL) {
 	info_msgs_size = 0;
@@ -857,6 +857,20 @@ fmt_accept_message(struct client_closure *closure)
     if (details->cwd != NULL) {
 	accept_msg.info_msgs[n]->key = "submitcwd";
 	accept_msg.info_msgs[n]->strval = (char *)details->cwd;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    if (details->runcwd != NULL) {
+	accept_msg.info_msgs[n]->key = "runcwd";
+	accept_msg.info_msgs[n]->strval = (char *)details->runcwd;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    if (details->runchroot != NULL) {
+	accept_msg.info_msgs[n]->key = "runchroot";
+	accept_msg.info_msgs[n]->strval = (char *)details->runchroot;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }

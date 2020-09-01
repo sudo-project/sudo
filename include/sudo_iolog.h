@@ -64,6 +64,8 @@ struct iolog_info {
     char *user;
     char *runas_user;
     char *runas_group;
+    char *runchroot;
+    char *runcwd;
     char *tty;
     char *cmd;
     char *host;
