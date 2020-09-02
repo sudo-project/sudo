@@ -923,6 +923,7 @@ should_mail(int status)
 }
 
 #define	LL_TTY_STR	"TTY="
+#define	LL_CHROOT_STR	"CHROOT="
 #define	LL_CWD_STR	"PWD="		/* XXX - should be CWD= */
 #define	LL_USER_STR	"USER="
 #define	LL_GROUP_STR	"GROUP="
@@ -978,6 +979,8 @@ new_logline(const char *message, const char *errstr)
     if (errstr != NULL)
 	len += strlen(errstr) + 3;
     len += sizeof(LL_TTY_STR) + 2 + strlen(user_tty);
+    if (user_runchroot != NULL)
+	len += sizeof(LL_CHROOT_STR) + 2 + strlen(user_runchroot);
     len += sizeof(LL_CWD_STR) + 2 + strlen(user_runcwd);
     if (runas_pw != NULL)
 	len += sizeof(LL_USER_STR) + 2 + strlen(runas_pw->pw_name);
@@ -1032,6 +1035,12 @@ new_logline(const char *message, const char *errstr)
 	strlcat(line, user_tty, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
+    if (user_runchroot != NULL) {
+	if (strlcat(line, LL_CHROOT_STR, len) >= len ||
+	    strlcat(line, user_runchroot, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+    }
     if (strlcat(line, LL_CWD_STR, len) >= len ||
 	strlcat(line, user_runcwd, len) >= len ||
 	strlcat(line, " ; ", len) >= len)

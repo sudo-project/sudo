@@ -59,6 +59,7 @@
 
 #define	LL_HOST_STR	"HOST="
 #define	LL_TTY_STR	"TTY="
+#define	LL_CHROOT_STR	"CHROOT="
 #define	LL_CWD_STR	"PWD="
 #define	LL_USER_STR	"USER="
 #define	LL_GROUP_STR	"GROUP="
@@ -114,6 +115,8 @@ new_logline(const char *message, const char *errstr,
 	len += strlen(errstr) + 3;
     len += sizeof(LL_HOST_STR) + 2 + strlen(details->submithost);
     len += sizeof(LL_TTY_STR) + 2 + strlen(details->ttyname);
+    if (details->runchroot != NULL)
+	len += sizeof(LL_CHROOT_STR) + 2 + strlen(details->runchroot);
     len += sizeof(LL_CWD_STR) + 2 + strlen(details->runcwd);
     if (details->runuser != NULL)
 	len += sizeof(LL_USER_STR) + 2 + strlen(details->runuser);
@@ -174,6 +177,12 @@ new_logline(const char *message, const char *errstr,
 	strlcat(line, details->ttyname, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
+    if (details->runchroot != NULL) {
+	if (strlcat(line, LL_CHROOT_STR, len) >= len ||
+	    strlcat(line, details->runchroot, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+    }
     if (strlcat(line, LL_CWD_STR, len) >= len ||
 	strlcat(line, details->runcwd, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
