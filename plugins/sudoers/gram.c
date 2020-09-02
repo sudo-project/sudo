@@ -3579,6 +3579,8 @@ init_options(struct command_options *opts)
     opts->notbefore = UNSPEC;
     opts->notafter = UNSPEC;
     opts->timeout = UNSPEC;
+    opts->runchroot = NULL;
+    opts->runcwd = NULL;
 #ifdef HAVE_SELINUX
     opts->role = NULL;
     opts->type = NULL;
