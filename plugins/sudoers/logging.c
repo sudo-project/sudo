@@ -978,7 +978,7 @@ new_logline(const char *message, const char *errstr)
     if (errstr != NULL)
 	len += strlen(errstr) + 3;
     len += sizeof(LL_TTY_STR) + 2 + strlen(user_tty);
-    len += sizeof(LL_CWD_STR) + 2 + strlen(user_cwd);
+    len += sizeof(LL_CWD_STR) + 2 + strlen(user_runcwd);
     if (runas_pw != NULL)
 	len += sizeof(LL_USER_STR) + 2 + strlen(runas_pw->pw_name);
     if (runas_gr != NULL)
@@ -1033,7 +1033,7 @@ new_logline(const char *message, const char *errstr)
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
     if (strlcat(line, LL_CWD_STR, len) >= len ||
-	strlcat(line, user_cwd, len) >= len ||
+	strlcat(line, user_runcwd, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
     if (runas_pw != NULL) {

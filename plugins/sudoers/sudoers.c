@@ -405,9 +405,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto bad;
 	}
 	free(def_runchroot);
-	def_runchroot = user_runchroot;
+	if ((def_runchroot = strdup(user_runchroot)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
     }
-    if (user_runcwd != NULL) {
+    if (strcmp(user_cwd, user_runcwd) != 0) {
 	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
 	    audit_failure(NewArgv,
 		N_("user not allowed to change directory to %s"), user_runcwd);
@@ -415,7 +418,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto bad;
 	}
 	free(def_runcwd);
-	def_runcwd = user_runcwd;
+	if ((def_runcwd = strdup(user_runcwd)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
     }
 
     /*

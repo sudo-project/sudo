@@ -82,6 +82,7 @@ struct sudo_user {
     struct passwd *_runas_pw;
     struct group *_runas_gr;
     struct stat *cmnd_stat;
+    char *cwd;
     char *name;
     char *path;
     char *tty;
@@ -109,7 +110,6 @@ struct sudo_user {
     char *privs;
     char *limitprivs;
 #endif
-    const char *cwd;
     char *iolog_file;
     GETGROUPS_T *gids;
     int   execfd;

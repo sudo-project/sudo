@@ -476,6 +476,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if ((user_cwd = strdup("unknown")) == NULL)
 	    goto oom;
     }
+    if (user_runcwd == NULL) {
+	if ((user_runcwd = strdup(user_cwd)) == NULL)
+	    goto oom;
+    }
     if (user_tty == NULL) {
 	if ((user_tty = strdup("unknown")) == NULL)
 	    goto oom;

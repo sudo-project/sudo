@@ -114,7 +114,7 @@ new_logline(const char *message, const char *errstr,
 	len += strlen(errstr) + 3;
     len += sizeof(LL_HOST_STR) + 2 + strlen(details->submithost);
     len += sizeof(LL_TTY_STR) + 2 + strlen(details->ttyname);
-    len += sizeof(LL_CWD_STR) + 2 + strlen(details->cwd);
+    len += sizeof(LL_CWD_STR) + 2 + strlen(details->runcwd);
     if (details->runuser != NULL)
 	len += sizeof(LL_USER_STR) + 2 + strlen(details->runuser);
     if (details->rungroup != NULL)
@@ -175,7 +175,7 @@ new_logline(const char *message, const char *errstr,
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
     if (strlcat(line, LL_CWD_STR, len) >= len ||
-	strlcat(line, details->cwd, len) >= len ||
+	strlcat(line, details->runcwd, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
     if (details->runuser != NULL) {

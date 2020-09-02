@@ -422,6 +422,14 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    goto done;
 	}
     }
+    if (details->runcwd == NULL) {
+	if ((details->runcwd = strdup(details->cwd)) == NULL) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"strdup");
+	    goto done;
+	}
+    }
     if (details->submitgroup == NULL) {
 	/* TODO: make submitgroup required */
 	if ((details->submitgroup = strdup("unknown")) == NULL) {
