@@ -987,6 +987,48 @@ lock_sudoers(struct sudoersfile *entry)
 }
 
 /*
+ * Open (and lock) a new sudoers file.
+ * Returns a new struct sudoersfile on success or NULL on failure.
+ */
+static struct sudoersfile *
+new_sudoers(const char *path, bool doedit)
+{
+    struct sudoersfile *entry;
+    struct stat sb;
+    int open_flags;
+    debug_decl(new_sudoersfile, SUDOERS_DEBUG_UTIL);
+
+    if (checkonly)
+	open_flags = O_RDONLY;
+    else
+	open_flags = O_RDWR | O_CREAT;
+
+    entry = calloc(1, sizeof(*entry));
+    if (entry == NULL || (entry->path = strdup(path)) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    /* entry->tpath = NULL; */
+    /* entry->modified = false; */
+    entry->doedit = doedit;
+    entry->fd = open(entry->path, open_flags, sudoers_mode);
+    if (entry->fd == -1 || fstat(entry->fd, &sb) == -1) {
+	sudo_warn("%s", entry->path);
+	goto bad;
+    }
+    if (!S_ISREG(sb.st_mode)) {
+	sudo_warnx(U_("%s is not a regular file"), entry->path);
+	goto bad;
+    }
+    if (!checkonly && !lock_sudoers(entry))
+	goto bad;
+    debug_return_ptr(entry);
+bad:
+    if (entry->fd != -1)
+	close(entry->fd);
+    free(entry);
+    debug_return_ptr(NULL);
+}
+
+/*
  * Used to open (and lock) the initial sudoers file and to also open
  * any subsequent files #included via a callback from the parser.
  */
@@ -994,15 +1036,8 @@ FILE *
 open_sudoers(const char *path, bool doedit, bool *keepopen)
 {
     struct sudoersfile *entry;
-    struct stat sb;
     FILE *fp;
-    int open_flags;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
-
-    if (checkonly)
-	open_flags = O_RDONLY;
-    else
-	open_flags = O_RDWR | O_CREAT;
 
     /* Check for existing entry */
     TAILQ_FOREACH(entry, &sudoerslist, entries) {
@@ -1010,27 +1045,7 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    break;
     }
     if (entry == NULL) {
-	entry = calloc(1, sizeof(*entry));
-	if (entry == NULL || (entry->path = strdup(path)) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	/* entry->tpath = NULL; */
-	/* entry->modified = false; */
-	entry->doedit = doedit;
-	entry->fd = open(entry->path, open_flags, sudoers_mode);
-	if (entry->fd == -1 || fstat(entry->fd, &sb) == -1) {
-	    sudo_warn("%s", entry->path);
-	    if (entry->fd != -1)
-		close(entry->fd);
-	    free(entry);
-	    debug_return_ptr(NULL);
-	}
-	if (!S_ISREG(sb.st_mode)) {
-	    sudo_warnx(U_("%s is not a regular file"), entry->path);
-	    close(entry->fd);
-	    free(entry);
-	    debug_return_ptr(NULL);
-	}
-	if (!checkonly && !lock_sudoers(entry))
+	if ((entry = new_sudoers(path, doedit)) == NULL)
 	    debug_return_ptr(NULL);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    sudo_fatal("%s", entry->path);
