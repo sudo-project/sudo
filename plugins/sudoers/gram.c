@@ -3414,7 +3414,7 @@ free_privilege(struct privilege *priv)
 	    free(cs->runcwd);
 	}
 	if (cs->runchroot != runchroot) {
-	    runcwd = cs->runchroot;
+	    runchroot = cs->runchroot;
 	    free(cs->runchroot);
 	}
 #ifdef HAVE_SELINUX
