@@ -72,7 +72,6 @@ AC_SUBST([SEMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
-AC_SUBST([mansrcdir])
 AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
 AC_SUBST([noexec_file])
@@ -116,9 +115,9 @@ AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
 AC_SUBST([SIGNAME])
 AC_SUBST([PYTHON_PLUGIN_SRC])
-AC_SUBST([LOGSRV])
+AC_SUBST([LOGSRV_SRC])
 AC_SUBST([LIBLOGSRV])
-AC_SUBST([LOGSRVD])
+AC_SUBST([LOGSRVD_SRC])
 AC_SUBST([LOGSRVD_CONF])
 AC_SUBST([PPFILES])
 
@@ -229,7 +228,6 @@ exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
 : ${MANDIRTYPE='man'}
-: ${mansrcdir='.'}
 : ${SHLIB_MODE='0644'}
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
@@ -270,9 +268,9 @@ shadow_funcs=
 shadow_libs=
 TMPFILES_D=
 CONFIGURE_ARGS="$@"
-LOGSRVD=logsrvd
+LOGSRVD_SRC=logsrvd
 LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
-LOGSRV=lib/logsrv
+LOGSRV_SRC=lib/logsrv
 LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
 PPFILES='$(srcdir)/etc/sudo.pp'
 
@@ -1642,7 +1640,7 @@ AC_ARG_ENABLE(log-server,
     yes)
 	    ;;
     no)
-	    LOGSRVD=
+	    LOGSRVD_SRC=
 	    LOGSRVD_CONF=
 	    ;;
     *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-log-server: $enableval])
@@ -1665,10 +1663,10 @@ AC_ARG_ENABLE(log-client,
 
 if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
     # No need for liblogsrv.la
-    LOGSRV=
+    LOGSRV_SRC=
     LIBLOGSRV=
 fi
-if test X"$LOGSRVD" != X""; then
+if test X"$LOGSRVD_SRC" != X""; then
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-logsrvd.pp'
 fi
 
