@@ -737,11 +737,13 @@ logpath
 log_dir
 iolog_dir
 PPFILES
+LIBLOGSRV
 LOGSRVD_CONF
 LOGSRVD_SRC
-LIBLOGSRV
 LOGSRV_SRC
+LOGSRV
 PYTHON_PLUGIN_SRC
+PYTHON_PLUGIN
 SIGNAME
 devsearch
 DIGEST
@@ -3136,6 +3138,8 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
+
 #
 # Begin initial values for man page substitution
 #
@@ -3231,9 +3235,11 @@ shadow_funcs=
 shadow_libs=
 TMPFILES_D=
 CONFIGURE_ARGS="$@"
+PYTHON_PLUGIN=#
+LOGSRVD=
 LOGSRVD_SRC=logsrvd
-LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
 LOGSRV_SRC=lib/logsrv
+LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
 LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
 PPFILES='$(srcdir)/etc/sudo.pp'
 
@@ -6742,6 +6748,7 @@ if test "${enable_log_server+set}" = set; then :
     yes)
 	    ;;
     no)
+	    LOGSRV=#
 	    LOGSRVD_SRC=
 	    LOGSRVD_CONF=
 	    ;;
@@ -19188,6 +19195,7 @@ fi
 
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-python.pp'
     PYTHON_PLUGIN_SRC=plugins/python
+    PYTHON_PLUGIN=
     ac_config_files="$ac_config_files $PYTHON_PLUGIN_SRC/Makefile"
 
 fi

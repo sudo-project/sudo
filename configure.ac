@@ -114,11 +114,13 @@ AC_SUBST([exampledir])
 AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
 AC_SUBST([SIGNAME])
+AC_SUBST([PYTHON_PLUGIN])
 AC_SUBST([PYTHON_PLUGIN_SRC])
+AC_SUBST([LOGSRV])
 AC_SUBST([LOGSRV_SRC])
-AC_SUBST([LIBLOGSRV])
 AC_SUBST([LOGSRVD_SRC])
 AC_SUBST([LOGSRVD_CONF])
+AC_SUBST([LIBLOGSRV])
 AC_SUBST([PPFILES])
 
 dnl
@@ -268,9 +270,11 @@ shadow_funcs=
 shadow_libs=
 TMPFILES_D=
 CONFIGURE_ARGS="$@"
+PYTHON_PLUGIN=#
+LOGSRVD=
 LOGSRVD_SRC=logsrvd
-LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
 LOGSRV_SRC=lib/logsrv
+LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
 LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
 PPFILES='$(srcdir)/etc/sudo.pp'
 
@@ -1640,6 +1644,7 @@ AC_ARG_ENABLE(log-server,
     yes)
 	    ;;
     no)
+	    LOGSRV=#
 	    LOGSRVD_SRC=
 	    LOGSRVD_CONF=
 	    ;;
@@ -2593,6 +2598,7 @@ if test ${USE_PYTHON-'no'} = "yes"; then
 
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-python.pp'
     PYTHON_PLUGIN_SRC=plugins/python
+    PYTHON_PLUGIN=
     AC_CONFIG_FILES([$PYTHON_PLUGIN_SRC/Makefile])
 fi
 
