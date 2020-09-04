@@ -332,7 +332,7 @@ fmt_client_hello(struct client_closure *closure)
     hello_msg.client_id = "Sudo Sendlog " PACKAGE_VERSION;
 
     /* Schedule ClientMessage */
-    client_msg.hello_msg = &hello_msg;
+    client_msg.u.hello_msg = &hello_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
@@ -354,8 +354,8 @@ free_info_messages(InfoMessage **info_msgs, size_t n_info_msgs)
 	while (n_info_msgs-- > 0) {
 	    if (info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
 		/* Only strlistval was dynamically allocated */
-		free(info_msgs[n_info_msgs]->strlistval->strings);
-		free(info_msgs[n_info_msgs]->strlistval);
+		free(info_msgs[n_info_msgs]->u.strlistval->strings);
+		free(info_msgs[n_info_msgs]->u.strlistval);
 	    }
 	    free(info_msgs[n_info_msgs]);
 	}
@@ -398,55 +398,55 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
     /* Fill in info_msgs */
     n = 0;
     info_msgs[n]->key = "command";
-    info_msgs[n]->strval = log_info->cmd;
+    info_msgs[n]->u.strval = log_info->cmd;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "columns";
-    info_msgs[n]->numval = log_info->cols;
+    info_msgs[n]->u.numval = log_info->cols;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     info_msgs[n]->key = "lines";
-    info_msgs[n]->numval = log_info->lines;
+    info_msgs[n]->u.numval = log_info->lines;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     info_msgs[n]->key = "runargv";
-    info_msgs[n]->strlistval = runargv;
+    info_msgs[n]->u.strlistval = runargv;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     runargv = NULL;
     n++;
 
     if (log_info->runas_group != NULL) {
 	info_msgs[n]->key = "rungroup";
-	info_msgs[n]->strval = log_info->runas_group;
+	info_msgs[n]->u.strval = log_info->runas_group;
 	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
 
     info_msgs[n]->key = "runuser";
-    info_msgs[n]->strval = log_info->runas_user;
+    info_msgs[n]->u.strval = log_info->runas_user;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "submitcwd";
-    info_msgs[n]->strval = log_info->cwd;
+    info_msgs[n]->u.strval = log_info->cwd;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "submithost";
-    info_msgs[n]->strval = hostname;
+    info_msgs[n]->u.strval = hostname;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "submituser";
-    info_msgs[n]->strval = log_info->user;
+    info_msgs[n]->u.strval = log_info->user;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "ttyname";
-    info_msgs[n]->strval = log_info->tty;
+    info_msgs[n]->u.strval = log_info->tty;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
@@ -515,7 +515,7 @@ fmt_reject_message(struct client_closure *closure)
 	"%s: sending RejectMessage, array length %zu", __func__, n_info_msgs);
 
     /* Schedule ClientMessage */
-    client_msg.reject_msg = &reject_msg;
+    client_msg.u.reject_msg = &reject_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_REJECT_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
@@ -574,7 +574,7 @@ fmt_accept_message(struct client_closure *closure)
 	"%s: sending AcceptMessage, array length %zu", __func__, n_info_msgs);
 
     /* Schedule ClientMessage */
-    client_msg.accept_msg = &accept_msg;
+    client_msg.u.accept_msg = &accept_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
@@ -613,7 +613,7 @@ fmt_restart_message(struct client_closure *closure)
     restart_msg.log_id = (char *)closure->iolog_id;
 
     /* Schedule ClientMessage */
-    client_msg.restart_msg = &restart_msg;
+    client_msg.u.restart_msg = &restart_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_RESTART_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
@@ -649,7 +649,7 @@ fmt_exit_message(struct client_closure *closure)
 	__func__, exit_msg.exit_value);
 
     /* Send ClientMessage */
-    client_msg.exit_msg = &exit_msg;
+    client_msg.u.exit_msg = &exit_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
     if (!fmt_client_message(&closure->write_buf, &client_msg))
 	goto done;
@@ -691,7 +691,7 @@ fmt_io_buf(int type, struct client_closure *closure,
 	iobuf_msg.data.len, type, io_buffer__get_packed_size(&iobuf_msg));
 
     /* Send ClientMessage, it doesn't matter which IoBuffer we set. */
-    client_msg.ttyout_buf = &iobuf_msg;
+    client_msg.u.ttyout_buf = &iobuf_msg;
     client_msg.type_case = type;
     if (!fmt_client_message(buf, &client_msg))
         goto done;
@@ -728,7 +728,7 @@ fmt_winsize(struct client_closure *closure, struct connection_buffer *buf)
 	__func__, winsize_msg.rows, winsize_msg.cols);
 
     /* Send ClientMessage */
-    client_msg.winsize_event = &winsize_msg;
+    client_msg.u.winsize_event = &winsize_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_WINSIZE_EVENT;
     if (!fmt_client_message(buf, &client_msg))
         goto done;
@@ -766,7 +766,7 @@ fmt_suspend(struct client_closure *closure, struct connection_buffer *buf)
     	"%s: sending CommandSuspend, SIG%s", __func__, suspend_msg.signal);
 
     /* Send ClientMessage */
-    client_msg.suspend_event = &suspend_msg;
+    client_msg.u.suspend_event = &suspend_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_SUSPEND_EVENT;
     if (!fmt_client_message(buf, &client_msg))
         goto done;
@@ -1014,7 +1014,7 @@ handle_server_message(uint8_t *buf, size_t len,
 
     switch (msg->type_case) {
     case SERVER_MESSAGE__TYPE_HELLO:
-	if ((ret = handle_server_hello(msg->hello, closure))) {
+	if ((ret = handle_server_hello(msg->u.hello, closure))) {
 	    if (sudo_timespecisset(&closure->restart)) {
 		closure->state = SEND_RESTART;
 		ret = fmt_restart_message(closure);
@@ -1028,7 +1028,7 @@ handle_server_message(uint8_t *buf, size_t len,
 	}
 	break;
     case SERVER_MESSAGE__TYPE_COMMIT_POINT:
-	ret = handle_commit_point(msg->commit_point, closure);
+	ret = handle_commit_point(msg->u.commit_point, closure);
 	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
 	    sudo_ev_del(closure->evbase, closure->read_ev);
 	    closure->state = FINISHED;
@@ -1037,14 +1037,14 @@ handle_server_message(uint8_t *buf, size_t len,
 	}
 	break;
     case SERVER_MESSAGE__TYPE_LOG_ID:
-	ret = handle_log_id(msg->log_id, closure);
+	ret = handle_log_id(msg->u.log_id, closure);
 	break;
     case SERVER_MESSAGE__TYPE_ERROR:
-	ret = handle_server_error(msg->error, closure);
+	ret = handle_server_error(msg->u.error, closure);
 	closure->state = ERROR;
 	break;
     case SERVER_MESSAGE__TYPE_ABORT:
-	ret = handle_server_abort(msg->abort, closure);
+	ret = handle_server_abort(msg->u.abort, closure);
 	closure->state = ERROR;
 	break;
     default:

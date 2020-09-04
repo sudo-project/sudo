@@ -186,7 +186,7 @@ fmt_hello_message(struct connection_buffer *buf, bool tls)
 
     /* TODO: implement redirect and servers array.  */
     hello.server_id = (char *)server_id;
-    msg.hello = &hello;
+    msg.u.hello = &hello;
     msg.type_case = SERVER_MESSAGE__TYPE_HELLO;
 
     debug_return_bool(fmt_server_message(buf, &msg));
@@ -198,7 +198,7 @@ fmt_log_id_message(const char *id, struct connection_buffer *buf)
     ServerMessage msg = SERVER_MESSAGE__INIT;
     debug_decl(fmt_log_id_message, SUDO_DEBUG_UTIL);
 
-    msg.log_id = (char *)id;
+    msg.u.log_id = (char *)id;
     msg.type_case = SERVER_MESSAGE__TYPE_LOG_ID;
 
     debug_return_bool(fmt_server_message(buf, &msg));
@@ -210,7 +210,7 @@ fmt_error_message(const char *errstr, struct connection_buffer *buf)
     ServerMessage msg = SERVER_MESSAGE__INIT;
     debug_decl(fmt_error_message, SUDO_DEBUG_UTIL);
 
-    msg.error = (char *)errstr;
+    msg.u.error = (char *)errstr;
     msg.type_case = SERVER_MESSAGE__TYPE_ERROR;
 
     debug_return_bool(fmt_server_message(buf, &msg));
@@ -586,43 +586,43 @@ handle_client_message(uint8_t *buf, size_t len,
 
     switch (msg->type_case) {
     case CLIENT_MESSAGE__TYPE_ACCEPT_MSG:
-	ret = handle_accept(msg->accept_msg, closure);
+	ret = handle_accept(msg->u.accept_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_REJECT_MSG:
-	ret = handle_reject(msg->reject_msg, closure);
+	ret = handle_reject(msg->u.reject_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_EXIT_MSG:
-	ret = handle_exit(msg->exit_msg, closure);
+	ret = handle_exit(msg->u.exit_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_RESTART_MSG:
-	ret = handle_restart(msg->restart_msg, closure);
+	ret = handle_restart(msg->u.restart_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_ALERT_MSG:
-	ret = handle_alert(msg->alert_msg, closure);
+	ret = handle_alert(msg->u.alert_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_TTYIN_BUF:
-	ret = handle_iobuf(IOFD_TTYIN, msg->ttyin_buf, closure);
+	ret = handle_iobuf(IOFD_TTYIN, msg->u.ttyin_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_TTYOUT_BUF:
-	ret = handle_iobuf(IOFD_TTYOUT, msg->ttyout_buf, closure);
+	ret = handle_iobuf(IOFD_TTYOUT, msg->u.ttyout_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDIN_BUF:
-	ret = handle_iobuf(IOFD_STDIN, msg->stdin_buf, closure);
+	ret = handle_iobuf(IOFD_STDIN, msg->u.stdin_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDOUT_BUF:
-	ret = handle_iobuf(IOFD_STDOUT, msg->stdout_buf, closure);
+	ret = handle_iobuf(IOFD_STDOUT, msg->u.stdout_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDERR_BUF:
-	ret = handle_iobuf(IOFD_STDERR, msg->stderr_buf, closure);
+	ret = handle_iobuf(IOFD_STDERR, msg->u.stderr_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_WINSIZE_EVENT:
-	ret = handle_winsize(msg->winsize_event, closure);
+	ret = handle_winsize(msg->u.winsize_event, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_SUSPEND_EVENT:
-	ret = handle_suspend(msg->suspend_event, closure);
+	ret = handle_suspend(msg->u.suspend_event, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_HELLO_MSG:
-	ret = handle_client_hello(msg->hello_msg, closure);
+	ret = handle_client_hello(msg->u.hello_msg, closure);
 	break;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -952,7 +952,7 @@ server_commit_cb(int unused, int what, void *v)
     /* Send the client an acknowledgement of what has been committed to disk. */
     commit_point.tv_sec = closure->elapsed_time.tv_sec;
     commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
-    msg.commit_point = &commit_point;
+    msg.u.commit_point = &commit_point;
     msg.type_case = SERVER_MESSAGE__TYPE_COMMIT_POINT;
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending commit point [%lld, %ld]",

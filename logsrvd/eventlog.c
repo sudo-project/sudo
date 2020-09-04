@@ -371,18 +371,18 @@ format_json(ClientMessage__TypeCase event_type, const char *reason,
 	switch (info->value_case) {
 	case INFO_MESSAGE__VALUE_NUMVAL:
 	    json_value.type = JSON_NUMBER;
-	    json_value.u.number = info->numval;
+	    json_value.u.number = info->u.numval;
 	    if (!sudo_json_add_value(&json, info->key, &json_value))
 		goto bad;
 	    break;
 	case INFO_MESSAGE__VALUE_STRVAL:
 	    json_value.type = JSON_STRING;
-	    json_value.u.string = info->strval;
+	    json_value.u.string = info->u.strval;
 	    if (!sudo_json_add_value(&json, info->key, &json_value))
 		goto bad;
 	    break;
 	case INFO_MESSAGE__VALUE_STRLISTVAL: {
-	    InfoMessage__StringList *strlist = info->strlistval;
+	    InfoMessage__StringList *strlist = info->u.strlistval;
 	    size_t n;
 
 	    if (!sudo_json_open_array(&json, info->key))

@@ -78,7 +78,7 @@ struct  _ClientMessage
     ChangeWindowSize *winsize_event;
     CommandSuspend *suspend_event;
     ClientHello *hello_msg;
-  };
+  } u;
 };
 #define CLIENT_MESSAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&client_message__descriptor) \
@@ -170,7 +170,7 @@ struct  _InfoMessage
     char *strval;
     InfoMessage__StringList *strlistval;
     InfoMessage__NumberList *numlistval;
-  };
+  } u;
 };
 #define INFO_MESSAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&info_message__descriptor) \
@@ -398,7 +398,7 @@ struct  _ServerMessage
      * abort message, kill command 
      */
     char *abort;
-  };
+  } u;
 };
 #define SERVER_MESSAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&server_message__descriptor) \

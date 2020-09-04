@@ -172,17 +172,17 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		if (!has_numval(info)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"columns specified but not a number");
-		} else if (info->numval <= 0 || info->numval > INT_MAX) {
+		} else if (info->u.numval <= 0 || info->u.numval > INT_MAX) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"columns (%" PRId64 ") out of range", info->numval);
+			"columns (%" PRId64 ") out of range", info->u.numval);
 		} else {
-		    details->columns = info->numval;
+		    details->columns = info->u.numval;
 		}
 		continue;
 	    }
 	    if (strcmp(key, "command") == 0) {
 		if (has_strval(info)) {
-		    if ((details->command = strdup(info->strval)) == NULL) {
+		    if ((details->command = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -200,11 +200,11 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		if (!has_numval(info)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"lines specified but not a number");
-		} else if (info->numval <= 0 || info->numval > INT_MAX) {
+		} else if (info->u.numval <= 0 || info->u.numval > INT_MAX) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"lines (%" PRId64 ") out of range", info->numval);
+			"lines (%" PRId64 ") out of range", info->u.numval);
 		} else {
-		    details->lines = info->numval;
+		    details->lines = info->u.numval;
 		}
 		continue;
 	    }
@@ -212,10 +212,10 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	case 'r':
 	    if (strcmp(key, "runargv") == 0) {
 		if (has_strlistval(info)) {
-		    details->argv = strlist_copy(info->strlistval);
+		    details->argv = strlist_copy(info->u.strlistval);
 		    if (details->argv == NULL)
 			goto done;
-		    details->argc = info->strlistval->n_strings;
+		    details->argc = info->u.strlistval->n_strings;
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runargv specified but not a string list");
@@ -224,7 +224,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "runchroot") == 0) {
 		if (has_strval(info)) {
-		    if ((details->runchroot = strdup(info->strval)) == NULL) {
+		    if ((details->runchroot = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -238,7 +238,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "runcwd") == 0) {
 		if (has_strval(info)) {
-		    if ((details->runcwd = strdup(info->strval)) == NULL) {
+		    if ((details->runcwd = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -252,7 +252,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "runenv") == 0) {
 		if (has_strlistval(info)) {
-		    details->envp = strlist_copy(info->strlistval);
+		    details->envp = strlist_copy(info->u.strlistval);
 		    if (details->envp == NULL)
 			goto done;
 		} else {
@@ -265,17 +265,17 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		if (!has_numval(info)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"rungid specified but not a number");
-		} else if (info->numval < 0 || info->numval > INT_MAX) {
+		} else if (info->u.numval < 0 || info->u.numval > INT_MAX) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"rungid (%" PRId64 ") out of range", info->numval);
+			"rungid (%" PRId64 ") out of range", info->u.numval);
 		} else {
-		    details->rungid = info->numval;
+		    details->rungid = info->u.numval;
 		}
 		continue;
 	    }
 	    if (strcmp(key, "rungroup") == 0) {
 		if (has_strval(info)) {
-		    if ((details->rungroup = strdup(info->strval)) == NULL) {
+		    if ((details->rungroup = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -291,17 +291,17 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		if (!has_numval(info)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runuid specified but not a number");
-		} else if (info->numval < 0 || info->numval > INT_MAX) {
+		} else if (info->u.numval < 0 || info->u.numval > INT_MAX) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"runuid (%" PRId64 ") out of range", info->numval);
+			"runuid (%" PRId64 ") out of range", info->u.numval);
 		} else {
-		    details->runuid = info->numval;
+		    details->runuid = info->u.numval;
 		}
 		continue;
 	    }
 	    if (strcmp(key, "runuser") == 0) {
 		if (has_strval(info)) {
-		    if ((details->runuser = strdup(info->strval)) == NULL) {
+		    if ((details->runuser = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -317,7 +317,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	case 's':
 	    if (strcmp(key, "submitcwd") == 0) {
 		if (has_strval(info)) {
-		    if ((details->cwd = strdup(info->strval)) == NULL) {
+		    if ((details->cwd = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -331,7 +331,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "submitgroup") == 0) {
 		if (has_strval(info)) {
-		    if ((details->submitgroup = strdup(info->strval)) == NULL) {
+		    if ((details->submitgroup = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -345,7 +345,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "submithost") == 0) {
 		if (has_strval(info)) {
-		    if ((details->submithost = strdup(info->strval)) == NULL) {
+		    if ((details->submithost = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -359,7 +359,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "submituser") == 0) {
 		if (has_strval(info)) {
-		    if ((details->submituser = strdup(info->strval)) == NULL) {
+		    if ((details->submituser = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
@@ -375,7 +375,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	case 't':
 	    if (strcmp(key, "ttyname") == 0) {
 		if (has_strval(info)) {
-		    if ((details->ttyname = strdup(info->strval)) == NULL) {
+		    if ((details->ttyname = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");

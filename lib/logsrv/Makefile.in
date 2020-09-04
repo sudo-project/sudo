@@ -111,6 +111,8 @@ $(devdir)/log_server.pb-c.c: $(srcdir)/log_server.proto
 	@if [ -n "$(DEVEL)" ]; then \
 	    cmd='protoc-c --c_out=$(devdir) --proto_path=$(srcdir) $(srcdir)/log_server.proto'; \
 	    echo "$$cmd"; eval $$cmd; \
+	    cmd='$(scriptdir)/unanon $(devdir)/log_server.pb-c.h $(devdir)/log_server.pb-c.c'; \
+	    echo "$$cmd"; eval $$cmd; \
 	    if [ "$(devdir)" == "$(srcdir)" ]; then \
 		cmd='mv -f $(devdir)/log_server.pb-c.h $(incdir)/log_server.pb-c.h'; \
 	    else \

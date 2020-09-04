@@ -733,7 +733,7 @@ fmt_client_hello(struct client_closure *closure)
     hello_msg.client_id = "sudoers " PACKAGE_VERSION;
 
     /* Schedule ClientMessage */
-    client_msg.hello_msg = &hello_msg;
+    client_msg.u.hello_msg = &hello_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;
     ret = fmt_client_message(closure, &client_msg);
 
@@ -805,38 +805,38 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO: clientsid */
 
     accept_msg.info_msgs[n]->key = "columns";
-    accept_msg.info_msgs[n]->numval = details->cols;
+    accept_msg.info_msgs[n]->u.numval = details->cols;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "command";
-    accept_msg.info_msgs[n]->strval = (char *)details->command;
+    accept_msg.info_msgs[n]->u.strval = (char *)details->command;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "lines";
-    accept_msg.info_msgs[n]->numval = details->lines;
+    accept_msg.info_msgs[n]->u.numval = details->lines;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "runargv";
-    accept_msg.info_msgs[n]->strlistval = &runargv;
+    accept_msg.info_msgs[n]->u.strlistval = &runargv;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "runenv";
-    accept_msg.info_msgs[n]->strlistval = &runenv;
+    accept_msg.info_msgs[n]->u.strlistval = &runenv;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     n++;
 
     if (details->runas_gr!= NULL) {
 	accept_msg.info_msgs[n]->key = "rungid";
-	accept_msg.info_msgs[n]->numval = details->runas_gr->gr_gid;
+	accept_msg.info_msgs[n]->u.numval = details->runas_gr->gr_gid;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
 	n++;
 
 	accept_msg.info_msgs[n]->key = "rungroup";
-	accept_msg.info_msgs[n]->strval = details->runas_gr->gr_name;
+	accept_msg.info_msgs[n]->u.strval = details->runas_gr->gr_name;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
@@ -845,32 +845,32 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO - rungroups */
 
     accept_msg.info_msgs[n]->key = "runuid";
-    accept_msg.info_msgs[n]->numval = details->runas_pw->pw_uid;
+    accept_msg.info_msgs[n]->u.numval = details->runas_pw->pw_uid;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "runuser";
-    accept_msg.info_msgs[n]->strval = details->runas_pw->pw_name;
+    accept_msg.info_msgs[n]->u.strval = details->runas_pw->pw_name;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     if (details->cwd != NULL) {
 	accept_msg.info_msgs[n]->key = "submitcwd";
-	accept_msg.info_msgs[n]->strval = (char *)details->cwd;
+	accept_msg.info_msgs[n]->u.strval = (char *)details->cwd;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
 
     if (details->runcwd != NULL) {
 	accept_msg.info_msgs[n]->key = "runcwd";
-	accept_msg.info_msgs[n]->strval = (char *)details->runcwd;
+	accept_msg.info_msgs[n]->u.strval = (char *)details->runcwd;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
 
     if (details->runchroot != NULL) {
 	accept_msg.info_msgs[n]->key = "runchroot";
-	accept_msg.info_msgs[n]->strval = (char *)details->runchroot;
+	accept_msg.info_msgs[n]->u.strval = (char *)details->runchroot;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
@@ -882,20 +882,20 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO - submitgroups */
 
     accept_msg.info_msgs[n]->key = "submithost";
-    accept_msg.info_msgs[n]->strval = (char *)details->host;
+    accept_msg.info_msgs[n]->u.strval = (char *)details->host;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     /* TODO - submituid */
 
     accept_msg.info_msgs[n]->key = "submituser";
-    accept_msg.info_msgs[n]->strval = (char *)details->user;
+    accept_msg.info_msgs[n]->u.strval = (char *)details->user;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     if (details->tty != NULL) {
 	accept_msg.info_msgs[n]->key = "ttyname";
-	accept_msg.info_msgs[n]->strval = (char *)details->tty;
+	accept_msg.info_msgs[n]->u.strval = (char *)details->tty;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
@@ -907,7 +907,7 @@ fmt_accept_message(struct client_closure *closure)
 	"%s: sending AcceptMessage, array length %zu", __func__, n);
 
     /* Schedule ClientMessage */
-    client_msg.accept_msg = &accept_msg;
+    client_msg.u.accept_msg = &accept_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
     ret = fmt_client_message(closure, &client_msg);
 
@@ -1009,7 +1009,7 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
 	exit_msg.dumped_core ? "yes" : "no");
 
     /* Send ClientMessage */
-    client_msg.exit_msg = &exit_msg;
+    client_msg.u.exit_msg = &exit_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
     if (!fmt_client_message(closure, &client_msg))
 	goto done;
@@ -1048,7 +1048,7 @@ fmt_io_buf(struct client_closure *closure, int type, const char *buf,
 	iobuf_msg.data.len, type, io_buffer__get_packed_size(&iobuf_msg));
 
     /* Schedule ClientMessage, it doesn't matter which IoBuffer we set. */
-    client_msg.ttyout_buf = &iobuf_msg;
+    client_msg.u.ttyout_buf = &iobuf_msg;
     client_msg.type_case = type;
     if (!fmt_client_message(closure, &client_msg))
         goto done;
@@ -1085,7 +1085,7 @@ fmt_winsize(struct client_closure *closure, unsigned int lines,
 	__func__, winsize_msg.rows, winsize_msg.cols);
 
     /* Send ClientMessage */
-    client_msg.winsize_event = &winsize_msg;
+    client_msg.u.winsize_event = &winsize_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_WINSIZE_EVENT;
     if (!fmt_client_message(closure, &client_msg))
         goto done;
@@ -1120,7 +1120,7 @@ fmt_suspend(struct client_closure *closure, const char *signame, struct timespec
     	"%s: sending CommandSuspend, SIG%s", __func__, suspend_msg.signal);
 
     /* Send ClientMessage */
-    client_msg.suspend_event = &suspend_msg;
+    client_msg.u.suspend_event = &suspend_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_SUSPEND_EVENT;
     if (!fmt_client_message(closure, &client_msg))
         goto done;
@@ -1365,7 +1365,7 @@ handle_server_message(uint8_t *buf, size_t len,
 
     switch (msg->type_case) {
     case SERVER_MESSAGE__TYPE_HELLO:
-	if (handle_server_hello(msg->hello, closure)) {
+	if (handle_server_hello(msg->u.hello, closure)) {
 	    /* Format and schedule accept message. */
 	    closure->state = SEND_ACCEPT;
 	    if ((ret = fmt_accept_message(closure))) {
@@ -1378,17 +1378,17 @@ handle_server_message(uint8_t *buf, size_t len,
 	}
 	break;
     case SERVER_MESSAGE__TYPE_COMMIT_POINT:
-	ret = handle_commit_point(msg->commit_point, closure);
+	ret = handle_commit_point(msg->u.commit_point, closure);
 	break;
     case SERVER_MESSAGE__TYPE_LOG_ID:
-	ret = handle_log_id(msg->log_id, closure);
+	ret = handle_log_id(msg->u.log_id, closure);
 	break;
     case SERVER_MESSAGE__TYPE_ERROR:
-	ret = handle_server_error(msg->error, closure);
+	ret = handle_server_error(msg->u.error, closure);
 	closure->state = ERROR;
 	break;
     case SERVER_MESSAGE__TYPE_ABORT:
-	ret = handle_server_abort(msg->abort, closure);
+	ret = handle_server_abort(msg->u.abort, closure);
 	closure->state = ERROR;
 	break;
     default:
