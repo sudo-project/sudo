@@ -455,6 +455,14 @@ arc4random_uniform.i: $(srcdir)/arc4random_uniform.c $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 arc4random_uniform.plog: arc4random_uniform.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/arc4random_uniform.c --i-file $< --output-file $@
+cfmakeraw.lo: $(srcdir)/cfmakeraw.c $(incdir)/sudo_compat.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cfmakeraw.c
+cfmakeraw.i: $(srcdir)/cfmakeraw.c $(incdir)/sudo_compat.h \
+              $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+cfmakeraw.plog: cfmakeraw.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/cfmakeraw.c --i-file $< --output-file $@
 closefrom.lo: $(srcdir)/closefrom.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
