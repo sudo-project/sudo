@@ -43,7 +43,7 @@
 # include <security/pam_appl.h>
 #endif
 
-#ifdef __hpux__
+#ifdef __hpux
 # include <nl_types.h>
 #endif
 
@@ -100,7 +100,7 @@ conv_filter_init(void)
 {
     debug_decl(conv_filter_init, SUDOERS_DEBUG_AUTH);
 
-#ifdef __hpux__
+#ifdef __hpux
     /*
      * HP-UX displays last login information as part of either account
      * management (in trusted mode) or session management (regular mode).
@@ -165,7 +165,7 @@ conv_filter_init(void)
 	    conv_filter[nfilt].msglen = 0;
 	}
     }
-#endif /* __hpux__ */
+#endif /* __hpux */
     debug_return;
 }
 
