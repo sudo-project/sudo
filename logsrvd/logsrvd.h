@@ -131,7 +131,7 @@ struct listen_address {
     TAILQ_ENTRY(listen_address) entries;
     char *sa_str;
     union sockaddr_union sa_un;
-    socklen_t sa_len;
+    socklen_t sa_size;
     bool tls;
 };
 TAILQ_HEAD(listen_address_list, listen_address);

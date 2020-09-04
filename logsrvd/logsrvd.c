@@ -1565,7 +1565,7 @@ create_listener(struct listen_address *addr)
 #endif
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
 	sudo_warn("SO_REUSEADDR");
-    if (bind(sock, &addr->sa_un.sa, addr->sa_len) == -1) {
+    if (bind(sock, &addr->sa_un.sa, addr->sa_size) == -1) {
 	/* TODO: only warn once for IPv4 and IPv6 or disambiguate */
 	sudo_warn("%s (%s)", addr->sa_str, family);
 	goto bad;
