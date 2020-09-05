@@ -54,8 +54,8 @@ SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
 
 static struct sudo_fatal_callback_list callbacks = SLIST_HEAD_INITIALIZER(&callbacks);
 static sudo_conv_t sudo_warn_conversation;
-static bool (*sudo_warn_setlocale)(bool, int *);
-static bool (*sudo_warn_setlocale_prev)(bool, int *);
+static sudo_warn_setlocale_t sudo_warn_setlocale;
+static sudo_warn_setlocale_t sudo_warn_setlocale_prev;
 
 static void warning(const char *errstr, const char *fmt, va_list ap);
 
@@ -310,7 +310,7 @@ sudo_warn_set_conversation_v1(sudo_conv_t conv)
  * locale for user warnings.
  */
 void
-sudo_warn_set_locale_func_v1(bool (*func)(bool, int *))
+sudo_warn_set_locale_func_v1(sudo_warn_setlocale_t func)
 {
     sudo_warn_setlocale_prev = sudo_warn_setlocale;
     sudo_warn_setlocale = func;
