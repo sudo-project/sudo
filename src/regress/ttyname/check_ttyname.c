@@ -46,7 +46,8 @@ match_ttys(const char *tty1, const char *tty2)
 	if (strcmp(tty1, tty2) == 0)
 	    return 0;
 	/* Could be the same device with a different name. */
-	if (stat(tty1, &sb1) == 0 && stat(tty2, &sb2) == 0) {
+	if (stat(tty1, &sb1) == 0 && S_ISCHR(sb1.st_mode) &&
+	    stat(tty2, &sb2) == 0 && S_ISCHR(sb2.st_mode)) {
 	    if (sb1.st_rdev == sb2.st_rdev)
 		return 0;
 	}
