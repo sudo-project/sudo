@@ -1717,6 +1717,19 @@ aix4.[[23]]|aix4.[[23]].*|aix[[5-9]]*)
 esac
 
 dnl
+dnl On HP-UX 11.11 and higher (and hiuxmpp) we prefer dlopen()
+dnl over shl_load().  Libtool defaults to shl_load() so we need
+dnl to prime the cache to override that default.
+dnl
+case "$host_os" in
+hiuxmpp*|hpux11.1[[1-9]]|hpux11.[[2-9]][[0-9]]|hpux1[[2-9]].*)
+    # Prefer dlopen() over shl_load()
+    : ${ac_cv_func_shl_load='no'}
+    : ${ac_cv_lib_dld_shl_load='no'}
+    ;;
+esac
+
+dnl
 dnl Libtool init, we require libtool 2.2.6b or higher
 dnl
 LT_PREREQ([2.2.6b])

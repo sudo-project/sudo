@@ -7263,6 +7263,14 @@ fi
     ;;
 esac
 
+case "$host_os" in
+hiuxmpp*|hpux11.1[1-9]|hpux11.[2-9][0-9]|hpux1[2-9].*)
+    # Prefer dlopen() over shl_load()
+    : ${ac_cv_func_shl_load='no'}
+    : ${ac_cv_lib_dld_shl_load='no'}
+    ;;
+esac
+
 
 case `pwd` in
   *\ * | *\	*)
