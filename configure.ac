@@ -4416,7 +4416,7 @@ EOF
 		    if test -n "$GCC"; then
 			LDFLAGS="$LDFLAGS -shared -Wl,-c,./conftest.opt"
 		    else
-			LDFLAGS="$LDFLAGS -Wl,-b -Wl,-c,./conftest.opt"
+			LDFLAGS="$LDFLAGS -b -Wl,-c,./conftest.opt"
 		    fi
 		    AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
 			[sudo_cv_var_hpux_ld_symbol_export=yes])

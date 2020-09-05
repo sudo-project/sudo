@@ -27250,7 +27250,7 @@ else
 		    if test -n "$GCC"; then
 			LDFLAGS="$LDFLAGS -shared -Wl,-c,./conftest.opt"
 		    else
-			LDFLAGS="$LDFLAGS -Wl,-b -Wl,-c,./conftest.opt"
+			LDFLAGS="$LDFLAGS -b -Wl,-c,./conftest.opt"
 		    fi
 		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
