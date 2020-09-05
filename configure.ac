@@ -4329,10 +4329,29 @@ else
     case "$host_os" in
 	hpux*)
 	    AX_CHECK_COMPILE_FLAG([-Bhidden_def], [
-		AC_DEFINE(HAVE_DSO_VISIBILITY)
-		CFLAGS="${CFLAGS} -Bhidden_def"
-		LT_LDEXPORTS=
-		LT_LDDEP=
+		# HP-UX cc may not allow __declspec(dllexport) to be
+		# used in conjunction with #pragma HP_DEFINED_EXTERNAL
+		# when redefining standard libc functions.
+		AC_CACHE_CHECK([whether __declspec(dllexport) can be used when overriding libc functions],
+		    [sudo_cv_var_hpux_declspec_libc_function],
+		    [
+			_CFLAGS="$CFLAGS"
+			CFLAGS="${CFLAGS} -Bhidden_def"
+			AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <stdlib.h>
+	__declspec(dllexport) char * getenv(const char *n) { return NULL; }]])], [
+			    sudo_cv_var_hpux_declspec_libc_function=yes
+			], [
+			    sudo_cv_var_hpux_declspec_libc_function=no
+			])
+			CFLAGS="$_CFLAGS"
+		    ]
+		)
+		if test "$sudo_cv_var_hpux_declspec_libc_function" = "yes"; then
+		    AC_DEFINE(HAVE_DSO_VISIBILITY)
+		    CFLAGS="${CFLAGS} -Bhidden_def"
+		    LT_LDEXPORTS=
+		    LT_LDDEP=
+		fi
 	    ])
 	    ;;
 	solaris2*)
