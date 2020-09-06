@@ -26718,7 +26718,7 @@ EOF
 $as_echo_n "checking for sudo run dir location... " >&6; }
 if test -n "$with_rundir"; then
     rundir="$with_rundir"
-elif test "$runstatedir" != '${localstatedir}/run'; then
+elif test -n "$runstatedir" && test "$runstatedir" != '${localstatedir}/run'; then
     rundir="$runstatedir/sudo"
 else
     # No --with-rundir or --runstatedir specified

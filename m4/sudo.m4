@@ -120,7 +120,7 @@ dnl
 AC_DEFUN([SUDO_RUNDIR], [AC_MSG_CHECKING(for sudo run dir location)
 if test -n "$with_rundir"; then
     rundir="$with_rundir"
-elif test "$runstatedir" != '${localstatedir}/run'; then
+elif test -n "$runstatedir" && test "$runstatedir" != '${localstatedir}/run'; then
     rundir="$runstatedir/sudo"
 else
     # No --with-rundir or --runstatedir specified
