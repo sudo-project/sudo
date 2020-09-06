@@ -2312,6 +2312,26 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
+    *-*-*sco3.2*)	# SCO OpenServer 5
+		: ${mansectsu='1'}
+		: ${mansectform='4'}
+		shadow_funcs="getprpwnam"
+		shadow_libs="-lprot"
+		;;
+# UnixWare 7.x, OpenUNIX 8
+    *-*-*sysv5*)
+		: ${mansectsu='1'}
+		: ${mansectform='4'}
+	case "$host" in
+	*-*-sysv5SCO_SV*)	# SCO OpenServer 6.x
+		shadow_funcs="getprpwnam"
+		shadow_libs="-lprot"
+		;;
+	*)	shadow_funcs="getspnam"
+		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
+		;;
+	esac
+		;;
     *-*-sysv*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
