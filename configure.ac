@@ -2945,7 +2945,7 @@ AC_CHECK_FUNCS([getopt_long], [], [
     AC_MSG_RESULT($sudo_cv_optreset)
 ])
 AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
-    SUDO_APPEND_COMPAT_EXP(closefrom_fallback sudo_closefrom)
+    SUDO_APPEND_COMPAT_EXP(sudo_closefrom)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [], [
 #	include <limits.h>
 #	include <fcntl.h> ])

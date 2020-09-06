@@ -21295,7 +21295,7 @@ else
 esac
 
 
-    for _sym in closefrom_fallback sudo_closefrom; do
+    for _sym in sudo_closefrom; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
