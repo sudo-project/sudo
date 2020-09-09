@@ -336,7 +336,8 @@ main(int argc, char *argv[])
 			cs->runasuserlist, cs->runasgrouplist, NULL, NULL);
 		    if (runas_match == ALLOW) {
 			puts("\trunas matched");
-			cmnd_match = cmnd_matches(&parsed_policy, cs->cmnd);
+			cmnd_match = cmnd_matches(&parsed_policy, cs->cmnd,
+			    cs->runchroot);
 			if (cmnd_match != UNSPEC)
 			    match = cmnd_match;
 			printf("\tcmnd  %s\n", match == ALLOW ? "allowed" :
@@ -497,6 +498,12 @@ bool
 restore_perms(void)
 {
     return true;
+}
+
+int
+set_cmnd_path(const char *runchroot)
+{
+    return FOUND;
 }
 
 static bool

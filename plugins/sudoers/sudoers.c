@@ -275,6 +275,59 @@ done:
     debug_return_str(iolog_path);
 }
 
+static int
+check_runchroot(void)
+{
+    debug_decl(check_runchroot, SUDOERS_DEBUG_PLUGIN);
+
+    if (user_runchroot == NULL)
+	debug_return_bool(true);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"def_runchroot %s, user_runchroot %s",
+	def_runchroot ? def_runchroot : "NULL", user_runchroot);
+
+    if (def_runchroot == NULL || (strcmp(def_runchroot, "*") != 0 &&
+	    strcmp(def_runchroot, user_runchroot) != 0)) {
+	audit_failure(NewArgv,
+	    N_("user not allowed to change root directory to %s"),
+	    user_runchroot);
+	sudo_warnx("%s", U_("you are not permitted to use the -R option"));
+	debug_return_bool(false);
+    }
+    free(def_runchroot);
+    if ((def_runchroot = strdup(user_runchroot)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(-1);
+    }
+    debug_return_bool(true);
+}
+
+static int
+check_runcwd(void)
+{
+    debug_decl(check_runcwd, SUDOERS_DEBUG_PLUGIN);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"def_runcwd %s, user_runcwd %s, user_cwd %s",
+	def_runcwd, user_runcwd, user_cwd);
+
+    if (strcmp(user_cwd, user_runcwd) != 0) {
+	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
+	    audit_failure(NewArgv,
+		N_("user not allowed to change directory to %s"), user_runcwd);
+	    sudo_warnx("%s", U_("you are not permitted to use the -D option"));
+	    debug_return_bool(false);
+	}
+	free(def_runcwd);
+	if ((def_runcwd = strdup(user_runcwd)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_int(-1);
+	}
+    }
+    debug_return_bool(true);
+}
+
 int
 sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     bool verbose, void *closure)
@@ -396,32 +449,24 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-    if (user_runchroot != NULL) {
-	if (def_runchroot == NULL || strcmp(def_runchroot, "*") != 0) {
-	    audit_failure(NewArgv,
-		N_("user not allowed to change root directory to %s"),
-		user_runchroot);
-	    sudo_warnx("%s", U_("you are not permitted to use the -R option"));
-	    goto bad;
-	}
-	free(def_runchroot);
-	if ((def_runchroot = strdup(user_runchroot)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
+    /* Check whether user_runchroot is permitted (if specified). */
+    switch (check_runchroot()) {
+    case true:
+	break;
+    case false:
+	goto bad;
+    default:
+	goto done;
     }
-    if (strcmp(user_cwd, user_runcwd) != 0) {
-	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
-	    audit_failure(NewArgv,
-		N_("user not allowed to change directory to %s"), user_runcwd);
-	    sudo_warnx("%s", U_("you are not permitted to use the -D option"));
-	    goto bad;
-	}
-	free(def_runcwd);
-	if ((def_runcwd = strdup(user_runcwd)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
+
+    /* Check whether user_runcwd is permitted (if specified). */
+    switch (check_runcwd()) {
+    case true:
+	break;
+    case false:
+	goto bad;
+    default:
+	goto done;
     }
 
     /*
@@ -862,6 +907,38 @@ init_vars(char * const envp[])
 }
 
 /*
+ * Fill in user_cmnd and user_stat variables.
+ * Does not fill in user_base.
+ */
+int
+set_cmnd_path(const char *runchroot)
+{
+    char *path = user_path;
+    int ret;
+    debug_decl(set_cmnd_path, SUDOERS_DEBUG_PLUGIN);
+
+    if (def_secure_path && !user_is_exempt())
+	path = def_secure_path;
+    if (!set_perms(PERM_RUNAS))
+	debug_return_int(NOT_FOUND_ERROR);
+    ret = find_path(NewArgv[0], &user_cmnd, user_stat, path,
+	runchroot, def_ignore_dot, NULL);
+    if (!restore_perms())
+	debug_return_int(NOT_FOUND_ERROR);
+    if (ret == NOT_FOUND) {
+	/* Failed as root, try as invoking user. */
+	if (!set_perms(PERM_USER))
+	    debug_return_int(false);
+	ret = find_path(NewArgv[0], &user_cmnd, user_stat, path,
+	    runchroot, def_ignore_dot, NULL);
+	if (!restore_perms())
+	    debug_return_int(NOT_FOUND_ERROR);
+    }
+
+    debug_return_int(ret);
+}
+
+/*
  * Fill in user_cmnd, user_args, user_base and user_stat variables
  * and apply any command-specific defaults entries.
  */
@@ -869,7 +946,6 @@ static int
 set_cmnd(void)
 {
     struct sudo_nss *nss;
-    char *path = user_path;
     int ret = FOUND;
     debug_decl(set_cmnd, SUDOERS_DEBUG_PLUGIN);
 
@@ -886,23 +962,12 @@ set_cmnd(void)
 
     if (sudo_mode & (MODE_RUN | MODE_EDIT | MODE_CHECK)) {
 	if (ISSET(sudo_mode, MODE_RUN | MODE_CHECK)) {
-	    if (def_secure_path && !user_is_exempt())
-		path = def_secure_path;
-	    if (!set_perms(PERM_RUNAS))
-		debug_return_int(-1);
-	    ret = find_path(NewArgv[0], &user_cmnd, user_stat, path,
-		def_ignore_dot, NULL);
-	    if (!restore_perms())
-		debug_return_int(-1);
-	    if (ret == NOT_FOUND) {
-		/* Failed as root, try as invoking user. */
-		if (!set_perms(PERM_USER))
-		    debug_return_int(-1);
-		ret = find_path(NewArgv[0], &user_cmnd, user_stat, path,
-		    def_ignore_dot, NULL);
-		if (!restore_perms())
-		    debug_return_int(-1);
-	    }
+	    const char *runchroot = user_runchroot;
+	    if (runchroot == NULL && def_runchroot != NULL &&
+		    strcmp(def_runchroot, "*") != 0)
+		runchroot = def_runchroot;
+
+	    ret = set_cmnd_path(runchroot);
 	    if (ret == NOT_FOUND_ERROR) {
 		if (errno == ENAMETOOLONG) {
 		    audit_failure(NewArgv, N_("command too long"));
@@ -922,7 +987,7 @@ set_cmnd(void)
 		size += strlen(*av) + 1;
 	    if (size == 0 || (user_args = malloc(size)) == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		debug_return_int(-1);
+		debug_return_int(NOT_FOUND_ERROR);
 	    }
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL)) {
 		/*
@@ -944,7 +1009,7 @@ set_cmnd(void)
 		    n = strlcpy(to, *av, size - (to - user_args));
 		    if (n >= size - (to - user_args)) {
 			sudo_warnx(U_("internal error, %s overflow"), __func__);
-			debug_return_int(-1);
+			debug_return_int(NOT_FOUND_ERROR);
 		    }
 		    to += n;
 		    *to++ = ' ';

@@ -92,7 +92,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 		    /* Only check the command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
-			cmnd_matches(nss->parse_tree, cs->cmnd) == ALLOW)
+			cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot) == ALLOW)
 			    match = ALLOW;
 		}
 	    }
@@ -146,7 +146,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 		    cs->runasuserlist, cs->runasgrouplist, &matching_user,
 		    NULL);
 		if (runas_match == ALLOW) {
-		    cmnd_match = cmnd_matches(nss->parse_tree, cs->cmnd);
+		    cmnd_match = cmnd_matches(nss->parse_tree, cs->cmnd,
+			cs->runchroot);
 		    if (cmnd_match != UNSPEC) {
 			/*
 			 * If user is running command as himself,
@@ -196,6 +197,8 @@ apply_cmndspec(struct cmndspec *cs)
 	    } else {
 		user_role = def_role;
 	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"user_role -> %s", user_role);
 	}
 	if (user_type == NULL) {
 	    if (cs->type != NULL) {
@@ -208,6 +211,8 @@ apply_cmndspec(struct cmndspec *cs)
 	    } else {
 		user_type = def_type;
 	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"user_type -> %s", user_type);
 	}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
@@ -223,6 +228,8 @@ apply_cmndspec(struct cmndspec *cs)
 	    } else {
 		runas_privs = def_privs;
 	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"runas_privs -> %s", runas_privs);
 	}
 	if (runas_limitprivs == NULL) {
 	    if (cs->limitprivs != NULL) {
@@ -235,10 +242,15 @@ apply_cmndspec(struct cmndspec *cs)
 	    } else {
 		runas_limitprivs = def_limitprivs;
 	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"runas_limitprivs -> %s", runas_limitprivs);
 	}
 #endif /* HAVE_PRIV_SET */
-	if (cs->timeout > 0)
+	if (cs->timeout > 0) {
 	    def_command_timeout = cs->timeout;
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_command_timeout -> %d", def_command_timeout);
+	}
 	if (cs->runcwd != NULL) {
 	    free(def_runcwd);
 	    def_runcwd = strdup(cs->runcwd);
@@ -247,6 +259,8 @@ apply_cmndspec(struct cmndspec *cs)
 		    U_("unable to allocate memory"));
 		debug_return_bool(false);
 	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_runcwd -> %s", def_runcwd);
 	}
 	if (cs->runchroot != NULL) {
 	    free(def_runchroot);
@@ -256,28 +270,53 @@ apply_cmndspec(struct cmndspec *cs)
 		    U_("unable to allocate memory"));
 		debug_return_bool(false);
 	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_runchroot -> %s", def_runchroot);
 	}
-	if (cs->tags.nopasswd != UNSPEC)
+	if (cs->tags.nopasswd != UNSPEC) {
 	    def_authenticate = !cs->tags.nopasswd;
-	if (cs->tags.noexec != UNSPEC)
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_authenticate -> %s", def_authenticate ? "true" : "false");
+	}
+	if (cs->tags.noexec != UNSPEC) {
 	    def_noexec = cs->tags.noexec;
-	if (cs->tags.setenv != UNSPEC)
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_noexec -> %s", def_noexec ? "true" : "false");
+	}
+	if (cs->tags.setenv != UNSPEC) {
 	    def_setenv = cs->tags.setenv;
-	if (cs->tags.log_input != UNSPEC)
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_setenv -> %s", def_setenv ? "true" : "false");
+	}
+	if (cs->tags.log_input != UNSPEC) {
 	    def_log_input = cs->tags.log_input;
-	if (cs->tags.log_output != UNSPEC)
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_log_input -> %s", def_log_input ? "true" : "false");
+	}
+	if (cs->tags.log_output != UNSPEC) {
 	    def_log_output = cs->tags.log_output;
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_log_output -> %s", def_log_output ? "true" : "false");
+	}
 	if (cs->tags.send_mail != UNSPEC) {
 	    if (cs->tags.send_mail) {
 		def_mail_all_cmnds = true;
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "def_mail_all_cmnds -> true");
 	    } else {
 		def_mail_all_cmnds = false;
 		def_mail_always = false;
 		def_mail_no_perms = false;
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "def_mail_all_cmnds -> false, def_mail_always -> false, "
+		    "def_mail_no_perms -> false");
 	    }
 	}
-	if (cs->tags.follow != UNSPEC)
+	if (cs->tags.follow != UNSPEC) {
 	    def_sudoedit_follow = cs->tags.follow;
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_sudoedit_follow -> %s", def_sudoedit_follow ? "true" : "false");
+	}
     }
 
     debug_return_bool(true);
@@ -836,7 +875,8 @@ display_cmnd_check(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		runas_match = runaslist_matches(parse_tree, cs->runasuserlist,
 		    cs->runasgrouplist, NULL, NULL);
 		if (runas_match == ALLOW) {
-		    cmnd_match = cmnd_matches(parse_tree, cs->cmnd);
+		    cmnd_match = cmnd_matches(parse_tree, cs->cmnd,
+			cs->runchroot);
 		    if (cmnd_match != UNSPEC)
 			debug_return_int(cmnd_match);
 		}

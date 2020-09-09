@@ -312,7 +312,7 @@ void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 bool addr_matches(char *n);
 
 /* match_command.c */
-bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest_list *digests);
+bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const char *runchroot, const struct command_digest_list *digests);
 
 /* match_digest.c */
 bool digest_matches(int fd, const char *file, const struct command_digest_list *digests);
@@ -325,8 +325,8 @@ bool hostname_matches(const char *shost, const char *lhost, const char *pattern)
 bool netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user);
 bool usergr_matches(const char *group, const char *user, const struct passwd *pw);
 bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
-int cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m);
-int cmndlist_matches(struct sudoers_parse_tree *parse_tree, const struct member_list *list);
+int cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot);
+int cmndlist_matches(struct sudoers_parse_tree *parse_tree, const struct member_list *list, const char *runchroot);
 int host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const char *host, const char *shost, const struct member *m);
 int hostlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
 int runaslist_matches(struct sudoers_parse_tree *parse_tree, const struct member_list *user_list, const struct member_list *group_list, struct member **matching_user, struct member **matching_group);

@@ -263,11 +263,12 @@ struct timespec;
 #define YY_DECL int sudoerslex(void)
 
 /* goodpath.c */
-bool sudo_goodpath(const char *path, struct stat *sbp);
+bool sudo_goodpath(const char *path, const char *runchroot, struct stat *sbp);
 
 /* findpath.c */
 int find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, int ignore_dot, char * const *whitelist);
+    const char *path, const char *runchroot, int ignore_dot,
+    char * const *whitelist);
 
 /* check.c */
 int check_user(int validate, int mode);
@@ -394,6 +395,7 @@ bool matches_env_pattern(const char *pattern, const char *var, bool *full_match)
 
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
+int set_cmnd_path(const char *runchroot);
 int sudoers_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
