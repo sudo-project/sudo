@@ -92,7 +92,8 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 		    /* Only check the command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
-			cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot) == ALLOW)
+			cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot,
+			NULL) == ALLOW)
 			    match = ALLOW;
 		}
 	    }
@@ -112,7 +113,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 
 static int
 sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
-    int *validated, struct cmndspec **matching_cs,
+    int *validated, struct cmnd_info *info, struct cmndspec **matching_cs,
     struct defaults_list **defs, time_t now)
 {
     int host_match, runas_match, cmnd_match;
@@ -121,6 +122,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
     struct userspec *us;
     struct member *matching_user;
     debug_decl(sudoers_lookup_check, SUDOERS_DEBUG_PARSER);
+
+    memset(info, 0, sizeof(*info));
 
     TAILQ_FOREACH_REVERSE(us, &nss->parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(nss->parse_tree, pw, &us->users) != ALLOW)
@@ -147,7 +150,7 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 		    NULL);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(nss->parse_tree, cs->cmnd,
-			cs->runchroot);
+			cs->runchroot, info);
 		    if (cmnd_match != UNSPEC) {
 			/*
 			 * If user is running command as himself,
@@ -167,6 +170,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 			    cmnd_match ? "allowed" : "denied");
 			debug_return_int(cmnd_match);
 		    }
+		    free(info->cmnd_path);
+		    memset(info, 0, sizeof(*info));
 		}
 	    }
 	}
@@ -327,13 +332,15 @@ apply_cmndspec(struct cmndspec *cs)
  * allowed to run the specified command on this host as the target user.
  */
 int
-sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated,
+sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
     int pwflag)
 {
     struct defaults_list *defs = NULL;
     struct sudoers_parse_tree *parse_tree = NULL;
     struct cmndspec *cs = NULL;
     struct sudo_nss *nss;
+    struct cmnd_info info;
+    int validated = FLAG_NO_USER | FLAG_NO_HOST;
     int m, match = UNSPEC;
     time_t now;
     debug_decl(sudoers_lookup, SUDOERS_DEBUG_PARSER);
@@ -357,7 +364,7 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated,
 	    break;
 	}
 
-	m = sudoers_lookup_check(nss, pw, &validated, &cs, &defs, now);
+	m = sudoers_lookup_check(nss, pw, &validated, &info, &cs, &defs, now);
 	if (m != UNSPEC) {
 	    match = m;
 	    parse_tree = nss->parse_tree;
@@ -367,6 +374,14 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated,
 	    break;
     }
     if (match != UNSPEC) {
+	if (info.cmnd_path != NULL) {
+	    /* Update user_cmnd, user_stat, cmnd_status from matching entry. */
+	    free(user_cmnd);
+	    user_cmnd = info.cmnd_path;
+	    if (user_stat != NULL)
+		*user_stat = info.cmnd_stat;
+	    *cmnd_status = info.status;
+	}
 	if (defs != NULL)
 	    update_defaults(parse_tree, defs, SETDEF_GENERIC, false);
 	if (!apply_cmndspec(cs))
@@ -876,7 +891,7 @@ display_cmnd_check(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    cs->runasgrouplist, NULL, NULL);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(parse_tree, cs->cmnd,
-			cs->runchroot);
+			cs->runchroot, NULL);
 		    if (cmnd_match != UNSPEC)
 			debug_return_int(cmnd_match);
 		}

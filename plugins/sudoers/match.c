@@ -366,14 +366,15 @@ host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
  */
 int
 cmndlist_matches(struct sudoers_parse_tree *parse_tree,
-    const struct member_list *list, const char *runchroot)
+    const struct member_list *list, const char *runchroot,
+    struct cmnd_info *info)
 {
     struct member *m;
     int matched = UNSPEC;
     debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH);
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	matched = cmnd_matches(parse_tree, m, runchroot);
+	matched = cmnd_matches(parse_tree, m, runchroot, info);
 	if (matched != UNSPEC)
 	    break;
     }
@@ -386,7 +387,7 @@ cmndlist_matches(struct sudoers_parse_tree *parse_tree,
  */
 int
 cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m,
-    const char *runchroot)
+    const char *runchroot, struct cmnd_info *info)
 {
     struct alias *a;
     struct sudo_command *c;
@@ -402,13 +403,13 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m,
 	    FALLTHROUGH;
 	case COMMAND:
 	    c = (struct sudo_command *)m->name;
-	    if (command_matches(c->cmnd, c->args, runchroot, &c->digests))
+	    if (command_matches(c->cmnd, c->args, runchroot, info, &c->digests))
 		matched = !m->negated;
 	    break;
 	case ALIAS:
 	    a = alias_get(parse_tree, m->name, CMNDALIAS);
 	    if (a != NULL) {
-		rc = cmndlist_matches(parse_tree, &a->members, runchroot);
+		rc = cmndlist_matches(parse_tree, &a->members, runchroot, info);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);

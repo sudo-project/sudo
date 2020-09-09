@@ -337,7 +337,7 @@ main(int argc, char *argv[])
 		    if (runas_match == ALLOW) {
 			puts("\trunas matched");
 			cmnd_match = cmnd_matches(&parsed_policy, cs->cmnd,
-			    cs->runchroot);
+			    cs->runchroot, NULL);
 			if (cmnd_match != UNSPEC)
 			    match = cmnd_match;
 			printf("\tcmnd  %s\n", match == ALLOW ? "allowed" :

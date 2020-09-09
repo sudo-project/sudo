@@ -528,8 +528,10 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 
     /* If it ends in '/' it is a directory spec. */
     dlen = strlen(sudoers_cmnd);
-    if (sudoers_cmnd[dlen - 1] == '/')
-	debug_return_bool(command_matches_dir(sudoers_cmnd, dlen, runchroot, digests));
+    if (sudoers_cmnd[dlen - 1] == '/') {
+	debug_return_bool(command_matches_dir(sudoers_cmnd, dlen, runchroot,
+	    digests));
+    }
 
     /* Only proceed if user_base and basename(sudoers_cmnd) match */
     if ((base = strrchr(sudoers_cmnd, '/')) == NULL)
@@ -584,7 +586,8 @@ bad:
  */
 bool
 command_matches(const char *sudoers_cmnd, const char *sudoers_args,
-    const char *runchroot, const struct command_digest_list *digests)
+    const char *runchroot, struct cmnd_info *info,
+    const struct command_digest_list *digests)
 {
     char *saved_user_cmnd = NULL;
     struct stat saved_user_stat;
@@ -605,11 +608,16 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
 	    runchroot = def_runchroot;
     } else {
 	/* Rule-specific runchroot, reset user_cmnd and user_stat. */
+	int status;
+
 	saved_user_cmnd = user_cmnd;
 	if (user_stat != NULL)
 	    saved_user_stat = *user_stat;
-	if (set_cmnd_path(runchroot) != FOUND)
+	status = set_cmnd_path(runchroot);
+	if (status != FOUND)
 	    saved_user_cmnd = NULL;
+	if (info != NULL)
+	    info->status = status;
     }
 
     if (sudoers_cmnd == NULL) {
@@ -648,7 +656,13 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
     }
 done:
     if (saved_user_cmnd != NULL) {
-	free(user_cmnd);
+	if (info != NULL) {
+	    info->cmnd_path = user_cmnd;
+	    if (user_stat != NULL)
+		info->cmnd_stat = *user_stat;
+	} else {
+	    free(user_cmnd);
+	}
 	user_cmnd = saved_user_cmnd;
 	if (user_stat != NULL)
 	    *user_stat = saved_user_stat;

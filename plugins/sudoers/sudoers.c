@@ -418,8 +418,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * Check sudoers sources, using the locale specified in sudoers.
      */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-    validated = sudoers_lookup(snl, sudo_user.pw, FLAG_NO_USER | FLAG_NO_HOST,
-	pwflag);
+    validated = sudoers_lookup(snl, sudo_user.pw, &cmnd_status, pwflag);
     if (ISSET(validated, VALIDATE_ERROR)) {
 	/* The lookup function should have printed an error. */
 	goto done;
