@@ -73,6 +73,7 @@ static bool cb_fqdn(const union sudo_defs_val *);
 static bool cb_runas_default(const union sudo_defs_val *);
 static bool cb_tty_tickets(const union sudo_defs_val *);
 static bool cb_umask(const union sudo_defs_val *);
+static bool cb_runchroot(const union sudo_defs_val *);
 static int set_cmnd(void);
 static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
@@ -100,6 +101,7 @@ static char *runas_group;
 static struct sudo_nss_list *snl;
 static bool unknown_runas_uid;
 static bool unknown_runas_gid;
+static int cmnd_status = -1;
 
 #ifdef __linux__
 static struct rlimit nproclimit;
@@ -276,9 +278,9 @@ done:
 }
 
 static int
-check_runchroot(void)
+check_user_runchroot(void)
 {
-    debug_decl(check_runchroot, SUDOERS_DEBUG_PLUGIN);
+    debug_decl(check_user_runchroot, SUDOERS_DEBUG_PLUGIN);
 
     if (user_runchroot == NULL)
 	debug_return_bool(true);
@@ -292,7 +294,8 @@ check_runchroot(void)
 	audit_failure(NewArgv,
 	    N_("user not allowed to change root directory to %s"),
 	    user_runchroot);
-	sudo_warnx("%s", U_("you are not permitted to use the -R option"));
+	sudo_warnx(U_("you are not permitted to use the -R option with %s"),
+	    user_cmnd);
 	debug_return_bool(false);
     }
     free(def_runchroot);
@@ -304,9 +307,9 @@ check_runchroot(void)
 }
 
 static int
-check_runcwd(void)
+check_user_runcwd(void)
 {
-    debug_decl(check_runcwd, SUDOERS_DEBUG_PLUGIN);
+    debug_decl(check_user_runcwd, SUDOERS_DEBUG_PLUGIN);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"def_runcwd %s, user_runcwd %s, user_cwd %s",
@@ -316,7 +319,8 @@ check_runcwd(void)
 	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
 	    audit_failure(NewArgv,
 		N_("user not allowed to change directory to %s"), user_runcwd);
-	    sudo_warnx("%s", U_("you are not permitted to use the -D option"));
+	    sudo_warnx(U_("you are not permitted to use the -D option with %s"),
+		user_cmnd);
 	    debug_return_bool(false);
 	}
 	free(def_runcwd);
@@ -335,8 +339,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char *iolog_path = NULL;
     mode_t cmnd_umask = ACCESSPERMS;
     struct sudo_nss *nss;
-    int cmnd_status = -1, oldlocale, validated;
-    int ret = -1;
+    int oldlocale, validated, ret = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN);
 
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
@@ -448,26 +451,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-    /* Check whether user_runchroot is permitted (if specified). */
-    switch (check_runchroot()) {
-    case true:
-	break;
-    case false:
-	goto bad;
-    default:
-	goto done;
-    }
-
-    /* Check whether user_runcwd is permitted (if specified). */
-    switch (check_runcwd()) {
-    case true:
-	break;
-    case false:
-	goto bad;
-    default:
-	goto done;
-    }
-
     /*
      * Look up the timestamp dir owner if one is specified.
      */
@@ -545,6 +528,26 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	goto bad;
     default:
 	/* some other error, ret is -1. */
+	goto done;
+    }
+
+    /* Check whether user_runchroot is permitted (if specified). */
+    switch (check_user_runchroot()) {
+    case true:
+	break;
+    case false:
+	goto bad;
+    default:
+	goto done;
+    }
+
+    /* Check whether user_runcwd is permitted (if specified). */
+    switch (check_user_runcwd()) {
+    case true:
+	break;
+    case false:
+	goto bad;
+    default:
 	goto done;
     }
 
@@ -879,6 +882,9 @@ init_vars(char * const envp[])
 
     /* Set umask callback. */
     sudo_defs_table[I_UMASK].callback = cb_umask;
+
+    /* Set runchroot callback. */
+    sudo_defs_table[I_RUNCHROOT].callback = cb_runchroot;
 
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
@@ -1415,6 +1421,26 @@ cb_umask(const union sudo_defs_val *sd_un)
 
     /* Force umask if explicitly set in sudoers. */
     force_umask = sd_un->mode != ACCESSPERMS;
+
+    debug_return_bool(true);
+}
+
+/*
+ * Callback for runchroot sudoers setting.
+ */
+static bool
+cb_runchroot(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_runchroot, SUDOERS_DEBUG_PLUGIN);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"def_runchroot now %s", sd_un->str);
+    if (user_cmnd != NULL) {
+	/* Update user_cmnd based on the new chroot. */
+	cmnd_status = set_cmnd_path(sd_un->str);
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user_cmnd now %s", user_cmnd);
+    }
 
     debug_return_bool(true);
 }
