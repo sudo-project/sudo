@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 1, 2020
+.Dd September 9, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1476,7 +1476,7 @@ indicates that the user may specify the root directory by running
 .Nm sudo
 with the
 .Fl R
-option .
+option.
 This setting can be used to run the command in a
 .Xr chroot 2
 .Dq sandbox
@@ -4192,6 +4192,16 @@ See the
 .Sx Chroot_Spec
 section for more details.
 .Pp
+It is only possible to use
+.Em runchroot
+as a command-specific Defaults setting if the command exists with
+the same path both inside and outside the chroot jail.
+This restriction does not apply to generic, host or user-based
+Defaults settings or to a
+.Em Cmnd_Spec
+that includes a
+.Em Chroot_Spec .
+.Pp
 This setting is only supported by version 1.9.3 or higher.
 .It runcwd
 If set,
@@ -5132,12 +5142,19 @@ to log via
 .Xr syslog 3
 using the
 .Em auth
-facility in all cases.
+facility in all cases and for commands to be run with
+the target user's home directory as the working directory.
 We don't want to subject the full time staff to the
 .Nm sudo
-lecture, user
+lecture and we want to allow them to run commands in a
+.Xr chroot 2
+.Dq sandbox
+via the
+.Fl R
+option.
+User
 .Sy millert
-need not give a password, and we don't want to reset the
+need not provide a password and we don't want to reset the
 .Ev LOGNAME
 or
 .Ev USER
@@ -5161,9 +5178,9 @@ Note that this will not effectively constrain users with
 privileges.
 .Bd -literal
 # Override built-in defaults
-Defaults		syslog=auth
+Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
-Defaults:FULLTIMERS	!lecture
+Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
 Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
 Defaults!PAGERS		noexec

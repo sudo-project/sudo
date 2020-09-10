@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 1, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 9, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1556,7 +1556,7 @@ indicates that the user may specify the root directory by running
 \fBsudo\fR
 with the
 \fB\-R\fR
-option .
+option.
 This setting can be used to run the command in a
 chroot(2)
 \(lqsandbox\(rq
@@ -4481,6 +4481,16 @@ See the
 \fIChroot_Spec\fR
 section for more details.
 .sp
+It is only possible to use
+\fIrunchroot\fR
+as a command-specific Defaults setting if the command exists with
+the same path both inside and outside the chroot jail.
+This restriction does not apply to generic, host or user-based
+Defaults settings or to a
+\fICmnd_Spec\fR
+that includes a
+\fIChroot_Spec\fR.
+.sp
 This setting is only supported by version 1.9.3 or higher.
 .TP 14n
 runcwd
@@ -5524,12 +5534,19 @@ to log via
 syslog(3)
 using the
 \fIauth\fR
-facility in all cases.
+facility in all cases and for commands to be run with
+the target user's home directory as the working directory.
 We don't want to subject the full time staff to the
 \fBsudo\fR
-lecture, user
+lecture and we want to allow them to run commands in a
+chroot(2)
+\(lqsandbox\(rq
+via the
+\fB\-R\fR
+option.
+User
 \fBmillert\fR
-need not give a password, and we don't want to reset the
+need not provide a password and we don't want to reset the
 \fRLOGNAME\fR
 or
 \fRUSER\fR
@@ -5554,9 +5571,9 @@ privileges.
 .sp
 .RS 0n
 # Override built-in defaults
-Defaults		syslog=auth
+Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
-Defaults:FULLTIMERS	!lecture
+Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
 Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
 Defaults!PAGERS		noexec
