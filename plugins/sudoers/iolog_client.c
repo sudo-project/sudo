@@ -539,11 +539,14 @@ log_server_connect(struct client_closure *closure)
     const char *cause = NULL;
     int sock;
     bool tls, ret = false;
-    debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL);
+    debug_decl(log_server_connect, SUDOERS_DEBUG_UTIL);
 
     STAILQ_FOREACH(server, closure->log_details->log_servers, entries) {
         free(copy);
-	copy = strdup(server->str);
+	if ((copy = strdup(server->str)) == NULL) {
+                cause = U_("unable to allocate memory");
+                break;
+	}
 	if (!iolog_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
 		DEFAULT_PORT_TLS)) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
