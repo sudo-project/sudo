@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.3\n"
+"Project-Id-Version: sudo 1.9.3b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-09-12 08:28-0600\n"
+"POT-Creation-Date: 2020-09-14 06:53-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1868,12 +1868,12 @@ msgstr ""
 
 #: plugins/sudoers/defaults.c:1025
 #, c-format
-msgid "%s:%d: values for \"%s\" must start with a '/', '*', or '*'"
+msgid "%s:%d: values for \"%s\" must start with a '/', '~', or '*'"
 msgstr ""
 
 #: plugins/sudoers/defaults.c:1029
 #, c-format
-msgid "%s: values for \"%s\" must start with a '/', '*', or '*'"
+msgid "%s: values for \"%s\" must start with a '/', '~', or '*'"
 msgstr ""
 
 #: plugins/sudoers/defaults.c:1040

@@ -1022,11 +1022,11 @@ valid_path(struct sudo_defs_types *def, const char *val,
 	    if (!quiet) {
 		if (lineno > 0) {
 		    sudo_warnx(
-			U_("%s:%d: values for \"%s\" must start with a '/', '*', or '*'"),
+			U_("%s:%d: values for \"%s\" must start with a '/', '~', or '*'"),
 			file, lineno, def->name);
 		} else {
 		    sudo_warnx(
-			U_("%s: values for \"%s\" must start with a '/', '*', or '*'"),
+			U_("%s: values for \"%s\" must start with a '/', '~', or '*'"),
 			file, def->name);
 		}
 	    }
