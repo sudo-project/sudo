@@ -1,15 +1,15 @@
 # Esperanto translations for sudo package.
 # This file is distributed under the same license as the sudo package.
-# Keith Bowes <zooplah@gmail.com>, 2012.
+# Keith Bowes <zooplah@gmail.com>, 2012, 2020.
 # Felipe Castro <fefcas@gmail.com>, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.2rc1\n"
+"Project-Id-Version: sudo 1.9.3b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-24 05:35-0600\n"
-"PO-Revision-Date: 2020-07-16 21:41-0400\n"
-"Last-Translator: Felipe Castro <fefcas@gmail.com>\n"
+"POT-Creation-Date: 2020-09-12 08:28-0600\n"
+"PO-Revision-Date: 2020-09-15 20:02-0400\n"
+"Last-Translator: Keith Bowes <zooplah@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
 "MIME-Version: 1.0\n"
@@ -52,17 +52,17 @@ msgstr "ne eblas restarigi registrejon"
 #: src/exec_pty.c:1276 src/exec_pty.c:1283 src/exec_pty.c:1290
 #: src/exec_pty.c:1298 src/exec_pty.c:1740 src/load_plugins.c:52
 #: src/load_plugins.c:65 src/load_plugins.c:163 src/load_plugins.c:188
-#: src/load_plugins.c:223 src/load_plugins.c:462 src/load_plugins.c:468
-#: src/parse_args.c:176 src/parse_args.c:197 src/parse_args.c:270
-#: src/parse_args.c:593 src/parse_args.c:615 src/parse_args.c:640
+#: src/load_plugins.c:223 src/load_plugins.c:463 src/load_plugins.c:469
+#: src/parse_args.c:181 src/parse_args.c:202 src/parse_args.c:275
+#: src/parse_args.c:616 src/parse_args.c:638 src/parse_args.c:663
 #: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:90
-#: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
-#: src/sudo.c:624 src/sudo.c:693 src/sudo.c:703 src/sudo.c:724 src/sudo.c:743
-#: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
-#: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
-#: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
-#: src/sudo_edit.c:994
+#: src/selinux.c:360 src/selinux.c:489 src/selinux.c:498 src/sesh.c:115
+#: src/sudo.c:632 src/sudo.c:701 src/sudo.c:711 src/sudo.c:732 src/sudo.c:751
+#: src/sudo.c:760 src/sudo.c:769 src/sudo.c:786 src/sudo.c:828 src/sudo.c:838
+#: src/sudo.c:867 src/sudo.c:1053 src/sudo.c:1075 src/sudo.c:1373
+#: src/sudo.c:1546 src/sudo.c:1740 src/sudo.c:2084 src/sudo_edit.c:263
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:976
+#: src/sudo_edit.c:996
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -85,20 +85,20 @@ msgstr "%s: %s"
 #: src/exec_pty.c:1262 src/exec_pty.c:1269 src/exec_pty.c:1276
 #: src/exec_pty.c:1283 src/exec_pty.c:1290 src/exec_pty.c:1298
 #: src/exec_pty.c:1740 src/load_plugins.c:163 src/load_plugins.c:188
-#: src/load_plugins.c:223 src/load_plugins.c:462 src/load_plugins.c:468
-#: src/parse_args.c:176 src/parse_args.c:198 src/parse_args.c:270
-#: src/parse_args.c:593 src/parse_args.c:615 src/parse_args.c:640
+#: src/load_plugins.c:223 src/load_plugins.c:463 src/load_plugins.c:469
+#: src/parse_args.c:181 src/parse_args.c:203 src/parse_args.c:275
+#: src/parse_args.c:616 src/parse_args.c:638 src/parse_args.c:663
 #: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:90
-#: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
-#: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
-#: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
-#: src/sudo_edit.c:974 src/sudo_edit.c:994
+#: src/selinux.c:360 src/selinux.c:489 src/selinux.c:498 src/sesh.c:115
+#: src/sudo.c:235 src/sudo.c:632 src/sudo.c:867 src/sudo.c:1053
+#: src/sudo.c:1075 src/sudo.c:1373 src/sudo.c:1546 src/sudo.c:1740
+#: src/sudo.c:2084 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:976 src/sudo_edit.c:996
 msgid "unable to allocate memory"
 msgstr "ne eblas generi memoron"
 
 #: lib/util/mkdir_parents.c:69 lib/util/sudo_conf.c:614 src/selinux.c:234
-#: src/selinux.c:264 src/sudo.c:367
+#: src/selinux.c:264 src/sudo.c:369
 #, c-format
 msgid "unable to open %s"
 msgstr "ne eblas malfermi %s"
@@ -175,12 +175,22 @@ msgstr "%s estas skribebla de ĉiuj"
 msgid "%s is group writable"
 msgstr "%s estas skribebla de la tuta grupo"
 
-#: src/copy_file.c:118
+#: src/copy_file.c:91
+#, c-format
+msgid "%s: truncate %s to zero bytes? (y/n) [n] "
+msgstr "%s: ĉu trunki %s ĝis nul bajto? (y/n) [n]"
+
+#: src/copy_file.c:95
+#, c-format
+msgid "not overwriting %s"
+msgstr "ne anstataŭigos je %s"
+
+#: src/copy_file.c:117
 #, c-format
 msgid "unable to read from %s"
 msgstr "ne eblas legi ell %s"
 
-#: src/copy_file.c:122 src/sudo_edit.c:695
+#: src/copy_file.c:134 src/sudo_edit.c:695
 #, c-format
 msgid "unable to write to %s"
 msgstr "ne eblas skribi al %s"
@@ -261,7 +271,7 @@ msgid "unable to set controlling tty"
 msgstr "ne eblas elekti la regan tty-on"
 
 #: src/exec_monitor.c:590 src/exec_nopty.c:358 src/exec_pty.c:1465
-#: src/exec_pty.c:1486 src/exec_pty.c:1506 src/tgetpass.c:304
+#: src/exec_pty.c:1486 src/exec_pty.c:1506 src/tgetpass.c:306
 msgid "unable to create pipe"
 msgstr "ne eblas krei tubon"
 
@@ -270,7 +280,7 @@ msgid "unable to receive message from parent"
 msgstr "ne eblas ricevi mesaĝon el supre"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:735 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:310
 msgid "unable to fork"
 msgstr "ne eblas forki"
 
@@ -278,7 +288,7 @@ msgstr "ne eblas forki"
 msgid "unable to restore tty label"
 msgstr "ne eblis reatingi tty-etikedon"
 
-#: src/exec_monitor.c:632 src/sesh.c:126 src/sudo.c:1123
+#: src/exec_monitor.c:632 src/sesh.c:125 src/sudo.c:1131
 #, c-format
 msgid "unable to execute %s"
 msgstr "ne eblas plenumigi: %s"
@@ -329,7 +339,7 @@ msgstr "ne eblas sendi mesaĝon al observa procezo"
 #: src/load_plugins.c:50 src/load_plugins.c:63 src/load_plugins.c:85
 #: src/load_plugins.c:115 src/load_plugins.c:129 src/load_plugins.c:135
 #: src/load_plugins.c:287 src/load_plugins.c:297 src/load_plugins.c:307
-#: src/load_plugins.c:353
+#: src/load_plugins.c:354
 #, c-format
 msgid "error in %s, line %d while loading plugin \"%s\""
 msgstr "eraro en %s, linio %d dum ŝargi kromprogramon \"%s\""
@@ -374,67 +384,67 @@ msgstr "malkongrua granda versio %d de kromprogramo (atendite %d) trovita en %s"
 msgid "ignoring policy plugin \"%s\" in %s, line %d"
 msgstr "ni malatentas kondutan kromprogramon \"%s\" en %s, linio %d"
 
-#: src/load_plugins.c:329
+#: src/load_plugins.c:330
 msgid "only a single policy plugin may be specified"
 msgstr "nur unu konduta kromprogramo povas esti indikata"
 
-#: src/load_plugins.c:355
+#: src/load_plugins.c:356
 #, c-format
 msgid "unknown plugin type %d found in %s"
 msgstr "nekonata kromprograma tipo %d trovita en %s"
 
-#: src/load_plugins.c:541
+#: src/load_plugins.c:552
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "konduta kromprogramo %s ne inkluzivas la metodon check_policy"
 
-#: src/net_ifs.c:178 src/net_ifs.c:195 src/net_ifs.c:340 src/sudo.c:477
+#: src/net_ifs.c:178 src/net_ifs.c:195 src/net_ifs.c:340 src/sudo.c:479
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "interna eraro, superfluo en %s"
 
-#: src/parse_args.c:218
+#: src/parse_args.c:223
 #, c-format
 msgid "invalid environment variable name: %s"
 msgstr "malvalida medivariabla nomo: %s"
 
-#: src/parse_args.c:319
+#: src/parse_args.c:325
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "la parametro de -C devas esti nombron almenaŭ 3"
 
-#: src/parse_args.c:532
+#: src/parse_args.c:552
 msgid "you may not specify both the -i and -s options"
 msgstr "vi ne rajtas specifi ambaŭ parametrojn -i kaj -s"
 
-#: src/parse_args.c:536
+#: src/parse_args.c:557
 msgid "you may not specify both the -i and -E options"
 msgstr "vi ne rajtas specifi ambaŭ parametrojn -i kaj -E"
 
-#: src/parse_args.c:546
+#: src/parse_args.c:567
 msgid "the -E option is not valid in edit mode"
 msgstr "la parametro -E ne validas en redakta reĝimo"
 
-#: src/parse_args.c:548
+#: src/parse_args.c:570
 msgid "you may not specify environment variables in edit mode"
 msgstr "vi ne rajtas specifi medivariablojn en redakta reĝimo"
 
-#: src/parse_args.c:557
+#: src/parse_args.c:580
 msgid "the -U option may only be used with the -l option"
 msgstr "la parametro '-U' nur povas esti uzata kun '-l'"
 
-#: src/parse_args.c:561
+#: src/parse_args.c:584
 msgid "the -A and -S options may not be used together"
 msgstr "vi ne rajtas kune uzi la parametrojn '-A' kaj '-S'"
 
-#: src/parse_args.c:654
+#: src/parse_args.c:677
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit ne estas havebla en ĉi tiu platformon"
 
-#: src/parse_args.c:735
+#: src/parse_args.c:759
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Vi rajtas specifi nur unu el -e, -h, -i, -K, -l, -s, -v aŭ -V"
 
-#: src/parse_args.c:749
+#: src/parse_args.c:773
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -443,7 +453,7 @@ msgstr ""
 "%s - redakti dosierojn kiel alia uzanto\n"
 "\n"
 
-#: src/parse_args.c:751
+#: src/parse_args.c:775
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -452,8 +462,7 @@ msgstr ""
 "%s - plenumigi komandon kiel alia uzanto\n"
 "\n"
 
-#: src/parse_args.c:756
-#, c-format
+#: src/parse_args.c:780
 msgid ""
 "\n"
 "Options:\n"
@@ -461,123 +470,131 @@ msgstr ""
 "\n"
 "Parametroj:\n"
 
-#: src/parse_args.c:758
+#: src/parse_args.c:782
 msgid "use a helper program for password prompting"
 msgstr "uzi helpoprogrogramon por pasvortilo"
 
-#: src/parse_args.c:761
+#: src/parse_args.c:785
 msgid "use specified BSD authentication type"
 msgstr "uzi specifitan BSD-konstatan tipon"
 
-#: src/parse_args.c:764
+#: src/parse_args.c:788
 msgid "run command in the background"
 msgstr "plenumigi komandon fone"
 
-#: src/parse_args.c:766
+#: src/parse_args.c:790
 msgid "ring bell when prompting"
 msgstr "sonigi pepon kiam invitanta"
 
-#: src/parse_args.c:768
+#: src/parse_args.c:792
 msgid "close all file descriptors >= num"
 msgstr "fermi ĉiujn dosierpriskribilojn >= numeron"
 
-#: src/parse_args.c:771
+#: src/parse_args.c:795
 msgid "run command with the specified BSD login class"
 msgstr "plenumigi komandon per specifita BSD-ensaluta klaso"
 
-#: src/parse_args.c:774
+#: src/parse_args.c:798
+msgid "change the working directory before running command"
+msgstr "ŝanĝu la kurantan dosierujon antaŭ plenumi komandon"
+
+#: src/parse_args.c:800
 msgid "preserve user environment when running command"
 msgstr "konservi uzanto-medivariablojn dum plenumigi komandon"
 
-#: src/parse_args.c:776
+#: src/parse_args.c:802
 msgid "preserve specific environment variables"
 msgstr "konservi specifajn medivariablojn"
 
-#: src/parse_args.c:778
+#: src/parse_args.c:804
 msgid "edit files instead of running a command"
 msgstr "redakti dosierojn anstataŭ plenumigi komandon"
 
-#: src/parse_args.c:780
+#: src/parse_args.c:806
 msgid "run command as the specified group name or ID"
 msgstr "plenumigi komandon kiel la specifitan grupnomon aŭ identigilon"
 
-#: src/parse_args.c:782
+#: src/parse_args.c:808
 msgid "set HOME variable to target user's home dir"
 msgstr "valorizi medivariablon HOME je la hejma dosierujo de la cela uzanto"
 
-#: src/parse_args.c:784
+#: src/parse_args.c:810
 msgid "display help message and exit"
 msgstr "elmontri helpan mesaĝon kaj eliri"
 
-#: src/parse_args.c:786
+#: src/parse_args.c:812
 msgid "run command on host (if supported by plugin)"
 msgstr "plenumigi komandon en gastiganto (se permesata de kromprogramo)"
 
-#: src/parse_args.c:788
+#: src/parse_args.c:814
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "plenumigi ensalutan ŝelon kiel celan uzanton; komando ankaŭ enmeteblas"
 
-#: src/parse_args.c:790
+#: src/parse_args.c:816
 msgid "remove timestamp file completely"
 msgstr "tute forigi tempo-indikilan dosieron"
 
-#: src/parse_args.c:792
+#: src/parse_args.c:818
 msgid "invalidate timestamp file"
 msgstr "eksvalidigi tempo-indikilan dosieron"
 
-#: src/parse_args.c:794
+#: src/parse_args.c:820
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "listigi privilegiojn de la uzanto aŭ kontroli specifan komandon; uzu dufoje por pli longa formato"
 
-#: src/parse_args.c:796
+#: src/parse_args.c:822
 msgid "non-interactive mode, no prompts are used"
 msgstr "neinteraga reĝimo, ne demandos al uzanto"
 
-#: src/parse_args.c:798
+#: src/parse_args.c:824
 msgid "preserve group vector instead of setting to target's"
 msgstr "konservi grupan vektoron anstataŭ elekti celan"
 
-#: src/parse_args.c:800
+#: src/parse_args.c:826
 msgid "use the specified password prompt"
 msgstr "uzi specifitan pasvortilon"
 
-#: src/parse_args.c:803
+#: src/parse_args.c:828
+msgid "change the root directory before running command"
+msgstr "ŝanĝu la radikan dosierujon antaŭ ol plenumigi komandon"
+
+#: src/parse_args.c:831
 msgid "create SELinux security context with specified role"
 msgstr "krei SELinux-sekurecan kuntekston kun specifita rolo"
 
-#: src/parse_args.c:806
+#: src/parse_args.c:834
 msgid "read password from standard input"
 msgstr "legi pasvorton el norma enigo"
 
-#: src/parse_args.c:808
+#: src/parse_args.c:836
 msgid "run shell as the target user; a command may also be specified"
 msgstr "plenumigi ŝelon kiel cela uzanto; komando ankaŭ specifebla"
 
-#: src/parse_args.c:811
+#: src/parse_args.c:839
 msgid "create SELinux security context with specified type"
 msgstr "krei SELinux-sekurecan kuntekston kun specifita rolo"
 
-#: src/parse_args.c:814
+#: src/parse_args.c:842
 msgid "terminate command after the specified time limit"
 msgstr "finigi la komandon post la specifita tempolimo"
 
-#: src/parse_args.c:816
+#: src/parse_args.c:844
 msgid "in list mode, display privileges for user"
 msgstr "en lista reĝimo elmontri privilegiojn por uzanto"
 
-#: src/parse_args.c:818
+#: src/parse_args.c:846
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "plenumigi komandon (aŭ redakti dosieron) kiel specifita uzanto"
 
-#: src/parse_args.c:820
+#: src/parse_args.c:848
 msgid "display version information and exit"
 msgstr "elmontri eldonan informon kaj eliri"
 
-#: src/parse_args.c:822
+#: src/parse_args.c:850
 msgid "update user's timestamp without running a command"
 msgstr "ĝisdatigi la tempo-indikilon de la uzanto, sed ne plenumigi komandon"
 
-#: src/parse_args.c:824
+#: src/parse_args.c:852
 msgid "stop processing command line arguments"
 msgstr "ĉesigi procedi komandliniajn parametrojn"
 
@@ -682,16 +699,16 @@ msgstr "ne eblas elekti exec-kuntekston al %s"
 msgid "unable to set key creation context to %s"
 msgstr "ne eblas elekti kuntekston de kreo de ŝlosilo al %s"
 
-#: src/sesh.c:78
+#: src/sesh.c:77
 msgid "requires at least one argument"
 msgstr "postulas almenaŭ unu parametron"
 
-#: src/sesh.c:107
+#: src/sesh.c:106
 #, c-format
 msgid "invalid file descriptor number: %s"
 msgstr "malvalida dosierpriskribila numero: %s"
 
-#: src/sesh.c:121
+#: src/sesh.c:120
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr "ne eblas lanĉi %s kiel ensalut-ŝelo"
@@ -744,124 +761,124 @@ msgstr "setproject malsukcesis por projekto \"%s\""
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "averto, rimedo-rega asigno malsukcesis por projekto \"%s\""
 
-#: src/sudo.c:219
+#: src/sudo.c:220
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo: eldono %s\n"
 
-#: src/sudo.c:221
+#: src/sudo.c:222
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Muntaj parametroj: %s\n"
 
-#: src/sudo.c:230
+#: src/sudo.c:231
 msgid "fatal error, unable to load plugins"
 msgstr "ĉesiga eraro: ne eblas ŝargi kromprogramojn"
 
-#: src/sudo.c:275
+#: src/sudo.c:277
 msgid "plugin did not return a command to execute"
 msgstr "kromprogramo ne liveris komandon por plenumi"
 
-#: src/sudo.c:310
+#: src/sudo.c:312
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "neatendita sudo-reĝimon 0x%x"
 
-#: src/sudo.c:543
+#: src/sudo.c:546
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "vi ne ekzistas en la datumbazo %s"
 
-#: src/sudo.c:600
+#: src/sudo.c:603
 msgid "unable to determine tty"
 msgstr "ne eblas determini tty-on"
 
-#: src/sudo.c:905
+#: src/sudo.c:913
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s devas esti posedata de uid %d kaj la setuid-bito devas esti markita"
 
-#: src/sudo.c:908
+#: src/sudo.c:916
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "efektiva uid ne estas %d; ĉu %s estas en dosiersistemo kun la elekto 'nosuid' aŭ reta dosiersistemo sen ĉefuzanto-privilegioj?"
 
-#: src/sudo.c:914
+#: src/sudo.c:922
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "efektiva uid ne estas %d; ĉu sudo estas instalita kiel setuid-radiko?"
 
-#: src/sudo.c:930
+#: src/sudo.c:938
 msgid "unable to set supplementary group IDs"
 msgstr "ne eblas elekti suplementajn grupajn identigilojn"
 
-#: src/sudo.c:937
+#: src/sudo.c:945
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "ne eblas elekti efikan gid-on al plenumigkiela gid %u"
 
-#: src/sudo.c:943
+#: src/sudo.c:951
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "ne eblas elekti gid-on kiel plenumigkielan gid-on %u"
 
-#: src/sudo.c:986
+#: src/sudo.c:994
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "neatendita ido finiĝis laŭ la kondiĉo: %d"
 
-#: src/sudo.c:1095
+#: src/sudo.c:1103
 msgid "unable to initialize policy plugin"
 msgstr "ne eblas komenci konduktan kromprogramon"
 
-#: src/sudo.c:1158
+#: src/sudo.c:1166
 #, c-format
 msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "konduta kromprogramo %s ne inkluzivas la metodon \"check_policy\""
 
-#: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
+#: src/sudo.c:1181 src/sudo.c:1234 src/sudo.c:1278
 msgid "command rejected by policy"
 msgstr "komando rifuzita pro konduto-regularo"
 
-#: src/sudo.c:1178 src/sudo.c:1231 src/sudo.c:1275
+#: src/sudo.c:1186 src/sudo.c:1239 src/sudo.c:1283
 msgid "policy plugin error"
 msgstr "eraro de konduta kromprogramo"
 
-#: src/sudo.c:1212
+#: src/sudo.c:1220
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "konduta kromprogramo %s ne komprenas listigon de privilegioj"
 
-#: src/sudo.c:1256
+#: src/sudo.c:1264
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "konduta kromprogramo %s ne komprenas la parametron -v"
 
-#: src/sudo.c:1294
+#: src/sudo.c:1302
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "konduta kromprogramo %s ne komprenas la parametrojn -k kaj -K"
 
-#: src/sudo.c:1423
+#: src/sudo.c:1431
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "eraro dum lanĉo de eneliga kromprogramo %s"
 
-#: src/sudo.c:1577
+#: src/sudo.c:1585
 #, c-format
 msgid "error initializing audit plugin %s"
 msgstr "eraro dum lanĉo de ekzamena kromprogramo %s"
 
-#: src/sudo.c:1755
+#: src/sudo.c:1763
 #, c-format
 msgid "error initializing approval plugin %s"
 msgstr "eraro dum lanĉo de aproba kromprogramo %s"
 
-#: src/sudo.c:1831
+#: src/sudo.c:1839
 msgid "command rejected by approver"
 msgstr "komando rifuzita de aprobanto"
 
-#: src/sudo.c:1840
+#: src/sudo.c:1848
 msgid "approval plugin error"
 msgstr "eraro de aproba kromprogramo"
 
@@ -898,7 +915,7 @@ msgstr "%s restas ne modifita"
 msgid "%s unchanged"
 msgstr "%s ne ŝanĝita"
 
-#: src/sudo_edit.c:706 src/sudo_edit.c:907
+#: src/sudo_edit.c:706 src/sudo_edit.c:909
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "enhavo de redakta seanco restas en %s"
@@ -911,33 +928,33 @@ msgstr "sesh: interna eraro: malpara nombro da vojoj"
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: ne eblas krei provizorajn dosierojn"
 
-#: src/sudo_edit.c:818 src/sudo_edit.c:900
+#: src/sudo_edit.c:818 src/sudo_edit.c:902
 msgid "sesh: killed by a signal"
 msgstr "sesh: mortigita de signalo"
 
-#: src/sudo_edit.c:820 src/sudo_edit.c:903
+#: src/sudo_edit.c:820 src/sudo_edit.c:905
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: nekonata eraro %d"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:895
 msgid "unable to copy temporary files back to their original location"
 msgstr "ne eblas retrokopii provizorajn dosierojn al ilia originala loko"
 
-#: src/sudo_edit.c:897
+#: src/sudo_edit.c:899
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "ne eblas retrokopii kelkajn el la provizoraj dosieroj al ilia originala loko"
 
-#: src/sudo_edit.c:941
+#: src/sudo_edit.c:943
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "ne eblas ŝanĝi uid-on al ĉefuzanto (%u)"
 
-#: src/sudo_edit.c:958
+#: src/sudo_edit.c:960
 msgid "plugin error: missing file list for sudoedit"
 msgstr "kromprograma eraro: malhavas dosieran liston por sudoedit"
 
-#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
+#: src/sudo_edit.c:1011 src/sudo_edit.c:1024
 msgid "unable to read the clock"
 msgstr "ne eblas legi la horloĝon"
 
@@ -953,25 +970,25 @@ msgstr "neniu pasvorto estis provizata"
 msgid "unable to read password"
 msgstr "ne eblas legi pasvorton"
 
-#: src/tgetpass.c:140
+#: src/tgetpass.c:141
 msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
 msgstr "terminalo estas postulata por legi la pasvorton; uzu la parametron -S por legi el norma enigo aŭ agordu helpanton askpass"
 
-#: src/tgetpass.c:150
+#: src/tgetpass.c:152
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "neniu programo askpass indikita, provu difini SUDO_ASKPASS"
 
-#: src/tgetpass.c:325
+#: src/tgetpass.c:327
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "ne eblas elekti gid-on al %u"
 
-#: src/tgetpass.c:329
+#: src/tgetpass.c:331
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "ne eblas elekti uid-on al %u"
 
-#: src/tgetpass.c:334
+#: src/tgetpass.c:336
 #, c-format
 msgid "unable to run %s"
 msgstr "ne eblas plenumigi: %s"

@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1b1\n"
+"Project-Id-Version: sudo 1.9.2rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-08 06:03+0200\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-23 08:05+0200\n"
 "Last-Translator: Frédéric Marchal <fmarchal@perso.be>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -61,8 +61,8 @@ msgstr "impossible de rétablir le registre"
 #: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
 #: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
 #: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -92,8 +92,8 @@ msgstr "%s: %s"
 #: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
 #: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
 #: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
 msgid "unable to allocate memory"
 msgstr "impossible d'allouer la mémoire"
 
@@ -270,7 +270,7 @@ msgid "unable to receive message from parent"
 msgstr "impossible de recevoir un message du parent"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:308
 msgid "unable to fork"
 msgstr "erreur de fork"
 
@@ -403,28 +403,28 @@ msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "l'argument à -C doit être un nombre plus grand ou égal à 3"
 
 #: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "vous ne pouvez pas spécifier les options « -i » et « -s » en même temps"
+msgid "you may not specify both the -i and -s options"
+msgstr "vous ne pouvez pas spécifier les options -i et -s en même temps"
 
 #: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "vous ne pouvez pas spécifier les options « -i » et « -E » en même temps"
+msgid "you may not specify both the -i and -E options"
+msgstr "vous ne pouvez pas spécifier les options -i et -E en même temps"
 
 #: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
-msgstr "l'option « -E » n'est pas valable en mode édition"
+msgid "the -E option is not valid in edit mode"
+msgstr "l'option -E n'est pas valable en mode édition"
 
 #: src/parse_args.c:548
 msgid "you may not specify environment variables in edit mode"
 msgstr "vous ne pouvez pas spécifier de variable d'environnement en mode édition"
 
 #: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
-msgstr "l'option « -U » ne peut être utilisée qu'avec l'option « -l »"
+msgid "the -U option may only be used with the -l option"
+msgstr "l'option -U ne peut être utilisée qu'avec l'option -l"
 
 #: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "les options « -A » et « -S » ne peuvent pas être utilisées ensemble"
+msgid "the -A and -S options may not be used together"
+msgstr "les options -A et -S ne peuvent pas être utilisées ensemble"
 
 #: src/parse_args.c:654
 msgid "sudoedit is not supported on this platform"
@@ -719,27 +719,27 @@ msgstr "la tâche appelante est « final »"
 msgid "could not join project \"%s\""
 msgstr "impossible de joindre le projet « %s »"
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "aucun pool de ressources acceptant les liaisons par défaut existe pour le projet « %s »"
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "le pool de ressources spécifié n'existe pas pour le projet « %s »"
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "impossible de se lier au pool de ressources par défaut du projet « %s »"
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "setproject a échoué pour le projet « %s »"
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "attention, l'assignement du contrôle de ressources a échoue pour le projet « %s »"
@@ -816,7 +816,7 @@ msgstr "impossible d'initialiser le greffon de règles"
 
 #: src/sudo.c:1158
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
+msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "le greffon de règles %s n'a pas de méthode « check_policy »"
 
 #: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
@@ -893,51 +893,51 @@ msgstr "%s: l'édition de fichiers dans un répertoire accessible en écriture n
 msgid "%s left unmodified"
 msgstr "%s laissé tel quel"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s non modifié"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "contenu de la session d'édition laissé dans %s"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: erreur interne: nombre impaire de chemins"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: impossible de créer des fichiers temporaires"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
 msgid "sesh: killed by a signal"
 msgstr "sesh: tué par un signal"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: erreur %d inconnue"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:894
 msgid "unable to copy temporary files back to their original location"
 msgstr "impossible de copier les fichiers temporaires à leurs emplacements d'origine"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:897
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "impossible de copier quelques fichiers temporaires à leurs emplacements d'origine"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:941
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "impossible de changer le uid en root (%u)"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:958
 msgid "plugin error: missing file list for sudoedit"
 msgstr "erreur de greffon : liste de fichiers manquantes pour sudoedit"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
 msgid "unable to read the clock"
 msgstr "impossible de lire l'horloge"
 
