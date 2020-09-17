@@ -107,8 +107,10 @@ rpl_putenv(PUTENV_CONST char *string)
 	char **envp = reallocarray(priv_environ, env_len + 2, sizeof(char *));
 	if (envp == NULL)
 	    return -1;
-	if (environ != priv_environ)
+	if (environ != priv_environ) {
 	    memcpy(envp, environ, env_len * sizeof(char *));
+	    free(environ);
+	}
 	envp[env_len++] = (char *)string;
 	envp[env_len] = NULL;
 	priv_environ = environ = envp;
