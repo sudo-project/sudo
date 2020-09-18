@@ -91,7 +91,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     debug_return;
 }
 
-#ifdef HAVE_FACCESSAT
+#if defined(HAVE_FACCESSAT) && defined(AT_EACCESS)
 /*
  * Returns true if the open directory fd is owned or writable by the user.
  */
@@ -199,7 +199,7 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
     errno = EACCES;
     debug_return_int(false);
 }
-#endif /* HAVE_FACCESSAT */
+#endif /* HAVE_FACCESSAT && AT_EACCESS */
 
 /*
  * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
