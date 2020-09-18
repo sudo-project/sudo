@@ -92,7 +92,7 @@ typedef struct utmp sudo_utmp_t;
 # define __e_exit		e_exit
 #endif
 
-#if defined(HAVE_GETUTSID) || defined(HAVE_GETUTXID) || defined(HAVE_GETUTID)
+#if defined(HAVE_STRUCT_UTMP_UT_ID)
 /*
  * Create ut_id from the new ut_line and the old ut_id.
  */
@@ -124,7 +124,7 @@ utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
 
     debug_return;
 }
-#endif /* HAVE_GETUTSID || HAVE_GETUTXID || HAVE_GETUTID */
+#endif /* HAVE_STRUCT_UTMP_UT_ID */
 
 /*
  * Store time in utmp structure.
@@ -272,7 +272,7 @@ utmp_slot(const char *line, int ttyfd)
     endttyent();
     debug_return_int(tty ? slot : 0);
 }
-# else
+# elif defined(HAVE_TTYSLOT)
 static int
 utmp_slot(const char *line, int ttyfd)
 {
@@ -293,6 +293,12 @@ utmp_slot(const char *line, int ttyfd)
     close(sfd);
 
     debug_return_int(slot);
+}
+# else /* !HAVE_TTYSLOT */
+static int
+utmp_slot(const char *line, int ttyfd)
+{
+    retun -1;
 }
 # endif /* HAVE_GETTTYENT */
 
