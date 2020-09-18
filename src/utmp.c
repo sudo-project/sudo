@@ -298,7 +298,7 @@ utmp_slot(const char *line, int ttyfd)
 static int
 utmp_slot(const char *line, int ttyfd)
 {
-    retun -1;
+    return -1;
 }
 # endif /* HAVE_GETTTYENT */
 
