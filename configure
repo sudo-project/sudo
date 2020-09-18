@@ -15941,8 +15941,7 @@ else
 
 fi
 
-		LIB_CRYPT=1
-		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
+		ac_cv_search_crypt="-lcrypt"
 
 		shadow_funcs="getspnam"
 		shadow_libs="-lsec"
@@ -25476,9 +25475,8 @@ fi
 fi
 
 if test ${with_passwd-'no'} != "no"; then
-                if test -z "$LIB_CRYPT"; then
-	_LIBS="$LIBS"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
+                _LIBS="$LIBS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
 $as_echo_n "checking for library containing crypt... " >&6; }
 if ${ac_cv_search_crypt+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25532,11 +25530,16 @@ ac_res=$ac_cv_search_crypt
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-	    test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
+	test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
+	$as_echo "#define HAVE_CRYPT 1" >>confdefs.h
+
 
 fi
 
-	LIBS="$_LIBS"
+    LIBS="$_LIBS"
+    if test test "${ac_cv_search_crypt}" = "no"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No crypt function found, assuming plaintext passwords" >&5
+$as_echo "$as_me: WARNING: No crypt function found, assuming plaintext passwords" >&2;}
     fi
 
     if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
@@ -30297,6 +30300,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

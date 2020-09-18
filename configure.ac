@@ -2134,8 +2134,7 @@ case "$host" in
 		;;
     *-*-isc*)
 		AX_APPEND_FLAG([-D_ISC], [CPPFLAGS])
-		LIB_CRYPT=1
-		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
+		ac_cv_search_crypt="-lcrypt"
 
 		shadow_funcs="getspnam"
 		shadow_libs="-lsec"
@@ -4009,12 +4008,14 @@ if test ${with_passwd-'no'} != "no"; then
     dnl
     dnl if crypt(3) not in libc, look elsewhere
     dnl
-    if test -z "$LIB_CRYPT"; then
-	_LIBS="$LIBS"
-	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [
-	    test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
-	])
-	LIBS="$_LIBS"
+    _LIBS="$LIBS"
+    AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [
+	test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
+	AC_DEFINE(HAVE_CRYPT)
+    ])
+    LIBS="$_LIBS"
+    if test test "${ac_cv_search_crypt}" = "no"; then
+	AC_MSG_WARN([No crypt function found, assuming plaintext passwords])
     fi
 
     if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
@@ -4858,6 +4859,7 @@ AH_TEMPLATE(HAVE_AFS, [Define to 1 if you use AFS.])
 AH_TEMPLATE(HAVE_AIXAUTH, [Define to 1 if you use AIX general authentication.])
 AH_TEMPLATE(HAVE_BSD_AUTH_H, [Define to 1 if you use BSD authentication.])
 AH_TEMPLATE(HAVE_BSM_AUDIT, [Define to 1 to enable BSM audit support.])
+AH_TEMPLATE(HAVE_CRYPT, [Define to 1 if you have the `crypt' function.])
 AH_TEMPLATE(HAVE_DCE, [Define to 1 if you use OSF DCE.])
 AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
 AH_TEMPLATE(HAVE_DIRFD, [Define to 1 if you have the `dirfd' function or macro.])
