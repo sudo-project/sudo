@@ -4,10 +4,10 @@
 # Yuri Chornoivan <yurchor@ukr.net>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.3b1\n"
+"Project-Id-Version: sudoers 1.9.3b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-09-12 08:28-0600\n"
-"PO-Revision-Date: 2020-09-14 11:51+0300\n"
+"POT-Creation-Date: 2020-09-14 06:53-0600\n"
+"PO-Revision-Date: 2020-09-18 13:29+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Lokalize 20.03.70\n"
+"X-Generator: Lokalize 20.11.70\n"
 
 #: confstr.sh:1
 msgid "syntax error"
@@ -1907,13 +1907,13 @@ msgstr "%s: значення «%s» є некоректним для парам�
 
 #: plugins/sudoers/defaults.c:1025
 #, c-format
-msgid "%s:%d: values for \"%s\" must start with a '/', '*', or '*'"
-msgstr "%s:%d значення для «%s» має починатися з «/», «*» або «*»"
+msgid "%s:%d: values for \"%s\" must start with a '/', '~', or '*'"
+msgstr "%s:%d значення для «%s» має починатися з «/», «~» або «*»"
 
 #: plugins/sudoers/defaults.c:1029
 #, c-format
-msgid "%s: values for \"%s\" must start with a '/', '*', or '*'"
-msgstr "%s: значення для «%s» має починатися з «/», «*» або «*»"
+msgid "%s: values for \"%s\" must start with a '/', '~', or '*'"
+msgstr "%s: значення для «%s» має починатися з «/», «~» або «*»"
 
 #: plugins/sudoers/defaults.c:1040
 #, c-format

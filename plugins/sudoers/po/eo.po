@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.3b1\n"
+"Project-Id-Version: sudoers 1.9.3b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-09-12 08:28-0600\n"
-"PO-Revision-Date: 2020-09-15 20:01-0400\n"
+"POT-Creation-Date: 2020-09-14 06:53-0600\n"
+"PO-Revision-Date: 2020-09-18 14:06-0400\n"
 "Last-Translator: Keith Bowes <zooplah@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -1907,13 +1907,13 @@ msgstr "%s: valoro \"%s\" estas malvalida por parametro \"%s\""
 
 #: plugins/sudoers/defaults.c:1025
 #, c-format
-msgid "%s:%d: values for \"%s\" must start with a '/', '*', or '*'"
-msgstr "%s:%d: valoroj por \"%s\" devas komenciĝi per '/', '*' aŭ '*'"
+msgid "%s:%d: values for \"%s\" must start with a '/', '~', or '*'"
+msgstr "%s:%d: valoroj por \"%s\" devas komenciĝi per '/', '~' aŭ '*'"
 
 #: plugins/sudoers/defaults.c:1029
 #, c-format
-msgid "%s: values for \"%s\" must start with a '/', '*', or '*'"
-msgstr "%s: valoroj por \"%s\" devas komenciĝi per '/', '*' aŭ '*'"
+msgid "%s: values for \"%s\" must start with a '/', '~', or '*'"
+msgstr "%s: valoroj por \"%s\" devas komenciĝi per '/', '~' aŭ '*'"
 
 #: plugins/sudoers/defaults.c:1040
 #, c-format
@@ -3046,6 +3046,3 @@ msgstr ""
 #: toke.l:1093
 msgid "too many levels of includes"
 msgstr "tro da niveloj de inkluzivaĵoj"
-
-#~ msgid "sudo_ldap_conf_add_ports: port too large"
-#~ msgstr "sudo_ldap_conf_add_ports: pordo tro granda"

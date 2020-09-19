@@ -6,10 +6,10 @@
 # Yi-Jyun Pan <pan93412@gmail.com>, 2019, 2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.3b1\n"
+"Project-Id-Version: sudoers 1.9.3b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-09-12 08:28-0600\n"
-"PO-Revision-Date: 2020-09-16 01:14+0800\n"
+"POT-Creation-Date: 2020-09-14 06:53-0600\n"
+"PO-Revision-Date: 2020-09-19 10:31+0800\n"
 "Last-Translator: Yi-Jyun Pan <pan93412@gmail.com>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@lists.linux.org.tw>\n"
 "Language: zh_TW\n"
@@ -1909,12 +1909,12 @@ msgstr "%s：值「%s」對選項「%s」無效"
 
 #: plugins/sudoers/defaults.c:1025
 #, c-format
-msgid "%s:%d: values for \"%s\" must start with a '/', '*', or '*'"
+msgid "%s:%d: values for \"%s\" must start with a '/', '~', or '*'"
 msgstr "%s:%d: \"%s\" 的值開頭必須是 '/'、'~' 或 '*'"
 
 #: plugins/sudoers/defaults.c:1029
 #, c-format
-msgid "%s: values for \"%s\" must start with a '/', '*', or '*'"
+msgid "%s: values for \"%s\" must start with a '/', '~', or '*'"
 msgstr "%s: \"%s\" 的值開頭必須是 '/'、'~' 或 '*'"
 
 #: plugins/sudoers/defaults.c:1040

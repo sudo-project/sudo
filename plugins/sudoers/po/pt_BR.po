@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.3b1\n"
+"Project-Id-Version: sudoers 1.9.3b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-09-12 08:28-0600\n"
-"PO-Revision-Date: 2020-09-14 07:16-0300\n"
+"POT-Creation-Date: 2020-09-14 06:53-0600\n"
+"PO-Revision-Date: 2020-09-18 09:04-0300\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge.net>\n"
 "Language: pt_BR\n"
@@ -1916,13 +1916,13 @@ msgstr "%s: o valor \"%s\" é inválido para a opção \"%s\""
 
 #: plugins/sudoers/defaults.c:1025
 #, c-format
-msgid "%s:%d: values for \"%s\" must start with a '/', '*', or '*'"
-msgstr "%s:%d: valores para \"%s\" devem iniciar com um \"/\", \"*\" ou \"*\""
+msgid "%s:%d: values for \"%s\" must start with a '/', '~', or '*'"
+msgstr "%s:%d: valores para \"%s\" devem iniciar com um \"/\", \"~\" ou \"*\""
 
 #: plugins/sudoers/defaults.c:1029
 #, c-format
-msgid "%s: values for \"%s\" must start with a '/', '*', or '*'"
-msgstr "%s: valores para \"%s\" devem iniciar com um \"/\", '*', ou '*'"
+msgid "%s: values for \"%s\" must start with a '/', '~', or '*'"
+msgstr "%s: valores para \"%s\" devem iniciar com um \"/\", '~', ou '*'"
 
 #: plugins/sudoers/defaults.c:1040
 #, c-format

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sudo 1.9.3b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2020-09-12 08:28-0600\n"
-"PO-Revision-Date: 2020-09-15 20:02-0400\n"
+"PO-Revision-Date: 2020-09-20 12:15-0400\n"
 "Last-Translator: Keith Bowes <zooplah@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -178,7 +178,7 @@ msgstr "%s estas skribebla de la tuta grupo"
 #: src/copy_file.c:91
 #, c-format
 msgid "%s: truncate %s to zero bytes? (y/n) [n] "
-msgstr "%s: ĉu trunki %s ĝis nul bajto? (y/n) [n]"
+msgstr "%s: ĉu distranĉi %s ĝis nul bajto? (y/n) [n]"
 
 #: src/copy_file.c:95
 #, c-format

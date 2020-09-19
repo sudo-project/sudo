@@ -6,10 +6,10 @@
 # Jochen Hein <jochen@jochen.org>, 2001-2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.3b1\n"
+"Project-Id-Version: sudoers 1.9.3b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-09-12 08:28-0600\n"
-"PO-Revision-Date: 2020-09-14 21:26+0200\n"
+"POT-Creation-Date: 2020-09-14 06:53-0600\n"
+"PO-Revision-Date: 2020-09-18 21:49+0200\n"
 "Last-Translator: Jochen Hein <jochen@jochen.org>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "Language: de\n"
@@ -1912,12 +1912,12 @@ msgstr "%s: Der Wert »%s« ist für die Option »%s« ungültig"
 
 #: plugins/sudoers/defaults.c:1025
 #, c-format
-msgid "%s:%d: values for \"%s\" must start with a '/', '*', or '*'"
+msgid "%s:%d: values for \"%s\" must start with a '/', '~', or '*'"
 msgstr "%s:%d: Werte für »%s« müssen mit »/«, »~« oder »*« beginnen"
 
 #: plugins/sudoers/defaults.c:1029
 #, c-format
-msgid "%s: values for \"%s\" must start with a '/', '*', or '*'"
+msgid "%s: values for \"%s\" must start with a '/', '~', or '*'"
 msgstr "%s: Werte für »%s« müssen mit »/«, »~« oder »*« beginnen"
 
 #: plugins/sudoers/defaults.c:1040
