@@ -25537,10 +25537,6 @@ if test "$ac_res" != no; then :
 fi
 
     LIBS="$_LIBS"
-    if test test "${ac_cv_search_crypt}" = "no"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No crypt function found, assuming plaintext passwords" >&5
-$as_echo "$as_me: WARNING: No crypt function found, assuming plaintext passwords" >&2;}
-    fi
 
     if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
 	_LIBS="$LIBS"
@@ -27921,6 +27917,10 @@ fi
 case "$with_passwd" in
 yes|maybe)
     AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
+    if test test "${ac_cv_search_crypt}" = "no"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No crypt function found, assuming plaintext passwords" >&5
+$as_echo "$as_me: WARNING: No crypt function found, assuming plaintext passwords" >&2;}
+    fi
     ;;
 *)
     $as_echo "#define WITHOUT_PASSWD 1" >>confdefs.h

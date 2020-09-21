@@ -4014,9 +4014,6 @@ if test ${with_passwd-'no'} != "no"; then
 	AC_DEFINE(HAVE_CRYPT)
     ])
     LIBS="$_LIBS"
-    if test test "${ac_cv_search_crypt}" = "no"; then
-	AC_MSG_WARN([No crypt function found, assuming plaintext passwords])
-    fi
 
     if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
 	_LIBS="$LIBS"
@@ -4615,6 +4612,9 @@ dnl
 case "$with_passwd" in
 yes|maybe)
     AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
+    if test test "${ac_cv_search_crypt}" = "no"; then
+	AC_MSG_WARN([No crypt function found, assuming plaintext passwords])
+    fi
     ;;
 *)
     AC_DEFINE(WITHOUT_PASSWD)
