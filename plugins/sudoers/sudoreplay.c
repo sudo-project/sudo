@@ -50,27 +50,25 @@
 #endif /* HAVE_STDBOOL_H */
 #include <regex.h>
 #include <signal.h>
-
-#include <pathnames.h>
-
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "logging.h"
-#include "sudo_iolog.h"
-#include "sudo_queue.h"
-#include "sudo_plugin.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_util.h"
-
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
+
+#include "pathnames.h"
+#include "sudo_compat.h"
+#include "sudo_conf.h"
+#include "sudo_debug.h"
+#include "sudo_event.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_iolog.h"
+#include "sudo_plugin.h"
+#include "sudo_queue.h"
+#include "sudo_util.h"
+
+#include "logging.h"
 
 struct replay_closure {
     const char *iolog_dir;
@@ -198,7 +196,7 @@ static void setup_terminal(struct iolog_info *li, bool interactive, bool resize)
     isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
     (s)[8] == '\0')
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])
@@ -448,7 +446,7 @@ getsize_cb(int fd, int what, void *v)
 	    case -1:
 		if (errno == EAGAIN)
 		    goto another;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	    case 0:
 		goto done;
 	    default:
@@ -487,7 +485,7 @@ getsize_cb(int fd, int what, void *v)
 		goto done;
 	    gc->nums[gc->nums_depth] = 0;
 	    gc->state = NUMBER;
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case NUMBER:
 	    if (!isdigit(ch)) {
 		/* done with number, reparse ch */
@@ -510,7 +508,7 @@ getsize_cb(int fd, int what, void *v)
 
 another:
     if (sudo_ev_add(NULL, gc->ev, &gc->timeout, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 done:
     debug_return;
 }
@@ -557,7 +555,7 @@ xterm_get_size(int *new_lines, int *new_cols)
 
     /* Read back terminal size response */
     if (sudo_ev_add(evbase, gc.ev, &gc.timeout, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
     sudo_ev_dispatch(evbase);
 
     if (gc.state == GOTSIZE) {
@@ -625,7 +623,7 @@ setup_terminal(struct iolog_info *li, bool interactive, bool resize)
 	ttyfd = open(_PATH_TTY, O_RDWR);
 	while (!sudo_term_raw(ttyfd, 1)) {
 	    if (errno != EINTR)
-		sudo_fatal(U_("unable to set tty to raw mode"));
+		sudo_fatal("%s", U_("unable to set tty to raw mode"));
 	    kill(getpid(), SIGTTOU);
 	}
     }
@@ -789,7 +787,7 @@ get_timing_record(struct replay_closure *closure)
 
     /* Schedule the delay event. */
     if (sudo_ev_add(closure->evbase, closure->delay_ev, &timing->delay, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     debug_return_int(0);
 }
@@ -901,7 +899,7 @@ delay_cb(int fd, int what, void *v)
     if (timing->iol != NULL) {
 	/* If the stream is open, enable the write event. */
 	if (sudo_ev_add(closure->evbase, closure->output_ev, NULL, false) == -1)
-	    sudo_fatal(U_("unable to add event to queue"));
+	    sudo_fatal("%s", U_("unable to add event to queue"));
     } else {
 	/* Not replaying, get the next timing record and continue. */
 	next_timing_record(closure);
@@ -991,7 +989,7 @@ replay_closure_alloc(int iolog_dir_fd, const char *iolog_dir,
 	if (closure->keyboard_ev == NULL)
 	    goto bad;
 	if (sudo_ev_add(closure->evbase, closure->keyboard_ev, NULL, false) == -1)
-	    sudo_fatal(U_("unable to add event to queue"));
+	    sudo_fatal("%s", U_("unable to add event to queue"));
     }
     closure->output_ev = sudo_ev_alloc(interactive ? ttyfd : STDOUT_FILENO,
 	SUDO_EV_WRITE, write_output, closure);
@@ -1006,35 +1004,35 @@ replay_closure_alloc(int iolog_dir_fd, const char *iolog_dir,
     if (closure->sighup_ev == NULL)
 	goto bad;
     if (sudo_ev_add(closure->evbase, closure->sighup_ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     closure->sigint_ev = sudo_ev_alloc(SIGINT, SUDO_EV_SIGNAL, signal_cb,
 	closure);
     if (closure->sigint_ev == NULL)
 	goto bad;
     if (sudo_ev_add(closure->evbase, closure->sigint_ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     closure->sigquit_ev = sudo_ev_alloc(SIGQUIT, SUDO_EV_SIGNAL, signal_cb,
 	closure);
     if (closure->sigquit_ev == NULL)
 	goto bad;
     if (sudo_ev_add(closure->evbase, closure->sigquit_ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     closure->sigterm_ev = sudo_ev_alloc(SIGTERM, SUDO_EV_SIGNAL, signal_cb,
 	closure);
     if (closure->sigterm_ev == NULL)
 	goto bad;
     if (sudo_ev_add(closure->evbase, closure->sigterm_ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     closure->sigtstp_ev = sudo_ev_alloc(SIGTSTP, SUDO_EV_SIGNAL, signal_cb,
 	closure);
     if (closure->sigtstp_ev == NULL)
 	goto bad;
     if (sudo_ev_add(closure->evbase, closure->sigtstp_ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     debug_return_ptr(closure);
 bad:
@@ -1161,7 +1159,7 @@ write_output(int fd, int what, void *v)
     } else {
 	/* Reschedule event to write remainder. */
 	if (sudo_ev_add(NULL, closure->output_ev, NULL, false) == -1)
-	    sudo_fatal(U_("unable to add event to queue"));
+	    sudo_fatal("%s", U_("unable to add event to queue"));
     }
     debug_return;
 }
@@ -1247,7 +1245,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	    if (av[0][1] != '\0')
 		goto bad;
 	    if (!sub_expr)
-		sudo_fatalx(U_("unmatched ')' in expression"));
+		sudo_fatalx("%s", U_("unmatched ')' in expression"));
 	    debug_return_int(av - argv + 1);
 	default:
 	bad:
@@ -1283,11 +1281,11 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	STAILQ_INSERT_TAIL(head, sn, entries);
     }
     if (sub_expr)
-	sudo_fatalx(U_("unmatched '(' in expression"));
+	sudo_fatalx("%s", U_("unmatched '(' in expression"));
     if (or)
-	sudo_fatalx(U_("illegal trailing \"or\""));
+	sudo_fatalx("%s", U_("illegal trailing \"or\""));
     if (not)
-	sudo_fatalx(U_("illegal trailing \"!\""));
+	sudo_fatalx("%s", U_("illegal trailing \"!\""));
 
     debug_return_int(av - argv);
 }

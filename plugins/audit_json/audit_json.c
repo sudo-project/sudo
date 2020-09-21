@@ -40,17 +40,16 @@
 #include <limits.h>
 #include <time.h>
 
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
+#include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_dso.h"
 #include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_json.h"
 #include "sudo_plugin.h"
 #include "sudo_util.h"
-#include "pathnames.h"
 
 static int audit_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static sudo_conv_t audit_conv;
@@ -414,7 +413,7 @@ audit_write_exit_record(int exit_status, int error)
     debug_decl(audit_write_exit_record, SUDO_DEBUG_PLUGIN);
 
     if (sudo_gettime_real(&now) == -1) {
-	sudo_warn(U_("unable to read the clock"));
+	sudo_warn("%s", U_("unable to read the clock"));
 	goto done;
     }
 
@@ -499,7 +498,7 @@ audit_write_record(const char *audit_str, const char *plugin_name,
     debug_decl(audit_write_record, SUDO_DEBUG_PLUGIN);
 
     if (sudo_gettime_real(&now) == -1) {
-	sudo_warn(U_("unable to read the clock"));
+	sudo_warn("%s", U_("unable to read the clock"));
 	goto done;
     }
 
@@ -684,7 +683,7 @@ audit_json_show_version(int verbose)
     debug_return_int(true);
 }
 
-__dso_public struct audit_plugin audit_json = {
+sudo_dso_public struct audit_plugin audit_json = {
     SUDO_AUDIT_PLUGIN,
     SUDO_API_VERSION,
     audit_json_open,

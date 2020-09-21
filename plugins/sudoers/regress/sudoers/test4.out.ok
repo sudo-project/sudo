@@ -1,4 +1,3 @@
-Parse error in sudoers near line 7.
 
 User_Alias BAR = bar
 User_Alias FOO = foo

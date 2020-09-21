@@ -399,3 +399,9 @@ pam_ruser
 pam_rhost
 	T_FLAG
 	"Set the pam remote host to the local host name"
+runcwd
+	T_STR|T_BOOL|T_CHPATH
+	"Working directory to change to before executing the command: %s"
+runchroot
+	T_STR|T_BOOL|T_CHPATH
+	"Root directory to change to before executing the command: %s"

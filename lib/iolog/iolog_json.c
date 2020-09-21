@@ -37,13 +37,12 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
-#include "sudo_fatal.h"
 #include "sudo_debug.h"
-#include "sudo_util.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_iolog.h"
+#include "sudo_util.h"
 
 #include "iolog_json.h"
 
@@ -189,6 +188,26 @@ json_store_runuser(struct json_item *item, struct iolog_info *li)
 }
 
 static bool
+json_store_runchroot(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_runchroot, SUDO_DEBUG_UTIL);
+
+    li->runchroot = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_runcwd(struct json_item *item, struct iolog_info *li)
+{
+    debug_decl(json_store_runcwd, SUDO_DEBUG_UTIL);
+
+    li->runcwd = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
 json_store_submitcwd(struct json_item *item, struct iolog_info *li)
 {
     debug_decl(json_store_submitcwd, SUDO_DEBUG_UTIL);
@@ -264,6 +283,8 @@ static struct iolog_json_key {
     { "rungroup", JSON_STRING, json_store_rungroup },
     { "runuid", JSON_ID, json_store_runuid },
     { "runuser", JSON_STRING, json_store_runuser },
+    { "runchroot", JSON_STRING, json_store_runchroot },
+    { "runcwd", JSON_STRING, json_store_runcwd },
     { "submitcwd", JSON_STRING, json_store_submitcwd },
     { "submithost", JSON_STRING, json_store_submithost },
     { "submituser", JSON_STRING, json_store_submituser },
@@ -302,14 +323,14 @@ json_parse_string(char **strp)
 	    end++;
     }
     if (*end != '"') {
-	sudo_warnx(U_("missing double quote in name"));
+	sudo_warnx("%s", U_("missing double quote in name"));
 	debug_return_str(NULL);
     }
     len = (size_t)(end - src);
 
     /* Copy string, flattening escaped chars. */
     dst = ret = malloc(len + 1);
-    if (ret == NULL)
+    if (dst == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     while (src < end) {
 	char ch = *src++;
@@ -604,7 +625,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		cp++;
 		if (stack.depth == 0 || frame->parent == NULL ||
 			frame->parent->type != JSON_OBJECT) {
-		    sudo_warnx(U_("unmatched close brace"));
+		    sudo_warnx("%s", U_("unmatched close brace"));
 		    goto parse_error;
 		}
 		frame = stack.frames[--stack.depth];
@@ -613,7 +634,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		cp++;
 		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
-		    sudo_warnx(U_("unexpected array"));
+		    sudo_warnx("%s", U_("unexpected array"));
 		    goto parse_error;
 		}
 		frame = json_stack_push(&stack, &frame->items, frame,
@@ -626,7 +647,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		cp++;
 		if (stack.depth == 0 || frame->parent == NULL ||
 			frame->parent->type != JSON_ARRAY) {
-		    sudo_warnx(U_("unmatched close bracket"));
+		    sudo_warnx("%s", U_("unmatched close bracket"));
 		    goto parse_error;
 		}
 		frame = stack.frames[--stack.depth];
@@ -634,7 +655,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    case '"':
 		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
-		    sudo_warnx(U_("unexpected string"));
+		    sudo_warnx("%s", U_("unexpected string"));
 		    goto parse_error;
 		}
 
@@ -644,7 +665,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 			goto parse_error;
 		    /* TODO: allow colon on next line? */
 		    if (*cp++ != ':') {
-			sudo_warnx(U_("missing colon after name"));
+			sudo_warnx("%s", U_("missing colon after name"));
 			goto parse_error;
 		    }
 		} else {
@@ -655,7 +676,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		break;
 	    case 't':
 		if (!expect_value) {
-		    sudo_warnx(U_("unexpected boolean"));
+		    sudo_warnx("%s", U_("unexpected boolean"));
 		    goto parse_error;
 		}
 		if (strncmp(cp, "true", sizeof("true") - 1) != 0)
@@ -670,7 +691,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		break;
 	    case 'f':
 		if (!expect_value) {
-		    sudo_warnx(U_("unexpected boolean"));
+		    sudo_warnx("%s", U_("unexpected boolean"));
 		    goto parse_error;
 		}
 		if (strncmp(cp, "false", sizeof("false") - 1) != 0)
@@ -685,7 +706,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		break;
 	    case 'n':
 		if (!expect_value) {
-		    sudo_warnx(U_("unexpected boolean"));
+		    sudo_warnx("%s", U_("unexpected boolean"));
 		    goto parse_error;
 		}
 		if (strncmp(cp, "null", sizeof("null") - 1) != 0)
@@ -701,7 +722,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    case '+': case '-': case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7': case '8': case '9':
 		if (!expect_value) {
-		    sudo_warnx(U_("unexpected number"));
+		    sudo_warnx("%s", U_("unexpected number"));
 		    goto parse_error;
 		}
 		/* XXX - strtonumx() would be simpler here. */
@@ -728,9 +749,9 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
     if (stack.depth != 0) {
 	frame = stack.frames[stack.depth - 1];
 	if (frame->parent == NULL || frame->parent->type == JSON_OBJECT)
-	    sudo_warnx(U_("unmatched close brace"));
+	    sudo_warnx("%s", U_("unmatched close brace"));
 	else
-	    sudo_warnx(U_("unmatched close bracket"));
+	    sudo_warnx("%s", U_("unmatched close bracket"));
 	goto parse_error;
     }
 

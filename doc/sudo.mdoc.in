@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 7, 2020
+.Dd September 1, 2020
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -65,9 +65,11 @@
 .if \n(LC \{\
 .Op Fl c Ar class
 .\}
+.Op Fl D Ar directory
 .Op Fl g Ar group
 .Op Fl h Ar host
 .Op Fl p Ar prompt
+.Op Fl R Ar directory
 .if \n(SL \{\
 .Op Fl r Ar role
 .Op Fl t Ar type
@@ -86,9 +88,15 @@
 .if \n(LC \{\
 .Op Fl c Ar class
 .\}
+.Op Fl D Ar directory
 .Op Fl g Ar group
 .Op Fl h Ar host
 .Op Fl p Ar prompt
+.Op Fl R Ar directory
+.if \n(SL \{\
+.Op Fl r Ar role
+.Op Fl t Ar type
+.\}
 .Op Fl T Ar timeout
 .Op Fl u Ar user
 .Ar
@@ -157,6 +165,16 @@ with the
 .Fl v
 option, a user can update the cached credentials without running a
 .Ar command .
+.Pp
+On systems where
+.Nm
+is the primary method of gaining superuser privileges, it is imperative
+to avoid syntax errors in the security policy configuration files.
+For the default security policy,
+.Xr sudoers @mansectform@ ,
+changes to the configuration files should be made using the
+.Xr visudo @mansectsu@
+utility which will ensure that no syntax errors are introduced.
 .Pp
 When invoked as
 .Nm sudoedit ,
@@ -269,6 +287,12 @@ This option is only available on systems with
 .Bx
 login classes.
 .\}
+.It Fl D Ar directory , Fl -chdir Ns = Ns Ar directory
+Run the command in the specified
+.Ar directory
+instead of the current working directory.
+The security policy may return an error if the user does not have
+permission to specify the working directory.
 .It Fl E , -preserve-env
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
@@ -336,6 +360,8 @@ If the specified file does not exist, it will be created.
 Note that unlike most commands run by
 .Em sudo ,
 the editor is run with the invoking user's environment unmodified.
+If the temporary file becomes empty after editing, the user will
+be prompted before it is installed.
 If, for some reason,
 .Nm
 is unable to update a file with its edited version, the user will
@@ -533,6 +559,14 @@ specified by a PAM module unless the
 .Em passprompt_override
 flag is disabled in
 .Em sudoers .
+.It Fl R Ar directory , Fl -chroot Ns = Ns Ar directory
+Change to the specified root
+.Ar directory
+(see
+.Xr chroot @mansectsu@ )
+before running the command.
+The security policy may return an error if the user does not have
+permission to specify the root directory.
 .if \n(SL \{\
 .It Fl r Ar role , Fl -role Ns = Ns Ar role
 Run the command with an SELinux security context that includes
@@ -871,13 +905,13 @@ or compiled directly into the
 binary.
 If no
 .Xr sudo.conf @mansectform@
-file is present, or it contains no
+file is present, or if it doesn't contain any
 .Li Plugin
 lines,
 .Nm
-will use the traditional
-.Em sudoers
-security policy and I/O logging.
+will use
+.Xr sudoers @mansectform@
+for the policy, auditing and I/O logging plugins.
 See the
 .Xr sudo.conf @mansectform@
 manual for details of the

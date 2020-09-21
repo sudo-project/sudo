@@ -25,26 +25,24 @@
 #define SUDO_SUDO_H
 
 #include <limits.h>
-#include <pathnames.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
-
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_queue.h"
-#include "sudo_event.h"
-#include "sudo_util.h"
-
 #ifdef HAVE_PRIV_SET
 # include <priv.h>
 #endif
+
+#include "pathnames.h"
+#include "sudo_compat.h"
+#include "sudo_conf.h"
+#include "sudo_debug.h"
+#include "sudo_event.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_queue.h"
+#include "sudo_util.h"
 
 /* Enable asserts() to avoid static analyzer false positives. */
 #if !(defined(SUDO_DEVEL) || defined(__clang_analyzer__) || defined(__COVERITY__))
@@ -295,5 +293,6 @@ void restore_limits(void);
 void restore_nproc(void);
 void unlimit_nproc(void);
 void unlimit_sudo(void);
+int serialize_limits(char **info, size_t info_max);
 
 #endif /* SUDO_SUDO_H */

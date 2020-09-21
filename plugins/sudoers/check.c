@@ -121,7 +121,7 @@ check_user_interactive(int validated, int mode, struct getpass_closure *closure)
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: check user flag overrides time stamp", __func__);
-	/* FALLTHROUGH */
+	FALLTHROUGH;
 
     default:
 	/* Bail out if we are non-interactive and a password is required */

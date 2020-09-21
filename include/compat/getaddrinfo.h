@@ -66,10 +66,10 @@ struct addrinfo {
 #define EAI_OVERFLOW    10      /* An argument buffer overflowed */
 
 /* Function prototypes. */
-__dso_public int sudo_getaddrinfo(const char *nodename, const char *servname,
+sudo_dso_public int sudo_getaddrinfo(const char *nodename, const char *servname,
                 const struct addrinfo *hints, struct addrinfo **res);
-__dso_public void sudo_freeaddrinfo(struct addrinfo *ai);
-__dso_public const char *sudo_gai_strerror(int ecode);
+sudo_dso_public void sudo_freeaddrinfo(struct addrinfo *ai);
+sudo_dso_public const char *sudo_gai_strerror(int ecode);
 
 /* Map sudo_* to RFC 3493 names. */
 #undef getaddrinfo

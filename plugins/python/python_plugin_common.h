@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Robert Manner <robert.manner@oneidentity.com>
+ * Copyright (c) 2019-2020 Robert Manner <robert.manner@oneidentity.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -76,7 +76,7 @@ const char *python_plugin_name(struct PluginContext *plugin_ctx);
 // version is enough and "errstr" is valid
 #define CALLBACK_SET_ERROR(plugin_ctx, errstr) \
     do { \
-        if ((plugin_ctx)->sudo_api_version >= SUDO_API_MKVERSION(1, 15) && errstr != NULL) { \
+        if ((plugin_ctx)->sudo_api_version >= SUDO_API_MKVERSION(1, 15)) { \
             if (errstr != NULL) \
                 *errstr = (plugin_ctx)->callback_error; \
         } \

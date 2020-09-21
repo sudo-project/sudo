@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,10 +32,32 @@
 #include "sudo_util.h"
 #include "sudo_debug.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 extern char *get_process_ttyname(char *name, size_t namelen);
+
+static int
+match_ttys(const char *tty1, const char *tty2)
+{
+    struct stat sb1, sb2;
+
+    if (tty1 != NULL && tty2 != NULL) {
+	if (strcmp(tty1, tty2) == 0)
+	    return 0;
+	/* Could be the same device with a different name. */
+	if (stat(tty1, &sb1) == 0 && S_ISCHR(sb1.st_mode) &&
+	    stat(tty2, &sb2) == 0 && S_ISCHR(sb2.st_mode)) {
+	    if (sb1.st_rdev == sb2.st_rdev)
+		return 0;
+	}
+    } else if (tty1 == NULL && tty2 == NULL) {
+	return 0;
+    }
+
+    return 1;
+}
+
 
 int
 main(int argc, char *argv[])
@@ -61,13 +84,7 @@ main(int argc, char *argv[])
 #endif
 
     /* Compare libc and kernel ttys. */
-    if (tty_libc != NULL && tty_sudo != NULL) {
-	if (strcmp(tty_libc, tty_sudo) == 0)
-	    ret = 0;
-    } else if (tty_libc == NULL && tty_sudo == NULL) {
-	ret = 0;
-    }
-
+    ret = match_ttys(tty_libc, tty_sudo);
     if (ret == 0) {
 	printf("%s: OK (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
     } else if (tty_libc == NULL) {

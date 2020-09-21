@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,19 +37,22 @@
 #include "sudo_compat.h"
 #include "sudo_util.h"
 
-#if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1
-#  define sudo_sys_signame	sys_signame
-#elif defined(HAVE_DECL__SYS_SIGNAME) && HAVE_DECL__SYS_SIGNAME == 1
-#  define sudo_sys_signame	_sys_signame
-#elif defined(HAVE_DECL_SYS_SIGABBREV) && HAVE_DECL_SYS_SIGABBREV == 1
-#  define sudo_sys_signame	sys_sigabbrev
-#else
-# ifdef HAVE_SYS_SIGABBREV
-   /* sys_sigabbrev is not declared by glibc */
-#  define sudo_sys_signame	sys_sigabbrev
+#if !defined(HAVE_SIGABBREV_NP)
+# if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1
+#   define sigabbrev_np(_x)	sys_signame[(_x)]
+# elif defined(HAVE_DECL__SYS_SIGNAME) && HAVE_DECL__SYS_SIGNAME == 1
+#   define sigabbrev_np(_x)	_sys_signame[(_x)]
+# elif defined(HAVE_SYS_SIGABBREV)
+#   define sigabbrev_np(_x)	sys_sigabbrev[(_x)]
+#  if defined(HAVE_DECL_SYS_SIGABBREV) && HAVE_DECL_SYS_SIGABBREV == 0
+    /* sys_sigabbrev is not declared by glibc */
+    extern const char *const sys_sigabbrev[NSIG];
+#  endif
+# else
+#   define sigabbrev_np(_x)	sudo_sys_signame[(_x)]
+    extern const char *const sudo_sys_signame[NSIG];
 # endif
-extern const char *const sudo_sys_signame[NSIG];
-#endif
+#endif /* !HAVE_SIGABBREV_NP */
 
 /*
  * Many systems use aliases for source backward compatibility.
@@ -154,11 +157,11 @@ sudo_str2sig(const char *signame, int *result)
 	}
     }
 
-    /* Check sys_signame[]. */
     for (signo = 1; signo < NSIG; signo++) {
-	if (sudo_sys_signame[signo] != NULL) {
+	const char *cp = sigabbrev_np(signo);
+	if (cp != NULL) {
 	    /* On macOS sys_signame[] may contain lower-case names. */
-	    if (strcasecmp(signame, sudo_sys_signame[signo]) == 0) {
+	    if (strcasecmp(signame, cp) == 0) {
 		*result = signo;
 		return 0;
 	    }

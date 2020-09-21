@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -49,13 +49,14 @@ struct sudoers_exec_args {
 
 static unsigned int sudo_version;
 static const char *interfaces_string;
+bool sudoers_recovery = true;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
 static bool session_opened;
 
-extern __dso_public struct policy_plugin sudoers_policy;
+extern sudo_dso_public struct policy_plugin sudoers_policy;
 
 #ifdef HAVE_BSD_AUTH_H
 extern char *login_style;
@@ -97,10 +98,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 #define MATCHES(s, v)	\
     (strncmp((s), (v), sizeof(v) - 1) == 0)
 
+#define INVALID(v) do {	\
+    sudo_warn(U_("invalid %.*s set by sudo front-end"), \
+	(int)(sizeof(v) - 2), (v)); \
+} while (0)
+
 #define CHECK(s, v) do {	\
     if ((s)[sizeof(v) - 1] == '\0') { \
-	sudo_warn(U_("invalid %.*s set by sudo front-end"), \
-	    (int)(sizeof(v) - 2), v); \
+	INVALID(v); \
 	goto bad; \
     } \
 } while (0)
@@ -108,6 +113,15 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     /* Parse sudo.conf plugin args. */
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
+	    if (MATCHES(*cur, "error_recovery=")) {
+		int val = sudo_strtobool(*cur + sizeof("error_recovery=") - 1);
+		if (val == -1) {
+		    INVALID("error_recovery=");	/* Not a fatal error. */
+		} else {
+		    sudoers_recovery = val;
+		}
+		continue;
+	    }
 	    if (MATCHES(*cur, "sudoers_file=")) {
 		CHECK(*cur, "sudoers_file=");
 		sudoers_file = *cur + sizeof("sudoers_file=") - 1;
@@ -164,6 +178,16 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
+	    continue;
+	}
+	if (MATCHES(*cur, "cmnd_chroot=")) {
+	    CHECK(*cur, "cmnd_chroot=");
+	    user_runchroot = *cur + sizeof("cmnd_chroot=") - 1;
+	    continue;
+	}
+	if (MATCHES(*cur, "cmnd_cwd=")) {
+	    CHECK(*cur, "cmnd_cwd=");
+	    user_runcwd = *cur + sizeof("cmnd_cwd=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_user=")) {
@@ -278,7 +302,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "network_addrs=")) {
 	    interfaces_string = *cur + sizeof("network_addrs=") - 1;
 	    if (!set_interfaces(interfaces_string)) {
-		sudo_warn(U_("unable to parse network address list"));
+		sudo_warn("%s", U_("unable to parse network address list"));
 		goto bad;
 	    }
 	    continue;
@@ -423,19 +447,19 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 
     /* User name, user-ID, group-ID and host name must be specified. */
     if (user_name == NULL) {
-	sudo_warnx(U_("user name not set by sudo front-end"));
+	sudo_warnx("%s", U_("user name not set by sudo front-end"));
 	goto bad;
     }
     if (user_uid == (uid_t)-1) {
-	sudo_warnx(U_("user-ID not set by sudo front-end"));
+	sudo_warnx("%s", U_("user-ID not set by sudo front-end"));
 	goto bad;
     }
     if (user_gid == (gid_t)-1) {
-	sudo_warnx(U_("group-ID not set by sudo front-end"));
+	sudo_warnx("%s", U_("group-ID not set by sudo front-end"));
 	goto bad;
     }
     if (user_host == NULL) {
-	sudo_warnx(U_("host name not set by sudo front-end"));
+	sudo_warnx("%s", U_("host name not set by sudo front-end"));
 	goto bad;
     }
 
@@ -450,6 +474,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     }
     if (user_cwd == NULL) {
 	if ((user_cwd = strdup("unknown")) == NULL)
+	    goto oom;
+    }
+    if (user_runcwd == NULL) {
+	if ((user_runcwd = strdup(user_cwd)) == NULL)
 	    goto oom;
     }
     if (user_tty == NULL) {
@@ -485,6 +513,8 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "user_info: %s", *cur);
 
 #undef MATCHES
+#undef INVALID
+#undef CHECK
     debug_return_int(flags);
 
 oom:
@@ -551,7 +581,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	debug_return_bool(true);	/* nothing to do */
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(54, sizeof(char *));
+    command_info = calloc(55, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -602,7 +632,15 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 		goto oom;
 	}
     }
-    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+    if (def_runcwd && strcmp(def_runcwd, "*") != 0) {
+	/* Set cwd to explicit value in sudoers. */
+	if (!expand_tilde(&def_runcwd, runas_pw->pw_name)) {
+	    sudo_warnx(U_("invalid working directory: %s"), def_runcwd);
+	    goto bad;
+	}
+	if ((command_info[info_len++] = sudo_new_key_val("cwd", def_runcwd)) == NULL)
+	    goto oom;
+    } else if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Set cwd to run user's homedir. */
 	if ((command_info[info_len++] = sudo_new_key_val("cwd", runas_pw->pw_dir)) == NULL)
 	    goto oom;
@@ -762,6 +800,14 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    timeout = def_command_timeout;
 	if (asprintf(&command_info[info_len++], "timeout=%u", timeout) == -1)
 	    goto oom;
+    }
+    if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
+	if (!expand_tilde(&def_runchroot, runas_pw->pw_name)) {
+	    sudo_warnx(U_("invalid chroot directory: %s"), def_runchroot);
+	    goto bad;
+	}
+        if ((command_info[info_len++] = sudo_new_key_val("chroot", def_runchroot)) == NULL)
+            goto oom;
     }
     if (cmnd_umask != ACCESSPERMS) {
 	if (asprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask) == -1)
@@ -1109,7 +1155,7 @@ sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook
     }
 }
 
-__dso_public struct policy_plugin sudoers_policy = {
+sudo_dso_public struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
     sudoers_policy_open,

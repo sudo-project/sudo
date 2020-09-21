@@ -65,34 +65,34 @@ struct json_container {
     bool need_comma;
 };
 
-__dso_public bool sudo_json_init_v1(struct json_container *json, int indent, bool compact, bool memfatal);
+sudo_dso_public bool sudo_json_init_v1(struct json_container *json, int indent, bool compact, bool memfatal);
 #define sudo_json_init(_a, _b, _c, _d) sudo_json_init_v1((_a), (_b), (_c), (_d))
 
-__dso_public void sudo_json_free_v1(struct json_container *json);
+sudo_dso_public void sudo_json_free_v1(struct json_container *json);
 #define sudo_json_free(_a) sudo_json_free_v1((_a))
 
-__dso_public bool sudo_json_open_object_v1(struct json_container *json, const char *name);
+sudo_dso_public bool sudo_json_open_object_v1(struct json_container *json, const char *name);
 #define sudo_json_open_object(_a, _b) sudo_json_open_object_v1((_a), (_b))
 
-__dso_public bool sudo_json_close_object_v1(struct json_container *json);
+sudo_dso_public bool sudo_json_close_object_v1(struct json_container *json);
 #define sudo_json_close_object(_a) sudo_json_close_object_v1((_a))
 
-__dso_public bool sudo_json_open_array_v1(struct json_container *json, const char *name);
+sudo_dso_public bool sudo_json_open_array_v1(struct json_container *json, const char *name);
 #define sudo_json_open_array(_a, _b) sudo_json_open_array_v1((_a), (_b))
 
-__dso_public bool sudo_json_close_array_v1(struct json_container *json);
+sudo_dso_public bool sudo_json_close_array_v1(struct json_container *json);
 #define sudo_json_close_array(_a) sudo_json_close_array_v1((_a))
 
-__dso_public bool sudo_json_add_value_v1(struct json_container *json, const char *name, struct json_value *value);
+sudo_dso_public bool sudo_json_add_value_v1(struct json_container *json, const char *name, struct json_value *value);
 #define sudo_json_add_value(_a, _b, _c) sudo_json_add_value_v1((_a), (_b), (_c))
 
-__dso_public bool sudo_json_add_value_as_object_v1(struct json_container *json, const char *name, struct json_value *value);
+sudo_dso_public bool sudo_json_add_value_as_object_v1(struct json_container *json, const char *name, struct json_value *value);
 #define sudo_json_add_value_as_object(_a, _b, _c) sudo_json_add_value_as_object_v1((_a), (_b), (_c))
 
-__dso_public char *sudo_json_get_buf_v1(struct json_container *json);
+sudo_dso_public char *sudo_json_get_buf_v1(struct json_container *json);
 #define sudo_json_get_buf(_a) sudo_json_get_buf_v1((_a))
 
-__dso_public unsigned int sudo_json_get_len_v1(struct json_container *json);
+sudo_dso_public unsigned int sudo_json_get_len_v1(struct json_container *json);
 #define sudo_json_get_len(_a) sudo_json_get_len_v1((_a))
 
 #endif /* SUDO_JSON_H */

@@ -30,12 +30,6 @@
     !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
 # include <stdarg.h>
 #endif
-#if !defined(HAVE_MEMSET_S) && !defined(rsize_t)
-# include <stddef.h>	/* for rsize_t */
-# ifdef HAVE_STRING_H
-#  include <string.h>	/* for rsize_t on AIX */
-# endif /* HAVE_STRING_H */
-#endif /* HAVE_MEMSET_S && rsize_t */
 
 /*
  * Macros and functions that may be missing on some operating systems.
@@ -80,30 +74,18 @@
 # endif
 #endif
 
+#ifdef HAVE_FALLTHROUGH_ATTRIBUTE
+# define FALLTHROUGH 	__attribute__((__fallthrough__))
+#else
+# define FALLTHROUGH 	do { } while (0)
+#endif
+
 /*
  * Given the pointer x to the member m of the struct s, return
  * a pointer to the containing structure.
  */
 #ifndef __containerof
 # define __containerof(x, s, m)	((s *)((char *)(x) - offsetof(s, m)))
-#endif
-
-#ifndef __dso_public
-# ifdef HAVE_DSO_VISIBILITY
-#  if defined(__GNUC__)
-#   define __dso_public	__attribute__((__visibility__("default")))
-#   define __dso_hidden	__attribute__((__visibility__("hidden")))
-#  elif defined(__SUNPRO_C)
-#   define __dso_public	__global
-#   define __dso_hidden __hidden
-#  else
-#   define __dso_public	__declspec(dllexport)
-#   define __dso_hidden
-#  endif
-# else
-#  define __dso_public
-#  define __dso_hidden
-# endif
 #endif
 
 /*
@@ -259,7 +241,7 @@
  * Simple isblank() macro and function for systems without it.
  */
 #ifndef HAVE_ISBLANK
-__dso_public int isblank(int);
+sudo_dso_public int isblank(int);
 # define isblank(_x)	((_x) == ' ' || (_x) == '\t')
 #endif
 
@@ -427,27 +409,37 @@ struct timespec;
 struct termios;
 
 #ifndef HAVE_CFMAKERAW
-__dso_public void sudo_cfmakeraw(struct termios *term);
+sudo_dso_public void sudo_cfmakeraw(struct termios *term);
 # undef cfmakeraw
 # define cfmakeraw(_a) sudo_cfmakeraw((_a))
 #endif /* HAVE_CFMAKERAW */
 #ifndef HAVE_CLOSEFROM
-__dso_public void sudo_closefrom(int);
+sudo_dso_public void sudo_closefrom(int);
 # undef closefrom
 # define closefrom(_a) sudo_closefrom((_a))
 #endif /* HAVE_CLOSEFROM */
+#ifndef HAVE_EXPLICIT_BZERO
+sudo_dso_public void sudo_explicit_bzero(void *s, size_t n);
+# undef explicit_bzero
+# define explicit_bzero(_a, _b) sudo_explicit_bzero((_a), (_b))
+#endif /* HAVE_EXPLICIT_BZERO */
+#ifndef HAVE_FREEZERO
+sudo_dso_public void sudo_freezero(void *p, size_t n);
+# undef freezero
+# define freezero(_a, _b) sudo_freezero((_a), (_b))
+#endif /* HAVE_FREEZERO */
 #ifdef PREFER_PORTABLE_GETCWD
-__dso_public char *sudo_getcwd(char *, size_t size);
+sudo_dso_public char *sudo_getcwd(char *, size_t size);
 # undef getcwd
 # define getcwd(_a, _b) sudo_getcwd((_a), (_b))
 #endif /* PREFER_PORTABLE_GETCWD */
 #ifndef HAVE_GETGROUPLIST
-__dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GETGROUPS_T *groups, int *ngroupsp);
+sudo_dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GETGROUPS_T *groups, int *ngroupsp);
 # undef getgrouplist
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
 #if !defined(HAVE_GETDELIM)
-__dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+sudo_dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
 # undef getdelim
 # define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
 #elif defined(HAVE_DECL_GETDELIM) && !HAVE_DECL_GETDELIM
@@ -455,161 +447,156 @@ __dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FIL
 ssize_t getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
 #endif /* HAVE_GETDELIM */
 #ifndef HAVE_GETUSERSHELL
-__dso_public char *sudo_getusershell(void);
+sudo_dso_public char *sudo_getusershell(void);
 # undef getusershell
 # define getusershell() sudo_getusershell()
-__dso_public void sudo_setusershell(void);
+sudo_dso_public void sudo_setusershell(void);
 # undef setusershell
 # define setusershell() sudo_setusershell()
-__dso_public void sudo_endusershell(void);
+sudo_dso_public void sudo_endusershell(void);
 # undef endusershell
 # define endusershell() sudo_endusershell()
 #endif /* HAVE_GETUSERSHELL */
 #ifndef HAVE_UTIMENSAT
-__dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
+sudo_dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
 # undef utimensat
 # define utimensat(_a, _b, _c, _d) sudo_utimensat((_a), (_b), (_c), (_d))
 #endif /* HAVE_UTIMENSAT */
 #ifndef HAVE_FCHMODAT
-__dso_public int sudo_fchmodat(int dfd, const char *path, mode_t mode, int flag);
+sudo_dso_public int sudo_fchmodat(int dfd, const char *path, mode_t mode, int flag);
 # undef fchmodat
 # define fchmodat(_a, _b, _c, _d) sudo_fchmodat((_a), (_b), (_c), (_d))
 #endif /* HAVE_FCHMODAT */
 #ifndef HAVE_FSTATAT
-__dso_public int sudo_fstatat(int dfd, const char *path, struct stat *sb, int flag);
+sudo_dso_public int sudo_fstatat(int dfd, const char *path, struct stat *sb, int flag);
 # undef fstatat
 # define fstatat(_a, _b, _c, _d) sudo_fstatat((_a), (_b), (_c), (_d))
 #endif /* HAVE_FSTATAT */
 #ifndef HAVE_FUTIMENS
-__dso_public int sudo_futimens(int fd, const struct timespec *times);
+sudo_dso_public int sudo_futimens(int fd, const struct timespec *times);
 # undef futimens
 # define futimens(_a, _b) sudo_futimens((_a), (_b))
 #endif /* HAVE_FUTIMENS */
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-__dso_public int sudo_snprintf(char *str, size_t n, char const *fmt, ...) __printflike(3, 4);
+sudo_dso_public int sudo_snprintf(char *str, size_t n, char const *fmt, ...) __printflike(3, 4);
 # undef snprintf
 # define snprintf sudo_snprintf
 #endif /* HAVE_SNPRINTF */
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-__dso_public int sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap) __printflike(3, 0);
+sudo_dso_public int sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap) __printflike(3, 0);
 # undef vsnprintf
 # define vsnprintf sudo_vsnprintf
 #endif /* HAVE_VSNPRINTF */
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-__dso_public int sudo_asprintf(char **str, char const *fmt, ...) __printflike(2, 3);
+sudo_dso_public int sudo_asprintf(char **str, char const *fmt, ...) __printflike(2, 3);
 # undef asprintf
 # define asprintf sudo_asprintf
 #endif /* HAVE_ASPRINTF */
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-__dso_public int sudo_vasprintf(char **str, const char *fmt, va_list ap) __printflike(2, 0);
+sudo_dso_public int sudo_vasprintf(char **str, const char *fmt, va_list ap) __printflike(2, 0);
 # undef vasprintf
 # define vasprintf sudo_vasprintf
 #endif /* HAVE_VASPRINTF */
 #ifndef HAVE_STRLCAT
-__dso_public size_t sudo_strlcat(char *dst, const char *src, size_t siz);
+sudo_dso_public size_t sudo_strlcat(char *dst, const char *src, size_t siz);
 # undef strlcat
 # define strlcat(_a, _b, _c) sudo_strlcat((_a), (_b), (_c))
 #endif /* HAVE_STRLCAT */
 #ifndef HAVE_STRLCPY
-__dso_public size_t sudo_strlcpy(char *dst, const char *src, size_t siz);
+sudo_dso_public size_t sudo_strlcpy(char *dst, const char *src, size_t siz);
 # undef strlcpy
 # define strlcpy(_a, _b, _c) sudo_strlcpy((_a), (_b), (_c))
 #endif /* HAVE_STRLCPY */
 #ifndef HAVE_STRNDUP
-__dso_public char *sudo_strndup(const char *str, size_t maxlen);
+sudo_dso_public char *sudo_strndup(const char *str, size_t maxlen);
 # undef strndup
 # define strndup(_a, _b) sudo_strndup((_a), (_b))
 #endif /* HAVE_STRNDUP */
 #ifndef HAVE_STRNLEN
-__dso_public size_t sudo_strnlen(const char *str, size_t maxlen);
+sudo_dso_public size_t sudo_strnlen(const char *str, size_t maxlen);
 # undef strnlen
 # define strnlen(_a, _b) sudo_strnlen((_a), (_b))
 #endif /* HAVE_STRNLEN */
 #ifndef HAVE_MEMRCHR
-__dso_public void *sudo_memrchr(const void *s, int c, size_t n);
+sudo_dso_public void *sudo_memrchr(const void *s, int c, size_t n);
 # undef memrchr
 # define memrchr(_a, _b, _c) sudo_memrchr((_a), (_b), (_c))
 #endif /* HAVE_MEMRCHR */
-#ifndef HAVE_MEMSET_S
-__dso_public errno_t sudo_memset_s(void *v, rsize_t smax, int c, rsize_t n);
-# undef memset_s
-# define memset_s(_a, _b, _c, _d) sudo_memset_s((_a), (_b), (_c), (_d))
-#endif /* HAVE_MEMSET_S */
 #if !defined(HAVE_MKDTEMP) || !defined(HAVE_MKSTEMPS)
-__dso_public char *sudo_mkdtemp(char *path);
+sudo_dso_public char *sudo_mkdtemp(char *path);
 # undef mkdtemp
 # define mkdtemp(_a) sudo_mkdtemp((_a))
-__dso_public int sudo_mkstemps(char *path, int slen);
+sudo_dso_public int sudo_mkstemps(char *path, int slen);
 # undef mkstemps
 # define mkstemps(_a, _b) sudo_mkstemps((_a), (_b))
 #endif /* !HAVE_MKDTEMP || !HAVE_MKSTEMPS */
 #ifndef HAVE_NANOSLEEP
-__dso_public int sudo_nanosleep(const struct timespec *timeout, struct timespec *remainder);
+sudo_dso_public int sudo_nanosleep(const struct timespec *timeout, struct timespec *remainder);
 #undef nanosleep
 # define nanosleep(_a, _b) sudo_nanosleep((_a), (_b))
 #endif /* HAVE_NANOSLEEP */
 #ifndef HAVE_OPENAT
-__dso_public int sudo_openat(int dfd, const char *path, int flags, mode_t mode);
+sudo_dso_public int sudo_openat(int dfd, const char *path, int flags, mode_t mode);
 # undef openat
 # define openat(_a, _b, _c, _d) sudo_openat((_a), (_b), (_c), (_d))
 #endif /* HAVE_OPENAT */
 #ifndef HAVE_PW_DUP
-__dso_public struct passwd *sudo_pw_dup(const struct passwd *pw);
+sudo_dso_public struct passwd *sudo_pw_dup(const struct passwd *pw);
 # undef pw_dup
 # define pw_dup(_a) sudo_pw_dup((_a))
 #endif /* HAVE_PW_DUP */
 #ifndef HAVE_STRSIGNAL
-__dso_public char *sudo_strsignal(int signo);
+sudo_dso_public char *sudo_strsignal(int signo);
 # undef strsignal
 # define strsignal(_a) sudo_strsignal((_a))
 #endif /* HAVE_STRSIGNAL */
 #ifndef HAVE_SIG2STR
-__dso_public int sudo_sig2str(int signo, char *signame);
+sudo_dso_public int sudo_sig2str(int signo, char *signame);
 # undef sig2str
 # define sig2str(_a, _b) sudo_sig2str((_a), (_b))
 #endif /* HAVE_SIG2STR */
 #ifndef HAVE_STR2SIG
-__dso_public int sudo_str2sig(const char *signame, int *signum);
+sudo_dso_public int sudo_str2sig(const char *signame, int *signum);
 # undef str2sig
 # define str2sig(_a, _b) sudo_str2sig((_a), (_b))
 #endif /* HAVE_STR2SIG */
 #if !defined(HAVE_INET_NTOP) && defined(NEED_INET_NTOP)
-__dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
+sudo_dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
 # undef inet_ntop
 # define inet_ntop(_a, _b, _c, _d) sudo_inet_ntop((_a), (_b), (_c), (_d))
 #endif /* HAVE_INET_NTOP */
 #ifndef HAVE_INET_PTON
-__dso_public int sudo_inet_pton(int af, const char *src, void *dst);
+sudo_dso_public int sudo_inet_pton(int af, const char *src, void *dst);
 # undef inet_pton
 # define inet_pton(_a, _b, _c) sudo_inet_pton((_a), (_b), (_c))
 #endif /* HAVE_INET_PTON */
 #ifndef HAVE_GETPROGNAME
-__dso_public const char *sudo_getprogname(void);
+sudo_dso_public const char *sudo_getprogname(void);
 # undef getprogname
 # define getprogname() sudo_getprogname()
 #endif /* HAVE_GETPROGNAME */
 #ifndef HAVE_REALLOCARRAY
-__dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
+sudo_dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # undef reallocarray
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
 #ifndef HAVE_VSYSLOG
-__dso_public void sudo_vsyslog(int pri, const char *fmt, va_list ap);
+sudo_dso_public void sudo_vsyslog(int pri, const char *fmt, va_list ap);
 # undef vsyslog
 # define vsyslog(_a, _b, _c) sudo_vsyslog((_a), (_b), (_c))
 #endif /* HAVE_VSYSLOG */
 #ifndef HAVE_DUP3
-__dso_public int sudo_dup3(int oldd, int newd, int flags);
+sudo_dso_public int sudo_dup3(int oldd, int newd, int flags);
 # undef dup3
 # define dup3(_a, _b, _c) sudo_dup3((_a), (_b), (_c))
 #endif /* HAVE_DUP3 */
 #ifndef HAVE_PIPE2
-__dso_public int sudo_pipe2(int fildes[2], int flags);
+sudo_dso_public int sudo_pipe2(int fildes[2], int flags);
 # undef pipe2
 # define pipe2(_a, _b) sudo_pipe2((_a), (_b))
 #endif /* HAVE_PIPE2 */
 #ifndef HAVE_UNLINKAT
-__dso_public int sudo_unlinkat(int dfd, const char *path, int flag);
+sudo_dso_public int sudo_unlinkat(int dfd, const char *path, int flag);
 # undef unlinkat
 # define unlinkat(_a, _b, _c) sudo_unlinkat((_a), (_b), (_c))
 #endif /* HAVE_UNLINKAT */

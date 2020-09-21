@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2015, 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2015, 2017-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -90,9 +90,9 @@ static struct termios term, oterm;
 static int changed;
 
 /* tgetpass() needs to know the erase and kill chars for cbreak mode. */
-__dso_public int sudo_term_eof;
-__dso_public int sudo_term_erase;
-__dso_public int sudo_term_kill;
+sudo_dso_public int sudo_term_eof;
+sudo_dso_public int sudo_term_erase;
+sudo_dso_public int sudo_term_kill;
 
 static volatile sig_atomic_t got_sigttou;
 

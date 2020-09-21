@@ -503,6 +503,7 @@ getentropy_fallback(void *buf, size_t len)
 						    / pgs);
 					}
 
+#ifdef HAVE_CLOCK_GETTIME
 					/* Check cnts and times... */
 					for (ii = 0; ii < sizeof(cl)/sizeof(cl[0]);
 					    ii++) {
@@ -511,6 +512,7 @@ getentropy_fallback(void *buf, size_t len)
 						if (e != -1)
 							cnt += (int)ts.tv_nsec;
 					}
+#endif /* HAVE_CLOCK_GETTIME */
 
 					HX((e = getrusage(RUSAGE_SELF,
 					    &ru)) == -1, ru);
@@ -613,10 +615,8 @@ getentropy_fallback(void *buf, size_t len)
 	}
 done:
 	sudo_digest_free(ctx);
-	if (results != NULL) {
-		memset_s(results, sizeof(results), 0, sizeof(results));
-		free(results);
-	}
+	if (results != NULL)
+		freezero(results, sizeof(results));
 	return (ret);
 }
 

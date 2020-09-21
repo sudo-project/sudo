@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Robert Manner <robert.manner@oneidentity.com>
+ * Copyright (c) 2019-2020 Robert Manner <robert.manner@oneidentity.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -230,7 +230,7 @@ python_plugin_io_log_suspend(struct IOPluginContext *io_ctx, int signo, const ch
 }
 
 // generate symbols for loading multiple io plugins:
-__dso_public struct io_plugin python_io;
+sudo_dso_public struct io_plugin python_io;
 #define IO_SYMBOL_NAME(symbol) symbol
 #include "python_plugin_io_multi.inc"
 #define IO_SYMBOL_NAME(symbol) symbol##1
@@ -258,7 +258,7 @@ static struct io_plugin *extra_io_plugins[] = {
     &python_io7
 };
 
-__dso_public struct io_plugin *
+sudo_dso_public struct io_plugin *
 python_io_clone(void)
 {
     static size_t counter = 0;

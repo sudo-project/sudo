@@ -9,17 +9,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "sudo_compat.h"
-#include "sudo_util.h"
-
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
 # include "compat/fnmatch.h"
 #endif
 
-__dso_public int main(int argc, char *argv[]);
+#include "sudo_compat.h"
+#include "sudo_util.h"
+
+sudo_dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])

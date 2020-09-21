@@ -201,9 +201,9 @@ $(shlib_opt): $(shlib_exp)
 libsudo_util.la: $(LTOBJS) @LT_LDDEP@
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) \
-	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) @LT_DEP_LIBS@ @LIBINTL@ @LIBMD@ @LIBPTHREAD@ @LIBDL@ @LIBRT@;; \
+	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) @LT_DEP_LIBS@ @LIBINTL@ @LIBMD@ @LIBPTHREAD@ @LIBDL@ @LIBRT@ @NET_LIBS@;; \
 	*) \
-	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBINTL@ @LIBMD@ @LIBPTHREAD@ @LIBDL@ @LIBRT@;; \
+	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBINTL@ @LIBMD@ @LIBPTHREAD@ @LIBDL@ @LIBRT@ @NET_LIBS@;; \
 	esac
 
 siglist.c: mksiglist
@@ -455,6 +455,14 @@ arc4random_uniform.i: $(srcdir)/arc4random_uniform.c $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 arc4random_uniform.plog: arc4random_uniform.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/arc4random_uniform.c --i-file $< --output-file $@
+cfmakeraw.lo: $(srcdir)/cfmakeraw.c $(incdir)/sudo_compat.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cfmakeraw.c
+cfmakeraw.i: $(srcdir)/cfmakeraw.c $(incdir)/sudo_compat.h \
+              $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+cfmakeraw.plog: cfmakeraw.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/cfmakeraw.c --i-file $< --output-file $@
 closefrom.lo: $(srcdir)/closefrom.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
@@ -559,6 +567,14 @@ event_select.i: $(srcdir)/event_select.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 event_select.plog: event_select.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/event_select.c --i-file $< --output-file $@
+explicit_bzero.lo: $(srcdir)/explicit_bzero.c $(incdir)/sudo_compat.h \
+                   $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/explicit_bzero.c
+explicit_bzero.i: $(srcdir)/explicit_bzero.c $(incdir)/sudo_compat.h \
+                   $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+explicit_bzero.plog: explicit_bzero.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/explicit_bzero.c --i-file $< --output-file $@
 fatal.lo: $(srcdir)/fatal.c $(incdir)/compat/getaddrinfo.h \
           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -601,6 +617,14 @@ fnmatch.i: $(srcdir)/fnmatch.c $(incdir)/compat/charclass.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fnmatch.plog: fnmatch.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fnmatch.c --i-file $< --output-file $@
+freezero.lo: $(srcdir)/freezero.c $(incdir)/sudo_compat.h \
+             $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/freezero.c
+freezero.i: $(srcdir)/freezero.c $(incdir)/sudo_compat.h \
+             $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+freezero.plog: freezero.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/freezero.c --i-file $< --output-file $@
 fstatat.lo: $(srcdir)/fstatat.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/fstatat.c
 fstatat.i: $(srcdir)/fstatat.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
@@ -847,14 +871,6 @@ memrchr.i: $(srcdir)/memrchr.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 memrchr.plog: memrchr.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/memrchr.c --i-file $< --output-file $@
-memset_s.lo: $(srcdir)/memset_s.c $(incdir)/sudo_compat.h \
-             $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/memset_s.c
-memset_s.i: $(srcdir)/memset_s.c $(incdir)/sudo_compat.h \
-             $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-memset_s.plog: memset_s.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/memset_s.c --i-file $< --output-file $@
 mkdir_parents.lo: $(srcdir)/mkdir_parents.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -1039,9 +1055,13 @@ sha2.i: $(srcdir)/sha2.c $(incdir)/compat/endian.h $(incdir)/compat/sha2.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sha2.plog: sha2.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sha2.c --i-file $< --output-file $@
-sig2str.lo: $(srcdir)/sig2str.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+sig2str.lo: $(srcdir)/sig2str.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sig2str.c
-sig2str.i: $(srcdir)/sig2str.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+sig2str.i: $(srcdir)/sig2str.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sig2str.plog: sig2str.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sig2str.c --i-file $< --output-file $@

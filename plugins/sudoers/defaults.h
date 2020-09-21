@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2008-2018
+ * Copyright (c) 1999-2005, 2008-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -111,6 +111,8 @@ struct early_default {
 #define T_BOOL		0x100
 #undef T_PATH
 #define T_PATH		0x200
+#undef T_CHPATH
+#define T_CHPATH	0x400
 
 /*
  * Argument to update_defaults()

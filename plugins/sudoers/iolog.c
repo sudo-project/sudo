@@ -73,7 +73,7 @@ static struct timespec last_time;
 static void sudoers_io_setops(void);
 
 /* sudoers_io is declared at the end of this file. */
-extern __dso_public struct io_plugin sudoers_io;
+extern sudo_dso_public struct io_plugin sudoers_io;
 
 /*
  * Sudoers callback for maxseq Defaults setting.
@@ -269,6 +269,10 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		details->command = *cur + sizeof("command=") - 1;
 		continue;
 	    }
+	    if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
+		details->runchroot = *cur + sizeof("chroot=") - 1;
+		continue;
+	    }
 	    break;
 	case 'i':
 	    if (strncmp(*cur, "ignore_iolog_errors=", sizeof("ignore_iolog_errors=") - 1) == 0) {
@@ -434,6 +438,10 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		runas_euid_str = *cur + sizeof("runas_euid=") - 1;
 		continue;
 	    }
+	    if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
+		details->runcwd = *cur + sizeof("runcwd=") - 1;
+		continue;
+	    }
 	    break;
 	}
     }
@@ -499,6 +507,8 @@ write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
     memset(&iolog_info, 0, sizeof(iolog_info));
     iolog_info.cwd = (char *)details->cwd;
     iolog_info.user = (char *)details->user;
+    iolog_info.runchroot = (char *)details->runchroot;
+    iolog_info.runcwd = (char *)details->runcwd;
     iolog_info.runas_user = details->runas_pw->pw_name;
     iolog_info.runas_group = details->runas_gr ? details->runas_gr->gr_name: NULL;
     iolog_info.tty = (char *)details->tty;
@@ -628,7 +638,7 @@ sudoers_io_open_remote(struct timespec *now)
     /* Connect to log server. */
     if (!log_server_connect(client_closure)) {
 	/* TODO: support offline logs if server unreachable */
-	sudo_warnx(U_("unable to connect to log server"));
+	sudo_warnx("%s", U_("unable to connect to log server"));
 	goto done;
     }
 
@@ -918,7 +928,7 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
 	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
-	    sudo_warn(U_("unable to add event to queue"));
+	    sudo_warn("%s", U_("unable to add event to queue"));
     }
 
 done:
@@ -1051,7 +1061,7 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
 	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
-	    sudo_warn(U_("unable to add event to queue"));
+	    sudo_warn("%s", U_("unable to add event to queue"));
     }
 
     debug_return_int(ret);
@@ -1149,7 +1159,7 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
 	ret = client_closure->write_ev->add(client_closure->write_ev,
 	    &iolog_details.server_timeout);
 	if (ret == -1)
-	    sudo_warn(U_("unable to add event to queue"));
+	    sudo_warn("%s", U_("unable to add event to queue"));
     }
 
     debug_return_int(ret);
@@ -1238,7 +1248,7 @@ sudoers_io_setops(void)
     debug_return;
 }
 
-__dso_public struct io_plugin sudoers_io = {
+sudo_dso_public struct io_plugin sudoers_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
     sudoers_io_open,

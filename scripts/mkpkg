@@ -324,6 +324,13 @@ case "$osversion" in
 	    exit 1
 	fi
 	PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
+	# Use correct libssl dependency
+	libssl_dep=`dpkg-query -S /usr/lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.1.[0-9]* /lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.1.[0-9]* 2>/dev/null | sort -rn | awk -F: '{ print $1; exit }'`
+	if [ -z "$libssl_dep" ]; then
+	    echo "unable to determine package for libssl" 1>&2
+	    exit 1
+	fi
+	PPVARS="${PPVARS}${PPVARS+$space}libssl_dep=$libssl_dep"
 	;;
     macos*)
 	# TODO: openssl (homebrew?)

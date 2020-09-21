@@ -1,4 +1,4 @@
-Parses OK.
+Parses OK
 
 Defaults env_check="COLORTERM LANG LANGUAGE LC_* LINGUAS"
 Defaults env_check+="TERM TZ"

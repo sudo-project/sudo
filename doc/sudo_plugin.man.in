@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "June 16, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "August 31, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -215,6 +215,24 @@ The plugin may optionally pass this, or another value, back in the
 \fIcommand_info\fR
 list.
 .TP 6n
+cmnd_chroot=string
+The root directory (see
+chroot(2))
+to run the command in, as specified by the user via the
+\fB\-R\fR
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+root directory.
+Only available starting with API version 1.16.
+.TP 6n
+cmnd_cwd=string
+The working directory to run the command in, as specified by the user via the
+\fB\-D\fR
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+working directory.
+Only available starting with API version 1.16.
+.TP 6n
 debug_flags=string
 A debug file path name followed by a space and a comma-separated
 list of debug flags that correspond to the plugin's
@@ -249,10 +267,6 @@ sudo.conf(@mansectform@)
 contains a plugin-specific
 \fRDebug\fR
 entry.
-.TP 6n
-debug_level=number
-This setting has been deprecated in favor of
-\fIdebug_flags\fR.
 .TP 6n
 ignore_ticket=bool
 Set to true if the user specified the
@@ -425,8 +439,10 @@ For more information, see the
 section.
 .TP 6n
 timeout=string
-User-specified command timeout.
-Not all plugins support command timeouts and the ability for the
+Command timeout specified by the user via the
+\fB\-T\fR
+option.
+Not all plugins support command timeouts and the ability of the
 user to set a timeout may be restricted by policy.
 The format of the timeout string is plugin-specific.
 .PP
@@ -512,6 +528,97 @@ The parent process ID of the running
 \fBsudo\fR
 process.
 Only available starting with API version 1.2.
+.TP 6n
+rlimit_as=soft,hard
+The maximum size to which the process's address space may grow (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_core=soft,hard
+The largest size core dump file that may be created (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_cpu=soft,hard
+The maximum amount of CPU time that the process may use (in seconds).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_data=soft,hard
+The maximum size of the data segment for the process (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_fsize=soft,hard
+The largest size file that the process may create (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_locks=soft,hard
+The maximum number of locks that the process may establish,
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_memlock=soft,hard
+The maximum size that the process may lock in memory (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_nofile=soft,hard
+The maximum number of files that the process may have open.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_nproc=soft,hard
+The maximum number of processes that the user may run simultaneously.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_rss=soft,hard
+The maximum size to which the process's resident set size may grow (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_stack=soft,hard
+The maximum size to which the process's stack may grow (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
 .TP 6n
 sid=int
 The session ID of the running
@@ -4481,9 +4588,6 @@ the trailing NUL character).
 In practical terms, this is the longest password
 \fBsudo\fR
 will support.
-It is also useful as a maximum value for the
-\fBmemset_s\fR()
-function when clearing passwords filled in by the conversation function.
 .PP
 The
 \fBprintf\fR()-style
@@ -4945,6 +5049,19 @@ command was not run.
 has increased from 255 to 1023 bytes.
 .sp
 Support for audit and approval plugins was added.
+.TP 6n
+Version 1.16 (sudo 1.9.3)
+Initial resource limit values were added to the
+\fRuser_info\fR
+list.
+.sp
+The
+\fIcmnd_chroot\fR
+and
+\fIcmnd_cwd\fR
+enties were added to the
+\fRsettings\fR
+list.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

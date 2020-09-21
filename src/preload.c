@@ -42,6 +42,7 @@
 
 extern struct policy_plugin sudoers_policy;
 extern struct io_plugin sudoers_io;
+extern struct io_plugin sudoers_audit;
 
 static struct sudo_preload_symbol sudo_rtld_default_symbols[] = {
 # ifdef HAVE_GSS_KRB5_CCACHE_NAME
@@ -54,6 +55,7 @@ static struct sudo_preload_symbol sudo_rtld_default_symbols[] = {
 static struct sudo_preload_symbol sudo_sudoers_plugin_symbols[] = {
     { "sudoers_policy", (void *)&sudoers_policy },
     { "sudoers_io", (void *)&sudoers_io },
+    { "sudoers_audit", (void *)&sudoers_audit },
     { (const char *)0, (void *)0 }
 };
 

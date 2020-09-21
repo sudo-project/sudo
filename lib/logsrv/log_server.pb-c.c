@@ -657,7 +657,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, accept_msg),
+    offsetof(ClientMessage, u.accept_msg),
     &accept_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -669,7 +669,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, reject_msg),
+    offsetof(ClientMessage, u.reject_msg),
     &reject_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -681,7 +681,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, exit_msg),
+    offsetof(ClientMessage, u.exit_msg),
     &exit_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -693,7 +693,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, restart_msg),
+    offsetof(ClientMessage, u.restart_msg),
     &restart_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -705,7 +705,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, alert_msg),
+    offsetof(ClientMessage, u.alert_msg),
     &alert_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -717,7 +717,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, ttyin_buf),
+    offsetof(ClientMessage, u.ttyin_buf),
     &io_buffer__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -729,7 +729,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, ttyout_buf),
+    offsetof(ClientMessage, u.ttyout_buf),
     &io_buffer__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -741,7 +741,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, stdin_buf),
+    offsetof(ClientMessage, u.stdin_buf),
     &io_buffer__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -753,7 +753,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, stdout_buf),
+    offsetof(ClientMessage, u.stdout_buf),
     &io_buffer__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -765,7 +765,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, stderr_buf),
+    offsetof(ClientMessage, u.stderr_buf),
     &io_buffer__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -777,7 +777,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, winsize_event),
+    offsetof(ClientMessage, u.winsize_event),
     &change_window_size__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -789,7 +789,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, suspend_event),
+    offsetof(ClientMessage, u.suspend_event),
     &command_suspend__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -801,7 +801,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ClientMessage, type_case),
-    offsetof(ClientMessage, hello_msg),
+    offsetof(ClientMessage, u.hello_msg),
     &client_hello__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1041,7 +1041,7 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT64,
     offsetof(InfoMessage, value_case),
-    offsetof(InfoMessage, numval),
+    offsetof(InfoMessage, u.numval),
     NULL,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1053,7 +1053,7 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     offsetof(InfoMessage, value_case),
-    offsetof(InfoMessage, strval),
+    offsetof(InfoMessage, u.strval),
     NULL,
     &protobuf_c_empty_string,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1065,7 +1065,7 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(InfoMessage, value_case),
-    offsetof(InfoMessage, strlistval),
+    offsetof(InfoMessage, u.strlistval),
     &info_message__string_list__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1077,7 +1077,7 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(InfoMessage, value_case),
-    offsetof(InfoMessage, numlistval),
+    offsetof(InfoMessage, u.numlistval),
     &info_message__number_list__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1592,7 +1592,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ServerMessage, type_case),
-    offsetof(ServerMessage, hello),
+    offsetof(ServerMessage, u.hello),
     &server_hello__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1604,7 +1604,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(ServerMessage, type_case),
-    offsetof(ServerMessage, commit_point),
+    offsetof(ServerMessage, u.commit_point),
     &time_spec__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1616,7 +1616,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     offsetof(ServerMessage, type_case),
-    offsetof(ServerMessage, log_id),
+    offsetof(ServerMessage, u.log_id),
     NULL,
     &protobuf_c_empty_string,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1628,7 +1628,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     offsetof(ServerMessage, type_case),
-    offsetof(ServerMessage, error),
+    offsetof(ServerMessage, u.error),
     NULL,
     &protobuf_c_empty_string,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -1640,7 +1640,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     offsetof(ServerMessage, type_case),
-    offsetof(ServerMessage, abort),
+    offsetof(ServerMessage, u.abort),
     NULL,
     &protobuf_c_empty_string,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */

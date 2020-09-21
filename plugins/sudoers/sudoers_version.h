@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2013, 2015, 2017
+ * Copyright (c) 2011-2013, 2015, 2017, 2019-2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -69,6 +69,7 @@
  * 46	sudo 1.8.20, added TIMEOUT, NOTBEFORE and NOTAFTER options.
  * 47	sudo 1.9.0, Cmd_Alias treated as Cmnd_Alias, support for multiple digests per command and for ALL.
  * 48	sudo 1.9.1, @include and @includedir, include path escaping/quoting.
+ * 49	sudo 1.9.3, CWD and CHDIR options.
  */
 
 #ifndef SUDOERS_VERSION_H

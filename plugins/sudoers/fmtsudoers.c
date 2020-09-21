@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,7 +58,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 		sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
 	    TAILQ_FOREACH(digest, &c->digests, entries) {
@@ -100,7 +100,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 		    break;
 		}
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	default:
 	print_word:
 	    /* Do not quote UID/GID, all others get quoted. */
@@ -228,6 +228,10 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     if (cs->type != NULL && FIELD_CHANGED(prev_cs, cs, type))
 	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
+    if (cs->runchroot != NULL && FIELD_CHANGED(prev_cs, cs, runchroot))
+	sudo_lbuf_append(lbuf, "CHROOT=%s ", cs->runchroot);
+    if (cs->runcwd != NULL && FIELD_CHANGED(prev_cs, cs, runcwd))
+	sudo_lbuf_append(lbuf, "CWD=%s ", cs->runcwd);
     if (cs->timeout > 0 && FIELD_CHANGED(prev_cs, cs, timeout)) {
 	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
 	(void)snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);

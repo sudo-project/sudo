@@ -85,7 +85,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     debug_return;
 }
 
-#ifdef HAVE_FACCESSAT
+#if defined(HAVE_FACCESSAT) && defined(AT_EACCESS)
 /*
  * Returns true if the open directory fd is owned or writable by the user.
  */
@@ -193,7 +193,7 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
     errno = EACCES;
     debug_return_int(false);
 }
-#endif /* HAVE_FACCESSAT */
+#endif /* HAVE_FACCESSAT && AT_EACCESS */
 
 /*
  * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
@@ -223,7 +223,7 @@ set_tmpdir(struct command_details *command_details)
 	}
     }
     if (tdir == NULL)
-	sudo_fatalx(U_("no writable temporary directory found"));
+	sudo_fatalx("%s", U_("no writable temporary directory found"));
    
     len = strlcpy(edit_tmpdir, tdir, sizeof(edit_tmpdir));
     if (len >= sizeof(edit_tmpdir)) {
@@ -348,7 +348,7 @@ done:
     /* Restore cwd */
     if (odfd != -1) {
 	if (fchdir(odfd) == -1)
-	    sudo_fatal(U_("unable to restore current working directory"));
+	    sudo_fatal("%s", U_("unable to restore current working directory"));
 	close(odfd);
     }
 
@@ -732,7 +732,7 @@ selinux_run_helper(char *argv[], char *envp[])
     child = sudo_debug_fork();
     switch (child) {
     case -1:
-	sudo_warn(U_("unable to fork"));
+	sudo_warn("%s", U_("unable to fork"));
 	break;
     case 0:
 	/* child runs sesh in new context */
@@ -811,11 +811,11 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     case SESH_SUCCESS:
 	break;
     case SESH_ERR_BAD_PATHS:
-	sudo_fatalx(U_("sesh: internal error: odd number of paths"));
+	sudo_fatalx("%s", U_("sesh: internal error: odd number of paths"));
     case SESH_ERR_NO_FILES:
-	sudo_fatalx(U_("sesh: unable to create temporary files"));
+	sudo_fatalx("%s", U_("sesh: unable to create temporary files"));
     case SESH_ERR_KILLED:
-	sudo_fatalx(U_("sesh: killed by a signal"));
+	sudo_fatalx("%s", U_("sesh: killed by a signal"));
     default:
 	sudo_fatalx(U_("sesh: unknown error %d"), rc);
     }
@@ -891,13 +891,15 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	    ret = 0;
 	    break;
 	case SESH_ERR_NO_FILES:
-	    sudo_warnx(U_("unable to copy temporary files back to their original location"));
+	    sudo_warnx("%s",
+		U_("unable to copy temporary files back to their original location"));
 	    break;
 	case SESH_ERR_SOME_FILES:
-	    sudo_warnx(U_("unable to copy some of the temporary files back to their original location"));
+	    sudo_warnx("%s",
+		U_("unable to copy some of the temporary files back to their original location"));
 	    break;
 	case SESH_ERR_KILLED:
-	    sudo_warnx(U_("sesh: killed by a signal"));
+	    sudo_warnx("%s", U_("sesh: killed by a signal"));
 	    break;
 	default:
 	    sudo_warnx(U_("sesh: unknown error %d"), rc);
@@ -955,7 +957,7 @@ sudo_edit(struct command_details *command_details)
 	    editor_argc++;
     }
     if (nfiles == 0) {
-	sudo_warnx(U_("plugin error: missing file list for sudoedit"));
+	sudo_warnx("%s", U_("plugin error: missing file list for sudoedit"));
 	goto cleanup;
     }
 
@@ -1006,7 +1008,7 @@ sudo_edit(struct command_details *command_details)
      * XXX - should run editor with user's context
      */
     if (sudo_gettime_real(&times[0]) == -1) {
-	sudo_warn(U_("unable to read the clock"));
+	sudo_warn("%s", U_("unable to read the clock"));
 	goto cleanup;
     }
     memcpy(&saved_command_details, command_details, sizeof(struct command_details));
@@ -1019,7 +1021,7 @@ sudo_edit(struct command_details *command_details)
     command_details->argv = nargv;
     rc = run_command(command_details);
     if (sudo_gettime_real(&times[1]) == -1) {
-	sudo_warn(U_("unable to read the clock"));
+	sudo_warn("%s", U_("unable to read the clock"));
 	goto cleanup;
     }
 

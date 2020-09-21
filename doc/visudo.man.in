@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2019
+.\" Copyright (c) 1996,1998-2005, 2007-2020
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "August 27, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -42,7 +42,7 @@ vipw(@mansectsu@).
 locks the
 \fIsudoers\fR
 file against multiple simultaneous edits, provides basic sanity checks,
-and checks for parse errors before installing the edited file.
+and checks for syntax errors before installing the edited file.
 If the
 \fIsudoers\fR
 file is currently being edited you will receive a message to try again later.
@@ -70,7 +70,7 @@ The
 \(oqQ\(cq
 option should be used with extreme caution because if
 \fBvisudo\fR
-believes there to be a parse error, so will
+believes there to be a syntax error, so will
 \fBsudo\fR
 and no one will be able to run
 \fBsudo\fR
@@ -79,7 +79,7 @@ If
 \(oqe\(cq
 is typed to edit the
 \fIsudoers\fR
-file after a parse error has been detected, the cursor will be placed on
+file after a syntax error has been detected, the cursor will be placed on
 the line where the error occurred (if the editor supports this feature).
 .PP
 There are two
@@ -228,7 +228,7 @@ file.
 If an alias is referenced but not actually defined
 or if there is a cycle in an alias,
 \fBvisudo\fR
-will consider this a parse error.
+will consider this a syntax error.
 Note that it is not possible to differentiate between an
 alias and a host name or user name that consists solely of uppercase
 letters, digits, and the underscore
@@ -364,7 +364,7 @@ Default temporary file used by visudo
 .SH "DIAGNOSTICS"
 In addition to reporting
 \fIsudoers\fR
-parse errors,
+syntax errors,
 \fBvisudo\fR
 may produce the following messages:
 .TP 6n

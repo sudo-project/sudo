@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Robert Manner <robert.manner@oneidentity.com>
+ * Copyright (c) 2019-2020 Robert Manner <robert.manner@oneidentity.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -351,6 +351,8 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
     }
 
     replies = calloc(Py_SSIZE2SIZE(num_msgs), sizeof(struct sudo_conv_reply));
+    if (replies == NULL)
+        goto cleanup;
     py_result = PyTuple_New(num_msgs);
     if (py_result == NULL)
         goto cleanup;

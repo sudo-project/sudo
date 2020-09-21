@@ -40,10 +40,10 @@
 #include <pwd.h>
 
 #include "sudoers.h"
-#include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
 #include "sudo_dso.h"
+#include <gram.h>
 
 /* SSSD <--> SUDO interface - do not change */
 struct sss_sudo_attr {
@@ -514,7 +514,7 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
 	break;
     case ENOMEM:
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "handle->fn_send_recv: rc=%d", rc);
 	debug_return_ptr(NULL);
@@ -570,7 +570,8 @@ sudo_sss_open(struct sudo_nss *nss)
 	const char *errstr = sudo_dso_strerror();
 	sudo_warnx(U_("unable to load %s: %s"), path,
 	    errstr ? errstr : "unknown error");
-	sudo_warnx(U_("unable to initialize SSS source. Is SSSD installed on your machine?"));
+	sudo_warnx("%s",
+	    U_("unable to initialize SSS source. Is SSSD installed on your machine?"));
 	free(handle);
 	debug_return_int(EFAULT);
     }
@@ -753,7 +754,7 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 	break;
     case ENOMEM:
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "handle->fn_send_recv_defaults: rc=%d, sss_error=%u", rc, sss_error);

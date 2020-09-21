@@ -55,6 +55,7 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
     debug_return_int(auth->data ? AUTH_SUCCESS : AUTH_FATAL);
 }
 
+#ifdef HAVE_CRYPT
 int
 sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
@@ -93,6 +94,20 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_c
 
     debug_return_int(matched ? AUTH_SUCCESS : AUTH_FAILURE);
 }
+#else
+int
+sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+{
+    char *pw_passwd = auth->data;
+    int matched;
+    debug_decl(sudo_passwd_verify, SUDOERS_DEBUG_AUTH);
+
+    /* Dummy version for systems without crypt(). */
+    matched = !strcmp(pass, pw_passwd);
+
+    debug_return_int(matched ? AUTH_SUCCESS : AUTH_FAILURE);
+}
+#endif
 
 int
 sudo_passwd_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
@@ -100,9 +115,8 @@ sudo_passwd_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
     char *pw_epasswd = auth->data;
     debug_decl(sudo_passwd_cleanup, SUDOERS_DEBUG_AUTH);
 
-    if (pw_epasswd != NULL) {
-	memset_s(pw_epasswd, SUDO_CONV_REPL_MAX, 0, strlen(pw_epasswd));
-	free(pw_epasswd);
-    }
+    if (pw_epasswd != NULL)
+	freezero(pw_epasswd, strlen(pw_epasswd));
+
     debug_return_int(AUTH_SUCCESS);
 }

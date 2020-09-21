@@ -27,7 +27,7 @@
 #define	FNM_LEADING_DIR	(1 << 3)	/* Only match the leading directory */
 #define	FNM_CASEFOLD	(1 << 4)	/* Case insensitive matching */
 
-__dso_public int sudo_fnmatch(const char *pattern, const char *string, int flags);
+sudo_dso_public int sudo_fnmatch(const char *pattern, const char *string, int flags);
 
 #define fnmatch(_a, _b, _c)	sudo_fnmatch((_a), (_b), (_c))
 

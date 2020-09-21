@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,12 +37,13 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 #include "sudo_compat.h"
 #include "sudo_debug.h"
-#include "sudo_util.h"
 #include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_iolog.h"
+#include "sudo_util.h"
+
 #include "logsrv_util.h"
 
 /*

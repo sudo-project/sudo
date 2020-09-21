@@ -55,7 +55,7 @@ linux_audit_open(void)
 	if (errno == EINVAL || errno == EPROTONOSUPPORT || errno == EAFNOSUPPORT)
 	    au_fd = AUDIT_NOT_CONFIGURED;
 	else
-	    sudo_warn(U_("unable to open audit system"));
+	    sudo_warn("%s", U_("unable to open audit system"));
     } else {
 	(void)fcntl(au_fd, F_SETFD, FD_CLOEXEC);
     }
@@ -66,7 +66,7 @@ int
 linux_audit_command(char *const argv[], int result)
 {
     int au_fd, rc = -1;
-    char *command, *cp;
+    char *cp, *command = NULL;
     char * const *av;
     size_t size, n;
     debug_decl(linux_audit_command, SUDOERS_DEBUG_AUDIT);
@@ -78,7 +78,8 @@ linux_audit_command(char *const argv[], int result)
     /* Convert argv to a flat string. */
     for (size = 0, av = argv; *av != NULL; av++)
 	size += strlen(*av) + 1;
-    command = malloc(size);
+    if (size != 0)
+	command = malloc(size);
     if (command == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
@@ -97,7 +98,7 @@ linux_audit_command(char *const argv[], int result)
     /* Log command, ignoring ECONNREFUSED on error. */
     if (audit_log_user_command(au_fd, AUDIT_USER_CMD, command, NULL, result) <= 0) {
 	if (errno != ECONNREFUSED) {
-	    sudo_warn(U_("unable to send audit message"));
+	    sudo_warn("%s", U_("unable to send audit message"));
 	    goto done;
 	}
     }

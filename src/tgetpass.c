@@ -92,13 +92,13 @@ tgetpass_display_error(enum tgetpass_errval errval)
     case TGP_ERRVAL_NOERROR:
 	break;
     case TGP_ERRVAL_TIMEOUT:
-	sudo_warnx(U_("timed out reading password"));
+	sudo_warnx("%s", U_("timed out reading password"));
 	break;
     case TGP_ERRVAL_NOPASSWORD:
-	sudo_warnx(U_("no password was provided"));
+	sudo_warnx("%s", U_("no password was provided"));
 	break;
     case TGP_ERRVAL_READERROR:
-	sudo_warn(U_("unable to read password"));
+	sudo_warn("%s", U_("unable to read password"));
 	break;
     }
     debug_return;
@@ -137,7 +137,8 @@ restart:
 	ttyfd = open(_PATH_TTY, O_RDWR);
 	if (ttyfd == -1 && !ISSET(flags, TGP_ECHO|TGP_NOECHO_TRY)) {
 	    if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
-		sudo_warnx(U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
+		sudo_warnx("%s",
+		    U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
 		debug_return_str(NULL);
 	    }
 	    SET(flags, TGP_ASKPASS);
@@ -147,7 +148,8 @@ restart:
     /* If using a helper program to get the password, run it instead. */
     if (ISSET(flags, TGP_ASKPASS)) {
 	if (askpass == NULL || *askpass == '\0')
-	    sudo_fatalx(U_("no askpass program specified, try setting SUDO_ASKPASS"));
+	    sudo_fatalx("%s",
+		U_("no askpass program specified, try setting SUDO_ASKPASS"));
 	debug_return_str_masked(sudo_askpass(askpass, prompt));
     }
 
@@ -301,11 +303,11 @@ sudo_askpass(const char *askpass, const char *prompt)
     (void) sigaction(SIGCHLD, &sa, &savechld);
 
     if (pipe2(pfd, O_CLOEXEC) == -1)
-	sudo_fatal(U_("unable to create pipe"));
+	sudo_fatal("%s", U_("unable to create pipe"));
 
     child = sudo_debug_fork();
     if (child == -1)
-	sudo_fatal(U_("unable to fork"));
+	sudo_fatal("%s", U_("unable to fork"));
 
     if (child == 0) {
 	/* child, set stdout to write side of the pipe */
@@ -435,7 +437,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 	    *errval = TGP_ERRVAL_NOPASSWORD;
 	    debug_return_str(NULL);
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	debug_return_str_masked(buf);
     }

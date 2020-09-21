@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Robert Manner <robert.manner@oneidentity.com>
+ * Copyright (c) 2019-2020 Robert Manner <robert.manner@oneidentity.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -273,7 +273,7 @@ cleanup:
     debug_return_int(rc);
 }
 
-__dso_public struct policy_plugin python_policy = {
+sudo_dso_public struct policy_plugin python_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
     CALLBACK_CFUNC(open),

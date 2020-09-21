@@ -49,15 +49,14 @@
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
-
-#include "sudoers.h"
-#include <gram.h>
-
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
+
+#include "sudoers.h"
+#include <gram.h>
 
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
 
@@ -98,7 +97,7 @@ user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 		alias_put(a);
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case WORD:
 	    if (userpw_matches(m->name, pw->pw_name, pw))
 		matched = !m->negated;
@@ -195,7 +194,7 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 			    alias_put(a);
 			    break;
 			}
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		    case WORD:
 			if (userpw_matches(m->name, runas_pw->pw_name, runas_pw))
 			    user_matched = !m->negated;
@@ -239,7 +238,7 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 			    alias_put(a);
 			    break;
 			}
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		    case WORD:
 			if (group_matches(m->name, runas_gr))
 			    group_matched = !m->negated;
@@ -352,7 +351,7 @@ host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 		alias_put(a);
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case WORD:
 	    if (hostname_matches(shost, lhost, m->name))
 		matched = !m->negated;
@@ -367,14 +366,15 @@ host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
  */
 int
 cmndlist_matches(struct sudoers_parse_tree *parse_tree,
-    const struct member_list *list)
+    const struct member_list *list, const char *runchroot,
+    struct cmnd_info *info)
 {
     struct member *m;
     int matched = UNSPEC;
     debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH);
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	matched = cmnd_matches(parse_tree, m);
+	matched = cmnd_matches(parse_tree, m, runchroot, info);
 	if (matched != UNSPEC)
 	    break;
     }
@@ -386,7 +386,8 @@ cmndlist_matches(struct sudoers_parse_tree *parse_tree,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
+cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m,
+    const char *runchroot, struct cmnd_info *info)
 {
     struct alias *a;
     struct sudo_command *c;
@@ -399,16 +400,16 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
 		matched = !m->negated;
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case COMMAND:
 	    c = (struct sudo_command *)m->name;
-	    if (command_matches(c->cmnd, c->args, &c->digests))
+	    if (command_matches(c->cmnd, c->args, runchroot, info, &c->digests))
 		matched = !m->negated;
 	    break;
 	case ALIAS:
 	    a = alias_get(parse_tree, m->name, CMNDALIAS);
 	    if (a != NULL) {
-		rc = cmndlist_matches(parse_tree, &a->members);
+		rc = cmndlist_matches(parse_tree, &a->members, runchroot, info);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);

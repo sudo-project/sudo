@@ -304,7 +304,7 @@ globexp2(const Char *ptr, const Char *pattern, glob_t *pglob,
 				i--;
 				break;
 			}
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case COMMA:
 			if (i && *pm == COMMA)
 				break;

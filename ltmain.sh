@@ -8831,7 +8831,7 @@ func_mode_link ()
 	    age=$number_minor
 	    revision=$number_revision
 	    ;;
-	  freebsd-aout|qnx|sunos)
+	  freebsd-aout|qnx|sco|sunos)
 	    current=$number_major
 	    revision=$number_minor
 	    age=0

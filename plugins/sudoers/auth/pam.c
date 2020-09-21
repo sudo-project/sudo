@@ -43,7 +43,7 @@
 # include <security/pam_appl.h>
 #endif
 
-#ifdef __hpux__
+#ifdef __hpux
 # include <nl_types.h>
 #endif
 
@@ -100,7 +100,7 @@ conv_filter_init(void)
 {
     debug_decl(conv_filter_init, SUDOERS_DEBUG_AUTH);
 
-#ifdef __hpux__
+#ifdef __hpux
     /*
      * HP-UX displays last login information as part of either account
      * management (in trusted mode) or session management (regular mode).
@@ -165,7 +165,7 @@ conv_filter_init(void)
 	    conv_filter[nfilt].msglen = 0;
 	}
     }
-#endif /* __hpux__ */
+#endif /* __hpux */
     debug_return;
 }
 
@@ -681,7 +681,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
 		type = SUDO_CONV_PROMPT_ECHO_ON;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	    case PAM_PROMPT_ECHO_OFF:
 		/* Error out if the last password read was interrupted. */
 		if (getpass_error)
@@ -702,7 +702,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"password longer than %d", PAM_MAX_RESP_SIZE);
 		    ret = PAM_CONV_ERR;
-		    memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+		    explicit_bzero(pass, strlen(pass));
 		    goto done;
 		}
 		reply[n].resp = pass;	/* auth_getpass() malloc's a copy */
@@ -732,8 +732,7 @@ done:
 	    struct pam_response *pr = &reply[n];
 
 	    if (pr->resp != NULL) {
-		memset_s(pr->resp, SUDO_CONV_REPL_MAX, 0, strlen(pr->resp));
-		free(pr->resp);
+		freezero(pr->resp, strlen(pr->resp));
 		pr->resp = NULL;
 	    }
 	}

@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -143,7 +144,7 @@ static void approval_show_version(int verbose, struct sudo_settings *settings,
     char * const user_info[], int submit_optind, char * const submit_argv[],
     char * const submit_envp[]);
 
-__dso_public int main(int argc, char *argv[], char *envp[]);
+sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
 int
 main(int argc, char *argv[], char *envp[])
@@ -227,7 +228,7 @@ main(int argc, char *argv[], char *envp[])
     /* Load plugins. */
     if (!sudo_load_plugins(&policy_plugin, &io_plugins, &audit_plugins,
 	    &approval_plugins))
-	sudo_fatalx(U_("fatal error, unable to load plugins"));
+	sudo_fatalx("%s", U_("fatal error, unable to load plugins"));
 
     /* Allocate event base so plugin can use it. */
     if ((sudo_event_base = sudo_ev_base_alloc()) == NULL)
@@ -272,7 +273,8 @@ main(int argc, char *argv[], char *envp[])
 	    for (nargv = argv_out, nargc = 0; nargv[nargc] != NULL; nargc++)
 		continue;
 	    if (nargc == 0)
-		sudo_fatalx(U_("plugin did not return a command to execute"));
+		sudo_fatalx("%s",
+		    U_("plugin did not return a command to execute"));
 
 	    /* Approval plugins run after policy plugin accepts the command. */
 	    approval_check(settings, user_info, submit_optind, argv, envp,
@@ -489,10 +491,11 @@ static char **
 get_user_info(struct user_details *ud)
 {
     char *cp, **user_info, path[PATH_MAX];
+    size_t user_info_max = 32 + RLIM_NLIMITS;
     unsigned int i = 0;
     mode_t mask;
     struct passwd *pw;
-    int fd;
+    int fd, n;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL);
 
     /*
@@ -511,7 +514,7 @@ get_user_info(struct user_details *ud)
     memset(ud, 0, sizeof(*ud));
 
     /* XXX - bound check number of entries */
-    user_info = reallocarray(NULL, 32, sizeof(char *));
+    user_info = reallocarray(NULL, user_info_max, sizeof(char *));
     if (user_info == NULL)
 	goto oom;
 
@@ -597,7 +600,7 @@ get_user_info(struct user_details *ud)
     } else {
 	/* tty may not always be present */
 	if (errno != ENOENT)
-	    sudo_warn(U_("unable to determine tty"));
+	    sudo_warn("%s", U_("unable to determine tty"));
     }
 
     cp = sudo_gethostname();
@@ -612,6 +615,11 @@ get_user_info(struct user_details *ud)
 	goto oom;
     if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
 	goto oom;
+
+    n = serialize_limits(&user_info[i + 1], user_info_max - (i + 1));
+    if (n == -1)
+	goto oom;
+    i += n;
 
     user_info[++i] = NULL;
 
@@ -927,7 +935,7 @@ set_user_groups(struct command_details *details)
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
 	if (details->ngroups >= 0) {
 	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		sudo_warn(U_("unable to set supplementary group IDs"));
+		sudo_warn("%s", U_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
@@ -1092,7 +1100,7 @@ policy_open(struct sudo_settings *settings, char * const user_info[],
 	    usage();
 	else {
 	    /* XXX - audit */
-	    sudo_fatalx(U_("unable to initialize policy plugin"));
+	    sudo_fatalx("%s", U_("unable to initialize policy plugin"));
 	}
     }
 

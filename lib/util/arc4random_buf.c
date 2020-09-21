@@ -50,13 +50,13 @@ sudo_arc4random_buf(void *buf, size_t n)
 		switch (m) {
 		case 4:
 			*cp++ = (val >> 24) & 0xff;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case 3:
 			*cp++ = (val >> 16) & 0xff;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case 2:
 			*cp++ = (val >> 8) & 0xff;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case 1:
 			*cp++ = val & 0xff;
 			break;

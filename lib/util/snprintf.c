@@ -535,7 +535,7 @@ reswitch:	switch (ch) {
 			if (width == INT_MIN)
 				goto overflow;
 			width = -width;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case '-':
 			flags |= LADJUST;
 			goto rflag;
@@ -649,7 +649,7 @@ reswitch:	switch (ch) {
 			break;
 		case 'D':
 			flags |= LONGINT;
-			/*FALLTHROUGH*/
+			FALLTHROUGH;
 		case 'd':
 		case 'i':
 			_umax = SARG();
@@ -815,7 +815,7 @@ fp_common:
 #endif /* NO_PRINTF_PERCENT_N */
 		case 'O':
 			flags |= LONGINT;
-			/*FALLTHROUGH*/
+			FALLTHROUGH;
 		case 'o':
 			_umax = UARG();
 			base = OCT;
@@ -875,7 +875,7 @@ fp_common:
 			break;
 		case 'U':
 			flags |= LONGINT;
-			/*FALLTHROUGH*/
+			FALLTHROUGH;
 		case 'u':
 			_umax = UARG();
 			base = DEC;
@@ -1276,7 +1276,7 @@ reswitch:	switch (ch) {
 			break;
 		case 'D':
 			flags |= LONGINT;
-			/*FALLTHROUGH*/
+			FALLTHROUGH;
 		case 'd':
 		case 'i':
 			ADDSARG();
@@ -1316,7 +1316,7 @@ reswitch:	switch (ch) {
 #endif /* NO_PRINTF_PERCENT_N */
 		case 'O':
 			flags |= LONGINT;
-			/*FALLTHROUGH*/
+			FALLTHROUGH;
 		case 'o':
 			ADDUARG();
 			break;
@@ -1333,7 +1333,7 @@ reswitch:	switch (ch) {
 			break;
 		case 'U':
 			flags |= LONGINT;
-			/*FALLTHROUGH*/
+			FALLTHROUGH;
 		case 'u':
 		case 'X':
 		case 'x':

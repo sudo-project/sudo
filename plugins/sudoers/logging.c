@@ -48,12 +48,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <syslog.h>
-
-#include "sudoers.h"
-
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
 #endif
+
+#include "sudoers.h"
 
 /* Special message for log_warning() so we know to use ngettext() */
 #define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
@@ -781,12 +780,12 @@ send_mail(const char *fmt, ...)
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
-	    sudo_warn(U_("unable to fork"));
+	    sudo_warn("%s", U_("unable to fork"));
 	    debug_return_bool(false);
 	    break;
 	case 0:
 	    /* Child. */
-	    switch (pid = fork()) {
+	    switch (fork()) {
 		case -1:
 		    /* Error. */
 		    mysyslog(LOG_ERR, _("unable to fork: %m"));
@@ -924,6 +923,7 @@ should_mail(int status)
 }
 
 #define	LL_TTY_STR	"TTY="
+#define	LL_CHROOT_STR	"CHROOT="
 #define	LL_CWD_STR	"PWD="		/* XXX - should be CWD= */
 #define	LL_USER_STR	"USER="
 #define	LL_GROUP_STR	"GROUP="
@@ -979,7 +979,9 @@ new_logline(const char *message, const char *errstr)
     if (errstr != NULL)
 	len += strlen(errstr) + 3;
     len += sizeof(LL_TTY_STR) + 2 + strlen(user_tty);
-    len += sizeof(LL_CWD_STR) + 2 + strlen(user_cwd);
+    if (user_runchroot != NULL)
+	len += sizeof(LL_CHROOT_STR) + 2 + strlen(user_runchroot);
+    len += sizeof(LL_CWD_STR) + 2 + strlen(user_runcwd);
     if (runas_pw != NULL)
 	len += sizeof(LL_USER_STR) + 2 + strlen(runas_pw->pw_name);
     if (runas_gr != NULL)
@@ -1033,8 +1035,14 @@ new_logline(const char *message, const char *errstr)
 	strlcat(line, user_tty, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
+    if (user_runchroot != NULL) {
+	if (strlcat(line, LL_CHROOT_STR, len) >= len ||
+	    strlcat(line, user_runchroot, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+    }
     if (strlcat(line, LL_CWD_STR, len) >= len ||
-	strlcat(line, user_cwd, len) >= len ||
+	strlcat(line, user_runcwd, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
     if (runas_pw != NULL) {

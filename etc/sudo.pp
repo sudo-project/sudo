@@ -90,6 +90,9 @@ still allow people to get their work done."
 	if test -n "$linux_audit"; then
 		pp_rpm_requires="audit-libs >= $linux_audit"
 	fi
+	if test -z "$libssl_dep"; then
+		libssl_dep="libssl1.1"
+	fi
 	# The package manager will handle an existing sudoers file
 	rm -f ${pp_destdir}$sudoersdir/sudoers.dist
 %else
@@ -328,7 +331,7 @@ still allow people to get their work done."
 	fi
 
 %depend [deb]
-	libc6, libpam0g, libpam-modules, zlib1g, libselinux1, libssl1.1
+	libc6, libpam0g, libpam-modules, zlib1g, libselinux1
 
 %fixup [deb]
 	# Add Conflicts, Replaces headers and add libldap dependency as needed.
@@ -341,6 +344,9 @@ still allow people to get their work done."
 	    echo "Replaces: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Provides: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    DEPENDS="${DEPENDS}${DEPENDS:+, }libldap-2.4-2"
+	fi
+	if test -n "%{libssl_dep}"; then
+	    DEPENDS="${DEPENDS}${DEPENDS:+, }%{libssl_dep}"
 	fi
 	cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	if test -n "${DEPENDS}"; then

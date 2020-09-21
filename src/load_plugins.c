@@ -326,7 +326,8 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 		if (!quiet) {
 		    sudo_warnx(U_("ignoring policy plugin \"%s\" in %s, line %d"),
 			info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-		    sudo_warnx(U_("only a single policy plugin may be specified"));
+		    sudo_warnx("%s",
+			U_("only a single policy plugin may be specified"));
 		}
 		goto done;
 	    }
@@ -531,8 +532,18 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	 * loaded, load it too, if possible.
 	 */
 	if (!plugin_exists(audit_plugins, "sudoers_audit")) {
-	    (void)sudo_load_sudoers_plugin("sudoers_audit", policy_plugin,
-		io_plugins, audit_plugins, approval_plugins, true);
+	    if (sudo_load_sudoers_plugin("sudoers_audit", policy_plugin,
+		    io_plugins, audit_plugins, approval_plugins, true)) {
+		/*
+		 * Move the plugin options from sudoers_policy to sudoers_audit
+		 * since the audit module is now what actually opens sudoers.
+		 */
+		if (policy_plugin->options != NULL) {
+		    TAILQ_LAST(audit_plugins, plugin_container_list)->options =
+			policy_plugin->options;
+		    policy_plugin->options = NULL;
+		}
+	    }
 	}
     }
 

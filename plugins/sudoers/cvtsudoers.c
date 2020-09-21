@@ -37,6 +37,11 @@
 #include <errno.h>
 #include <pwd.h>
 #include <unistd.h>
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #include "sudoers.h"
 #include "sudoers_version.h"
@@ -44,12 +49,6 @@
 #include "redblack.h"
 #include "cvtsudoers.h"
 #include <gram.h>
-
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 
 /*
  * Globals
@@ -78,7 +77,7 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	'\0' },
 };
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static bool convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
@@ -328,7 +327,7 @@ main(int argc, char *argv[])
 
     /* Setup defaults data structures. */
     if (!init_defaults())
-	sudo_fatalx(U_("unable to initialize sudoers default values"));
+	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     switch (input_format) {
     case format_ldif:

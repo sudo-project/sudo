@@ -43,7 +43,7 @@ CALLBACK_CFUNC(show_version)(int verbose)
     return python_plugin_approval_show_version(&PLUGIN_CTX, verbose);
 }
 
-__dso_public struct approval_plugin APPROVAL_SYMBOL_NAME(python_approval) = {
+struct approval_plugin APPROVAL_SYMBOL_NAME(python_approval) = {
     SUDO_APPROVAL_PLUGIN,
     SUDO_API_VERSION,
     CALLBACK_CFUNC(open),
