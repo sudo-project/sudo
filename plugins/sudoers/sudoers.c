@@ -295,6 +295,9 @@ check_user_runchroot(void)
 	audit_failure(NewArgv,
 	    N_("user not allowed to change root directory to %s"),
 	    user_runchroot);
+	log_warningx(SLOG_NO_STDERR,
+	    N_("user not allowed to change root directory to %s"),
+	    user_runchroot);
 	sudo_warnx(U_("you are not permitted to use the -R option with %s"),
 	    user_cmnd);
 	debug_return_bool(false);
@@ -320,6 +323,8 @@ check_user_runcwd(void)
     if (strcmp(user_cwd, user_runcwd) != 0) {
 	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
 	    audit_failure(NewArgv,
+		N_("user not allowed to change directory to %s"), user_runcwd);
+	    log_warningx(SLOG_NO_STDERR,
 		N_("user not allowed to change directory to %s"), user_runcwd);
 	    sudo_warnx(U_("you are not permitted to use the -D option with %s"),
 		user_cmnd);
@@ -413,6 +418,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (!def_closefrom_override) {
 	    audit_failure(NewArgv,
 		N_("user not allowed to override closefrom limit"));
+	    log_warningx(SLOG_NO_STDERR,
+		N_("user not allowed to override closefrom limit"));
 	    sudo_warnx("%s", U_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
@@ -442,13 +449,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Defer uid/gid checks until after defaults have been updated. */
     if (unknown_runas_uid && !def_runas_allow_unknown_id) {
 	audit_failure(NewArgv, N_("unknown user: %s"), runas_pw->pw_name);
-	sudo_warnx(U_("unknown user: %s"), runas_pw->pw_name);
+	log_warningx(0, N_("unknown user: %s"), runas_pw->pw_name);
 	goto done;
     }
     if (runas_gr != NULL) {
 	if (unknown_runas_gid && !def_runas_allow_unknown_id) {
 	    audit_failure(NewArgv, N_("unknown group: %s"), runas_gr->gr_name);
-	    sudo_warnx(U_("unknown group: %s"), runas_gr->gr_name);
+	    log_warningx(0, N_("unknown group: %s"), runas_gr->gr_name);
 	    goto done;
 	}
     }
@@ -490,6 +497,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty && !tty_present()) {
 	audit_failure(NewArgv, N_("no tty"));
+	log_warningx(SLOG_NO_STDERR, N_("no tty"));
 	sudo_warnx("%s", U_("sorry, you must have a tty to run sudo"));
 	goto bad;
     }
@@ -600,6 +608,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified a timeout make sure sudoers allows it. */
     if (!def_user_command_timeouts && user_timeout > 0) {
 	audit_failure(NewArgv, N_("user not allowed to set a command timeout"));
+	log_warningx(SLOG_NO_STDERR,
+	    N_("user not allowed to set a command timeout"));
 	sudo_warnx("%s",
 	    U_("sorry, you are not allowed set a command timeout"));
 	goto bad;
@@ -609,6 +619,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
 	    audit_failure(NewArgv,
+		N_("user not allowed to preserve the environment"));
+	    log_warningx(SLOG_NO_STDERR,
 		N_("user not allowed to preserve the environment"));
 	    sudo_warnx("%s",
 		U_("sorry, you are not allowed to preserve the environment"));
