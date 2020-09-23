@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.9.3], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.3p1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -4011,8 +4011,10 @@ if test ${with_passwd-'no'} != "no"; then
     _LIBS="$LIBS"
     AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [
 	test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
-	AC_DEFINE(HAVE_CRYPT)
     ])
+    if test "${ac_cv_search_crypt}" != "no"; then
+	AC_DEFINE(HAVE_CRYPT)
+    fi
     LIBS="$_LIBS"
 
     if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
@@ -4612,7 +4614,7 @@ dnl
 case "$with_passwd" in
 yes|maybe)
     AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
-    if test test "${ac_cv_search_crypt}" = "no"; then
+    if test "${ac_cv_search_crypt}" = "no"; then
 	AC_MSG_WARN([No crypt function found, assuming plaintext passwords])
     fi
     ;;

@@ -75,8 +75,11 @@ sudo_getepw(const struct passwd *pw)
     {
 	struct passwd *spw;
 
+	/* On OpenBSD we need to closed the non-shadow passwd db first. */
+	endpwent();
 	if ((spw = getpwnam_shadow(pw->pw_name)) != NULL)
 	    epw = spw->pw_passwd;
+	setpassent(1);
     }
 #endif /* HAVE_GETPWNAM_SHADOW */
 #ifdef HAVE_GETPRPWNAM

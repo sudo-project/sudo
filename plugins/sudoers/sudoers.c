@@ -287,11 +287,12 @@ check_user_runchroot(void)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"def_runchroot %s, user_runchroot %s",
-	def_runchroot ? def_runchroot : "NULL", user_runchroot);
+	def_runchroot ? def_runchroot : "none",
+	user_runchroot ? user_runchroot : "none");
 
     if (def_runchroot == NULL || (strcmp(def_runchroot, "*") != 0 &&
 	    strcmp(def_runchroot, user_runchroot) != 0)) {
-	audit_failure(NewArgv,
+	log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
 	    N_("user not allowed to change root directory to %s"),
 	    user_runchroot);
 	sudo_warnx(U_("you are not permitted to use the -R option with %s"),
@@ -313,11 +314,12 @@ check_user_runcwd(void)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"def_runcwd %s, user_runcwd %s, user_cwd %s",
-	def_runcwd, user_runcwd, user_cwd);
+	def_runcwd ? def_runcwd : "none", user_runcwd ? user_runcwd : "none",
+	user_cwd ? user_cwd : "none");
 
     if (strcmp(user_cwd, user_runcwd) != 0) {
 	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
-	    audit_failure(NewArgv,
+	    log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
 		N_("user not allowed to change directory to %s"), user_runcwd);
 	    sudo_warnx(U_("you are not permitted to use the -D option with %s"),
 		user_cmnd);
@@ -409,7 +411,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
-	    audit_failure(NewArgv,
+	    log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
 		N_("user not allowed to override closefrom limit"));
 	    sudo_warnx("%s", U_("you are not permitted to use the -C option"));
 	    goto bad;
@@ -439,14 +441,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Defer uid/gid checks until after defaults have been updated. */
     if (unknown_runas_uid && !def_runas_allow_unknown_id) {
-	audit_failure(NewArgv, N_("unknown user: %s"), runas_pw->pw_name);
-	sudo_warnx(U_("unknown user: %s"), runas_pw->pw_name);
+	log_warningx(SLOG_AUDIT, N_("unknown user: %s"), runas_pw->pw_name);
 	goto done;
     }
     if (runas_gr != NULL) {
 	if (unknown_runas_gid && !def_runas_allow_unknown_id) {
-	    audit_failure(NewArgv, N_("unknown group: %s"), runas_gr->gr_name);
-	    sudo_warnx(U_("unknown group: %s"), runas_gr->gr_name);
+	    log_warningx(SLOG_AUDIT, N_("unknown group: %s"),
+		runas_gr->gr_name);
 	    goto done;
 	}
     }
@@ -487,16 +488,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty && !tty_present()) {
-	audit_failure(NewArgv, N_("no tty"));
+	log_warningx(SLOG_NO_STDERR|SLOG_AUDIT, N_("no tty"));
 	sudo_warnx("%s", U_("sorry, you must have a tty to run sudo"));
 	goto bad;
     }
 
     /* Check runas user's shell. */
     if (!check_user_shell(runas_pw)) {
-	audit_failure(NewArgv, N_("invalid shell for user %s: %s"),
-	    runas_pw->pw_name, runas_pw->pw_shell);
-	log_warningx(SLOG_RAW_MSG, N_("invalid shell for user %s: %s"),
+	log_warningx(SLOG_RAW_MSG|SLOG_AUDIT,
+	    N_("invalid shell for user %s: %s"),
 	    runas_pw->pw_name, runas_pw->pw_shell);
 	goto bad;
     }
@@ -597,7 +597,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If user specified a timeout make sure sudoers allows it. */
     if (!def_user_command_timeouts && user_timeout > 0) {
-	audit_failure(NewArgv, N_("user not allowed to set a command timeout"));
+	log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
+	    N_("user not allowed to set a command timeout"));
 	sudo_warnx("%s",
 	    U_("sorry, you are not allowed set a command timeout"));
 	goto bad;
@@ -606,7 +607,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    audit_failure(NewArgv,
+	    log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
 		N_("user not allowed to preserve the environment"));
 	    sudo_warnx("%s",
 		U_("sorry, you are not allowed to preserve the environment"));
