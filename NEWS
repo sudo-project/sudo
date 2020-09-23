@@ -1,3 +1,19 @@
+What's new in Sudo 1.9.3p1
+
+ * Fixed a regression introduced in sudo 1.9.3 where the configure
+   script would not detect the crypt(3) function if it was present
+   in the C library, not an additional library.
+
+ * Fixed a regression introduced in sudo 1.8.23 with shadow passwd
+   file authentication on OpenBSD.  BSD authentication was not
+   affected.
+
+ * Sudo now logs when a user-specified command-line option is
+   rejected by a sudoers rule.  Previously, these conditions were
+   written to the audit log, but the default sudo log file.  Affected
+   command line arguments include -C (--close-from), -D (--chdir),
+   -R (--chroot), -g (--group) and -u (--user).
+
 What's new in Sudo 1.9.3
 
  * sudoedit will now prompt the user before overwriting an existing
@@ -7,7 +23,7 @@ What's new in Sudo 1.9.3
    doesn't support symbol hiding.
 
  * Sudo now uses a linker script to hide symbols even when the
-   compiler has native symbol hiding support.  This should make is
+   compiler has native symbol hiding support.  This should make it
    easier to detect omissions in the symbol exports file, regardless
    of the platform.
 
