@@ -287,7 +287,8 @@ check_user_runchroot(void)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"def_runchroot %s, user_runchroot %s",
-	def_runchroot ? def_runchroot : "NULL", user_runchroot);
+	def_runchroot ? def_runchroot : "none",
+	user_runchroot ? user_runchroot : "none");
 
     if (def_runchroot == NULL || (strcmp(def_runchroot, "*") != 0 &&
 	    strcmp(def_runchroot, user_runchroot) != 0)) {
@@ -313,7 +314,8 @@ check_user_runcwd(void)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"def_runcwd %s, user_runcwd %s, user_cwd %s",
-	def_runcwd, user_runcwd, user_cwd);
+	def_runcwd ? def_runcwd : "none", user_runcwd ? user_runcwd : "none",
+	user_cwd ? user_cwd : "none");
 
     if (strcmp(user_cwd, user_runcwd) != 0) {
 	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
