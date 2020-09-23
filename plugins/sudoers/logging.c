@@ -502,6 +502,13 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
     int len;
     debug_decl(vlog_warning, SUDOERS_DEBUG_LOGGING);
 
+    /* Do auditing first (audit_failure() handles the locale itself). */
+    if (ISSET(flags, SLOG_AUDIT)) {
+	va_copy(ap2, ap);
+	vaudit_failure(NewArgv, fmt, ap2);
+	va_end(ap2);
+    }
+
     /* Need extra copy of ap for sudo_vwarn()/sudo_vwarnx() below. */
     va_copy(ap2, ap);
 

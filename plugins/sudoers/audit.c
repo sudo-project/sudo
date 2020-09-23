@@ -93,20 +93,17 @@ audit_failure_int(char *const argv[], const char *message)
 }
 
 int
-audit_failure(char *const argv[], char const *const fmt, ...)
+vaudit_failure(char *const argv[], char const *const fmt, va_list ap)
 {
     int oldlocale, ret;
     char *message;
-    va_list ap;
-    debug_decl(audit_failure, SUDOERS_DEBUG_AUDIT);
+    debug_decl(vaudit_failure, SUDOERS_DEBUG_AUDIT);
 
     /* Audit messages should be in the sudoers locale. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-    va_start(ap, fmt);
     if ((ret = vasprintf(&message, _(fmt), ap)) == -1)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    va_end(ap);
 
     if (ret != -1) {
 	/* Set audit_msg for audit plugins.  */
@@ -117,6 +114,20 @@ audit_failure(char *const argv[], char const *const fmt, ...)
     }
 
     sudoers_setlocale(oldlocale, NULL);
+
+    debug_return_int(ret);
+}
+
+int
+audit_failure(char *const argv[], char const *const fmt, ...)
+{
+    va_list ap;
+    int ret;
+    debug_decl(audit_failure, SUDOERS_DEBUG_AUDIT);
+
+    va_start(ap, fmt);
+    ret = vaudit_failure(argv, fmt, ap);
+    va_end(ap);
 
     debug_return_int(ret);
 }
