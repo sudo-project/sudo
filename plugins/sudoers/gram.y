@@ -697,6 +697,24 @@ runaslist	:	/* empty */ {
 			}
 		;
 
+reserved_word	:	ALL
+		|	CHROOT
+		|	CWD
+		|	CMND_TIMEOUT
+		|	NOTBEFORE
+		|	NOTAFTER
+		|	ROLE
+		|	TYPE
+		|	PRIVS
+		|	LIMITPRIVS
+		;
+
+reserved_alias	:	reserved_word {
+			    sudoerserror(N_("syntax error, reserved word used as an alias name"));
+			    YYERROR;
+			}
+		;
+
 options		:	/* empty */ {
 			    init_options(&$$);
 			}
@@ -851,6 +869,7 @@ hostalias	:	ALIAS '=' hostlist {
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' hostlist
 		;
 
 hostlist	:	ophost
@@ -873,6 +892,7 @@ cmndalias	:	ALIAS '=' cmndlist {
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' cmndlist
 		;
 
 cmndlist	:	digcmnd
@@ -895,6 +915,7 @@ runasalias	:	ALIAS '=' userlist {
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' userlist
 		;
 
 useraliases	:	useralias
@@ -910,6 +931,7 @@ useralias	:	ALIAS '=' userlist {
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' userlist
 		;
 
 userlist	:	opuser

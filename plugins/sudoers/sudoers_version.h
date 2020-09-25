@@ -69,7 +69,7 @@
  * 46	sudo 1.8.20, added TIMEOUT, NOTBEFORE and NOTAFTER options.
  * 47	sudo 1.9.0, Cmd_Alias treated as Cmnd_Alias, support for multiple digests per command and for ALL.
  * 48	sudo 1.9.1, @include and @includedir, include path escaping/quoting.
- * 49	sudo 1.9.3, CWD and CHDIR options.
+ * 49	sudo 1.9.3, CWD and CHROOT options.
  */
 
 #ifndef SUDOERS_VERSION_H
