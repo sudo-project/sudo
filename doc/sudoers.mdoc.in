@@ -2031,7 +2031,7 @@ are also considered reserved words:
 .Li ROLE ,
 .Li TYPE ,
 .\}
-.Li CMND_TIMEOUT ,
+.Li TIMEOUT ,
 .Li CWD ,
 .Li NOTBEFORE
 and

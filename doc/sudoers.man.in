@@ -2159,7 +2159,7 @@ are also considered reserved words:
 .if \n(SL \{\
 \fRTYPE\fR,
 .\}
-\fRCMND_TIMEOUT\fR,
+\fRTIMEOUT\fR,
 \fRCWD\fR,
 \fRNOTBEFORE\fR
 and
