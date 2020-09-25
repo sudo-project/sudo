@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 9, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 25, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1380,6 +1380,10 @@ subsequent
 in the
 \fRCmnd_Spec_List\fR,
 inherit that option unless it is overridden by another option.
+Note that the option names are reserved words in
+\fIsudoers\fR.
+This means that none of the valid option names (see below) can be used
+when declaring an alias.
 .if \n(SL \{\
 .SS "SELinux_Spec"
 On systems with SELinux support,
@@ -2128,16 +2132,41 @@ It can be used wherever one might otherwise use a
 \fRRunas_Alias\fR,
 or
 \fRHost_Alias\fR.
-You should not try to define your own
+Attempting to define an
 \fIalias\fR
-called
+named
 \fBALL\fR
-as the built-in alias will be used in preference to your own.
+will result in a syntax error.
 Please note that using
 \fBALL\fR
 can be dangerous since in a command context, it allows the user to run
 \fIany\fR
 command on the system.
+.PP
+The following option names permitted in an
+\fROption_Spec\fR
+are also considered reserved words:
+\fRCHROOT\fR,
+.if \n(PS \{\
+\fRPRIVS\fR,
+.\}
+.if \n(PS \{\
+\fRLIMITPRIVS\fR,
+.\}
+.if \n(SL \{\
+\fRROLE\fR,
+.\}
+.if \n(SL \{\
+\fRTYPE\fR,
+.\}
+\fRCMND_TIMEOUT\fR,
+\fRCWD\fR,
+\fRNOTBEFORE\fR
+and
+\fRNOTAFTER\fR.
+Attempting to define an
+\fIalias\fR
+with the same name as one of the options will result in a syntax error.
 .PP
 An exclamation point
 (\(oq\&!\(cq)

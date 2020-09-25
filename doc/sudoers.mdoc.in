@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 9, 2020
+.Dd September 25, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1308,6 +1308,10 @@ subsequent
 in the
 .Li Cmnd_Spec_List ,
 inherit that option unless it is overridden by another option.
+Note that the option names are reserved words in
+.Em sudoers .
+This means that none of the valid option names (see below) can be used
+when declaring an alias.
 .if \n(SL \{\
 .Ss SELinux_Spec
 On systems with SELinux support,
@@ -2004,16 +2008,37 @@ It can be used wherever one might otherwise use a
 .Li Runas_Alias ,
 or
 .Li Host_Alias .
-You should not try to define your own
+Attempting to define an
 .Em alias
-called
+named
 .Sy ALL
-as the built-in alias will be used in preference to your own.
+will result in a syntax error.
 Please note that using
 .Sy ALL
 can be dangerous since in a command context, it allows the user to run
 .Em any
 command on the system.
+.Pp
+The following option names permitted in an
+.Li Option_Spec
+are also considered reserved words:
+.Li CHROOT ,
+.if \n(PS \{\
+.Li PRIVS ,
+.Li LIMITPRIVS ,
+.\}
+.if \n(SL \{\
+.Li ROLE ,
+.Li TYPE ,
+.\}
+.Li CMND_TIMEOUT ,
+.Li CWD ,
+.Li NOTBEFORE
+and
+.Li NOTAFTER .
+Attempting to define an
+.Em alias
+with the same name as one of the options will result in a syntax error.
 .Pp
 An exclamation point
 .Pq Ql \&!

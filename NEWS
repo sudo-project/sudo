@@ -67,9 +67,10 @@ What's new in Sudo 1.9.3
 
  * It is now possible to set the working directory or change the
    root directory on a per-command basis using the CWD and CHROOT
-   options.  There are also new Defaults settings, runchroot and
-   runcwd, that can be used to set the working directory or root
-   directory on a more global basis.
+   options.  CWD and CHROOT are now reserved words in sudoers--they
+   can no longer be used as alias names.  There are also new Defaults
+   settings, runchroot and runcwd, that can be used to set the
+   working directory or root directory on a more global basis.
 
  * New -D (--chdir) and -R (--chroot) command line options can be
    used to set the working directory or root directory if the sudoers

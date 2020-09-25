@@ -3,6 +3,12 @@ Notes on upgrading from an older release
 
 o Upgrading from a version prior to 1.9.3:
 
+    Due to the addition of the CHROOT and CWD options, it is no
+    longer possible to declare an alias with one of those names.
+    If a sudoers file has an alias with one of those names, sudo
+    and visudo will report a syntax error with a message like
+    "syntax error: unexpected CHROOT, expecting ALIAS".
+
     Starting with version 1.9.3, sudoers rules must end in either
     a newline or the end-of-file.  This makes it possible to provide
     better error messages.  Previously, it was possible to include
@@ -97,6 +103,13 @@ o Upgrading from a version prior to 1.8.23:
 
 o Upgrading from a version prior to 1.8.20:
 
+    Due to the addition of the TIMEOUT, NOTBEFORE and NOTAFTTER
+    options, it is no longer possible to declare an alias with one
+    of those names.  If a sudoers file has an alias with one of
+    those names, sudo and visudo will report a syntax error with a
+    message like "syntax error: unexpected TIMEOUT, expecting ALIAS".
+
+    Starting with version 1.9.3, sudoers rules must end in either
     Prior to version 1.8.20, when log_input, log_output or use_pty
     were enabled, if any of the standard input, output or error
     were not connected to a terminal, sudo would use a pipe.  The
