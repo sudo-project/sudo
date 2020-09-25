@@ -829,6 +829,8 @@ plugins/sudoers/regress/testsudoers/test11.out.ok
 plugins/sudoers/regress/testsudoers/test11.sh
 plugins/sudoers/regress/testsudoers/test12.out.ok
 plugins/sudoers/regress/testsudoers/test12.sh
+plugins/sudoers/regress/testsudoers/test13.out.ok
+plugins/sudoers/regress/testsudoers/test13.sh
 plugins/sudoers/regress/testsudoers/test2.inc
 plugins/sudoers/regress/testsudoers/test2.out.ok
 plugins/sudoers/regress/testsudoers/test2.sh
