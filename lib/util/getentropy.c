@@ -399,7 +399,7 @@ getentropy_fallback(void *buf, size_t len)
 	struct timespec ts;
 	struct timeval tv;
 	struct rusage ru;
-	sigset_t sigset;
+	sigset_t set;
 	struct stat st;
 	struct sudo_digest *ctx;
 	static pid_t lastpid;
@@ -451,9 +451,8 @@ getentropy_fallback(void *buf, size_t len)
 				(void) nanosleep(&ts, NULL);
 			}
 
-			HX(sigpending(&sigset) == -1, sigset);
-			HX(sigprocmask(SIG_BLOCK, NULL, &sigset) == -1,
-			    sigset);
+			HX(sigpending(&set) == -1, set);
+			HX(sigprocmask(SIG_BLOCK, NULL, &set) == -1, set);
 
 			HF(sudo_getentropy);	/* an addr in this library */
 			HF(printf);		/* an addr in libc */

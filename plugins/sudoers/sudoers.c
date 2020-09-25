@@ -1049,11 +1049,11 @@ set_cmnd(void)
 }
 
 /*
- * Open sudoers and sanity check mode/owner/type.
+ * Open sudoers file and sanity check mode/owner/type.
  * Returns a handle to the sudoers file or NULL on error.
  */
 FILE *
-open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
+open_sudoers(const char *file, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
@@ -1064,7 +1064,7 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	debug_return_ptr(NULL);
 
 again:
-    switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
+    switch (sudo_secure_file(file, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
 	    /*
 	     * If we are expecting sudoers to be group readable by
@@ -1080,15 +1080,15 @@ again:
 		}
 	    }
 	    /*
-	     * Open sudoers and make sure we can read it so we can present
+	     * Open file and make sure we can read it so we can present
 	     * the user with a reasonable error message (unlike the lexer).
 	     */
-	    if ((fp = fopen(sudoers, "r")) == NULL) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), sudoers);
+	    if ((fp = fopen(file, "r")) == NULL) {
+		log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
 	    } else {
 		if (sb.st_size != 0 && fgetc(fp) == EOF) {
 		    log_warning(SLOG_SEND_MAIL,
-			N_("unable to read %s"), sudoers);
+			N_("unable to read %s"), file);
 		    fclose(fp);
 		    fp = NULL;
 		} else {
@@ -1113,23 +1113,23 @@ again:
 		}
 		errno = serrno;
 	    }
-	    log_warning(SLOG_SEND_MAIL, N_("unable to stat %s"), sudoers);
+	    log_warning(SLOG_SEND_MAIL, N_("unable to stat %s"), file);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
 	    log_warningx(SLOG_SEND_MAIL,
-		N_("%s is not a regular file"), sudoers);
+		N_("%s is not a regular file"), file);
 	    break;
 	case SUDO_PATH_WRONG_OWNER:
 	    log_warningx(SLOG_SEND_MAIL,
-		N_("%s is owned by uid %u, should be %u"), sudoers,
+		N_("%s is owned by uid %u, should be %u"), file,
 		(unsigned int) sb.st_uid, (unsigned int) sudoers_uid);
 	    break;
 	case SUDO_PATH_WORLD_WRITABLE:
-	    log_warningx(SLOG_SEND_MAIL, N_("%s is world writable"), sudoers);
+	    log_warningx(SLOG_SEND_MAIL, N_("%s is world writable"), file);
 	    break;
 	case SUDO_PATH_GROUP_WRITABLE:
 	    log_warningx(SLOG_SEND_MAIL,
-		N_("%s is owned by gid %u, should be %u"), sudoers,
+		N_("%s is owned by gid %u, should be %u"), file,
 		(unsigned int) sb.st_gid, (unsigned int) sudoers_gid);
 	    break;
 	default:

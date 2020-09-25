@@ -190,7 +190,7 @@ static int
 sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 {
     static int pam_status = PAM_SUCCESS;
-    const char *tty = user_ttypath;
+    const char *ttypath = user_ttypath;
     const char *errstr, *pam_service;
     int rc;
     debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH);
@@ -249,15 +249,15 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
      * Some PAM modules assume PAM_TTY is set and will misbehave (or crash)
      * if it is not.  Known offenders include pam_lastlog and pam_time.
      */
-    if (tty == NULL)
-	tty = "";
+    if (ttypath == NULL)
+	ttypath = "";
 #endif
-    if (tty != NULL) {
-	rc = pam_set_item(pamh, PAM_TTY, tty);
+    if (ttypath != NULL) {
+	rc = pam_set_item(pamh, PAM_TTY, ttypath);
 	if (rc != PAM_SUCCESS) {
 	    errstr = sudo_pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"pam_set_item(pamh, PAM_TTY, %s): %s", tty, errstr);
+		"pam_set_item(pamh, PAM_TTY, %s): %s", ttypath, errstr);
 	}
     }
 

@@ -652,9 +652,9 @@ parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
 }
 
 FILE *
-open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
+open_sudoers(const char *file, bool doedit, bool *keepopen)
 {
-    return fopen(sudoers, "r");
+    return fopen(file, "r");
 }
 
 static bool

@@ -908,30 +908,30 @@ check_owner(const char *path, bool quiet)
 }
 
 static bool
-check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
+check_syntax(const char *file, bool quiet, bool strict, bool oldperms)
 {
     bool ok = false;
     int oldlocale;
     debug_decl(check_syntax, SUDOERS_DEBUG_UTIL);
 
-    if (strcmp(sudoers_file, "-") == 0) {
+    if (strcmp(file, "-") == 0) {
 	sudoersin = stdin;
-	sudoers_file = "stdin";
-    } else if ((sudoersin = fopen(sudoers_file, "r")) == NULL) {
+	file = "stdin";
+    } else if ((sudoersin = fopen(file, "r")) == NULL) {
 	if (!quiet)
-	    sudo_warn(U_("unable to open %s"), sudoers_file);
+	    sudo_warn(U_("unable to open %s"), file);
 	goto done;
     }
     if (!init_defaults())
 	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
-    init_parser(sudoers_file, quiet, true);
+    init_parser(file, quiet, true);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
-	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_file);
+	    sudo_warnx(U_("failed to parse %s file, unknown error"), file);
 	parse_error = true;
 	rcstr_delref(errorfile);
-	if ((errorfile = rcstr_dup(sudoers_file)) == NULL)
+	if ((errorfile = rcstr_dup(file)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     if (!parse_error) {
@@ -946,9 +946,9 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	struct sudoersfile *sp;
 
 	/* Parsed OK, check mode and owner. */
-	if (oldperms || check_owner(sudoers_file, quiet)) {
+	if (oldperms || check_owner(file, quiet)) {
 	    if (!quiet)
-		(void) printf(_("%s: parsed OK\n"), sudoers_file);
+		(void) printf(_("%s: parsed OK\n"), file);
 	} else {
 	    ok = false;
 	}

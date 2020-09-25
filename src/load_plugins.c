@@ -263,11 +263,7 @@ done:
  * Load the plugin specified by "info".
  */
 static bool
-sudo_load_plugin(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins,
-    struct plugin_container_list *audit_plugins,
-    struct plugin_container_list *approval_plugins,
-    struct plugin_info *info, bool quiet)
+sudo_load_plugin(struct plugin_info *info, bool quiet)
 {
     struct generic_plugin *plugin;
     char path[PATH_MAX];
@@ -315,9 +311,9 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 
     switch (plugin->type) {
     case SUDO_POLICY_PLUGIN:
-	if (policy_plugin->handle != NULL) {
+	if (policy_plugin.handle != NULL) {
 	    /* Ignore duplicate entries. */
-	    if (strcmp(policy_plugin->name, info->symbol_name) == 0) {
+	    if (strcmp(policy_plugin.name, info->symbol_name) == 0) {
 		if (!quiet) {
 		    sudo_warnx(U_("ignoring duplicate plugin \"%s\" in %s, line %d"),
 			info->symbol_name, _PATH_SUDO_CONF, info->lineno);
@@ -334,19 +330,19 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    ret = true;
 	    goto done;
 	}
-	if (!fill_container(policy_plugin, handle, path, plugin, info))
+	if (!fill_container(&policy_plugin, handle, path, plugin, info))
 	    goto done;
 	break;
     case SUDO_IO_PLUGIN:
-	if (!sudo_insert_plugin(io_plugins, handle, path, plugin, info))
+	if (!sudo_insert_plugin(&io_plugins, handle, path, plugin, info))
 	    goto done;
 	break;
     case SUDO_AUDIT_PLUGIN:
-	if (!sudo_insert_plugin(audit_plugins, handle, path, plugin, info))
+	if (!sudo_insert_plugin(&audit_plugins, handle, path, plugin, info))
 	    goto done;
 	break;
     case SUDO_APPROVAL_PLUGIN:
-	if (!sudo_insert_plugin(approval_plugins, handle, path, plugin, info))
+	if (!sudo_insert_plugin(&approval_plugins, handle, path, plugin, info))
 	    goto done;
 	break;
     default:
@@ -384,23 +380,21 @@ free_plugin_info(struct plugin_info *info)
 }
 
 static void
-sudo_register_hooks(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins,
-    struct plugin_container_list *audit_plugins)
+sudo_register_hooks(void)
 {
     struct plugin_container *container;
     debug_decl(sudo_register_hooks, SUDO_DEBUG_PLUGIN);
 
-    if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
-	if (policy_plugin->u.policy->register_hooks != NULL) {
-	    sudo_debug_set_active_instance(policy_plugin->debug_instance);
-	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION,
+    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
+	if (policy_plugin.u.policy->register_hooks != NULL) {
+	    sudo_debug_set_active_instance(policy_plugin.debug_instance);
+	    policy_plugin.u.policy->register_hooks(SUDO_HOOK_VERSION,
 		register_hook);
 	    sudo_debug_set_active_instance(sudo_debug_instance);
 	}
     }
 
-    TAILQ_FOREACH(container, io_plugins, entries) {
+    TAILQ_FOREACH(container, &io_plugins, entries) {
 	if (container->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
 	    if (container->u.io->register_hooks != NULL) {
 		sudo_debug_set_active_instance(container->debug_instance);
@@ -411,7 +405,7 @@ sudo_register_hooks(struct plugin_container *policy_plugin,
 	}
     }
 
-    TAILQ_FOREACH(container, audit_plugins, entries) {
+    TAILQ_FOREACH(container, &audit_plugins, entries) {
 	if (container->u.audit->register_hooks != NULL) {
 	    sudo_debug_set_active_instance(container->debug_instance);
 	    container->u.audit->register_hooks(SUDO_HOOK_VERSION,
@@ -424,16 +418,15 @@ sudo_register_hooks(struct plugin_container *policy_plugin,
 }
 
 static void
-sudo_init_event_alloc(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins)
+sudo_init_event_alloc(void)
 {
     struct plugin_container *container;
     debug_decl(sudo_init_event_alloc, SUDO_DEBUG_PLUGIN);
 
-    if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 15))
-	policy_plugin->u.policy->event_alloc = sudo_plugin_event_alloc;
+    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
+	policy_plugin.u.policy->event_alloc = sudo_plugin_event_alloc;
 
-    TAILQ_FOREACH(container, io_plugins, entries) {
+    TAILQ_FOREACH(container, &io_plugins, entries) {
 	if (container->u.io->version >= SUDO_API_MKVERSION(1, 15))
 	    container->u.io->event_alloc = sudo_plugin_event_alloc;
     }
@@ -446,12 +439,7 @@ sudo_init_event_alloc(struct plugin_container *policy_plugin,
  * Used to provide a default plugin when none are specified in sudo.conf.
  */
 bool
-sudo_load_sudoers_plugin(const char *symbol_name,
-    struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins,
-    struct plugin_container_list *audit_plugins,
-    struct plugin_container_list *approval_plugins,
-    bool optional)
+sudo_load_sudoers_plugin(const char *symbol_name, bool optional)
 {
     struct plugin_info *info;
     bool ret = false;
@@ -471,8 +459,7 @@ sudo_load_sudoers_plugin(const char *symbol_name,
 	goto done;
     }
     /* info->options = NULL; */
-    ret = sudo_load_plugin(policy_plugin, io_plugins, audit_plugins,
-	approval_plugins, info, optional);
+    ret = sudo_load_plugin(info, optional);
     free_plugin_info(info);
 
 done:
@@ -483,10 +470,7 @@ done:
  * Load the plugins listed in sudo.conf.
  */
 bool
-sudo_load_plugins(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins,
-    struct plugin_container_list *audit_plugins,
-    struct plugin_container_list *approval_plugins)
+sudo_load_plugins(void)
 {
     struct plugin_info_list *plugins;
     struct plugin_info *info, *next;
@@ -496,8 +480,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     /* Walk the plugin list from sudo.conf, if any and free it. */
     plugins = sudo_conf_plugins();
     TAILQ_FOREACH_SAFE(info, plugins, entries, next) {
-	ret = sudo_load_plugin(policy_plugin, io_plugins, audit_plugins,
-	    approval_plugins, info, false);
+	ret = sudo_load_plugin(info, false);
 	if (!ret)
 	    goto done;
 	free_plugin_info(info);
@@ -508,58 +491,54 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
      * If no policy plugin, fall back to the default (sudoers).
      * If there is also no I/O log plugin, use sudoers for that too.
      */
-    if (policy_plugin->handle == NULL) {
+    if (policy_plugin.handle == NULL) {
 	/* Default policy plugin */
-	ret = sudo_load_sudoers_plugin("sudoers_policy", policy_plugin,
-	    io_plugins, audit_plugins, approval_plugins, false);
+	ret = sudo_load_sudoers_plugin("sudoers_policy", false);
 	if (!ret)
 	    goto done;
 
 	/* Default audit plugin, optional (sudoers < 1.9.1 lack this) */
-	(void)sudo_load_sudoers_plugin("sudoers_audit", policy_plugin,
-	    io_plugins, audit_plugins, approval_plugins, true);
+	(void)sudo_load_sudoers_plugin("sudoers_audit", true);
 
 	/* Default I/O plugin */
-	if (TAILQ_EMPTY(io_plugins)) {
-	    ret = sudo_load_sudoers_plugin("sudoers_io", policy_plugin,
-		io_plugins, audit_plugins, approval_plugins, false);
+	if (TAILQ_EMPTY(&io_plugins)) {
+	    ret = sudo_load_sudoers_plugin("sudoers_io", false);
 	    if (!ret)
 		goto done;
 	}
-    } else if (strcmp(policy_plugin->name, "sudoers_policy") == 0) {
+    } else if (strcmp(policy_plugin.name, "sudoers_policy") == 0) {
 	/*
 	 * If policy plugin is sudoers_policy but there is no sudoers_audit
 	 * loaded, load it too, if possible.
 	 */
-	if (!plugin_exists(audit_plugins, "sudoers_audit")) {
-	    if (sudo_load_sudoers_plugin("sudoers_audit", policy_plugin,
-		    io_plugins, audit_plugins, approval_plugins, true)) {
+	if (!plugin_exists(&audit_plugins, "sudoers_audit")) {
+	    if (sudo_load_sudoers_plugin("sudoers_audit", true)) {
 		/*
 		 * Move the plugin options from sudoers_policy to sudoers_audit
 		 * since the audit module is now what actually opens sudoers.
 		 */
-		if (policy_plugin->options != NULL) {
-		    TAILQ_LAST(audit_plugins, plugin_container_list)->options =
-			policy_plugin->options;
-		    policy_plugin->options = NULL;
+		if (policy_plugin.options != NULL) {
+		    TAILQ_LAST(&audit_plugins, plugin_container_list)->options =
+			policy_plugin.options;
+		    policy_plugin.options = NULL;
 		}
 	    }
 	}
     }
 
     /* TODO: check all plugins for open function too */
-    if (policy_plugin->u.policy->check_policy == NULL) {
+    if (policy_plugin.u.policy->check_policy == NULL) {
 	sudo_warnx(U_("policy plugin %s does not include a check_policy method"),
-	    policy_plugin->name);
+	    policy_plugin.name);
 	ret = false;
 	goto done;
     }
 
     /* Set event_alloc() in plugins. */
-    sudo_init_event_alloc(policy_plugin, io_plugins);
+    sudo_init_event_alloc();
 
     /* Install hooks (XXX - later, after open). */
-    sudo_register_hooks(policy_plugin, io_plugins, audit_plugins);
+    sudo_register_hooks();
 
 done:
     debug_return_bool(ret);

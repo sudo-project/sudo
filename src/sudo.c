@@ -111,9 +111,9 @@ static int policy_show_version(int verbose);
 static void policy_check(int argc, char * const argv[], char *env_add[],
     char **command_info[], char **argv_out[], char **user_env_out[]);
 static void policy_list(int argc, char * const argv[],
-    int verbose, const char *list_user, char * const envp[]);
+    int verbose, const char *user, char * const envp[]);
 static void policy_validate(char * const argv[], char * const envp[]);
-static void policy_invalidate(int remove);
+static void policy_invalidate(int unlinkit);
 
 /* I/O log plugin convenience functions. */
 static void iolog_open(struct sudo_settings *settings, char * const user_info[],
@@ -226,8 +226,7 @@ main(int argc, char *argv[], char *envp[])
     sudo_warn_set_conversation(sudo_conversation);
 
     /* Load plugins. */
-    if (!sudo_load_plugins(&policy_plugin, &io_plugins, &audit_plugins,
-	    &approval_plugins))
+    if (!sudo_load_plugins())
 	sudo_fatalx("%s", U_("fatal error, unable to load plugins"));
 
     /* Allocate event base so plugin can use it. */
@@ -1205,7 +1204,7 @@ policy_check(int argc, char * const argv[],
 
 static void
 policy_list(int argc, char * const argv[], int verbose,
-    const char *list_user, char * const envp[])
+    const char *user, char * const envp[])
 {
     const char *errstr = NULL;
     /* TODO: add list_user */
@@ -1221,7 +1220,7 @@ policy_list(int argc, char * const argv[], int verbose,
 	    policy_plugin.name);
     }
     sudo_debug_set_active_instance(policy_plugin.debug_instance);
-    ok = policy_plugin.u.policy->list(argc, argv, verbose, list_user, &errstr);
+    ok = policy_plugin.u.policy->list(argc, argv, verbose, user, &errstr);
     sudo_debug_set_active_instance(sudo_debug_instance);
 
     switch (ok) {
@@ -1294,7 +1293,7 @@ policy_validate(char * const argv[], char * const envp[])
 }
 
 static void
-policy_invalidate(int remove)
+policy_invalidate(int unlinkit)
 {
     debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM);
 
@@ -1303,7 +1302,7 @@ policy_invalidate(int remove)
 	    policy_plugin.name);
     }
     sudo_debug_set_active_instance(policy_plugin.debug_instance);
-    policy_plugin.u.policy->invalidate(remove);
+    policy_plugin.u.policy->invalidate(unlinkit);
     if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
 	if (policy_plugin.u.policy->close != NULL)
 	    policy_plugin.u.policy->close(0, 0);

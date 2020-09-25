@@ -1327,9 +1327,9 @@ static struct sudoers_env_file env_file_system = {
 
 void
 register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *),
-    char * (*ef_next)(void *, int *), bool system)
+    char * (*ef_next)(void *, int *), bool sys)
 {
-    struct sudoers_env_file *ef = system ? &env_file_system : &env_file_sudoers;
+    struct sudoers_env_file *ef = sys ? &env_file_system : &env_file_sudoers;
 
     ef->open = ef_open;
     ef->close = ef_close;

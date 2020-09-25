@@ -72,7 +72,7 @@ bool do_logfile(const char *msg);
 bool do_syslog(int pri, const char *msg);
 char *new_logline(const char *, const char *);
 bool sudoers_warn_setlocale(bool restore, int *cookie);
-bool sudoers_setlocale(int newlocale, int *prevlocale);
+bool sudoers_setlocale(int locale_type, int *prev_locale);
 int sudoers_getlocale(void);
 int audit_failure(char *const argv[], char const *const fmt, ...) __printflike(2, 3);
 int vaudit_failure(char *const argv[], char const *const fmt, va_list ap) __printflike(2, 0);

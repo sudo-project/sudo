@@ -440,39 +440,39 @@ sudo_endspent(void)
 }
 
 FILE *
-open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
+open_sudoers(const char *file, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
-    const char *sudoers_base;
+    const char *base;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
 
-    sudoers_base = strrchr(sudoers, '/');
-    if (sudoers_base != NULL)
-	sudoers_base++;
+    base = strrchr(file, '/');
+    if (base != NULL)
+	base++;
     else
-	sudoers_base = sudoers;
+	base = file;
 
-    switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
+    switch (sudo_secure_file(file, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
-	    fp = fopen(sudoers, "r");
+	    fp = fopen(file, "r");
 	    break;
 	case SUDO_PATH_MISSING:
-	    sudo_warn("unable to stat %s", sudoers_base);
+	    sudo_warn("unable to stat %s", base);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
-	    sudo_warnx("%s is not a regular file", sudoers_base);
+	    sudo_warnx("%s is not a regular file", base);
 	    break;
 	case SUDO_PATH_WRONG_OWNER:
 	    sudo_warnx("%s should be owned by uid %u",
-		sudoers_base, (unsigned int) sudoers_uid);
+		base, (unsigned int) sudoers_uid);
 	    break;
 	case SUDO_PATH_WORLD_WRITABLE:
-	    sudo_warnx("%s is world writable", sudoers_base);
+	    sudo_warnx("%s is world writable", base);
 	    break;
 	case SUDO_PATH_GROUP_WRITABLE:
 	    sudo_warnx("%s should be owned by gid %u",
-		sudoers_base, (unsigned int) sudoers_gid);
+		base, (unsigned int) sudoers_gid);
 	    break;
 	default:
 	    /* NOTREACHED */

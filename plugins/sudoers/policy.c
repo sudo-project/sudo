@@ -1053,13 +1053,13 @@ sudoers_policy_validate(const char **errstr)
 }
 
 static void
-sudoers_policy_invalidate(int remove)
+sudoers_policy_invalidate(int unlinkit)
 {
     debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN);
 
     user_cmnd = "kill";
     /* XXX - plugin API should support a return value for fatal errors. */
-    timestamp_remove(remove);
+    timestamp_remove(unlinkit);
     sudoers_cleanup();
 
     debug_return;
