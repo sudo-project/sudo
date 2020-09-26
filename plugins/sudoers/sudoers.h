@@ -315,7 +315,6 @@ extern mode_t sudoers_mode;
 extern uid_t sudoers_uid;
 extern gid_t sudoers_gid;
 extern int sudolineno;
-extern int last_token;
 
 /* defaults.c */
 void dump_defaults(void);

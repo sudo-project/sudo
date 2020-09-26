@@ -43,7 +43,7 @@
 #endif
 
 /* If we last saw a newline the entry is on the preceding line. */
-#define this_lineno	(last_token == '\n' ? sudolineno - 1 : sudolineno)
+#define this_lineno	(sudoerschar == '\n' ? sudolineno - 1 : sudolineno)
 
 /*
  * Globals
@@ -1043,7 +1043,7 @@ sudoerserror(const char *s)
     debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER);
 
     /* The lexer displays more detailed messages for ERROR tokens. */
-    if (last_token == ERROR)
+    if (sudoerschar == ERROR)
 	debug_return;
 
     /* Save the line the first error occurred on. */
