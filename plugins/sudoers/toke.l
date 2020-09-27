@@ -759,6 +759,9 @@ sudoedit		{
 
 <*>\r?\n		{
 			    if (YY_START == INSTR) {
+				/* re-scan after changing state */
+				BEGIN INITIAL;
+				sudoersless(0);
 				sudoerserror("unexpected line break in string");
 				LEXTRACE("ERROR ");
 				return ERROR;
@@ -802,6 +805,10 @@ sudoedit		{
 
 <*><<EOF>>		{
 			    if (YY_START != INITIAL) {
+				if (YY_START == INSTR)
+				    sudoerserror("unterminated string");
+				else
+				    sudoerserror("unexpected state at EOF");
 			    	BEGIN INITIAL;
 				LEXTRACE("ERROR ");
 				return ERROR;
