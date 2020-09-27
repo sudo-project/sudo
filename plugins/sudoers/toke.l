@@ -177,7 +177,7 @@ DEFVAR			[a-z_]+
 			    BEGIN prev_state;
 
 			    if (sudoerslval.string == NULL) {
-				sudoerserror("empty string");
+				sudoerserror(N_("empty string"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -187,7 +187,7 @@ DEFVAR			[a-z_]+
 				    if (sudoerslval.string[1] == '\0' ||
 					(sudoerslval.string[1] == ':' &&
 					sudoerslval.string[2] == '\0')) {
-					sudoerserror("empty group");
+					sudoerserror(N_("empty group"));
 					LEXTRACE("ERROR ");
 					return ERROR;
 				    }
@@ -195,7 +195,7 @@ DEFVAR			[a-z_]+
 				    return USERGROUP;
 				case '+':
 				    if (sudoerslval.string[1] == '\0') {
-					sudoerserror("empty netgroup");
+					sudoerserror(N_("empty netgroup"));
 					LEXTRACE("ERROR ");
 					return ERROR;
 				    }
@@ -291,7 +291,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>@include	{
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -303,7 +303,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>@includedir	{
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -315,7 +315,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^#include[[:blank:]]+.*(\r\n|\n)? {
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -331,7 +331,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^#includedir[[:blank:]]+.*(\r\n|\n)? {
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -350,7 +350,7 @@ DEFVAR			[a-z_]+
 			    int n;
 
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -390,7 +390,7 @@ DEFVAR			[a-z_]+
 			    int n;
 
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -487,9 +487,9 @@ NOFOLLOW[[:blank:]]*:	{
 
 <INITIAL,GOTDEFS>(\+|\%|\%:) {
 			    if (sudoerstext[0] == '+')
-				sudoerserror("empty netgroup");
+				sudoerserror(N_("empty netgroup"));
 			    else
-				sudoerserror("empty group");
+				sudoerserror(N_("empty group"));
 			    LEXTRACE("ERROR ");
 			    return ERROR;
 			}
@@ -526,7 +526,7 @@ NOFOLLOW[[:blank:]]*:	{
 
 {IPV6ADDR}(\/{IPV6ADDR})? {
 			    if (!ipv6_valid(sudoerstext)) {
-				sudoerserror("invalid IPv6 address");
+				sudoerserror(N_("invalid IPv6 address"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -538,7 +538,7 @@ NOFOLLOW[[:blank:]]*:	{
 
 {IPV6ADDR}\/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8]) {
 			    if (!ipv6_valid(sudoerstext)) {
-				sudoerserror("invalid IPv6 address");
+				sudoerserror(N_("invalid IPv6 address"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -762,7 +762,7 @@ sudoedit		{
 				/* re-scan after changing state */
 				BEGIN INITIAL;
 				sudoersless(0);
-				sudoerserror("unexpected line break in string");
+				sudoerserror(N_("unexpected line break in string"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -806,9 +806,9 @@ sudoedit		{
 <*><<EOF>>		{
 			    if (YY_START != INITIAL) {
 				if (YY_START == INSTR)
-				    sudoerserror("unterminated string");
+				    sudoerserror(N_("unterminated string"));
 				else
-				    sudoerserror("unexpected state at EOF");
+				    sudoerserror(N_("unexpected state at end of file"));
 			    	BEGIN INITIAL;
 				LEXTRACE("ERROR ");
 				return ERROR;

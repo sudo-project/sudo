@@ -3180,7 +3180,7 @@ YY_RULE_SETUP
 			    BEGIN prev_state;
 
 			    if (sudoerslval.string == NULL) {
-				sudoerserror("empty string");
+				sudoerserror(N_("empty string"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3190,7 +3190,7 @@ YY_RULE_SETUP
 				    if (sudoerslval.string[1] == '\0' ||
 					(sudoerslval.string[1] == ':' &&
 					sudoerslval.string[2] == '\0')) {
-					sudoerserror("empty group");
+					sudoerserror(N_("empty group"));
 					LEXTRACE("ERROR ");
 					return ERROR;
 				    }
@@ -3198,7 +3198,7 @@ YY_RULE_SETUP
 				    return USERGROUP;
 				case '+':
 				    if (sudoerslval.string[1] == '\0') {
-					sudoerserror("empty netgroup");
+					sudoerserror(N_("empty netgroup"));
 					LEXTRACE("ERROR ");
 					return ERROR;
 				    }
@@ -3322,7 +3322,7 @@ YY_RULE_SETUP
 #line 292 "toke.l"
 {
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3337,7 +3337,7 @@ YY_RULE_SETUP
 #line 304 "toke.l"
 {
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3353,7 +3353,7 @@ YY_RULE_SETUP
 #line 316 "toke.l"
 {
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3373,7 +3373,7 @@ YY_RULE_SETUP
 #line 332 "toke.l"
 {
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3395,7 +3395,7 @@ YY_RULE_SETUP
 			    int n;
 
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3438,7 +3438,7 @@ YY_RULE_SETUP
 			    int n;
 
 			    if (continued) {
-				sudoerserror("invalid line continuation");
+				sudoerserror(N_("invalid line continuation"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3580,9 +3580,9 @@ YY_RULE_SETUP
 #line 488 "toke.l"
 {
 			    if (sudoerstext[0] == '+')
-				sudoerserror("empty netgroup");
+				sudoerserror(N_("empty netgroup"));
 			    else
-				sudoerserror("empty group");
+				sudoerserror(N_("empty group"));
 			    LEXTRACE("ERROR ");
 			    return ERROR;
 			}
@@ -3634,7 +3634,7 @@ YY_RULE_SETUP
 #line 527 "toke.l"
 {
 			    if (!ipv6_valid(sudoerstext)) {
-				sudoerserror("invalid IPv6 address");
+				sudoerserror(N_("invalid IPv6 address"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3649,7 +3649,7 @@ YY_RULE_SETUP
 #line 539 "toke.l"
 {
 			    if (!ipv6_valid(sudoerstext)) {
-				sudoerserror("invalid IPv6 address");
+				sudoerserror(N_("invalid IPv6 address"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -3965,7 +3965,7 @@ YY_RULE_SETUP
 				/* re-scan after changing state */
 				BEGIN INITIAL;
 				sudoersless(0);
-				sudoerserror("unexpected line break in string");
+				sudoerserror(N_("unexpected line break in string"));
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -4033,9 +4033,9 @@ case YY_STATE_EOF(EXPECTPATH):
 {
 			    if (YY_START != INITIAL) {
 				if (YY_START == INSTR)
-				    sudoerserror("unterminated string");
+				    sudoerserror(N_("unterminated string"));
 				else
-				    sudoerserror("unexpected state at EOF");
+				    sudoerserror(N_("unexpected state at end of file"));
 			    	BEGIN INITIAL;
 				LEXTRACE("ERROR ");
 				return ERROR;
