@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 19, 2020
+.Dd September 25, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -69,6 +69,7 @@ to use the
 .Nm
 plugin, the following configuration can be used.
 .Bd -literal -offset indent
+Plugin sudoers_audit sudoers.so
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 .Ed
@@ -80,17 +81,47 @@ Starting with
 plugin in the
 .Xr sudo.conf @mansectform@
 file.
-These arguments, if present, should be listed after the path to the plugin
+Plugin arguments, if any, should be listed after the path to the plugin
 (i.e., after
 .Pa sudoers.so ) .
+The arguments are only effective for the plugin that opens (and parses) the
+.Em sudoers
+file.
+.Pp
+For
+.Nm sudo
+version 1.9.1 and higher, this is the
+.Em sudoers_audit
+plugin.
+For older versions, it is the
+.Em sudoers_policy
+plugin.
 Multiple arguments may be specified, separated by white space.
 For example:
 .Bd -literal -offset indent
-Plugin sudoers_policy sudoers.so sudoers_mode=0400
+Plugin sudoers_audit sudoers.so sudoers_mode=0400 error_recovery=false
 .Ed
 .Pp
 The following plugin arguments are supported:
 .Bl -tag -width 8n
+.It error_recovery=bool
+The
+.Em error_recovery
+argument can be used to control whether
+.Nm
+should attempt to recover from syntax errors in the
+.Em sudoers
+file.
+If set to
+.Em true
+(the default),
+.Nm
+will try to recover from a syntax error by discarding the portion
+of the line that contains the error until the end of the line.
+A value of
+.Em false
+will disable error recovery.
+Prior to version 1.9.3, no error recovery was performed.
 .It ldap_conf=pathname
 The
 .Em ldap_conf
@@ -369,13 +400,8 @@ explicitly denied by the
 .Em env_check
 and
 .Em env_delete
-options are
+options are allowed and their values are
 inherited from the invoking process.
-In this case,
-.Em env_check
-and
-.Em env_delete
-behave like a blacklist.
 Prior to version 1.8.21, environment variables with a value beginning with
 .Li ()
 were always removed.
@@ -385,7 +411,7 @@ is used to match
 .Sy bash
 shell functions instead.
 Since it is not possible
-to blacklist all potentially dangerous environment variables, use
+to block all potentially dangerous environment variables, use
 of the default
 .Em env_reset
 behavior is encouraged.
@@ -1070,12 +1096,12 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
 .ie \n(SL \{\
-.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
-.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec)
+.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
 .\}
 .el \{\
-.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
-.el Option_Spec ::= (Date_Spec | Timeout_Spec)
+.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
 .\}
 
 .if \n(SL \{\
@@ -1089,6 +1115,10 @@ Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
 Timeout_Spec ::= 'TIMEOUT=timeout'
+
+Chdir_Spec ::= 'CWD=directory'
+
+Chroot_Spec ::= 'CHROOT=directory'
 
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
@@ -1278,6 +1308,10 @@ subsequent
 in the
 .Li Cmnd_Spec_List ,
 inherit that option unless it is overridden by another option.
+Note that the option names are reserved words in
+.Em sudoers .
+This means that none of the valid option names (see below) can be used
+when declaring an alias.
 .if \n(SL \{\
 .Ss SELinux_Spec
 On systems with SELinux support,
@@ -1396,6 +1430,70 @@ timeout values:
 .Li 1d2d3h .
 .Pp
 This setting is only supported by version 1.8.20 or higher.
+.Ss Chdir_Spec
+The working directory that the command will be run in can be specified
+using the
+.Li CWD
+setting.
+The
+.Fa directory
+must be a fully-qualified path name beginning with a
+.Sq /
+or
+.Sq ~
+character, or the special value
+.Dq * .
+A value of
+.Dq *
+indicates that the user may specify the working directory by running
+.Nm sudo
+with the
+.Fl D
+option.
+By default, commands are run from the invoking user's current working
+directory, unless the
+.Fl i
+option is given.
+Path names of the form
+.Li ~user/path/name
+are interpreted as being relative to the named user's home directory.
+If the user name is omitted, the path will be relative to the runas
+user's home directory.
+.Pp
+This setting is only supported by version 1.9.3 or higher.
+.Ss Chroot_Spec
+The root directory that the command will be run in can be specified
+using the
+.Li CHROOT
+setting.
+The
+.Fa directory
+must be a fully-qualified path name beginning with a
+.Sq /
+or
+.Sq ~
+character, or the special value
+.Dq * .
+A value of
+.Dq *
+indicates that the user may specify the root directory by running
+.Nm sudo
+with the
+.Fl R
+option.
+This setting can be used to run the command in a
+.Xr chroot 2
+.Dq sandbox
+similar to the
+.Xr chroot @mansectsu@
+utility.
+Path names of the form
+.Li ~user/path/name
+are interpreted as being relative to the named user's home directory.
+If the user name is omitted, the path will be relative to the runas
+user's home directory.
+.Pp
+This setting is only supported by version 1.9.3 or higher.
 .Ss Tag_Spec
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -1910,16 +2008,37 @@ It can be used wherever one might otherwise use a
 .Li Runas_Alias ,
 or
 .Li Host_Alias .
-You should not try to define your own
+Attempting to define an
 .Em alias
-called
+named
 .Sy ALL
-as the built-in alias will be used in preference to your own.
+will result in a syntax error.
 Please note that using
 .Sy ALL
 can be dangerous since in a command context, it allows the user to run
 .Em any
 command on the system.
+.Pp
+The following option names permitted in an
+.Li Option_Spec
+are also considered reserved words:
+.Li CHROOT ,
+.if \n(PS \{\
+.Li PRIVS ,
+.Li LIMITPRIVS ,
+.\}
+.if \n(SL \{\
+.Li ROLE ,
+.Li TYPE ,
+.\}
+.Li TIMEOUT ,
+.Li CWD ,
+.Li NOTBEFORE
+and
+.Li NOTAFTER .
+Attempting to define an
+.Em alias
+with the same name as one of the options will result in a syntax error.
 .Pp
 An exclamation point
 .Pq Ql \&!
@@ -4084,6 +4203,46 @@ In either case, the contents of
 .Em restricted_env_file
 are processed before the contents of
 .Em env_file .
+.It runchroot
+If set,
+.Nm sudo
+will use this value for the root directory when running a command.
+The special value
+.Dq *
+will allow the user to specify the root directory via
+.Nm sudo Ns 's
+.Fl R
+option.
+See the
+.Sx Chroot_Spec
+section for more details.
+.Pp
+It is only possible to use
+.Em runchroot
+as a command-specific Defaults setting if the command exists with
+the same path both inside and outside the chroot jail.
+This restriction does not apply to generic, host or user-based
+Defaults settings or to a
+.Em Cmnd_Spec
+that includes a
+.Em Chroot_Spec .
+.Pp
+This setting is only supported by version 1.9.3 or higher.
+.It runcwd
+If set,
+.Nm sudo
+will use this value for the working directory when running a command.
+The special value
+.Dq *
+will allow the user to specify the working directory via
+.Nm sudo Ns 's
+.Fl D
+option.
+See the
+.Sx Chdir_Spec
+section for more details.
+.Pp
+This setting is only supported by version 1.9.3 or higher.
 .It secure_path
 If set,
 .Nm sudo
@@ -4774,6 +4933,71 @@ was run from, and the number of lines and columns of the terminal.
 The second and third lines contain the working directory the command
 was run from and the path name of the command itself (with arguments
 if present).
+.It Pa log.json
+A JSON-formatted file containing information about the command.
+This is similar to the
+.Pa log
+file but contains additional information and is easily extensible.
+The
+.Pa log.json
+file will be used by
+.Xr sudoreplay @mansectsu@
+in preference to the
+.Pa log
+file if it exists.
+The file may contain the following elements:
+.Bl -tag -width 8n
+.It timestamp
+A JSON object containing time the command was run.
+It consists of two values,
+.Em seconds
+and
+.Em nanoseconds .
+.It columns
+The number of columns of the terminal the command ran on, or zero
+if no terminal was present.
+.It command
+The fully-qualified path of the command that was run.
+.It lines
+The number of lines of the terminal the command ran on, or zero
+if no terminal was present.
+.It runargv
+A JSON array representing the command's argument vector as passed to the
+.Xr execve 2
+system call.
+.It runenv
+A JSON array representing the command's environment as passed to the
+.Xr execve 2
+system call.
+.It rungid
+The group ID the command ran as.
+This element is only present when the user specifies a group on the
+command line.
+.It rungroup
+The name of the group the command ran as.
+This element is only present when the user specifies a group on the
+command line.
+.It runuid
+The user ID the command ran as.
+.It runuser
+The name of the user the command ran as.
+.It submitcwd
+The current working directory at the time
+.Nm sudo
+was run.
+.It submithost
+The name of the host the command was run on.
+.It submituser
+The name of the user who ran the command via
+.Nm sudo .
+.It ttyname
+The path name of the terminal the user invoked
+.Nm sudo
+from.
+If the command was run in a pseudo-terminal,
+.Em ttyname
+will be different from the terminal the command actually ran in.
+.El
 .It Pa timing
 Timing information used to replay the session.
 Each line consists of the I/O log entry type and amount of time
@@ -4902,7 +5126,7 @@ Defaults env_keep += "DISPLAY HOME"
 # User alias specification
 User_Alias	FULLTIMERS = millert, mikef, dowdy
 User_Alias	PARTTIMERS = bostley, jwfox, crawl
-User_Alias	WEBMASTERS = will, wendy, wim
+User_Alias	WEBADMIN = will, wendy, wim
 
 # Runas alias specification
 Runas_Alias	OP = root, operator
@@ -4916,7 +5140,7 @@ Host_Alias	SPARC = bigtime, eclipse, moet, anchor :\e
 		HPPA = boa, nag, python
 Host_Alias	CUNETS = 128.138.0.0/255.255.0.0
 Host_Alias	CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
-Host_Alias	SERVERS = master, mail, www, ns
+Host_Alias	SERVERS = primary, mail, www, ns
 Host_Alias	CDROM = orion, perseus, hercules
 
 # Cmnd alias specification
@@ -4943,12 +5167,19 @@ to log via
 .Xr syslog 3
 using the
 .Em auth
-facility in all cases.
+facility in all cases and for commands to be run with
+the target user's home directory as the working directory.
 We don't want to subject the full time staff to the
 .Nm sudo
-lecture, user
+lecture and we want to allow them to run commands in a
+.Xr chroot 2
+.Dq sandbox
+via the
+.Fl R
+option.
+User
 .Sy millert
-need not give a password, and we don't want to reset the
+need not provide a password and we don't want to reset the
 .Ev LOGNAME
 or
 .Ev USER
@@ -4972,9 +5203,9 @@ Note that this will not effectively constrain users with
 privileges.
 .Bd -literal
 # Override built-in defaults
-Defaults		syslog=auth
+Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
-Defaults:FULLTIMERS	!lecture
+Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
 Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
 Defaults!PAGERS		noexec
@@ -5198,7 +5429,7 @@ The user
 may run any command on any machine except for those in the
 .Em SERVERS
 .Li Host_Alias
-(master, mail, www and ns).
+(primary, mail, www and ns).
 .Bd -literal
 jill		SERVERS = /usr/bin/, !SU, !SHELLS
 .Ed
@@ -5240,11 +5471,11 @@ On his personal workstation, valkyrie,
 .Sy matt
 needs to be able to kill hung processes.
 .Bd -literal
-WEBMASTERS	www = (www) ALL, (root) /usr/bin/su www
+WEBADMIN	www = (www) ALL, (root) /usr/bin/su www
 .Ed
 .Pp
 On the host www, any user in the
-.Em WEBMASTERS
+.Em WEBADMIN
 .Li User_Alias
 (will, wendy, and wim), may run any command as user www (which owns the
 web pages) or simply
@@ -5702,15 +5933,23 @@ file should
 .Sy always
 be edited by the
 .Nm visudo
-command which locks the file and does grammatical checking.
-It is
-imperative that the
+utility which locks the file and checks for syntax errors.
+If
 .Em sudoers
-file be free of syntax errors since
+contains syntax errors,
 .Nm sudo
-will not run with a syntactically incorrect
+may refuse to run, which is a serious problem if
+.Nm sudo
+is your only method of obtaining superuser privileges.
+Recent versions of
+.Nm
+will attempt to recover after a syntax error by ignoring the rest of
+the line after encountering an error.
+Older versions of
+.Nm sudo
+will not run if
 .Em sudoers
-file.
+contains a syntax error.
 .Pp
 When using netgroups of machines (as opposed to users), if you
 store fully qualified host name in the netgroup (as is usually the

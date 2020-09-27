@@ -1,3 +1,5 @@
+/* generated file, do not edit */
+
 #define I_SYSLOG                0
 #define def_syslog              (sudo_defs_table[I_SYSLOG].sd_un.ival)
 #define I_SYSLOG_GOODPRI        1
@@ -254,6 +256,10 @@
 #define def_pam_ruser           (sudo_defs_table[I_PAM_RUSER].sd_un.flag)
 #define I_PAM_RHOST             127
 #define def_pam_rhost           (sudo_defs_table[I_PAM_RHOST].sd_un.flag)
+#define I_RUNCWD                128
+#define def_runcwd              (sudo_defs_table[I_RUNCWD].sd_un.str)
+#define I_RUNCHROOT             129
+#define def_runchroot           (sudo_defs_table[I_RUNCHROOT].sd_un.str)
 
 enum def_tuple {
 	never,

@@ -162,7 +162,7 @@ disable_execute(char *envp[], const char *dso)
     (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_SEARCH", NULL);
     if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
 	debug_return_ptr(envp);
-    sudo_warn(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
+    sudo_warn("%s", U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
 #ifdef RTLD_PRELOAD_VAR

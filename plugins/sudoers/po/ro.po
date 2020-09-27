@@ -1,0 +1,3029 @@
+# Portable object template file for the sudoers plugin
+# This file is put in the public domain.
+# Todd C. Miller <Todd.Miller@sudo.ws>, 2011-2018
+# Florentina Mușat <florentina.musat.28@gmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudoers 1.9.2rc1\n"
+"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-16 17:56+0200\n"
+"Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
+"Language-Team: Romanian <translation-team-ro@lists.sourceforge.net>\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 2.3.1\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n%100<=19) ? 1 : 2);\n"
+
+#: confstr.sh:1
+msgid "syntax error"
+msgstr "eroare de sintaxă"
+
+#: confstr.sh:2
+msgid "%p's password: "
+msgstr "parola lui %p: "
+
+#: confstr.sh:3
+msgid "[sudo] password for %p: "
+msgstr "[sudo] parolă pentru %p: "
+
+#: confstr.sh:4
+msgid "Password: "
+msgstr "Parolă: "
+
+#: confstr.sh:5
+msgid "*** SECURITY information for %h ***"
+msgstr "*** Informații de SECURITATE pentru %h ***"
+
+#: confstr.sh:6
+msgid "Sorry, try again."
+msgstr "Încercați din nou."
+
+#: gram.y:203 gram.y:251 gram.y:258 gram.y:265 gram.y:272 gram.y:279
+#: gram.y:295 gram.y:319 gram.y:326 gram.y:333 gram.y:340 gram.y:347
+#: gram.y:410 gram.y:419 gram.y:430 gram.y:463 gram.y:470 gram.y:477
+#: gram.y:484 gram.y:511 gram.y:583 gram.y:590 gram.y:599 gram.y:608
+#: gram.y:625 gram.y:737 gram.y:744 gram.y:752 gram.y:758 gram.y:858
+#: gram.y:865 gram.y:872 gram.y:879 gram.y:886 gram.y:912 gram.y:919
+#: gram.y:926 gram.y:1068 gram.y:1347 lib/iolog/iolog_fileio.c:1101
+#: lib/iolog/iolog_json.c:120 lib/iolog/iolog_json.c:283
+#: lib/iolog/iolog_json.c:313 lib/iolog/iolog_json.c:435
+#: lib/iolog/iolog_util.c:106 lib/iolog/iolog_util.c:115
+#: lib/iolog/iolog_util.c:125 lib/iolog/iolog_util.c:133
+#: lib/iolog/iolog_util.c:137 lib/iolog/iolog_util.c:196
+#: logsrvd/eventlog.c:223 logsrvd/sendlog.c:443 plugins/sudoers/alias.c:125
+#: plugins/sudoers/alias.c:132 plugins/sudoers/alias.c:148
+#: plugins/sudoers/audit.c:108 plugins/sudoers/audit.c:212
+#: plugins/sudoers/auth/bsdauth.c:143 plugins/sudoers/auth/kerb5.c:118
+#: plugins/sudoers/auth/kerb5.c:144 plugins/sudoers/auth/pam.c:669
+#: plugins/sudoers/auth/rfc1938.c:111 plugins/sudoers/auth/sia.c:59
+#: plugins/sudoers/cvtsudoers.c:120 plugins/sudoers/cvtsudoers.c:161
+#: plugins/sudoers/cvtsudoers.c:178 plugins/sudoers/cvtsudoers.c:189
+#: plugins/sudoers/cvtsudoers.c:301 plugins/sudoers/cvtsudoers.c:429
+#: plugins/sudoers/cvtsudoers.c:562 plugins/sudoers/cvtsudoers.c:579
+#: plugins/sudoers/cvtsudoers.c:642 plugins/sudoers/cvtsudoers.c:757
+#: plugins/sudoers/cvtsudoers.c:765 plugins/sudoers/cvtsudoers.c:1179
+#: plugins/sudoers/cvtsudoers.c:1183 plugins/sudoers/cvtsudoers.c:1285
+#: plugins/sudoers/cvtsudoers_json.c:76 plugins/sudoers/cvtsudoers_ldif.c:151
+#: plugins/sudoers/cvtsudoers_ldif.c:194 plugins/sudoers/cvtsudoers_ldif.c:235
+#: plugins/sudoers/cvtsudoers_ldif.c:300 plugins/sudoers/cvtsudoers_ldif.c:371
+#: plugins/sudoers/cvtsudoers_ldif.c:426 plugins/sudoers/cvtsudoers_ldif.c:434
+#: plugins/sudoers/cvtsudoers_ldif.c:451 plugins/sudoers/cvtsudoers_ldif.c:460
+#: plugins/sudoers/cvtsudoers_ldif.c:607 plugins/sudoers/defaults.c:626
+#: plugins/sudoers/defaults.c:919 plugins/sudoers/defaults.c:1052
+#: plugins/sudoers/editor.c:66 plugins/sudoers/editor.c:84
+#: plugins/sudoers/editor.c:95 plugins/sudoers/env.c:261
+#: plugins/sudoers/filedigest.c:54 plugins/sudoers/filedigest.c:70
+#: plugins/sudoers/gc.c:56 plugins/sudoers/group_plugin.c:133
+#: plugins/sudoers/interfaces.c:72 plugins/sudoers/iolog.c:483
+#: plugins/sudoers/iolog_client.c:105 plugins/sudoers/iolog_client.c:382
+#: plugins/sudoers/iolog_client.c:559 plugins/sudoers/iolog_client.c:678
+#: plugins/sudoers/iolog_client.c:696 plugins/sudoers/iolog_client.c:1176
+#: plugins/sudoers/iolog_client.c:1405 plugins/sudoers/iolog_client.c:1723
+#: plugins/sudoers/iolog_client.c:1751 plugins/sudoers/ldap.c:183
+#: plugins/sudoers/ldap.c:421 plugins/sudoers/ldap.c:431
+#: plugins/sudoers/ldap.c:436 plugins/sudoers/ldap.c:440
+#: plugins/sudoers/ldap.c:452 plugins/sudoers/ldap.c:743
+#: plugins/sudoers/ldap.c:907 plugins/sudoers/ldap.c:1279
+#: plugins/sudoers/ldap.c:1706 plugins/sudoers/ldap.c:1743
+#: plugins/sudoers/ldap.c:1824 plugins/sudoers/ldap.c:1959
+#: plugins/sudoers/ldap.c:2060 plugins/sudoers/ldap.c:2076
+#: plugins/sudoers/ldap_conf.c:218 plugins/sudoers/ldap_conf.c:249
+#: plugins/sudoers/ldap_conf.c:301 plugins/sudoers/ldap_conf.c:337
+#: plugins/sudoers/ldap_conf.c:441 plugins/sudoers/ldap_conf.c:456
+#: plugins/sudoers/ldap_conf.c:553 plugins/sudoers/ldap_conf.c:586
+#: plugins/sudoers/ldap_conf.c:678 plugins/sudoers/ldap_conf.c:760
+#: plugins/sudoers/ldap_util.c:326 plugins/sudoers/ldap_util.c:333
+#: plugins/sudoers/ldap_util.c:598 plugins/sudoers/linux_audit.c:83
+#: plugins/sudoers/logging.c:103 plugins/sudoers/logging.c:192
+#: plugins/sudoers/logging.c:519 plugins/sudoers/logging.c:545
+#: plugins/sudoers/logging.c:586 plugins/sudoers/logging.c:723
+#: plugins/sudoers/logging.c:1083 plugins/sudoers/match_command.c:243
+#: plugins/sudoers/match_command.c:391 plugins/sudoers/match_command.c:438
+#: plugins/sudoers/match_command.c:509 plugins/sudoers/match_digest.c:80
+#: plugins/sudoers/parse.c:193 plugins/sudoers/parse.c:205
+#: plugins/sudoers/parse.c:220 plugins/sudoers/parse.c:232
+#: plugins/sudoers/parse_ldif.c:153 plugins/sudoers/parse_ldif.c:184
+#: plugins/sudoers/parse_ldif.c:253 plugins/sudoers/parse_ldif.c:260
+#: plugins/sudoers/parse_ldif.c:265 plugins/sudoers/parse_ldif.c:341
+#: plugins/sudoers/parse_ldif.c:352 plugins/sudoers/parse_ldif.c:379
+#: plugins/sudoers/parse_ldif.c:396 plugins/sudoers/parse_ldif.c:408
+#: plugins/sudoers/parse_ldif.c:412 plugins/sudoers/parse_ldif.c:426
+#: plugins/sudoers/parse_ldif.c:594 plugins/sudoers/parse_ldif.c:624
+#: plugins/sudoers/parse_ldif.c:649 plugins/sudoers/parse_ldif.c:707
+#: plugins/sudoers/parse_ldif.c:724 plugins/sudoers/parse_ldif.c:752
+#: plugins/sudoers/parse_ldif.c:759 plugins/sudoers/policy.c:491
+#: plugins/sudoers/policy.c:823 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:262
+#: plugins/sudoers/pwutil.c:340 plugins/sudoers/pwutil.c:514
+#: plugins/sudoers/pwutil.c:578 plugins/sudoers/pwutil.c:649
+#: plugins/sudoers/pwutil.c:808 plugins/sudoers/pwutil.c:865
+#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:967
+#: plugins/sudoers/sssd.c:146 plugins/sudoers/sssd.c:409
+#: plugins/sudoers/sssd.c:472 plugins/sudoers/sssd.c:516
+#: plugins/sudoers/sssd.c:563 plugins/sudoers/sssd.c:755
+#: plugins/sudoers/stubs.c:96 plugins/sudoers/stubs.c:104
+#: plugins/sudoers/sudoers.c:316 plugins/sudoers/sudoers.c:327
+#: plugins/sudoers/sudoers.c:337 plugins/sudoers/sudoers.c:380
+#: plugins/sudoers/sudoers.c:720 plugins/sudoers/sudoers.c:849
+#: plugins/sudoers/sudoers.c:894 plugins/sudoers/sudoers.c:1198
+#: plugins/sudoers/sudoreplay.c:553 plugins/sudoers/sudoreplay.c:556
+#: plugins/sudoers/sudoreplay.c:1260 plugins/sudoers/sudoreplay.c:1470
+#: plugins/sudoers/sudoreplay.c:1474 plugins/sudoers/testsudoers.c:128
+#: plugins/sudoers/testsudoers.c:228 plugins/sudoers/testsudoers.c:245
+#: plugins/sudoers/testsudoers.c:581 plugins/sudoers/timestamp.c:432
+#: plugins/sudoers/timestamp.c:476 plugins/sudoers/timestamp.c:986
+#: plugins/sudoers/toke_util.c:51 plugins/sudoers/toke_util.c:104
+#: plugins/sudoers/toke_util.c:129 plugins/sudoers/toke_util.c:157
+#: plugins/sudoers/tsdump.c:123 plugins/sudoers/visudo.c:146
+#: plugins/sudoers/visudo.c:322 plugins/sudoers/visudo.c:328
+#: plugins/sudoers/visudo.c:438 plugins/sudoers/visudo.c:616
+#: plugins/sudoers/visudo.c:936 plugins/sudoers/visudo.c:1024
+#: plugins/sudoers/visudo.c:1121 toke.l:864 toke.l:981 toke.l:1039
+msgid "unable to allocate memory"
+msgstr "nu se poate aloca memoria"
+
+#: gram.y:505
+msgid "a digest requires a path name"
+msgstr "o publicație informativă necesită un nume de cale"
+
+#: gram.y:638
+msgid "invalid notbefore value"
+msgstr "valoare nu-înainte nevalidă"
+
+#: gram.y:646
+msgid "invalid notafter value"
+msgstr "valoare nu-după nevalidă"
+
+#: gram.y:655 plugins/sudoers/policy.c:306
+msgid "timeout value too large"
+msgstr "limită de timp prea mare"
+
+#: gram.y:657 plugins/sudoers/policy.c:308
+msgid "invalid timeout value"
+msgstr "valoare de limită de timp nevalidă"
+
+#: gram.y:1347 lib/iolog/iolog_fileio.c:1101 lib/iolog/iolog_json.c:120
+#: lib/iolog/iolog_json.c:282 lib/iolog/iolog_json.c:313
+#: lib/iolog/iolog_json.c:435 lib/iolog/iolog_json.c:713
+#: lib/iolog/iolog_util.c:106 lib/iolog/iolog_util.c:115
+#: lib/iolog/iolog_util.c:125 lib/iolog/iolog_util.c:133
+#: lib/iolog/iolog_util.c:137 lib/iolog/iolog_util.c:196
+#: logsrvd/eventlog.c:223 logsrvd/logsrvd.c:1208 logsrvd/logsrvd.c:1221
+#: logsrvd/logsrvd.c:1266 logsrvd/sendlog.c:443 logsrvd/sendlog.c:1302
+#: logsrvd/sendlog.c:1309 logsrvd/sendlog.c:1727 plugins/sudoers/audit.c:108
+#: plugins/sudoers/audit.c:212 plugins/sudoers/auth/pam.c:482
+#: plugins/sudoers/auth/pam.c:669 plugins/sudoers/auth/rfc1938.c:111
+#: plugins/sudoers/cvtsudoers.c:120 plugins/sudoers/cvtsudoers.c:160
+#: plugins/sudoers/cvtsudoers.c:177 plugins/sudoers/cvtsudoers.c:188
+#: plugins/sudoers/cvtsudoers.c:300 plugins/sudoers/cvtsudoers.c:428
+#: plugins/sudoers/cvtsudoers.c:561 plugins/sudoers/cvtsudoers.c:578
+#: plugins/sudoers/cvtsudoers.c:642 plugins/sudoers/cvtsudoers.c:757
+#: plugins/sudoers/cvtsudoers.c:764 plugins/sudoers/cvtsudoers.c:1179
+#: plugins/sudoers/cvtsudoers.c:1183 plugins/sudoers/cvtsudoers.c:1285
+#: plugins/sudoers/cvtsudoers_json.c:75 plugins/sudoers/cvtsudoers_ldif.c:150
+#: plugins/sudoers/cvtsudoers_ldif.c:193 plugins/sudoers/cvtsudoers_ldif.c:234
+#: plugins/sudoers/cvtsudoers_ldif.c:299 plugins/sudoers/cvtsudoers_ldif.c:370
+#: plugins/sudoers/cvtsudoers_ldif.c:425 plugins/sudoers/cvtsudoers_ldif.c:433
+#: plugins/sudoers/cvtsudoers_ldif.c:450 plugins/sudoers/cvtsudoers_ldif.c:459
+#: plugins/sudoers/cvtsudoers_ldif.c:606 plugins/sudoers/defaults.c:626
+#: plugins/sudoers/defaults.c:919 plugins/sudoers/defaults.c:1052
+#: plugins/sudoers/editor.c:66 plugins/sudoers/editor.c:84
+#: plugins/sudoers/editor.c:95 plugins/sudoers/env.c:261
+#: plugins/sudoers/filedigest.c:54 plugins/sudoers/filedigest.c:70
+#: plugins/sudoers/gc.c:56 plugins/sudoers/group_plugin.c:132
+#: plugins/sudoers/interfaces.c:72 plugins/sudoers/iolog.c:483
+#: plugins/sudoers/iolog_client.c:105 plugins/sudoers/iolog_client.c:215
+#: plugins/sudoers/iolog_client.c:236 plugins/sudoers/iolog_client.c:249
+#: plugins/sudoers/iolog_client.c:382 plugins/sudoers/iolog_client.c:678
+#: plugins/sudoers/iolog_client.c:696 plugins/sudoers/iolog_client.c:1176
+#: plugins/sudoers/iolog_client.c:1405 plugins/sudoers/iolog_client.c:1723
+#: plugins/sudoers/iolog_client.c:1751 plugins/sudoers/ldap.c:183
+#: plugins/sudoers/ldap.c:421 plugins/sudoers/ldap.c:431
+#: plugins/sudoers/ldap.c:436 plugins/sudoers/ldap.c:440
+#: plugins/sudoers/ldap.c:452 plugins/sudoers/ldap.c:743
+#: plugins/sudoers/ldap.c:907 plugins/sudoers/ldap.c:1279
+#: plugins/sudoers/ldap.c:1706 plugins/sudoers/ldap.c:1743
+#: plugins/sudoers/ldap.c:1824 plugins/sudoers/ldap.c:1959
+#: plugins/sudoers/ldap.c:2060 plugins/sudoers/ldap.c:2076
+#: plugins/sudoers/ldap_conf.c:218 plugins/sudoers/ldap_conf.c:249
+#: plugins/sudoers/ldap_conf.c:301 plugins/sudoers/ldap_conf.c:337
+#: plugins/sudoers/ldap_conf.c:441 plugins/sudoers/ldap_conf.c:456
+#: plugins/sudoers/ldap_conf.c:553 plugins/sudoers/ldap_conf.c:586
+#: plugins/sudoers/ldap_conf.c:677 plugins/sudoers/ldap_conf.c:760
+#: plugins/sudoers/ldap_util.c:325 plugins/sudoers/ldap_util.c:332
+#: plugins/sudoers/ldap_util.c:598 plugins/sudoers/linux_audit.c:83
+#: plugins/sudoers/logging.c:103 plugins/sudoers/logging.c:192
+#: plugins/sudoers/logging.c:519 plugins/sudoers/logging.c:545
+#: plugins/sudoers/logging.c:585 plugins/sudoers/logging.c:1083
+#: plugins/sudoers/match_command.c:242 plugins/sudoers/match_command.c:390
+#: plugins/sudoers/match_command.c:437 plugins/sudoers/match_command.c:509
+#: plugins/sudoers/match_digest.c:80 plugins/sudoers/parse.c:192
+#: plugins/sudoers/parse.c:204 plugins/sudoers/parse.c:219
+#: plugins/sudoers/parse.c:231 plugins/sudoers/parse_ldif.c:152
+#: plugins/sudoers/parse_ldif.c:183 plugins/sudoers/parse_ldif.c:252
+#: plugins/sudoers/parse_ldif.c:259 plugins/sudoers/parse_ldif.c:264
+#: plugins/sudoers/parse_ldif.c:340 plugins/sudoers/parse_ldif.c:351
+#: plugins/sudoers/parse_ldif.c:378 plugins/sudoers/parse_ldif.c:395
+#: plugins/sudoers/parse_ldif.c:407 plugins/sudoers/parse_ldif.c:411
+#: plugins/sudoers/parse_ldif.c:425 plugins/sudoers/parse_ldif.c:594
+#: plugins/sudoers/parse_ldif.c:623 plugins/sudoers/parse_ldif.c:648
+#: plugins/sudoers/parse_ldif.c:706 plugins/sudoers/parse_ldif.c:723
+#: plugins/sudoers/parse_ldif.c:751 plugins/sudoers/parse_ldif.c:758
+#: plugins/sudoers/policy.c:120 plugins/sudoers/policy.c:129
+#: plugins/sudoers/policy.c:138 plugins/sudoers/policy.c:164
+#: plugins/sudoers/policy.c:291 plugins/sudoers/policy.c:306
+#: plugins/sudoers/policy.c:308 plugins/sudoers/policy.c:337
+#: plugins/sudoers/policy.c:346 plugins/sudoers/policy.c:389
+#: plugins/sudoers/policy.c:399 plugins/sudoers/policy.c:408
+#: plugins/sudoers/policy.c:417 plugins/sudoers/policy.c:491
+#: plugins/sudoers/policy.c:823 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:262
+#: plugins/sudoers/pwutil.c:340 plugins/sudoers/pwutil.c:514
+#: plugins/sudoers/pwutil.c:578 plugins/sudoers/pwutil.c:649
+#: plugins/sudoers/pwutil.c:808 plugins/sudoers/pwutil.c:865
+#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:967
+#: plugins/sudoers/set_perms.c:359 plugins/sudoers/set_perms.c:698
+#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1364
+#: plugins/sudoers/set_perms.c:1529 plugins/sudoers/sssd.c:145
+#: plugins/sudoers/sssd.c:409 plugins/sudoers/sssd.c:472
+#: plugins/sudoers/sssd.c:516 plugins/sudoers/sssd.c:563
+#: plugins/sudoers/sssd.c:755 plugins/sudoers/stubs.c:96
+#: plugins/sudoers/stubs.c:104 plugins/sudoers/sudoers.c:316
+#: plugins/sudoers/sudoers.c:327 plugins/sudoers/sudoers.c:337
+#: plugins/sudoers/sudoers.c:380 plugins/sudoers/sudoers.c:720
+#: plugins/sudoers/sudoers.c:849 plugins/sudoers/sudoers.c:894
+#: plugins/sudoers/sudoers.c:1198 plugins/sudoers/sudoreplay.c:553
+#: plugins/sudoers/sudoreplay.c:556 plugins/sudoers/sudoreplay.c:1260
+#: plugins/sudoers/sudoreplay.c:1470 plugins/sudoers/sudoreplay.c:1474
+#: plugins/sudoers/testsudoers.c:128 plugins/sudoers/testsudoers.c:228
+#: plugins/sudoers/testsudoers.c:245 plugins/sudoers/testsudoers.c:581
+#: plugins/sudoers/timestamp.c:432 plugins/sudoers/timestamp.c:476
+#: plugins/sudoers/timestamp.c:986 plugins/sudoers/toke_util.c:51
+#: plugins/sudoers/toke_util.c:104 plugins/sudoers/toke_util.c:128
+#: plugins/sudoers/toke_util.c:157 plugins/sudoers/tsdump.c:123
+#: plugins/sudoers/visudo.c:146 plugins/sudoers/visudo.c:322
+#: plugins/sudoers/visudo.c:328 plugins/sudoers/visudo.c:438
+#: plugins/sudoers/visudo.c:616 plugins/sudoers/visudo.c:936
+#: plugins/sudoers/visudo.c:1024 plugins/sudoers/visudo.c:1121 toke.l:864
+#: toke.l:981 toke.l:1039
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: lib/iolog/iolog_fileio.c:157
+#, c-format
+msgid "%s exists but is not a directory (0%o)"
+msgstr "%s există dar nu este un director (0%o)"
+
+#: lib/iolog/iolog_fileio.c:187 lib/iolog/iolog_fileio.c:233
+#: plugins/sudoers/timestamp.c:205
+#, c-format
+msgid "unable to mkdir %s"
+msgstr "nu se poate mkdir %s"
+
+#: lib/iolog/iolog_fileio.c:237 plugins/sudoers/visudo.c:733
+#: plugins/sudoers/visudo.c:744
+#, c-format
+msgid "unable to change mode of %s to 0%o"
+msgstr "nu se poate modifica modul de %s la 0%o"
+
+#: lib/iolog/iolog_json.c:114
+#, c-format
+msgid "expected JSON_STRING, got %d"
+msgstr "s-a așteptat JSON_STRING, s-a obținut %d"
+
+#: lib/iolog/iolog_json.c:305
+msgid "missing double quote in name"
+msgstr "lipsește un citat dublu în nume"
+
+#: lib/iolog/iolog_json.c:392
+#, c-format
+msgid "expected JSON_OBJECT, got %d"
+msgstr "s-a așteptat JSON_OBJECT, s-a obținut %d"
+
+#: lib/iolog/iolog_json.c:441 lib/iolog/iolog_json.c:444
+#: lib/iolog/iolog_json.c:446 lib/iolog/iolog_json.c:538
+#: logsrvd/eventlog.c:228 plugins/sudoers/cvtsudoers_ldif.c:244
+#: plugins/sudoers/cvtsudoers_ldif.c:251 plugins/sudoers/cvtsudoers_ldif.c:563
+#: plugins/sudoers/env.c:323 plugins/sudoers/env.c:330
+#: plugins/sudoers/env.c:435 plugins/sudoers/iolog.c:561
+#: plugins/sudoers/iolog.c:577 plugins/sudoers/ldap.c:516
+#: plugins/sudoers/ldap.c:747 plugins/sudoers/ldap.c:1080
+#: plugins/sudoers/ldap_conf.c:222 plugins/sudoers/ldap_conf.c:312
+#: plugins/sudoers/linux_audit.c:89 plugins/sudoers/logging.c:1088
+#: plugins/sudoers/policy.c:521 plugins/sudoers/policy.c:668
+#: plugins/sudoers/policy.c:678 plugins/sudoers/prompt.c:161
+#: plugins/sudoers/sudoers.c:916 plugins/sudoers/testsudoers.c:249
+#: plugins/sudoers/toke_util.c:169
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "eroare internă, supraplin %s"
+
+#: lib/iolog/iolog_json.c:607 lib/iolog/iolog_json.c:731
+msgid "unmatched close brace"
+msgstr "paranteză de închidere desperecheată"
+
+#: lib/iolog/iolog_json.c:616
+msgid "unexpected array"
+msgstr "vector neașteptat"
+
+#: lib/iolog/iolog_json.c:629 lib/iolog/iolog_json.c:733
+msgid "unmatched close bracket"
+msgstr "paranteză pătrată închisă desperecheată"
+
+#: lib/iolog/iolog_json.c:637
+msgid "unexpected string"
+msgstr "șir neașteptat"
+
+#: lib/iolog/iolog_json.c:647
+msgid "missing colon after name"
+msgstr "lipsește două puncte după nume"
+
+#: lib/iolog/iolog_json.c:658 lib/iolog/iolog_json.c:673
+#: lib/iolog/iolog_json.c:688
+msgid "unexpected boolean"
+msgstr "logic neașteptat"
+
+#: lib/iolog/iolog_json.c:704
+msgid "unexpected number"
+msgstr "număr neașteptat"
+
+#: lib/iolog/iolog_json.c:741
+#, c-format
+msgid "%s:%u unable to parse \"%s\""
+msgstr "%s:%u nu se poate parsa „%s”"
+
+#: lib/iolog/iolog_util.c:71
+#, c-format
+msgid "%s: invalid log file"
+msgstr "%s: fișier de istoric nevalid"
+
+#: lib/iolog/iolog_util.c:89
+#, c-format
+msgid "%s: time stamp field is missing"
+msgstr "%s: câmpul marcaj de timp lipsește"
+
+#: lib/iolog/iolog_util.c:95
+#, c-format
+msgid "%s: time stamp %s: %s"
+msgstr "%s: marcajul de timp %s: %s"
+
+#: lib/iolog/iolog_util.c:102
+#, c-format
+msgid "%s: user field is missing"
+msgstr "%s: câmpul utilizator lipsește"
+
+#: lib/iolog/iolog_util.c:111
+#, c-format
+msgid "%s: runas user field is missing"
+msgstr "%s: câmpul de utilizator rulează-ca lipsește"
+
+#: lib/iolog/iolog_util.c:120
+#, c-format
+msgid "%s: runas group field is missing"
+msgstr "%s: câmpul de grup rulează-ca lipsește"
+
+#: lib/iolog/iolog_util.c:419
+#, c-format
+msgid "error reading timing file: %s"
+msgstr "eroare la citirea fișierului de sincronizare: %s"
+
+#: lib/iolog/iolog_util.c:426
+#, c-format
+msgid "invalid timing file line: %s"
+msgstr "linie de fișier de sincronizare nevalidă: %s"
+
+#: logsrvd/eventlog.c:430 plugins/sudoers/logging.c:112
+#, c-format
+msgid "%8s : %s"
+msgstr "%8s : %s"
+
+#: logsrvd/eventlog.c:459 plugins/sudoers/logging.c:136
+#, c-format
+msgid "%8s : (command continued) %s"
+msgstr "%8s : (comandă continuată) %s"
+
+#: logsrvd/iolog_writer.c:936
+msgid "log is already complete, cannot be restarted"
+msgstr "istoricul este deja complet, nu poate fi repornit"
+
+#: logsrvd/iolog_writer.c:967
+msgid "unable to restart log"
+msgstr "nu se poate reporni istoricul"
+
+#: logsrvd/logsrv_util.c:98 logsrvd/logsrv_util.c:105
+#: plugins/sudoers/sudoreplay.c:353 plugins/sudoers/sudoreplay.c:359
+#, c-format
+msgid "unable to open %s/%s"
+msgstr "nu se poate porni %s/%s"
+
+#: logsrvd/logsrv_util.c:132
+#, c-format
+msgid "missing I/O log file %s/%s"
+msgstr "lipsește fișierul istoric I/O %s/%s"
+
+#: logsrvd/logsrv_util.c:139
+#, c-format
+msgid "%s/%s: unable to seek forward %zu"
+msgstr "%s/%s: nu se poate căuta înainte %zu"
+
+#: logsrvd/logsrv_util.c:149
+#, c-format
+msgid "unable to find resume point [%lld, %ld] in %s/%s"
+msgstr "nu se poate găsi punctul de rezumare [%lld, %ld] în %s/%s"
+
+#: logsrvd/logsrvd.c:230 logsrvd/logsrvd.c:299 logsrvd/logsrvd.c:343
+#: logsrvd/logsrvd.c:398 logsrvd/logsrvd.c:445 logsrvd/logsrvd.c:496
+#: logsrvd/logsrvd.c:528 logsrvd/logsrvd.c:560
+msgid "state machine error"
+msgstr "eroare de mașină de stare"
+
+#: logsrvd/logsrvd.c:239
+msgid "invalid AcceptMessage"
+msgstr "MesajAcceptare nevalid"
+
+#: logsrvd/logsrvd.c:250
+msgid "error parsing AcceptMessage"
+msgstr "eroare la parsarea MesajAccept"
+
+#: logsrvd/logsrvd.c:257
+msgid "error creating I/O log"
+msgstr "eroare la crearea istoricului I/O"
+
+#: logsrvd/logsrvd.c:265
+msgid "error logging accept event"
+msgstr "eroare la înregistrarea evenimentului de acceptare"
+
+#: logsrvd/logsrvd.c:308
+msgid "invalid RejectMessage"
+msgstr "MesajRespingere nevalid"
+
+#: logsrvd/logsrvd.c:319
+msgid "error parsing RejectMessage"
+msgstr "eroare la parsarea MesajRespingere"
+
+#: logsrvd/logsrvd.c:325
+msgid "error logging reject event"
+msgstr "eroare la înregistrarea evenimentului de respingere"
+
+#: logsrvd/logsrvd.c:430
+msgid "error logging alert event"
+msgstr "eroare la înregistrarea evenimentului de alertă"
+
+#: logsrvd/logsrvd.c:451 logsrvd/logsrvd.c:502 logsrvd/logsrvd.c:534
+msgid "protocol error"
+msgstr "eroare de protocol"
+
+#: logsrvd/logsrvd.c:461
+msgid "error writing IoBuffer"
+msgstr "eroare la scrierea IoBuffer"
+
+#: logsrvd/logsrvd.c:513
+msgid "error writing ChangeWindowSize"
+msgstr "eroare la scrierea ModificăDimensiuneaFerestrei"
+
+#: logsrvd/logsrvd.c:545
+msgid "error writing CommandSuspend"
+msgstr "eroare la scrierea SuspendăComanda"
+
+#: logsrvd/logsrvd.c:630
+msgid "unrecognized ClientMessage type"
+msgstr "tip de MesajClient necunoscut"
+
+#: logsrvd/logsrvd.c:895
+msgid "client message too large"
+msgstr "mesajul de client este prea mare"
+
+#: logsrvd/logsrvd.c:1125 logsrvd/logsrvd.c:1133
+#, c-format
+msgid "unable to set TLS 1.2 ciphersuite to %s: %s"
+msgstr "nu se poate stabili suita de cifrare TLS 1.2 LA %s: %s"
+
+#: logsrvd/logsrvd.c:1153 logsrvd/logsrvd.c:1161
+#, c-format
+msgid "unable to set TLS 1.3 ciphersuite to %s: %s"
+msgstr "nu se poate stabili suita de cifrare TLS 1.3 la %s: %s"
+
+#: logsrvd/logsrvd.c:1197
+#, c-format
+msgid "unable to get TLS server method: %s"
+msgstr "nu se poate obține metoda de server TLS: %s"
+
+#: logsrvd/logsrvd.c:1202
+#, c-format
+msgid "unable to create TLS context: %s"
+msgstr "nu se poate crea contextul TLS: %s"
+
+#: logsrvd/logsrvd.c:1209 plugins/sudoers/iolog_client.c:237
+#, c-format
+msgid "unable to load certificate %s"
+msgstr "nu se poate încărca certificatul %s"
+
+#: logsrvd/logsrvd.c:1222 plugins/sudoers/iolog_client.c:217
+#, c-format
+msgid "unable to load certificate authority bundle %s"
+msgstr "nu se poate încărca pachetul de autoritate al certificatului %s"
+
+#: logsrvd/logsrvd.c:1267 plugins/sudoers/iolog_client.c:250
+#, c-format
+msgid "unable to load private key %s"
+msgstr "nu se poate încărca cheia privată %s"
+
+#: logsrvd/logsrvd.c:1284 logsrvd/logsrvd.c:1293
+#, c-format
+msgid "unable to set diffie-hellman parameters: %s"
+msgstr "nu se pot stabili parametrii diffie-hellman: %s"
+
+#: logsrvd/logsrvd.c:1306
+#, c-format
+msgid "unable to set minimum protocol version to TLS 1.2: %s"
+msgstr "nu se poate stabili versiunea de protocol minimă la TLS 1.2: %s"
+
+#: logsrvd/logsrvd.c:1491
+msgid "unable to get remote IP addr"
+msgstr "nu se poate obține adresa IP de la distanță"
+
+#: logsrvd/logsrvd.c:1519 plugins/sudoers/iolog_client.c:264
+#, c-format
+msgid "Unable to attach user data to the ssl object: %s"
+msgstr "Nu se pot atașa datele utilizatorului la obiectul ssl: %s"
+
+#: logsrvd/logsrvd.c:1527 logsrvd/logsrvd.c:1649 logsrvd/logsrvd.c:1749
+#: logsrvd/sendlog.c:1106 logsrvd/sendlog.c:1462 logsrvd/sendlog.c:1477
+#: logsrvd/sendlog.c:1535 plugins/sudoers/iolog.c:921
+#: plugins/sudoers/iolog.c:1054 plugins/sudoers/iolog.c:1152
+#: plugins/sudoers/iolog_client.c:109 plugins/sudoers/iolog_client.c:325
+#: plugins/sudoers/iolog_client.c:341 plugins/sudoers/iolog_client.c:387
+#: plugins/sudoers/iolog_client.c:567 plugins/sudoers/iolog_client.c:574
+#: plugins/sudoers/iolog_client.c:1150 plugins/sudoers/iolog_client.c:1186
+#: plugins/sudoers/iolog_client.c:1194 plugins/sudoers/iolog_client.c:1254
+#: plugins/sudoers/iolog_client.c:1361 plugins/sudoers/iolog_client.c:1477
+#: plugins/sudoers/iolog_client.c:1759 plugins/sudoers/iolog_client.c:1767
+#: plugins/sudoers/sudoreplay.c:513 plugins/sudoers/sudoreplay.c:560
+#: plugins/sudoers/sudoreplay.c:792 plugins/sudoers/sudoreplay.c:904
+#: plugins/sudoers/sudoreplay.c:994 plugins/sudoers/sudoreplay.c:1009
+#: plugins/sudoers/sudoreplay.c:1016 plugins/sudoers/sudoreplay.c:1023
+#: plugins/sudoers/sudoreplay.c:1030 plugins/sudoers/sudoreplay.c:1037
+#: plugins/sudoers/sudoreplay.c:1164
+msgid "unable to add event to queue"
+msgstr "nu se poate adăuga evenimentul la coadă"
+
+#: logsrvd/logsrvd.c:1703 logsrvd/logsrvd.c:1937
+msgid "unable setup listen socket"
+msgstr "nu se poate pregăti soclul de ascultare"
+
+#: logsrvd/logsrvd.c:1843 logsrvd/sendlog.c:123
+#, c-format
+msgid ""
+"%s - send sudo I/O log to remote server\n"
+"\n"
+msgstr ""
+"%s - trimite istoricul I/O sudo la serverul de la distanță\n"
+"\n"
+
+#: logsrvd/logsrvd.c:1846
+msgid ""
+"\n"
+"Options:\n"
+"  -f, --file               path to configuration file\n"
+"  -h  --help               display help message and exit\n"
+"  -n, --no-fork            do not fork, run in the foreground\n"
+"  -R, --random-drop        percent chance connections will drop\n"
+"  -V, --version            display version information and exit\n"
+msgstr ""
+"\n"
+"Opțini:\n"
+"  -f, --file               calea către fișierul de configurare\n"
+"  -h  --help               afișează mesajul de ajutor și ieși\n"
+"  -n, --no-fork            nu da fork, rulează în prim plan\n"
+"  -R, --random-drop        șansa în procente pentru căderea conexiunii\n"
+"  -V, --version            afișează informațiile de versiune și ieși\n"
+
+#: logsrvd/logsrvd.c:1898 logsrvd/sendlog.c:1700
+msgid "Protobuf-C version 1.3 or higher required"
+msgstr "Protobuf-C versiunea 1.3 sau mai mare necesară"
+
+#: logsrvd/logsrvd.c:1916
+#, c-format
+msgid "invalid random drop value: %s"
+msgstr "valoare de cădere întâmplătoare nevalidă: %s"
+
+#: logsrvd/logsrvd.c:1920 logsrvd/sendlog.c:1750
+#: plugins/sudoers/cvtsudoers.c:229 plugins/sudoers/sudoreplay.c:300
+#: plugins/sudoers/visudo.c:178
+#, c-format
+msgid "%s version %s\n"
+msgstr "%s versiunea %s\n"
+
+#: logsrvd/logsrvd_conf.c:393
+msgid "TLS not supported"
+msgstr "TLS nu este suportat"
+
+#: logsrvd/logsrvd_conf.c:405
+#, c-format
+msgid "%s:%s"
+msgstr "%s:%s"
+
+#: logsrvd/logsrvd_conf.c:471 logsrvd/logsrvd_conf.c:715
+#, c-format
+msgid "%s: not a fully qualified path"
+msgstr "%s: nu este o cale calificată complet"
+
+#: logsrvd/logsrvd_conf.c:829
+#, c-format
+msgid "%s:%d unmatched '[': %s"
+msgstr "%s:%d „[” desperecheată: %s"
+
+#: logsrvd/logsrvd_conf.c:840
+#, c-format
+msgid "%s:%d invalid config section: %s"
+msgstr "%s:%d secțiune de configurare nevalidă: %s"
+
+#: logsrvd/logsrvd_conf.c:848
+#, c-format
+msgid "%s:%d invalid configuration line: %s"
+msgstr "%s:%d linie de configurare nevalidă: %s"
+
+#: logsrvd/logsrvd_conf.c:854
+#, c-format
+msgid "%s:%d expected section name: %s"
+msgstr "%s:%d nume de secție așteptată: %s"
+
+#: logsrvd/logsrvd_conf.c:868
+#, c-format
+msgid "invalid value for %s: %s"
+msgstr "valoare nevalidă pentru %s: %s"
+
+#: logsrvd/logsrvd_conf.c:876
+#, c-format
+msgid "%s:%d unknown key: %s"
+msgstr "%s:%d cheie necunoscută: %s"
+
+#: logsrvd/logsrvd_conf.c:1032
+#, c-format
+msgid "unknown syslog facility %s"
+msgstr "facilitate de syslog necunoscută %s"
+
+#: logsrvd/logsrvd_conf.c:1036 logsrvd/logsrvd_conf.c:1040
+#: logsrvd/logsrvd_conf.c:1044
+#, c-format
+msgid "unknown syslog priority %s"
+msgstr "prioritate de syslog necunoscută %s"
+
+#: logsrvd/sendlog.c:126
+msgid ""
+"\n"
+"Options:\n"
+"      --help               display help message and exit\n"
+"  -A, --accept             only send an accept event (no I/O)\n"
+"  -h, --host               host to send logs to\n"
+"  -i, --iolog_id           remote ID of I/O log to be resumed\n"
+"  -p, --port               port to use when connecting to host\n"
+"  -r, --restart            restart previous I/O log transfer\n"
+"  -R, --reject             reject the command with the given reason\n"
+"  -b, --ca-bundle          certificate bundle file to verify server's cert against\n"
+"  -c, --cert               certificate file for TLS handshake\n"
+"  -k, --key                private key file\n"
+"  -n, --no-verify          do not verify server certificate\n"
+"  -t, --test               test audit server by sending selected I/O log n times in parallel\n"
+"  -V, --version            display version information and exit\n"
+msgstr ""
+"\n"
+"Opțiuni:\n"
+"      --help               afișează mesajul de ajutor și ieși\n"
+"  -A, --accept             trimite doar un eveniment de acceptare (fără I/O)\n"
+"  -h, --host               gazda la care să se trimită înregistrări\n"
+"  -i, --iolog_id           ID-ul de la distanță al istoricului I/O de rezumat \n"
+"  -p, --port               portul de utilizat când se conectează la gazdă\n"
+"  -r, --restart            repornește transferul de istoric I/O anterior\n"
+"  -R, --reject             respinge comanda cu motivul dat\n"
+"  -b, --ca-bundle          fișier de pachet de certificat împotriva căruia se verifică certificarea serverului\n"
+"  -c, --cert               fișierul certificat pentru conexiunea TLS\n"
+"  -k, --key                fișier cheie privată\n"
+"  -n, --no-verify          nu verifica certificatul serverului\n"
+"  -V, --version            afișează informațiile de versiune și ieși\n"
+
+#: logsrvd/sendlog.c:163 plugins/sudoers/iolog_client.c:433
+#, c-format
+msgid "unable to look up %s:%s: %s"
+msgstr "nu se poate căuta %s:%s: %s"
+
+#: logsrvd/sendlog.c:186
+msgid "unable to get server IP addr"
+msgstr "nu se poate obține adresa IP a serverului"
+
+#: logsrvd/sendlog.c:240 plugins/sudoers/sudoreplay.c:852
+#, c-format
+msgid "unable to read %s/%s: %s"
+msgstr "nu se poate citi %s/%s: %s"
+
+#: logsrvd/sendlog.c:261 plugins/sudoers/iolog_client.c:684
+#, c-format
+msgid "client message too large: %zu"
+msgstr "mesajul clientului este prea mare: %zu"
+
+#: logsrvd/sendlog.c:791
+#, c-format
+msgid "%s: write buffer already in use"
+msgstr "%s: preîncărcare de scriere deja în uz"
+
+#: logsrvd/sendlog.c:843 plugins/sudoers/iolog.c:845
+#: plugins/sudoers/iolog.c:914
+#, c-format
+msgid "unexpected I/O event %d"
+msgstr "eveniment I/O neașteptat %d"
+
+#: logsrvd/sendlog.c:889 logsrvd/sendlog.c:906 logsrvd/sendlog.c:940
+#: plugins/sudoers/iolog_client.c:1155 plugins/sudoers/iolog_client.c:1225
+#: plugins/sudoers/iolog_client.c:1273
+#, c-format
+msgid "%s: unexpected state %d"
+msgstr "%s: stare neașteptată %d"
+
+#: logsrvd/sendlog.c:912 plugins/sudoers/iolog_client.c:1231
+msgid "invalid ServerHello"
+msgstr "SalutServer nevalid"
+
+#: logsrvd/sendlog.c:976 plugins/sudoers/iolog_client.c:1317
+#, c-format
+msgid "error message received from server: %s"
+msgstr "mesaj de eroare primit de la server: %s"
+
+#: logsrvd/sendlog.c:989 plugins/sudoers/iolog_client.c:1330
+#, c-format
+msgid "abort message received from server: %s"
+msgstr "mesaj de renunțare primit de la server: %s"
+
+#: logsrvd/sendlog.c:1008 plugins/sudoers/iolog_client.c:1349
+msgid "unable to unpack ServerMessage"
+msgstr "nu se poate despacheta MesajServer"
+
+#: logsrvd/sendlog.c:1048 plugins/sudoers/iolog_client.c:1382
+#, c-format
+msgid "%s: unexpected type_case value %d"
+msgstr "%s: valoare type_case neașteptată %d"
+
+#: logsrvd/sendlog.c:1077
+msgid "timeout reading from server"
+msgstr "limită de timp de citire de la server"
+
+#: logsrvd/sendlog.c:1155
+msgid "premature EOF"
+msgstr "EOF prematur"
+
+#: logsrvd/sendlog.c:1168 plugins/sudoers/iolog_client.c:1536
+#, c-format
+msgid "server message too large: %u"
+msgstr "mesajul de server este prea mare: %u"
+
+#: logsrvd/sendlog.c:1219
+msgid "timeout writing to server"
+msgstr "limită de timp de scriere la server"
+
+#: logsrvd/sendlog.c:1438 plugins/sudoers/iolog_client.c:297
+msgid "TLS handshake timeout occurred"
+msgstr "A apărut o limită de timp a conexiunii TLS"
+
+#: logsrvd/sendlog.c:1457 logsrvd/sendlog.c:1472
+#: plugins/sudoers/iolog_client.c:319 plugins/sudoers/iolog_client.c:335
+msgid "unable to set event"
+msgstr "nu se poate stabili evenimentul"
+
+#: logsrvd/sendlog.c:1482 logsrvd/sendlog.c:1486
+#, c-format
+msgid "TLS connection failed: %s"
+msgstr "Conexiunea TLS a eșuat: %s"
+
+#: logsrvd/sendlog.c:1519
+#, c-format
+msgid "Unable to initialize ssl context: %s"
+msgstr "Nu se poate inițializa contextul ssl: %s"
+
+#: logsrvd/sendlog.c:1524 plugins/sudoers/iolog_client.c:259
+#, c-format
+msgid "Unable to allocate ssl object: %s"
+msgstr "Nu se poate aloca obiectul ssl: %s"
+
+#: logsrvd/sendlog.c:1529
+#, c-format
+msgid "Unable to attach socket to the ssl object: %s"
+msgstr "Nu se poate atașa soclul la obiectul ssl: %s"
+
+#: logsrvd/sendlog.c:1773
+msgid "both restart point and iolog ID must be specified"
+msgstr "trebuie specificate ambele ID-ul iolog și punctul de repornire"
+
+#: logsrvd/sendlog.c:1777
+msgid "a restart point may not be set when no I/O is sent"
+msgstr "un punct de repornire poate să nu fie stabilit când niciun I/O nu este stabilit"
+
+#: logsrvd/sendlog.c:1852
+#, c-format
+msgid "exited prematurely with state %d"
+msgstr "a ieșit prematur cu starea %d"
+
+#: logsrvd/sendlog.c:1853
+#, c-format
+msgid "elapsed time sent to server [%lld, %ld]"
+msgstr "timpul scurs trimis la server [%lld, %ld]"
+
+#: logsrvd/sendlog.c:1855
+#, c-format
+msgid "commit point received from server [%lld, %ld]"
+msgstr "punctul de comit primit de la server [%lld, %ld]"
+
+#: plugins/sudoers/alias.c:144
+#, c-format
+msgid "Alias \"%s\" already defined"
+msgstr "Aliasul „%s” este deja definit"
+
+#: plugins/sudoers/auth/aix_auth.c:198 plugins/sudoers/logging.c:784
+msgid "unable to fork"
+msgstr "nu se poate da fork"
+
+#: plugins/sudoers/auth/aix_auth.c:278
+#, c-format
+msgid "unable to change password for %s"
+msgstr "nu se poate schimba parola pentru %s"
+
+#: plugins/sudoers/auth/bsdauth.c:70
+#, c-format
+msgid "unable to get login class for user %s"
+msgstr "nu se poate obține clasa de autentificare pentru utilizatorul %s"
+
+#: plugins/sudoers/auth/bsdauth.c:75
+msgid "unable to begin bsd authentication"
+msgstr "nu se poate începe autentificarea bsd"
+
+#: plugins/sudoers/auth/bsdauth.c:83
+msgid "invalid authentication type"
+msgstr "tip de autentificare nevalid"
+
+#: plugins/sudoers/auth/bsdauth.c:92
+msgid "unable to initialize BSD authentication"
+msgstr "nu se poate inițializa autentificarea BSD"
+
+#: plugins/sudoers/auth/bsdauth.c:180
+msgid "your account has expired"
+msgstr "contul a expirat"
+
+#: plugins/sudoers/auth/bsdauth.c:182
+msgid "approval failed"
+msgstr "aprobarea a eșuat"
+
+#: plugins/sudoers/auth/fwtk.c:54
+msgid "unable to read fwtk config"
+msgstr "nu se poate citi configurarea fwtk"
+
+#: plugins/sudoers/auth/fwtk.c:59
+msgid "unable to connect to authentication server"
+msgstr "nu se poate conecta la serverul de autentificare"
+
+#: plugins/sudoers/auth/fwtk.c:65 plugins/sudoers/auth/fwtk.c:89
+#: plugins/sudoers/auth/fwtk.c:121
+msgid "lost connection to authentication server"
+msgstr "s-a pierdut conexiunea la serverul de autentificare"
+
+#: plugins/sudoers/auth/fwtk.c:69
+#, c-format
+msgid ""
+"authentication server error:\n"
+"%s"
+msgstr ""
+"eroare server de autentificare:\n"
+"%s"
+
+#: plugins/sudoers/auth/kerb5.c:110
+#, c-format
+msgid "%s: unable to convert principal to string ('%s'): %s"
+msgstr "%s: nu se poate converti principalul la șir („%s”): %s"
+
+#: plugins/sudoers/auth/kerb5.c:160
+#, c-format
+msgid "%s: unable to parse '%s': %s"
+msgstr "%s: nu se poate parsa „%s”: %s"
+
+#: plugins/sudoers/auth/kerb5.c:169
+#, c-format
+msgid "%s: unable to resolve credential cache: %s"
+msgstr "%s: nu se poate rezolva cache-ul de certificare: %s"
+
+#: plugins/sudoers/auth/kerb5.c:216
+#, c-format
+msgid "%s: unable to allocate options: %s"
+msgstr "%s: nu se pot aloca opțiunile: %s"
+
+#: plugins/sudoers/auth/kerb5.c:231
+#, c-format
+msgid "%s: unable to get credentials: %s"
+msgstr "%s: nu se pot obține certificările: %s"
+
+#: plugins/sudoers/auth/kerb5.c:244
+#, c-format
+msgid "%s: unable to initialize credential cache: %s"
+msgstr "%s: nu se poate inițializa cache-ul de certificare: %s"
+
+#: plugins/sudoers/auth/kerb5.c:247
+#, c-format
+msgid "%s: unable to store credential in cache: %s"
+msgstr "%s: nu se poate stoca certificarea în cache: %s"
+
+#: plugins/sudoers/auth/kerb5.c:311
+#, c-format
+msgid "%s: unable to get host principal: %s"
+msgstr "%s: nu se poate obține principalul gazdei: %s"
+
+#: plugins/sudoers/auth/kerb5.c:325
+#, c-format
+msgid "%s: Cannot verify TGT! Possible attack!: %s"
+msgstr "%s: Nu se poate verifica TGT! Posibil atac!: %s"
+
+#: plugins/sudoers/auth/pam.c:218
+#, c-format
+msgid "unable to initialize PAM: %s"
+msgstr "nu se poate inițializa PAM: %s"
+
+#: plugins/sudoers/auth/pam.c:317
+#, c-format
+msgid "PAM authentication error: %s"
+msgstr "Eroare de autentificare PAM: %s"
+
+#: plugins/sudoers/auth/pam.c:336
+msgid "account validation failure, is your account locked?"
+msgstr "eșec la validarea contului, este contul blocat?"
+
+#: plugins/sudoers/auth/pam.c:347
+msgid "Account or password is expired, reset your password and try again"
+msgstr "Contul sau parola au expirat, restabiliți parola și încercați din nou"
+
+#: plugins/sudoers/auth/pam.c:353
+#, c-format
+msgid "unable to change expired password: %s"
+msgstr "nu se poate schimba parola expirată: %s"
+
+#: plugins/sudoers/auth/pam.c:364
+msgid "Password expired, contact your system administrator"
+msgstr "Parolă expirată, contactați administratorul de sistem"
+
+#: plugins/sudoers/auth/pam.c:369
+msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
+msgstr "Contul este expirat sau configurării PAM îi lipsește o secțiune „cont” pentru sudo, contactați administratorul de sistem"
+
+#: plugins/sudoers/auth/pam.c:377 plugins/sudoers/auth/pam.c:382
+#, c-format
+msgid "PAM account management error: %s"
+msgstr "Eroare de gestionare a contului PAM: %s"
+
+#: plugins/sudoers/auth/rfc1938.c:99 plugins/sudoers/visudo.c:242
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "nu existați în baza de date %s"
+
+#: plugins/sudoers/auth/securid5.c:72
+msgid "failed to initialise the ACE API library"
+msgstr "nu s-a putut inițializa biblioteca API ACE"
+
+#: plugins/sudoers/auth/securid5.c:98
+msgid "unable to contact the SecurID server"
+msgstr "nu se poate contacta serverul SecurID"
+
+#: plugins/sudoers/auth/securid5.c:107
+msgid "User ID locked for SecurID Authentication"
+msgstr "ID-ul utilizatorului blocat pentru autentificarea SecurID"
+
+#: plugins/sudoers/auth/securid5.c:111 plugins/sudoers/auth/securid5.c:162
+msgid "invalid username length for SecurID"
+msgstr "lungime de nume de utilizator nevalidă pentru SecurID"
+
+#: plugins/sudoers/auth/securid5.c:115 plugins/sudoers/auth/securid5.c:167
+msgid "invalid Authentication Handle for SecurID"
+msgstr "mâner de autentificare nevalid pentru SecurID"
+
+#: plugins/sudoers/auth/securid5.c:119
+msgid "SecurID communication failed"
+msgstr "Comunicarea SecurID a eșuat"
+
+#: plugins/sudoers/auth/securid5.c:123 plugins/sudoers/auth/securid5.c:212
+msgid "unknown SecurID error"
+msgstr "eroare de SecurID necunoscută"
+
+#: plugins/sudoers/auth/securid5.c:157
+msgid "invalid passcode length for SecurID"
+msgstr "lungime de cod de parolă nevalidă pentru SecurID"
+
+#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:124
+msgid "unable to initialize SIA session"
+msgstr "nu se poate inițializa sesiunea SIA"
+
+#: plugins/sudoers/auth/sudo_auth.c:132
+msgid "invalid authentication methods"
+msgstr "metode de autentificare nevalide"
+
+#: plugins/sudoers/auth/sudo_auth.c:134
+msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
+msgstr "Metode de autentificare nevalide compilate în sudo!  Nu se pot amesteca autentificările autonome și neautonome."
+
+#: plugins/sudoers/auth/sudo_auth.c:255 plugins/sudoers/auth/sudo_auth.c:305
+msgid "no authentication methods"
+msgstr "nu există metode de autentificare"
+
+#: plugins/sudoers/auth/sudo_auth.c:257
+msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
+msgstr "Nu există metode de autentificare compilate în sudo!  Dacă doriți să opriți autentificarea, utilizați opțiunea de configurare --disable-authentication."
+
+#: plugins/sudoers/auth/sudo_auth.c:307
+msgid "Unable to initialize authentication methods."
+msgstr "Nu se pot inițializa metodele de autentificare."
+
+#: plugins/sudoers/auth/sudo_auth.c:473
+msgid "Authentication methods:"
+msgstr "Metode de autentificare:"
+
+#: plugins/sudoers/bsm_audit.c:123 plugins/sudoers/bsm_audit.c:214
+msgid "Could not determine audit condition"
+msgstr "Nu s-a putut determina condiția de audit"
+
+#: plugins/sudoers/bsm_audit.c:188 plugins/sudoers/bsm_audit.c:277
+msgid "unable to commit audit record"
+msgstr "nu se poate comite înregistrarea de audit"
+
+#: plugins/sudoers/check.c:258
+msgid ""
+"\n"
+"We trust you have received the usual lecture from the local System\n"
+"Administrator. It usually boils down to these three things:\n"
+"\n"
+"    #1) Respect the privacy of others.\n"
+"    #2) Think before you type.\n"
+"    #3) With great power comes great responsibility.\n"
+"\n"
+msgstr ""
+"\n"
+"Avem încredere că ați primit lectura obișnuită de la administratorul de\n"
+"sistem local. De obicei se reduce la aceste trei lucruri:\n"
+"\n"
+"    #1) Respectă intimitatea celorlalți.\n"
+"    #2) Gândește înainte de a tasta.\n"
+"    #3) Cu putere mare vine o mare responsabilitate.\n"
+"\n"
+
+#: plugins/sudoers/check.c:301 plugins/sudoers/check.c:311
+#: plugins/sudoers/sudoers.c:763 plugins/sudoers/sudoers.c:811
+#: plugins/sudoers/tsdump.c:119
+#, c-format
+msgid "unknown uid: %u"
+msgstr "uid necunoscut: %u"
+
+#: plugins/sudoers/check.c:306 plugins/sudoers/iolog.c:117
+#: plugins/sudoers/policy.c:1037 plugins/sudoers/sudoers.c:387
+#: plugins/sudoers/sudoers.c:388 plugins/sudoers/sudoers.c:1240
+#: plugins/sudoers/testsudoers.c:219 plugins/sudoers/testsudoers.c:392
+#, c-format
+msgid "unknown user: %s"
+msgstr "utilizator necunoscut: %s"
+
+#: plugins/sudoers/cvtsudoers.c:195
+#, c-format
+msgid "order increment: %s: %s"
+msgstr "incrementarea ordinii: %s: %s"
+
+#: plugins/sudoers/cvtsudoers.c:211
+#, c-format
+msgid "starting order: %s: %s"
+msgstr "ordinea de început: %s: %s"
+
+#: plugins/sudoers/cvtsudoers.c:221
+#, c-format
+msgid "order padding: %s: %s"
+msgstr "umplutură de ordin: %s: %s"
+
+#: plugins/sudoers/cvtsudoers.c:231 plugins/sudoers/visudo.c:180
+#, c-format
+msgid "%s grammar version %d\n"
+msgstr "%s versiune de gramatică %d\n"
+
+#: plugins/sudoers/cvtsudoers.c:248 plugins/sudoers/testsudoers.c:167
+#, c-format
+msgid "unsupported input format %s"
+msgstr "format de intrare nesuportat %s"
+
+#: plugins/sudoers/cvtsudoers.c:263
+#, c-format
+msgid "unsupported output format %s"
+msgstr "format de ieșire nesuportat %s"
+
+#: plugins/sudoers/cvtsudoers.c:315
+#, c-format
+msgid "%s: input and output files must be different"
+msgstr "%s: fișierele de intrare și ieșire trebuie să fie diferite"
+
+#: plugins/sudoers/cvtsudoers.c:331 plugins/sudoers/sudoers.c:181
+#: plugins/sudoers/testsudoers.c:258 plugins/sudoers/visudo.c:248
+#: plugins/sudoers/visudo.c:604 plugins/sudoers/visudo.c:927
+msgid "unable to initialize sudoers default values"
+msgstr "nu se poate inițializa valorile implicite a sudoers"
+
+#: plugins/sudoers/cvtsudoers.c:417 plugins/sudoers/ldap_conf.c:431
+#, c-format
+msgid "%s: %s: %s: %s"
+msgstr "%s: %s: %s: %s"
+
+#: plugins/sudoers/cvtsudoers.c:476
+#, c-format
+msgid "%s: unknown key word: %s"
+msgstr "%s: cuvânt cheie necunoscut: %s"
+
+#: plugins/sudoers/cvtsudoers.c:522
+#, c-format
+msgid "invalid defaults type: %s"
+msgstr "tip de implicite nevalid: %s"
+
+#: plugins/sudoers/cvtsudoers.c:545
+#, c-format
+msgid "invalid suppression type: %s"
+msgstr "tip de suprimare nevalid: %s"
+
+#: plugins/sudoers/cvtsudoers.c:585 plugins/sudoers/cvtsudoers.c:599
+#, c-format
+msgid "invalid filter: %s"
+msgstr "filtru nevalid: %s"
+
+#: plugins/sudoers/cvtsudoers.c:618 plugins/sudoers/cvtsudoers.c:635
+#: plugins/sudoers/cvtsudoers.c:1245 plugins/sudoers/cvtsudoers_json.c:861
+#: plugins/sudoers/cvtsudoers_ldif.c:680 plugins/sudoers/sudoers.c:986
+#: plugins/sudoers/sudoreplay.c:1436 plugins/sudoers/timestamp.c:441
+#: plugins/sudoers/tsdump.c:128 plugins/sudoers/visudo.c:923
+#, c-format
+msgid "unable to open %s"
+msgstr "nu se poate deschide %s"
+
+#: plugins/sudoers/cvtsudoers.c:638 plugins/sudoers/visudo.c:932
+#, c-format
+msgid "failed to parse %s file, unknown error"
+msgstr "nu s-a putut parsa fișierul %s, eroare necunoscută"
+
+#: plugins/sudoers/cvtsudoers.c:646 plugins/sudoers/visudo.c:949
+#, c-format
+msgid "parse error in %s near line %d\n"
+msgstr "eroare de parsare în %s aproape de linia %d\n"
+
+#: plugins/sudoers/cvtsudoers.c:649 plugins/sudoers/visudo.c:952
+#, c-format
+msgid "parse error in %s\n"
+msgstr "eroare de parsare în %s\n"
+
+#: plugins/sudoers/cvtsudoers.c:1292 plugins/sudoers/sudoreplay.c:1125
+#: plugins/sudoers/timestamp.c:325 plugins/sudoers/timestamp.c:328
+#, c-format
+msgid "unable to write to %s"
+msgstr "nu se poate scrie la %s"
+
+#: plugins/sudoers/cvtsudoers.c:1315
+#, c-format
+msgid ""
+"%s - convert between sudoers file formats\n"
+"\n"
+msgstr ""
+"%s - convertește între formatele de fișier sudoers\n"
+"\n"
+
+#: plugins/sudoers/cvtsudoers.c:1317
+msgid ""
+"\n"
+"Options:\n"
+"  -b, --base=dn              the base DN for sudo LDAP queries\n"
+"  -c, --config=conf_file     the path to the configuration file\n"
+"  -d, --defaults=deftypes    only convert Defaults of the specified types\n"
+"  -e, --expand-aliases       expand aliases when converting\n"
+"  -f, --output-format=format set output format: JSON, LDIF or sudoers\n"
+"  -i, --input-format=format  set input format: LDIF or sudoers\n"
+"  -I, --increment=num        amount to increase each sudoOrder by\n"
+"  -h, --help                 display help message and exit\n"
+"  -m, --match=filter         only convert entries that match the filter\n"
+"  -M, --match-local          match filter uses passwd and group databases\n"
+"  -o, --output=output_file   write converted sudoers to output_file\n"
+"  -O, --order-start=num      starting point for first sudoOrder\n"
+"  -p, --prune-matches        prune non-matching users, groups and hosts\n"
+"  -P, --padding=num          base padding for sudoOrder increment\n"
+"  -s, --suppress=sections    suppress output of certain sections\n"
+"  -V, --version              display version information and exit"
+msgstr ""
+"\n"
+"Options:\n"
+"  -b, --base=dn              baza DN pentru interogări LDAP sudo\n"
+"  -c, --config=conf_file     calea către fișierul de configurare\n"
+"  -d, --defaults=deftypes    convertește implicite doar pentru tipurile specificate\n"
+"  -e, --expand-aliases       extinde aliasurile când se convertește\n"
+"  -f, --output-format=format de ieșire stabilit de format: JSON, LDIF sau sudoers\n"
+"  -i, --input-format=format  format de intrare stabilit: LDIF sau sudoers\n"
+"  -I, --increment=num        cantitate cu care se mărește fiecare sudoOrder\n"
+"  -h, --help                 afișează mesajul de ajutor și ieși\n"
+"  -m, --match=filter         conertește doar intrările care se potrivesc cu filtrul\n"
+"  -M, --match-local          filtrul potrivit utilizează passwd și baze de date ale grupului\n"
+"  -o, --output=output_file   scrie sudoers convertit la fișierul_ieșire\n"
+"  -O, --order-start=num      punct de început pentru primul sudoOrder\n"
+"  -p, --prune-matches        reduce utilizatori, grupuri și gazde care nu se potrivesc\n"
+"  -P, --padding=num          umplutură de bază pentru incrementarea sudoOrder\n"
+"  -s, --suppress=sections    suprimă ieșirea a anumitor acțiuni\n"
+"  -V, --version              afișează informația versiunii și ieși"
+
+#: plugins/sudoers/cvtsudoers_json.c:480 plugins/sudoers/cvtsudoers_json.c:514
+#: plugins/sudoers/cvtsudoers_json.c:702
+#, c-format
+msgid "unknown defaults entry \"%s\""
+msgstr "intrare de implicite necunoscută „%s”"
+
+#: plugins/sudoers/cvtsudoers_json.c:640 plugins/sudoers/cvtsudoers_json.c:653
+#: plugins/sudoers/cvtsudoers_ldif.c:345 plugins/sudoers/cvtsudoers_ldif.c:356
+#: plugins/sudoers/ldap.c:502
+msgid "unable to get GMT time"
+msgstr "nu se poate obține ora GMT"
+
+#: plugins/sudoers/cvtsudoers_json.c:643 plugins/sudoers/cvtsudoers_json.c:656
+#: plugins/sudoers/cvtsudoers_ldif.c:348 plugins/sudoers/cvtsudoers_ldif.c:359
+#: plugins/sudoers/ldap.c:508
+msgid "unable to format timestamp"
+msgstr "nu se poate formata marcajul de timp"
+
+#: plugins/sudoers/cvtsudoers_ldif.c:632
+#, c-format
+msgid "too many sudoers entries, maximum %u"
+msgstr "prea multe intrări sudoers, maximum %u"
+
+#: plugins/sudoers/cvtsudoers_ldif.c:675
+msgid "the SUDOERS_BASE environment variable is not set and the -b option was not specified."
+msgstr "variabila de mediu SUDOERS_BASE nu este stabilită și opțiunea -b nu a fost specificată."
+
+#: plugins/sudoers/def_data.c:42
+#, c-format
+msgid "Syslog facility if syslog is being used for logging: %s"
+msgstr "Facilitatea syslog dacă syslog este utilizat pentru înregistrare: %s"
+
+#: plugins/sudoers/def_data.c:46
+#, c-format
+msgid "Syslog priority to use when user authenticates successfully: %s"
+msgstr "Prioritatea syslog de utilizat când utilizatorul se autentifică cu succes: %s"
+
+#: plugins/sudoers/def_data.c:50
+#, c-format
+msgid "Syslog priority to use when user authenticates unsuccessfully: %s"
+msgstr "Prioritatea syslog de utilizat când utilizatorul nu se autentifică cu succes: %s"
+
+#: plugins/sudoers/def_data.c:54
+msgid "Put OTP prompt on its own line"
+msgstr "Plasează prompterul OTP pe propria linie"
+
+#: plugins/sudoers/def_data.c:58
+msgid "Ignore '.' in $PATH"
+msgstr "Ignoră „.” în $PATH"
+
+#: plugins/sudoers/def_data.c:62
+msgid "Always send mail when sudo is run"
+msgstr "Trimite întotdeauna mail când sudo este rulat"
+
+#: plugins/sudoers/def_data.c:66
+msgid "Send mail if user authentication fails"
+msgstr "Trimite mail dacă autentificarea eșuează"
+
+#: plugins/sudoers/def_data.c:70
+msgid "Send mail if the user is not in sudoers"
+msgstr "Trimite mail dacă utilizatorul nu este în sudoers"
+
+#: plugins/sudoers/def_data.c:74
+msgid "Send mail if the user is not in sudoers for this host"
+msgstr "Trimite mail dacă utilizatorul nu este în sudoers pentru această gazdă"
+
+#: plugins/sudoers/def_data.c:78
+msgid "Send mail if the user is not allowed to run a command"
+msgstr "Trimite mail dacă utilizatorul nu are voie să ruleze o comandă"
+
+#: plugins/sudoers/def_data.c:82
+msgid "Send mail if the user tries to run a command"
+msgstr "Trimite mail dacă utilizatorul încearcă să ruleze o comandă"
+
+#: plugins/sudoers/def_data.c:86
+msgid "Use a separate timestamp for each user/tty combo"
+msgstr "Utilizează un marcaj de timp separat pentru fiecare combinare utilizator/tty"
+
+#: plugins/sudoers/def_data.c:90
+msgid "Lecture user the first time they run sudo"
+msgstr "Ține o prelegere utilizatorului când rulează pentru prima dată sudo"
+
+#: plugins/sudoers/def_data.c:94
+#, c-format
+msgid "File containing the sudo lecture: %s"
+msgstr "Fișierul care conține lectura sudo: %s"
+
+#: plugins/sudoers/def_data.c:98
+msgid "Require users to authenticate by default"
+msgstr "Cere utilizatorilor să se autentifice ca implicit"
+
+#: plugins/sudoers/def_data.c:102
+msgid "Root may run sudo"
+msgstr "Root poate rula sudo"
+
+#: plugins/sudoers/def_data.c:106
+msgid "Log the hostname in the (non-syslog) log file"
+msgstr "Înregistrează numele gazdei în fișierul de înregistrare (ne-syslog)"
+
+#: plugins/sudoers/def_data.c:110
+msgid "Log the year in the (non-syslog) log file"
+msgstr "Înregistrează anul fișierului de înregistrare (ne-syslog)"
+
+#: plugins/sudoers/def_data.c:114
+msgid "If sudo is invoked with no arguments, start a shell"
+msgstr "Dacă sudo este invocat fără argumente, pornește un shell"
+
+#: plugins/sudoers/def_data.c:118
+msgid "Set $HOME to the target user when starting a shell with -s"
+msgstr "Stabilește $HOME la ținta utilizatorului când se pornește un shell cu -s"
+
+#: plugins/sudoers/def_data.c:122
+msgid "Always set $HOME to the target user's home directory"
+msgstr "Totdeauna stabilește $HOME la directorul personal al utilizatorului țintă"
+
+#: plugins/sudoers/def_data.c:126
+msgid "Allow some information gathering to give useful error messages"
+msgstr "Permite colectarea de informații pentru a da eroare de mesaje utile"
+
+#: plugins/sudoers/def_data.c:130
+msgid "Require fully-qualified hostnames in the sudoers file"
+msgstr "Necesită nume de gazdă calificate complet în fișierul sudoers"
+
+#: plugins/sudoers/def_data.c:134
+msgid "Insult the user when they enter an incorrect password"
+msgstr "Insultă utilizatorul când introduce o parolă incorectă"
+
+#: plugins/sudoers/def_data.c:138
+msgid "Only allow the user to run sudo if they have a tty"
+msgstr "Permite utilizatorului să ruleze sudo doar dacă are un tty"
+
+#: plugins/sudoers/def_data.c:142
+msgid "Visudo will honor the EDITOR environment variable"
+msgstr "Visudo va onora variabila de mediu EDITOR"
+
+#: plugins/sudoers/def_data.c:146
+msgid "Prompt for root's password, not the users's"
+msgstr "Solicită parola pentru root, nu a utilizatorului"
+
+#: plugins/sudoers/def_data.c:150
+msgid "Prompt for the runas_default user's password, not the users's"
+msgstr "Solicită pentru parola utilizatorului runas_default, nu a utilizatorului"
+
+#: plugins/sudoers/def_data.c:154
+msgid "Prompt for the target user's password, not the users's"
+msgstr "Solicită pentru parola utilizatorului țintă, nu a utilizatorului"
+
+#: plugins/sudoers/def_data.c:158
+msgid "Apply defaults in the target user's login class if there is one"
+msgstr "Aplică implicitele în clasa de autentificare a utilizatorului țintă dacă aceasta există"
+
+#: plugins/sudoers/def_data.c:162
+msgid "Set the LOGNAME and USER environment variables"
+msgstr "Stabilește variabilele de mediu NUMEISTORIC și UTILIZATOR"
+
+#: plugins/sudoers/def_data.c:166
+msgid "Only set the effective uid to the target user, not the real uid"
+msgstr "Stabilește doar uid-ul efectiv la utilizatorul țintă, nu uid-ul real"
+
+#: plugins/sudoers/def_data.c:170
+msgid "Don't initialize the group vector to that of the target user"
+msgstr "Nu inițializa vectorul de grup la cel al utilizatorului țintă"
+
+#: plugins/sudoers/def_data.c:174
+#, c-format
+msgid "Length at which to wrap log file lines (0 for no wrap): %u"
+msgstr "Lungimea la care să se încadreze liniile fișierului istoric (0 pentru fără încadrare): %u"
+
+#: plugins/sudoers/def_data.c:178
+#, c-format
+msgid "Authentication timestamp timeout: %.1f minutes"
+msgstr "Limită de timp a datării de autentificare: %.1f minute"
+
+#: plugins/sudoers/def_data.c:182
+#, c-format
+msgid "Password prompt timeout: %.1f minutes"
+msgstr "Limită de timp a solicitării parolei: %.1f minute"
+
+#: plugins/sudoers/def_data.c:186
+#, c-format
+msgid "Number of tries to enter a password: %u"
+msgstr "Numărul de încercări pentru a introduce o parolă: %u"
+
+#: plugins/sudoers/def_data.c:190
+#, c-format
+msgid "Umask to use or 0777 to use user's: 0%o"
+msgstr "Demascarea de utilizat sau 0777 de utilizat pentru utilizator: 0%o"
+
+#: plugins/sudoers/def_data.c:194
+#, c-format
+msgid "Path to log file: %s"
+msgstr "Calea la fișierul de înregistrare: %s"
+
+#: plugins/sudoers/def_data.c:198
+#, c-format
+msgid "Path to mail program: %s"
+msgstr "Calea la programul de mail: %s"
+
+#: plugins/sudoers/def_data.c:202
+#, c-format
+msgid "Flags for mail program: %s"
+msgstr "Fanioane pentru programul de mail: %s"
+
+#: plugins/sudoers/def_data.c:206
+#, c-format
+msgid "Address to send mail to: %s"
+msgstr "Adresa la care să se trimită mailul: %s"
+
+#: plugins/sudoers/def_data.c:210
+#, c-format
+msgid "Address to send mail from: %s"
+msgstr "Adresa de la care să se trimită mailul: %s"
+
+#: plugins/sudoers/def_data.c:214
+#, c-format
+msgid "Subject line for mail messages: %s"
+msgstr "Linia de subiect pentru mesajele mail: %s"
+
+#: plugins/sudoers/def_data.c:218
+#, c-format
+msgid "Incorrect password message: %s"
+msgstr "Mesaj de parolă incorect: %s"
+
+#: plugins/sudoers/def_data.c:222
+#, c-format
+msgid "Path to lecture status dir: %s"
+msgstr "Cale către directorul de stare de lectură: %s"
+
+#: plugins/sudoers/def_data.c:226
+#, c-format
+msgid "Path to authentication timestamp dir: %s"
+msgstr "Cale către directorul de datare de autentificare: %s"
+
+#: plugins/sudoers/def_data.c:230
+#, c-format
+msgid "Owner of the authentication timestamp dir: %s"
+msgstr "Deținător al directorului de datare de autentificare: %s"
+
+#: plugins/sudoers/def_data.c:234
+#, c-format
+msgid "Users in this group are exempt from password and PATH requirements: %s"
+msgstr "Utilizatorii din acest grup sunt scutiți de la cerințele parolei și PATH: %s"
+
+#: plugins/sudoers/def_data.c:238
+#, c-format
+msgid "Default password prompt: %s"
+msgstr "Prompter de parolă implicită: %s"
+
+#: plugins/sudoers/def_data.c:242
+msgid "If set, passprompt will override system prompt in all cases."
+msgstr "Dacă este stabilit, prompterul de parolă va suprascrie prompterul de sistem în toate cazurile."
+
+#: plugins/sudoers/def_data.c:246
+#, c-format
+msgid "Default user to run commands as: %s"
+msgstr "Utilizatorul implicit cu care să se ruleze comenzile: %s"
+
+#: plugins/sudoers/def_data.c:250
+#, c-format
+msgid "Value to override user's $PATH with: %s"
+msgstr "Valoarea cu care să se suprascrie $PATH a utilizatorului: %s"
+
+#: plugins/sudoers/def_data.c:254
+#, c-format
+msgid "Path to the editor for use by visudo: %s"
+msgstr "Calea către editorul de utilizat de visudo: %s"
+
+#: plugins/sudoers/def_data.c:258
+#, c-format
+msgid "When to require a password for 'list' pseudocommand: %s"
+msgstr "Când să se ceară o parolă pentru pseudocomanda „listează”: %s"
+
+#: plugins/sudoers/def_data.c:262
+#, c-format
+msgid "When to require a password for 'verify' pseudocommand: %s"
+msgstr "Când să se ceară o parolă pentru pseudocomanda „verifică”: %s"
+
+#: plugins/sudoers/def_data.c:266
+msgid "Preload the dummy exec functions contained in the sudo_noexec library"
+msgstr "Preîncarcă funcțiile de execuție dummy conținute în biblioteca sudo_nonexec"
+
+#: plugins/sudoers/def_data.c:270
+msgid "If LDAP directory is up, do we ignore local sudoers file"
+msgstr "Dacă directorul LDAP este jos, se ignoră fișierul sudoers local"
+
+#: plugins/sudoers/def_data.c:274
+#, c-format
+msgid "File descriptors >= %d will be closed before executing a command"
+msgstr "Descriptorii de fișier >= %d vor fi închise înainte de executarea unei comenzi"
+
+#: plugins/sudoers/def_data.c:278
+msgid "If set, users may override the value of \"closefrom\" with the -C option"
+msgstr "Dacă este stabilit, utilizatorii pot să suprascrie valoarea a „closeform” cu opțiunea -C"
+
+#: plugins/sudoers/def_data.c:282
+msgid "Allow users to set arbitrary environment variables"
+msgstr "Permite utilizatorilor să stabilească variabile de mediu arbitrare"
+
+#: plugins/sudoers/def_data.c:286
+msgid "Reset the environment to a default set of variables"
+msgstr "Restabilește mediul la un set de variabile implicite"
+
+#: plugins/sudoers/def_data.c:290
+msgid "Environment variables to check for sanity:"
+msgstr "Variabile de mediu pentru a verifica starea de sănătate:"
+
+#: plugins/sudoers/def_data.c:294
+msgid "Environment variables to remove:"
+msgstr "Variabile de mediu de eliminat:"
+
+#: plugins/sudoers/def_data.c:298
+msgid "Environment variables to preserve:"
+msgstr "Variabile de mediu de păstrat:"
+
+#: plugins/sudoers/def_data.c:302
+#, c-format
+msgid "SELinux role to use in the new security context: %s"
+msgstr "Rolul SELinux de utilizat în contextul de securitate nou: %s"
+
+#: plugins/sudoers/def_data.c:306
+#, c-format
+msgid "SELinux type to use in the new security context: %s"
+msgstr "Tipul SELinux de utilizat în contextul de securitate nou: %s"
+
+#: plugins/sudoers/def_data.c:310
+#, c-format
+msgid "Path to the sudo-specific environment file: %s"
+msgstr "Calea către fișierul de mediu specific sudo: %s"
+
+#: plugins/sudoers/def_data.c:314
+#, c-format
+msgid "Path to the restricted sudo-specific environment file: %s"
+msgstr "Calea către fișierul de mediu specific sudo restricționat: %s"
+
+#: plugins/sudoers/def_data.c:318
+#, c-format
+msgid "Locale to use while parsing sudoers: %s"
+msgstr "Localizare de utilizat în timpul parsării sudoers: %s"
+
+#: plugins/sudoers/def_data.c:322
+msgid "Allow sudo to prompt for a password even if it would be visible"
+msgstr "Permite sudo să solicite o parolă chiar dacă ar fi vizibilă"
+
+#: plugins/sudoers/def_data.c:326
+msgid "Provide visual feedback at the password prompt when there is user input"
+msgstr "Furnizează feedback vizual la solicitarea parolei când există intrare de utilizator"
+
+#: plugins/sudoers/def_data.c:330
+msgid "Use faster globbing that is less accurate but does not access the filesystem"
+msgstr "Utilizează expandare mai rapidă care este mai puțin exactă dar nu accesează sistemul de fișiere"
+
+#: plugins/sudoers/def_data.c:334
+msgid "The umask specified in sudoers will override the user's, even if it is more permissive"
+msgstr "Demascarea specificată în sudoers o va suprascrie pe cea a utilizatorului, chiar dacă este mai permisivă"
+
+#: plugins/sudoers/def_data.c:338
+msgid "Log user's input for the command being run"
+msgstr "Înregistrează intrarea utilizatorului pentru comanda care se rulează"
+
+#: plugins/sudoers/def_data.c:342
+msgid "Log the output of the command being run"
+msgstr "Înregistrează ieșire comenzii care se rulează"
+
+#: plugins/sudoers/def_data.c:346
+msgid "Compress I/O logs using zlib"
+msgstr "Comprimă înregistrările I/O utilizând zlib"
+
+#: plugins/sudoers/def_data.c:350
+msgid "Always run commands in a pseudo-tty"
+msgstr "Totdeauna rulează comenzile într-un pseudo-tty"
+
+#: plugins/sudoers/def_data.c:354
+#, c-format
+msgid "Plugin for non-Unix group support: %s"
+msgstr "Modul pentru suport de grup non-Unix: %s"
+
+#: plugins/sudoers/def_data.c:358
+#, c-format
+msgid "Directory in which to store input/output logs: %s"
+msgstr "Director în care să se stocheze înregistrările intrare/ieșire: %s"
+
+#: plugins/sudoers/def_data.c:362
+#, c-format
+msgid "File in which to store the input/output log: %s"
+msgstr "Fișier în care să se stocheze înregistrarea intrare/ieșire: %s"
+
+#: plugins/sudoers/def_data.c:366
+msgid "Add an entry to the utmp/utmpx file when allocating a pty"
+msgstr "Adaugă o intrare la fișierul utmp/utmpx când se alocă un pty"
+
+#: plugins/sudoers/def_data.c:370
+msgid "Set the user in utmp to the runas user, not the invoking user"
+msgstr "Stabilește utilizatorul în utmp la utilizatorul runas, nu la utilizatorul care invocă"
+
+#: plugins/sudoers/def_data.c:374
+#, c-format
+msgid "Set of permitted privileges: %s"
+msgstr "Setul de privilegii permise: %s"
+
+#: plugins/sudoers/def_data.c:378
+#, c-format
+msgid "Set of limit privileges: %s"
+msgstr "Setul de privilegii limită: %s"
+
+#: plugins/sudoers/def_data.c:382
+msgid "Run commands on a pty in the background"
+msgstr "Rulează comenzile pe un pty în fundal"
+
+#: plugins/sudoers/def_data.c:386
+#, c-format
+msgid "PAM service name to use: %s"
+msgstr "Nume de serviciu PAM de utilizat: %s"
+
+#: plugins/sudoers/def_data.c:390
+#, c-format
+msgid "PAM service name to use for login shells: %s"
+msgstr "Nume de serviciu PAM de utilizat pentru shell-urile de autentificare: %s"
+
+#: plugins/sudoers/def_data.c:394
+msgid "Attempt to establish PAM credentials for the target user"
+msgstr "Încearcă să stabilești certificări PAM pentru utilizatorul țintă"
+
+#: plugins/sudoers/def_data.c:398
+msgid "Create a new PAM session for the command to run in"
+msgstr "Creează o sesiune PAM pentru a rula comanda în ea"
+
+#: plugins/sudoers/def_data.c:402
+msgid "Perform PAM account validation management"
+msgstr "Execută gestionare de validare de cont PAM"
+
+#: plugins/sudoers/def_data.c:406
+#, c-format
+msgid "Maximum I/O log sequence number: %s"
+msgstr "Număr de secvență de istoric I/O maxim: %s"
+
+#: plugins/sudoers/def_data.c:410
+msgid "Enable sudoers netgroup support"
+msgstr "Activează suportul de grup de rețea sudoers"
+
+#: plugins/sudoers/def_data.c:414
+msgid "Check parent directories for writability when editing files with sudoedit"
+msgstr "Verifică directoarele părinte pentru capacitatea de scriere când se editează fișiere cu sudoedit"
+
+#: plugins/sudoers/def_data.c:418
+msgid "Follow symbolic links when editing files with sudoedit"
+msgstr "Urmărește legăturile simbolice când se editează fișierele cu sudoedit"
+
+#: plugins/sudoers/def_data.c:422
+msgid "Query the group plugin for unknown system groups"
+msgstr "Interoghează modulul grupului pentru grupuri de sistem necunoscute"
+
+#: plugins/sudoers/def_data.c:426
+msgid "Match netgroups based on the entire tuple: user, host and domain"
+msgstr "Potrivește grupurile de rețea pe baza întregului tuplu: utilizator, gazdă și domeniu"
+
+#: plugins/sudoers/def_data.c:430
+msgid "Allow commands to be run even if sudo cannot write to the audit log"
+msgstr "Permite comenzile să fie rulate chiar dacă sudo nu poate scrie la istoricul audit"
+
+#: plugins/sudoers/def_data.c:434
+msgid "Allow commands to be run even if sudo cannot write to the I/O log"
+msgstr "Permite comenzile să fie rulate chiar dacă sudo nu poate scrie la istoricul I/O"
+
+#: plugins/sudoers/def_data.c:438
+msgid "Allow commands to be run even if sudo cannot write to the log file"
+msgstr "Permite comenzile să fie rulate chiar dacă sudo nu poate scrie la fișierul istoric"
+
+#: plugins/sudoers/def_data.c:442
+msgid "Resolve groups in sudoers and match on the group ID, not the name"
+msgstr "Rezolvă grupurile în sudoers și potrivește pe ID-ul grupului, nu pe nume"
+
+#: plugins/sudoers/def_data.c:446
+#, c-format
+msgid "Log entries larger than this value will be split into multiple syslog messages: %u"
+msgstr "Intrările în istoric mai mari decât această valoare vor fi împărțite în mesaje syslog multiple: %u"
+
+#: plugins/sudoers/def_data.c:450
+#, c-format
+msgid "User that will own the I/O log files: %s"
+msgstr "Utilizator care va deține fișierele istoricului I/O: %s"
+
+#: plugins/sudoers/def_data.c:454
+#, c-format
+msgid "Group that will own the I/O log files: %s"
+msgstr "Grupul care va deține fișierele istoric I/O: %s"
+
+#: plugins/sudoers/def_data.c:458
+#, c-format
+msgid "File mode to use for the I/O log files: 0%o"
+msgstr "Modul de fișier de utilizat pentru fișierele istoric I/O: 0%o"
+
+#: plugins/sudoers/def_data.c:462
+#, c-format
+msgid "Execute commands by file descriptor instead of by path: %s"
+msgstr "Execută comenzile prin descriptorul fișierului în loc de cale: %s"
+
+#: plugins/sudoers/def_data.c:466
+msgid "Ignore unknown Defaults entries in sudoers instead of producing a warning"
+msgstr "Ignoră intrările Implicite necunoscute în sudoers în locul producerii unui avertisment"
+
+#: plugins/sudoers/def_data.c:470
+#, c-format
+msgid "Time in seconds after which the command will be terminated: %u"
+msgstr "Timpul în secunde după care comanda va fi terminată: %u"
+
+#: plugins/sudoers/def_data.c:474
+msgid "Allow the user to specify a timeout on the command line"
+msgstr "Permite utilizatorul să specifice o limită de timp pe linia de comandă"
+
+#: plugins/sudoers/def_data.c:478
+msgid "Flush I/O log data to disk immediately instead of buffering it"
+msgstr "Curătați datele de istoric I/O pe disc imediat în loc să le preîncărcați"
+
+#: plugins/sudoers/def_data.c:482
+msgid "Include the process ID when logging via syslog"
+msgstr "Include ID-ul procesului când se înregistrează via syslog"
+
+#: plugins/sudoers/def_data.c:486
+#, c-format
+msgid "Type of authentication timestamp record: %s"
+msgstr "Tipul de înregistrare de limită de timp de autentificare: %s"
+
+#: plugins/sudoers/def_data.c:490
+#, c-format
+msgid "Authentication failure message: %s"
+msgstr "Mesaj de eșuare de autentificare: %s"
+
+#: plugins/sudoers/def_data.c:494
+msgid "Ignore case when matching user names"
+msgstr "Ignoră majusculele când se potrivesc numele de utilizator"
+
+#: plugins/sudoers/def_data.c:498
+msgid "Ignore case when matching group names"
+msgstr "Ignoră majusculele când se potrivesc numele de grupuri"
+
+#: plugins/sudoers/def_data.c:502
+msgid "Log when a command is allowed by sudoers"
+msgstr "Înregistrează când o comandă este permisă de sudoers"
+
+#: plugins/sudoers/def_data.c:506
+msgid "Log when a command is denied by sudoers"
+msgstr "Înregistrează când o comandă este respinsă de sudoers"
+
+#: plugins/sudoers/def_data.c:510
+msgid "Sudo log server(s) to connect to with optional port"
+msgstr "Server(e) de înregistrare sudo de conectat cu portul opțional"
+
+#: plugins/sudoers/def_data.c:514
+#, c-format
+msgid "Sudo log server timeout in seconds: %u"
+msgstr "Limită de timp de server de înregistrare sudo în secunde: %u"
+
+#: plugins/sudoers/def_data.c:518
+msgid "Enable SO_KEEPALIVE socket option on the socket connected to the logserver"
+msgstr "Activează opțiunea de soclu SO_KEEPALIVE pe soclul conectat la serverul de înregistrare"
+
+#: plugins/sudoers/def_data.c:522
+#, c-format
+msgid "Path to the audit server's CA bundle file: %s"
+msgstr "Calea către fișierul pachet CA al serverului audit: %s"
+
+#: plugins/sudoers/def_data.c:526
+#, c-format
+msgid "Path to the sudoers certificate file: %s"
+msgstr "Calea către fișierul certificat sudoers: %s"
+
+#: plugins/sudoers/def_data.c:530
+#, c-format
+msgid "Path to the sudoers private key file: %s"
+msgstr "Calea către fișierul cheie privată sudoers: %s"
+
+#: plugins/sudoers/def_data.c:534
+msgid "Verify that the log server's certificate is valid"
+msgstr "Verifică dacă certificatul serverului istoricului este valid"
+
+#: plugins/sudoers/def_data.c:538
+msgid "Allow the use of unknown runas user and/or group ID"
+msgstr "Permite utilizarea de ID-ul de grup și/sau utilizator runas necunoscut"
+
+#: plugins/sudoers/def_data.c:542
+msgid "Only permit running commands as a user with a valid shell"
+msgstr "Permite doar rularea de comenzi ca un utilizator cu un shell valid"
+
+#: plugins/sudoers/def_data.c:546
+msgid "Set the pam remote user to the user running sudo"
+msgstr "Stabilește utilizatorul de la distanță pam la utilizatorul care rulează sudo"
+
+#: plugins/sudoers/def_data.c:550
+msgid "Set the pam remote host to the local host name"
+msgstr "Stabilește gazda de la distanță pam la numele de gazdă local"
+
+#: plugins/sudoers/defaults.c:183
+#, c-format
+msgid "%s:%d unknown defaults entry \"%s\""
+msgstr "%s:%d intrare implicite necunoscută „%s”"
+
+#: plugins/sudoers/defaults.c:186
+#, c-format
+msgid "%s: unknown defaults entry \"%s\""
+msgstr "%s: intrare implicite necunoscută „%s”"
+
+#: plugins/sudoers/defaults.c:229
+#, c-format
+msgid "%s:%d no value specified for \"%s\""
+msgstr "%s:%d nicio valoare specificată pentru „%s”"
+
+#: plugins/sudoers/defaults.c:232
+#, c-format
+msgid "%s: no value specified for \"%s\""
+msgstr "%s: nicio valoare specificată pentru „%s”"
+
+#: plugins/sudoers/defaults.c:252
+#, c-format
+msgid "%s:%d values for \"%s\" must start with a '/'"
+msgstr "%s:%d valorile pentru „%s” trebuie să înceapă cu un „/”"
+
+#: plugins/sudoers/defaults.c:255
+#, c-format
+msgid "%s: values for \"%s\" must start with a '/'"
+msgstr "%s: valorile pentru „%s” trebuie să înceapă cu un „/”"
+
+#: plugins/sudoers/defaults.c:277
+#, c-format
+msgid "%s:%d option \"%s\" does not take a value"
+msgstr "%s:%d opțiunea „%s” nu ia o valoare"
+
+#: plugins/sudoers/defaults.c:280
+#, c-format
+msgid "%s: option \"%s\" does not take a value"
+msgstr "%s: opțiunea „%s” nu ia o valoare"
+
+#: plugins/sudoers/defaults.c:305
+#, c-format
+msgid "%s:%d invalid Defaults type 0x%x for option \"%s\""
+msgstr "%s:%d tip de implicite nevalid 0x%x pentru opțiunea „%s”"
+
+#: plugins/sudoers/defaults.c:308
+#, c-format
+msgid "%s: invalid Defaults type 0x%x for option \"%s\""
+msgstr "%s: tip de implicite nevalid 0x%x pentru opțiunea „%s”"
+
+#: plugins/sudoers/defaults.c:318
+#, c-format
+msgid "%s:%d value \"%s\" is invalid for option \"%s\""
+msgstr "%s:%d valoarea „%s” nu este validă pentru opțiunea „%s”"
+
+#: plugins/sudoers/defaults.c:321
+#, c-format
+msgid "%s: value \"%s\" is invalid for option \"%s\""
+msgstr "%s: valoarea „%s” nu este validă pentru opțiunea „%s”"
+
+#: plugins/sudoers/env.c:404
+msgid "sudo_putenv: corrupted envp, length mismatch"
+msgstr "sudo_putenv: envp corupt, nepotrivire a lungimii"
+
+#: plugins/sudoers/env.c:1131
+msgid "unable to rebuild the environment"
+msgstr "nu se poate regenera mediul"
+
+#: plugins/sudoers/env.c:1205
+#, c-format
+msgid "sorry, you are not allowed to set the following environment variables: %s"
+msgstr "nu aveți permisiunea de a stabili următoarele variabile de mediu: %s"
+
+#: plugins/sudoers/file.c:104
+#, c-format
+msgid "parse error in %s near line %d"
+msgstr "eroare de parsare în %s lângă linia %d"
+
+#: plugins/sudoers/file.c:107
+#, c-format
+msgid "parse error in %s"
+msgstr "eroare de parsare în %s"
+
+#: plugins/sudoers/filedigest.c:49
+#, c-format
+msgid "unsupported digest type %d for %s"
+msgstr "tip de digest nesuportat %d pentru %s"
+
+#: plugins/sudoers/filedigest.c:78
+#, c-format
+msgid "%s: read error"
+msgstr "%s: eroare de citire"
+
+#: plugins/sudoers/group_plugin.c:83
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s trebuie să fie deținut de uid-ul %d"
+
+#: plugins/sudoers/group_plugin.c:87
+#, c-format
+msgid "%s must only be writable by owner"
+msgstr "%s nu trebuie să fie inscriptibilă de către deținător"
+
+#: plugins/sudoers/group_plugin.c:96 plugins/sudoers/sssd.c:571
+#, c-format
+msgid "unable to load %s: %s"
+msgstr "nu se poate încărca %s: %s"
+
+#: plugins/sudoers/group_plugin.c:102
+#, c-format
+msgid "unable to find symbol \"group_plugin\" in %s"
+msgstr "nu se poate găsi simbolul „group_plugin” în %s"
+
+#: plugins/sudoers/group_plugin.c:107
+#, c-format
+msgid "%s: incompatible group plugin major version %d, expected %d"
+msgstr "%s: versiune majoră de modul de grup incompatibilă %d, s-a așteptat %d"
+
+#: plugins/sudoers/interfaces.c:80 plugins/sudoers/interfaces.c:97
+#, c-format
+msgid "unable to parse IP address \"%s\""
+msgstr "nu se poate parsa adresa IP „%s”"
+
+#: plugins/sudoers/interfaces.c:85 plugins/sudoers/interfaces.c:102
+#, c-format
+msgid "unable to parse netmask \"%s\""
+msgstr "nu se poate parsa masca de rețea „%s”"
+
+#: plugins/sudoers/interfaces.c:130
+msgid "Local IP address and netmask pairs:\n"
+msgstr "Perechile adresă de IP locală și mască de rețea:\n"
+
+#: plugins/sudoers/iolog.c:142 plugins/sudoers/sudoers.c:393
+#: plugins/sudoers/sudoers.c:394 plugins/sudoers/sudoers.c:1274
+#: plugins/sudoers/testsudoers.c:416
+#, c-format
+msgid "unknown group: %s"
+msgstr "grup necunoscut: %s"
+
+#: plugins/sudoers/iolog.c:517 plugins/sudoers/iolog.c:807
+#: plugins/sudoers/iolog.c:959 plugins/sudoers/iolog.c:966
+#: plugins/sudoers/iolog.c:1087 plugins/sudoers/iolog.c:1094
+#: plugins/sudoers/iolog.c:1193 plugins/sudoers/iolog.c:1200
+#, c-format
+msgid "unable to write to I/O log file: %s"
+msgstr "nu se poate scrie la fișierul istoric I/O: %s"
+
+#: plugins/sudoers/iolog.c:566
+msgid "unable to update sequence file"
+msgstr "nu se poate actualiza fișierul de secvență"
+
+#: plugins/sudoers/iolog.c:605
+#, c-format
+msgid "unable to create %s/%s"
+msgstr "nu se poate crea %s/%s"
+
+#: plugins/sudoers/iolog.c:631
+msgid "unable to connect to log server"
+msgstr "nu se poate conecta la serverul de înregistrare"
+
+#: plugins/sudoers/iolog.c:851
+#, c-format
+msgid "%s: internal error, I/O log file for event %d not open"
+msgstr "%s: eroare internă, fișierul istoric I/O pentru evenimentul %d nu este deschis"
+
+#: plugins/sudoers/iolog.c:944 plugins/sudoers/iolog.c:1072
+#: plugins/sudoers/iolog.c:1177 plugins/sudoers/timestamp.c:855
+#: plugins/sudoers/timestamp.c:947 plugins/sudoers/visudo.c:492
+#: plugins/sudoers/visudo.c:498
+msgid "unable to read the clock"
+msgstr "nu se poate citi ceasul"
+
+#: plugins/sudoers/iolog.c:1169 plugins/sudoers/iolog_client.c:977
+#, c-format
+msgid "%s: internal error, invalid signal %d"
+msgstr "%s: eroare internă, semnal nevalid %d"
+
+#: plugins/sudoers/iolog_client.c:113 plugins/sudoers/iolog_client.c:392
+#: plugins/sudoers/iolog_client.c:1200 plugins/sudoers/iolog_client.c:1775
+msgid "error in event loop"
+msgstr "eroare în bucla de eveniment"
+
+#: plugins/sudoers/iolog_client.c:194
+#, c-format
+msgid "Creation of new SSL_CTX object failed: %s"
+msgstr "Crearea obiectului SSL_CTX nou a eșuat: %s"
+
+#: plugins/sudoers/iolog_client.c:346 plugins/sudoers/iolog_client.c:351
+#, c-format
+msgid "TLS connection to %s:%s failed: %s"
+msgstr "Conexiunea TLS la %s:%s a eșuat: %s"
+
+#: plugins/sudoers/iolog_client.c:496
+msgid "TLS initialization was unsuccessful"
+msgstr "Inițializarea TLS nu a fost cu succes"
+
+#: plugins/sudoers/iolog_client.c:505
+msgid "TLS handshake was unsuccessful"
+msgstr "Conectarea TLS nu a fost cu succes"
+
+#: plugins/sudoers/iolog_client.c:767 plugins/sudoers/iolog_client.c:959
+msgid "unable to get time of day"
+msgstr "nu se poate obține timpul zilei"
+
+#: plugins/sudoers/iolog_client.c:986
+#, c-format
+msgid "%s: internal error, invalid exit status %d"
+msgstr "%s: eroare internă, stare de ieșire nevalidă %d"
+
+#: plugins/sudoers/iolog_client.c:1523
+msgid "lost connection to log server"
+msgstr "a fost pierdută conexiunea la serverul de înregistrare"
+
+#: plugins/sudoers/iolog_client.c:1600
+msgid "missing write buffer"
+msgstr "lipsește preîncărcarea de scriere"
+
+#: plugins/sudoers/ldap.c:176 plugins/sudoers/ldap_conf.c:291
+msgid "starttls not supported when using ldaps"
+msgstr "starttls nu este suportată când se utilizează ldaps"
+
+#: plugins/sudoers/ldap.c:247
+#, c-format
+msgid "unable to initialize SSL cert and key db: %s"
+msgstr "nu se poate inițializa certificatul SSL și db a cheii: %s"
+
+#: plugins/sudoers/ldap.c:250
+#, c-format
+msgid "you must set TLS_CERT in %s to use SSL"
+msgstr "trebuie să stabiliți TLS_CERT în %s pentru a utiliza SSL"
+
+#: plugins/sudoers/ldap.c:1658
+#, c-format
+msgid "unable to initialize LDAP: %s"
+msgstr "nu se poate inițializa LDAP: %s"
+
+#: plugins/sudoers/ldap.c:1694
+msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
+msgstr "start_tls specificat dar libs LDAP nu suportă ldap_start_tls_s() sau ldap_start_tls_s_np()"
+
+#: plugins/sudoers/ldap.c:1831 plugins/sudoers/parse_ldif.c:744
+#, c-format
+msgid "invalid sudoOrder attribute: %s"
+msgstr "atribut sudoOrder nevalid: %s"
+
+#: plugins/sudoers/ldap_conf.c:200
+msgid "sudo_ldap_conf_add_ports: port too large"
+msgstr "sudo_ldap_conf_add_ports: portul prea mare"
+
+#: plugins/sudoers/ldap_conf.c:260
+#, c-format
+msgid "unsupported LDAP uri type: %s"
+msgstr "tip uri LDAP nesuportat: %s"
+
+#: plugins/sudoers/ldap_conf.c:287
+msgid "unable to mix ldap and ldaps URIs"
+msgstr "nu se pot fuziona URI-uri ldap și ldaps"
+
+#: plugins/sudoers/ldap_util.c:548 plugins/sudoers/ldap_util.c:550
+#, c-format
+msgid "unable to convert sudoOption: %s%s%s"
+msgstr "nu se poate converti sudoOption: %s%s%s"
+
+#: plugins/sudoers/linux_audit.c:58
+msgid "unable to open audit system"
+msgstr "nu se poate deschide sistemul audit"
+
+#: plugins/sudoers/linux_audit.c:100
+msgid "unable to send audit message"
+msgstr "nu se poate trimite mesajul de audit"
+
+#: plugins/sudoers/logging.c:167
+#, c-format
+msgid "unable to open log file: %s"
+msgstr "nu se poate deschide fișierul de istoric: %s"
+
+#: plugins/sudoers/logging.c:175
+#, c-format
+msgid "unable to lock log file: %s"
+msgstr "nu se poate bloca fișierul de istoric: %s"
+
+#: plugins/sudoers/logging.c:208
+#, c-format
+msgid "unable to write log file: %s"
+msgstr "nu se poate scrie fișierul de istoric: %s"
+
+#: plugins/sudoers/logging.c:241
+msgid "user NOT in sudoers"
+msgstr "utilizatorul NU este în sudoers"
+
+#: plugins/sudoers/logging.c:243
+msgid "user NOT authorized on host"
+msgstr "utilizatorul NU este autorizat pe gazdă"
+
+#: plugins/sudoers/logging.c:245
+msgid "command not allowed"
+msgstr "comanda nu este permisă"
+
+#: plugins/sudoers/logging.c:288
+#, c-format
+msgid "%s is not in the sudoers file.  This incident will be reported.\n"
+msgstr "%s nu este în fișierul sudoers.  Acest incident va fi raportat.\n"
+
+#: plugins/sudoers/logging.c:291
+#, c-format
+msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
+msgstr "%s nu are permisiunea de a rula sudo pe %s.  Acest incident va fi raportat.\n"
+
+#: plugins/sudoers/logging.c:295
+#, c-format
+msgid "Sorry, user %s may not run sudo on %s.\n"
+msgstr "Utilizatorul %s poate să nu ruleze sudo pe %s.\n"
+
+#: plugins/sudoers/logging.c:298
+#, c-format
+msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
+msgstr "Utilizatorului %s nu îi este permis să execute „%s%s%s” ca %s%s%s pe %s.\n"
+
+#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:512
+#: plugins/sudoers/sudoers.c:514 plugins/sudoers/sudoers.c:516
+#: plugins/sudoers/sudoers.c:518 plugins/sudoers/sudoers.c:665
+#: plugins/sudoers/sudoers.c:667
+#, c-format
+msgid "%s: command not found"
+msgstr "%s: comanda nu a fost găsită"
+
+#: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:508
+#, c-format
+msgid ""
+"ignoring \"%s\" found in '.'\n"
+"Use \"sudo ./%s\" if this is the \"%s\" you wish to run."
+msgstr ""
+"se ignoră „%s” găsit în „.”\n"
+"Utilizați „sudo ./%s” dacă acesta este „%s” pe care doriți să îl rulați."
+
+#: plugins/sudoers/logging.c:354
+msgid "authentication failure"
+msgstr "eșec de autentificare"
+
+#: plugins/sudoers/logging.c:380
+msgid "a password is required"
+msgstr "o parolă este necesară"
+
+#: plugins/sudoers/logging.c:450
+#, c-format
+msgid "%u incorrect password attempt"
+msgid_plural "%u incorrect password attempts"
+msgstr[0] "%u încercare de parolă incorectă"
+msgstr[1] "%u încercări de parolă incorecte"
+msgstr[2] "%u de încercări de parole incorecte"
+
+#: plugins/sudoers/logging.c:714
+#, c-format
+msgid "unable to dup stdin: %m"
+msgstr "nu se poate duplica stdin: %m"
+
+#: plugins/sudoers/logging.c:751
+#, c-format
+msgid "unable to execute %s: %m"
+msgstr "nu se poate executa %s: %m"
+
+#: plugins/sudoers/logging.c:792 plugins/sudoers/logging.c:848
+#, c-format
+msgid "unable to fork: %m"
+msgstr "nu se poate da fork: %m"
+
+#: plugins/sudoers/logging.c:838
+#, c-format
+msgid "unable to open pipe: %m"
+msgstr "nu se poate opri conexiunea: %m"
+
+#: plugins/sudoers/match_digest.c:116
+#, c-format
+msgid "digest for %s (%s) is not in %s form"
+msgstr "digest pentru %s (%s) nu este în forma %s"
+
+#: plugins/sudoers/parse.c:442
+#, c-format
+msgid ""
+"\n"
+"LDAP Role: %s\n"
+msgstr ""
+"\n"
+"Rolul LDAP: %s\n"
+
+#: plugins/sudoers/parse.c:445
+#, c-format
+msgid ""
+"\n"
+"Sudoers entry:\n"
+msgstr ""
+"\n"
+"Intrare sudoers:\n"
+
+#: plugins/sudoers/parse.c:447
+#, c-format
+msgid "    RunAsUsers: "
+msgstr "    RuleazăCaUtilizatori: "
+
+#: plugins/sudoers/parse.c:462
+#, c-format
+msgid "    RunAsGroups: "
+msgstr "    RuleazăCaGrupuri: "
+
+#: plugins/sudoers/parse.c:472
+#, c-format
+msgid "    Options: "
+msgstr "    Opțiuni: "
+
+#: plugins/sudoers/parse.c:522
+#, c-format
+msgid "    Commands:\n"
+msgstr "    Comenzi:\n"
+
+#: plugins/sudoers/parse.c:713
+#, c-format
+msgid "Matching Defaults entries for %s on %s:\n"
+msgstr "Se potrivesc intrările implicite pentru %s pe %s:\n"
+
+#: plugins/sudoers/parse.c:731
+#, c-format
+msgid "Runas and Command-specific defaults for %s:\n"
+msgstr "Implicite specifice comenzii și runas pentru %s:\n"
+
+#: plugins/sudoers/parse.c:749
+#, c-format
+msgid "User %s may run the following commands on %s:\n"
+msgstr "Utilizatorul %s poate să ruleze următoarele comenzi pe %s:\n"
+
+#: plugins/sudoers/parse.c:764
+#, c-format
+msgid "User %s is not allowed to run sudo on %s.\n"
+msgstr "Utilizatorului %s nu îi este permisă să ruleze sudo pe %s.\n"
+
+#: plugins/sudoers/parse_ldif.c:614
+#, c-format
+msgid "ignoring incomplete sudoRole: cn: %s"
+msgstr "se ignoră sudoRole incomplet cn: %s"
+
+#: plugins/sudoers/parse_ldif.c:674
+#, c-format
+msgid "invalid LDIF attribute: %s"
+msgstr "atribut LDIF nevalid: %s"
+
+#: plugins/sudoers/policy.c:77 plugins/sudoers/policy.c:102
+#, c-format
+msgid "invalid %.*s set by sudo front-end"
+msgstr "%.*s nevalid stabilit de interfața sudo"
+
+#: plugins/sudoers/policy.c:281 plugins/sudoers/testsudoers.c:272
+msgid "unable to parse network address list"
+msgstr "nu se poate parsa lista de adrese de rețea"
+
+#: plugins/sudoers/policy.c:426
+msgid "user name not set by sudo front-end"
+msgstr "numele de utilizator nu este stabilit de interfața sudo"
+
+#: plugins/sudoers/policy.c:430
+msgid "user-ID not set by sudo front-end"
+msgstr "ID-ul utilizatorului nu este stabilită de interfața sudo"
+
+#: plugins/sudoers/policy.c:434
+msgid "group-ID not set by sudo front-end"
+msgstr "ID-ul grupului nu este stabilit de interfața sudo"
+
+#: plugins/sudoers/policy.c:438
+msgid "host name not set by sudo front-end"
+msgstr "numele gazdei nu este stabilit de interfața sudo"
+
+#: plugins/sudoers/policy.c:896 plugins/sudoers/visudo.c:230
+#: plugins/sudoers/visudo.c:861
+#, c-format
+msgid "unable to execute %s"
+msgstr "nu se poate executa %s"
+
+#: plugins/sudoers/policy.c:1060
+#, c-format
+msgid "Sudoers policy plugin version %s\n"
+msgstr "Versiune de modul de politică sudoers %s\n"
+
+#: plugins/sudoers/policy.c:1062
+#, c-format
+msgid "Sudoers file grammar version %d\n"
+msgstr "Versiune de gramatică de fișier sudoers %d\n"
+
+#: plugins/sudoers/policy.c:1066
+#, c-format
+msgid ""
+"\n"
+"Sudoers path: %s\n"
+msgstr ""
+"\n"
+"Cale sudoers: %s\n"
+
+#: plugins/sudoers/policy.c:1069
+#, c-format
+msgid "nsswitch path: %s\n"
+msgstr "cale nsswitch: %s\n"
+
+#: plugins/sudoers/policy.c:1071
+#, c-format
+msgid "ldap.conf path: %s\n"
+msgstr "cale ldap.conf: %s\n"
+
+#: plugins/sudoers/policy.c:1072
+#, c-format
+msgid "ldap.secret path: %s\n"
+msgstr "cale ldap.secret: %s\n"
+
+#: plugins/sudoers/policy.c:1105
+#, c-format
+msgid "unable to register hook of type %d (version %d.%d)"
+msgstr "nu se poate înregistra hook-ul de tipul %d (versiunea %d.%d)"
+
+#: plugins/sudoers/pwutil.c:214 plugins/sudoers/pwutil.c:232
+#, c-format
+msgid "unable to cache uid %u"
+msgstr "nu se poate plasa în cache uid-ul %u"
+
+#: plugins/sudoers/pwutil.c:226
+#, c-format
+msgid "unable to cache uid %u, already exists"
+msgstr "nu se poate plasa în cache uid-ul %u, există deja"
+
+#: plugins/sudoers/pwutil.c:286 plugins/sudoers/pwutil.c:304
+#: plugins/sudoers/pwutil.c:367 plugins/sudoers/pwutil.c:412
+#, c-format
+msgid "unable to cache user %s"
+msgstr "nu se poate plasa în cache utilizatorul %s"
+
+#: plugins/sudoers/pwutil.c:299
+#, c-format
+msgid "unable to cache user %s, already exists"
+msgstr "nu se poate plasa în cache utilizatorul %s, există deja"
+
+#: plugins/sudoers/pwutil.c:531 plugins/sudoers/pwutil.c:549
+#, c-format
+msgid "unable to cache gid %u"
+msgstr "nu se poate plasa în cache gid-ul %u"
+
+#: plugins/sudoers/pwutil.c:543
+#, c-format
+msgid "unable to cache gid %u, already exists"
+msgstr "nu se poate plasa în cache gid-ul %u, există deja"
+
+#: plugins/sudoers/pwutil.c:596 plugins/sudoers/pwutil.c:614
+#: plugins/sudoers/pwutil.c:662 plugins/sudoers/pwutil.c:704
+#, c-format
+msgid "unable to cache group %s"
+msgstr "nu se poate plasa în cache grupul %s"
+
+#: plugins/sudoers/pwutil.c:609
+#, c-format
+msgid "unable to cache group %s, already exists"
+msgstr "nu se poate plasa în cache %s, există deja"
+
+#: plugins/sudoers/pwutil.c:831 plugins/sudoers/pwutil.c:883
+#: plugins/sudoers/pwutil.c:933 plugins/sudoers/pwutil.c:986
+#, c-format
+msgid "unable to cache group list for %s, already exists"
+msgstr "nu se poate plasa în cache lista grupului pentru %s, există deja"
+
+#: plugins/sudoers/pwutil.c:837 plugins/sudoers/pwutil.c:888
+#: plugins/sudoers/pwutil.c:939 plugins/sudoers/pwutil.c:991
+#, c-format
+msgid "unable to cache group list for %s"
+msgstr "nu se poate plasa în cache lista grupului pentru %s"
+
+#: plugins/sudoers/pwutil.c:877
+#, c-format
+msgid "unable to parse groups for %s"
+msgstr "nu se pot parsa grupurile pentru %s"
+
+#: plugins/sudoers/pwutil.c:980
+#, c-format
+msgid "unable to parse gids for %s"
+msgstr "nu se pot parsa gid-urile pentru %s"
+
+#: plugins/sudoers/set_perms.c:114 plugins/sudoers/set_perms.c:441
+#: plugins/sudoers/set_perms.c:844 plugins/sudoers/set_perms.c:1150
+#: plugins/sudoers/set_perms.c:1444
+msgid "perm stack overflow"
+msgstr "supraplin de stivă permanent"
+
+#: plugins/sudoers/set_perms.c:122 plugins/sudoers/set_perms.c:372
+#: plugins/sudoers/set_perms.c:449 plugins/sudoers/set_perms.c:711
+#: plugins/sudoers/set_perms.c:852 plugins/sudoers/set_perms.c:1074
+#: plugins/sudoers/set_perms.c:1158 plugins/sudoers/set_perms.c:1377
+#: plugins/sudoers/set_perms.c:1452 plugins/sudoers/set_perms.c:1542
+msgid "perm stack underflow"
+msgstr "subplin de stivă permanent"
+
+#: plugins/sudoers/set_perms.c:181 plugins/sudoers/set_perms.c:495
+#: plugins/sudoers/set_perms.c:1211 plugins/sudoers/set_perms.c:1485
+msgid "unable to change to root gid"
+msgstr "nu se poate schimba la gid-ul root"
+
+#: plugins/sudoers/set_perms.c:272 plugins/sudoers/set_perms.c:592
+#: plugins/sudoers/set_perms.c:983 plugins/sudoers/set_perms.c:1288
+msgid "unable to change to runas gid"
+msgstr "nu se poate schimba la gid-ul runas"
+
+#: plugins/sudoers/set_perms.c:277 plugins/sudoers/set_perms.c:597
+#: plugins/sudoers/set_perms.c:988 plugins/sudoers/set_perms.c:1293
+msgid "unable to set runas group vector"
+msgstr "nu se poate stabili vectorul de grup runas"
+
+#: plugins/sudoers/set_perms.c:288 plugins/sudoers/set_perms.c:608
+#: plugins/sudoers/set_perms.c:997 plugins/sudoers/set_perms.c:1302
+msgid "unable to change to runas uid"
+msgstr "nu se poate schimba uid-ul runas"
+
+#: plugins/sudoers/set_perms.c:306 plugins/sudoers/set_perms.c:626
+#: plugins/sudoers/set_perms.c:1013 plugins/sudoers/set_perms.c:1318
+msgid "unable to change to sudoers gid"
+msgstr "nu se poate schimba gid-ul sudoers"
+
+#: plugins/sudoers/set_perms.c:359 plugins/sudoers/set_perms.c:698
+#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1364
+#: plugins/sudoers/set_perms.c:1529
+msgid "too many processes"
+msgstr "prea multe procese"
+
+#: plugins/sudoers/solaris_audit.c:61
+msgid "unable to get current working directory"
+msgstr "nu se poate obține directorul de lucru"
+
+#: plugins/sudoers/solaris_audit.c:69
+#, c-format
+msgid "truncated audit path user_cmnd: %s"
+msgstr "cale de audit trunchiată user_cmnd: %s"
+
+#: plugins/sudoers/solaris_audit.c:76
+#, c-format
+msgid "truncated audit path argv[0]: %s"
+msgstr "cale de audit trunchiată argv[0]: %s"
+
+#: plugins/sudoers/sssd.c:573
+msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
+msgstr "nu se poate inițializa sursa SSS. Este SSSD instalat pe mașină?"
+
+#: plugins/sudoers/sssd.c:581 plugins/sudoers/sssd.c:590
+#: plugins/sudoers/sssd.c:599 plugins/sudoers/sssd.c:608
+#: plugins/sudoers/sssd.c:617
+#, c-format
+msgid "unable to find symbol \"%s\" in %s"
+msgstr "nu se poate găsi simbolul „%s” în %s"
+
+#: plugins/sudoers/sudoers.c:217 plugins/sudoers/sudoers.c:943
+msgid "problem with defaults entries"
+msgstr "problemă cu intrările implicite"
+
+#: plugins/sudoers/sudoers.c:221
+msgid "no valid sudoers sources found, quitting"
+msgstr "nicio sursă sudoers validă, se iese"
+
+#: plugins/sudoers/sudoers.c:297
+msgid "sudoers specifies that root is not allowed to sudo"
+msgstr "sudoers specifică că root nu are permisiunea să sudo"
+
+#: plugins/sudoers/sudoers.c:357
+msgid "user not allowed to override closefrom limit"
+msgstr "utilizatorului nu îi este permis să suprascrie limita de formă închisă"
+
+#: plugins/sudoers/sudoers.c:358
+msgid "you are not permitted to use the -C option"
+msgstr "nu aveți permisiunea de a utiliza opțiunea -C"
+
+#: plugins/sudoers/sudoers.c:420
+#, c-format
+msgid "timestamp owner (%s): No such user"
+msgstr "deținător datare (%s): Nu există un astfel de utilizator"
+
+#: plugins/sudoers/sudoers.c:435
+msgid "no tty"
+msgstr "fără tty"
+
+#: plugins/sudoers/sudoers.c:436
+msgid "sorry, you must have a tty to run sudo"
+msgstr "trebuie să aveți un tty pentru a rula sudo"
+
+#: plugins/sudoers/sudoers.c:442 plugins/sudoers/sudoers.c:444
+#, c-format
+msgid "invalid shell for user %s: %s"
+msgstr "shell nevalid pentru utilizatorul %s: %s"
+
+#: plugins/sudoers/sudoers.c:507
+msgid "command in current directory"
+msgstr "comandă în directorul curent"
+
+#: plugins/sudoers/sudoers.c:525
+msgid "user not allowed to set a command timeout"
+msgstr "utilizatorului nu îi este permis să stabilească o limită de timp a comenzii"
+
+#: plugins/sudoers/sudoers.c:526
+msgid "sorry, you are not allowed set a command timeout"
+msgstr "nu aveți permisiunea de a stabili o limită de timp a comenzii"
+
+#: plugins/sudoers/sudoers.c:534
+msgid "user not allowed to preserve the environment"
+msgstr "utilizatorului nu îi este permis să păstreze mediul"
+
+#: plugins/sudoers/sudoers.c:535
+msgid "sorry, you are not allowed to preserve the environment"
+msgstr "nu aveți permisiunea să păstrați mediul"
+
+#: plugins/sudoers/sudoers.c:878
+msgid "command too long"
+msgstr "comandă prea lungă"
+
+#: plugins/sudoers/sudoers.c:936
+msgid "sudoedit doesn't need to be run via sudo"
+msgstr "sudoedit nu are nevoie să fie rulat via sudo"
+
+#: plugins/sudoers/sudoers.c:990 plugins/sudoers/sudoreplay.c:1548
+#: plugins/sudoers/tsdump.c:138
+#, c-format
+msgid "unable to read %s"
+msgstr "nu se poate citi %s"
+
+#: plugins/sudoers/sudoers.c:1015 plugins/sudoers/visudo.c:431
+#: plugins/sudoers/visudo.c:727
+#, c-format
+msgid "unable to stat %s"
+msgstr "nu se poate stat %s"
+
+#: plugins/sudoers/sudoers.c:1019 plugins/sudoers/visudo.c:1037
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s nu este un fișier regular"
+
+#: plugins/sudoers/sudoers.c:1023 plugins/sudoers/timestamp.c:252 toke.l:1060
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s este deținut de uid-ul %u, ar trebui să fie %u"
+
+#: plugins/sudoers/sudoers.c:1027 toke.l:1065
+#, c-format
+msgid "%s is world writable"
+msgstr "%s este inscriptibil global"
+
+#: plugins/sudoers/sudoers.c:1031 toke.l:1068
+#, c-format
+msgid "%s is owned by gid %u, should be %u"
+msgstr "%s este deținut de gid-ul %u, ar trebui să fie %u"
+
+#: plugins/sudoers/sudoers.c:1064
+#, c-format
+msgid "only root can use \"-c %s\""
+msgstr "doar root poate utiliza „-c %s”"
+
+#: plugins/sudoers/sudoers.c:1083
+#, c-format
+msgid "unknown login class: %s"
+msgstr "clasă de autentificare necunoscută: %s"
+
+#: plugins/sudoers/sudoers.c:1168 plugins/sudoers/sudoers.c:1183
+#, c-format
+msgid "unable to resolve host %s"
+msgstr "nu se poate rezolva gazda %s"
+
+#: plugins/sudoers/sudoreplay.c:258
+#, c-format
+msgid "invalid filter option: %s"
+msgstr "opțiune de filtru nevalidă: %s"
+
+#: plugins/sudoers/sudoreplay.c:274
+#, c-format
+msgid "invalid max wait: %s"
+msgstr "așteptare maximă nevalidă: %s"
+
+#: plugins/sudoers/sudoreplay.c:297
+#, c-format
+msgid "invalid speed factor: %s"
+msgstr "factor de viteză nevalid: %s"
+
+#: plugins/sudoers/sudoreplay.c:333
+#, c-format
+msgid "%s/%.2s/%.2s/%.2s: %s"
+msgstr "%s/%.2s/%.2s/%.2s: %s"
+
+#: plugins/sudoers/sudoreplay.c:338
+#, c-format
+msgid "%s/timing: %s"
+msgstr "%s/sincronizare: %s"
+
+#: plugins/sudoers/sudoreplay.c:342
+#, c-format
+msgid "%s/%s: %s"
+msgstr "%s/%s: %s"
+
+#: plugins/sudoers/sudoreplay.c:366
+#, c-format
+msgid "Replaying sudo session: %s"
+msgstr "Se redă sesiunea sudo: %s"
+
+#: plugins/sudoers/sudoreplay.c:628
+msgid "unable to set tty to raw mode"
+msgstr "nu se poate stabili tty la modul raw"
+
+#: plugins/sudoers/sudoreplay.c:679
+msgid "Warning: your terminal is too small to properly replay the log.\n"
+msgstr "Avertisment: terminalul este prea mic pentru a putea reda bine istoricul.\n"
+
+#: plugins/sudoers/sudoreplay.c:680
+#, c-format
+msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
+msgstr "Geometria istoricului este %d x %d, geometria terminalului este %d x %d."
+
+#: plugins/sudoers/sudoreplay.c:708
+msgid "Replay finished, press any key to restore the terminal."
+msgstr "Redarea terminată, apăsați orice cheie pentru a restaura terminalul."
+
+#: plugins/sudoers/sudoreplay.c:1198 plugins/sudoers/sudoreplay.c:1228
+#, c-format
+msgid "ambiguous expression \"%s\""
+msgstr "expresie ambiguă „%s”"
+
+#: plugins/sudoers/sudoreplay.c:1250
+msgid "unmatched ')' in expression"
+msgstr "„)” fără pereche în expresie"
+
+#: plugins/sudoers/sudoreplay.c:1254
+#, c-format
+msgid "unknown search term \"%s\""
+msgstr "termen de căutare necunoscut „%s”"
+
+#: plugins/sudoers/sudoreplay.c:1269
+#, c-format
+msgid "%s requires an argument"
+msgstr "%s necesită un argument"
+
+#: plugins/sudoers/sudoreplay.c:1272 plugins/sudoers/sudoreplay.c:1524
+#, c-format
+msgid "invalid regular expression: %s"
+msgstr "expresie regulată nevalidă: %s"
+
+#: plugins/sudoers/sudoreplay.c:1277
+#, c-format
+msgid "could not parse date \"%s\""
+msgstr "nu s-a putut parsa data „%s”"
+
+#: plugins/sudoers/sudoreplay.c:1286
+msgid "unmatched '(' in expression"
+msgstr "„(” fără pereche în expresie"
+
+#: plugins/sudoers/sudoreplay.c:1288
+msgid "illegal trailing \"or\""
+msgstr "urmă „sau” ilegală"
+
+#: plugins/sudoers/sudoreplay.c:1290
+msgid "illegal trailing \"!\""
+msgstr "urmă „!” ilegală"
+
+#: plugins/sudoers/sudoreplay.c:1348
+#, c-format
+msgid "unknown search type %d"
+msgstr "tip de căutare necunoscută %d"
+
+#: plugins/sudoers/sudoreplay.c:1615
+#, c-format
+msgid "usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"
+msgstr "utilizare: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"
+
+#: plugins/sudoers/sudoreplay.c:1618
+#, c-format
+msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
+msgstr "utilizare: %s [-h] [-d dir] -l [expresie de căutare]\n"
+
+#: plugins/sudoers/sudoreplay.c:1627
+#, c-format
+msgid ""
+"%s - replay sudo session logs\n"
+"\n"
+msgstr ""
+"%s - redă înregistrările de sesiune sudo\n"
+"\n"
+
+#: plugins/sudoers/sudoreplay.c:1629
+msgid ""
+"\n"
+"Options:\n"
+"  -d, --directory=dir    specify directory for session logs\n"
+"  -f, --filter=filter    specify which I/O type(s) to display\n"
+"  -h, --help             display help message and exit\n"
+"  -l, --list             list available session IDs, with optional expression\n"
+"  -m, --max-wait=num     max number of seconds to wait between events\n"
+"  -n, --non-interactive  no prompts, session is sent to the standard output\n"
+"  -R, --no-resize        do not attempt to re-size the terminal\n"
+"  -S, --suspend-wait     wait while the command was suspended\n"
+"  -s, --speed=num        speed up or slow down output\n"
+"  -V, --version          display version information and exit"
+msgstr ""
+"\n"
+"Options:\n"
+"  -d, --directory=dir    specifică directorul pentru înregistrările sesiunii\n"
+"  -f, --filter=filter    specifică care tip(uri) I/O să se afișeze\n"
+"  -h, --help             afișează informațiile ajutorului și ieși\n"
+"  -l, --list             listează ID-urile sesiunii disponibile, cu expresii opționale\n"
+"  -m, --max-wait=num     numărul maxim de secunde de așteptat între evenimente\n"
+"  -n, --non-interactive  fără promptere, sesiunea este trimisă la ieșirea standard\n"
+"  -R, --no-resize        nu încercați să redimensionați terminalul\n"
+"  -S, --suspend-wait     așteaptă până când comanda a fost suspendată\n"
+"  -s, --speed=num        accelerează sau încetinește ieșirea\n"
+"  -V, --version          afișează informațiile de versiune și ieși"
+
+#: plugins/sudoers/testsudoers.c:354
+msgid "\thost  unmatched"
+msgstr "\tgazdă  nepotrivită"
+
+#: plugins/sudoers/testsudoers.c:357
+msgid ""
+"\n"
+"Command allowed"
+msgstr ""
+"\n"
+"Comandă permisă"
+
+#: plugins/sudoers/testsudoers.c:358
+msgid ""
+"\n"
+"Command denied"
+msgstr ""
+"\n"
+"Comandă negată"
+
+#: plugins/sudoers/testsudoers.c:358
+msgid ""
+"\n"
+"Command unmatched"
+msgstr ""
+"\n"
+"Comandă nepotrivită"
+
+#: plugins/sudoers/timestamp.c:260
+#, c-format
+msgid "%s is group writable"
+msgstr "%s este inscriptibil pe grup"
+
+#: plugins/sudoers/timestamp.c:336 plugins/sudoers/timestamp.c:680
+#, c-format
+msgid "unable to truncate time stamp file to %lld bytes"
+msgstr "nu se poate trunchia fișierul datare în %lld octeți"
+
+#: plugins/sudoers/timestamp.c:866
+msgid "ignoring time stamp from the future"
+msgstr "se ignoră datarea pe viitor"
+
+#: plugins/sudoers/timestamp.c:889
+#, c-format
+msgid "time stamp too far in the future: %20.20s"
+msgstr "datarea este prea departe în viitor: %20.20s"
+
+#: plugins/sudoers/timestamp.c:1011
+#, c-format
+msgid "unable to lock time stamp file %s"
+msgstr "nu se poate bloca fișierul datării %s"
+
+#: plugins/sudoers/timestamp.c:1055 plugins/sudoers/timestamp.c:1075
+#, c-format
+msgid "lecture status path too long: %s/%s"
+msgstr "calea stării lecturii este prea lungă: %s/%s"
+
+#: plugins/sudoers/toke_util.c:124
+msgid "sudoedit should not be specified with a path"
+msgstr "sudoedit nu ar trebui să fie specificat cu o cale"
+
+#: plugins/sudoers/visudo.c:226
+msgid "the -x option will be removed in a future release"
+msgstr "opțiunea -x va fi eliminată într-o lansare viitoare"
+
+#: plugins/sudoers/visudo.c:227
+msgid "please consider using the cvtsudoers utility instead"
+msgstr "considerați utilizarea în loc a utilității cvtsudoers"
+
+#: plugins/sudoers/visudo.c:278 plugins/sudoers/visudo.c:660
+#, c-format
+msgid "press return to edit %s: "
+msgstr "apăsați enter pentru a edita %s: "
+
+#: plugins/sudoers/visudo.c:339
+#, c-format
+msgid "specified editor (%s) doesn't exist"
+msgstr "editorul specificat (%s) nu există"
+
+#: plugins/sudoers/visudo.c:341
+#, c-format
+msgid "no editor found (editor path = %s)"
+msgstr "nu s-a găsit niciun editor (cale editor = %s)"
+
+#: plugins/sudoers/visudo.c:451 plugins/sudoers/visudo.c:459
+msgid "write error"
+msgstr "eroare de scriere"
+
+#: plugins/sudoers/visudo.c:505
+#, c-format
+msgid "unable to stat temporary file (%s), %s unchanged"
+msgstr "nu se poate da stat la fișierul temporar (%s), %s neschimbat"
+
+#: plugins/sudoers/visudo.c:512
+#, c-format
+msgid "zero length temporary file (%s), %s unchanged"
+msgstr "fișier temporar de lungime zero (%s), %s neschimbat"
+
+#: plugins/sudoers/visudo.c:518
+#, c-format
+msgid "editor (%s) failed, %s unchanged"
+msgstr "editorul (%s) a eșuat, %s neschimbat"
+
+#: plugins/sudoers/visudo.c:540
+#, c-format
+msgid "%s unchanged"
+msgstr "%s neschimbat"
+
+#: plugins/sudoers/visudo.c:599
+#, c-format
+msgid "unable to re-open temporary file (%s), %s unchanged."
+msgstr "nu se poate redeschide fișierul temporar (%s), %s neschimbat."
+
+#: plugins/sudoers/visudo.c:611
+#, c-format
+msgid "unable to parse temporary file (%s), unknown error"
+msgstr "nu se poate parsa temporar fișierul (%s), eroare necunoscută"
+
+#: plugins/sudoers/visudo.c:649
+#, c-format
+msgid "internal error, unable to find %s in list!"
+msgstr "eroare internă, nu se poate găsi %s în listă!"
+
+#: plugins/sudoers/visudo.c:729 plugins/sudoers/visudo.c:738
+#, c-format
+msgid "unable to set (uid, gid) of %s to (%u, %u)"
+msgstr "nu se poate stabili (uid, gid) a %s la (%u, %u)"
+
+#: plugins/sudoers/visudo.c:761
+#, c-format
+msgid "%s and %s not on the same file system, using mv to rename"
+msgstr "%s și %s nu sunt pe același sistem de fișiere, se utilizează mv pentru a redenumi"
+
+#: plugins/sudoers/visudo.c:775
+#, c-format
+msgid "command failed: '%s %s %s', %s unchanged"
+msgstr "comanda a eșuat: „%s %s %s”, %s neschimbat"
+
+#: plugins/sudoers/visudo.c:785
+#, c-format
+msgid "error renaming %s, %s unchanged"
+msgstr "eroare la redenumirea %s, %s neschimbat"
+
+#: plugins/sudoers/visudo.c:806
+msgid "What now? "
+msgstr "Acum ce? "
+
+#: plugins/sudoers/visudo.c:820
+msgid ""
+"Options are:\n"
+"  (e)dit sudoers file again\n"
+"  e(x)it without saving changes to sudoers file\n"
+"  (Q)uit and save changes to sudoers file (DANGER!)\n"
+msgstr ""
+"Opțiunile sunt:\n"
+"  (e)ditează fișierul sudoers din nou\n"
+"  (x)ieși fără a salva modificările la fișierul sudoers\n"
+"  (Q)ieși și salvează modificările la fișierul sudo (PERICOL!)\n"
+
+#: plugins/sudoers/visudo.c:866
+#, c-format
+msgid "unable to run %s"
+msgstr "nu se poate rula %s"
+
+#: plugins/sudoers/visudo.c:896
+#, c-format
+msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
+msgstr "%s: deținător greșit (uid, gid) ar trebui să fie (%u, %u)\n"
+
+#: plugins/sudoers/visudo.c:903
+#, c-format
+msgid "%s: bad permissions, should be mode 0%o\n"
+msgstr "%s: permisiuni rele, ar trebui să fie modul 0%o\n"
+
+#: plugins/sudoers/visudo.c:960 plugins/sudoers/visudo.c:967
+#, c-format
+msgid "%s: parsed OK\n"
+msgstr "%s: parsat OK\n"
+
+#: plugins/sudoers/visudo.c:986
+#, c-format
+msgid "%s busy, try again later"
+msgstr "%s ocupat, încercați din nou mai târziu"
+
+#: plugins/sudoers/visudo.c:989
+#, c-format
+msgid "unable to lock %s"
+msgstr "nu se poate bloca %s"
+
+#: plugins/sudoers/visudo.c:990
+msgid "Edit anyway? [y/N]"
+msgstr "Editați oricum? [y/N]"
+
+#: plugins/sudoers/visudo.c:1083
+#, c-format
+msgid "Error: %s:%d cycle in %s \"%s\""
+msgstr "Eroare: %s:%d ciclu în %s „%s”"
+
+#: plugins/sudoers/visudo.c:1084
+#, c-format
+msgid "Warning: %s:%d cycle in %s \"%s\""
+msgstr "Avertisment: %s:%d ciclu în %s \"%s\""
+
+#: plugins/sudoers/visudo.c:1088
+#, c-format
+msgid "Error: %s:%d %s \"%s\" referenced but not defined"
+msgstr "Eroare: %s:%d %s „%s” menționat dar nu definit"
+
+#: plugins/sudoers/visudo.c:1089
+#, c-format
+msgid "Warning: %s:%d %s \"%s\" referenced but not defined"
+msgstr "Avertisment: %s:%d %s \"%s\" menționat dar nu definit"
+
+#: plugins/sudoers/visudo.c:1180
+#, c-format
+msgid "Warning: %s:%d unused %s \"%s\""
+msgstr "Avertisment: %s:%d neutilizat %s „%s”"
+
+#: plugins/sudoers/visudo.c:1295
+#, c-format
+msgid ""
+"%s - safely edit the sudoers file\n"
+"\n"
+msgstr ""
+"%s - editează în siguranță fișierul sudoers\n"
+"\n"
+
+#: plugins/sudoers/visudo.c:1297
+msgid ""
+"\n"
+"Options:\n"
+"  -c, --check              check-only mode\n"
+"  -f, --file=sudoers       specify sudoers file location\n"
+"  -h, --help               display help message and exit\n"
+"  -q, --quiet              less verbose (quiet) syntax error messages\n"
+"  -s, --strict             strict syntax checking\n"
+"  -V, --version            display version information and exit\n"
+msgstr ""
+"\n"
+"Opțiuni:\n"
+"  -c, --check              modul doar verifică\n"
+"  -f, --file=sudoers       specifică locația fișierului sudo\n"
+"  -h, --help               afișează mesajul de ajutor și ieși\n"
+"  -q, --quiet              mesaje de eroare de sintaxă mai puțin detaliate (liniștite)\n"
+"  -s, --strict             verificare de sintaxă strictă\n"
+"  -V, --version            afișează informațiile de versiune și ieși\n"
+
+#: toke.l:1032
+msgid "too many levels of includes"
+msgstr "prea multe niveluri de include-uri"
+
+#~ msgid "SSL_connect failed: ssl_error=%d, stack=%s\n"
+#~ msgstr "SSL_connect a eșuat: ssl_error=%d, stiva=%s\n"
+
+#~ msgid "CA bundle file was not specified"
+#~ msgstr "Fișierul de pachet CA nu a fost specificat"
+
+#~ msgid "Client certificate was not specified"
+#~ msgstr "Certificatul clientului nu a fost specificat"
+
+#~ msgid "Unable to allocate ssl object: %s\n"
+#~ msgstr "Nu se poate aloca obiectul ssl: %s\n"
+
+#~ msgid "Unable to attach socket to the ssl object: %s\n"
+#~ msgstr "Nu se poate atașa soclul la obiectul ssl: %s\n"
+
+#~ msgid "client message too large: %zu\n"
+#~ msgstr "mesajul de client este prea mare: %zu\n"
+
+#~ msgid "server message too large: %u\n"
+#~ msgstr "mesaj de server prea mare: %u\n"
+
+#~ msgid "CA bundle file is not set in sudoers"
+#~ msgstr "Fișierul pachet CA nu este stabilit în sudoers"
+
+#~ msgid "Calling SSL_CTX_load_verify_locations() failed: %s"
+#~ msgstr "Apelarea a SSL_CTX_load_verify_locations() a eșuat: %s"
+
+#~ msgid "Signed certificate file is not set in sudoers"
+#~ msgstr "Fișierul de certificat semnat nu este stabilit în sudoers"
+
+#~ msgid "Unable to load private key into the ssl context: %s"
+#~ msgstr "Nu se poate încărca cheia privată în contextul ssl: %s"
+
+#~ msgid "SSL_connect failed: ssl_error=%d, stack=%s"
+#~ msgstr "SSL_connect a eșuat: ssl_error=%d, stivă=%s"
+
+#~ msgid "SSL_read failed: ssl_error=%d, stack=%s"
+#~ msgstr "SSL_read a eșuat: ssl_error=%d, stivă=%s"
+
+#~ msgid "SSL_write failed: ssl_error=%d, stack=%s"
+#~ msgstr "SSL_write a eșuat: ssl_error=%d, stivă=%s"
+
+#~ msgid "unknown address family: %d"
+#~ msgstr "familie de adrese necunoscută: %d"
+
+#~ msgid "audit_failure message too long"
+#~ msgstr "mesaj audit_failure prea mare"

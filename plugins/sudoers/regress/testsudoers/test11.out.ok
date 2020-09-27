@@ -1,27 +1,21 @@
 Testing @include with garbage after the path name
 
->>> sudoers: syntax error near line 1 <<<
-Parse error in sudoers near line 1.
+sudoers:1: syntax error
+@include sudoers.local womp womp
+                       ^~~~
+testsudoers: unable to stat sudoers.local: No such file or directory
 
 Entries for user root:
 
-ALL = ALL
-	host  matched
-	runas matched
-	cmnd  allowed
-
-Command allowed
+Command unmatched
 
 Testing #include with garbage after the path name
 
->>> sudoers: syntax error near line 1 <<<
-Parse error in sudoers near line 1.
+sudoers:1: syntax error
+#include sudoers.local womp womp
+                       ^~~~
+testsudoers: unable to stat sudoers.local: No such file or directory
 
 Entries for user root:
 
-ALL = ALL
-	host  matched
-	runas matched
-	cmnd  allowed
-
-Command allowed
+Command unmatched

@@ -43,6 +43,11 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
@@ -51,26 +56,21 @@
 
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
-#include "log_server.pb-c.h"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
+#include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
-#include "sudo_rand.h"
 #include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_iolog.h"
-#include "pathnames.h"
+#include "sudo_queue.h"
+#include "sudo_rand.h"
+#include "sudo_util.h"
+
+#include "log_server.pb-c.h"
 #include "hostcheck.h"
 #include "logsrvd.h"
-
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 
 #if defined(HAVE_OPENSSL)
 # define LOGSRVD_DEFAULT_CIPHER_LST12 "HIGH:!aNULL"
@@ -186,7 +186,7 @@ fmt_hello_message(struct connection_buffer *buf, bool tls)
 
     /* TODO: implement redirect and servers array.  */
     hello.server_id = (char *)server_id;
-    msg.hello = &hello;
+    msg.u.hello = &hello;
     msg.type_case = SERVER_MESSAGE__TYPE_HELLO;
 
     debug_return_bool(fmt_server_message(buf, &msg));
@@ -198,7 +198,7 @@ fmt_log_id_message(const char *id, struct connection_buffer *buf)
     ServerMessage msg = SERVER_MESSAGE__INIT;
     debug_decl(fmt_log_id_message, SUDO_DEBUG_UTIL);
 
-    msg.log_id = (char *)id;
+    msg.u.log_id = (char *)id;
     msg.type_case = SERVER_MESSAGE__TYPE_LOG_ID;
 
     debug_return_bool(fmt_server_message(buf, &msg));
@@ -210,7 +210,7 @@ fmt_error_message(const char *errstr, struct connection_buffer *buf)
     ServerMessage msg = SERVER_MESSAGE__INIT;
     debug_decl(fmt_error_message, SUDO_DEBUG_UTIL);
 
-    msg.error = (char *)errstr;
+    msg.u.error = (char *)errstr;
     msg.type_case = SERVER_MESSAGE__TYPE_ERROR;
 
     debug_return_bool(fmt_server_message(buf, &msg));
@@ -586,43 +586,43 @@ handle_client_message(uint8_t *buf, size_t len,
 
     switch (msg->type_case) {
     case CLIENT_MESSAGE__TYPE_ACCEPT_MSG:
-	ret = handle_accept(msg->accept_msg, closure);
+	ret = handle_accept(msg->u.accept_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_REJECT_MSG:
-	ret = handle_reject(msg->reject_msg, closure);
+	ret = handle_reject(msg->u.reject_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_EXIT_MSG:
-	ret = handle_exit(msg->exit_msg, closure);
+	ret = handle_exit(msg->u.exit_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_RESTART_MSG:
-	ret = handle_restart(msg->restart_msg, closure);
+	ret = handle_restart(msg->u.restart_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_ALERT_MSG:
-	ret = handle_alert(msg->alert_msg, closure);
+	ret = handle_alert(msg->u.alert_msg, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_TTYIN_BUF:
-	ret = handle_iobuf(IOFD_TTYIN, msg->ttyin_buf, closure);
+	ret = handle_iobuf(IOFD_TTYIN, msg->u.ttyin_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_TTYOUT_BUF:
-	ret = handle_iobuf(IOFD_TTYOUT, msg->ttyout_buf, closure);
+	ret = handle_iobuf(IOFD_TTYOUT, msg->u.ttyout_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDIN_BUF:
-	ret = handle_iobuf(IOFD_STDIN, msg->stdin_buf, closure);
+	ret = handle_iobuf(IOFD_STDIN, msg->u.stdin_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDOUT_BUF:
-	ret = handle_iobuf(IOFD_STDOUT, msg->stdout_buf, closure);
+	ret = handle_iobuf(IOFD_STDOUT, msg->u.stdout_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDERR_BUF:
-	ret = handle_iobuf(IOFD_STDERR, msg->stderr_buf, closure);
+	ret = handle_iobuf(IOFD_STDERR, msg->u.stderr_buf, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_WINSIZE_EVENT:
-	ret = handle_winsize(msg->winsize_event, closure);
+	ret = handle_winsize(msg->u.winsize_event, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_SUSPEND_EVENT:
-	ret = handle_suspend(msg->suspend_event, closure);
+	ret = handle_suspend(msg->u.suspend_event, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_HELLO_MSG:
-	ret = handle_client_hello(msg->hello_msg, closure);
+	ret = handle_client_hello(msg->u.hello_msg, closure);
 	break;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -952,7 +952,7 @@ server_commit_cb(int unused, int what, void *v)
     /* Send the client an acknowledgement of what has been committed to disk. */
     commit_point.tv_sec = closure->elapsed_time.tv_sec;
     commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
-    msg.commit_point = &commit_point;
+    msg.u.commit_point = &commit_point;
     msg.type_case = SERVER_MESSAGE__TYPE_COMMIT_POINT;
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending commit point [%lld, %ld]",
@@ -1488,7 +1488,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
             sizeof(closure->ipaddr));
 #endif /* HAVE_STRUCT_IN6_ADDR */
     } else {
-        sudo_fatal(U_("unable to get remote IP addr"));
+        sudo_fatal("%s", U_("unable to get remote IP addr"));
         goto bad;
     }
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -1524,7 +1524,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
         /* Enable SSL_accept to begin handshake with client. */
         if (sudo_ev_add(evbase, closure->ssl_accept_ev,
 		logsrvd_conf_get_sock_timeout(), false) == -1) {
-            sudo_fatal(U_("unable to add event to queue"));
+            sudo_fatal("%s", U_("unable to add event to queue"));
             goto bad;
         }
     }
@@ -1565,7 +1565,7 @@ create_listener(struct listen_address *addr)
 #endif
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
 	sudo_warn("SO_REUSEADDR");
-    if (bind(sock, &addr->sa_un.sa, addr->sa_len) == -1) {
+    if (bind(sock, &addr->sa_un.sa, addr->sa_size) == -1) {
 	/* TODO: only warn once for IPv4 and IPv6 or disambiguate */
 	sudo_warn("%s (%s)", addr->sa_str, family);
 	goto bad;
@@ -1646,7 +1646,7 @@ register_listener(struct listen_address *addr, struct sudo_event_base *evbase)
     if (l->ev == NULL)
 	sudo_fatal(NULL);
     if (sudo_ev_add(evbase, l->ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
     TAILQ_INSERT_TAIL(&listeners, l, entries);
 
     debug_return_bool(true);
@@ -1700,7 +1700,7 @@ server_reload(struct sudo_event_base *base)
     if (logsrvd_conf_read(conf_file)) {
 	/* Re-initialize listeners and TLS context. */
 	if (!server_setup(base))
-	    sudo_fatalx(U_("unable setup listen socket"));
+	    sudo_fatalx("%s", U_("unable setup listen socket"));
 
 	/* Re-initialize debugging. */
 	if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
@@ -1746,7 +1746,7 @@ register_signal(int signo, struct sudo_event_base *base)
     if (ev == NULL)
 	sudo_fatal(NULL);
     if (sudo_ev_add(base, ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     debug_return;
 }
@@ -1862,7 +1862,7 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	0 },
 };
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])
@@ -1895,7 +1895,7 @@ main(int argc, char *argv[])
         sudo_conf_debug_files(getprogname()));
 
     if (protobuf_c_version_number() < 1003000)
-	sudo_fatalx(U_("Protobuf-C version 1.3 or higher required"));
+	sudo_fatalx("%s", U_("Protobuf-C version 1.3 or higher required"));
 
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
@@ -1934,7 +1934,7 @@ main(int argc, char *argv[])
 
     /* Initialize listeners and TLS context. */
     if (!server_setup(evbase))
-	sudo_fatalx(U_("unable setup listen socket"));
+	sudo_fatalx("%s", U_("unable setup listen socket"));
 
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);

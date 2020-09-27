@@ -40,19 +40,19 @@
 #include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
-
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
 #endif
 
-#include "log_server.pb-c.h"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
+#include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_debug.h"
-#include "sudo_util.h"
 #include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_iolog.h"
-#include "pathnames.h"
+#include "sudo_util.h"
+
+#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 #if defined(HAVE_OPENSSL)
@@ -418,7 +418,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 	    goto done;
 	}
 	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
-	addr->sa_len = res->ai_addrlen;
+	addr->sa_size = res->ai_addrlen;
 	addr->tls = tls;
 	TAILQ_INSERT_TAIL(&config->server.addresses, addr, entries);
     }

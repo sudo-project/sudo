@@ -43,14 +43,14 @@
  * On failure, returns false.
  */
 static bool
-cmnd_allowed(char *cmnd, size_t cmnd_size, struct stat *cmnd_sbp,
-    char * const *whitelist)
+cmnd_allowed(char *cmnd, size_t cmnd_size, const char *runchroot,
+    struct stat *cmnd_sbp, char * const *whitelist)
 {
     const char *cmnd_base;
     char * const *wl;
     debug_decl(cmnd_allowed, SUDOERS_DEBUG_UTIL);
 
-    if (!sudo_goodpath(cmnd, cmnd_sbp))
+    if (!sudo_goodpath(cmnd, runchroot, cmnd_sbp))
 	debug_return_bool(false);
 
     if (whitelist == NULL)
@@ -62,21 +62,20 @@ cmnd_allowed(char *cmnd, size_t cmnd_size, struct stat *cmnd_sbp,
     cmnd_base++;
 
     for (wl = whitelist; *wl != NULL; wl++) {
+	const char *base, *path = *wl;
 	struct stat sb;
-	const char *base;
 
-	if ((base = strrchr(*wl, '/')) == NULL)
+	if ((base = strrchr(path, '/')) == NULL)
 	    continue;		/* XXX - warn? */
 	base++;
 
 	if (strcmp(cmnd_base, base) != 0)
 	    continue;
 
-	if (sudo_goodpath(*wl, &sb) &&
+	if (sudo_goodpath(path, runchroot, &sb) &&
 	    sb.st_dev == cmnd_sbp->st_dev && sb.st_ino == cmnd_sbp->st_ino) {
 	    /* Overwrite cmnd with safe version from whitelist. */
-	    if (strlcpy(cmnd, *wl, cmnd_size) < cmnd_size)
-		return true;
+	    if (strlcpy(cmnd, path, cmnd_size) < cmnd_size)
 		debug_return_bool(true);
 	}
     }
@@ -93,7 +92,8 @@ cmnd_allowed(char *cmnd, size_t cmnd_size, struct stat *cmnd_sbp,
  */
 int
 find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, int ignore_dot, char * const *whitelist)
+    const char *path, const char *runchroot, int ignore_dot,
+    char * const *whitelist)
 {
     char command[PATH_MAX];
     const char *cp, *ep, *pathend;
@@ -111,7 +111,8 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
-	found = cmnd_allowed(command, sizeof(command), sbp, whitelist);
+	found = cmnd_allowed(command, sizeof(command), runchroot, sbp,
+	    whitelist);
 	goto done;
     }
 
@@ -140,7 +141,8 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
-	found = cmnd_allowed(command, sizeof(command), sbp, whitelist);
+	found = cmnd_allowed(command, sizeof(command), runchroot,
+	    sbp, whitelist);
 	if (found)
 	    break;
     }
@@ -154,7 +156,8 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
-	found = cmnd_allowed(command, sizeof(command), sbp, whitelist);
+	found = cmnd_allowed(command, sizeof(command), runchroot,
+	    sbp, whitelist);
 	if (found && ignore_dot)
 	    debug_return_int(NOT_FOUND_DOT);
     }

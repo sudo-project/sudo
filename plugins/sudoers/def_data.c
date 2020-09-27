@@ -1,3 +1,5 @@
+/* generated file, do not edit */
+
 static struct def_values def_data_lecture[] = {
     { "never", never },
     { "once", once },
@@ -275,7 +277,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"closefrom_override", T_FLAG,
-	N_("If set, users may override the value of `closefrom' with the -C option"),
+	N_("If set, users may override the value of \"closefrom\" with the -C option"),
 	NULL,
     }, {
 	"setenv", T_FLAG,
@@ -548,6 +550,14 @@ struct sudo_defs_types sudo_defs_table[] = {
     }, {
 	"pam_rhost", T_FLAG,
 	N_("Set the pam remote host to the local host name"),
+	NULL,
+    }, {
+	"runcwd", T_STR|T_BOOL|T_CHPATH,
+	N_("Working directory to change to before executing the command: %s"),
+	NULL,
+    }, {
+	"runchroot", T_STR|T_BOOL|T_CHPATH,
+	N_("Root directory to change to before executing the command: %s"),
 	NULL,
     }, {
 	NULL, 0, NULL

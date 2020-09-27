@@ -60,7 +60,7 @@ CALLBACK_CFUNC(show_version)(int verbose)
     return python_plugin_audit_show_version(&PLUGIN_CTX, verbose);
 }
 
-__dso_public struct audit_plugin AUDIT_SYMBOL_NAME(python_audit) = {
+struct audit_plugin AUDIT_SYMBOL_NAME(python_audit) = {
     SUDO_AUDIT_PLUGIN,
     SUDO_API_VERSION,
     CALLBACK_CFUNC(open),

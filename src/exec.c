@@ -137,7 +137,7 @@ exec_setup(struct command_details *details, int errfd)
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY|LOGIN_SETUMASK;
 	    }
 	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
-		sudo_warn(U_("unable to set user context"));
+		sudo_warn("%s", U_("unable to set user context"));
 		if (details->pw->pw_uid != ROOT_UID)
 		    goto done;
 	    }
@@ -153,7 +153,7 @@ exec_setup(struct command_details *details, int errfd)
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
 	if (setpriority(PRIO_PROCESS, 0, details->priority) != 0) {
-	    sudo_warn(U_("unable to set process priority"));
+	    sudo_warn("%s", U_("unable to set process priority"));
 	    goto done;
 	}
     }
@@ -309,7 +309,7 @@ sudo_terminated(struct command_status *cstat)
     debug_return_bool(false);
 }
 
-#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 15)
+#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 16)
 # error "Update sudo_needs_pty() after changing the plugin API"
 #endif
 static bool

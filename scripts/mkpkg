@@ -138,20 +138,6 @@ if [ "$crossbuild" = "false" ]; then
 		CC=/usr/bin/clang; export CC
 	    fi
 	    ;;
-	sol[0-9]*)
-	    # Use the Sun Studio C compiler on Solaris if possible
-	    if [ -z "$CC" ]; then
-		for f in /opt/developerstudio12.[9876]/bin/cc /opt/solarisstudio12.[43]/bin/cc; do
-		    if [ -x $f ]; then
-			CC=$f; export CC
-			if [ -z "$CFLAGS" ]; then
-			    CFLAGS=-O; export CFLAGS
-			fi
-			break
-		    fi
-		done
-	    fi
-	    ;;
     esac
 fi
 
@@ -338,6 +324,13 @@ case "$osversion" in
 	    exit 1
 	fi
 	PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
+	# Use correct libssl dependency
+	libssl_dep=`dpkg-query -S /usr/lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.1.[0-9]* /lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.1.[0-9]* 2>/dev/null | sort -rn | awk -F: '{ print $1; exit }'`
+	if [ -z "$libssl_dep" ]; then
+	    echo "unable to determine package for libssl" 1>&2
+	    exit 1
+	fi
+	PPVARS="${PPVARS}${PPVARS+$space}libssl_dep=$libssl_dep"
 	;;
     macos*)
 	# TODO: openssl (homebrew?)
@@ -412,9 +405,35 @@ case "$osversion" in
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-project"
 
 		if [ $osrelease -ge 11 ]; then
-		    configure_opts="${configure_opts}${configure_opts+$tab}--with-solaris-audit"
+		    # Build 64-bit binaries on Solaris 11 and above.
+		    CFLAGS="-O2 -g -m64"; export CFLAGS
+		    LDFLAGS="-m64"; export LDFLAGS
+		    # Solaris audit is not supported by Illumos
+		    if test X"`uname -o 2>/dev/null`" = X"illumos"; then
+			configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
+		    else
+			configure_opts="${configure_opts}${configure_opts+$tab}--with-solaris-audit"
+		    fi
 		    # Encrypted remote I/O log support.
 		    with_openssl=true
+		    # Python plugins
+		    with_python=true
+
+		    # We prefer the system version of python3 to the
+		    # csw one (which may be 32-bit)
+		    if [ -z "$PYTHON" ]; then
+			if [ -x /usr/bin/python3 ]; then
+			    PYTHON="/usr/bin/python3"; export PYTHON
+			else
+			    # Sometimes the /usr/bin/python3 is missing
+			    for f in /usr/bin/python3.9 /usr/bin/python3.8 /usr/bin/python3.7 /usr/bin/python3.6 /usr/bin/python3.5 /usr/bin/python3.4 /usr/bin/python3.3 /usr/bin/python3.2 /usr/bin/python3.1 /usr/bin/python3.0; do
+				if [ -x $f ]; then
+				    PYTHON="$f"; export PYTHON
+				    break
+				fi
+			    done
+			fi
+		    fi
 		fi
 		;;
 	    *)

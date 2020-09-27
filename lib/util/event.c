@@ -826,10 +826,9 @@ sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *ts)
 {
     debug_decl(sudo_ev_get_timeleft, SUDO_DEBUG_EVENT);
 
-    if (sudo_ev_pending_v1(ev, SUDO_EV_TIMEOUT, ts) != SUDO_EV_TIMEOUT) {
-	sudo_timespecclear(ts);
+    sudo_timespecclear(ts);
+    if (sudo_ev_pending_v1(ev, SUDO_EV_TIMEOUT, ts) != SUDO_EV_TIMEOUT)
 	debug_return_int(-1);
-    }
     debug_return_int(0);
 }
 
@@ -846,6 +845,7 @@ sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts)
 	debug_return_int(0);
 
     ret = ev->events & events;
+    CLR(ret, SUDO_EV_TIMEOUT);
     if (ISSET(ev->flags, SUDO_EVQ_TIMEOUTS) && ISSET(events, SUDO_EV_TIMEOUT)) {
 	ret |= SUDO_EV_TIMEOUT;
 	if (ts != NULL) {

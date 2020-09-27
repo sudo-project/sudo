@@ -34,12 +34,11 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_plugin.h"
 #include "sudo_util.h"
 
@@ -160,7 +159,7 @@ sample_approval_show_version(int verbose)
     debug_return_int(true);
 }
 
-__dso_public struct approval_plugin sample_approval = {
+sudo_dso_public struct approval_plugin sample_approval = {
     SUDO_APPROVAL_PLUGIN,
     SUDO_API_VERSION,
     sample_approval_open,

@@ -36,22 +36,22 @@ sudo_pipe2(int fildes[2], int flags)
     if (pipe(fildes) != 0)
 	return -1;
 
-    if (ISSET(flags, O_NONBLOCK)) {
-	int flags = fcntl(fildes[0], F_GETFL, 0);
-	if (flags == -1)
-	    goto bad;
-	if (fcntl(fildes[0], F_SETFL, flags | O_NONBLOCK) == -1)
-	    goto bad;
-	flags = fcntl(fildes[1], F_GETFL, 0);
-	if (flags == -1)
-	    goto bad;
-	if (fcntl(fildes[1], F_SETFL, flags | O_NONBLOCK) == -1)
-	    goto bad;
-    }
     if (ISSET(flags, O_CLOEXEC)) {
 	if (fcntl(fildes[0], F_SETFD, FD_CLOEXEC) == -1)
 	    goto bad;
 	if (fcntl(fildes[1], F_SETFD, FD_CLOEXEC) == -1)
+	    goto bad;
+    }
+    if (ISSET(flags, O_NONBLOCK)) {
+	int oflags = fcntl(fildes[0], F_GETFL, 0);
+	if (oflags == -1)
+	    goto bad;
+	if (fcntl(fildes[0], F_SETFL, oflags | O_NONBLOCK) == -1)
+	    goto bad;
+	oflags = fcntl(fildes[1], F_GETFL, 0);
+	if (oflags == -1)
+	    goto bad;
+	if (fcntl(fildes[1], F_SETFL, oflags | O_NONBLOCK) == -1)
 	    goto bad;
     }
     return 0;

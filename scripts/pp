@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2020 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20200506"
+pp_revision="20200814"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -5562,12 +5562,11 @@ pp_rpm_detect_distro () {
           /^Fedora release/ { print "f" $3; exit; }
        ' /etc/fedora-release`
     elif test -f /etc/redhat-release; then
-       pp_rpm_distro=`awk '
-          /^Red Hat Enterprise Linux/ { print "rhel" $7; exit; }
-          /^CentOS release/           { print "centos" $3; exit; }
-          /^CentOS Linux release/     { print "centos" $4; exit; }
-          /^Red Hat Linux release/    { print "rh" $5; exit; }
-       ' /etc/redhat-release`
+       pp_rpm_distro=`sed -n \
+         -e 's/^Red Hat Linux.*release \([0-9][0-9\.]*\).*/rh\1/p' \
+         -e 's/^Red Hat Enterprise Linux.*release \([0-9][0-9\.]*\).*/rhel\1/p' \
+         -e 's/^CentOS.*release \([0-9][0-9\.]*\).*/centos\1/p' \
+       /etc/redhat-release`
     elif test -f /etc/SuSE-release; then
        pp_rpm_distro=`awk '
           /^SuSE Linux [0-9]/ { print "suse" $3; exit; }
@@ -7487,7 +7486,7 @@ pp_backend_macos_flat () {
     test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 
     # Create the flat package with xar (like pkgutil --flatten does)
-    # Note that --distribution is only supported by Mac OS X 10.6 and above
+    # Note that --distribution is only supported by macOS 10.6 and above
     xar_flags="--compression=bzip2 --no-compress Scripts --no-compress Payload"
     case $mac_version in
         "10.5"*) ;;
@@ -7683,10 +7682,11 @@ pp_macos_add_service () {
 pp_backend_macos_probe () {
     typeset name vers arch
     case `sw_vers -productName` in
+         "macOS")    name="macos";;
          "Mac OS X") name="macos";;
 	 *)          name="unknown";;
     esac
-    vers=`sw_vers -productVersion | sed -e 's/^\([^.]*\)\.\([^.]*\).*/\1\2/'`
+    vers=`sw_vers -productVersion | awk -F. '{ printf "%d%02d\n", $1, $2 }'`
     arch=`arch`
     echo "$name$vers-$arch"
 }

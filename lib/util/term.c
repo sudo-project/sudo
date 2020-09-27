@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2015, 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2015, 2017-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -86,13 +86,13 @@
 # define PENDIN		0
 #endif
 
-static struct termios term, oterm;
+static struct termios oterm;
 static int changed;
 
 /* tgetpass() needs to know the erase and kill chars for cbreak mode. */
-__dso_public int sudo_term_eof;
-__dso_public int sudo_term_erase;
-__dso_public int sudo_term_kill;
+sudo_dso_public int sudo_term_eof;
+sudo_dso_public int sudo_term_erase;
+sudo_dso_public int sudo_term_kill;
 
 static volatile sig_atomic_t got_sigttou;
 
@@ -159,6 +159,7 @@ sudo_term_restore_v1(int fd, bool flush)
 bool
 sudo_term_noecho_v1(int fd)
 {
+    struct termios term;
     debug_decl(sudo_term_noecho, SUDO_DEBUG_UTIL);
 
     if (!changed && tcgetattr(fd, &oterm) != 0)
@@ -206,6 +207,7 @@ sudo_term_raw_v1(int fd, int isig)
 bool
 sudo_term_cbreak_v1(int fd)
 {
+    struct termios term;
     debug_decl(sudo_term_cbreak, SUDO_DEBUG_UTIL);
 
     if (!changed && tcgetattr(fd, &oterm) != 0)

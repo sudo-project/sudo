@@ -44,6 +44,9 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
 
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
@@ -58,10 +61,6 @@
 #include "sudo_iolog.h"
 #include "iolog_plugin.h"
 #include "hostcheck.h"
-
-#ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
-#endif
 
 /* Server callback may redirect to client callback for TLS. */
 static void client_msg_cb(int fd, int what, void *v);
@@ -106,11 +105,11 @@ timed_connect(int sock, const struct sockaddr *addr, socklen_t addrlen,
 	    goto done;
 	}
 	if (sudo_ev_add(evbase, connect_event, timo, false) == -1) {
-	    sudo_warnx(U_("unable to add event to queue"));
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    goto done;
 	}
 	if (sudo_ev_dispatch(evbase) == -1) {
-	    sudo_warn(U_("error in event loop"));
+	    sudo_warn("%s", U_("error in event loop"));
 	    goto done;
 	}
 	if (errnum == 0)
@@ -294,7 +293,7 @@ tls_connect_cb(int sock, int what, void *v)
     debug_decl(tls_connect_cb, SUDOERS_DEBUG_UTIL);
 
     if (what == SUDO_PLUGIN_EV_TIMEOUT) {
-        sudo_warnx(U_("TLS handshake timeout occurred"));
+        sudo_warnx("%s", U_("TLS handshake timeout occurred"));
         goto bad;
     }
 
@@ -316,13 +315,13 @@ tls_connect_cb(int sock, int what, void *v)
 		if (what != SUDO_EV_READ) {
 		    if (sudo_ev_set(closure->tls_connect_ev, sock,
 			    SUDO_EV_READ, tls_connect_cb, closure) == -1) {
-			sudo_warnx(U_("unable to set event"));
+			sudo_warnx("%s", U_("unable to set event"));
 			goto bad;
 		    }
 		}
 		if (sudo_ev_add(closure->evbase, closure->tls_connect_ev,
 			&timeo, false) == -1) {
-                    sudo_warnx(U_("unable to add event to queue"));
+                    sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
 		break;
@@ -332,13 +331,13 @@ tls_connect_cb(int sock, int what, void *v)
 		if (what != SUDO_EV_WRITE) {
 		    if (sudo_ev_set(closure->tls_connect_ev, sock,
 			    SUDO_EV_WRITE, tls_connect_cb, closure) == -1) {
-			sudo_warnx(U_("unable to set event"));
+			sudo_warnx("%s", U_("unable to set event"));
 			goto bad;
 		    }
 		}
 		if (sudo_ev_add(closure->evbase, closure->tls_connect_ev,
 			&timeo, false) == -1) {
-                    sudo_warnx(U_("unable to add event to queue"));
+                    sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
                 break;
@@ -384,12 +383,12 @@ tls_timed_connect(SSL *ssl, const char *host, const char *port,
     }
 
     if (sudo_ev_add(closure.evbase, closure.tls_connect_ev, timo, false) == -1) {
-	sudo_warnx(U_("unable to add event to queue"));
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
     if (sudo_ev_dispatch(closure.evbase) == -1) {
-	sudo_warnx(U_("error in event loop"));
+	sudo_warnx("%s", U_("error in event loop"));
 	goto done;
     }
 
@@ -540,11 +539,14 @@ log_server_connect(struct client_closure *closure)
     const char *cause = NULL;
     int sock;
     bool tls, ret = false;
-    debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL);
+    debug_decl(log_server_connect, SUDOERS_DEBUG_UTIL);
 
     STAILQ_FOREACH(server, closure->log_details->log_servers, entries) {
         free(copy);
-	copy = strdup(server->str);
+	if ((copy = strdup(server->str)) == NULL) {
+                cause = U_("unable to allocate memory");
+                break;
+	}
 	if (!iolog_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
 		DEFAULT_PORT_TLS)) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -734,7 +736,7 @@ fmt_client_hello(struct client_closure *closure)
     hello_msg.client_id = "sudoers " PACKAGE_VERSION;
 
     /* Schedule ClientMessage */
-    client_msg.hello_msg = &hello_msg;
+    client_msg.u.hello_msg = &hello_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;
     ret = fmt_client_message(closure, &client_msg);
 
@@ -782,7 +784,7 @@ fmt_accept_message(struct client_closure *closure)
 	runenv.n_strings++;
 
     /* XXX - realloc as needed instead of preallocating */
-    info_msgs_size = 22;
+    info_msgs_size = 24;
     accept_msg.info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
     if (accept_msg.info_msgs == NULL) {
 	info_msgs_size = 0;
@@ -806,38 +808,38 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO: clientsid */
 
     accept_msg.info_msgs[n]->key = "columns";
-    accept_msg.info_msgs[n]->numval = details->cols;
+    accept_msg.info_msgs[n]->u.numval = details->cols;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "command";
-    accept_msg.info_msgs[n]->strval = (char *)details->command;
+    accept_msg.info_msgs[n]->u.strval = (char *)details->command;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "lines";
-    accept_msg.info_msgs[n]->numval = details->lines;
+    accept_msg.info_msgs[n]->u.numval = details->lines;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "runargv";
-    accept_msg.info_msgs[n]->strlistval = &runargv;
+    accept_msg.info_msgs[n]->u.strlistval = &runargv;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "runenv";
-    accept_msg.info_msgs[n]->strlistval = &runenv;
+    accept_msg.info_msgs[n]->u.strlistval = &runenv;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     n++;
 
     if (details->runas_gr!= NULL) {
 	accept_msg.info_msgs[n]->key = "rungid";
-	accept_msg.info_msgs[n]->numval = details->runas_gr->gr_gid;
+	accept_msg.info_msgs[n]->u.numval = details->runas_gr->gr_gid;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
 	n++;
 
 	accept_msg.info_msgs[n]->key = "rungroup";
-	accept_msg.info_msgs[n]->strval = details->runas_gr->gr_name;
+	accept_msg.info_msgs[n]->u.strval = details->runas_gr->gr_name;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
@@ -846,18 +848,32 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO - rungroups */
 
     accept_msg.info_msgs[n]->key = "runuid";
-    accept_msg.info_msgs[n]->numval = details->runas_pw->pw_uid;
+    accept_msg.info_msgs[n]->u.numval = details->runas_pw->pw_uid;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "runuser";
-    accept_msg.info_msgs[n]->strval = details->runas_pw->pw_name;
+    accept_msg.info_msgs[n]->u.strval = details->runas_pw->pw_name;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     if (details->cwd != NULL) {
 	accept_msg.info_msgs[n]->key = "submitcwd";
-	accept_msg.info_msgs[n]->strval = (char *)details->cwd;
+	accept_msg.info_msgs[n]->u.strval = (char *)details->cwd;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    if (details->runcwd != NULL) {
+	accept_msg.info_msgs[n]->key = "runcwd";
+	accept_msg.info_msgs[n]->u.strval = (char *)details->runcwd;
+	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    if (details->runchroot != NULL) {
+	accept_msg.info_msgs[n]->key = "runchroot";
+	accept_msg.info_msgs[n]->u.strval = (char *)details->runchroot;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
@@ -869,20 +885,20 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO - submitgroups */
 
     accept_msg.info_msgs[n]->key = "submithost";
-    accept_msg.info_msgs[n]->strval = (char *)details->host;
+    accept_msg.info_msgs[n]->u.strval = (char *)details->host;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     /* TODO - submituid */
 
     accept_msg.info_msgs[n]->key = "submituser";
-    accept_msg.info_msgs[n]->strval = (char *)details->user;
+    accept_msg.info_msgs[n]->u.strval = (char *)details->user;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     if (details->tty != NULL) {
 	accept_msg.info_msgs[n]->key = "ttyname";
-	accept_msg.info_msgs[n]->strval = (char *)details->tty;
+	accept_msg.info_msgs[n]->u.strval = (char *)details->tty;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
@@ -894,7 +910,7 @@ fmt_accept_message(struct client_closure *closure)
 	"%s: sending AcceptMessage, array length %zu", __func__, n);
 
     /* Schedule ClientMessage */
-    client_msg.accept_msg = &accept_msg;
+    client_msg.u.accept_msg = &accept_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
     ret = fmt_client_message(closure, &client_msg);
 
@@ -996,7 +1012,7 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
 	exit_msg.dumped_core ? "yes" : "no");
 
     /* Send ClientMessage */
-    client_msg.exit_msg = &exit_msg;
+    client_msg.u.exit_msg = &exit_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
     if (!fmt_client_message(closure, &client_msg))
 	goto done;
@@ -1035,7 +1051,7 @@ fmt_io_buf(struct client_closure *closure, int type, const char *buf,
 	iobuf_msg.data.len, type, io_buffer__get_packed_size(&iobuf_msg));
 
     /* Schedule ClientMessage, it doesn't matter which IoBuffer we set. */
-    client_msg.ttyout_buf = &iobuf_msg;
+    client_msg.u.ttyout_buf = &iobuf_msg;
     client_msg.type_case = type;
     if (!fmt_client_message(closure, &client_msg))
         goto done;
@@ -1072,7 +1088,7 @@ fmt_winsize(struct client_closure *closure, unsigned int lines,
 	__func__, winsize_msg.rows, winsize_msg.cols);
 
     /* Send ClientMessage */
-    client_msg.winsize_event = &winsize_msg;
+    client_msg.u.winsize_event = &winsize_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_WINSIZE_EVENT;
     if (!fmt_client_message(closure, &client_msg))
         goto done;
@@ -1107,7 +1123,7 @@ fmt_suspend(struct client_closure *closure, const char *signame, struct timespec
     	"%s: sending CommandSuspend, SIG%s", __func__, suspend_msg.signal);
 
     /* Send ClientMessage */
-    client_msg.suspend_event = &suspend_msg;
+    client_msg.u.suspend_event = &suspend_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_SUSPEND_EVENT;
     if (!fmt_client_message(closure, &client_msg))
         goto done;
@@ -1147,7 +1163,7 @@ client_message_completion(struct client_closure *closure)
 	/* Enable timeout while waiting for final commit point. */
 	if (closure->read_ev->add(closure->read_ev,
 		&closure->log_details->server_timeout) == -1) {
-	    sudo_warn(U_("unable to add event to queue"));
+	    sudo_warn("%s", U_("unable to add event to queue"));
 	    debug_return_bool(false);
 	}
 	break;
@@ -1183,7 +1199,7 @@ read_server_hello(struct client_closure *closure)
     closure->write_ev->setbase(closure->write_ev, evbase);
     if (closure->write_ev->add(closure->write_ev,
 	    &closure->log_details->server_timeout) == -1) {
-	sudo_warnx(U_("unable to add event to queue"));
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
@@ -1191,13 +1207,13 @@ read_server_hello(struct client_closure *closure)
     closure->read_ev->setbase(closure->read_ev, evbase);
     if (closure->read_ev->add(closure->read_ev,
 	    &closure->log_details->server_timeout) == -1) {
-	sudo_warnx(U_("unable to add event to queue"));
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
     /* Read/write hello messages synchronously. */
     if (sudo_ev_dispatch(evbase) == -1) {
-	sudo_warnx(U_("error in event loop"));
+	sudo_warnx("%s", U_("error in event loop"));
 	goto done;
     }
 
@@ -1251,7 +1267,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
      */
     closure->read_ev->setbase(closure->read_ev, NULL);
     if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
-        sudo_warn(U_("unable to add event to queue"));
+        sudo_warn("%s", U_("unable to add event to queue"));
 	debug_return_bool(false);
     }
     closure->write_ev->setbase(closure->write_ev, NULL);
@@ -1352,30 +1368,30 @@ handle_server_message(uint8_t *buf, size_t len,
 
     switch (msg->type_case) {
     case SERVER_MESSAGE__TYPE_HELLO:
-	if (handle_server_hello(msg->hello, closure)) {
+	if (handle_server_hello(msg->u.hello, closure)) {
 	    /* Format and schedule accept message. */
 	    closure->state = SEND_ACCEPT;
 	    if ((ret = fmt_accept_message(closure))) {
 		if (closure->write_ev->add(closure->write_ev,
 			&closure->log_details->server_timeout) == -1) {
-		    sudo_warn(U_("unable to add event to queue"));
+		    sudo_warn("%s", U_("unable to add event to queue"));
 		    ret = false;
 		}
 	    }
 	}
 	break;
     case SERVER_MESSAGE__TYPE_COMMIT_POINT:
-	ret = handle_commit_point(msg->commit_point, closure);
+	ret = handle_commit_point(msg->u.commit_point, closure);
 	break;
     case SERVER_MESSAGE__TYPE_LOG_ID:
-	ret = handle_log_id(msg->log_id, closure);
+	ret = handle_log_id(msg->u.log_id, closure);
 	break;
     case SERVER_MESSAGE__TYPE_ERROR:
-	ret = handle_server_error(msg->error, closure);
+	ret = handle_server_error(msg->u.error, closure);
 	closure->state = ERROR;
 	break;
     case SERVER_MESSAGE__TYPE_ABORT:
-	ret = handle_server_abort(msg->abort, closure);
+	ret = handle_server_abort(msg->u.abort, closure);
 	closure->state = ERROR;
 	break;
     default:
@@ -1474,7 +1490,7 @@ server_msg_cb(int fd, int what, void *v)
 			    SUDO_PLUGIN_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
 			if (closure->write_ev->add(closure->write_ev, NULL) == -1) {
-			    sudo_warn(U_("unable to add event to queue"));
+			    sudo_warn("%s", U_("unable to add event to queue"));
 			    goto bad;
 			}
 			closure->temporary_write_event = true;
@@ -1756,7 +1772,7 @@ client_close(struct client_closure *closure, int exit_status, int error)
     closure->read_ev->setbase(closure->read_ev, evbase);
     if (closure->read_ev->add(closure->read_ev,
 	    &closure->log_details->server_timeout) == -1) {
-	sudo_warn(U_("unable to add event to queue"));
+	sudo_warn("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
@@ -1764,7 +1780,7 @@ client_close(struct client_closure *closure, int exit_status, int error)
     closure->write_ev->setbase(closure->write_ev, evbase);
     if (closure->write_ev->add(closure->write_ev,
 	    &closure->log_details->server_timeout) == -1) {
-	sudo_warn(U_("unable to add event to queue"));
+	sudo_warn("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
@@ -1772,7 +1788,7 @@ client_close(struct client_closure *closure, int exit_status, int error)
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"flushing buffers and waiting for final commit point");
     if (sudo_ev_dispatch(evbase) == -1 || sudo_ev_got_break(evbase)) {
-	sudo_warnx(U_("error in event loop"));
+	sudo_warnx("%s", U_("error in event loop"));
 	goto done;
     }
 

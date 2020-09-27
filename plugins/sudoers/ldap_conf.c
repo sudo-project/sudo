@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -197,7 +197,7 @@ sudo_ldap_conf_add_ports(void)
     hostbuf[0] = '\0';
     len = snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
     if (len < 0 || len >= ssizeof(defport)) {
-	sudo_warnx(U_("sudo_ldap_conf_add_ports: port too large"));
+	sudo_warnx(U_("%s: port too large"), __func__);
 	debug_return_bool(false);
     }
 
@@ -284,11 +284,11 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 
 	if (nldaps != 0) {
 	    if (nldap != 0) {
-		sudo_warnx(U_("unable to mix ldap and ldaps URIs"));
+		sudo_warnx("%s", U_("unable to mix ldap and ldaps URIs"));
 		goto done;
 	    }
 	    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS)
-		sudo_warnx(U_("starttls not supported when using ldaps"));
+		sudo_warnx("%s", U_("starttls not supported when using ldaps"));
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
 	}
 	free(buf);

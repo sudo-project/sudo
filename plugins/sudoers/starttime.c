@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2012-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2012-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -268,7 +268,7 @@ done:
 int
 get_starttime(pid_t pid, struct timespec *starttime)
 {
-    struct pst_status pstat;
+    struct pst_status pst;
     int rc;
     debug_decl(get_starttime, SUDOERS_DEBUG_UTIL);
 
@@ -277,9 +277,9 @@ get_starttime(pid_t pid, struct timespec *starttime)
      * EOVERFLOW is not a fatal error for the fields we use.
      * See the "EOVERFLOW Error" section of pstat_getvminfo(3).
      */
-    rc = pstat_getproc(&pstat, sizeof(pstat), 0, pid);
+    rc = pstat_getproc(&pst, sizeof(pst), 0, pid);
     if (rc != -1 || errno == EOVERFLOW) {
-	starttime->tv_sec = pstat.pst_start;
+	starttime->tv_sec = pst.pst_start;
 	starttime->tv_nsec = 0;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,

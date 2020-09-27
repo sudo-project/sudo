@@ -1,0 +1,17 @@
+Testing @include of a file with a missing newline
+
+Parses OK
+
+Entries for user root:
+
+ALL = /usr/bin/id
+	host  matched
+	runas matched
+	cmnd  unmatched
+
+ALL = ALL
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed

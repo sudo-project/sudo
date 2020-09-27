@@ -45,24 +45,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-
-#include "log_server.pb-c.h"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
-#include "sudo_event.h"
-#include "sudo_fatal.h"
-#include "sudo_iolog.h"
-#include "hostcheck.h"
-#include "sendlog.h"
-
-#if defined(HAVE_OPENSSL)
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-#endif
-
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
 #endif
@@ -71,6 +53,24 @@
 # else
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
+
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+#endif
+
+#include "sudo_compat.h"
+#include "sudo_conf.h"
+#include "sudo_debug.h"
+#include "sudo_event.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_iolog.h"
+#include "sudo_util.h"
+
+#include "hostcheck.h"
+#include "log_server.pb-c.h"
+#include "sendlog.h"
 
 #if defined(HAVE_OPENSSL)
 # define TLS_HANDSHAKE_TIMEO_SEC 10
@@ -183,7 +183,7 @@ connect_server(const char *host, const char *port)
 	if (*server_ip == '\0') {
 	    if (inet_ntop(res->ai_family, res->ai_addr, server_ip,
 		    sizeof(server_ip)) == NULL) {
-		sudo_warnx(U_("unable to get server IP addr"));
+		sudo_warnx("%s", U_("unable to get server IP addr"));
 	    }
 	}
 	break;	/* success */
@@ -332,7 +332,7 @@ fmt_client_hello(struct client_closure *closure)
     hello_msg.client_id = "Sudo Sendlog " PACKAGE_VERSION;
 
     /* Schedule ClientMessage */
-    client_msg.hello_msg = &hello_msg;
+    client_msg.u.hello_msg = &hello_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
@@ -345,11 +345,31 @@ fmt_client_hello(struct client_closure *closure)
     debug_return_bool(ret);
 }
 
+static void
+free_info_messages(InfoMessage **info_msgs, size_t n_info_msgs)
+{
+    debug_decl(free_info_messages, SUDO_DEBUG_UTIL);
+
+    if (info_msgs != NULL) {
+	while (n_info_msgs-- > 0) {
+	    if (info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
+		/* Only strlistval was dynamically allocated */
+		free(info_msgs[n_info_msgs]->u.strlistval->strings);
+		free(info_msgs[n_info_msgs]->u.strlistval);
+	    }
+	    free(info_msgs[n_info_msgs]);
+	}
+	free(info_msgs);
+    }
+
+    debug_return;
+}
+
 static InfoMessage **
 fmt_info_messages(struct iolog_info *log_info, char *hostname,
     size_t *n_info_msgs)
 {
-    InfoMessage **info_msgs;
+    InfoMessage **info_msgs = NULL;
     InfoMessage__StringList *runargv = NULL;
     size_t info_msgs_size, n = 0;
     debug_decl(fmt_info_messages, SUDO_DEBUG_UTIL);
@@ -378,54 +398,55 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
     /* Fill in info_msgs */
     n = 0;
     info_msgs[n]->key = "command";
-    info_msgs[n]->strval = log_info->cmd;
+    info_msgs[n]->u.strval = log_info->cmd;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "columns";
-    info_msgs[n]->numval = log_info->cols;
+    info_msgs[n]->u.numval = log_info->cols;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     info_msgs[n]->key = "lines";
-    info_msgs[n]->numval = log_info->lines;
+    info_msgs[n]->u.numval = log_info->lines;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     info_msgs[n]->key = "runargv";
-    info_msgs[n]->strlistval = runargv;
+    info_msgs[n]->u.strlistval = runargv;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    runargv = NULL;
     n++;
 
     if (log_info->runas_group != NULL) {
 	info_msgs[n]->key = "rungroup";
-	info_msgs[n]->strval = log_info->runas_group;
+	info_msgs[n]->u.strval = log_info->runas_group;
 	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
 
     info_msgs[n]->key = "runuser";
-    info_msgs[n]->strval = log_info->runas_user;
+    info_msgs[n]->u.strval = log_info->runas_user;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "submitcwd";
-    info_msgs[n]->strval = log_info->cwd;
+    info_msgs[n]->u.strval = log_info->cwd;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "submithost";
-    info_msgs[n]->strval = hostname;
+    info_msgs[n]->u.strval = hostname;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "submituser";
-    info_msgs[n]->strval = log_info->user;
+    info_msgs[n]->u.strval = log_info->user;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "ttyname";
-    info_msgs[n]->strval = log_info->tty;
+    info_msgs[n]->u.strval = log_info->tty;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
@@ -441,8 +462,7 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    while (n-- > 0)
-	free(info_msgs[n]);
+    free_info_messages(info_msgs, n);
     if (runargv != NULL) {
         free(runargv->strings);
         free(runargv);
@@ -495,7 +515,7 @@ fmt_reject_message(struct client_closure *closure)
 	"%s: sending RejectMessage, array length %zu", __func__, n_info_msgs);
 
     /* Schedule ClientMessage */
-    client_msg.reject_msg = &reject_msg;
+    client_msg.u.reject_msg = &reject_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_REJECT_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
@@ -504,15 +524,7 @@ fmt_reject_message(struct client_closure *closure)
     }
 
 done:
-    while (n_info_msgs-- > 0) {
-        if (reject_msg.info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
-            /* strlistval was dynamically allocated */
-            free(reject_msg.info_msgs[n_info_msgs]->strlistval->strings);
-            free(reject_msg.info_msgs[n_info_msgs]->strlistval);
-        }
-	free(reject_msg.info_msgs[n_info_msgs]);
-    }
-    free(reject_msg.info_msgs);
+    free_info_messages(reject_msg.info_msgs, n_info_msgs);
     free(hostname);
 
     debug_return_bool(ret);
@@ -562,7 +574,7 @@ fmt_accept_message(struct client_closure *closure)
 	"%s: sending AcceptMessage, array length %zu", __func__, n_info_msgs);
 
     /* Schedule ClientMessage */
-    client_msg.accept_msg = &accept_msg;
+    client_msg.u.accept_msg = &accept_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
@@ -571,15 +583,7 @@ fmt_accept_message(struct client_closure *closure)
     }
 
 done:
-    while (n_info_msgs-- > 0) {
-        if (accept_msg.info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
-            /* strlistval was dynamically allocated */
-            free(accept_msg.info_msgs[n_info_msgs]->strlistval->strings);
-            free(accept_msg.info_msgs[n_info_msgs]->strlistval);
-        }
-	free(accept_msg.info_msgs[n_info_msgs]);
-    }
-    free(accept_msg.info_msgs);
+    free_info_messages(accept_msg.info_msgs, n_info_msgs);
     free(hostname);
 
     debug_return_bool(ret);
@@ -609,7 +613,7 @@ fmt_restart_message(struct client_closure *closure)
     restart_msg.log_id = (char *)closure->iolog_id;
 
     /* Schedule ClientMessage */
-    client_msg.restart_msg = &restart_msg;
+    client_msg.u.restart_msg = &restart_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_RESTART_MSG;
     ret = fmt_client_message(&closure->write_buf, &client_msg);
     if (ret) {
@@ -645,7 +649,7 @@ fmt_exit_message(struct client_closure *closure)
 	__func__, exit_msg.exit_value);
 
     /* Send ClientMessage */
-    client_msg.exit_msg = &exit_msg;
+    client_msg.u.exit_msg = &exit_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
     if (!fmt_client_message(&closure->write_buf, &client_msg))
 	goto done;
@@ -687,7 +691,7 @@ fmt_io_buf(int type, struct client_closure *closure,
 	iobuf_msg.data.len, type, io_buffer__get_packed_size(&iobuf_msg));
 
     /* Send ClientMessage, it doesn't matter which IoBuffer we set. */
-    client_msg.ttyout_buf = &iobuf_msg;
+    client_msg.u.ttyout_buf = &iobuf_msg;
     client_msg.type_case = type;
     if (!fmt_client_message(buf, &client_msg))
         goto done;
@@ -724,7 +728,7 @@ fmt_winsize(struct client_closure *closure, struct connection_buffer *buf)
 	__func__, winsize_msg.rows, winsize_msg.cols);
 
     /* Send ClientMessage */
-    client_msg.winsize_event = &winsize_msg;
+    client_msg.u.winsize_event = &winsize_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_WINSIZE_EVENT;
     if (!fmt_client_message(buf, &client_msg))
         goto done;
@@ -762,7 +766,7 @@ fmt_suspend(struct client_closure *closure, struct connection_buffer *buf)
     	"%s: sending CommandSuspend, SIG%s", __func__, suspend_msg.signal);
 
     /* Send ClientMessage */
-    client_msg.suspend_event = &suspend_msg;
+    client_msg.u.suspend_event = &suspend_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_SUSPEND_EVENT;
     if (!fmt_client_message(buf, &client_msg))
         goto done;
@@ -865,10 +869,10 @@ client_message_completion(struct client_closure *closure)
 	    closure->state = SEND_EXIT;
 	    debug_return_bool(fmt_exit_message(closure));
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case SEND_RESTART:
 	closure->state = SEND_IO;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case SEND_IO:
 	/* fmt_next_iolog() will advance state on EOF. */
 	if (!fmt_next_iolog(closure))
@@ -1010,7 +1014,7 @@ handle_server_message(uint8_t *buf, size_t len,
 
     switch (msg->type_case) {
     case SERVER_MESSAGE__TYPE_HELLO:
-	if ((ret = handle_server_hello(msg->hello, closure))) {
+	if ((ret = handle_server_hello(msg->u.hello, closure))) {
 	    if (sudo_timespecisset(&closure->restart)) {
 		closure->state = SEND_RESTART;
 		ret = fmt_restart_message(closure);
@@ -1024,7 +1028,7 @@ handle_server_message(uint8_t *buf, size_t len,
 	}
 	break;
     case SERVER_MESSAGE__TYPE_COMMIT_POINT:
-	ret = handle_commit_point(msg->commit_point, closure);
+	ret = handle_commit_point(msg->u.commit_point, closure);
 	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
 	    sudo_ev_del(closure->evbase, closure->read_ev);
 	    closure->state = FINISHED;
@@ -1033,14 +1037,14 @@ handle_server_message(uint8_t *buf, size_t len,
 	}
 	break;
     case SERVER_MESSAGE__TYPE_LOG_ID:
-	ret = handle_log_id(msg->log_id, closure);
+	ret = handle_log_id(msg->u.log_id, closure);
 	break;
     case SERVER_MESSAGE__TYPE_ERROR:
-	ret = handle_server_error(msg->error, closure);
+	ret = handle_server_error(msg->u.error, closure);
 	closure->state = ERROR;
 	break;
     case SERVER_MESSAGE__TYPE_ABORT:
-	ret = handle_server_abort(msg->abort, closure);
+	ret = handle_server_abort(msg->u.abort, closure);
 	closure->state = ERROR;
 	break;
     default:
@@ -1073,7 +1077,7 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_warnx(U_("timeout reading from server"));
+        sudo_warnx("%s", U_("timeout reading from server"));
         goto bad;
     }
 
@@ -1102,7 +1106,7 @@ server_msg_cb(int fd, int what, void *v)
 		    if (!sudo_ev_pending(closure->write_ev, SUDO_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
 			if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1) {
-			    sudo_warnx(U_("unable to add event to queue"));
+			    sudo_warnx("%s", U_("unable to add event to queue"));
 			    goto bad;
 			}
 			closure->temporary_write_event = true;
@@ -1215,7 +1219,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_warnx(U_("timeout writing to server"));
+        sudo_warnx("%s", U_("timeout writing to server"));
         goto bad;
     }
 
@@ -1434,7 +1438,7 @@ tls_connect_cb(int sock, int what, void *v)
     debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_warnx(U_("TLS handshake timeout occurred"));
+        sudo_warnx("%s", U_("TLS handshake timeout occurred"));
         goto bad;
     }
 
@@ -1453,12 +1457,12 @@ tls_connect_cb(int sock, int what, void *v)
 		if (what != SUDO_EV_READ) {
 		    if (sudo_ev_set(closure->tls_connect_ev, closure->sock,
 			    SUDO_EV_READ, tls_connect_cb, closure) == -1) {
-			sudo_warnx(U_("unable to set event"));
+			sudo_warnx("%s", U_("unable to set event"));
 			goto bad;
 		    }
 		}
                 if (sudo_ev_add(evbase, closure->tls_connect_ev, &timeo, false) == -1) {
-                    sudo_warnx(U_("unable to add event to queue"));
+                    sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
 		break;
@@ -1468,12 +1472,12 @@ tls_connect_cb(int sock, int what, void *v)
 		if (what != SUDO_EV_WRITE) {
 		    if (sudo_ev_set(closure->tls_connect_ev, closure->sock,
 			    SUDO_EV_WRITE, tls_connect_cb, closure) == -1) {
-			sudo_warnx(U_("unable to set event"));
+			sudo_warnx("%s", U_("unable to set event"));
 			goto bad;
 		    }
 		}
                 if (sudo_ev_add(evbase, closure->tls_connect_ev, &timeo, false) == -1) {
-                    sudo_warnx(U_("unable to add event to queue"));
+                    sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
 		break;
@@ -1531,7 +1535,7 @@ tls_setup(struct client_closure *closure)
     }
 
     if (sudo_ev_add(closure->evbase, closure->tls_connect_ev, NULL, false) == -1) {
-	sudo_warnx(U_("unable to add event to queue"));
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto bad;
     }
 
@@ -1656,7 +1660,7 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	0 },
 };
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])

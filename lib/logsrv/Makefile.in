@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -110,6 +110,8 @@ Makefile: $(srcdir)/Makefile.in
 $(devdir)/log_server.pb-c.c: $(srcdir)/log_server.proto
 	@if [ -n "$(DEVEL)" ]; then \
 	    cmd='protoc-c --c_out=$(devdir) --proto_path=$(srcdir) $(srcdir)/log_server.proto'; \
+	    echo "$$cmd"; eval $$cmd; \
+	    cmd='$(scriptdir)/unanon $(devdir)/log_server.pb-c.h $(devdir)/log_server.pb-c.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	    if [ "$(devdir)" == "$(srcdir)" ]; then \
 		cmd='mv -f $(devdir)/log_server.pb-c.h $(incdir)/log_server.pb-c.h'; \

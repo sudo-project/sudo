@@ -19,7 +19,7 @@
 #ifndef SUDOERS_SOLARIS_AUDIT_H
 #define	SUDOERS_SOLARIS_AUDIT_H
 
-int	solaris_audit_success(int argc, char *argv[]);
-int	solaris_audit_failure(int argc, char *argv[], char const *const fmt, va_list);
+int	solaris_audit_success(char *const argv[]);
+int	solaris_audit_failure(char *const argv[], const char *errmsg);
 
 #endif /* SUDOERS_SOLARIS_AUDIT_H */

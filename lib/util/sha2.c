@@ -237,8 +237,8 @@ SHA256Transform(uint32_t state[8], const uint8_t data[SHA256_BLOCK_LENGTH])
 	state[6] += g(0);
 	state[7] += h(0);
 	/* Cleanup */
-	memset_s(T, sizeof(T), 0, sizeof(T));
-	memset_s(W, sizeof(W), 0, sizeof(W));
+	explicit_bzero(T, sizeof(T));
+	explicit_bzero(W, sizeof(W));
 }
 
 #undef S0
@@ -454,8 +454,8 @@ SHA512Transform(uint64_t state[8], const uint8_t data[SHA512_BLOCK_LENGTH])
 	state[6] += g(0);
 	state[7] += h(0);
 	/* Cleanup. */
-	memset_s(T, sizeof(T), 0, sizeof(T));
-	memset_s(W, sizeof(W), 0, sizeof(W));
+	explicit_bzero(T, sizeof(T));
+	explicit_bzero(W, sizeof(W));
 }
 
 void

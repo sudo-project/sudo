@@ -115,6 +115,7 @@ lib/iolog/regress/iolog_json/test1.in
 lib/iolog/regress/iolog_json/test2.in
 lib/iolog/regress/iolog_json/test2.out.ok
 lib/iolog/regress/iolog_json/test3.in
+lib/iolog/regress/iolog_mkpath/check_iolog_mkpath.c
 lib/iolog/regress/iolog_path/check_iolog_path.c
 lib/iolog/regress/iolog_path/data
 lib/iolog/regress/iolog_util/check_iolog_util.c
@@ -137,9 +138,11 @@ lib/util/dup3.c
 lib/util/event.c
 lib/util/event_poll.c
 lib/util/event_select.c
+lib/util/explicit_bzero.c
 lib/util/fatal.c
 lib/util/fchmodat.c
 lib/util/fnmatch.c
+lib/util/freezero.c
 lib/util/fstatat.c
 lib/util/getaddrinfo.c
 lib/util/getcwd.c
@@ -162,7 +165,6 @@ lib/util/locking.c
 lib/util/logfac.c
 lib/util/logpri.c
 lib/util/memrchr.c
-lib/util/memset_s.c
 lib/util/mkdir_parents.c
 lib/util/mksiglist.c
 lib/util/mksiglist.h
@@ -330,6 +332,7 @@ plugins/python/python_baseplugin.c
 plugins/python/python_convmessage.c
 plugins/python/python_importblocker.c
 plugins/python/python_loghandler.c
+plugins/python/python_plugin.exp
 plugins/python/python_plugin_approval.c
 plugins/python/python_plugin_approval_multi.inc
 plugins/python/python_plugin_audit.c
@@ -468,6 +471,7 @@ plugins/sudoers/digestname.c
 plugins/sudoers/editor.c
 plugins/sudoers/env.c
 plugins/sudoers/env_pattern.c
+plugins/sudoers/exptilde.c
 plugins/sudoers/file.c
 plugins/sudoers/filedigest.c
 plugins/sudoers/find_path.c
@@ -558,6 +562,8 @@ plugins/sudoers/po/pt.mo
 plugins/sudoers/po/pt.po
 plugins/sudoers/po/pt_BR.mo
 plugins/sudoers/po/pt_BR.po
+plugins/sudoers/po/ro.mo
+plugins/sudoers/po/ro.po
 plugins/sudoers/po/ru.mo
 plugins/sudoers/po/ru.po
 plugins/sudoers/po/sk.mo
@@ -663,6 +669,7 @@ plugins/sudoers/regress/cvtsudoers/test9.out.ok
 plugins/sudoers/regress/cvtsudoers/test9.sh
 plugins/sudoers/regress/env_match/check_env_pattern.c
 plugins/sudoers/regress/env_match/data
+plugins/sudoers/regress/exptilde/check_exptilde.c
 plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
 plugins/sudoers/regress/logging/check_wrap.c
 plugins/sudoers/regress/logging/check_wrap.in
@@ -769,6 +776,13 @@ plugins/sudoers/regress/sudoers/test23.ldif2sudo.ok
 plugins/sudoers/regress/sudoers/test23.out.ok
 plugins/sudoers/regress/sudoers/test23.sudo.ok
 plugins/sudoers/regress/sudoers/test23.toke.ok
+plugins/sudoers/regress/sudoers/test24.in
+plugins/sudoers/regress/sudoers/test24.json.ok
+plugins/sudoers/regress/sudoers/test24.ldif.ok
+plugins/sudoers/regress/sudoers/test24.ldif2sudo.ok
+plugins/sudoers/regress/sudoers/test24.out.ok
+plugins/sudoers/regress/sudoers/test24.sudo.ok
+plugins/sudoers/regress/sudoers/test24.toke.ok
 plugins/sudoers/regress/sudoers/test3.in
 plugins/sudoers/regress/sudoers/test3.json.ok
 plugins/sudoers/regress/sudoers/test3.ldif.ok
@@ -813,6 +827,14 @@ plugins/sudoers/regress/testsudoers/test10.out.ok
 plugins/sudoers/regress/testsudoers/test10.sh
 plugins/sudoers/regress/testsudoers/test11.out.ok
 plugins/sudoers/regress/testsudoers/test11.sh
+plugins/sudoers/regress/testsudoers/test12.out.ok
+plugins/sudoers/regress/testsudoers/test12.sh
+plugins/sudoers/regress/testsudoers/test13.out.ok
+plugins/sudoers/regress/testsudoers/test13.sh
+plugins/sudoers/regress/testsudoers/test14.out.ok
+plugins/sudoers/regress/testsudoers/test14.sh
+plugins/sudoers/regress/testsudoers/test15.out.ok
+plugins/sudoers/regress/testsudoers/test15.sh
 plugins/sudoers/regress/testsudoers/test2.inc
 plugins/sudoers/regress/testsudoers/test2.out.ok
 plugins/sudoers/regress/testsudoers/test2.sh
@@ -936,6 +958,8 @@ po/pt.mo
 po/pt.po
 po/pt_BR.mo
 po/pt_BR.po
+po/ro.mo
+po/ro.po
 po/ru.mo
 po/ru.po
 po/sk.mo
@@ -963,6 +987,7 @@ scripts/mkdep.pl
 scripts/mkinstalldirs
 scripts/mkpkg
 scripts/pp
+scripts/unanon
 src/Makefile.in
 src/conversation.c
 src/copy_file.c

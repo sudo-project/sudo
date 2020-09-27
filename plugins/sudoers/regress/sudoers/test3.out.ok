@@ -1,4 +1,4 @@
-Parses OK.
+Parses OK
 
 Defaults:FOO env_reset
 Defaults:foo, bar env_reset

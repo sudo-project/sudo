@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,7 +25,7 @@
 #include "sudo_util.h"
 #include "sudo_fatal.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 /* sudo_strtomode() tests */
 static struct strtomode_data {

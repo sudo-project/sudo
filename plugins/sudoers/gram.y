@@ -38,8 +38,12 @@
 #include "sudo_digest.h"
 #include "toke.h"
 
+#ifdef YYBISON
+# define YYERROR_VERBOSE
+#endif
+
 /* If we last saw a newline the entry is on the preceding line. */
-#define this_lineno	(last_token == COMMENT ? sudolineno - 1 : sudolineno)
+#define this_lineno	(sudoerschar == '\n' ? sudolineno - 1 : sudolineno)
 
 /*
  * Globals
@@ -66,6 +70,7 @@ static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
+static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(int, char *);
 %}
 
@@ -84,6 +89,7 @@ static struct command_digest *new_digest(int, char *);
 }
 
 %start file				/* special start symbol */
+%token		 END 0			/* end of file from lexer */
 %token <command> COMMAND		/* absolute pathname w/ optional args */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
 %token <string>	 DEFVAR			/* a Defaults variable name */
@@ -114,14 +120,17 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 FOLLOWLNK		/* follow symbolic links */
 %token <tok>	 NOFOLLOWLNK		/* don't follow symbolic links */
 %token <tok>	 ALL			/* ALL keyword */
-%token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
 %token <tok>	 USERALIAS		/* User_Alias keyword */
 %token <tok>	 RUNASALIAS		/* Runas_Alias keyword */
 %token <tok>	 ':' '=' ',' '!' '+' '-' /* union member tokens */
 %token <tok>	 '(' ')'		/* runas tokens */
-%token <tok>	 ERROR
+%token <tok>	 '\n'			/* newline (with optional comment) */
+%token <tok>	 ERROR			/* error from lexer */
+%token <tok>	 NOMATCH		/* no match from lexer */
+%token <tok>	 CHROOT			/* root directory for command */
+%token <tok>	 CWD			/* working directory for command */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
 %token <tok>	 PRIVS			/* Solaris privileges */
@@ -158,6 +167,8 @@ static struct command_digest *new_digest(int, char *);
 %type <privilege> privileges
 %type <tag>	  cmndtag
 %type <options>	  options
+%type <string>	  chdirspec
+%type <string>	  chrootspec
 %type <string>	  rolespec
 %type <string>	  typespec
 %type <string>	  privsspec
@@ -165,12 +176,16 @@ static struct command_digest *new_digest(int, char *);
 %type <string>	  timeoutspec
 %type <string>	  notbeforespec
 %type <string>	  notafterspec
+%type <string>	  include
+%type <string>	  includedir
 %type <digest>	  digestspec
 %type <digest>	  digestlist
 
 %%
 
-file		:	{ ; }
+file		:	{
+			    ; /* empty file */
+			}
 		|	line
 		;
 
@@ -178,63 +193,81 @@ line		:	entry
 		|	line entry
 		;
 
-entry		:	COMMENT {
-			    ;
+entry		:	'\n' {
+			    ; /* blank line */
 			}
-                |       error COMMENT {
+                |       error eol {
 			    yyerrok;
 			}
-		|	INCLUDE WORD {
-			    if (!push_include($2, false)) {
-				free($2);
+		|	include {
+			    if (!push_include($1, false)) {
+				free($1);
 				YYERROR;
 			    }
-			    free($2);
+			    free($1);
 			}
-		|	INCLUDEDIR WORD {
-			    if (!push_include($2, true)) {
-				free($2);
+		|	includedir {
+			    if (!push_include($1, true)) {
+				free($1);
 				YYERROR;
 			    }
-			    free($2);
+			    free($1);
 			}
-		|	userlist privileges {
+		|	userlist privileges eol {
 			    if (!add_userspec($1, $2)) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-		|	USERALIAS useraliases {
+		|	USERALIAS useraliases eol {
 			    ;
 			}
-		|	HOSTALIAS hostaliases {
+		|	HOSTALIAS hostaliases eol {
 			    ;
 			}
-		|	CMNDALIAS cmndaliases {
+		|	CMNDALIAS cmndaliases eol {
 			    ;
 			}
-		|	RUNASALIAS runasaliases {
+		|	RUNASALIAS runasaliases eol {
 			    ;
 			}
-		|	DEFAULTS defaults_list {
+		|	DEFAULTS defaults_list eol {
 			    if (!add_defaults(DEFAULTS, NULL, $2))
 				YYERROR;
 			}
-		|	DEFAULTS_USER userlist defaults_list {
+		|	DEFAULTS_USER userlist defaults_list eol {
 			    if (!add_defaults(DEFAULTS_USER, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_RUNAS userlist defaults_list {
+		|	DEFAULTS_RUNAS userlist defaults_list eol {
 			    if (!add_defaults(DEFAULTS_RUNAS, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_HOST hostlist defaults_list {
+		|	DEFAULTS_HOST hostlist defaults_list eol {
 			    if (!add_defaults(DEFAULTS_HOST, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_CMND cmndlist defaults_list {
+		|	DEFAULTS_CMND cmndlist defaults_list eol {
 			    if (!add_defaults(DEFAULTS_CMND, $2, $3))
 				YYERROR;
+			}
+		;
+
+include		:	INCLUDE WORD eol {
+			    $$ = $2;
+			}
+		|	INCLUDE WORD error eol {
+			    yyerrok;
+			    $$ = $2;
+			}
+		;
+
+includedir	:	INCLUDEDIR WORD eol {
+			    $$ = $2;
+			}
+		|	INCLUDEDIR WORD error eol {
+			    yyerrok;
+			    $$ = $2;
 			}
 		;
 
@@ -285,6 +318,10 @@ defaults_entry	:	DEFVAR {
 privileges	:	privilege
 		|	privileges ':' privilege {
 			    HLTQ_CONCAT($1, $3, entries);
+			    $$ = $1;
+			}
+		|	privileges ':' error {
+			    yyerrok;
 			    $$ = $1;
 			}
 		;
@@ -355,6 +392,12 @@ cmndspeclist	:	cmndspec
 			    struct cmndspec *prev;
 			    prev = HLTQ_LAST($1, cmndspec, entries);
 			    HLTQ_CONCAT($1, $3, entries);
+
+			    /* propagate runcwd and runchroot */
+			    if ($3->runcwd == NULL)
+				$3->runcwd = prev->runcwd;
+			    if ($3->runchroot == NULL)
+				$3->runchroot = prev->runchroot;
 #ifdef HAVE_SELINUX
 			    /* propagate role and type */
 			    if ($3->role == NULL && $3->type == NULL) {
@@ -446,6 +489,8 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			    cs->notbefore = $2.notbefore;
 			    cs->notafter = $2.notafter;
 			    cs->timeout = $2.timeout;
+			    cs->runcwd = $2.runcwd;
+			    cs->runchroot = $2.runchroot;
 			    cs->tags = $3;
 			    cs->cmnd = $4;
 			    HLTQ_INIT(cs, entries);
@@ -525,6 +570,30 @@ opcmnd		:	cmnd {
 		|	'!' cmnd {
 			    $$ = $2;
 			    $$->negated = true;
+			}
+		;
+
+chdirspec	:	CWD '=' WORD {
+			    if ($3[0] != '/' && $3[0] != '~') {
+				if (strcmp($3, "*") != 0) {
+				    sudoerserror(N_("values for \"CWD\" must"
+					" start with a '/', '~', or '*'"));
+				    YYERROR;
+				}
+			    }
+			    $$ = $3;
+			}
+		;
+
+chrootspec	:	CHROOT '=' WORD {
+			    if ($3[0] != '/' && $3[0] != '~') {
+				if (strcmp($3, "*") != 0) {
+				    sudoerserror(N_("values for \"CHROOT\" must"
+					" start with a '/', '~', or '*'"));
+				    YYERROR;
+				}
+			    }
+			    $$ = $3;
 			}
 		;
 
@@ -628,8 +697,34 @@ runaslist	:	/* empty */ {
 			}
 		;
 
+reserved_word	:	ALL
+		|	CHROOT
+		|	CWD
+		|	CMND_TIMEOUT
+		|	NOTBEFORE
+		|	NOTAFTER
+		|	ROLE
+		|	TYPE
+		|	PRIVS
+		|	LIMITPRIVS
+		;
+
+reserved_alias	:	reserved_word {
+			    sudoerserror(N_("syntax error, reserved word used as an alias name"));
+			    YYERROR;
+			}
+		;
+
 options		:	/* empty */ {
 			    init_options(&$$);
+			}
+		|	options chdirspec {
+			    free($$.runcwd);
+			    $$.runcwd = $2;
+			}
+		|	options chrootspec {
+			    free($$.runchroot);
+			    $$.runchroot = $2;
 			}
 		|	options notbeforespec {
 			    $$.notbefore = parse_gentime($2);
@@ -774,6 +869,7 @@ hostalias	:	ALIAS '=' hostlist {
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' hostlist
 		;
 
 hostlist	:	ophost
@@ -796,6 +892,7 @@ cmndalias	:	ALIAS '=' cmndlist {
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' cmndlist
 		;
 
 cmndlist	:	digcmnd
@@ -818,6 +915,7 @@ runasalias	:	ALIAS '=' userlist {
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' userlist
 		;
 
 useraliases	:	useralias
@@ -833,6 +931,7 @@ useralias	:	ALIAS '=' userlist {
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' userlist
 		;
 
 userlist	:	opuser
@@ -929,11 +1028,23 @@ group		:	ALIAS {
 			}
 		;
 
+eol		:	'\n' {
+			    ;
+			}
+		|	END {
+			    ; /* EOF */
+			}
+		;
+
 %%
 void
 sudoerserror(const char *s)
 {
     debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER);
+
+    /* The lexer displays more detailed messages for ERROR tokens. */
+    if (sudoerschar == ERROR)
+	debug_return;
 
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
@@ -945,13 +1056,31 @@ sudoerserror(const char *s)
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
-	    const char fmt[] = ">>> %s: %s near line %d <<<\n";
 	    int oldlocale;
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), this_lineno);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d: %s\n"), sudoers,
+		this_lineno, _(s));
 	    sudoers_setlocale(oldlocale, NULL);
+
+	    /* Display the offending line and token if possible. */
+	    if (sudolinebuf.len != 0) {
+		char tildes[128];
+		size_t tlen = 0;
+
+		sudo_printf(SUDO_CONV_ERROR_MSG, "%s%s", sudolinebuf.buf,
+		    sudolinebuf.buf[sudolinebuf.len - 1] == '\n' ? "" : "\n");
+		if (sudolinebuf.toke_end > sudolinebuf.toke_start) {
+		    tlen = sudolinebuf.toke_end - sudolinebuf.toke_start - 1;
+		    if (tlen >= sizeof(tildes))
+			tlen = sizeof(tildes) - 1;
+		    memset(tildes, '~', tlen);
+		}
+		tildes[tlen] = '\0';
+		sudo_printf(SUDO_CONV_ERROR_MSG, "%*s^%s\n",
+		    (int)sudolinebuf.toke_start, "", tildes);
+	    }
 	}
 #endif
     }
@@ -1001,6 +1130,7 @@ new_member(char *name, int type)
 
     debug_return_ptr(m);
 }
+
 static struct sudo_command *
 new_command(char *cmnd, char *args)
 {
@@ -1196,6 +1326,7 @@ free_privilege(struct privilege *priv)
     struct member_list *prev_binding = NULL;
     struct cmndspec *cs;
     struct defaults *def;
+    char *runcwd = NULL, *runchroot = NULL;
 #ifdef HAVE_SELINUX
     char *role = NULL, *type = NULL;
 #endif /* HAVE_SELINUX */
@@ -1208,6 +1339,15 @@ free_privilege(struct privilege *priv)
     free_members(&priv->hostlist);
     while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
 	TAILQ_REMOVE(&priv->cmndlist, cs, entries);
+	/* Only free the first instance of runcwd/runchroot. */
+	if (cs->runcwd != runcwd) {
+	    runcwd = cs->runcwd;
+	    free(cs->runcwd);
+	}
+	if (cs->runchroot != runchroot) {
+	    runchroot = cs->runchroot;
+	    free(cs->runchroot);
+	}
 #ifdef HAVE_SELINUX
 	/* Only free the first instance of a role/type. */
 	if (cs->role != role) {
@@ -1370,6 +1510,8 @@ init_options(struct command_options *opts)
     opts->notbefore = UNSPEC;
     opts->notafter = UNSPEC;
     opts->timeout = UNSPEC;
+    opts->runchroot = NULL;
+    opts->runcwd = NULL;
 #ifdef HAVE_SELINUX
     opts->role = NULL;
     opts->type = NULL;

@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -110,9 +111,9 @@ static int policy_show_version(int verbose);
 static void policy_check(int argc, char * const argv[], char *env_add[],
     char **command_info[], char **argv_out[], char **user_env_out[]);
 static void policy_list(int argc, char * const argv[],
-    int verbose, const char *list_user, char * const envp[]);
+    int verbose, const char *user, char * const envp[]);
 static void policy_validate(char * const argv[], char * const envp[]);
-static void policy_invalidate(int remove);
+static void policy_invalidate(int unlinkit);
 
 /* I/O log plugin convenience functions. */
 static void iolog_open(struct sudo_settings *settings, char * const user_info[],
@@ -143,7 +144,7 @@ static void approval_show_version(int verbose, struct sudo_settings *settings,
     char * const user_info[], int submit_optind, char * const submit_argv[],
     char * const submit_envp[]);
 
-__dso_public int main(int argc, char *argv[], char *envp[]);
+sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
 int
 main(int argc, char *argv[], char *envp[])
@@ -225,9 +226,8 @@ main(int argc, char *argv[], char *envp[])
     sudo_warn_set_conversation(sudo_conversation);
 
     /* Load plugins. */
-    if (!sudo_load_plugins(&policy_plugin, &io_plugins, &audit_plugins,
-	    &approval_plugins))
-	sudo_fatalx(U_("fatal error, unable to load plugins"));
+    if (!sudo_load_plugins())
+	sudo_fatalx("%s", U_("fatal error, unable to load plugins"));
 
     /* Allocate event base so plugin can use it. */
     if ((sudo_event_base = sudo_ev_base_alloc()) == NULL)
@@ -272,7 +272,8 @@ main(int argc, char *argv[], char *envp[])
 	    for (nargv = argv_out, nargc = 0; nargv[nargc] != NULL; nargc++)
 		continue;
 	    if (nargc == 0)
-		sudo_fatalx(U_("plugin did not return a command to execute"));
+		sudo_fatalx("%s",
+		    U_("plugin did not return a command to execute"));
 
 	    /* Approval plugins run after policy plugin accepts the command. */
 	    approval_check(settings, user_info, submit_optind, argv, envp,
@@ -281,6 +282,10 @@ main(int argc, char *argv[], char *envp[])
 	    /* Open I/O plugin once policy and approval plugins succeed. */
 	    iolog_open(settings, user_info, command_info, nargc, nargv,
 		user_env_out);
+
+	    /* Audit the accept event on behalf of the sudo front-end. */
+	    audit_accept("sudo", SUDO_FRONT_END, command_info,
+		nargv, user_env_out);
 
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
@@ -485,10 +490,11 @@ static char **
 get_user_info(struct user_details *ud)
 {
     char *cp, **user_info, path[PATH_MAX];
+    size_t user_info_max = 32 + RLIM_NLIMITS;
     unsigned int i = 0;
     mode_t mask;
     struct passwd *pw;
-    int fd;
+    int fd, n;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL);
 
     /*
@@ -507,7 +513,7 @@ get_user_info(struct user_details *ud)
     memset(ud, 0, sizeof(*ud));
 
     /* XXX - bound check number of entries */
-    user_info = reallocarray(NULL, 32, sizeof(char *));
+    user_info = reallocarray(NULL, user_info_max, sizeof(char *));
     if (user_info == NULL)
 	goto oom;
 
@@ -593,7 +599,7 @@ get_user_info(struct user_details *ud)
     } else {
 	/* tty may not always be present */
 	if (errno != ENOENT)
-	    sudo_warn(U_("unable to determine tty"));
+	    sudo_warn("%s", U_("unable to determine tty"));
     }
 
     cp = sudo_gethostname();
@@ -608,6 +614,11 @@ get_user_info(struct user_details *ud)
 	goto oom;
     if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
 	goto oom;
+
+    n = serialize_limits(&user_info[i + 1], user_info_max - (i + 1));
+    if (n == -1)
+	goto oom;
+    i += n;
 
     user_info[++i] = NULL;
 
@@ -923,7 +934,7 @@ set_user_groups(struct command_details *details)
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
 	if (details->ngroups >= 0) {
 	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		sudo_warn(U_("unable to set supplementary group IDs"));
+		sudo_warn("%s", U_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
@@ -1088,7 +1099,7 @@ policy_open(struct sudo_settings *settings, char * const user_info[],
 	    usage();
 	else {
 	    /* XXX - audit */
-	    sudo_fatalx(U_("unable to initialize policy plugin"));
+	    sudo_fatalx("%s", U_("unable to initialize policy plugin"));
 	}
     }
 
@@ -1113,9 +1124,11 @@ policy_close(int exit_status, int error_code)
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	policy_plugin.u.policy->close(exit_status, error_code);
 	sudo_debug_set_active_instance(sudo_debug_instance);
-    } else if (error_code) {
-	errno = error_code;
-	sudo_warn(U_("unable to execute %s"), command_details.command);
+    } else if (error_code != 0) {
+	if (command_details.command != NULL) {
+	    errno = error_code;
+	    sudo_warn(U_("unable to execute %s"), command_details.command);
+	}
     }
 
     debug_return;
@@ -1149,7 +1162,7 @@ policy_check(int argc, char * const argv[],
     debug_decl(policy_check, SUDO_DEBUG_PCOMM);
 
     if (policy_plugin.u.policy->check_policy == NULL) {
-	sudo_fatalx(U_("policy plugin %s is missing the `check_policy' method"),
+	sudo_fatalx(U_("policy plugin %s is missing the \"check_policy\" method"),
 	    policy_plugin.name);
     }
     sudo_debug_set_active_instance(policy_plugin.debug_instance);
@@ -1191,7 +1204,7 @@ policy_check(int argc, char * const argv[],
 
 static void
 policy_list(int argc, char * const argv[], int verbose,
-    const char *list_user, char * const envp[])
+    const char *user, char * const envp[])
 {
     const char *errstr = NULL;
     /* TODO: add list_user */
@@ -1207,7 +1220,7 @@ policy_list(int argc, char * const argv[], int verbose,
 	    policy_plugin.name);
     }
     sudo_debug_set_active_instance(policy_plugin.debug_instance);
-    ok = policy_plugin.u.policy->list(argc, argv, verbose, list_user, &errstr);
+    ok = policy_plugin.u.policy->list(argc, argv, verbose, user, &errstr);
     sudo_debug_set_active_instance(sudo_debug_instance);
 
     switch (ok) {
@@ -1280,7 +1293,7 @@ policy_validate(char * const argv[], char * const envp[])
 }
 
 static void
-policy_invalidate(int remove)
+policy_invalidate(int unlinkit)
 {
     debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM);
 
@@ -1289,7 +1302,7 @@ policy_invalidate(int remove)
 	    policy_plugin.name);
     }
     sudo_debug_set_active_instance(policy_plugin.debug_instance);
-    policy_plugin.u.policy->invalidate(remove);
+    policy_plugin.u.policy->invalidate(unlinkit);
     if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15)) {
 	if (policy_plugin.u.policy->close != NULL)
 	    policy_plugin.u.policy->close(0, 0);

@@ -41,7 +41,7 @@
 #include <limits.h>
 #include <dirent.h>
 
-#include <pathnames.h>
+#include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_conf.h"
@@ -158,8 +158,6 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, char *name, size_t namelen)
     pathbuf[sdlen++] = '/';
 
     while ((dp = readdir(d)) != NULL) {
-	struct stat sb;
-
 	/* Skip anything starting with "." */
 	if (dp->d_name[0] == '.')
 	    continue;

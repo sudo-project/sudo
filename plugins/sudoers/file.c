@@ -91,6 +91,7 @@ sudo_file_parse(struct sudo_nss *nss)
 {
     debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle = nss->handle;
+    int error;
 
     if (handle == NULL || handle->fp == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: called with NULL %s",
@@ -99,14 +100,19 @@ sudo_file_parse(struct sudo_nss *nss)
     }
 
     sudoersin = handle->fp;
-    if (sudoersparse() != 0 || parse_error) {
+    error = sudoersparse();
+    if (error || parse_error) {
 	if (errorlineno != -1) {
-	    log_warningx(SLOG_SEND_MAIL, N_("parse error in %s near line %d"),
-		errorfile, errorlineno);
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+		N_("parse error in %s near line %d"), errorfile, errorlineno);
 	} else {
-	    log_warningx(SLOG_SEND_MAIL, N_("parse error in %s"), errorfile);
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+		N_("parse error in %s"), errorfile);
 	}
-	debug_return_ptr(NULL);
+	if (error || !sudoers_recovery) {
+	    /* unrecoverable error */
+	    debug_return_ptr(NULL);
+	}
     }
 
     /* Move parsed sudoers policy to nss handle. */

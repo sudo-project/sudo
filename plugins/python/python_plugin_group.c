@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Robert Manner <robert.manner@oneidentity.com>
+ * Copyright (c) 2019-2020 Robert Manner <robert.manner@oneidentity.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -106,7 +106,7 @@ python_plugin_group_query(const char *user, const char *group, const struct pass
     debug_return_int(rc);
 }
 
-__dso_public struct sudoers_group_plugin group_plugin = {
+sudo_dso_public struct sudoers_group_plugin group_plugin = {
     GROUP_API_VERSION,
     CALLBACK_CFUNC(init),
     CALLBACK_CFUNC(cleanup),

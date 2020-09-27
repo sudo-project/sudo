@@ -579,7 +579,7 @@ cmndspec_continues(struct cmndspec *cs, struct cmndspec *next)
 #ifdef HAVE_SELINUX
 	&& cs->role == next->role && cs->type == next->type
 #endif /* HAVE_SELINUX */
-	;
+	&& cs->runchroot == next->runchroot && cs->runcwd == next->runcwd;
     return ret;
 }
 
@@ -626,10 +626,21 @@ print_cmndspec_json(struct json_container *json,
 
     /* Print options and tags */
     if (cs->timeout > 0 || cs->notbefore != UNSPEC || cs->notafter != UNSPEC ||
-	TAGS_SET(cs->tags) || !TAILQ_EMPTY(options)) {
+	cs->runchroot != NULL || cs->runcwd != NULL || TAGS_SET(cs->tags) ||
+	!TAILQ_EMPTY(options)) {
 	struct cmndtag tag = cs->tags;
 
 	sudo_json_open_array(json, "Options");
+	if (cs->runchroot != NULL) {
+	    value.type = JSON_STRING;
+	    value.u.string = cs->runchroot;
+	    sudo_json_add_value(json, "runchroot", &value);
+	}
+	if (cs->runcwd != NULL) {
+	    value.type = JSON_STRING;
+	    value.u.string = cs->runcwd;
+	    sudo_json_add_value(json, "runcwd", &value);
+	}
 	if (cs->timeout > 0) {
 	    value.type = JSON_NUMBER;
 	    value.u.number = cs->timeout;
@@ -637,10 +648,10 @@ print_cmndspec_json(struct json_container *json,
 	}
 	if (cs->notbefore != UNSPEC) {
 	    if ((tp = gmtime(&cs->notbefore)) == NULL) {
-		sudo_warn(U_("unable to get GMT time"));
+		sudo_warn("%s", U_("unable to get GMT time"));
 	    } else {
 		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
-		    sudo_warnx(U_("unable to format timestamp"));
+		    sudo_warnx("%s", U_("unable to format timestamp"));
 		} else {
 		    value.type = JSON_STRING;
 		    value.u.string = timebuf;
@@ -650,10 +661,10 @@ print_cmndspec_json(struct json_container *json,
 	}
 	if (cs->notafter != UNSPEC) {
 	    if ((tp = gmtime(&cs->notafter)) == NULL) {
-		sudo_warn(U_("unable to get GMT time"));
+		sudo_warn("%s", U_("unable to get GMT time"));
 	    } else {
 		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
-		    sudo_warnx(U_("unable to format timestamp"));
+		    sudo_warnx("%s", U_("unable to format timestamp"));
 		} else {
 		    value.type = JSON_STRING;
 		    value.u.string = timebuf;

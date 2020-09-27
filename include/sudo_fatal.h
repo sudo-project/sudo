@@ -26,6 +26,8 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
+#include "sudo_plugin.h"	/* for conversation function */
+
 /*
  * We wrap fatal/fatalx and warn/warnx so that the same output can
  * go to the debug file, if there is one.
@@ -158,28 +160,25 @@
 #endif /* SUDO_ERROR_WRAP */
 
 typedef void (*sudo_fatal_callback_t)(void);
+typedef bool (*sudo_warn_setlocale_t)(bool, int *);
 
-struct sudo_conv_message;
-struct sudo_conv_reply;
-struct sudo_conv_callback;
-
-__dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func);
-__dso_public int  sudo_fatal_callback_register_v1(sudo_fatal_callback_t func);
-__dso_public char *sudo_warn_gettext_v1(const char *domainname, const char *msgid) __format_arg(2);
-__dso_public void sudo_warn_set_locale_func_v1(bool (*func)(bool, int *));
-__dso_public void sudo_fatal_nodebug_v1(const char *fmt, ...) __printf0like(1, 2) __attribute__((__noreturn__));
-__dso_public void sudo_fatalx_nodebug_v1(const char *fmt, ...) __printflike(1, 2) __attribute__((__noreturn__));
-__dso_public void sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
-__dso_public void sudo_vfatal_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
-__dso_public void sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
-__dso_public void sudo_gai_vfatal_nodebug_v1(int errnum, const char *fmt, va_list ap) __printflike(2, 0) __attribute__((__noreturn__));
-__dso_public void sudo_warn_nodebug_v1(const char *fmt, ...) __printf0like(1, 2);
-__dso_public void sudo_warnx_nodebug_v1(const char *fmt, ...) __printflike(1, 2);
-__dso_public void sudo_gai_warn_nodebug_v1(int errnum, const char *fmt, ...) __printflike(2, 3);
-__dso_public void sudo_vwarn_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0);
-__dso_public void sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0);
-__dso_public void sudo_gai_vwarn_nodebug_v1(int errnum, const char *fmt, va_list ap) __printflike(2, 0);
-__dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const struct sudo_conv_message *msgs, struct sudo_conv_reply *replies, struct sudo_conv_callback *callback));
+sudo_dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func);
+sudo_dso_public int  sudo_fatal_callback_register_v1(sudo_fatal_callback_t func);
+sudo_dso_public char *sudo_warn_gettext_v1(const char *domainname, const char *msgid) __format_arg(2);
+sudo_dso_public void sudo_warn_set_locale_func_v1(sudo_warn_setlocale_t func);
+sudo_dso_public void sudo_fatal_nodebug_v1(const char *fmt, ...) __printf0like(1, 2) __attribute__((__noreturn__));
+sudo_dso_public void sudo_fatalx_nodebug_v1(const char *fmt, ...) __printflike(1, 2) __attribute__((__noreturn__));
+sudo_dso_public void sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
+sudo_dso_public void sudo_vfatal_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
+sudo_dso_public void sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
+sudo_dso_public void sudo_gai_vfatal_nodebug_v1(int errnum, const char *fmt, va_list ap) __printflike(2, 0) __attribute__((__noreturn__));
+sudo_dso_public void sudo_warn_nodebug_v1(const char *fmt, ...) __printf0like(1, 2);
+sudo_dso_public void sudo_warnx_nodebug_v1(const char *fmt, ...) __printflike(1, 2);
+sudo_dso_public void sudo_gai_warn_nodebug_v1(int errnum, const char *fmt, ...) __printflike(2, 3);
+sudo_dso_public void sudo_vwarn_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0);
+sudo_dso_public void sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0);
+sudo_dso_public void sudo_gai_vwarn_nodebug_v1(int errnum, const char *fmt, va_list ap) __printflike(2, 0);
+sudo_dso_public void sudo_warn_set_conversation_v1(sudo_conv_t conv);
 
 #define sudo_fatal_callback_deregister(_a) sudo_fatal_callback_deregister_v1((_a))
 #define sudo_fatal_callback_register(_a) sudo_fatal_callback_register_v1((_a))

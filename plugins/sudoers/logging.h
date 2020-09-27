@@ -44,6 +44,7 @@
 #define SLOG_SEND_MAIL		0x08	/* log via mail */
 #define SLOG_NO_STDERR		0x10	/* do not log via stderr */
 #define SLOG_NO_LOG		0x20	/* do not log via file or syslog */
+#define SLOG_AUDIT		0x40	/* send message to audit as well */
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
@@ -67,11 +68,14 @@ extern char *audit_msg;
 
 union sudo_defs_val;
 
+bool do_logfile(const char *msg);
+bool do_syslog(int pri, const char *msg);
+char *new_logline(const char *, const char *);
 bool sudoers_warn_setlocale(bool restore, int *cookie);
-bool sudoers_setlocale(int newlocale, int *prevlocale);
+bool sudoers_setlocale(int locale_type, int *prev_locale);
 int sudoers_getlocale(void);
-int audit_success(int argc, char *argv[]);
-int audit_failure(int argc, char *argv[], char const *const fmt, ...) __printflike(3, 4);
+int audit_failure(char *const argv[], char const *const fmt, ...) __printflike(2, 3);
+int vaudit_failure(char *const argv[], char const *const fmt, va_list ap) __printflike(2, 0);
 bool log_allowed(int status);
 bool log_auth_failure(int status, unsigned int tries);
 bool log_denial(int status, bool inform_user);

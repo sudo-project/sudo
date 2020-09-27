@@ -178,75 +178,75 @@
 #endif
 
 /* aix.c */
-__dso_public int aix_getauthregistry_v1(char *user, char *saved_registry);
+sudo_dso_public int aix_getauthregistry_v1(char *user, char *saved_registry);
 #define aix_getauthregistry(_a, _b) aix_getauthregistry_v1((_a), (_b))
-__dso_public int aix_prep_user_v1(char *user, const char *tty);
+sudo_dso_public int aix_prep_user_v1(char *user, const char *tty);
 #define aix_prep_user(_a, _b) aix_prep_user_v1((_a), (_b))
-__dso_public int aix_restoreauthdb_v1(void);
+sudo_dso_public int aix_restoreauthdb_v1(void);
 #define aix_restoreauthdb() aix_restoreauthdb_v1()
-__dso_public int aix_setauthdb_v1(char *user);
-__dso_public int aix_setauthdb_v2(char *user, char *registry);
+sudo_dso_public int aix_setauthdb_v1(char *user);
+sudo_dso_public int aix_setauthdb_v2(char *user, char *registry);
 #define aix_setauthdb(_a, _b) aix_setauthdb_v2((_a), (_b))
 
 /* gethostname.c */
-__dso_public char *sudo_gethostname_v1(void);
+sudo_dso_public char *sudo_gethostname_v1(void);
 #define sudo_gethostname() sudo_gethostname_v1()
 
 /* gettime.c */
-__dso_public int sudo_gettime_awake_v1(struct timespec *ts);
+sudo_dso_public int sudo_gettime_awake_v1(struct timespec *ts);
 #define sudo_gettime_awake(_a) sudo_gettime_awake_v1((_a))
-__dso_public int sudo_gettime_mono_v1(struct timespec *ts);
+sudo_dso_public int sudo_gettime_mono_v1(struct timespec *ts);
 #define sudo_gettime_mono(_a) sudo_gettime_mono_v1((_a))
-__dso_public int sudo_gettime_real_v1(struct timespec *ts);
+sudo_dso_public int sudo_gettime_real_v1(struct timespec *ts);
 #define sudo_gettime_real(_a) sudo_gettime_real_v1((_a))
 
 /* gidlist.c */
-__dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+sudo_dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
 #define sudo_parse_gids(_a, _b, _c) sudo_parse_gids_v1((_a), (_b), (_c))
 
 /* getgrouplist.c */
-__dso_public int sudo_getgrouplist2_v1(const char *name, gid_t basegid, GETGROUPS_T **groupsp, int *ngroupsp);
+sudo_dso_public int sudo_getgrouplist2_v1(const char *name, gid_t basegid, GETGROUPS_T **groupsp, int *ngroupsp);
 #define sudo_getgrouplist2(_a, _b, _c, _d) sudo_getgrouplist2_v1((_a), (_b), (_c), (_d))
 
 /* key_val.c */
-__dso_public char *sudo_new_key_val_v1(const char *key, const char *value);
+sudo_dso_public char *sudo_new_key_val_v1(const char *key, const char *value);
 #define sudo_new_key_val(_a, _b) sudo_new_key_val_v1((_a), (_b))
 
 /* locking.c */
 #define SUDO_LOCK	1		/* lock a file */
 #define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
 #define SUDO_UNLOCK	4		/* unlock a file */
-__dso_public bool sudo_lock_file_v1(int fd, int action);
+sudo_dso_public bool sudo_lock_file_v1(int fd, int action);
 #define sudo_lock_file(_a, _b) sudo_lock_file_v1((_a), (_b))
-__dso_public bool sudo_lock_region_v1(int fd, int action, off_t len);
+sudo_dso_public bool sudo_lock_region_v1(int fd, int action, off_t len);
 #define sudo_lock_region(_a, _b, _c) sudo_lock_region_v1((_a), (_b), (_c))
 
 /* logfac.c */
-__dso_public bool sudo_str2logfac_v1(const char *str, int *logfac);
+sudo_dso_public bool sudo_str2logfac_v1(const char *str, int *logfac);
 #define sudo_str2logfac(_a, _b) sudo_str2logfac_v1((_a), (_b))
-__dso_public const char *sudo_logfac2str_v1(int num);
+sudo_dso_public const char *sudo_logfac2str_v1(int num);
 #define sudo_logfac2str(_a) sudo_logfac2str_v1((_a))
 
 /* logpri.c */
-__dso_public bool sudo_str2logpri_v1(const char *str, int *logpri);
+sudo_dso_public bool sudo_str2logpri_v1(const char *str, int *logpri);
 #define sudo_str2logpri(_a, _b) sudo_str2logpri_v1((_a), (_b))
-__dso_public const char *sudo_logpri2str_v1(int num);
+sudo_dso_public const char *sudo_logpri2str_v1(int num);
 #define sudo_logpri2str(_a) sudo_logpri2str_v1((_a))
 
 /* mkdir_parents.c */
-__dso_public bool sudo_mkdir_parents_v1(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
+sudo_dso_public bool sudo_mkdir_parents_v1(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
 #define sudo_mkdir_parents(_a, _b, _c, _d, _e) sudo_mkdir_parents_v1((_a), (_b), (_c), (_d), (_e))
 
 /* parseln.c */
-__dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
-__dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp, int flags);
+sudo_dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
+sudo_dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp, int flags);
 #define sudo_parseln(_a, _b, _c, _d, _e) sudo_parseln_v2((_a), (_b), (_c), (_d), (_e))
 
 /* progname.c */
-__dso_public void initprogname(const char *);
+sudo_dso_public void initprogname(const char *);
 
 /* roundup.c */
-__dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
+sudo_dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
 #define sudo_pow2_roundup(_a) sudo_pow2_roundup_v1((_a))
 
 /* secure_path.c */
@@ -257,65 +257,65 @@ __dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
 #define SUDO_PATH_WORLD_WRITABLE	-4
 #define SUDO_PATH_GROUP_WRITABLE	-5
 struct stat;
-__dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+sudo_dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
 #define sudo_secure_dir(_a, _b, _c, _d) sudo_secure_dir_v1((_a), (_b), (_c), (_d))
-__dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+sudo_dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
 #define sudo_secure_file(_a, _b, _c, _d) sudo_secure_file_v1((_a), (_b), (_c), (_d))
 
 /* setgroups.c */
-__dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);
+sudo_dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);
 #define sudo_setgroups(_a, _b) sudo_setgroups_v1((_a), (_b))
 
 /* strsplit.c */
-__dso_public const char *sudo_strsplit_v1(const char *str, const char *endstr, const char *sep, const char **last);
+sudo_dso_public const char *sudo_strsplit_v1(const char *str, const char *endstr, const char *sep, const char **last);
 #define sudo_strsplit(_a, _b, _c, _d) sudo_strsplit_v1(_a, _b, _c, _d)
 
 /* strtobool.c */
-__dso_public int sudo_strtobool_v1(const char *str);
+sudo_dso_public int sudo_strtobool_v1(const char *str);
 #define sudo_strtobool(_a) sudo_strtobool_v1((_a))
 
 /* strtonum.c */
 /* Not versioned for historical reasons. */
-__dso_public long long sudo_strtonum(const char *, long long, long long, const char **);
+sudo_dso_public long long sudo_strtonum(const char *, long long, long long, const char **);
 
 /* strtoid.c */
-__dso_public id_t sudo_strtoid_v1(const char *str, const char *sep, char **endp, const char **errstr);
-__dso_public id_t sudo_strtoid_v2(const char *str, const char **errstr);
+sudo_dso_public id_t sudo_strtoid_v1(const char *str, const char *sep, char **endp, const char **errstr);
+sudo_dso_public id_t sudo_strtoid_v2(const char *str, const char **errstr);
 #define sudo_strtoid(_a, _b) sudo_strtoid_v2((_a), (_b))
-__dso_public id_t sudo_strtoidx_v1(const char *str, const char *sep, char **endp, const char **errstr);
+sudo_dso_public id_t sudo_strtoidx_v1(const char *str, const char *sep, char **endp, const char **errstr);
 #define sudo_strtoidx(_a, _b, _c, _d) sudo_strtoidx_v1((_a), (_b), (_c), (_d))
 
 /* strtomode.c */
-__dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);
+sudo_dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);
 #define sudo_strtomode(_a, _b) sudo_strtomode_v1((_a), (_b))
 
 /* sudo_printf.c */
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 
 /* term.c */
-__dso_public bool sudo_term_cbreak_v1(int fd);
+sudo_dso_public bool sudo_term_cbreak_v1(int fd);
 #define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))
-__dso_public bool sudo_term_copy_v1(int src, int dst);
+sudo_dso_public bool sudo_term_copy_v1(int src, int dst);
 #define sudo_term_copy(_a, _b) sudo_term_copy_v1((_a), (_b))
-__dso_public bool sudo_term_noecho_v1(int fd);
+sudo_dso_public bool sudo_term_noecho_v1(int fd);
 #define sudo_term_noecho(_a) sudo_term_noecho_v1((_a))
-__dso_public bool sudo_term_raw_v1(int fd, int isig);
+sudo_dso_public bool sudo_term_raw_v1(int fd, int isig);
 #define sudo_term_raw(_a, _b) sudo_term_raw_v1((_a), (_b))
-__dso_public bool sudo_term_restore_v1(int fd, bool flush);
+sudo_dso_public bool sudo_term_restore_v1(int fd, bool flush);
 #define sudo_term_restore(_a, _b) sudo_term_restore_v1((_a), (_b))
 
 /* ttyname_dev.c */
-__dso_public char *sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen);
+sudo_dso_public char *sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen);
 #define sudo_ttyname_dev(_a, _b, _c) sudo_ttyname_dev_v1((_a), (_b), (_c))
 
 /* ttysize.c */
-__dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
+sudo_dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
 #define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
 
 /* uuid.c */
-__dso_public void sudo_uuid_create_v1(unsigned char uuid_out[16]);
+sudo_dso_public void sudo_uuid_create_v1(unsigned char uuid_out[16]);
 #define sudo_uuid_create(_a) sudo_uuid_create_v1((_a))
-__dso_public char *sudo_uuid_to_string_v1(unsigned char uuid[16], char *dst, size_t dstsiz);
+sudo_dso_public char *sudo_uuid_to_string_v1(unsigned char uuid[16], char *dst, size_t dstsiz);
 #define sudo_uuid_to_string(_a, _b, _c) sudo_uuid_to_string_v1((_a), (_b), (_c))
 
 #endif /* SUDO_UTIL_H */

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -45,19 +45,21 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "log_server.pb-c.h"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 #include "sudo_compat.h"
+#include "sudo_debug.h"
 #include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_iolog.h"
 #include "sudo_json.h"
 #include "sudo_queue.h"
-#include "sudo_debug.h"
 #include "sudo_util.h"
-#include "sudo_iolog.h"
+
+#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 #define	LL_HOST_STR	"HOST="
 #define	LL_TTY_STR	"TTY="
+#define	LL_CHROOT_STR	"CHROOT="
 #define	LL_CWD_STR	"PWD="
 #define	LL_USER_STR	"USER="
 #define	LL_GROUP_STR	"GROUP="
@@ -113,7 +115,9 @@ new_logline(const char *message, const char *errstr,
 	len += strlen(errstr) + 3;
     len += sizeof(LL_HOST_STR) + 2 + strlen(details->submithost);
     len += sizeof(LL_TTY_STR) + 2 + strlen(details->ttyname);
-    len += sizeof(LL_CWD_STR) + 2 + strlen(details->cwd);
+    if (details->runchroot != NULL)
+	len += sizeof(LL_CHROOT_STR) + 2 + strlen(details->runchroot);
+    len += sizeof(LL_CWD_STR) + 2 + strlen(details->runcwd);
     if (details->runuser != NULL)
 	len += sizeof(LL_USER_STR) + 2 + strlen(details->runuser);
     if (details->rungroup != NULL)
@@ -173,8 +177,14 @@ new_logline(const char *message, const char *errstr,
 	strlcat(line, details->ttyname, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
+    if (details->runchroot != NULL) {
+	if (strlcat(line, LL_CHROOT_STR, len) >= len ||
+	    strlcat(line, details->runchroot, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+    }
     if (strlcat(line, LL_CWD_STR, len) >= len ||
-	strlcat(line, details->cwd, len) >= len ||
+	strlcat(line, details->runcwd, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
     if (details->runuser != NULL) {
@@ -361,18 +371,18 @@ format_json(ClientMessage__TypeCase event_type, const char *reason,
 	switch (info->value_case) {
 	case INFO_MESSAGE__VALUE_NUMVAL:
 	    json_value.type = JSON_NUMBER;
-	    json_value.u.number = info->numval;
+	    json_value.u.number = info->u.numval;
 	    if (!sudo_json_add_value(&json, info->key, &json_value))
 		goto bad;
 	    break;
 	case INFO_MESSAGE__VALUE_STRVAL:
 	    json_value.type = JSON_STRING;
-	    json_value.u.string = info->strval;
+	    json_value.u.string = info->u.strval;
 	    if (!sudo_json_add_value(&json, info->key, &json_value))
 		goto bad;
 	    break;
 	case INFO_MESSAGE__VALUE_STRLISTVAL: {
-	    InfoMessage__StringList *strlist = info->strlistval;
+	    InfoMessage__StringList *strlist = info->u.strlistval;
 	    size_t n;
 
 	    if (!sudo_json_open_array(&json, info->key))

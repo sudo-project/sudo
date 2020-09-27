@@ -399,7 +399,7 @@ getentropy_fallback(void *buf, size_t len)
 	struct timespec ts;
 	struct timeval tv;
 	struct rusage ru;
-	sigset_t sigset;
+	sigset_t set;
 	struct stat st;
 	struct sudo_digest *ctx;
 	static pid_t lastpid;
@@ -451,9 +451,8 @@ getentropy_fallback(void *buf, size_t len)
 				(void) nanosleep(&ts, NULL);
 			}
 
-			HX(sigpending(&sigset) == -1, sigset);
-			HX(sigprocmask(SIG_BLOCK, NULL, &sigset) == -1,
-			    sigset);
+			HX(sigpending(&set) == -1, set);
+			HX(sigprocmask(SIG_BLOCK, NULL, &set) == -1, set);
 
 			HF(sudo_getentropy);	/* an addr in this library */
 			HF(printf);		/* an addr in libc */
@@ -503,6 +502,7 @@ getentropy_fallback(void *buf, size_t len)
 						    / pgs);
 					}
 
+#ifdef HAVE_CLOCK_GETTIME
 					/* Check cnts and times... */
 					for (ii = 0; ii < sizeof(cl)/sizeof(cl[0]);
 					    ii++) {
@@ -511,6 +511,7 @@ getentropy_fallback(void *buf, size_t len)
 						if (e != -1)
 							cnt += (int)ts.tv_nsec;
 					}
+#endif /* HAVE_CLOCK_GETTIME */
 
 					HX((e = getrusage(RUSAGE_SELF,
 					    &ru)) == -1, ru);
@@ -613,10 +614,8 @@ getentropy_fallback(void *buf, size_t len)
 	}
 done:
 	sudo_digest_free(ctx);
-	if (results != NULL) {
-		memset_s(results, sizeof(results), 0, sizeof(results));
-		free(results);
-	}
+	if (results != NULL)
+		freezero(results, sizeof(results));
 	return (ret);
 }
 

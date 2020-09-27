@@ -195,7 +195,7 @@ sudo_aix_change_password(const char *user)
     switch (child = sudo_debug_fork()) {
     case -1:
 	/* error */
-	sudo_warn(U_("unable to fork"));
+	sudo_warn("%s", U_("unable to fork"));
 	break;
     case 0:
 	/* child, run passwd(1) */
@@ -243,8 +243,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 	free(message);
 	message = NULL;
 	result = authenticate(pw->pw_name, pass, &reenter, &message);
-	memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
-	free(pass);
+	freezero(pass, strlen(pass));
 	prompt = message;
     } while (reenter);
 

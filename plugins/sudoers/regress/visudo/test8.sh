@@ -24,7 +24,7 @@ if [ $? -eq 0 ]; then
 else
     # No support for LC_NUMERIC?
     echo "parse error in stdin near line 1"
-    echo 'visudo: stdin:1 value "2.5" is invalid for option "passwd_timeout"' 1>&2
+    echo 'visudo: stdin:1: value "2.5" is invalid for option "passwd_timeout"' 1>&2
 fi
 
 exit 0

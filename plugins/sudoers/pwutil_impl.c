@@ -54,6 +54,8 @@ do {							\
 	if (src->name) {				\
 		size = strlen(src->name) + 1;		\
 		total += size;				\
+	} else {                                        \
+		size = 0;				\
 	}                                               \
 } while (0)
 
@@ -78,7 +80,10 @@ sudo_make_pwitem(uid_t uid, const char *name)
 {
     char *cp;
     const char *pw_shell;
-    size_t nsize, psize, csize, gsize, dsize, ssize, total;
+    size_t nsize, psize, gsize, dsize, ssize, total;
+#ifdef HAVE_LOGIN_CAP_H
+    size_t csize;
+#endif
     struct cache_item_pw *pwitem;
     struct passwd *pw, *newpw;
     debug_decl(sudo_make_pwitem, SUDOERS_DEBUG_NSS);
@@ -95,7 +100,6 @@ sudo_make_pwitem(uid_t uid, const char *name)
 	? _PATH_BSHELL : pw->pw_shell;
 
     /* Allocate in one big chunk for easy freeing. */
-    nsize = psize = csize = gsize = dsize = ssize = 0;
     total = sizeof(*pwitem);
     FIELD_SIZE(pw, pw_name, nsize);
     FIELD_SIZE(pw, pw_passwd, psize);
@@ -160,7 +164,7 @@ struct cache_item *
 sudo_make_gritem(gid_t gid, const char *name)
 {
     char *cp;
-    size_t nsize, psize, nmem, total, len;
+    size_t nsize, psize, total, len, nmem = 0;
     struct cache_item_gr *gritem;
     struct group *gr, *newgr;
     debug_decl(sudo_make_gritem, SUDOERS_DEBUG_NSS);
@@ -173,7 +177,6 @@ sudo_make_gritem(gid_t gid, const char *name)
     }
 
     /* Allocate in one big chunk for easy freeing. */
-    nsize = psize = nmem = 0;
     total = sizeof(*gritem);
     FIELD_SIZE(gr, gr_name, nsize);
     FIELD_SIZE(gr, gr_passwd, psize);

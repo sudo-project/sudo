@@ -1,6 +1,6 @@
 Testing @includedir of an unquoted path
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 
@@ -13,7 +13,7 @@ Command allowed
 
 Testing @includedir of a double-quoted path
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 
@@ -26,7 +26,7 @@ Command allowed
 
 Testing #includedir of an unquoted path
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 
@@ -39,7 +39,7 @@ Command allowed
 
 Testing #includedir of a double-quoted path
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 

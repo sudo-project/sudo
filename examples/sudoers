@@ -8,9 +8,9 @@
 ##
 # Override built-in defaults
 ##
-Defaults		syslog=auth
+Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
-Defaults:FULLTIMERS	!lecture
+Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
 Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
 Defaults!PAGERS		noexec
@@ -20,7 +20,7 @@ Defaults!PAGERS		noexec
 ##
 User_Alias	FULLTIMERS = millert, mikef, dowdy
 User_Alias	PARTTIMERS = bostley, jwfox, crawl
-User_Alias	WEBMASTERS = will, wendy, wim
+User_Alias	WEBADMIN = will, wendy, wim
 
 ##
 # Runas alias specification
@@ -37,7 +37,7 @@ Host_Alias	SPARC = bigtime, eclipse, moet, anchor:\
 		HPPA = boa, nag, python
 Host_Alias	CUNETS = 128.138.0.0/255.255.0.0
 Host_Alias	CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
-Host_Alias	SERVERS = master, mail, www, ns
+Host_Alias	SERVERS = primary, mail, www, ns
 Host_Alias	CDROM = orion, perseus, hercules
 
 ##
@@ -123,10 +123,10 @@ steve		CSNETS = (operator) /usr/local/op_commands/
 # they get hung.
 matt		valkyrie = KILL
 
-# users in the WEBMASTERS User_Alias (will, wendy, and wim)
+# users in the WEBADMIN User_Alias (will, wendy, and wim)
 # may run any command as user www (which owns the web pages)
 # or simply su to www.
-WEBMASTERS	www = (www) ALL, (root) /usr/bin/su www
+WEBADMIN	www = (www) ALL, (root) /usr/bin/su www
 
 # anyone can mount/unmount a cd-rom on the machines in the CDROM alias
 ALL		CDROM = NOPASSWD: /sbin/umount /CDROM,\

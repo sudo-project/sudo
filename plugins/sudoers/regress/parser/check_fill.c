@@ -37,7 +37,7 @@
 #include "sudo_util.h"
 #include <gram.h>
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 /*
  * TODO: test realloc

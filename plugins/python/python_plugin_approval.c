@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Robert Manner <robert.manner@oneidentity.com>
+ * Copyright (c) 2020 Robert Manner <robert.manner@oneidentity.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -145,7 +145,7 @@ python_plugin_approval_show_version(struct ApprovalPluginContext *approval_ctx, 
         CALLBACK_PYNAME(show_version), verbose, PY_APPROVAL_PLUGIN_VERSION, "approval"));
 }
 
-__dso_public struct approval_plugin python_approval;
+sudo_dso_public struct approval_plugin python_approval;
 
 // generate symbols for loading multiple approval plugins:
 #define APPROVAL_SYMBOL_NAME(symbol) symbol
@@ -175,7 +175,7 @@ static struct approval_plugin *extra_approval_plugins[] = {
     &python_approval7
 };
 
-__dso_public struct approval_plugin *
+sudo_dso_public struct approval_plugin *
 python_approval_clone(void)
 {
     static size_t counter = 0;

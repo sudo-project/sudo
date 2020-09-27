@@ -36,10 +36,10 @@
 
 #include "sudoers.h"
 #include "interfaces.h"
-#include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
 #include "sudo_digest.h"
+#include <gram.h>
 
 /*
  * Returns true if the string pointed to by valp begins with an
@@ -152,7 +152,7 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 		m->type = ALL;
 		break;
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	default:
 	    m->type = WORD;
 	    break;
@@ -222,7 +222,7 @@ host_to_member(char *host)
 	    m->type = ALL;
 	    break;
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	if (is_address(host)) {
 	    m->type = NTWKADDR;
@@ -516,6 +516,12 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		    op = sudo_ldap_parse_option(opt, &var, &val);
 		    if (strcmp(var, "command_timeout") == 0 && val != NULL) {
 			cmndspec->timeout = parse_timeout(val);
+		    } else if (strcmp(var, "runchroot") == 0 && val != NULL) {
+			if ((cmndspec->runchroot = strdup(val)) == NULL)
+			    break;
+		    } else if (strcmp(var, "runcwd") == 0 && val != NULL) {
+			if ((cmndspec->runcwd = strdup(val)) == NULL)
+			    break;
 #ifdef HAVE_SELINUX
 		    } else if (strcmp(var, "role") == 0 && val != NULL) {
 			if ((cmndspec->role = strdup(val)) == NULL)

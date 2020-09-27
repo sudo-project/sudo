@@ -34,7 +34,7 @@
 #include "sudoers.h"
 #include "interfaces.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 static int
 check_addr(char *input)

@@ -41,7 +41,7 @@
 #include "sudo_util.h"
 #include "sudo_exec.h"
 
-__dso_public int main(int argc, char *argv[], char *envp[]);
+sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
 static bool
 report_status(int status, const char *what)
@@ -161,7 +161,7 @@ try_wordexp(void)
 	    break;
 	}
 	wordfree(&we);
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     default:
 	printf("%s: FAIL (wordexp) [%d]\n", getprogname(), rc);
 	break;

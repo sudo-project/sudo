@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2007-2010, 2013, 2015, 2017
+ * Copyright (c) 2007-2010, 2013, 2015, 2017, 2020
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -27,8 +27,8 @@
 #define SUDO_USAGE1 " -h | -K | -k | -V"
 #define SUDO_USAGE2 " -v [-AknS] @BSDAUTH_USAGE@[-g group] [-h host] [-p prompt] [-u user]"
 #define SUDO_USAGE3 " -l [-AknS] @BSDAUTH_USAGE@[-g group] [-h host] [-p prompt] [-U user] [-u user] [command]"
-#define SUDO_USAGE4 " [-AbEHknPS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C num] @LOGINCAP_USAGE@[-g group] [-h host] [-p prompt] [-T timeout] [-u user] [VAR=value] [-i|-s] [<command>]"
-#define SUDO_USAGE5 " -e [-AknS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C num] @LOGINCAP_USAGE@[-g group] [-h host] [-p prompt] [-T timeout] [-u user] file ..."
+#define SUDO_USAGE4 " [-AbEHknPS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C num] [-D directory] @LOGINCAP_USAGE@[-g group] [-h host] [-p prompt] [-R directory] [-T timeout] [-u user] [VAR=value] [-i|-s] [<command>]"
+#define SUDO_USAGE5 " -e [-AknS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C num] @LOGINCAP_USAGE@[-D directory] [-g group] [-h host] [-p prompt] [-R directory] [-T timeout] [-u user] file ..."
 
 /*
  * Configure script arguments used to build sudo.

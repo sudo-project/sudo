@@ -400,8 +400,10 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
     ret = sudo_putenv_nodebug(str, dupcheck, overwrite);
     if (ret == -1) {
 #ifdef ENV_DEBUG
-	if (env.envp[env.env_len] != NULL)
-	    sudo_warnx(U_("sudo_putenv: corrupted envp, length mismatch"));
+	if (env.envp[env.env_len] != NULL) {
+	    sudo_warnx("%s",
+		U_("sudo_putenv: corrupted envp, length mismatch"));
+	}
 #endif
     }
     debug_return_int(ret);
@@ -1128,7 +1130,7 @@ rebuild_env(void)
     debug_return_bool(true);
 
 bad:
-    sudo_warn(U_("unable to rebuild the environment"));
+    sudo_warn("%s", U_("unable to rebuild the environment"));
     debug_return_bool(false);
 }
 
@@ -1325,9 +1327,9 @@ static struct sudoers_env_file env_file_system = {
 
 void
 register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *),
-    char * (*ef_next)(void *, int *), bool system)
+    char * (*ef_next)(void *, int *), bool sys)
 {
-    struct sudoers_env_file *ef = system ? &env_file_system : &env_file_sudoers;
+    struct sudoers_env_file *ef = sys ? &env_file_system : &env_file_sudoers;
 
     ef->open = ef_open;
     ef->close = ef_close;

@@ -28,7 +28,7 @@
 #include "sudo_queue.h"
 #include "sudo_util.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 /*
  * Note: HLTQ_ENTRY is intentionally in the middle of the struct

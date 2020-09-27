@@ -2,6 +2,7 @@
 \.i$
 \.l[ao]$
 \.lai$
+\.map$
 \.mo$
 \.o$
 \.plog$
@@ -19,16 +20,16 @@ Makefile$
 ^build$
 
 ^ChangeLog$
-^PVS-Studio.cfg$
-^uncrustify.files$
+^PVS-Studio\.cfg$
+^uncrustify\.files$
 ^doc/.*\.man$
 ^doc/.*\.mdoc$
 ^doc/fixman\.sed$
 
 ^examples/sudo\.conf$
 
-^init.d/.*.sh$
-^init.d/sudo.conf$
+^init\.d/.*\.sh$
+^init\.d/sudo\.conf$
 
 ^pathnames\.h$
 ^src/sudo$
@@ -51,7 +52,7 @@ Makefile$
 ^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|prologue|check_[a-z0-9_]+)$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
 ^plugins/sudoers/regress/iolog_plugin/iolog$
-^plugins/sudoers/regress/testsudoers/test3.d/root$
+^plugins/sudoers/regress/testsudoers/test3\.d/root$
 
 ^plugins/python/__pycache__
 ^plugins/python/regress/__pycache__

@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019 Robert Manner <robert.manner@oneidentity.com>
+.\" Copyright (c) 2019-2020 Robert Manner <robert.manner@oneidentity.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -804,15 +804,43 @@ accept(self, plugin_name: str, plugin_type: int, command_info: Tuple[str, ...],
        run_argv: Tuple[str, ...], run_envp: Tuple[str, ...]) -> int
 .Ed
 .Pp
-This function is called when a command or action is accepted by the policy
-plugin.
+This function is called when a command or action is accepted by a policy
+or approval plugin.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that accepted the command or
+.Dq sudo
+for the
+.Nm sudo
+front-end.
 .It plugin_type
-The type of plugin that accepted the command, currently always
-.Dv sudo.PLUGIN_TYPE.POLICY .
+The type of plugin that accepted the command, currently either
+.Dv sudo.PLUGIN_TYPE.POLICY ,
+.Dv sudo.PLUGIN_TYPE.APPROVAL
+or
+.Dv sudo.PLUGIN_TYPE.SUDO .
+The
+.Fn accept
+function is called multiple times--once for each policy or approval
+plugin that succeeds and once for the sudo front-end.
+When called on behalf of the sudo front-end,
+.Fa command_info
+may include information from an I/O logging plugin as well.
+.Pp
+Typically, an audit plugin is interested in either the accept status from
+the
+.Nm sudo
+front-end or from the various policy and approval plugins, but not both.
+It is possible for the policy plugin to accept a command that is
+later rejected by an approval plugin, in which case the audit
+plugin's
+.Fn accept
+and
+.Fn reject
+functions will
+.Em both
+be called.
 .It command_info
 A vector of information describing the command being run.
 See the
@@ -834,10 +862,21 @@ plugin.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that rejected the command.
 .It plugin_type
-The type of plugin that accepted the command, currently always
-.Dv sudo.PLUGIN_TYPE.POLICY .
+The type of plugin that rejected the command, currently either
+.Dv sudo.PLUGIN_TYPE.POLICY ,
+.Dv sudo.PLUGIN_TYPE.APPROVAL
+or
+.Dv sudo.PLUGIN_TYPE.IO .
+.Pp
+Unlike the
+.Fn accept
+function, the
+.Fn reject
+function is not called on behalf of the
+.Nm sudo
+front-end.
 .It audit_msg
 An optional string describing the reason the command was rejected by the plugin.
 If the plugin did not provide a reason, audit_msg will be
@@ -855,17 +894,23 @@ error(self, plugin_name: str, plugin_type: int, audit_msg: str,
       command_info: Tuple[str, ...]) -> int
 .Ed
 .Pp
-This function is called when a plugin returns an error.
+This function is called when a plugin or the
+.Nm sudo
+front-end returns an error.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that generated the error or
+.Dq sudo
+for the
+.Nm sudo
+front-end.
 .It plugin_type
-The type of plugin that accepted the command, currently
-.Dv sudo.PLUGIN_TYPE.POLICY
-or
-.Dv sudo.PLUGIN_TYPE.IO
-.
+The type of plugin that generated the error, or
+.Dv SUDO_FRONT_END
+for the
+.Nm sudo
+front-end.
 .It audit_msg
 An optional string describing the plugin error.
 If the plugin did not provide a description, it will be

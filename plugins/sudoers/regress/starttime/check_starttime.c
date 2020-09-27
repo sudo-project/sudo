@@ -30,7 +30,7 @@
 #include "sudo_fatal.h"
 #include "check.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 #ifdef __linux__
 static int

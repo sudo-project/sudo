@@ -64,7 +64,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		goto read_pass;
 	    case SUDO_CONV_PROMPT_MASK:
 		SET(flags, TGP_MASK);
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	    case SUDO_CONV_PROMPT_ECHO_OFF:
 		if (ISSET(msg->msg_type, SUDO_CONV_PROMPT_ECHO_OK))
 		    SET(flags, TGP_NOECHO_TRY);
@@ -80,11 +80,11 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    sudo_fatalx_nodebug(U_("%s: %s"), "sudo_conversation",
 			U_("unable to allocate memory"));
 		}
-		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+		explicit_bzero(pass, strlen(pass));
 		break;
 	    case SUDO_CONV_ERROR_MSG:
 		fp = stderr;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	    case SUDO_CONV_INFO_MSG:
 		if (msg->msg != NULL) {
 		    size_t len = strlen(msg->msg);
@@ -135,8 +135,7 @@ err:
 	    struct sudo_conv_reply *repl = &replies[n];
 	    if (repl->reply == NULL)
 		continue;
-	    memset_s(repl->reply, SUDO_CONV_REPL_MAX, 0, strlen(repl->reply));
-	    free(repl->reply);
+	    freezero(repl->reply, strlen(repl->reply));
 	    repl->reply = NULL;
 	} while (n--);
     }
@@ -172,7 +171,7 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
     switch (msg_type & 0xff) {
     case SUDO_CONV_ERROR_MSG:
 	fp = stderr;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case SUDO_CONV_INFO_MSG:
 	va_start(ap, fmt);
 	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);

@@ -1,0 +1,995 @@
+# Portable object template file for sudo
+# This file is put in the public domain.
+# Todd C. Miller <Todd.Miller@sudo.ws>, 2011-2018
+# Florentina Mușat <florentina.musat.28@gmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.9.2rc1\n"
+"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
+"POT-Creation-Date: 2020-06-24 05:35-0600\n"
+"PO-Revision-Date: 2020-07-16 17:54+0200\n"
+"Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
+"Language-Team: Romanian <translation-team-ro@lists.sourceforge.net>\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 2.3.1\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n%100<=19) ? 1 : 2);\n"
+
+#: lib/util/aix.c:89 lib/util/aix.c:169
+msgid "unable to open userdb"
+msgstr "nu se poate deschide userdb"
+
+#: lib/util/aix.c:224
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "nu se poate comuta la registrul „%s” pentru %s"
+
+#: lib/util/aix.c:249
+msgid "unable to restore registry"
+msgstr "nu se poate restaura registrul"
+
+#: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/gidlist.c:76
+#: lib/util/json.c:54 lib/util/json.c:180 lib/util/sudo_conf.c:186
+#: lib/util/sudo_conf.c:272 lib/util/sudo_conf.c:349 lib/util/sudo_conf.c:575
+#: src/conversation.c:80 src/exec_common.c:106 src/exec_common.c:122
+#: src/exec_common.c:131 src/exec_monitor.c:206 src/exec_monitor.c:455
+#: src/exec_monitor.c:461 src/exec_monitor.c:469 src/exec_monitor.c:477
+#: src/exec_monitor.c:484 src/exec_monitor.c:491 src/exec_monitor.c:498
+#: src/exec_monitor.c:505 src/exec_monitor.c:512 src/exec_monitor.c:519
+#: src/exec_monitor.c:526 src/exec_nopty.c:212 src/exec_nopty.c:221
+#: src/exec_nopty.c:228 src/exec_nopty.c:235 src/exec_nopty.c:242
+#: src/exec_nopty.c:249 src/exec_nopty.c:256 src/exec_nopty.c:263
+#: src/exec_nopty.c:270 src/exec_nopty.c:277 src/exec_nopty.c:284
+#: src/exec_nopty.c:291 src/exec_nopty.c:299 src/exec_nopty.c:473
+#: src/exec_pty.c:827 src/exec_pty.c:836 src/exec_pty.c:893
+#: src/exec_pty.c:1046 src/exec_pty.c:1218 src/exec_pty.c:1227
+#: src/exec_pty.c:1234 src/exec_pty.c:1241 src/exec_pty.c:1248
+#: src/exec_pty.c:1255 src/exec_pty.c:1262 src/exec_pty.c:1269
+#: src/exec_pty.c:1276 src/exec_pty.c:1283 src/exec_pty.c:1290
+#: src/exec_pty.c:1298 src/exec_pty.c:1740 src/load_plugins.c:52
+#: src/load_plugins.c:65 src/load_plugins.c:163 src/load_plugins.c:188
+#: src/load_plugins.c:223 src/load_plugins.c:462 src/load_plugins.c:468
+#: src/parse_args.c:176 src/parse_args.c:197 src/parse_args.c:270
+#: src/parse_args.c:593 src/parse_args.c:615 src/parse_args.c:640
+#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:90
+#: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
+#: src/sudo.c:624 src/sudo.c:693 src/sudo.c:703 src/sudo.c:724 src/sudo.c:743
+#: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
+#: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
+#: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:974
+#: src/sudo_edit.c:994
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:55
+#: lib/util/json.c:181 lib/util/sudo_conf.c:187 lib/util/sudo_conf.c:272
+#: lib/util/sudo_conf.c:349 lib/util/sudo_conf.c:575 src/conversation.c:81
+#: src/exec_common.c:106 src/exec_common.c:123 src/exec_common.c:132
+#: src/exec_monitor.c:455 src/exec_monitor.c:461 src/exec_monitor.c:469
+#: src/exec_monitor.c:477 src/exec_monitor.c:484 src/exec_monitor.c:491
+#: src/exec_monitor.c:498 src/exec_monitor.c:505 src/exec_monitor.c:512
+#: src/exec_monitor.c:519 src/exec_monitor.c:526 src/exec_nopty.c:212
+#: src/exec_nopty.c:221 src/exec_nopty.c:228 src/exec_nopty.c:235
+#: src/exec_nopty.c:242 src/exec_nopty.c:249 src/exec_nopty.c:256
+#: src/exec_nopty.c:263 src/exec_nopty.c:270 src/exec_nopty.c:277
+#: src/exec_nopty.c:284 src/exec_nopty.c:291 src/exec_nopty.c:299
+#: src/exec_pty.c:827 src/exec_pty.c:836 src/exec_pty.c:893
+#: src/exec_pty.c:1218 src/exec_pty.c:1227 src/exec_pty.c:1234
+#: src/exec_pty.c:1241 src/exec_pty.c:1248 src/exec_pty.c:1255
+#: src/exec_pty.c:1262 src/exec_pty.c:1269 src/exec_pty.c:1276
+#: src/exec_pty.c:1283 src/exec_pty.c:1290 src/exec_pty.c:1298
+#: src/exec_pty.c:1740 src/load_plugins.c:163 src/load_plugins.c:188
+#: src/load_plugins.c:223 src/load_plugins.c:462 src/load_plugins.c:468
+#: src/parse_args.c:176 src/parse_args.c:198 src/parse_args.c:270
+#: src/parse_args.c:593 src/parse_args.c:615 src/parse_args.c:640
+#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:90
+#: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
+#: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
+#: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
+#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:974 src/sudo_edit.c:994
+msgid "unable to allocate memory"
+msgstr "nu se poate aloca memoria"
+
+#: lib/util/mkdir_parents.c:69 lib/util/sudo_conf.c:614 src/selinux.c:234
+#: src/selinux.c:264 src/sudo.c:367
+#, c-format
+msgid "unable to open %s"
+msgstr "nu se poate deschide %s"
+
+#: lib/util/mkdir_parents.c:84
+#, c-format
+msgid "unable to mkdir %s"
+msgstr "nu se poate mkdir %s"
+
+#: lib/util/mkdir_parents.c:93 lib/util/sudo_conf.c:591
+#, c-format
+msgid "unable to stat %s"
+msgstr "nu se poate stat %s"
+
+#: lib/util/mkdir_parents.c:98
+#, c-format
+msgid "%s exists but is not a directory (0%o)"
+msgstr "%s există dar nu este un director (0%o)"
+
+#: lib/util/strsignal.c:50
+msgid "Unknown signal"
+msgstr "Semnal necunoscut"
+
+#: lib/util/strtoid.c:87 lib/util/strtomode.c:52 lib/util/strtonum.c:148
+#: lib/util/strtonum.c:187
+msgid "invalid value"
+msgstr "valoare nevalidă"
+
+#: lib/util/strtomode.c:58 lib/util/strtonum.c:160
+msgid "value too large"
+msgstr "valoare prea mare"
+
+#: lib/util/strtomode.c:58 lib/util/strtonum.c:154
+msgid "value too small"
+msgstr "valoare prea mică"
+
+#: lib/util/sudo_conf.c:205
+#, c-format
+msgid "invalid Path value \"%s\" in %s, line %u"
+msgstr "valoare de cale nevalidă „%s” în %s, linia %u"
+
+#: lib/util/sudo_conf.c:371 lib/util/sudo_conf.c:387 lib/util/sudo_conf.c:440
+#, c-format
+msgid "invalid value for %s \"%s\" in %s, line %u"
+msgstr "valoare nevalidă pentru %s „%s” în %s, linia %u"
+
+#: lib/util/sudo_conf.c:408
+#, c-format
+msgid "unsupported group source \"%s\" in %s, line %u"
+msgstr "sursă de grup nesuportată „%s” în %s, linia %u"
+
+#: lib/util/sudo_conf.c:424
+#, c-format
+msgid "invalid max groups \"%s\" in %s, line %u"
+msgstr "grupuri maxime nevalide „%s” în %s, linia %u"
+
+#: lib/util/sudo_conf.c:594
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s nu este un fișier regulat"
+
+#: lib/util/sudo_conf.c:597
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s este deținut de uid-ul %u, ar trebui să fie %u"
+
+#: lib/util/sudo_conf.c:601
+#, c-format
+msgid "%s is world writable"
+msgstr "%s este inscriptibilă global"
+
+#: lib/util/sudo_conf.c:604
+#, c-format
+msgid "%s is group writable"
+msgstr "%s este inscriptibil pe grup"
+
+#: src/copy_file.c:118
+#, c-format
+msgid "unable to read from %s"
+msgstr "nu se poate scrie de la %s"
+
+#: src/copy_file.c:122 src/sudo_edit.c:695
+#, c-format
+msgid "unable to write to %s"
+msgstr "nu se poate scrie la %s"
+
+#: src/exec.c:128
+#, c-format
+msgid "unknown login class %s"
+msgstr "clasă de autentificare necunoscută %s"
+
+#: src/exec.c:140
+msgid "unable to set user context"
+msgstr "nu se poate stabili contextul utilizatorului"
+
+#: src/exec.c:156
+msgid "unable to set process priority"
+msgstr "nu se poate stabili prioritatea procesului"
+
+#: src/exec.c:170
+#, c-format
+msgid "unable to change root to %s"
+msgstr "nu se poate schimba root-ul la %s"
+
+#: src/exec.c:183 src/exec.c:189 src/exec.c:196
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "nu se poate schimba la uid-ul runas (%u, %u)"
+
+#: src/exec.c:214
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "nu se poate schimba directorul la %s"
+
+#: src/exec.c:218
+#, c-format
+msgid "starting from %s"
+msgstr "începând de la %s"
+
+#: src/exec.c:300 src/exec_monitor.c:564 src/exec_monitor.c:566
+#: src/exec_nopty.c:531 src/exec_pty.c:568 src/exec_pty.c:1386
+#: src/exec_pty.c:1388 src/signal.c:139 src/signal.c:153
+#, c-format
+msgid "unable to set handler for signal %d"
+msgstr "nu se poate stabili mânerul pentru semnalul %d"
+
+#: src/exec_common.c:165
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "nu se poate elimina PRIV_PROC_EXEC de la PRIV_LIMIT"
+
+#: src/exec_monitor.c:360
+msgid "error reading from socketpair"
+msgstr "eroare la citirea de la socketpair"
+
+#: src/exec_monitor.c:377
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "tip de răspuns neașteptat pe backchannel: %d"
+
+#: src/exec_monitor.c:463 src/exec_monitor.c:471 src/exec_monitor.c:479
+#: src/exec_monitor.c:486 src/exec_monitor.c:493 src/exec_monitor.c:500
+#: src/exec_monitor.c:507 src/exec_monitor.c:514 src/exec_monitor.c:521
+#: src/exec_monitor.c:528 src/exec_nopty.c:214 src/exec_nopty.c:223
+#: src/exec_nopty.c:230 src/exec_nopty.c:237 src/exec_nopty.c:244
+#: src/exec_nopty.c:251 src/exec_nopty.c:258 src/exec_nopty.c:265
+#: src/exec_nopty.c:272 src/exec_nopty.c:279 src/exec_nopty.c:286
+#: src/exec_nopty.c:293 src/exec_nopty.c:301 src/exec_pty.c:693
+#: src/exec_pty.c:698 src/exec_pty.c:795 src/exec_pty.c:802 src/exec_pty.c:899
+#: src/exec_pty.c:1220 src/exec_pty.c:1229 src/exec_pty.c:1236
+#: src/exec_pty.c:1243 src/exec_pty.c:1250 src/exec_pty.c:1257
+#: src/exec_pty.c:1264 src/exec_pty.c:1271 src/exec_pty.c:1278
+#: src/exec_pty.c:1285 src/exec_pty.c:1292 src/exec_pty.c:1693
+#: src/exec_pty.c:1703 src/exec_pty.c:1748 src/exec_pty.c:1755
+#: src/exec_pty.c:1782
+msgid "unable to add event to queue"
+msgstr "nu se poate adăuga evenimentul la coadă"
+
+#: src/exec_monitor.c:582
+msgid "unable to set controlling tty"
+msgstr "nu se poate stabili tty de control"
+
+#: src/exec_monitor.c:590 src/exec_nopty.c:358 src/exec_pty.c:1465
+#: src/exec_pty.c:1486 src/exec_pty.c:1506 src/tgetpass.c:304
+msgid "unable to create pipe"
+msgstr "nu se poate crea linia de asamblare"
+
+#: src/exec_monitor.c:598
+msgid "unable to receive message from parent"
+msgstr "nu se poate primi mesajul de la superior"
+
+#: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
+#: src/sudo_edit.c:735 src/tgetpass.c:308
+msgid "unable to fork"
+msgstr "nu se poate da fork"
+
+#: src/exec_monitor.c:616 src/exec_monitor.c:715 src/exec_nopty.c:441
+msgid "unable to restore tty label"
+msgstr "nu se poate restaura eticheta tty"
+
+#: src/exec_monitor.c:632 src/sesh.c:126 src/sudo.c:1123
+#, c-format
+msgid "unable to execute %s"
+msgstr "nu se poate executa %s"
+
+#: src/exec_nopty.c:352 src/exec_pty.c:1395
+msgid "policy plugin failed session initialization"
+msgstr "modulul de politică a eșuat la inițializarea sesiunii"
+
+#: src/exec_nopty.c:429 src/exec_pty.c:1632
+msgid "error in event loop"
+msgstr "eroare în bucla de eveniment"
+
+#: src/exec_nopty.c:539 src/exec_pty.c:606 src/signal.c:101
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr "nu se poate restaura mânerul pentru semnalul %d"
+
+#: src/exec_pty.c:152
+msgid "unable to allocate pty"
+msgstr "nu se poate aloca pty"
+
+#: src/exec_pty.c:216 src/exec_pty.c:255 src/exec_pty.c:294 src/exec_pty.c:344
+#: src/exec_pty.c:394
+msgid "I/O plugin error"
+msgstr "Eroare de plugin I/O"
+
+#: src/exec_pty.c:219 src/exec_pty.c:258 src/exec_pty.c:297 src/exec_pty.c:347
+#: src/exec_pty.c:397
+msgid "command rejected by I/O plugin"
+msgstr "comandă respinsă de modulul I/O"
+
+#: src/exec_pty.c:444
+msgid "error logging suspend"
+msgstr "eroare la suspendarea jurnalizării"
+
+#: src/exec_pty.c:477
+msgid "error changing window size"
+msgstr "eroare la schimbarea dimensiunii ferestrei"
+
+#: src/exec_pty.c:1375
+msgid "unable to create sockets"
+msgstr "nu se pot crea socluri"
+
+#: src/exec_pty.c:1587
+msgid "unable to send message to monitor process"
+msgstr "nu se poate trimite mesajul la procesul de monitorizare"
+
+#: src/load_plugins.c:50 src/load_plugins.c:63 src/load_plugins.c:85
+#: src/load_plugins.c:115 src/load_plugins.c:129 src/load_plugins.c:135
+#: src/load_plugins.c:287 src/load_plugins.c:297 src/load_plugins.c:307
+#: src/load_plugins.c:353
+#, c-format
+msgid "error in %s, line %d while loading plugin \"%s\""
+msgstr "eroare în %s, linia %d în timpul încărcării modulului „%s”"
+
+#: src/load_plugins.c:87
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s: %s"
+
+#: src/load_plugins.c:131
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s trebuie să fie deținut de uid-ul %d"
+
+#: src/load_plugins.c:137
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s trebuie să fie inscriptibil doar de deținător"
+
+#: src/load_plugins.c:247 src/load_plugins.c:322
+#, c-format
+msgid "ignoring duplicate plugin \"%s\" in %s, line %d"
+msgstr "se ignoră modulul duplicat „%s” în %s, linia %d"
+
+#: src/load_plugins.c:289
+#, c-format
+msgid "unable to load %s: %s"
+msgstr "nu se poate încărca %s: %s"
+
+#: src/load_plugins.c:299
+#, c-format
+msgid "unable to find symbol \"%s\" in %s"
+msgstr "nu se poate găsi simbolul „%s” în %s"
+
+#: src/load_plugins.c:309
+#, c-format
+msgid "incompatible plugin major version %d (expected %d) found in %s"
+msgstr "versiune majoră a modulului incompatibilă %d (s-a așteptat %d) găsită în %s"
+
+#: src/load_plugins.c:327
+#, c-format
+msgid "ignoring policy plugin \"%s\" in %s, line %d"
+msgstr "se ignoră modulul de politică „%s” în %s, linia %d"
+
+#: src/load_plugins.c:329
+msgid "only a single policy plugin may be specified"
+msgstr "doar un singur modul de politică poate fi specificat"
+
+#: src/load_plugins.c:355
+#, c-format
+msgid "unknown plugin type %d found in %s"
+msgstr "tip de modul necunoscut %d găsit în %s"
+
+#: src/load_plugins.c:541
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "modulul de politică %s nu include o metodă check_policy"
+
+#: src/net_ifs.c:178 src/net_ifs.c:195 src/net_ifs.c:340 src/sudo.c:477
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "eroare internă, supraplin %s"
+
+#: src/parse_args.c:218
+#, c-format
+msgid "invalid environment variable name: %s"
+msgstr "nume de variabilă de mediu nevalid: %s"
+
+#: src/parse_args.c:319
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "argumentul la -C trebuie să fie un număr mai mare decât sau egal cu 3"
+
+#: src/parse_args.c:532
+msgid "you may not specify both the -i and -s options"
+msgstr "trebuie să specificați amândouă opțiunile -i și -s"
+
+#: src/parse_args.c:536
+msgid "you may not specify both the -i and -E options"
+msgstr "nu puteți specifica amândouă opțiunile -i și -E"
+
+#: src/parse_args.c:546
+msgid "the -E option is not valid in edit mode"
+msgstr "opțiunea -E nu este validă în modul editare"
+
+#: src/parse_args.c:548
+msgid "you may not specify environment variables in edit mode"
+msgstr "nu puteți specifica variabile de mediu în modul editare"
+
+#: src/parse_args.c:557
+msgid "the -U option may only be used with the -l option"
+msgstr "opțiunea -U poate fi utilizată doar cu opțiunea -l"
+
+#: src/parse_args.c:561
+msgid "the -A and -S options may not be used together"
+msgstr "opțiunile -A și -S nu pot fi utilizate împreună"
+
+#: src/parse_args.c:654
+msgid "sudoedit is not supported on this platform"
+msgstr "sudoedit nu este suportat pe această platformă"
+
+#: src/parse_args.c:735
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "Doar una dintre opțiunile -e, -h, -i, -K, -l, -s, -v sau -V poate fi specificată"
+
+#: src/parse_args.c:749
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s - editează fișiere ca alt utilizator\n"
+"\n"
+
+#: src/parse_args.c:751
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s - execută o comandă ca alt utilizator\n"
+"\n"
+
+#: src/parse_args.c:756
+#, c-format
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"Opțiuni:\n"
+
+#: src/parse_args.c:758
+msgid "use a helper program for password prompting"
+msgstr "utilizează un program de ajutor pentru solicitarea parolei"
+
+#: src/parse_args.c:761
+msgid "use specified BSD authentication type"
+msgstr "utilizează un tip de autentificare BSD specificat"
+
+#: src/parse_args.c:764
+msgid "run command in the background"
+msgstr "rulează comanda în fundal"
+
+#: src/parse_args.c:766
+msgid "ring bell when prompting"
+msgstr "sună din clopoțel atunci când se solicită"
+
+#: src/parse_args.c:768
+msgid "close all file descriptors >= num"
+msgstr "închide toți descriptorii de fișier >= num"
+
+#: src/parse_args.c:771
+msgid "run command with the specified BSD login class"
+msgstr "rulează comanda cu clasa de autentificare BSD specificată"
+
+#: src/parse_args.c:774
+msgid "preserve user environment when running command"
+msgstr "păstrează mediul utilizatorului atunci când se rulează comanda"
+
+#: src/parse_args.c:776
+msgid "preserve specific environment variables"
+msgstr "păstrează variabile de mediu specifice"
+
+#: src/parse_args.c:778
+msgid "edit files instead of running a command"
+msgstr "editează fișiere în locul rulării unei comenzi"
+
+#: src/parse_args.c:780
+msgid "run command as the specified group name or ID"
+msgstr "rulează comanda ca numele sau ID-ul de grup specificat"
+
+#: src/parse_args.c:782
+msgid "set HOME variable to target user's home dir"
+msgstr "stabilește variabila HOME să țintească spre directorul personal al utilizatorului"
+
+#: src/parse_args.c:784
+msgid "display help message and exit"
+msgstr "afișează mesajul de ajutor și ieși"
+
+#: src/parse_args.c:786
+msgid "run command on host (if supported by plugin)"
+msgstr "rulează comanda pe gazdă (dacă este suportat de modul)"
+
+#: src/parse_args.c:788
+msgid "run login shell as the target user; a command may also be specified"
+msgstr "rulează shell-ul de autentificare ca utilizatorul țintă; o comandă poate fi, de asemenea, specificată"
+
+#: src/parse_args.c:790
+msgid "remove timestamp file completely"
+msgstr "elimină complet fișierul de datare"
+
+#: src/parse_args.c:792
+msgid "invalidate timestamp file"
+msgstr "invalidează fișierul de datare"
+
+#: src/parse_args.c:794
+msgid "list user's privileges or check a specific command; use twice for longer format"
+msgstr "listează privilegiile utilizatorului sau verifică o comandă specifică; utilizează de două ori pentru formatul mai lung"
+
+#: src/parse_args.c:796
+msgid "non-interactive mode, no prompts are used"
+msgstr "mod neinteractiv, nu sunt utilizate solicitări"
+
+#: src/parse_args.c:798
+msgid "preserve group vector instead of setting to target's"
+msgstr "păstrează vectorul grupului în loc să configurați pe cel al țintei"
+
+#: src/parse_args.c:800
+msgid "use the specified password prompt"
+msgstr "utilizează solicitarea de parolă specificată"
+
+#: src/parse_args.c:803
+msgid "create SELinux security context with specified role"
+msgstr "creează contextul de securitate SELinux cu rolul specificat"
+
+#: src/parse_args.c:806
+msgid "read password from standard input"
+msgstr "citește parola de la intrarea standard"
+
+#: src/parse_args.c:808
+msgid "run shell as the target user; a command may also be specified"
+msgstr "rulează shell-ul ca utilizatorul țintă; o comandă poate fi, de asemenea, specificată"
+
+#: src/parse_args.c:811
+msgid "create SELinux security context with specified type"
+msgstr "creează contextul de securitate SELinux cu tipul specificat"
+
+#: src/parse_args.c:814
+msgid "terminate command after the specified time limit"
+msgstr "termină comanda după limita de timp specificată"
+
+#: src/parse_args.c:816
+msgid "in list mode, display privileges for user"
+msgstr "în modul listă, afișează privilegiile pentru utilizator"
+
+#: src/parse_args.c:818
+msgid "run command (or edit file) as specified user name or ID"
+msgstr "rulează comanda (sau fișierul de editare) ca nume de utilizator sau ID specificat"
+
+#: src/parse_args.c:820
+msgid "display version information and exit"
+msgstr "afișează informațiile de versiune și ieși"
+
+#: src/parse_args.c:822
+msgid "update user's timestamp without running a command"
+msgstr "actualizează datarea utilizatorului fără să se ruleze o comandă"
+
+#: src/parse_args.c:824
+msgid "stop processing command line arguments"
+msgstr "oprește procesarea argumentelor în linie de comandă"
+
+#: src/selinux.c:84
+msgid "unable to open audit system"
+msgstr "nu se poate deschide sistemul audit"
+
+#: src/selinux.c:94
+msgid "unable to send audit message"
+msgstr "nu se poate trimite mesajul audit"
+
+#: src/selinux.c:128
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "nu se poate fgetfilecon %s"
+
+#: src/selinux.c:133
+#, c-format
+msgid "%s changed labels"
+msgstr "etichete modificate %s"
+
+#: src/selinux.c:141
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "nu se poate restaura contextul pentru %s"
+
+#: src/selinux.c:189
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "nu se poate deschide %s, nu se etichetează din nou tty"
+
+#: src/selinux.c:193 src/selinux.c:238 src/selinux.c:268
+#, c-format
+msgid "%s is not a character device, not relabeling tty"
+msgstr "%s nu este un dispozitiv de caracter, nu se etichetează din nou tty"
+
+#: src/selinux.c:202
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "nu se poate obține contextul tty curent, nu se etichetează din nou tty"
+
+#: src/selinux.c:209
+msgid "unknown security class \"chr_file\", not relabeling tty"
+msgstr "clasă de securitate necunoscută „chr_file”, nu se etichetează din nou tty"
+
+#: src/selinux.c:214
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "nu se poate obține contextul tty nou, nu se etichetează din nou tty"
+
+#: src/selinux.c:223
+msgid "unable to set new tty context"
+msgstr "nu se poate stabili contextul tty nou"
+
+#: src/selinux.c:321
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "trebuie să specificați un rol pentru tipul %s"
+
+#: src/selinux.c:327
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "nu se poate obține tipul implicit pentru rolul %s"
+
+#: src/selinux.c:339
+msgid "failed to get new context"
+msgstr "nu s-a putu obține contextul nou"
+
+#: src/selinux.c:348
+#, c-format
+msgid "failed to set new role %s"
+msgstr "nu s-a putut stabili rolul nou %s"
+
+#: src/selinux.c:352
+#, c-format
+msgid "failed to set new type %s"
+msgstr "nu s-a putut stabili tipul nou %s"
+
+#: src/selinux.c:364
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s nu este un context valid"
+
+#: src/selinux.c:396
+msgid "failed to get old context"
+msgstr "nu s-a putut obține contextul vechi"
+
+#: src/selinux.c:402
+msgid "unable to determine enforcing mode."
+msgstr "nu se poate determina modul de impunere."
+
+#: src/selinux.c:419
+#, c-format
+msgid "unable to set tty context to %s"
+msgstr "nu se poate stabili contextul tty la %s"
+
+#: src/selinux.c:440
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "nu se poate stabili contextul exec la %s"
+
+#: src/selinux.c:447
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "nu se poate stabili contextul de creare a cheii la %s"
+
+#: src/sesh.c:78
+msgid "requires at least one argument"
+msgstr "necesită cel puțin un argument"
+
+#: src/sesh.c:107
+#, c-format
+msgid "invalid file descriptor number: %s"
+msgstr "număr de descriptor de fișier nevalid: %s"
+
+#: src/sesh.c:121
+#, c-format
+msgid "unable to run %s as a login shell"
+msgstr "nu se poate rula %s ca shell de autentificare"
+
+#: src/signal.c:79
+#, c-format
+msgid "unable to save handler for signal %d"
+msgstr "nu se poate salva mânerul pentru semnalul %d"
+
+#: src/solaris.c:72
+msgid "resource control limit has been reached"
+msgstr "limita de control al resursei a fost atinsă"
+
+#: src/solaris.c:75
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "utilizatorul „%s” nu este un membru al proiectului „%s”"
+
+#: src/solaris.c:79
+msgid "the invoking task is final"
+msgstr "sarcina de invocare este finală"
+
+#: src/solaris.c:82
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "nu s-a putut alătura proiectului „%s”"
+
+#: src/solaris.c:89
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "nu există un grup de resurse care acceptă legături implicite pentru proiectul „%s”"
+
+#: src/solaris.c:93
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "nu există grupul de resurse specificat pentru proiectul „%s”"
+
+#: src/solaris.c:97
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "nu s-a putut lega la grupul de resurse implicit pentru proiectul „%s”"
+
+#: src/solaris.c:104
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "setproject a eșuat pentru proiectul „%s”"
+
+#: src/solaris.c:106
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "avertisment, alocarea controlului de resurse a eșuat pentru proiectul „%s”"
+
+#: src/sudo.c:219
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "Versiune sudo %s\n"
+
+#: src/sudo.c:221
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "Configurează opțiunile: %s\n"
+
+#: src/sudo.c:230
+msgid "fatal error, unable to load plugins"
+msgstr "eroare fatală, nu se pot încărca modulele"
+
+#: src/sudo.c:275
+msgid "plugin did not return a command to execute"
+msgstr "modulul nu a întors o comandă de executat"
+
+#: src/sudo.c:310
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "mod sudo neașteptat 0x%x"
+
+#: src/sudo.c:543
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "nu existați în baza de date %s"
+
+#: src/sudo.c:600
+msgid "unable to determine tty"
+msgstr "nu se poate determina tty"
+
+#: src/sudo.c:905
+#, c-format
+msgid "%s must be owned by uid %d and have the setuid bit set"
+msgstr "%s trebuie să fie deținut de uid-ul %d și să aibă bitul setuid stabilit"
+
+#: src/sudo.c:908
+#, c-format
+msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
+msgstr "uid-ul eficient nu este %d, este %s pe un sistem de fișiere cu opțiunea „nosuid” stabilită sau un sistem de fișiere NFS fără privilegii de root?"
+
+#: src/sudo.c:914
+#, c-format
+msgid "effective uid is not %d, is sudo installed setuid root?"
+msgstr "uid-ul eficient nu este %d, este sudo instalat root setuid?"
+
+#: src/sudo.c:930
+msgid "unable to set supplementary group IDs"
+msgstr "nu se pot stabili ID-urile de grup suplimentare"
+
+#: src/sudo.c:937
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "nu se pot stabili gid-uri eficiente către gid-uri runas %u"
+
+#: src/sudo.c:943
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "nu se poate stabili gid-ul către gid-ul runas %u"
+
+#: src/sudo.c:986
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "condiție de terminare a inferiorului neașteptată: %d"
+
+#: src/sudo.c:1095
+msgid "unable to initialize policy plugin"
+msgstr "nu se poate inițializa modulul de politică"
+
+#: src/sudo.c:1158
+#, c-format
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "modulului de politică %s îi lipsește metoda „check_policy”"
+
+#: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
+msgid "command rejected by policy"
+msgstr "comandă respinsă de politică"
+
+#: src/sudo.c:1178 src/sudo.c:1231 src/sudo.c:1275
+msgid "policy plugin error"
+msgstr "eroare de modul de politică"
+
+#: src/sudo.c:1212
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "modulul de politică %s nu suportă listarea privilegiilor"
+
+#: src/sudo.c:1256
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "modulul de politică %s nu suportă opțiunea -v"
+
+#: src/sudo.c:1294
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "modulul de politică %s nu suportă opțiunile -k/-K"
+
+#: src/sudo.c:1423
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "eroare la inițializarea modulului I/O %s"
+
+#: src/sudo.c:1577
+#, c-format
+msgid "error initializing audit plugin %s"
+msgstr "eroare la inițializarea modulului audit %s"
+
+#: src/sudo.c:1755
+#, c-format
+msgid "error initializing approval plugin %s"
+msgstr "eroare la inițializarea modulului de aprobare %s"
+
+#: src/sudo.c:1831
+msgid "command rejected by approver"
+msgstr "comandă respinsă de aprobator"
+
+#: src/sudo.c:1840
+msgid "approval plugin error"
+msgstr "eroare la modulul de aprobare"
+
+#: src/sudo_edit.c:226
+msgid "no writable temporary directory found"
+msgstr "nu s-a găsit niciun director temporar inscriptibil"
+
+#: src/sudo_edit.c:351
+msgid "unable to restore current working directory"
+msgstr "nu se poate restaura directorul de lucru curent"
+
+#: src/sudo_edit.c:566 src/sudo_edit.c:666
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: nu este un fișier regulat"
+
+#: src/sudo_edit.c:573
+#, c-format
+msgid "%s: editing symbolic links is not permitted"
+msgstr "%s: editarea legăturilor simbolice nu este permisă"
+
+#: src/sudo_edit.c:576
+#, c-format
+msgid "%s: editing files in a writable directory is not permitted"
+msgstr "%s: editarea fișierelor într-un director inscriptibil nu este permisă"
+
+#: src/sudo_edit.c:667
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s lăsat nemodificat"
+
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
+#, c-format
+msgid "%s unchanged"
+msgstr "%s neschimbat"
+
+#: src/sudo_edit.c:706 src/sudo_edit.c:907
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "conținutul sesiunii de editare rămase în %s"
+
+#: src/sudo_edit.c:814
+msgid "sesh: internal error: odd number of paths"
+msgstr "sesh: eroare internă: număr impar de căi"
+
+#: src/sudo_edit.c:816
+msgid "sesh: unable to create temporary files"
+msgstr "sesh: nu se pot crea fișierele temporare"
+
+#: src/sudo_edit.c:818 src/sudo_edit.c:900
+msgid "sesh: killed by a signal"
+msgstr "sesh: omorât de un semnal"
+
+#: src/sudo_edit.c:820 src/sudo_edit.c:903
+#, c-format
+msgid "sesh: unknown error %d"
+msgstr "sesh: eroare necunoscută %d"
+
+#: src/sudo_edit.c:894
+msgid "unable to copy temporary files back to their original location"
+msgstr "nu se pot copia fișierele temporare înapoi la locația lor originală"
+
+#: src/sudo_edit.c:897
+msgid "unable to copy some of the temporary files back to their original location"
+msgstr "nu se pot copia o parte din fișierele temporare înapoi la locația lor originală"
+
+#: src/sudo_edit.c:941
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "nu se poate schimba uid-ul la root (%u)"
+
+#: src/sudo_edit.c:958
+msgid "plugin error: missing file list for sudoedit"
+msgstr "eroare de modul: lipsește lista de fișiere pentru sudoedit"
+
+#: src/sudo_edit.c:1009 src/sudo_edit.c:1022
+msgid "unable to read the clock"
+msgstr "nu se poate citi ceasul"
+
+#: src/tgetpass.c:95
+msgid "timed out reading password"
+msgstr "limită de timp atinsă pentru citirea parolei"
+
+#: src/tgetpass.c:98
+msgid "no password was provided"
+msgstr "nu a fost furnizată nicio parolă"
+
+#: src/tgetpass.c:101
+msgid "unable to read password"
+msgstr "nu se poate citi parola"
+
+#: src/tgetpass.c:140
+msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
+msgstr "un terminal este necesar pentru a citit parola; ori utilizați opțiunea -S pentru a citi de la intrarea standard ori configurați un ajutor askpass"
+
+#: src/tgetpass.c:150
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "nu s-a specificat niciun program askpass, încercați să stabiliți SUDO_ASKPASS"
+
+#: src/tgetpass.c:325
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "nu se poate stabili gid-ul la %u"
+
+#: src/tgetpass.c:329
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "nu se poate stabili uid-ul la %u"
+
+#: src/tgetpass.c:334
+#, c-format
+msgid "unable to run %s"
+msgstr "nu se poate rula %s"
+
+#: src/utmp.c:287
+msgid "unable to save stdin"
+msgstr "nu se poate salva stdin"
+
+#: src/utmp.c:289
+msgid "unable to dup2 stdin"
+msgstr "nu se poate dup2 stdin"
+
+#: src/utmp.c:292
+msgid "unable to restore stdin"
+msgstr "nu se poate restaura stdin"
+
+#~ msgid "%s: short write"
+#~ msgstr "%s: scris scurt"
+
+#~ msgid "unable to read temporary file"
+#~ msgstr "nu se poate citi fișierul temporar"

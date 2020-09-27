@@ -80,6 +80,13 @@ get_interfaces(void)
     return &dummy;
 }
 
+/* STUB */
+int
+set_cmnd_path(const char *runchroot)
+{
+    return FOUND;
+}
+
 /*
  * Look up the hostname and set user_host and user_shost.
  */

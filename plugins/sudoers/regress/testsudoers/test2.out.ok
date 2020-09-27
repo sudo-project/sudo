@@ -1,6 +1,6 @@
 Testing @include
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 
@@ -13,7 +13,7 @@ Command allowed
 
 Testing #include
 
-Parses OK.
+Parses OK
 
 Entries for user root:
 

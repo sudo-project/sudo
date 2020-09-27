@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "May 7, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "September 1, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -66,9 +66,11 @@
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-C\fR\ \fInum\fR]
 .if \n(LC [\fB\-c\fR\ \fIclass\fR]
+[\fB\-D\fR\ \fIdirectory\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
+[\fB\-R\fR\ \fIdirectory\fR]
 .if \n(SL [\fB\-r\fR\ \fIrole\fR]
 .if \n(SL [\fB\-t\fR\ \fItype\fR]
 [\fB\-T\fR\ \fItimeout\fR]
@@ -83,9 +85,13 @@
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-C\fR\ \fInum\fR]
 .if \n(LC [\fB\-c\fR\ \fIclass\fR]
+[\fB\-D\fR\ \fIdirectory\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
+[\fB\-R\fR\ \fIdirectory\fR]
+.if \n(SL [\fB\-r\fR\ \fIrole\fR]
+.if \n(SL [\fB\-t\fR\ \fItype\fR]
 [\fB\-T\fR\ \fItimeout\fR]
 [\fB\-u\fR\ \fIuser\fR]
 \fIfile\ ...\fR
@@ -155,6 +161,16 @@ with the
 \fB\-v\fR
 option, a user can update the cached credentials without running a
 \fIcommand\fR.
+.PP
+On systems where
+\fBsudo\fR
+is the primary method of gaining superuser privileges, it is imperative
+to avoid syntax errors in the security policy configuration files.
+For the default security policy,
+sudoers(@mansectform@),
+changes to the configuration files should be made using the
+visudo(@mansectsu@)
+utility which will ensure that no syntax errors are introduced.
 .PP
 When invoked as
 \fBsudoedit\fR,
@@ -278,6 +294,13 @@ BSD
 login classes.
 .\}
 .TP 12n
+\fB\-D\fR \fIdirectory\fR, \fB\--chdir\fR=\fIdirectory\fR
+Run the command in the specified
+\fIdirectory\fR
+instead of the current working directory.
+The security policy may return an error if the user does not have
+permission to specify the working directory.
+.TP 12n
 \fB\-E\fR, \fB\--preserve-env\fR
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
@@ -354,6 +377,8 @@ If the specified file does not exist, it will be created.
 Note that unlike most commands run by
 \fIsudo\fR,
 the editor is run with the invoking user's environment unmodified.
+If the temporary file becomes empty after editing, the user will
+be prompted before it is installed.
 If, for some reason,
 \fBsudo\fR
 is unable to update a file with its edited version, the user will
@@ -572,6 +597,15 @@ specified by a PAM module unless the
 flag is disabled in
 \fIsudoers\fR.
 .RE
+.TP 12n
+\fB\-R\fR \fIdirectory\fR, \fB\--chroot\fR=\fIdirectory\fR
+Change to the specified root
+\fIdirectory\fR
+(see
+chroot(@mansectsu@))
+before running the command.
+The security policy may return an error if the user does not have
+permission to specify the root directory.
 .if \n(SL \{\
 .TP 12n
 \fB\-r\fR \fIrole\fR, \fB\--role\fR=\fIrole\fR
@@ -930,13 +964,13 @@ or compiled directly into the
 binary.
 If no
 sudo.conf(@mansectform@)
-file is present, or it contains no
+file is present, or if it doesn't contain any
 \fRPlugin\fR
 lines,
 \fBsudo\fR
-will use the traditional
-\fIsudoers\fR
-security policy and I/O logging.
+will use
+sudoers(@mansectform@)
+for the policy, auditing and I/O logging plugins.
 See the
 sudo.conf(@mansectform@)
 manual for details of the

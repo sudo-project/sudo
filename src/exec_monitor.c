@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -97,21 +97,21 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	break;
     case SIGCONT_FG:
 	/* Continue in foreground, grant it controlling tty. */
-	if (tcsetpgrp(io_fds[SFD_SLAVE], mc->cmnd_pgrp) == -1) {
+	if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc->cmnd_pgrp) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to set foreground pgrp to %d (command)",
 		__func__, (int)mc->cmnd_pgrp);
 	}
 	/* Lazily initialize the pty if needed. */
 	if (!tty_initialized) {
-	    if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]))
+	    if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER]))
 		    tty_initialized = true;
 	}
 	killpg(mc->cmnd_pid, SIGCONT);
 	break;
     case SIGCONT_BG:
 	/* Continue in background, I take controlling tty. */
-	if (tcsetpgrp(io_fds[SFD_SLAVE], mc->mon_pgrp) == -1) {
+	if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc->mon_pgrp) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to set foreground pgrp to %d (monitor)",
 		__func__, (int)mc->mon_pgrp);
@@ -131,7 +131,7 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 
 /*
  * Unpack rows and cols from a CMD_TTYWINCH value, set the new window
- * size on the pty slave and inform the command of the change.
+ * size on the pty follower and inform the command of the change.
  */
 static void
 handle_winch(struct monitor_closure *mc, unsigned int wsize_packed)
@@ -143,14 +143,14 @@ handle_winch(struct monitor_closure *mc, unsigned int wsize_packed)
     wsize.ws_row = wsize_packed & 0xffff;
     wsize.ws_col = (wsize_packed >> 16) & 0xffff;
 
-    if (ioctl(io_fds[SFD_SLAVE], TIOCGWINSZ, &owsize) == 0 &&
+    if (ioctl(io_fds[SFD_FOLLOWER], TIOCGWINSZ, &owsize) == 0 &&
 	(wsize.ws_row != owsize.ws_row || wsize.ws_col != owsize.ws_col)) {
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "window size change %dx%d -> %dx%d",
 	    owsize.ws_col, owsize.ws_row, wsize.ws_col, wsize.ws_row);
 
-	(void)ioctl(io_fds[SFD_SLAVE], TIOCSWINSZ, &wsize);
+	(void)ioctl(io_fds[SFD_FOLLOWER], TIOCSWINSZ, &wsize);
 	deliver_signal(mc, SIGWINCH, true);
     }
 
@@ -201,7 +201,7 @@ mon_handle_sigchld(struct monitor_closure *mc)
     switch (pid) {
     case 0:
 	errno = ECHILD;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case -1:
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;
@@ -242,7 +242,7 @@ mon_handle_sigchld(struct monitor_closure *mc)
 	    mc->cstat->val = status;
 	    if (WIFSTOPPED(status)) {
 		/* Save the foreground pgid so we can restore it later. */
-		pid = tcgetpgrp(io_fds[SFD_SLAVE]);
+		pid = tcgetpgrp(io_fds[SFD_FOLLOWER]);
 		if (pid != mc->mon_pgrp)
 		    mc->cmnd_pgrp = pid;
 		send_status(mc->backchannel, mc->cstat);
@@ -357,7 +357,7 @@ mon_backchannel_cb(int fd, int what, void *v)
 	if (n == -1) {
 	    if (errno == EINTR || errno == EAGAIN)
 		debug_return;
-	    sudo_warn(U_("error reading from socketpair"));
+	    sudo_warn("%s", U_("error reading from socketpair"));
 	} else {
 	    /* short read or EOF, parent process died? */
 	}
@@ -400,15 +400,15 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
     /* Wire up standard fds, note that stdout/stderr may be pipes. */
     if (dup3(io_fds[SFD_STDIN], STDIN_FILENO, 0) == -1)
 	sudo_fatal("dup3");
-    if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDIN] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDIN]);
     if (dup3(io_fds[SFD_STDOUT], STDOUT_FILENO, 0) == -1)
 	sudo_fatal("dup3");
-    if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDOUT] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDOUT]);
     if (dup3(io_fds[SFD_STDERR], STDERR_FILENO, 0) == -1)
 	sudo_fatal("dup3");
-    if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDERR] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDERR]);
 
     /* Wait for parent to grant us the tty if we are foreground. */
@@ -416,15 +416,15 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
 	struct timespec ts = { 0, 1000 };  /* 1us */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: waiting for controlling tty",
 	    __func__);
-	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
+	while (tcgetpgrp(io_fds[SFD_FOLLOWER]) != self)
 	    nanosleep(&ts, NULL);
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: got controlling tty",
 	    __func__);
     }
 
-    /* Done with the pty slave, don't leak it. */
-    if (io_fds[SFD_SLAVE] != -1)
-	close(io_fds[SFD_SLAVE]);
+    /* Done with the pty follower, don't leak it. */
+    if (io_fds[SFD_FOLLOWER] != -1)
+	close(io_fds[SFD_FOLLOWER]);
 
     /* Execute command; only returns on error. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "executing %s in the %s",
@@ -460,7 +460,7 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     if (mc->errpipe_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->errpipe_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Event for forwarded signals via backchannel. */
     mc->backchannel_event = sudo_ev_alloc(backchannel,
@@ -468,7 +468,7 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     if (mc->backchannel_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->backchannel_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Events for local signals. */
     mc->sigint_event = sudo_ev_alloc(SIGINT,
@@ -476,56 +476,56 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     if (mc->sigint_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigint_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigquit_event = sudo_ev_alloc(SIGQUIT,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigquit_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigquit_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigtstp_event = sudo_ev_alloc(SIGTSTP,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigtstp_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigtstp_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigterm_event = sudo_ev_alloc(SIGTERM,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigterm_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigterm_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sighup_event = sudo_ev_alloc(SIGHUP,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sighup_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sighup_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigusr1_event = sudo_ev_alloc(SIGUSR1,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigusr1_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigusr1_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigusr2_event = sudo_ev_alloc(SIGUSR2,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigusr2_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigusr2_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     mc->sigchld_event = sudo_ev_alloc(SIGCHLD,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigchld_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigchld_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Clear the default event base. */
     sudo_ev_base_setdef(NULL);
@@ -551,9 +551,9 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     int errpipe[2];
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
-    /* The pty master is not used by the monitor. */
-    if (io_fds[SFD_MASTER] != -1)
-	close(io_fds[SFD_MASTER]);
+    /* The pty leader is not used by the monitor. */
+    if (io_fds[SFD_LEADER] != -1)
+	close(io_fds[SFD_LEADER]);
 
     /* Ignore any SIGTTIN or SIGTTOU we receive (shouldn't be possible). */
     memset(&sa, 0, sizeof(sa));
@@ -571,7 +571,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 
     /*
      * Start a new session with the parent as the session leader
-     * and the slave pty as the controlling terminal.
+     * and the follower device as the controlling terminal.
      * This allows us to be notified when the command has been suspended.
      */
     if (setsid() == -1) {
@@ -579,7 +579,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	goto bad;
     }
     if (pty_make_controlling() == -1) {
-	sudo_warn(U_("unable to set controlling tty"));
+	sudo_warn("%s", U_("unable to set controlling tty"));
 	goto bad;
     }
 
@@ -587,7 +587,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * We use a pipe to get errno if execve(2) fails in the child.
      */
     if (pipe2(errpipe, O_CLOEXEC) != 0)
-	sudo_fatal(U_("unable to create pipe"));
+	sudo_fatal("%s", U_("unable to create pipe"));
 
     /*
      * Before forking, wait for the main sudo process to tell us to go.
@@ -595,13 +595,13 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      */
     while (recv(backchannel, &cstat, sizeof(cstat), MSG_WAITALL) == -1) {
 	if (errno != EINTR && errno != EAGAIN)
-	    sudo_fatal(U_("unable to receive message from parent"));
+	    sudo_fatal("%s", U_("unable to receive message from parent"));
     }
 
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
         if (selinux_setup(details->selinux_role, details->selinux_type,
-            details->tty, io_fds[SFD_SLAVE], true) == -1)
+            details->tty, io_fds[SFD_FOLLOWER], true) == -1)
             goto bad;
     }
 #endif
@@ -609,11 +609,11 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     mc.cmnd_pid = sudo_debug_fork();
     switch (mc.cmnd_pid) {
     case -1:
-	sudo_warn(U_("unable to fork"));
+	sudo_warn("%s", U_("unable to fork"));
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	    if (selinux_restore_tty() != 0)
-		sudo_warnx(U_("unable to restore tty label"));
+		sudo_warnx("%s", U_("unable to restore tty label"));
 	}
 #endif
 	goto bad;
@@ -655,20 +655,20 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     sigprocmask(SIG_SETMASK, oset, NULL);
 
     /* If any of stdin/stdout/stderr are pipes, close them in parent. */
-    if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDIN] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDIN]);
-    if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDOUT] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDOUT]);
-    if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
+    if (io_fds[SFD_STDERR] != io_fds[SFD_FOLLOWER])
 	close(io_fds[SFD_STDERR]);
 
     /* Put command in its own process group. */
     mc.cmnd_pgrp = mc.cmnd_pid;
     setpgid(mc.cmnd_pid, mc.cmnd_pgrp);
 
-    /* Make the command the foreground process for the pty slave. */
+    /* Make the command the foreground process for the pty follower. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
-	if (tcsetpgrp(io_fds[SFD_SLAVE], mc.cmnd_pgrp) == -1) {
+	if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc.cmnd_pgrp) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to set foreground pgrp to %d (command)",
 		__func__, (int)mc.cmnd_pgrp);
@@ -700,7 +700,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * Take the controlling tty.  This prevents processes spawned by the
      * command from receiving SIGHUP when the session leader (us) exits.
      */
-    if (tcsetpgrp(io_fds[SFD_SLAVE], mc.mon_pgrp) == -1) {
+    if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc.mon_pgrp) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to set foreground pgrp to %d (monitor)",
 	    __func__, (int)mc.mon_pgrp);
@@ -712,7 +712,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	if (selinux_restore_tty() != 0)
-	    sudo_warnx(U_("unable to restore tty label"));
+	    sudo_warnx("%s", U_("unable to restore tty label"));
     }
 #endif
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);

@@ -88,6 +88,9 @@
 /* Define to 1 to enable BSM audit support. */
 #undef HAVE_BSM_AUDIT
 
+/* Define to 1 if you have the `bzero' function. */
+#undef HAVE_BZERO
+
 /* Define to 1 if you have the `cfmakeraw' function. */
 #undef HAVE_CFMAKERAW
 
@@ -96,6 +99,9 @@
 
 /* Define to 1 if you have the `closefrom' function. */
 #undef HAVE_CLOSEFROM
+
+/* Define to 1 if you have the `crypt' function. */
+#undef HAVE_CRYPT
 
 /* Define to 1 if you use OSF DCE. */
 #undef HAVE_DCE
@@ -106,6 +112,10 @@
 /* Define to 1 if you have the declaration of `errno', and to 0 if you don't.
    */
 #undef HAVE_DECL_ERRNO
+
+/* Define to 1 if you have the declaration of `getdelim', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETDELIM
 
 /* Define to 1 if you have the declaration of `getdomainname', and to 0 if you
    don't. */
@@ -251,8 +261,17 @@
 /* Define to 1 if you have the `execvpe' function. */
 #undef HAVE_EXECVPE
 
+/* Define to 1 if you have the `explicit_bzero' function. */
+#undef HAVE_EXPLICIT_BZERO
+
+/* Define to 1 if you have the `explicit_memset' function. */
+#undef HAVE_EXPLICIT_MEMSET
+
 /* Define to 1 if you have the `faccessat' function. */
 #undef HAVE_FACCESSAT
+
+/* Define to 1 if the compiler supports the fallthrough attribute. */
+#undef HAVE_FALLTHROUGH_ATTRIBUTE
 
 /* Define to 1 if you have the `fchmodat' function. */
 #undef HAVE_FCHMODAT
@@ -268,6 +287,9 @@
 
 /* Define to 1 if you have the `freeifaddrs' function. */
 #undef HAVE_FREEIFADDRS
+
+/* Define to 1 if you have the `freezero' function. */
+#undef HAVE_FREEZERO
 
 /* Define to 1 if you have the `fseeko' function. */
 #undef HAVE_FSEEKO
@@ -370,8 +392,14 @@
 /* Define to 1 if you have the `grantpt' function. */
 #undef HAVE_GRANTPT
 
+/* Define to 1 if you have the <gssapi/gssapi.h> header file. */
+#undef HAVE_GSSAPI_GSSAPI_H
+
 /* Define to 1 if you have the <gssapi/gssapi_krb5.h> header file. */
 #undef HAVE_GSSAPI_GSSAPI_KRB5_H
+
+/* Define to 1 if you have the <gssapi.h> header file. */
+#undef HAVE_GSSAPI_H
 
 /* Define to 1 if you have the `gss_krb5_ccache_name' function. */
 #undef HAVE_GSS_KRB5_CCACHE_NAME
@@ -521,6 +549,9 @@
 
 /* Define to 1 if you have the `memrchr' function. */
 #undef HAVE_MEMRCHR
+
+/* Define to 1 if you have the `memset_explicit' function. */
+#undef HAVE_MEMSET_EXPLICIT
 
 /* Define to 1 if you have the `memset_s' function. */
 #undef HAVE_MEMSET_S
@@ -711,6 +742,9 @@
 
 /* Define to 1 if you have the `sig2str' function. */
 #undef HAVE_SIG2STR
+
+/* Define to 1 if you have the `sigabbrev_np' function. */
+#undef HAVE_SIGABBREV_NP
 
 /* Define to 1 if you use S/Key. */
 #undef HAVE_SKEY
@@ -1028,8 +1062,8 @@
 /* Define to 1 if you want sudo to free up memory before exiting. */
 #undef NO_LEAKS
 
-/* Define to 1 if you don't want users to get the lecture the first they user
-   sudo. */
+/* Define to 1 if you don't want users to get the lecture the first time they
+   use sudo. */
 #undef NO_LECTURE
 
 /* Define to 1 if you don't want to use sudo's PAM session support. */
@@ -1250,9 +1284,6 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
-/* Define to `int' if <sys/types.h> does not define. */
-#undef errno_t
-
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
 
@@ -1270,9 +1301,6 @@
 
 /* Define to an OS-specific initialization function or `os_init_common'. */
 #undef os_init
-
-/* Define to `size_t' if <sys/types.h> does not define. */
-#undef rsize_t
 
 /* Define to `int' if <signal.h> does not define. */
 #undef sig_atomic_t
@@ -1301,6 +1329,19 @@
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */
 #undef volatile
+
+/* Symbol visibility controls */
+#ifdef HAVE_DSO_VISIBILITY
+# if defined(__GNUC__)
+#  define sudo_dso_public __attribute__((__visibility__("default")))
+# elif defined(__SUNPRO_C)
+#  define sudo_dso_public __global
+# else
+#  define sudo_dso_public __declspec(dllexport)
+# endif
+#else
+# define sudo_dso_public
+#endif
 
 /* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__

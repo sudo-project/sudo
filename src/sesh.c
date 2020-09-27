@@ -39,17 +39,16 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
-#include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_exec.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_plugin.h"
 #include "sudo_util.h"
 
-__dso_public int main(int argc, char *argv[], char *envp[]);
+sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
 static int sesh_sudoedit(int argc, char *argv[]);
 
@@ -75,7 +74,7 @@ main(int argc, char *argv[], char *envp[])
     textdomain(PACKAGE_NAME);
 
     if (argc < 2)
-	sudo_fatalx(U_("requires at least one argument"));
+	sudo_fatalx("%s", U_("requires at least one argument"));
 
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)

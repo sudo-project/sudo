@@ -29,7 +29,7 @@
 
 int hexchar(const char *s);
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 struct hexchar_test {
     char hex[3];

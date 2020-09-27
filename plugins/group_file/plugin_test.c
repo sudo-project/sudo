@@ -33,7 +33,7 @@
 
 #include "sudo_plugin.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 /*
  * Simple driver to test sudoer group plugins.

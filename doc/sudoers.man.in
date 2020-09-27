@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "May 19, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 25, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -72,6 +72,7 @@ plugin, the following configuration can be used.
 .nf
 .sp
 .RS 6n
+Plugin sudoers_audit sudoers.so
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 .RE
@@ -84,19 +85,50 @@ Starting with
 plugin in the
 sudo.conf(@mansectform@)
 file.
-These arguments, if present, should be listed after the path to the plugin
+Plugin arguments, if any, should be listed after the path to the plugin
 (i.e., after
 \fIsudoers.so\fR).
+The arguments are only effective for the plugin that opens (and parses) the
+\fIsudoers\fR
+file.
+.PP
+For
+\fBsudo\fR
+version 1.9.1 and higher, this is the
+\fIsudoers_audit\fR
+plugin.
+For older versions, it is the
+\fIsudoers_policy\fR
+plugin.
 Multiple arguments may be specified, separated by white space.
 For example:
 .nf
 .sp
 .RS 6n
-Plugin sudoers_policy sudoers.so sudoers_mode=0400
+Plugin sudoers_audit sudoers.so sudoers_mode=0400 error_recovery=false
 .RE
 .fi
 .PP
 The following plugin arguments are supported:
+.TP 10n
+error_recovery=bool
+The
+\fIerror_recovery\fR
+argument can be used to control whether
+\fBsudoers\fR
+should attempt to recover from syntax errors in the
+\fIsudoers\fR
+file.
+If set to
+\fItrue\fR
+(the default),
+\fBsudoers\fR
+will try to recover from a syntax error by discarding the portion
+of the line that contains the error until the end of the line.
+A value of
+\fIfalse\fR
+will disable error recovery.
+Prior to version 1.9.3, no error recovery was performed.
 .TP 10n
 ldap_conf=pathname
 The
@@ -379,13 +411,8 @@ explicitly denied by the
 \fIenv_check\fR
 and
 \fIenv_delete\fR
-options are
+options are allowed and their values are
 inherited from the invoking process.
-In this case,
-\fIenv_check\fR
-and
-\fIenv_delete\fR
-behave like a blacklist.
 Prior to version 1.8.21, environment variables with a value beginning with
 \fR()\fR
 were always removed.
@@ -395,7 +422,7 @@ is used to match
 \fBbash\fR
 shell functions instead.
 Since it is not possible
-to blacklist all potentially dangerous environment variables, use
+to block all potentially dangerous environment variables, use
 of the default
 \fIenv_reset\fR
 behavior is encouraged.
@@ -1136,6 +1163,10 @@ Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
 Timeout_Spec ::= 'TIMEOUT=timeout'
 
+Chdir_Spec ::= 'CWD=directory'
+
+Chroot_Spec ::= 'CHROOT=directory'
+
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
               'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
@@ -1349,6 +1380,10 @@ subsequent
 in the
 \fRCmnd_Spec_List\fR,
 inherit that option unless it is overridden by another option.
+Note that the option names are reserved words in
+\fIsudoers\fR.
+This means that none of the valid option names (see below) can be used
+when declaring an alias.
 .if \n(SL \{\
 .SS "SELinux_Spec"
 On systems with SELinux support,
@@ -1475,6 +1510,70 @@ timeout values:
 \fR1d2d3h\fR.
 .PP
 This setting is only supported by version 1.8.20 or higher.
+.SS "Chdir_Spec"
+The working directory that the command will be run in can be specified
+using the
+\fRCWD\fR
+setting.
+The
+\fIdirectory\fR
+must be a fully-qualified path name beginning with a
+\(oq/\(cq
+or
+\(oq~\(cq
+character, or the special value
+\(lq*\(rq.
+A value of
+\(lq*\(rq
+indicates that the user may specify the working directory by running
+\fBsudo\fR
+with the
+\fB\-D\fR
+option.
+By default, commands are run from the invoking user's current working
+directory, unless the
+\fB\-i\fR
+option is given.
+Path names of the form
+\fR~user/path/name\fR
+are interpreted as being relative to the named user's home directory.
+If the user name is omitted, the path will be relative to the runas
+user's home directory.
+.PP
+This setting is only supported by version 1.9.3 or higher.
+.SS "Chroot_Spec"
+The root directory that the command will be run in can be specified
+using the
+\fRCHROOT\fR
+setting.
+The
+\fIdirectory\fR
+must be a fully-qualified path name beginning with a
+\(oq/\(cq
+or
+\(oq~\(cq
+character, or the special value
+\(lq*\(rq.
+A value of
+\(lq*\(rq
+indicates that the user may specify the root directory by running
+\fBsudo\fR
+with the
+\fB\-R\fR
+option.
+This setting can be used to run the command in a
+chroot(2)
+\(lqsandbox\(rq
+similar to the
+chroot(@mansectsu@)
+utility.
+Path names of the form
+\fR~user/path/name\fR
+are interpreted as being relative to the named user's home directory.
+If the user name is omitted, the path will be relative to the runas
+user's home directory.
+.PP
+This setting is only supported by version 1.9.3 or higher.
 .SS "Tag_Spec"
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -2037,16 +2136,41 @@ It can be used wherever one might otherwise use a
 \fRRunas_Alias\fR,
 or
 \fRHost_Alias\fR.
-You should not try to define your own
+Attempting to define an
 \fIalias\fR
-called
+named
 \fBALL\fR
-as the built-in alias will be used in preference to your own.
+will result in a syntax error.
 Please note that using
 \fBALL\fR
 can be dangerous since in a command context, it allows the user to run
 \fIany\fR
 command on the system.
+.PP
+The following option names permitted in an
+\fROption_Spec\fR
+are also considered reserved words:
+\fRCHROOT\fR,
+.if \n(PS \{\
+\fRPRIVS\fR,
+.\}
+.if \n(PS \{\
+\fRLIMITPRIVS\fR,
+.\}
+.if \n(SL \{\
+\fRROLE\fR,
+.\}
+.if \n(SL \{\
+\fRTYPE\fR,
+.\}
+\fRTIMEOUT\fR,
+\fRCWD\fR,
+\fRNOTBEFORE\fR
+and
+\fRNOTAFTER\fR.
+Attempting to define an
+\fIalias\fR
+with the same name as one of the options will result in a syntax error.
 .PP
 An exclamation point
 (\(oq\&!\(cq)
@@ -4376,6 +4500,48 @@ In either case, the contents of
 are processed before the contents of
 \fIenv_file\fR.
 .TP 14n
+runchroot
+If set,
+\fBsudo\fR
+will use this value for the root directory when running a command.
+The special value
+\(lq*\(rq
+will allow the user to specify the root directory via
+\fBsudo\fR's
+\fB\-R\fR
+option.
+See the
+\fIChroot_Spec\fR
+section for more details.
+.sp
+It is only possible to use
+\fIrunchroot\fR
+as a command-specific Defaults setting if the command exists with
+the same path both inside and outside the chroot jail.
+This restriction does not apply to generic, host or user-based
+Defaults settings or to a
+\fICmnd_Spec\fR
+that includes a
+\fIChroot_Spec\fR.
+.sp
+This setting is only supported by version 1.9.3 or higher.
+.TP 14n
+runcwd
+If set,
+\fBsudo\fR
+will use this value for the working directory when running a command.
+The special value
+\(lq*\(rq
+will allow the user to specify the working directory via
+\fBsudo\fR's
+\fB\-D\fR
+option.
+See the
+\fIChdir_Spec\fR
+section for more details.
+.sp
+This setting is only supported by version 1.9.3 or higher.
+.TP 14n
 secure_path
 If set,
 \fBsudo\fR
@@ -5120,6 +5286,94 @@ The second and third lines contain the working directory the command
 was run from and the path name of the command itself (with arguments
 if present).
 .TP 10n
+\fIlog.json\fR
+A JSON-formatted file containing information about the command.
+This is similar to the
+\fIlog\fR
+file but contains additional information and is easily extensible.
+The
+\fIlog.json\fR
+file will be used by
+sudoreplay(@mansectsu@)
+in preference to the
+\fIlog\fR
+file if it exists.
+The file may contain the following elements:
+.PP
+.RS 10n
+.PD 0
+.TP 10n
+timestamp
+.br
+A JSON object containing time the command was run.
+It consists of two values,
+\fIseconds\fR
+and
+\fInanoseconds\fR.
+.PD
+.TP 10n
+columns
+The number of columns of the terminal the command ran on, or zero
+if no terminal was present.
+.TP 10n
+command
+The fully-qualified path of the command that was run.
+.TP 10n
+lines
+The number of lines of the terminal the command ran on, or zero
+if no terminal was present.
+.TP 10n
+runargv
+A JSON array representing the command's argument vector as passed to the
+execve(2)
+system call.
+.TP 10n
+runenv
+A JSON array representing the command's environment as passed to the
+execve(2)
+system call.
+.TP 10n
+rungid
+The group ID the command ran as.
+This element is only present when the user specifies a group on the
+command line.
+.TP 10n
+rungroup
+The name of the group the command ran as.
+This element is only present when the user specifies a group on the
+command line.
+.TP 10n
+runuid
+The user ID the command ran as.
+.TP 10n
+runuser
+The name of the user the command ran as.
+.TP 10n
+submitcwd
+.br
+The current working directory at the time
+\fBsudo\fR
+was run.
+.TP 10n
+submithost
+The name of the host the command was run on.
+.TP 10n
+submituser
+The name of the user who ran the command via
+\fBsudo\fR.
+.TP 10n
+ttyname
+The path name of the terminal the user invoked
+\fBsudo\fR
+from.
+If the command was run in a pseudo-terminal,
+\fIttyname\fR
+will be different from the terminal the command actually ran in.
+.PD 0
+.PP
+.RE
+.PD
+.TP 10n
 \fItiming\fR
 Timing information used to replay the session.
 Each line consists of the I/O log entry type and amount of time
@@ -5271,7 +5525,7 @@ Defaults env_keep += "DISPLAY HOME"
 # User alias specification
 User_Alias	FULLTIMERS = millert, mikef, dowdy
 User_Alias	PARTTIMERS = bostley, jwfox, crawl
-User_Alias	WEBMASTERS = will, wendy, wim
+User_Alias	WEBADMIN = will, wendy, wim
 
 # Runas alias specification
 Runas_Alias	OP = root, operator
@@ -5285,7 +5539,7 @@ Host_Alias	SPARC = bigtime, eclipse, moet, anchor :\e
 		HPPA = boa, nag, python
 Host_Alias	CUNETS = 128.138.0.0/255.255.0.0
 Host_Alias	CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
-Host_Alias	SERVERS = master, mail, www, ns
+Host_Alias	SERVERS = primary, mail, www, ns
 Host_Alias	CDROM = orion, perseus, hercules
 
 # Cmnd alias specification
@@ -5313,12 +5567,19 @@ to log via
 syslog(3)
 using the
 \fIauth\fR
-facility in all cases.
+facility in all cases and for commands to be run with
+the target user's home directory as the working directory.
 We don't want to subject the full time staff to the
 \fBsudo\fR
-lecture, user
+lecture and we want to allow them to run commands in a
+chroot(2)
+\(lqsandbox\(rq
+via the
+\fB\-R\fR
+option.
+User
 \fBmillert\fR
-need not give a password, and we don't want to reset the
+need not provide a password and we don't want to reset the
 \fRLOGNAME\fR
 or
 \fRUSER\fR
@@ -5343,9 +5604,9 @@ privileges.
 .sp
 .RS 0n
 # Override built-in defaults
-Defaults		syslog=auth
+Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
-Defaults:FULLTIMERS	!lecture
+Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
 Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
 Defaults!PAGERS		noexec
@@ -5609,7 +5870,7 @@ The user
 may run any command on any machine except for those in the
 \fISERVERS\fR
 \fRHost_Alias\fR
-(master, mail, www and ns).
+(primary, mail, www and ns).
 .nf
 .sp
 .RS 0n
@@ -5662,12 +5923,12 @@ needs to be able to kill hung processes.
 .nf
 .sp
 .RS 0n
-WEBMASTERS	www = (www) ALL, (root) /usr/bin/su www
+WEBADMIN	www = (www) ALL, (root) /usr/bin/su www
 .RE
 .fi
 .PP
 On the host www, any user in the
-\fIWEBMASTERS\fR
+\fIWEBADMIN\fR
 \fRUser_Alias\fR
 (will, wendy, and wim), may run any command as user www (which owns the
 web pages) or simply
@@ -6178,15 +6439,23 @@ file should
 \fBalways\fR
 be edited by the
 \fBvisudo\fR
-command which locks the file and does grammatical checking.
-It is
-imperative that the
+utility which locks the file and checks for syntax errors.
+If
 \fIsudoers\fR
-file be free of syntax errors since
+contains syntax errors,
 \fBsudo\fR
-will not run with a syntactically incorrect
+may refuse to run, which is a serious problem if
+\fBsudo\fR
+is your only method of obtaining superuser privileges.
+Recent versions of
+\fBsudoers\fR
+will attempt to recover after a syntax error by ignoring the rest of
+the line after encountering an error.
+Older versions of
+\fBsudo\fR
+will not run if
 \fIsudoers\fR
-file.
+contains a syntax error.
 .PP
 When using netgroups of machines (as opposed to users), if you
 store fully qualified host name in the netgroup (as is usually the

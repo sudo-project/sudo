@@ -132,7 +132,7 @@ pty_cleanup(void)
 
 /*
  * Allocate a pty if /dev/tty is a tty.
- * Fills in io_fds[SFD_USERTTY], io_fds[SFD_MASTER], io_fds[SFD_SLAVE]
+ * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER], io_fds[SFD_FOLLOWER]
  * and ptyname globals.
  */
 static bool
@@ -147,9 +147,9 @@ pty_setup(struct command_details *details, const char *tty)
 	debug_return_bool(false);
     }
 
-    if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
+    if (!get_pty(&io_fds[SFD_LEADER], &io_fds[SFD_FOLLOWER],
 	ptyname, sizeof(ptyname), details->euid))
-	sudo_fatal(U_("unable to allocate pty"));
+	sudo_fatal("%s", U_("unable to allocate pty"));
 
     /* Update tty name in command details (used by SELinux and AIX). */
     details->tty = ptyname;
@@ -158,30 +158,30 @@ pty_setup(struct command_details *details, const char *tty)
     if (ISSET(details->flags, CD_SET_UTMP)) {
 	utmp_user =
 	    details->utmp_user ? details->utmp_user : user_details.username;
-	utmp_login(tty, ptyname, io_fds[SFD_SLAVE], utmp_user);
+	utmp_login(tty, ptyname, io_fds[SFD_FOLLOWER], utmp_user);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: %s fd %d, pty master fd %d, pty slave fd %d",
-	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
-	io_fds[SFD_SLAVE]);
+	"%s: %s fd %d, pty leader fd %d, pty follower fd %d",
+	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
+	io_fds[SFD_FOLLOWER]);
 
     debug_return_bool(true);
 }
 
 /*
- * Make the tty slave the controlling tty.
+ * Make the tty follower the controlling tty.
  * This is only used by the monitor but ptyname[] is static.
  */
 int
 pty_make_controlling(void)
 {
-    if (io_fds[SFD_SLAVE] != -1) {
+    if (io_fds[SFD_FOLLOWER] != -1) {
 #ifdef TIOCSCTTY
-	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
+	if (ioctl(io_fds[SFD_FOLLOWER], TIOCSCTTY, NULL) != 0)
 	    return -1;
 #else
-	/* Set controlling tty by reopening pty slave. */
+	/* Set controlling tty by reopening pty follower. */
 	int fd = open(ptyname, O_RDWR);
 	if (fd == -1)
 	    return -1;
@@ -542,7 +542,7 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	    ret = SIGCONT_FG; /* resume command in foreground */
 	    break;
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case SIGSTOP:
     case SIGTSTP:
 	/* Flush any remaining output and deschedule I/O events. */
@@ -663,7 +663,7 @@ read_callback(int fd, int what, void *v)
 	    /* treat read error as fatal and close the fd */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"error reading fd %d: %s", fd, strerror(errno));
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case 0:
 	    /* got EOF or pty has gone away */
 	    if (n == 0) {
@@ -690,12 +690,12 @@ read_callback(int fd, int what, void *v)
 	    /* Enable writer now that there is data in the buffer. */
 	    if (iob->wevent != NULL) {
 		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		    sudo_fatal(U_("unable to add event to queue"));
+		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	    /* Re-enable reader if buffer is not full. */
 	    if (iob->len != sizeof(iob->buf)) {
 		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    sudo_fatal(U_("unable to add event to queue"));
+		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	    break;
     }
@@ -763,7 +763,7 @@ write_callback(int fd, int what, void *v)
 		/* Schedule SIGTTOU to be forwarded to the command. */
 		schedule_signal(iob->ec, SIGTTOU);
 	    }
-	    /* FALLTHROUGH */
+	    FALLTHROUGH;
 	case EAGAIN:
 	    /* not an error */
 	    break;
@@ -792,14 +792,14 @@ write_callback(int fd, int what, void *v)
 	/* Re-enable writer if buffer is not empty. */
 	if (iob->len > iob->off) {
 	    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		sudo_fatal(U_("unable to add event to queue"));
+		sudo_fatal("%s", U_("unable to add event to queue"));
 	}
 	/* Enable reader if buffer is not full. */
 	if (iob->revent != NULL &&
 	    (ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
 	    if (iob->len != sizeof(iob->buf)) {
 		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    sudo_fatal(U_("unable to add event to queue"));
+		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}
     }
@@ -840,7 +840,7 @@ io_buf_new(int rfd, int wfd,
 }
 
 /*
- * We already closed the slave pty so reads from the master will not block.
+ * We already closed the follower so reads from the leader will not block.
  */
 static void
 pty_finish(struct command_status *cstat)
@@ -896,7 +896,7 @@ send_command_status(struct exec_closure_pty *ec, int type, int val)
     TAILQ_INSERT_TAIL(&ec->monitor_messages, msg, entries);
 
     if (sudo_ev_add(ec->evbase, ec->fwdchannel_event, NULL, true) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Restart event loop to send the command immediately. */
     sudo_ev_loopcontinue(ec->evbase);
@@ -1041,7 +1041,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
     switch (pid) {
     case 0:
 	errno = ECHILD;
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case -1:
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;
@@ -1217,7 +1217,7 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     if (ec->backchannel_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->backchannel_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
     sudo_debug_printf(SUDO_DEBUG_INFO, "backchannel fd %d\n", backchannel);
 
     /* Events for local signals. */
@@ -1226,70 +1226,70 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     if (ec->sigint_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigint_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigquit_event = sudo_ev_alloc(SIGQUIT,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigquit_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigquit_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigtstp_event = sudo_ev_alloc(SIGTSTP,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigtstp_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigtstp_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigterm_event = sudo_ev_alloc(SIGTERM,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigterm_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigterm_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sighup_event = sudo_ev_alloc(SIGHUP,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sighup_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sighup_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigalrm_event = sudo_ev_alloc(SIGALRM,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigalrm_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigalrm_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigusr1_event = sudo_ev_alloc(SIGUSR1,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigusr1_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigusr1_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigusr2_event = sudo_ev_alloc(SIGUSR2,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigusr2_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigusr2_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigchld_event = sudo_ev_alloc(SIGCHLD,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigchld_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigchld_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigwinch_event = sudo_ev_alloc(SIGWINCH,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigwinch_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigwinch_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* The signal forwarding event gets added on demand. */
     ec->fwdchannel_event = sudo_ev_alloc(backchannel,
@@ -1372,7 +1372,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1 ||
 	    fcntl(sv[0], F_SETFD, FD_CLOEXEC) == -1 ||
 	    fcntl(sv[1], F_SETFD, FD_CLOEXEC) == -1)
-	sudo_fatal(U_("unable to create sockets"));
+	sudo_fatal("%s", U_("unable to create sockets"));
 
     /*
      * We don't want to receive SIGTTIN/SIGTTOU.
@@ -1392,7 +1392,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * or certain pam modules won't be able to track their state.
      */
     if (policy_init_session(details) != true)
-	sudo_fatalx(U_("policy plugin failed session initialization"));
+	sudo_fatalx("%s", U_("policy plugin failed session initialization"));
 
     /*
      * Child will run the command in the pty, parent will pass data
@@ -1424,19 +1424,19 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * In background mode there is no stdin.
      */
     if (!ISSET(details->flags, CD_BACKGROUND))
-	io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
-    io_fds[SFD_STDOUT] = io_fds[SFD_SLAVE];
-    io_fds[SFD_STDERR] = io_fds[SFD_SLAVE];
+	io_fds[SFD_STDIN] = io_fds[SFD_FOLLOWER];
+    io_fds[SFD_STDOUT] = io_fds[SFD_FOLLOWER];
+    io_fds[SFD_STDERR] = io_fds[SFD_FOLLOWER];
 
     if (io_fds[SFD_USERTTY] != -1) {
-	/* Read from /dev/tty, write to pty master */
+	/* Read from /dev/tty, write to pty leader */
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
-	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
 		log_ttyin, &ec, &iobufs);
 	}
 
-	/* Read from pty master, write to /dev/tty */
-	io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
+	/* Read from pty leader, write to /dev/tty */
+	io_buf_new(io_fds[SFD_LEADER], io_fds[SFD_USERTTY],
 	    log_ttyout, &ec, &iobufs);
 
 	/* Are we the foreground process? */
@@ -1462,7 +1462,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 		"stdin not a tty, creating a pipe");
 	    pipeline = true;
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
-		sudo_fatal(U_("unable to create pipe"));
+		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
 		log_stdin, &ec, &iobufs);
 	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
@@ -1483,7 +1483,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 		"stdout not a tty, creating a pipe");
 	    pipeline = true;
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
-		sudo_fatal(U_("unable to create pipe"));
+		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
 		log_stdout, &ec, &iobufs);
 	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
@@ -1503,7 +1503,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not a tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
-		sudo_fatal(U_("unable to create pipe"));
+		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
 		log_stderr, &ec, &iobufs);
 	    io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
@@ -1511,8 +1511,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     }
 
     if (foreground) {
-	/* Copy terminal attrs from user tty -> pty slave. */
-	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
+	/* Copy terminal attrs from user tty -> pty follower. */
+	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER])) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
                 "%s: unable to copy terminal settings to pty", __func__);
 	    foreground = false;
@@ -1541,7 +1541,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     ec.monitor_pid = sudo_debug_fork();
     switch (ec.monitor_pid) {
     case -1:
-	sudo_fatal(U_("unable to fork"));
+	sudo_fatal("%s", U_("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -1570,21 +1570,21 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     }
 
     /*
-     * We close the pty slave so only the monitor and command have a
+     * We close the pty follower so only the monitor and command have a
      * reference to it.  This ensures that we can don't block reading
-     * from the master when the command and monitor have exited.
+     * from the leader when the command and monitor have exited.
      */
-    if (io_fds[SFD_SLAVE] != -1) {
-	close(io_fds[SFD_SLAVE]);
-	io_fds[SFD_SLAVE] = -1;
+    if (io_fds[SFD_FOLLOWER] != -1) {
+	close(io_fds[SFD_FOLLOWER]);
+	io_fds[SFD_FOLLOWER] = -1;
     }
 
-    /* Tell the monitor to continue now that the slave is closed. */
+    /* Tell the monitor to continue now that the follower is closed. */
     cstat->type = CMD_SIGNO;
     cstat->val = 0;
     while (send(sv[0], cstat, sizeof(*cstat), 0) == -1) {
 	if (errno != EINTR && errno != EAGAIN)
-	    sudo_fatal(U_("unable to send message to monitor process"));
+	    sudo_fatal("%s", U_("unable to send message to monitor process"));
     }
 
     /* Close the other end of the stdin/stdout/stderr pipes and socketpair. */
@@ -1622,14 +1622,14 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     setlocale(LC_ALL, "C");
 
     /*
-     * In the event loop we pass input from user tty to master
-     * and pass output from master to stdout and IO plugin.
+     * In the event loop we pass input from user tty to leader
+     * and pass output from leader to stdout and IO plugin.
      * Try to recover on ENXIO, it means the tty was revoked.
      */
     add_io_events(ec.evbase);
     do {
 	if (sudo_ev_dispatch(ec.evbase) == -1)
-	    sudo_warn(U_("error in event loop"));
+	    sudo_warn("%s", U_("error in event loop"));
 	if (sudo_ev_got_break(ec.evbase)) {
 	    /* error from callback or monitor died */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
@@ -1690,7 +1690,7 @@ add_io_events(struct sudo_event_base *evbase)
 		    "added I/O revent %p, fd %d, events %d",
 		    iob->revent, iob->revent->fd, iob->revent->events);
 		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    sudo_fatal(U_("unable to add event to queue"));
+		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}
 	if (iob->wevent != NULL) {
@@ -1700,7 +1700,7 @@ add_io_events(struct sudo_event_base *evbase)
 		    "added I/O wevent %p, fd %d, events %d",
 		    iob->wevent, iob->wevent->fd, iob->wevent->events);
 		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		    sudo_fatal(U_("unable to add event to queue"));
+		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}
     }
@@ -1745,14 +1745,14 @@ del_io_events(bool nonblocking)
 	if (iob->revent != NULL && !USERTTY_EVENT(iob->revent)) {
 	    if (iob->len != sizeof(iob->buf)) {
 		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    sudo_fatal(U_("unable to add event to queue"));
+		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}
 	/* Flush any write buffers with data in them. */
 	if (iob->wevent != NULL) {
 	    if (iob->len > iob->off) {
 		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		    sudo_fatal(U_("unable to add event to queue"));
+		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}
     }
@@ -1779,7 +1779,7 @@ del_io_events(bool nonblocking)
 	    if (iob->wevent != NULL) {
 		if (iob->len > iob->off) {
 		    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-			sudo_fatal(U_("unable to add event to queue"));
+			sudo_fatal("%s", U_("unable to add event to queue"));
 		}
 	    }
 	}

@@ -114,3 +114,29 @@ s/^\(.TH .*\)/.nr SL @SEMAN@\
 	    }
 	}
 }
+
+/^\\fRPRIVS\\fR,/ {
+    i\
+.if \\n(PS \\{\\
+    a\
+.\\}
+}
+/^\\fRLIMITPRIVS\\fR,/ {
+    i\
+.if \\n(PS \\{\\
+    a\
+.\\}
+}
+
+/^\\fRROLE\\fR,/ {
+    i\
+.if \\n(SL \\{\\
+    a\
+.\\}
+}
+/^\\fRTYPE\\fR,/ {
+    i\
+.if \\n(SL \\{\\
+    a\
+.\\}
+}

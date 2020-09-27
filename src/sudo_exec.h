@@ -41,8 +41,8 @@
 #define SFD_STDIN	0
 #define SFD_STDOUT	1
 #define SFD_STDERR	2
-#define SFD_MASTER	3
-#define SFD_SLAVE	4
+#define SFD_LEADER	3
+#define SFD_FOLLOWER	4
 #define SFD_USERTTY	5
 
 /*

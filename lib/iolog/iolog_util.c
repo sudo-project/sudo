@@ -39,13 +39,12 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
 #include "sudo_compat.h"
-#include "sudo_fatal.h"
 #include "sudo_debug.h"
-#include "sudo_util.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_iolog.h"
+#include "sudo_util.h"
 
 static int timing_event_adj;
 
@@ -450,6 +449,8 @@ iolog_free_loginfo(struct iolog_info *li)
 	free(li->user);
 	free(li->runas_user);
 	free(li->runas_group);
+	free(li->runchroot);
+	free(li->runcwd);
 	free(li->tty);
 	free(li->cmd);
 	free(li->host);

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -369,7 +369,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDOERS_DEBUG_PERMS);
 
     if (perm_stack_depth < 2) {
-	sudo_warnx(U_("perm stack underflow"));
+	sudo_warnx("%s", U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -708,7 +708,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDOERS_DEBUG_PERMS);
 
     if (perm_stack_depth < 2) {
-	sudo_warnx(U_("perm stack underflow"));
+	sudo_warnx("%s", U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -1071,7 +1071,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDOERS_DEBUG_PERMS);
 
     if (perm_stack_depth < 2) {
-	sudo_warnx(U_("perm stack underflow"));
+	sudo_warnx("%s", U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -1374,7 +1374,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDOERS_DEBUG_PERMS);
 
     if (perm_stack_depth < 2) {
-	sudo_warnx(U_("perm stack underflow"));
+	sudo_warnx("%s", U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -1539,7 +1539,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDOERS_DEBUG_PERMS);
 
     if (perm_stack_depth < 2) {
-	sudo_warnx(U_("perm stack underflow"));
+	sudo_warnx("%s", U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 

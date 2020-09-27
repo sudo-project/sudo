@@ -367,7 +367,7 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
     default:
 	/* Unknown time stamp ticket type, treat as tty (should not happen). */
 	sudo_warnx("unknown time stamp ticket type %d", ticket_type);
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case tty:
 	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
 	    /* tty-based time stamp */
@@ -377,7 +377,7 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
 		get_starttime(entry->sid, &entry->start_time);
 	    break;
 	}
-	/* FALLTHROUGH */
+	FALLTHROUGH;
     case kernel:
     case ppid:
 	/* ppid-based time stamp */

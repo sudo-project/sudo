@@ -49,11 +49,11 @@ typedef struct {
     uint8_t buffer[SHA512_BLOCK_LENGTH];
 } SHA2_CTX;
 
-__dso_public void sudo_SHA224Init(SHA2_CTX *ctx);
-__dso_public void sudo_SHA224Pad(SHA2_CTX *ctx);
-__dso_public void sudo_SHA224Transform(uint32_t state[8], const uint8_t buffer[SHA224_BLOCK_LENGTH]);
-__dso_public void sudo_SHA224Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
-__dso_public void sudo_SHA224Final(uint8_t digest[SHA224_DIGEST_LENGTH], SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA224Init(SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA224Pad(SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA224Transform(uint32_t state[8], const uint8_t buffer[SHA224_BLOCK_LENGTH]);
+sudo_dso_public void sudo_SHA224Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+sudo_dso_public void sudo_SHA224Final(uint8_t digest[SHA224_DIGEST_LENGTH], SHA2_CTX *ctx);
 
 #define SHA224Init		sudo_SHA224Init
 #define SHA224Pad		sudo_SHA224Pad
@@ -61,11 +61,11 @@ __dso_public void sudo_SHA224Final(uint8_t digest[SHA224_DIGEST_LENGTH], SHA2_CT
 #define SHA224Update		sudo_SHA224Update
 #define SHA224Final		sudo_SHA224Final
 
-__dso_public void sudo_SHA256Init(SHA2_CTX *ctx);
-__dso_public void sudo_SHA256Pad(SHA2_CTX *ctx);
-__dso_public void sudo_SHA256Transform(uint32_t state[8], const uint8_t buffer[SHA256_BLOCK_LENGTH]);
-__dso_public void sudo_SHA256Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
-__dso_public void sudo_SHA256Final(uint8_t digest[SHA256_DIGEST_LENGTH], SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA256Init(SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA256Pad(SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA256Transform(uint32_t state[8], const uint8_t buffer[SHA256_BLOCK_LENGTH]);
+sudo_dso_public void sudo_SHA256Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+sudo_dso_public void sudo_SHA256Final(uint8_t digest[SHA256_DIGEST_LENGTH], SHA2_CTX *ctx);
 
 #define SHA256Init		sudo_SHA256Init
 #define SHA256Pad		sudo_SHA256Pad
@@ -73,11 +73,11 @@ __dso_public void sudo_SHA256Final(uint8_t digest[SHA256_DIGEST_LENGTH], SHA2_CT
 #define SHA256Update		sudo_SHA256Update
 #define SHA256Final		sudo_SHA256Final
 
-__dso_public void sudo_SHA384Init(SHA2_CTX *ctx);
-__dso_public void sudo_SHA384Pad(SHA2_CTX *ctx);
-__dso_public void sudo_SHA384Transform(uint64_t state[8], const uint8_t buffer[SHA384_BLOCK_LENGTH]);
-__dso_public void sudo_SHA384Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
-__dso_public void sudo_SHA384Final(uint8_t digest[SHA384_DIGEST_LENGTH], SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA384Init(SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA384Pad(SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA384Transform(uint64_t state[8], const uint8_t buffer[SHA384_BLOCK_LENGTH]);
+sudo_dso_public void sudo_SHA384Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+sudo_dso_public void sudo_SHA384Final(uint8_t digest[SHA384_DIGEST_LENGTH], SHA2_CTX *ctx);
 
 #define SHA384Init		sudo_SHA384Init
 #define SHA384Pad		sudo_SHA384Pad
@@ -85,11 +85,11 @@ __dso_public void sudo_SHA384Final(uint8_t digest[SHA384_DIGEST_LENGTH], SHA2_CT
 #define SHA384Update		sudo_SHA384Update
 #define SHA384Final		sudo_SHA384Final
 
-__dso_public void sudo_SHA512Init(SHA2_CTX *ctx);
-__dso_public void sudo_SHA512Pad(SHA2_CTX *ctx);
-__dso_public void sudo_SHA512Transform(uint64_t state[8], const uint8_t buffer[SHA512_BLOCK_LENGTH]);
-__dso_public void sudo_SHA512Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
-__dso_public void sudo_SHA512Final(uint8_t digest[SHA512_DIGEST_LENGTH], SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA512Init(SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA512Pad(SHA2_CTX *ctx);
+sudo_dso_public void sudo_SHA512Transform(uint64_t state[8], const uint8_t buffer[SHA512_BLOCK_LENGTH]);
+sudo_dso_public void sudo_SHA512Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+sudo_dso_public void sudo_SHA512Final(uint8_t digest[SHA512_DIGEST_LENGTH], SHA2_CTX *ctx);
 
 #define SHA512Init		sudo_SHA512Init
 #define SHA512Pad		sudo_SHA512Pad

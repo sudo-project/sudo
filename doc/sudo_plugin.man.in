@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "April 1, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "August 31, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -215,6 +215,24 @@ The plugin may optionally pass this, or another value, back in the
 \fIcommand_info\fR
 list.
 .TP 6n
+cmnd_chroot=string
+The root directory (see
+chroot(2))
+to run the command in, as specified by the user via the
+\fB\-R\fR
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+root directory.
+Only available starting with API version 1.16.
+.TP 6n
+cmnd_cwd=string
+The working directory to run the command in, as specified by the user via the
+\fB\-D\fR
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+working directory.
+Only available starting with API version 1.16.
+.TP 6n
 debug_flags=string
 A debug file path name followed by a space and a comma-separated
 list of debug flags that correspond to the plugin's
@@ -249,10 +267,6 @@ sudo.conf(@mansectform@)
 contains a plugin-specific
 \fRDebug\fR
 entry.
-.TP 6n
-debug_level=number
-This setting has been deprecated in favor of
-\fIdebug_flags\fR.
 .TP 6n
 ignore_ticket=bool
 Set to true if the user specified the
@@ -425,8 +439,10 @@ For more information, see the
 section.
 .TP 6n
 timeout=string
-User-specified command timeout.
-Not all plugins support command timeouts and the ability for the
+Command timeout specified by the user via the
+\fB\-T\fR
+option.
+Not all plugins support command timeouts and the ability of the
 user to set a timeout may be restricted by policy.
 The format of the timeout string is plugin-specific.
 .PP
@@ -512,6 +528,97 @@ The parent process ID of the running
 \fBsudo\fR
 process.
 Only available starting with API version 1.2.
+.TP 6n
+rlimit_as=soft,hard
+The maximum size to which the process's address space may grow (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_core=soft,hard
+The largest size core dump file that may be created (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_cpu=soft,hard
+The maximum amount of CPU time that the process may use (in seconds).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_data=soft,hard
+The maximum size of the data segment for the process (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_fsize=soft,hard
+The largest size file that the process may create (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_locks=soft,hard
+The maximum number of locks that the process may establish,
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_memlock=soft,hard
+The maximum size that the process may lock in memory (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_nofile=soft,hard
+The maximum number of files that the process may have open.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_nproc=soft,hard
+The maximum number of processes that the user may run simultaneously.
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_rss=soft,hard
+The maximum size to which the process's resident set size may grow (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.TP 6n
+rlimit_stack=soft,hard
+The maximum size to which the process's stack may grow (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+Only available starting with API version 1.16.
 .TP 6n
 sid=int
 The session ID of the running
@@ -2926,16 +3033,44 @@ int (*accept)(const char *plugin_name, unsigned int plugin_type,
 .sp
 The
 \fBaccept\fR()
-function is called when a command or action is accepted by the policy
-plugin.
+function is called when a command or action is accepted by a policy
+or approval plugin.
 The function arguments are as follows:
 .TP 6n
 plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that accepted the command or
+\(lqsudo\(rq
+for the
+\fBsudo\fR
+front-end.
 .TP 6n
 plugin_type
-The type of plugin that accepted the command, currently always
-\fRSUDO_POLICY_PLUGIN\fR.
+The type of plugin that accepted the command, currently either
+\fRSUDO_POLICY_PLUGIN\fR,
+\fRSUDO_POLICY_APPROVAL\fR
+or
+\fRSUDO_FRONT_END\fR.
+The
+\fBaccept\fR()
+function is called multiple times--once for each policy or approval
+plugin that succeeds and once for the sudo front-end.
+When called on behalf of the sudo front-end,
+\fIcommand_info\fR
+may include information from an I/O logging plugin as well.
+.sp
+Typically, an audit plugin is interested in either the accept status from
+the
+\fBsudo\fR
+front-end or from the various policy and approval plugins, but not both.
+It is possible for the policy plugin to accept a command that is
+later rejected by an approval plugin, in which case the audit
+plugin's
+\fBaccept\fR()
+and
+\fBreject\fR()
+functions will
+\fIboth\fR
+be called.
 .TP 6n
 command_info
 A vector of information describing the command being run in the form of
@@ -3025,13 +3160,22 @@ function is called when a command or action is rejected by a plugin.
 The function arguments are as follows:
 .TP 6n
 plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that rejected the command.
 .TP 6n
 plugin_type
-The type of plugin that accepted the command, currently either
-\fRSUDO_POLICY_PLUGIN\fR
+The type of plugin that rejected the command, currently either
+\fRSUDO_POLICY_PLUGIN\fR,
+\fRSUDO_APPROVAL_PLUGIN\fR
 or
 \fRSUDO_IO_PLUGIN\fR.
+.sp
+Unlike the
+\fBaccept\fR()
+function, the
+\fBreject\fR()
+function is not called on behalf of the
+\fBsudo\fR
+front-end.
 .TP 6n
 audit_msg
 An optional string describing the reason the command was rejected
@@ -3099,17 +3243,24 @@ int (*error)(const char *plugin_name, unsigned int plugin_type,
 .sp
 The
 \fBerror\fR()
-function is called when a plugin returns an error.
+function is called when a plugin or the
+\fBsudo\fR
+front-end returns an error.
 The function arguments are as follows:
 .TP 6n
 plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that generated the error or
+\(lqsudo\(rq
+for the
+\fBsudo\fR
+front-end.
 .TP 6n
 plugin_type
-The type of plugin that accepted the command, currently either
-\fRSUDO_POLICY_PLUGIN\fR
-or
-\fRSUDO_IO_PLUGIN\fR.
+The type of plugin that generated the error, or
+\fRSUDO_FRONT_END\fR
+for the
+\fBsudo\fR
+front-end.
 .TP 6n
 audit_msg
 An optional string describing the plugin error.
@@ -4437,9 +4588,6 @@ the trailing NUL character).
 In practical terms, this is the longest password
 \fBsudo\fR
 will support.
-It is also useful as a maximum value for the
-\fBmemset_s\fR()
-function when clearing passwords filled in by the conversation function.
 .PP
 The
 \fBprintf\fR()-style
@@ -4461,6 +4609,58 @@ escape sequences.
 See the sample plugin for an example of the
 \fBconversation\fR()
 function usage.
+.SS "Plugin invocation order"
+As of
+\fBsudo\fR
+1.9.0, the plugin
+\fBopen\fR()
+and
+\fBclose\fR()
+functions are called in the
+following order:
+.TP 5n
+1.\&
+audit open
+.TP 5n
+2.\&
+policy open
+.TP 5n
+3.\&
+approval open
+.TP 5n
+4.\&
+approval close
+.TP 5n
+5.\&
+I/O log open
+.TP 5n
+6.\&
+command runs
+.TP 5n
+7.\&
+command exits
+.TP 5n
+8.\&
+I/O log close
+.TP 5n
+9.\&
+policy close
+.TP 5n
+10.\&
+audit close
+.TP 5n
+11.\&
+sudo exits
+.PP
+Prior to
+\fBsudo\fR
+1.9.0, the I/O log
+\fBclose\fR()
+function was called
+\fIafter\fR
+the policy
+\fBclose\fR()
+function.
 .SS "Sudoers group plugin API"
 The
 \fBsudoers\fR
@@ -4849,6 +5049,19 @@ command was not run.
 has increased from 255 to 1023 bytes.
 .sp
 Support for audit and approval plugins was added.
+.TP 6n
+Version 1.16 (sudo 1.9.3)
+Initial resource limit values were added to the
+\fRuser_info\fR
+list.
+.sp
+The
+\fIcmnd_chroot\fR
+and
+\fIcmnd_cwd\fR
+enties were added to the
+\fRsettings\fR
+list.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

@@ -30,7 +30,7 @@
 #include "sudoers_debug.h"
 #include "parse.h"
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 const struct gentime_test {
     char *gentime;

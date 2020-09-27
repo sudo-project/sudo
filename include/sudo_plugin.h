@@ -21,7 +21,7 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 15
+#define SUDO_API_VERSION_MINOR 16
 #define SUDO_API_MKVERSION(x, y) (((x) << 16) | (y))
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
@@ -34,6 +34,9 @@
 #define SUDO_API_VERSION_SET_MINOR(vp, n) do { \
     *(vp) = (*(vp) & 0xffff0000U) | (n); \
 } while(0)
+
+/* "plugin type" for the sudo front end, as passed to an audit plugin */
+#define SUDO_FRONT_END		0
 
 /* Conversation function types and defines */
 struct sudo_conv_message {
@@ -54,9 +57,7 @@ struct sudo_conv_message {
  * conversing with the user.  In practical terms, this is the longest
  * password sudo will support.  This means that a buffer of size
  * SUDO_CONV_REPL_MAX+1 is guaranteed to be able to hold any reply
- * from the conversation function.  It is also useful as a max value
- * for memset_s() when clearing passwords returned by the conversation
- * function.
+ * from the conversation function.
  */
 #define SUDO_CONV_REPL_MAX	1023
 

@@ -37,17 +37,17 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
+#include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
+#include "sudo_iolog.h"
 #include "sudo_json.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"
-#include "sudo_fatal.h"
-#include "sudo_iolog.h"
-#include "pathnames.h"
 
 static unsigned char const gzip_magic[2] = {0x1f, 0x8b};
 static unsigned int sessid_max = SESSID_MAX;
@@ -74,7 +74,7 @@ io_swapids(bool restore)
     if (user_euid == (uid_t)-1)
 	user_euid = geteuid();
     if (user_egid == (gid_t)-1)
-	user_euid = getegid();
+	user_egid = getegid();
 
     if (restore) {
 	if (seteuid(user_euid) == -1) {
@@ -121,23 +121,21 @@ iolog_mkdirs(char *path)
     mode_t omask;
     struct stat sb;
     int dfd;
-    bool ok = false, uid_changed = false;
+    bool ok = true, uid_changed = false;
     debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL);
 
-    if ((dfd = open(path, O_RDONLY|O_NONBLOCK)) != -1)
-	ok = true;
-    if (!ok && errno == EACCES) {
+    dfd = open(path, O_RDONLY|O_NONBLOCK);
+    if (dfd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (io_swapids(false)) {
-	    if ((dfd = open(path, O_RDONLY|O_NONBLOCK)) != -1)
-		ok = true;
-	    if (!io_swapids(true))
+	    dfd = open(path, O_RDONLY|O_NONBLOCK);
+	    if (!io_swapids(true)) {
 		ok = false;
+		goto done;
+	    }
 	}
     }
-    if (ok && fstat(dfd, &sb) == -1)
-	ok = false;
-    if (ok) {
+    if (dfd != -1 && fstat(dfd, &sb) != -1) {
 	if (S_ISDIR(sb.st_mode)) {
 	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid) {
 		if (fchown(dfd, iolog_uid, iolog_gid) != 0) {
@@ -473,21 +471,19 @@ iolog_nextid(char *iolog_dir, char sessid[7])
     }
 
     /* Read current seq number (base 36). */
-    if (id == 0) {
-	nread = read(fd, buf, sizeof(buf) - 1);
-	if (nread != 0) {
-	    if (nread == -1) {
-		goto done;
-	    }
-	    if (buf[nread - 1] == '\n')
-		nread--;
-	    buf[nread] = '\0';
-	    id = strtoul(buf, &ep, 36);
-	    if (ep == buf || *ep != '\0' || id >= sessid_max) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "%s: bad sequence number: %s", pathbuf, buf);
-		id = 0;
-	    }
+    nread = read(fd, buf, sizeof(buf) - 1);
+    if (nread != 0) {
+	if (nread == -1) {
+	    goto done;
+	}
+	if (buf[nread - 1] == '\n')
+	    nread--;
+	buf[nread] = '\0';
+	id = strtoul(buf, &ep, 36);
+	if (ep == buf || *ep != '\0' || id >= sessid_max) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: bad sequence number: %s", pathbuf, buf);
+	    id = 0;
 	}
     }
     id++;
@@ -1019,7 +1015,7 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
     }
 
     if (info->runas_group!= NULL) {
-	if (info->runas_uid != (uid_t)-1) {
+	if (info->runas_gid != (gid_t)-1) {
 	    json_value.type = JSON_ID;
 	    json_value.u.id = info->runas_gid;
 	    if (!sudo_json_add_value(&json, "rungid", &json_value))
@@ -1036,6 +1032,20 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
 	json_value.type = JSON_ID;
 	json_value.u.id = info->runas_uid;
 	if (!sudo_json_add_value(&json, "runuid", &json_value))
+	    goto oom;
+    }
+
+    if (info->runchroot != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = info->runchroot;
+	if (!sudo_json_add_value(&json, "runchroot", &json_value))
+	    goto oom;
+    }
+
+    if (info->runcwd != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = info->runcwd;
+	if (!sudo_json_add_value(&json, "runcwd", &json_value))
 	    goto oom;
     }
 

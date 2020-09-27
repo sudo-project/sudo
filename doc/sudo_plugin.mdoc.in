@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 1, 2020
+.Dd August 31, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -197,6 +197,22 @@ or higher.
 The plugin may optionally pass this, or another value, back in the
 .Em command_info
 list.
+.It cmnd_chroot=string
+The root directory (see
+.Xr chroot 2 )
+to run the command in, as specified by the user via the
+.Fl R
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+root directory.
+Only available starting with API version 1.16.
+.It cmnd_cwd=string
+The working directory to run the command in, as specified by the user via the
+.Fl D
+option.
+The plugin may ignore or restrict the user's ability to specify a new
+working directory.
+Only available starting with API version 1.16.
 .It debug_flags=string
 A debug file path name followed by a space and a comma-separated
 list of debug flags that correspond to the plugin's
@@ -231,9 +247,6 @@ if
 contains a plugin-specific
 .Li Debug
 entry.
-.It debug_level=number
-This setting has been deprecated in favor of
-.Em debug_flags .
 .It ignore_ticket=bool
 Set to true if the user specified the
 .Fl k
@@ -384,8 +397,10 @@ For more information, see the
 .Em check_policy
 section.
 .It timeout=string
-User-specified command timeout.
-Not all plugins support command timeouts and the ability for the
+Command timeout specified by the user via the
+.Fl T
+option.
+Not all plugins support command timeouts and the ability of the
 user to set a timeout may be restricted by policy.
 The format of the timeout string is plugin-specific.
 .El
@@ -456,6 +471,86 @@ The parent process ID of the running
 .Nm sudo
 process.
 Only available starting with API version 1.2.
+.It rlimit_as=soft,hard
+The maximum size to which the process's address space may grow (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_core=soft,hard
+The largest size core dump file that may be created (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_cpu=soft,hard
+The maximum amount of CPU time that the process may use (in seconds).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_data=soft,hard
+The maximum size of the data segment for the process (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_fsize=soft,hard
+The largest size file that the process may create (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_locks=soft,hard
+The maximum number of locks that the process may establish,
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_memlock=soft,hard
+The maximum size that the process may lock in memory (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_nofile=soft,hard
+The maximum number of files that the process may have open.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_nproc=soft,hard
+The maximum number of processes that the user may run simultaneously.
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_rss=soft,hard
+The maximum size to which the process's resident set size may grow (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
+.It rlimit_stack=soft,hard
+The maximum size to which the process's stack may grow (in bytes).
+The soft and hard limits are separated by a comma.
+A value of
+.Dq infinity
+indicates that there is no limit.
+Only available starting with API version 1.16.
 .It sid=int
 The session ID of the running
 .Nm sudo
@@ -2607,15 +2702,43 @@ int (*accept)(const char *plugin_name, unsigned int plugin_type,
 .Pp
 The
 .Fn accept
-function is called when a command or action is accepted by the policy
-plugin.
+function is called when a command or action is accepted by a policy
+or approval plugin.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that accepted the command or
+.Dq sudo
+for the
+.Nm sudo
+front-end.
 .It plugin_type
-The type of plugin that accepted the command, currently always
-.Dv SUDO_POLICY_PLUGIN .
+The type of plugin that accepted the command, currently either
+.Dv SUDO_POLICY_PLUGIN ,
+.Dv SUDO_POLICY_APPROVAL
+or
+.Dv SUDO_FRONT_END .
+The
+.Fn accept
+function is called multiple times--once for each policy or approval
+plugin that succeeds and once for the sudo front-end.
+When called on behalf of the sudo front-end,
+.Fa command_info
+may include information from an I/O logging plugin as well.
+.Pp
+Typically, an audit plugin is interested in either the accept status from
+the
+.Nm sudo
+front-end or from the various policy and approval plugins, but not both.
+It is possible for the policy plugin to accept a command that is
+later rejected by an approval plugin, in which case the audit
+plugin's
+.Fn accept
+and
+.Fn reject
+functions will
+.Em both
+be called.
 .It command_info
 A vector of information describing the command being run in the form of
 .Dq name=value
@@ -2694,12 +2817,21 @@ function is called when a command or action is rejected by a plugin.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that rejected the command.
 .It plugin_type
-The type of plugin that accepted the command, currently either
-.Dv SUDO_POLICY_PLUGIN
+The type of plugin that rejected the command, currently either
+.Dv SUDO_POLICY_PLUGIN ,
+.Dv SUDO_APPROVAL_PLUGIN
 or
 .Dv SUDO_IO_PLUGIN .
+.Pp
+Unlike the
+.Fn accept
+function, the
+.Fn reject
+function is not called on behalf of the
+.Nm sudo
+front-end.
 .It audit_msg
 An optional string describing the reason the command was rejected
 by the plugin.
@@ -2756,16 +2888,23 @@ int (*error)(const char *plugin_name, unsigned int plugin_type,
 .Pp
 The
 .Fn error
-function is called when a plugin returns an error.
+function is called when a plugin or the
+.Nm sudo
+front-end returns an error.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It plugin_name
-The name of the plugin that accepted the command.
+The name of the plugin that generated the error or
+.Dq sudo
+for the
+.Nm sudo
+front-end.
 .It plugin_type
-The type of plugin that accepted the command, currently either
-.Dv SUDO_POLICY_PLUGIN
-or
-.Dv SUDO_IO_PLUGIN .
+The type of plugin that generated the error, or
+.Dv SUDO_FRONT_END
+for the
+.Nm sudo
+front-end.
 .It audit_msg
 An optional string describing the plugin error.
 If the plugin did not provide a description,
@@ -3916,9 +4055,6 @@ the trailing NUL character).
 In practical terms, this is the longest password
 .Nm sudo
 will support.
-It is also useful as a maximum value for the
-.Fn memset_s
-function when clearing passwords filled in by the conversation function.
 .Pp
 The
 .Fn printf Ns -style
@@ -3940,6 +4076,49 @@ escape sequences.
 See the sample plugin for an example of the
 .Fn conversation
 function usage.
+.Ss Plugin invocation order
+As of
+.Nm sudo
+1.9.0, the plugin
+.Fn open
+and
+.Fn close
+functions are called in the
+following order:
+.Bl -enum
+.It
+audit open
+.It
+policy open
+.It
+approval open
+.It
+approval close
+.It
+I/O log open
+.It
+command runs
+.It
+command exits
+.It
+I/O log close
+.It
+policy close
+.It
+audit close
+.It
+sudo exits
+.El
+.Pp
+Prior to
+.Nm sudo
+1.9.0, the I/O log
+.Fn close
+function was called
+.Em after
+the policy
+.Fn close
+function.
 .Ss Sudoers group plugin API
 The
 .Nm sudoers
@@ -4283,6 +4462,18 @@ command was not run.
 has increased from 255 to 1023 bytes.
 .Pp
 Support for audit and approval plugins was added.
+.It Version 1.16 (sudo 1.9.3)
+Initial resource limit values were added to the
+.Li user_info
+list.
+.Pp
+The
+.Em cmnd_chroot
+and
+.Em cmnd_cwd
+enties were added to the
+.Li settings
+list.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

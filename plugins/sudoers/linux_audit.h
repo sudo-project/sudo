@@ -19,6 +19,6 @@
 #ifndef SUDOERS_LINUX_AUDIT_H
 #define	SUDOERS_LINUX_AUDIT_H
 
-int	linux_audit_command(char *argv[], int result);
+int	linux_audit_command(char *const argv[], int result);
 
 #endif /* SUDOERS_LINUX_AUDIT_H */

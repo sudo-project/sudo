@@ -160,7 +160,6 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
     output->filename = strdup(debug_file->debug_file);
     if (output->filename == NULL)
 	goto oom;
-    output->fd = -1;
 
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
     for (j = 0; j <= instance->max_subsystem; j++)

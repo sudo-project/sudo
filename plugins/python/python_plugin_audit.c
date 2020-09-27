@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019 Robert Manner <robert.manner@oneidentity.com>
+ * Copyright (c) 2020 Robert Manner <robert.manner@oneidentity.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -233,7 +233,7 @@ python_plugin_audit_show_version(struct AuditPluginContext *audit_ctx, int verbo
         CALLBACK_PYNAME(show_version), verbose, PY_AUDIT_PLUGIN_VERSION, "audit"));
 }
 
-__dso_public struct audit_plugin python_audit;
+sudo_dso_public struct audit_plugin python_audit;
 
 // generate symbols for loading multiple audit plugins:
 #define AUDIT_SYMBOL_NAME(symbol) symbol
@@ -263,7 +263,7 @@ static struct audit_plugin *extra_audit_plugins[] = {
     &python_audit7
 };
 
-__dso_public struct audit_plugin *
+sudo_dso_public struct audit_plugin *
 python_audit_clone(void)
 {
     static size_t counter = 0;

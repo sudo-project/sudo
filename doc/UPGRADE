@@ -1,6 +1,39 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.9.3:
+
+    Due to the addition of the CHROOT and CWD options, it is no
+    longer possible to declare an alias with one of those names.
+    If a sudoers file has an alias with one of those names, sudo
+    and visudo will report a syntax error with a message like
+    "syntax error: unexpected CHROOT, expecting ALIAS".
+
+    Starting with version 1.9.3, sudoers rules must end in either
+    a newline or the end-of-file.  This makes it possible to provide
+    better error messages.  Previously, it was possible to include
+    multiple rules on a single line, separated by white space.
+
+    Starting with version 1.9.3, sudo will attempt to recover from
+    a syntax error in the sudoers file by discarding the portion
+    of the line that contains the error until the end of the line.
+    To restore the historic behavior of refusing to run when a
+    syntax error is encountered, add "error_recovery=false" as a
+    plugin option in sudo.conf for the "sudoers_audit" plugin, (or
+    "sudoers_policy" if there is no "sudoers_audit" plugin configured).
+
+o Upgrading from a version prior to 1.9.1:
+
+    Starting with version 1.9.1, sudoers plugin arguments in sudo.conf
+    should be specified for the "sudoers_audit" plugin, not
+    "sudoers_policy".  This is because the sudoers file is now
+    opened and parsed by the "sudoers_audit" plugin.  Previously,
+    this was done by the "sudoers_policy" plugin.  The use of an
+    audit plugin makes it possible for the sudoers module to detect
+    when a command has been rejected by an approval plugin and only
+    log commands that are allowed by both policy and approval
+    plugins.
+
 o Upgrading from a version prior to 1.8.30:
 
     Starting with version 1.8.30, sudo will no longer allow commands
@@ -70,6 +103,13 @@ o Upgrading from a version prior to 1.8.23:
 
 o Upgrading from a version prior to 1.8.20:
 
+    Due to the addition of the TIMEOUT, NOTBEFORE and NOTAFTTER
+    options, it is no longer possible to declare an alias with one
+    of those names.  If a sudoers file has an alias with one of
+    those names, sudo and visudo will report a syntax error with a
+    message like "syntax error: unexpected TIMEOUT, expecting ALIAS".
+
+    Starting with version 1.9.3, sudoers rules must end in either
     Prior to version 1.8.20, when log_input, log_output or use_pty
     were enabled, if any of the standard input, output or error
     were not connected to a terminal, sudo would use a pipe.  The

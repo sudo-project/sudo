@@ -31,6 +31,7 @@ AC_DEFUN([AX_FUNC_SNPRINTF],
 AC_MSG_CHECKING(for working snprintf)
 AC_CACHE_VAL(ac_cv_have_working_snprintf,
 [AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
+#include <string.h>
 
 int main(void)
 {
@@ -38,18 +39,19 @@ int main(void)
     char bufd[5] = { 'x', 'x', 'x', '\0', '\0' };
     int i;
     i = snprintf (bufs, 2, "%s", "111");
-    if (strcmp (bufs, "1")) exit (1);
-    if (i != 3) exit (1);
+    if (strcmp (bufs, "1")) return (1);
+    if (i != 3) return (1);
     i = snprintf (bufd, 2, "%d", 111);
-    if (strcmp (bufd, "1")) exit (1);
-    if (i != 3) exit (1);
-    exit(0);
+    if (strcmp (bufd, "1")) return (1);
+    if (i != 3) return (1);
+    return(0);
 }]])],[ac_cv_have_working_snprintf=yes],[ac_cv_have_working_snprintf=no],[ac_cv_have_working_snprintf=cross])])
 AC_MSG_RESULT([$ac_cv_have_working_snprintf])
 AC_MSG_CHECKING(for working vsnprintf)
 AC_CACHE_VAL(ac_cv_have_working_vsnprintf,
 [AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 int my_vsnprintf (char *buf, const char *tmpl, ...)
 {
@@ -67,12 +69,12 @@ int main(void)
     char bufd[5] = { 'x', 'x', 'x', '\0', '\0' };
     int i;
     i = my_vsnprintf (bufs, "%s", "111");
-    if (strcmp (bufs, "1")) exit (1);
-    if (i != 3) exit (1);
+    if (strcmp (bufs, "1")) return (1);
+    if (i != 3) return (1);
     i = my_vsnprintf (bufd, "%d", 111);
-    if (strcmp (bufd, "1")) exit (1);
-    if (i != 3) exit (1);
-    exit(0);
+    if (strcmp (bufd, "1")) return (1);
+    if (i != 3) return (1);
+    return(0);
 }]])],[ac_cv_have_working_vsnprintf=yes],[ac_cv_have_working_vsnprintf=no],[ac_cv_have_working_vsnprintf=cross])])
 AC_MSG_RESULT([$ac_cv_have_working_vsnprintf])
 if test x$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf != "xyesyes"; then

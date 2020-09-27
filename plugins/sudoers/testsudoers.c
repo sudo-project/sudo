@@ -99,7 +99,7 @@ extern char *malloc_options;
 extern int sudoersdebug;
 #endif
 
-__dso_public int main(int argc, char *argv[]);
+sudo_dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])
@@ -255,7 +255,7 @@ main(int argc, char *argv[])
 
     /* Initialize default values. */
     if (!init_defaults())
-	sudo_fatalx(U_("unable to initialize sudoers default values"));
+	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     /* Set group_plugin callback. */
     sudo_defs_table[I_GROUP_PLUGIN].callback = cb_group_plugin;
@@ -269,7 +269,7 @@ main(int argc, char *argv[])
     /* Load ip addr/mask for each interface. */
     if (get_net_ifs(&p) > 0) {
 	if (!set_interfaces(p))
-	    sudo_fatal(U_("unable to parse network address list"));
+	    sudo_fatal("%s", U_("unable to parse network address list"));
     }
 
     /* Allocate space for data structures in the parser. */
@@ -290,30 +290,23 @@ main(int argc, char *argv[])
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
     switch (input_format) {
     case format_ldif:
-        if (!sudoers_parse_ldif(&parsed_policy, stdin, NULL, true))
-	    (void) printf("Parse error in LDIF");
-	else
-	    (void) fputs("Parses OK", stdout);
+        if (!sudoers_parse_ldif(&parsed_policy, stdin, NULL, true)) {
+	    (void) puts("Parse error in LDIF");
+	    parse_error = true;
+	}
         break;
     case format_sudoers:
-	if (sudoersparse() != 0 || parse_error) {
+	if (sudoersparse() != 0 || parse_error)
 	    parse_error = true;
-	    if (errorlineno != -1)
-		(void) printf("Parse error in %s near line %d",
-		    errorfile, errorlineno);
-	    else
-		(void) printf("Parse error in %s", errorfile);
-	} else {
-	    (void) fputs("Parses OK", stdout);
-	}
         break;
     default:
         sudo_fatalx("error: unhandled input %d", input_format);
     }
+    if (!parse_error)
+	(void) puts("Parses OK");
 
     if (!update_defaults(&parsed_policy, NULL, SETDEF_ALL, false))
-	(void) fputs(" (problem with defaults entries)", stdout);
-    puts(".");
+	(void) puts("Problem with defaults entries");
 
     if (dflag) {
 	(void) putchar('\n');
@@ -343,7 +336,8 @@ main(int argc, char *argv[])
 			cs->runasuserlist, cs->runasgrouplist, NULL, NULL);
 		    if (runas_match == ALLOW) {
 			puts("\trunas matched");
-			cmnd_match = cmnd_matches(&parsed_policy, cs->cmnd);
+			cmnd_match = cmnd_matches(&parsed_policy, cs->cmnd,
+			    cs->runchroot, NULL);
 			if (cmnd_match != UNSPEC)
 			    match = cmnd_match;
 			printf("\tcmnd  %s\n", match == ALLOW ? "allowed" :
@@ -446,39 +440,39 @@ sudo_endspent(void)
 }
 
 FILE *
-open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
+open_sudoers(const char *file, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
-    const char *sudoers_base;
+    const char *base;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
 
-    sudoers_base = strrchr(sudoers, '/');
-    if (sudoers_base != NULL)
-	sudoers_base++;
+    base = strrchr(file, '/');
+    if (base != NULL)
+	base++;
     else
-	sudoers_base = sudoers;
+	base = file;
 
-    switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
+    switch (sudo_secure_file(file, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
-	    fp = fopen(sudoers, "r");
+	    fp = fopen(file, "r");
 	    break;
 	case SUDO_PATH_MISSING:
-	    sudo_warn("unable to stat %s", sudoers_base);
+	    sudo_warn("unable to stat %s", base);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
-	    sudo_warnx("%s is not a regular file", sudoers_base);
+	    sudo_warnx("%s is not a regular file", base);
 	    break;
 	case SUDO_PATH_WRONG_OWNER:
 	    sudo_warnx("%s should be owned by uid %u",
-		sudoers_base, (unsigned int) sudoers_uid);
+		base, (unsigned int) sudoers_uid);
 	    break;
 	case SUDO_PATH_WORLD_WRITABLE:
-	    sudo_warnx("%s is world writable", sudoers_base);
+	    sudo_warnx("%s is world writable", base);
 	    break;
 	case SUDO_PATH_GROUP_WRITABLE:
 	    sudo_warnx("%s should be owned by gid %u",
-		sudoers_base, (unsigned int) sudoers_gid);
+		base, (unsigned int) sudoers_gid);
 	    break;
 	default:
 	    /* NOTREACHED */
@@ -504,6 +498,12 @@ bool
 restore_perms(void)
 {
     return true;
+}
+
+int
+set_cmnd_path(const char *runchroot)
+{
+    return FOUND;
 }
 
 static bool

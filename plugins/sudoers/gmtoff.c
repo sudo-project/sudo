@@ -36,24 +36,24 @@
  */
 #ifdef HAVE_STRUCT_TM_TM_GMTOFF
 long
-get_gmtoff(time_t *clock)
+get_gmtoff(time_t *when)
 {
 	struct tm *local;
 
-	local = localtime(clock);
+	local = localtime(when);
 	return local->tm_gmtoff;
 }
 #else
 long
-get_gmtoff(time_t *clock)
+get_gmtoff(time_t *when)
 {
 	struct tm *gm, gmt, *local;
 	long offset;
 
-	if ((gm = gmtime(clock)) == NULL)
+	if ((gm = gmtime(when)) == NULL)
 	    return 0;
 	gmt = *gm;
-	if ((local = localtime(clock)) == NULL)
+	if ((local = localtime(when)) == NULL)
 	    return 0;
 
 	offset = (local->tm_sec - gmt.tm_sec) +
