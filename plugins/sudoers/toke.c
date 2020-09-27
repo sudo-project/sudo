@@ -2760,9 +2760,9 @@ char *sudoerstext;
 #endif
 
 int sudolineno;			/* current sudoers line number. */
-int last_token;			/* last token that was parsed. */
 char *sudoers;			/* sudoers file being parsed. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
+extern int sudoerschar;		/* last token that was parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
 const char *sudoers_file = _PATH_SUDOERS;
@@ -4031,25 +4031,37 @@ case YY_STATE_EOF(GOTINC):
 case YY_STATE_EOF(EXPECTPATH):
 #line 806 "toke.l"
 {
-			    if (YY_START != INITIAL) {
-				if (YY_START == INSTR)
-				    sudoerserror(N_("unterminated string"));
-				else
-				    sudoerserror(N_("unexpected state at end of file"));
-			    	BEGIN INITIAL;
+			    int state = YY_START;
+
+			    BEGIN INITIAL;
+
+			    switch (state) {
+			    case GOTCMND:
+				/* missing newline after command/args */
+				return COMMAND;
+			    case INSTR:
+				sudoerserror(N_("unterminated string"));
 				LEXTRACE("ERROR ");
 				return ERROR;
+			    default:
+				if (!pop_include())
+				    yyterminate();
+
+				/* force a newline at EOF */
+				if (sudoerschar != '\n') {
+				    LEXTRACE("\n");
+				    return '\n';
+				}
+				break;
 			    }
-			    if (!pop_include())
-				yyterminate();
 			}
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 820 "toke.l"
+#line 832 "toke.l"
 ECHO;
 	YY_BREAK
-#line 4047 "toke.c"
+#line 4059 "toke.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -5010,7 +5022,7 @@ void sudoersfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 820 "toke.l"
+#line 832 "toke.l"
 
 
 struct path_list {

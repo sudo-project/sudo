@@ -51,9 +51,9 @@
 #endif
 
 int sudolineno;			/* current sudoers line number. */
-int last_token;			/* last token that was parsed. */
 char *sudoers;			/* sudoers file being parsed. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
+extern int sudoerschar;		/* last token that was parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
 const char *sudoers_file = _PATH_SUDOERS;
@@ -804,17 +804,29 @@ sudoedit		{
 			}	/* parse error, no matching token */
 
 <*><<EOF>>		{
-			    if (YY_START != INITIAL) {
-				if (YY_START == INSTR)
-				    sudoerserror(N_("unterminated string"));
-				else
-				    sudoerserror(N_("unexpected state at end of file"));
-			    	BEGIN INITIAL;
+			    int state = YY_START;
+
+			    BEGIN INITIAL;
+
+			    switch (state) {
+			    case GOTCMND:
+				/* missing newline after command/args */
+				return COMMAND;
+			    case INSTR:
+				sudoerserror(N_("unterminated string"));
 				LEXTRACE("ERROR ");
 				return ERROR;
+			    default:
+				if (!pop_include())
+				    yyterminate();
+
+				/* force a newline at EOF */
+				if (sudoerschar != '\n') {
+				    LEXTRACE("\n");
+				    return '\n';
+				}
+				break;
 			    }
-			    if (!pop_include())
-				yyterminate();
 			}
 
 %%
