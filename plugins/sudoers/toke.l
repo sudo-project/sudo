@@ -1288,6 +1288,7 @@ sudoers_input(char *buf, yy_size_t max_size)
 		    return 0;
 		}
 		sudolinebuf.buf = cp;
+		sudolinebuf.size++;
 	    }
 	    sudolinebuf.buf[avail++] = '\n';
 	}
