@@ -49,7 +49,6 @@ extern int sudoersdebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    END = 0,
     COMMAND = 258,
     ALIAS = 259,
     DEFVAR = 260,
@@ -103,7 +102,6 @@ extern int sudoersdebug;
   };
 #endif
 /* Tokens.  */
-#define END 0
 #define COMMAND 258
 #define ALIAS 259
 #define DEFVAR 260
@@ -174,7 +172,7 @@ union YYSTYPE
     char *string;
     int tok;
 
-#line 178 "y.tab.h" /* yacc.c:1921  */
+#line 176 "y.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;

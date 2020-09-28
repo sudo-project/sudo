@@ -89,7 +89,6 @@ static struct command_digest *new_digest(int, char *);
 }
 
 %start file				/* special start symbol */
-%token		 END 0			/* end of file from lexer */
 %token <command> COMMAND		/* absolute pathname w/ optional args */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
 %token <string>	 DEFVAR			/* a Defaults variable name */
@@ -196,7 +195,7 @@ line		:	entry
 entry		:	'\n' {
 			    ; /* blank line */
 			}
-                |       error eol {
+                |       error '\n' {
 			    yyerrok;
 			}
 		|	include {
@@ -213,59 +212,59 @@ entry		:	'\n' {
 			    }
 			    free($1);
 			}
-		|	userlist privileges eol {
+		|	userlist privileges '\n' {
 			    if (!add_userspec($1, $2)) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-		|	USERALIAS useraliases eol {
+		|	USERALIAS useraliases '\n' {
 			    ;
 			}
-		|	HOSTALIAS hostaliases eol {
+		|	HOSTALIAS hostaliases '\n' {
 			    ;
 			}
-		|	CMNDALIAS cmndaliases eol {
+		|	CMNDALIAS cmndaliases '\n' {
 			    ;
 			}
-		|	RUNASALIAS runasaliases eol {
+		|	RUNASALIAS runasaliases '\n' {
 			    ;
 			}
-		|	DEFAULTS defaults_list eol {
+		|	DEFAULTS defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS, NULL, $2))
 				YYERROR;
 			}
-		|	DEFAULTS_USER userlist defaults_list eol {
+		|	DEFAULTS_USER userlist defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS_USER, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_RUNAS userlist defaults_list eol {
+		|	DEFAULTS_RUNAS userlist defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS_RUNAS, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_HOST hostlist defaults_list eol {
+		|	DEFAULTS_HOST hostlist defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS_HOST, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_CMND cmndlist defaults_list eol {
+		|	DEFAULTS_CMND cmndlist defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS_CMND, $2, $3))
 				YYERROR;
 			}
 		;
 
-include		:	INCLUDE WORD eol {
+include		:	INCLUDE WORD '\n' {
 			    $$ = $2;
 			}
-		|	INCLUDE WORD error eol {
+		|	INCLUDE WORD error '\n' {
 			    yyerrok;
 			    $$ = $2;
 			}
 		;
 
-includedir	:	INCLUDEDIR WORD eol {
+includedir	:	INCLUDEDIR WORD '\n' {
 			    $$ = $2;
 			}
-		|	INCLUDEDIR WORD error eol {
+		|	INCLUDEDIR WORD error '\n' {
 			    yyerrok;
 			    $$ = $2;
 			}
@@ -1027,15 +1026,6 @@ group		:	ALIAS {
 			    }
 			}
 		;
-
-eol		:	'\n' {
-			    ;
-			}
-		|	END {
-			    ; /* EOF */
-			}
-		;
-
 %%
 void
 sudoerserror(const char *s)

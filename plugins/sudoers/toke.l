@@ -53,7 +53,6 @@
 int sudolineno;			/* current sudoers line number. */
 char *sudoers;			/* sudoers file being parsed. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
-extern int sudoerschar;		/* last token that was parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
 const char *sudoers_file = _PATH_SUDOERS;
@@ -819,12 +818,6 @@ sudoedit		{
 			    default:
 				if (!pop_include())
 				    yyterminate();
-
-				/* force a newline at EOF */
-				if (sudoerschar != '\n') {
-				    LEXTRACE("\n");
-				    return '\n';
-				}
 				break;
 			    }
 			}
@@ -1285,6 +1278,20 @@ sudoers_input(char *buf, yy_size_t max_size)
 		YY_FATAL_ERROR("input in flex scanner failed");
 	    return 0;
 	}
+
+	/* Add trailing newline if it is missing. */
+	if (sudolinebuf.buf[avail - 1] != '\n') {
+	    if (avail == sudolinebuf.size) {
+		char *cp = realloc(sudolinebuf.buf, avail + 1);
+		if (cp == NULL) {
+		    YY_FATAL_ERROR("unable to allocate memory");
+		    return 0;
+		}
+		sudolinebuf.buf = cp;
+	    }
+	    sudolinebuf.buf[avail++] = '\n';
+	}
+
 	sudolinebuf.len = avail;
 	sudolinebuf.off = 0;
 	sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
