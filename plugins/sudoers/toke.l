@@ -803,23 +803,8 @@ sudoedit		{
 			}	/* parse error, no matching token */
 
 <*><<EOF>>		{
-			    int state = YY_START;
-
-			    BEGIN INITIAL;
-
-			    switch (state) {
-			    case GOTCMND:
-				/* missing newline after command/args */
-				return COMMAND;
-			    case INSTR:
-				sudoerserror(N_("unterminated string"));
-				LEXTRACE("ERROR ");
-				return ERROR;
-			    default:
-				if (!pop_include())
-				    yyterminate();
-				break;
-			    }
+			    if (!pop_include())
+				yyterminate();
 			}
 
 %%
