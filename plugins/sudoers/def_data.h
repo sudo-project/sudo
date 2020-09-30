@@ -262,14 +262,14 @@
 #define def_runchroot           (sudo_defs_table[I_RUNCHROOT].sd_un.str)
 
 enum def_tuple {
-	never,
-	once,
-	always,
-	any,
-	all,
-	digest_only,
-	global,
-	ppid,
-	tty,
-	kernel
+    never,
+    once,
+    always,
+    any,
+    all,
+    digest_only,
+    global,
+    ppid,
+    tty,
+    kernel
 };
