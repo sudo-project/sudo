@@ -77,6 +77,10 @@ What's new in Sudo 1.9.3
    file allows it.  This functionality is not enabled by default
    and must be explicitly enabled in the sudoers file.
 
+ * Fixed a regression introduced in sudo 1.9.1 where the sudoers_audit
+   symbol could not be resolved when sudo is configured with the
+   --enable-static-sudoers option.  Bug #936 and GitHub issue #61.
+
 What's new in Sudo 1.9.2
 
  * Fixed package builds on RedHat Enterprise Linux 8.
