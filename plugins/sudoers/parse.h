@@ -325,7 +325,7 @@ bool addr_matches(char *n);
 bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const char *runchroot, struct cmnd_info *info, const struct command_digest_list *digests);
 
 /* match_digest.c */
-bool digest_matches(int fd, const char *file, const struct command_digest_list *digests);
+bool digest_matches(int fd, const char *path, const char *runchroot, const struct command_digest_list *digests);
 
 /* match.c */
 struct group;
