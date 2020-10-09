@@ -240,7 +240,7 @@ static struct privilege *
 sss_rule_to_priv(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
     int *rc_out)
 {
-    char **cmnds, **runasusers = NULL, **runasgroups = NULL;
+    char **cmnds = NULL, **runasusers = NULL, **runasgroups = NULL;
     char **opts = NULL, **notbefore = NULL, **notafter = NULL;
     char **hosts = NULL, **cn_array = NULL, *cn = NULL;
     struct privilege *priv = NULL;
