@@ -4,12 +4,14 @@
 # The standard error output is dup'd to the standard output.
 #
 
+: ${TESTSUDOERS=testsudoers}
+
 # Avoid warnings about memory leaks when there is a syntax error
 ASAN_OPTIONS=detect_leaks=0; export ASAN_OPTIONS
 
 echo "Testing alias definitions using reserved words"
 echo ""
-./testsudoers -d <<EOF 2>&1
+$TESTSUDOERS -d <<EOF 2>&1
 Cmnd_Alias ALL=ALL
 Cmnd_Alias CHROOT=foo
 User_Alias TIMEOUT=foo

@@ -4,7 +4,9 @@
 # Visudo in strict mode reports "parse error" even if there is no error
 #
 
-./visudo -csf - <<EOF
+: ${VISUDO=visudo}
+
+$VISUDO -csf - <<EOF
 User_Alias FOO = nobody
 FOO ALL=(ALL) NOPASSWD: ALL
 EOF

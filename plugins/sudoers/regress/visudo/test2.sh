@@ -5,7 +5,9 @@
 # The names of the aliases (or rather their lexical order) is important.
 #
 
-./visudo -csf - <<EOF
+: ${VISUDO=visudo}
+
+$VISUDO -csf - <<EOF
 User_Alias YYY = FOO
 User_Alias XXX = nobody
 User_Alias FOO = XXX, YYY

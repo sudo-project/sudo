@@ -3,6 +3,8 @@
 # Test @include of a file with a missing newline
 #
 
+: ${TESTSUDOERS=testsudoers}
+
 # Create test file
 TESTDIR="`pwd`/regress/testsudoers"
 printf "root ALL = ALL" >"$TESTDIR/test15.inc"
@@ -13,7 +15,7 @@ exec 2>&1
 
 echo "Testing @include of a file with a missing newline"
 echo ""
-./testsudoers -U $MYUID -G $MYGID root id <<-EOF
+$TESTSUDOERS -U $MYUID -G $MYGID root id <<-EOF
 	@include $TESTDIR/test15.inc
 	ALL ALL = /usr/bin/id
 EOF

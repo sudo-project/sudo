@@ -3,6 +3,8 @@
 # Test @includedir facility
 #
 
+: ${TESTSUDOERS=testsudoers}
+
 TESTDIR="`pwd`/regress/testsudoers"
 # make sure include file is owned by current user
 rm -rf "$TESTDIR/test3.d"
@@ -17,28 +19,28 @@ exec 2>&1
 
 echo "Testing @includedir of an unquoted path"
 echo ""
-./testsudoers -U $MYUID -G $MYGID root id <<-EOF
+$TESTSUDOERS -U $MYUID -G $MYGID root id <<-EOF
 	@includedir $TESTDIR/test3.d
 EOF
 
 echo ""
 echo "Testing @includedir of a double-quoted path"
 echo ""
-./testsudoers -U $MYUID -G $MYGID root id <<-EOF
+$TESTSUDOERS -U $MYUID -G $MYGID root id <<-EOF
 	@includedir "$TESTDIR/test3.d"
 EOF
 
 echo ""
 echo "Testing #includedir of an unquoted path"
 echo ""
-./testsudoers -U $MYUID -G $MYGID root id <<-EOF
+$TESTSUDOERS -U $MYUID -G $MYGID root id <<-EOF
 	#includedir $TESTDIR/test3.d
 EOF
 
 echo ""
 echo "Testing #includedir of a double-quoted path"
 echo ""
-./testsudoers -U $MYUID -G $MYGID root id <<-EOF
+$TESTSUDOERS -U $MYUID -G $MYGID root id <<-EOF
 	#includedir "$TESTDIR/test3.d"
 EOF
 

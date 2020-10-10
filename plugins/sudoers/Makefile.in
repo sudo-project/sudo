@@ -574,7 +574,8 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 		    out="regress/$$dir/$${base}.out"; \
 		    err="regress/$$dir/$${base}.err"; \
 		    status=0; \
-		    TESTDIR=$(srcdir)/regress/$$dir \
+		    TESTSUDOERS=./testsudoers VISUDO=./visudo \
+		    CVTSUDOERS=./cvtsudoers TESTDIR=$(srcdir)/regress/$$dir \
 			$(SHELL) $$t >$$out 2>$$err || status=$$?; \
 		    if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
 			if test $$status -ne 0; then \

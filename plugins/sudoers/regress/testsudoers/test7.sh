@@ -3,8 +3,10 @@
 # Verify sudoers matching by gid.
 #
 
+: ${TESTSUDOERS=testsudoers}
+
 exec 2>&1
-./testsudoers root id <<EOF
+$TESTSUDOERS root id <<EOF
 %#0 ALL = ALL
 EOF
 

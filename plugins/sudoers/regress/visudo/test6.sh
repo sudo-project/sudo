@@ -3,7 +3,9 @@
 # Verify parsing of Defaults syntax
 #
 
-./visudo -csf - <<EOF
+: ${VISUDO=visudo}
+
+$VISUDO -csf - <<EOF
 Defaults		syslog=auth
 Defaults>root		!set_logname
 Defaults:FULLTIMERS	!lecture

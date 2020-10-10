@@ -4,7 +4,9 @@
 # Bugzilla #766
 #
 
-./visudo -cf - <<-EOF
+: ${VISUDO=visudo}
+
+$VISUDO -cf - <<-EOF
 	Defaults@127.0.0.1 !authenticate
 	Defaults@10.0.0.0/8 !always_set_home
 	EOF

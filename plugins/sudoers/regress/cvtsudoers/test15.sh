@@ -3,6 +3,8 @@
 # Test filters and pruning
 #
 
-./cvtsudoers -c "" -f sudoers -p -m user=user1 <<EOF
+: ${CVTSUDOERS=cvtsudoers}
+
+$CVTSUDOERS -c "" -f sudoers -p -m user=user1 <<EOF
 user1, user2, user3, %group1 host1, host2, host3 = ALL
 EOF
