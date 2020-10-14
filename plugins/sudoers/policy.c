@@ -563,19 +563,19 @@ bad:
 }
 
 /*
- * Setup the execution environment.
+ * Store the execution environment and other front-end settings.
  * Builds up the command_info list and sets argv and envp.
  * Consumes iolog_path if not NULL.
  * Returns 1 on success and -1 on error.
  */
 bool
-sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
-    char *iolog_path, void *v)
+sudoers_policy_store(bool accepted, char *argv[], char *envp[],
+    mode_t cmnd_umask, char *iolog_path, void *v)
 {
     struct sudoers_exec_args *exec_args = v;
     char **command_info;
     int info_len = 0;
-    debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN);
+    debug_decl(sudoers_policy_store, SUDOERS_DEBUG_PLUGIN);
 
     if (exec_args == NULL)
 	debug_return_bool(true);	/* nothing to do */

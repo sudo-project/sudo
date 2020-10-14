@@ -760,9 +760,9 @@ bad:
     ret = false;
 
 done:
-    /* Setup execution environment to pass back to front-end. */
+    /* Store settings to pass back to front-end. */
     if (ret != -1) {
-	if (!sudoers_policy_exec_setup(NewArgv, env_get(), cmnd_umask,
+	if (!sudoers_policy_store(ret, NewArgv, env_get(), cmnd_umask,
 		iolog_path, closure))
 	    ret = -1;
     }
