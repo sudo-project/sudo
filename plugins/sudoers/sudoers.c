@@ -762,7 +762,7 @@ bad:
 done:
     /* Store settings to pass back to front-end. */
     if (ret != -1) {
-	if (!sudoers_policy_store(ret, NewArgv, env_get(), cmnd_umask,
+	if (!sudoers_policy_store_result(ret, NewArgv, env_get(), cmnd_umask,
 		iolog_path, closure))
 	    ret = -1;
     }

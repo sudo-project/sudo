@@ -569,13 +569,13 @@ bad:
  * Returns 1 on success and -1 on error.
  */
 bool
-sudoers_policy_store(bool accepted, char *argv[], char *envp[],
+sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     mode_t cmnd_umask, char *iolog_path, void *v)
 {
     struct sudoers_exec_args *exec_args = v;
     char **command_info;
     int info_len = 0;
-    debug_decl(sudoers_policy_store, SUDOERS_DEBUG_PLUGIN);
+    debug_decl(sudoers_policy_store_result, SUDOERS_DEBUG_PLUGIN);
 
     if (exec_args == NULL)
 	debug_return_bool(true);	/* nothing to do */
