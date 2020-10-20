@@ -436,6 +436,14 @@ case "$osversion" in
 		    fi
 		fi
 		;;
+	    hpux*-ia64)
+		# Build 64-bit binaries on HP-UX ia64
+		if test -z "$CC" && gcc -v >/dev/null 2>&1; then
+		    CC="gcc -mlp64"; export CC
+		fi
+		# TODO: openssl
+		configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls"
+		;;
 	    *)
 		# TODO: openssl
 		configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls"
