@@ -177,9 +177,11 @@ log_server.pb-c.i: $(srcdir)/log_server.pb-c.c $(incdir)/log_server.pb-c.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 log_server.pb-c.plog: log_server.pb-c.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/log_server.pb-c.c --i-file $< --output-file $@
-protobuf-c.lo: $(srcdir)/protobuf-c.c $(incdir)/protobuf-c/protobuf-c.h
+protobuf-c.lo: $(srcdir)/protobuf-c.c $(incdir)/protobuf-c/protobuf-c.h \
+               $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/protobuf-c.c
-protobuf-c.i: $(srcdir)/protobuf-c.c $(incdir)/protobuf-c/protobuf-c.h
+protobuf-c.i: $(srcdir)/protobuf-c.c $(incdir)/protobuf-c/protobuf-c.h \
+               $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 protobuf-c.plog: protobuf-c.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/protobuf-c.c --i-file $< --output-file $@
