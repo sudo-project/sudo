@@ -848,7 +848,6 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *details)
 	    save = *tmp;
 	    *tmp = '\0';
 
-	    /* XXX - assumes openlog() already done */
 	    syslog(pri, fmt, details->submituser, p);
 
 	    *tmp = save;			/* restore saved character */
@@ -1219,6 +1218,24 @@ eventlog_free(struct eventlog *evlog)
     debug_return;
 }
 
+static FILE *
+eventlog_stub_open_log(int type, const char *logfile)
+{
+    debug_decl(eventlog_stub_open_log, SUDO_DEBUG_UTIL);
+    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	"open_log not set, using stub");
+    debug_return_ptr(NULL);
+}
+
+static void
+eventlog_stub_close_log(int type, FILE *fp)
+{
+    debug_decl(eventlog_stub_close_log, SUDO_DEBUG_UTIL);
+    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	"close_log not set, using stub");
+    debug_return;
+}
+
 /*
  * Set eventlog config settings.
  */
@@ -1232,5 +1249,26 @@ eventlog_setconf(struct eventlog_config *conf)
     } else {
 	memset(&evl_conf, 0, sizeof(evl_conf));
     }
+
+    /* Apply default values where possible. */
+    if (evl_conf.syslog_maxlen == 0)
+	evl_conf.syslog_maxlen = MAXSYSLOGLEN;
+    if (evl_conf.logpath == NULL)
+	evl_conf.logpath = _PATH_SUDO_LOGFILE;
+    if (evl_conf.time_fmt == NULL)
+	evl_conf.time_fmt = "%h %e %T";
+    if (evl_conf.mailerpath == NULL)
+	evl_conf.mailerpath = _PATH_SUDO_SENDMAIL;
+    if (evl_conf.mailerflags == NULL)
+	evl_conf.mailerflags = "-t";
+    if (evl_conf.mailto == NULL)
+	evl_conf.mailto = MAILTO;
+    if (evl_conf.mailsub == NULL)
+	evl_conf.mailsub = N_(MAILSUBJECT);
+    if (evl_conf.open_log == NULL)
+	evl_conf.open_log = eventlog_stub_open_log;
+    if (evl_conf.close_log == NULL)
+	evl_conf.close_log = eventlog_stub_close_log;
+
     debug_return_bool(true);
 }
