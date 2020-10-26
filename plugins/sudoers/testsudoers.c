@@ -501,7 +501,7 @@ restore_perms(void)
 }
 
 void
-update_eventlog_config(void)
+init_eventlog_config(void)
 {
     return;
 }

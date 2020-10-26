@@ -568,40 +568,38 @@ sudoers_log_close(int type, FILE *fp)
 }
 
 void
-update_eventlog_config(void)
+init_eventlog_config(void)
 {
-    struct eventlog_config evconf;
-    debug_decl(update_eventlog_config, SUDOERS_DEBUG_DEFAULTS);
-
-    memset(&evconf, 0, sizeof(evconf));
-    if (def_syslog) {
-	evconf.type |= EVLOG_SYSLOG;
-	evconf.syslog_acceptpri = def_syslog_goodpri;
-	evconf.syslog_rejectpri = def_syslog_badpri;
-	evconf.syslog_alertpri = def_syslog_badpri;
-	evconf.syslog_maxlen = def_syslog_maxlen;
-    }
-    if (def_logfile) {
-	evconf.type |= EVLOG_FILE;
-	evconf.logpath = def_logfile;
-    }
-    evconf.format = EVLOG_SUDO;
-    evconf.time_fmt = def_log_year ? "%h %e %T %Y" : "%h %e %T";
-    if (!def_log_host)
-	evconf.omit_hostname = true;
+    int logtype = 0;
 #ifdef NO_ROOT_MAILER
-    evconf.mailuid = user_uid;
+    uid_t mailuid = user_uid;
 #else
-    evconf.mailuid = ROOT_UID;
+    uid_t mailuid = ROOT_UID;
 #endif
-    evconf.mailerpath = def_mailerpath;
-    evconf.mailerflags = def_mailerflags;
-    evconf.mailfrom = def_mailfrom;
-    evconf.mailto = def_mailto;
-    evconf.open_log = sudoers_log_open;
-    evconf.close_log = sudoers_log_close;
+    debug_decl(init_eventlog_config, SUDOERS_DEBUG_DEFAULTS);
 
-    eventlog_setconf(&evconf);
+    if (def_syslog)
+	logtype |= EVLOG_SYSLOG;
+    if (def_logfile)
+	logtype |= EVLOG_FILE;
+
+    eventlog_set_type(logtype);
+    eventlog_set_format(EVLOG_SUDO);
+    eventlog_set_syslog_acceptpri(def_syslog_goodpri);
+    eventlog_set_syslog_rejectpri(def_syslog_badpri);
+    eventlog_set_syslog_alertpri(def_syslog_badpri);
+    eventlog_set_syslog_maxlen(def_syslog_maxlen);
+    eventlog_set_mailuid(mailuid);
+    eventlog_set_omit_hostname(!def_log_host);
+    eventlog_set_logpath(def_logfile);
+    eventlog_set_time_fmt(def_log_year ? "%h %e %T %Y" : "%h %e %T");
+    eventlog_set_mailerpath(def_mailerpath);
+    eventlog_set_mailerflags(def_mailerflags);
+    eventlog_set_mailfrom(def_mailfrom);
+    eventlog_set_mailto(def_mailto);
+    eventlog_set_mailsub(def_mailsub);
+    eventlog_set_open_log(sudoers_log_open);
+    eventlog_set_close_log(sudoers_log_close);
 
     debug_return;
 }

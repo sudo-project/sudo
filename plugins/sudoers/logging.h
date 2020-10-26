@@ -74,6 +74,6 @@ bool sudoers_initlocale(const char *ulocale, const char *slocale);
 bool sudoers_locale_callback(const union sudo_defs_val *);
 int writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 void sudoers_to_eventlog(struct eventlog *evlog);
-void update_eventlog_config(void);
+void init_eventlog_config(void);
 
 #endif /* SUDOERS_LOGGING_H */

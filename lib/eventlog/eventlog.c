@@ -75,8 +75,29 @@
     isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
     (s)[8] == '\0')
 
+static FILE *eventlog_stub_open_log(int type, const char *logfile);
+static void eventlog_stub_close_log(int type, FILE *fp);
+
 /* Eventlog config settings */
-static struct eventlog_config evl_conf;
+static struct eventlog_config evl_conf = {
+    EVLOG_NONE,			/* type */
+    EVLOG_SUDO,			/* format */
+    LOG_NOTICE,			/* syslog_acceptpri */
+    LOG_ALERT,			/* syslog_rejectpri */
+    LOG_ALERT,			/* syslog_alertpri */
+    MAXSYSLOGLEN,		/* syslog_maxlen */
+    ROOT_UID,			/* mailuid */
+    false,			/* omit_hostname */
+    _PATH_SUDO_LOGFILE,		/* logpath */
+    "%h %e %T",			/* time_fmt */
+    _PATH_SUDO_SENDMAIL,	/* mailerpath */
+    "-t",			/* mailerflags */
+    NULL,			/* mailfrom */
+    MAILTO,			/* mailto */
+    N_(MAILSUBJECT),		/* mailsub */
+    eventlog_stub_open_log,	/* open_log */
+    eventlog_stub_close_log	/* close_log */
+};
 
 /*
  * Allocate and fill in a new logline.
@@ -1245,6 +1266,109 @@ eventlog_stub_close_log(int type, FILE *fp)
 /*
  * Set eventlog config settings.
  */
+
+void
+eventlog_set_type(int type)
+{
+    evl_conf.type = type;
+}
+
+void
+eventlog_set_format(enum eventlog_format format)
+{
+    evl_conf.format = format;
+}
+
+void
+eventlog_set_syslog_acceptpri(int pri)
+{
+    evl_conf.syslog_acceptpri = pri;
+}
+
+void
+eventlog_set_syslog_rejectpri(int pri)
+{
+    evl_conf.syslog_rejectpri = pri;
+}
+
+void
+eventlog_set_syslog_alertpri(int pri)
+{
+    evl_conf.syslog_alertpri = pri;
+}
+
+void
+eventlog_set_syslog_maxlen(int len)
+{
+    evl_conf.syslog_maxlen = len;
+}
+
+void
+eventlog_set_mailuid(uid_t uid)
+{
+    evl_conf.mailuid = uid;
+}
+
+void
+eventlog_set_omit_hostname(bool omit_hostname)
+{
+    evl_conf.omit_hostname = omit_hostname;
+}
+
+void
+eventlog_set_logpath(const char *path)
+{
+    evl_conf.logpath = path;
+}
+
+void
+eventlog_set_time_fmt(const char *fmt)
+{
+    evl_conf.time_fmt = fmt;
+}
+
+void
+eventlog_set_mailerpath(const char *path)
+{
+    evl_conf.mailerpath = path;
+}
+
+void
+eventlog_set_mailerflags(const char *mflags)
+{
+    evl_conf.mailerflags = mflags;
+}
+
+void
+eventlog_set_mailfrom(const char *from_addr)
+{
+    evl_conf.mailfrom = from_addr;
+}
+
+void
+eventlog_set_mailto(const char *to_addr)
+{
+    evl_conf.mailto = to_addr;
+}
+
+void
+eventlog_set_mailsub(const char *subject)
+{
+    evl_conf.mailsub = subject;
+}
+
+void
+eventlog_set_open_log(FILE *(*fn)(int type, const char *))
+{
+    evl_conf.open_log = fn;
+}
+
+void
+eventlog_set_close_log(void (*fn)(int type, FILE *))
+{
+    evl_conf.close_log = fn;
+}
+
 bool
 eventlog_setconf(struct eventlog_config *conf)
 {

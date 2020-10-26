@@ -869,21 +869,18 @@ logsrvd_stub_close_log(int type, FILE *fp)
 static void
 logsrvd_conf_eventlog_setconf(struct logsrvd_config *config)
 {
-    struct eventlog_config evconf;
     debug_decl(logsrvd_conf_eventlog_setconf, SUDO_DEBUG_UTIL);
 
-    memset(&evconf, 0, sizeof(evconf));
-    evconf.type = config->eventlog.log_type;
-    evconf.format = config->eventlog.log_format;
-    evconf.syslog_acceptpri = config->syslog.acceptpri; 
-    evconf.syslog_rejectpri = config->syslog.rejectpri;
-    evconf.syslog_alertpri = config->syslog.alertpri;
-    evconf.syslog_maxlen = config->syslog.maxlen;
-    evconf.logpath = config->logfile.path;
-    evconf.time_fmt = config->logfile.time_format;
-    evconf.open_log = logsrvd_stub_open_log;
-    evconf.close_log = logsrvd_stub_close_log;
-    eventlog_setconf(&evconf);
+    eventlog_set_type(config->eventlog.log_type);
+    eventlog_set_format(config->eventlog.log_format);
+    eventlog_set_syslog_acceptpri(config->syslog.acceptpri); 
+    eventlog_set_syslog_rejectpri(config->syslog.rejectpri); 
+    eventlog_set_syslog_alertpri(config->syslog.alertpri); 
+    eventlog_set_syslog_maxlen(config->syslog.maxlen); 
+    eventlog_set_logpath(config->logfile.path);
+    eventlog_set_time_fmt(config->logfile.time_format);
+    eventlog_set_open_log(logsrvd_stub_open_log);
+    eventlog_set_close_log(logsrvd_stub_close_log);
 
     debug_return;
 }

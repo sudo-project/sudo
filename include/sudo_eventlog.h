@@ -112,8 +112,24 @@ typedef bool (*eventlog_json_callback_t)(struct json_container *, void *);
 bool eventlog_accept(const struct eventlog *details, int flags, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_alert(const struct eventlog *details, int flags, struct timespec *alert_time, const char *reason, const char *errstr);
 bool eventlog_reject(const struct eventlog *details, int flags, const char *reason, eventlog_json_callback_t info_cb, void *info);
-bool eventlog_setconf(struct eventlog_config *conf);
 bool eventlog_store_json(struct json_container *json, const struct eventlog *evlog);
 void eventlog_free(struct eventlog *evlog);
+void eventlog_set_type(int type);
+void eventlog_set_format(enum eventlog_format format);
+void eventlog_set_syslog_acceptpri(int pri);
+void eventlog_set_syslog_rejectpri(int pri);
+void eventlog_set_syslog_alertpri(int pri);
+void eventlog_set_syslog_maxlen(int len);
+void eventlog_set_mailuid(uid_t uid);
+void eventlog_set_omit_hostname(bool omit_hostname);
+void eventlog_set_logpath(const char *path);
+void eventlog_set_time_fmt(const char *fmt);
+void eventlog_set_mailerpath(const char *path);
+void eventlog_set_mailerflags(const char *mflags);
+void eventlog_set_mailfrom(const char *from_addr);
+void eventlog_set_mailto(const char *to_addr);
+void eventlog_set_mailsub(const char *subject);
+void eventlog_set_open_log(FILE *(*fn)(int type, const char *));
+void eventlog_set_close_log(void (*fn)(int type, FILE *));
 
 #endif /* SUDO_EVENTLOG_H */

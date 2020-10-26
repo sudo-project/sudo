@@ -620,8 +620,8 @@ init_defaults(void)
     if (!init_envtables())
 	goto oom;
 
-    /* Update eventlog config. */
-    update_eventlog_config();
+    /* Init eventlog config. */
+    init_eventlog_config();
 
     firsttime = 0;
 
@@ -757,9 +757,6 @@ update_defaults(struct sudoers_parse_tree *parse_tree,
 	if (!set_default(d->var, d->val, d->op, d->file, d->lineno, quiet))
 	    ret = false;
     }
-
-    /* Update eventlog config. */
-    update_eventlog_config();
 
     debug_return_bool(ret);
 }

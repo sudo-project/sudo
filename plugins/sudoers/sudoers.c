@@ -69,11 +69,6 @@
 /*
  * Prototypes
  */
-static bool cb_fqdn(const union sudo_defs_val *);
-static bool cb_runas_default(const union sudo_defs_val *);
-static bool cb_tty_tickets(const union sudo_defs_val *);
-static bool cb_umask(const union sudo_defs_val *);
-static bool cb_runchroot(const union sudo_defs_val *);
 static int set_cmnd(void);
 static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
@@ -81,6 +76,7 @@ static bool set_loginclass(struct passwd *);
 static bool set_runasgr(const char *, bool);
 static bool set_runaspw(const char *, bool);
 static bool tty_present(void);
+static void set_callbacks(void);
 
 /*
  * Globals
@@ -854,38 +850,8 @@ init_vars(char * const envp[])
     if (!set_perms(PERM_INITIAL))
 	debug_return_bool(false);
 
-    /* Set fqdn callback. */
-    sudo_defs_table[I_FQDN].callback = cb_fqdn;
-
-    /* Set group_plugin callback. */
-    sudo_defs_table[I_GROUP_PLUGIN].callback = cb_group_plugin;
-
-    /* Set runas callback. */
-    sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
-
-    /* Set locale callback. */
-    sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
-
-    /* Set maxseq callback. */
-    sudo_defs_table[I_MAXSEQ].callback = cb_maxseq;
-
-    /* Set iolog_user callback. */
-    sudo_defs_table[I_IOLOG_USER].callback = cb_iolog_user;
-
-    /* Set iolog_group callback. */
-    sudo_defs_table[I_IOLOG_GROUP].callback = cb_iolog_group;
-
-    /* Set iolog_mode callback. */
-    sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
-
-    /* Set tty_tickets callback. */
-    sudo_defs_table[I_TTY_TICKETS].callback = cb_tty_tickets;
-
-    /* Set umask callback. */
-    sudo_defs_table[I_UMASK].callback = cb_umask;
-
-    /* Set runchroot callback. */
-    sudo_defs_table[I_RUNCHROOT].callback = cb_runchroot;
+    /* Set parse callbacks */
+    set_callbacks();
 
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
@@ -1444,6 +1410,194 @@ cb_runchroot(const union sudo_defs_val *sd_un)
     }
 
     debug_return_bool(true);
+}
+
+static bool
+cb_logfile(const union sudo_defs_val *sd_un)
+{
+    int logtype = def_syslog ? EVLOG_SYSLOG : EVLOG_NONE;
+    debug_decl(cb_logfile, SUDOERS_DEBUG_PLUGIN);
+
+    if (sd_un->str != NULL)
+	SET(logtype, EVLOG_FILE);
+    eventlog_set_type(logtype);
+    eventlog_set_logpath(sd_un->str);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_syslog(const union sudo_defs_val *sd_un)
+{
+    int logtype = def_logfile ? EVLOG_FILE : EVLOG_NONE;
+    debug_decl(cb_syslog, SUDOERS_DEBUG_PLUGIN);
+
+    if (sd_un->str != NULL)
+	SET(logtype, EVLOG_SYSLOG);
+    eventlog_set_type(logtype);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_syslog_goodpri(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_syslog_goodpri, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_syslog_acceptpri(sd_un->ival);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_syslog_badpri(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_syslog_badpri, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_syslog_rejectpri(sd_un->ival);
+    eventlog_set_syslog_alertpri(sd_un->ival);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_syslog_maxlen(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_syslog_maxlen(sd_un->ival);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_log_year(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_time_fmt(sd_un->flag ? "%h %e %T %Y" : "%h %e %T");
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_log_host(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_omit_hostname(!sd_un->flag);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_mailerpath(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_mailerpath, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_mailerpath(sd_un->str);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_mailerflags(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_mailerflags, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_mailerflags(sd_un->str);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_mailfrom(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_mailfrom, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_mailfrom(sd_un->str);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_mailto(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_mailto, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_mailto(sd_un->str);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_mailsub(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_mailsub, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_mailsub(sd_un->str);
+
+    debug_return_bool(true);
+}
+
+/*
+ * Set parse Defaults callbacks.
+ * We do this here instead in def_data.in so we don't have to
+ * stub out the callbacks for visudo and testsudoers.
+ */
+static void
+set_callbacks(void)
+{
+    debug_decl(set_callbacks, SUDOERS_DEBUG_PLUGIN);
+
+    /* Set fqdn callback. */
+    sudo_defs_table[I_FQDN].callback = cb_fqdn;
+
+    /* Set group_plugin callback. */
+    sudo_defs_table[I_GROUP_PLUGIN].callback = cb_group_plugin;
+
+    /* Set runas callback. */
+    sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
+
+    /* Set locale callback. */
+    sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
+
+    /* Set maxseq callback. */
+    sudo_defs_table[I_MAXSEQ].callback = cb_maxseq;
+
+    /* Set iolog_user callback. */
+    sudo_defs_table[I_IOLOG_USER].callback = cb_iolog_user;
+
+    /* Set iolog_group callback. */
+    sudo_defs_table[I_IOLOG_GROUP].callback = cb_iolog_group;
+
+    /* Set iolog_mode callback. */
+    sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
+
+    /* Set tty_tickets callback. */
+    sudo_defs_table[I_TTY_TICKETS].callback = cb_tty_tickets;
+
+    /* Set umask callback. */
+    sudo_defs_table[I_UMASK].callback = cb_umask;
+
+    /* Set runchroot callback. */
+    sudo_defs_table[I_RUNCHROOT].callback = cb_runchroot;
+
+    /* eventlog callbacks */
+    sudo_defs_table[I_SYSLOG].callback = cb_syslog;
+    sudo_defs_table[I_SYSLOG_GOODPRI].callback = cb_syslog_goodpri;
+    sudo_defs_table[I_SYSLOG_BADPRI].callback = cb_syslog_badpri;
+    sudo_defs_table[I_SYSLOG_MAXLEN].callback = cb_syslog_maxlen;
+    sudo_defs_table[I_LOG_HOST].callback = cb_log_host;
+    sudo_defs_table[I_LOGFILE].callback = cb_logfile;
+    sudo_defs_table[I_LOG_YEAR].callback = cb_log_year;
+    sudo_defs_table[I_MAILERPATH].callback = cb_mailerpath;
+    sudo_defs_table[I_MAILERFLAGS].callback = cb_mailerflags;
+    sudo_defs_table[I_MAILFROM].callback = cb_mailfrom;
+    sudo_defs_table[I_MAILTO].callback = cb_mailto;
+    sudo_defs_table[I_MAILSUB].callback = cb_mailsub;
+
+    debug_return;
 }
 
 /*
