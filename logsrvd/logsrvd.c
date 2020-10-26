@@ -492,7 +492,7 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 
     alert_time.tv_sec = msg->alert_time->tv_sec;
     alert_time.tv_nsec = msg->alert_time->tv_nsec;
-    if (!eventlog_alert(closure->evlog, &alert_time, msg->reason)) {
+    if (!eventlog_alert(closure->evlog, &alert_time, msg->reason, NULL)) {
 	closure->errstr = _("error logging alert event");
 	debug_return_bool(false);
     }
