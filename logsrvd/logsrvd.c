@@ -315,7 +315,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	closure->log_io = true;
     }
 
-    if (!eventlog_accept(closure->evlog, logsrvd_json_log_cb, &info)) {
+    if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging accept event");
 	debug_return_bool(false);
     }
@@ -372,7 +372,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    if (!eventlog_reject(closure->evlog, msg->reason,
+    if (!eventlog_reject(closure->evlog, 0, msg->reason,
 	    logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging reject event");
 	debug_return_bool(false);
@@ -491,7 +491,7 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 
     alert_time.tv_sec = msg->alert_time->tv_sec;
     alert_time.tv_nsec = msg->alert_time->tv_nsec;
-    if (!eventlog_alert(closure->evlog, &alert_time, msg->reason, NULL)) {
+    if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
 	closure->errstr = _("error logging alert event");
 	debug_return_bool(false);
     }

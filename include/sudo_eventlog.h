@@ -29,16 +29,31 @@ enum event_type {
     EVLOG_ALERT
 };
 
-/* Supported eventlog types. */
-#define EVLOG_NONE	0x0
-#define EVLOG_SYSLOG	0x2
-#define EVLOG_FILE	0x4
+/* Supported eventlog types (bitmask). */
+#define EVLOG_NONE	0x00
+#define EVLOG_SYSLOG	0x01
+#define EVLOG_FILE	0x02
 
 /* Supported eventlog formats. */
 enum eventlog_format {
     EVLOG_SUDO,
     EVLOG_JSON
 };
+
+/* Eventlog flag values. */
+#define EVLOG_RAW	0x01
+#define EVLOG_MAIL	0x02
+#define EVLOG_MAIL_ONLY	0x04
+
+/*
+ * Maximum number of characters to log per entry.  The syslogger
+ * will log this much, after that, it truncates the log line.
+ * We need this here to make sure that we continue with another
+ * syslog(3) call if the internal buffer is more than 1023 characters.
+ */
+#ifndef MAXSYSLOGLEN
+# define MAXSYSLOGLEN		960
+#endif
 
 /*
  * Event log config, used with eventlog_setconf()
@@ -50,8 +65,14 @@ struct eventlog_config {
     int syslog_rejectpri;
     int syslog_alertpri;
     int syslog_maxlen;
+    uid_t mailuid;
     const char *logpath;
     const char *time_fmt;
+    const char *mailerpath;
+    const char *mailerflags;
+    const char *mailfrom;
+    const char *mailto;
+    const char *mailsub;
     FILE *(*open_log)(int type, const char *);
     void (*close_log)(int type, FILE *);
 };
@@ -87,9 +108,9 @@ struct eventlog {
 struct json_container;
 typedef bool (*eventlog_json_callback_t)(struct json_container *, void *);
 
-bool eventlog_accept(const struct eventlog *details, eventlog_json_callback_t info_cb, void *info);
-bool eventlog_alert(const struct eventlog *details, struct timespec *alert_time, const char *reason, const char *errstr);
-bool eventlog_reject(const struct eventlog *details, const char *reason, eventlog_json_callback_t info_cb, void *info);
+bool eventlog_accept(const struct eventlog *details, int flags, eventlog_json_callback_t info_cb, void *info);
+bool eventlog_alert(const struct eventlog *details, int flags, struct timespec *alert_time, const char *reason, const char *errstr);
+bool eventlog_reject(const struct eventlog *details, int flags, const char *reason, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_setconf(struct eventlog_config *conf);
 bool eventlog_store_json(struct json_container *json, const struct eventlog *evlog);
 void eventlog_free(struct eventlog *evlog);

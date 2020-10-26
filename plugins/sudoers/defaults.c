@@ -37,6 +37,7 @@
 #include <syslog.h>
 
 #include "sudoers.h"
+#include "sudo_eventlog.h"
 #include <gram.h>
 
 static struct early_default early_defaults[] = {

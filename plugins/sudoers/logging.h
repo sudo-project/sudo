@@ -47,16 +47,6 @@
 #define SLOG_AUDIT		0x40	/* send message to audit as well */
 
 /*
- * Maximum number of characters to log per entry.  The syslogger
- * will log this much, after that, it truncates the log line.
- * We need this here to make sure that we continue with another
- * syslog(3) call if the internal buffer is more than 1023 characters.
- */
-#ifndef MAXSYSLOGLEN
-# define MAXSYSLOGLEN		960
-#endif
-
-/*
  * Indentation level for file-based logs when word wrap is enabled.
  */
 #define LOG_INDENT	"    "

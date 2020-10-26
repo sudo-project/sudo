@@ -30,12 +30,14 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <grp.h>
+#include <locale.h>
 #include <pwd.h>
 #include <signal.h>
 #include <stdio.h>
@@ -45,6 +47,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_eventlog.h"
@@ -79,7 +82,7 @@ static struct eventlog_config evl_conf;
  * Allocate and fill in a new logline.
  */
 static char *
-new_logline(const char *message, const char *errstr,
+new_logline(int flags, const char *message, const char *errstr,
     const struct eventlog *details)
 {
     char *line = NULL, *evstr = NULL;
@@ -89,6 +92,17 @@ new_logline(const char *message, const char *errstr,
     size_t len = 0;
     int i;
     debug_decl(new_logline, SUDO_DEBUG_UTIL);
+
+    if (ISSET(flags, EVLOG_RAW)) {
+	if (errstr != NULL) {
+	    if (asprintf(&line, "%s: %s", message, errstr) == -1)
+		goto oom;
+	} else {
+	    if ((line = strdup(message)) == NULL)
+		goto oom;
+	}
+	debug_return_str(line);
+    }
 
     /* A TSID may be a sudoers-style session ID or a free-form string. */
     if (iolog_file != NULL) {
@@ -242,6 +256,273 @@ toobig:
     free(line);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
     debug_return_str(NULL);
+}
+
+static void
+closefrom_nodebug(int lowfd)
+{
+    unsigned char *debug_fds;
+    int fd, startfd;
+    debug_decl(closefrom_nodebug, SUDO_DEBUG_UTIL);
+
+    startfd = sudo_debug_get_fds(&debug_fds) + 1;
+    if (lowfd > startfd)
+	startfd = lowfd;
+
+    /* Close fds higher than the debug fds. */
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"closing fds >= %d", startfd);
+    closefrom(startfd);
+
+    /* Close fds [lowfd, startfd) that are not in debug_fds. */
+    for (fd = lowfd; fd < startfd; fd++) {
+	if (sudo_isset(debug_fds, fd))
+	    continue;
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "closing fd %d", fd);
+#ifdef __APPLE__
+	/* Avoid potential libdispatch crash when we close its fds. */
+	(void) fcntl(fd, F_SETFD, FD_CLOEXEC);
+#else
+	(void) close(fd);
+#endif
+    }
+    debug_return;
+}
+
+#define MAX_MAILFLAGS	63
+
+static void __attribute__((__noreturn__))
+exec_mailer(const struct eventlog *evlog, int pipein)
+{
+    char *last, *mflags, *p, *argv[MAX_MAILFLAGS + 1];
+    const char *mpath = evl_conf.mailerpath;
+    int i;
+    char * const root_envp[] = {
+	"HOME=/",
+	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
+	"LOGNAME=root",
+	"USER=root",
+# ifdef _AIX
+	"LOGIN=root",
+# endif
+	NULL
+    };
+    debug_decl(exec_mailer, SUDO_DEBUG_UTIL);
+
+    /* Set stdin to read side of the pipe. */
+    if (dup3(pipein, STDIN_FILENO, 0) == -1) {
+	syslog(LOG_ERR, _("unable to dup stdin: %m"));
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "unable to dup stdin: %s", strerror(errno));
+	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	_exit(127);
+    }
+
+    /* Build up an argv based on the mailer path and flags */
+    if ((mflags = strdup(evl_conf.mailerflags)) == NULL) {
+	syslog(LOG_ERR, _("unable to allocate memory"));
+	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	_exit(127);
+    }
+    if ((argv[0] = strrchr(mpath, '/')))
+	argv[0]++;
+    else
+	argv[0] = (char *)mpath;
+
+    i = 1;
+    if ((p = strtok_r(mflags, " \t", &last))) {
+	do {
+	    argv[i] = p;
+	} while (++i < MAX_MAILFLAGS && (p = strtok_r(NULL, " \t", &last)));
+    }
+    argv[i] = NULL;
+
+    /*
+     * Depending on the config, either run the mailer as root
+     * (so user cannot kill it) or as the user (for the paranoid).
+     */
+    if (setuid(ROOT_UID) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to change uid to %u",
+	    ROOT_UID);
+    }
+    if (evl_conf.mailuid != ROOT_UID) {
+	if (setuid(evl_conf.mailuid) != 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to change uid to %u",
+		(unsigned int)evl_conf.mailuid);
+	}
+    }
+    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+    if (evl_conf.mailuid == ROOT_UID)
+	execve(mpath, argv, root_envp);
+    else
+	execv(mpath, argv);
+    syslog(LOG_ERR, _("unable to execute %s: %m"), mpath);
+    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to execute %s: %s",
+	mpath, strerror(errno));
+    _exit(127);
+}
+
+/* Send a message to MAILTO user */
+static bool
+send_mail(const struct eventlog *evlog, const char *fmt, ...)
+{
+    const char *cp, *timefmt = evl_conf.time_fmt;
+    char timebuf[1024];
+    struct tm *tm;
+    time_t now;
+    FILE *mail;
+    int fd, pfd[2], status;
+    pid_t pid, rv;
+    struct stat sb;
+    va_list ap;
+#if defined(HAVE_NL_LANGINFO) && defined(CODESET)
+    char *locale;
+#endif
+    debug_decl(send_mail, SUDO_DEBUG_UTIL);
+
+    /* If mailer is disabled just return. */
+    if (evl_conf.mailerpath == NULL || evl_conf.mailto == NULL)
+	debug_return_bool(true);
+
+    /* Make sure the mailer exists and is a regular file. */
+    if (stat(evl_conf.mailerpath, &sb) != 0 || !S_ISREG(sb.st_mode))
+	debug_return_bool(false);
+
+    time(&now);
+    if ((tm = gmtime(&now)) == NULL)
+	debug_return_bool(false);
+
+    /* Fork and return, child will daemonize. */
+    switch (pid = sudo_debug_fork()) {
+	case -1:
+	    /* Error. */
+	    sudo_warn("%s", U_("unable to fork"));
+	    debug_return_bool(false);
+	    break;
+	case 0:
+	    /* Child. */
+	    switch (fork()) {
+		case -1:
+		    /* Error. */
+		    syslog(LOG_ERR, _("unable to fork: %m"));
+		    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
+			strerror(errno));
+		    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+		    _exit(EXIT_FAILURE);
+		case 0:
+		    /* Grandchild continues below. */
+		    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+		    break;
+		default:
+		    /* Parent will wait for us. */
+		    _exit(EXIT_SUCCESS);
+	    }
+	    break;
+	default:
+	    /* Parent. */
+	    for (;;) {
+		rv = waitpid(pid, &status, 0);
+		if (rv == -1 && errno != EINTR)
+		    break;
+		if (rv != -1 && !WIFSTOPPED(status))
+		    break;
+	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"child (%d) exit value %d", (int)rv, status);
+	    debug_return_bool(true);
+    }
+
+    /* Daemonize - disassociate from session/tty. */
+    if (setsid() == -1)
+      sudo_warn("setsid");
+    if (chdir("/") == -1)
+      sudo_warn("chdir(/)");
+    fd = open(_PATH_DEVNULL, O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    if (fd != -1) {
+	(void) dup2(fd, STDIN_FILENO);
+	(void) dup2(fd, STDOUT_FILENO);
+	(void) dup2(fd, STDERR_FILENO);
+    }
+
+    /* Close non-debug fds so we don't leak anything. */
+    closefrom_nodebug(STDERR_FILENO + 1);
+
+    if (pipe2(pfd, O_CLOEXEC) == -1) {
+	syslog(LOG_ERR, _("unable to open pipe: %m"));
+	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to open pipe: %s",
+	    strerror(errno));
+	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	_exit(EXIT_FAILURE);
+    }
+
+    switch (pid = sudo_debug_fork()) {
+	case -1:
+	    /* Error. */
+	    syslog(LOG_ERR, _("unable to fork: %m"));
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
+		strerror(errno));
+	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	    _exit(EXIT_FAILURE);
+	    break;
+	case 0:
+	    /* Child. */
+	    exec_mailer(evlog, pfd[0]);
+	    /* NOTREACHED */
+    }
+
+    (void) close(pfd[0]);
+    mail = fdopen(pfd[1], "w");
+
+    /* Pipes are all setup, send message. */
+    (void) fprintf(mail, "To: %s\nFrom: %s\nAuto-Submitted: %s\nSubject: ",
+	evl_conf.mailto,
+	evl_conf.mailfrom ? evl_conf.mailfrom : evlog->submituser,
+	"auto-generated");
+    for (cp = _(evl_conf.mailsub); *cp; cp++) {
+	/* Expand escapes in the subject */
+	if (*cp == '%' && *(cp+1) != '%') {
+	    switch (*(++cp)) {
+		case 'h':
+		    (void) fputs(evlog->submithost, mail);
+		    break;
+		case 'u':
+		    (void) fputs(evlog->submituser, mail);
+		    break;
+		default:
+		    cp--;
+		    break;
+	    }
+	} else
+	    (void) fputc(*cp, mail);
+    }
+
+#if defined(HAVE_NL_LANGINFO) && defined(CODESET)
+    locale = setlocale(LC_ALL, NULL);
+    if (locale[0] != 'C' || locale[1] != '\0')
+	(void) fprintf(mail, "\nContent-Type: text/plain; charset=\"%s\"\nContent-Transfer-Encoding: 8bit", nl_langinfo(CODESET));
+#endif /* HAVE_NL_LANGINFO && CODESET */
+
+    strftime(timebuf, sizeof(timebuf), timefmt, tm);
+    (void) fprintf(mail, "\n\n%s : %s : %s : ", evlog->submithost, timebuf,
+	evlog->submituser);
+    va_start(ap, fmt);
+    (void) vfprintf(mail, fmt, ap);
+    va_end(ap);
+    fputs("\n\n", mail);
+
+    fclose(mail);
+    for (;;) {
+	rv = waitpid(pid, &status, 0);
+	if (rv == -1 && errno != EINTR)
+	    break;
+	if (rv != -1 && !WIFSTOPPED(status))
+	    break;
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"child (%d) exit value %d", (int)rv, status);
+    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+    _exit(EXIT_SUCCESS);
 }
 
 static bool
@@ -537,20 +818,12 @@ bad:
  * message into parts if it is longer than syslog_maxlen.
  */
 static bool
-do_syslog_sudo(int pri, const char *reason, const char *errstr,
-    const struct eventlog *details)
+do_syslog_sudo(int pri, char *logline, const struct eventlog *details)
 {
     size_t len, maxlen;
-    char *logline, *p, *tmp, save;
+    char *p, *tmp, save;
     const char *fmt;
     debug_decl(do_syslog_sudo, SUDO_DEBUG_UTIL);
-
-    /* A priority of -1 corresponds to "none". */
-    if (pri == -1)
-	debug_return_bool(true);
-
-    if ((logline = new_logline(reason, errstr, details)) == NULL)
-	debug_return_bool(false);
 
     evl_conf.open_log(EVLOG_SYSLOG, NULL);
 
@@ -591,7 +864,6 @@ do_syslog_sudo(int pri, const char *reason, const char *errstr,
 	maxlen = evl_conf.syslog_maxlen -
 	    (strlen(fmt) - 5 + strlen(details->submituser));
     }
-    free(logline);
     evl_conf.close_log(EVLOG_SYSLOG, NULL);
 
     debug_return_bool(true);
@@ -605,10 +877,6 @@ do_syslog_json(int pri, int event_type, const char *reason,
 {
     char *json_str;
     debug_decl(do_syslog_json, SUDO_DEBUG_UTIL);
-
-    /* A priority of -1 corresponds to "none". */
-    if (pri == -1)
-	debug_return_bool(true);
 
     /* Format as a compact JSON message (no newlines) */
     json_str = format_json(event_type, reason, errstr, details, event_time,
@@ -629,13 +897,32 @@ do_syslog_json(int pri, int event_type, const char *reason,
  * Log a message to syslog in either sudo or JSON format.
  */
 static bool
-do_syslog(int event_type, const char *reason, const char *errstr,
+do_syslog(int event_type, int flags, const char *reason, const char *errstr,
     const struct eventlog *details, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
-    int pri;
+    char *logline = NULL;
     bool ret = false;
+    int pri;
     debug_decl(do_syslog, SUDO_DEBUG_UTIL);
+
+    /* Sudo format logs and mailed logs use the same log line format. */
+    if (evl_conf.format == EVLOG_SUDO || ISSET(flags, EVLOG_MAIL)) {
+	logline = new_logline(flags, reason, errstr, details);
+	if (logline == NULL)
+	    debug_return_bool(false);
+
+	if (ISSET(flags, EVLOG_MAIL)) {
+	    if (!send_mail(details, "%s", logline)) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to mail log line");
+	    }
+	    if (ISSET(flags, EVLOG_MAIL_ONLY)) {
+		free(logline);
+		debug_return_bool(true);
+	    }
+	}
+    }
 
     switch (event_type) {
     case EVLOG_ACCEPT:
@@ -655,12 +942,13 @@ do_syslog(int event_type, const char *reason, const char *errstr,
     }
     if (pri == -1) {
 	/* syslog disabled for this message type */
+	free(logline);
 	debug_return_bool(true);
     }
 
     switch (evl_conf.format) {
     case EVLOG_SUDO:
-	ret = do_syslog_sudo(pri, reason, errstr, details);
+	ret = do_syslog_sudo(pri, logline, details);
 	break;
     case EVLOG_JSON:
 	ret = do_syslog_json(pri, event_type, reason, errstr, details,
@@ -671,26 +959,23 @@ do_syslog(int event_type, const char *reason, const char *errstr,
 	    "unexpected eventlog format %d", evl_conf.format);
 	break;
     }
+    free(logline);
 
     debug_return_bool(ret);
 }
 
 static bool
-do_logfile_sudo(const char *reason, const char *errstr,
-    const struct eventlog *details)
+do_logfile_sudo(const char *logline, const struct eventlog *details)
 {
     const char *timefmt = evl_conf.time_fmt;
     const char *logfile = evl_conf.logpath;
-    char *logline, timebuf[8192], *timestr = NULL;
+    char timebuf[8192], *timestr = NULL;
     struct tm *timeptr;
     bool ret = false;
     FILE *fp;
     debug_decl(do_logfile_sudo, SUDO_DEBUG_UTIL);
 
     if ((fp = evl_conf.open_log(EVLOG_FILE, logfile)) == NULL)
-	debug_return_bool(false);
-
-    if ((logline = new_logline(reason, errstr, details)) == NULL)
 	debug_return_bool(false);
 
     if (!sudo_lock_file(fileno(fp), SUDO_LOCK)) {
@@ -718,7 +1003,6 @@ do_logfile_sudo(const char *reason, const char *errstr,
     ret = true;
 
 done:
-    free(logline);
     (void)sudo_lock_file(fileno(fp), SUDO_UNLOCK);
     evl_conf.close_log(EVLOG_FILE, fp);
     debug_return_bool(ret);
@@ -782,32 +1066,52 @@ done:
 }
 
 static bool
-do_logfile(int event_type, const char *reason, const char *errstr,
+do_logfile(int event_type, int flags, const char *reason, const char *errstr,
     const struct eventlog *details, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
     bool ret = false;
+    char *logline = NULL;
     debug_decl(do_logfile, SUDO_DEBUG_UTIL);
+
+    /* Sudo format logs and mailed logs use the same log line format. */
+    if (evl_conf.format == EVLOG_SUDO || ISSET(flags, EVLOG_MAIL)) {
+	logline = new_logline(flags, reason, errstr, details);
+	if (logline == NULL)
+	    debug_return_bool(false);
+
+	if (ISSET(flags, EVLOG_MAIL)) {
+	    if (!send_mail(details, "%s", logline)) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to mail log line");
+	    }
+	    if (ISSET(flags, EVLOG_MAIL_ONLY)) {
+		free(logline);
+		debug_return_bool(true);
+	    }
+	}
+    }
 
     switch (evl_conf.format) {
     case EVLOG_SUDO:
-	ret = do_logfile_sudo(reason, errstr, details);
+	ret = do_logfile_sudo(logline ? logline : reason, details);
 	break;
     case EVLOG_JSON:
-	ret = do_logfile_json(event_type, reason, errstr, details, event_time,
-	    info_cb, info);
+	ret = do_logfile_json(event_type, reason, errstr, details,
+	    event_time, info_cb, info);
 	break;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected eventlog format %d", evl_conf.format);
 	break;
     }
+    free(logline);
 
     debug_return_bool(ret);
 }
 
 bool
-eventlog_accept(const struct eventlog *details,
+eventlog_accept(const struct eventlog *details, int flags,
     eventlog_json_callback_t info_cb, void *info)
 {
     const int log_type = evl_conf.type;
@@ -818,12 +1122,13 @@ eventlog_accept(const struct eventlog *details,
 	debug_return_bool(true);
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
-	if (!do_syslog(EVLOG_ACCEPT, NULL, NULL, details,
+	if (!do_syslog(EVLOG_ACCEPT, flags, NULL, NULL, details,
 		&details->submit_time, info_cb, info))
 	    ret = false;
+	CLR(flags, EVLOG_MAIL);
     }
     if (ISSET(log_type, EVLOG_FILE)) {
-	if (!do_logfile(EVLOG_ACCEPT, NULL, NULL, details,
+	if (!do_logfile(EVLOG_ACCEPT, flags, NULL, NULL, details,
 		&details->submit_time, info_cb, info))
 	    ret = false;
     }
@@ -832,7 +1137,7 @@ eventlog_accept(const struct eventlog *details,
 }
 
 bool
-eventlog_reject(const struct eventlog *details, const char *reason,
+eventlog_reject(const struct eventlog *details, int flags, const char *reason,
     eventlog_json_callback_t info_cb, void *info)
 {
     const int log_type = evl_conf.type;
@@ -840,12 +1145,13 @@ eventlog_reject(const struct eventlog *details, const char *reason,
     debug_decl(log_reject, SUDO_DEBUG_UTIL);
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
-	if (!do_syslog(EVLOG_REJECT, reason, NULL, details,
+	if (!do_syslog(EVLOG_REJECT, flags, reason, NULL, details,
 		&details->submit_time, info_cb, info))
 	    ret = false;
+	CLR(flags, EVLOG_MAIL);
     }
     if (ISSET(log_type, EVLOG_FILE)) {
-	if (!do_logfile(EVLOG_REJECT, reason, NULL, details,
+	if (!do_logfile(EVLOG_REJECT, flags, reason, NULL, details,
 		&details->submit_time, info_cb, info))
 	    ret = false;
     }
@@ -854,20 +1160,21 @@ eventlog_reject(const struct eventlog *details, const char *reason,
 }
 
 bool
-eventlog_alert(const struct eventlog *details, struct timespec *alert_time,
-    const char *reason, const char *errstr)
+eventlog_alert(const struct eventlog *details, int flags,
+    struct timespec *alert_time, const char *reason, const char *errstr)
 {
     const int log_type = evl_conf.type;
     bool ret = true;
     debug_decl(log_alert, SUDO_DEBUG_UTIL);
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
-	if (!do_syslog(EVLOG_ALERT, reason, errstr, details, alert_time,
+	if (!do_syslog(EVLOG_ALERT, flags, reason, errstr, details, alert_time,
 		NULL, NULL))
 	    ret = false;
+	CLR(flags, EVLOG_MAIL);
     }
     if (ISSET(log_type, EVLOG_FILE)) {
-	if (!do_logfile(EVLOG_ALERT, reason, errstr, details, alert_time,
+	if (!do_logfile(EVLOG_ALERT, flags, reason, errstr, details, alert_time,
 		NULL, NULL))
 	    ret = false;
     }
