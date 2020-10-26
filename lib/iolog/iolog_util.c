@@ -41,6 +41,7 @@
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
@@ -50,7 +51,7 @@ static int timing_event_adj;
 
 static bool
 iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
-    struct iolog_info *li)
+    struct eventlog *evlog)
 {
     char *buf = NULL, *cp, *ep;
     const char *errstr;
@@ -65,15 +66,15 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
      *  3) command with args
      */
     if (getdelim(&buf, &bufsize, '\n', fp) == -1 ||
-	getdelim(&li->cwd, &cwdsize, '\n', fp) == -1 ||
-	getdelim(&li->cmd, &cmdsize, '\n', fp) == -1) {
+	getdelim(&evlog->cwd, &cwdsize, '\n', fp) == -1 ||
+	getdelim(&evlog->command, &cmdsize, '\n', fp) == -1) {
 	sudo_warn(U_("%s: invalid log file"), iolog_dir);
 	goto done;
     }
 
     /* Strip the newline from the cwd and command. */
-    li->cwd[strcspn(li->cwd, "\n")] = '\0';
-    li->cmd[strcspn(li->cmd, "\n")] = '\0';
+    evlog->cwd[strcspn(evlog->cwd, "\n")] = '\0';
+    evlog->command[strcspn(evlog->command, "\n")] = '\0';
 
     /*
      * Crack the log line (lines and cols not present in old versions).
@@ -89,7 +90,7 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	goto done;
     }
     *ep = '\0';
-    li->tstamp.tv_sec = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
+    evlog->submit_time.tv_sec = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_warn(U_("%s: time stamp %s: %s"), iolog_dir, cp, errstr);
 	goto done;
@@ -101,7 +102,7 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	sudo_warn(U_("%s: user field is missing"), iolog_dir);
 	goto done;
     }
-    if ((li->user = strndup(cp, (size_t)(ep - cp))) == NULL)
+    if ((evlog->submituser = strndup(cp, (size_t)(ep - cp))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* runas user */
@@ -110,7 +111,7 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	sudo_warn(U_("%s: runas user field is missing"), iolog_dir);
 	goto done;
     }
-    if ((li->runas_user = strndup(cp, (size_t)(ep - cp))) == NULL)
+    if ((evlog->runuser = strndup(cp, (size_t)(ep - cp))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* runas group */
@@ -120,7 +121,7 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	goto done;
     }
     if (cp != ep) {
-	if ((li->runas_group = strndup(cp, (size_t)(ep - cp))) == NULL)
+	if ((evlog->rungroup = strndup(cp, (size_t)(ep - cp))) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
 
@@ -128,11 +129,11 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
 	/* just the tty */
-	if ((li->tty = strdup(cp)) == NULL)
+	if ((evlog->ttyname = strdup(cp)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     } else {
 	/* tty followed by lines + cols */
-	if ((li->tty = strndup(cp, (size_t)(ep - cp))) == NULL)
+	if ((evlog->ttyname = strndup(cp, (size_t)(ep - cp))) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	cp = ep + 1;
 	/* need to NULL out separator to use sudo_strtonum() */
@@ -140,14 +141,14 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	if ((ep = strchr(cp, ':')) != NULL) {
 	    *ep = '\0';
 	}
-	li->lines = sudo_strtonum(cp, 1, INT_MAX, &errstr);
+	evlog->lines = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: tty lines %s: %s", iolog_dir, cp, errstr);
 	}
 	if (ep != NULL) {
 	    cp = ep + 1;
-	    li->cols = sudo_strtonum(cp, 1, INT_MAX, &errstr);
+	    evlog->columns = sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "%s: tty cols %s: %s", iolog_dir, cp, errstr);
@@ -162,10 +163,10 @@ done:
     debug_return_bool(ret);
 }
 
-struct iolog_info *
+struct eventlog *
 iolog_parse_loginfo(int dfd, const char *iolog_dir)
 {
-    struct iolog_info *li = NULL;
+    struct eventlog *evlog = NULL;
     FILE *fp = NULL;
     int fd = -1;
     int tmpfd = -1;
@@ -191,16 +192,16 @@ iolog_parse_loginfo(int dfd, const char *iolog_dir)
     }
     fd = -1;
 
-    if ((li = calloc(1, sizeof(*li))) == NULL)
+    if ((evlog = calloc(1, sizeof(*evlog))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    li->runas_uid = (uid_t)-1;
-    li->runas_gid = (gid_t)-1;
+    evlog->runuid = (uid_t)-1;
+    evlog->rungid = (gid_t)-1;
 
-    ok = legacy ? iolog_parse_loginfo_legacy(fp, iolog_dir, li) :
-	iolog_parse_loginfo_json(fp, iolog_dir, li);
+    ok = legacy ? iolog_parse_loginfo_legacy(fp, iolog_dir, evlog) :
+	iolog_parse_loginfo_json(fp, iolog_dir, evlog);
     if (ok) {
 	fclose(fp);
-	debug_return_ptr(li);
+	debug_return_ptr(evlog);
     }
 
 bad:
@@ -208,7 +209,7 @@ bad:
 	close(fd);
     if (fp != NULL)
 	fclose(fp);
-    iolog_free_loginfo(li);
+    eventlog_free(evlog);
     debug_return_ptr(NULL);
 }
 
@@ -427,33 +428,4 @@ iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
     }
 
     debug_return_int(0);
-}
-
-void
-iolog_free_loginfo(struct iolog_info *li)
-{
-    char **p;
-
-    if (li != NULL) {
-	if (li->argv != NULL) {
-	    for (p = li->argv; *p != NULL; p++)
-		free(*p);
-	    free(li->argv);
-	}
-	if (li->envp != NULL) {
-	    for (p = li->envp; *p != NULL; p++)
-		free(*p);
-	    free(li->envp);
-	}
-	free(li->cwd);
-	free(li->user);
-	free(li->runas_user);
-	free(li->runas_group);
-	free(li->runchroot);
-	free(li->runcwd);
-	free(li->tty);
-	free(li->cmd);
-	free(li->host);
-	free(li);
-    }
 }

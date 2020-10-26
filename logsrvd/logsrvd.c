@@ -119,7 +119,7 @@ connection_closure_free(struct connection_closure *closure)
 #if defined(HAVE_OPENSSL)
 	sudo_ev_free(closure->ssl_accept_ev);
 #endif
-	evlog_free(&closure->evlog);
+	eventlog_free(closure->evlog);
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
 	free(closure);
@@ -300,8 +300,8 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
 
-    if (!evlog_fill(&closure->evlog, msg->submit_time, msg->info_msgs,
-	    msg->n_info_msgs)) {
+    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs, msg->n_info_msgs);
+    if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing AcceptMessage");
 	debug_return_bool(false);
     }
@@ -315,7 +315,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	closure->log_io = true;
     }
 
-    if (!eventlog_accept(&closure->evlog, &closure->evlog.submit_time,
+    if (!eventlog_accept(closure->evlog, &closure->evlog->submit_time,
 	    logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging accept event");
 	debug_return_bool(false);
@@ -327,7 +327,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
 
     /* Send log ID to client for restarting connections. */
-    if (!fmt_log_id_message(closure->evlog.iolog_path, &closure->write_buf))
+    if (!fmt_log_id_message(closure->evlog->iolog_path, &closure->write_buf))
 	debug_return_bool(false);
     if (sudo_ev_add(closure->evbase, closure->write_ev,
         logsrvd_conf_get_sock_timeout(), false) == -1) {
@@ -366,14 +366,15 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
 
-    if (!evlog_fill(&closure->evlog, msg->submit_time, msg->info_msgs,
-	    msg->n_info_msgs)) {
+    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
+	msg->n_info_msgs);
+    if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing RejectMessage");
 	debug_return_bool(false);
     }
 
-    if (!eventlog_reject(&closure->evlog, msg->reason,
-	    &closure->evlog.submit_time, logsrvd_json_log_cb, &info)) {
+    if (!eventlog_reject(closure->evlog, msg->reason,
+	    &closure->evlog->submit_time, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging reject event");
 	debug_return_bool(false);
     }
@@ -491,7 +492,7 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 
     alert_time.tv_sec = msg->alert_time->tv_sec;
     alert_time.tv_nsec = msg->alert_time->tv_nsec;
-    if (!eventlog_alert(&closure->evlog, &alert_time, msg->reason)) {
+    if (!eventlog_alert(closure->evlog, &alert_time, msg->reason)) {
 	closure->errstr = _("error logging alert event");
 	debug_return_bool(false);
     }

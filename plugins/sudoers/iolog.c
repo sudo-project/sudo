@@ -40,6 +40,7 @@
 #include <netinet/in.h>
 
 #include "sudoers.h"
+#include "sudo_eventlog.h"
 #include "sudo_iolog.h"
 #include "iolog_plugin.h"
 
@@ -498,31 +499,32 @@ oom:
  * This file is not compressed.
  */
 static bool
-write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
+write_info_log(int dfd, char *iolog_path, struct iolog_details *details)
 {
-    struct iolog_info iolog_info;
+    struct eventlog evlog;
     debug_decl(write_info_log, SUDOERS_DEBUG_UTIL);
 
-    /* XXX - just use iolog_info in the first place? */
-    memset(&iolog_info, 0, sizeof(iolog_info));
-    iolog_info.cwd = (char *)details->cwd;
-    iolog_info.user = (char *)details->user;
-    iolog_info.runchroot = (char *)details->runchroot;
-    iolog_info.runcwd = (char *)details->runcwd;
-    iolog_info.runas_user = details->runas_pw->pw_name;
-    iolog_info.runas_group = details->runas_gr ? details->runas_gr->gr_name: NULL;
-    iolog_info.tty = (char *)details->tty;
-    iolog_info.cmd = (char *)details->command;
-    iolog_info.host = (char *)details->host;
-    sudo_gettime_real(&iolog_info.tstamp);
-    iolog_info.lines = details->lines;
-    iolog_info.cols = details->cols;
-    iolog_info.runas_uid = details->runas_pw->pw_uid;
-    iolog_info.runas_gid = details->runas_gr ? details->runas_gr->gr_gid: (gid_t)-1;
-    iolog_info.argv = (char **)details->argv;
-    iolog_info.envp = (char **)details->user_env;
+    /* XXX - just use eventlog in the first place? */
+    memset(&evlog, 0, sizeof(evlog));
+    evlog.cwd = (char *)details->cwd;
+    evlog.iolog_path = iolog_path;
+    evlog.submituser = (char *)details->user;
+    evlog.runchroot = (char *)details->runchroot;
+    evlog.runcwd = (char *)details->runcwd;
+    evlog.runuser = details->runas_pw->pw_name;
+    evlog.rungroup = details->runas_gr ? details->runas_gr->gr_name: NULL;
+    evlog.ttyname = (char *)details->tty;
+    evlog.command = (char *)details->command;
+    evlog.submithost = (char *)details->host;
+    sudo_gettime_real(&evlog.submit_time);
+    evlog.lines = details->lines;
+    evlog.columns = details->cols;
+    evlog.runuid = details->runas_pw->pw_uid;
+    evlog.rungid = details->runas_gr ? details->runas_gr->gr_gid: (gid_t)-1;
+    evlog.argv = (char **)details->argv;
+    evlog.envp = (char **)details->user_env;
 
-    if (!iolog_write_info_file(dfd, iolog_dir, &iolog_info)) {
+    if (!iolog_write_info_file(dfd, &evlog)) {
 	log_warningx(SLOG_SEND_MAIL,
 	    N_("unable to write to I/O log file: %s"), strerror(errno));
 	warned = true;

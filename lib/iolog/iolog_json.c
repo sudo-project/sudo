@@ -39,6 +39,7 @@
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
@@ -54,48 +55,48 @@ struct json_stack {
 #define JSON_STACK_INTIALIZER(s) { 0, nitems((s).frames) };
 
 static bool
-json_store_columns(struct json_item *item, struct iolog_info *li)
+json_store_columns(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_columns, SUDO_DEBUG_UTIL);
 
     if (item->u.number < 1 || item->u.number > INT_MAX) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "tty cols %lld: out of range", item->u.number);
-	li->cols = 0;
+	evlog->columns = 0;
 	debug_return_bool(false);
     }
 
-    li->cols = item->u.number;
+    evlog->columns = item->u.number;
     debug_return_bool(true);
 }
 
 static bool
-json_store_command(struct json_item *item, struct iolog_info *li)
+json_store_command(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_command, SUDO_DEBUG_UTIL);
 
     /*
-     * Note: struct iolog_info must store command + args.
+     * Note: struct eventlog must store command + args.
      *       We don't have argv yet so we append the args later.
      */
-    li->cmd = item->u.string;
+    evlog->command = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
 
 static bool
-json_store_lines(struct json_item *item, struct iolog_info *li)
+json_store_lines(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_lines, SUDO_DEBUG_UTIL);
 
     if (item->u.number < 1 || item->u.number > INT_MAX) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "tty lines %lld: out of range", item->u.number);
-	li->lines = 0;
+	evlog->lines = 0;
 	debug_return_bool(false);
     }
 
-    li->lines = item->u.number;
+    evlog->lines = item->u.number;
     debug_return_bool(true);
 }
 
@@ -130,115 +131,115 @@ json_array_to_strvec(struct json_object *array)
 }
 
 static bool
-json_store_runargv(struct json_item *item, struct iolog_info *li)
+json_store_runargv(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runargv, SUDO_DEBUG_UTIL);
 
-    li->argv = json_array_to_strvec(&item->u.child);
+    evlog->argv = json_array_to_strvec(&item->u.child);
 
-    debug_return_bool(li->argv != NULL);
+    debug_return_bool(evlog->argv != NULL);
 }
 
 static bool
-json_store_runenv(struct json_item *item, struct iolog_info *li)
+json_store_runenv(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runenv, SUDO_DEBUG_UTIL);
 
-    li->envp = json_array_to_strvec(&item->u.child);
+    evlog->envp = json_array_to_strvec(&item->u.child);
 
-    debug_return_bool(li->envp != NULL);
+    debug_return_bool(evlog->envp != NULL);
 }
 
 static bool
-json_store_rungid(struct json_item *item, struct iolog_info *li)
+json_store_rungid(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_rungid, SUDO_DEBUG_UTIL);
 
-    li->runas_gid = (gid_t)item->u.number;
+    evlog->rungid = (gid_t)item->u.number;
     debug_return_bool(true);
 }
 
 static bool
-json_store_rungroup(struct json_item *item, struct iolog_info *li)
+json_store_rungroup(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_rungroup, SUDO_DEBUG_UTIL);
 
-    li->runas_group = item->u.string;
+    evlog->rungroup = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
 
 static bool
-json_store_runuid(struct json_item *item, struct iolog_info *li)
+json_store_runuid(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runuid, SUDO_DEBUG_UTIL);
 
-    li->runas_uid = (uid_t)item->u.number;
+    evlog->runuid = (uid_t)item->u.number;
     debug_return_bool(true);
 }
 
 static bool
-json_store_runuser(struct json_item *item, struct iolog_info *li)
+json_store_runuser(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runuser, SUDO_DEBUG_UTIL);
 
-    li->runas_user = item->u.string;
+    evlog->runuser = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
 
 static bool
-json_store_runchroot(struct json_item *item, struct iolog_info *li)
+json_store_runchroot(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runchroot, SUDO_DEBUG_UTIL);
 
-    li->runchroot = item->u.string;
+    evlog->runchroot = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
 
 static bool
-json_store_runcwd(struct json_item *item, struct iolog_info *li)
+json_store_runcwd(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runcwd, SUDO_DEBUG_UTIL);
 
-    li->runcwd = item->u.string;
+    evlog->runcwd = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
 
 static bool
-json_store_submitcwd(struct json_item *item, struct iolog_info *li)
+json_store_submitcwd(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submitcwd, SUDO_DEBUG_UTIL);
 
-    li->cwd = item->u.string;
+    evlog->cwd = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
 
 static bool
-json_store_submithost(struct json_item *item, struct iolog_info *li)
+json_store_submithost(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submithost, SUDO_DEBUG_UTIL);
 
-    li->host = item->u.string;
+    evlog->submithost = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
 
 static bool
-json_store_submituser(struct json_item *item, struct iolog_info *li)
+json_store_submituser(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submituser, SUDO_DEBUG_UTIL);
 
-    li->user = item->u.string;
+    evlog->submituser = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
 
 static bool
-json_store_timestamp(struct json_item *item, struct iolog_info *li)
+json_store_timestamp(struct json_item *item, struct eventlog *evlog)
 {
     struct json_object *object;
     debug_decl(json_store_timestamp, SUDO_DEBUG_UTIL);
@@ -248,11 +249,11 @@ json_store_timestamp(struct json_item *item, struct iolog_info *li)
 	if (item->type != JSON_NUMBER)
 	    continue;
 	if (strcmp(item->name, "seconds") == 0) {
-	    li->tstamp.tv_sec = item->u.number;
+	    evlog->submit_time.tv_sec = item->u.number;
 	    continue;
 	}
 	if (strcmp(item->name, "nanoseconds") == 0) {
-	    li->tstamp.tv_nsec = item->u.number;
+	    evlog->submit_time.tv_nsec = item->u.number;
 	    continue;
 	}
     }
@@ -260,11 +261,11 @@ json_store_timestamp(struct json_item *item, struct iolog_info *li)
 }
 
 static bool
-json_store_ttyname(struct json_item *item, struct iolog_info *li)
+json_store_ttyname(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_ttyname, SUDO_DEBUG_UTIL);
 
-    li->tty = item->u.string;
+    evlog->ttyname = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
 }
@@ -272,7 +273,7 @@ json_store_ttyname(struct json_item *item, struct iolog_info *li)
 static struct iolog_json_key {
     const char *name;
     enum json_value_type type;
-    bool (*setter)(struct json_item *, struct iolog_info *);
+    bool (*setter)(struct json_item *, struct eventlog *);
 } iolog_json_keys[] = {
     { "columns", JSON_NUMBER, json_store_columns },
     { "command", JSON_STRING, json_store_command },
@@ -401,7 +402,7 @@ free_json_items(struct json_item_list *items)
 }
 
 static bool
-iolog_parse_json_object(struct json_object *object, struct iolog_info *li)
+iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
 {
     struct json_item *item;
     bool ret = false;
@@ -434,7 +435,7 @@ iolog_parse_json_object(struct json_object *object, struct iolog_info *li)
 	    goto done;
 	} else {
 	    /* Matched name and type. */
-	    if (!key->setter(item, li)) {
+	    if (!key->setter(item, evlog)) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to store %s", key->name);
 		goto done;
@@ -443,14 +444,14 @@ iolog_parse_json_object(struct json_object *object, struct iolog_info *li)
     }
 
     /* Merge cmd and argv as sudoreplay expects. */
-    if (li->cmd != NULL && li->argv != NULL) {
-	size_t len = strlen(li->cmd) + 1;
+    if (evlog->command != NULL && evlog->argv != NULL) {
+	size_t len = strlen(evlog->command) + 1;
 	char *newcmd;
 	int ac;
 
-	/* Skip argv[0], we use li->cmd instead. */
-	for (ac = 1; li->argv[ac] != NULL; ac++)
-	    len += strlen(li->argv[ac]) + 1;
+	/* Skip argv[0], we use evlog->command instead. */
+	for (ac = 1; evlog->argv[ac] != NULL; ac++)
+	    len += strlen(evlog->argv[ac]) + 1;
 
 	if ((newcmd = malloc(len)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -458,17 +459,17 @@ iolog_parse_json_object(struct json_object *object, struct iolog_info *li)
 	}
 
 	/* TODO: optimize this. */
-	if (strlcpy(newcmd, li->cmd, len) >= len)
+	if (strlcpy(newcmd, evlog->command, len) >= len)
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
-	for (ac = 1; li->argv[ac] != NULL; ac++) {
+	for (ac = 1; evlog->argv[ac] != NULL; ac++) {
 	    if (strlcat(newcmd, " ", len) >= len)
 		sudo_fatalx(U_("internal error, %s overflow"), __func__);
-	    if (strlcat(newcmd, li->argv[ac], len) >= len)
+	    if (strlcat(newcmd, evlog->argv[ac], len) >= len)
 		sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	}
 
-	free(li->cmd);
-	li->cmd = newcmd;
+	free(evlog->command);
+	evlog->command = newcmd;
     }
 
     ret = true;
@@ -770,7 +771,7 @@ done:
 }
 
 bool
-iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
+iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct eventlog *evlog)
 {
     struct json_object root;
     bool ret = false;
@@ -778,7 +779,7 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li)
 
     if (iolog_parse_json(fp, iolog_dir, &root)) {
 	/* Walk the stack and parse entries. */
-	ret = iolog_parse_json_object(&root, li);
+	ret = iolog_parse_json_object(&root, evlog);
 
 	/* Cleanup. */
 	free_json_items(&root.items);

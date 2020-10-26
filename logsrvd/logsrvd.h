@@ -58,7 +58,7 @@ enum connection_status {
  */
 struct connection_closure {
     TAILQ_ENTRY(connection_closure) entries;
-    struct eventlog evlog;
+    struct eventlog *evlog;
     struct timespec elapsed_time;
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
@@ -137,14 +137,13 @@ struct logsrvd_tls_runtime {
 #endif
 
 /* iolog_writer.c */
-bool evlog_fill(struct eventlog *evlog, TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen);
+struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen);
 bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
 bool iolog_restart(RestartMessage *msg, struct connection_closure *closure);
 int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);
 int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
-void evlog_free(struct eventlog *evlog);
 
 /* logsrvd_conf.c */
 bool logsrvd_conf_read(const char *path);

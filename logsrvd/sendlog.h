@@ -64,7 +64,7 @@ struct client_closure {
 #endif
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;
-    struct iolog_info *log_info;
+    struct eventlog *evlog;
     struct iolog_file iolog_files[IOFD_MAX];
     const char *iolog_id;
     char *reject_reason;
