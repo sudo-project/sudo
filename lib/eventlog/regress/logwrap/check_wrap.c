@@ -26,11 +26,10 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "sudo_compat.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_plugin.h"
 #include "sudo_util.h"
-
-extern void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
 sudo_dso_public int main(int argc, char *argv[]);
 
@@ -92,7 +91,7 @@ main(int argc, char *argv[])
 		    sudo_fatalx("%s: invalid length on line %d\n", argv[1], lineno);
 		while (len <= maxlen) {
 		    printf("# word wrap at %d characters\n", (int)len);
-		    writeln_wrap(stdout, lines[0], strlen(lines[0]), len);
+		    eventlog_writeln(stdout, lines[0], strlen(lines[0]), len);
 		    len++;
 		}
 	    }

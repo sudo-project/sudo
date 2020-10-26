@@ -46,11 +46,6 @@
 #define SLOG_NO_LOG		0x20	/* do not log via file or syslog */
 #define SLOG_AUDIT		0x40	/* send message to audit as well */
 
-/*
- * Indentation level for file-based logs when word wrap is enabled.
- */
-#define LOG_INDENT	"    "
-
 /* XXX - needed for auditing */
 extern int NewArgc;
 extern char **NewArgv;
@@ -72,7 +67,6 @@ bool log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 bool gai_log_warning(int flags, int errnum, const char *fmt, ...) __printflike(3, 4);
 bool sudoers_initlocale(const char *ulocale, const char *slocale);
 bool sudoers_locale_callback(const union sudo_defs_val *);
-int writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 void sudoers_to_eventlog(struct eventlog *evlog);
 void init_eventlog_config(void);
 

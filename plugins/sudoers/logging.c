@@ -589,6 +589,7 @@ init_eventlog_config(void)
     eventlog_set_syslog_rejectpri(def_syslog_badpri);
     eventlog_set_syslog_alertpri(def_syslog_badpri);
     eventlog_set_syslog_maxlen(def_syslog_maxlen);
+    eventlog_set_file_maxlen(def_loglinelen);
     eventlog_set_mailuid(mailuid);
     eventlog_set_omit_hostname(!def_log_host);
     eventlog_set_logpath(def_logfile);

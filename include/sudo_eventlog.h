@@ -21,6 +21,11 @@
 
 #include <sys/types.h>	/* for gid_t, uid_t */
 #include <time.h>	/* for struct timespec */
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
 /* Supported event types. */
 enum event_type {
@@ -56,6 +61,11 @@ enum eventlog_format {
 #endif
 
 /*
+ * Indentation level for file-based logs when word wrap is enabled.
+ */
+#define EVENTLOG_INDENT	"    "
+
+/*
  * Event log config, used with eventlog_setconf()
  */
 struct eventlog_config {
@@ -65,6 +75,7 @@ struct eventlog_config {
     int syslog_rejectpri;
     int syslog_alertpri;
     int syslog_maxlen;
+    int file_maxlen;
     uid_t mailuid;
     bool omit_hostname;
     const char *logpath;
@@ -113,6 +124,7 @@ bool eventlog_accept(const struct eventlog *details, int flags, eventlog_json_ca
 bool eventlog_alert(const struct eventlog *details, int flags, struct timespec *alert_time, const char *reason, const char *errstr);
 bool eventlog_reject(const struct eventlog *details, int flags, const char *reason, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_store_json(struct json_container *json, const struct eventlog *evlog);
+size_t eventlog_writeln(FILE *fp, char *line, size_t len, size_t maxlen);
 void eventlog_free(struct eventlog *evlog);
 void eventlog_set_type(int type);
 void eventlog_set_format(enum eventlog_format format);
@@ -120,6 +132,7 @@ void eventlog_set_syslog_acceptpri(int pri);
 void eventlog_set_syslog_rejectpri(int pri);
 void eventlog_set_syslog_alertpri(int pri);
 void eventlog_set_syslog_maxlen(int len);
+void eventlog_set_file_maxlen(int len);
 void eventlog_set_mailuid(uid_t uid);
 void eventlog_set_omit_hostname(bool omit_hostname);
 void eventlog_set_logpath(const char *path);

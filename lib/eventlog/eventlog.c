@@ -86,6 +86,7 @@ static struct eventlog_config evl_conf = {
     LOG_ALERT,			/* syslog_rejectpri */
     LOG_ALERT,			/* syslog_alertpri */
     MAXSYSLOGLEN,		/* syslog_maxlen */
+    0,				/* file_maxlen */
     ROOT_UID,			/* mailuid */
     false,			/* omit_hostname */
     _PATH_SUDO_LOGFILE,		/* logpath */
@@ -995,10 +996,11 @@ do_logfile_sudo(const char *logline, const struct eventlog *details)
 {
     const char *timefmt = evl_conf.time_fmt;
     const char *logfile = evl_conf.logpath;
-    char timebuf[8192], *timestr = NULL;
+    char *full_line, timebuf[8192], *timestr = NULL;
     struct tm *timeptr;
     bool ret = false;
     FILE *fp;
+    int len;
     debug_decl(do_logfile_sudo, SUDO_DEBUG_UTIL);
 
     if ((fp = evl_conf.open_log(EVLOG_FILE, logfile)) == NULL)
@@ -1018,8 +1020,13 @@ do_logfile_sudo(const char *logline, const struct eventlog *details)
 	    timestr = timebuf;
 	}
     }
-    (void)fprintf(fp, "%s : %s : %s\n", timestr ? timestr : "invalid date",
-	details->submituser, logline);
+    len = asprintf(&full_line, "%s : %s : %s",
+	timestr ? timestr : "invalid date", details->submituser, logline);
+    if (len == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    eventlog_writeln(fp, full_line, len, evl_conf.file_maxlen);
     (void)fflush(fp);
     if (ferror(fp)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -1301,6 +1308,12 @@ void
 eventlog_set_syslog_maxlen(int len)
 {
     evl_conf.syslog_maxlen = len;
+}
+
+void
+eventlog_set_file_maxlen(int len)
+{
+    evl_conf.file_maxlen = len;
 }
 
 void

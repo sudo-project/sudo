@@ -1471,6 +1471,16 @@ cb_syslog_maxlen(const union sudo_defs_val *sd_un)
 }
 
 static bool
+cb_loglinelen(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_loglinelen, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_file_maxlen(sd_un->ival);
+
+    debug_return_bool(true);
+}
+
+static bool
 cb_log_year(const union sudo_defs_val *sd_un)
 {
     debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
@@ -1588,6 +1598,7 @@ set_callbacks(void)
     sudo_defs_table[I_SYSLOG_GOODPRI].callback = cb_syslog_goodpri;
     sudo_defs_table[I_SYSLOG_BADPRI].callback = cb_syslog_badpri;
     sudo_defs_table[I_SYSLOG_MAXLEN].callback = cb_syslog_maxlen;
+    sudo_defs_table[I_LOGLINELEN].callback = cb_loglinelen;
     sudo_defs_table[I_LOG_HOST].callback = cb_log_host;
     sudo_defs_table[I_LOGFILE].callback = cb_logfile;
     sudo_defs_table[I_LOG_YEAR].callback = cb_log_year;
