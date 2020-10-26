@@ -160,6 +160,29 @@ cb_iolog_mode(const union sudo_defs_val *sd_un)
     return true;
 }
 
+static void
+free_iolog_details(void)
+{
+    debug_decl(free_iolog_details, SUDOERS_DEBUG_PLUGIN);
+
+    if (iolog_details.evlog != NULL) {
+	/* We only make a shallow copy of argv and envp. */
+	free(iolog_details.evlog->argv);
+	iolog_details.evlog->argv = NULL;
+	free(iolog_details.evlog->envp);
+	iolog_details.evlog->envp = NULL;
+	eventlog_free(iolog_details.evlog);
+    }
+    str_list_free(iolog_details.log_servers);
+#if defined(HAVE_OPENSSL)
+    free(iolog_details.ca_bundle);
+    free(iolog_details.cert_file);
+    free(iolog_details.key_file);
+#endif /* HAVE_OPENSSL */
+
+    debug_return;
+}
+
 /*
  * Convert a comma-separated list to a string list.
  */
@@ -205,7 +228,7 @@ static int
 iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     char * const command_info[])
 {
-    struct eventlog *evlog = &details->evlog;
+    struct eventlog *evlog;
     const char *runas_uid_str = "0", *runas_euid_str = NULL;
     const char *runas_gid_str = "0", *runas_egid_str = NULL;
     const char *errstr;
@@ -216,13 +239,16 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     id_t id;
     debug_decl(iolog_deserialize_info, SUDOERS_DEBUG_UTIL);
 
-    sudo_gettime_real(&evlog->submit_time);
+    if ((evlog = calloc(1, sizeof(*evlog))) == NULL)
+	goto oom;
+    details->evlog = evlog;
+
     evlog->lines = 24;
     evlog->columns = 80;
     evlog->runuid = ROOT_UID;
     evlog->rungid = 0;
+    sudo_gettime_real(&evlog->submit_time);
 
-    /* TODO: make copies of strings and cleanup on error and in close() */
     for (cur = user_info; *cur != NULL; cur++) {
 	switch (**cur) {
 	case 'c':
@@ -234,13 +260,17 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "cwd=", sizeof("cwd=") - 1) == 0) {
-		evlog->cwd = *cur + sizeof("cwd=") - 1;
+		evlog->cwd = strdup(*cur + sizeof("cwd=") - 1);
+		if (evlog->cwd == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
 	case 'h':
 	    if (strncmp(*cur, "host=", sizeof("host=") - 1) == 0) {
-		evlog->submithost = *cur + sizeof("host=") - 1;
+		evlog->submithost = strdup(*cur + sizeof("host=") - 1);
+		if (evlog->submithost == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
@@ -255,13 +285,17 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    break;
 	case 't':
 	    if (strncmp(*cur, "tty=", sizeof("tty=") - 1) == 0) {
-		evlog->ttyname = *cur + sizeof("tty=") - 1;
+		evlog->ttyname = strdup(*cur + sizeof("tty=") - 1);
+		if (evlog->ttyname == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
 	case 'u':
 	    if (strncmp(*cur, "user=", sizeof("user=") - 1) == 0) {
-		evlog->submituser = *cur + sizeof("user=") - 1;
+		evlog->submituser = strdup(*cur + sizeof("user=") - 1);
+		if (evlog->submituser == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
@@ -272,11 +306,15 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	switch (**cur) {
 	case 'c':
 	    if (strncmp(*cur, "command=", sizeof("command=") - 1) == 0) {
-		evlog->command = *cur + sizeof("command=") - 1;
+		evlog->command = strdup(*cur + sizeof("command=") - 1);
+		if (evlog->command == NULL)
+		    goto oom;
 		continue;
 	    }
 	    if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
-		evlog->runchroot = *cur + sizeof("chroot=") - 1;
+		evlog->runchroot = strdup(*cur + sizeof("chroot=") - 1);
+		if (evlog->runchroot == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
@@ -399,15 +437,21 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
             }
 #if defined(HAVE_OPENSSL)
             if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
-                details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
+                details->ca_bundle = strdup(*cur + sizeof("log_server_cabundle=") - 1);
+		if (details->ca_bundle == NULL)
+		    goto oom;
                 continue;
             }
             if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
-                details->cert_file = *cur + sizeof("log_server_peer_cert=") - 1;
+                details->cert_file = strdup(*cur + sizeof("log_server_peer_cert=") - 1);
+		if (details->cert_file == NULL)
+		    goto oom;
                 continue;
             }
             if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
-                details->key_file = *cur + sizeof("log_server_peer_key=") - 1;
+                details->key_file = strdup(*cur + sizeof("log_server_peer_key=") - 1);
+		if (details->key_file == NULL)
+		    goto oom;
                 continue;
             }
             if (strncmp(*cur, "log_server_verify=", sizeof("log_server_verify=") - 1) == 0) {
@@ -448,7 +492,9 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
-		evlog->runcwd = *cur + sizeof("runcwd=") - 1;
+		evlog->runcwd = strdup(*cur + sizeof("runcwd=") - 1);
+		if (evlog->runcwd == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
@@ -494,14 +540,16 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    } else {
 		idbuf[0] = '#';
 		strlcpy(&idbuf[1], runas_gid_str, sizeof(idbuf) - 1);
-		if ((evlog->rungroup = strdup(idbuf)) == NULL)
+		evlog->rungroup = strdup(idbuf);
+		if (evlog->rungroup == NULL)
 		    goto oom;
 	    }
 	}
     } else {
 	idbuf[0] = '#';
 	strlcpy(&idbuf[1], runas_uid_str, sizeof(idbuf) - 1);
-	if ((evlog->runuser = strdup(idbuf)) == NULL)
+	evlog->runuser = strdup(idbuf);
+	if (evlog->runuser == NULL)
 	    goto oom;
     }
 
@@ -511,8 +559,6 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	iolog_files[IOFD_TTYOUT].enabled);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    /* XXX - more cleanup */
-    str_list_free(details->log_servers);
     debug_return_int(-1);
 }
 
@@ -543,7 +589,7 @@ copy_vector_shallow(char * const *vec)
 static int
 sudoers_io_open_local(struct timespec *now)
 {
-    struct eventlog *evlog = &iolog_details.evlog;
+    struct eventlog *evlog = iolog_details.evlog;
     int i, ret = -1;
     size_t len;
     debug_decl(sudoers_io_open_local, SUDOERS_DEBUG_PLUGIN);
@@ -591,7 +637,7 @@ sudoers_io_open_local(struct timespec *now)
     }
 
     /* Write log file with user and command details. */
-    if (!iolog_write_info_file(iolog_dir_fd, &iolog_details.evlog)) {
+    if (!iolog_write_info_file(iolog_dir_fd, iolog_details.evlog)) {
 	log_warningx(SLOG_SEND_MAIL,
 	    N_("unable to write to I/O log file: %s"), strerror(errno));
 	warned = true;
@@ -691,19 +737,15 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (ret != true)
 	goto done;
     if (argv != NULL) {
-	iolog_details.evlog.argv = copy_vector_shallow(argv);
-	if (iolog_details.evlog.argv ==  NULL) {
+	iolog_details.evlog->argv = copy_vector_shallow(argv);
+	if (iolog_details.evlog->argv == NULL) {
 	    ret = -1;
 	    goto done;
 	}
     }
-
-    /*
-     * Copy user_env, it may be reallocated during policy session init.
-     */
     if (user_env != NULL) {
-	iolog_details.evlog.envp = copy_vector_shallow(user_env);
-	if (iolog_details.evlog.envp ==  NULL) {
+	iolog_details.evlog->envp = copy_vector_shallow(user_env);
+	if (iolog_details.evlog->envp ==  NULL) {
 	    ret = -1;
 	    goto done;
 	}
@@ -744,6 +786,7 @@ done:
 	    close(iolog_dir_fd);
 	    iolog_dir_fd = -1;
 	}
+	free_iolog_details();
 	sudo_freepwcache();
 	sudo_freegrcache();
     }
@@ -813,8 +856,7 @@ sudoers_io_close(int exit_status, int error)
 	warned = true;
     }
 
-    /* TODO: clean up iolog_details */
-
+    free_iolog_details();
     sudo_freepwcache();
     sudo_freegrcache();
 

@@ -633,15 +633,6 @@ client_closure_free(struct client_closure *closure)
     free(closure->read_buf.data);
     free(closure->iolog_id);
 
-    /* Most of log_details is const. */
-    if (closure->log_details != NULL) {
-	/* XXX - cannot use eventlog_free() here (more to free). */
-	free(closure->log_details->evlog.argv);
-	closure->log_details->evlog.argv = NULL;
-	free(closure->log_details->evlog.envp);
-	closure->log_details->evlog.envp = NULL;
-    }
-
     free(closure);
 
     debug_return;
@@ -757,7 +748,7 @@ fmt_accept_message(struct client_closure *closure)
     InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
     InfoMessage__StringList runenv = INFO_MESSAGE__STRING_LIST__INIT;
     struct iolog_details *details = closure->log_details;
-    struct eventlog *evlog = &details->evlog;
+    struct eventlog *evlog = details->evlog;
     size_t info_msgs_size, n;
     struct timespec now;
     bool ret = false;

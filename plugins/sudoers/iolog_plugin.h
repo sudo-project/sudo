@@ -48,7 +48,7 @@ struct connection_buffer {
 TAILQ_HEAD(connection_buffer_list, connection_buffer);
 
 struct iolog_details {
-    struct eventlog evlog;
+    struct eventlog *evlog;
     struct sudoers_str_list *log_servers;
     struct timespec server_timeout;
 #if defined(HAVE_OPENSSL)
