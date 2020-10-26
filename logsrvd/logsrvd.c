@@ -61,8 +61,10 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
+#include "sudo_json.h"
 #include "sudo_iolog.h"
 #include "sudo_queue.h"
 #include "sudo_rand.h"
@@ -117,7 +119,7 @@ connection_closure_free(struct connection_closure *closure)
 #if defined(HAVE_OPENSSL)
 	sudo_ev_free(closure->ssl_accept_ev);
 #endif
-	iolog_details_free(&closure->details);
+	evlog_free(&closure->evlog);
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
 	free(closure);
@@ -216,12 +218,69 @@ fmt_error_message(const char *errstr, struct connection_buffer *buf)
     debug_return_bool(fmt_server_message(buf, &msg));
 }
 
+struct logsrvd_info_closure {
+    InfoMessage **info_msgs;
+    size_t infolen;
+};
+
+static bool
+logsrvd_json_log_cb(struct json_container *json, void *v)
+{
+    struct logsrvd_info_closure *closure = v;
+    struct json_value json_value;
+    size_t idx;
+    debug_decl(logsrvd_json_log_cb, SUDO_DEBUG_UTIL);
+
+    for (idx = 0; idx < closure->infolen; idx++) {
+	InfoMessage *info = closure->info_msgs[idx];
+
+	switch (info->value_case) {
+	case INFO_MESSAGE__VALUE_NUMVAL:
+	    json_value.type = JSON_NUMBER;
+	    json_value.u.number = info->u.numval;
+	    if (!sudo_json_add_value(json, info->key, &json_value))
+		goto bad;
+	    break;
+	case INFO_MESSAGE__VALUE_STRVAL:
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = info->u.strval;
+	    if (!sudo_json_add_value(json, info->key, &json_value))
+		goto bad;
+	    break;
+	case INFO_MESSAGE__VALUE_STRLISTVAL: {
+	    InfoMessage__StringList *strlist = info->u.strlistval;
+	    size_t n;
+
+	    if (!sudo_json_open_array(json, info->key))
+		goto bad;
+	    for (n = 0; n < strlist->n_strings; n++) {
+		json_value.type = JSON_STRING;
+		json_value.u.string = strlist->strings[n];
+		if (!sudo_json_add_value(json, NULL, &json_value))
+		    goto bad;
+	    }
+	    if (!sudo_json_close_array(json))
+		goto bad;
+	    break;
+	}
+	default:
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected value case %d", info->value_case);
+	    goto bad;
+	}
+    }
+    debug_return_bool(true);
+bad:
+    debug_return_bool(false);
+}
+
 /*
  * Parse an AcceptMessage
  */
 static bool
 handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 {
+    struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
     debug_decl(handle_accept, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
@@ -241,11 +300,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
 
-    /* Save start time. */
-    closure->submit_time.tv_sec = msg->submit_time->tv_sec;
-    closure->submit_time.tv_nsec = msg->submit_time->tv_nsec;
-
-    if (!iolog_details_fill(&closure->details, msg->submit_time, msg->info_msgs,
+    if (!evlog_fill(&closure->evlog, msg->submit_time, msg->info_msgs,
 	    msg->n_info_msgs)) {
 	closure->errstr = _("error parsing AcceptMessage");
 	debug_return_bool(false);
@@ -260,8 +315,8 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	closure->log_io = true;
     }
 
-    if (!log_accept(&closure->details, msg->submit_time, msg->info_msgs,
-	    msg->n_info_msgs)) {
+    if (!eventlog_accept(&closure->evlog, &closure->evlog.submit_time,
+	    logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging accept event");
 	debug_return_bool(false);
     }
@@ -272,7 +327,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
 
     /* Send log ID to client for restarting connections. */
-    if (!fmt_log_id_message(closure->details.iolog_path, &closure->write_buf))
+    if (!fmt_log_id_message(closure->evlog.iolog_path, &closure->write_buf))
 	debug_return_bool(false);
     if (sudo_ev_add(closure->evbase, closure->write_ev,
         logsrvd_conf_get_sock_timeout(), false) == -1) {
@@ -291,6 +346,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 static bool
 handle_reject(RejectMessage *msg, struct connection_closure *closure)
 {
+    struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
     debug_decl(handle_reject, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
@@ -310,18 +366,14 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
 
-    /* Save start time. */
-    closure->submit_time.tv_sec = msg->submit_time->tv_sec;
-    closure->submit_time.tv_nsec = msg->submit_time->tv_nsec;
-
-    if (!iolog_details_fill(&closure->details, msg->submit_time, msg->info_msgs,
+    if (!evlog_fill(&closure->evlog, msg->submit_time, msg->info_msgs,
 	    msg->n_info_msgs)) {
 	closure->errstr = _("error parsing RejectMessage");
 	debug_return_bool(false);
     }
 
-    if (!log_reject(&closure->details, msg->reason, msg->submit_time,
-	    msg->info_msgs, msg->n_info_msgs)) {
+    if (!eventlog_reject(&closure->evlog, msg->reason,
+	    &closure->evlog.submit_time, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging reject event");
 	debug_return_bool(false);
     }
@@ -424,9 +476,22 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 static bool
 handle_alert(AlertMessage *msg, struct connection_closure *closure)
 {
+    struct timespec alert_time;
     debug_decl(handle_alert, SUDO_DEBUG_UTIL);
 
-    if (!log_alert(&closure->details, msg->alert_time, msg->reason)) {
+    /* Sanity check message. */
+    if (msg->alert_time == NULL || msg->reason == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid AlertMessage, alert_time: %p, reason: %p",
+	    msg->alert_time, msg->reason);
+	closure->errstr = _("invalid AlertMessage");
+	debug_return_bool(false);
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AlertMessage", __func__);
+
+    alert_time.tv_sec = msg->alert_time->tv_sec;
+    alert_time.tv_nsec = msg->alert_time->tv_nsec;
+    if (!eventlog_alert(&closure->evlog, &alert_time, msg->reason)) {
 	closure->errstr = _("error logging alert event");
 	debug_return_bool(false);
     }

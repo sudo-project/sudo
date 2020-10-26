@@ -47,6 +47,7 @@
 #include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_debug.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
@@ -98,8 +99,8 @@ static struct logsrvd_config {
 	char *iolog_file;
     } iolog;
     struct logsrvd_config_eventlog {
-	enum logsrvd_eventlog_type log_type;
-	enum logsrvd_eventlog_format log_format;
+	int log_type;
+	enum eventlog_format log_format;
     } eventlog;
     struct logsrvd_config_syslog {
 	unsigned int maxlen;
@@ -178,13 +179,13 @@ logsrvd_get_tls_runtime(void)
 #endif
 
 /* eventlog getters */
-enum logsrvd_eventlog_type
+int
 logsrvd_conf_eventlog_type(void)
 {
     return logsrvd_config->eventlog.log_type;
 }
 
-enum logsrvd_eventlog_format
+enum eventlog_format
 logsrvd_conf_eventlog_format(void)
 {
     return logsrvd_config->eventlog.log_format;
@@ -914,6 +915,42 @@ logsrvd_open_eventlog(struct logsrvd_config *config)
     debug_return_ptr(fp);
 }
 
+static FILE *
+logsrvd_stub_open_log(int type, const char *logfile)
+{
+    /* Actual open already done by logsrvd_open_eventlog() */
+    return logsrvd_config->logfile.stream;
+}
+
+static void
+logsrvd_stub_close_log(int type, FILE *fp)
+{
+    return;
+}
+
+/* Set eventlog configuration settings from on logsrvd config. */
+static void
+logsrvd_conf_eventlog_setconf(struct logsrvd_config *config)
+{
+    struct eventlog_config evconf;
+    debug_decl(logsrvd_conf_eventlog_setconf, SUDO_DEBUG_UTIL);
+
+    memset(&evconf, 0, sizeof(evconf));
+    evconf.type = config->eventlog.log_type;
+    evconf.format = config->eventlog.log_format;
+    evconf.syslog_acceptpri = config->syslog.acceptpri; 
+    evconf.syslog_rejectpri = config->syslog.rejectpri;
+    evconf.syslog_alertpri = config->syslog.alertpri;
+    evconf.syslog_maxlen = config->syslog.maxlen;
+    evconf.logpath = config->logfile.path;
+    evconf.time_fmt = config->logfile.time_format;
+    evconf.open_log = logsrvd_stub_open_log;
+    evconf.close_log = logsrvd_stub_close_log;
+    eventlog_setconf(&evconf);
+
+    debug_return;
+}
+
 /* Free the specified struct logsrvd_config and its contents. */
 void
 logsrvd_conf_free(struct logsrvd_config *config)
@@ -1122,6 +1159,9 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     iolog_set_owner(config->iolog.uid, config->iolog.gid);
     iolog_set_mode(config->iolog.mode);
     iolog_set_maxseq(config->iolog.maxseq);
+
+    /* Set event log config */
+    logsrvd_conf_eventlog_setconf(config);
 
     logsrvd_conf_free(logsrvd_config);
     logsrvd_config = config;

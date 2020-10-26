@@ -290,7 +290,6 @@ lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
 logsrvd/Makefile.in
-logsrvd/eventlog.c
 logsrvd/iolog_writer.c
 logsrvd/logsrv_util.c
 logsrvd/logsrv_util.h
