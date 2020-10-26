@@ -47,23 +47,8 @@ struct connection_buffer {
 };
 TAILQ_HEAD(connection_buffer_list, connection_buffer);
 
-/* XXX - remove dependency on sudoers.h? */
-#undef runas_pw
-#undef runas_gr
-
 struct iolog_details {
-    const char *cwd;
-    const char *host;
-    const char *tty;
-    const char *user;
-    const char *command;
-    const char *iolog_path;
-    struct passwd *runas_pw;
-    struct group *runas_gr;
-    char * const *argv;
-    const char *runcwd;
-    const char *runchroot;
-    char **user_env;
+    struct eventlog evlog;
     struct sudoers_str_list *log_servers;
     struct timespec server_timeout;
 #if defined(HAVE_OPENSSL)
@@ -71,9 +56,6 @@ struct iolog_details {
     char *cert_file;
     char *key_file;
 #endif /* HAVE_OPENSSL */
-    int argc;
-    int lines;
-    int cols;
     bool keepalive;
     bool verify_server;
     bool ignore_iolog_errors;

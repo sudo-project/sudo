@@ -58,6 +58,7 @@
 
 #include "sudoers.h"
 #include "sudo_event.h"
+#include "sudo_eventlog.h"
 #include "sudo_iolog.h"
 #include "iolog_plugin.h"
 #include "hostcheck.h"
@@ -634,12 +635,11 @@ client_closure_free(struct client_closure *closure)
 
     /* Most of log_details is const. */
     if (closure->log_details != NULL) {
-	free(closure->log_details->user_env);
-	closure->log_details->user_env = NULL;
-	if (closure->log_details->runas_pw)
-	    sudo_pw_delref(closure->log_details->runas_pw);
-	if (closure->log_details->runas_gr)
-	    sudo_gr_delref(closure->log_details->runas_gr);
+	/* XXX - cannot use eventlog_free() here (more to free). */
+	free(closure->log_details->evlog.argv);
+	closure->log_details->evlog.argv = NULL;
+	free(closure->log_details->evlog.envp);
+	closure->log_details->evlog.envp = NULL;
     }
 
     free(closure);
@@ -757,6 +757,7 @@ fmt_accept_message(struct client_closure *closure)
     InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
     InfoMessage__StringList runenv = INFO_MESSAGE__STRING_LIST__INIT;
     struct iolog_details *details = closure->log_details;
+    struct eventlog *evlog = &details->evlog;
     size_t info_msgs_size, n;
     struct timespec now;
     bool ret = false;
@@ -777,9 +778,10 @@ fmt_accept_message(struct client_closure *closure)
     accept_msg.expect_iobufs = true;
 
     /* Convert NULL-terminated vectors to StringList. */
-    runargv.strings = (char **)details->argv;
-    runargv.n_strings = details->argc;
-    runenv.strings = (char **)details->user_env;
+    runargv.strings = evlog->argv;
+    while (runargv.strings[runargv.n_strings] != NULL)
+	runargv.n_strings++;
+    runenv.strings = evlog->envp;
     while (runenv.strings[runenv.n_strings] != NULL)
 	runenv.n_strings++;
 
@@ -808,17 +810,17 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO: clientsid */
 
     accept_msg.info_msgs[n]->key = "columns";
-    accept_msg.info_msgs[n]->u.numval = details->cols;
+    accept_msg.info_msgs[n]->u.numval = evlog->columns;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "command";
-    accept_msg.info_msgs[n]->u.strval = (char *)details->command;
+    accept_msg.info_msgs[n]->u.strval = evlog->command;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "lines";
-    accept_msg.info_msgs[n]->u.numval = details->lines;
+    accept_msg.info_msgs[n]->u.numval = evlog->lines;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
@@ -832,14 +834,14 @@ fmt_accept_message(struct client_closure *closure)
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
     n++;
 
-    if (details->runas_gr!= NULL) {
+    if (evlog->rungroup!= NULL) {
 	accept_msg.info_msgs[n]->key = "rungid";
-	accept_msg.info_msgs[n]->u.numval = details->runas_gr->gr_gid;
+	accept_msg.info_msgs[n]->u.numval = evlog->rungid;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
 	n++;
 
 	accept_msg.info_msgs[n]->key = "rungroup";
-	accept_msg.info_msgs[n]->u.strval = details->runas_gr->gr_name;
+	accept_msg.info_msgs[n]->u.strval = evlog->rungroup;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
@@ -848,32 +850,32 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO - rungroups */
 
     accept_msg.info_msgs[n]->key = "runuid";
-    accept_msg.info_msgs[n]->u.numval = details->runas_pw->pw_uid;
+    accept_msg.info_msgs[n]->u.numval = evlog->runuid;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     accept_msg.info_msgs[n]->key = "runuser";
-    accept_msg.info_msgs[n]->u.strval = details->runas_pw->pw_name;
+    accept_msg.info_msgs[n]->u.strval = evlog->runuser;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    if (details->cwd != NULL) {
+    if (evlog->cwd != NULL) {
 	accept_msg.info_msgs[n]->key = "submitcwd";
-	accept_msg.info_msgs[n]->u.strval = (char *)details->cwd;
+	accept_msg.info_msgs[n]->u.strval = evlog->cwd;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
 
-    if (details->runcwd != NULL) {
+    if (evlog->runcwd != NULL) {
 	accept_msg.info_msgs[n]->key = "runcwd";
-	accept_msg.info_msgs[n]->u.strval = (char *)details->runcwd;
+	accept_msg.info_msgs[n]->u.strval = evlog->runcwd;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
 
-    if (details->runchroot != NULL) {
+    if (evlog->runchroot != NULL) {
 	accept_msg.info_msgs[n]->key = "runchroot";
-	accept_msg.info_msgs[n]->u.strval = (char *)details->runchroot;
+	accept_msg.info_msgs[n]->u.strval = evlog->runchroot;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
@@ -885,20 +887,20 @@ fmt_accept_message(struct client_closure *closure)
     /* TODO - submitgroups */
 
     accept_msg.info_msgs[n]->key = "submithost";
-    accept_msg.info_msgs[n]->u.strval = (char *)details->host;
+    accept_msg.info_msgs[n]->u.strval = evlog->submithost;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     /* TODO - submituid */
 
     accept_msg.info_msgs[n]->key = "submituser";
-    accept_msg.info_msgs[n]->u.strval = (char *)details->user;
+    accept_msg.info_msgs[n]->u.strval = evlog->submituser;
     accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
-    if (details->tty != NULL) {
+    if (evlog->ttyname != NULL) {
 	accept_msg.info_msgs[n]->key = "ttyname";
-	accept_msg.info_msgs[n]->u.strval = (char *)details->tty;
+	accept_msg.info_msgs[n]->u.strval = evlog->ttyname;
 	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
