@@ -87,8 +87,8 @@ new_logline(int flags, const char *message, const char *errstr,
 {
     char *line = NULL, *evstr = NULL;
     const char *iolog_file = details->iolog_file;
+    const char *tty, *tsid = NULL;
     char sessid[7];
-    const char *tsid = NULL;
     size_t len = 0;
     int i;
     debug_decl(new_logline, SUDO_DEBUG_UTIL);
@@ -120,6 +120,12 @@ new_logline(int flags, const char *message, const char *errstr,
 	}
     }
 
+    /* Sudo-format logs use the short form of the ttyname. */
+    if ((tty = details->ttyname) != NULL) {
+	if (strncmp(tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	    tty += sizeof(_PATH_DEV) - 1;
+    }
+
     /*
      * Compute line length
      */
@@ -129,8 +135,8 @@ new_logline(int flags, const char *message, const char *errstr,
 	len += strlen(errstr) + 3;
     if (details->submithost != NULL && !evl_conf.omit_hostname)
 	len += sizeof(LL_HOST_STR) + 2 + strlen(details->submithost);
-    if (details->ttyname != NULL)
-	len += sizeof(LL_TTY_STR) + 2 + strlen(details->ttyname);
+    if (tty != NULL)
+	len += sizeof(LL_TTY_STR) + 2 + strlen(tty);
     if (details->runchroot != NULL)
 	len += sizeof(LL_CHROOT_STR) + 2 + strlen(details->runchroot);
     if (details->runcwd != NULL)
@@ -190,9 +196,9 @@ new_logline(int flags, const char *message, const char *errstr,
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
-    if (details->ttyname != NULL) {
+    if (tty != NULL) {
 	if (strlcat(line, LL_TTY_STR, len) >= len ||
-	    strlcat(line, details->ttyname, len) >= len ||
+	    strlcat(line, tty, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }

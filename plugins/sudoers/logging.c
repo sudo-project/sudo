@@ -490,8 +490,7 @@ sudoers_to_eventlog(struct eventlog *evlog)
     evlog->submithost = user_host;
     evlog->submituser = user_name;
     /* TODO - submitgroup */
-    /* XXX - use ttypath for JSON logs */
-    evlog->ttyname = user_tty;
+    evlog->ttyname = user_ttypath;
     evlog->argv = NewArgv;
     evlog->env_add = (char **)sudo_user.env_vars;
     evlog->envp = env_get();
