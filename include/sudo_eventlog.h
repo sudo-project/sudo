@@ -87,9 +87,9 @@ struct eventlog {
 struct json_container;
 typedef bool (*eventlog_json_callback_t)(struct json_container *, void *);
 
-bool eventlog_accept(const struct eventlog *details, struct timespec *submit_time, eventlog_json_callback_t info_cb, void *info);
+bool eventlog_accept(const struct eventlog *details, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_alert(const struct eventlog *details, struct timespec *alert_time, const char *reason, const char *errstr);
-bool eventlog_reject(const struct eventlog *details, const char *reason, struct timespec *submit_time, eventlog_json_callback_t info_cb, void *info);
+bool eventlog_reject(const struct eventlog *details, const char *reason, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_setconf(struct eventlog_config *conf);
 void eventlog_free(struct eventlog *evlog);
 

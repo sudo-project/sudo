@@ -315,8 +315,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	closure->log_io = true;
     }
 
-    if (!eventlog_accept(closure->evlog, &closure->evlog->submit_time,
-	    logsrvd_json_log_cb, &info)) {
+    if (!eventlog_accept(closure->evlog, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging accept event");
 	debug_return_bool(false);
     }
@@ -374,7 +373,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     }
 
     if (!eventlog_reject(closure->evlog, msg->reason,
-	    &closure->evlog->submit_time, logsrvd_json_log_cb, &info)) {
+	    logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging reject event");
 	debug_return_bool(false);
     }

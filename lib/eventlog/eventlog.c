@@ -246,7 +246,7 @@ toobig:
 
 static bool
 json_add_timestamp(struct json_container *json, const char *name,
-    struct timespec *ts)
+    const struct timespec *ts)
 {
     const char *timefmt = evl_conf.time_fmt;
     struct json_value json_value;
@@ -295,7 +295,7 @@ oom:
 
 static char *
 format_json(int event_type, const char *reason, const char *errstr,
-    const struct eventlog *details, struct timespec *event_time,
+    const struct eventlog *details, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info, bool compact)
 {
     const char *type_str;
@@ -457,7 +457,8 @@ do_syslog_sudo(int pri, const char *reason, const char *errstr,
 static bool
 do_syslog_json(int pri, int event_type, const char *reason,
     const char *errstr, const struct eventlog *details,
-    struct timespec *event_time, eventlog_json_callback_t info_cb, void *info)
+    const struct timespec *event_time,
+    eventlog_json_callback_t info_cb, void *info)
 {
     char *json_str;
     debug_decl(do_syslog_json, SUDO_DEBUG_UTIL);
@@ -486,7 +487,7 @@ do_syslog_json(int pri, int event_type, const char *reason,
  */
 static bool
 do_syslog(int event_type, const char *reason, const char *errstr,
-    const struct eventlog *details, struct timespec *event_time,
+    const struct eventlog *details, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
     int pri;
@@ -582,7 +583,7 @@ done:
 
 static bool
 do_logfile_json(int event_type, const char *reason, const char *errstr,
-    const struct eventlog *details, struct timespec *event_time,
+    const struct eventlog *details, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
     const char *logfile = evl_conf.logpath;
@@ -639,7 +640,7 @@ done:
 
 static bool
 do_logfile(int event_type, const char *reason, const char *errstr,
-    const struct eventlog *details, struct timespec *event_time,
+    const struct eventlog *details, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
     bool ret = false;
@@ -663,7 +664,7 @@ do_logfile(int event_type, const char *reason, const char *errstr,
 }
 
 bool
-eventlog_accept(const struct eventlog *details, struct timespec *submit_time,
+eventlog_accept(const struct eventlog *details,
     eventlog_json_callback_t info_cb, void *info)
 {
     const int log_type = evl_conf.type;
@@ -674,13 +675,13 @@ eventlog_accept(const struct eventlog *details, struct timespec *submit_time,
 	debug_return_bool(true);
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
-	if (!do_syslog(EVLOG_ACCEPT, NULL, NULL, details, submit_time,
-		info_cb, info))
+	if (!do_syslog(EVLOG_ACCEPT, NULL, NULL, details,
+		&details->submit_time, info_cb, info))
 	    ret = false;
     }
     if (ISSET(log_type, EVLOG_FILE)) {
-	if (!do_logfile(EVLOG_ACCEPT, NULL, NULL, details, submit_time,
-		info_cb, info))
+	if (!do_logfile(EVLOG_ACCEPT, NULL, NULL, details,
+		&details->submit_time, info_cb, info))
 	    ret = false;
     }
 
@@ -689,20 +690,20 @@ eventlog_accept(const struct eventlog *details, struct timespec *submit_time,
 
 bool
 eventlog_reject(const struct eventlog *details, const char *reason,
-    struct timespec *submit_time, eventlog_json_callback_t info_cb, void *info)
+    eventlog_json_callback_t info_cb, void *info)
 {
     const int log_type = evl_conf.type;
     bool ret = true;
     debug_decl(log_reject, SUDO_DEBUG_UTIL);
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
-	if (!do_syslog(EVLOG_REJECT, reason, NULL, details, submit_time,
-		info_cb, info))
+	if (!do_syslog(EVLOG_REJECT, reason, NULL, details,
+		&details->submit_time, info_cb, info))
 	    ret = false;
     }
     if (ISSET(log_type, EVLOG_FILE)) {
-	if (!do_logfile(EVLOG_REJECT, reason, NULL, details, submit_time,
-		info_cb, info))
+	if (!do_logfile(EVLOG_REJECT, reason, NULL, details,
+		&details->submit_time, info_cb, info))
 	    ret = false;
     }
 
