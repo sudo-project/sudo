@@ -178,69 +178,6 @@ logsrvd_get_tls_runtime(void)
 }
 #endif
 
-/* eventlog getters */
-int
-logsrvd_conf_eventlog_type(void)
-{
-    return logsrvd_config->eventlog.log_type;
-}
-
-enum eventlog_format
-logsrvd_conf_eventlog_format(void)
-{
-    return logsrvd_config->eventlog.log_format;
-}
-
-/* syslog getters */
-unsigned int
-logsrvd_conf_syslog_maxlen(void)
-{
-    return logsrvd_config->syslog.maxlen;
-}
-
-int
-logsrvd_conf_syslog_facility(void)
-{
-    return logsrvd_config->syslog.facility;
-}
-
-int
-logsrvd_conf_syslog_acceptpri(void)
-{
-    return logsrvd_config->syslog.acceptpri;
-}
-
-int
-logsrvd_conf_syslog_rejectpri(void)
-{
-    return logsrvd_config->syslog.rejectpri;
-}
-
-int
-logsrvd_conf_syslog_alertpri(void)
-{
-    return logsrvd_config->syslog.alertpri;
-}
-
-/* logfile getters */
-const char *
-logsrvd_conf_logfile_path(void)
-{
-    return logsrvd_config->logfile.path;
-}
-
-FILE *
-logsrvd_conf_logfile_stream(void)
-{
-    return logsrvd_config->logfile.stream;
-}
-
-const char *
-logsrvd_conf_logfile_time_format(void)
-{
-    return logsrvd_config->logfile.time_format;
-}
-
 /* I/O log callbacks */
 static bool
 cb_iolog_dir(struct logsrvd_config *config, const char *path)
