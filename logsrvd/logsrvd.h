@@ -42,6 +42,7 @@
 
 /*
  * I/O log details from the AcceptMessage + iolog path and sessid.
+ * XXX - struct eventlog
  */
 struct iolog_details {
     char *iolog_path;
