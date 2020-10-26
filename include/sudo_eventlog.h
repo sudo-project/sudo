@@ -91,6 +91,7 @@ bool eventlog_accept(const struct eventlog *details, eventlog_json_callback_t in
 bool eventlog_alert(const struct eventlog *details, struct timespec *alert_time, const char *reason, const char *errstr);
 bool eventlog_reject(const struct eventlog *details, const char *reason, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_setconf(struct eventlog_config *conf);
+bool eventlog_store_json(struct json_container *json, const struct eventlog *evlog);
 void eventlog_free(struct eventlog *evlog);
 
 #endif /* SUDO_EVENTLOG_H */

@@ -293,6 +293,146 @@ oom:
     debug_return_bool(false);
 }
 
+/*
+ * Store the contents of struct eventlog as JSON.
+ * The submit_time and iolog_path members are not stored, they should
+ * be stored and formatted by the caller.
+ */
+bool
+eventlog_store_json(struct json_container *json, const struct eventlog *evlog)
+{
+    struct json_value json_value;
+    size_t i;
+    char *cp;
+    debug_decl(eventlog_store_json, SUDO_DEBUG_UTIL);
+
+    /* Required settings. */
+    if (evlog->command == NULL || evlog->submituser == NULL ||
+	    evlog->runuser == NULL)
+	debug_return_bool(false);
+
+    /* Note: submit_time and iolog_path must be stored by caller. */
+
+    json_value.type = JSON_NUMBER;
+    json_value.u.number = evlog->columns;
+    if (!sudo_json_add_value(json, "columns", &json_value))
+        goto oom;
+
+    json_value.type = JSON_STRING;
+    json_value.u.string = evlog->command;
+    if (!sudo_json_add_value(json, "command", &json_value))
+        goto oom;
+
+    json_value.type = JSON_NUMBER;
+    json_value.u.number = evlog->lines;
+    if (!sudo_json_add_value(json, "lines", &json_value))
+        goto oom;
+
+    if (evlog->argv != NULL) {
+	if (!sudo_json_open_array(json, "runargv"))
+	    goto oom;
+	for (i = 0; (cp = evlog->argv[i]) != NULL; i++) {
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = cp;
+	    if (!sudo_json_add_value(json, NULL, &json_value))
+		goto oom;
+	}
+	if (!sudo_json_close_array(json))
+	    goto oom;
+    }
+
+    if (evlog->envp != NULL) {
+	if (!sudo_json_open_array(json, "runenv"))
+	    goto oom;
+	for (i = 0; (cp = evlog->envp[i]) != NULL; i++) {
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = cp;
+	    if (!sudo_json_add_value(json, NULL, &json_value))
+		goto oom;
+	}
+	if (!sudo_json_close_array(json))
+	    goto oom;
+    }
+
+    if (evlog->rungroup!= NULL) {
+	if (evlog->rungid != (gid_t)-1) {
+	    json_value.type = JSON_ID;
+	    json_value.u.id = evlog->rungid;
+	    if (!sudo_json_add_value(json, "rungid", &json_value))
+		goto oom;
+	}
+
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->rungroup;
+	if (!sudo_json_add_value(json, "rungroup", &json_value))
+	    goto oom;
+    }
+
+    if (evlog->runuid != (uid_t)-1) {
+	json_value.type = JSON_ID;
+	json_value.u.id = evlog->runuid;
+	if (!sudo_json_add_value(json, "runuid", &json_value))
+	    goto oom;
+    }
+
+    if (evlog->runchroot != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->runchroot;
+	if (!sudo_json_add_value(json, "runchroot", &json_value))
+	    goto oom;
+    }
+
+    if (evlog->runcwd != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->runcwd;
+	if (!sudo_json_add_value(json, "runcwd", &json_value))
+	    goto oom;
+    }
+
+    json_value.type = JSON_STRING;
+    json_value.u.string = evlog->runuser;
+    if (!sudo_json_add_value(json, "runuser", &json_value))
+	goto oom;
+
+    if (evlog->cwd != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->cwd;
+	if (!sudo_json_add_value(json, "submitcwd", &json_value))
+	    goto oom;
+    }
+
+    if (evlog->submithost != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->submithost;
+	if (!sudo_json_add_value(json, "submithost", &json_value))
+	    goto oom;
+    }
+
+    json_value.type = JSON_STRING;
+    json_value.u.string = evlog->submituser;
+    if (!sudo_json_add_value(json, "submituser", &json_value))
+	goto oom;
+
+    if (evlog->ttyname != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->ttyname;
+	if (!sudo_json_add_value(json, "ttyname", &json_value))
+	    goto oom;
+    }
+
+    debug_return_bool(true);
+
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_bool(false);
+}
+
+static bool
+default_json_cb(struct json_container *json, void *v)
+{
+    return eventlog_store_json(json, v);
+}
+
 static char *
 format_json(int event_type, const char *reason, const char *errstr,
     const struct eventlog *details, const struct timespec *event_time,
@@ -304,6 +444,11 @@ format_json(int event_type, const char *reason, const char *errstr,
     struct json_value json_value;
     struct timespec now;
     debug_decl(format_json, SUDO_DEBUG_UTIL);
+
+    if (info_cb == NULL) {
+	info_cb = default_json_cb;
+	info = (void *)details;
+    }
 
     if (sudo_gettime_real(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -372,11 +517,9 @@ format_json(int event_type, const char *reason, const char *errstr,
 	    goto bad;
     }
 
-    /* Dump details if present. */
-    if (info_cb != NULL) {
-	if (!info_cb(&json, info))
-	    goto bad;
-    }
+    /* Write log details. */
+    if (!info_cb(&json, info))
+	goto bad;
 
     if (!sudo_json_close_object(&json))
 	goto bad;

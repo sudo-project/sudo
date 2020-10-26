@@ -944,13 +944,7 @@ iolog_write_info_file_json(int dfd, struct eventlog *evlog)
     bool ret = false;
     FILE *fp = NULL;
     int fd = -1;
-    size_t i;
-    char *cp;
     debug_decl(iolog_write_info_file_json, SUDO_DEBUG_UTIL);
-
-    if (evlog->command == NULL || evlog->submituser == NULL ||
-	    evlog->submituser == NULL)
-	debug_return_bool(false);
 
     if (!sudo_json_init(&json, 4, false, false))
 	debug_return_bool(false);
@@ -972,115 +966,8 @@ iolog_write_info_file_json(int dfd, struct eventlog *evlog)
     if (!sudo_json_close_object(&json))
 	goto oom;
 
-    json_value.type = JSON_NUMBER;
-    json_value.u.number = evlog->columns;
-    if (!sudo_json_add_value(&json, "columns", &json_value))
-        goto oom;
-
-    /* Required */
-    json_value.type = JSON_STRING;
-    json_value.u.string = evlog->command;
-    if (!sudo_json_add_value(&json, "command", &json_value))
-        goto oom;
-
-    json_value.type = JSON_NUMBER;
-    json_value.u.number = evlog->lines;
-    if (!sudo_json_add_value(&json, "lines", &json_value))
-        goto oom;
-
-    if (evlog->argv != NULL) {
-	if (!sudo_json_open_array(&json, "runargv"))
-	    goto oom;
-	for (i = 0; (cp = evlog->argv[i]) != NULL; i++) {
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = cp;
-	    if (!sudo_json_add_value(&json, NULL, &json_value))
-		goto oom;
-	}
-	if (!sudo_json_close_array(&json))
-	    goto oom;
-    }
-
-    if (evlog->envp != NULL) {
-	if (!sudo_json_open_array(&json, "runenv"))
-	    goto oom;
-	for (i = 0; (cp = evlog->envp[i]) != NULL; i++) {
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = cp;
-	    if (!sudo_json_add_value(&json, NULL, &json_value))
-		goto oom;
-	}
-	if (!sudo_json_close_array(&json))
-	    goto oom;
-    }
-
-    if (evlog->rungroup!= NULL) {
-	if (evlog->rungid != (gid_t)-1) {
-	    json_value.type = JSON_ID;
-	    json_value.u.id = evlog->rungid;
-	    if (!sudo_json_add_value(&json, "rungid", &json_value))
-		goto oom;
-	}
-
-	json_value.type = JSON_STRING;
-	json_value.u.string = evlog->rungroup;
-	if (!sudo_json_add_value(&json, "rungroup", &json_value))
-	    goto oom;
-    }
-
-    if (evlog->runuid != (uid_t)-1) {
-	json_value.type = JSON_ID;
-	json_value.u.id = evlog->runuid;
-	if (!sudo_json_add_value(&json, "runuid", &json_value))
-	    goto oom;
-    }
-
-    if (evlog->runchroot != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = evlog->runchroot;
-	if (!sudo_json_add_value(&json, "runchroot", &json_value))
-	    goto oom;
-    }
-
-    if (evlog->runcwd != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = evlog->runcwd;
-	if (!sudo_json_add_value(&json, "runcwd", &json_value))
-	    goto oom;
-    }
-
-    /* Required */
-    json_value.type = JSON_STRING;
-    json_value.u.string = evlog->runuser;
-    if (!sudo_json_add_value(&json, "runuser", &json_value))
-	goto oom;
-
-    if (evlog->cwd != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = evlog->cwd;
-	if (!sudo_json_add_value(&json, "submitcwd", &json_value))
-	    goto oom;
-    }
-
-    if (evlog->submithost != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = evlog->submithost;
-	if (!sudo_json_add_value(&json, "submithost", &json_value))
-	    goto oom;
-    }
-
-    /* Required */
-    json_value.type = JSON_STRING;
-    json_value.u.string = evlog->submituser;
-    if (!sudo_json_add_value(&json, "submituser", &json_value))
-	goto oom;
-
-    if (evlog->ttyname != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = evlog->ttyname;
-	if (!sudo_json_add_value(&json, "ttyname", &json_value))
-	    goto oom;
-    }
+    if (!eventlog_store_json(&json, evlog))
+	goto done;
 
     fd = iolog_openat(dfd, "log.json", O_CREAT|O_TRUNC|O_WRONLY);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
