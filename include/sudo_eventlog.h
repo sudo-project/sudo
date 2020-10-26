@@ -66,6 +66,7 @@ struct eventlog_config {
     int syslog_alertpri;
     int syslog_maxlen;
     uid_t mailuid;
+    bool omit_hostname;
     const char *logpath;
     const char *time_fmt;
     const char *mailerpath;

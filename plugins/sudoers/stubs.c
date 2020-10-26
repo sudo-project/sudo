@@ -87,6 +87,13 @@ set_cmnd_path(const char *runchroot)
     return FOUND;
 }
 
+/* STUB */
+void
+update_eventlog_config(void)
+{
+    return;
+}
+
 /*
  * Look up the hostname and set user_host and user_shost.
  */

@@ -110,6 +110,11 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     } \
 } while (0)
 
+    if (sudo_gettime_real(&sudo_user.submit_time) == -1) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	goto bad;
+    }
+
     /* Parse sudo.conf plugin args. */
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {

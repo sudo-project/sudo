@@ -58,15 +58,12 @@ extern char *audit_msg;
 
 union sudo_defs_val;
 
-bool do_logfile(const char *msg);
-bool do_syslog(int pri, const char *msg);
-char *new_logline(const char *, const char *);
 bool sudoers_warn_setlocale(bool restore, int *cookie);
 bool sudoers_setlocale(int locale_type, int *prev_locale);
 int sudoers_getlocale(void);
 int audit_failure(char *const argv[], char const *const fmt, ...) __printflike(2, 3);
 int vaudit_failure(char *const argv[], char const *const fmt, va_list ap) __printflike(2, 0);
-bool log_allowed(int status);
+bool log_allowed(void);
 bool log_auth_failure(int status, unsigned int tries);
 bool log_denial(int status, bool inform_user);
 bool log_failure(int status, int flags);
@@ -76,5 +73,7 @@ bool gai_log_warning(int flags, int errnum, const char *fmt, ...) __printflike(3
 bool sudoers_initlocale(const char *ulocale, const char *slocale);
 bool sudoers_locale_callback(const union sudo_defs_val *);
 int writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
+void sudoers_to_eventlog(struct eventlog *evlog);
+void update_eventlog_config(void);
 
 #endif /* SUDOERS_LOGGING_H */

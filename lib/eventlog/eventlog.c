@@ -127,7 +127,7 @@ new_logline(int flags, const char *message, const char *errstr,
 	len += strlen(message) + 3;
     if (errstr != NULL)
 	len += strlen(errstr) + 3;
-    if (details->submithost != NULL)
+    if (details->submithost != NULL && !evl_conf.omit_hostname)
 	len += sizeof(LL_HOST_STR) + 2 + strlen(details->submithost);
     if (details->ttyname != NULL)
 	len += sizeof(LL_TTY_STR) + 2 + strlen(details->ttyname);
@@ -184,7 +184,7 @@ new_logline(int flags, const char *message, const char *errstr,
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
-    if (details->submithost != NULL) {
+    if (details->submithost != NULL && !evl_conf.omit_hostname) {
 	if (strlcat(line, LL_HOST_STR, len) >= len ||
 	    strlcat(line, details->submithost, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)

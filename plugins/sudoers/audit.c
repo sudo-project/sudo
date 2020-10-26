@@ -196,7 +196,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
 	if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
 	    ret = false;
 
-	if (!log_allowed(VALIDATE_SUCCESS) && !def_ignore_logfile_errors)
+	if (!log_allowed() && !def_ignore_logfile_errors)
 	    ret = false;
     }
 
@@ -207,8 +207,8 @@ static int
 sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
     const char *message, char * const command_info[], const char **errstr)
 {
+    struct eventlog evlog;
     int ret = true;
-    char *logline;
     debug_decl(sudoers_audit_reject, SUDOERS_DEBUG_PLUGIN);
 
     /* Skip reject events that sudoers generated itself. */
@@ -223,27 +223,10 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
 	    ret = false;
     }
 
-    logline = new_logline(message, NULL);
-    if (logline == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudoers_to_eventlog(&evlog);
+    if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
-	goto done;
-    }
-    if (def_syslog) {
-	if (!do_syslog(def_syslog_badpri, logline)) {
-	    if (!def_ignore_logfile_errors)
-		ret = false;
-	}
-    }
-    if (def_logfile) {
-	if (!do_logfile(logline)) {
-	    if (!def_ignore_logfile_errors)
-		ret = false;
-	}
-    }
-    free(logline);
 
-done:
     debug_return_int(ret);
 }
 
@@ -251,6 +234,8 @@ static int
 sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *message, char * const command_info[], const char **errstr)
 {
+    struct eventlog evlog;
+    struct timespec now;
     int ret = true;
     debug_decl(sudoers_audit_error, SUDOERS_DEBUG_PLUGIN);
 
@@ -262,18 +247,15 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 	if (!def_ignore_audit_errors)
 	    ret = false;
     }
-    if (def_syslog) {
-	if (!do_syslog(def_syslog_badpri, message)) {
-	    if (!def_ignore_logfile_errors)
-		ret = false;
-	}
+
+    if (sudo_gettime_real(&now)) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	debug_return_bool(false);
     }
-    if (def_logfile) {
-	if (!do_logfile(message)) {
-	    if (!def_ignore_logfile_errors)
-		ret = false;
-	}
-    }
+
+    sudoers_to_eventlog(&evlog);
+    if (!eventlog_alert(&evlog, 0, &now, message, NULL))
+	ret = false;
 
     debug_return_int(ret);
 }

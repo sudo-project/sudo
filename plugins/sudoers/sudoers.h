@@ -37,6 +37,7 @@
 #include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_conf.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_nss.h"
@@ -76,8 +77,10 @@ struct group_list {
 
 /*
  * Info pertaining to the invoking user.
+ * XXX - can we embed struct eventlog here or use it instead?
  */
 struct sudo_user {
+    struct timespec submit_time;
     struct passwd *pw;
     struct passwd *_runas_pw;
     struct group *_runas_gr;

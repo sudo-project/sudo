@@ -500,6 +500,12 @@ restore_perms(void)
     return true;
 }
 
+void
+update_eventlog_config(void)
+{
+    return;
+}
+
 int
 set_cmnd_path(const char *runchroot)
 {
