@@ -58,6 +58,7 @@
 #define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
 
 static bool should_mail(int);
+static bool warned = false;
 
 /*
  * Log, audit and mail the denial message, optionally informing the user.
@@ -506,7 +507,6 @@ sudoers_to_eventlog(struct eventlog *evlog)
 static FILE *
 sudoers_log_open(int type, const char *log_file)
 {
-    static bool warned = false; /* XXX */
     bool uid_changed;
     FILE *fp = NULL;
     mode_t oldmask;
@@ -529,6 +529,7 @@ sudoers_log_open(int type, const char *log_file)
 	    }
 	    (void) umask(oldmask);
 	    if (fp == NULL && !warned) {
+		warned = true;
 		log_warning(SLOG_SEND_MAIL|SLOG_NO_LOG,
 		    N_("unable to open log file: %s"), log_file);
 	    }
@@ -551,12 +552,18 @@ sudoers_log_close(int type, FILE *fp)
 	case EVLOG_SYSLOG:
 	    break;
 	case EVLOG_FILE:
-	    if (fp != NULL) {
-		fclose(fp);
-	    } else {
+	    if (fp == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "tried to close NULL");
+		    "tried to close NULL log stream");
+		break;
 	    }
+	    (void)fflush(fp);
+	    if (ferror(fp) && !warned) {
+		warned = true;
+		log_warning(SLOG_SEND_MAIL|SLOG_NO_LOG,
+		    N_("unable to write log file: %s"), def_logfile);
+	    }
+	    fclose(fp);
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
