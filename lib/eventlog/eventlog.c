@@ -921,7 +921,7 @@ do_syslog_json(int pri, int event_type, const char *reason,
     /* Syslog it with a @cee: prefix */
     /* TODO: use evl_conf.syslog_maxlen to break up long messages. */
     evl_conf.open_log(EVLOG_SYSLOG, NULL);
-    syslog(pri, "@cee:{%s }", json_str);
+    syslog(pri, "@cee:{%s}", json_str);
     evl_conf.close_log(EVLOG_SYSLOG, NULL);
     free(json_str);
     debug_return_bool(true);
