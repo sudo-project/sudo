@@ -488,8 +488,9 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 	case -1:
 	    /* Error. */
 	    syslog(LOG_ERR, _("unable to fork: %m"));
-	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
-		strerror(errno));
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to fork");
 	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	    _exit(EXIT_FAILURE);
 	    break;
@@ -500,7 +501,13 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     }
 
     (void) close(pfd[0]);
-    mail = fdopen(pfd[1], "w");
+    if ((mail = fdopen(pfd[1], "w")) == NULL) {
+	syslog(LOG_ERR, "fdopen: %m");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to fdopen pipe");
+	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	_exit(EXIT_FAILURE);
+    }
 
     /* Pipes are all setup, send message. */
     (void) fprintf(mail, "To: %s\nFrom: %s\nAuto-Submitted: %s\nSubject: ",
