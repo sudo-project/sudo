@@ -405,3 +405,7 @@ runcwd
 runchroot
 	T_STR|T_BOOL|T_CHPATH
 	"Root directory to change to before executing the command: %s"
+log_format
+	T_TUPLE
+	"The format of logs to produce: %s"
+	sudo json

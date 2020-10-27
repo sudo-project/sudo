@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 25, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 27, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4416,6 +4416,33 @@ The default value is
 \fIany\fR.
 .RE
 .TP 14n
+log_format
+The event log format.
+Supported log formats are:
+.PP
+.RS 14n
+.PD 0
+.TP 10n
+json
+Logs in JSON format.
+JSON log entries contain the full user details as well as the execution
+environment if the command was allowed.
+.PD
+.TP 10n
+sudo
+Traditional sudo-style logs, see
+\fILOG FORMAT\fR
+for a description of the log file format.
+.PP
+This setting affects logs sent via
+syslog(3)
+as well as the file specified by the
+\fIlogfile\fR
+setting, if any.
+The default value is
+\fIsudo\fR.
+.RE
+.TP 14n
 logfile
 Path to the
 \fBsudo\fR
@@ -4896,9 +4923,19 @@ The group provider plugin API is described in detail in
 sudo_plugin(@mansectform@).
 .SH "LOG FORMAT"
 \fBsudoers\fR
-can log events using either
-syslog(3)
-or a simple log file.
+can log events in either JSON or
+\fIsudo\fR
+format,
+this section describes the
+\fIsudo\fR
+log format.
+Depending on
+\fIsudoers\fR
+configuration,
+\fBsudoers\fR
+can log events via
+syslog(3),
+to a local log file, or both.
 The log format is almost identical in both cases.
 .SS "Accepted command log entries"
 Commands that sudo runs are logged using the following format (split

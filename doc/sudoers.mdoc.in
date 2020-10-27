@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 25, 2020
+.Dd October 27, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4129,6 +4129,30 @@ Negating the option results in a value of
 being used.
 The default value is
 .Em any .
+.It log_format
+The event log format.
+Supported log formats are:
+.Bl -tag -width 8n
+.It json
+Logs in JSON format.
+JSON log entries contain the full user details as well as the execution
+environment if the command was allowed.
+Due to limitations of the protocol, JSON events sent via
+.Em syslog
+may be truncated.
+.It sudo
+Traditional sudo-style logs, see
+.Sx "LOG FORMAT"
+for a description of the log file format.
+.El
+.Pp
+This setting affects logs sent via
+.Xr syslog 3
+as well as the file specified by the
+.Em logfile
+setting, if any.
+The default value is
+.Em sudo .
 .It logfile
 Path to the
 .Nm sudo
@@ -4574,9 +4598,19 @@ The group provider plugin API is described in detail in
 .Xr sudo_plugin @mansectform@ .
 .Sh LOG FORMAT
 .Nm
-can log events using either
-.Xr syslog 3
-or a simple log file.
+can log events in either JSON or
+.Em sudo
+format,
+this section describes the
+.Em sudo
+log format.
+Depending on
+.Em sudoers
+configuration,
+.Nm
+can log events via
+.Xr syslog 3 ,
+to a local log file, or both.
 The log format is almost identical in both cases.
 .Ss Accepted command log entries
 Commands that sudo runs are logged using the following format (split

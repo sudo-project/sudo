@@ -1427,6 +1427,16 @@ cb_logfile(const union sudo_defs_val *sd_un)
 }
 
 static bool
+cb_log_format(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_log_format, SUDOERS_DEBUG_PLUGIN);
+
+    eventlog_set_format(sd_un->tuple == sudo ? EVLOG_SUDO : EVLOG_JSON);
+
+    debug_return_bool(true);
+}
+
+static bool
 cb_syslog(const union sudo_defs_val *sd_un)
 {
     int logtype = def_logfile ? EVLOG_FILE : EVLOG_NONE;
@@ -1601,6 +1611,7 @@ set_callbacks(void)
     sudo_defs_table[I_LOGLINELEN].callback = cb_loglinelen;
     sudo_defs_table[I_LOG_HOST].callback = cb_log_host;
     sudo_defs_table[I_LOGFILE].callback = cb_logfile;
+    sudo_defs_table[I_LOG_FORMAT].callback = cb_log_format;
     sudo_defs_table[I_LOG_YEAR].callback = cb_log_year;
     sudo_defs_table[I_MAILERPATH].callback = cb_mailerpath;
     sudo_defs_table[I_MAILERFLAGS].callback = cb_mailerflags;

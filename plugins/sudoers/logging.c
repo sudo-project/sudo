@@ -510,6 +510,8 @@ sudoers_log_open(int type, const char *log_file)
     bool uid_changed;
     FILE *fp = NULL;
     mode_t oldmask;
+    int fd, flags;
+    char *omode;
     debug_decl(sudoers_log_open, SUDOERS_DEBUG_DEFAULTS);
 
     switch (type) {
@@ -517,21 +519,32 @@ sudoers_log_open(int type, const char *log_file)
 	    openlog("sudo", def_syslog_pid ? LOG_PID : 0, def_syslog);
 	    break;
 	case EVLOG_FILE:
-	    /* Open log file as root, mode 0600. */
+	    /* Open log file as root, mode 0600 (cannot append to JSON). */
+	    if (def_log_format == json) {
+		flags = O_RDWR|O_CREAT;
+		omode = "w";
+	    } else {
+		flags = O_WRONLY|O_APPEND|O_CREAT;
+		omode = "a";
+	    }
 	    oldmask = umask(S_IRWXG|S_IRWXO);
 	    uid_changed = set_perms(PERM_ROOT);
-	    fp = fopen(log_file, "a");
+	    fd = open(log_file, flags, S_IRUSR|S_IWUSR);
 	    if (uid_changed && !restore_perms()) {
-		if (fp != NULL) {
-		    fclose(fp);
-		    fp = NULL;
+		if (fd != -1) {
+		    close(fd);
+		    fd = -1;
 		}
 	    }
 	    (void) umask(oldmask);
-	    if (fp == NULL && !warned) {
-		warned = true;
-		log_warning(SLOG_SEND_MAIL|SLOG_NO_LOG,
-		    N_("unable to open log file: %s"), log_file);
+	    if (fd == -1 || (fp = fdopen(fd, omode)) == NULL) {
+		if (!warned) {
+		    warned = true;
+		    log_warning(SLOG_SEND_MAIL|SLOG_NO_LOG,
+			N_("unable to open log file: %s"), log_file);
+		}
+		if (fd != -1)
+		    close(fd);
 	    }
 	    break;
 	default:
@@ -591,7 +604,7 @@ init_eventlog_config(void)
 	logtype |= EVLOG_FILE;
 
     eventlog_set_type(logtype);
-    eventlog_set_format(EVLOG_SUDO);
+    eventlog_set_format(def_log_format == sudo ? EVLOG_SUDO : EVLOG_JSON);
     eventlog_set_syslog_acceptpri(def_syslog_goodpri);
     eventlog_set_syslog_rejectpri(def_syslog_badpri);
     eventlog_set_syslog_alertpri(def_syslog_badpri);

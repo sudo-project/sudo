@@ -260,6 +260,8 @@
 #define def_runcwd              (sudo_defs_table[I_RUNCWD].sd_un.str)
 #define I_RUNCHROOT             129
 #define def_runchroot           (sudo_defs_table[I_RUNCHROOT].sd_un.str)
+#define I_LOG_FORMAT            130
+#define def_log_format          (sudo_defs_table[I_LOG_FORMAT].sd_un.tuple)
 
 enum def_tuple {
     never,
@@ -271,5 +273,7 @@ enum def_tuple {
     global,
     ppid,
     tty,
-    kernel
+    kernel,
+    sudo,
+    json
 };
