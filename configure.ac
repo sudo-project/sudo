@@ -2452,6 +2452,13 @@ dnl Program checks
 dnl
 AC_PROG_AWK
 AC_PROG_YACC
+case "$ac_cv_prog_YACC" in
+    *bison*) 
+	# Bison generates an extra enum containing the tokens which
+	# conflicts with the IBM ldap.h at least.
+	AX_APPEND_FLAG([-DYYTOKENTYPE], [CPPFLAGS])
+	;;
+esac
 AC_PATH_PROG([FLEX], [flex], [flex])
 SUDO_PROG_MV
 SUDO_PROG_BSHELL

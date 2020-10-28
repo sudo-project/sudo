@@ -17021,6 +17021,44 @@ fi
 done
 test -n "$YACC" || YACC="yacc"
 
+case "$ac_cv_prog_YACC" in
+    *bison*)
+	# Bison generates an extra enum containing the tokens which
+	# conflicts with the IBM ldap.h at least.
+
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -DYYTOKENTYPE "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -DYYTOKENTYPE"; } >&5
+  (: CPPFLAGS already contains -DYYTOKENTYPE) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -DYYTOKENTYPE"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-DYYTOKENTYPE
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	;;
+esac
 # Extract the first word of "flex", so it can be a program name with args.
 set dummy flex; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
