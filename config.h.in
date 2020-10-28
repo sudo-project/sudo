@@ -466,6 +466,9 @@
 /* Define to 1 if you use LDAP for sudoers. */
 #undef HAVE_LDAP
 
+/* Define to 1 if you have the <ldapssl.h> header file. */
+#undef HAVE_LDAPSSL_H
+
 /* Define to 1 if you have the `ldapssl_init' function. */
 #undef HAVE_LDAPSSL_INIT
 

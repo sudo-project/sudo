@@ -26259,7 +26259,7 @@ done
 	    fi
 	fi
     fi
-    for ac_header in ldap_ssl.h mps/ldap_ssl.h
+    for ac_header in ldapssl.h ldap_ssl.h mps/ldap_ssl.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "#include <ldap.h>
