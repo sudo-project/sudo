@@ -75,6 +75,7 @@ main(int argc, char *argv[])
 	if (which) {
 	    lineno++;
 	    for (cp = strtok_r(lines[1], ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
+		const char *errstr;
 		char *dash;
 		size_t maxlen;
 
@@ -82,15 +83,19 @@ main(int argc, char *argv[])
 		dash = strchr(cp, '-');
 		if (dash != NULL) {
 		    *dash = '\0';
-		    len = sudo_strtonum(cp, 1, INT_MAX, NULL);
-		    maxlen = sudo_strtonum(dash + 1, 1, INT_MAX, NULL);
+		    len = sudo_strtonum(cp, 0, INT_MAX, &errstr);
+		    if (errstr == NULL)
+			maxlen = sudo_strtonum(dash + 1, 0, INT_MAX, &errstr);
 		} else {
-		    len = maxlen = sudo_strtonum(cp, 1, INT_MAX, NULL);
+		    len = maxlen = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		}
-		if (len == 0 || maxlen == 0)
+		if (errstr != NULL)
 		    sudo_fatalx("%s: invalid length on line %d\n", argv[1], lineno);
 		while (len <= maxlen) {
-		    printf("# word wrap at %d characters\n", (int)len);
+		    if (len == 0)
+			printf("# word wrap disabled\n");
+		    else
+			printf("# word wrap at %d characters\n", (int)len);
 		    eventlog_writeln(stdout, lines[0], strlen(lines[0]), len);
 		    len++;
 		}
