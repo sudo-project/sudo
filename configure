@@ -25889,6 +25889,77 @@ fi
     fi
 
 	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
+	if test -d "${with_ldap}/lib64"; then
+
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${with_ldap}/lib64 "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${with_ldap}/lib64"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${with_ldap}/lib64) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${with_ldap}/lib64"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${with_ldap}/lib64
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${with_ldap}/lib64 "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${with_ldap}/lib64"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${with_ldap}/lib64) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${with_ldap}/lib64"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${with_ldap}/lib64
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
+
+	    LDFLAGS="$LDFLAGS -L${with_ldap}/lib64"
+	fi
 
 if ${CPPFLAGS+:} false; then :
 

@@ -4092,6 +4092,10 @@ if test ${with_ldap-'no'} != "no"; then
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib])
 	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
+	if test -d "${with_ldap}/lib64"; then
+	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib64])
+	    LDFLAGS="$LDFLAGS -L${with_ldap}/lib64"
+	fi
 	AX_APPEND_FLAG([-I${with_ldap}/include], [CPPFLAGS])
 	with_ldap=yes
     fi
