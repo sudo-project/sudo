@@ -4427,6 +4427,9 @@ json
 Logs in JSON format.
 JSON log entries contain the full user details as well as the execution
 environment if the command was allowed.
+Due to limitations of the protocol, JSON events sent via
+\fIsyslog\fR
+may be truncated.
 .PD
 .TP 10n
 sudo
