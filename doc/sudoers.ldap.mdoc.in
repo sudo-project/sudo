@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 20, 2019
+.Dd October 29, 2020
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -747,6 +747,7 @@ specification and is included for backwards compatibility only.
 .It Sy KRB5_CCNAME Ar file name
 The path to the Kerberos 5 credential cache to use when authenticating
 with the remote server.
+.Pp
 This option is only relevant when using SASL authentication (see below).
 .It Sy LDAP_VERSION Ar number
 The version of the LDAP protocol to use when connecting to the server.
@@ -800,7 +801,8 @@ The default search filter is:
 If
 .Ar ldap_filter
 is omitted, no search filter will be used.
-This option is only when querying netgroups directly via LDAP.
+.Pp
+This option is only used when querying netgroups directly via LDAP.
 .It Sy NETWORK_TIMEOUT Ar seconds
 An alias for
 .Sy BIND_TIMELIMIT
@@ -852,6 +854,7 @@ The SASL user name to use when connecting to the LDAP server.
 By default,
 .Nm sudo
 will use an anonymous connection.
+.Pp
 This option is only relevant when using SASL authentication.
 .It Sy SASL_MECH Ar mechanisms
 A white space-delimited list of SASL authentication mechanisms to use.
@@ -865,6 +868,7 @@ SASL security properties or
 .Em none
 for no properties.
 See the SASL programmer's manual for details.
+.Pp
 This option is only relevant when using SASL authentication.
 .It Sy SSL Ar on/true/yes/off/false/no
 If the
@@ -967,6 +971,7 @@ for OpenLDAP compatibility.
 The path to a certificate authority bundle which contains the certificates
 for all the Certificate Authorities the client knows to be valid, e.g.,
 .Pa /etc/ssl/ca-bundle.pem .
+.Pp
 This option is only supported by the OpenLDAP libraries.
 Netscape-derived LDAP libraries use the same certificate
 database for CA and client certificates (see
@@ -981,6 +986,7 @@ The directory specified by
 .Sy TLS_CACERTDIR
 is checked after
 .Sy TLS_CACERTFILE .
+.Pp
 This option is only supported by the OpenLDAP libraries.
 .It Sy TLS_CERT Ar file name
 The path to a file containing the client certificate which can
@@ -1014,6 +1020,7 @@ Note that disabling the check creates an opportunity for man-in-the-middle
 attacks since the server's identity will not be authenticated.
 If possible, the CA's certificate should be installed locally so it can
 be verified.
+.Pp
 This option is not supported by the Tivoli Directory Server LDAP libraries.
 .It Sy TLS_KEY Ar file name
 The path to a file containing the private key which matches the
@@ -1029,6 +1036,7 @@ The key type depends on the LDAP libraries used.
 .It Tivoli Directory Server:
 .Li tls_key /usr/ldap/ldapkey.kdb
 .El
+.Pp
 When using Tivoli LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
 .It Sy TLS_CIPHERS Ar cipher list
@@ -1038,6 +1046,7 @@ parameter allows the administer to restrict which encryption algorithms
 may be used for TLS (SSL) connections.
 See the OpenLDAP or Tivoli Directory Server manual for a list of valid
 ciphers.
+.Pp
 This option is not supported by Netscape-derived libraries.
 .It Sy TLS_KEYPW Ar secret
 The
@@ -1090,6 +1099,7 @@ The
 .Em gsk8capicmd
 utility can be used to manage the key database and create a
 .Em stash file .
+.Pp
 This option is only supported by the Tivoli LDAP libraries.
 .It Sy TLS_REQCERT Ar level
 The
@@ -1132,6 +1142,7 @@ It is generally used in conjunction with
 .Em prngd
 or
 .Em egd .
+.Pp
 This option is only supported by the OpenLDAP libraries.
 .It Sy URI Ar ldap[s]://[hostname[:port]] ...
 Specifies a white space-delimited list of one or more URIs describing

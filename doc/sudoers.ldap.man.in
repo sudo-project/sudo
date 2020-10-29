@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "October 29, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -798,6 +798,7 @@ specification and is included for backwards compatibility only.
 \fBKRB5_CCNAME\fR \fIfile name\fR
 The path to the Kerberos 5 credential cache to use when authenticating
 with the remote server.
+.sp
 This option is only relevant when using SASL authentication (see below).
 .TP 6n
 \fBLDAP_VERSION\fR \fInumber\fR
@@ -857,7 +858,8 @@ The default search filter is:
 If
 \fIldap_filter\fR
 is omitted, no search filter will be used.
-This option is only when querying netgroups directly via LDAP.
+.sp
+This option is only used when querying netgroups directly via LDAP.
 .TP 6n
 \fBNETWORK_TIMEOUT\fR \fIseconds\fR
 An alias for
@@ -914,6 +916,7 @@ The SASL user name to use when connecting to the LDAP server.
 By default,
 \fBsudo\fR
 will use an anonymous connection.
+.sp
 This option is only relevant when using SASL authentication.
 .TP 6n
 \fBSASL_MECH\fR \fImechanisms\fR
@@ -929,6 +932,7 @@ SASL security properties or
 \fInone\fR
 for no properties.
 See the SASL programmer's manual for details.
+.sp
 This option is only relevant when using SASL authentication.
 .TP 6n
 \fBSSL\fR \fIon/true/yes/off/false/no\fR
@@ -1041,6 +1045,7 @@ for OpenLDAP compatibility.
 The path to a certificate authority bundle which contains the certificates
 for all the Certificate Authorities the client knows to be valid, e.g.,
 \fI/etc/ssl/ca-bundle.pem\fR.
+.sp
 This option is only supported by the OpenLDAP libraries.
 Netscape-derived LDAP libraries use the same certificate
 database for CA and client certificates (see
@@ -1056,6 +1061,7 @@ The directory specified by
 \fBTLS_CACERTDIR\fR
 is checked after
 \fBTLS_CACERTFILE\fR.
+.sp
 This option is only supported by the OpenLDAP libraries.
 .TP 6n
 \fBTLS_CERT\fR \fIfile name\fR
@@ -1100,6 +1106,7 @@ Note that disabling the check creates an opportunity for man-in-the-middle
 attacks since the server's identity will not be authenticated.
 If possible, the CA's certificate should be installed locally so it can
 be verified.
+.sp
 This option is not supported by the Tivoli Directory Server LDAP libraries.
 .TP 6n
 \fBTLS_KEY\fR \fIfile name\fR
@@ -1121,12 +1128,10 @@ Netscape-derived:
 .TP 6n
 Tivoli Directory Server:
 \fRtls_key /usr/ldap/ldapkey.kdb\fR
-.PD 0
 .PP
 When using Tivoli LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
 .RE
-.PD
 .TP 6n
 \fBTLS_CIPHERS\fR \fIcipher list\fR
 The
@@ -1135,6 +1140,7 @@ parameter allows the administer to restrict which encryption algorithms
 may be used for TLS (SSL) connections.
 See the OpenLDAP or Tivoli Directory Server manual for a list of valid
 ciphers.
+.sp
 This option is not supported by Netscape-derived libraries.
 .TP 6n
 \fBTLS_KEYPW\fR \fIsecret\fR
@@ -1192,6 +1198,7 @@ The
 \fIgsk8capicmd\fR
 utility can be used to manage the key database and create a
 \fIstash file\fR.
+.sp
 This option is only supported by the Tivoli LDAP libraries.
 .RE
 .TP 6n
@@ -1243,6 +1250,7 @@ It is generally used in conjunction with
 \fIprngd\fR
 or
 \fIegd\fR.
+.sp
 This option is only supported by the OpenLDAP libraries.
 .TP 6n
 \fBURI\fR \fIldap[s]://[hostname[:port]] ...\fR
