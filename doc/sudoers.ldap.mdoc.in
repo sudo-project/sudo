@@ -670,6 +670,14 @@ or the user's
 .Pa .ldaprc
 files are not used.
 .Pp
+.Nm sudo
+supports a variety of LDAP library implementations, including
+OpenLDAP, Netscape-derived (also used by Solaris and HP-UX), and
+IBM LDAP (aka Tivoli).
+Some options are specific to certain LDAP implementations or have
+implementation-specific behavior.
+These differences are noted below where applicable.
+.Pp
 Only those options explicitly listed in
 .Pa @ldap_conf@
 as being supported by
@@ -891,7 +899,7 @@ This has the advantage of not requiring a dedicated port for encrypted
 communications.
 This parameter is only supported by LDAP servers that honor the
 .Em start_tls
-extension, such as the OpenLDAP and Tivoli Directory servers.
+extension, such as the OpenLDAP and IBM Tivoli Directory servers.
 .It Sy SUDOERS_BASE Ar base
 The base DN to use when performing
 .Nm sudo
@@ -997,14 +1005,14 @@ The certificate type depends on the LDAP libraries used.
 .Li tls_cert /etc/ssl/client_cert.pem
 .It Netscape-derived:
 .Li tls_cert /var/ldap/cert7.db
-.It Tivoli Directory Server:
+.It IBM LDAP:
 Unused, the key database specified by
 .Sy TLS_KEY
 contains both keys and certificates.
+.El
 .Pp
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
-.El
 .It Sy TLS_CHECKPEER Ar on/true/yes/off/false/no
 If enabled,
 .Sy TLS_CHECKPEER
@@ -1021,7 +1029,7 @@ attacks since the server's identity will not be authenticated.
 If possible, the CA's certificate should be installed locally so it can
 be verified.
 .Pp
-This option is not supported by the Tivoli Directory Server LDAP libraries.
+This option is not supported by the IBM LDAP libraries.
 .It Sy TLS_KEY Ar file name
 The path to a file containing the private key which matches the
 certificate specified by
@@ -1033,18 +1041,18 @@ The key type depends on the LDAP libraries used.
 .Li tls_key /etc/ssl/client_key.pem
 .It Netscape-derived:
 .Li tls_key /var/ldap/key3.db
-.It Tivoli Directory Server:
+.It IBM LDAP:
 .Li tls_key /usr/ldap/ldapkey.kdb
 .El
 .Pp
-When using Tivoli LDAP libraries, this file may also contain
+When using IBM LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
 .It Sy TLS_CIPHERS Ar cipher list
 The
 .Sy TLS_CIPHERS
 parameter allows the administer to restrict which encryption algorithms
 may be used for TLS (SSL) connections.
-See the OpenLDAP or Tivoli Directory Server manual for a list of valid
+See the OpenLDAP or IBM Tivoli Directory Server manual for a list of valid
 ciphers.
 .Pp
 This option is not supported by Netscape-derived libraries.
@@ -1052,7 +1060,7 @@ This option is not supported by Netscape-derived libraries.
 The
 .Sy TLS_KEYPW
 contains the password used to decrypt the key database on clients
-using the Tivoli Directory Server LDAP library.
+using the IBM LDAP library.
 The
 .Ar secret
 may be a plain text password or a base64-encoded string with a
@@ -1093,14 +1101,14 @@ e.g.,
 .Li ldapkey.sth .
 The default
 .Li ldapkey.kdb
-that ships with Tivoli Directory Server is encrypted with the password
+that ships with the IBM Tivoli Directory Server is encrypted with the password
 .Li ssl_password .
 The
 .Em gsk8capicmd
 utility can be used to manage the key database and create a
 .Em stash file .
 .Pp
-This option is only supported by the Tivoli LDAP libraries.
+This option is only supported by the IBM LDAP libraries.
 .It Sy TLS_REQCERT Ar level
 The
 .Sy TLS_REQCERT
@@ -1175,7 +1183,7 @@ Only systems using the OpenSSL libraries support the mixing of
 and
 .Li ldaps://
 URIs.
-Both the Netscape-derived and Tivoli LDAP libraries used on most commercial
+Both the Netscape-derived and IBM LDAP libraries used on most commercial
 versions of Unix are only capable of supporting one or the other.
 .It Sy USE_SASL Ar on/true/yes/off/false/no
 Enable
@@ -1418,7 +1426,7 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 #tls_cert /etc/certs/client_cert.pem
 #tls_key  /etc/certs/client_key.pem
 #
-# For SunONE or iPlanet LDAP, tls_cert and tls_key may specify either
+# For Netscape-derived LDAP, tls_cert and tls_key may specify either
 # a directory, in which case the files in the directory must have the
 # default names (e.g., cert8.db and key4.db), or the path to the cert
 # and key files themselves.  However, a bug in version 5.0 of the LDAP

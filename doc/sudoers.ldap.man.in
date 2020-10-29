@@ -711,6 +711,14 @@ or the user's
 \fI.ldaprc\fR
 files are not used.
 .PP
+\fBsudo\fR
+supports a variety of LDAP library implementations, including
+OpenLDAP, Netscape-derived (also used by Solaris and HP-UX), and
+IBM LDAP (aka Tivoli).
+Some options are specific to certain LDAP implementations or have
+implementation-specific behavior.
+These differences are noted below where applicable.
+.PP
 Only those options explicitly listed in
 \fI@ldap_conf@\fR
 as being supported by
@@ -957,7 +965,7 @@ This has the advantage of not requiring a dedicated port for encrypted
 communications.
 This parameter is only supported by LDAP servers that honor the
 \fIstart_tls\fR
-extension, such as the OpenLDAP and Tivoli Directory servers.
+extension, such as the OpenLDAP and IBM Tivoli Directory servers.
 .TP 6n
 \fBSUDOERS_BASE\fR \fIbase\fR
 The base DN to use when performing
@@ -1079,17 +1087,14 @@ OpenLDAP:
 Netscape-derived:
 \fRtls_cert /var/ldap/cert7.db\fR
 .TP 6n
-Tivoli Directory Server:
+IBM LDAP:
 Unused, the key database specified by
 \fBTLS_KEY\fR
 contains both keys and certificates.
-.sp
+.PP
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
-.PD 0
-.PP
 .RE
-.PD
 .TP 6n
 \fBTLS_CHECKPEER\fR \fIon/true/yes/off/false/no\fR
 If enabled,
@@ -1107,7 +1112,7 @@ attacks since the server's identity will not be authenticated.
 If possible, the CA's certificate should be installed locally so it can
 be verified.
 .sp
-This option is not supported by the Tivoli Directory Server LDAP libraries.
+This option is not supported by the IBM LDAP libraries.
 .TP 6n
 \fBTLS_KEY\fR \fIfile name\fR
 The path to a file containing the private key which matches the
@@ -1126,10 +1131,10 @@ OpenLDAP:
 Netscape-derived:
 \fRtls_key /var/ldap/key3.db\fR
 .TP 6n
-Tivoli Directory Server:
+IBM LDAP:
 \fRtls_key /usr/ldap/ldapkey.kdb\fR
 .PP
-When using Tivoli LDAP libraries, this file may also contain
+When using IBM LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
 .RE
 .TP 6n
@@ -1138,7 +1143,7 @@ The
 \fBTLS_CIPHERS\fR
 parameter allows the administer to restrict which encryption algorithms
 may be used for TLS (SSL) connections.
-See the OpenLDAP or Tivoli Directory Server manual for a list of valid
+See the OpenLDAP or IBM Tivoli Directory Server manual for a list of valid
 ciphers.
 .sp
 This option is not supported by Netscape-derived libraries.
@@ -1147,7 +1152,7 @@ This option is not supported by Netscape-derived libraries.
 The
 \fBTLS_KEYPW\fR
 contains the password used to decrypt the key database on clients
-using the Tivoli Directory Server LDAP library.
+using the IBM LDAP library.
 The
 \fIsecret\fR
 may be a plain text password or a base64-encoded string with a
@@ -1192,14 +1197,14 @@ e.g.,
 \fRldapkey.sth\fR.
 The default
 \fRldapkey.kdb\fR
-that ships with Tivoli Directory Server is encrypted with the password
+that ships with the IBM Tivoli Directory Server is encrypted with the password
 \fRssl_password\fR.
 The
 \fIgsk8capicmd\fR
 utility can be used to manage the key database and create a
 \fIstash file\fR.
 .sp
-This option is only supported by the Tivoli LDAP libraries.
+This option is only supported by the IBM LDAP libraries.
 .RE
 .TP 6n
 \fBTLS_REQCERT\fR \fIlevel\fR
@@ -1284,7 +1289,7 @@ Only systems using the OpenSSL libraries support the mixing of
 and
 \fRldaps://\fR
 URIs.
-Both the Netscape-derived and Tivoli LDAP libraries used on most commercial
+Both the Netscape-derived and IBM LDAP libraries used on most commercial
 versions of Unix are only capable of supporting one or the other.
 .TP 6n
 \fBUSE_SASL\fR \fIon/true/yes/off/false/no\fR
@@ -1555,7 +1560,7 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 #tls_cert /etc/certs/client_cert.pem
 #tls_key  /etc/certs/client_key.pem
 #
-# For SunONE or iPlanet LDAP, tls_cert and tls_key may specify either
+# For Netscape-derived LDAP, tls_cert and tls_key may specify either
 # a directory, in which case the files in the directory must have the
 # default names (e.g., cert8.db and key4.db), or the path to the cert
 # and key files themselves.  However, a bug in version 5.0 of the LDAP
