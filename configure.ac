@@ -4708,7 +4708,7 @@ if test -n "$GCC"; then
 fi
 
 dnl
-dnl Skip regress tests and sudoers sanity check if cross compiling.
+dnl Skip regress tests and sudoers validation checks if cross compiling.
 dnl
 CROSS_COMPILING="$cross_compiling"
 

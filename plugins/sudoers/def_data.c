@@ -271,7 +271,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	def_data_verifypw,
     }, {
 	"noexec", T_FLAG,
-	N_("Preload the dummy exec functions contained in the sudo_noexec library"),
+	N_("Preload the sudo_noexec library which replaces the exec functions"),
 	NULL,
     }, {
 	"ignore_local_sudoers", T_FLAG,
@@ -295,7 +295,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"env_check", T_LIST|T_BOOL,
-	N_("Environment variables to check for sanity:"),
+	N_("Environment variables to check for safety:"),
 	NULL,
     }, {
 	"env_delete", T_LIST|T_BOOL,

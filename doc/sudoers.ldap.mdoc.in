@@ -751,7 +751,7 @@ The
 .Sy HOST
 parameter is deprecated in favor of the
 .Sy URI
-specification and is included for backwards compatibility only.
+specification and is included for backward compatibility only.
 .It Sy KRB5_CCNAME Ar file name
 The path to the Kerberos 5 credential cache to use when authenticating
 with the remote server.
@@ -831,7 +831,7 @@ The
 .Sy PORT
 parameter is deprecated in favor of the
 .Sy URI
-specification and is included for backwards compatibility only.
+specification and is included for backward compatibility only.
 .It Sy ROOTBINDDN Ar DN
 The
 .Sy ROOTBINDDN

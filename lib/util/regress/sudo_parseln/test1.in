@@ -35,7 +35,7 @@ Plugin sudoers_io sudoers.so
 #
 # Sudo noexec:
 #
-# Path to a shared library containing dummy versions of the execv(),
+# Path to a shared library containing replacements for the execv(),
 # execve() and fexecve() library functions that just return an error.
 # This is used to implement the "noexec" functionality on systems that
 # support LD_PRELOAD or its equivalent.

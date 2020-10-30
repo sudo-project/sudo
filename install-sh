@@ -80,7 +80,7 @@ while ${MORETODO} ; do
 	BACKUP="`echo \"$1\" | sed 's/^..//'`"
 	;;
     X-c)
-	# backwards compatibility
+	# backward compatibility
 	;;
     X-d)
 	DIRMODE=true

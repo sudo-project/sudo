@@ -1015,7 +1015,7 @@ set_cmnd(void)
 }
 
 /*
- * Open sudoers file and sanity check mode/owner/type.
+ * Open sudoers file and check mode/owner/type.
  * Returns a handle to the sudoers file or NULL on error.
  */
 FILE *

@@ -41,7 +41,7 @@ vipw(@mansectsu@).
 \fBvisudo\fR
 locks the
 \fIsudoers\fR
-file against multiple simultaneous edits, provides basic sanity checks,
+file against multiple simultaneous edits, performs basic validity checks,
 and checks for syntax errors before installing the edited file.
 If the
 \fIsudoers\fR

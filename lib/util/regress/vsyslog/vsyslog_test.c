@@ -38,7 +38,7 @@ static int errors;
 static int ntests;
 
 /*
- * Dummy version of syslog to verify the message
+ * Replacement for syslog(3) that just verifies the message
  */
 void
 syslog(int priority, const char *fmt, ...)

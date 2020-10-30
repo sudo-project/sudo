@@ -1074,7 +1074,7 @@ policy_open(struct sudo_settings *settings, char * const user_info[],
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /*
-     * Backwards compatibility for older API versions
+     * Backward compatibility for older API versions
      */
     sudo_debug_set_active_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
     switch (policy_plugin.u.generic->version) {
@@ -1338,7 +1338,7 @@ policy_init_session(struct command_details *details)
 
     if (policy_plugin.u.policy->init_session) {
 	/*
-	 * Backwards compatibility for older API versions
+	 * Backward compatibility for older API versions
 	 */
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	switch (policy_plugin.u.generic->version) {
@@ -1374,7 +1374,7 @@ iolog_open_int(struct plugin_container *plugin, struct sudo_settings *settings,
     }
 
     /*
-     * Backwards compatibility for older API versions
+     * Backward compatibility for older API versions
      */
     sudo_debug_set_active_instance(plugin->debug_instance);
     switch (plugin->u.generic->version) {

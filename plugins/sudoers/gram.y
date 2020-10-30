@@ -106,8 +106,8 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 DEFAULTS_CMND		/* Command-specific defaults entry */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
-%token <tok> 	 NOEXEC			/* preload dummy execve() for cmnd */
-%token <tok> 	 EXEC			/* don't preload dummy execve() */
+%token <tok> 	 NOEXEC			/* preload fake execve() for cmnd */
+%token <tok> 	 EXEC			/* don't preload fake execve() */
 %token <tok>	 SETENV			/* user may set environment for cmnd */
 %token <tok>	 NOSETENV		/* user may not set environment */
 %token <tok>	 LOG_INPUT		/* log user's cmnd input */

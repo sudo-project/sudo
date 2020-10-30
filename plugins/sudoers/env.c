@@ -640,7 +640,7 @@ matches_env_list(const char *var, struct list_members *list, bool *full_match)
 }
 
 /*
- * Check the env_delete blacklist.
+ * Check the env_delete blocklist.
  * Returns true if the variable was found, else false.
  */
 static bool
@@ -654,15 +654,15 @@ matches_env_delete(const char *var)
 }
 
 /*
- * Sanity-check the TZ environment variable.
+ * Verify the TZ environment variable is safe.
  * On many systems it is possible to set this to a pathname.
  */
 static bool
-tz_is_sane(const char *tzval)
+tz_is_safe(const char *tzval)
 {
     const char *cp;
     char lastch;
-    debug_decl(tz_is_sane, SUDOERS_DEBUG_ENV);
+    debug_decl(tz_is_safe, SUDOERS_DEBUG_ENV);
 
     /* tzcode treats a value beginning with a ':' as a path. */
     if (tzval[0] == ':')
@@ -716,7 +716,7 @@ matches_env_check(const char *var, bool *full_match)
     if (matches_env_list(var, &def_env_check, full_match)) {
 	if (strncmp(var, "TZ=", 3) == 0) {
 	    /* Special case for TZ */
-	    keepit = tz_is_sane(var + 3);
+	    keepit = tz_is_safe(var + 3);
 	} else {
 	    const char *val = strchr(var, '=');
 	    if (val != NULL)

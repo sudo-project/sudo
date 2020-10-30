@@ -3979,7 +3979,7 @@ The hook function encountered an error.
 .TP 6n
 \fRSUDO_HOOK_RET_NEXT\fR
 The hook completed without error, go on to the next hook (including
-the native implementation if applicable).
+the system implementation if applicable).
 For example, a
 getenv(3)
 hook might return
@@ -3988,7 +3988,7 @@ if the specified variable was not found in the private copy of the environment.
 .TP 6n
 \fRSUDO_HOOK_RET_STOP\fR
 The hook completed without error, stop processing hooks for this invocation.
-This can be used to replace the native implementation.
+This can be used to replace the system implementation.
 For example, a
 \fRsetenv\fR
 hook that operates on a private copy of
@@ -4347,7 +4347,7 @@ from the event loop and frees the memory associated with it.
 .SS "Remote command execution"
 The
 \fBsudo\fR
-front end does not have native support for running remote commands.
+front end does not support running remote commands.
 However, starting with
 \fBsudo\fR
 1.8.8, the

@@ -77,7 +77,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
 	debug_return_int(AUTH_FATAL);
     }
 
-    /* XXX - maybe sanity check the auth style earlier? */
+    /* XXX - maybe check the auth style earlier? */
     login_style = login_getstyle(state.lc, login_style, "auth-sudo");
     if (login_style == NULL) {
 	log_warningx(0, N_("invalid authentication type"));

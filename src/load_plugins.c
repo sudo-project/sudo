@@ -271,7 +271,7 @@ sudo_load_plugin(struct plugin_info *info, bool quiet)
     bool ret = false;
     debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN);
 
-    /* Sanity check plugin and fill in path */
+    /* Check plugin owner/mode and fill in path */
     if (!sudo_check_plugin(info, path, sizeof(path)))
 	goto done;
 

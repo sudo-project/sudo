@@ -677,7 +677,7 @@ userlist_matches_filter(struct sudoers_parse_tree *parse_tree,
 	    struct passwd pw;
 
 	    /*
-	     * Only groups in filter, make a dummy user so userlist_matches()
+	     * Only groups in filter, make a fake user so userlist_matches()
 	     * can do its thing.
 	     */
 	    memset(&pw, 0, sizeof(pw));

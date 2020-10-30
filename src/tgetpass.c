@@ -379,7 +379,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
     if (left == 0) {
 	*errval = TGP_ERRVAL_READERROR;
 	errno = EINVAL;
-	debug_return_str(NULL);		/* sanity */
+	debug_return_str(NULL);
     }
 
     while (--left) {

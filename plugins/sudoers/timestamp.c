@@ -423,7 +423,7 @@ timestamp_open(const char *user, pid_t sid)
 	goto bad;
     }
 
-    /* Sanity check timestamp dir and create if missing. */
+    /* Check the validity of timestamp dir and create if missing. */
     if (!ts_secure_dir(def_timestampdir, true, false))
 	goto bad;
 
@@ -1077,7 +1077,7 @@ set_lectured(void)
 	goto done;
     }
 
-    /* Sanity check lecture dir and create if missing. */
+    /* Check the validity of lecture dir and create if missing. */
     if (!ts_secure_dir(def_lecture_status_dir, true, false))
 	goto done;
 

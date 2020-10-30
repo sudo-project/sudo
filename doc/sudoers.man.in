@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "October 27, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 30, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -369,7 +369,6 @@ are preserved from the invoking user's environment if permitted by the
 or
 \fIenv_keep\fR
 options.
-This is effectively a whitelist for environment variables.
 A few environment variables are treated specially.
 If the
 \fRPATH\fR
@@ -6091,9 +6090,9 @@ On such systems,
 functionality can be used to prevent a program run by
 \fBsudo\fR
 from executing any other programs.
-Note, however, that this applies only to native dynamically-linked
+Note, however, that this applies only to dynamically-linked
 executables.
-Statically-linked executables and foreign executables
+Statically-linked executables and executables
 running under binary emulation are not affected.
 .sp
 The

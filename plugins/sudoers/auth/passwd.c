@@ -102,7 +102,7 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_c
     int matched;
     debug_decl(sudo_passwd_verify, SUDOERS_DEBUG_AUTH);
 
-    /* Dummy version for systems without crypt(). */
+    /* Simple string compare for systems without crypt(). */
     matched = !strcmp(pass, pw_passwd);
 
     debug_return_int(matched ? AUTH_SUCCESS : AUTH_FAILURE);

@@ -1047,7 +1047,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     } else {
 	struct listen_address *addr;
 
-	/* Sanity check the TLS configuration. */
+	/* Check that TLS configuration is valid. */
 	TAILQ_FOREACH(addr, &config->server.addresses, entries) {
 	    if (!addr->tls)
 		continue;

@@ -221,7 +221,7 @@ main(int argc, char *argv[])
     }
 
     if (export_path != NULL) {
-	/* Backwards compatibility for the time being. */
+	/* Backward compatibility for the time being. */
 	sudo_warnx("%s",
 	    U_("the -x option will be removed in a future release"));
 	sudo_warnx("%s",
@@ -302,37 +302,37 @@ done:
 static char *
 get_editor(int *editor_argc, char ***editor_argv)
 {
-    char *editor_path = NULL, **whitelist = NULL;
+    char *editor_path = NULL, **allowlist = NULL;
     const char *env_editor;
     static char *files[] = { "+1", "sudoers" };
-    unsigned int whitelist_len = 0;
+    unsigned int allowlist_len = 0;
     debug_decl(get_editor, SUDOERS_DEBUG_UTIL);
 
-    /* Build up editor whitelist from def_editor unless env_editor is set. */
+    /* Build up editor allowlist from def_editor unless env_editor is set. */
     if (!def_env_editor) {
 	const char *cp, *ep;
 	const char *def_editor_end = def_editor + strlen(def_editor);
 
-	/* Count number of entries in whitelist and split into a list. */
+	/* Count number of entries in allowlist and split into a list. */
 	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
 	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
-	    whitelist_len++;
+	    allowlist_len++;
 	}
-	whitelist = reallocarray(NULL, whitelist_len + 1, sizeof(char *));
-	if (whitelist == NULL)
+	allowlist = reallocarray(NULL, allowlist_len + 1, sizeof(char *));
+	if (allowlist == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	whitelist_len = 0;
+	allowlist_len = 0;
 	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
 	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
-	    whitelist[whitelist_len] = strndup(cp, (size_t)(ep - cp));
-	    if (whitelist[whitelist_len] == NULL)
+	    allowlist[allowlist_len] = strndup(cp, (size_t)(ep - cp));
+	    if (allowlist[allowlist_len] == NULL)
 		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    whitelist_len++;
+	    allowlist_len++;
 	}
-	whitelist[whitelist_len] = NULL;
+	allowlist[allowlist_len] = NULL;
     }
 
-    editor_path = find_editor(2, files, editor_argc, editor_argv, whitelist,
+    editor_path = find_editor(2, files, editor_argc, editor_argv, allowlist,
 	&env_editor, true);
     if (editor_path == NULL) {
 	if (def_env_editor && env_editor != NULL) {
@@ -342,10 +342,10 @@ get_editor(int *editor_argc, char ***editor_argv)
 	sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
     }
 
-    if (whitelist != NULL) {
-	while (whitelist_len--)
-	    free(whitelist[whitelist_len]);
-	free(whitelist);
+    if (allowlist != NULL) {
+	while (allowlist_len--)
+	    free(allowlist[allowlist_len]);
+	free(allowlist);
     }
 
     debug_return_str(editor_path);
@@ -500,7 +500,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    goto done;
 	}
 	/*
-	 * Sanity checks.
+	 * Check for zero length sudoers file.
 	 */
 	if (stat(sp->tpath, &sb) < 0) {
 	    sudo_warnx(U_("unable to stat temporary file (%s), %s unchanged"),
@@ -589,7 +589,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
     debug_decl(reparse_sudoers, SUDOERS_DEBUG_UTIL);
 
     /*
-     * Parse the edited sudoers files and do sanity checking
+     * Parse the edited sudoers files.
      */
     while ((sp = TAILQ_FIRST(&sudoerslist)) != NULL) {
 	last = TAILQ_LAST(&sudoerslist, sudoersfile_list);
@@ -747,7 +747,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
     }
 
     /*
-     * Now that sp->tpath is sane (parses ok) it needs to be
+     * Now that we know sp->tpath parses correctly, it needs to be
      * rename(2)'d to sp->path.  If the rename(2) fails we try using
      * mv(1) in case sp->tpath and sp->path are on different file systems.
      */

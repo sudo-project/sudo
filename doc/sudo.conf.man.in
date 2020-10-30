@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "June 1, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "October 30, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -739,7 +739,7 @@ Plugin sudoers_audit sudoers.so
 # Sudo noexec:
 #   Path noexec /path/to/sudo_noexec.so
 #
-# Path to a shared library containing dummy versions of the execv(),
+# Path to a shared library containing replacements for the execv(),
 # execve() and fexecve() library functions that just return an error.
 # This is used to implement the "noexec" functionality on systems that
 # support LD_PRELOAD or its equivalent.

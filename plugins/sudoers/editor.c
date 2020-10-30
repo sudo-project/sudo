@@ -34,7 +34,7 @@
 
 /*
  * Search for the specified editor in the user's PATH, checking
- * the result against whitelist if non-NULL.  An argument vector
+ * the result against allowlist if non-NULL.  An argument vector
  * suitable for execve() is allocated and stored in argv_out.
  * If nfiles is non-zero, files[] is added to the end of argv_out.
  *
@@ -44,7 +44,7 @@
  */
 static char *
 resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
-    int *argc_out, char ***argv_out, char * const *whitelist)
+    int *argc_out, char ***argv_out, char * const *allowlist)
 {
     char **nargv, *editor, *editor_path = NULL;
     const char *cp, *ep, *tmp;
@@ -69,7 +69,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
 
     /* If we can't find the editor in the user's PATH, give up. */
     if (find_path(editor, &editor_path, &user_editor_sb, getenv("PATH"), NULL,
-	    0, whitelist) != FOUND) {
+	    0, allowlist) != FOUND) {
 	free(editor);
 	errno = ENOENT;
 	debug_return_str(NULL);
@@ -125,7 +125,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
  */
 char *
 find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
-     char * const *whitelist, const char **env_editor, bool env_error)
+     char * const *allowlist, const char **env_editor, bool env_error)
 {
     char *ev[3], *editor_path = NULL;
     unsigned int i;
@@ -144,7 +144,7 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
 	if (editor != NULL && *editor != '\0') {
 	    *env_editor = editor;
 	    editor_path = resolve_editor(editor, strlen(editor),
-		nfiles, files, argc_out, argv_out, whitelist);
+		nfiles, files, argc_out, argv_out, allowlist);
 	    if (editor_path != NULL)
 		break;
 	    if (errno != ENOENT)
@@ -164,7 +164,7 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
 	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
 	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
 	    editor_path = resolve_editor(cp, (size_t)(ep - cp), nfiles,
-		files, argc_out, argv_out, whitelist);
+		files, argc_out, argv_out, allowlist);
 	    if (editor_path != NULL)
 		break;
 	    if (errno != ENOENT)

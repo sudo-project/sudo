@@ -801,7 +801,7 @@ The
 \fBHOST\fR
 parameter is deprecated in favor of the
 \fBURI\fR
-specification and is included for backwards compatibility only.
+specification and is included for backward compatibility only.
 .TP 6n
 \fBKRB5_CCNAME\fR \fIfile name\fR
 The path to the Kerberos 5 credential cache to use when authenticating
@@ -890,7 +890,7 @@ The
 \fBPORT\fR
 parameter is deprecated in favor of the
 \fBURI\fR
-specification and is included for backwards compatibility only.
+specification and is included for backward compatibility only.
 .TP 6n
 \fBROOTBINDDN\fR \fIDN\fR
 The

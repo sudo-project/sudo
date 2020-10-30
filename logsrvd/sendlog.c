@@ -911,7 +911,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
-    /* Sanity check ServerHello message. */
+    /* Check that ServerHello is valid. */
     if (msg->server_id == NULL || msg->server_id[0] == '\0') {
 	sudo_warnx("%s", U_("invalid ServerHello"));
 	debug_return_bool(false);

@@ -290,7 +290,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    /* Sanity check message. */
+    /* Check that message is valid. */
     if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid AcceptMessage, submit_time: %p, n_info_msgs: %zu",
@@ -355,7 +355,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    /* Sanity check message. */
+    /* Check that message is valid. */
     if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid RejectMessage, submit_time: %p, n_info_msgs: %zu",
@@ -479,7 +479,7 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
     struct timespec alert_time;
     debug_decl(handle_alert, SUDO_DEBUG_UTIL);
 
-    /* Sanity check message. */
+    /* Check that message is valid. */
     if (msg->alert_time == NULL || msg->reason == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid AlertMessage, alert_time: %p, reason: %p",

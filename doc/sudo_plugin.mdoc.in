@@ -3525,7 +3525,7 @@ The function return value may be one of the following:
 The hook function encountered an error.
 .It Dv SUDO_HOOK_RET_NEXT
 The hook completed without error, go on to the next hook (including
-the native implementation if applicable).
+the system implementation if applicable).
 For example, a
 .Xr getenv 3
 hook might return
@@ -3533,7 +3533,7 @@ hook might return
 if the specified variable was not found in the private copy of the environment.
 .It Dv SUDO_HOOK_RET_STOP
 The hook completed without error, stop processing hooks for this invocation.
-This can be used to replace the native implementation.
+This can be used to replace the system implementation.
 For example, a
 .Li setenv
 hook that operates on a private copy of
@@ -3823,7 +3823,7 @@ from the event loop and frees the memory associated with it.
 .Ss Remote command execution
 The
 .Nm sudo
-front end does not have native support for running remote commands.
+front end does not support running remote commands.
 However, starting with
 .Nm sudo
 1.8.8, the

@@ -182,7 +182,7 @@ sudo_getentropy(void *buf, size_t len)
  */
 
 /*
- * Basic sanity checking; wish we could do better.
+ * Basic validity checking; wish we could do better.
  */
 static int
 gotdata(char *buf, size_t len)
@@ -222,7 +222,7 @@ start:
 	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 #endif
 
-	/* Lightly verify that the device node looks sane */
+	/* Lightly verify that the device node looks OK */
 	if (fstat(fd, &st) == -1 || !S_ISCHR(st.st_mode)) {
 		close(fd);
 		goto nodevrandom;
