@@ -87,9 +87,10 @@ struct client_closure {
 #if defined(HAVE_OPENSSL)
     SSL_CTX *ssl_ctx;
     SSL *ssl;
+    bool ssl_initialized;
 #endif /* HAVE_OPENSSL */
-    enum client_state state;
     bool disabled;
+    enum client_state state;
     struct connection_buffer_list write_bufs;
     struct connection_buffer_list free_bufs;
     struct connection_buffer read_buf;

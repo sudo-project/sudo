@@ -171,19 +171,18 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
 static bool
 tls_init(struct client_closure *closure)
 {
-    static bool initialized;
     const char *errstr;
     debug_decl(tls_init, SUDOERS_DEBUG_PLUGIN);
 
     /* Only attempt to initialize TLS once, the parameters don't change. */
-    if (initialized) {
+    if (closure->ssl_initialized) {
         if (closure->ssl == NULL)
             debug_return_bool(false);
         SSL_clear(closure->ssl);
         debug_return_bool(true);
     }
 
-    initialized = true;
+    closure->ssl_initialized = true;
     SSL_library_init();
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
