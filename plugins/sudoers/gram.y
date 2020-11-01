@@ -1050,8 +1050,8 @@ sudoerserror(const char *s)
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d: %s\n"), sudoers,
-		this_lineno, _(s));
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
+		this_lineno, (int)sudolinebuf.toke_start + 1, _(s));
 	    sudoers_setlocale(oldlocale, NULL);
 
 	    /* Display the offending line and token if possible. */
