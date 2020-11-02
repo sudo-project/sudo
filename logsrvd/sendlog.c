@@ -152,7 +152,7 @@ static int
 connect_server(const char *host, const char *port)
 {
     struct addrinfo hints, *res, *res0;
-    const char *cause = "getaddrinfo";
+    const char *addr, *cause = "getaddrinfo";
     int error, sock, save_errno;
     debug_decl(connect_server, SUDO_DEBUG_UTIL);
 
@@ -182,7 +182,22 @@ connect_server(const char *host, const char *port)
 	    continue;
 	}
 	if (*server_ip == '\0') {
-	    if (inet_ntop(res->ai_family, res->ai_addr, server_ip,
+	    switch (res->ai_family) {
+	    case AF_INET:
+		addr = (char *)&((struct sockaddr_in *)res->ai_addr)->sin_addr;
+		break;
+	    case AF_INET6:
+		addr = (char *)&((struct sockaddr_in6 *)res->ai_addr)->sin6_addr;
+		break;
+	    default:
+		cause = "ai_family";
+		save_errno = EAFNOSUPPORT;
+		close(sock);
+		errno = save_errno;
+		sock = -1;
+		continue;
+	    }
+	    if (inet_ntop(res->ai_family, addr, server_ip,
 		    sizeof(server_ip)) == NULL) {
 		sudo_warnx("%s", U_("unable to get server IP addr"));
 	    }

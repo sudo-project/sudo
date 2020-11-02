@@ -412,7 +412,7 @@ connect_server(const char *host, const char *port, bool tls,
 {
     const struct timespec *timo = &closure->log_details->server_timeout;
     struct addrinfo hints, *res, *res0;
-    const char *cause = NULL;
+    const char *addr, *cause = NULL;
     int error, sock = -1;
     debug_decl(connect_server, SUDOERS_DEBUG_UTIL);
 
@@ -479,7 +479,22 @@ connect_server(const char *host, const char *port, bool tls,
 	    sock = -1;
 	    continue;
 	}
-        if (inet_ntop(res->ai_family, res->ai_addr, closure->server_ip,
+	switch (res->ai_family) {
+	case AF_INET:
+	    addr = (char *)&((struct sockaddr_in *)res->ai_addr)->sin_addr;
+	    break;
+	case AF_INET6:
+	    addr = (char *)&((struct sockaddr_in6 *)res->ai_addr)->sin6_addr;
+	    break;
+	default:
+            cause = "ai_family";
+	    save_errno = EAFNOSUPPORT;
+	    close(sock);
+	    errno = save_errno;
+	    sock = -1;
+	    continue;
+	}
+        if (inet_ntop(res->ai_family, addr, closure->server_ip,
                 sizeof(closure->server_ip)) == NULL) {
             cause = "inet_ntop";
 	    save_errno = errno;
@@ -488,6 +503,15 @@ connect_server(const char *host, const char *port, bool tls,
 	    sock = -1;
 	    continue;
         }
+	free(closure->server_name);
+	if ((closure->server_name = strdup(host)) == NULL) {
+	    cause = "strdup";
+	    save_errno = errno;
+	    close(sock);
+	    errno = save_errno;
+	    sock = -1;
+	    continue;
+	}
 
 #if defined(HAVE_OPENSSL)
         if (tls) {
@@ -544,7 +568,7 @@ log_server_connect(struct client_closure *closure)
     STAILQ_FOREACH(server, closure->log_details->log_servers, entries) {
         free(copy);
 	if ((copy = strdup(server->str)) == NULL) {
-                cause = U_("unable to allocate memory");
+                cause = "strdup";
                 break;
 	}
 	if (!iolog_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
@@ -557,12 +581,6 @@ log_server_connect(struct client_closure *closure)
             "connecting to %s port %s%s", host, port, tls ? " (tls)" : "");
 	sock = connect_server(host, port, tls, closure, &cause);
 	if (sock != -1) {
-            if ((closure->server_name = strdup(host)) == NULL) {
-                cause = U_("unable to allocate memory");
-                close(sock);
-                break;
-            }
-
             if (closure->read_ev->set(closure->read_ev, sock,
                     SUDO_PLUGIN_EV_READ|SUDO_PLUGIN_EV_PERSIST,
                     server_msg_cb, closure) == -1) {
