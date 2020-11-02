@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 31, 2020
+.Dd November 2, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2446,6 +2446,7 @@ struct audit_plugin {
         int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
         int (*deregister_hook)(struct sudo_hook *hook));
+    struct sudo_plugin_event * (*event_alloc)(void);
 }
 .Ed
 .Pp
@@ -2985,6 +2986,39 @@ See the
 .Sx Policy plugin API
 section for a description of
 .Li deregister_hooks .
+.It event_alloc
+.Bd -literal -compact
+struct sudo_plugin_event * (*event_alloc)(void);
+.Ed
+.Pp
+The
+.Fn event_alloc
+function is used to allocate a
+.Li struct sudo_plugin_event
+which provides access to the main
+.Nm sudo
+event loop.
+Unlike the other fields, the
+.Fn event_alloc
+pointer is filled in by the
+.Nm sudo
+front end, not by the plugin.
+.Pp
+See the
+.Sx Event API
+section below for more information
+about events.
+.Pp
+NOTE: the
+.Fn event_alloc
+function is only available starting
+with API version 1.17.
+If the
+.Nm sudo
+front end doesn't support API
+version 1.17 or higher,
+.Fn event_alloc
+will not be set.
 .El
 .Ss Approval plugin API
 .Bd -literal
@@ -4474,6 +4508,10 @@ and
 enties were added to the
 .Li settings
 list.
+.It Version 1.17 (sudo 1.9.4)
+The
+.Em event_alloc
+field was added to the audit_plugin and approval_plugin structs.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

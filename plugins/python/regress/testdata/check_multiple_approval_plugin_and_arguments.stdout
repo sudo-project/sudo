@@ -26,7 +26,7 @@
         "INFO1=VALUE1",
         "info2=value2"
     \],
-    "version": "1.16"
+    "version": "1.17"
 }
 (APPROVAL 2) Constructed:
 {
@@ -56,7 +56,7 @@
         "INFO1=VALUE1",
         "info2=value2"
     \],
-    "version": "1.16"
+    "version": "1.17"
 }
 (APPROVAL 1) Show version was called with arguments: (0,)
 Python approval plugin (API 1.0): ApprovalTestPlugin (loaded from 'SRC_DIR/regress/plugin_approval_test.py')

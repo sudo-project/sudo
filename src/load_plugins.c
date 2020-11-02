@@ -430,6 +430,10 @@ sudo_init_event_alloc(void)
 	if (container->u.io->version >= SUDO_API_MKVERSION(1, 15))
 	    container->u.io->event_alloc = sudo_plugin_event_alloc;
     }
+    TAILQ_FOREACH(container, &audit_plugins, entries) {
+	if (container->u.audit->version >= SUDO_API_MKVERSION(1, 17))
+	    container->u.audit->event_alloc = sudo_plugin_event_alloc;
+    }
 
     debug_return;
 }
