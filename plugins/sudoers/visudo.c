@@ -564,7 +564,7 @@ check_defaults_and_aliases(bool strict, bool quiet)
 	    if (d->error) {
 		/* Defaults parse error, set errorfile/errorlineno. */
 		errorfile = rcstr_addref(d->file);
-		errorlineno = d->lineno;
+		errorlineno = d->line;
 		break;
 	    }
 	}
@@ -1067,7 +1067,8 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 }
 
 static int
-check_alias(char *name, int type, char *file, int lineno, bool strict, bool quiet)
+check_alias(char *name, int type, char *file, int line, int column,
+    bool strict, bool quiet)
 {
     struct member *m;
     struct alias *a;
@@ -1079,26 +1080,27 @@ check_alias(char *name, int type, char *file, int lineno, bool strict, bool quie
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type != ALIAS)
 		continue;
-	    errors += check_alias(m->name, type, a->file, a->lineno, strict, quiet);
+	    errors += check_alias(m->name, type, a->file, a->line, a->column,
+		strict, quiet);
 	}
 	alias_put(a);
     } else {
 	if (!quiet) {
 	    if (errno == ELOOP) {
 		fprintf(stderr, strict ?
-		    U_("Error: %s:%d: cycle in %s \"%s\"") :
-		    U_("Warning: %s:%d: cycle in %s \"%s\""),
-		    file, lineno, alias_type_to_string(type), name);
+		    U_("Error: %s:%d:%d: cycle in %s \"%s\"") :
+		    U_("Warning: %s:%d:%d: cycle in %s \"%s\""),
+		    file, line, column, alias_type_to_string(type), name);
 	    } else {
 		fprintf(stderr, strict ?
-		    U_("Error: %s:%d: %s \"%s\" referenced but not defined") :
-		    U_("Warning: %s:%d: %s \"%s\" referenced but not defined"),
-		    file, lineno, alias_type_to_string(type), name);
+		    U_("Error: %s:%d:%d: %s \"%s\" referenced but not defined") :
+		    U_("Warning: %s:%d:%d: %s \"%s\" referenced but not defined"),
+		    file, line, column, alias_type_to_string(type), name);
 	    }
 	    fputc('\n', stderr);
 	    if (strict && errorfile == NULL) {
 		errorfile = rcstr_addref(file);
-		errorlineno = lineno;
+		errorlineno = line;
 	    }
 	}
 	errors++;
@@ -1133,14 +1135,14 @@ check_aliases(bool strict, bool quiet)
 	TAILQ_FOREACH(m, &us->users, entries) {
 	    if (m->type == ALIAS) {
 		errors += check_alias(m->name, USERALIAS,
-		    us->file, us->lineno, strict, quiet);
+		    us->file, us->line, us->column, strict, quiet);
 	    }
 	}
 	TAILQ_FOREACH(priv, &us->privileges, entries) {
 	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
 		if (m->type == ALIAS) {
 		    errors += check_alias(m->name, HOSTALIAS,
-			us->file, us->lineno, strict, quiet);
+			us->file, us->line, us->column, strict, quiet);
 		}
 	    }
 	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
@@ -1148,7 +1150,7 @@ check_aliases(bool strict, bool quiet)
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m->type == ALIAS) {
 			    errors += check_alias(m->name, RUNASALIAS,
-				us->file, us->lineno, strict, quiet);
+				us->file, us->line, us->column, strict, quiet);
 			}
 		    }
 		}
@@ -1156,13 +1158,13 @@ check_aliases(bool strict, bool quiet)
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m->type == ALIAS) {
 			    errors += check_alias(m->name, RUNASALIAS,
-				us->file, us->lineno, strict, quiet);
+				us->file, us->line, us->column, strict, quiet);
 			}
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
 		    errors += check_alias(m->name, CMNDALIAS,
-			us->file, us->lineno, strict, quiet);
+			us->file, us->line, us->column, strict, quiet);
 		}
 	    }
 	}
@@ -1183,8 +1185,8 @@ check_aliases(bool strict, bool quiet)
 static int
 print_unused(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 {
-    fprintf(stderr, U_("Warning: %s:%d: unused %s \"%s\""),
-	a->file, a->lineno, alias_type_to_string(a->type), a->name);
+    fprintf(stderr, U_("Warning: %s:%d:%d: unused %s \"%s\""),
+	a->file, a->line, a->column, alias_type_to_string(a->type), a->name);
     fputc('\n', stderr);
     return 0;
 }

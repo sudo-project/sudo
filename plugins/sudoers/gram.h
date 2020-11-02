@@ -158,7 +158,7 @@ extern int sudoersdebug;
 
 union YYSTYPE
 {
-#line 77 "gram.y" /* yacc.c:1921  */
+#line 79 "gram.y" /* yacc.c:1921  */
 
     struct cmndspec *cmndspec;
     struct defaults *defaults;

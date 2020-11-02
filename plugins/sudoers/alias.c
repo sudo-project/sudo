@@ -114,7 +114,7 @@ alias_put(struct alias *a)
  */
 const char *
 alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
-    char *file, int lineno, struct member *members)
+    char *file, int line, int column, struct member *members)
 {
     static char errbuf[512];
     struct alias *a;
@@ -136,7 +136,8 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
     a->type = type;
     /* a->used = false; */
     a->file = rcstr_addref(file);
-    a->lineno = lineno;
+    a->line = line;
+    a->column = column;
     HLTQ_TO_TAILQ(&a->members, members, entries);
     switch (rbinsert(parse_tree->aliases, a, NULL)) {
     case 1:

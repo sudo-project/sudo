@@ -54,6 +54,8 @@ bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
 
+static int alias_line, alias_column;
+
 struct sudoers_parse_tree parsed_policy = {
     TAILQ_HEAD_INITIALIZER(parsed_policy.userspecs),
     TAILQ_HEAD_INITIALIZER(parsed_policy.defaults),
@@ -859,10 +861,13 @@ hostaliases	:	hostalias
 		|	hostaliases ':' hostalias
 		;
 
-hostalias	:	ALIAS '=' hostlist {
+hostalias	:	ALIAS {
+			    alias_line = this_lineno;
+			    alias_column = sudolinebuf.toke_start + 1;
+			} '=' hostlist {
 			    const char *s;
 			    s = alias_add(&parsed_policy, $1, HOSTALIAS,
-				sudoers, this_lineno, $3);
+				sudoers, alias_line, alias_column, $4);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -882,10 +887,13 @@ cmndaliases	:	cmndalias
 		|	cmndaliases ':' cmndalias
 		;
 
-cmndalias	:	ALIAS '=' cmndlist {
+cmndalias	:	ALIAS {
+			    alias_line = this_lineno;
+			    alias_column = sudolinebuf.toke_start + 1;
+			} '=' cmndlist {
 			    const char *s;
 			    s = alias_add(&parsed_policy, $1, CMNDALIAS,
-				sudoers, this_lineno, $3);
+				sudoers, alias_line, alias_column, $4);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -905,10 +913,13 @@ runasaliases	:	runasalias
 		|	runasaliases ':' runasalias
 		;
 
-runasalias	:	ALIAS '=' userlist {
+runasalias	:	ALIAS {
+			    alias_line = this_lineno;
+			    alias_column = sudolinebuf.toke_start + 1;
+			} '=' userlist {
 			    const char *s;
 			    s = alias_add(&parsed_policy, $1, RUNASALIAS,
-				sudoers, this_lineno, $3);
+				sudoers, alias_line, alias_column, $4);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -921,10 +932,13 @@ useraliases	:	useralias
 		|	useraliases ':' useralias
 		;
 
-useralias	:	ALIAS '=' userlist {
+useralias	:	ALIAS {
+			    alias_line = this_lineno;
+			    alias_column = sudolinebuf.toke_start + 1;
+			} '=' userlist {
 			    const char *s;
 			    s = alias_add(&parsed_policy, $1, USERALIAS,
-				sudoers, this_lineno, $3);
+				sudoers, alias_line, alias_column, $4);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -1095,7 +1109,8 @@ new_default(char *var, char *val, short op)
     /* d->type = 0; */
     d->op = op;
     /* d->binding = NULL */
-    d->lineno = this_lineno;
+    d->line = this_lineno;
+    d->column = sudolinebuf.toke_start + 1;
     d->file = rcstr_addref(sudoers);
     HLTQ_INIT(d, entries);
 
@@ -1222,7 +1237,8 @@ add_userspec(struct member *members, struct privilege *privs)
 	    "unable to allocate memory");
 	debug_return_bool(false);
     }
-    u->lineno = this_lineno;
+    u->line = this_lineno;
+    u->column = sudolinebuf.toke_start + 1;
     u->file = rcstr_addref(sudoers);
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
