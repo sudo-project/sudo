@@ -699,22 +699,26 @@ alias.i: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
 alias.plog: alias.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/alias.c --i-file $< --output-file $@
 audit.lo: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/bsm_audit.h \
-          $(srcdir)/defaults.h $(srcdir)/linux_audit.h $(srcdir)/logging.h \
-          $(srcdir)/parse.h $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
+          $(srcdir)/linux_audit.h $(srcdir)/logging.h $(srcdir)/parse.h \
+          $(srcdir)/solaris_audit.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/audit.c
 audit.i: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/bsm_audit.h \
-          $(srcdir)/defaults.h $(srcdir)/linux_audit.h $(srcdir)/logging.h \
-          $(srcdir)/parse.h $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
+          $(srcdir)/linux_audit.h $(srcdir)/logging.h $(srcdir)/parse.h \
+          $(srcdir)/solaris_audit.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<

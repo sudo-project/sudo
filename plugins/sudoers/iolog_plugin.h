@@ -78,6 +78,7 @@ struct client_closure {
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
+    bool log_io;
     char *server_name;
 #if defined(HAVE_STRUCT_IN6_ADDR)
     char server_ip[INET6_ADDRSTRLEN];
@@ -104,7 +105,7 @@ struct client_closure {
 };
 
 /* iolog_client.c */
-struct client_closure *log_server_open(struct iolog_details *details, struct timespec *now, struct sudo_plugin_event * (*event_alloc)(void));
+struct client_closure *log_server_open(struct iolog_details *details, struct timespec *now, bool log_io, struct sudo_plugin_event * (*event_alloc)(void));
 bool log_server_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);

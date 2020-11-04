@@ -23,12 +23,15 @@
 
 #include <config.h>
 
+#include <sys/wait.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "sudoers.h"
+#include <netinet/in.h> /* XXX */
+#include "iolog_plugin.h" /* XXX */
 
 #ifdef HAVE_BSM_AUDIT
 # include "bsm_audit.h"
@@ -40,7 +43,14 @@
 # include "solaris_audit.h"
 #endif
 
+#ifdef SUDOERS_IOLOG_CLIENT
+static struct client_closure *client_closure = NULL;
+static struct iolog_details audit_details;
+#endif
 char *audit_msg = NULL;
+
+/* sudoers_audit is declared at the end of this file. */
+extern sudo_dso_public struct audit_plugin sudoers_audit;
 
 static int
 audit_success(char *const argv[])
@@ -132,6 +142,14 @@ audit_failure(char *const argv[], char const *const fmt, ...)
     debug_return_int(ret);
 }
 
+static struct sudoers_audit_state {
+    char * const *settings;
+    char * const *user_info;
+    int submit_optind;
+    char * const *submit_argv;
+    char * const *submit_envp;
+} sudoers_audit_state;
+
 static int
 sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
@@ -167,6 +185,13 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     if (!sudoers_debug_register(plugin_path, &debug_files))
 	debug_return_int(-1);
 
+    /* Stash for later use. */
+    sudoers_audit_state.settings = settings;
+    sudoers_audit_state.user_info = user_info;
+    sudoers_audit_state.submit_argv = submit_argv;
+    sudoers_audit_state.submit_optind = submit_optind;
+    sudoers_audit_state.submit_envp = submit_envp;
+
     /* Call the sudoers init function. */
     info.settings = settings;
     info.user_info = user_info;
@@ -192,13 +217,41 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (plugin_type != SUDO_FRONT_END)
 	debug_return_int(true);
 
-    if (def_log_allowed) {
-	if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
-	    ret = false;
+    if (!def_log_allowed)
+	debug_return_int(true);
 
-	if (!log_allowed() && !def_ignore_logfile_errors)
+    if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
+	ret = false;
+
+    if (!log_allowed() && !def_ignore_logfile_errors)
+	ret = false;
+
+#ifdef SUDOERS_IOLOG_CLIENT
+    /* XXX - move to function, maybe log_allowed()? */
+    if (!SLIST_EMPTY(&def_log_servers) && !def_log_input && !def_log_output) {
+	/* Send accept event to log server. */
+	struct timespec now;
+
+	if (sudo_gettime_real(&now) == -1) {
+	    sudo_warn("%s", U_("unable to get time of day"));
+	    goto bad;
+	}
+
+	/* XXX - no longer iolog-specific */
+	/* XXX - returns false if not io logging */
+	if (iolog_deserialize_info(&audit_details, sudoers_audit_state.user_info,
+	    command_info, run_argv, run_envp) == -1) {
+	    goto bad;
+	}
+
+	/* Open connection to log server, send hello and accept messages. */
+	client_closure = log_server_open(&audit_details, &now, false,
+	    sudoers_audit.event_alloc);
+	if (client_closure == NULL)
+bad:
 	    ret = false;
     }
+#endif
 
     debug_return_int(ret);
 }
@@ -260,6 +313,32 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     debug_return_int(ret);
 }
 
+void
+sudoers_audit_close(int status_type, int status)
+{
+#ifdef SUDOERS_IOLOG_CLIENT
+    debug_decl(sudoers_audit_close, SUDOERS_DEBUG_PLUGIN);
+
+    if (client_closure != NULL) {
+	int exit_status = 0, error = 0;
+
+	if (status_type == SUDO_PLUGIN_WAIT_STATUS) {
+	    if (WIFEXITED(status))
+		exit_status = WEXITSTATUS(status);
+	    else
+		exit_status = WTERMSIG(status) | 128;
+	} else {
+	    /* Must be errno. */
+	    error = status;
+	}
+	log_server_close(client_closure, exit_status, error);
+	client_closure = NULL;
+    }
+
+    debug_return;
+#endif
+}
+
 static int
 sudoers_audit_version(int verbose)
 {
@@ -275,11 +354,12 @@ sudo_dso_public struct audit_plugin sudoers_audit = {
     SUDO_AUDIT_PLUGIN,
     SUDO_API_VERSION,
     sudoers_audit_open,
-    NULL, /* audit_close */
+    sudoers_audit_close,
     sudoers_audit_accept,
     sudoers_audit_reject,
     sudoers_audit_error,
     sudoers_audit_version,
     NULL, /* register_hooks */
-    NULL /* deregister_hooks */
+    NULL, /* deregister_hooks */
+    NULL /* event_alloc() filled in by sudo */
 };

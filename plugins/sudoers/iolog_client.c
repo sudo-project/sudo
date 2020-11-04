@@ -959,7 +959,7 @@ fmt_accept_message(struct client_closure *closure)
     accept_msg.submit_time = &ts;
 
     /* Client will send IoBuffer messages. */
-    accept_msg.expect_iobufs = true;
+    accept_msg.expect_iobufs = closure->log_io;
 
     accept_msg.info_msgs = fmt_info_messages(closure, &accept_msg.n_info_msgs);
     if (accept_msg.info_msgs == NULL)
@@ -1214,15 +1214,21 @@ client_message_completion(struct client_closure *closure)
 	/* Arbitrary number of I/O log buffers, no state change. */
 	break;
     case SEND_EXIT:
-	/* Done writing, just waiting for final commit point. */
-	closure->write_ev->del(closure->write_ev);
-	closure->state = CLOSING;
+	if (closure->log_io) {
+	    /* Done writing, just waiting for final commit point. */
+	    closure->write_ev->del(closure->write_ev);
+	    closure->state = CLOSING;
 
-	/* Enable timeout while waiting for final commit point. */
-	if (closure->read_ev->add(closure->read_ev,
-		&closure->log_details->server_timeout) == -1) {
-	    sudo_warn("%s", U_("unable to add event to queue"));
-	    debug_return_bool(false);
+	    /* Enable timeout while waiting for final commit point. */
+	    if (closure->read_ev->add(closure->read_ev,
+		    &closure->log_details->server_timeout) == -1) {
+		sudo_warn("%s", U_("unable to add event to queue"));
+		debug_return_bool(false);
+	    }
+	} else {
+	    /* No commit point to wait for, we are done. */
+	    closure->state = FINISHED;
+	    closure->read_ev->del(closure->read_ev);
 	}
 	break;
     default:
@@ -1762,7 +1768,7 @@ bad:
  */
 static struct client_closure *
 client_closure_alloc(struct iolog_details *details, struct timespec *now,
-    struct sudo_plugin_event * (*event_alloc)(void))
+    bool log_io, struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;
     debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL);
@@ -1771,6 +1777,7 @@ client_closure_alloc(struct iolog_details *details, struct timespec *now,
         goto oom;
 
     closure->sock = -1;
+    closure->log_io = log_io;
     closure->state = RECV_HELLO;
 
     closure->start_time.tv_sec = now->tv_sec;
@@ -1802,12 +1809,12 @@ oom:
 
 struct client_closure *
 log_server_open(struct iolog_details *details, struct timespec *now,
-    struct sudo_plugin_event * (*event_alloc)(void))
+    bool log_io, struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;
     debug_decl(log_server_open, SUDOERS_DEBUG_UTIL);
 
-    closure = client_closure_alloc(details, now, event_alloc);
+    closure = client_closure_alloc(details, now, log_io, event_alloc);
     if (closure == NULL)
 	goto bad;
 
