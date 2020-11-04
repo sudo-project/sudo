@@ -752,6 +752,187 @@ fmt_client_hello(struct client_closure *closure)
 }
 
 /*
+ * Free an array of InfoMessage.
+ * Does not free the actual contents, other than strlistval arrays.
+ */
+static void
+free_info_messages(InfoMessage **info_msgs, size_t n)
+{
+    debug_decl(free_info_messages, SUDOERS_DEBUG_UTIL);
+
+    if (info_msgs != NULL) {
+	while (n-- != 0) {
+	    /* A strlist array is dynamically allocated. */
+	    if (info_msgs[n]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
+		free(info_msgs[n]->u.strlistval);
+	    }
+	    free(info_msgs[n]);
+	}
+	free(info_msgs);
+    }
+
+    debug_return;
+}
+
+static InfoMessage **
+fmt_info_messages(struct client_closure *closure, size_t *n_info_msgs)
+{
+    struct iolog_details *details = closure->log_details;
+    struct eventlog *evlog = details->evlog;
+    InfoMessage__StringList *runargv = NULL;
+    InfoMessage__StringList *runenv = NULL;
+    InfoMessage **info_msgs = NULL;
+    size_t info_msgs_size, n = 0;
+    debug_decl(fmt_info_messages, SUDOERS_DEBUG_UTIL);
+
+    /* Convert NULL-terminated vectors to StringList. */
+    if ((runargv = malloc(sizeof(*runargv))) == NULL)
+	goto bad;
+    info_message__string_list__init(runargv);
+    runargv->strings = evlog->argv;
+    while (runargv->strings[runargv->n_strings] != NULL)
+	runargv->n_strings++;
+
+    if ((runenv = malloc(sizeof(*runenv))) == NULL)
+	goto bad;
+    info_message__string_list__init(runenv);
+    runenv->strings = evlog->envp;
+    while (runenv->strings[runenv->n_strings] != NULL)
+	runenv->n_strings++;
+
+    /* XXX - realloc as needed instead of preallocating */
+    info_msgs_size = 24;
+    info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
+    if (info_msgs == NULL)
+	goto bad;
+    for (n = 0; n < info_msgs_size; n++) {
+	info_msgs[n] = malloc(sizeof(InfoMessage));
+	if (info_msgs[n] == NULL)
+	    goto bad;
+	info_message__init(info_msgs[n]);
+    }
+
+    /* Fill in info_msgs */
+    n = 0;
+
+    /* TODO: clientargv (not currently supported by API) */
+    /* TODO: clientpid */
+    /* TODO: clientppid */
+    /* TODO: clientsid */
+
+    info_msgs[n]->key = "columns";
+    info_msgs[n]->u.numval = evlog->columns;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    n++;
+
+    info_msgs[n]->key = "command";
+    info_msgs[n]->u.strval = evlog->command;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    info_msgs[n]->key = "lines";
+    info_msgs[n]->u.numval = evlog->lines;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    n++;
+
+    info_msgs[n]->key = "runargv";
+    info_msgs[n]->u.strlistval = runargv;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    n++;
+
+    info_msgs[n]->key = "runenv";
+    info_msgs[n]->u.strlistval = runenv;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    n++;
+
+    if (evlog->rungroup!= NULL) {
+	info_msgs[n]->key = "rungid";
+	info_msgs[n]->u.numval = evlog->rungid;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+	n++;
+
+	info_msgs[n]->key = "rungroup";
+	info_msgs[n]->u.strval = evlog->rungroup;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    /* TODO - rungids */
+    /* TODO - rungroups */
+
+    info_msgs[n]->key = "runuid";
+    info_msgs[n]->u.numval = evlog->runuid;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+    n++;
+
+    info_msgs[n]->key = "runuser";
+    info_msgs[n]->u.strval = evlog->runuser;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    if (evlog->cwd != NULL) {
+	info_msgs[n]->key = "submitcwd";
+	info_msgs[n]->u.strval = evlog->cwd;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    if (evlog->runcwd != NULL) {
+	info_msgs[n]->key = "runcwd";
+	info_msgs[n]->u.strval = evlog->runcwd;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    if (evlog->runchroot != NULL) {
+	info_msgs[n]->key = "runchroot";
+	info_msgs[n]->u.strval = evlog->runchroot;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    /* TODO - submitenv */
+    /* TODO - submitgid */
+    /* TODO - submitgids */
+    /* TODO - submitgroup */
+    /* TODO - submitgroups */
+
+    info_msgs[n]->key = "submithost";
+    info_msgs[n]->u.strval = evlog->submithost;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    /* TODO - submituid */
+
+    info_msgs[n]->key = "submituser";
+    info_msgs[n]->u.strval = evlog->submituser;
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+    n++;
+
+    if (evlog->ttyname != NULL) {
+	info_msgs[n]->key = "ttyname";
+	info_msgs[n]->u.strval = evlog->ttyname;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    /* Free unused structs. */
+    while (info_msgs_size > n)
+	free(info_msgs[--info_msgs_size]);
+
+    *n_info_msgs = n;
+    debug_return_ptr(info_msgs);
+
+bad:
+    free_info_messages(info_msgs, n);
+    free(runargv);
+    free(runenv);
+
+    *n_info_msgs = 0;
+    debug_return_ptr(NULL);
+}
+
+/*
  * Build and format an AcceptMessage wrapped in a ClientMessage.
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
@@ -762,11 +943,6 @@ fmt_accept_message(struct client_closure *closure)
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     AcceptMessage accept_msg = ACCEPT_MESSAGE__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
-    InfoMessage__StringList runargv = INFO_MESSAGE__STRING_LIST__INIT;
-    InfoMessage__StringList runenv = INFO_MESSAGE__STRING_LIST__INIT;
-    struct iolog_details *details = closure->log_details;
-    struct eventlog *evlog = details->evlog;
-    size_t info_msgs_size, n;
     struct timespec now;
     bool ret = false;
     debug_decl(fmt_accept_message, SUDOERS_DEBUG_UTIL);
@@ -785,139 +961,13 @@ fmt_accept_message(struct client_closure *closure)
     /* Client will send IoBuffer messages. */
     accept_msg.expect_iobufs = true;
 
-    /* Convert NULL-terminated vectors to StringList. */
-    runargv.strings = evlog->argv;
-    while (runargv.strings[runargv.n_strings] != NULL)
-	runargv.n_strings++;
-    runenv.strings = evlog->envp;
-    while (runenv.strings[runenv.n_strings] != NULL)
-	runenv.n_strings++;
-
-    /* XXX - realloc as needed instead of preallocating */
-    info_msgs_size = 24;
-    accept_msg.info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
-    if (accept_msg.info_msgs == NULL) {
-	info_msgs_size = 0;
+    accept_msg.info_msgs = fmt_info_messages(closure, &accept_msg.n_info_msgs);
+    if (accept_msg.info_msgs == NULL)
 	goto done;
-    }
-    for (n = 0; n < info_msgs_size; n++) {
-	accept_msg.info_msgs[n] = malloc(sizeof(InfoMessage));
-	if (accept_msg.info_msgs[n] == NULL) {
-	    info_msgs_size = n;
-	    goto done;
-	}
-	info_message__init(accept_msg.info_msgs[n]);
-    }
-
-    /* Fill in info_msgs */
-    n = 0;
-
-    /* TODO: clientargv (not currently supported by API) */
-    /* TODO: clientpid */
-    /* TODO: clientppid */
-    /* TODO: clientsid */
-
-    accept_msg.info_msgs[n]->key = "columns";
-    accept_msg.info_msgs[n]->u.numval = evlog->columns;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "command";
-    accept_msg.info_msgs[n]->u.strval = evlog->command;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "lines";
-    accept_msg.info_msgs[n]->u.numval = evlog->lines;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "runargv";
-    accept_msg.info_msgs[n]->u.strlistval = &runargv;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "runenv";
-    accept_msg.info_msgs[n]->u.strlistval = &runenv;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
-    n++;
-
-    if (evlog->rungroup!= NULL) {
-	accept_msg.info_msgs[n]->key = "rungid";
-	accept_msg.info_msgs[n]->u.numval = evlog->rungid;
-	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-	n++;
-
-	accept_msg.info_msgs[n]->key = "rungroup";
-	accept_msg.info_msgs[n]->u.strval = evlog->rungroup;
-	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
-
-    /* TODO - rungids */
-    /* TODO - rungroups */
-
-    accept_msg.info_msgs[n]->key = "runuid";
-    accept_msg.info_msgs[n]->u.numval = evlog->runuid;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    accept_msg.info_msgs[n]->key = "runuser";
-    accept_msg.info_msgs[n]->u.strval = evlog->runuser;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    if (evlog->cwd != NULL) {
-	accept_msg.info_msgs[n]->key = "submitcwd";
-	accept_msg.info_msgs[n]->u.strval = evlog->cwd;
-	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
-
-    if (evlog->runcwd != NULL) {
-	accept_msg.info_msgs[n]->key = "runcwd";
-	accept_msg.info_msgs[n]->u.strval = evlog->runcwd;
-	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
-
-    if (evlog->runchroot != NULL) {
-	accept_msg.info_msgs[n]->key = "runchroot";
-	accept_msg.info_msgs[n]->u.strval = evlog->runchroot;
-	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
-
-    /* TODO - submitenv */
-    /* TODO - submitgid */
-    /* TODO - submitgids */
-    /* TODO - submitgroup */
-    /* TODO - submitgroups */
-
-    accept_msg.info_msgs[n]->key = "submithost";
-    accept_msg.info_msgs[n]->u.strval = evlog->submithost;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    /* TODO - submituid */
-
-    accept_msg.info_msgs[n]->key = "submituser";
-    accept_msg.info_msgs[n]->u.strval = evlog->submituser;
-    accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    if (evlog->ttyname != NULL) {
-	accept_msg.info_msgs[n]->key = "ttyname";
-	accept_msg.info_msgs[n]->u.strval = evlog->ttyname;
-	accept_msg.info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
-
-    /* Update n_info_msgs. */
-    accept_msg.n_info_msgs = n;
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: sending AcceptMessage, array length %zu", __func__, n);
+	"%s: sending AcceptMessage, array length %zu", __func__,
+	accept_msg.n_info_msgs);
 
     /* Schedule ClientMessage */
     client_msg.u.accept_msg = &accept_msg;
@@ -925,9 +975,7 @@ fmt_accept_message(struct client_closure *closure)
     ret = fmt_client_message(closure, &client_msg);
 
 done:
-    for (n = 0; n < info_msgs_size; n++)
-	free(accept_msg.info_msgs[n]);
-    free(accept_msg.info_msgs);
+    free_info_messages(accept_msg.info_msgs, accept_msg.n_info_msgs);
 
     debug_return_bool(ret);
 }
