@@ -320,19 +320,16 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    if (!msg->expect_iobufs) {
-	closure->state = RUNNING;
-	debug_return_bool(true);
-    }
-
-    /* Send log ID to client for restarting connections. */
-    if (!fmt_log_id_message(closure->evlog->iolog_path, &closure->write_buf))
-	debug_return_bool(false);
-    if (sudo_ev_add(closure->evbase, closure->write_ev,
-        logsrvd_conf_get_sock_timeout(), false) == -1) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to add server write event");
-        debug_return_bool(false);
+    if (msg->expect_iobufs) {
+	/* Send log ID to client for restarting connections. */
+	if (!fmt_log_id_message(closure->evlog->iolog_path, &closure->write_buf))
+	    debug_return_bool(false);
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_get_sock_timeout(), false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    debug_return_bool(false);
+	}
     }
 
     closure->state = RUNNING;
