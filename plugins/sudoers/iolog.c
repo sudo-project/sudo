@@ -160,6 +160,30 @@ cb_iolog_mode(const union sudo_defs_val *sd_un)
     return true;
 }
 
+/*
+ * Make a shallow copy of a NULL-terminated argument or environment vector.
+ * Only the outer array is allocated, the pointers inside are copied.
+ * The caller is responsible for freeing the returned copy.
+ */
+static char **
+copy_vector_shallow(char * const *vec)
+{
+    char **copy;
+    size_t len;
+    debug_decl(copy_vector, SUDOERS_DEBUG_UTIL);
+
+    for (len = 0; vec[len] != NULL; len++)
+	continue;
+
+    if ((copy = reallocarray(NULL, len + 1, sizeof(char *))) != NULL) {
+	for (len = 0; vec[len] != NULL; len++)
+	    copy[len] = vec[len];
+	copy[len] = NULL;
+    }
+
+    debug_return_ptr(copy);
+}
+
 static void
 free_iolog_details(void)
 {
@@ -226,7 +250,7 @@ bad:
  */
 static int
 iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
-    char * const command_info[])
+    char * const command_info[], char * const argv[], char * const user_env[])
 {
     struct eventlog *evlog;
     const char *runas_uid_str = "0", *runas_euid_str = NULL;
@@ -501,6 +525,18 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	}
     }
 
+    if (argv != NULL) {
+	evlog->argv = copy_vector_shallow(argv);
+	if (evlog->argv == NULL)
+	    goto oom;
+    }
+    if (user_env != NULL) {
+	evlog->envp = copy_vector_shallow(user_env);
+	if (evlog->envp ==  NULL)
+	    goto oom;
+    }
+
+
     /*
      * Lookup runas user and group, preferring effective over real uid/gid.
      */
@@ -560,30 +596,6 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     debug_return_int(-1);
-}
-
-/*
- * Make a shallow copy of a NULL-terminated argument or environment vector.
- * Only the outer array is allocated, the pointers inside are copied.
- * The caller is responsible for freeing the returned copy.
- */
-static char **
-copy_vector_shallow(char * const *vec)
-{
-    char **copy;
-    size_t len;
-    debug_decl(copy_vector, SUDOERS_DEBUG_UTIL);
-
-    for (len = 0; vec[len] != NULL; len++)
-	continue;
-
-    if ((copy = reallocarray(NULL, len + 1, sizeof(char *))) != NULL) {
-	for (len = 0; vec[len] != NULL; len++)
-	    copy[len] = vec[len];
-	copy[len] = NULL;
-    }
-
-    debug_return_ptr(copy);
 }
 
 static int
@@ -733,23 +745,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /*
      * Pull iolog settings out of command_info.
      */
-    ret = iolog_deserialize_info(&iolog_details, user_info, command_info);
+    ret = iolog_deserialize_info(&iolog_details, user_info, command_info,
+	argv, user_env);
     if (ret != true)
 	goto done;
-    if (argv != NULL) {
-	iolog_details.evlog->argv = copy_vector_shallow(argv);
-	if (iolog_details.evlog->argv == NULL) {
-	    ret = -1;
-	    goto done;
-	}
-    }
-    if (user_env != NULL) {
-	iolog_details.evlog->envp = copy_vector_shallow(user_env);
-	if (iolog_details.evlog->envp ==  NULL) {
-	    ret = -1;
-	    goto done;
-	}
-    }
 
     /* Initialize io_operations. */
     sudoers_io_setops();
