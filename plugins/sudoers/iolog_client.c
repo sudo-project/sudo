@@ -1712,9 +1712,9 @@ bad:
 /*
  * Allocate and initialize a new client closure
  */
-struct client_closure *
-client_closure_alloc(struct iolog_details *details,
-    struct io_plugin *sudoers_io, struct timespec *now)
+static struct client_closure *
+client_closure_alloc(struct iolog_details *details, struct timespec *now,
+    struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;
     debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL);
@@ -1736,10 +1736,10 @@ client_closure_alloc(struct iolog_details *details,
     TAILQ_INIT(&closure->write_bufs);
     TAILQ_INIT(&closure->free_bufs);
 
-    if ((closure->read_ev = sudoers_io->event_alloc()) == NULL)
+    if ((closure->read_ev = event_alloc()) == NULL)
 	goto oom;
 
-    if ((closure->write_ev = sudoers_io->event_alloc()) == NULL)
+    if ((closure->write_ev = event_alloc()) == NULL)
 	goto oom;
 
     closure->log_details = details;
@@ -1752,15 +1752,42 @@ oom:
     debug_return_ptr(NULL);
 }
 
+struct client_closure *
+log_server_open(struct iolog_details *details, struct timespec *now,
+    struct sudo_plugin_event * (*event_alloc)(void))
+{
+    struct client_closure *closure;
+    debug_decl(log_server_open, SUDOERS_DEBUG_UTIL);
+
+    closure = client_closure_alloc(details, now, event_alloc);
+    if (closure == NULL)
+	goto bad;
+
+    /* Connect to log first available log server. */
+    if (!log_server_connect(closure)) {
+	/* TODO: support offline logs if server unreachable */
+	sudo_warnx("%s", U_("unable to connect to log server"));
+	goto bad;
+    }
+
+    /* Read ServerHello synchronously or fail. */
+    if (read_server_hello(closure))
+	debug_return_ptr(closure);
+
+bad:
+    client_closure_free(closure);
+    debug_return_ptr(NULL);
+}
+
 /*
  * Send ExitMessage, wait for final commit message and free closure.
  */
 bool
-client_close(struct client_closure *closure, int exit_status, int error)
+log_server_close(struct client_closure *closure, int exit_status, int error)
 {
     struct sudo_event_base *evbase = NULL;
     bool ret = false;
-    debug_decl(client_close, SUDOERS_DEBUG_UTIL);
+    debug_decl(log_server_close, SUDOERS_DEBUG_UTIL);
 
     if (closure->disabled)
 	goto done;
@@ -1807,7 +1834,6 @@ client_close(struct client_closure *closure, int exit_status, int error)
 done:
     sudo_ev_base_free(evbase);
     client_closure_free(closure);
-    closure = NULL;
     debug_return_bool(ret);
 }
 

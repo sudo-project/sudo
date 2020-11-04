@@ -104,8 +104,8 @@ struct client_closure {
 };
 
 /* iolog_client.c */
-struct client_closure *client_closure_alloc(struct iolog_details *details, struct io_plugin *sudoers_io, struct timespec *now);
-bool client_close(struct client_closure *closure, int exit_status, int error);
+struct client_closure *log_server_open(struct iolog_details *details, struct timespec *now, struct sudo_plugin_event * (*event_alloc)(void));
+bool log_server_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);
 bool fmt_exit_message(struct client_closure *closure, int exit_status, int error);

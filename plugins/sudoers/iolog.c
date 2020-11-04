@@ -536,7 +536,6 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    goto oom;
     }
 
-
     /*
      * Lookup runas user and group, preferring effective over real uid/gid.
      */
@@ -676,28 +675,15 @@ done:
 static int
 sudoers_io_open_remote(struct timespec *now)
 {
-    int ret = -1;
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
-    client_closure = client_closure_alloc(&iolog_details, &sudoers_io, now);
-    if (client_closure == NULL)
-	goto done;
+    /* Open connection to log server, send hello and accept messages. */
+    client_closure = log_server_open(&iolog_details, now,
+	sudoers_io.event_alloc);
+    if (client_closure != NULL)
+	debug_return_int(1);
 
-    /* Connect to log server. */
-    if (!log_server_connect(client_closure)) {
-	/* TODO: support offline logs if server unreachable */
-	sudo_warnx("%s", U_("unable to connect to log server"));
-	goto done;
-    }
-
-    /* Read ServerHello synchronously or fail. */
-    if (read_server_hello(client_closure))
-	ret = 1;
-
-done:
-    if (ret != 1)
-	client_closure_free(client_closure);
-    debug_return_int(ret);
+    debug_return_int(-1);
 }
 #endif /* SUDOERS_IOLOG_CLIENT */
 
@@ -833,7 +819,8 @@ sudoers_io_close_remote(int exit_status, int error, const char **errstr)
 {
     debug_decl(sudoers_io_close_remote, SUDOERS_DEBUG_PLUGIN);
 
-    client_close(client_closure, exit_status, error);
+    log_server_close(client_closure, exit_status, error);
+    client_closure = NULL;
 
     debug_return;
 }
