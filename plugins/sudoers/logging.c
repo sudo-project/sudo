@@ -512,7 +512,7 @@ sudoers_log_open(int type, const char *log_file)
     mode_t oldmask;
     int fd, flags;
     char *omode;
-    debug_decl(sudoers_log_open, SUDOERS_DEBUG_DEFAULTS);
+    debug_decl(sudoers_log_open, SUDOERS_DEBUG_LOGGING);
 
     switch (type) {
 	case EVLOG_SYSLOG:
@@ -559,7 +559,7 @@ sudoers_log_open(int type, const char *log_file)
 static void
 sudoers_log_close(int type, FILE *fp)
 {
-    debug_decl(sudoers_log_close, SUDOERS_DEBUG_DEFAULTS);
+    debug_decl(sudoers_log_close, SUDOERS_DEBUG_LOGGING);
 
     switch (type) {
 	case EVLOG_SYSLOG:
@@ -596,7 +596,7 @@ init_eventlog_config(void)
 #else
     uid_t mailuid = ROOT_UID;
 #endif
-    debug_decl(init_eventlog_config, SUDOERS_DEBUG_DEFAULTS);
+    debug_decl(init_eventlog_config, SUDOERS_DEBUG_LOGGING);
 
     if (def_syslog)
 	logtype |= EVLOG_SYSLOG;
