@@ -800,18 +800,24 @@ format_json(int event_type, const char *reason, const char *errstr,
     if (!sudo_json_open_object(&json, type_str))
 	goto bad;
 
-    /* Reject and Alert events include a reason */
+    /* Reject and Alert events include a reason and optional error string. */
     if (reason != NULL) {
+	char *ereason = NULL;
+
+	if (errstr != NULL) {
+	    if (asprintf(&ereason, _("%s: %s"), reason, errstr) == -1) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		goto bad;
+	    }
+	}
 	json_value.type = JSON_STRING;
-	json_value.u.string = reason;
-	if (!sudo_json_add_value(&json, "reason", &json_value))
+	json_value.u.string = ereason ? ereason : reason;
+	if (!sudo_json_add_value(&json, "reason", &json_value)) {
+	    free(ereason);
 	    goto bad;
-    }
-    if (errstr != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = errstr;
-	if (!sudo_json_add_value(&json, "error", &json_value))
-	    goto bad;
+	}
+	free(ereason);
     }
 
     /* XXX - create and log uuid? */
