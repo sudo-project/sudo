@@ -321,7 +321,7 @@ closefrom_nodebug(int lowfd)
 #define MAX_MAILFLAGS	63
 
 static void __attribute__((__noreturn__))
-exec_mailer(const struct eventlog *evlog, int pipein)
+exec_mailer(int pipein)
 {
     char *last, *mflags, *p, *argv[MAX_MAILFLAGS + 1];
     const char *mpath = evl_conf.mailerpath;
@@ -496,7 +496,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 	    break;
 	case 0:
 	    /* Child. */
-	    exec_mailer(evlog, pfd[0]);
+	    exec_mailer(pfd[0]);
 	    /* NOTREACHED */
     }
 
@@ -512,17 +512,20 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     /* Pipes are all setup, send message. */
     (void) fprintf(mail, "To: %s\nFrom: %s\nAuto-Submitted: %s\nSubject: ",
 	evl_conf.mailto,
-	evl_conf.mailfrom ? evl_conf.mailfrom : evlog->submituser,
+	evl_conf.mailfrom ? evl_conf.mailfrom :
+	(evlog ? evlog->submituser : "root"),
 	"auto-generated");
     for (cp = _(evl_conf.mailsub); *cp; cp++) {
 	/* Expand escapes in the subject */
 	if (*cp == '%' && *(cp+1) != '%') {
 	    switch (*(++cp)) {
 		case 'h':
-		    (void) fputs(evlog->submithost, mail);
+		    if (evlog != NULL)
+			(void) fputs(evlog->submithost, mail);
 		    break;
 		case 'u':
-		    (void) fputs(evlog->submituser, mail);
+		    if (evlog != NULL)
+			(void) fputs(evlog->submituser, mail);
 		    break;
 		default:
 		    cp--;
@@ -539,8 +542,12 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 #endif /* HAVE_NL_LANGINFO && CODESET */
 
     strftime(timebuf, sizeof(timebuf), timefmt, tm);
-    (void) fprintf(mail, "\n\n%s : %s : %s : ", evlog->submithost, timebuf,
-	evlog->submituser);
+    if (evlog != NULL) {
+	(void) fprintf(mail, "\n\n%s : %s : %s : ", evlog->submithost, timebuf,
+	    evlog->submituser);
+    } else {
+	(void) fprintf(mail, "\n\n%s : ", timebuf);
+    }
     va_start(ap, fmt);
     (void) vfprintf(mail, fmt, ap);
     va_end(ap);
@@ -836,16 +843,19 @@ format_json(int event_type, const char *reason, const char *errstr,
 	goto bad;
     }
 
-    if (evlog->iolog_path != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = evlog->iolog_path;
-	if (!sudo_json_add_value(&json, "iolog_path", &json_value))
+     /* Event log info may be missing for alert messages. */
+     if (evlog != NULL) {
+	if (evlog->iolog_path != NULL) {
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = evlog->iolog_path;
+	    if (!sudo_json_add_value(&json, "iolog_path", &json_value))
+		goto bad;
+	}
+
+	/* Write log info. */
+	if (!info_cb(&json, info))
 	    goto bad;
     }
-
-    /* Write log info. */
-    if (!info_cb(&json, info))
-	goto bad;
 
     if (!sudo_json_close_object(&json))
 	goto bad;
@@ -871,6 +881,12 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
     debug_decl(do_syslog_sudo, SUDO_DEBUG_UTIL);
 
     evl_conf.open_log(EVLOG_SYSLOG, NULL);
+
+    if (evlog == NULL) {
+	/* Not a command, just log it as-is. */
+	syslog(pri, "%s", logline);
+	goto done;
+    }
 
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
@@ -908,6 +924,7 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
 	maxlen = evl_conf.syslog_maxlen -
 	    (strlen(fmt) - 5 + strlen(evlog->submituser));
     }
+done:
     evl_conf.close_log(EVLOG_SYSLOG, NULL);
 
     debug_return_bool(true);
