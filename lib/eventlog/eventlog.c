@@ -105,10 +105,10 @@ static struct eventlog_config evl_conf = {
  */
 static char *
 new_logline(int flags, const char *message, const char *errstr,
-    const struct eventlog *details)
+    const struct eventlog *evlog)
 {
     char *line = NULL, *evstr = NULL;
-    const char *iolog_file = details->iolog_file;
+    const char *iolog_file = evlog->iolog_file;
     const char *tty, *tsid = NULL;
     char sessid[7];
     size_t len = 0;
@@ -143,7 +143,7 @@ new_logline(int flags, const char *message, const char *errstr,
     }
 
     /* Sudo-format logs use the short form of the ttyname. */
-    if ((tty = details->ttyname) != NULL) {
+    if ((tty = evlog->ttyname) != NULL) {
 	if (strncmp(tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 	    tty += sizeof(_PATH_DEV) - 1;
     }
@@ -155,30 +155,30 @@ new_logline(int flags, const char *message, const char *errstr,
 	len += strlen(message) + 3;
     if (errstr != NULL)
 	len += strlen(errstr) + 3;
-    if (details->submithost != NULL && !evl_conf.omit_hostname)
-	len += sizeof(LL_HOST_STR) + 2 + strlen(details->submithost);
+    if (evlog->submithost != NULL && !evl_conf.omit_hostname)
+	len += sizeof(LL_HOST_STR) + 2 + strlen(evlog->submithost);
     if (tty != NULL)
 	len += sizeof(LL_TTY_STR) + 2 + strlen(tty);
-    if (details->runchroot != NULL)
-	len += sizeof(LL_CHROOT_STR) + 2 + strlen(details->runchroot);
-    if (details->runcwd != NULL)
-	len += sizeof(LL_CWD_STR) + 2 + strlen(details->runcwd);
-    if (details->runuser != NULL)
-	len += sizeof(LL_USER_STR) + 2 + strlen(details->runuser);
-    if (details->rungroup != NULL)
-	len += sizeof(LL_GROUP_STR) + 2 + strlen(details->rungroup);
+    if (evlog->runchroot != NULL)
+	len += sizeof(LL_CHROOT_STR) + 2 + strlen(evlog->runchroot);
+    if (evlog->runcwd != NULL)
+	len += sizeof(LL_CWD_STR) + 2 + strlen(evlog->runcwd);
+    if (evlog->runuser != NULL)
+	len += sizeof(LL_USER_STR) + 2 + strlen(evlog->runuser);
+    if (evlog->rungroup != NULL)
+	len += sizeof(LL_GROUP_STR) + 2 + strlen(evlog->rungroup);
     if (tsid != NULL)
 	len += sizeof(LL_TSID_STR) + 2 + strlen(tsid);
-    if (details->env_add != NULL) {
+    if (evlog->env_add != NULL) {
 	size_t evlen = 0;
 	char * const *ep;
 
-	for (ep = details->env_add; *ep != NULL; ep++)
+	for (ep = evlog->env_add; *ep != NULL; ep++)
 	    evlen += strlen(*ep) + 1;
 	if (evlen != 0) {
 	    if ((evstr = malloc(evlen)) == NULL)
 		goto oom;
-	    ep = details->env_add;
+	    ep = evlog->env_add;
 	    if (strlcpy(evstr, *ep, evlen) >= evlen)
 		goto toobig;
 	    while (*++ep != NULL) {
@@ -189,10 +189,10 @@ new_logline(int flags, const char *message, const char *errstr,
 	    len += sizeof(LL_ENV_STR) + 2 + evlen;
 	}
     }
-    if (details->command != NULL) {
-	len += sizeof(LL_CMND_STR) - 1 + strlen(details->command);
-	for (i = 1; details->argv[i] != NULL; i++)
-	    len += strlen(details->argv[i]) + 1;
+    if (evlog->command != NULL) {
+	len += sizeof(LL_CMND_STR) - 1 + strlen(evlog->command);
+	for (i = 1; evlog->argv[i] != NULL; i++)
+	    len += strlen(evlog->argv[i]) + 1;
     }
 
     /*
@@ -212,9 +212,9 @@ new_logline(int flags, const char *message, const char *errstr,
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
-    if (details->submithost != NULL && !evl_conf.omit_hostname) {
+    if (evlog->submithost != NULL && !evl_conf.omit_hostname) {
 	if (strlcat(line, LL_HOST_STR, len) >= len ||
-	    strlcat(line, details->submithost, len) >= len ||
+	    strlcat(line, evlog->submithost, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
@@ -224,27 +224,27 @@ new_logline(int flags, const char *message, const char *errstr,
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
-    if (details->runchroot != NULL) {
+    if (evlog->runchroot != NULL) {
 	if (strlcat(line, LL_CHROOT_STR, len) >= len ||
-	    strlcat(line, details->runchroot, len) >= len ||
+	    strlcat(line, evlog->runchroot, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
-    if (details->runcwd != NULL) {
+    if (evlog->runcwd != NULL) {
 	if (strlcat(line, LL_CWD_STR, len) >= len ||
-	    strlcat(line, details->runcwd, len) >= len ||
+	    strlcat(line, evlog->runcwd, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
-    if (details->runuser != NULL) {
+    if (evlog->runuser != NULL) {
 	if (strlcat(line, LL_USER_STR, len) >= len ||
-	    strlcat(line, details->runuser, len) >= len ||
+	    strlcat(line, evlog->runuser, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
-    if (details->rungroup != NULL) {
+    if (evlog->rungroup != NULL) {
 	if (strlcat(line, LL_GROUP_STR, len) >= len ||
-	    strlcat(line, details->rungroup, len) >= len ||
+	    strlcat(line, evlog->rungroup, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
@@ -262,14 +262,14 @@ new_logline(int flags, const char *message, const char *errstr,
 	free(evstr);
 	evstr = NULL;
     }
-    if (details->command != NULL) {
+    if (evlog->command != NULL) {
 	if (strlcat(line, LL_CMND_STR, len) >= len)
 	    goto toobig;
-	if (strlcat(line, details->command, len) >= len)
+	if (strlcat(line, evlog->command, len) >= len)
 	    goto toobig;
-	for (i = 1; details->argv[i] != NULL; i++) {
+	for (i = 1; evlog->argv[i] != NULL; i++) {
 	    if (strlcat(line, " ", len) >= len ||
-		strlcat(line, details->argv[i], len) >= len)
+		strlcat(line, evlog->argv[i], len) >= len)
 		goto toobig;
 	}
     }
@@ -755,7 +755,7 @@ default_json_cb(struct json_container *json, void *v)
 
 static char *
 format_json(int event_type, const char *reason, const char *errstr,
-    const struct eventlog *details, const struct timespec *event_time,
+    const struct eventlog *evlog, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info, bool compact)
 {
     const char *type_str;
@@ -767,7 +767,7 @@ format_json(int event_type, const char *reason, const char *errstr,
 
     if (info_cb == NULL) {
 	info_cb = default_json_cb;
-	info = (void *)details;
+	info = (void *)evlog;
     }
 
     if (sudo_gettime_real(&now) == -1) {
@@ -830,14 +830,14 @@ format_json(int event_type, const char *reason, const char *errstr,
 	goto bad;
     }
 
-    if (details->iolog_path != NULL) {
+    if (evlog->iolog_path != NULL) {
 	json_value.type = JSON_STRING;
-	json_value.u.string = details->iolog_path;
+	json_value.u.string = evlog->iolog_path;
 	if (!sudo_json_add_value(&json, "iolog_path", &json_value))
 	    goto bad;
     }
 
-    /* Write log details. */
+    /* Write log info. */
     if (!info_cb(&json, info))
 	goto bad;
 
@@ -857,7 +857,7 @@ bad:
  * message into parts if it is longer than syslog_maxlen.
  */
 static bool
-do_syslog_sudo(int pri, char *logline, const struct eventlog *details)
+do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
 {
     size_t len, maxlen;
     char *p, *tmp, save;
@@ -871,7 +871,7 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *details)
      */
     fmt = _("%8s : %s");
     maxlen = evl_conf.syslog_maxlen -
-	(strlen(fmt) - 5 + strlen(details->submituser));
+	(strlen(fmt) - 5 + strlen(evlog->submituser));
     for (p = logline; *p != '\0'; ) {
 	len = strlen(p);
 	if (len > maxlen) {
@@ -887,7 +887,7 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *details)
 	    save = *tmp;
 	    *tmp = '\0';
 
-	    syslog(pri, fmt, details->submituser, p);
+	    syslog(pri, fmt, evlog->submituser, p);
 
 	    *tmp = save;			/* restore saved character */
 
@@ -895,12 +895,12 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *details)
 	    for (p = tmp; *p == ' '; p++)
 		continue;
 	} else {
-	    syslog(pri, fmt, details->submituser, p);
+	    syslog(pri, fmt, evlog->submituser, p);
 	    p += len;
 	}
 	fmt = _("%8s : (command continued) %s");
 	maxlen = evl_conf.syslog_maxlen -
-	    (strlen(fmt) - 5 + strlen(details->submituser));
+	    (strlen(fmt) - 5 + strlen(evlog->submituser));
     }
     evl_conf.close_log(EVLOG_SYSLOG, NULL);
 
@@ -909,7 +909,7 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *details)
 
 static bool
 do_syslog_json(int pri, int event_type, const char *reason,
-    const char *errstr, const struct eventlog *details,
+    const char *errstr, const struct eventlog *evlog,
     const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
@@ -917,7 +917,7 @@ do_syslog_json(int pri, int event_type, const char *reason,
     debug_decl(do_syslog_json, SUDO_DEBUG_UTIL);
 
     /* Format as a compact JSON message (no newlines) */
-    json_str = format_json(event_type, reason, errstr, details, event_time,
+    json_str = format_json(event_type, reason, errstr, evlog, event_time,
 	info_cb, info, true);
     if (json_str == NULL)
 	debug_return_bool(false);
@@ -936,7 +936,7 @@ do_syslog_json(int pri, int event_type, const char *reason,
  */
 static bool
 do_syslog(int event_type, int flags, const char *reason, const char *errstr,
-    const struct eventlog *details, const struct timespec *event_time,
+    const struct eventlog *evlog, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
     char *logline = NULL;
@@ -946,12 +946,12 @@ do_syslog(int event_type, int flags, const char *reason, const char *errstr,
 
     /* Sudo format logs and mailed logs use the same log line format. */
     if (evl_conf.format == EVLOG_SUDO || ISSET(flags, EVLOG_MAIL)) {
-	logline = new_logline(flags, reason, errstr, details);
+	logline = new_logline(flags, reason, errstr, evlog);
 	if (logline == NULL)
 	    debug_return_bool(false);
 
 	if (ISSET(flags, EVLOG_MAIL)) {
-	    if (!send_mail(details, "%s", logline)) {
+	    if (!send_mail(evlog, "%s", logline)) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to mail log line");
 	    }
@@ -986,10 +986,10 @@ do_syslog(int event_type, int flags, const char *reason, const char *errstr,
 
     switch (evl_conf.format) {
     case EVLOG_SUDO:
-	ret = do_syslog_sudo(pri, logline, details);
+	ret = do_syslog_sudo(pri, logline, evlog);
 	break;
     case EVLOG_JSON:
-	ret = do_syslog_json(pri, event_type, reason, errstr, details,
+	ret = do_syslog_json(pri, event_type, reason, errstr, evlog,
 	    event_time, info_cb, info);
 	break;
     default:
@@ -1003,7 +1003,7 @@ do_syslog(int event_type, int flags, const char *reason, const char *errstr,
 }
 
 static bool
-do_logfile_sudo(const char *logline, const struct eventlog *details)
+do_logfile_sudo(const char *logline, const struct eventlog *evlog)
 {
     const char *timefmt = evl_conf.time_fmt;
     const char *logfile = evl_conf.logpath;
@@ -1023,7 +1023,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *details)
 	goto done;
     }
 
-    if ((timeptr = localtime(&details->submit_time.tv_sec)) != NULL) {
+    if ((timeptr = localtime(&evlog->submit_time.tv_sec)) != NULL) {
 	/* strftime() does not guarantee to NUL-terminate so we must check. */
 	timebuf[sizeof(timebuf) - 1] = '\0';
 	if (strftime(timebuf, sizeof(timebuf), timefmt, timeptr) != 0 &&
@@ -1032,7 +1032,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *details)
 	}
     }
     len = asprintf(&full_line, "%s : %s : %s",
-	timestr ? timestr : "invalid date", details->submituser, logline);
+	timestr ? timestr : "invalid date", evlog->submituser, logline);
     if (len == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
@@ -1054,7 +1054,7 @@ done:
 
 static bool
 do_logfile_json(int event_type, const char *reason, const char *errstr,
-    const struct eventlog *details, const struct timespec *event_time,
+    const struct eventlog *evlog, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
     const char *logfile = evl_conf.logpath;
@@ -1067,7 +1067,7 @@ do_logfile_json(int event_type, const char *reason, const char *errstr,
     if ((fp = evl_conf.open_log(EVLOG_FILE, logfile)) == NULL)
 	debug_return_bool(false);
 
-    json_str = format_json(event_type, reason, errstr, details, event_time,
+    json_str = format_json(event_type, reason, errstr, evlog, event_time,
 	info_cb, info, false);
     if (json_str == NULL)
 	goto done;
@@ -1111,7 +1111,7 @@ done:
 
 static bool
 do_logfile(int event_type, int flags, const char *reason, const char *errstr,
-    const struct eventlog *details, const struct timespec *event_time,
+    const struct eventlog *evlog, const struct timespec *event_time,
     eventlog_json_callback_t info_cb, void *info)
 {
     bool ret = false;
@@ -1120,12 +1120,12 @@ do_logfile(int event_type, int flags, const char *reason, const char *errstr,
 
     /* Sudo format logs and mailed logs use the same log line format. */
     if (evl_conf.format == EVLOG_SUDO || ISSET(flags, EVLOG_MAIL)) {
-	logline = new_logline(flags, reason, errstr, details);
+	logline = new_logline(flags, reason, errstr, evlog);
 	if (logline == NULL)
 	    debug_return_bool(false);
 
 	if (ISSET(flags, EVLOG_MAIL)) {
-	    if (!send_mail(details, "%s", logline)) {
+	    if (!send_mail(evlog, "%s", logline)) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to mail log line");
 	    }
@@ -1138,10 +1138,10 @@ do_logfile(int event_type, int flags, const char *reason, const char *errstr,
 
     switch (evl_conf.format) {
     case EVLOG_SUDO:
-	ret = do_logfile_sudo(logline ? logline : reason, details);
+	ret = do_logfile_sudo(logline ? logline : reason, evlog);
 	break;
     case EVLOG_JSON:
-	ret = do_logfile_json(event_type, reason, errstr, details,
+	ret = do_logfile_json(event_type, reason, errstr, evlog,
 	    event_time, info_cb, info);
 	break;
     default:
@@ -1155,7 +1155,7 @@ do_logfile(int event_type, int flags, const char *reason, const char *errstr,
 }
 
 bool
-eventlog_accept(const struct eventlog *details, int flags,
+eventlog_accept(const struct eventlog *evlog, int flags,
     eventlog_json_callback_t info_cb, void *info)
 {
     const int log_type = evl_conf.type;
@@ -1166,14 +1166,14 @@ eventlog_accept(const struct eventlog *details, int flags,
 	debug_return_bool(true);
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
-	if (!do_syslog(EVLOG_ACCEPT, flags, NULL, NULL, details,
-		&details->submit_time, info_cb, info))
+	if (!do_syslog(EVLOG_ACCEPT, flags, NULL, NULL, evlog,
+		&evlog->submit_time, info_cb, info))
 	    ret = false;
 	CLR(flags, EVLOG_MAIL);
     }
     if (ISSET(log_type, EVLOG_FILE)) {
-	if (!do_logfile(EVLOG_ACCEPT, flags, NULL, NULL, details,
-		&details->submit_time, info_cb, info))
+	if (!do_logfile(EVLOG_ACCEPT, flags, NULL, NULL, evlog,
+		&evlog->submit_time, info_cb, info))
 	    ret = false;
     }
 
@@ -1181,7 +1181,7 @@ eventlog_accept(const struct eventlog *details, int flags,
 }
 
 bool
-eventlog_reject(const struct eventlog *details, int flags, const char *reason,
+eventlog_reject(const struct eventlog *evlog, int flags, const char *reason,
     eventlog_json_callback_t info_cb, void *info)
 {
     const int log_type = evl_conf.type;
@@ -1189,14 +1189,14 @@ eventlog_reject(const struct eventlog *details, int flags, const char *reason,
     debug_decl(log_reject, SUDO_DEBUG_UTIL);
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
-	if (!do_syslog(EVLOG_REJECT, flags, reason, NULL, details,
-		&details->submit_time, info_cb, info))
+	if (!do_syslog(EVLOG_REJECT, flags, reason, NULL, evlog,
+		&evlog->submit_time, info_cb, info))
 	    ret = false;
 	CLR(flags, EVLOG_MAIL);
     }
     if (ISSET(log_type, EVLOG_FILE)) {
-	if (!do_logfile(EVLOG_REJECT, flags, reason, NULL, details,
-		&details->submit_time, info_cb, info))
+	if (!do_logfile(EVLOG_REJECT, flags, reason, NULL, evlog,
+		&evlog->submit_time, info_cb, info))
 	    ret = false;
     }
 
@@ -1204,7 +1204,7 @@ eventlog_reject(const struct eventlog *details, int flags, const char *reason,
 }
 
 bool
-eventlog_alert(const struct eventlog *details, int flags,
+eventlog_alert(const struct eventlog *evlog, int flags,
     struct timespec *alert_time, const char *reason, const char *errstr)
 {
     const int log_type = evl_conf.type;
@@ -1212,13 +1212,13 @@ eventlog_alert(const struct eventlog *details, int flags,
     debug_decl(log_alert, SUDO_DEBUG_UTIL);
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
-	if (!do_syslog(EVLOG_ALERT, flags, reason, errstr, details, alert_time,
+	if (!do_syslog(EVLOG_ALERT, flags, reason, errstr, evlog, alert_time,
 		NULL, NULL))
 	    ret = false;
 	CLR(flags, EVLOG_MAIL);
     }
     if (ISSET(log_type, EVLOG_FILE)) {
-	if (!do_logfile(EVLOG_ALERT, flags, reason, errstr, details, alert_time,
+	if (!do_logfile(EVLOG_ALERT, flags, reason, errstr, evlog, alert_time,
 		NULL, NULL))
 	    ret = false;
     }
