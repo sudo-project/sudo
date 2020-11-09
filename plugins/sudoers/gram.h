@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.3.2.  */
+/* A Bison parser, made by GNU Bison 3.7.3.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_SUDOERS_Y_TAB_H_INCLUDED
 # define YY_SUDOERS_Y_TAB_H_INCLUDED
@@ -44,64 +45,73 @@
 extern int sudoersdebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    COMMAND = 258,
-    ALIAS = 259,
-    DEFVAR = 260,
-    NTWKADDR = 261,
-    NETGROUP = 262,
-    USERGROUP = 263,
-    WORD = 264,
-    DIGEST = 265,
-    INCLUDE = 266,
-    INCLUDEDIR = 267,
-    DEFAULTS = 268,
-    DEFAULTS_HOST = 269,
-    DEFAULTS_USER = 270,
-    DEFAULTS_RUNAS = 271,
-    DEFAULTS_CMND = 272,
-    NOPASSWD = 273,
-    PASSWD = 274,
-    NOEXEC = 275,
-    EXEC = 276,
-    SETENV = 277,
-    NOSETENV = 278,
-    LOG_INPUT = 279,
-    NOLOG_INPUT = 280,
-    LOG_OUTPUT = 281,
-    NOLOG_OUTPUT = 282,
-    MAIL = 283,
-    NOMAIL = 284,
-    FOLLOWLNK = 285,
-    NOFOLLOWLNK = 286,
-    ALL = 287,
-    HOSTALIAS = 288,
-    CMNDALIAS = 289,
-    USERALIAS = 290,
-    RUNASALIAS = 291,
-    ERROR = 292,
-    NOMATCH = 293,
-    CHROOT = 294,
-    CWD = 295,
-    TYPE = 296,
-    ROLE = 297,
-    PRIVS = 298,
-    LIMITPRIVS = 299,
-    CMND_TIMEOUT = 300,
-    NOTBEFORE = 301,
-    NOTAFTER = 302,
-    MYSELF = 303,
-    SHA224_TOK = 304,
-    SHA256_TOK = 305,
-    SHA384_TOK = 306,
-    SHA512_TOK = 307
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    COMMAND = 258,                 /* COMMAND  */
+    ALIAS = 259,                   /* ALIAS  */
+    DEFVAR = 260,                  /* DEFVAR  */
+    NTWKADDR = 261,                /* NTWKADDR  */
+    NETGROUP = 262,                /* NETGROUP  */
+    USERGROUP = 263,               /* USERGROUP  */
+    WORD = 264,                    /* WORD  */
+    DIGEST = 265,                  /* DIGEST  */
+    INCLUDE = 266,                 /* INCLUDE  */
+    INCLUDEDIR = 267,              /* INCLUDEDIR  */
+    DEFAULTS = 268,                /* DEFAULTS  */
+    DEFAULTS_HOST = 269,           /* DEFAULTS_HOST  */
+    DEFAULTS_USER = 270,           /* DEFAULTS_USER  */
+    DEFAULTS_RUNAS = 271,          /* DEFAULTS_RUNAS  */
+    DEFAULTS_CMND = 272,           /* DEFAULTS_CMND  */
+    NOPASSWD = 273,                /* NOPASSWD  */
+    PASSWD = 274,                  /* PASSWD  */
+    NOEXEC = 275,                  /* NOEXEC  */
+    EXEC = 276,                    /* EXEC  */
+    SETENV = 277,                  /* SETENV  */
+    NOSETENV = 278,                /* NOSETENV  */
+    LOG_INPUT = 279,               /* LOG_INPUT  */
+    NOLOG_INPUT = 280,             /* NOLOG_INPUT  */
+    LOG_OUTPUT = 281,              /* LOG_OUTPUT  */
+    NOLOG_OUTPUT = 282,            /* NOLOG_OUTPUT  */
+    MAIL = 283,                    /* MAIL  */
+    NOMAIL = 284,                  /* NOMAIL  */
+    FOLLOWLNK = 285,               /* FOLLOWLNK  */
+    NOFOLLOWLNK = 286,             /* NOFOLLOWLNK  */
+    ALL = 287,                     /* ALL  */
+    HOSTALIAS = 288,               /* HOSTALIAS  */
+    CMNDALIAS = 289,               /* CMNDALIAS  */
+    USERALIAS = 290,               /* USERALIAS  */
+    RUNASALIAS = 291,              /* RUNASALIAS  */
+    ERROR = 292,                   /* ERROR  */
+    NOMATCH = 293,                 /* NOMATCH  */
+    CHROOT = 294,                  /* CHROOT  */
+    CWD = 295,                     /* CWD  */
+    TYPE = 296,                    /* TYPE  */
+    ROLE = 297,                    /* ROLE  */
+    PRIVS = 298,                   /* PRIVS  */
+    LIMITPRIVS = 299,              /* LIMITPRIVS  */
+    CMND_TIMEOUT = 300,            /* CMND_TIMEOUT  */
+    NOTBEFORE = 301,               /* NOTBEFORE  */
+    NOTAFTER = 302,                /* NOTAFTER  */
+    MYSELF = 303,                  /* MYSELF  */
+    SHA224_TOK = 304,              /* SHA224_TOK  */
+    SHA256_TOK = 305,              /* SHA256_TOK  */
+    SHA384_TOK = 306,              /* SHA384_TOK  */
+    SHA512_TOK = 307               /* SHA512_TOK  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define COMMAND 258
 #define ALIAS 259
 #define DEFVAR 260
@@ -155,10 +165,9 @@ extern int sudoersdebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-#line 79 "gram.y" /* yacc.c:1921  */
+#line 79 "gram.y"
 
     struct cmndspec *cmndspec;
     struct defaults *defaults;
@@ -172,9 +181,9 @@ union YYSTYPE
     char *string;
     int tok;
 
-#line 176 "y.tab.h" /* yacc.c:1921  */
-};
+#line 185 "y.tab.h"
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

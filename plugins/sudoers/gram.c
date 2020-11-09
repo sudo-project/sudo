@@ -4,11 +4,11 @@
  */
 
 #include <config.h>
-/* A Bison parser, made by GNU Bison 3.3.2.  */
+/* A Bison parser, made by GNU Bison 3.7.3.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -40,6 +40,10 @@
 /* C LALR(1) parser skeleton written by Richard Stallman, by
    simplifying the original so-called "semantic" parser.  */
 
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
 /* All symbols defined below should begin with yy or YY, to avoid
    infringing on user name space.  This should be done even for local
    variables, as they might otherwise be expanded by user macros.
@@ -47,14 +51,11 @@
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
-
 /* Identify Bison output.  */
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.3.2"
+#define YYBISON_VERSION "3.7.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -75,12 +76,11 @@
 #define yyerror         sudoerserror
 #define yydebug         sudoersdebug
 #define yynerrs         sudoersnerrs
-
 #define yylval          sudoerslval
 #define yychar          sudoerschar
 
 /* First part of user prologue.  */
-#line 1 "gram.y" /* yacc.c:337  */
+#line 1 "gram.y"
 
 /*
  * SPDX-License-Identifier: ISC
@@ -158,7 +158,17 @@ static struct member *new_member(char *, int);
 static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(int, char *);
 
-#line 156 "gram.c" /* yacc.c:337  */
+#line 156 "gram.c"
+
+# ifndef YY_CAST
+#  ifdef __cplusplus
+#   define YY_CAST(Type, Val) static_cast<Type> (Val)
+#   define YY_REINTERPRET_CAST(Type, Val) reinterpret_cast<Type> (Val)
+#  else
+#   define YY_CAST(Type, Val) ((Type) (Val))
+#   define YY_REINTERPRET_CAST(Type, Val) ((Type) (Val))
+#  endif
+# endif
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -171,16 +181,8 @@ static struct command_digest *new_digest(int, char *);
 #  endif
 # endif
 
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-/* In a future release of Bison, this section will be replaced
-   by #include "y.tab.h".  */
+/* Use api.header.include to #include this header
+   instead of duplicating it here.  */
 #ifndef YY_SUDOERS_Y_TAB_H_INCLUDED
 # define YY_SUDOERS_Y_TAB_H_INCLUDED
 /* Debug traces.  */
@@ -191,64 +193,73 @@ static struct command_digest *new_digest(int, char *);
 extern int sudoersdebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    COMMAND = 258,
-    ALIAS = 259,
-    DEFVAR = 260,
-    NTWKADDR = 261,
-    NETGROUP = 262,
-    USERGROUP = 263,
-    WORD = 264,
-    DIGEST = 265,
-    INCLUDE = 266,
-    INCLUDEDIR = 267,
-    DEFAULTS = 268,
-    DEFAULTS_HOST = 269,
-    DEFAULTS_USER = 270,
-    DEFAULTS_RUNAS = 271,
-    DEFAULTS_CMND = 272,
-    NOPASSWD = 273,
-    PASSWD = 274,
-    NOEXEC = 275,
-    EXEC = 276,
-    SETENV = 277,
-    NOSETENV = 278,
-    LOG_INPUT = 279,
-    NOLOG_INPUT = 280,
-    LOG_OUTPUT = 281,
-    NOLOG_OUTPUT = 282,
-    MAIL = 283,
-    NOMAIL = 284,
-    FOLLOWLNK = 285,
-    NOFOLLOWLNK = 286,
-    ALL = 287,
-    HOSTALIAS = 288,
-    CMNDALIAS = 289,
-    USERALIAS = 290,
-    RUNASALIAS = 291,
-    ERROR = 292,
-    NOMATCH = 293,
-    CHROOT = 294,
-    CWD = 295,
-    TYPE = 296,
-    ROLE = 297,
-    PRIVS = 298,
-    LIMITPRIVS = 299,
-    CMND_TIMEOUT = 300,
-    NOTBEFORE = 301,
-    NOTAFTER = 302,
-    MYSELF = 303,
-    SHA224_TOK = 304,
-    SHA256_TOK = 305,
-    SHA384_TOK = 306,
-    SHA512_TOK = 307
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    COMMAND = 258,                 /* COMMAND  */
+    ALIAS = 259,                   /* ALIAS  */
+    DEFVAR = 260,                  /* DEFVAR  */
+    NTWKADDR = 261,                /* NTWKADDR  */
+    NETGROUP = 262,                /* NETGROUP  */
+    USERGROUP = 263,               /* USERGROUP  */
+    WORD = 264,                    /* WORD  */
+    DIGEST = 265,                  /* DIGEST  */
+    INCLUDE = 266,                 /* INCLUDE  */
+    INCLUDEDIR = 267,              /* INCLUDEDIR  */
+    DEFAULTS = 268,                /* DEFAULTS  */
+    DEFAULTS_HOST = 269,           /* DEFAULTS_HOST  */
+    DEFAULTS_USER = 270,           /* DEFAULTS_USER  */
+    DEFAULTS_RUNAS = 271,          /* DEFAULTS_RUNAS  */
+    DEFAULTS_CMND = 272,           /* DEFAULTS_CMND  */
+    NOPASSWD = 273,                /* NOPASSWD  */
+    PASSWD = 274,                  /* PASSWD  */
+    NOEXEC = 275,                  /* NOEXEC  */
+    EXEC = 276,                    /* EXEC  */
+    SETENV = 277,                  /* SETENV  */
+    NOSETENV = 278,                /* NOSETENV  */
+    LOG_INPUT = 279,               /* LOG_INPUT  */
+    NOLOG_INPUT = 280,             /* NOLOG_INPUT  */
+    LOG_OUTPUT = 281,              /* LOG_OUTPUT  */
+    NOLOG_OUTPUT = 282,            /* NOLOG_OUTPUT  */
+    MAIL = 283,                    /* MAIL  */
+    NOMAIL = 284,                  /* NOMAIL  */
+    FOLLOWLNK = 285,               /* FOLLOWLNK  */
+    NOFOLLOWLNK = 286,             /* NOFOLLOWLNK  */
+    ALL = 287,                     /* ALL  */
+    HOSTALIAS = 288,               /* HOSTALIAS  */
+    CMNDALIAS = 289,               /* CMNDALIAS  */
+    USERALIAS = 290,               /* USERALIAS  */
+    RUNASALIAS = 291,              /* RUNASALIAS  */
+    ERROR = 292,                   /* ERROR  */
+    NOMATCH = 293,                 /* NOMATCH  */
+    CHROOT = 294,                  /* CHROOT  */
+    CWD = 295,                     /* CWD  */
+    TYPE = 296,                    /* TYPE  */
+    ROLE = 297,                    /* ROLE  */
+    PRIVS = 298,                   /* PRIVS  */
+    LIMITPRIVS = 299,              /* LIMITPRIVS  */
+    CMND_TIMEOUT = 300,            /* CMND_TIMEOUT  */
+    NOTBEFORE = 301,               /* NOTBEFORE  */
+    NOTAFTER = 302,                /* NOTAFTER  */
+    MYSELF = 303,                  /* MYSELF  */
+    SHA224_TOK = 304,              /* SHA224_TOK  */
+    SHA256_TOK = 305,              /* SHA256_TOK  */
+    SHA384_TOK = 306,              /* SHA384_TOK  */
+    SHA512_TOK = 307               /* SHA512_TOK  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define COMMAND 258
 #define ALIAS 259
 #define DEFVAR 260
@@ -302,10 +313,9 @@ extern int sudoersdebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-#line 79 "gram.y" /* yacc.c:352  */
+#line 79 "gram.y"
 
     struct cmndspec *cmndspec;
     struct defaults *defaults;
@@ -319,9 +329,9 @@ union YYSTYPE
     char *string;
     int tok;
 
-#line 317 "gram.c" /* yacc.c:352  */
-};
+#line 327 "gram.c"
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -333,6 +343,129 @@ extern YYSTYPE sudoerslval;
 int sudoersparse (void);
 
 #endif /* !YY_SUDOERS_Y_TAB_H_INCLUDED  */
+/* Symbol kind.  */
+enum yysymbol_kind_t
+{
+  YYSYMBOL_YYEMPTY = -2,
+  YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
+  YYSYMBOL_YYerror = 1,                    /* error  */
+  YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
+  YYSYMBOL_COMMAND = 3,                    /* COMMAND  */
+  YYSYMBOL_ALIAS = 4,                      /* ALIAS  */
+  YYSYMBOL_DEFVAR = 5,                     /* DEFVAR  */
+  YYSYMBOL_NTWKADDR = 6,                   /* NTWKADDR  */
+  YYSYMBOL_NETGROUP = 7,                   /* NETGROUP  */
+  YYSYMBOL_USERGROUP = 8,                  /* USERGROUP  */
+  YYSYMBOL_WORD = 9,                       /* WORD  */
+  YYSYMBOL_DIGEST = 10,                    /* DIGEST  */
+  YYSYMBOL_INCLUDE = 11,                   /* INCLUDE  */
+  YYSYMBOL_INCLUDEDIR = 12,                /* INCLUDEDIR  */
+  YYSYMBOL_DEFAULTS = 13,                  /* DEFAULTS  */
+  YYSYMBOL_DEFAULTS_HOST = 14,             /* DEFAULTS_HOST  */
+  YYSYMBOL_DEFAULTS_USER = 15,             /* DEFAULTS_USER  */
+  YYSYMBOL_DEFAULTS_RUNAS = 16,            /* DEFAULTS_RUNAS  */
+  YYSYMBOL_DEFAULTS_CMND = 17,             /* DEFAULTS_CMND  */
+  YYSYMBOL_NOPASSWD = 18,                  /* NOPASSWD  */
+  YYSYMBOL_PASSWD = 19,                    /* PASSWD  */
+  YYSYMBOL_NOEXEC = 20,                    /* NOEXEC  */
+  YYSYMBOL_EXEC = 21,                      /* EXEC  */
+  YYSYMBOL_SETENV = 22,                    /* SETENV  */
+  YYSYMBOL_NOSETENV = 23,                  /* NOSETENV  */
+  YYSYMBOL_LOG_INPUT = 24,                 /* LOG_INPUT  */
+  YYSYMBOL_NOLOG_INPUT = 25,               /* NOLOG_INPUT  */
+  YYSYMBOL_LOG_OUTPUT = 26,                /* LOG_OUTPUT  */
+  YYSYMBOL_NOLOG_OUTPUT = 27,              /* NOLOG_OUTPUT  */
+  YYSYMBOL_MAIL = 28,                      /* MAIL  */
+  YYSYMBOL_NOMAIL = 29,                    /* NOMAIL  */
+  YYSYMBOL_FOLLOWLNK = 30,                 /* FOLLOWLNK  */
+  YYSYMBOL_NOFOLLOWLNK = 31,               /* NOFOLLOWLNK  */
+  YYSYMBOL_ALL = 32,                       /* ALL  */
+  YYSYMBOL_HOSTALIAS = 33,                 /* HOSTALIAS  */
+  YYSYMBOL_CMNDALIAS = 34,                 /* CMNDALIAS  */
+  YYSYMBOL_USERALIAS = 35,                 /* USERALIAS  */
+  YYSYMBOL_RUNASALIAS = 36,                /* RUNASALIAS  */
+  YYSYMBOL_37_ = 37,                       /* ':'  */
+  YYSYMBOL_38_ = 38,                       /* '='  */
+  YYSYMBOL_39_ = 39,                       /* ','  */
+  YYSYMBOL_40_ = 40,                       /* '!'  */
+  YYSYMBOL_41_ = 41,                       /* '+'  */
+  YYSYMBOL_42_ = 42,                       /* '-'  */
+  YYSYMBOL_43_ = 43,                       /* '('  */
+  YYSYMBOL_44_ = 44,                       /* ')'  */
+  YYSYMBOL_45_n_ = 45,                     /* '\n'  */
+  YYSYMBOL_ERROR = 46,                     /* ERROR  */
+  YYSYMBOL_NOMATCH = 47,                   /* NOMATCH  */
+  YYSYMBOL_CHROOT = 48,                    /* CHROOT  */
+  YYSYMBOL_CWD = 49,                       /* CWD  */
+  YYSYMBOL_TYPE = 50,                      /* TYPE  */
+  YYSYMBOL_ROLE = 51,                      /* ROLE  */
+  YYSYMBOL_PRIVS = 52,                     /* PRIVS  */
+  YYSYMBOL_LIMITPRIVS = 53,                /* LIMITPRIVS  */
+  YYSYMBOL_CMND_TIMEOUT = 54,              /* CMND_TIMEOUT  */
+  YYSYMBOL_NOTBEFORE = 55,                 /* NOTBEFORE  */
+  YYSYMBOL_NOTAFTER = 56,                  /* NOTAFTER  */
+  YYSYMBOL_MYSELF = 57,                    /* MYSELF  */
+  YYSYMBOL_SHA224_TOK = 58,                /* SHA224_TOK  */
+  YYSYMBOL_SHA256_TOK = 59,                /* SHA256_TOK  */
+  YYSYMBOL_SHA384_TOK = 60,                /* SHA384_TOK  */
+  YYSYMBOL_SHA512_TOK = 61,                /* SHA512_TOK  */
+  YYSYMBOL_YYACCEPT = 62,                  /* $accept  */
+  YYSYMBOL_file = 63,                      /* file  */
+  YYSYMBOL_line = 64,                      /* line  */
+  YYSYMBOL_entry = 65,                     /* entry  */
+  YYSYMBOL_include = 66,                   /* include  */
+  YYSYMBOL_includedir = 67,                /* includedir  */
+  YYSYMBOL_defaults_list = 68,             /* defaults_list  */
+  YYSYMBOL_defaults_entry = 69,            /* defaults_entry  */
+  YYSYMBOL_privileges = 70,                /* privileges  */
+  YYSYMBOL_privilege = 71,                 /* privilege  */
+  YYSYMBOL_ophost = 72,                    /* ophost  */
+  YYSYMBOL_host = 73,                      /* host  */
+  YYSYMBOL_cmndspeclist = 74,              /* cmndspeclist  */
+  YYSYMBOL_cmndspec = 75,                  /* cmndspec  */
+  YYSYMBOL_digestspec = 76,                /* digestspec  */
+  YYSYMBOL_digestlist = 77,                /* digestlist  */
+  YYSYMBOL_digcmnd = 78,                   /* digcmnd  */
+  YYSYMBOL_opcmnd = 79,                    /* opcmnd  */
+  YYSYMBOL_chdirspec = 80,                 /* chdirspec  */
+  YYSYMBOL_chrootspec = 81,                /* chrootspec  */
+  YYSYMBOL_timeoutspec = 82,               /* timeoutspec  */
+  YYSYMBOL_notbeforespec = 83,             /* notbeforespec  */
+  YYSYMBOL_notafterspec = 84,              /* notafterspec  */
+  YYSYMBOL_rolespec = 85,                  /* rolespec  */
+  YYSYMBOL_typespec = 86,                  /* typespec  */
+  YYSYMBOL_privsspec = 87,                 /* privsspec  */
+  YYSYMBOL_limitprivsspec = 88,            /* limitprivsspec  */
+  YYSYMBOL_runasspec = 89,                 /* runasspec  */
+  YYSYMBOL_runaslist = 90,                 /* runaslist  */
+  YYSYMBOL_reserved_word = 91,             /* reserved_word  */
+  YYSYMBOL_reserved_alias = 92,            /* reserved_alias  */
+  YYSYMBOL_options = 93,                   /* options  */
+  YYSYMBOL_cmndtag = 94,                   /* cmndtag  */
+  YYSYMBOL_cmnd = 95,                      /* cmnd  */
+  YYSYMBOL_hostaliases = 96,               /* hostaliases  */
+  YYSYMBOL_hostalias = 97,                 /* hostalias  */
+  YYSYMBOL_98_1 = 98,                      /* $@1  */
+  YYSYMBOL_hostlist = 99,                  /* hostlist  */
+  YYSYMBOL_cmndaliases = 100,              /* cmndaliases  */
+  YYSYMBOL_cmndalias = 101,                /* cmndalias  */
+  YYSYMBOL_102_2 = 102,                    /* $@2  */
+  YYSYMBOL_cmndlist = 103,                 /* cmndlist  */
+  YYSYMBOL_runasaliases = 104,             /* runasaliases  */
+  YYSYMBOL_runasalias = 105,               /* runasalias  */
+  YYSYMBOL_106_3 = 106,                    /* $@3  */
+  YYSYMBOL_useraliases = 107,              /* useraliases  */
+  YYSYMBOL_useralias = 108,                /* useralias  */
+  YYSYMBOL_109_4 = 109,                    /* $@4  */
+  YYSYMBOL_userlist = 110,                 /* userlist  */
+  YYSYMBOL_opuser = 111,                   /* opuser  */
+  YYSYMBOL_user = 112,                     /* user  */
+  YYSYMBOL_grouplist = 113,                /* grouplist  */
+  YYSYMBOL_opgroup = 114,                  /* opgroup  */
+  YYSYMBOL_group = 115                     /* group  */
+};
+typedef enum yysymbol_kind_t yysymbol_kind_t;
+
 
 
 
@@ -340,28 +473,75 @@ int sudoersparse (void);
 # undef short
 #endif
 
-#ifdef YYTYPE_UINT8
-typedef YYTYPE_UINT8 yytype_uint8;
-#else
-typedef unsigned char yytype_uint8;
+/* On compilers that do not define __PTRDIFF_MAX__ etc., make sure
+   <limits.h> and (if available) <stdint.h> are included
+   so that the code can choose integer types of a good width.  */
+
+#ifndef __PTRDIFF_MAX__
+# include <limits.h> /* INFRINGES ON USER NAME SPACE */
+# if defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
+#  include <stdint.h> /* INFRINGES ON USER NAME SPACE */
+#  define YY_STDINT_H
+# endif
 #endif
 
-#ifdef YYTYPE_INT8
-typedef YYTYPE_INT8 yytype_int8;
+/* Narrow types that promote to a signed type and that can represent a
+   signed or unsigned integer of at least N bits.  In tables they can
+   save space and decrease cache pressure.  Promoting to a signed type
+   helps avoid bugs in integer arithmetic.  */
+
+#ifdef __INT_LEAST8_MAX__
+typedef __INT_LEAST8_TYPE__ yytype_int8;
+#elif defined YY_STDINT_H
+typedef int_least8_t yytype_int8;
 #else
 typedef signed char yytype_int8;
 #endif
 
-#ifdef YYTYPE_UINT16
-typedef YYTYPE_UINT16 yytype_uint16;
-#else
-typedef unsigned short yytype_uint16;
-#endif
-
-#ifdef YYTYPE_INT16
-typedef YYTYPE_INT16 yytype_int16;
+#ifdef __INT_LEAST16_MAX__
+typedef __INT_LEAST16_TYPE__ yytype_int16;
+#elif defined YY_STDINT_H
+typedef int_least16_t yytype_int16;
 #else
 typedef short yytype_int16;
+#endif
+
+#if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
+typedef __UINT_LEAST8_TYPE__ yytype_uint8;
+#elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
+       && UINT_LEAST8_MAX <= INT_MAX)
+typedef uint_least8_t yytype_uint8;
+#elif !defined __UINT_LEAST8_MAX__ && UCHAR_MAX <= INT_MAX
+typedef unsigned char yytype_uint8;
+#else
+typedef short yytype_uint8;
+#endif
+
+#if defined __UINT_LEAST16_MAX__ && __UINT_LEAST16_MAX__ <= __INT_MAX__
+typedef __UINT_LEAST16_TYPE__ yytype_uint16;
+#elif (!defined __UINT_LEAST16_MAX__ && defined YY_STDINT_H \
+       && UINT_LEAST16_MAX <= INT_MAX)
+typedef uint_least16_t yytype_uint16;
+#elif !defined __UINT_LEAST16_MAX__ && USHRT_MAX <= INT_MAX
+typedef unsigned short yytype_uint16;
+#else
+typedef int yytype_uint16;
+#endif
+
+#ifndef YYPTRDIFF_T
+# if defined __PTRDIFF_TYPE__ && defined __PTRDIFF_MAX__
+#  define YYPTRDIFF_T __PTRDIFF_TYPE__
+#  define YYPTRDIFF_MAXIMUM __PTRDIFF_MAX__
+# elif defined PTRDIFF_MAX
+#  ifndef ptrdiff_t
+#   include <stddef.h> /* INFRINGES ON USER NAME SPACE */
+#  endif
+#  define YYPTRDIFF_T ptrdiff_t
+#  define YYPTRDIFF_MAXIMUM PTRDIFF_MAX
+# else
+#  define YYPTRDIFF_T long
+#  define YYPTRDIFF_MAXIMUM LONG_MAX
+# endif
 #endif
 
 #ifndef YYSIZE_T
@@ -369,7 +549,7 @@ typedef short yytype_int16;
 #  define YYSIZE_T __SIZE_TYPE__
 # elif defined size_t
 #  define YYSIZE_T size_t
-# elif ! defined YYSIZE_T
+# elif defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
 #  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
 #  define YYSIZE_T size_t
 # else
@@ -377,7 +557,20 @@ typedef short yytype_int16;
 # endif
 #endif
 
-#define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
+#define YYSIZE_MAXIMUM                                  \
+  YY_CAST (YYPTRDIFF_T,                                 \
+           (YYPTRDIFF_MAXIMUM < YY_CAST (YYSIZE_T, -1)  \
+            ? YYPTRDIFF_MAXIMUM                         \
+            : YY_CAST (YYSIZE_T, -1)))
+
+#define YYSIZEOF(X) YY_CAST (YYPTRDIFF_T, sizeof (X))
+
+
+/* Stored state numbers (used for stacks). */
+typedef yytype_uint8 yy_state_t;
+
+/* State numbers in computations.  */
+typedef int yy_state_fast_t;
 
 #ifndef YY_
 # if defined YYENABLE_NLS && YYENABLE_NLS
@@ -391,22 +584,21 @@ typedef short yytype_int16;
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE
-# if (defined __GNUC__                                               \
-      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
-     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
-#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
+
+#ifndef YY_ATTRIBUTE_PURE
+# if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_PURE __attribute__ ((__pure__))
 # else
-#  define YY_ATTRIBUTE(Spec) /* empty */
+#  define YY_ATTRIBUTE_PURE
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE_PURE
-# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
-#endif
-
 #ifndef YY_ATTRIBUTE_UNUSED
-# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
+# if defined __GNUC__ && 2 < __GNUC__ + (7 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
+# else
+#  define YY_ATTRIBUTE_UNUSED
+# endif
 #endif
 
 /* Suppress unused-variable warnings by "using" E.  */
@@ -418,11 +610,11 @@ typedef short yytype_int16;
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
-    _Pragma ("GCC diagnostic push") \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
 # define YY_INITIAL_VALUE(Value) Value
@@ -435,8 +627,22 @@ typedef short yytype_int16;
 # define YY_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
+#if defined __cplusplus && defined __GNUC__ && ! defined __ICC && 6 <= __GNUC__
+# define YY_IGNORE_USELESS_CAST_BEGIN                          \
+    _Pragma ("GCC diagnostic push")                            \
+    _Pragma ("GCC diagnostic ignored \"-Wuseless-cast\"")
+# define YY_IGNORE_USELESS_CAST_END            \
+    _Pragma ("GCC diagnostic pop")
+#endif
+#ifndef YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_END
+#endif
 
-#if ! defined yyoverflow || YYERROR_VERBOSE
+
+#define YY_ASSERT(E) ((void) (0 && (E)))
+
+#if !defined yyoverflow
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
@@ -501,8 +707,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 # endif
-#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
-
+#endif /* !defined yyoverflow */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
@@ -511,17 +716,17 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss_alloc;
+  yy_state_t yyss_alloc;
   YYSTYPE yyvs_alloc;
 };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
-# define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
+# define YYSTACK_GAP_MAXIMUM (YYSIZEOF (union yyalloc) - 1)
 
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
+     ((N) * (YYSIZEOF (yy_state_t) + YYSIZEOF (YYSTYPE)) \
       + YYSTACK_GAP_MAXIMUM)
 
 # define YYCOPY_NEEDED 1
@@ -534,11 +739,11 @@ union yyalloc
 # define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
     do                                                                  \
       {                                                                 \
-        YYSIZE_T yynewbytes;                                            \
+        YYPTRDIFF_T yynewbytes;                                         \
         YYCOPY (&yyptr->Stack_alloc, Stack, yysize);                    \
         Stack = &yyptr->Stack_alloc;                                    \
-        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
-        yyptr += yynewbytes / sizeof (*yyptr);                          \
+        yynewbytes = yystacksize * YYSIZEOF (*Stack) + YYSTACK_GAP_MAXIMUM; \
+        yyptr += yynewbytes / YYSIZEOF (*yyptr);                        \
       }                                                                 \
     while (0)
 
@@ -550,12 +755,12 @@ union yyalloc
 # ifndef YYCOPY
 #  if defined __GNUC__ && 1 < __GNUC__
 #   define YYCOPY(Dst, Src, Count) \
-      __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
+      __builtin_memcpy (Dst, Src, YY_CAST (YYSIZE_T, (Count)) * sizeof (*(Src)))
 #  else
 #   define YYCOPY(Dst, Src, Count)              \
       do                                        \
         {                                       \
-          YYSIZE_T yyi;                         \
+          YYPTRDIFF_T yyi;                      \
           for (yyi = 0; yyi < (Count); yyi++)   \
             (Dst)[yyi] = (Src)[yyi];            \
         }                                       \
@@ -578,17 +783,20 @@ union yyalloc
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  248
 
-#define YYUNDEFTOK  2
+/* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   307
+
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
-#define YYTRANSLATE(YYX)                                                \
-  ((unsigned) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+#define YYTRANSLATE(YYX)                                \
+  (0 <= (YYX) && (YYX) <= YYMAXUTOK                     \
+   ? YY_CAST (yysymbol_kind_t, yytranslate[YYX])        \
+   : YYSYMBOL_YYUNDEF)
 
 /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex.  */
-static const yytype_uint8 yytranslate[] =
+static const yytype_int8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
       45,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -625,7 +833,7 @@ static const yytype_uint8 yytranslate[] =
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+static const yytype_int16 yyrline[] =
 {
        0,   187,   187,   190,   193,   194,   197,   200,   203,   210,
      217,   223,   226,   229,   232,   235,   239,   243,   247,   251,
@@ -645,23 +853,30 @@ static const yytype_uint16 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+/** Accessing symbol of state STATE.  */
+#define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
+
+#if YYDEBUG || 0
+/* The user-facing name of the symbol whose (internal) number is
+   YYSYMBOL.  No bounds checking.  */
+static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
+
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "COMMAND", "ALIAS", "DEFVAR", "NTWKADDR",
-  "NETGROUP", "USERGROUP", "WORD", "DIGEST", "INCLUDE", "INCLUDEDIR",
-  "DEFAULTS", "DEFAULTS_HOST", "DEFAULTS_USER", "DEFAULTS_RUNAS",
-  "DEFAULTS_CMND", "NOPASSWD", "PASSWD", "NOEXEC", "EXEC", "SETENV",
-  "NOSETENV", "LOG_INPUT", "NOLOG_INPUT", "LOG_OUTPUT", "NOLOG_OUTPUT",
-  "MAIL", "NOMAIL", "FOLLOWLNK", "NOFOLLOWLNK", "ALL", "HOSTALIAS",
-  "CMNDALIAS", "USERALIAS", "RUNASALIAS", "':'", "'='", "','", "'!'",
-  "'+'", "'-'", "'('", "')'", "'\\n'", "ERROR", "NOMATCH", "CHROOT", "CWD",
-  "TYPE", "ROLE", "PRIVS", "LIMITPRIVS", "CMND_TIMEOUT", "NOTBEFORE",
-  "NOTAFTER", "MYSELF", "SHA224_TOK", "SHA256_TOK", "SHA384_TOK",
-  "SHA512_TOK", "$accept", "file", "line", "entry", "include",
-  "includedir", "defaults_list", "defaults_entry", "privileges",
+  "\"end of file\"", "error", "\"invalid token\"", "COMMAND", "ALIAS",
+  "DEFVAR", "NTWKADDR", "NETGROUP", "USERGROUP", "WORD", "DIGEST",
+  "INCLUDE", "INCLUDEDIR", "DEFAULTS", "DEFAULTS_HOST", "DEFAULTS_USER",
+  "DEFAULTS_RUNAS", "DEFAULTS_CMND", "NOPASSWD", "PASSWD", "NOEXEC",
+  "EXEC", "SETENV", "NOSETENV", "LOG_INPUT", "NOLOG_INPUT", "LOG_OUTPUT",
+  "NOLOG_OUTPUT", "MAIL", "NOMAIL", "FOLLOWLNK", "NOFOLLOWLNK", "ALL",
+  "HOSTALIAS", "CMNDALIAS", "USERALIAS", "RUNASALIAS", "':'", "'='", "','",
+  "'!'", "'+'", "'-'", "'('", "')'", "'\\n'", "ERROR", "NOMATCH", "CHROOT",
+  "CWD", "TYPE", "ROLE", "PRIVS", "LIMITPRIVS", "CMND_TIMEOUT",
+  "NOTBEFORE", "NOTAFTER", "MYSELF", "SHA224_TOK", "SHA256_TOK",
+  "SHA384_TOK", "SHA512_TOK", "$accept", "file", "line", "entry",
+  "include", "includedir", "defaults_list", "defaults_entry", "privileges",
   "privilege", "ophost", "host", "cmndspeclist", "cmndspec", "digestspec",
   "digestlist", "digcmnd", "opcmnd", "chdirspec", "chrootspec",
   "timeoutspec", "notbeforespec", "notafterspec", "rolespec", "typespec",
@@ -672,12 +887,18 @@ static const char *const yytname[] =
   "useralias", "$@4", "userlist", "opuser", "user", "grouplist", "opgroup",
   "group", YY_NULLPTR
 };
+
+static const char *
+yysymbol_name (yysymbol_kind_t yysymbol)
+{
+  return yytname[yysymbol];
+}
 #endif
 
-# ifdef YYPRINT
+#ifdef YYPRINT
 /* YYTOKNUM[NUM] -- (External) token number corresponding to the
    (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_uint16 yytoknum[] =
+static const yytype_int16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
@@ -687,16 +908,16 @@ static const yytype_uint16 yytoknum[] =
      296,   297,   298,   299,   300,   301,   302,   303,   304,   305,
      306,   307
 };
-# endif
+#endif
 
-#define YYPACT_NINF -114
+#define YYPACT_NINF (-114)
 
-#define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-114)))
+#define yypact_value_is_default(Yyn) \
+  ((Yyn) == YYPACT_NINF)
 
-#define YYTABLE_NINF -4
+#define YYTABLE_NINF (-4)
 
-#define yytable_value_is_error(Yytable_value) \
+#define yytable_value_is_error(Yyn) \
   0
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -863,7 +1084,7 @@ static const yytype_int16 yycheck[] =
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
-static const yytype_uint8 yystos[] =
+static const yytype_int8 yystos[] =
 {
        0,     1,     4,     7,     8,     9,    11,    12,    13,    14,
       15,    16,    17,    32,    33,    34,    35,    36,    40,    45,
@@ -893,7 +1114,7 @@ static const yytype_uint8 yystos[] =
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const yytype_uint8 yyr1[] =
+static const yytype_int8 yyr1[] =
 {
        0,    62,    63,    63,    64,    64,    65,    65,    65,    65,
       65,    65,    65,    65,    65,    65,    65,    65,    65,    65,
@@ -913,7 +1134,7 @@ static const yytype_uint8 yyr1[] =
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
-static const yytype_uint8 yyr2[] =
+static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     1,     1,     2,     1,     2,     1,     1,
        3,     3,     3,     3,     3,     3,     4,     4,     4,     4,
@@ -933,10 +1154,10 @@ static const yytype_uint8 yyr2[] =
 };
 
 
+enum { YYENOMEM = -2 };
+
 #define yyerrok         (yyerrstatus = 0)
 #define yyclearin       (yychar = YYEMPTY)
-#define YYEMPTY         (-2)
-#define YYEOF           0
 
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
@@ -962,10 +1183,9 @@ static const yytype_uint8 yyr2[] =
       }                                                           \
   while (0)
 
-/* Error token number */
-#define YYTERROR        1
-#define YYERRCODE       256
-
+/* Backward compatibility with an undocumented macro.
+   Use YYerror or YYUNDEF. */
+#define YYERRCODE YYUNDEF
 
 
 /* Enable debugging if requested.  */
@@ -983,18 +1203,18 @@ do {                                            \
 } while (0)
 
 /* This macro is provided for backward compatibility. */
-#ifndef YY_LOCATION_PRINT
-# define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-#endif
+# ifndef YY_LOCATION_PRINT
+#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
+# endif
 
 
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)                    \
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
 do {                                                                      \
   if (yydebug)                                                            \
     {                                                                     \
       YYFPRINTF (stderr, "%s ", Title);                                   \
       yy_symbol_print (stderr,                                            \
-                  Type, Value); \
+                  Kind, Value); \
       YYFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
@@ -1005,17 +1225,20 @@ do {                                                                      \
 `-----------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_value_print (FILE *yyo,
+                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep)
 {
   FILE *yyoutput = yyo;
   YYUSE (yyoutput);
   if (!yyvaluep)
     return;
 # ifdef YYPRINT
-  if (yytype < YYNTOKENS)
-    YYPRINT (yyo, yytoknum[yytype], *yyvaluep);
+  if (yykind < YYNTOKENS)
+    YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
 # endif
-  YYUSE (yytype);
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+  YYUSE (yykind);
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
@@ -1024,12 +1247,13 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
 `---------------------------*/
 
 static void
-yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_print (FILE *yyo,
+                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep)
 {
   YYFPRINTF (yyo, "%s %s (",
-             yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
+             yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
 
-  yy_symbol_value_print (yyo, yytype, yyvaluep);
+  yy_symbol_value_print (yyo, yykind, yyvaluep);
   YYFPRINTF (yyo, ")");
 }
 
@@ -1039,7 +1263,7 @@ yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
 `------------------------------------------------------------------*/
 
 static void
-yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
+yy_stack_print (yy_state_t *yybottom, yy_state_t *yytop)
 {
   YYFPRINTF (stderr, "Stack now");
   for (; yybottom <= yytop; yybottom++)
@@ -1062,21 +1286,21 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule)
+yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp,
+                 int yyrule)
 {
-  unsigned long yylno = yyrline[yyrule];
+  int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
   int yyi;
-  YYFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
+  YYFPRINTF (stderr, "Reducing stack by rule %d (line %d):\n",
              yyrule - 1, yylno);
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr,
-                       yystos[yyssp[yyi + 1 - yynrhs]],
-                       &yyvsp[(yyi + 1) - (yynrhs)]
-                                              );
+                       YY_ACCESSING_SYMBOL (+yyssp[yyi + 1 - yynrhs]),
+                       &yyvsp[(yyi + 1) - (yynrhs)]);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -1091,8 +1315,8 @@ do {                                    \
    multiple parsers can coexist.  */
 int yydebug;
 #else /* !YYDEBUG */
-# define YYDPRINTF(Args)
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)
+# define YYDPRINTF(Args) ((void) 0)
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
 # define YY_STACK_PRINT(Bottom, Top)
 # define YY_REDUCE_PRINT(Rule)
 #endif /* !YYDEBUG */
@@ -1115,260 +1339,38 @@ int yydebug;
 #endif
 
 
-#if YYERROR_VERBOSE
 
-# ifndef yystrlen
-#  if defined __GLIBC__ && defined _STRING_H
-#   define yystrlen strlen
-#  else
-/* Return the length of YYSTR.  */
-static YYSIZE_T
-yystrlen (const char *yystr)
-{
-  YYSIZE_T yylen;
-  for (yylen = 0; yystr[yylen]; yylen++)
-    continue;
-  return yylen;
-}
-#  endif
-# endif
 
-# ifndef yystpcpy
-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
-#   define yystpcpy stpcpy
-#  else
-/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-   YYDEST.  */
-static char *
-yystpcpy (char *yydest, const char *yysrc)
-{
-  char *yyd = yydest;
-  const char *yys = yysrc;
 
-  while ((*yyd++ = *yys++) != '\0')
-    continue;
-
-  return yyd - 1;
-}
-#  endif
-# endif
-
-# ifndef yytnamerr
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
-   heuristic is that double-quoting is unnecessary unless the string
-   contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
-   null, do not copy; instead, return the length of what the result
-   would have been.  */
-static YYSIZE_T
-yytnamerr (char *yyres, const char *yystr)
-{
-  if (*yystr == '"')
-    {
-      YYSIZE_T yyn = 0;
-      char const *yyp = yystr;
-
-      for (;;)
-        switch (*++yyp)
-          {
-          case '\'':
-          case ',':
-            goto do_not_strip_quotes;
-
-          case '\\':
-            if (*++yyp != '\\')
-              goto do_not_strip_quotes;
-            else
-              goto append;
-
-          append:
-          default:
-            if (yyres)
-              yyres[yyn] = *yyp;
-            yyn++;
-            break;
-
-          case '"':
-            if (yyres)
-              yyres[yyn] = '\0';
-            return yyn;
-          }
-    do_not_strip_quotes: ;
-    }
-
-  if (! yyres)
-    return yystrlen (yystr);
-
-  return (YYSIZE_T) (yystpcpy (yyres, yystr) - yyres);
-}
-# endif
-
-/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
-   about the unexpected token YYTOKEN for the state stack whose top is
-   YYSSP.
-
-   Return 0 if *YYMSG was successfully written.  Return 1 if *YYMSG is
-   not large enough to hold the message.  In that case, also set
-   *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
-   required number of bytes is too large to store.  */
-static int
-yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
-                yytype_int16 *yyssp, int yytoken)
-{
-  YYSIZE_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
-  YYSIZE_T yysize = yysize0;
-  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-  /* Internationalized format string. */
-  const char *yyformat = YY_NULLPTR;
-  /* Arguments of yyformat. */
-  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-  /* Number of reported tokens (one for the "unexpected", one per
-     "expected"). */
-  int yycount = 0;
-
-  /* There are many possibilities here to consider:
-     - If this state is a consistent state with a default action, then
-       the only way this function was invoked is if the default action
-       is an error action.  In that case, don't check for expected
-       tokens because there are none.
-     - The only way there can be no lookahead present (in yychar) is if
-       this state is a consistent state with a default action.  Thus,
-       detecting the absence of a lookahead is sufficient to determine
-       that there is no unexpected or expected token to report.  In that
-       case, just report a simple "syntax error".
-     - Don't assume there isn't a lookahead just because this state is a
-       consistent state with a default action.  There might have been a
-       previous inconsistent state, consistent state with a non-default
-       action, or user semantic action that manipulated yychar.
-     - Of course, the expected token list depends on states to have
-       correct lookahead information, and it depends on the parser not
-       to perform extra reductions after fetching a lookahead from the
-       scanner and before detecting a syntax error.  Thus, state merging
-       (from LALR or IELR) and default reductions corrupt the expected
-       token list.  However, the list is correct for canonical LR with
-       one exception: it will still contain any token that will not be
-       accepted due to an error action in a later state.
-  */
-  if (yytoken != YYEMPTY)
-    {
-      int yyn = yypact[*yyssp];
-      yyarg[yycount++] = yytname[yytoken];
-      if (!yypact_value_is_default (yyn))
-        {
-          /* Start YYX at -YYN if negative to avoid negative indexes in
-             YYCHECK.  In other words, skip the first -YYN actions for
-             this state because they are default actions.  */
-          int yyxbegin = yyn < 0 ? -yyn : 0;
-          /* Stay within bounds of both yycheck and yytname.  */
-          int yychecklim = YYLAST - yyn + 1;
-          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-          int yyx;
-
-          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
-                && !yytable_value_is_error (yytable[yyx + yyn]))
-              {
-                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                  {
-                    yycount = 1;
-                    yysize = yysize0;
-                    break;
-                  }
-                yyarg[yycount++] = yytname[yyx];
-                {
-                  YYSIZE_T yysize1 = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
-                  if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
-                    yysize = yysize1;
-                  else
-                    return 2;
-                }
-              }
-        }
-    }
-
-  switch (yycount)
-    {
-# define YYCASE_(N, S)                      \
-      case N:                               \
-        yyformat = S;                       \
-      break
-    default: /* Avoid compiler warnings. */
-      YYCASE_(0, YY_("syntax error"));
-      YYCASE_(1, YY_("syntax error, unexpected %s"));
-      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
-# undef YYCASE_
-    }
-
-  {
-    YYSIZE_T yysize1 = yysize + yystrlen (yyformat);
-    if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
-      yysize = yysize1;
-    else
-      return 2;
-  }
-
-  if (*yymsg_alloc < yysize)
-    {
-      *yymsg_alloc = 2 * yysize;
-      if (! (yysize <= *yymsg_alloc
-             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
-        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
-      return 1;
-    }
-
-  /* Avoid sprintf, as that infringes on the user's name space.
-     Don't have undefined behavior even if the translation
-     produced a string with the wrong number of "%s"s.  */
-  {
-    char *yyp = *yymsg;
-    int yyi = 0;
-    while ((*yyp = *yyformat) != '\0')
-      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
-        {
-          yyp += yytnamerr (yyp, yyarg[yyi++]);
-          yyformat += 2;
-        }
-      else
-        {
-          yyp++;
-          yyformat++;
-        }
-  }
-  return 0;
-}
-#endif /* YYERROR_VERBOSE */
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
+yydestruct (const char *yymsg,
+            yysymbol_kind_t yykind, YYSTYPE *yyvaluep)
 {
   YYUSE (yyvaluep);
   if (!yymsg)
     yymsg = "Deleting";
-  YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
+  YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yytype);
+  YYUSE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
-
-
-/* The lookahead symbol.  */
+/* Lookahead token kind.  */
 int yychar;
 
 /* The semantic value of the lookahead symbol.  */
 YYSTYPE yylval;
 /* Number of syntax errors so far.  */
 int yynerrs;
+
+
 
 
 /*----------.
@@ -1378,43 +1380,36 @@ int yynerrs;
 int
 yyparse (void)
 {
-    int yystate;
+    yy_state_fast_t yystate = 0;
     /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
+    int yyerrstatus = 0;
 
-    /* The stacks and their tools:
-       'yyss': related to states.
-       'yyvs': related to semantic values.
-
-       Refer to the stacks through separate pointers, to allow yyoverflow
+    /* Refer to the stacks through separate pointers, to allow yyoverflow
        to reallocate them elsewhere.  */
 
-    /* The state stack.  */
-    yytype_int16 yyssa[YYINITDEPTH];
-    yytype_int16 *yyss;
-    yytype_int16 *yyssp;
+    /* Their size.  */
+    YYPTRDIFF_T yystacksize = YYINITDEPTH;
 
-    /* The semantic value stack.  */
+    /* The state stack: array, bottom, top.  */
+    yy_state_t yyssa[YYINITDEPTH];
+    yy_state_t *yyss = yyssa;
+    yy_state_t *yyssp = yyss;
+
+    /* The semantic value stack: array, bottom, top.  */
     YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
-
-    YYSIZE_T yystacksize;
+    YYSTYPE *yyvs = yyvsa;
+    YYSTYPE *yyvsp = yyvs;
 
   int yyn;
+  /* The return value of yyparse.  */
   int yyresult;
-  /* Lookahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  /* Lookahead symbol kind.  */
+  yysymbol_kind_t yytoken = YYSYMBOL_YYEMPTY;
   /* The variables used to return semantic value and location from the
      action routines.  */
   YYSTYPE yyval;
 
-#if YYERROR_VERBOSE
-  /* Buffer for error messages, and its allocated size.  */
-  char yymsgbuf[128];
-  char *yymsg = yymsgbuf;
-  YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
-#endif
+
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
 
@@ -1422,15 +1417,8 @@ yyparse (void)
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  yyssp = yyss = yyssa;
-  yyvsp = yyvs = yyvsa;
-  yystacksize = YYINITDEPTH;
-
   YYDPRINTF ((stderr, "Starting parse\n"));
 
-  yystate = 0;
-  yyerrstatus = 0;
-  yynerrs = 0;
   yychar = YYEMPTY; /* Cause a token to be read.  */
   goto yysetstate;
 
@@ -1445,10 +1433,15 @@ yynewstate:
 
 
 /*--------------------------------------------------------------------.
-| yynewstate -- set current state (the top of the stack) to yystate.  |
+| yysetstate -- set current state (the top of the stack) to yystate.  |
 `--------------------------------------------------------------------*/
 yysetstate:
-  *yyssp = (yytype_int16) yystate;
+  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
+  YY_ASSERT (0 <= yystate && yystate < YYNSTATES);
+  YY_IGNORE_USELESS_CAST_BEGIN
+  *yyssp = YY_CAST (yy_state_t, yystate);
+  YY_IGNORE_USELESS_CAST_END
+  YY_STACK_PRINT (yyss, yyssp);
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
@@ -1456,23 +1449,23 @@ yysetstate:
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
-      YYSIZE_T yysize = (YYSIZE_T) (yyssp - yyss + 1);
+      YYPTRDIFF_T yysize = yyssp - yyss + 1;
 
 # if defined yyoverflow
       {
         /* Give user a chance to reallocate the stack.  Use copies of
            these so that the &'s don't force the real ones into
            memory.  */
+        yy_state_t *yyss1 = yyss;
         YYSTYPE *yyvs1 = yyvs;
-        yytype_int16 *yyss1 = yyss;
 
         /* Each stack pointer address is followed by the size of the
            data in use in that stack, in bytes.  This used to be a
            conditional around just the two extra args, but that might
            be undefined if yyoverflow is a macro.  */
         yyoverflow (YY_("memory exhausted"),
-                    &yyss1, yysize * sizeof (*yyssp),
-                    &yyvs1, yysize * sizeof (*yyvsp),
+                    &yyss1, yysize * YYSIZEOF (*yyssp),
+                    &yyvs1, yysize * YYSIZEOF (*yyvsp),
                     &yystacksize);
         yyss = yyss1;
         yyvs = yyvs1;
@@ -1486,14 +1479,15 @@ yysetstate:
         yystacksize = YYMAXDEPTH;
 
       {
-        yytype_int16 *yyss1 = yyss;
+        yy_state_t *yyss1 = yyss;
         union yyalloc *yyptr =
-          (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
+          YY_CAST (union yyalloc *,
+                   YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
           goto yyexhaustedlab;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
-# undef YYSTACK_RELOCATE
+#  undef YYSTACK_RELOCATE
         if (yyss1 != yyssa)
           YYSTACK_FREE (yyss1);
       }
@@ -1502,15 +1496,15 @@ yysetstate:
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
-      YYDPRINTF ((stderr, "Stack size increased to %lu\n",
-                  (unsigned long) yystacksize));
+      YY_IGNORE_USELESS_CAST_BEGIN
+      YYDPRINTF ((stderr, "Stack size increased to %ld\n",
+                  YY_CAST (long, yystacksize)));
+      YY_IGNORE_USELESS_CAST_END
 
       if (yyss + yystacksize - 1 <= yyssp)
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
-
-  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1532,17 +1526,28 @@ yybackup:
 
   /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
+  /* YYCHAR is either empty, or end-of-input, or a valid lookahead.  */
   if (yychar == YYEMPTY)
     {
-      YYDPRINTF ((stderr, "Reading a token: "));
+      YYDPRINTF ((stderr, "Reading a token\n"));
       yychar = yylex ();
     }
 
   if (yychar <= YYEOF)
     {
-      yychar = yytoken = YYEOF;
+      yychar = YYEOF;
+      yytoken = YYSYMBOL_YYEOF;
       YYDPRINTF ((stderr, "Now at end of input.\n"));
+    }
+  else if (yychar == YYerror)
+    {
+      /* The scanner already issued an error message, process directly
+         to error recovery.  But do not keep the error token as
+         lookahead, it is too special and may lead us to an endless
+         loop in error recovery. */
+      yychar = YYUNDEF;
+      yytoken = YYSYMBOL_YYerror;
+      goto yyerrlab1;
     }
   else
     {
@@ -1571,15 +1576,13 @@ yybackup:
 
   /* Shift the lookahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
-
-  /* Discard the shifted token.  */
-  yychar = YYEMPTY;
-
   yystate = yyn;
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
   goto yynewstate;
 
 
@@ -1614,266 +1617,266 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-#line 187 "gram.y" /* yacc.c:1652  */
-    {
+  case 2: /* file: %empty  */
+#line 187 "gram.y"
+                        {
 			    ; /* empty file */
 			}
-#line 1617 "gram.c" /* yacc.c:1652  */
+#line 1620 "gram.c"
     break;
 
-  case 6:
-#line 197 "gram.y" /* yacc.c:1652  */
-    {
+  case 6: /* entry: '\n'  */
+#line 197 "gram.y"
+                             {
 			    ; /* blank line */
 			}
-#line 1625 "gram.c" /* yacc.c:1652  */
+#line 1628 "gram.c"
     break;
 
-  case 7:
-#line 200 "gram.y" /* yacc.c:1652  */
-    {
+  case 7: /* entry: error '\n'  */
+#line 200 "gram.y"
+                                   {
 			    yyerrok;
 			}
-#line 1633 "gram.c" /* yacc.c:1652  */
+#line 1636 "gram.c"
     break;
 
-  case 8:
-#line 203 "gram.y" /* yacc.c:1652  */
-    {
+  case 8: /* entry: include  */
+#line 203 "gram.y"
+                                {
 			    if (!push_include((yyvsp[0].string), false)) {
 				free((yyvsp[0].string));
 				YYERROR;
 			    }
 			    free((yyvsp[0].string));
 			}
-#line 1645 "gram.c" /* yacc.c:1652  */
+#line 1648 "gram.c"
     break;
 
-  case 9:
-#line 210 "gram.y" /* yacc.c:1652  */
-    {
+  case 9: /* entry: includedir  */
+#line 210 "gram.y"
+                                   {
 			    if (!push_include((yyvsp[0].string), true)) {
 				free((yyvsp[0].string));
 				YYERROR;
 			    }
 			    free((yyvsp[0].string));
 			}
-#line 1657 "gram.c" /* yacc.c:1652  */
+#line 1660 "gram.c"
     break;
 
-  case 10:
-#line 217 "gram.y" /* yacc.c:1652  */
-    {
+  case 10: /* entry: userlist privileges '\n'  */
+#line 217 "gram.y"
+                                                 {
 			    if (!add_userspec((yyvsp[-2].member), (yyvsp[-1].privilege))) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1668 "gram.c" /* yacc.c:1652  */
+#line 1671 "gram.c"
     break;
 
-  case 11:
-#line 223 "gram.y" /* yacc.c:1652  */
-    {
+  case 11: /* entry: USERALIAS useraliases '\n'  */
+#line 223 "gram.y"
+                                                   {
 			    ;
 			}
-#line 1676 "gram.c" /* yacc.c:1652  */
+#line 1679 "gram.c"
     break;
 
-  case 12:
-#line 226 "gram.y" /* yacc.c:1652  */
-    {
+  case 12: /* entry: HOSTALIAS hostaliases '\n'  */
+#line 226 "gram.y"
+                                                   {
 			    ;
 			}
-#line 1684 "gram.c" /* yacc.c:1652  */
+#line 1687 "gram.c"
     break;
 
-  case 13:
-#line 229 "gram.y" /* yacc.c:1652  */
-    {
+  case 13: /* entry: CMNDALIAS cmndaliases '\n'  */
+#line 229 "gram.y"
+                                                   {
 			    ;
 			}
-#line 1692 "gram.c" /* yacc.c:1652  */
+#line 1695 "gram.c"
     break;
 
-  case 14:
-#line 232 "gram.y" /* yacc.c:1652  */
-    {
+  case 14: /* entry: RUNASALIAS runasaliases '\n'  */
+#line 232 "gram.y"
+                                                     {
 			    ;
 			}
-#line 1700 "gram.c" /* yacc.c:1652  */
+#line 1703 "gram.c"
     break;
 
-  case 15:
-#line 235 "gram.y" /* yacc.c:1652  */
-    {
+  case 15: /* entry: DEFAULTS defaults_list '\n'  */
+#line 235 "gram.y"
+                                                    {
 			    if (!add_defaults(DEFAULTS, NULL, (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1709 "gram.c" /* yacc.c:1652  */
+#line 1712 "gram.c"
     break;
 
-  case 16:
-#line 239 "gram.y" /* yacc.c:1652  */
-    {
+  case 16: /* entry: DEFAULTS_USER userlist defaults_list '\n'  */
+#line 239 "gram.y"
+                                                                  {
 			    if (!add_defaults(DEFAULTS_USER, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1718 "gram.c" /* yacc.c:1652  */
+#line 1721 "gram.c"
     break;
 
-  case 17:
-#line 243 "gram.y" /* yacc.c:1652  */
-    {
+  case 17: /* entry: DEFAULTS_RUNAS userlist defaults_list '\n'  */
+#line 243 "gram.y"
+                                                                   {
 			    if (!add_defaults(DEFAULTS_RUNAS, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1727 "gram.c" /* yacc.c:1652  */
+#line 1730 "gram.c"
     break;
 
-  case 18:
-#line 247 "gram.y" /* yacc.c:1652  */
-    {
+  case 18: /* entry: DEFAULTS_HOST hostlist defaults_list '\n'  */
+#line 247 "gram.y"
+                                                                  {
 			    if (!add_defaults(DEFAULTS_HOST, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1736 "gram.c" /* yacc.c:1652  */
+#line 1739 "gram.c"
     break;
 
-  case 19:
-#line 251 "gram.y" /* yacc.c:1652  */
-    {
+  case 19: /* entry: DEFAULTS_CMND cmndlist defaults_list '\n'  */
+#line 251 "gram.y"
+                                                                  {
 			    if (!add_defaults(DEFAULTS_CMND, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1745 "gram.c" /* yacc.c:1652  */
+#line 1748 "gram.c"
     break;
 
-  case 20:
-#line 257 "gram.y" /* yacc.c:1652  */
-    {
+  case 20: /* include: INCLUDE WORD '\n'  */
+#line 257 "gram.y"
+                                          {
 			    (yyval.string) = (yyvsp[-1].string);
 			}
-#line 1753 "gram.c" /* yacc.c:1652  */
+#line 1756 "gram.c"
     break;
 
-  case 21:
-#line 260 "gram.y" /* yacc.c:1652  */
-    {
+  case 21: /* include: INCLUDE WORD error '\n'  */
+#line 260 "gram.y"
+                                                {
 			    yyerrok;
 			    (yyval.string) = (yyvsp[-2].string);
 			}
-#line 1762 "gram.c" /* yacc.c:1652  */
+#line 1765 "gram.c"
     break;
 
-  case 22:
-#line 266 "gram.y" /* yacc.c:1652  */
-    {
+  case 22: /* includedir: INCLUDEDIR WORD '\n'  */
+#line 266 "gram.y"
+                                             {
 			    (yyval.string) = (yyvsp[-1].string);
 			}
-#line 1770 "gram.c" /* yacc.c:1652  */
+#line 1773 "gram.c"
     break;
 
-  case 23:
-#line 269 "gram.y" /* yacc.c:1652  */
-    {
+  case 23: /* includedir: INCLUDEDIR WORD error '\n'  */
+#line 269 "gram.y"
+                                                   {
 			    yyerrok;
 			    (yyval.string) = (yyvsp[-2].string);
 			}
-#line 1779 "gram.c" /* yacc.c:1652  */
+#line 1782 "gram.c"
     break;
 
-  case 25:
-#line 276 "gram.y" /* yacc.c:1652  */
-    {
+  case 25: /* defaults_list: defaults_list ',' defaults_entry  */
+#line 276 "gram.y"
+                                                         {
 			    HLTQ_CONCAT((yyvsp[-2].defaults), (yyvsp[0].defaults), entries);
 			    (yyval.defaults) = (yyvsp[-2].defaults);
 			}
-#line 1788 "gram.c" /* yacc.c:1652  */
+#line 1791 "gram.c"
     break;
 
-  case 26:
-#line 282 "gram.y" /* yacc.c:1652  */
-    {
+  case 26: /* defaults_entry: DEFVAR  */
+#line 282 "gram.y"
+                               {
 			    (yyval.defaults) = new_default((yyvsp[0].string), NULL, true);
 			    if ((yyval.defaults) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1800 "gram.c" /* yacc.c:1652  */
+#line 1803 "gram.c"
     break;
 
-  case 27:
-#line 289 "gram.y" /* yacc.c:1652  */
-    {
+  case 27: /* defaults_entry: '!' DEFVAR  */
+#line 289 "gram.y"
+                                   {
 			    (yyval.defaults) = new_default((yyvsp[0].string), NULL, false);
 			    if ((yyval.defaults) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1812 "gram.c" /* yacc.c:1652  */
+#line 1815 "gram.c"
     break;
 
-  case 28:
-#line 296 "gram.y" /* yacc.c:1652  */
-    {
+  case 28: /* defaults_entry: DEFVAR '=' WORD  */
+#line 296 "gram.y"
+                                        {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), true);
 			    if ((yyval.defaults) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1824 "gram.c" /* yacc.c:1652  */
+#line 1827 "gram.c"
     break;
 
-  case 29:
-#line 303 "gram.y" /* yacc.c:1652  */
-    {
+  case 29: /* defaults_entry: DEFVAR '+' WORD  */
+#line 303 "gram.y"
+                                        {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), '+');
 			    if ((yyval.defaults) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1836 "gram.c" /* yacc.c:1652  */
+#line 1839 "gram.c"
     break;
 
-  case 30:
-#line 310 "gram.y" /* yacc.c:1652  */
-    {
+  case 30: /* defaults_entry: DEFVAR '-' WORD  */
+#line 310 "gram.y"
+                                        {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), '-');
 			    if ((yyval.defaults) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1848 "gram.c" /* yacc.c:1652  */
+#line 1851 "gram.c"
     break;
 
-  case 32:
-#line 320 "gram.y" /* yacc.c:1652  */
-    {
+  case 32: /* privileges: privileges ':' privilege  */
+#line 320 "gram.y"
+                                                 {
 			    HLTQ_CONCAT((yyvsp[-2].privilege), (yyvsp[0].privilege), entries);
 			    (yyval.privilege) = (yyvsp[-2].privilege);
 			}
-#line 1857 "gram.c" /* yacc.c:1652  */
+#line 1860 "gram.c"
     break;
 
-  case 33:
-#line 324 "gram.y" /* yacc.c:1652  */
-    {
+  case 33: /* privileges: privileges ':' error  */
+#line 324 "gram.y"
+                                             {
 			    yyerrok;
 			    (yyval.privilege) = (yyvsp[-2].privilege);
 			}
-#line 1866 "gram.c" /* yacc.c:1652  */
+#line 1869 "gram.c"
     break;
 
-  case 34:
-#line 330 "gram.y" /* yacc.c:1652  */
-    {
+  case 34: /* privilege: hostlist '=' cmndspeclist  */
+#line 330 "gram.y"
+                                                  {
 			    struct privilege *p = calloc(1, sizeof(*p));
 			    if (p == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -1885,90 +1888,90 @@ yyreduce:
 			    HLTQ_INIT(p, entries);
 			    (yyval.privilege) = p;
 			}
-#line 1883 "gram.c" /* yacc.c:1652  */
+#line 1886 "gram.c"
     break;
 
-  case 35:
-#line 344 "gram.y" /* yacc.c:1652  */
-    {
+  case 35: /* ophost: host  */
+#line 344 "gram.y"
+                             {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 1892 "gram.c" /* yacc.c:1652  */
+#line 1895 "gram.c"
     break;
 
-  case 36:
-#line 348 "gram.y" /* yacc.c:1652  */
-    {
+  case 36: /* ophost: '!' host  */
+#line 348 "gram.y"
+                                 {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 1901 "gram.c" /* yacc.c:1652  */
+#line 1904 "gram.c"
     break;
 
-  case 37:
-#line 354 "gram.y" /* yacc.c:1652  */
-    {
+  case 37: /* host: ALIAS  */
+#line 354 "gram.y"
+                              {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1913 "gram.c" /* yacc.c:1652  */
+#line 1916 "gram.c"
     break;
 
-  case 38:
-#line 361 "gram.y" /* yacc.c:1652  */
-    {
+  case 38: /* host: ALL  */
+#line 361 "gram.y"
+                            {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1925 "gram.c" /* yacc.c:1652  */
+#line 1928 "gram.c"
     break;
 
-  case 39:
-#line 368 "gram.y" /* yacc.c:1652  */
-    {
+  case 39: /* host: NETGROUP  */
+#line 368 "gram.y"
+                                 {
 			    (yyval.member) = new_member((yyvsp[0].string), NETGROUP);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1937 "gram.c" /* yacc.c:1652  */
+#line 1940 "gram.c"
     break;
 
-  case 40:
-#line 375 "gram.y" /* yacc.c:1652  */
-    {
+  case 40: /* host: NTWKADDR  */
+#line 375 "gram.y"
+                                 {
 			    (yyval.member) = new_member((yyvsp[0].string), NTWKADDR);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1949 "gram.c" /* yacc.c:1652  */
+#line 1952 "gram.c"
     break;
 
-  case 41:
-#line 382 "gram.y" /* yacc.c:1652  */
-    {
+  case 41: /* host: WORD  */
+#line 382 "gram.y"
+                             {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1961 "gram.c" /* yacc.c:1652  */
+#line 1964 "gram.c"
     break;
 
-  case 43:
-#line 392 "gram.y" /* yacc.c:1652  */
-    {
+  case 43: /* cmndspeclist: cmndspeclist ',' cmndspec  */
+#line 392 "gram.y"
+                                                  {
 			    struct cmndspec *prev;
 			    prev = HLTQ_LAST((yyvsp[-2].cmndspec), cmndspec, entries);
 			    HLTQ_CONCAT((yyvsp[-2].cmndspec), (yyvsp[0].cmndspec), entries);
@@ -2025,12 +2028,12 @@ yyreduce:
 			    }
 			    (yyval.cmndspec) = (yyvsp[-2].cmndspec);
 			}
-#line 2023 "gram.c" /* yacc.c:1652  */
+#line 2026 "gram.c"
     break;
 
-  case 44:
-#line 451 "gram.y" /* yacc.c:1652  */
-    {
+  case 44: /* cmndspec: runasspec options cmndtag digcmnd  */
+#line 451 "gram.y"
+                                                          {
 			    struct cmndspec *cs = calloc(1, sizeof(*cs));
 			    if (cs == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -2083,77 +2086,77 @@ yyreduce:
 				cs->tags.setenv = IMPLIED;
 			    (yyval.cmndspec) = cs;
 			}
-#line 2081 "gram.c" /* yacc.c:1652  */
+#line 2084 "gram.c"
     break;
 
-  case 45:
-#line 506 "gram.y" /* yacc.c:1652  */
-    {
+  case 45: /* digestspec: SHA224_TOK ':' DIGEST  */
+#line 506 "gram.y"
+                                              {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA224, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2093 "gram.c" /* yacc.c:1652  */
+#line 2096 "gram.c"
     break;
 
-  case 46:
-#line 513 "gram.y" /* yacc.c:1652  */
-    {
+  case 46: /* digestspec: SHA256_TOK ':' DIGEST  */
+#line 513 "gram.y"
+                                              {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA256, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2105 "gram.c" /* yacc.c:1652  */
+#line 2108 "gram.c"
     break;
 
-  case 47:
-#line 520 "gram.y" /* yacc.c:1652  */
-    {
+  case 47: /* digestspec: SHA384_TOK ':' DIGEST  */
+#line 520 "gram.y"
+                                              {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA384, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2117 "gram.c" /* yacc.c:1652  */
+#line 2120 "gram.c"
     break;
 
-  case 48:
-#line 527 "gram.y" /* yacc.c:1652  */
-    {
+  case 48: /* digestspec: SHA512_TOK ':' DIGEST  */
+#line 527 "gram.y"
+                                              {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA512, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2129 "gram.c" /* yacc.c:1652  */
+#line 2132 "gram.c"
     break;
 
-  case 50:
-#line 537 "gram.y" /* yacc.c:1652  */
-    {
+  case 50: /* digestlist: digestlist ',' digestspec  */
+#line 537 "gram.y"
+                                                  {
 			    HLTQ_CONCAT((yyvsp[-2].digest), (yyvsp[0].digest), entries);
 			    (yyval.digest) = (yyvsp[-2].digest);
 			}
-#line 2138 "gram.c" /* yacc.c:1652  */
+#line 2141 "gram.c"
     break;
 
-  case 51:
-#line 543 "gram.y" /* yacc.c:1652  */
-    {
+  case 51: /* digcmnd: opcmnd  */
+#line 543 "gram.y"
+                               {
 			    (yyval.member) = (yyvsp[0].member);
 			}
-#line 2146 "gram.c" /* yacc.c:1652  */
+#line 2149 "gram.c"
     break;
 
-  case 52:
-#line 546 "gram.y" /* yacc.c:1652  */
-    {
+  case 52: /* digcmnd: digestlist opcmnd  */
+#line 546 "gram.y"
+                                          {
 			    struct sudo_command *c =
 				(struct sudo_command *) (yyvsp[0].member)->name;
 
@@ -2172,30 +2175,30 @@ yyreduce:
 			    HLTQ_TO_TAILQ(&c->digests, (yyvsp[-1].digest), entries);
 			    (yyval.member) = (yyvsp[0].member);
 			}
-#line 2170 "gram.c" /* yacc.c:1652  */
+#line 2173 "gram.c"
     break;
 
-  case 53:
-#line 567 "gram.y" /* yacc.c:1652  */
-    {
+  case 53: /* opcmnd: cmnd  */
+#line 567 "gram.y"
+                             {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 2179 "gram.c" /* yacc.c:1652  */
+#line 2182 "gram.c"
     break;
 
-  case 54:
-#line 571 "gram.y" /* yacc.c:1652  */
-    {
+  case 54: /* opcmnd: '!' cmnd  */
+#line 571 "gram.y"
+                                 {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 2188 "gram.c" /* yacc.c:1652  */
+#line 2191 "gram.c"
     break;
 
-  case 55:
-#line 577 "gram.y" /* yacc.c:1652  */
-    {
+  case 55: /* chdirspec: CWD '=' WORD  */
+#line 577 "gram.y"
+                                     {
 			    if ((yyvsp[0].string)[0] != '/' && (yyvsp[0].string)[0] != '~') {
 				if (strcmp((yyvsp[0].string), "*") != 0) {
 				    sudoerserror(N_("values for \"CWD\" must"
@@ -2205,12 +2208,12 @@ yyreduce:
 			    }
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2203 "gram.c" /* yacc.c:1652  */
+#line 2206 "gram.c"
     break;
 
-  case 56:
-#line 589 "gram.y" /* yacc.c:1652  */
-    {
+  case 56: /* chrootspec: CHROOT '=' WORD  */
+#line 589 "gram.y"
+                                        {
 			    if ((yyvsp[0].string)[0] != '/' && (yyvsp[0].string)[0] != '~') {
 				if (strcmp((yyvsp[0].string), "*") != 0) {
 				    sudoerserror(N_("values for \"CHROOT\" must"
@@ -2220,84 +2223,84 @@ yyreduce:
 			    }
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2218 "gram.c" /* yacc.c:1652  */
+#line 2221 "gram.c"
     break;
 
-  case 57:
-#line 601 "gram.y" /* yacc.c:1652  */
-    {
+  case 57: /* timeoutspec: CMND_TIMEOUT '=' WORD  */
+#line 601 "gram.y"
+                                              {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2226 "gram.c" /* yacc.c:1652  */
+#line 2229 "gram.c"
     break;
 
-  case 58:
-#line 606 "gram.y" /* yacc.c:1652  */
-    {
+  case 58: /* notbeforespec: NOTBEFORE '=' WORD  */
+#line 606 "gram.y"
+                                           {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2234 "gram.c" /* yacc.c:1652  */
+#line 2237 "gram.c"
     break;
 
-  case 59:
-#line 610 "gram.y" /* yacc.c:1652  */
-    {
+  case 59: /* notafterspec: NOTAFTER '=' WORD  */
+#line 610 "gram.y"
+                                          {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2242 "gram.c" /* yacc.c:1652  */
+#line 2245 "gram.c"
     break;
 
-  case 60:
-#line 615 "gram.y" /* yacc.c:1652  */
-    {
+  case 60: /* rolespec: ROLE '=' WORD  */
+#line 615 "gram.y"
+                                      {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2250 "gram.c" /* yacc.c:1652  */
+#line 2253 "gram.c"
     break;
 
-  case 61:
-#line 620 "gram.y" /* yacc.c:1652  */
-    {
+  case 61: /* typespec: TYPE '=' WORD  */
+#line 620 "gram.y"
+                                      {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2258 "gram.c" /* yacc.c:1652  */
+#line 2261 "gram.c"
     break;
 
-  case 62:
-#line 625 "gram.y" /* yacc.c:1652  */
-    {
+  case 62: /* privsspec: PRIVS '=' WORD  */
+#line 625 "gram.y"
+                                       {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2266 "gram.c" /* yacc.c:1652  */
+#line 2269 "gram.c"
     break;
 
-  case 63:
-#line 629 "gram.y" /* yacc.c:1652  */
-    {
+  case 63: /* limitprivsspec: LIMITPRIVS '=' WORD  */
+#line 629 "gram.y"
+                                            {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2274 "gram.c" /* yacc.c:1652  */
+#line 2277 "gram.c"
     break;
 
-  case 64:
-#line 634 "gram.y" /* yacc.c:1652  */
-    {
+  case 64: /* runasspec: %empty  */
+#line 634 "gram.y"
+                                    {
 			    (yyval.runas) = NULL;
 			}
-#line 2282 "gram.c" /* yacc.c:1652  */
+#line 2285 "gram.c"
     break;
 
-  case 65:
-#line 637 "gram.y" /* yacc.c:1652  */
-    {
+  case 65: /* runasspec: '(' runaslist ')'  */
+#line 637 "gram.y"
+                                          {
 			    (yyval.runas) = (yyvsp[-1].runas);
 			}
-#line 2290 "gram.c" /* yacc.c:1652  */
+#line 2293 "gram.c"
     break;
 
-  case 66:
-#line 642 "gram.y" /* yacc.c:1652  */
-    {
+  case 66: /* runaslist: %empty  */
+#line 642 "gram.y"
+                                    {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) != NULL) {
 				(yyval.runas)->runasusers = new_member(NULL, MYSELF);
@@ -2312,12 +2315,12 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2310 "gram.c" /* yacc.c:1652  */
+#line 2313 "gram.c"
     break;
 
-  case 67:
-#line 657 "gram.y" /* yacc.c:1652  */
-    {
+  case 67: /* runaslist: userlist  */
+#line 657 "gram.y"
+                                 {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -2326,12 +2329,12 @@ yyreduce:
 			    (yyval.runas)->runasusers = (yyvsp[0].member);
 			    /* $$->runasgroups = NULL; */
 			}
-#line 2324 "gram.c" /* yacc.c:1652  */
+#line 2327 "gram.c"
     break;
 
-  case 68:
-#line 666 "gram.y" /* yacc.c:1652  */
-    {
+  case 68: /* runaslist: userlist ':' grouplist  */
+#line 666 "gram.y"
+                                               {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -2340,12 +2343,12 @@ yyreduce:
 			    (yyval.runas)->runasusers = (yyvsp[-2].member);
 			    (yyval.runas)->runasgroups = (yyvsp[0].member);
 			}
-#line 2338 "gram.c" /* yacc.c:1652  */
+#line 2341 "gram.c"
     break;
 
-  case 69:
-#line 675 "gram.y" /* yacc.c:1652  */
-    {
+  case 69: /* runaslist: ':' grouplist  */
+#line 675 "gram.y"
+                                      {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -2354,12 +2357,12 @@ yyreduce:
 			    /* $$->runasusers = NULL; */
 			    (yyval.runas)->runasgroups = (yyvsp[0].member);
 			}
-#line 2352 "gram.c" /* yacc.c:1652  */
+#line 2355 "gram.c"
     break;
 
-  case 70:
-#line 684 "gram.y" /* yacc.c:1652  */
-    {
+  case 70: /* runaslist: ':'  */
+#line 684 "gram.y"
+                            {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) != NULL) {
 				(yyval.runas)->runasusers = new_member(NULL, MYSELF);
@@ -2374,47 +2377,47 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2372 "gram.c" /* yacc.c:1652  */
+#line 2375 "gram.c"
     break;
 
-  case 81:
-#line 713 "gram.y" /* yacc.c:1652  */
-    {
+  case 81: /* reserved_alias: reserved_word  */
+#line 713 "gram.y"
+                                      {
 			    sudoerserror(N_("syntax error, reserved word used as an alias name"));
 			    YYERROR;
 			}
-#line 2381 "gram.c" /* yacc.c:1652  */
+#line 2384 "gram.c"
     break;
 
-  case 82:
-#line 719 "gram.y" /* yacc.c:1652  */
-    {
+  case 82: /* options: %empty  */
+#line 719 "gram.y"
+                                    {
 			    init_options(&(yyval.options));
 			}
-#line 2389 "gram.c" /* yacc.c:1652  */
+#line 2392 "gram.c"
     break;
 
-  case 83:
-#line 722 "gram.y" /* yacc.c:1652  */
-    {
+  case 83: /* options: options chdirspec  */
+#line 722 "gram.y"
+                                          {
 			    free((yyval.options).runcwd);
 			    (yyval.options).runcwd = (yyvsp[0].string);
 			}
-#line 2398 "gram.c" /* yacc.c:1652  */
+#line 2401 "gram.c"
     break;
 
-  case 84:
-#line 726 "gram.y" /* yacc.c:1652  */
-    {
+  case 84: /* options: options chrootspec  */
+#line 726 "gram.y"
+                                           {
 			    free((yyval.options).runchroot);
 			    (yyval.options).runchroot = (yyvsp[0].string);
 			}
-#line 2407 "gram.c" /* yacc.c:1652  */
+#line 2410 "gram.c"
     break;
 
-  case 85:
-#line 730 "gram.y" /* yacc.c:1652  */
-    {
+  case 85: /* options: options notbeforespec  */
+#line 730 "gram.y"
+                                              {
 			    (yyval.options).notbefore = parse_gentime((yyvsp[0].string));
 			    free((yyvsp[0].string));
 			    if ((yyval.options).notbefore == -1) {
@@ -2422,12 +2425,12 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2420 "gram.c" /* yacc.c:1652  */
+#line 2423 "gram.c"
     break;
 
-  case 86:
-#line 738 "gram.y" /* yacc.c:1652  */
-    {
+  case 86: /* options: options notafterspec  */
+#line 738 "gram.y"
+                                             {
 			    (yyval.options).notafter = parse_gentime((yyvsp[0].string));
 			    free((yyvsp[0].string));
 			    if ((yyval.options).notafter == -1) {
@@ -2435,12 +2438,12 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2433 "gram.c" /* yacc.c:1652  */
+#line 2436 "gram.c"
     break;
 
-  case 87:
-#line 746 "gram.y" /* yacc.c:1652  */
-    {
+  case 87: /* options: options timeoutspec  */
+#line 746 "gram.y"
+                                            {
 			    (yyval.options).timeout = parse_timeout((yyvsp[0].string));
 			    free((yyvsp[0].string));
 			    if ((yyval.options).timeout == -1) {
@@ -2451,200 +2454,200 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2449 "gram.c" /* yacc.c:1652  */
+#line 2452 "gram.c"
     break;
 
-  case 88:
-#line 757 "gram.y" /* yacc.c:1652  */
-    {
+  case 88: /* options: options rolespec  */
+#line 757 "gram.y"
+                                         {
 #ifdef HAVE_SELINUX
 			    free((yyval.options).role);
 			    (yyval.options).role = (yyvsp[0].string);
 #endif
 			}
-#line 2460 "gram.c" /* yacc.c:1652  */
+#line 2463 "gram.c"
     break;
 
-  case 89:
-#line 763 "gram.y" /* yacc.c:1652  */
-    {
+  case 89: /* options: options typespec  */
+#line 763 "gram.y"
+                                         {
 #ifdef HAVE_SELINUX
 			    free((yyval.options).type);
 			    (yyval.options).type = (yyvsp[0].string);
 #endif
 			}
-#line 2471 "gram.c" /* yacc.c:1652  */
+#line 2474 "gram.c"
     break;
 
-  case 90:
-#line 769 "gram.y" /* yacc.c:1652  */
-    {
+  case 90: /* options: options privsspec  */
+#line 769 "gram.y"
+                                          {
 #ifdef HAVE_PRIV_SET
 			    free((yyval.options).privs);
 			    (yyval.options).privs = (yyvsp[0].string);
 #endif
 			}
-#line 2482 "gram.c" /* yacc.c:1652  */
+#line 2485 "gram.c"
     break;
 
-  case 91:
-#line 775 "gram.y" /* yacc.c:1652  */
-    {
+  case 91: /* options: options limitprivsspec  */
+#line 775 "gram.y"
+                                               {
 #ifdef HAVE_PRIV_SET
 			    free((yyval.options).limitprivs);
 			    (yyval.options).limitprivs = (yyvsp[0].string);
 #endif
 			}
-#line 2493 "gram.c" /* yacc.c:1652  */
+#line 2496 "gram.c"
     break;
 
-  case 92:
-#line 783 "gram.y" /* yacc.c:1652  */
-    {
+  case 92: /* cmndtag: %empty  */
+#line 783 "gram.y"
+                                    {
 			    TAGS_INIT((yyval.tag));
 			}
-#line 2501 "gram.c" /* yacc.c:1652  */
+#line 2504 "gram.c"
     break;
 
-  case 93:
-#line 786 "gram.y" /* yacc.c:1652  */
-    {
+  case 93: /* cmndtag: cmndtag NOPASSWD  */
+#line 786 "gram.y"
+                                         {
 			    (yyval.tag).nopasswd = true;
 			}
-#line 2509 "gram.c" /* yacc.c:1652  */
+#line 2512 "gram.c"
     break;
 
-  case 94:
-#line 789 "gram.y" /* yacc.c:1652  */
-    {
+  case 94: /* cmndtag: cmndtag PASSWD  */
+#line 789 "gram.y"
+                                       {
 			    (yyval.tag).nopasswd = false;
 			}
-#line 2517 "gram.c" /* yacc.c:1652  */
+#line 2520 "gram.c"
     break;
 
-  case 95:
-#line 792 "gram.y" /* yacc.c:1652  */
-    {
+  case 95: /* cmndtag: cmndtag NOEXEC  */
+#line 792 "gram.y"
+                                       {
 			    (yyval.tag).noexec = true;
 			}
-#line 2525 "gram.c" /* yacc.c:1652  */
+#line 2528 "gram.c"
     break;
 
-  case 96:
-#line 795 "gram.y" /* yacc.c:1652  */
-    {
+  case 96: /* cmndtag: cmndtag EXEC  */
+#line 795 "gram.y"
+                                     {
 			    (yyval.tag).noexec = false;
 			}
-#line 2533 "gram.c" /* yacc.c:1652  */
+#line 2536 "gram.c"
     break;
 
-  case 97:
-#line 798 "gram.y" /* yacc.c:1652  */
-    {
+  case 97: /* cmndtag: cmndtag SETENV  */
+#line 798 "gram.y"
+                                       {
 			    (yyval.tag).setenv = true;
 			}
-#line 2541 "gram.c" /* yacc.c:1652  */
+#line 2544 "gram.c"
     break;
 
-  case 98:
-#line 801 "gram.y" /* yacc.c:1652  */
-    {
+  case 98: /* cmndtag: cmndtag NOSETENV  */
+#line 801 "gram.y"
+                                         {
 			    (yyval.tag).setenv = false;
 			}
-#line 2549 "gram.c" /* yacc.c:1652  */
+#line 2552 "gram.c"
     break;
 
-  case 99:
-#line 804 "gram.y" /* yacc.c:1652  */
-    {
+  case 99: /* cmndtag: cmndtag LOG_INPUT  */
+#line 804 "gram.y"
+                                          {
 			    (yyval.tag).log_input = true;
 			}
-#line 2557 "gram.c" /* yacc.c:1652  */
+#line 2560 "gram.c"
     break;
 
-  case 100:
-#line 807 "gram.y" /* yacc.c:1652  */
-    {
+  case 100: /* cmndtag: cmndtag NOLOG_INPUT  */
+#line 807 "gram.y"
+                                            {
 			    (yyval.tag).log_input = false;
 			}
-#line 2565 "gram.c" /* yacc.c:1652  */
+#line 2568 "gram.c"
     break;
 
-  case 101:
-#line 810 "gram.y" /* yacc.c:1652  */
-    {
+  case 101: /* cmndtag: cmndtag LOG_OUTPUT  */
+#line 810 "gram.y"
+                                           {
 			    (yyval.tag).log_output = true;
 			}
-#line 2573 "gram.c" /* yacc.c:1652  */
+#line 2576 "gram.c"
     break;
 
-  case 102:
-#line 813 "gram.y" /* yacc.c:1652  */
-    {
+  case 102: /* cmndtag: cmndtag NOLOG_OUTPUT  */
+#line 813 "gram.y"
+                                             {
 			    (yyval.tag).log_output = false;
 			}
-#line 2581 "gram.c" /* yacc.c:1652  */
+#line 2584 "gram.c"
     break;
 
-  case 103:
-#line 816 "gram.y" /* yacc.c:1652  */
-    {
+  case 103: /* cmndtag: cmndtag FOLLOWLNK  */
+#line 816 "gram.y"
+                                          {
 			    (yyval.tag).follow = true;
 			}
-#line 2589 "gram.c" /* yacc.c:1652  */
+#line 2592 "gram.c"
     break;
 
-  case 104:
-#line 819 "gram.y" /* yacc.c:1652  */
-    {
+  case 104: /* cmndtag: cmndtag NOFOLLOWLNK  */
+#line 819 "gram.y"
+                                            {
 			    (yyval.tag).follow = false;
 			}
-#line 2597 "gram.c" /* yacc.c:1652  */
+#line 2600 "gram.c"
     break;
 
-  case 105:
-#line 822 "gram.y" /* yacc.c:1652  */
-    {
+  case 105: /* cmndtag: cmndtag MAIL  */
+#line 822 "gram.y"
+                                     {
 			    (yyval.tag).send_mail = true;
 			}
-#line 2605 "gram.c" /* yacc.c:1652  */
+#line 2608 "gram.c"
     break;
 
-  case 106:
-#line 825 "gram.y" /* yacc.c:1652  */
-    {
+  case 106: /* cmndtag: cmndtag NOMAIL  */
+#line 825 "gram.y"
+                                       {
 			    (yyval.tag).send_mail = false;
 			}
-#line 2613 "gram.c" /* yacc.c:1652  */
+#line 2616 "gram.c"
     break;
 
-  case 107:
-#line 830 "gram.y" /* yacc.c:1652  */
-    {
+  case 107: /* cmnd: ALL  */
+#line 830 "gram.y"
+                            {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2625 "gram.c" /* yacc.c:1652  */
+#line 2628 "gram.c"
     break;
 
-  case 108:
-#line 837 "gram.y" /* yacc.c:1652  */
-    {
+  case 108: /* cmnd: ALIAS  */
+#line 837 "gram.y"
+                              {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2637 "gram.c" /* yacc.c:1652  */
+#line 2640 "gram.c"
     break;
 
-  case 109:
-#line 844 "gram.y" /* yacc.c:1652  */
-    {
+  case 109: /* cmnd: COMMAND  */
+#line 844 "gram.y"
+                                {
 			    struct sudo_command *c;
 
 			    if ((c = new_command((yyvsp[0].command).cmnd, (yyvsp[0].command).args)) == NULL) {
@@ -2658,21 +2661,21 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2656 "gram.c" /* yacc.c:1652  */
+#line 2659 "gram.c"
     break;
 
-  case 112:
-#line 864 "gram.y" /* yacc.c:1652  */
-    {
+  case 112: /* $@1: %empty  */
+#line 864 "gram.y"
+                              {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2665 "gram.c" /* yacc.c:1652  */
+#line 2668 "gram.c"
     break;
 
-  case 113:
-#line 867 "gram.y" /* yacc.c:1652  */
-    {
+  case 113: /* hostalias: ALIAS $@1 '=' hostlist  */
+#line 867 "gram.y"
+                                       {
 			    const char *s;
 			    s = alias_add(&parsed_policy, (yyvsp[-3].string), HOSTALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member));
@@ -2681,30 +2684,30 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2679 "gram.c" /* yacc.c:1652  */
+#line 2682 "gram.c"
     break;
 
-  case 116:
-#line 880 "gram.y" /* yacc.c:1652  */
-    {
+  case 116: /* hostlist: hostlist ',' ophost  */
+#line 880 "gram.y"
+                                            {
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2688 "gram.c" /* yacc.c:1652  */
+#line 2691 "gram.c"
     break;
 
-  case 119:
-#line 890 "gram.y" /* yacc.c:1652  */
-    {
+  case 119: /* $@2: %empty  */
+#line 890 "gram.y"
+                              {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2697 "gram.c" /* yacc.c:1652  */
+#line 2700 "gram.c"
     break;
 
-  case 120:
-#line 893 "gram.y" /* yacc.c:1652  */
-    {
+  case 120: /* cmndalias: ALIAS $@2 '=' cmndlist  */
+#line 893 "gram.y"
+                                       {
 			    const char *s;
 			    s = alias_add(&parsed_policy, (yyvsp[-3].string), CMNDALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member));
@@ -2713,30 +2716,30 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2711 "gram.c" /* yacc.c:1652  */
+#line 2714 "gram.c"
     break;
 
-  case 123:
-#line 906 "gram.y" /* yacc.c:1652  */
-    {
+  case 123: /* cmndlist: cmndlist ',' digcmnd  */
+#line 906 "gram.y"
+                                             {
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2720 "gram.c" /* yacc.c:1652  */
+#line 2723 "gram.c"
     break;
 
-  case 126:
-#line 916 "gram.y" /* yacc.c:1652  */
-    {
+  case 126: /* $@3: %empty  */
+#line 916 "gram.y"
+                              {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2729 "gram.c" /* yacc.c:1652  */
+#line 2732 "gram.c"
     break;
 
-  case 127:
-#line 919 "gram.y" /* yacc.c:1652  */
-    {
+  case 127: /* runasalias: ALIAS $@3 '=' userlist  */
+#line 919 "gram.y"
+                                       {
 			    const char *s;
 			    s = alias_add(&parsed_policy, (yyvsp[-3].string), RUNASALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member));
@@ -2745,21 +2748,21 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2743 "gram.c" /* yacc.c:1652  */
+#line 2746 "gram.c"
     break;
 
-  case 131:
-#line 935 "gram.y" /* yacc.c:1652  */
-    {
+  case 131: /* $@4: %empty  */
+#line 935 "gram.y"
+                              {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2752 "gram.c" /* yacc.c:1652  */
+#line 2755 "gram.c"
     break;
 
-  case 132:
-#line 938 "gram.y" /* yacc.c:1652  */
-    {
+  case 132: /* useralias: ALIAS $@4 '=' userlist  */
+#line 938 "gram.y"
+                                       {
 			    const char *s;
 			    s = alias_add(&parsed_policy, (yyvsp[-3].string), USERALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member));
@@ -2768,161 +2771,162 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2766 "gram.c" /* yacc.c:1652  */
+#line 2769 "gram.c"
     break;
 
-  case 135:
-#line 951 "gram.y" /* yacc.c:1652  */
-    {
+  case 135: /* userlist: userlist ',' opuser  */
+#line 951 "gram.y"
+                                            {
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2775 "gram.c" /* yacc.c:1652  */
+#line 2778 "gram.c"
     break;
 
-  case 136:
-#line 957 "gram.y" /* yacc.c:1652  */
-    {
+  case 136: /* opuser: user  */
+#line 957 "gram.y"
+                             {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 2784 "gram.c" /* yacc.c:1652  */
+#line 2787 "gram.c"
     break;
 
-  case 137:
-#line 961 "gram.y" /* yacc.c:1652  */
-    {
+  case 137: /* opuser: '!' user  */
+#line 961 "gram.y"
+                                 {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 2793 "gram.c" /* yacc.c:1652  */
+#line 2796 "gram.c"
     break;
 
-  case 138:
-#line 967 "gram.y" /* yacc.c:1652  */
-    {
+  case 138: /* user: ALIAS  */
+#line 967 "gram.y"
+                              {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2805 "gram.c" /* yacc.c:1652  */
+#line 2808 "gram.c"
     break;
 
-  case 139:
-#line 974 "gram.y" /* yacc.c:1652  */
-    {
+  case 139: /* user: ALL  */
+#line 974 "gram.y"
+                            {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2817 "gram.c" /* yacc.c:1652  */
+#line 2820 "gram.c"
     break;
 
-  case 140:
-#line 981 "gram.y" /* yacc.c:1652  */
-    {
+  case 140: /* user: NETGROUP  */
+#line 981 "gram.y"
+                                 {
 			    (yyval.member) = new_member((yyvsp[0].string), NETGROUP);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2829 "gram.c" /* yacc.c:1652  */
+#line 2832 "gram.c"
     break;
 
-  case 141:
-#line 988 "gram.y" /* yacc.c:1652  */
-    {
+  case 141: /* user: USERGROUP  */
+#line 988 "gram.y"
+                                  {
 			    (yyval.member) = new_member((yyvsp[0].string), USERGROUP);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2841 "gram.c" /* yacc.c:1652  */
+#line 2844 "gram.c"
     break;
 
-  case 142:
-#line 995 "gram.y" /* yacc.c:1652  */
-    {
+  case 142: /* user: WORD  */
+#line 995 "gram.y"
+                             {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2853 "gram.c" /* yacc.c:1652  */
+#line 2856 "gram.c"
     break;
 
-  case 144:
-#line 1005 "gram.y" /* yacc.c:1652  */
-    {
+  case 144: /* grouplist: grouplist ',' opgroup  */
+#line 1005 "gram.y"
+                                              {
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2862 "gram.c" /* yacc.c:1652  */
+#line 2865 "gram.c"
     break;
 
-  case 145:
-#line 1011 "gram.y" /* yacc.c:1652  */
-    {
+  case 145: /* opgroup: group  */
+#line 1011 "gram.y"
+                              {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 2871 "gram.c" /* yacc.c:1652  */
+#line 2874 "gram.c"
     break;
 
-  case 146:
-#line 1015 "gram.y" /* yacc.c:1652  */
-    {
+  case 146: /* opgroup: '!' group  */
+#line 1015 "gram.y"
+                                  {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 2880 "gram.c" /* yacc.c:1652  */
+#line 2883 "gram.c"
     break;
 
-  case 147:
-#line 1021 "gram.y" /* yacc.c:1652  */
-    {
+  case 147: /* group: ALIAS  */
+#line 1021 "gram.y"
+                              {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2892 "gram.c" /* yacc.c:1652  */
+#line 2895 "gram.c"
     break;
 
-  case 148:
-#line 1028 "gram.y" /* yacc.c:1652  */
-    {
+  case 148: /* group: ALL  */
+#line 1028 "gram.y"
+                            {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2904 "gram.c" /* yacc.c:1652  */
+#line 2907 "gram.c"
     break;
 
-  case 149:
-#line 1035 "gram.y" /* yacc.c:1652  */
-    {
+  case 149: /* group: WORD  */
+#line 1035 "gram.y"
+                             {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 2916 "gram.c" /* yacc.c:1652  */
+#line 2919 "gram.c"
     break;
 
 
-#line 2920 "gram.c" /* yacc.c:1652  */
+#line 2923 "gram.c"
+
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2936,11 +2940,10 @@ yyreduce:
      case of YYERROR or YYBACKUP, subsequent parser actions might lead
      to an incorrect destructor call or verbose syntax error message
      before the lookahead is translated.  */
-  YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
+  YY_SYMBOL_PRINT ("-> $$ =", YY_CAST (yysymbol_kind_t, yyr1[yyn]), &yyval, &yyloc);
 
   YYPOPSTACK (yylen);
   yylen = 0;
-  YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
 
@@ -2964,49 +2967,13 @@ yyreduce:
 yyerrlab:
   /* Make sure we have latest lookahead translation.  See comments at
      user semantic actions for why this is necessary.  */
-  yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
-
+  yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
       ++yynerrs;
-#if ! YYERROR_VERBOSE
       yyerror (YY_("syntax error"));
-#else
-# define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
-                                        yyssp, yytoken)
-      {
-        char const *yymsgp = YY_("syntax error");
-        int yysyntax_error_status;
-        yysyntax_error_status = YYSYNTAX_ERROR;
-        if (yysyntax_error_status == 0)
-          yymsgp = yymsg;
-        else if (yysyntax_error_status == 1)
-          {
-            if (yymsg != yymsgbuf)
-              YYSTACK_FREE (yymsg);
-            yymsg = (char *) YYSTACK_ALLOC (yymsg_alloc);
-            if (!yymsg)
-              {
-                yymsg = yymsgbuf;
-                yymsg_alloc = sizeof yymsgbuf;
-                yysyntax_error_status = 2;
-              }
-            else
-              {
-                yysyntax_error_status = YYSYNTAX_ERROR;
-                yymsgp = yymsg;
-              }
-          }
-        yyerror (yymsgp);
-        if (yysyntax_error_status == 2)
-          goto yyexhaustedlab;
-      }
-# undef YYSYNTAX_ERROR
-#endif
     }
-
-
 
   if (yyerrstatus == 3)
     {
@@ -3056,13 +3023,14 @@ yyerrorlab:
 yyerrlab1:
   yyerrstatus = 3;      /* Each real token shifted decrements this.  */
 
+  /* Pop stack until we find a state that shifts the error token.  */
   for (;;)
     {
       yyn = yypact[yystate];
       if (!yypact_value_is_default (yyn))
         {
-          yyn += YYTERROR;
-          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
+          yyn += YYSYMBOL_YYerror;
+          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYSYMBOL_YYerror)
             {
               yyn = yytable[yyn];
               if (0 < yyn)
@@ -3076,7 +3044,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-                  yystos[yystate], yyvsp);
+                  YY_ACCESSING_SYMBOL (yystate), yyvsp);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -3088,7 +3056,7 @@ yyerrlab1:
 
 
   /* Shift the error token.  */
-  YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
+  YY_SYMBOL_PRINT ("Shifting", YY_ACCESSING_SYMBOL (yyn), yyvsp, yylsp);
 
   yystate = yyn;
   goto yynewstate;
@@ -3110,20 +3078,20 @@ yyabortlab:
   goto yyreturn;
 
 
-#if !defined yyoverflow || YYERROR_VERBOSE
+#if !defined yyoverflow
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
   yyerror (YY_("memory exhausted"));
   yyresult = 2;
-  /* Fall through.  */
+  goto yyreturn;
 #endif
 
 
-/*-----------------------------------------------------.
-| yyreturn -- parsing is finished, return the result.  |
-`-----------------------------------------------------*/
+/*-------------------------------------------------------.
+| yyreturn -- parsing is finished, clean up and return.  |
+`-------------------------------------------------------*/
 yyreturn:
   if (yychar != YYEMPTY)
     {
@@ -3140,20 +3108,18 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[*yyssp], yyvsp);
+                  YY_ACCESSING_SYMBOL (+*yyssp), yyvsp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
 #endif
-#if YYERROR_VERBOSE
-  if (yymsg != yymsgbuf)
-    YYSTACK_FREE (yymsg);
-#endif
+
   return yyresult;
 }
-#line 1043 "gram.y" /* yacc.c:1918  */
+
+#line 1043 "gram.y"
 
 void
 sudoerserror(const char *s)
