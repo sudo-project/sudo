@@ -53,6 +53,7 @@ extern char *audit_msg;
 
 union sudo_defs_val;
 struct sudo_plugin_event;
+struct log_details;
 
 bool sudoers_warn_setlocale(bool restore, int *cookie);
 bool sudoers_setlocale(int locale_type, int *prev_locale);
@@ -70,7 +71,8 @@ bool log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 bool gai_log_warning(int flags, int errnum, const char *fmt, ...) __printflike(3, 4);
 bool sudoers_initlocale(const char *ulocale, const char *slocale);
 bool sudoers_locale_callback(const union sudo_defs_val *);
-void sudoers_to_eventlog(struct eventlog *evlog);
+void sudoers_to_eventlog(struct eventlog *evlog, char * const argv[], char *const envp[]);
 void init_eventlog_config(void);
+bool init_log_details(struct log_details *details, struct eventlog *evlog);
 
 #endif /* SUDOERS_LOGGING_H */

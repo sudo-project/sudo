@@ -88,7 +88,7 @@ oom:
     debug_return_ptr(NULL);
 }
 
-static bool
+bool
 init_log_details(struct log_details *details, struct eventlog *evlog)
 {
     struct sudoers_str_list *log_servers = NULL;
@@ -215,7 +215,7 @@ log_reject(const char *message, bool logit, bool mailit)
 	if (!logit)
 	    SET(evl_flags, EVLOG_MAIL_ONLY);
     }
-    sudoers_to_eventlog(&evlog);
+    sudoers_to_eventlog(&evlog, NewArgv, env_get());
     if (!eventlog_reject(&evlog, evl_flags, message, NULL, NULL))
 	ret = false;
 
@@ -477,7 +477,7 @@ log_allowed(void)
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	sudoers_to_eventlog(&evlog);
+	sudoers_to_eventlog(&evlog, NewArgv, env_get());
 	if (mailit) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_allowed)
@@ -555,7 +555,7 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
 	    if (ISSET(flags, SLOG_NO_LOG))
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
-	sudoers_to_eventlog(&evlog);
+	sudoers_to_eventlog(&evlog, NewArgv, env_get());
 	eventlog_alert(&evlog, evl_flags, &now, message, errstr);
 
 	log_server_alert(&evlog, &now, message, errstr,
@@ -649,7 +649,8 @@ should_mail(int status)
  * The values in the resulting eventlog struct should not be freed.
  */
 void
-sudoers_to_eventlog(struct eventlog *evlog)
+sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
+    char * const envp[])
 {
     debug_decl(sudoers_to_eventlog, SUDOERS_DEBUG_LOGGING);
 
@@ -676,9 +677,9 @@ sudoers_to_eventlog(struct eventlog *evlog)
     evlog->submituser = user_name;
     /* TODO - submitgroup */
     evlog->ttyname = user_ttypath;
-    evlog->argv = NewArgv;
+    evlog->argv = (char **)argv;
     evlog->env_add = (char **)sudo_user.env_vars;
-    evlog->envp = env_get();
+    evlog->envp = (char **)envp;
     evlog->submit_time = sudo_user.submit_time;
     evlog->lines = sudo_user.lines;
     evlog->columns = sudo_user.cols;
