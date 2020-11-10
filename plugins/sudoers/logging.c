@@ -54,11 +54,31 @@
 
 #include "sudoers.h"
 
-/* Special message for log_warning() so we know to use ngettext() */
-#define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
-
 static bool should_mail(int);
 static bool warned = false;
+
+/*
+ * Log a reject event to syslog, a log file, sudo_logsrvd and/or email.
+ */
+static bool
+log_reject(const char *message, bool logit, bool mailit)
+{
+    int evl_flags = 0;
+    struct eventlog evlog;
+    bool ret = true;
+    debug_decl(log_reject, SUDOERS_DEBUG_LOGGING);
+
+    if (mailit) {
+	SET(evl_flags, EVLOG_MAIL);
+	if (!logit)
+	    SET(evl_flags, EVLOG_MAIL_ONLY);
+    }
+    sudoers_to_eventlog(&evlog);
+    if (!eventlog_reject(&evlog, evl_flags, message, NULL, NULL))
+	ret = false;
+
+    debug_return_bool(ret);
+}
 
 /*
  * Log, audit and mail the denial message, optionally informing the user.
@@ -66,10 +86,8 @@ static bool warned = false;
 bool
 log_denial(int status, bool inform_user)
 {
-    struct eventlog evlog;
     const char *message;
     int oldlocale;
-    int evl_flags = 0;
     bool mailit, ret = true;
     debug_decl(log_denial, SUDOERS_DEBUG_LOGGING);
 
@@ -91,20 +109,14 @@ log_denial(int status, bool inform_user)
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	if (mailit) {
-	    SET(evl_flags, EVLOG_MAIL);
-	    if (!def_log_denied)
-		SET(evl_flags, EVLOG_MAIL_ONLY);
-	}
-	sudoers_to_eventlog(&evlog);
-	if (!eventlog_reject(&evlog, evl_flags, message, NULL, NULL))
+	if (!log_reject(message, def_log_denied, mailit))
 	    ret = false;
 
 	/* Restore locale. */
 	sudoers_setlocale(oldlocale, NULL);
     }
 
-    /* Inform the user if they failed to authenticate (in their locale).  */
+    /* Inform the user of the failure (in their locale).  */
     if (inform_user) {
 	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 
@@ -165,89 +177,12 @@ log_failure(int status, int flags)
 }
 
 /*
- * Log and audit that user was not able to authenticate themselves.
- */
-bool
-log_auth_failure(int status, unsigned int tries)
-{
-    int flags = 0;
-    bool ret = true;
-    debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING);
-
-    /* Do auditing first (audit_failure() handles the locale itself). */
-    audit_failure(NewArgv, "%s", N_("authentication failure"));
-
-    /*
-     * Do we need to send mail?
-     * We want to avoid sending multiple messages for the same command
-     * so if we are going to send an email about the denial, that takes
-     * precedence.
-     */
-    if (ISSET(status, VALIDATE_SUCCESS)) {
-	/* Command allowed, auth failed; do we need to send mail? */
-	if (def_mail_badpass || def_mail_always)
-	    SET(flags, SLOG_SEND_MAIL);
-    } else {
-	/* Command denied, auth failed; make sure we don't send mail twice. */
-	if (def_mail_badpass && !should_mail(status))
-	    SET(flags, SLOG_SEND_MAIL);
-	/* Don't log the bad password message, we'll log a denial instead. */
-	SET(flags, SLOG_NO_LOG);
-    }
-
-    /*
-     * If sudoers denied the command we'll log that separately.
-     */
-    if (ISSET(status, FLAG_BAD_PASSWORD))
-	ret = log_warningx(flags, INCORRECT_PASSWORD_ATTEMPT, tries);
-    else if (ISSET(status, FLAG_NON_INTERACTIVE))
-	ret = log_warningx(flags, N_("a password is required"));
-
-    debug_return_bool(ret);
-}
-
-/*
- * Log and potentially mail the allowed command.
- */
-bool
-log_allowed(void)
-{
-    struct eventlog evlog;
-    int oldlocale;
-    int evl_flags = 0;
-    bool mailit, ret = true;
-    debug_decl(log_allowed, SUDOERS_DEBUG_LOGGING);
-
-    /* Send mail based on status. */
-    mailit = should_mail(VALIDATE_SUCCESS);
-
-    if (def_log_allowed || mailit) {
-	/* Log and mail messages should be in the sudoers locale. */
-	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-
-	sudoers_to_eventlog(&evlog);
-	if (mailit) {
-	    SET(evl_flags, EVLOG_MAIL);
-	    if (!def_log_allowed)
-		SET(evl_flags, EVLOG_MAIL_ONLY);
-	}
-	if (!eventlog_accept(&evlog, evl_flags, NULL, NULL))
-	    ret = false;
-
-	sudoers_setlocale(oldlocale, NULL);
-    }
-
-    debug_return_bool(ret);
-}
-
-/*
  * Format an authentication failure message, using either
  * authfail_message from sudoers or a locale-specific message.
  */
 static int
-fmt_authfail_message(char **str, va_list ap)
+fmt_authfail_message(char **str, unsigned int tries)
 {
-    unsigned int tries = va_arg(ap, unsigned int);
     char *src, *dst0, *dst, *dst_end;
     size_t size;
     int len;
@@ -297,6 +232,122 @@ done:
 }
 
 /*
+ * Log and audit that user was not able to authenticate themselves.
+ */
+bool
+log_auth_failure(int status, unsigned int tries)
+{
+    char *message = NULL;
+    int oldlocale;
+    bool ret = true;
+    bool mailit = false;
+    bool logit = true;
+    debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING);
+
+    /* Do auditing first (audit_failure() handles the locale itself). */
+    audit_failure(NewArgv, "%s", N_("authentication failure"));
+
+    /* If sudoers denied the command we'll log that separately. */
+    if (!ISSET(status, FLAG_BAD_PASSWORD|FLAG_NON_INTERACTIVE))
+	logit = false;
+
+    /*
+     * Do we need to send mail?
+     * We want to avoid sending multiple messages for the same command
+     * so if we are going to send an email about the denial, that takes
+     * precedence.
+     */
+    if (ISSET(status, VALIDATE_SUCCESS)) {
+	/* Command allowed, auth failed; do we need to send mail? */
+	if (def_mail_badpass || def_mail_always)
+	    mailit = true;
+	if (!def_log_denied)
+	    logit = false;
+    } else {
+	/* Command denied, auth failed; make sure we don't send mail twice. */
+	if (def_mail_badpass && !should_mail(status))
+	    mailit = true;
+	/* Don't log the bad password message, we'll log a denial instead. */
+	logit = false;
+    }
+
+    if (logit || mailit) {
+	/* Log and mail messages should be in the sudoers locale. */
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+
+	if (ISSET(status, FLAG_BAD_PASSWORD)) {
+	    if (fmt_authfail_message(&message, tries) == -1) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		ret = false;
+	    } else {
+		ret = log_reject(message, logit, mailit);
+		free(message);
+	    }
+	} else {
+	    ret = log_reject(_("a password is required"), logit, mailit);
+	}
+
+	/* Restore locale. */
+	sudoers_setlocale(oldlocale, NULL);
+    }
+
+    /* Inform the user if they failed to authenticate (in their locale).  */
+    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+
+    if (ISSET(status, FLAG_BAD_PASSWORD)) {
+	if (fmt_authfail_message(&message, tries) == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	    ret = false;
+	} else {
+	    sudo_warnx("%s", message);
+	    free(message);
+	}
+    } else {
+	sudo_warnx("%s", _("a password is required"));
+    }
+
+    sudoers_setlocale(oldlocale, NULL);
+
+    debug_return_bool(ret);
+}
+
+/*
+ * Log and potentially mail the allowed command.
+ */
+bool
+log_allowed(void)
+{
+    struct eventlog evlog;
+    int oldlocale;
+    int evl_flags = 0;
+    bool mailit, ret = true;
+    debug_decl(log_allowed, SUDOERS_DEBUG_LOGGING);
+
+    /* Send mail based on status. */
+    mailit = should_mail(VALIDATE_SUCCESS);
+
+    if (def_log_allowed || mailit) {
+	/* Log and mail messages should be in the sudoers locale. */
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+
+	sudoers_to_eventlog(&evlog);
+	if (mailit) {
+	    SET(evl_flags, EVLOG_MAIL);
+	    if (!def_log_allowed)
+		SET(evl_flags, EVLOG_MAIL_ONLY);
+	}
+	if (!eventlog_accept(&evlog, evl_flags, NULL, NULL))
+	    ret = false;
+
+	sudoers_setlocale(oldlocale, NULL);
+    }
+
+    debug_return_bool(ret);
+}
+
+/*
  * Perform logging for log_warning()/log_warningx().
  */
 static bool
@@ -325,12 +376,8 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
     /* Log messages should be in the sudoers locale. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-    /* Expand printf-style format + args (with a special case). */
-    if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
-	len = fmt_authfail_message(&message, ap);
-    } else {
-	len = vasprintf(&message, _(fmt), ap);
-    }
+    /* Expand printf-style format + args. */
+    len = vasprintf(&message, _(fmt), ap);
     if (len == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	ret = false;
@@ -372,24 +419,13 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
      */
     if (!ISSET(flags, SLOG_NO_STDERR)) {
 	sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
-	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
-	    len = fmt_authfail_message(&message, ap2);
-	    if (len == -1) {
-		sudo_warnx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-		ret = false;
-		goto done;
-	    }
-	    sudo_warnx_nodebug("%s", message);
-	    free(message);
+	if (ISSET(flags, SLOG_USE_ERRNO)) {
+	    errno = errnum;
+	    sudo_vwarn_nodebug(_(fmt), ap2);
+	} else if (ISSET(flags, SLOG_GAI_ERRNO)) {
+	    sudo_gai_vwarn_nodebug(errnum, _(fmt), ap2);
 	} else {
-	    if (ISSET(flags, SLOG_USE_ERRNO)) {
-		errno = errnum;
-		sudo_vwarn_nodebug(_(fmt), ap2);
-	    } else if (ISSET(flags, SLOG_GAI_ERRNO)) {
-		sudo_gai_vwarn_nodebug(errnum, _(fmt), ap2);
-	    } else
-		sudo_vwarnx_nodebug(_(fmt), ap2);
+	    sudo_vwarnx_nodebug(_(fmt), ap2);
 	}
     }
 
