@@ -937,7 +937,7 @@ bad:
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
  */
-bool
+static bool
 fmt_accept_message(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
@@ -985,7 +985,7 @@ done:
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
  */
-bool
+static bool
 fmt_reject_message(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
@@ -1033,7 +1033,7 @@ done:
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
  */
-bool
+static bool
 fmt_alert_message(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
@@ -1073,6 +1073,52 @@ fmt_alert_message(struct client_closure *closure)
 done:
     free_info_messages(alert_msg.info_msgs, alert_msg.n_info_msgs);
 
+    debug_return_bool(ret);
+}
+
+/*
+ * Build and format an AcceptMessage, RejectMessage or AlertMessage
+ * (depending on initial_state) wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+static bool
+fmt_initial_message(struct client_closure *closure)
+{
+    bool ret = true;
+    debug_decl(fmt_initial_message, SUDOERS_DEBUG_UTIL);
+
+    closure->state = closure->initial_state;
+    switch (closure->state) {
+    case SEND_ACCEPT:
+	/* Format and schedule AcceptMessage. */
+	if ((ret = fmt_accept_message(closure))) {
+	    /*
+	     * Move read/write events back to main sudo event loop.
+	     * Server messages may occur at any time, so no timeout.
+	     * Write event will be re-enabled later.
+	     */
+	    closure->read_ev->setbase(closure->read_ev, NULL);
+	    if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
+		sudo_warn("%s", U_("unable to add event to queue"));
+		ret = false;
+	    }
+	    closure->write_ev->setbase(closure->write_ev, NULL);
+	}
+	break;
+    case SEND_REJECT:
+	/* Format and schedule RejectMessage. */
+	ret = fmt_reject_message(closure);
+	break;
+    case SEND_ALERT:
+	/* Format and schedule AlertMessage. */
+	ret = fmt_alert_message(closure);
+	break;
+    default:
+	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
+	ret = false;
+	break;
+    }
     debug_return_bool(ret);
 }
 
@@ -1524,56 +1570,12 @@ handle_server_message(uint8_t *buf, size_t len,
     switch (msg->type_case) {
     case SERVER_MESSAGE__TYPE_HELLO:
 	if (handle_server_hello(msg->u.hello, closure)) {
-	    /* XXX - move into a function */
-	    closure->state = closure->initial_state;
-	    switch (closure->state) {
-	    case SEND_ACCEPT:
-		/* Format and schedule AcceptMessage. */
-		if ((ret = fmt_accept_message(closure))) {
-		    if (closure->write_ev->add(closure->write_ev,
-			    &closure->log_details->server_timeout) == -1) {
-			sudo_warn("%s", U_("unable to add event to queue"));
-			ret = false;
-		    }
-
-		    /*
-		     * Move read/write events back to main sudo event loop.
-		     * Server messages may occur at any time, so no timeout.
-		     * Write event will be re-enabled later.
-		     */
-		    closure->read_ev->setbase(closure->read_ev, NULL);
-		    if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
-			sudo_warn("%s", U_("unable to add event to queue"));
-			debug_return_bool(false);
-		    }
-		    closure->write_ev->setbase(closure->write_ev, NULL);
+	    if ((ret = fmt_initial_message(closure))) {
+		if (closure->write_ev->add(closure->write_ev,
+			&closure->log_details->server_timeout) == -1) {
+		    sudo_warn("%s", U_("unable to add event to queue"));
+		    ret = false;
 		}
-		break;
-	    case SEND_REJECT:
-		/* Format and schedule RejectMessage. */
-		if ((ret = fmt_reject_message(closure))) {
-		    if (closure->write_ev->add(closure->write_ev,
-			    &closure->log_details->server_timeout) == -1) {
-			sudo_warn("%s", U_("unable to add event to queue"));
-			ret = false;
-		    }
-		}
-		break;
-	    case SEND_ALERT:
-		/* Format and schedule AlertMessage. */
-		if ((ret = fmt_alert_message(closure))) {
-		    if (closure->write_ev->add(closure->write_ev,
-			    &closure->log_details->server_timeout) == -1) {
-			sudo_warn("%s", U_("unable to add event to queue"));
-			ret = false;
-		    }
-		}
-		break;
-	    default:
-		sudo_warnx(U_("%s: unexpected state %d"), __func__,
-		    closure->state);
-		debug_return_bool(false);
-		break;
 	    }
 	}
 	break;

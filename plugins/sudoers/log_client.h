@@ -112,12 +112,9 @@ struct client_closure {
 /* iolog_client.c */
 struct client_closure *log_server_open(struct log_details *details, struct timespec *now, bool log_io, enum client_state initial_state, const char *reason, struct sudo_plugin_event * (*event_alloc)(void));
 bool log_server_close(struct client_closure *closure, int exit_status, int error);
-bool fmt_accept_message(struct client_closure *closure);
-bool fmt_alert_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);
 bool fmt_exit_message(struct client_closure *closure, int exit_status, int error);
 bool fmt_io_buf(struct client_closure *closure, int type, const char *buf, unsigned int len, struct timespec *delay);
-bool fmt_reject_message(struct client_closure *closure);
 bool fmt_suspend(struct client_closure *closure, const char *signame, struct timespec *delay);
 bool fmt_winsize(struct client_closure *closure, unsigned int lines, unsigned int cols, struct timespec *delay);
 bool log_server_connect(struct client_closure *closure);
