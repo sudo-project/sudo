@@ -980,6 +980,89 @@ done:
     debug_return_bool(ret);
 }
 
+/*
+ * Build and format a RejectMessage wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_reject_message(struct client_closure *closure)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    RejectMessage reject_msg = REJECT_MESSAGE__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
+    struct timespec now;
+    bool ret = false;
+    debug_decl(fmt_reject_message, SUDOERS_DEBUG_UTIL);
+
+    /*
+     * Fill in RejectMessage and add it to ClientMessage.
+     */
+    if (sudo_gettime_real(&now)) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	debug_return_bool(false);
+    }
+    ts.tv_sec = now.tv_sec;
+    ts.tv_nsec = now.tv_nsec;
+    reject_msg.submit_time = &ts;
+
+    /* Reason for rejecting the request. */
+    reject_msg.reason = (char *)closure->reason;
+
+    reject_msg.info_msgs = fmt_info_messages(closure, &reject_msg.n_info_msgs);
+    if (reject_msg.info_msgs == NULL)
+	goto done;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending RejectMessage, array length %zu", __func__,
+	reject_msg.n_info_msgs);
+
+    /* Schedule ClientMessage */
+    client_msg.u.reject_msg = &reject_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_REJECT_MSG;
+    ret = fmt_client_message(closure, &client_msg);
+
+done:
+    free_info_messages(reject_msg.info_msgs, reject_msg.n_info_msgs);
+
+    debug_return_bool(ret);
+}
+
+/*
+ * Build and format an AlertMessage wrapped in a ClientMessage.
+ * Appends the wire format message to the closure's write queue.
+ * Returns true on success, false on failure.
+ */
+bool
+fmt_alert_message(struct client_closure *closure)
+{
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    AlertMessage alert_msg = ALERT_MESSAGE__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
+    struct timespec now;
+    debug_decl(fmt_alert_message, SUDOERS_DEBUG_UTIL);
+
+    /*
+     * Fill in AlertMessage and add it to ClientMessage.
+     */
+    if (sudo_gettime_real(&now)) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	debug_return_bool(false);
+    }
+    ts.tv_sec = now.tv_sec;
+    ts.tv_nsec = now.tv_nsec;
+    alert_msg.alert_time = &ts;
+
+    /* Reason for the alert. */
+    alert_msg.reason = (char *)closure->reason;
+
+    /* Schedule ClientMessage */
+    client_msg.u.alert_msg = &alert_msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_ALERT_MSG;
+
+    debug_return_bool(fmt_client_message(closure, &client_msg));
+}
+
 #ifdef notyet
 /*
  * Build and format a RestartMessage wrapped in a ClientMessage.
@@ -1002,7 +1085,7 @@ fmt_restart_message(struct client_closure *closure)
     tv.tv_sec = closure->restart->tv_sec;
     tv.tv_nsec = closure->restart->tv_nsec;
     restart_msg.resume_point = &tv;
-    restart_msg.log_id = (char *)closure->iolog_id;
+    restart_msg.log_id = closure->iolog_id;
 
     /* Schedule ClientMessage */
     client_msg.restart_msg = &restart_msg;
@@ -1202,9 +1285,18 @@ client_message_completion(struct client_closure *closure)
 {
     debug_decl(client_message_completion, SUDOERS_DEBUG_UTIL);
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: state %d", __func__, closure->state);
+
     switch (closure->state) {
     case RECV_HELLO:
 	/* Waiting for ServerHello, nothing else to do. */
+	break;
+    case SEND_ALERT:
+    case SEND_REJECT:
+	/* Nothing else to send, we are done. */
+	closure->write_ev->del(closure->write_ev);
+	closure->read_ev->del(closure->read_ev);
+	closure->state = FINISHED;
 	break;
     case SEND_ACCEPT:
     case SEND_RESTART:
@@ -1267,7 +1359,7 @@ read_server_hello(struct client_closure *closure)
 	goto done;
     }
 
-    /* Read ServerHello synchronously. */
+    /* Read ServerHello. */
     closure->read_ev->setbase(closure->read_ev, evbase);
     if (closure->read_ev->add(closure->read_ev,
 	    &closure->log_details->server_timeout) == -1) {
@@ -1283,8 +1375,6 @@ read_server_hello(struct client_closure *closure)
 
     if (!sudo_ev_got_break(evbase))
 	ret = true;
-
-    /* Note: handle_server_hello() reset the event back to sudo's event loop. */
 
 done:
     sudo_ev_base_free(evbase);
@@ -1323,18 +1413,6 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: server %zu: %s",
 	    __func__, n + 1, msg->servers[n]);
     }
-
-    /*
-     * Move read/write events back to main sudo event loop.
-     * Server messages may occur at any time, so no timeout.
-     * Write event will be re-enabled later.
-     */
-    closure->read_ev->setbase(closure->read_ev, NULL);
-    if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
-        sudo_warn("%s", U_("unable to add event to queue"));
-	debug_return_bool(false);
-    }
-    closure->write_ev->setbase(closure->write_ev, NULL);
 
     debug_return_bool(true);
 }
@@ -1433,14 +1511,56 @@ handle_server_message(uint8_t *buf, size_t len,
     switch (msg->type_case) {
     case SERVER_MESSAGE__TYPE_HELLO:
 	if (handle_server_hello(msg->u.hello, closure)) {
-	    /* Format and schedule accept message. */
-	    closure->state = SEND_ACCEPT;
-	    if ((ret = fmt_accept_message(closure))) {
-		if (closure->write_ev->add(closure->write_ev,
-			&closure->log_details->server_timeout) == -1) {
-		    sudo_warn("%s", U_("unable to add event to queue"));
-		    ret = false;
+	    /* XXX - move into a function */
+	    closure->state = closure->initial_state;
+	    switch (closure->state) {
+	    case SEND_ACCEPT:
+		/* Format and schedule AcceptMessage. */
+		if ((ret = fmt_accept_message(closure))) {
+		    if (closure->write_ev->add(closure->write_ev,
+			    &closure->log_details->server_timeout) == -1) {
+			sudo_warn("%s", U_("unable to add event to queue"));
+			ret = false;
+		    }
+
+		    /*
+		     * Move read/write events back to main sudo event loop.
+		     * Server messages may occur at any time, so no timeout.
+		     * Write event will be re-enabled later.
+		     */
+		    closure->read_ev->setbase(closure->read_ev, NULL);
+		    if (closure->read_ev->add(closure->read_ev, NULL) == -1) {
+			sudo_warn("%s", U_("unable to add event to queue"));
+			debug_return_bool(false);
+		    }
+		    closure->write_ev->setbase(closure->write_ev, NULL);
 		}
+		break;
+	    case SEND_REJECT:
+		/* Format and schedule RejectMessage. */
+		if ((ret = fmt_reject_message(closure))) {
+		    if (closure->write_ev->add(closure->write_ev,
+			    &closure->log_details->server_timeout) == -1) {
+			sudo_warn("%s", U_("unable to add event to queue"));
+			ret = false;
+		    }
+		}
+		break;
+	    case SEND_ALERT:
+		/* Format and schedule AlertMessage. */
+		if ((ret = fmt_alert_message(closure))) {
+		    if (closure->write_ev->add(closure->write_ev,
+			    &closure->log_details->server_timeout) == -1) {
+			sudo_warn("%s", U_("unable to add event to queue"));
+			ret = false;
+		    }
+		}
+		break;
+	    default:
+		sudo_warnx(U_("%s: unexpected state %d"), __func__,
+		    closure->state);
+		debug_return_bool(false);
+		break;
 	    }
 	}
 	break;
@@ -1677,7 +1797,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
     if ((buf = TAILQ_FIRST(&closure->write_bufs)) == NULL) {
-	sudo_warn("%s", U_("missing write buffer"));
+	sudo_warnx("%s", U_("missing write buffer"));
 	goto bad;
     }
 
@@ -1768,7 +1888,8 @@ bad:
  */
 static struct client_closure *
 client_closure_alloc(struct log_details *details, struct timespec *now,
-    bool log_io, struct sudo_plugin_event * (*event_alloc)(void))
+    bool log_io, enum client_state initial_state, const char *reason,
+    struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;
     debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL);
@@ -1778,7 +1899,9 @@ client_closure_alloc(struct log_details *details, struct timespec *now,
 
     closure->sock = -1;
     closure->log_io = log_io;
+    closure->reason = reason;
     closure->state = RECV_HELLO;
+    closure->initial_state = initial_state;
 
     closure->start_time.tv_sec = now->tv_sec;
     closure->start_time.tv_nsec = now->tv_nsec;
@@ -1809,12 +1932,14 @@ oom:
 
 struct client_closure *
 log_server_open(struct log_details *details, struct timespec *now,
-    bool log_io, struct sudo_plugin_event * (*event_alloc)(void))
+    bool log_io, enum client_state initial_state, const char *reason,
+    struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;
     debug_decl(log_server_open, SUDOERS_DEBUG_UTIL);
 
-    closure = client_closure_alloc(details, now, log_io, event_alloc);
+    closure = client_closure_alloc(details, now, log_io, initial_state,
+	reason, event_alloc);
     if (closure == NULL)
 	goto bad;
 

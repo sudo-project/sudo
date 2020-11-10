@@ -678,8 +678,8 @@ sudoers_io_open_remote(struct timespec *now)
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
     /* Open connection to log server, send hello and accept messages. */
-    client_closure = log_server_open(&iolog_details, now, true,
-	sudoers_io.event_alloc);
+    client_closure = log_server_open(&iolog_details, now, true, SEND_ACCEPT,
+	NULL, sudoers_io.event_alloc);
     if (client_closure != NULL)
 	debug_return_int(1);
 

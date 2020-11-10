@@ -52,6 +52,7 @@ extern char **NewArgv;
 extern char *audit_msg;
 
 union sudo_defs_val;
+struct sudo_plugin_event;
 
 bool sudoers_warn_setlocale(bool restore, int *cookie);
 bool sudoers_setlocale(int locale_type, int *prev_locale);
@@ -62,6 +63,8 @@ bool log_allowed(void);
 bool log_auth_failure(int status, unsigned int tries);
 bool log_denial(int status, bool inform_user);
 bool log_failure(int status, int flags);
+bool log_server_alert(struct eventlog *evlog, struct timespec *now, const char *message, const char *errstr, struct sudo_plugin_event * (*event_alloc)(void));
+bool log_server_reject(struct eventlog *evlog, const char *message, struct sudo_plugin_event * (*event_alloc)(void));
 bool log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
 bool log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 bool gai_log_warning(int flags, int errnum, const char *fmt, ...) __printflike(3, 4);

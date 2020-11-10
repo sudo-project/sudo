@@ -67,6 +67,8 @@ enum client_state {
     RECV_HELLO,
     SEND_RESTART,	/* TODO: currently unimplemented */
     SEND_ACCEPT,
+    SEND_ALERT,
+    SEND_REJECT,
     SEND_IO,
     SEND_EXIT,
     CLOSING,
@@ -79,6 +81,7 @@ struct client_closure {
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
+    bool disabled;
     bool log_io;
     char *server_name;
 #if defined(HAVE_STRUCT_IN6_ADDR)
@@ -91,8 +94,8 @@ struct client_closure {
     SSL *ssl;
     bool ssl_initialized;
 #endif /* HAVE_OPENSSL */
-    bool disabled;
     enum client_state state;
+    enum client_state initial_state; /* XXX - bad name */
     struct connection_buffer_list write_bufs;
     struct connection_buffer_list free_bufs;
     struct connection_buffer read_buf;
@@ -103,15 +106,18 @@ struct client_closure {
     struct timespec elapsed;
     struct timespec committed;
     char *iolog_id;
+    const char *reason;
 };
 
 /* iolog_client.c */
-struct client_closure *log_server_open(struct log_details *details, struct timespec *now, bool log_io, struct sudo_plugin_event * (*event_alloc)(void));
+struct client_closure *log_server_open(struct log_details *details, struct timespec *now, bool log_io, enum client_state initial_state, const char *reason, struct sudo_plugin_event * (*event_alloc)(void));
 bool log_server_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure);
+bool fmt_alert_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);
 bool fmt_exit_message(struct client_closure *closure, int exit_status, int error);
 bool fmt_io_buf(struct client_closure *closure, int type, const char *buf, unsigned int len, struct timespec *delay);
+bool fmt_reject_message(struct client_closure *closure);
 bool fmt_suspend(struct client_closure *closure, const char *signame, struct timespec *delay);
 bool fmt_winsize(struct client_closure *closure, unsigned int lines, unsigned int cols, struct timespec *delay);
 bool log_server_connect(struct client_closure *closure);

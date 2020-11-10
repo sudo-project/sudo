@@ -53,9 +53,151 @@
 #endif
 
 #include "sudoers.h"
+#include "log_client.h"
 
 static bool should_mail(int);
 static bool warned = false;
+
+extern struct policy_plugin sudoers_policy;	/* XXX */
+
+#ifdef SUDOERS_LOG_CLIENT
+/*
+ * Convert a defaults-style list to a stringlist.
+ */
+static struct sudoers_str_list *
+list_to_strlist(struct list_members *list)
+{
+    struct sudoers_str_list *strlist;
+    struct sudoers_string *str;
+    struct list_member *item;
+    debug_decl(slist_to_strlist, SUDOERS_DEBUG_LOGGING);
+
+    if ((strlist = str_list_alloc()) == NULL)
+	goto oom;
+
+    SLIST_FOREACH(item, list, entries) {
+	if ((str = sudoers_string_alloc(item->value)) == NULL)
+	    goto oom;
+	/* List is in reverse order, insert at head to fix that. */
+	STAILQ_INSERT_HEAD(strlist, str, entries);
+    }
+
+    debug_return_ptr(strlist);
+oom:
+    str_list_free(strlist);
+    debug_return_ptr(NULL);
+}
+
+static bool
+init_log_details(struct log_details *details, struct eventlog *evlog)
+{
+    struct sudoers_str_list *log_servers = NULL;
+    debug_decl(init_log_details, SUDOERS_DEBUG_LOGGING);
+
+    memset(details, 0, sizeof(*details));
+
+    if ((log_servers = list_to_strlist(&def_log_servers)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
+
+    details->evlog = evlog;
+    details->ignore_log_errors = def_ignore_logfile_errors;
+    details->log_servers = log_servers;
+    details->server_timeout.tv_sec = def_log_server_timeout;
+    details->keepalive = def_log_server_keepalive;
+#if defined(HAVE_OPENSSL)
+    details->ca_bundle = def_log_server_cabundle;
+    details->cert_file = def_log_server_peer_cert;
+    details->key_file = def_log_server_peer_key;
+    details->verify_server = def_log_server_verify;
+#endif /* HAVE_OPENSSL */
+
+    debug_return_bool(true);
+}
+
+bool
+log_server_reject(struct eventlog *evlog, const char *message,
+    struct sudo_plugin_event * (*event_alloc)(void))
+{
+    struct client_closure *client_closure;
+    struct log_details details;
+    bool ret = false;
+    debug_decl(log_server_reject, SUDOERS_DEBUG_LOGGING);
+
+    if (SLIST_EMPTY(&def_log_servers))
+	debug_return_bool(true);
+
+    if (!init_log_details(&details, evlog))
+	debug_return_bool(false);
+
+    /* Open connection to log server, send hello and reject messages. */
+    client_closure = log_server_open(&details, &sudo_user.submit_time, false,
+	SEND_REJECT, message, event_alloc);
+    if (client_closure != NULL) {
+	client_closure_free(client_closure);
+	ret = true;
+    }
+
+    /* Only the log_servers string list is dynamically allocated. */
+    str_list_free(details.log_servers);
+    debug_return_bool(ret);
+}
+
+bool
+log_server_alert(struct eventlog *evlog, struct timespec *now,
+    const char *message, const char *errstr,
+    struct sudo_plugin_event * (*event_alloc)(void))
+{
+    struct client_closure *client_closure;
+    struct log_details details;
+    char *emessage = NULL;
+    bool ret = false;
+    debug_decl(log_server_alert, SUDOERS_DEBUG_LOGGING);
+
+    if (SLIST_EMPTY(&def_log_servers))
+	debug_return_bool(true);
+
+    if (!init_log_details(&details, evlog))
+	goto done;
+
+    if (errstr != NULL) {
+	if (asprintf(&emessage, _("%s: %s"), message, errstr) == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+    }
+
+    /* Open connection to log server, send hello and alert messages. */
+    client_closure = log_server_open(&details, now, false,
+	SEND_ALERT, emessage ? emessage : message, event_alloc);
+    if (client_closure != NULL) {
+	client_closure_free(client_closure);
+	ret = true;
+    }
+
+done:
+    /* Only the log_servers string list is dynamically allocated. */
+    free(emessage);
+    str_list_free(details.log_servers);
+    debug_return_bool(ret);
+}
+#else
+bool
+log_server_reject(struct eventlog *evlog, const char *message,
+    struct sudo_plugin_event * (*event_alloc)(void))
+{
+    return true;
+}
+
+bool
+log_server_alert(struct eventlog *evlog, struct timespec *now,
+    const char *message, const char *errstr,
+    struct sudo_plugin_event * (*event_alloc)(void))
+{
+    return true;
+}
+#endif /* SUDOERS_LOG_CLIENT */
 
 /*
  * Log a reject event to syslog, a log file, sudo_logsrvd and/or email.
@@ -75,6 +217,9 @@ log_reject(const char *message, bool logit, bool mailit)
     }
     sudoers_to_eventlog(&evlog);
     if (!eventlog_reject(&evlog, evl_flags, message, NULL, NULL))
+	ret = false;
+
+    if (!log_server_reject(&evlog, message, sudoers_policy.event_alloc))
 	ret = false;
 
     debug_return_bool(ret);
@@ -412,6 +557,9 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
 	}
 	sudoers_to_eventlog(&evlog);
 	eventlog_alert(&evlog, evl_flags, &now, message, errstr);
+
+	log_server_alert(&evlog, &now, message, errstr,
+	    sudoers_policy.event_alloc);
     }
 
     /*

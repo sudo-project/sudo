@@ -248,7 +248,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
 
 	/* Open connection to log server, send hello and accept messages. */
 	client_closure = log_server_open(&audit_details, &now, false,
-	    sudoers_audit.event_alloc);
+	    SEND_ACCEPT, NULL, sudoers_audit.event_alloc);
 	if (client_closure == NULL)
 bad:
 	    ret = false;
@@ -282,6 +282,9 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
     if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
 
+    if (!log_server_reject(&evlog, message, sudoers_audit.event_alloc))
+	ret = false;
+
     debug_return_int(ret);
 }
 
@@ -310,6 +313,10 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 
     sudoers_to_eventlog(&evlog);
     if (!eventlog_alert(&evlog, 0, &now, message, NULL))
+	ret = false;
+
+    if (!log_server_alert(&evlog, &now, message, NULL,
+	    sudoers_audit.event_alloc))
 	ret = false;
 
     debug_return_int(ret);
