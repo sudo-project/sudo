@@ -64,7 +64,7 @@ static struct sudoers_io_operations {
 	const char **errstr);
 } io_operations;
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static struct client_closure *client_closure;
 #endif
 static struct iolog_details iolog_details;
@@ -671,7 +671,7 @@ done:
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static int
 sudoers_io_open_remote(struct timespec *now)
 {
@@ -685,7 +685,7 @@ sudoers_io_open_remote(struct timespec *now)
 
     debug_return_int(-1);
 }
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
 
 static int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
@@ -813,7 +813,7 @@ sudoers_io_close_local(int exit_status, int error, const char **errstr)
     debug_return;
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static void
 sudoers_io_close_remote(int exit_status, int error, const char **errstr)
 {
@@ -910,7 +910,7 @@ done:
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 /*
  * Schedule an I/O log entry to be written to the log server.
  * Returns 1 on success and -1 on error.
@@ -959,7 +959,7 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
 done:
     debug_return_int(ret);
 }
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
 
 /*
  * Generic I/O logging function.  Called by the I/O logging entry points.
@@ -1068,7 +1068,7 @@ done:
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static int
 sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
     struct timespec *delay, const char **errstr)
@@ -1091,7 +1091,7 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
 
     debug_return_int(ret);
 }
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
 
 static int
 sudoers_io_change_winsize(unsigned int lines, unsigned int cols, const char **errstr)
@@ -1166,7 +1166,7 @@ done:
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static int
 sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
     const char **errstr)
@@ -1189,7 +1189,7 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
 
     debug_return_int(ret);
 }
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
 
 static int
 sudoers_io_suspend(int signo, const char **errstr)
@@ -1253,7 +1253,7 @@ sudoers_io_setops(void)
 {
     debug_decl(sudoers_io_setops, SUDOERS_DEBUG_PLUGIN);
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
     if (sudoers_io.event_alloc != NULL && iolog_details.log_servers != NULL) {
 	io_operations.open = sudoers_io_open_remote;
 	io_operations.close = sudoers_io_close_remote;
@@ -1261,7 +1261,7 @@ sudoers_io_setops(void)
 	io_operations.change_winsize = sudoers_io_change_winsize_remote;
 	io_operations.suspend = sudoers_io_suspend_remote;
     } else
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
     {
 	io_operations.open = sudoers_io_open_local;
 	io_operations.close = sudoers_io_close_local;

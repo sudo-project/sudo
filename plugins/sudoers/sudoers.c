@@ -107,7 +107,7 @@ static struct rlimit nproclimit;
 int NewArgc;
 char **NewArgv;
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 # define remote_iologs	(!SLIST_EMPTY(&def_log_servers))
 #else
 # define remote_iologs	0

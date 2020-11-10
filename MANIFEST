@@ -503,7 +503,6 @@ plugins/sudoers/insults.h
 plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
-plugins/sudoers/iolog_client.c
 plugins/sudoers/iolog_path_escapes.c
 plugins/sudoers/iolog_plugin.h
 plugins/sudoers/ldap.c
@@ -512,6 +511,7 @@ plugins/sudoers/ldap_util.c
 plugins/sudoers/linux_audit.c
 plugins/sudoers/linux_audit.h
 plugins/sudoers/locale.c
+plugins/sudoers/log_client.c
 plugins/sudoers/logging.c
 plugins/sudoers/logging.h
 plugins/sudoers/match.c

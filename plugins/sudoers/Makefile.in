@@ -171,7 +171,7 @@ LIBPARSESUDOERS_IOBJS = $(LIBPARSESUDOERS_OBJS:.lo=.i) passwd.i
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo \
 	       env_pattern.lo file.lo find_path.lo fmtsudoers.lo gc.lo \
 	       goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
-	       iolog_path_escapes.lo locale.lo iolog_client.lo logging.lo \
+	       iolog_path_escapes.lo locale.lo log_client.lo logging.lo \
 	       parse.lo policy.lo prompt.lo set_perms.lo starttime.lo \
 	       sudo_nss.lo sudoers.lo timestamp.lo @SUDOERS_OBJS@
 
@@ -221,7 +221,7 @@ CHECK_GENTIME_OBJS = check_gentime.o gentime.lo gmtoff.lo sudoers_debug.lo
 
 CHECK_HEXCHAR_OBJS = check_hexchar.o hexchar.lo sudoers_debug.lo
 
-CHECK_IOLOG_PLUGIN_OBJS = check_iolog_plugin.o iolog.lo iolog_client.lo \
+CHECK_IOLOG_PLUGIN_OBJS = check_iolog_plugin.o iolog.lo log_client.lo \
 			  locale.lo pwutil.lo pwutil_impl.lo redblack.lo \
 			  strlist.lo sudoers_debug.lo
 
@@ -1614,38 +1614,6 @@ iolog.i: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog.plog: iolog.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog.c --i-file $< --output-file $@
-iolog_client.lo: $(srcdir)/iolog_client.c $(devdir)/def_data.h \
-                 $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
-                 $(incdir)/hostcheck.h $(incdir)/log_server.pb-c.h \
-                 $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
-                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-                 $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
-                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
-                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                 $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
-                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
-                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                 $(top_builddir)/pathnames.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_client.c
-iolog_client.i: $(srcdir)/iolog_client.c $(devdir)/def_data.h \
-                 $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
-                 $(incdir)/hostcheck.h $(incdir)/log_server.pb-c.h \
-                 $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
-                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-                 $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
-                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
-                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                 $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
-                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
-                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                 $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-iolog_client.plog: iolog_client.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_client.c --i-file $< --output-file $@
 iolog_path_escapes.lo: $(srcdir)/iolog_path_escapes.c $(devdir)/def_data.h \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1810,6 +1778,38 @@ locale.i: $(srcdir)/locale.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 locale.plog: locale.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/locale.c --i-file $< --output-file $@
+log_client.lo: $(srcdir)/log_client.c $(devdir)/def_data.h \
+               $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
+               $(incdir)/hostcheck.h $(incdir)/log_server.pb-c.h \
+               $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
+               $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/log_client.c
+log_client.i: $(srcdir)/log_client.c $(devdir)/def_data.h \
+               $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
+               $(incdir)/hostcheck.h $(incdir)/log_server.pb-c.h \
+               $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
+               $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+log_client.plog: log_client.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/log_client.c --i-file $< --output-file $@
 logging.lo: $(srcdir)/logging.c $(devdir)/def_data.h \
             $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \

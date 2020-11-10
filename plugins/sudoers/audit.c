@@ -43,7 +43,7 @@
 # include "solaris_audit.h"
 #endif
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static struct client_closure *client_closure = NULL;
 static struct iolog_details audit_details;
 #endif
@@ -51,6 +51,9 @@ char *audit_msg = NULL;
 
 /* sudoers_audit is declared at the end of this file. */
 extern sudo_dso_public struct audit_plugin sudoers_audit;
+
+/* XXX */
+int iolog_deserialize_info(struct iolog_details *details, char * const user_info[], char * const command_info[], char * const argv[], char * const user_env[]);
 
 static int
 audit_success(char *const argv[])
@@ -226,7 +229,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (!log_allowed() && !def_ignore_logfile_errors)
 	ret = false;
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
     /* XXX - move to function, maybe log_allowed()? */
     if (!SLIST_EMPTY(&def_log_servers) && !def_log_input && !def_log_output) {
 	/* Send accept event to log server. */
@@ -316,7 +319,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 void
 sudoers_audit_close(int status_type, int status)
 {
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
     debug_decl(sudoers_audit_close, SUDOERS_DEBUG_PLUGIN);
 
     if (client_closure != NULL) {

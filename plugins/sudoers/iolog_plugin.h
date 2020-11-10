@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef SUDOERS_IOLOG_CLIENT_H
-#define SUDOERS_IOLOG_CLIENT_H
+#ifndef SUDOERS_LOG_CLIENT_H
+#define SUDOERS_LOG_CLIENT_H
 
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
@@ -117,4 +117,4 @@ bool log_server_connect(struct client_closure *closure);
 void client_closure_free(struct client_closure *closure);
 bool read_server_hello(struct client_closure *closure);
 
-#endif /* SUDOERS_IOLOG_CLIENT_H */
+#endif /* SUDOERS_LOG_CLIENT_H */

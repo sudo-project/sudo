@@ -1657,14 +1657,14 @@ AC_ARG_ENABLE(log-client,
 [AS_HELP_STRING([--disable-log-client], [Disable sudoers support for using the sudo_logsrvd log server.])],
 [ case "$enableval" in
     yes)
-	    AC_DEFINE([SUDOERS_IOLOG_CLIENT])
+	    AC_DEFINE([SUDOERS_LOG_CLIENT])
 	    ;;
     no)
 	    ;;
     *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-log-client: $enableval])
 	    ;;
   esac
-], [AC_DEFINE([SUDOERS_IOLOG_CLIENT])])
+], [AC_DEFINE([SUDOERS_LOG_CLIENT])])
 
 if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
     # No need for liblogsrv.la
@@ -4964,7 +4964,7 @@ AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
-AH_TEMPLATE(SUDOERS_IOLOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers I/O log plugin.])
+AH_TEMPLATE(SUDOERS_LOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers plugin.])
 AH_TEMPLATE(HAVE_FALLTHROUGH_ATTRIBUTE, [Define to 1 if the compiler supports the fallthrough attribute.])
 
 dnl

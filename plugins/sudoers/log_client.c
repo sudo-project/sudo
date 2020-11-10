@@ -18,7 +18,7 @@
 
 #include "config.h"
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -610,7 +610,7 @@ log_server_connect(struct client_closure *closure)
 }
 
 /*
- * Free client closure and contents, including log details.
+ * Free client closure and contents, not including log details.
  */
 void
 client_closure_free(struct client_closure *closure)
@@ -1892,4 +1892,4 @@ done:
     debug_return_bool(ret);
 }
 
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
