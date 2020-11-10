@@ -42,7 +42,7 @@
 #include "sudoers.h"
 #include "sudo_eventlog.h"
 #include "sudo_iolog.h"
-#include "iolog_plugin.h"
+#include "log_client.h"
 
 static struct iolog_file iolog_files[] = {
     { false },	/* IOFD_STDIN */
@@ -67,7 +67,7 @@ static struct sudoers_io_operations {
 #ifdef SUDOERS_LOG_CLIENT
 static struct client_closure *client_closure;
 #endif
-static struct iolog_details iolog_details;
+static struct log_details iolog_details;
 static bool warned = false;
 static int iolog_dir_fd = -1;
 static struct timespec last_time;
@@ -249,7 +249,7 @@ bad:
  * Returns true if I/O logging is enabled, false if not and -1 on error.
  */
 int
-iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
+iolog_deserialize_info(struct log_details *details, char * const user_info[],
     char * const command_info[], char * const argv[], char * const user_env[])
 {
     struct eventlog *evlog;
@@ -345,7 +345,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	case 'i':
 	    if (strncmp(*cur, "ignore_iolog_errors=", sizeof("ignore_iolog_errors=") - 1) == 0) {
 		if (sudo_strtobool(*cur + sizeof("ignore_iolog_errors=") - 1) == true)
-		    details->ignore_iolog_errors = true;
+		    details->ignore_log_errors = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
@@ -777,7 +777,7 @@ done:
     }
 
     /* Ignore errors if they occur if the policy says so. */
-    if (ret == -1 && iolog_details.ignore_iolog_errors)
+    if (ret == -1 && iolog_details.ignore_log_errors)
 	ret = 0;
 
     debug_return_int(ret);
@@ -1004,7 +1004,7 @@ bad:
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
-	if (iolog_details.ignore_iolog_errors)
+	if (iolog_details.ignore_log_errors)
 	    ret = 1;
     }
 
@@ -1132,7 +1132,7 @@ bad:
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
-	if (iolog_details.ignore_iolog_errors)
+	if (iolog_details.ignore_log_errors)
 	    ret = 1;
     }
 
@@ -1238,7 +1238,7 @@ bad:
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
-	if (iolog_details.ignore_iolog_errors)
+	if (iolog_details.ignore_log_errors)
 	    ret = 1;
     }
 

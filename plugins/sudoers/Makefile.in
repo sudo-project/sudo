@@ -704,11 +704,11 @@ audit.lo: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/bsm_audit.h \
-          $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
-          $(srcdir)/linux_audit.h $(srcdir)/logging.h $(srcdir)/parse.h \
-          $(srcdir)/solaris_audit.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
-          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+          $(srcdir)/defaults.h $(srcdir)/linux_audit.h $(srcdir)/log_client.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/solaris_audit.h \
+          $(srcdir)/strlist.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+          $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/audit.c
 audit.i: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
@@ -716,11 +716,11 @@ audit.i: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/bsm_audit.h \
-          $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
-          $(srcdir)/linux_audit.h $(srcdir)/logging.h $(srcdir)/parse.h \
-          $(srcdir)/solaris_audit.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
-          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+          $(srcdir)/defaults.h $(srcdir)/linux_audit.h $(srcdir)/log_client.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/solaris_audit.h \
+          $(srcdir)/strlist.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+          $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 audit.plog: audit.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/audit.c --i-file $< --output-file $@
@@ -1596,7 +1596,7 @@ iolog.lo: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-          $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h $(srcdir)/logging.h \
+          $(srcdir)/defaults.h $(srcdir)/log_client.h $(srcdir)/logging.h \
           $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
@@ -1607,7 +1607,7 @@ iolog.i: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-          $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h $(srcdir)/logging.h \
+          $(srcdir)/defaults.h $(srcdir)/log_client.h $(srcdir)/logging.h \
           $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
@@ -1787,11 +1787,10 @@ log_client.lo: $(srcdir)/log_client.c $(devdir)/def_data.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-               $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
-               $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
-               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-               $(top_builddir)/pathnames.h
+               $(srcdir)/defaults.h $(srcdir)/log_client.h $(srcdir)/logging.h \
+               $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/log_client.c
 log_client.i: $(srcdir)/log_client.c $(devdir)/def_data.h \
                $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
@@ -1802,11 +1801,10 @@ log_client.i: $(srcdir)/log_client.c $(devdir)/def_data.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-               $(srcdir)/defaults.h $(srcdir)/iolog_plugin.h \
-               $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
-               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-               $(top_builddir)/pathnames.h
+               $(srcdir)/defaults.h $(srcdir)/log_client.h $(srcdir)/logging.h \
+               $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 log_client.plog: log_client.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/log_client.c --i-file $< --output-file $@

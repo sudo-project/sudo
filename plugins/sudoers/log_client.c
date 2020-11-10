@@ -60,8 +60,8 @@
 #include "sudo_event.h"
 #include "sudo_eventlog.h"
 #include "sudo_iolog.h"
-#include "iolog_plugin.h"
 #include "hostcheck.h"
+#include "log_client.h"
 
 /* Server callback may redirect to client callback for TLS. */
 static void client_msg_cb(int fd, int what, void *v);
@@ -777,7 +777,7 @@ free_info_messages(InfoMessage **info_msgs, size_t n)
 static InfoMessage **
 fmt_info_messages(struct client_closure *closure, size_t *n_info_msgs)
 {
-    struct iolog_details *details = closure->log_details;
+    struct log_details *details = closure->log_details;
     struct eventlog *evlog = details->evlog;
     InfoMessage__StringList *runargv = NULL;
     InfoMessage__StringList *runenv = NULL;
@@ -1636,7 +1636,7 @@ server_msg_cb(int fd, int what, void *v)
     buf->off = 0;
     debug_return;
 bad:
-    if (closure->log_details->ignore_iolog_errors) {
+    if (closure->log_details->ignore_log_errors) {
 	/* Disable plugin, the command continues. */
 	closure->disabled = true;
 	closure->read_ev->del(closure->read_ev);
@@ -1751,7 +1751,7 @@ client_msg_cb(int fd, int what, void *v)
     debug_return;
 
 bad:
-    if (closure->log_details->ignore_iolog_errors) {
+    if (closure->log_details->ignore_log_errors) {
 	/* Disable plugin, the command continues. */
 	closure->disabled = true;
 	closure->write_ev->del(closure->read_ev);
@@ -1767,7 +1767,7 @@ bad:
  * Allocate and initialize a new client closure
  */
 static struct client_closure *
-client_closure_alloc(struct iolog_details *details, struct timespec *now,
+client_closure_alloc(struct log_details *details, struct timespec *now,
     bool log_io, struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;
@@ -1808,7 +1808,7 @@ oom:
 }
 
 struct client_closure *
-log_server_open(struct iolog_details *details, struct timespec *now,
+log_server_open(struct log_details *details, struct timespec *now,
     bool log_io, struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;

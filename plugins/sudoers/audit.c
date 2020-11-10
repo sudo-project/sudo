@@ -30,8 +30,7 @@
 #include <string.h>
 
 #include "sudoers.h"
-#include <netinet/in.h> /* XXX */
-#include "iolog_plugin.h" /* XXX */
+#include "log_client.h"
 
 #ifdef HAVE_BSM_AUDIT
 # include "bsm_audit.h"
@@ -45,7 +44,7 @@
 
 #ifdef SUDOERS_LOG_CLIENT
 static struct client_closure *client_closure = NULL;
-static struct iolog_details audit_details;
+static struct log_details audit_details;
 #endif
 char *audit_msg = NULL;
 
@@ -53,7 +52,7 @@ char *audit_msg = NULL;
 extern sudo_dso_public struct audit_plugin sudoers_audit;
 
 /* XXX */
-int iolog_deserialize_info(struct iolog_details *details, char * const user_info[], char * const command_info[], char * const argv[], char * const user_env[]);
+int iolog_deserialize_info(struct log_details *details, char * const user_info[], char * const command_info[], char * const argv[], char * const user_env[]);
 
 static int
 audit_success(char *const argv[])

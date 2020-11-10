@@ -19,6 +19,7 @@
 #ifndef SUDOERS_LOG_CLIENT_H
 #define SUDOERS_LOG_CLIENT_H
 
+#include <netinet/in.h>			/* for INET6?_ADDRSTRLEN */
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
 #endif /* HAVE_OPENSSL */
@@ -47,7 +48,7 @@ struct connection_buffer {
 };
 TAILQ_HEAD(connection_buffer_list, connection_buffer);
 
-struct iolog_details {
+struct log_details {
     struct eventlog *evlog;
     struct sudoers_str_list *log_servers;
     struct timespec server_timeout;
@@ -58,7 +59,7 @@ struct iolog_details {
 #endif /* HAVE_OPENSSL */
     bool keepalive;
     bool verify_server;
-    bool ignore_iolog_errors;
+    bool ignore_log_errors;
 };
 
 enum client_state {
@@ -97,7 +98,7 @@ struct client_closure {
     struct connection_buffer read_buf;
     struct sudo_plugin_event *read_ev;
     struct sudo_plugin_event *write_ev;
-    struct iolog_details *log_details;
+    struct log_details *log_details;
     struct timespec start_time;
     struct timespec elapsed;
     struct timespec committed;
@@ -105,7 +106,7 @@ struct client_closure {
 };
 
 /* iolog_client.c */
-struct client_closure *log_server_open(struct iolog_details *details, struct timespec *now, bool log_io, struct sudo_plugin_event * (*event_alloc)(void));
+struct client_closure *log_server_open(struct log_details *details, struct timespec *now, bool log_io, struct sudo_plugin_event * (*event_alloc)(void));
 bool log_server_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);
