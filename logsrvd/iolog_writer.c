@@ -125,8 +125,10 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen)
     memset(evlog, 0, sizeof(*evlog));
 
     /* Submit time. */
-    evlog->submit_time.tv_sec = submit_time->tv_sec;
-    evlog->submit_time.tv_nsec = submit_time->tv_nsec;
+    if (submit_time != NULL) {
+	evlog->submit_time.tv_sec = submit_time->tv_sec;
+	evlog->submit_time.tv_nsec = submit_time->tv_nsec;
+    }
 
     /* Default values */
     evlog->lines = 24;

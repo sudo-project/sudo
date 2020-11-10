@@ -1040,6 +1040,7 @@ fmt_alert_message(struct client_closure *closure)
     AlertMessage alert_msg = ALERT_MESSAGE__INIT;
     TimeSpec ts = TIME_SPEC__INIT;
     struct timespec now;
+    bool ret = false;
     debug_decl(fmt_alert_message, SUDOERS_DEBUG_UTIL);
 
     /*
@@ -1056,11 +1057,23 @@ fmt_alert_message(struct client_closure *closure)
     /* Reason for the alert. */
     alert_msg.reason = (char *)closure->reason;
 
+    alert_msg.info_msgs = fmt_info_messages(closure, &alert_msg.n_info_msgs);
+    if (alert_msg.info_msgs == NULL)
+	goto done;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sending AlertMessage, array length %zu", __func__,
+	alert_msg.n_info_msgs);
+
     /* Schedule ClientMessage */
     client_msg.u.alert_msg = &alert_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ALERT_MSG;
+    ret = fmt_client_message(closure, &client_msg);
 
-    debug_return_bool(fmt_client_message(closure, &client_msg));
+done:
+    free_info_messages(alert_msg.info_msgs, alert_msg.n_info_msgs);
+
+    debug_return_bool(ret);
 }
 
 #ifdef notyet

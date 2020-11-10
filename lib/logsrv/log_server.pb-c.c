@@ -1329,7 +1329,7 @@ const ProtobufCMessageDescriptor exit_message__descriptor =
   (ProtobufCMessageInit) exit_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor alert_message__field_descriptors[2] =
+static const ProtobufCFieldDescriptor alert_message__field_descriptors[3] =
 {
   {
     "alert_time",
@@ -1355,15 +1355,28 @@ static const ProtobufCFieldDescriptor alert_message__field_descriptors[2] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "info_msgs",
+    3,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(AlertMessage, n_info_msgs),
+    offsetof(AlertMessage, info_msgs),
+    &info_message__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned alert_message__field_indices_by_name[] = {
   0,   /* field[0] = alert_time */
+  2,   /* field[2] = info_msgs */
   1,   /* field[1] = reason */
 };
 static const ProtobufCIntRange alert_message__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 3 }
 };
 const ProtobufCMessageDescriptor alert_message__descriptor =
 {
@@ -1373,7 +1386,7 @@ const ProtobufCMessageDescriptor alert_message__descriptor =
   "AlertMessage",
   "",
   sizeof(AlertMessage),
-  2,
+  3,
   alert_message__field_descriptors,
   alert_message__field_indices_by_name,
   1,  alert_message__number_ranges,

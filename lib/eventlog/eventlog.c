@@ -1026,11 +1026,13 @@ do_syslog(int event_type, int flags, const char *reason, const char *errstr,
 }
 
 static bool
-do_logfile_sudo(const char *logline, const struct eventlog *evlog)
+do_logfile_sudo(const char *logline, const struct eventlog *evlog,
+    const struct timespec *event_time)
 {
+    char *full_line, timebuf[8192], *timestr = NULL;
     const char *timefmt = evl_conf.time_fmt;
     const char *logfile = evl_conf.logpath;
-    char *full_line, timebuf[8192], *timestr = NULL;
+    time_t tv_sec = event_time->tv_sec;
     struct tm *timeptr;
     bool ret = false;
     FILE *fp;
@@ -1046,7 +1048,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog)
 	goto done;
     }
 
-    if ((timeptr = localtime(&evlog->submit_time.tv_sec)) != NULL) {
+    if ((timeptr = localtime(&tv_sec)) != NULL) {
 	/* strftime() does not guarantee to NUL-terminate so we must check. */
 	timebuf[sizeof(timebuf) - 1] = '\0';
 	if (strftime(timebuf, sizeof(timebuf), timefmt, timeptr) != 0 &&
@@ -1161,7 +1163,7 @@ do_logfile(int event_type, int flags, const char *reason, const char *errstr,
 
     switch (evl_conf.format) {
     case EVLOG_SUDO:
-	ret = do_logfile_sudo(logline ? logline : reason, evlog);
+	ret = do_logfile_sudo(logline ? logline : reason, evlog, event_time);
 	break;
     case EVLOG_JSON:
 	ret = do_logfile_json(event_type, reason, errstr, evlog,

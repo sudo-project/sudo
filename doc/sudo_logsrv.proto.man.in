@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "May 4, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "November 6, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -174,7 +174,6 @@ describing the user who submitted the command as well as the execution
 environment of the command.
 This information is used to generate an event log entry and may also be
 used by server to determine where and how the I/O log is stored.
-as choose the
 .TP 8n
 expect_iobufs
 Set to true if the server should expect
@@ -326,6 +325,7 @@ or
 message AlertMessage {
   TimeSpec alert_time = 1;
   string reason = 2;
+  repeated InfoMessage info_msgs = 3;
 }
 .RE
 .fi
@@ -341,6 +341,13 @@ The wall clock time when the alert occurred.
 .TP 8n
 reason
 The reason for the alert.
+.TP 8n
+info_msgs
+An optional array of
+\fIInfoMessage\fR
+describing the user who submitted the command as well as the execution
+environment of the command.
+This information is used to generate an event log entry.
 .SS "IoBuffer ttyin_buf | ttyout_buf | stdin_buf | stdout_buf | stderr_buf"
 .nf
 .RS 0n
@@ -599,7 +606,8 @@ If an
 \fIabort\fR
 message is received, the client should terminate the running command.
 .SH "EVENT LOG VARIABLES"
-\fIAcceptMessage\fR
+\fIAcceptMessage\fR,
+\fIAlertMessage\fR
 and
 \fIRejectMessage\fR
 classes contain an array of
@@ -798,8 +806,9 @@ message ExitMessage {
 
 /* Alert message, policy module-specific. */
 message AlertMessage {
-  TimeSpec alert_time = 1;	/* time alert message occurred */
-  string reason = 2;		/* description of policy violation */
+  TimeSpec alert_time = 1;		/* time alert message occurred */
+  string reason = 2;			/* policy alert error string */
+  repeated InfoMessage info_msgs = 3;	/* key,value event log data */
 }
 
 /* Used to restart an existing I/O log on the server. */

@@ -300,7 +300,8 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
 
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs, msg->n_info_msgs);
+    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
+	msg->n_info_msgs);
     if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing AcceptMessage");
 	debug_return_bool(false);
@@ -485,6 +486,14 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AlertMessage", __func__);
+
+    if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
+	closure->evlog = evlog_new(NULL, msg->info_msgs, msg->n_info_msgs);
+	if (closure->evlog == NULL) {
+	    closure->errstr = _("error parsing AlertMessage");
+	    debug_return_bool(false);
+	}
+    }
 
     alert_time.tv_sec = msg->alert_time->tv_sec;
     alert_time.tv_nsec = msg->alert_time->tv_nsec;

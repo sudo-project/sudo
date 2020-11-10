@@ -270,13 +270,18 @@ struct  _AlertMessage
    */
   TimeSpec *alert_time;
   /*
-   * description of policy violation 
+   * policy alert error string 
    */
   char *reason;
+  /*
+   * optional key,value event log data 
+   */
+  size_t n_info_msgs;
+  InfoMessage **info_msgs;
 };
 #define ALERT_MESSAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&alert_message__descriptor) \
-    , NULL, (char *)protobuf_c_empty_string }
+    , NULL, (char *)protobuf_c_empty_string, 0,NULL }
 
 
 /*
