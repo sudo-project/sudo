@@ -297,9 +297,6 @@ main(int argc, char *argv[], char *envp[])
 		SET(command_details.flags, CD_LOGIN_SHELL);
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
 		SET(command_details.flags, CD_BACKGROUND);
-	    /* Become full root (not just setuid) so user cannot kill us. */
-	    if (setuid(ROOT_UID) == -1)
-		sudo_warn("setuid(%d)", ROOT_UID);
 	    if (ISSET(command_details.flags, CD_SUDOEDIT)) {
 		status = sudo_edit(&command_details);
 	    } else {
