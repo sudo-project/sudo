@@ -1194,12 +1194,14 @@ ldap_entry_to_priv(LDAP *ld, LDAPMessage *entry, int *rc_out)
 	goto cleanup;
 
     /* Get sudoNotBefore / sudoNotAfter */
-    notbefore = sudo_ldap_get_values_len(ld, entry, "sudoNotBefore", &rc);
-    if (rc == LDAP_NO_MEMORY)
-	goto cleanup;
-    notafter = sudo_ldap_get_values_len(ld, entry, "sudoNotAfter", &rc);
-    if (rc == LDAP_NO_MEMORY)
-	goto cleanup;
+    if (ldap_conf.timed) {
+	notbefore = sudo_ldap_get_values_len(ld, entry, "sudoNotBefore", &rc);
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
+	notafter = sudo_ldap_get_values_len(ld, entry, "sudoNotAfter", &rc);
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
+    }
 
     /* Parse sudoOptions. */
     opts = sudo_ldap_get_values_len(ld, entry, "sudoOption", &rc);
