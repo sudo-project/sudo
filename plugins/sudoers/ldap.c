@@ -66,7 +66,6 @@
 #include "sudo_ldap.h"
 #include "sudo_ldap_conf.h"
 #include "sudo_dso.h"
-#include <gram.h>
 
 #ifndef LDAP_OPT_RESULT_CODE
 # define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
@@ -1257,9 +1256,8 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     TAILQ_INSERT_TAIL(ldap_userspecs, us, entries);
 
     /* The user has already matched, use ALL as wildcard. */
-    if ((m = calloc(1, sizeof(*m))) == NULL)
+    if ((m = new_member_all(NULL)) == NULL)
 	goto oom;
-    m->type = ALL;
     TAILQ_INSERT_TAIL(&us->users, m, entries);
 
     /* Treat each entry as a separate privilege. */

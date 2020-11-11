@@ -1136,6 +1136,16 @@ new_member(char *name, int type)
     debug_return_ptr(m);
 }
 
+/*
+ * Like new_member() but uses ALL for the type.
+ * Used by the ldap and sssd back-ends, which don't include gram.h.
+ */
+struct member *
+new_member_all(char *name)
+{
+    return new_member(name, ALL);
+}
+
 static struct sudo_command *
 new_command(char *cmnd, char *args)
 {
