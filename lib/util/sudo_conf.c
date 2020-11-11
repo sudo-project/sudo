@@ -99,7 +99,27 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
 #define SUDO_CONF_PATH_PLUGIN_DIR	3
 #define SUDO_CONF_PATH_DEVSEARCH	4
 
+#define SUDO_CONF_DATA_INITIALIZER	{				\
+    false,								\
+    false,								\
+    true,								\
+    true,								\
+    GROUP_SOURCE_ADAPTIVE,						\
+    -1,									\
+    TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),			\
+    TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),			\
+    {									\
+	{ "askpass", sizeof("askpass") - 1, false, _PATH_SUDO_ASKPASS }, \
+	{ "sesh", sizeof("sesh") - 1, false, _PATH_SUDO_SESH },		\
+	{ "noexec", sizeof("noexec") - 1, false, _PATH_SUDO_NOEXEC },	\
+	{ "plugin_dir", sizeof("plugin_dir") - 1, false, _PATH_SUDO_PLUGIN_DIR }, \
+	{ "devsearch", sizeof("devsearch") - 1, false, _PATH_SUDO_DEVSEARCH }, \
+	{ NULL } \
+    }									\
+}
+
 static struct sudo_conf_data {
+    bool updated;
     bool developer_mode;
     bool disable_coredump;
     bool probe_interfaces;
@@ -108,23 +128,7 @@ static struct sudo_conf_data {
     struct sudo_conf_debug_list debugging;
     struct plugin_info_list plugins;
     struct sudo_conf_path_table path_table[6];
-} sudo_conf_data = {
-    false,
-    true,
-    true,
-    GROUP_SOURCE_ADAPTIVE,
-    -1,
-    TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),
-    TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
-    {
-	{ "askpass", sizeof("askpass") - 1, false, _PATH_SUDO_ASKPASS },
-	{ "sesh", sizeof("sesh") - 1, false, _PATH_SUDO_SESH },
-	{ "noexec", sizeof("noexec") - 1, false, _PATH_SUDO_NOEXEC },
-	{ "plugin_dir", sizeof("plugin_dir") - 1, false, _PATH_SUDO_PLUGIN_DIR },
-	{ "devsearch", sizeof("devsearch") - 1, false, _PATH_SUDO_DEVSEARCH },
-	{ NULL }
-    }
-};
+} sudo_conf_data = SUDO_CONF_DATA_INITIALIZER;
 
 /*
  * "Set variable_name value"
@@ -554,7 +558,56 @@ sudo_conf_probe_interfaces_v1(void)
 }
 
 /*
- * Reads in /etc/sudo.conf and populates sudo_conf_data.
+ * Free dynamically allocated parts of sudo_conf_data and
+ * reset to initial values.
+ */
+static void
+sudo_conf_init(void)
+{
+    struct sudo_conf_data sudo_conf_initial = SUDO_CONF_DATA_INITIALIZER;
+    struct sudo_conf_debug *debug_spec;
+    struct sudo_debug_file *debug_file;
+    struct plugin_info *plugin_info;
+    int i;
+    debug_decl(sudo_conf_init, SUDO_DEBUG_UTIL);
+
+    /* Free paths. */
+    sudo_conf_clear_paths();
+
+    /* Free debug settings. */
+    while ((debug_spec = TAILQ_FIRST(&sudo_conf_data.debugging))) {
+	TAILQ_REMOVE(&sudo_conf_data.debugging, debug_spec, entries);
+	free(debug_spec->progname);
+	while ((debug_file = TAILQ_FIRST(&debug_spec->debug_files))) {
+	    TAILQ_REMOVE(&debug_spec->debug_files, debug_file, entries);
+	    free(debug_file->debug_file);
+	    free(debug_file->debug_flags);
+	    free(debug_file);
+	}
+	free(debug_spec);
+    }
+
+    /* Free plugins. */
+    while ((plugin_info = TAILQ_FIRST(&sudo_conf_data.plugins))) {
+	TAILQ_REMOVE(&sudo_conf_data.plugins, plugin_info, entries);
+	free(plugin_info->symbol_name);
+	free(plugin_info->path);
+	if (plugin_info->options != NULL) {
+	    for (i = 0; plugin_info->options[i] != NULL; i++)
+		free(plugin_info->options[i]);
+	    free(plugin_info->options);
+	}
+	free(plugin_info);
+    }
+
+    /* Set to initial values. */
+    sudo_conf_data = sudo_conf_initial;
+
+    debug_return;
+}
+
+/*
+ * Read in /etc/sudo.conf and populates sudo_conf_data.
  */
 int
 sudo_conf_read_v1(const char *conf_file, int conf_types)
@@ -615,6 +668,10 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 	goto done;
     }
 
+    /* Reset to initial values if necessary. */
+    if (sudo_conf_data.updated)
+	sudo_conf_init();
+
     while (sudo_parseln(&line, &linesize, &conf_lineno, fp, 0) != -1) {
 	struct sudo_conf_table *cur;
 	unsigned int i;
@@ -631,8 +688,15 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 		    while (isblank((unsigned char)*cp))
 			cp++;
 		    ret = cur->parser(cp, conf_file, conf_lineno);
-		    if (ret == -1)
+		    switch (ret) {
+		    case true:
+			sudo_conf_data.updated = true;
+			break;
+		    case false:
+			break;
+		    default:
 			goto done;
+		    }
 		}
 		break;
 	    }

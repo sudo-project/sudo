@@ -82,6 +82,7 @@
 /*
  * Sudo I/O audit server.
  */
+static int logsrvd_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
@@ -1773,10 +1774,12 @@ server_reload(struct sudo_event_base *base)
 	if (!server_setup(base))
 	    sudo_fatalx("%s", U_("unable setup listen socket"));
 
-	/* Re-initialize debugging. */
+	/* Re-read sudo.conf and re-initialize debugging. */
+	sudo_debug_deregister(logsrvd_debug_instance);
+	logsrvd_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
-	    sudo_debug_register(getprogname(), NULL, NULL,
-		sudo_conf_debug_files(getprogname()));
+	    logsrvd_debug_instance = sudo_debug_register(getprogname(),
+		NULL, NULL, sudo_conf_debug_files(getprogname()));
 	}
     }
 
@@ -1962,7 +1965,7 @@ main(int argc, char *argv[])
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
         exit(EXIT_FAILURE);
-    sudo_debug_register(getprogname(), NULL, NULL,
+    logsrvd_debug_instance = sudo_debug_register(getprogname(), NULL, NULL,
         sudo_conf_debug_files(getprogname()));
 
     if (protobuf_c_version_number() < 1003000)

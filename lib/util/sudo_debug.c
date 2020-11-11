@@ -137,6 +137,7 @@ sudo_debug_free_output(struct sudo_debug_output *output)
 /*
  * Create a new output file for the specified debug instance.
  * Returns NULL if the file cannot be opened or memory cannot be allocated.
+ * XXX - check for duplicates
  */
 static struct sudo_debug_output *
 sudo_debug_new_output(struct sudo_debug_instance *instance,
