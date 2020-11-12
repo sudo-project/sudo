@@ -1,9 +1,9 @@
  -- Plugin STARTED --
 EXEC id --help
-EXEC info \[
+EXEC info [
     "command=/bin/id",
     "runas_uid=0"
-\]
+]
 STD IN some standard input
 STD OUT some standard output
 STD ERR some standard error

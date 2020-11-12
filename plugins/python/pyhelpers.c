@@ -145,10 +145,9 @@ py_log_last_error(const char *context_message)
 
     char *message = py_message ? py_create_string_rep(py_message) : NULL;
 
-    py_sudo_log(SUDO_CONV_ERROR_MSG, "%s%s(%s) %s\n",
+    py_sudo_log(SUDO_CONV_ERROR_MSG, "%s%s%s\n",
                 context_message ? context_message : "",
                 context_message && *context_message ? ": " : "",
-                py_type ? ((PyTypeObject *)py_type)->tp_name : "None",
                 message ? message : "(NULL)");
     free(message);
 

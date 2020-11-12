@@ -223,6 +223,11 @@ check: $(TEST_PROGS)
             ./check_python_examples ".libs/python_plugin.so"; \
 	fi
 
+update_test_data: $(TEST_PROGS)
+	@if test X"$(cross_compiling)" != X"yes"; then \
+            UPDATE_TESTDATA=1 ./check_python_examples ".libs/python_plugin.so"; \
+	fi
+
 check_python_examples: $(CHECK_PYTHON_EXAMPLES_OBJS) $(LIBPYTHONPLUGIN)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_PYTHON_EXAMPLES_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
