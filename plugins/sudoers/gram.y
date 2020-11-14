@@ -181,6 +181,7 @@ static struct command_digest *new_digest(int, char *);
 %type <string>	  includedir
 %type <digest>	  digestspec
 %type <digest>	  digestlist
+%type <string>	  reserved_word
 
 %%
 
@@ -698,20 +699,20 @@ runaslist	:	/* empty */ {
 			}
 		;
 
-reserved_word	:	ALL
-		|	CHROOT
-		|	CWD
-		|	CMND_TIMEOUT
-		|	NOTBEFORE
-		|	NOTAFTER
-		|	ROLE
-		|	TYPE
-		|	PRIVS
-		|	LIMITPRIVS
+reserved_word	:	ALL		{ $$ = "ALL"; }
+		|	CHROOT		{ $$ = "CHROOT"; }
+		|	CWD		{ $$ = "CWD"; }
+		|	CMND_TIMEOUT	{ $$ = "CMND_TIMEOUT"; }
+		|	NOTBEFORE	{ $$ = "NOTBEFORE"; }
+		|	NOTAFTER	{ $$ = "NOTAFTER"; }
+		|	ROLE		{ $$ = "ROLE"; }
+		|	TYPE		{ $$ = "TYPE"; }
+		|	PRIVS		{ $$ = "PRIVS"; }
+		|	LIMITPRIVS	{ $$ = "LIMITPRIVS"; }
 		;
 
 reserved_alias	:	reserved_word {
-			    sudoerserror(N_("syntax error, reserved word used as an alias name"));
+			    sudoerserrorf(U_("syntax error, reserved word %s used as an alias name"), $1);
 			    YYERROR;
 			}
 		;
@@ -1041,10 +1042,11 @@ group		:	ALIAS {
 			}
 		;
 %%
+/* Like yyerror() but takes a printf-style format string. */
 void
-sudoerserror(const char *s)
+sudoerserrorf(const char *fmt, ...)
 {
-    debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER);
+    debug_decl(sudoerserrorf, SUDOERS_DEBUG_PARSER);
 
     /* The lexer displays more detailed messages for ERROR tokens. */
     if (sudoerschar == ERROR)
@@ -1056,16 +1058,28 @@ sudoerserror(const char *s)
 	rcstr_delref(errorfile);
 	errorfile = rcstr_addref(sudoers);
     }
-    if (sudoers_warnings && s != NULL) {
+    if (sudoers_warnings && fmt != NULL) {
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
+	    char *s, *tofree = NULL;
 	    int oldlocale;
+	    va_list ap;
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+	    va_start(ap, fmt);
+	    if (strcmp(fmt, "%s") == 0) {
+		/* Optimize common case, a single string. */
+		s = _(va_arg(ap, char *));
+	    } else {
+		if (vasprintf(&s, fmt, ap) == -1)
+		    s = _("syntax error");
+	    }
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
-		this_lineno, (int)sudolinebuf.toke_start + 1, _(s));
+		this_lineno, (int)sudolinebuf.toke_start + 1, s);
+	    free(tofree);
+	    va_end(ap);
 	    sudoers_setlocale(oldlocale, NULL);
 
 	    /* Display the offending line and token if possible. */
@@ -1090,6 +1104,15 @@ sudoerserror(const char *s)
     }
     parse_error = true;
     debug_return;
+}
+
+void
+sudoerserror(const char *s)
+{
+    if (s == NULL)
+	sudoerserrorf(NULL);
+    else
+	sudoerserrorf("%s", s);
 }
 
 static struct defaults *

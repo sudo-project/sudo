@@ -20,11 +20,7 @@
 #ifndef SUDOERS_LOGGING_H
 #define SUDOERS_LOGGING_H
 
-#ifdef __STDC__
-# include <stdarg.h>
-#else
-# include <varargs.h>
-#endif
+#include <stdarg.h>
 
 /*
  * Values for sudoers_setlocale()
