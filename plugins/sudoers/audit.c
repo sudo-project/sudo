@@ -190,8 +190,53 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
 }
 
 #ifdef SUDOERS_LOG_CLIENT
+static void
+audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
+    char * const run_argv[], char * const run_envp[])
+{
+    char * const *cur;
+    debug_decl(audit_to_eventlog, SUDOERS_DEBUG_PLUGIN);
+
+    /* Fill in evlog from sudoers Defaults, run_argv and run_envp. */
+    sudoers_to_eventlog(evlog, run_argv, run_envp);
+
+    /* Update iolog and execution environment from command_info[]. */
+    for (cur = command_info; *cur != NULL; cur++) {
+	switch (**cur) {
+	case 'c':
+	    if (strncmp(*cur, "command=", sizeof("command=") - 1) == 0) {
+		evlog->command = *cur + sizeof("command=") - 1;
+		continue;
+	    }
+	    if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
+		evlog->runchroot = *cur + sizeof("chroot=") - 1;
+		continue;
+	    }
+	    break;
+	case 'i':
+	    if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
+		evlog->iolog_path = *cur + sizeof("iolog_path=") - 1;
+		evlog->iolog_file = strrchr(evlog->iolog_path, '/');
+		if (evlog->iolog_file != NULL)
+		    evlog->iolog_file++;
+		continue;
+	    }
+	    break;
+	case 'r':
+	    if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
+		evlog->runcwd = *cur + sizeof("runcwd=") - 1;
+		continue;
+	    }
+	    break;
+	}
+    }
+
+    debug_return;
+}
+
 static bool
-log_server_accept(char * const run_argv[], char * const run_envp[])
+log_server_accept(char * const command_info[], char * const run_argv[],
+    char * const run_envp[])
 {
     struct eventlog *evlog;
     struct timespec now;
@@ -211,8 +256,7 @@ log_server_accept(char * const run_argv[], char * const run_envp[])
 	goto done;
     }
 
-    /* XXX - command and iolog_path from command_info? */
-    sudoers_to_eventlog(evlog, run_argv, run_envp);
+    audit_to_eventlog(evlog, command_info, run_argv, run_envp);
     if (!init_log_details(&audit_details, evlog))
 	goto done;
 
@@ -252,7 +296,8 @@ log_server_exit(int status_type, int status)
 }
 #else
 static bool
-log_server_accept(char * const run_argv[], char * const run_envp[])
+log_server_accept(char * const command_info[], char * const run_argv[],
+    char * const run_envp[])
 {
     return true;
 }
@@ -285,8 +330,10 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (!log_allowed() && !def_ignore_logfile_errors)
 	ret = false;
 
-    if (!log_server_accept(run_argv, run_envp) && !def_ignore_logfile_errors)
-	ret = false;
+    if (!log_server_accept(command_info, run_argv, run_envp)) {
+	if (!def_ignore_logfile_errors)
+	    ret = false;
+    }
 
     debug_return_int(ret);
 }
@@ -311,7 +358,7 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
 	    ret = false;
     }
 
-    sudoers_to_eventlog(&evlog, NewArgv, env_get());
+    audit_to_eventlog(&evlog, command_info, NewArgv, env_get());
     if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
 
@@ -344,7 +391,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 	debug_return_bool(false);
     }
 
-    sudoers_to_eventlog(&evlog, NewArgv, env_get());
+    audit_to_eventlog(&evlog, command_info, NewArgv, env_get());
     if (!eventlog_alert(&evlog, 0, &now, message, NULL))
 	ret = false;
 
