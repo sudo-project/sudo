@@ -1,3 +1,59 @@
+What's new in Sudo 1.9.4
+
+ * The sudoers parser will now detect when an upper-case reserved
+   word is used when declaring an alias.  Now instead of "syntax
+   error, unexpected CHROOT, expecting ALIAS" the message will be
+   "syntax error, reserved word CHROOT used as an alias name".
+   Bug #941.
+
+ * Better handling of sudoers files without a final newline.
+   The parser now adds a newline at end-of-file automatically which
+   removes the need for special cases in the parser.
+
+ * Fixed a regression introduced in sudo 1.9.1 in the sssd back-end
+   where an uninitialized pointer could be freed on an error path.
+   GitHub issue #67.
+
+ * The core logging code is now shared between sudo_logsrvd and
+   the sudoers plugin.
+
+ * JSON log entries sent to syslog now use "minimal" JSON which
+   skips all non-essention whitespace.
+
+ * The sudoers plugin can now produce JSON-formatted logs.  The
+   "log_format" sudoers option can be used to select sudo or json
+   format logs.  The default is sudo format logs.
+
+ * The sudoers plugin and visudo now display the column number in
+   syntax error messages in addition to the line number.  Bug #841.
+
+ * If I/O logging is not enabled but "log_servers" is set, the
+   sudoers plugin will now log accept events to sudo_logsrvd.
+   Previously, the accept event was only sent when I/O logging was
+   enabled.  The sudoers plugin now sends reject and alert events too.
+
+ * The sudo logsrv protocol has been extended to allow an AlertMessage
+   to contain an optional array of InfoMessage, as AcceptMessage
+   and RejectMessage already do.
+
+ * Fixed a bug in sudo_logsrvd where receipt of SIGHUP would result
+   in duplicate entries in the debug log when debugging was enabled.
+
+ * The visudo utility now supports EDITOR environment variables
+   that use single or double quotes in the command arguments.
+   Bug #942.
+
+ * The PAM session modules now run when sudo is set-user-ID root,
+   which allows a module to determine the original user-ID.
+   Bug #944.
+
+ * Fixed a regression introduced in sudo 1.8.24 in the LDAP back-end
+   where sudoNotBefore and sudoNotAfter were applied even when the
+   SUDOERS_TIMED setting was not present in ldap.conf.  Bug #945.
+
+ * Sudo packages for macOS 11 now contain universal binaries that
+   support both Intel and Apple Silicon CPUs.
+
 What's new in Sudo 1.9.3p1
 
  * Fixed a regression introduced in sudo 1.9.3 where the configure
