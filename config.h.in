@@ -767,7 +767,8 @@
 /* Define to 1 if you have the `SSL_CTX_get0_certificate' function. */
 #undef HAVE_SSL_CTX_GET0_CERTIFICATE
 
-/* Define to 1 if you have the `SSL_CTX_set_ciphersuites' function. */
+/* Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.
+   */
 #undef HAVE_SSL_CTX_SET_CIPHERSUITES
 
 /* Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or

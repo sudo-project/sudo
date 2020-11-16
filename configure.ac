@@ -3065,11 +3065,18 @@ if test "${enable_openssl-no}" != no; then
 
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
-    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method])
+    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate TLS_client_method TLS_server_method])
     # SSL_CTX_set_min_proto_version may be a macro
     AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
 	AC_INCLUDES_DEFAULT
 	#include <openssl/ssl.h>
+    ])
+    # LibreSSL TLS 1.3 support may not be enabled, check for declaration too.
+    AC_CHECK_FUNC([SSL_CTX_set_ciphersuites], [
+	AC_CHECK_DECL([SSL_CTX_set_ciphersuites], [AC_DEFINE(HAVE_SSL_CTX_SET_CIPHERSUITES)], [], [
+	    AC_INCLUDES_DEFAULT
+	    #include <openssl/ssl.h>
+	])
     ])
     LIBS="$OLIBS"
 elif test "${enable_gcrypt-no}" != no; then
@@ -4964,6 +4971,7 @@ AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
+AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.])
 AH_TEMPLATE(SUDOERS_LOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers plugin.])
 AH_TEMPLATE(HAVE_FALLTHROUGH_ATTRIBUTE, [Define to 1 if the compiler supports the fallthrough attribute.])
 
