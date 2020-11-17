@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 2, 2020
+.Dd November 17, 2020
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2741,7 +2741,8 @@ functions will
 .Em both
 be called.
 .It command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 .Dq name=value
 strings.
 The vector is terminated by a
@@ -2842,7 +2843,8 @@ will be the
 .Dv NULL
 pointer.
 .It command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 .Dq name=value
 strings.
 The vector is terminated by a
@@ -2914,7 +2916,8 @@ will be the
 .Dv NULL
 pointer.
 .It command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 .Dq name=value
 strings.
 The vector is terminated by a

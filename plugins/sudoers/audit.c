@@ -201,33 +201,35 @@ audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
     sudoers_to_eventlog(evlog, run_argv, run_envp);
 
     /* Update iolog and execution environment from command_info[]. */
-    for (cur = command_info; *cur != NULL; cur++) {
-	switch (**cur) {
-	case 'c':
-	    if (strncmp(*cur, "command=", sizeof("command=") - 1) == 0) {
-		evlog->command = *cur + sizeof("command=") - 1;
-		continue;
+    if (command_info != NULL) {
+	for (cur = command_info; *cur != NULL; cur++) {
+	    switch (**cur) {
+	    case 'c':
+		if (strncmp(*cur, "command=", sizeof("command=") - 1) == 0) {
+		    evlog->command = *cur + sizeof("command=") - 1;
+		    continue;
+		}
+		if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
+		    evlog->runchroot = *cur + sizeof("chroot=") - 1;
+		    continue;
+		}
+		break;
+	    case 'i':
+		if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
+		    evlog->iolog_path = *cur + sizeof("iolog_path=") - 1;
+		    evlog->iolog_file = strrchr(evlog->iolog_path, '/');
+		    if (evlog->iolog_file != NULL)
+			evlog->iolog_file++;
+		    continue;
+		}
+		break;
+	    case 'r':
+		if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
+		    evlog->runcwd = *cur + sizeof("runcwd=") - 1;
+		    continue;
+		}
+		break;
 	    }
-	    if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
-		evlog->runchroot = *cur + sizeof("chroot=") - 1;
-		continue;
-	    }
-	    break;
-	case 'i':
-	    if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
-		evlog->iolog_path = *cur + sizeof("iolog_path=") - 1;
-		evlog->iolog_file = strrchr(evlog->iolog_path, '/');
-		if (evlog->iolog_file != NULL)
-		    evlog->iolog_file++;
-		continue;
-	    }
-	    break;
-	case 'r':
-	    if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
-		evlog->runcwd = *cur + sizeof("runcwd=") - 1;
-		continue;
-	    }
-	    break;
 	}
     }
 

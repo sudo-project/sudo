@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "November 2, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 17, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3074,7 +3074,8 @@ functions will
 be called.
 .TP 6n
 command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 \(lqname=value\(rq
 strings.
 The vector is terminated by a
@@ -3188,7 +3189,8 @@ will be the
 pointer.
 .TP 6n
 command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 \(lqname=value\(rq
 strings.
 The vector is terminated by a
@@ -3272,7 +3274,8 @@ will be the
 pointer.
 .TP 6n
 command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 \(lqname=value\(rq
 strings.
 The vector is terminated by a
