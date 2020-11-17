@@ -756,15 +756,15 @@ bad:
     ret = false;
 
 done:
-    /* Store settings to pass back to front-end. */
-    if (ret != -1) {
+    if (ret == -1) {
+	/* Free stashed copy of the environment. */
+	(void)env_init(NULL);
+    } else {
+	/* Store settings to pass back to front-end. */
 	if (!sudoers_policy_store_result(ret, NewArgv, env_get(), cmnd_umask,
 		iolog_path, closure))
 	    ret = -1;
     }
-
-    /* Zero out stashed copy of environment, it is owned by the front-end. */
-    (void)env_init(NULL);
 
     if (!rewind_perms())
 	ret = -1;
