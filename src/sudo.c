@@ -646,6 +646,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM);
 
     memset(details, 0, sizeof(*details));
+    details->info = info;
     details->closefrom = -1;
     details->execfd = -1;
     details->flags = CD_SUDOEDIT_CHECKDIR | CD_SET_GROUPS;

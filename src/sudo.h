@@ -174,6 +174,7 @@ struct command_details {
     priv_set_t *privs;
     priv_set_t *limitprivs;
 #endif
+    char * const *info;
 };
 
 /* Status passed between parent and child via socketpair */

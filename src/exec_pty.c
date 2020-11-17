@@ -213,11 +213,12 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyin = NULL;
 		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"), NULL);
+			errstr ? errstr : _("I/O plugin error"),
+			iob->ec->details->info);
 		} else {
 		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
 			errstr ? errstr : _("command rejected by I/O plugin"),
-			NULL);
+			iob->ec->details->info);
 		}
 		ret = false;
 		break;
@@ -252,11 +253,12 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdin = NULL;
 		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"), NULL);
+			errstr ? errstr : _("I/O plugin error"),
+			iob->ec->details->info);
 		} else {
 		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
 			errstr ? errstr : _("command rejected by I/O plugin"),
-			NULL);
+			iob->ec->details->info);
 		}
 		ret = false;
 		break;
@@ -291,11 +293,12 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyout = NULL;
 		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"), NULL);
+			errstr ? errstr : _("I/O plugin error"),
+			iob->ec->details->info);
 		} else {
 		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
 			errstr ? errstr : _("command rejected by I/O plugin"),
-			NULL);
+			iob->ec->details->info);
 		}
 		ret = false;
 		break;
@@ -341,11 +344,12 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdout = NULL;
 		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"), NULL);
+			errstr ? errstr : _("I/O plugin error"),
+			iob->ec->details->info);
 		} else {
 		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
 			errstr ? errstr : _("command rejected by I/O plugin"),
-			NULL);
+			iob->ec->details->info);
 		}
 		ret = false;
 		break;
@@ -391,11 +395,12 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stderr = NULL;
 		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"), NULL);
+			errstr ? errstr : _("I/O plugin error"),
+			iob->ec->details->info);
 		} else {
 		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
 			errstr ? errstr : _("command rejected by I/O plugin"),
-			NULL);
+			iob->ec->details->info);
 		}
 		ret = false;
 		break;
@@ -421,7 +426,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 
 /* Call I/O plugin suspend log method. */
 static void
-log_suspend(int signo)
+log_suspend(struct exec_closure_pty *ec, int signo)
 {
     struct plugin_container *plugin;
     const char *errstr = NULL;
@@ -441,7 +446,8 @@ log_suspend(int signo)
 		/* Error: disable plugin's I/O function. */
 		plugin->u.io->log_suspend = NULL;
 		audit_error(plugin->name, SUDO_IO_PLUGIN,
-		    errstr ? errstr : _("error logging suspend"), NULL);
+		    errstr ? errstr : _("error logging suspend"),
+		    ec->details->info);
 		break;
 	    }
 	}
@@ -454,7 +460,7 @@ log_suspend(int signo)
 
 /* Call I/O plugin window change log method. */
 static void
-log_winchange(unsigned int rows, unsigned int cols)
+log_winchange(struct exec_closure_pty *ec, unsigned int rows, unsigned int cols)
 {
     struct plugin_container *plugin;
     const char *errstr = NULL;
@@ -474,7 +480,8 @@ log_winchange(unsigned int rows, unsigned int cols)
 		/* Error: disable plugin's I/O function. */
 		plugin->u.io->change_winsize = NULL;
 		audit_error(plugin->name, SUDO_IO_PLUGIN,
-		    errstr ? errstr : _("error changing window size"), NULL);
+		    errstr ? errstr : _("error changing window size"),
+		    ec->details->info);
 		break;
 	    }
 	}
@@ -553,7 +560,7 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	    sudo_term_restore(io_fds[SFD_USERTTY], false);
 
 	/* Log the suspend event. */
-	log_suspend(signo);
+	log_suspend(ec, signo);
 
 	if (sig2str(signo, signame) == -1)
 	    (void)snprintf(signame, sizeof(signame), "%d", signo);
@@ -572,7 +579,7 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	    sudo_warn("killpg(%d, SIG%s)", (int)ec->ppgrp, signame);
 
 	/* Log the resume event. */
-	log_suspend(SIGCONT);
+	log_suspend(ec, SIGCONT);
 
 	/* Check foreground/background status on resume. */
 	if (check_foreground(ec) == -1) {
@@ -1821,7 +1828,7 @@ sync_ttysize(struct exec_closure_pty *ec)
 		((wsize.ws_col & 0xffff) << 16);
 
 	    /* Log window change event. */
-	    log_winchange(wsize.ws_row, wsize.ws_col);
+	    log_winchange(ec, wsize.ws_row, wsize.ws_col);
 
 	    /* Send window change event to monitor process. */
 	    send_command_status(ec, CMD_TTYWINCH, wsize_packed);
