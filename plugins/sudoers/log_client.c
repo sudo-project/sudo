@@ -786,19 +786,23 @@ fmt_info_messages(struct client_closure *closure, size_t *n_info_msgs)
     debug_decl(fmt_info_messages, SUDOERS_DEBUG_UTIL);
 
     /* Convert NULL-terminated vectors to StringList. */
-    if ((runargv = malloc(sizeof(*runargv))) == NULL)
-	goto bad;
-    info_message__string_list__init(runargv);
-    runargv->strings = evlog->argv;
-    while (runargv->strings[runargv->n_strings] != NULL)
-	runargv->n_strings++;
+    if (evlog->argv != NULL) {
+	if ((runargv = malloc(sizeof(*runargv))) == NULL)
+	    goto bad;
+	info_message__string_list__init(runargv);
+	runargv->strings = evlog->argv;
+	while (runargv->strings[runargv->n_strings] != NULL)
+	    runargv->n_strings++;
+    }
 
-    if ((runenv = malloc(sizeof(*runenv))) == NULL)
-	goto bad;
-    info_message__string_list__init(runenv);
-    runenv->strings = evlog->envp;
-    while (runenv->strings[runenv->n_strings] != NULL)
-	runenv->n_strings++;
+    if (evlog->envp != NULL) {
+	if ((runenv = malloc(sizeof(*runenv))) == NULL)
+	    goto bad;
+	info_message__string_list__init(runenv);
+	runenv->strings = evlog->envp;
+	while (runenv->strings[runenv->n_strings] != NULL)
+	    runenv->n_strings++;
+    }
 
     /* XXX - realloc as needed instead of preallocating */
     info_msgs_size = 24;
@@ -835,17 +839,21 @@ fmt_info_messages(struct client_closure *closure, size_t *n_info_msgs)
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
-    info_msgs[n]->key = "runargv";
-    info_msgs[n]->u.strlistval = runargv;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
-    n++;
+    if (runargv != NULL) {
+	info_msgs[n]->key = "runargv";
+	info_msgs[n]->u.strlistval = runargv;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+	n++;
+    }
 
-    info_msgs[n]->key = "runenv";
-    info_msgs[n]->u.strlistval = runenv;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
-    n++;
+    if (runenv != NULL) {
+	info_msgs[n]->key = "runenv";
+	info_msgs[n]->u.strlistval = runenv;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+	n++;
+    }
 
-    if (evlog->rungroup!= NULL) {
+    if (evlog->rungroup != NULL) {
 	info_msgs[n]->key = "rungid";
 	info_msgs[n]->u.numval = evlog->rungid;
 	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
