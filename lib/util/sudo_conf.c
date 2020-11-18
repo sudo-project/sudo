@@ -64,6 +64,15 @@ struct sudo_conf_path_table {
     char *pval;
 };
 
+struct sudo_conf_settings {
+    bool updated;
+    bool developer_mode;
+    bool disable_coredump;
+    bool probe_interfaces;
+    int group_source;
+    int max_groups;
+};
+
 static int parse_debug(const char *entry, const char *conf_file, unsigned int lineno);
 static int parse_path(const char *entry, const char *conf_file, unsigned int lineno);
 static int parse_plugin(const char *entry, const char *conf_file, unsigned int lineno);
@@ -99,36 +108,35 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
 #define SUDO_CONF_PATH_PLUGIN_DIR	3
 #define SUDO_CONF_PATH_DEVSEARCH	4
 
-#define SUDO_CONF_DATA_INITIALIZER	{				\
-    false,								\
-    false,								\
-    true,								\
-    true,								\
-    GROUP_SOURCE_ADAPTIVE,						\
-    -1,									\
-    TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),			\
-    TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),			\
-    {									\
-	{ "askpass", sizeof("askpass") - 1, false, _PATH_SUDO_ASKPASS }, \
-	{ "sesh", sizeof("sesh") - 1, false, _PATH_SUDO_SESH },		\
-	{ "noexec", sizeof("noexec") - 1, false, _PATH_SUDO_NOEXEC },	\
-	{ "plugin_dir", sizeof("plugin_dir") - 1, false, _PATH_SUDO_PLUGIN_DIR }, \
-	{ "devsearch", sizeof("devsearch") - 1, false, _PATH_SUDO_DEVSEARCH }, \
-	{ NULL } \
-    }									\
+#define SUDO_CONF_PATH_INITIALIZER	{				\
+    { "askpass", sizeof("askpass") - 1, false, _PATH_SUDO_ASKPASS },	\
+    { "sesh", sizeof("sesh") - 1, false, _PATH_SUDO_SESH },		\
+    { "noexec", sizeof("noexec") - 1, false, _PATH_SUDO_NOEXEC },	\
+    { "plugin_dir", sizeof("plugin_dir") - 1, false, _PATH_SUDO_PLUGIN_DIR }, \
+    { "devsearch", sizeof("devsearch") - 1, false, _PATH_SUDO_DEVSEARCH }, \
+    { NULL } \
+}
+
+#define SUDO_CONF_SETTINGS_INITIALIZER	{				\
+    false,			/* updated */				\
+    false,			/* developer_mode */			\
+    true,			/* disable_coredump */			\
+    true,			/* probe_interfaces */			\
+    GROUP_SOURCE_ADAPTIVE,	/* group_source */			\
+    -1				/* max_groups */			\
 }
 
 static struct sudo_conf_data {
-    bool updated;
-    bool developer_mode;
-    bool disable_coredump;
-    bool probe_interfaces;
-    int group_source;
-    int max_groups;
+    struct sudo_conf_settings settings;
     struct sudo_conf_debug_list debugging;
     struct plugin_info_list plugins;
     struct sudo_conf_path_table path_table[6];
-} sudo_conf_data = SUDO_CONF_DATA_INITIALIZER;
+} sudo_conf_data = {
+    SUDO_CONF_SETTINGS_INITIALIZER,
+    TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),
+    TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
+    SUDO_CONF_PATH_INITIALIZER
+};
 
 /*
  * "Set variable_name value"
@@ -376,7 +384,7 @@ set_var_developer_mode(const char *strval, const char *conf_file,
             "developer_mode", strval, conf_file, lineno);
         debug_return_bool(false);
     }
-    sudo_conf_data.developer_mode = val;
+    sudo_conf_data.settings.developer_mode = val;
     debug_return_bool(true);
 }
 
@@ -392,7 +400,7 @@ set_var_disable_coredump(const char *strval, const char *conf_file,
 	    "disable_coredump", strval, conf_file, lineno);
 	debug_return_bool(false);
     }
-    sudo_conf_data.disable_coredump = val;
+    sudo_conf_data.settings.disable_coredump = val;
     debug_return_bool(true);
 }
 
@@ -403,11 +411,11 @@ set_var_group_source(const char *strval, const char *conf_file,
     debug_decl(set_var_group_source, SUDO_DEBUG_UTIL);
 
     if (strcasecmp(strval, "adaptive") == 0) {
-	sudo_conf_data.group_source = GROUP_SOURCE_ADAPTIVE;
+	sudo_conf_data.settings.group_source = GROUP_SOURCE_ADAPTIVE;
     } else if (strcasecmp(strval, "static") == 0) {
-	sudo_conf_data.group_source = GROUP_SOURCE_STATIC;
+	sudo_conf_data.settings.group_source = GROUP_SOURCE_STATIC;
     } else if (strcasecmp(strval, "dynamic") == 0) {
-	sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
+	sudo_conf_data.settings.group_source = GROUP_SOURCE_DYNAMIC;
     } else {
 	sudo_warnx(U_("unsupported group source \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
@@ -429,7 +437,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
 	    conf_file, lineno);
 	debug_return_bool(false);
     }
-    sudo_conf_data.max_groups = max_groups;
+    sudo_conf_data.settings.max_groups = max_groups;
     debug_return_bool(true);
 }
 
@@ -445,7 +453,7 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
 	    "probe_interfaces", strval, conf_file, lineno);
 	debug_return_bool(false);
     }
-    sudo_conf_data.probe_interfaces = val;
+    sudo_conf_data.settings.probe_interfaces = val;
     debug_return_bool(true);
 }
 
@@ -482,13 +490,13 @@ sudo_conf_devsearch_path_v1(void)
 int
 sudo_conf_group_source_v1(void)
 {
-    return sudo_conf_data.group_source;
+    return sudo_conf_data.settings.group_source;
 }
 
 int
 sudo_conf_max_groups_v1(void)
 {
-    return sudo_conf_data.max_groups;
+    return sudo_conf_data.settings.max_groups;
 }
 
 struct plugin_info_list *
@@ -542,19 +550,19 @@ sudo_conf_debug_files_v1(const char *progname)
 bool
 sudo_conf_developer_mode_v1(void)
 {
-    return sudo_conf_data.developer_mode;
+    return sudo_conf_data.settings.developer_mode;
 }
 
 bool
 sudo_conf_disable_coredump_v1(void)
 {
-    return sudo_conf_data.disable_coredump;
+    return sudo_conf_data.settings.disable_coredump;
 }
 
 bool
 sudo_conf_probe_interfaces_v1(void)
 {
-    return sudo_conf_data.probe_interfaces;
+    return sudo_conf_data.settings.probe_interfaces;
 }
 
 /*
@@ -562,46 +570,57 @@ sudo_conf_probe_interfaces_v1(void)
  * reset to initial values.
  */
 static void
-sudo_conf_init(void)
+sudo_conf_init(int conf_types)
 {
-    struct sudo_conf_data sudo_conf_initial = SUDO_CONF_DATA_INITIALIZER;
     struct sudo_conf_debug *debug_spec;
     struct sudo_debug_file *debug_file;
     struct plugin_info *plugin_info;
     int i;
     debug_decl(sudo_conf_init, SUDO_DEBUG_UTIL);
 
-    /* Free paths. */
-    sudo_conf_clear_paths();
-
-    /* Free debug settings. */
-    while ((debug_spec = TAILQ_FIRST(&sudo_conf_data.debugging))) {
-	TAILQ_REMOVE(&sudo_conf_data.debugging, debug_spec, entries);
-	free(debug_spec->progname);
-	while ((debug_file = TAILQ_FIRST(&debug_spec->debug_files))) {
-	    TAILQ_REMOVE(&debug_spec->debug_files, debug_file, entries);
-	    free(debug_file->debug_file);
-	    free(debug_file->debug_flags);
-	    free(debug_file);
-	}
-	free(debug_spec);
+    /* Free and reset paths. */
+    if (ISSET(conf_types, SUDO_CONF_PATHS)) {
+	const struct sudo_conf_path_table path_table[] = SUDO_CONF_PATH_INITIALIZER;
+	sudo_conf_clear_paths();
+	memcpy(sudo_conf_data.path_table, path_table,
+	    sizeof(sudo_conf_data.path_table));
     }
 
-    /* Free plugins. */
-    while ((plugin_info = TAILQ_FIRST(&sudo_conf_data.plugins))) {
-	TAILQ_REMOVE(&sudo_conf_data.plugins, plugin_info, entries);
-	free(plugin_info->symbol_name);
-	free(plugin_info->path);
-	if (plugin_info->options != NULL) {
-	    for (i = 0; plugin_info->options[i] != NULL; i++)
-		free(plugin_info->options[i]);
-	    free(plugin_info->options);
+    /* Free and reset debug settings. */
+    if (ISSET(conf_types, SUDO_CONF_DEBUG)) {
+	while ((debug_spec = TAILQ_FIRST(&sudo_conf_data.debugging))) {
+	    TAILQ_REMOVE(&sudo_conf_data.debugging, debug_spec, entries);
+	    free(debug_spec->progname);
+	    while ((debug_file = TAILQ_FIRST(&debug_spec->debug_files))) {
+		TAILQ_REMOVE(&debug_spec->debug_files, debug_file, entries);
+		free(debug_file->debug_file);
+		free(debug_file->debug_flags);
+		free(debug_file);
+	    }
+	    free(debug_spec);
 	}
-	free(plugin_info);
     }
 
-    /* Set to initial values. */
-    sudo_conf_data = sudo_conf_initial;
+    /* Free and reset plugins. */
+    if (ISSET(conf_types, SUDO_CONF_PLUGINS)) {
+	while ((plugin_info = TAILQ_FIRST(&sudo_conf_data.plugins))) {
+	    TAILQ_REMOVE(&sudo_conf_data.plugins, plugin_info, entries);
+	    free(plugin_info->symbol_name);
+	    free(plugin_info->path);
+	    if (plugin_info->options != NULL) {
+		for (i = 0; plugin_info->options[i] != NULL; i++)
+		    free(plugin_info->options[i]);
+		free(plugin_info->options);
+	    }
+	    free(plugin_info);
+	}
+    }
+
+    /* Set initial values. */
+    if (ISSET(conf_types, SUDO_CONF_SETTINGS)) {
+	const struct sudo_conf_settings settings = SUDO_CONF_SETTINGS_INITIALIZER;
+	sudo_conf_data.settings = settings;
+    }
 
     debug_return;
 }
@@ -669,8 +688,8 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
     }
 
     /* Reset to initial values if necessary. */
-    if (sudo_conf_data.updated)
-	sudo_conf_init();
+    if (sudo_conf_data.settings.updated)
+	sudo_conf_init(conf_types);
 
     while (sudo_parseln(&line, &linesize, &conf_lineno, fp, 0) != -1) {
 	struct sudo_conf_table *cur;
@@ -690,7 +709,7 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 		    ret = cur->parser(cp, conf_file, conf_lineno);
 		    switch (ret) {
 		    case true:
-			sudo_conf_data.updated = true;
+			sudo_conf_data.settings.updated = true;
 			break;
 		    case false:
 			break;
