@@ -75,8 +75,9 @@ char ** create_str_array(size_t count, ...);
             printf("FAILED: deitialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
             success = 0; \
         } \
-        if (!success) \
+        if (!success) { \
             errors++; \
+        } \
     } while(false)
 
 #define VERIFY_PRINT_MSG(fmt, actual_str, actual, expected_str, expected, expected_to_be_message) \
