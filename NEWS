@@ -54,6 +54,9 @@ What's new in Sudo 1.9.4
  * Sudo packages for macOS 11 now contain universal binaries that
    support both Intel and Apple Silicon CPUs.
 
+ * For sudo_logsrvd, an empty value for the "pid_file" setting in
+   sudo_logsrvd.conf will now disable the process ID file.
+
 What's new in Sudo 1.9.3p1
 
  * Fixed a regression introduced in sudo 1.9.3 where the configure
