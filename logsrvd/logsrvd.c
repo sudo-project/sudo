@@ -2029,7 +2029,7 @@ main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     sudo_ev_dispatch(evbase);
-    if (!nofork)
+    if (!nofork && logsrvd_conf_pid_file() != NULL)
 	unlink(logsrvd_conf_pid_file());
 
     debug_return_int(1);
