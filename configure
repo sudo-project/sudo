@@ -1809,7 +1809,7 @@ Optional Packages:
   --with-ldap-conf-file   path to LDAP configuration file
   --with-ldap-secret-file path to LDAP secret password file
   --with-secure-path      override the user's path with a built-in one
-  --without-interfaces    don't try to read the ip addr of ether interfaces
+  --without-interfaces    don't try to read the ip addr of network interfaces
   --with-askpass=PATH     Fully qualified pathname of askpass helper
   --with-exampledir=DIR   path to install sudo examples in
   --with-plugindir=DIR    set directory to load plugins from

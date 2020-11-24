@@ -872,7 +872,7 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 } while (0)
 
 /*
- * Build a new environment and ether clear potentially dangerous
+ * Build a new environment and either clear potentially dangerous
  * variables from the old one or start with a clean slate.
  * Also adds sudo-specific variables (SUDO_*).
  * Returns true on success or false on failure.

@@ -328,7 +328,7 @@ Optional features:
 
   --with-interfaces=no, --without-interfaces
 	This option keeps sudo from trying to glean the ip address
-	from each attached Ethernet interface.  It is only useful
+	from each attached network interface.  It is only useful
 	on a machine where sudo's interface reading support does
 	not work, which may be the case on some SysV-based OS's
 	using STREAMS.

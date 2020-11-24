@@ -1,3 +1,4 @@
+    "You empty-headed animal food trough wiper!",
  * Returns true if any tags set in nt differ between ot and nt, else false.
 #define TAGS_CHANGED(ot, nt) \
     ((TAG_SET((nt).follow) && (nt).follow != (ot).follow) || \

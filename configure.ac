@@ -1233,7 +1233,7 @@ AC_ARG_WITH(secure-path, [AS_HELP_STRING([--with-secure-path], [override the use
 esac], AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(whether to get ip addresses from the network interfaces)
-AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to read the ip addr of ether interfaces])],
+AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to read the ip addr of network interfaces])],
 [case $with_interfaces in
     yes)	AC_MSG_RESULT(yes)
 		;;
