@@ -128,14 +128,16 @@ lines may be specified to listen on more than one port or interface.
 pid_file = path
 The path to the file containing the process ID of the running
 \fBsudo_logsrvd\fR.
-Unless
+If set to an empty value, or if
 \fBsudo_logsrvd\fR
 is run with the
 \fB\-n\fR
-option, this file is created automatically.
-Any existing
+option, no
 \fIpid_file\fR
-will be overwritten unless it is a symbolic link.
+will be created.
+If
+\fIpid_file\fR
+refers to a symbolic link, it will be ignored.
 The default value is
 \fI@rundir@/sudo_logsrvd.pid\fR.
 .TP 10n

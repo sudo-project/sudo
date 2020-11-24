@@ -404,14 +404,16 @@ cb_pid_file(struct logsrvd_config *config, const char *str)
     char *copy = NULL;
     debug_decl(cb_pid_file, SUDO_DEBUG_UTIL);
 
-    if (*str != '/') {
-	debug_return_bool(false);
-	sudo_warnx(U_("%s: not a fully qualified path"), str);
-	debug_return_bool(false);
-    }
-    if ((copy = strdup(str)) == NULL) {
-	sudo_warn(NULL);
-	debug_return_bool(false);
+    /* An empty value means to disable the pid file. */
+    if (*str != '\0') {
+	if (*str != '/') {
+	    sudo_warnx(U_("%s: not a fully qualified path"), str);
+	    debug_return_bool(false);
+	}
+	if ((copy = strdup(str)) == NULL) {
+	    sudo_warn(NULL);
+	    debug_return_bool(false);
+	}
     }
 
     free(config->server.pid_file);

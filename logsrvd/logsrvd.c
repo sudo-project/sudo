@@ -1849,6 +1849,9 @@ write_pidfile(void)
     char *pid_file = (char *)logsrvd_conf_pid_file();
     debug_decl(write_pidfile, SUDO_DEBUG_UTIL);
 
+    if (pid_file == NULL)
+	debug_return;
+
     /* sudo_mkdir_parents() modifies the path but restores it before return. */
     success = sudo_mkdir_parents(pid_file, ROOT_UID, ROOT_GID,
 	S_IRWXU|S_IXGRP|S_IXOTH, false);

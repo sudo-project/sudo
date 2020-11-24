@@ -115,14 +115,16 @@ lines may be specified to listen on more than one port or interface.
 .It pid_file = path
 The path to the file containing the process ID of the running
 .Nm sudo_logsrvd .
-Unless
+If set to an empty value, or if
 .Nm sudo_logsrvd
 is run with the
 .Fl n
-option, this file is created automatically.
-Any existing
+option, no
 .Em pid_file
-will be overwritten unless it is a symbolic link.
+will be created.
+If
+.Em pid_file
+refers to a symbolic link, it will be ignored.
 The default value is
 .Pa @rundir@/sudo_logsrvd.pid .
 .It tcp_keepalive = boolean
