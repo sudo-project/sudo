@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 8, 2020
+.Dd November 24, 2020
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -115,11 +115,14 @@ lines may be specified to listen on more than one port or interface.
 .It pid_file = path
 The path to the file containing the process ID of the running
 .Nm sudo_logsrvd .
-This file is not created when
+Unless
 .Nm sudo_logsrvd
 is run with the
 .Fl n
-option.
+option, this file is created automatically.
+Any existing
+.Em pid_file
+will be overwritten unless it is a symbolic link.
 The default value is
 .Pa @rundir@/sudo_logsrvd.pid .
 .It tcp_keepalive = boolean

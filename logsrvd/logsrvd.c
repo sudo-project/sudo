@@ -79,6 +79,10 @@
 # define LOGSRVD_DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"
 #endif
 
+#ifndef O_NOFOLLOW
+# define O_NOFOLLOW 0
+#endif
+
 /*
  * Sudo I/O audit server.
  */
@@ -1840,6 +1844,7 @@ static void
 write_pidfile(void)
 {
     FILE *fp;
+    int fd;
     bool success;
     char *pid_file = (char *)logsrvd_conf_pid_file();
     debug_decl(write_pidfile, SUDO_DEBUG_UTIL);
@@ -1848,9 +1853,11 @@ write_pidfile(void)
     success = sudo_mkdir_parents(pid_file, ROOT_UID, ROOT_GID,
 	S_IRWXU|S_IXGRP|S_IXOTH, false);
     if (success) {
-	fp = fopen(logsrvd_conf_pid_file(), "w");
-	if (fp == NULL) {
+	fd = open(pid_file, O_WRONLY|O_CREAT|O_NOFOLLOW, 0644);
+	if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	    sudo_warn("%s", pid_file);
+	    if (fd != -1)
+		close(fd);
 	} else {
 	    fprintf(fp, "%u\n", (unsigned int)getpid());
 	    fflush(fp);
