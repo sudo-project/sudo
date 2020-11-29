@@ -1,28 +1,28 @@
-# Unable to translate stdin:26
+# Unable to translate stdin:26:29:
 # Defaults@somehost set_home
 
-# Unable to translate stdin:27
+# Unable to translate stdin:27:29:
 # Defaults@quoted\" set_home
 
-# Unable to translate stdin:30
+# Unable to translate stdin:30:24:
 # Defaults:you set_home
 
-# Unable to translate stdin:31
+# Unable to translate stdin:31:25:
 # Defaults:us\" set_home
 
-# Unable to translate stdin:32
+# Unable to translate stdin:32:26:
 # Defaults:%them set_home
 
-# Unable to translate stdin:33
+# Unable to translate stdin:33:36:
 # Defaults:"%: non UNIX 0 c" set_home
 
-# Unable to translate stdin:34
+# Unable to translate stdin:34:25:
 # Defaults:+net set_home
 
-# Unable to translate stdin:37
+# Unable to translate stdin:37:28:
 # Defaults>someone set_home
 
-# Unable to translate stdin:38
+# Unable to translate stdin:38:29:
 # Defaults>"some one" set_home
 
 dn: cn=foo,ou=SUDOers,dc=sudo,dc=ws

@@ -61,6 +61,7 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
@@ -181,7 +182,7 @@ static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
 static void restore_terminal_size(void);
-static void setup_terminal(struct iolog_info *li, bool interactive, bool resize);
+static void setup_terminal(struct eventlog *evlog, bool interactive, bool resize);
 
 #define VALID_ID(s) (isalnum((unsigned char)(s)[0]) && \
     isalnum((unsigned char)(s)[1]) && isalnum((unsigned char)(s)[2]) && \
@@ -206,7 +207,7 @@ main(int argc, char *argv[])
     bool interactive = true, suspend_wait = false, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, iolog_dir[PATH_MAX];
-    struct iolog_info *li;
+    struct eventlog *evlog;
     struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
     debug_decl(main, SUDO_DEBUG_MAIN);
@@ -359,20 +360,20 @@ main(int argc, char *argv[])
     }
 
     /* Parse log file. */
-    if ((li = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
+    if ((evlog = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
 	goto done;
-    printf(_("Replaying sudo session: %s"), li->cmd);
+    printf(_("Replaying sudo session: %s"), evlog->command);
 
     /* Setup terminal if appropriate. */
     if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
 	interactive = false;
-    setup_terminal(li, interactive, resize);
+    setup_terminal(evlog, interactive, resize);
     putchar('\r');
     putchar('\n');
 
     /* Done with parsed log file. */
-    iolog_free_loginfo(li);
-    li = NULL;
+    eventlog_free(evlog);
+    evlog = NULL;
 
     /* Replay session corresponding to iolog_files[]. */
     exitcode = replay_session(iolog_dir_fd, iolog_dir, max_delay, decimal,
@@ -611,7 +612,7 @@ done:
 }
 
 static void
-setup_terminal(struct iolog_info *li, bool interactive, bool resize)
+setup_terminal(struct eventlog *evlog, bool interactive, bool resize)
 {
     const char *term;
     debug_decl(check_terminal, SUDO_DEBUG_UTIL);
@@ -629,7 +630,7 @@ setup_terminal(struct iolog_info *li, bool interactive, bool resize)
     }
 
     /* Find terminal size if the session has size info. */
-    if (li->lines == 0 && li->cols == 0) {
+    if (evlog->lines == 0 && evlog->columns == 0) {
 	/* no tty size info, hope for the best... */
 	debug_return;
     }
@@ -655,17 +656,17 @@ setup_terminal(struct iolog_info *li, bool interactive, bool resize)
 	sudo_get_ttysize(&terminal_lines, &terminal_cols);
     }
 
-    if (li->lines == terminal_lines && li->cols == terminal_cols) {
+    if (evlog->lines == terminal_lines && evlog->columns == terminal_cols) {
 	/* nothing to change */
 	debug_return;
     }
 
     if (terminal_can_resize) {
 	/* session terminal size is different, try to resize ours */
-	if (xterm_set_size(li->lines, li->cols)) {
+	if (xterm_set_size(evlog->lines, evlog->columns)) {
 	    /* success */
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"resized terminal to %d x %x", li->lines, li->cols);
+		"resized terminal to %d x %x", evlog->lines, evlog->columns);
 	    terminal_was_resized = true;
 	    debug_return;
 	}
@@ -673,9 +674,9 @@ setup_terminal(struct iolog_info *li, bool interactive, bool resize)
 	terminal_can_resize = false;
     }
 
-    if (li->lines > terminal_lines || li->cols > terminal_cols) {
+    if (evlog->lines > terminal_lines || evlog->columns > terminal_cols) {
 	fputs(_("Warning: your terminal is too small to properly replay the log.\n"), stdout);
-	printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), li->lines, li->cols, terminal_lines, terminal_cols);
+	printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), evlog->lines, evlog->columns, terminal_lines, terminal_cols);
     }
     debug_return;
 }
@@ -1291,7 +1292,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 }
 
 static bool
-match_expr(struct search_node_list *head, struct iolog_info *log, bool last_match)
+match_expr(struct search_node_list *head, struct eventlog *evlog, bool last_match)
 {
     struct search_node *sn;
     bool res = false, matched = last_match;
@@ -1301,34 +1302,34 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
     STAILQ_FOREACH(sn, head, entries) {
 	switch (sn->type) {
 	case ST_EXPR:
-	    res = match_expr(&sn->u.expr, log, matched);
+	    res = match_expr(&sn->u.expr, evlog, matched);
 	    break;
 	case ST_CWD:
-	    if (log->cwd != NULL)
-		res = strcmp(sn->u.cwd, log->cwd) == 0;
+	    if (evlog->cwd != NULL)
+		res = strcmp(sn->u.cwd, evlog->cwd) == 0;
 	    break;
 	case ST_HOST:
-	    if (log->host != NULL)
-		res = strcmp(sn->u.host, log->host) == 0;
+	    if (evlog->submithost != NULL)
+		res = strcmp(sn->u.host, evlog->submithost) == 0;
 	    break;
 	case ST_TTY:
-	    if (log->tty != NULL)
-		res = strcmp(sn->u.tty, log->tty) == 0;
+	    if (evlog->ttyname != NULL)
+		res = strcmp(sn->u.tty, evlog->ttyname) == 0;
 	    break;
 	case ST_RUNASGROUP:
-	    if (log->runas_group != NULL)
-		res = strcmp(sn->u.runas_group, log->runas_group) == 0;
+	    if (evlog->rungroup != NULL)
+		res = strcmp(sn->u.runas_group, evlog->rungroup) == 0;
 	    break;
 	case ST_RUNASUSER:
-	    if (log->runas_user != NULL)
-		res = strcmp(sn->u.runas_user, log->runas_user) == 0;
+	    if (evlog->runuser != NULL)
+		res = strcmp(sn->u.runas_user, evlog->runuser) == 0;
 	    break;
 	case ST_USER:
-	    if (log->user != NULL)
-		res = strcmp(sn->u.user, log->user) == 0;
+	    if (evlog->submituser != NULL)
+		res = strcmp(sn->u.user, evlog->submituser) == 0;
 	    break;
 	case ST_PATTERN:
-	    rc = regexec(&sn->u.cmdre, log->cmd, 0, NULL, 0);
+	    rc = regexec(&sn->u.cmdre, evlog->command, 0, NULL, 0);
 	    if (rc && rc != REG_NOMATCH) {
 		char buf[BUFSIZ];
 		regerror(rc, &sn->u.cmdre, buf, sizeof(buf));
@@ -1337,10 +1338,10 @@ match_expr(struct search_node_list *head, struct iolog_info *log, bool last_matc
 	    res = rc == REG_NOMATCH ? 0 : 1;
 	    break;
 	case ST_FROMDATE:
-	    res = sudo_timespeccmp(&log->tstamp, &sn->u.tstamp, >=);
+	    res = sudo_timespeccmp(&evlog->submit_time, &sn->u.tstamp, >=);
 	    break;
 	case ST_TODATE:
-	    res = sudo_timespeccmp(&log->tstamp, &sn->u.tstamp, <=);
+	    res = sudo_timespeccmp(&evlog->submit_time, &sn->u.tstamp, <=);
 	    break;
 	default:
 	    sudo_fatalx(U_("unknown search type %d"), sn->type);
@@ -1358,16 +1359,16 @@ static int
 list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
-    struct iolog_info *li = NULL;
+    struct eventlog *evlog = NULL;
     const char *timestr;
     int ret = -1;
     debug_decl(list_session, SUDO_DEBUG_UTIL);
 
-    if ((li = iolog_parse_loginfo(-1, log_dir)) == NULL)
+    if ((evlog = iolog_parse_loginfo(-1, log_dir)) == NULL)
 	goto done;
 
     /* Match on search expression if there is one. */
-    if (!STAILQ_EMPTY(&search_expr) && !match_expr(&search_expr, li, true))
+    if (!STAILQ_EMPTY(&search_expr) && !match_expr(&search_expr, evlog, true))
 	goto done;
 
     /* Convert from /var/log/sudo-sessions/00/00/01 to 000001 */
@@ -1386,20 +1387,20 @@ list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
 	idstr = cp;
     }
     /* XXX - print lines + cols? */
-    timestr = get_timestr(li->tstamp.tv_sec, 1);
+    timestr = get_timestr(evlog->submit_time.tv_sec, 1);
     printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
 	timestr ? timestr : "invalid date",
-	li->user, li->tty, li->cwd, li->runas_user);
-    if (li->runas_group)
-	printf("GROUP=%s ; ", li->runas_group);
-    if (li->host)
-	printf("HOST=%s ; ", li->host);
-    printf("TSID=%s ; COMMAND=%s\n", idstr, li->cmd);
+	evlog->submituser, evlog->ttyname, evlog->cwd, evlog->runuser);
+    if (evlog->rungroup)
+	printf("GROUP=%s ; ", evlog->rungroup);
+    if (evlog->submithost)
+	printf("HOST=%s ; ", evlog->submithost);
+    printf("TSID=%s ; COMMAND=%s\n", idstr, evlog->command);
 
     ret = 0;
 
 done:
-    iolog_free_loginfo(li);
+    eventlog_free(evlog);
     debug_return_int(ret);
 }
 

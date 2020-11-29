@@ -65,21 +65,24 @@ json_expand_buf(struct json_container *json)
 }
 
 /*
+ * Start a new line and indent unless formatting as minimal JSON.
  * Append "indent" number of blank characters.
  */
 static bool
-json_append_indent(struct json_container *json, int indent)
+json_new_line(struct json_container *json)
 {
-    debug_decl(json_append_indent, SUDO_DEBUG_UTIL);
+    int indent = json->indent_level;
+    debug_decl(json_new_line, SUDO_DEBUG_UTIL);
 
-    /* No indentation in compact mode. */
-    if (json->compact)
+    /* No non-essential white space in minimal mode. */
+    if (json->minimal)
 	debug_return_bool(true);
 
-    while (json->buflen + indent >= json->bufsize) {
+    while (json->buflen + 1 + indent >= json->bufsize) {
 	if (!json_expand_buf(json))
 	    debug_return_bool(false);
     }
+    json->buf[json->buflen++] = '\n';
     while (indent--) {
 	json->buf[json->buflen++] = ' ';
     }
@@ -164,7 +167,7 @@ json_append_string(struct json_container *json, const char *str)
 }
 
 bool
-sudo_json_init_v1(struct json_container *json, int indent, bool compact,
+sudo_json_init_v1(struct json_container *json, int indent, bool minimal,
     bool memfatal)
 {
     debug_decl(sudo_json_init, SUDO_DEBUG_UTIL);
@@ -172,7 +175,7 @@ sudo_json_init_v1(struct json_container *json, int indent, bool compact,
     memset(json, 0, sizeof(*json));
     json->indent_level = indent;
     json->indent_increment = indent;
-    json->compact = compact;
+    json->minimal = minimal;
     json->memfatal = memfatal;
     json->buf = malloc(64 * 1024);
     if (json->buf == NULL) {
@@ -211,14 +214,12 @@ sudo_json_open_object_v1(struct json_container *json, const char *name)
 	if (!json_append_buf(json, ","))
 	    debug_return_bool(false);
     }
-    if (!json_append_buf(json, json->compact ? " " : "\n"))
+    if (!json_new_line(json))
 	debug_return_bool(false);
-
-    json_append_indent(json, json->indent_level);
 
     if (name != NULL) {
 	json_append_string(json, name);
-	if (!json_append_buf(json, ": {"))
+	if (!json_append_buf(json, json->minimal ? ":{" : ": {"))
 	    debug_return_bool(false);
     } else {
 	if (!json_append_buf(json, "{"))
@@ -236,11 +237,11 @@ sudo_json_close_object_v1(struct json_container *json)
 {
     debug_decl(sudo_json_close_object, SUDO_DEBUG_UTIL);
 
-    json->indent_level -= json->indent_increment;
-    if (!json_append_buf(json, json->compact ? " " : "\n"))
-	debug_return_bool(false);
-    if (!json_append_indent(json, json->indent_level))
-	debug_return_bool(false);
+    if (!json->minimal) {
+	json->indent_level -= json->indent_increment;
+	if (!json_new_line(json))
+	    debug_return_bool(false);
+    }
     if (!json_append_buf(json, "}"))
 	debug_return_bool(false);
 
@@ -257,14 +258,12 @@ sudo_json_open_array_v1(struct json_container *json, const char *name)
 	if (!json_append_buf(json, ","))
 	    debug_return_bool(false);
     }
-    if (!json_append_buf(json, json->compact ? " " : "\n"))
+    if (!json_new_line(json))
 	debug_return_bool(false);
-
-    json_append_indent(json, json->indent_level);
 
     if (name != NULL) {
 	json_append_string(json, name);
-	if (!json_append_buf(json, ": ["))
+	if (!json_append_buf(json, json->minimal ? ":[" : ": ["))
 	    debug_return_bool(false);
     } else {
 	if (!json_append_buf(json, "["))
@@ -282,11 +281,11 @@ sudo_json_close_array_v1(struct json_container *json)
 {
     debug_decl(sudo_json_close_array, SUDO_DEBUG_UTIL);
 
-    json->indent_level -= json->indent_increment;
-    if (!json_append_buf(json, json->compact ? " " : "\n"))
-	debug_return_bool(false);
-    if (!json_append_indent(json, json->indent_level))
-	debug_return_bool(false);
+    if (!json->minimal) {
+	json->indent_level -= json->indent_increment;
+	if (!json_new_line(json))
+	    debug_return_bool(false);
+    }
     if (!json_append_buf(json, "]"))
 	debug_return_bool(false);
 
@@ -305,21 +304,20 @@ sudo_json_add_value_int(struct json_container *json, const char *name,
 	if (!json_append_buf(json, ","))
 	    debug_return_bool(false);
     }
-    if (!json_append_buf(json, json->compact ? " " : "\n"))
+    if (!json_new_line(json))
 	debug_return_bool(false);
     json->need_comma = true;
 
-    if (!json_append_indent(json, json->indent_level))
-	debug_return_bool(false);
-
     if (as_object) {
-	if (!json_append_buf(json, "{ "))
+	if (!json_append_buf(json, json->minimal ? "{" : "{ "))
 	    debug_return_bool(false);
     }
 
     /* name */
     if (name != NULL) {
-	if (!json_append_string(json, name) || !json_append_buf(json, ": "))
+	if (!json_append_string(json, name))
+	    debug_return_bool(false);
+	if (!json_append_buf(json, json->minimal ? ":" : ": "))
 	    debug_return_bool(false);
     }
 
@@ -356,7 +354,7 @@ sudo_json_add_value_int(struct json_container *json, const char *name,
     }
 
     if (as_object) {
-	if (!json_append_buf(json, " }"))
+	if (!json_append_buf(json, json->minimal ? "}" : " }"))
 	    debug_return_bool(false);
     }
 

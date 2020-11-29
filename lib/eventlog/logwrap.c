@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011, 2014-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011, 2014-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,16 +27,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include "sudo_compat.h"
+#include "sudo_debug.h"
+#include "sudo_util.h"
+#include "sudo_eventlog.h"
 
-int
-writeln_wrap(FILE *fp, char *line, size_t linelen, size_t maxlen)
+size_t
+eventlog_writeln(FILE *fp, char *line, size_t linelen, size_t maxlen)
 {
     char *indent = "";
     char *beg = line;
     char *end;
-    int len, outlen = 0;
-    debug_decl(writeln_wrap, SUDOERS_DEBUG_LOGGING);
+    int len;
+    size_t outlen = 0;
+    debug_decl(eventlog_writeln, SUDO_DEBUG_UTIL);
+
+    if (maxlen < sizeof(EVENTLOG_INDENT)) {
+	/* Maximum length too small, disable wrapping. */
+	outlen = fwrite(line, 1, linelen, fp);
+	if (outlen != linelen)
+	    debug_return_size_t(-1);
+	if (fputc('\n', fp) == EOF)
+	    debug_return_size_t(-1);
+	debug_return_int(outlen + 1);
+    }
 
     /*
      * Print out line with word wrap around maxlen characters.
@@ -53,24 +67,24 @@ writeln_wrap(FILE *fp, char *line, size_t linelen, size_t maxlen)
 	}
 	len = fprintf(fp, "%s%.*s\n", indent, (int)(end - beg), beg);
 	if (len < 0)
-	    debug_return_int(-1);
+	    debug_return_size_t(-1);
 	outlen += len;
 	while (*end == ' ')
 	    end++;
 	linelen -= (end - beg);
 	beg = end;
 	if (indent[0] == '\0') {
-	    indent = LOG_INDENT;
-	    maxlen -= sizeof(LOG_INDENT) - 1;
+	    indent = EVENTLOG_INDENT;
+	    maxlen -= sizeof(EVENTLOG_INDENT) - 1;
 	}
     }
     /* Print remainder, if any. */
     if (linelen) {
 	len = fprintf(fp, "%s%s\n", indent, beg);
 	if (len < 0)
-	    debug_return_int(-1);
+	    debug_return_size_t(-1);
 	outlen += len;
     }
 
-    debug_return_int(outlen);
+    debug_return_size_t(outlen);
 }

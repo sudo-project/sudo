@@ -176,7 +176,8 @@ struct userspec {
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
     struct comment_list comments;	/* optional comments */
-    int lineno;				/* line number in sudoers */
+    int line;				/* line number in sudoers */
+    int column;				/* column number in sudoers */
     char *file;				/* name of sudoers file */
 };
 
@@ -252,7 +253,8 @@ struct alias {
     char *name;				/* alias name */
     unsigned short type;		/* {USER,HOST,RUNAS,CMND}ALIAS */
     short used;				/* "used" flag for cycle detection */
-    int lineno;				/* line number of alias entry */
+    int line;				/* line number of alias entry */
+    int column;				/* column number of alias entry */
     char *file;				/* file the alias entry was in */
     struct member_list members;		/* list of alias members */
 };
@@ -269,7 +271,8 @@ struct defaults {
     short type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
     char op;				/* true, false, '+', '-' */
     char error;				/* parse error flag */
-    int lineno;				/* line number of Defaults entry */
+    int line;				/* line number of Defaults entry */
+    int column;				/* column number of Defaults entry */
 };
 
 /*
@@ -295,7 +298,7 @@ struct cmnd_info {
 struct rbtree *alloc_aliases(void);
 void free_aliases(struct rbtree *aliases);
 bool no_aliases(struct sudoers_parse_tree *parse_tree);
-const char *alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type, char *file, int lineno, struct member *members);
+const char *alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type, char *file, int line, int column, struct member *members);
 const char *alias_type_to_string(int alias_type);
 struct alias *alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type);
 struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type);
@@ -307,6 +310,7 @@ void alias_put(struct alias *a);
 /* gram.c */
 extern struct sudoers_parse_tree parsed_policy;
 bool init_parser(const char *path, bool quiet, bool strict);
+struct member *new_member_all(char *name);
 void free_member(struct member *m);
 void free_members(struct member_list *members);
 void free_privilege(struct privilege *priv);
@@ -325,7 +329,7 @@ bool addr_matches(char *n);
 bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const char *runchroot, struct cmnd_info *info, const struct command_digest_list *digests);
 
 /* match_digest.c */
-bool digest_matches(int fd, const char *file, const struct command_digest_list *digests);
+bool digest_matches(int fd, const char *path, const char *runchroot, const struct command_digest_list *digests);
 
 /* match.c */
 struct group;

@@ -20,11 +20,7 @@
 #ifndef SUDOERS_LOGGING_H
 #define SUDOERS_LOGGING_H
 
-#ifdef __STDC__
-# include <stdarg.h>
-#else
-# include <varargs.h>
-#endif
+#include <stdarg.h>
 
 /*
  * Values for sudoers_setlocale()
@@ -46,45 +42,33 @@
 #define SLOG_NO_LOG		0x20	/* do not log via file or syslog */
 #define SLOG_AUDIT		0x40	/* send message to audit as well */
 
-/*
- * Maximum number of characters to log per entry.  The syslogger
- * will log this much, after that, it truncates the log line.
- * We need this here to make sure that we continue with another
- * syslog(3) call if the internal buffer is more than 1023 characters.
- */
-#ifndef MAXSYSLOGLEN
-# define MAXSYSLOGLEN		960
-#endif
-
-/*
- * Indentation level for file-based logs when word wrap is enabled.
- */
-#define LOG_INDENT	"    "
-
 /* XXX - needed for auditing */
 extern int NewArgc;
 extern char **NewArgv;
 extern char *audit_msg;
 
 union sudo_defs_val;
+struct sudo_plugin_event;
+struct log_details;
 
-bool do_logfile(const char *msg);
-bool do_syslog(int pri, const char *msg);
-char *new_logline(const char *, const char *);
 bool sudoers_warn_setlocale(bool restore, int *cookie);
-bool sudoers_setlocale(int newlocale, int *prevlocale);
+bool sudoers_setlocale(int locale_type, int *prev_locale);
 int sudoers_getlocale(void);
 int audit_failure(char *const argv[], char const *const fmt, ...) __printflike(2, 3);
 int vaudit_failure(char *const argv[], char const *const fmt, va_list ap) __printflike(2, 0);
-bool log_allowed(int status);
+bool log_allowed(void);
 bool log_auth_failure(int status, unsigned int tries);
 bool log_denial(int status, bool inform_user);
 bool log_failure(int status, int flags);
+bool log_server_alert(struct eventlog *evlog, struct timespec *now, const char *message, const char *errstr, struct sudo_plugin_event * (*event_alloc)(void));
+bool log_server_reject(struct eventlog *evlog, const char *message, struct sudo_plugin_event * (*event_alloc)(void));
 bool log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
 bool log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 bool gai_log_warning(int flags, int errnum, const char *fmt, ...) __printflike(3, 4);
 bool sudoers_initlocale(const char *ulocale, const char *slocale);
 bool sudoers_locale_callback(const union sudo_defs_val *);
-int writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
+void sudoers_to_eventlog(struct eventlog *evlog, char * const argv[], char *const envp[]);
+void init_eventlog_config(void);
+bool init_log_details(struct log_details *details, struct eventlog *evlog);
 
 #endif /* SUDOERS_LOGGING_H */

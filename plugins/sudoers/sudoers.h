@@ -37,6 +37,7 @@
 #include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_conf.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_nss.h"
@@ -76,8 +77,10 @@ struct group_list {
 
 /*
  * Info pertaining to the invoking user.
+ * XXX - can we embed struct eventlog here or use it instead?
  */
 struct sudo_user {
+    struct timespec submit_time;
     struct passwd *pw;
     struct passwd *_runas_pw;
     struct group *_runas_gr;
@@ -268,7 +271,7 @@ bool sudo_goodpath(const char *path, const char *runchroot, struct stat *sbp);
 /* findpath.c */
 int find_path(const char *infile, char **outfile, struct stat *sbp,
     const char *path, const char *runchroot, int ignore_dot,
-    char * const *whitelist);
+    char * const *allowlist);
 
 /* check.c */
 int check_user(int validate, int mode);
@@ -315,7 +318,6 @@ extern mode_t sudoers_mode;
 extern uid_t sudoers_uid;
 extern gid_t sudoers_gid;
 extern int sudolineno;
-extern int last_token;
 
 /* defaults.c */
 void dump_defaults(void);
@@ -415,7 +417,7 @@ void sudoers_debug_deregister(void);
 
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);
-bool sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
+bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 extern const char *path_ldap_conf;
 extern const char *path_ldap_secret;
 
@@ -429,7 +431,7 @@ extern const char *path_plugin_dir;
 
 /* editor.c */
 char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
-     char * const *whitelist, const char **env_editor, bool env_error);
+     char * const *allowlist, const char **env_editor, bool env_error);
 
 /* exptilde.c */
 bool expand_tilde(char **path, const char *user);

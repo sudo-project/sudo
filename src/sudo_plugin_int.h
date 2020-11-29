@@ -128,9 +128,6 @@ int sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[]);
 int sudo_conversation_printf(int msg_type, const char *fmt, ...);
 
-bool sudo_load_plugins(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins,
-    struct plugin_container_list *audit_plugins,
-    struct plugin_container_list *approval_plugins);
+bool sudo_load_plugins(void);
 
 #endif /* SUDO_PLUGIN_INT_H */

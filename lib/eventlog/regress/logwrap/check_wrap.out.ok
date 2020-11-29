@@ -1,3 +1,5 @@
+# word wrap disabled
+Jul 11 11:30:17 : tu2sp3-a : command not allowed ; TTY=pts/1 ; PWD=/home/tu2sp3-a ; USER=root ; COMMAND=/opt/quest/bin/vastool list users
 # word wrap at 60 characters
 Jul 11 11:30:17 : tu2sp3-a : command not allowed ; TTY=pts/1
     ; PWD=/home/tu2sp3-a ; USER=root ;
@@ -84,6 +86,8 @@ Jul 11 11:30:17 : tu2sp3-a : command not allowed ; TTY=pts/1 ; PWD=/home/tu2sp3-
     COMMAND=/opt/quest/bin/vastool list users
 # word wrap at 140 characters
 Jul 11 11:30:17 : tu2sp3-a : command not allowed ; TTY=pts/1 ; PWD=/home/tu2sp3-a ; USER=root ; COMMAND=/opt/quest/bin/vastool list users
+# word wrap disabled
+Jun 26 18:00:06 : millert : TTY=ttypm ; PWD=/usr/src/local/millert/hg/sudo/build ; USER=root ; TSID=0004KT ; COMMAND=/bin/rm /root/.bash_profile
 # word wrap at 60 characters
 Jun 26 18:00:06 : millert : TTY=ttypm ;
     PWD=/usr/src/local/millert/hg/sudo/build ; USER=root ;

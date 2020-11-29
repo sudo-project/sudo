@@ -339,6 +339,10 @@ case "$osversion" in
 		# Build intel universal binaries for 10.6 and below
 		ARCH_FLAGS="-arch i386 -arch x86_64"
 		;;
+	    macos11*)
+		# Build arm64/x86_64 universal binaries for macOS 11
+		ARCH_FLAGS="-arch arm64 -arch x86_64"
+		;;
 	esac
 	if test "${osversion}" != "`$scriptdir/pp --probe`"; then
 	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
@@ -435,6 +439,14 @@ case "$osversion" in
 			fi
 		    fi
 		fi
+		;;
+	    hpux*-ia64)
+		# Build 64-bit binaries on HP-UX ia64
+		if test -z "$CC" && gcc -v >/dev/null 2>&1; then
+		    CC="gcc -mlp64"; export CC
+		fi
+		# TODO: openssl
+		configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls"
 		;;
 	    *)
 		# TODO: openssl

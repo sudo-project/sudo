@@ -35,6 +35,7 @@
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
 
 #include "sudo_compat.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudoers_debug.h"
@@ -76,19 +77,19 @@ sudoers_initlocale(const char *ulocale, const char *slocale)
 /*
  * Set locale to user or sudoers value.
  * Returns true on success and false on failure,
- * If prevlocale is non-NULL it will be filled in with the
+ * If prev_locale is non-NULL it will be filled in with the
  * old SUDOERS_LOCALE_* value.
  */
 bool
-sudoers_setlocale(int newlocale, int *prevlocale)
+sudoers_setlocale(int locale_type, int *prev_locale)
 {
     char *res = NULL;
     debug_decl(sudoers_setlocale, SUDOERS_DEBUG_UTIL);
 
-    switch (newlocale) {
+    switch (locale_type) {
 	case SUDOERS_LOCALE_USER:
-	    if (prevlocale)
-		*prevlocale = current_locale;
+	    if (prev_locale)
+		*prev_locale = current_locale;
 	    if (current_locale != SUDOERS_LOCALE_USER) {
 		current_locale = SUDOERS_LOCALE_USER;
 		sudo_debug_printf(SUDO_DEBUG_DEBUG,
@@ -105,8 +106,8 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 	    }
 	    break;
 	case SUDOERS_LOCALE_SUDOERS:
-	    if (prevlocale)
-		*prevlocale = current_locale;
+	    if (prev_locale)
+		*prev_locale = current_locale;
 	    if (current_locale != SUDOERS_LOCALE_SUDOERS) {
 		current_locale = SUDOERS_LOCALE_SUDOERS;
 		sudo_debug_printf(SUDO_DEBUG_DEBUG,

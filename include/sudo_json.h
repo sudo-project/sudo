@@ -60,12 +60,12 @@ struct json_container {
     unsigned int bufsize;
     unsigned int indent_level;
     unsigned int indent_increment;
-    bool compact;
+    bool minimal;
     bool memfatal;
     bool need_comma;
 };
 
-sudo_dso_public bool sudo_json_init_v1(struct json_container *json, int indent, bool compact, bool memfatal);
+sudo_dso_public bool sudo_json_init_v1(struct json_container *json, int indent, bool minimal, bool memfatal);
 #define sudo_json_init(_a, _b, _c, _d) sudo_json_init_v1((_a), (_b), (_c), (_d))
 
 sudo_dso_public void sudo_json_free_v1(struct json_container *json);

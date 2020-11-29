@@ -63,6 +63,7 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
@@ -151,7 +152,7 @@ static int
 connect_server(const char *host, const char *port)
 {
     struct addrinfo hints, *res, *res0;
-    const char *cause = "getaddrinfo";
+    const char *addr, *cause = "getaddrinfo";
     int error, sock, save_errno;
     debug_decl(connect_server, SUDO_DEBUG_UTIL);
 
@@ -181,7 +182,22 @@ connect_server(const char *host, const char *port)
 	    continue;
 	}
 	if (*server_ip == '\0') {
-	    if (inet_ntop(res->ai_family, res->ai_addr, server_ip,
+	    switch (res->ai_family) {
+	    case AF_INET:
+		addr = (char *)&((struct sockaddr_in *)res->ai_addr)->sin_addr;
+		break;
+	    case AF_INET6:
+		addr = (char *)&((struct sockaddr_in6 *)res->ai_addr)->sin6_addr;
+		break;
+	    default:
+		cause = "ai_family";
+		save_errno = EAFNOSUPPORT;
+		close(sock);
+		errno = save_errno;
+		sock = -1;
+		continue;
+	    }
+	    if (inet_ntop(res->ai_family, addr, server_ip,
 		    sizeof(server_ip)) == NULL) {
 		sudo_warnx("%s", U_("unable to get server IP addr"));
 	    }
@@ -366,7 +382,7 @@ free_info_messages(InfoMessage **info_msgs, size_t n_info_msgs)
 }
 
 static InfoMessage **
-fmt_info_messages(struct iolog_info *log_info, char *hostname,
+fmt_info_messages(const struct eventlog *evlog, char *hostname,
     size_t *n_info_msgs)
 {
     InfoMessage **info_msgs = NULL;
@@ -379,7 +395,7 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
     if (runargv == NULL)
         goto oom;
     info_message__string_list__init(runargv);
-    runargv->strings = split_command(log_info->cmd, &runargv->n_strings);
+    runargv->strings = split_command(evlog->command, &runargv->n_strings);
     if (runargv->strings == NULL)
 	goto oom;
 
@@ -398,17 +414,17 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
     /* Fill in info_msgs */
     n = 0;
     info_msgs[n]->key = "command";
-    info_msgs[n]->u.strval = log_info->cmd;
+    info_msgs[n]->u.strval = evlog->command;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "columns";
-    info_msgs[n]->u.numval = log_info->cols;
+    info_msgs[n]->u.numval = evlog->columns;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
     info_msgs[n]->key = "lines";
-    info_msgs[n]->u.numval = log_info->lines;
+    info_msgs[n]->u.numval = evlog->lines;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
     n++;
 
@@ -418,20 +434,20 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
     runargv = NULL;
     n++;
 
-    if (log_info->runas_group != NULL) {
+    if (evlog->rungroup != NULL) {
 	info_msgs[n]->key = "rungroup";
-	info_msgs[n]->u.strval = log_info->runas_group;
+	info_msgs[n]->u.strval = evlog->rungroup;
 	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
 	n++;
     }
 
     info_msgs[n]->key = "runuser";
-    info_msgs[n]->u.strval = log_info->runas_user;
+    info_msgs[n]->u.strval = evlog->runuser;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "submitcwd";
-    info_msgs[n]->u.strval = log_info->cwd;
+    info_msgs[n]->u.strval = evlog->cwd;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
@@ -441,12 +457,12 @@ fmt_info_messages(struct iolog_info *log_info, char *hostname,
     n++;
 
     info_msgs[n]->key = "submituser";
-    info_msgs[n]->u.strval = log_info->user;
+    info_msgs[n]->u.strval = evlog->submituser;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
     info_msgs[n]->key = "ttyname";
-    info_msgs[n]->u.strval = log_info->tty;
+    info_msgs[n]->u.strval = evlog->ttyname;
     info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
     n++;
 
@@ -496,14 +512,14 @@ fmt_reject_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = closure->log_info->tstamp.tv_sec;
-    tv.tv_nsec = closure->log_info->tstamp.tv_nsec;
+    tv.tv_sec = closure->evlog->submit_time.tv_sec;
+    tv.tv_nsec = closure->evlog->submit_time.tv_nsec;
     reject_msg.submit_time = &tv;
 
     /* Why the command was rejected. */
     reject_msg.reason = closure->reject_reason;
 
-    reject_msg.info_msgs = fmt_info_messages(closure->log_info, hostname,
+    reject_msg.info_msgs = fmt_info_messages(closure->evlog, hostname,
         &n_info_msgs);
     if (reject_msg.info_msgs == NULL)
 	goto done;
@@ -555,14 +571,14 @@ fmt_accept_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = closure->log_info->tstamp.tv_sec;
-    tv.tv_nsec = closure->log_info->tstamp.tv_nsec;
+    tv.tv_sec = closure->evlog->submit_time.tv_sec;
+    tv.tv_nsec = closure->evlog->submit_time.tv_nsec;
     accept_msg.submit_time = &tv;
 
     /* Client will send IoBuffer messages. */
     accept_msg.expect_iobufs = !closure->accept_only;
 
-    accept_msg.info_msgs = fmt_info_messages(closure->log_info, hostname,
+    accept_msg.info_msgs = fmt_info_messages(closure->evlog, hostname,
         &n_info_msgs);
     if (accept_msg.info_msgs == NULL)
 	goto done;
@@ -910,7 +926,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
-    /* Sanity check ServerHello message. */
+    /* Check that ServerHello is valid. */
     if (msg->server_id == NULL || msg->server_id[0] == '\0') {
 	sudo_warnx("%s", U_("invalid ServerHello"));
 	debug_return_bool(false);
@@ -1581,7 +1597,7 @@ client_closure_free(struct client_closure *closure)
 static struct client_closure *
 client_closure_alloc(int sock, struct sudo_event_base *base,
     struct timespec *elapsed, struct timespec *restart, const char *iolog_id,
-    char *reject_reason, bool accept_only, struct iolog_info *log_info)
+    char *reject_reason, bool accept_only, struct eventlog *evlog)
 {
     struct client_closure *closure;
     debug_decl(client_closure_alloc, SUDO_DEBUG_UTIL);
@@ -1597,7 +1613,7 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
     closure->state = RECV_HELLO;
     closure->accept_only = accept_only;
     closure->reject_reason = reject_reason;
-    closure->log_info = log_info;
+    closure->evlog = evlog;
 
     closure->elapsed.tv_sec = elapsed->tv_sec;
     closure->elapsed.tv_nsec = elapsed->tv_nsec;
@@ -1667,7 +1683,7 @@ main(int argc, char *argv[])
 {
     struct client_closure *closure = NULL;
     struct sudo_event_base *evbase;
-    struct iolog_info *log_info;
+    struct eventlog *evlog;
     const char *port = NULL;
     struct timespec restart = { 0, 0 };
     struct timespec elapsed = { 0, 0 };
@@ -1791,7 +1807,7 @@ main(int argc, char *argv[])
     }
 
     /* Parse I/O log info file. */
-    if ((log_info = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
+    if ((evlog = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
 	goto bad;
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
@@ -1809,7 +1825,7 @@ main(int argc, char *argv[])
             printf("Connected to %s:%s\n", server_name, port);
 
         closure = client_closure_alloc(sock, evbase, &elapsed, &restart,
-	    iolog_id, reject_reason, accept_only, log_info);
+	    iolog_id, reject_reason, accept_only, evlog);
         if (closure == NULL)
             goto bad;
 
@@ -1860,7 +1876,7 @@ main(int argc, char *argv[])
         }
         client_closure_free(closure);
     }
-    iolog_free_loginfo(log_info);
+    eventlog_free(evlog);
 #if defined(HAVE_OPENSSL)
     SSL_CTX_free(ssl_ctx);
 #endif

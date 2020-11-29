@@ -76,8 +76,8 @@ group_plugin_query(const char *user, const char *group, const struct passwd *pw)
 struct interface_list *
 get_interfaces(void)
 {
-    static struct interface_list dummy = SLIST_HEAD_INITIALIZER(interfaces);
-    return &dummy;
+    static struct interface_list empty = SLIST_HEAD_INITIALIZER(interfaces);
+    return &empty;
 }
 
 /* STUB */
@@ -85,6 +85,13 @@ int
 set_cmnd_path(const char *runchroot)
 {
     return FOUND;
+}
+
+/* STUB */
+void
+init_eventlog_config(void)
+{
+    return;
 }
 
 /*

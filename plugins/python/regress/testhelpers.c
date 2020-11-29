@@ -190,13 +190,35 @@ verify_log_lines(const char *reference_path)
     char line[1024] = "";
     char stored_str[MAX_OUTPUT] = "";
     while(fgets(line, sizeof(line), file) != NULL) {
-        const char *line_data = strstr(line, "] "); // this skips the timestamp and pid at the beginning
+        char *line_data = strstr(line, "] "); // this skips the timestamp and pid at the beginning
         VERIFY_NOT_NULL(line_data); // malformed log line
         line_data += 2;
 
         char *line_end = strstr(line_data, " object at "); // this skips checking the pointer hex
         if (line_end)
             snprintf(line_end, sizeof(line) - (line_end - line), " object>\n");
+
+	if (strncmp(line_data, "handle @ /", sizeof("handle @ /") - 1) == 0) {
+            char *start = line_data + sizeof("handle @ ") - 1;
+
+            // normalize path to logging/__init__.py
+            char *logging = strstr(start, "logging/");
+            if (logging != NULL) {
+                memmove(start, logging, strlen(logging) + 1);
+            }
+
+            // remove line number
+            char *colon = strchr(start, ':');
+            if (colon != NULL) {
+                size_t len = strspn(colon + 1, "0123456789");
+                if (len != 0)
+                    memmove(colon, colon + len + 1, strlen(colon + len + 1) + 1);
+            }
+        } else if (strncmp(line_data, "LogHandler.emit was called ", 27) == 0) {
+            // LogHandler.emit argument details vary based on python version
+            line_data[26] = '\n';
+            line_data[27] = '\0';
+        }
 
         VERIFY_TRUE(strlcat(stored_str, line_data, sizeof(stored_str)) < sizeof(stored_str));  // we have enough space in buffer
     }

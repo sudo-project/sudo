@@ -23,12 +23,14 @@
 
 #include <config.h>
 
+#include <sys/wait.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "sudoers.h"
+#include "log_client.h"
 
 #ifdef HAVE_BSM_AUDIT
 # include "bsm_audit.h"
@@ -40,7 +42,14 @@
 # include "solaris_audit.h"
 #endif
 
+#ifdef SUDOERS_LOG_CLIENT
+static struct client_closure *client_closure = NULL;
+static struct log_details audit_details;
+#endif
 char *audit_msg = NULL;
+
+/* sudoers_audit is declared at the end of this file. */
+extern sudo_dso_public struct audit_plugin sudoers_audit;
 
 static int
 audit_success(char *const argv[])
@@ -180,6 +189,128 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     debug_return_int(ret);
 }
 
+#ifdef SUDOERS_LOG_CLIENT
+static void
+audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
+    char * const run_argv[], char * const run_envp[])
+{
+    char * const *cur;
+    debug_decl(audit_to_eventlog, SUDOERS_DEBUG_PLUGIN);
+
+    /* Fill in evlog from sudoers Defaults, run_argv and run_envp. */
+    sudoers_to_eventlog(evlog, run_argv, run_envp);
+
+    /* Update iolog and execution environment from command_info[]. */
+    if (command_info != NULL) {
+	for (cur = command_info; *cur != NULL; cur++) {
+	    switch (**cur) {
+	    case 'c':
+		if (strncmp(*cur, "command=", sizeof("command=") - 1) == 0) {
+		    evlog->command = *cur + sizeof("command=") - 1;
+		    continue;
+		}
+		if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
+		    evlog->runchroot = *cur + sizeof("chroot=") - 1;
+		    continue;
+		}
+		break;
+	    case 'i':
+		if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
+		    evlog->iolog_path = *cur + sizeof("iolog_path=") - 1;
+		    evlog->iolog_file = strrchr(evlog->iolog_path, '/');
+		    if (evlog->iolog_file != NULL)
+			evlog->iolog_file++;
+		    continue;
+		}
+		break;
+	    case 'r':
+		if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
+		    evlog->runcwd = *cur + sizeof("runcwd=") - 1;
+		    continue;
+		}
+		break;
+	    }
+	}
+    }
+
+    debug_return;
+}
+
+static bool
+log_server_accept(char * const command_info[], char * const run_argv[],
+    char * const run_envp[])
+{
+    struct eventlog *evlog;
+    struct timespec now;
+    bool ret = false;
+    debug_decl(log_server_accept, SUDOERS_DEBUG_PLUGIN);
+
+    /* Only send accept event to log server if I/O log plugin did not. */
+    if (SLIST_EMPTY(&def_log_servers) || def_log_input || def_log_output)
+	debug_return_bool(true);
+
+    if (sudo_gettime_real(&now) == -1) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	goto done;
+    }
+    if ((evlog = malloc(sizeof(*evlog))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+
+    audit_to_eventlog(evlog, command_info, run_argv, run_envp);
+    if (!init_log_details(&audit_details, evlog))
+	goto done;
+
+    /* Open connection to log server, send hello and accept messages. */
+    client_closure = log_server_open(&audit_details, &now, false,
+	SEND_ACCEPT, NULL, sudoers_audit.event_alloc);
+    if (client_closure != NULL)
+	ret = true;
+done:
+    debug_return_bool(ret);
+}
+
+static void
+log_server_exit(int status_type, int status)
+{
+    debug_decl(log_server_exit, SUDOERS_DEBUG_PLUGIN);
+
+    if (client_closure != NULL) {
+	int exit_status = 0, error = 0;
+
+	if (status_type == SUDO_PLUGIN_WAIT_STATUS) {
+	    if (WIFEXITED(status))
+		exit_status = WEXITSTATUS(status);
+	    else
+		exit_status = WTERMSIG(status) | 128;
+	} else {
+	    /* Must be errno. */
+	    error = status;
+	}
+	log_server_close(client_closure, exit_status, error);
+	client_closure = NULL;
+	free(audit_details.evlog);
+	audit_details.evlog = NULL;
+    }
+
+    debug_return;
+}
+#else
+static bool
+log_server_accept(char * const command_info[], char * const run_argv[],
+    char * const run_envp[])
+{
+    return true;
+}
+
+static void
+log_server_exit(int status_type, int status)
+{
+    return;
+}
+#endif /* SUDOERS_LOG_CLIENT */
+
 static int
 sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
@@ -192,11 +323,17 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (plugin_type != SUDO_FRONT_END)
 	debug_return_int(true);
 
-    if (def_log_allowed) {
-	if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
-	    ret = false;
+    if (!def_log_allowed)
+	debug_return_int(true);
 
-	if (!log_allowed(VALIDATE_SUCCESS) && !def_ignore_logfile_errors)
+    if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
+	ret = false;
+
+    if (!log_allowed() && !def_ignore_logfile_errors)
+	ret = false;
+
+    if (!log_server_accept(command_info, run_argv, run_envp)) {
+	if (!def_ignore_logfile_errors)
 	    ret = false;
     }
 
@@ -207,8 +344,8 @@ static int
 sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
     const char *message, char * const command_info[], const char **errstr)
 {
+    struct eventlog evlog;
     int ret = true;
-    char *logline;
     debug_decl(sudoers_audit_reject, SUDOERS_DEBUG_PLUGIN);
 
     /* Skip reject events that sudoers generated itself. */
@@ -223,27 +360,13 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
 	    ret = false;
     }
 
-    logline = new_logline(message, NULL);
-    if (logline == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    audit_to_eventlog(&evlog, command_info, NewArgv, env_get());
+    if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
-	goto done;
-    }
-    if (def_syslog) {
-	if (!do_syslog(def_syslog_badpri, logline)) {
-	    if (!def_ignore_logfile_errors)
-		ret = false;
-	}
-    }
-    if (def_logfile) {
-	if (!do_logfile(logline)) {
-	    if (!def_ignore_logfile_errors)
-		ret = false;
-	}
-    }
-    free(logline);
 
-done:
+    if (!log_server_reject(&evlog, message, sudoers_audit.event_alloc))
+	ret = false;
+
     debug_return_int(ret);
 }
 
@@ -251,6 +374,8 @@ static int
 sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *message, char * const command_info[], const char **errstr)
 {
+    struct eventlog evlog;
+    struct timespec now;
     int ret = true;
     debug_decl(sudoers_audit_error, SUDOERS_DEBUG_PLUGIN);
 
@@ -262,20 +387,27 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 	if (!def_ignore_audit_errors)
 	    ret = false;
     }
-    if (def_syslog) {
-	if (!do_syslog(def_syslog_badpri, message)) {
-	    if (!def_ignore_logfile_errors)
-		ret = false;
-	}
-    }
-    if (def_logfile) {
-	if (!do_logfile(message)) {
-	    if (!def_ignore_logfile_errors)
-		ret = false;
-	}
+
+    if (sudo_gettime_real(&now)) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	debug_return_bool(false);
     }
 
+    audit_to_eventlog(&evlog, command_info, NewArgv, env_get());
+    if (!eventlog_alert(&evlog, 0, &now, message, NULL))
+	ret = false;
+
+    if (!log_server_alert(&evlog, &now, message, NULL,
+	    sudoers_audit.event_alloc))
+	ret = false;
+
     debug_return_int(ret);
+}
+
+void
+sudoers_audit_close(int status_type, int status)
+{
+    log_server_exit(status_type, status);
 }
 
 static int
@@ -293,11 +425,12 @@ sudo_dso_public struct audit_plugin sudoers_audit = {
     SUDO_AUDIT_PLUGIN,
     SUDO_API_VERSION,
     sudoers_audit_open,
-    NULL, /* audit_close */
+    sudoers_audit_close,
     sudoers_audit_accept,
     sudoers_audit_reject,
     sudoers_audit_error,
     sudoers_audit_version,
     NULL, /* register_hooks */
-    NULL /* deregister_hooks */
+    NULL, /* deregister_hooks */
+    NULL /* event_alloc() filled in by sudo */
 };

@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "May 8, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "November 24, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -128,11 +128,16 @@ lines may be specified to listen on more than one port or interface.
 pid_file = path
 The path to the file containing the process ID of the running
 \fBsudo_logsrvd\fR.
-This file is not created when
+If set to an empty value, or if
 \fBsudo_logsrvd\fR
 is run with the
 \fB\-n\fR
-option.
+option, no
+\fIpid_file\fR
+will be created.
+If
+\fIpid_file\fR
+refers to a symbolic link, it will be ignored.
 The default value is
 \fI@rundir@/sudo_logsrvd.pid\fR.
 .TP 10n

@@ -640,7 +640,7 @@ matches_env_list(const char *var, struct list_members *list, bool *full_match)
 }
 
 /*
- * Check the env_delete blacklist.
+ * Check the env_delete blocklist.
  * Returns true if the variable was found, else false.
  */
 static bool
@@ -654,15 +654,15 @@ matches_env_delete(const char *var)
 }
 
 /*
- * Sanity-check the TZ environment variable.
+ * Verify the TZ environment variable is safe.
  * On many systems it is possible to set this to a pathname.
  */
 static bool
-tz_is_sane(const char *tzval)
+tz_is_safe(const char *tzval)
 {
     const char *cp;
     char lastch;
-    debug_decl(tz_is_sane, SUDOERS_DEBUG_ENV);
+    debug_decl(tz_is_safe, SUDOERS_DEBUG_ENV);
 
     /* tzcode treats a value beginning with a ':' as a path. */
     if (tzval[0] == ':')
@@ -716,7 +716,7 @@ matches_env_check(const char *var, bool *full_match)
     if (matches_env_list(var, &def_env_check, full_match)) {
 	if (strncmp(var, "TZ=", 3) == 0) {
 	    /* Special case for TZ */
-	    keepit = tz_is_sane(var + 3);
+	    keepit = tz_is_safe(var + 3);
 	} else {
 	    const char *val = strchr(var, '=');
 	    if (val != NULL)
@@ -860,17 +860,19 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 }
 
 #define CHECK_PUTENV(a, b, c)	do {					       \
-    if (sudo_putenv((a), (b), (c)) == -1)				       \
+    if (sudo_putenv((a), (b), (c)) == -1) {				       \
 	goto bad;							       \
+    }									       \
 } while (0)
 
 #define CHECK_SETENV2(a, b, c, d)	do {				       \
-    if (sudo_setenv2((a), (b), (c), (d)) == -1)				       \
+    if (sudo_setenv2((a), (b), (c), (d)) == -1) {			       \
 	goto bad;							       \
+    }									       \
 } while (0)
 
 /*
- * Build a new environment and ether clear potentially dangerous
+ * Build a new environment and either clear potentially dangerous
  * variables from the old one or start with a clean slate.
  * Also adds sudo-specific variables (SUDO_*).
  * Returns true on success or false on failure.
@@ -1327,9 +1329,9 @@ static struct sudoers_env_file env_file_system = {
 
 void
 register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *),
-    char * (*ef_next)(void *, int *), bool system)
+    char * (*ef_next)(void *, int *), bool sys)
 {
-    struct sudoers_env_file *ef = system ? &env_file_system : &env_file_sudoers;
+    struct sudoers_env_file *ef = sys ? &env_file_system : &env_file_sudoers;
 
     ef->open = ef_open;
     ef->close = ef_close;

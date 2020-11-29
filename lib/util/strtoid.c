@@ -96,7 +96,7 @@ sudo_strtoidx_v1(const char *p, const char *sep, char **endp, const char **errst
     debug_return_id_t(ret);
 }
 
-/* Backwards compatibility */
+/* Backward compatibility */
 id_t
 sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstrp)
 {

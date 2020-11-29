@@ -14,7 +14,7 @@
  *
  * The last four issues could probably be easily remedied, but haven't been
  * needed to date.  Adding IPv6 support isn't worth it; systems with IPv6
- * support should already support getaddrinfo natively.
+ * support should already have getaddrinfo.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
  * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
@@ -89,7 +89,7 @@ int test_getaddrinfo(const char *, const char *, const struct addrinfo *,
 #endif
 
 /*
- * If the native platform doesn't support AI_NUMERICSERV or AI_NUMERICHOST,
+ * If the platform doesn't support AI_NUMERICSERV or AI_NUMERICHOST,
  * pick some other values for them.
  */
 #ifdef TESTING

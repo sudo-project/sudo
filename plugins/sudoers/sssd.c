@@ -43,7 +43,6 @@
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
 #include "sudo_dso.h"
-#include <gram.h>
 
 /* SSSD <--> SUDO interface - do not change */
 struct sss_sudo_attr {
@@ -240,7 +239,7 @@ static struct privilege *
 sss_rule_to_priv(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
     int *rc_out)
 {
-    char **cmnds, **runasusers = NULL, **runasgroups = NULL;
+    char **cmnds = NULL, **runasusers = NULL, **runasgroups = NULL;
     char **opts = NULL, **notbefore = NULL, **notafter = NULL;
     char **hosts = NULL, **cn_array = NULL, *cn = NULL;
     struct privilege *priv = NULL;
@@ -371,9 +370,8 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
     TAILQ_INSERT_TAIL(&handle->parse_tree.userspecs, us, entries);
 
     /* We only include rules where the user matches. */
-    if ((m = calloc(1, sizeof(*m))) == NULL)
+    if ((m = new_member_all(NULL)) == NULL)
 	goto oom;
-    m->type = ALL;
     TAILQ_INSERT_TAIL(&us->users, m, entries);
 
     /*

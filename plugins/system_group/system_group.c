@@ -47,8 +47,6 @@
  * This can be used on systems where lookups by group ID are problematic.
  */
 
-static sudo_printf_t sudo_log;
-
 typedef struct group * (*sysgroup_getgrnam_t)(const char *);
 typedef struct group * (*sysgroup_getgrgid_t)(gid_t);
 typedef void (*sysgroup_gr_delref_t)(struct group *);
@@ -59,14 +57,12 @@ static sysgroup_gr_delref_t sysgroup_gr_delref;
 static bool need_setent;
 
 static int
-sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
+sysgroup_init(int version, sudo_printf_t plugin_printf, char *const argv[])
 {
     void *handle;
 
-    sudo_log = sudo_printf;
-
     if (SUDO_API_VERSION_GET_MAJOR(version) != GROUP_API_VERSION_MAJOR) {
-	sudo_log(SUDO_CONV_ERROR_MSG,
+	plugin_printf(SUDO_CONV_ERROR_MSG,
 	    "sysgroup_group: incompatible major version %d, expected %d\n",
 	    SUDO_API_VERSION_GET_MAJOR(version),
 	    GROUP_API_VERSION_MAJOR);

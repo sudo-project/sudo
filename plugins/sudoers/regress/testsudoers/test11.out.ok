@@ -1,6 +1,6 @@
 Testing @include with garbage after the path name
 
-sudoers:1: syntax error
+sudoers:1:24: syntax error
 @include sudoers.local womp womp
                        ^~~~
 testsudoers: unable to stat sudoers.local: No such file or directory
@@ -11,7 +11,7 @@ Command unmatched
 
 Testing #include with garbage after the path name
 
-sudoers:1: syntax error
+sudoers:1:24: syntax error
 #include sudoers.local womp womp
                        ^~~~
 testsudoers: unable to stat sudoers.local: No such file or directory

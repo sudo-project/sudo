@@ -466,6 +466,9 @@
 /* Define to 1 if you use LDAP for sudoers. */
 #undef HAVE_LDAP
 
+/* Define to 1 if you have the <ldapssl.h> header file. */
+#undef HAVE_LDAPSSL_H
+
 /* Define to 1 if you have the `ldapssl_init' function. */
 #undef HAVE_LDAPSSL_INIT
 
@@ -764,7 +767,8 @@
 /* Define to 1 if you have the `SSL_CTX_get0_certificate' function. */
 #undef HAVE_SSL_CTX_GET0_CERTIFICATE
 
-/* Define to 1 if you have the `SSL_CTX_set_ciphersuites' function. */
+/* Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.
+   */
 #undef HAVE_SSL_CTX_SET_CIPHERSUITES
 
 /* Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or
@@ -1186,9 +1190,8 @@
 /* Define to 1 if the code in interfaces.c does not compile for you. */
 #undef STUB_LOAD_INTERFACES
 
-/* Define to 1 to compile support for sudo_logsrvd in the sudoers I/O log
-   plugin. */
-#undef SUDOERS_IOLOG_CLIENT
+/* Define to 1 to compile support for sudo_logsrvd in the sudoers plugin. */
+#undef SUDOERS_LOG_CLIENT
 
 /* An instance string to append to the username (separated by a slash) for
    Kerberos V authentication. */

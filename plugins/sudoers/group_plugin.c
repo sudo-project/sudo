@@ -73,7 +73,7 @@ group_plugin_load(char *plugin_info)
 	goto done;
     }
 
-    /* Sanity check plugin path. */
+    /* Check owner and mode of plugin path. */
     if (stat(path, &sb) != 0) {
 	sudo_warn("%s", path);
 	goto done;

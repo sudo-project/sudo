@@ -1,3 +1,62 @@
+What's new in Sudo 1.9.4
+
+ * The sudoers parser will now detect when an upper-case reserved
+   word is used when declaring an alias.  Now instead of "syntax
+   error, unexpected CHROOT, expecting ALIAS" the message will be
+   "syntax error, reserved word CHROOT used as an alias name".
+   Bug #941.
+
+ * Better handling of sudoers files without a final newline.
+   The parser now adds a newline at end-of-file automatically which
+   removes the need for special cases in the parser.
+
+ * Fixed a regression introduced in sudo 1.9.1 in the sssd back-end
+   where an uninitialized pointer could be freed on an error path.
+   GitHub issue #67.
+
+ * The core logging code is now shared between sudo_logsrvd and
+   the sudoers plugin.
+
+ * JSON log entries sent to syslog now use "minimal" JSON which
+   skips all non-essention whitespace.
+
+ * The sudoers plugin can now produce JSON-formatted logs.  The
+   "log_format" sudoers option can be used to select sudo or json
+   format logs.  The default is sudo format logs.
+
+ * The sudoers plugin and visudo now display the column number in
+   syntax error messages in addition to the line number.  Bug #841.
+
+ * If I/O logging is not enabled but "log_servers" is set, the
+   sudoers plugin will now log accept events to sudo_logsrvd.
+   Previously, the accept event was only sent when I/O logging was
+   enabled.  The sudoers plugin now sends reject and alert events too.
+
+ * The sudo logsrv protocol has been extended to allow an AlertMessage
+   to contain an optional array of InfoMessage, as AcceptMessage
+   and RejectMessage already do.
+
+ * Fixed a bug in sudo_logsrvd where receipt of SIGHUP would result
+   in duplicate entries in the debug log when debugging was enabled.
+
+ * The visudo utility now supports EDITOR environment variables
+   that use single or double quotes in the command arguments.
+   Bug #942.
+
+ * The PAM session modules now run when sudo is set-user-ID root,
+   which allows a module to determine the original user-ID.
+   Bug #944.
+
+ * Fixed a regression introduced in sudo 1.8.24 in the LDAP back-end
+   where sudoNotBefore and sudoNotAfter were applied even when the
+   SUDOERS_TIMED setting was not present in ldap.conf.  Bug #945.
+
+ * Sudo packages for macOS 11 now contain universal binaries that
+   support both Intel and Apple Silicon CPUs.
+
+ * For sudo_logsrvd, an empty value for the "pid_file" setting in
+   sudo_logsrvd.conf will now disable the process ID file.
+
 What's new in Sudo 1.9.3p1
 
  * Fixed a regression introduced in sudo 1.9.3 where the configure
@@ -23,9 +82,9 @@ What's new in Sudo 1.9.3
    doesn't support symbol hiding.
 
  * Sudo now uses a linker script to hide symbols even when the
-   compiler has native symbol hiding support.  This should make it
-   easier to detect omissions in the symbol exports file, regardless
-   of the platform.
+   compiler supports symbol hiding.  This should make it easier to
+   detect omissions in the symbol exports file, regardless of the
+   platform.
 
  * Fixed the libssl dependency in Debian packages for older releases
    that use libssl1.0.0.
@@ -67,14 +126,19 @@ What's new in Sudo 1.9.3
 
  * It is now possible to set the working directory or change the
    root directory on a per-command basis using the CWD and CHROOT
-   options.  There are also new Defaults settings, runchroot and
-   runcwd, that can be used to set the working directory or root
-   directory on a more global basis.
+   options.  CWD and CHROOT are now reserved words in sudoers--they
+   can no longer be used as alias names.  There are also new Defaults
+   settings, runchroot and runcwd, that can be used to set the
+   working directory or root directory on a more global basis.
 
  * New -D (--chdir) and -R (--chroot) command line options can be
    used to set the working directory or root directory if the sudoers
    file allows it.  This functionality is not enabled by default
    and must be explicitly enabled in the sudoers file.
+
+ * Fixed a regression introduced in sudo 1.9.1 where the sudoers_audit
+   symbol could not be resolved when sudo is configured with the
+   --enable-static-sudoers option.  Bug #936 and GitHub issue #61.
 
 What's new in Sudo 1.9.2
 
@@ -1694,7 +1758,7 @@ What's new in Sudo 1.8.11
 
  * Fixed a crash in the system_group plugin.  Bug #653.
 
- * Fixed sudoedit on platforms without a native version of the
+ * Fixed sudoedit on platforms without a system version of the
    getprogname() function.  Bug #654.
 
  * Fixed compilation problems with some pre-C99 compilers.
@@ -2020,7 +2084,7 @@ What's new in Sudo 1.8.7?
  * There is now a standalone sudo.conf manual page.
 
  * Sudo now stores its libexec files in a "sudo" sub-directory instead
-   of in libexec itself. For backwards compatibility, if the plugin
+   of in libexec itself. For backward compatibility, if the plugin
    is not found in the default plugin directory, sudo will check
    the parent directory if the default directory ends in "/sudo".
 
@@ -2483,7 +2547,7 @@ What's new in Sudo 1.8.3?
  * Added --enable-werror configure option for gcc's -Werror flag.
 
  * Visudo no longer assumes all editors support the +linenumber
-   command line argument.  It now uses a whitelist of editors known
+   command line argument.  It now uses a allowlist of editors known
    to support the option.
 
  * Fixed matching of network addresses when a netmask is specified

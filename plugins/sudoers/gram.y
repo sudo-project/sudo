@@ -43,7 +43,7 @@
 #endif
 
 /* If we last saw a newline the entry is on the preceding line. */
-#define this_lineno	(last_token == '\n' ? sudolineno - 1 : sudolineno)
+#define this_lineno	(sudoerschar == '\n' ? sudolineno - 1 : sudolineno)
 
 /*
  * Globals
@@ -53,6 +53,8 @@ bool sudoers_strict = false;
 bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
+
+static int alias_line, alias_column;
 
 struct sudoers_parse_tree parsed_policy = {
     TAILQ_HEAD_INITIALIZER(parsed_policy.userspecs),
@@ -89,7 +91,6 @@ static struct command_digest *new_digest(int, char *);
 }
 
 %start file				/* special start symbol */
-%token		 END 0			/* end of file from lexer */
 %token <command> COMMAND		/* absolute pathname w/ optional args */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
 %token <string>	 DEFVAR			/* a Defaults variable name */
@@ -107,8 +108,8 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 DEFAULTS_CMND		/* Command-specific defaults entry */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
-%token <tok> 	 NOEXEC			/* preload dummy execve() for cmnd */
-%token <tok> 	 EXEC			/* don't preload dummy execve() */
+%token <tok> 	 NOEXEC			/* preload fake execve() for cmnd */
+%token <tok> 	 EXEC			/* don't preload fake execve() */
 %token <tok>	 SETENV			/* user may set environment for cmnd */
 %token <tok>	 NOSETENV		/* user may not set environment */
 %token <tok>	 LOG_INPUT		/* log user's cmnd input */
@@ -180,6 +181,7 @@ static struct command_digest *new_digest(int, char *);
 %type <string>	  includedir
 %type <digest>	  digestspec
 %type <digest>	  digestlist
+%type <string>	  reserved_word
 
 %%
 
@@ -196,7 +198,7 @@ line		:	entry
 entry		:	'\n' {
 			    ; /* blank line */
 			}
-                |       error eol {
+                |       error '\n' {
 			    yyerrok;
 			}
 		|	include {
@@ -213,59 +215,59 @@ entry		:	'\n' {
 			    }
 			    free($1);
 			}
-		|	userlist privileges eol {
+		|	userlist privileges '\n' {
 			    if (!add_userspec($1, $2)) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-		|	USERALIAS useraliases eol {
+		|	USERALIAS useraliases '\n' {
 			    ;
 			}
-		|	HOSTALIAS hostaliases eol {
+		|	HOSTALIAS hostaliases '\n' {
 			    ;
 			}
-		|	CMNDALIAS cmndaliases eol {
+		|	CMNDALIAS cmndaliases '\n' {
 			    ;
 			}
-		|	RUNASALIAS runasaliases eol {
+		|	RUNASALIAS runasaliases '\n' {
 			    ;
 			}
-		|	DEFAULTS defaults_list eol {
+		|	DEFAULTS defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS, NULL, $2))
 				YYERROR;
 			}
-		|	DEFAULTS_USER userlist defaults_list eol {
+		|	DEFAULTS_USER userlist defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS_USER, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_RUNAS userlist defaults_list eol {
+		|	DEFAULTS_RUNAS userlist defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS_RUNAS, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_HOST hostlist defaults_list eol {
+		|	DEFAULTS_HOST hostlist defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS_HOST, $2, $3))
 				YYERROR;
 			}
-		|	DEFAULTS_CMND cmndlist defaults_list eol {
+		|	DEFAULTS_CMND cmndlist defaults_list '\n' {
 			    if (!add_defaults(DEFAULTS_CMND, $2, $3))
 				YYERROR;
 			}
 		;
 
-include		:	INCLUDE WORD eol {
+include		:	INCLUDE WORD '\n' {
 			    $$ = $2;
 			}
-		|	INCLUDE WORD error eol {
+		|	INCLUDE WORD error '\n' {
 			    yyerrok;
 			    $$ = $2;
 			}
 		;
 
-includedir	:	INCLUDEDIR WORD eol {
+includedir	:	INCLUDEDIR WORD '\n' {
 			    $$ = $2;
 			}
-		|	INCLUDEDIR WORD error eol {
+		|	INCLUDEDIR WORD error '\n' {
 			    yyerrok;
 			    $$ = $2;
 			}
@@ -697,6 +699,24 @@ runaslist	:	/* empty */ {
 			}
 		;
 
+reserved_word	:	ALL		{ $$ = "ALL"; }
+		|	CHROOT		{ $$ = "CHROOT"; }
+		|	CWD		{ $$ = "CWD"; }
+		|	CMND_TIMEOUT	{ $$ = "CMND_TIMEOUT"; }
+		|	NOTBEFORE	{ $$ = "NOTBEFORE"; }
+		|	NOTAFTER	{ $$ = "NOTAFTER"; }
+		|	ROLE		{ $$ = "ROLE"; }
+		|	TYPE		{ $$ = "TYPE"; }
+		|	PRIVS		{ $$ = "PRIVS"; }
+		|	LIMITPRIVS	{ $$ = "LIMITPRIVS"; }
+		;
+
+reserved_alias	:	reserved_word {
+			    sudoerserrorf(U_("syntax error, reserved word %s used as an alias name"), $1);
+			    YYERROR;
+			}
+		;
+
 options		:	/* empty */ {
 			    init_options(&$$);
 			}
@@ -842,15 +862,19 @@ hostaliases	:	hostalias
 		|	hostaliases ':' hostalias
 		;
 
-hostalias	:	ALIAS '=' hostlist {
+hostalias	:	ALIAS {
+			    alias_line = this_lineno;
+			    alias_column = sudolinebuf.toke_start + 1;
+			} '=' hostlist {
 			    const char *s;
 			    s = alias_add(&parsed_policy, $1, HOSTALIAS,
-				sudoers, this_lineno, $3);
+				sudoers, alias_line, alias_column, $4);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' hostlist
 		;
 
 hostlist	:	ophost
@@ -864,15 +888,19 @@ cmndaliases	:	cmndalias
 		|	cmndaliases ':' cmndalias
 		;
 
-cmndalias	:	ALIAS '=' cmndlist {
+cmndalias	:	ALIAS {
+			    alias_line = this_lineno;
+			    alias_column = sudolinebuf.toke_start + 1;
+			} '=' cmndlist {
 			    const char *s;
 			    s = alias_add(&parsed_policy, $1, CMNDALIAS,
-				sudoers, this_lineno, $3);
+				sudoers, alias_line, alias_column, $4);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' cmndlist
 		;
 
 cmndlist	:	digcmnd
@@ -886,30 +914,38 @@ runasaliases	:	runasalias
 		|	runasaliases ':' runasalias
 		;
 
-runasalias	:	ALIAS '=' userlist {
+runasalias	:	ALIAS {
+			    alias_line = this_lineno;
+			    alias_column = sudolinebuf.toke_start + 1;
+			} '=' userlist {
 			    const char *s;
 			    s = alias_add(&parsed_policy, $1, RUNASALIAS,
-				sudoers, this_lineno, $3);
+				sudoers, alias_line, alias_column, $4);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' userlist
 		;
 
 useraliases	:	useralias
 		|	useraliases ':' useralias
 		;
 
-useralias	:	ALIAS '=' userlist {
+useralias	:	ALIAS {
+			    alias_line = this_lineno;
+			    alias_column = sudolinebuf.toke_start + 1;
+			} '=' userlist {
 			    const char *s;
 			    s = alias_add(&parsed_policy, $1, USERALIAS,
-				sudoers, this_lineno, $3);
+				sudoers, alias_line, alias_column, $4);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
 			    }
 			}
+		|	reserved_alias '=' userlist
 		;
 
 userlist	:	opuser
@@ -1005,23 +1041,15 @@ group		:	ALIAS {
 			    }
 			}
 		;
-
-eol		:	'\n' {
-			    ;
-			}
-		|	END {
-			    ; /* EOF */
-			}
-		;
-
 %%
+/* Like yyerror() but takes a printf-style format string. */
 void
-sudoerserror(const char *s)
+sudoerserrorf(const char *fmt, ...)
 {
-    debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER);
+    debug_decl(sudoerserrorf, SUDOERS_DEBUG_PARSER);
 
     /* The lexer displays more detailed messages for ERROR tokens. */
-    if (last_token == ERROR)
+    if (sudoerschar == ERROR)
 	debug_return;
 
     /* Save the line the first error occurred on. */
@@ -1030,16 +1058,28 @@ sudoerserror(const char *s)
 	rcstr_delref(errorfile);
 	errorfile = rcstr_addref(sudoers);
     }
-    if (sudoers_warnings && s != NULL) {
+    if (sudoers_warnings && fmt != NULL) {
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
+	    char *s, *tofree = NULL;
 	    int oldlocale;
+	    va_list ap;
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d: %s\n"), sudoers,
-		this_lineno, _(s));
+	    va_start(ap, fmt);
+	    if (strcmp(fmt, "%s") == 0) {
+		/* Optimize common case, a single string. */
+		s = _(va_arg(ap, char *));
+	    } else {
+		if (vasprintf(&s, fmt, ap) == -1)
+		    s = _("syntax error");
+	    }
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
+		this_lineno, (int)sudolinebuf.toke_start + 1, s);
+	    free(tofree);
+	    va_end(ap);
 	    sudoers_setlocale(oldlocale, NULL);
 
 	    /* Display the offending line and token if possible. */
@@ -1066,6 +1106,15 @@ sudoerserror(const char *s)
     debug_return;
 }
 
+void
+sudoerserror(const char *s)
+{
+    if (s == NULL)
+	sudoerserrorf(NULL);
+    else
+	sudoerserrorf("%s", s);
+}
+
 static struct defaults *
 new_default(char *var, char *val, short op)
 {
@@ -1083,7 +1132,8 @@ new_default(char *var, char *val, short op)
     /* d->type = 0; */
     d->op = op;
     /* d->binding = NULL */
-    d->lineno = this_lineno;
+    d->line = this_lineno;
+    d->column = sudolinebuf.toke_start + 1;
     d->file = rcstr_addref(sudoers);
     HLTQ_INIT(d, entries);
 
@@ -1107,6 +1157,16 @@ new_member(char *name, int type)
     HLTQ_INIT(m, entries);
 
     debug_return_ptr(m);
+}
+
+/*
+ * Like new_member() but uses ALL for the type.
+ * Used by the ldap and sssd back-ends, which don't include gram.h.
+ */
+struct member *
+new_member_all(char *name)
+{
+    return new_member(name, ALL);
 }
 
 static struct sudo_command *
@@ -1210,7 +1270,8 @@ add_userspec(struct member *members, struct privilege *privs)
 	    "unable to allocate memory");
 	debug_return_bool(false);
     }
-    u->lineno = this_lineno;
+    u->line = this_lineno;
+    u->column = sudolinebuf.toke_start + 1;
     u->file = rcstr_addref(sudoers);
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);

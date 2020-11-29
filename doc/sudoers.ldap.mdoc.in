@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 20, 2019
+.Dd October 29, 2020
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -670,6 +670,14 @@ or the user's
 .Pa .ldaprc
 files are not used.
 .Pp
+.Nm sudo
+supports a variety of LDAP library implementations, including
+OpenLDAP, Netscape-derived (also used by Solaris and HP-UX), and
+IBM LDAP (aka Tivoli).
+Some options are specific to certain LDAP implementations or have
+implementation-specific behavior.
+These differences are noted below where applicable.
+.Pp
 Only those options explicitly listed in
 .Pa @ldap_conf@
 as being supported by
@@ -743,10 +751,11 @@ The
 .Sy HOST
 parameter is deprecated in favor of the
 .Sy URI
-specification and is included for backwards compatibility only.
+specification and is included for backward compatibility only.
 .It Sy KRB5_CCNAME Ar file name
 The path to the Kerberos 5 credential cache to use when authenticating
 with the remote server.
+.Pp
 This option is only relevant when using SASL authentication (see below).
 .It Sy LDAP_VERSION Ar number
 The version of the LDAP protocol to use when connecting to the server.
@@ -800,7 +809,8 @@ The default search filter is:
 If
 .Ar ldap_filter
 is omitted, no search filter will be used.
-This option is only when querying netgroups directly via LDAP.
+.Pp
+This option is only used when querying netgroups directly via LDAP.
 .It Sy NETWORK_TIMEOUT Ar seconds
 An alias for
 .Sy BIND_TIMELIMIT
@@ -821,7 +831,7 @@ The
 .Sy PORT
 parameter is deprecated in favor of the
 .Sy URI
-specification and is included for backwards compatibility only.
+specification and is included for backward compatibility only.
 .It Sy ROOTBINDDN Ar DN
 The
 .Sy ROOTBINDDN
@@ -852,6 +862,7 @@ The SASL user name to use when connecting to the LDAP server.
 By default,
 .Nm sudo
 will use an anonymous connection.
+.Pp
 This option is only relevant when using SASL authentication.
 .It Sy SASL_MECH Ar mechanisms
 A white space-delimited list of SASL authentication mechanisms to use.
@@ -865,6 +876,7 @@ SASL security properties or
 .Em none
 for no properties.
 See the SASL programmer's manual for details.
+.Pp
 This option is only relevant when using SASL authentication.
 .It Sy SSL Ar on/true/yes/off/false/no
 If the
@@ -887,7 +899,7 @@ This has the advantage of not requiring a dedicated port for encrypted
 communications.
 This parameter is only supported by LDAP servers that honor the
 .Em start_tls
-extension, such as the OpenLDAP and Tivoli Directory servers.
+extension, such as the OpenLDAP and IBM Tivoli Directory servers.
 .It Sy SUDOERS_BASE Ar base
 The base DN to use when performing
 .Nm sudo
@@ -967,6 +979,7 @@ for OpenLDAP compatibility.
 The path to a certificate authority bundle which contains the certificates
 for all the Certificate Authorities the client knows to be valid, e.g.,
 .Pa /etc/ssl/ca-bundle.pem .
+.Pp
 This option is only supported by the OpenLDAP libraries.
 Netscape-derived LDAP libraries use the same certificate
 database for CA and client certificates (see
@@ -981,6 +994,7 @@ The directory specified by
 .Sy TLS_CACERTDIR
 is checked after
 .Sy TLS_CACERTFILE .
+.Pp
 This option is only supported by the OpenLDAP libraries.
 .It Sy TLS_CERT Ar file name
 The path to a file containing the client certificate which can
@@ -991,14 +1005,14 @@ The certificate type depends on the LDAP libraries used.
 .Li tls_cert /etc/ssl/client_cert.pem
 .It Netscape-derived:
 .Li tls_cert /var/ldap/cert7.db
-.It Tivoli Directory Server:
+.It IBM LDAP:
 Unused, the key database specified by
 .Sy TLS_KEY
 contains both keys and certificates.
+.El
 .Pp
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
-.El
 .It Sy TLS_CHECKPEER Ar on/true/yes/off/false/no
 If enabled,
 .Sy TLS_CHECKPEER
@@ -1014,7 +1028,8 @@ Note that disabling the check creates an opportunity for man-in-the-middle
 attacks since the server's identity will not be authenticated.
 If possible, the CA's certificate should be installed locally so it can
 be verified.
-This option is not supported by the Tivoli Directory Server LDAP libraries.
+.Pp
+This option is not supported by the IBM LDAP libraries.
 .It Sy TLS_KEY Ar file name
 The path to a file containing the private key which matches the
 certificate specified by
@@ -1026,24 +1041,26 @@ The key type depends on the LDAP libraries used.
 .Li tls_key /etc/ssl/client_key.pem
 .It Netscape-derived:
 .Li tls_key /var/ldap/key3.db
-.It Tivoli Directory Server:
+.It IBM LDAP:
 .Li tls_key /usr/ldap/ldapkey.kdb
 .El
-When using Tivoli LDAP libraries, this file may also contain
+.Pp
+When using IBM LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
 .It Sy TLS_CIPHERS Ar cipher list
 The
 .Sy TLS_CIPHERS
 parameter allows the administer to restrict which encryption algorithms
 may be used for TLS (SSL) connections.
-See the OpenLDAP or Tivoli Directory Server manual for a list of valid
+See the OpenLDAP or IBM Tivoli Directory Server manual for a list of valid
 ciphers.
+.Pp
 This option is not supported by Netscape-derived libraries.
 .It Sy TLS_KEYPW Ar secret
 The
 .Sy TLS_KEYPW
 contains the password used to decrypt the key database on clients
-using the Tivoli Directory Server LDAP library.
+using the IBM LDAP library.
 The
 .Ar secret
 may be a plain text password or a base64-encoded string with a
@@ -1084,13 +1101,14 @@ e.g.,
 .Li ldapkey.sth .
 The default
 .Li ldapkey.kdb
-that ships with Tivoli Directory Server is encrypted with the password
+that ships with the IBM Tivoli Directory Server is encrypted with the password
 .Li ssl_password .
 The
 .Em gsk8capicmd
 utility can be used to manage the key database and create a
 .Em stash file .
-This option is only supported by the Tivoli LDAP libraries.
+.Pp
+This option is only supported by the IBM LDAP libraries.
 .It Sy TLS_REQCERT Ar level
 The
 .Sy TLS_REQCERT
@@ -1132,6 +1150,7 @@ It is generally used in conjunction with
 .Em prngd
 or
 .Em egd .
+.Pp
 This option is only supported by the OpenLDAP libraries.
 .It Sy URI Ar ldap[s]://[hostname[:port]] ...
 Specifies a white space-delimited list of one or more URIs describing
@@ -1164,7 +1183,7 @@ Only systems using the OpenSSL libraries support the mixing of
 and
 .Li ldaps://
 URIs.
-Both the Netscape-derived and Tivoli LDAP libraries used on most commercial
+Both the Netscape-derived and IBM LDAP libraries used on most commercial
 versions of Unix are only capable of supporting one or the other.
 .It Sy USE_SASL Ar on/true/yes/off/false/no
 Enable
@@ -1407,7 +1426,7 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 #tls_cert /etc/certs/client_cert.pem
 #tls_key  /etc/certs/client_key.pem
 #
-# For SunONE or iPlanet LDAP, tls_cert and tls_key may specify either
+# For Netscape-derived LDAP, tls_cert and tls_key may specify either
 # a directory, in which case the files in the directory must have the
 # default names (e.g., cert8.db and key4.db), or the path to the cert
 # and key files themselves.  However, a bug in version 5.0 of the LDAP

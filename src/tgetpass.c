@@ -58,7 +58,7 @@ static char *getln(int, char *, size_t, bool, enum tgetpass_errval *);
 static char *sudo_askpass(const char *, const char *);
 
 static int
-suspend(int signo, struct sudo_conv_callback *callback)
+suspend(int sig, struct sudo_conv_callback *callback)
 {
     int ret = 0;
     debug_decl(suspend, SUDO_DEBUG_CONV);
@@ -72,12 +72,12 @@ suspend(int signo, struct sudo_conv_callback *callback)
     }
 
     if (callback != NULL && callback->on_suspend != NULL) {
-	if (callback->on_suspend(signo, callback->closure) == -1)
+	if (callback->on_suspend(sig, callback->closure) == -1)
 	    ret = -1;
     }
-    kill(getpid(), signo);
+    kill(getpid(), sig);
     if (callback != NULL && callback->on_resume != NULL) {
-	if (callback->on_resume(signo, callback->closure) == -1)
+	if (callback->on_resume(sig, callback->closure) == -1)
 	    ret = -1;
     }
     debug_return_int(ret);
@@ -379,7 +379,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
     if (left == 0) {
 	*errval = TGP_ERRVAL_READERROR;
 	errno = EINVAL;
-	debug_return_str(NULL);		/* sanity */
+	debug_return_str(NULL);
     }
 
     while (--left) {

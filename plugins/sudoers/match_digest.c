@@ -28,6 +28,7 @@
 
 #include <config.h>
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,13 +39,15 @@
 #include <gram.h>
 
 bool
-digest_matches(int fd, const char *file, const struct command_digest_list *digests)
+digest_matches(int fd, const char *path, const char *runchroot,
+    const struct command_digest_list *digests)
 {
     unsigned int digest_type = SUDO_DIGEST_INVALID;
     unsigned char *file_digest = NULL;
     unsigned char *sudoers_digest = NULL;
     struct command_digest *digest;
     size_t digest_len = (size_t)-1;
+    char pathbuf[PATH_MAX];
     bool matched = false;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
 
@@ -58,11 +61,21 @@ digest_matches(int fd, const char *file, const struct command_digest_list *diges
 	goto done;
     }
 
+    if (runchroot != NULL) {
+	const int len =
+	    snprintf(pathbuf, sizeof(pathbuf), "%s%s", runchroot, path);
+	if (len >= ssizeof(pathbuf)) {
+	    errno = ENAMETOOLONG;
+	    debug_return_bool(false);
+	}
+	path = pathbuf;
+    }
+
     TAILQ_FOREACH(digest, digests, entries) {
 	/* Compute file digest if needed. */
 	if (digest->digest_type != digest_type) {
 	    free(file_digest);
-	    file_digest = sudo_filedigest(fd, file, digest->digest_type,
+	    file_digest = sudo_filedigest(fd, path, digest->digest_type,
 		&digest_len);
 	    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
@@ -106,14 +119,14 @@ digest_matches(int fd, const char *file, const struct command_digest_list *diges
 
 	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 	    "%s digest mismatch for %s, expecting %s",
-	    digest_type_to_name(digest->digest_type), file, digest->digest_str);
+	    digest_type_to_name(digest->digest_type), path, digest->digest_str);
 	free(sudoers_digest);
 	sudoers_digest = NULL;
     }
     goto done;
 
 bad_format:
-    sudo_warnx(U_("digest for %s (%s) is not in %s form"), file,
+    sudo_warnx(U_("digest for %s (%s) is not in %s form"), path,
 	digest->digest_str, digest_type_to_name(digest->digest_type));
 done:
     free(sudoers_digest);

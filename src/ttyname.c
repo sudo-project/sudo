@@ -276,7 +276,7 @@ done:
 char *
 get_process_ttyname(char *name, size_t namelen)
 {
-    struct pst_status pstat;
+    struct pst_status pst;
     char *ret = NULL;
     int rc, serrno = errno;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
@@ -286,12 +286,12 @@ get_process_ttyname(char *name, size_t namelen)
      * EOVERFLOW is not a fatal error for the fields we use.
      * See the "EOVERFLOW Error" section of pstat_getvminfo(3).
      */
-    rc = pstat_getproc(&pstat, sizeof(pstat), 0, getpid());
+    rc = pstat_getproc(&pst, sizeof(pst), 0, getpid());
     if (rc != -1 || errno == EOVERFLOW) {
-	if (pstat.pst_term.psd_major != -1 && pstat.pst_term.psd_minor != -1) {
+	if (pst.pst_term.psd_major != -1 && pst.pst_term.psd_minor != -1) {
 	    errno = serrno;
-	    ret = sudo_ttyname_dev(makedev(pstat.pst_term.psd_major,
-		pstat.pst_term.psd_minor), name, namelen);
+	    ret = sudo_ttyname_dev(makedev(pst.pst_term.psd_major,
+		pst.pst_term.psd_minor), name, namelen);
 	    goto done;
 	}
     }

@@ -22,7 +22,7 @@ work on translations can contact the appropriate team.
 ===================
 
 Some packages are "localizable" when properly installed; the programs
-they contain can be made to speak your own native language.  Most such
+they contain can be made to speak your own local language.  Most such
 packages use GNU 'gettext'.  Other packages have their own ways to
 internationalization, predating GNU 'gettext'.
 

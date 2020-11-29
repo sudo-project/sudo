@@ -47,6 +47,7 @@
 #include "pathnames.h"
 #include "sudo_compat.h"
 #include "sudo_debug.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
@@ -98,8 +99,8 @@ static struct logsrvd_config {
 	char *iolog_file;
     } iolog;
     struct logsrvd_config_eventlog {
-	enum logsrvd_eventlog_type log_type;
-	enum logsrvd_eventlog_format log_format;
+	int log_type;
+	enum eventlog_format log_format;
     } eventlog;
     struct logsrvd_config_syslog {
 	unsigned int maxlen;
@@ -176,69 +177,6 @@ logsrvd_get_tls_runtime(void)
     return &logsrvd_config->server.tls_runtime;
 }
 #endif
-
-/* eventlog getters */
-enum logsrvd_eventlog_type
-logsrvd_conf_eventlog_type(void)
-{
-    return logsrvd_config->eventlog.log_type;
-}
-
-enum logsrvd_eventlog_format
-logsrvd_conf_eventlog_format(void)
-{
-    return logsrvd_config->eventlog.log_format;
-}
-
-/* syslog getters */
-unsigned int
-logsrvd_conf_syslog_maxlen(void)
-{
-    return logsrvd_config->syslog.maxlen;
-}
-
-int
-logsrvd_conf_syslog_facility(void)
-{
-    return logsrvd_config->syslog.facility;
-}
-
-int
-logsrvd_conf_syslog_acceptpri(void)
-{
-    return logsrvd_config->syslog.acceptpri;
-}
-
-int
-logsrvd_conf_syslog_rejectpri(void)
-{
-    return logsrvd_config->syslog.rejectpri;
-}
-
-int
-logsrvd_conf_syslog_alertpri(void)
-{
-    return logsrvd_config->syslog.alertpri;
-}
-
-/* logfile getters */
-const char *
-logsrvd_conf_logfile_path(void)
-{
-    return logsrvd_config->logfile.path;
-}
-
-FILE *
-logsrvd_conf_logfile_stream(void)
-{
-    return logsrvd_config->logfile.stream;
-}
-
-const char *
-logsrvd_conf_logfile_time_format(void)
-{
-    return logsrvd_config->logfile.time_format;
-}
 
 /* I/O log callbacks */
 static bool
@@ -466,14 +404,16 @@ cb_pid_file(struct logsrvd_config *config, const char *str)
     char *copy = NULL;
     debug_decl(cb_pid_file, SUDO_DEBUG_UTIL);
 
-    if (*str != '/') {
-	debug_return_bool(false);
-	sudo_warnx(U_("%s: not a fully qualified path"), str);
-	debug_return_bool(false);
-    }
-    if ((copy = strdup(str)) == NULL) {
-	sudo_warn(NULL);
-	debug_return_bool(false);
+    /* An empty value means to disable the pid file. */
+    if (*str != '\0') {
+	if (*str != '/') {
+	    sudo_warnx(U_("%s: not a fully qualified path"), str);
+	    debug_return_bool(false);
+	}
+	if ((copy = strdup(str)) == NULL) {
+	    sudo_warn(NULL);
+	    debug_return_bool(false);
+	}
     }
 
     free(config->server.pid_file);
@@ -914,6 +854,39 @@ logsrvd_open_eventlog(struct logsrvd_config *config)
     debug_return_ptr(fp);
 }
 
+static FILE *
+logsrvd_stub_open_log(int type, const char *logfile)
+{
+    /* Actual open already done by logsrvd_open_eventlog() */
+    return logsrvd_config->logfile.stream;
+}
+
+static void
+logsrvd_stub_close_log(int type, FILE *fp)
+{
+    return;
+}
+
+/* Set eventlog configuration settings from on logsrvd config. */
+static void
+logsrvd_conf_eventlog_setconf(struct logsrvd_config *config)
+{
+    debug_decl(logsrvd_conf_eventlog_setconf, SUDO_DEBUG_UTIL);
+
+    eventlog_set_type(config->eventlog.log_type);
+    eventlog_set_format(config->eventlog.log_format);
+    eventlog_set_syslog_acceptpri(config->syslog.acceptpri); 
+    eventlog_set_syslog_rejectpri(config->syslog.rejectpri); 
+    eventlog_set_syslog_alertpri(config->syslog.alertpri); 
+    eventlog_set_syslog_maxlen(config->syslog.maxlen); 
+    eventlog_set_logpath(config->logfile.path);
+    eventlog_set_time_fmt(config->logfile.time_format);
+    eventlog_set_open_log(logsrvd_stub_open_log);
+    eventlog_set_close_log(logsrvd_stub_close_log);
+
+    debug_return;
+}
+
 /* Free the specified struct logsrvd_config and its contents. */
 void
 logsrvd_conf_free(struct logsrvd_config *config)
@@ -1076,7 +1049,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     } else {
 	struct listen_address *addr;
 
-	/* Sanity check the TLS configuration. */
+	/* Check that TLS configuration is valid. */
 	TAILQ_FOREACH(addr, &config->server.addresses, entries) {
 	    if (!addr->tls)
 		continue;
@@ -1122,6 +1095,9 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     iolog_set_owner(config->iolog.uid, config->iolog.gid);
     iolog_set_mode(config->iolog.mode);
     iolog_set_maxseq(config->iolog.maxseq);
+
+    /* Set event log config */
+    logsrvd_conf_eventlog_setconf(config);
 
     logsrvd_conf_free(logsrvd_config);
     logsrvd_config = config;

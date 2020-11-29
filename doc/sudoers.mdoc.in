@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 9, 2020
+.Dd October 30, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -304,6 +304,13 @@ command tags.
 See
 .Sx "I/O LOG FILES"
 for details on how I/O log files are stored.
+.Pp
+Starting with version 1.9, the
+.Em log_servers
+setting may be used to send event and I/O log data to a remote server running
+.Nm sudo_logsrvd
+or another service that implements the protocol described by
+.Xr sudo_logsrv.proto @mansectform@ .
 .Ss Command environment
 Since environment variables can influence program behavior,
 .Nm
@@ -358,7 +365,6 @@ are preserved from the invoking user's environment if permitted by the
 or
 .Em env_keep
 options.
-This is effectively a whitelist for environment variables.
 A few environment variables are treated specially.
 If the
 .Ev PATH
@@ -1308,6 +1314,10 @@ subsequent
 in the
 .Li Cmnd_Spec_List ,
 inherit that option unless it is overridden by another option.
+Note that the option names are reserved words in
+.Em sudoers .
+This means that none of the valid option names (see below) can be used
+when declaring an alias.
 .if \n(SL \{\
 .Ss SELinux_Spec
 On systems with SELinux support,
@@ -2004,16 +2014,37 @@ It can be used wherever one might otherwise use a
 .Li Runas_Alias ,
 or
 .Li Host_Alias .
-You should not try to define your own
+Attempting to define an
 .Em alias
-called
+named
 .Sy ALL
-as the built-in alias will be used in preference to your own.
+will result in a syntax error.
 Please note that using
 .Sy ALL
 can be dangerous since in a command context, it allows the user to run
 .Em any
 command on the system.
+.Pp
+The following option names permitted in an
+.Li Option_Spec
+are also considered reserved words:
+.Li CHROOT ,
+.if \n(PS \{\
+.Li PRIVS ,
+.Li LIMITPRIVS ,
+.\}
+.if \n(SL \{\
+.Li ROLE ,
+.Li TYPE ,
+.\}
+.Li TIMEOUT ,
+.Li CWD ,
+.Li NOTBEFORE
+and
+.Li NOTAFTER .
+Attempting to define an
+.Em alias
+with the same name as one of the options will result in a syntax error.
 .Pp
 An exclamation point
 .Pq Ql \&!
@@ -2575,12 +2606,16 @@ If set,
 will enable the TCP keepalive socket option on the connection to the log server.
 This enables the periodic transmission of keepalive messages to the server.
 If the server does not respond to a message, the connection will
-be closed and the running command will be killed unless the
+be closed and the running command will be terminated unless the
 .Em ignore_iolog_errors
-flag is set.
+flag (I/O logging enabled) or the
+.Em ignore_log_errors
+flag (I/O logging disabled) is set.
 This flag is
 .Em on
 by default.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .It log_server_verify
 If set, the server certificate received during the TLS handshake
 must be valid and it must contain either the server name (from
@@ -2590,7 +2625,8 @@ If either of these conditions is not met, the TLS handshake will fail.
 This flag is
 .Em on
 by default.
-.Nm sudo
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -3716,19 +3752,25 @@ The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
 when authenticating the log server.
 The default is to use the system's default certificate authority database.
-This setting has no effect unless the
-.Em log_server
-flag is enabled and the remote log server is secured with TLS.
+This setting has no effect unless
+.Em log_servers
+is set and the remote log server is secured with TLS.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .It log_server_peer_cert
 The path to the client's certificate file, in PEM format.
-This setting is required when the
-.Em log_server
-flag is enabled and the remote log server is secured with TLS.
+This setting is required when
+.Em log_servers
+is set and the remote log server is secured with TLS.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .It log_server_peer_key
 The path to the client's private key file, in PEM format.
-This setting is required when the
-.Em log_server
-flag is enabled and the remote log server is secured with TLS.
+This setting is required when
+.Em log_servers
+is set and the remote log server is secured with TLS.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .It mailsub
 Subject of the mail sent to the
 .Em mailto
@@ -4104,6 +4146,30 @@ Negating the option results in a value of
 being used.
 The default value is
 .Em any .
+.It log_format
+The event log format.
+Supported log formats are:
+.Bl -tag -width 8n
+.It json
+Logs in JSON format.
+JSON log entries contain the full user details as well as the execution
+environment if the command was allowed.
+Due to limitations of the protocol, JSON events sent via
+.Em syslog
+may be truncated.
+.It sudo
+Traditional sudo-style logs, see
+.Sx "LOG FORMAT"
+for a description of the log file format.
+.El
+.Pp
+This setting affects logs sent via
+.Xr syslog 3
+as well as the file specified by the
+.Em logfile
+setting, if any.
+The default value is
+.Em sudo .
 .It logfile
 Path to the
 .Nm sudo
@@ -4452,12 +4518,8 @@ should run
 to get their accustomed editor configuration instead of
 invoking the editor directly.
 .It log_servers
-A list of one or more remote servers to use for I/O log storage, separated
-by white space.
-Starting with
-.Nm sudo
-1.9, it is possible to send I/O logs to a remote server instead of
-logging them locally.
+A list of one or more servers to use for remote event and I/O log storage,
+separated by white space.
 Log servers must be running
 .Nm sudo_logsrvd
 or another service that implements the protocol described by
@@ -4468,29 +4530,40 @@ Server addresses should be of the form
 The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
 .Pp
-If the optional tls flag is present, the connection will be secured
+If the optional
+.Em tls
+flag is present, the connection will be secured
 with Transport Layer Security (TLS) version 1.2 or 1.3.
 Versions of TLS prior to 1.2 are not supported.
 .Pp
-If a port is specified, it may either be a port number or a known
+If a port is specified, it may either be a port number or a well-known
 service name as defined by the system service name database.
 If no port is specified, port 30343 will be used for plaintext
 connections and port 30344 will be used for TLS connections.
 .Pp
 When
 .Em log_servers
-is enabled, I/O logs will not be logged locally.
-If multiple hosts are specified,
-.Nm
-will try them in reverse order until it connects successfully.
-If no log servers are reachable, the user will not be able
-to run a command unless the
+is set, event log data will be logged both locally (see the
+.Em syslog
+and
+.Em log_file
+settings) as well as remotely, but I/O log data will only be logged remotely.
+If multiple hosts are specified, they will be attempted in reverse order.
+If no log servers are available, the user will not be able to run
+a command unless either the
 .Em ignore_iolog_errors
-flag is set.
-If the connection to the log server is interrupted while
-the command is running, the command will be killed unless
+flag (I/O logging enabled) or the
+.Em ignore_log_errors
+flag (I/O logging disabled) is set.
+Likewise, if the connection to the log server is interrupted while
+.Nm sudo
+is running, the command will be terminated unless the
 .Em ignore_iolog_errors
-is set.
+flag (I/O logging enabled) or the
+.Em ignore_log_errors
+flag (I/O logging disabled) is set.
+.Pp
+This setting is only supported by version 1.9.0 or higher.
 .El
 .Sh GROUP PROVIDER PLUGINS
 The
@@ -4549,9 +4622,19 @@ The group provider plugin API is described in detail in
 .Xr sudo_plugin @mansectform@ .
 .Sh LOG FORMAT
 .Nm
-can log events using either
-.Xr syslog 3
-or a simple log file.
+can log events in either JSON or
+.Em sudo
+format,
+this section describes the
+.Em sudo
+log format.
+Depending on
+.Em sudoers
+configuration,
+.Nm
+can log events via
+.Xr syslog 3 ,
+to a local log file, or both.
 The log format is almost identical in both cases.
 .Ss Accepted command log entries
 Commands that sudo runs are logged using the following format (split
@@ -5567,9 +5650,9 @@ On such systems,
 functionality can be used to prevent a program run by
 .Nm sudo
 from executing any other programs.
-Note, however, that this applies only to native dynamically-linked
+Note, however, that this applies only to dynamically-linked
 executables.
-Statically-linked executables and foreign executables
+Statically-linked executables and executables
 running under binary emulation are not affected.
 .Pp
 The

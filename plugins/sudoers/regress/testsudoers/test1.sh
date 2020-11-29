@@ -5,8 +5,10 @@
 # This is RedHat bug Bug 667103.
 #
 
+: ${TESTSUDOERS=testsudoers}
+
 exec 2>&1
-./testsudoers -g bin -P ${TESTDIR}/group root id <<EOF
+$TESTSUDOERS -g bin -P ${TESTDIR}/group root id <<EOF
 root ALL = ALL
 EOF
 

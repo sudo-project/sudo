@@ -3,7 +3,7 @@
  *
  * This is an implementation of the getaddrinfo family of functions for
  * systems that lack it, so that code can use getaddrinfo always.  It provides
- * IPv4 support only; for IPv6 support, a native getaddrinfo implementation is
+ * IPv4 support only; for IPv6 support, a system getaddrinfo implementation is
  * required.
  *
  * The canonical version of this file is maintained in the rra-c-util package,

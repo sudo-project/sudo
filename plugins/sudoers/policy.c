@@ -110,6 +110,11 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     } \
 } while (0)
 
+    if (sudo_gettime_real(&sudo_user.submit_time) == -1) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	goto bad;
+    }
+
     /* Parse sudo.conf plugin args. */
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
@@ -563,19 +568,19 @@ bad:
 }
 
 /*
- * Setup the execution environment.
+ * Store the execution environment and other front-end settings.
  * Builds up the command_info list and sets argv and envp.
  * Consumes iolog_path if not NULL.
  * Returns 1 on success and -1 on error.
  */
 bool
-sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
-    char *iolog_path, void *v)
+sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
+    mode_t cmnd_umask, char *iolog_path, void *v)
 {
     struct sudoers_exec_args *exec_args = v;
     char **command_info;
     int info_len = 0;
-    debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN);
+    debug_decl(sudoers_policy_store_result, SUDOERS_DEBUG_PLUGIN);
 
     if (exec_args == NULL)
 	debug_return_bool(true);	/* nothing to do */
@@ -946,6 +951,9 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Deregister the callback for sudo_fatal()/sudo_fatalx(). */
     sudo_fatal_callback_deregister(sudoers_cleanup);
 
+    /* Free stashed copy of the environment. */
+    (void)env_init(NULL);
+
     /* Free remaining references to password and group entries. */
     /* XXX - move cleanup to function in sudoers.c */
     if (sudo_user.pw != NULL) {
@@ -1053,13 +1061,13 @@ sudoers_policy_validate(const char **errstr)
 }
 
 static void
-sudoers_policy_invalidate(int remove)
+sudoers_policy_invalidate(int unlinkit)
 {
     debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN);
 
     user_cmnd = "kill";
     /* XXX - plugin API should support a return value for fatal errors. */
-    timestamp_remove(remove);
+    timestamp_remove(unlinkit);
     sudoers_cleanup();
 
     debug_return;

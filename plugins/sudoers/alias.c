@@ -114,7 +114,7 @@ alias_put(struct alias *a)
  */
 const char *
 alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
-    char *file, int lineno, struct member *members)
+    char *file, int line, int column, struct member *members)
 {
     static char errbuf[512];
     struct alias *a;
@@ -122,6 +122,7 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
 
     if (parse_tree->aliases == NULL) {
 	if ((parse_tree->aliases = alloc_aliases()) == NULL) {
+	    /* XXX - return error code instead */
 	    strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
 	    debug_return_str(errbuf);
 	}
@@ -129,6 +130,7 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
 
     a = calloc(1, sizeof(*a));
     if (a == NULL) {
+	/* XXX - return error code instead */
 	strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
 	debug_return_str(errbuf);
     }
@@ -136,15 +138,18 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
     a->type = type;
     /* a->used = false; */
     a->file = rcstr_addref(file);
-    a->lineno = lineno;
+    a->line = line;
+    a->column = column;
     HLTQ_TO_TAILQ(&a->members, members, entries);
     switch (rbinsert(parse_tree->aliases, a, NULL)) {
     case 1:
+	/* XXX - return error code instead, this is not translatable. */
 	(void)snprintf(errbuf, sizeof(errbuf),
 	    N_("Alias \"%s\" already defined"), name);
 	alias_free(a);
 	debug_return_str(errbuf);
     case -1:
+	/* XXX - return error code instead */
 	(void)strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
 	alias_free(a);
 	debug_return_str(errbuf);

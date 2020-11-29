@@ -371,7 +371,7 @@ AC_DEFUN([SUDO_SOCK_SIN_LEN], [
 dnl
 dnl check for max length of uid_t in string representation.
 dnl we can't really trust UID_MAX or MAXUID since they may exist
-dnl only for backwards compatibility.
+dnl only for backward compatibility.
 dnl
 AC_DEFUN([SUDO_UID_T_LEN],
 [AC_REQUIRE([AC_TYPE_UID_T])

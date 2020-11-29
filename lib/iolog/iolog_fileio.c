@@ -41,7 +41,7 @@
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
-#include "sudo_event.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
@@ -887,8 +887,7 @@ iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes,
  * This file is not compressed.
  */
 static bool
-iolog_write_info_file_legacy(int dfd, const char *parent,
-    struct iolog_info *log_info)
+iolog_write_info_file_legacy(int dfd, struct eventlog *evlog)
 {
     char * const *av;
     FILE *fp;
@@ -898,7 +897,7 @@ iolog_write_info_file_legacy(int dfd, const char *parent,
     fd = iolog_openat(dfd, "log", O_CREAT|O_TRUNC|O_WRONLY);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to open %s/log", parent);
+	    "unable to open %s/log", evlog->iolog_path);
 	if (fd != -1)
 	    close(fd);
 	debug_return_bool(false);
@@ -906,19 +905,19 @@ iolog_write_info_file_legacy(int dfd, const char *parent,
     if (fchown(fd, iolog_uid, iolog_gid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to fchown %d:%d %s/log", __func__,
-	    (int)iolog_uid, (int)iolog_gid, parent);
+	    (int)iolog_uid, (int)iolog_gid, evlog->iolog_path);
     }
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n",
-	(long long)log_info->tstamp.tv_sec,
-	log_info->user ? log_info->user : "unknown",
-	log_info->runas_user ? log_info->runas_user : RUNAS_DEFAULT,
-	log_info->runas_group ? log_info->runas_group : "",
-	log_info->tty ? log_info->tty : "unknown",
-	log_info->lines, log_info->cols,
-	log_info->cwd ? log_info->cwd : "unknown");
-    fputs(log_info->cmd ? log_info->cmd : "unknown", fp);
-    for (av = log_info->argv + 1; *av != NULL; av++) {
+	(long long)evlog->submit_time.tv_sec,
+	evlog->submituser ? evlog->submituser : "unknown",
+	evlog->runuser ? evlog->runuser : RUNAS_DEFAULT,
+	evlog->rungroup ? evlog->rungroup : "",
+	evlog->ttyname ? evlog->ttyname : "unknown",
+	evlog->lines, evlog->columns,
+	evlog->cwd ? evlog->cwd : "unknown");
+    fputs(evlog->command ? evlog->command : "unknown", fp);
+    for (av = evlog->argv + 1; *av != NULL; av++) {
 	fputc(' ', fp);
 	fputs(*av, fp);
     }
@@ -926,7 +925,7 @@ iolog_write_info_file_legacy(int dfd, const char *parent,
     fflush(fp);
     if ((error = ferror(fp))) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to write to I/O log file %s/log", parent);
+	    "unable to write to I/O log file %s/log", evlog->iolog_path);
     }
     fclose(fp);
 
@@ -938,19 +937,14 @@ iolog_write_info_file_legacy(int dfd, const char *parent,
  * This file is not compressed.
  */
 static bool
-iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
+iolog_write_info_file_json(int dfd, struct eventlog *evlog)
 {
     struct json_container json;
     struct json_value json_value;
     bool ret = false;
     FILE *fp = NULL;
     int fd = -1;
-    size_t i;
-    char *cp;
     debug_decl(iolog_write_info_file_json, SUDO_DEBUG_UTIL);
-
-    if (info->cmd == NULL || info->user == NULL || info->runas_user == NULL)
-	debug_return_bool(false);
 
     if (!sudo_json_init(&json, 4, false, false))
 	debug_return_bool(false);
@@ -960,139 +954,32 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
 	goto oom;
 
     json_value.type = JSON_NUMBER;
-    json_value.u.number = info->tstamp.tv_sec;
+    json_value.u.number = evlog->submit_time.tv_sec;
     if (!sudo_json_add_value(&json, "seconds", &json_value))
         goto oom;
 
     json_value.type = JSON_NUMBER;
-    json_value.u.number = info->tstamp.tv_nsec;
+    json_value.u.number = evlog->submit_time.tv_nsec;
     if (!sudo_json_add_value(&json, "nanoseconds", &json_value))
         goto oom;
 
     if (!sudo_json_close_object(&json))
 	goto oom;
 
-    json_value.type = JSON_NUMBER;
-    json_value.u.number = info->cols;
-    if (!sudo_json_add_value(&json, "columns", &json_value))
-        goto oom;
-
-    /* Required */
-    json_value.type = JSON_STRING;
-    json_value.u.string = info->cmd;
-    if (!sudo_json_add_value(&json, "command", &json_value))
-        goto oom;
-
-    json_value.type = JSON_NUMBER;
-    json_value.u.number = info->lines;
-    if (!sudo_json_add_value(&json, "lines", &json_value))
-        goto oom;
-
-    if (info->argv != NULL) {
-	if (!sudo_json_open_array(&json, "runargv"))
-	    goto oom;
-	for (i = 0; (cp = info->argv[i]) != NULL; i++) {
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = cp;
-	    if (!sudo_json_add_value(&json, NULL, &json_value))
-		goto oom;
-	}
-	if (!sudo_json_close_array(&json))
-	    goto oom;
-    }
-
-    if (info->envp != NULL) {
-	if (!sudo_json_open_array(&json, "runenv"))
-	    goto oom;
-	for (i = 0; (cp = info->envp[i]) != NULL; i++) {
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = cp;
-	    if (!sudo_json_add_value(&json, NULL, &json_value))
-		goto oom;
-	}
-	if (!sudo_json_close_array(&json))
-	    goto oom;
-    }
-
-    if (info->runas_group!= NULL) {
-	if (info->runas_gid != (gid_t)-1) {
-	    json_value.type = JSON_ID;
-	    json_value.u.id = info->runas_gid;
-	    if (!sudo_json_add_value(&json, "rungid", &json_value))
-		goto oom;
-	}
-
-	json_value.type = JSON_STRING;
-	json_value.u.string = info->runas_group;
-	if (!sudo_json_add_value(&json, "rungroup", &json_value))
-	    goto oom;
-    }
-
-    if (info->runas_uid != (uid_t)-1) {
-	json_value.type = JSON_ID;
-	json_value.u.id = info->runas_uid;
-	if (!sudo_json_add_value(&json, "runuid", &json_value))
-	    goto oom;
-    }
-
-    if (info->runchroot != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = info->runchroot;
-	if (!sudo_json_add_value(&json, "runchroot", &json_value))
-	    goto oom;
-    }
-
-    if (info->runcwd != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = info->runcwd;
-	if (!sudo_json_add_value(&json, "runcwd", &json_value))
-	    goto oom;
-    }
-
-    /* Required */
-    json_value.type = JSON_STRING;
-    json_value.u.string = info->runas_user;
-    if (!sudo_json_add_value(&json, "runuser", &json_value))
-	goto oom;
-
-    if (info->cwd != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = info->cwd;
-	if (!sudo_json_add_value(&json, "submitcwd", &json_value))
-	    goto oom;
-    }
-
-    if (info->host != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = info->host;
-	if (!sudo_json_add_value(&json, "submithost", &json_value))
-	    goto oom;
-    }
-
-    /* Required */
-    json_value.type = JSON_STRING;
-    json_value.u.string = info->user;
-    if (!sudo_json_add_value(&json, "submituser", &json_value))
-	goto oom;
-
-    if (info->tty != NULL) {
-	json_value.type = JSON_STRING;
-	json_value.u.string = info->tty;
-	if (!sudo_json_add_value(&json, "ttyname", &json_value))
-	    goto oom;
-    }
+    if (!eventlog_store_json(&json, evlog))
+	goto done;
 
     fd = iolog_openat(dfd, "log.json", O_CREAT|O_TRUNC|O_WRONLY);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-            "unable to open %s/log.json", parent);
+            "unable to open %s/log.json", evlog->iolog_path);
         goto done;
     }
 
     if (fchown(fd, iolog_uid, iolog_gid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to fchown %d:%d %s/log", __func__,
-	    (int)iolog_uid, (int)iolog_gid, parent);
+	    (int)iolog_uid, (int)iolog_gid, evlog->iolog_path);
     }
     fd = -1;
 
@@ -1100,7 +987,7 @@ iolog_write_info_file_json(int dfd, const char *parent, struct iolog_info *info)
     fflush(fp);
     if (ferror(fp)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-            "unable to write to I/O log file %s/log.json", parent);
+            "unable to write to I/O log file %s/log.json", evlog->iolog_path);
 	goto done;
     }
 
@@ -1124,14 +1011,13 @@ done:
  * These files are not compressed.
  */
 bool
-iolog_write_info_file(int dfd, const char *parent,
-    struct iolog_info *log_info)
+iolog_write_info_file(int dfd, struct eventlog *evlog)
 {
     debug_decl(iolog_write_info_file, SUDO_DEBUG_UTIL);
 
-    if (!iolog_write_info_file_legacy(dfd, parent, log_info))
+    if (!iolog_write_info_file_legacy(dfd, evlog))
 	debug_return_bool(false);
-    if (!iolog_write_info_file_json(dfd, parent, log_info))
+    if (!iolog_write_info_file_json(dfd, evlog))
 	debug_return_bool(false);
 
     debug_return_bool(true);

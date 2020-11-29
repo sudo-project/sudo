@@ -180,8 +180,8 @@ print_global_defaults_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	    lbuf.len = 0;
 	    sudo_lbuf_append(&lbuf, "# ");
 	    sudoers_format_default_line(&lbuf, parse_tree, opt, false, true);
-	    fprintf(fp, "# Unable to translate %s:%d\n%s\n",
-		opt->file, opt->lineno, lbuf.buf);
+	    fprintf(fp, "# Unable to translate %s:%d:%d:\n%s\n",
+		opt->file, opt->line, opt->column, lbuf.buf);
 	}
     }
     sudo_lbuf_destroy(&lbuf);

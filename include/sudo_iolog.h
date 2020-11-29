@@ -56,28 +56,6 @@
 #define IOFD_TIMING	5
 #define IOFD_MAX	6
 
-/*
- * Info present in the I/O log file
- */
-struct iolog_info {
-    char *cwd;
-    char *user;
-    char *runas_user;
-    char *runas_group;
-    char *runchroot;
-    char *runcwd;
-    char *tty;
-    char *cmd;
-    char *host;
-    struct timespec tstamp;
-    int lines;
-    int cols;
-    uid_t runas_uid;
-    gid_t runas_gid;
-    char **argv;
-    char **envp;
-};
-
 struct timing_closure {
     struct timespec delay;
     const char *decimal;
@@ -121,10 +99,9 @@ bool expand_iolog_path(const char *inpath, char *path, size_t pathlen, const str
 bool iolog_parse_timing(const char *line, struct timing_closure *timing);
 char *iolog_parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
 int iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing);
-struct iolog_info *iolog_parse_loginfo(int dfd, const char *iolog_dir);
-bool iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct iolog_info *li);
+struct eventlog *iolog_parse_loginfo(int dfd, const char *iolog_dir);
+bool iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct eventlog *evlog);
 void iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
-void iolog_free_loginfo(struct iolog_info *li);
 
 /* iolog_fileio.c */
 struct passwd;
@@ -136,7 +113,7 @@ bool iolog_mkpath(char *path);
 bool iolog_nextid(char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
 bool iolog_rename(const char *from, const char *to);
-bool iolog_write_info_file(int dfd, const char *parent, struct iolog_info *log_info);
+bool iolog_write_info_file(int dfd, struct eventlog *evlog);
 char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
 const char *iolog_fd_to_name(int iofd);
 int iolog_openat(int fdf, const char *path, int flags);

@@ -3,6 +3,8 @@
 # Test comment on the last line with no newline
 #
 
-printf "# one comment\n#two comments" | ./visudo -csf -
+: ${VISUDO=visudo}
+
+printf "# one comment\n#two comments" | $VISUDO -csf -
 
 exit 0

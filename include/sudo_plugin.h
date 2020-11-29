@@ -21,7 +21,7 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 16
+#define SUDO_API_VERSION_MINOR 17
 #define SUDO_API_MKVERSION(x, y) (((x) << 16) | (y))
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
@@ -240,6 +240,7 @@ struct audit_plugin {
     int (*show_version)(int verbose);
     void (*register_hooks)(int version, int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version, int (*deregister_hook)(struct sudo_hook *hook));
+    struct sudo_plugin_event * (*event_alloc)(void);
 };
 
 /* Approval plugin type and defines */

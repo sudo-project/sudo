@@ -3,6 +3,8 @@
 # Test group and host filters
 #
 
-./cvtsudoers -c "" -f sudoers -m group=wheel,host=blackhole $TESTDIR/sudoers
+: ${CVTSUDOERS=cvtsudoers}
+
+$CVTSUDOERS -c "" -f sudoers -m group=wheel,host=blackhole $TESTDIR/sudoers
 
 exit 0

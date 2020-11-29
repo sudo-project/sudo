@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "August 31, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 17, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2746,6 +2746,7 @@ struct audit_plugin {
         int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
         int (*deregister_hook)(struct sudo_hook *hook));
+    struct sudo_plugin_event * (*event_alloc)(void);
 }
 .RE
 .fi
@@ -3073,7 +3074,8 @@ functions will
 be called.
 .TP 6n
 command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 \(lqname=value\(rq
 strings.
 The vector is terminated by a
@@ -3187,7 +3189,8 @@ will be the
 pointer.
 .TP 6n
 command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 \(lqname=value\(rq
 strings.
 The vector is terminated by a
@@ -3271,7 +3274,8 @@ will be the
 pointer.
 .TP 6n
 command_info
-A vector of information describing the command being run in the form of
+An optional
+vector of information describing the command being run in the form of
 \(lqname=value\(rq
 strings.
 The vector is terminated by a
@@ -3354,6 +3358,44 @@ See the
 \fIPolicy plugin API\fR
 section for a description of
 \fRderegister_hooks\fR.
+.TP 6n
+event_alloc
+.nf
+.RS 6n
+struct sudo_plugin_event * (*event_alloc)(void);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBevent_alloc\fR()
+function is used to allocate a
+\fRstruct sudo_plugin_event\fR
+which provides access to the main
+\fBsudo\fR
+event loop.
+Unlike the other fields, the
+\fBevent_alloc\fR()
+pointer is filled in by the
+\fBsudo\fR
+front end, not by the plugin.
+.sp
+See the
+\fIEvent API\fR
+section below for more information
+about events.
+.sp
+NOTE: the
+\fBevent_alloc\fR()
+function is only available starting
+with API version 1.17.
+If the
+\fBsudo\fR
+front end doesn't support API
+version 1.17 or higher,
+\fBevent_alloc\fR()
+will not be set.
+.RE
 .SS "Approval plugin API"
 .nf
 .RS 0n
@@ -3979,7 +4021,7 @@ The hook function encountered an error.
 .TP 6n
 \fRSUDO_HOOK_RET_NEXT\fR
 The hook completed without error, go on to the next hook (including
-the native implementation if applicable).
+the system implementation if applicable).
 For example, a
 getenv(3)
 hook might return
@@ -3988,7 +4030,7 @@ if the specified variable was not found in the private copy of the environment.
 .TP 6n
 \fRSUDO_HOOK_RET_STOP\fR
 The hook completed without error, stop processing hooks for this invocation.
-This can be used to replace the native implementation.
+This can be used to replace the system implementation.
 For example, a
 \fRsetenv\fR
 hook that operates on a private copy of
@@ -4347,7 +4389,7 @@ from the event loop and frees the memory associated with it.
 .SS "Remote command execution"
 The
 \fBsudo\fR
-front end does not have native support for running remote commands.
+front end does not support running remote commands.
 However, starting with
 \fBsudo\fR
 1.8.8, the
@@ -5062,6 +5104,11 @@ and
 enties were added to the
 \fRsettings\fR
 list.
+.TP 6n
+Version 1.17 (sudo 1.9.4)
+The
+\fIevent_alloc\fR
+field was added to the audit_plugin and approval_plugin structs.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

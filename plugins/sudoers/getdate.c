@@ -902,7 +902,7 @@ get_date(char *p)
     time_t		Start;
     time_t		tod;
     time_t		now;
-    time_t		timezone;
+    time_t		tz;
 
     yyInput = p;
     (void)time (&now);
@@ -922,22 +922,22 @@ get_date(char *p)
 	return -1;
 
     if (gmt != NULL)
-	timezone = difftm (gmt, tm) / 60;
+	tz = difftm (gmt, tm) / 60;
     else
 	/* We are on a system like VMS, where the system clock is
 	   in local time and the system has no concept of timezones.
 	   Hopefully we can fake this out (for the case in which the
 	   user specifies no timezone) by just saying the timezone
 	   is zero.  */
-	timezone = 0;
+	tz = 0;
 
     if(tm->tm_isdst)
-	timezone += 60;
+	tz += 60;
 
     yyYear = tm->tm_year + 1900;
     yyMonth = tm->tm_mon + 1;
     yyDay = tm->tm_mday;
-    yyTimezone = timezone;
+    yyTimezone = tz;
     yyDSTmode = DSTmaybe;
     yyHour = 0;
     yyMinutes = 0;

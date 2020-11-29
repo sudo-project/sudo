@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 4, 2020
+.Dd November 6, 2020
 .Dt SUDO_LOGSRV.PROTO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -162,7 +162,6 @@ describing the user who submitted the command as well as the execution
 environment of the command.
 This information is used to generate an event log entry and may also be
 used by server to determine where and how the I/O log is stored.
-as choose the
 .It expect_iobufs
 Set to true if the server should expect
 .Em IoBuffer
@@ -303,6 +302,7 @@ or
 message AlertMessage {
   TimeSpec alert_time = 1;
   string reason = 2;
+  repeated InfoMessage info_msgs = 3;
 }
 .Ed
 .Pp
@@ -316,6 +316,12 @@ It contains the following members:
 The wall clock time when the alert occurred.
 .It reason
 The reason for the alert.
+.It info_msgs
+An optional array of
+.Em InfoMessage
+describing the user who submitted the command as well as the execution
+environment of the command.
+This information is used to generate an event log entry.
 .El
 .Ss IoBuffer ttyin_buf | ttyout_buf | stdin_buf | stdout_buf | stderr_buf
 .Bd -literal
@@ -552,7 +558,8 @@ If an
 .Em abort
 message is received, the client should terminate the running command.
 .Sh EVENT LOG VARIABLES
-.Em AcceptMessage
+.Em AcceptMessage ,
+.Em AlertMessage
 and
 .Em RejectMessage
 classes contain an array of
@@ -718,8 +725,9 @@ message ExitMessage {
 
 /* Alert message, policy module-specific. */
 message AlertMessage {
-  TimeSpec alert_time = 1;	/* time alert message occurred */
-  string reason = 2;		/* description of policy violation */
+  TimeSpec alert_time = 1;		/* time alert message occurred */
+  string reason = 2;			/* policy alert error string */
+  repeated InfoMessage info_msgs = 3;	/* key,value event log data */
 }
 
 /* Used to restart an existing I/O log on the server. */

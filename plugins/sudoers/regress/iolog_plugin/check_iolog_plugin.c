@@ -28,8 +28,9 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "sudoers.h"
-#include "sudo_plugin.h"
+#include "sudo_eventlog.h"
 #include "sudo_iolog.h"
+#include "sudo_plugin.h"
 
 #include <def_data.c>		/* for iolog_path.c */
 
@@ -78,77 +79,77 @@ sudo_printf_int(int msg_type, const char *fmt, ...)
 static bool
 validate_iolog_info(const char *log_dir, bool legacy)
 {
-    struct iolog_info *info;
+    struct eventlog *evlog;
     time_t now;
 
     time(&now);
 
     /* Parse log file. */
-    if ((info = iolog_parse_loginfo(-1, log_dir)) == NULL)
+    if ((evlog = iolog_parse_loginfo(-1, log_dir)) == NULL)
 	return false;
 
-    if (info->cwd == NULL || strcmp(info->cwd, "/") != 0) {
+    if (evlog->cwd == NULL || strcmp(evlog->cwd, "/") != 0) {
 	sudo_warnx("bad cwd: want \"/\", got \"%s\"",
-	    info->cwd ? info->cwd : "NULL");
+	    evlog->cwd ? evlog->cwd : "NULL");
 	return false;
     }
 
     /* No host in the legacy log file. */
     if (!legacy) {
-	if (info->host == NULL || strcmp(info->host, "localhost") != 0) {
+	if (evlog->submithost == NULL || strcmp(evlog->submithost, "localhost") != 0) {
 	    sudo_warnx("bad host: want \"localhost\", got \"%s\"",
-		info->host ? info->host : "NULL");
+		evlog->submithost ? evlog->submithost : "NULL");
 	    return false;
 	}
     }
 
-    if (info->user == NULL || strcmp(info->user, "nobody") != 0) {
+    if (evlog->submituser == NULL || strcmp(evlog->submituser, "nobody") != 0) {
 	sudo_warnx("bad user: want \"nobody\" got \"%s\"",
-	    info->user ? info->user : "NULL");
+	    evlog->submituser ? evlog->submituser : "NULL");
 	return false;
     }
 
-    if (info->runas_user == NULL || strcmp(info->runas_user, "root") != 0) {
-	sudo_warnx("bad runas_user: want \"root\" got \"%s\"",
-	    info->runas_user ? info->runas_user : "NULL");
+    if (evlog->runuser == NULL || strcmp(evlog->runuser, "root") != 0) {
+	sudo_warnx("bad runuser: want \"root\" got \"%s\"",
+	    evlog->runuser ? evlog->runuser : "NULL");
 	return false;
     }
 
     /* No runas group specified, should be NULL. */
-    if (info->runas_group != NULL) {
-	sudo_warnx("bad runas_group: want \"\" got \"%s\"", info->runas_group);
+    if (evlog->rungroup != NULL) {
+	sudo_warnx("bad rungroup: want \"\" got \"%s\"", evlog->rungroup);
 	return false;
     }
 
-    if (info->tty == NULL || strcmp(info->tty, "/dev/console") != 0) {
+    if (evlog->ttyname == NULL || strcmp(evlog->ttyname, "/dev/console") != 0) {
 	sudo_warnx("bad tty: want \"/dev/console\" got \"%s\"",
-	    info->tty ? info->tty : "NULL");
+	    evlog->ttyname ? evlog->ttyname : "NULL");
 	return false;
     }
 
-    if (info->cmd == NULL || strcmp(info->cmd, "/usr/bin/id") != 0) {
+    if (evlog->command == NULL || strcmp(evlog->command, "/usr/bin/id") != 0) {
 	sudo_warnx("bad command: want \"/usr/bin/id\" got \"%s\"",
-	    info->cmd ? info->cmd : "NULL");
+	    evlog->command ? evlog->command : "NULL");
 	return false;
     }
 
-    if (info->lines != 24) {
-	sudo_warnx("bad lines: want 24 got %d", info->lines);
+    if (evlog->lines != 24) {
+	sudo_warnx("bad lines: want 24 got %d", evlog->lines);
 	return false;
     }
 
-    if (info->cols != 80) {
-	sudo_warnx("bad cols: want 80 got %d", info->cols);
+    if (evlog->columns != 80) {
+	sudo_warnx("bad columns: want 80 got %d", evlog->columns);
 	return false;
     }
 
-    if (info->tstamp.tv_sec < now - 10 || info->tstamp.tv_sec > now + 10) {
-	sudo_warnx("bad tstamp: want %lld got %lld", (long long)now,
-	    (long long)info->tstamp.tv_sec);
+    if (evlog->submit_time.tv_sec < now - 10 || evlog->submit_time.tv_sec > now + 10) {
+	sudo_warnx("bad submit_time: want %lld got %lld", (long long)now,
+	    (long long)evlog->submit_time.tv_sec);
 	return false;
     }
 
-    iolog_free_loginfo(info);
+    eventlog_free(evlog);
 
     return true;
 }

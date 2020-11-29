@@ -75,8 +75,9 @@ char ** create_str_array(size_t count, ...);
             printf("FAILED: deitialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
             success = 0; \
         } \
-        if (!success) \
+        if (!success) { \
             errors++; \
+        } \
     } while(false)
 
 #define VERIFY_PRINT_MSG(fmt, actual_str, actual, expected_str, expected, expected_to_be_message) \
@@ -111,27 +112,10 @@ char ** create_str_array(size_t count, ...);
 #define VERIFY_STR(actual, expected) \
     do { \
         const char *actual_str = actual; \
-	regex_t regex; \
-	int result = 0; \
-        if (!actual_str) { \
-            result = -1; \
-	} else if (*expected == '\0') { \
-	    result = strcmp(actual_str, expected); \
-	} else { \
-	    if ((result = regcomp(&regex, expected, REG_NOSUB)) != 0) { \
-		char errbuf[1024]; \
-		regerror(result, &regex, errbuf, sizeof(errbuf)); \
-		fprintf(stderr, "regcomp failed at %s:%d: %s\npattern: %s\n", \
-		    __FILE__, __LINE__, errbuf, expected); \
-	    } else { \
-		result = regexec(&regex, actual_str, 0, NULL, 0); \
-		regfree(&regex); \
-	    } \
-	} \
-	if (result != 0) { \
-	    VERIFY_PRINT_MSG("%s", #actual, actual_str ? actual_str : "(null)", #expected, expected, "expected to be"); \
-	    return false; \
-	} \
+        if (!actual_str || strcmp(actual_str, expected) != 0) { \
+            VERIFY_PRINT_MSG("%s", #actual, actual_str ? actual_str : "(null)", #expected, expected, "expected to be"); \
+            return false; \
+        } \
     } while(false)
 
 #define VERIFY_STR_CONTAINS(actual, expected) \

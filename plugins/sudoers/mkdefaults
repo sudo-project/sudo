@@ -131,7 +131,7 @@ END {
     # Print out def_tuple
     print "\nenum def_tuple {" > header
     for (i = 0; i < ntuples; i++)
-	printf "%s\t%s", i ? ",\n" : "", tuple_values[i] > header
+	printf "%s    %s", i ? ",\n" : "", tuple_values[i] > header
     print "\n};" > header
 }
 

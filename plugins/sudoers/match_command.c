@@ -272,7 +272,8 @@ command_matches_dir(const char *sudoers_dir, size_t dlen, const char *runchroot,
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    if (!digest_matches(fd, buf, digests))
+	    /* buf is already relative to runchroot */
+	    if (!digest_matches(fd, buf, NULL, digests))
 		continue;
 	    free(safe_cmnd);
 	    if ((safe_cmnd = strdup(buf + chrootlen)) == NULL) {
@@ -311,7 +312,7 @@ command_matches_all(const char *runchroot,
     }
 
     /* Check digest of user_cmnd since we have no sudoers_cmnd for ALL. */
-    if (!digest_matches(fd, user_cmnd, digests))
+    if (!digest_matches(fd, user_cmnd, runchroot, digests))
 	goto bad;
     set_cmnd_fd(fd);
 
@@ -351,7 +352,7 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 	if (!do_stat(fd, user_cmnd, runchroot, &sb))
 	    goto bad;
 	/* Check digest of user_cmnd since sudoers_cmnd is a pattern. */
-	if (!digest_matches(fd, user_cmnd, digests))
+	if (!digest_matches(fd, user_cmnd, runchroot, digests))
 	    goto bad;
 	set_cmnd_fd(fd);
 
@@ -438,7 +439,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 		(user_stat->st_dev == sudoers_stat.st_dev &&
 		user_stat->st_ino == sudoers_stat.st_ino)) {
 		/* There could be multiple matches, check digest early. */
-		if (!digest_matches(fd, cp, digests)) {
+		if (!digest_matches(fd, cp, runchroot, digests)) {
 		    bad_digest = true;
 		    continue;
 		}
@@ -490,7 +491,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 	    if (user_stat == NULL ||
 		(user_stat->st_dev == sudoers_stat.st_dev &&
 		user_stat->st_ino == sudoers_stat.st_ino)) {
-		if (!digest_matches(fd, cp, digests))
+		if (!digest_matches(fd, cp, runchroot, digests))
 		    continue;
 		free(safe_cmnd);
 		if ((safe_cmnd = strdup(cp)) == NULL) {
@@ -563,7 +564,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
     }
     if (!command_args_match(sudoers_cmnd, sudoers_args))
 	goto bad;
-    if (!digest_matches(fd, sudoers_cmnd, digests)) {
+    if (!digest_matches(fd, sudoers_cmnd, runchroot, digests)) {
 	/* XXX - log functions not available but we should log very loudly */
 	goto bad;
     }

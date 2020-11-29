@@ -71,7 +71,7 @@ sample_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 	return -1;
     }
 
-    /* Sanity check the specified group file. */
+    /* Check that the group file exists and has a safe mode. */
     if (argv == NULL || argv[0] == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
 	    "group_file: path to group file not specified\n");

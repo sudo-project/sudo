@@ -40,8 +40,9 @@
 #include <netinet/in.h>
 
 #include "sudoers.h"
+#include "sudo_eventlog.h"
 #include "sudo_iolog.h"
-#include "iolog_plugin.h"
+#include "log_client.h"
 
 static struct iolog_file iolog_files[] = {
     { false },	/* IOFD_STDIN */
@@ -63,10 +64,10 @@ static struct sudoers_io_operations {
 	const char **errstr);
 } io_operations;
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static struct client_closure *client_closure;
 #endif
-static struct iolog_details iolog_details;
+static struct log_details iolog_details;
 static bool warned = false;
 static int iolog_dir_fd = -1;
 static struct timespec last_time;
@@ -160,6 +161,53 @@ cb_iolog_mode(const union sudo_defs_val *sd_un)
 }
 
 /*
+ * Make a shallow copy of a NULL-terminated argument or environment vector.
+ * Only the outer array is allocated, the pointers inside are copied.
+ * The caller is responsible for freeing the returned copy.
+ */
+static char **
+copy_vector_shallow(char * const *vec)
+{
+    char **copy;
+    size_t len;
+    debug_decl(copy_vector, SUDOERS_DEBUG_UTIL);
+
+    for (len = 0; vec[len] != NULL; len++)
+	continue;
+
+    if ((copy = reallocarray(NULL, len + 1, sizeof(char *))) != NULL) {
+	for (len = 0; vec[len] != NULL; len++)
+	    copy[len] = vec[len];
+	copy[len] = NULL;
+    }
+
+    debug_return_ptr(copy);
+}
+
+static void
+free_iolog_details(void)
+{
+    debug_decl(free_iolog_details, SUDOERS_DEBUG_PLUGIN);
+
+    if (iolog_details.evlog != NULL) {
+	/* We only make a shallow copy of argv and envp. */
+	free(iolog_details.evlog->argv);
+	iolog_details.evlog->argv = NULL;
+	free(iolog_details.evlog->envp);
+	iolog_details.evlog->envp = NULL;
+	eventlog_free(iolog_details.evlog);
+    }
+    str_list_free(iolog_details.log_servers);
+#if defined(HAVE_OPENSSL)
+    free(iolog_details.ca_bundle);
+    free(iolog_details.cert_file);
+    free(iolog_details.key_file);
+#endif /* HAVE_OPENSSL */
+
+    debug_return;
+}
+
+/*
  * Convert a comma-separated list to a string list.
  */
 static struct sudoers_str_list *
@@ -200,22 +248,30 @@ bad:
  * Pull out I/O log related data from user_info and command_info arrays.
  * Returns true if I/O logging is enabled, false if not and -1 on error.
  */
-static int
-iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
-    char * const command_info[])
+int
+iolog_deserialize_info(struct log_details *details, char * const user_info[],
+    char * const command_info[], char * const argv[], char * const user_env[])
 {
+    struct eventlog *evlog;
     const char *runas_uid_str = "0", *runas_euid_str = NULL;
     const char *runas_gid_str = "0", *runas_egid_str = NULL;
     const char *errstr;
     char idbuf[MAX_UID_T_LEN + 2];
     char * const *cur;
+    struct passwd *pw;
+    struct group *gr;
     id_t id;
-    uid_t runas_uid = 0;
-    gid_t runas_gid = 0;
     debug_decl(iolog_deserialize_info, SUDOERS_DEBUG_UTIL);
 
-    details->lines = 24;
-    details->cols = 80;
+    if ((evlog = calloc(1, sizeof(*evlog))) == NULL)
+	goto oom;
+    details->evlog = evlog;
+
+    evlog->lines = 24;
+    evlog->columns = 80;
+    evlog->runuid = ROOT_UID;
+    evlog->rungid = 0;
+    sudo_gettime_real(&evlog->submit_time);
 
     for (cur = user_info; *cur != NULL; cur++) {
 	switch (**cur) {
@@ -224,17 +280,21 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		int n = sudo_strtonum(*cur + sizeof("cols=") - 1, 1, INT_MAX,
 		    NULL);
 		if (n > 0)
-		    details->cols = n;
+		    evlog->columns = n;
 		continue;
 	    }
 	    if (strncmp(*cur, "cwd=", sizeof("cwd=") - 1) == 0) {
-		details->cwd = *cur + sizeof("cwd=") - 1;
+		evlog->cwd = strdup(*cur + sizeof("cwd=") - 1);
+		if (evlog->cwd == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
 	case 'h':
 	    if (strncmp(*cur, "host=", sizeof("host=") - 1) == 0) {
-		details->host = *cur + sizeof("host=") - 1;
+		evlog->submithost = strdup(*cur + sizeof("host=") - 1);
+		if (evlog->submithost == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
@@ -243,19 +303,23 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		int n = sudo_strtonum(*cur + sizeof("lines=") - 1, 1, INT_MAX,
 		    NULL);
 		if (n > 0)
-		    details->lines = n;
+		    evlog->lines = n;
 		continue;
 	    }
 	    break;
 	case 't':
 	    if (strncmp(*cur, "tty=", sizeof("tty=") - 1) == 0) {
-		details->tty = *cur + sizeof("tty=") - 1;
+		evlog->ttyname = strdup(*cur + sizeof("tty=") - 1);
+		if (evlog->ttyname == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
 	case 'u':
 	    if (strncmp(*cur, "user=", sizeof("user=") - 1) == 0) {
-		details->user = *cur + sizeof("user=") - 1;
+		evlog->submituser = strdup(*cur + sizeof("user=") - 1);
+		if (evlog->submituser == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
@@ -266,22 +330,31 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	switch (**cur) {
 	case 'c':
 	    if (strncmp(*cur, "command=", sizeof("command=") - 1) == 0) {
-		details->command = *cur + sizeof("command=") - 1;
+		evlog->command = strdup(*cur + sizeof("command=") - 1);
+		if (evlog->command == NULL)
+		    goto oom;
 		continue;
 	    }
 	    if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
-		details->runchroot = *cur + sizeof("chroot=") - 1;
+		evlog->runchroot = strdup(*cur + sizeof("chroot=") - 1);
+		if (evlog->runchroot == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
 	case 'i':
 	    if (strncmp(*cur, "ignore_iolog_errors=", sizeof("ignore_iolog_errors=") - 1) == 0) {
 		if (sudo_strtobool(*cur + sizeof("ignore_iolog_errors=") - 1) == true)
-		    details->ignore_iolog_errors = true;
+		    details->ignore_log_errors = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
-		details->iolog_path = *cur + sizeof("iolog_path=") - 1;
+		evlog->iolog_path = strdup(*cur + sizeof("iolog_path=") - 1);
+		if (evlog->iolog_path == NULL)
+		    goto oom;
+		evlog->iolog_file = strrchr(evlog->iolog_path, '/');
+		if (evlog->iolog_file != NULL)
+		    evlog->iolog_file++;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
@@ -340,8 +413,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_group=", sizeof("iolog_group=") - 1) == 0) {
-		struct group *gr =
-		    sudo_getgrnam(*cur + sizeof("iolog_group=") - 1);
+		gr = sudo_getgrnam(*cur + sizeof("iolog_group=") - 1);
 		if (gr == NULL) {
 		    sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unknown group %s",
 			__func__, *cur + sizeof("iolog_group=") - 1);
@@ -352,8 +424,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_user=", sizeof("iolog_user=") - 1) == 0) {
-		struct passwd *pw =
-		    sudo_getpwnam(*cur + sizeof("iolog_user=") - 1);
+		pw = sudo_getpwnam(*cur + sizeof("iolog_user=") - 1);
 		if (pw == NULL) {
 		    sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unknown user %s",
 			__func__, *cur + sizeof("iolog_user=") - 1);
@@ -390,15 +461,21 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
             }
 #if defined(HAVE_OPENSSL)
             if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
-                details->ca_bundle = *cur + sizeof("log_server_cabundle=") - 1;
+                details->ca_bundle = strdup(*cur + sizeof("log_server_cabundle=") - 1);
+		if (details->ca_bundle == NULL)
+		    goto oom;
                 continue;
             }
             if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
-                details->cert_file = *cur + sizeof("log_server_peer_cert=") - 1;
+                details->cert_file = strdup(*cur + sizeof("log_server_peer_cert=") - 1);
+		if (details->cert_file == NULL)
+		    goto oom;
                 continue;
             }
             if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
-                details->key_file = *cur + sizeof("log_server_peer_key=") - 1;
+                details->key_file = strdup(*cur + sizeof("log_server_peer_key=") - 1);
+		if (details->key_file == NULL)
+		    goto oom;
                 continue;
             }
             if (strncmp(*cur, "log_server_verify=", sizeof("log_server_verify=") - 1) == 0) {
@@ -439,11 +516,24 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
-		details->runcwd = *cur + sizeof("runcwd=") - 1;
+		evlog->runcwd = strdup(*cur + sizeof("runcwd=") - 1);
+		if (evlog->runcwd == NULL)
+		    goto oom;
 		continue;
 	    }
 	    break;
 	}
+    }
+
+    if (argv != NULL) {
+	evlog->argv = copy_vector_shallow(argv);
+	if (evlog->argv == NULL)
+	    goto oom;
+    }
+    if (user_env != NULL) {
+	evlog->envp = copy_vector_shallow(user_env);
+	if (evlog->envp ==  NULL)
+	    goto oom;
     }
 
     /*
@@ -456,7 +546,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	if (errstr != NULL)
 	    sudo_warnx("runas uid %s: %s", runas_uid_str, U_(errstr));
 	else
-	    runas_uid = (uid_t)id;
+	    evlog->runuid = (uid_t)id;
     }
     if (runas_egid_str != NULL)
 	runas_gid_str = runas_egid_str;
@@ -465,155 +555,112 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	if (errstr != NULL)
 	    sudo_warnx("runas gid %s: %s", runas_gid_str, U_(errstr));
 	else
-	    runas_gid = (gid_t)id;
+	    evlog->rungid = (gid_t)id;
     }
 
-    details->runas_pw = sudo_getpwuid(runas_uid);
-    if (details->runas_pw == NULL) {
+    pw = sudo_getpwuid(evlog->runuid);
+    if (pw != NULL) {
+	gid_t pw_gid = pw->pw_gid;
+	evlog->runuser = strdup(pw->pw_name);
+	sudo_pw_delref(pw);
+	if (evlog->runuser == NULL)
+	    goto oom;
+	if (evlog->rungid != pw_gid) {
+	    gr = sudo_getgrgid(evlog->rungid);
+	    if (gr != NULL) {
+		evlog->rungroup = strdup(gr->gr_name);
+		sudo_gr_delref(gr);
+		if (evlog->rungroup == NULL)
+		    goto oom;
+	    } else {
+		idbuf[0] = '#';
+		strlcpy(&idbuf[1], runas_gid_str, sizeof(idbuf) - 1);
+		evlog->rungroup = strdup(idbuf);
+		if (evlog->rungroup == NULL)
+		    goto oom;
+	    }
+	}
+    } else {
 	idbuf[0] = '#';
 	strlcpy(&idbuf[1], runas_uid_str, sizeof(idbuf) - 1);
-	details->runas_pw = sudo_fakepwnam(idbuf, runas_gid);
+	evlog->runuser = strdup(idbuf);
+	if (evlog->runuser == NULL)
+	    goto oom;
     }
 
-    if (runas_gid != details->runas_pw->pw_gid) {
-	details->runas_gr = sudo_getgrgid(runas_gid);
-	if (details->runas_gr == NULL) {
-	    idbuf[0] = '#';
-	    strlcpy(&idbuf[1], runas_gid_str, sizeof(idbuf) - 1);
-	    details->runas_gr = sudo_fakegrnam(idbuf);
-	}
-    }
     debug_return_int(
 	iolog_files[IOFD_STDIN].enabled || iolog_files[IOFD_STDOUT].enabled ||
 	iolog_files[IOFD_STDERR].enabled || iolog_files[IOFD_TTYIN].enabled ||
 	iolog_files[IOFD_TTYOUT].enabled);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    str_list_free(details->log_servers);
     debug_return_int(-1);
-}
-
-/*
- * Write the "log" file that contains the user and command info.
- * This file is not compressed.
- */
-static bool
-write_info_log(int dfd, char *iolog_dir, struct iolog_details *details)
-{
-    struct iolog_info iolog_info;
-    debug_decl(write_info_log, SUDOERS_DEBUG_UTIL);
-
-    /* XXX - just use iolog_info in the first place? */
-    memset(&iolog_info, 0, sizeof(iolog_info));
-    iolog_info.cwd = (char *)details->cwd;
-    iolog_info.user = (char *)details->user;
-    iolog_info.runchroot = (char *)details->runchroot;
-    iolog_info.runcwd = (char *)details->runcwd;
-    iolog_info.runas_user = details->runas_pw->pw_name;
-    iolog_info.runas_group = details->runas_gr ? details->runas_gr->gr_name: NULL;
-    iolog_info.tty = (char *)details->tty;
-    iolog_info.cmd = (char *)details->command;
-    iolog_info.host = (char *)details->host;
-    sudo_gettime_real(&iolog_info.tstamp);
-    iolog_info.lines = details->lines;
-    iolog_info.cols = details->cols;
-    iolog_info.runas_uid = details->runas_pw->pw_uid;
-    iolog_info.runas_gid = details->runas_gr ? details->runas_gr->gr_gid: (gid_t)-1;
-    iolog_info.argv = (char **)details->argv;
-    iolog_info.envp = (char **)details->user_env;
-
-    if (!iolog_write_info_file(dfd, iolog_dir, &iolog_info)) {
-	log_warningx(SLOG_SEND_MAIL,
-	    N_("unable to write to I/O log file: %s"), strerror(errno));
-	warned = true;
-	debug_return_bool(false);
-    }
-    debug_return_bool(true);
-}
-
-/*
- * Make a shallow copy of a NULL-terminated argument or environment vector.
- * Only the outer array is allocated, the pointers inside are copied.
- * The caller is responsible for freeing the returned copy.
- */
-static char **
-copy_vector_shallow(char * const *vec)
-{
-    char **copy;
-    size_t len;
-    debug_decl(copy_vector, SUDOERS_DEBUG_UTIL);
-
-    for (len = 0; vec[len] != NULL; len++)
-	continue;
-
-    if ((copy = reallocarray(NULL, len + 1, sizeof(char *))) != NULL) {
-	for (len = 0; vec[len] != NULL; len++)
-	    copy[len] = vec[len];
-	copy[len] = NULL;
-    }
-
-    debug_return_ptr(copy);
 }
 
 static int
 sudoers_io_open_local(struct timespec *now)
 {
-    char iolog_path[PATH_MAX], sessid[7];
-    size_t len;
+    struct eventlog *evlog = iolog_details.evlog;
     int i, ret = -1;
+    size_t len;
     debug_decl(sudoers_io_open_local, SUDOERS_DEBUG_PLUGIN);
 
     /* If no I/O log path defined we need to figure it out ourselves. */
-    if (iolog_details.iolog_path == NULL) {
+    if (evlog->iolog_path == NULL) {
 	/* Get next session ID and convert it into a path. */
-	len = strlcpy(iolog_path, _PATH_SUDO_IO_LOGDIR, sizeof(iolog_path));
-	if (len + strlen("/00/00/00") >= sizeof(iolog_path)) {
-	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    ret = false;
+	const size_t pathlen = sizeof(_PATH_SUDO_IO_LOGDIR "/00/00/00");
+	if ((evlog->iolog_path = malloc(pathlen)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	if (!iolog_nextid(iolog_path, sessid)) {
+	len = strlcpy(evlog->iolog_path, _PATH_SUDO_IO_LOGDIR, pathlen);
+	if (len + strlen("/00/00/00") >= pathlen) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    goto done;
+	}
+	if (!iolog_nextid(evlog->iolog_path, evlog->sessid)) {
 	    log_warning(SLOG_SEND_MAIL, N_("unable to update sequence file"));
-	    ret = false;
+	    warned = true;
 	    goto done;
 	}
-	(void)snprintf(iolog_path + sizeof(_PATH_SUDO_IO_LOGDIR),
-	    sizeof(iolog_path) - sizeof(_PATH_SUDO_IO_LOGDIR),
-	    "/%c%c/%c%c/%c%c", sessid[0], sessid[1], sessid[2],
-	    sessid[3], sessid[4], sessid[5]);
-    } else {
-	len = strlcpy(iolog_path, iolog_details.iolog_path, sizeof(iolog_path));
-	if (len >= sizeof(iolog_path)) {
-	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    ret = false;
-	    goto done;
-	}
+	(void)snprintf(evlog->iolog_path + strlen(_PATH_SUDO_IO_LOGDIR),
+	    pathlen - strlen(_PATH_SUDO_IO_LOGDIR),
+	    "/%c%c/%c%c/%c%c", evlog->sessid[0], evlog->sessid[1],
+	    evlog->sessid[2], evlog->sessid[3], evlog->sessid[4],
+	    evlog->sessid[5]);
     }
 
     /*
-     * Create I/O log path along with any * intermediate subdirs.
+     * Create I/O log path along with any intermediate subdirs.
      * Calls mkdtemp() if iolog_path ends in XXXXXX.
      */
-    if (!iolog_mkpath(iolog_path)) {
-	log_warning(SLOG_SEND_MAIL, "%s", iolog_path);
+    if (!iolog_mkpath(evlog->iolog_path)) {
+	log_warning(SLOG_SEND_MAIL, "%s", evlog->iolog_path);
+	warned = true;
 	goto done;
     }
 
-    iolog_dir_fd = iolog_openat(AT_FDCWD, iolog_path, O_RDONLY);
+    iolog_dir_fd = iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY);
     if (iolog_dir_fd == -1) {
-	log_warning(SLOG_SEND_MAIL, "%s", iolog_path);
+	log_warning(SLOG_SEND_MAIL, "%s", evlog->iolog_path);
+	warned = true;
 	goto done;
     }
 
     /* Write log file with user and command details. */
-    if (!write_info_log(iolog_dir_fd, iolog_path, &iolog_details))
+    if (!iolog_write_info_file(iolog_dir_fd, iolog_details.evlog)) {
+	log_warningx(SLOG_SEND_MAIL,
+	    N_("unable to write to I/O log file: %s"), strerror(errno));
+	warned = true;
 	goto done;
+    }
 
     /* Create the timing and I/O log files. */
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!iolog_open(&iolog_files[i], iolog_dir_fd, i, "w")) {
 	    log_warning(SLOG_SEND_MAIL, N_("unable to create %s/%s"),
-		iolog_path, iolog_fd_to_name(i));
+		evlog->iolog_path, iolog_fd_to_name(i));
+	    warned = true;
 	    goto done;
 	}
     }
@@ -624,34 +671,21 @@ done:
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static int
 sudoers_io_open_remote(struct timespec *now)
 {
-    int ret = -1;
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
-    client_closure = client_closure_alloc(&iolog_details, &sudoers_io, now);
-    if (client_closure == NULL)
-	goto done;
+    /* Open connection to log server, send hello and accept messages. */
+    client_closure = log_server_open(&iolog_details, now, true, SEND_ACCEPT,
+	NULL, sudoers_io.event_alloc);
+    if (client_closure != NULL)
+	debug_return_int(1);
 
-    /* Connect to log server. */
-    if (!log_server_connect(client_closure)) {
-	/* TODO: support offline logs if server unreachable */
-	sudo_warnx("%s", U_("unable to connect to log server"));
-	goto done;
-    }
-
-    /* Read ServerHello synchronously or fail. */
-    if (read_server_hello(client_closure))
-	ret = 1;
-
-done:
-    if (ret != 1)
-	client_closure_free(client_closure);
-    debug_return_int(ret);
+    debug_return_int(-1);
 }
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
 
 static int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
@@ -697,22 +731,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /*
      * Pull iolog settings out of command_info.
      */
-    ret = iolog_deserialize_info(&iolog_details, user_info, command_info);
+    ret = iolog_deserialize_info(&iolog_details, user_info, command_info,
+	argv, user_env);
     if (ret != true)
 	goto done;
-    iolog_details.argv = argv;
-    iolog_details.argc = argc;
-
-    /*
-     * Copy user_env, it may be reallocated during policy session init.
-     */
-    if (user_env != NULL) {
-	iolog_details.user_env = copy_vector_shallow(user_env);
-	if (iolog_details.user_env ==  NULL) {
-	    ret = -1;
-	    goto done;
-	}
-    }
 
     /* Initialize io_operations. */
     sudoers_io_setops();
@@ -749,12 +771,13 @@ done:
 	    close(iolog_dir_fd);
 	    iolog_dir_fd = -1;
 	}
+	free_iolog_details();
 	sudo_freepwcache();
 	sudo_freegrcache();
     }
 
     /* Ignore errors if they occur if the policy says so. */
-    if (ret == -1 && iolog_details.ignore_iolog_errors)
+    if (ret == -1 && iolog_details.ignore_log_errors)
 	ret = 0;
 
     debug_return_int(ret);
@@ -790,13 +813,14 @@ sudoers_io_close_local(int exit_status, int error, const char **errstr)
     debug_return;
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static void
 sudoers_io_close_remote(int exit_status, int error, const char **errstr)
 {
     debug_decl(sudoers_io_close_remote, SUDOERS_DEBUG_PLUGIN);
 
-    client_close(client_closure, exit_status, error);
+    log_server_close(client_closure, exit_status, error);
+    client_closure = NULL;
 
     debug_return;
 }
@@ -818,6 +842,7 @@ sudoers_io_close(int exit_status, int error)
 	warned = true;
     }
 
+    free_iolog_details();
     sudo_freepwcache();
     sudo_freegrcache();
 
@@ -885,7 +910,7 @@ done:
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 /*
  * Schedule an I/O log entry to be written to the log server.
  * Returns 1 on success and -1 on error.
@@ -934,7 +959,7 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
 done:
     debug_return_int(ret);
 }
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
 
 /*
  * Generic I/O logging function.  Called by the I/O logging entry points.
@@ -979,7 +1004,7 @@ bad:
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
-	if (iolog_details.ignore_iolog_errors)
+	if (iolog_details.ignore_log_errors)
 	    ret = 1;
     }
 
@@ -1043,7 +1068,7 @@ done:
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static int
 sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
     struct timespec *delay, const char **errstr)
@@ -1066,7 +1091,7 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
 
     debug_return_int(ret);
 }
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
 
 static int
 sudoers_io_change_winsize(unsigned int lines, unsigned int cols, const char **errstr)
@@ -1107,7 +1132,7 @@ bad:
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
-	if (iolog_details.ignore_iolog_errors)
+	if (iolog_details.ignore_log_errors)
 	    ret = 1;
     }
 
@@ -1141,7 +1166,7 @@ done:
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
 static int
 sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
     const char **errstr)
@@ -1164,7 +1189,7 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
 
     debug_return_int(ret);
 }
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
 
 static int
 sudoers_io_suspend(int signo, const char **errstr)
@@ -1213,7 +1238,7 @@ bad:
 	}
 
 	/* Ignore errors if they occur if the policy says so. */
-	if (iolog_details.ignore_iolog_errors)
+	if (iolog_details.ignore_log_errors)
 	    ret = 1;
     }
 
@@ -1228,7 +1253,7 @@ sudoers_io_setops(void)
 {
     debug_decl(sudoers_io_setops, SUDOERS_DEBUG_PLUGIN);
 
-#ifdef SUDOERS_IOLOG_CLIENT
+#ifdef SUDOERS_LOG_CLIENT
     if (sudoers_io.event_alloc != NULL && iolog_details.log_servers != NULL) {
 	io_operations.open = sudoers_io_open_remote;
 	io_operations.close = sudoers_io_close_remote;
@@ -1236,7 +1261,7 @@ sudoers_io_setops(void)
 	io_operations.change_winsize = sudoers_io_change_winsize_remote;
 	io_operations.suspend = sudoers_io_suspend_remote;
     } else
-#endif /* SUDOERS_IOLOG_CLIENT */
+#endif /* SUDOERS_LOG_CLIENT */
     {
 	io_operations.open = sudoers_io_open_local;
 	io_operations.close = sudoers_io_close_local;

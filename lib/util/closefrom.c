@@ -86,7 +86,7 @@ void
 sudo_closefrom(int lowfd)
 {
 #if defined(HAVE_PSTAT_GETPROC)
-    struct pst_status pstat;
+    struct pst_status pst;
 #elif defined(HAVE_DIRFD)
     const char *path;
     DIR *dirp;
@@ -102,11 +102,11 @@ sudo_closefrom(int lowfd)
      * EOVERFLOW is not a fatal error for the fields we use.
      * See the "EOVERFLOW Error" section of pstat_getvminfo(3).
      */                             
-    if (pstat_getproc(&pstat, sizeof(pstat), 0, getpid()) != -1 ||
+    if (pstat_getproc(&pst, sizeof(pst), 0, getpid()) != -1 ||
 	errno == EOVERFLOW) {
 	int fd;
 
-	for (fd = lowfd; fd <= pstat.pst_highestfd; fd++)
+	for (fd = lowfd; fd <= pst.pst_highestfd; fd++)
 	    (void) close(fd);
 	return;
     }

@@ -40,6 +40,7 @@
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
+#include "sudo_eventlog.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
 #include "sudo_queue.h"
@@ -104,63 +105,36 @@ bad:
 }
 
 /*
- * Free the strings in a struct iolog_details.
- */
-void
-iolog_details_free(struct iolog_details *details)
-{
-    int i;
-    debug_decl(iolog_details_free, SUDO_DEBUG_UTIL);
-
-    if (details != NULL) {
-	free(details->iolog_path);
-	free(details->command);
-	free(details->cwd);
-	free(details->runchroot);
-	free(details->runcwd);
-	free(details->rungroup);
-	free(details->runuser);
-	free(details->submithost);
-	free(details->submituser);
-	free(details->submitgroup);
-	free(details->ttyname);
-	for (i = 0; i < details->argc; i++)
-	    free(details->argv[i]);
-	free(details->argv);
-	if (details->envp != NULL) {
-	    for (i = 0; details->envp[i] != NULL; i++)
-		free(details->envp[i]);
-	    free(details->envp);
-	}
-    }
-
-    debug_return;
-}
-
-/*
- * Fill in I/O log details from an AcceptMessage
- * Caller is responsible for freeing strings in struct iolog_details.
+ * Fill in eventlog details from an AcceptMessage
+ * Caller is responsible for freeing strings in struct eventlog.
  * Returns true on success and false on failure.
  */
-bool
-iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
-    InfoMessage **info_msgs, size_t infolen)
+struct eventlog *
+evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen)
 {
+    struct eventlog *evlog;
     size_t idx;
-    bool ret = false;
-    debug_decl(iolog_details_fill, SUDO_DEBUG_UTIL);
+    debug_decl(evlog_new, SUDO_DEBUG_UTIL);
 
-    memset(details, 0, sizeof(*details));
+    evlog = calloc(1, sizeof(*evlog));
+    if (evlog == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "calloc(1, %zu)", sizeof(*evlog));
+	goto bad;
+    }
+    memset(evlog, 0, sizeof(*evlog));
 
     /* Submit time. */
-    details->submit_time.tv_sec = submit_time->tv_sec;
-    details->submit_time.tv_nsec = submit_time->tv_nsec;
+    if (submit_time != NULL) {
+	evlog->submit_time.tv_sec = submit_time->tv_sec;
+	evlog->submit_time.tv_nsec = submit_time->tv_nsec;
+    }
 
     /* Default values */
-    details->lines = 24;
-    details->columns = 80;
-    details->runuid = (uid_t)-1;
-    details->rungid = (gid_t)-1;
+    evlog->lines = 24;
+    evlog->columns = 80;
+    evlog->runuid = (uid_t)-1;
+    evlog->rungid = (gid_t)-1;
 
     /* Pull out values by key from info array. */
     for (idx = 0; idx < infolen; idx++) {
@@ -176,17 +150,17 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"columns (%" PRId64 ") out of range", info->u.numval);
 		} else {
-		    details->columns = info->u.numval;
+		    evlog->columns = info->u.numval;
 		}
 		continue;
 	    }
 	    if (strcmp(key, "command") == 0) {
 		if (has_strval(info)) {
-		    if ((details->command = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->command = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -204,7 +178,7 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"lines (%" PRId64 ") out of range", info->u.numval);
 		} else {
-		    details->lines = info->u.numval;
+		    evlog->lines = info->u.numval;
 		}
 		continue;
 	    }
@@ -212,10 +186,9 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	case 'r':
 	    if (strcmp(key, "runargv") == 0) {
 		if (has_strlistval(info)) {
-		    details->argv = strlist_copy(info->u.strlistval);
-		    if (details->argv == NULL)
-			goto done;
-		    details->argc = info->u.strlistval->n_strings;
+		    evlog->argv = strlist_copy(info->u.strlistval);
+		    if (evlog->argv == NULL)
+			goto bad;
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runargv specified but not a string list");
@@ -224,11 +197,11 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "runchroot") == 0) {
 		if (has_strval(info)) {
-		    if ((details->runchroot = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->runchroot = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -238,11 +211,11 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "runcwd") == 0) {
 		if (has_strval(info)) {
-		    if ((details->runcwd = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->runcwd = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -252,9 +225,9 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "runenv") == 0) {
 		if (has_strlistval(info)) {
-		    details->envp = strlist_copy(info->u.strlistval);
-		    if (details->envp == NULL)
-			goto done;
+		    evlog->envp = strlist_copy(info->u.strlistval);
+		    if (evlog->envp == NULL)
+			goto bad;
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runenv specified but not a string list");
@@ -269,17 +242,17 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"rungid (%" PRId64 ") out of range", info->u.numval);
 		} else {
-		    details->rungid = info->u.numval;
+		    evlog->rungid = info->u.numval;
 		}
 		continue;
 	    }
 	    if (strcmp(key, "rungroup") == 0) {
 		if (has_strval(info)) {
-		    if ((details->rungroup = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->rungroup = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -295,17 +268,17 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"runuid (%" PRId64 ") out of range", info->u.numval);
 		} else {
-		    details->runuid = info->u.numval;
+		    evlog->runuid = info->u.numval;
 		}
 		continue;
 	    }
 	    if (strcmp(key, "runuser") == 0) {
 		if (has_strval(info)) {
-		    if ((details->runuser = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->runuser = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -317,11 +290,11 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	case 's':
 	    if (strcmp(key, "submitcwd") == 0) {
 		if (has_strval(info)) {
-		    if ((details->cwd = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->cwd = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -331,11 +304,11 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "submitgroup") == 0) {
 		if (has_strval(info)) {
-		    if ((details->submitgroup = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->submitgroup = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -345,11 +318,11 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "submithost") == 0) {
 		if (has_strval(info)) {
-		    if ((details->submithost = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->submithost = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -359,11 +332,11 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	    }
 	    if (strcmp(key, "submituser") == 0) {
 		if (has_strval(info)) {
-		    if ((details->submituser = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->submituser = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -375,11 +348,11 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
 	case 't':
 	    if (strcmp(key, "ttyname") == 0) {
 		if (has_strval(info)) {
-		    if ((details->ttyname = strdup(info->u.strval)) == NULL) {
+		    if ((evlog->ttyname = strdup(info->u.strval)) == NULL) {
 			sudo_debug_printf(
 			    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 			    "strdup");
-			goto done;
+			goto bad;
 		    }
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -392,80 +365,79 @@ iolog_details_fill(struct iolog_details *details, TimeSpec *submit_time,
     }
 
     /* Check for required settings */
-    if (details->submituser == NULL) {
+    if (evlog->submituser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing submituser in AcceptMessage");
-	goto done;
+	goto bad;
     }
-    if (details->submithost == NULL) {
+    if (evlog->submithost == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing submithost in AcceptMessage");
-	goto done;
+	goto bad;
     }
-    if (details->runuser == NULL) {
+    if (evlog->runuser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing runuser in AcceptMessage");
-	goto done;
+	goto bad;
     }
-    if (details->command == NULL) {
+    if (evlog->command == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "missing command in AcceptMessage");
-	goto done;
+	goto bad;
     }
 
     /* Other settings that must exist for event logging. */
-    if (details->cwd == NULL) {
-	if ((details->cwd = strdup("unknown")) == NULL) {
+    if (evlog->cwd == NULL) {
+	if ((evlog->cwd = strdup("unknown")) == NULL) {
 	    sudo_debug_printf(
 		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"strdup");
-	    goto done;
+	    goto bad;
 	}
     }
-    if (details->runcwd == NULL) {
-	if ((details->runcwd = strdup(details->cwd)) == NULL) {
+    if (evlog->runcwd == NULL) {
+	if ((evlog->runcwd = strdup(evlog->cwd)) == NULL) {
 	    sudo_debug_printf(
 		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"strdup");
-	    goto done;
+	    goto bad;
 	}
     }
-    if (details->submitgroup == NULL) {
+    if (evlog->submitgroup == NULL) {
 	/* TODO: make submitgroup required */
-	if ((details->submitgroup = strdup("unknown")) == NULL) {
+	if ((evlog->submitgroup = strdup("unknown")) == NULL) {
 	    sudo_debug_printf(
 		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"strdup");
-	    goto done;
+	    goto bad;
 	}
     }
-    if (details->ttyname == NULL) {
-	if ((details->ttyname = strdup("unknown")) == NULL) {
+    if (evlog->ttyname == NULL) {
+	if ((evlog->ttyname = strdup("unknown")) == NULL) {
 	    sudo_debug_printf(
 		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"strdup");
-	    goto done;
+	    goto bad;
 	}
     }
 
-    ret = true;
+    debug_return_ptr(evlog);
 
-done:
-    if (!ret)
-	iolog_details_free(details);
-    debug_return_bool(ret);
+bad:
+    eventlog_free(evlog);
+    debug_return_ptr(NULL);
 }
 
 struct iolog_path_closure {
     char *iolog_dir;
-    struct iolog_details *details;
+    struct eventlog *evlog;
 };
 
 static size_t
 fill_seq(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
-    char *sessid = closure->details->sessid;
+    char *sessid = closure->evlog->sessid;
     int len;
     debug_decl(fill_seq, SUDO_DEBUG_UTIL);
 
@@ -489,91 +461,91 @@ static size_t
 fill_user(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
-    const struct iolog_details *details = closure->details;
+    const struct eventlog *evlog = closure->evlog;
     debug_decl(fill_user, SUDO_DEBUG_UTIL);
 
-    if (details->submituser == NULL) {
+    if (evlog->submituser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "submituser not set");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, details->submituser, strsize));
+    debug_return_size_t(strlcpy(str, evlog->submituser, strsize));
 }
 
 static size_t
 fill_group(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
-    const struct iolog_details *details = closure->details;
+    const struct eventlog *evlog = closure->evlog;
     debug_decl(fill_group, SUDO_DEBUG_UTIL);
 
-    if (details->submitgroup == NULL) {
+    if (evlog->submitgroup == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "submitgroup not set");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, details->submitgroup, strsize));
+    debug_return_size_t(strlcpy(str, evlog->submitgroup, strsize));
 }
 
 static size_t
 fill_runas_user(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
-    const struct iolog_details *details = closure->details;
+    const struct eventlog *evlog = closure->evlog;
     debug_decl(fill_runas_user, SUDO_DEBUG_UTIL);
 
-    if (details->runuser == NULL) {
+    if (evlog->runuser == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "runuser not set");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, details->runuser, strsize));
+    debug_return_size_t(strlcpy(str, evlog->runuser, strsize));
 }
 
 static size_t
 fill_runas_group(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
-    const struct iolog_details *details = closure->details;
+    const struct eventlog *evlog = closure->evlog;
     debug_decl(fill_runas_group, SUDO_DEBUG_UTIL);
 
     /* FIXME: rungroup not guaranteed to be set */
-    if (details->rungroup == NULL) {
+    if (evlog->rungroup == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "rungroup not set");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, details->rungroup, strsize));
+    debug_return_size_t(strlcpy(str, evlog->rungroup, strsize));
 }
 
 static size_t
 fill_hostname(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
-    const struct iolog_details *details = closure->details;
+    const struct eventlog *evlog = closure->evlog;
     debug_decl(fill_hostname, SUDO_DEBUG_UTIL);
 
-    if (details->submithost == NULL) {
+    if (evlog->submithost == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "submithost not set");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, details->submithost, strsize));
+    debug_return_size_t(strlcpy(str, evlog->submithost, strsize));
 }
 
 static size_t
 fill_command(char *str, size_t strsize, void *v)
 {
     struct iolog_path_closure *closure = v;
-    const struct iolog_details *details = closure->details;
+    const struct eventlog *evlog = closure->evlog;
     debug_decl(fill_command, SUDO_DEBUG_UTIL);
 
-    if (details->command == NULL) {
+    if (evlog->command == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "command not set");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, details->command, strsize));
+    debug_return_size_t(strlcpy(str, evlog->command, strsize));
 }
 
 /* Note: "seq" must be first in the list. */
@@ -595,13 +567,13 @@ static const struct iolog_path_escape path_escapes[] = {
 static bool
 create_iolog_path(struct connection_closure *closure)
 {
-    struct iolog_details *details = &closure->details;
+    struct eventlog *evlog = closure->evlog;
     struct iolog_path_closure path_closure;
     char expanded_dir[PATH_MAX], expanded_file[PATH_MAX], pathbuf[PATH_MAX];
     size_t len;
     debug_decl(create_iolog_path, SUDO_DEBUG_UTIL);
 
-    path_closure.details = details;
+    path_closure.evlog = evlog;
     path_closure.iolog_dir = expanded_dir;
 
     if (!expand_iolog_path(logsrvd_conf_iolog_dir(), expanded_dir,
@@ -636,60 +608,27 @@ create_iolog_path(struct connection_closure *closure)
 	    "unable to mkdir iolog path %s", pathbuf);
         goto bad;
     }
-    if ((details->iolog_path = strdup(pathbuf)) == NULL) {
+    if ((evlog->iolog_path = strdup(pathbuf)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "strdup");
 	goto bad;
     }
-    details->iolog_file = details->iolog_path + strlen(expanded_dir) + 1;
+    evlog->iolog_file = evlog->iolog_path + strlen(expanded_dir) + 1;
 
     /* We use iolog_dir_fd in calls to openat(2) */
     closure->iolog_dir_fd =
-	iolog_openat(AT_FDCWD, details->iolog_path, O_RDONLY);
+	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s", details->iolog_path);
+	    "%s", evlog->iolog_path);
 	goto bad;
     }
 
     debug_return_bool(true);
 bad:
-    free(details->iolog_path);
-    details->iolog_path = NULL;
+    free(evlog->iolog_path);
+    evlog->iolog_path = NULL;
     debug_return_bool(false);
-}
-
-/*
- * Write the sudo-style I/O log info file containing user and command info.
- */
-static bool
-iolog_details_write(struct iolog_details *details,
-     struct connection_closure *closure)
-{
-    struct iolog_info log_info;
-    debug_decl(iolog_details_write, SUDO_DEBUG_UTIL);
-
-    /* Convert to iolog_info */
-    memset(&log_info, 0, sizeof(log_info));
-    log_info.cwd = details->cwd;
-    log_info.user = details->submituser;
-    log_info.runchroot = details->runchroot;
-    log_info.runcwd = details->runcwd;
-    log_info.runas_user = details->runuser;
-    log_info.runas_group = details->rungroup;
-    log_info.tty = details->ttyname;
-    log_info.cmd = details->command;
-    log_info.host = details->submithost;
-    log_info.tstamp = details->submit_time;
-    log_info.lines = details->lines;
-    log_info.cols = details->columns;
-    log_info.runas_uid = details->runuid;
-    log_info.runas_gid = details->rungid;
-    log_info.argv = details->argv;
-    log_info.envp = details->envp;
-
-    debug_return_bool(iolog_write_info_file(closure->iolog_dir_fd,
-	 details->iolog_path, &log_info));
 }
 
 static bool
@@ -732,6 +671,7 @@ iolog_close_all(struct connection_closure *closure)
 bool
 iolog_init(AcceptMessage *msg, struct connection_closure *closure)
 {
+    struct eventlog *evlog = closure->evlog;
     debug_decl(iolog_init, SUDO_DEBUG_UTIL);
 
     /* Create I/O log path */
@@ -739,7 +679,7 @@ iolog_init(AcceptMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
 
     /* Write sudo I/O log info file */
-    if (!iolog_details_write(&closure->details, closure))
+    if (!iolog_write_info_file(closure->iolog_dir_fd, evlog))
 	debug_return_bool(false);
 
     /*
@@ -791,6 +731,7 @@ iolog_copy(struct iolog_file *src, struct iolog_file *dst, off_t remainder,
 static bool
 iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 {
+    const struct eventlog *evlog = closure->evlog;
     struct iolog_file new_iolog_files[IOFD_MAX];
     off_t iolog_file_sizes[IOFD_MAX] = { 0 };
     struct timing_closure timing;
@@ -837,10 +778,10 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 
     /* Create new I/O log files in a temporary directory. */
     len = snprintf(tmpdir, sizeof(tmpdir), "%s/restart.XXXXXX",
-	closure->details.iolog_path);
+	evlog->iolog_path);
     if (len < 0 || len >= ssizeof(tmpdir)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format %s/restart.XXXXXX", closure->details.iolog_path);
+	    "unable to format %s/restart.XXXXXX", evlog->iolog_path);
 	goto done;
     }
     if (!iolog_mkdtemp(tmpdir)) {
@@ -878,7 +819,7 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 	    name = iolog_fd_to_name(iofd);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to copy %s/%s to %s/%s: %s",
-		closure->details.iolog_path, name, tmpdir, name, errstr);
+		evlog->iolog_path, name, tmpdir, name, errstr);
 	    goto done;
 	}
     }
@@ -898,11 +839,11 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 		"unable to format %s/%s", tmpdir, name);
 	    goto done;
 	}
-	len = snprintf(to, sizeof(to), "%s/%s", closure->details.iolog_path,
+	len = snprintf(to, sizeof(to), "%s/%s", evlog->iolog_path,
 	    name);
 	if (len < 0 || len >= ssizeof(from)) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to format %s/%s", closure->details.iolog_path, name);
+		"unable to format %s/%s", evlog->iolog_path, name);
 	    goto done;
 	}
 	if (!iolog_rename(from, to)) {
@@ -942,6 +883,7 @@ done:
 bool
 iolog_restart(RestartMessage *msg, struct connection_closure *closure)
 {
+    struct eventlog *evlog = closure->evlog;
     struct timespec target;
     struct stat sb;
     int iofd;
@@ -950,7 +892,7 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     target.tv_sec = msg->resume_point->tv_sec;
     target.tv_nsec = msg->resume_point->tv_nsec;
 
-    if ((closure->details.iolog_path = strdup(msg->log_id)) == NULL) {
+    if ((evlog->iolog_path = strdup(msg->log_id)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "strdup");
 	goto bad;
@@ -958,28 +900,28 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
 
     /* We use iolog_dir_fd in calls to openat(2) */
     closure->iolog_dir_fd =
-	iolog_openat(AT_FDCWD, closure->details.iolog_path, O_RDONLY);
+	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s", closure->details.iolog_path);
+	    "%s", evlog->iolog_path);
 	goto bad;
     }
 
     /* If the timing file write bit is clear, log is already complete. */
     if (fstatat(closure->iolog_dir_fd, "timing", &sb, 0) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to stat %s/timing", closure->details.iolog_path);
+	    "unable to stat %s/timing", evlog->iolog_path);
 	goto bad;
     }
     if (!ISSET(sb.st_mode, S_IWUSR)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s already complete", closure->details.iolog_path);
+	    "%s already complete", evlog->iolog_path);
 	closure->errstr = _("log is already complete, cannot be restarted");
 	goto bad;
     }
 
     /* Open existing I/O log files. */
-    if (!iolog_open_all(closure->iolog_dir_fd, closure->details.iolog_path,
+    if (!iolog_open_all(closure->iolog_dir_fd, evlog->iolog_path,
 	    closure->iolog_files, "r+"))
 	goto bad;
 
@@ -990,7 +932,7 @@ iolog_restart(RestartMessage *msg, struct connection_closure *closure)
     }
 
     /* Parse timing file until we reach the target point. */
-    if (!iolog_seekto(closure->iolog_dir_fd, closure->details.iolog_path,
+    if (!iolog_seekto(closure->iolog_dir_fd, evlog->iolog_path,
 	    closure->iolog_files, &closure->elapsed_time, &target))
 	goto bad;
 
@@ -1032,6 +974,7 @@ update_elapsed_time(TimeSpec *delta, struct timespec *elapsed)
 int
 store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 {
+    const struct eventlog *evlog = closure->evlog;
     const char *errstr;
     char tbuf[1024];
     int len;
@@ -1058,7 +1001,7 @@ store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     if (!iolog_write(&closure->iolog_files[iofd], msg->data.data,
 	    msg->data.len, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->details.iolog_path,
+	    "unable to write to %s/%s: %s", evlog->iolog_path,
 	    iolog_fd_to_name(iofd), errstr);
 	debug_return_int(-1);
     }
@@ -1067,7 +1010,7 @@ store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->details.iolog_path,
+	    "unable to write to %s/%s: %s", evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	debug_return_int(-1);
     }
@@ -1080,6 +1023,7 @@ store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 int
 store_suspend(CommandSuspend *msg, struct connection_closure *closure)
 {
+    const struct eventlog *evlog = closure->evlog;
     const char *errstr;
     char tbuf[1024];
     int len;
@@ -1100,7 +1044,7 @@ store_suspend(CommandSuspend *msg, struct connection_closure *closure)
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->details.iolog_path,
+	    "unable to write to %s/%s: %s", evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	debug_return_int(-1);
     }
@@ -1113,6 +1057,7 @@ store_suspend(CommandSuspend *msg, struct connection_closure *closure)
 int
 store_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 {
+    const struct eventlog *evlog = closure->evlog;
     const char *errstr;
     char tbuf[1024];
     int len;
@@ -1132,7 +1077,7 @@ store_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->details.iolog_path,
+	    "unable to write to %s/%s: %s", evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	debug_return_int(-1);
     }

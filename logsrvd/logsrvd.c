@@ -61,8 +61,10 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
+#include "sudo_json.h"
 #include "sudo_iolog.h"
 #include "sudo_queue.h"
 #include "sudo_rand.h"
@@ -77,9 +79,14 @@
 # define LOGSRVD_DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"
 #endif
 
+#ifndef O_NOFOLLOW
+# define O_NOFOLLOW 0
+#endif
+
 /*
  * Sudo I/O audit server.
  */
+static int logsrvd_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
@@ -117,7 +124,7 @@ connection_closure_free(struct connection_closure *closure)
 #if defined(HAVE_OPENSSL)
 	sudo_ev_free(closure->ssl_accept_ev);
 #endif
-	iolog_details_free(&closure->details);
+	eventlog_free(closure->evlog);
 	free(closure->read_buf.data);
 	free(closure->write_buf.data);
 	free(closure);
@@ -216,12 +223,69 @@ fmt_error_message(const char *errstr, struct connection_buffer *buf)
     debug_return_bool(fmt_server_message(buf, &msg));
 }
 
+struct logsrvd_info_closure {
+    InfoMessage **info_msgs;
+    size_t infolen;
+};
+
+static bool
+logsrvd_json_log_cb(struct json_container *json, void *v)
+{
+    struct logsrvd_info_closure *closure = v;
+    struct json_value json_value;
+    size_t idx;
+    debug_decl(logsrvd_json_log_cb, SUDO_DEBUG_UTIL);
+
+    for (idx = 0; idx < closure->infolen; idx++) {
+	InfoMessage *info = closure->info_msgs[idx];
+
+	switch (info->value_case) {
+	case INFO_MESSAGE__VALUE_NUMVAL:
+	    json_value.type = JSON_NUMBER;
+	    json_value.u.number = info->u.numval;
+	    if (!sudo_json_add_value(json, info->key, &json_value))
+		goto bad;
+	    break;
+	case INFO_MESSAGE__VALUE_STRVAL:
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = info->u.strval;
+	    if (!sudo_json_add_value(json, info->key, &json_value))
+		goto bad;
+	    break;
+	case INFO_MESSAGE__VALUE_STRLISTVAL: {
+	    InfoMessage__StringList *strlist = info->u.strlistval;
+	    size_t n;
+
+	    if (!sudo_json_open_array(json, info->key))
+		goto bad;
+	    for (n = 0; n < strlist->n_strings; n++) {
+		json_value.type = JSON_STRING;
+		json_value.u.string = strlist->strings[n];
+		if (!sudo_json_add_value(json, NULL, &json_value))
+		    goto bad;
+	    }
+	    if (!sudo_json_close_array(json))
+		goto bad;
+	    break;
+	}
+	default:
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected value case %d", info->value_case);
+	    goto bad;
+	}
+    }
+    debug_return_bool(true);
+bad:
+    debug_return_bool(false);
+}
+
 /*
  * Parse an AcceptMessage
  */
 static bool
 handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 {
+    struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
     debug_decl(handle_accept, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
@@ -231,7 +295,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    /* Sanity check message. */
+    /* Check that message is valid. */
     if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid AcceptMessage, submit_time: %p, n_info_msgs: %zu",
@@ -241,12 +305,9 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
 
-    /* Save start time. */
-    closure->submit_time.tv_sec = msg->submit_time->tv_sec;
-    closure->submit_time.tv_nsec = msg->submit_time->tv_nsec;
-
-    if (!iolog_details_fill(&closure->details, msg->submit_time, msg->info_msgs,
-	    msg->n_info_msgs)) {
+    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
+	msg->n_info_msgs);
+    if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing AcceptMessage");
 	debug_return_bool(false);
     }
@@ -260,25 +321,21 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	closure->log_io = true;
     }
 
-    if (!log_accept(&closure->details, msg->submit_time, msg->info_msgs,
-	    msg->n_info_msgs)) {
+    if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging accept event");
 	debug_return_bool(false);
     }
 
-    if (!msg->expect_iobufs) {
-	closure->state = RUNNING;
-	debug_return_bool(true);
-    }
-
-    /* Send log ID to client for restarting connections. */
-    if (!fmt_log_id_message(closure->details.iolog_path, &closure->write_buf))
-	debug_return_bool(false);
-    if (sudo_ev_add(closure->evbase, closure->write_ev,
-        logsrvd_conf_get_sock_timeout(), false) == -1) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to add server write event");
-        debug_return_bool(false);
+    if (msg->expect_iobufs) {
+	/* Send log ID to client for restarting connections. */
+	if (!fmt_log_id_message(closure->evlog->iolog_path, &closure->write_buf))
+	    debug_return_bool(false);
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_get_sock_timeout(), false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    debug_return_bool(false);
+	}
     }
 
     closure->state = RUNNING;
@@ -291,6 +348,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 static bool
 handle_reject(RejectMessage *msg, struct connection_closure *closure)
 {
+    struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
     debug_decl(handle_reject, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
@@ -300,7 +358,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
-    /* Sanity check message. */
+    /* Check that message is valid. */
     if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid RejectMessage, submit_time: %p, n_info_msgs: %zu",
@@ -310,18 +368,15 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
 
-    /* Save start time. */
-    closure->submit_time.tv_sec = msg->submit_time->tv_sec;
-    closure->submit_time.tv_nsec = msg->submit_time->tv_nsec;
-
-    if (!iolog_details_fill(&closure->details, msg->submit_time, msg->info_msgs,
-	    msg->n_info_msgs)) {
+    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
+	msg->n_info_msgs);
+    if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing RejectMessage");
 	debug_return_bool(false);
     }
 
-    if (!log_reject(&closure->details, msg->reason, msg->submit_time,
-	    msg->info_msgs, msg->n_info_msgs)) {
+    if (!eventlog_reject(closure->evlog, 0, msg->reason,
+	    logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging reject event");
 	debug_return_bool(false);
     }
@@ -424,9 +479,30 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 static bool
 handle_alert(AlertMessage *msg, struct connection_closure *closure)
 {
+    struct timespec alert_time;
     debug_decl(handle_alert, SUDO_DEBUG_UTIL);
 
-    if (!log_alert(&closure->details, msg->alert_time, msg->reason)) {
+    /* Check that message is valid. */
+    if (msg->alert_time == NULL || msg->reason == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid AlertMessage, alert_time: %p, reason: %p",
+	    msg->alert_time, msg->reason);
+	closure->errstr = _("invalid AlertMessage");
+	debug_return_bool(false);
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AlertMessage", __func__);
+
+    if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
+	closure->evlog = evlog_new(NULL, msg->info_msgs, msg->n_info_msgs);
+	if (closure->evlog == NULL) {
+	    closure->errstr = _("error parsing AlertMessage");
+	    debug_return_bool(false);
+	}
+    }
+
+    alert_time.tv_sec = msg->alert_time->tv_sec;
+    alert_time.tv_nsec = msg->alert_time->tv_nsec;
+    if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
 	closure->errstr = _("error logging alert event");
 	debug_return_bool(false);
     }
@@ -1702,10 +1778,12 @@ server_reload(struct sudo_event_base *base)
 	if (!server_setup(base))
 	    sudo_fatalx("%s", U_("unable setup listen socket"));
 
-	/* Re-initialize debugging. */
+	/* Re-read sudo.conf and re-initialize debugging. */
+	sudo_debug_deregister(logsrvd_debug_instance);
+	logsrvd_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
-	    sudo_debug_register(getprogname(), NULL, NULL,
-		sudo_conf_debug_files(getprogname()));
+	    logsrvd_debug_instance = sudo_debug_register(getprogname(),
+		NULL, NULL, sudo_conf_debug_files(getprogname()));
 	}
     }
 
@@ -1766,17 +1844,23 @@ static void
 write_pidfile(void)
 {
     FILE *fp;
+    int fd;
     bool success;
     char *pid_file = (char *)logsrvd_conf_pid_file();
     debug_decl(write_pidfile, SUDO_DEBUG_UTIL);
+
+    if (pid_file == NULL)
+	debug_return;
 
     /* sudo_mkdir_parents() modifies the path but restores it before return. */
     success = sudo_mkdir_parents(pid_file, ROOT_UID, ROOT_GID,
 	S_IRWXU|S_IXGRP|S_IXOTH, false);
     if (success) {
-	fp = fopen(logsrvd_conf_pid_file(), "w");
-	if (fp == NULL) {
+	fd = open(pid_file, O_WRONLY|O_CREAT|O_NOFOLLOW, 0644);
+	if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	    sudo_warn("%s", pid_file);
+	    if (fd != -1)
+		close(fd);
 	} else {
 	    fprintf(fp, "%u\n", (unsigned int)getpid());
 	    fflush(fp);
@@ -1891,7 +1975,7 @@ main(int argc, char *argv[])
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
         exit(EXIT_FAILURE);
-    sudo_debug_register(getprogname(), NULL, NULL,
+    logsrvd_debug_instance = sudo_debug_register(getprogname(), NULL, NULL,
         sudo_conf_debug_files(getprogname()));
 
     if (protobuf_c_version_number() < 1003000)
@@ -1945,7 +2029,7 @@ main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     sudo_ev_dispatch(evbase);
-    if (!nofork)
+    if (!nofork && logsrvd_conf_pid_file() != NULL)
 	unlink(logsrvd_conf_pid_file());
 
     debug_return_int(1);

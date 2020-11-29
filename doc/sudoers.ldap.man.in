@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "October 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "October 29, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -711,6 +711,14 @@ or the user's
 \fI.ldaprc\fR
 files are not used.
 .PP
+\fBsudo\fR
+supports a variety of LDAP library implementations, including
+OpenLDAP, Netscape-derived (also used by Solaris and HP-UX), and
+IBM LDAP (aka Tivoli).
+Some options are specific to certain LDAP implementations or have
+implementation-specific behavior.
+These differences are noted below where applicable.
+.PP
 Only those options explicitly listed in
 \fI@ldap_conf@\fR
 as being supported by
@@ -793,11 +801,12 @@ The
 \fBHOST\fR
 parameter is deprecated in favor of the
 \fBURI\fR
-specification and is included for backwards compatibility only.
+specification and is included for backward compatibility only.
 .TP 6n
 \fBKRB5_CCNAME\fR \fIfile name\fR
 The path to the Kerberos 5 credential cache to use when authenticating
 with the remote server.
+.sp
 This option is only relevant when using SASL authentication (see below).
 .TP 6n
 \fBLDAP_VERSION\fR \fInumber\fR
@@ -857,7 +866,8 @@ The default search filter is:
 If
 \fIldap_filter\fR
 is omitted, no search filter will be used.
-This option is only when querying netgroups directly via LDAP.
+.sp
+This option is only used when querying netgroups directly via LDAP.
 .TP 6n
 \fBNETWORK_TIMEOUT\fR \fIseconds\fR
 An alias for
@@ -880,7 +890,7 @@ The
 \fBPORT\fR
 parameter is deprecated in favor of the
 \fBURI\fR
-specification and is included for backwards compatibility only.
+specification and is included for backward compatibility only.
 .TP 6n
 \fBROOTBINDDN\fR \fIDN\fR
 The
@@ -914,6 +924,7 @@ The SASL user name to use when connecting to the LDAP server.
 By default,
 \fBsudo\fR
 will use an anonymous connection.
+.sp
 This option is only relevant when using SASL authentication.
 .TP 6n
 \fBSASL_MECH\fR \fImechanisms\fR
@@ -929,6 +940,7 @@ SASL security properties or
 \fInone\fR
 for no properties.
 See the SASL programmer's manual for details.
+.sp
 This option is only relevant when using SASL authentication.
 .TP 6n
 \fBSSL\fR \fIon/true/yes/off/false/no\fR
@@ -953,7 +965,7 @@ This has the advantage of not requiring a dedicated port for encrypted
 communications.
 This parameter is only supported by LDAP servers that honor the
 \fIstart_tls\fR
-extension, such as the OpenLDAP and Tivoli Directory servers.
+extension, such as the OpenLDAP and IBM Tivoli Directory servers.
 .TP 6n
 \fBSUDOERS_BASE\fR \fIbase\fR
 The base DN to use when performing
@@ -1041,6 +1053,7 @@ for OpenLDAP compatibility.
 The path to a certificate authority bundle which contains the certificates
 for all the Certificate Authorities the client knows to be valid, e.g.,
 \fI/etc/ssl/ca-bundle.pem\fR.
+.sp
 This option is only supported by the OpenLDAP libraries.
 Netscape-derived LDAP libraries use the same certificate
 database for CA and client certificates (see
@@ -1056,6 +1069,7 @@ The directory specified by
 \fBTLS_CACERTDIR\fR
 is checked after
 \fBTLS_CACERTFILE\fR.
+.sp
 This option is only supported by the OpenLDAP libraries.
 .TP 6n
 \fBTLS_CERT\fR \fIfile name\fR
@@ -1073,17 +1087,14 @@ OpenLDAP:
 Netscape-derived:
 \fRtls_cert /var/ldap/cert7.db\fR
 .TP 6n
-Tivoli Directory Server:
+IBM LDAP:
 Unused, the key database specified by
 \fBTLS_KEY\fR
 contains both keys and certificates.
-.sp
+.PP
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
-.PD 0
-.PP
 .RE
-.PD
 .TP 6n
 \fBTLS_CHECKPEER\fR \fIon/true/yes/off/false/no\fR
 If enabled,
@@ -1100,7 +1111,8 @@ Note that disabling the check creates an opportunity for man-in-the-middle
 attacks since the server's identity will not be authenticated.
 If possible, the CA's certificate should be installed locally so it can
 be verified.
-This option is not supported by the Tivoli Directory Server LDAP libraries.
+.sp
+This option is not supported by the IBM LDAP libraries.
 .TP 6n
 \fBTLS_KEY\fR \fIfile name\fR
 The path to a file containing the private key which matches the
@@ -1119,29 +1131,28 @@ OpenLDAP:
 Netscape-derived:
 \fRtls_key /var/ldap/key3.db\fR
 .TP 6n
-Tivoli Directory Server:
+IBM LDAP:
 \fRtls_key /usr/ldap/ldapkey.kdb\fR
-.PD 0
 .PP
-When using Tivoli LDAP libraries, this file may also contain
+When using IBM LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
 .RE
-.PD
 .TP 6n
 \fBTLS_CIPHERS\fR \fIcipher list\fR
 The
 \fBTLS_CIPHERS\fR
 parameter allows the administer to restrict which encryption algorithms
 may be used for TLS (SSL) connections.
-See the OpenLDAP or Tivoli Directory Server manual for a list of valid
+See the OpenLDAP or IBM Tivoli Directory Server manual for a list of valid
 ciphers.
+.sp
 This option is not supported by Netscape-derived libraries.
 .TP 6n
 \fBTLS_KEYPW\fR \fIsecret\fR
 The
 \fBTLS_KEYPW\fR
 contains the password used to decrypt the key database on clients
-using the Tivoli Directory Server LDAP library.
+using the IBM LDAP library.
 The
 \fIsecret\fR
 may be a plain text password or a base64-encoded string with a
@@ -1186,13 +1197,14 @@ e.g.,
 \fRldapkey.sth\fR.
 The default
 \fRldapkey.kdb\fR
-that ships with Tivoli Directory Server is encrypted with the password
+that ships with the IBM Tivoli Directory Server is encrypted with the password
 \fRssl_password\fR.
 The
 \fIgsk8capicmd\fR
 utility can be used to manage the key database and create a
 \fIstash file\fR.
-This option is only supported by the Tivoli LDAP libraries.
+.sp
+This option is only supported by the IBM LDAP libraries.
 .RE
 .TP 6n
 \fBTLS_REQCERT\fR \fIlevel\fR
@@ -1243,6 +1255,7 @@ It is generally used in conjunction with
 \fIprngd\fR
 or
 \fIegd\fR.
+.sp
 This option is only supported by the OpenLDAP libraries.
 .TP 6n
 \fBURI\fR \fIldap[s]://[hostname[:port]] ...\fR
@@ -1276,7 +1289,7 @@ Only systems using the OpenSSL libraries support the mixing of
 and
 \fRldaps://\fR
 URIs.
-Both the Netscape-derived and Tivoli LDAP libraries used on most commercial
+Both the Netscape-derived and IBM LDAP libraries used on most commercial
 versions of Unix are only capable of supporting one or the other.
 .TP 6n
 \fBUSE_SASL\fR \fIon/true/yes/off/false/no\fR
@@ -1547,7 +1560,7 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 #tls_cert /etc/certs/client_cert.pem
 #tls_key  /etc/certs/client_key.pem
 #
-# For SunONE or iPlanet LDAP, tls_cert and tls_key may specify either
+# For Netscape-derived LDAP, tls_cert and tls_key may specify either
 # a directory, in which case the files in the directory must have the
 # default names (e.g., cert8.db and key4.db), or the path to the cert
 # and key files themselves.  However, a bug in version 5.0 of the LDAP

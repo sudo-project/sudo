@@ -4,7 +4,9 @@
 # See https://bugzilla.sudo.ws/show_bug.cgi?id=853
 #
 
-./cvtsudoers -c "" -e -f json <<EOF
+: ${CVTSUDOERS=cvtsudoers}
+
+$CVTSUDOERS -c "" -e -f json <<EOF
 Cmnd_Alias	CMDA=/path/to/cmda
 Cmnd_Alias	CMDB=/path/to/cmdb
 Cmnd_Alias	CMDC=/path/to/cmdc

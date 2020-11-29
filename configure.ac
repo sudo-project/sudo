@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.9.3p1], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.4], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -1233,7 +1233,7 @@ AC_ARG_WITH(secure-path, [AS_HELP_STRING([--with-secure-path], [override the use
 esac], AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(whether to get ip addresses from the network interfaces)
-AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to read the ip addr of ether interfaces])],
+AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to read the ip addr of network interfaces])],
 [case $with_interfaces in
     yes)	AC_MSG_RESULT(yes)
 		;;
@@ -1657,14 +1657,14 @@ AC_ARG_ENABLE(log-client,
 [AS_HELP_STRING([--disable-log-client], [Disable sudoers support for using the sudo_logsrvd log server.])],
 [ case "$enableval" in
     yes)
-	    AC_DEFINE([SUDOERS_IOLOG_CLIENT])
+	    AC_DEFINE([SUDOERS_LOG_CLIENT])
 	    ;;
     no)
 	    ;;
     *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-log-client: $enableval])
 	    ;;
   esac
-], [AC_DEFINE([SUDOERS_IOLOG_CLIENT])])
+], [AC_DEFINE([SUDOERS_LOG_CLIENT])])
 
 if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
     # No need for liblogsrv.la
@@ -3065,11 +3065,18 @@ if test "${enable_openssl-no}" != no; then
 
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
-    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set_ciphersuites TLS_client_method TLS_server_method])
+    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate TLS_client_method TLS_server_method])
     # SSL_CTX_set_min_proto_version may be a macro
     AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
 	AC_INCLUDES_DEFAULT
 	#include <openssl/ssl.h>
+    ])
+    # LibreSSL TLS 1.3 support may not be enabled, check for declaration too.
+    AC_CHECK_FUNC([SSL_CTX_set_ciphersuites], [
+	AC_CHECK_DECL([SSL_CTX_set_ciphersuites], [AC_DEFINE(HAVE_SSL_CTX_SET_CIPHERSUITES)], [], [
+	    AC_INCLUDES_DEFAULT
+	    #include <openssl/ssl.h>
+	])
     ])
     LIBS="$OLIBS"
 elif test "${enable_gcrypt-no}" != no; then
@@ -4092,6 +4099,10 @@ if test ${with_ldap-'no'} != "no"; then
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib])
 	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
+	if test -d "${with_ldap}/lib64"; then
+	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib64])
+	    LDFLAGS="$LDFLAGS -L${with_ldap}/lib64"
+	fi
 	AX_APPEND_FLAG([-I${with_ldap}/include], [CPPFLAGS])
 	with_ldap=yes
     fi
@@ -4155,7 +4166,7 @@ if test ${with_ldap-'no'} != "no"; then
 	    fi
 	fi
     fi
-    AC_CHECK_HEADERS([ldap_ssl.h] [mps/ldap_ssl.h], [break], [], [#include <ldap.h>])
+    AC_CHECK_HEADERS([ldapssl.h] [ldap_ssl.h] [mps/ldap_ssl.h], [break], [], [#include <ldap.h>])
     AC_CHECK_FUNCS([ldap_initialize ldap_start_tls_s ldapssl_init ldapssl_set_strength ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s ldap_ssl_init ldap_ssl_client_init ldap_start_tls_s_np])
     AC_CHECK_FUNCS([ldap_search_ext_s ldap_search_st], [break])
 
@@ -4658,6 +4669,7 @@ if test -n "$GCC"; then
 	dnl Default warnings for development use.
 	dnl
 	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith"
+	AX_CHECK_COMPILE_FLAG([-Wshadow], [CFLAGS="$CFLAGS -Wshadow"])
 	dnl
 	dnl The fallthrough attribute is supported by gcc 7.0 and clang 10.
 	dnl This test relies on AC_LANG_WERROR.
@@ -4696,7 +4708,7 @@ if test -n "$GCC"; then
 fi
 
 dnl
-dnl Skip regress tests and sudoers sanity check if cross compiling.
+dnl Skip regress tests and sudoers validation checks if cross compiling.
 dnl
 CROSS_COMPILING="$cross_compiling"
 
@@ -4808,7 +4820,7 @@ elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
 
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 
 AC_OUTPUT
 
@@ -4959,7 +4971,8 @@ AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
-AH_TEMPLATE(SUDOERS_IOLOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers I/O log plugin.])
+AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.])
+AH_TEMPLATE(SUDOERS_LOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers plugin.])
 AH_TEMPLATE(HAVE_FALLTHROUGH_ATTRIBUTE, [Define to 1 if the compiler supports the fallthrough attribute.])
 
 dnl

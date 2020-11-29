@@ -84,8 +84,9 @@ message ExitMessage {
 
 /* Alert message, policy module-specific. */
 message AlertMessage {
-  TimeSpec alert_time = 1;	/* time alert message occurred */
-  string reason = 2;		/* description of policy violation */
+  TimeSpec alert_time = 1;		/* time alert message occurred */
+  string reason = 2;			/* policy alert error string */
+  repeated InfoMessage info_msgs = 3;	/* optional key,value event log data */
 }
 
 /* Used to restart an existing I/O log on the server. */

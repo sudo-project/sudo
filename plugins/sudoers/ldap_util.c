@@ -409,9 +409,8 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
     if (hosts == NULL) {
 	/* The host has already matched, use ALL as wildcard. */
-	if ((m = calloc(1, sizeof(*m))) == NULL)
+	if ((m = new_member_all(NULL)) == NULL)
 	    goto oom;
-	m->type = ALL;
 	TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
     } else {
 	char *host;

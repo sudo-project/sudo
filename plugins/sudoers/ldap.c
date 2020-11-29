@@ -46,7 +46,9 @@
 # include <lber.h>
 #endif
 #include <ldap.h>
-#if defined(HAVE_LDAP_SSL_H)
+#if defined(HAVE_LDAPSSL_H)
+# include <ldapssl.h>
+#elif defined(HAVE_LDAP_SSL_H)
 # include <ldap_ssl.h>
 #elif defined(HAVE_MPS_LDAP_SSL_H)
 # include <mps/ldap_ssl.h>
@@ -64,7 +66,6 @@
 #include "sudo_ldap.h"
 #include "sudo_ldap_conf.h"
 #include "sudo_dso.h"
-#include <gram.h>
 
 #ifndef LDAP_OPT_RESULT_CODE
 # define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
@@ -262,8 +263,8 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	ret = ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw,
 	    0, &sslrc);
 	if (ret != LDAP_SUCCESS) {
-	    sudo_warnx("ldap_ssl_client_init(): %s (SSL reason code %d)",
-		ldap_err2string(ret), sslrc);
+	    sudo_warnx("ldap_ssl_client_init(): %s: %s",
+		ldap_err2string(ret), ssl_err2string(sslrc));
 	    goto done;
 	}
 	DPRINTF2("ldap_ssl_init(%s, %d, NULL)", host, port);
@@ -1193,12 +1194,14 @@ ldap_entry_to_priv(LDAP *ld, LDAPMessage *entry, int *rc_out)
 	goto cleanup;
 
     /* Get sudoNotBefore / sudoNotAfter */
-    notbefore = sudo_ldap_get_values_len(ld, entry, "sudoNotBefore", &rc);
-    if (rc == LDAP_NO_MEMORY)
-	goto cleanup;
-    notafter = sudo_ldap_get_values_len(ld, entry, "sudoNotAfter", &rc);
-    if (rc == LDAP_NO_MEMORY)
-	goto cleanup;
+    if (ldap_conf.timed) {
+	notbefore = sudo_ldap_get_values_len(ld, entry, "sudoNotBefore", &rc);
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
+	notafter = sudo_ldap_get_values_len(ld, entry, "sudoNotAfter", &rc);
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
+    }
 
     /* Parse sudoOptions. */
     opts = sudo_ldap_get_values_len(ld, entry, "sudoOption", &rc);
@@ -1255,9 +1258,8 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     TAILQ_INSERT_TAIL(ldap_userspecs, us, entries);
 
     /* The user has already matched, use ALL as wildcard. */
-    if ((m = calloc(1, sizeof(*m))) == NULL)
+    if ((m = new_member_all(NULL)) == NULL)
 	goto oom;
-    m->type = ALL;
     TAILQ_INSERT_TAIL(&us->users, m, entries);
 
     /* Treat each entry as a separate privilege. */
@@ -1680,8 +1682,8 @@ sudo_ldap_open(struct sudo_nss *nss)
 	rc = ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw,
 	    0, &sslrc);
 	if (rc != LDAP_SUCCESS) {
-	    sudo_warnx("ldap_ssl_client_init(): %s (SSL reason code %d)",
-		ldap_err2string(rc), sslrc);
+	    sudo_warnx("ldap_ssl_client_init(): %s: %s",
+		ldap_err2string(rc), ssl_err2string(sslrc));
 	    goto done;
 	}
 	rc = ldap_start_tls_s_np(ld, NULL);

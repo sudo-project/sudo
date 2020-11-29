@@ -469,6 +469,7 @@ _python_plugin_get_class(const char *plugin_path, PyObject *py_module, const cha
     py_class = PyObject_GetAttrString(py_module, plugin_class);
     if (py_class == NULL) {
         py_sudo_log(SUDO_CONV_ERROR_MSG, "Failed to find plugin class '%s'\n", plugin_class);
+        PyErr_Clear();
         goto cleanup;
     }
 

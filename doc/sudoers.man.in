@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 9, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 30, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -315,6 +315,13 @@ command tags.
 See
 \fII/O LOG FILES\fR
 for details on how I/O log files are stored.
+.PP
+Starting with version 1.9, the
+\fIlog_servers\fR
+setting may be used to send event and I/O log data to a remote server running
+\fBsudo_logsrvd\fR
+or another service that implements the protocol described by
+sudo_logsrv.proto(@mansectform@).
 .SS "Command environment"
 Since environment variables can influence program behavior,
 \fBsudoers\fR
@@ -369,7 +376,6 @@ are preserved from the invoking user's environment if permitted by the
 or
 \fIenv_keep\fR
 options.
-This is effectively a whitelist for environment variables.
 A few environment variables are treated specially.
 If the
 \fRPATH\fR
@@ -1380,6 +1386,10 @@ subsequent
 in the
 \fRCmnd_Spec_List\fR,
 inherit that option unless it is overridden by another option.
+Note that the option names are reserved words in
+\fIsudoers\fR.
+This means that none of the valid option names (see below) can be used
+when declaring an alias.
 .if \n(SL \{\
 .SS "SELinux_Spec"
 On systems with SELinux support,
@@ -2128,16 +2138,41 @@ It can be used wherever one might otherwise use a
 \fRRunas_Alias\fR,
 or
 \fRHost_Alias\fR.
-You should not try to define your own
+Attempting to define an
 \fIalias\fR
-called
+named
 \fBALL\fR
-as the built-in alias will be used in preference to your own.
+will result in a syntax error.
 Please note that using
 \fBALL\fR
 can be dangerous since in a command context, it allows the user to run
 \fIany\fR
 command on the system.
+.PP
+The following option names permitted in an
+\fROption_Spec\fR
+are also considered reserved words:
+\fRCHROOT\fR,
+.if \n(PS \{\
+\fRPRIVS\fR,
+.\}
+.if \n(PS \{\
+\fRLIMITPRIVS\fR,
+.\}
+.if \n(SL \{\
+\fRROLE\fR,
+.\}
+.if \n(SL \{\
+\fRTYPE\fR,
+.\}
+\fRTIMEOUT\fR,
+\fRCWD\fR,
+\fRNOTBEFORE\fR
+and
+\fRNOTAFTER\fR.
+Attempting to define an
+\fIalias\fR
+with the same name as one of the options will result in a syntax error.
 .PP
 An exclamation point
 (\(oq\&!\(cq)
@@ -2729,12 +2764,16 @@ If set,
 will enable the TCP keepalive socket option on the connection to the log server.
 This enables the periodic transmission of keepalive messages to the server.
 If the server does not respond to a message, the connection will
-be closed and the running command will be killed unless the
+be closed and the running command will be terminated unless the
 \fIignore_iolog_errors\fR
-flag is set.
+flag (I/O logging enabled) or the
+\fIignore_log_errors\fR
+flag (I/O logging disabled) is set.
 This flag is
 \fIon\fR
 by default.
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 log_server_verify
 .br
@@ -2746,7 +2785,8 @@ If either of these conditions is not met, the TLS handshake will fail.
 This flag is
 \fIon\fR
 by default.
-\fBsudo\fR
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
@@ -3945,21 +3985,27 @@ The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
 when authenticating the log server.
 The default is to use the system's default certificate authority database.
-This setting has no effect unless the
-\fIlog_server\fR
-flag is enabled and the remote log server is secured with TLS.
+This setting has no effect unless
+\fIlog_servers\fR
+is set and the remote log server is secured with TLS.
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 log_server_peer_cert
 The path to the client's certificate file, in PEM format.
-This setting is required when the
-\fIlog_server\fR
-flag is enabled and the remote log server is secured with TLS.
+This setting is required when
+\fIlog_servers\fR
+is set and the remote log server is secured with TLS.
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 log_server_peer_key
 The path to the client's private key file, in PEM format.
-This setting is required when the
-\fIlog_server\fR
-flag is enabled and the remote log server is secured with TLS.
+This setting is required when
+\fIlog_servers\fR
+is set and the remote log server is secured with TLS.
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 mailsub
 Subject of the mail sent to the
@@ -4387,6 +4433,36 @@ The default value is
 \fIany\fR.
 .RE
 .TP 14n
+log_format
+The event log format.
+Supported log formats are:
+.PP
+.RS 14n
+.PD 0
+.TP 10n
+json
+Logs in JSON format.
+JSON log entries contain the full user details as well as the execution
+environment if the command was allowed.
+Due to limitations of the protocol, JSON events sent via
+\fIsyslog\fR
+may be truncated.
+.PD
+.TP 10n
+sudo
+Traditional sudo-style logs, see
+\fILOG FORMAT\fR
+for a description of the log file format.
+.PP
+This setting affects logs sent via
+syslog(3)
+as well as the file specified by the
+\fIlogfile\fR
+setting, if any.
+The default value is
+\fIsudo\fR.
+.RE
+.TP 14n
 logfile
 Path to the
 \fBsudo\fR
@@ -4765,12 +4841,8 @@ to get their accustomed editor configuration instead of
 invoking the editor directly.
 .TP 18n
 log_servers
-A list of one or more remote servers to use for I/O log storage, separated
-by white space.
-Starting with
-\fBsudo\fR
-1.9, it is possible to send I/O logs to a remote server instead of
-logging them locally.
+A list of one or more servers to use for remote event and I/O log storage,
+separated by white space.
 Log servers must be running
 \fBsudo_logsrvd\fR
 or another service that implements the protocol described by
@@ -4781,29 +4853,40 @@ Server addresses should be of the form
 The host portion may be a host name, an IPv4 address, or an IPv6 address
 in square brackets.
 .sp
-If the optional tls flag is present, the connection will be secured
+If the optional
+\fItls\fR
+flag is present, the connection will be secured
 with Transport Layer Security (TLS) version 1.2 or 1.3.
 Versions of TLS prior to 1.2 are not supported.
 .sp
-If a port is specified, it may either be a port number or a known
+If a port is specified, it may either be a port number or a well-known
 service name as defined by the system service name database.
 If no port is specified, port 30343 will be used for plaintext
 connections and port 30344 will be used for TLS connections.
 .sp
 When
 \fIlog_servers\fR
-is enabled, I/O logs will not be logged locally.
-If multiple hosts are specified,
-\fBsudoers\fR
-will try them in reverse order until it connects successfully.
-If no log servers are reachable, the user will not be able
-to run a command unless the
+is set, event log data will be logged both locally (see the
+\fIsyslog\fR
+and
+\fIlog_file\fR
+settings) as well as remotely, but I/O log data will only be logged remotely.
+If multiple hosts are specified, they will be attempted in reverse order.
+If no log servers are available, the user will not be able to run
+a command unless either the
 \fIignore_iolog_errors\fR
-flag is set.
-If the connection to the log server is interrupted while
-the command is running, the command will be killed unless
+flag (I/O logging enabled) or the
+\fIignore_log_errors\fR
+flag (I/O logging disabled) is set.
+Likewise, if the connection to the log server is interrupted while
+\fBsudo\fR
+is running, the command will be terminated unless the
 \fIignore_iolog_errors\fR
-is set.
+flag (I/O logging enabled) or the
+\fIignore_log_errors\fR
+flag (I/O logging disabled) is set.
+.sp
+This setting is only supported by version 1.9.0 or higher.
 .SH "GROUP PROVIDER PLUGINS"
 The
 \fBsudoers\fR
@@ -4867,9 +4950,19 @@ The group provider plugin API is described in detail in
 sudo_plugin(@mansectform@).
 .SH "LOG FORMAT"
 \fBsudoers\fR
-can log events using either
-syslog(3)
-or a simple log file.
+can log events in either JSON or
+\fIsudo\fR
+format,
+this section describes the
+\fIsudo\fR
+log format.
+Depending on
+\fIsudoers\fR
+configuration,
+\fBsudoers\fR
+can log events via
+syslog(3),
+to a local log file, or both.
 The log format is almost identical in both cases.
 .SS "Accepted command log entries"
 Commands that sudo runs are logged using the following format (split
@@ -6022,9 +6115,9 @@ On such systems,
 functionality can be used to prevent a program run by
 \fBsudo\fR
 from executing any other programs.
-Note, however, that this applies only to native dynamically-linked
+Note, however, that this applies only to dynamically-linked
 executables.
-Statically-linked executables and foreign executables
+Statically-linked executables and executables
 running under binary emulation are not affected.
 .sp
 The

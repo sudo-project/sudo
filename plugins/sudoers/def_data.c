@@ -38,6 +38,12 @@ static struct def_values def_data_timestamp_type[] = {
     { NULL, 0 },
 };
 
+static struct def_values def_data_log_format[] = {
+    { "sudo", sudo },
+    { "json", json },
+    { NULL, 0 },
+};
+
 struct sudo_defs_types sudo_defs_table[] = {
     {
 	"syslog", T_LOGFAC|T_BOOL,
@@ -265,7 +271,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	def_data_verifypw,
     }, {
 	"noexec", T_FLAG,
-	N_("Preload the dummy exec functions contained in the sudo_noexec library"),
+	N_("Preload the sudo_noexec library which replaces the exec functions"),
 	NULL,
     }, {
 	"ignore_local_sudoers", T_FLAG,
@@ -289,7 +295,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"env_check", T_LIST|T_BOOL,
-	N_("Environment variables to check for sanity:"),
+	N_("Environment variables to check for safety:"),
 	NULL,
     }, {
 	"env_delete", T_LIST|T_BOOL,
@@ -559,6 +565,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"runchroot", T_STR|T_BOOL|T_CHPATH,
 	N_("Root directory to change to before executing the command: %s"),
 	NULL,
+    }, {
+	"log_format", T_TUPLE,
+	N_("The format of logs to produce: %s"),
+	def_data_log_format,
     }, {
 	NULL, 0, NULL
     }
