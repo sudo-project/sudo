@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: sudo-1.9.3b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2020-09-12 08:28-0600\n"
-"PO-Revision-Date: 2020-11-22 13:28-0800\n"
+"PO-Revision-Date: 2020-11-26 17:25-0800\n"
 "Last-Translator: Božidar Putanec <bozidarp@yahoo.com>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
 "Language: hr\n"
@@ -167,7 +167,7 @@ msgstr "%s nije obična datoteka"
 #: lib/util/sudo_conf.c:597
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
-msgstr "vlasnik %s je UID %u, a trebao bi biti %u"
+msgstr "vlasnik %s je UID %u, a treba biti %u"
 
 #: lib/util/sudo_conf.c:601
 #, c-format
@@ -964,7 +964,7 @@ msgstr "greška plugina: nedostaje popis datoteka za sudoedit"
 
 #: src/sudo_edit.c:1011 src/sudo_edit.c:1024
 msgid "unable to read the clock"
-msgstr "nije moguće očitati vrijeme (clock)"
+msgstr "nije moguće pročitati vrijeme (clock)"
 
 #: src/tgetpass.c:95
 msgid "timed out reading password"

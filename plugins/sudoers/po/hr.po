@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: sudoers-1.9.4b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2020-11-14 06:24-0700\n"
-"PO-Revision-Date: 2020-11-22 13:28-0800\n"
+"PO-Revision-Date: 2020-11-26 17:25-0800\n"
 "Last-Translator: Božidar Putanec <bozidarp@yahoo.com>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
 "Language: hr\n"
@@ -358,7 +358,7 @@ msgstr "%8s : (naredba se nastavlja) %s"
 #: lib/iolog/iolog_fileio.c:155
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
-msgstr "%s postoji, ali nije direktorij (0%o)"
+msgstr "%s postoji ali nije direktorij (0%o)"
 
 #: lib/iolog/iolog_fileio.c:185 lib/iolog/iolog_fileio.c:231
 #: plugins/sudoers/timestamp.c:205
@@ -1179,7 +1179,7 @@ msgstr "nepodržani ulazni formata %s"
 #: plugins/sudoers/cvtsudoers.c:262
 #, c-format
 msgid "unsupported output format %s"
-msgstr "nepodržani izlazni formata %s"
+msgstr "nepodržani izlazni format %s"
 
 #: plugins/sudoers/cvtsudoers.c:314
 #, c-format
@@ -2133,7 +2133,7 @@ msgstr "nije moguće pretvoriti sudoOption: %s%s%s"
 
 #: plugins/sudoers/linux_audit.c:58
 msgid "unable to open audit system"
-msgstr "nije moguće otvoriti sustav revizije"
+msgstr "nije moguće otvoriti revizijski sustav"
 
 #: plugins/sudoers/linux_audit.c:101
 msgid "unable to send audit message"
@@ -2142,7 +2142,7 @@ msgstr "nije moguće poslati revizijsku poruku"
 #: plugins/sudoers/log_client.c:113 plugins/sudoers/log_client.c:391
 #: plugins/sudoers/log_client.c:1431 plugins/sudoers/log_client.c:2023
 msgid "error in event loop"
-msgstr "pogreška u petlji događaja"
+msgstr "greška u petlji događaja"
 
 #: plugins/sudoers/log_client.c:193
 #, c-format
@@ -2653,7 +2653,7 @@ msgstr "vlasnik %s je UID %u, a treba biti %u"
 #: plugins/sudoers/sudoers.c:1094 toke.l:1117
 #, c-format
 msgid "%s is world writable"
-msgstr "%s smije svako mijenjati/pisati"
+msgstr "%s smije svatko mijenjati/pisati"
 
 #: plugins/sudoers/sudoers.c:1098 toke.l:1120
 #, c-format
