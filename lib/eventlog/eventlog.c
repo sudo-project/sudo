@@ -78,7 +78,7 @@
 static FILE *eventlog_stub_open_log(int type, const char *logfile);
 static void eventlog_stub_close_log(int type, FILE *fp);
 
-/* Eventlog config settings */
+/* Eventlog config settings (default values). */
 static struct eventlog_config evl_conf = {
     EVLOG_NONE,			/* type */
     EVLOG_SUDO,			/* format */
@@ -91,7 +91,11 @@ static struct eventlog_config evl_conf = {
     false,			/* omit_hostname */
     _PATH_SUDO_LOGFILE,		/* logpath */
     "%h %e %T",			/* time_fmt */
+#ifdef _PATH_SUDO_SENDMAIL
     _PATH_SUDO_SENDMAIL,	/* mailerpath */
+#else
+    NULL,			/* mailerpath (disabled) */
+#endif
     "-t",			/* mailerflags */
     NULL,			/* mailfrom */
     MAILTO,			/* mailto */
@@ -1436,8 +1440,10 @@ eventlog_setconf(struct eventlog_config *conf)
 	evl_conf.logpath = _PATH_SUDO_LOGFILE;
     if (evl_conf.time_fmt == NULL)
 	evl_conf.time_fmt = "%h %e %T";
+#ifdef _PATH_SUDO_SENDMAIL
     if (evl_conf.mailerpath == NULL)
 	evl_conf.mailerpath = _PATH_SUDO_SENDMAIL;
+#endif
     if (evl_conf.mailerflags == NULL)
 	evl_conf.mailerflags = "-t";
     if (evl_conf.mailto == NULL)
