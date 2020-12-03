@@ -1721,7 +1721,10 @@ server_msg_cb(int fd, int what, void *v)
                     sudo_warnx("%s", errstr);
                     goto bad;
                 case SSL_ERROR_SYSCALL:
-                    sudo_warn("recv");
+		    if (nread == 0)
+			sudo_warnx("%s", U_("lost connection to log server"));
+		    else
+			sudo_warn("recv");
                     goto bad;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
