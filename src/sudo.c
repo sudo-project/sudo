@@ -1639,7 +1639,6 @@ audit_accept(const char *plugin_name, unsigned int plugin_type,
     int ok;
     debug_decl(audit_accept, SUDO_DEBUG_PCOMM);
 
-    /* XXX - kill command if can't audit accept event */
     TAILQ_FOREACH(plugin, &audit_plugins, entries) {
 	if (plugin->u.audit->accept == NULL)
 	    continue;
@@ -1647,13 +1646,15 @@ audit_accept(const char *plugin_name, unsigned int plugin_type,
 	sudo_debug_set_active_instance(plugin->debug_instance);
 	ok = plugin->u.audit->accept(plugin_name, plugin_type,
 	    command_info, run_argv, run_envp, &errstr);
+	sudo_debug_set_active_instance(sudo_debug_instance);
 	if (ok != 1) {
-	    /* XXX - fatal error?  log error with other audit modules? */
+	    /* TODO: notify other audit plugins of the error. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"%s: plugin %s accept failed, ret %d", __func__,
 		plugin->name, ok);
+	    sudo_fatalx(U_("%s: unable to log accept event%s%s"),
+		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
 	}
-	sudo_debug_set_active_instance(sudo_debug_instance);
     }
 
     debug_return;
@@ -1678,13 +1679,15 @@ audit_reject(const char *plugin_name, unsigned int plugin_type,
 	sudo_debug_set_active_instance(plugin->debug_instance);
 	ok = plugin->u.audit->reject(plugin_name, plugin_type,
 	    audit_msg, command_info, &errstr);
+	sudo_debug_set_active_instance(sudo_debug_instance);
 	if (ok != 1) {
 	    /* TODO: notify other audit plugins of the error. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"%s: plugin %s reject failed, ret %d", __func__,
 		plugin->name, ok);
+	    sudo_warnx(U_("%s: unable to log reject event%s%s"),
+		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
 	}
-	sudo_debug_set_active_instance(sudo_debug_instance);
     }
 
     debug_return;
@@ -1709,13 +1712,15 @@ audit_error(const char *plugin_name, unsigned int plugin_type,
 	sudo_debug_set_active_instance(plugin->debug_instance);
 	ok = plugin->u.audit->error(plugin_name, plugin_type,
 	    audit_msg, command_info, &errstr);
+	sudo_debug_set_active_instance(sudo_debug_instance);
 	if (ok != 1) {
 	    /* TODO: notify other audit plugins of the error. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"%s: plugin %s error failed, ret %d", __func__,
 		plugin->name, ok);
+	    sudo_warnx(U_("%s: unable to log error event%s%s"),
+		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
 	}
-	sudo_debug_set_active_instance(sudo_debug_instance);
     }
 
     debug_return;
