@@ -472,7 +472,7 @@ connect_server(const char *host, const char *port, bool tls,
             }
         }
 	if (timed_connect(sock, res->ai_addr, res->ai_addrlen, timo) == -1) {
-	    cause = "connect";
+	    /* No need to set cause, caller's error message is sufficient. */
 	    save_errno = errno;
 	    close(sock);
 	    errno = save_errno;
@@ -567,10 +567,8 @@ log_server_connect(struct client_closure *closure)
 
     STAILQ_FOREACH(server, closure->log_details->log_servers, entries) {
         free(copy);
-	if ((copy = strdup(server->str)) == NULL) {
-                cause = "strdup";
+	if ((copy = strdup(server->str)) == NULL)
                 break;
-	}
 	if (!iolog_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
 		DEFAULT_PORT_TLS)) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1972,7 +1970,7 @@ log_server_open(struct log_details *details, struct timespec *now,
     /* Connect to log first available log server. */
     if (!log_server_connect(closure)) {
 	/* TODO: support offline logs if server unreachable */
-	sudo_warnx("%s", U_("unable to connect to log server"));
+	sudo_warn("%s", U_("unable to connect to log server"));
 	goto bad;
     }
 
