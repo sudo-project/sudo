@@ -672,7 +672,6 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     if (runas_gr != NULL) {
 	evlog->rungroup = runas_gr->gr_name;
     }
-    evlog->runuser = runas_pw->pw_name;
     evlog->submithost = user_host;
     evlog->submituser = user_name;
     /* TODO - submitgroup */
@@ -683,8 +682,14 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     evlog->submit_time = sudo_user.submit_time;
     evlog->lines = sudo_user.lines;
     evlog->columns = sudo_user.cols;
-    evlog->runuid = runas_pw->pw_uid;
-    evlog->rungid = runas_pw->pw_gid;
+    if (runas_pw != NULL) {
+	evlog->rungid = runas_pw->pw_gid;
+	evlog->runuid = runas_pw->pw_uid;
+	evlog->runuser = runas_pw->pw_name;
+    } else {
+	evlog->rungid = (gid_t)-1;
+	evlog->runuid = (uid_t)-1;
+    }
 
     debug_return;
 }
