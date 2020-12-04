@@ -195,8 +195,10 @@ new_logline(int flags, const char *message, const char *errstr,
     }
     if (evlog->command != NULL) {
 	len += sizeof(LL_CMND_STR) - 1 + strlen(evlog->command);
-	for (i = 1; evlog->argv[i] != NULL; i++)
-	    len += strlen(evlog->argv[i]) + 1;
+	if (evlog->argv != NULL) {
+	    for (i = 1; evlog->argv[i] != NULL; i++)
+		len += strlen(evlog->argv[i]) + 1;
+	}
     }
 
     /*
@@ -271,10 +273,12 @@ new_logline(int flags, const char *message, const char *errstr,
 	    goto toobig;
 	if (strlcat(line, evlog->command, len) >= len)
 	    goto toobig;
-	for (i = 1; evlog->argv[i] != NULL; i++) {
-	    if (strlcat(line, " ", len) >= len ||
-		strlcat(line, evlog->argv[i], len) >= len)
-		goto toobig;
+	if (evlog->argv != NULL) {
+	    for (i = 1; evlog->argv[i] != NULL; i++) {
+		if (strlcat(line, " ", len) >= len ||
+		    strlcat(line, evlog->argv[i], len) >= len)
+		    goto toobig;
+	    }
 	}
     }
 
