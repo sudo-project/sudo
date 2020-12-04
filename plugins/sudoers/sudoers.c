@@ -395,6 +395,21 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
+    /*
+     * Set runas passwd/group entries based on command line or sudoers.
+     * Note that if runas_group was specified without runas_user we
+     * run the command as the invoking user.
+     */
+    if (runas_group != NULL) {
+	if (!set_runasgr(runas_group, false))
+	    goto done;
+	if (!set_runaspw(runas_user ? runas_user : user_name, false))
+	    goto done;
+    } else {
+	if (!set_runaspw(runas_user ? runas_user : def_runas_default, false))
+	    goto done;
+    }
+
     /* If given the -P option, set the "preserve_groups" flag. */
     if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
 	def_preserve_groups = true;
@@ -860,21 +875,6 @@ init_vars(char * const envp[])
 	debug_return_bool(false);
     }
 
-    /*
-     * Set runas passwd/group entries based on command line or sudoers.
-     * Note that if runas_group was specified without runas_user we
-     * run the command as the invoking user.
-     */
-    if (runas_group != NULL) {
-	if (!set_runasgr(runas_group, false))
-	    debug_return_bool(false);
-	if (!set_runaspw(runas_user ? runas_user : user_name, false))
-	    debug_return_bool(false);
-    } else {
-	if (!set_runaspw(runas_user ? runas_user : def_runas_default, false))
-	    debug_return_bool(false);
-    }
-
     debug_return_bool(true);
 }
 
@@ -1304,7 +1304,7 @@ set_runaspw(const char *user, bool quiet)
     if (pw == NULL) {
 	if ((pw = sudo_getpwnam(user)) == NULL) {
 	    if (!quiet)
-		log_warningx(SLOG_RAW_MSG, N_("unknown user: %s"), user);
+		log_warningx(SLOG_AUDIT, N_("unknown user: %s"), user);
 	    debug_return_bool(false);
 	}
     }
@@ -1338,7 +1338,7 @@ set_runasgr(const char *group, bool quiet)
     if (gr == NULL) {
 	if ((gr = sudo_getgrnam(group)) == NULL) {
 	    if (!quiet)
-		log_warningx(SLOG_RAW_MSG, N_("unknown group: %s"), group);
+		log_warningx(SLOG_AUDIT, N_("unknown group: %s"), group);
 	    debug_return_bool(false);
 	}
     }

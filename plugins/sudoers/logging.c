@@ -657,7 +657,7 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     memset(evlog, 0, sizeof(*evlog));
     /* TODO: iolog_path */
     evlog->iolog_file = sudo_user.iolog_file;
-    evlog->command = safe_cmnd;
+    evlog->command = safe_cmnd ? safe_cmnd : (argv ? argv[0] : NULL);
     evlog->cwd = user_cwd;
     if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
 	evlog->runchroot = def_runchroot;
