@@ -114,6 +114,7 @@ struct sudo_user {
     char *limitprivs;
 #endif
     char *iolog_file;
+    char *iolog_path;
     GETGROUPS_T *gids;
     int   execfd;
     int   ngids;
