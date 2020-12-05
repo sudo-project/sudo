@@ -92,8 +92,6 @@ bool force_umask;
 int sudo_mode;
 
 static char *prev_user;
-static char *runas_user;
-static char *runas_group;
 static struct sudo_nss_list *snl;
 static bool unknown_runas_uid;
 static bool unknown_runas_gid;
@@ -180,7 +178,7 @@ sudoers_init(void *info, char * const envp[])
     }
 
     /* Parse info from front-end. */
-    sudo_mode = sudoers_policy_deserialize_info(info, &runas_user, &runas_group);
+    sudo_mode = sudoers_policy_deserialize_info(info);
     if (ISSET(sudo_mode, MODE_ERROR))
 	debug_return_int(-1);
 
@@ -400,13 +398,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * Note that if runas_group was specified without runas_user we
      * run the command as the invoking user.
      */
-    if (runas_group != NULL) {
-	if (!set_runasgr(runas_group, false))
+    if (sudo_user.runas_group != NULL) {
+	if (!set_runasgr(sudo_user.runas_group, false))
 	    goto done;
-	if (!set_runaspw(runas_user ? runas_user : user_name, false))
+	if (!set_runaspw(sudo_user.runas_user ?
+		sudo_user.runas_user : user_name, false))
 	    goto done;
     } else {
-	if (!set_runaspw(runas_user ? runas_user : def_runas_default, false))
+	if (!set_runaspw(sudo_user.runas_user ?
+		sudo_user.runas_user : def_runas_default, false))
 	    goto done;
     }
 
@@ -1357,7 +1357,7 @@ cb_runas_default(const union sudo_defs_val *sd_un)
     debug_decl(cb_runas_default, SUDOERS_DEBUG_PLUGIN);
 
     /* Only reset runaspw if user didn't specify one. */
-    if (!runas_user && !runas_group)
+    if (sudo_user.runas_user == NULL && sudo_user.runas_group == NULL)
 	debug_return_bool(set_runaspw(sd_un->str, true));
     debug_return_bool(true);
 }
