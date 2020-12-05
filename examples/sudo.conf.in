@@ -11,9 +11,9 @@
 # The plugin_options are optional.
 #
 # The sudoers plugin is used by default if no Plugin lines are present.
-Plugin sudoers_policy sudoers.so
-Plugin sudoers_io sudoers.so
-Plugin sudoers_audit sudoers.so
+#Plugin sudoers_policy sudoers.so
+#Plugin sudoers_io sudoers.so
+#Plugin sudoers_audit sudoers.so
 
 #
 # Sudo askpass:
