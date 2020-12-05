@@ -652,7 +652,12 @@ void
 sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     char * const envp[])
 {
+    struct group *grp;
     debug_decl(sudoers_to_eventlog, SUDOERS_DEBUG_LOGGING);
+
+    /* We rely on the reference held by the group cache. */
+    if ((grp = sudo_getgrgid(sudo_user.pw->pw_gid)) != NULL)
+	sudo_gr_delref(grp);
 
     memset(evlog, 0, sizeof(*evlog));
     evlog->iolog_file = sudo_user.iolog_file;
@@ -674,7 +679,8 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     }
     evlog->submithost = user_host;
     evlog->submituser = user_name;
-    /* TODO - submitgroup */
+    if (grp != NULL)
+	evlog->submitgroup = grp->gr_name;
     evlog->ttyname = user_ttypath;
     evlog->argv = (char **)argv;
     evlog->env_add = (char **)sudo_user.env_vars;
