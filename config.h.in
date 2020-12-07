@@ -1371,6 +1371,11 @@
 # undef _LINUX_SOURCE_COMPAT
 #endif
 
+/* Enable unlimited getgroups(2) support on macOS. */
+#ifndef _DARWIN_UNLIMITED_GETGROUPS
+# undef _DARWIN_UNLIMITED_GETGROUPS
+#endif
+
 /* Enable prototypes in GCC fixed includes on older systems.  */
 #ifndef __USE_FIXED_PROTOTYPES__
 # undef __USE_FIXED_PROTOTYPES__

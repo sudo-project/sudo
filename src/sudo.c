@@ -431,9 +431,10 @@ get_user_groups(struct user_details *ud)
 	if (maxgroups < 0)
 	    maxgroups = NGROUPS_MAX;
 
+	/* Note that macOS may return ngroups > NGROUPS_MAX. */
 	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
-	    /* Use groups from kernel if not too many or source is static. */
-	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
+	    /* Use groups from kernel if not at limit or source is static. */
+	    if (ud->ngroups != maxgroups || group_source == GROUP_SOURCE_STATIC) {
 		ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
 		if (ud->groups == NULL)
 		    goto done;

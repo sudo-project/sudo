@@ -2292,6 +2292,9 @@ case "$host" in
 		# Undocumented API that dynamically allocates the groups.
 		AC_CHECK_FUNCS([getgrouplist_2], [AC_CHECK_DECLS([getgrouplist_2])])
 
+		# macOS >= 10.6 getgroups(2) can support more than > 16 groups
+		AC_DEFINE([_DARWIN_UNLIMITED_GETGROUPS])
+
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])])
@@ -5017,6 +5020,11 @@ AH_BOTTOM([/* Symbol visibility controls */
 /* Enable Linux-compatible extensions on AIX.  */
 #ifndef _LINUX_SOURCE_COMPAT
 # undef _LINUX_SOURCE_COMPAT
+#endif
+
+/* Enable unlimited getgroups(2) support on macOS. */
+#ifndef _DARWIN_UNLIMITED_GETGROUPS
+# undef _DARWIN_UNLIMITED_GETGROUPS
 #endif
 
 /* Enable prototypes in GCC fixed includes on older systems.  */
