@@ -2431,7 +2431,6 @@ fi
 dnl
 dnl C compiler checks (to be done after os checks)
 dnl
-AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
@@ -4042,12 +4041,36 @@ if test ${with_passwd-'no'} != "no"; then
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
 	found=no
-	AC_CHECK_FUNCS([$shadow_funcs], [found=yes])
-	if test "$found" = "yes"; then
-	    case "$shadow_funcs" in
-		*getprpwnam*) SECUREWARE=1;;
-	    esac
-	else
+	for func in $shadow_funcs; do
+	    AC_CHECK_FUNC([$func], [
+		dnl Enumerate shadow functions instead of using:
+		dnl     AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$func]))
+		dnl for autoheader's sake and to catch template omissions.
+		case "$func" in
+		    dispcrypt)
+			AC_DEFINE(HAVE_DISPCRYPT)
+			;;
+		    getprpwnam)
+			AC_DEFINE(HAVE_GETPRPWNAM)
+			SECUREWARE=1
+			;;
+		    getpwnam_shadow)
+			AC_DEFINE(HAVE_GETPWNAM_SHADOW)
+			;;
+		    getspnam)
+			AC_DEFINE(HAVE_GETSPNAM)
+			;;
+		    iscomsec)
+			AC_DEFINE(HAVE_ISCOMSEC)
+			;;
+		    *)
+			AC_MSG_ERROR([unhandled shadow password function $func])
+			;;
+		esac
+		found=yes
+	    ])
+	done
+	if test "$found" = "no"; then
 	    shadow_libs=
 	fi
 	CHECKSHADOW=false
