@@ -182,9 +182,17 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     info.plugin_args = plugin_options;
     ret = sudoers_init(&info, submit_envp);
 
-    /* The audit functions set audit_msg on failure. */
-    if (ret != 1 && audit_msg != NULL)
-	*errstr = audit_msg;
+    if (ret == true) {
+	/* Unset close function if we don't need it to avoid extra process. */
+#ifdef SUDOERS_LOG_CLIENT
+	if (client_closure == NULL)
+#endif
+	    sudoers_audit.close = NULL;
+    } else {
+	/* The audit functions set audit_msg on failure. */
+	if (audit_msg != NULL)
+	    *errstr = audit_msg;
+    }
 
     debug_return_int(ret);
 }
