@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "October 30, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "December 11, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3049,7 +3049,9 @@ If
 \fIpam_setcred\fR,
 and
 \fIuse_pty\fR
-are disabled and I/O logging has not been configured,
+are disabled,
+\fIlog_servers\fR
+has not been set and I/O logging has not been configured,
 \fBsudo\fR
 will execute the command directly instead of running it as a child
 process.
@@ -3070,7 +3072,9 @@ If
 \fIpam_setcred\fR,
 and
 \fIuse_pty\fR
-are disabled and I/O logging has not been configured,
+are disabled,
+\fIlog_servers\fR
+has not been set and I/O logging has not been configured,
 \fBsudo\fR
 will execute the command directly instead of running it as a child
 process.
