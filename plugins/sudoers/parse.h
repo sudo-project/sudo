@@ -298,7 +298,7 @@ struct cmnd_info {
 struct rbtree *alloc_aliases(void);
 void free_aliases(struct rbtree *aliases);
 bool no_aliases(struct sudoers_parse_tree *parse_tree);
-const char *alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type, char *file, int line, int column, struct member *members);
+bool alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type, char *file, int line, int column, struct member *members);
 const char *alias_type_to_string(int alias_type);
 struct alias *alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type);
 struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type);

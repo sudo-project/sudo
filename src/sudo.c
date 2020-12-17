@@ -431,9 +431,10 @@ get_user_groups(struct user_details *ud)
 	if (maxgroups < 0)
 	    maxgroups = NGROUPS_MAX;
 
+	/* Note that macOS may return ngroups > NGROUPS_MAX. */
 	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
-	    /* Use groups from kernel if not too many or source is static. */
-	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
+	    /* Use groups from kernel if not at limit or source is static. */
+	    if (ud->ngroups != maxgroups || group_source == GROUP_SOURCE_STATIC) {
 		ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
 		if (ud->groups == NULL)
 		    goto done;
@@ -1349,7 +1350,11 @@ policy_init_session(struct command_details *details)
 		&details->envp, &errstr);
 	}
 	sudo_debug_set_active_instance(sudo_debug_instance);
-	/* TODO: audit on error */
+	if (ret != 1) {
+	    audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN,
+		errstr ? errstr : _("policy plugin error"),
+		details->info);
+	}
     }
 done:
     debug_return_int(ret);
@@ -1625,6 +1630,47 @@ audit_show_version(int verbose)
 }
 
 /*
+ * Error from plugin or front-end.
+ * The error will not be sent to plugin source, if specified.
+ */
+static void
+audit_error2(struct plugin_container *source, const char *plugin_name,
+    unsigned int plugin_type, const char *audit_msg, char * const command_info[])
+{
+    struct plugin_container *plugin;
+    const char *errstr = NULL;
+    int ok;
+    debug_decl(audit_error2, SUDO_DEBUG_PCOMM);
+
+    TAILQ_FOREACH(plugin, &audit_plugins, entries) {
+	if (plugin->u.audit->error == NULL)
+	    continue;
+
+	/* Avoid a loop if the audit plugin itself has an error. */
+	if (plugin == source)
+	    continue;
+
+	sudo_debug_set_active_instance(plugin->debug_instance);
+	ok = plugin->u.audit->error(plugin_name, plugin_type,
+	    audit_msg, command_info, &errstr);
+	sudo_debug_set_active_instance(sudo_debug_instance);
+	if (ok != 1) {
+	    /*
+	     * Don't propagate the error to other audit plugins.
+	     * It is not worth the trouble to avoid potential loops.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"%s: plugin %s error failed, ret %d", __func__,
+		plugin->name, ok);
+	    sudo_warnx(U_("%s: unable to log error event%s%s"),
+		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
+	}
+    }
+
+    debug_return;
+}
+
+/*
  * Command accepted by policy.
  * See command_info[] for additional info.
  * XXX - actual environment may be updated by policy_init_session().
@@ -1639,7 +1685,6 @@ audit_accept(const char *plugin_name, unsigned int plugin_type,
     int ok;
     debug_decl(audit_accept, SUDO_DEBUG_PCOMM);
 
-    /* XXX - kill command if can't audit accept event */
     TAILQ_FOREACH(plugin, &audit_plugins, entries) {
 	if (plugin->u.audit->accept == NULL)
 	    continue;
@@ -1647,13 +1692,20 @@ audit_accept(const char *plugin_name, unsigned int plugin_type,
 	sudo_debug_set_active_instance(plugin->debug_instance);
 	ok = plugin->u.audit->accept(plugin_name, plugin_type,
 	    command_info, run_argv, run_envp, &errstr);
+	sudo_debug_set_active_instance(sudo_debug_instance);
 	if (ok != 1) {
-	    /* XXX - fatal error?  log error with other audit modules? */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"%s: plugin %s accept failed, ret %d", __func__,
 		plugin->name, ok);
+	    sudo_warnx(U_("%s: unable to log accept event%s%s"),
+		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
+
+	    /* Notify other audit plugins and exit. */
+	    audit_error2(plugin, plugin->name, SUDO_AUDIT_PLUGIN,
+		errstr ? errstr : _("audit plugin error"), command_info);
+	    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
+	    exit(EXIT_FAILURE);
 	}
-	sudo_debug_set_active_instance(sudo_debug_instance);
     }
 
     debug_return;
@@ -1678,47 +1730,31 @@ audit_reject(const char *plugin_name, unsigned int plugin_type,
 	sudo_debug_set_active_instance(plugin->debug_instance);
 	ok = plugin->u.audit->reject(plugin_name, plugin_type,
 	    audit_msg, command_info, &errstr);
+	sudo_debug_set_active_instance(sudo_debug_instance);
 	if (ok != 1) {
-	    /* TODO: notify other audit plugins of the error. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"%s: plugin %s reject failed, ret %d", __func__,
 		plugin->name, ok);
+	    sudo_warnx(U_("%s: unable to log reject event%s%s"),
+		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
+
+	    /* Notify other audit plugins. */
+	    audit_error2(plugin, plugin->name, SUDO_AUDIT_PLUGIN,
+		errstr ? errstr : _("audit plugin error"), command_info);
 	}
-	sudo_debug_set_active_instance(sudo_debug_instance);
     }
 
     debug_return;
 }
 
 /*
- * Error from policy or I/O plugin.
+ * Error from plugin or front-end.
  */
 void
 audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[])
 {
-    struct plugin_container *plugin;
-    const char *errstr = NULL;
-    int ok;
-    debug_decl(audit_error, SUDO_DEBUG_PCOMM);
-
-    TAILQ_FOREACH(plugin, &audit_plugins, entries) {
-	if (plugin->u.audit->error == NULL)
-	    continue;
-
-	sudo_debug_set_active_instance(plugin->debug_instance);
-	ok = plugin->u.audit->error(plugin_name, plugin_type,
-	    audit_msg, command_info, &errstr);
-	if (ok != 1) {
-	    /* TODO: notify other audit plugins of the error. */
-	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"%s: plugin %s error failed, ret %d", __func__,
-		plugin->name, ok);
-	}
-	sudo_debug_set_active_instance(sudo_debug_instance);
-    }
-
-    debug_return;
+    audit_error2(NULL, plugin_name, plugin_type, audit_msg, command_info);
 }
 
 static int

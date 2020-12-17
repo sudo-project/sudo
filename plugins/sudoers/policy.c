@@ -86,7 +86,7 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
  * Fills in struct sudo_user and other common sudoers state.
  */
 int
-sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
+sudoers_policy_deserialize_info(void *v)
 {
     struct sudoers_open_info *info = v;
     char * const *cur;
@@ -178,7 +178,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "closefrom=")) {
 	    errno = 0;
 	    p = *cur + sizeof("closefrom=") - 1;
-	    user_closefrom = sudo_strtonum(p, 4, INT_MAX, &errstr);
+	    user_closefrom = sudo_strtonum(p, 3, INT_MAX, &errstr);
 	    if (user_closefrom == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -197,13 +197,13 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "runas_user=")) {
 	    CHECK(*cur, "runas_user=");
-	    *runas_user = *cur + sizeof("runas_user=") - 1;
+	    sudo_user.runas_user = *cur + sizeof("runas_user=") - 1;
 	    SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_group=")) {
 	    CHECK(*cur, "runas_group=");
-	    *runas_group = *cur + sizeof("runas_group=") - 1;
+	    sudo_user.runas_group = *cur + sizeof("runas_group=") - 1;
 	    SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
 	    continue;
 	}

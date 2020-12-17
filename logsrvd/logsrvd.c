@@ -745,15 +745,19 @@ server_shutdown(struct sudo_event_base *base)
 	debug_return;
     }
 
-    /* Schedule final commit point for each active connection. */
     TAILQ_FOREACH(closure, &connections, entries) {
 	closure->state = SHUTDOWN;
 	sudo_ev_del(base, closure->read_ev);
 	if (closure->log_io) {
+	    /* Schedule final commit point for the connection. */
 	    if (sudo_ev_add(base, closure->commit_ev, &tv, false) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to add commit point event");
 	    }
+	} else {
+	    /* No commit point, close connection immediately. */
+	    sudo_ev_del(closure->evbase, closure->write_ev);
+	    connection_closure_free(closure);
 	}
     }
 

@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd October 30, 2020
+.Dd December 11, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2874,7 +2874,9 @@ If
 .Em pam_setcred ,
 and
 .Em use_pty
-are disabled and I/O logging has not been configured,
+are disabled,
+.Em log_servers
+has not been set and I/O logging has not been configured,
 .Nm sudo
 will execute the command directly instead of running it as a child
 process.
@@ -2894,7 +2896,9 @@ If
 .Em pam_setcred ,
 and
 .Em use_pty
-are disabled and I/O logging has not been configured,
+are disabled,
+.Em log_servers
+has not been set and I/O logging has not been configured,
 .Nm sudo
 will execute the command directly instead of running it as a child
 process.

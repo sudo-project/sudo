@@ -652,12 +652,17 @@ void
 sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     char * const envp[])
 {
+    struct group *grp;
     debug_decl(sudoers_to_eventlog, SUDOERS_DEBUG_LOGGING);
 
+    /* We rely on the reference held by the group cache. */
+    if ((grp = sudo_getgrgid(sudo_user.pw->pw_gid)) != NULL)
+	sudo_gr_delref(grp);
+
     memset(evlog, 0, sizeof(*evlog));
-    /* TODO: iolog_path */
     evlog->iolog_file = sudo_user.iolog_file;
-    evlog->command = safe_cmnd;
+    evlog->iolog_path = sudo_user.iolog_path;
+    evlog->command = safe_cmnd ? safe_cmnd : (argv ? argv[0] : NULL);
     evlog->cwd = user_cwd;
     if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
 	evlog->runchroot = def_runchroot;
@@ -669,13 +674,11 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     } else {
 	evlog->runcwd = user_cwd;
     }
-    if (runas_gr != NULL) {
-	evlog->rungroup = runas_gr->gr_name;
-    }
-    evlog->runuser = runas_pw->pw_name;
+    evlog->rungroup = runas_gr ? runas_gr->gr_name : sudo_user.runas_group;
     evlog->submithost = user_host;
     evlog->submituser = user_name;
-    /* TODO - submitgroup */
+    if (grp != NULL)
+	evlog->submitgroup = grp->gr_name;
     evlog->ttyname = user_ttypath;
     evlog->argv = (char **)argv;
     evlog->env_add = (char **)sudo_user.env_vars;
@@ -683,8 +686,15 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     evlog->submit_time = sudo_user.submit_time;
     evlog->lines = sudo_user.lines;
     evlog->columns = sudo_user.cols;
-    evlog->runuid = runas_pw->pw_uid;
-    evlog->rungid = runas_pw->pw_gid;
+    if (runas_pw != NULL) {
+	evlog->rungid = runas_pw->pw_gid;
+	evlog->runuid = runas_pw->pw_uid;
+	evlog->runuser = runas_pw->pw_name;
+    } else {
+	evlog->rungid = (gid_t)-1;
+	evlog->runuid = (uid_t)-1;
+	evlog->runuser = sudo_user.runas_user;
+    }
 
     debug_return;
 }

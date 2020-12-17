@@ -74,6 +74,7 @@ static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
 static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(int, char *);
+static void alias_error(const char *name, int errnum);
 %}
 
 %union {
@@ -866,11 +867,9 @@ hostalias	:	ALIAS {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			} '=' hostlist {
-			    const char *s;
-			    s = alias_add(&parsed_policy, $1, HOSTALIAS,
-				sudoers, alias_line, alias_column, $4);
-			    if (s != NULL) {
-				sudoerserror(s);
+			    if (!alias_add(&parsed_policy, $1, HOSTALIAS,
+				sudoers, alias_line, alias_column, $4)) {
+				alias_error($1, errno);
 				YYERROR;
 			    }
 			}
@@ -892,11 +891,9 @@ cmndalias	:	ALIAS {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			} '=' cmndlist {
-			    const char *s;
-			    s = alias_add(&parsed_policy, $1, CMNDALIAS,
-				sudoers, alias_line, alias_column, $4);
-			    if (s != NULL) {
-				sudoerserror(s);
+			    if (!alias_add(&parsed_policy, $1, CMNDALIAS,
+				sudoers, alias_line, alias_column, $4)) {
+				alias_error($1, errno);
 				YYERROR;
 			    }
 			}
@@ -918,11 +915,9 @@ runasalias	:	ALIAS {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			} '=' userlist {
-			    const char *s;
-			    s = alias_add(&parsed_policy, $1, RUNASALIAS,
-				sudoers, alias_line, alias_column, $4);
-			    if (s != NULL) {
-				sudoerserror(s);
+			    if (!alias_add(&parsed_policy, $1, RUNASALIAS,
+				sudoers, alias_line, alias_column, $4)) {
+				alias_error($1, errno);
 				YYERROR;
 			    }
 			}
@@ -937,11 +932,9 @@ useralias	:	ALIAS {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			} '=' userlist {
-			    const char *s;
-			    s = alias_add(&parsed_policy, $1, USERALIAS,
-				sudoers, alias_line, alias_column, $4);
-			    if (s != NULL) {
-				sudoerserror(s);
+			    if (!alias_add(&parsed_policy, $1, USERALIAS,
+				sudoers, alias_line, alias_column, $4)) {
+				alias_error($1, errno);
 				YYERROR;
 			    }
 			}
@@ -1113,6 +1106,15 @@ sudoerserror(const char *s)
 	sudoerserrorf(NULL);
     else
 	sudoerserrorf("%s", s);
+}
+
+static void
+alias_error(const char *name, int errnum)
+{
+    if (errnum == EEXIST)
+	sudoerserrorf(U_("Alias \"%s\" already defined"), name);
+    else
+	sudoerserror(N_("unable to allocate memory"));
 }
 
 static struct defaults *

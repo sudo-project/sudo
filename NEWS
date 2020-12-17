@@ -1,3 +1,35 @@
+What's new in Sudo 1.9.4p1
+
+ * Sudo on macOS now supports users with more than 16 groups without
+   needing to set "group_source" to "dynamic" in /etc/sudo.conf.
+   Previously, only the first 15 were used when matching group-based
+   rules in sudoers.  Bug #946.
+
+ * Fixed a regression introduced in version 1.9.4 where sudo would
+   not build when configured using the --without-sendmail option.
+   Bug #947.
+
+ * Fixed a problem where if I/O logging was disabled and sudo was
+   unable to connect to sudo_logsrvd, the command would still be
+   allowed to run even when the "ignore_logfile_errors" sudoers
+   option was enabled.
+
+ * Fixed a crash introduced in version 1.9.4 when attempting to run
+   a command as a non-existent user.  Bug #948.
+
+ * The installed sudo.conf file now has the default sudoers Plugin
+   lines commented out.  This fixes a potential conflict when there
+   is both a system-installed version of sudo and a user-installed
+   version.  GitHub issue #75.
+
+ * Fixed a regression introduced in sudo 1.9.4 where sudo would run
+   the command as a child process even when a pseudo-terminal was
+   not in use and the "pam_session" and "pam_setcred" options were
+   disabled.  GitHub issue #76.
+
+ * Fixed a regression introduced in sudo 1.8.9 where the "closefrom"
+   sudoers option could not be set to a value of 3.  Bug #950.
+
 What's new in Sudo 1.9.4
 
  * The sudoers parser will now detect when an upper-case reserved
@@ -18,7 +50,7 @@ What's new in Sudo 1.9.4
    the sudoers plugin.
 
  * JSON log entries sent to syslog now use "minimal" JSON which
-   skips all non-essention whitespace.
+   skips all non-essential white space.
 
  * The sudoers plugin can now produce JSON-formatted logs.  The
    "log_format" sudoers option can be used to select sudo or json
