@@ -178,7 +178,7 @@ sudoers_policy_deserialize_info(void *v)
 	if (MATCHES(*cur, "closefrom=")) {
 	    errno = 0;
 	    p = *cur + sizeof("closefrom=") - 1;
-	    user_closefrom = sudo_strtonum(p, 4, INT_MAX, &errstr);
+	    user_closefrom = sudo_strtonum(p, 3, INT_MAX, &errstr);
 	    if (user_closefrom == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
