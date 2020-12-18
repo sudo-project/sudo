@@ -55,20 +55,27 @@
  * Copy any tags set in t2 into t, overriding the value in t.
  */
 #define TAGS_MERGE(t, t2) do {						       \
-    if ((t2).follow != UNSPEC)						       \
+    if ((t2).follow != UNSPEC) {						       \
 	(t).follow = (t2).follow;					       \
-    if ((t2).log_input != UNSPEC)					       \
+    }						       \
+    if ((t2).log_input != UNSPEC) {					       \
 	(t).log_input = (t2).log_input;					       \
-    if ((t2).log_output != UNSPEC)					       \
+    }						       \
+    if ((t2).log_output != UNSPEC) {					       \
 	(t).log_output = (t2).log_output;				       \
-    if ((t2).noexec != UNSPEC)						       \
+    }						       \
+    if ((t2).noexec != UNSPEC) {						       \
 	(t).noexec = (t2).noexec;					       \
-    if ((t2).nopasswd != UNSPEC)					       \
+    }						       \
+    if ((t2).nopasswd != UNSPEC) {					       \
 	(t).nopasswd = (t2).nopasswd;					       \
-    if ((t2).send_mail != UNSPEC)					       \
+    }						       \
+    if ((t2).send_mail != UNSPEC) {					       \
 	(t).send_mail = (t2).send_mail;					       \
-    if ((t2).setenv != UNSPEC)						       \
+    }						       \
+    if ((t2).setenv != UNSPEC) {						       \
 	(t).setenv = (t2).setenv;					       \
+    }						       \
 } while (0)
 
 /*
