@@ -393,23 +393,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-    /*
-     * Set runas passwd/group entries based on command line or sudoers.
-     * Note that if runas_group was specified without runas_user we
-     * run the command as the invoking user.
-     */
-    if (sudo_user.runas_group != NULL) {
-	if (!set_runasgr(sudo_user.runas_group, false))
-	    goto done;
-	if (!set_runaspw(sudo_user.runas_user ?
-		sudo_user.runas_user : user_name, false))
-	    goto done;
-    } else {
-	if (!set_runaspw(sudo_user.runas_user ?
-		sudo_user.runas_user : def_runas_default, false))
-	    goto done;
-    }
-
     /* If given the -P option, set the "preserve_groups" flag. */
     if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
 	def_preserve_groups = true;
@@ -873,6 +856,23 @@ init_vars(char * const envp[])
 	log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"),
 	    (unsigned int) user_uid);
 	debug_return_bool(false);
+    }
+
+    /*
+     * Set runas passwd/group entries based on command line or sudoers.
+     * Note that if runas_group was specified without runas_user we
+     * run the command as the invoking user.
+     */
+    if (sudo_user.runas_group != NULL) {
+	if (!set_runasgr(sudo_user.runas_group, false))
+	    debug_return_bool(false);
+	if (!set_runaspw(sudo_user.runas_user ?
+		sudo_user.runas_user : user_name, false))
+	    debug_return_bool(false);
+    } else {
+	if (!set_runaspw(sudo_user.runas_user ?
+		sudo_user.runas_user : def_runas_default, false))
+	    debug_return_bool(false);
     }
 
     debug_return_bool(true);
