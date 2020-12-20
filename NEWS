@@ -1,3 +1,9 @@
+What's new in Sudo 1.9.4p2
+
+ * Fixed a bug introduced in sudo 1.9.4p1 which could lead to a crash
+   if the sudoers file contains a runas user-specific Defaults entry.
+   Bug #951.
+
 What's new in Sudo 1.9.4p1
 
  * Sudo on macOS now supports users with more than 16 groups without
