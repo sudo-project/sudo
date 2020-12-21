@@ -119,7 +119,8 @@ get_net_ifs(char **addrinfo)
 #else
     char addrstr[INET_ADDRSTRLEN], maskstr[INET_ADDRSTRLEN];
 #endif
-    int ailen, len, num_interfaces = 0;
+    int len, num_interfaces = 0;
+    size_t ailen;
     char *cp;
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
 
@@ -172,13 +173,14 @@ get_net_ifs(char **addrinfo)
 		if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL)
 		    continue;
 
-		len = snprintf(cp, ailen - (*addrinfo - cp),
-		    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
-		if (len < 0 || len >= ailen - (*addrinfo - cp)) {
+		len = snprintf(cp, ailen, "%s%s/%s",
+		    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+		if (len < 0 || (size_t)len >= ailen) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
+		ailen -= len;
 		break;
 #ifdef HAVE_STRUCT_IN6_ADDR
 	    case AF_INET6:
@@ -189,13 +191,14 @@ get_net_ifs(char **addrinfo)
 		if (inet_ntop(AF_INET6, &sin6->sin6_addr, maskstr, sizeof(maskstr)) == NULL)
 		    continue;
 
-		len = snprintf(cp, ailen - (*addrinfo - cp),
-		    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
-		if (len < 0 || len >= ailen - (*addrinfo - cp)) {
+		len = snprintf(cp, ailen, "%s%s/%s",
+		    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+		if (len < 0 || (size_t)len >= ailen) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
+		ailen -= len;
 		break;
 #endif /* HAVE_STRUCT_IN6_ADDR */
 	}
@@ -223,8 +226,8 @@ get_net_ifs(char **addrinfo)
     struct ifreq *ifr, *ifr_tmp = (struct ifreq *)ifr_tmpbuf;
     struct ifconf *ifconf;
     struct sockaddr_in *sin;
-    int ailen, i, len, n, sock, num_interfaces = 0;
-    size_t buflen = sizeof(struct ifconf) + BUFSIZ;
+    int i, len, n, sock, num_interfaces = 0;
+    size_t ailen, buflen = sizeof(struct ifconf) + BUFSIZ;
     char *cp, *previfname = "", *ifconf_buf = NULL;
     char addrstr[INET_ADDRSTRLEN], maskstr[INET_ADDRSTRLEN];
 #ifdef _ISC
@@ -334,13 +337,14 @@ get_net_ifs(char **addrinfo)
 	if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL)
 	    continue;
 
-	len = snprintf(cp, ailen - (*addrinfo - cp),
-	    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
-	if (len < 0 || len >= ailen - (*addrinfo - cp)) {
+	len = snprintf(cp, ailen, "%s%s/%s",
+	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+	if (len < 0 || (size_t)len >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}
 	cp += len;
+	ailen -= len;
 
 	/* Stash the name of the interface we saved. */
 	previfname = ifr->ifr_name;
