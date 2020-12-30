@@ -280,18 +280,19 @@ sudo_fatal_callback_register_v1(sudo_fatal_callback_t func)
 int
 sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func)
 {
-    struct sudo_fatal_callback *cb, **prev;
+    struct sudo_fatal_callback *cb, *prev = NULL;
 
     /* Search for callback and remove if found, dupes are not allowed. */
-    SLIST_FOREACH_PREVPTR(cb, prev, &callbacks, entries) {
+    SLIST_FOREACH(cb, &callbacks, entries) {
 	if (cb->func == func) {
-	    if (cb == SLIST_FIRST(&callbacks))
+	    if (prev == NULL)
 		SLIST_REMOVE_HEAD(&callbacks, entries);
 	    else
-		SLIST_REMOVE_AFTER(*prev, entries);
+		SLIST_REMOVE_AFTER(prev, entries);
 	    free(cb);
 	    return 0;
 	}
+	prev = cb;
     }
 
     return -1;
