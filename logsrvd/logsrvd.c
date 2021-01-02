@@ -735,7 +735,7 @@ shutdown_cb(int unused, int what, void *v)
 static void
 server_shutdown(struct sudo_event_base *base)
 {
-    struct connection_closure *closure;
+    struct connection_closure *closure, *next;
     struct sudo_event *ev;
     struct timespec tv = { 0, 0 };
     debug_decl(server_shutdown, SUDO_DEBUG_UTIL);
@@ -745,7 +745,7 @@ server_shutdown(struct sudo_event_base *base)
 	debug_return;
     }
 
-    TAILQ_FOREACH(closure, &connections, entries) {
+    TAILQ_FOREACH_SAFE(closure, &connections, entries, next) {
 	closure->state = SHUTDOWN;
 	sudo_ev_del(base, closure->read_ev);
 	if (closure->log_io) {
@@ -761,13 +761,15 @@ server_shutdown(struct sudo_event_base *base)
 	}
     }
 
-    /* We need a timed event to exit even if clients time out. */
-    ev = sudo_ev_alloc(-1, SUDO_EV_TIMEOUT, shutdown_cb, base);
-    if (ev != NULL) {
-	tv.tv_sec = SHUTDOWN_TIMEO;
-	if (sudo_ev_add(base, ev, &tv, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add shutdown event");
+    if (!TAILQ_EMPTY(&connections)) {
+	/* We need a timed event to exit even if clients time out. */
+	ev = sudo_ev_alloc(-1, SUDO_EV_TIMEOUT, shutdown_cb, base);
+	if (ev != NULL) {
+	    tv.tv_sec = SHUTDOWN_TIMEO;
+	    if (sudo_ev_add(base, ev, &tv, false) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to add shutdown event");
+	    }
 	}
     }
 
