@@ -591,11 +591,10 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 		iol->compressed = iolog_compress;
 	    } else {
 		/* check for gzip magic number */
-		if (read(fd, magic, sizeof(magic)) == ssizeof(magic)) {
+		if (pread(fd, magic, sizeof(magic), 0) == ssizeof(magic)) {
 		    if (magic[0] == gzip_magic[0] && magic[1] == gzip_magic[1])
 			iol->compressed = true;
 		}
-		(void)lseek(fd, 0, SEEK_SET);
 	    }
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H

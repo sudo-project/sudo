@@ -115,13 +115,9 @@ is_script(int fd)
     char magic[2];
     debug_decl(is_script, SUDOERS_DEBUG_MATCH);
 
-    if (read(fd, magic, 2) == 2) {
+    if (pread(fd, magic, 2, 0) == 2) {
 	if (magic[0] == '#' && magic[1] == '!')
 	    ret = true;
-    }
-    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to rewind script fd");
     }
     debug_return_int(ret);
 }
