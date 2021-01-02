@@ -2928,8 +2928,6 @@ as_fn_append ac_header_list " sys/statvfs.h"
 as_fn_append ac_func_list " fexecve"
 as_fn_append ac_func_list " killpg"
 as_fn_append ac_func_list " nl_langinfo"
-as_fn_append ac_func_list " pread"
-as_fn_append ac_func_list " pwrite"
 as_fn_append ac_func_list " faccessat"
 as_fn_append ac_func_list " wordexp"
 as_fn_append ac_func_list " getauxval"
@@ -19437,10 +19435,6 @@ done
 
 
 
-
-
-
-
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -19466,6 +19460,58 @@ done
 	fi
 	;;
 esac
+for ac_func in pread
+do :
+  ac_fn_c_check_func "$LINENO" "pread" "ac_cv_func_pread"
+if test "x$ac_cv_func_pread" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PREAD 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" pread.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS pread.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_pread; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+for ac_func in pwrite
+do :
+  ac_fn_c_check_func "$LINENO" "pwrite" "ac_cv_func_pwrite"
+if test "x$ac_cv_func_pwrite" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PWRITE 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" pwrite.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS pwrite.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_pwrite; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
 for ac_func in cfmakeraw
 do :
   ac_fn_c_check_func "$LINENO" "cfmakeraw" "ac_cv_func_cfmakeraw"

@@ -2641,7 +2641,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite faccessat wordexp getauxval fseeko])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo faccessat wordexp getauxval fseeko])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -2654,6 +2654,14 @@ case "$host_os" in
 	fi
 	;;
 esac
+AC_CHECK_FUNCS([pread], [], [
+    AC_LIBOBJ(pread)
+    SUDO_APPEND_COMPAT_EXP(sudo_pread)
+])
+AC_CHECK_FUNCS([pwrite], [], [
+    AC_LIBOBJ(pwrite)
+    SUDO_APPEND_COMPAT_EXP(sudo_pwrite)
+])
 AC_CHECK_FUNCS([cfmakeraw], [], [
     AC_LIBOBJ(cfmakeraw)
     SUDO_APPEND_COMPAT_EXP(sudo_cfmakeraw)

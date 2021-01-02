@@ -595,6 +595,16 @@ sudo_dso_public int sudo_pipe2(int fildes[2], int flags);
 # undef pipe2
 # define pipe2(_a, _b) sudo_pipe2((_a), (_b))
 #endif /* HAVE_PIPE2 */
+#ifndef HAVE_PREAD
+sudo_dso_public int sudo_pread(int fd, void *buf, size_t nbytes, off_t offset);
+# undef pread
+# define pread(_a, _b, _c, _d) sudo_pread((_a), (_b), (_c), (_d))
+#endif /* HAVE_PREAD */
+#ifndef HAVE_PWRITE
+sudo_dso_public int sudo_pwrite(int fd, const void *buf, size_t nbytes, off_t offset);
+# undef pwrite
+# define pwrite(_a, _b, _c, _d) sudo_pwrite((_a), (_b), (_c), (_d))
+#endif /* HAVE_PWRITE */
 #ifndef HAVE_UNLINKAT
 sudo_dso_public int sudo_unlinkat(int dfd, const char *path, int flag);
 # undef unlinkat

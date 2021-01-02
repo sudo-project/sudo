@@ -182,8 +182,10 @@ lib/util/nanosleep.c
 lib/util/openat.c
 lib/util/parseln.c
 lib/util/pipe2.c
+lib/util/pread.c
 lib/util/progname.c
 lib/util/pw_dup.c
+lib/util/pwrite.c
 lib/util/reallocarray.c
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in

@@ -985,6 +985,12 @@ pipe2.i: $(srcdir)/pipe2.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 pipe2.plog: pipe2.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pipe2.c --i-file $< --output-file $@
+pread.lo: $(srcdir)/pread.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/pread.c
+pread.i: $(srcdir)/pread.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+pread.plog: pread.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pread.c --i-file $< --output-file $@
 progname.lo: $(srcdir)/progname.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
@@ -1011,6 +1017,12 @@ pw_dup.i: $(srcdir)/pw_dup.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 pw_dup.plog: pw_dup.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pw_dup.c --i-file $< --output-file $@
+pwrite.lo: $(srcdir)/pwrite.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/pwrite.c
+pwrite.i: $(srcdir)/pwrite.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+pwrite.plog: pwrite.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pwrite.c --i-file $< --output-file $@
 reallocarray.lo: $(srcdir)/reallocarray.c $(incdir)/sudo_compat.h \
                  $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/reallocarray.c
