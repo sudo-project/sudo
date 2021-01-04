@@ -296,7 +296,7 @@ check_user_runchroot(void)
     free(def_runchroot);
     if ((def_runchroot = strdup(user_runchroot)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_bool(-1);
+	debug_return_int(-1);
     }
     debug_return_bool(true);
 }
