@@ -174,14 +174,172 @@ parse_user(char *userstr, struct sudo_cred *cred)
 }
 
 static int
-sesh_sudoedit(int argc, char *argv[])
+sesh_edit_create_tfiles(int edit_flags, struct sudo_cred *user_cred,
+    struct sudo_cred *run_cred, int argc, char *argv[])
 {
-    int i, post, ret = SESH_ERR_FAILURE;
-    int edit_flags, fd_src = -1, fd_dst = -1;
-    struct sudo_cred user_cred, run_cred;
+    int i, fd_src = -1, fd_dst = -1;
     struct timespec times[2];
     struct stat sb;
-    debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT)
+    debug_decl(sesh_edit_create_tfiles, SUDO_DEBUG_EDIT)
+
+    for (i = 0; i < argc - 1; i += 2) {
+	char *path_src = argv[i];
+	const char *path_dst = argv[i + 1];
+
+	/*
+	 * Try to open the source file for reading.
+	 * If it doesn't exist, we'll create an empty destination file.
+	 */
+	fd_src = sudo_edit_open(path_src, O_RDONLY,
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, edit_flags, user_cred, run_cred);
+	if (fd_src == -1) {
+	    if (errno != ENOENT) {
+		if (errno == ELOOP) {
+		    sudo_warnx(U_("%s: editing symbolic links is not "
+			"permitted"), path_src);
+		} else if (errno == EISDIR) {
+		    sudo_warnx(U_("%s: editing files in a writable directory "
+			"is not permitted"), path_src);
+		} else {
+		    sudo_warn("%s", path_src);
+		}
+		goto cleanup;
+	    }
+	    /* New file, verify parent dir exists and is not writable. */
+	    if (!sudo_edit_parent_valid(path_src, edit_flags, user_cred, run_cred))
+		goto cleanup;
+	}
+	if (fd_src == -1) {
+	    /* New file. */
+	    memset(&sb, 0, sizeof(sb));
+	} else if (fstat(fd_src, &sb) == -1 || !S_ISREG(sb.st_mode)) {
+	    sudo_warnx(U_("%s: not a regular file"), path_src);
+	    goto cleanup;
+	}
+
+	/*
+	 * Create temporary file using O_EXCL to ensure that temporary
+	 * files are created by us and that we do not open any symlinks.
+	 */
+	fd_dst = open(path_dst, O_WRONLY|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR);
+	if (fd_dst == -1) {
+	    sudo_warn("%s", path_dst);
+	    goto cleanup;
+	}
+
+	if (fd_src != -1) {
+	    if (sudo_copy_file(path_src, fd_src, -1, path_dst, fd_dst, -1) == -1)
+		goto cleanup;
+	    close(fd_src);
+	}
+
+	/* Make mtime on temp file match src (sb filled in above). */
+	mtim_get(&sb, times[0]);
+	times[1].tv_sec = times[0].tv_sec;
+	times[1].tv_nsec = times[0].tv_nsec;
+	if (futimens(fd_dst, times) == -1) {
+	    if (utimensat(AT_FDCWD, path_dst, times, 0) == -1)
+		sudo_warn("%s", path_dst);
+	}
+	close(fd_dst);
+	fd_dst = -1;
+    }
+    debug_return_int(SESH_SUCCESS);
+
+cleanup:
+    /* Remove temporary files. */
+    for (i = 0; i < argc - 1; i += 2)
+	unlink(argv[i + 1]);
+    if (fd_src != -1)
+	close(fd_src);
+    if (fd_dst != -1)
+	close(fd_dst);
+    debug_return_int(SESH_ERR_NO_FILES);
+}
+
+static int
+sesh_edit_copy_tfiles(int edit_flags, struct sudo_cred *user_cred,
+    struct sudo_cred *run_cred, int argc, char *argv[])
+{
+    int i, ret = SESH_SUCCESS;
+    int fd_src = -1, fd_dst = -1;
+    debug_decl(sesh_edit_copy_tfiles, SUDO_DEBUG_EDIT);
+
+    for (i = 0; i < argc - 1; i += 2) {
+	const char *path_src = argv[i];
+	char *path_dst = argv[i + 1];
+	off_t len_src, len_dst;
+	struct stat sb;
+
+	/* Open temporary file for reading. */
+	if (fd_src != -1)
+	    close(fd_src);
+	fd_src = open(path_src, O_RDONLY|O_NONBLOCK|O_NOFOLLOW);
+	if (fd_src == -1) {
+	    sudo_warn("%s", path_src);
+	    ret = SESH_ERR_SOME_FILES;
+	    continue;
+	}
+	/* Make sure the temporary file is safe and has the proper owner. */
+	if (!sudo_check_temp_file(fd_src, path_src, run_cred->uid, &sb)) {
+	    sudo_warnx(U_("contents of edit session left in %s"), path_src);
+	    ret = SESH_ERR_SOME_FILES;
+	    continue;
+	}
+	(void) fcntl(fd_src, F_SETFL, fcntl(fd_src, F_GETFL, 0) & ~O_NONBLOCK);
+
+	/* Create destination file. */
+	if (fd_dst != -1)
+	    close(fd_dst);
+	fd_dst = sudo_edit_open(path_dst, O_WRONLY|O_CREAT,
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, edit_flags, user_cred, run_cred);
+	if (fd_dst == -1) {
+	    if (errno == ELOOP) {
+		sudo_warnx(U_("%s: editing symbolic links is not "
+		    "permitted"), path_dst);
+	    } else if (errno == EISDIR) {
+		sudo_warnx(U_("%s: editing files in a writable directory "
+		    "is not permitted"), path_dst);
+	    } else {
+		sudo_warn("%s", path_dst);
+	    }
+	    sudo_warnx(U_("contents of edit session left in %s"), path_src);
+	    ret = SESH_ERR_SOME_FILES;
+	    continue;
+	}
+
+	/* sudo_check_temp_file() filled in sb for us. */
+	len_src = sb.st_size;
+	if (fstat(fd_dst, &sb) != 0) {
+	    sudo_warn("%s", path_dst);
+	    sudo_warnx(U_("contents of edit session left in %s"), path_src);
+	    ret = SESH_ERR_SOME_FILES;
+	    continue;
+	}
+	len_dst = sb.st_size;
+
+	if (sudo_copy_file(path_src, fd_src, len_src, path_dst, fd_dst,
+		len_dst) == -1) {
+	    sudo_warnx(U_("contents of edit session left in %s"), path_src);
+	    ret = SESH_ERR_SOME_FILES;
+	    continue;
+	}
+	unlink(path_src);
+    }
+    if (fd_src != -1)
+	close(fd_src);
+    if (fd_dst != -1)
+	close(fd_dst);
+
+    debug_return_int(ret);
+}
+
+static int
+sesh_sudoedit(int argc, char *argv[])
+{
+    int edit_flags, post, ret;
+    struct sudo_cred user_cred, run_cred;
+    debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT);
 
     memset(&user_cred, 0, sizeof(user_cred));
     memset(&run_cred, 0, sizeof(run_cred));
@@ -233,6 +391,9 @@ sesh_sudoedit(int argc, char *argv[])
     if (argc & 1)
 	debug_return_int(SESH_ERR_BAD_PATHS);
 
+    /* Masquerade as sudoedit so the user gets consistent error messages. */
+    setprogname("sudoedit");
+
     /*
      * sudoedit runs us with the effective user-ID and group-ID of
      * the target user as well as with the target user's group list.
@@ -254,139 +415,8 @@ sesh_sudoedit(int argc, char *argv[])
 	}
     }
 
-    for (i = 0; i < argc - 1; i += 2) {
-	char *path_src = argv[i];
-	char *path_dst = argv[i + 1];
-	/*
-	 * Try to open the source (original or temporary) file for reading.
-	 * If it doesn't exist, we'll create an empty destination file.
-	 */
-	if (post) {
-	    fd_src = open(path_src, O_RDONLY|O_NONBLOCK|O_NOFOLLOW);
-	} else {
-	    fd_src = sudo_edit_open(path_src, post ? O_RDONLY|O_NOFOLLOW : O_RDONLY,
-		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, &user_cred, &run_cred);
-	}
-	if (fd_src == -1) {
-	    if (post || errno != ENOENT) {
-		if (errno == ELOOP) {
-		    sudo_warnx(U_("%s: editing symbolic links is not "
-			"permitted"), path_src);
-		} else if (errno == EISDIR) {
-		    sudo_warnx(U_("%s: editing files in a writable directory "
-			"is not permitted"), path_src);
-		} else {
-		    sudo_warn("%s", path_src);
-		}
-		if (post) {
-		    ret = SESH_ERR_SOME_FILES;
-		    goto nocleanup;
-		} else
-		    goto cleanup_0;
-	    }
-	    /* New file, verify parent dir exists and is not writable. */
-	    if (!sudo_edit_parent_valid(path_src, edit_flags, &user_cred, &run_cred))
-		goto cleanup_0;
-	}
-	if (post) {
-	    /* Make sure the temporary file is safe and has the proper owner. */
-	    if (!sudo_check_temp_file(fd_src, path_src, run_cred.uid, &sb)) {
-		ret = SESH_ERR_SOME_FILES;
-		goto nocleanup;
-	    }
-	    (void) fcntl(fd_src, F_SETFL, fcntl(fd_src, F_GETFL, 0) & ~O_NONBLOCK);
-
-	    /* Create destination file. */
-	    fd_dst = sudo_edit_open(path_dst, O_WRONLY|O_CREAT,
-		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, edit_flags, &user_cred,
-		&run_cred);
-	} else {
-	    if (fd_src == -1) {
-		/* New file. */
-		memset(&sb, 0, sizeof(sb));
-	    } else if (fstat(fd_src, &sb) == -1 || !S_ISREG(sb.st_mode)) {
-		sudo_warnx(U_("%s: not a regular file"), path_src);
-		goto cleanup_0;
-	    }
-
-	    /*
-	     * Create temporary file using O_EXCL to ensure that temporary
-	     * files are created by us and that we do not open any symlinks.
-	     */
-	    fd_dst = open(path_dst, O_WRONLY|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR);
-	}
-	if (fd_dst == -1) {
-	    /* error - cleanup */
-	    sudo_warn("%s", path_dst);
-	    if (post) {
-		ret = SESH_ERR_SOME_FILES;
-		goto nocleanup;
-	    } else
-		goto cleanup_0;
-	}
-
-	if (fd_src != -1) {
-	    off_t len_src = -1;
-	    off_t len_dst = -1;
-
-	    if (post) {
-		/* sudo_check_temp_file() filled in sb for us. */
-		len_src = sb.st_size;
-		if (fstat(fd_dst, &sb) != 0) {
-		    ret = SESH_ERR_SOME_FILES;
-		    goto nocleanup;
-		}
-		len_dst = sb.st_size;
-	    }
-
-	    if (sudo_copy_file(path_src, fd_src, len_src, path_dst, fd_dst,
-		    len_dst) == -1) {
-		if (post) {
-		    ret = SESH_ERR_SOME_FILES;
-		    goto nocleanup;
-		} else {
-		    goto cleanup_0;
-		}
-	    }
-	}
-
-	if (!post) {
-	    /* Make mtime on temp file match src (sb filled in above). */
-	    mtim_get(&sb, times[0]);
-	    times[1].tv_sec = times[0].tv_sec;
-	    times[1].tv_nsec = times[0].tv_nsec;
-	    if (futimens(fd_dst, times) == -1) {
-		if (utimensat(AT_FDCWD, path_dst, times, 0) == -1)
-		    sudo_warn("%s", path_dst);
-	    }
-	}
-	close(fd_dst);
-	fd_dst = -1;
-	if (fd_src != -1) {
-	    close(fd_src);
-	    fd_src = -1;
-	}
-    }
-
-    ret = SESH_SUCCESS;
-    if (post) {
-	/* Remove temporary files (post=1) */
-	for (i = 0; i < argc - 1; i += 2)
-	    unlink(argv[i]);
-    }
-nocleanup:
-    if (fd_dst != -1)
-	close(fd_dst);
-    if (fd_src != -1)
-	close(fd_src);
+    ret = post ?
+	sesh_edit_copy_tfiles(edit_flags, &user_cred, &run_cred, argc, argv) :
+	sesh_edit_create_tfiles(edit_flags, &user_cred, &run_cred, argc, argv);
     debug_return_int(ret);
-cleanup_0:
-    /* Remove temporary files (post=0) */
-    for (i = 0; i < argc - 1; i += 2)
-	unlink(argv[i + 1]);
-    if (fd_dst != -1)
-	close(fd_dst);
-    if (fd_src != -1)
-	close(fd_src);
-    debug_return_int(SESH_ERR_NO_FILES);
 }

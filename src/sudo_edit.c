@@ -584,8 +584,6 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	    sudo_warnx(U_("sesh: unknown error %d"), error);
 	    break;
 	}
-	if (ret != 0)
-	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
     }
 
 done:
