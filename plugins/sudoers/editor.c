@@ -123,7 +123,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     int *argc_out, char ***argv_out, char * const *allowlist)
 {
     char **nargv = NULL, *editor = NULL, *editor_path = NULL;
-    const char *cp, *ep, *tmp;
+    const char *tmp, *cp, *ep = NULL;
     const char *edend = ed + edlen;
     struct stat user_editor_sb;
     int nargc;

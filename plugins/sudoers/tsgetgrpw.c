@@ -356,8 +356,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     GETGROUPS_T **groupsp, int *ngroupsp)
 {
     GETGROUPS_T *groups = *groupsp;
-    int grpsize = *ngroupsp;
-    int i, ngroups = 1;
+    int i, grpsize, ngroups = 1;
     int ret = -1;
     struct group *grp;
 
@@ -372,7 +371,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	grpsize <<= 2;
     } else {
 	/* Static group vector. */
-	if (grpsize < 1)
+	if ((grpsize = *ngroupsp) < 1)
 	    return -1;
     }
 

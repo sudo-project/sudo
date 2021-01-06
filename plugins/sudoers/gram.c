@@ -2565,7 +2565,7 @@ yyreduce:
   case 92: /* cmndtag: %empty  */
 #line 785 "gram.y"
                                     {
-			    TAGS_INIT((yyval.tag));
+			    TAGS_INIT(&(yyval.tag));
 			}
 #line 2565 "gram.c"
     break;

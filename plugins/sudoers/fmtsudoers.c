@@ -177,7 +177,7 @@ sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags)
     struct defaults *d;
     debug_decl(sudoers_defaults_list_to_tags, SUDOERS_DEBUG_UTIL);
 
-    TAGS_INIT(*tags);
+    TAGS_INIT(tags);
     if (defs != NULL) {
 	TAILQ_FOREACH(d, defs, entries) {
 	    if (!sudoers_defaults_to_tags(d->var, d->val, d->op, tags)) {

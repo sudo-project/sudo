@@ -783,7 +783,7 @@ options		:	/* empty */ {
 		;
 
 cmndtag		:	/* empty */ {
-			    TAGS_INIT($$);
+			    TAGS_INIT(&$$);
 			}
 		|	cmndtag NOPASSWD {
 			    $$.nopasswd = true;

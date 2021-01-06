@@ -42,13 +42,13 @@
  * Initialize all tags to UNSPEC.
  */
 #define TAGS_INIT(t)	do {						       \
-    (t).follow = UNSPEC;						       \
-    (t).log_input = UNSPEC;						       \
-    (t).log_output = UNSPEC;						       \
-    (t).noexec = UNSPEC;						       \
-    (t).nopasswd = UNSPEC;						       \
-    (t).send_mail = UNSPEC;						       \
-    (t).setenv = UNSPEC;						       \
+    (t)->follow = UNSPEC;						       \
+    (t)->log_input = UNSPEC;						       \
+    (t)->log_output = UNSPEC;						       \
+    (t)->noexec = UNSPEC;						       \
+    (t)->nopasswd = UNSPEC;						       \
+    (t)->send_mail = UNSPEC;						       \
+    (t)->setenv = UNSPEC;						       \
 } while (0)
 
 /*

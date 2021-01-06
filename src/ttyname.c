@@ -111,7 +111,7 @@ get_process_ttyname(char *name, size_t namelen)
     mib[3] = (int)getpid();
     mib[4] = sizeof(*ki_proc);
     mib[5] = 1;
-    do {
+    for (;;) {
 	struct sudo_kinfo_proc *kp;
 
 	size += size / 10;
@@ -121,7 +121,9 @@ get_process_ttyname(char *name, size_t namelen)
 	}
 	ki_proc = kp;
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
-    } while (rc == -1 && errno == ENOMEM);
+	if (rc != -1 || errno != ENOMEM)
+	    break;
+    }
     errno = ENOENT;
     if (rc != -1) {
 	if ((dev_t)ki_proc->sudo_kp_tdev != (dev_t)-1) {
