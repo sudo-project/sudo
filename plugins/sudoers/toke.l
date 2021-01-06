@@ -50,6 +50,9 @@
 # define NAMLEN(dirent)	strlen((dirent)->d_name)
 #endif
 
+// PVS Studio suppression
+// -V::519, 1004, 1037
+
 int sudolineno;			/* current sudoers line number. */
 char *sudoers;			/* sudoers file being parsed. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */

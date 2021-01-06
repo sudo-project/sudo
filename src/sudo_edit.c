@@ -81,7 +81,7 @@ set_tmpdir(struct sudo_cred *user_cred)
     saved_cred.euid = geteuid();
     saved_cred.gid = getgid();
     saved_cred.egid = getegid();
-    saved_cred.ngroups = getgroups(0, NULL);
+    saved_cred.ngroups = getgroups(0, NULL); // -V575
     if (saved_cred.ngroups > 0) {
 	saved_cred.groups =
 	    reallocarray(NULL, saved_cred.ngroups, sizeof(GETGROUPS_T));
@@ -216,7 +216,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    continue;
 	}
 	tf[j].ofile = files[i];
-	tf[j].osize = sb.st_size;
+	tf[j].osize = sb.st_size; // -V614
 	mtim_get(&sb, tf[j].omtim);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", (unsigned int)user_details.cred.uid);

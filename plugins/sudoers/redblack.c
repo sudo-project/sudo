@@ -109,7 +109,7 @@ rbcreate(int (*compar)(const void *, const void*))
      * Similarly, the fake root node keeps us from having to worry
      * about splitting the root.
      */
-    tree->root.left = tree->root.right = tree->root.parent = &tree->nil;
+    tree->root.left = tree->root.right = tree->root.parent = &tree->nil; // -V778
     tree->root.color = black;
     tree->root.data = NULL;
 

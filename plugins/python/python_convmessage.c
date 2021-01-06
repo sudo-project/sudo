@@ -50,11 +50,11 @@ _sudo_ConvMessage__Init(PyObject *py_self, PyObject *py_args, PyObject *py_kwarg
         goto cleanup;
 
     py_object_set_attr_number(py_self, "timeout", conv_message.timeout);
-    if (PyErr_Occurred())
+    if (PyErr_Occurred()) // -V547
         goto cleanup;
 
     py_object_set_attr_string(py_self, "msg", conv_message.msg);
-    if (PyErr_Occurred())
+    if (PyErr_Occurred()) // -V547
         goto cleanup;
 
 cleanup:
@@ -113,11 +113,11 @@ sudo_module_ConvMessage_to_c(PyObject *py_conv_message, struct sudo_conv_message
         debug_return_int(SUDO_RC_ERROR);
 
     conv_message->timeout = (int)py_object_get_optional_attr_number(py_conv_message, "timeout");
-    if (PyErr_Occurred())
+    if (PyErr_Occurred()) // -V547
         debug_return_int(SUDO_RC_ERROR);
 
     conv_message->msg = py_object_get_optional_attr_string(py_conv_message, "msg");
-    if (PyErr_Occurred())
+    if (PyErr_Occurred()) // -V547
         debug_return_int(SUDO_RC_ERROR);
 
     debug_return_int(SUDO_RC_OK);

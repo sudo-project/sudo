@@ -434,7 +434,8 @@ get_user_groups(const char *user, struct sudo_cred *cred)
 	    maxgroups = NGROUPS_MAX;
 
 	/* Note that macOS may return ngroups > NGROUPS_MAX. */
-	if ((cred->ngroups = getgroups(0, NULL)) > 0) {
+	cred->ngroups = getgroups(0, NULL); // -V575
+	if (cred->ngroups > 0) {
 	    /* Use groups from kernel if not at limit or source is static. */
 	    if (cred->ngroups != maxgroups || group_source == GROUP_SOURCE_STATIC) {
 		cred->groups = reallocarray(NULL, cred->ngroups, sizeof(GETGROUPS_T));

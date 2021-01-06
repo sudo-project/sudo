@@ -99,7 +99,7 @@ preload_dso(char *envp[], const char *dso_file)
      * whether it was dynamically allocated. [TODO: plugin API]
      */
     if (preload_idx == -1 || !enabled) {
-	const int env_size = env_len + 1 + (preload_idx == -1) + enabled;
+	const int env_size = env_len + 1 + (preload_idx == -1) + enabled; // -V547
 
 	char **nenvp = reallocarray(NULL, env_size, sizeof(*envp));
 	if (nenvp == NULL)

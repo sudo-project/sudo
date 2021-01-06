@@ -167,7 +167,7 @@ extern int sudoersdebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 80 "gram.y"
+#line 83 "gram.y"
 
     struct cmndspec *cmndspec;
     struct defaults *defaults;

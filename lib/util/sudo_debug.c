@@ -239,6 +239,7 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 
     return output;
 oom:
+    // -V:sudo_warn_nodebug:575, 618
     sudo_warn_nodebug(NULL);
 bad:
     if (output != NULL)

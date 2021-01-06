@@ -477,7 +477,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     ac = editor_argc - 3;
     if (lineno > 0) {
 	(void)snprintf(linestr, sizeof(linestr), "+%d", lineno);
-	editor_argv[ac++] = linestr;
+	editor_argv[ac++] = linestr; // -V507
     }
     editor_argv[ac++] = "--";
     editor_argv[ac++] = sp->tpath;

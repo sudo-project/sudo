@@ -348,7 +348,7 @@ sesh_sudoedit(int argc, char *argv[])
     if (argv[2] != NULL && strcmp(argv[2], "-h") == 0) {
 	argv++;
 	argc--;
-	CLR(edit_flags, CD_SUDOEDIT_FOLLOW);
+	CLR(edit_flags, CD_SUDOEDIT_FOLLOW); // -V753
     }
 
     /* Check for -w flag (disallow directories writable by the user). */
@@ -399,7 +399,7 @@ sesh_sudoedit(int argc, char *argv[])
      */
     run_cred.uid = run_cred.euid = geteuid();
     run_cred.gid = run_cred.egid = getegid();
-    run_cred.ngroups = getgroups(0, NULL);
+    run_cred.ngroups = getgroups(0, NULL); // -V575
     if (run_cred.ngroups > 0) {
 	run_cred.groups = reallocarray(NULL, run_cred.ngroups,
 	    sizeof(GETGROUPS_T));

@@ -252,7 +252,7 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
     if (ttypath == NULL)
 	ttypath = "";
 #endif
-    if (ttypath != NULL) {
+    if (ttypath != NULL) { // -V547
 	rc = pam_set_item(pamh, PAM_TTY, ttypath);
 	if (rc != PAM_SUCCESS) {
 	    errstr = sudo_pam_strerror(pamh, rc);

@@ -348,7 +348,7 @@ exec_mailer(int pipein)
 
     /* Set stdin to read side of the pipe. */
     if (dup3(pipein, STDIN_FILENO, 0) == -1) {
-	syslog(LOG_ERR, _("unable to dup stdin: %m"));
+	syslog(LOG_ERR, _("unable to dup stdin: %m")); // -V618
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "unable to dup stdin: %s", strerror(errno));
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
@@ -357,7 +357,7 @@ exec_mailer(int pipein)
 
     /* Build up an argv based on the mailer path and flags */
     if ((mflags = strdup(evl_conf.mailerflags)) == NULL) {
-	syslog(LOG_ERR, _("unable to allocate memory"));
+	syslog(LOG_ERR, _("unable to allocate memory")); // -V618
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	_exit(127);
     }
@@ -393,7 +393,7 @@ exec_mailer(int pipein)
 	execve(mpath, argv, root_envp);
     else
 	execv(mpath, argv);
-    syslog(LOG_ERR, _("unable to execute %s: %m"), mpath);
+    syslog(LOG_ERR, _("unable to execute %s: %m"), mpath); // -V618
     sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to execute %s: %s",
 	mpath, strerror(errno));
     _exit(127);
@@ -441,7 +441,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 	    switch (fork()) {
 		case -1:
 		    /* Error. */
-		    syslog(LOG_ERR, _("unable to fork: %m"));
+		    syslog(LOG_ERR, _("unable to fork: %m")); // -V618
 		    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
 			strerror(errno));
 		    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
@@ -485,7 +485,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     closefrom_nodebug(STDERR_FILENO + 1);
 
     if (pipe2(pfd, O_CLOEXEC) == -1) {
-	syslog(LOG_ERR, _("unable to open pipe: %m"));
+	syslog(LOG_ERR, _("unable to open pipe: %m")); // -V618
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to open pipe: %s",
 	    strerror(errno));
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
@@ -495,7 +495,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
-	    syslog(LOG_ERR, _("unable to fork: %m"));
+	    syslog(LOG_ERR, _("unable to fork: %m")); // -V618
 	    sudo_debug_printf(
 		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"unable to fork");
