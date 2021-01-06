@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2016
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2021
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -99,23 +99,28 @@ struct sudo_settings {
     const char *value;
 };
 
+/* Sudo user credentials */
+struct sudo_cred {
+    uid_t uid;
+    uid_t euid;
+    uid_t gid;
+    uid_t egid;
+    int ngroups;
+    GETGROUPS_T *groups;
+};
+
 struct user_details {
+    struct sudo_cred cred;
     pid_t pid;
     pid_t ppid;
     pid_t pgid;
     pid_t tcpgid;
     pid_t sid;
-    uid_t uid;
-    uid_t euid;
-    uid_t gid;
-    uid_t egid;
     const char *username;
     const char *cwd;
     const char *tty;
     const char *host;
     const char *shell;
-    GETGROUPS_T *groups;
-    int ngroups;
     int ts_rows;
     int ts_cols;
 };
@@ -150,20 +155,15 @@ struct preserved_fd {
 TAILQ_HEAD(preserved_fd_list, preserved_fd);
 
 struct command_details {
-    uid_t uid;
-    uid_t euid;
-    gid_t gid;
-    gid_t egid;
+    struct sudo_cred cred;
     mode_t umask;
     int priority;
     int timeout;
-    int ngroups;
     int closefrom;
     int flags;
     int execfd;
     struct preserved_fd_list preserved_fds;
     struct passwd *pw;
-    GETGROUPS_T *groups;
     const char *command;
     const char *cwd;
     const char *login_class;

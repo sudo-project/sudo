@@ -132,7 +132,7 @@ main(int argc, char *argv[], char *envp[])
  * On success, fills in ud and returns true, else false.
  */
 static bool
-parse_user(char *userstr, struct user_details *ud)
+parse_user(char *userstr, struct sudo_cred *cred)
 {
     char *cp, *ep;
     const char *errstr;
@@ -145,7 +145,7 @@ parse_user(char *userstr, struct user_details *ud)
 	debug_return_bool(false);
     }
     *ep++ = '\0';
-    ud->uid = sudo_strtoid(cp, &errstr);
+    cred->uid = cred->euid = sudo_strtoid(cp, &errstr);
     if (errstr != NULL) {
 	sudo_warnx(U_("%s: %s"), cp, errstr);
 	debug_return_bool(false);
@@ -158,7 +158,7 @@ parse_user(char *userstr, struct user_details *ud)
 	debug_return_bool(false);
     }
     *ep++ = '\0';
-    ud->gid = sudo_strtoid(cp, &errstr);
+    cred->gid = cred->egid = sudo_strtoid(cp, &errstr);
     if (errstr != NULL) {
 	sudo_warnx(U_("%s: %s"), cp, errstr);
 	debug_return_bool(false);
@@ -166,8 +166,8 @@ parse_user(char *userstr, struct user_details *ud)
 
     /* group vector */
     cp = ep;
-    ud->ngroups = sudo_parse_gids(cp, NULL, &ud->groups);
-    if (ud->ngroups == -1)
+    cred->ngroups = sudo_parse_gids(cp, NULL, &cred->groups);
+    if (cred->ngroups == -1)
 	debug_return_bool(false);
 
     debug_return_bool(true);
@@ -177,30 +177,29 @@ static int
 sesh_sudoedit(int argc, char *argv[])
 {
     int i, post, ret = SESH_ERR_FAILURE;
-    int fd_src = -1, fd_dst = -1;
-    struct command_details command_details;
-    struct user_details edit_user;
+    int edit_flags, fd_src = -1, fd_dst = -1;
+    struct sudo_cred user_cred, run_cred;
     struct timespec times[2];
     struct stat sb;
     debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT)
 
-    memset(&edit_user, 0, sizeof(edit_user));
-    memset(&command_details, 0, sizeof(command_details));
-    command_details.flags = CD_SUDOEDIT_FOLLOW;
+    memset(&user_cred, 0, sizeof(user_cred));
+    memset(&run_cred, 0, sizeof(run_cred));
+    edit_flags = CD_SUDOEDIT_FOLLOW;
 
     /* Check for -h flag (don't follow links). */
     if (argv[2] != NULL && strcmp(argv[2], "-h") == 0) {
 	argv++;
 	argc--;
-	CLR(command_details.flags, CD_SUDOEDIT_FOLLOW);
+	CLR(edit_flags, CD_SUDOEDIT_FOLLOW);
     }
 
     /* Check for -w flag (disallow directories writable by the user). */
     if (argv[2] != NULL && strcmp(argv[2], "-w") == 0) {
-	SET(command_details.flags, CD_SUDOEDIT_CHECKDIR);
+	SET(edit_flags, CD_SUDOEDIT_CHECKDIR);
 
 	/* Parse uid:gid:gid1,gid2,... */
-	if (argv[3] == NULL || !parse_user(argv[3], &edit_user))
+	if (argv[3] == NULL || !parse_user(argv[3], &user_cred))
 	    debug_return_int(SESH_ERR_FAILURE);
 	argv += 2;
 	argc -= 2;
@@ -238,18 +237,18 @@ sesh_sudoedit(int argc, char *argv[])
      * sudoedit runs us with the effective user-ID and group-ID of
      * the target user as well as with the target user's group list.
      */
-    command_details.uid = command_details.euid = geteuid();
-    command_details.gid = command_details.egid = getegid();
-    command_details.ngroups = getgroups(0, NULL);
-    if (command_details.ngroups > 0) {
-	command_details.groups = reallocarray(NULL, command_details.ngroups,
+    run_cred.uid = run_cred.euid = geteuid();
+    run_cred.gid = run_cred.egid = getegid();
+    run_cred.ngroups = getgroups(0, NULL);
+    if (run_cred.ngroups > 0) {
+	run_cred.groups = reallocarray(NULL, run_cred.ngroups,
 	    sizeof(GETGROUPS_T));
-	if (command_details.groups == NULL) {
+	if (run_cred.groups == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	    debug_return_int(SESH_ERR_FAILURE);
 	}
-	if (getgroups(command_details.ngroups, command_details.groups) < 0) {
+	if (getgroups(run_cred.ngroups, run_cred.groups) < 0) {
 	    sudo_warn("%s", U_("unable to get group list"));
 	    debug_return_int(SESH_ERR_FAILURE);
 	}
@@ -266,7 +265,7 @@ sesh_sudoedit(int argc, char *argv[])
 	    fd_src = open(path_src, O_RDONLY|O_NONBLOCK|O_NOFOLLOW);
 	} else {
 	    fd_src = sudo_edit_open(path_src, post ? O_RDONLY|O_NOFOLLOW : O_RDONLY,
-		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, &edit_user, &command_details);
+		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, &user_cred, &run_cred);
 	}
 	if (fd_src == -1) {
 	    if (post || errno != ENOENT) {
@@ -286,12 +285,12 @@ sesh_sudoedit(int argc, char *argv[])
 		    goto cleanup_0;
 	    }
 	    /* New file, verify parent dir exists and is not writable. */
-	    if (!sudo_edit_parent_valid(path_src, &edit_user, &command_details))
+	    if (!sudo_edit_parent_valid(path_src, edit_flags, &user_cred, &run_cred))
 		goto cleanup_0;
 	}
 	if (post) {
 	    /* Make sure the temporary file is safe and has the proper owner. */
-	    if (!sudo_check_temp_file(fd_src, path_src, command_details.uid, &sb)) {
+	    if (!sudo_check_temp_file(fd_src, path_src, run_cred.uid, &sb)) {
 		ret = SESH_ERR_SOME_FILES;
 		goto nocleanup;
 	    }
@@ -299,7 +298,8 @@ sesh_sudoedit(int argc, char *argv[])
 
 	    /* Create destination file. */
 	    fd_dst = sudo_edit_open(path_dst, O_WRONLY|O_CREAT,
-		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, &edit_user, &command_details);
+		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, edit_flags, &user_cred,
+		&run_cred);
 	} else {
 	    if (fd_src == -1) {
 		/* New file. */

@@ -46,9 +46,10 @@ int sudo_copy_file(const char *src, int src_fd, off_t src_len, const char *dst, 
 bool sudo_check_temp_file(int tfd, const char *tname, uid_t uid, struct stat *sb);
 
 /* edit_open.c */
+struct sudo_cred;
 void switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups);
-int sudo_edit_open(char *path, int oflags, mode_t mode, struct user_details *ud, struct command_details *cd);
-int dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd);
-bool sudo_edit_parent_valid(char *path, struct user_details *ud, struct command_details *cd);
+int sudo_edit_open(char *path, int oflags, mode_t mode, int sflags, struct sudo_cred *user_cred, struct sudo_cred *run_cred);
+int dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *run_cred);
+bool sudo_edit_parent_valid(char *path, int sflags, struct sudo_cred *user_cred, struct sudo_cred *run_cred);
 
 #endif /* SUDO_EDIT_H */
