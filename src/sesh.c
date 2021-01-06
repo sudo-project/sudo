@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2008, 2010-2018, 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2008, 2010-2018, 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -132,7 +132,7 @@ main(int argc, char *argv[], char *envp[])
 static int
 sesh_sudoedit(int argc, char *argv[])
 {
-    int i, oflags_dst, post, ret = SESH_ERR_FAILURE;
+    int i, oflags_src, oflags_dst, post, ret = SESH_ERR_FAILURE;
     int fd_src = -1, fd_dst = -1, follow = 0;
     struct stat sb;
     struct timespec times[2];
@@ -174,10 +174,12 @@ sesh_sudoedit(int argc, char *argv[])
 	debug_return_int(SESH_ERR_BAD_PATHS);
 
     /*
-     * Use O_EXCL if we are not in the post editing stage
-     * so that it's ensured that the temporary files are
-     * created by us and that we are not opening any symlinks.
+     * In the pre-editing stage, use O_EXCL to ensure that the temporary
+     * files are created by us and that we are not opening any symlinks.
+     * In the post-editing stage, use O_NOFOLLOW so we don't follow symlinks
+     * when opening the temporary files.
      */
+    oflags_src = O_RDONLY|(post ? O_NONBLOCK|O_NOFOLLOW : follow);
     oflags_dst = O_WRONLY|O_CREAT|(post ? follow : O_EXCL);
     for (i = 0; i < argc - 1; i += 2) {
 	const char *path_src = argv[i];
@@ -187,7 +189,7 @@ sesh_sudoedit(int argc, char *argv[])
 	 * doesn't exist, that's OK, we'll create an empty
 	 * destination file.
 	 */
-	if ((fd_src = open(path_src, O_RDONLY|follow, S_IRUSR|S_IWUSR)) < 0) {
+	if ((fd_src = open(path_src, oflags_src, S_IRUSR|S_IWUSR)) < 0) {
 	    if (errno != ENOENT) {
 		sudo_warn("%s", path_src);
 		if (post) {
@@ -196,6 +198,14 @@ sesh_sudoedit(int argc, char *argv[])
 		} else
 		    goto cleanup_0;
 	    }
+	}
+	if (post) {
+	    /* Make sure the temporary file is safe and has the proper owner. */
+	    if (!sudo_check_temp_file(fd_src, path_src, geteuid(), &sb)) {
+		ret = SESH_ERR_SOME_FILES;
+		goto nocleanup;
+	    }
+	    fcntl(fd_src, F_SETFL, fcntl(fd_src, F_GETFL, 0) & ~O_NONBLOCK);
 	}
 
 	if ((fd_dst = open(path_dst, oflags_dst, post ?
@@ -214,10 +224,7 @@ sesh_sudoedit(int argc, char *argv[])
 	    off_t len_dst = -1;
 
 	    if (post) {
-		if (fstat(fd_src, &sb) != 0) {
-		    ret = SESH_ERR_SOME_FILES;
-		    goto nocleanup;
-		}
+		/* sudo_check_temp_file() filled in sb for us. */
 		len_src = sb.st_size;
 		if (fstat(fd_dst, &sb) != 0) {
 		    ret = SESH_ERR_SOME_FILES;
