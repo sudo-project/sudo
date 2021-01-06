@@ -251,6 +251,9 @@ sesh_sudoedit(int argc, char *argv[])
 	    sudo_warn("%s", U_("unable to get group list"));
 	    debug_return_int(SESH_ERR_FAILURE);
 	}
+    } else {
+	run_cred.ngroups = 0;
+	run_cred.groups = NULL;
     }
 
     for (i = 0; i < argc - 1; i += 2) {

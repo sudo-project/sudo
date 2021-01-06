@@ -60,7 +60,7 @@ static char edit_tmpdir[MAX(sizeof(_PATH_VARTMP), sizeof(_PATH_TMP))];
  * Returns true on success, else false;
  */
 static bool
-set_tmpdir(struct command_details *command_details)
+set_tmpdir(struct sudo_cred *user_cred)
 {
     const char *tdir = NULL;
     const char *tmpdirs[] = {
@@ -70,21 +70,49 @@ set_tmpdir(struct command_details *command_details)
 #endif
 	_PATH_TMP
     };
+    struct sudo_cred saved_cred;
     unsigned int i;
     size_t len;
     int dfd;
     debug_decl(set_tmpdir, SUDO_DEBUG_EDIT);
 
+    /* Stash old credentials. */
+    saved_cred.uid = getuid();
+    saved_cred.euid = geteuid();
+    saved_cred.gid = getgid();
+    saved_cred.egid = getegid();
+    saved_cred.ngroups = getgroups(0, NULL);
+    if (saved_cred.ngroups > 0) {
+	saved_cred.groups =
+	    reallocarray(NULL, saved_cred.ngroups, sizeof(GETGROUPS_T));
+	if (saved_cred.groups == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_bool(false);
+	}
+	if (getgroups(saved_cred.ngroups, saved_cred.groups) < 0) {
+	    sudo_warn("%s", U_("unable to get group list"));
+	    free(saved_cred.groups);
+	    debug_return_bool(false);
+	}
+    } else {
+	saved_cred.ngroups = 0;
+	saved_cred.groups = NULL;
+    }
+
     for (i = 0; tdir == NULL && i < nitems(tmpdirs); i++) {
 	if ((dfd = open(tmpdirs[i], O_RDONLY)) != -1) {
-	    if (dir_is_writable(dfd, &user_details.cred, &command_details->cred) == true)
+	    if (dir_is_writable(dfd, user_cred, &saved_cred) == true)
 		tdir = tmpdirs[i];
 	    close(dfd);
 	}
     }
-    if (tdir == NULL)
-	sudo_fatalx("%s", U_("no writable temporary directory found"));
-   
+    free(saved_cred.groups);
+
+    if (tdir == NULL) {
+	sudo_warnx("%s", U_("no writable temporary directory found"));
+	debug_return_bool(false);
+    }
+
     len = strlcpy(edit_tmpdir, tdir, sizeof(edit_tmpdir));
     if (len >= sizeof(edit_tmpdir)) {
 	errno = ENAMETOOLONG;
@@ -609,9 +637,6 @@ sudo_edit(struct command_details *command_details)
     struct tempfile *tf = NULL;
     debug_decl(sudo_edit, SUDO_DEBUG_EDIT);
 
-    if (!set_tmpdir(command_details))
-	goto cleanup;
-
     /*
      * Set real, effective and saved uids to root.
      * We will change the euid as needed below.
@@ -622,6 +647,10 @@ sudo_edit(struct command_details *command_details)
 	sudo_warn(U_("unable to change uid to root (%u)"), ROOT_UID);
 	goto cleanup;
     }
+
+    /* Find a temporary directory writable by the user.  */
+    if (!set_tmpdir(&user_details.cred))
+	goto cleanup;
 
     /*
      * The user's editor must be separated from the files to be
