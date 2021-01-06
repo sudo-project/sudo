@@ -47,7 +47,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"set uid:gid to %u:%u(%u)", (unsigned int)euid, (unsigned int)egid,
-	ngroups ? (unsigned int)groups[0] : (unsigned int)egid);
+	ngroups > 0 ? (unsigned int)groups[0] : (unsigned int)egid);
 
     /* When restoring root, change euid first; otherwise change it last. */
     if (euid == ROOT_UID) {
@@ -74,7 +74,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
  * Returns true if the open directory fd is owned or writable by the user.
  */
 int
-dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
+dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *run_cred)
 {
     struct stat sb;
     int rc;
@@ -84,29 +84,31 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 	debug_return_int(-1);
 
     /* If the user owns the dir we always consider it writable. */
-    if (sb.st_uid == ud->uid) {
+    if (sb.st_uid == user_cred->uid) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user uid %u matches directory uid %u", (unsigned int)ud->uid,
-	    (unsigned int)sb.st_uid);
+	    "user uid %u matches directory uid %u",
+	    (unsigned int)user_cred->uid, (unsigned int)sb.st_uid);
 	debug_return_int(true);
     }
 
     /* Change uid/gid/groups to invoking user, usually needs root perms. */
-    if (cd->euid != ROOT_UID) {
+    if (run_cred->euid != ROOT_UID) {
 	if (seteuid(ROOT_UID) != 0)
 	    sudo_fatal("seteuid(ROOT_UID)");
     }
-    switch_user(ud->uid, ud->gid, ud->ngroups, ud->groups);
+    switch_user(user_cred->uid, user_cred->gid, user_cred->ngroups,
+	user_cred->groups);
 
     /* Access checks are done using the euid/egid and group vector. */
     rc = faccessat(dfd, ".", W_OK, AT_EACCESS);
 
     /* Change uid/gid/groups back to target user, may need root perms. */
-    if (ud->uid != ROOT_UID) {
+    if (user_cred->uid != ROOT_UID) {
 	if (seteuid(ROOT_UID) != 0)
 	    sudo_fatal("seteuid(ROOT_UID)");
     }
-    switch_user(cd->euid, cd->egid, cd->ngroups, cd->groups);
+    switch_user(run_cred->euid, run_cred->egid, run_cred->ngroups,
+	run_cred->groups);
 
     if (rc == 0)
 	debug_return_int(true);
@@ -116,21 +118,21 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 }
 #else
 static bool
-group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
+group_matches(gid_t target, struct sudo_cred *cred)
 {
     int i;
     debug_decl(group_matches, SUDO_DEBUG_EDIT);
 
-    if (target == gid) {
+    if (target == cred->gid) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user gid %u matches directory gid %u", (unsigned int)gid,
+	    "user gid %u matches directory gid %u", (unsigned int)cred->gid,
 	    (unsigned int)target);
 	debug_return_bool(true);
     }
-    for (i = 0; i < ngroups; i++) {
-	if (target == groups[i]) {
+    for (i = 0; i < cred->ngroups; i++) {
+	if (target == cred->groups[i]) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"user gid %u matches directory gid %u", (unsigned int)gid,
+		"user gid %u matches directory gid %u", cred->groups[i],
 		(unsigned int)target);
 	    debug_return_bool(true);
 	}
@@ -142,7 +144,7 @@ group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
  * Returns true if the open directory fd is owned or writable by the user.
  */
 int
-dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
+dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *run_cred)
 {
     struct stat sb;
     debug_decl(dir_is_writable, SUDO_DEBUG_EDIT);
@@ -151,10 +153,10 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 	debug_return_int(-1);
 
     /* If the user owns the dir we always consider it writable. */
-    if (sb.st_uid == ud->uid) {
+    if (sb.st_uid == user_cred->uid) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user uid %u matches directory uid %u", (unsigned int)ud->uid,
-	    (unsigned int)sb.st_uid);
+	    "user uid %u matches directory uid %u",
+	    (unsigned int)user_cred->uid, (unsigned int)sb.st_uid);
 	debug_return_int(true);
     }
 
@@ -167,7 +169,7 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 
     /* Group writable? */
     if (ISSET(sb.st_mode, S_IWGRP)) {
-	if (group_matches(sb.st_gid, ud->gid, ud->ngroups, ud->groups)) {
+	if (group_matches(sb.st_gid, user_cred)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"directory is writable by one of the user's groups");
 	    debug_return_int(true);
@@ -270,7 +272,7 @@ done:
 
 static int
 sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
-    struct user_details *ud, struct command_details *cd)
+    struct sudo_cred *user_cred, struct sudo_cred *run_cred)
 {
     const int dflags = DIR_OPEN_FLAGS;
     int dfd, fd, is_writable;
@@ -295,7 +297,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	 * Look up one component at a time, avoiding symbolic links in
 	 * writable directories.
 	 */
-	is_writable = dir_is_writable(dfd, ud, cd);
+	is_writable = dir_is_writable(dfd, user_cred, run_cred);
 	if (is_writable == -1) {
 	    close(dfd);
 	    debug_return_int(-1);
@@ -336,17 +338,17 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 
 #ifdef O_NOFOLLOW
 int
-sudo_edit_open(char *path, int oflags, mode_t mode, struct user_details *ud,
-    struct command_details *cd)
+sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
+    struct sudo_cred *user_cred, struct sudo_cred *run_cred)
 {
-    const int sflags = cd ? cd->flags : 0;
     int fd;
     debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT);
 
     if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW))
 	oflags |= O_NOFOLLOW;
-    if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && ud->uid != ROOT_UID) {
-	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode, ud, cd);
+    if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && user_cred->uid != ROOT_UID) {
+	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode,
+	    user_cred, run_cred);
     } else {
 	fd = open(path, oflags|O_NONBLOCK, mode);
     }
@@ -356,10 +358,9 @@ sudo_edit_open(char *path, int oflags, mode_t mode, struct user_details *ud,
 }
 #else
 int
-sudo_edit_open(char *path, int oflags, mode_t mode, struct user_details *ud,
-    struct command_details *cd)
+sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
+    struct sudo_cred *user_cred, struct sudo_cred *run_cred)
 {
-    const int sflags = cd ? cd->flags : 0;
     struct stat sb;
     int fd;
     debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT);
@@ -377,8 +378,9 @@ sudo_edit_open(char *path, int oflags, mode_t mode, struct user_details *ud,
 	}
     }
 
-    if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && ud->uid != ROOT_UID) {
-	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode, ud, cd);
+    if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && user_cred->uid != ROOT_UID) {
+	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode,
+	    user_cred, run_cred);
     } else {
 	fd = open(path, oflags|O_NONBLOCK, mode);
     }
@@ -409,11 +411,10 @@ sudo_edit_open(char *path, int oflags, mode_t mode, struct user_details *ud,
  * Does not modify the value of errno.
  */
 bool
-sudo_edit_parent_valid(char *path, struct user_details *ud,
-    struct command_details *cd)
+sudo_edit_parent_valid(char *path, int sflags, struct sudo_cred *user_cred,
+    struct sudo_cred *run_cred)
 {
     const int serrno = errno;
-    const int sflags = cd->flags;
     struct stat sb;
     bool ret = false;
     char *slash;
@@ -436,10 +437,8 @@ sudo_edit_parent_valid(char *path, struct user_details *ud,
      * The parent directory is allowed to be a symbolic link unless
      * *its* parent is writable and CD_SUDOEDIT_CHECK is set.
      */
-    SET(cd->flags, CD_SUDOEDIT_FOLLOW);
     dfd = sudo_edit_open(path, DIR_OPEN_FLAGS, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH,
-	ud, cd);
-    cd->flags = sflags;
+	sflags|CD_SUDOEDIT_FOLLOW, user_cred, run_cred);
     if (dfd != -1) {
 	if (fstat(dfd, &sb) == 0 && S_ISDIR(sb.st_mode))
 	    ret = true;

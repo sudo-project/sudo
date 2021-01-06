@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -179,22 +179,22 @@ exec_setup(struct command_details *details, int errfd)
     unlimit_nproc();
 
 #if defined(HAVE_SETRESUID)
-    if (setresuid(details->uid, details->euid, details->euid) != 0) {
+    if (setresuid(details->cred.uid, details->cred.euid, details->cred.euid) != 0) {
 	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
-	    (unsigned int)details->uid, (unsigned int)details->euid);
+	    (unsigned int)details->cred.uid, (unsigned int)details->cred.euid);
 	goto done;
     }
 #elif defined(HAVE_SETREUID)
-    if (setreuid(details->uid, details->euid) != 0) {
+    if (setreuid(details->cred.uid, details->cred.euid) != 0) {
 	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
-	    (unsigned int)details->uid, (unsigned int)details->euid);
+	    (unsigned int)details->cred.uid, (unsigned int)details->cred.euid);
 	goto done;
     }
 #else
     /* Cannot support real user-ID that is different from effective user-ID. */
-    if (setuid(details->euid) != 0) {
+    if (setuid(details->cred.euid) != 0) {
 	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
-	    (unsigned int)details->euid, (unsigned int)details->euid);
+	    (unsigned int)details->cred.euid, (unsigned int)details->cred.euid);
 	goto done;
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
