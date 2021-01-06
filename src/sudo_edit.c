@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2008, 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2008, 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -265,8 +265,10 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
     } else {
 	len = asprintf(tfile, "%s/%s.XXXXXXXX", edit_tmpdir, cp);
     }
-    if (len == -1)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (len == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
     tfd = mkstemps(*tfile, suff ? strlen(suff) : 0);
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"%s -> %s, fd %d", ofile, *tfile, tfd);
@@ -772,7 +774,8 @@ bad:
 
 #ifdef HAVE_SELINUX
 static int
-selinux_run_helper(char *argv[], char *envp[])
+selinux_run_helper(uid_t uid, gid_t gid, int ngroups, GETGROUPS_T *groups,
+    char *const argv[], char *const envp[])
 {
     int status, ret = SESH_ERR_FAILURE;
     const char *sesh;
@@ -792,8 +795,10 @@ selinux_run_helper(char *argv[], char *envp[])
 	break;
     case 0:
 	/* child runs sesh in new context */
-	if (selinux_setcon() == 0)
+	if (selinux_setcon() == 0) {
+	    switch_user(uid, gid, ngroups, groups);
 	    execve(sesh, argv, envp);
+	}
 	_exit(SESH_ERR_FAILURE);
     default:
 	/* parent waits */
@@ -812,7 +817,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     struct tempfile *tf, char *files[], int nfiles)
 {
     char **sesh_args, **sesh_ap;
-    int i, rc, sesh_nargs;
+    int i, error, sesh_nargs, ret = -1;
     struct stat sb;
     debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT)
     
@@ -824,7 +829,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
+	goto done;
     }
     *sesh_ap++ = "sesh";
     *sesh_ap++ = "-e";
@@ -832,7 +837,6 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	*sesh_ap++ = "-h";
     *sesh_ap++ = "0";
 
-    /* XXX - temp files should be created with user's context */
     for (i = 0; i < nfiles; i++) {
 	char *tfile, *ofile = files[i];
 	int tfd;
@@ -850,8 +854,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	if (tfd == -1) {
 	    sudo_warn("mkstemps");
 	    free(tfile);
-	    free(sesh_args);
-	    debug_return_int(-1);
+	    goto done;
 	}
 	/* Helper will re-create temp file with proper security context. */
 	close(tfd);
@@ -862,8 +865,10 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     *sesh_ap = NULL;
 
     /* Run sesh -e [-h] 0 <o1> <t1> ... <on> <tn> */
-    rc = selinux_run_helper(sesh_args, command_details->envp);
-    switch (rc) {
+    error = selinux_run_helper(command_details->uid, command_details->gid,
+	command_details->ngroups, command_details->groups, sesh_args,
+	command_details->envp);
+    switch (error) {
     case SESH_SUCCESS:
 	break;
     case SESH_ERR_BAD_PATHS:
@@ -873,21 +878,35 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     case SESH_ERR_KILLED:
 	sudo_fatalx(U_("sesh: killed by a signal"));
     default:
-	sudo_fatalx(U_("sesh: unknown error %d"), rc);
+	sudo_warnx(U_("sesh: unknown error %d"), error);
+	goto done;
     }
 
-    /* Chown to user's UID so they can edit the temporary files. */
     for (i = 0; i < nfiles; i++) {
-	if (chown(tf[i].tfile, user_details.uid, user_details.gid) != 0) {
+	int tfd = open(tf[i].tfile, O_RDONLY|O_NONBLOCK|O_NOFOLLOW);
+	if (tfd == -1) {
+	    sudo_warn(U_("unable to open %s"), tf[i].tfile);
+	    goto done;
+	}
+	if (!sudo_check_temp_file(tfd, tf[i].tfile, command_details->uid, NULL)) {
+	    close(tfd);
+	    goto done;
+	}
+	if (fchown(tfd, user_details.uid, user_details.gid) != 0) {
 	    sudo_warn("unable to chown(%s) to %d:%d for editing",
 		tf[i].tfile, user_details.uid, user_details.gid);
+	    close(tfd);
+	    goto done;
 	}
+	close(tfd);
     }
+    ret = nfiles;
 
+done:
     /* Contents of tf will be freed by caller. */
     free(sesh_args);
 
-    return (nfiles);
+    debug_return_int(ret);
 }
 
 static int
@@ -895,7 +914,8 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     struct tempfile *tf, int nfiles, struct timespec *times)
 {
     char **sesh_args, **sesh_ap;
-    int i, rc, sesh_nargs, ret = 1;
+    int i, error, sesh_nargs, ret = 1;
+    int tfd = -1;
     struct timespec ts;
     struct stat sb;
     debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT)
@@ -916,33 +936,43 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 
     /* Construct args for sesh -e 1 */
     for (i = 0; i < nfiles; i++) {
-	if (stat(tf[i].tfile, &sb) == 0) {
-	    mtim_get(&sb, ts);
-	    if (tf[i].osize == sb.st_size && sudo_timespeccmp(&tf[i].omtim, &ts, ==)) {
-		/*
-		 * If mtime and size match but the user spent no measurable
-		 * time in the editor we can't tell if the file was changed.
-		 */
-		if (sudo_timespeccmp(&times[0], &times[1], !=)) {
-		    sudo_warnx(U_("%s unchanged"), tf[i].ofile);
-		    unlink(tf[i].tfile);
-		    continue;
-		}
+	if (tfd != -1)
+	    close(tfd);
+	if ((tfd = open(tf[i].tfile, O_RDONLY|O_NONBLOCK|O_NOFOLLOW)) == -1) {
+	    sudo_warn(U_("unable to open %s"), tf[i].tfile);
+	    continue;
+	}
+	if (!sudo_check_temp_file(tfd, tf[i].tfile, user_details.uid, &sb))
+	    continue;
+	mtim_get(&sb, ts);
+	if (tf[i].osize == sb.st_size && sudo_timespeccmp(&tf[i].omtim, &ts, ==)) {
+	    /*
+	     * If mtime and size match but the user spent no measurable
+	     * time in the editor we can't tell if the file was changed.
+	     */
+	    if (sudo_timespeccmp(&times[0], &times[1], !=)) {
+		sudo_warnx(U_("%s unchanged"), tf[i].ofile);
+		unlink(tf[i].tfile);
+		continue;
 	    }
 	}
 	*sesh_ap++ = tf[i].tfile;
 	*sesh_ap++ = tf[i].ofile;
-	if (chown(tf[i].tfile, command_details->uid, command_details->gid) != 0) {
+	if (fchown(tfd, command_details->uid, command_details->gid) != 0) {
 	    sudo_warn("unable to chown(%s) back to %d:%d", tf[i].tfile,
 		command_details->uid, command_details->gid);
 	}
     }
     *sesh_ap = NULL;
+    if (tfd != -1)
+	close(tfd);
 
     if (sesh_ap - sesh_args > 3) {
 	/* Run sesh -e 1 <t1> <o1> ... <tn> <on> */
-	rc = selinux_run_helper(sesh_args, command_details->envp);
-	switch (rc) {
+	error = selinux_run_helper(command_details->uid, command_details->gid,
+	    command_details->ngroups, command_details->groups, sesh_args,
+	    command_details->envp);
+	switch (error) {
 	case SESH_SUCCESS:
 	    ret = 0;
 	    break;
@@ -956,7 +986,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	    sudo_warnx(U_("sesh: killed by a signal"));
 	    break;
 	default:
-	    sudo_warnx(U_("sesh: unknown error %d"), rc);
+	    sudo_warnx(U_("sesh: unknown error %d"), error);
 	    break;
 	}
 	if (ret != 0)
@@ -978,7 +1008,7 @@ sudo_edit(struct command_details *command_details)
 {
     struct command_details saved_command_details;
     char **nargv = NULL, **ap, **files = NULL;
-    int errors, i, ac, nargc, rc;
+    int errors, i, ac, nargc, ret;
     int editor_argc = 0, nfiles = 0;
     struct timespec times[2];
     struct tempfile *tf = NULL;
@@ -1073,7 +1103,7 @@ sudo_edit(struct command_details *command_details)
     command_details->ngroups = user_details.ngroups;
     command_details->groups = user_details.groups;
     command_details->argv = nargv;
-    rc = run_command(command_details);
+    ret = run_command(command_details);
     if (sudo_gettime_real(&times[1]) == -1) {
 	sudo_warn(U_("unable to read the clock"));
 	goto cleanup;
@@ -1097,14 +1127,14 @@ sudo_edit(struct command_details *command_details)
 	errors = sudo_edit_copy_tfiles(command_details, tf, nfiles, times);
     if (errors) {
 	/* Preserve the edited temporary files. */
-	rc = W_EXITCODE(1, 0);
+	ret = W_EXITCODE(1, 0);
     }
 
     for (i = 0; i < nfiles; i++)
 	free(tf[i].tfile);
     free(tf);
     free(nargv);
-    debug_return_int(rc);
+    debug_return_int(ret);
 
 cleanup:
     /* Clean up temp files and return. */

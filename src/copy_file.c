@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,9 +23,8 @@
 
 #include <config.h>
 
-#include <sys/types.h>
+#include <sys/stat.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
@@ -105,24 +104,56 @@ sudo_copy_file(const char *src, int src_fd, off_t src_len, const char *dst,
 	    off += nwritten;
 	} while (nread > off);
     }
-    if (nread == 0) {
-	/* success, read to EOF */
-	if (src_len < dst_len) {
-	    /* We don't open with O_TRUNC so must truncate manually. */
-	    if (ftruncate(dst_fd, src_len) == -1) {
-		sudo_debug_printf(
-		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "unable to truncate %s to %lld", dst, (long long)src_len);
-		goto write_error;
-	    }
-	}
-	debug_return_int(0);
-    } else if (nread < 0) {
+    if (nread == -1) {
 	sudo_warn(U_("unable to read from %s"), src);
 	debug_return_int(-1);
-    } else {
-write_error:
-	sudo_warn(U_("unable to write to %s"), dst);
-	debug_return_int(-1);
     }
+
+    /* Did the file shrink? */
+    if (src_len < dst_len) {
+	/* We don't open with O_TRUNC so must truncate manually. */
+	if (ftruncate(dst_fd, src_len) == -1) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to truncate %s to %lld", dst, (long long)src_len);
+	    goto write_error;
+	}
+    }
+
+    debug_return_int(0);
+write_error:
+    sudo_warn(U_("unable to write to %s"), dst);
+    debug_return_int(-1);
 }
+
+#ifdef HAVE_SELINUX
+bool
+sudo_check_temp_file(int tfd, const char *tfile, uid_t uid, struct stat *sb)
+{
+    struct stat sbuf;
+    debug_decl(sudo_check_temp_file, SUDO_DEBUG_UTIL);
+
+    if (sb == NULL)
+	sb = &sbuf;
+
+    if (fstat(tfd, sb) == -1) {
+	sudo_warn(U_("unable to stat %s"), tfile);
+	debug_return_bool(false);
+    }
+    if (!S_ISREG(sb->st_mode)) {
+	sudo_warnx(U_("%s: not a regular file"), tfile);
+	debug_return_bool(false);
+    }
+    if ((sb->st_mode & ALLPERMS) != (S_IRUSR|S_IWUSR)) {
+	sudo_warnx(U_("%s: bad file mode: 0%o"), tfile, sb->st_mode & ALLPERMS);
+	debug_return_bool(false);
+    }
+    if (sb->st_uid != uid) {
+	sudo_warnx(U_("%s is owned by uid %u, should be %u"),
+	    tfile, (unsigned int)sb->st_uid, (unsigned int)uid);
+	debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+#endif /* SELINUX */
+>>>>>>> /tmp/copy_file~other.hgw8pyni.c
