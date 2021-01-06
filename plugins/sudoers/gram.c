@@ -3205,7 +3205,9 @@ sudoerserrorf(const char *fmt, ...)
 		/* Optimize common case, a single string. */
 		s = _(va_arg(ap, char *));
 	    } else {
-		if (vasprintf(&s, fmt, ap) == -1)
+		if (vasprintf(&s, fmt, ap) != -1)
+		    tofree = s;
+		else
 		    s = _("syntax error");
 	    }
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
