@@ -563,13 +563,14 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 		    "%s: unable to fchown %d:%d %s", __func__,
 		    (int)iolog_uid, (int)iolog_gid, pathbuf);
 	    }
-	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
+	    if (fcntl(fd, F_SETFD, FD_CLOEXEC) != -1) {
 #ifdef HAVE_ZLIB_H
-	    if (docompress)
-		iol->fd.g = gzdopen(fd, "w");
-	    else
+		if (docompress)
+		    iol->fd.g = gzdopen(fd, "w");
+		else
 #endif
-		iol->fd.f = fdopen(fd, "w");
+		    iol->fd.f = fdopen(fd, "w");
+	    }
 	    if (iol->fd.v == NULL) {
 		close(fd);
 		fd = -1;

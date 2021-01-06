@@ -57,8 +57,10 @@ linux_audit_open(void)
 	    au_fd = AUDIT_NOT_CONFIGURED;
 	else
 	    sudo_warn(U_("unable to open audit system"));
-    } else {
-	(void)fcntl(au_fd, F_SETFD, FD_CLOEXEC);
+    } else if (fcntl(au_fd, F_SETFD, FD_CLOEXEC) == -1) {
+	sudo_warn("%s", U_("unable to open audit system"));
+	audit_close(au_fd);
+	au_fd = -1;
     }
     debug_return_int(au_fd);
 }
