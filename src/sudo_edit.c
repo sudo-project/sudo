@@ -704,24 +704,17 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 
     /* Copy contents of temp files to real ones. */
     for (i = 0; i < nfiles; i++) {
-	int rc = -1;
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", (unsigned int)user_details.uid);
 	if (seteuid(user_details.uid) != 0)
 	    sudo_fatal("seteuid(%u)", (unsigned int)user_details.uid);
 	tfd = sudo_edit_open(tf[i].tfile, O_RDONLY,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, NULL);
-	if (tfd != -1)
-	    rc = fstat(tfd, &sb);
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "seteuid(%u)", ROOT_UID);
 	if (seteuid(ROOT_UID) != 0)
 	    sudo_fatal("seteuid(ROOT_UID)");
-	if (rc == -1 || !S_ISREG(sb.st_mode)) {
-	    if (rc == -1)
-		sudo_warn("%s", tf[i].tfile);
-	    else
-		sudo_warnx(U_("%s: not a regular file"), tf[i].tfile);
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", ROOT_UID);
+	if (tfd == -1 || !sudo_check_temp_file(tfd, tf[i].tfile, user_details.uid, &sb)) {
 	    sudo_warnx(U_("%s left unmodified"), tf[i].ofile);
 	    if (tfd != -1)
 		close(tfd);

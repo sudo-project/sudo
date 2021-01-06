@@ -126,7 +126,6 @@ write_error:
     debug_return_int(-1);
 }
 
-#ifdef HAVE_SELINUX
 bool
 sudo_check_temp_file(int tfd, const char *tfile, uid_t uid, struct stat *sb)
 {
@@ -155,5 +154,3 @@ sudo_check_temp_file(int tfd, const char *tfile, uid_t uid, struct stat *sb)
     }
     debug_return_bool(true);
 }
-#endif /* SELINUX */
->>>>>>> /tmp/copy_file~other.hgw8pyni.c
