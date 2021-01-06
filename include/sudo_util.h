@@ -220,6 +220,7 @@ __dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned int *
 
 /* progname.c */
 __dso_public void initprogname(const char *);
+__dso_public void initprogname2(const char *, const char * const *);
 
 /* secure_path.c */
 #define SUDO_PATH_SECURE		0
