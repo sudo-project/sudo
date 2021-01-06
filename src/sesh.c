@@ -39,15 +39,9 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_edit.h"
+#include "sudo.h"
 #include "sudo_exec.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include "sudo_edit.h"
 
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
@@ -130,20 +124,85 @@ main(int argc, char *argv[], char *envp[])
     _exit(ret);
 }
 
+/*
+ * Destructively parse a string in the format:
+ *  uid:gid:groups,...
+ *
+ * On success, fills in ud and returns true, else false.
+ */
+static bool
+parse_user(char *userstr, struct user_details *ud)
+{
+    char *cp, *ep;
+    const char *errstr;
+    debug_decl(parse_user, SUDO_DEBUG_EDIT);
+
+    /* UID */
+    cp = userstr;
+    if ((ep = strchr(cp, ':')) == NULL) {
+	sudo_warnx(U_("%s: %s"), cp, U_("invalid value"));
+	debug_return_bool(false);
+    }
+    *ep++ = '\0';
+    ud->uid = sudo_strtoid(cp, &errstr);
+    if (errstr != NULL) {
+	sudo_warnx(U_("%s: %s"), cp, errstr);
+	debug_return_bool(false);
+    }
+
+    /* GID */
+    cp = ep;
+    if ((ep = strchr(cp, ':')) == NULL) {
+	sudo_warnx(U_("%s: %s"), cp, U_("invalid value"));
+	debug_return_bool(false);
+    }
+    *ep++ = '\0';
+    ud->gid = sudo_strtoid(cp, &errstr);
+    if (errstr != NULL) {
+	sudo_warnx(U_("%s: %s"), cp, errstr);
+	debug_return_bool(false);
+    }
+
+    /* group vector */
+    cp = ep;
+    ud->ngroups = sudo_parse_gids(cp, NULL, &ud->groups);
+    if (ud->ngroups == -1)
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}
+
 static int
 sesh_sudoedit(int argc, char *argv[])
 {
-    int i, oflags_src, oflags_dst, post, ret = SESH_ERR_FAILURE;
-    int fd_src = -1, fd_dst = -1, follow = 0;
-    struct stat sb;
+    int i, post, ret = SESH_ERR_FAILURE;
+    int fd_src = -1, fd_dst = -1;
+    struct command_details command_details;
+    struct user_details edit_user;
     struct timespec times[2];
+    struct stat sb;
     debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT);
 
+    memset(&edit_user, 0, sizeof(edit_user));
+    memset(&command_details, 0, sizeof(command_details));
+    command_details.flags = CD_SUDOEDIT_FOLLOW;
+
     /* Check for -h flag (don't follow links). */
-    if (strcmp(argv[2], "-h") == 0) {
+    if (argv[2] != NULL && strcmp(argv[2], "-h") == 0) {
 	argv++;
 	argc--;
-	follow = O_NOFOLLOW;
+	CLR(command_details.flags, CD_SUDOEDIT_FOLLOW);
+    }
+
+    /* Check for -w flag (disallow directories writable by the user). */
+    if (argv[2] != NULL && strcmp(argv[2], "-w") == 0) {
+	SET(command_details.flags, CD_SUDOEDIT_CHECKDIR);
+
+	/* Parse uid:gid:gid1,gid2,... */
+	if (argv[3] == NULL || !parse_user(argv[3], &edit_user))
+	    debug_return_int(SESH_ERR_FAILURE);
+	argv += 2;
+	argc -= 2;
     }
 
     if (argc < 3)
@@ -175,42 +234,87 @@ sesh_sudoedit(int argc, char *argv[])
 	debug_return_int(SESH_ERR_BAD_PATHS);
 
     /*
-     * In the pre-editing stage, use O_EXCL to ensure that the temporary
-     * files are created by us and that we are not opening any symlinks.
-     * In the post-editing stage, use O_NOFOLLOW so we don't follow symlinks
-     * when opening the temporary files.
+     * sudoedit runs us with the effective user-ID and group-ID of
+     * the target user as well as with the target user's group list.
      */
-    oflags_src = O_RDONLY|(post ? O_NONBLOCK|O_NOFOLLOW : follow);
-    oflags_dst = O_WRONLY|O_CREAT|(post ? follow : O_EXCL);
+    command_details.uid = command_details.euid = geteuid();
+    command_details.gid = command_details.egid = getegid();
+    command_details.ngroups = getgroups(0, NULL);
+    if (command_details.ngroups > 0) {
+	command_details.groups = reallocarray(NULL, command_details.ngroups,
+	    sizeof(GETGROUPS_T));
+	if (command_details.groups == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	    debug_return_int(SESH_ERR_FAILURE);
+	}
+	if (getgroups(command_details.ngroups, command_details.groups) < 0) {
+	    sudo_warn("%s", U_("unable to get group list"));
+	    debug_return_int(SESH_ERR_FAILURE);
+	}
+    }
+
     for (i = 0; i < argc - 1; i += 2) {
-	const char *path_src = argv[i];
-	const char *path_dst = argv[i + 1];
+	char *path_src = argv[i];
+	char *path_dst = argv[i + 1];
 	/*
-	 * Try to open the source file for reading. If it
-	 * doesn't exist, that's OK, we'll create an empty
-	 * destination file.
+	 * Try to open the source (original or temporary) file for reading.
+	 * If it doesn't exist, we'll create an empty destination file.
 	 */
-	if ((fd_src = open(path_src, oflags_src, S_IRUSR|S_IWUSR)) < 0) {
-	    if (errno != ENOENT) {
-		sudo_warn("%s", path_src);
+	if (post) {
+	    fd_src = open(path_src, O_RDONLY|O_NONBLOCK|O_NOFOLLOW);
+	} else {
+	    fd_src = sudo_edit_open(path_src, post ? O_RDONLY|O_NOFOLLOW : O_RDONLY,
+		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, &edit_user, &command_details);
+	}
+	if (fd_src == -1) {
+	    if (post || errno != ENOENT) {
+		if (errno == ELOOP) {
+		    sudo_warnx(U_("%s: editing symbolic links is not "
+			"permitted"), path_src);
+		} else if (errno == EISDIR) {
+		    sudo_warnx(U_("%s: editing files in a writable directory "
+			"is not permitted"), path_src);
+		} else {
+		    sudo_warn("%s", path_src);
+		}
 		if (post) {
 		    ret = SESH_ERR_SOME_FILES;
 		    goto nocleanup;
 		} else
 		    goto cleanup_0;
 	    }
+	    /* New file, verify parent dir exists and is not writable. */
+	    if (!sudo_edit_parent_valid(path_src, &edit_user, &command_details))
+		goto cleanup_0;
 	}
 	if (post) {
 	    /* Make sure the temporary file is safe and has the proper owner. */
-	    if (!sudo_check_temp_file(fd_src, path_src, geteuid(), &sb)) {
+	    if (!sudo_check_temp_file(fd_src, path_src, command_details.uid, &sb)) {
 		ret = SESH_ERR_SOME_FILES;
 		goto nocleanup;
 	    }
-	    fcntl(fd_src, F_SETFL, fcntl(fd_src, F_GETFL, 0) & ~O_NONBLOCK);
-	}
+	    (void) fcntl(fd_src, F_SETFL, fcntl(fd_src, F_GETFL, 0) & ~O_NONBLOCK);
 
-	if ((fd_dst = open(path_dst, oflags_dst, post ?
-	    (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH) : (S_IRUSR|S_IWUSR))) < 0) {
+	    /* Create destination file. */
+	    fd_dst = sudo_edit_open(path_dst, O_WRONLY|O_CREAT,
+		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, &edit_user, &command_details);
+	} else {
+	    if (fd_src == -1) {
+		/* New file. */
+		memset(&sb, 0, sizeof(sb));
+	    } else if (fstat(fd_src, &sb) == -1 || !S_ISREG(sb.st_mode)) {
+		sudo_warnx(U_("%s: not a regular file"), path_src);
+		goto cleanup_0;
+	    }
+
+	    /*
+	     * Create temporary file using O_EXCL to ensure that temporary
+	     * files are created by us and that we do not open any symlinks.
+	     */
+	    fd_dst = open(path_dst, O_WRONLY|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR);
+	}
+	if (fd_dst == -1) {
 	    /* error - cleanup */
 	    sudo_warn("%s", path_dst);
 	    if (post) {
@@ -246,9 +350,7 @@ sesh_sudoedit(int argc, char *argv[])
 	}
 
 	if (!post) {
-	    if (fd_src == -1 || fstat(fd_src, &sb) != 0)
-		memset(&sb, 0, sizeof(sb));
-	    /* Make mtime on temp file match src. */
+	    /* Make mtime on temp file match src (sb filled in above). */
 	    mtim_get(&sb, times[0]);
 	    times[1].tv_sec = times[0].tv_sec;
 	    times[1].tv_nsec = times[0].tv_nsec;
@@ -276,7 +378,7 @@ nocleanup:
 	close(fd_dst);
     if (fd_src != -1)
 	close(fd_src);
-    return(ret);
+    debug_return_int(ret);
 cleanup_0:
     /* Remove temporary files (post=0) */
     for (i = 0; i < argc - 1; i += 2)
@@ -285,5 +387,5 @@ cleanup_0:
 	close(fd_dst);
     if (fd_src != -1)
 	close(fd_src);
-    return(SESH_ERR_NO_FILES);
+    debug_return_int(SESH_ERR_NO_FILES);
 }

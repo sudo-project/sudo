@@ -49,5 +49,6 @@ bool sudo_check_temp_file(int tfd, const char *tname, uid_t uid, struct stat *sb
 void switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups);
 int sudo_edit_open(char *path, int oflags, mode_t mode, struct user_details *ud, struct command_details *cd);
 int dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd);
+bool sudo_edit_parent_valid(char *path, struct user_details *ud, struct command_details *cd);
 
 #endif /* SUDO_EDIT_H */

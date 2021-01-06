@@ -401,4 +401,57 @@ sudo_edit_open(char *path, int oflags, mode_t mode, struct user_details *ud,
 }
 #endif /* O_NOFOLLOW */
 
+/*
+ * Verify that the parent dir of a new file exists and is not writable
+ * by the user.  This fails early so the user knows ahead of time if the
+ * edit won't succeed.  Additional checks are performed when copying the
+ * temporary file back to the origin so there are no TOCTOU issues.
+ * Does not modify the value of errno.
+ */
+bool
+sudo_edit_parent_valid(char *path, struct user_details *ud,
+    struct command_details *cd)
+{
+    const int serrno = errno;
+    const int sflags = cd->flags;
+    struct stat sb;
+    bool ret = false;
+    char *slash;
+    int dfd;
+    debug_decl(sudo_edit_parent_valid, SUDO_DEBUG_EDIT);
+
+    /* Get dirname of path (the slash is restored later). */
+    slash = strrchr(path, '/');
+    if (slash == NULL) {
+	/* cwd */
+	path = ".";
+    } else if (slash == path) {
+	path = "/";
+	slash = NULL;
+    } else {
+	*slash = '\0';
+    }
+
+    /*
+     * The parent directory is allowed to be a symbolic link unless
+     * *its* parent is writable and CD_SUDOEDIT_CHECK is set.
+     */
+    SET(cd->flags, CD_SUDOEDIT_FOLLOW);
+    dfd = sudo_edit_open(path, DIR_OPEN_FLAGS, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH,
+	ud, cd);
+    cd->flags = sflags;
+    if (dfd != -1) {
+	if (fstat(dfd, &sb) == 0 && S_ISDIR(sb.st_mode))
+	    ret = true;
+	close(dfd);
+    }
+    if (slash != NULL)
+	*slash = '/';
+
+    /* Restore errno. */
+    errno = serrno;
+
+    debug_return_bool(ret);
+}
+
 #endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
