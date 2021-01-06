@@ -180,7 +180,10 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	}
 	ignore_result(fchown(output->fd, (uid_t)-1, 0));
     }
-    (void)fcntl(output->fd, F_SETFD, FD_CLOEXEC);
+    if (fcntl(output->fd, F_SETFD, FD_CLOEXEC) == -1) {
+	sudo_warn_nodebug("%s", output->filename);
+	goto bad;
+    }
     if (sudo_debug_fds_size < output->fd) {
 	/* Bump fds size to the next multiple of 4 * NBBY. */
 	const int old_size = sudo_debug_fds_size / NBBY;

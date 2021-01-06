@@ -596,13 +596,14 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 			iol->compressed = true;
 		}
 	    }
-	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
+	    if (fcntl(fd, F_SETFD, FD_CLOEXEC) != -1) {
 #ifdef HAVE_ZLIB_H
-	    if (iol->compressed)
-		iol->fd.g = gzdopen(fd, mode);
-	    else
+		if (iol->compressed)
+		    iol->fd.g = gzdopen(fd, mode);
+		else
 #endif
-		iol->fd.f = fdopen(fd, mode);
+		    iol->fd.f = fdopen(fd, mode);
+	    }
 	    if (iol->fd.v != NULL) {
 		switch ((flags & O_ACCMODE)) {
 		case O_WRONLY:
