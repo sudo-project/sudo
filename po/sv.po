@@ -6,19 +6,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.1b1\n"
+"Project-Id-Version: sudo 1.9.3b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2020-06-05 10:24-0600\n"
-"PO-Revision-Date: 2020-06-07 19:16+0800\n"
+"POT-Creation-Date: 2020-09-12 08:28-0600\n"
+"PO-Revision-Date: 2020-12-26 03:44+0100\n"
 "Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
-"Language-Team: Swedish <tp-sv-list@lists.sourceforge.net>\n"
+"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-Poedit-Bookmarks: -1,0,-1,-1,-1,-1,-1,-1,-1,-1\n"
 
 #: lib/util/aix.c:89 lib/util/aix.c:169
@@ -54,17 +54,17 @@ msgstr "kunde inte återställa registret"
 #: src/exec_pty.c:1276 src/exec_pty.c:1283 src/exec_pty.c:1290
 #: src/exec_pty.c:1298 src/exec_pty.c:1740 src/load_plugins.c:52
 #: src/load_plugins.c:65 src/load_plugins.c:163 src/load_plugins.c:188
-#: src/load_plugins.c:223 src/load_plugins.c:462 src/load_plugins.c:468
-#: src/parse_args.c:176 src/parse_args.c:197 src/parse_args.c:270
-#: src/parse_args.c:593 src/parse_args.c:615 src/parse_args.c:640
+#: src/load_plugins.c:223 src/load_plugins.c:463 src/load_plugins.c:469
+#: src/parse_args.c:181 src/parse_args.c:202 src/parse_args.c:275
+#: src/parse_args.c:616 src/parse_args.c:638 src/parse_args.c:663
 #: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:90
-#: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
-#: src/sudo.c:624 src/sudo.c:693 src/sudo.c:703 src/sudo.c:724 src/sudo.c:743
-#: src/sudo.c:752 src/sudo.c:761 src/sudo.c:778 src/sudo.c:820 src/sudo.c:830
-#: src/sudo.c:859 src/sudo.c:1045 src/sudo.c:1067 src/sudo.c:1365
-#: src/sudo.c:1538 src/sudo.c:1732 src/sudo.c:2076 src/sudo_edit.c:263
-#: src/sudo_edit.c:767 src/sudo_edit.c:851 src/sudo_edit.c:971
-#: src/sudo_edit.c:991
+#: src/selinux.c:360 src/selinux.c:489 src/selinux.c:498 src/sesh.c:115
+#: src/sudo.c:632 src/sudo.c:701 src/sudo.c:711 src/sudo.c:732 src/sudo.c:751
+#: src/sudo.c:760 src/sudo.c:769 src/sudo.c:786 src/sudo.c:828 src/sudo.c:838
+#: src/sudo.c:867 src/sudo.c:1053 src/sudo.c:1075 src/sudo.c:1373
+#: src/sudo.c:1546 src/sudo.c:1740 src/sudo.c:2084 src/sudo_edit.c:263
+#: src/sudo_edit.c:770 src/sudo_edit.c:854 src/sudo_edit.c:976
+#: src/sudo_edit.c:996
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -87,20 +87,20 @@ msgstr "%s: %s"
 #: src/exec_pty.c:1262 src/exec_pty.c:1269 src/exec_pty.c:1276
 #: src/exec_pty.c:1283 src/exec_pty.c:1290 src/exec_pty.c:1298
 #: src/exec_pty.c:1740 src/load_plugins.c:163 src/load_plugins.c:188
-#: src/load_plugins.c:223 src/load_plugins.c:462 src/load_plugins.c:468
-#: src/parse_args.c:176 src/parse_args.c:198 src/parse_args.c:270
-#: src/parse_args.c:593 src/parse_args.c:615 src/parse_args.c:640
+#: src/load_plugins.c:223 src/load_plugins.c:463 src/load_plugins.c:469
+#: src/parse_args.c:181 src/parse_args.c:203 src/parse_args.c:275
+#: src/parse_args.c:616 src/parse_args.c:638 src/parse_args.c:663
 #: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:90
-#: src/selinux.c:360 src/selinux.c:485 src/selinux.c:494 src/sesh.c:116
-#: src/sudo.c:234 src/sudo.c:624 src/sudo.c:859 src/sudo.c:1045
-#: src/sudo.c:1067 src/sudo.c:1365 src/sudo.c:1538 src/sudo.c:1732
-#: src/sudo.c:2076 src/sudo_edit.c:263 src/sudo_edit.c:767 src/sudo_edit.c:851
-#: src/sudo_edit.c:971 src/sudo_edit.c:991
+#: src/selinux.c:360 src/selinux.c:489 src/selinux.c:498 src/sesh.c:115
+#: src/sudo.c:235 src/sudo.c:632 src/sudo.c:867 src/sudo.c:1053
+#: src/sudo.c:1075 src/sudo.c:1373 src/sudo.c:1546 src/sudo.c:1740
+#: src/sudo.c:2084 src/sudo_edit.c:263 src/sudo_edit.c:770 src/sudo_edit.c:854
+#: src/sudo_edit.c:976 src/sudo_edit.c:996
 msgid "unable to allocate memory"
 msgstr "kunde inte allokera minne"
 
 #: lib/util/mkdir_parents.c:69 lib/util/sudo_conf.c:614 src/selinux.c:234
-#: src/selinux.c:264 src/sudo.c:367
+#: src/selinux.c:264 src/sudo.c:369
 #, c-format
 msgid "unable to open %s"
 msgstr "kunde inte öppna %s"
@@ -177,12 +177,22 @@ msgstr "%s är skrivbar för alla"
 msgid "%s is group writable"
 msgstr "%s är skrivbar för gruppen"
 
-#: src/copy_file.c:118
+#: src/copy_file.c:91
+#, c-format
+msgid "%s: truncate %s to zero bytes? (y/n) [n] "
+msgstr "%s: trunkera %s till noll byte? (y för ja/n för nej) [n] "
+
+#: src/copy_file.c:95
+#, c-format
+msgid "not overwriting %s"
+msgstr "skriver inte över %s"
+
+#: src/copy_file.c:117
 #, c-format
 msgid "unable to read from %s"
 msgstr "kunde inte läsa från %s"
 
-#: src/copy_file.c:122 src/sudo_edit.c:695
+#: src/copy_file.c:134 src/sudo_edit.c:695
 #, c-format
 msgid "unable to write to %s"
 msgstr "kunde inte skriva till %s"
@@ -263,7 +273,7 @@ msgid "unable to set controlling tty"
 msgstr "kan inte ställa in kontrollerande tty"
 
 #: src/exec_monitor.c:590 src/exec_nopty.c:358 src/exec_pty.c:1465
-#: src/exec_pty.c:1486 src/exec_pty.c:1506 src/tgetpass.c:304
+#: src/exec_pty.c:1486 src/exec_pty.c:1506 src/tgetpass.c:306
 msgid "unable to create pipe"
 msgstr "kunde inte skapa rör"
 
@@ -272,7 +282,7 @@ msgid "unable to receive message from parent"
 msgstr "kan inte ta emot meddelande från förälder"
 
 #: src/exec_monitor.c:612 src/exec_nopty.c:387 src/exec_pty.c:1544
-#: src/sudo_edit.c:732 src/tgetpass.c:308
+#: src/sudo_edit.c:735 src/tgetpass.c:310
 msgid "unable to fork"
 msgstr "kunde inte grena process"
 
@@ -280,7 +290,7 @@ msgstr "kunde inte grena process"
 msgid "unable to restore tty label"
 msgstr "kan inte återställa tty-etikett"
 
-#: src/exec_monitor.c:632 src/sesh.c:126 src/sudo.c:1123
+#: src/exec_monitor.c:632 src/sesh.c:125 src/sudo.c:1131
 #, c-format
 msgid "unable to execute %s"
 msgstr "kunde inte köra %s"
@@ -331,7 +341,7 @@ msgstr "kan inte skicka meddelande till övervakningsprocess"
 #: src/load_plugins.c:50 src/load_plugins.c:63 src/load_plugins.c:85
 #: src/load_plugins.c:115 src/load_plugins.c:129 src/load_plugins.c:135
 #: src/load_plugins.c:287 src/load_plugins.c:297 src/load_plugins.c:307
-#: src/load_plugins.c:353
+#: src/load_plugins.c:354
 #, c-format
 msgid "error in %s, line %d while loading plugin \"%s\""
 msgstr "fel i %s, rad %d under inläsning av insticksmodul ”%s”"
@@ -376,67 +386,67 @@ msgstr "inkompatibel huvudversion %d för insticksmodul (%d förväntades) hitta
 msgid "ignoring policy plugin \"%s\" in %s, line %d"
 msgstr "ignorerar policyinsticksmodul ”%s” i %s, rad %d"
 
-#: src/load_plugins.c:329
+#: src/load_plugins.c:330
 msgid "only a single policy plugin may be specified"
 msgstr "bara en policyinsticksmodul kan anges"
 
-#: src/load_plugins.c:355
+#: src/load_plugins.c:356
 #, c-format
 msgid "unknown plugin type %d found in %s"
 msgstr "okänd insticksmodulstyp %d hittad i %s"
 
-#: src/load_plugins.c:541
+#: src/load_plugins.c:552
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "policyinsticksmodul %s inkluderar inte en check_policy-metod"
 
-#: src/net_ifs.c:178 src/net_ifs.c:195 src/net_ifs.c:340 src/sudo.c:477
+#: src/net_ifs.c:178 src/net_ifs.c:195 src/net_ifs.c:340 src/sudo.c:479
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "internt fel, %s spill"
 
-#: src/parse_args.c:218
+#: src/parse_args.c:223
 #, c-format
 msgid "invalid environment variable name: %s"
 msgstr "ogiltigt namn på miljövariabel: %s"
 
-#: src/parse_args.c:319
+#: src/parse_args.c:325
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "argumentet till -C måste vara ett tal större än eller lika med 3"
 
-#: src/parse_args.c:532
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "du får inte ange flaggorna ”-i” och ”-s” samtidigt"
+#: src/parse_args.c:552
+msgid "you may not specify both the -i and -s options"
+msgstr "du får inte ange flaggorna -i och -s samtidigt"
 
-#: src/parse_args.c:536
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "du får inte ange flaggorna ”-i” och ”-E” samtidigt"
+#: src/parse_args.c:557
+msgid "you may not specify both the -i and -E options"
+msgstr "du får inte ange flaggorna -i och -E samtidigt"
 
-#: src/parse_args.c:546
-msgid "the `-E' option is not valid in edit mode"
-msgstr "flaggan ”-E” är inte giltig i redigeringsläget"
+#: src/parse_args.c:567
+msgid "the -E option is not valid in edit mode"
+msgstr "flaggan -E är inte giltig i redigeringsläget"
 
-#: src/parse_args.c:548
+#: src/parse_args.c:570
 msgid "you may not specify environment variables in edit mode"
 msgstr "du får inte ange miljövariabler i redigeringsläget"
 
-#: src/parse_args.c:557
-msgid "the `-U' option may only be used with the `-l' option"
-msgstr "flaggan ”-U” får bara användas med flaggan ”-l”"
+#: src/parse_args.c:580
+msgid "the -U option may only be used with the -l option"
+msgstr "flaggan -U får bara användas med flaggan -l"
 
-#: src/parse_args.c:561
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "flaggorna ”-A” och ”-S” får inte användas tillsammans"
+#: src/parse_args.c:584
+msgid "the -A and -S options may not be used together"
+msgstr "flaggorna -A och -S får inte användas tillsammans"
 
-#: src/parse_args.c:654
+#: src/parse_args.c:677
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit stöds inte på denna plattform"
 
-#: src/parse_args.c:735
+#: src/parse_args.c:759
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Endast en av flaggorna -e, -h, -i, -K, -l, -s, -v eller -V får anges"
 
-#: src/parse_args.c:749
+#: src/parse_args.c:773
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -445,7 +455,7 @@ msgstr ""
 "%s - redigera filer som en annan användare\n"
 "\n"
 
-#: src/parse_args.c:751
+#: src/parse_args.c:775
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -454,8 +464,7 @@ msgstr ""
 "%s - kör ett kommando som en annan användare\n"
 "\n"
 
-#: src/parse_args.c:756
-#, c-format
+#: src/parse_args.c:780
 msgid ""
 "\n"
 "Options:\n"
@@ -463,123 +472,131 @@ msgstr ""
 "\n"
 "Flaggor:\n"
 
-#: src/parse_args.c:758
+#: src/parse_args.c:782
 msgid "use a helper program for password prompting"
 msgstr "använd hjälpprogram för att fråga efter lösenord"
 
-#: src/parse_args.c:761
+#: src/parse_args.c:785
 msgid "use specified BSD authentication type"
 msgstr "använd angiven BSD-autentiseringstyp"
 
-#: src/parse_args.c:764
+#: src/parse_args.c:788
 msgid "run command in the background"
 msgstr "kör kommando i bakgrunden"
 
-#: src/parse_args.c:766
+#: src/parse_args.c:790
 msgid "ring bell when prompting"
 msgstr "ring i klockan vid fråga"
 
-#: src/parse_args.c:768
+#: src/parse_args.c:792
 msgid "close all file descriptors >= num"
 msgstr "stäng alla fildeskriptorer >= num"
 
-#: src/parse_args.c:771
+#: src/parse_args.c:795
 msgid "run command with the specified BSD login class"
 msgstr "kör kommando med den angivna BSD-inloggningsklassen"
 
-#: src/parse_args.c:774
+#: src/parse_args.c:798
+msgid "change the working directory before running command"
+msgstr "ändra arbetskatalog innan kommando körs"
+
+#: src/parse_args.c:800
 msgid "preserve user environment when running command"
 msgstr "bevara användarens miljö när kommandot körs"
 
-#: src/parse_args.c:776
+#: src/parse_args.c:802
 msgid "preserve specific environment variables"
 msgstr "bevara specifika miljövariabler"
 
-#: src/parse_args.c:778
+#: src/parse_args.c:804
 msgid "edit files instead of running a command"
 msgstr "redigera filer istället för att köra ett kommando"
 
-#: src/parse_args.c:780
+#: src/parse_args.c:806
 msgid "run command as the specified group name or ID"
 msgstr "kör kommando som angivet gruppnamn eller ID"
 
-#: src/parse_args.c:782
+#: src/parse_args.c:808
 msgid "set HOME variable to target user's home dir"
 msgstr "ställ in HOME-variabeln till målanvändarens hemkatalog"
 
-#: src/parse_args.c:784
+#: src/parse_args.c:810
 msgid "display help message and exit"
 msgstr "visa hjälpmeddelande och avsluta"
 
-#: src/parse_args.c:786
+#: src/parse_args.c:812
 msgid "run command on host (if supported by plugin)"
 msgstr "kör kommando på värd (om det stöds av instick)"
 
-#: src/parse_args.c:788
+#: src/parse_args.c:814
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "kör ett inloggningsskal som målanvändaren; ett kommando kan också anges"
 
-#: src/parse_args.c:790
+#: src/parse_args.c:816
 msgid "remove timestamp file completely"
 msgstr "ta bort tidsstämpelfil helt"
 
-#: src/parse_args.c:792
+#: src/parse_args.c:818
 msgid "invalidate timestamp file"
 msgstr "ogiltigförklara tidsstämpelfil"
 
-#: src/parse_args.c:794
+#: src/parse_args.c:820
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "lista användarens rättigheter eller kontrollera ett specifikt kommando; använd två gånger för längre format"
 
-#: src/parse_args.c:796
+#: src/parse_args.c:822
 msgid "non-interactive mode, no prompts are used"
 msgstr "icke-interaktivt läge, inga frågor ställs"
 
-#: src/parse_args.c:798
+#: src/parse_args.c:824
 msgid "preserve group vector instead of setting to target's"
 msgstr "behåll gruppvektor istället för att ställa in den till målets"
 
-#: src/parse_args.c:800
+#: src/parse_args.c:826
 msgid "use the specified password prompt"
 msgstr "använd angiven lösenordsprompt"
 
-#: src/parse_args.c:803
+#: src/parse_args.c:828
+msgid "change the root directory before running command"
+msgstr "ändra rotkatalog innan kommando körs"
+
+#: src/parse_args.c:831
 msgid "create SELinux security context with specified role"
 msgstr "skapa SELinux-säkerhetskontext med angiven roll"
 
-#: src/parse_args.c:806
+#: src/parse_args.c:834
 msgid "read password from standard input"
 msgstr "läs lösenord från standard in"
 
-#: src/parse_args.c:808
+#: src/parse_args.c:836
 msgid "run shell as the target user; a command may also be specified"
 msgstr "kör skal som målanvändaren; ett kommando kan också anges"
 
-#: src/parse_args.c:811
+#: src/parse_args.c:839
 msgid "create SELinux security context with specified type"
 msgstr "skapa SELinux-säkerhetskontext med angiven typ"
 
-#: src/parse_args.c:814
+#: src/parse_args.c:842
 msgid "terminate command after the specified time limit"
 msgstr "avsluta kommando efter den angivna tidsgränsen"
 
-#: src/parse_args.c:816
+#: src/parse_args.c:844
 msgid "in list mode, display privileges for user"
 msgstr "i listläge, visa rättigheter för användaren"
 
-#: src/parse_args.c:818
+#: src/parse_args.c:846
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "kör kommando (eller redigera fil) som angivet användarnamn eller ID"
 
-#: src/parse_args.c:820
+#: src/parse_args.c:848
 msgid "display version information and exit"
 msgstr "visa versionsinformation och avsluta"
 
-#: src/parse_args.c:822
+#: src/parse_args.c:850
 msgid "update user's timestamp without running a command"
 msgstr "uppdatera användarens tidsstämpel utan att köra ett kommando"
 
-#: src/parse_args.c:824
+#: src/parse_args.c:852
 msgid "stop processing command line arguments"
 msgstr "sluta behandla kommandoradsargument"
 
@@ -684,16 +701,16 @@ msgstr "kunde inte ställa in körkontext till %s"
 msgid "unable to set key creation context to %s"
 msgstr "kan inte ställa in kontext för nyckelskapande till %s"
 
-#: src/sesh.c:78
+#: src/sesh.c:77
 msgid "requires at least one argument"
 msgstr "kräver minst ett argument"
 
-#: src/sesh.c:107
+#: src/sesh.c:106
 #, c-format
 msgid "invalid file descriptor number: %s"
 msgstr "ogiltigt fildeskriptornummer: %s"
 
-#: src/sesh.c:121
+#: src/sesh.c:120
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr "kunde inte köra %s som ett inloggningsskal"
@@ -721,149 +738,149 @@ msgstr "den startande uppgiften är den sista"
 msgid "could not join project \"%s\""
 msgstr "kunde inte gå med i projekt ”%s”"
 
-#: src/solaris.c:87
+#: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "ingen resurspool som accepterar standardbindningar existerar för projekt ”%s”"
 
-#: src/solaris.c:91
+#: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "angiven resurspool finns inte för projekt ”%s”"
 
-#: src/solaris.c:95
+#: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "kunde inte binda till standardresurspool för projekt ”%s”"
 
-#: src/solaris.c:101
+#: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "setproject misslyckades för projekt ”%s”"
 
-#: src/solaris.c:103
+#: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "varning, tilldelning av resurskontroll misslyckades för projekt ”%s”"
 
-#: src/sudo.c:219
+#: src/sudo.c:220
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo version %s\n"
 
-#: src/sudo.c:221
+#: src/sudo.c:222
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Konfigurationsflaggor: %s\n"
 
-#: src/sudo.c:230
+#: src/sudo.c:231
 msgid "fatal error, unable to load plugins"
 msgstr "ödesdigert fel, kunde inte läsa in insticksmoduler"
 
-#: src/sudo.c:275
+#: src/sudo.c:277
 msgid "plugin did not return a command to execute"
 msgstr "insticksmodul returnerade ett kommando att exekvera"
 
-#: src/sudo.c:310
+#: src/sudo.c:312
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "oväntat sudo-läge 0x%x"
 
-#: src/sudo.c:543
+#: src/sudo.c:546
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "du existerar inte i %s-databasen"
 
-#: src/sudo.c:600
+#: src/sudo.c:603
 msgid "unable to determine tty"
 msgstr "kan inte detektera tty"
 
-#: src/sudo.c:905
+#: src/sudo.c:913
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s måste ägas av uid %d och ha setuid-biten inställd"
 
-#: src/sudo.c:908
+#: src/sudo.c:916
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "effektivt uid är inte %d, är %s på ett filsystem med flaggan ”nosuid” inställd eller ett NFS-filsystem utan root-rättigheter?"
 
-#: src/sudo.c:914
+#: src/sudo.c:922
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "effektivt uid är inte %d, har sudo installerats som setuid root?"
 
-#: src/sudo.c:930
+#: src/sudo.c:938
 msgid "unable to set supplementary group IDs"
 msgstr "kan inte ställa in kompletterande grupp-ID:n"
 
-#: src/sudo.c:937
+#: src/sudo.c:945
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "kunde inte ställa in effektiv gid till runas gid %u"
 
-#: src/sudo.c:943
+#: src/sudo.c:951
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "kunde inte ställa in gid för runas gid %u"
 
-#: src/sudo.c:986
+#: src/sudo.c:994
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "oväntat barnavslutsvillkor: %d"
 
-#: src/sudo.c:1095
+#: src/sudo.c:1103
 msgid "unable to initialize policy plugin"
 msgstr "kan inte initiera policy-instick"
 
-#: src/sudo.c:1158
+#: src/sudo.c:1166
 #, c-format
-msgid "policy plugin %s is missing the `check_policy' method"
+msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "policyinsticksmodul %s saknar metoden ”check_policy”"
 
-#: src/sudo.c:1173 src/sudo.c:1226 src/sudo.c:1270
+#: src/sudo.c:1181 src/sudo.c:1234 src/sudo.c:1278
 msgid "command rejected by policy"
 msgstr "kommando avböjt enligt policy"
 
-#: src/sudo.c:1178 src/sudo.c:1231 src/sudo.c:1275
+#: src/sudo.c:1186 src/sudo.c:1239 src/sudo.c:1283
 msgid "policy plugin error"
 msgstr "fel i policyinsticksmodul"
 
-#: src/sudo.c:1212
+#: src/sudo.c:1220
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "policyinsticksmodul %s har inte stöd för att lista rättigheter"
 
-#: src/sudo.c:1256
+#: src/sudo.c:1264
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "policyinsticksmodul %s har inte stöd för flaggan -v"
 
-#: src/sudo.c:1294
+#: src/sudo.c:1302
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "policyinsticksmodul %s har inte stöd för flaggorna -k/-K"
 
-#: src/sudo.c:1423
+#: src/sudo.c:1431
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "fel vid initiering av I/O-insticksmodul %s"
 
-#: src/sudo.c:1577
+#: src/sudo.c:1585
 #, c-format
 msgid "error initializing audit plugin %s"
 msgstr "fel vid initiering av granskningsinsticksmodul %s"
 
-#: src/sudo.c:1755
+#: src/sudo.c:1763
 #, c-format
 msgid "error initializing approval plugin %s"
 msgstr "fel vid initiering av godkänningsinsticksmodul %s"
 
-#: src/sudo.c:1831
+#: src/sudo.c:1839
 msgid "command rejected by approver"
 msgstr "kommando avböjt av godkännare"
 
-#: src/sudo.c:1840
+#: src/sudo.c:1848
 msgid "approval plugin error"
 msgstr "fel i godkänningsinsticksmodul"
 
@@ -895,51 +912,51 @@ msgstr "%s: att redigera filer i en skrivbar katalog är inte tillåtet"
 msgid "%s left unmodified"
 msgstr "%s lämnad oförändrad"
 
-#: src/sudo_edit.c:680 src/sudo_edit.c:868
+#: src/sudo_edit.c:680 src/sudo_edit.c:871
 #, c-format
 msgid "%s unchanged"
 msgstr "%s oförändrad"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:904
+#: src/sudo_edit.c:706 src/sudo_edit.c:909
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "innehåll av redigeringssession finns kvar i %s"
 
-#: src/sudo_edit.c:811
+#: src/sudo_edit.c:814
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: internt fel: udda antal sökvägar"
 
-#: src/sudo_edit.c:813
+#: src/sudo_edit.c:816
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: kunde inte skapa temporärfiler"
 
-#: src/sudo_edit.c:815 src/sudo_edit.c:897
+#: src/sudo_edit.c:818 src/sudo_edit.c:902
 msgid "sesh: killed by a signal"
-msgstr "sesh: dödad en signal"
+msgstr "sesh: dödad av en signal"
 
-#: src/sudo_edit.c:817 src/sudo_edit.c:900
+#: src/sudo_edit.c:820 src/sudo_edit.c:905
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: okänt fel %d"
 
-#: src/sudo_edit.c:891
+#: src/sudo_edit.c:895
 msgid "unable to copy temporary files back to their original location"
 msgstr "kan inte kopiera temporära filer tillbaka till deras originalplats"
 
-#: src/sudo_edit.c:894
+#: src/sudo_edit.c:899
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "kan inte kopiera vissa av de temporära filerna tillbaka till deras originalplats"
 
-#: src/sudo_edit.c:938
+#: src/sudo_edit.c:943
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "kunde inte ändra uid till root (%u)"
 
-#: src/sudo_edit.c:955
+#: src/sudo_edit.c:960
 msgid "plugin error: missing file list for sudoedit"
 msgstr "insticksfel: fillista för sudoedit saknas"
 
-#: src/sudo_edit.c:1006 src/sudo_edit.c:1019
+#: src/sudo_edit.c:1011 src/sudo_edit.c:1024
 msgid "unable to read the clock"
 msgstr "kunde inte läsa klockan"
 
@@ -955,25 +972,25 @@ msgstr "inget lösenord angavs"
 msgid "unable to read password"
 msgstr "kan inte läsa lösenord"
 
-#: src/tgetpass.c:140
+#: src/tgetpass.c:141
 msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
 msgstr "en terminal krävs för att läsa lösenordet; använd antingen flaggan -S för att läsa från standard in, eller konfigurera en askpass-hjälpare"
 
-#: src/tgetpass.c:150
+#: src/tgetpass.c:152
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "inget askpass-program angivet, prova att ställ in SUDO_ASKPASS"
 
-#: src/tgetpass.c:325
+#: src/tgetpass.c:327
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "kunde inte ställa in gid till %u"
 
-#: src/tgetpass.c:329
+#: src/tgetpass.c:331
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "kunde inte ställa in uid till %u"
 
-#: src/tgetpass.c:334
+#: src/tgetpass.c:336
 #, c-format
 msgid "unable to run %s"
 msgstr "kunde inte köra %s"

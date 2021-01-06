@@ -1164,7 +1164,7 @@ msgstr "početni redoslijed (order): %s: %s"
 #: plugins/sudoers/cvtsudoers.c:220
 #, c-format
 msgid "order padding: %s: %s"
-msgstr "popuna redoslijeda (order): %s: %s"
+msgstr "ispuna redoslijeda (order): %s: %s"
 
 #: plugins/sudoers/cvtsudoers.c:230 plugins/sudoers/visudo.c:179
 #, c-format
@@ -1282,8 +1282,8 @@ msgstr ""
 "  -b, --base=dn              osnovni DN za sudo LDAP upite\n"
 "  -c, --config=conf_file     staza do konfiguracijske datoteke\n"
 "  -d, --defaults=deftypes    pretvori samo Defaults od specificiranih deftypes\n"
-"  -e, --expand-aliases       proširuje aliase kada pretvara\n"
-"  -f, --output-format=format izlazni format jedan od: JSON, LDIF ili sudoers\n"
+"  -e, --expand-aliases       proširuje aliase prilikom pretvaranja\n"
+"  -f, --output-format=format izlazni format je jedan od: JSON, LDIF ili sudoers\n"
 "  -i, --input-format=format  ulazni format jedan od: LDIF ili sudoers\n"
 "  -I, --increment=num        inkrement za num svaki sudoOrder\n"
 "  -h, --help                 pokaže ovu pomoć i završi\n"
@@ -1292,7 +1292,7 @@ msgstr ""
 "  -o, --output=output_file   pretvoreni sudoers zapiše u output_file\n"
 "  -O, --order-start=num      prvi sudoOrder započinje od num\n"
 "  -p, --prune-matches        izreže nepodudarne korisnike, grupe i računala\n"
-"  -P, --padding=num          osnovna popuna za sudoOrder inkrement\n"
+"  -P, --padding=num          osnovna ispuna za sudoOrder inkrement\n"
 "  -s, --suppress=sections    izostavi izlaz od sections sekcija\n"
 "  -V, --version              informira o inačici ovog programa i završi"
 
