@@ -578,14 +578,33 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details);
 	if (ofd != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
-		/* New file, verify parent dir exists unless in cwd. */
+		/*
+		 * New file, verify parent dir exists unless in cwd.
+		 * This fails early so the user knows ahead of time if the
+		 * edit won't succeed.  Additional checks are performed
+		 * when copying the temporary file back to the origin.
+		 */
 		char *slash = strrchr(files[i], '/');
 		if (slash != NULL && slash != files[i]) {
-		    int serrno = errno;
+		    const int sflags = command_details->flags;
+		    const int serrno = errno;
+		    int dfd;
+
+		    /*
+		     * The parent directory is allowed to be a symbolic
+		     * link as long as *its* parent is not writable.
+		     */
 		    *slash = '\0';
-		    if (stat(files[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
-			memset(&sb, 0, sizeof(sb));
-			rc = 0;
+		    SET(command_details->flags, CD_SUDOEDIT_FOLLOW);
+		    dfd = sudo_edit_open(files[i], DIR_OPEN_FLAGS,
+			S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details);
+		    command_details->flags = sflags;
+		    if (dfd != -1) {
+			if (fstat(dfd, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+			    memset(&sb, 0, sizeof(sb));
+			    rc = 0;
+			}
+			close(dfd);
 		    }
 		    *slash = '/';
 		    errno = serrno;
