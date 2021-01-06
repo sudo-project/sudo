@@ -152,12 +152,14 @@ main(int argc, char *argv[], char *envp[])
     int nargc, status = 0;
     char **nargv, **env_add, **user_info;
     char **command_info = NULL, **argv_out = NULL, **user_env_out = NULL;
+    const char * const allowed_prognames[] = { "sudo", "sudoedit", NULL };
     struct sudo_settings *settings;
     int submit_optind;
     sigset_t mask;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
-    initprogname(argc > 0 ? argv[0] : "sudo");
+    /* Only allow "sudo" or "sudoedit" as the program name. */
+    initprogname2(argc > 0 ? argv[0] : "sudo", allowed_prognames);
 
     /* Crank resource limits to unlimited. */
     unlimit_sudo();

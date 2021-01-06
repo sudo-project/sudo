@@ -244,6 +244,7 @@ sudo_dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned in
 
 /* progname.c */
 sudo_dso_public void initprogname(const char *);
+sudo_dso_public void initprogname2(const char *, const char * const *);
 
 /* roundup.c */
 sudo_dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
