@@ -995,6 +995,7 @@ scripts/unanon
 src/Makefile.in
 src/conversation.c
 src/copy_file.c
+src/edit_open.c
 src/env_hooks.c
 src/exec.c
 src/exec_common.c
@@ -1019,6 +1020,7 @@ src/solaris.c
 src/sudo.c
 src/sudo.h
 src/sudo_edit.c
+src/sudo_edit.h
 src/sudo_exec.h
 src/sudo_noexec.c
 src/sudo_plugin_int.h

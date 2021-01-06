@@ -42,6 +42,7 @@
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_edit.h"
 #include "sudo_exec.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
