@@ -31,10 +31,21 @@
 
 #ifdef HAVE_GETPROGNAME
 
+# ifndef HAVE_SETPROGNAME
+/* Assume __progname if have getprogname(3) but not setprogname(3). */
+extern const char *__progname;
+
+void
+sudo_setprogname(const char *name)
+{
+    const char *base = strrchr(name, '/');
+    __progname = base ? base : name;
+}
+# endif
+
 void
 initprogname2(const char *name, const char * const * allowed)
 {
-# ifdef HAVE_SETPROGNAME
     const char *progname;
     int i;
 
@@ -61,7 +72,6 @@ initprogname2(const char *name, const char * const * allowed)
     /* Update internal progname if needed. */
     if (name != progname)
 	setprogname(name);
-# endif
     return;
 }
 
@@ -108,6 +118,13 @@ const char *
 sudo_getprogname(void)
 {
     return progname;
+}
+
+void
+sudo_setprogname(const char *name)
+{
+    const char *base = strrchr(name, '/');
+    progname = base ? base : name;
 }
 #endif /* !HAVE_GETPROGNAME */
 
