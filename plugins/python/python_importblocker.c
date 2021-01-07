@@ -35,6 +35,8 @@ _verify_import(const char *file_path)
 {
     debug_decl(_verify_import, PYTHON_DEBUG_INTERNAL);
 
+    // Check mode and owner similar to what we do in open_sudoers().
+    // This is to help avoid loading a potentially insecure module.
     struct stat sb;
     if (stat(file_path, &sb) != 0) {
         PyErr_Format(PyExc_ImportError, "Failed to stat file '%s'", file_path);
