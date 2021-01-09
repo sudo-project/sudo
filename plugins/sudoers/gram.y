@@ -45,6 +45,9 @@
 /* If we last saw a newline the entry is on the preceding line. */
 #define this_lineno	(sudoerschar == '\n' ? sudolineno - 1 : sudolineno)
 
+// PVS Studio suppression
+// -V::1037, 1042
+
 /*
  * Globals
  */
@@ -783,7 +786,7 @@ options		:	/* empty */ {
 		;
 
 cmndtag		:	/* empty */ {
-			    TAGS_INIT($$);
+			    TAGS_INIT(&$$);
 			}
 		|	cmndtag NOPASSWD {
 			    $$.nopasswd = true;
@@ -1066,7 +1069,9 @@ sudoerserrorf(const char *fmt, ...)
 		/* Optimize common case, a single string. */
 		s = _(va_arg(ap, char *));
 	    } else {
-		if (vasprintf(&s, fmt, ap) == -1)
+		if (vasprintf(&s, fmt, ap) != -1)
+		    tofree = s;
+		else
 		    s = _("syntax error");
 	    }
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
@@ -1102,6 +1107,7 @@ sudoerserrorf(const char *fmt, ...)
 void
 sudoerserror(const char *s)
 {
+    // -V:sudoerserror:575, 618
     if (s == NULL)
 	sudoerserrorf(NULL);
     else

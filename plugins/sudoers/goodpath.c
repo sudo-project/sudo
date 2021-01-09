@@ -55,7 +55,7 @@ sudo_goodpath(const char *path, const char *runchroot, struct stat *sbp)
 		errno = ENAMETOOLONG;
 		goto done;
 	    }
-	    path = pathbuf;
+	    path = pathbuf; // -V507
 	}
 	if (sbp == NULL)
 	    sbp = &sb;

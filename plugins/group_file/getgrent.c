@@ -64,8 +64,12 @@ mysetgrent(void)
 {
     if (grf == NULL) {
 	grf = fopen(grfile, "r");
-	if (grf != NULL)
-	    (void)fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+	if (grf != NULL) {
+	    if (fcntl(fileno(grf), F_SETFD, FD_CLOEXEC) == -1) {
+		fclose(grf);
+		grf = NULL;
+	    }
+	}
     } else {
 	rewind(grf);
     }
@@ -139,7 +143,10 @@ mygetgrnam(const char *name)
     if (grf == NULL) {
 	if ((grf = fopen(grfile, "r")) == NULL)
 	    return NULL;
-	(void)fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+	if (fcntl(fileno(grf), F_SETFD, FD_CLOEXEC) == -1) {
+	    fclose(grf);
+	    return NULL;
+	}
     } else {
 	rewind(grf);
     }
@@ -162,7 +169,10 @@ mygetgrgid(gid_t gid)
     if (grf == NULL) {
 	if ((grf = fopen(grfile, "r")) == NULL)
 	    return NULL;
-	(void)fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+	if (fcntl(fileno(grf), F_SETFD, FD_CLOEXEC) == -1) {
+	    fclose(grf);
+	    return NULL;
+	}
     } else {
 	rewind(grf);
     }

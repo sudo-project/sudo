@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.9.4p2], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.5], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -2641,7 +2641,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite faccessat wordexp getauxval fseeko])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo faccessat wordexp getauxval fseeko])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -2654,6 +2654,14 @@ case "$host_os" in
 	fi
 	;;
 esac
+AC_CHECK_FUNCS([pread], [], [
+    AC_LIBOBJ(pread)
+    SUDO_APPEND_COMPAT_EXP(sudo_pread)
+])
+AC_CHECK_FUNCS([pwrite], [], [
+    AC_LIBOBJ(pwrite)
+    SUDO_APPEND_COMPAT_EXP(sudo_pwrite)
+])
 AC_CHECK_FUNCS([cfmakeraw], [], [
     AC_LIBOBJ(cfmakeraw)
     SUDO_APPEND_COMPAT_EXP(sudo_cfmakeraw)
@@ -3301,9 +3309,11 @@ esac
 LIBS="$OLIBS"
 
 dnl
-dnl Check for getprogname() or __progname
+dnl Check for getprogname()/setprogname() or __progname
 dnl
-AC_CHECK_FUNCS([getprogname], [AC_CHECK_FUNCS([setprogname])], [
+AC_CHECK_FUNCS([getprogname], [
+    AC_CHECK_FUNCS([setprogname], [], [SUDO_APPEND_COMPAT_EXP(sudo_setprogname)])
+], [
     AC_MSG_CHECKING([for __progname])
     AC_CACHE_VAL(sudo_cv___progname, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; if (__progname[0] == '\0') return 1;]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
@@ -3312,6 +3322,7 @@ AC_CHECK_FUNCS([getprogname], [AC_CHECK_FUNCS([setprogname])], [
     fi
     AC_MSG_RESULT($sudo_cv___progname)
     SUDO_APPEND_COMPAT_EXP(sudo_getprogname)
+    SUDO_APPEND_COMPAT_EXP(sudo_setprogname)
 ])
 dnl
 dnl Check for __func__ or __FUNCTION__

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2017, 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -84,9 +84,7 @@
  */
 struct command_details;
 struct command_status;
-
-/* copy_file.c */
-int sudo_copy_file(const char *src, int src_fd, off_t src_len, const char *dst, int dst_fd, off_t dst_len);
+struct stat;
 
 /* exec.c */
 void exec_cmnd(struct command_details *details, int errfd);

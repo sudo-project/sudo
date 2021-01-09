@@ -570,6 +570,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("The format of logs to produce: %s"),
 	def_data_log_format,
     }, {
+	"selinux", T_FLAG,
+	N_("Enable SELinux RBAC support"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

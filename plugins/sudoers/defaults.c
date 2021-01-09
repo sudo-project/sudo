@@ -526,6 +526,9 @@ init_defaults(void)
 #else
     def_pam_session = true;
 #endif
+#ifdef HAVE_SELINUX
+    def_selinux = true;
+#endif
 #ifdef HAVE_INNETGR
     def_use_netgroups = true;
 #endif

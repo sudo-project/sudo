@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2021
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 11, 2020
+.Dd January 8, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3051,6 +3051,15 @@ when running a command or editing a file.
 This flag is
 .Em off
 by default.
+.if \n(SL \{\
+.It selinux
+If enabled, the user may specify an SELinux role and/or type to use
+when running the command, as permitted by the SELinux policy.
+If SELinux is disabled on the system, this flag has no effect.
+This flag is
+.Em on
+by default.
+.\}
 .It set_home
 If enabled and
 .Nm sudo

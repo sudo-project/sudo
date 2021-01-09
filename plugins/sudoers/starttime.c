@@ -98,7 +98,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     mib[3] = (int)pid;
     mib[4] = sizeof(*ki_proc);
     mib[5] = 1;
-    do {
+    for (;;) {
 	struct sudo_kinfo_proc *kp;
 
 	size += size / 10;
@@ -108,7 +108,9 @@ get_starttime(pid_t pid, struct timespec *starttime)
 	}
 	ki_proc = kp;
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
-    } while (rc == -1 && errno == ENOMEM);
+	if (rc != -1 || errno != ENOMEM)
+	    break;
+    }
     if (rc != -1) {
 #if defined(HAVE_KINFO_PROC_FREEBSD)
 	/* FreeBSD and Dragonfly */

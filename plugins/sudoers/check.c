@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <time.h>
 #include <errno.h>
 #include <pwd.h>
@@ -231,11 +232,12 @@ done:
 static bool
 display_lecture(int status)
 {
-    FILE *fp;
-    char buf[BUFSIZ];
-    ssize_t nread;
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
+    char buf[BUFSIZ];
+    struct stat sb;
+    ssize_t nread;
+    int fd;
     debug_decl(lecture, SUDOERS_DEBUG_AUTH);
 
     if (def_lecture == never ||
@@ -245,24 +247,46 @@ display_lecture(int status)
     memset(&msg, 0, sizeof(msg));
     memset(&repl, 0, sizeof(repl));
 
-    if (def_lecture_file && (fp = fopen(def_lecture_file, "r")) != NULL) {
-	while ((nread = fread(buf, sizeof(char), sizeof(buf) - 1, fp)) != 0) {
-	    buf[nread] = '\0';
-	    msg.msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
-	    msg.msg = buf;
-	    sudo_conv(1, &msg, &repl, NULL);
+    if (def_lecture_file) {
+	fd = open(def_lecture_file, O_RDONLY|O_NONBLOCK);
+	if (fd != -1 && fstat(fd, &sb) == 0) {
+	    if (S_ISREG(sb.st_mode)) {
+		(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
+		while ((nread = read(fd, buf, sizeof(buf) - 1)) > 0) {
+		    buf[nread] = '\0';
+		    msg.msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
+		    msg.msg = buf;
+		    sudo_conv(1, &msg, &repl, NULL);
+		}
+		close(fd);
+		if (nread == -1) {
+		    log_warning(SLOG_RAW_MSG,
+			N_("error reading lecture file %s"), def_lecture_file);
+		    debug_return_bool(false);
+		}
+		debug_return_bool(true);
+	    } else {
+		log_warningx(SLOG_RAW_MSG,
+		    N_("ignoring lecture file %s: not a regular file"),
+		    def_lecture_file);
+	    }
+	} else {
+	    log_warning(SLOG_RAW_MSG|SLOG_NO_STDERR, N_("unable to open %s"),
+		def_lecture_file);
 	}
-	fclose(fp);
-    } else {
-	msg.msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
-	msg.msg = _("\n"
-	    "We trust you have received the usual lecture from the local System\n"
-	    "Administrator. It usually boils down to these three things:\n\n"
-	    "    #1) Respect the privacy of others.\n"
-	    "    #2) Think before you type.\n"
-	    "    #3) With great power comes great responsibility.\n\n");
-	sudo_conv(1, &msg, &repl, NULL);
+	if (fd != -1)
+	    close(fd);
     }
+
+    /* Default sudo lecture. */
+    msg.msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
+    msg.msg = _("\n"
+	"We trust you have received the usual lecture from the local System\n"
+	"Administrator. It usually boils down to these three things:\n\n"
+	"    #1) Respect the privacy of others.\n"
+	"    #2) Think before you type.\n"
+	"    #3) With great power comes great responsibility.\n\n");
+    sudo_conv(1, &msg, &repl, NULL);
     debug_return_bool(true);
 }
 

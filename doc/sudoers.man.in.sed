@@ -97,6 +97,14 @@ s/^\(.TH .*\)/.nr SL @SEMAN@\
 .\\}
 	    }
 	}
+	/^\.TP 18n\nselinux$/,/^\.TP 18n/ {
+	    /^\.TP 18n/ {
+		/^\.TP 18n\nselinux$/i\
+.if \\n(SL \\{\\
+		/^\.TP 18n\nselinux$/!i\
+.\\}
+	    }
+	}
 	/^\.TP 18n\nrole$/,/^\.TP 18n/ {
 	    /^\.TP 18n/ {
 		/^\.TP 18n\nrole$/i\

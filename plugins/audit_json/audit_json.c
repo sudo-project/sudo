@@ -456,7 +456,7 @@ audit_write_exit_record(int exit_status, int error)
 		    goto oom;
             } else {
 		json_value.type = JSON_STRING;
-		json_value.u.string = signame;
+		json_value.u.string = signame; // -V507
 		if (!sudo_json_add_value(&json, "signal", &json_value))
 		    goto oom;
 	    }

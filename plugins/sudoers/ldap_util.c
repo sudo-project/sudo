@@ -458,7 +458,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    TAILQ_INSERT_TAIL(&priv->cmndlist, cmndspec, entries);
 
 	/* Initialize cmndspec */
-	TAGS_INIT(cmndspec->tags);
+	TAGS_INIT(&cmndspec->tags);
 	cmndspec->notbefore = UNSPEC;
 	cmndspec->notafter = UNSPEC;
 	cmndspec->timeout = UNSPEC;

@@ -669,7 +669,7 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     }
     if (def_runcwd && strcmp(def_runcwd, "*") != 0) {
 	evlog->runcwd = def_runcwd;
-    } else if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+    } else if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
 	evlog->runcwd = runas_pw->pw_dir;
     } else {
 	evlog->runcwd = user_cwd;

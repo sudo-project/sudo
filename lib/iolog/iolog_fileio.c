@@ -591,19 +591,19 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 		iol->compressed = iolog_compress;
 	    } else {
 		/* check for gzip magic number */
-		if (read(fd, magic, sizeof(magic)) == ssizeof(magic)) {
+		if (pread(fd, magic, sizeof(magic), 0) == ssizeof(magic)) {
 		    if (magic[0] == gzip_magic[0] && magic[1] == gzip_magic[1])
 			iol->compressed = true;
 		}
-		(void)lseek(fd, 0, SEEK_SET);
 	    }
-	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
+	    if (fcntl(fd, F_SETFD, FD_CLOEXEC) != -1) {
 #ifdef HAVE_ZLIB_H
-	    if (iol->compressed)
-		iol->fd.g = gzdopen(fd, mode);
-	    else
+		if (iol->compressed)
+		    iol->fd.g = gzdopen(fd, mode);
+		else
 #endif
-		iol->fd.f = fdopen(fd, mode);
+		    iol->fd.f = fdopen(fd, mode);
+	    }
 	    if (iol->fd.v != NULL) {
 		switch ((flags & O_ACCMODE)) {
 		case O_WRONLY:

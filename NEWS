@@ -1,3 +1,66 @@
+What's new in Sudo 1.9.5
+
+ * Fixed a crash introduced in 1.9.4 when running "sudo -i" as an
+   unknown user.  This is related to but distinct from Bug #948.
+
+ * If the "lecture_file" setting is enabled in sudoers, it must now
+   refer to a regular file or a symbolic link to a regular file.
+
+ * Fixed a potential use-after-free bug in sudo_logsrvd when the
+   server shuts down if there are existing connections from clients
+   that are only logging events and not session I/O data.
+
+ * Fixed a buffer size mismatch when serializing the list of IP
+   addresses for configured network interfaces.  This bug is not
+   actually exploitable since the allocated buffer is large enough
+   to hold the list of addresses.
+
+ * If sudo is executed with a name other that "sudo" or "sudoedit",
+   it will now fall back to "sudo" as the program name.  This affects
+   warning, help and usage messages as well as the matching of Debug
+   lines in the /etc/sudo.conf file.  Previously, it was possible
+   for the invoking user to manipulate the program name by setting
+   argv[0] to an arbitrary value when executing sudo.
+
+ * Sudo now checks for failure when setting the close-on-exec flag
+   on open file descriptors.  This should never fail but, if it
+   were to, there is the possibility of a file descriptor leak to
+   a child process (such as the command sudo runs).
+
+ * Fixed CVE-2021-23239, a potential information leak in sudoedit
+   that could be used to test for the existence of directories not
+   normally accessible to the user in certain circumstances.  When
+   creating a new file, sudoedit checks to make sure the parent
+   directory of the new file exists before running the editor.
+   However, a race condition exists if the invoking user can replace
+   (or create) the parent directory.  If a symbolic link is created
+   in place of the parent directory, sudoedit will run the editor
+   as long as the target of the link exists.  If the target of the
+   link does not exist, an error message will be displayed.  The
+   race condition can be used to test for the existence of an
+   arbitrary directory.  However, it _cannot_ be used to write to
+   an arbitrary location.
+
+ * Fixed CVE-2021-23240, a flaw in the temporary file handling of
+   sudoedit's SELinux RBAC support.  On systems where SELinux is
+   enabled, a user with sudoedit permissions may be able to set the
+   owner of an arbitrary file to the user-ID of the target user.
+   On Linux kernels that support "protected symlinks", setting
+   /proc/sys/fs/protected_symlinks to 1 will prevent the bug from
+   being exploited.  For more information see
+   https://www.sudo.ws/alerts/sudoedit_selinux.html.
+
+ * Added writability checks for sudoedit when SELinux RBAC is in use.
+   This makes sudoedit behavior consistent regardless of whether
+   or not SELinux RBAC is in use.  Previously, the "sudoedit_checkdir"
+   setting had no effect for RBAC entries.
+
+ * A new sudoers option "selinux" can be used to disable sudo's
+   SELinux RBAC support.
+
+ * Quieted warnings from PVS Studio, clang analyzer, and cppcheck.
+   Added suppression annotations for PVS Studio false positives.
+
 What's new in Sudo 1.9.4p2
 
  * Fixed a bug introduced in sudo 1.9.4p1 which could lead to a crash

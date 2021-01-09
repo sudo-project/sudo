@@ -307,17 +307,7 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
 	nwritten = write(fd, entry, entry->size);
     } else {
 	old_eof = offset;
-#ifdef HAVE_PWRITE
 	nwritten = pwrite(fd, entry, entry->size, offset);
-#else
-	if (lseek(fd, offset, SEEK_SET) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		"unable to seek to %lld", (long long)offset);
-	    nwritten = -1;
-	} else {
-	    nwritten = write(fd, entry, entry->size);
-	}
-#endif
     }
     if ((size_t)nwritten != entry->size) {
 	if (nwritten == -1) {
@@ -577,16 +567,7 @@ ts_read(struct ts_cookie *cookie, struct timestamp_entry *entry)
     }
 
     /* Seek to the record position and read it.  */
-#ifdef HAVE_PREAD
     nread = pread(cookie->fd, entry, sizeof(*entry), cookie->pos);
-#else
-    if (lseek(cookie->fd, cookie->pos, SEEK_SET) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to seek to %lld", (long long)cookie->pos);
-	goto done;
-    }
-    nread = read(cookie->fd, entry, sizeof(*entry));
-#endif
     if (nread != sizeof(*entry)) {
 	/* short read, should not happen */
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,

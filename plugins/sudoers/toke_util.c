@@ -117,7 +117,7 @@ fill_cmnd(const char *src, size_t len)
     *dst = '\0';
 
     /* Check for sudoedit specified as a fully-qualified path. */
-    if ((dst = strrchr(sudoerslval.command.cmnd, '/')) != NULL) {
+    if ((dst = strrchr(sudoerslval.command.cmnd, '/')) != NULL) { // -V575
 	if (strcmp(dst, "/sudoedit") == 0) {
 	    if (sudoers_strict) {
 		sudoerserror(

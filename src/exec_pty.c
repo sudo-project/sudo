@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -148,7 +148,7 @@ pty_setup(struct command_details *details, const char *tty)
     }
 
     if (!get_pty(&io_fds[SFD_LEADER], &io_fds[SFD_FOLLOWER],
-	ptyname, sizeof(ptyname), details->euid))
+	ptyname, sizeof(ptyname), details->cred.euid))
 	sudo_fatal("%s", U_("unable to allocate pty"));
 
     /* Update tty name in command details (used by SELinux and AIX). */

@@ -839,11 +839,11 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 #endif /* HAVE_LOGIN_CAP_H */
 #ifdef HAVE_SELINUX
-    if (user_role != NULL) {
+    if (def_selinux && user_role != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("selinux_role", user_role)) == NULL)
 	    goto oom;
     }
-    if (user_type != NULL) {
+    if (def_selinux && user_type != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("selinux_type", user_type)) == NULL)
 	    goto oom;
     }

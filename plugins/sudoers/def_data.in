@@ -409,3 +409,6 @@ log_format
 	T_TUPLE
 	"The format of logs to produce: %s"
 	sudo json
+selinux
+	T_FLAG
+	"Enable SELinux RBAC support"

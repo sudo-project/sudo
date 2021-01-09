@@ -12,6 +12,9 @@
 /* SUPPRESS 287 on yaccpar_sccsid *//* Unused static variable */
 /* SUPPRESS 288 on yyerrlab *//* Label unused */
 
+// PVS Studio suppression
+// -V::1037, 1042
+
 #include <config.h>
 
 #include <stdio.h>

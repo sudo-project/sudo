@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -152,12 +152,14 @@ main(int argc, char *argv[], char *envp[])
     int nargc, status = 0;
     char **nargv, **env_add, **user_info;
     char **command_info = NULL, **argv_out = NULL, **user_env_out = NULL;
+    const char * const allowed_prognames[] = { "sudo", "sudoedit", NULL };
     struct sudo_settings *settings;
     int submit_optind;
     sigset_t mask;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
-    initprogname(argc > 0 ? argv[0] : "sudo");
+    /* Only allow "sudo" or "sudoedit" as the program name. */
+    initprogname2(argc > 0 ? argv[0] : "sudo", allowed_prognames);
 
     /* Crank resource limits to unlimited. */
     unlimit_sudo();
@@ -218,7 +220,7 @@ main(int argc, char *argv[], char *envp[])
     /* Print sudo version early, in case of plugin init failure. */
     if (ISSET(sudo_mode, MODE_VERSION)) {
 	printf(_("Sudo version %s\n"), PACKAGE_VERSION);
-	if (user_details.uid == ROOT_UID)
+	if (user_details.cred.uid == ROOT_UID)
 	    (void) printf(_("Configure options: %s\n"), CONFIGURE_ARGS);
     }
 
@@ -240,12 +242,12 @@ main(int argc, char *argv[], char *envp[])
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
-	    policy_show_version(!user_details.uid);
-	    iolog_show_version(!user_details.uid, settings, user_info,
+	    policy_show_version(!user_details.cred.uid);
+	    iolog_show_version(!user_details.cred.uid, settings, user_info,
 		nargc, nargv, envp);
-	    approval_show_version(!user_details.uid, settings, user_info,
+	    approval_show_version(!user_details.cred.uid, settings, user_info,
 		submit_optind, argv, envp);
-	    audit_show_version(!user_details.uid);
+	    audit_show_version(!user_details.cred.uid);
 	    break;
 	case MODE_VALIDATE:
 	case MODE_VALIDATE|MODE_INVALIDATE:
@@ -381,7 +383,7 @@ fix_fds(void)
  * Returns 0 on success and -1 on failure.
  */
 static int
-fill_group_list(struct user_details *ud)
+fill_group_list(const char *user, struct sudo_cred *cred)
 {
     int ret = -1;
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL);
@@ -390,41 +392,41 @@ fill_group_list(struct user_details *ud)
      * If user specified a max number of groups, use it, otherwise let
      * sudo_getgrouplist2() allocate the group vector.
      */
-    ud->ngroups = sudo_conf_max_groups();
-    if (ud->ngroups > 0) {
-	ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
-	if (ud->groups != NULL) {
+    cred->ngroups = sudo_conf_max_groups();
+    if (cred->ngroups > 0) {
+	cred->groups = reallocarray(NULL, cred->ngroups, sizeof(GETGROUPS_T));
+	if (cred->groups != NULL) {
 	    /* No error on insufficient space if user specified max_groups. */
-	    (void)sudo_getgrouplist2(ud->username, ud->gid, &ud->groups,
-		&ud->ngroups);
+	    (void)sudo_getgrouplist2(user, cred->gid,
+		&cred->groups, &cred->ngroups);
 	    ret = 0;
 	}
     } else {
-	ud->groups = NULL;
-	ret = sudo_getgrouplist2(ud->username, ud->gid, &ud->groups,
-	    &ud->ngroups);
+	cred->groups = NULL;
+	ret = sudo_getgrouplist2(user, cred->gid, &cred->groups,
+	    &cred->ngroups);
     }
     if (ret == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: %s: unable to get groups via sudo_getgrouplist2()",
-	    __func__, ud->username);
+	    __func__, user);
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: %s: got %d groups via sudo_getgrouplist2()",
-	    __func__, ud->username, ud->ngroups);
+	    __func__, user, cred->ngroups);
     }
     debug_return_int(ret);
 }
 
 static char *
-get_user_groups(struct user_details *ud)
+get_user_groups(const char *user, struct sudo_cred *cred)
 {
     char *cp, *gid_list = NULL;
     size_t glsize;
     int i, len, group_source;
     debug_decl(get_user_groups, SUDO_DEBUG_UTIL);
 
-    ud->groups = NULL;
+    cred->groups = NULL;
     group_source = sudo_conf_group_source();
     if (group_source != GROUP_SOURCE_DYNAMIC) {
 	int maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
@@ -432,46 +434,47 @@ get_user_groups(struct user_details *ud)
 	    maxgroups = NGROUPS_MAX;
 
 	/* Note that macOS may return ngroups > NGROUPS_MAX. */
-	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
+	cred->ngroups = getgroups(0, NULL); // -V575
+	if (cred->ngroups > 0) {
 	    /* Use groups from kernel if not at limit or source is static. */
-	    if (ud->ngroups != maxgroups || group_source == GROUP_SOURCE_STATIC) {
-		ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
-		if (ud->groups == NULL)
+	    if (cred->ngroups != maxgroups || group_source == GROUP_SOURCE_STATIC) {
+		cred->groups = reallocarray(NULL, cred->ngroups, sizeof(GETGROUPS_T));
+		if (cred->groups == NULL)
 		    goto done;
-		if (getgroups(ud->ngroups, ud->groups) < 0) {
+		if (getgroups(cred->ngroups, cred->groups) < 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: %s: unable to get %d groups via getgroups()",
-			__func__, ud->username, ud->ngroups);
-		    free(ud->groups);
-		    ud->groups = NULL;
+			"%s: unable to get %d groups via getgroups()",
+			__func__, cred->ngroups);
+		    free(cred->groups);
+		    cred->groups = NULL;
 		} else {
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"%s: %s: got %d groups via getgroups()",
-			__func__, ud->username, ud->ngroups);
+			"%s: got %d groups via getgroups()",
+			__func__, cred->ngroups);
 		}
 	    }
 	}
     }
-    if (ud->groups == NULL) {
+    if (cred->groups == NULL) {
 	/*
 	 * Query group database if kernel list is too small or disabled.
 	 * Typically, this is because NFS can only support up to 16 groups.
 	 */
-	if (fill_group_list(ud) == -1)
+	if (fill_group_list(user, cred) == -1)
 	    goto done;
     }
 
     /*
      * Format group list as a comma-separated string of gids.
      */
-    glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
+    glsize = sizeof("groups=") - 1 + (cred->ngroups * (MAX_UID_T_LEN + 1));
     if ((gid_list = malloc(glsize)) == NULL)
 	goto done;
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
     cp = gid_list + sizeof("groups=") - 1;
-    for (i = 0; i < ud->ngroups; i++) {
+    for (i = 0; i < cred->ngroups; i++) {
 	len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
-	    i ? "," : "", (unsigned int)ud->groups[i]);
+	    i ? "," : "", (unsigned int)cred->groups[i]);
 	if (len < 0 || (size_t)len >= glsize - (cp - gid_list))
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
@@ -527,15 +530,15 @@ get_user_info(struct user_details *ud)
     if ((ud->sid = getsid(0)) == -1)
 	ud->sid = 0;
 
-    ud->uid = getuid();
-    ud->euid = geteuid();
-    ud->gid = getgid();
-    ud->egid = getegid();
+    ud->cred.uid = getuid();
+    ud->cred.euid = geteuid();
+    ud->cred.gid = getgid();
+    ud->cred.egid = getegid();
 
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb(IDtouser(ud->uid), NULL);
+    aix_setauthdb(IDtouser(ud->cred.uid), NULL);
 #endif
-    pw = getpwuid(ud->uid);
+    pw = getpwuid(ud->cred.uid);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -564,16 +567,16 @@ get_user_info(struct user_details *ud)
 	goto oom;
     if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid) == -1)
+    if (asprintf(&user_info[++i], "uid=%u", (unsigned int)ud->cred.uid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid) == -1)
+    if (asprintf(&user_info[++i], "euid=%u", (unsigned int)ud->cred.euid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid) == -1)
+    if (asprintf(&user_info[++i], "gid=%u", (unsigned int)ud->cred.gid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid) == -1)
+    if (asprintf(&user_info[++i], "egid=%u", (unsigned int)ud->cred.egid) == -1)
 	goto oom;
 
-    if ((cp = get_user_groups(ud)) == NULL)
+    if ((cp = get_user_groups(ud->username, &ud->cred)) == NULL)
 	goto oom;
     user_info[++i] = cp;
 
@@ -747,7 +750,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
-		    details->egid = (gid_t)id;
+		    details->cred.egid = (gid_t)id;
 		    SET(details->flags, CD_SET_EGID);
 		    break;
 		}
@@ -756,7 +759,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
-		    details->euid = (uid_t)id;
+		    details->cred.euid = (uid_t)id;
 		    SET(details->flags, CD_SET_EUID);
 		    break;
 		}
@@ -765,15 +768,15 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
-		    details->gid = (gid_t)id;
+		    details->cred.gid = (gid_t)id;
 		    SET(details->flags, CD_SET_GID);
 		    break;
 		}
 		if (strncmp("runas_groups=", info[i], sizeof("runas_groups=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_groups=") - 1;
-		    details->ngroups = sudo_parse_gids(cp, NULL, &details->groups);
+		    details->cred.ngroups = sudo_parse_gids(cp, NULL, &details->cred.groups);
 		    /* sudo_parse_gids() will print a warning on error. */
-		    if (details->ngroups == -1)
+		    if (details->cred.ngroups == -1)
 			exit(EXIT_FAILURE); /* XXX */
 		    break;
 		}
@@ -782,7 +785,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    id = sudo_strtoid(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
-		    details->uid = (uid_t)id;
+		    details->cred.uid = (uid_t)id;
 		    SET(details->flags, CD_SET_UID);
 		    break;
 		}
@@ -845,19 +848,19 @@ command_info_to_details(char * const info[], struct command_details *details)
     }
 
     if (!ISSET(details->flags, CD_SET_EUID))
-	details->euid = details->uid;
+	details->cred.euid = details->cred.uid;
     if (!ISSET(details->flags, CD_SET_EGID))
-	details->egid = details->gid;
+	details->cred.egid = details->cred.gid;
     if (!ISSET(details->flags, CD_SET_UMASK))
 	CLR(details->flags, CD_OVERRIDE_UMASK);
 
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb(IDtouser(details->euid), NULL);
+    aix_setauthdb(IDtouser(details->cred.euid), NULL);
 #endif
     if (details->runas_user != NULL)
 	details->pw = getpwnam(details->runas_user);
     if (details->pw == NULL)
-	details->pw = getpwuid(details->euid);
+	details->pw = getpwuid(details->cred.euid);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -931,23 +934,23 @@ set_user_groups(struct command_details *details)
     debug_decl(set_user_groups, SUDO_DEBUG_EXEC);
 
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
-	if (details->ngroups >= 0) {
-	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
+	if (details->cred.ngroups >= 0) {
+	    if (sudo_setgroups(details->cred.ngroups, details->cred.groups) < 0) {
 		sudo_warn("%s", U_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
     }
 #ifdef HAVE_SETEUID
-    if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
+    if (ISSET(details->flags, CD_SET_EGID) && setegid(details->cred.egid)) {
 	sudo_warn(U_("unable to set effective gid to runas gid %u"),
-	    (unsigned int)details->egid);
+	    (unsigned int)details->cred.egid);
 	goto done;
     }
 #endif
-    if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
+    if (ISSET(details->flags, CD_SET_GID) && setgid(details->cred.gid)) {
 	sudo_warn(U_("unable to set gid to runas gid %u"),
-	    (unsigned int)details->gid);
+	    (unsigned int)details->cred.gid);
 	goto done;
     }
     ret = true;

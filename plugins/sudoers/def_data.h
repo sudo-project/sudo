@@ -262,6 +262,8 @@
 #define def_runchroot           (sudo_defs_table[I_RUNCHROOT].sd_un.str)
 #define I_LOG_FORMAT            130
 #define def_log_format          (sudo_defs_table[I_LOG_FORMAT].sd_un.tuple)
+#define I_SELINUX               131
+#define def_selinux             (sudo_defs_table[I_SELINUX].sd_un.flag)
 
 enum def_tuple {
     never,

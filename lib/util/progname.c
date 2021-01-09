@@ -31,11 +31,23 @@
 
 #ifdef HAVE_GETPROGNAME
 
+# ifndef HAVE_SETPROGNAME
+/* Assume __progname if have getprogname(3) but not setprogname(3). */
+extern const char *__progname;
+
 void
-initprogname(const char *name)
+sudo_setprogname(const char *name)
 {
-# ifdef HAVE_SETPROGNAME
+    const char *base = strrchr(name, '/');
+    __progname = base ? base : name;
+}
+# endif
+
+void
+initprogname2(const char *name, const char * const * allowed)
+{
     const char *progname;
+    int i;
 
     /* Fall back on "name" if getprogname() returns an empty string. */
     if ((progname = getprogname()) != NULL && *progname != '\0')
@@ -45,10 +57,21 @@ initprogname(const char *name)
     if (name[0] == 'l' && name[1] == 't' && name[2] == '-' && name[3] != '\0')
 	name += 3;
 
+    /* Check allow list if present (first element is the default). */
+    if (allowed != NULL) {
+	for (i = 0; ; i++) {
+	    if (allowed[i] == NULL) {
+		name = allowed[0];
+		break;
+	    }
+	    if (strcmp(allowed[i], name) == 0)
+		break;
+	}
+    }
+
     /* Update internal progname if needed. */
     if (name != progname)
 	setprogname(name);
-# endif
     return;
 }
 
@@ -57,8 +80,9 @@ initprogname(const char *name)
 static const char *progname = "";
 
 void
-initprogname(const char *name)
+initprogname2(const char *name, const char * const * allowed)
 {
+    int i;
 # ifdef HAVE___PROGNAME
     extern const char *__progname;
 
@@ -76,6 +100,18 @@ initprogname(const char *name)
     if (progname[0] == 'l' && progname[1] == 't' && progname[2] == '-' &&
 	progname[3] != '\0')
 	progname += 3;
+
+    /* Check allow list if present (first element is the default). */
+    if (allowed != NULL) {
+	for (i = 0; ; i++) {
+	    if (allowed[i] == NULL) {
+		progname = allowed[0];
+		break;
+	    }
+	    if (strcmp(allowed[i], progname) == 0)
+		break;
+	}
+    }
 }
 
 const char *
@@ -83,4 +119,17 @@ sudo_getprogname(void)
 {
     return progname;
 }
+
+void
+sudo_setprogname(const char *name)
+{
+    const char *base = strrchr(name, '/');
+    progname = base ? base : name;
+}
 #endif /* !HAVE_GETPROGNAME */
+
+void
+initprogname(const char *name)
+{
+    initprogname2(name, NULL);
+}

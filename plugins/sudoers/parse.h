@@ -42,13 +42,13 @@
  * Initialize all tags to UNSPEC.
  */
 #define TAGS_INIT(t)	do {						       \
-    (t).follow = UNSPEC;						       \
-    (t).log_input = UNSPEC;						       \
-    (t).log_output = UNSPEC;						       \
-    (t).noexec = UNSPEC;						       \
-    (t).nopasswd = UNSPEC;						       \
-    (t).send_mail = UNSPEC;						       \
-    (t).setenv = UNSPEC;						       \
+    (t)->follow = UNSPEC;						       \
+    (t)->log_input = UNSPEC;						       \
+    (t)->log_output = UNSPEC;						       \
+    (t)->noexec = UNSPEC;						       \
+    (t)->nopasswd = UNSPEC;						       \
+    (t)->send_mail = UNSPEC;						       \
+    (t)->setenv = UNSPEC;						       \
 } while (0)
 
 /*
@@ -318,7 +318,7 @@ void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
 void free_default(struct defaults *def, struct member_list **binding);
 void free_defaults(struct defaults_list *defs);
-void init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *shost, const char *lhost);
+void init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *lhost, const char *shost);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
 void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 
