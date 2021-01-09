@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.9.4p2], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.5], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl

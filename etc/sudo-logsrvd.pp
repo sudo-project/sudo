@@ -5,7 +5,7 @@
 from sudo clients.
 This makes it possible to have all sudo I/O logs on a central server."
 	vendor="Todd C. Miller"
-	copyright="(c) 2019-2020 Todd C. Miller"
+	copyright="(c) 2019-2021 Todd C. Miller"
 
 %if [aix]
 	# Convert to 4 part version for AIX, including patch level
