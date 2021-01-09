@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2021
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 11, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "January 8, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3238,6 +3238,16 @@ when running a command or editing a file.
 This flag is
 \fIoff\fR
 by default.
+.if \n(SL \{\
+.TP 18n
+selinux
+If enabled, the user may specify an SELinux role and/or type to use
+when running the command, as permitted by the SELinux policy.
+If SELinux is disabled on the system, this flag has no effect.
+This flag is
+\fIon\fR
+by default.
+.\}
 .TP 18n
 set_home
 If enabled and
