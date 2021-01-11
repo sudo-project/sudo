@@ -15,7 +15,7 @@ What's new in Sudo 1.9.5
    actually exploitable since the allocated buffer is large enough
    to hold the list of addresses.
 
- * If sudo is executed with a name other that "sudo" or "sudoedit",
+ * If sudo is executed with a name other than "sudo" or "sudoedit",
    it will now fall back to "sudo" as the program name.  This affects
    warning, help and usage messages as well as the matching of Debug
    lines in the /etc/sudo.conf file.  Previously, it was possible
