@@ -1,3 +1,9 @@
+What's new in Sudo 1.9.5p1
+
+ * Fixed a regression introduced in sudo 1.9.5 where the editor run
+   by sudoedit was set-user-ID root unless SELinux RBAC was in use.
+   The editor is now run with the user's real and effective user-IDs.
+
 What's new in Sudo 1.9.5
 
  * Fixed a crash introduced in 1.9.4 when running "sudo -i" as an
