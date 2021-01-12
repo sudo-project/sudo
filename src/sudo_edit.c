@@ -684,8 +684,9 @@ sudo_edit(struct command_details *command_details)
     nargv[ac] = NULL;
 
     /*
-     * Run the editor with the invoking user's creds,
-     * keeping track of the time spent in the editor.
+     * Run the editor with the invoking user's creds and drop setuid.
+     * Keep track of the time spent in the editor to distinguish between
+     * a user editing a file and a program doing it.
      * XXX - should run editor with user's context
      */
     if (sudo_gettime_real(&times[0]) == -1) {
@@ -694,6 +695,8 @@ sudo_edit(struct command_details *command_details)
     }
     memcpy(&saved_command_details, command_details, sizeof(struct command_details));
     command_details->cred = user_details.cred;
+    command_details->cred.euid = user_details.cred.uid;
+    command_details->cred.egid = user_details.cred.gid;
     command_details->argv = nargv;
     ret = run_command(command_details);
     if (sudo_gettime_real(&times[1]) == -1) {
