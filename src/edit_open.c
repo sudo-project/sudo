@@ -132,8 +132,8 @@ group_matches(gid_t target, struct sudo_cred *cred)
     for (i = 0; i < cred->ngroups; i++) {
 	if (target == cred->groups[i]) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"user gid %u matches directory gid %u", cred->groups[i],
-		(unsigned int)target);
+		"user gid %u matches directory gid %u",
+		(unsigned int)cred->groups[i], (unsigned int)target);
 	    debug_return_bool(true);
 	}
     }

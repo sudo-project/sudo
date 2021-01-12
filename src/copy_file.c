@@ -155,7 +155,8 @@ sudo_check_temp_file(int tfd, const char *tfile, uid_t uid, struct stat *sb)
 	debug_return_bool(false);
     }
     if ((sb->st_mode & ALLPERMS) != (S_IRUSR|S_IWUSR)) {
-	sudo_warnx(U_("%s: bad file mode: 0%o"), tfile, sb->st_mode & ALLPERMS);
+	sudo_warnx(U_("%s: bad file mode: 0%o"), tfile,
+	    (unsigned int)(sb->st_mode & ALLPERMS));
 	debug_return_bool(false);
     }
     if (sb->st_uid != uid) {
