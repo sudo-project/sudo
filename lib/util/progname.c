@@ -45,8 +45,8 @@ extern const char *__progname;
 void
 sudo_setprogname(const char *name)
 {
-    const char *base = strrchr(name, '/');
-    __progname = base ? base : name;
+    const char *slash = strrchr(name, '/');
+    __progname = slash ? slash + 1 : name;
 }
 # endif
 
@@ -130,8 +130,8 @@ sudo_getprogname(void)
 void
 sudo_setprogname(const char *name)
 {
-    const char *base = strrchr(name, '/');
-    progname = base ? base : name;
+    const char *slash = strrchr(name, '/');
+    progname = slash ? slash + 1 : name;
 }
 #endif /* !HAVE_GETPROGNAME */
 
