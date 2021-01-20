@@ -1700,7 +1700,8 @@ server_msg_cb(int fd, int what, void *v)
 			}
 			closure->temporary_write_event = true;
 		    }
-		    closure->write_instead_of_read = true;
+		    /* Redirect write event to finish SSL_read() */
+		    closure->read_instead_of_write = true;
                     debug_return;
                 case SSL_ERROR_SSL:
                     /*
@@ -1842,6 +1843,7 @@ client_msg_cb(int fd, int what, void *v)
 		    /* ssl wants to read, read event always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
 			"SSL_write returns SSL_ERROR_WANT_READ");
+		    /* Redirect read event to finish SSL_write() */
 		    closure->write_instead_of_read = true;
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
