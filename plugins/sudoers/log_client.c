@@ -1890,9 +1890,6 @@ client_msg_cb(int fd, int what, void *v)
 	    if (!client_message_completion(closure))
 		goto bad;
 	}
-    } else {
-	/* not done yet */
-	TAILQ_INSERT_HEAD(&closure->write_bufs, buf, entries);
     }
     debug_return;
 
