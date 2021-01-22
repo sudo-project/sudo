@@ -46,8 +46,9 @@ LDFLAGS = @LDFLAGS@
 # Flags to pass to libtool
 LTFLAGS = @LT_STATIC@
 
-# Libraries for test programs
-LIBS = $(top_builddir)/lib/util/libsudo_util.la
+# Libraries
+LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
+LIBS = $(LT_LIBS)
 
 # Address sanitizer flags
 ASAN_CFLAGS = @ASAN_CFLAGS@
@@ -132,7 +133,7 @@ $(devdir)/log_server.pb-c.c: $(srcdir)/log_server.proto
 	fi
 
 libsudo_eventlog.la: $(LIBEVENTLOG_OBJS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBEVENTLOG_OBJS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBEVENTLOG_OBJS) $(LT_LIBS)
 
 check_wrap: $(CHECK_WRAP_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
