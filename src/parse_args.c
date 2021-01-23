@@ -602,16 +602,16 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	if (argc != 0) {
 	    /* shell -c "command" */
 	    char *src, *dst;
-	    size_t cmnd_size = (size_t) (argv[argc - 1] - argv[0]) +
-		strlen(argv[argc - 1]) + 1;
+	    size_t size = 0;
 
-	    cmnd = dst = reallocarray(NULL, cmnd_size, 2);
-	    if (cmnd == NULL)
+	    for (av = argv; *av != NULL; av++)
+		size += strlen(*av) + 1;
+	    if (size == 0 || (cmnd = reallocarray(NULL, size, 2)) == NULL)
 		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    if (!gc_add(GC_PTR, cmnd))
 		exit(1);
 
-	    for (av = argv; *av != NULL; av++) {
+	    for (dst = cmnd, av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
 		    /* quote potential meta characters */
 		    if (!isalnum((unsigned char)*src) && *src != '_' && *src != '-' && *src != '$')
