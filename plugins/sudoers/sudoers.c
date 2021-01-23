@@ -547,7 +547,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
-    if (sudo_mode & (MODE_RUN | MODE_EDIT) && prev_user != NULL) {
+    if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT) && prev_user != NULL) {
 	if (user_uid == 0 && strcmp(prev_user, "root") != 0) {
 	    struct passwd *pw;
 
@@ -932,8 +932,8 @@ set_cmnd(void)
     if (user_cmnd == NULL)
 	user_cmnd = NewArgv[0];
 
-    if (sudo_mode & (MODE_RUN | MODE_EDIT | MODE_CHECK)) {
-	if (ISSET(sudo_mode, MODE_RUN | MODE_CHECK)) {
+    if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT|MODE_CHECK)) {
+	if (!ISSET(sudo_mode, MODE_EDIT)) {
 	    const char *runchroot = user_runchroot;
 	    if (runchroot == NULL && def_runchroot != NULL &&
 		    strcmp(def_runchroot, "*") != 0)
@@ -961,7 +961,8 @@ set_cmnd(void)
 		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		debug_return_int(NOT_FOUND_ERROR);
 	    }
-	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL)) {
+	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL) &&
+		    ISSET(sudo_mode, MODE_RUN)) {
 		/*
 		 * When running a command via a shell, the sudo front-end
 		 * escapes potential meta chars.  We unescape non-spaces
@@ -969,9 +970,21 @@ set_cmnd(void)
 		 */
 		for (to = user_args, av = NewArgv + 1; (from = *av); av++) {
 		    while (*from) {
-			if (from[0] == '\\' && !isspace((unsigned char)from[1]))
+			if (from[0] == '\\' && from[1] != '\0' &&
+				!isspace((unsigned char)from[1])) {
 			    from++;
+			}
+			if (size - (to - user_args) < 1) {
+			    sudo_warnx(U_("internal error, %s overflow"),
+				__func__);
+			    debug_return_int(NOT_FOUND_ERROR);
+			}
 			*to++ = *from++;
+		    }
+		    if (size - (to - user_args) < 1) {
+			sudo_warnx(U_("internal error, %s overflow"),
+			    __func__);
+			debug_return_int(NOT_FOUND_ERROR);
 		    }
 		    *to++ = ' ';
 		}
