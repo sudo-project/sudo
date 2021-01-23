@@ -1,3 +1,31 @@
+What's new in Sudo 1.9.5p2
+
+ * Fixed sudo's setprogname(3) emulation on systems that don't
+   provide it.
+
+ * Fixed a problem with the sudoers log server client where a partial
+   write to the server could result the sudo process consuming large
+   amounts of CPU time due to a cycle in the buffer queue. Bug #954.
+
+ * Added a missing dependency on libsudo_util in libsudo_eventlog.
+   Fixes a link error when building sudo statically.
+
+ * The user's KRB5CCNAME environment variable is now preserved when
+   performing PAM authentication.  This fixes GSSAPI authentication
+   when the user has a non-default ccache.
+
+ * When invoked as sudoedit, the same set of command line options
+   are now accepted as for "sudo -e".  The -H and -P options are
+   now rejected for sudoedit and "sudo -e" which matches the sudo
+   1.7 behavior.  This is part of the fix for CVE-2021-3156.
+
+ * Fixed a potential buffer overflow when unescaping backslashes
+   in the command's arguments.  Normally, sudo escapes special
+   characters when running a command via a shell (sudo -s or sudo
+   -i).  However, it was also possible to run sudoedit with the -s
+   or -i flags in which case no escaping had actually been done,
+   making a buffer overflow possible.  This fixes CVE-2021-3156.
+
 What's new in Sudo 1.9.5p1
 
  * Fixed a regression introduced in sudo 1.9.5 where the editor run

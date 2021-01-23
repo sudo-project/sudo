@@ -88,10 +88,11 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 int
 sudoers_policy_deserialize_info(void *v)
 {
+    const int edit_mask = MODE_EDIT|MODE_IGNORE_TICKET|MODE_NONINTERACTIVE;
     struct sudoers_open_info *info = v;
-    char * const *cur;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
+    char * const *cur;
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN);
 
@@ -346,6 +347,12 @@ sudoers_policy_deserialize_info(void *v)
 	    continue;
 	}
 #endif
+    }
+
+    /* Sudo front-end should restrict mode flags for sudoedit. */
+    if (ISSET(flags, MODE_EDIT) && (flags & edit_mask) != flags) {
+	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"), flags);
+	goto bad;
     }
 
     user_gid = (gid_t)-1;

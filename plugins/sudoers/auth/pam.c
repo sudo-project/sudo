@@ -114,10 +114,10 @@ conv_filter_init(void)
 
 	/*
 	 * Messages from PAM account management when trusted mode is enabled:
-	 *  1 Last   successful login for %s: %s  
-	 *  2 Last   successful login for %s: %s on %s 
-	 *  3 Last unsuccessful login for %s: %s      
-	 *  4 Last unsuccessful login for %s: %s on %s 
+	 *  1 Last   successful login for %s: %s
+	 *  2 Last   successful login for %s: %s on %s
+	 *  3 Last unsuccessful login for %s: %s
+	 *  4 Last unsuccessful login for %s: %s on %s
 	 */
 	if ((catd = catopen("pam_comsec", NL_CAT_LOCALE)) != -1) {
 	    maxfilters += 4;
@@ -288,6 +288,7 @@ sudo_pam_init_quiet(struct passwd *pw, sudo_auth *auth)
 int
 sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
+	const char *envccname;
     const char *s;
     int *pam_status = (int *) auth->data;
     debug_decl(sudo_pam_verify, SUDOERS_DEBUG_AUTH);
@@ -296,8 +297,27 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
     getpass_error = false;	/* set by converse if user presses ^C */
     conv_callback = callback;	/* passed to conversation function */
 
+	/* Set KRB5CCNAME from the user environment if not set to propagate this
+	 * information to PAM modules that may use it to authentication. */
+	envccname = sudo_getenv("KRB5CCNAME");
+	if (envccname == NULL && user_ccname != NULL) {
+		if (sudo_setenv("KRB5CCNAME", user_ccname, true) != 0) {
+			sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+			"unable to set KRB5CCNAME");
+			debug_return_int(AUTH_FAILURE);
+		}
+	}
+
     /* PAM_SILENT prevents the authentication service from generating output. */
     *pam_status = pam_authenticate(pamh, PAM_SILENT);
+
+	/* Restore KRB5CCNAME to its original value. */
+	if (envccname == NULL && sudo_unsetenv("KRB5CCNAME") != 0) {
+		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"unable to restore KRB5CCNAME");
+		debug_return_int(AUTH_FAILURE);
+	}
+
     if (getpass_error) {
 	/* error or ^C from tgetpass() */
 	debug_return_int(AUTH_INTR);
