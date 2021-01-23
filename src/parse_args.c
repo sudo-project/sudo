@@ -124,7 +124,10 @@ struct environment {
 /*
  * Default flags allowed when running a command.
  */
-#define DEFAULT_VALID_FLAGS	(MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_SHELL)
+#define DEFAULT_VALID_FLAGS	(MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_PRESERVE_GROUPS|MODE_SHELL)
+#define EDIT_VALID_FLAGS	MODE_NONINTERACTIVE
+#define LIST_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_LONG_LIST)
+#define VALIDATE_VALID_FLAGS	MODE_NONINTERACTIVE
 
 /* Option number for the --host long option due to ambiguity of the -h flag. */
 #define OPT_HOSTNAME	256
@@ -267,6 +270,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	progname = "sudoedit";
 	mode = MODE_EDIT;
 	sudo_settings[ARG_SUDOEDIT].value = "true";
+	valid_flags = EDIT_VALID_FLAGS;
     }
 
     /* Load local IP addresses and masks. */
@@ -366,7 +370,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 			usage_excl();
 		    mode = MODE_EDIT;
 		    sudo_settings[ARG_SUDOEDIT].value = "true";
-		    valid_flags = MODE_NONINTERACTIVE;
+		    valid_flags = EDIT_VALID_FLAGS;
 		    break;
 		case 'g':
 		    assert(optarg != NULL);
@@ -378,6 +382,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 		case 'H':
 		    sudo_settings[ARG_SET_HOME].value = "true";
+		    SET(flags, MODE_RESET_HOME);
 		    break;
 		case 'h':
 		    if (optarg == NULL) {
@@ -432,7 +437,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 			    usage_excl();
 		    }
 		    mode = MODE_LIST;
-		    valid_flags = MODE_NONINTERACTIVE|MODE_LONG_LIST;
+		    valid_flags = LIST_VALID_FLAGS;
 		    break;
 		case 'n':
 		    SET(flags, MODE_NONINTERACTIVE);
@@ -440,6 +445,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 		case 'P':
 		    sudo_settings[ARG_PRESERVE_GROUPS].value = "true";
+		    SET(flags, MODE_PRESERVE_GROUPS);
 		    break;
 		case 'p':
 		    /* An empty prompt is allowed. */
@@ -498,7 +504,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    if (mode && mode != MODE_VALIDATE)
 			usage_excl();
 		    mode = MODE_VALIDATE;
-		    valid_flags = MODE_NONINTERACTIVE;
+		    valid_flags = VALIDATE_VALID_FLAGS;
 		    break;
 		case 'V':
 		    if (mode && mode != MODE_VERSION)
@@ -525,7 +531,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     if (!mode) {
 	/* Defer -k mode setting until we know whether it is a flag or not */
 	if (sudo_settings[ARG_IGNORE_TICKET].value != NULL) {
-	    if (argc == 0 && !(flags & (MODE_SHELL|MODE_LOGIN_SHELL))) {
+	    if (argc == 0 && !ISSET(flags, MODE_SHELL|MODE_LOGIN_SHELL)) {
 		mode = MODE_INVALIDATE;	/* -k by itself */
 		sudo_settings[ARG_IGNORE_TICKET].value = NULL;
 		valid_flags = 0;
@@ -589,7 +595,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     /*
      * For shell mode we need to rewrite argv
      */
-    if (ISSET(mode, MODE_RUN) && ISSET(flags, MODE_SHELL)) {
+    if (ISSET(flags, MODE_SHELL|MODE_LOGIN_SHELL) && ISSET(mode, MODE_RUN)) {
 	char **av, *cmnd = NULL;
 	int ac = 1;
 

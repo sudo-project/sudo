@@ -541,7 +541,7 @@ __dso_public const char *sudo_getprogname(void);
 # define getprogname() sudo_getprogname()
 #endif /* HAVE_GETPROGNAME */
 #ifndef HAVE_SETPROGNAME
-sudo_dso_public void sudo_setprogname(const char *name);
+__dso_public void sudo_setprogname(const char *name);
 # undef setprogname
 # define setprogname(_a) sudo_setprogname(_a)
 #endif /* HAVE_SETPROGNAME */
