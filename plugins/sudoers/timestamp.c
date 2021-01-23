@@ -652,8 +652,8 @@ timestamp_lock(void *vcookie, struct passwd *pw)
     } else if (entry.type != TS_LOCKEXCL) {
 	/* Old sudo record, convert it to TS_LOCKEXCL. */
 	entry.type = TS_LOCKEXCL;
-	memset((char *)&entry + offsetof(struct timestamp_entry, type), 0,
-	    nread - offsetof(struct timestamp_entry, type));
+	memset((char *)&entry + offsetof(struct timestamp_entry, flags), 0,
+	    nread - offsetof(struct timestamp_entry, flags));
 	if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
 	    debug_return_bool(false);
     }
