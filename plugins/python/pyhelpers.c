@@ -212,7 +212,7 @@ py_str_array_from_tuple(PyObject *py_tuple)
     Py_ssize_t tuple_size = PyTuple_Size(py_tuple);
 
     // we need an extra 0 at the end
-    char **result = calloc(Py_SSIZE2SIZE(tuple_size) + 1, sizeof(char*));
+    char **result = calloc(tuple_size + 1, sizeof(char *));
     if (result == NULL) {
         debug_return_ptr(NULL);
     }
