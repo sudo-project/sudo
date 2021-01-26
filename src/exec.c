@@ -389,7 +389,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * as sudoedit, there is no command timeout and there is no close
      * function, just exec directly.  Only returns on error.
      */
-    if (!ISSET(details->flags, CD_SET_TIMEOUT|CD_SUDOEDIT) &&
+    if (!ISSET(details->flags, CD_RBAC_ENABLED|CD_SET_TIMEOUT|CD_SUDOEDIT) &&
 	policy_plugin.u.policy->close == NULL) {
 	if (!sudo_terminated(cstat)) {
 	    exec_cmnd(details, -1);
