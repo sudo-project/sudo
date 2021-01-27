@@ -455,4 +455,7 @@ char *rcstr_alloc(size_t len);
 char *rcstr_addref(const char *s);
 void rcstr_delref(const char *s);
 
+/* strlcpy_unesc.c */
+size_t strlcpy_unescape(char *dst, const char *src, size_t size);
+
 #endif /* SUDOERS_SUDOERS_H */

@@ -951,7 +951,7 @@ set_cmnd(void)
 
 	/* set user_args */
 	if (NewArgc > 1) {
-	    char *to, *from, **av;
+	    char *dst, **av;
 	    size_t size, n;
 
 	    /* Alloc and build up user_args. */
@@ -968,38 +968,31 @@ set_cmnd(void)
 		 * escapes potential meta chars.  We unescape non-spaces
 		 * for sudoers matching and logging purposes.
 		 */
-		for (to = user_args, av = NewArgv + 1; (from = *av); av++) {
-		    while (*from) {
-			if (from[0] == '\\' && from[1] != '\0' &&
-				!isspace((unsigned char)from[1])) {
-			    from++;
-			}
-			if (size - (to - user_args) < 1) {
-			    sudo_warnx(U_("internal error, %s overflow"),
-				__func__);
-			    debug_return_int(NOT_FOUND_ERROR);
-			}
-			*to++ = *from++;
-		    }
-		    if (size - (to - user_args) < 1) {
-			sudo_warnx(U_("internal error, %s overflow"),
-			    __func__);
-			debug_return_int(NOT_FOUND_ERROR);
-		    }
-		    *to++ = ' ';
-		}
-		*--to = '\0';
-	    } else {
-		for (to = user_args, av = NewArgv + 1; *av; av++) {
-		    n = strlcpy(to, *av, size - (to - user_args));
-		    if (n >= size - (to - user_args)) {
+		for (dst = user_args, av = NewArgv + 1; *av; av++) {
+		    n = strlcpy_unescape(dst, *av, size);
+		    if (n >= size) {
 			sudo_warnx(U_("internal error, %s overflow"), __func__);
 			debug_return_int(NOT_FOUND_ERROR);
 		    }
-		    to += n;
-		    *to++ = ' ';
+		    dst += n;
+		    size -= n;
+		    *dst++ = ' ';
+		    size--;
 		}
-		*--to = '\0';
+		*--dst = '\0';
+	    } else {
+		for (dst = user_args, av = NewArgv + 1; *av; av++) {
+		    n = strlcpy(dst, *av, size);
+		    if (n >= size) {
+			sudo_warnx(U_("internal error, %s overflow"), __func__);
+			debug_return_int(NOT_FOUND_ERROR);
+		    }
+		    dst += n;
+		    size -= n;
+		    *dst++ = ' ';
+		    size--;
+		}
+		*--dst = '\0';
 	    }
 	}
     }
