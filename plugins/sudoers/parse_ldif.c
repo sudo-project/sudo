@@ -479,6 +479,8 @@ ldif_to_sudoers(struct sudoers_parse_tree *parse_tree,
 
     /* Convert from list of roles to array and sort by order. */
     role_array = reallocarray(NULL, numroles + 1, sizeof(*role_array));
+    if (role_array == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     for (n = 0; n < numroles; n++) {
 	if ((role = STAILQ_FIRST(roles)) == NULL)
 	    break;	/* cannot happen */
