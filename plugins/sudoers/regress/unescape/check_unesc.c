@@ -45,15 +45,14 @@ struct test_data {
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-int
-main(int argc, char *argv[])
+static void
+test_strlcpy_unescape(int *ntests_out, int *errors_out)
 {
-    int ntests = 0, errors = 0;
+    int ntests = *ntests_out;
+    int errors = *errors_out;
     struct test_data *td;
     char buf[1024];
     size_t len;
-
-    initprogname(argc > 0 ? argv[0] : "check_unesc");
 
     for (td = test_data; td->input != NULL; td++) {
 	ntests++;
@@ -81,6 +80,59 @@ main(int argc, char *argv[])
 	    errors++;
 	}
     }
+
+    *ntests_out = ntests;
+    *errors_out = errors;
+}
+
+static void
+test_strvec_join(int *ntests_out, int *errors_out)
+{
+    int ntests = *ntests_out;
+    int errors = *errors_out;
+    char buf[64*1024 + 1], expected[64*1024 + 3];
+    char *argv[3], *result;
+
+    /* Test joining an argument vector while unescaping. */
+    memset(buf, 'A', sizeof(buf));
+    buf[sizeof(buf) - 1] = '\0';
+    argv[0] = "\\";
+    argv[1] = buf;
+    argv[2] = NULL;
+
+    memset(expected, 'A', sizeof(expected));
+    expected[0] = '\\';
+    expected[1] = ' ';
+    expected[sizeof(expected) - 1] = '\0';
+
+    ntests++;
+    result = strvec_join(argv, ' ', strlcpy_unescape);
+    if (result == NULL) {
+	sudo_warnx("%d: failed to join argument vector", ntests);
+	errors++;
+    } else if (strcmp(result, expected) != 0) {
+	sudo_warnx("%d: got \"%s\", expected \"%s\"", ntests,
+	    result, expected);
+	errors++;
+    }
+    free(result);
+
+    *ntests_out = ntests;
+    *errors_out = errors;
+}
+
+int
+main(int argc, char *argv[])
+{
+    int ntests = 0, errors = 0;
+
+    initprogname(argc > 0 ? argv[0] : "check_unesc");
+
+    /* strlcpy_unescape tests */
+    test_strlcpy_unescape(&ntests, &errors);
+
+    /* strvec_join test */
+    test_strvec_join(&ntests, &errors);
 
     printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
 	ntests, errors, (ntests - errors) * 100 / ntests);

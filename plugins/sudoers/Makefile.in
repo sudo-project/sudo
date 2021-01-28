@@ -230,7 +230,7 @@ CHECK_SYMBOLS_OBJS = check_symbols.o
 
 CHECK_STARTTIME_OBJS = check_starttime.o starttime.lo sudoers_debug.lo
 
-CHECK_UNESC_OBJS = check_unesc.o strlcpy_unesc.lo sudoers_debug.lo
+CHECK_UNESC_OBJS = check_unesc.o strlcpy_unesc.lo strvec_join.lo sudoers_debug.lo
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
