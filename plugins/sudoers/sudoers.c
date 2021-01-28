@@ -960,7 +960,7 @@ set_cmnd(void)
 		 */
 		user_args = strvec_join(NewArgv + 1, ' ', strlcpy_unescape);
 	    } else {
-		user_args = strvec_join(NewArgv + 1, ' ', strlcpy);
+		user_args = strvec_join(NewArgv + 1, ' ', NULL);
 	    }
 	    if (user_args == NULL)
 		debug_return_int(NOT_FOUND_ERROR);

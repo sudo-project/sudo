@@ -29,9 +29,15 @@
 
 #include "sudoers.h"
 
+#ifdef HAVE_STRLCPY
+# define cpy_default	strlcpy
+#else
+# define cpy_default	sudo_strlcpy
+#endif
+
 /*
  * Join a NULL-terminated array of strings using the specified separator
- * character.  The copy function must have strlcpy-like semantics.
+ * char.  If non-NULL, the copy function must have strlcpy-like semantics.
  */
 char *
 strvec_join(char *const argv[], char sep, size_t (*cpy)(char *, const char *, size_t))
@@ -48,6 +54,8 @@ strvec_join(char *const argv[], char sep, size_t (*cpy)(char *, const char *, si
 	debug_return_ptr(NULL);
     }
 
+    if (cpy == NULL)
+	cpy = cpy_default;
     for (dst = result, av = argv; *av != NULL; av++) {
 	n = cpy(dst, *av, size);
 	if (n >= size) {
