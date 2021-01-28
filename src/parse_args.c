@@ -622,9 +622,6 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
 	    for (dst = cmnd, av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
-		    /* quote potential meta characters */
-		    if (!isalnum((unsigned char)*src) && *src != '_' && *src != '-' && *src != '$')
-			*dst++ = '\\';
 		    *dst++ = *src;
 		}
 		*dst++ = ' ';
