@@ -86,7 +86,7 @@ test_strlcpy_unescape(int *ntests_out, int *errors_out)
 }
 
 static void
-test_strvec_join(int *ntests_out, int *errors_out)
+test_strvec_join(char sep, int *ntests_out, int *errors_out)
 {
     int ntests = *ntests_out;
     int errors = *errors_out;
@@ -94,6 +94,7 @@ test_strvec_join(int *ntests_out, int *errors_out)
     char *argv[3], *result;
 
     /* Test joining an argument vector while unescaping. */
+    /* Simulate: sudoedit -s '\' `perl -e 'print "A" x 65536'` */
     memset(buf, 'A', sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
     argv[0] = "\\";
@@ -102,11 +103,11 @@ test_strvec_join(int *ntests_out, int *errors_out)
 
     memset(expected, 'A', sizeof(expected));
     expected[0] = '\\';
-    expected[1] = ' ';
+    expected[1] = sep;
     expected[sizeof(expected) - 1] = '\0';
 
     ntests++;
-    result = strvec_join(argv, ' ', strlcpy_unescape);
+    result = strvec_join(argv, sep, strlcpy_unescape);
     if (result == NULL) {
 	sudo_warnx("%d: failed to join argument vector", ntests);
 	errors++;
@@ -132,7 +133,8 @@ main(int argc, char *argv[])
     test_strlcpy_unescape(&ntests, &errors);
 
     /* strvec_join test */
-    test_strvec_join(&ntests, &errors);
+    test_strvec_join(' ', &ntests, &errors);
+    test_strvec_join('\n', &ntests, &errors);
 
     printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
 	ntests, errors, (ntests - errors) * 100 / ntests);

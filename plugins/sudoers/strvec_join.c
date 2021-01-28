@@ -29,8 +29,12 @@
 
 #include "sudoers.h"
 
+/*
+ * Join a NULL-terminated array of strings using the specified separator
+ * character.  The copy function must have strlcpy-like semantics.
+ */
 char *
-strvec_join(char *const argv[], char ch, size_t (*cpy)(char *, const char *, size_t))
+strvec_join(char *const argv[], char sep, size_t (*cpy)(char *, const char *, size_t))
 {
     char *dst, *result = NULL;
     char *const *av;
@@ -48,11 +52,12 @@ strvec_join(char *const argv[], char ch, size_t (*cpy)(char *, const char *, siz
 	n = cpy(dst, *av, size);
 	if (n >= size) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    free(result);
 	    debug_return_ptr(NULL);
 	}
 	dst += n;
 	size -= n;
-	*dst++ = ' ';
+	*dst++ = sep;
 	size--;
     }
     *--dst = '\0';
