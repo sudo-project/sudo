@@ -888,6 +888,7 @@ plugins/sudoers/starttime.c
 plugins/sudoers/strlcpy_unesc.c
 plugins/sudoers/strlist.c
 plugins/sudoers/strlist.h
+plugins/sudoers/strvec_join.c
 plugins/sudoers/stubs.c
 plugins/sudoers/sudo_ldap.h
 plugins/sudoers/sudo_ldap_conf.h
