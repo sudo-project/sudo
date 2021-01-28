@@ -951,16 +951,6 @@ set_cmnd(void)
 
 	/* set user_args */
 	if (NewArgc > 1) {
-	    char *dst, **av;
-	    size_t size, n;
-
-	    /* Alloc and build up user_args. */
-	    for (size = 0, av = NewArgv + 1; *av; av++)
-		size += strlen(*av) + 1;
-	    if (size == 0 || (user_args = malloc(size)) == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		debug_return_int(NOT_FOUND_ERROR);
-	    }
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL) &&
 		    ISSET(sudo_mode, MODE_RUN)) {
 		/*
@@ -968,32 +958,12 @@ set_cmnd(void)
 		 * escapes potential meta chars.  We unescape non-spaces
 		 * for sudoers matching and logging purposes.
 		 */
-		for (dst = user_args, av = NewArgv + 1; *av; av++) {
-		    n = strlcpy_unescape(dst, *av, size);
-		    if (n >= size) {
-			sudo_warnx(U_("internal error, %s overflow"), __func__);
-			debug_return_int(NOT_FOUND_ERROR);
-		    }
-		    dst += n;
-		    size -= n;
-		    *dst++ = ' ';
-		    size--;
-		}
-		*--dst = '\0';
+		user_args = strvec_join(NewArgv + 1, ' ', strlcpy_unescape);
 	    } else {
-		for (dst = user_args, av = NewArgv + 1; *av; av++) {
-		    n = strlcpy(dst, *av, size);
-		    if (n >= size) {
-			sudo_warnx(U_("internal error, %s overflow"), __func__);
-			debug_return_int(NOT_FOUND_ERROR);
-		    }
-		    dst += n;
-		    size -= n;
-		    *dst++ = ' ';
-		    size--;
-		}
-		*--dst = '\0';
+		user_args = strvec_join(NewArgv + 1, ' ', strlcpy);
 	    }
+	    if (user_args == NULL)
+		debug_return_int(NOT_FOUND_ERROR);
 	}
     }
 

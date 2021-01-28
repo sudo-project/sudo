@@ -458,4 +458,7 @@ void rcstr_delref(const char *s);
 /* strlcpy_unesc.c */
 size_t strlcpy_unescape(char *dst, const char *src, size_t size);
 
+/* strvec_join.c */
+char *strvec_join(char *const argv[], char ch, size_t (*cpy)(char *, const char *, size_t));
+
 #endif /* SUDOERS_SUDOERS_H */

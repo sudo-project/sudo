@@ -173,7 +173,8 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo \
 	       goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
 	       iolog_path_escapes.lo locale.lo log_client.lo logging.lo \
 	       parse.lo policy.lo prompt.lo set_perms.lo starttime.lo \
-	       sudo_nss.lo sudoers.lo timestamp.lo @SUDOERS_OBJS@
+	       strlcpy_unesc.lo strvec_join.lo sudo_nss.lo sudoers.lo \
+	       timestamp.lo @SUDOERS_OBJS@
 
 SUDOERS_IOBJS = $(SUDOERS_OBJS:.lo=.i)
 
@@ -2418,6 +2419,30 @@ strlist.i: $(srcdir)/strlist.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 strlist.plog: strlist.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/strlist.c --i-file $< --output-file $@
+strvec_join.lo: $(srcdir)/strvec_join.c $(devdir)/def_data.h \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strvec_join.c
+strvec_join.i: $(srcdir)/strvec_join.c $(devdir)/def_data.h \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+strvec_join.plog: strvec_join.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/strvec_join.c --i-file $< --output-file $@
 stubs.o: $(srcdir)/stubs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
