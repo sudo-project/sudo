@@ -1930,15 +1930,20 @@ usage(bool fatal)
 static void
 help(void)
 {
-    (void)printf(_("%s - send sudo I/O log to remote server\n\n"),
-	getprogname());
+    printf("%s - %s\n\n", getprogname(), _("sudo log server"));
     usage(false);
-    (void)puts(_("\nOptions:\n"
-	"  -f, --file               path to configuration file\n"
-	"  -h  --help               display help message and exit\n"
-	"  -n, --no-fork            do not fork, run in the foreground\n"
-	"  -R, --random-drop        percent chance connections will drop\n"
-	"  -V, --version            display version information and exit\n"));
+    printf("\n%s\n", _("Options:"));
+    printf("  -f, --file            %s\n",
+	_("path to configuration file"));
+    printf("  -h, --help            %s\n",
+        _("display help message and exit"));
+    printf("  -n, --no-fork         %s\n",
+	_("do not fork, run in the foreground"));
+    printf("  -R, --random-drop     %s\n",
+	_("percent chance connections will drop"));
+    printf("  -V, --version         %s\n",
+	_("display version information and exit"));
+    putchar('\n');
     exit(EXIT_SUCCESS);
 }
 
