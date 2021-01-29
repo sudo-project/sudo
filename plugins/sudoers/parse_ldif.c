@@ -766,7 +766,8 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
     free(line);
 
     /* Convert from roles to sudoers data structures. */
-    ldif_to_sudoers(parse_tree, &roles, numroles, store_options);
+    if (numroles > 0)
+	ldif_to_sudoers(parse_tree, &roles, numroles, store_options);
 
     /* Clean up. */
     rbdestroy(usercache, str_list_free);
