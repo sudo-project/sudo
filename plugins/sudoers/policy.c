@@ -518,6 +518,10 @@ sudoers_policy_deserialize_info(void *v)
     /* Some systems support fexecve() which we use for digest matches. */
     cmnd_fd = -1;
 
+#ifdef NO_ROOT_MAILER
+    eventlog_set_mailuid(user_uid);
+#endif
+
     /* Dump settings and user info (XXX - plugin args) */
     for (cur = info->settings; *cur != NULL; cur++)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s", *cur);
