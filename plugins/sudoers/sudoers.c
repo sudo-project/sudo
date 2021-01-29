@@ -1147,8 +1147,9 @@ set_loginclass(struct passwd *pw)
 /*
  * Look up the fully qualified domain name of host.
  * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
- * Returns true on success, setting longp and shortp.
- * Returns false on failure, longp and shortp are unchanged.
+ * Returns 0 on success, setting longp and shortp.
+ * Returns non-zero on failure, longp and shortp are unchanged.
+ * See gai_strerror() for the list of error return codes.
  */
 static int
 resolve_host(const char *host, char **longp, char **shortp)
