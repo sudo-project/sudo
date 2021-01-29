@@ -548,6 +548,12 @@ json_stack_push(struct json_stack *stack, struct json_item_list *items,
     struct json_item *item;
     debug_decl(iolog_parse_loginfo_json, SUDO_DEBUG_UTIL);
 
+    /* We limit the stack size rather than expanding it. */
+    if (stack->depth >= stack->maxdepth) {
+	sudo_warnx(U_("json stack exhausted (max %u frames)"), stack->maxdepth);
+	debug_return_ptr(NULL);
+    }
+
     /* Allocate a new item and insert it into the list. */
     if ((item = new_json_item(type, name, lineno)) == NULL)
 	debug_return_ptr(NULL);
@@ -555,9 +561,7 @@ json_stack_push(struct json_stack *stack, struct json_item_list *items,
     item->u.child.parent = item;
     TAILQ_INSERT_TAIL(items, item, entries);
 
-    /* Push the current frame onto the stack. */
-    if (stack->depth == stack->maxdepth)
-	sudo_fatalx(U_("internal error, %s overflow"), __func__);
+    /* Push the current frame onto the stack (depth check performed above). */
     stack->frames[stack->depth++] = frame;
 
     /* Return the new frame */
