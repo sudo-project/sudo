@@ -525,26 +525,60 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 		    op = sudo_ldap_parse_option(opt, &var, &val);
 		    if (strcmp(var, "command_timeout") == 0 && val != NULL) {
+			if (cmndspec->timeout != UNSPEC) {
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			cmndspec->timeout = parse_timeout(val);
 		    } else if (strcmp(var, "runchroot") == 0 && val != NULL) {
+			if (cmndspec->runchroot != NULL) {
+			    free(cmndspec->runchroot);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->runchroot = strdup(val)) == NULL)
 			    break;
 		    } else if (strcmp(var, "runcwd") == 0 && val != NULL) {
+			if (cmndspec->runcwd != NULL) {
+			    free(cmndspec->runcwd);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->runcwd = strdup(val)) == NULL)
 			    break;
 #ifdef HAVE_SELINUX
 		    } else if (strcmp(var, "role") == 0 && val != NULL) {
+			if (cmndspec->role != NULL) {
+			    free(cmndspec->role);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->role = strdup(val)) == NULL)
 			    break;
 		    } else if (strcmp(var, "type") == 0 && val != NULL) {
+			if (cmndspec->type != NULL) {
+			    free(cmndspec->type);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->type = strdup(val)) == NULL)
 			    break;
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 		    } else if (strcmp(var, "privs") == 0 && val != NULL) {
+			if (cmndspec->privs != NULL) {
+			    free(cmndspec->privs);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->privs = strdup(val)) == NULL)
 			    break;
 		    } else if (strcmp(var, "limitprivs") == 0 && val != NULL) {
+			if (cmndspec->limitprivs != NULL) {
+			    free(cmndspec->limitprivs);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->limitprivs = strdup(val)) == NULL)
 			    break;
 #endif /* HAVE_PRIV_SET */
