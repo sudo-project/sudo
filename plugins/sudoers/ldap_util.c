@@ -470,6 +470,17 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    cmndspec->runasgrouplist = prev_cmndspec->runasgrouplist;
 	    cmndspec->notbefore = prev_cmndspec->notbefore;
 	    cmndspec->notafter = prev_cmndspec->notafter;
+	    cmndspec->timeout = prev_cmndspec->timeout;
+	    cmndspec->runchroot = prev_cmndspec->runchroot;
+	    cmndspec->runcwd = prev_cmndspec->runcwd;
+#ifdef HAVE_SELINUX
+	    cmndspec->role = prev_cmndspec->role;
+	    cmndspec->type = prev_cmndspec->type;
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	    cmndspec->privs = prev_cmndspec->privs;
+	    cmndspec->limitprivs = prev_cmndspec->limitprivs;
+#endif /* HAVE_PRIV_SET */
 	    cmndspec->tags = prev_cmndspec->tags;
 	    if (cmndspec->tags.setenv == IMPLIED)
 		cmndspec->tags.setenv = UNSPEC;
