@@ -764,6 +764,7 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
     }
     sudo_role_free(role);
     free(line);
+    free(savedline);
 
     /* Convert from roles to sudoers data structures. */
     if (numroles > 0)
