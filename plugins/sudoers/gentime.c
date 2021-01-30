@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2017, 2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,7 +47,7 @@
 time_t
 parse_gentime(const char *timestr)
 {
-    char tcopy[sizeof("yyyymmddHHMMSS.F")];
+    char tcopy[sizeof("yyyymmddHHMMSS")];
     const char *cp;
     time_t result;
     struct tm tm;
@@ -56,9 +56,9 @@ parse_gentime(const char *timestr)
     bool islocal = false;
     debug_decl(parse_gentime, SUDOERS_DEBUG_PARSER);
 
-    /* Make a copy of the time without time zone for easy parsing. */
-    len = strspn(timestr, "0123456789.,");
-    if (len >= sizeof(tcopy)) {
+    /* Make a copy of the non-fractional time without zone for easy parsing. */
+    len = strspn(timestr, "0123456789");
+    if (len >= sizeof(tcopy) || len < sizeof("yyyymmddHH") -1 || (len & 1)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to parse general time string %s", timestr);
 	debug_return_time_t(-1);
@@ -75,9 +75,9 @@ parse_gentime(const char *timestr)
 	    "only parsed %d items in general time string %s", items, timestr); 
 	debug_return_time_t(-1);
     }
-    cp = timestr + ((items + 1) * 2);
 
     /* Parse optional fractional hours/minute/second if present. */
+    cp = timestr + len;
     if ((cp[0] == '.' || cp[0] == ',') && isdigit((unsigned char)cp[1])) {
 	int frac = cp[1] - '0';
 	switch (items) {
@@ -96,6 +96,7 @@ parse_gentime(const char *timestr)
 	cp += 2;	/* skip over radix and fraction */
     }
 
+    /* Parse optional time zone. */
     switch (*cp) {
     case '-':
     case '+': {
