@@ -104,6 +104,14 @@ parse_gentime(const char *timestr)
 
 	/* No DST */
 	tm.tm_isdst = 0;
+	/* time zone offset must be hh or hhmm */
+	len = strspn(cp + 1, "0123456789");
+	if (len != 2 && len != 4) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to parse time zone offset in %s, bad tz offset",
+		timestr);
+	    debug_return_time_t(-1);
+	}
 	/* parse time zone offset */
 	items = sscanf(cp + 1, "%2d%2d", &hour, &min);
 	if (items == EOF || items < 1) {
