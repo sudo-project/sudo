@@ -1525,6 +1525,17 @@ AC_ARG_ENABLE(pie,
 AC_ARG_ENABLE(asan,
 [AS_HELP_STRING([--enable-asan], [Build sudo with address sanitizer support.])])
 
+AC_ARG_ENABLE(leaks,
+[AS_HELP_STRING([--disable-leaks], [Prevent some harmless memory leaks.])],
+[ case "$enableval" in
+    yes)    ;;
+    no)	    AC_DEFINE(NO_LEAKS)
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --disable-leaks: $enableval])
+	    ;;
+  esac
+])
+
 AC_ARG_ENABLE(poll,
 [AS_HELP_STRING([--disable-poll], [Use select() instead of poll().])])
 

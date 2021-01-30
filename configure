@@ -1005,6 +1005,7 @@ enable_gcrypt
 enable_hardening
 enable_pie
 enable_asan
+enable_leaks
 enable_poll
 enable_admin_flag
 enable_nls
@@ -1705,6 +1706,7 @@ Optional Features:
                           options
   --enable-pie            Build sudo as a position independent executable.
   --enable-asan           Build sudo with address sanitizer support.
+  --disable-leaks         Prevent some harmless memory leaks.
   --disable-poll          Use select() instead of poll().
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
@@ -6899,6 +6901,22 @@ fi
 if test ${enable_asan+y}
 then :
   enableval=$enable_asan;
+fi
+
+
+# Check whether --enable-leaks was given.
+if test ${enable_leaks+y}
+then :
+  enableval=$enable_leaks;  case "$enableval" in
+    yes)    ;;
+    no)	    printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
+
+	    ;;
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --disable-leaks: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --disable-leaks: $enableval" >&2;}
+	    ;;
+  esac
+
 fi
 
 
