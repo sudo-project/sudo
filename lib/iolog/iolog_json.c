@@ -79,6 +79,7 @@ json_store_command(struct json_item *item, struct eventlog *evlog)
      * Note: struct eventlog must store command + args.
      *       We don't have argv yet so we append the args later.
      */
+    free(evlog->command);
     evlog->command = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -133,8 +134,14 @@ json_array_to_strvec(struct json_object *array)
 static bool
 json_store_runargv(struct json_item *item, struct eventlog *evlog)
 {
+    int i;
     debug_decl(json_store_runargv, SUDO_DEBUG_UTIL);
 
+    if (evlog->argv != NULL) {
+	for (i = 0; evlog->argv[i] != NULL; i++)
+	    free(evlog->argv[i]);
+	free(evlog->argv);
+    }
     evlog->argv = json_array_to_strvec(&item->u.child);
 
     debug_return_bool(evlog->argv != NULL);
@@ -143,8 +150,14 @@ json_store_runargv(struct json_item *item, struct eventlog *evlog)
 static bool
 json_store_runenv(struct json_item *item, struct eventlog *evlog)
 {
+    int i;
     debug_decl(json_store_runenv, SUDO_DEBUG_UTIL);
 
+    if (evlog->envp != NULL) {
+	for (i = 0; evlog->envp[i] != NULL; i++)
+	    free(evlog->envp[i]);
+	free(evlog->envp);
+    }
     evlog->envp = json_array_to_strvec(&item->u.child);
 
     debug_return_bool(evlog->envp != NULL);
@@ -164,6 +177,7 @@ json_store_rungroup(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_rungroup, SUDO_DEBUG_UTIL);
 
+    free(evlog->rungroup);
     evlog->rungroup = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -183,6 +197,7 @@ json_store_runuser(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runuser, SUDO_DEBUG_UTIL);
 
+    free(evlog->rungroup);
     evlog->runuser = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -193,6 +208,7 @@ json_store_runchroot(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runchroot, SUDO_DEBUG_UTIL);
 
+    free(evlog->runchroot);
     evlog->runchroot = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -203,6 +219,7 @@ json_store_runcwd(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runcwd, SUDO_DEBUG_UTIL);
 
+    free(evlog->runcwd);
     evlog->runcwd = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -213,6 +230,7 @@ json_store_submitcwd(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submitcwd, SUDO_DEBUG_UTIL);
 
+    free(evlog->cwd);
     evlog->cwd = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -223,6 +241,7 @@ json_store_submithost(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submithost, SUDO_DEBUG_UTIL);
 
+    free(evlog->submithost);
     evlog->submithost = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -233,6 +252,7 @@ json_store_submituser(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submituser, SUDO_DEBUG_UTIL);
 
+    free(evlog->submituser);
     evlog->submituser = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -265,6 +285,7 @@ json_store_ttyname(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_ttyname, SUDO_DEBUG_UTIL);
 
+    free(evlog->ttyname);
     evlog->ttyname = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
