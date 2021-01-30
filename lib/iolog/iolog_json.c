@@ -431,6 +431,10 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
 
     /* First object holds all the actual data. */
     item = TAILQ_FIRST(&object->items);
+    if (item == NULL) {
+	sudo_warnx(U_("missing JSON_OBJECT"));
+	goto done;
+    }
     if (item->type != JSON_OBJECT) {
 	sudo_warnx(U_("expected JSON_OBJECT, got %d"), item->type);
 	goto done;
@@ -439,6 +443,13 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
 
     TAILQ_FOREACH(item, &object->items, entries) {
 	struct iolog_json_key *key;
+
+	/* expecting key:value pairs */
+	if (item->name == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"%s: missing object name", __func__);
+	    goto done;
+	}
 
 	/* lookup name */
 	for (key = iolog_json_keys; key->name != NULL; key++) {
@@ -465,7 +476,7 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
     }
 
     /* Merge cmd and argv as sudoreplay expects. */
-    if (evlog->command != NULL && evlog->argv != NULL) {
+    if (evlog->command != NULL && evlog->argv != NULL && evlog->argv[0] != NULL) {
 	size_t len = strlen(evlog->command) + 1;
 	char *newcmd;
 	int ac;
@@ -641,6 +652,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    switch (*cp) {
 	    case '{':
 		cp++;
+		if (name == NULL && frame->parent != NULL) {
+		    sudo_warnx("%s",
+			U_("objects must consist of name:value pairs"));
+		    goto parse_error;
+		}
 		frame = json_stack_push(&stack, &frame->items, frame,
 		    JSON_OBJECT, name, lineno);
 		if (frame == NULL)
