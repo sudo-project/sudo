@@ -409,7 +409,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
     if (hosts == NULL) {
 	/* The host has already matched, use ALL as wildcard. */
-	if ((m = new_member_all(NULL)) == NULL)
+	if ((m = sudo_ldap_new_member_all()) == NULL)
 	    goto oom;
 	TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
     } else {
@@ -652,4 +652,16 @@ oom:
 	free_privilege(priv);
     }
     debug_return_ptr(NULL);
+}
+
+/* So ldap.c and sssd.c don't need to include gram.h */
+struct member *
+sudo_ldap_new_member_all(void)
+{
+    struct member *m;
+    debug_decl(sudo_ldap_new_member_all, SUDOERS_DEBUG_LDAP);
+
+    if ((m = calloc(1, sizeof(*m))) != NULL)
+	m->type = ALL;
+    debug_return_ptr(m);
 }
