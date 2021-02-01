@@ -294,6 +294,37 @@ struct cmnd_info {
     int status;
 };
 
+/*
+ * The parser passes pointers to data structures that are not stored anywhere.
+ * We add them to the leak list at allocation time and remove them from
+ * the list when they are stored in another data structure.
+ * This makes it possible to free data on error that would otherwise be leaked.
+ */
+enum parser_leak_types {
+    LEAK_UNKNOWN,
+    LEAK_PRIVILEGE,
+    LEAK_CMNDSPEC,
+    LEAK_DEFAULTS,
+    LEAK_MEMBER,
+    LEAK_DIGEST,
+    LEAK_RUNAS,
+    LEAK_PTR
+};
+struct parser_leak_entry {
+    SLIST_ENTRY(parser_leak_entry) entries;
+    enum parser_leak_types type;
+    union {
+	struct command_digest *dig;
+	struct privilege *p;
+	struct cmndspec *cs;
+	struct defaults *d;
+	struct member *m;
+	struct runascontainer *rc;
+	void *ptr;
+    } u;
+};
+SLIST_HEAD(parser_leak_list, parser_leak_entry);
+
 /* alias.c */
 struct rbtree *alloc_aliases(void);
 void free_aliases(struct rbtree *aliases);
@@ -313,6 +344,7 @@ bool init_parser(const char *path, bool quiet, bool strict);
 struct member *new_member_all(char *name);
 void free_member(struct member *m);
 void free_members(struct member_list *members);
+void free_cmndspecs(struct cmndspec_list *csl);
 void free_privilege(struct privilege *priv);
 void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
@@ -321,6 +353,9 @@ void free_defaults(struct defaults_list *defs);
 void init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *lhost, const char *shost);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
 void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
+bool parser_leak_add(enum parser_leak_types type, void *v);
+bool parser_leak_remove(enum parser_leak_types type, void *v);
+void parser_leak_init(void);
 
 /* match_addr.c */
 bool addr_matches(char *n);

@@ -156,8 +156,8 @@ fill_args(const char *s, size_t len, int addspace)
 	if (p == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto bad;
-	} else
-	    sudoerslval.command.args = p;
+	}
+	sudoerslval.command.args = p;
     }
 
     /* Efficiently append the arg (with a leading space if needed). */

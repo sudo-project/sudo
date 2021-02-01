@@ -136,11 +136,11 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
     HLTQ_TO_TAILQ(&a->members, members, entries);
     switch (rbinsert(parse_tree->aliases, a, NULL)) {
     case 1:
-	alias_free(a);
+	free(a);
 	errno = EEXIST;
 	debug_return_bool(false);
     case -1:
-	alias_free(a);
+	free(a);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
