@@ -6,9 +6,6 @@
 
 : ${TESTSUDOERS=testsudoers}
 
-# Avoid warnings about memory leaks when there is a syntax error
-ASAN_OPTIONS=detect_leaks=0; export ASAN_OPTIONS
-
 MYUID=`\ls -ln $TESTDIR/test2.inc | awk '{print $3}'`
 MYGID=`\ls -ln $TESTDIR/test2.inc | awk '{print $4}'`
 

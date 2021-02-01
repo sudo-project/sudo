@@ -6,9 +6,6 @@
 
 : ${TESTSUDOERS=testsudoers}
 
-# Avoid warnings about memory leaks when there is a syntax error
-ASAN_OPTIONS=detect_leaks=0; export ASAN_OPTIONS
-
 echo "Testing sudoers with multiple syntax errors"
 echo ""
 $TESTSUDOERS -d <<EOF 2>&1 | sed 's/\(syntax error\), .*/\1/' 
