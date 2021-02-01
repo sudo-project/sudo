@@ -446,7 +446,6 @@ enum sudoers_gc_types {
     GC_PTR
 };
 bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);
-bool sudoers_gc_remove(enum sudoers_gc_types type, void *ptr);
 void sudoers_gc_init(void);
 
 /* rcstr.c */

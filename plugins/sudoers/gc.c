@@ -76,40 +76,6 @@ sudoers_gc_add(enum sudoers_gc_types type, void *v)
 #endif /* NO_LEAKS */
 }
 
-bool
-sudoers_gc_remove(enum sudoers_gc_types type, void *v)
-{
-#ifdef NO_LEAKS
-    struct sudoers_gc_entry *gc, *prev = NULL;
-    debug_decl(sudoers_gc_remove, SUDOERS_DEBUG_UTIL);
-
-    SLIST_FOREACH(gc, &sudoers_gc_list, entries) {
-	switch (gc->type) {
-	case GC_PTR:
-	    if (gc->u.ptr == v)
-	    	goto found;
-	    break;
-	case GC_VECTOR:
-	    if (gc->u.vec == v)
-	    	goto found;
-	    break;
-	default:
-	    sudo_warnx("unexpected garbage type %d in %p", gc->type, gc);
-	}
-	prev = gc;
-    }
-    return false;
-found:
-    if (prev == NULL)
-	SLIST_REMOVE_HEAD(&sudoers_gc_list, entries);
-    else
-	SLIST_REMOVE_AFTER(prev, entries);
-    return true;
-#else
-    return false;
-#endif /* NO_LEAKS */
-}
-
 #ifdef NO_LEAKS
 static void
 sudoers_gc_run(void)
@@ -141,6 +107,7 @@ sudoers_gc_run(void)
 }
 #endif /* NO_LEAKS */
 
+/* XXX - currently unused */
 void
 sudoers_gc_init(void)
 {
