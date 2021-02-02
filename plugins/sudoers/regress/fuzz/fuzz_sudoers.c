@@ -56,7 +56,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Cleanup. */
     init_parser(NULL, false, true);
-    fclose(fp);
+    fclose(sudoersin);
+    sudoersin = NULL;
 
     return 0;
 }
