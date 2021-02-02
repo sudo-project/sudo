@@ -47,7 +47,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (size < 5)
         return 0;
 
-    /* Operate in-memory, do not fclose or it will free() data. */
+    /* Operate in-memory. */
     fp = fmemopen((void *)data, size, "r");
     if (fp == NULL)
         return 0;
@@ -59,6 +59,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Cleanup. */
     free_parse_tree(&parse_tree);
+    fclose(fp);
 
     return 0;
 }

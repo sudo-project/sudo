@@ -39,20 +39,22 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct eventlog *evlog = NULL;
     FILE *fp;
 
-    /* Operate in-memory, do not fclose or it will free() data. */
+    /* Operate in-memory. */
     fp = fmemopen((void *)data, size, "r");
     if (fp == NULL)
         return 0;
 
     /* Parsed contents of an log.json file are stored in evlog. */
-    if ((evlog = calloc(1, sizeof(*evlog))) == NULL)
-	return 0;
-    evlog->runuid = (uid_t)-1;
-    evlog->rungid = (gid_t)-1;
+    evlog = calloc(1, sizeof(*evlog));
+    if (evlog != NULL) {
+	evlog->runuid = (uid_t)-1;
+	evlog->rungid = (gid_t)-1;
 
-    /* Try to parse buffer as a JSON-format I/O log info file. */
-    iolog_parse_loginfo_json(fp, "fuzz.json", evlog);
-    eventlog_free(evlog);
+	/* Try to parse buffer as a JSON-format I/O log info file. */
+	iolog_parse_loginfo_json(fp, "fuzz.json", evlog);
+	eventlog_free(evlog);
+    }
+    fclose(fp);
 
     return 0;
 }

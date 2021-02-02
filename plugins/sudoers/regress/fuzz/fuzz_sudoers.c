@@ -44,7 +44,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (size < 5)
         return 0;
 
-    /* Operate in-memory, do not fclose or it will free() data. */
+    /* Operate in-memory. */
     sudoersin = fmemopen((void *)data, size, "r");
     if (sudoersin == NULL)
         return 0;
@@ -53,7 +53,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     init_defaults();
     init_parser("sudoers", false, true);
     sudoersparse();
+
+    /* Cleanup. */
     init_parser(NULL, false, true);
+    fclose(fp);
 
     return 0;
 }
