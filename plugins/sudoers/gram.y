@@ -933,8 +933,7 @@ cmnd		:	ALL {
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, $1.cmnd);
-			    if ($1.args != NULL)
-				parser_leak_remove(LEAK_PTR, $1.args);
+			    parser_leak_remove(LEAK_PTR, $1.args);
 			    parser_leak_add(LEAK_MEMBER, $$);
 			}
 		;
@@ -1736,6 +1735,9 @@ parser_leak_remove(enum parser_leak_types type, void *v)
 #ifdef NO_LEAKS
     struct parser_leak_entry *entry, *prev = NULL;
     debug_decl(parser_leak_remove, SUDOERS_DEBUG_PARSER);
+
+    if (v == NULL)
+	debug_return_bool(false);
 
     SLIST_FOREACH(entry, &parser_leak_list, entries) {
 	switch (entry->type) {
