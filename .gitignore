@@ -41,6 +41,11 @@ src/check_noexec
 src/check_ttyname
 src/sudo_usage.h
 
+lib/eventlog/check_wrap
+lib/eventlog/regress/logwrap/check_wrap.out
+
+lib/iolog/check_iolog_json
+lib/iolog/check_iolog_mkpath
 lib/iolog/check_iolog_path
 lib/iolog/check_iolog_util
 
@@ -76,3 +81,4 @@ plugins/sudoers/regress/testsudoers/test3.d/root
 
 plugins/python/__pycache__
 plugins/python/regress/__pycache__
+plugins/python/check_python_examples

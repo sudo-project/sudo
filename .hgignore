@@ -37,7 +37,11 @@ Makefile$
 ^src/check_(noexec|ttyname)$
 ^src/sudo_usage\.h$
 
-^lib/iolog/check_iolog_(path|util)$
+^lib/eventlog/check_wrap$
+^lib/eventlog/regress/logwrap/check_wrap.out$
+
+^lib/iolog/check_iolog_(json|mkpath|path|util)$
+^lib/iolog/host_port_test$
 
 ^lib/util/mksiglist$
 ^lib/util/mksigname$
@@ -56,3 +60,4 @@ Makefile$
 
 ^plugins/python/__pycache__
 ^plugins/python/regress/__pycache__
+^plugins/python/check_python_examples$
