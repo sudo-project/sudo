@@ -527,17 +527,23 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			    }
 #ifdef HAVE_SELINUX
 			    cs->role = $2.role;
+			    parser_leak_remove(LEAK_PTR, $2.role);
 			    cs->type = $2.type;
+			    parser_leak_remove(LEAK_PTR, $2.type);
 #endif
 #ifdef HAVE_PRIV_SET
 			    cs->privs = $2.privs;
+			    parser_leak_remove(LEAK_PTR, $2.privs);
 			    cs->limitprivs = $2.limitprivs;
+			    parser_leak_remove(LEAK_PTR, $2.limitprivs);
 #endif
 			    cs->notbefore = $2.notbefore;
 			    cs->notafter = $2.notafter;
 			    cs->timeout = $2.timeout;
 			    cs->runcwd = $2.runcwd;
+			    parser_leak_remove(LEAK_PTR, $2.runcwd);
 			    cs->runchroot = $2.runchroot;
+			    parser_leak_remove(LEAK_PTR, $2.runchroot);
 			    cs->tags = $3;
 			    cs->cmnd = $4;
 			    parser_leak_remove(LEAK_MEMBER, $4);
@@ -788,12 +794,10 @@ options		:	/* empty */ {
 		|	options chdirspec {
 			    free($$.runcwd);
 			    $$.runcwd = $2;
-			    parser_leak_remove(LEAK_PTR, $2);
 			}
 		|	options chrootspec {
 			    free($$.runchroot);
 			    $$.runchroot = $2;
-			    parser_leak_remove(LEAK_PTR, $2);
 			}
 		|	options notbeforespec {
 			    $$.notbefore = parse_gentime($2);
@@ -829,28 +833,24 @@ options		:	/* empty */ {
 #ifdef HAVE_SELINUX
 			    free($$.role);
 			    $$.role = $2;
-			    parser_leak_remove(LEAK_PTR, $2);
 #endif
 			}
 		|	options typespec {
 #ifdef HAVE_SELINUX
 			    free($$.type);
 			    $$.type = $2;
-			    parser_leak_remove(LEAK_PTR, $2);
 #endif
 			}
 		|	options privsspec {
 #ifdef HAVE_PRIV_SET
 			    free($$.privs);
 			    $$.privs = $2;
-			    parser_leak_remove(LEAK_PTR, $2);
 #endif
 			}
 		|	options limitprivsspec {
 #ifdef HAVE_PRIV_SET
 			    free($$.limitprivs);
 			    $$.limitprivs = $2;
-			    parser_leak_remove(LEAK_PTR, $2);
 #endif
 			}
 		;

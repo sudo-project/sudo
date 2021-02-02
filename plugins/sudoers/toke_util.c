@@ -48,6 +48,11 @@ fill_txt(const char *src, size_t len, size_t olen)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
+	if (olen != 0) {
+	    /* realloc failure, avoid leaking original */
+	    free(sudoerslval.string);
+	    sudoerslval.string = NULL;
+	}
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_bool(false);

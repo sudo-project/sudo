@@ -3988,6 +3988,9 @@ YY_RULE_SETUP
 #line 786 "toke.l"
 {
 			    if (YY_START == INSTR) {
+				/* throw away old string */
+				free(sudoerslval.string);
+				sudoerslval.string = NULL;
 				/* re-scan after changing state */
 				BEGIN INITIAL;
 				sudoersless(0);
@@ -4004,7 +4007,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 802 "toke.l"
+#line 805 "toke.l"
 {			/* throw away space/tabs */
 			    sawspace = true;	/* but remember for fill_args */
 			}
@@ -4012,7 +4015,7 @@ YY_RULE_SETUP
 case 78:
 /* rule 78 can match eol */
 YY_RULE_SETUP
-#line 806 "toke.l"
+#line 809 "toke.l"
 {
 			    sawspace = true;	/* remember for fill_args */
 			    sudolineno++;
@@ -4022,7 +4025,7 @@ YY_RULE_SETUP
 case 79:
 /* rule 79 can match eol */
 YY_RULE_SETUP
-#line 812 "toke.l"
+#line 815 "toke.l"
 {
 			    if (sudoerstext[sudoersleng - 1] == '\n') {
 				/* comment ending in a newline */
@@ -4040,7 +4043,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 827 "toke.l"
+#line 830 "toke.l"
 {
 			    LEXTRACE("NOMATCH ");
 			    return NOMATCH;
@@ -4055,7 +4058,7 @@ case YY_STATE_EOF(INSTR):
 case YY_STATE_EOF(WANTDIGEST):
 case YY_STATE_EOF(GOTINC):
 case YY_STATE_EOF(EXPECTPATH):
-#line 832 "toke.l"
+#line 835 "toke.l"
 {
 			    if (!pop_include())
 				yyterminate();
@@ -4063,10 +4066,10 @@ case YY_STATE_EOF(EXPECTPATH):
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 837 "toke.l"
+#line 840 "toke.l"
 ECHO;
 	YY_BREAK
-#line 4064 "toke.c"
+#line 4067 "toke.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -5027,7 +5030,7 @@ void sudoersfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 837 "toke.l"
+#line 840 "toke.l"
 
 
 struct path_list {

@@ -790,6 +790,11 @@ plugins/sudoers/regress/sudoers/test24.ldif2sudo.ok
 plugins/sudoers/regress/sudoers/test24.out.ok
 plugins/sudoers/regress/sudoers/test24.sudo.ok
 plugins/sudoers/regress/sudoers/test24.toke.ok
+plugins/sudoers/regress/sudoers/test25.in
+plugins/sudoers/regress/sudoers/test25.json.ok
+plugins/sudoers/regress/sudoers/test25.ldif.ok
+plugins/sudoers/regress/sudoers/test25.out.ok
+plugins/sudoers/regress/sudoers/test25.toke.ok
 plugins/sudoers/regress/sudoers/test3.in
 plugins/sudoers/regress/sudoers/test3.json.ok
 plugins/sudoers/regress/sudoers/test3.ldif.ok

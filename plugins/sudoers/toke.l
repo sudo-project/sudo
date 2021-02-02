@@ -785,6 +785,9 @@ sudoedit		{
 
 <*>\r?\n		{
 			    if (YY_START == INSTR) {
+				/* throw away old string */
+				free(sudoerslval.string);
+				sudoerslval.string = NULL;
 				/* re-scan after changing state */
 				BEGIN INITIAL;
 				sudoersless(0);
