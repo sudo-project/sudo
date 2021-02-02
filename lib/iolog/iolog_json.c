@@ -586,7 +586,7 @@ json_stack_push(struct json_stack *stack, struct json_item_list *items,
     unsigned int lineno)
 {
     struct json_item *item;
-    debug_decl(iolog_parse_loginfo_json, SUDO_DEBUG_UTIL);
+    debug_decl(json_stack_push, SUDO_DEBUG_UTIL);
 
     /* We limit the stack size rather than expanding it. */
     if (stack->depth >= stack->maxdepth) {
@@ -725,12 +725,12 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		}
 		break;
 	    case 't':
+		if (strncmp(cp, "true", sizeof("true") - 1) != 0)
+		    goto parse_error;
 		if (!expect_value) {
 		    sudo_warnx("%s", U_("unexpected boolean"));
 		    goto parse_error;
 		}
-		if (strncmp(cp, "true", sizeof("true") - 1) != 0)
-		    goto parse_error;
 		cp += sizeof("true") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
@@ -740,12 +740,12 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		name = NULL;
 		break;
 	    case 'f':
+		if (strncmp(cp, "false", sizeof("false") - 1) != 0)
+		    goto parse_error;
 		if (!expect_value) {
 		    sudo_warnx("%s", U_("unexpected boolean"));
 		    goto parse_error;
 		}
-		if (strncmp(cp, "false", sizeof("false") - 1) != 0)
-		    goto parse_error;
 		cp += sizeof("false") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
@@ -755,12 +755,12 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		name = NULL;
 		break;
 	    case 'n':
-		if (!expect_value) {
-		    sudo_warnx("%s", U_("unexpected boolean"));
-		    goto parse_error;
-		}
 		if (strncmp(cp, "null", sizeof("null") - 1) != 0)
 		    goto parse_error;
+		if (!expect_value) {
+		    sudo_warnx("%s", U_("unexpected null"));
+		    goto parse_error;
+		}
 		cp += sizeof("null") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
