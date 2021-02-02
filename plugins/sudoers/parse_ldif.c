@@ -775,8 +775,5 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
     rbdestroy(groupcache, str_list_free);
     rbdestroy(hostcache, str_list_free);
 
-    if (fp != stdin)
-	fclose(fp);
-
     debug_return_bool(errors == 0);
 }
