@@ -197,7 +197,7 @@ json_store_runuser(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runuser, SUDO_DEBUG_UTIL);
 
-    free(evlog->rungroup);
+    free(evlog->runuser);
     evlog->runuser = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -412,7 +412,15 @@ free_json_items(struct json_item_list *items)
 	case JSON_OBJECT:
 	    free_json_items(&item->u.child.items);
 	    break;
+	case JSON_ID:
+	case JSON_NUMBER:
+	case JSON_BOOL:
+	case JSON_NULL:
+	    /* Nothing to free. */
+	    break;
 	default:
+	    sudo_warnx("%s: internal error, invalid JSON type %d",
+		__func__, item->type);
 	    break;
 	}
 	free(item->name);
