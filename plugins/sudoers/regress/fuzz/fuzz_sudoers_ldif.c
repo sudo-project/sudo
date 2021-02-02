@@ -40,6 +40,7 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    struct sudoers_parse_tree parse_tree;
     FILE *fp;
 
     /* Don't waste time fuzzing tiny inputs. */
@@ -53,7 +54,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse LDIF-format sudoers. */
     init_defaults();
-    sudoers_parse_ldif(&parsed_policy, fp, NULL, true);
+    init_parse_tree(&parse_tree, NULL, NULL);
+    sudoers_parse_ldif(&parse_tree, fp, NULL, true);
+
+    /* Cleanup. */
+    free_parse_tree(&parse_tree);
 
     return 0;
 }
