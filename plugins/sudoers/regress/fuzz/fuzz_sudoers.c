@@ -53,6 +53,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     init_defaults();
     init_parser("sudoers", false, true);
     sudoersparse();
+    init_parser(NULL, false, true);
 
     return 0;
 }
