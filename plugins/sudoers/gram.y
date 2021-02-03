@@ -792,10 +792,12 @@ options		:	/* empty */ {
 			    init_options(&$$);
 			}
 		|	options chdirspec {
+			    parser_leak_remove(LEAK_PTR, $$.runcwd);
 			    free($$.runcwd);
 			    $$.runcwd = $2;
 			}
 		|	options chrootspec {
+			    parser_leak_remove(LEAK_PTR, $$.runchroot);
 			    free($$.runchroot);
 			    $$.runchroot = $2;
 			}
@@ -831,24 +833,28 @@ options		:	/* empty */ {
 			}
 		|	options rolespec {
 #ifdef HAVE_SELINUX
+			    parser_leak_remove(LEAK_PTR, $$.role);
 			    free($$.role);
 			    $$.role = $2;
 #endif
 			}
 		|	options typespec {
 #ifdef HAVE_SELINUX
+			    parser_leak_remove(LEAK_PTR, $$.type);
 			    free($$.type);
 			    $$.type = $2;
 #endif
 			}
 		|	options privsspec {
 #ifdef HAVE_PRIV_SET
+			    parser_leak_remove(LEAK_PTR, $$.privs);
 			    free($$.privs);
 			    $$.privs = $2;
 #endif
 			}
 		|	options limitprivsspec {
 #ifdef HAVE_PRIV_SET
+			    parser_leak_remove(LEAK_PTR, $$.limitprivs);
 			    free($$.limitprivs);
 			    $$.limitprivs = $2;
 #endif
