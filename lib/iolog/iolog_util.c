@@ -49,7 +49,7 @@
 
 static int timing_event_adj;
 
-static bool
+bool
 iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
     struct eventlog *evlog)
 {

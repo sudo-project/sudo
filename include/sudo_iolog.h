@@ -101,6 +101,7 @@ char *iolog_parse_delay(const char *cp, struct timespec *delay, const char *deci
 int iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing);
 struct eventlog *iolog_parse_loginfo(int dfd, const char *iolog_dir);
 bool iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct eventlog *evlog);
+bool iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir, struct eventlog *evlog);
 void iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
 
 /* iolog_fileio.c */
