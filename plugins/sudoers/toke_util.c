@@ -39,28 +39,15 @@
 static unsigned int arg_len = 0;
 static unsigned int arg_size = 0;
 
-bool
-fill_txt(const char *src, size_t len, size_t olen)
+/*
+ * Copy the string and collapse any escaped characters.
+ * Requires that dst have at least len + 1 bytes free.
+ */
+static void
+copy_string(char *dst, const char *src, size_t len)
 {
-    char *dst;
     int h;
-    debug_decl(fill_txt, SUDOERS_DEBUG_PARSER);
 
-    dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
-    if (dst == NULL) {
-	if (olen != 0) {
-	    /* realloc failure, avoid leaking original */
-	    free(sudoerslval.string);
-	    sudoerslval.string = NULL;
-	}
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	sudoerserror(NULL);
-	debug_return_bool(false);
-    }
-    sudoerslval.string = dst;
-
-    /* Copy the string and collapse any escaped characters. */
-    dst += olen;
     while (len--) {
 	if (*src == '\\' && len) {
 	    if (src[1] == 'x' && len >= 3 && (h = hexchar(src + 2)) != -1) {
@@ -77,19 +64,53 @@ fill_txt(const char *src, size_t len, size_t olen)
 	}
     }
     *dst = '\0';
+}
+
+bool
+fill(const char *src, size_t len)
+{
+    char *dst;
+    debug_decl(fill, SUDOERS_DEBUG_PARSER);
+
+    dst = malloc(len + 1);
+    if (dst == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	sudoerserror(NULL);
+	debug_return_bool(false);
+    }
+    parser_leak_add(LEAK_PTR, dst);
+    copy_string(dst, src, len);
+    sudoerslval.string = dst;
+
     debug_return_bool(true);
 }
 
 bool
 append(const char *src, size_t len)
 {
-    int olen = 0;
+    size_t olen = 0;
+    char *dst;
     debug_decl(append, SUDOERS_DEBUG_PARSER);
 
-    if (sudoerslval.string != NULL)
+    if (sudoerslval.string != NULL) {
 	olen = strlen(sudoerslval.string);
+	parser_leak_remove(LEAK_PTR, sudoerslval.string);
+    }
 
-    debug_return_bool(fill_txt(src, len, olen));
+    dst = realloc(sudoerslval.string, olen + len + 1);
+    if (dst == NULL) {
+	/* realloc failure, avoid leaking original */
+	free(sudoerslval.string);
+	sudoerslval.string = NULL;
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	sudoerserror(NULL);
+	debug_return_bool(false);
+    }
+    parser_leak_add(LEAK_PTR, dst);
+    copy_string(dst + olen, src, len);
+    sudoerslval.string = dst;
+
+    debug_return_bool(true);
 }
 
 #define SPECIAL(c) \
@@ -137,6 +158,7 @@ fill_cmnd(const char *src, size_t len)
 	}
     }
 
+    parser_leak_add(LEAK_PTR, sudoerslval.command.cmnd);
     debug_return_bool(true);
 }
 
@@ -148,10 +170,18 @@ fill_args(const char *s, size_t len, int addspace)
     debug_decl(fill_args, SUDOERS_DEBUG_PARSER);
 
     if (arg_size == 0) {
+#ifdef NO_LEAKS
+	if (sudoerslval.command.args != NULL) {
+	    sudo_warnx("%s: command.args %p, should be NULL", __func__,
+		sudoerslval.command.args);
+	    sudoerslval.command.args = NULL;
+	}
+#endif
 	addspace = 0;
 	new_len = len;
-    } else
+    } else {
 	new_len = arg_len + len + addspace;
+    }
 
     if (new_len >= arg_size) {
 	/* Allocate in increments of 128 bytes to avoid excessive realloc(). */
@@ -162,7 +192,11 @@ fill_args(const char *s, size_t len, int addspace)
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto bad;
 	}
-	sudoerslval.command.args = p;
+	if (sudoerslval.command.args != p) {
+	    parser_leak_remove(LEAK_PTR, sudoerslval.command.args);
+	    parser_leak_add(LEAK_PTR, p);
+	    sudoerslval.command.args = p;
+	}
     }
 
     /* Efficiently append the arg (with a leading space if needed). */
@@ -178,6 +212,7 @@ fill_args(const char *s, size_t len, int addspace)
     debug_return_bool(true);
 bad:
     sudoerserror(NULL);
+    parser_leak_remove(LEAK_PTR, sudoerslval.command.args);
     free(sudoerslval.command.args);
     sudoerslval.command.args = NULL;
     arg_len = arg_size = 0;

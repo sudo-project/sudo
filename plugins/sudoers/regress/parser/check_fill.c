@@ -187,3 +187,17 @@ sudoerserror(const char *s)
 {
     return;
 }
+
+/* STUB */
+bool
+parser_leak_add(enum parser_leak_types type, void *v)
+{
+    return true;
+}
+
+/* STUB */
+bool
+parser_leak_remove(enum parser_leak_types type, void *v)
+{
+    return true;
+}

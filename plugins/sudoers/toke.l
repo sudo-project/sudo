@@ -127,7 +127,6 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("DEFVAR ");
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    return DEFVAR;
 			}
 
@@ -164,7 +163,6 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("WORD(2) ");
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    return WORD;
 			}
 }
@@ -191,27 +189,26 @@ DEFVAR			[a-z_]+
 				    if (sudoerslval.string[1] == '\0' ||
 					(sudoerslval.string[1] == ':' &&
 					sudoerslval.string[2] == '\0')) {
+					parser_leak_remove(LEAK_PTR, sudoerslval.string);
 					free(sudoerslval.string);
 					sudoerserror(N_("empty group"));
 					LEXTRACE("ERROR ");
 					return ERROR;
 				    }
-				    parser_leak_add(LEAK_PTR, sudoerslval.string);
 				    LEXTRACE("USERGROUP ");
 				    return USERGROUP;
 				case '+':
 				    if (sudoerslval.string[1] == '\0') {
+					parser_leak_remove(LEAK_PTR, sudoerslval.string);
 					free(sudoerslval.string);
 					sudoerserror(N_("empty netgroup"));
 					LEXTRACE("ERROR ");
 					return ERROR;
 				    }
-				    parser_leak_add(LEAK_PTR, sudoerslval.string);
 				    LEXTRACE("NETGROUP ");
 				    return NETGROUP;
 				}
 			    }
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("WORD(4) ");
 			    return WORD;
 			}
@@ -250,8 +247,6 @@ DEFVAR			[a-z_]+
 			    BEGIN INITIAL;
 			    sudoersless(0);
 			    yy_set_bol(0);
-			    parser_leak_add(LEAK_PTR, sudoerslval.command.cmnd);
-			    parser_leak_add(LEAK_PTR, sudoerslval.command.args);
 			    return COMMAND;
 			}			/* end of command line args */
 
@@ -270,7 +265,6 @@ DEFVAR			[a-z_]+
 			    if ((yy_size_t)sudoersleng == digest_len * 2) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
-				parser_leak_add(LEAK_PTR, sudoerslval.string);
 				BEGIN INITIAL;
 				LEXTRACE("DIGEST ");
 				return DIGEST;
@@ -293,7 +287,6 @@ DEFVAR			[a-z_]+
 			    if ((yy_size_t)sudoersleng == len) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
-				parser_leak_add(LEAK_PTR, sudoerslval.string);
 				BEGIN INITIAL;
 				LEXTRACE("DIGEST ");
 				return DIGEST;
@@ -511,7 +504,6 @@ NOFOLLOW[[:blank:]]*:	{
 			    /* netgroup */
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("NETGROUP ");
 			    return NETGROUP;
 			}
@@ -520,7 +512,6 @@ NOFOLLOW[[:blank:]]*:	{
 			    /* group */
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("USERGROUP ");
 			    return USERGROUP;
 			}
@@ -528,7 +519,6 @@ NOFOLLOW[[:blank:]]*:	{
 {IPV4ADDR}(\/{IPV4ADDR})? {
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("NTWKADDR ");
 			    return NTWKADDR;
 			}
@@ -536,7 +526,6 @@ NOFOLLOW[[:blank:]]*:	{
 {IPV4ADDR}\/([12]?[0-9]|3[0-2]) {
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("NTWKADDR ");
 			    return NTWKADDR;
 			}
@@ -549,7 +538,6 @@ NOFOLLOW[[:blank:]]*:	{
 			    }
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("NTWKADDR ");
 			    return NTWKADDR;
 			}
@@ -562,7 +550,6 @@ NOFOLLOW[[:blank:]]*:	{
 			    }
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("NTWKADDR ");
 			    return NTWKADDR;
 			}
@@ -641,7 +628,6 @@ ALL {
 			got_alias:
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("ALIAS ");
 			    return ALIAS;
 			}
@@ -651,8 +637,6 @@ ALL {
 			    /* no command args allowed for Defaults!/path */
 			    if (!fill_cmnd(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.command.cmnd);
-			    parser_leak_add(LEAK_PTR, sudoerslval.command.args);
 			    LEXTRACE("COMMAND ");
 			    return COMMAND;
 			}
@@ -696,7 +680,6 @@ sudoedit		{
 				BEGIN prev_state;
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
-				parser_leak_add(LEAK_PTR, sudoerslval.string);
 				LEXTRACE("WORD(5) ");
 				return WORD;
 			}
@@ -707,7 +690,6 @@ sudoedit		{
 				LEXTRACE("COMMAND ");
 				if (!fill_cmnd(sudoerstext, sudoersleng))
 				    yyterminate();
-				parser_leak_add(LEAK_PTR, sudoerslval.command.cmnd);
 				return COMMAND;
 			    }
 			    BEGIN GOTCMND;
@@ -727,7 +709,6 @@ sudoedit		{
 			    /* a word */
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    LEXTRACE("WORD(6) ");
 			    return WORD;
 			}
@@ -737,7 +718,6 @@ sudoedit		{
 			    /* include file/directory */
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
-			    parser_leak_add(LEAK_PTR, sudoerslval.string);
 			    BEGIN INITIAL;
 			    LEXTRACE("WORD(7) ");
 			    return WORD;
@@ -786,8 +766,8 @@ sudoedit		{
 <*>\r?\n		{
 			    if (YY_START == INSTR) {
 				/* throw away old string */
+				parser_leak_remove(LEAK_PTR, sudoerslval.string);
 				free(sudoerslval.string);
-				sudoerslval.string = NULL;
 				/* re-scan after changing state */
 				BEGIN INITIAL;
 				sudoersless(0);
