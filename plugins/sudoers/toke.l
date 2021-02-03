@@ -995,6 +995,7 @@ init_lexer(void)
     continued = false;
     digest_type = -1;
     prev_state = INITIAL;
+    BEGIN INITIAL;
 
     debug_return;
 }
