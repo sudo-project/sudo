@@ -393,7 +393,7 @@ uninstall:
 		$(DESTDIR)$(mandirform)/sudo_logsrv.proto.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudo_logsrvd.conf.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers.$(mansectform) \
-		$(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform)
+		$(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 
 splint:

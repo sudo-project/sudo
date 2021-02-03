@@ -434,7 +434,7 @@ install-sudoers: install-dirs
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sudoers.la
 	-rm -f	$(DESTDIR)$(bindir)/cvtsudoers \
-		$(DESTDIR)$(bindir)/sudoreplay
+		$(DESTDIR)$(bindir)/sudoreplay \
 		$(DESTDIR)$(sbindir)/visudo
 	-test -z "$(INSTALL_BACKUP)" || \
 		$(DESTDIR)$(bindir)/cvtsudoers$(INSTALL_BACKUP) \
