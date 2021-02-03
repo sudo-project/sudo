@@ -1006,26 +1006,29 @@ init_lexer(void)
  * Returns a reference-counted string.
  */
 static char *
-expand_include(const char *opath, size_t olen)
+expand_include(const char *opath)
 {
     const char *cp, *ep;
     char *path, *pp;
-    int dirlen = 0, len;
+    size_t len, olen, dirlen = 0;
     size_t shost_len = 0;
     bool subst = false;
     debug_decl(expand_include, SUDOERS_DEBUG_PARSER);
 
     /* Strip double quotes if present. */
-    if (*opath == '"') {
+    olen = strlen(opath);
+    if (olen > 1 && opath[0] == '"' && opath[olen - 1] == '"') {
 	opath++;
 	olen -= 2;
     }
+    if (olen == 0)
+	debug_return_ptr(NULL);
 
     /* Relative paths are located in the same dir as the sudoers file. */
     if (*opath != '/') {
 	char *dirend = strrchr(sudoers, '/');
 	if (dirend != NULL)
-	    dirlen = (int)(dirend - sudoers) + 1;
+	    dirlen = (size_t)(dirend - sudoers) + 1;
     }
 
     len = olen;
@@ -1083,7 +1086,7 @@ push_include(const char *opath, bool isdir)
     FILE *fp;
     debug_decl(push_include, SUDOERS_DEBUG_PARSER);
 
-    if ((path = expand_include(opath, strlen(opath))) == NULL)
+    if ((path = expand_include(opath)) == NULL)
 	debug_return_bool(false);
 
     /* push current state onto stack */
