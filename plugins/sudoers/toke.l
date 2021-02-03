@@ -1277,14 +1277,14 @@ sudoers_input(char *buf, yy_size_t max_size)
 
 	/* Add trailing newline if it is missing. */
 	if (sudolinebuf.buf[avail - 1] != '\n') {
-	    if (avail == sudolinebuf.size) {
-		char *cp = realloc(sudolinebuf.buf, avail + 1);
+	    if (avail + 2 >= sudolinebuf.size) {
+		char *cp = realloc(sudolinebuf.buf, avail + 2);
 		if (cp == NULL) {
 		    YY_FATAL_ERROR("unable to allocate memory");
 		    return 0;
 		}
 		sudolinebuf.buf = cp;
-		sudolinebuf.size++;
+		sudolinebuf.size = avail + 2;
 	    }
 	    sudolinebuf.buf[avail++] = '\n';
 	    sudolinebuf.buf[avail] = '\0';
