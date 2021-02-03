@@ -314,6 +314,7 @@ extern bool sudoers_strict;
 
 /* toke.l */
 YY_DECL;
+void sudoersrestart(FILE *);
 extern FILE *sudoersin;
 extern const char *sudoers_file;
 extern char *sudoers;

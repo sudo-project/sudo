@@ -40,13 +40,15 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    FILE *fp;
+
     /* Don't waste time fuzzing tiny inputs. */
     if (size < 5)
         return 0;
 
     /* Operate in-memory. */
-    sudoersin = fmemopen((void *)data, size, "r");
-    if (sudoersin == NULL)
+    fp = fmemopen((void *)data, size, "r");
+    if (fp == NULL)
         return 0;
 
     /* Parser needs user_shost for the %h escape in @include expansion. */
@@ -55,12 +57,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* Initialize defaults and parse sudoers. */
     init_defaults();
     init_parser("sudoers", false, true);
+    sudoersrestart(fp);
     sudoersparse();
 
     /* Cleanup. */
     init_parser(NULL, false, true);
-    fclose(sudoersin);
-    sudoersin = NULL;
+    fclose(fp);
 
     return 0;
 }

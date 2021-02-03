@@ -100,7 +100,6 @@ static void usage(int);
 static void visudo_cleanup(void);
 
 extern void get_hostname(void);
-extern void sudoersrestart(FILE *);
 
 /*
  * Globals
