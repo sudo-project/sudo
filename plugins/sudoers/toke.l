@@ -1260,9 +1260,16 @@ sudoers_trace_print(const char *msg)
 }
 #endif /* TRACELEXER */
 
+/*
+ * Custom input function that uses getdelim(3) and stores the buffer
+ * where the error functions can access it for better reporting.
+ * On success, buf is guaranteed to end in a newline and not contain
+ * embedded NULs.  Calls YY_FATAL_ERROR on error.
+ */
 static yy_size_t
 sudoers_input(char *buf, yy_size_t max_size)
 {
+    char *cp;
     size_t avail = sudolinebuf.len - sudolinebuf.off;
 
     /* Refill line buffer if needed. */
@@ -1275,10 +1282,18 @@ sudoers_input(char *buf, yy_size_t max_size)
 	    return 0;
 	}
 
+	/* getdelim() can return embedded NULs, truncate if we find one. */
+	cp = memchr(sudolinebuf.buf, '\0', avail);
+	if (cp != NULL) {
+	    *cp++ = '\n';
+	    *cp = '\0';
+	    avail = (size_t)(cp - sudolinebuf.buf);
+	}
+
 	/* Add trailing newline if it is missing. */
 	if (sudolinebuf.buf[avail - 1] != '\n') {
 	    if (avail + 2 >= sudolinebuf.size) {
-		char *cp = realloc(sudolinebuf.buf, avail + 2);
+		cp = realloc(sudolinebuf.buf, avail + 2);
 		if (cp == NULL) {
 		    YY_FATAL_ERROR("unable to allocate memory");
 		    return 0;
