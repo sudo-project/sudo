@@ -2834,13 +2834,13 @@ yyreduce:
   case 113: /* hostalias: ALIAS $@1 '=' hostlist  */
 #line 954 "gram.y"
                                        {
-			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
-			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), HOSTALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
 				alias_error((yyvsp[-3].string), errno);
 				YYERROR;
 			    }
+			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
+			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
 #line 2840 "gram.c"
     break;
@@ -2867,13 +2867,13 @@ yyreduce:
   case 120: /* cmndalias: ALIAS $@2 '=' cmndlist  */
 #line 981 "gram.y"
                                        {
-			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
-			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), CMNDALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
 				alias_error((yyvsp[-3].string), errno);
 				YYERROR;
 			    }
+			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
+			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
 #line 2873 "gram.c"
     break;
@@ -2900,13 +2900,13 @@ yyreduce:
   case 127: /* runasalias: ALIAS $@3 '=' userlist  */
 #line 1008 "gram.y"
                                        {
-			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
-			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), RUNASALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
 				alias_error((yyvsp[-3].string), errno);
 				YYERROR;
 			    }
+			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
+			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
 #line 2906 "gram.c"
     break;
@@ -2923,13 +2923,13 @@ yyreduce:
   case 132: /* useralias: ALIAS $@4 '=' userlist  */
 #line 1027 "gram.y"
                                        {
-			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
-			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), USERALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
 				alias_error((yyvsp[-3].string), errno);
 				YYERROR;
 			    }
+			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
+			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
 #line 2929 "gram.c"
     break;

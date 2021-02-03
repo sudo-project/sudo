@@ -952,13 +952,13 @@ hostalias	:	ALIAS {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			} '=' hostlist {
-			    parser_leak_remove(LEAK_PTR, $1);
-			    parser_leak_remove(LEAK_MEMBER, $4);
 			    if (!alias_add(&parsed_policy, $1, HOSTALIAS,
 				sudoers, alias_line, alias_column, $4)) {
 				alias_error($1, errno);
 				YYERROR;
 			    }
+			    parser_leak_remove(LEAK_PTR, $1);
+			    parser_leak_remove(LEAK_MEMBER, $4);
 			}
 		|	reserved_alias '=' hostlist
 		;
@@ -979,13 +979,13 @@ cmndalias	:	ALIAS {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			} '=' cmndlist {
-			    parser_leak_remove(LEAK_PTR, $1);
-			    parser_leak_remove(LEAK_MEMBER, $4);
 			    if (!alias_add(&parsed_policy, $1, CMNDALIAS,
 				sudoers, alias_line, alias_column, $4)) {
 				alias_error($1, errno);
 				YYERROR;
 			    }
+			    parser_leak_remove(LEAK_PTR, $1);
+			    parser_leak_remove(LEAK_MEMBER, $4);
 			}
 		|	reserved_alias '=' cmndlist
 		;
@@ -1006,13 +1006,13 @@ runasalias	:	ALIAS {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			} '=' userlist {
-			    parser_leak_remove(LEAK_PTR, $1);
-			    parser_leak_remove(LEAK_MEMBER, $4);
 			    if (!alias_add(&parsed_policy, $1, RUNASALIAS,
 				sudoers, alias_line, alias_column, $4)) {
 				alias_error($1, errno);
 				YYERROR;
 			    }
+			    parser_leak_remove(LEAK_PTR, $1);
+			    parser_leak_remove(LEAK_MEMBER, $4);
 			}
 		|	reserved_alias '=' userlist
 		;
@@ -1025,13 +1025,13 @@ useralias	:	ALIAS {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			} '=' userlist {
-			    parser_leak_remove(LEAK_PTR, $1);
-			    parser_leak_remove(LEAK_MEMBER, $4);
 			    if (!alias_add(&parsed_policy, $1, USERALIAS,
 				sudoers, alias_line, alias_column, $4)) {
 				alias_error($1, errno);
 				YYERROR;
 			    }
+			    parser_leak_remove(LEAK_PTR, $1);
+			    parser_leak_remove(LEAK_MEMBER, $4);
 			}
 		|	reserved_alias '=' userlist
 		;
