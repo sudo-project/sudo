@@ -49,6 +49,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (sudoersin == NULL)
         return 0;
 
+    /* Parser needs user_shost for the %h escape in @include expansion. */
+    user_host = user_shost = "localhost";
+
     /* Initialize defaults and parse sudoers. */
     init_defaults();
     init_parser("sudoers", false, true);
