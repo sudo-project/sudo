@@ -115,7 +115,11 @@ json_array_to_strvec(struct json_object *array)
 	    sudo_warnx(U_("expected JSON_STRING, got %d"), item->type);
 	    debug_return_ptr(NULL);
 	}
-	len++;
+	/* Prevent integer overflow. */
+	if (++len == INT_MAX) {
+	    sudo_warnx(U_("JSON_ARRAY too large"));
+	    debug_return_ptr(NULL);
+	}
     }
     if ((ret = reallocarray(NULL, len + 1, sizeof(char *))) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
