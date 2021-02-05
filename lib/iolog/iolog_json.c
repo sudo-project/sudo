@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -626,6 +626,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
     size_t bufsize = 0;
     ssize_t len;
     bool ret = false;
+    bool saw_comma = false;
     long long num;
     char ch;
     debug_decl(iolog_parse_json, SUDO_DEBUG_UTIL);
@@ -651,13 +652,15 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    while (isspace((unsigned char)*cp))
 		cp++;
 
-	    /* Strip out commas.  TODO: require commas between values. */
+	    /* Check for comma separator and strip it out. */
 	    if (*cp == ',') {
+		saw_comma = true;
 		cp++;
 		while (isspace((unsigned char)*cp))
 		    cp++;
 	    }
 
+	    /* End of line? */
 	    if (*cp == '\0')
 		break;
 
@@ -669,6 +672,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 			U_("objects must consist of name:value pairs"));
 		    goto parse_error;
 		}
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx(U_("missing comma before %s"), "{");
+		    goto parse_error;
+		}
+		saw_comma = false;
 		frame = json_stack_push(&stack, &frame->items, frame,
 		    JSON_OBJECT, name, lineno);
 		if (frame == NULL)
@@ -683,6 +691,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		    goto parse_error;
 		}
 		frame = stack.frames[--stack.depth];
+		saw_comma = false;
 		break;
 	    case '[':
 		cp++;
@@ -691,6 +700,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		    sudo_warnx("%s", U_("unexpected array"));
 		    goto parse_error;
 		}
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx(U_("missing comma before %s"), "[");
+		    goto parse_error;
+		}
+		saw_comma = false;
 		frame = json_stack_push(&stack, &frame->items, frame,
 		    JSON_ARRAY, name, lineno);
 		if (frame == NULL)
@@ -705,6 +719,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		    goto parse_error;
 		}
 		frame = stack.frames[--stack.depth];
+		saw_comma = false;
 		break;
 	    case '"':
 		if (frame->parent == NULL) {
@@ -723,6 +738,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 			goto parse_error;
 		    }
 		} else {
+		    if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+			sudo_warnx(U_("missing comma before %s"), cp);
+			goto parse_error;
+		    }
+		    saw_comma = false;
 		    if (!json_insert_str(&frame->items, name, &cp, lineno))
 			goto parse_error;
 		    name = NULL;
@@ -738,6 +758,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		cp += sizeof("true") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx(U_("missing comma before %s"), "true");
+		    goto parse_error;
+		}
+		saw_comma = false;
 
 		if (!json_insert_bool(&frame->items, name, true, lineno))
 		    goto parse_error;
@@ -753,6 +778,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		cp += sizeof("false") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx(U_("missing comma before %s"), "false");
+		    goto parse_error;
+		}
+		saw_comma = false;
 
 		if (!json_insert_bool(&frame->items, name, false, lineno))
 		    goto parse_error;
@@ -768,6 +798,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		cp += sizeof("null") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx(U_("missing comma before %s"), "null");
+		    goto parse_error;
+		}
+		saw_comma = false;
 
 		if (!json_insert_null(&frame->items, name, lineno))
 		    goto parse_error;
@@ -783,6 +818,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		len = strcspn(cp, " \f\n\r\t\v,");
 		ch = cp[len];
 		cp[len] = '\0';
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx(U_("missing comma before %s"), cp);
+		    goto parse_error;
+		}
+		saw_comma = false;
 		num = sudo_strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), cp, U_(errstr));
