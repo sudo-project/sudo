@@ -1,6 +1,6 @@
 #!/bin/sh
-# Copyright 2019 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20190919"
+# Copyright 2020 One Identity LLC. ALL RIGHTS RESERVED
+pp_revision="20200814"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -3785,15 +3785,11 @@ pp_solaris_remove_service () {
 if [ "x${PKG_INSTALL_ROOT}" = 'x' ]; then
     if [ -x /usr/sbin/svcadm ] ; then
         /usr/sbin/svcadm disable -s '$svc' 2>/dev/null
-	case "`uname -r`-$pp_svc_xml_file" in
-	  5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
-	    # Use manifest-import if > 5.10 and manifest in default location
-	    /usr/sbin/svcadm restart manifest-import 2>/dev/null
-	    ;;
-	  *)
-	    /usr/sbin/svccfg delete '$svc' 2>/dev/null
-	    ;;
-	esac
+        if [ `uname -r` = 5.10 ] || [ "'${pp_svc_xml_file%/*/*}'" != "/var/svc/manifest" ]; then
+          /usr/sbin/svccfg delete '$svc' 2>/dev/null
+        else
+          /usr/sbin/svcadm restart manifest-import 2>/dev/null
+        fi
     else
         '$file' stop >/dev/null 2>/dev/null
     fi
@@ -3813,15 +3809,11 @@ pp_solaris_install_service () {
     echo '
 if [ "x${PKG_INSTALL_ROOT}" != "x" ]; then
   if [ -x ${PKG_INSTALL_ROOT}/usr/sbin/svcadm ]; then
-    case "`uname -r`-$pp_svc_xml_file" in
-      5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
-	# Use manifest-import if > 5.10 and manifest in default location
-	echo "/usr/sbin/svcadm restart manifest-import 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
-	;;
-      *)
-	echo "/usr/sbin/svccfg import '$pp_svc_xml_file' 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
-	;;
-    esac
+    if [ `uname -r` = 5.10 ] || [ "'${pp_svc_xml_file%/*/*}'" != "/var/svc/manifest" ]; then
+      echo "/usr/sbin/svccfg import '$pp_svc_xml_file' 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
+    else
+      echo "/usr/sbin/svcadm restart manifest-import 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
+    fi
   else'
     test -n "${solaris_sysv_init_start_states}" &&
         for state in ${solaris_sysv_init_start_states}; do
@@ -3843,30 +3835,26 @@ else
     if [ -x /usr/sbin/svcadm ]; then
         echo "Registering '$svc' with SMF"
         /usr/sbin/svcadm disable -s '$svc' 2>/dev/null
-	case "`uname -r`-$pp_svc_xml_file" in
-	  5.1[1-9]*-/var/svc/manifest/*|5.[2-9]*-/var/svc/manifest/*)
-	    # Use manifest-import if > 5.10 and manifest in default location
-	    /usr/sbin/svcadm restart manifest-import
-	    # Wait for import to complete, otherwise it will not know
-	    # about our service until after we try to start it
-	    echo Waiting for manifest-import...
-	    typeset waited
-	    waited=0
-	    while [ $waited -lt 15 ] && ! /usr/bin/svcs -l '$svc' >/dev/null 2>&1; do
-		sleep 1
-		waited=`expr $waited + 1`
-	    done
-	    if /usr/bin/svcs -l '$svc' >/dev/null 2>&1; then
-		echo OK
-	    else
-		echo manifest-import took to long, you might have to control '$svc' manually.
-	    fi
-	    ;;
-	  *)
-	    /usr/sbin/svccfg delete '$svc' 2>/dev/null
-	    /usr/sbin/svccfg import '$pp_svc_xml_file'
-	    ;;
-	esac
+        if [ `uname -r` = 5.10 ] || [ "'${pp_svc_xml_file%/*/*}'" != "/var/svc/manifest" ]; then
+          /usr/sbin/svccfg delete '$svc' 2>/dev/null
+          /usr/sbin/svccfg import '$pp_svc_xml_file'
+        else
+          /usr/sbin/svcadm restart manifest-import
+          # Wait for import to complete, otherwise it will not know
+          # about our service until after we try to start it
+          echo Waiting for manifest-import...
+          typeset waited
+          waited=0
+          while [ $waited -lt 15 ] && ! /usr/bin/svcs -l '$svc' >/dev/null 2>&1; do
+              sleep 1
+              waited=`expr $waited + 1`
+          done
+          if /usr/bin/svcs -l '$svc' >/dev/null 2>&1; then
+              echo OK
+          else
+              echo manifest-import took to long, you might have to control '$svc' manually.
+          fi
+        fi
     else'
     test -n "${solaris_sysv_init_start_states}" &&
         for state in ${solaris_sysv_init_start_states}; do
@@ -4071,45 +4059,66 @@ pp_deb_handle_services() {
 
     #-- add service start/stop code
     if test -n "$pp_services"; then
+	#-- append common %post install code
+        pp_systemd_service_install_common >> $pp_wrkdir/%post.run
+
         #-- record the uninstall commands in reverse order
         for svc in $pp_services; do
             pp_load_service_vars $svc
 
-            # Create init script (unless one exists)
-            pp_deb_service_make_init_script $svc
+            # Create init script and systemd service file (unless they exists)
+            pp_deb_service_make_service_files $svc ||
+		pp_error "could not create service files for $svc"
 
             #-- append %post code to install the svc
 	    test x"yes" = x"$enable" &&
             cat<<-. >> $pp_wrkdir/%post.run
+
 		case "\$1" in
 		    configure)
 		        # Install the service links
-		        update-rc.d $svc defaults
+		        _pp_systemd_init
+		        if test -n "\$systemctl_cmd"; then
+		            _pp_systemd_install $svc
+		            _pp_systemd_enable $svc
+		        else
+		            update-rc.d $svc defaults
+		        fi
 		        ;;
 		esac
 .
 
             #-- prepend %preun code to stop svc
             cat<<-. | pp_prepend $pp_wrkdir/%preun.run
+
 		case "\$1" in
 		    remove|deconfigure|upgrade)
 		        # Stop the $svc service
 		        invoke-rc.d $svc stop
+		        _pp_systemd_disable $svc
 		        ;;
 		esac
 .
 
             #-- prepend %postun code to remove service
             cat<<-. | pp_prepend $pp_wrkdir/%postun.run
+
 		case "\$1" in
 		    purge)
 		        # Remove the service links
 		        update-rc.d $svc remove
+		        _pp_systemd_remove $svc
 		        ;;
 		esac
 .
         done
+
+        pp_systemd_service_remove_common | pp_prepend $pp_wrkdir/%preun.run
         #pp_deb_service_remove_common | pp_prepend $pp_wrkdir/%preun.run
+
+        # Actual systemd service removal is done in %postun.
+        # Otherwise, systemd may pick up the init.d script if it exists.
+        pp_systemd_service_remove_common | pp_prepend $pp_wrkdir/%postun.run
     fi
 
 }
@@ -4478,6 +4487,8 @@ pp_backend_deb_init_svc_vars () {
     stop_runlevels=${pp_deb_default_stop_runlevels-"0 1 6"}     # == lsb default-stop
     svc_description="${pp_deb_default_svc_description}" # == lsb short descr
     svc_process=
+    svc_init_filename="${pp_deb_svc_init_filename}"     # == $svc.init
+    svc_init_filepath="${pp_deb_svc_init_filepath}"     # == /etc/init.d/ by default
 
     lsb_required_start='$local_fs $network'
     lsb_should_start=
@@ -4488,9 +4499,9 @@ pp_backend_deb_init_svc_vars () {
     stop_priority=50            #-- stop_priority = 100 - start_priority
 }
 
-pp_deb_service_make_init_script () {
-    local svc=$1
-    local script=/etc/init.d/$svc
+pp_deb_service_make_service_files () {
+    local svc=${svc_init_filename:-$1}
+    local script="${svc_init_filepath:-"/etc/init.d"}/$svc"
     local out=$pp_destdir$script
     local _process _cmd
 
@@ -4706,6 +4717,9 @@ esac
 :
 .
     chmod 755 $out
+
+    # Create systemd service file
+    pp_systemd_make_service_file $svc
 }
 pp_backend_deb_function() {
     case "$1" in
@@ -5548,12 +5562,11 @@ pp_rpm_detect_distro () {
           /^Fedora release/ { print "f" $3; exit; }
        ' /etc/fedora-release`
     elif test -f /etc/redhat-release; then
-       pp_rpm_distro=`awk '
-          /^Red Hat Enterprise Linux/ { print "rhel" $7; exit; }
-          /^CentOS release/           { print "centos" $3; exit; }
-          /^CentOS Linux release/     { print "centos" $4; exit; }
-          /^Red Hat Linux release/    { print "rh" $5; exit; }
-       ' /etc/redhat-release`
+       pp_rpm_distro=`sed -n \
+         -e 's/^Red Hat Linux.*release \([0-9][0-9\.]*\).*/rh\1/p' \
+         -e 's/^Red Hat Enterprise Linux.*release \([0-9][0-9\.]*\).*/rhel\1/p' \
+         -e 's/^CentOS.*release \([0-9][0-9\.]*\).*/centos\1/p' \
+       /etc/redhat-release`
     elif test -f /etc/SuSE-release; then
        pp_rpm_distro=`awk '
           /^SuSE Linux [0-9]/ { print "suse" $3; exit; }
@@ -5846,7 +5859,7 @@ pp_backend_rpm () {
 .
 	done >>$specfile
 
-        #-- NB: we don't put any %prep, %build or %install RPM sections
+        #-- NB: we do not put any %prep, %build or %install RPM sections
 	#   into the spec file.
 
         #-- add service start/stop code
@@ -5857,7 +5870,8 @@ pp_backend_rpm () {
             for svc in $pp_services; do
                 pp_load_service_vars $svc
 
-                pp_rpm_service_make_init_script $svc
+                pp_rpm_service_make_service_files $svc ||
+		    pp_error "could not create service files for $svc"
 
                 #-- append %post code to install the svc
                 pp_rpm_service_install $svc >> $pp_wrkdir/%post.run
@@ -5866,6 +5880,7 @@ pp_backend_rpm () {
                 # (use files in case vars are modified)
                 pp_rpm_service_remove $svc | pp_prepend $pp_wrkdir/%preun.run
             done
+
             pp_rpm_service_remove_common | pp_prepend $pp_wrkdir/%preun.run
         fi
 
@@ -6221,6 +6236,7 @@ pp_rpm_service_install_common () {
             fi
         }
 .
+    pp_systemd_service_install_common
 }
 
 pp_rpm_service_remove_common () {
@@ -6246,22 +6262,30 @@ pp_rpm_service_remove_common () {
             fi
         }
 .
+    pp_systemd_service_remove_common
 }
 
-
 pp_rpm_service_install () {
-    pp_rpm_service_make_init_script $1 >/dev/null ||
-        pp_error "could not create init script for service $1"
-    echo "_pp_install_service $1"
-    test $enable = yes && echo "_pp_enable_service $1"
+    echo ""
+    echo "_pp_systemd_init"
+    echo 'if test -n "$systemctl_cmd"; then'
+    echo "    _pp_systemd_install $1"
+    test $enable = yes && echo "    _pp_systemd_enable $1"
+    echo "else"
+    echo "    _pp_install_service $1"
+    test $enable = yes && echo "    _pp_enable_service $1"
+    echo "fi"
 }
 
 pp_rpm_service_remove () {
     cat <<-.
-        if [ "\$1" = "remove" -o "\$1" = "0" ]; then
-            # only remove the service if not upgrade
-            _pp_remove_service $1
-        fi
+
+	if [ "\$1" = "remove" -o "\$1" = "0" ]; then
+	    # only remove the service if not upgrade
+	    _pp_remove_service $1
+	    _pp_systemd_disable $1
+	    _pp_systemd_remove $1
+	fi
 .
 }
 
@@ -6273,6 +6297,8 @@ pp_backend_rpm_init_svc_vars () {
     stop_runlevels=${pp_rpm_default_stop_runlevels-"0 1 6"} # == lsb default-stop
     svc_description="${pp_rpm_default_svc_description}" # == lsb short descr
     svc_process=
+    svc_init_filename="${pp_rpm_svc_init_filename}"     # == $svc.init
+    svc_init_filepath="${pp_rpm_svc_init_filepath}"     # == /etc/init.d/ by default
 
     lsb_required_start='$local_fs $network'
     lsb_should_start=
@@ -6373,9 +6399,9 @@ pp_rpm_service_group_make_init_script () {
     chmod 755 $out
 }
 
-pp_rpm_service_make_init_script () {
-    local svc=$1
-    local script=/etc/init.d/$svc
+pp_rpm_service_make_service_files () {
+    local svc=${svc_init_filename:-$1}
+    local script="${svc_init_filepath:-"/etc/init.d"}/$svc"
     local out=$pp_destdir$script
     local _process _cmd _rpmlevels
 
@@ -6583,6 +6609,9 @@ pp_rpm_service_make_init_script () {
 
 .
     chmod 755 $out
+
+    # Create systemd service file
+    pp_systemd_make_service_file $svc
 }
 pp_backend_rpm_function () {
     case "$1" in
@@ -7298,7 +7327,8 @@ pp_backend_macos_flat () {
 
     # build the flat package layout
     pkgdir=$pp_wrkdir/pkg
-    bundledir=$pp_wrkdir/pkg/$name.pkg
+    pkgfile=$name-$version.pkg
+    bundledir=$pp_wrkdir/pkg/$pkgfile
     Resources=$pkgdir/Resources
     lprojdir=$Resources/en.lproj
     mkdir $pkgdir $bundledir $Resources $lprojdir ||
@@ -7347,7 +7377,7 @@ pp_backend_macos_flat () {
 	    <choice id="choice0" title="$name $version">
 	        <pkg-ref id="${pp_macos_bundle_id}"/>
 	    </choice>
-	    <pkg-ref id="${pp_macos_bundle_id}" installKBytes="$size" version="$version" auth="Root">#$name.pkg</pkg-ref>
+	    <pkg-ref id="${pp_macos_bundle_id}" installKBytes="$size" version="$version" auth="Root">#$pkgfile</pkg-ref>
 	</installer-script>
 .
 
@@ -7442,6 +7472,7 @@ pp_backend_macos_flat () {
     cd $pp_destdir || pp_error "Can't cd to $pp_destdir"
     awk '{ print "." $6 }' $filelists | sed 's:/$::' | sort | /usr/bin/cpio -o | pp_macos_rewrite_cpio $filelists | gzip -9f -c > $bundledir/Payload
     )
+    awk '{print $6}' $filelists > $name.files
 
     # Copy installer plugins if any
     if test -n "$pp_macos_installer_plugin"; then
@@ -7455,13 +7486,15 @@ pp_backend_macos_flat () {
     test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 
     # Create the flat package with xar (like pkgutil --flatten does)
-    # Note that --distribution is only supported by Mac OS X 10.6 and above
+    # Note that --distribution is only supported by macOS 10.6 and above
     xar_flags="--compression=bzip2 --no-compress Scripts --no-compress Payload"
     case $mac_version in
         "10.5"*) ;;
 	*)	 xar_flags="$xar_flags --distribution";;
     esac
-    (cd $pkgdir && /usr/bin/xar $xar_flags -cf "../$name-$version.pkg" *)
+    (cd $pkgdir && /usr/bin/xar $xar_flags -cf "../$pkgfile" *)
+
+    echo "version=$version" > $name.uninstall
 }
 
 pp_backend_macos_cleanup () {
@@ -7649,10 +7682,11 @@ pp_macos_add_service () {
 pp_backend_macos_probe () {
     typeset name vers arch
     case `sw_vers -productName` in
+         "macOS")    name="macos";;
          "Mac OS X") name="macos";;
 	 *)          name="unknown";;
     esac
-    vers=`sw_vers -productVersion | sed -e 's/^\([^.]*\)\.\([^.]*\).*/\1\2/'`
+    vers=`sw_vers -productVersion | awk -F. '{ printf "%d%02d\n", $1, $2 }'`
     arch=`arch`
     echo "$name$vers-$arch"
 }
@@ -7904,20 +7938,20 @@ pp_backend_bsd_init () {
     pp_bsd_desc=
     pp_bsd_message=
 
-    # pp_bsd_category must be in array format comma seperated
+    # pp_bsd_category must be in array format comma separated
     # pp_bsd_category=[security,network]
     pp_bsd_category=
 
     # pp_bsd_licenselogic can be one of the following: single, and, or unset
     pp_bsd_licenselogic=
 
-    # pp_bsd_licenses must be in array format comma seperated
+    # pp_bsd_licenses must be in array format comma separated
     # pp_bsd_licenses=[GPLv2,MIT]
     pp_bsd_licenses=
 
     # pp_bsd_annotations. These can be any key: value pair
-    # key must be seperated by a :
-    # keyvalue pairs must be comma seperated
+    # key must be separated by a :
+    # keyvalue pairs must be comma separated
     # pp_bsd_annotations="repo_type: binary, somekey: somevalue"
     # since all packages created by PolyPackage will be of type binary
     # let's just set it now.
@@ -8001,8 +8035,8 @@ pp_bsd_make_annotations () {
     manifest=$1
 
     # Add annotations. These can be any key: value pair
-    # key must be seperated by a :
-    # key:value pairs must be comma seperated.
+    # key must be separated by a :
+    # key:value pairs must be comma separated.
     if test -n "$pp_bsd_annotations"; then
         pp_debug "Processing annotations:"
         pp_bsd_label "annotations" "{" >> $manifest
@@ -8046,7 +8080,7 @@ pp_bsd_make_messages () {
     test -z $1 && pp_die "pp_bsd_make_messages requires a parameter"
     manifest=$1
    
-    pp_debug "Processing messsages"
+    pp_debug "Processing messages"
 
     # Empty messages: [ ] is OK in the manifest
     pp_bsd_label "messages" "[" >> $manifest
@@ -8758,6 +8792,242 @@ pp_backend_bsd_function() {
 .
         *) false;;
     esac
+}
+pp_systemd_make_service_file() {
+    local svc f
+
+    if [ "${pp_systemd_disabled:-false}" = "true" ]; then
+	return
+    fi
+
+    svc="$1"
+    f="${pp_systemd_service_dir:-/opt/quest/libexec/vas}/$svc.service"
+    pp_add_file_if_missing $f run 644 v || return 0
+
+    cat <<. >$pp_destdir$f
+
+[Unit]
+Description=${pp_systemd_service_description:-"systemd service file for $svc"}
+${pp_systemd_service_man:+"Documentation=$pp_systemd_service_man"}
+${pp_systemd_service_documentation:+"Documentation=$pp_systemd_service_documentation"}
+${pp_systemd_service_requires:+"Requires=$pp_systemd_service_requires"}
+After=${pp_systemd_service_after:-"syslog.target network.target auditd.service"}
+${pp_systemd_service_before:+"Before=$pp_systemd_service_before"}
+${pp_systemd_service_wants:+"Wants=$pp_systemd_service_wants"}
+${pp_systemd_service_conflicts:+"Conflicts=$pp_systemd_service_conflicts"}
+
+[Service]
+ExecStart=${pp_systemd_service_exec:-"/opt/quest/sbin/$svc"} ${pp_systemd_service_exec_args}
+KillMode=${pp_systemd_service_killmode:-process}
+Type=${pp_systemd_service_type:-forking}
+${pp_systemd_service_pidfile:+"PIDFile=$pp_systemd_service_pidfile"}
+
+[Install]
+WantedBy=${pp_systemd_system_target:-"multi-user.target"}
+.
+}
+
+pp_systemd_service_init_common () {
+    cat <<.
+
+        _pp_systemd_init () {
+	    systemd_service_dir=${pp_systemd_service_dir:-/opt/quest/libexec/vas}
+            systemd_target=${pp_systemd_system_target:-"multi-user.target"}
+            systemd_target_wants="\${systemd_target}.wants"
+
+            pkg_config_cmd=${pp_systemd_pkg_config_cmd:-"\$(command -v pkg-config)"}
+            systemctl_cmd=${pp_systemd_systemctl_cmd:-"\$(command -v systemctl)"}
+
+            # See if pkg-config is installed to get the default locations for this OS, if not installed then just use what we hard code.
+            # So far works on Debian 8, OpenSuse12.3, Ubuntu 16.04, RHEL 7.3
+            # See systemd wiki for more OS interactions https://en.wikipedia.org/wiki/Systemd
+            if [ -x "\$pkg_config_cmd" ]; then
+                systemd_system_unit_dir="\$(pkg-config systemd --variable=systemdsystemunitdir)"
+                systemd_system_conf_dir="\$(pkg-config systemd --variable=systemdsystemconfdir)"
+            fi
+
+            #if pkg-config does not exist or if the \$pkg_config_cmd command returns nothing
+            if test -z "\$systemd_system_unit_dir"; then
+              systemdsystemunitdirs="/lib/systemd/system /usr/lib/systemd/system"
+              for dir in \$systemdsystemunitdirs; do
+                  if [ -d "\$dir/\$systemd_target_wants" ]; then
+                    systemd_system_unit_dir="\$dir"
+                    break
+                  fi
+              done
+            fi
+
+            # In the case where \$systemd_system_conf_dir is empty hard code the path
+            if test -z "\$systemd_system_conf_dir"; then
+                systemd_system_conf_dir="/etc/systemd/system"
+            fi
+
+            # if the \$svc.pp file defines the systemd unit dir then use it.
+            ${pp_systemd_system_unit_dir:+"# systemd_system_unit_dir defined by variable pp_systemd_system_unit_dir from the \$svc.pp file"}
+            systemd_system_unit_dir="${pp_systemd_system_unit_dir:-"\$systemd_system_unit_dir"}"
+
+            # if the \$svc.pp file defines the systemd conf dir then use it.
+            ${pp_systemd_system_conf_dir:+"# systemd_system_conf_dir defined by variable pp_systemd_system_conf_dir from the \$svc.pp file"}
+            systemd_system_conf_dir="${pp_systemd_system_conf_dir:-"\$systemd_system_conf_dir"}"
+        }
+.
+}
+
+pp_systemd_service_install_common () {
+    if [ "${pp_systemd_disabled:-false}" = "true" ]; then
+	cat<<'.'
+
+        # systemd support disabled
+        _pp_systemd_init () {
+            return
+        }
+
+        _pp_systemd_install () {
+            return
+        }
+
+        _pp_systemd_enable () {
+            return
+        }
+.
+	return
+    fi
+
+    pp_systemd_service_init_common
+
+    cat<<'.'
+
+        _pp_systemd_install () {
+            local svc="$1"
+
+            # If $systemctl_cmd is not set, then call _pp_systemd_init. If still not
+            # set, we do not know where the systemctl command is so do nothing;
+            # systemd must not be on this system.
+            if test -z "$systemctl_cmd"; then
+                _pp_systemd_init
+            fi
+
+            if test -x "$systemctl_cmd" && test -d "$systemd_system_conf_dir/$systemd_target_wants"; then
+                # If our service file still exists (upgrade) remove the link/file and systemctl
+                # will recreate it if/when we enable the $svc service.
+                rm -f "$systemd_system_conf_dir/$systemd_target_wants/$svc.service"
+
+                # Copy the $svc.service file to the correct systemd_system_unit_dir location
+                if [ "x$systemd_service_dir" != "x$systemd_system_unit_dir" ]; then
+                    cp -f "$systemd_service_dir/$svc.service" "$systemd_system_unit_dir/$svc.service"
+                    chmod 644 "$systemd_system_unit_dir/$svc.service"
+                fi
+            fi
+        }
+
+        _pp_systemd_enable () {
+            local svc="$1"
+            local RUNNING
+
+            # If $systemctl_cmd is not set, then call _pp_systemd_init. If still not
+            # set, we do not know where the systemctl command is so do nothing;
+            # systemd must not be on this system.
+            if test -z "$systemctl_cmd"; then
+                _pp_systemd_init
+            fi
+
+            if test -x "$systemctl_cmd" && test -f "$systemd_system_unit_dir/$svc.service"; then
+                # stop the daemon using the old init script before enabling systemd for the service
+                # we do this so we do not "orphan" the process. Because init started it and if we enable systemd
+                # it will not know about this process and will not be able to stop it.
+                if [ -x "/etc/init.d/$svc" ]; then
+                    /etc/init.d/$svc status > /dev/null 2>&1
+                    RUNNING=$?
+                    if [ $RUNNING -eq 0 ]; then
+                        /etc/init.d/$svc stop > /dev/null 2>&1
+                    fi
+                else
+                    RUNNING=1
+                fi
+
+                # Enable the $svc.service
+                $systemctl_cmd daemon-reload >/dev/null 2>&1
+                $systemctl_cmd enable $svc.service >/dev/null 2>&1
+
+                # Now that the service has been enabled, start it again if it was running before.
+                if [ $RUNNING -eq 0 ]; then
+                    /etc/init.d/$svc start > /dev/null 2>&1
+                fi
+            fi
+        }
+.
+}
+
+pp_systemd_service_remove_common () {
+    if [ "${pp_systemd_disabled:-false}" = "true" ]; then
+	cat<<'.'
+
+        # systemd support disabled
+        _pp_systemd_init () {
+            return
+        }
+
+        _pp_systemd_disable () {
+            return
+        }
+
+        _pp_systemd_remove () {
+            return
+        }
+.
+	return
+    fi
+
+    pp_systemd_service_init_common
+
+    cat<<'.'
+
+        _pp_systemd_disable () {
+            local svc="$1"
+
+            # If $systemctl_cmd is not set, then call _pp_systemd_init.
+            # If still not set, we do not know where the systemctl command
+            # is so do nothing; systemd must not be on this system.
+            if test -z "$systemctl_cmd"; then
+                _pp_systemd_init
+            fi
+
+            systemd_service_file="$systemd_system_conf_dir/$systemd_target_wants/$svc.service"
+
+            # Remove systemd symlink (enabled) unit service file
+            if test -e $systemd_service_file; then
+                # Disable the $svc service
+                if test -x "$systemctl_cmd"; then
+                    $systemctl_cmd disable $svc.service > /dev/null 2>&1
+                else
+                    # For some reason systemctl is not install but our service file exists
+                    # Just delete the symlink then
+                    rm -f "$systemd_service_file"
+                fi
+            fi
+        }
+
+        _pp_systemd_remove () {
+            local svc="$1"
+
+            # If $systemctl_cmd is not set, then call _pp_systemd_init.
+            # If still not set, we do not know where the systemctl command
+            # is so do nothing; systemd must not be on this system.
+            if test -z "$systemctl_cmd"; then
+                _pp_systemd_init
+            fi
+
+            # Remove the systemd unit service file
+            if [ "x$systemd_service_dir" != "x$systemd_system_unit_dir" ]; then
+                rm -f "$systemd_system_unit_dir/$svc.service"
+            fi
+
+            if test -x "$systemctl_cmd"; then
+                $systemctl_cmd daemon-reload
+                $systemctl_cmd reset-failed $svc.service >/dev/null 2>&1 || true
+            fi
+        }
+.
 }
 
 
