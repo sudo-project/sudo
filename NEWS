@@ -1,3 +1,69 @@
+What's new in Sudo 1.8.32
+
+ * Fixed a regression introduced in sudo 1.8.9 where the "closefrom"
+   sudoers option could not be set to a value of 3.  Bug #950.
+
+ * Fixed a regression introduced in sudo 1.8.24 in the LDAP back-end
+   where sudoNotBefore and sudoNotAfter were applied even when the
+   SUDOERS_TIMED setting was not present in ldap.conf.  Bug #945.
+
+ * Fixed a buffer size mismatch when serializing the list of IP
+   addresses for configured network interfaces.  This bug is not
+   actually exploitable since the allocated buffer is large enough
+   to hold the list of addresses.
+
+ * If sudo is executed with a name other than "sudo" or "sudoedit",
+   it will now fall back to "sudo" as the program name.  This affects
+   warning, help and usage messages as well as the matching of Debug
+   lines in the /etc/sudo.conf file.  Previously, it was possible
+   for the invoking user to manipulate the program name by setting
+   argv[0] to an arbitrary value when executing sudo.
+
+ * Sudo now checks for failure when setting the close-on-exec flag
+   on open file descriptors.  This should never fail but, if it
+   were to, there is the possibility of a file descriptor leak to
+   a child process (such as the command sudo runs).
+
+ * Fixed CVE-2021-23239, a potential information leak in sudoedit
+   that could be used to test for the existence of directories not
+   normally accessible to the user in certain circumstances.  When
+   creating a new file, sudoedit checks to make sure the parent
+   directory of the new file exists before running the editor.
+   However, a race condition exists if the invoking user can replace
+   (or create) the parent directory.  If a symbolic link is created
+   in place of the parent directory, sudoedit will run the editor
+   as long as the target of the link exists.  If the target of the
+   link does not exist, an error message will be displayed.  The
+   race condition can be used to test for the existence of an
+   arbitrary directory.  However, it _cannot_ be used to write to
+   an arbitrary location.
+
+ * Fixed CVE-2021-23240, a flaw in the temporary file handling of
+   sudoedit's SELinux RBAC support.  On systems where SELinux is
+   enabled, a user with sudoedit permissions may be able to set the
+   owner of an arbitrary file to the user-ID of the target user.
+   On Linux kernels that support "protected symlinks", setting
+   /proc/sys/fs/protected_symlinks to 1 will prevent the bug from
+   being exploited.  For more information see
+   https://www.sudo.ws/alerts/sudoedit_selinux.html.
+
+ * Added writability checks for sudoedit when SELinux RBAC is in use.
+   This makes sudoedit behavior consistent regardless of whether
+   or not SELinux RBAC is in use.  Previously, the "sudoedit_checkdir"
+   setting had no effect for RBAC entries.
+
+ * When invoked as sudoedit, the same set of command line options
+   are now accepted as for "sudo -e".  The -H and -P options are
+   now rejected for sudoedit and "sudo -e" which matches the sudo
+   1.7 behavior.  This is part of the fix for CVE-2021-3156.
+
+ * Fixed a potential buffer overflow when unescaping backslashes
+   in the command's arguments.  Normally, sudo escapes special
+   characters when running a command via a shell (sudo -s or sudo
+   -i).  However, it was also possible to run sudoedit with the -s
+   or -i flags in which case no escaping had actually been done,
+   making a buffer overflow possible.  This fixes CVE-2021-3156.
+
 What's new in Sudo 1.8.31p2
 
  * Sudo command line options that take a value may only be specified
