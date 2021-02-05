@@ -236,7 +236,7 @@ authentication.
 .\}
 .TP 12n
 \fB\-B\fR, \fB\--bell\fR
-Ring the bell as part of the password promp when a terminal is present.
+Ring the bell as part of the password prompt when a terminal is present.
 This option has no effect if an askpass program is used.
 .TP 12n
 \fB\-b\fR, \fB\--background\fR
