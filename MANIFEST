@@ -118,6 +118,7 @@ lib/iolog/iolog_path.c
 lib/iolog/iolog_util.c
 lib/iolog/regress/fuzz/fuzz_iolog_json.c
 lib/iolog/regress/fuzz/fuzz_iolog_legacy.c
+lib/iolog/regress/fuzz/fuzz_iolog_timing.c
 lib/iolog/regress/host_port/host_port_test.c  
 lib/iolog/regress/iolog_json/check_iolog_json.c
 lib/iolog/regress/iolog_json/test1.in
