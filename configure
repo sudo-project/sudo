@@ -1004,7 +1004,7 @@ enable_openssl
 enable_gcrypt
 enable_hardening
 enable_pie
-enable_asan
+enable_sanitizer
 enable_leaks
 enable_poll
 enable_admin_flag
@@ -1705,7 +1705,7 @@ Optional Features:
   --disable-hardening     Do not use compiler/linker exploit mitigation
                           options
   --enable-pie            Build sudo as a position independent executable.
-  --enable-asan           Build sudo with address sanitizer support.
+  --enable-sanitizer      Build sudo with sanitizer support.
   --disable-leaks         Prevent some harmless memory leaks.
   --disable-poll          Use select() instead of poll().
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
@@ -6897,10 +6897,16 @@ then :
 fi
 
 
-# Check whether --enable-asan was given.
-if test ${enable_asan+y}
+# Check whether --enable-sanitizer was given.
+if test ${enable_sanitizer+y}
 then :
-  enableval=$enable_asan;
+  enableval=$enable_sanitizer;
+if test X"$enable_sanitizer" = X"yes"; then
+    enable_sanitizer="-fsanitize=address,undefined"
+fi
+
+else $as_nop
+  enable_sanitizer=no
 fi
 
 
@@ -28339,16 +28345,17 @@ printf "%s\n" "$sudo_cv_var_hpux_ld_symbol_export" >&6; }
     esac
 fi
 
-if test "$enable_asan" = "yes"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fsanitize=address -fsanitize=undefined" >&5
-printf %s "checking whether C compiler accepts -fsanitize=address -fsanitize=undefined... " >&6; }
-if test ${ax_cv_check_cflags___fsanitize_address__fsanitize_undefined+y}
+if test "$enable_sanitizer" != "no"; then
+    as_CACHEVAR=`printf "%s\n" "ax_cv_check_cflags__$enable_sanitizer" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $enable_sanitizer" >&5
+printf %s "checking whether C compiler accepts $enable_sanitizer... " >&6; }
+if eval test \${$as_CACHEVAR+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
 
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fsanitize=address -fsanitize=undefined"
+  CFLAGS="$CFLAGS  $enable_sanitizer"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -28362,27 +28369,29 @@ main (void)
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  ax_cv_check_cflags___fsanitize_address__fsanitize_undefined=yes
+  eval "$as_CACHEVAR=yes"
 else $as_nop
-  ax_cv_check_cflags___fsanitize_address__fsanitize_undefined=no
+  eval "$as_CACHEVAR=no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
   CFLAGS=$ax_check_save_flags
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fsanitize_address__fsanitize_undefined" >&5
-printf "%s\n" "$ax_cv_check_cflags___fsanitize_address__fsanitize_undefined" >&6; }
-if test x"$ax_cv_check_cflags___fsanitize_address__fsanitize_undefined" = xyes
+eval ac_res=\$$as_CACHEVAR
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if test x"`eval 'as_val=${'$as_CACHEVAR'};printf "%s\n" "$as_val"'`" = xyes
 then :
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fsanitize=address -fsanitize=undefined" >&5
-printf %s "checking whether the linker accepts -fsanitize=address -fsanitize=undefined... " >&6; }
-if test ${ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined+y}
+	as_CACHEVAR=`printf "%s\n" "ax_cv_check_ldflags__$enable_sanitizer" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts $enable_sanitizer" >&5
+printf %s "checking whether the linker accepts $enable_sanitizer... " >&6; }
+if eval test \${$as_CACHEVAR+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
 
   ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -fsanitize=address -fsanitize=undefined"
+  LDFLAGS="$LDFLAGS  $enable_sanitizer"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -28396,21 +28405,22 @@ main (void)
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined=yes
+  eval "$as_CACHEVAR=yes"
 else $as_nop
-  ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined=no
+  eval "$as_CACHEVAR=no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
   LDFLAGS=$ax_check_save_flags
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined" >&5
-printf "%s\n" "$ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined" >&6; }
-if test x"$ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined" = xyes
+eval ac_res=\$$as_CACHEVAR
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if test x"`eval 'as_val=${'$as_CACHEVAR'};printf "%s\n" "$as_val"'`" = xyes
 then :
 
-	    ASAN_LDFLAGS="-Wc,-fsanitize=address -Wc,-fsanitize=undefined"
-	    ASAN_CFLAGS="-fsanitize=address -fsanitize=undefined"
+	    ASAN_LDFLAGS="$enable_sanitizer"
+	    ASAN_CFLAGS="$enable_sanitizer"
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
 printf %s "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
 if test ${ax_cv_check_cflags___fno_omit_frame_pointer+y}
@@ -29112,8 +29122,8 @@ if test X"$with_noexec" != X"no"; then
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"
 
-    # Can't use asan with LD_PRELOAD
-    if test "$enable_asan" != "yes"; then
+    # Can't use sanitizers with LD_PRELOAD
+    if test "$enable_sanitizer" != "yes"; then
 	CHECK_NOEXEC=check_noexec
     fi
 

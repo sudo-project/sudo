@@ -1522,8 +1522,12 @@ AC_ARG_ENABLE(hardening,
 AC_ARG_ENABLE(pie,
 [AS_HELP_STRING([--enable-pie], [Build sudo as a position independent executable.])])
 
-AC_ARG_ENABLE(asan,
-[AS_HELP_STRING([--enable-asan], [Build sudo with address sanitizer support.])])
+AC_ARG_ENABLE(sanitizer,
+[AS_HELP_STRING([--enable-sanitizer], [Build sudo with sanitizer support.])], [
+if test X"$enable_sanitizer" = X"yes"; then
+    enable_sanitizer="-fsanitize=address,undefined"
+fi
+], [enable_sanitizer=no])
 
 AC_ARG_ENABLE(leaks,
 [AS_HELP_STRING([--disable-leaks], [Prevent some harmless memory leaks.])],
@@ -4544,14 +4548,14 @@ EOF
 fi
 
 dnl
-dnl Check for -fsanitize=address,undefined support
+dnl Check for -fsanitize support
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test "$enable_asan" = "yes"; then
-    AX_CHECK_COMPILE_FLAG([-fsanitize=address -fsanitize=undefined], [
-	AX_CHECK_LINK_FLAG([-fsanitize=address -fsanitize=undefined], [
-	    ASAN_LDFLAGS="-Wc,-fsanitize=address -Wc,-fsanitize=undefined"
-	    ASAN_CFLAGS="-fsanitize=address -fsanitize=undefined"
+if test "$enable_sanitizer" != "no"; then
+    AX_CHECK_COMPILE_FLAG([$enable_sanitizer], [
+	AX_CHECK_LINK_FLAG([$enable_sanitizer], [
+	    ASAN_LDFLAGS="$enable_sanitizer"
+	    ASAN_CFLAGS="$enable_sanitizer"
 	    AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
 		CFLAGS="$CFLAGS -fno-omit-frame-pointer"
 	    ])
@@ -4806,8 +4810,8 @@ if test X"$with_noexec" != X"no"; then
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"
 
-    # Can't use asan with LD_PRELOAD
-    if test "$enable_asan" != "yes"; then
+    # Can't use sanitizers with LD_PRELOAD
+    if test "$enable_sanitizer" != "yes"; then
 	CHECK_NOEXEC=check_noexec
     fi
 
