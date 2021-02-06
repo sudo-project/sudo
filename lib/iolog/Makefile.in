@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -36,7 +36,8 @@ CC = @CC@
 LIBTOOL = @LIBTOOL@
 
 # Libraries
-LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
+LT_LIBS = $(top_builddir)/lib/eventlog/libsudo_eventlog.la \
+	  $(top_builddir)/lib/util/libsudo_util.la
 LIBS = @LIBS@ @ZLIB@ $(LT_LIBS)
 
 # C preprocessor flags
@@ -76,7 +77,7 @@ PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
 TEST_PROGS = check_iolog_json check_iolog_mkpath check_iolog_path check_iolog_util host_port_test
-TEST_LIBS = @LIBS@ $(top_builddir)/lib/eventlog/libsudo_eventlog.la
+TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 
 # Set to non-empty for development mode
