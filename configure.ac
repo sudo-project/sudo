@@ -101,6 +101,7 @@ AC_SUBST([SUDOERS_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
 AC_SUBST([ASAN_LDFLAGS])
 AC_SUBST([ASAN_CFLAGS])
+AC_SUBST([FUZZ_LDFLAGS])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
 AC_SUBST([SSP_LDFLAGS])
@@ -1528,6 +1529,10 @@ if test X"$enable_sanitizer" = X"yes"; then
     enable_sanitizer="-fsanitize=address,undefined"
 fi
 ], [enable_sanitizer=no])
+
+AC_ARG_ENABLE(fuzzer,
+[AS_HELP_STRING([--enable-fuzzer], [Build sudo with LLVM libFuzzer support.])],
+[], [enable_fuzzer=no])
 
 AC_ARG_ENABLE(leaks,
 [AS_HELP_STRING([--disable-leaks], [Prevent some harmless memory leaks.])],
@@ -4553,14 +4558,24 @@ dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$enable_sanitizer" != "no"; then
     AX_CHECK_COMPILE_FLAG([$enable_sanitizer], [
-	AX_CHECK_LINK_FLAG([$enable_sanitizer], [
-	    ASAN_LDFLAGS="$enable_sanitizer"
-	    ASAN_CFLAGS="$enable_sanitizer"
-	    AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
-		CFLAGS="$CFLAGS -fno-omit-frame-pointer"
-	    ])
-	    AC_DEFINE(NO_LEAKS)
+	AX_APPEND_FLAG([$enable_sanitizer], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([$enable_sanitizer], [ASAN_LDFLAGS])
+	AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
+	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
 	])
+	AC_DEFINE(NO_LEAKS)
+    ])
+fi
+if test "$enable_fuzzer" = "yes"; then
+    AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
+	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([-fsanitize=fuzzer], [FUZZ_LDFLAGS])
+	AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
+	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
+	])
+	# Use CFLAGS, not CPPFLAGS to match oss-fuzz behavior
+	AX_APPEND_FLAG([-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION], [CFLAGS])
+	AC_DEFINE(NO_LEAKS)
     ])
 fi
 

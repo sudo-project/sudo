@@ -161,7 +161,7 @@ TEST_PROGS = check_addr check_base64 check_digest check_env_pattern \
 # Fuzzers
 FUZZ_PROGS = fuzz_sudoers fuzz_sudoers_ldif
 FUZZ_LIBS = $(LIBS) libparsesudoers.la
-FUZZ_LDFLAGS = @LDFLAGS@
+FUZZ_LDFLAGS = @LDFLAGS@ @FUZZ_LDFLAGS@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 

@@ -176,6 +176,16 @@ Compilation options:
         use of environment variables, it is trivial to exploit a
         setuid root executable such as sudo.
 
+  --enable-fuzzer
+	Enable building sudo with the LLVM libFuzzer, see
+	https://www.llvm.org/docs/LibFuzzer.html for details.
+	The resulting binaries, beginning with "fuzz_" can be used
+	to test sudo.  This option is generally used in conjunction
+	with --enable-sanitizer.
+
+	This option should only be used for testing and not in a
+	production environment.
+
   --disable-hardening
 	Disable the use of compiler/linker exploit mitigation options
 	which are enabled by default.  This includes compiling with

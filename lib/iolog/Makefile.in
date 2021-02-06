@@ -83,7 +83,7 @@ TEST_LDFLAGS = @LDFLAGS@
 # Fuzzers
 FUZZ_PROGS = fuzz_iolog_json fuzz_iolog_legacy fuzz_iolog_timing
 FUZZ_LIBS = @LIBS@
-FUZZ_LDFLAGS = @LDFLAGS@
+FUZZ_LDFLAGS = @LDFLAGS@ @FUZZ_LDFLAGS@
 
 # Set to non-empty for development mode
 DEVEL = @DEVEL@

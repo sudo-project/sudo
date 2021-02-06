@@ -783,6 +783,7 @@ SSP_CFLAGS
 SSP_LDFLAGS
 PIE_CFLAGS
 PIE_LDFLAGS
+FUZZ_LDFLAGS
 ASAN_CFLAGS
 ASAN_LDFLAGS
 CROSS_COMPILING
@@ -1005,6 +1006,7 @@ enable_gcrypt
 enable_hardening
 enable_pie
 enable_sanitizer
+enable_fuzzer
 enable_leaks
 enable_poll
 enable_admin_flag
@@ -1706,6 +1708,7 @@ Optional Features:
                           options
   --enable-pie            Build sudo as a position independent executable.
   --enable-sanitizer      Build sudo with sanitizer support.
+  --enable-fuzzer         Build sudo with LLVM libFuzzer support.
   --disable-leaks         Prevent some harmless memory leaks.
   --disable-poll          Use select() instead of poll().
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
@@ -3389,6 +3392,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 printf "%s\n" "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -6907,6 +6911,15 @@ fi
 
 else $as_nop
   enable_sanitizer=no
+fi
+
+
+# Check whether --enable-fuzzer was given.
+if test ${enable_fuzzer+y}
+then :
+  enableval=$enable_fuzzer;
+else $as_nop
+  enable_fuzzer=no
 fi
 
 
@@ -28382,46 +28395,73 @@ printf "%s\n" "$ac_res" >&6; }
 if test x"`eval 'as_val=${'$as_CACHEVAR'};printf "%s\n" "$as_val"'`" = xyes
 then :
 
-	as_CACHEVAR=`printf "%s\n" "ax_cv_check_ldflags__$enable_sanitizer" | $as_tr_sh`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts $enable_sanitizer" >&5
-printf %s "checking whether the linker accepts $enable_sanitizer... " >&6; }
-if eval test \${$as_CACHEVAR+y}
+
+if test ${ASAN_CFLAGS+y}
 then :
-  printf %s "(cached) " >&6
+
+  case " $ASAN_CFLAGS " in #(
+  *" $enable_sanitizer "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_CFLAGS already contains \$enable_sanitizer"; } >&5
+  (: ASAN_CFLAGS already contains $enable_sanitizer) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append ASAN_CFLAGS " $enable_sanitizer"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_CFLAGS=\"\$ASAN_CFLAGS\""; } >&5
+  (: ASAN_CFLAGS="$ASAN_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
 else $as_nop
 
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  $enable_sanitizer"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  ASAN_CFLAGS=$enable_sanitizer
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_CFLAGS=\"\$ASAN_CFLAGS\""; } >&5
+  (: ASAN_CFLAGS="$ASAN_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
 
-int
-main (void)
-{
+fi
 
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
+
+if test ${ASAN_LDFLAGS+y}
 then :
-  eval "$as_CACHEVAR=yes"
+
+  case " $ASAN_LDFLAGS " in #(
+  *" $enable_sanitizer "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS already contains \$enable_sanitizer"; } >&5
+  (: ASAN_LDFLAGS already contains $enable_sanitizer) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append ASAN_LDFLAGS " $enable_sanitizer"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
 else $as_nop
-  eval "$as_CACHEVAR=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags
-fi
-eval ac_res=\$$as_CACHEVAR
-	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-printf "%s\n" "$ac_res" >&6; }
-if test x"`eval 'as_val=${'$as_CACHEVAR'};printf "%s\n" "$as_val"'`" = xyes
-then :
 
-	    ASAN_LDFLAGS="$enable_sanitizer"
-	    ASAN_CFLAGS="$enable_sanitizer"
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
+  ASAN_LDFLAGS=$enable_sanitizer
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
 printf %s "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
 if test ${ax_cv_check_cflags___fno_omit_frame_pointer+y}
 then :
@@ -28455,18 +28495,260 @@ printf "%s\n" "$ax_cv_check_cflags___fno_omit_frame_pointer" >&6; }
 if test x"$ax_cv_check_cflags___fno_omit_frame_pointer" = xyes
 then :
 
-		CFLAGS="$CFLAGS -fno-omit-frame-pointer"
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -fno-omit-frame-pointer "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -fno-omit-frame-pointer"; } >&5
+  (: CFLAGS already contains -fno-omit-frame-pointer) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -fno-omit-frame-pointer"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CFLAGS=-fno-omit-frame-pointer
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 
 else $as_nop
   :
 fi
 
-	    printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
+	printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
 
 
 else $as_nop
   :
 fi
+
+fi
+if test "$enable_fuzzer" = "yes"; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fsanitize=fuzzer-no-link" >&5
+printf %s "checking whether C compiler accepts -fsanitize=fuzzer-no-link... " >&6; }
+if test ${ax_cv_check_cflags___fsanitize_fuzzer_no_link+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fsanitize=fuzzer-no-link"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___fsanitize_fuzzer_no_link=yes
+else $as_nop
+  ax_cv_check_cflags___fsanitize_fuzzer_no_link=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fsanitize_fuzzer_no_link" >&5
+printf "%s\n" "$ax_cv_check_cflags___fsanitize_fuzzer_no_link" >&6; }
+if test x"$ax_cv_check_cflags___fsanitize_fuzzer_no_link" = xyes
+then :
+
+
+if test ${ASAN_CFLAGS+y}
+then :
+
+  case " $ASAN_CFLAGS " in #(
+  *" -fsanitize=fuzzer-no-link "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_CFLAGS already contains -fsanitize=fuzzer-no-link"; } >&5
+  (: ASAN_CFLAGS already contains -fsanitize=fuzzer-no-link) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append ASAN_CFLAGS " -fsanitize=fuzzer-no-link"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_CFLAGS=\"\$ASAN_CFLAGS\""; } >&5
+  (: ASAN_CFLAGS="$ASAN_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  ASAN_CFLAGS=-fsanitize=fuzzer-no-link
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_CFLAGS=\"\$ASAN_CFLAGS\""; } >&5
+  (: ASAN_CFLAGS="$ASAN_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+if test ${FUZZ_LDFLAGS+y}
+then :
+
+  case " $FUZZ_LDFLAGS " in #(
+  *" -fsanitize=fuzzer "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : FUZZ_LDFLAGS already contains -fsanitize=fuzzer"; } >&5
+  (: FUZZ_LDFLAGS already contains -fsanitize=fuzzer) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append FUZZ_LDFLAGS " -fsanitize=fuzzer"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : FUZZ_LDFLAGS=\"\$FUZZ_LDFLAGS\""; } >&5
+  (: FUZZ_LDFLAGS="$FUZZ_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  FUZZ_LDFLAGS=-fsanitize=fuzzer
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : FUZZ_LDFLAGS=\"\$FUZZ_LDFLAGS\""; } >&5
+  (: FUZZ_LDFLAGS="$FUZZ_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
+printf %s "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
+if test ${ax_cv_check_cflags___fno_omit_frame_pointer+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fno-omit-frame-pointer"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___fno_omit_frame_pointer=yes
+else $as_nop
+  ax_cv_check_cflags___fno_omit_frame_pointer=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_omit_frame_pointer" >&5
+printf "%s\n" "$ax_cv_check_cflags___fno_omit_frame_pointer" >&6; }
+if test x"$ax_cv_check_cflags___fno_omit_frame_pointer" = xyes
+then :
+
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -fno-omit-frame-pointer "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -fno-omit-frame-pointer"; } >&5
+  (: CFLAGS already contains -fno-omit-frame-pointer) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -fno-omit-frame-pointer"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CFLAGS=-fno-omit-frame-pointer
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+else $as_nop
+  :
+fi
+
+	# Use CFLAGS, not CPPFLAGS to match oss-fuzz behavior
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"; } >&5
+  (: CFLAGS already contains -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CFLAGS=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
 
 
 else $as_nop
