@@ -35,7 +35,7 @@
  * Extend the given fd to the specified size in bytes.
  * We do this to allocate disk space up-front before overwriting
  * the original file with the temporary.  Otherwise, we could
- * we run out of disk space after truncating the original file.
+ * run out of disk space after truncating the original file.
  */
 static int
 sudo_extend_file(int fd, const char *name, off_t new_size)
