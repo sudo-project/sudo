@@ -26,6 +26,8 @@ Makefile$
 ^doc/.*\.mdoc$
 ^doc/fixman\.sed$
 
+^etc/init\.d/sudo\.conf$
+
 ^examples/sudo\.conf$
 
 ^init\.d/.*\.sh$
@@ -41,6 +43,7 @@ Makefile$
 ^lib/eventlog/regress/logwrap/check_wrap.out$
 
 ^lib/iolog/check_iolog_(json|mkpath|path|util)$
+^lib/iolog/fuzz_iolog_(json|legacy|timing)$
 ^lib/iolog/host_port_test$
 
 ^lib/util/mksiglist$
@@ -54,6 +57,7 @@ Makefile$
 ^logsrvd/sudo_(logsrvd|sendlog)$
 
 ^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|prologue|check_[a-z0-9_]+)$
+^plugins/sudoers/fuzz_sudoers(_ldif)?$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
 ^plugins/sudoers/regress/iolog_plugin/iolog$
 ^plugins/sudoers/regress/testsudoers/test3\.d/root$

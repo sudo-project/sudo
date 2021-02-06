@@ -32,6 +32,8 @@ doc/fixman.sed
 
 examples/sudo.conf
 
+etc/init.d/sudo.conf
+
 init.d/*.sh
 init.d/sudo.conf
 
@@ -44,17 +46,16 @@ src/sudo_usage.h
 lib/eventlog/check_wrap
 lib/eventlog/regress/logwrap/check_wrap.out
 
-lib/iolog/check_iolog_json
-lib/iolog/check_iolog_mkpath
-lib/iolog/check_iolog_path
-lib/iolog/check_iolog_util
+lib/iolog/check_iolog_[a-z]*
+lib/iolog/fuzz_iolog_[a-z]*
+lib/iolog/host_port_test
 
 lib/util/mksiglist
 lib/util/mksigname
 lib/util/siglist.c
 lib/util/signame.c
 lib/util/util.exp
-lib/util/[a-z0-9_]*_test
+lib/util/[a-z]*_test
 lib/util/regress/**/*.out
 lib/util/regress/**/*.err
 
@@ -68,7 +69,8 @@ plugins/sudoers/testsudoers
 plugins/sudoers/tsdump
 plugins/sudoers/visudo
 plugins/sudoers/prologue
-plugins/sudoers/check_[a-z0-9_]*
+plugins/sudoers/check_[a-z]*
+plugins/sudoers/fuzz_[a-z]*
 plugins/sudoers/regress/**/*.out
 plugins/sudoers/regress/**/*.toke
 plugins/sudoers/regress/**/*.err
