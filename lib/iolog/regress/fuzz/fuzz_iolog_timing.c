@@ -16,6 +16,7 @@
 
 #include <config.h>
 
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,7 +62,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	sudo_warn_nodebug("unable to open %s/timing", logdir);
 	goto cleanup;
     }
-    if (write(fd, data, size) != size) {
+    if (write(fd, data, size) != (ssize_t)size) {
 	sudo_warn_nodebug("unable to write %s/timing", logdir);
 	goto cleanup;
     }
@@ -93,3 +94,12 @@ cleanup:
 
     return 0;
 }
+
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+int
+main(int argc, char *argv[])
+{
+    /* Nothing for now. */
+    return LLVMFuzzerTestOneInput(NULL, 0);
+}
+#endif
