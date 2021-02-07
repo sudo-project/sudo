@@ -88,8 +88,6 @@ IOBJS = $(LIBEVENTLOG_OBJS:.lo=.i)
 
 POBJS = $(IOBJS:.i=.plog)
 
-GENERATED = log_server.pb-c.h log_server.pb-c.c
-
 CHECK_WRAP_OBJS = check_wrap.lo logwrap.lo
 
 all: libsudo_eventlog.la
@@ -117,20 +115,6 @@ Makefile: $(srcdir)/Makefile.in
 
 .i.plog:
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
-
-$(devdir)/log_server.pb-c.c: $(srcdir)/log_server.proto
-	@if [ -n "$(DEVEL)" ]; then \
-	    cmd='protoc-c --c_out=$(devdir) --proto_path=$(srcdir) $(srcdir)/log_server.proto'; \
-	    echo "$$cmd"; eval $$cmd; \
-	    cmd='$(scriptdir)/unanon $(devdir)/log_server.pb-c.h $(devdir)/log_server.pb-c.c'; \
-	    echo "$$cmd"; eval $$cmd; \
-	    if [ "$(devdir)" == "$(srcdir)" ]; then \
-		cmd='mv -f $(devdir)/log_server.pb-c.h $(incdir)/log_server.pb-c.h'; \
-	    else \
-		cmd='mv -f $(devdir)/log_server.pb-c.h $(top_builddir)/log_server.pb-c.h'; \
-	    fi; \
-	    echo "$$cmd"; eval $$cmd; \
-	fi
 
 libsudo_eventlog.la: $(LIBEVENTLOG_OBJS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBEVENTLOG_OBJS) $(LT_LIBS)
@@ -182,10 +166,6 @@ mostlyclean: clean
 
 distclean: clean
 	-rm -rf Makefile .libs
-	@if [ -n "$(DEVEL)" -a "$(devdir)" != "$(srcdir)" ]; then \
-	    cmd='rm -rf $(GENERATED)'; \
-	    echo "$$cmd"; eval $$cmd; \
-	fi
 
 clobber: distclean
 
