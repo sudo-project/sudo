@@ -282,6 +282,9 @@
 /* Define to 1 if you have the `fexecve' function. */
 #undef HAVE_FEXECVE
 
+/* Define to 1 if you have the `fmemopen' function. */
+#undef HAVE_FMEMOPEN
+
 /* Define to 1 if you have the `fnmatch' function. */
 #undef HAVE_FNMATCH
 

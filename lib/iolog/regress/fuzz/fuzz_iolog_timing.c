@@ -40,7 +40,8 @@
 #include "sudo_iolog.h"
 #include "sudo_util.h"
 
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+int
+LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct iolog_file iolog_file = { true };
     struct timing_closure closure;

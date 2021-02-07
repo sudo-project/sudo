@@ -3220,6 +3220,7 @@ as_fn_append ac_header_c_list " sys/sysmacros.h sys_sysmacros_h HAVE_SYS_SYSMACR
 as_fn_append ac_header_c_list " sys/syscall.h sys_syscall_h HAVE_SYS_SYSCALL_H"
 as_fn_append ac_header_c_list " sys/statvfs.h sys_statvfs_h HAVE_SYS_STATVFS_H"
 as_fn_append ac_func_c_list " fexecve HAVE_FEXECVE"
+as_fn_append ac_func_c_list " fmemopen HAVE_FMEMOPEN"
 as_fn_append ac_func_c_list " killpg HAVE_KILLPG"
 as_fn_append ac_func_c_list " nl_langinfo HAVE_NL_LANGINFO"
 as_fn_append ac_func_c_list " faccessat HAVE_FACCESSAT"
@@ -20160,6 +20161,7 @@ do
     ac_func=$ac_item
   fi
 done
+
 
 
 

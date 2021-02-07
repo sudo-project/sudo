@@ -34,13 +34,39 @@
 
 #include "iolog_json.h"
 
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+static FILE *
+open_data(const uint8_t *data, size_t size)
+{
+#ifdef HAVE_FMEMOPEN
+    /* Operate in-memory. */
+    return fmemopen((void *)data, size, "r");
+#else
+    char tempfile[] = "/tmp/json.XXXXXX";
+    size_t nwritten;
+    int fd;
+
+    /* Use (unlinked) temporary file. */
+    fd = mkstemp(tempfile);
+    if (fd == -1)
+	return NULL;
+    unlink(tempfile);
+    nwritten = write(fd, data, size);
+    if (nwritten != size) {
+	close(fd);
+	return NULL;
+    }
+    lseek(fd, 0, SEEK_SET);
+    return fdopen(fd, "r");
+#endif
+}
+
+int
+LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct eventlog *evlog = NULL;
     FILE *fp;
 
-    /* Operate in-memory. */
-    fp = fmemopen((void *)data, size, "r");
+    fp = open_data(data, size);
     if (fp == NULL)
         return 0;
 
