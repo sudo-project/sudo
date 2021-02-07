@@ -181,10 +181,24 @@ Compilation options:
 	https://www.llvm.org/docs/LibFuzzer.html for details.
 	The resulting binaries, beginning with "fuzz_" can be used
 	to test sudo.  This option is generally used in conjunction
-	with --enable-sanitizer.
+	with --enable-sanitizer.  This option requires the clang
+	C compiler--it is not supported by gcc.
 
 	This option should only be used for testing and not in a
 	production environment.
+
+  --enable-fuzzer-engine=library
+        The library to use when linking fuzz targets instead of
+        LLVM's libFuzzer.  It is intended to be set to the path to
+        an alternate fuzzing library, such as AFL++ or Honggfuzz.
+
+  --enable-fuzzer-linker=command
+        An alternate linker command to use when building fuzz
+        targets, instead of clang.  It may be necessary to set this
+        when using the --enable-fuzzer-engine option to link with
+        a fuzzer engine that requires C++ libraries.  For oss-fuzz,
+        this option is used to cause fuzz targets to be linked with
+        clang++.
 
   --disable-hardening
 	Disable the use of compiler/linker exploit mitigation options

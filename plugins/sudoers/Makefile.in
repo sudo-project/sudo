@@ -159,9 +159,10 @@ TEST_PROGS = check_addr check_base64 check_digest check_env_pattern \
 	     check_iolog_plugin check_starttime check_unesc @SUDOERS_TEST_PROGS@
 
 # Fuzzers
+LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
 FUZZ_PROGS = fuzz_sudoers fuzz_sudoers_ldif
-FUZZ_LIBS = libparsesudoers.la $(LIBS)
-FUZZ_LDFLAGS = @LDFLAGS@ @FUZZ_LDFLAGS@
+FUZZ_LIBS = libparsesudoers.la $(LIBS) $(LIB_FUZZING_ENGINE)
+FUZZ_LDFLAGS = @LDFLAGS@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
@@ -347,10 +348,10 @@ check_symbols: $(CHECK_SYMBOLS_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(CHECK_SYMBOLS_LDFLAGS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@
 
 fuzz_sudoers: $(FUZZ_SUDOERS_OBJS) libparsesudoers.la $(LIBUTIL)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FUZZ_SUDOERS_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_SUDOERS_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
 fuzz_sudoers_ldif: $(FUZZ_SUDOERS_LDIF_OBJS) libparsesudoers.la $(LIBUTIL)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FUZZ_SUDOERS_LDIF_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_SUDOERS_LDIF_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
 GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 

@@ -101,7 +101,6 @@ AC_SUBST([SUDOERS_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
 AC_SUBST([ASAN_LDFLAGS])
 AC_SUBST([ASAN_CFLAGS])
-AC_SUBST([FUZZ_LDFLAGS])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
 AC_SUBST([SSP_LDFLAGS])
@@ -123,6 +122,8 @@ AC_SUBST([LOGSRVD_SRC])
 AC_SUBST([LOGSRVD_CONF])
 AC_SUBST([LIBLOGSRV])
 AC_SUBST([PPFILES])
+AC_SUBST([FUZZ_ENGINE])
+AC_SUBST([FUZZ_LD])
 
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -262,6 +263,8 @@ INIT_DIR=
 RC_LINK=
 COMPAT_EXP=
 SIGNAME=
+FUZZ_ENGINE=
+FUZZ_LD='$(CC)'
 dnl
 dnl Other variables
 dnl
@@ -1533,6 +1536,28 @@ fi
 AC_ARG_ENABLE(fuzzer,
 [AS_HELP_STRING([--enable-fuzzer], [Build sudo with LLVM libFuzzer support.])],
 [], [enable_fuzzer=no])
+
+AC_ARG_ENABLE(fuzzer-engine,
+[AS_HELP_STRING([--enable-fuzzer-engine], [Link fuzz targets with the specified fuzzer engine instead of the default.])],
+[ case "$enableval" in
+    yes)    AC_MSG_ERROR(["must give --enable-fuzzer-engine an argument."])
+	    ;;
+    no)	    ;;
+    *)	    FUZZ_ENGINE="$enableval"
+	    ;;
+  esac
+])
+
+AC_ARG_ENABLE(fuzzer-linker,
+[AS_HELP_STRING([--enable-fuzzer-linker], [Use the specified linker when building fuzz targets instead of the default C compiler.])],
+[ case "$enableval" in
+    yes)    AC_MSG_ERROR(["must give --enable-fuzzer-linker an argument."])
+	    ;;
+    no)	    ;;
+    *)	    FUZZ_LD="$enableval"
+	    ;;
+  esac
+])
 
 AC_ARG_ENABLE(leaks,
 [AS_HELP_STRING([--disable-leaks], [Prevent some harmless memory leaks.])],
@@ -4569,7 +4594,9 @@ fi
 if test "$enable_fuzzer" = "yes"; then
     AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
 	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_CFLAGS])
-	AX_APPEND_FLAG([-fsanitize=fuzzer], [FUZZ_LDFLAGS])
+	if test -z "$FUZZ_ENGINE"; then
+	    FUZZ_ENGINE="-fsanitize=fuzzer"
+	fi
 	AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
 	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
 	])
