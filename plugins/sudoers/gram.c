@@ -3933,13 +3933,15 @@ parser_leak_remove(enum parser_leak_types type, void *v)
     }
     /* If this happens, there is a bug in the leak tracking code. */
     sudo_warnx("%s: unable to find %p, type %d", __func__, v, type);
-    return false;
+    debug_return_bool(false);
 found:
     if (prev == NULL)
 	SLIST_REMOVE_HEAD(&parser_leak_list, entries);
     else
 	SLIST_REMOVE_AFTER(prev, entries);
     free(entry);
+    debug_return_bool(true);
+#else
     return true;
 #endif /* NO_LEAKS */
 }
