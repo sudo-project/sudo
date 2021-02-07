@@ -108,6 +108,8 @@ lib/eventlog/logwrap.c
 lib/eventlog/regress/logwrap/check_wrap.c
 lib/eventlog/regress/logwrap/check_wrap.in
 lib/eventlog/regress/logwrap/check_wrap.out.ok
+lib/fuzzstub/Makefile.in
+lib/fuzzstub/fuzzstub.c
 lib/iolog/Makefile.in
 lib/iolog/host_port.c
 lib/iolog/hostcheck.c

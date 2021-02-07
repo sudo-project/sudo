@@ -95,12 +95,3 @@ cleanup:
 
     return 0;
 }
-
-#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-int
-main(int argc, char *argv[])
-{
-    /* Nothing for now. */
-    return LLVMFuzzerTestOneInput(NULL, 0);
-}
-#endif
