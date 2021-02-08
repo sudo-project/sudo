@@ -35,7 +35,12 @@ struct passwd *list_pw;
 FILE *
 open_sudoers(const char *file, bool doedit, bool *keepopen)
 {
-    return fopen(file, "r");
+    /*
+     * If we allow the fuzzer to choose include paths it will
+     * include random files in the file system.
+     * This leads to bug reports that cannot be reproduced.
+     */
+    return NULL;
 }
 
 static FILE *
