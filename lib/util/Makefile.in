@@ -313,6 +313,8 @@ cppcheck:
 
 pvs-log-files: $(POBJS)
 
+fuzz:
+
 # Note: some regress checks are run from srcdir for consistent error messages
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \

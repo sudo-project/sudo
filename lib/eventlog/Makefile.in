@@ -144,6 +144,8 @@ cppcheck:
 
 pvs-log-files: $(POBJS)
 
+fuzz:
+
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    LC_ALL=C; export LC_ALL; \

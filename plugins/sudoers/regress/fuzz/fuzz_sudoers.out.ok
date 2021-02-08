@@ -1,0 +1,57 @@
+sudoers:1:6: syntax error
+bogus
+     ^
+sudoers:1:17: syntax error
+user ALL = (ALL)
+                ^
+sudoers:1:17: syntax error
+user ALL = (ALL)
+                ^
+sudoers:4:21: invalid timeout value
+user0	ALL = TIMEOUT=7dd4h10m30s /usr/bin/id, /usr/bin/who, TIMEOUT=0 /bin/ls
+                    ^~~~~~~~~~~
+sudoers:5:21: invalid timeout value
+user1	ALL = TIMEOUT=7d4h10mm30s /usr/bin/id
+                    ^~~~~~~~~~~
+sudoers:6:21: invalid timeout value
+user2	ALL = TIMEOUT=4hg10m30s /usr/bin/id
+                    ^~~~~~~~~
+sudoers:7:21: invalid timeout value
+user3	ALL = TIMEOUT=10m30ss /usr/bin/id
+                    ^~~~~~~
+sudoers:8:21: invalid timeout value
+user4	ALL = TIMEOUT=14g /usr/bin/id
+                    ^~~
+sudoers:4:28: syntax error
+foo ALL = CWD=~ron /bin/ls \
+                           ^~
+sudoers:7:1: invalid line continuation
+User_Alias BAR = bar
+^~~~~~~~~~
+sudoers:2:19: empty string
+User_Alias FOO = ""
+                  ^
+sudoers:3:2: empty string
+"" ALL = ALL
+ ^
+sudoers:2:21: empty group
+User_Alias FOO1 = "%"
+                    ^
+sudoers:3:22: empty group
+User_Alias FOO2 = "%:"
+                     ^
+sudoers:4:21: empty netgroup
+User_Alias FOO3 = "+"
+                    ^
+sudoers:5:19: empty group
+User_Alias FOO4 = %
+                  ^
+sudoers:6:19: empty group
+User_Alias FOO5 = %:
+                  ^~
+sudoers:7:19: empty netgroup
+User_Alias FOO6 = +
+                  ^
+sudoers:8:20: unexpected line break in string
+User_Alias UA4 = "x
+                   ^

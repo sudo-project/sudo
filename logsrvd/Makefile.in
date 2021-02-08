@@ -187,6 +187,8 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
+fuzz:
+
 check:
 
 clean:

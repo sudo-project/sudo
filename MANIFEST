@@ -701,6 +701,7 @@ plugins/sudoers/regress/env_match/check_env_pattern.c
 plugins/sudoers/regress/env_match/data
 plugins/sudoers/regress/exptilde/check_exptilde.c
 plugins/sudoers/regress/fuzz/fuzz_sudoers.c
+plugins/sudoers/regress/fuzz/fuzz_sudoers.out.ok
 plugins/sudoers/regress/fuzz/fuzz_sudoers_ldif.c
 plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
 plugins/sudoers/regress/parser/check_addr.c

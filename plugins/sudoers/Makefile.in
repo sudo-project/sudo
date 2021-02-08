@@ -474,7 +474,17 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
-check: $(TEST_PROGS) $(FUZZ_PROGS) visudo testsudoers cvtsudoers
+fuzz: $(FUZZ_PROGS)
+	@if test X"$(cross_compiling)" != X"yes"; then \
+	    echo "fuzz_sudoers: verifying corpus"; \
+	    mkdir -p regress/fuzz; \
+	    ./fuzz_sudoers $(srcdir)/sudoers $(srcdir)/regress/sudoers/*.in > regress/fuzz/fuzz_sudoers.out 2>&1; \
+	    diff $(srcdir)/regress/fuzz/fuzz_sudoers.out.ok regress/fuzz/fuzz_sudoers.out; \
+	    echo "fuzz_sudoers-ldif: verifying corpus"; \
+	    ./fuzz_sudoers_ldif $(srcdir)/regress/sudoers/*.ldif.ok; \
+	fi
+
+check: $(TEST_PROGS) visudo testsudoers cvtsudoers fuzz
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    LC_ALL=C; export LC_ALL; \
 	    unset LANG || LANG=; \

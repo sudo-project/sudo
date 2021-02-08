@@ -191,7 +191,17 @@ cppcheck:
 
 pvs-log-files: $(POBJS)
 
-check: $(TEST_PROGS) $(FUZZ_PROGS)
+fuzz: $(FUZZ_PROGS)
+	@if test X"$(cross_compiling)" != X"yes"; then \
+	    echo "fuzz_iolog_legacy: verifying corpus"; \
+	    ./fuzz_iolog_legacy $(srcdir)/regress/corpus/log_legacy/*; \
+	    echo "fuzz_iolog_json: verifying corpus"; \
+	    ./fuzz_iolog_json $(srcdir)/regress/corpus/log_json/*; \
+	    echo "fuzz_iolog_timing: verifying corpus"; \
+	    ./fuzz_iolog_timing $(srcdir)/regress/corpus/timing/*; \
+	fi
+
+check: $(TEST_PROGS) fuzz
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    LC_ALL=C; export LC_ALL; \
 	    unset LANG || LANG=; \

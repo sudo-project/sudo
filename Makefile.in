@@ -110,7 +110,7 @@ all: config.status
 	    exit $$?; \
 	done
 
-check pre-install: config.status
+fuzz check pre-install: config.status
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \

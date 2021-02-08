@@ -263,6 +263,8 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
+fuzz:
+
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
