@@ -4594,6 +4594,7 @@ fi
 if test "$enable_fuzzer" = "yes"; then
     AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
 	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_LDFLAGS])
 	if test -z "$FUZZ_ENGINE"; then
 	    FUZZ_ENGINE="-fsanitize=fuzzer"
 	fi

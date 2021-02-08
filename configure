@@ -28649,6 +28649,39 @@ else $as_nop
 
 fi
 
+
+if test ${ASAN_LDFLAGS+y}
+then :
+
+  case " $ASAN_LDFLAGS " in #(
+  *" -fsanitize=fuzzer-no-link "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS already contains -fsanitize=fuzzer-no-link"; } >&5
+  (: ASAN_LDFLAGS already contains -fsanitize=fuzzer-no-link) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append ASAN_LDFLAGS " -fsanitize=fuzzer-no-link"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  ASAN_LDFLAGS=-fsanitize=fuzzer-no-link
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 	if test -z "$FUZZ_ENGINE"; then
 	    FUZZ_ENGINE="-fsanitize=fuzzer"
 	fi
