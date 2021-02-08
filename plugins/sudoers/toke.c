@@ -4025,9 +4025,9 @@ case 80:
 YY_RULE_SETUP
 #line 810 "toke.l"
 {
-			    LEXTRACE("NOMATCH ");
-			    return NOMATCH;
-			}	/* parse error, no matching token */
+			    LEXTRACE("ERROR ");
+			    return ERROR;
+			}	/* parse error */
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(GOTDEFS):

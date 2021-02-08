@@ -138,7 +138,6 @@ static void alias_error(const char *name, int errnum);
 %token <tok>	 '(' ')'		/* runas tokens */
 %token <tok>	 '\n'			/* newline (with optional comment) */
 %token <tok>	 ERROR			/* error from lexer */
-%token <tok>	 NOMATCH		/* no match from lexer */
 %token <tok>	 CHROOT			/* root directory for command */
 %token <tok>	 CWD			/* working directory for command */
 %token <tok>	 TYPE			/* SELinux type */
@@ -1150,11 +1149,15 @@ group		:	ALIAS {
 void
 sudoerserrorf(const char *fmt, ...)
 {
+    static int last_error_line = -1;
+    static char *last_error_file = NULL;
     debug_decl(sudoerserrorf, SUDOERS_DEBUG_PARSER);
 
-    /* The lexer displays more detailed messages for ERROR tokens. */
-    if (sudoerschar == ERROR)
+    /* Only print the first error found in a line. */
+    if (last_error_file == sudoers && last_error_line == this_lineno)
 	debug_return;
+    last_error_file = sudoers;
+    last_error_line = this_lineno;
 
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {

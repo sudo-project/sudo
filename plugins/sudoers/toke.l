@@ -808,9 +808,9 @@ sudoedit		{
 			}			/* comment, not uid/gid */
 
 <*>.			{
-			    LEXTRACE("NOMATCH ");
-			    return NOMATCH;
-			}	/* parse error, no matching token */
+			    LEXTRACE("ERROR ");
+			    return ERROR;
+			}	/* parse error */
 
 <*><<EOF>>		{
 			    if (!pop_include())

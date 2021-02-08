@@ -89,21 +89,20 @@ extern int sudoersdebug;
     USERALIAS = 290,               /* USERALIAS  */
     RUNASALIAS = 291,              /* RUNASALIAS  */
     ERROR = 292,                   /* ERROR  */
-    NOMATCH = 293,                 /* NOMATCH  */
-    CHROOT = 294,                  /* CHROOT  */
-    CWD = 295,                     /* CWD  */
-    TYPE = 296,                    /* TYPE  */
-    ROLE = 297,                    /* ROLE  */
-    PRIVS = 298,                   /* PRIVS  */
-    LIMITPRIVS = 299,              /* LIMITPRIVS  */
-    CMND_TIMEOUT = 300,            /* CMND_TIMEOUT  */
-    NOTBEFORE = 301,               /* NOTBEFORE  */
-    NOTAFTER = 302,                /* NOTAFTER  */
-    MYSELF = 303,                  /* MYSELF  */
-    SHA224_TOK = 304,              /* SHA224_TOK  */
-    SHA256_TOK = 305,              /* SHA256_TOK  */
-    SHA384_TOK = 306,              /* SHA384_TOK  */
-    SHA512_TOK = 307               /* SHA512_TOK  */
+    CHROOT = 293,                  /* CHROOT  */
+    CWD = 294,                     /* CWD  */
+    TYPE = 295,                    /* TYPE  */
+    ROLE = 296,                    /* ROLE  */
+    PRIVS = 297,                   /* PRIVS  */
+    LIMITPRIVS = 298,              /* LIMITPRIVS  */
+    CMND_TIMEOUT = 299,            /* CMND_TIMEOUT  */
+    NOTBEFORE = 300,               /* NOTBEFORE  */
+    NOTAFTER = 301,                /* NOTAFTER  */
+    MYSELF = 302,                  /* MYSELF  */
+    SHA224_TOK = 303,              /* SHA224_TOK  */
+    SHA256_TOK = 304,              /* SHA256_TOK  */
+    SHA384_TOK = 305,              /* SHA384_TOK  */
+    SHA512_TOK = 306               /* SHA512_TOK  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -147,21 +146,20 @@ extern int sudoersdebug;
 #define USERALIAS 290
 #define RUNASALIAS 291
 #define ERROR 292
-#define NOMATCH 293
-#define CHROOT 294
-#define CWD 295
-#define TYPE 296
-#define ROLE 297
-#define PRIVS 298
-#define LIMITPRIVS 299
-#define CMND_TIMEOUT 300
-#define NOTBEFORE 301
-#define NOTAFTER 302
-#define MYSELF 303
-#define SHA224_TOK 304
-#define SHA256_TOK 305
-#define SHA384_TOK 306
-#define SHA512_TOK 307
+#define CHROOT 293
+#define CWD 294
+#define TYPE 295
+#define ROLE 296
+#define PRIVS 297
+#define LIMITPRIVS 298
+#define CMND_TIMEOUT 299
+#define NOTBEFORE 300
+#define NOTAFTER 301
+#define MYSELF 302
+#define SHA224_TOK 303
+#define SHA256_TOK 304
+#define SHA384_TOK 305
+#define SHA512_TOK 306
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -181,7 +179,7 @@ union YYSTYPE
     char *string;
     int tok;
 
-#line 185 "y.tab.h"
+#line 183 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

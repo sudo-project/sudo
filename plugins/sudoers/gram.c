@@ -246,21 +246,20 @@ extern int sudoersdebug;
     USERALIAS = 290,               /* USERALIAS  */
     RUNASALIAS = 291,              /* RUNASALIAS  */
     ERROR = 292,                   /* ERROR  */
-    NOMATCH = 293,                 /* NOMATCH  */
-    CHROOT = 294,                  /* CHROOT  */
-    CWD = 295,                     /* CWD  */
-    TYPE = 296,                    /* TYPE  */
-    ROLE = 297,                    /* ROLE  */
-    PRIVS = 298,                   /* PRIVS  */
-    LIMITPRIVS = 299,              /* LIMITPRIVS  */
-    CMND_TIMEOUT = 300,            /* CMND_TIMEOUT  */
-    NOTBEFORE = 301,               /* NOTBEFORE  */
-    NOTAFTER = 302,                /* NOTAFTER  */
-    MYSELF = 303,                  /* MYSELF  */
-    SHA224_TOK = 304,              /* SHA224_TOK  */
-    SHA256_TOK = 305,              /* SHA256_TOK  */
-    SHA384_TOK = 306,              /* SHA384_TOK  */
-    SHA512_TOK = 307               /* SHA512_TOK  */
+    CHROOT = 293,                  /* CHROOT  */
+    CWD = 294,                     /* CWD  */
+    TYPE = 295,                    /* TYPE  */
+    ROLE = 296,                    /* ROLE  */
+    PRIVS = 297,                   /* PRIVS  */
+    LIMITPRIVS = 298,              /* LIMITPRIVS  */
+    CMND_TIMEOUT = 299,            /* CMND_TIMEOUT  */
+    NOTBEFORE = 300,               /* NOTBEFORE  */
+    NOTAFTER = 301,                /* NOTAFTER  */
+    MYSELF = 302,                  /* MYSELF  */
+    SHA224_TOK = 303,              /* SHA224_TOK  */
+    SHA256_TOK = 304,              /* SHA256_TOK  */
+    SHA384_TOK = 305,              /* SHA384_TOK  */
+    SHA512_TOK = 306               /* SHA512_TOK  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -304,21 +303,20 @@ extern int sudoersdebug;
 #define USERALIAS 290
 #define RUNASALIAS 291
 #define ERROR 292
-#define NOMATCH 293
-#define CHROOT 294
-#define CWD 295
-#define TYPE 296
-#define ROLE 297
-#define PRIVS 298
-#define LIMITPRIVS 299
-#define CMND_TIMEOUT 300
-#define NOTBEFORE 301
-#define NOTAFTER 302
-#define MYSELF 303
-#define SHA224_TOK 304
-#define SHA256_TOK 305
-#define SHA384_TOK 306
-#define SHA512_TOK 307
+#define CHROOT 293
+#define CWD 294
+#define TYPE 295
+#define ROLE 296
+#define PRIVS 297
+#define LIMITPRIVS 298
+#define CMND_TIMEOUT 299
+#define NOTBEFORE 300
+#define NOTAFTER 301
+#define MYSELF 302
+#define SHA224_TOK 303
+#define SHA256_TOK 304
+#define SHA384_TOK 305
+#define SHA512_TOK 306
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -338,7 +336,7 @@ union YYSTYPE
     char *string;
     int tok;
 
-#line 336 "gram.c"
+#line 334 "gram.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -403,75 +401,74 @@ enum yysymbol_kind_t
   YYSYMBOL_44_ = 44,                       /* ')'  */
   YYSYMBOL_45_n_ = 45,                     /* '\n'  */
   YYSYMBOL_ERROR = 46,                     /* ERROR  */
-  YYSYMBOL_NOMATCH = 47,                   /* NOMATCH  */
-  YYSYMBOL_CHROOT = 48,                    /* CHROOT  */
-  YYSYMBOL_CWD = 49,                       /* CWD  */
-  YYSYMBOL_TYPE = 50,                      /* TYPE  */
-  YYSYMBOL_ROLE = 51,                      /* ROLE  */
-  YYSYMBOL_PRIVS = 52,                     /* PRIVS  */
-  YYSYMBOL_LIMITPRIVS = 53,                /* LIMITPRIVS  */
-  YYSYMBOL_CMND_TIMEOUT = 54,              /* CMND_TIMEOUT  */
-  YYSYMBOL_NOTBEFORE = 55,                 /* NOTBEFORE  */
-  YYSYMBOL_NOTAFTER = 56,                  /* NOTAFTER  */
-  YYSYMBOL_MYSELF = 57,                    /* MYSELF  */
-  YYSYMBOL_SHA224_TOK = 58,                /* SHA224_TOK  */
-  YYSYMBOL_SHA256_TOK = 59,                /* SHA256_TOK  */
-  YYSYMBOL_SHA384_TOK = 60,                /* SHA384_TOK  */
-  YYSYMBOL_SHA512_TOK = 61,                /* SHA512_TOK  */
-  YYSYMBOL_YYACCEPT = 62,                  /* $accept  */
-  YYSYMBOL_file = 63,                      /* file  */
-  YYSYMBOL_line = 64,                      /* line  */
-  YYSYMBOL_entry = 65,                     /* entry  */
-  YYSYMBOL_include = 66,                   /* include  */
-  YYSYMBOL_includedir = 67,                /* includedir  */
-  YYSYMBOL_defaults_list = 68,             /* defaults_list  */
-  YYSYMBOL_defaults_entry = 69,            /* defaults_entry  */
-  YYSYMBOL_privileges = 70,                /* privileges  */
-  YYSYMBOL_privilege = 71,                 /* privilege  */
-  YYSYMBOL_ophost = 72,                    /* ophost  */
-  YYSYMBOL_host = 73,                      /* host  */
-  YYSYMBOL_cmndspeclist = 74,              /* cmndspeclist  */
-  YYSYMBOL_cmndspec = 75,                  /* cmndspec  */
-  YYSYMBOL_digestspec = 76,                /* digestspec  */
-  YYSYMBOL_digestlist = 77,                /* digestlist  */
-  YYSYMBOL_digcmnd = 78,                   /* digcmnd  */
-  YYSYMBOL_opcmnd = 79,                    /* opcmnd  */
-  YYSYMBOL_chdirspec = 80,                 /* chdirspec  */
-  YYSYMBOL_chrootspec = 81,                /* chrootspec  */
-  YYSYMBOL_timeoutspec = 82,               /* timeoutspec  */
-  YYSYMBOL_notbeforespec = 83,             /* notbeforespec  */
-  YYSYMBOL_notafterspec = 84,              /* notafterspec  */
-  YYSYMBOL_rolespec = 85,                  /* rolespec  */
-  YYSYMBOL_typespec = 86,                  /* typespec  */
-  YYSYMBOL_privsspec = 87,                 /* privsspec  */
-  YYSYMBOL_limitprivsspec = 88,            /* limitprivsspec  */
-  YYSYMBOL_runasspec = 89,                 /* runasspec  */
-  YYSYMBOL_runaslist = 90,                 /* runaslist  */
-  YYSYMBOL_reserved_word = 91,             /* reserved_word  */
-  YYSYMBOL_reserved_alias = 92,            /* reserved_alias  */
-  YYSYMBOL_options = 93,                   /* options  */
-  YYSYMBOL_cmndtag = 94,                   /* cmndtag  */
-  YYSYMBOL_cmnd = 95,                      /* cmnd  */
-  YYSYMBOL_hostaliases = 96,               /* hostaliases  */
-  YYSYMBOL_hostalias = 97,                 /* hostalias  */
-  YYSYMBOL_98_1 = 98,                      /* $@1  */
-  YYSYMBOL_hostlist = 99,                  /* hostlist  */
-  YYSYMBOL_cmndaliases = 100,              /* cmndaliases  */
-  YYSYMBOL_cmndalias = 101,                /* cmndalias  */
-  YYSYMBOL_102_2 = 102,                    /* $@2  */
-  YYSYMBOL_cmndlist = 103,                 /* cmndlist  */
-  YYSYMBOL_runasaliases = 104,             /* runasaliases  */
-  YYSYMBOL_runasalias = 105,               /* runasalias  */
-  YYSYMBOL_106_3 = 106,                    /* $@3  */
-  YYSYMBOL_useraliases = 107,              /* useraliases  */
-  YYSYMBOL_useralias = 108,                /* useralias  */
-  YYSYMBOL_109_4 = 109,                    /* $@4  */
-  YYSYMBOL_userlist = 110,                 /* userlist  */
-  YYSYMBOL_opuser = 111,                   /* opuser  */
-  YYSYMBOL_user = 112,                     /* user  */
-  YYSYMBOL_grouplist = 113,                /* grouplist  */
-  YYSYMBOL_opgroup = 114,                  /* opgroup  */
-  YYSYMBOL_group = 115                     /* group  */
+  YYSYMBOL_CHROOT = 47,                    /* CHROOT  */
+  YYSYMBOL_CWD = 48,                       /* CWD  */
+  YYSYMBOL_TYPE = 49,                      /* TYPE  */
+  YYSYMBOL_ROLE = 50,                      /* ROLE  */
+  YYSYMBOL_PRIVS = 51,                     /* PRIVS  */
+  YYSYMBOL_LIMITPRIVS = 52,                /* LIMITPRIVS  */
+  YYSYMBOL_CMND_TIMEOUT = 53,              /* CMND_TIMEOUT  */
+  YYSYMBOL_NOTBEFORE = 54,                 /* NOTBEFORE  */
+  YYSYMBOL_NOTAFTER = 55,                  /* NOTAFTER  */
+  YYSYMBOL_MYSELF = 56,                    /* MYSELF  */
+  YYSYMBOL_SHA224_TOK = 57,                /* SHA224_TOK  */
+  YYSYMBOL_SHA256_TOK = 58,                /* SHA256_TOK  */
+  YYSYMBOL_SHA384_TOK = 59,                /* SHA384_TOK  */
+  YYSYMBOL_SHA512_TOK = 60,                /* SHA512_TOK  */
+  YYSYMBOL_YYACCEPT = 61,                  /* $accept  */
+  YYSYMBOL_file = 62,                      /* file  */
+  YYSYMBOL_line = 63,                      /* line  */
+  YYSYMBOL_entry = 64,                     /* entry  */
+  YYSYMBOL_include = 65,                   /* include  */
+  YYSYMBOL_includedir = 66,                /* includedir  */
+  YYSYMBOL_defaults_list = 67,             /* defaults_list  */
+  YYSYMBOL_defaults_entry = 68,            /* defaults_entry  */
+  YYSYMBOL_privileges = 69,                /* privileges  */
+  YYSYMBOL_privilege = 70,                 /* privilege  */
+  YYSYMBOL_ophost = 71,                    /* ophost  */
+  YYSYMBOL_host = 72,                      /* host  */
+  YYSYMBOL_cmndspeclist = 73,              /* cmndspeclist  */
+  YYSYMBOL_cmndspec = 74,                  /* cmndspec  */
+  YYSYMBOL_digestspec = 75,                /* digestspec  */
+  YYSYMBOL_digestlist = 76,                /* digestlist  */
+  YYSYMBOL_digcmnd = 77,                   /* digcmnd  */
+  YYSYMBOL_opcmnd = 78,                    /* opcmnd  */
+  YYSYMBOL_chdirspec = 79,                 /* chdirspec  */
+  YYSYMBOL_chrootspec = 80,                /* chrootspec  */
+  YYSYMBOL_timeoutspec = 81,               /* timeoutspec  */
+  YYSYMBOL_notbeforespec = 82,             /* notbeforespec  */
+  YYSYMBOL_notafterspec = 83,              /* notafterspec  */
+  YYSYMBOL_rolespec = 84,                  /* rolespec  */
+  YYSYMBOL_typespec = 85,                  /* typespec  */
+  YYSYMBOL_privsspec = 86,                 /* privsspec  */
+  YYSYMBOL_limitprivsspec = 87,            /* limitprivsspec  */
+  YYSYMBOL_runasspec = 88,                 /* runasspec  */
+  YYSYMBOL_runaslist = 89,                 /* runaslist  */
+  YYSYMBOL_reserved_word = 90,             /* reserved_word  */
+  YYSYMBOL_reserved_alias = 91,            /* reserved_alias  */
+  YYSYMBOL_options = 92,                   /* options  */
+  YYSYMBOL_cmndtag = 93,                   /* cmndtag  */
+  YYSYMBOL_cmnd = 94,                      /* cmnd  */
+  YYSYMBOL_hostaliases = 95,               /* hostaliases  */
+  YYSYMBOL_hostalias = 96,                 /* hostalias  */
+  YYSYMBOL_97_1 = 97,                      /* $@1  */
+  YYSYMBOL_hostlist = 98,                  /* hostlist  */
+  YYSYMBOL_cmndaliases = 99,               /* cmndaliases  */
+  YYSYMBOL_cmndalias = 100,                /* cmndalias  */
+  YYSYMBOL_101_2 = 101,                    /* $@2  */
+  YYSYMBOL_cmndlist = 102,                 /* cmndlist  */
+  YYSYMBOL_runasaliases = 103,             /* runasaliases  */
+  YYSYMBOL_runasalias = 104,               /* runasalias  */
+  YYSYMBOL_105_3 = 105,                    /* $@3  */
+  YYSYMBOL_useraliases = 106,              /* useraliases  */
+  YYSYMBOL_useralias = 107,                /* useralias  */
+  YYSYMBOL_108_4 = 108,                    /* $@4  */
+  YYSYMBOL_userlist = 109,                 /* userlist  */
+  YYSYMBOL_opuser = 110,                   /* opuser  */
+  YYSYMBOL_user = 111,                     /* user  */
+  YYSYMBOL_grouplist = 112,                /* grouplist  */
+  YYSYMBOL_opgroup = 113,                  /* opgroup  */
+  YYSYMBOL_group = 114                     /* group  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -796,7 +793,7 @@ union yyalloc
 #define YYLAST   320
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  62
+#define YYNTOKENS  61
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  54
 /* YYNRULES -- Number of rules.  */
@@ -805,7 +802,7 @@ union yyalloc
 #define YYNSTATES  248
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   307
+#define YYMAXUTOK   306
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -849,28 +846,28 @@ static const yytype_int8 yytranslate[] =
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    46,    47,    48,    49,    50,    51,    52,    53,
-      54,    55,    56,    57,    58,    59,    60,    61
+      54,    55,    56,    57,    58,    59,    60
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   197,   197,   200,   203,   204,   207,   210,   213,   222,
-     231,   237,   240,   243,   246,   249,   253,   257,   261,   265,
-     271,   274,   280,   283,   289,   290,   297,   306,   315,   325,
-     335,   347,   348,   353,   359,   376,   380,   386,   395,   403,
-     412,   421,   432,   433,   493,   559,   568,   577,   586,   597,
-     598,   605,   608,   630,   634,   640,   652,   664,   669,   673,
-     678,   683,   688,   692,   697,   700,   705,   721,   732,   744,
-     755,   773,   774,   775,   776,   777,   778,   779,   780,   781,
-     782,   785,   791,   794,   799,   804,   813,   822,   834,   841,
-     848,   855,   864,   867,   870,   873,   876,   879,   882,   885,
-     888,   891,   894,   897,   900,   903,   906,   911,   919,   928,
-     947,   948,   951,   951,   963,   966,   967,   974,   975,   978,
-     978,   990,   993,   994,  1001,  1002,  1005,  1005,  1017,  1020,
-    1021,  1024,  1024,  1036,  1039,  1040,  1047,  1051,  1057,  1066,
-    1074,  1083,  1092,  1103,  1104,  1111,  1115,  1121,  1130,  1138
+       0,   196,   196,   199,   202,   203,   206,   209,   212,   221,
+     230,   236,   239,   242,   245,   248,   252,   256,   260,   264,
+     270,   273,   279,   282,   288,   289,   296,   305,   314,   324,
+     334,   346,   347,   352,   358,   375,   379,   385,   394,   402,
+     411,   420,   431,   432,   492,   558,   567,   576,   585,   596,
+     597,   604,   607,   629,   633,   639,   651,   663,   668,   672,
+     677,   682,   687,   691,   696,   699,   704,   720,   731,   743,
+     754,   772,   773,   774,   775,   776,   777,   778,   779,   780,
+     781,   784,   790,   793,   798,   803,   812,   821,   833,   840,
+     847,   854,   863,   866,   869,   872,   875,   878,   881,   884,
+     887,   890,   893,   896,   899,   902,   905,   910,   918,   927,
+     946,   947,   950,   950,   962,   965,   966,   973,   974,   977,
+     977,   989,   992,   993,  1000,  1001,  1004,  1004,  1016,  1019,
+    1020,  1023,  1023,  1035,  1038,  1039,  1046,  1050,  1056,  1065,
+    1073,  1082,  1091,  1102,  1103,  1110,  1114,  1120,  1129,  1137
 };
 #endif
 
@@ -893,11 +890,11 @@ static const char *const yytname[] =
   "EXEC", "SETENV", "NOSETENV", "LOG_INPUT", "NOLOG_INPUT", "LOG_OUTPUT",
   "NOLOG_OUTPUT", "MAIL", "NOMAIL", "FOLLOWLNK", "NOFOLLOWLNK", "ALL",
   "HOSTALIAS", "CMNDALIAS", "USERALIAS", "RUNASALIAS", "':'", "'='", "','",
-  "'!'", "'+'", "'-'", "'('", "')'", "'\\n'", "ERROR", "NOMATCH", "CHROOT",
-  "CWD", "TYPE", "ROLE", "PRIVS", "LIMITPRIVS", "CMND_TIMEOUT",
-  "NOTBEFORE", "NOTAFTER", "MYSELF", "SHA224_TOK", "SHA256_TOK",
-  "SHA384_TOK", "SHA512_TOK", "$accept", "file", "line", "entry",
-  "include", "includedir", "defaults_list", "defaults_entry", "privileges",
+  "'!'", "'+'", "'-'", "'('", "')'", "'\\n'", "ERROR", "CHROOT", "CWD",
+  "TYPE", "ROLE", "PRIVS", "LIMITPRIVS", "CMND_TIMEOUT", "NOTBEFORE",
+  "NOTAFTER", "MYSELF", "SHA224_TOK", "SHA256_TOK", "SHA384_TOK",
+  "SHA512_TOK", "$accept", "file", "line", "entry", "include",
+  "includedir", "defaults_list", "defaults_entry", "privileges",
   "privilege", "ophost", "host", "cmndspeclist", "cmndspec", "digestspec",
   "digestlist", "digcmnd", "opcmnd", "chdirspec", "chrootspec",
   "timeoutspec", "notbeforespec", "notafterspec", "rolespec", "typespec",
@@ -927,7 +924,7 @@ static const yytype_int16 yytoknum[] =
      285,   286,   287,   288,   289,   290,   291,    58,    61,    44,
       33,    43,    45,    40,    41,    10,   292,   293,   294,   295,
      296,   297,   298,   299,   300,   301,   302,   303,   304,   305,
-     306,   307
+     306
 };
 #endif
 
@@ -945,28 +942,28 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     178,   -11,  -114,  -114,  -114,  -114,    27,    44,     9,   240,
-     148,   148,     6,  -114,    31,    40,   112,   121,   193,  -114,
-      75,   220,  -114,  -114,  -114,    95,  -114,  -114,  -114,    10,
-      11,    16,    73,    32,  -114,  -114,  -114,  -114,  -114,  -114,
-     255,  -114,  -114,     8,    12,    12,  -114,  -114,  -114,   106,
-      63,    70,    74,    89,  -114,    66,  -114,  -114,  -114,    34,
+     174,   -28,  -114,  -114,  -114,  -114,    27,    45,     9,   194,
+     231,   231,     6,  -114,    30,    39,    92,   118,   148,  -114,
+      57,   216,  -114,  -114,  -114,    95,  -114,  -114,  -114,    10,
+      11,   217,    34,    68,  -114,  -114,  -114,  -114,  -114,  -114,
+     190,  -114,  -114,     8,    69,    69,  -114,  -114,  -114,   128,
+      32,    58,    63,    74,  -114,    12,  -114,  -114,  -114,    98,
     -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,
-    -114,  -114,   107,    77,  -114,  -114,   120,    83,  -114,  -114,
-     143,    87,  -114,  -114,   158,    92,  -114,  -114,  -114,  -114,
-     148,   105,  -114,   145,    88,  -114,   102,  -114,   189,   190,
-     197,  -114,     9,  -114,  -114,   240,    91,   101,   104,  -114,
-     198,   206,   207,   212,   209,  -114,     6,   170,   169,   240,
-      31,  -114,   188,     6,    40,  -114,   192,   148,   112,  -114,
-     201,   148,   121,  -114,  -114,    36,  -114,   202,  -114,  -114,
+    -114,  -114,    78,     5,  -114,  -114,   111,    81,  -114,  -114,
+     126,   139,  -114,  -114,   141,   167,  -114,  -114,  -114,  -114,
+     231,   168,  -114,   124,    91,  -114,   132,  -114,   183,   184,
+     186,  -114,     9,  -114,  -114,   194,    75,   176,   208,  -114,
+     192,   201,   226,   227,   207,  -114,     6,   215,   180,   194,
+      30,  -114,   206,     6,    39,  -114,   224,   231,    92,  -114,
+     230,   231,   118,  -114,  -114,    66,  -114,   202,  -114,  -114,
     -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,
-    -114,  -114,  -114,  -114,  -114,   240,   211,  -114,     6,   218,
-    -114,   148,   219,  -114,   148,   219,  -114,  -114,  -114,   234,
-     224,  -114,  -114,   211,   218,   219,   219,    99,   196,   -21,
-     202,   241,  -114,  -114,  -114,   109,   236,  -114,  -114,  -114,
-      99,  -114,   210,   213,   235,   238,   239,   243,   244,   245,
-     246,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,
-       1,  -114,    99,   236,   269,   270,   276,   277,   279,   289,
+    -114,  -114,  -114,  -114,  -114,   194,   242,  -114,     6,   243,
+    -114,   231,   244,  -114,   231,   244,  -114,  -114,  -114,   121,
+     245,  -114,  -114,   242,   243,   244,   244,    36,   241,    -2,
+     202,   225,  -114,  -114,  -114,   101,   247,  -114,  -114,  -114,
+      36,  -114,   232,   249,   250,   251,   252,   253,   254,   255,
+     256,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,
+       1,  -114,    36,   247,   237,   260,   286,   287,   288,   289,
      290,   291,   292,  -114,  -114,  -114,  -114,  -114,  -114,  -114,
     -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,
     -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114
@@ -1007,12 +1004,12 @@ static const yytype_uint8 yydefact[] =
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -114,  -114,  -114,   281,  -114,  -114,   160,   203,  -114,   168,
-     199,   266,  -114,   127,   194,  -114,  -113,   254,  -114,  -114,
+    -114,  -114,  -114,   281,  -114,  -114,   198,   203,  -114,   169,
+     204,   263,  -114,   127,   196,  -114,  -113,   257,  -114,  -114,
     -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,  -114,
-      -9,  -114,  -114,   261,  -114,   191,  -114,    -7,  -114,   195,
-    -114,  -108,  -114,   180,  -114,  -114,   185,  -114,   -10,   225,
-     296,   126,   108,   132
+      -9,  -114,  -114,   259,  -114,   191,  -114,    -7,  -114,   182,
+    -114,  -105,  -114,   181,  -114,  -114,   187,  -114,   -10,   228,
+     296,   129,   104,   135
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -1032,75 +1029,75 @@ static const yytype_uint8 yydefgoto[] =
 static const yytype_int16 yytable[] =
 {
       44,    45,    43,   153,    46,    47,    76,    80,    84,    46,
-      47,    94,    96,    31,    31,   159,   190,    31,    90,   223,
+      47,    94,    96,    31,    31,    46,    47,    28,   159,   223,
      224,   225,   226,   227,   228,   229,   230,   231,   232,   233,
-     234,   235,   236,    48,    28,    60,    29,   167,    48,    31,
-      35,    49,    36,    37,    75,    38,    49,   105,    32,    32,
-     174,    90,    32,    30,    98,    95,    97,    99,   100,    50,
-      51,    52,    53,    61,    50,    51,    52,    53,    39,    46,
-      47,   102,    61,   116,    32,    88,    40,   103,   101,    62,
-      63,    64,    65,    66,    67,    68,    69,    70,    62,    63,
-      64,    65,    66,    67,    68,    69,    70,   237,    48,    35,
-     110,    36,    37,   182,    38,   114,    49,   111,   183,    46,
-      47,   112,   156,   182,   120,    76,    79,   162,   183,    80,
-     124,   165,   121,    84,   128,    83,   113,    39,   125,   132,
-     102,   184,   129,   138,    90,    40,   145,   133,    48,   185,
-     102,   184,   135,   102,    61,   119,   146,   139,   173,   147,
-     136,   175,     2,    61,   176,     3,     4,     5,   123,   179,
-      62,    63,    64,    65,    66,    67,    68,    69,    70,    62,
-      63,    64,    65,    66,    67,    68,    69,    70,    -2,     1,
-      13,   127,     2,   137,   105,     3,     4,     5,    18,     6,
-       7,     8,     9,    10,    11,    12,   131,     2,   140,   141,
-       3,     4,     5,   106,   107,   108,   142,   155,   148,   102,
-      13,    14,    15,    16,    17,   154,   149,   150,    18,   117,
-      -3,     1,   151,    19,     2,    13,   158,     3,     4,     5,
-     161,     6,     7,     8,     9,    10,    11,    12,     2,   164,
-     189,     3,     4,     5,    35,   169,    36,    37,   214,    38,
-     105,   215,    13,    14,    15,    16,    17,   116,    90,    35,
-      18,    36,    37,   180,    38,    19,    13,    50,    51,    52,
-      53,   177,    39,   216,    18,   212,   217,   218,   239,   240,
-      40,   219,   220,   221,   222,   241,   242,    39,   243,   192,
-     193,   194,   195,   196,   197,   198,   199,   200,   244,   245,
-     246,   247,    89,   168,   144,   143,   104,   191,   152,   115,
-     109,   157,   166,   163,    87,   134,   213,   211,     0,   160,
-     238
+     234,   235,   236,    48,    60,   190,    29,    90,    48,   101,
+     182,    49,   120,    75,    48,   183,    49,   105,    32,    32,
+     121,   114,    49,   174,    30,    95,    97,    88,    50,    51,
+      52,    53,    61,    50,    51,    52,    53,   167,   184,   110,
+      35,    61,    36,    37,    31,    38,   185,    62,    63,    64,
+      65,    66,    67,    68,    69,    70,    62,    63,    64,    65,
+      66,    67,    68,    69,    70,   111,    79,   237,    39,    35,
+     112,    36,    37,    31,    38,   182,    40,   102,    90,    32,
+     183,   113,   156,   103,   102,    76,   119,   162,   124,    80,
+     145,   165,    83,    84,    61,     2,   125,    39,     3,     4,
+       5,    46,    47,   184,    90,    40,   138,   116,    32,    62,
+      63,    64,    65,    66,    67,    68,    69,    70,   173,   123,
+      61,   175,     2,    13,   176,     3,     4,     5,   177,   179,
+      48,    18,   137,   105,   127,    62,    63,    64,    65,    66,
+      67,    68,    69,    70,    -2,     1,   128,   139,     2,   131,
+      13,     3,     4,     5,   129,     6,     7,     8,     9,    10,
+      11,    12,   140,   141,    35,   142,    36,    37,    35,    38,
+      36,    37,   148,    38,   132,   135,    13,    14,    15,    16,
+      17,   149,   133,   136,    18,   102,    -3,     1,   155,    19,
+       2,   146,    39,     3,     4,     5,    39,     6,     7,     8,
+       9,    10,    11,    12,    40,     2,   150,   151,     3,     4,
+       5,   106,   107,   108,   158,   169,   239,   102,    13,    14,
+      15,    16,    17,   147,   102,    98,    18,   117,    99,   100,
+     154,    19,   161,    13,    50,    51,    52,    53,   164,   240,
+     214,    18,   192,   193,   194,   195,   196,   197,   198,   199,
+     200,   105,   116,    90,   180,   189,   212,   215,   216,   217,
+     218,   219,   220,   221,   222,   241,   242,   243,   244,   245,
+     246,   247,    89,   104,   168,   143,   160,   191,   109,   144,
+     152,   157,   115,   166,    87,   163,   238,     0,   134,   213,
+     211
 };
 
 static const yytype_int16 yycheck[] =
 {
       10,    11,     9,   116,     3,     4,    15,    16,    17,     3,
-       4,     1,     1,     5,     5,   123,    37,     5,    39,    18,
+       4,     1,     1,     5,     5,     3,     4,    45,   123,    18,
       19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
-      29,    30,    31,    32,    45,     4,     9,     1,    32,     5,
-       4,    40,     6,     7,     4,     9,    40,    39,    40,    40,
-     158,    39,    40,     9,    38,    45,    45,    41,    42,    58,
-      59,    60,    61,    32,    58,    59,    60,    61,    32,     3,
-       4,    39,    32,    39,    40,     0,    40,    45,     5,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,    48,    49,
-      50,    51,    52,    53,    54,    55,    56,   210,    32,     4,
-      37,     6,     7,     4,     9,    39,    40,    37,     9,     3,
-       4,    37,   119,     4,    37,   124,     4,   127,     9,   128,
-      37,   131,    45,   132,    37,     4,    37,    32,    45,    37,
-      39,    32,    45,    45,    39,    40,    45,    45,    32,    40,
-      39,    32,    37,    39,    32,    38,    45,    45,   155,    45,
-      45,   161,     4,    32,   164,     7,     8,     9,    38,   169,
-      48,    49,    50,    51,    52,    53,    54,    55,    56,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,     0,     1,
-      32,    38,     4,    38,    39,     7,     8,     9,    40,    11,
-      12,    13,    14,    15,    16,    17,    38,     4,     9,     9,
-       7,     8,     9,    43,    44,    45,     9,    38,    10,    39,
-      32,    33,    34,    35,    36,    45,    10,    10,    40,    59,
-       0,     1,    10,    45,     4,    32,    38,     7,     8,     9,
-      38,    11,    12,    13,    14,    15,    16,    17,     4,    38,
-      44,     7,     8,     9,     4,    43,     6,     7,    38,     9,
-      39,    38,    32,    33,    34,    35,    36,    39,    39,     4,
-      40,     6,     7,    39,     9,    45,    32,    58,    59,    60,
-      61,    37,    32,    38,    40,    39,    38,    38,     9,     9,
-      40,    38,    38,    38,    38,     9,     9,    32,     9,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,     9,     9,
-       9,     9,    21,   135,   105,   102,    40,   180,   114,    55,
-      49,   120,   132,   128,    18,    90,   190,   185,    -1,   124,
-     212
+      29,    30,    31,    32,     4,    37,     9,    39,    32,     5,
+       4,    40,    37,     4,    32,     9,    40,    39,    40,    40,
+      45,    39,    40,   158,     9,    45,    45,     0,    57,    58,
+      59,    60,    32,    57,    58,    59,    60,     1,    32,    37,
+       4,    32,     6,     7,     5,     9,    40,    47,    48,    49,
+      50,    51,    52,    53,    54,    55,    47,    48,    49,    50,
+      51,    52,    53,    54,    55,    37,     4,   210,    32,     4,
+      37,     6,     7,     5,     9,     4,    40,    39,    39,    40,
+       9,    37,   119,    45,    39,   124,    38,   127,    37,   128,
+      45,   131,     4,   132,    32,     4,    45,    32,     7,     8,
+       9,     3,     4,    32,    39,    40,    45,    39,    40,    47,
+      48,    49,    50,    51,    52,    53,    54,    55,   155,    38,
+      32,   161,     4,    32,   164,     7,     8,     9,    37,   169,
+      32,    40,    38,    39,    38,    47,    48,    49,    50,    51,
+      52,    53,    54,    55,     0,     1,    37,    45,     4,    38,
+      32,     7,     8,     9,    45,    11,    12,    13,    14,    15,
+      16,    17,     9,     9,     4,     9,     6,     7,     4,     9,
+       6,     7,    10,     9,    37,    37,    32,    33,    34,    35,
+      36,    10,    45,    45,    40,    39,     0,     1,    38,    45,
+       4,    45,    32,     7,     8,     9,    32,    11,    12,    13,
+      14,    15,    16,    17,    40,     4,    10,    10,     7,     8,
+       9,    43,    44,    45,    38,    43,     9,    39,    32,    33,
+      34,    35,    36,    45,    39,    38,    40,    59,    41,    42,
+      45,    45,    38,    32,    57,    58,    59,    60,    38,     9,
+      38,    40,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    39,    39,    39,    39,    44,    39,    38,    38,    38,
+      38,    38,    38,    38,    38,     9,     9,     9,     9,     9,
+       9,     9,    21,    40,   135,   102,   124,   180,    49,   105,
+     114,   120,    55,   132,    18,   128,   212,    -1,    90,   190,
+     185
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -1109,49 +1106,49 @@ static const yytype_int8 yystos[] =
 {
        0,     1,     4,     7,     8,     9,    11,    12,    13,    14,
       15,    16,    17,    32,    33,    34,    35,    36,    40,    45,
-      63,    64,    65,    66,    67,   110,   111,   112,    45,     9,
-       9,     5,    40,    68,    69,     4,     6,     7,     9,    32,
-      40,    72,    73,    99,   110,   110,     3,     4,    32,    40,
-      58,    59,    60,    61,    76,    77,    78,    79,    95,   103,
-       4,    32,    48,    49,    50,    51,    52,    53,    54,    55,
-      56,    91,    92,    96,    97,     4,    92,   100,   101,     4,
-      92,   107,   108,     4,    92,   104,   105,   112,     0,    65,
-      39,    70,    71,    99,     1,    45,     1,    45,    38,    41,
-      42,     5,    39,    45,    73,    39,    68,    68,    68,    95,
-      37,    37,    37,    37,    39,    79,    39,    68,    98,    38,
-      37,    45,   102,    38,    37,    45,   109,    38,    37,    45,
-     106,    38,    37,    45,   111,    37,    45,    38,    45,    45,
-       9,     9,     9,    69,    72,    45,    45,    45,    10,    10,
-      10,    10,    76,    78,    45,    38,    99,    97,    38,   103,
-     101,    38,   110,   108,    38,   110,   105,     1,    71,    43,
-      74,    75,    89,    99,   103,   110,   110,    37,    90,   110,
-      39,    93,     4,     9,    32,    40,   113,   114,   115,    44,
-      37,    75,    48,    49,    50,    51,    52,    53,    54,    55,
-      56,    80,    81,    82,    83,    84,    85,    86,    87,    88,
-      94,   115,    39,   113,    38,    38,    38,    38,    38,    38,
+      62,    63,    64,    65,    66,   109,   110,   111,    45,     9,
+       9,     5,    40,    67,    68,     4,     6,     7,     9,    32,
+      40,    71,    72,    98,   109,   109,     3,     4,    32,    40,
+      57,    58,    59,    60,    75,    76,    77,    78,    94,   102,
+       4,    32,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    90,    91,    95,    96,     4,    91,    99,   100,     4,
+      91,   106,   107,     4,    91,   103,   104,   111,     0,    64,
+      39,    69,    70,    98,     1,    45,     1,    45,    38,    41,
+      42,     5,    39,    45,    72,    39,    67,    67,    67,    94,
+      37,    37,    37,    37,    39,    78,    39,    67,    97,    38,
+      37,    45,   101,    38,    37,    45,   108,    38,    37,    45,
+     105,    38,    37,    45,   110,    37,    45,    38,    45,    45,
+       9,     9,     9,    68,    71,    45,    45,    45,    10,    10,
+      10,    10,    75,    77,    45,    38,    98,    96,    38,   102,
+     100,    38,   109,   107,    38,   109,   104,     1,    70,    43,
+      73,    74,    88,    98,   102,   109,   109,    37,    89,   109,
+      39,    92,     4,     9,    32,    40,   112,   113,   114,    44,
+      37,    74,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    79,    80,    81,    82,    83,    84,    85,    86,    87,
+      93,   114,    39,   112,    38,    38,    38,    38,    38,    38,
       38,    38,    38,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    78,   114,     9,
+      25,    26,    27,    28,    29,    30,    31,    77,   113,     9,
        9,     9,     9,     9,     9,     9,     9,     9
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    62,    63,    63,    64,    64,    65,    65,    65,    65,
-      65,    65,    65,    65,    65,    65,    65,    65,    65,    65,
-      66,    66,    67,    67,    68,    68,    69,    69,    69,    69,
-      69,    70,    70,    70,    71,    72,    72,    73,    73,    73,
-      73,    73,    74,    74,    75,    76,    76,    76,    76,    77,
-      77,    78,    78,    79,    79,    80,    81,    82,    83,    84,
-      85,    86,    87,    88,    89,    89,    90,    90,    90,    90,
-      90,    91,    91,    91,    91,    91,    91,    91,    91,    91,
-      91,    92,    93,    93,    93,    93,    93,    93,    93,    93,
-      93,    93,    94,    94,    94,    94,    94,    94,    94,    94,
-      94,    94,    94,    94,    94,    94,    94,    95,    95,    95,
-      96,    96,    98,    97,    97,    99,    99,   100,   100,   102,
-     101,   101,   103,   103,   104,   104,   106,   105,   105,   107,
-     107,   109,   108,   108,   110,   110,   111,   111,   112,   112,
-     112,   112,   112,   113,   113,   114,   114,   115,   115,   115
+       0,    61,    62,    62,    63,    63,    64,    64,    64,    64,
+      64,    64,    64,    64,    64,    64,    64,    64,    64,    64,
+      65,    65,    66,    66,    67,    67,    68,    68,    68,    68,
+      68,    69,    69,    69,    70,    71,    71,    72,    72,    72,
+      72,    72,    73,    73,    74,    75,    75,    75,    75,    76,
+      76,    77,    77,    78,    78,    79,    80,    81,    82,    83,
+      84,    85,    86,    87,    88,    88,    89,    89,    89,    89,
+      89,    90,    90,    90,    90,    90,    90,    90,    90,    90,
+      90,    91,    92,    92,    92,    92,    92,    92,    92,    92,
+      92,    92,    93,    93,    93,    93,    93,    93,    93,    93,
+      93,    93,    93,    93,    93,    93,    93,    94,    94,    94,
+      95,    95,    97,    96,    96,    98,    98,    99,    99,   101,
+     100,   100,   102,   102,   103,   103,   105,   104,   104,   106,
+     106,   108,   107,   107,   109,   109,   110,   110,   111,   111,
+     111,   111,   111,   112,   112,   113,   113,   114,   114,   114
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -1639,31 +1636,31 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* file: %empty  */
-#line 197 "gram.y"
+#line 196 "gram.y"
                         {
 			    ; /* empty file */
 			}
-#line 1641 "gram.c"
+#line 1638 "gram.c"
     break;
 
   case 6: /* entry: '\n'  */
-#line 207 "gram.y"
+#line 206 "gram.y"
                              {
 			    ; /* blank line */
 			}
-#line 1649 "gram.c"
+#line 1646 "gram.c"
     break;
 
   case 7: /* entry: error '\n'  */
-#line 210 "gram.y"
+#line 209 "gram.y"
                                    {
 			    yyerrok;
 			}
-#line 1657 "gram.c"
+#line 1654 "gram.c"
     break;
 
   case 8: /* entry: include  */
-#line 213 "gram.y"
+#line 212 "gram.y"
                                 {
 			    if (!push_include((yyvsp[0].string), false)) {
 				parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -1673,11 +1670,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    free((yyvsp[0].string));
 			}
-#line 1671 "gram.c"
+#line 1668 "gram.c"
     break;
 
   case 9: /* entry: includedir  */
-#line 222 "gram.y"
+#line 221 "gram.y"
                                    {
 			    if (!push_include((yyvsp[0].string), true)) {
 				parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -1687,143 +1684,143 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    free((yyvsp[0].string));
 			}
-#line 1685 "gram.c"
+#line 1682 "gram.c"
     break;
 
   case 10: /* entry: userlist privileges '\n'  */
-#line 231 "gram.y"
+#line 230 "gram.y"
                                                  {
 			    if (!add_userspec((yyvsp[-2].member), (yyvsp[-1].privilege))) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1696 "gram.c"
+#line 1693 "gram.c"
     break;
 
   case 11: /* entry: USERALIAS useraliases '\n'  */
-#line 237 "gram.y"
+#line 236 "gram.y"
                                                    {
 			    ;
 			}
-#line 1704 "gram.c"
+#line 1701 "gram.c"
     break;
 
   case 12: /* entry: HOSTALIAS hostaliases '\n'  */
-#line 240 "gram.y"
+#line 239 "gram.y"
                                                    {
 			    ;
 			}
-#line 1712 "gram.c"
+#line 1709 "gram.c"
     break;
 
   case 13: /* entry: CMNDALIAS cmndaliases '\n'  */
-#line 243 "gram.y"
+#line 242 "gram.y"
                                                    {
 			    ;
 			}
-#line 1720 "gram.c"
+#line 1717 "gram.c"
     break;
 
   case 14: /* entry: RUNASALIAS runasaliases '\n'  */
-#line 246 "gram.y"
+#line 245 "gram.y"
                                                      {
 			    ;
 			}
-#line 1728 "gram.c"
+#line 1725 "gram.c"
     break;
 
   case 15: /* entry: DEFAULTS defaults_list '\n'  */
-#line 249 "gram.y"
+#line 248 "gram.y"
                                                     {
 			    if (!add_defaults(DEFAULTS, NULL, (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1737 "gram.c"
+#line 1734 "gram.c"
     break;
 
   case 16: /* entry: DEFAULTS_USER userlist defaults_list '\n'  */
-#line 253 "gram.y"
+#line 252 "gram.y"
                                                                   {
 			    if (!add_defaults(DEFAULTS_USER, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1746 "gram.c"
+#line 1743 "gram.c"
     break;
 
   case 17: /* entry: DEFAULTS_RUNAS userlist defaults_list '\n'  */
-#line 257 "gram.y"
+#line 256 "gram.y"
                                                                    {
 			    if (!add_defaults(DEFAULTS_RUNAS, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1755 "gram.c"
+#line 1752 "gram.c"
     break;
 
   case 18: /* entry: DEFAULTS_HOST hostlist defaults_list '\n'  */
-#line 261 "gram.y"
+#line 260 "gram.y"
                                                                   {
 			    if (!add_defaults(DEFAULTS_HOST, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1764 "gram.c"
+#line 1761 "gram.c"
     break;
 
   case 19: /* entry: DEFAULTS_CMND cmndlist defaults_list '\n'  */
-#line 265 "gram.y"
+#line 264 "gram.y"
                                                                   {
 			    if (!add_defaults(DEFAULTS_CMND, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1773 "gram.c"
+#line 1770 "gram.c"
     break;
 
   case 20: /* include: INCLUDE WORD '\n'  */
-#line 271 "gram.y"
+#line 270 "gram.y"
                                           {
 			    (yyval.string) = (yyvsp[-1].string);
 			}
-#line 1781 "gram.c"
+#line 1778 "gram.c"
     break;
 
   case 21: /* include: INCLUDE WORD error '\n'  */
-#line 274 "gram.y"
+#line 273 "gram.y"
                                                 {
 			    yyerrok;
 			    (yyval.string) = (yyvsp[-2].string);
 			}
-#line 1790 "gram.c"
+#line 1787 "gram.c"
     break;
 
   case 22: /* includedir: INCLUDEDIR WORD '\n'  */
-#line 280 "gram.y"
+#line 279 "gram.y"
                                              {
 			    (yyval.string) = (yyvsp[-1].string);
 			}
-#line 1798 "gram.c"
+#line 1795 "gram.c"
     break;
 
   case 23: /* includedir: INCLUDEDIR WORD error '\n'  */
-#line 283 "gram.y"
+#line 282 "gram.y"
                                                    {
 			    yyerrok;
 			    (yyval.string) = (yyvsp[-2].string);
 			}
-#line 1807 "gram.c"
+#line 1804 "gram.c"
     break;
 
   case 25: /* defaults_list: defaults_list ',' defaults_entry  */
-#line 290 "gram.y"
+#line 289 "gram.y"
                                                          {
 			    parser_leak_remove(LEAK_DEFAULTS, (yyvsp[0].defaults));
 			    HLTQ_CONCAT((yyvsp[-2].defaults), (yyvsp[0].defaults), entries);
 			    (yyval.defaults) = (yyvsp[-2].defaults);
 			}
-#line 1817 "gram.c"
+#line 1814 "gram.c"
     break;
 
   case 26: /* defaults_entry: DEFVAR  */
-#line 297 "gram.y"
+#line 296 "gram.y"
                                {
 			    (yyval.defaults) = new_default((yyvsp[0].string), NULL, true);
 			    if ((yyval.defaults) == NULL) {
@@ -1833,11 +1830,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1831 "gram.c"
+#line 1828 "gram.c"
     break;
 
   case 27: /* defaults_entry: '!' DEFVAR  */
-#line 306 "gram.y"
+#line 305 "gram.y"
                                    {
 			    (yyval.defaults) = new_default((yyvsp[0].string), NULL, false);
 			    if ((yyval.defaults) == NULL) {
@@ -1847,11 +1844,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1845 "gram.c"
+#line 1842 "gram.c"
     break;
 
   case 28: /* defaults_entry: DEFVAR '=' WORD  */
-#line 315 "gram.y"
+#line 314 "gram.y"
                                         {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), true);
 			    if ((yyval.defaults) == NULL) {
@@ -1862,11 +1859,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1860 "gram.c"
+#line 1857 "gram.c"
     break;
 
   case 29: /* defaults_entry: DEFVAR '+' WORD  */
-#line 325 "gram.y"
+#line 324 "gram.y"
                                         {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), '+');
 			    if ((yyval.defaults) == NULL) {
@@ -1877,11 +1874,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1875 "gram.c"
+#line 1872 "gram.c"
     break;
 
   case 30: /* defaults_entry: DEFVAR '-' WORD  */
-#line 335 "gram.y"
+#line 334 "gram.y"
                                         {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), '-');
 			    if ((yyval.defaults) == NULL) {
@@ -1892,30 +1889,30 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1890 "gram.c"
+#line 1887 "gram.c"
     break;
 
   case 32: /* privileges: privileges ':' privilege  */
-#line 348 "gram.y"
+#line 347 "gram.y"
                                                  {
 			    parser_leak_remove(LEAK_PRIVILEGE, (yyvsp[0].privilege));
 			    HLTQ_CONCAT((yyvsp[-2].privilege), (yyvsp[0].privilege), entries);
 			    (yyval.privilege) = (yyvsp[-2].privilege);
 			}
-#line 1900 "gram.c"
+#line 1897 "gram.c"
     break;
 
   case 33: /* privileges: privileges ':' error  */
-#line 353 "gram.y"
+#line 352 "gram.y"
                                              {
 			    yyerrok;
 			    (yyval.privilege) = (yyvsp[-2].privilege);
 			}
-#line 1909 "gram.c"
+#line 1906 "gram.c"
     break;
 
   case 34: /* privilege: hostlist '=' cmndspeclist  */
-#line 359 "gram.y"
+#line 358 "gram.y"
                                                   {
 			    struct privilege *p = calloc(1, sizeof(*p));
 			    if (p == NULL) {
@@ -1931,29 +1928,29 @@ yyreduce:
 			    HLTQ_INIT(p, entries);
 			    (yyval.privilege) = p;
 			}
-#line 1929 "gram.c"
+#line 1926 "gram.c"
     break;
 
   case 35: /* ophost: host  */
-#line 376 "gram.y"
+#line 375 "gram.y"
                              {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 1938 "gram.c"
+#line 1935 "gram.c"
     break;
 
   case 36: /* ophost: '!' host  */
-#line 380 "gram.y"
+#line 379 "gram.y"
                                  {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 1947 "gram.c"
+#line 1944 "gram.c"
     break;
 
   case 37: /* host: ALIAS  */
-#line 386 "gram.y"
+#line 385 "gram.y"
                               {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
@@ -1963,11 +1960,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 1961 "gram.c"
+#line 1958 "gram.c"
     break;
 
   case 38: /* host: ALL  */
-#line 395 "gram.y"
+#line 394 "gram.y"
                             {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
@@ -1976,11 +1973,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 1974 "gram.c"
+#line 1971 "gram.c"
     break;
 
   case 39: /* host: NETGROUP  */
-#line 403 "gram.y"
+#line 402 "gram.y"
                                  {
 			    (yyval.member) = new_member((yyvsp[0].string), NETGROUP);
 			    if ((yyval.member) == NULL) {
@@ -1990,11 +1987,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 1988 "gram.c"
+#line 1985 "gram.c"
     break;
 
   case 40: /* host: NTWKADDR  */
-#line 412 "gram.y"
+#line 411 "gram.y"
                                  {
 			    (yyval.member) = new_member((yyvsp[0].string), NTWKADDR);
 			    if ((yyval.member) == NULL) {
@@ -2004,11 +2001,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2002 "gram.c"
+#line 1999 "gram.c"
     break;
 
   case 41: /* host: WORD  */
-#line 421 "gram.y"
+#line 420 "gram.y"
                              {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
@@ -2018,11 +2015,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2016 "gram.c"
+#line 2013 "gram.c"
     break;
 
   case 43: /* cmndspeclist: cmndspeclist ',' cmndspec  */
-#line 433 "gram.y"
+#line 432 "gram.y"
                                                   {
 			    struct cmndspec *prev;
 			    prev = HLTQ_LAST((yyvsp[-2].cmndspec), cmndspec, entries);
@@ -2081,11 +2078,11 @@ yyreduce:
 			    }
 			    (yyval.cmndspec) = (yyvsp[-2].cmndspec);
 			}
-#line 2079 "gram.c"
+#line 2076 "gram.c"
     break;
 
   case 44: /* cmndspec: runasspec options cmndtag digcmnd  */
-#line 493 "gram.y"
+#line 492 "gram.y"
                                                           {
 			    struct cmndspec *cs = calloc(1, sizeof(*cs));
 			    if (cs == NULL) {
@@ -2150,11 +2147,11 @@ yyreduce:
 				cs->tags.setenv = IMPLIED;
 			    (yyval.cmndspec) = cs;
 			}
-#line 2148 "gram.c"
+#line 2145 "gram.c"
     break;
 
   case 45: /* digestspec: SHA224_TOK ':' DIGEST  */
-#line 559 "gram.y"
+#line 558 "gram.y"
                                               {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA224, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
@@ -2164,11 +2161,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DIGEST, (yyval.digest));
 			}
-#line 2162 "gram.c"
+#line 2159 "gram.c"
     break;
 
   case 46: /* digestspec: SHA256_TOK ':' DIGEST  */
-#line 568 "gram.y"
+#line 567 "gram.y"
                                               {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA256, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
@@ -2178,11 +2175,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DIGEST, (yyval.digest));
 			}
-#line 2176 "gram.c"
+#line 2173 "gram.c"
     break;
 
   case 47: /* digestspec: SHA384_TOK ':' DIGEST  */
-#line 577 "gram.y"
+#line 576 "gram.y"
                                               {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA384, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
@@ -2192,11 +2189,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DIGEST, (yyval.digest));
 			}
-#line 2190 "gram.c"
+#line 2187 "gram.c"
     break;
 
   case 48: /* digestspec: SHA512_TOK ':' DIGEST  */
-#line 586 "gram.y"
+#line 585 "gram.y"
                                               {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA512, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
@@ -2206,29 +2203,29 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DIGEST, (yyval.digest));
 			}
-#line 2204 "gram.c"
+#line 2201 "gram.c"
     break;
 
   case 50: /* digestlist: digestlist ',' digestspec  */
-#line 598 "gram.y"
+#line 597 "gram.y"
                                                   {
 			    parser_leak_remove(LEAK_DIGEST, (yyvsp[0].digest));
 			    HLTQ_CONCAT((yyvsp[-2].digest), (yyvsp[0].digest), entries);
 			    (yyval.digest) = (yyvsp[-2].digest);
 			}
-#line 2214 "gram.c"
+#line 2211 "gram.c"
     break;
 
   case 51: /* digcmnd: opcmnd  */
-#line 605 "gram.y"
+#line 604 "gram.y"
                                {
 			    (yyval.member) = (yyvsp[0].member);
 			}
-#line 2222 "gram.c"
+#line 2219 "gram.c"
     break;
 
   case 52: /* digcmnd: digestlist opcmnd  */
-#line 608 "gram.y"
+#line 607 "gram.y"
                                           {
 			    struct sudo_command *c =
 				(struct sudo_command *) (yyvsp[0].member)->name;
@@ -2249,29 +2246,29 @@ yyreduce:
 			    HLTQ_TO_TAILQ(&c->digests, (yyvsp[-1].digest), entries);
 			    (yyval.member) = (yyvsp[0].member);
 			}
-#line 2247 "gram.c"
+#line 2244 "gram.c"
     break;
 
   case 53: /* opcmnd: cmnd  */
-#line 630 "gram.y"
+#line 629 "gram.y"
                              {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 2256 "gram.c"
+#line 2253 "gram.c"
     break;
 
   case 54: /* opcmnd: '!' cmnd  */
-#line 634 "gram.y"
+#line 633 "gram.y"
                                  {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 2265 "gram.c"
+#line 2262 "gram.c"
     break;
 
   case 55: /* chdirspec: CWD '=' WORD  */
-#line 640 "gram.y"
+#line 639 "gram.y"
                                      {
 			    if ((yyvsp[0].string)[0] != '/' && (yyvsp[0].string)[0] != '~') {
 				if (strcmp((yyvsp[0].string), "*") != 0) {
@@ -2282,11 +2279,11 @@ yyreduce:
 			    }
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2280 "gram.c"
+#line 2277 "gram.c"
     break;
 
   case 56: /* chrootspec: CHROOT '=' WORD  */
-#line 652 "gram.y"
+#line 651 "gram.y"
                                         {
 			    if ((yyvsp[0].string)[0] != '/' && (yyvsp[0].string)[0] != '~') {
 				if (strcmp((yyvsp[0].string), "*") != 0) {
@@ -2297,83 +2294,83 @@ yyreduce:
 			    }
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2295 "gram.c"
+#line 2292 "gram.c"
     break;
 
   case 57: /* timeoutspec: CMND_TIMEOUT '=' WORD  */
-#line 664 "gram.y"
+#line 663 "gram.y"
                                               {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2303 "gram.c"
+#line 2300 "gram.c"
     break;
 
   case 58: /* notbeforespec: NOTBEFORE '=' WORD  */
-#line 669 "gram.y"
+#line 668 "gram.y"
                                            {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2311 "gram.c"
+#line 2308 "gram.c"
     break;
 
   case 59: /* notafterspec: NOTAFTER '=' WORD  */
-#line 673 "gram.y"
+#line 672 "gram.y"
                                           {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2319 "gram.c"
+#line 2316 "gram.c"
     break;
 
   case 60: /* rolespec: ROLE '=' WORD  */
-#line 678 "gram.y"
+#line 677 "gram.y"
                                       {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2327 "gram.c"
+#line 2324 "gram.c"
     break;
 
   case 61: /* typespec: TYPE '=' WORD  */
-#line 683 "gram.y"
+#line 682 "gram.y"
                                       {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2335 "gram.c"
+#line 2332 "gram.c"
     break;
 
   case 62: /* privsspec: PRIVS '=' WORD  */
-#line 688 "gram.y"
+#line 687 "gram.y"
                                        {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2343 "gram.c"
+#line 2340 "gram.c"
     break;
 
   case 63: /* limitprivsspec: LIMITPRIVS '=' WORD  */
-#line 692 "gram.y"
+#line 691 "gram.y"
                                             {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2351 "gram.c"
+#line 2348 "gram.c"
     break;
 
   case 64: /* runasspec: %empty  */
-#line 697 "gram.y"
+#line 696 "gram.y"
                                     {
 			    (yyval.runas) = NULL;
 			}
-#line 2359 "gram.c"
+#line 2356 "gram.c"
     break;
 
   case 65: /* runasspec: '(' runaslist ')'  */
-#line 700 "gram.y"
+#line 699 "gram.y"
                                           {
 			    (yyval.runas) = (yyvsp[-1].runas);
 			}
-#line 2367 "gram.c"
+#line 2364 "gram.c"
     break;
 
   case 66: /* runaslist: %empty  */
-#line 705 "gram.y"
+#line 704 "gram.y"
                                     {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) != NULL) {
@@ -2390,11 +2387,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_RUNAS, (yyval.runas));
 			}
-#line 2388 "gram.c"
+#line 2385 "gram.c"
     break;
 
   case 67: /* runaslist: userlist  */
-#line 721 "gram.y"
+#line 720 "gram.y"
                                  {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
@@ -2406,11 +2403,11 @@ yyreduce:
 			    (yyval.runas)->runasusers = (yyvsp[0].member);
 			    /* $$->runasgroups = NULL; */
 			}
-#line 2404 "gram.c"
+#line 2401 "gram.c"
     break;
 
   case 68: /* runaslist: userlist ':' grouplist  */
-#line 732 "gram.y"
+#line 731 "gram.y"
                                                {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
@@ -2423,11 +2420,11 @@ yyreduce:
 			    (yyval.runas)->runasusers = (yyvsp[-2].member);
 			    (yyval.runas)->runasgroups = (yyvsp[0].member);
 			}
-#line 2421 "gram.c"
+#line 2418 "gram.c"
     break;
 
   case 69: /* runaslist: ':' grouplist  */
-#line 744 "gram.y"
+#line 743 "gram.y"
                                       {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
@@ -2439,11 +2436,11 @@ yyreduce:
 			    /* $$->runasusers = NULL; */
 			    (yyval.runas)->runasgroups = (yyvsp[0].member);
 			}
-#line 2437 "gram.c"
+#line 2434 "gram.c"
     break;
 
   case 70: /* runaslist: ':'  */
-#line 755 "gram.y"
+#line 754 "gram.y"
                             {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) != NULL) {
@@ -2460,108 +2457,108 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_RUNAS, (yyval.runas));
 			}
-#line 2458 "gram.c"
+#line 2455 "gram.c"
     break;
 
   case 71: /* reserved_word: ALL  */
-#line 773 "gram.y"
+#line 772 "gram.y"
                                         { (yyval.string) = "ALL"; }
-#line 2464 "gram.c"
+#line 2461 "gram.c"
     break;
 
   case 72: /* reserved_word: CHROOT  */
-#line 774 "gram.y"
+#line 773 "gram.y"
                                         { (yyval.string) = "CHROOT"; }
-#line 2470 "gram.c"
+#line 2467 "gram.c"
     break;
 
   case 73: /* reserved_word: CWD  */
-#line 775 "gram.y"
+#line 774 "gram.y"
                                         { (yyval.string) = "CWD"; }
-#line 2476 "gram.c"
+#line 2473 "gram.c"
     break;
 
   case 74: /* reserved_word: CMND_TIMEOUT  */
-#line 776 "gram.y"
+#line 775 "gram.y"
                                         { (yyval.string) = "CMND_TIMEOUT"; }
-#line 2482 "gram.c"
+#line 2479 "gram.c"
     break;
 
   case 75: /* reserved_word: NOTBEFORE  */
-#line 777 "gram.y"
+#line 776 "gram.y"
                                         { (yyval.string) = "NOTBEFORE"; }
-#line 2488 "gram.c"
+#line 2485 "gram.c"
     break;
 
   case 76: /* reserved_word: NOTAFTER  */
-#line 778 "gram.y"
+#line 777 "gram.y"
                                         { (yyval.string) = "NOTAFTER"; }
-#line 2494 "gram.c"
+#line 2491 "gram.c"
     break;
 
   case 77: /* reserved_word: ROLE  */
-#line 779 "gram.y"
+#line 778 "gram.y"
                                         { (yyval.string) = "ROLE"; }
-#line 2500 "gram.c"
+#line 2497 "gram.c"
     break;
 
   case 78: /* reserved_word: TYPE  */
-#line 780 "gram.y"
+#line 779 "gram.y"
                                         { (yyval.string) = "TYPE"; }
-#line 2506 "gram.c"
+#line 2503 "gram.c"
     break;
 
   case 79: /* reserved_word: PRIVS  */
-#line 781 "gram.y"
+#line 780 "gram.y"
                                         { (yyval.string) = "PRIVS"; }
-#line 2512 "gram.c"
+#line 2509 "gram.c"
     break;
 
   case 80: /* reserved_word: LIMITPRIVS  */
-#line 782 "gram.y"
+#line 781 "gram.y"
                                         { (yyval.string) = "LIMITPRIVS"; }
-#line 2518 "gram.c"
+#line 2515 "gram.c"
     break;
 
   case 81: /* reserved_alias: reserved_word  */
-#line 785 "gram.y"
+#line 784 "gram.y"
                                       {
 			    sudoerserrorf(U_("syntax error, reserved word %s used as an alias name"), (yyvsp[0].string));
 			    YYERROR;
 			}
-#line 2527 "gram.c"
+#line 2524 "gram.c"
     break;
 
   case 82: /* options: %empty  */
-#line 791 "gram.y"
+#line 790 "gram.y"
                                     {
 			    init_options(&(yyval.options));
 			}
-#line 2535 "gram.c"
+#line 2532 "gram.c"
     break;
 
   case 83: /* options: options chdirspec  */
-#line 794 "gram.y"
+#line 793 "gram.y"
                                           {
 			    parser_leak_remove(LEAK_PTR, (yyval.options).runcwd);
 			    free((yyval.options).runcwd);
 			    (yyval.options).runcwd = (yyvsp[0].string);
 			}
-#line 2545 "gram.c"
+#line 2542 "gram.c"
     break;
 
   case 84: /* options: options chrootspec  */
-#line 799 "gram.y"
+#line 798 "gram.y"
                                            {
 			    parser_leak_remove(LEAK_PTR, (yyval.options).runchroot);
 			    free((yyval.options).runchroot);
 			    (yyval.options).runchroot = (yyvsp[0].string);
 			}
-#line 2555 "gram.c"
+#line 2552 "gram.c"
     break;
 
   case 85: /* options: options notbeforespec  */
-#line 804 "gram.y"
+#line 803 "gram.y"
                                               {
 			    (yyval.options).notbefore = parse_gentime((yyvsp[0].string));
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -2571,11 +2568,11 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2569 "gram.c"
+#line 2566 "gram.c"
     break;
 
   case 86: /* options: options notafterspec  */
-#line 813 "gram.y"
+#line 812 "gram.y"
                                              {
 			    (yyval.options).notafter = parse_gentime((yyvsp[0].string));
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -2585,11 +2582,11 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2583 "gram.c"
+#line 2580 "gram.c"
     break;
 
   case 87: /* options: options timeoutspec  */
-#line 822 "gram.y"
+#line 821 "gram.y"
                                             {
 			    (yyval.options).timeout = parse_timeout((yyvsp[0].string));
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -2602,11 +2599,11 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2600 "gram.c"
+#line 2597 "gram.c"
     break;
 
   case 88: /* options: options rolespec  */
-#line 834 "gram.y"
+#line 833 "gram.y"
                                          {
 #ifdef HAVE_SELINUX
 			    parser_leak_remove(LEAK_PTR, (yyval.options).role);
@@ -2614,11 +2611,11 @@ yyreduce:
 			    (yyval.options).role = (yyvsp[0].string);
 #endif
 			}
-#line 2612 "gram.c"
+#line 2609 "gram.c"
     break;
 
   case 89: /* options: options typespec  */
-#line 841 "gram.y"
+#line 840 "gram.y"
                                          {
 #ifdef HAVE_SELINUX
 			    parser_leak_remove(LEAK_PTR, (yyval.options).type);
@@ -2626,11 +2623,11 @@ yyreduce:
 			    (yyval.options).type = (yyvsp[0].string);
 #endif
 			}
-#line 2624 "gram.c"
+#line 2621 "gram.c"
     break;
 
   case 90: /* options: options privsspec  */
-#line 848 "gram.y"
+#line 847 "gram.y"
                                           {
 #ifdef HAVE_PRIV_SET
 			    parser_leak_remove(LEAK_PTR, (yyval.options).privs);
@@ -2638,11 +2635,11 @@ yyreduce:
 			    (yyval.options).privs = (yyvsp[0].string);
 #endif
 			}
-#line 2636 "gram.c"
+#line 2633 "gram.c"
     break;
 
   case 91: /* options: options limitprivsspec  */
-#line 855 "gram.y"
+#line 854 "gram.y"
                                                {
 #ifdef HAVE_PRIV_SET
 			    parser_leak_remove(LEAK_PTR, (yyval.options).limitprivs);
@@ -2650,131 +2647,131 @@ yyreduce:
 			    (yyval.options).limitprivs = (yyvsp[0].string);
 #endif
 			}
-#line 2648 "gram.c"
+#line 2645 "gram.c"
     break;
 
   case 92: /* cmndtag: %empty  */
-#line 864 "gram.y"
+#line 863 "gram.y"
                                     {
 			    TAGS_INIT(&(yyval.tag));
 			}
-#line 2656 "gram.c"
+#line 2653 "gram.c"
     break;
 
   case 93: /* cmndtag: cmndtag NOPASSWD  */
-#line 867 "gram.y"
+#line 866 "gram.y"
                                          {
 			    (yyval.tag).nopasswd = true;
 			}
-#line 2664 "gram.c"
+#line 2661 "gram.c"
     break;
 
   case 94: /* cmndtag: cmndtag PASSWD  */
-#line 870 "gram.y"
+#line 869 "gram.y"
                                        {
 			    (yyval.tag).nopasswd = false;
 			}
-#line 2672 "gram.c"
+#line 2669 "gram.c"
     break;
 
   case 95: /* cmndtag: cmndtag NOEXEC  */
-#line 873 "gram.y"
+#line 872 "gram.y"
                                        {
 			    (yyval.tag).noexec = true;
 			}
-#line 2680 "gram.c"
+#line 2677 "gram.c"
     break;
 
   case 96: /* cmndtag: cmndtag EXEC  */
-#line 876 "gram.y"
+#line 875 "gram.y"
                                      {
 			    (yyval.tag).noexec = false;
 			}
-#line 2688 "gram.c"
+#line 2685 "gram.c"
     break;
 
   case 97: /* cmndtag: cmndtag SETENV  */
-#line 879 "gram.y"
+#line 878 "gram.y"
                                        {
 			    (yyval.tag).setenv = true;
 			}
-#line 2696 "gram.c"
+#line 2693 "gram.c"
     break;
 
   case 98: /* cmndtag: cmndtag NOSETENV  */
-#line 882 "gram.y"
+#line 881 "gram.y"
                                          {
 			    (yyval.tag).setenv = false;
 			}
-#line 2704 "gram.c"
+#line 2701 "gram.c"
     break;
 
   case 99: /* cmndtag: cmndtag LOG_INPUT  */
-#line 885 "gram.y"
+#line 884 "gram.y"
                                           {
 			    (yyval.tag).log_input = true;
 			}
-#line 2712 "gram.c"
+#line 2709 "gram.c"
     break;
 
   case 100: /* cmndtag: cmndtag NOLOG_INPUT  */
-#line 888 "gram.y"
+#line 887 "gram.y"
                                             {
 			    (yyval.tag).log_input = false;
 			}
-#line 2720 "gram.c"
+#line 2717 "gram.c"
     break;
 
   case 101: /* cmndtag: cmndtag LOG_OUTPUT  */
-#line 891 "gram.y"
+#line 890 "gram.y"
                                            {
 			    (yyval.tag).log_output = true;
 			}
-#line 2728 "gram.c"
+#line 2725 "gram.c"
     break;
 
   case 102: /* cmndtag: cmndtag NOLOG_OUTPUT  */
-#line 894 "gram.y"
+#line 893 "gram.y"
                                              {
 			    (yyval.tag).log_output = false;
 			}
-#line 2736 "gram.c"
+#line 2733 "gram.c"
     break;
 
   case 103: /* cmndtag: cmndtag FOLLOWLNK  */
-#line 897 "gram.y"
+#line 896 "gram.y"
                                           {
 			    (yyval.tag).follow = true;
 			}
-#line 2744 "gram.c"
+#line 2741 "gram.c"
     break;
 
   case 104: /* cmndtag: cmndtag NOFOLLOWLNK  */
-#line 900 "gram.y"
+#line 899 "gram.y"
                                             {
 			    (yyval.tag).follow = false;
 			}
-#line 2752 "gram.c"
+#line 2749 "gram.c"
     break;
 
   case 105: /* cmndtag: cmndtag MAIL  */
-#line 903 "gram.y"
+#line 902 "gram.y"
                                      {
 			    (yyval.tag).send_mail = true;
 			}
-#line 2760 "gram.c"
+#line 2757 "gram.c"
     break;
 
   case 106: /* cmndtag: cmndtag NOMAIL  */
-#line 906 "gram.y"
+#line 905 "gram.y"
                                        {
 			    (yyval.tag).send_mail = false;
 			}
-#line 2768 "gram.c"
+#line 2765 "gram.c"
     break;
 
   case 107: /* cmnd: ALL  */
-#line 911 "gram.y"
+#line 910 "gram.y"
                             {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
@@ -2783,11 +2780,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2781 "gram.c"
+#line 2778 "gram.c"
     break;
 
   case 108: /* cmnd: ALIAS  */
-#line 919 "gram.y"
+#line 918 "gram.y"
                               {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
@@ -2797,11 +2794,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2795 "gram.c"
+#line 2792 "gram.c"
     break;
 
   case 109: /* cmnd: COMMAND  */
-#line 928 "gram.y"
+#line 927 "gram.y"
                                 {
 			    struct sudo_command *c;
 
@@ -2819,20 +2816,20 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].command).args);
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2817 "gram.c"
+#line 2814 "gram.c"
     break;
 
   case 112: /* $@1: %empty  */
-#line 951 "gram.y"
+#line 950 "gram.y"
                               {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2826 "gram.c"
+#line 2823 "gram.c"
     break;
 
   case 113: /* hostalias: ALIAS $@1 '=' hostlist  */
-#line 954 "gram.y"
+#line 953 "gram.y"
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), HOSTALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
@@ -2842,30 +2839,30 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
-#line 2840 "gram.c"
+#line 2837 "gram.c"
     break;
 
   case 116: /* hostlist: hostlist ',' ophost  */
-#line 967 "gram.y"
+#line 966 "gram.y"
                                             {
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2850 "gram.c"
+#line 2847 "gram.c"
     break;
 
   case 119: /* $@2: %empty  */
-#line 978 "gram.y"
+#line 977 "gram.y"
                               {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2859 "gram.c"
+#line 2856 "gram.c"
     break;
 
   case 120: /* cmndalias: ALIAS $@2 '=' cmndlist  */
-#line 981 "gram.y"
+#line 980 "gram.y"
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), CMNDALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
@@ -2875,30 +2872,30 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
-#line 2873 "gram.c"
+#line 2870 "gram.c"
     break;
 
   case 123: /* cmndlist: cmndlist ',' digcmnd  */
-#line 994 "gram.y"
+#line 993 "gram.y"
                                              {
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2883 "gram.c"
+#line 2880 "gram.c"
     break;
 
   case 126: /* $@3: %empty  */
-#line 1005 "gram.y"
+#line 1004 "gram.y"
                               {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2892 "gram.c"
+#line 2889 "gram.c"
     break;
 
   case 127: /* runasalias: ALIAS $@3 '=' userlist  */
-#line 1008 "gram.y"
+#line 1007 "gram.y"
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), RUNASALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
@@ -2908,20 +2905,20 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
-#line 2906 "gram.c"
+#line 2903 "gram.c"
     break;
 
   case 131: /* $@4: %empty  */
-#line 1024 "gram.y"
+#line 1023 "gram.y"
                               {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2915 "gram.c"
+#line 2912 "gram.c"
     break;
 
   case 132: /* useralias: ALIAS $@4 '=' userlist  */
-#line 1027 "gram.y"
+#line 1026 "gram.y"
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), USERALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
@@ -2931,39 +2928,39 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
-#line 2929 "gram.c"
+#line 2926 "gram.c"
     break;
 
   case 135: /* userlist: userlist ',' opuser  */
-#line 1040 "gram.y"
+#line 1039 "gram.y"
                                             {
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2939 "gram.c"
+#line 2936 "gram.c"
     break;
 
   case 136: /* opuser: user  */
-#line 1047 "gram.y"
+#line 1046 "gram.y"
                              {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 2948 "gram.c"
+#line 2945 "gram.c"
     break;
 
   case 137: /* opuser: '!' user  */
-#line 1051 "gram.y"
+#line 1050 "gram.y"
                                  {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 2957 "gram.c"
+#line 2954 "gram.c"
     break;
 
   case 138: /* user: ALIAS  */
-#line 1057 "gram.y"
+#line 1056 "gram.y"
                               {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
@@ -2973,11 +2970,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2971 "gram.c"
+#line 2968 "gram.c"
     break;
 
   case 139: /* user: ALL  */
-#line 1066 "gram.y"
+#line 1065 "gram.y"
                             {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
@@ -2986,11 +2983,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2984 "gram.c"
+#line 2981 "gram.c"
     break;
 
   case 140: /* user: NETGROUP  */
-#line 1074 "gram.y"
+#line 1073 "gram.y"
                                  {
 			    (yyval.member) = new_member((yyvsp[0].string), NETGROUP);
 			    if ((yyval.member) == NULL) {
@@ -3000,11 +2997,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2998 "gram.c"
+#line 2995 "gram.c"
     break;
 
   case 141: /* user: USERGROUP  */
-#line 1083 "gram.y"
+#line 1082 "gram.y"
                                   {
 			    (yyval.member) = new_member((yyvsp[0].string), USERGROUP);
 			    if ((yyval.member) == NULL) {
@@ -3014,11 +3011,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3012 "gram.c"
+#line 3009 "gram.c"
     break;
 
   case 142: /* user: WORD  */
-#line 1092 "gram.y"
+#line 1091 "gram.y"
                              {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
@@ -3028,39 +3025,39 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3026 "gram.c"
+#line 3023 "gram.c"
     break;
 
   case 144: /* grouplist: grouplist ',' opgroup  */
-#line 1104 "gram.y"
+#line 1103 "gram.y"
                                               {
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 3036 "gram.c"
+#line 3033 "gram.c"
     break;
 
   case 145: /* opgroup: group  */
-#line 1111 "gram.y"
+#line 1110 "gram.y"
                               {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 3045 "gram.c"
+#line 3042 "gram.c"
     break;
 
   case 146: /* opgroup: '!' group  */
-#line 1115 "gram.y"
+#line 1114 "gram.y"
                                   {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 3054 "gram.c"
+#line 3051 "gram.c"
     break;
 
   case 147: /* group: ALIAS  */
-#line 1121 "gram.y"
+#line 1120 "gram.y"
                               {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
@@ -3070,11 +3067,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3068 "gram.c"
+#line 3065 "gram.c"
     break;
 
   case 148: /* group: ALL  */
-#line 1130 "gram.y"
+#line 1129 "gram.y"
                             {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
@@ -3083,11 +3080,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3081 "gram.c"
+#line 3078 "gram.c"
     break;
 
   case 149: /* group: WORD  */
-#line 1138 "gram.y"
+#line 1137 "gram.y"
                              {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
@@ -3097,11 +3094,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3095 "gram.c"
+#line 3092 "gram.c"
     break;
 
 
-#line 3099 "gram.c"
+#line 3096 "gram.c"
 
       default: break;
     }
@@ -3295,17 +3292,21 @@ yyreturn:
   return yyresult;
 }
 
-#line 1148 "gram.y"
+#line 1147 "gram.y"
 
 /* Like yyerror() but takes a printf-style format string. */
 void
 sudoerserrorf(const char *fmt, ...)
 {
+    static int last_error_line = -1;
+    static char *last_error_file = NULL;
     debug_decl(sudoerserrorf, SUDOERS_DEBUG_PARSER);
 
-    /* The lexer displays more detailed messages for ERROR tokens. */
-    if (sudoerschar == ERROR)
+    /* Only print the first error found in a line. */
+    if (last_error_file == sudoers && last_error_line == this_lineno)
 	debug_return;
+    last_error_file = sudoers;
+    last_error_line = this_lineno;
 
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
