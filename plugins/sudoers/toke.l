@@ -55,6 +55,7 @@
 
 int sudolineno;			/* current sudoers line number. */
 char *sudoers;			/* sudoers file being parsed. */
+char *sudoers_errstr;		/* description of last error from lexer. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
@@ -179,7 +180,7 @@ DEFVAR			[a-z_]+
 			    BEGIN prev_state;
 
 			    if (sudoerslval.string == NULL) {
-				sudoerserror(N_("empty string"));
+				sudoers_errstr = N_("empty string");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -191,7 +192,7 @@ DEFVAR			[a-z_]+
 					sudoerslval.string[2] == '\0')) {
 					parser_leak_remove(LEAK_PTR, sudoerslval.string);
 					free(sudoerslval.string);
-					sudoerserror(N_("empty group"));
+					sudoers_errstr = N_("empty group");
 					LEXTRACE("ERROR ");
 					return ERROR;
 				    }
@@ -201,7 +202,7 @@ DEFVAR			[a-z_]+
 				    if (sudoerslval.string[1] == '\0') {
 					parser_leak_remove(LEAK_PTR, sudoerslval.string);
 					free(sudoerslval.string);
-					sudoerserror(N_("empty netgroup"));
+					sudoers_errstr = N_("empty netgroup");
 					LEXTRACE("ERROR ");
 					return ERROR;
 				    }
@@ -297,7 +298,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>@include	{
 			    if (continued) {
-				sudoerserror(N_("invalid line continuation"));
+				sudoers_errstr = N_("invalid line continuation");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -309,7 +310,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>@includedir	{
 			    if (continued) {
-				sudoerserror(N_("invalid line continuation"));
+				sudoers_errstr = N_("invalid line continuation");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -321,7 +322,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^#include[[:blank:]]+.*(\r\n|\n)? {
 			    if (continued) {
-				sudoerserror(N_("invalid line continuation"));
+				sudoers_errstr = N_("invalid line continuation");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -337,7 +338,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^#includedir[[:blank:]]+.*(\r\n|\n)? {
 			    if (continued) {
-				sudoerserror(N_("invalid line continuation"));
+				sudoers_errstr = N_("invalid line continuation");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -356,7 +357,7 @@ DEFVAR			[a-z_]+
 			    int n;
 
 			    if (continued) {
-				sudoerserror(N_("invalid line continuation"));
+				sudoers_errstr = N_("invalid line continuation");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -396,7 +397,7 @@ DEFVAR			[a-z_]+
 			    int n;
 
 			    if (continued) {
-				sudoerserror(N_("invalid line continuation"));
+				sudoers_errstr = N_("invalid line continuation");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -493,9 +494,9 @@ NOFOLLOW[[:blank:]]*:	{
 
 <INITIAL,GOTDEFS>(\+|\%|\%:) {
 			    if (sudoerstext[0] == '+')
-				sudoerserror(N_("empty netgroup"));
+				sudoers_errstr = N_("empty netgroup");
 			    else
-				sudoerserror(N_("empty group"));
+				sudoers_errstr = N_("empty group");
 			    LEXTRACE("ERROR ");
 			    return ERROR;
 			}
@@ -532,7 +533,7 @@ NOFOLLOW[[:blank:]]*:	{
 
 {IPV6ADDR}(\/{IPV6ADDR})? {
 			    if (!ipv6_valid(sudoerstext)) {
-				sudoerserror(N_("invalid IPv6 address"));
+				sudoers_errstr = N_("invalid IPv6 address");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -544,7 +545,7 @@ NOFOLLOW[[:blank:]]*:	{
 
 {IPV6ADDR}\/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8]) {
 			    if (!ipv6_valid(sudoerstext)) {
-				sudoerserror(N_("invalid IPv6 address"));
+				sudoers_errstr = N_("invalid IPv6 address");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -771,7 +772,7 @@ sudoedit		{
 				/* re-scan after changing state */
 				BEGIN INITIAL;
 				sudoersless(0);
-				sudoerserror(N_("unexpected line break in string"));
+				sudoers_errstr = N_("unexpected line break in string");
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -799,7 +800,7 @@ sudoedit		{
 				sudolineno++;
 				continued = false;
 			    } else if (!feof(sudoersin)) {
-				sudoerserror(strerror(errno));
+				sudoers_errstr = strerror(errno);
 				LEXTRACE("ERROR ");
 				return ERROR;
 			    }
@@ -808,9 +809,9 @@ sudoedit		{
 			}			/* comment, not uid/gid */
 
 <*>.			{
-			    LEXTRACE("ERROR ");
-			    return ERROR;
-			}	/* parse error */
+			    LEXTRACE("NOMATCH ");
+			    return NOMATCH;
+			}	/* parse error, no matching token */
 
 <*><<EOF>>		{
 			    if (!pop_include())
@@ -1094,7 +1095,9 @@ push_include(const char *opath, bool isdir)
 	struct include_stack *new_istack;
 
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    sudoerserror(N_("too many levels of includes"));
+	    if (sudoers_warnings)
+		sudo_warnx(U_("%s: %s"), path, U_("too many levels of includes"));
+	    sudoerserror(NULL);
 	    rcstr_delref(path);
 	    debug_return_bool(false);
 	}
