@@ -117,7 +117,7 @@ json_array_to_strvec(struct json_object *array)
 	}
 	/* Prevent integer overflow. */
 	if (++len == INT_MAX) {
-	    sudo_warnx(U_("JSON_ARRAY too large"));
+	    sudo_warnx("%s", U_("JSON_ARRAY too large"));
 	    debug_return_ptr(NULL);
 	}
     }
@@ -444,7 +444,7 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
     /* First object holds all the actual data. */
     item = TAILQ_FIRST(&object->items);
     if (item == NULL) {
-	sudo_warnx(U_("missing JSON_OBJECT"));
+	sudo_warnx("%s", U_("missing JSON_OBJECT"));
 	goto done;
     }
     if (item->type != JSON_OBJECT) {
