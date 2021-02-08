@@ -187,16 +187,14 @@ fill_args(const char *s, size_t len, int addspace)
 	/* Allocate in increments of 128 bytes to avoid excessive realloc(). */
 	arg_size = (new_len + 1 + 127) & ~127;
 
+	parser_leak_remove(LEAK_PTR, sudoerslval.command.args);
 	p = realloc(sudoerslval.command.args, arg_size);
 	if (p == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto bad;
 	}
-	if (sudoerslval.command.args != p) {
-	    parser_leak_remove(LEAK_PTR, sudoerslval.command.args);
-	    parser_leak_add(LEAK_PTR, p);
-	    sudoerslval.command.args = p;
-	}
+	parser_leak_add(LEAK_PTR, p);
+	sudoerslval.command.args = p;
     }
 
     /* Efficiently append the arg (with a leading space if needed). */
@@ -206,13 +204,13 @@ fill_args(const char *s, size_t len, int addspace)
     len = arg_size - (p - sudoerslval.command.args);
     if (strlcpy(p, s, len) >= len) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
+	parser_leak_remove(LEAK_PTR, sudoerslval.command.args);
 	goto bad;
     }
     arg_len = new_len;
     debug_return_bool(true);
 bad:
     sudoerserror(NULL);
-    parser_leak_remove(LEAK_PTR, sudoerslval.command.args);
     free(sudoerslval.command.args);
     sudoerslval.command.args = NULL;
     arg_len = arg_size = 0;
