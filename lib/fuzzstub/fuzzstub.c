@@ -51,7 +51,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 int
 main(int argc, char *argv[])
 {
-    size_t bufsize = 0;
+    size_t filesize, bufsize = 0;
     ssize_t nread;
     struct stat sb;
     uint8_t *buf = NULL;
@@ -67,15 +67,18 @@ main(int argc, char *argv[])
 	    errors++;
 	    continue;
 	}
-	if (sb.st_size > SSIZE_MAX) {
+#ifndef __LP64__
+	if (sizeof(sb.st_size) > sizeof(size_t) && sb.st_size > SSIZE_MAX) {
 	    errno = E2BIG;
 	    fprintf(stderr, "%s: %s\n", argv[i], strerror(errno));
 	    close(fd);
 	    errors++;
 	    continue;
 	}
-	if (bufsize < (size_t)sb.st_size) {
-	    void *tmp = realloc(buf, sb.st_size);
+#endif
+	filesize = sb.st_size;
+	if (bufsize < filesize) {
+	    void *tmp = realloc(buf, filesize);
 	    if (tmp == NULL) {
 		fprintf(stderr, "realloc: %s\n", strerror(errno));
 		close(fd);
@@ -83,10 +86,10 @@ main(int argc, char *argv[])
 		continue;
 	    }
 	    buf = tmp;
-	    bufsize = sb.st_size;
+	    bufsize = filesize;
 	}
-	nread = read(fd, buf, sb.st_size);
-	if (nread != sb.st_size) {
+	nread = read(fd, buf, filesize);
+	if ((size_t)nread != filesize) {
 	    if (nread == -1)
 		fprintf(stderr, "read %s: %s\n", argv[i], strerror(errno));
 	    else
