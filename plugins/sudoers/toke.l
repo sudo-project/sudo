@@ -1280,11 +1280,23 @@ sudoers_input(char *buf, yy_size_t max_size)
 
     /* Refill line buffer if needed. */
     if (avail == 0) {
+	char ch = sudolinebuf.len ? *sudolinebuf.buf : '\0';
 	avail = getdelim(&sudolinebuf.buf, &sudolinebuf.size, '\n', sudoersin);
 	if (avail == (size_t)-1) {
 	    /* EOF or error. */
-	    if (ferror(sudoersin) && errno != EINTR)
-		YY_FATAL_ERROR("input in flex scanner failed");
+	    if (feof(sudoersin)) {
+		/*
+		 * Some getdelim(3) implementations write NUL to buf on EOF.
+		 * Restore the first character so we can report syntax errors
+		 * on the last line.
+		 */
+		if (sudolinebuf.len != 0)
+		    *sudolinebuf.buf = ch;
+	    } else {
+		/* This matches the default YY_INPUT behavior. */
+		if (errno != EINTR)
+		    YY_FATAL_ERROR("input in flex scanner failed");
+	    }
 	    return 0;
 	}
 
