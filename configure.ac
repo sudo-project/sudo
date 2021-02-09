@@ -1891,6 +1891,11 @@ case "$host" in
 		# LD_PRELOAD is space-delimited
 		RTLD_PRELOAD_DELIM=" "
 
+		# illumos has a broken fmemopen(3)
+		if test X"`uname -o 2>/dev/null`" = X"illumos"; then
+		    : ${ac_cv_func_fmemopen='no'}
+		fi
+
 		# Solaris-specific initialization
 		OS_INIT=os_init_solaris
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
