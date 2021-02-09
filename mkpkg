@@ -139,11 +139,16 @@ if [ "$crossbuild" = "false" ]; then
 	    ;;
 	sol[0-9]*)
 	    # Use the Sun Studio C compiler on Solaris if possible
-	    if [ -z "$CC" -a -x /usr/bin/cc ]; then
-		CC=/usr/bin/cc; export CC
-		if [ -z "$CFLAGS" ]; then
-		    CFLAGS=-O; export CFLAGS
-		fi
+	    if [ -z "$CC" ]; then
+		for f in /opt/developerstudio12.[9876]/bin/cc /opt/solarisstudio12.[43]/bin/cc; do
+		    if [ -x $f ]; then
+			CC=$f; export CC
+			if [ -z "$CFLAGS" ]; then
+			    CFLAGS=-O; export CFLAGS
+			fi
+			break
+		    fi
+		done
 	    fi
 	    ;;
     esac
