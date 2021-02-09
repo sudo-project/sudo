@@ -134,6 +134,10 @@
 # endif
 #endif
 
+#if defined(HAVE_DECL_SSIZE_MAX) && !HAVE_DECL_SSIZE_MAX
+# define SIZE_MAX	LONG_MAX
+#endif
+
 #if defined(HAVE_DECL_PATH_MAX) && !HAVE_DECL_PATH_MAX
 # if defined(HAVE_DECL__POSIX_PATH_MAX) && HAVE_DECL__POSIX_PATH_MAX
 #  define PATH_MAX		_POSIX_PATH_MAX

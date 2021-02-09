@@ -3514,7 +3514,7 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl Check for incomplete limits.h and missing SIZE_MAX.
 dnl
-AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX], [], [], [
+AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, SSIZE_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
 ])

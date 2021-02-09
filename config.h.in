@@ -181,6 +181,10 @@
    don't. */
 #undef HAVE_DECL_SIZE_T_MAX
 
+/* Define to 1 if you have the declaration of `SSIZE_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SSIZE_MAX
+
 /* Define to 1 if you have the declaration of `sys_sigabbrev', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGABBREV
