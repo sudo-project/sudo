@@ -478,7 +478,7 @@ fuzz: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    echo "fuzz_sudoers: verifying corpus"; \
 	    mkdir -p regress/fuzz; \
-	    ./fuzz_sudoers $(srcdir)/sudoers $(srcdir)/regress/sudoers/*.in > regress/fuzz/fuzz_sudoers.out 2>&1; \
+	    ./fuzz_sudoers $(top_srcdir)/examples/sudoers $(srcdir)/regress/sudoers/*.in > regress/fuzz/fuzz_sudoers.out 2>&1; \
 	    diff $(srcdir)/regress/fuzz/fuzz_sudoers.out.ok regress/fuzz/fuzz_sudoers.out; \
 	    echo "fuzz_sudoers-ldif: verifying corpus"; \
 	    ./fuzz_sudoers_ldif $(srcdir)/regress/sudoers/*.ldif.ok; \
