@@ -158,6 +158,7 @@ lib/util/aix.c
 lib/util/arc4random.c
 lib/util/arc4random_buf.c
 lib/util/arc4random_uniform.c
+lib/util/basename.c
 lib/util/cfmakeraw.c
 lib/util/chacha_private.h
 lib/util/closefrom.c

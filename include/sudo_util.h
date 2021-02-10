@@ -188,6 +188,10 @@ sudo_dso_public int aix_setauthdb_v1(char *user);
 sudo_dso_public int aix_setauthdb_v2(char *user, char *registry);
 #define aix_setauthdb(_a, _b) aix_setauthdb_v2((_a), (_b))
 
+/* basename.c */
+sudo_dso_public char *sudo_basename_v1(const char *filename);
+#define sudo_basename(_a) sudo_basename_v1(_a)
+
 /* gethostname.c */
 sudo_dso_public char *sudo_gethostname_v1(void);
 #define sudo_gethostname() sudo_gethostname_v1()
