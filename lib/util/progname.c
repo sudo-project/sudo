@@ -53,8 +53,7 @@ sudo_getprogname(void)
 void
 sudo_setprogname(const char *name)
 {
-    const char *slash = strrchr(name, '/');
-    __progname = slash ? slash + 1 : name;
+    __progname = sudo_basename(name);
 }
 #endif
 
@@ -69,9 +68,7 @@ initprogname2(const char *name, const char * const * allowed)
 	name = progname;
     } else {
 	/* Make sure user-specified name is relative. */
-	const char *slash = strrchr(name, '/');
-	if (slash != NULL)
-	    name = slash + 1;
+	name = sudo_basename(name);
     }
 
     /* Check for libtool prefix and strip it if present. */

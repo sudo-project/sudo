@@ -516,33 +516,25 @@ struct sudo_conf_debug_file_list *
 sudo_conf_debug_files_v1(const char *progname)
 {
     struct sudo_conf_debug *debug_spec;
-    size_t prognamelen, progbaselen;
-    const char *progbase = progname;
+    const char *progbase;
     debug_decl(sudo_conf_debug_files, SUDO_DEBUG_UTIL);
 
     /* Determine basename if program is fully qualified (like for plugins). */
-    prognamelen = progbaselen = strlen(progname);
-    if (*progname == '/') {
-	progbase = strrchr(progname, '/');
-	progbaselen = strlen(++progbase);
-    }
+    progbase = progname[0] == '/' ? sudo_basename(progname) : progname;
+
     /* Convert sudoedit -> sudo. */
-    if (progbaselen > 4 && strcmp(progbase + 4, "edit") == 0) {
-	progbaselen -= 4;
-    }
+    if (strcmp(progbase, "sudoedit") == 0)
+	progbase = "sudo";
+
     TAILQ_FOREACH(debug_spec, &sudo_conf_data.debugging, entries) {
 	const char *prog = progbase;
-	size_t len = progbaselen;
 
 	if (debug_spec->progname[0] == '/') {
 	    /* Match fully-qualified name, if possible. */
 	    prog = progname;
-	    len = prognamelen;
 	}
-	if (strncmp(debug_spec->progname, prog, len) == 0 &&
-	    debug_spec->progname[len] == '\0') {
+	if (strcmp(debug_spec->progname, prog) == 0)
 	    debug_return_ptr(&debug_spec->debug_files);
-	}
     }
     debug_return_ptr(NULL);
 }

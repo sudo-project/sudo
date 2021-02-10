@@ -361,10 +361,7 @@ exec_mailer(int pipein)
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	_exit(127);
     }
-    if ((argv[0] = strrchr(mpath, '/')))
-	argv[0]++;
-    else
-	argv[0] = (char *)mpath;
+    argv[0] = sudo_basename(mpath);
 
     i = 1;
     if ((p = strtok_r(mflags, " \t", &last))) {

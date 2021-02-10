@@ -136,7 +136,7 @@ MKTEMP_TEST_OBJS = mktemp_test.lo mktemp.lo
 
 PARSELN_TEST_OBJS = parseln_test.lo parseln.lo
 
-PROGNAME_TEST_OBJS = progname_test.lo progname.lo
+PROGNAME_TEST_OBJS = progname_test.lo progname.lo basename.lo
 
 CONF_TEST_OBJS = conf_test.lo sudo_conf.lo
 

@@ -37,12 +37,8 @@ main(int argc, char *argv[])
 {
     char *progbase = "progname_test";
 
-    if (argc > 0) {
-	if ((progbase = strrchr(argv[0], '/')) != NULL)
-	    progbase++;
-	else
-	    progbase = argv[0];
-    }
+    if (argc > 0)
+	progbase = sudo_basename(argv[0]);
     initprogname(progbase);
 
     /* Make sure getprogname() matches basename of argv[0]. */

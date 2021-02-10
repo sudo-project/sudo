@@ -928,7 +928,7 @@ set_cmnd(void)
 	debug_return_int(NOT_FOUND_ERROR);
     }
 
-    /* Default value for cmnd, overridden below. */
+    /* Default value for cmnd, overridden by set_cmnd_path() below. */
     if (user_cmnd == NULL)
 	user_cmnd = NewArgv[0];
 
@@ -966,11 +966,7 @@ set_cmnd(void)
 		debug_return_int(NOT_FOUND_ERROR);
 	}
     }
-
-    if ((user_base = strrchr(user_cmnd, '/')) != NULL)
-	user_base++;
-    else
-	user_base = user_cmnd;
+    user_base = sudo_basename(user_cmnd);
 
     /* Convert "sudo sudoedit" -> "sudoedit" */
     if (ISSET(sudo_mode, MODE_RUN) && strcmp(user_base, "sudoedit") == 0) {

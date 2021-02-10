@@ -384,11 +384,9 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
      */
     dlen = strlen(sudoers_cmnd);
     if (sudoers_cmnd[dlen - 1] != '/') {
-	if ((base = strrchr(sudoers_cmnd, '/')) != NULL) {
-	    base++;
-	    if (!has_meta(base) && strcmp(user_base, base) != 0)
-		debug_return_bool(false);
-	}
+	base = sudo_basename(sudoers_cmnd);
+	if (!has_meta(base) && strcmp(user_base, base) != 0)
+	    debug_return_bool(false);
     }
 
     /* Make sudoers_cmnd relative to the new root, if any. */
@@ -472,10 +470,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 	    }
 
 	    /* Only proceed if user_base and basename(cp) match */
-	    if ((base = strrchr(cp, '/')) != NULL)
-		base++;
-	    else
-		base = cp;
+	    base = sudo_basename(cp);
 	    if (strcmp(user_base, base) != 0)
 		continue;
 
@@ -531,10 +526,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
     }
 
     /* Only proceed if user_base and basename(sudoers_cmnd) match */
-    if ((base = strrchr(sudoers_cmnd, '/')) == NULL)
-	base = sudoers_cmnd;
-    else
-	base++;
+    base = sudo_basename(sudoers_cmnd);
     if (strcmp(user_base, base) != 0)
 	debug_return_bool(false);
 

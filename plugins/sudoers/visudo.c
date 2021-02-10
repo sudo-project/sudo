@@ -381,15 +381,11 @@ static char *lineno_editors[] = {
 static bool
 editor_supports_plus(const char *editor)
 {
-    const char *editor_base = strrchr(editor, '/');
-    const char *cp;
+    const char *cp, *editor_base;
     char **av;
     debug_decl(editor_supports_plus, SUDOERS_DEBUG_UTIL);
 
-    if (editor_base != NULL)
-	editor_base++;
-    else
-	editor_base = editor;
+    editor_base = sudo_basename(editor);
     if (*editor_base == 'r')
 	editor_base++;
 
@@ -760,10 +756,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	      sp->tpath, sp->path);
 
 	    /* Build up argument vector for the command */
-	    if ((av[0] = strrchr(_PATH_MV, '/')) != NULL)
-		av[0]++;
-	    else
-		av[0] = _PATH_MV;
+	    av[0] = sudo_basename(_PATH_MV);
 	    av[1] = sp->tpath;
 	    av[2] = sp->path;
 	    av[3] = NULL;
