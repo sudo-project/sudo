@@ -827,10 +827,10 @@ iolog_eof(struct iolog_file *iol)
 
 #ifdef HAVE_ZLIB_H
     if (iol->compressed)
-	ret = gzeof(iol->fd.g) == 1;
+	ret = gzeof(iol->fd.g) != 0;
     else
 #endif
-	ret = feof(iol->fd.f) == 1;
+	ret = feof(iol->fd.f) != 0;
     debug_return_int(ret);
 }
 
