@@ -55,7 +55,6 @@ INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # Libraries
-LIBEVENTLOG = $(top_builddir)/lib/eventlog/libsudo_eventlog.la
 LIBIOLOG = $(top_builddir)/lib/iolog/libsudo_iolog.la
 LIBLOGSRV = @LIBLOGSRV@
 LIBUTIL = $(top_builddir)/lib/util/libsudo_util.la
@@ -287,7 +286,7 @@ Makefile: $(srcdir)/Makefile.in
 libparsesudoers.la: $(LIBPARSESUDOERS_OBJS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBPARSESUDOERS_OBJS) -no-install
 
-sudoers.la: $(SUDOERS_OBJS) $(LIBUTIL) $(LIBIOLOG) $(LIBLOGSRV) libparsesudoers.la @LT_LDDEP@
+sudoers.la: $(SUDOERS_OBJS) $(LIBIOLOG) $(LIBLOGSRV) libparsesudoers.la @LT_LDDEP@
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) \
 	    $(LIBTOOL) $(LTFLAGS) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module;; \
@@ -301,7 +300,7 @@ visudo: libparsesudoers.la $(VISUDO_OBJS) $(LIBUTIL)
 cvtsudoers: libparsesudoers.la $(CVTSUDOERS_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CVTSUDOERS_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(CVTSUDOERS_LIBS)
 
-sudoreplay: timestr.lo $(REPLAY_OBJS) $(LIBUTIL) $(LIBIOLOG)
+sudoreplay: timestr.lo $(REPLAY_OBJS) $(LIBIOLOG)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) timestr.lo $(REPLAY_LIBS)
 
 testsudoers: libparsesudoers.la $(TEST_OBJS) $(LIBUTIL)

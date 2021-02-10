@@ -116,7 +116,7 @@ Makefile: $(srcdir)/Makefile.in
 .i.plog:
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
-libsudo_eventlog.la: $(LIBEVENTLOG_OBJS)
+libsudo_eventlog.la: $(LIBEVENTLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBEVENTLOG_OBJS) $(LT_LIBS)
 
 check_wrap: $(CHECK_WRAP_OBJS) $(LIBUTIL)

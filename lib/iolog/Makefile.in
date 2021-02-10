@@ -142,7 +142,7 @@ Makefile: $(srcdir)/Makefile.in
 .i.plog:
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
-libsudo_iolog.la: $(LIBIOLOG_OBJS)
+libsudo_iolog.la: $(LIBIOLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBIOLOG_OBJS) $(LT_LIBS) @ZLIB@ @NET_LIBS@
 
 check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) libsudo_iolog.la
