@@ -165,7 +165,7 @@ FUZZ_LDFLAGS = @LDFLAGS@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
-LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo digestname.lo \
+LIBPARSESUDOERS_OBJS = alias.lo base64.lo defaults.lo digestname.lo \
 		       exptilde.lo filedigest.lo gentime.lo gmtoff.lo gram.lo \
 		       hexchar.lo match.lo match_addr.lo match_command.lo \
 		       match_digest.lo pwutil.lo pwutil_impl.lo rcstr.lo \
@@ -174,7 +174,7 @@ LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo digestname.lo \
 
 LIBPARSESUDOERS_IOBJS = $(LIBPARSESUDOERS_OBJS:.lo=.i) passwd.i
 
-SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo \
+SUDOERS_OBJS = $(AUTH_OBJS) audit.lo boottime.lo check.lo editor.lo env.lo \
 	       env_pattern.lo file.lo find_path.lo fmtsudoers.lo gc.lo \
 	       goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
 	       iolog_path_escapes.lo locale.lo log_client.lo logging.lo \

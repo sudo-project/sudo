@@ -701,6 +701,7 @@ plugins/sudoers/regress/cvtsudoers/test9.sh
 plugins/sudoers/regress/env_match/check_env_pattern.c
 plugins/sudoers/regress/env_match/data
 plugins/sudoers/regress/exptilde/check_exptilde.c
+plugins/sudoers/regress/fuzz/fuzz_policy.c
 plugins/sudoers/regress/fuzz/fuzz_sudoers.c
 plugins/sudoers/regress/fuzz/fuzz_sudoers.out.ok
 plugins/sudoers/regress/fuzz/fuzz_sudoers_ldif.c
