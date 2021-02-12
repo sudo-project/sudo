@@ -159,8 +159,9 @@ sudoers_init(void *info, char * const envp[])
     static int ret = -1;
     debug_decl(sudoers_init, SUDOERS_DEBUG_PLUGIN);
 
-    if (ret == true)
-	debug_return_int(true);
+    /* Only initialize once. */
+    if (snl != NULL)
+	debug_return_int(ret);
 
     bindtextdomain("sudoers", LOCALEDIR);
 
@@ -647,6 +648,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     TAILQ_FOREACH(nss, snl, entries) {
 	nss->close(nss);
     }
+    snl = NULL;
     if (def_group_plugin)
 	group_plugin_unload();
     init_parser(NULL, false, false);
@@ -1608,6 +1610,7 @@ sudoers_cleanup(void)
 	TAILQ_FOREACH(nss, snl, entries) {
 	    nss->close(nss);
 	}
+	snl = NULL;
     }
     if (def_group_plugin)
 	group_plugin_unload();
