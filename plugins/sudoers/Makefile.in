@@ -55,6 +55,7 @@ INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # Libraries
+LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
 LIBIOLOG = $(top_builddir)/lib/iolog/libsudo_iolog.la
 LIBLOGSRV = @LIBLOGSRV@
 LIBUTIL = $(top_builddir)/lib/util/libsudo_util.la
@@ -346,10 +347,10 @@ check_unesc: $(CHECK_UNESC_OBJS) $(LIBUTIL)
 check_symbols: $(CHECK_SYMBOLS_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(CHECK_SYMBOLS_LDFLAGS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@
 
-fuzz_sudoers: $(FUZZ_SUDOERS_OBJS) libparsesudoers.la $(LIBUTIL)
+fuzz_sudoers: $(FUZZ_SUDOERS_OBJS) libparsesudoers.la $(LIBUTIL) $(LIBFUZZSTUB)
 	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_SUDOERS_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
-fuzz_sudoers_ldif: $(FUZZ_SUDOERS_LDIF_OBJS) libparsesudoers.la $(LIBUTIL)
+fuzz_sudoers_ldif: $(FUZZ_SUDOERS_LDIF_OBJS) libparsesudoers.la $(LIBUTIL) $(LIBFUZZSTUB)
 	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_SUDOERS_LDIF_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
 GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c

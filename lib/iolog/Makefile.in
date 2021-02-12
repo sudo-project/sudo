@@ -81,6 +81,7 @@ TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 
 # Fuzzers
+LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
 FUZZ_PROGS = fuzz_iolog_json fuzz_iolog_legacy fuzz_iolog_timing
 FUZZ_LIBS = @LIBS@ $(LIB_FUZZING_ENGINE)
@@ -160,13 +161,13 @@ check_iolog_json: $(CHECK_IOLOG_JSON_OBJS) libsudo_iolog.la
 host_port_test: $(HOST_PORT_TEST_OBJS) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HOST_PORT_TEST_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-fuzz_iolog_json: $(FUZZ_IOLOG_JSON_OBJS) libsudo_iolog.la
+fuzz_iolog_json: $(FUZZ_IOLOG_JSON_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_JSON_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
-fuzz_iolog_legacy: $(FUZZ_IOLOG_LEGACY_OBJS) libsudo_iolog.la
+fuzz_iolog_legacy: $(FUZZ_IOLOG_LEGACY_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_LEGACY_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
-fuzz_iolog_timing: $(FUZZ_IOLOG_TIMING_OBJS) libsudo_iolog.la
+fuzz_iolog_timing: $(FUZZ_IOLOG_TIMING_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_TIMING_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
 pre-install:
