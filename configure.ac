@@ -3845,7 +3845,9 @@ if test ${with_kerb5-'no'} != "no"; then
     if test -n "$KRB5CONFIG"; then
 	AC_DEFINE(HAVE_KERB5)
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
-	AX_APPEND_FLAG([`krb5-config --cflags`], [CPPFLAGS])
+	for f in `krb5-config --cflags`; do
+	    AX_APPEND_FLAG([$f], [CPPFLAGS])
+	done
 	SUDOERS_LIBS="$SUDOERS_LIBS `krb5-config --libs`"
 	dnl
 	dnl Try to determine whether we have Heimdal or MIT Kerberos
@@ -4311,7 +4313,8 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared -static], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
 	    LT_STATIC=""
 	else
 	    LT_STATIC="--tag=disable-static"
@@ -4323,7 +4326,8 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared -static], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
 	    LT_STATIC=""
 	else
 	    LT_STATIC="--tag=disable-static"

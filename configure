@@ -27464,15 +27464,15 @@ if test ${SUDOERS_LDFLAGS+y}
 then :
 
   case " $SUDOERS_LDFLAGS " in #(
-  *" --tag=disable-shared -static "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains --tag=disable-shared -static"; } >&5
-  (: SUDOERS_LDFLAGS already contains --tag=disable-shared -static) 2>&5
+  *" --tag=disable-shared "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains --tag=disable-shared"; } >&5
+  (: SUDOERS_LDFLAGS already contains --tag=disable-shared) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SUDOERS_LDFLAGS " --tag=disable-shared -static"
+     as_fn_append SUDOERS_LDFLAGS " --tag=disable-shared"
      { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
   (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
   ac_status=$?
@@ -27483,7 +27483,40 @@ esac
 
 else $as_nop
 
-  SUDOERS_LDFLAGS=--tag=disable-shared -static
+  SUDOERS_LDFLAGS=--tag=disable-shared
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+if test ${SUDOERS_LDFLAGS+y}
+then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -static "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -static"; } >&5
+  (: SUDOERS_LDFLAGS already contains -static) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -static"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  SUDOERS_LDFLAGS=-static
   { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
   (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
   ac_status=$?
@@ -27510,15 +27543,15 @@ if test ${SUDOERS_LDFLAGS+y}
 then :
 
   case " $SUDOERS_LDFLAGS " in #(
-  *" --tag=disable-shared -static "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains --tag=disable-shared -static"; } >&5
-  (: SUDOERS_LDFLAGS already contains --tag=disable-shared -static) 2>&5
+  *" --tag=disable-shared "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains --tag=disable-shared"; } >&5
+  (: SUDOERS_LDFLAGS already contains --tag=disable-shared) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SUDOERS_LDFLAGS " --tag=disable-shared -static"
+     as_fn_append SUDOERS_LDFLAGS " --tag=disable-shared"
      { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
   (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
   ac_status=$?
@@ -27529,7 +27562,40 @@ esac
 
 else $as_nop
 
-  SUDOERS_LDFLAGS=--tag=disable-shared -static
+  SUDOERS_LDFLAGS=--tag=disable-shared
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+if test ${SUDOERS_LDFLAGS+y}
+then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -static "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -static"; } >&5
+  (: SUDOERS_LDFLAGS already contains -static) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -static"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  SUDOERS_LDFLAGS=-static
   { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
   (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
   ac_status=$?
