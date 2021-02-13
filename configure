@@ -25202,20 +25202,21 @@ fi
 	printf "%s\n" "#define HAVE_KERB5 1" >>confdefs.h
 
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
+	for f in `krb5-config --cflags`; do
 
 if test ${CPPFLAGS+y}
 then :
 
   case " $CPPFLAGS " in #(
-  *" `krb5-config --cflags` "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains \`krb5-config --cflags\`"; } >&5
-  (: CPPFLAGS already contains `krb5-config --cflags`) 2>&5
+  *" $f "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains \$f"; } >&5
+  (: CPPFLAGS already contains $f) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append CPPFLAGS " `krb5-config --cflags`"
+     as_fn_append CPPFLAGS " $f"
      { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
   (: CPPFLAGS="$CPPFLAGS") 2>&5
   ac_status=$?
@@ -25226,7 +25227,7 @@ esac
 
 else $as_nop
 
-  CPPFLAGS=`krb5-config --cflags`
+  CPPFLAGS=$f
   { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
   (: CPPFLAGS="$CPPFLAGS") 2>&5
   ac_status=$?
@@ -25235,6 +25236,7 @@ else $as_nop
 
 fi
 
+	done
 	SUDOERS_LIBS="$SUDOERS_LIBS `krb5-config --libs`"
 				{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether we are using Heimdal" >&5
 printf %s "checking whether we are using Heimdal... " >&6; }
@@ -28660,7 +28662,9 @@ fi
 
 
 else $as_nop
-  :
+
+	as_fn_error $? "$CC does not support the $enable_sanitizer flag" "$LINENO" 5
+
 fi
 
 fi
@@ -28878,7 +28882,9 @@ fi
 
 
 else $as_nop
-  :
+
+	as_fn_error $? "$CC does not support the -fsanitize=fuzzer-no-link flag" "$LINENO" 5
+
 fi
 
 else

@@ -4598,6 +4598,8 @@ if test "$enable_sanitizer" != "no"; then
 	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
 	])
 	AC_DEFINE(NO_LEAKS)
+    ], [
+	AC_MSG_ERROR([$CC does not support the $enable_sanitizer flag])
     ])
 fi
 if test "$enable_fuzzer" = "yes"; then
@@ -4613,6 +4615,8 @@ if test "$enable_fuzzer" = "yes"; then
 	# Use CFLAGS, not CPPFLAGS to match oss-fuzz behavior
 	AX_APPEND_FLAG([-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION], [CFLAGS])
 	AC_DEFINE(NO_LEAKS)
+    ], [
+	AC_MSG_ERROR([$CC does not support the -fsanitize=fuzzer-no-link flag])
     ])
 else
     # Not using compiler fuzzing support, link with stub library.
