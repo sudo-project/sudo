@@ -644,15 +644,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto done;
     }
 
-    /* Cleanup sudoers sources */
-    TAILQ_FOREACH(nss, snl, entries) {
-	nss->close(nss);
-    }
-    snl = NULL;
-    if (def_group_plugin)
-	group_plugin_unload();
-    init_parser(NULL, false, false);
-
     if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
 	/* ret already set appropriately */
 	goto done;
@@ -756,6 +747,15 @@ bad:
     ret = false;
 
 done:
+    /* Cleanup sudoers sources */
+    TAILQ_FOREACH(nss, snl, entries) {
+	nss->close(nss);
+    }
+    snl = NULL;
+    if (def_group_plugin)
+	group_plugin_unload();
+    init_parser(NULL, false, false);
+
     if (ret == -1) {
 	/* Free stashed copy of the environment. */
 	(void)env_init(NULL);
