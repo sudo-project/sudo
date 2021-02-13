@@ -561,7 +561,8 @@ done:
 	    item->d.gr ? item->d.gr->gr_name : "unknown",
 	    item->registry, node ? "cache hit" : "cached");
     }
-    item->refcnt++;
+    if (item->d.gr != NULL)
+	item->refcnt++;
     debug_return_ptr(item->d.gr);
 }
 
