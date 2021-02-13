@@ -362,6 +362,7 @@ sudoers_policy_deserialize_info(void *v)
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
 	    CHECK(*cur, "user=");
+	    free(user_name);
 	    if ((user_name = strdup(*cur + sizeof("user=") - 1)) == NULL)
 		goto oom;
 	    continue;
@@ -391,12 +392,14 @@ sudoers_policy_deserialize_info(void *v)
 	}
 	if (MATCHES(*cur, "cwd=")) {
 	    CHECK(*cur, "cwd=");
+	    free(user_cwd);
 	    if ((user_cwd = strdup(*cur + sizeof("cwd=") - 1)) == NULL)
 		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "tty=")) {
 	    CHECK(*cur, "tty=");
+	    free(user_ttypath);
 	    if ((user_ttypath = strdup(*cur + sizeof("tty=") - 1)) == NULL)
 		goto oom;
 	    user_tty = user_ttypath;
@@ -406,6 +409,9 @@ sudoers_policy_deserialize_info(void *v)
 	}
 	if (MATCHES(*cur, "host=")) {
 	    CHECK(*cur, "host=");
+	    if (user_shost != user_host)
+		free(user_shost);
+	    free(user_host);
 	    if ((user_host = strdup(*cur + sizeof("host=") - 1)) == NULL)
 		goto oom;
 	    if ((p = strchr(user_host, '.')) != NULL) {
@@ -475,6 +481,9 @@ sudoers_policy_deserialize_info(void *v)
 	goto bad;
     }
 
+    if (user_srunhost != user_runhost)
+	free(user_srunhost);
+    free(user_runhost);
     if ((user_runhost = strdup(remhost ? remhost : user_host)) == NULL)
 	goto oom;
     if ((p = strchr(user_runhost, '.')) != NULL) {
@@ -489,8 +498,8 @@ sudoers_policy_deserialize_info(void *v)
 	    goto oom;
     }
     if (user_runcwd == NULL) {
-	if ((user_runcwd = strdup(user_cwd)) == NULL)
-	    goto oom;
+	/* Unlike user_cwd, user_runcwd is not free()d. */
+	user_runcwd = user_cwd;
     }
     if (user_tty == NULL) {
 	if ((user_tty = strdup("unknown")) == NULL)
