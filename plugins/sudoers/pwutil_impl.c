@@ -263,7 +263,9 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1,
 		    "unable to allocate memory");
 		debug_return_ptr(NULL);
 	    }
-	    (void)sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids);
+	    /* Clamp to max_groups if insufficient space for all groups. */
+	    if (sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1)
+		ngids = sudo_user.max_groups;
 	} else {
 	    gids = NULL;
 	    if (sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1) {

@@ -396,9 +396,11 @@ fill_group_list(const char *user, struct sudo_cred *cred)
     if (cred->ngroups > 0) {
 	cred->groups = reallocarray(NULL, cred->ngroups, sizeof(GETGROUPS_T));
 	if (cred->groups != NULL) {
-	    /* No error on insufficient space if user specified max_groups. */
-	    (void)sudo_getgrouplist2(user, cred->gid,
-		&cred->groups, &cred->ngroups);
+	    /* Clamp to max_groups if insufficient space for all groups. */
+	    if (sudo_getgrouplist2(user, cred->gid, &cred->groups,
+		    &cred->ngroups) == -1) {
+		cred->ngroups = sudo_conf_max_groups();
+	    }
 	    ret = 0;
 	}
     } else {
