@@ -117,6 +117,10 @@ sudoers_policy_deserialize_info(void *v)
     }
 
     /* Parse sudo.conf plugin args. */
+    sudoers_file = _PATH_SUDOERS;
+    sudoers_mode = SUDOERS_MODE;
+    sudoers_uid = SUDOERS_UID;
+    sudoers_gid = SUDOERS_GID;
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
 	    if (MATCHES(*cur, "error_recovery=")) {
