@@ -1082,3 +1082,42 @@ set_lectured(void)
 done:
     debug_return_int(ret);
 }
+
+#ifdef USE_ADMIN_FLAG
+int
+create_admin_success_flag(void)
+{
+    char flagfile[PATH_MAX];
+    int len, ret = -1;
+    debug_decl(create_admin_success_flag, SUDOERS_DEBUG_AUTH);
+
+    /* Check whether the user is in the sudo or admin group. */
+    if (!user_in_group(sudo_user.pw, "sudo") &&
+	!user_in_group(sudo_user.pw, "admin"))
+	debug_return_int(true);
+
+    /* Build path to flag file. */
+    len = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
+	user_dir);
+    if (len < 0 || len >= ssizeof(flagfile))
+	debug_return_int(false);
+
+    /* Create admin flag file if it doesn't already exist. */
+    if (set_perms(PERM_USER)) {
+	int fd = open(flagfile, O_CREAT|O_WRONLY|O_NONBLOCK|O_EXCL, 0644);
+	ret = fd != -1 || errno == EEXIST;
+	if (fd != -1)
+	    close(fd);
+	if (!restore_perms())
+	    ret = -1;
+    }
+    debug_return_int(ret);
+}
+#else /* !USE_ADMIN_FLAG */
+int
+create_admin_success_flag(void)
+{
+    /* STUB */
+    return true;
+}
+#endif /* USE_ADMIN_FLAG */

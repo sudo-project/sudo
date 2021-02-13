@@ -501,6 +501,13 @@ timestamp_remove(bool unlink_it)
 }
 
 /* STUB */
+int
+create_admin_success_flag(void)
+{
+    return true;
+}
+
+/* STUB */
 static int
 sudo_file_open(struct sudo_nss *nss)
 {

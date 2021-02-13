@@ -63,6 +63,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
+#include "check.h"
 #include "auth/sudo_auth.h"
 #include "sudo_iolog.h"
 
@@ -70,7 +71,6 @@
  * Prototypes
  */
 static int set_cmnd(void);
-static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
 static bool set_loginclass(struct passwd *);
 static bool set_runasgr(const char *, bool);
@@ -1619,45 +1619,6 @@ sudoers_cleanup(void)
 
     debug_return;
 }
-
-#ifdef USE_ADMIN_FLAG
-static int
-create_admin_success_flag(void)
-{
-    char flagfile[PATH_MAX];
-    int len, ret = -1;
-    debug_decl(create_admin_success_flag, SUDOERS_DEBUG_PLUGIN);
-
-    /* Check whether the user is in the sudo or admin group. */
-    if (!user_in_group(sudo_user.pw, "sudo") &&
-	!user_in_group(sudo_user.pw, "admin"))
-	debug_return_int(true);
-
-    /* Build path to flag file. */
-    len = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
-	user_dir);
-    if (len < 0 || len >= ssizeof(flagfile))
-	debug_return_int(false);
-
-    /* Create admin flag file if it doesn't already exist. */
-    if (set_perms(PERM_USER)) {
-	int fd = open(flagfile, O_CREAT|O_WRONLY|O_NONBLOCK|O_EXCL, 0644);
-	ret = fd != -1 || errno == EEXIST;
-	if (fd != -1)
-	    close(fd);
-	if (!restore_perms())
-	    ret = -1;
-    }
-    debug_return_int(ret);
-}
-#else /* !USE_ADMIN_FLAG */
-static int
-create_admin_success_flag(void)
-{
-    /* STUB */
-    return true;
-}
-#endif /* USE_ADMIN_FLAG */
 
 static bool
 tty_present(void)
