@@ -112,6 +112,7 @@ push(struct dynamic_array *arr, const char *entry)
 	    return false;
 	}
 	arr->entries = tmp;
+	arr->size += 128;
     }
     if (copy != NULL)
 	arr->entries[arr->len++] = copy;
