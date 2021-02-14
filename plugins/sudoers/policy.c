@@ -278,18 +278,6 @@ sudoers_policy_deserialize_info(void *v)
 	    def_use_loginclass = true;
 	    continue;
 	}
-#ifdef HAVE_PRIV_SET
-	if (MATCHES(*cur, "runas_privs=")) {
-	    CHECK(*cur, "runas_privs=");
-	    def_privs = *cur + sizeof("runas_privs=") - 1;
-	    continue;
-	}
-	if (MATCHES(*cur, "runas_limitprivs=")) {
-	    CHECK(*cur, "runas_limitprivs=");
-	    def_limitprivs = *cur + sizeof("runas_limitprivs=") - 1;
-	    continue;
-	}
-#endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
 	    CHECK(*cur, "selinux_role=");
