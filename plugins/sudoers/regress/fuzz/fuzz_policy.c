@@ -375,13 +375,11 @@ done:
     free(sudo_user.cmnd_safe);
     free(sudo_user.cmnd_stat);
     /* XXX - sudo_user.env_vars */
-#ifdef HAVE_SELINUX_XXX
-    /* XXX - not always dynamic */
+#ifdef HAVE_SELINUX
     free(sudo_user.role);
     free(sudo_user.type);
 #endif
-#ifdef HAVE_PRIV_SET_XXX
-    /* XXX - not always dynamic */
+#ifdef HAVE_PRIV_SET
     free(sudo_user.privs);
     free(sudo_user.limitprivs);
 #endif

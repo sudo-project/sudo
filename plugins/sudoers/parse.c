@@ -201,6 +201,7 @@ apply_cmndspec(struct cmndspec *cs)
 		}
 	    } else {
 		user_role = def_role;
+		def_role = NULL;
 	    }
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"user_role -> %s", user_role);
@@ -215,6 +216,7 @@ apply_cmndspec(struct cmndspec *cs)
 		}
 	    } else {
 		user_type = def_type;
+		def_type = NULL;
 	    }
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"user_type -> %s", user_type);
@@ -232,6 +234,7 @@ apply_cmndspec(struct cmndspec *cs)
 		}
 	    } else {
 		runas_privs = def_privs;
+		def_privs = NULL;
 	    }
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"runas_privs -> %s", runas_privs);
@@ -246,6 +249,7 @@ apply_cmndspec(struct cmndspec *cs)
 		}
 	    } else {
 		runas_limitprivs = def_limitprivs;
+		def_limitprivs = NULL;
 	    }
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"runas_limitprivs -> %s", runas_limitprivs);

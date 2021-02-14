@@ -281,12 +281,18 @@ sudoers_policy_deserialize_info(void *v)
 #ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
 	    CHECK(*cur, "selinux_role=");
-	    user_role = *cur + sizeof("selinux_role=") - 1;
+	    free(user_role);
+	    user_role = strdup(*cur + sizeof("selinux_role=") - 1);
+	    if (user_role == NULL)
+		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "selinux_type=")) {
 	    CHECK(*cur, "selinux_type=");
-	    user_type = *cur + sizeof("selinux_type=") - 1;
+	    free(user_type);
+	    user_type = strdup(*cur + sizeof("selinux_type=") - 1);
+	    if (user_type == NULL)
+		goto oom;
 	    continue;
 	}
 #endif /* HAVE_SELINUX */
