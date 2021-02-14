@@ -3,16 +3,16 @@
 name: CIFuzz
 on:
   # Trigger the workflow on push or pull requests, but only for the
-  # master branch and only for C source files.
+  # main branch and only for C source files.
   push:
     branches:
-      - master
+      - main
     paths:
       - '**.c'
       - '**.h'
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - '**.c'
       - '**.h'
