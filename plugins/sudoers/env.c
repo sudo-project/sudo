@@ -239,6 +239,7 @@ env_init(char * const envp[])
 
     if (envp == NULL) {
 	/* Free the old envp we allocated, if any. */
+	sudoers_gc_remove(GC_PTR, env.old_envp);
 	free(env.old_envp);
 
 	/* Reset to initial state but keep a pointer to what we allocated. */
@@ -261,6 +262,7 @@ env_init(char * const envp[])
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
+	sudoers_gc_add(GC_PTR, env.envp);
 #ifdef ENV_DEBUG
 	memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
@@ -268,6 +270,7 @@ env_init(char * const envp[])
 	env.envp[len] = NULL;
 
 	/* Free the old envp we allocated, if any. */
+	sudoers_gc_remove(GC_PTR, env.old_envp);
 	free(env.old_envp);
 	env.old_envp = NULL;
     }
@@ -332,9 +335,13 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	    errno = EOVERFLOW;
 	    return -1;
 	}
+	sudoers_gc_remove(GC_PTR, env.envp);
 	nenvp = reallocarray(env.envp, nsize, sizeof(char *));
-	if (nenvp == NULL)
+	if (nenvp == NULL) {
+	    sudoers_gc_add(GC_PTR, env.envp);
 	    return -1;
+	}
+	sudoers_gc_add(GC_PTR, nenvp);
 	env.envp = nenvp;
 	env.env_size = nsize;
 #ifdef ENV_DEBUG
@@ -893,6 +900,7 @@ rebuild_env(void)
     didvar = 0;
     env.env_len = 0;
     env.env_size = 128;
+    sudoers_gc_remove(GC_PTR, env.old_envp);
     free(env.old_envp);
     env.old_envp = env.envp;
     env.envp = reallocarray(NULL, env.env_size, sizeof(char *));
@@ -902,6 +910,7 @@ rebuild_env(void)
 	env.env_size = 0;
 	goto bad;
     }
+    sudoers_gc_add(GC_PTR, env.envp);
 #ifdef ENV_DEBUG
     memset(env.envp, 0, env.env_size * sizeof(char *));
 #else

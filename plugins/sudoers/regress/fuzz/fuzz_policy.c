@@ -334,8 +334,6 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	/* Call policy check function */
 	sudoers_policy.check_policy(argv.len, argv.entries, env_add.entries,
 	    &command_info, &argv_out, &user_env_out, &errstr);
-
-	/* XXX - may need to free argv_out and user_env_out */
 	break;
     default:
 	/* fatal or usage error */
@@ -374,7 +372,6 @@ done:
     free(sudo_user.cmnd_args);
     free(sudo_user.cmnd_safe);
     free(sudo_user.cmnd_stat);
-    /* XXX - sudo_user.env_vars */
 #ifdef HAVE_SELINUX
     free(sudo_user.role);
     free(sudo_user.type);
@@ -388,7 +385,11 @@ done:
     free(sudo_user.gids);
     memset(&sudo_user, 0, sizeof(sudo_user));
 
+    /* XXX - Init twice to free everything. */
     env_init(NULL);
+    env_init(NULL);
+
+    sudoers_gc_run();
 
     free_dynamic_array(&plugin_args);
     free_dynamic_array(&settings);

@@ -369,7 +369,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	sudoers_gc_add(GC_VECTOR, NewArgv);
+	sudoers_gc_add(GC_PTR, NewArgv);
 	NewArgv[0] = user_cmnd;
 	NewArgv[1] = NULL;
     } else {
@@ -380,7 +380,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	sudoers_gc_add(GC_VECTOR, NewArgv);
+	sudoers_gc_add(GC_PTR, NewArgv);
 	NewArgv++;	/* reserve an extra slot for --login */
 	memcpy(NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
@@ -733,7 +733,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		env_editor ? env_editor : def_editor);
 	    goto bad;
 	}
-	sudoers_gc_add(GC_VECTOR, edit_argv);
+	sudoers_gc_add(GC_EDIT_ARGS, edit_argv);
 	NewArgv = edit_argv;
 	NewArgc = edit_argc;
 

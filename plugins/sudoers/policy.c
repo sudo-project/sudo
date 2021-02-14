@@ -607,6 +607,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     command_info = calloc(55, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
+    sudoers_gc_add(GC_VECTOR, command_info);
 
     if (safe_cmnd != NULL) {
 	command_info[info_len] = sudo_new_key_val("command", safe_cmnd);
@@ -876,10 +877,6 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	    goto oom;
     }
 #endif /* HAVE_SELINUX */
-
-    /* Free on exit; they are not available in the close function. */
-    sudoers_gc_add(GC_VECTOR, envp);
-    sudoers_gc_add(GC_VECTOR, command_info);
 
     /* Fill in exec environment info. */
     *(exec_args->argv) = argv;

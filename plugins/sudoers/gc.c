@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "sudoers.h"
 
@@ -61,6 +62,7 @@ sudoers_gc_add(enum sudoers_gc_types type, void *v)
 	gc->u.ptr = v;
 	break;
     case GC_VECTOR:
+    case GC_EDIT_ARGS:
 	gc->u.vec = v;
 	break;
     default:
@@ -76,16 +78,62 @@ sudoers_gc_add(enum sudoers_gc_types type, void *v)
 #endif /* NO_LEAKS */
 }
 
+bool
+sudoers_gc_remove(enum sudoers_gc_types type, void *v)
+{
 #ifdef NO_LEAKS
-static void
+    struct sudoers_gc_entry *gc, *prev = NULL;
+    debug_decl(sudoers_gc_remove, SUDOERS_DEBUG_UTIL);
+
+    if (v == NULL)
+	debug_return_bool(false);
+
+    SLIST_FOREACH(gc, &sudoers_gc_list, entries) {
+	switch (gc->type) {
+	case GC_PTR:
+	    if (gc->u.ptr == v)
+	    	goto found;
+	    break;
+	case GC_VECTOR:
+	case GC_EDIT_ARGS:
+	    if (gc->u.vec == v)
+	    	goto found;
+	    break;
+	default:
+	    sudo_warnx("unexpected garbage type %d in %p", gc->type, gc);
+	}
+	prev = gc;
+    }
+    /* If this happens, there is a bug in the g/c code. */
+    sudo_warnx("%s: unable to find %p, type %d", __func__, v, type);
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    abort();
+#else
+    debug_return_bool(false);
+#endif
+found:
+    if (prev == NULL)
+	SLIST_REMOVE_HEAD(&sudoers_gc_list, entries);
+    else
+	SLIST_REMOVE_AFTER(prev, entries);
+    free(gc);
+
+    debug_return_bool(true);
+#else
+    return true;
+#endif /* NO_LEAKS */
+}
+
+void
 sudoers_gc_run(void)
 {
+#ifdef NO_LEAKS
     struct sudoers_gc_entry *gc;
     char **cur;
     debug_decl(sudoers_gc_run, SUDOERS_DEBUG_UTIL);
 
     /* Collect garbage. */
-    while ((gc = SLIST_FIRST(&sudoers_gc_list))) {
+    while ((gc = SLIST_FIRST(&sudoers_gc_list)) != NULL) {
 	SLIST_REMOVE_HEAD(&sudoers_gc_list, entries);
 	switch (gc->type) {
 	case GC_PTR:
@@ -98,14 +146,24 @@ sudoers_gc_run(void)
 	    free(gc->u.vec);
 	    free(gc);
 	    break;
+	case GC_EDIT_ARGS:
+	    for (cur = gc->u.vec; *cur != NULL; cur++) {
+		/* The "--" separates dynamic from non-dynamic args. */
+		if (strcmp(*cur, "--") == 0)
+		    break;
+		free(*cur);
+	    }
+	    free(gc->u.vec);
+	    free(gc);
+	    break;
 	default:
 	    sudo_warnx("unexpected garbage type %d", gc->type);
 	}
     }
 
     debug_return;
-}
 #endif /* NO_LEAKS */
+}
 
 /* XXX - currently unused */
 void
