@@ -75,7 +75,7 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 	CLR(*flags, fval);
 	debug_return_int(false);
     default:
-	sudo_warn(U_("invalid %.*s set by sudo front-end"),
+	sudo_warnx(U_("invalid %.*s set by sudo front-end"),
 	    varlen, line);
 	debug_return_int(-1);
     }
@@ -100,7 +100,7 @@ sudoers_policy_deserialize_info(void *v)
     (strncmp((s), (v), sizeof(v) - 1) == 0)
 
 #define INVALID(v) do {	\
-    sudo_warn(U_("invalid %.*s set by sudo front-end"), \
+    sudo_warnx(U_("invalid %.*s set by sudo front-end"), \
 	(int)(sizeof(v) - 2), (v)); \
 } while (0)
 
