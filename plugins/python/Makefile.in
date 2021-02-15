@@ -222,6 +222,8 @@ fuzz:
 
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
             ./check_python_examples ".libs/python_plugin.so"; \
 	fi
 

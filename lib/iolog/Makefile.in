@@ -194,6 +194,8 @@ pvs-log-files: $(POBJS)
 
 fuzz: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_iolog_legacy: verifying corpus"; \
 	    ./fuzz_iolog_legacy $(srcdir)/regress/corpus/log_legacy/*.log; \
 	    echo "fuzz_iolog_json: verifying corpus"; \
@@ -204,6 +206,8 @@ fuzz: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) fuzz
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    LC_ALL=C; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    rval=0; \

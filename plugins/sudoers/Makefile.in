@@ -483,6 +483,8 @@ pvs-studio: $(POBJS)
 
 fuzz: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_sudoers: verifying corpus"; \
 	    mkdir -p regress/fuzz; \
 	    ./fuzz_sudoers $(top_srcdir)/examples/sudoers $(srcdir)/regress/sudoers/*.in > regress/fuzz/fuzz_sudoers.out 2>&1; \
@@ -495,6 +497,8 @@ fuzz: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) visudo testsudoers cvtsudoers fuzz
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    LC_ALL=C; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
