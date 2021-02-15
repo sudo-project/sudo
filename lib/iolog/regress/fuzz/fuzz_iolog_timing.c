@@ -85,10 +85,9 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 cleanup:
     if (dfd != -1) {
-	if (fd != -1) {
+	if (fd != -1)
 	    close(fd);
-	    unlinkat(dfd, "timing", 0);
-	}
+	unlinkat(dfd, "timing", 0);
 	close(dfd);
     }
     rmdir(logdir);
