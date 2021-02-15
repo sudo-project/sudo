@@ -969,26 +969,10 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Free stashed copy of the environment. */
     (void)env_init(NULL);
 
-    /* Free remaining references to password and group entries. */
-    /* XXX - move cleanup to function in sudoers.c */
-    if (sudo_user.pw != NULL) {
-	sudo_pw_delref(sudo_user.pw);
-	sudo_user.pw = NULL;
-    }
-    if (runas_pw != NULL) {
-	sudo_pw_delref(runas_pw);
-	runas_pw = NULL;
-    }
-    if (runas_gr != NULL) {
-	sudo_gr_delref(runas_gr);
-	runas_gr = NULL;
-    }
-    if (user_gid_list != NULL) {
-	sudo_gidlist_delref(user_gid_list);
-	user_gid_list = NULL;
-    }
-    free(user_gids);
-    user_gids = NULL;
+    /* Free struct sudo_user. */
+    sudo_user_free();
+
+    /* Free error message passed back to front-end, if any. */
     free(audit_msg);
     audit_msg = NULL;
 
@@ -1041,12 +1025,14 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     exec_args.info = command_infop;
 
     ret = sudoers_policy_main(argc, argv, 0, env_add, false, &exec_args);
+#ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
 	if (!def_log_input && !def_log_output && !def_use_pty &&
 	    !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
+#endif
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {

@@ -405,6 +405,7 @@ int set_cmnd_path(const char *runchroot);
 int sudoers_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
+void sudo_user_free(void);
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
 extern bool force_umask;

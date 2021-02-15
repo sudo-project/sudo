@@ -337,56 +337,17 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	break;
     default:
 	/* fatal or usage error */
-	goto done;
+	break;
     }
 
-    if (sudoers_policy.close != NULL)
-	sudoers_policy.close(0, 0);
+    /* Avoid double free of user_cmnd, it will be freed as part of argv. */
+    if (argv.len != 0 && user_cmnd == argv.entries[0])
+	user_cmnd = NULL;
 
-done:
-    /* Cleanup. */
+    /* Free resources. */
+    sudoers_policy.close(0, 0);
 
-    /* Free dynamic contents of sudo_user. */
-    if (sudo_user.pw != NULL)
-	sudo_pw_delref(sudo_user.pw);
-    if (sudo_user.gid_list != NULL)
-	sudo_gidlist_delref(sudo_user.gid_list);
-    if (sudo_user._runas_pw != NULL)
-	sudo_pw_delref(sudo_user._runas_pw);
-    if (sudo_user._runas_gr != NULL)
-	sudo_gr_delref(sudo_user._runas_gr);
-    free(sudo_user.cwd);
-    free(sudo_user.name);
-    if (sudo_user.ttypath != NULL)
-	free(sudo_user.ttypath);
-    else
-	free(sudo_user.tty);
-    if (sudo_user.shost != sudo_user.host)
-	    free(sudo_user.shost);
-    free(sudo_user.host);
-    if (sudo_user.srunhost != sudo_user.runhost)
-	    free(sudo_user.srunhost);
-    free(sudo_user.runhost);
-    if (argv.len == 0 || (argv.len != 0 && sudo_user.cmnd != argv.entries[0]))
-	free(sudo_user.cmnd);
-    free(sudo_user.cmnd_args);
-    free(sudo_user.cmnd_safe);
-    free(sudo_user.cmnd_stat);
-#ifdef HAVE_SELINUX
-    free(sudo_user.role);
-    free(sudo_user.type);
-#endif
-#ifdef HAVE_PRIV_SET
-    free(sudo_user.privs);
-    free(sudo_user.limitprivs);
-#endif
-    free(sudo_user.iolog_file);
-    free(sudo_user.iolog_path);
-    free(sudo_user.gids);
-    memset(&sudo_user, 0, sizeof(sudo_user));
-
-    /* XXX - Init twice to free everything. */
-    env_init(NULL);
+    /* Call a second time to free old env pointer. */
     env_init(NULL);
 
     sudoers_gc_run();

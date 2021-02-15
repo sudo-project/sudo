@@ -1614,6 +1614,7 @@ sudoers_cleanup(void)
     }
     if (def_group_plugin)
 	group_plugin_unload();
+    sudo_user_free();
     sudo_freepwcache();
     sudo_freegrcache();
 
@@ -1632,4 +1633,55 @@ tty_present(void)
 	close(fd);
     }
     debug_return_bool(true);
+}
+
+/*
+ * Free memory allocated for struct sudo_user.
+ */
+void
+sudo_user_free(void)
+{
+    debug_decl(sudo_user_free, SUDOERS_DEBUG_PLUGIN);
+
+    /* Free remaining references to password and group entries. */
+    if (sudo_user.pw != NULL)
+	sudo_pw_delref(sudo_user.pw);
+    if (runas_pw != NULL)
+	sudo_pw_delref(runas_pw);
+    if (runas_gr != NULL)
+	sudo_gr_delref(runas_gr);
+    if (user_gid_list != NULL)
+	sudo_gidlist_delref(user_gid_list);
+
+    /* Free dynamic contents of sudo_user. */
+    free(user_cwd);
+    free(user_name);
+    free(user_gids);
+    if (user_ttypath != NULL)
+	free(user_ttypath);
+    else
+	free(user_tty);
+    if (user_shost != user_host)
+	    free(user_shost);
+    free(user_host);
+    if (user_srunhost != user_runhost)
+	    free(user_srunhost);
+    free(user_runhost);
+    free(user_cmnd);
+    free(user_args);
+    free(safe_cmnd);
+    free(user_stat);
+#ifdef HAVE_SELINUX
+    free(user_role);
+    free(user_type);
+#endif
+#ifdef HAVE_PRIV_SET
+    free(user_privs);
+    free(user_limitprivs);
+#endif
+    free(sudo_user.iolog_file);
+    free(sudo_user.iolog_path);
+    memset(&sudo_user, 0, sizeof(sudo_user));
+
+    debug_return;
 }
