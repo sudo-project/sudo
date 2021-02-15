@@ -330,6 +330,10 @@ logsrvd/logsrv_util.h
 logsrvd/logsrvd.c
 logsrvd/logsrvd.h
 logsrvd/logsrvd_conf.c
+logsrvd/regress/corpus/logsrvd_conf/logsrvd.conf.1
+logsrvd/regress/corpus/logsrvd_conf/logsrvd.conf.2
+logsrvd/regress/corpus/logsrvd_conf/logsrvd.conf.3
+logsrvd/regress/fuzz/fuzz_logsrvd_conf.c
 logsrvd/sendlog.c
 logsrvd/sendlog.h
 ltmain.sh
