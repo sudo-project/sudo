@@ -211,8 +211,12 @@ lib/util/progname.c
 lib/util/pw_dup.c
 lib/util/pwrite.c
 lib/util/reallocarray.c
+lib/util/regress/corpus/sudo_conf/sudo.conf.1
+lib/util/regress/corpus/sudo_conf/sudo.conf.2
+lib/util/regress/corpus/sudo_conf/sudo.conf.3
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
+lib/util/regress/fuzz/fuzz_sudo_conf.c
 lib/util/regress/getdelim/getdelim_test.c
 lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
