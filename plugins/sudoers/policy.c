@@ -968,8 +968,8 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Free stashed copy of the environment. */
     (void)env_init(NULL);
 
-    /* Free struct sudo_user. */
-    sudo_user_free();
+    /* Free sudoers sources, sudo_user and passwd/group caches. */
+    sudoers_cleanup();
 
     /* Free error message passed back to front-end, if any. */
     free(audit_msg);
@@ -1025,8 +1025,8 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 	SET(sudo_mode, MODE_RUN);
 
     if ((sudo_mode & valid_flags) != sudo_mode) {
-	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"),
-	    sudo_mode);
+	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
+	    __func__, sudo_mode);
 	debug_return_int(-1);
     }
 
@@ -1062,8 +1062,8 @@ sudoers_policy_validate(const char **errstr)
 
     SET(sudo_mode, MODE_VALIDATE);
     if ((sudo_mode & VALIDATE_VALID_FLAGS) != sudo_mode) {
-	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"),
-	    sudo_mode);
+	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
+	    __func__, sudo_mode);
 	debug_return_int(-1);
     }
 
@@ -1084,8 +1084,8 @@ sudoers_policy_invalidate(int unlinkit)
 
     SET(sudo_mode, MODE_INVALIDATE);
     if ((sudo_mode & INVALIDATE_VALID_FLAGS) != sudo_mode) {
-	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"),
-	    sudo_mode);
+	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
+	    __func__, sudo_mode);
     } else {
 	timestamp_remove(unlinkit);
     }
@@ -1110,8 +1110,8 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     }
 
     if ((sudo_mode & LIST_VALID_FLAGS) != sudo_mode) {
-	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"),
-	    sudo_mode);
+	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
+	    __func__, sudo_mode);
 	debug_return_int(-1);
     }
 

@@ -1612,6 +1612,7 @@ sudoers_cleanup(void)
 	    nss->close(nss);
 	}
 	snl = NULL;
+	init_parser(NULL, false, false);
     }
     if (def_group_plugin)
 	group_plugin_unload();
