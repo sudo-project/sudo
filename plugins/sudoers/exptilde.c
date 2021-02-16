@@ -86,7 +86,7 @@ expand_tilde(char **path, const char *user)
 	debug_return_bool(false);
     }
 
-    len = asprintf(&npath, "%s%s%s", pw->pw_dir, slash ? "/" : "", opath);
+    len = asprintf(&npath, "%s%s%s", pw->pw_dir, *opath ? "/" : "", opath);
     sudo_pw_delref(pw);
     if (len == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
