@@ -102,8 +102,10 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	sudo_warn(U_("%s: user field is missing"), iolog_dir);
 	goto done;
     }
-    if ((evlog->submituser = strndup(cp, (size_t)(ep - cp))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if ((evlog->submituser = strndup(cp, (size_t)(ep - cp))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
 
     /* runas user */
     cp = ep + 1;
@@ -111,8 +113,10 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	sudo_warn(U_("%s: runas user field is missing"), iolog_dir);
 	goto done;
     }
-    if ((evlog->runuser = strndup(cp, (size_t)(ep - cp))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if ((evlog->runuser = strndup(cp, (size_t)(ep - cp))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
 
     /* runas group */
     cp = ep + 1;
@@ -121,20 +125,26 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	goto done;
     }
     if (cp != ep) {
-	if ((evlog->rungroup = strndup(cp, (size_t)(ep - cp))) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if ((evlog->rungroup = strndup(cp, (size_t)(ep - cp))) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
     }
 
     /* tty, followed by optional lines + cols */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
 	/* just the tty */
-	if ((evlog->ttyname = strdup(cp)) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if ((evlog->ttyname = strdup(cp)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
     } else {
 	/* tty followed by lines + cols */
-	if ((evlog->ttyname = strndup(cp, (size_t)(ep - cp))) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if ((evlog->ttyname = strndup(cp, (size_t)(ep - cp))) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
 	cp = ep + 1;
 	/* need to NULL out separator to use sudo_strtonum() */
 	/* XXX - use sudo_strtonumx */
@@ -192,8 +202,10 @@ iolog_parse_loginfo(int dfd, const char *iolog_dir)
     }
     fd = -1;
 
-    if ((evlog = calloc(1, sizeof(*evlog))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if ((evlog = calloc(1, sizeof(*evlog))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
     evlog->runuid = (uid_t)-1;
     evlog->rungid = (gid_t)-1;
 

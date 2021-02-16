@@ -356,8 +356,10 @@ json_parse_string(char **strp)
 
     /* Copy string, flattening escaped chars. */
     dst = ret = malloc(len + 1);
-    if (dst == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (dst == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_str(NULL);
+    }
     while (src < end) {
 	char ch = *src++;
 	/* TODO: handle unicode escapes */
