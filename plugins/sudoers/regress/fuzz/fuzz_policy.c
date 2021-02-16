@@ -302,7 +302,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    continue;
 	}
 
-	/* First argv entry is the command, the rest are args. */
+	/* Additional environment variables to add. */
 	if (strncmp(line, "env=", sizeof("env=") - 1) == 0) {
 	    push(&env_add, line);
 	    continue;
@@ -339,10 +339,6 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	/* fatal or usage error */
 	break;
     }
-
-    /* Avoid double free of user_cmnd, it will be freed as part of argv. */
-    if (argv.len != 0 && user_cmnd == argv.entries[0])
-	user_cmnd = NULL;
 
     /* Free resources. */
     sudoers_policy.close(0, 0);
@@ -639,7 +635,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	if (asprintf(outfile, "/usr/bin/%s", infile) == -1)
 	    *outfile = NULL;
     }
-    return *outfile ? FOUND : NOT_FOUND;
+    return *outfile ? FOUND : NOT_FOUND_ERROR;
 }
 
 /* STUB */

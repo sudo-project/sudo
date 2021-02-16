@@ -341,6 +341,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
 
+    if (argc == 0) {
+	sudo_warnx("%s", U_("no command specified"));
+	debug_return_int(-1);
+    }
+
     unlimit_nproc();
 
     /* Is root even allowed to run sudo? */
@@ -360,38 +365,26 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /*
      * Make a local copy of argc/argv, with special handling
-     * for pseudo-commands and the '-i' option.
+     * for the '-i' option.
      */
-    if (argc == 0) {
-	NewArgc = 1;
-	NewArgv = reallocarray(NULL, NewArgc + 1, sizeof(char *));
-	if (NewArgv == NULL) {
+    /* Must leave an extra slot before NewArgv for bash's --login */
+    NewArgc = argc;
+    NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
+    if (NewArgv == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    sudoers_gc_add(GC_PTR, NewArgv);
+    NewArgv++;	/* reserve an extra slot for --login */
+    memcpy(NewArgv, argv, argc * sizeof(char *));
+    NewArgv[NewArgc] = NULL;
+    if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
+	NewArgv[0] = strdup(runas_pw->pw_shell);
+	if (NewArgv[0] == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	sudoers_gc_add(GC_PTR, NewArgv);
-	NewArgv[0] = user_cmnd;
-	NewArgv[1] = NULL;
-    } else {
-	/* Must leave an extra slot before NewArgv for bash's --login */
-	NewArgc = argc;
-	NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
-	if (NewArgv == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
-	sudoers_gc_add(GC_PTR, NewArgv);
-	NewArgv++;	/* reserve an extra slot for --login */
-	memcpy(NewArgv, argv, argc * sizeof(char *));
-	NewArgv[NewArgc] = NULL;
-	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
-	    NewArgv[0] = strdup(runas_pw->pw_shell);
-	    if (NewArgv[0] == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		goto done;
-	    }
-	    sudoers_gc_add(GC_PTR, NewArgv[0]);
-	}
+	sudoers_gc_add(GC_PTR, NewArgv[0]);
     }
 
     /* If given the -P option, set the "preserve_groups" flag. */
@@ -930,10 +923,6 @@ set_cmnd(void)
 	debug_return_int(NOT_FOUND_ERROR);
     }
 
-    /* Default value for cmnd, overridden by set_cmnd_path() below. */
-    if (user_cmnd == NULL)
-	user_cmnd = NewArgv[0];
-
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT|MODE_CHECK)) {
 	if (!ISSET(sudo_mode, MODE_EDIT)) {
 	    const char *runchroot = user_runchroot;
@@ -968,14 +957,26 @@ set_cmnd(void)
 		debug_return_int(NOT_FOUND_ERROR);
 	}
     }
+    if (user_cmnd == NULL) {
+	user_cmnd = strdup(NewArgv[0]);
+	if (user_cmnd == NULL)
+	    debug_return_int(NOT_FOUND_ERROR);
+    }
     user_base = sudo_basename(user_cmnd);
 
     /* Convert "sudo sudoedit" -> "sudoedit" */
     if (ISSET(sudo_mode, MODE_RUN) && strcmp(user_base, "sudoedit") == 0) {
+	char *new_cmnd;
+
 	CLR(sudo_mode, MODE_RUN);
 	SET(sudo_mode, MODE_EDIT);
 	sudo_warnx("%s", U_("sudoedit doesn't need to be run via sudo"));
-	user_base = user_cmnd = "sudoedit";
+	if ((new_cmnd = strdup("sudoedit")) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_int(NOT_FOUND_ERROR);
+	}
+	free(user_cmnd);
+	user_base = user_cmnd = new_cmnd;
     }
 
     TAILQ_FOREACH(nss, snl, entries) {

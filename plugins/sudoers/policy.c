@@ -348,6 +348,7 @@ sudoers_policy_deserialize_info(void *v)
     }
 
     /* Sudo front-end should restrict mode flags for sudoedit. */
+    /* XXX - also restrict pseudo-commands */
     if (ISSET(flags, MODE_EDIT) && (flags & edit_mask) != flags) {
 	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"), flags);
 	goto bad;
@@ -976,6 +977,8 @@ sudoers_policy_close(int exit_status, int error_code)
     free(audit_msg);
     audit_msg = NULL;
 
+    /* XXX - leaks NewArgv */
+
     /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
     sudoers_debug_deregister();
 }
@@ -1045,13 +1048,13 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(const char **errstr)
 {
+    char *argv[] = { "validate", NULL };
+    const int argc = 1;
     int ret;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
 
-    user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
-
-    ret = sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, false, NULL);
+    ret = sudoers_policy_main(argc, argv, I_VERIFYPW, NULL, false, NULL);
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
@@ -1075,14 +1078,17 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user, const char **errstr)
 {
+    char *list_argv[] = { "list", NULL };
     int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
 
-    user_cmnd = "list";
-    if (argc)
-	SET(sudo_mode, MODE_CHECK);
-    else
+    if (argc == 0) {
 	SET(sudo_mode, MODE_LIST);
+	argc = 1;
+	argv = list_argv;
+    } else {
+	SET(sudo_mode, MODE_CHECK);
+    }
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
