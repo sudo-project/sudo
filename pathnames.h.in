@@ -141,6 +141,14 @@
 # undef _PATH_SUDO_LOGFILE
 #endif /* _PATH_SUDO_LOGFILE */
 
+/*
+ * The path to an Ubuntu-style admin flag file that is created the
+ * first time a user runs sudo.
+ */
+#ifndef _PATH_SUDO_ADMIN_FLAG
+# undef _PATH_SUDO_ADMIN_FLAG
+#endif /* _PATH_SUDO_ADMIN_FLAG */
+
 #ifndef _PATH_SUDO_SENDMAIL
 # undef _PATH_SUDO_SENDMAIL
 #endif /* _PATH_SUDO_SENDMAIL */

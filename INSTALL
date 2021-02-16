@@ -424,9 +424,11 @@ Operating system-specific options:
 	Disable use of the setresuid() function for operating systems
 	where it is broken (none currently known).
 
-  --enable-admin-flag
-	Enable the creation of an Ubuntu-style admin flag file
-	the first time sudo is run.
+  --enable-admin-flag[=PATH]
+        Enable the creation of an Ubuntu-style admin flag file the
+        first time sudo is run.  If PATH is not specified, the
+        default value is:
+	    ~/.sudo_as_admin_successful
 
   --enable-devsearch=PATH
         Set a system-specific search path of directories to look in

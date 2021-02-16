@@ -1718,7 +1718,8 @@ Optional Features:
                           instead of the default C compiler.
   --disable-leaks         Prevent some harmless memory leaks.
   --disable-poll          Use select() instead of poll().
-  --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
+  --enable-admin-flag[=PATH]
+                          Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
   --disable-rpath         Disable passing of -Rpath to the linker
   --enable-static-sudoers Build the sudoers policy module as part of the sudo
@@ -6989,12 +6990,16 @@ fi
 if test ${enable_admin_flag+y}
 then :
   enableval=$enable_admin_flag;  case "$enableval" in
-    yes)    printf "%s\n" "#define USE_ADMIN_FLAG 1" >>confdefs.h
+    yes)    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_ADMIN_FLAG "~/.sudo_as_admin_successful"
+EOF
 
 	    ;;
     no)	    ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-admin-flag: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-admin-flag: $enableval" >&2;}
+    *)	    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_ADMIN_FLAG "$enableval"
+EOF
+
 	    ;;
   esac
 
@@ -31795,7 +31800,6 @@ printf "%s\n" "$as_me: Warning: the $rundir/ts directory must be cleared at boot
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
-
 
 
 

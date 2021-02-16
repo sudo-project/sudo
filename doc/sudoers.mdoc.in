@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 8, 2020
+.Dd February 16, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4003,6 +4003,23 @@ is built with SELinux support.
 .Pp
 .Sy Strings that can be used in a boolean context :
 .Bl -tag -width 12n
+.It admin_flag
+The
+.Em admin_flag
+option specifies the path to a file that is created the first time
+a user that is a member of the
+.Em sudo
+or
+.Em admin
+groups runs
+.Nm sudo .
+Only available if
+.Nm sudo
+is configured with the
+.Li --enable-admin-flag
+option.
+The default value is
+.Li ~/.sudo_as_admin_successful .
 .It env_file
 The
 .Em env_file

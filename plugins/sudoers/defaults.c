@@ -532,6 +532,10 @@ init_defaults(void)
 #ifdef HAVE_INNETGR
     def_use_netgroups = true;
 #endif
+#ifdef _PATH_SUDO_ADMIN_FLAG
+    if ((def_admin_flag = strdup(_PATH_SUDO_ADMIN_FLAG)) == NULL)
+	goto oom;
+#endif
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;

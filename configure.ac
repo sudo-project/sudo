@@ -1574,12 +1574,12 @@ AC_ARG_ENABLE(poll,
 [AS_HELP_STRING([--disable-poll], [Use select() instead of poll().])])
 
 AC_ARG_ENABLE(admin-flag,
-[AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
+[AS_HELP_STRING([--enable-admin-flag[[=PATH]]], [Whether to create a Ubuntu-style admin flag file])],
 [ case "$enableval" in
-    yes)    AC_DEFINE(USE_ADMIN_FLAG)
+    yes)    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ADMIN_FLAG, "~/.sudo_as_admin_successful")
 	    ;;
     no)	    ;;
-    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-admin-flag: $enableval])
+    *)	    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ADMIN_FLAG, "$enableval")
 	    ;;
   esac
 ])
@@ -5051,7 +5051,6 @@ AH_TEMPLATE(SHELL_SETS_HOME, [Define to 1 if you want sudo to set $HOME in shell
 AH_TEMPLATE(STATIC_SUDOERS_PLUGIN, [Define to 1 to compile the sudoers plugin statically into the sudo binary.])
 AH_TEMPLATE(STUB_LOAD_INTERFACES, [Define to 1 if the code in interfaces.c does not compile for you.])
 AH_TEMPLATE(UMASK_OVERRIDE, [Define to 1 to use the umask specified in sudoers even when it is less restrictive than the invoking user's.])
-AH_TEMPLATE(USE_ADMIN_FLAG, [Define to 1 if you want to create ~/.sudo_as_admin_successful if the user is in the admin group the first time they run sudo.])
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])

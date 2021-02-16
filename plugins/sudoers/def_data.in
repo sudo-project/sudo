@@ -412,3 +412,6 @@ log_format
 selinux
 	T_FLAG
 	"Enable SELinux RBAC support"
+admin_flag
+	T_STR|T_BOOL|T_CHPATH
+	"Path to the file that is created the first time sudo is run: %s"
