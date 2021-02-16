@@ -81,6 +81,12 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
     }
 }
 
+#define RUN_VALID_FLAGS	(MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_PRESERVE_GROUPS|MODE_SHELL|MODE_RUN)
+#define EDIT_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_EDIT)
+#define LIST_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_LIST)
+#define VALIDATE_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_VALIDATE)
+#define INVALIDATE_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_INVALIDATE)
+
 /*
  * Deserialize args, settings and user_info arrays.
  * Fills in struct sudo_user and other common sudoers state.
@@ -88,7 +94,6 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 int
 sudoers_policy_deserialize_info(void *v)
 {
-    const int edit_mask = MODE_EDIT|MODE_IGNORE_TICKET|MODE_NONINTERACTIVE;
     struct sudoers_open_info *info = v;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
@@ -345,13 +350,6 @@ sudoers_policy_deserialize_info(void *v)
 	    continue;
 	}
 #endif
-    }
-
-    /* Sudo front-end should restrict mode flags for sudoedit. */
-    /* XXX - also restrict pseudo-commands */
-    if (ISSET(flags, MODE_EDIT) && (flags & edit_mask) != flags) {
-	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"), flags);
-	goto bad;
     }
 
     user_gid = (gid_t)-1;
@@ -1016,12 +1014,21 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[],
     const char **errstr)
 {
+    int valid_flags = RUN_VALID_FLAGS;
     struct sudoers_exec_args exec_args;
     int ret;
     debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN);
 
-    if (!ISSET(sudo_mode, MODE_EDIT))
+    if (ISSET(sudo_mode, MODE_EDIT))
+	valid_flags = EDIT_VALID_FLAGS;
+    else
 	SET(sudo_mode, MODE_RUN);
+
+    if ((sudo_mode & valid_flags) != sudo_mode) {
+	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"),
+	    sudo_mode);
+	debug_return_int(-1);
+    }
 
     exec_args.argv = argv_out;
     exec_args.envp = user_env_out;
@@ -1054,6 +1061,12 @@ sudoers_policy_validate(const char **errstr)
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
 
     SET(sudo_mode, MODE_VALIDATE);
+    if ((sudo_mode & VALIDATE_VALID_FLAGS) != sudo_mode) {
+	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"),
+	    sudo_mode);
+	debug_return_int(-1);
+    }
+
     ret = sudoers_policy_main(argc, argv, I_VERIFYPW, NULL, false, NULL);
 
     /* The audit functions set audit_msg on failure. */
@@ -1069,7 +1082,13 @@ sudoers_policy_invalidate(int unlinkit)
 {
     debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN);
 
-    timestamp_remove(unlinkit);
+    SET(sudo_mode, MODE_INVALIDATE);
+    if ((sudo_mode & INVALIDATE_VALID_FLAGS) != sudo_mode) {
+	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"),
+	    sudo_mode);
+    } else {
+	timestamp_remove(unlinkit);
+    }
 
     debug_return;
 }
@@ -1089,6 +1108,13 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     } else {
 	SET(sudo_mode, MODE_CHECK);
     }
+
+    if ((sudo_mode & LIST_VALID_FLAGS) != sudo_mode) {
+	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"),
+	    sudo_mode);
+	debug_return_int(-1);
+    }
+
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
