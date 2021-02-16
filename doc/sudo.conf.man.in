@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "December 5, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "February 16, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -496,7 +496,7 @@ version 1.8.7 and higher.
 .TP 10n
 max_groups
 The maximum number of user groups to retrieve from the group database.
-Values less than one will be ignored.
+Values less than one or larger than 1024 will be ignored.
 This setting is only used when querying the group database directly.
 It is intended to be used on systems where it is not possible to detect
 when the array to be populated with group entries is not sufficiently large.
