@@ -206,10 +206,10 @@ fuzz: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) fuzz
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
-	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    LC_ALL=C; export LC_ALL; \
 	    unset LANG || LANG=; \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
 	    ./check_iolog_json $(srcdir)/regress/iolog_json/*.in || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
