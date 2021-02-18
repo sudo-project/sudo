@@ -56,6 +56,10 @@ What's new in Sudo 1.9.6
    "/home/userfoo" instead of "/home/user/foo".  This also affects
    the runchroot and runcwd Defaults settings.
 
+ * Fixed a bug on systems without a native getdelim(3) function
+   where very long lines could cause parsing of the sudoers file
+   to end prematurely.  Bug #960.
+
 What's new in Sudo 1.9.5p2
 
  * Fixed sudo's setprogname(3) emulation on systems that don't
