@@ -1678,8 +1678,8 @@ sudo_user_free(void)
     free(user_type);
 #endif
 #ifdef HAVE_PRIV_SET
-    free(user_privs);
-    free(user_limitprivs);
+    free(runas_privs);
+    free(runas_limitprivs);
 #endif
     free(sudo_user.iolog_file);
     free(sudo_user.iolog_path);
