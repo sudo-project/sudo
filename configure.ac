@@ -1519,6 +1519,10 @@ AC_ARG_ENABLE(gcrypt,
     fi
 ])
 
+AC_ARG_ENABLE(ssp,
+[AS_HELP_STRING([--disable-ssp], [Do not compile using the -fstack-protector option.])],
+[], [enable_ssp=yes])
+
 AC_ARG_ENABLE(hardening,
 [AS_HELP_STRING([--disable-hardening], [Do not use compiler/linker exploit mitigation options])],
 [], [enable_hardening=yes])
@@ -4678,7 +4682,7 @@ dnl
 dnl Check for -fstack-protector and -z relro support
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test "$enable_hardening" != "no"; then
+if test "$enable_hardening" != "no" && test "$enable_ssp" != "no"; then
     AC_CACHE_CHECK([for compiler stack protector support],
 	[sudo_cv_var_stack_protector],
 	[
@@ -4727,6 +4731,9 @@ if test "$enable_hardening" != "no"; then
 	SSP_CFLAGS="$sudo_cv_var_stack_protector"
 	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
+    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
+fi
+if test "$enable_hardening" != "no"; then
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
 fi
 

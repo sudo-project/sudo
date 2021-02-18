@@ -206,6 +206,10 @@ Compilation options:
 	_FORTIFY_SOURCE defined to 2, building with -fstack-protector
 	and linking with -zrelro, where supported.
 
+  --disable-ssp
+	Disable use of the -fstack-protector compiler option.
+	This does not affect the other hardening options.
+
   --disable-leaks
 	Avoid leaking memory even when we are headed for exit,
 	which helps reduce the noise from static and active analyzers.
