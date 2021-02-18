@@ -5488,9 +5488,9 @@ sudoers_input(char *buf, yy_size_t max_size)
 	if (avail == (size_t)-1) {
 sudoers_eof:
 	    /* EOF or error. */
-	    if (ferror(sudoersin) && errno != EINTR)
-		YY_FATAL_ERROR("input in flex scanner failed");
-	    return 0;
+	    if (feof(sudoersin))
+		return 0;
+	    YY_FATAL_ERROR("input in flex scanner failed");
 	}
 
 	/* getdelim() can return embedded NULs, truncate if we find one. */
