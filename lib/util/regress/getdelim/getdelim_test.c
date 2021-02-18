@@ -48,9 +48,6 @@ struct getdelim_test {
     int delim;
 };
 
-/*
- * TODO: test error case.
- */
 static char longstr[LINE_MAX * 2];
 static struct getdelim_test test_data[] = {
     { "a\nb\nc\n", { "a\n", "b\n", "c\n", NULL }, '\n' },
@@ -112,6 +109,7 @@ runtests(char **buf, size_t *buflen)
 		errors++;
 	    }
 	}
+
 	/* test EOF */
 	ntests++;
 	alarm(30);
@@ -126,6 +124,25 @@ runtests(char **buf, size_t *buflen)
 		errors++;
 	    }
 	}
+
+	/* test error by closing the underlying fd. */
+	clearerr(fp);
+	close(fileno(fp));
+	ntests++;
+	alarm(30);
+	if (getdelim(buf, buflen, test_data[i].delim, fp) != -1) {
+	    sudo_warnx_nodebug("failed test #%d: expected error, got %s",
+		ntests, *buf);
+	    errors++;
+	} else {
+	    /* Use feof(3), not ferror(3) so we can detect out of memory. */
+	    if (feof(fp)) {
+		sudo_warn_nodebug("failed test #%d: expected error, got EOF",
+		    ntests);
+		errors++;
+	    }
+	}
+
 	fclose(fp);
 	waitpid(pid, NULL, 0);
 	alarm(0);
