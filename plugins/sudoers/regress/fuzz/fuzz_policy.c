@@ -193,10 +193,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct dynamic_array env_add = { NULL };
     char **command_info = NULL, **argv_out = NULL, **user_env_out = NULL;
     const char *errstr = NULL;
+    const int num_checks = 4;
     char *line = NULL;
     size_t linesize = 0;
     ssize_t linelen;
-    int res;
+    int i, res;
     FILE *fp;
 
     fp = open_data(data, size);
@@ -315,39 +316,53 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     free(line);
     line = NULL;
 
-    /* Call policy open function */
-    res = sudoers_policy.open(SUDO_API_VERSION, fuzz_conversation, fuzz_printf,
-	settings.entries, user_info.entries, environ, plugin_args.entries,
-	&errstr);
+    for (i = 0; i < num_checks; i++) {
+	/* Call policy open function */
+	res = sudoers_policy.open(SUDO_API_VERSION, fuzz_conversation, fuzz_printf,
+	    settings.entries, user_info.entries, environ, plugin_args.entries,
+	    &errstr);
 
-    switch (res) {
-    case 0:
-	/* failure */
-	break;
-    case 1:
-	/* success */
-	if (argv.len == 0) {
-	    /* Must have a command to check. */
-	    push(&argv, "/usr/bin/id");
+	switch (res) {
+	case 1:
+	    /* success */
+	    if (argv.len == 0) {
+		/* Must have a command to check. */
+		push(&argv, "/usr/bin/id");
+	    }
+
+	    switch (i) {
+	    case 0:
+		sudoers_policy.check_policy(argv.len, argv.entries,
+		    env_add.entries, &command_info, &argv_out, &user_env_out,
+		    &errstr);
+		break;
+	    case 1:
+		sudoers_policy.list(argv.len, argv.entries, false, NULL,
+		    &errstr);
+		break;
+	    case 2:
+		sudoers_policy.validate(&errstr);
+		break;
+	    case 3:
+		sudoers_policy.invalidate(false);
+		break;
+	    }
+	    break;
+	default:
+	    /* failure or error, skip remaining checks (counts by 4) */
+	    i = ((i + num_checks) & ~(num_checks - 1)) - 1;
+	    break;
 	}
 
-	/* Call policy check function */
-	sudoers_policy.check_policy(argv.len, argv.entries, env_add.entries,
-	    &command_info, &argv_out, &user_env_out, &errstr);
-	break;
-    default:
-	/* fatal or usage error */
-	break;
+	/* Free resources. */
+	if (sudoers_policy.close != NULL)
+	    sudoers_policy.close(0, 0);
+	else
+	    sudoers_cleanup();
+
+	/* Call a second time to free old env pointer. */
+	env_init(NULL);
     }
-
-    /* Free resources. */
-    if (sudoers_policy.close != NULL)
-	sudoers_policy.close(0, 0);
-    else
-	sudoers_cleanup();
-
-    /* Call a second time to free old env pointer. */
-    env_init(NULL);
 
     sudoers_gc_run();
 
