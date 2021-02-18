@@ -669,12 +669,12 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    switch (*cp) {
 	    case '{':
 		if (name == NULL && frame->parent != NULL) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("objects must consist of name:value pairs"));
 		    goto done;
 		}
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("missing separator between values"));
 		    goto done;
 		}
@@ -689,7 +689,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    case '}':
 		if (stack.depth == 0 || frame->parent == NULL ||
 			frame->parent->type != JSON_OBJECT) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("unmatched close brace"));
 		    goto done;
 		}
@@ -700,12 +700,12 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    case '[':
 		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("unexpected array"));
 		    goto done;
 		}
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("missing separator between values"));
 		    goto done;
 		}
@@ -720,7 +720,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    case ']':
 		if (stack.depth == 0 || frame->parent == NULL ||
 			frame->parent->type != JSON_ARRAY) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("unmatched close bracket"));
 		    goto done;
 		}
@@ -731,7 +731,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    case '"':
 		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("unexpected string"));
 		    goto done;
 		}
@@ -742,14 +742,14 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 			goto done;
 		    /* TODO: allow colon on next line? */
 		    if (*cp != ':') {
-			sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+			sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			    U_("missing colon after name"));
 			goto done;
 		    }
 		    cp++;
 		} else {
 		    if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-			sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+			sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			    U_("missing separator between values"));
 			goto done;
 		    }
@@ -763,7 +763,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (strncmp(cp, "true", sizeof("true") - 1) != 0)
 		    goto parse_error;
 		if (!expect_value) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("unexpected boolean"));
 		    goto done;
 		}
@@ -771,7 +771,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("missing separator between values"));
 		    goto done;
 		}
@@ -785,7 +785,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (strncmp(cp, "false", sizeof("false") - 1) != 0)
 		    goto parse_error;
 		if (!expect_value) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("unexpected boolean"));
 		    goto done;
 		}
@@ -793,7 +793,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("missing separator between values"));
 		    goto done;
 		}
@@ -807,7 +807,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (strncmp(cp, "null", sizeof("null") - 1) != 0)
 		    goto parse_error;
 		if (!expect_value) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("unexpected null"));
 		    goto done;
 		}
@@ -815,7 +815,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("missing separator between values"));
 		    goto done;
 		}
@@ -828,7 +828,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    case '+': case '-': case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7': case '8': case '9':
 		if (!expect_value) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("unexpected number"));
 		    goto done;
 		}
@@ -837,14 +837,14 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 		ch = cp[len];
 		cp[len] = '\0';
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
 			U_("missing separator between values"));
 		    goto done;
 		}
 		saw_comma = false;
 		num = sudo_strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
 		if (errstr != NULL) {
-		    sudo_warnx("%s:%u:%ld: %s: %s", filename, lineno, cp - buf,
+		    sudo_warnx("%s:%u:%td: %s: %s", filename, lineno, cp - buf,
 			cp, U_(errstr));
 		    goto done;
 		}
@@ -863,10 +863,10 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
     if (stack.depth != 0) {
 	frame = stack.frames[stack.depth - 1];
 	if (frame->parent == NULL || frame->parent->type == JSON_OBJECT) {
-	    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf,
+	    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf,
 		U_("unmatched close brace"));
 	} else {
-	    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf,
+	    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf,
 		U_("unmatched close bracket"));
 	}
 	goto done;
@@ -876,7 +876,7 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
     goto done;
 
 parse_error:
-    sudo_warnx("%s:%u:%ld: %s", filename, lineno, cp - buf, U_("parse error"));
+    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, U_("parse error"));
 done:
     free(buf);
     free(name);
