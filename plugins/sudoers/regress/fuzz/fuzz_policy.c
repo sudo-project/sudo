@@ -341,7 +341,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     /* Free resources. */
-    sudoers_policy.close(0, 0);
+    if (sudoers_policy.close != NULL)
+	sudoers_policy.close(0, 0);
+    else
+	sudoers_cleanup();
 
     /* Call a second time to free old env pointer. */
     env_init(NULL);
