@@ -950,10 +950,10 @@ do_syslog_json(int pri, int event_type, const char *reason,
     if (json_str == NULL)
 	debug_return_bool(false);
 
-    /* Syslog it with a @cee: prefix */
+    /* Syslog it in a sudo object with a @cee: prefix. */
     /* TODO: use evl_conf.syslog_maxlen to break up long messages. */
     evl_conf.open_log(EVLOG_SYSLOG, NULL);
-    syslog(pri, "@cee:{%s}", json_str);
+    syslog(pri, "@cee:{\"sudo\":{%s}}", json_str);
     evl_conf.close_log(EVLOG_SYSLOG, NULL);
     free(json_str);
     debug_return_bool(true);
