@@ -492,7 +492,10 @@ fuzz: $(FUZZ_PROGS)
 	    echo "fuzz_sudoers-ldif: verifying corpus"; \
 	    ./fuzz_sudoers_ldif $(srcdir)/regress/sudoers/*.ldif.ok; \
 	    echo "fuzz_policy: verifying corpus"; \
-	    ./fuzz_policy $(srcdir)/regress/corpus/policy/policy.*; \
+	    ./fuzz_policy $(srcdir)/regress/corpus/policy/policy.* > fuzz_policy.out 2>&1; \
+	    if [ $$? -ne 0 ]; then \
+		cat fuzz_policy.out; \
+	    fi; \
 	fi
 
 check: $(TEST_PROGS) visudo testsudoers cvtsudoers fuzz
