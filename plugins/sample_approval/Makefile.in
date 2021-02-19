@@ -163,6 +163,8 @@ install-plugin: install-dirs sample_approval.la
 	    INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sample_approval.la $(DESTDIR)$(plugindir); \
 	fi
 
+install-fuzzer:
+
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sample_approval.la
 	-test -z "$(INSTALL_BACKUP)" || \

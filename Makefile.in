@@ -174,7 +174,7 @@ pvs-studio: config.status
 	fi; \
 	plog-converter $(PVS_LOG_OPTS) $$files
 
-install-dirs install-binaries install-includes install-plugin: config.status pre-install
+install-dirs install-binaries install-fuzzer install-includes install-plugin: config.status pre-install
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) "INSTALL_OWNER=$(INSTALL_OWNER)" $@) && continue; \
 	    exit $$?; \

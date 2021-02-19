@@ -77,6 +77,8 @@ install-includes: install-dirs
 
 install-plugin:
 
+install-fuzzer:
+
 uninstall:
 	-rm -f $(DESTDIR)$(includedir)/sudo_plugin.h
 

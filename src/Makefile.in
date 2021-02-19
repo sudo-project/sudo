@@ -239,6 +239,8 @@ install-noexec: install-dirs sudo_noexec.la
 
 install-plugin:
 
+install-fuzzer:
+
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
 	-rm -f	$(DESTDIR)$(bindir)/sudo \

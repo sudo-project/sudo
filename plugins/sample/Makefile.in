@@ -161,6 +161,8 @@ install-plugin: install-dirs sample_plugin.la
 	    INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sample_plugin.la $(DESTDIR)$(plugindir); \
 	fi
 
+install-fuzzer:
+
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sample_plugin.la
 	-test -z "$(INSTALL_BACKUP)" || \

@@ -378,6 +378,8 @@ install-doc: install-dirs
 
 install-plugin:
 
+install-fuzzer:
+
 uninstall:
 	-rm -rf	$(DESTDIR)$(docdir)
 	-rm -f	$(DESTDIR)$(mandirexe)/cvtsudoers.1 \

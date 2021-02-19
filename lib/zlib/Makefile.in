@@ -146,6 +146,8 @@ install-doc:
 
 install-plugin:
 
+install-fuzzer:
+
 uninstall:
 	$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_z.la
 	-test -z "$(INSTALL_BACKUP)" || \

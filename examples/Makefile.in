@@ -91,6 +91,8 @@ install-doc: install-dirs
 
 install-plugin:
 
+install-fuzzer:
+
 uninstall:
 	-rm -rf	$(DESTDIR)$(exampledir)
 

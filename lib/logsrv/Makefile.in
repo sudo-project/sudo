@@ -136,6 +136,8 @@ install-doc:
 
 install-plugin:
 
+install-fuzzer:
+
 uninstall:
 
 splint:
