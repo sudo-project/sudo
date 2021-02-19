@@ -160,11 +160,24 @@ sudo_dso_strerror_v1(void)
 #  define RTLD_GLOBAL	0
 # endif
 
+/* Default member names for AIX when dlopen()ing an ar (.a) file. */
+# ifdef RTLD_MEMBER
+#  ifdef __LP64__
+#   define SUDO_DSO_MEMBER	"shr_64.o"
+#  else
+#   define SUDO_DSO_MEMBER	"shr.o"
+#  endif
+# endif
+
 void *
 sudo_dso_load_v1(const char *path, int mode)
 {
     struct sudo_preload_table *pt;
     int flags = 0;
+    void *ret;
+#ifdef RTLD_MEMBER
+    char *cp;
+#endif
 
     /* Check prelinked symbols first. */
     if (preload_table != NULL) {
@@ -176,15 +189,38 @@ sudo_dso_load_v1(const char *path, int mode)
 
     /* Map SUDO_DSO_* -> RTLD_* */
     if (ISSET(mode, SUDO_DSO_LAZY))
-	flags |= RTLD_LAZY;
+	SET(flags, RTLD_LAZY);
     if (ISSET(mode, SUDO_DSO_NOW))
-	flags |= RTLD_NOW;
+	SET(flags, RTLD_NOW);
     if (ISSET(mode, SUDO_DSO_GLOBAL))
-	flags |= RTLD_GLOBAL;
+	SET(flags, RTLD_GLOBAL);
     if (ISSET(mode, SUDO_DSO_LOCAL))
-	flags |= RTLD_LOCAL;
+	SET(flags, RTLD_LOCAL);
 
-    return dlopen(path, flags);
+#ifdef RTLD_MEMBER
+    /* Check for AIX path(module) syntax and add RTLD_MEMBER for a module. */
+    cp = strrchr(path, '(');
+    if (cp != NULL) {
+	size_t len = strlen(cp);
+	if (len > 2 && cp[len - 1] == '\0')
+	    SET(flags, RTLD_MEMBER);
+    }
+#endif /* RTLD_MEMBER */
+    ret = dlopen(path, flags);
+#ifdef RTLD_MEMBER
+    /*
+     * If we try to dlopen() an AIX .a file without an explicit member
+     * it will fail with ENOEXEC.  Try again using the default member.
+     */
+    if (ret == NULL && !ISSET(flags, RTLD_MEMBER) && errno == ENOEXEC) {
+	if (asprintf(&cp, "%s(%s)", path, SUDO_DSO_MEMBER) != -1) {
+	    ret = dlopen(cp, flags|RTLD_MEMBER);
+	    free(cp);
+	}
+    }
+#endif /* RTLD_MEMBER */
+
+    return ret;
 }
 
 int
