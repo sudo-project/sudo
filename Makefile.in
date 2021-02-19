@@ -437,4 +437,5 @@ sandwich:
 	    echo "What?  Make it yourself!"; \
 	fi
 
-.PHONY: ChangeLog me a sandwhich check-format reformat
+.PHONY: clean mostlyclean distclean cleandir clobber realclean ChangeLog \
+        me a sandwhich check-format reformat

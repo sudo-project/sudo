@@ -294,6 +294,8 @@ realclean: distclean
 
 cleandir: realclean
 
+.PHONY: clean mostlyclean distclean cleandir clobber realclean
+
 # *Not* auto-generated to avoid building with ASAN
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/sudo_compat.h \
                 $(top_builddir)/config.h $(top_builddir)/pathnames.h

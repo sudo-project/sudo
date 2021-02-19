@@ -423,3 +423,5 @@ clobber: distclean
 realclean: distclean
 
 cleandir: distclean
+
+.PHONY: clean mostlyclean distclean cleandir clobber realclean
