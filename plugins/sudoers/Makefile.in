@@ -246,7 +246,8 @@ FUZZ_POLICY_OBJS = fuzz_policy.o editor.lo env.lo env_pattern.lo gc.lo \
 
 FUZZ_POLICY_CORPUS = $(srcdir)/regress/corpus/policy/policy.*
 
-FUZZ_SUDOERS_OBJS = fuzz_sudoers.o locale.lo stubs.o sudo_printf.o
+FUZZ_SUDOERS_OBJS = file.lo fuzz_sudoers.o fmtsudoers.lo parse.lo locale.lo \
+		    stubs.o sudo_printf.o
 
 FUZZ_SUDOERS_CORPUS = $(top_srcdir)/examples/sudoers \
 		      $(srcdir)/regress/sudoers/*.in
