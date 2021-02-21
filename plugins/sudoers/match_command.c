@@ -33,11 +33,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#ifdef HAVE_GLOB
-# include <glob.h>
-#else
-# include "compat/glob.h"
-#endif /* HAVE_GLOB */
+#ifndef SUDOERS_NAME_MATCH
+# ifdef HAVE_GLOB
+#  include <glob.h>
+# else
+#  include "compat/glob.h"
+# endif /* HAVE_GLOB */
+#endif /* SUDOERS_NAME_MATCH */
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -206,6 +208,7 @@ set_cmnd_fd(int fd)
     debug_return;
 }
 
+#ifndef SUDOERS_NAME_MATCH
 /*
  * Return true if user_cmnd names one of the inodes in dir, else false.
  */
@@ -290,6 +293,19 @@ command_matches_dir(const char *sudoers_dir, size_t dlen, const char *runchroot,
 	close(fd);
     debug_return_bool(false);
 }
+#else /* SUDOERS_NAME_MATCH */
+/*
+ * Return true if user_cmnd names one of the inodes in dir, else false.
+ */
+static bool
+command_matches_dir(const char *sudoers_dir, size_t dlen, const char *runchroot,
+    const struct command_digest_list *digests)
+{
+    debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH);
+    /* XXX - check digest */
+    debug_return_bool(strncmp(user_cmnd, sudoers_dir, dlen) == 0);
+}
+#endif /* SUDOERS_NAME_MATCH */
 
 static bool
 command_matches_all(const char *runchroot,
@@ -364,6 +380,7 @@ bad:
     debug_return_bool(false);
 }
 
+#ifndef SUDOERS_NAME_MATCH
 static bool
 command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
     const char *runchroot, const struct command_digest_list *digests)
@@ -570,6 +587,41 @@ bad:
 	close(fd);
     debug_return_bool(false);
 }
+#else /* SUDOERS_NAME_MATCH */
+static bool
+command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
+    const char *runchroot, const struct command_digest_list *digests)
+{
+    return command_matches_fnmatch(sudoers_cmnd, sudoers_args, runchroot,
+	digests);
+}
+
+static bool
+command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
+    const char *runchroot, const struct command_digest_list *digests)
+{
+    size_t dlen;
+    debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH);
+
+    /* If it ends in '/' it is a directory spec. */
+    dlen = strlen(sudoers_cmnd);
+    if (sudoers_cmnd[dlen - 1] == '/') {
+	debug_return_bool(command_matches_dir(sudoers_cmnd, dlen, runchroot,
+	    digests));
+    }
+
+    if (strcmp(user_cmnd, sudoers_cmnd) == 0) {
+	if (command_args_match(sudoers_cmnd, sudoers_args)) {
+	    /* XXX - check digest */
+	    free(safe_cmnd);
+	    if ((safe_cmnd = strdup(sudoers_cmnd)) != NULL)
+		debug_return_bool(true);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	}
+    }
+    debug_return_bool(false);
+}
+#endif /* SUDOERS_NAME_MATCH */
 
 /*
  * If path doesn't end in /, return true iff cmnd & path name the same inode;

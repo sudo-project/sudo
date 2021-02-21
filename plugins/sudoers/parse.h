@@ -29,6 +29,11 @@
 /* Returns true if string 's' contains meta characters. */
 #define has_meta(s)	(strpbrk(s, "\\?*[]") != NULL)
 
+/* Match by name, not inode, when fuzzing. */
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+# define SUDOERS_NAME_MATCH
+#endif
+
 #undef UNSPEC
 #define UNSPEC	-1
 #undef DENY
