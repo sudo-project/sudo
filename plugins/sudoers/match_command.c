@@ -464,8 +464,10 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 	    /* If it ends in '/' it is a directory spec. */
 	    dlen = strlen(cp);
 	    if (cp[dlen - 1] == '/') {
-		if (command_matches_dir(cp, dlen, runchroot, digests))
+		if (command_matches_dir(cp, dlen, runchroot, digests)) {
+		    globfree(&gl);
 		    debug_return_bool(true);
+		}
 		continue;
 	    }
 
