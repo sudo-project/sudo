@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#include <sys/socket.h>
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,8 +29,16 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#ifdef NEED_RESOLV_H
+# include <arpa/nameser.h>
+# include <resolv.h>
+#endif /* NEED_RESOLV_H */
+#include <netdb.h>
 
 #include "sudoers.h"
+#include "interfaces.h"
 
 static int fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
 
@@ -148,8 +158,13 @@ extern struct sudo_nss sudo_nss_file;
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    char **u, *users[] = { "root", "millert", "operator", NULL };
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     struct sudoers_parse_tree parse_tree;
+    struct interface_list *interfaces;
+    struct passwd *pw;
+    struct group *gr;
+    char *gids[10];
     FILE *fp;
 
     /* Don't waste time fuzzing tiny inputs. */
@@ -160,14 +175,73 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (fp == NULL)
         return 0;
 
-    /* The minimum needed to perform matching. */
+    /* Prime the group cache */
+    gr = sudo_mkgrent("wheel", 0, "millert", "root", NULL);
+    if (gr == NULL)
+	goto done;
+    sudo_gr_delref(gr);
+
+    gr = sudo_mkgrent("operator", 5, "operator", "root", "millert", NULL);
+    if (gr == NULL)
+	goto done;
+    sudo_gr_delref(gr);
+
+    gr = sudo_mkgrent("staff", 20, "root", "millert", NULL);
+    if (gr == NULL)
+	goto done;
+    sudo_gr_delref(gr);
+
+    /* Prime the passwd cache */
+    pw = sudo_mkpwent("root", 0, 0, "/", "/bin/sh");
+    if (pw == NULL)
+	goto done;
+    gids[0] = "0";
+    gids[1] = "20";
+    gids[2] = "5";
+    gids[3] = NULL;
+    if (sudo_set_gidlist(pw, gids, ENTRY_TYPE_FRONTEND) == -1)
+	goto done;
+    sudo_pw_delref(pw);
+
+    pw = sudo_mkpwent("operator", 2, 5, "/operator", "/sbin/nologin");
+    if (pw == NULL)
+	goto done;
+    gids[0] = "5";
+    gids[1] = NULL;
+    if (sudo_set_gidlist(pw, gids, ENTRY_TYPE_FRONTEND) == -1)
+	goto done;
+    sudo_pw_delref(pw);
+
+    pw = sudo_mkpwent("millert", 8036, 20, "/home/millert", "/bin/tcsh");
+    if (pw == NULL)
+	goto done;
+    gids[0] = "0";
+    gids[1] = "20";
+    gids[2] = "5";
+    gids[3] = NULL;
+    if (sudo_set_gidlist(pw, gids, ENTRY_TYPE_FRONTEND) == -1)
+	goto done;
+    sudo_pw_delref(pw);
+
+    /* The minimum needed to perform matching (user_cmnd must be dynamic). */
     user_host = user_shost = user_runhost = user_srunhost = "localhost";
-    user_name = "nobody";
-    user_cmnd = "/usr/bin/id";
+    user_cmnd = strdup("/usr/bin/id");
     user_args = "-u";
     user_base = "id";
-    sudo_user.pw = sudo_getpwnam("root");
     runas_pw = sudo_getpwnam("root");
+    if (user_cmnd == NULL || runas_pw == NULL)
+	goto done;
+
+    /* Add a fake network interfaces. */
+    interfaces = get_interfaces();
+    if (SLIST_EMPTY(interfaces)) {
+	static struct interface interface;
+
+	interface.family = AF_INET;
+	inet_pton(AF_INET, "128.138.243.151", &interface.addr.ip4);
+	inet_pton(AF_INET, "255.255.255.0", &interface.netmask.ip4);
+	SLIST_INSERT_HEAD(interfaces, &interface, entries);
+    }
 
     /* Only one sudoers source, the sudoers file itself. */
     TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
@@ -182,21 +256,41 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     reparent_parse_tree(&parse_tree);
 
     if (!parse_error) {
-	/* Match command against parsed policy. */
-	int cmnd_status;
-	sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, false);
+	/* Match user/host/command against parsed policy. */
+	for (u = users; (user_name = *u) != NULL; u++) {
+	    int cmnd_status;
 
-	/* Match again as a pseudo-command (list, validate, etc). */
-	sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, true);
+	    sudo_user.pw = sudo_getpwnam(user_name);
+	    if (sudo_user.pw == NULL)
+		goto done;
 
-	/* Display privileges. */
-	display_privs(&snl, sudo_user.pw, false);
+	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, false);
+
+	    /* Match again as a pseudo-command (list, validate, etc). */
+	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, true);
+
+	    /* Display privileges. */
+	    display_privs(&snl, sudo_user.pw, false);
+	    display_privs(&snl, sudo_user.pw, true);
+
+	    sudo_pw_delref(sudo_user.pw);
+	    sudo_user.pw = NULL;
+	}
     }
 
+done:
     /* Cleanup. */
+    fclose(fp);
     free_parse_tree(&parse_tree);
     init_parser(NULL, false, true);
-    fclose(fp);
+    if (sudo_user.pw != NULL)
+	sudo_pw_delref(sudo_user.pw);
+    if (runas_pw != NULL)
+	sudo_pw_delref(runas_pw);
+    sudo_freepwcache();
+    sudo_freegrcache();
+    free(user_cmnd);
+    memset(&sudo_user, 0, sizeof(sudo_user));
 
     return 0;
 }
