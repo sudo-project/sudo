@@ -250,7 +250,31 @@ FUZZ_SUDOERS_OBJS = file.lo fuzz_sudoers.o fmtsudoers.lo parse.lo locale.lo \
 		    stubs.o sudo_printf.o
 
 FUZZ_SUDOERS_CORPUS = $(top_srcdir)/examples/sudoers \
-		      $(srcdir)/regress/sudoers/*.in
+		      $(srcdir)/regress/sudoers/test1.in \
+		      $(srcdir)/regress/sudoers/test2.in \
+		      $(srcdir)/regress/sudoers/test3.in \
+		      $(srcdir)/regress/sudoers/test4.in \
+		      $(srcdir)/regress/sudoers/test5.in \
+		      $(srcdir)/regress/sudoers/test6.in \
+		      $(srcdir)/regress/sudoers/test7.in \
+		      $(srcdir)/regress/sudoers/test8.in \
+		      $(srcdir)/regress/sudoers/test9.in \
+		      $(srcdir)/regress/sudoers/test10.in \
+		      $(srcdir)/regress/sudoers/test11.in \
+		      $(srcdir)/regress/sudoers/test12.in \
+		      $(srcdir)/regress/sudoers/test13.in \
+		      $(srcdir)/regress/sudoers/test14.in \
+		      $(srcdir)/regress/sudoers/test15.in \
+		      $(srcdir)/regress/sudoers/test16.in \
+		      $(srcdir)/regress/sudoers/test17.in \
+		      $(srcdir)/regress/sudoers/test18.in \
+		      $(srcdir)/regress/sudoers/test19.in \
+		      $(srcdir)/regress/sudoers/test20.in \
+		      $(srcdir)/regress/sudoers/test21.in \
+		      $(srcdir)/regress/sudoers/test22.in \
+		      $(srcdir)/regress/sudoers/test23.in \
+		      $(srcdir)/regress/sudoers/test24.in \
+		      $(srcdir)/regress/sudoers/test25.in
 
 FUZZ_SUDOERS_LDIF_OBJS = fuzz_sudoers_ldif.o parse_ldif.o ldap_util.lo \
 			 fmtsudoers.lo locale.lo stubs.o sudo_printf.o
@@ -526,11 +550,13 @@ pvs-studio: $(POBJS)
 
 fuzz: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    LC_ALL=C; export LC_ALL; \
+	    unset LANG || LANG=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_sudoers: verifying corpus"; \
 	    mkdir -p regress/fuzz; \
-	    ./fuzz_sudoers $(FUZZ_SUDOERS_CORPUS) > regress/fuzz/fuzz_sudoers.out 2>&1; \
+	    ./fuzz_sudoers $(FUZZ_SUDOERS_CORPUS) 2>&1 | sed -e 's/^\(Running: \).*\(examples\)/\1\2/' -e 's/^\(Executed \).*\(examples.*\) in [0-9]* ms$$/\1\2/' -e 's/^\(Running: \).*\(regress\)/\1\2/' -e 's/^\(Executed \).*\(regress.*\) in [0-9]* ms$$/\1\2/' > regress/fuzz/fuzz_sudoers.out; \
 	    diff $(srcdir)/regress/fuzz/fuzz_sudoers.out.ok regress/fuzz/fuzz_sudoers.out; \
 	    echo "fuzz_sudoers-ldif: verifying corpus"; \
 	    ./fuzz_sudoers_ldif $(FUZZ_SUDOERS_LDIF_CORPUS); \
