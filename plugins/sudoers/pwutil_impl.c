@@ -235,7 +235,7 @@ sudo_make_gritem(gid_t gid, const char *name)
  * elements.  Fills in datum from user_gids or from sudo_getgrouplist2(3).
  */
 struct cache_item *
-sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1,
+sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
     unsigned int type)
 {
     char *cp;
@@ -246,12 +246,42 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1,
     int i, ngids;
     debug_decl(sudo_make_gidlist_item, SUDOERS_DEBUG_NSS);
 
-    /* Don't use user_gids if the entry type says we must query the db. */
-    if (type != ENTRY_TYPE_QUERIED && pw == sudo_user.pw && sudo_user.gids != NULL) {
-	gids = user_gids;
-	ngids = user_ngids;
-	user_gids = NULL;
-	user_ngids = 0;
+    /*
+     * Ignore supplied gids if the entry type says we must query the group db.
+     */
+    if (type != ENTRY_TYPE_QUERIED && (gidstrs != NULL ||
+	    (pw == sudo_user.pw && sudo_user.gids != NULL))) {
+	if (gidstrs != NULL) {
+	    /* Use supplied gids list (string format). */
+	    ngids = 1;
+	    for (i = 0; gidstrs[i] != NULL; i++)
+		ngids++;
+	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	    if (gids == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
+		debug_return_ptr(NULL);
+	    }
+	    ngids = 1;
+	    gids[0] = pw->pw_gid;
+	    for (i = 0; gidstrs[i] != NULL; i++) {
+		const char *errstr;
+		GETGROUPS_T gid = (gid_t) sudo_strtoid(gidstrs[i], &errstr);
+		if (errstr != NULL) {
+		    sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
+			"gid %s %s", gidstrs[i], errstr);
+		    continue;
+		}
+		if (gid != gids[0])
+		    gids[ngids++] = gid;
+	    }
+	} else {
+	    /* Adopt sudo_user.gids. */
+	    gids = user_gids;
+	    ngids = user_ngids;
+	    user_gids = NULL;
+	    user_ngids = 0;
+	}
 	type = ENTRY_TYPE_FRONTEND;
     } else {
 	type = ENTRY_TYPE_QUERIED;
