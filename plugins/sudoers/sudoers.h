@@ -341,6 +341,7 @@ sudo_dso_public void sudo_gr_addref(struct group *);
 sudo_dso_public void sudo_gr_delref(struct group *);
 bool user_in_group(const struct passwd *, const char *);
 struct group *sudo_fakegrnam(const char *);
+struct group *sudo_mkgrent(const char *group, gid_t gid, ...);
 struct gid_list *sudo_get_gidlist(const struct passwd *pw, unsigned int type);
 struct group_list *sudo_get_grlist(const struct passwd *pw);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
