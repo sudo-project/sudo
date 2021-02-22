@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <time.h>
 #include <unistd.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -39,6 +40,7 @@
 #endif
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
@@ -51,8 +53,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 int
 main(int argc, char *argv[])
 {
+    struct timespec start_time, stop_time;
     size_t filesize, bufsize = 0;
-    ssize_t nread;
+    ssize_t nread, ms;
     struct stat sb;
     uint8_t *buf = NULL;
     int fd, i, errors = 0;
@@ -101,7 +104,14 @@ main(int argc, char *argv[])
 	close(fd);
 
 	/* NOTE: doesn't support LLVMFuzzerInitialize() (but we don't use it) */
+	fprintf(stderr, "Running: %s\n", argv[i]);
+	sudo_gettime_mono(&start_time);
 	LLVMFuzzerTestOneInput(buf, nread);
+	fflush(stdout);
+	sudo_gettime_mono(&stop_time);
+	sudo_timespecsub(&stop_time, &start_time, &stop_time);
+	ms = (stop_time.tv_sec * 1000) + (stop_time.tv_nsec / 1000000);
+	fprintf(stderr, "Executed %s in %zd ms\n", argv[i], ms);
     }
     free(buf);
 
