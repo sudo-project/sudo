@@ -1,19 +1,19 @@
 # sudo.conf keywords
-Debug
-Path
-Plugin
-Set
+"Debug"
+"Path"
+"Plugin"
+"Set"
 
 # Paths
-askpass
-sesh
-noexec
-plugin_dir
-devsearch
+"askpass"
+"sesh"
+"noexec"
+"plugin_dir"
+"devsearch"
 
 # Variables
-developer_mode
-disable_coredump
-group_source
-max_groups
-probe_interfaces
+"developer_mode"
+"disable_coredump"
+"group_source"
+"max_groups"
+"probe_interfaces"

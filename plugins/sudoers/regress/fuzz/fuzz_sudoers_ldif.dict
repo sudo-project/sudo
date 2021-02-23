@@ -1,14 +1,14 @@
 # Sudoers LDIF attributes
 
-description
-objectClass
-organizationalRole
-sudoCommand
-sudoHost
-sudoOption
-sudoOption
-sudoOrder
-sudoRunAs
-sudoRunAsGroup
-sudoRunAsUser
-sudoUser
+"description"
+"objectClass"
+"organizationalRole"
+"sudoCommand"
+"sudoHost"
+"sudoOption"
+"sudoOption"
+"sudoOrder"
+"sudoRunAs"
+"sudoRunAsGroup"
+"sudoRunAsUser"
+"sudoUser"
