@@ -290,6 +290,7 @@ done:
     sudo_freepwcache();
     sudo_freegrcache();
     free(user_cmnd);
+    free(safe_cmnd);
     memset(&sudo_user, 0, sizeof(sudo_user));
 
     return 0;
