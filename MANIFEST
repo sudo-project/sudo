@@ -137,6 +137,7 @@ lib/iolog/regress/corpus/timing/timing.2
 lib/iolog/regress/corpus/timing/timing.3
 lib/iolog/regress/corpus/timing/timing.4
 lib/iolog/regress/fuzz/fuzz_iolog_json.c
+lib/iolog/regress/fuzz/fuzz_iolog_json.dict
 lib/iolog/regress/fuzz/fuzz_iolog_legacy.c
 lib/iolog/regress/fuzz/fuzz_iolog_timing.c
 lib/iolog/regress/host_port/host_port_test.c  
@@ -217,6 +218,7 @@ lib/util/regress/corpus/sudo_conf/sudo.conf.3
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
 lib/util/regress/fuzz/fuzz_sudo_conf.c
+lib/util/regress/fuzz/fuzz_sudo_conf.dict
 lib/util/regress/getdelim/getdelim_test.c
 lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
@@ -715,9 +717,12 @@ plugins/sudoers/regress/env_match/check_env_pattern.c
 plugins/sudoers/regress/env_match/data
 plugins/sudoers/regress/exptilde/check_exptilde.c
 plugins/sudoers/regress/fuzz/fuzz_policy.c
+plugins/sudoers/regress/fuzz/fuzz_policy.dict
 plugins/sudoers/regress/fuzz/fuzz_sudoers.c
+plugins/sudoers/regress/fuzz/fuzz_sudoers.dict
 plugins/sudoers/regress/fuzz/fuzz_sudoers.out.ok
 plugins/sudoers/regress/fuzz/fuzz_sudoers_ldif.c
+plugins/sudoers/regress/fuzz/fuzz_sudoers_ldif.dict
 plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
 plugins/sudoers/regress/parser/check_addr.c
 plugins/sudoers/regress/parser/check_addr.in

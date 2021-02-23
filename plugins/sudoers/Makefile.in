@@ -521,6 +521,7 @@ install-fuzzer: $(FUZZ_PROGS) $(FUZZ_SEED_CORPUS)
 	    echo "must set FUZZ_DESTDIR for install-fuzzer target"; \
 	else \
 	    cp $(FUZZ_PROGS) $(FUZZ_SEED_CORPUS) $(FUZZ_DESTDIR); \
+	    cp $(srcdir)/regress/fuzz/*.dict $(FUZZ_DESTDIR); \
 	fi
 
 uninstall:
