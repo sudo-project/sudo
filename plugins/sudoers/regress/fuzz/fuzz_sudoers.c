@@ -127,6 +127,12 @@ log_warningx(int flags, const char *fmt, ...)
     return true;
 }
 
+static int
+sudo_fuzz_query(struct sudo_nss *nss, struct passwd *pw)
+{
+    return 0;
+}
+
 static FILE *
 open_data(const uint8_t *data, size_t size)
 {
@@ -153,12 +159,11 @@ open_data(const uint8_t *data, size_t size)
 #endif
 }
 
-extern struct sudo_nss sudo_nss_file;
-
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     char **u, *users[] = { "root", "millert", "operator", NULL };
+    struct sudo_nss sudo_nss_fuzz;
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     struct sudoers_parse_tree parse_tree;
     struct interface_list *interfaces;
@@ -244,9 +249,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     /* Only one sudoers source, the sudoers file itself. */
-    TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
     init_parse_tree(&parse_tree, user_host, user_shost);
-    sudo_nss_file.parse_tree = &parse_tree;
+    memset(&sudo_nss_fuzz, 0, sizeof(sudo_nss_fuzz));
+    sudo_nss_fuzz.parse_tree = &parse_tree;
+    sudo_nss_fuzz.query = sudo_fuzz_query;
+    TAILQ_INSERT_TAIL(&snl, &sudo_nss_fuzz, entries);
 
     /* Initialize defaults and parse sudoers. */
     init_defaults();
