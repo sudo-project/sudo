@@ -502,7 +502,8 @@ init_eventlog_config(void)
 int
 set_cmnd_path(const char *runchroot)
 {
-    return FOUND;
+    /* Cannot return FOUND without also setting user_cmnd to a new value. */
+    return NOT_FOUND;
 }
 
 static bool
