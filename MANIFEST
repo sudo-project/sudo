@@ -724,6 +724,7 @@ plugins/sudoers/regress/env_match/data
 plugins/sudoers/regress/exptilde/check_exptilde.c
 plugins/sudoers/regress/fuzz/fuzz_policy.c
 plugins/sudoers/regress/fuzz/fuzz_policy.dict
+plugins/sudoers/regress/fuzz/fuzz_stubs.c
 plugins/sudoers/regress/fuzz/fuzz_sudoers.c
 plugins/sudoers/regress/fuzz/fuzz_sudoers.dict
 plugins/sudoers/regress/fuzz/fuzz_sudoers.out.ok

@@ -336,28 +336,6 @@ user_is_exempt(void)
 }
 
 /* STUB */
-int
-group_plugin_query(const char *user, const char *group, const struct passwd *pw)
-{
-    return false;
-}
-
-/* STUB */
-struct interface_list *
-get_interfaces(void)
-{
-    static struct interface_list empty = SLIST_HEAD_INITIALIZER(interfaces);
-    return &empty;
-}
-
-/* STUB */
-void
-init_eventlog_config(void)
-{
-    return;
-}
-
-/* STUB */
 bool
 set_interfaces(const char *ai)
 {
@@ -397,27 +375,6 @@ bool
 sudo_auth_needs_end_session(void)
 {
     return false;
-}
-
-/* STUB */
-bool
-set_perms(int perm)
-{
-    return true;
-}
-
-/* STUB */
-bool
-restore_perms(void)
-{
-    return true;
-}
-
-/* STUB */
-bool
-rewind_perms(void)
-{
-    return true;
 }
 
 /* STUB */

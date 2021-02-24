@@ -43,6 +43,19 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
     return NULL;
 }
 
+bool
+init_envtables(void)
+{
+    return true;
+}
+
+int
+set_cmnd_path(const char *runchroot)
+{
+    /* Cannot return FOUND without also setting user_cmnd to a new value. */
+    return NOT_FOUND;
+}
+
 static FILE *
 open_data(const uint8_t *data, size_t size)
 {

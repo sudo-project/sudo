@@ -98,21 +98,16 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 }
 
 bool
-set_perms(int perm)
+init_envtables(void)
 {
     return true;
 }
 
-bool
-restore_perms(void)
+int
+set_cmnd_path(const char *runchroot)
 {
-    return true;
-}
-
-bool
-sudo_nss_can_continue(struct sudo_nss *nss, int match)
-{
-    return true;
+    /* Cannot return FOUND without also setting user_cmnd to a new value. */
+    return NOT_FOUND;
 }
 
 bool
