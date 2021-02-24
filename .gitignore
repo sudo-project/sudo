@@ -56,11 +56,13 @@ lib/util/siglist.c
 lib/util/signame.c
 lib/util/util.exp
 lib/util/[a-z]*_test
+lib/util/fuzz_[a-z]*
 lib/util/regress/**/*.out
 lib/util/regress/**/*.err
 
 logsrvd/sudo_logsrvd
 logsrvd/sudo_sendlog
+logsrvd/fuzz_[a-z]*
 
 plugins/sudoers/cvtsudoers
 plugins/sudoers/sudoers
