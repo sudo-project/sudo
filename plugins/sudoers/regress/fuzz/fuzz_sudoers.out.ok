@@ -368,6 +368,7 @@ user3	ALL = TIMEOUT=10m30ss /usr/bin/id
 sudoers:8:21: invalid timeout value
 user4	ALL = TIMEOUT=14g /usr/bin/id
                     ^~~
+fuzz_sudoers: sudoers:2:26: value "2d8h10m59ss" is invalid for option "command_timeout"
 Executed regress/sudoers/test18.in
 Running: regress/sudoers/test19.in
 User root is not allowed to run sudo on localhost.

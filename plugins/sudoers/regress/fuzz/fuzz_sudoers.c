@@ -268,6 +268,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);
+    update_defaults(&parse_tree, NULL, (SETDEF_ALL & ~SETDEF_USER), false);
 
     if (!parse_error) {
 	/* Match user/host/command against parsed policy. */
@@ -277,6 +278,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    sudo_user.pw = sudo_getpwnam(user_name);
 	    if (sudo_user.pw == NULL)
 		goto done;
+
+	    update_defaults(&parse_tree, NULL, SETDEF_USER, false);
 
 	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, false);
 

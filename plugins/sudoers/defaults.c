@@ -81,6 +81,7 @@ static bool valid_path(struct sudo_defs_types *def, const char *val, const char 
 void
 dump_defaults(void)
 {
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     struct sudo_defs_types *cur;
     struct list_member *item;
     struct def_values *def;
@@ -164,6 +165,7 @@ dump_defaults(void)
 	}
     }
     debug_return;
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 }
 
 /*
