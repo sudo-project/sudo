@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <pwd.h>
 #include <unistd.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -288,6 +289,14 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	    sudo_pw_delref(sudo_user.pw);
 	    sudo_user.pw = NULL;
+	}
+
+	/* Expand tildes in runcwd and runchroot. */
+	if (def_runcwd != NULL && strcmp(def_runcwd, "*") != 0) {
+	    expand_tilde(&def_runcwd, runas_pw->pw_name);
+	}
+	if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
+	    expand_tilde(&def_runchroot, runas_pw->pw_name);
 	}
 
 	/* Check aliases. */
