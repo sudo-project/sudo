@@ -34,6 +34,7 @@
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_eventlog.h"
 #include "sudo_iolog.h"
 #include "sudo_util.h"
 
@@ -63,4 +64,154 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     unlink(tempfile);
 
     return 0;
+}
+
+void
+eventlog_set_type(int type)
+{
+    return;
+}
+
+void
+eventlog_set_format(enum eventlog_format format)
+{
+    return;
+}
+
+void
+eventlog_set_syslog_acceptpri(int pri)
+{
+    return;
+}
+
+void
+eventlog_set_syslog_rejectpri(int pri)
+{
+    return;
+}
+
+void
+eventlog_set_syslog_alertpri(int pri)
+{
+    return;
+}
+
+void
+eventlog_set_syslog_maxlen(int len)
+{
+    return;
+}
+
+void
+eventlog_set_file_maxlen(int len)
+{
+    return;
+}
+
+void
+eventlog_set_mailuid(uid_t uid)
+{
+    return;
+}
+
+void
+eventlog_set_omit_hostname(bool omit_hostname)
+{
+    return;
+}
+
+void
+eventlog_set_logpath(const char *path)
+{
+    return;
+}
+
+void
+eventlog_set_time_fmt(const char *fmt)
+{
+    return;
+}
+
+void
+eventlog_set_mailerpath(const char *path)
+{
+    return;
+}
+
+void
+eventlog_set_mailerflags(const char *mflags)
+{
+    return;
+}
+
+void
+eventlog_set_mailfrom(const char *from_addr)
+{
+    return;
+}
+
+void
+eventlog_set_mailto(const char *to_addr)
+{
+    return;
+}
+
+void
+eventlog_set_mailsub(const char *subject)
+{
+    return;
+}
+
+void
+eventlog_set_open_log(FILE *(*fn)(int type, const char *))
+{
+    return;
+}
+
+void
+eventlog_set_close_log(void (*fn)(int type, FILE *))
+{
+    return;
+}
+
+void
+iolog_set_defaults(void)
+{
+    return;
+}
+
+void
+iolog_set_maxseq(unsigned int newval)
+{
+    return;
+}
+
+void
+iolog_set_owner(uid_t uid, gid_t gid)
+{
+    return;
+}
+
+void
+iolog_set_gid(gid_t gid)
+{
+    return;
+}
+
+void
+iolog_set_mode(mode_t mode)
+{
+    return;
+}
+
+void
+iolog_set_compress(bool newval)
+{
+    return;
+}
+
+void
+iolog_set_flush(bool newval)
+{
+    return;
 }
