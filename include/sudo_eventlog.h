@@ -66,7 +66,7 @@ enum eventlog_format {
 #define EVENTLOG_INDENT	"    "
 
 /*
- * Event log config, used with eventlog_setconf()
+ * Event log config, used with eventlog_getconf()
  */
 struct eventlog_config {
     int type;
@@ -144,5 +144,6 @@ void eventlog_set_mailto(const char *to_addr);
 void eventlog_set_mailsub(const char *subject);
 void eventlog_set_open_log(FILE *(*fn)(int type, const char *));
 void eventlog_set_close_log(void (*fn)(int type, FILE *));
+const struct eventlog_config *eventlog_getconf(void);
 
 #endif /* SUDO_EVENTLOG_H */
