@@ -66,6 +66,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct eventlog *evlog = NULL;
     FILE *fp;
 
+    setprogname("fuzz_iolog_json");
+
     fp = open_data(data, size);
     if (fp == NULL)
         return 0;

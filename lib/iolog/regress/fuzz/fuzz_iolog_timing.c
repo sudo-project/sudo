@@ -48,6 +48,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     char logdir[] = "/tmp/timing.XXXXXX";
     int dfd = -1, fd = -1;
 
+    setprogname("fuzz_iolog_timing");
+
     if (mkdtemp(logdir) == NULL) {
 	sudo_warn_nodebug("unable to make temp dir");
 	return 0;

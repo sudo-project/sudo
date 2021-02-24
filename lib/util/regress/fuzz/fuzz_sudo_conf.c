@@ -38,6 +38,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     size_t nwritten;
     int fd;
 
+    setprogname("fuzz_sudo_conf");
+
     /* sudo_conf_read() uses a conf file path, not an open file. */
     fd = mkstemp(tempfile);
     if (fd == -1)

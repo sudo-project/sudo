@@ -69,7 +69,8 @@ open_data(const uint8_t *data, size_t size)
 #endif
 }
 
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+int
+LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct sudoers_parse_tree parse_tree;
     FILE *fp;
@@ -77,6 +78,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* Don't waste time fuzzing tiny inputs. */
     if (size < 5)
         return 0;
+
+    setprogname("fuzz_sudoers_ldif");
 
     fp = open_data(data, size);
     if (fp == NULL)

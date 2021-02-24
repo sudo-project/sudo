@@ -151,6 +151,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int i, res;
     FILE *fp;
 
+    setprogname("fuzz_policy");
+
     fp = open_data(data, size);
     if (fp == NULL)
         return 0;

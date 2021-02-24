@@ -179,6 +179,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     char *gids[10];
     FILE *fp;
 
+    setprogname("fuzz_sudoers");
+
     /* Don't waste time fuzzing tiny inputs. */
     if (size < 5)
         return 0;
