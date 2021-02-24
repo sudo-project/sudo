@@ -299,7 +299,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    expand_tilde(&def_runchroot, runas_pw->pw_name);
 	}
 
-	/* Check aliases. */
+	/* Check Defaults and aliases. */
+	check_defaults(&parse_tree, true);
 	check_aliases(&parse_tree, true, true, cb_unused);
     }
 
