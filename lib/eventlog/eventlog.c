@@ -1256,43 +1256,6 @@ eventlog_alert(const struct eventlog *evlog, int flags,
     debug_return_bool(ret);
 }
 
-/*
- * Free the strings in a struct eventlog.
- */
-void
-eventlog_free(struct eventlog *evlog)
-{
-    int i;
-    debug_decl(eventlog_free, SUDO_DEBUG_UTIL);
-
-    if (evlog != NULL) {
-	free(evlog->iolog_path);
-	free(evlog->command);
-	free(evlog->cwd);
-	free(evlog->runchroot);
-	free(evlog->runcwd);
-	free(evlog->rungroup);
-	free(evlog->runuser);
-	free(evlog->submithost);
-	free(evlog->submituser);
-	free(evlog->submitgroup);
-	free(evlog->ttyname);
-	if (evlog->argv != NULL) {
-	    for (i = 0; evlog->argv[i] != NULL; i++)
-		free(evlog->argv[i]);
-	    free(evlog->argv);
-	}
-	if (evlog->envp != NULL) {
-	    for (i = 0; evlog->envp[i] != NULL; i++)
-		free(evlog->envp[i]);
-	    free(evlog->envp);
-	}
-	free(evlog);
-    }
-
-    debug_return;
-}
-
 static FILE *
 eventlog_stub_open_log(int type, const char *logfile)
 {

@@ -82,7 +82,7 @@ SHELL = @SHELL@
 
 TEST_PROGS = check_wrap
 
-LIBEVENTLOG_OBJS = eventlog.lo logwrap.lo
+LIBEVENTLOG_OBJS = eventlog.lo eventlog_free.lo logwrap.lo
 
 IOBJS = $(LIBEVENTLOG_OBJS:.lo=.i)
 
@@ -213,6 +213,18 @@ eventlog.i: $(srcdir)/eventlog.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 eventlog.plog: eventlog.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/eventlog.c --i-file $< --output-file $@
+eventlog_free.lo: $(srcdir)/eventlog_free.c $(incdir)/compat/stdbool.h \
+                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                  $(incdir)/sudo_eventlog.h $(incdir)/sudo_queue.h \
+                  $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/eventlog_free.c
+eventlog_free.i: $(srcdir)/eventlog_free.c $(incdir)/compat/stdbool.h \
+                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                  $(incdir)/sudo_eventlog.h $(incdir)/sudo_queue.h \
+                  $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+eventlog_free.plog: eventlog_free.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/eventlog_free.c --i-file $< --output-file $@
 logwrap.lo: $(srcdir)/logwrap.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_queue.h \

@@ -104,6 +104,7 @@ include/sudo_util.h
 install-sh
 lib/eventlog/Makefile.in
 lib/eventlog/eventlog.c
+lib/eventlog/eventlog_free.c
 lib/eventlog/logwrap.c
 lib/eventlog/regress/logwrap/check_wrap.c
 lib/eventlog/regress/logwrap/check_wrap.in
