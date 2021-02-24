@@ -56,6 +56,7 @@ INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # Libraries
 LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
+LIBEVENTLOG = $(top_builddir)/lib/eventlog/libsudo_eventlog.la
 LIBIOLOG = $(top_builddir)/lib/iolog/libsudo_iolog.la
 LIBLOGSRV = @LIBLOGSRV@
 LIBUTIL = $(top_builddir)/lib/util/libsudo_util.la
@@ -162,7 +163,7 @@ TEST_PROGS = check_addr check_base64 check_digest check_env_pattern \
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
 FUZZ_PROGS = fuzz_policy fuzz_sudoers fuzz_sudoers_ldif
 FUZZ_SEED_CORPUS = ${FUZZ_PROGS:=_seed_corpus.zip}
-FUZZ_LIBS = libparsesudoers.la $(LIBS) $(LIB_FUZZING_ENGINE)
+FUZZ_LIBS = libparsesudoers.la $(LIB_FUZZING_ENGINE)
 FUZZ_LDFLAGS = @LDFLAGS@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
@@ -384,14 +385,14 @@ check_unesc: $(CHECK_UNESC_OBJS) $(LIBUTIL)
 check_symbols: $(CHECK_SYMBOLS_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(CHECK_SYMBOLS_LDFLAGS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@
 
-fuzz_policy: $(FUZZ_POLICY_OBJS) libparsesudoers.la $(LIBUTIL) $(LIBFUZZSTUB)
-	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_POLICY_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
+fuzz_policy: $(FUZZ_POLICY_OBJS) libparsesudoers.la $(LIBEVENTLOG) $(LIBUTIL) $(LIBFUZZSTUB)
+	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_POLICY_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) $(LIBEVENTLOG)
 
 fuzz_sudoers: $(FUZZ_SUDOERS_OBJS) libparsesudoers.la $(LIBUTIL) $(LIBFUZZSTUB)
-	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_SUDOERS_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_SUDOERS_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) $(LIBUTIL)
 
 fuzz_sudoers_ldif: $(FUZZ_SUDOERS_LDIF_OBJS) libparsesudoers.la $(LIBUTIL) $(LIBFUZZSTUB)
-	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_SUDOERS_LDIF_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_SUDOERS_LDIF_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) $(LIBUTIL)
 
 fuzz_policy_seed_corpus.zip:
 	tdir=fuzz_policy.$$$$; \
