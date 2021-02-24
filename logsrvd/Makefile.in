@@ -228,7 +228,8 @@ fuzz: $(FUZZ_PROGS)
 check:
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) *.lo *.o *.la
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(FUZZ_PROGS) \
+	    *.lo *.o *.la
 	-rm -f *.i *.plog stamp-* core *.core core.*
 
 mostlyclean: clean

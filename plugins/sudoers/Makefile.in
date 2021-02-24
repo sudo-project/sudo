@@ -728,7 +728,7 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers fuzz
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
-	    *.lo *.o *.la
+	    $(FUZZ_PROGS) *.lo *.o *.la
 	-rm -f *.i *.plog stamp-* core *.core core.* prologue regress/*/*.out \
 	    regress/*/*.toke regress/*/*.err regress/*/*.json \
 	    regress/*/*.ldif regress/*/*.ldif2sudo regress/*/*.sudo
