@@ -246,8 +246,8 @@ FUZZ_POLICY_OBJS = fuzz_policy.o editor.lo env.lo env_pattern.lo gc.lo \
 
 FUZZ_POLICY_CORPUS = $(srcdir)/regress/corpus/policy/policy.*
 
-FUZZ_SUDOERS_OBJS = fuzz_sudoers.o fmtsudoers.lo parse.lo locale.lo \
-		    stubs.o sudo_printf.o
+FUZZ_SUDOERS_OBJS = check_aliases.o fuzz_sudoers.o fmtsudoers.lo parse.lo \
+		    locale.lo stubs.o sudo_printf.o
 
 FUZZ_SUDOERS_CORPUS = $(top_srcdir)/examples/sudoers \
 		      $(srcdir)/regress/sudoers/test1.in \
@@ -559,12 +559,15 @@ fuzz: $(FUZZ_PROGS)
 	    mkdir -p regress/fuzz; \
 	    ./fuzz_sudoers $(FUZZ_SUDOERS_CORPUS) 2>&1 | sed -e 's/^\(Running: \).*\(examples\)/\1\2/' -e 's/^\(Executed \).*\(examples.*\) in [0-9]* ms$$/\1\2/' -e 's/^\(Running: \).*\(regress\)/\1\2/' -e 's/^\(Executed \).*\(regress.*\) in [0-9]* ms$$/\1\2/' > regress/fuzz/fuzz_sudoers.out; \
 	    diff $(srcdir)/regress/fuzz/fuzz_sudoers.out.ok regress/fuzz/fuzz_sudoers.out; \
+	    echo "fuzz_sudoers: output in fuzz_sudoers.out"; \
 	    echo "fuzz_sudoers-ldif: verifying corpus"; \
 	    ./fuzz_sudoers_ldif $(FUZZ_SUDOERS_LDIF_CORPUS); \
 	    echo "fuzz_policy: verifying corpus"; \
 	    ./fuzz_policy $(FUZZ_POLICY_CORPUS) > fuzz_policy.out 2>&1; \
 	    if [ $$? -ne 0 ]; then \
 		cat fuzz_policy.out; \
+	    else \
+		echo "fuzz_policy: output in fuzz_policy.out"; \
 	    fi; \
 	fi
 

@@ -133,6 +133,12 @@ sudo_fuzz_query(struct sudo_nss *nss, struct passwd *pw)
     return 0;
 }
 
+static int
+cb_unused(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
+{
+    return 0;
+}
+
 static FILE *
 open_data(const uint8_t *data, size_t size)
 {
@@ -283,6 +289,9 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    sudo_pw_delref(sudo_user.pw);
 	    sudo_user.pw = NULL;
 	}
+
+	/* Check aliases. */
+	check_aliases(&parse_tree, true, true, cb_unused);
     }
 
 done:
