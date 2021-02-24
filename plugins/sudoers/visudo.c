@@ -85,7 +85,6 @@ TAILQ_HEAD(sudoersfile_list, sudoersfile);
  */
 static void quit(int);
 static int whatnow(void);
-static int check_aliases(bool strict, bool quiet);
 static char *get_editor(int *editor_argc, char ***editor_argv);
 static bool check_syntax(const char *, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
@@ -565,7 +564,7 @@ check_defaults_and_aliases(bool strict, bool quiet)
 	}
 	parse_error = true;
     }
-    if (check_aliases(strict, quiet) != 0) {
+    if (check_aliases(&parsed_policy, strict, quiet, print_unused) != 0) {
 	parse_error = true;
     }
     debug_return;
@@ -1058,128 +1057,17 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
     debug_return_ptr(fp);
 }
 
-static int
-check_alias(char *name, int type, char *file, int line, int column,
-    bool strict, bool quiet)
-{
-    struct member *m;
-    struct alias *a;
-    int errors = 0;
-    debug_decl(check_alias, SUDOERS_DEBUG_ALIAS);
-
-    if ((a = alias_get(&parsed_policy, name, type)) != NULL) {
-	/* check alias contents */
-	TAILQ_FOREACH(m, &a->members, entries) {
-	    if (m->type != ALIAS)
-		continue;
-	    errors += check_alias(m->name, type, a->file, a->line, a->column,
-		strict, quiet);
-	}
-	alias_put(a);
-    } else {
-	if (!quiet) {
-	    if (errno == ELOOP) {
-		fprintf(stderr, strict ?
-		    U_("Error: %s:%d:%d: cycle in %s \"%s\"") :
-		    U_("Warning: %s:%d:%d: cycle in %s \"%s\""),
-		    file, line, column, alias_type_to_string(type), name);
-	    } else {
-		fprintf(stderr, strict ?
-		    U_("Error: %s:%d:%d: %s \"%s\" referenced but not defined") :
-		    U_("Warning: %s:%d:%d: %s \"%s\" referenced but not defined"),
-		    file, line, column, alias_type_to_string(type), name);
-	    }
-	    fputc('\n', stderr);
-	    if (strict && errorfile == NULL) {
-		errorfile = rcstr_addref(file);
-		errorlineno = line;
-	    }
-	}
-	errors++;
-    }
-
-    debug_return_int(errors);
-}
-
-/*
- * Iterate through the sudoers datastructures looking for undefined
- * aliases or unused aliases.
- */
-static int
-check_aliases(bool strict, bool quiet)
-{
-    struct rbtree *used_aliases;
-    struct cmndspec *cs;
-    struct member *m;
-    struct privilege *priv;
-    struct userspec *us;
-    int errors = 0;
-    debug_decl(check_aliases, SUDOERS_DEBUG_ALIAS);
-
-    used_aliases = alloc_aliases();
-    if (used_aliases == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
-
-    /* Forward check. */
-    TAILQ_FOREACH(us, &parsed_policy.userspecs, entries) {
-	TAILQ_FOREACH(m, &us->users, entries) {
-	    if (m->type == ALIAS) {
-		errors += check_alias(m->name, USERALIAS,
-		    us->file, us->line, us->column, strict, quiet);
-	    }
-	}
-	TAILQ_FOREACH(priv, &us->privileges, entries) {
-	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
-		if (m->type == ALIAS) {
-		    errors += check_alias(m->name, HOSTALIAS,
-			us->file, us->line, us->column, strict, quiet);
-		}
-	    }
-	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-		if (cs->runasuserlist != NULL) {
-		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
-			if (m->type == ALIAS) {
-			    errors += check_alias(m->name, RUNASALIAS,
-				us->file, us->line, us->column, strict, quiet);
-			}
-		    }
-		}
-		if (cs->runasgrouplist != NULL) {
-		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
-			if (m->type == ALIAS) {
-			    errors += check_alias(m->name, RUNASALIAS,
-				us->file, us->line, us->column, strict, quiet);
-			}
-		    }
-		}
-		if ((m = cs->cmnd)->type == ALIAS) {
-		    errors += check_alias(m->name, CMNDALIAS,
-			us->file, us->line, us->column, strict, quiet);
-		}
-	    }
-	}
-    }
-
-    /* Reverse check (destructive) */
-    if (!alias_find_used(&parsed_policy, used_aliases))
-	errors++;
-    free_aliases(used_aliases);
-
-    /* If all aliases were referenced we will have an empty tree. */
-    if (!no_aliases(&parsed_policy) && !quiet)
-	alias_apply(&parsed_policy, print_unused, NULL);
-
-    debug_return_int(strict ? errors : 0);
-}
-
+/* Display unused aliases from check_aliases(). */
 static int
 print_unused(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 {
-    fprintf(stderr, U_("Warning: %s:%d:%d: unused %s \"%s\""),
-	a->file, a->line, a->column, alias_type_to_string(a->type), a->name);
-    fputc('\n', stderr);
+    const bool quiet = *((bool *)v);
+
+    if (!quiet) {
+	fprintf(stderr, U_("Warning: %s:%d:%d: unused %s \"%s\""), a->file,
+	    a->line, a->column, alias_type_to_string(a->type), a->name);
+	fputc('\n', stderr);
+    }
     return 0;
 }
 

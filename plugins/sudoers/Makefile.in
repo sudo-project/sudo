@@ -186,8 +186,8 @@ SUDOERS_OBJS = $(AUTH_OBJS) audit.lo boottime.lo check.lo editor.lo env.lo \
 
 SUDOERS_IOBJS = $(SUDOERS_OBJS:.lo=.i)
 
-VISUDO_OBJS = editor.lo find_path.lo goodpath.lo locale.lo stubs.o \
-	      sudo_printf.o visudo.o
+VISUDO_OBJS = check_aliases.o editor.lo find_path.lo goodpath.lo locale.lo \
+	      stubs.o sudo_printf.o visudo.o
 
 VISUDO_IOBJS = sudo_printf.i visudo.i
 
@@ -973,6 +973,30 @@ check_addr.i: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_addr.plog: check_addr.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_addr.c --i-file $< --output-file $@
+check_aliases.o: $(srcdir)/check_aliases.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/check_aliases.c
+check_aliases.i: $(srcdir)/check_aliases.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_aliases.plog: check_aliases.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/check_aliases.c --i-file $< --output-file $@
 check_base64.o: $(srcdir)/regress/parser/check_base64.c \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_util.h $(top_builddir)/config.h
@@ -1551,10 +1575,10 @@ fuzz_sudoers.o: $(srcdir)/regress/fuzz/fuzz_sudoers.c $(devdir)/def_data.h \
                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                $(top_builddir)/pathnames.h
+                $(srcdir)/defaults.h $(srcdir)/interfaces.h \
+                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_sudoers.c
 fuzz_sudoers.i: $(srcdir)/regress/fuzz/fuzz_sudoers.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1562,10 +1586,10 @@ fuzz_sudoers.i: $(srcdir)/regress/fuzz/fuzz_sudoers.c $(devdir)/def_data.h \
                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                $(top_builddir)/pathnames.h
+                $(srcdir)/defaults.h $(srcdir)/interfaces.h \
+                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fuzz_sudoers.plog: fuzz_sudoers.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_sudoers.c --i-file $< --output-file $@

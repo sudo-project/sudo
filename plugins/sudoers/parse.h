@@ -343,6 +343,9 @@ void alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoe
 void alias_free(void *a);
 void alias_put(struct alias *a);
 
+/* check_aliases.c */
+int check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet, int (*cb_unused)(struct sudoers_parse_tree *, struct alias *, void *));
+
 /* gram.c */
 extern struct sudoers_parse_tree parsed_policy;
 bool init_parser(const char *path, bool quiet, bool strict);
