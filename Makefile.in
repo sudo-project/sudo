@@ -240,7 +240,7 @@ ChangeLog:
 	    fi; \
 	elif test -d $(srcdir)/.git; then \
 	    $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $(srcdir)/$@; \
-	else \
+	elif test ! -f $(srcdir)/$@; then \
 	    echo "ChangeLog data not available" > $(srcdir)/$@; \
 	fi
 
