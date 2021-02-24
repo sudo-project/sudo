@@ -119,8 +119,9 @@ lib/iolog/iolog_fileio.c
 lib/iolog/iolog_json.c
 lib/iolog/iolog_json.h
 lib/iolog/iolog_legacy.c
+lib/iolog/iolog_loginfo.c
 lib/iolog/iolog_path.c
-lib/iolog/iolog_util.c
+lib/iolog/iolog_timing.c
 lib/iolog/regress/corpus/log_json/id.json
 lib/iolog/regress/corpus/log_json/ls.json
 lib/iolog/regress/corpus/log_json/mailq.json
@@ -152,7 +153,7 @@ lib/iolog/regress/iolog_json/test3.in
 lib/iolog/regress/iolog_mkpath/check_iolog_mkpath.c
 lib/iolog/regress/iolog_path/check_iolog_path.c
 lib/iolog/regress/iolog_path/data
-lib/iolog/regress/iolog_util/check_iolog_util.c
+lib/iolog/regress/iolog_timing/check_iolog_timing.c
 lib/logsrv/Makefile.in
 lib/logsrv/log_server.pb-c.c
 lib/logsrv/log_server.proto
