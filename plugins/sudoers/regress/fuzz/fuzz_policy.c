@@ -150,11 +150,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct dynamic_array env_add = { NULL };
     char **command_info = NULL, **argv_out = NULL, **user_env_out = NULL;
     const char *errstr = NULL;
-    const int num_checks = 4;
+    const int num_passes = 7;
     char *line = NULL;
     size_t linesize = 0;
     ssize_t linelen;
-    int i, res;
+    int pass, res = 1;
     FILE *fp;
 
     fp = open_data(data, size);
@@ -278,45 +278,50 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     sudoers_policy.register_hooks(SUDO_API_VERSION, fuzz_hook_stub);
 
-    for (i = 0; i < num_checks; i++) {
+    for (pass = 1; res == 1 && pass <= num_passes; pass++) {
 	/* Call policy open function */
-	res = sudoers_policy.open(SUDO_API_VERSION, fuzz_conversation, fuzz_printf,
-	    settings.entries, user_info.entries, environ, plugin_args.entries,
-	    &errstr);
-
-	switch (res) {
-	case 1:
-	    /* success */
-	    if (i == 0)
-		sudoers_policy.show_version(true);
-
+	res = sudoers_policy.open(SUDO_API_VERSION, fuzz_conversation,
+	    fuzz_printf, settings.entries, user_info.entries, environ,
+	    plugin_args.entries, &errstr);
+	if (res == 1) {
 	    if (argv.len == 0) {
 		/* Must have a command to check. */
 		push(&argv, "/usr/bin/id");
 	    }
 
-	    switch (i) {
-	    case 0:
+	    switch (pass) {
+	    case 1:
+		/* sudo -V */
+		sudoers_policy.show_version(true);
+		break;
+	    case 2:
+		/* sudo command */
 		sudoers_policy.check_policy(argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		break;
-	    case 1:
+	    case 3:
+		/* sudo -l */
+		sudoers_policy.list(0, NULL, false, NULL, &errstr);
+		break;
+	    case 4:
+		/* sudo -l -U root */
+		sudoers_policy.list(0, NULL, false, "root", &errstr);
+		break;
+	    case 5:
+		/* sudo -l command */
 		sudoers_policy.list(argv.len, argv.entries, false, NULL,
 		    &errstr);
 		break;
-	    case 2:
+	    case 6:
+		/* sudo -v */
 		sudoers_policy.validate(&errstr);
 		break;
-	    case 3:
+	    case 7:
+		/* sudo -k */
 		sudoers_policy.invalidate(false);
 		break;
 	    }
-	    break;
-	default:
-	    /* failure or error, skip remaining checks (counts by 4) */
-	    i = ((i + num_checks) & ~(num_checks - 1)) - 1;
-	    break;
 	}
 
 	/* Free resources. */
