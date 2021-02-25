@@ -300,8 +300,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	}
 
 	/* Check Defaults and aliases. */
-	check_defaults(&parse_tree, true);
-	check_aliases(&parse_tree, true, true, cb_unused);
+	check_defaults(&parse_tree, false);
+	check_aliases(&parse_tree, true, false, cb_unused);
     }
 
 done:
