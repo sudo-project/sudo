@@ -688,7 +688,6 @@ default_binding_matches(struct sudoers_parse_tree *parse_tree,
     switch (d->type) {
     case DEFAULTS:
 	debug_return_bool(true);
-	break;
     case DEFAULTS_USER:
 	if (userlist_matches(parse_tree, sudo_user.pw, d->binding) == ALLOW)
 	    debug_return_bool(true);
