@@ -50,32 +50,27 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     setprogname("fuzz_iolog_timing");
 
-    if (mkdtemp(logdir) == NULL) {
-	sudo_warn_nodebug("unable to make temp dir");
+    /* I/O logs consist of multiple files in a directory. */
+    if (mkdtemp(logdir) == NULL)
 	return 0;
-    }
+
+    /* Create a timing file from the supplied data. */
     dfd = open(logdir, O_RDONLY);
-    if (dfd == -1) {
-	sudo_warn_nodebug("unable to open %s", logdir);
+    if (dfd == -1)
 	goto cleanup;
-    }
 
     fd = openat(dfd, "timing", O_WRONLY|O_CREAT|O_EXCL, S_IRWXU);
-    if (fd == -1) {
-	sudo_warn_nodebug("unable to open %s/timing", logdir);
+    if (fd == -1)
 	goto cleanup;
-    }
-    if (write(fd, data, size) != (ssize_t)size) {
-	sudo_warn_nodebug("unable to write %s/timing", logdir);
+
+    if (write(fd, data, size) != (ssize_t)size)
 	goto cleanup;
-    }
     close(fd);
     fd = -1;
 
-    if (!iolog_open(&iolog_file, dfd, IOFD_TIMING, "r")) {
-	sudo_warn_nodebug("unable to iolog_open %s/timing", logdir);
+    /* Open the timing file we wrote and try to parse it. */
+    if (!iolog_open(&iolog_file, dfd, IOFD_TIMING, "r"))
 	goto cleanup;
-    }
 
     memset(&closure, 0, sizeof(closure));
     closure.decimal = ".";
