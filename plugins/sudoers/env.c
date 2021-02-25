@@ -310,7 +310,7 @@ env_swap_old(void)
  * Will only overwrite an existing variable if overwrite is set.
  * Does not include warnings or debugging to avoid recursive calls.
  */
-static int
+int
 sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 {
     char **ep;
@@ -463,59 +463,10 @@ sudo_setenv(const char *var, const char *val, int overwrite)
 }
 
 /*
- * Similar to setenv(3) but operates on a private copy of the environment.
- * Does not include warnings or debugging to avoid recursive calls.
- */
-static int
-sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
-{
-    char *ep, *estring = NULL;
-    const char *cp;
-    size_t esize;
-    int ret = -1;
-
-    if (var == NULL || *var == '\0') {
-	errno = EINVAL;
-	goto done;
-    }
-
-    /*
-     * POSIX says a var name with '=' is an error but BSD
-     * just ignores the '=' and anything after it.
-     */
-    for (cp = var; *cp && *cp != '='; cp++)
-	continue;
-    esize = (size_t)(cp - var) + 2;
-    if (val) {
-	esize += strlen(val);	/* glibc treats a NULL val as "" */
-    }
-
-    /* Allocate and fill in estring. */
-    if ((estring = ep = malloc(esize)) == NULL)
-	goto done;
-    for (cp = var; *cp && *cp != '='; cp++)
-	*ep++ = *cp;
-    *ep++ = '=';
-    if (val) {
-	for (cp = val; *cp; cp++)
-	    *ep++ = *cp;
-    }
-    *ep = '\0';
-
-    ret = sudo_putenv_nodebug(estring, true, overwrite);
-done:
-    if (ret == -1)
-	free(estring);
-    else
-	sudoers_gc_add(GC_PTR, estring);
-    return ret;
-}
-
-/*
  * Similar to unsetenv(3) but operates on a private copy of the environment.
  * Does not include warnings or debugging to avoid recursive calls.
  */
-static int
+int
 sudo_unsetenv_nodebug(const char *var)
 {
     char **ep = env.envp;
@@ -562,7 +513,7 @@ sudo_unsetenv(const char *name)
  * Similar to getenv(3) but operates on a private copy of the environment.
  * Does not include warnings or debugging to avoid recursive calls.
  */
-static char *
+char *
 sudo_getenv_nodebug(const char *name)
 {
     char **ep, *val = NULL;
@@ -1442,74 +1393,4 @@ init_envtables(void)
 	SLIST_INSERT_HEAD(&def_env_keep, cur, entries);
     }
     debug_return_bool(true);
-}
-
-int
-sudoers_hook_getenv(const char *name, char **value, void *closure)
-{
-    static bool in_progress = false; /* avoid recursion */
-
-    if (in_progress || env.envp == NULL)
-	return SUDO_HOOK_RET_NEXT;
-
-    in_progress = true;
-
-    /* Hack to make GNU gettext() find the sudoers locale when needed. */
-    if (*name == 'L' && sudoers_getlocale() == SUDOERS_LOCALE_SUDOERS) {
-	if (strcmp(name, "LANGUAGE") == 0 || strcmp(name, "LANG") == 0) {
-	    *value = NULL;
-	    goto done;
-	}
-	if (strcmp(name, "LC_ALL") == 0 || strcmp(name, "LC_MESSAGES") == 0) {
-	    *value = def_sudoers_locale;
-	    goto done;
-	}
-    }
-
-    *value = sudo_getenv_nodebug(name);
-done:
-    in_progress = false;
-    return SUDO_HOOK_RET_STOP;
-}
-
-int
-sudoers_hook_putenv(char *string, void *closure)
-{
-    static bool in_progress = false; /* avoid recursion */
-
-    if (in_progress || env.envp == NULL)
-	return SUDO_HOOK_RET_NEXT;
-
-    in_progress = true;
-    sudo_putenv_nodebug(string, true, true);
-    in_progress = false;
-    return SUDO_HOOK_RET_STOP;
-}
-
-int
-sudoers_hook_setenv(const char *name, const char *value, int overwrite, void *closure)
-{
-    static bool in_progress = false; /* avoid recursion */
-
-    if (in_progress || env.envp == NULL)
-	return SUDO_HOOK_RET_NEXT;
-
-    in_progress = true;
-    sudo_setenv_nodebug(name, value, overwrite);
-    in_progress = false;
-    return SUDO_HOOK_RET_STOP;
-}
-
-int
-sudoers_hook_unsetenv(const char *name, void *closure)
-{
-    static bool in_progress = false; /* avoid recursion */
-
-    if (in_progress || env.envp == NULL)
-	return SUDO_HOOK_RET_NEXT;
-
-    in_progress = true;
-    sudo_unsetenv_nodebug(name);
-    in_progress = false;
-    return SUDO_HOOK_RET_STOP;
 }
