@@ -194,7 +194,8 @@ VISUDO_IOBJS = sudo_printf.i visudo.i
 
 CVTSUDOERS_OBJS = b64_encode.o cvtsudoers.o cvtsudoers_json.o \
 		  cvtsudoers_ldif.o cvtsudoers_pwutil.o fmtsudoers.lo \
-		  locale.lo parse_ldif.o stubs.o sudo_printf.o ldap_util.lo
+		  fmtsudoers_cvt.lo locale.lo parse_ldif.o stubs.o \
+		  sudo_printf.o ldap_util.lo
 
 CVTSUDOERS_IOBJS = cvtsudoers.i cvtsudoers_json.i cvtsudoers_ldif.i \
 		   cvtsudoers_pwutil.i
@@ -203,8 +204,8 @@ REPLAY_OBJS = getdate.o sudoreplay.o
 
 REPLAY_IOBJS = $(REPLAY_OBJS:.o=.i)
 
-TEST_OBJS = fmtsudoers.lo group_plugin.lo interfaces.lo ldap_util.lo \
-	    locale.lo net_ifs.o parse_ldif.o sudo_printf.o \
+TEST_OBJS = fmtsudoers.lo fmtsudoers_cvt.lo group_plugin.lo interfaces.lo \
+	    ldap_util.lo locale.lo net_ifs.o parse_ldif.o sudo_printf.o \
 	    testsudoers.o tsgetgrpw.o
 
 IOBJS = $(LIBPARSESUDOERS_IOBJS) $(SUDOERS_IOBJS) $(VISUDO_IOBJS) \
@@ -1575,6 +1576,32 @@ fmtsudoers.i: $(srcdir)/fmtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fmtsudoers.plog: fmtsudoers.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fmtsudoers.c --i-file $< --output-file $@
+fmtsudoers_cvt.lo: $(srcdir)/fmtsudoers_cvt.c $(devdir)/def_data.h \
+                   $(devdir)/gram.h $(incdir)/compat/stdbool.h \
+                   $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                   $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                   $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                   $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/fmtsudoers_cvt.c
+fmtsudoers_cvt.i: $(srcdir)/fmtsudoers_cvt.c $(devdir)/def_data.h \
+                   $(devdir)/gram.h $(incdir)/compat/stdbool.h \
+                   $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                   $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                   $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                   $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+fmtsudoers_cvt.plog: fmtsudoers_cvt.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fmtsudoers_cvt.c --i-file $< --output-file $@
 fuzz_policy.o: $(srcdir)/regress/fuzz/fuzz_policy.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

@@ -524,6 +524,7 @@ plugins/sudoers/file.c
 plugins/sudoers/filedigest.c
 plugins/sudoers/find_path.c
 plugins/sudoers/fmtsudoers.c
+plugins/sudoers/fmtsudoers_cvt.c
 plugins/sudoers/gc.c
 plugins/sudoers/gentime.c
 plugins/sudoers/getdate.c
