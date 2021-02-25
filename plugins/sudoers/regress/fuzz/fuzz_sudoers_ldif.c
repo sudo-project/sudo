@@ -92,11 +92,12 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (size < 5)
         return 0;
 
-    setprogname("fuzz_sudoers_ldif");
-
     fp = open_data(data, size);
     if (fp == NULL)
         return 0;
+
+    setprogname("fuzz_sudoers_ldif");
+    sudoers_debug_register(getprogname(), NULL);
 
     /* Initialize defaults and parse LDIF-format sudoers. */
     init_defaults();
@@ -106,6 +107,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* Cleanup. */
     free_parse_tree(&parse_tree);
     fclose(fp);
+    sudoers_debug_deregister();
 
     return 0;
 }

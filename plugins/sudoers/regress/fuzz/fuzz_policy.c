@@ -151,11 +151,12 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int i, res;
     FILE *fp;
 
-    setprogname("fuzz_policy");
-
     fp = open_data(data, size);
     if (fp == NULL)
         return 0;
+
+    setprogname("fuzz_policy");
+    sudoers_debug_register(getprogname(), NULL);
 
     /* user_info and settings must be non-NULL (even if empty). */
     push(&user_info, NULL);
@@ -324,6 +325,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     free_dynamic_array(&user_info);
     free_dynamic_array(&argv);
     free_dynamic_array(&env_add);
+
+    sudoers_debug_deregister();
 
     return 0;
 }

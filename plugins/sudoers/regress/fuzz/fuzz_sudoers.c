@@ -178,11 +178,12 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (size < 5)
         return 0;
 
-    setprogname("fuzz_sudoers");
-
     fp = open_data(data, size);
     if (fp == NULL)
         return 0;
+
+    setprogname("fuzz_sudoers");
+    sudoers_debug_register(getprogname(), NULL);
 
     /* Sudoers locale setup. */
     sudoers_initlocale(setlocale(LC_ALL, ""), "C");
@@ -328,6 +329,7 @@ done:
     free(safe_cmnd);
     memset(&sudo_user, 0, sizeof(sudo_user));
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
+    sudoers_debug_deregister();
 
     return 0;
 }
