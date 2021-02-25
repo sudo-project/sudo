@@ -174,15 +174,24 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     char *gids[10];
     FILE *fp;
 
-    setprogname("fuzz_sudoers");
-
     /* Don't waste time fuzzing tiny inputs. */
     if (size < 5)
         return 0;
 
+    setprogname("fuzz_sudoers");
+
     fp = open_data(data, size);
     if (fp == NULL)
         return 0;
+
+    /* Sudoers locale setup. */
+    sudoers_initlocale(setlocale(LC_ALL, ""), "C");
+    sudo_warn_set_locale_func(sudoers_warn_setlocale);
+    bindtextdomain("sudoers", LOCALEDIR);
+    textdomain("sudoers");
+
+    /* Use the sudoers locale for everything. */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
 
     /* Prime the group cache */
     gr = sudo_mkgrent("wheel", 0, "millert", "root", NULL);
@@ -318,6 +327,7 @@ done:
     free(user_cmnd);
     free(safe_cmnd);
     memset(&sudo_user, 0, sizeof(sudo_user));
+    sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
 
     return 0;
 }
