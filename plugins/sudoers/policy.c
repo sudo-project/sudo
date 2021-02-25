@@ -1193,6 +1193,24 @@ sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook
     }
 }
 
+/*
+ * De-register environment function hooks.
+ */
+static void
+sudoers_policy_deregister_hooks(int version, int (*deregister_hook)(struct sudo_hook *hook))
+{
+    struct sudo_hook *hook;
+
+    for (hook = sudoers_hooks; hook->hook_fn != NULL; hook++) {
+	if (deregister_hook(hook) != 0) {
+	    sudo_warn_nodebug(
+		U_("unable to deregister hook of type %d (version %d.%d)"),
+		hook->hook_type, SUDO_API_VERSION_GET_MAJOR(hook->hook_version),
+		SUDO_API_VERSION_GET_MINOR(hook->hook_version));
+	}
+    }
+}
+
 sudo_dso_public struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
@@ -1205,5 +1223,6 @@ sudo_dso_public struct policy_plugin sudoers_policy = {
     sudoers_policy_invalidate,
     sudoers_policy_init_session,
     sudoers_policy_register_hooks,
+    sudoers_policy_deregister_hooks,
     NULL /* event_alloc() filled in by sudo */
 };

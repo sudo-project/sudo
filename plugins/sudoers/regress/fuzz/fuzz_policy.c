@@ -135,6 +135,12 @@ fuzz_printf(int msg_type, const char *fmt, ...)
 }
 
 int
+fuzz_hook_stub(struct sudo_hook *hook)
+{
+    return 0;
+}
+
+int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct dynamic_array plugin_args = { NULL };
@@ -270,6 +276,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     free(line);
     line = NULL;
 
+    sudoers_policy.register_hooks(SUDO_API_VERSION, fuzz_hook_stub);
+
     for (i = 0; i < num_checks; i++) {
 	/* Call policy open function */
 	res = sudoers_policy.open(SUDO_API_VERSION, fuzz_conversation, fuzz_printf,
@@ -279,6 +287,9 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	switch (res) {
 	case 1:
 	    /* success */
+	    if (i == 0)
+		sudoers_policy.show_version(true);
+
 	    if (argv.len == 0) {
 		/* Must have a command to check. */
 		push(&argv, "/usr/bin/id");
@@ -318,6 +329,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	env_init(NULL);
     }
 
+    sudoers_policy.deregister_hooks(SUDO_API_VERSION, fuzz_hook_stub);
     sudoers_gc_run();
 
     free_dynamic_array(&plugin_args);
