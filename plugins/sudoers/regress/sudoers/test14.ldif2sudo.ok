@@ -7,5 +7,6 @@ millert ALL = sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1,\
     /bin/kill
 
 # sudoRole operator
-operator ALL = sha256:hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=,\
+operator ALL =\
+    sha384:knMlCLkJ71K6uRrKo5C1CAvZ5kq+mRpjKDD/RofGosFjiGcYhiYYZORVyiRHgBnu,\
     sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= ALL

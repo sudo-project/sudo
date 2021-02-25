@@ -300,14 +300,14 @@ Sudoers entry:
 	sha512:srzYEQ2aqzm+it3f74opTMkIImZRLxBARVpb0g9RSouJYdLt7DTRMEY4Ry9NyaOiDoUIplpNjqYH0JMYPVdFnw /bin/kill
 
 User operator may run the following commands on localhost:
-    (root) sha256:hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= ALL
+    (root) sha384:knMlCLkJ71K6uRrKo5C1CAvZ5kq+mRpjKDD/RofGosFjiGcYhiYYZORVyiRHgBnu, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= ALL
 
 User operator may run the following commands on localhost:
 
 Sudoers entry:
     RunAsUsers: root
     Commands:
-	sha256:hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= ALL
+	sha384:knMlCLkJ71K6uRrKo5C1CAvZ5kq+mRpjKDD/RofGosFjiGcYhiYYZORVyiRHgBnu, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= ALL
 
 Executed regress/sudoers/test14.in
 Running: regress/sudoers/test15.in
