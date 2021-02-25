@@ -165,7 +165,7 @@ sudoers_gc_run(void)
 #endif /* NO_LEAKS */
 }
 
-/* XXX - currently unused */
+#ifndef notyet
 void
 sudoers_gc_init(void)
 {
@@ -173,3 +173,4 @@ sudoers_gc_init(void)
     atexit(sudoers_gc_run);
 #endif
 }
+#endif
