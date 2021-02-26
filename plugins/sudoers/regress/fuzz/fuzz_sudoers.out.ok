@@ -60,6 +60,37 @@ Sudoers entry:
     Commands:
 	ALL
 
+Matching Defaults entries for millert on localhost:
+    syslog=auth, runcwd=~, !lecture, runchroot=*, !authenticate
+
+Runas and Command-specific defaults for millert:
+    Defaults>root !set_logname    Defaults!/usr/bin/more, /usr/bin/pg, /usr/bin/less noexec
+
+
+User millert may run the following commands on localhost:
+    (ALL) ALL
+    (root) NOPASSWD: ALL
+
+Matching Defaults entries for millert on localhost:
+    syslog=auth, runcwd=~, !lecture, runchroot=*, !authenticate
+
+Runas and Command-specific defaults for millert:
+    Defaults>root !set_logname    Defaults!/usr/bin/more, /usr/bin/pg, /usr/bin/less noexec
+
+
+User millert may run the following commands on localhost:
+
+Sudoers entry:
+    RunAsUsers: ALL
+    Commands:
+	ALL
+
+Sudoers entry:
+    RunAsUsers: root
+    Options: !authenticate
+    Commands:
+	ALL
+
 Matching Defaults entries for operator on localhost:
     syslog=auth, runcwd=~
 
@@ -108,6 +139,10 @@ User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
 User operator is not allowed to run sudo on localhost.
 
 User operator is not allowed to run sudo on localhost.
@@ -122,6 +157,10 @@ User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
 User operator is not allowed to run sudo on localhost.
 
 User operator is not allowed to run sudo on localhost.
@@ -131,6 +170,10 @@ Running: regress/sudoers/test3.in
 User root is not allowed to run sudo on localhost.
 
 User root is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
@@ -196,6 +239,32 @@ Sudoers entry:
     RunAsGroups: #0
     Commands:
 	ALL
+
+Sudoers entry:
+    RunAsUsers: root
+    Commands:
+	ALL
+
+Sudoers entry:
+    RunAsUsers: root
+    Commands:
+	ALL
+
+Runas and Command-specific defaults for millert:
+    Defaults>#123 set_home
+    Defaults>#123 set_home
+
+
+User millert may run the following commands on localhost:
+    (root) ALL
+    (root) ALL
+
+Runas and Command-specific defaults for millert:
+    Defaults>#123 set_home
+    Defaults>#123 set_home
+
+
+User millert may run the following commands on localhost:
 
 Sudoers entry:
     RunAsUsers: root
@@ -299,6 +368,18 @@ Sudoers entry:
 	sha256:hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= /bin/sh
 	sha512:srzYEQ2aqzm+it3f74opTMkIImZRLxBARVpb0g9RSouJYdLt7DTRMEY4Ry9NyaOiDoUIplpNjqYH0JMYPVdFnw /bin/kill
 
+User millert may run the following commands on localhost:
+    (root) sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1, sha224:d7910e1967342b4605cb73a550944044c631cd3514001900966962ac /bin/ls, sha256:hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= /bin/sh, sha512:srzYEQ2aqzm+it3f74opTMkIImZRLxBARVpb0g9RSouJYdLt7DTRMEY4Ry9NyaOiDoUIplpNjqYH0JMYPVdFnw /bin/kill
+
+User millert may run the following commands on localhost:
+
+Sudoers entry:
+    RunAsUsers: root
+    Commands:
+	sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1, sha224:d7910e1967342b4605cb73a550944044c631cd3514001900966962ac /bin/ls
+	sha256:hOtoe/iK6SlGg7w4BfZBBdSsXjUmTJ5+ts51yjh7vkM=, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= /bin/sh
+	sha512:srzYEQ2aqzm+it3f74opTMkIImZRLxBARVpb0g9RSouJYdLt7DTRMEY4Ry9NyaOiDoUIplpNjqYH0JMYPVdFnw /bin/kill
+
 User operator may run the following commands on localhost:
     (root) sha384:knMlCLkJ71K6uRrKo5C1CAvZ5kq+mRpjKDD/RofGosFjiGcYhiYYZORVyiRHgBnu, sha256:1IXHRCxXgSnIEnb+xBz4PAfWaPdXIBWKFF0QCwxJ5G4= ALL
 
@@ -319,6 +400,10 @@ User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
 User operator is not allowed to run sudo on localhost.
 
 User operator is not allowed to run sudo on localhost.
@@ -333,6 +418,10 @@ User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
 User operator is not allowed to run sudo on localhost.
 
 User operator is not allowed to run sudo on localhost.
@@ -342,6 +431,10 @@ Running: regress/sudoers/test17.in
 User root is not allowed to run sudo on localhost.
 
 User root is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
@@ -368,12 +461,15 @@ user3	ALL = TIMEOUT=10m30ss /usr/bin/id
 sudoers:8:21: invalid timeout value
 user4	ALL = TIMEOUT=14g /usr/bin/id
                     ^~~
-fuzz_sudoers: sudoers:2:26: value "2d8h10m59ss" is invalid for option "command_timeout"
 Executed regress/sudoers/test18.in
 Running: regress/sudoers/test19.in
 User root is not allowed to run sudo on localhost.
 
 User root is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
@@ -393,6 +489,10 @@ User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
 User operator is not allowed to run sudo on localhost.
 
 User operator is not allowed to run sudo on localhost.
@@ -402,6 +502,10 @@ Running: regress/sudoers/test21.in
 User root is not allowed to run sudo on localhost.
 
 User root is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
@@ -421,6 +525,10 @@ User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
 User operator is not allowed to run sudo on localhost.
 
 User operator is not allowed to run sudo on localhost.
@@ -435,6 +543,10 @@ User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
 User operator is not allowed to run sudo on localhost.
 
 User operator is not allowed to run sudo on localhost.
@@ -444,6 +556,10 @@ Running: regress/sudoers/test24.in
 User root is not allowed to run sudo on localhost.
 
 User root is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
+
+User millert is not allowed to run sudo on localhost.
 
 User millert is not allowed to run sudo on localhost.
 
