@@ -1,3 +1,5 @@
+Defaults always_query_group_plugin
+
 # sudoRole root
 root ALL = (root : wheel) ALL
 

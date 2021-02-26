@@ -62,7 +62,7 @@
             "Cmnd_Specs": [
                 {
                     "runasgroups": [
-                        { "usergroup": "wheel" }
+                        { "usergroup": "ALL" }
                     ],
                     "Options": [
                         { "setenv": true }
@@ -84,6 +84,27 @@
                 {
                     "runasusers": [
                         { "usergroup": "wheel" }
+                    ],
+                    "Options": [
+                        { "setenv": true }
+                    ],
+                    "Commands": [
+                        { "command": "ALL" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "netgroup": "netusers" }
+            ],
+            "Host_List": [
+                { "netgroup": "nethosts" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "runasusers": [
+                        { "netgroup": "netrunas" }
                     ],
                     "Options": [
                         { "setenv": true }

@@ -32,7 +32,7 @@ objectClass: sudoRole
 cn: %sudo
 sudoUser: %sudo
 sudoHost: ALL
-sudoRunAsGroup: wheel
+sudoRunAsGroup: ALL
 sudoCommand: ALL
 sudoOrder: 3
 
@@ -45,4 +45,14 @@ sudoHost: ALL
 sudoRunAsUser: %wheel
 sudoCommand: ALL
 sudoOrder: 4
+
+dn: cn=\+netusers,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: \+netusers
+sudoUser: +netusers
+sudoHost: +nethosts
+sudoRunAsUser: +netrunas
+sudoCommand: ALL
+sudoOrder: 5
 
