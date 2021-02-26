@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -29,8 +31,12 @@
 #endif
 #include <errno.h>
 #include <fcntl.h>
+#include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
 
 #include "sudoers.h"
 #include "interfaces.h"
@@ -138,6 +144,19 @@ int
 fuzz_hook_stub(struct sudo_hook *hook)
 {
     return 0;
+}
+
+int
+#ifdef HAVE_GETADDRINFO
+getaddrinfo(
+#else
+sudo_getaddrinfo(
+#endif
+    const char *nodename, const char *servname,
+    const struct addrinfo *hints, struct addrinfo **res)
+{
+    /* Stub getaddrinfo(3) to avoid a DNS timeout in CIfuzz. */
+    return EAI_FAIL;
 }
 
 int
