@@ -431,6 +431,32 @@ sudo_file_parse(struct sudo_nss *nss)
 {
     static struct sudoers_parse_tree parse_tree;
 
+    /* Set some Defaults */
+    set_default("log_input", NULL, true, "sudoers", 1, 1, false);
+    set_default("log_output", NULL, true, "sudoers", 1, 1, false);
+    set_default("env_file", "/dev/null", true, "sudoers", 1, 1, false);
+    set_default("restricted_env_file", "/dev/null", true, "sudoers", 1, 1, false);
+    set_default("exempt_group", "sudo", true, "sudoers", 1, 1, false);
+    set_default("runchroot", "*", true, "sudoers", 1, 1, false);
+    set_default("runcwd", "*", true, "sudoers", 1, 1, false);
+    set_default("fqdn", "*", true, "sudoers", 1, 1, false);
+    set_default("runas_default", "root", true, "sudoers", 1, 1, false);
+    set_default("tty_tickets", NULL, true, "sudoers", 1, 1, false);
+    set_default("umask", "022", true, "sudoers", 1, 1, false);
+    set_default("logfile", "/var/log/sudo", true, "sudoers", 1, 1, false);
+    set_default("syslog", "auth", true, "sudoers", 1, 1, false);
+    set_default("syslog_goodpri", "notice", true, "sudoers", 1, 1, false);
+    set_default("syslog_badpri", "alert", true, "sudoers", 1, 1, false);
+    set_default("syslog_maxlen", "2048", true, "sudoers", 1, 1, false);
+    set_default("loglinelen", "0", true, "sudoers", 1, 1, false);
+    set_default("log_year", NULL, true, "sudoers", 1, 1, false);
+    set_default("log_host", NULL, true, "sudoers", 1, 1, false);
+    set_default("mailerpath", NULL, false, "sudoers", 1, 1, false);
+    set_default("mailerflags", "-t", true, "sudoers", 1, 1, false);
+    set_default("mailto", "root@localhost", true, "sudoers", 1, 1, false);
+    set_default("mailfrom", "sudo@sudo.ws", true, "sudoers", 1, 1, false);
+    set_default("mailsub", "Someone has been naughty on %h", true, "sudoers", 1, 1, false);
+
     return &parse_tree;
 }
 
