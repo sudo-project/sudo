@@ -59,18 +59,18 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     close(fd);
 
-    logsrvd_conf_read(tempfile);
+    if (logsrvd_conf_read(tempfile)) {
+	/* public config getters */
+	logsrvd_conf_iolog_mode();
+	logsrvd_conf_iolog_dir();
+	logsrvd_conf_iolog_file();
+	logsrvd_conf_listen_address();
+	logsrvd_conf_tcp_keepalive();
+	logsrvd_conf_pid_file();
+	logsrvd_conf_get_sock_timeout();
+    }
 
     unlink(tempfile);
-
-    /* public config getters */
-    logsrvd_conf_iolog_mode();
-    logsrvd_conf_iolog_dir();
-    logsrvd_conf_iolog_file();
-    logsrvd_conf_listen_address();
-    logsrvd_conf_tcp_keepalive();
-    logsrvd_conf_pid_file();
-    logsrvd_conf_get_sock_timeout();
 
     return 0;
 }
