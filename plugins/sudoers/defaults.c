@@ -855,10 +855,13 @@ store_timespec(const char *str, union sudo_defs_val *sd_un)
 	while (*str != '\0' && *str != '.') {
 		if (!isdigit((unsigned char)*str))
 		    debug_return_bool(false);	/* invalid number */
-		if (ts.tv_sec > TIME_T_MAX / 10)
+
+		/* Verify (ts.tv_sec * 10) + digit <= TIME_T_MAX. */
+		i = *str++ - '0';
+		if (ts.tv_sec > (TIME_T_MAX - i) / 10)
 		    debug_return_bool(false);	/* overflow */
 		ts.tv_sec *= 10;
-		ts.tv_sec += *str++ - '0';
+		ts.tv_sec += i;
 	}
 	if (*str++ == '.') {
 	    /* Convert optional fractional component to nanosecs. */
