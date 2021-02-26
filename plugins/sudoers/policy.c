@@ -606,7 +606,6 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     command_info = calloc(55, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
-    sudoers_gc_add(GC_VECTOR, command_info);
 
     if (safe_cmnd != NULL) {
 	command_info[info_len] = sudo_new_key_val("command", safe_cmnd);
@@ -881,6 +880,9 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     *(exec_args->argv) = argv;
     *(exec_args->envp) = envp;
     *(exec_args->info) = command_info;
+
+    /* Free command_info on exit. */
+    sudoers_gc_add(GC_VECTOR, command_info);
 
     debug_return_bool(true);
 
