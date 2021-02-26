@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,27 +37,14 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#include "pathnames.h"
 #include "sudo_compat.h"
-#include "sudo_conf.h"
 #include "sudo_debug.h"
-#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
-#include "sudo_json.h"
-#include "sudo_queue.h"
 #include "sudo_util.h"
 
 static unsigned char const gzip_magic[2] = {0x1f, 0x8b};
-static unsigned int sessid_max = SESSID_MAX;
-static mode_t iolog_filemode = S_IRUSR|S_IWUSR;
-static mode_t iolog_dirmode = S_IRWXU;
-static uid_t iolog_uid = ROOT_UID;
-static gid_t iolog_gid = ROOT_GID;
-static bool iolog_gid_set;
-static bool iolog_compress;
-static bool iolog_flush;
 
 /*
  * Set effective user and group-IDs to iolog_uid and iolog_gid.
@@ -69,6 +56,8 @@ io_swapids(bool restore)
 #ifdef HAVE_SETEUID
     static uid_t user_euid = (uid_t)-1;
     static gid_t user_egid = (gid_t)-1;
+    const uid_t iolog_uid = iolog_get_uid();
+    const gid_t iolog_gid = iolog_get_gid();
     debug_decl(io_swapids, SUDO_DEBUG_UTIL);
 
     if (user_euid == (uid_t)-1)
@@ -118,10 +107,14 @@ io_swapids(bool restore)
 static bool
 iolog_mkdirs(char *path)
 {
-    mode_t omask;
-    struct stat sb;
-    int dfd;
+    const mode_t iolog_filemode = iolog_get_file_mode();
+    const mode_t iolog_dirmode = iolog_get_dir_mode();
+    const uid_t iolog_uid = iolog_get_uid();
+    const gid_t iolog_gid = iolog_get_gid();
     bool ok = true, uid_changed = false;
+    struct stat sb;
+    mode_t omask;
+    int dfd;
     debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL);
 
     dfd = open(path, O_RDONLY|O_NONBLOCK);
@@ -210,6 +203,9 @@ done:
 bool
 iolog_mkdtemp(char *path)
 {
+    const mode_t iolog_dirmode = iolog_get_dir_mode();
+    const uid_t iolog_uid = iolog_get_uid();
+    const gid_t iolog_gid = iolog_get_gid();
     bool ok, uid_changed = false;
     debug_decl(iolog_mkdtemp, SUDO_DEBUG_UTIL);
 
@@ -269,121 +265,16 @@ iolog_rename(const char *from, const char *to)
 }
 
 /*
- * Reset I/O log settings to default values.
- */
-void
-iolog_set_defaults(void)
-{
-    sessid_max = SESSID_MAX;
-    iolog_filemode = S_IRUSR|S_IWUSR;
-    iolog_dirmode = S_IRWXU;
-    iolog_uid = ROOT_UID;
-    iolog_gid = ROOT_GID;
-    iolog_gid_set = false;
-    iolog_compress = false;
-    iolog_flush = false;
-}
-
-/*
- * Set max sequence number (aka session ID)
- */
-void
-iolog_set_maxseq(unsigned int newval)
-{
-    debug_decl(iolog_set_maxseq, SUDO_DEBUG_UTIL);
-
-    /* Clamp to SESSID_MAX as documented. */
-    if (newval > SESSID_MAX)
-	newval = SESSID_MAX;
-    sessid_max = newval;
-
-    debug_return;
-}
-
-/*
- * Set iolog_uid (and iolog_gid if gid not explicitly set).
- */
-void
-iolog_set_owner(uid_t uid, gid_t gid)
-{
-    debug_decl(iolog_set_owner, SUDO_DEBUG_UTIL);
-
-    iolog_uid = uid;
-    if (!iolog_gid_set)
-	iolog_gid = gid;
-
-    debug_return;
-}
-
-/*
- * Set iolog_gid.
- */
-void
-iolog_set_gid(gid_t gid)
-{
-    debug_decl(iolog_set_gid, SUDO_DEBUG_UTIL);
-
-    iolog_gid = gid;
-    iolog_gid_set = true;
-
-    debug_return;
-}
-
-/*
- * Set iolog_filemode and iolog_dirmode.
- */
-void
-iolog_set_mode(mode_t mode)
-{
-    debug_decl(iolog_set_mode, SUDO_DEBUG_UTIL);
-
-    /* I/O log files must be readable and writable by owner. */
-    iolog_filemode = S_IRUSR|S_IWUSR;
-
-    /* Add in group and other read/write if specified. */
-    iolog_filemode |= mode & (S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
-
-    /* For directory mode, add execute bits as needed. */
-    iolog_dirmode = iolog_filemode | S_IXUSR;
-    if (iolog_dirmode & (S_IRGRP|S_IWGRP))
-	iolog_dirmode |= S_IXGRP;
-    if (iolog_dirmode & (S_IROTH|S_IWOTH))
-	iolog_dirmode |= S_IXOTH;
-
-    debug_return;
-}
-
-/*
- * Set iolog_compress
- */
-void
-iolog_set_compress(bool newval)
-{
-    debug_decl(iolog_set_compress, SUDO_DEBUG_UTIL);
-    iolog_compress = newval;
-    debug_return;
-}
-
-/*
- * Set iolog_flush
- */
-void
-iolog_set_flush(bool newval)
-{
-    debug_decl(iolog_set_flush, SUDO_DEBUG_UTIL);
-    iolog_flush = newval;
-    debug_return;
-}
-
-/*
  * Wrapper for openat(2) that sets umask and retries as iolog_uid/iolog_gid
  * if openat(2) returns EACCES.
  */
 int
 iolog_openat(int dfd, const char *path, int flags)
 {
-    int fd;
+    const mode_t iolog_filemode = iolog_get_file_mode();
+    const mode_t iolog_dirmode = iolog_get_dir_mode();
     mode_t omask = S_IRWXG|S_IRWXO;
+    int fd;
     debug_decl(iolog_openat, SUDO_DEBUG_UTIL);
 
     if (ISSET(flags, O_CREAT)) {
@@ -435,6 +326,8 @@ iolog_nextid(char *iolog_dir, char sessid[7])
     bool ret = false;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const uid_t iolog_uid = iolog_get_uid();
+    const gid_t iolog_gid = iolog_get_gid();
     debug_decl(iolog_nextid, SUDO_DEBUG_UTIL);
 
     /*
@@ -480,7 +373,7 @@ iolog_nextid(char *iolog_dir, char sessid[7])
 	    nread--;
 	buf[nread] = '\0';
 	id = strtoul(buf, &ep, 36);
-	if (ep == buf || *ep != '\0' || id >= sessid_max) {
+	if (ep == buf || *ep != '\0' || id >= iolog_get_maxseq()) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: bad sequence number: %s", pathbuf, buf);
 	    id = 0;
@@ -559,6 +452,8 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
     int flags;
     const char *file;
     unsigned char magic[2];
+    const uid_t iolog_uid = iolog_get_uid();
+    const gid_t iolog_gid = iolog_get_gid();
     debug_decl(iolog_open, SUDO_DEBUG_UTIL);
 
     if (mode[0] == 'r') {
@@ -588,7 +483,7 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 			"%s: unable to fchown %d:%d %s", __func__,
 			(int)iolog_uid, (int)iolog_gid, file);
 		}
-		iol->compressed = iolog_compress;
+		iol->compressed = iolog_get_compress();
 	    } else {
 		/* check for gzip magic number */
 		if (pread(fd, magic, sizeof(magic), 0) == ssizeof(magic)) {
@@ -784,7 +679,7 @@ iolog_write(struct iolog_file *iol, const void *buf, size_t len,
 		*errstr = gzstrerror(iol->fd.g);
 	    goto done;
 	}
-	if (iolog_flush) {
+	if (iolog_get_flush()) {
 	    if (gzflush(iol->fd.g, Z_SYNC_FLUSH) != Z_OK) {
 		ret = -1;
 		if (errstr != NULL)
@@ -802,7 +697,7 @@ iolog_write(struct iolog_file *iol, const void *buf, size_t len,
 		*errstr = strerror(errno);
 	    goto done;
 	}
-	if (iolog_flush) {
+	if (iolog_get_flush()) {
 	    if (fflush(iol->fd.f) != 0) {
 		ret = -1;
 		if (errstr != NULL)
@@ -880,15 +775,6 @@ iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes,
 	}
     }
     debug_return_str(str);
-}
-
-/*
- * Set owner using iolog_uid and iolog_gid.
- */
-int
-iolog_fchown(int fd)
-{
-    return fchown(fd, iolog_uid, iolog_gid);
 }
 
 /*

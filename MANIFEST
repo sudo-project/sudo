@@ -115,6 +115,7 @@ lib/fuzzstub/fuzzstub.c
 lib/iolog/Makefile.in
 lib/iolog/host_port.c
 lib/iolog/hostcheck.c
+lib/iolog/iolog_conf.c
 lib/iolog/iolog_fileio.c
 lib/iolog/iolog_json.c
 lib/iolog/iolog_json.h

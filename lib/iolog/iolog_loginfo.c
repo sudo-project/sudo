@@ -115,9 +115,10 @@ iolog_write_info_file_legacy(int dfd, struct eventlog *evlog)
 	    close(fd);
 	debug_return_bool(false);
     }
-    if (iolog_fchown(fd) != 0) {
+    if (fchown(fd, iolog_get_uid(), iolog_get_gid()) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	"%s: unable to set owner on %s/log", __func__, evlog->iolog_path);
+	    "%s: unable to fchown %d:%d %s/log", __func__,
+	    (int)iolog_get_uid(), (int)iolog_get_gid(), evlog->iolog_path);
     }
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n",
@@ -187,9 +188,10 @@ iolog_write_info_file_json(int dfd, struct eventlog *evlog)
             "unable to open %s/log.json", evlog->iolog_path);
         goto done;
     }
-    if (iolog_fchown(fd) != 0) {
+    if (fchown(fd, iolog_get_uid(), iolog_get_gid()) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	"%s: unable to set owner on %s/log", __func__, evlog->iolog_path);
+	    "%s: unable to fchown %d:%d %s/log.json", __func__,
+	    (int)iolog_get_uid(), (int)iolog_get_gid(), evlog->iolog_path);
     }
     fd = -1;
 
