@@ -437,9 +437,9 @@ sudo_file_parse(struct sudo_nss *nss)
     set_default("env_file", "/dev/null", true, "sudoers", 1, 1, false);
     set_default("restricted_env_file", "/dev/null", true, "sudoers", 1, 1, false);
     set_default("exempt_group", "sudo", true, "sudoers", 1, 1, false);
-    set_default("runchroot", "*", true, "sudoers", 1, 1, false);
-    set_default("runcwd", "*", true, "sudoers", 1, 1, false);
-    set_default("fqdn", "*", true, "sudoers", 1, 1, false);
+    set_default("runchroot", "/", true, "sudoers", 1, 1, false);
+    set_default("runcwd", "~", true, "sudoers", 1, 1, false);
+    set_default("fqdn", NULL, true, "sudoers", 1, 1, false);
     set_default("runas_default", "root", true, "sudoers", 1, 1, false);
     set_default("tty_tickets", NULL, true, "sudoers", 1, 1, false);
     set_default("umask", "022", true, "sudoers", 1, 1, false);
@@ -456,6 +456,7 @@ sudo_file_parse(struct sudo_nss *nss)
     set_default("mailto", "root@localhost", true, "sudoers", 1, 1, false);
     set_default("mailfrom", "sudo@sudo.ws", true, "sudoers", 1, 1, false);
     set_default("mailsub", "Someone has been naughty on %h", true, "sudoers", 1, 1, false);
+    set_default("timestampowner", "root", true, "sudoers", 1, 1, false);
 
     return &parse_tree;
 }
