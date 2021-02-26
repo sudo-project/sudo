@@ -1,0 +1,8 @@
+Parses OK
+
+Defaults always_query_group_plugin
+
+root ALL = (root : wheel) ALL
+millert ALL = ( : wheel) ALL
+%sudo ALL = ( : wheel) ALL
+operator ALL = (%wheel) ALL

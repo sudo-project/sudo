@@ -1,0 +1,11 @@
+# sudoRole root
+root ALL = (root : wheel) ALL
+
+# sudoRole millert
+millert ALL = ( : wheel) ALL
+
+# sudoRole %sudo
+%sudo ALL = ( : wheel) ALL
+
+# sudoRole operator
+operator ALL = (%wheel) ALL

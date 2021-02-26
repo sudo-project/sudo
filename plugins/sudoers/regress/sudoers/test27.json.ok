@@ -1,0 +1,98 @@
+{
+    "Defaults": [
+        {
+            "Options": [
+                { "always_query_group_plugin": true }
+            ]
+        }
+    ],
+    "User_Specs": [
+        {
+            "User_List": [
+                { "username": "root" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "runasusers": [
+                        { "username": "root" }
+                    ],
+                    "runasgroups": [
+                        { "usergroup": "wheel" }
+                    ],
+                    "Options": [
+                        { "setenv": true }
+                    ],
+                    "Commands": [
+                        { "command": "ALL" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "millert" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "runasgroups": [
+                        { "usergroup": "wheel" }
+                    ],
+                    "Options": [
+                        { "setenv": true }
+                    ],
+                    "Commands": [
+                        { "command": "ALL" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "usergroup": "sudo" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "runasgroups": [
+                        { "usergroup": "wheel" }
+                    ],
+                    "Options": [
+                        { "setenv": true }
+                    ],
+                    "Commands": [
+                        { "command": "ALL" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "operator" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "runasusers": [
+                        { "usergroup": "wheel" }
+                    ],
+                    "Options": [
+                        { "setenv": true }
+                    ],
+                    "Commands": [
+                        { "command": "ALL" }
+                    ]
+                }
+            ]
+        }
+    ]
+}

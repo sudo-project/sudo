@@ -1,0 +1,10 @@
+#
+DEFAULTS DEFVAR 
+
+#
+WORD(6) ALL = ( WORD(6) : WORD(6) ) ALL 
+WORD(6) ALL = ( : WORD(6) ) ALL 
+USERGROUP ALL = ( : WORD(6) ) ALL 
+
+#
+WORD(6) ALL = ( USERGROUP ) ALL 
