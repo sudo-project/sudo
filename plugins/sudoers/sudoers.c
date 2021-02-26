@@ -1681,8 +1681,6 @@ sudo_user_free(void)
     free(runas_privs);
     free(runas_limitprivs);
 #endif
-    free(sudo_user.iolog_file);
-    free(sudo_user.iolog_path);
     memset(&sudo_user, 0, sizeof(sudo_user));
 
     debug_return;
