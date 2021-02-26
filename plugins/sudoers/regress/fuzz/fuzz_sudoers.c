@@ -161,10 +161,22 @@ open_data(const uint8_t *data, size_t size)
 #endif
 }
 
+static struct user_data {
+    char *user;
+    char *runuser;
+    char *rungroup;
+} user_data[] = {
+    { "root", NULL, NULL },
+    { "millert", "operator", NULL },
+    { "millert", NULL, "wheel" },
+    { "operator", NULL, NULL },
+    { NULL }
+};
+
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    char **u, *users[] = { "root", "millert", "operator", NULL };
+    struct user_data *ud;
     struct sudo_nss sudo_nss_fuzz;
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     struct sudoers_parse_tree parse_tree;
@@ -251,11 +263,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* The minimum needed to perform matching (user_cmnd must be dynamic). */
     user_host = user_shost = user_runhost = user_srunhost = "localhost";
     user_cmnd = strdup("/usr/bin/id");
+    if (user_cmnd == NULL)
+	goto done;
     user_args = "-u";
     user_base = "id";
-    runas_pw = sudo_getpwnam("root");
-    if (user_cmnd == NULL || runas_pw == NULL)
-	goto done;
 
     /* Add a fake network interfaces. */
     interfaces = get_interfaces();
@@ -281,18 +292,59 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);
-    update_defaults(&parse_tree, NULL, (SETDEF_ALL & ~SETDEF_USER), false);
 
     if (!parse_error) {
 	/* Match user/host/command against parsed policy. */
-	for (u = users; (user_name = *u) != NULL; u++) {
+	for (ud = user_data; ud->user != NULL; ud++) {
 	    int cmnd_status;
 
+	    /* Invoking user. */
+	    user_name = ud->user;
+	    if (sudo_user.pw != NULL)
+		sudo_pw_delref(sudo_user.pw);
 	    sudo_user.pw = sudo_getpwnam(user_name);
-	    if (sudo_user.pw == NULL)
-		goto done;
+	    if (sudo_user.pw == NULL) {
+		fprintf(stderr, "unknown user: %s\n", user_name);
+		continue;
+	    }
 
-	    update_defaults(&parse_tree, NULL, SETDEF_USER, false);
+	    /* Run user. */
+	    if (runas_pw != NULL)
+		sudo_pw_delref(runas_pw);
+	    if (ud->runuser != NULL) {
+		sudo_user.runas_user = ud->runuser;
+		SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
+		runas_pw = sudo_getpwnam(sudo_user.runas_user);
+	    } else {
+		sudo_user.runas_user = NULL;
+		CLR(sudo_user.flags, RUNAS_USER_SPECIFIED);
+		runas_pw = sudo_getpwnam("root");
+	    }
+	    if (runas_pw == NULL) {
+		fprintf(stderr, "unknown run user: %s\n",
+		    sudo_user.runas_user);
+		continue;
+	    }
+
+	    /* Run group. */
+	    if (runas_gr != NULL)
+		sudo_gr_delref(runas_gr);
+	    if (ud->rungroup != NULL) {
+		sudo_user.runas_group = ud->rungroup;
+		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
+		runas_gr = sudo_getgrnam(sudo_user.runas_group);
+		if (runas_gr == NULL) {
+		    fprintf(stderr, "unknown run group: %s\n",
+			sudo_user.runas_group);
+		    continue;
+		}
+	    } else {
+		sudo_user.runas_group = NULL;
+		CLR(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
+		runas_gr = NULL;
+	    }
+
+	    update_defaults(&parse_tree, NULL, SETDEF_ALL, false);
 
 	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, false);
 
@@ -302,9 +354,6 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    /* Display privileges. */
 	    display_privs(&snl, sudo_user.pw, false);
 	    display_privs(&snl, sudo_user.pw, true);
-
-	    sudo_pw_delref(sudo_user.pw);
-	    sudo_user.pw = NULL;
 	}
 
 	/* Expand tildes in runcwd and runchroot. */
@@ -329,6 +378,8 @@ done:
 	sudo_pw_delref(sudo_user.pw);
     if (runas_pw != NULL)
 	sudo_pw_delref(runas_pw);
+    if (runas_gr != NULL)
+	sudo_gr_delref(runas_gr);
     sudo_freepwcache();
     sudo_freegrcache();
     free(user_cmnd);
