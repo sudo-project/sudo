@@ -565,11 +565,11 @@ fuzz: $(FUZZ_PROGS)
 	    echo "fuzz_sudoers-ldif: verifying corpus"; \
 	    ./fuzz_sudoers_ldif $(FUZZ_SUDOERS_LDIF_CORPUS); \
 	    echo "fuzz_policy: verifying corpus"; \
-	    ./fuzz_policy $(FUZZ_POLICY_CORPUS) > fuzz_policy.out 2>&1; \
+	    ./fuzz_policy $(FUZZ_POLICY_CORPUS) > regress/fuzz/fuzz_policy.out 2>&1; \
 	    if [ $$? -ne 0 ]; then \
-		cat fuzz_policy.out; \
+		cat regress/fuzz/fuzz_policy.out; \
 	    else \
-		echo "fuzz_policy: output in fuzz_policy.out"; \
+		echo "fuzz_policy: output in regress/fuzz/fuzz_policy.out"; \
 	    fi; \
 	fi
 

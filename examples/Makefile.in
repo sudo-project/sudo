@@ -113,7 +113,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile
+	-rm -rf Makefile sudo.conf
 
 clobber: distclean
 
