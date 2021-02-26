@@ -210,6 +210,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	goto done;
     sudo_gr_delref(gr);
 
+    gr = sudo_mkgrent("sudo", 100, "root", "millert", NULL);
+    if (gr == NULL)
+	goto done;
+    sudo_gr_delref(gr);
+
     /* Prime the passwd cache */
     pw = sudo_mkpwent("root", 0, 0, "/", "/bin/sh");
     if (pw == NULL)
@@ -237,7 +242,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     gids[0] = "0";
     gids[1] = "20";
     gids[2] = "5";
-    gids[3] = NULL;
+    gids[3] = "100";
+    gids[4] = NULL;
     if (sudo_set_gidlist(pw, gids, ENTRY_TYPE_FRONTEND) == -1)
 	goto done;
     sudo_pw_delref(pw);
