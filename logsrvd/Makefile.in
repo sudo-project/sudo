@@ -251,17 +251,19 @@ fuzz_logsrvd_conf.o: $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c \
                      $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
                      $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
                      $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-                     $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
-                     $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
-                     $(srcdir)/logsrvd.h $(top_builddir)/config.h
+                     $(incdir)/sudo_eventlog.h $(incdir)/sudo_iolog.h \
+                     $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                     $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
+                     $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c
 fuzz_logsrvd_conf.i: $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c \
                      $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
                      $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
                      $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-                     $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
-                     $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
-                     $(srcdir)/logsrvd.h $(top_builddir)/config.h
+                     $(incdir)/sudo_eventlog.h $(incdir)/sudo_iolog.h \
+                     $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                     $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
+                     $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fuzz_logsrvd_conf.plog: fuzz_logsrvd_conf.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c --i-file $< --output-file $@
