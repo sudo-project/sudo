@@ -727,6 +727,29 @@ iolog_copy(struct iolog_file *src, struct iolog_file *dst, off_t remainder,
     debug_return_bool(true);
 }
 
+/*
+ * Like rename(2) but changes UID as needed.
+ */
+static bool
+iolog_rename(const char *from, const char *to)
+{
+    bool ok, uid_changed = false;
+    debug_decl(iolog_rename, SUDO_DEBUG_UTIL);
+
+    ok = rename(from, to) == 0;
+    if (!ok && errno == EACCES) {
+	uid_changed = iolog_swapids(false);
+	if (uid_changed)
+	    ok = rename(from, to) == 0;
+    }
+
+    if (uid_changed) {
+	if (!iolog_swapids(true))
+	    ok = false;
+    }
+    debug_return_bool(ok);
+}
+
 /* Compressed logs don't support random access, need to rewrite them. */
 static bool
 iolog_rewrite(const struct timespec *target, struct connection_closure *closure)

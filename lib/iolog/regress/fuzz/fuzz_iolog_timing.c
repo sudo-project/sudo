@@ -91,3 +91,10 @@ cleanup:
 
     return 0;
 }
+
+/* STUB */
+bool
+iolog_swapids(bool restore)
+{
+    return false;
+}

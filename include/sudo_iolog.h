@@ -113,7 +113,6 @@ bool iolog_mkdtemp(char *path);
 bool iolog_mkpath(char *path);
 bool iolog_nextid(char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
-bool iolog_rename(const char *from, const char *to);
 bool iolog_write_info_file(int dfd, struct eventlog *evlog);
 char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
 const char *iolog_fd_to_name(int iofd);
@@ -137,5 +136,7 @@ void iolog_set_gid(gid_t gid);
 void iolog_set_maxseq(unsigned int maxval);
 void iolog_set_mode(mode_t mode);
 void iolog_set_owner(uid_t uid, uid_t gid);
+bool iolog_swapids(bool restore);
+bool iolog_mkdirs(char *path);
 
 #endif /* SUDO_IOLOG_H */
