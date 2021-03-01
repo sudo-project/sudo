@@ -157,8 +157,48 @@ sudo_getaddrinfo(
     const char *nodename, const char *servname,
     const struct addrinfo *hints, struct addrinfo **res)
 {
+    struct addrinfo *ai;
+    struct in_addr addr;
+
     /* Stub getaddrinfo(3) to avoid a DNS timeout in CIfuzz. */
-    return EAI_FAIL;
+    if (strcmp(nodename, "localhost") != 0 || servname != NULL)
+	return EAI_FAIL;
+
+    /* Hard-code localhost. */
+    ai = calloc(1, sizeof(*ai) + sizeof(struct sockaddr_in));
+    if (ai == NULL)
+	return EAI_MEMORY;
+    ai->ai_canonname = strdup("localhost");
+    if (ai == NULL) {
+	free(ai);
+	return EAI_MEMORY;
+    }
+    ai->ai_family = AF_INET;
+    ai->ai_protocol = IPPROTO_TCP;
+    ai->ai_addrlen = sizeof(struct sockaddr_in);
+    ai->ai_addr = (struct sockaddr *)(ai + 1);
+    inet_pton(AF_INET, "127.0.0.1", &addr);
+    ((struct sockaddr_in *)ai->ai_addr)->sin_family = AF_INET;
+    ((struct sockaddr_in *)ai->ai_addr)->sin_addr = addr;
+    *res = ai;
+    return 0;
+}
+
+void
+#ifdef HAVE_GETADDRINFO
+freeaddrinfo(struct addrinfo *ai)
+#else
+sudo_freeaddrinfo(struct addrinfo *ai)
+#endif
+{
+    struct addrinfo *next;
+
+    while (ai != NULL) {
+	next = ai->ai_next;
+	free(ai->ai_canonname);
+	free(ai);
+	ai = next;
+    }
 }
 
 enum fuzz_policy_pass {
