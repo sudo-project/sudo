@@ -60,6 +60,10 @@ What's new in Sudo 1.9.6
    where very long lines could cause parsing of the sudoers file
    to end prematurely.  Bug #960.
 
+ * Fixed a potential integer overflow when converting the
+   timestamp_timeout and passwd_timeout sudoers settings to a
+   timespec struct.
+
 What's new in Sudo 1.9.5p2
 
  * Fixed sudo's setprogname(3) emulation on systems that don't
