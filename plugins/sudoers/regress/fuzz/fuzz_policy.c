@@ -737,21 +737,20 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
     const char *path, const char *runchroot, int ignore_dot,
     char * const *allowlist)
 {
-    if (infile[0] == '/') {
-	*outfile = strdup(infile);
-    } else {
-	if (asprintf(outfile, "/usr/bin/%s", infile) == -1)
-	    *outfile = NULL;
-    }
-    if (*outfile == NULL)
-	return NOT_FOUND_ERROR;
-
     switch (pass) {
     case PASS_CHECK_NOT_FOUND:
 	return NOT_FOUND;
     case PASS_CHECK_NOT_FOUND_DOT:
 	return NOT_FOUND_DOT;
     default:
+	if (infile[0] == '/') {
+	    *outfile = strdup(infile);
+	} else {
+	    if (asprintf(outfile, "/usr/bin/%s", infile) == -1)
+		*outfile = NULL;
+	}
+	if (*outfile == NULL)
+	    return NOT_FOUND_ERROR;
 	return FOUND;
     }
 }
