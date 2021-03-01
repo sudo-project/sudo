@@ -81,6 +81,7 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
     debug_return_bool(false);
 }
 
+#ifndef SUDOERS_NAME_MATCH
 /*
  * Stat file by fd is possible, else by path.
  * Returns true on success, else false.
@@ -88,8 +89,12 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
 static bool
 do_stat(int fd, const char *path, const char *runchroot, struct stat *sb)
 {
+    struct stat sbuf;
     char pathbuf[PATH_MAX];
     debug_decl(do_stat, SUDOERS_DEBUG_MATCH);
+
+    if (sb == NULL)
+	sb = &sbuf;
 
     if (fd != -1)
 	debug_return_bool(fstat(fd, sb) == 0);
@@ -106,6 +111,7 @@ do_stat(int fd, const char *path, const char *runchroot, struct stat *sb)
     }
     debug_return_bool(stat(path, sb) == 0);
 }
+#endif /* SUDOERS_NAME_MATCH */
 
 /*
  * Check whether the fd refers to a shell script with a "#!" shebang.
@@ -301,9 +307,29 @@ static bool
 command_matches_dir(const char *sudoers_dir, size_t dlen, const char *runchroot,
     const struct command_digest_list *digests)
 {
+    int fd = -1;
     debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH);
-    /* XXX - check digest */
-    debug_return_bool(strncmp(user_cmnd, sudoers_dir, dlen) == 0);
+
+    /* Match user_cmnd against sudoers_dir. */
+    if (strncmp(user_cmnd, sudoers_dir, dlen) != 0 || user_cmnd[dlen] != '/')
+	goto bad;
+
+    /* Make sure user_cmnd is not in a subdir of sudoers_dir. */
+    if (strchr(user_cmnd + dlen + 1, '\0') != NULL)
+	goto bad;
+
+    /* Open the file for fdexec or for digest matching. */
+    if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
+	goto bad;
+    if (!digest_matches(fd, user_cmnd, runchroot, digests))
+	goto bad;
+    set_cmnd_fd(fd);
+
+    debug_return_bool(true);
+bad:
+    if (fd != -1)
+	close(fd);
+    debug_return_bool(false);
 }
 #endif /* SUDOERS_NAME_MATCH */
 
@@ -311,7 +337,6 @@ static bool
 command_matches_all(const char *runchroot,
     const struct command_digest_list *digests)
 {
-    struct stat sb; /* XXX - unused */
     int fd = -1;
     debug_decl(command_matches_all, SUDOERS_DEBUG_MATCH);
 
@@ -319,8 +344,10 @@ command_matches_all(const char *runchroot,
 	/* Open the file for fdexec or for digest matching. */
 	if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
 	    goto bad;
-	if (!do_stat(fd, user_cmnd, runchroot, &sb))
+#ifndef SUDOERS_NAME_MATCH
+	if (!do_stat(fd, user_cmnd, runchroot, NULL))
 	    goto bad;
+#endif
     }
 
     /* Check digest of user_cmnd since we have no sudoers_cmnd for ALL. */
@@ -331,10 +358,8 @@ command_matches_all(const char *runchroot,
     /* No need to set safe_cmnd for ALL. */
     debug_return_bool(true);
 bad:
-    if (fd != -1) {
+    if (fd != -1)
 	close(fd);
-	fd = -1;
-    }
     debug_return_bool(false);
 }
 
@@ -342,7 +367,6 @@ static bool
 command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
     const char *runchroot, const struct command_digest_list *digests)
 {
-    struct stat sb; /* XXX - unused */
     int fd = -1;
     debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH);
 
@@ -361,8 +385,10 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 	/* Open the file for fdexec or for digest matching. */
 	if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
 	    goto bad;
-	if (!do_stat(fd, user_cmnd, runchroot, &sb))
+#ifndef SUDOERS_NAME_MATCH
+	if (!do_stat(fd, user_cmnd, runchroot, NULL))
 	    goto bad;
+#endif
 	/* Check digest of user_cmnd since sudoers_cmnd is a pattern. */
 	if (!digest_matches(fd, user_cmnd, runchroot, digests))
 	    goto bad;
@@ -371,10 +397,8 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 	/* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
 bad:
-	if (fd != -1) {
+	if (fd != -1)
 	    close(fd);
-	    fd = -1;
-	}
 	debug_return_bool(false);
     }
     debug_return_bool(false);
@@ -601,6 +625,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
     const char *runchroot, const struct command_digest_list *digests)
 {
     size_t dlen;
+    int fd = -1;
     debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH);
 
     /* If it ends in '/' it is a directory spec. */
@@ -612,13 +637,26 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 
     if (strcmp(user_cmnd, sudoers_cmnd) == 0) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	    /* XXX - check digest */
+	    /* Open the file for fdexec or for digest matching. */
+	    if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
+		goto bad;
+	    if (!digest_matches(fd, user_cmnd, runchroot, digests))
+		goto bad;
+
+	    /* Successful match. */
 	    free(safe_cmnd);
-	    if ((safe_cmnd = strdup(sudoers_cmnd)) != NULL)
-		debug_return_bool(true);
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    if ((safe_cmnd = strdup(sudoers_cmnd)) == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		goto bad;
+	    }
+	    set_cmnd_fd(fd);
+	    debug_return_bool(true);
 	}
     }
+bad:
+    if (fd != -1)
+	close(fd);
     debug_return_bool(false);
 }
 #endif /* SUDOERS_NAME_MATCH */

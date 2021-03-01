@@ -38,7 +38,6 @@
 #include "sudo_digest.h"
 #include <gram.h>
 
-#ifndef SUDOERS_NAME_MATCH
 bool
 digest_matches(int fd, const char *path, const char *runchroot,
     const struct command_digest_list *digests)
@@ -134,15 +133,3 @@ done:
     free(file_digest);
     debug_return_bool(matched);
 }
-#else /* SUDOERS_NAME_MATCH */
-bool
-digest_matches(int fd, const char *path, const char *runchroot,
-    const struct command_digest_list *digests)
-{
-    debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
-
-    /* Digests are not supported when matching only by name. */
-
-    debug_return_bool(false);
-}
-#endif /* SUDOERS_NAME_MATCH */
