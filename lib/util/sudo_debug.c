@@ -45,6 +45,7 @@
 #include "sudo_plugin.h"
 #include "sudo_util.h"
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 /*
  * The debug priorities and subsystems are currently hard-coded.
  * In the future we might consider allowing plugins to register their
@@ -960,3 +961,167 @@ sudo_debug_get_fds_v1(unsigned char **fds)
     *fds = sudo_debug_fds;
     return sudo_debug_max_fd;
 }
+#else /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+int
+sudo_debug_register_v1(const char *program, const char *const subsystems[],
+    unsigned int ids[], struct sudo_conf_debug_file_list *debug_files)
+{
+    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+}
+
+int
+sudo_debug_deregister_v1(int idx)
+{
+    return -1;
+}
+
+int
+sudo_debug_parse_flags_v1(struct sudo_conf_debug_file_list *debug_files,
+    const char *entry)
+{
+    return 0;
+}
+
+int
+sudo_debug_get_instance_v1(const char *program)
+{
+    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+}
+
+pid_t
+sudo_debug_fork_v1(void)
+{
+    return fork();
+}
+
+void
+sudo_debug_enter_v1(const char *func, const char *file, int line,
+    int subsys)
+{
+}
+
+void
+sudo_debug_exit_v1(const char *func, const char *file, int line,
+    int subsys)
+{
+}
+
+void
+sudo_debug_exit_int_v1(const char *func, const char *file, int line,
+    int subsys, int ret)
+{
+}
+
+void
+sudo_debug_exit_long_v1(const char *func, const char *file, int line,
+    int subsys, long ret)
+{
+}
+
+void
+sudo_debug_exit_id_t_v1(const char *func, const char *file, int line,
+    int subsys, id_t ret)
+{
+}
+
+void
+sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
+    int subsys, size_t ret)
+{
+}
+
+void
+sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line,
+    int subsys, ssize_t ret)
+{
+}
+
+void
+sudo_debug_exit_time_t_v1(const char *func, const char *file, int line,
+    int subsys, time_t ret)
+{
+}
+
+void
+sudo_debug_exit_bool_v1(const char *func, const char *file, int line,
+    int subsys, bool ret)
+{
+}
+
+void
+sudo_debug_exit_str_v1(const char *func, const char *file, int line,
+    int subsys, const char *ret)
+{
+}
+
+void
+sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line,
+    int subsys, const char *ret)
+{
+}
+
+void
+sudo_debug_exit_ptr_v1(const char *func, const char *file, int line,
+    int subsys, const void *ret)
+{
+}
+
+void
+sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
+    const char *str, int len, int errnum)
+{
+}
+
+bool
+sudo_debug_needed_v1(int level)
+{
+    return false;
+}
+
+void
+sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level,
+    const char *fmt, va_list ap)
+{
+}
+
+#ifdef NO_VARIADIC_MACROS
+void
+sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...)
+{
+}
+#endif /* NO_VARIADIC_MACROS */
+
+void
+sudo_debug_printf2_v1(const char *func, const char *file, int lineno, int level,
+    const char *fmt, ...)
+{
+}
+
+void
+sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *const envp[])
+{
+}
+
+int
+sudo_debug_get_active_instance_v1(void)
+{
+    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+}
+
+int
+sudo_debug_set_active_instance_v1(int idx)
+{
+    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+}
+
+void
+sudo_debug_update_fd_v1(int ofd, int nfd)
+{
+}
+
+int
+sudo_debug_get_fds_v1(unsigned char **fds)
+{
+    return -1;
+}
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
