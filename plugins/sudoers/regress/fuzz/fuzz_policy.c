@@ -47,6 +47,8 @@ extern sudo_dso_public struct policy_plugin sudoers_policy;
 const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 char *audit_msg;
 
+static int pass;
+
 static FILE *
 open_data(const uint8_t *data, size_t size)
 {
@@ -159,6 +161,20 @@ sudo_getaddrinfo(
     return EAI_FAIL;
 }
 
+enum fuzz_policy_pass {
+    PASS_NONE,
+    PASS_VERSION,
+    PASS_CHECK_LOG_LOCAL,
+    PASS_CHECK_LOG_REMOTE,
+    PASS_CHECK_NOT_FOUND,
+    PASS_CHECK_NOT_FOUND_DOT,
+    PASS_LIST,
+    PASS_LIST_OTHER,
+    PASS_LIST_CHECK,
+    PASS_VALIDATE,
+    PASS_INVALIDATE
+};
+
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -169,11 +185,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct dynamic_array env_add = { NULL };
     char **command_info = NULL, **argv_out = NULL, **user_env_out = NULL;
     const char *errstr = NULL;
-    const int num_passes = 7;
+    const int num_passes = 10;
     char *line = NULL;
     size_t linesize = 0;
     ssize_t linelen;
-    int pass, res = 1;
+    int res = 1;
     FILE *fp;
 
     fp = open_data(data, size);
@@ -295,6 +311,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     free(line);
     line = NULL;
 
+    /* Exercise code paths that use KRB5CCNAME and SUDO_PROMPT. */
+    putenv("KRB5CCNAME=/tmp/krb5cc_123456");
+    putenv("SUDO_PROMPT=[sudo] password for %p: ");
+
     sudoers_policy.register_hooks(SUDO_API_VERSION, fuzz_hook_stub);
 
     for (pass = 1; res == 1 && pass <= num_passes; pass++) {
@@ -309,34 +329,68 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    }
 
 	    switch (pass) {
-	    case 1:
+	    case PASS_NONE:
+		break;
+	    case PASS_VERSION:
 		/* sudo -V */
 		sudoers_policy.show_version(true);
 		break;
-	    case 2:
-		/* sudo command */
+	    case PASS_CHECK_LOG_LOCAL: {
+		struct list_members savedlist;
+
+		/* sudo command w/ local I/O logging (MODE_RUN) */
+		memcpy(&savedlist, &def_log_servers, sizeof(savedlist));
+		SLIST_INIT(&def_log_servers);
 		sudoers_policy.check_policy(argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
+		/* sudo_auth_begin_session() is stubbed out below. */
+		sudoers_policy.init_session(NULL, NULL, NULL);
+		memcpy(&def_log_servers, &savedlist, sizeof(savedlist));
 		break;
-	    case 3:
-		/* sudo -l */
+	    }
+	    case PASS_CHECK_LOG_REMOTE:
+		/* sudo command w/ remote I/O logging (MODE_RUN) */
+		sudoers_policy.check_policy(argv.len, argv.entries,
+		    env_add.entries, &command_info, &argv_out, &user_env_out,
+		    &errstr);
+		/* sudo_auth_begin_session() is stubbed out below. */
+		sudoers_policy.init_session(NULL, NULL, NULL);
+		break;
+	    case PASS_CHECK_NOT_FOUND:
+		/* sudo command (not found) */
+		sudoers_policy.check_policy(argv.len, argv.entries,
+		    env_add.entries, &command_info, &argv_out, &user_env_out,
+		    &errstr);
+		/* sudo_auth_begin_session() is stubbed out below. */
+		sudoers_policy.init_session(NULL, NULL, NULL);
+		break;
+	    case PASS_CHECK_NOT_FOUND_DOT:
+		/* sudo command (found but in cwd) */
+		sudoers_policy.check_policy(argv.len, argv.entries,
+		    env_add.entries, &command_info, &argv_out, &user_env_out,
+		    &errstr);
+		/* sudo_auth_begin_session() is stubbed out below. */
+		sudoers_policy.init_session(NULL, NULL, NULL);
+		break;
+	    case PASS_LIST:
+		/* sudo -l (MODE_LIST) */
 		sudoers_policy.list(0, NULL, false, NULL, &errstr);
 		break;
-	    case 4:
-		/* sudo -l -U root */
+	    case PASS_LIST_OTHER:
+		/* sudo -l -U root (MODE_LIST) */
 		sudoers_policy.list(0, NULL, false, "root", &errstr);
 		break;
-	    case 5:
-		/* sudo -l command */
+	    case PASS_LIST_CHECK:
+		/* sudo -l command (MODE_CHECK) */
 		sudoers_policy.list(argv.len, argv.entries, false, NULL,
 		    &errstr);
 		break;
-	    case 6:
-		/* sudo -v */
+	    case PASS_VALIDATE:
+		/* sudo -v (MODE_VALIDATE) */
 		sudoers_policy.validate(&errstr);
 		break;
-	    case 7:
+	    case PASS_INVALIDATE:
 		/* sudo -k */
 		sudoers_policy.invalidate(false);
 		break;
@@ -450,6 +504,20 @@ sudo_file_parse(struct sudo_nss *nss)
 {
     static struct sudoers_parse_tree parse_tree;
 
+    return &parse_tree;
+}
+
+/* STUB */
+static int
+sudo_file_query(struct sudo_nss *nss, struct passwd *pw)
+{
+    return 0;
+}
+
+/* STUB */
+static int
+sudo_file_getdefs(struct sudo_nss *nss)
+{
     /* Set some Defaults */
     set_default("log_input", NULL, true, "sudoers", 1, 1, false);
     set_default("log_output", NULL, true, "sudoers", 1, 1, false);
@@ -475,22 +543,28 @@ sudo_file_parse(struct sudo_nss *nss)
     set_default("mailto", "root@localhost", true, "sudoers", 1, 1, false);
     set_default("mailfrom", "sudo@sudo.ws", true, "sudoers", 1, 1, false);
     set_default("mailsub", "Someone has been naughty on %h", true, "sudoers", 1, 1, false);
-    set_default("timestampowner", "root", true, "sudoers", 1, 1, false);
+    set_default("timestampowner", "#0", true, "sudoers", 1, 1, false);
+    set_default("compress_io", NULL, true, "sudoers", 1, 1, false);
+    set_default("iolog_flush", NULL, true, "sudoers", 1, 1, false);
+    set_default("iolog_flush", NULL, true, "sudoers", 1, 1, false);
+    set_default("maxseq", "2176782336", true, "sudoers", 1, 1, false);
+    set_default("sudoedit_checkdir", NULL, false, "sudoers", 1, 1, false);
+    set_default("sudoedit_follow", NULL, true, "sudoers", 1, 1, false);
+    set_default("ignore_iolog_errors", NULL, true, "sudoers", 1, 1, false);
+    set_default("ignore_iolog_errors", NULL, true, "sudoers", 1, 1, false);
+    set_default("noexec", NULL, true, "sudoers", 1, 1, false);
+    set_default("exec_background", NULL, true, "sudoers", 1, 1, false);
+    set_default("use_pty", NULL, true, "sudoers", 1, 1, false);
+    set_default("utmp_runas", NULL, true, "sudoers", 1, 1, false);
+    set_default("iolog_mode", "0640", true, "sudoers", 1, 1, false);
+    set_default("iolog_user", NULL, false, "sudoers", 1, 1, false);
+    set_default("iolog_group", NULL, false, "sudoers", 1, 1, false);
+    set_default("log_servers", "localhost", true, "sudoers", 1, 1, false);
+    set_default("log_server_timeout", "30", true, "sudoers", 1, 1, false);
+    set_default("log_server_cabundle", "/etc/ssl/cacert.pem", true, "sudoers", 1, 1, false);
+    set_default("log_server_peer_cert", "/etc/ssl/localhost.crt", true, "sudoers", 1, 1, false);
+    set_default("log_server_peer_key", "/etc/ssl/private/localhost.key", true, "sudoers", 1, 1, false);
 
-    return &parse_tree;
-}
-
-/* STUB */
-static int
-sudo_file_query(struct sudo_nss *nss, struct passwd *pw)
-{
-    return 0;
-}
-
-/* STUB */
-static int
-sudo_file_getdefs(struct sudo_nss *nss)
-{
     return 0;
 }
 
@@ -629,7 +703,17 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	if (asprintf(outfile, "/usr/bin/%s", infile) == -1)
 	    *outfile = NULL;
     }
-    return *outfile ? FOUND : NOT_FOUND_ERROR;
+    if (*outfile == NULL)
+	return NOT_FOUND_ERROR;
+
+    switch (pass) {
+    case PASS_CHECK_NOT_FOUND:
+	return NOT_FOUND;
+    case PASS_CHECK_NOT_FOUND_DOT:
+	return NOT_FOUND_DOT;
+    default:
+	return FOUND;
+    }
 }
 
 /* STUB */
