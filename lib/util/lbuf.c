@@ -55,6 +55,9 @@ sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
     debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL);
 
     free(lbuf->buf);
+    lbuf->error = 0;
+    lbuf->len = 0;
+    lbuf->size = 0;
     lbuf->buf = NULL;
 
     debug_return;
