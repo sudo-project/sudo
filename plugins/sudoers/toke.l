@@ -71,6 +71,10 @@ static int digest_type = -1;
 static bool pop_include(void);
 static yy_size_t sudoers_input(char *buf, yy_size_t max_size);
 
+#ifndef TRACELEXER
+static struct sudo_lbuf trace_lbuf;
+#endif
+
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
@@ -972,6 +976,11 @@ init_lexer(void)
     struct path_list *pl;
     debug_decl(init_lexer, SUDOERS_DEBUG_PARSER);
 
+#ifndef TRACELEXER
+    free(trace_lbuf.buf);
+    sudo_lbuf_init(&trace_lbuf, NULL, 0, NULL, 0);
+#endif
+
     while (idepth) {
 	idepth--;
 	while ((pl = SLIST_FIRST(&istack[idepth].more)) != NULL) {
@@ -1246,21 +1255,12 @@ sudoers_trace_print(const char *msg)
 int
 sudoers_trace_print(const char *msg)
 {
-    static bool initialized;
-    static struct sudo_lbuf lbuf;
-
-    if (!initialized) {
-	initialized = true;
-	sudo_lbuf_init(&lbuf, NULL, 0, NULL, 0);
-    }
-
-    sudo_lbuf_append(&lbuf, "%s", msg);
-    /* XXX - assumes a final newline */
+    sudo_lbuf_append(&trace_lbuf, "%s", msg);
     if (strchr(msg, '\n') != NULL)
     {
 	sudo_debug_printf2(NULL, NULL, 0, SUDOERS_DEBUG_PARSER|SUDO_DEBUG_DEBUG,
-	    "%s:%d: %s", sudoers, sudolineno, lbuf.buf);
-	lbuf.len = 0;
+	    "%s:%d: %s", sudoers, sudolineno, trace_lbuf.buf);
+	trace_lbuf.len = 0;
     }
     return 0;
 }
