@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "February 16, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "March 2, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -470,12 +470,15 @@ Currently,
 \fBsudo\fR
 supports efficient group queries on AIX,
 BSD,
-HP-UX, Linux and Solaris.
+HP-UX, Linux, macOS and Solaris.
+This is the default behavior on macOS in
+\fBsudo\fR
+1.9.6 and higher.
 .TP 10n
 adaptive
 Only query the group database if the static group list returned
 by the kernel has the maximum number of entries.
-This is the default behavior in
+This is the default behavior on systems other than macOS in
 \fBsudo\fR
 1.8.7 and higher.
 .PP

@@ -64,6 +64,11 @@ What's new in Sudo 1.9.6
    timestamp_timeout and passwd_timeout sudoers settings to a
    timespec struct.
 
+ * The default for the "group_source" setting in sudo.conf is now
+   "dynamic" on macOS.  Recent versions of macOS do not reliably
+   return all of a user's non-local groups via getgroups(2), even
+   when _DARWIN_UNLIMITED_GETGROUPS is defined.  Bug #946.
+
 What's new in Sudo 1.9.5p2
 
  * Fixed sudo's setprogname(3) emulation on systems that don't

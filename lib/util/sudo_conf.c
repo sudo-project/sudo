@@ -117,12 +117,23 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
     { NULL } \
 }
 
+/*
+ * getgroups(2) on macOS is flakey with respect to non-local groups. 
+ * Even with _DARWIN_UNLIMITED_GETGROUPS set we may not get all groups./
+ * See bug #946 for details.
+ */
+#ifdef __APPLE__
+# define GROUP_SOURCE_DEFAULT	GROUP_SOURCE_DYNAMIC
+#else
+# define GROUP_SOURCE_DEFAULT	GROUP_SOURCE_ADAPTIVE
+#endif
+
 #define SUDO_CONF_SETTINGS_INITIALIZER	{				\
     false,			/* updated */				\
     false,			/* developer_mode */			\
     true,			/* disable_coredump */			\
     true,			/* probe_interfaces */			\
-    GROUP_SOURCE_ADAPTIVE,	/* group_source */			\
+    GROUP_SOURCE_DEFAULT,	/* group_source */			\
     -1				/* max_groups */			\
 }
 
