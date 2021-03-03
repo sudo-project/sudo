@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 16, 2020
+.Dd March 3, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1064,6 +1064,21 @@ in double quotes
 when they contain multiple words.
 Special characters may be escaped with a backslash
 .Pq Ql \e .
+.Pp
+To include a literal backslash character in a command line argument
+you must escape the backslash twice.
+For example, to match
+.Ql \en
+as part of a command line argument, you must use
+.Ql \e\e\e\en
+in the
+.Em sudoers
+file.
+This is due to there being two levels of escaping, one in the
+.Em sudoers
+parser itself and another when command line arguments are matched by the
+.Xr fnmatch 3
+function.
 .Pp
 Lists have two additional assignment operators,
 .Li +=
