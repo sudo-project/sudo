@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -137,7 +137,7 @@ struct logsrvd_tls_runtime {
 #endif
 
 /* iolog_writer.c */
-struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen);
+struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen, struct connection_closure *closure);
 bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
 bool iolog_restart(RestartMessage *msg, struct connection_closure *closure);
 int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -306,7 +306,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
 
     closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs);
+	msg->n_info_msgs, closure);
     if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing AcceptMessage");
 	debug_return_bool(false);
@@ -369,7 +369,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
 
     closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs);
+	msg->n_info_msgs, closure);
     if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing RejectMessage");
 	debug_return_bool(false);
@@ -493,7 +493,8 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AlertMessage", __func__);
 
     if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
-	closure->evlog = evlog_new(NULL, msg->info_msgs, msg->n_info_msgs);
+	closure->evlog = evlog_new(NULL, msg->info_msgs,
+	    msg->n_info_msgs, closure);
 	if (closure->evlog == NULL) {
 	    closure->errstr = _("error parsing AlertMessage");
 	    debug_return_bool(false);

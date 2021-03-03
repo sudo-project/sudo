@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -825,6 +825,13 @@ format_json(int event_type, const char *reason, const char *errstr,
 
      /* Event log info may be missing for alert messages. */
      if (evlog != NULL) {
+	if (evlog->peeraddr != NULL) {
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = evlog->peeraddr;
+	    if (!sudo_json_add_value(&json, "peeraddr", &json_value))
+		goto bad;
+	}
+
 	if (evlog->iolog_path != NULL) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = evlog->iolog_path;

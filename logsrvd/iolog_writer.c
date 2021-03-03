@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -110,7 +110,8 @@ bad:
  * Returns true on success and false on failure.
  */
 struct eventlog *
-evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen)
+evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
+    struct connection_closure *closure)
 {
     struct eventlog *evlog;
     size_t idx;
@@ -123,6 +124,9 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen)
 	goto bad;
     }
     memset(evlog, 0, sizeof(*evlog));
+
+    /* Client/peer IP address. */
+    evlog->peeraddr = closure->ipaddr;
 
     /* Submit time. */
     if (submit_time != NULL) {
