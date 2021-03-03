@@ -17100,10 +17100,6 @@ fi
 
 done
 
-		# macOS >= 10.6 getgroups(2) can support more than > 16 groups
-		printf "%s\n" "#define _DARWIN_UNLIMITED_GETGROUPS 1" >>confdefs.h
-
-
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-force_flat_namespace" >&5

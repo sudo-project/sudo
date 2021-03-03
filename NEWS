@@ -69,6 +69,9 @@ What's new in Sudo 1.9.6
    return all of a user's non-local groups via getgroups(2), even
    when _DARWIN_UNLIMITED_GETGROUPS is defined.  Bug #946.
 
+ * Fixed a potential use-after-free in the PAM conversation function.
+   Bug #967.
+
 What's new in Sudo 1.9.5p2
 
  * Fixed sudo's setprogname(3) emulation on systems that don't
