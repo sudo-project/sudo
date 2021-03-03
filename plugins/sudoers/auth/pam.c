@@ -311,6 +311,9 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
     /* PAM_SILENT prevents the authentication service from generating output. */
     *pam_status = pam_authenticate(pamh, PAM_SILENT);
 
+    /* Restore def_prompt, the passed-in prompt may be freed later. */
+    def_prompt = PASSPROMPT;
+
 	/* Restore KRB5CCNAME to its original value. */
 	if (envccname == NULL && sudo_unsetenv("KRB5CCNAME") != 0) {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
