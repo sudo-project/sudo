@@ -46,7 +46,7 @@ What's new in Sudo 1.9.6
  * Added an "admin_flag" sudoers option to make the use of the
    ~/.sudo_as_admin_successful file configurable on systems where
    sudo is build with the --enable-admin-flag configure option.
-   This mostly affects Ubuntu and its derivatives.
+   This mostly affects Ubuntu and its derivatives.  GitHub issue #56.
 
  * The "max_groups" setting in sudo.conf is now limited to 1024.
    This setting is obsolete and should no longer be needed.
@@ -617,7 +617,7 @@ What's new in Sudo 1.8.30
    those users.
 
  * Fixed a problem restoring the SELinux tty context during reboot
-   if mctransd is killed before sudo finishes.  GitHub Issue #17.
+   if mctransd is killed before sudo finishes.  GitHub issue #17.
 
  * Fixed an intermittent warning on NetBSD when sudo restores the
    initial stack size limit.
