@@ -697,7 +697,6 @@ sudo_mkgrent(const char *group, gid_t gid, ...)
 	gr->gr_mem[nmem] = NULL;
 	gr->gr_name = cp;
 	memcpy(gr->gr_name, group, nsize);
-	cp += nsize;
 
 	item = &gritem->cache;
 	item->refcnt = 1;
