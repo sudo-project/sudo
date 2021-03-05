@@ -111,7 +111,7 @@ connection_closure_free(struct connection_closure *closure)
 
 	TAILQ_REMOVE(&connections, closure, entries);
 #if defined(HAVE_OPENSSL)
-	if (closure->tls) {
+	if (closure->ssl != NULL) {
 	    SSL_shutdown(closure->ssl);
 	    SSL_free(closure->ssl);
 	}
@@ -185,7 +185,7 @@ done:
 }
 
 static bool
-fmt_hello_message(struct connection_buffer *buf, bool tls)
+fmt_hello_message(struct connection_buffer *buf)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
     ServerHello hello = SERVER_HELLO__INIT;
@@ -810,7 +810,7 @@ server_msg_cb(int fd, int what, void *v)
 	__func__, buf->len - buf->off);
 
 #if defined(HAVE_OPENSSL)
-    if (closure->tls) {
+    if (closure->ssl != NULL) {
         nwritten = SSL_write(closure->ssl, buf->data + buf->off,
 	    buf->len - buf->off);
         if (nwritten <= 0) {
@@ -897,7 +897,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
 #if defined(HAVE_OPENSSL)
-    if (closure->tls) {
+    if (closure->ssl != NULL) {
        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
         if (nread <= 0) {
             int err = SSL_get_error(closure->ssl, nread);
@@ -1074,7 +1074,7 @@ start_protocol(struct connection_closure *closure)
     const struct timespec *timeout = logsrvd_conf_get_sock_timeout();
     debug_decl(start_protocol, SUDO_DEBUG_UTIL);
 
-    if (!fmt_hello_message(&closure->write_buf, closure->tls))
+    if (!fmt_hello_message(&closure->write_buf))
 	debug_return_bool(false);
 
     if (sudo_ev_add(closure->evbase, closure->write_ev, timeout, false) == -1)
@@ -1505,7 +1505,6 @@ connection_closure_alloc(int sock, bool tls, struct sudo_event_base *base)
 
     closure->iolog_dir_fd = -1;
     closure->sock = sock;
-    closure->tls = tls;
     closure->evbase = base;
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
