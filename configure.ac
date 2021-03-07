@@ -1951,14 +1951,20 @@ case "$host" in
 		# strnlen/strndup may be broken on AIX < 6 depending
 		# on the libc version, use our own.
 		if test $OSMAJOR -lt 6; then
-		    ac_cv_func_strnlen=no
+		    : ${ac_cv_func_strnlen='no'}
+		fi
+
+		# fmemopen(3) may be broken on AIX < 7.1 depending
+		# on the libc version.
+		if test $OSMAJOR -lt 7; then
+		    : ${ac_cv_func_fmemopen='no'}
 		fi
 
 		# getdelim() may or may not be present on AIX <= 6.1.
 		# bos610 is missing getdelim but bos61J has it.
 		if test "$enable_package_build" = "yes"; then
 		    if test $OSMAJOR -le 6; then
-			ac_cv_func_getdelim=no
+			: ${ac_cv_func_getdelim='no'}
 		    fi
 		fi
 
@@ -1966,7 +1972,7 @@ case "$host" in
 		# bos710 is missing memset_s but bos71L has it.
 		if test "$enable_package_build" = "yes"; then
 		    if test $OSMAJOR -le 7; then
-			ac_cv_func_memset_s=no
+			: ${ac_cv_func_memset_s='no'}
 		    fi
 		fi
 
