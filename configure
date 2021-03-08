@@ -18732,7 +18732,7 @@ then :
   printf "%s\n" "#define HAVE_LOGIN_CAP_H 1" >>confdefs.h
  LOGINCAP_USAGE='[-c class] '; LCMAN=1
 	case "$OS" in
-	    freebsd|netbsd)
+	    freebsd*|netbsd*)
 		SUDO_LIBS="${SUDO_LIBS} -lutil"
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
 		;;
@@ -28101,7 +28101,7 @@ fi
 fi
 
 case "$OS" in
-    netbsd)
+    netbsd*)
 	;;
     *)
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--enable-new-dtags" >&5

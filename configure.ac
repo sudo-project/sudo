@@ -2581,7 +2581,7 @@ SUDO_MAILDIR
 if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS([login_cap.h], [LOGINCAP_USAGE='[[-c class]] '; LCMAN=1
 	case "$OS" in
-	    freebsd|netbsd)
+	    freebsd*|netbsd*)
 		SUDO_LIBS="${SUDO_LIBS} -lutil"
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
 		;;
@@ -4449,7 +4449,7 @@ dnl Otherwise, LD_LIBRARY_PATH does not work when running the tests.
 dnl We don't do this on NetBSD where RPATH already supports LD_LIBRARY_PATH.
 dnl
 case "$OS" in
-    netbsd)
+    netbsd*)
 	;;
     *)
 	AX_CHECK_LINK_FLAG([-Wl,--enable-new-dtags], [AX_APPEND_FLAG([-Wl,--enable-new-dtags], [LDFLAGS])])
