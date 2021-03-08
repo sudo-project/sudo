@@ -163,7 +163,7 @@ TEST_PROGS = check_addr check_base64 check_digest check_env_pattern \
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
 FUZZ_PROGS = fuzz_policy fuzz_sudoers fuzz_sudoers_ldif
 FUZZ_SEED_CORPUS = ${FUZZ_PROGS:=_seed_corpus.zip}
-FUZZ_LIBS = libparsesudoers.la $(LIB_FUZZING_ENGINE)
+FUZZ_LIBS = libparsesudoers.la @SUDOERS_LIBS@ $(LIB_FUZZING_ENGINE)
 FUZZ_LDFLAGS = @LDFLAGS@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
