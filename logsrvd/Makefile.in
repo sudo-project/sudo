@@ -119,9 +119,10 @@ SHELL = @SHELL@
 
 PROGS = sudo_logsrvd sudo_sendlog
 
-LOGSRVD_OBJS = logsrv_util.o iolog_writer.o logsrvd.o logsrvd_conf.o
+LOGSRVD_OBJS = logsrv_util.o iolog_writer.o logsrvd.o logsrvd_conf.o \
+	       tls_init.o
 
-SENDLOG_OBJS = logsrv_util.o sendlog.o
+SENDLOG_OBJS = logsrv_util.o sendlog.o tls_init.o
 
 IOBJS = $(LOGSRVD_OBJS:.o=.i) $(SENDLOG_OBJS:.o=.i)
 
@@ -283,7 +284,7 @@ fuzz_logsrvd_conf.o: $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c \
                      $(incdir)/sudo_eventlog.h $(incdir)/sudo_iolog.h \
                      $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                      $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
-                     $(top_builddir)/config.h
+                     $(srcdir)/tls_common.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c
 fuzz_logsrvd_conf.i: $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c \
                      $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
@@ -292,7 +293,7 @@ fuzz_logsrvd_conf.i: $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c \
                      $(incdir)/sudo_eventlog.h $(incdir)/sudo_iolog.h \
                      $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                      $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
-                     $(top_builddir)/config.h
+                     $(srcdir)/tls_common.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fuzz_logsrvd_conf.plog: fuzz_logsrvd_conf.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c --i-file $< --output-file $@
@@ -302,7 +303,8 @@ iolog_writer.o: $(srcdir)/iolog_writer.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
-                $(srcdir)/logsrvd.h $(top_builddir)/config.h
+                $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_writer.c
 iolog_writer.i: $(srcdir)/iolog_writer.c $(incdir)/compat/stdbool.h \
                 $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
@@ -310,7 +312,8 @@ iolog_writer.i: $(srcdir)/iolog_writer.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
-                $(srcdir)/logsrvd.h $(top_builddir)/config.h
+                $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog_writer.plog: iolog_writer.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_writer.c --i-file $< --output-file $@
@@ -339,7 +342,7 @@ logsrvd.o: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
            $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h $(incdir)/sudo_util.h \
-           $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
+           $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd.c
 logsrvd.i: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
@@ -351,7 +354,7 @@ logsrvd.i: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
            $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h $(incdir)/sudo_util.h \
-           $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
+           $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 logsrvd.plog: logsrvd.i
@@ -364,7 +367,8 @@ logsrvd_conf.o: $(srcdir)/logsrvd_conf.c $(incdir)/compat/getaddrinfo.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
-                $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                $(srcdir)/tls_common.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd_conf.c
 logsrvd_conf.i: $(srcdir)/logsrvd_conf.c $(incdir)/compat/getaddrinfo.h \
                 $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
@@ -374,7 +378,8 @@ logsrvd_conf.i: $(srcdir)/logsrvd_conf.c $(incdir)/compat/getaddrinfo.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
-                $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                $(srcdir)/tls_common.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 logsrvd_conf.plog: logsrvd_conf.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrvd_conf.c --i-file $< --output-file $@
@@ -387,7 +392,7 @@ sendlog.o: $(srcdir)/sendlog.c $(incdir)/compat/getaddrinfo.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h $(srcdir)/sendlog.h \
-           $(top_builddir)/config.h
+           $(srcdir)/tls_common.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sendlog.c
 sendlog.i: $(srcdir)/sendlog.c $(incdir)/compat/getaddrinfo.h \
            $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
@@ -398,7 +403,23 @@ sendlog.i: $(srcdir)/sendlog.c $(incdir)/compat/getaddrinfo.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h $(srcdir)/sendlog.h \
-           $(top_builddir)/config.h
+           $(srcdir)/tls_common.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sendlog.plog: sendlog.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sendlog.c --i-file $< --output-file $@
+tls_init.o: $(srcdir)/tls_init.c $(incdir)/compat/stdbool.h \
+            $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(srcdir)/tls_common.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tls_init.c
+tls_init.i: $(srcdir)/tls_init.c $(incdir)/compat/stdbool.h \
+            $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(srcdir)/tls_common.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+tls_init.plog: tls_init.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/tls_init.c --i-file $< --output-file $@

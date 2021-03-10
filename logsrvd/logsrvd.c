@@ -74,11 +74,6 @@
 #include "hostcheck.h"
 #include "logsrvd.h"
 
-#if defined(HAVE_OPENSSL)
-# define LOGSRVD_DEFAULT_CIPHER_LST12 "HIGH:!aNULL"
-# define LOGSRVD_DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"
-#endif
-
 #ifndef O_NOFOLLOW
 # define O_NOFOLLOW 0
 #endif
@@ -1173,131 +1168,6 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     }
 }
 
-static bool
-verify_server_cert(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
-{
-#ifdef HAVE_SSL_CTX_GET0_CERTIFICATE
-    bool ret = false;
-    X509_STORE_CTX *store_ctx = NULL;
-    X509_STORE *ca_store;
-    STACK_OF(X509) *chain_certs;
-    X509 *x509;
-    debug_decl(verify_server_cert, SUDO_DEBUG_UTIL);
-
-    if ((x509 = SSL_CTX_get0_certificate(ctx)) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to get X509 object from SSL_CTX: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    if ((store_ctx = X509_STORE_CTX_new()) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to allocate X509_STORE_CTX object: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    if (!SSL_CTX_get0_chain_certs(ctx, &chain_certs)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to get chain certs: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    if ((ca_store = SSL_CTX_get_cert_store(ctx)) != NULL)
-        X509_STORE_set_flags(ca_store, X509_V_FLAG_X509_STRICT);
-
-    if (!X509_STORE_CTX_init(store_ctx, ca_store, x509, chain_certs)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to initialize X509_STORE_CTX object: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    if (X509_verify_cert(store_ctx) <= 0) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to verify cert %s: %s", tls_config->cert_path,
-            ERR_error_string(ERR_get_error(), NULL));
-        goto exit;
-    }
-
-    ret = true;
-exit:
-    X509_STORE_CTX_free(store_ctx);
-
-    debug_return_bool(ret);
-#else
-    /* TODO: verify server cert with old OpenSSL */
-    return true;
-#endif /* HAVE_SSL_CTX_GET0_CERTIFICATE */
-}
-
-static bool
-init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
-{
-    const char *errstr;
-    int success = 0;
-    debug_decl(init_tls_ciphersuites, SUDO_DEBUG_UTIL);
-
-    if (tls_config->ciphers_v12) {
-	/* try to set TLS v1.2 ciphersuite list from config if given */
-        success = SSL_CTX_set_cipher_list(ctx, tls_config->ciphers_v12);
-	if (success) {
-            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "TLS 1.2 ciphersuite list set to %s", tls_config->ciphers_v12);
-        } else {
-	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("unable to set TLS 1.2 ciphersuite to %s: %s"),
-		tls_config->ciphers_v12, errstr);
-        }
-    }
-    if (!success) {
-	/* fallback to default ciphersuites for TLS v1.2 */
-        if (SSL_CTX_set_cipher_list(ctx, LOGSRVD_DEFAULT_CIPHER_LST12) <= 0) {
-	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("unable to set TLS 1.2 ciphersuite to %s: %s"),
-		LOGSRVD_DEFAULT_CIPHER_LST12, errstr);
-            debug_return_bool(false);
-        } else {
-            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "TLS v1.2 ciphersuite list set to %s (default)",
-                LOGSRVD_DEFAULT_CIPHER_LST12);
-        }
-    }
-
-# if defined(HAVE_SSL_CTX_SET_CIPHERSUITES)
-    success = 0;
-    if (tls_config->ciphers_v13) {
-	/* try to set TLSv1.3 ciphersuite list from config */
-        success = SSL_CTX_set_ciphersuites(ctx, tls_config->ciphers_v13);
-	if (success) {
-            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "TLS v1.3 ciphersuite list set to %s", tls_config->ciphers_v13);
-        } else {
-	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("unable to set TLS 1.3 ciphersuite to %s: %s"),
-		tls_config->ciphers_v13, errstr);
-        }
-    }
-    if (!success) {
-	/* fallback to default ciphersuites for TLS v1.3 */
-        if (SSL_CTX_set_ciphersuites(ctx, LOGSRVD_DEFAULT_CIPHER_LST13) <= 0) {
-	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("unable to set TLS 1.3 ciphersuite to %s: %s"),
-		LOGSRVD_DEFAULT_CIPHER_LST13, errstr);
-            debug_return_bool(false);
-        } else {
-            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "TLS v1.3 ciphersuite list set to %s (default)",
-                LOGSRVD_DEFAULT_CIPHER_LST13);
-        }
-    }
-# endif
-
-    debug_return_bool(true);
-}
-
 /*
  * Calls series of openssl initialization functions in order to
  * be able to establish configured network connections over TLS
@@ -1305,145 +1175,23 @@ init_tls_ciphersuites(SSL_CTX *ctx, const struct logsrvd_tls_config *tls_config)
 static bool
 init_tls_server_context(void)
 {
-    const SSL_METHOD *method;
-    FILE *dhparam_file = NULL;
-    SSL_CTX *ctx = NULL;
     struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
     const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
-    bool ca_bundle_required = tls_config->verify | tls_config->check_peer;
-    const char *errstr;
     debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL);
 
-    SSL_library_init();
-    OpenSSL_add_all_algorithms();
-    SSL_load_error_strings();
+    tls_runtime->ssl_ctx = init_tls_context(tls_config->cacert_path,
+	tls_config->cert_path, tls_config->pkey_path, tls_config->dhparams_path,
+	tls_config->ciphers_v12, tls_config->ciphers_v13, tls_config->verify);
 
-    if ((method = TLS_server_method()) == NULL) {
-	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx(U_("unable to get TLS server method: %s"), errstr);
-        goto bad;
-    }
-    if ((ctx = SSL_CTX_new(method)) == NULL) {
-	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx(U_("unable to create TLS context: %s"), errstr);
-        goto bad;
-    }
-
-    if (SSL_CTX_use_certificate_chain_file(ctx, tls_config->cert_path) <= 0) {
-	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx(U_("%s: %s"), tls_config->cert_path, errstr);
-	sudo_warnx(U_("unable to load certificate %s"), tls_config->cert_path);
-        goto bad;
-    }
-
-    /* if server or client authentication is required, CA bundle file has to be prepared */
-    if (ca_bundle_required) {
-        if (tls_config->cacert_path != NULL) {
-            STACK_OF(X509_NAME) *cacerts =
-                SSL_load_client_CA_file(tls_config->cacert_path);
-
-            if (cacerts == NULL) {
-		errstr = ERR_reason_error_string(ERR_get_error());
-		sudo_warnx(U_("%s: %s"), tls_config->cacert_path, errstr);
-		sudo_warnx(U_("unable to load certificate authority bundle %s"),
-		    tls_config->cacert_path);
-                goto bad;
-            }
-            SSL_CTX_set_client_CA_list(ctx, cacerts);
-
-            /* set the location of the CA bundle file for verification */
-            if (SSL_CTX_load_verify_locations(ctx, tls_config->cacert_path, NULL) <= 0) {
-                errstr = ERR_reason_error_string(ERR_get_error());
-                sudo_warnx("SSL_CTX_load_verify_locations: %s", errstr);
-                goto bad;
-            }
-        } else {
-	    if (!SSL_CTX_set_default_verify_paths(ctx)) {
-                errstr = ERR_reason_error_string(ERR_get_error());
-                sudo_warnx("SSL_CTX_set_default_verify_paths: %s", errstr);
-                goto bad;
-	    }
+    if (tls_runtime->ssl_ctx != NULL) {
+	if (tls_config->check_peer) {
+	    /* Verify server cert during the handshake. */
+	    SSL_CTX_set_verify(tls_runtime->ssl_ctx,
+		SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+		verify_peer_identity);
 	}
-
-        /* only verify server cert if it is set in the configuration */
-        if (tls_config->verify) {
-            if (!verify_server_cert(ctx, tls_config))
-                goto bad;
-        } else {
-            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "skipping server cert check");
-        }
+	debug_return_bool(true);
     }
-
-    /* if peer authentication is enabled, verify client cert during TLS handshake
-     * The last parameter is a callback, where identity validation (hostname/ip)
-     * will be performed, because it is not automatically done by openssl.
-     */
-    if (tls_config->check_peer) {
-        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, verify_peer_identity);
-    }
-
-    /* if private key file was not set, assume that the cert file contains the private key */
-    char* pkey = (tls_config->pkey_path == NULL ? tls_config->cert_path : tls_config->pkey_path);
-
-    if (!SSL_CTX_use_PrivateKey_file(ctx, pkey, SSL_FILETYPE_PEM) ||
-	    !SSL_CTX_check_private_key(ctx)) {
-	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx(U_("%s: %s"), pkey, errstr);
-	sudo_warnx(U_("unable to load private key %s"), pkey);
-        goto bad;
-    }
-
-    /* initialize TLSv1.2 and TLSv1.3 ciphersuites */
-    if (!init_tls_ciphersuites(ctx, tls_config)) {
-        goto bad;
-    }
-
-    /* try to load and set diffie-hellman parameters  */
-    if (tls_config->dhparams_path != NULL)
-	dhparam_file = fopen(tls_config->dhparams_path, "r");
-    if (dhparam_file != NULL) {
-        DH *dhparams = PEM_read_DHparams(dhparam_file, NULL, NULL, NULL);
-        if (dhparams != NULL) {
-            if (!SSL_CTX_set_tmp_dh(ctx, dhparams)) {
-		errstr = ERR_reason_error_string(ERR_get_error());
-		sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
-                    errstr);
-                DH_free(dhparams);
-            } else {
-                sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                    "diffie-hellman parameters are loaded");
-            }
-        } else {
-	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
-                errstr);
-        }
-        fclose(dhparam_file);
-    } else {
-        sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-            "dhparam file not found, will use default parameters");
-    }
-    
-    /* audit server supports TLS version 1.2 or higher */
-#ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
-    if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
-        errstr = ERR_reason_error_string(ERR_get_error());
-        sudo_warnx(U_("unable to set minimum protocol version to TLS 1.2: %s"),
-            errstr);
-        goto bad;
-    }
-#else
-    SSL_CTX_set_options(ctx,
-	SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1);
-#endif
-
-    tls_runtime->ssl_ctx = ctx;
-
-    debug_return_bool(true);
-
-bad:
-    SSL_CTX_free(ctx);
 
     debug_return_bool(false);
 }

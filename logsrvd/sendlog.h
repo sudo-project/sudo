@@ -30,6 +30,7 @@
 #endif
 
 #include "logsrv_util.h"
+#include "tls_common.h"
 
 enum client_state {
     ERROR,

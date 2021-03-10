@@ -1385,81 +1385,6 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     debug_return_int(0);
 }
 
-static SSL_CTX *
-init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const char *key_file)
-{
-    const SSL_METHOD *method;
-    SSL_CTX *ctx = NULL;
-    debug_decl(init_tls_client_context, SUDO_DEBUG_UTIL);
-
-    SSL_library_init();
-    OpenSSL_add_all_algorithms();
-    SSL_load_error_strings();
-
-    if ((method = TLS_client_method()) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "creation of SSL_METHOD failed: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto bad;
-    }
-    if ((ctx = SSL_CTX_new(method)) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "creation of new SSL_CTX object failed: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto bad;
-    }
-#ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
-    if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to restrict min. protocol version: %s",
-            ERR_error_string(ERR_get_error(), NULL));
-        goto bad;
-    }
-#else
-    SSL_CTX_set_options(ctx,
-        SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1);
-#endif
-
-    if (cert_file) {
-        if (!SSL_CTX_use_certificate_chain_file(ctx, cert_file)) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to load cert to the ssl context: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-        if (!SSL_CTX_use_PrivateKey_file(ctx, key_file, X509_FILETYPE_PEM)) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to load key to the ssl context: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-    }
-
-    if (ca_bundle_file != NULL) {
-        /* sets the location of the CA bundle file for verification purposes */
-        if (SSL_CTX_load_verify_locations(ctx, ca_bundle_file, NULL) <= 0) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "calling SSL_CTX_load_verify_locations() failed: %s",
-                ERR_error_string(ERR_get_error(), NULL));
-            goto bad;
-        }
-    }
-
-    if (verify_server) {
-        /* verify server cert during the handshake */
-        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_peer_identity);
-    }
-
-    goto done;
-
-bad:
-    SSL_CTX_free(ctx);
-    ctx = NULL;
-
-done:
-    debug_return_ptr(ctx);
-}
-
 static void
 tls_connect_cb(int sock, int what, void *v)
 {
@@ -1550,11 +1475,18 @@ tls_setup(struct client_closure *closure)
     const char *errstr;
     debug_decl(tls_setup, SUDO_DEBUG_UTIL);
 
-    if ((ssl_ctx = init_tls_client_context(ca_bundle, cert, key)) == NULL) {
+    ssl_ctx = init_tls_context(ca_bundle, cert, key, NULL, NULL, NULL, false);
+    if (ssl_ctx == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
         sudo_warnx(U_("Unable to initialize ssl context: %s"), errstr);
         goto bad;
     }
+
+    if (verify_server) {
+	/* verify server cert during the handshake */
+	SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, verify_peer_identity);
+    }
+
     if ((closure->ssl = SSL_new(ssl_ctx)) == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
         sudo_warnx(U_("Unable to allocate ssl object: %s"), errstr);

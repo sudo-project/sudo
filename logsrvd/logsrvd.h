@@ -30,6 +30,7 @@
 #endif
 
 #include "logsrv_util.h"
+#include "tls_common.h"
 
 /* Default timeout value for server socket */
 #define DEFAULT_SOCKET_TIMEOUT_SEC 30
