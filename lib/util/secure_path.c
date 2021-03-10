@@ -41,7 +41,7 @@ sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, stru
     debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL);
 
     if (path != NULL && stat(path, &sb) == 0) {
-	if ((sb.st_mode & _S_IFMT) != type) {
+	if ((sb.st_mode & S_IFMT) != type) {
 	    ret = SUDO_PATH_BAD_TYPE;
 	} else if (uid != (uid_t)-1 && sb.st_uid != uid) {
 	    ret = SUDO_PATH_WRONG_OWNER;
@@ -66,7 +66,7 @@ sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, stru
 int
 sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
 {
-    return sudo_secure_path(path, _S_IFREG, uid, gid, sbp);
+    return sudo_secure_path(path, S_IFREG, uid, gid, sbp);
 }
 
 /*
@@ -75,5 +75,5 @@ sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
 int
 sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
 {
-    return sudo_secure_path(path, _S_IFDIR, uid, gid, sbp);
+    return sudo_secure_path(path, S_IFDIR, uid, gid, sbp);
 }

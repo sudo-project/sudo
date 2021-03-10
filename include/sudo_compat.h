@@ -146,48 +146,12 @@
 # endif
 #endif
 
-/*
- * POSIX versions for those without...
- */
-#ifndef _S_IFMT
-# define _S_IFMT		S_IFMT
-#endif /* _S_IFMT */
-#ifndef _S_IFREG
-# define _S_IFREG		S_IFREG
-#endif /* _S_IFREG */
-#ifndef _S_IFDIR
-# define _S_IFDIR		S_IFDIR
-#endif /* _S_IFDIR */
-#ifndef _S_IFLNK
-# define _S_IFLNK		S_IFLNK
-#endif /* _S_IFLNK */
-#ifndef _S_IFIFO
-# define _S_IFIFO		S_IFIFO
-#endif /* _S_IFIFO */
-#ifndef S_ISREG
-# define S_ISREG(m)		(((m) & _S_IFMT) == _S_IFREG)
-#endif /* S_ISREG */
-#ifndef S_ISDIR
-# define S_ISDIR(m)		(((m) & _S_IFMT) == _S_IFDIR)
-#endif /* S_ISDIR */
-#ifndef S_ISLNK
-# define S_ISLNK(m)		(((m) & _S_IFMT) == _S_IFLNK)
-#endif /* S_ISLNK */
-#ifndef S_ISFIFO
-# define S_ISFIFO(m)		(((m) & _S_IFMT) == _S_IFIFO)
-#endif /* S_ISLNK */
-#ifndef S_ISTXT
-# define S_ISTXT		0001000
-#endif /* S_ISTXT */
-
-/*
- * ACCESSPERMS (00777) and ALLPERMS (07777) are handy BSDisms
- */
+/* ACCESSPERMS and ALLPERMS are handy BSDisms. */
 #ifndef ACCESSPERMS
-# define ACCESSPERMS	(S_IRWXU|S_IRWXG|S_IRWXO)
+# define ACCESSPERMS	00777
 #endif /* ACCESSPERMS */
 #ifndef ALLPERMS
-# define ALLPERMS	(S_ISUID|S_ISGID|S_ISTXT|S_IRWXU|S_IRWXG|S_IRWXO)
+# define ALLPERMS	07777
 #endif /* ALLPERMS */
 
 /* For futimens() and utimensat() emulation. */
