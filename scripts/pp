@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2021 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20210306"
+pp_revision="20210310"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -2855,7 +2855,11 @@ pp_solaris_detect_os () {
 }
 
 pp_solaris_detect_arch () {
-	pp_solaris_arch=`/usr/bin/optisa amd64 sparcv9 i386 sparc`
+	if [ -x /usr/bin/isainfo ]; then
+	    pp_solaris_arch=`/usr/bin/isainfo -n`
+	else
+	    pp_solaris_arch=`/usr/bin/optisa amd64 sparcv9 i386 sparc`
+	fi
 	[ -z "$pp_solaris_arch" ] &&
 	    pp_error "can't determine processor architecture"
 	case "$pp_solaris_arch" in
