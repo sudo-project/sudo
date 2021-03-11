@@ -72,6 +72,9 @@ What's new in Sudo 1.9.6
  * Fixed a potential use-after-free in the PAM conversation function.
    Bug #967.
 
+ * Fixed potential redefinition of sys/stat.h macros in sudo_compat.h.
+   Bug #968.
+
 What's new in Sudo 1.9.5p2
 
  * Fixed sudo's setprogname(3) emulation on systems that don't
