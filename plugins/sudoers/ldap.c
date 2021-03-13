@@ -1258,7 +1258,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     TAILQ_INSERT_TAIL(ldap_userspecs, us, entries);
 
     /* The user has already matched, use ALL as wildcard. */
-    if ((m = new_member_all(NULL)) == NULL)
+    if ((m = sudo_ldap_new_member_all()) == NULL)
 	goto oom;
     TAILQ_INSERT_TAIL(&us->users, m, entries);
 

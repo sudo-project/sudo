@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2015, 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,19 +29,33 @@
 #include "sudo_compat.h"
 #include "sudo_util.h"
 
-#ifdef HAVE_GETPROGNAME
-
-# ifndef HAVE_SETPROGNAME
-/* Assume __progname if have getprogname(3) but not setprogname(3). */
+/*
+ * Declare/define __progname[] if necessary.
+ * Assumes __progname[] is present if we have getprogname(3).
+ */
+#ifndef HAVE_SETPROGNAME
+# if defined(HAVE_GETPROGNAME) || defined(HAVE___PROGNAME)
 extern const char *__progname;
+# else
+static const char *__progname = "";
+# endif /* HAVE_GETPROGNAME || HAVE___PROGNAME */
+#endif /* HAVE_SETPROGNAME */
 
+#ifndef HAVE_GETPROGNAME
+const char *
+sudo_getprogname(void)
+{
+    return __progname;
+}
+#endif
+
+#ifndef HAVE_SETPROGNAME
 void
 sudo_setprogname(const char *name)
 {
-    const char *slash = strrchr(name, '/');
-    __progname = slash ? slash + 1 : name;
+    __progname = sudo_basename(name);
 }
-# endif
+#endif
 
 void
 initprogname2(const char *name, const char * const * allowed)
@@ -50,8 +64,12 @@ initprogname2(const char *name, const char * const * allowed)
     int i;
 
     /* Fall back on "name" if getprogname() returns an empty string. */
-    if ((progname = getprogname()) != NULL && *progname != '\0')
+    if ((progname = getprogname()) != NULL && *progname != '\0') {
 	name = progname;
+    } else {
+	/* Make sure user-specified name is relative. */
+	name = sudo_basename(name);
+    }
 
     /* Check for libtool prefix and strip it if present. */
     if (name[0] == 'l' && name[1] == 't' && name[2] == '-' && name[3] != '\0')
@@ -74,59 +92,6 @@ initprogname2(const char *name, const char * const * allowed)
 	setprogname(name);
     return;
 }
-
-#else /* !HAVE_GETPROGNAME */
-
-static const char *progname = "";
-
-void
-initprogname2(const char *name, const char * const * allowed)
-{
-    int i;
-# ifdef HAVE___PROGNAME
-    extern const char *__progname;
-
-    if (__progname != NULL && *__progname != '\0')
-	progname = __progname;
-    else
-# endif
-    if ((progname = strrchr(name, '/')) != NULL) {
-	progname++;
-    } else {
-	progname = name;
-    }
-
-    /* Check for libtool prefix and strip it if present. */
-    if (progname[0] == 'l' && progname[1] == 't' && progname[2] == '-' &&
-	progname[3] != '\0')
-	progname += 3;
-
-    /* Check allow list if present (first element is the default). */
-    if (allowed != NULL) {
-	for (i = 0; ; i++) {
-	    if (allowed[i] == NULL) {
-		progname = allowed[0];
-		break;
-	    }
-	    if (strcmp(allowed[i], progname) == 0)
-		break;
-	}
-    }
-}
-
-const char *
-sudo_getprogname(void)
-{
-    return progname;
-}
-
-void
-sudo_setprogname(const char *name)
-{
-    const char *slash = strrchr(name, '/');
-    progname = slash ? slash + 1 : name;
-}
-#endif /* !HAVE_GETPROGNAME */
 
 void
 initprogname(const char *name)

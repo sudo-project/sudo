@@ -117,12 +117,23 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
     { NULL } \
 }
 
+/*
+ * getgroups(2) on macOS is flakey with respect to non-local groups. 
+ * Even with _DARWIN_UNLIMITED_GETGROUPS set we may not get all groups./
+ * See bug #946 for details.
+ */
+#ifdef __APPLE__
+# define GROUP_SOURCE_DEFAULT	GROUP_SOURCE_DYNAMIC
+#else
+# define GROUP_SOURCE_DEFAULT	GROUP_SOURCE_ADAPTIVE
+#endif
+
 #define SUDO_CONF_SETTINGS_INITIALIZER	{				\
     false,			/* updated */				\
     false,			/* developer_mode */			\
     true,			/* disable_coredump */			\
     true,			/* probe_interfaces */			\
-    GROUP_SOURCE_ADAPTIVE,	/* group_source */			\
+    GROUP_SOURCE_DEFAULT,	/* group_source */			\
     -1				/* max_groups */			\
 }
 
@@ -431,7 +442,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
     int max_groups;
     debug_decl(set_var_max_groups, SUDO_DEBUG_UTIL);
 
-    max_groups = sudo_strtonum(strval, 1, INT_MAX, NULL);
+    max_groups = sudo_strtonum(strval, 1, 1024, NULL);
     if (max_groups <= 0) {
 	sudo_warnx(U_("invalid max groups \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
@@ -516,33 +527,25 @@ struct sudo_conf_debug_file_list *
 sudo_conf_debug_files_v1(const char *progname)
 {
     struct sudo_conf_debug *debug_spec;
-    size_t prognamelen, progbaselen;
-    const char *progbase = progname;
+    const char *progbase;
     debug_decl(sudo_conf_debug_files, SUDO_DEBUG_UTIL);
 
     /* Determine basename if program is fully qualified (like for plugins). */
-    prognamelen = progbaselen = strlen(progname);
-    if (*progname == '/') {
-	progbase = strrchr(progname, '/');
-	progbaselen = strlen(++progbase);
-    }
+    progbase = progname[0] == '/' ? sudo_basename(progname) : progname;
+
     /* Convert sudoedit -> sudo. */
-    if (progbaselen > 4 && strcmp(progbase + 4, "edit") == 0) {
-	progbaselen -= 4;
-    }
+    if (strcmp(progbase, "sudoedit") == 0)
+	progbase = "sudo";
+
     TAILQ_FOREACH(debug_spec, &sudo_conf_data.debugging, entries) {
 	const char *prog = progbase;
-	size_t len = progbaselen;
 
 	if (debug_spec->progname[0] == '/') {
 	    /* Match fully-qualified name, if possible. */
 	    prog = progname;
-	    len = prognamelen;
 	}
-	if (strncmp(debug_spec->progname, prog, len) == 0 &&
-	    debug_spec->progname[len] == '\0') {
+	if (strcmp(debug_spec->progname, prog) == 0)
 	    debug_return_ptr(&debug_spec->debug_files);
-	}
     }
     debug_return_ptr(NULL);
 }

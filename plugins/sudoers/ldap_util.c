@@ -409,7 +409,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
     if (hosts == NULL) {
 	/* The host has already matched, use ALL as wildcard. */
-	if ((m = new_member_all(NULL)) == NULL)
+	if ((m = sudo_ldap_new_member_all()) == NULL)
 	    goto oom;
 	TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
     } else {
@@ -470,6 +470,17 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    cmndspec->runasgrouplist = prev_cmndspec->runasgrouplist;
 	    cmndspec->notbefore = prev_cmndspec->notbefore;
 	    cmndspec->notafter = prev_cmndspec->notafter;
+	    cmndspec->timeout = prev_cmndspec->timeout;
+	    cmndspec->runchroot = prev_cmndspec->runchroot;
+	    cmndspec->runcwd = prev_cmndspec->runcwd;
+#ifdef HAVE_SELINUX
+	    cmndspec->role = prev_cmndspec->role;
+	    cmndspec->type = prev_cmndspec->type;
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	    cmndspec->privs = prev_cmndspec->privs;
+	    cmndspec->limitprivs = prev_cmndspec->limitprivs;
+#endif /* HAVE_PRIV_SET */
 	    cmndspec->tags = prev_cmndspec->tags;
 	    if (cmndspec->tags.setenv == IMPLIED)
 		cmndspec->tags.setenv = UNSPEC;
@@ -514,26 +525,60 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 		    op = sudo_ldap_parse_option(opt, &var, &val);
 		    if (strcmp(var, "command_timeout") == 0 && val != NULL) {
+			if (cmndspec->timeout != UNSPEC) {
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			cmndspec->timeout = parse_timeout(val);
 		    } else if (strcmp(var, "runchroot") == 0 && val != NULL) {
+			if (cmndspec->runchroot != NULL) {
+			    free(cmndspec->runchroot);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->runchroot = strdup(val)) == NULL)
 			    break;
 		    } else if (strcmp(var, "runcwd") == 0 && val != NULL) {
+			if (cmndspec->runcwd != NULL) {
+			    free(cmndspec->runcwd);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->runcwd = strdup(val)) == NULL)
 			    break;
 #ifdef HAVE_SELINUX
 		    } else if (strcmp(var, "role") == 0 && val != NULL) {
+			if (cmndspec->role != NULL) {
+			    free(cmndspec->role);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->role = strdup(val)) == NULL)
 			    break;
 		    } else if (strcmp(var, "type") == 0 && val != NULL) {
+			if (cmndspec->type != NULL) {
+			    free(cmndspec->type);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->type = strdup(val)) == NULL)
 			    break;
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 		    } else if (strcmp(var, "privs") == 0 && val != NULL) {
+			if (cmndspec->privs != NULL) {
+			    free(cmndspec->privs);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->privs = strdup(val)) == NULL)
 			    break;
 		    } else if (strcmp(var, "limitprivs") == 0 && val != NULL) {
+			if (cmndspec->limitprivs != NULL) {
+			    free(cmndspec->limitprivs);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
 			if ((cmndspec->limitprivs = strdup(val)) == NULL)
 			    break;
 #endif /* HAVE_PRIV_SET */
@@ -607,4 +652,16 @@ oom:
 	free_privilege(priv);
     }
     debug_return_ptr(NULL);
+}
+
+/* So ldap.c and sssd.c don't need to include gram.h */
+struct member *
+sudo_ldap_new_member_all(void)
+{
+    struct member *m;
+    debug_decl(sudo_ldap_new_member_all, SUDOERS_DEBUG_LDAP);
+
+    if ((m = calloc(1, sizeof(*m))) != NULL)
+	m->type = ALL;
+    debug_return_ptr(m);
 }

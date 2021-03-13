@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -110,7 +110,8 @@ bad:
  * Returns true on success and false on failure.
  */
 struct eventlog *
-evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen)
+evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
+    struct connection_closure *closure)
 {
     struct eventlog *evlog;
     size_t idx;
@@ -123,6 +124,9 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen)
 	goto bad;
     }
     memset(evlog, 0, sizeof(*evlog));
+
+    /* Client/peer IP address. */
+    evlog->peeraddr = closure->ipaddr;
 
     /* Submit time. */
     if (submit_time != NULL) {
@@ -725,6 +729,29 @@ iolog_copy(struct iolog_file *src, struct iolog_file *dst, off_t remainder,
     }
 
     debug_return_bool(true);
+}
+
+/*
+ * Like rename(2) but changes UID as needed.
+ */
+static bool
+iolog_rename(const char *from, const char *to)
+{
+    bool ok, uid_changed = false;
+    debug_decl(iolog_rename, SUDO_DEBUG_UTIL);
+
+    ok = rename(from, to) == 0;
+    if (!ok && errno == EACCES) {
+	uid_changed = iolog_swapids(false);
+	if (uid_changed)
+	    ok = rename(from, to) == 0;
+    }
+
+    if (uid_changed) {
+	if (!iolog_swapids(true))
+	    ok = false;
+    }
+    debug_return_bool(ok);
 }
 
 /* Compressed logs don't support random access, need to rewrite them. */

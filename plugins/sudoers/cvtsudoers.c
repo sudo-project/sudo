@@ -609,16 +609,21 @@ parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file,
     struct cvtsudoers_config *conf)
 {
     FILE *fp = stdin;
+    bool ret = false;
     debug_decl(parse_ldif, SUDOERS_DEBUG_UTIL);
 
     /* Open LDIF file and parse it. */
     if (strcmp(input_file, "-") != 0) {
 	if ((fp = fopen(input_file, "r")) == NULL)
-	    sudo_fatal(U_("unable to open %s"), input_file);
+	    sudo_warn(U_("unable to open %s"), input_file);
     }
-
-    debug_return_bool(sudoers_parse_ldif(parse_tree, fp, conf->sudoers_base,
-	conf->store_options));
+    if (fp != NULL) {
+	ret = sudoers_parse_ldif(parse_tree, fp, conf->sudoers_base,
+	    conf->store_options);
+	if (fp != stdin)
+	    fclose(fp);
+    }
+    debug_return_bool(ret);
 }
 
 static bool

@@ -56,7 +56,7 @@ shlib_mode = @SHLIB_MODE@
 # Version of python detected by configure (major.minor)
 python_version = @PYTHON_VERSION@
 
-SUBDIRS = lib/util @ZLIB_SRC@ lib/eventlog lib/iolog @LOGSRV_SRC@ \
+SUBDIRS = lib/util @ZLIB_SRC@ lib/eventlog lib/fuzzstub lib/iolog @LOGSRV_SRC@ \
 	  @LOGSRVD_SRC@ plugins/audit_json plugins/group_file \
 	  plugins/sample_approval plugins/sudoers plugins/system_group \
 	  @PYTHON_PLUGIN_SRC@ src include doc examples
@@ -110,7 +110,7 @@ all: config.status
 	    exit $$?; \
 	done
 
-check pre-install: config.status
+fuzz check pre-install: config.status
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
@@ -174,7 +174,7 @@ pvs-studio: config.status
 	fi; \
 	plog-converter $(PVS_LOG_OPTS) $$files
 
-install-dirs install-binaries install-includes install-plugin: config.status pre-install
+install-dirs install-binaries install-fuzzer install-includes install-plugin: config.status pre-install
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) "INSTALL_OWNER=$(INSTALL_OWNER)" $@) && continue; \
 	    exit $$?; \
@@ -210,7 +210,8 @@ siglist.c signame.c:
 depend: siglist.c signame.c
 	$(scriptdir)/mkdep.pl \
 	    --srcdir=$(abs_top_srcdir) --builddir=$(abs_top_builddir) \
-	    lib/util/Makefile.in lib/zlib/Makefile.in lib/eventlog/Makefile.in \
+	    lib/util/Makefile.in lib/zlib/Makefile.in \
+	    lib/fuzzstub/Makefile.in lib/eventlog/Makefile.in \
 	    lib/iolog/Makefile.in lib/logsrv/Makefile.in logsrvd/Makefile.in \
 	    plugins/group_file/Makefile.in plugins/sample/Makefile.in \
 	    plugins/sudoers/Makefile.in plugins/system_group/Makefile.in \
@@ -219,6 +220,7 @@ depend: siglist.c signame.c
 	$(top_builddir)/config.status --file $(top_builddir)/lib/util/Makefile \
 	    --file $(top_builddir)/lib/zlib/Makefile \
 	    --file $(top_builddir)/lib/eventlog/Makefile \
+	    --file $(top_builddir)/lib/fuzzstub/Makefile \
 	    --file $(top_builddir)/lib/iolog/Makefile \
 	    --file $(top_builddir)/lib/logsrv/Makefile \
 	    --file $(top_builddir)/logsrvd/Makefile \
@@ -238,7 +240,7 @@ ChangeLog:
 	    fi; \
 	elif test -d $(srcdir)/.git; then \
 	    $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $(srcdir)/$@; \
-	else \
+	elif test ! -f $(srcdir)/$@; then \
 	    echo "ChangeLog data not available" > $(srcdir)/$@; \
 	fi
 
@@ -435,4 +437,5 @@ sandwich:
 	    echo "What?  Make it yourself!"; \
 	fi
 
-.PHONY: ChangeLog me a sandwhich check-format reformat
+.PHONY: clean mostlyclean distclean cleandir clobber realclean ChangeLog \
+        me a sandwhich check-format reformat

@@ -209,10 +209,7 @@ main(int argc, char *argv[])
     } else {
 	user_name = *argv++;
 	user_cmnd = *argv++;
-	if ((p = strrchr(user_cmnd, '/')) != NULL)
-	    user_base = p + 1;
-	else
-	    user_base = user_cmnd;
+	user_base = sudo_basename(user_cmnd);
 	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
@@ -447,12 +444,8 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
     const char *base;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
 
-    base = strrchr(file, '/');
-    if (base != NULL)
-	base++;
-    else
-	base = file;
-
+    /* Report errors using the basename for consistent test output. */
+    base = sudo_basename(file);
     switch (sudo_secure_file(file, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
 	    fp = fopen(file, "r");
@@ -509,7 +502,8 @@ init_eventlog_config(void)
 int
 set_cmnd_path(const char *runchroot)
 {
-    return FOUND;
+    /* Cannot return FOUND without also setting user_cmnd to a new value. */
+    return NOT_FOUND;
 }
 
 static bool

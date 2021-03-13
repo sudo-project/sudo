@@ -28,6 +28,7 @@
 
 #include <config.h>
 
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -561,7 +562,8 @@ done:
 	    item->d.gr ? item->d.gr->gr_name : "unknown",
 	    item->registry, node ? "cache hit" : "cached");
     }
-    item->refcnt++;
+    if (item->d.gr != NULL)
+	item->refcnt++;
     debug_return_ptr(item->d.gr);
 }
 
@@ -631,18 +633,19 @@ done:
 }
 
 /*
- * Take a gid in string form "#123" and return a faked up group struct.
+ * Take a group name, ID, members and return a faked up group struct.
  */
 struct group *
-sudo_fakegrnam(const char *group)
+sudo_mkgrent(const char *group, gid_t gid, ...)
 {
     struct cache_item_gr *gritem;
     struct cache_item *item;
-    const char *errstr;
     struct group *gr;
-    size_t len, name_len;
+    size_t nmem, nsize, total;
+    char *cp, *mem;
+    va_list ap;
     int i;
-    debug_decl(sudo_fakegrnam, SUDOERS_DEBUG_NSS);
+    debug_decl(sudo_mkgrent, SUDOERS_DEBUG_NSS);
 
     if (grcache_bygid == NULL)
 	grcache_bygid = rbcreate(cmp_grgid);
@@ -653,28 +656,47 @@ sudo_fakegrnam(const char *group)
 	debug_return_ptr(NULL);
     }
 
-    name_len = strlen(group);
-    len = sizeof(*gritem) + name_len + 1;
+    /* Allocate in one big chunk for easy freeing. */
+    nsize = strlen(group) + 1;
+    total = sizeof(*gritem) + nsize;
+    va_start(ap, gid);
+    for (nmem = 1; (mem = va_arg(ap, char *)) != NULL; nmem++) {
+	total += strlen(mem) + 1;
+    }
+    va_end(ap);
+    total += sizeof(char *) * nmem;
 
     for (i = 0; i < 2; i++) {
 	struct rbtree *grcache;
 	struct rbnode *node;
 
-	gritem = calloc(1, len);
+	/*
+	 * Fill in group contents and make strings relative to space
+	 * at the end of the buffer.  Note that gr_mem must come
+	 * immediately after struct group to guarantee proper alignment.
+	 */
+	gritem = calloc(1, total);
 	if (gritem == NULL) {
 	    sudo_warn(U_("unable to cache group %s"), group);
 	    debug_return_ptr(NULL);
 	}
 	gr = &gritem->gr;
-	gr->gr_gid = (gid_t) sudo_strtoid(group + 1, &errstr);
-	gr->gr_name = (char *)(gritem + 1);
-	memcpy(gr->gr_name, group, name_len + 1);
-	if (errstr != NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
-		"gid %s %s", group, errstr);
-	    free(gritem);
-	    debug_return_ptr(NULL);
+	gr->gr_gid = gid;
+	gr->gr_passwd = "*";
+	cp = (char *)(gritem + 1);
+	gr->gr_mem = (char **)cp;
+	cp += sizeof(char *) * nmem;
+	va_start(ap, gid);
+	for (nmem = 0; (mem = va_arg(ap, char *)) != NULL; nmem++) {
+	    size_t len = strlen(mem) + 1;
+	    memcpy(cp, mem, len);
+	    gr->gr_mem[nmem] = cp;
+	    cp += len;
 	}
+	va_end(ap);
+	gr->gr_mem[nmem] = NULL;
+	gr->gr_name = cp;
+	memcpy(gr->gr_name, group, nsize);
 
 	item = &gritem->cache;
 	item->refcnt = 1;
@@ -712,6 +734,26 @@ sudo_fakegrnam(const char *group)
     if (item->d.gr != NULL)
 	item->refcnt++;
     debug_return_ptr(item->d.gr);
+}
+
+/*
+ * Take a gid in string form "#123" and return a faked up group struct.
+ */
+struct group *
+sudo_fakegrnam(const char *group)
+{
+    const char *errstr;
+    gid_t gid;
+    debug_decl(sudo_fakegrnam, SUDOERS_DEBUG_NSS);
+
+    gid = (gid_t) sudo_strtoid(group + 1, &errstr);
+    if (errstr != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
+	    "gid %s %s", group, errstr);
+	debug_return_ptr(NULL);
+    }
+
+    debug_return_ptr(sudo_mkgrent(group, gid, NULL));
 }
 
 void

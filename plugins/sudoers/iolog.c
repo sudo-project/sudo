@@ -284,6 +284,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "cwd=", sizeof("cwd=") - 1) == 0) {
+		free(evlog->cwd);
 		evlog->cwd = strdup(*cur + sizeof("cwd=") - 1);
 		if (evlog->cwd == NULL)
 		    goto oom;
@@ -292,6 +293,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	    break;
 	case 'h':
 	    if (strncmp(*cur, "host=", sizeof("host=") - 1) == 0) {
+		free(evlog->submithost);
 		evlog->submithost = strdup(*cur + sizeof("host=") - 1);
 		if (evlog->submithost == NULL)
 		    goto oom;
@@ -309,6 +311,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	    break;
 	case 't':
 	    if (strncmp(*cur, "tty=", sizeof("tty=") - 1) == 0) {
+		free(evlog->ttyname);
 		evlog->ttyname = strdup(*cur + sizeof("tty=") - 1);
 		if (evlog->ttyname == NULL)
 		    goto oom;
@@ -317,6 +320,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	    break;
 	case 'u':
 	    if (strncmp(*cur, "user=", sizeof("user=") - 1) == 0) {
+		free(evlog->submituser);
 		evlog->submituser = strdup(*cur + sizeof("user=") - 1);
 		if (evlog->submituser == NULL)
 		    goto oom;
@@ -330,12 +334,14 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	switch (**cur) {
 	case 'c':
 	    if (strncmp(*cur, "command=", sizeof("command=") - 1) == 0) {
+		free(evlog->command);
 		evlog->command = strdup(*cur + sizeof("command=") - 1);
 		if (evlog->command == NULL)
 		    goto oom;
 		continue;
 	    }
 	    if (strncmp(*cur, "chroot=", sizeof("chroot=") - 1) == 0) {
+		free(evlog->runchroot);
 		evlog->runchroot = strdup(*cur + sizeof("chroot=") - 1);
 		if (evlog->runchroot == NULL)
 		    goto oom;
@@ -349,12 +355,11 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
+		free(evlog->iolog_path);
 		evlog->iolog_path = strdup(*cur + sizeof("iolog_path=") - 1);
 		if (evlog->iolog_path == NULL)
 		    goto oom;
-		evlog->iolog_file = strrchr(evlog->iolog_path, '/');
-		if (evlog->iolog_file != NULL)
-		    evlog->iolog_file++;
+		evlog->iolog_file = sudo_basename(evlog->iolog_path);
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
@@ -461,18 +466,21 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
             }
 #if defined(HAVE_OPENSSL)
             if (strncmp(*cur, "log_server_cabundle=", sizeof("log_server_cabundle=") - 1) == 0) {
+		free(details->ca_bundle);
                 details->ca_bundle = strdup(*cur + sizeof("log_server_cabundle=") - 1);
 		if (details->ca_bundle == NULL)
 		    goto oom;
                 continue;
             }
             if (strncmp(*cur, "log_server_peer_cert=", sizeof("log_server_peer_cert=") - 1) == 0) {
+		free(details->cert_file);
                 details->cert_file = strdup(*cur + sizeof("log_server_peer_cert=") - 1);
 		if (details->cert_file == NULL)
 		    goto oom;
                 continue;
             }
             if (strncmp(*cur, "log_server_peer_key=", sizeof("log_server_peer_key=") - 1) == 0) {
+		free(details->key_file);
                 details->key_file = strdup(*cur + sizeof("log_server_peer_key=") - 1);
 		if (details->key_file == NULL)
 		    goto oom;
@@ -516,6 +524,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "runcwd=", sizeof("runcwd=") - 1) == 0) {
+		free(evlog->runcwd);
 		evlog->runcwd = strdup(*cur + sizeof("runcwd=") - 1);
 		if (evlog->runcwd == NULL)
 		    goto oom;
@@ -561,6 +570,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     pw = sudo_getpwuid(evlog->runuid);
     if (pw != NULL) {
 	gid_t pw_gid = pw->pw_gid;
+	free(evlog->runuser);
 	evlog->runuser = strdup(pw->pw_name);
 	sudo_pw_delref(pw);
 	if (evlog->runuser == NULL)
@@ -568,6 +578,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	if (evlog->rungid != pw_gid) {
 	    gr = sudo_getgrgid(evlog->rungid);
 	    if (gr != NULL) {
+		free(evlog->rungroup);
 		evlog->rungroup = strdup(gr->gr_name);
 		sudo_gr_delref(gr);
 		if (evlog->rungroup == NULL)
@@ -575,6 +586,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	    } else {
 		idbuf[0] = '#';
 		strlcpy(&idbuf[1], runas_gid_str, sizeof(idbuf) - 1);
+		free(evlog->rungroup);
 		evlog->rungroup = strdup(idbuf);
 		if (evlog->rungroup == NULL)
 		    goto oom;
@@ -583,6 +595,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     } else {
 	idbuf[0] = '#';
 	strlcpy(&idbuf[1], runas_uid_str, sizeof(idbuf) - 1);
+	free(evlog->runuser);
 	evlog->runuser = strdup(idbuf);
 	if (evlog->runuser == NULL)
 	    goto oom;

@@ -8,7 +8,7 @@
 #define CALLBACK_CFUNC(func_name) APPROVAL_SYMBOL_NAME(_python_plugin_approval_ ## func_name)
 
 extern struct approval_plugin APPROVAL_SYMBOL_NAME(python_approval);
-static struct ApprovalPluginContext PLUGIN_CTX = { {}, &APPROVAL_SYMBOL_NAME(python_approval) };
+static struct ApprovalPluginContext PLUGIN_CTX = { { NULL }, &APPROVAL_SYMBOL_NAME(python_approval) };
 
 
 int

@@ -201,9 +201,12 @@ apply_cmndspec(struct cmndspec *cs)
 		}
 	    } else {
 		user_role = def_role;
+		def_role = NULL;
 	    }
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"user_role -> %s", user_role);
+	    if (user_role != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "user_role -> %s", user_role);
+	    }
 	}
 	if (user_type == NULL) {
 	    if (cs->type != NULL) {
@@ -215,9 +218,12 @@ apply_cmndspec(struct cmndspec *cs)
 		}
 	    } else {
 		user_type = def_type;
+		def_type = NULL;
 	    }
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"user_type -> %s", user_type);
+	    if (user_type != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "user_type -> %s", user_type);
+	    }
 	}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
@@ -232,9 +238,12 @@ apply_cmndspec(struct cmndspec *cs)
 		}
 	    } else {
 		runas_privs = def_privs;
+		def_privs = NULL;
 	    }
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"runas_privs -> %s", runas_privs);
+	    if (runas_privs != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "runas_privs -> %s", runas_privs);
+	    }
 	}
 	if (runas_limitprivs == NULL) {
 	    if (cs->limitprivs != NULL) {
@@ -246,9 +255,12 @@ apply_cmndspec(struct cmndspec *cs)
 		}
 	    } else {
 		runas_limitprivs = def_limitprivs;
+		def_limitprivs = NULL;
 	    }
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"runas_limitprivs -> %s", runas_limitprivs);
+	    if (runas_limitprivs != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "runas_limitprivs -> %s", runas_limitprivs);
+	    }
 	}
 #endif /* HAVE_PRIV_SET */
 	if (cs->timeout > 0) {

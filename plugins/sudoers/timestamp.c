@@ -1082,3 +1082,51 @@ set_lectured(void)
 done:
     debug_return_int(ret);
 }
+
+#ifdef _PATH_SUDO_ADMIN_FLAG
+int
+create_admin_success_flag(void)
+{
+    char *flagfile;
+    int ret = -1;
+    debug_decl(create_admin_success_flag, SUDOERS_DEBUG_AUTH);
+
+    /* Is the admin flag file even enabled? */
+    if (!def_admin_flag)
+	debug_return_int(true);
+
+    /* Check whether the user is in the sudo or admin group. */
+    if (!user_in_group(sudo_user.pw, "sudo") &&
+	!user_in_group(sudo_user.pw, "admin"))
+	debug_return_int(true);
+
+    /* Build path to flag file. */
+    if ((flagfile = strdup(def_admin_flag)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
+    if (!expand_tilde(&flagfile, user_name)) {
+	free(flagfile);
+	debug_return_int(false);
+    }
+
+    /* Create admin flag file if it doesn't already exist. */
+    if (set_perms(PERM_USER)) {
+	int fd = open(flagfile, O_CREAT|O_WRONLY|O_NONBLOCK|O_EXCL, 0644);
+	ret = fd != -1 || errno == EEXIST;
+	if (fd != -1)
+	    close(fd);
+	if (!restore_perms())
+	    ret = -1;
+    }
+    free(flagfile);
+    debug_return_int(ret);
+}
+#else /* !_PATH_SUDO_ADMIN_FLAG */
+int
+create_admin_success_flag(void)
+{
+    /* STUB */
+    return true;
+}
+#endif /* _PATH_SUDO_ADMIN_FLAG */

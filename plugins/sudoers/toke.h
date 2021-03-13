@@ -27,12 +27,13 @@ struct sudolinebuf {
     size_t toke_start;		/* starting column of current token */
     size_t toke_end;		/* ending column of current token */
 };
+extern char *sudoers_errstr;
 extern struct sudolinebuf sudolinebuf;
 
 bool append(const char *, size_t);
 bool fill_args(const char *, size_t, int);
 bool fill_cmnd(const char *, size_t);
-bool fill_txt(const char *, size_t, size_t);
+bool fill(const char *, size_t);
 bool ipv6_valid(const char *s);
 int sudoers_trace_print(const char *);
 void sudoerserrorf(const char *, ...) __printf0like(1, 2);
@@ -42,8 +43,6 @@ bool push_include(const char *, bool);
 #ifndef FLEX_SCANNER
 extern int (*trace_print)(const char *msg);
 #endif
-
-#define fill(a, b)	fill_txt(a, b, 0)
 
 #define LEXTRACE(msg)   do {						\
     if (trace_print != NULL)						\

@@ -55,7 +55,7 @@ bool
 get_pty(int *leader, int *follower, char *name, size_t namesz, uid_t ttyuid)
 {
     struct group *gr;
-    gid_t ttygid = -1;
+    gid_t ttygid = (gid_t)-1;
     bool ret = false;
     debug_decl(get_pty, SUDO_DEBUG_PTY);
 

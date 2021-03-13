@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -66,7 +66,7 @@ enum eventlog_format {
 #define EVENTLOG_INDENT	"    "
 
 /*
- * Event log config, used with eventlog_setconf()
+ * Event log config, used with eventlog_getconf()
  */
 struct eventlog_config {
     int type;
@@ -101,6 +101,7 @@ struct eventlog {
     char *runcwd;
     char *rungroup;
     char *runuser;
+    char *peeraddr;
     char *submithost;
     char *submituser;
     char *submitgroup;
@@ -144,5 +145,6 @@ void eventlog_set_mailto(const char *to_addr);
 void eventlog_set_mailsub(const char *subject);
 void eventlog_set_open_log(FILE *(*fn)(int type, const char *));
 void eventlog_set_close_log(void (*fn)(int type, FILE *));
+const struct eventlog_config *eventlog_getconf(void);
 
 #endif /* SUDO_EVENTLOG_H */

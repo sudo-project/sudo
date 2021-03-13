@@ -127,22 +127,29 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
     a = calloc(1, sizeof(*a));
     if (a == NULL)
 	debug_return_bool(false);
+
+    /* Only set elements used by alias_compare() in case there is a dupe. */
     a->name = name;
     a->type = type;
+    switch (rbinsert(parse_tree->aliases, a, NULL)) {
+    case 1:
+	free(a);
+	errno = EEXIST;
+	debug_return_bool(false);
+    case -1:
+	free(a);
+	debug_return_bool(false);
+    }
+
+    /*
+     * It is now safe to fill in the rest of the alias.  We do this last
+     * since it modifies "file" (adds a ref) and "members" (tailq conversion).
+     */
     /* a->used = false; */
     a->file = rcstr_addref(file);
     a->line = line;
     a->column = column;
     HLTQ_TO_TAILQ(&a->members, members, entries);
-    switch (rbinsert(parse_tree->aliases, a, NULL)) {
-    case 1:
-	alias_free(a);
-	errno = EEXIST;
-	debug_return_bool(false);
-    case -1:
-	alias_free(a);
-	debug_return_bool(false);
-    }
     debug_return_bool(true);
 }
 

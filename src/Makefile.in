@@ -239,6 +239,8 @@ install-noexec: install-dirs sudo_noexec.la
 
 install-plugin:
 
+install-fuzzer:
+
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
 	-rm -f	$(DESTDIR)$(bindir)/sudo \
@@ -263,8 +265,16 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
+fuzz:
+
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
+	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+		LC_ALL=C.UTF-8; export LC_ALL; \
+	    else \
+		LC_ALL=C; export LC_ALL; \
+	    fi; \
+	    unset LANG || LANG=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    ./check_ttyname; \
@@ -289,6 +299,8 @@ realclean: distclean
 	rm -f TAGS tags
 
 cleandir: realclean
+
+.PHONY: clean mostlyclean distclean cleandir clobber realclean
 
 # *Not* auto-generated to avoid building with ASAN
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/sudo_compat.h \

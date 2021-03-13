@@ -8,7 +8,7 @@
 #define CALLBACK_CFUNC(func_name) AUDIT_SYMBOL_NAME(_python_plugin_audit_ ## func_name)
 
 extern struct audit_plugin AUDIT_SYMBOL_NAME(python_audit);
-static struct AuditPluginContext PLUGIN_CTX = { {}, &AUDIT_SYMBOL_NAME(python_audit) };
+static struct AuditPluginContext PLUGIN_CTX = { { NULL }, &AUDIT_SYMBOL_NAME(python_audit) };
 
 
 static int

@@ -188,17 +188,10 @@ FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags)
     void *fn = NULL;
     int idx = 0;
 
-    name = strrchr(myname, '/');
-    if (name != NULL)
-	myname = name + 1;
-
     /* Search for wordexp() but skip this shared object. */
+    myname = sudo_basename(myname);
     while (shl_get(idx++, &desc) == 0) {
-	name = strrchr(desc->filename, '/');
-	if (name == NULL)
-		name = desc->filename;
-	else
-		name++;
+	name = sudo_basename(desc->filename);
 	if (strcmp(name, myname) == 0)
 	    continue;
 	if (shl_findsym(&desc->handle, "wordexp", TYPE_PROCEDURE, &fn) == 0)

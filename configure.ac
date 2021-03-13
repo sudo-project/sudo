@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.9.5p2], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.6], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -122,6 +122,8 @@ AC_SUBST([LOGSRVD_SRC])
 AC_SUBST([LOGSRVD_CONF])
 AC_SUBST([LIBLOGSRV])
 AC_SUBST([PPFILES])
+AC_SUBST([FUZZ_ENGINE])
+AC_SUBST([FUZZ_LD])
 
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -261,6 +263,8 @@ INIT_DIR=
 RC_LINK=
 COMPAT_EXP=
 SIGNAME=
+FUZZ_ENGINE=
+FUZZ_LD='$(CC)'
 dnl
 dnl Other variables
 dnl
@@ -1515,6 +1519,10 @@ AC_ARG_ENABLE(gcrypt,
     fi
 ])
 
+AC_ARG_ENABLE(ssp,
+[AS_HELP_STRING([--disable-ssp], [Do not compile using the -fstack-protector option.])],
+[], [enable_ssp=yes])
+
 AC_ARG_ENABLE(hardening,
 [AS_HELP_STRING([--disable-hardening], [Do not use compiler/linker exploit mitigation options])],
 [], [enable_hardening=yes])
@@ -1522,19 +1530,60 @@ AC_ARG_ENABLE(hardening,
 AC_ARG_ENABLE(pie,
 [AS_HELP_STRING([--enable-pie], [Build sudo as a position independent executable.])])
 
-AC_ARG_ENABLE(asan,
-[AS_HELP_STRING([--enable-asan], [Build sudo with address sanitizer support.])])
+AC_ARG_ENABLE(sanitizer,
+[AS_HELP_STRING([--enable-sanitizer], [Build sudo with sanitizer support.])], [
+if test X"$enable_sanitizer" = X"yes"; then
+    enable_sanitizer="-fsanitize=address,undefined"
+fi
+], [enable_sanitizer=no])
+
+AC_ARG_ENABLE(fuzzer,
+[AS_HELP_STRING([--enable-fuzzer], [Build sudo with LLVM libFuzzer support.])],
+[], [enable_fuzzer=no])
+
+AC_ARG_ENABLE(fuzzer-engine,
+[AS_HELP_STRING([--enable-fuzzer-engine], [Link fuzz targets with the specified fuzzer engine instead of the default.])],
+[ case "$enableval" in
+    yes)    AC_MSG_ERROR(["must give --enable-fuzzer-engine an argument."])
+	    ;;
+    no)	    ;;
+    *)	    FUZZ_ENGINE="$enableval"
+	    ;;
+  esac
+])
+
+AC_ARG_ENABLE(fuzzer-linker,
+[AS_HELP_STRING([--enable-fuzzer-linker], [Use the specified linker when building fuzz targets instead of the default C compiler.])],
+[ case "$enableval" in
+    yes)    AC_MSG_ERROR(["must give --enable-fuzzer-linker an argument."])
+	    ;;
+    no)	    ;;
+    *)	    FUZZ_LD="$enableval"
+	    ;;
+  esac
+])
+
+AC_ARG_ENABLE(leaks,
+[AS_HELP_STRING([--disable-leaks], [Prevent some harmless memory leaks.])],
+[ case "$enableval" in
+    yes)    ;;
+    no)	    AC_DEFINE(NO_LEAKS)
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --disable-leaks: $enableval])
+	    ;;
+  esac
+])
 
 AC_ARG_ENABLE(poll,
 [AS_HELP_STRING([--disable-poll], [Use select() instead of poll().])])
 
 AC_ARG_ENABLE(admin-flag,
-[AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
+[AS_HELP_STRING([--enable-admin-flag[[=PATH]]], [Whether to create a Ubuntu-style admin flag file])],
 [ case "$enableval" in
-    yes)    AC_DEFINE(USE_ADMIN_FLAG)
+    yes)    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ADMIN_FLAG, "~/.sudo_as_admin_successful")
 	    ;;
     no)	    ;;
-    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-admin-flag: $enableval])
+    *)	    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ADMIN_FLAG, "$enableval")
 	    ;;
   esac
 ])
@@ -1846,6 +1895,11 @@ case "$host" in
 		# LD_PRELOAD is space-delimited
 		RTLD_PRELOAD_DELIM=" "
 
+		# illumos has a broken fmemopen(3)
+		if test X"`uname -o 2>/dev/null`" = X"illumos"; then
+		    : ${ac_cv_func_fmemopen='no'}
+		fi
+
 		# Solaris-specific initialization
 		OS_INIT=os_init_solaris
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
@@ -1897,14 +1951,20 @@ case "$host" in
 		# strnlen/strndup may be broken on AIX < 6 depending
 		# on the libc version, use our own.
 		if test $OSMAJOR -lt 6; then
-		    ac_cv_func_strnlen=no
+		    : ${ac_cv_func_strnlen='no'}
+		fi
+
+		# fmemopen(3) may be broken on AIX < 7.1 depending
+		# on the libc version.
+		if test $OSMAJOR -lt 7; then
+		    : ${ac_cv_func_fmemopen='no'}
 		fi
 
 		# getdelim() may or may not be present on AIX <= 6.1.
 		# bos610 is missing getdelim but bos61J has it.
 		if test "$enable_package_build" = "yes"; then
 		    if test $OSMAJOR -le 6; then
-			ac_cv_func_getdelim=no
+			: ${ac_cv_func_getdelim='no'}
 		    fi
 		fi
 
@@ -1912,7 +1972,7 @@ case "$host" in
 		# bos710 is missing memset_s but bos71L has it.
 		if test "$enable_package_build" = "yes"; then
 		    if test $OSMAJOR -le 7; then
-			ac_cv_func_memset_s=no
+			: ${ac_cv_func_memset_s='no'}
 		    fi
 		fi
 
@@ -2292,9 +2352,6 @@ case "$host" in
 		# Undocumented API that dynamically allocates the groups.
 		AC_CHECK_FUNCS([getgrouplist_2], [AC_CHECK_DECLS([getgrouplist_2])])
 
-		# macOS >= 10.6 getgroups(2) can support more than > 16 groups
-		AC_DEFINE([_DARWIN_UNLIMITED_GETGROUPS])
-
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])])
@@ -2431,7 +2488,6 @@ fi
 dnl
 dnl C compiler checks (to be done after os checks)
 dnl
-AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
@@ -2525,7 +2581,7 @@ SUDO_MAILDIR
 if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS([login_cap.h], [LOGINCAP_USAGE='[[-c class]] '; LCMAN=1
 	case "$OS" in
-	    freebsd|netbsd)
+	    freebsd*|netbsd*)
 		SUDO_LIBS="${SUDO_LIBS} -lutil"
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
 		;;
@@ -2641,7 +2697,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo faccessat wordexp getauxval fseeko])
+AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval fseeko])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -3470,7 +3526,7 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl Check for incomplete limits.h and missing SIZE_MAX.
 dnl
-AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX], [], [], [
+AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, SSIZE_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
 ])
@@ -3796,7 +3852,9 @@ if test ${with_kerb5-'no'} != "no"; then
     if test -n "$KRB5CONFIG"; then
 	AC_DEFINE(HAVE_KERB5)
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
-	AX_APPEND_FLAG([`krb5-config --cflags`], [CPPFLAGS])
+	for f in `krb5-config --cflags`; do
+	    AX_APPEND_FLAG([$f], [CPPFLAGS])
+	done
 	SUDOERS_LIBS="$SUDOERS_LIBS `krb5-config --libs`"
 	dnl
 	dnl Try to determine whether we have Heimdal or MIT Kerberos
@@ -4042,12 +4100,36 @@ if test ${with_passwd-'no'} != "no"; then
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
 	found=no
-	AC_CHECK_FUNCS([$shadow_funcs], [found=yes])
-	if test "$found" = "yes"; then
-	    case "$shadow_funcs" in
-		*getprpwnam*) SECUREWARE=1;;
-	    esac
-	else
+	for func in $shadow_funcs; do
+	    AC_CHECK_FUNC([$func], [
+		dnl Enumerate shadow functions instead of using:
+		dnl     AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$func]))
+		dnl for autoheader's sake and to catch template omissions.
+		case "$func" in
+		    dispcrypt)
+			AC_DEFINE(HAVE_DISPCRYPT)
+			;;
+		    getprpwnam)
+			AC_DEFINE(HAVE_GETPRPWNAM)
+			SECUREWARE=1
+			;;
+		    getpwnam_shadow)
+			AC_DEFINE(HAVE_GETPWNAM_SHADOW)
+			;;
+		    getspnam)
+			AC_DEFINE(HAVE_GETSPNAM)
+			;;
+		    iscomsec)
+			AC_DEFINE(HAVE_ISCOMSEC)
+			;;
+		    *)
+			AC_MSG_ERROR([unhandled shadow password function $func])
+			;;
+		esac
+		found=yes
+	    ])
+	done
+	if test "$found" = "no"; then
 	    shadow_libs=
 	fi
 	CHECKSHADOW=false
@@ -4238,7 +4320,8 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared -static], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
 	    LT_STATIC=""
 	else
 	    LT_STATIC="--tag=disable-static"
@@ -4250,7 +4333,8 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared -static], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
 	    LT_STATIC=""
 	else
 	    LT_STATIC="--tag=disable-static"
@@ -4365,7 +4449,7 @@ dnl Otherwise, LD_LIBRARY_PATH does not work when running the tests.
 dnl We don't do this on NetBSD where RPATH already supports LD_LIBRARY_PATH.
 dnl
 case "$OS" in
-    netbsd)
+    netbsd*)
 	;;
     *)
 	AX_CHECK_LINK_FLAG([-Wl,--enable-new-dtags], [AX_APPEND_FLAG([-Wl,--enable-new-dtags], [LDFLAGS])])
@@ -4510,20 +4594,40 @@ EOF
 fi
 
 dnl
-dnl Check for -fsanitize=address,undefined support
+dnl Check for -fsanitize support
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test "$enable_asan" = "yes"; then
-    AX_CHECK_COMPILE_FLAG([-fsanitize=address -fsanitize=undefined], [
-	AX_CHECK_LINK_FLAG([-fsanitize=address -fsanitize=undefined], [
-	    ASAN_LDFLAGS="-Wc,-fsanitize=address -Wc,-fsanitize=undefined"
-	    ASAN_CFLAGS="-fsanitize=address -fsanitize=undefined"
-	    AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
-		CFLAGS="$CFLAGS -fno-omit-frame-pointer"
-	    ])
-	    AC_DEFINE(NO_LEAKS)
+if test "$enable_sanitizer" != "no"; then
+    AX_CHECK_COMPILE_FLAG([$enable_sanitizer], [
+	AX_APPEND_FLAG([$enable_sanitizer], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([$enable_sanitizer], [ASAN_LDFLAGS])
+	AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
+	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
 	])
+	AC_DEFINE(NO_LEAKS)
+    ], [
+	AC_MSG_ERROR([$CC does not support the $enable_sanitizer flag])
     ])
+fi
+if test "$enable_fuzzer" = "yes"; then
+    AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
+	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_LDFLAGS])
+	if test -z "$FUZZ_ENGINE"; then
+	    FUZZ_ENGINE="-fsanitize=fuzzer"
+	fi
+	AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
+	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
+	])
+	# Use CFLAGS, not CPPFLAGS to match oss-fuzz behavior
+	AX_APPEND_FLAG([-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION], [CFLAGS])
+	AC_DEFINE(NO_LEAKS)
+    ], [
+	AC_MSG_ERROR([$CC does not support the -fsanitize=fuzzer-no-link flag])
+    ])
+else
+    # Not using compiler fuzzing support, link with stub library.
+    FUZZ_ENGINE='$(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la'
 fi
 
 dnl
@@ -4581,7 +4685,7 @@ dnl
 dnl Check for -fstack-protector and -z relro support
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test "$enable_hardening" != "no"; then
+if test "$enable_hardening" != "no" && test "$enable_ssp" != "no"; then
     AC_CACHE_CHECK([for compiler stack protector support],
 	[sudo_cv_var_stack_protector],
 	[
@@ -4630,6 +4734,9 @@ if test "$enable_hardening" != "no"; then
 	SSP_CFLAGS="$sudo_cv_var_stack_protector"
 	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
+    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
+fi
+if test "$enable_hardening" != "no"; then
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
 fi
 
@@ -4682,7 +4789,7 @@ if test -n "$GCC"; then
 	dnl
 	dnl Default warnings for development use.
 	dnl
-	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith"
+	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas"
 	AX_CHECK_COMPILE_FLAG([-Wshadow], [CFLAGS="$CFLAGS -Wshadow"])
 	dnl
 	dnl The fallthrough attribute is supported by gcc 7.0 and clang 10.
@@ -4772,8 +4879,8 @@ if test X"$with_noexec" != X"no"; then
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"
 
-    # Can't use asan with LD_PRELOAD
-    if test "$enable_asan" != "yes"; then
+    # Can't use sanitizers with LD_PRELOAD
+    if test "$enable_sanitizer" != "yes"; then
 	CHECK_NOEXEC=check_noexec
     fi
 
@@ -4834,7 +4941,7 @@ elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
 
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 
 AC_OUTPUT
 
@@ -4954,7 +5061,6 @@ AH_TEMPLATE(SHELL_SETS_HOME, [Define to 1 if you want sudo to set $HOME in shell
 AH_TEMPLATE(STATIC_SUDOERS_PLUGIN, [Define to 1 to compile the sudoers plugin statically into the sudo binary.])
 AH_TEMPLATE(STUB_LOAD_INTERFACES, [Define to 1 if the code in interfaces.c does not compile for you.])
 AH_TEMPLATE(UMASK_OVERRIDE, [Define to 1 to use the umask specified in sudoers even when it is less restrictive than the invoking user's.])
-AH_TEMPLATE(USE_ADMIN_FLAG, [Define to 1 if you want to create ~/.sudo_as_admin_successful if the user is in the admin group the first time they run sudo.])
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])

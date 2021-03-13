@@ -248,21 +248,18 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     int ch, i;
     char *cp;
     const char *progname;
-    int proglen;
     debug_decl(parse_args, SUDO_DEBUG_ARGS);
 
     /* Is someone trying something funny? */
     if (argc <= 0)
 	usage();
 
-    /* Pass progname to plugin so it can call initprogname() */
+    /* The plugin API includes the program name (either sudo or sudoedit). */
     progname = getprogname();
     sudo_settings[ARG_PROGNAME].value = progname;
 
     /* First, check to see if we were invoked as "sudoedit". */
-    proglen = strlen(progname);
-    if (proglen > 4 && strcmp(progname + proglen - 4, "edit") == 0) {
-	progname = "sudoedit";
+    if (strcmp(progname, "sudoedit") == 0) {
 	mode = MODE_EDIT;
 	sudo_settings[ARG_SUDOEDIT].value = "true";
 	valid_flags = EDIT_VALID_FLAGS;

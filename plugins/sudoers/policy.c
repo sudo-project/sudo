@@ -75,11 +75,17 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 	CLR(*flags, fval);
 	debug_return_int(false);
     default:
-	sudo_warn(U_("invalid %.*s set by sudo front-end"),
+	sudo_warnx(U_("invalid %.*s set by sudo front-end"),
 	    varlen, line);
 	debug_return_int(-1);
     }
 }
+
+#define RUN_VALID_FLAGS	(MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_PRESERVE_GROUPS|MODE_SHELL|MODE_RUN)
+#define EDIT_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_EDIT)
+#define LIST_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_LIST|MODE_CHECK)
+#define VALIDATE_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_VALIDATE)
+#define INVALIDATE_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_INVALIDATE)
 
 /*
  * Deserialize args, settings and user_info arrays.
@@ -88,7 +94,6 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 int
 sudoers_policy_deserialize_info(void *v)
 {
-    const int edit_mask = MODE_EDIT|MODE_IGNORE_TICKET|MODE_NONINTERACTIVE;
     struct sudoers_open_info *info = v;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
@@ -100,7 +105,7 @@ sudoers_policy_deserialize_info(void *v)
     (strncmp((s), (v), sizeof(v) - 1) == 0)
 
 #define INVALID(v) do {	\
-    sudo_warn(U_("invalid %.*s set by sudo front-end"), \
+    sudo_warnx(U_("invalid %.*s set by sudo front-end"), \
 	(int)(sizeof(v) - 2), (v)); \
 } while (0)
 
@@ -117,6 +122,10 @@ sudoers_policy_deserialize_info(void *v)
     }
 
     /* Parse sudo.conf plugin args. */
+    sudoers_file = _PATH_SUDOERS;
+    sudoers_mode = SUDOERS_MODE;
+    sudoers_uid = SUDOERS_UID;
+    sudoers_gid = SUDOERS_GID;
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
 	    if (MATCHES(*cur, "error_recovery=")) {
@@ -274,27 +283,21 @@ sudoers_policy_deserialize_info(void *v)
 	    def_use_loginclass = true;
 	    continue;
 	}
-#ifdef HAVE_PRIV_SET
-	if (MATCHES(*cur, "runas_privs=")) {
-	    CHECK(*cur, "runas_privs=");
-	    def_privs = *cur + sizeof("runas_privs=") - 1;
-	    continue;
-	}
-	if (MATCHES(*cur, "runas_limitprivs=")) {
-	    CHECK(*cur, "runas_limitprivs=");
-	    def_limitprivs = *cur + sizeof("runas_limitprivs=") - 1;
-	    continue;
-	}
-#endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
 	    CHECK(*cur, "selinux_role=");
-	    user_role = *cur + sizeof("selinux_role=") - 1;
+	    free(user_role);
+	    user_role = strdup(*cur + sizeof("selinux_role=") - 1);
+	    if (user_role == NULL)
+		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "selinux_type=")) {
 	    CHECK(*cur, "selinux_type=");
-	    user_type = *cur + sizeof("selinux_type=") - 1;
+	    free(user_type);
+	    user_type = strdup(*cur + sizeof("selinux_type=") - 1);
+	    if (user_type == NULL)
+		goto oom;
 	    continue;
 	}
 #endif /* HAVE_SELINUX */
@@ -316,7 +319,7 @@ sudoers_policy_deserialize_info(void *v)
 	if (MATCHES(*cur, "max_groups=")) {
 	    errno = 0;
 	    p = *cur + sizeof("max_groups=") - 1;
-	    sudo_user.max_groups = sudo_strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.max_groups = sudo_strtonum(p, 1, 1024, &errstr);
 	    if (sudo_user.max_groups == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -349,12 +352,6 @@ sudoers_policy_deserialize_info(void *v)
 #endif
     }
 
-    /* Sudo front-end should restrict mode flags for sudoedit. */
-    if (ISSET(flags, MODE_EDIT) && (flags & edit_mask) != flags) {
-	sudo_warnx(U_("invalid mode flags from sudo front end: 0x%x"), flags);
-	goto bad;
-    }
-
     user_gid = (gid_t)-1;
     user_sid = (pid_t)-1;
     user_uid = (gid_t)-1;
@@ -362,6 +359,7 @@ sudoers_policy_deserialize_info(void *v)
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
 	    CHECK(*cur, "user=");
+	    free(user_name);
 	    if ((user_name = strdup(*cur + sizeof("user=") - 1)) == NULL)
 		goto oom;
 	    continue;
@@ -391,12 +389,14 @@ sudoers_policy_deserialize_info(void *v)
 	}
 	if (MATCHES(*cur, "cwd=")) {
 	    CHECK(*cur, "cwd=");
+	    free(user_cwd);
 	    if ((user_cwd = strdup(*cur + sizeof("cwd=") - 1)) == NULL)
 		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "tty=")) {
 	    CHECK(*cur, "tty=");
+	    free(user_ttypath);
 	    if ((user_ttypath = strdup(*cur + sizeof("tty=") - 1)) == NULL)
 		goto oom;
 	    user_tty = user_ttypath;
@@ -406,6 +406,9 @@ sudoers_policy_deserialize_info(void *v)
 	}
 	if (MATCHES(*cur, "host=")) {
 	    CHECK(*cur, "host=");
+	    if (user_shost != user_host)
+		free(user_shost);
+	    free(user_host);
 	    if ((user_host = strdup(*cur + sizeof("host=") - 1)) == NULL)
 		goto oom;
 	    if ((p = strchr(user_host, '.')) != NULL) {
@@ -475,6 +478,9 @@ sudoers_policy_deserialize_info(void *v)
 	goto bad;
     }
 
+    if (user_srunhost != user_runhost)
+	free(user_srunhost);
+    free(user_runhost);
     if ((user_runhost = strdup(remhost ? remhost : user_host)) == NULL)
 	goto oom;
     if ((p = strchr(user_runhost, '.')) != NULL) {
@@ -489,8 +495,8 @@ sudoers_policy_deserialize_info(void *v)
 	    goto oom;
     }
     if (user_runcwd == NULL) {
-	if ((user_runcwd = strdup(user_cwd)) == NULL)
-	    goto oom;
+	/* Unlike user_cwd, user_runcwd is not free()d. */
+	user_runcwd = user_cwd;
     }
     if (user_tty == NULL) {
 	if ((user_tty = strdup("unknown")) == NULL)
@@ -517,6 +523,10 @@ sudoers_policy_deserialize_info(void *v)
 
     /* Some systems support fexecve() which we use for digest matches. */
     cmnd_fd = -1;
+
+#ifdef NO_ROOT_MAILER
+    eventlog_set_mailuid(user_uid);
+#endif
 
     /* Dump settings and user info (XXX - plugin args) */
     for (cur = info->settings; *cur != NULL; cur++)
@@ -866,14 +876,13 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 #endif /* HAVE_SELINUX */
 
-    /* Free on exit; they are not available in the close function. */
-    sudoers_gc_add(GC_VECTOR, envp);
-    sudoers_gc_add(GC_VECTOR, command_info);
-
     /* Fill in exec environment info. */
     *(exec_args->argv) = argv;
     *(exec_args->envp) = envp;
     *(exec_args->info) = command_info;
+
+    /* Free command_info on exit. */
+    sudoers_gc_add(GC_VECTOR, command_info);
 
     debug_return_bool(true);
 
@@ -961,28 +970,14 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Free stashed copy of the environment. */
     (void)env_init(NULL);
 
-    /* Free remaining references to password and group entries. */
-    /* XXX - move cleanup to function in sudoers.c */
-    if (sudo_user.pw != NULL) {
-	sudo_pw_delref(sudo_user.pw);
-	sudo_user.pw = NULL;
-    }
-    if (runas_pw != NULL) {
-	sudo_pw_delref(runas_pw);
-	runas_pw = NULL;
-    }
-    if (runas_gr != NULL) {
-	sudo_gr_delref(runas_gr);
-	runas_gr = NULL;
-    }
-    if (user_gid_list != NULL) {
-	sudo_gidlist_delref(user_gid_list);
-	user_gid_list = NULL;
-    }
-    free(user_gids);
-    user_gids = NULL;
+    /* Free sudoers sources, sudo_user and passwd/group caches. */
+    sudoers_cleanup();
+
+    /* Free error message passed back to front-end, if any. */
     free(audit_msg);
     audit_msg = NULL;
+
+    /* XXX - leaks NewArgv */
 
     /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
     sudoers_debug_deregister();
@@ -1021,24 +1016,35 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[],
     const char **errstr)
 {
+    int valid_flags = RUN_VALID_FLAGS;
     struct sudoers_exec_args exec_args;
     int ret;
     debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN);
 
-    if (!ISSET(sudo_mode, MODE_EDIT))
+    if (ISSET(sudo_mode, MODE_EDIT))
+	valid_flags = EDIT_VALID_FLAGS;
+    else
 	SET(sudo_mode, MODE_RUN);
+
+    if ((sudo_mode & valid_flags) != sudo_mode) {
+	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
+	    __func__, sudo_mode);
+	debug_return_int(-1);
+    }
 
     exec_args.argv = argv_out;
     exec_args.envp = user_env_out;
     exec_args.info = command_infop;
 
     ret = sudoers_policy_main(argc, argv, 0, env_add, false, &exec_args);
+#ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
 	if (!def_log_input && !def_log_output && !def_use_pty &&
 	    !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
+#endif
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
@@ -1051,13 +1057,19 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(const char **errstr)
 {
+    char *argv[] = { "validate", NULL };
+    const int argc = 1;
     int ret;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
 
-    user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
+    if ((sudo_mode & VALIDATE_VALID_FLAGS) != sudo_mode) {
+	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
+	    __func__, sudo_mode);
+	debug_return_int(-1);
+    }
 
-    ret = sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, false, NULL);
+    ret = sudoers_policy_main(argc, argv, I_VERIFYPW, NULL, false, NULL);
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
@@ -1072,10 +1084,13 @@ sudoers_policy_invalidate(int unlinkit)
 {
     debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN);
 
-    user_cmnd = "kill";
-    /* XXX - plugin API should support a return value for fatal errors. */
-    timestamp_remove(unlinkit);
-    sudoers_cleanup();
+    SET(sudo_mode, MODE_INVALIDATE);
+    if ((sudo_mode & INVALIDATE_VALID_FLAGS) != sudo_mode) {
+	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
+	    __func__, sudo_mode);
+    } else {
+	timestamp_remove(unlinkit);
+    }
 
     debug_return;
 }
@@ -1084,14 +1099,24 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user, const char **errstr)
 {
+    char *list_argv[] = { "list", NULL };
     int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
 
-    user_cmnd = "list";
-    if (argc)
-	SET(sudo_mode, MODE_CHECK);
-    else
+    if (argc == 0) {
 	SET(sudo_mode, MODE_LIST);
+	argc = 1;
+	argv = list_argv;
+    } else {
+	SET(sudo_mode, MODE_CHECK);
+    }
+
+    if ((sudo_mode & LIST_VALID_FLAGS) != sudo_mode) {
+	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
+	    __func__, sudo_mode);
+	debug_return_int(-1);
+    }
+
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
@@ -1170,6 +1195,24 @@ sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook
     }
 }
 
+/*
+ * De-register environment function hooks.
+ */
+static void
+sudoers_policy_deregister_hooks(int version, int (*deregister_hook)(struct sudo_hook *hook))
+{
+    struct sudo_hook *hook;
+
+    for (hook = sudoers_hooks; hook->hook_fn != NULL; hook++) {
+	if (deregister_hook(hook) != 0) {
+	    sudo_warn_nodebug(
+		U_("unable to deregister hook of type %d (version %d.%d)"),
+		hook->hook_type, SUDO_API_VERSION_GET_MAJOR(hook->hook_version),
+		SUDO_API_VERSION_GET_MINOR(hook->hook_version));
+	}
+    }
+}
+
 sudo_dso_public struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
@@ -1182,5 +1225,6 @@ sudo_dso_public struct policy_plugin sudoers_policy = {
     sudoers_policy_invalidate,
     sudoers_policy_init_session,
     sudoers_policy_register_hooks,
+    sudoers_policy_deregister_hooks,
     NULL /* event_alloc() filled in by sudo */
 };

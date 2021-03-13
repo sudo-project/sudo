@@ -53,9 +53,10 @@ sudo_getdelim(char **buf, size_t *bufsize, int delim, FILE *fp)
 	    char *tmp = reallocarray(*buf, *bufsize, 2);
 	    if (tmp == NULL)
 		goto bad;
-	    cp = tmp + (cp - *buf);
-	    *buf = tmp;
 	    *bufsize *= 2;
+	    cp = tmp + (cp - *buf);
+	    ep = cp + *bufsize;
+	    *buf = tmp;
 	}
 	if ((ch = getc(fp)) == EOF) {
 	    if (feof(fp))

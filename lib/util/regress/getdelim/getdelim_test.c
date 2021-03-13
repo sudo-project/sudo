@@ -29,6 +29,7 @@
 #else
 # include "compat/stdbool.h"
 #endif
+#include <limits.h>
 #include <unistd.h>
 
 #include "sudo_compat.h"
@@ -47,15 +48,13 @@ struct getdelim_test {
     int delim;
 };
 
-/*
- * TODO: test error case.
- *       test realloc case (buf > LINE_MAX)
- */
+static char longstr[LINE_MAX * 2];
 static struct getdelim_test test_data[] = {
     { "a\nb\nc\n", { "a\n", "b\n", "c\n", NULL }, '\n' },
     { "a\nb\nc", { "a\n", "b\n", "c", NULL }, '\n' },
     { "a\tb\tc\t", { "a\t", "b\t", "c\t", NULL }, '\t' },
     { "a\tb\tc", { "a\t", "b\t", "c", NULL }, '\t' },
+    { longstr, { longstr, NULL }, '\n' },
     { NULL, { NULL }, '\0' }
 };
 
@@ -67,6 +66,11 @@ runtests(char **buf, size_t *buflen)
     int i, j, sv[2];
     pid_t pid;
     FILE *fp;
+
+    /* Exercise realloc case by injecting an entry > LINE_MAX. */
+    memset(longstr, 'A', sizeof(longstr) - 2);
+    longstr[sizeof(longstr) - 2] = '\n';
+    longstr[sizeof(longstr) - 1] = '\0';
 
     for (i = 0; test_data[i].input != NULL; i++) {
 	if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1)
@@ -105,6 +109,7 @@ runtests(char **buf, size_t *buflen)
 		errors++;
 	    }
 	}
+
 	/* test EOF */
 	ntests++;
 	alarm(30);
@@ -119,6 +124,25 @@ runtests(char **buf, size_t *buflen)
 		errors++;
 	    }
 	}
+
+	/* test error by closing the underlying fd. */
+	clearerr(fp);
+	close(fileno(fp));
+	ntests++;
+	alarm(30);
+	if (getdelim(buf, buflen, test_data[i].delim, fp) != -1) {
+	    sudo_warnx_nodebug("failed test #%d: expected error, got %s",
+		ntests, *buf);
+	    errors++;
+	} else {
+	    /* Use feof(3), not ferror(3) so we can detect out of memory. */
+	    if (feof(fp)) {
+		sudo_warn_nodebug("failed test #%d: expected error, got EOF",
+		    ntests);
+		errors++;
+	    }
+	}
+
 	fclose(fp);
 	waitpid(pid, NULL, 0);
 	alarm(0);

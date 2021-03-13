@@ -132,20 +132,17 @@ set_tmpdir(struct sudo_cred *user_cred)
 static int
 sudo_edit_mktemp(const char *ofile, char **tfile)
 {
-    const char *cp, *suff;
+    const char *base, *suff;
     int len, tfd;
     debug_decl(sudo_edit_mktemp, SUDO_DEBUG_EDIT);
 
-    if ((cp = strrchr(ofile, '/')) != NULL)
-	cp++;
-    else
-	cp = ofile;
-    suff = strrchr(cp, '.');
+    base = sudo_basename(ofile);
+    suff = strrchr(base, '.');
     if (suff != NULL) {
 	len = asprintf(tfile, "%s/%.*sXXXXXXXX%s", edit_tmpdir,
-	    (int)(size_t)(suff - cp), cp, suff);
+	    (int)(size_t)(suff - base), base, suff);
     } else {
-	len = asprintf(tfile, "%s/%s.XXXXXXXX", edit_tmpdir, cp);
+	len = asprintf(tfile, "%s/%s.XXXXXXXX", edit_tmpdir, base);
     }
     if (len == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));

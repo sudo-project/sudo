@@ -101,6 +101,7 @@ char *iolog_parse_delay(const char *cp, struct timespec *delay, const char *deci
 int iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing);
 struct eventlog *iolog_parse_loginfo(int dfd, const char *iolog_dir);
 bool iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct eventlog *evlog);
+bool iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir, struct eventlog *evlog);
 void iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
 
 /* iolog_fileio.c */
@@ -112,7 +113,6 @@ bool iolog_mkdtemp(char *path);
 bool iolog_mkpath(char *path);
 bool iolog_nextid(char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
-bool iolog_rename(const char *from, const char *to);
 bool iolog_write_info_file(int dfd, struct eventlog *evlog);
 char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
 const char *iolog_fd_to_name(int iofd);
@@ -122,6 +122,13 @@ ssize_t iolog_read(struct iolog_file *iol, void *buf, size_t nbytes, const char 
 ssize_t iolog_write(struct iolog_file *iol, const void *buf, size_t len, const char **errstr);
 void iolog_clearerr(struct iolog_file *iol);
 void iolog_rewind(struct iolog_file *iol);
+unsigned int iolog_get_maxseq(void);
+uid_t iolog_get_uid(void);
+gid_t iolog_get_gid(void);
+mode_t iolog_get_file_mode(void);
+mode_t iolog_get_dir_mode(void);
+bool iolog_get_compress(void);
+bool iolog_get_flush(void);
 void iolog_set_compress(bool);
 void iolog_set_defaults(void);
 void iolog_set_flush(bool);
@@ -129,5 +136,7 @@ void iolog_set_gid(gid_t gid);
 void iolog_set_maxseq(unsigned int maxval);
 void iolog_set_mode(mode_t mode);
 void iolog_set_owner(uid_t uid, uid_t gid);
+bool iolog_swapids(bool restore);
+bool iolog_mkdirs(char *path);
 
 #endif /* SUDO_IOLOG_H */

@@ -57,18 +57,13 @@ cmnd_allowed(char *cmnd, size_t cmnd_size, const char *runchroot,
 	debug_return_bool(true);	/* nothing to check */
 
     /* We compare the base names to avoid excessive stat()ing. */
-    if ((cmnd_base = strrchr(cmnd, '/')) == NULL)
-	debug_return_bool(false);	/* can't happen */
-    cmnd_base++;
+    cmnd_base = sudo_basename(cmnd);
 
     for (al = allowlist; *al != NULL; al++) {
 	const char *base, *path = *al;
 	struct stat sb;
 
-	if ((base = strrchr(path, '/')) == NULL)
-	    continue;		/* XXX - warn? */
-	base++;
-
+	base = sudo_basename(path);
 	if (strcmp(cmnd_base, base) != 0)
 	    continue;
 

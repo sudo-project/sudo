@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+#include <time.h>
 #include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
@@ -82,7 +83,6 @@ static struct logsrvd_config {
         bool tcp_keepalive;
 	char *pid_file;
 #if defined(HAVE_OPENSSL)
-        bool tls;
         struct logsrvd_tls_config tls_config;
         struct logsrvd_tls_runtime tls_runtime;
 #endif

@@ -26,6 +26,8 @@ Makefile$
 ^doc/.*\.mdoc$
 ^doc/fixman\.sed$
 
+^etc/init\.d/sudo\.conf$
+
 ^examples/sudo\.conf$
 
 ^init\.d/.*\.sh$
@@ -37,7 +39,12 @@ Makefile$
 ^src/check_(noexec|ttyname)$
 ^src/sudo_usage\.h$
 
-^lib/iolog/check_iolog_(path|util)$
+^lib/eventlog/check_wrap$
+^lib/eventlog/regress/logwrap/check_wrap.out$
+
+^lib/iolog/check_iolog_(json|mkpath|path|util)$
+^lib/iolog/fuzz_iolog_(json|legacy|timing)$
+^lib/iolog/host_port_test$
 
 ^lib/util/mksiglist$
 ^lib/util/mksigname$
@@ -45,14 +52,18 @@ Makefile$
 ^lib/util/signame\.c$
 ^lib/util/util\.exp$
 ^lib/util/[a-z0-9_]+_test$
+^lib/util/fuzz_sudo_conf$
 ^lib/util/regress/.*\.(out|err)$
 
 ^logsrvd/sudo_(logsrvd|sendlog)$
+^logsrvd/fuzz_logsrvd_conf$
 
 ^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|prologue|check_[a-z0-9_]+)$
+^plugins/sudoers/fuzz_(policy|sudoers(_ldif)?)$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
 ^plugins/sudoers/regress/iolog_plugin/iolog$
 ^plugins/sudoers/regress/testsudoers/test3\.d/root$
 
 ^plugins/python/__pycache__
 ^plugins/python/regress/__pycache__
+^plugins/python/check_python_examples$

@@ -84,7 +84,8 @@ get_interfaces(void)
 int
 set_cmnd_path(const char *runchroot)
 {
-    return FOUND;
+    /* Cannot return FOUND without also setting user_cmnd to a new value. */
+    return NOT_FOUND;
 }
 
 /* STUB */

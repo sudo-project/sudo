@@ -63,6 +63,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
+#include "check.h"
 #include "auth/sudo_auth.h"
 #include "sudo_iolog.h"
 
@@ -70,7 +71,6 @@
  * Prototypes
  */
 static int set_cmnd(void);
-static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
 static bool set_loginclass(struct passwd *);
 static bool set_runasgr(const char *, bool);
@@ -159,8 +159,9 @@ sudoers_init(void *info, char * const envp[])
     static int ret = -1;
     debug_decl(sudoers_init, SUDOERS_DEBUG_PLUGIN);
 
-    if (ret == true)
-	debug_return_int(true);
+    /* Only initialize once. */
+    if (snl != NULL)
+	debug_return_int(ret);
 
     bindtextdomain("sudoers", LOCALEDIR);
 
@@ -340,6 +341,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
 
+    if (argc == 0) {
+	sudo_warnx("%s", U_("no command specified"));
+	debug_return_int(-1);
+    }
+
     unlimit_nproc();
 
     /* Is root even allowed to run sudo? */
@@ -359,38 +365,26 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /*
      * Make a local copy of argc/argv, with special handling
-     * for pseudo-commands and the '-i' option.
+     * for the '-i' option.
      */
-    if (argc == 0) {
-	NewArgc = 1;
-	NewArgv = reallocarray(NULL, NewArgc + 1, sizeof(char *));
-	if (NewArgv == NULL) {
+    /* Must leave an extra slot before NewArgv for bash's --login */
+    NewArgc = argc;
+    NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
+    if (NewArgv == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    sudoers_gc_add(GC_PTR, NewArgv);
+    NewArgv++;	/* reserve an extra slot for --login */
+    memcpy(NewArgv, argv, argc * sizeof(char *));
+    NewArgv[NewArgc] = NULL;
+    if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
+	NewArgv[0] = strdup(runas_pw->pw_shell);
+	if (NewArgv[0] == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	sudoers_gc_add(GC_VECTOR, NewArgv);
-	NewArgv[0] = user_cmnd;
-	NewArgv[1] = NULL;
-    } else {
-	/* Must leave an extra slot before NewArgv for bash's --login */
-	NewArgc = argc;
-	NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
-	if (NewArgv == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
-	sudoers_gc_add(GC_VECTOR, NewArgv);
-	NewArgv++;	/* reserve an extra slot for --login */
-	memcpy(NewArgv, argv, argc * sizeof(char *));
-	NewArgv[NewArgc] = NULL;
-	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
-	    NewArgv[0] = strdup(runas_pw->pw_shell);
-	    if (NewArgv[0] == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		goto done;
-	    }
-	    sudoers_gc_add(GC_PTR, NewArgv[0]);
-	}
+	sudoers_gc_add(GC_PTR, NewArgv[0]);
     }
 
     /* If given the -P option, set the "preserve_groups" flag. */
@@ -643,14 +637,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto done;
     }
 
-    /* Cleanup sudoers sources */
-    TAILQ_FOREACH(nss, snl, entries) {
-	nss->close(nss);
-    }
-    if (def_group_plugin)
-	group_plugin_unload();
-    init_parser(NULL, false, false);
-
     if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
 	/* ret already set appropriately */
 	goto done;
@@ -740,7 +726,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		env_editor ? env_editor : def_editor);
 	    goto bad;
 	}
-	sudoers_gc_add(GC_VECTOR, edit_argv);
+	sudoers_gc_add(GC_EDIT_ARGS, edit_argv);
 	NewArgv = edit_argv;
 	NewArgc = edit_argc;
 
@@ -754,6 +740,15 @@ bad:
     ret = false;
 
 done:
+    /* Cleanup sudoers sources */
+    TAILQ_FOREACH(nss, snl, entries) {
+	nss->close(nss);
+    }
+    snl = NULL;
+    if (def_group_plugin)
+	group_plugin_unload();
+    init_parser(NULL, false, false);
+
     if (ret == -1) {
 	/* Free stashed copy of the environment. */
 	(void)env_init(NULL);
@@ -928,10 +923,6 @@ set_cmnd(void)
 	debug_return_int(NOT_FOUND_ERROR);
     }
 
-    /* Default value for cmnd, overridden below. */
-    if (user_cmnd == NULL)
-	user_cmnd = NewArgv[0];
-
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT|MODE_CHECK)) {
 	if (!ISSET(sudo_mode, MODE_EDIT)) {
 	    const char *runchroot = user_runchroot;
@@ -951,16 +942,6 @@ set_cmnd(void)
 
 	/* set user_args */
 	if (NewArgc > 1) {
-	    char *to, *from, **av;
-	    size_t size, n;
-
-	    /* Alloc and build up user_args. */
-	    for (size = 0, av = NewArgv + 1; *av; av++)
-		size += strlen(*av) + 1;
-	    if (size == 0 || (user_args = malloc(size)) == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		debug_return_int(NOT_FOUND_ERROR);
-	    }
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL) &&
 		    ISSET(sudo_mode, MODE_RUN)) {
 		/*
@@ -968,53 +949,34 @@ set_cmnd(void)
 		 * escapes potential meta chars.  We unescape non-spaces
 		 * for sudoers matching and logging purposes.
 		 */
-		for (to = user_args, av = NewArgv + 1; (from = *av); av++) {
-		    while (*from) {
-			if (from[0] == '\\' && from[1] != '\0' &&
-				!isspace((unsigned char)from[1])) {
-			    from++;
-			}
-			if (size - (to - user_args) < 1) {
-			    sudo_warnx(U_("internal error, %s overflow"),
-				__func__);
-			    debug_return_int(NOT_FOUND_ERROR);
-			}
-			*to++ = *from++;
-		    }
-		    if (size - (to - user_args) < 1) {
-			sudo_warnx(U_("internal error, %s overflow"),
-			    __func__);
-			debug_return_int(NOT_FOUND_ERROR);
-		    }
-		    *to++ = ' ';
-		}
-		*--to = '\0';
+		user_args = strvec_join(NewArgv + 1, ' ', strlcpy_unescape);
 	    } else {
-		for (to = user_args, av = NewArgv + 1; *av; av++) {
-		    n = strlcpy(to, *av, size - (to - user_args));
-		    if (n >= size - (to - user_args)) {
-			sudo_warnx(U_("internal error, %s overflow"), __func__);
-			debug_return_int(NOT_FOUND_ERROR);
-		    }
-		    to += n;
-		    *to++ = ' ';
-		}
-		*--to = '\0';
+		user_args = strvec_join(NewArgv + 1, ' ', NULL);
 	    }
+	    if (user_args == NULL)
+		debug_return_int(NOT_FOUND_ERROR);
 	}
     }
-
-    if ((user_base = strrchr(user_cmnd, '/')) != NULL)
-	user_base++;
-    else
-	user_base = user_cmnd;
+    if (user_cmnd == NULL) {
+	user_cmnd = strdup(NewArgv[0]);
+	if (user_cmnd == NULL)
+	    debug_return_int(NOT_FOUND_ERROR);
+    }
+    user_base = sudo_basename(user_cmnd);
 
     /* Convert "sudo sudoedit" -> "sudoedit" */
     if (ISSET(sudo_mode, MODE_RUN) && strcmp(user_base, "sudoedit") == 0) {
+	char *new_cmnd;
+
 	CLR(sudo_mode, MODE_RUN);
 	SET(sudo_mode, MODE_EDIT);
 	sudo_warnx("%s", U_("sudoedit doesn't need to be run via sudo"));
-	user_base = user_cmnd = "sudoedit";
+	if ((new_cmnd = strdup("sudoedit")) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_int(NOT_FOUND_ERROR);
+	}
+	free(user_cmnd);
+	user_base = user_cmnd = new_cmnd;
     }
 
     TAILQ_FOREACH(nss, snl, entries) {
@@ -1184,8 +1146,9 @@ set_loginclass(struct passwd *pw)
 /*
  * Look up the fully qualified domain name of host.
  * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
- * Returns true on success, setting longp and shortp.
- * Returns false on failure, longp and shortp are unchanged.
+ * Returns 0 on success, setting longp and shortp.
+ * Returns non-zero on failure, longp and shortp are unchanged.
+ * See gai_strerror() for the list of error return codes.
  */
 static int
 resolve_host(const char *host, char **longp, char **shortp)
@@ -1648,53 +1611,17 @@ sudoers_cleanup(void)
 	TAILQ_FOREACH(nss, snl, entries) {
 	    nss->close(nss);
 	}
+	snl = NULL;
+	init_parser(NULL, false, false);
     }
     if (def_group_plugin)
 	group_plugin_unload();
+    sudo_user_free();
     sudo_freepwcache();
     sudo_freegrcache();
 
     debug_return;
 }
-
-#ifdef USE_ADMIN_FLAG
-static int
-create_admin_success_flag(void)
-{
-    char flagfile[PATH_MAX];
-    int len, ret = -1;
-    debug_decl(create_admin_success_flag, SUDOERS_DEBUG_PLUGIN);
-
-    /* Check whether the user is in the sudo or admin group. */
-    if (!user_in_group(sudo_user.pw, "sudo") &&
-	!user_in_group(sudo_user.pw, "admin"))
-	debug_return_int(true);
-
-    /* Build path to flag file. */
-    len = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
-	user_dir);
-    if (len < 0 || len >= ssizeof(flagfile))
-	debug_return_int(false);
-
-    /* Create admin flag file if it doesn't already exist. */
-    if (set_perms(PERM_USER)) {
-	int fd = open(flagfile, O_CREAT|O_WRONLY|O_NONBLOCK|O_EXCL, 0644);
-	ret = fd != -1 || errno == EEXIST;
-	if (fd != -1)
-	    close(fd);
-	if (!restore_perms())
-	    ret = -1;
-    }
-    debug_return_int(ret);
-}
-#else /* !USE_ADMIN_FLAG */
-static int
-create_admin_success_flag(void)
-{
-    /* STUB */
-    return true;
-}
-#endif /* USE_ADMIN_FLAG */
 
 static bool
 tty_present(void)
@@ -1708,4 +1635,53 @@ tty_present(void)
 	close(fd);
     }
     debug_return_bool(true);
+}
+
+/*
+ * Free memory allocated for struct sudo_user.
+ */
+void
+sudo_user_free(void)
+{
+    debug_decl(sudo_user_free, SUDOERS_DEBUG_PLUGIN);
+
+    /* Free remaining references to password and group entries. */
+    if (sudo_user.pw != NULL)
+	sudo_pw_delref(sudo_user.pw);
+    if (runas_pw != NULL)
+	sudo_pw_delref(runas_pw);
+    if (runas_gr != NULL)
+	sudo_gr_delref(runas_gr);
+    if (user_gid_list != NULL)
+	sudo_gidlist_delref(user_gid_list);
+
+    /* Free dynamic contents of sudo_user. */
+    free(user_cwd);
+    free(user_name);
+    free(user_gids);
+    if (user_ttypath != NULL)
+	free(user_ttypath);
+    else
+	free(user_tty);
+    if (user_shost != user_host)
+	    free(user_shost);
+    free(user_host);
+    if (user_srunhost != user_runhost)
+	    free(user_srunhost);
+    free(user_runhost);
+    free(user_cmnd);
+    free(user_args);
+    free(safe_cmnd);
+    free(user_stat);
+#ifdef HAVE_SELINUX
+    free(user_role);
+    free(user_type);
+#endif
+#ifdef HAVE_PRIV_SET
+    free(runas_privs);
+    free(runas_limitprivs);
+#endif
+    memset(&sudo_user, 0, sizeof(sudo_user));
+
+    debug_return;
 }

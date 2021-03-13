@@ -346,11 +346,12 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
         goto cleanup;
     }
 
+    /* sudo_module_ConvMessages_to_c() returns error if no messages. */
     if (sudo_module_ConvMessages_to_c(py_args, &num_msgs, &msgs) < 0) {
         goto cleanup;
     }
 
-    replies = calloc(Py_SSIZE2SIZE(num_msgs), sizeof(struct sudo_conv_reply));
+    replies = calloc(num_msgs, sizeof(struct sudo_conv_reply));
     if (replies == NULL)
         goto cleanup;
     py_result = PyTuple_New(num_msgs);

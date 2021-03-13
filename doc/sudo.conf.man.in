@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "December 5, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "March 2, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -470,12 +470,15 @@ Currently,
 \fBsudo\fR
 supports efficient group queries on AIX,
 BSD,
-HP-UX, Linux and Solaris.
+HP-UX, Linux, macOS and Solaris.
+This is the default behavior on macOS in
+\fBsudo\fR
+1.9.6 and higher.
 .TP 10n
 adaptive
 Only query the group database if the static group list returned
 by the kernel has the maximum number of entries.
-This is the default behavior in
+This is the default behavior on systems other than macOS in
 \fBsudo\fR
 1.8.7 and higher.
 .PP
@@ -496,7 +499,7 @@ version 1.8.7 and higher.
 .TP 10n
 max_groups
 The maximum number of user groups to retrieve from the group database.
-Values less than one will be ignored.
+Values less than one or larger than 1024 will be ignored.
 This setting is only used when querying the group database directly.
 It is intended to be used on systems where it is not possible to detect
 when the array to be populated with group entries is not sufficiently large.

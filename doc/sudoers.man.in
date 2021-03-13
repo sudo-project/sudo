@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "January 8, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "March 3, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1110,6 +1110,21 @@ in double quotes
 when they contain multiple words.
 Special characters may be escaped with a backslash
 (\(oq\e\(cq).
+.PP
+To include a literal backslash character in a command line argument
+you must escape the backslash twice.
+For example, to match
+\(oq\en\(cq
+as part of a command line argument, you must use
+\(oq\e\e\e\en\(cq
+in the
+\fIsudoers\fR
+file.
+This is due to there being two levels of escaping, one in the
+\fIsudoers\fR
+parser itself and another when command line arguments are matched by the
+fnmatch(3)
+function.
 .PP
 Lists have two additional assignment operators,
 \fR+=\fR
@@ -4264,6 +4279,24 @@ This option is only available when
 is built with SELinux support.
 .PP
 \fBStrings that can be used in a boolean context\fR:
+.TP 14n
+admin_flag
+The
+\fIadmin_flag\fR
+option specifies the path to a file that is created the first time
+a user that is a member of the
+\fIsudo\fR
+or
+\fIadmin\fR
+groups runs
+\fBsudo\fR.
+Only available if
+\fBsudo\fR
+is configured with the
+\fR--enable-admin-flag\fR
+option.
+The default value is
+\fR~/.sudo_as_admin_successful\fR.
 .TP 14n
 env_file
 The

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -79,6 +79,7 @@ json_store_command(struct json_item *item, struct eventlog *evlog)
      * Note: struct eventlog must store command + args.
      *       We don't have argv yet so we append the args later.
      */
+    free(evlog->command);
     evlog->command = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -114,7 +115,11 @@ json_array_to_strvec(struct json_object *array)
 	    sudo_warnx(U_("expected JSON_STRING, got %d"), item->type);
 	    debug_return_ptr(NULL);
 	}
-	len++;
+	/* Prevent integer overflow. */
+	if (++len == INT_MAX) {
+	    sudo_warnx("%s", U_("JSON_ARRAY too large"));
+	    debug_return_ptr(NULL);
+	}
     }
     if ((ret = reallocarray(NULL, len + 1, sizeof(char *))) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -133,8 +138,14 @@ json_array_to_strvec(struct json_object *array)
 static bool
 json_store_runargv(struct json_item *item, struct eventlog *evlog)
 {
+    int i;
     debug_decl(json_store_runargv, SUDO_DEBUG_UTIL);
 
+    if (evlog->argv != NULL) {
+	for (i = 0; evlog->argv[i] != NULL; i++)
+	    free(evlog->argv[i]);
+	free(evlog->argv);
+    }
     evlog->argv = json_array_to_strvec(&item->u.child);
 
     debug_return_bool(evlog->argv != NULL);
@@ -143,8 +154,14 @@ json_store_runargv(struct json_item *item, struct eventlog *evlog)
 static bool
 json_store_runenv(struct json_item *item, struct eventlog *evlog)
 {
+    int i;
     debug_decl(json_store_runenv, SUDO_DEBUG_UTIL);
 
+    if (evlog->envp != NULL) {
+	for (i = 0; evlog->envp[i] != NULL; i++)
+	    free(evlog->envp[i]);
+	free(evlog->envp);
+    }
     evlog->envp = json_array_to_strvec(&item->u.child);
 
     debug_return_bool(evlog->envp != NULL);
@@ -164,6 +181,7 @@ json_store_rungroup(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_rungroup, SUDO_DEBUG_UTIL);
 
+    free(evlog->rungroup);
     evlog->rungroup = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -183,6 +201,7 @@ json_store_runuser(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runuser, SUDO_DEBUG_UTIL);
 
+    free(evlog->runuser);
     evlog->runuser = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -193,6 +212,7 @@ json_store_runchroot(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runchroot, SUDO_DEBUG_UTIL);
 
+    free(evlog->runchroot);
     evlog->runchroot = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -203,6 +223,7 @@ json_store_runcwd(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_runcwd, SUDO_DEBUG_UTIL);
 
+    free(evlog->runcwd);
     evlog->runcwd = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -213,6 +234,7 @@ json_store_submitcwd(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submitcwd, SUDO_DEBUG_UTIL);
 
+    free(evlog->cwd);
     evlog->cwd = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -223,6 +245,7 @@ json_store_submithost(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submithost, SUDO_DEBUG_UTIL);
 
+    free(evlog->submithost);
     evlog->submithost = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -233,6 +256,7 @@ json_store_submituser(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submituser, SUDO_DEBUG_UTIL);
 
+    free(evlog->submituser);
     evlog->submituser = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -265,6 +289,7 @@ json_store_ttyname(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_ttyname, SUDO_DEBUG_UTIL);
 
+    free(evlog->ttyname);
     evlog->ttyname = item->u.string;
     item->u.string = NULL;
     debug_return_bool(true);
@@ -331,8 +356,10 @@ json_parse_string(char **strp)
 
     /* Copy string, flattening escaped chars. */
     dst = ret = malloc(len + 1);
-    if (dst == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (dst == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_str(NULL);
+    }
     while (src < end) {
 	char ch = *src++;
 	/* TODO: handle unicode escapes */
@@ -391,7 +418,15 @@ free_json_items(struct json_item_list *items)
 	case JSON_OBJECT:
 	    free_json_items(&item->u.child.items);
 	    break;
+	case JSON_ID:
+	case JSON_NUMBER:
+	case JSON_BOOL:
+	case JSON_NULL:
+	    /* Nothing to free. */
+	    break;
 	default:
+	    sudo_warnx("%s: internal error, invalid JSON type %d",
+		__func__, item->type);
 	    break;
 	}
 	free(item->name);
@@ -410,6 +445,10 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
 
     /* First object holds all the actual data. */
     item = TAILQ_FIRST(&object->items);
+    if (item == NULL) {
+	sudo_warnx("%s", U_("missing JSON_OBJECT"));
+	goto done;
+    }
     if (item->type != JSON_OBJECT) {
 	sudo_warnx(U_("expected JSON_OBJECT, got %d"), item->type);
 	goto done;
@@ -418,6 +457,13 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
 
     TAILQ_FOREACH(item, &object->items, entries) {
 	struct iolog_json_key *key;
+
+	/* expecting key:value pairs */
+	if (item->name == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"%s: missing object name", __func__);
+	    goto done;
+	}
 
 	/* lookup name */
 	for (key = iolog_json_keys; key->name != NULL; key++) {
@@ -444,7 +490,7 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
     }
 
     /* Merge cmd and argv as sudoreplay expects. */
-    if (evlog->command != NULL && evlog->argv != NULL) {
+    if (evlog->command != NULL && evlog->argv != NULL && evlog->argv[0] != NULL) {
 	size_t len = strlen(evlog->command) + 1;
 	char *newcmd;
 	int ac;
@@ -546,7 +592,13 @@ json_stack_push(struct json_stack *stack, struct json_item_list *items,
     unsigned int lineno)
 {
     struct json_item *item;
-    debug_decl(iolog_parse_loginfo_json, SUDO_DEBUG_UTIL);
+    debug_decl(json_stack_push, SUDO_DEBUG_UTIL);
+
+    /* We limit the stack size rather than expanding it. */
+    if (stack->depth >= stack->maxdepth) {
+	sudo_warnx(U_("json stack exhausted (max %u frames)"), stack->maxdepth);
+	debug_return_ptr(NULL);
+    }
 
     /* Allocate a new item and insert it into the list. */
     if ((item = new_json_item(type, name, lineno)) == NULL)
@@ -555,9 +607,7 @@ json_stack_push(struct json_stack *stack, struct json_item_list *items,
     item->u.child.parent = item;
     TAILQ_INSERT_TAIL(items, item, entries);
 
-    /* Push the current frame onto the stack. */
-    if (stack->depth == stack->maxdepth)
-	sudo_fatalx(U_("internal error, %s overflow"), __func__);
+    /* Push the current frame onto the stack (depth check performed above). */
     stack->frames[stack->depth++] = frame;
 
     /* Return the new frame */
@@ -574,10 +624,11 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
     struct json_stack stack = JSON_STACK_INTIALIZER(stack);
     unsigned int lineno = 0;
     char *name = NULL;
-    char *buf = NULL;
+    char *cp, *buf = NULL;
     size_t bufsize = 0;
     ssize_t len;
     bool ret = false;
+    bool saw_comma = false;
     long long num;
     char ch;
     debug_decl(iolog_parse_json, SUDO_DEBUG_UTIL);
@@ -586,8 +637,8 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
     TAILQ_INIT(&root->items);
 
     while ((len = getdelim(&buf, &bufsize, '\n', fp)) != -1) {
-	char *cp = buf;
 	char *ep = buf + len - 1;
+	cp = buf;
 
 	lineno++;
 
@@ -603,143 +654,205 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
 	    while (isspace((unsigned char)*cp))
 		cp++;
 
-	    /* Strip out commas.  TODO: require commas between values. */
+	    /* Check for comma separator and strip it out. */
 	    if (*cp == ',') {
+		saw_comma = true;
 		cp++;
 		while (isspace((unsigned char)*cp))
 		    cp++;
 	    }
 
+	    /* End of line? */
 	    if (*cp == '\0')
 		break;
 
 	    switch (*cp) {
 	    case '{':
+		if (name == NULL && frame->parent != NULL) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("objects must consist of name:value pairs"));
+		    goto done;
+		}
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("missing separator between values"));
+		    goto done;
+		}
 		cp++;
+		saw_comma = false;
 		frame = json_stack_push(&stack, &frame->items, frame,
 		    JSON_OBJECT, name, lineno);
 		if (frame == NULL)
-		    goto parse_error;
+		    goto done;
 		name = NULL;
 		break;
 	    case '}':
-		cp++;
 		if (stack.depth == 0 || frame->parent == NULL ||
 			frame->parent->type != JSON_OBJECT) {
-		    sudo_warnx("%s", U_("unmatched close brace"));
-		    goto parse_error;
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("unmatched close brace"));
+		    goto done;
 		}
+		cp++;
 		frame = stack.frames[--stack.depth];
+		saw_comma = false;
 		break;
 	    case '[':
-		cp++;
 		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
-		    sudo_warnx("%s", U_("unexpected array"));
-		    goto parse_error;
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("unexpected array"));
+		    goto done;
 		}
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("missing separator between values"));
+		    goto done;
+		}
+		cp++;
+		saw_comma = false;
 		frame = json_stack_push(&stack, &frame->items, frame,
 		    JSON_ARRAY, name, lineno);
 		if (frame == NULL)
-		    goto parse_error;
+		    goto done;
 		name = NULL;
 		break;
 	    case ']':
-		cp++;
 		if (stack.depth == 0 || frame->parent == NULL ||
 			frame->parent->type != JSON_ARRAY) {
-		    sudo_warnx("%s", U_("unmatched close bracket"));
-		    goto parse_error;
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("unmatched close bracket"));
+		    goto done;
 		}
+		cp++;
 		frame = stack.frames[--stack.depth];
+		saw_comma = false;
 		break;
 	    case '"':
 		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
-		    sudo_warnx("%s", U_("unexpected string"));
-		    goto parse_error;
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("unexpected string"));
+		    goto done;
 		}
 
 		if (!expect_value) {
 		    /* Parse "name": */
 		    if ((name = json_parse_string(&cp)) == NULL)
-			goto parse_error;
+			goto done;
 		    /* TODO: allow colon on next line? */
-		    if (*cp++ != ':') {
-			sudo_warnx("%s", U_("missing colon after name"));
-			goto parse_error;
+		    if (*cp != ':') {
+			sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			    U_("missing colon after name"));
+			goto done;
 		    }
+		    cp++;
 		} else {
+		    if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+			sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			    U_("missing separator between values"));
+			goto done;
+		    }
+		    saw_comma = false;
 		    if (!json_insert_str(&frame->items, name, &cp, lineno))
-			goto parse_error;
+			goto done;
 		    name = NULL;
 		}
 		break;
 	    case 't':
-		if (!expect_value) {
-		    sudo_warnx("%s", U_("unexpected boolean"));
-		    goto parse_error;
-		}
 		if (strncmp(cp, "true", sizeof("true") - 1) != 0)
 		    goto parse_error;
+		if (!expect_value) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("unexpected boolean"));
+		    goto done;
+		}
 		cp += sizeof("true") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("missing separator between values"));
+		    goto done;
+		}
+		saw_comma = false;
 
 		if (!json_insert_bool(&frame->items, name, true, lineno))
-		    goto parse_error;
+		    goto done;
 		name = NULL;
 		break;
 	    case 'f':
-		if (!expect_value) {
-		    sudo_warnx("%s", U_("unexpected boolean"));
-		    goto parse_error;
-		}
 		if (strncmp(cp, "false", sizeof("false") - 1) != 0)
 		    goto parse_error;
+		if (!expect_value) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("unexpected boolean"));
+		    goto done;
+		}
 		cp += sizeof("false") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("missing separator between values"));
+		    goto done;
+		}
+		saw_comma = false;
 
 		if (!json_insert_bool(&frame->items, name, false, lineno))
-		    goto parse_error;
+		    goto done;
 		name = NULL;
 		break;
 	    case 'n':
-		if (!expect_value) {
-		    sudo_warnx("%s", U_("unexpected boolean"));
-		    goto parse_error;
-		}
 		if (strncmp(cp, "null", sizeof("null") - 1) != 0)
 		    goto parse_error;
+		if (!expect_value) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("unexpected null"));
+		    goto done;
+		}
 		cp += sizeof("null") - 1;
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("missing separator between values"));
+		    goto done;
+		}
+		saw_comma = false;
 
 		if (!json_insert_null(&frame->items, name, lineno))
-		    goto parse_error;
+		    goto done;
 		name = NULL;
 		break;
 	    case '+': case '-': case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7': case '8': case '9':
 		if (!expect_value) {
-		    sudo_warnx("%s", U_("unexpected number"));
-		    goto parse_error;
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("unexpected number"));
+		    goto done;
 		}
 		/* XXX - strtonumx() would be simpler here. */
 		len = strcspn(cp, " \f\n\r\t\v,");
 		ch = cp[len];
 		cp[len] = '\0';
+		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			U_("missing separator between values"));
+		    goto done;
+		}
+		saw_comma = false;
 		num = sudo_strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
 		if (errstr != NULL) {
-		    sudo_warnx(U_("%s: %s"), cp, U_(errstr));
-		    goto parse_error;
+		    sudo_warnx("%s:%u:%td: %s: %s", filename, lineno, cp - buf,
+			cp, U_(errstr));
+		    goto done;
 		}
 		cp += len;
 		*cp = ch;
 
 		if (!json_insert_num(&frame->items, name, num, lineno))
-		    goto parse_error;
+		    goto done;
 		name = NULL;
 		break;
 	    default:
@@ -749,18 +862,21 @@ iolog_parse_json(FILE *fp, const char *filename, struct json_object *root)
     }
     if (stack.depth != 0) {
 	frame = stack.frames[stack.depth - 1];
-	if (frame->parent == NULL || frame->parent->type == JSON_OBJECT)
-	    sudo_warnx("%s", U_("unmatched close brace"));
-	else
-	    sudo_warnx("%s", U_("unmatched close bracket"));
-	goto parse_error;
+	if (frame->parent == NULL || frame->parent->type == JSON_OBJECT) {
+	    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf,
+		U_("unmatched close brace"));
+	} else {
+	    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf,
+		U_("unmatched close bracket"));
+	}
+	goto done;
     }
 
     ret = true;
     goto done;
 
 parse_error:
-    sudo_warnx(U_("%s:%u unable to parse \"%s\""), filename, lineno, buf);
+    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, U_("parse error"));
 done:
     free(buf);
     free(name);

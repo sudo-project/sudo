@@ -160,24 +160,61 @@ Directory and file names:
 	contain a fully-qualified path.
 
 Compilation options:
+  --enable-sanitizer=[flags]
+        Enable the use of sanitizers such as AddressSanitizer and
+        UndefinedBehaviorSanitizer if supported by the compiler.
+        This can help detect common problems such as buffer overflows
+        and use after free bugs as well as behavior not defined by
+        the C standard.  For more information see:
+	    https://github.com/google/sanitizers/wiki
+
+	If no flags are specified by the user, a default value of
+	"-fsanitize=address,undefined" will be used.
+
+        This option should only be used for testing and not in a
+        production environment.  Due to some sanitizers' unchecked
+        use of environment variables, it is trivial to exploit a
+        setuid root executable such as sudo.
+
+  --enable-fuzzer
+	Enable building sudo with the LLVM libFuzzer, see
+	https://www.llvm.org/docs/LibFuzzer.html for details.
+	The resulting binaries, beginning with "fuzz_" can be used
+	to test sudo.  This option is generally used in conjunction
+	with --enable-sanitizer.  This option requires the clang
+	C compiler--it is not supported by gcc.
+
+	This option should only be used for testing and not in a
+	production environment.
+
+  --enable-fuzzer-engine=library
+        The library to use when linking fuzz targets instead of
+        LLVM's libFuzzer.  It is intended to be set to the path to
+        an alternate fuzzing library, such as AFL++ or Honggfuzz.
+
+  --enable-fuzzer-linker=command
+        An alternate linker command to use when building fuzz
+        targets, instead of clang.  It may be necessary to set this
+        when using the --enable-fuzzer-engine option to link with
+        a fuzzer engine that requires C++ libraries.  For oss-fuzz,
+        this option is used to cause fuzz targets to be linked with
+        clang++.
+
   --disable-hardening
 	Disable the use of compiler/linker exploit mitigation options
 	which are enabled by default.  This includes compiling with
 	_FORTIFY_SOURCE defined to 2, building with -fstack-protector
 	and linking with -zrelro, where supported.
 
-  --enable-asan
-        Enable the use of AddressSanitizer if supported by the
-        compiler.  This can help detect common problems such as
-        buffer overflows and user after free bugs as well as behavior
-	undefined by the C standard.  For more information see
-        https://github.com/google/sanitizers/wiki/AddressSanitizer
-	The following compiler flag is used: -fsanitize=address,undefined
+  --disable-ssp
+	Disable use of the -fstack-protector compiler option.
+	This does not affect the other hardening options.
 
-        This option should only be used for testing and not in a
-        production environment.  Due to AddressSanitizer's unchecked
-        use of environment variables, it is trivial to exploit a
-        setuid root executable such as sudo.
+  --disable-leaks
+	Avoid leaking memory even when we are headed for exit,
+	which helps reduce the noise from static and active analyzers.
+	This option should only be used for testing and not in a
+	production environment.
 
   --enable-pie
         Build sudo and related programs as as a position independent
@@ -391,9 +428,11 @@ Operating system-specific options:
 	Disable use of the setresuid() function for operating systems
 	where it is broken (none currently known).
 
-  --enable-admin-flag
-	Enable the creation of an Ubuntu-style admin flag file
-	the first time sudo is run.
+  --enable-admin-flag[=PATH]
+        Enable the creation of an Ubuntu-style admin flag file the
+        first time sudo is run.  If PATH is not specified, the
+        default value is:
+	    ~/.sudo_as_admin_successful
 
   --enable-devsearch=PATH
         Set a system-specific search path of directories to look in

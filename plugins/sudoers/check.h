@@ -85,5 +85,6 @@ int   timestamp_status(void *vcookie, struct passwd *pw);
 int   get_starttime(pid_t pid, struct timespec *starttime);
 bool  already_lectured(int status);
 int   set_lectured(void);
+int   create_admin_success_flag(void);
 
 #endif /* SUDOERS_CHECK_H */

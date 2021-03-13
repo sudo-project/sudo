@@ -370,7 +370,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
     TAILQ_INSERT_TAIL(&handle->parse_tree.userspecs, us, entries);
 
     /* We only include rules where the user matches. */
-    if ((m = new_member_all(NULL)) == NULL)
+    if ((m = sudo_ldap_new_member_all()) == NULL)
 	goto oom;
     TAILQ_INSERT_TAIL(&us->users, m, entries);
 

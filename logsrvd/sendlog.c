@@ -121,25 +121,41 @@ usage(bool fatal)
 static void
 help(void)
 {
-    (void)printf(_("%s - send sudo I/O log to remote server\n\n"),
-	getprogname());
+    printf("%s - %s\n\n", getprogname(),
+	_("send sudo I/O log to remote server"));
     usage(false);
-    (void)puts(_("\nOptions:\n"
-	"      --help               display help message and exit\n"
-	"  -A, --accept             only send an accept event (no I/O)\n"
-	"  -h, --host               host to send logs to\n"
-	"  -i, --iolog_id           remote ID of I/O log to be resumed\n"
-	"  -p, --port               port to use when connecting to host\n"
-	"  -r, --restart            restart previous I/O log transfer\n"
-	"  -R, --reject             reject the command with the given reason\n"
+    printf("\n%s\n", _("Options:"));
+    printf("      --help            %s\n",
+	_("display help message and exit"));
+    printf("  -A, --accept          %s\n",
+	_("only send an accept event (no I/O)"));
 #if defined(HAVE_OPENSSL)
-	"  -b, --ca-bundle          certificate bundle file to verify server's cert against\n"
-	"  -c, --cert               certificate file for TLS handshake\n"
-	"  -k, --key                private key file\n"
-	"  -n, --no-verify          do not verify server certificate\n"
+    printf("  -b, --ca-bundle       %s\n",
+	_("certificate bundle file to verify server's cert against"));
+    printf("  -c, --cert            %s\n",
+	_("certificate file for TLS handshake"));
 #endif
-	"  -t, --test               test audit server by sending selected I/O log n times in parallel\n"
-	"  -V, --version            display version information and exit\n"));
+    printf("  -h, --host            %s\n",
+	_("host to send logs to"));
+    printf("  -i, --iolog_id        %s\n",
+	_("remote ID of I/O log to be resumed"));
+#if defined(HAVE_OPENSSL)
+    printf("  -k, --key             %s\n",
+	_("private key file"));
+    printf("  -n, --no-verify       %s\n",
+	_("do not verify server certificate"));
+#endif
+    printf("  -p, --port            %s\n",
+	_("port to use when connecting to host"));
+    printf("  -r, --restart         %s\n",
+	_("restart previous I/O log transfer"));
+    printf("  -R, --reject          %s\n",
+	_("reject the command with the given reason"));
+    printf("  -t, --test            %s\n",
+	_("test audit server by sending selected I/O log n times in parallel"));
+    printf("  -V, --version         %s\n",
+	_("display version information and exit"));
+    putchar('\n');
     exit(EXIT_SUCCESS);
 }
 

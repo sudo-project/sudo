@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd December 5, 2020
+.Dd March 2, 2021
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -432,11 +432,14 @@ Currently,
 .Nm sudo
 supports efficient group queries on AIX,
 .Bx ,
-HP-UX, Linux and Solaris.
+HP-UX, Linux, macOS and Solaris.
+This is the default behavior on macOS in
+.Nm sudo
+1.9.6 and higher.
 .It adaptive
 Only query the group database if the static group list returned
 by the kernel has the maximum number of entries.
-This is the default behavior in
+This is the default behavior on systems other than macOS in
 .Nm sudo
 1.8.7 and higher.
 .El
@@ -453,7 +456,7 @@ This setting is only available in
 version 1.8.7 and higher.
 .It max_groups
 The maximum number of user groups to retrieve from the group database.
-Values less than one will be ignored.
+Values less than one or larger than 1024 will be ignored.
 This setting is only used when querying the group database directly.
 It is intended to be used on systems where it is not possible to detect
 when the array to be populated with group entries is not sufficiently large.

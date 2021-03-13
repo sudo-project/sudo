@@ -42,7 +42,9 @@ struct test_data {
     { "foo/bar", NULL, NULL, false },
     { "~root", "/", NULL, true },
     { "~", "/home/millert", "millert", true },
+    { "~/foo", "/home/millert/foo", "millert", true },
     { "~millert", "/home/millert", "millert", true },
+    { "~millert/bar", "/home/millert/bar", "millert", true },
     { NULL }
 };
 

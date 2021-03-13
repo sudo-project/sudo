@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -111,7 +111,7 @@ connection_closure_free(struct connection_closure *closure)
 
 	TAILQ_REMOVE(&connections, closure, entries);
 #if defined(HAVE_OPENSSL)
-	if (closure->tls) {
+	if (closure->ssl != NULL) {
 	    SSL_shutdown(closure->ssl);
 	    SSL_free(closure->ssl);
 	}
@@ -185,7 +185,7 @@ done:
 }
 
 static bool
-fmt_hello_message(struct connection_buffer *buf, bool tls)
+fmt_hello_message(struct connection_buffer *buf)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
     ServerHello hello = SERVER_HELLO__INIT;
@@ -306,7 +306,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
 
     closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs);
+	msg->n_info_msgs, closure);
     if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing AcceptMessage");
 	debug_return_bool(false);
@@ -369,7 +369,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
 
     closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs);
+	msg->n_info_msgs, closure);
     if (closure->evlog == NULL) {
 	closure->errstr = _("error parsing RejectMessage");
 	debug_return_bool(false);
@@ -493,7 +493,8 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AlertMessage", __func__);
 
     if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
-	closure->evlog = evlog_new(NULL, msg->info_msgs, msg->n_info_msgs);
+	closure->evlog = evlog_new(NULL, msg->info_msgs,
+	    msg->n_info_msgs, closure);
 	if (closure->evlog == NULL) {
 	    closure->errstr = _("error parsing AlertMessage");
 	    debug_return_bool(false);
@@ -809,7 +810,7 @@ server_msg_cb(int fd, int what, void *v)
 	__func__, buf->len - buf->off);
 
 #if defined(HAVE_OPENSSL)
-    if (closure->tls) {
+    if (closure->ssl != NULL) {
         nwritten = SSL_write(closure->ssl, buf->data + buf->off,
 	    buf->len - buf->off);
         if (nwritten <= 0) {
@@ -896,7 +897,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
 #if defined(HAVE_OPENSSL)
-    if (closure->tls) {
+    if (closure->ssl != NULL) {
        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
         if (nread <= 0) {
             int err = SSL_get_error(closure->ssl, nread);
@@ -1073,7 +1074,7 @@ start_protocol(struct connection_closure *closure)
     const struct timespec *timeout = logsrvd_conf_get_sock_timeout();
     debug_decl(start_protocol, SUDO_DEBUG_UTIL);
 
-    if (!fmt_hello_message(&closure->write_buf, closure->tls))
+    if (!fmt_hello_message(&closure->write_buf))
 	debug_return_bool(false);
 
     if (sudo_ev_add(closure->evbase, closure->write_ev, timeout, false) == -1)
@@ -1504,7 +1505,6 @@ connection_closure_alloc(int sock, bool tls, struct sudo_event_base *base)
 
     closure->iolog_dir_fd = -1;
     closure->sock = sock;
-    closure->tls = tls;
     closure->evbase = base;
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
@@ -1930,15 +1930,20 @@ usage(bool fatal)
 static void
 help(void)
 {
-    (void)printf(_("%s - send sudo I/O log to remote server\n\n"),
-	getprogname());
+    printf("%s - %s\n\n", getprogname(), _("sudo log server"));
     usage(false);
-    (void)puts(_("\nOptions:\n"
-	"  -f, --file               path to configuration file\n"
-	"  -h  --help               display help message and exit\n"
-	"  -n, --no-fork            do not fork, run in the foreground\n"
-	"  -R, --random-drop        percent chance connections will drop\n"
-	"  -V, --version            display version information and exit\n"));
+    printf("\n%s\n", _("Options:"));
+    printf("  -f, --file            %s\n",
+	_("path to configuration file"));
+    printf("  -h, --help            %s\n",
+        _("display help message and exit"));
+    printf("  -n, --no-fork         %s\n",
+	_("do not fork, run in the foreground"));
+    printf("  -R, --random-drop     %s\n",
+	_("percent chance connections will drop"));
+    printf("  -V, --version         %s\n",
+	_("display version information and exit"));
+    putchar('\n');
     exit(EXIT_SUCCESS);
 }
 

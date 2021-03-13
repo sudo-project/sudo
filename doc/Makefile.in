@@ -378,6 +378,8 @@ install-doc: install-dirs
 
 install-plugin:
 
+install-fuzzer:
+
 uninstall:
 	-rm -rf	$(DESTDIR)$(docdir)
 	-rm -f	$(DESTDIR)$(mandirexe)/cvtsudoers.1 \
@@ -393,7 +395,7 @@ uninstall:
 		$(DESTDIR)$(mandirform)/sudo_logsrv.proto.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudo_logsrvd.conf.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers.$(mansectform) \
-		$(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform)
+		$(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 
 splint:
@@ -403,6 +405,8 @@ cppcheck:
 pvs-log-files:
 
 pvs-studio:
+
+fuzz:
 
 check:
 
@@ -419,3 +423,5 @@ clobber: distclean
 realclean: distclean
 
 cleandir: distclean
+
+.PHONY: clean mostlyclean distclean cleandir clobber realclean

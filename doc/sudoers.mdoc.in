@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 8, 2020
+.Dd March 3, 2020
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1064,6 +1064,21 @@ in double quotes
 when they contain multiple words.
 Special characters may be escaped with a backslash
 .Pq Ql \e .
+.Pp
+To include a literal backslash character in a command line argument
+you must escape the backslash twice.
+For example, to match
+.Ql \en
+as part of a command line argument, you must use
+.Ql \e\e\e\en
+in the
+.Em sudoers
+file.
+This is due to there being two levels of escaping, one in the
+.Em sudoers
+parser itself and another when command line arguments are matched by the
+.Xr fnmatch 3
+function.
 .Pp
 Lists have two additional assignment operators,
 .Li +=
@@ -4003,6 +4018,23 @@ is built with SELinux support.
 .Pp
 .Sy Strings that can be used in a boolean context :
 .Bl -tag -width 12n
+.It admin_flag
+The
+.Em admin_flag
+option specifies the path to a file that is created the first time
+a user that is a member of the
+.Em sudo
+or
+.Em admin
+groups runs
+.Nm sudo .
+Only available if
+.Nm sudo
+is configured with the
+.Li --enable-admin-flag
+option.
+The default value is
+.Li ~/.sudo_as_admin_successful .
 .It env_file
 The
 .Em env_file

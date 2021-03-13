@@ -574,6 +574,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Enable SELinux RBAC support"),
 	NULL,
     }, {
+	"admin_flag", T_STR|T_BOOL|T_CHPATH,
+	N_("Path to the file that is created the first time sudo is run: %s"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

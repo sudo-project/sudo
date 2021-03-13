@@ -8,7 +8,7 @@
 #define CALLBACK_CFUNC(func_name) IO_SYMBOL_NAME(_python_plugin_io_ ## func_name)
 
 extern struct io_plugin IO_SYMBOL_NAME(python_io);
-static struct IOPluginContext PLUGIN_CTX = { {}, &IO_SYMBOL_NAME(python_io) };
+static struct IOPluginContext PLUGIN_CTX = { { NULL }, &IO_SYMBOL_NAME(python_io) };
 
 int
 CALLBACK_CFUNC(open)(

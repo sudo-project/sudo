@@ -6,9 +6,6 @@
 
 : ${TESTSUDOERS=testsudoers}
 
-# Avoid warnings about memory leaks when there is a syntax error
-ASAN_OPTIONS=detect_leaks=0; export ASAN_OPTIONS
-
 echo "Testing alias definitions using reserved words"
 echo ""
 $TESTSUDOERS -d <<EOF 2>&1

@@ -132,14 +132,14 @@ main(int argc, char *argv[])
 {
     int tests = 0, errors = 0;
 
-    initprogname(argc > 0 ? argv[0] : "check_iolog_util");
+    initprogname(argc > 0 ? argv[0] : "check_iolog_timing");
 
     test_parse_delay(&tests, &errors);
 
     test_adjust_delay(&tests, &errors);
 
     if (tests != 0) {
-	printf("iolog_util: %d test%s run, %d errors, %d%% success rate\n",
+	printf("iolog_timing: %d test%s run, %d errors, %d%% success rate\n",
 	    tests, tests == 1 ? "" : "s", errors,
 	    (tests - errors) * 100 / tests);
     }

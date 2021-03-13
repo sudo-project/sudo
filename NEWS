@@ -1,3 +1,80 @@
+What's new in Sudo 1.9.6
+
+ * Fixed a sudo_sendlog compilation problem with the AIX xlC compiler.
+
+ * Fixed a regression introduced in sudo 1.9.4 where the
+   --disable-root-mailer configure option had no effect.
+
+ * Added a --disable-leaks configure option that avoids some
+   memory leaks on exit that would otherwise occur.  This is intended
+   to be used with development tools that measure memory leaks.  It
+   is not safe to use in production at this time.
+
+ * Plugged some memory leaks identified by oss-fuzz and ASAN.
+
+ * Fixed the handling of sudoOptions for an LDAP sudoRole that
+   contains multiple sudoCommands.  Previously, some of the options
+   would only be applied to the first sudoCommand.
+
+ * Fixed a potential out of bounds read in the parsing of NOTBEFORE
+   and NOTAFTER sudoers command options (and their LDAP equivalents).
+
+ * The parser used for reading I/O log JSON files is now more
+   resilient when processing invalid JSON.
+
+ * Fixed typos that prevented "make uninstall" from working.
+   GitHub issue #87.
+
+ * Fixed a regression introduced in sudo 1.9.4 where the last line
+   in a sudoers file might not have a terminating NUL character
+   added if no newline was present.
+
+ * Integrated oss-fuzz and LLVM's libFuzzer with sudo.  The new
+   --enable-fuzzer configure option can be combined with the
+   --enable-sanitizer option to build sudo with fuzzing support.
+   Multiple fuzz targets are available for fuzzing different parts
+   of sudo.  Fuzzers are built and tested via "make fuzz" or as part
+   of "make check" (even when sudo is not built with fuzzing support).
+   Fuzzing support currently requires the LLVM clang compiler (not gcc).
+
+ * Fixed the --enable-static-sudoers configure option.
+   GitHub issue #92.
+
+ * Fixed a potential out of bounds read sudo when is run by a user
+   with more groups than the value of "max_groups" in sudo.conf.
+
+ * Added an "admin_flag" sudoers option to make the use of the
+   ~/.sudo_as_admin_successful file configurable on systems where
+   sudo is build with the --enable-admin-flag configure option.
+   This mostly affects Ubuntu and its derivatives.  GitHub issue #56.
+
+ * The "max_groups" setting in sudo.conf is now limited to 1024.
+   This setting is obsolete and should no longer be needed.
+
+ * Fixed a bug in the tilde expansion of "CHROOT=dir" and "CWD=dir"
+   sudoers command options.  A path "~/foo" was expanded to
+   "/home/userfoo" instead of "/home/user/foo".  This also affects
+   the runchroot and runcwd Defaults settings.
+
+ * Fixed a bug on systems without a native getdelim(3) function
+   where very long lines could cause parsing of the sudoers file
+   to end prematurely.  Bug #960.
+
+ * Fixed a potential integer overflow when converting the
+   timestamp_timeout and passwd_timeout sudoers settings to a
+   timespec struct.
+
+ * The default for the "group_source" setting in sudo.conf is now
+   "dynamic" on macOS.  Recent versions of macOS do not reliably
+   return all of a user's non-local groups via getgroups(2), even
+   when _DARWIN_UNLIMITED_GETGROUPS is defined.  Bug #946.
+
+ * Fixed a potential use-after-free in the PAM conversation function.
+   Bug #967.
+
+ * Fixed potential redefinition of sys/stat.h macros in sudo_compat.h.
+   Bug #968.
+
 What's new in Sudo 1.9.5p2
 
  * Fixed sudo's setprogname(3) emulation on systems that don't
@@ -546,7 +623,7 @@ What's new in Sudo 1.8.30
    those users.
 
  * Fixed a problem restoring the SELinux tty context during reboot
-   if mctransd is killed before sudo finishes.  GitHub Issue #17.
+   if mctransd is killed before sudo finishes.  GitHub issue #17.
 
  * Fixed an intermittent warning on NetBSD when sudo restores the
    initial stack size limit.

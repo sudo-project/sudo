@@ -345,14 +345,14 @@ sesh_sudoedit(int argc, char *argv[])
     edit_flags = CD_SUDOEDIT_FOLLOW;
 
     /* Check for -h flag (don't follow links). */
-    if (argv[2] != NULL && strcmp(argv[2], "-h") == 0) {
+    if (argc > 2 && strcmp(argv[2], "-h") == 0) {
 	argv++;
 	argc--;
 	CLR(edit_flags, CD_SUDOEDIT_FOLLOW); // -V753
     }
 
     /* Check for -w flag (disallow directories writable by the user). */
-    if (argv[2] != NULL && strcmp(argv[2], "-w") == 0) {
+    if (argc > 2 && strcmp(argv[2], "-w") == 0) {
 	SET(edit_flags, CD_SUDOEDIT_CHECKDIR);
 
 	/* Parse uid:gid:gid1,gid2,... */

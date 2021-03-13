@@ -410,8 +410,8 @@ case "$osversion" in
 
 		if [ $osrelease -ge 11 ]; then
 		    # Build 64-bit binaries on Solaris 11 and above.
-		    CFLAGS="-O2 -g -m64"; export CFLAGS
-		    LDFLAGS="-m64"; export LDFLAGS
+		    CFLAGS="${CFLAGS:--O2 -g} -m64"; export CFLAGS
+		    LDFLAGS="-m64${LDFLAGS:+ }${LDFLAGS}"; export LDFLAGS
 		    # Solaris audit is not supported by Illumos
 		    if test X"`uname -o 2>/dev/null`" = X"illumos"; then
 			configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"

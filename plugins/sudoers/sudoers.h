@@ -314,6 +314,7 @@ extern bool sudoers_strict;
 
 /* toke.l */
 YY_DECL;
+void sudoersrestart(FILE *);
 extern FILE *sudoersin;
 extern const char *sudoers_file;
 extern char *sudoers;
@@ -340,6 +341,7 @@ sudo_dso_public void sudo_gr_addref(struct group *);
 sudo_dso_public void sudo_gr_delref(struct group *);
 bool user_in_group(const struct passwd *, const char *);
 struct group *sudo_fakegrnam(const char *);
+struct group *sudo_mkgrent(const char *group, gid_t gid, ...);
 struct gid_list *sudo_get_gidlist(const struct passwd *pw, unsigned int type);
 struct group_list *sudo_get_grlist(const struct passwd *pw);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
@@ -389,6 +391,9 @@ bool validate_env_vars(char * const envp[]);
 int sudo_setenv(const char *var, const char *val, int overwrite);
 int sudo_unsetenv(const char *var);
 char *sudo_getenv(const char *name);
+char *sudo_getenv_nodebug(const char *name);
+int sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite);
+int sudo_unsetenv_nodebug(const char *var);
 int sudoers_hook_getenv(const char *name, char **value, void *closure);
 int sudoers_hook_putenv(char *string, void *closure);
 int sudoers_hook_setenv(const char *name, const char *value, int overwrite, void *closure);
@@ -404,6 +409,7 @@ int set_cmnd_path(const char *runchroot);
 int sudoers_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
+void sudo_user_free(void);
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
 extern bool force_umask;
@@ -443,16 +449,24 @@ bool expand_tilde(char **path, const char *user);
 enum sudoers_gc_types {
     GC_UNKNOWN,
     GC_VECTOR,
+    GC_EDIT_ARGS,
     GC_PTR
 };
 bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);
 bool sudoers_gc_remove(enum sudoers_gc_types type, void *ptr);
 void sudoers_gc_init(void);
+void sudoers_gc_run(void);
 
 /* rcstr.c */
 char *rcstr_dup(const char *src);
 char *rcstr_alloc(size_t len);
 char *rcstr_addref(const char *s);
 void rcstr_delref(const char *s);
+
+/* strlcpy_unesc.c */
+size_t strlcpy_unescape(char *dst, const char *src, size_t size);
+
+/* strvec_join.c */
+char *strvec_join(char *const argv[], char sep, size_t (*cpy)(char *, const char *, size_t));
 
 #endif /* SUDOERS_SUDOERS_H */

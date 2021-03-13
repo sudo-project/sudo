@@ -209,9 +209,9 @@ main(int argc, char *argv[])
 
 	/* Parse input file. */
 	if ((infp = fopen(infile, "r")) == NULL) {
-	    sudo_warn("%s", argv[1]);
+	    sudo_warn("%s", argv[i]);
 	    errors++;
-	    goto next;
+	    continue;
 	}
 	if (!iolog_parse_json(infp, infile, &root)) {
 	    errors++;

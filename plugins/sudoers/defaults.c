@@ -532,6 +532,10 @@ init_defaults(void)
 #ifdef HAVE_INNETGR
     def_use_netgroups = true;
 #endif
+#ifdef _PATH_SUDO_ADMIN_FLAG
+    if ((def_admin_flag = strdup(_PATH_SUDO_ADMIN_FLAG)) == NULL)
+	goto oom;
+#endif
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;
@@ -682,7 +686,6 @@ default_binding_matches(struct sudoers_parse_tree *parse_tree,
     switch (d->type) {
     case DEFAULTS:
 	debug_return_bool(true);
-	break;
     case DEFAULTS_USER:
 	if (userlist_matches(parse_tree, sudo_user.pw, d->binding) == ALLOW)
 	    debug_return_bool(true);
@@ -852,10 +855,13 @@ store_timespec(const char *str, union sudo_defs_val *sd_un)
 	while (*str != '\0' && *str != '.') {
 		if (!isdigit((unsigned char)*str))
 		    debug_return_bool(false);	/* invalid number */
-		if (ts.tv_sec > TIME_T_MAX / 10)
+
+		/* Verify (ts.tv_sec * 10) + digit <= TIME_T_MAX. */
+		i = *str++ - '0';
+		if (ts.tv_sec > (TIME_T_MAX - i) / 10)
 		    debug_return_bool(false);	/* overflow */
 		ts.tv_sec *= 10;
-		ts.tv_sec += *str++ - '0';
+		ts.tv_sec += i;
 	}
 	if (*str++ == '.') {
 	    /* Convert optional fractional component to nanosecs. */
