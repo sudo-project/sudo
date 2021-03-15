@@ -1,3 +1,9 @@
+What's new in Sudo 1.9.6p1
+
+ * Fixed a regression introduced in sudo 1.9.6 that resulted in an
+   error message instead of a usage message when sudo is run with
+   no arguments.
+
 What's new in Sudo 1.9.6
 
  * Fixed a sudo_sendlog compilation problem with the AIX xlC compiler.
