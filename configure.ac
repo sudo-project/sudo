@@ -4457,6 +4457,12 @@ case "$OS" in
 esac
 
 dnl
+dnl For fuzz_policy we redefine getaddrinfo() and freeaddrinfo(), but
+dnl this can cause problems with ld.lld when sanitizers are enabled.
+dnl
+AX_CHECK_LINK_FLAG([-Wl,--allow-multiple-definition], [AX_APPEND_FLAG([-Wl,--allow-multiple-definition], [LDFLAGS])])
+
+dnl
 dnl Check for symbol visibility support.
 dnl This test relies on AC_LANG_WERROR
 dnl
