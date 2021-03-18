@@ -146,9 +146,9 @@ cppcheck:
 
 pvs-log-files: $(POBJS)
 
-fuzz:
+check-fuzzer:
 
-check: $(TEST_PROGS)
+check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \

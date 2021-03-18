@@ -551,7 +551,7 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
-fuzz: $(FUZZ_PROGS)
+check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
@@ -577,7 +577,7 @@ fuzz: $(FUZZ_PROGS)
 	    fi; \
 	fi
 
-check: $(TEST_PROGS) visudo testsudoers cvtsudoers fuzz
+check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \

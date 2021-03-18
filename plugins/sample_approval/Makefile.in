@@ -181,9 +181,9 @@ pvs-log-files: $(POBJS)
 pvs-studio: $(POBJS)
 	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
-fuzz:
+check-fuzzer:
 
-check:
+check: check-fuzzer
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la *.a *.i *.plog \

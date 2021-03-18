@@ -148,9 +148,9 @@ cppcheck:
 
 pvs-log-files: $(POBJS)
 
-fuzz:
+check-fuzzer:
 
-check:
+check: check-fuzzer
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la
