@@ -991,6 +991,7 @@ plugins/sudoers/sudoers_hooks.c
 plugins/sudoers/sudoers_version.h
 plugins/sudoers/sudoreplay.c
 plugins/sudoers/testsudoers.c
+plugins/sudoers/testsudoers_pwutil.c
 plugins/sudoers/timeout.c
 plugins/sudoers/timestamp.c
 plugins/sudoers/timestr.c

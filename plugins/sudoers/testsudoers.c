@@ -68,19 +68,11 @@ static bool cb_runas_default(const union sudo_defs_val *);
 static int testsudoers_error(const char *msg);
 static int testsudoers_output(const char *buf);
 
-/* tsgetgrpw.c */
-extern void setgrfile(const char *);
-extern void setgrent(void);
-extern void endgrent(void);
-extern struct group *getgrent(void);
-extern struct group *getgrnam(const char *);
-extern struct group *getgrgid(gid_t);
-extern void setpwfile(const char *);
-extern void setpwent(void);
-extern void endpwent(void);
-extern struct passwd *getpwent(void);
-extern struct passwd *getpwnam(const char *);
-extern struct passwd *getpwuid(uid_t);
+/* testsudoers_pwutil.c */
+extern struct cache_item *testsudoers_make_gritem(gid_t gid, const char *group);
+extern struct cache_item *testsudoers_make_grlist_item(const struct passwd *pw, char * const *groups);
+extern struct cache_item *testsudoers_make_gidlist_item(const struct passwd *pw, char * const *gids, unsigned int type);
+extern struct cache_item *testsudoers_make_pwitem(uid_t uid, const char *user);
 
 /* gram.y */
 extern int (*trace_print)(const char *msg);
@@ -194,11 +186,18 @@ main(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    /* Set group/passwd file and init the cache. */
-    if (grfile)
-	setgrfile(grfile);
-    if (pwfile)
-	setpwfile(pwfile);
+    if (grfile != NULL || pwfile != NULL) {
+	/* Set group/passwd file and init the cache. */
+	if (grfile)
+	    testsudoers_setgrfile(grfile);
+	if (pwfile)
+	    testsudoers_setpwfile(pwfile);
+
+	/* Use custom passwd/group backend. */
+	sudo_pwutil_set_backend(testsudoers_make_pwitem,
+	    testsudoers_make_gritem, testsudoers_make_gidlist_item,
+	    testsudoers_make_grlist_item);
+    }
 
     if (argc < 2) {
 	if (!dflag)

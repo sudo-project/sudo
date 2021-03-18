@@ -59,30 +59,16 @@ static FILE *grf;
 static const char *grfile = "/etc/group";
 static int gr_stayopen;
 
-void setgrfile(const char *);
-void setgrent(void);
-void endgrent(void);
-struct group *getgrent(void);
-struct group *getgrnam(const char *);
-struct group *getgrgid(gid_t);
-
-void setpwfile(const char *);
-void setpwent(void);
-void endpwent(void);
-struct passwd *getpwent(void);
-struct passwd *getpwnam(const char *);
-struct passwd *getpwuid(uid_t);
-
 void
-setpwfile(const char *file)
+testsudoers_setpwfile(const char *file)
 {
     pwfile = file;
     if (pwf != NULL)
-	endpwent();
+	testsudoers_endpwent();
 }
 
 void
-setpwent(void)
+testsudoers_setpwent(void)
 {
     if (pwf == NULL) {
 	pwf = fopen(pwfile, "r");
@@ -99,7 +85,7 @@ setpwent(void)
 }
 
 void
-endpwent(void)
+testsudoers_endpwent(void)
 {
     if (pwf != NULL) {
 	fclose(pwf);
@@ -109,7 +95,7 @@ endpwent(void)
 }
 
 struct passwd *
-getpwent(void)
+testsudoers_getpwent(void)
 {
     static struct passwd pw;
     static char pwbuf[LINE_MAX];
@@ -161,7 +147,7 @@ next_entry:
 }
 
 struct passwd *
-getpwnam(const char *name)
+testsudoers_getpwnam(const char *name)
 {
     struct passwd *pw;
 
@@ -175,7 +161,7 @@ getpwnam(const char *name)
     } else {
 	rewind(pwf);
     }
-    while ((pw = getpwent()) != NULL) {
+    while ((pw = testsudoers_getpwent()) != NULL) {
 	if (strcmp(pw->pw_name, name) == 0)
 	    break;
     }
@@ -187,7 +173,7 @@ getpwnam(const char *name)
 }
 
 struct passwd *
-getpwuid(uid_t uid)
+testsudoers_getpwuid(uid_t uid)
 {
     struct passwd *pw;
 
@@ -201,7 +187,7 @@ getpwuid(uid_t uid)
     } else {
 	rewind(pwf);
     }
-    while ((pw = getpwent()) != NULL) {
+    while ((pw = testsudoers_getpwent()) != NULL) {
 	if (pw->pw_uid == uid)
 	    break;
     }
@@ -213,7 +199,7 @@ getpwuid(uid_t uid)
 }
 
 void
-setgrfile(const char *file)
+testsudoers_setgrfile(const char *file)
 {
     grfile = file;
     if (grf != NULL)
@@ -221,7 +207,7 @@ setgrfile(const char *file)
 }
 
 void
-setgrent(void)
+testsudoers_setgrent(void)
 {
     if (grf == NULL) {
 	grf = fopen(grfile, "r");
@@ -238,7 +224,7 @@ setgrent(void)
 }
 
 void
-endgrent(void)
+testsudoers_endgrent(void)
 {
     if (grf != NULL) {
 	fclose(grf);
@@ -248,7 +234,7 @@ endgrent(void)
 }
 
 struct group *
-getgrent(void)
+testsudoers_getgrent(void)
 {
     static struct group gr;
     static char grbuf[LINE_MAX], *gr_mem[GRMEM_MAX+1];
@@ -297,7 +283,7 @@ next_entry:
 }
 
 struct group *
-getgrnam(const char *name)
+testsudoers_getgrnam(const char *name)
 {
     struct group *gr;
 
@@ -311,7 +297,7 @@ getgrnam(const char *name)
     } else {
 	rewind(grf);
     }
-    while ((gr = getgrent()) != NULL) {
+    while ((gr = testsudoers_getgrent()) != NULL) {
 	if (strcmp(gr->gr_name, name) == 0)
 	    break;
     }
@@ -323,7 +309,7 @@ getgrnam(const char *name)
 }
 
 struct group *
-getgrgid(gid_t gid)
+testsudoers_getgrgid(gid_t gid)
 {
     struct group *gr;
 
@@ -337,7 +323,7 @@ getgrgid(gid_t gid)
     } else {
 	rewind(grf);
     }
-    while ((gr = getgrent()) != NULL) {
+    while ((gr = testsudoers_getgrent()) != NULL) {
 	if (gr->gr_gid == gid)
 	    break;
     }
@@ -352,7 +338,7 @@ getgrgid(gid_t gid)
  * Copied from getgrouplist.c
  */
 int
-sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+testsudoers_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     GETGROUPS_T **groupsp, int *ngroupsp)
 {
     GETGROUPS_T *groups = *groupsp;
@@ -378,8 +364,8 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     /* We support BSD semantics where the first element is the base gid */
     groups[0] = basegid;
 
-    setgrent();
-    while ((grp = getgrent()) != NULL) {
+    testsudoers_setgrent();
+    while ((grp = testsudoers_getgrent()) != NULL) {
 	if (grp->gr_gid == basegid || grp->gr_mem == NULL)
 	    continue;
 
@@ -419,7 +405,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     ret = 0;
 
 done:
-    endgrent();
+    testsudoers_endgrent();
     *groupsp = groups;
     *ngroupsp = ngroups;
 
