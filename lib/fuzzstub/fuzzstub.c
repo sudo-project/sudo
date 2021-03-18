@@ -107,7 +107,6 @@ main(int argc, char *argv[])
 	fprintf(stderr, "Running: %s\n", argv[i]);
 	sudo_gettime_mono(&start_time);
 	LLVMFuzzerTestOneInput(buf, nread);
-	fflush(stdout);
 	sudo_gettime_mono(&stop_time);
 	sudo_timespecsub(&stop_time, &start_time, &stop_time);
 	ms = (stop_time.tv_sec * 1000) + (stop_time.tv_nsec / 1000000);
