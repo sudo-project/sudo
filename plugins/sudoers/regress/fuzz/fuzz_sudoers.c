@@ -387,6 +387,7 @@ done:
     memset(&sudo_user, 0, sizeof(sudo_user));
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     sudoers_debug_deregister();
+    fflush(stdout);
 
     return 0;
 }

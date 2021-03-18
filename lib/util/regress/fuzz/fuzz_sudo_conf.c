@@ -57,5 +57,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     unlink(tempfile);
 
+    fflush(stdout);
+
     return 0;
 }

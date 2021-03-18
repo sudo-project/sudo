@@ -108,6 +108,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     free_parse_tree(&parse_tree);
     fclose(fp);
     sudoers_debug_deregister();
+    fflush(stdout);
 
     return 0;
 }
