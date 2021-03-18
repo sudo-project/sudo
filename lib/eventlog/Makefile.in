@@ -146,6 +146,8 @@ cppcheck:
 
 pvs-log-files: $(POBJS)
 
+fuzz:
+
 check-fuzzer:
 
 check: $(TEST_PROGS) check-fuzzer

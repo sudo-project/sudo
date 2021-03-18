@@ -220,6 +220,8 @@ realclean: distclean
 
 cleandir: realclean
 
+fuzz:
+
 check-fuzzer:
 
 check: $(TEST_PROGS) check-fuzzer
