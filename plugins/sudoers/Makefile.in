@@ -246,7 +246,7 @@ FUZZ_POLICY_OBJS = editor.lo env.lo env_pattern.lo fuzz_policy.o fuzz_stubs.o \
 		   gc.lo iolog_path_escapes.lo locale.lo policy.lo \
 		   strlcpy_unesc.lo strvec_join.lo sudoers.lo sudoers_hooks.lo
 
-FUZZ_POLICY_CORPUS = $(srcdir)/regress/corpus/policy/policy.*
+FUZZ_POLICY_CORPUS = $(srcdir)/regress/corpus/seed/policy/policy.*
 
 FUZZ_SUDOERS_OBJS = check_aliases.o fuzz_stubs.o fuzz_sudoers.o fmtsudoers.lo \
 		    parse.lo locale.lo sudo_printf.o

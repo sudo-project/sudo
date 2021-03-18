@@ -176,7 +176,7 @@ VSYSLOG_TEST_OBJS = vsyslog_test.lo vsyslog.lo
 
 FUZZ_SUDO_CONF_OBJS = fuzz_sudo_conf.lo
 
-FUZZ_SUDO_CONF_CORPUS = $(srcdir)/regress/corpus/sudo_conf/sudo.conf.*
+FUZZ_SUDO_CONF_CORPUS = $(srcdir)/regress/corpus/seed/sudo_conf/sudo.conf.*
 
 all: libsudo_util.la
 

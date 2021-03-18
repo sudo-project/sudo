@@ -131,7 +131,7 @@ VERSION = @PACKAGE_VERSION@
 
 FUZZ_LOGSRVD_CONF_OBJS = fuzz_logsrvd_conf.o logsrvd_conf.o
 
-FUZZ_LOGSRVD_CONF_CORPUS = $(srcdir)/regress/corpus/logsrvd_conf/logsrvd.conf.*
+FUZZ_LOGSRVD_CONF_CORPUS = $(srcdir)/regress/corpus/seed/logsrvd_conf/logsrvd.conf.*
 
 all: $(PROGS)
 

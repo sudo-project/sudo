@@ -119,15 +119,15 @@ HOST_PORT_TEST_OBJS = host_port_test.lo
 
 FUZZ_IOLOG_JSON_OBJS = fuzz_iolog_json.lo
 
-FUZZ_IOLOG_JSON_CORPUS = $(srcdir)/regress/corpus/log_json/*.json
+FUZZ_IOLOG_JSON_CORPUS = $(srcdir)/regress/corpus/seed/log_json/*.json
 
 FUZZ_IOLOG_LEGACY_OBJS = fuzz_iolog_legacy.lo
 
-FUZZ_IOLOG_LEGACY_CORPUS = $(srcdir)/regress/corpus/log_legacy/*.log
+FUZZ_IOLOG_LEGACY_CORPUS = $(srcdir)/regress/corpus/seed/log_legacy/*.log
 
 FUZZ_IOLOG_TIMING_OBJS = fuzz_iolog_timing.lo
 
-FUZZ_IOLOG_TIMING_CORPUS = $(srcdir)/regress/corpus/timing/timing.*
+FUZZ_IOLOG_TIMING_CORPUS = $(srcdir)/regress/corpus/seed/timing/timing.*
 
 all: libsudo_iolog.la
 
