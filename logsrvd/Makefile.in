@@ -192,7 +192,7 @@ run-fuzz_logsrvd_conf: fuzz_logsrvd_conf
 	for f in $(FUZZ_LOGSRVD_CONF_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_logsrvd_conf -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_logsrvd_conf -dict=$(srcdir)/regress/fuzz/fuzz_logsrvd_conf.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
 
 pre-install:
 
