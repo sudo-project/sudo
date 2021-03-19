@@ -180,9 +180,14 @@ Compilation options:
 	Enable building sudo with the LLVM libFuzzer, see
 	https://www.llvm.org/docs/LibFuzzer.html for details.
 	The resulting binaries, beginning with "fuzz_" can be used
-	to test sudo.  This option is generally used in conjunction
-	with --enable-sanitizer.  This option requires the clang
-	C compiler--it is not supported by gcc.
+	to test sudo.  To run all the fuzzers for 8192 iterations,
+	"make fuzz" can be used.  This option is generally used in
+	conjunction with --enable-sanitizer.
+
+	Fuzzing currently requires the clang C compiler--it is not
+	supported by gcc.  For best results, it is suggested to use
+	clang 11 or higher.  Some of the fuzzers are known to hang
+	when used with earlier versions.
 
 	This option should only be used for testing and not in a
 	production environment.
