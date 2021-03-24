@@ -95,6 +95,11 @@ struct rtentry;
 # undef SIOCGLIFCONF
 #endif
 
+/* SCO OpenServer 5 returns a bogus value for SIOCGIFNUM. */
+#if _SCO_DS >= 1
+# undef SIOCGIFNUM
+#endif
+
 #ifdef HAVE_GETIFADDRS
 
 /*
