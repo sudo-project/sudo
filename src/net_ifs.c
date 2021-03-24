@@ -143,8 +143,7 @@ get_net_ifs(char **addrinfo)
     if ((cp = malloc(ailen)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate memory");
-	num_interfaces = -1;
-	goto done;
+	goto bad;
     }
     *addrinfo = cp;
 
@@ -203,12 +202,15 @@ get_net_ifs(char **addrinfo)
 	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
 	if (len < 0 || (size_t)len >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    goto done;
+	    goto bad;
 	}
 	cp += len;
 	ailen -= len;
     }
+    goto done;
 
+bad:
+    num_interfaces = -1;
 done:
 # ifdef HAVE_FREEIFADDRS
     freeifaddrs(ifaddrs);
@@ -236,8 +238,8 @@ get_net_ifs(char **addrinfo)
 # endif
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
     int i, n, sock, sock4, sock6 = -1;
-    int num_interfaces = -1;
-    size_t ailen, buflen;
+    int num_interfaces = 0;
+    size_t ailen;
     char *cp;
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
 
@@ -272,27 +274,27 @@ get_net_ifs(char **addrinfo)
     if (lifconf.lifc_buf == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate memory");
-	goto done;
+	goto bad;
     }
     if (ioctl(sock, SIOCGLIFCONF, &lifconf) < 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to get interface list (SIOCGLIFCONF)");
-	goto done;
+	goto bad;
     }
 
     /* Allocate space for the maximum number of interfaces that could exist. */
-    if ((n = lifconf.lifc_len / sizeof(struct lifreq)) > 0) {
-	ailen = n * 2 * INET6_ADDRSTRLEN;
-	if ((cp = malloc(ailen)) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to allocate memory");
-	    goto done;
-	}
-	*addrinfo = cp;
+    n = lifconf.lifc_len / sizeof(struct lifreq);
+    if (n == 0)
+	goto done;
+    ailen = n * 2 * INET6_ADDRSTRLEN;
+    if ((cp = malloc(ailen)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	goto bad;
     }
+    *addrinfo = cp;
 
     /* For each interface, store the ip address and netmask. */
-    num_interfaces = 0;
     for (i = 0; i < lifconf.lifc_len; ) {
 	/* Get a pointer to the current interface. */
 	lifr = (struct lifreq *)&lifconf.lifc_buf[i];
@@ -389,14 +391,17 @@ get_net_ifs(char **addrinfo)
 	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
 	if (n < 0 || (size_t)n >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    goto done;
+	    goto bad;
 	}
 	cp += n;
 	ailen -= n;
 
 	num_interfaces++;
     }
+    goto done;
 
+bad:
+    num_interfaces = -1;
 done:
     free(lifconf.lifc_buf);
     if (sock4 != -1)
@@ -424,8 +429,9 @@ get_net_ifs(char **addrinfo)
     struct sockaddr_in6 *sin6;
 # endif
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
-    int i, n, sock, sock4, sock6 = -1, num_interfaces = 0;
-    size_t ailen;
+    int i, n, sock, sock4, sock6 = -1;
+    int num_interfaces = 0;
+    size_t ailen, buflen;
     char *cp, *ifconf_buf = NULL;
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
 
@@ -442,31 +448,43 @@ get_net_ifs(char **addrinfo)
     /* Use INET6 socket with SIOCGIFCONF if possible (may not matter). */
     sock = sock6 != -1 ? sock6 : sock4;
 
-    /* Get the size of the interface buffer (if possible). */
-    memset(&ifconf, 0, sizeof(ifconf));
+    /*
+     * Get the size of the interface buffer (if possible).
+     * We over-allocate a bit in case interfaces come afterward.
+     */
 # if defined(SIOCGSIZIFCONF)
     if (ioctl(sock, SIOCGSIZIFCONF, &i) != -1) {
-	ifconf.ifc_len = i;
-    }
+	buflen = i + (sizeof(struct ifreq) * 4);
+    } else
 # elif defined(SIOCGIFNUM)
     if (ioctl(sock, SIOCGIFNUM, &i) != -1) {
-	ifconf.ifc_len = sizeof(struct ifreq) * (i + 4);
-    }
+	buflen = (i + 4) * sizeof(struct ifreq);
+    } else
 # endif
-    if (ifconf.ifc_len = 0)
-	ifconf.ifc_len = sizeof(struct ifreq) * 512;
-
-    /* Allocate and fill in the interface buffer. */
-    ifconf.ifc_buf = malloc(ifconf.ifc_len);
-    if (ifconf.ifc_buf == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to allocate memory");
-	num_interfaces = -1;
-	goto done;
+    {
+	buflen = 256 * sizeof(struct ifreq);
     }
-    if (ioctl(sock, SIOCGIFCONF, &ifconf) < 0) {
-	num_interfaces = -1;
-	goto done;
+
+    /* Get interface configuration. */
+    memset(&ifconf, 0, sizeof(ifconf));
+    for (i = 0; i < 4; i++) {
+	ifconf.ifc_len = buflen;
+	ifconf.ifc_buf = malloc(buflen);
+	if (ifconf.ifc_buf == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    goto bad;
+	}
+
+	/* Note that some kernels return EINVAL if the buffer is too small */
+	if (ioctl(sock, SIOCGIFCONF, &ifconf) < 0 && errno != EINVAL)
+	    goto bad;
+
+	/* Break out of loop if we have a big enough buffer. */
+	if (ifconf.ifc_len + sizeof(struct ifreq) < buflen)
+	    break;
+	buflen *= 2;
+	free(ifconf.ifc_buf);
     }
 
     /*
@@ -488,8 +506,7 @@ get_net_ifs(char **addrinfo)
     if ((cp = malloc(ailen)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate memory");
-	num_interfaces = -1;
-	goto done;
+	goto bad;
     }
     *addrinfo = cp;
 
@@ -589,14 +606,17 @@ get_net_ifs(char **addrinfo)
 	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
 	if (n < 0 || (size_t)n >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    goto done;
+	    goto bad;
 	}
 	cp += n;
 	ailen -= n;
 
 	num_interfaces++;
     }
+    goto done;
 
+bad:
+    num_interfaces = -1;
 done:
     free(ifconf_buf);
     if (sock4 != -1)
