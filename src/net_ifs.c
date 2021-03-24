@@ -234,7 +234,6 @@ done:
 int
 get_net_ifs(char **addrinfo)
 {
-    struct lifreq *lifr, lifr_tmp;
     struct lifconf lifconf;
     struct lifnum lifn;
     struct sockaddr_in *sin;
@@ -299,16 +298,19 @@ get_net_ifs(char **addrinfo)
     }
     *addrinfo = cp;
 
-    /* For each interface, store the ip address and netmask. */
+    /*
+     * For each interface, store the ip address and netmask.
+     * Keep a copy of the address family, else it will be overwritten.
+     */
     for (i = 0; i < lifconf.lifc_len; ) {
-	/* Get a pointer to the current interface. */
-	lifr = (struct lifreq *)&lifconf.lifc_buf[i];
+	struct lifreq *lifr = (struct lifreq *)&lifconf.lifc_buf[i];
+	const int family = lifr->lifr_addr.ss_family;
 
 	/* Set i to the subscript of the next interface (no sa_len). */
 	i += sizeof(struct lifreq);
 
 	/* Store the address. */
-	switch (lifr->lifr_addr.ss_family) {
+	switch (family) {
 	case AF_INET:
 	    sin = (struct sockaddr_in *)&lifr->lifr_addr;
 	    if (sin->sin_addr.s_addr == INADDR_ANY || sin->sin_addr.s_addr == INADDR_NONE) {
@@ -342,33 +344,29 @@ get_net_ifs(char **addrinfo)
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"ignoring address with family %d for %s",
-		lifr->lifr_addr.ss_family, lifr->lifr_name);
+		family, lifr->lifr_name);
 	    continue;
 	}
 
 	/* Skip interfaces marked "down" and "loopback". */
-	memset(&lifr_tmp, 0, sizeof(lifr_tmp));
-	memcpy(lifr_tmp.lifr_name, lifr->lifr_name, sizeof(lifr_tmp.lifr_name));
-	if (ioctl(sock, SIOCGLIFFLAGS, &lifr_tmp) < 0) {
+	if (ioctl(sock, SIOCGLIFFLAGS, lifr) < 0) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"SIOCGLIFFLAGS for %s", lifr->lifr_name);
 	    continue;
 	}
-	if (!ISSET(lifr_tmp.lifr_flags, IFF_UP) ||
-	    ISSET(lifr_tmp.lifr_flags, IFF_LOOPBACK))
+	if (!ISSET(lifr->lifr_flags, IFF_UP) ||
+	    ISSET(lifr->lifr_flags, IFF_LOOPBACK))
 		continue;
 
 	/* Fetch and store the netmask. */
-	memset(&lifr_tmp, 0, sizeof(lifr_tmp));
-	memcpy(lifr_tmp.lifr_name, lifr->lifr_name, sizeof(lifr_tmp.lifr_name));
-	if (ioctl(sock, SIOCGLIFNETMASK, &lifr_tmp) < 0) {
+	if (ioctl(sock, SIOCGLIFNETMASK, lifr) < 0) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"SIOCGLIFNETMASK for %s", lifr->lifr_name);
 	    continue;
 	}
-	switch (lifr->lifr_addr.ss_family) {
+	switch (family) {
 	case AF_INET:
-	    sin = (struct sockaddr_in *)&lifr_tmp.lifr_addr;
+	    sin = (struct sockaddr_in *)&lifr->lifr_addr;
 	    if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET mask for %s", lifr->lifr_name);
@@ -377,7 +375,7 @@ get_net_ifs(char **addrinfo)
 	    break;
 # ifdef HAVE_STRUCT_IN6_ADDR
 	case AF_INET6:
-	    sin6 = (struct sockaddr_in6 *)&lifr_tmp.lifr_addr;
+	    sin6 = (struct sockaddr_in6 *)&lifr->lifr_addr;
 	    if (inet_ntop(AF_INET6, &sin6->sin6_addr, maskstr, sizeof(maskstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET6 mask for %s", lifr->lifr_name);
@@ -388,7 +386,7 @@ get_net_ifs(char **addrinfo)
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unexpected address family %d for %s",
-		lifr->lifr_addr.ss_family, lifr->lifr_name);
+		family, lifr->lifr_name);
 	    continue;
 	}
 
@@ -426,9 +424,8 @@ done:
 int
 get_net_ifs(char **addrinfo)
 {
-    long ifr_tmpbuf[1024 / sizeof(long)];
-    struct ifreq *ifr, *ifr_tmp = (struct ifreq *)ifr_tmpbuf;
     struct ifconf ifconf;
+    struct ifreq *ifr;
     struct sockaddr_in *sin;
 # ifdef HAVE_STRUCT_IN6_ADDR
     struct sockaddr_in6 *sin6;
@@ -515,10 +512,15 @@ get_net_ifs(char **addrinfo)
     }
     *addrinfo = cp;
 
-    /* For each interface, store the ip address and netmask. */
+    /*
+     * For each interface, store the ip address and netmask.
+     * Keep a copy of the address family, else it will be overwritten.
+     */
     for (i = 0; i < ifconf.ifc_len; ) {
-	/* Get a pointer to the current interface. */
+	int family;
+
 	ifr = (struct ifreq *)&ifconf.ifc_buf[i];
+	family = ifr->ifr_addr.sa_family;
 
 	/* Set i to the subscript of the next interface. */
 	i += sizeof(struct ifreq);
@@ -528,7 +530,7 @@ get_net_ifs(char **addrinfo)
 #endif /* HAVE_STRUCT_SOCKADDR_SA_LEN */
 
 	/* Store the address. */
-	switch (ifr->ifr_addr.sa_family) {
+	switch (family) {
 	case AF_INET:
 	    sin = (struct sockaddr_in *)&ifr->ifr_addr;
 	    if (sin->sin_addr.s_addr == INADDR_ANY || sin->sin_addr.s_addr == INADDR_NONE) {
@@ -562,31 +564,31 @@ get_net_ifs(char **addrinfo)
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unexpected address family %d for %s",
-		ifr->ifr_addr.sa_family, ifr->ifr_name);
+		family, ifr->ifr_name);
 	    continue;
 	}
 
 	/* Skip interfaces marked "down" and "loopback". */
-#ifdef SIOCGIFFLAGS
-	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
-	memcpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name));
-	if (ioctl(sock, SIOCGIFFLAGS, ifr_tmp) < 0)
-#endif
-	    memcpy(ifr_tmp, ifr, sizeof(*ifr_tmp));
-	if (!ISSET(ifr_tmp->ifr_flags, IFF_UP) ||
-	    ISSET(ifr_tmp->ifr_flags, IFF_LOOPBACK))
+	if (ioctl(sock, SIOCGIFFLAGS, ifr) < 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"SIOCGLIFFLAGS for %s", ifr->ifr_name);
+	    continue;
+	}
+	if (!ISSET(ifr->ifr_flags, IFF_UP) ||
+	    ISSET(ifr->ifr_flags, IFF_LOOPBACK))
 		continue;
 
 	/* Fetch and store the netmask. */
-	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
-	memcpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name));
-	if (ioctl(sock, SIOCGIFNETMASK, ifr_tmp) < 0)
+	if (ioctl(sock, SIOCGIFNETMASK, ifr) < 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"SIOCGLIFNETMASK for %s", ifr->ifr_name);
 	    continue;
+	}
 
 	/* Convert the mask to string form. */
-	switch (ifr->ifr_addr.sa_family) {
+	switch (family) {
 	case AF_INET:
-	    sin = (struct sockaddr_in *)&ifr_tmp->ifr_addr;
+	    sin = (struct sockaddr_in *)&ifr->ifr_addr;
 	    if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET mask for %s", ifr->ifr_name);
@@ -595,7 +597,7 @@ get_net_ifs(char **addrinfo)
 	    break;
 # ifdef HAVE_STRUCT_IN6_ADDR
 	case AF_INET6:
-	    sin6 = (struct sockaddr_in6 *)&ifr_tmp->ifr_addr;
+	    sin6 = (struct sockaddr_in6 *)&ifr->ifr_addr;
 	    if (inet_ntop(AF_INET6, &sin6->sin6_addr, maskstr, sizeof(maskstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET6 mask for %s", ifr->ifr_name);
