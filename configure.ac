@@ -2184,24 +2184,6 @@ case "$host" in
 		# lockf() is broken on the Hurd
 		ac_cv_func_lockf=no
 		;;
-    *-*-riscos*)
-		LIBS="${LIBS} -lsun -lbsd"
-		AX_APPEND_FLAG([-I/usr/include], [CPPFLAGS])
-		AX_APPEND_FLAG([-I/usr/include/bsd], [CPPFLAGS])
-		AX_APPEND_FLAG([-D_MIPS], [CPPFLAGS])
-		: ${mansectsu='1m'}
-		: ${mansectform='4'}
-		;;
-    *-*-isc*)
-		AX_APPEND_FLAG([-D_ISC], [CPPFLAGS])
-		ac_cv_search_crypt="-lcrypt"
-
-		shadow_funcs="getspnam"
-		shadow_libs="-lsec"
-
-		: ${mansectsu='1m'}
-		: ${mansectform='4'}
-		;;
     *-*-sco*|*-sco-*)
 		shadow_funcs="getprpwnam"
 		shadow_libs="-lprot -lx"

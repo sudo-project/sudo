@@ -57,18 +57,6 @@ struct rtentry;
 #include <unistd.h>
 #include <netdb.h>
 #include <errno.h>
-#ifdef _ISC
-# include <sys/stream.h>
-# include <sys/sioctl.h>
-# include <sys/stropts.h>
-# define STRSET(cmd, param, len) {strioctl.ic_cmd=(cmd);\
-				 strioctl.ic_dp=(param);\
-				 strioctl.ic_timout=0;\
-				 strioctl.ic_len=(len);}
-#endif /* _ISC */
-#ifdef _MIPS
-# include <net/soioctl.h>
-#endif /* _MIPS */
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #ifdef NEED_RESOLV_H
@@ -277,7 +265,7 @@ get_net_ifs(char **addrinfo)
 	lifn.lifn_count = 512;
     }
 
-    /* Allocate space for the interface buffer. */
+    /* Allocate and fill in the interface buffer. */
     memset(&lifconf, 0, sizeof(lifconf));
     lifconf.lifc_len = lifn.lifn_count * sizeof(struct lifreq);
     lifconf.lifc_buf = malloc(lifconf.lifc_len);
@@ -430,18 +418,15 @@ get_net_ifs(char **addrinfo)
 {
     long ifr_tmpbuf[1024 / sizeof(long)];
     struct ifreq *ifr, *ifr_tmp = (struct ifreq *)ifr_tmpbuf;
-    struct ifconf *ifconf;
+    struct ifconf ifconf;
     struct sockaddr_in *sin;
 # ifdef HAVE_STRUCT_IN6_ADDR
     struct sockaddr_in6 *sin6;
 # endif
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
     int i, n, sock, sock4, sock6 = -1, num_interfaces = 0;
-    size_t ailen, buflen = sizeof(struct ifconf) + BUFSIZ;
+    size_t ailen;
     char *cp, *ifconf_buf = NULL;
-#ifdef _ISC
-    struct strioctl strioctl;
-#endif /* _ISC */
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
 
     if (!sudo_conf_probe_interfaces())
@@ -457,48 +442,42 @@ get_net_ifs(char **addrinfo)
     /* Use INET6 socket with SIOCGIFCONF if possible (may not matter). */
     sock = sock6 != -1 ? sock6 : sock4;
 
-    /*
-     * Get interface configuration or return.
-     */
-    for (;;) {
-	if ((ifconf_buf = malloc(buflen)) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to allocate memory");
-	    num_interfaces = -1;
-	    goto done;
-	}
-	ifconf = (struct ifconf *)ifconf_buf;
-	ifconf->ifc_len = buflen - sizeof(struct ifconf);
-	ifconf->ifc_buf = (caddr_t)(ifconf_buf + sizeof(struct ifconf));
+    /* Get the size of the interface buffer (if possible). */
+    memset(&ifconf, 0, sizeof(ifconf));
+# if defined(SIOCGSIZIFCONF)
+    if (ioctl(sock, SIOCGSIZIFCONF, &i) != -1) {
+	ifconf.ifc_len = i;
+    }
+# elif defined(SIOCGIFNUM)
+    if (ioctl(sock, SIOCGIFNUM, &i) != -1) {
+	ifconf.ifc_len = sizeof(struct ifreq) * (i + 4);
+    }
+# endif
+    if (ifconf.ifc_len = 0)
+	ifconf.ifc_len = sizeof(struct ifreq) * 512;
 
-#ifdef _ISC
-	STRSET(SIOCGIFCONF, (caddr_t)ifconf, buflen);
-	if (ioctl(sock, I_STR, (caddr_t)&strioctl) < 0)
-#else
-	/* Note that some kernels return EINVAL if the buffer is too small */
-	if (ioctl(sock, SIOCGIFCONF, ifconf) < 0 && errno != EINVAL)
-#endif /* _ISC */
-	{
-	    num_interfaces = -1;
-	    goto done;
-	}
-
-	/* Break out of loop if we have a big enough buffer. */
-	if (ifconf->ifc_len + sizeof(struct ifreq) < buflen)
-	    break;
-	buflen += BUFSIZ;
-	free(ifconf_buf);
+    /* Allocate and fill in the interface buffer. */
+    ifconf.ifc_buf = malloc(ifconf.ifc_len);
+    if (ifconf.ifc_buf == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	num_interfaces = -1;
+	goto done;
+    }
+    if (ioctl(sock, SIOCGIFCONF, &ifconf) < 0) {
+	num_interfaces = -1;
+	goto done;
     }
 
     /*
      * Allocate space for the maximum number of interfaces that could exist.
      * We walk the list for systems with sa_len in struct sockaddr.
      */
-    for (i = 0, n = 0; i < ifconf->ifc_len; n++) {
+    for (i = 0, n = 0; i < ifconf.ifc_len; n++) {
 	/* Set i to the subscript of the next interface. */
 	i += sizeof(struct ifreq);
 #ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
-	ifr = (struct ifreq *)&ifconf->ifc_buf[i];
+	ifr = (struct ifreq *)&ifconf.ifc_buf[i];
 	if (ifr->ifr_addr.sa_len > sizeof(ifr->ifr_addr))
 	    i += ifr->ifr_addr.sa_len - sizeof(struct sockaddr);
 #endif /* HAVE_STRUCT_SOCKADDR_SA_LEN */
@@ -515,9 +494,9 @@ get_net_ifs(char **addrinfo)
     *addrinfo = cp;
 
     /* For each interface, store the ip address and netmask. */
-    for (i = 0; i < ifconf->ifc_len; ) {
+    for (i = 0; i < ifconf.ifc_len; ) {
 	/* Get a pointer to the current interface. */
-	ifr = (struct ifreq *)&ifconf->ifc_buf[i];
+	ifr = (struct ifreq *)&ifconf.ifc_buf[i];
 
 	/* Set i to the subscript of the next interface. */
 	i += sizeof(struct ifreq);
@@ -579,12 +558,7 @@ get_net_ifs(char **addrinfo)
 	/* Fetch and store the netmask. */
 	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
 	memcpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name));
-#ifdef _ISC
-	STRSET(SIOCGIFNETMASK, (caddr_t)ifr_tmp, sizeof(*ifr_tmp));
-	if (ioctl(sock, I_STR, &strioctl) < 0)
-#else
 	if (ioctl(sock, SIOCGIFNETMASK, ifr_tmp) < 0)
-#endif /* _ISC */
 	    continue;
 
 	/* Convert the mask to string form. */
