@@ -83,9 +83,6 @@ struct rtentry;
 # define IFF_LOOPBACK	0
 #endif
 
-#ifndef INET_ADDRSTRLEN
-# define INET_ADDRSTRLEN 16
-#endif
 #ifndef INET6_ADDRSTRLEN
 # define INET6_ADDRSTRLEN 46
 #endif
@@ -100,7 +97,20 @@ struct rtentry;
 # undef SIOCGIFNUM
 #endif
 
-#ifdef HAVE_GETIFADDRS
+#if defined(STUB_LOAD_INTERFACES) || \
+    !(defined(HAVE_GETIFADDRS) || defined(SIOCGIFCONF) || defined(SIOCGLIFCONF))
+
+/*
+ * Stub function for those without SIOCGIFCONF or getifaddrs()
+ */
+int
+get_net_ifs(char **addrinfo)
+{
+    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
+    debug_return_int(0);
+}
+
+#elif defined(HAVE_GETIFADDRS)
 
 /*
  * Fill in the interfaces string with the machine's ip addresses and netmasks
@@ -225,7 +235,7 @@ done:
     debug_return_int(num_interfaces);
 }
 
-#elif defined(SIOCGLIFCONF) && !defined(STUB_LOAD_INTERFACES)
+#elif defined(SIOCGLIFCONF)
 
 /*
  * Fill in the interfaces string with the machine's ip addresses and netmasks
@@ -415,7 +425,7 @@ done:
     debug_return_int(num_interfaces);
 }
 
-#elif defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
+#elif defined(SIOCGIFCONF)
 
 /*
  * Fill in the interfaces string with the machine's ip addresses and netmasks
@@ -634,16 +644,4 @@ done:
     debug_return_int(num_interfaces);
 }
 
-#else /* !SIOCGIFCONF || STUB_LOAD_INTERFACES */
-
-/*
- * Stub function for those without SIOCGIFCONF or getifaddrs()
- */
-int
-get_net_ifs(char **addrinfo)
-{
-    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
-    debug_return_int(0);
-}
-
-#endif /* SIOCGIFCONF && !STUB_LOAD_INTERFACES */
+#endif /* SIOCGIFCONF */
