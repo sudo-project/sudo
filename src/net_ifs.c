@@ -49,11 +49,6 @@ struct rtentry;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif /* HAVE_STDBOOL_H */
 #include <unistd.h>
 #include <netdb.h>
 #include <errno.h>
@@ -85,11 +80,6 @@ struct rtentry;
 
 #ifndef INET6_ADDRSTRLEN
 # define INET6_ADDRSTRLEN 46
-#endif
-
-/* HP-UX SIOCGLIFCONF is not compatible (and may only include IPv6?). */
-#ifdef __hpux
-# undef SIOCGLIFCONF
 #endif
 
 /* SCO OpenServer 5 returns a bogus value for SIOCGIFNUM. */
@@ -237,9 +227,238 @@ done:
 
 #elif defined(SIOCGLIFCONF)
 
+# if defined(__hpux)
+
 /*
  * Fill in the interfaces string with the machine's ip addresses and netmasks
  * and return the number of interfaces found.  Returns -1 on error.
+ * HP-UX has incompatible SIOCGLIFNUM and SIOCGLIFCONF ioctls.
+ */
+int
+get_net_ifs(char **addrinfo)
+{
+    struct if_laddrconf laddrconf;
+    struct ifconf ifconf;
+    char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
+    int i, n, sock4, sock6 = -1;
+    int num_interfaces = 0;
+    size_t ailen;
+    char *cp;
+    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
+
+    if (!sudo_conf_probe_interfaces())
+	debug_return_int(0);
+
+    memset(&ifconf, 0, sizeof(ifconf));
+    memset(&laddrconf, 0, sizeof(laddrconf));
+
+    /* Allocate and fill in the IPv4 interface list. */
+    sock4 = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock4 != -1 && ioctl(sock4, SIOCGIFNUM, &n) != -1) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "SIOCGIFNUM reports %d interfaces", n);
+	n += 4;	/* in case new interfaces come up */
+
+	ifconf.ifc_len = n * sizeof(struct ifreq);
+	ifconf.ifc_buf = malloc(ifconf.ifc_len);
+	if (ifconf.ifc_buf == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    goto bad;
+	}
+
+	if (ioctl(sock4, SIOCGIFCONF, &ifconf) < 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to get interface list (SIOCGIFCONF)");
+	    goto bad;
+	}
+    }
+
+    /* Allocate and fill in the IPv6 interface list. */
+    sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (sock6 != -1 && ioctl(sock6, SIOCGLIFNUM, &n) != -1) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "SIOCGLIFNUM reports %d interfaces", n);
+	n += 4;	/* in case new interfaces come up */
+
+	laddrconf.iflc_len = n * sizeof(struct if_laddrreq);
+	laddrconf.iflc_buf = malloc(laddrconf.iflc_len);
+	if (laddrconf.iflc_buf == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    goto bad;
+	}
+
+	if (ioctl(sock4, SIOCGLIFCONF, &laddrconf) < 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to get interface list (SIOCGLIFCONF)");
+	    goto bad;
+	}
+    }
+
+    /* Allocate space for the maximum number of interfaces that could exist. */
+    n = ifconf.ifc_len / sizeof(struct ifconf) +
+	laddrconf.iflc_len / sizeof(struct if_laddrreq);
+    if (n == 0)
+	goto done;
+    ailen = n * 2 * INET6_ADDRSTRLEN;
+    if ((cp = malloc(ailen)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	goto bad;
+    }
+    *addrinfo = cp;
+
+    /*
+     * For each interface, store the ip address and netmask.
+     * Keep a copy of the address family, else it will be overwritten.
+     */
+    for (i = 0; i < ifconf.ifc_len; ) {
+	struct ifreq *ifr = (struct ifreq *)&ifconf.ifc_buf[i];
+	struct sockaddr_in *sin;
+
+	/* Set i to the subscript of the next interface (no sa_len). */
+	i += sizeof(struct ifreq);
+
+	/* IPv4 only. */
+	if (ifr->ifr_addr.sa_family != AF_INET) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected address family %d for %s",
+		ifr->ifr_addr.sa_family, ifr->ifr_name);
+	    continue;
+	}
+
+	/* Store the address. */
+	sin = (struct sockaddr_in *)&ifr->ifr_addr;
+	if (sin->sin_addr.s_addr == INADDR_ANY || sin->sin_addr.s_addr == INADDR_NONE) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"ignoring unspecified AF_INET addr for %s", ifr->ifr_name);
+	    continue;
+	}
+	if (inet_ntop(AF_INET, &sin->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"ignoring bad AF_INET addr for %s", ifr->ifr_name);
+	    continue;
+	}
+
+	/* Skip interfaces marked "down" and "loopback". */
+	if (ioctl(sock4, SIOCGIFFLAGS, ifr) < 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"SIOCGLIFFLAGS for %s", ifr->ifr_name);
+	    continue;
+	}
+	if (!ISSET(ifr->ifr_flags, IFF_UP) ||
+	    ISSET(ifr->ifr_flags, IFF_LOOPBACK))
+		continue;
+
+	/* Fetch and store the netmask. */
+	if (ioctl(sock4, SIOCGIFNETMASK, ifr) < 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"SIOCGLIFNETMASK for %s", ifr->ifr_name);
+	    continue;
+	}
+
+	/* Convert the mask to string form. */
+	sin = (struct sockaddr_in *)&ifr->ifr_addr;
+	if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"ignoring bad AF_INET mask for %s", ifr->ifr_name);
+	    continue;
+	}
+
+	n = snprintf(cp, ailen, "%s%s/%s",
+	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+	if (n < 0 || (size_t)n >= ailen) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    goto bad;
+	}
+	cp += n;
+	ailen -= n;
+
+	num_interfaces++;
+    }
+    for (i = 0; i < laddrconf.iflc_len; ) {
+	struct if_laddrreq *lreq = (struct if_laddrreq *)&laddrconf.iflc_buf[i];
+	struct sockaddr_in6 *sin6;
+
+	/* Set i to the subscript of the next interface (no sa_len). */
+	i += sizeof(struct if_laddrreq);
+
+	/* IPv6 only. */
+	if (lreq->iflr_addr.sa_family != AF_INET6) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected address family %d for %s",
+		lreq->iflr_addr.sa_family, lreq->iflr_name);
+	    continue;
+	}
+
+	sin6 = (struct sockaddr_in6 *)&lreq->iflr_addr;
+	if (IN6_IS_ADDR_UNSPECIFIED(&sin6->sin6_addr)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"ignoring unspecified AF_INET6 addr for %s", lreq->iflr_name);
+	    continue;
+	}
+	if (inet_ntop(AF_INET6, &sin6->sin6_addr, addrstr, sizeof(addrstr)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"ignoring bad AF_INET6 addr for %s", lreq->iflr_name);
+	    continue;
+	}
+
+	/* Skip interfaces marked "down" and "loopback". */
+	if (ioctl(sock6, SIOCGLIFFLAGS, lreq) < 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"SIOCGLIFFLAGS for %s", lreq->iflr_name);
+	    continue;
+	}
+	if (!ISSET(lreq->iflr_flags, IFF_UP) ||
+	    ISSET(lreq->iflr_flags, IFF_LOOPBACK))
+		continue;
+
+	/* Fetch and store the netmask. */
+	if (ioctl(sock6, SIOCGLIFNETMASK, lreq) < 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"SIOCGLIFNETMASK for %s", lreq->iflr_name);
+	    continue;
+	}
+	sin6 = (struct sockaddr_in6 *)&lreq->iflr_addr;
+	if (inet_ntop(AF_INET6, &sin6->sin6_addr, maskstr, sizeof(maskstr)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"ignoring bad AF_INET6 mask for %s", lreq->iflr_name);
+	    continue;
+	}
+
+	n = snprintf(cp, ailen, "%s%s/%s",
+	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+	if (n < 0 || (size_t)n >= ailen) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    goto bad;
+	}
+	cp += n;
+	ailen -= n;
+
+	num_interfaces++;
+    }
+    goto done;
+
+bad:
+    num_interfaces = -1;
+done:
+    free(ifconf.ifc_buf);
+    free(laddrconf.iflc_buf);
+    if (sock4 != -1)
+	close(sock4);
+    if (sock6 != -1)
+	close(sock6);
+
+    debug_return_int(num_interfaces);
+}
+
+# else
+
+/*
+ * Fill in the interfaces string with the machine's ip addresses and netmasks
+ * and return the number of interfaces found.  Returns -1 on error.
+ * SIOCGLIFCONF version (IPv6 compatible).
  */
 int
 get_net_ifs(char **addrinfo)
@@ -247,9 +466,7 @@ get_net_ifs(char **addrinfo)
     struct lifconf lifconf;
     struct lifnum lifn;
     struct sockaddr_in *sin;
-# ifdef HAVE_STRUCT_IN6_ADDR
     struct sockaddr_in6 *sin6;
-# endif
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
     int i, n, sock, sock4, sock6 = -1;
     int num_interfaces = 0;
@@ -262,9 +479,7 @@ get_net_ifs(char **addrinfo)
 
     /* We need both INET4 and INET6 sockets to get flags and netmask. */
     sock4 = socket(AF_INET, SOCK_DGRAM, 0);
-# ifdef HAVE_STRUCT_IN6_ADDR
     sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
-# endif
     if (sock4 == -1 && sock6 == -1)
 	debug_return_int(-1);
 
@@ -335,7 +550,6 @@ get_net_ifs(char **addrinfo)
 	    }
 	    sock = sock4;
 	    break;
-# ifdef HAVE_STRUCT_IN6_ADDR
 	case AF_INET6:
 	    sin6 = (struct sockaddr_in6 *)&lifr->lifr_addr;
 	    if (IN6_IS_ADDR_UNSPECIFIED(&sin6->sin6_addr)) {
@@ -350,7 +564,6 @@ get_net_ifs(char **addrinfo)
 	    }
 	    sock = sock6;
 	    break;
-# endif /* HAVE_STRUCT_IN6_ADDR */
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"ignoring address with family %d for %s",
@@ -383,7 +596,6 @@ get_net_ifs(char **addrinfo)
 		continue;
 	    }
 	    break;
-# ifdef HAVE_STRUCT_IN6_ADDR
 	case AF_INET6:
 	    sin6 = (struct sockaddr_in6 *)&lifr->lifr_addr;
 	    if (inet_ntop(AF_INET6, &sin6->sin6_addr, maskstr, sizeof(maskstr)) == NULL) {
@@ -392,7 +604,6 @@ get_net_ifs(char **addrinfo)
 		continue;
 	    }
 	    break;
-# endif /* HAVE_STRUCT_IN6_ADDR */
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unexpected address family %d for %s",
@@ -424,12 +635,14 @@ done:
 
     debug_return_int(num_interfaces);
 }
+# endif /* !__hpux */
 
 #elif defined(SIOCGIFCONF)
 
 /*
  * Fill in the interfaces string with the machine's ip addresses and netmasks
  * and return the number of interfaces found.  Returns -1 on error.
+ * SIOCGIFCONF version.
  */
 int
 get_net_ifs(char **addrinfo)
