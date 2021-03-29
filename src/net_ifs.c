@@ -82,11 +82,6 @@ struct rtentry;
 # define INET6_ADDRSTRLEN 46
 #endif
 
-/* SCO OpenServer 5 returns a bogus value for SIOCGIFNUM. */
-#if _SCO_DS >= 1
-# undef SIOCGIFNUM
-#endif
-
 #if defined(STUB_LOAD_INTERFACES) || \
     !(defined(HAVE_GETIFADDRS) || defined(SIOCGIFCONF) || defined(SIOCGLIFCONF))
 
@@ -675,13 +670,20 @@ get_net_ifs(char **addrinfo)
 
     /*
      * Get the size of the interface buffer (if possible).
-     * We over-allocate a bit in case interfaces come afterward.
+     * We over-allocate a bit in case interfaces come up afterward.
      */
 # if defined(SIOCGSIZIFCONF)
+    /* AIX */
     if (ioctl(sock, SIOCGSIZIFCONF, &i) != -1) {
 	buflen = i + (sizeof(struct ifreq) * 4);
     } else
+# elif defined(SIOCGIFANUM)
+    /* SCO OpenServer 5 */
+    if (ioctl(sock, SIOCGIFANUM, &i) != -1) {
+	buflen = (i + 4) * sizeof(struct ifreq);
+    } else
 # elif defined(SIOCGIFNUM)
+    /* HP-UX, Solaris, others? */
     if (ioctl(sock, SIOCGIFNUM, &i) != -1) {
 	buflen = (i + 4) * sizeof(struct ifreq);
     } else
