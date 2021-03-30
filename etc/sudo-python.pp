@@ -100,6 +100,7 @@
 	perl -pe 'last if (/^What/i && $seen++)' ${pp_destdir}$docdir/NEWS > ${pp_wrkdir}/ReadMe.txt
 %endif
 
+%if [!rpm,deb]
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}${mandir}/[mc]* | sed "s#${pp_destdir}##g"`
@@ -113,6 +114,7 @@
 	    done
 	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
 	fi
+%endif
 
 %depend [deb]
 	libc6, libpython@PYTHON_VERSION@, sudo

@@ -315,6 +315,7 @@ still allow people to get their work done."
 	ln -s -f ${sbindir}/visudo ${pp_destdir}/usr/sbin
 %endif
 
+%if [!rpm,deb]
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}${mandir}/[mc]* | sed "s#${pp_destdir}##g"`
@@ -329,6 +330,7 @@ still allow people to get their work done."
 	    done
 	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
 	fi
+%endif
 
 %depend [deb]
 	libc6, libpam0g, libpam-modules, zlib1g, libselinux1

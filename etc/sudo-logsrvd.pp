@@ -146,6 +146,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 	ln -s -f ${sbindir}/sudo_logsrvd ${pp_destdir}/usr/sbin
 %endif
 
+%if [!rpm,deb]
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}${mandir}/[mc]* | sed "s#${pp_destdir}##g"`
@@ -159,6 +160,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 	    done
 	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
 	fi
+%endif
 
 %depend [deb]
 	libc6, zlib1g, sudo
