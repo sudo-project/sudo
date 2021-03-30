@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -511,8 +511,10 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    valid_flags = VALIDATE_VALID_FLAGS;
 		    break;
 		case 'V':
-		    if (mode && mode != MODE_VERSION)
-			usage_excl();
+		    if (mode && mode != MODE_VERSION) {
+			if (strcmp(progname, "sudoedit") != 0)
+			    usage_excl();
+		    }
 		    mode = MODE_VERSION;
 		    valid_flags = 0;
 		    break;
