@@ -129,41 +129,47 @@ struct environment {
  * Available command line options, both short and long.
  * Note that we must disable arg permutation to support setting environment
  * variables and to better support the optional arg of the -h flag.
+ * There is a more limited set of options for sudoedit (the sudo-specific
+ * long options are listed first).
  */
-static const char short_opts[] =  "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:R:r:SsT:t:U:u:Vv";
-static struct option long_opts[] = {
+static const char sudo_short_opts[] = "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:R:r:SsT:t:U:u:Vv";
+static const char edit_short_opts[] = "+Aa:BC:c:D:g:h::knp:R:r:ST:t:u:V";
+static struct option sudo_long_opts[] = {
+    /* sudo-specific long options */
+    { "background",	no_argument,		NULL,	'b' },
+    { "preserve-env",	optional_argument,	NULL,	'E' },
+    { "edit",		no_argument,		NULL,	'e' },
+    { "set-home",	no_argument,		NULL,	'H' },
+    { "login",		no_argument,		NULL,	'i' },
+    { "remove-timestamp", no_argument,		NULL,	'K' },
+    { "list",		no_argument,		NULL,	'l' },
+    { "preserve-groups", no_argument,		NULL,	'P' },
+    { "shell",		no_argument,		NULL,	's' },
+    { "other-user",	required_argument,	NULL,	'U' },
+    { "validate",	no_argument,		NULL,	'v' },
+    /* common long options */
     { "askpass",	no_argument,		NULL,	'A' },
     { "auth-type",	required_argument,	NULL,	'a' },
-    { "background",	no_argument,		NULL,	'b' },
     { "bell",	        no_argument,		NULL,	'B' },
     { "close-from",	required_argument,	NULL,	'C' },
     { "login-class",	required_argument,	NULL,	'c' },
     { "chdir",		required_argument,	NULL,	'D' },
-    { "preserve-env",	optional_argument,	NULL,	'E' },
-    { "edit",		no_argument,		NULL,	'e' },
     { "group",		required_argument,	NULL,	'g' },
-    { "set-home",	no_argument,		NULL,	'H' },
     { "help",		no_argument,		NULL,	'h' },
     { "host",		required_argument,	NULL,	OPT_HOSTNAME },
-    { "login",		no_argument,		NULL,	'i' },
-    { "remove-timestamp", no_argument,		NULL,	'K' },
     { "reset-timestamp", no_argument,		NULL,	'k' },
-    { "list",		no_argument,		NULL,	'l' },
     { "non-interactive", no_argument,		NULL,	'n' },
-    { "preserve-groups", no_argument,		NULL,	'P' },
     { "prompt",		required_argument,	NULL,	'p' },
     { "chroot",		required_argument,	NULL,	'R' },
     { "role",		required_argument,	NULL,	'r' },
     { "stdin",		no_argument,		NULL,	'S' },
-    { "shell",		no_argument,		NULL,	's' },
-    { "type",		required_argument,	NULL,	't' },
     { "command-timeout",required_argument,	NULL,	'T' },
-    { "other-user",	required_argument,	NULL,	'U' },
+    { "type",		required_argument,	NULL,	't' },
     { "user",		required_argument,	NULL,	'u' },
     { "version",	no_argument,		NULL,	'V' },
-    { "validate",	no_argument,		NULL,	'v' },
     { NULL,		no_argument,		NULL,	'\0' },
 };
+static struct option *edit_long_opts = &sudo_long_opts[11];
 
 /*
  * Insert a key=value pair into the specified environment.
@@ -241,13 +247,14 @@ int
 parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     struct sudo_settings **settingsp, char ***env_addp)
 {
+    const char *progname, *short_opts = sudo_short_opts;
+    struct option *long_opts = sudo_long_opts;
     struct environment extra_env;
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
     int valid_flags = DEFAULT_VALID_FLAGS;
     int ch, i;
     char *cp;
-    const char *progname;
     debug_decl(parse_args, SUDO_DEBUG_ARGS);
 
     /* Is someone trying something funny? */
@@ -263,6 +270,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	mode = MODE_EDIT;
 	sudo_settings[ARG_SUDOEDIT].value = "true";
 	valid_flags = EDIT_VALID_FLAGS;
+	short_opts = edit_short_opts;
+	long_opts = edit_long_opts;
     }
 
     /* Load local IP addresses and masks. */
