@@ -1454,6 +1454,7 @@ init_tls_client_context(const char *ca_bundle_file, const char *cert_file, const
 
 bad:
     SSL_CTX_free(ctx);
+    ctx = NULL;
 
 done:
     debug_return_ptr(ctx);
