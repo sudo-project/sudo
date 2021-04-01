@@ -303,6 +303,13 @@ log_server_exit(int status_type, int status)
     debug_return;
 }
 #else
+static void
+audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
+    char * const run_argv[], char * const run_envp[])
+{
+    return;
+}
+
 static bool
 log_server_accept(char * const command_info[], char * const run_argv[],
     char * const run_envp[])
