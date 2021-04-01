@@ -58,10 +58,10 @@
 #include "sudo_exec.h"
 
 static struct selinux_state {
-    security_context_t old_context;
-    security_context_t new_context;
-    security_context_t tty_con_raw;
-    security_context_t new_tty_con_raw;
+    char * old_context;
+    char * new_context;
+    char * tty_con_raw;
+    char * new_tty_con_raw;
     const char *ttyn;
     int ttyfd;
     int enforcing;
@@ -69,8 +69,8 @@ static struct selinux_state {
 
 #ifdef HAVE_LINUX_AUDIT
 static int
-audit_role_change(const security_context_t old_context,
-    const security_context_t new_context, const char *ttyn, int result)
+audit_role_change(const char * old_context,
+    const char * new_context, const char *ttyn, int result)
 {
     int au_fd, rc = -1;
     char *message;
@@ -111,7 +111,7 @@ int
 selinux_restore_tty(void)
 {
     int ret = -1;
-    security_context_t chk_tty_con_raw = NULL;
+    char * chk_tty_con_raw = NULL;
     debug_decl(selinux_restore_tty, SUDO_DEBUG_SELINUX);
 
     if (se_state.ttyfd == -1 || se_state.new_tty_con_raw == NULL) {
@@ -166,8 +166,8 @@ skip_relabel:
 static int
 relabel_tty(const char *ttyn, int ptyfd)
 {
-    security_context_t tty_con = NULL;
-    security_context_t new_tty_con = NULL;
+    char * tty_con = NULL;
+    char * new_tty_con = NULL;
     struct stat sb;
     int fd;
     debug_decl(relabel_tty, SUDO_DEBUG_SELINUX);
@@ -308,10 +308,10 @@ bad:
  * Returns a new security context based on the old context and the
  * specified role and type.
  */
-security_context_t
-get_exec_context(security_context_t old_context, const char *role, const char *type)
+char *
+get_exec_context(char * old_context, const char *role, const char *type)
 {
-    security_context_t new_context = NULL;
+    char * new_context = NULL;
     context_t context = NULL;
     char *typebuf = NULL;
     debug_decl(get_exec_context, SUDO_DEBUG_SELINUX);
