@@ -197,7 +197,6 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     debug_return_int(ret);
 }
 
-#ifdef SUDOERS_LOG_CLIENT
 static void
 audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
     char * const run_argv[], char * const run_envp[])
@@ -242,6 +241,7 @@ audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
     debug_return;
 }
 
+#ifdef SUDOERS_LOG_CLIENT
 static bool
 log_server_accept(char * const command_info[], char * const run_argv[],
     char * const run_envp[])
