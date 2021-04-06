@@ -1072,24 +1072,19 @@ close_connection:
 /*
  * Format and schedule a commit_point message.
  */
-static void
-server_commit_cb(int unused, int what, void *v)
+static bool
+schedule_commit_point(TimeSpec *commit_point,
+    struct connection_closure *closure)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
-    TimeSpec commit_point = TIME_SPEC__INIT;
-    struct connection_closure *closure = v;
-
-    debug_decl(server_commit_cb, SUDO_DEBUG_UTIL);
+    debug_decl(schedule_commit_point, SUDO_DEBUG_UTIL);
 
     /* Send the client an acknowledgement of what has been committed to disk. */
-    commit_point.tv_sec = closure->elapsed_time.tv_sec;
-    commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
-    msg.u.commit_point = &commit_point;
+    msg.u.commit_point = commit_point;
     msg.type_case = SERVER_MESSAGE__TYPE_COMMIT_POINT;
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending commit point [%lld, %ld]",
-	__func__, (long long)closure->elapsed_time.tv_sec,
-	closure->elapsed_time.tv_nsec);
+	__func__, (long long)commit_point->tv_sec, (long)commit_point->tv_nsec);
 
     if (!fmt_server_message(closure, &msg)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1105,9 +1100,28 @@ server_commit_cb(int unused, int what, void *v)
 
     if (closure->state == EXITED)
 	closure->state = FINISHED;
-    debug_return;
+    debug_return_bool(true);
 bad:
     connection_closure_free(closure);
+    debug_return_bool(false);
+}
+
+/*
+ * Time-based event that fires periodically to report to the client
+ * what has been committed to disk.
+ */
+static void
+server_commit_cb(int unused, int what, void *v)
+{
+    struct connection_closure *closure = v;
+    TimeSpec commit_point = TIME_SPEC__INIT;
+    debug_decl(server_commit_cb, SUDO_DEBUG_UTIL);
+
+    commit_point.tv_sec = closure->elapsed_time.tv_sec;
+    commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
+    if (!schedule_commit_point(&commit_point, closure))
+	connection_closure_free(closure);
+
     debug_return;
 }
 
