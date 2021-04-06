@@ -125,6 +125,7 @@ union sockaddr_union {
  */
 struct server_address {
     TAILQ_ENTRY(server_address) entries;
+    char *sa_host;
     char *sa_str;
     union sockaddr_union sa_un;
     socklen_t sa_size;

@@ -88,6 +88,7 @@ relay_closure_free(struct relay_closure *relay_closure)
 
     if (relay_closure->relays != NULL)
 	address_list_delref(relay_closure->relays);
+    sudo_rcstr_delref(relay_closure->relay_name.name);
     sudo_ev_free(relay_closure->read_ev);
     sudo_ev_free(relay_closure->write_ev);
     sudo_ev_free(relay_closure->connect_ev);
@@ -291,6 +292,7 @@ connect_relay_next(struct connection_closure *closure)
     inet_ntop(relay->sa_un.sa.sa_family, addr,
 	relay_closure->relay_name.ipaddr,
 	sizeof(relay_closure->relay_name.ipaddr));
+    relay_closure->relay_name.name = sudo_rcstr_addref(relay->sa_host);
 
     if (ret == 0) {
 	relay_closure->sock = sock;
@@ -327,6 +329,7 @@ bad:
     /* Connection or system error. */
     if (sock != -1)
 	close(sock);
+    sudo_rcstr_delref(relay_closure->relay_name.name);
     sudo_ev_free(relay_closure->connect_ev);
     relay_closure->connect_ev = NULL;
     debug_return_int(-1);
@@ -401,8 +404,9 @@ connect_cb(int sock, int what, void *v)
 	/* Connection failed, try next relay (if any). */
 	int res;
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-	    "unable to connect to relay %s: %s",
-	    relay_closure->relay_name.ipaddr, strerror(errnum));
+	    "unable to connect to relay %s (%s): %s",
+	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
+	    strerror(errnum));
 	while ((res = connect_relay_next(closure)) == -1) {
 	    if (errno == ENOENT || errno == EINPROGRESS) {
 		/* Out of relays or connecting asynchronously. */
@@ -467,8 +471,8 @@ handle_server_hello(ServerHello *msg, struct connection_closure *closure)
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"relay server (%s) ID %s", relay_closure->relay_name.ipaddr,
-	msg->server_id);
+	"relay server %s (%s) ID %s", relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr, msg->server_id);
 
     /* TODO: handle redirect */
 
@@ -508,12 +512,13 @@ handle_log_id(char *id, struct connection_closure *closure)
     debug_decl(handle_log_id, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"log ID %s from relay (%s)", id,
+	"log ID %s from relay %s (%s)", id,
+	closure->relay_closure->relay_name.name,
 	closure->relay_closure->relay_name.ipaddr);
 
     /* Generate a new log ID that includes the relay host. */
     len = asprintf(&new_id, "%s/%s", id,
-	closure->relay_closure->relay_name.ipaddr);
+	closure->relay_closure->relay_name.name);
     if (len != -1) {
 	if (fmt_log_id_message(id, closure)) {
 	    if (sudo_ev_add(closure->evbase, closure->write_ev,
@@ -541,8 +546,9 @@ handle_server_error(char *errmsg, struct connection_closure *closure)
     debug_decl(handle_server_error, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	"error message received from relay (%s): %s",
-	relay_closure->relay_name.ipaddr, errmsg);
+	"error message received from relay %s (%s): %s",
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
+	errmsg);
 
     if (!fmt_error_message(errmsg, closure))
 	debug_return_bool(false);
@@ -570,8 +576,9 @@ handle_server_abort(char *errmsg, struct connection_closure *closure)
     debug_decl(handle_server_abort, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	"abort message received from relay (%s): %s",
-	relay_closure->relay_name.ipaddr, errmsg);
+	"abort message received from relay %s (%s): %s",
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
+	errmsg);
 
     if (!fmt_error_message(errmsg, closure))
 	debug_return_bool(false);
@@ -659,8 +666,8 @@ relay_server_msg_cb(int fd, int what, void *v)
 
     if (what == SUDO_EV_TIMEOUT) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "timed out reading from relay (%s)",
-	    relay_closure->relay_name.ipaddr);
+	    "timed out reading from relay %s (%s)",
+	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 	closure->errstr = _("timeout reading from relay");
         goto send_error;
     }
@@ -669,8 +676,8 @@ relay_server_msg_cb(int fd, int what, void *v)
     if (relay_closure->tls_client.ssl != NULL) {
 	SSL *ssl = relay_closure->tls_client.ssl;
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: ServerMessage from relay %s (TLS)",
-	    __func__, relay_closure->relay_name.ipaddr);
+	    "%s: ServerMessage from relay %s (%s) [TLS]", __func__,
+	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
         nread = SSL_read(ssl, buf->data + buf->len, buf->size - buf->len);
         if (nread <= 0) {
 	    const char *errstr;
@@ -718,19 +725,22 @@ relay_server_msg_cb(int fd, int what, void *v)
                         errstr = ERR_reason_error_string(err);
                     }
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_read from %s: %s",
+			"SSL_read from %s (%s): %s",
+			relay_closure->relay_name.name,
 			relay_closure->relay_name.ipaddr, errstr);
                     goto close_connection;
                 case SSL_ERROR_SYSCALL:
                     errstr = strerror(errno);
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_read from %s: %s",
+			"SSL_read from %s (%s): %s",
+			relay_closure->relay_name.name,
 			relay_closure->relay_name.ipaddr, errstr);
                     goto close_connection;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_read from %s: %s",
+			"SSL_read from %s (%s): %s",
+			relay_closure->relay_name.name,
 			relay_closure->relay_name.ipaddr, errstr);
                     goto close_connection;
             }
@@ -738,19 +748,22 @@ relay_server_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: ServerMessage from relay %s",
-	    __func__, relay_closure->relay_name.ipaddr);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: ServerMessage from relay %s (%s)", __func__,
+	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 	nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from relay %s",
-	__func__, nread, relay_closure->relay_name.ipaddr);
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: received %zd bytes from relay %s (%s)", __func__, nread,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
     switch (nread) {
     case -1:
 	if (errno == EAGAIN)
 	    debug_return;
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "recv from %s", relay_closure->relay_name.ipaddr);
+	    "recv from %s (%s)", relay_closure->relay_name.name,
+	    relay_closure->relay_name.ipaddr);
 	closure->errstr = _("unable to read from relay");
 	goto send_error;
     case 0:
@@ -762,7 +775,8 @@ relay_server_msg_cb(int fd, int what, void *v)
 
 	if (closure->state != FINISHED) {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"unexpected EOF from %s (state %d)",
+		"unexpected EOF from %s (%s) [state %d]",
+		relay_closure->relay_name.name,
 		relay_closure->relay_name.ipaddr, closure->state);
 	    closure->errstr = _("unexpected EOF from relay");
 	    goto send_error;
@@ -857,8 +871,8 @@ relay_client_msg_cb(int fd, int what, void *v)
     if (what == SUDO_EV_TIMEOUT) {
 	closure->errstr = _("timeout writing to relay");
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "timed out writing to relay (%s)",
-	    relay_closure->relay_name.ipaddr);
+            "timed out writing to relay %s (%s)",
+	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
         goto send_error;
     }
 
@@ -868,8 +882,9 @@ relay_client_msg_cb(int fd, int what, void *v)
         goto close_connection;
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to server (%s)",
-	__func__, buf->len - buf->off, relay_closure->relay_name.ipaddr);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to server %s (%s)",
+	__func__, buf->len - buf->off, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
 
 #if defined(HAVE_OPENSSL)
     if (relay_closure->tls_client.ssl != NULL) {
@@ -909,14 +924,16 @@ relay_client_msg_cb(int fd, int what, void *v)
                 case SSL_ERROR_SYSCALL:
 		    errstr = strerror(errno);
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_write to %s: %s",
+			"SSL_write to %s (%s): %s",
+			relay_closure->relay_name.name,
 			relay_closure->relay_name.ipaddr, errstr);
 		    closure->errstr = _("error writing to relay");
 		    goto send_error;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_write to %s: %s",
+			"SSL_write to %s (%s): %s",
+			relay_closure->relay_name.name,
 			relay_closure->relay_name.ipaddr, errstr);
 		    closure->errstr = _("error writing to relay");
 		    goto send_error;
@@ -928,7 +945,8 @@ relay_client_msg_cb(int fd, int what, void *v)
 	nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
 	if (nwritten == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"send to %s", relay_closure->relay_name.ipaddr);
+		"send to %s (%s)", relay_closure->relay_name.name,
+		relay_closure->relay_name.ipaddr);
 	    closure->errstr = _("error writing to relay");
 	    goto send_error;
 	}
@@ -1008,8 +1026,9 @@ relay_accept(AcceptMessage *msg, struct connection_closure *closure)
     debug_decl(relay_accept, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying AcceptMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->relay_name.ipaddr);
+	"%s: relaying AcceptMessage from %s to %s (%s)", __func__,
+	closure->ipaddr, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
 
     client_msg.u.accept_msg = msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
@@ -1045,8 +1064,9 @@ relay_reject(RejectMessage *msg, struct connection_closure *closure)
     debug_decl(relay_reject, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying RejectMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->relay_name.ipaddr);
+	"%s: relaying RejectMessage from %s to %s (%s)", __func__,
+	closure->ipaddr, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
 
     client_msg.u.reject_msg = msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_REJECT_MSG;
@@ -1077,8 +1097,9 @@ relay_exit(ExitMessage *msg, struct connection_closure *closure)
     debug_decl(relay_exit, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying ExitMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->relay_name.ipaddr);
+	"%s: relaying ExitMessage from %s to %s (%s)", __func__,
+	closure->ipaddr, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
 
     client_msg.u.exit_msg = msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
@@ -1114,8 +1135,9 @@ relay_restart(RestartMessage *msg, struct connection_closure *closure)
     debug_decl(relay_restart, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying RestartMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->relay_name.ipaddr);
+	"%s: relaying RestartMessage from %s to %s (%s)", __func__,
+	closure->ipaddr, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
 
     /*
      * We prepend "relayhost/" to the log ID before relaying it to
@@ -1154,8 +1176,9 @@ relay_alert(AlertMessage *msg, struct connection_closure *closure)
     debug_decl(relay_alert, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying AlertMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->relay_name.ipaddr);
+	"%s: relaying AlertMessage from %s to %s (%s)", __func__,
+	closure->ipaddr, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
 
     client_msg.u.alert_msg = msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ALERT_MSG;
@@ -1184,8 +1207,9 @@ relay_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure)
     debug_decl(relay_iobuf, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying IoBuffer from %s to %s", __func__,
-	closure->ipaddr, relay_closure->relay_name.ipaddr);
+	"%s: relaying IoBuffer from %s to %s (%s)", __func__,
+	closure->ipaddr, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
 
     switch (iofd) {
     case IOFD_TTYIN:

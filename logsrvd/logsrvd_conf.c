@@ -332,6 +332,7 @@ static bool
 append_address(struct server_address_list *addresses, const char *str)
 {
     struct addrinfo hints, *res, *res0 = NULL;
+    char *sa_str = NULL, *sa_host = NULL;
     char *copy, *host, *port;
     bool tls, ret = false;
     int error;
@@ -356,6 +357,16 @@ append_address(struct server_address_list *addresses, const char *str)
     }
 #endif
 
+    /* Only make a single copy of the string + host for all addresses. */
+    if ((sa_str = sudo_rcstr_dup(str)) == NULL)	{
+	sudo_warn(NULL);
+	goto done;
+    }
+    if (host != NULL && (sa_host = sudo_rcstr_dup(host)) == NULL) {
+	sudo_warn(NULL);
+	goto done;
+    }
+
     /* Resolve host (and port if it is a service). */
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
@@ -373,11 +384,9 @@ append_address(struct server_address_list *addresses, const char *str)
 	    sudo_warn(NULL);
 	    goto done;
 	}
-	if ((addr->sa_str = strdup(str)) == NULL) {
-	    sudo_warn(NULL);
-	    free(addr);
-	    goto done;
-	}
+	addr->sa_str = sudo_rcstr_addref(sa_str);
+	addr->sa_host = sudo_rcstr_addref(sa_host);
+
 	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
 	addr->sa_size = res->ai_addrlen;
 	addr->tls = tls;
@@ -386,6 +395,8 @@ append_address(struct server_address_list *addresses, const char *str)
 
     ret = true;
 done:
+    sudo_rcstr_delref(sa_str);
+    sudo_rcstr_delref(sa_host);
     if (res0 != NULL)
 	freeaddrinfo(res0);
     free(copy);
@@ -751,7 +762,8 @@ address_list_delref(struct server_address_list *al)
 	struct server_address *addr;
 	while ((addr = TAILQ_FIRST(al))) {
 	    TAILQ_REMOVE(al, addr, entries);
-	    free(addr->sa_str);
+	    sudo_rcstr_delref(addr->sa_str);
+	    sudo_rcstr_delref(addr->sa_host);
 	    free(addr);
 	}
     }
