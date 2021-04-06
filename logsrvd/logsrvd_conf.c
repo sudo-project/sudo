@@ -84,7 +84,9 @@ struct address_list_container {
 static struct logsrvd_config {
     struct logsrvd_config_server {
         struct address_list_container addresses;
+        struct address_list_container relays;
         struct timespec timeout;
+        struct timespec connect_timeout;
         bool tcp_keepalive;
 	char *pid_file;
 #if defined(HAVE_OPENSSL)
@@ -147,6 +149,12 @@ logsrvd_conf_listen_address(void)
     return &logsrvd_config->server.addresses.addrs;
 }
 
+struct server_address_list *
+logsrvd_conf_relay(void)
+{
+    return &logsrvd_config->server.relays.addrs;
+}
+
 bool
 logsrvd_conf_tcp_keepalive(void)
 {
@@ -164,6 +172,16 @@ logsrvd_conf_get_sock_timeout(void)
 {
     if (sudo_timespecisset(&logsrvd_config->server.timeout)) {
         return &(logsrvd_config->server.timeout);
+    }
+
+    return NULL;
+}
+
+struct timespec *
+logsrvd_conf_get_connect_timeout(void)
+{
+    if (sudo_timespecisset(&logsrvd_config->server.connect_timeout)) {
+        return &(logsrvd_config->server.connect_timeout);
     }
 
     return NULL;
@@ -381,6 +399,12 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 }
 
 static bool
+cb_relay(struct logsrvd_config *config, const char *str)
+{
+    return append_address(&config->server.relays.addrs, str);
+}
+
+static bool
 cb_timeout(struct logsrvd_config *config, const char *str)
 {
     int timeout;
@@ -392,6 +416,22 @@ cb_timeout(struct logsrvd_config *config, const char *str)
 	debug_return_bool(false);
 
     config->server.timeout.tv_sec = timeout;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_connect_timeout(struct logsrvd_config *config, const char *str)
+{
+    int timeout;
+    const char* errstr;
+    debug_decl(cb_connect_timeout, SUDO_DEBUG_UTIL);
+
+    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+    if (errstr != NULL)
+	debug_return_bool(false);
+
+    config->server.connect_timeout.tv_sec = timeout;
 
     debug_return_bool(true);
 }
@@ -719,7 +759,9 @@ address_list_delref(struct server_address_list *al)
 
 static struct logsrvd_config_entry server_conf_entries[] = {
     { "listen_address", cb_listen_address },
+    { "relay", cb_relay },
     { "timeout", cb_timeout },
+    { "connect_timeout", cb_connect_timeout },
     { "tcp_keepalive", cb_keepalive },
     { "pid_file", cb_pid_file },
 #if defined(HAVE_OPENSSL)
@@ -932,6 +974,7 @@ logsrvd_conf_free(struct logsrvd_config *config)
 
     /* struct logsrvd_config_server */
     address_list_delref(&config->server.addresses.addrs);
+    address_list_delref(&config->server.relays.addrs);
     free(config->server.pid_file);
 
     /* struct logsrvd_config_iolog */
@@ -976,6 +1019,8 @@ logsrvd_conf_alloc(void)
     /* Server defaults */
     TAILQ_INIT(&config->server.addresses.addrs);
     config->server.addresses.refcnt = 1;
+    TAILQ_INIT(&config->server.relays.addrs);
+    config->server.relays.refcnt = 1;
     config->server.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->server.tcp_keepalive = true;
     config->server.pid_file = strdup(_PATH_SUDO_LOGSRVD_PID);

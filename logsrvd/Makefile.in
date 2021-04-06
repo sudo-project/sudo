@@ -120,7 +120,7 @@ SHELL = @SHELL@
 PROGS = sudo_logsrvd sudo_sendlog
 
 LOGSRVD_OBJS = logsrv_util.o iolog_writer.o logsrvd.o logsrvd_conf.o \
-	       tls_init.o
+	       logsrvd_relay.o tls_init.o
 
 SENDLOG_OBJS = logsrv_util.o sendlog.o tls_client.o tls_init.o
 
@@ -383,6 +383,30 @@ logsrvd_conf.i: $(srcdir)/logsrvd_conf.c $(incdir)/compat/getaddrinfo.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 logsrvd_conf.plog: logsrvd_conf.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrvd_conf.c --i-file $< --output-file $@
+logsrvd_relay.o: $(srcdir)/logsrvd_relay.c $(incdir)/compat/getopt.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
+                 $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                 $(incdir)/sudo_json.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+                 $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd_relay.c
+logsrvd_relay.i: $(srcdir)/logsrvd_relay.c $(incdir)/compat/getopt.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
+                 $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                 $(incdir)/sudo_json.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+                 $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+logsrvd_relay.plog: logsrvd_relay.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrvd_relay.c --i-file $< --output-file $@
 sendlog.o: $(srcdir)/sendlog.c $(incdir)/compat/getaddrinfo.h \
            $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
            $(incdir)/hostcheck.h $(incdir)/log_server.pb-c.h \

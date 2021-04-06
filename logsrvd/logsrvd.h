@@ -47,6 +47,7 @@
  */
 enum connection_status {
     INITIAL,
+    CONNECTING,
     RUNNING,
     EXITED,
     SHUTDOWN,
@@ -55,10 +56,30 @@ enum connection_status {
 };
 
 /*
+ * Per-connection relay state.
+ */
+struct relay_closure {
+    struct server_address_list *relays;
+    struct server_address *relay_addr;
+    struct sudo_event *read_ev;
+    struct sudo_event *write_ev;
+    struct sudo_event *connect_ev;
+    struct connection_buffer read_buf;
+    struct connection_buffer_list write_bufs;
+    int sock;
+#ifdef HAVE_STRUCT_IN6_ADDR
+    char ipaddr[INET6_ADDRSTRLEN];
+#else
+    char ipaddr[INET_ADDRSTRLEN];
+#endif
+};
+
+/*
  * Per-connection state.
  */
 struct connection_closure {
     TAILQ_ENTRY(connection_closure) entries;
+    struct relay_closure *relay_closure;
     struct eventlog *evlog;
     struct timespec elapsed_time;
     struct connection_buffer read_buf;
@@ -74,19 +95,19 @@ struct connection_closure {
 #endif
     const char *errstr;
     struct iolog_file iolog_files[IOFD_MAX];
+    int iolog_dir_fd;
+    int sock;
+    enum connection_status state;
     bool tls;
     bool log_io;
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
-    int iolog_dir_fd;
-    int sock;
 #ifdef HAVE_STRUCT_IN6_ADDR
     char ipaddr[INET6_ADDRSTRLEN];
 #else
     char ipaddr[INET_ADDRSTRLEN];
 #endif
-    enum connection_status state;
 };
 
 union sockaddr_union {
@@ -147,14 +168,24 @@ int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
 
+/* logsrvd.c */
+bool start_protocol(struct connection_closure *closure);
+void connection_closure_free(struct connection_closure *closure);
+bool schedule_commit_point(TimeSpec *commit_point, struct connection_closure *closure);
+bool fmt_log_id_message(const char *id, struct connection_closure *closure);
+bool fmt_error_message(const char *errstr, struct connection_closure *closure);
+struct connection_buffer *get_free_buf(struct connection_closure *closure);
+
 /* logsrvd_conf.c */
 bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct server_address_list *logsrvd_conf_listen_address(void);
+struct server_address_list *logsrvd_conf_relay(void);
 bool logsrvd_conf_tcp_keepalive(void);
 const char *logsrvd_conf_pid_file(void);
 struct timespec *logsrvd_conf_get_sock_timeout(void);
+struct timespec *logsrvd_conf_get_connect_timeout(void);
 #if defined(HAVE_OPENSSL)
 const struct logsrvd_tls_config *logsrvd_get_tls_config(void);
 struct logsrvd_tls_runtime *logsrvd_get_tls_runtime(void);
@@ -162,5 +193,16 @@ struct logsrvd_tls_runtime *logsrvd_get_tls_runtime(void);
 mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);
 void address_list_delref(struct server_address_list *);
+
+/* logsrvd_relay.c */
+void relay_closure_free(struct relay_closure *relay_closure);
+bool connect_relay(struct connection_closure *closure);
+bool relay_accept(AcceptMessage *msg, struct connection_closure *closure);
+bool relay_reject(RejectMessage *msg, struct connection_closure *closure);
+bool relay_exit(ExitMessage *msg, struct connection_closure *closure);
+bool relay_restart(RestartMessage *msg, struct connection_closure *closure);
+bool relay_alert(AlertMessage *msg, struct connection_closure *closure);
+bool relay_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure);
+bool relay_shutdown(struct connection_closure *closure);
 
 #endif /* SUDO_LOGSRVD_H */

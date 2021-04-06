@@ -348,6 +348,7 @@ logsrvd/logsrv_util.h
 logsrvd/logsrvd.c
 logsrvd/logsrvd.h
 logsrvd/logsrvd_conf.c
+logsrvd/logsrvd_relay.c
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.1
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.2
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.3

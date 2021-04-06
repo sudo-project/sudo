@@ -95,7 +95,7 @@ static void client_msg_cb(int fd, int what, void *v);
 /*
  * Free a struct connection_closure container and its contents.
  */
-static void
+void
 connection_closure_free(struct connection_closure *closure)
 {
     debug_decl(connection_closure_free, SUDO_DEBUG_UTIL);
@@ -106,12 +106,8 @@ connection_closure_free(struct connection_closure *closure)
 	struct connection_buffer *buf;
 
 	TAILQ_REMOVE(&connections, closure, entries);
-#if defined(HAVE_OPENSSL)
-	if (closure->ssl != NULL) {
-	    SSL_shutdown(closure->ssl);
-	    SSL_free(closure->ssl);
-	}
-#endif
+	if (closure->relay_closure != NULL)
+	    relay_closure_free(closure->relay_closure);
 	close(closure->sock);
 	iolog_close_all(closure);
 	sudo_ev_free(closure->commit_ev);
@@ -119,6 +115,10 @@ connection_closure_free(struct connection_closure *closure)
 	sudo_ev_free(closure->write_ev);
 #if defined(HAVE_OPENSSL)
 	sudo_ev_free(closure->ssl_accept_ev);
+	if (closure->ssl != NULL) {
+	    SSL_shutdown(closure->ssl);
+	    SSL_free(closure->ssl);
+	}
 #endif
 	eventlog_free(closure->evlog);
 	free(closure->read_buf.data);
@@ -141,7 +141,7 @@ connection_closure_free(struct connection_closure *closure)
     debug_return;
 }
 
-static struct connection_buffer *
+struct connection_buffer *
 get_free_buf(struct connection_closure *closure)
 {
     struct connection_buffer *buf;
@@ -156,7 +156,7 @@ get_free_buf(struct connection_closure *closure)
     debug_return_ptr(buf);
 }
 
-static bool
+bool
 fmt_server_message(struct connection_closure *closure, ServerMessage *msg)
 {
     struct connection_buffer *buf;
@@ -227,7 +227,7 @@ fmt_hello_message(struct connection_closure *closure)
     debug_return_bool(fmt_server_message(closure, &msg));
 }
 
-static bool
+bool
 fmt_log_id_message(const char *id, struct connection_closure *closure)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
@@ -239,7 +239,7 @@ fmt_log_id_message(const char *id, struct connection_closure *closure)
     debug_return_bool(fmt_server_message(closure, &msg));
 }
 
-static bool
+bool
 fmt_error_message(const char *errstr, struct connection_closure *closure)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
@@ -333,6 +333,11 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
 
+    if (closure->relay_closure != NULL) {
+	/* Forward AcceptMessage to connected relay. */
+	debug_return_bool(relay_accept(msg, closure));
+    }
+
     closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
 	msg->n_info_msgs, closure);
     if (closure->evlog == NULL) {
@@ -396,6 +401,11 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
 
+    if (closure->relay_closure != NULL) {
+	/* Forward RejectMessage to connected relay. */
+	debug_return_bool(relay_reject(msg, closure));
+    }
+
     closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
 	msg->n_info_msgs, closure);
     if (closure->evlog == NULL) {
@@ -428,6 +438,11 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExitMessage", __func__);
+
+    if (closure->relay_closure != NULL) {
+	/* Forward ExitMessage to connected relay. */
+	debug_return_bool(relay_exit(msg, closure));
+    }
 
     /* Sudo I/O logs don't store this info. */
     if (msg->signal != NULL && msg->signal[0] != '\0') {
@@ -484,6 +499,11 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RestartMessage for %s",
 	__func__, msg->log_id);
 
+    if (closure->relay_closure != NULL) {
+	/* Forward RestartMessage to connected relay. */
+	debug_return_bool(relay_restart(msg, closure));
+    }
+
     if (!iolog_restart(msg, closure)) {
 	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log", __func__);
 	/* XXX - structured error message so client can send from beginning */
@@ -520,6 +540,11 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AlertMessage", __func__);
 
+    if (closure->relay_closure != NULL) {
+	/* Forward AlertMessage to connected relay. */
+	debug_return_bool(relay_alert(msg, closure));
+    }
+
     if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
 	closure->evlog = evlog_new(NULL, msg->info_msgs,
 	    msg->n_info_msgs, closure);
@@ -540,7 +565,7 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 }
 
 static bool
-handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
+handle_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure)
 {
     debug_decl(handle_iobuf, SUDO_DEBUG_UTIL);
 
@@ -559,8 +584,13 @@ handle_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received IoBuffer", __func__);
 
+    if (closure->relay_closure != NULL) {
+	/* Forward IoBuffer to connected relay. */
+	debug_return_bool(relay_iobuf(iofd, iobuf, closure));
+    }
+
     /* Store IoBuffer in log. */
-    if (store_iobuf(iofd, msg, closure) == -1) {
+    if (store_iobuf(iofd, iobuf, closure) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "failed to store IoBuffer");
 	closure->errstr = _("error writing IoBuffer");
@@ -682,6 +712,7 @@ handle_client_message(uint8_t *buf, size_t len,
     bool ret = false;
     debug_decl(handle_client_message, SUDO_DEBUG_UTIL);
 
+    /* TODO: can we extract type_case without unpacking for relay case? */
     msg = client_message__unpack(NULL, len, buf);
     if (msg == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -777,7 +808,10 @@ server_shutdown(struct sudo_event_base *base)
     TAILQ_FOREACH_SAFE(closure, &connections, entries, next) {
 	closure->state = SHUTDOWN;
 	sudo_ev_del(base, closure->read_ev);
-	if (closure->log_io) {
+	if (closure->relay_closure != NULL) {
+	    /* Connection being relayed, check for pending I/O. */
+	    relay_shutdown(closure);
+	} else if (closure->log_io) {
 	    /* Schedule final commit point for the connection. */
 	    if (sudo_ev_add(base, closure->commit_ev, &tv, false) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1072,7 +1106,7 @@ close_connection:
 /*
  * Format and schedule a commit_point message.
  */
-static bool
+bool
 schedule_commit_point(TimeSpec *commit_point,
     struct connection_closure *closure)
 {
@@ -1130,11 +1164,18 @@ server_commit_cb(int unused, int what, void *v)
  * When we enter the event loop the ServerHello message will be written
  * and any pending ClientMessage will be read.
  */
-static bool
+bool
 start_protocol(struct connection_closure *closure)
 {
     const struct timespec *timeout = logsrvd_conf_get_sock_timeout();
     debug_decl(start_protocol, SUDO_DEBUG_UTIL);
+
+    if (closure->relay_closure != NULL && closure->relay_closure->relays != NULL) {
+	/* No longer need the stashed relays list. */
+	address_list_delref(closure->relay_closure->relays);
+	closure->relay_closure->relays = NULL;
+	closure->relay_closure->relay_addr = NULL;
+    }
 
     if (!fmt_hello_message(closure))
 	debug_return_bool(false);
@@ -1296,8 +1337,13 @@ tls_handshake_cb(int fd, int what, void *v)
         SSL_get_cipher(closure->ssl));
 
     /* Start the actual protocol now that the TLS handshake is complete. */
-    if (!start_protocol(closure))
-	goto bad;
+    if (logsrvd_conf_relay() != NULL) {
+	if (!connect_relay(closure))
+	    goto bad;
+    } else {
+	if (!start_protocol(closure))
+	    goto bad;
+    }
 
     debug_return;
 bad:
@@ -1387,7 +1433,8 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
             sizeof(closure->ipaddr));
 #endif /* HAVE_STRUCT_IN6_ADDR */
     } else {
-        sudo_fatal("%s", U_("unable to get remote IP addr"));
+	errno = EAFNOSUPPORT;
+        sudo_warn("%s", U_("unable to get remote IP addr"));
         goto bad;
     }
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -1430,8 +1477,13 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 #endif
     /* If no TLS handshake, start the protocol immediately. */
     if (!tls) {
-	if (!start_protocol(closure))
-	    goto bad;
+	if (logsrvd_conf_relay() != NULL) {
+	    if (!connect_relay(closure))
+		goto bad;
+	} else {
+	    if (!start_protocol(closure))
+		goto bad;
+	}
     }
 
     debug_return_bool(true);
