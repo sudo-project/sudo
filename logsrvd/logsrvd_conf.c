@@ -980,7 +980,7 @@ logsrvd_conf_eventlog_setconf(struct logsrvd_config *config)
 }
 
 /* Free the specified struct logsrvd_config and its contents. */
-void
+static void
 logsrvd_conf_free(struct logsrvd_config *config)
 {
     debug_decl(logsrvd_conf_free, SUDO_DEBUG_UTIL);
@@ -1021,7 +1021,7 @@ logsrvd_conf_free(struct logsrvd_config *config)
 }
 
 /* Allocate a new struct logsrvd_config and set default values. */
-struct logsrvd_config *
+static struct logsrvd_config *
 logsrvd_conf_alloc(void)
 {
     struct logsrvd_config *config;
@@ -1121,7 +1121,7 @@ bad:
     debug_return_ptr(NULL);
 }
 
-bool
+static bool
 logsrvd_conf_apply(struct logsrvd_config *config)
 {
     debug_decl(logsrvd_conf_apply, SUDO_DEBUG_UTIL);
@@ -1231,4 +1231,14 @@ done:
     if (fp != NULL)
 	fclose(fp);
     debug_return_bool(ret);
+}
+
+void
+logsrvd_conf_cleanup(void)
+{
+    debug_decl(logsrvd_conf_cleanup, SUDO_DEBUG_UTIL);
+
+    logsrvd_conf_free(logsrvd_config);
+
+    debug_return;
 }

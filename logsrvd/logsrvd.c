@@ -777,13 +777,6 @@ shutdown_cb(int unused, int what, void *v)
     struct sudo_event_base *base = v;
     debug_decl(shutdown_cb, SUDO_DEBUG_UTIL);
 
-#if defined(HAVE_OPENSSL)
-    /* deallocate server's SSL context object */
-    struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
-    if (tls_runtime != NULL) {
-        SSL_CTX_free(tls_runtime->ssl_ctx);
-    }
-#endif
     sudo_ev_loopbreak(base);
 
     debug_return;
@@ -1911,6 +1904,7 @@ main(int argc, char *argv[])
     sudo_ev_dispatch(evbase);
     if (!nofork && logsrvd_conf_pid_file() != NULL)
 	unlink(logsrvd_conf_pid_file());
+    logsrvd_conf_cleanup();
 
     debug_return_int(1);
 }

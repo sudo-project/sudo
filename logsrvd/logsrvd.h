@@ -196,6 +196,7 @@ struct logsrvd_tls_runtime *logsrvd_get_tls_runtime(void);
 mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);
 void address_list_delref(struct server_address_list *);
+void logsrvd_conf_cleanup(void);
 
 /* logsrvd_relay.c */
 void relay_closure_free(struct relay_closure *relay_closure);
