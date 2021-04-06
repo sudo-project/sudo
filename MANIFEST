@@ -358,6 +358,7 @@ logsrvd/regress/fuzz/fuzz_logsrvd_conf.c
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.dict
 logsrvd/sendlog.c
 logsrvd/sendlog.h
+logsrvd/tls_client.c
 logsrvd/tls_common.h
 logsrvd/tls_init.c
 m4/ax_append_flag.m4

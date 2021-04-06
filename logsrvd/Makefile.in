@@ -122,7 +122,7 @@ PROGS = sudo_logsrvd sudo_sendlog
 LOGSRVD_OBJS = logsrv_util.o iolog_writer.o logsrvd.o logsrvd_conf.o \
 	       tls_init.o
 
-SENDLOG_OBJS = logsrv_util.o sendlog.o tls_init.o
+SENDLOG_OBJS = logsrv_util.o sendlog.o tls_client.o tls_init.o
 
 IOBJS = $(LOGSRVD_OBJS:.o=.i) $(SENDLOG_OBJS:.o=.i)
 
@@ -407,6 +407,24 @@ sendlog.i: $(srcdir)/sendlog.c $(incdir)/compat/getaddrinfo.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sendlog.plog: sendlog.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sendlog.c --i-file $< --output-file $@
+tls_client.o: $(srcdir)/tls_client.c $(incdir)/compat/stdbool.h \
+              $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+              $(srcdir)/tls_common.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tls_client.c
+tls_client.i: $(srcdir)/tls_client.c $(incdir)/compat/stdbool.h \
+              $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+              $(srcdir)/tls_common.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+tls_client.plog: tls_client.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/tls_client.c --i-file $< --output-file $@
 tls_init.o: $(srcdir)/tls_init.c $(incdir)/compat/stdbool.h \
             $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
