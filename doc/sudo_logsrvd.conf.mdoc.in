@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 24, 2020
+.Dd April 6, 2021
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -76,6 +76,17 @@ The
 section configures the address and port the server will listen on.
 The following keys are recognized:
 .Bl -tag -width 8n
+.It connect_timeout = number
+The amount of time, in seconds,
+.Nm sudo_logsrvd
+will wait for the connection to a relay server (see below) to complete.
+Once the connection is complete, the
+.Em timeout
+setting controls the amount of time
+.Nm sudo_logsrvd
+will wait for the relay to respond.
+A value of 0 will disable the timeout.
+The default value is 30.
 .It listen_address = host Ns Oo : Ns port Oc Ns Op (tls)
 The host name or IP address, optional port to listen on and
 an optional Transport Layer Security (TLS) flag in parentheses.
@@ -127,6 +138,28 @@ If
 refers to a symbolic link, it will be ignored.
 The default value is
 .Pa @rundir@/sudo_logsrvd.pid .
+.It relay = host Ns Oo : Ns port Oc Ns Op (tls)
+The relay host name or IP address, optional port to connect to and
+an optional Transport Layer Security (TLS) flag in parentheses.
+The syntax is identical to
+.Em listen_address
+with one exception: the wild card
+.Ql *
+syntax is not supported.
+.Pp
+When this setting is enabled, messages from the client will be forwarded
+to one of the specified relay hosts instead of being stored locally.
+The
+.Ar host
+could be an instance of
+.Nm
+or another server that supports the
+.Xr sudo_logsrv.proto 5
+protocol.
+.Pp
+If multiple
+.Em relay
+lines are specified, the first available relay host will be used.
 .It tcp_keepalive = boolean
 If true,
 .Nm sudo_logsrvd
@@ -136,7 +169,7 @@ If the client does not respond to a message, the connection will be closed.
 .It timeout = number
 The amount of time, in seconds,
 .Nm sudo_logsrvd
-will wait for the client to respond.
+will wait for the client or relay to respond.
 A value of 0 will disable the timeout.
 The default value is 30.
 .It tls_cacert = path
@@ -532,6 +565,14 @@ Sudo log server configuration file
 #listen_address = *:30343
 #listen_address = *:30344(tls)
 
+# The host name or IP address and port to send logs to in relay mode.
+# The syntax is identical to listen_address with the exception of
+# the wild card ('*') syntax.  When this setting is enabled, logs will
+# be relayed to the specified host instead of being stored locally.
+# This setting is not enabled by default.
+#relay = relayhost.dom.ain
+#relay = relayhost.dom.ain(tls)
+
 # The file containing the ID of the running sudo_logsrvd process.
 #pid_file = @rundir@/sudo_logsrvd.pid
 
@@ -541,6 +582,11 @@ Sudo log server configuration file
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 #timeout = 30
+
+# The amount of time, in seconds, the server will wait for a connection
+# to the relay server to complete.  A value of 0 will disable the timeout.
+# The default value is 30.
+#connect_timeout = 30
 
 # If set, server certificate will be verified at server startup and
 # also connecting clients will perform server authentication by
