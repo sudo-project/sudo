@@ -75,7 +75,6 @@ static void relay_client_msg_cb(int fd, int what, void *v);
 static void relay_server_msg_cb(int fd, int what, void *v);
 static void connect_cb(int sock, int what, void *v);
 static bool start_relay(int sock, struct connection_closure *closure);
-static bool connect_relay_tls(struct connection_closure *closure);
 
 /*
  * Free a struct relay_closure container and its contents.
@@ -233,6 +232,42 @@ fmt_client_hello(struct connection_closure *closure)
     debug_return_bool(ret);
 }
 
+#if defined(HAVE_OPENSSL)
+/* Wrapper for start_relay() called via tls_connect_cb() */
+static bool
+tls_client_start_fn(struct tls_client_closure *tls_client)
+{
+    sudo_ev_free(tls_client->tls_connect_ev);
+    tls_client->tls_connect_ev = NULL;
+    return start_relay(SSL_get_fd(tls_client->ssl), tls_client->parent_closure);
+}
+
+/* Perform TLS connection to the relay host. */
+static bool
+connect_relay_tls(struct connection_closure *closure)
+{
+    struct tls_client_closure *tls_client = &closure->relay_closure->tls_client;
+    SSL_CTX *ssl_ctx = logsrvd_get_tls_runtime()->ssl_ctx;
+    debug_decl(connect_relay_tls, SUDO_DEBUG_UTIL);
+
+    /* Populate struct tls_client_closure. */
+    tls_client->parent_closure = closure;
+    tls_client->evbase = closure->evbase;
+    tls_client->tls_connect_ev = sudo_ev_alloc(closure->relay_closure->sock,
+	SUDO_EV_WRITE, tls_connect_cb, tls_client);
+    if (tls_client->tls_connect_ev == NULL)
+        goto bad;
+    tls_client->peer_name = &closure->relay_closure->relay_name;
+    tls_client->start_fn = tls_client_start_fn;
+    if (!tls_ctx_client_setup(ssl_ctx, closure->relay_closure->sock, tls_client))
+        goto bad;
+
+    debug_return_bool(true);
+bad:
+    debug_return_bool(false);
+}
+#endif /* HAVE_OPENSSL */
+
 /*
  * Try to connect to the next relay host.
  * Returns 0 on success, -1 on error, setting errno.
@@ -334,42 +369,6 @@ bad:
     relay_closure->connect_ev = NULL;
     debug_return_int(-1);
 }
-
-#if defined(HAVE_OPENSSL)
-/* Wrapper for start_relay() called via tls_connect_cb() */
-static bool
-tls_client_start_fn(struct tls_client_closure *tls_client)
-{
-    sudo_ev_free(tls_client->tls_connect_ev);
-    tls_client->tls_connect_ev = NULL;
-    return start_relay(SSL_get_fd(tls_client->ssl), tls_client->parent_closure);
-}
-
-/* Perform TLS connection to the relay host. */
-static bool
-connect_relay_tls(struct connection_closure *closure)
-{
-    struct tls_client_closure *tls_client = &closure->relay_closure->tls_client;
-    SSL_CTX *ssl_ctx = logsrvd_get_tls_runtime()->ssl_ctx;
-    debug_decl(connect_relay_tls, SUDO_DEBUG_UTIL);
-
-    /* Populate struct tls_client_closure. */
-    tls_client->parent_closure = closure;
-    tls_client->evbase = closure->evbase;
-    tls_client->tls_connect_ev = sudo_ev_alloc(closure->relay_closure->sock,
-	SUDO_EV_WRITE, tls_connect_cb, tls_client);
-    if (tls_client->tls_connect_ev == NULL)
-        goto bad;
-    tls_client->peer_name = &closure->relay_closure->relay_name;
-    tls_client->start_fn = tls_client_start_fn;
-    if (!tls_ctx_client_setup(ssl_ctx, closure->relay_closure->sock, tls_client))
-        goto bad;
-
-    debug_return_bool(true);
-bad:
-    debug_return_bool(false);
-}
-#endif /* HAVE_OPENSSL */
 
 static void
 connect_cb(int sock, int what, void *v)
