@@ -21,6 +21,7 @@ AC_PREREQ([2.59])
 AC_INIT([sudo], [1.9.6p1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
+AC_CONFIG_AUX_DIR([scripts])
 dnl
 dnl Note: this must come after AC_INIT
 dnl

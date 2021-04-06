@@ -9,9 +9,7 @@ README
 README.LDAP
 aclocal.m4
 autogen.sh
-config.guess
 config.h.in
-config.sub
 configure
 configure.ac
 doc/CONTRIBUTORS
@@ -101,7 +99,6 @@ include/sudo_plugin.h
 include/sudo_queue.h
 include/sudo_rand.h
 include/sudo_util.h
-install-sh
 lib/eventlog/Makefile.in
 lib/eventlog/eventlog.c
 lib/eventlog/eventlog_conf.c
@@ -361,7 +358,6 @@ logsrvd/regress/fuzz/fuzz_logsrvd_conf.c
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.dict
 logsrvd/sendlog.c
 logsrvd/sendlog.h
-ltmain.sh
 m4/ax_append_flag.m4
 m4/ax_check_compile_flag.m4
 m4/ax_check_link_flag.m4
@@ -1077,8 +1073,12 @@ po/zh_CN.mo
 po/zh_CN.po
 po/zh_TW.mo
 po/zh_TW.po
+scripts/config.guess
+scripts/config.sub
 scripts/generate_test_coverage.sh
+scripts/install-sh
 scripts/log2cl.pl
+scripts/ltmain.sh
 scripts/mkdep.pl
 scripts/mkinstalldirs
 scripts/mkpkg
