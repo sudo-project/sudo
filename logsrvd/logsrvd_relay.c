@@ -49,6 +49,11 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
+#if defined(HAVE_OPENSSL)
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+#endif
+
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
 #include "pathnames.h"
@@ -70,6 +75,7 @@ static void relay_client_msg_cb(int fd, int what, void *v);
 static void relay_server_msg_cb(int fd, int what, void *v);
 static void connect_cb(int sock, int what, void *v);
 static bool start_relay(int sock, struct connection_closure *closure);
+static bool connect_relay_tls(struct connection_closure *closure);
 
 /*
  * Free a struct relay_closure container and its contents.
@@ -85,6 +91,12 @@ relay_closure_free(struct relay_closure *relay_closure)
     sudo_ev_free(relay_closure->read_ev);
     sudo_ev_free(relay_closure->write_ev);
     sudo_ev_free(relay_closure->connect_ev);
+#if defined(HAVE_OPENSSL)
+    if (relay_closure->tls_client.ssl != NULL) {
+	SSL_shutdown(relay_closure->tls_client.ssl);
+	SSL_free(relay_closure->tls_client.ssl);
+    }
+#endif
     free(relay_closure->read_buf.data);
     while ((buf = TAILQ_FIRST(&relay_closure->write_bufs)) != NULL) {
 	TAILQ_REMOVE(&relay_closure->write_bufs, buf, entries);
@@ -276,14 +288,24 @@ connect_relay_next(struct connection_closure *closure)
 	    relay->sa_un.sa.sa_family);
 	goto bad;
     }
-    inet_ntop(relay->sa_un.sa.sa_family, addr, relay_closure->ipaddr,
-	sizeof(relay_closure->ipaddr));
+    inet_ntop(relay->sa_un.sa.sa_family, addr,
+	relay_closure->relay_name.ipaddr,
+	sizeof(relay_closure->relay_name.ipaddr));
 
     if (ret == 0) {
-	/* Connection succeeded without blocking. */
 	relay_closure->sock = sock;
-	if (!start_relay(sock, closure))
-	    goto bad;
+#if defined(HAVE_OPENSSL)
+	/* Relay connection succeeded, start TLS handshake. */
+	if (relay_closure->relay_addr->tls) {
+	    if (!connect_relay_tls(closure))
+		goto bad;
+	} else
+#endif
+	{
+	    /* Connection succeeded without blocking. */
+	    if (!start_relay(sock, closure))
+		goto bad;
+	}
     } else {
 	/* Connection will be completed in connect_cb(). */
 	relay_closure->connect_ev = sudo_ev_alloc(sock, SUDO_EV_WRITE,
@@ -310,6 +332,42 @@ bad:
     debug_return_int(-1);
 }
 
+#if defined(HAVE_OPENSSL)
+/* Wrapper for start_relay() called via tls_connect_cb() */
+static bool
+tls_client_start_fn(struct tls_client_closure *tls_client)
+{
+    sudo_ev_free(tls_client->tls_connect_ev);
+    tls_client->tls_connect_ev = NULL;
+    return start_relay(SSL_get_fd(tls_client->ssl), tls_client->parent_closure);
+}
+
+/* Perform TLS connection to the relay host. */
+static bool
+connect_relay_tls(struct connection_closure *closure)
+{
+    struct tls_client_closure *tls_client = &closure->relay_closure->tls_client;
+    SSL_CTX *ssl_ctx = logsrvd_get_tls_runtime()->ssl_ctx;
+    debug_decl(connect_relay_tls, SUDO_DEBUG_UTIL);
+
+    /* Populate struct tls_client_closure. */
+    tls_client->parent_closure = closure;
+    tls_client->evbase = closure->evbase;
+    tls_client->tls_connect_ev = sudo_ev_alloc(closure->relay_closure->sock,
+	SUDO_EV_WRITE, tls_connect_cb, tls_client);
+    if (tls_client->tls_connect_ev == NULL)
+        goto bad;
+    tls_client->peer_name = &closure->relay_closure->relay_name;
+    tls_client->start_fn = tls_client_start_fn;
+    if (!tls_ctx_client_setup(ssl_ctx, closure->relay_closure->sock, tls_client))
+        goto bad;
+
+    debug_return_bool(true);
+bad:
+    debug_return_bool(false);
+}
+#endif /* HAVE_OPENSSL */
+
 static void
 connect_cb(int sock, int what, void *v)
 {
@@ -326,16 +384,25 @@ connect_cb(int sock, int what, void *v)
 	errnum = ret == 0 ? optval : errno;
     }
     if (errnum == 0) {
-	/* Relay connection succeeded, start talking to the client.  */
 	closure->state = INITIAL;
-	if (!start_relay(sock, closure))
-	    connection_closure_free(closure);
+#if defined(HAVE_OPENSSL)
+	/* Relay connection succeeded, start TLS handshake. */
+	if (relay_closure->relay_addr->tls) {
+	    if (!connect_relay_tls(closure))
+		connection_closure_free(closure);
+	} else
+#endif
+	{
+	    /* Relay connection succeeded, start talking to the client.  */
+	    if (!start_relay(sock, closure))
+		connection_closure_free(closure);
+	}
     } else {
 	/* Connection failed, try next relay (if any). */
 	int res;
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-	    "unable to connect to relay %s: %s", relay_closure->ipaddr,
-	    strerror(errnum));
+	    "unable to connect to relay %s: %s",
+	    relay_closure->relay_name.ipaddr, strerror(errnum));
 	while ((res = connect_relay_next(closure)) == -1) {
 	    if (errno == ENOENT || errno == EINPROGRESS) {
 		/* Out of relays or connecting asynchronously. */
@@ -400,7 +467,8 @@ handle_server_hello(ServerHello *msg, struct connection_closure *closure)
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"relay server (%s) ID %s", relay_closure->ipaddr, msg->server_id);
+	"relay server (%s) ID %s", relay_closure->relay_name.ipaddr,
+	msg->server_id);
 
     /* TODO: handle redirect */
 
@@ -436,13 +504,17 @@ handle_log_id(char *id, struct connection_closure *closure)
 {
     char *new_id;
     bool ret = false;
+    int len;
     debug_decl(handle_log_id, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"log ID %s from relay (%s)", id, closure->relay_closure->ipaddr);
+	"log ID %s from relay (%s)", id,
+	closure->relay_closure->relay_name.ipaddr);
 
     /* Generate a new log ID that includes the relay host. */
-    if (asprintf(&new_id, "%s/%s", id, closure->relay_closure->ipaddr) != -1) {
+    len = asprintf(&new_id, "%s/%s", id,
+	closure->relay_closure->relay_name.ipaddr);
+    if (len != -1) {
 	if (fmt_log_id_message(id, closure)) {
 	    if (sudo_ev_add(closure->evbase, closure->write_ev,
 		    logsrvd_conf_get_sock_timeout(), false) == -1) {
@@ -470,7 +542,7 @@ handle_server_error(char *errmsg, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	"error message received from relay (%s): %s",
-	relay_closure->ipaddr, errmsg);
+	relay_closure->relay_name.ipaddr, errmsg);
 
     if (!fmt_error_message(errmsg, closure))
 	debug_return_bool(false);
@@ -499,7 +571,7 @@ handle_server_abort(char *errmsg, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	"abort message received from relay (%s): %s",
-	relay_closure->ipaddr, errmsg);
+	relay_closure->relay_name.ipaddr, errmsg);
 
     if (!fmt_error_message(errmsg, closure))
 	debug_return_bool(false);
@@ -578,25 +650,107 @@ relay_server_msg_cb(int fd, int what, void *v)
     uint32_t msg_len;
     debug_decl(relay_server_msg_cb, SUDO_DEBUG_UTIL);
 
+    /* For TLS we may need to read as part of SSL_write(). */
+    if (relay_closure->write_instead_of_read) {
+	relay_closure->write_instead_of_read = false;
+        relay_client_msg_cb(fd, what, v);
+        debug_return;
+    }
+
     if (what == SUDO_EV_TIMEOUT) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "timed out reading from relay (%s)", relay_closure->ipaddr);
+	    "timed out reading from relay (%s)",
+	    relay_closure->relay_name.ipaddr);
 	closure->errstr = _("timeout reading from relay");
         goto send_error;
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: ServerMessage from relay %s",
-	__func__, relay_closure->ipaddr);
+#if defined(HAVE_OPENSSL)
+    if (relay_closure->tls_client.ssl != NULL) {
+	SSL *ssl = relay_closure->tls_client.ssl;
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: ServerMessage from relay %s (TLS)",
+	    __func__, relay_closure->relay_name.ipaddr);
+        nread = SSL_read(ssl, buf->data + buf->len, buf->size - buf->len);
+        if (nread <= 0) {
+	    const char *errstr;
+	    int err;
 
-    nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+            switch (SSL_get_error(ssl, nread)) {
+		case SSL_ERROR_ZERO_RETURN:
+		    /* ssl connection shutdown cleanly */
+		    nread = 0;
+		    break;
+                case SSL_ERROR_WANT_READ:
+                    /* ssl wants to read more, read event is always active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_read returns SSL_ERROR_WANT_READ");
+                    debug_return;
+                case SSL_ERROR_WANT_WRITE:
+                    /* ssl wants to write, schedule a write if not pending */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_read returns SSL_ERROR_WANT_WRITE");
+		    if (!sudo_ev_pending(relay_closure->write_ev, SUDO_EV_WRITE, NULL)) {
+			/* Enable a temporary write event. */
+			if (sudo_ev_add(closure->evbase, relay_closure->write_ev, NULL, false) == -1) {
+			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+				"unable to add server write event");
+			    closure->errstr = _("unable to allocate memory");
+			    goto send_error;
+			}
+			relay_closure->temporary_write_event = true;
+		    }
+		    /* Redirect write event to finish SSL_read() */
+		    relay_closure->read_instead_of_write = true;
+                    debug_return;
+                case SSL_ERROR_SSL:
+                    /*
+                     * For TLS 1.3, if the cert verify function on the server
+                     * returns an error, OpenSSL will send an internal error
+                     * alert when we read ServerHello.  Convert to a more useful
+                     * message and hope that no actual internal error occurs.
+                     */
+                    err = ERR_get_error();
+                    if (closure->state == INITIAL &&
+                        ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
+                        errstr = "host name does not match certificate";
+                    } else {
+                        errstr = ERR_reason_error_string(err);
+                    }
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"SSL_read from %s: %s",
+			relay_closure->relay_name.ipaddr, errstr);
+                    goto close_connection;
+                case SSL_ERROR_SYSCALL:
+                    errstr = strerror(errno);
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"SSL_read from %s: %s",
+			relay_closure->relay_name.ipaddr, errstr);
+                    goto close_connection;
+                default:
+                    errstr = ERR_reason_error_string(ERR_get_error());
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"SSL_read from %s: %s",
+			relay_closure->relay_name.ipaddr, errstr);
+                    goto close_connection;
+            }
+        }
+    } else
+#endif
+    {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: ServerMessage from relay %s",
+	    __func__, relay_closure->relay_name.ipaddr);
+	nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+    }
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from relay %s",
-	__func__, nread, relay_closure->ipaddr);
+	__func__, nread, relay_closure->relay_name.ipaddr);
     switch (nread) {
     case -1:
 	if (errno == EAGAIN)
 	    debug_return;
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "recv from %s", relay_closure->ipaddr);
+	    "recv from %s", relay_closure->relay_name.ipaddr);
 	closure->errstr = _("unable to read from relay");
 	goto send_error;
     case 0:
@@ -608,8 +762,8 @@ relay_server_msg_cb(int fd, int what, void *v)
 
 	if (closure->state != FINISHED) {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"unexpected EOF from %s (state %d)", relay_closure->ipaddr,
-		closure->state);
+		"unexpected EOF from %s (state %d)",
+		relay_closure->relay_name.ipaddr, closure->state);
 	    closure->errstr = _("unexpected EOF from relay");
 	    goto send_error;
 	}
@@ -688,10 +842,23 @@ relay_client_msg_cb(int fd, int what, void *v)
     ssize_t nwritten;
     debug_decl(relay_client_msg_cb, SUDO_DEBUG_UTIL);
 
+    /* For TLS we may need to write as part of SSL_read(). */
+    if (relay_closure->read_instead_of_write) {
+	relay_closure->read_instead_of_write = false;
+        /* Delete write event if it was only due to SSL_read(). */
+        if (relay_closure->temporary_write_event) {
+            relay_closure->temporary_write_event = false;
+            sudo_ev_del(closure->evbase, relay_closure->write_ev);
+        }
+        relay_server_msg_cb(fd, what, v);
+        debug_return;
+    }
+
     if (what == SUDO_EV_TIMEOUT) {
 	closure->errstr = _("timeout writing to relay");
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "timed out writing to relay (%s)", relay_closure->ipaddr);
+            "timed out writing to relay (%s)",
+	    relay_closure->relay_name.ipaddr);
         goto send_error;
     }
 
@@ -702,14 +869,69 @@ relay_client_msg_cb(int fd, int what, void *v)
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to server (%s)",
-	__func__, buf->len - buf->off, relay_closure->ipaddr);
+	__func__, buf->len - buf->off, relay_closure->relay_name.ipaddr);
 
-    nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
-    if (nwritten == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "send to %s", relay_closure->ipaddr);
-	closure->errstr = _("error writing to relay");
-	goto send_error;
+#if defined(HAVE_OPENSSL)
+    if (relay_closure->tls_client.ssl != NULL) {
+	SSL *ssl = relay_closure->tls_client.ssl;
+        nwritten = SSL_write(ssl, buf->data + buf->off, buf->len - buf->off);
+        if (nwritten <= 0) {
+	    const char *errstr;
+
+            switch (SSL_get_error(ssl, nwritten)) {
+		case SSL_ERROR_ZERO_RETURN:
+		    /* ssl connection shutdown cleanly */
+		    close(relay_closure->sock);
+		    relay_closure->sock = -1;
+		    sudo_ev_del(closure->evbase, relay_closure->read_ev);
+		    sudo_ev_del(closure->evbase, relay_closure->write_ev);
+
+		    if (closure->state != FINISHED) {
+			sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+			    "unexpected EOF from %s (state %d)",
+			    relay_closure->relay_name.ipaddr, closure->state);
+			closure->errstr = _("unexpected EOF from relay");
+			goto send_error;
+		    }
+		    debug_return;
+                case SSL_ERROR_WANT_READ:
+                    /* ssl wants to read, read event always active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_write returns SSL_ERROR_WANT_READ");
+		    /* Redirect read event to finish SSL_write() */
+		    relay_closure->write_instead_of_read = true;
+                    debug_return;
+                case SSL_ERROR_WANT_WRITE:
+		    /* ssl wants to write more, write event remains active */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"SSL_write returns SSL_ERROR_WANT_WRITE");
+                    debug_return;
+                case SSL_ERROR_SYSCALL:
+		    errstr = strerror(errno);
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"SSL_write to %s: %s",
+			relay_closure->relay_name.ipaddr, errstr);
+		    closure->errstr = _("error writing to relay");
+		    goto send_error;
+                default:
+		    errstr = ERR_reason_error_string(ERR_get_error());
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"SSL_write to %s: %s",
+			relay_closure->relay_name.ipaddr, errstr);
+		    closure->errstr = _("error writing to relay");
+		    goto send_error;
+            }
+        }
+    } else
+#endif
+    {
+	nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+	if (nwritten == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"send to %s", relay_closure->relay_name.ipaddr);
+	    closure->errstr = _("error writing to relay");
+	    goto send_error;
+	}
     }
     buf->off += nwritten;
 
@@ -787,7 +1009,7 @@ relay_accept(AcceptMessage *msg, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying AcceptMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->ipaddr);
+	closure->ipaddr, relay_closure->relay_name.ipaddr);
 
     client_msg.u.accept_msg = msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
@@ -824,7 +1046,7 @@ relay_reject(RejectMessage *msg, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying RejectMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->ipaddr);
+	closure->ipaddr, relay_closure->relay_name.ipaddr);
 
     client_msg.u.reject_msg = msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_REJECT_MSG;
@@ -856,7 +1078,7 @@ relay_exit(ExitMessage *msg, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying ExitMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->ipaddr);
+	closure->ipaddr, relay_closure->relay_name.ipaddr);
 
     client_msg.u.exit_msg = msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
@@ -893,7 +1115,7 @@ relay_restart(RestartMessage *msg, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying RestartMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->ipaddr);
+	closure->ipaddr, relay_closure->relay_name.ipaddr);
 
     /*
      * We prepend "relayhost/" to the log ID before relaying it to
@@ -933,7 +1155,7 @@ relay_alert(AlertMessage *msg, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying AlertMessage from %s to %s", __func__,
-	closure->ipaddr, relay_closure->ipaddr);
+	closure->ipaddr, relay_closure->relay_name.ipaddr);
 
     client_msg.u.alert_msg = msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ALERT_MSG;
@@ -963,7 +1185,7 @@ relay_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying IoBuffer from %s to %s", __func__,
-	closure->ipaddr, relay_closure->ipaddr);
+	closure->ipaddr, relay_closure->relay_name.ipaddr);
 
     switch (iofd) {
     case IOFD_TTYIN:

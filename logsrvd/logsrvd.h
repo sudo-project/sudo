@@ -66,12 +66,14 @@ struct relay_closure {
     struct sudo_event *connect_ev;
     struct connection_buffer read_buf;
     struct connection_buffer_list write_bufs;
-    int sock;
-#ifdef HAVE_STRUCT_IN6_ADDR
-    char ipaddr[INET6_ADDRSTRLEN];
-#else
-    char ipaddr[INET_ADDRSTRLEN];
+    struct peer_info relay_name;
+#if defined(HAVE_OPENSSL)
+    struct tls_client_closure tls_client;
 #endif
+    int sock;
+    bool read_instead_of_write;
+    bool write_instead_of_read;
+    bool temporary_write_event;
 };
 
 /*

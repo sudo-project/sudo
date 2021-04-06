@@ -120,7 +120,7 @@ SHELL = @SHELL@
 PROGS = sudo_logsrvd sudo_sendlog
 
 LOGSRVD_OBJS = logsrv_util.o iolog_writer.o logsrvd.o logsrvd_conf.o \
-	       logsrvd_relay.o tls_init.o
+	       logsrvd_relay.o tls_client.o tls_init.o
 
 SENDLOG_OBJS = logsrv_util.o sendlog.o tls_client.o tls_init.o
 

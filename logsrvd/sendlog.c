@@ -377,10 +377,7 @@ fmt_client_hello(struct client_closure *closure)
 static bool
 tls_start_fn(struct tls_client_closure *tls_client)
 {
-    struct client_closure *closure =
-	__containerof(tls_client, struct client_closure, tls_client);
-
-    return fmt_client_hello(closure);
+    return fmt_client_hello(tls_client->parent_closure);
 }
 #endif /* HAVE_OPENSSL */
 
@@ -1442,6 +1439,7 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
 	if (closure->tls_client.tls_connect_ev == NULL)
 	    goto bad;
 	closure->tls_client.evbase = base;
+	closure->tls_client.parent_closure = closure;
 	closure->tls_client.peer_name = &server_info;
 	closure->tls_client.start_fn = tls_start_fn;
     }
