@@ -146,7 +146,7 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
      * since it modifies "file" (adds a ref) and "members" (tailq conversion).
      */
     /* a->used = false; */
-    a->file = rcstr_addref(file);
+    a->file = sudo_rcstr_addref(file);
     a->line = line;
     a->column = column;
     HLTQ_TO_TAILQ(&a->members, members, entries);
@@ -215,7 +215,7 @@ alias_free(void *v)
 
     if (a != NULL) {
 	free(a->name);
-	rcstr_delref(a->file);
+	sudo_rcstr_delref(a->file);
 	free_members(&a->members);
 	free(a);
     }

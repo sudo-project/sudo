@@ -1155,8 +1155,8 @@ sudoerserrorf(const char *fmt, ...)
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
 	errorlineno = this_lineno;
-	rcstr_delref(errorfile);
-	errorfile = rcstr_addref(sudoers);
+	sudo_rcstr_delref(errorfile);
+	errorfile = sudo_rcstr_addref(sudoers);
     }
     if (sudoers_warnings && fmt != NULL) {
 	LEXTRACE("<*> ");
@@ -1250,7 +1250,7 @@ new_default(char *var, char *val, short op)
     /* d->binding = NULL */
     d->line = this_lineno;
     d->column = sudolinebuf.toke_start + 1;
-    d->file = rcstr_addref(sudoers);
+    d->file = sudo_rcstr_addref(sudoers);
     HLTQ_INIT(d, entries);
 
     debug_return_ptr(d);
@@ -1382,7 +1382,7 @@ add_userspec(struct member *members, struct privilege *privs)
     }
     u->line = this_lineno;
     u->column = sudolinebuf.toke_start + 1;
-    u->file = rcstr_addref(sudoers);
+    u->file = sudo_rcstr_addref(sudoers);
     parser_leak_remove(LEAK_MEMBER, members);
     HLTQ_TO_TAILQ(&u->users, members, entries);
     parser_leak_remove(LEAK_PRIVILEGE, privs);
@@ -1462,7 +1462,7 @@ free_default(struct defaults *def, struct member_list **binding)
 	    free(def->binding);
 	}
     }
-    rcstr_delref(def->file);
+    sudo_rcstr_delref(def->file);
     free(def->var);
     free(def->val);
     free(def);
@@ -1586,7 +1586,7 @@ free_userspec(struct userspec *us)
 	free(comment->str);
 	free(comment);
     }
-    rcstr_delref(us->file);
+    sudo_rcstr_delref(us->file);
     free(us);
 
     debug_return;
@@ -1644,9 +1644,9 @@ init_parser(const char *path, bool quiet, bool strict)
     parser_leak_init();
     init_lexer();
 
-    rcstr_delref(sudoers);
+    sudo_rcstr_delref(sudoers);
     if (path != NULL) {
-	if ((sudoers = rcstr_dup(path)) == NULL) {
+	if ((sudoers = sudo_rcstr_dup(path)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    ret = false;
 	}
@@ -1656,7 +1656,7 @@ init_parser(const char *path, bool quiet, bool strict)
 
     parse_error = false;
     errorlineno = -1;
-    rcstr_delref(errorfile);
+    sudo_rcstr_delref(errorfile);
     errorfile = NULL;
     sudoers_warnings = !quiet;
     sudoers_strict = strict;

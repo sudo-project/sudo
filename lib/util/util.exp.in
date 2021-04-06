@@ -113,6 +113,10 @@ sudo_parse_gids_v1
 sudo_parseln_v1
 sudo_parseln_v2
 sudo_pow2_roundup_v1
+sudo_rcstr_addref
+sudo_rcstr_alloc
+sudo_rcstr_delref
+sudo_rcstr_dup
 sudo_secure_dir_v1
 sudo_secure_file_v1
 sudo_setgroups_v1

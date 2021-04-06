@@ -173,7 +173,7 @@ AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 LIBPARSESUDOERS_OBJS = alias.lo b64_decode.lo defaults.lo digestname.lo \
 		       exptilde.lo filedigest.lo gentime.lo gmtoff.lo gram.lo \
 		       hexchar.lo match.lo match_addr.lo match_command.lo \
-		       match_digest.lo pwutil.lo pwutil_impl.lo rcstr.lo \
+		       match_digest.lo pwutil.lo pwutil_impl.lo \
 		       redblack.lo strlist.lo sudoers_debug.lo timeout.lo \
 		       timestr.lo toke.lo toke_util.lo
 
@@ -2512,26 +2512,6 @@ pwutil_impl.i: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 pwutil_impl.plog: pwutil_impl.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pwutil_impl.c --i-file $< --output-file $@
-rcstr.lo: $(srcdir)/rcstr.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
-          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
-          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
-          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/rcstr.c
-rcstr.i: $(srcdir)/rcstr.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
-          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
-          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
-          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-rcstr.plog: rcstr.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/rcstr.c --i-file $< --output-file $@
 redblack.lo: $(srcdir)/redblack.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

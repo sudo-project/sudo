@@ -64,7 +64,7 @@ check_alias(struct sudoers_parse_tree *parse_tree, char *name, int type,
 	    }
 	    fputc('\n', stderr);
 	    if (strict && errorfile == NULL) {
-		errorfile = rcstr_addref(file);
+		errorfile = sudo_rcstr_addref(file);
 		errorlineno = line;
 	    }
 	}

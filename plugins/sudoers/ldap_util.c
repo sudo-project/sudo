@@ -262,7 +262,7 @@ sudo_ldap_add_default(const char *var, const char *val, int op,
 	    goto oom;
     }
     def->file = source;
-    rcstr_addref(source);
+    sudo_rcstr_addref(source);
     TAILQ_INSERT_TAIL(defs, def, entries);
     debug_return_bool(true);
 
@@ -514,7 +514,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		if (store_options) {
 		    /* Use sudoRole in place of file name in defaults. */
 		    size_t slen = sizeof("sudoRole") + strlen(priv->ldap_role);
-		    if ((source = rcstr_alloc(slen)) == NULL)
+		    if ((source = sudo_rcstr_alloc(slen)) == NULL)
 			goto oom;
 		    (void)snprintf(source, slen, "sudoRole %s", priv->ldap_role);
 		}
@@ -604,7 +604,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			}
 		    }
 		}
-		rcstr_delref(source);
+		sudo_rcstr_delref(source);
 		if (opt != NULL) {
 		    /* Defer oom until we drop the ref on source. */
 		    goto oom;

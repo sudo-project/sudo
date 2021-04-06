@@ -132,7 +132,7 @@ SHELL = @SHELL@
 
 LTOBJS = basename.lo @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
 	 gettime.lo getgrouplist.lo gidlist.lo json.lo lbuf.lo locking.lo \
-         logfac.lo logpri.lo mkdir_parents.lo parseln.lo progname.lo \
+         logfac.lo logpri.lo mkdir_parents.lo parseln.lo progname.lo rcstr.lo \
          roundup.lo secure_path.lo setgroups.lo strsplit.lo strtobool.lo \
          strtoid.lo strtomode.lo strtonum.lo sudo_conf.lo \
 	 sudo_debug.lo sudo_dso.lo term.lo ttyname_dev.lo \
@@ -1125,6 +1125,14 @@ pwrite.i: $(srcdir)/pwrite.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 pwrite.plog: pwrite.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pwrite.c --i-file $< --output-file $@
+rcstr.lo: $(srcdir)/rcstr.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+          $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/rcstr.c
+rcstr.i: $(srcdir)/rcstr.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+          $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+rcstr.plog: rcstr.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/rcstr.c --i-file $< --output-file $@
 reallocarray.lo: $(srcdir)/reallocarray.c $(incdir)/sudo_compat.h \
                  $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/reallocarray.c

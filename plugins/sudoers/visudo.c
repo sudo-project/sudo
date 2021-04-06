@@ -550,14 +550,14 @@ check_defaults_and_aliases(bool strict, bool quiet)
 
     if (!check_defaults(&parsed_policy, quiet)) {
 	struct defaults *d;
-	rcstr_delref(errorfile);
+	sudo_rcstr_delref(errorfile);
 	errorfile = NULL;
 	errorlineno = -1;
 	/* XXX - should edit all files with errors */
 	TAILQ_FOREACH(d, &parsed_policy.defaults, entries) {
 	    if (d->error) {
 		/* Defaults parse error, set errorfile/errorlineno. */
-		errorfile = rcstr_addref(d->file);
+		errorfile = sudo_rcstr_addref(d->file);
 		errorlineno = d->line;
 		break;
 	    }
@@ -604,8 +604,8 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    sudo_warnx(U_("unable to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = true;
-	    rcstr_delref(errorfile);
-	    if ((errorfile = rcstr_dup(sp->path)) == NULL)
+	    sudo_rcstr_delref(errorfile);
+	    if ((errorfile = sudo_rcstr_dup(sp->path)) == NULL)
 		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	}
 	fclose(sudoersin);
@@ -921,8 +921,8 @@ check_syntax(const char *file, bool quiet, bool strict, bool oldperms)
 	if (!quiet)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), file);
 	parse_error = true;
-	rcstr_delref(errorfile);
-	if ((errorfile = rcstr_dup(file)) == NULL)
+	sudo_rcstr_delref(errorfile);
+	if ((errorfile = sudo_rcstr_dup(file)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     if (!parse_error) {

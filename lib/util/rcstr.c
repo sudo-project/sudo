@@ -27,7 +27,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include "sudo_compat.h"
+#include "sudo_debug.h"
+#include "sudo_util.h"
 
 /* Trivial reference-counted strings. */
 struct rcstr {
@@ -40,23 +42,23 @@ struct rcstr {
  * Returns the newly-created string with a refcnt of 1.
  */
 char *
-rcstr_dup(const char *src)
+sudo_rcstr_dup(const char *src)
 {
     size_t len = strlen(src);
     char *dst;
-    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL);
+    debug_decl(sudo_rcstr_dup, SUDO_DEBUG_UTIL);
 
-    dst = rcstr_alloc(len);
+    dst = sudo_rcstr_alloc(len);
     memcpy(dst, src, len);
     dst[len] = '\0';
     debug_return_ptr(dst);
 }
 
 char *
-rcstr_alloc(size_t len)
+sudo_rcstr_alloc(size_t len)
 {
     struct rcstr *rcs;
-    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL);
+    debug_decl(sudo_rcstr_dup, SUDO_DEBUG_UTIL);
 
     /* Note: sizeof(struct rcstr) includes space for the NUL */
     rcs = malloc(sizeof(struct rcstr) + len);
@@ -70,10 +72,10 @@ rcstr_alloc(size_t len)
 }
 
 char *
-rcstr_addref(const char *s)
+sudo_rcstr_addref(const char *s)
 {
     struct rcstr *rcs;
-    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL);
+    debug_decl(sudo_rcstr_dup, SUDO_DEBUG_UTIL);
 
     if (s == NULL)
 	debug_return_ptr(NULL);
@@ -84,10 +86,10 @@ rcstr_addref(const char *s)
 }
 
 void
-rcstr_delref(const char *s)
+sudo_rcstr_delref(const char *s)
 {
     struct rcstr *rcs;
-    debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL);
+    debug_decl(sudo_rcstr_dup, SUDO_DEBUG_UTIL);
 
     if (s != NULL) {
 	rcs = __containerof((const void *)s, struct rcstr, str);
