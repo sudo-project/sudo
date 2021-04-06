@@ -98,16 +98,16 @@ union sockaddr_union {
 };
 
 /*
- * List of listen addresses.
+ * List of server addresses.
  */
-struct listen_address {
-    TAILQ_ENTRY(listen_address) entries;
+struct server_address {
+    TAILQ_ENTRY(server_address) entries;
     char *sa_str;
     union sockaddr_union sa_un;
     socklen_t sa_size;
     bool tls;
 };
-TAILQ_HEAD(listen_address_list, listen_address);
+TAILQ_HEAD(server_address_list, server_address);
 
 /*
  * List of active network listeners.
@@ -151,7 +151,7 @@ void iolog_close_all(struct connection_closure *closure);
 bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
-struct listen_address_list *logsrvd_conf_listen_address(void);
+struct server_address_list *logsrvd_conf_listen_address(void);
 bool logsrvd_conf_tcp_keepalive(void);
 const char *logsrvd_conf_pid_file(void);
 struct timespec *logsrvd_conf_get_sock_timeout(void);
@@ -160,5 +160,7 @@ const struct logsrvd_tls_config *logsrvd_get_tls_config(void);
 struct logsrvd_tls_runtime *logsrvd_get_tls_runtime(void);
 #endif
 mode_t logsrvd_conf_iolog_mode(void);
+void address_list_addref(struct server_address_list *);
+void address_list_delref(struct server_address_list *);
 
 #endif /* SUDO_LOGSRVD_H */

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -76,9 +76,14 @@ struct logsrvd_config_section {
     struct logsrvd_config_entry *entries;
 };
 
+struct address_list_container {
+    unsigned int refcnt;
+    struct server_address_list addrs;
+};
+
 static struct logsrvd_config {
     struct logsrvd_config_server {
-        struct listen_address_list addresses;
+        struct address_list_container addresses;
         struct timespec timeout;
         bool tcp_keepalive;
 	char *pid_file;
@@ -136,10 +141,10 @@ logsrvd_conf_iolog_file(void)
 }
 
 /* server getters */
-struct listen_address_list *
+struct server_address_list *
 logsrvd_conf_listen_address(void)
 {
-    return &logsrvd_config->server.addresses;
+    return &logsrvd_config->server.addresses.addrs;
 }
 
 bool
@@ -306,13 +311,13 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str)
 
 /* Server callbacks */
 static bool
-cb_listen_address(struct logsrvd_config *config, const char *str)
+append_address(struct server_address_list *addresses, const char *str)
 {
     struct addrinfo hints, *res, *res0 = NULL;
     char *copy, *host, *port;
     bool tls, ret = false;
     int error;
-    debug_decl(cb_iolog_mode, SUDO_DEBUG_UTIL);
+    debug_decl(append_address, SUDO_DEBUG_UTIL);
 
     if ((copy = strdup(str)) == NULL) {
 	sudo_warn(NULL);
@@ -344,7 +349,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 	goto done;
     }
     for (res = res0; res != NULL; res = res->ai_next) {
-	struct listen_address *addr;
+	struct server_address *addr;
 
 	if ((addr = malloc(sizeof(*addr))) == NULL) {
 	    sudo_warn(NULL);
@@ -358,7 +363,7 @@ cb_listen_address(struct logsrvd_config *config, const char *str)
 	memcpy(&addr->sa_un, res->ai_addr, res->ai_addrlen);
 	addr->sa_size = res->ai_addrlen;
 	addr->tls = tls;
-	TAILQ_INSERT_TAIL(&config->server.addresses, addr, entries);
+	TAILQ_INSERT_TAIL(addresses, addr, entries);
     }
 
     ret = true;
@@ -367,6 +372,12 @@ done:
 	freeaddrinfo(res0);
     free(copy);
     debug_return_bool(ret);
+}
+
+static bool
+cb_listen_address(struct logsrvd_config *config, const char *str)
+{
+    return append_address(&config->server.addresses.addrs, str);
 }
 
 static bool
@@ -683,6 +694,29 @@ cb_logfile_time_format(struct logsrvd_config *config, const char *str)
     debug_return_bool(true);
 }
 
+void
+address_list_addref(struct server_address_list *al)
+{
+    struct address_list_container *container =
+	__containerof(al, struct address_list_container, addrs);
+    container->refcnt++;
+}
+
+void
+address_list_delref(struct server_address_list *al)
+{
+    struct address_list_container *container =
+	__containerof(al, struct address_list_container, addrs);
+    if (--container->refcnt == 0) {
+	struct server_address *addr;
+	while ((addr = TAILQ_FIRST(al))) {
+	    TAILQ_REMOVE(al, addr, entries);
+	    free(addr->sa_str);
+	    free(addr);
+	}
+    }
+}
+
 static struct logsrvd_config_entry server_conf_entries[] = {
     { "listen_address", cb_listen_address },
     { "timeout", cb_timeout },
@@ -891,18 +925,13 @@ logsrvd_conf_eventlog_setconf(struct logsrvd_config *config)
 void
 logsrvd_conf_free(struct logsrvd_config *config)
 {
-    struct listen_address *addr;
     debug_decl(logsrvd_conf_free, SUDO_DEBUG_UTIL);
 
     if (config == NULL)
 	debug_return;
 
     /* struct logsrvd_config_server */
-    while ((addr = TAILQ_FIRST(&config->server.addresses))) {
-	TAILQ_REMOVE(&config->server.addresses, addr, entries);
-	free(addr->sa_str);
-	free(addr);
-    }
+    address_list_delref(&config->server.addresses.addrs);
     free(config->server.pid_file);
 
     /* struct logsrvd_config_iolog */
@@ -945,7 +974,8 @@ logsrvd_conf_alloc(void)
     }
 
     /* Server defaults */
-    TAILQ_INIT(&config->server.addresses);
+    TAILQ_INIT(&config->server.addresses.addrs);
+    config->server.addresses.refcnt = 1;
     config->server.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->server.tcp_keepalive = true;
     config->server.pid_file = strdup(_PATH_SUDO_LOGSRVD_PID);
@@ -1036,7 +1066,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     debug_decl(logsrvd_conf_apply, SUDO_DEBUG_UTIL);
 
     /* There can be multiple addresses so we can't set a default earlier. */
-    if (TAILQ_EMPTY(&config->server.addresses)) {
+    if (TAILQ_EMPTY(&config->server.addresses.addrs)) {
 	/* Enable plaintext listender. */
 	if (!cb_listen_address(config, "*:" DEFAULT_PORT))
 	    debug_return_bool(false);
@@ -1047,10 +1077,10 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 		debug_return_bool(false);
 	}
     } else {
-	struct listen_address *addr;
+	struct server_address *addr;
 
 	/* Check that TLS configuration is valid. */
-	TAILQ_FOREACH(addr, &config->server.addresses, entries) {
+	TAILQ_FOREACH(addr, &config->server.addresses.addrs, entries) {
 	    if (!addr->tls)
 		continue;
 	    /*

@@ -1417,7 +1417,7 @@ bad:
 }
 
 static int
-create_listener(struct listen_address *addr)
+create_listener(struct server_address *addr)
 {
     int flags, on, sock;
     const char *family = "inet4";
@@ -1502,7 +1502,7 @@ listener_cb(int fd, int what, void *v)
 }
 
 static bool
-register_listener(struct listen_address *addr, struct sudo_event_base *evbase)
+register_listener(struct server_address *addr, struct sudo_event_base *evbase)
 {
     struct listener *l;
     int sock;
@@ -1533,7 +1533,7 @@ register_listener(struct listen_address *addr, struct sudo_event_base *evbase)
 static bool
 server_setup(struct sudo_event_base *base)
 {
-    struct listen_address *addr;
+    struct server_address *addr;
     struct listener *l;
     int nlisteners = 0;
     bool ret, config_tls = false;
