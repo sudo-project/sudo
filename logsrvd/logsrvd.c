@@ -785,7 +785,6 @@ server_shutdown(struct sudo_event_base *base)
 	    }
 	} else {
 	    /* No commit point, close connection immediately. */
-	    sudo_ev_del(closure->evbase, closure->write_ev);
 	    connection_closure_free(closure);
 	}
     }
@@ -931,8 +930,8 @@ client_msg_cb(int fd, int what, void *v)
 
     if (what == SUDO_EV_TIMEOUT) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "Reading from client timed out");
-        goto finished;
+            "timed out reading from client (%s)", closure->ipaddr);
+        goto close_connection;
     }
 
 #if defined(HAVE_OPENSSL)
@@ -961,7 +960,8 @@ client_msg_cb(int fd, int what, void *v)
 			    logsrvd_conf_get_sock_timeout(), false) == -1) {
 			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 				"unable to add event to queue");
-			    goto finished;
+			    closure->errstr = _("unable to allocate memory");
+			    goto send_error;
 			}
 			closure->temporary_write_event = true;
 		    }
@@ -972,12 +972,12 @@ client_msg_cb(int fd, int what, void *v)
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"unexpected error during SSL_read(): %d (%s)",
 			err, strerror(errno));
-		    goto finished;
+		    goto close_connection;
                 default:
                     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                         "unexpected error during SSL_read(): %d (%s)",
                         err, ERR_error_string(ERR_get_error(), NULL));
-                        goto finished;
+                        goto close_connection;
             }
         }
     } else
@@ -986,21 +986,21 @@ client_msg_cb(int fd, int what, void *v)
         nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client",
-	__func__, nread);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client %s",
+	__func__, nread, closure->ipaddr);
     switch (nread) {
     case -1:
 	if (errno == EAGAIN)
 	    debug_return;
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to receive %u bytes", buf->size - buf->len);
-	goto finished;
+	goto close_connection;
     case 0:
         if (closure->state != FINISHED) {
             sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
                 "unexpected EOF");
         }
-        goto finished;
+        goto close_connection;
     default:
 	break;
     }
@@ -1020,18 +1020,21 @@ client_msg_cb(int fd, int what, void *v)
 
 	if (msg_len + sizeof(msg_len) > buf->len - buf->off) {
 	    /* Incomplete message, we'll read the rest next time. */
-	    if (!expand_buf(buf, msg_len + sizeof(msg_len)))
-		goto finished;
+	    if (!expand_buf(buf, msg_len + sizeof(msg_len))) {
+		closure->errstr = _("unable to allocate memory");
+		goto send_error;
+	    }
 	    debug_return;
 	}
 
-	/* Parse ClientMessage, could be zero bytes. */
+	/* Parse ClientMessage (could be zero bytes). */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: parsing ClientMessage, size %u", __func__, msg_len);
 	buf->off += sizeof(msg_len);
 	if (!handle_client_message(buf->data + buf->off, msg_len, closure)) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to parse ClientMessage, size %u", msg_len);
+	    closure->errstr = _("invalid ClientMessage");
 	    goto send_error;
 	}
 	buf->off += msg_len;
@@ -1040,21 +1043,28 @@ client_msg_cb(int fd, int what, void *v)
     buf->off = 0;
 
     if (closure->state == FINISHED)
-	goto finished;
+	goto close_connection;
 
     debug_return;
 send_error:
-    if (closure->errstr == NULL)
-	goto finished;
-    if (fmt_error_message(closure->errstr, closure)) {
-	sudo_ev_del(closure->evbase, closure->read_ev);
-	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_get_sock_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	}
+    /*
+     * Try to send client an error message before closing connection.
+     * If we are already in an error state, just give up.
+     */
+    if (closure->state == ERROR)
+	goto close_connection;
+    if (closure->errstr == NULL || !fmt_error_message(closure->errstr, closure))
+	goto close_connection;
+    sudo_ev_del(closure->evbase, closure->read_ev);
+    if (sudo_ev_add(closure->evbase, closure->write_ev,
+	    logsrvd_conf_get_sock_timeout(), false) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to add server write event");
+	goto close_connection;
     }
-finished:
+    closure->state = ERROR;
+    debug_return;
+close_connection:
     connection_closure_free(closure);
     debug_return;
 }
