@@ -289,6 +289,7 @@ static char *
 sudo_askpass(const char *askpass, const char *prompt)
 {
     static char buf[SUDO_CONV_REPL_MAX + 1], *pass;
+    struct sudo_cred *cred = &user_details.cred;
     struct sigaction sa, savechld;
     enum tgetpass_errval errval;
     int pfd[2], status;
@@ -323,12 +324,18 @@ sudo_askpass(const char *askpass, const char *prompt)
 	restore_limits();
 	/* But avoid a setuid() failure on Linux due to RLIMIT_NPROC. */
 	unlimit_nproc();
-	if (setgid(user_details.cred.gid)) {
-	    sudo_warn(U_("unable to set gid to %u"), (unsigned int)user_details.cred.gid);
+	if (setgid(cred->gid)) {
+	    sudo_warn(U_("unable to set gid to %u"), (unsigned int)cred->gid);
 	    _exit(255);
 	}
-	if (setuid(user_details.cred.uid)) {
-	    sudo_warn(U_("unable to set uid to %u"), (unsigned int)user_details.cred.uid);
+	if (cred->ngroups != -1) {
+	    if (sudo_setgroups(cred->ngroups, cred->groups) == -1) {
+		sudo_warn("%s", U_("unable to set supplementary group IDs"));
+		_exit(255);
+	    }
+	}
+	if (setuid(cred->uid)) {
+	    sudo_warn(U_("unable to set uid to %u"), (unsigned int)cred->uid);
 	    _exit(255);
 	}
 	restore_nproc();
