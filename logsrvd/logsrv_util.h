@@ -27,11 +27,13 @@
 #define MESSAGE_SIZE_MAX	(2 * 1024 * 1024)
 
 struct connection_buffer {
+    TAILQ_ENTRY(connection_buffer) entries;
     uint8_t *data;
     unsigned int size;
     unsigned int len;
     unsigned int off;
 };
+TAILQ_HEAD(connection_buffer_list, connection_buffer);
 
 /* logsrv_util.c */
 struct iolog_file;

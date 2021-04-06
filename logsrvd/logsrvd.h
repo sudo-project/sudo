@@ -61,7 +61,8 @@ struct connection_closure {
     struct eventlog *evlog;
     struct timespec elapsed_time;
     struct connection_buffer read_buf;
-    struct connection_buffer write_buf;
+    struct connection_buffer_list write_bufs;
+    struct connection_buffer_list free_bufs;
     struct sudo_event_base *evbase;
     struct sudo_event *commit_ev;
     struct sudo_event *read_ev;
