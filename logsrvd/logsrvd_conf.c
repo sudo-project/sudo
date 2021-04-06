@@ -329,7 +329,8 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str)
 
 /* Server callbacks */
 static bool
-append_address(struct server_address_list *addresses, const char *str)
+append_address(struct server_address_list *addresses, const char *str,
+    bool allow_wildcard)
 {
     struct addrinfo hints, *res, *res0 = NULL;
     char *sa_str = NULL, *sa_host = NULL;
@@ -347,8 +348,11 @@ append_address(struct server_address_list *addresses, const char *str)
     if (!iolog_parse_host_port(copy, &host, &port, &tls, DEFAULT_PORT,
 	    DEFAULT_PORT_TLS))
 	goto done;
-    if (host[0] == '*' && host[1] == '\0')
+    if (host[0] == '*' && host[1] == '\0') {
+	if (!allow_wildcard)
+	    goto done;
 	host = NULL;
+    }
 
 #if !defined(HAVE_OPENSSL)
     if (tls) {
@@ -406,13 +410,13 @@ done:
 static bool
 cb_listen_address(struct logsrvd_config *config, const char *str)
 {
-    return append_address(&config->server.addresses.addrs, str);
+    return append_address(&config->server.addresses.addrs, str, true);
 }
 
 static bool
 cb_relay(struct logsrvd_config *config, const char *str)
 {
-    return append_address(&config->server.relays.addrs, str);
+    return append_address(&config->server.relays.addrs, str, false);
 }
 
 static bool
