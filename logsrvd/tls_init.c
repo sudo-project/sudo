@@ -160,15 +160,15 @@ init_tls_ciphersuites(SSL_CTX *ctx, const char *ciphers_v12,
     }
     if (!success) {
 	/* fallback to default ciphersuites for TLS v1.3 */
-        if (SSL_CTX_set_ciphersuites(ctx, LOGSRVD_DEFAULT_CIPHER_LST13) <= 0) {
+        if (SSL_CTX_set_ciphersuites(ctx, DEFAULT_CIPHER_LST13) <= 0) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
 	    sudo_warnx(U_("unable to set TLS 1.3 ciphersuite to %s: %s"),
-		LOGSRVD_DEFAULT_CIPHER_LST13, errstr);
+		DEFAULT_CIPHER_LST13, errstr);
             debug_return_bool(false);
         } else {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
                 "TLS v1.3 ciphersuite list set to %s (default)",
-                LOGSRVD_DEFAULT_CIPHER_LST13);
+                DEFAULT_CIPHER_LST13);
         }
     }
 # endif
