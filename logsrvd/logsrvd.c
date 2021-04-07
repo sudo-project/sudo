@@ -1129,7 +1129,6 @@ schedule_commit_point(TimeSpec *commit_point,
 	closure->state = FINISHED;
     debug_return_bool(true);
 bad:
-    connection_closure_free(closure);
     debug_return_bool(false);
 }
 
