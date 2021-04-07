@@ -207,22 +207,22 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
 
     /* Prime the group cache */
-    gr = sudo_mkgrent("wheel", 0, "millert", "root", NULL);
+    gr = sudo_mkgrent("wheel", 0, "millert", "root", (char *)NULL);
     if (gr == NULL)
 	goto done;
     sudo_gr_delref(gr);
 
-    gr = sudo_mkgrent("operator", 5, "operator", "root", "millert", NULL);
+    gr = sudo_mkgrent("operator", 5, "operator", "root", "millert", (char *)NULL);
     if (gr == NULL)
 	goto done;
     sudo_gr_delref(gr);
 
-    gr = sudo_mkgrent("staff", 20, "root", "millert", NULL);
+    gr = sudo_mkgrent("staff", 20, "root", "millert", (char *)NULL);
     if (gr == NULL)
 	goto done;
     sudo_gr_delref(gr);
 
-    gr = sudo_mkgrent("sudo", 100, "root", "millert", NULL);
+    gr = sudo_mkgrent("sudo", 100, "root", "millert", (char *)NULL);
     if (gr == NULL)
 	goto done;
     sudo_gr_delref(gr);
