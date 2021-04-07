@@ -89,7 +89,7 @@ struct rtentry;
  * Stub function for those without SIOCGIFCONF or getifaddrs()
  */
 int
-get_net_ifs(char **addrinfo)
+get_net_ifs(char **addrinfo_out)
 {
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF);
     debug_return_int(0);
@@ -102,7 +102,7 @@ get_net_ifs(char **addrinfo)
  * and return the number of interfaces found.  Returns -1 on error.
  */
 int
-get_net_ifs(char **addrinfo)
+get_net_ifs(char **addrinfo_out)
 {
     struct ifaddrs *ifa, *ifaddrs;
     struct sockaddr_in *sin;
@@ -110,6 +110,7 @@ get_net_ifs(char **addrinfo)
     struct sockaddr_in6 *sin6;
 # endif
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
+    char *addrinfo = NULL;
     int len, num_interfaces = 0;
     size_t ailen;
     char *cp;
@@ -145,7 +146,7 @@ get_net_ifs(char **addrinfo)
 	    "unable to allocate memory");
 	goto bad;
     }
-    *addrinfo = cp;
+    addrinfo = cp;
 
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
 	/* Skip interfaces marked "down" and "loopback". */
@@ -199,7 +200,7 @@ get_net_ifs(char **addrinfo)
 
 	/* Store the IP addr/netmask pairs. */
 	len = snprintf(cp, ailen, "%s%s/%s",
-	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+	    cp == addrinfo ? "" : " ", addrstr, maskstr);
 	if (len < 0 || (size_t)len >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto bad;
@@ -207,9 +208,11 @@ get_net_ifs(char **addrinfo)
 	cp += len;
 	ailen -= len;
     }
+    *addrinfo_out = addrinfo;
     goto done;
 
 bad:
+    free(addrinfo);
     num_interfaces = -1;
 done:
 # ifdef HAVE_FREEIFADDRS
@@ -230,11 +233,12 @@ done:
  * HP-UX has incompatible SIOCGLIFNUM and SIOCGLIFCONF ioctls.
  */
 int
-get_net_ifs(char **addrinfo)
+get_net_ifs(char **addrinfo_out)
 {
     struct if_laddrconf laddrconf;
     struct ifconf ifconf;
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
+    char *addrinfo = NULL;
     int i, n, sock4, sock6 = -1;
     int num_interfaces = 0;
     size_t ailen;
@@ -302,7 +306,7 @@ get_net_ifs(char **addrinfo)
 	    "unable to allocate memory");
 	goto bad;
     }
-    *addrinfo = cp;
+    addrinfo = cp;
 
     /*
      * For each interface, store the ip address and netmask.
@@ -362,7 +366,7 @@ get_net_ifs(char **addrinfo)
 	}
 
 	n = snprintf(cp, ailen, "%s%s/%s",
-	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+	    cp == addrinfo ? "" : " ", addrstr, maskstr);
 	if (n < 0 || (size_t)n >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto bad;
@@ -423,7 +427,7 @@ get_net_ifs(char **addrinfo)
 	}
 
 	n = snprintf(cp, ailen, "%s%s/%s",
-	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+	    cp == addrinfo ? "" : " ", addrstr, maskstr);
 	if (n < 0 || (size_t)n >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto bad;
@@ -433,9 +437,11 @@ get_net_ifs(char **addrinfo)
 
 	num_interfaces++;
     }
+    *addrinfo_out = addrinfo;
     goto done;
 
 bad:
+    free(addrinfo);
     num_interfaces = -1;
 done:
     free(ifconf.ifc_buf);
@@ -456,13 +462,14 @@ done:
  * SIOCGLIFCONF version (IPv6 compatible).
  */
 int
-get_net_ifs(char **addrinfo)
+get_net_ifs(char **addrinfo_out)
 {
     struct lifconf lifconf;
     struct lifnum lifn;
     struct sockaddr_in *sin;
     struct sockaddr_in6 *sin6;
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
+    char *addrinfo = NULL;
     int i, n, sock, sock4, sock6 = -1;
     int num_interfaces = 0;
     size_t ailen;
@@ -516,7 +523,7 @@ get_net_ifs(char **addrinfo)
 	    "unable to allocate memory");
 	goto bad;
     }
-    *addrinfo = cp;
+    addrinfo = cp;
 
     /*
      * For each interface, store the ip address and netmask.
@@ -607,7 +614,7 @@ get_net_ifs(char **addrinfo)
 	}
 
 	n = snprintf(cp, ailen, "%s%s/%s",
-	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+	    cp == addrinfo ? "" : " ", addrstr, maskstr);
 	if (n < 0 || (size_t)n >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto bad;
@@ -617,9 +624,11 @@ get_net_ifs(char **addrinfo)
 
 	num_interfaces++;
     }
+    *addrinfo_out = addrinfo;
     goto done;
 
 bad:
+    free(addrinfo);
     num_interfaces = -1;
 done:
     free(lifconf.lifc_buf);
@@ -640,7 +649,7 @@ done:
  * SIOCGIFCONF version.
  */
 int
-get_net_ifs(char **addrinfo)
+get_net_ifs(char **addrinfo_out)
 {
     struct ifconf ifconf;
     struct ifreq *ifr;
@@ -649,6 +658,7 @@ get_net_ifs(char **addrinfo)
     struct sockaddr_in6 *sin6;
 # endif
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
+    char *addrinfo = NULL;
     int i, n, sock, sock4, sock6 = -1;
     int num_interfaces = 0;
     size_t ailen, buflen;
@@ -735,7 +745,7 @@ get_net_ifs(char **addrinfo)
 	    "unable to allocate memory");
 	goto bad;
     }
-    *addrinfo = cp;
+    addrinfo = cp;
 
     /*
      * For each interface, store the ip address and netmask.
@@ -835,7 +845,7 @@ get_net_ifs(char **addrinfo)
 	}
 
 	n = snprintf(cp, ailen, "%s%s/%s",
-	    cp == *addrinfo ? "" : " ", addrstr, maskstr);
+	    cp == addrinfo ? "" : " ", addrstr, maskstr);
 	if (n < 0 || (size_t)n >= ailen) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto bad;
@@ -845,9 +855,11 @@ get_net_ifs(char **addrinfo)
 
 	num_interfaces++;
     }
+    *addrinfo_out = addrinfo;
     goto done;
 
 bad:
+    free(addrinfo);
     num_interfaces = -1;
 done:
     free(ifconf_buf);
