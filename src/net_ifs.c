@@ -123,7 +123,7 @@ get_net_ifs(char **addrinfo_out)
 	debug_return_int(-1);
 
     /* Allocate space for the interfaces info string. */
-    for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
+    for (ifa = ifaddrs; ifa != NULL; ifa = ifa->ifa_next) {
 	/* Skip interfaces marked "down" and "loopback". */
 	if (ifa->ifa_addr == NULL || ifa->ifa_netmask == NULL ||
 	    !ISSET(ifa->ifa_flags, IFF_UP) || ISSET(ifa->ifa_flags, IFF_LOOPBACK))
@@ -148,9 +148,10 @@ get_net_ifs(char **addrinfo_out)
     }
     addrinfo = cp;
 
-    for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
+    for (ifa = ifaddrs; ifa != NULL; ifa = ifa->ifa_next) {
 	/* Skip interfaces marked "down" and "loopback". */
-	if (!ISSET(ifa->ifa_flags, IFF_UP) || ISSET(ifa->ifa_flags, IFF_LOOPBACK))
+	if (ifa->ifa_addr == NULL || ifa->ifa_netmask == NULL ||
+	    !ISSET(ifa->ifa_flags, IFF_UP) || ISSET(ifa->ifa_flags, IFF_LOOPBACK))
 		continue;
 
 	switch (ifa->ifa_addr->sa_family) {
