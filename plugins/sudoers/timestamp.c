@@ -752,6 +752,9 @@ timestamp_close(void *vcookie)
     debug_return;
 }
 
+#define TIMESPEC_VALID(ts) \
+    ((ts)->tv_sec >= 0 && (ts)->tv_nsec >= 0 && (ts)->tv_nsec < 1000000000L)
+
 /*
  * Check the time stamp file and directory and return their status.
  * Called with the file position before the locked record to read.
@@ -803,9 +806,17 @@ timestamp_status(void *vcookie, struct passwd *pw)
 
     /* Make sure what we read matched the expected record. */
     if (entry.version != TS_VERSION || entry.size != nread) {
-	/* do something else? */
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid time stamp file @ %lld", (long long)cookie->pos);
+	status = TS_OLD;
+	goto done;
+    }
+
+    /* Sanity check time stamps. */
+    if (!TIMESPEC_VALID(&entry.start_time) || !TIMESPEC_VALID(&entry.ts)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid timespec in time stamp file @ %lld",
+	    (long long)cookie->pos);
 	status = TS_OLD;
 	goto done;
     }
