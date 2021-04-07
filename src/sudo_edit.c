@@ -529,6 +529,8 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     if (nfiles < 1)
 	debug_return_int(0);
 
+    const int check_dir = ISSET(command_details->flags, CD_SUDOEDIT_CHECKDIR);
+
     /* Construct common args for sesh */
     sesh_nargs = 5 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
@@ -538,7 +540,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     }
     *sesh_ap++ = "sesh";
     *sesh_ap++ = "-e";
-    if (ISSET(command_details->flags, CD_SUDOEDIT_CHECKDIR)) {
+    if (check_dir) {
 	if ((user_str = selinux_fmt_sudo_user()) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
@@ -581,7 +583,11 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     if (tfd != -1)
 	close(tfd);
 
-    if (sesh_ap - sesh_args > 3) {
+    /*
+     * check dir adds two more args to the array
+     */
+    if ((!check_dir && sesh_ap - sesh_args > 3)
+        || (check_dir && sesh_ap - sesh_args > 5)) {
 	/* Run sesh -e 1 <t1> <o1> ... <tn> <on> */
 	error = selinux_run_helper(command_details->cred.uid, command_details->cred.gid,
 	    command_details->cred.ngroups, command_details->cred.groups, sesh_args,
