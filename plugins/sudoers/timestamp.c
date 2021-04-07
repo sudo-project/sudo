@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -304,6 +304,8 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
 
     if (offset == -1) {
 	old_eof = lseek(fd, 0, SEEK_CUR);
+	if (old_eof == -1)
+	    debug_return_ssize_t(-1);
 	nwritten = write(fd, entry, entry->size);
     } else {
 	old_eof = offset;
