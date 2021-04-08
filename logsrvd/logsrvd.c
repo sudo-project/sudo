@@ -1226,19 +1226,14 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
 }
 
 /*
- * Calls series of openssl initialization functions in order to
- * be able to establish configured network connections over TLS
+ * Set the TLS verify callback to verify_peer_identity().
  */
-static bool
-init_tls_server_context(void)
+static void
+set_tls_verify_peer(void)
 {
     struct logsrvd_tls_runtime *tls_runtime = logsrvd_get_tls_runtime();
     const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
-    debug_decl(init_tls_server_context, SUDO_DEBUG_UTIL);
-
-    tls_runtime->ssl_ctx = init_tls_context(tls_config->cacert_path,
-	tls_config->cert_path, tls_config->pkey_path, tls_config->dhparams_path,
-	tls_config->ciphers_v12, tls_config->ciphers_v13, tls_config->verify);
+    debug_decl(set_tls_verify_peer, SUDO_DEBUG_UTIL);
 
     if (tls_runtime->ssl_ctx != NULL) {
 	if (tls_config->check_peer) {
@@ -1247,10 +1242,9 @@ init_tls_server_context(void)
 		SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
 		verify_peer_identity);
 	}
-	debug_return_bool(true);
     }
 
-    debug_return_bool(false);
+    debug_return;
 }
 
 static void
@@ -1604,7 +1598,7 @@ server_setup(struct sudo_event_base *base)
     struct server_address *addr;
     struct listener *l;
     int nlisteners = 0;
-    bool ret, config_tls = false;
+    bool ret;
     debug_decl(server_setup, SUDO_DEBUG_UTIL);
 
     /* Free old listeners (if any) and register new ones. */
@@ -1616,17 +1610,13 @@ server_setup(struct sudo_event_base *base)
     }
     TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries) {
 	nlisteners += register_listener(addr, base);
-	if (addr->tls)
-	    config_tls = true;
     }
     ret = nlisteners > 0;
 
-    if (ret && config_tls) {
 #if defined(HAVE_OPENSSL)
-	if (!init_tls_server_context())
-	    ret = false;
+    if (ret)
+	set_tls_verify_peer();
 #endif
-    }
 
     debug_return_bool(ret);
 }

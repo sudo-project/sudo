@@ -1124,6 +1124,9 @@ bad:
 static bool
 logsrvd_conf_apply(struct logsrvd_config *config)
 {
+#if defined(HAVE_OPENSSL)
+    struct server_address *addr;
+#endif
     debug_decl(logsrvd_conf_apply, SUDO_DEBUG_UTIL);
 
     /* There can be multiple addresses so we can't set a default earlier. */
@@ -1138,8 +1141,6 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 		debug_return_bool(false);
 	}
     } else {
-	struct server_address *addr;
-
 	/* Check that TLS configuration is valid. */
 	TAILQ_FOREACH(addr, &config->server.addresses.addrs, entries) {
 	    if (!addr->tls)
@@ -1160,6 +1161,27 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	}
 #endif
     }
+
+#if defined(HAVE_OPENSSL)
+    TAILQ_FOREACH(addr, &config->server.addresses.addrs, entries) {
+	if (!addr->tls)
+	    continue;
+        /* Create a TLS context for the server. */
+	config->server.tls_runtime.ssl_ctx = init_tls_context(
+	    config->server.tls_config.cacert_path,
+	    config->server.tls_config.cert_path,
+	    config->server.tls_config.pkey_path,
+	    config->server.tls_config.dhparams_path,
+	    config->server.tls_config.ciphers_v12,
+	    config->server.tls_config.ciphers_v13,
+	    config->server.tls_config.verify);
+	if (config->server.tls_runtime.ssl_ctx == NULL) {
+	    sudo_warnx(U_("unable to initialize server TLS context"));
+	    debug_return_bool(false);
+	}
+	break;
+    }
+#endif /* HAVE_OPENSSL */
 
     /* Open event log if specified. */
     switch (config->eventlog.log_type) {
