@@ -183,11 +183,16 @@ init_tls_context(const char *ca_bundle_file, const char *cert_file,
 {
     SSL_CTX *ctx = NULL;
     const char *errstr;
+    static bool initialized;
     debug_decl(init_tls_context, SUDO_DEBUG_UTIL);
 
-    SSL_library_init();
-    OpenSSL_add_all_algorithms();
-    SSL_load_error_strings();
+    /* Only initialize the SSL library once. */
+    if (!initialized) {
+	SSL_library_init();
+	OpenSSL_add_all_algorithms();
+	SSL_load_error_strings();
+	initialized = true;
+    }
 
     /* Create the ssl context and enforce TLS 1.2 or higher. */
     if ((ctx = SSL_CTX_new(TLS_client_method())) == NULL) {
