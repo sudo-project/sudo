@@ -156,10 +156,6 @@ struct logsrvd_tls_config {
     bool verify;
     bool check_peer;
 };
-
-struct logsrvd_tls_runtime {
-    SSL_CTX *ssl_ctx;
-};
 #endif
 
 /* iolog_writer.c */
@@ -191,7 +187,7 @@ struct timespec *logsrvd_conf_get_sock_timeout(void);
 struct timespec *logsrvd_conf_get_connect_timeout(void);
 #if defined(HAVE_OPENSSL)
 const struct logsrvd_tls_config *logsrvd_get_tls_config(void);
-struct logsrvd_tls_runtime *logsrvd_get_tls_runtime(void);
+SSL_CTX *logsrvd_get_tls_ctx(void);
 #endif
 mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);

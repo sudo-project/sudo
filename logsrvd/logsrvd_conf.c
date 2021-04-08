@@ -91,7 +91,7 @@ static struct logsrvd_config {
 	char *pid_file;
 #if defined(HAVE_OPENSSL)
         struct logsrvd_tls_config tls_config;
-        struct logsrvd_tls_runtime tls_runtime;
+        SSL_CTX *ssl_ctx;
 #endif
     } server;
     struct logsrvd_config_iolog {
@@ -194,10 +194,10 @@ logsrvd_get_tls_config(void)
     return &logsrvd_config->server.tls_config;
 }
 
-struct logsrvd_tls_runtime *
-logsrvd_get_tls_runtime(void)
+SSL_CTX *
+logsrvd_get_tls_ctx(void)
 {
-    return &logsrvd_config->server.tls_runtime;
+    return logsrvd_config->server.ssl_ctx;
 }
 #endif
 
@@ -1011,8 +1011,8 @@ logsrvd_conf_free(struct logsrvd_config *config)
     free(config->server.tls_config.ciphers_v12);
     free(config->server.tls_config.ciphers_v13);
 
-    if (config->server.tls_runtime.ssl_ctx != NULL)
-	SSL_CTX_free(config->server.tls_runtime.ssl_ctx);
+    if (config->server.ssl_ctx != NULL)
+	SSL_CTX_free(config->server.ssl_ctx);
 #endif
 
     free(config);
@@ -1167,7 +1167,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	if (!addr->tls)
 	    continue;
         /* Create a TLS context for the server. */
-	config->server.tls_runtime.ssl_ctx = init_tls_context(
+	config->server.ssl_ctx = init_tls_context(
 	    config->server.tls_config.cacert_path,
 	    config->server.tls_config.cert_path,
 	    config->server.tls_config.pkey_path,
@@ -1175,7 +1175,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	    config->server.tls_config.ciphers_v12,
 	    config->server.tls_config.ciphers_v13,
 	    config->server.tls_config.verify);
-	if (config->server.tls_runtime.ssl_ctx == NULL) {
+	if (config->server.ssl_ctx == NULL) {
 	    sudo_warnx(U_("unable to initialize server TLS context"));
 	    debug_return_bool(false);
 	}
