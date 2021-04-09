@@ -90,8 +90,15 @@ static struct logsrvd_config {
         bool tcp_keepalive;
 	char *pid_file;
 #if defined(HAVE_OPENSSL)
-        struct logsrvd_tls_config tls_config;
-        SSL_CTX *ssl_ctx;
+	char *tls_key_path;
+	char *tls_cert_path;
+	char *tls_cacert_path;
+	char *tls_dhparams_path;
+	char *tls_ciphers_v12;
+	char *tls_ciphers_v13;
+	int tls_check_peer;
+	int tls_verify;
+	SSL_CTX *ssl_ctx;
 #endif
     } server;
     struct logsrvd_config_iolog {
@@ -188,16 +195,16 @@ logsrvd_conf_get_connect_timeout(void)
 }
 
 #if defined(HAVE_OPENSSL)
-const struct logsrvd_tls_config *
-logsrvd_get_tls_config(void)
-{
-    return &logsrvd_config->server.tls_config;
-}
-
 SSL_CTX *
-logsrvd_get_tls_ctx(void)
+logsrvd_server_tls_ctx(void)
 {
     return logsrvd_config->server.ssl_ctx;
+}
+
+bool
+logsrvd_conf_server_tls_check_peer(void)
+{
+    return logsrvd_config->server.tls_check_peer;
 }
 #endif
 
@@ -494,8 +501,8 @@ cb_tls_key(struct logsrvd_config *config, const char *path)
 {
     debug_decl(cb_tls_key, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_config.pkey_path);
-    if ((config->server.tls_config.pkey_path = strdup(path)) == NULL) {
+    free(config->server.tls_key_path);
+    if ((config->server.tls_key_path = strdup(path)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -507,8 +514,8 @@ cb_tls_cacert(struct logsrvd_config *config, const char *path)
 {
     debug_decl(cb_tls_cacert, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_config.cacert_path);
-    if ((config->server.tls_config.cacert_path = strdup(path)) == NULL) {
+    free(config->server.tls_cacert_path);
+    if ((config->server.tls_cacert_path = strdup(path)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -520,8 +527,8 @@ cb_tls_cert(struct logsrvd_config *config, const char *path)
 {
     debug_decl(cb_tls_cert, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_config.cert_path);
-    if ((config->server.tls_config.cert_path = strdup(path)) == NULL) {
+    free(config->server.tls_cert_path);
+    if ((config->server.tls_cert_path = strdup(path)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -533,8 +540,8 @@ cb_tls_dhparam(struct logsrvd_config *config, const char *path)
 {
     debug_decl(cb_tls_dhparam, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_config.dhparams_path);
-    if ((config->server.tls_config.dhparams_path = strdup(path)) == NULL) {
+    free(config->server.tls_dhparams_path);
+    if ((config->server.tls_dhparams_path = strdup(path)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -546,8 +553,8 @@ cb_tls_ciphers12(struct logsrvd_config *config, const char *str)
 {
     debug_decl(cb_tls_ciphers12, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_config.ciphers_v12);
-    if ((config->server.tls_config.ciphers_v12 = strdup(str)) == NULL) {
+    free(config->server.tls_ciphers_v12);
+    if ((config->server.tls_ciphers_v12 = strdup(str)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -559,8 +566,8 @@ cb_tls_ciphers13(struct logsrvd_config *config, const char *str)
 {
     debug_decl(cb_tls_ciphers13, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_config.ciphers_v13);
-    if ((config->server.tls_config.ciphers_v13 = strdup(str)) == NULL) {
+    free(config->server.tls_ciphers_v13);
+    if ((config->server.tls_ciphers_v13 = strdup(str)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -576,7 +583,7 @@ cb_tls_verify(struct logsrvd_config *config, const char *str)
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
 
-    config->server.tls_config.verify = val;
+    config->server.tls_verify = val;
     debug_return_bool(true);
 }
 
@@ -589,7 +596,7 @@ cb_tls_checkpeer(struct logsrvd_config *config, const char *str)
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
 
-    config->server.tls_config.check_peer = val;
+    config->server.tls_check_peer = val;
     debug_return_bool(true);
 }
 #endif
@@ -1004,12 +1011,12 @@ logsrvd_conf_free(struct logsrvd_config *config)
 	fclose(config->logfile.stream);
 
 #if defined(HAVE_OPENSSL)
-    free(config->server.tls_config.pkey_path);
-    free(config->server.tls_config.cert_path);
-    free(config->server.tls_config.cacert_path);
-    free(config->server.tls_config.dhparams_path);
-    free(config->server.tls_config.ciphers_v12);
-    free(config->server.tls_config.ciphers_v13);
+    free(config->server.tls_key_path);
+    free(config->server.tls_cert_path);
+    free(config->server.tls_cacert_path);
+    free(config->server.tls_dhparams_path);
+    free(config->server.tls_ciphers_v12);
+    free(config->server.tls_ciphers_v13);
 
     if (config->server.ssl_ctx != NULL)
 	SSL_CTX_free(config->server.ssl_ctx);
@@ -1051,26 +1058,26 @@ logsrvd_conf_alloc(void)
      * This ensures we don't enable TLS by default when it is not configured.
      */
     if (access(DEFAULT_CA_CERT_PATH, R_OK) == 0) {
-	config->server.tls_config.cacert_path = strdup(DEFAULT_CA_CERT_PATH);
-	if (config->server.tls_config.cacert_path == NULL) {
+	config->server.tls_cacert_path = strdup(DEFAULT_CA_CERT_PATH);
+	if (config->server.tls_cacert_path == NULL) {
 	    sudo_warn(NULL);
 	    goto bad;
 	}
     }
     if (access(DEFAULT_SERVER_CERT_PATH, R_OK) == 0) {
-	config->server.tls_config.cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
-	if (config->server.tls_config.cert_path == NULL) {
+	config->server.tls_cert_path = strdup(DEFAULT_SERVER_CERT_PATH);
+	if (config->server.tls_cert_path == NULL) {
 	    sudo_warn(NULL);
 	    goto bad;
 	}
     }
-    config->server.tls_config.pkey_path = strdup(DEFAULT_SERVER_KEY_PATH);
-    if (config->server.tls_config.pkey_path == NULL) {
+    config->server.tls_key_path = strdup(DEFAULT_SERVER_KEY_PATH);
+    if (config->server.tls_key_path == NULL) {
 	sudo_warn(NULL);
 	goto bad;
     }
-    config->server.tls_config.verify = true;
-    config->server.tls_config.check_peer = false;
+    config->server.tls_verify = true;
+    config->server.tls_check_peer = false;
 #endif
 
     /* I/O log defaults */
@@ -1136,7 +1143,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	    debug_return_bool(false);
 #if defined(HAVE_OPENSSL)
 	/* If a certificate was specified, enable the TLS listener too. */
-	if (config->server.tls_config.cert_path != NULL) {
+	if (config->server.tls_cert_path != NULL) {
 	    if (!cb_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)"))
 		debug_return_bool(false);
 	}
@@ -1149,10 +1156,10 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	     * If a TLS listener was explicitly enabled but the cert path
 	     * was not, use the default.
 	     */
-	    if (config->server.tls_config.cert_path == NULL) {
-		config->server.tls_config.cert_path =
+	    if (config->server.tls_cert_path == NULL) {
+		config->server.tls_cert_path =
 		    strdup(DEFAULT_SERVER_CERT_PATH);
-		if (config->server.tls_config.cert_path == NULL) {
+		if (config->server.tls_cert_path == NULL) {
 		    sudo_warn(NULL);
 		    debug_return_bool(false);
 		}
@@ -1168,13 +1175,10 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	    continue;
         /* Create a TLS context for the server. */
 	config->server.ssl_ctx = init_tls_context(
-	    config->server.tls_config.cacert_path,
-	    config->server.tls_config.cert_path,
-	    config->server.tls_config.pkey_path,
-	    config->server.tls_config.dhparams_path,
-	    config->server.tls_config.ciphers_v12,
-	    config->server.tls_config.ciphers_v13,
-	    config->server.tls_config.verify);
+	    config->server.tls_cacert_path, config->server.tls_cert_path,
+	    config->server.tls_key_path, config->server.tls_dhparams_path,
+	    config->server.tls_ciphers_v12, config->server.tls_ciphers_v13,
+	    config->server.tls_verify);
 	if (config->server.ssl_ctx == NULL) {
 	    sudo_warnx(U_("unable to initialize server TLS context"));
 	    debug_return_bool(false);

@@ -247,7 +247,7 @@ static bool
 connect_relay_tls(struct connection_closure *closure)
 {
     struct tls_client_closure *tls_client = &closure->relay_closure->tls_client;
-    SSL_CTX *ssl_ctx = logsrvd_get_tls_ctx();
+    SSL_CTX *ssl_ctx = logsrvd_server_tls_ctx();
     debug_decl(connect_relay_tls, SUDO_DEBUG_UTIL);
 
     /* Populate struct tls_client_closure. */

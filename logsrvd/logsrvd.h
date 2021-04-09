@@ -144,20 +144,6 @@ struct listener {
 };
 TAILQ_HEAD(listener_list, listener);
 
-#if defined(HAVE_OPENSSL)
-/* parameters to configure tls */
-struct logsrvd_tls_config {
-    char *pkey_path;
-    char *cert_path;
-    char *cacert_path;
-    char *dhparams_path;
-    char *ciphers_v12;
-    char *ciphers_v13;
-    bool verify;
-    bool check_peer;
-};
-#endif
-
 /* iolog_writer.c */
 struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen, struct connection_closure *closure);
 bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
@@ -186,8 +172,8 @@ const char *logsrvd_conf_pid_file(void);
 struct timespec *logsrvd_conf_get_sock_timeout(void);
 struct timespec *logsrvd_conf_get_connect_timeout(void);
 #if defined(HAVE_OPENSSL)
-const struct logsrvd_tls_config *logsrvd_get_tls_config(void);
-SSL_CTX *logsrvd_get_tls_ctx(void);
+bool logsrvd_conf_server_tls_check_peer(void);
+SSL_CTX *logsrvd_server_tls_ctx(void);
 #endif
 mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);

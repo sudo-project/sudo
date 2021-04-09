@@ -1231,17 +1231,14 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
 static void
 set_tls_verify_peer(void)
 {
-    SSL_CTX *ssl_ctx = logsrvd_get_tls_ctx();
-    const struct logsrvd_tls_config *tls_config = logsrvd_get_tls_config();
+    SSL_CTX *server_ctx = logsrvd_server_tls_ctx();
     debug_decl(set_tls_verify_peer, SUDO_DEBUG_UTIL);
 
-    if (ssl_ctx != NULL) {
-	if (tls_config->check_peer) {
-	    /* Verify server cert during the handshake. */
-	    SSL_CTX_set_verify(ssl_ctx,
-		SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-		verify_peer_identity);
-	}
+    if (server_ctx != NULL && logsrvd_conf_server_tls_check_peer()) {
+	/* Verify server cert during the handshake. */
+	SSL_CTX_set_verify(server_ctx,
+	    SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+	    verify_peer_identity);
     }
 
     debug_return;
@@ -1430,7 +1427,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
     /* If TLS is enabled, perform the TLS handshake first. */
     if (tls) {
         /* Create the SSL object for the closure and attach it to the socket */
-        if ((closure->ssl = SSL_new(logsrvd_get_tls_ctx())) == NULL) {
+        if ((closure->ssl = SSL_new(logsrvd_server_tls_ctx())) == NULL) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                 "unable to create new ssl object: %s",
                 ERR_error_string(ERR_get_error(), NULL));
