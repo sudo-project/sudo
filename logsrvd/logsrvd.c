@@ -364,7 +364,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 	if (!fmt_log_id_message(closure->evlog->iolog_path, closure))
 	    debug_return_bool(false);
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_get_sock_timeout(), false) == -1) {
+		logsrvd_conf_server_timeout(), false) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to add server write event");
 	    debug_return_bool(false);
@@ -511,7 +511,7 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 	    debug_return_bool(false);
 	sudo_ev_del(closure->evbase, closure->read_ev);
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_get_sock_timeout(), false) == -1) {
+		logsrvd_conf_server_timeout(), false) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to add server write event");
 	    debug_return_bool(false);
@@ -984,7 +984,7 @@ client_msg_cb(int fd, int what, void *v)
 		    if (!sudo_ev_pending(closure->write_ev, SUDO_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
 			if (sudo_ev_add(closure->evbase, closure->write_ev,
-			    logsrvd_conf_get_sock_timeout(), false) == -1) {
+			    logsrvd_conf_server_timeout(), false) == -1) {
 			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 				"unable to add event to queue");
 			    closure->errstr = _("unable to allocate memory");
@@ -1084,7 +1084,7 @@ send_error:
 	goto close_connection;
     sudo_ev_del(closure->evbase, closure->read_ev);
     if (sudo_ev_add(closure->evbase, closure->write_ev,
-	    logsrvd_conf_get_sock_timeout(), false) == -1) {
+	    logsrvd_conf_server_timeout(), false) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to add server write event");
 	goto close_connection;
@@ -1119,7 +1119,7 @@ schedule_commit_point(TimeSpec *commit_point,
 	goto bad;
     }
     if (sudo_ev_add(closure->evbase, closure->write_ev,
-        logsrvd_conf_get_sock_timeout(), false) == -1) {
+        logsrvd_conf_server_timeout(), false) == -1) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "unable to add server write event");
         goto bad;
@@ -1159,7 +1159,7 @@ server_commit_cb(int unused, int what, void *v)
 bool
 start_protocol(struct connection_closure *closure)
 {
-    const struct timespec *timeout = logsrvd_conf_get_sock_timeout();
+    const struct timespec *timeout = logsrvd_conf_server_timeout();
     debug_decl(start_protocol, SUDO_DEBUG_UTIL);
 
     if (closure->relay_closure != NULL && closure->relay_closure->relays != NULL) {
@@ -1277,7 +1277,7 @@ tls_handshake_cb(int fd, int what, void *v)
 		}
 	    }
             if (sudo_ev_add(closure->evbase, closure->ssl_accept_ev,
-                logsrvd_conf_get_sock_timeout(), false) == -1) {
+                logsrvd_conf_server_timeout(), false) == -1) {
                 sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                     "unable to add ssl_accept_ev to queue");
                 goto bad;
@@ -1296,7 +1296,7 @@ tls_handshake_cb(int fd, int what, void *v)
 		}
 	    }
             if (sudo_ev_add(closure->evbase, closure->ssl_accept_ev,
-		    logsrvd_conf_get_sock_timeout(), false) == -1) {
+		    logsrvd_conf_server_timeout(), false) == -1) {
                 sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                     "unable to add ssl_accept_ev to queue");
                 goto bad;
@@ -1320,7 +1320,7 @@ tls_handshake_cb(int fd, int what, void *v)
         SSL_get_cipher(closure->ssl));
 
     /* Start the actual protocol now that the TLS handshake is complete. */
-    if (logsrvd_conf_relay() != NULL) {
+    if (logsrvd_conf_relay_address() != NULL) {
 	if (!connect_relay(closure))
 	    goto bad;
     } else {
@@ -1452,7 +1452,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 
         /* Enable SSL_accept to begin handshake with client. */
         if (sudo_ev_add(evbase, closure->ssl_accept_ev,
-		logsrvd_conf_get_sock_timeout(), false) == -1) {
+		logsrvd_conf_server_timeout(), false) == -1) {
             sudo_fatal("%s", U_("unable to add event to queue"));
             goto bad;
         }
@@ -1460,7 +1460,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 #endif
     /* If no TLS handshake, start the protocol immediately. */
     if (!tls) {
-	if (logsrvd_conf_relay() != NULL) {
+	if (logsrvd_conf_relay_address() != NULL) {
 	    if (!connect_relay(closure))
 		goto bad;
 	} else {
@@ -1536,7 +1536,7 @@ listener_cb(int fd, int what, void *v)
     sock = accept(fd, &s_un.sa, &salen);
     if (sock != -1) {
 	/* set keepalive socket option on socket returned by accept */
-	if (logsrvd_conf_tcp_keepalive()) {
+	if (logsrvd_conf_server_tcp_keepalive()) {
 	    int keepalive = 1;
 	    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
 		sizeof(keepalive)) == -1) {
@@ -1587,7 +1587,7 @@ register_listener(struct server_address *addr, struct sudo_event_base *evbase)
 }
 
 /*
- * Register listeners and init the TLS context.
+ * Register listeners and set the TLS verify callback.
  */
 static bool
 server_setup(struct sudo_event_base *base)
@@ -1605,7 +1605,7 @@ server_setup(struct sudo_event_base *base)
 	close(l->sock);
 	free(l);
     }
-    TAILQ_FOREACH(addr, logsrvd_conf_listen_address(), entries) {
+    TAILQ_FOREACH(addr, logsrvd_conf_server_listen_address(), entries) {
 	nlisteners += register_listener(addr, base);
     }
     ret = nlisteners > 0;
@@ -1619,7 +1619,7 @@ server_setup(struct sudo_event_base *base)
 }
 
 /*
- * Reload config and re-initialize listeners and TLS context.
+ * Reload config and re-initialize listeners.
  */
 static void
 server_reload(struct sudo_event_base *base)
@@ -1628,9 +1628,9 @@ server_reload(struct sudo_event_base *base)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "reloading server config");
     if (logsrvd_conf_read(conf_file)) {
-	/* Re-initialize listeners and TLS context. */
+	/* Re-initialize listeners. */
 	if (!server_setup(base))
-	    sudo_fatalx("%s", U_("unable setup listen socket"));
+	    sudo_fatalx("%s", U_("unable to setup listen socket"));
 
 	/* Re-read sudo.conf and re-initialize debugging. */
 	sudo_debug_deregister(logsrvd_debug_instance);
@@ -1875,9 +1875,9 @@ main(int argc, char *argv[])
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatal(NULL);
 
-    /* Initialize listeners and TLS context. */
+    /* Initialize listeners. */
     if (!server_setup(evbase))
-	sudo_fatalx("%s", U_("unable setup listen socket"));
+	sudo_fatalx("%s", U_("unable to setup listen socket"));
 
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);

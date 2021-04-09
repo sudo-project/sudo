@@ -151,19 +151,19 @@ logsrvd_conf_iolog_file(void)
 
 /* server getters */
 struct server_address_list *
-logsrvd_conf_listen_address(void)
+logsrvd_conf_server_listen_address(void)
 {
     return &logsrvd_config->server.addresses.addrs;
 }
 
 struct server_address_list *
-logsrvd_conf_relay(void)
+logsrvd_conf_relay_address(void)
 {
     return &logsrvd_config->server.relays.addrs;
 }
 
 bool
-logsrvd_conf_tcp_keepalive(void)
+logsrvd_conf_server_tcp_keepalive(void)
 {
     return logsrvd_config->server.tcp_keepalive;
 }
@@ -175,7 +175,7 @@ logsrvd_conf_pid_file(void)
 }
 
 struct timespec *
-logsrvd_conf_get_sock_timeout(void)
+logsrvd_conf_server_timeout(void)
 {
     if (sudo_timespecisset(&logsrvd_config->server.timeout)) {
         return &(logsrvd_config->server.timeout);
@@ -185,7 +185,7 @@ logsrvd_conf_get_sock_timeout(void)
 }
 
 struct timespec *
-logsrvd_conf_get_connect_timeout(void)
+logsrvd_conf_relay_connect_timeout(void)
 {
     if (sudo_timespecisset(&logsrvd_config->server.connect_timeout)) {
         return &(logsrvd_config->server.connect_timeout);
@@ -415,23 +415,23 @@ done:
 }
 
 static bool
-cb_listen_address(struct logsrvd_config *config, const char *str)
+cb_server_listen_address(struct logsrvd_config *config, const char *str)
 {
     return append_address(&config->server.addresses.addrs, str, true);
 }
 
 static bool
-cb_relay(struct logsrvd_config *config, const char *str)
+cb_relay_host(struct logsrvd_config *config, const char *str)
 {
     return append_address(&config->server.relays.addrs, str, false);
 }
 
 static bool
-cb_timeout(struct logsrvd_config *config, const char *str)
+cb_server_timeout(struct logsrvd_config *config, const char *str)
 {
     int timeout;
     const char* errstr;
-    debug_decl(cb_timeout, SUDO_DEBUG_UTIL);
+    debug_decl(cb_server_timeout, SUDO_DEBUG_UTIL);
 
     timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
     if (errstr != NULL)
@@ -443,11 +443,11 @@ cb_timeout(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_connect_timeout(struct logsrvd_config *config, const char *str)
+cb_relay_connect_timeout(struct logsrvd_config *config, const char *str)
 {
     int timeout;
     const char* errstr;
-    debug_decl(cb_connect_timeout, SUDO_DEBUG_UTIL);
+    debug_decl(cb_relay_connect_timeout, SUDO_DEBUG_UTIL);
 
     timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
     if (errstr != NULL)
@@ -459,10 +459,10 @@ cb_connect_timeout(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_keepalive(struct logsrvd_config *config, const char *str)
+cb_server_keepalive(struct logsrvd_config *config, const char *str)
 {
     int val;
-    debug_decl(cb_keepalive, SUDO_DEBUG_UTIL);
+    debug_decl(cb_server_keepalive, SUDO_DEBUG_UTIL);
 
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
@@ -781,11 +781,11 @@ address_list_delref(struct server_address_list *al)
 }
 
 static struct logsrvd_config_entry server_conf_entries[] = {
-    { "listen_address", cb_listen_address },
-    { "relay", cb_relay },
-    { "timeout", cb_timeout },
-    { "connect_timeout", cb_connect_timeout },
-    { "tcp_keepalive", cb_keepalive },
+    { "listen_address", cb_server_listen_address },
+    { "relay", cb_relay_host },
+    { "timeout", cb_server_timeout },
+    { "connect_timeout", cb_relay_connect_timeout },
+    { "tcp_keepalive", cb_server_keepalive },
     { "pid_file", cb_pid_file },
 #if defined(HAVE_OPENSSL)
     { "tls_key", cb_tls_key },
@@ -1139,12 +1139,12 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     /* There can be multiple addresses so we can't set a default earlier. */
     if (TAILQ_EMPTY(&config->server.addresses.addrs)) {
 	/* Enable plaintext listender. */
-	if (!cb_listen_address(config, "*:" DEFAULT_PORT))
+	if (!cb_server_listen_address(config, "*:" DEFAULT_PORT))
 	    debug_return_bool(false);
 #if defined(HAVE_OPENSSL)
 	/* If a certificate was specified, enable the TLS listener too. */
 	if (config->server.tls_cert_path != NULL) {
-	    if (!cb_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)"))
+	    if (!cb_server_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)"))
 		debug_return_bool(false);
 	}
     } else {

@@ -165,12 +165,12 @@ struct connection_buffer *get_free_buf(struct connection_closure *closure);
 bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
-struct server_address_list *logsrvd_conf_listen_address(void);
-struct server_address_list *logsrvd_conf_relay(void);
-bool logsrvd_conf_tcp_keepalive(void);
+struct server_address_list *logsrvd_conf_server_listen_address(void);
+struct server_address_list *logsrvd_conf_relay_address(void);
+bool logsrvd_conf_server_tcp_keepalive(void);
 const char *logsrvd_conf_pid_file(void);
-struct timespec *logsrvd_conf_get_sock_timeout(void);
-struct timespec *logsrvd_conf_get_connect_timeout(void);
+struct timespec *logsrvd_conf_server_timeout(void);
+struct timespec *logsrvd_conf_relay_connect_timeout(void);
 #if defined(HAVE_OPENSSL)
 bool logsrvd_conf_server_tls_check_peer(void);
 SSL_CTX *logsrvd_server_tls_ctx(void);
