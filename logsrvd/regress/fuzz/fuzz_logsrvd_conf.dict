@@ -12,6 +12,10 @@
 "tls_ciphers_v13"
 "tls_dhparams"
 
+"[relay]"
+"relay_host"
+"connect_timeout"
+
 "[iolog]"
 "iolog_dir"
 "iolog_file"

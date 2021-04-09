@@ -1,5 +1,5 @@
 #
-# sudo logsrv configuration
+# sudo logsrv daemon configuration
 #
 
 [server]
@@ -24,24 +24,24 @@ listen_address = *:30343
 # The file containing the ID of the running sudo_logsrvd process.
 pid_file = /var/run/sudo/sudo_logsrvd.pid
 
-# If set, enable the SO_KEEPALIVE socket option on the connected socket.
+# If true, enable the SO_KEEPALIVE socket option on client connections.
 tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 timeout = 0
 
-# If set, server certificate will be verified at server startup and
-# also connecting clients will perform server authentication by
-# verifying the server's certificate and identity.
+# If true, the server certificate will be verified at startup and clients
+# will authenticate the server by verifying its certificate and identity.
 #tls_verify = true
 
-# Whether to verify client certificates for TLS connections.
-# By default client certs are not checked.
+# If true, client certificates will be validated by the server;
+# clients without a valid certificate will be unable to connect.
+# By default, client certs are not checked.
 #tls_checkpeer = false
 
-# Path to the certificate authority bundle file in PEM format.
-# Required if 'tls_verify' or 'tls_checkpeer' is set.
+# Path to a certificate authority bundle file in PEM format to use
+# instead of the system's default certificate authority database.
 #tls_cacert = /etc/ssl/sudo/cacert.pem
 
 # Path to the server's certificate file in PEM format.
@@ -64,6 +64,62 @@ timeout = 0
 
 # Path to the Diffie-Hellman parameter file in PEM format.
 # If not set, the server will use the OpenSSL defaults.
+#tls_dhparams = /etc/ssl/sudo/logsrvd_dhparams.pem
+
+[relay]
+# The host name or IP address and port to send logs to in relay mode.
+# The syntax is identical to listen_address with the exception of
+# the wild card ('*') syntax.  When this setting is enabled, logs will
+# be relayed to the specified host instead of being stored locally.
+# This setting is not enabled by default.
+#relay_host = relayhost.dom.ain
+#relay_host = relayhost.dom.ain(tls)
+
+# The amount of time, in seconds, the server will wait for a connection
+# to the relay server to complete.  A value of 0 will disable the timeout.
+# The default value is 30.
+#connect_timeout = 30
+
+# If true, enable the SO_KEEPALIVE socket option on relay connections.
+#tcp_keepalive = true
+
+# The amount of time, in seconds, the server will wait for the relay to
+# respond.  A value of 0 will disable the timeout.  The default value is 30.
+#timeout = 30
+
+# If true, the server's relay certificate will be verified at startup.
+# The default is to use the value in the [server] section.
+#tls_verify = true
+
+# Whether to verify the relay's certificate for TLS connections.
+# The default is to use the value in the [server] section.
+#tls_checkpeer = false
+
+# Path to a certificate authority bundle file in PEM format to use
+# instead of the system's default certificate authority database.
+# The default is to use the value in the [server] section.
+#tls_cacert = /etc/ssl/sudo/cacert.pem
+
+# Path to the server's certificate file in PEM format.
+# The default is to use the certificate in the [server] section.
+#tls_cert = /etc/ssl/sudo/certs/logsrvd_cert.pem
+
+# Path to the server's private key file in PEM format.
+# The default is to use the key in the [server] section.
+#tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
+
+# TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
+# NOTE that this setting is only effective if the negotiated protocol
+# is TLS version 1.2.
+# The default is to use the value in the [server] section.
+#tls_ciphers_v12 = HIGH:!aNULL
+
+# TLS cipher list if the negotiated protocol is TLS version 1.3.
+# The default is to use the value in the [server] section.
+#tls_ciphers_v13 = TLS_AES_256_GCM_SHA384
+
+# Path to the Diffie-Hellman parameter file in PEM format.
+# The default is to use the value in the [server] section.
 #tls_dhparams = /etc/ssl/sudo/logsrvd_dhparams.pem
 
 [iolog]
