@@ -167,13 +167,17 @@ const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct server_address_list *logsrvd_conf_server_listen_address(void);
 struct server_address_list *logsrvd_conf_relay_address(void);
+bool logsrvd_conf_relay_tcp_keepalive(void);
 bool logsrvd_conf_server_tcp_keepalive(void);
 const char *logsrvd_conf_pid_file(void);
 struct timespec *logsrvd_conf_server_timeout(void);
 struct timespec *logsrvd_conf_relay_connect_timeout(void);
+struct timespec *logsrvd_conf_relay_timeout(void);
 #if defined(HAVE_OPENSSL)
 bool logsrvd_conf_server_tls_check_peer(void);
 SSL_CTX *logsrvd_server_tls_ctx(void);
+bool logsrvd_conf_relay_tls_check_peer(void);
+SSL_CTX *logsrvd_relay_tls_ctx(void);
 #endif
 mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);

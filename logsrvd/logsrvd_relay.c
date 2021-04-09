@@ -247,7 +247,7 @@ static bool
 connect_relay_tls(struct connection_closure *closure)
 {
     struct tls_client_closure *tls_client = &closure->relay_closure->tls_client;
-    SSL_CTX *ssl_ctx = logsrvd_server_tls_ctx();
+    SSL_CTX *ssl_ctx = logsrvd_relay_tls_ctx();
     debug_decl(connect_relay_tls, SUDO_DEBUG_UTIL);
 
     /* Populate struct tls_client_closure. */
@@ -299,6 +299,14 @@ connect_relay_next(struct connection_closure *closure)
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to allocate relay socket");
 	goto bad;
+    }
+    if (logsrvd_conf_relay_tcp_keepalive()) {
+	int keepalive = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
+		sizeof(keepalive)) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to set SO_KEEPALIVE option");
+	}
     }
     ret = fcntl(sock, F_GETFL, 0);
     if (ret == -1 || fcntl(sock, F_SETFL, ret | O_NONBLOCK) == -1) {
@@ -521,7 +529,7 @@ handle_log_id(char *id, struct connection_closure *closure)
     if (len != -1) {
 	if (fmt_log_id_message(id, closure)) {
 	    if (sudo_ev_add(closure->evbase, closure->write_ev,
-		    logsrvd_conf_server_timeout(), false) == -1) {
+		    logsrvd_conf_relay_timeout(), false) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to add server write event");
 	    } else {
@@ -554,7 +562,7 @@ handle_server_error(char *errmsg, struct connection_closure *closure)
 
     sudo_ev_del(closure->evbase, closure->read_ev);
     if (sudo_ev_add(closure->evbase, closure->write_ev,
-	    logsrvd_conf_server_timeout(), false) == -1) {
+	    logsrvd_conf_relay_timeout(), false) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to add server write event");
 	debug_return_bool(false);
@@ -584,7 +592,7 @@ handle_server_abort(char *errmsg, struct connection_closure *closure)
 
     sudo_ev_del(closure->evbase, closure->read_ev);
     if (sudo_ev_add(closure->evbase, closure->write_ev,
-	    logsrvd_conf_server_timeout(), false) == -1) {
+	    logsrvd_conf_relay_timeout(), false) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to add server write event");
 	debug_return_bool(false);
@@ -830,7 +838,7 @@ send_error:
 	goto close_connection;
     sudo_ev_del(closure->evbase, relay_closure->read_ev);
     if (sudo_ev_add(closure->evbase, closure->write_ev,
-            logsrvd_conf_server_timeout(), false) == -1) {
+            logsrvd_conf_relay_timeout(), false) == -1) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "unable to add server write event");
         goto close_connection;
@@ -976,7 +984,7 @@ send_error:
 	goto close_connection;
     sudo_ev_del(closure->evbase, relay_closure->read_ev);
     if (sudo_ev_add(closure->evbase, closure->write_ev,
-            logsrvd_conf_server_timeout(), false) == -1) {
+            logsrvd_conf_relay_timeout(), false) == -1) {
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
             "unable to add server write event");
         goto close_connection;

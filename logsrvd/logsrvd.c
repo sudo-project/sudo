@@ -1232,11 +1232,18 @@ static void
 set_tls_verify_peer(void)
 {
     SSL_CTX *server_ctx = logsrvd_server_tls_ctx();
+    SSL_CTX *relay_ctx = logsrvd_relay_tls_ctx();
     debug_decl(set_tls_verify_peer, SUDO_DEBUG_UTIL);
 
     if (server_ctx != NULL && logsrvd_conf_server_tls_check_peer()) {
 	/* Verify server cert during the handshake. */
 	SSL_CTX_set_verify(server_ctx,
+	    SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+	    verify_peer_identity);
+    }
+    if (relay_ctx != NULL && logsrvd_conf_relay_tls_check_peer()) {
+	/* Verify relay cert during the handshake. */
+	SSL_CTX_set_verify(relay_ctx,
 	    SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
 	    verify_peer_identity);
     }
@@ -1535,7 +1542,6 @@ listener_cb(int fd, int what, void *v)
 
     sock = accept(fd, &s_un.sa, &salen);
     if (sock != -1) {
-	/* set keepalive socket option on socket returned by accept */
 	if (logsrvd_conf_server_tcp_keepalive()) {
 	    int keepalive = 1;
 	    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
@@ -1622,14 +1628,14 @@ server_setup(struct sudo_event_base *base)
  * Reload config and re-initialize listeners.
  */
 static void
-server_reload(struct sudo_event_base *base)
+server_reload(struct sudo_event_base *evbase)
 {
     debug_decl(server_reload, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "reloading server config");
     if (logsrvd_conf_read(conf_file)) {
 	/* Re-initialize listeners. */
-	if (!server_setup(base))
+	if (!server_setup(evbase))
 	    sudo_fatalx("%s", U_("unable to setup listen socket"));
 
 	/* Re-read sudo.conf and re-initialize debugging. */

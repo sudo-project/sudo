@@ -33,6 +33,7 @@
 #else
 # include "compat/stdbool.h"
 #endif
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,14 +62,29 @@
 # define DEFAULT_CA_CERT_PATH       "/etc/ssl/sudo/cacert.pem"
 # define DEFAULT_SERVER_CERT_PATH   "/etc/ssl/sudo/certs/logsrvd_cert.pem"
 # define DEFAULT_SERVER_KEY_PATH    "/etc/ssl/sudo/private/logsrvd_key.pem"
+
+/* Evaluates to true if at least one TLS field is set, else false. */
+# define TLS_CONFIGURED(_s)						\
+    ((_s).tls_key_path != NULL || (_s).tls_cert_path != NULL ||		\
+     (_s).tls_cacert_path != NULL || (_s).tls_dhparams_path != NULL ||	\
+     (_s).tls_ciphers_v12 != NULL || (_s).tls_ciphers_v13 != NULL ||	\
+     (_s).tls_verify != -1)
+
+/* Evaluates to the relay-specific TLS setting, falling back to server. */
+# define TLS_RELAY_STR(_c, _f)	\
+    ((_c)->relay._f != NULL ? (_c)->relay._f : (_c)->server._f)
+
+# define TLS_RELAY_INT(_c, _f)	\
+    ((_c)->relay._f != -1 ? (_c)->relay._f : (_c)->server._f)
 #endif
 
 struct logsrvd_config;
-typedef bool (*logsrvd_conf_cb_t)(struct logsrvd_config *config, const char *);
+typedef bool (*logsrvd_conf_cb_t)(struct logsrvd_config *, const char *, size_t);
 
 struct logsrvd_config_entry {
     char *conf_str;
     logsrvd_conf_cb_t setter;
+    size_t offset;
 };
 
 struct logsrvd_config_section {
@@ -84,9 +100,7 @@ struct address_list_container {
 static struct logsrvd_config {
     struct logsrvd_config_server {
         struct address_list_container addresses;
-        struct address_list_container relays;
         struct timespec timeout;
-        struct timespec connect_timeout;
         bool tcp_keepalive;
 	char *pid_file;
 #if defined(HAVE_OPENSSL)
@@ -101,6 +115,23 @@ static struct logsrvd_config {
 	SSL_CTX *ssl_ctx;
 #endif
     } server;
+    struct logsrvd_config_relay {
+        struct address_list_container relays;
+        struct timespec connect_timeout;
+        struct timespec timeout;
+        bool tcp_keepalive;
+#if defined(HAVE_OPENSSL)
+	char *tls_key_path;
+	char *tls_cert_path;
+	char *tls_cacert_path;
+	char *tls_dhparams_path;
+	char *tls_ciphers_v12;
+	char *tls_ciphers_v13;
+	int tls_check_peer;
+	int tls_verify;
+	SSL_CTX *ssl_ctx;
+#endif
+    } relay;
     struct logsrvd_config_iolog {
 	bool compress;
 	bool flush;
@@ -156,12 +187,6 @@ logsrvd_conf_server_listen_address(void)
     return &logsrvd_config->server.addresses.addrs;
 }
 
-struct server_address_list *
-logsrvd_conf_relay_address(void)
-{
-    return &logsrvd_config->server.relays.addrs;
-}
-
 bool
 logsrvd_conf_server_tcp_keepalive(void)
 {
@@ -178,17 +203,7 @@ struct timespec *
 logsrvd_conf_server_timeout(void)
 {
     if (sudo_timespecisset(&logsrvd_config->server.timeout)) {
-        return &(logsrvd_config->server.timeout);
-    }
-
-    return NULL;
-}
-
-struct timespec *
-logsrvd_conf_relay_connect_timeout(void)
-{
-    if (sudo_timespecisset(&logsrvd_config->server.connect_timeout)) {
-        return &(logsrvd_config->server.connect_timeout);
+        return &logsrvd_config->server.timeout;
     }
 
     return NULL;
@@ -208,9 +223,60 @@ logsrvd_conf_server_tls_check_peer(void)
 }
 #endif
 
+/* relay getters */
+struct server_address_list *
+logsrvd_conf_relay_address(void)
+{
+    return &logsrvd_config->relay.relays.addrs;
+}
+
+bool
+logsrvd_conf_relay_tcp_keepalive(void)
+{
+    return logsrvd_config->relay.tcp_keepalive;
+}
+
+struct timespec *
+logsrvd_conf_relay_timeout(void)
+{
+    if (sudo_timespecisset(&logsrvd_config->relay.timeout)) {
+        return &logsrvd_config->relay.timeout;
+    }
+
+    return NULL;
+}
+
+struct timespec *
+logsrvd_conf_relay_connect_timeout(void)
+{
+    if (sudo_timespecisset(&logsrvd_config->relay.connect_timeout)) {
+        return &logsrvd_config->relay.connect_timeout;
+    }
+
+    return NULL;
+}
+
+#if defined(HAVE_OPENSSL)
+SSL_CTX *
+logsrvd_relay_tls_ctx(void)
+{
+    if (logsrvd_config->relay.ssl_ctx != NULL)
+	return logsrvd_config->relay.ssl_ctx;
+    return logsrvd_config->server.ssl_ctx;
+}
+
+bool
+logsrvd_conf_relay_tls_check_peer(void)
+{
+    if (logsrvd_config->relay.tls_check_peer != -1)
+	return logsrvd_config->relay.tls_check_peer;
+    return logsrvd_config->server.tls_check_peer;
+}
+#endif
+
 /* I/O log callbacks */
 static bool
-cb_iolog_dir(struct logsrvd_config *config, const char *path)
+cb_iolog_dir(struct logsrvd_config *config, const char *path, size_t offset)
 {
     debug_decl(cb_iolog_dir, SUDO_DEBUG_UTIL);
 
@@ -223,7 +289,7 @@ cb_iolog_dir(struct logsrvd_config *config, const char *path)
 }
 
 static bool
-cb_iolog_file(struct logsrvd_config *config, const char *path)
+cb_iolog_file(struct logsrvd_config *config, const char *path, size_t offset)
 {
     debug_decl(cb_iolog_file, SUDO_DEBUG_UTIL);
 
@@ -236,7 +302,7 @@ cb_iolog_file(struct logsrvd_config *config, const char *path)
 }
 
 static bool
-cb_iolog_compress(struct logsrvd_config *config, const char *str)
+cb_iolog_compress(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int val;
     debug_decl(cb_iolog_compress, SUDO_DEBUG_UTIL);
@@ -249,7 +315,7 @@ cb_iolog_compress(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_iolog_flush(struct logsrvd_config *config, const char *str)
+cb_iolog_flush(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int val;
     debug_decl(cb_iolog_flush, SUDO_DEBUG_UTIL);
@@ -262,7 +328,7 @@ cb_iolog_flush(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_iolog_user(struct logsrvd_config *config, const char *user)
+cb_iolog_user(struct logsrvd_config *config, const char *user, size_t offset)
 {
     struct passwd *pw;
     debug_decl(cb_iolog_user, SUDO_DEBUG_UTIL);
@@ -280,7 +346,7 @@ cb_iolog_user(struct logsrvd_config *config, const char *user)
 }
 
 static bool
-cb_iolog_group(struct logsrvd_config *config, const char *group)
+cb_iolog_group(struct logsrvd_config *config, const char *group, size_t offset)
 {
     struct group *gr;
     debug_decl(cb_iolog_group, SUDO_DEBUG_UTIL);
@@ -297,7 +363,7 @@ cb_iolog_group(struct logsrvd_config *config, const char *group)
 }
 
 static bool
-cb_iolog_mode(struct logsrvd_config *config, const char *str)
+cb_iolog_mode(struct logsrvd_config *config, const char *str, size_t offset)
 {
     const char *errstr;
     mode_t mode;
@@ -314,7 +380,7 @@ cb_iolog_mode(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_iolog_maxseq(struct logsrvd_config *config, const char *str)
+cb_iolog_maxseq(struct logsrvd_config *config, const char *str, size_t offset)
 {
     const char *errstr;
     unsigned int value;
@@ -415,19 +481,13 @@ done:
 }
 
 static bool
-cb_server_listen_address(struct logsrvd_config *config, const char *str)
+cb_server_listen_address(struct logsrvd_config *config, const char *str, size_t offset)
 {
     return append_address(&config->server.addresses.addrs, str, true);
 }
 
 static bool
-cb_relay_host(struct logsrvd_config *config, const char *str)
-{
-    return append_address(&config->server.relays.addrs, str, false);
-}
-
-static bool
-cb_server_timeout(struct logsrvd_config *config, const char *str)
+cb_server_timeout(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int timeout;
     const char* errstr;
@@ -443,23 +503,7 @@ cb_server_timeout(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_relay_connect_timeout(struct logsrvd_config *config, const char *str)
-{
-    int timeout;
-    const char* errstr;
-    debug_decl(cb_relay_connect_timeout, SUDO_DEBUG_UTIL);
-
-    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
-    if (errstr != NULL)
-	debug_return_bool(false);
-
-    config->server.connect_timeout.tv_sec = timeout;
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_server_keepalive(struct logsrvd_config *config, const char *str)
+cb_server_keepalive(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int val;
     debug_decl(cb_server_keepalive, SUDO_DEBUG_UTIL);
@@ -472,10 +516,10 @@ cb_server_keepalive(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_pid_file(struct logsrvd_config *config, const char *str)
+cb_server_pid_file(struct logsrvd_config *config, const char *str, size_t offset)
 {
     char *copy = NULL;
-    debug_decl(cb_pid_file, SUDO_DEBUG_UTIL);
+    debug_decl(cb_server_pid_file, SUDO_DEBUG_UTIL);
 
     /* An empty value means to disable the pid file. */
     if (*str != '\0') {
@@ -497,12 +541,13 @@ cb_pid_file(struct logsrvd_config *config, const char *str)
 
 #if defined(HAVE_OPENSSL)
 static bool
-cb_tls_key(struct logsrvd_config *config, const char *path)
+cb_tls_key(struct logsrvd_config *config, const char *path, size_t offset)
 {
+    char **p = (char **)((char *)config + offset);
     debug_decl(cb_tls_key, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_key_path);
-    if ((config->server.tls_key_path = strdup(path)) == NULL) {
+    free(*p);
+    if ((*p = strdup(path)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -510,12 +555,13 @@ cb_tls_key(struct logsrvd_config *config, const char *path)
 }
 
 static bool
-cb_tls_cacert(struct logsrvd_config *config, const char *path)
+cb_tls_cacert(struct logsrvd_config *config, const char *path, size_t offset)
 {
+    char **p = (char **)((char *)config + offset);
     debug_decl(cb_tls_cacert, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_cacert_path);
-    if ((config->server.tls_cacert_path = strdup(path)) == NULL) {
+    free(*p);
+    if ((*p = strdup(path)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -523,12 +569,13 @@ cb_tls_cacert(struct logsrvd_config *config, const char *path)
 }
 
 static bool
-cb_tls_cert(struct logsrvd_config *config, const char *path)
+cb_tls_cert(struct logsrvd_config *config, const char *path, size_t offset)
 {
+    char **p = (char **)((char *)config + offset);
     debug_decl(cb_tls_cert, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_cert_path);
-    if ((config->server.tls_cert_path = strdup(path)) == NULL) {
+    free(*p);
+    if ((*p = strdup(path)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -536,12 +583,13 @@ cb_tls_cert(struct logsrvd_config *config, const char *path)
 }
 
 static bool
-cb_tls_dhparam(struct logsrvd_config *config, const char *path)
+cb_tls_dhparams(struct logsrvd_config *config, const char *path, size_t offset)
 {
-    debug_decl(cb_tls_dhparam, SUDO_DEBUG_UTIL);
+    char **p = (char **)((char *)config + offset);
+    debug_decl(cb_tls_dhparams, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_dhparams_path);
-    if ((config->server.tls_dhparams_path = strdup(path)) == NULL) {
+    free(*p);
+    if ((*p = strdup(path)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -549,12 +597,13 @@ cb_tls_dhparam(struct logsrvd_config *config, const char *path)
 }
 
 static bool
-cb_tls_ciphers12(struct logsrvd_config *config, const char *str)
+cb_tls_ciphers12(struct logsrvd_config *config, const char *str, size_t offset)
 {
+    char **p = (char **)((char *)config + offset);
     debug_decl(cb_tls_ciphers12, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_ciphers_v12);
-    if ((config->server.tls_ciphers_v12 = strdup(str)) == NULL) {
+    free(*p);
+    if ((*p = strdup(str)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -562,12 +611,13 @@ cb_tls_ciphers12(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_tls_ciphers13(struct logsrvd_config *config, const char *str)
+cb_tls_ciphers13(struct logsrvd_config *config, const char *str, size_t offset)
 {
+    char **p = (char **)((char *)config + offset);
     debug_decl(cb_tls_ciphers13, SUDO_DEBUG_UTIL);
 
-    free(config->server.tls_ciphers_v13);
-    if ((config->server.tls_ciphers_v13 = strdup(str)) == NULL) {
+    free(*p);
+    if ((*p = strdup(str)) == NULL) {
         sudo_warn(NULL);
         debug_return_bool(false);
     }
@@ -575,35 +625,89 @@ cb_tls_ciphers13(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_tls_verify(struct logsrvd_config *config, const char *str)
+cb_tls_verify(struct logsrvd_config *config, const char *str, size_t offset)
 {
+    int *p = (int *)((char *)config + offset);
     int val;
     debug_decl(cb_tls_verify, SUDO_DEBUG_UTIL);
 
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
 
-    config->server.tls_verify = val;
+    *p = val;
     debug_return_bool(true);
 }
 
 static bool
-cb_tls_checkpeer(struct logsrvd_config *config, const char *str)
+cb_tls_checkpeer(struct logsrvd_config *config, const char *str, size_t offset)
 {
+    int *p = (int *)((char *)config + offset);
     int val;
     debug_decl(cb_tls_checkpeer, SUDO_DEBUG_UTIL);
 
     if ((val = sudo_strtobool(str)) == -1)
 	debug_return_bool(false);
 
-    config->server.tls_check_peer = val;
+    *p = val;
     debug_return_bool(true);
 }
 #endif
 
+/* relay callbacks */
+static bool
+cb_relay_host(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    return append_address(&config->relay.relays.addrs, str, false);
+}
+
+static bool
+cb_relay_timeout(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    int timeout;
+    const char* errstr;
+    debug_decl(cb_relay_timeout, SUDO_DEBUG_UTIL);
+
+    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+    if (errstr != NULL)
+	debug_return_bool(false);
+
+    config->server.timeout.tv_sec = timeout;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_relay_connect_timeout(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    int timeout;
+    const char* errstr;
+    debug_decl(cb_relay_connect_timeout, SUDO_DEBUG_UTIL);
+
+    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+    if (errstr != NULL)
+	debug_return_bool(false);
+
+    config->relay.connect_timeout.tv_sec = timeout;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_relay_keepalive(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    int val;
+    debug_decl(cb_relay_keepalive, SUDO_DEBUG_UTIL);
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->relay.tcp_keepalive = val;
+    debug_return_bool(true);
+}
+
 /* eventlog callbacks */
 static bool
-cb_eventlog_type(struct logsrvd_config *config, const char *str)
+cb_eventlog_type(struct logsrvd_config *config, const char *str, size_t offset)
 {
     debug_decl(cb_eventlog_type, SUDO_DEBUG_UTIL);
 
@@ -620,7 +724,7 @@ cb_eventlog_type(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_eventlog_format(struct logsrvd_config *config, const char *str)
+cb_eventlog_format(struct logsrvd_config *config, const char *str, size_t offset)
 {
     debug_decl(cb_eventlog_format, SUDO_DEBUG_UTIL);
 
@@ -636,7 +740,7 @@ cb_eventlog_format(struct logsrvd_config *config, const char *str)
 
 /* syslog callbacks */
 static bool
-cb_syslog_maxlen(struct logsrvd_config *config, const char *str)
+cb_syslog_maxlen(struct logsrvd_config *config, const char *str, size_t offset)
 {
     unsigned int maxlen;
     const char *errstr;
@@ -652,7 +756,7 @@ cb_syslog_maxlen(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_syslog_facility(struct logsrvd_config *config, const char *str)
+cb_syslog_facility(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int logfac;
     debug_decl(cb_syslog_facility, SUDO_DEBUG_UTIL);
@@ -669,7 +773,7 @@ cb_syslog_facility(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_syslog_acceptpri(struct logsrvd_config *config, const char *str)
+cb_syslog_acceptpri(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int logpri;
     debug_decl(cb_syslog_acceptpri, SUDO_DEBUG_UTIL);
@@ -686,7 +790,7 @@ cb_syslog_acceptpri(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_syslog_rejectpri(struct logsrvd_config *config, const char *str)
+cb_syslog_rejectpri(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int logpri;
     debug_decl(cb_syslog_rejectpri, SUDO_DEBUG_UTIL);
@@ -700,7 +804,7 @@ cb_syslog_rejectpri(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_syslog_alertpri(struct logsrvd_config *config, const char *str)
+cb_syslog_alertpri(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int logpri;
     debug_decl(cb_syslog_alertpri, SUDO_DEBUG_UTIL);
@@ -718,7 +822,7 @@ cb_syslog_alertpri(struct logsrvd_config *config, const char *str)
 
 /* logfile callbacks */
 static bool
-cb_logfile_path(struct logsrvd_config *config, const char *str)
+cb_logfile_path(struct logsrvd_config *config, const char *str, size_t offset)
 {
     char *copy = NULL;
     debug_decl(cb_logfile_path, SUDO_DEBUG_UTIL);
@@ -740,7 +844,7 @@ cb_logfile_path(struct logsrvd_config *config, const char *str)
 }
 
 static bool
-cb_logfile_time_format(struct logsrvd_config *config, const char *str)
+cb_logfile_time_format(struct logsrvd_config *config, const char *str, size_t offset)
 {
     char *copy = NULL;
     debug_decl(cb_logfile_time_format, SUDO_DEBUG_UTIL);
@@ -782,20 +886,36 @@ address_list_delref(struct server_address_list *al)
 
 static struct logsrvd_config_entry server_conf_entries[] = {
     { "listen_address", cb_server_listen_address },
-    { "relay", cb_relay_host },
     { "timeout", cb_server_timeout },
-    { "connect_timeout", cb_relay_connect_timeout },
     { "tcp_keepalive", cb_server_keepalive },
-    { "pid_file", cb_pid_file },
+    { "pid_file", cb_server_pid_file },
 #if defined(HAVE_OPENSSL)
-    { "tls_key", cb_tls_key },
-    { "tls_cacert", cb_tls_cacert },
-    { "tls_cert", cb_tls_cert },
-    { "tls_dhparams", cb_tls_dhparam },
-    { "tls_ciphers_v12", cb_tls_ciphers12 },
-    { "tls_ciphers_v13", cb_tls_ciphers13 },
-    { "tls_checkpeer", cb_tls_checkpeer },
-    { "tls_verify", cb_tls_verify },
+    { "tls_key", cb_tls_key, offsetof(struct logsrvd_config, server.tls_key_path) },
+    { "tls_cacert", cb_tls_cacert, offsetof(struct logsrvd_config, server.tls_cacert_path) },
+    { "tls_cert", cb_tls_cert, offsetof(struct logsrvd_config, server.tls_cert_path) },
+    { "tls_dhparams", cb_tls_dhparams, offsetof(struct logsrvd_config, server.tls_dhparams_path) },
+    { "tls_ciphers_v12", cb_tls_ciphers12, offsetof(struct logsrvd_config, server.tls_ciphers_v12) },
+    { "tls_ciphers_v13", cb_tls_ciphers13, offsetof(struct logsrvd_config, server.tls_ciphers_v13) },
+    { "tls_checkpeer", cb_tls_checkpeer, offsetof(struct logsrvd_config, server.tls_check_peer) },
+    { "tls_verify", cb_tls_verify, offsetof(struct logsrvd_config, server.tls_verify) },
+#endif
+    { NULL }
+};
+
+static struct logsrvd_config_entry relay_conf_entries[] = {
+    { "relay_host", cb_relay_host },
+    { "timeout", cb_relay_timeout },
+    { "connect_timeout", cb_relay_connect_timeout },
+    { "tcp_keepalive", cb_relay_keepalive },
+#if defined(HAVE_OPENSSL)
+    { "tls_key", cb_tls_key, offsetof(struct logsrvd_config, relay.tls_key_path) },
+    { "tls_cacert", cb_tls_cacert, offsetof(struct logsrvd_config, relay.tls_cacert_path) },
+    { "tls_cert", cb_tls_cert, offsetof(struct logsrvd_config, relay.tls_cert_path) },
+    { "tls_dhparams", cb_tls_dhparams, offsetof(struct logsrvd_config, relay.tls_dhparams_path) },
+    { "tls_ciphers_v12", cb_tls_ciphers12, offsetof(struct logsrvd_config, relay.tls_ciphers_v12) },
+    { "tls_ciphers_v13", cb_tls_ciphers13, offsetof(struct logsrvd_config, relay.tls_ciphers_v13) },
+    { "tls_checkpeer", cb_tls_checkpeer, offsetof(struct logsrvd_config, relay.tls_check_peer) },
+    { "tls_verify", cb_tls_verify, offsetof(struct logsrvd_config, relay.tls_verify) },
 #endif
     { NULL }
 };
@@ -835,6 +955,7 @@ static struct logsrvd_config_entry logfile_conf_entries[] = {
 
 static struct logsrvd_config_section logsrvd_config_sections[] = {
     { "server", server_conf_entries },
+    { "relay", relay_conf_entries },
     { "iolog", iolog_conf_entries },
     { "eventlog", eventlog_conf_entries },
     { "syslog", syslog_conf_entries },
@@ -903,7 +1024,7 @@ logsrvd_conf_parse(struct logsrvd_config *config, FILE *fp, const char *path)
 	*ep = '\0';
 	for (entry = conf_section->entries; entry->conf_str != NULL; entry++) {
 	    if (strcasecmp(line, entry->conf_str) == 0) {
-		if (!entry->setter(config, val)) {
+		if (!entry->setter(config, val, entry->offset)) {
 		    sudo_warnx(U_("invalid value for %s: %s"),
 			entry->conf_str, val);
 		    goto done;
@@ -997,19 +1118,7 @@ logsrvd_conf_free(struct logsrvd_config *config)
 
     /* struct logsrvd_config_server */
     address_list_delref(&config->server.addresses.addrs);
-    address_list_delref(&config->server.relays.addrs);
     free(config->server.pid_file);
-
-    /* struct logsrvd_config_iolog */
-    free(config->iolog.iolog_dir);
-    free(config->iolog.iolog_file);
-
-    /* struct logsrvd_config_logfile */
-    free(config->logfile.path);
-    free(config->logfile.time_format);
-    if (config->logfile.stream != NULL)
-	fclose(config->logfile.stream);
-
 #if defined(HAVE_OPENSSL)
     free(config->server.tls_key_path);
     free(config->server.tls_cert_path);
@@ -1021,6 +1130,30 @@ logsrvd_conf_free(struct logsrvd_config *config)
     if (config->server.ssl_ctx != NULL)
 	SSL_CTX_free(config->server.ssl_ctx);
 #endif
+
+    /* struct logsrvd_config_relay */
+    address_list_delref(&config->relay.relays.addrs);
+#if defined(HAVE_OPENSSL)
+    free(config->relay.tls_key_path);
+    free(config->relay.tls_cert_path);
+    free(config->relay.tls_cacert_path);
+    free(config->relay.tls_dhparams_path);
+    free(config->relay.tls_ciphers_v12);
+    free(config->relay.tls_ciphers_v13);
+
+    if (config->relay.ssl_ctx != NULL)
+	SSL_CTX_free(config->relay.ssl_ctx);
+#endif
+
+    /* struct logsrvd_config_iolog */
+    free(config->iolog.iolog_dir);
+    free(config->iolog.iolog_file);
+
+    /* struct logsrvd_config_logfile */
+    free(config->logfile.path);
+    free(config->logfile.time_format);
+    if (config->logfile.stream != NULL)
+	fclose(config->logfile.stream);
 
     free(config);
 
@@ -1039,11 +1172,20 @@ logsrvd_conf_alloc(void)
 	debug_return_ptr(NULL);
     }
 
+    /* Relay defaults */
+    TAILQ_INIT(&config->relay.relays.addrs);
+    config->relay.relays.refcnt = 1;
+    config->relay.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
+    config->relay.connect_timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
+    config->relay.tcp_keepalive = true;
+#if defined(HAVE_OPENSSL)
+    config->relay.tls_verify = -1;
+    config->relay.tls_check_peer = -1;
+#endif
+
     /* Server defaults */
     TAILQ_INIT(&config->server.addresses.addrs);
     config->server.addresses.refcnt = 1;
-    TAILQ_INIT(&config->server.relays.addrs);
-    config->server.relays.refcnt = 1;
     config->server.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->server.tcp_keepalive = true;
     config->server.pid_file = strdup(_PATH_SUDO_LOGSRVD_PID);
@@ -1085,9 +1227,9 @@ logsrvd_conf_alloc(void)
     config->iolog.flush = true;
     config->iolog.mode = S_IRUSR|S_IWUSR;
     config->iolog.maxseq = SESSID_MAX;
-    if (!cb_iolog_dir(config, _PATH_SUDO_IO_LOGDIR))
+    if (!cb_iolog_dir(config, _PATH_SUDO_IO_LOGDIR, 0))
 	goto bad;
-    if (!cb_iolog_file(config, "%{seq}"))
+    if (!cb_iolog_file(config, "%{seq}", 0))
 	goto bad;
     config->iolog.uid = ROOT_UID;
     config->iolog.gid = ROOT_GID;
@@ -1099,27 +1241,27 @@ logsrvd_conf_alloc(void)
 
     /* Syslog defaults */
     config->syslog.maxlen = 960;
-    if (!cb_syslog_facility(config, LOGFAC)) {
+    if (!cb_syslog_facility(config, LOGFAC, 0)) {
 	sudo_warnx(U_("unknown syslog facility %s"), LOGFAC);
 	goto bad;
     }
-    if (!cb_syslog_acceptpri(config, PRI_SUCCESS)) {
+    if (!cb_syslog_acceptpri(config, PRI_SUCCESS, 0)) {
 	sudo_warnx(U_("unknown syslog priority %s"), PRI_SUCCESS);
 	goto bad;
     }
-    if (!cb_syslog_rejectpri(config, PRI_FAILURE)) {
+    if (!cb_syslog_rejectpri(config, PRI_FAILURE, 0)) {
 	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
 	goto bad;
     }
-    if (!cb_syslog_alertpri(config, PRI_FAILURE)) {
+    if (!cb_syslog_alertpri(config, PRI_FAILURE, 0)) {
 	sudo_warnx(U_("unknown syslog priority %s"), PRI_FAILURE);
 	goto bad;
     }
 
     /* Log file defaults */
-    if (!cb_logfile_time_format(config, "%h %e %T"))
+    if (!cb_logfile_time_format(config, "%h %e %T", 0))
 	goto bad;
-    if (!cb_logfile_path(config, _PATH_SUDO_LOGFILE))
+    if (!cb_logfile_path(config, _PATH_SUDO_LOGFILE, 0))
 	goto bad;
 
     debug_return_ptr(config);
@@ -1139,12 +1281,12 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     /* There can be multiple addresses so we can't set a default earlier. */
     if (TAILQ_EMPTY(&config->server.addresses.addrs)) {
 	/* Enable plaintext listender. */
-	if (!cb_server_listen_address(config, "*:" DEFAULT_PORT))
+	if (!cb_server_listen_address(config, "*:" DEFAULT_PORT, 0))
 	    debug_return_bool(false);
 #if defined(HAVE_OPENSSL)
 	/* If a certificate was specified, enable the TLS listener too. */
 	if (config->server.tls_cert_path != NULL) {
-	    if (!cb_server_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)"))
+	    if (!cb_server_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)", 0))
 		debug_return_bool(false);
 	}
     } else {
@@ -1166,7 +1308,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	    }
 	    break;
 	}
-#endif
+#endif /* HAVE_OPENSSL */
     }
 
 #if defined(HAVE_OPENSSL)
@@ -1184,6 +1326,27 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	    debug_return_bool(false);
 	}
 	break;
+    }
+
+    if (TLS_CONFIGURED(config->relay)) {
+	TAILQ_FOREACH(addr, &config->relay.relays.addrs, entries) {
+	    if (!addr->tls)
+		continue;
+	    /* Create a TLS context for the relay. */
+	    config->relay.ssl_ctx = init_tls_context(
+		TLS_RELAY_STR(config, tls_cacert_path),
+		TLS_RELAY_STR(config, tls_cert_path),
+		TLS_RELAY_STR(config, tls_key_path),
+		TLS_RELAY_STR(config, tls_dhparams_path),
+		TLS_RELAY_STR(config, tls_ciphers_v12),
+		TLS_RELAY_STR(config, tls_ciphers_v13),
+		TLS_RELAY_INT(config, tls_verify));
+	    if (config->relay.ssl_ctx == NULL) {
+		sudo_warnx(U_("unable to initialize relay TLS context"));
+		debug_return_bool(false);
+	    }
+	    break;
+	}
     }
 #endif /* HAVE_OPENSSL */
 
