@@ -1428,6 +1428,7 @@ logsrvd_conf_cleanup(void)
     debug_decl(logsrvd_conf_cleanup, SUDO_DEBUG_UTIL);
 
     logsrvd_conf_free(logsrvd_config);
+    logsrvd_config = NULL;
 
     debug_return;
 }
