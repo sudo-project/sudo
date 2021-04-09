@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 6, 2021
+.Dd April 9, 2021
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -60,6 +60,8 @@ The following configuration sections are recognized:
 .It
 server
 .It
+relay
+.It
 iolog
 .It
 eventlog
@@ -76,17 +78,6 @@ The
 section configures the address and port the server will listen on.
 The following keys are recognized:
 .Bl -tag -width 8n
-.It connect_timeout = number
-The amount of time, in seconds,
-.Nm sudo_logsrvd
-will wait for the connection to a relay server (see below) to complete.
-Once the connection is complete, the
-.Em timeout
-setting controls the amount of time
-.Nm sudo_logsrvd
-will wait for the relay to respond.
-A value of 0 will disable the timeout.
-The default value is 30.
 .It listen_address = host Ns Oo : Ns port Oc Ns Op (tls)
 The host name or IP address, optional port to listen on and
 an optional Transport Layer Security (TLS) flag in parentheses.
@@ -138,38 +129,17 @@ If
 refers to a symbolic link, it will be ignored.
 The default value is
 .Pa @rundir@/sudo_logsrvd.pid .
-.It relay = host Ns Oo : Ns port Oc Ns Op (tls)
-The relay host name or IP address, optional port to connect to and
-an optional Transport Layer Security (TLS) flag in parentheses.
-The syntax is identical to
-.Em listen_address
-with one exception: the wild card
-.Ql *
-syntax is not supported.
-.Pp
-When this setting is enabled, messages from the client will be forwarded
-to one of the specified relay hosts instead of being stored locally.
-The
-.Ar host
-could be an instance of
-.Nm
-or another server that supports the
-.Xr sudo_logsrv.proto 5
-protocol.
-.Pp
-If multiple
-.Em relay
-lines are specified, the first available relay host will be used.
 .It tcp_keepalive = boolean
 If true,
 .Nm sudo_logsrvd
 will enable the TCP keepalive socket option on the client connection.
 This enables the periodic transmission of keepalive messages to the client.
-If the client does not respond to a message, the connection will be closed.
+If the client does not respond to a message in time, the connection will
+be closed.
 .It timeout = number
 The amount of time, in seconds,
 .Nm sudo_logsrvd
-will wait for the client or relay to respond.
+will wait for the client to respond.
 A value of 0 will disable the timeout.
 The default value is 30.
 .It tls_cacert = path
@@ -185,7 +155,8 @@ The path to the server's certificate file, in PEM format.
 The default value is
 .Pa /etc/ssl/sudo/certs/logsrvd_cert.pem .
 .It tls_checkpeer = bool
-If true, client certificates will be validated by the server;
+If true, client certificates will be validated by
+.Nm sudo_logsrvd ;
 clients without a valid certificate will be unable to connect.
 If false, no validation of client certificates will be performed.
 It true and client certificates are created using a private certificate
@@ -248,6 +219,139 @@ by the server or the client.
 When using self-signed certificates without a certificate authority,
 this setting should be set to false.
 The default value is true.
+.El
+.Ss relay
+The
+.Em relay
+section configures the optional logsrv relay host and port the server will
+connect to.
+The TLS configuration keys are optional, by default the corresponding
+keys in the
+.Sx server
+section will be used.
+They are only present in this section to make it possible for the relay
+connection to use a different set of TLS parameters from the client-facing
+server.
+The following keys are recognized:
+.Bl -tag -width 8n
+.It connect_timeout = number
+The amount of time, in seconds,
+.Nm sudo_logsrvd
+will wait for the connection to a
+.Em relay_host
+(see below) to complete.
+Once the connection is complete, the
+.Em timeout
+setting controls the amount of time
+.Nm sudo_logsrvd
+will wait for the relay to respond.
+A value of 0 will disable the timeout.
+The default value is 30.
+.It relay_host = host Ns Oo : Ns port Oc Ns Op (tls)
+The relay host name or IP address, optional port to connect to and
+an optional Transport Layer Security (TLS) flag in parentheses.
+The syntax is identical to
+.Em listen_address
+in the
+.Sx server
+section with one exception: the wild card
+.Ql *
+syntax is not supported.
+.Pp
+When this setting is enabled, messages from the client will be forwarded
+to one of the specified relay hosts instead of being stored locally.
+The
+.Ar host
+could be running an instance of
+.Nm sudo_logsrvd
+or another server that supports the
+.Xr sudo_logsrv.proto 5
+protocol.
+.Pp
+If multiple
+.Em relay_host
+lines are specified, the first available relay host will be used.
+.It tcp_keepalive = boolean
+If true,
+.Nm sudo_logsrvd
+will enable the TCP keepalive socket option on the relay connection.
+This enables the periodic transmission of keepalive messages to the relay
+server.
+If the relay does not respond to a message in time, the connection will
+be closed.
+.It timeout = number
+The amount of time, in seconds,
+.Nm sudo_logsrvd
+will wait for the relay server to respond after a connection has succeeded.
+A value of 0 will disable the timeout.
+The default value is 30.
+.It tls_cacert = path
+The path to a certificate authority bundle file, in PEM format,
+to use instead of the system's default certificate authority database
+when authenticating clients.
+The default is to use the value specified in the
+.Sx server
+section, or the system's default certificate authority database if
+no value is set.
+.It tls_cert = path
+The path to the server's certificate file, in PEM format.
+The default is to use the value specified in the
+.Sx server
+section.
+.It tls_checkpeer = bool
+If true, the relay host's certificate will be validated by
+.Nm sudo_logsrvd ;
+connections to a relay without a valid certificate will fail.
+If false, no validation of relay certificates will be performed.
+It true and relay certificates are created using a private certificate
+authority, the
+.Em tls_cacert
+setting must be set to a CA bundle that contains the CA certificate
+used to generate the relay certificate.
+The default is to use the value specified in the
+.Sx server
+section.
+.It tls_ciphers_v12 = string
+A list of ciphers to use for connections secured by TLS version 1.2 only,
+separated by a colon
+.Ql :\& .
+See the
+.Sx CIPHER LIST FORMAT
+section in
+.Xr openssl-ciphers 1
+for full details.
+The default is to use the value specified in the
+.Sx server
+section.
+.It tls_ciphers_v13 = string
+A list of ciphers to use for connections secured by TLS version 1.3 only,
+separated by a colon
+.Ql :\& .
+Supported cipher suites depend on the version of OpenSSL used,
+see the
+.Sx server
+section for more information.
+The default is to use the value specified in the
+.Sx server
+section.
+.It tls_dhparams = path
+The path to a file containing custom Diffie-Hellman parameters in PEM format.
+The default is to use the value specified in the
+.Sx server
+section.
+.It tls_key = path
+The path to the server's private key file, in PEM format.
+The default is to use the value specified in the
+.Sx server
+section.
+.It tls_verify = bool
+If true, the server's certificate used for relaying will be verified at startup.
+If false, no verification is performed of the server certificate.
+When using self-signed certificates without a certificate authority,
+this setting should be set to false.
+The default is to use the value specified in the
+.Sx server
+section.
 .El
 .Ss iolog
 The
@@ -543,7 +647,7 @@ Sudo log server configuration file
 .Sh EXAMPLES
 .Bd -literal
 #
-# sudo logsrv configuration
+# sudo logsrv daemon configuration
 #
 
 [server]
@@ -565,40 +669,27 @@ Sudo log server configuration file
 #listen_address = *:30343
 #listen_address = *:30344(tls)
 
-# The host name or IP address and port to send logs to in relay mode.
-# The syntax is identical to listen_address with the exception of
-# the wild card ('*') syntax.  When this setting is enabled, logs will
-# be relayed to the specified host instead of being stored locally.
-# This setting is not enabled by default.
-#relay = relayhost.dom.ain
-#relay = relayhost.dom.ain(tls)
-
 # The file containing the ID of the running sudo_logsrvd process.
 #pid_file = @rundir@/sudo_logsrvd.pid
 
-# If set, enable the SO_KEEPALIVE socket option on the connected socket.
+# If true, enable the SO_KEEPALIVE socket option on client connections.
 #tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 #timeout = 30
 
-# The amount of time, in seconds, the server will wait for a connection
-# to the relay server to complete.  A value of 0 will disable the timeout.
-# The default value is 30.
-#connect_timeout = 30
-
-# If set, server certificate will be verified at server startup and
-# also connecting clients will perform server authentication by
-# verifying the server's certificate and identity.
+# If true, the server certificate will be verified at startup and clients
+# will authenticate the server by verifying its certificate and identity.
 #tls_verify = true
 
-# Whether to verify client certificates for TLS connections.
-# By default client certs are not checked.
+# If true, client certificates will be validated by the server;
+# clients without a valid certificate will be unable to connect.
+# By default, client certs are not checked.
 #tls_checkpeer = false
 
-# Path to the certificate authority bundle file in PEM format.
-# Required if 'tls_verify' or 'tls_checkpeer' is set.
+# Path to a certificate authority bundle file in PEM format to use
+# instead of the system's default certificate authority database.
 #tls_cacert = /etc/ssl/sudo/cacert.pem
 
 # Path to the server's certificate file in PEM format.
@@ -621,6 +712,62 @@ Sudo log server configuration file
 
 # Path to the Diffie-Hellman parameter file in PEM format.
 # If not set, the server will use the OpenSSL defaults.
+#tls_dhparams = /etc/ssl/sudo/logsrvd_dhparams.pem
+
+[relay]
+# The host name or IP address and port to send logs to in relay mode.
+# The syntax is identical to listen_address with the exception of
+# the wild card ('*') syntax.  When this setting is enabled, logs will
+# be relayed to the specified host instead of being stored locally.
+# This setting is not enabled by default.
+#relay_host = relayhost.dom.ain
+#relay_host = relayhost.dom.ain(tls)
+
+# The amount of time, in seconds, the server will wait for a connection
+# to the relay server to complete.  A value of 0 will disable the timeout.
+# The default value is 30.
+#connect_timeout = 30
+
+# If true, enable the SO_KEEPALIVE socket option on relay connections.
+#tcp_keepalive = true
+
+# The amount of time, in seconds, the server will wait for the relay to
+# respond.  A value of 0 will disable the timeout.  The default value is 30.
+#timeout = 30
+
+# If true, the server's relay certificate will be verified at startup.
+# The default is to use the value in the [server] section.
+#tls_verify = true
+
+# Whether to verify the relay's certificate for TLS connections.
+# The default is to use the value in the [server] section.
+#tls_checkpeer = false
+
+# Path to a certificate authority bundle file in PEM format to use
+# instead of the system's default certificate authority database.
+# The default is to use the value in the [server] section.
+#tls_cacert = /etc/ssl/sudo/cacert.pem
+
+# Path to the server's certificate file in PEM format.
+# The default is to use the certificate in the [server] section.
+#tls_cert = /etc/ssl/sudo/certs/logsrvd_cert.pem
+
+# Path to the server's private key file in PEM format.
+# The default is to use the key in the [server] section.
+#tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
+
+# TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
+# NOTE that this setting is only effective if the negotiated protocol
+# is TLS version 1.2.
+# The default is to use the value in the [server] section.
+#tls_ciphers_v12 = HIGH:!aNULL
+
+# TLS cipher list if the negotiated protocol is TLS version 1.3.
+# The default is to use the value in the [server] section.
+#tls_ciphers_v13 = TLS_AES_256_GCM_SHA384
+
+# Path to the Diffie-Hellman parameter file in PEM format.
+# The default is to use the value in the [server] section.
 #tls_dhparams = /etc/ssl/sudo/logsrvd_dhparams.pem
 
 [iolog]
