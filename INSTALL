@@ -598,18 +598,22 @@ Authentication options:
         is not supported by all Kerberos V and SASL combinations.
 
   --enable-gcrypt[=DIR]
-        Use GNU crypt's SHA-2 message digest functions instead of the
-        ones bundled with sudo (or in the system's C library).
-        If specified, DIR should contain the GNU crypt include and
-        lib directories.  This option is ignored when the
-        --enable-openssl option is also specified.
+        Use GNU crypt's SHA-2 message digest functions instead of
+        OpenSSL or the ones bundled with sudo (or in the system's
+        C library).  If specified, DIR should contain the GNU crypt
+        include and lib directories.  This option only has an effect
+        when OpenSSL 1.0.1 or higher is not present on the system
+        or the --disable-openssl option is also specified.
 
   --enable-openssl[=DIR]
-        Use OpenSSL's TLS and SHA-2 message digest functions.
-        By default, sudo does not support TLS and will use either its
-        own SHA-2 functions or the ones in the system's C library.
-        If specified, DIR should contain the OpenSSL include and
-        lib directories.
+        Use OpenSSL's TLS and SHA-2 message digest functions.  If
+        it is detected, OpenSSL will be used by default unless the
+        sudo log client and server are disabled via the
+        --disable-log-client and --disable-log-server options.  To
+        explicitly disable the use of OpenSSL, the --disable-openssl
+        option can be used.  OpenSSL versions prior to 1.0.1 will
+        not be used as they do not support TLS 1.2.  If specified,
+        DIR should contain the OpenSSL include and lib directories.
 
 Development options:
   --enable-env-debug

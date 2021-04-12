@@ -237,7 +237,6 @@ PROGS="sudo"
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
-: ${PKG_CONFIG='pkg-config'}
 DEVEL=
 LDAP="#"
 BAMAN=0
@@ -1509,17 +1508,6 @@ AC_ARG_ENABLE(werror,
   esac
 ])
 
-AC_ARG_ENABLE(openssl,
-[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])])
-
-AC_ARG_ENABLE(gcrypt,
-[AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
-    if test "${enable_openssl-no}" != no; then
-	AC_MSG_WARN([Ignoring --enable-gcrypt when OpenSSL is enabled.])
-	enable_gcrypt=no
-    fi
-])
-
 AC_ARG_ENABLE(ssp,
 [AS_HELP_STRING([--disable-ssp], [Do not compile using the -fstack-protector option.])],
 [], [enable_ssp=yes])
@@ -1638,7 +1626,7 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
 		SUDO_OBJS="${SUDO_OBJS} selinux.o"
 		PROGS="${PROGS} sesh"
 		SEMAN=1
-		AC_CHECK_LIB([selinux], [setkeycreatecon],
+		AC_CHECK_LIB(selinux, setkeycreatecon,
 		    [AC_DEFINE(HAVE_SETKEYCREATECON)])
 		;;
     no)		;;
@@ -1716,7 +1704,7 @@ AC_ARG_ENABLE(log-client,
   esac
 ], [AC_DEFINE([SUDOERS_LOG_CLIENT])])
 
-if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
+if test X"${enable_log_client}${enable_log_server}" = X"nono"; then
     # No need for liblogsrv.la
     LOGSRV_SRC=
     LIBLOGSRV=
@@ -1724,6 +1712,26 @@ fi
 if test X"$LOGSRVD_SRC" != X""; then
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-logsrvd.pp'
 fi
+
+dnl
+dnl Do OpenSSL / gcrypt after logsrv options
+dnl
+AC_ARG_ENABLE(openssl,
+[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
+[], [
+    # Enable OpenSSL by default unless logsrvd and client are disabled
+    if test X"${enable_log_client}${enable_log_server}" != X"nono"; then
+	enable_openssl=maybe
+    fi
+])
+
+AC_ARG_ENABLE(gcrypt,
+[AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
+    if test "${enable_openssl-no}" != no; then
+	AC_MSG_WARN([Ignoring --enable-gcrypt when OpenSSL is enabled.])
+	enable_gcrypt=no
+    fi
+])
 
 dnl
 dnl C compiler checks
@@ -3072,47 +3080,99 @@ dnl
 dnl Check for functions only present in OpenSSL 1.1 and above
 dnl
 if test "${enable_openssl-no}" != no; then
-    # Use OpenSSL's sha2 functions
-    AC_DEFINE(HAVE_OPENSSL)
-    DIGEST=digest_openssl.lo
-
     # Use pkg-config to find the openssl cflags and libs if possible.
-    if test "$enable_openssl" != "yes"; then
+    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
 	PKG_CONFIG_LIBDIR="${enable_openssl}/lib/pkgconfig:${enable_openssl}/lib64/pkgconfig:${enable_openssl}/share/pkgconfig"
 	export PKG_CONFIG_LIBDIR
+    elif test "$cross_compiling" = "yes" -a -z "$PKG_CONFIG"; then
+	# Cannot use pkg-config when cross-compiling
+	PKG_CONFIG=false
     fi
-    if $PKG_CONFIG --exists openssl >/dev/null 2>&1; then
-	# Check whether --static is needed
+    : ${PKG_CONFIG='pkg-config'}
+    if $PKG_CONFIG --exists "openssl >= 1.0.1" >/dev/null 2>&1; then
+	AC_DEFINE(HAVE_OPENSSL)
+
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
-	AC_CHECK_LIB([ssl], [SSL_library_init], [STATIC=""], [STATIC="--static"], [-lcrypto])
+	# Check whether --static is needed
+	AC_CHECK_LIB(ssl, SSL_new, [STATIC=""], [STATIC="--static"], [-lcrypto])
+
+	# Use OpenSSL's sha2 functions if possible
+	AC_CHECK_LIB(crypto, SHA224_Update, [DIGEST=digest_openssl.lo])
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
 	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
-	if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
-	    LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
-	else
-	    # No separate pkg config for libcrypto
-	    LIBMD="$LIBTLS"
+	if test "$DIGEST" = "digest_openssl.lo"; then
+	    if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
+		LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	    else
+		# No separate pkg config for libcrypto
+		LIBMD="$LIBTLS"
+	    fi
 	fi
 	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
 	    AX_APPEND_FLAG([$f], [CPPFLAGS])
 	done
     else
 	# No pkg-config file present, try to do it manually
-	if test "$enable_openssl" != "yes"; then
-	    AX_APPEND_FLAG([-I${enable_openssl}/include], [CPPFLAGS])
-	    SUDO_APPEND_LIBPATH(LIBMD, [${enable_openssl}/lib])
-	    SUDO_APPEND_LIBPATH(LIBTLS, [${enable_openssl}/lib])
+	O_LDFLAGS="$LDFLAGS"
+	if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
+	    LDFLAGS="$LDFLAGS -L${enable_openssl}/lib"
 	fi
-	LIBMD="${LIBMD} -lcrypto"
-	LIBTLS="${LIBTLS} -lcrypto -lssl"
-    fi
-    if test "$enable_openssl" != "yes"; then
-	unset PKG_CONFIG_LIBDIR
-    fi
+	AC_CHECK_LIB(ssl, SSL_new, [
+	    # Check OPENSSL_VERSION_NUMBER in headers
+	    O_CPPFLAGS="$CPPFLAGS"
+	    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
+		# Note: we only reset CPPFLAGS on failure
+		AX_APPEND_FLAG([-I${enable_openssl}/include], [CPPFLAGS])
+	    fi
+	    AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <openssl/opensslv.h>
+#if !defined(OPENSSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER < 0x1000100fL
+#error "OpenSSL too old"
+#endif
+]])], [
+	    # OpenSSL >= 1.0.1 detected, use it.
+	    AC_DEFINE(HAVE_OPENSSL)
+	    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
+		SUDO_APPEND_LIBPATH(LIBMD, [${enable_openssl}/lib])
+		SUDO_APPEND_LIBPATH(LIBTLS, [${enable_openssl}/lib])
+	    fi
+	    LIBTLS="${LIBTLS} -lcrypto -lssl"
 
+	    # Use OpenSSL's sha2 functions if possible
+	    AC_CHECK_LIB(crypto, SHA224_Update, [
+		DIGEST=digest_openssl.lo
+		LIBMD="${LIBMD} -lcrypto"
+	    ])
+], [
+	    # OpenSSL < 1.0.1 detected, ignore it.
+	    if test "$enable_openssl" = "maybe"; then
+		AC_MSG_WARN([OpenSSL too old (1.0.1 or higher required), Sudo logsrv connections will not be encrypted.])
+		enable_openssl=no
+	    else
+		AC_MSG_ERROR([OpenSSL too old (1.0.1 or higher required).])
+	    fi
+	    CPPFLAGS="$O_CPPFLAGS"
+])
+	], [
+	    if test "$enable_openssl" = "maybe"; then
+		AC_MSG_WARN([OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted.])
+		enable_openssl=no
+	    else
+		AC_MSG_ERROR([OpenSSL development libraries not found.])
+	    fi
+	], [-lcrypto])
+	LDFLAGS="$O_LDFLAGS"
+    fi
+    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
+	unset PKG_CONFIG_LIBDIRS
+    fi
+fi
+dnl
+dnl Note that enable_openssl may be reset above.
+dnl
+if test "${enable_openssl-no}" != no; then
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
     AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate TLS_client_method TLS_server_method])

@@ -1002,8 +1002,6 @@ enable_zlib
 enable_env_reset
 enable_warnings
 enable_werror
-enable_openssl
-enable_gcrypt
 enable_ssp
 enable_hardening
 enable_pie
@@ -1029,6 +1027,8 @@ enable_gss_krb5_ccache_name
 enable_pvs_studio
 enable_log_server
 enable_log_client
+enable_openssl
+enable_gcrypt
 enable_shared
 enable_static
 with_pic
@@ -1706,8 +1706,6 @@ Optional Features:
   --enable-env-reset      Whether to enable environment resetting by default.
   --enable-warnings       Whether to enable compiler warnings
   --enable-werror         Whether to enable the -Werror compiler option
-  --enable-openssl        Use OpenSSL's TLS and sha2 functions
-  --enable-gcrypt         Use GNU crypt's sha2 functions
   --disable-ssp           Do not compile using the -fstack-protector option.
   --disable-hardening     Do not use compiler/linker exploit mitigation
                           options
@@ -1743,6 +1741,8 @@ Optional Features:
   --disable-log-server    Disable building the sudo_logsrvd log server.
   --disable-log-client    Disable sudoers support for using the sudo_logsrvd
                           log server.
+  --enable-openssl        Use OpenSSL's TLS and sha2 functions
+  --enable-gcrypt         Use GNU crypt's sha2 functions
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -3600,7 +3600,6 @@ PROGS="sudo"
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
-: ${PKG_CONFIG='pkg-config'}
 DEVEL=
 LDAP="#"
 BAMAN=0
@@ -6880,26 +6879,6 @@ printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-werror: $e
 fi
 
 
-# Check whether --enable-openssl was given.
-if test ${enable_openssl+y}
-then :
-  enableval=$enable_openssl;
-fi
-
-
-# Check whether --enable-gcrypt was given.
-if test ${enable_gcrypt+y}
-then :
-  enableval=$enable_gcrypt;
-    if test "${enable_openssl-no}" != no; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring --enable-gcrypt when OpenSSL is enabled." >&5
-printf "%s\n" "$as_me: WARNING: Ignoring --enable-gcrypt when OpenSSL is enabled." >&2;}
-	enable_gcrypt=no
-    fi
-
-fi
-
-
 # Check whether --enable-ssp was given.
 if test ${enable_ssp+y}
 then :
@@ -7262,7 +7241,7 @@ else $as_nop
 fi
 
 
-if test X"$enable_log_server" = X"no" -a X"$enable_log_client" = X"no"; then
+if test X"${enable_log_client}${enable_log_server}" = X"nono"; then
     # No need for liblogsrv.la
     LOGSRV_SRC=
     LIBLOGSRV=
@@ -7270,6 +7249,33 @@ fi
 if test X"$LOGSRVD_SRC" != X""; then
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-logsrvd.pp'
 fi
+
+# Check whether --enable-openssl was given.
+if test ${enable_openssl+y}
+then :
+  enableval=$enable_openssl;
+else $as_nop
+
+    # Enable OpenSSL by default unless logsrvd and client are disabled
+    if test X"${enable_log_client}${enable_log_server}" != X"nono"; then
+	enable_openssl=maybe
+    fi
+
+fi
+
+
+# Check whether --enable-gcrypt was given.
+if test ${enable_gcrypt+y}
+then :
+  enableval=$enable_gcrypt;
+    if test "${enable_openssl-no}" != no; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring --enable-gcrypt when OpenSSL is enabled." >&5
+printf "%s\n" "$as_me: WARNING: Ignoring --enable-gcrypt when OpenSSL is enabled." >&2;}
+	enable_gcrypt=no
+    fi
+
+fi
+
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -22374,23 +22380,25 @@ printf "%s\n" "#define HAVE_STRUCT_DIRENT_D_NAMLEN 1" >>confdefs.h
 fi
 
 if test "${enable_openssl-no}" != no; then
-    # Use OpenSSL's sha2 functions
-    printf "%s\n" "#define HAVE_OPENSSL 1" >>confdefs.h
-
-    DIGEST=digest_openssl.lo
-
     # Use pkg-config to find the openssl cflags and libs if possible.
-    if test "$enable_openssl" != "yes"; then
+    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
 	PKG_CONFIG_LIBDIR="${enable_openssl}/lib/pkgconfig:${enable_openssl}/lib64/pkgconfig:${enable_openssl}/share/pkgconfig"
 	export PKG_CONFIG_LIBDIR
+    elif test "$cross_compiling" = "yes" -a -z "$PKG_CONFIG"; then
+	# Cannot use pkg-config when cross-compiling
+	PKG_CONFIG=false
     fi
-    if $PKG_CONFIG --exists openssl >/dev/null 2>&1; then
-	# Check whether --static is needed
+    : ${PKG_CONFIG='pkg-config'}
+    if $PKG_CONFIG --exists "openssl >= 1.0.1" >/dev/null 2>&1; then
+	printf "%s\n" "#define HAVE_OPENSSL 1" >>confdefs.h
+
+
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
-printf %s "checking for SSL_library_init in -lssl... " >&6; }
-if test ${ac_cv_lib_ssl_SSL_library_init_lcrypto+y}
+	# Check whether --static is needed
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_new in -lssl" >&5
+printf %s "checking for SSL_new in -lssl... " >&6; }
+if test ${ac_cv_lib_ssl_SSL_new_lcrypto+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -22402,43 +22410,87 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char SSL_library_init ();
+char SSL_new ();
 int
 main (void)
 {
-return SSL_library_init ();
+return SSL_new ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_ssl_SSL_library_init_lcrypto=yes
+  ac_cv_lib_ssl_SSL_new_lcrypto=yes
 else $as_nop
-  ac_cv_lib_ssl_SSL_library_init_lcrypto=no
+  ac_cv_lib_ssl_SSL_new_lcrypto=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_library_init_lcrypto" >&5
-printf "%s\n" "$ac_cv_lib_ssl_SSL_library_init_lcrypto" >&6; }
-if test "x$ac_cv_lib_ssl_SSL_library_init_lcrypto" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_new_lcrypto" >&5
+printf "%s\n" "$ac_cv_lib_ssl_SSL_new_lcrypto" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_new_lcrypto" = xyes
 then :
   STATIC=""
 else $as_nop
   STATIC="--static"
 fi
 
+
+	# Use OpenSSL's sha2 functions if possible
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SHA224_Update in -lcrypto" >&5
+printf %s "checking for SHA224_Update in -lcrypto... " >&6; }
+if test ${ac_cv_lib_crypto_SHA224_Update+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char SHA224_Update ();
+int
+main (void)
+{
+return SHA224_Update ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_crypto_SHA224_Update=yes
+else $as_nop
+  ac_cv_lib_crypto_SHA224_Update=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_SHA224_Update" >&5
+printf "%s\n" "$ac_cv_lib_crypto_SHA224_Update" >&6; }
+if test "x$ac_cv_lib_crypto_SHA224_Update" = xyes
+then :
+  DIGEST=digest_openssl.lo
+fi
+
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
 	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
-	if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
-	    LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
-	else
-	    # No separate pkg config for libcrypto
-	    LIBMD="$LIBTLS"
+	if test "$DIGEST" = "digest_openssl.lo"; then
+	    if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
+		LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	    else
+		# No separate pkg config for libcrypto
+		LIBMD="$LIBTLS"
+	    fi
 	fi
 	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
 
@@ -22477,7 +22529,52 @@ fi
 	done
     else
 	# No pkg-config file present, try to do it manually
-	if test "$enable_openssl" != "yes"; then
+	O_LDFLAGS="$LDFLAGS"
+	if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
+	    LDFLAGS="$LDFLAGS -L${enable_openssl}/lib"
+	fi
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_new in -lssl" >&5
+printf %s "checking for SSL_new in -lssl... " >&6; }
+if test ${ac_cv_lib_ssl_SSL_new_lcrypto+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl -lcrypto $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char SSL_new ();
+int
+main (void)
+{
+return SSL_new ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_ssl_SSL_new_lcrypto=yes
+else $as_nop
+  ac_cv_lib_ssl_SSL_new_lcrypto=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_new_lcrypto" >&5
+printf "%s\n" "$ac_cv_lib_ssl_SSL_new_lcrypto" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_new_lcrypto" = xyes
+then :
+
+	    # Check OPENSSL_VERSION_NUMBER in headers
+	    O_CPPFLAGS="$CPPFLAGS"
+	    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
+		# Note: we only reset CPPFLAGS on failure
 
 if test ${CPPFLAGS+y}
 then :
@@ -22511,6 +22608,29 @@ else $as_nop
 
 fi
 
+	    fi
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <openssl/opensslv.h>
+#if !defined(OPENSSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER < 0x1000100fL
+#error "OpenSSL too old"
+#endif
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"
+then :
+
+	    # OpenSSL >= 1.0.1 detected, use it.
+	    printf "%s\n" "#define HAVE_OPENSSL 1" >>confdefs.h
+
+	    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
 
 
 if test ${LIBMD+y}
@@ -22651,14 +22771,88 @@ fi
 
     fi
 
-	fi
-	LIBMD="${LIBMD} -lcrypto"
-	LIBTLS="${LIBTLS} -lcrypto -lssl"
-    fi
-    if test "$enable_openssl" != "yes"; then
-	unset PKG_CONFIG_LIBDIR
-    fi
+	    fi
+	    LIBTLS="${LIBTLS} -lcrypto -lssl"
 
+	    # Use OpenSSL's sha2 functions if possible
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SHA224_Update in -lcrypto" >&5
+printf %s "checking for SHA224_Update in -lcrypto... " >&6; }
+if test ${ac_cv_lib_crypto_SHA224_Update+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char SHA224_Update ();
+int
+main (void)
+{
+return SHA224_Update ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_crypto_SHA224_Update=yes
+else $as_nop
+  ac_cv_lib_crypto_SHA224_Update=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_SHA224_Update" >&5
+printf "%s\n" "$ac_cv_lib_crypto_SHA224_Update" >&6; }
+if test "x$ac_cv_lib_crypto_SHA224_Update" = xyes
+then :
+
+		DIGEST=digest_openssl.lo
+		LIBMD="${LIBMD} -lcrypto"
+
+fi
+
+
+else $as_nop
+
+	    # OpenSSL < 1.0.1 detected, ignore it.
+	    if test "$enable_openssl" = "maybe"; then
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL too old (1.0.1 or higher required), Sudo logsrv connections will not be encrypted." >&5
+printf "%s\n" "$as_me: WARNING: OpenSSL too old (1.0.1 or higher required), Sudo logsrv connections will not be encrypted." >&2;}
+		enable_openssl=no
+	    else
+		as_fn_error $? "OpenSSL too old (1.0.1 or higher required)." "$LINENO" 5
+	    fi
+	    CPPFLAGS="$O_CPPFLAGS"
+
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+
+else $as_nop
+
+	    if test "$enable_openssl" = "maybe"; then
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted." >&5
+printf "%s\n" "$as_me: WARNING: OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted." >&2;}
+		enable_openssl=no
+	    else
+		as_fn_error $? "OpenSSL development libraries not found." "$LINENO" 5
+	    fi
+
+fi
+
+	LDFLAGS="$O_LDFLAGS"
+    fi
+    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
+	unset PKG_CONFIG_LIBDIRS
+    fi
+fi
+if test "${enable_openssl-no}" != no; then
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
     ac_fn_c_check_func "$LINENO" "X509_STORE_CTX_get0_cert" "ac_cv_func_X509_STORE_CTX_get0_cert"

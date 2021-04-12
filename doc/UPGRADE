@@ -1,6 +1,15 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.9.7:
+
+    Sudo now links with OpenSSL 1.0.1 or higher by default if it
+    is present on the system unless it is explicitly disabled (via
+    --disable-openssl), or unless the sudo log client and server
+    code is disabled (via --disable-log-client and --disable-log-server).
+    As a result, the sudo log server (and the client built into the
+    sudoers plugin) now support TLS connections by default.
+
 o Upgrading from a version prior to 1.9.3:
 
     Due to the addition of the CHROOT and CWD options, it is no
