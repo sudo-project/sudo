@@ -1235,9 +1235,9 @@ and
 .Li [NOTFOUND=return] .
 These will unconditionally terminate the search if the user was either
 found
-.No ( Li [SUCCESS=return] )
+.Pq Li [SUCCESS=return]
 or not found
-.No ( Li [NOTFOUND=return] )
+.Pq Li [NOTFOUND=return]
 in the immediately preceding source.
 Other action statements tokens are not supported, nor is test
 negation with
