@@ -117,6 +117,10 @@ This makes it possible to have all sudo I/O logs on a central server."
 	$name: unstripped-binary-or-object
 	EOF
 	chmod 644 ${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name}
+	# If libssl_dep not passed in, try to figure it out
+	if test -z "$libssl_dep"; then
+	    libssl_dep="`ldd $libexecdir/sudo/sudoers.so 2>&1 | sed -n 's/^[ 	]*libssl\.so\([0-9.]*\).*/libssl\1/p'`"
+	fi
 %endif
 
 %if [rpm]
