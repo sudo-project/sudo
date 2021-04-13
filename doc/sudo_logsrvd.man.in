@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "March 28, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "April 13, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -35,10 +35,18 @@ is a high-performance log server that accepts event and I/O logs from
 It can be used to implement centralized logging of
 \fBsudo\fR
 logs.
-Event log entries may be logged either via
+The server has two modes of operation: local and relay.
+By default,
+\fBsudo_logsrvd\fR
+stores the logs locally but it can also be configured to
+relay them to another server that supports the
+sudo_logsrv.proto(@mansectform@)
+protocol.
+.PP
+When not relaying, event log entries may be logged either via
 syslog(3)
-or to a file.
-I/O Logs created by
+or to a local file.
+I/O Logs stored locally by
 \fBsudo_logsrvd\fR
 can be replayed via the
 sudoreplay(@mansectsu@)
@@ -376,8 +384,8 @@ names used earlier:
 .nf
 .sp
 .RS 6n
-# If set, secure connections with TLS 1.2 or 1.3.
-tls = true
+# Listen on port 30344 for TLS connections to any address.
+listen_address = *:30344(tls)
 
 # Path to the certificate authority bundle file in PEM format.
 tls_cacert = /etc/ssl/sudo/cacert.pem
