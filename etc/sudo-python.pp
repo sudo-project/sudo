@@ -36,6 +36,15 @@
 	odocdir="${docdir}"
 	oexampledir="${exampledir}"
 
+	# docdir and exampledir are installed with "sudo" as the package
+	# name which may not be correct.
+	docdir="`echo \"${docdir}\" | sed 's#/sudo$#/'\"${name}\"'#'`"
+	if test "${exampledir}" = "${odocdir}/examples"; then
+	    exampledir="${docdir}/examples"
+	else
+	    exampledir="`echo \"${exampledir}\" | sed 's#/sudo$#/'\"${name}\"'#'`"
+	fi
+
 	# For RedHat the doc dir is expected to include version and release
 	case "$pp_rpm_distro" in
 	centos*|rhel*|f[0-9]*)
@@ -43,11 +52,6 @@
 		exampledir="${docdir}/examples"
 		;;
 	esac
-
-	# docdir and exampledir are installed with "sudo" as the package
-	# name which may not be correct.
-	docdir="`echo \"${docdir}\" | sed \"s#/sudo#/${name}#g\"`"
-	exampledir="`echo \"${exampledir}\" | sed \"s#/sudo#/${name}#g\"`"
 
 	# Copy docdir and exampledir to new names if needed
 	if test ! -d "${pp_destdir}${docdir}"; then
