@@ -20053,9 +20053,17 @@ done
 
 
 
-case "$host_os" in
-    hpux*)
-	if test X"$ac_cv_func_pread" = X"yes"; then
+
+  for ac_func in pread
+do :
+  ac_fn_c_check_func "$LINENO" "pread" "ac_cv_func_pread"
+if test "x$ac_cv_func_pread" = xyes
+then :
+  printf "%s\n" "#define HAVE_PREAD 1" >>confdefs.h
+
+    # pread(2) on 32-bit HP-UX 11.00 is buggy, use pread64(2) instead.
+    case "$host_os" in
+	hpux*|hiuxmpp*)
 	    O_CPPFLAGS="$CPPFLAGS"
 	    CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
 
@@ -20077,16 +20085,8 @@ fi
 
 done
 	    CPPFLAGS="$O_CPPFLAGS"
-	fi
-	;;
-esac
-
-  for ac_func in pread
-do :
-  ac_fn_c_check_func "$LINENO" "pread" "ac_cv_func_pread"
-if test "x$ac_cv_func_pread" = xyes
-then :
-  printf "%s\n" "#define HAVE_PREAD 1" >>confdefs.h
+	    ;;
+    esac
 
 else $as_nop
 
@@ -26987,7 +26987,7 @@ fi
     found=no
     # On HP-UX, libibmldap has a hidden dependency on libCsup
     case "$host_os" in
-	hpux*) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lCsup" >&5
+	hpux*|hiuxmpp*) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lCsup" >&5
 printf %s "checking for main in -lCsup... " >&6; }
 if test ${ac_cv_lib_Csup_main+y}
 then :
@@ -27782,7 +27782,7 @@ fi
 # so always link against -lpthread on HP-UX if it is available.
 # This check should go after all other libraries tests.
 case "$host_os" in
-    hpux*)
+    hpux*|hiuxmpp*)
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lpthread" >&5
 printf %s "checking for main in -lpthread... " >&6; }
 if test ${ac_cv_lib_pthread_main+y}
@@ -28346,7 +28346,7 @@ fi
 
 else
     case "$host_os" in
-	hpux*)
+	hpux*|hiuxmpp*)
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Bhidden_def" >&5
 printf %s "checking whether C compiler accepts -Bhidden_def... " >&6; }
 if test ${ax_cv_check_cflags___Bhidden_def+y}
@@ -28572,7 +28572,7 @@ printf "%s\n" "$sudo_cv_var_solaris_ld_anon_map" >&6; }
 		LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,-M,\$(shlib_map)"
 	    fi
 	    ;;
-	hpux*)
+	hpux*|hiuxmpp*)
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether ld supports controlling exported symbols" >&5
 printf %s "checking whether ld supports controlling exported symbols... " >&6; }
 if test ${sudo_cv_var_hpux_ld_symbol_export+y}
@@ -31979,7 +31979,7 @@ fi
 
 if test "$with_pam" = "yes"; then
     case $host_os in
-	hpux*)
+	hpux*|hiuxmpp*)
 	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: You may wish to add the following line to /etc/pam.conf" >&5
 printf "%s\n" "$as_me: You may wish to add the following line to /etc/pam.conf" >&6;}

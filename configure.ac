@@ -2689,19 +2689,19 @@ dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval fseeko])
-case "$host_os" in
-    hpux*)
-	if test X"$ac_cv_func_pread" = X"yes"; then
+AC_CHECK_FUNCS([pread], [
+    # pread(2) on 32-bit HP-UX 11.00 is buggy, use pread64(2) instead.
+    case "$host_os" in
+	hpux*|hiuxmpp*)
 	    O_CPPFLAGS="$CPPFLAGS"
 	    CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
 	    AC_CHECK_FUNCS([pread64 pwrite64], [
 		AC_DEFINE([_LARGEFILE64_SOURCE], [1], [Define to 1 to enable 64-bit versions of standard C functions on 32-bit systems.])
 	    ])
 	    CPPFLAGS="$O_CPPFLAGS"
-	fi
-	;;
-esac
-AC_CHECK_FUNCS([pread], [], [
+	    ;;
+    esac
+], [
     AC_LIBOBJ(pread)
     SUDO_APPEND_COMPAT_EXP(sudo_pread)
 ])
@@ -4258,7 +4258,7 @@ if test ${with_ldap-'no'} != "no"; then
     found=no
     # On HP-UX, libibmldap has a hidden dependency on libCsup
     case "$host_os" in
-	hpux*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
+	hpux*|hiuxmpp*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
     esac
     AC_SEARCH_LIBS([ldap_init], ["ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}]", [
 	test "${ac_cv_search_ldap_init}" != "none required" && LDAP_LIBS="${ac_cv_search_ldap_init}"
@@ -4422,7 +4422,7 @@ fi
 # so always link against -lpthread on HP-UX if it is available.
 # This check should go after all other libraries tests.
 case "$host_os" in
-    hpux*)
+    hpux*|hiuxmpp*)
 	AC_CHECK_LIB(pthread, main, [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
 	AC_DEFINE(_REENTRANT)
 	;;
@@ -4518,7 +4518,7 @@ if test -n "$GCC"; then
     ])
 else
     case "$host_os" in
-	hpux*)
+	hpux*|hiuxmpp*)
 	    AX_CHECK_COMPILE_FLAG([-Bhidden_def], [
 		# HP-UX cc may not allow __declspec(dllexport) to be
 		# used in conjunction with #pragma HP_DEFINED_EXTERNAL
@@ -4614,7 +4614,7 @@ EOF
 		LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,-M,\$(shlib_map)"
 	    fi
 	    ;;
-	hpux*)
+	hpux*|hiuxmpp*)
 	    AC_CACHE_CHECK([whether ld supports controlling exported symbols],
 		[sudo_cv_var_hpux_ld_symbol_export],
 		[
@@ -4999,7 +4999,7 @@ dnl Spew any text the user needs to know about
 dnl
 if test "$with_pam" = "yes"; then
     case $host_os in
-	hpux*)
+	hpux*|hiuxmpp*)
 	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
 		AC_MSG_NOTICE([You may wish to add the following line to /etc/pam.conf])
 		AC_MSG_NOTICE([sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login])
