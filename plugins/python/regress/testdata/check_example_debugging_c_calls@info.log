@@ -1,7 +1,7 @@
 __init__ @ SRC_DIR/example_debugging.py:58 calls C function:
-sudo.debug was called with arguments: (<DEBUG.ERROR: 2>, 'My demo purpose plugin shows this ERROR level debug message') 
+sudo.debug was called with arguments: (DEBUG.ERROR, 'My demo purpose plugin shows this ERROR level debug message') 
 __init__ @ SRC_DIR/example_debugging.py:63 calls C function:
-sudo.debug was called with arguments: (<DEBUG.INFO: 6>, 'My demo purpose plugin shows this INFO level debug message') 
+sudo.debug was called with arguments: (DEBUG.INFO, 'My demo purpose plugin shows this INFO level debug message') 
 handle @ logging/__init__.py calls C function:
 LogHandler.emit was called
 handle @ logging/__init__.py calls C function:
