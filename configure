@@ -19594,7 +19594,7 @@ if test ${am_cv_python_version+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  am_cv_python_version=`$PYTHON -c "import sys; sys.stdout.write(sys.version[:3])"`
+  am_cv_python_version=`$PYTHON -c "import sys; print('%u.%u' % sys.version_info[:2])"`
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_version" >&5
 printf "%s\n" "$am_cv_python_version" >&6; }
