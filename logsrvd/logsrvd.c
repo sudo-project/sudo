@@ -638,6 +638,11 @@ handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 	debug_return_bool(false);
     }
 
+    if (closure->relay_closure != NULL) {
+	/* Forward ChangeWindowSize to connected relay. */
+	debug_return_bool(relay_winsize(msg, closure));
+    }
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize",
 	__func__);
 
@@ -668,6 +673,11 @@ handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
 	    "not logging I/O");
 	closure->errstr = _("protocol error");
 	debug_return_bool(false);
+    }
+
+    if (closure->relay_closure != NULL) {
+	/* Forward CommandSuspend to connected relay. */
+	debug_return_bool(relay_suspend(msg, closure));
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend",

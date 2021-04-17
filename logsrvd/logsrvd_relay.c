@@ -1202,6 +1202,68 @@ relay_alert(AlertMessage *msg, struct connection_closure *closure)
 }
 
 /*
+ * Relay a CommandSuspend from the client to the relay server.
+ */
+bool
+relay_suspend(CommandSuspend *msg, struct connection_closure *closure)
+{
+    struct relay_closure *relay_closure = closure->relay_closure;
+    struct sudo_event_base *evbase = closure->evbase;
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    bool ret;
+    debug_decl(relay_suspend, SUDO_DEBUG_UTIL);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: relaying CommandSuspend from %s to %s (%s)", __func__,
+	closure->ipaddr, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
+
+    client_msg.u.suspend_event = msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_SUSPEND_EVENT;
+    ret = fmt_client_message(closure, &client_msg);
+    if (ret) {
+	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    ret = false;
+	}
+    }
+
+    debug_return_bool(ret);
+}
+
+/*
+ * Relay a ChangeWindowSize from the client to the relay server.
+ */
+bool
+relay_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
+{
+    struct relay_closure *relay_closure = closure->relay_closure;
+    struct sudo_event_base *evbase = closure->evbase;
+    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
+    bool ret;
+    debug_decl(relay_winsize, SUDO_DEBUG_UTIL);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: relaying ChangeWindowSize from %s to %s (%s)", __func__,
+	closure->ipaddr, relay_closure->relay_name.name,
+	relay_closure->relay_name.ipaddr);
+
+    client_msg.u.winsize_event = msg;
+    client_msg.type_case = CLIENT_MESSAGE__TYPE_WINSIZE_EVENT;
+    ret = fmt_client_message(closure, &client_msg);
+    if (ret) {
+	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    ret = false;
+	}
+    }
+
+    debug_return_bool(ret);
+}
+
+/*
  * Relay an IoBuffer from the client to the relay server.
  */
 bool

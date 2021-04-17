@@ -193,6 +193,8 @@ bool relay_exit(ExitMessage *msg, struct connection_closure *closure);
 bool relay_restart(RestartMessage *msg, struct connection_closure *closure);
 bool relay_alert(AlertMessage *msg, struct connection_closure *closure);
 bool relay_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure);
+bool relay_suspend(CommandSuspend *msg, struct connection_closure *closure);
+bool relay_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 bool relay_shutdown(struct connection_closure *closure);
 
 #endif /* SUDO_LOGSRVD_H */
