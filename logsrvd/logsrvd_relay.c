@@ -148,17 +148,11 @@ static bool
 fmt_client_message(struct connection_closure *closure, ClientMessage *msg)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
-    struct connection_buffer *buf;
+    struct connection_buffer *buf = NULL;
     uint32_t msg_len;
     bool ret = false;
     size_t len;
     debug_decl(fmt_client_message, SUDO_DEBUG_UTIL);
-
-    if ((buf = get_free_buf(closure)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to allocate connection_buffer");
-        goto done;
-    }
 
     len = client_message__get_packed_size(msg);
     if (len > MESSAGE_SIZE_MAX) {
@@ -171,20 +165,14 @@ fmt_client_message(struct connection_closure *closure, ClientMessage *msg)
     msg_len = htonl((uint32_t)len);
     len += sizeof(msg_len);
 
-    /* Resize buffer as needed. */
-    if (len > buf->size) {
-	free(buf->data);
-	buf->size = sudo_pow2_roundup(len);
-	if ((buf->data = malloc(buf->size)) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to malloc %u", buf->size);
-	    buf->size = 0;
-	    goto done;
-	}
-    }
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"size + client message %zu bytes", len);
 
+    if ((buf = get_free_buf(len, closure)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate connection_buffer");
+        goto done;
+    }
     memcpy(buf->data, &msg_len, sizeof(msg_len));
     client_message__pack(msg, buf->data + sizeof(msg_len));
     buf->len = len;

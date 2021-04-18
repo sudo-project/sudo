@@ -142,7 +142,7 @@ connection_closure_free(struct connection_closure *closure)
 }
 
 struct connection_buffer *
-get_free_buf(struct connection_closure *closure)
+get_free_buf(size_t len, struct connection_closure *closure)
 {
     struct connection_buffer *buf;
     debug_decl(get_free_buf, SUDO_DEBUG_UTIL);
@@ -153,23 +153,28 @@ get_free_buf(struct connection_closure *closure)
     else
         buf = calloc(1, sizeof(*buf));
 
+    if (len > buf->size) {
+	free(buf->data);
+	buf->size = sudo_pow2_roundup(len);
+	if ((buf->data = malloc(buf->size)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to malloc %u", buf->size);
+	    free(buf);
+	    buf = NULL;
+	}
+    }
+
     debug_return_ptr(buf);
 }
 
 bool
 fmt_server_message(struct connection_closure *closure, ServerMessage *msg)
 {
-    struct connection_buffer *buf;
+    struct connection_buffer *buf = NULL;
     uint32_t msg_len;
     bool ret = false;
     size_t len;
     debug_decl(fmt_server_message, SUDO_DEBUG_UTIL);
-
-    if ((buf = get_free_buf(closure)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to allocate connection_buffer");
-        goto done;
-    }
 
     len = server_message__get_packed_size(msg);
     if (len > MESSAGE_SIZE_MAX) {
@@ -182,20 +187,14 @@ fmt_server_message(struct connection_closure *closure, ServerMessage *msg)
     msg_len = htonl((uint32_t)len);
     len += sizeof(msg_len);
 
-    /* Resize buffer as needed. */
-    if (len > buf->size) {
-	free(buf->data);
-	buf->size = sudo_pow2_roundup(len);
-	if ((buf->data = malloc(buf->size)) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to malloc %u", buf->size);
-	    buf->size = 0;
-	    goto done;
-	}
-    }
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"size + server message %zu bytes", len);
 
+    if ((buf = get_free_buf(len, closure)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate connection_buffer");
+        goto done;
+    }
     memcpy(buf->data, &msg_len, sizeof(msg_len));
     server_message__pack(msg, buf->data + sizeof(msg_len));
     buf->len = len;
