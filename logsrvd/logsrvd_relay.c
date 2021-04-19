@@ -141,6 +141,55 @@ bad:
 }
 
 /*
+ * Allocate a new buffer, copy buf to it and insert on the write queue.
+ * On success the relay write event is enabled.
+ * The length parameter does not include space for the message's wire size.
+ */
+static bool
+relay_enqueue_write(uint8_t *msg, size_t len, struct connection_closure *closure)
+{
+    struct relay_closure *relay_closure = closure->relay_closure;
+    struct connection_buffer *buf;
+    uint32_t msg_len;
+    bool ret = false;
+    debug_decl(relay_enqueue_write, SUDO_DEBUG_UTIL);
+
+    /* Wire message size is used for length encoding, precedes message. */
+    msg_len = htonl((uint32_t)len);
+    len += sizeof(msg_len);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"size + client message %zu bytes", len);
+
+    if ((buf = get_free_buf(len, closure)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate connection_buffer");
+	goto done;
+    }
+    memcpy(buf->data, &msg_len, sizeof(msg_len));
+    memcpy(buf->data + sizeof(msg_len), msg, msg_len);
+    buf->len = len;
+
+    if (sudo_ev_add(closure->evbase, relay_closure->write_ev, NULL, false) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to add server write event");
+	goto done;
+    }
+
+    TAILQ_INSERT_TAIL(&relay_closure->write_bufs, buf, entries);
+    buf = NULL;
+
+    ret = true;
+
+done:
+    if (buf != NULL) {
+	free(buf->data);
+	free(buf);
+    }
+    debug_return_bool(ret);
+}
+
+/*
  * Format a ClientMessage and store the wire format message in buf.
  * Returns true on success, false on failure.
  */
@@ -1012,11 +1061,10 @@ start_relay(int sock, struct connection_closure *closure)
  * Relay an AcceptMessage from the client to the relay server.
  */
 bool
-relay_accept(AcceptMessage *msg, struct connection_closure *closure)
+relay_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
-    struct sudo_event_base *evbase = closure->evbase;
-    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     bool ret;
     debug_decl(relay_accept, SUDO_DEBUG_UTIL);
 
@@ -1025,17 +1073,7 @@ relay_accept(AcceptMessage *msg, struct connection_closure *closure)
 	closure->ipaddr, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
-    client_msg.u.accept_msg = msg;
-    client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
-    ret = fmt_client_message(closure, &client_msg);
-    if (ret) {
-	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    ret = false;
-	}
-    }
-
+    ret = relay_enqueue_write(buf, len, closure);
     if (ret) {
 	/* success */
 	if (msg->expect_iobufs)
@@ -1050,11 +1088,10 @@ relay_accept(AcceptMessage *msg, struct connection_closure *closure)
  * Relay a RejectMessage from the client to the relay server.
  */
 bool
-relay_reject(RejectMessage *msg, struct connection_closure *closure)
+relay_reject(RejectMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
-    struct sudo_event_base *evbase = closure->evbase;
-    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     bool ret;
     debug_decl(relay_reject, SUDO_DEBUG_UTIL);
 
@@ -1063,17 +1100,7 @@ relay_reject(RejectMessage *msg, struct connection_closure *closure)
 	closure->ipaddr, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
-    client_msg.u.reject_msg = msg;
-    client_msg.type_case = CLIENT_MESSAGE__TYPE_REJECT_MSG;
-    ret = fmt_client_message(closure, &client_msg);
-    if (ret) {
-	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    ret = false;
-	}
-    }
-
+    ret = relay_enqueue_write(buf, len, closure);
     closure->state = FINISHED;
 
     debug_return_bool(ret);
@@ -1083,11 +1110,10 @@ relay_reject(RejectMessage *msg, struct connection_closure *closure)
  * Relay an ExitMessage from the client to the relay server.
  */
 bool
-relay_exit(ExitMessage *msg, struct connection_closure *closure)
+relay_exit(ExitMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
-    struct sudo_event_base *evbase = closure->evbase;
-    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     bool ret;
     debug_decl(relay_exit, SUDO_DEBUG_UTIL);
 
@@ -1096,17 +1122,7 @@ relay_exit(ExitMessage *msg, struct connection_closure *closure)
 	closure->ipaddr, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
-    client_msg.u.exit_msg = msg;
-    client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
-    ret = fmt_client_message(closure, &client_msg);
-    if (ret) {
-	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    ret = false;
-	}
-    }
-
+    ret = relay_enqueue_write(buf, len, closure);
     if (ret) {
 	/* Command exited, if I/O logging wait for commit point. */
 	closure->state = closure->log_io ? EXITED : FINISHED;
@@ -1117,9 +1133,11 @@ relay_exit(ExitMessage *msg, struct connection_closure *closure)
 
 /*
  * Relay a RestartMessage from the client to the relay server.
+ * We must rebuild the packed message because the log_id is modified.
  */
 bool
-relay_restart(RestartMessage *msg, struct connection_closure *closure)
+relay_restart(RestartMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
     struct sudo_event_base *evbase = closure->evbase;
@@ -1139,8 +1157,10 @@ relay_restart(RestartMessage *msg, struct connection_closure *closure)
      * the client.  Perform the reverse operation before passing the
      * log ID to the relay host.
      */
-    if ((cp = strchr(restart_msg.log_id, '/')) != NULL)
-	restart_msg.log_id = cp + 1;
+    if ((cp = strchr(restart_msg.log_id, '/')) != NULL) {
+	if (cp != restart_msg.log_id)
+	    restart_msg.log_id = cp + 1;
+    }
 
     client_msg.u.restart_msg = &restart_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_RESTART_MSG;
@@ -1162,11 +1182,10 @@ relay_restart(RestartMessage *msg, struct connection_closure *closure)
  * Relay an AlertMessage from the client to the relay server.
  */
 bool
-relay_alert(AlertMessage *msg, struct connection_closure *closure)
+relay_alert(AlertMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
-    struct sudo_event_base *evbase = closure->evbase;
-    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     bool ret;
     debug_decl(relay_alert, SUDO_DEBUG_UTIL);
 
@@ -1175,16 +1194,7 @@ relay_alert(AlertMessage *msg, struct connection_closure *closure)
 	closure->ipaddr, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
-    client_msg.u.alert_msg = msg;
-    client_msg.type_case = CLIENT_MESSAGE__TYPE_ALERT_MSG;
-    ret = fmt_client_message(closure, &client_msg);
-    if (ret) {
-	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    ret = false;
-	}
-    }
+    ret = relay_enqueue_write(buf, len, closure);
 
     debug_return_bool(ret);
 }
@@ -1193,11 +1203,10 @@ relay_alert(AlertMessage *msg, struct connection_closure *closure)
  * Relay a CommandSuspend from the client to the relay server.
  */
 bool
-relay_suspend(CommandSuspend *msg, struct connection_closure *closure)
+relay_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
-    struct sudo_event_base *evbase = closure->evbase;
-    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     bool ret;
     debug_decl(relay_suspend, SUDO_DEBUG_UTIL);
 
@@ -1206,16 +1215,7 @@ relay_suspend(CommandSuspend *msg, struct connection_closure *closure)
 	closure->ipaddr, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
-    client_msg.u.suspend_event = msg;
-    client_msg.type_case = CLIENT_MESSAGE__TYPE_SUSPEND_EVENT;
-    ret = fmt_client_message(closure, &client_msg);
-    if (ret) {
-	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    ret = false;
-	}
-    }
+    ret = relay_enqueue_write(buf, len, closure);
 
     debug_return_bool(ret);
 }
@@ -1224,11 +1224,10 @@ relay_suspend(CommandSuspend *msg, struct connection_closure *closure)
  * Relay a ChangeWindowSize from the client to the relay server.
  */
 bool
-relay_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
+relay_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
-    struct sudo_event_base *evbase = closure->evbase;
-    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     bool ret;
     debug_decl(relay_winsize, SUDO_DEBUG_UTIL);
 
@@ -1237,16 +1236,7 @@ relay_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 	closure->ipaddr, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
-    client_msg.u.winsize_event = msg;
-    client_msg.type_case = CLIENT_MESSAGE__TYPE_WINSIZE_EVENT;
-    ret = fmt_client_message(closure, &client_msg);
-    if (ret) {
-	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    ret = false;
-	}
-    }
+    ret = relay_enqueue_write(buf, len, closure);
 
     debug_return_bool(ret);
 }
@@ -1255,11 +1245,10 @@ relay_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
  * Relay an IoBuffer from the client to the relay server.
  */
 bool
-relay_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure)
+relay_iobuf(IoBuffer *iobuf, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
-    struct sudo_event_base *evbase = closure->evbase;
-    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     bool ret;
     debug_decl(relay_iobuf, SUDO_DEBUG_UTIL);
 
@@ -1268,40 +1257,7 @@ relay_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure)
 	closure->ipaddr, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
-    switch (iofd) {
-    case IOFD_TTYIN:
-	client_msg.type_case = CLIENT_MESSAGE__TYPE_TTYIN_BUF;
-	client_msg.u.ttyin_buf = iobuf;
-	break;
-    case IOFD_TTYOUT:
-	client_msg.type_case = CLIENT_MESSAGE__TYPE_TTYOUT_BUF;
-	client_msg.u.ttyout_buf = iobuf;
-	break;
-    case IOFD_STDIN:
-	client_msg.type_case = CLIENT_MESSAGE__TYPE_STDIN_BUF;
-	client_msg.u.stdin_buf = iobuf;
-	break;
-    case IOFD_STDOUT:
-	client_msg.type_case = CLIENT_MESSAGE__TYPE_STDOUT_BUF;
-	client_msg.u.stdout_buf = iobuf;
-	break;
-    case IOFD_STDERR:
-	client_msg.type_case = CLIENT_MESSAGE__TYPE_STDERR_BUF;
-	client_msg.u.stderr_buf = iobuf;
-	break;
-    default:
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unexpected iofd value %d", iofd);
-	debug_return_bool(false);
-    }
-    ret = fmt_client_message(closure, &client_msg);
-    if (ret) {
-	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    ret = false;
-	}
-    }
+    ret = relay_enqueue_write(buf, len, closure);
 
     debug_return_bool(ret);
 }

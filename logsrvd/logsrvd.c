@@ -310,7 +310,8 @@ bad:
  * Parse an AcceptMessage
  */
 static bool
-handle_accept(AcceptMessage *msg, struct connection_closure *closure)
+handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
     debug_decl(handle_accept, SUDO_DEBUG_UTIL);
@@ -334,7 +335,7 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
 
     if (closure->relay_closure != NULL) {
 	/* Forward AcceptMessage to connected relay. */
-	debug_return_bool(relay_accept(msg, closure));
+	debug_return_bool(relay_accept(msg, buf, len, closure));
     }
 
     closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
@@ -378,7 +379,8 @@ handle_accept(AcceptMessage *msg, struct connection_closure *closure)
  * Parse a RejectMessage
  */
 static bool
-handle_reject(RejectMessage *msg, struct connection_closure *closure)
+handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
     debug_decl(handle_reject, SUDO_DEBUG_UTIL);
@@ -402,7 +404,7 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 
     if (closure->relay_closure != NULL) {
 	/* Forward RejectMessage to connected relay. */
-	debug_return_bool(relay_reject(msg, closure));
+	debug_return_bool(relay_reject(msg, buf, len, closure));
     }
 
     closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
@@ -423,7 +425,8 @@ handle_reject(RejectMessage *msg, struct connection_closure *closure)
 }
 
 static bool
-handle_exit(ExitMessage *msg, struct connection_closure *closure)
+handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct timespec tv = { 0, 0 };
     mode_t mode;
@@ -440,7 +443,7 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 
     if (closure->relay_closure != NULL) {
 	/* Forward ExitMessage to connected relay. */
-	debug_return_bool(relay_exit(msg, closure));
+	debug_return_bool(relay_exit(msg, buf, len, closure));
     }
 
     /* Sudo I/O logs don't store this info. */
@@ -485,7 +488,8 @@ handle_exit(ExitMessage *msg, struct connection_closure *closure)
 }
 
 static bool
-handle_restart(RestartMessage *msg, struct connection_closure *closure)
+handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     debug_decl(handle_restart, SUDO_DEBUG_UTIL);
 
@@ -500,7 +504,7 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 
     if (closure->relay_closure != NULL) {
 	/* Forward RestartMessage to connected relay. */
-	debug_return_bool(relay_restart(msg, closure));
+	debug_return_bool(relay_restart(msg, buf, len, closure));
     }
 
     if (!iolog_restart(msg, closure)) {
@@ -524,7 +528,8 @@ handle_restart(RestartMessage *msg, struct connection_closure *closure)
 }
 
 static bool
-handle_alert(AlertMessage *msg, struct connection_closure *closure)
+handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     struct timespec alert_time;
     debug_decl(handle_alert, SUDO_DEBUG_UTIL);
@@ -541,7 +546,7 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 
     if (closure->relay_closure != NULL) {
 	/* Forward AlertMessage to connected relay. */
-	debug_return_bool(relay_alert(msg, closure));
+	debug_return_bool(relay_alert(msg, buf, len, closure));
     }
 
     if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
@@ -564,7 +569,8 @@ handle_alert(AlertMessage *msg, struct connection_closure *closure)
 }
 
 static bool
-handle_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure)
+handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     debug_decl(handle_iobuf, SUDO_DEBUG_UTIL);
 
@@ -585,7 +591,7 @@ handle_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure)
 
     if (closure->relay_closure != NULL) {
 	/* Forward IoBuffer to connected relay. */
-	debug_return_bool(relay_iobuf(iofd, iobuf, closure));
+	debug_return_bool(relay_iobuf(iobuf, buf, len, closure));
     }
 
     /* Store IoBuffer in log. */
@@ -620,7 +626,8 @@ handle_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure)
 }
 
 static bool
-handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
+handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     debug_decl(handle_winsize, SUDO_DEBUG_UTIL);
 
@@ -639,7 +646,7 @@ handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 
     if (closure->relay_closure != NULL) {
 	/* Forward ChangeWindowSize to connected relay. */
-	debug_return_bool(relay_winsize(msg, closure));
+	debug_return_bool(relay_winsize(msg, buf, len, closure));
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize",
@@ -657,7 +664,8 @@ handle_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
 }
 
 static bool
-handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
+handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     debug_decl(handle_suspend, SUDO_DEBUG_UTIL);
 
@@ -676,7 +684,7 @@ handle_suspend(CommandSuspend *msg, struct connection_closure *closure)
 
     if (closure->relay_closure != NULL) {
 	/* Forward CommandSuspend to connected relay. */
-	debug_return_bool(relay_suspend(msg, closure));
+	debug_return_bool(relay_suspend(msg, buf, len, closure));
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend",
@@ -731,40 +739,40 @@ handle_client_message(uint8_t *buf, size_t len,
 
     switch (msg->type_case) {
     case CLIENT_MESSAGE__TYPE_ACCEPT_MSG:
-	ret = handle_accept(msg->u.accept_msg, closure);
+	ret = handle_accept(msg->u.accept_msg, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_REJECT_MSG:
-	ret = handle_reject(msg->u.reject_msg, closure);
+	ret = handle_reject(msg->u.reject_msg, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_EXIT_MSG:
-	ret = handle_exit(msg->u.exit_msg, closure);
+	ret = handle_exit(msg->u.exit_msg, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_RESTART_MSG:
-	ret = handle_restart(msg->u.restart_msg, closure);
+	ret = handle_restart(msg->u.restart_msg, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_ALERT_MSG:
-	ret = handle_alert(msg->u.alert_msg, closure);
+	ret = handle_alert(msg->u.alert_msg, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_TTYIN_BUF:
-	ret = handle_iobuf(IOFD_TTYIN, msg->u.ttyin_buf, closure);
+	ret = handle_iobuf(IOFD_TTYIN, msg->u.ttyin_buf, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_TTYOUT_BUF:
-	ret = handle_iobuf(IOFD_TTYOUT, msg->u.ttyout_buf, closure);
+	ret = handle_iobuf(IOFD_TTYOUT, msg->u.ttyout_buf, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDIN_BUF:
-	ret = handle_iobuf(IOFD_STDIN, msg->u.stdin_buf, closure);
+	ret = handle_iobuf(IOFD_STDIN, msg->u.stdin_buf, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDOUT_BUF:
-	ret = handle_iobuf(IOFD_STDOUT, msg->u.stdout_buf, closure);
+	ret = handle_iobuf(IOFD_STDOUT, msg->u.stdout_buf, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_STDERR_BUF:
-	ret = handle_iobuf(IOFD_STDERR, msg->u.stderr_buf, closure);
+	ret = handle_iobuf(IOFD_STDERR, msg->u.stderr_buf, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_WINSIZE_EVENT:
-	ret = handle_winsize(msg->u.winsize_event, closure);
+	ret = handle_winsize(msg->u.winsize_event, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_SUSPEND_EVENT:
-	ret = handle_suspend(msg->u.suspend_event, closure);
+	ret = handle_suspend(msg->u.suspend_event, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_HELLO_MSG:
 	ret = handle_client_hello(msg->u.hello_msg, closure);

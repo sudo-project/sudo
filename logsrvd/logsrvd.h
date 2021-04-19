@@ -187,14 +187,14 @@ void logsrvd_conf_cleanup(void);
 /* logsrvd_relay.c */
 void relay_closure_free(struct relay_closure *relay_closure);
 bool connect_relay(struct connection_closure *closure);
-bool relay_accept(AcceptMessage *msg, struct connection_closure *closure);
-bool relay_reject(RejectMessage *msg, struct connection_closure *closure);
-bool relay_exit(ExitMessage *msg, struct connection_closure *closure);
-bool relay_restart(RestartMessage *msg, struct connection_closure *closure);
-bool relay_alert(AlertMessage *msg, struct connection_closure *closure);
-bool relay_iobuf(int iofd, IoBuffer *iobuf, struct connection_closure *closure);
-bool relay_suspend(CommandSuspend *msg, struct connection_closure *closure);
-bool relay_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 bool relay_shutdown(struct connection_closure *closure);
+bool relay_accept(AcceptMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool relay_reject(RejectMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool relay_exit(ExitMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool relay_restart(RestartMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool relay_alert(AlertMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool relay_iobuf(IoBuffer *iobuf, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool relay_suspend(CommandSuspend *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool relay_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
 
 #endif /* SUDO_LOGSRVD_H */
