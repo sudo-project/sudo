@@ -146,7 +146,8 @@ bad:
  * The length parameter does not include space for the message's wire size.
  */
 static bool
-relay_enqueue_write(uint8_t *msg, size_t len, struct connection_closure *closure)
+relay_enqueue_write(uint8_t *msgbuf, size_t len,
+    struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
     struct connection_buffer *buf;
@@ -156,19 +157,18 @@ relay_enqueue_write(uint8_t *msg, size_t len, struct connection_closure *closure
 
     /* Wire message size is used for length encoding, precedes message. */
     msg_len = htonl((uint32_t)len);
-    len += sizeof(msg_len);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"size + client message %zu bytes", len);
 
-    if ((buf = get_free_buf(len, closure)) == NULL) {
+    if ((buf = get_free_buf(sizeof(msg_len) + len, closure)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate connection_buffer");
 	goto done;
     }
     memcpy(buf->data, &msg_len, sizeof(msg_len));
-    memcpy(buf->data + sizeof(msg_len), msg, msg_len);
-    buf->len = len;
+    memcpy(buf->data + sizeof(msg_len), msgbuf, len);
+    buf->len = sizeof(msg_len) + len;
 
     if (sudo_ev_add(closure->evbase, relay_closure->write_ev, NULL, false) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
