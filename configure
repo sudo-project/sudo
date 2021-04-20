@@ -20061,33 +20061,6 @@ if test "x$ac_cv_func_pread" = xyes
 then :
   printf "%s\n" "#define HAVE_PREAD 1" >>confdefs.h
 
-    # pread(2) on 32-bit HP-UX 11.00 is buggy, use pread64(2) instead.
-    case "$host_os" in
-	hpux*|hiuxmpp*)
-	    O_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
-
-  for ac_func in pread64 pwrite64
-do :
-  as_ac_var=`printf "%s\n" "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"
-then :
-  cat >>confdefs.h <<_ACEOF
-#define `printf "%s\n" "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-
-printf "%s\n" "#define _LARGEFILE64_SOURCE 1" >>confdefs.h
-
-
-fi
-
-done
-	    CPPFLAGS="$O_CPPFLAGS"
-	    ;;
-    esac
-
 else $as_nop
 
     case " $LIBOBJS " in

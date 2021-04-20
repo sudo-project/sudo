@@ -2689,19 +2689,7 @@ dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval fseeko])
-AC_CHECK_FUNCS([pread], [
-    # pread(2) on 32-bit HP-UX 11.00 is buggy, use pread64(2) instead.
-    case "$host_os" in
-	hpux*|hiuxmpp*)
-	    O_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
-	    AC_CHECK_FUNCS([pread64 pwrite64], [
-		AC_DEFINE([_LARGEFILE64_SOURCE], [1], [Define to 1 to enable 64-bit versions of standard C functions on 32-bit systems.])
-	    ])
-	    CPPFLAGS="$O_CPPFLAGS"
-	    ;;
-    esac
-], [
+AC_CHECK_FUNCS([pread], [], [
     AC_LIBOBJ(pread)
     SUDO_APPEND_COMPAT_EXP(sudo_pread)
 ])
