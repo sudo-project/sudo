@@ -119,7 +119,9 @@ static struct logsrvd_config {
         struct address_list_container relays;
         struct timespec connect_timeout;
         struct timespec timeout;
+	char *relay_dir;
         bool tcp_keepalive;
+	bool store_first;
 #if defined(HAVE_OPENSSL)
 	char *tls_key_path;
 	char *tls_cert_path;
@@ -228,6 +230,18 @@ struct server_address_list *
 logsrvd_conf_relay_address(void)
 {
     return &logsrvd_config->relay.relays.addrs;
+}
+
+const char *
+logsrvd_conf_relay_dir(void)
+{
+    return logsrvd_config->relay.relay_dir;
+}
+
+bool
+logsrvd_conf_relay_store_first(void)
+{
+    return logsrvd_config->relay.store_first;
 }
 
 bool
@@ -693,6 +707,36 @@ cb_relay_connect_timeout(struct logsrvd_config *config, const char *str, size_t 
 }
 
 static bool
+cb_relay_dir(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    char *copy = NULL;
+    debug_decl(cb_relay_dir, SUDO_DEBUG_UTIL);
+
+    if ((copy = strdup(str)) == NULL) {
+	sudo_warn(NULL);
+	debug_return_bool(false);
+    }
+
+    free(config->relay.relay_dir);
+    config->relay.relay_dir = copy;
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_relay_store_first(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    int val;
+    debug_decl(cb_relay_store_first, SUDO_DEBUG_UTIL);
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->relay.store_first = val;
+    debug_return_bool(true);
+}
+
+static bool
 cb_relay_keepalive(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int val;
@@ -906,6 +950,8 @@ static struct logsrvd_config_entry relay_conf_entries[] = {
     { "relay_host", cb_relay_host },
     { "timeout", cb_relay_timeout },
     { "connect_timeout", cb_relay_connect_timeout },
+    { "relay_dir", cb_relay_dir },
+    { "store_first", cb_relay_store_first },
     { "tcp_keepalive", cb_relay_keepalive },
 #if defined(HAVE_OPENSSL)
     { "tls_key", cb_tls_key, offsetof(struct logsrvd_config, relay.tls_key_path) },
@@ -1133,6 +1179,7 @@ logsrvd_conf_free(struct logsrvd_config *config)
 
     /* struct logsrvd_config_relay */
     address_list_delref(&config->relay.relays.addrs);
+    free(config->relay.relay_dir);
 #if defined(HAVE_OPENSSL)
     free(config->relay.tls_key_path);
     free(config->relay.tls_cert_path);
@@ -1178,6 +1225,8 @@ logsrvd_conf_alloc(void)
     config->relay.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->relay.connect_timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->relay.tcp_keepalive = true;
+    if (!cb_relay_dir(config, _PATH_SUDO_RELAY_DIR, 0))
+	goto bad;
 #if defined(HAVE_OPENSSL)
     config->relay.tls_verify = -1;
     config->relay.tls_check_peer = -1;

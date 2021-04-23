@@ -38,7 +38,7 @@ By default,
 .Nm
 stores the logs locally but it can also be configured to
 relay them to another server that supports the
-.Xr sudo_logsrv.proto 5
+.Xr sudo_logsrv.proto @mansectform@
 protocol.
 .Pp
 When not relaying, event log entries may be logged either via

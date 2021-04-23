@@ -132,6 +132,7 @@ dnl
 AC_SUBST([iolog_dir])dnl real initial value from SUDO_IO_LOGDIR
 AC_SUBST([log_dir])dnl real initial value from SUDO_LOGDIR
 AC_SUBST([logpath])dnl real initial value from SUDO_LOGFILE
+AC_SUBST([relay_dir])dnl real initial value from SUDO_RELAY_DIR
 AC_SUBST([rundir])dnl real initial value from SUDO_RUNDIR
 AC_SUBST([vardir])dnl real initial value from SUDO_VARDIR
 AC_SUBST([timeout])
@@ -177,6 +178,7 @@ AC_SUBST([plugindir])
 iolog_dir=/var/log/sudo-io
 log_dir=/var/log
 logpath=/var/log/sudo.log
+relay_dir=/var/log/logsrvd-relay
 rundir=/var/run/sudo
 vardir=/var/adm/sudo
 timeout=5
@@ -907,6 +909,13 @@ AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory to store
 [case $with_iologdir in
     yes)    ;;
     no)     AC_MSG_ERROR(["--without-iologdir not supported."])
+	    ;;
+esac])
+
+AC_ARG_WITH(relaydir, [AS_HELP_STRING([--with-relaydir=DIR], [directory to store sudo_logsrvd relay temporary files in])],
+[case $with_relaydir in
+    yes)    ;;
+    no)     AC_MSG_ERROR(["--without-relaydir not supported."])
 	    ;;
 esac])
 
@@ -4424,6 +4433,7 @@ if test "$utmp_style" = "LEGACY"; then
 fi
 SUDO_LOGDIR
 SUDO_LOGFILE
+SUDO_RELAY_DIR
 SUDO_RUNDIR
 SUDO_VARDIR
 SUDO_IO_LOGDIR

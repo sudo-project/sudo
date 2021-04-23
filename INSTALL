@@ -149,6 +149,12 @@ Directory and file names:
 	    /var/db/sudo, /var/lib/sudo, /var/adm/sudo, /usr/adm/sudo
 	This directory should *not* be cleared when the system boots.
 
+  --with-relaydir=DIR
+	The directory to be used for sudo_logsrvd relay temporary files.
+	When sudo_logsrvd is configured as a store-and-forward relay,
+	the journaled data is written to this directory before it is
+	forwarded to a relay server.
+
   --with-tzdir=DIR
         The directory to the system's time zone data files.  This
         is only used when sanitizing the TZ environment variable

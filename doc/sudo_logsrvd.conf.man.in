@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "April 9, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "April 14, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -285,6 +285,14 @@ will wait for the relay to respond.
 A value of 0 will disable the timeout.
 The default value is 30.
 .TP 10n
+relay_dir = path
+The directory in which log messages are temporarily stored before they
+are sent to the relay host.
+Messages are stored in the wire format used by
+sudo_logsrv.proto(@mansectform@)
+The default value is
+\fI@relay_dir@\fR.
+.TP 10n
 relay_host = host[:port][(tls)]
 The relay host name or IP address, optional port to connect to and
 an optional Transport Layer Security (TLS) flag in parentheses.
@@ -309,6 +317,16 @@ protocol.
 If multiple
 \fIrelay_host\fR
 lines are specified, the first available relay host will be used.
+.TP 10n
+store_first = boolean
+If true,
+\fBsudo_logsrvd\fR
+will store logs locally before relaying them.
+Once the log is complete, a connection to the relay host is opened
+and the log is relayed.
+If the network connection is interrupted before the log can be fully
+transfered, it will be retransmitted later.
+The default is to relay logs in real-time.
 .TP 10n
 tcp_keepalive = boolean
 If true,

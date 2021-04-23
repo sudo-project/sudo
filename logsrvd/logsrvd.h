@@ -167,6 +167,8 @@ const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 struct server_address_list *logsrvd_conf_server_listen_address(void);
 struct server_address_list *logsrvd_conf_relay_address(void);
+const char *logsrvd_conf_relay_dir(void);
+bool logsrvd_conf_relay_store_first(void);
 bool logsrvd_conf_relay_tcp_keepalive(void);
 bool logsrvd_conf_server_tcp_keepalive(void);
 const char *logsrvd_conf_pid_file(void);

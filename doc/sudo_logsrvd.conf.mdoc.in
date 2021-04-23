@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 9, 2021
+.Dd April 14, 2021
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -247,6 +247,13 @@ setting controls the amount of time
 will wait for the relay to respond.
 A value of 0 will disable the timeout.
 The default value is 30.
+.It relay_dir = path
+The directory in which log messages are temporarily stored before they
+are sent to the relay host.
+Messages are stored in the wire format used by
+.Xr sudo_logsrv.proto @mansectform@
+The default value is
+.Pa @relay_dir@ .
 .It relay_host = host Ns Oo : Ns port Oc Ns Op (tls)
 The relay host name or IP address, optional port to connect to and
 an optional Transport Layer Security (TLS) flag in parentheses.
@@ -265,12 +272,21 @@ The
 could be running an instance of
 .Nm sudo_logsrvd
 or another server that supports the
-.Xr sudo_logsrv.proto 5
+.Xr sudo_logsrv.proto @mansectform@
 protocol.
 .Pp
 If multiple
 .Em relay_host
 lines are specified, the first available relay host will be used.
+.It store_first = boolean
+If true,
+.Nm sudo_logsrvd
+will store logs locally before relaying them.
+Once the log is complete, a connection to the relay host is opened
+and the log is relayed.
+If the network connection is interrupted before the log can be fully
+transfered, it will be retransmitted later.
+The default is to relay logs in real-time.
 .It tcp_keepalive = boolean
 If true,
 .Nm sudo_logsrvd

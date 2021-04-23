@@ -759,6 +759,7 @@ password_timeout
 timeout
 vardir
 rundir
+relay_dir
 logpath
 log_dir
 iolog_dir
@@ -954,6 +955,7 @@ with_timedir
 with_rundir
 with_vardir
 with_iologdir
+with_relaydir
 with_tzdir
 with_sendmail
 with_sudoers_mode
@@ -1814,6 +1816,8 @@ Optional Packages:
                           system reboot, e.g. `/var/db/sudo' or
                           `/var/lib/sudo'
   --with-iologdir=DIR     directory to store sudo I/O log files in
+  --with-relaydir=DIR     directory to store sudo_logsrvd relay temporary
+                          files in
   --with-tzdir=DIR        path to the time zone data directory
   --with-sendmail         set path to sendmail
   --without-sendmail      do not send mail at all
@@ -3544,6 +3548,7 @@ printf "%s\n" "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 iolog_dir=/var/log/sudo-io
 log_dir=/var/log
 logpath=/var/log/sudo.log
+relay_dir=/var/log/logsrvd-relay
 rundir=/var/run/sudo
 vardir=/var/adm/sudo
 timeout=5
@@ -5863,6 +5868,18 @@ then :
   withval=$with_iologdir; case $with_iologdir in
     yes)    ;;
     no)     as_fn_error $? "\"--without-iologdir not supported.\"" "$LINENO" 5
+	    ;;
+esac
+fi
+
+
+
+# Check whether --with-relaydir was given.
+if test ${with_relaydir+y}
+then :
+  withval=$with_relaydir; case $with_relaydir in
+    yes)    ;;
+    no)     as_fn_error $? "\"--without-relaydir not supported.\"" "$LINENO" 5
 	    ;;
 esac
 fi
@@ -27862,6 +27879,29 @@ printf "%s\n" "$logpath" >&6; }
 #define _PATH_SUDO_LOGFILE "$logpath"
 EOF
 
+
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for sudo_logsrvd relay dir location" >&5
+printf %s "checking for sudo_logsrvd relay dir location... " >&6; }
+    if test "${with_relaydir-yes}" != "yes"; then
+	relay_dir="$with_relaydir"
+    else
+	# Default value of relay_dir set in configure.ac
+	for d in /var/log /var/adm /usr/adm; do
+	    if test -d "$d"; then
+		relay_dir="$d/logsrvd-relay"
+		break
+	    fi
+	done
+    fi
+    if test "${with_relaydir}" != "no"; then
+	cat >>confdefs.h <<EOF
+#define _PATH_SUDO_RELAY_DIR "$relay_dir"
+EOF
+
+    fi
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $relay_dir" >&5
+printf "%s\n" "$relay_dir" >&6; }
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for sudo run dir location" >&5
 printf %s "checking for sudo run dir location... " >&6; }
