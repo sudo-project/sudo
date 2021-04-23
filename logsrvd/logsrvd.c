@@ -324,15 +324,10 @@ fmt_server_message(struct connection_closure *closure, ServerMessage *msg)
     server_message__pack(msg, buf->data + sizeof(msg_len));
     buf->len = len;
     TAILQ_INSERT_TAIL(&closure->write_bufs, buf, entries);
-    buf = NULL;
 
     ret = true;
 
 done:
-    if (buf != NULL) {
-        free(buf->data);
-        free(buf);
-    }
     debug_return_bool(ret);
 }
 
