@@ -180,6 +180,8 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 	    closure->errstr = _("client message too large");
 	    break;
 	}
+
+	/* Read actual message from journal. */
 	if (msg_len > bufsize) {
 	    bufsize = sudo_pow2_roundup(msg_len);
 	    free(buf);

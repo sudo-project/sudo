@@ -104,6 +104,7 @@ struct connection_closure {
     enum connection_status state;
     bool tls;
     bool log_io;
+    bool relay_only;
     bool store_first;
     bool read_instead_of_write;
     bool write_instead_of_read;
@@ -159,7 +160,7 @@ void update_elapsed_time(TimeSpec *delta, struct timespec *elapsed);
 
 /* logsrvd.c */
 bool start_protocol(struct connection_closure *closure);
-void connection_closure_free(struct connection_closure *closure);
+void connection_close(struct connection_closure *closure);
 bool schedule_commit_point(TimeSpec *commit_point, struct connection_closure *closure);
 bool fmt_log_id_message(const char *id, struct connection_closure *closure);
 bool fmt_error_message(const char *errstr, struct connection_closure *closure);

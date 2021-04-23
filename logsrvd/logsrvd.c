@@ -89,13 +89,18 @@ static const char server_id[] = "Sudo Audit Server " PACKAGE_VERSION;
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
 static double random_drop;
 
-/* Server callback may redirect to client callback for TLS. */
+/* Event loop callbacks. */
 static void client_msg_cb(int fd, int what, void *v);
+static void server_msg_cb(int fd, int what, void *v);
+static void server_commit_cb(int fd, int what, void *v);
+#if defined(HAVE_OPENSSL)
+static void tls_handshake_cb(int fd, int what, void *v);
+#endif
 
 /*
  * Free a struct connection_closure container and its contents.
  */
-void
+static void
 connection_closure_free(struct connection_closure *closure)
 {
     debug_decl(connection_closure_free, SUDO_DEBUG_UTIL);
@@ -123,6 +128,8 @@ connection_closure_free(struct connection_closure *closure)
 	eventlog_free(closure->evlog);
 	free(closure->read_buf.data);
 	while ((buf = TAILQ_FIRST(&closure->write_bufs)) != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"discarding write buffer %p, len %u", buf, buf->len - buf->off);
 	    TAILQ_REMOVE(&closure->write_bufs, buf, entries);
 	    free(buf->data);
 	    free(buf);
@@ -140,6 +147,113 @@ connection_closure_free(struct connection_closure *closure)
 	if (shutting_down && TAILQ_EMPTY(&connections))
 	    sudo_ev_loopbreak(evbase);
     }
+
+    debug_return;
+}
+
+/*
+ * Allocate a new connection closure.
+ */
+static struct connection_closure *
+connection_closure_alloc(int fd, bool tls, bool relay_only,
+    struct sudo_event_base *base)
+{
+    struct connection_closure *closure;
+    debug_decl(connection_closure_alloc, SUDO_DEBUG_UTIL);
+
+    if ((closure = calloc(1, sizeof(*closure))) == NULL)
+	debug_return_ptr(NULL);
+
+    closure->iolog_dir_fd = -1;
+    closure->sock = relay_only ? -1 : fd;
+    closure->evbase = base;
+    closure->relay_only = relay_only;
+    closure->store_first = !relay_only && logsrvd_conf_relay_store_first();
+    TAILQ_INIT(&closure->write_bufs);
+    TAILQ_INIT(&closure->free_bufs);
+
+    TAILQ_INSERT_TAIL(&connections, closure, entries);
+
+    closure->read_buf.size = 64 * 1024;
+    closure->read_buf.data = malloc(closure->read_buf.size);
+    if (closure->read_buf.data == NULL)
+	goto bad;
+
+    closure->read_ev = sudo_ev_alloc(fd, SUDO_EV_READ|SUDO_EV_PERSIST,
+	client_msg_cb, closure);
+    if (closure->read_ev == NULL)
+	goto bad;
+
+    if (!relay_only) {
+	closure->write_ev = sudo_ev_alloc(fd, SUDO_EV_WRITE|SUDO_EV_PERSIST,
+	    server_msg_cb, closure);
+	if (closure->write_ev == NULL)
+	    goto bad;
+
+	closure->commit_ev = sudo_ev_alloc(-1, SUDO_EV_TIMEOUT,
+	    server_commit_cb, closure);
+	if (closure->commit_ev == NULL)
+	    goto bad;
+    }
+#if defined(HAVE_OPENSSL)
+    if (tls) {
+	closure->ssl_accept_ev = sudo_ev_alloc(fd, SUDO_EV_READ,
+	    tls_handshake_cb, closure);
+	if (closure->ssl_accept_ev == NULL)
+	    goto bad;
+    }
+#endif
+
+    debug_return_ptr(closure);
+bad:
+    connection_closure_free(closure);
+    debug_return_ptr(NULL);
+}
+
+/*
+ * Close the client connection when finished.
+ * If in store-and-forward mode, initiate a relay connection.
+ * Otherwise, free the connection closure, removing any events.
+ */
+void
+connection_close(struct connection_closure *closure)
+{
+    struct connection_closure *new_closure;
+    debug_decl(connection_close, SUDO_DEBUG_UTIL);
+
+    if (closure == NULL)
+	debug_return;
+
+    /*
+     * If we finished a client connection in store-and-forward mode,
+     * create a new connection for the relay and replay the journal.
+     */
+    if (closure->store_first && closure->state == FINISHED &&
+	    closure->relay_closure == NULL && closure->journal != NULL) {
+	new_closure = connection_closure_alloc(fileno(closure->journal), false,
+	    true, closure->evbase);
+	if (new_closure != NULL) {
+	    /* Re-parent journal settings. */
+	    new_closure->journal = closure->journal;
+	    closure->journal = NULL;
+	    new_closure->journal_path = closure->journal_path;
+	    closure->journal_path = NULL;
+
+	    /* Connect to the first relay available asynchronously. */
+	    if (!connect_relay(new_closure)) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to connect to relay");
+		connection_closure_free(new_closure);
+	    }
+	}
+    }
+    if (closure->state == FINISHED && closure->journal_path != NULL) {
+	/* Journal relayed successfully, remove backing file. */
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "removing journal file %s", closure->journal_path);
+	unlink(closure->journal_path);
+    }
+    connection_closure_free(closure);
 
     debug_return;
 }
@@ -483,12 +597,11 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
     }
 
     if (closure->store_first) {
-	/* Store message in a journal for later relaying. */
+	/* Store exit message in journal. */
         if (!journal_write(buf, len, closure))
             debug_return_bool(false);
         if (!journal_finish(closure))
             debug_return_bool(false);
-	/* XXX - schedule relay of journal file */
     }
 
     if (closure->log_io) {
@@ -898,7 +1011,7 @@ server_shutdown(struct sudo_event_base *base)
 	    }
 	} else {
 	    /* No commit point, close connection immediately. */
-	    connection_closure_free(closure);
+	    connection_close(closure);
 	}
     }
 
@@ -989,7 +1102,7 @@ server_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-	nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+	nwritten = write(fd, buf->data + buf->off, buf->len - buf->off);
     }
 
     if (nwritten == -1) {
@@ -1018,7 +1131,7 @@ server_msg_cb(int fd, int what, void *v)
     debug_return;
 
 finished:
-    connection_closure_free(closure);
+    connection_close(closure);
     debug_return;
 }
 
@@ -1096,7 +1209,7 @@ client_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-        nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+        nread = read(fd, buf->data + buf->len, buf->size - buf->len);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client %s",
@@ -1164,7 +1277,7 @@ send_error:
      * Try to send client an error message before closing connection.
      * If we are already in an error state, just give up.
      */
-    if (closure->state == ERROR)
+    if (closure->state == ERROR || closure->write_ev == NULL)
 	goto close_connection;
     if (closure->errstr == NULL || !fmt_error_message(closure->errstr, closure))
 	goto close_connection;
@@ -1178,7 +1291,7 @@ send_error:
     closure->state = ERROR;
     debug_return;
 close_connection:
-    connection_closure_free(closure);
+    connection_close(closure);
     debug_return;
 }
 
@@ -1232,7 +1345,7 @@ server_commit_cb(int unused, int what, void *v)
     commit_point.tv_sec = closure->elapsed_time.tv_sec;
     commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
     if (!schedule_commit_point(&commit_point, closure))
-	connection_closure_free(closure);
+	connection_close(closure);
 
     debug_return;
 }
@@ -1255,11 +1368,14 @@ start_protocol(struct connection_closure *closure)
 	closure->relay_closure->relay_addr = NULL;
     }
 
-    if (!fmt_hello_message(closure))
-	debug_return_bool(false);
+    /* When replaying a journal there is no write event. */
+    if (closure->write_ev != NULL) {
+	if (!fmt_hello_message(closure))
+	    debug_return_bool(false);
 
-    if (sudo_ev_add(closure->evbase, closure->write_ev, timeout, false) == -1)
-	debug_return_bool(false);
+	if (sudo_ev_add(closure->evbase, closure->write_ev, timeout, false) == -1)
+	    debug_return_bool(false);
+    }
 
     /* No read timeout, client messages may happen at arbitrary times. */
     if (sudo_ev_add(closure->evbase, closure->read_ev, NULL, false) == -1)
@@ -1423,66 +1539,10 @@ tls_handshake_cb(int fd, int what, void *v)
 
     debug_return;
 bad:
-    connection_closure_free(closure);
+    connection_close(closure);
     debug_return;
 }
 #endif /* HAVE_OPENSSL */
-
-/*
- * Allocate a new connection closure.
- */
-static struct connection_closure *
-connection_closure_alloc(int sock, bool tls, struct sudo_event_base *base)
-{
-    struct connection_closure *closure;
-    debug_decl(connection_closure_alloc, SUDO_DEBUG_UTIL);
-
-    if ((closure = calloc(1, sizeof(*closure))) == NULL)
-	debug_return_ptr(NULL);
-
-    closure->iolog_dir_fd = -1;
-    closure->sock = sock;
-    closure->evbase = base;
-    closure->store_first = logsrvd_conf_relay_store_first();
-    TAILQ_INIT(&closure->write_bufs);
-    TAILQ_INIT(&closure->free_bufs);
-
-    TAILQ_INSERT_TAIL(&connections, closure, entries);
-
-    closure->read_buf.size = 64 * 1024;
-    closure->read_buf.data = malloc(closure->read_buf.size);
-    if (closure->read_buf.data == NULL)
-	goto bad;
-
-    closure->commit_ev = sudo_ev_alloc(-1, SUDO_EV_TIMEOUT,
-	server_commit_cb, closure);
-    if (closure->commit_ev == NULL)
-	goto bad;
-
-    closure->read_ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST,
-	client_msg_cb, closure);
-    if (closure->read_ev == NULL)
-	goto bad;
-
-    closure->write_ev = sudo_ev_alloc(sock, SUDO_EV_WRITE|SUDO_EV_PERSIST,
-	server_msg_cb, closure);
-    if (closure->write_ev == NULL)
-	goto bad;
-
-#if defined(HAVE_OPENSSL)
-    if (tls) {
-	closure->ssl_accept_ev = sudo_ev_alloc(sock, SUDO_EV_READ,
-	    tls_handshake_cb, closure);
-	if (closure->ssl_accept_ev == NULL)
-	    goto bad;
-    }
-#endif
-
-    debug_return_ptr(closure);
-bad:
-    connection_closure_free(closure);
-    debug_return_ptr(NULL);
-}
 
 /*
  * New connection.
@@ -1495,7 +1555,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
     struct connection_closure *closure;
     debug_decl(new_connection, SUDO_DEBUG_UTIL);
 
-    if ((closure = connection_closure_alloc(sock, tls, evbase)) == NULL)
+    if ((closure = connection_closure_alloc(sock, tls, false, evbase)) == NULL)
 	goto bad;
 
     /* store the peer's IP address in the closure object */
@@ -1565,7 +1625,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 
     debug_return_bool(true);
 bad:
-    connection_closure_free(closure);
+    connection_close(closure);
     debug_return_bool(false);
 }
 

@@ -428,13 +428,13 @@ connect_cb(int sock, int what, void *v)
 	/* Relay connection succeeded, start TLS handshake. */
 	if (relay_closure->relay_addr->tls) {
 	    if (!connect_relay_tls(closure))
-		connection_closure_free(closure);
+		connection_close(closure);
 	} else
 #endif
 	{
 	    /* Relay connection succeeded, start talking to the client.  */
 	    if (!start_relay(sock, closure))
-		connection_closure_free(closure);
+		connection_close(closure);
 	}
     } else {
 	/* Connection failed, try next relay (if any). */
@@ -552,6 +552,10 @@ handle_log_id(char *id, struct connection_closure *closure)
 	closure->relay_closure->relay_name.name,
 	closure->relay_closure->relay_name.ipaddr);
 
+    /* No client connection when replaying a journaled entry. */
+    if (closure->write_ev == NULL)
+	debug_return_bool(true);
+
     /* Generate a new log ID that includes the relay host. */
     len = asprintf(&new_id, "%s/%s", id,
 	closure->relay_closure->relay_name.name);
@@ -586,16 +590,18 @@ handle_server_error(char *errmsg, struct connection_closure *closure)
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
 	errmsg);
 
-    if (!fmt_error_message(errmsg, closure))
-	debug_return_bool(false);
+    if (closure->write_ev != NULL) {
+	if (!fmt_error_message(errmsg, closure))
+	    debug_return_bool(false);
 
-    sudo_ev_del(closure->evbase, closure->read_ev);
-    if (sudo_ev_add(closure->evbase, closure->write_ev,
-	    logsrvd_conf_relay_timeout(), false) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to add server write event");
-	debug_return_bool(false);
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_relay_timeout(), false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    debug_return_bool(false);
+	}
     }
+    sudo_ev_del(closure->evbase, relay_closure->read_ev);
     closure->state = ERROR;
 
     debug_return_bool(true);
@@ -616,16 +622,18 @@ handle_server_abort(char *errmsg, struct connection_closure *closure)
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
 	errmsg);
 
-    if (!fmt_error_message(errmsg, closure))
-	debug_return_bool(false);
+    if (closure->write_ev != NULL) {
+	if (!fmt_error_message(errmsg, closure))
+	    debug_return_bool(false);
 
-    sudo_ev_del(closure->evbase, closure->read_ev);
-    if (sudo_ev_add(closure->evbase, closure->write_ev,
-	    logsrvd_conf_relay_timeout(), false) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to add server write event");
-	debug_return_bool(false);
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_relay_timeout(), false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    debug_return_bool(false);
+	}
     }
+    sudo_ev_del(closure->evbase, relay_closure->read_ev);
     closure->state = ERROR;
 
     debug_return_bool(true);
@@ -787,7 +795,7 @@ relay_server_msg_cb(int fd, int what, void *v)
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: ServerMessage from relay %s (%s)", __func__,
 	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
-	nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+	nread = read(fd, buf->data + buf->len, buf->size - buf->len);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -798,7 +806,7 @@ relay_server_msg_cb(int fd, int what, void *v)
 	if (errno == EAGAIN)
 	    debug_return;
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "recv from %s (%s)", relay_closure->relay_name.name,
+	    "read from %s (%s)", relay_closure->relay_name.name,
 	    relay_closure->relay_name.ipaddr);
 	closure->errstr = _("unable to read from relay");
 	goto send_error;
@@ -865,18 +873,20 @@ send_error:
 	goto close_connection;
     if (closure->errstr != NULL || !fmt_error_message(closure->errstr, closure))
 	goto close_connection;
-    sudo_ev_del(closure->evbase, relay_closure->read_ev);
-    if (sudo_ev_add(closure->evbase, closure->write_ev,
-            logsrvd_conf_relay_timeout(), false) == -1) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to add server write event");
-        goto close_connection;
+    if (closure->write_ev != NULL) {
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_relay_timeout(), false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    goto close_connection;
+	}
     }
+    sudo_ev_del(closure->evbase, relay_closure->read_ev);
     closure->state = ERROR;
     debug_return;
 
 close_connection:
-    connection_closure_free(closure);
+    connection_close(closure);
     debug_return;
 }
 
@@ -978,10 +988,10 @@ relay_client_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-	nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+	nwritten = write(fd, buf->data + buf->off, buf->len - buf->off);
 	if (nwritten == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"send to %s (%s)", relay_closure->relay_name.name,
+		"write to %s (%s)", relay_closure->relay_name.name,
 		relay_closure->relay_name.ipaddr);
 	    closure->errstr = _("error writing to relay");
 	    goto send_error;
@@ -1011,18 +1021,20 @@ send_error:
 	goto close_connection;
     if (closure->errstr != NULL || !fmt_error_message(closure->errstr, closure))
 	goto close_connection;
-    sudo_ev_del(closure->evbase, relay_closure->read_ev);
-    if (sudo_ev_add(closure->evbase, closure->write_ev,
-            logsrvd_conf_relay_timeout(), false) == -1) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to add server write event");
-        goto close_connection;
+    if (closure->write_ev != NULL) {
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_relay_timeout(), false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    goto close_connection;
+	}
     }
+    sudo_ev_del(closure->evbase, relay_closure->read_ev);
     closure->state = ERROR;
     debug_return;
 
 close_connection:
-    connection_closure_free(closure);
+    connection_close(closure);
     debug_return;
 }
 
@@ -1057,13 +1069,14 @@ relay_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     bool ret;
     debug_decl(relay_accept, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying AcceptMessage from %s to %s (%s)", __func__,
-	closure->ipaddr, relay_closure->relay_name.name,
-	relay_closure->relay_name.ipaddr);
+	"%s: relaying AcceptMessage from %s to %s (%s)", __func__, source,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
     ret = relay_enqueue_write(buf, len, closure);
     if (ret) {
@@ -1084,13 +1097,14 @@ relay_reject(RejectMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     bool ret;
     debug_decl(relay_reject, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying RejectMessage from %s to %s (%s)", __func__,
-	closure->ipaddr, relay_closure->relay_name.name,
-	relay_closure->relay_name.ipaddr);
+	"%s: relaying RejectMessage from %s to %s (%s)", __func__, source,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
     ret = relay_enqueue_write(buf, len, closure);
     closure->state = FINISHED;
@@ -1106,18 +1120,22 @@ relay_exit(ExitMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     bool ret;
     debug_decl(relay_exit, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying ExitMessage from %s to %s (%s)", __func__,
-	closure->ipaddr, relay_closure->relay_name.name,
-	relay_closure->relay_name.ipaddr);
+	"%s: relaying ExitMessage from %s to %s (%s)", __func__, source,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
     ret = relay_enqueue_write(buf, len, closure);
     if (ret) {
 	/* Command exited, if I/O logging wait for commit point. */
-	closure->state = closure->log_io ? EXITED : FINISHED;
+	if (closure->log_io && !closure->relay_only)
+	    closure->state = EXITED;
+	else
+	    closure->state = FINISHED;
     }
 
     debug_return_bool(ret);
@@ -1132,6 +1150,8 @@ relay_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     struct sudo_event_base *evbase = closure->evbase;
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     RestartMessage restart_msg = *msg;
@@ -1140,9 +1160,8 @@ relay_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     debug_decl(relay_restart, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying RestartMessage from %s to %s (%s)", __func__,
-	closure->ipaddr, relay_closure->relay_name.name,
-	relay_closure->relay_name.ipaddr);
+	"%s: relaying RestartMessage from %s to %s (%s)", __func__, source,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
     /*
      * We prepend "relayhost/" to the log ID before relaying it to
@@ -1178,13 +1197,14 @@ relay_alert(AlertMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     bool ret;
     debug_decl(relay_alert, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying AlertMessage from %s to %s (%s)", __func__,
-	closure->ipaddr, relay_closure->relay_name.name,
-	relay_closure->relay_name.ipaddr);
+	"%s: relaying AlertMessage from %s to %s (%s)", __func__, source,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
     ret = relay_enqueue_write(buf, len, closure);
 
@@ -1199,13 +1219,14 @@ relay_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     bool ret;
     debug_decl(relay_suspend, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying CommandSuspend from %s to %s (%s)", __func__,
-	closure->ipaddr, relay_closure->relay_name.name,
-	relay_closure->relay_name.ipaddr);
+	"%s: relaying CommandSuspend from %s to %s (%s)", __func__, source,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
     ret = relay_enqueue_write(buf, len, closure);
 
@@ -1220,13 +1241,14 @@ relay_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     bool ret;
     debug_decl(relay_winsize, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying ChangeWindowSize from %s to %s (%s)", __func__,
-	closure->ipaddr, relay_closure->relay_name.name,
-	relay_closure->relay_name.ipaddr);
+	"%s: relaying ChangeWindowSize from %s to %s (%s)", __func__, source,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
     ret = relay_enqueue_write(buf, len, closure);
 
@@ -1241,13 +1263,14 @@ relay_iobuf(IoBuffer *iobuf, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     bool ret;
     debug_decl(relay_iobuf, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: relaying IoBuffer from %s to %s (%s)", __func__,
-	closure->ipaddr, relay_closure->relay_name.name,
-	relay_closure->relay_name.ipaddr);
+	"%s: relaying IoBuffer from %s to %s (%s)", __func__, source,
+	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
     ret = relay_enqueue_write(buf, len, closure);
 
@@ -1267,7 +1290,7 @@ relay_shutdown(struct connection_closure *closure)
     if (!sudo_ev_pending(relay_closure->read_ev, SUDO_EV_READ, NULL) &&
 	    !sudo_ev_pending(relay_closure->write_ev, SUDO_EV_WRITE, NULL) &&
 	    TAILQ_EMPTY(&relay_closure->write_bufs)) {
-	connection_closure_free(closure);
+	connection_close(closure);
     }
 
     debug_return_bool(true);
