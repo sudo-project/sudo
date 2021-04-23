@@ -479,6 +479,9 @@ connect_relay(struct connection_closure *closure)
 
     if (res == -1 && errno != EINPROGRESS)
 	debug_return_bool(false);
+
+    /* Switch to relay client message handlers. */
+    closure->cms = &cms_relay;
     debug_return_bool(true);
 }
 
@@ -1022,88 +1025,65 @@ start_relay(int sock, struct connection_closure *closure)
 /*
  * Relay an AcceptMessage from the client to the relay server.
  */
-bool
+static bool
 relay_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    bool ret;
     debug_decl(relay_accept, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying AcceptMessage from %s to %s (%s)", __func__, source,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
-    ret = relay_enqueue_write(buf, len, closure);
-    if (ret) {
-	/* success */
-	if (msg->expect_iobufs)
-	    closure->log_io = true;
-	closure->state = RUNNING;
-    }
-
-    debug_return_bool(ret);
+    debug_return_bool(relay_enqueue_write(buf, len, closure));
 }
 
 /*
  * Relay a RejectMessage from the client to the relay server.
  */
-bool
+static bool
 relay_reject(RejectMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    bool ret;
     debug_decl(relay_reject, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying RejectMessage from %s to %s (%s)", __func__, source,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
-    ret = relay_enqueue_write(buf, len, closure);
-    closure->state = FINISHED;
-
-    debug_return_bool(ret);
+    debug_return_bool(relay_enqueue_write(buf, len, closure));
 }
 
 /*
  * Relay an ExitMessage from the client to the relay server.
  */
-bool
+static bool
 relay_exit(ExitMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    bool ret;
     debug_decl(relay_exit, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying ExitMessage from %s to %s (%s)", __func__, source,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
-    ret = relay_enqueue_write(buf, len, closure);
-    if (ret) {
-	/* Command exited, if I/O logging wait for commit point. */
-	if (closure->log_io && !closure->relay_only)
-	    closure->state = EXITED;
-	else
-	    closure->state = FINISHED;
-    }
-
-    debug_return_bool(ret);
+    debug_return_bool(relay_enqueue_write(buf, len, closure));
 }
 
 /*
  * Relay a RestartMessage from the client to the relay server.
  * We must rebuild the packed message because the log_id is modified.
  */
-bool
+static bool
 relay_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
@@ -1142,15 +1122,13 @@ relay_restart(RestartMessage *msg, uint8_t *buf, size_t len,
 	}
     }
 
-    closure->state = ret ? RUNNING : ERROR;
-
     debug_return_bool(ret);
 }
 
 /*
  * Relay an AlertMessage from the client to the relay server.
  */
-bool
+static bool
 relay_alert(AlertMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
@@ -1172,7 +1150,7 @@ relay_alert(AlertMessage *msg, uint8_t *buf, size_t len,
 /*
  * Relay a CommandSuspend from the client to the relay server.
  */
-bool
+static bool
 relay_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
@@ -1194,7 +1172,7 @@ relay_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
 /*
  * Relay a ChangeWindowSize from the client to the relay server.
  */
-bool
+static bool
 relay_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
@@ -1216,8 +1194,8 @@ relay_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
 /*
  * Relay an IoBuffer from the client to the relay server.
  */
-bool
-relay_iobuf(IoBuffer *iobuf, uint8_t *buf, size_t len,
+static bool
+relay_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -1253,3 +1231,14 @@ relay_shutdown(struct connection_closure *closure)
 
     debug_return_bool(true);
 }
+
+struct client_message_switch cms_relay = {
+    relay_accept,
+    relay_reject,
+    relay_exit,
+    relay_restart,
+    relay_alert,
+    relay_iobuf,
+    relay_suspend,
+    relay_winsize
+};

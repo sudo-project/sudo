@@ -167,10 +167,18 @@ connection_closure_alloc(int fd, bool tls, bool relay_only,
     closure->iolog_dir_fd = -1;
     closure->sock = relay_only ? -1 : fd;
     closure->evbase = base;
-    closure->relay_only = relay_only;
-    closure->store_first = !relay_only && logsrvd_conf_relay_store_first();
     TAILQ_INIT(&closure->write_bufs);
     TAILQ_INIT(&closure->free_bufs);
+
+    /* Use different message handlers depending on the operating mode. */
+    if (relay_only) {
+	closure->cms = &cms_relay;
+    } else if (logsrvd_conf_relay_store_first()) {
+	closure->store_first = true;
+	closure->cms = &cms_journal;
+    } else {
+	closure->cms = &cms_local;
+    }
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
 
@@ -453,71 +461,37 @@ bad:
 }
 
 /*
- * Parse an AcceptMessage
+ * Parse and store an AcceptMessage locally.
  */
 static bool
-handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
+store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     char *log_id = NULL;
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
-    debug_decl(handle_accept, SUDO_DEBUG_UTIL);
+    debug_decl(store_accept_local, SUDO_DEBUG_UTIL);
 
-    if (closure->state != INITIAL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
-	closure->errstr = _("state machine error");
+    /* Store sudo-style event and I/O logs. */
+    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
+	msg->n_info_msgs, closure);
+    if (closure->evlog == NULL) {
+	closure->errstr = _("error parsing AcceptMessage");
 	debug_return_bool(false);
     }
 
-    /* Check that message is valid. */
-    if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid AcceptMessage, submit_time: %p, n_info_msgs: %zu",
-	    msg->submit_time, msg->n_info_msgs);
-	closure->errstr = _("invalid AcceptMessage");
+    /* Create I/O log info file and parent directories. */
+    if (msg->expect_iobufs) {
+	if (!iolog_init(msg, closure)) {
+	    closure->errstr = _("error creating I/O log");
+	    debug_return_bool(false);
+	}
+	closure->log_io = true;
+	log_id = closure->evlog->iolog_path;
+    }
+
+    if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
+	closure->errstr = _("error logging accept event");
 	debug_return_bool(false);
-    }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage", __func__);
-
-    if (closure->relay_closure != NULL) {
-	/* Forward AcceptMessage to connected relay. */
-	debug_return_bool(relay_accept(msg, buf, len, closure));
-    }
-
-    if (closure->store_first) {
-	/* Store message in a journal for later relaying. */
-        if (!journal_open(closure))
-            debug_return_bool(false);
-        if (!journal_write(buf, len, closure))
-            debug_return_bool(false);
-	if (msg->expect_iobufs) {
-	    closure->log_io = true;
-	    log_id = closure->journal_path;
-	}
-    } else {
-	/* Store sudo-style event and I/O logs. */
-	closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	    msg->n_info_msgs, closure);
-	if (closure->evlog == NULL) {
-	    closure->errstr = _("error parsing AcceptMessage");
-	    debug_return_bool(false);
-	}
-
-	/* Create I/O log info file and parent directories. */
-	if (msg->expect_iobufs) {
-	    if (!iolog_init(msg, closure)) {
-		closure->errstr = _("error creating I/O log");
-		debug_return_bool(false);
-	    }
-	    closure->log_io = true;
-	    log_id = closure->evlog->iolog_path;
-	}
-
-	if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
-	    closure->errstr = _("error logging accept event");
-	    debug_return_bool(false);
-	}
     }
 
     if (log_id != NULL) {
@@ -532,23 +506,24 @@ handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
 	}
     }
 
-    closure->state = RUNNING;
     debug_return_bool(true);
 }
 
 /*
- * Parse a RejectMessage
+ * AcceptMessage handler.
  */
 static bool
-handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
+handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
-    debug_decl(handle_reject, SUDO_DEBUG_UTIL);
+    const char *source = closure->journal_path ? closure->journal_path :
+        closure->ipaddr;
+    bool ret;
+    debug_decl(handle_accept, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	    "unexpected state %d for %s", closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
@@ -556,64 +531,92 @@ handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
     /* Check that message is valid. */
     if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid RejectMessage, submit_time: %p, n_info_msgs: %zu",
-	    msg->submit_time, msg->n_info_msgs);
-	closure->errstr = _("invalid RejectMessage");
+	    "invalid AcceptMessage from %s, submit_time: %p, n_info_msgs: %zu",
+	    source, msg->submit_time, msg->n_info_msgs);
+	closure->errstr = _("invalid AcceptMessage");
 	debug_return_bool(false);
     }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage", __func__);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AcceptMessage from %s",
+	__func__, source);
 
-    if (closure->relay_closure != NULL) {
-	/* Forward RejectMessage to connected relay. */
-	debug_return_bool(relay_reject(msg, buf, len, closure));
+    ret = closure->cms->accept(msg, buf, len, closure);
+    if (ret) {
+	if (msg->expect_iobufs)
+	    closure->log_io = true;
+	closure->state = RUNNING;
+    }
+    debug_return_bool(ret);
+}
+
+/*
+ * Parse and store a RejectMessage locally.
+ */
+static bool
+store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
+    debug_decl(store_reject_local, SUDO_DEBUG_UTIL);
+
+    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
+	msg->n_info_msgs, closure);
+    if (closure->evlog == NULL) {
+	closure->errstr = _("error parsing RejectMessage");
+	debug_return_bool(false);
     }
 
-    if (closure->store_first) {
-	/* Store message in a journal for later relaying. */
-        if (!journal_open(closure))
-            debug_return_bool(false);
-        if (!journal_write(buf, len, closure))
-            debug_return_bool(false);
-    } else {
-	closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	    msg->n_info_msgs, closure);
-	if (closure->evlog == NULL) {
-	    closure->errstr = _("error parsing RejectMessage");
-	    debug_return_bool(false);
-	}
-
-	if (!eventlog_reject(closure->evlog, 0, msg->reason,
-		logsrvd_json_log_cb, &info)) {
-	    closure->errstr = _("error logging reject event");
-	    debug_return_bool(false);
-	}
+    if (!eventlog_reject(closure->evlog, 0, msg->reason,
+	    logsrvd_json_log_cb, &info)) {
+	closure->errstr = _("error logging reject event");
+	debug_return_bool(false);
     }
 
-    closure->state = FINISHED;
     debug_return_bool(true);
 }
 
+/*
+ * RejectMessage handler.
+ */
 static bool
-handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
+handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    struct timespec tv = { 0, 0 };
-    mode_t mode;
-    debug_decl(handle_exit, SUDO_DEBUG_UTIL);
+    const char *source = closure->journal_path ? closure->journal_path :
+        closure->ipaddr;
+    bool ret;
+    debug_decl(handle_reject, SUDO_DEBUG_UTIL);
 
-    if (closure->state != RUNNING) {
+    if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	    "unexpected state %d for %s", closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExitMessage", __func__);
-
-    if (closure->relay_closure != NULL) {
-	/* Forward ExitMessage to connected relay. */
-	debug_return_bool(relay_exit(msg, buf, len, closure));
+    /* Check that message is valid. */
+    if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid RejectMessage from %s, submit_time: %p, n_info_msgs: %zu",
+	    source, msg->submit_time, msg->n_info_msgs);
+	closure->errstr = _("invalid RejectMessage");
+	debug_return_bool(false);
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RejectMessage from %s",
+	__func__, source);
+
+    ret = closure->cms->reject(msg, buf, len, closure);
+    if (ret)
+	closure->state = FINISHED;
+
+    debug_return_bool(ret);
+}
+
+static bool
+store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    mode_t mode;
+    debug_decl(store_exit_local, SUDO_DEBUG_UTIL);
 
     /* Sudo I/O logs don't store this info. */
     if (msg->signal != NULL && msg->signal[0] != '\0') {
@@ -625,82 +628,136 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 	    "command exited with %d", msg->exit_value);
     }
 
-    if (closure->store_first) {
-	/* Store exit message in journal. */
-        if (!journal_write(buf, len, closure))
-            debug_return_bool(false);
-        if (!journal_finish(closure))
-            debug_return_bool(false);
-    }
-
     if (closure->log_io) {
-	/* No more data, command exited. */
-	closure->state = EXITED;
-	sudo_ev_del(closure->evbase, closure->read_ev);
-
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: elapsed time: %lld, %ld",
-	    __func__, (long long)closure->elapsed_time.tv_sec,
-	    closure->elapsed_time.tv_nsec);
-
-	if (closure->iolog_dir_fd != -1) {
-	    /* Clear write bits from I/O timing file to indicate completion. */
-	    mode = logsrvd_conf_iolog_mode();
-	    CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
-	    if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "unable to fchmodat timing file");
-	    }
+	/* Clear write bits from I/O timing file to indicate completion. */
+	mode = logsrvd_conf_iolog_mode();
+	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
+	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to fchmodat timing file");
 	}
-
-	/* Schedule the final commit point event immediately. */
-	if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add commit point event");
-	    debug_return_bool(false);
-	}
-    } else {
-	/* Command exited, no I/O logs to flush. */
-	closure->state = FINISHED;
     }
 
     debug_return_bool(true);
 }
 
 static bool
+handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
+    bool ret;
+    debug_decl(handle_exit, SUDO_DEBUG_UTIL);
+
+    if (closure->state != RUNNING) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unexpected state %d for %s", closure->state, source);
+	closure->errstr = _("state machine error");
+	debug_return_bool(false);
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExitMessage from %s",
+	source, __func__);
+
+    ret = closure->cms->exit(msg, buf, len, closure);
+    if (ret) {
+	if (sudo_timespecisset(&closure->elapsed_time)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: elapsed time: %lld, %ld",
+		__func__, (long long)closure->elapsed_time.tv_sec,
+		closure->elapsed_time.tv_nsec);
+	}
+
+	if (closure->log_io) {
+	    /* Command exited, client waiting for final commit point. */
+	    closure->state = EXITED;
+
+	    /* Relay host will send the final commit point. */
+	    if (closure->relay_closure == NULL) {
+		struct timespec tv = { 0, 0 };
+		if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unable to add commit point event");
+		    ret = false;
+		}
+	    }
+	} else {
+	    /* No commit point to send to client, we are finished. */
+	    closure->state = FINISHED;
+	}
+    }
+    sudo_ev_del(closure->evbase, closure->read_ev);
+
+    debug_return_bool(ret);
+}
+
+static bool
+store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(store_restart_local, SUDO_DEBUG_UTIL);
+
+    debug_return_bool(iolog_restart(msg, closure));
+}
+
+static bool
 handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    bool restarted;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
+    bool ret;
     debug_decl(handle_restart, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	    "unexpected state %d for %s", closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received RestartMessage for %s",
-	__func__, msg->log_id);
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: received RestartMessage for %s from %s", __func__, msg->log_id,
+	source);
 
-    if (closure->relay_closure != NULL) {
-	/* Forward RestartMessage to connected relay. */
-	debug_return_bool(relay_restart(msg, buf, len, closure));
-    }
-
-    if (closure->store_first) {
-        restarted = journal_restart(msg, closure);
+    ret = closure->cms->restart(msg, buf, len, closure);
+    if (ret) {
+	/* Successfully restarted. */
+	closure->state = RUNNING;
     } else {
-	restarted = iolog_restart(msg, closure);
-    }
-    if (!restarted) {
-	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log", __func__);
+	/* Report error to client before closing the connection. */
+	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log",
+	    __func__);
 	sudo_ev_del(closure->evbase, closure->read_ev);
 	if (!schedule_error_message(closure->errstr, closure))
-	    debug_return_bool(false);
-	debug_return_bool(true);
+	    ret = false;
     }
 
-    closure->state = RUNNING;
+    debug_return_bool(ret);
+}
+
+static bool
+store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    struct timespec alert_time;
+    debug_decl(store_alert_local, SUDO_DEBUG_UTIL);
+
+    if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
+	closure->evlog = evlog_new(NULL, msg->info_msgs,
+	    msg->n_info_msgs, closure);
+	if (closure->evlog == NULL) {
+	    closure->errstr = _("error parsing AlertMessage");
+	    debug_return_bool(false);
+	}
+    }
+
+    alert_time.tv_sec = msg->alert_time->tv_sec;
+    alert_time.tv_nsec = msg->alert_time->tv_nsec;
+    if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
+	closure->errstr = _("error logging alert event");
+	debug_return_bool(false);
+    }
+
     debug_return_bool(true);
 }
 
@@ -708,7 +765,8 @@ static bool
 handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    struct timespec alert_time;
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     debug_decl(handle_alert, SUDO_DEBUG_UTIL);
 
     /* Check that message is valid. */
@@ -719,31 +777,32 @@ handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
 	closure->errstr = _("invalid AlertMessage");
 	debug_return_bool(false);
     }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AlertMessage", __func__);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received AlertMessage from %s",
+	source, __func__);
 
-    if (closure->relay_closure != NULL) {
-	/* Forward AlertMessage to connected relay. */
-	debug_return_bool(relay_alert(msg, buf, len, closure));
+    debug_return_bool(closure->cms->alert(msg, buf, len, closure));
+}
+
+static bool
+store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(store_iobuf_local, SUDO_DEBUG_UTIL);
+
+    /* Store IoBuffer in log. */
+    if (store_iobuf(iofd, iobuf, closure) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "failed to store IoBuffer");
+	closure->errstr = _("error writing IoBuffer");
+	debug_return_bool(false);
     }
 
-    if (closure->store_first) {
-	/* Store message in a journal for later relaying. */
-	if (!journal_write(buf, len, closure))
-	    debug_return_bool(false);
-    } else {
-	if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
-	    closure->evlog = evlog_new(NULL, msg->info_msgs,
-		msg->n_info_msgs, closure);
-	    if (closure->evlog == NULL) {
-		closure->errstr = _("error parsing AlertMessage");
-		debug_return_bool(false);
-	    }
-	}
-
-	alert_time.tv_sec = msg->alert_time->tv_sec;
-	alert_time.tv_nsec = msg->alert_time->tv_nsec;
-	if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
-	    closure->errstr = _("error logging alert event");
+    /* Random drop is a debugging tool to test client restart. */
+    if (random_drop > 0.0) {
+	double randval = arc4random() / (double)UINT32_MAX;
+	if (randval < random_drop) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"randomly dropping connection (%f < %f)", randval, random_drop);
 	    debug_return_bool(false);
 	}
     }
@@ -751,65 +810,69 @@ handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
     debug_return_bool(true);
 }
 
+/* Enable a commit event if not relaying and it is not already pending. */
+static bool
+enable_commit(struct connection_closure *closure)
+{
+    debug_decl(enable_commit, SUDO_DEBUG_UTIL);
+
+    if (closure->relay_closure == NULL) {
+	if (!ISSET(closure->commit_ev->flags, SUDO_EVQ_INSERTED)) {
+	    struct timespec tv = { ACK_FREQUENCY, 0 };
+	    if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to add commit point event");
+		debug_return_bool(false);
+	    }
+	}
+    }
+    debug_return_bool(true);
+}
+
 static bool
 handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     debug_decl(handle_iobuf, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	    "unexpected state %d for %s", closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
     if (!closure->log_io) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "not logging I/O");
+	    "not logging I/O for %s", source);
 	closure->errstr = _("protocol error");
 	debug_return_bool(false);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received IoBuffer", __func__);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received IoBuffer from %s",
+	source, __func__);
 
-    if (closure->relay_closure != NULL) {
-	/* Forward IoBuffer to connected relay. */
-	debug_return_bool(relay_iobuf(iobuf, buf, len, closure));
-    }
+    if (!closure->cms->iobuf(iofd, iobuf, buf, len, closure))
+	debug_return_bool(false);
+    if (!enable_commit(closure))
+	debug_return_bool(false);
 
-    if (closure->store_first) {
-	/* Store message in a journal for later relaying. */
-        if (!journal_write(buf, len, closure))
-            debug_return_bool(false);
-	update_elapsed_time(iobuf->delay, &closure->elapsed_time);
-    } else {
-	/* Store IoBuffer in log. */
-	if (store_iobuf(iofd, iobuf, closure) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"failed to store IoBuffer");
-	    closure->errstr = _("error writing IoBuffer");
-	    debug_return_bool(false);
-	}
+    debug_return_bool(true);
+}
 
-	/* Random drop is a debugging tool to test client restart. */
-	if (random_drop > 0.0) {
-	    double randval = arc4random() / (double)UINT32_MAX;
-	    if (randval < random_drop) {
-		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "randomly dropping connection (%f < %f)", randval, random_drop);
-		debug_return_bool(false);
-	    }
-	}
-    }
+static bool
+store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(store_winsize_local, SUDO_DEBUG_UTIL);
 
-    /* Schedule a commit point in 10 sec if one is not already pending. */
-    if (!ISSET(closure->commit_ev->flags, SUDO_EVQ_INSERTED)) {
-	struct timespec tv = { ACK_FREQUENCY, 0 };
-	if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add commit point event");
-	    debug_return_bool(false);
-	}
+    /* Store new window size in log. */
+    if (store_winsize(msg, closure) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "failed to store ChangeWindowSize");
+	closure->errstr = _("error writing ChangeWindowSize");
+	debug_return_bool(false);
     }
 
     debug_return_bool(true);
@@ -819,41 +882,46 @@ static bool
 handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     debug_decl(handle_winsize, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	    "unexpected state %d for %s", closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
     if (!closure->log_io) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "not logging I/O");
+	    "not logging I/O for %s", source);
 	closure->errstr = _("protocol error");
 	debug_return_bool(false);
     }
 
-    if (closure->relay_closure != NULL) {
-	/* Forward ChangeWindowSize to connected relay. */
-	debug_return_bool(relay_winsize(msg, buf, len, closure));
-    }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize from %s",
+	source, __func__);
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize",
-	__func__);
+    if (!closure->cms->winsize(msg, buf, len, closure))
+	debug_return_bool(false);
+    if (!enable_commit(closure))
+	debug_return_bool(false);
 
-    if (closure->store_first) {
-	/* Store message in a journal for later relaying. */
-	if (!journal_write(buf, len, closure))
-	    debug_return_bool(false);
-    } else {
-	/* Store new window size in log. */
-	if (store_winsize(msg, closure) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"failed to store ChangeWindowSize");
-	    closure->errstr = _("error writing ChangeWindowSize");
-	    debug_return_bool(false);
-	}
+    debug_return_bool(true);
+}
+
+static bool
+store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(store_suspend_local, SUDO_DEBUG_UTIL);
+
+    /* Store suspend signal in log. */
+    if (store_suspend(msg, closure) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "failed to store CommandSuspend");
+	closure->errstr = _("error writing CommandSuspend");
+	debug_return_bool(false);
     }
 
     debug_return_bool(true);
@@ -863,42 +931,30 @@ static bool
 handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    debug_decl(handle_suspend, SUDO_DEBUG_UTIL);
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
+    debug_decl(handle_syspend, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	    "unexpected state %d for %s", closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
     if (!closure->log_io) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "not logging I/O");
+	    "not logging I/O for %s", source);
 	closure->errstr = _("protocol error");
 	debug_return_bool(false);
     }
 
-    if (closure->relay_closure != NULL) {
-	/* Forward CommandSuspend to connected relay. */
-	debug_return_bool(relay_suspend(msg, buf, len, closure));
-    }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend from %s",
+	source, __func__);
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend",
-	__func__);
-
-    if (closure->store_first) {
-	/* Store message in a journal for later relaying. */
-        if (!journal_write(buf, len, closure))
-            debug_return_bool(false);
-    } else {
-	/* Store suspend signal in log. */
-	if (store_suspend(msg, closure) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"failed to store CommandSuspend");
-	    closure->errstr = _("error writing CommandSuspend");
-	    debug_return_bool(false);
-	}
-    }
+    if (!closure->cms->suspend(msg, buf, len, closure))
+	debug_return_bool(false);
+    if (!enable_commit(closure))
+	debug_return_bool(false);
 
     debug_return_bool(true);
 }
@@ -1315,26 +1371,29 @@ bool
 schedule_commit_point(TimeSpec *commit_point,
     struct connection_closure *closure)
 {
-    ServerMessage msg = SERVER_MESSAGE__INIT;
     debug_decl(schedule_commit_point, SUDO_DEBUG_UTIL);
 
-    /* Send the client an acknowledgement of what has been committed to disk. */
-    msg.u.commit_point = commit_point;
-    msg.type_case = SERVER_MESSAGE__TYPE_COMMIT_POINT;
+    if (closure->write_ev != NULL) {
+	/* Send an acknowledgement of what we've committed to disk. */
+	ServerMessage msg = SERVER_MESSAGE__INIT;
+	msg.u.commit_point = commit_point;
+	msg.type_case = SERVER_MESSAGE__TYPE_COMMIT_POINT;
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending commit point [%lld, %ld]",
-	__func__, (long long)commit_point->tv_sec, (long)commit_point->tv_nsec);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: sending commit point [%lld, %ld]", __func__,
+	    (long long)commit_point->tv_sec, (long)commit_point->tv_nsec);
 
-    if (!fmt_server_message(closure, &msg)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format ServerMessage (commit point)");
-	goto bad;
-    }
-    if (sudo_ev_add(closure->evbase, closure->write_ev,
-        logsrvd_conf_server_timeout(), false) == -1) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to add server write event");
-        goto bad;
+	if (!fmt_server_message(closure, &msg)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to format ServerMessage (commit point)");
+	    goto bad;
+	}
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+	    logsrvd_conf_server_timeout(), false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    goto bad;
+	}
     }
 
     if (closure->state == EXITED)
@@ -2060,3 +2119,14 @@ main(int argc, char *argv[])
 
     debug_return_int(1);
 }
+
+struct client_message_switch cms_local = {
+    store_accept_local,
+    store_reject_local,
+    store_exit_local,
+    store_restart_local,
+    store_alert_local,
+    store_iobuf_local,
+    store_suspend_local,
+    store_winsize_local
+};

@@ -47,8 +47,9 @@
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
-#include "sudo_gettext.h"
+#include "sudo_event.h"
 #include "sudo_eventlog.h"
+#include "sudo_gettext.h"
 #include "sudo_iolog.h"
 #include "sudo_util.h"
 
@@ -283,8 +284,9 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
  * Seeks to the resume_point in RestartMessage before continuing.
  * Returns true if we reached the target time exactly, else false.
  */
-bool
-journal_restart(RestartMessage *msg, struct connection_closure *closure)
+static bool
+journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
+    struct connection_closure *closure)
 {
     struct timespec target;
     int fd, len;
@@ -352,3 +354,132 @@ journal_write(uint8_t *buf, size_t len, struct connection_closure *closure)
     }
     debug_return_bool(true);
 }
+
+/*
+ * Store an AcceptMessage from the client in the journal.
+ */
+static bool
+journal_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(journal_accept, SUDO_DEBUG_UTIL);
+
+    /* Store message in a journal for later relaying. */
+    if (!journal_open(closure))
+	debug_return_bool(false);
+    if (!journal_write(buf, len, closure))
+	debug_return_bool(false);
+
+    if (msg->expect_iobufs) {
+	/* Send log ID to client for restarting connections. */
+	if (!fmt_log_id_message(closure->journal_path, closure))
+	    debug_return_bool(false);
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_server_timeout(), false) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to add server write event");
+	    debug_return_bool(false);
+	}
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Store a RejectMessage from the client in the journal.
+ */
+static bool
+journal_reject(RejectMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(journal_reject, SUDO_DEBUG_UTIL);
+
+    /* Store message in a journal for later relaying. */
+    if (!journal_open(closure))
+	debug_return_bool(false);
+    if (!journal_write(buf, len, closure))
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}
+
+/*
+ * Store an ExitMessage from the client in the journal.
+ */
+static bool
+journal_exit(ExitMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(journal_exit, SUDO_DEBUG_UTIL);
+
+    /* Store exit message in journal. */
+    if (!journal_write(buf, len, closure))
+	debug_return_bool(false);
+    if (!journal_finish(closure))
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}
+
+/*
+ * Store an AlertMessage from the client in the journal.
+ */
+static bool
+journal_alert(AlertMessage *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(journal_alert, SUDO_DEBUG_UTIL);
+
+    debug_return_bool(journal_write(buf, len, closure));
+}
+
+/*
+ * Store an IoBuffer from the client in the journal.
+ */
+static bool
+journal_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(journal_iobuf, SUDO_DEBUG_UTIL);
+
+    if (!journal_write(buf, len, closure))
+	debug_return_bool(false);
+    update_elapsed_time(iobuf->delay, &closure->elapsed_time);
+
+    debug_return_bool(true);
+}
+
+/*
+ * Store a CommandSuspend message from the client in the journal.
+ */
+static bool
+journal_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(journal_suspend, SUDO_DEBUG_UTIL);
+
+    debug_return_bool(journal_write(buf, len, closure));
+}
+
+/*
+ * Store a ChangeWindowSize message from the client in the journal.
+ */
+static bool
+journal_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
+{
+    debug_decl(journal_winsize, SUDO_DEBUG_UTIL);
+
+    debug_return_bool(journal_write(buf, len, closure));
+}
+
+struct client_message_switch cms_journal = {
+    journal_accept,
+    journal_reject,
+    journal_exit,
+    journal_restart,
+    journal_alert,
+    journal_iobuf,
+    journal_suspend,
+    journal_winsize
+};

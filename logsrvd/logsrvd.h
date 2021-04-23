@@ -81,6 +81,7 @@ struct relay_closure {
  */
 struct connection_closure {
     TAILQ_ENTRY(connection_closure) entries;
+    struct client_message_switch *cms;
     struct relay_closure *relay_closure;
     struct eventlog *evlog;
     struct timespec elapsed_time;
@@ -104,7 +105,6 @@ struct connection_closure {
     enum connection_status state;
     bool tls;
     bool log_io;
-    bool relay_only;
     bool store_first;
     bool read_instead_of_write;
     bool write_instead_of_read;
@@ -114,6 +114,26 @@ struct connection_closure {
 #else
     char ipaddr[INET_ADDRSTRLEN];
 #endif
+};
+
+/* Client message switch. */
+struct client_message_switch {
+    bool (*accept)(AcceptMessage *msg, uint8_t *buf, size_t len,
+	struct connection_closure *closure);
+    bool (*reject)(RejectMessage *msg, uint8_t *buf, size_t len,
+	struct connection_closure *closure);
+    bool (*exit)(ExitMessage *msg, uint8_t *buf, size_t len,
+	struct connection_closure *closure);
+    bool (*restart)(RestartMessage *msg, uint8_t *buf, size_t len,
+	struct connection_closure *closure);
+    bool (*alert)(AlertMessage *msg, uint8_t *buf, size_t len,
+	struct connection_closure *closure);
+    bool (*iobuf)(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
+	struct connection_closure *closure);
+    bool (*suspend)(CommandSuspend *msg, uint8_t *buf, size_t len,
+	struct connection_closure *closure);
+    bool (*winsize)(ChangeWindowSize *msg, uint8_t *buf, size_t len,
+	struct connection_closure *closure);
 };
 
 union sockaddr_union {
@@ -159,6 +179,7 @@ void iolog_close_all(struct connection_closure *closure);
 void update_elapsed_time(TimeSpec *delta, struct timespec *elapsed);
 
 /* logsrvd.c */
+extern struct client_message_switch cms_local;
 bool start_protocol(struct connection_closure *closure);
 void connection_close(struct connection_closure *closure);
 bool schedule_commit_point(TimeSpec *commit_point, struct connection_closure *closure);
@@ -192,22 +213,15 @@ void address_list_delref(struct server_address_list *);
 void logsrvd_conf_cleanup(void);
 
 /* logsrvd_journal.c */
+extern struct client_message_switch cms_journal;
 bool journal_open(struct connection_closure *closure);
 bool journal_finish(struct connection_closure *closure);
 bool journal_write(uint8_t *buf, size_t len, struct connection_closure *closure);
-bool journal_restart(RestartMessage *msg, struct connection_closure *closure);
 
 /* logsrvd_relay.c */
+extern struct client_message_switch cms_relay;
 void relay_closure_free(struct relay_closure *relay_closure);
 bool connect_relay(struct connection_closure *closure);
 bool relay_shutdown(struct connection_closure *closure);
-bool relay_accept(AcceptMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool relay_reject(RejectMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool relay_exit(ExitMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool relay_restart(RestartMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool relay_alert(AlertMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool relay_iobuf(IoBuffer *iobuf, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool relay_suspend(CommandSuspend *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool relay_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
 
 #endif /* SUDO_LOGSRVD_H */
