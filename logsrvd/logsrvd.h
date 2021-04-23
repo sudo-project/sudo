@@ -163,7 +163,7 @@ bool start_protocol(struct connection_closure *closure);
 void connection_close(struct connection_closure *closure);
 bool schedule_commit_point(TimeSpec *commit_point, struct connection_closure *closure);
 bool fmt_log_id_message(const char *id, struct connection_closure *closure);
-bool fmt_error_message(const char *errstr, struct connection_closure *closure);
+bool schedule_error_message(const char *errstr, struct connection_closure *closure);
 struct connection_buffer *get_free_buf(size_t, struct connection_closure *closure);
 
 /* logsrvd_conf.c */

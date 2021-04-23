@@ -590,19 +590,9 @@ handle_server_error(char *errmsg, struct connection_closure *closure)
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
 	errmsg);
 
-    if (closure->write_ev != NULL) {
-	if (!fmt_error_message(errmsg, closure))
-	    debug_return_bool(false);
-
-	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_relay_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    debug_return_bool(false);
-	}
-    }
     sudo_ev_del(closure->evbase, relay_closure->read_ev);
-    closure->state = ERROR;
+    if (!schedule_error_message(errmsg, closure))
+	debug_return_bool(false);
 
     debug_return_bool(true);
 }
@@ -622,19 +612,9 @@ handle_server_abort(char *errmsg, struct connection_closure *closure)
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
 	errmsg);
 
-    if (closure->write_ev != NULL) {
-	if (!fmt_error_message(errmsg, closure))
-	    debug_return_bool(false);
-
-	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_relay_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    debug_return_bool(false);
-	}
-    }
     sudo_ev_del(closure->evbase, relay_closure->read_ev);
-    closure->state = ERROR;
+    if (!schedule_error_message(errmsg, closure))
+	debug_return_bool(false);
 
     debug_return_bool(true);
 }
@@ -869,20 +849,9 @@ send_error:
      * Try to send client an error message before closing connection.
      * If we are already in an error state, just give up.
      */
-    if (closure->state == ERROR)
-	goto close_connection;
-    if (closure->errstr != NULL || !fmt_error_message(closure->errstr, closure))
-	goto close_connection;
-    if (closure->write_ev != NULL) {
-	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_relay_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    goto close_connection;
-	}
-    }
     sudo_ev_del(closure->evbase, relay_closure->read_ev);
-    closure->state = ERROR;
+    if (!schedule_error_message(closure->errstr, closure))
+	goto close_connection;
     debug_return;
 
 close_connection:
@@ -1017,20 +986,9 @@ send_error:
      * Try to send client an error message before closing connection.
      * If we are already in an error state, just give up.
      */
-    if (closure->state == ERROR)
-	goto close_connection;
-    if (closure->errstr != NULL || !fmt_error_message(closure->errstr, closure))
-	goto close_connection;
-    if (closure->write_ev != NULL) {
-	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_relay_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    goto close_connection;
-	}
-    }
     sudo_ev_del(closure->evbase, relay_closure->read_ev);
-    closure->state = ERROR;
+    if (!schedule_error_message(closure->errstr, closure))
+	goto close_connection;
     debug_return;
 
 close_connection:

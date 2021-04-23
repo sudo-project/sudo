@@ -355,7 +355,7 @@ fmt_log_id_message(const char *id, struct connection_closure *closure)
     debug_return_bool(fmt_server_message(closure, &msg));
 }
 
-bool
+static bool
 fmt_error_message(const char *errstr, struct connection_closure *closure)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
@@ -365,6 +365,35 @@ fmt_error_message(const char *errstr, struct connection_closure *closure)
     msg.type_case = SERVER_MESSAGE__TYPE_ERROR;
 
     debug_return_bool(fmt_server_message(closure, &msg));
+}
+
+/*
+ * Format a ServerMessage with the error string and add it to the write queue.
+ * Also sets the state to ERROR.
+ * Returns true if successfully scheduled, else false.
+ */
+bool
+schedule_error_message(const char *errstr, struct connection_closure *closure)
+{
+    debug_decl(schedule_error_message, SUDO_DEBUG_UTIL);
+
+    if (errstr == NULL || closure->state == ERROR || closure->write_ev == NULL)
+	debug_return_bool(false);
+
+    /* Set state to ERROR regardless of whether we can send the message. */
+    closure->state = ERROR;
+
+    /* Format error message and add to the write queue. */
+    if (!fmt_error_message(errstr, closure))
+	debug_return_bool(false);
+    if (sudo_ev_add(closure->evbase, closure->write_ev,
+	    logsrvd_conf_server_timeout(), false) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to add server write event");
+	debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
 }
 
 struct logsrvd_info_closure {
@@ -665,17 +694,9 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     }
     if (!restarted) {
 	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log", __func__);
-	/* XXX - structured error message so client can send from beginning */
-	if (!fmt_error_message(closure->errstr, closure))
-	    debug_return_bool(false);
 	sudo_ev_del(closure->evbase, closure->read_ev);
-	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_server_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
+	if (!schedule_error_message(closure->errstr, closure))
 	    debug_return_bool(false);
-	}
-	closure->state = ERROR;
 	debug_return_bool(true);
     }
 
@@ -1272,24 +1293,16 @@ client_msg_cb(int fd, int what, void *v)
 	goto close_connection;
 
     debug_return;
+
 send_error:
     /*
-     * Try to send client an error message before closing connection.
-     * If we are already in an error state, just give up.
+     * Try to send client an error message before closing the connection.
      */
-    if (closure->state == ERROR || closure->write_ev == NULL)
-	goto close_connection;
-    if (closure->errstr == NULL || !fmt_error_message(closure->errstr, closure))
-	goto close_connection;
     sudo_ev_del(closure->evbase, closure->read_ev);
-    if (sudo_ev_add(closure->evbase, closure->write_ev,
-	    logsrvd_conf_server_timeout(), false) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to add server write event");
+    if (!schedule_error_message(closure->errstr, closure))
 	goto close_connection;
-    }
-    closure->state = ERROR;
     debug_return;
+
 close_connection:
     connection_close(closure);
     debug_return;
