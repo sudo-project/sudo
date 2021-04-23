@@ -363,6 +363,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      */
     sigfillset(&set);
     sigprocmask(SIG_BLOCK, &set, &oset);
+    signal(SIGCHLD, SIG_DFL);
 
     /* Check for early termination or suspend signals before we fork. */
     if (sudo_terminated(cstat)) {
