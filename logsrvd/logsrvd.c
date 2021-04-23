@@ -278,7 +278,7 @@ get_free_buf(size_t len, struct connection_closure *closure)
     else
         buf = calloc(1, sizeof(*buf));
 
-    if (len > buf->size) {
+    if (buf != NULL && len > buf->size) {
 	free(buf->data);
 	buf->size = sudo_pow2_roundup(len);
 	if ((buf->data = malloc(buf->size)) == NULL) {
