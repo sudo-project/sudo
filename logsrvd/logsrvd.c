@@ -113,7 +113,8 @@ connection_closure_free(struct connection_closure *closure)
 	TAILQ_REMOVE(&connections, closure, entries);
 	if (closure->relay_closure != NULL)
 	    relay_closure_free(closure->relay_closure);
-	close(closure->sock);
+	if (closure->sock != -1)
+	    close(closure->sock);
 	iolog_close_all(closure);
 	sudo_ev_free(closure->commit_ev);
 	sudo_ev_free(closure->read_ev);
