@@ -104,6 +104,7 @@ struct connection_closure {
     enum connection_status state;
     bool tls;
     bool log_io;
+    bool store_first;
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;

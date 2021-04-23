@@ -254,7 +254,7 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 	    }
 	}
 
-	if (timespeccmp(&elapsed_time, target, >=)) {
+	if (sudo_timespeccmp(&elapsed_time, target, >=)) {
 	    if (sudo_timespeccmp(&elapsed_time, target, ==)) {
 		ret = true;
 		break;

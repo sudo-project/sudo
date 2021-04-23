@@ -342,7 +342,7 @@ handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(relay_accept(msg, buf, len, closure));
     }
 
-    if (logsrvd_conf_relay_store_first()) {
+    if (closure->store_first) {
 	/* Store message in a journal for later relaying. */
         if (!journal_open(closure))
             debug_return_bool(false);
@@ -425,7 +425,7 @@ handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(relay_reject(msg, buf, len, closure));
     }
 
-    if (logsrvd_conf_relay_store_first()) {
+    if (closure->store_first) {
 	/* Store message in a journal for later relaying. */
         if (!journal_open(closure))
             debug_return_bool(false);
@@ -482,7 +482,7 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 	    "command exited with %d", msg->exit_value);
     }
 
-    if (logsrvd_conf_relay_store_first()) {
+    if (closure->store_first) {
 	/* Store message in a journal for later relaying. */
         if (!journal_write(buf, len, closure))
             debug_return_bool(false);
@@ -545,7 +545,7 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(relay_restart(msg, buf, len, closure));
     }
 
-    if (logsrvd_conf_relay_store_first()) {
+    if (closure->store_first) {
         restarted = journal_restart(msg, closure);
     } else {
 	restarted = iolog_restart(msg, closure);
@@ -592,7 +592,7 @@ handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(relay_alert(msg, buf, len, closure));
     }
 
-    if (logsrvd_conf_relay_store_first()) {
+    if (closure->store_first) {
 	/* Store message in a journal for later relaying. */
 	if (!journal_write(buf, len, closure))
 	    debug_return_bool(false);
@@ -643,7 +643,7 @@ handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
 	debug_return_bool(relay_iobuf(iobuf, buf, len, closure));
     }
 
-    if (logsrvd_conf_relay_store_first()) {
+    if (closure->store_first) {
 	/* Store message in a journal for later relaying. */
         if (!journal_write(buf, len, closure))
             debug_return_bool(false);
@@ -708,7 +708,7 @@ handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize",
 	__func__);
 
-    if (logsrvd_conf_relay_store_first()) {
+    if (closure->store_first) {
 	/* Store message in a journal for later relaying. */
 	if (!journal_write(buf, len, closure))
 	    debug_return_bool(false);
@@ -752,7 +752,7 @@ handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend",
 	__func__);
 
-    if (logsrvd_conf_relay_store_first()) {
+    if (closure->store_first) {
 	/* Store message in a journal for later relaying. */
         if (!journal_write(buf, len, closure))
             debug_return_bool(false);
@@ -1413,7 +1413,7 @@ tls_handshake_cb(int fd, int what, void *v)
         SSL_get_cipher(closure->ssl));
 
     /* Start the actual protocol now that the TLS handshake is complete. */
-    if (!TAILQ_EMPTY(logsrvd_conf_relay_address()) && !logsrvd_conf_relay_store_first()) {
+    if (!TAILQ_EMPTY(logsrvd_conf_relay_address()) && !closure->store_first) {
 	if (!connect_relay(closure))
 	    goto bad;
     } else {
@@ -1443,6 +1443,7 @@ connection_closure_alloc(int sock, bool tls, struct sudo_event_base *base)
     closure->iolog_dir_fd = -1;
     closure->sock = sock;
     closure->evbase = base;
+    closure->store_first = logsrvd_conf_relay_store_first();
     TAILQ_INIT(&closure->write_bufs);
     TAILQ_INIT(&closure->free_bufs);
 
@@ -1553,7 +1554,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 #endif
     /* If no TLS handshake, start the protocol immediately. */
     if (!tls) {
-	if (!TAILQ_EMPTY(logsrvd_conf_relay_address()) && !logsrvd_conf_relay_store_first()) {
+	if (!TAILQ_EMPTY(logsrvd_conf_relay_address()) && !closure->store_first) {
 	    if (!connect_relay(closure))
 		goto bad;
 	} else {
