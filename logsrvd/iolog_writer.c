@@ -982,7 +982,7 @@ bad:
  * Add given delta to elapsed time.
  * We cannot use timespecadd here since delta is not struct timespec.
  */
-static void
+void
 update_elapsed_time(TimeSpec *delta, struct timespec *elapsed)
 {
     debug_decl(update_elapsed_time, SUDO_DEBUG_UTIL);

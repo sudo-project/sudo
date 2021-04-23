@@ -132,6 +132,9 @@ connection_closure_free(struct connection_closure *closure)
 	    free(buf->data);
 	    free(buf);
 	}
+	free(closure->journal_path);
+	if (closure->journal != NULL)
+	    fclose(closure->journal);
 	free(closure);
 
 	if (shutting_down && TAILQ_EMPTY(&connections))
@@ -313,6 +316,7 @@ static bool
 handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    char *log_id = NULL;
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
     debug_decl(handle_accept, SUDO_DEBUG_UTIL);
 
@@ -338,30 +342,44 @@ handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(relay_accept(msg, buf, len, closure));
     }
 
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs, closure);
-    if (closure->evlog == NULL) {
-	closure->errstr = _("error parsing AcceptMessage");
-	debug_return_bool(false);
-    }
-
-    /* Create I/O log info file and parent directories. */
-    if (msg->expect_iobufs) {
-	if (!iolog_init(msg, closure)) {
-	    closure->errstr = _("error creating I/O log");
+    if (logsrvd_conf_relay_store_first()) {
+	/* Store message in a journal for later relaying. */
+        if (!journal_open(closure))
+            debug_return_bool(false);
+        if (!journal_write(buf, len, closure))
+            debug_return_bool(false);
+	if (msg->expect_iobufs) {
+	    closure->log_io = true;
+	    log_id = closure->journal_path;
+	}
+    } else {
+	/* Store sudo-style event and I/O logs. */
+	closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
+	    msg->n_info_msgs, closure);
+	if (closure->evlog == NULL) {
+	    closure->errstr = _("error parsing AcceptMessage");
 	    debug_return_bool(false);
 	}
-	closure->log_io = true;
+
+	/* Create I/O log info file and parent directories. */
+	if (msg->expect_iobufs) {
+	    if (!iolog_init(msg, closure)) {
+		closure->errstr = _("error creating I/O log");
+		debug_return_bool(false);
+	    }
+	    closure->log_io = true;
+	    log_id = closure->evlog->iolog_path;
+	}
+
+	if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
+	    closure->errstr = _("error logging accept event");
+	    debug_return_bool(false);
+	}
     }
 
-    if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
-	closure->errstr = _("error logging accept event");
-	debug_return_bool(false);
-    }
-
-    if (msg->expect_iobufs) {
+    if (log_id != NULL) {
 	/* Send log ID to client for restarting connections. */
-	if (!fmt_log_id_message(closure->evlog->iolog_path, closure))
+	if (!fmt_log_id_message(log_id, closure))
 	    debug_return_bool(false);
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {
@@ -407,17 +425,25 @@ handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(relay_reject(msg, buf, len, closure));
     }
 
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs, closure);
-    if (closure->evlog == NULL) {
-	closure->errstr = _("error parsing RejectMessage");
-	debug_return_bool(false);
-    }
+    if (logsrvd_conf_relay_store_first()) {
+	/* Store message in a journal for later relaying. */
+        if (!journal_open(closure))
+            debug_return_bool(false);
+        if (!journal_write(buf, len, closure))
+            debug_return_bool(false);
+    } else {
+	closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
+	    msg->n_info_msgs, closure);
+	if (closure->evlog == NULL) {
+	    closure->errstr = _("error parsing RejectMessage");
+	    debug_return_bool(false);
+	}
 
-    if (!eventlog_reject(closure->evlog, 0, msg->reason,
-	    logsrvd_json_log_cb, &info)) {
-	closure->errstr = _("error logging reject event");
-	debug_return_bool(false);
+	if (!eventlog_reject(closure->evlog, 0, msg->reason,
+		logsrvd_json_log_cb, &info)) {
+	    closure->errstr = _("error logging reject event");
+	    debug_return_bool(false);
+	}
     }
 
     closure->state = FINISHED;
@@ -456,6 +482,15 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 	    "command exited with %d", msg->exit_value);
     }
 
+    if (logsrvd_conf_relay_store_first()) {
+	/* Store message in a journal for later relaying. */
+        if (!journal_write(buf, len, closure))
+            debug_return_bool(false);
+        if (!journal_finish(closure))
+            debug_return_bool(false);
+	/* XXX - schedule relay of journal file */
+    }
+
     if (closure->log_io) {
 	/* No more data, command exited. */
 	closure->state = EXITED;
@@ -465,12 +500,14 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 	    __func__, (long long)closure->elapsed_time.tv_sec,
 	    closure->elapsed_time.tv_nsec);
 
-	/* Clear write bits from I/O timing file to indicate completion. */
-	mode = logsrvd_conf_iolog_mode();
-	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
-	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"unable to fchmodat timing file");
+	if (closure->iolog_dir_fd != -1) {
+	    /* Clear write bits from I/O timing file to indicate completion. */
+	    mode = logsrvd_conf_iolog_mode();
+	    CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
+	    if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to fchmodat timing file");
+	    }
 	}
 
 	/* Schedule the final commit point event immediately. */
@@ -491,6 +528,7 @@ static bool
 handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    bool restarted;
     debug_decl(handle_restart, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
@@ -507,7 +545,12 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(relay_restart(msg, buf, len, closure));
     }
 
-    if (!iolog_restart(msg, closure)) {
+    if (logsrvd_conf_relay_store_first()) {
+        restarted = journal_restart(msg, closure);
+    } else {
+	restarted = iolog_restart(msg, closure);
+    }
+    if (!restarted) {
 	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log", __func__);
 	/* XXX - structured error message so client can send from beginning */
 	if (!fmt_error_message(closure->errstr, closure))
@@ -549,20 +592,26 @@ handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(relay_alert(msg, buf, len, closure));
     }
 
-    if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
-	closure->evlog = evlog_new(NULL, msg->info_msgs,
-	    msg->n_info_msgs, closure);
-	if (closure->evlog == NULL) {
-	    closure->errstr = _("error parsing AlertMessage");
+    if (logsrvd_conf_relay_store_first()) {
+	/* Store message in a journal for later relaying. */
+	if (!journal_write(buf, len, closure))
+	    debug_return_bool(false);
+    } else {
+	if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
+	    closure->evlog = evlog_new(NULL, msg->info_msgs,
+		msg->n_info_msgs, closure);
+	    if (closure->evlog == NULL) {
+		closure->errstr = _("error parsing AlertMessage");
+		debug_return_bool(false);
+	    }
+	}
+
+	alert_time.tv_sec = msg->alert_time->tv_sec;
+	alert_time.tv_nsec = msg->alert_time->tv_nsec;
+	if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
+	    closure->errstr = _("error logging alert event");
 	    debug_return_bool(false);
 	}
-    }
-
-    alert_time.tv_sec = msg->alert_time->tv_sec;
-    alert_time.tv_nsec = msg->alert_time->tv_nsec;
-    if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
-	closure->errstr = _("error logging alert event");
-	debug_return_bool(false);
     }
 
     debug_return_bool(true);
@@ -594,21 +643,28 @@ handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
 	debug_return_bool(relay_iobuf(iobuf, buf, len, closure));
     }
 
-    /* Store IoBuffer in log. */
-    if (store_iobuf(iofd, iobuf, closure) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "failed to store IoBuffer");
-	closure->errstr = _("error writing IoBuffer");
-	debug_return_bool(false);
-    }
-
-    /* Random drop is a debugging tool to test client restart. */
-    if (random_drop > 0.0) {
-	double randval = arc4random() / (double)UINT32_MAX;
-	if (randval < random_drop) {
-	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"randomly dropping connection (%f < %f)", randval, random_drop);
+    if (logsrvd_conf_relay_store_first()) {
+	/* Store message in a journal for later relaying. */
+        if (!journal_write(buf, len, closure))
+            debug_return_bool(false);
+	update_elapsed_time(iobuf->delay, &closure->elapsed_time);
+    } else {
+	/* Store IoBuffer in log. */
+	if (store_iobuf(iofd, iobuf, closure) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"failed to store IoBuffer");
+	    closure->errstr = _("error writing IoBuffer");
 	    debug_return_bool(false);
+	}
+
+	/* Random drop is a debugging tool to test client restart. */
+	if (random_drop > 0.0) {
+	    double randval = arc4random() / (double)UINT32_MAX;
+	    if (randval < random_drop) {
+		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		    "randomly dropping connection (%f < %f)", randval, random_drop);
+		debug_return_bool(false);
+	    }
 	}
     }
 
@@ -652,12 +708,18 @@ handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize",
 	__func__);
 
-    /* Store new window size in log. */
-    if (store_winsize(msg, closure) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "failed to store ChangeWindowSize");
-	closure->errstr = _("error writing ChangeWindowSize");
-	debug_return_bool(false);
+    if (logsrvd_conf_relay_store_first()) {
+	/* Store message in a journal for later relaying. */
+	if (!journal_write(buf, len, closure))
+	    debug_return_bool(false);
+    } else {
+	/* Store new window size in log. */
+	if (store_winsize(msg, closure) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"failed to store ChangeWindowSize");
+	    closure->errstr = _("error writing ChangeWindowSize");
+	    debug_return_bool(false);
+	}
     }
 
     debug_return_bool(true);
@@ -690,19 +752,26 @@ handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend",
 	__func__);
 
-    /* Store suspend signal in log. */
-    if (store_suspend(msg, closure) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "failed to store CommandSuspend");
-	closure->errstr = _("error writing CommandSuspend");
-	debug_return_bool(false);
+    if (logsrvd_conf_relay_store_first()) {
+	/* Store message in a journal for later relaying. */
+        if (!journal_write(buf, len, closure))
+            debug_return_bool(false);
+    } else {
+	/* Store suspend signal in log. */
+	if (store_suspend(msg, closure) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"failed to store CommandSuspend");
+	    closure->errstr = _("error writing CommandSuspend");
+	    debug_return_bool(false);
+	}
     }
 
     debug_return_bool(true);
 }
 
 static bool
-handle_client_hello(ClientHello *msg, struct connection_closure *closure)
+handle_client_hello(ClientHello *msg, uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     debug_decl(handle_client_hello, SUDO_DEBUG_UTIL);
 
@@ -775,7 +844,7 @@ handle_client_message(uint8_t *buf, size_t len,
 	ret = handle_suspend(msg->u.suspend_event, buf, len, closure);
 	break;
     case CLIENT_MESSAGE__TYPE_HELLO_MSG:
-	ret = handle_client_hello(msg->u.hello_msg, closure);
+	ret = handle_client_hello(msg->u.hello_msg, buf, len, closure);
 	break;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1344,7 +1413,7 @@ tls_handshake_cb(int fd, int what, void *v)
         SSL_get_cipher(closure->ssl));
 
     /* Start the actual protocol now that the TLS handshake is complete. */
-    if (logsrvd_conf_relay_address() != NULL) {
+    if (!TAILQ_EMPTY(logsrvd_conf_relay_address()) && !logsrvd_conf_relay_store_first()) {
 	if (!connect_relay(closure))
 	    goto bad;
     } else {
@@ -1484,7 +1553,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 #endif
     /* If no TLS handshake, start the protocol immediately. */
     if (!tls) {
-	if (logsrvd_conf_relay_address() != NULL) {
+	if (!TAILQ_EMPTY(logsrvd_conf_relay_address()) && !logsrvd_conf_relay_store_first()) {
 	    if (!connect_relay(closure))
 		goto bad;
 	} else {

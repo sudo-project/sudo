@@ -96,6 +96,8 @@ struct connection_closure {
     SSL *ssl;
 #endif
     const char *errstr;
+    FILE *journal;
+    char *journal_path;
     struct iolog_file iolog_files[IOFD_MAX];
     int iolog_dir_fd;
     int sock;
@@ -152,6 +154,7 @@ int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);
 int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
 int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
+void update_elapsed_time(TimeSpec *delta, struct timespec *elapsed);
 
 /* logsrvd.c */
 bool start_protocol(struct connection_closure *closure);
@@ -185,6 +188,12 @@ mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);
 void address_list_delref(struct server_address_list *);
 void logsrvd_conf_cleanup(void);
+
+/* logsrvd_journal.c */
+bool journal_open(struct connection_closure *closure);
+bool journal_finish(struct connection_closure *closure);
+bool journal_write(uint8_t *buf, size_t len, struct connection_closure *closure);
+bool journal_restart(RestartMessage *msg, struct connection_closure *closure);
 
 /* logsrvd_relay.c */
 void relay_closure_free(struct relay_closure *relay_closure);

@@ -1399,6 +1399,10 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     }
 #endif /* HAVE_OPENSSL */
 
+    /* Clear store_first if not relaying. */
+    if (TAILQ_EMPTY(&config->relay.relays.addrs))
+	config->relay.store_first = false;
+
     /* Open event log if specified. */
     switch (config->eventlog.log_type) {
     case EVLOG_SYSLOG:
