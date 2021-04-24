@@ -742,6 +742,7 @@ plugins/sudoers/regress/cvtsudoers/test8.out.ok
 plugins/sudoers/regress/cvtsudoers/test8.sh
 plugins/sudoers/regress/cvtsudoers/test9.out.ok
 plugins/sudoers/regress/cvtsudoers/test9.sh
+plugins/sudoers/regress/editor/check_editor.c
 plugins/sudoers/regress/env_match/check_env_pattern.c
 plugins/sudoers/regress/env_match/data
 plugins/sudoers/regress/exptilde/check_exptilde.c

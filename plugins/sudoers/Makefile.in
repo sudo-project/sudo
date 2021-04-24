@@ -155,9 +155,10 @@ SHELL = @SHELL@
 PROGS = sudoers.la visudo sudoreplay cvtsudoers testsudoers
 
 # Regression tests
-TEST_PROGS = check_addr check_base64 check_digest check_env_pattern \
-	     check_exptilde check_fill check_gentime check_hexchar \
-	     check_iolog_plugin check_starttime check_unesc @SUDOERS_TEST_PROGS@
+TEST_PROGS = check_addr check_base64 check_digest check_editor \
+	     check_env_pattern check_exptilde check_fill check_gentime \
+	     check_hexchar check_iolog_plugin check_starttime \
+	     check_unesc @SUDOERS_TEST_PROGS@
 
 # Fuzzers
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
@@ -223,6 +224,8 @@ CHECK_ADDR_OBJS = check_addr.o interfaces.lo match_addr.lo sudoers_debug.lo \
 CHECK_BASE64_OBJS = check_base64.o b64_decode.lo b64_encode.o sudoers_debug.lo
 
 CHECK_DIGEST_OBJS = check_digest.o filedigest.lo digestname.lo sudoers_debug.lo
+
+CHECK_EDITOR_OBJS = check_editor.o editor.lo sudoers_debug.lo
 
 CHECK_ENV_MATCH_OBJS = check_env_pattern.o env_pattern.lo sudoers_debug.lo
 
@@ -359,6 +362,9 @@ check_base64: $(CHECK_BASE64_OBJS) $(LIBUTIL)
 
 check_digest: $(CHECK_DIGEST_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_DIGEST_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+
+check_editor: $(CHECK_EDITOR_OBJS) $(LIBUTIL)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_EDITOR_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_env_pattern: $(CHECK_ENV_MATCH_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_ENV_MATCH_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
@@ -1118,6 +1124,30 @@ check_digest.i: $(srcdir)/regress/parser/check_digest.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_digest.plog: check_digest.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_digest.c --i-file $< --output-file $@
+check_editor.o: $(srcdir)/regress/editor/check_editor.c $(devdir)/def_data.c \
+                $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
+                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+                $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/editor/check_editor.c
+check_editor.i: $(srcdir)/regress/editor/check_editor.c $(devdir)/def_data.c \
+                $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
+                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+                $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_editor.plog: check_editor.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/editor/check_editor.c --i-file $< --output-file $@
 check_env_pattern.o: $(srcdir)/regress/env_match/check_env_pattern.c \
                      $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
                      $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
