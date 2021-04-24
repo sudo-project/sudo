@@ -325,7 +325,7 @@ will store logs locally before relaying them.
 Once the log is complete, a connection to the relay host is opened
 and the log is relayed.
 If the network connection is interrupted before the log can be fully
-transfered, it will be retransmitted later.
+transferred, it will be retransmitted later.
 The default is to relay logs in real-time.
 .TP 10n
 tcp_keepalive = boolean
