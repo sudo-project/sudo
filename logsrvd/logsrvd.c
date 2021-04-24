@@ -2049,6 +2049,9 @@ main(int argc, char *argv[])
     bindtextdomain("sudo", LOCALEDIR); /* XXX - add logsrvd domain */
     textdomain("sudo");
 
+    /* Create files readable/writable only by owner. */
+    umask(S_IRWXG|S_IRWXO);
+
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(logsrvd_cleanup);
 
