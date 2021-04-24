@@ -182,26 +182,27 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 	    break;
 	}
 
-	/* Read actual message from journal. */
-	if (msg_len > bufsize) {
-	    bufsize = sudo_pow2_roundup(msg_len);
-	    free(buf);
-	    if ((buf = malloc(bufsize)) == NULL) {
-		closure->errstr = _("unable to allocate memory");
+	/* Read actual message now that we know the size. */
+	if (msg_len != 0) {
+	    if (msg_len > bufsize) {
+		bufsize = sudo_pow2_roundup(msg_len);
+		free(buf);
+		if ((buf = malloc(bufsize)) == NULL) {
+		    closure->errstr = _("unable to allocate memory");
+		    break;
+		}
+	    }
+
+	    nread = fread(buf, msg_len, 1, closure->journal);
+	    if (nread != 1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to read message from %s", closure->journal_path);
+		if (feof(closure->journal))
+		    closure->errstr = _("unexpected EOF reading journal file");
+		else
+		    closure->errstr = _("error reading journal file");
 		break;
 	    }
-	}
-
-	/* Read actual message now that we know the size. */
-	nread = fread(buf, msg_len, 1, closure->journal);
-	if (nread != 1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to read message from %s", closure->journal_path);
-	    if (feof(closure->journal))
-		closure->errstr = _("unexpected EOF reading journal file");
-	    else
-		closure->errstr = _("error reading journal file");
-	    break;
 	}
 
 	client_message__free_unpacked(msg, NULL);
