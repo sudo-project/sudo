@@ -347,12 +347,12 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
 		}
 	    }
             args_str = py_create_string_rep(py_args);
-            if (py_args_sorted != NULL)
-                Py_DECREF(py_args_sorted);
-	    if (strncmp(args_str, "RC.", 3) == 0) {
+	    if (args_str != NULL && strncmp(args_str, "RC.", 3) == 0) {
 		/* Strip leading RC. to match python 3.10 behavior. */
 		memmove(args_str, args_str + 3, strlen(args_str + 3) + 1);
 	    }
+            if (py_args_sorted != NULL)
+                Py_DECREF(py_args_sorted);
         }
         if (py_kwargs != NULL) {
             /* Sort by key for consistent output on Python < 3.6 */
