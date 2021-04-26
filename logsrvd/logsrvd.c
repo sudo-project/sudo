@@ -122,6 +122,8 @@ connection_closure_free(struct connection_closure *closure)
 #if defined(HAVE_OPENSSL)
 	sudo_ev_free(closure->ssl_accept_ev);
 	if (closure->ssl != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"closing down TLS connection from %s", closure->ipaddr);
 	    SSL_shutdown(closure->ssl);
 	    SSL_free(closure->ssl);
 	}
@@ -1268,10 +1270,17 @@ client_msg_cb(int fd, int what, void *v)
 		    closure->read_instead_of_write = true;
                     debug_return;
 		case SSL_ERROR_SYSCALL:
+		    if (nread == 0) {
+			/* EOF, handled below */
+			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			    "EOF from %s without proper TLS shutdown",
+			    closure->ipaddr);
+			break;
+		    }
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"unexpected error during SSL_read(): %d (%s)",
-			err, strerror(errno));
-		    goto close_connection;
+			"SSL_read from %s: %s", closure->ipaddr,
+			strerror(errno));
+                    goto close_connection;
                 default:
                     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
                         "unexpected error during SSL_read(): %d (%s)",

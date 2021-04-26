@@ -77,18 +77,21 @@ relay_closure_free(struct relay_closure *relay_closure)
     struct connection_buffer *buf;
     debug_decl(relay_closure_free, SUDO_DEBUG_UTIL);
 
+#if defined(HAVE_OPENSSL)
+    if (relay_closure->tls_client.ssl != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "closing down TLS connection to %s",
+	    relay_closure->relay_name.name);
+	SSL_shutdown(relay_closure->tls_client.ssl);
+	SSL_free(relay_closure->tls_client.ssl);
+    }
+#endif
     if (relay_closure->relays != NULL)
 	address_list_delref(relay_closure->relays);
     sudo_rcstr_delref(relay_closure->relay_name.name);
     sudo_ev_free(relay_closure->read_ev);
     sudo_ev_free(relay_closure->write_ev);
     sudo_ev_free(relay_closure->connect_ev);
-#if defined(HAVE_OPENSSL)
-    if (relay_closure->tls_client.ssl != NULL) {
-	SSL_shutdown(relay_closure->tls_client.ssl);
-	SSL_free(relay_closure->tls_client.ssl);
-    }
-#endif
     free(relay_closure->read_buf.data);
     while ((buf = TAILQ_FIRST(&relay_closure->write_bufs)) != NULL) {
 	TAILQ_REMOVE(&relay_closure->write_bufs, buf, entries);
@@ -752,6 +755,14 @@ relay_server_msg_cb(int fd, int what, void *v)
 			relay_closure->relay_name.ipaddr, errstr);
                     goto close_connection;
                 case SSL_ERROR_SYSCALL:
+		    if (nread == 0) {
+			/* EOF, handled below */
+			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			    "EOF from %s (%s) without proper TLS shutdown",
+			    relay_closure->relay_name.name,
+			    relay_closure->relay_name.ipaddr);
+			break;
+		    }
                     errstr = strerror(errno);
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"SSL_read from %s (%s): %s",
