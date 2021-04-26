@@ -63,10 +63,16 @@ wordsplit(const char *str, const char *endstr, const char **last)
 
     /* If word is quoted, skip to end quote and return. */
     if (*str == '"' || *str == '\'') {
-	const char *endquote = memchr(str + 1, *str, endstr - str);
-	if (endquote != NULL) {
-	    *last = endquote;
-	    debug_return_const_ptr(str + 1);
+	const char *endquote;
+	for (cp = str + 1; cp < endstr; cp = endquote + 1) {
+	    endquote = memchr(cp, *str, endstr - cp);
+	    if (endquote == NULL)
+		break;
+	    /* ignore escaped quotes */
+	    if (endquote[-1] != '\\') {
+		*last = endquote;
+		debug_return_const_ptr(str + 1);
+	    }
 	}
     }
 

@@ -657,6 +657,7 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 		./check_digest > regress/parser/check_digest.out; \
 		diff regress/parser/check_digest.out $(srcdir)/regress/parser/check_digest.out.ok || rval=`expr $$rval + $$?`; \
 	    fi; \
+	    ./check_editor || rval=`expr $$rval + $$?`; \
 	    ./check_env_pattern $(srcdir)/regress/env_match/data || rval=`expr $$rval + $$?`; \
 	    ./check_exptilde || rval=`expr $$rval + $$?`; \
 	    ./check_fill || rval=`expr $$rval + $$?`; \

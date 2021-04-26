@@ -46,6 +46,15 @@ struct test_data {
 	{ "sh", "-c", "vi $1", "--", "/etc/motd", NULL }
     },
     {
+	/* Try connecting to the emacs server, falling back on plain emacs. */
+	"VISUAL=sh -c \"emacsclient -a emacs -n \\\"\\$@\\\" || emacs \\\"\\$@\\\"\"",
+	1,
+	{ "/etc/motd", NULL },
+	"/usr/bin/sh",
+	5,
+	{ "sh", "-c", "emacsclient -a emacs -n \"$@\" || emacs \"$@\"", "--", "/etc/motd", NULL }
+    },
+    {
 	/* GitHub issue #99 */
 	"EDITOR=/usr/bin/vi\\",
 	1,
