@@ -394,6 +394,7 @@ plugins/python/example_debugging.py
 plugins/python/example_group_plugin.py
 plugins/python/example_io_plugin.py
 plugins/python/example_policy_plugin.py
+plugins/python/lsan_suppr.txt
 plugins/python/pyhelpers.c
 plugins/python/pyhelpers.h
 plugins/python/pyhelpers_cpychecker.h

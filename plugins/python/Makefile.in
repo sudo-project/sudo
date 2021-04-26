@@ -234,7 +234,8 @@ check: $(TEST_PROGS) check-fuzzer
 	    unset LANG || LANG=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
-            ./check_python_examples ".libs/python_plugin.so"; \
+	    LSAN_OPTIONS=suppressions=$(srcdir)/lsan_suppr.txt \
+		./check_python_examples ".libs/python_plugin.so"; \
 	fi
 
 update_test_data: $(TEST_PROGS)
