@@ -113,6 +113,15 @@ connection_closure_free(struct connection_closure *closure)
 	TAILQ_REMOVE(&connections, closure, entries);
 	if (closure->relay_closure != NULL)
 	    relay_closure_free(closure->relay_closure);
+#if defined(HAVE_OPENSSL)
+	if (closure->ssl != NULL) {
+	    /* Must call SSL_shutdown() before closing closure->sock. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"closing down TLS connection from %s", closure->ipaddr);
+	    SSL_shutdown(closure->ssl);
+	    SSL_free(closure->ssl);
+	}
+#endif
 	if (closure->sock != -1)
 	    close(closure->sock);
 	iolog_close_all(closure);
@@ -121,12 +130,6 @@ connection_closure_free(struct connection_closure *closure)
 	sudo_ev_free(closure->write_ev);
 #if defined(HAVE_OPENSSL)
 	sudo_ev_free(closure->ssl_accept_ev);
-	if (closure->ssl != NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"closing down TLS connection from %s", closure->ipaddr);
-	    SSL_shutdown(closure->ssl);
-	    SSL_free(closure->ssl);
-	}
 #endif
 	eventlog_free(closure->evlog);
 	free(closure->read_buf.data);
