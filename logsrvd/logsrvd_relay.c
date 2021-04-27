@@ -425,14 +425,20 @@ connect_cb(int sock, int what, void *v)
 #if defined(HAVE_OPENSSL)
 	/* Relay connection succeeded, start TLS handshake. */
 	if (relay_closure->relay_addr->tls) {
-	    if (!connect_relay_tls(closure))
-		connection_close(closure);
+	    if (!connect_relay_tls(closure)) {
+		closure->errstr = _("TLS handshake with relay host failed");
+		if (!schedule_error_message(closure->errstr, closure))
+		    connection_close(closure);
+	    }
 	} else
 #endif
 	{
 	    /* Relay connection succeeded, start talking to the client.  */
-	    if (!start_relay(sock, closure))
-		connection_close(closure);
+	    if (!start_relay(sock, closure)) {
+		closure->errstr = _("unable to allocate memory");
+		if (!schedule_error_message(closure->errstr, closure))
+		    connection_close(closure);
+	    }
 	}
     } else {
 	/* Connection failed, try next relay (if any). */
@@ -449,7 +455,8 @@ connect_cb(int sock, int what, void *v)
 	}
 	if (res == -1 && errno != EINPROGRESS) {
 	    closure->errstr = _("unable to connect to relay host");
-	    closure->state = ERROR;
+	    if (!schedule_error_message(closure->errstr, closure))
+		connection_close(closure);
 	}
     }
 
@@ -497,6 +504,7 @@ handle_server_hello(ServerHello *msg, struct connection_closure *closure)
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected state %d", closure->state);
 	closure->errstr = _("state machine error");
+	debug_return_bool(false);
     }
 
     /* Check that ServerHello is valid. */
@@ -745,15 +753,17 @@ relay_server_msg_cb(int fd, int what, void *v)
                     err = ERR_get_error();
                     if (closure->state == INITIAL &&
                         ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
-                        errstr = "host name does not match certificate";
+                        errstr = _("relay host name does not match certificate");
+			closure->errstr = errstr;
                     } else {
                         errstr = ERR_reason_error_string(err);
+			closure->errstr = _("error reading from relay");
                     }
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"SSL_read from %s (%s): %s",
 			relay_closure->relay_name.name,
 			relay_closure->relay_name.ipaddr, errstr);
-                    goto close_connection;
+                    goto send_error;
                 case SSL_ERROR_SYSCALL:
 		    if (nread == 0) {
 			/* EOF, handled below */
@@ -768,14 +778,16 @@ relay_server_msg_cb(int fd, int what, void *v)
 			"SSL_read from %s (%s): %s",
 			relay_closure->relay_name.name,
 			relay_closure->relay_name.ipaddr, errstr);
-                    goto close_connection;
+		    closure->errstr = _("error reading from relay");
+                    goto send_error;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"SSL_read from %s (%s): %s",
 			relay_closure->relay_name.name,
 			relay_closure->relay_name.ipaddr, errstr);
-                    goto close_connection;
+		    closure->errstr = _("error reading from relay");
+                    goto send_error;
             }
         }
     } else
@@ -808,10 +820,10 @@ relay_server_msg_cb(int fd, int what, void *v)
 
 	if (closure->state != FINISHED) {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"unexpected EOF from %s (%s) [state %d]",
+		"premature EOF from %s (%s) [state %d]",
 		relay_closure->relay_name.name,
 		relay_closure->relay_name.ipaddr, closure->state);
-	    closure->errstr = _("unexpected EOF from relay");
+	    closure->errstr = _("relay server closed connection");
 	    goto send_error;
 	}
 	debug_return;
@@ -927,9 +939,9 @@ relay_client_msg_cb(int fd, int what, void *v)
 
 		    if (closure->state != FINISHED) {
 			sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-			    "unexpected EOF from %s (state %d)",
+			    "premature EOF from %s (state %d)",
 			    relay_closure->relay_name.ipaddr, closure->state);
-			closure->errstr = _("unexpected EOF from relay");
+			closure->errstr = _("relay server closed connection");
 			goto send_error;
 		    }
 		    debug_return;
