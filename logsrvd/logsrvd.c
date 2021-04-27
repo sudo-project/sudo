@@ -1969,7 +1969,7 @@ daemonize(bool nofork)
     debug_decl(daemonize, SUDO_DEBUG_UTIL);
 
     if (!nofork) {
-	switch (fork()) {
+	switch (sudo_debug_fork()) {
 	case -1:
 	    sudo_fatal("fork");
 	case 0:
