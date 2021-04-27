@@ -348,6 +348,7 @@ logsrvd/logsrv_util.c
 logsrvd/logsrv_util.h
 logsrvd/logsrvd.c
 logsrvd/logsrvd.h
+logsrvd/logsrvd_local.c
 logsrvd/logsrvd_conf.c
 logsrvd/logsrvd_journal.c
 logsrvd/logsrvd_relay.c

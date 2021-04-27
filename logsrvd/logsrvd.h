@@ -171,11 +171,9 @@ TAILQ_HEAD(listener_list, listener);
 /* iolog_writer.c */
 struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen, struct connection_closure *closure);
 bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
-bool iolog_restart(RestartMessage *msg, struct connection_closure *closure);
-int store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure);
-int store_suspend(CommandSuspend *msg, struct connection_closure *closure);
-int store_winsize(ChangeWindowSize *msg, struct connection_closure *closure);
+bool iolog_create(int iofd, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
+bool iolog_rewrite(const struct timespec *target, struct connection_closure *closure);
 void update_elapsed_time(TimeSpec *delta, struct timespec *elapsed);
 
 /* logsrvd.c */
@@ -217,6 +215,18 @@ extern struct client_message_switch cms_journal;
 bool journal_open(struct connection_closure *closure);
 bool journal_finish(struct connection_closure *closure);
 bool journal_write(uint8_t *buf, size_t len, struct connection_closure *closure);
+
+/* logsrvd_local.c */
+extern struct client_message_switch cms_local;
+bool set_random_drop(const char *dropstr);
+bool store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
 
 /* logsrvd_relay.c */
 extern struct client_message_switch cms_relay;

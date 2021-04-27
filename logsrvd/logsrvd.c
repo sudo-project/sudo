@@ -87,7 +87,6 @@ static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
 static const char server_id[] = "Sudo Audit Server " PACKAGE_VERSION;
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
-static double random_drop;
 
 /* Event loop callbacks. */
 static void client_msg_cb(int fd, int what, void *v);
@@ -405,111 +404,6 @@ schedule_error_message(const char *errstr, struct connection_closure *closure)
     debug_return_bool(true);
 }
 
-struct logsrvd_info_closure {
-    InfoMessage **info_msgs;
-    size_t infolen;
-};
-
-static bool
-logsrvd_json_log_cb(struct json_container *json, void *v)
-{
-    struct logsrvd_info_closure *closure = v;
-    struct json_value json_value;
-    size_t idx;
-    debug_decl(logsrvd_json_log_cb, SUDO_DEBUG_UTIL);
-
-    for (idx = 0; idx < closure->infolen; idx++) {
-	InfoMessage *info = closure->info_msgs[idx];
-
-	switch (info->value_case) {
-	case INFO_MESSAGE__VALUE_NUMVAL:
-	    json_value.type = JSON_NUMBER;
-	    json_value.u.number = info->u.numval;
-	    if (!sudo_json_add_value(json, info->key, &json_value))
-		goto bad;
-	    break;
-	case INFO_MESSAGE__VALUE_STRVAL:
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = info->u.strval;
-	    if (!sudo_json_add_value(json, info->key, &json_value))
-		goto bad;
-	    break;
-	case INFO_MESSAGE__VALUE_STRLISTVAL: {
-	    InfoMessage__StringList *strlist = info->u.strlistval;
-	    size_t n;
-
-	    if (!sudo_json_open_array(json, info->key))
-		goto bad;
-	    for (n = 0; n < strlist->n_strings; n++) {
-		json_value.type = JSON_STRING;
-		json_value.u.string = strlist->strings[n];
-		if (!sudo_json_add_value(json, NULL, &json_value))
-		    goto bad;
-	    }
-	    if (!sudo_json_close_array(json))
-		goto bad;
-	    break;
-	}
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected value case %d", info->value_case);
-	    goto bad;
-	}
-    }
-    debug_return_bool(true);
-bad:
-    debug_return_bool(false);
-}
-
-/*
- * Parse and store an AcceptMessage locally.
- */
-static bool
-store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
-{
-    char *log_id = NULL;
-    struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
-    debug_decl(store_accept_local, SUDO_DEBUG_UTIL);
-
-    /* Store sudo-style event and I/O logs. */
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs, closure);
-    if (closure->evlog == NULL) {
-	closure->errstr = _("error parsing AcceptMessage");
-	debug_return_bool(false);
-    }
-
-    /* Create I/O log info file and parent directories. */
-    if (msg->expect_iobufs) {
-	if (!iolog_init(msg, closure)) {
-	    closure->errstr = _("error creating I/O log");
-	    debug_return_bool(false);
-	}
-	closure->log_io = true;
-	log_id = closure->evlog->iolog_path;
-    }
-
-    if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
-	closure->errstr = _("error logging accept event");
-	debug_return_bool(false);
-    }
-
-    if (log_id != NULL) {
-	/* Send log ID to client for restarting connections. */
-	if (!fmt_log_id_message(log_id, closure))
-	    debug_return_bool(false);
-	if (sudo_ev_add(closure->evbase, closure->write_ev,
-		logsrvd_conf_server_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    debug_return_bool(false);
-	}
-    }
-
-    debug_return_bool(true);
-}
-
 /*
  * AcceptMessage handler.
  */
@@ -550,32 +444,6 @@ handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
 }
 
 /*
- * Parse and store a RejectMessage locally.
- */
-static bool
-store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
-{
-    struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
-    debug_decl(store_reject_local, SUDO_DEBUG_UTIL);
-
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs, closure);
-    if (closure->evlog == NULL) {
-	closure->errstr = _("error parsing RejectMessage");
-	debug_return_bool(false);
-    }
-
-    if (!eventlog_reject(closure->evlog, 0, msg->reason,
-	    logsrvd_json_log_cb, &info)) {
-	closure->errstr = _("error logging reject event");
-	debug_return_bool(false);
-    }
-
-    debug_return_bool(true);
-}
-
-/*
  * RejectMessage handler.
  */
 static bool
@@ -610,36 +478,6 @@ handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
 	closure->state = FINISHED;
 
     debug_return_bool(ret);
-}
-
-static bool
-store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
-{
-    mode_t mode;
-    debug_decl(store_exit_local, SUDO_DEBUG_UTIL);
-
-    /* Sudo I/O logs don't store this info. */
-    if (msg->signal != NULL && msg->signal[0] != '\0') {
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "command was killed by SIG%s%s", msg->signal,
-	    msg->dumped_core ? " (core dumped)" : "");
-    } else {
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "command exited with %d", msg->exit_value);
-    }
-
-    if (closure->log_io) {
-	/* Clear write bits from I/O timing file to indicate completion. */
-	mode = logsrvd_conf_iolog_mode();
-	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
-	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"unable to fchmodat timing file");
-	}
-    }
-
-    debug_return_bool(true);
 }
 
 static bool
@@ -693,15 +531,6 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 }
 
 static bool
-store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
-{
-    debug_decl(store_restart_local, SUDO_DEBUG_UTIL);
-
-    debug_return_bool(iolog_restart(msg, closure));
-}
-
-static bool
 handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
@@ -737,32 +566,6 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
 }
 
 static bool
-store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
-{
-    struct timespec alert_time;
-    debug_decl(store_alert_local, SUDO_DEBUG_UTIL);
-
-    if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
-	closure->evlog = evlog_new(NULL, msg->info_msgs,
-	    msg->n_info_msgs, closure);
-	if (closure->evlog == NULL) {
-	    closure->errstr = _("error parsing AlertMessage");
-	    debug_return_bool(false);
-	}
-    }
-
-    alert_time.tv_sec = msg->alert_time->tv_sec;
-    alert_time.tv_nsec = msg->alert_time->tv_nsec;
-    if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
-	closure->errstr = _("error logging alert event");
-	debug_return_bool(false);
-    }
-
-    debug_return_bool(true);
-}
-
-static bool
 handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
@@ -782,33 +585,6 @@ handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
 	source, __func__);
 
     debug_return_bool(closure->cms->alert(msg, buf, len, closure));
-}
-
-static bool
-store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
-{
-    debug_decl(store_iobuf_local, SUDO_DEBUG_UTIL);
-
-    /* Store IoBuffer in log. */
-    if (store_iobuf(iofd, iobuf, closure) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "failed to store IoBuffer");
-	closure->errstr = _("error writing IoBuffer");
-	debug_return_bool(false);
-    }
-
-    /* Random drop is a debugging tool to test client restart. */
-    if (random_drop > 0.0) {
-	double randval = arc4random() / (double)UINT32_MAX;
-	if (randval < random_drop) {
-	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"randomly dropping connection (%f < %f)", randval, random_drop);
-	    debug_return_bool(false);
-	}
-    }
-
-    debug_return_bool(true);
 }
 
 /* Enable a commit event if not relaying and it is not already pending. */
@@ -863,23 +639,6 @@ handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
 }
 
 static bool
-store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
-{
-    debug_decl(store_winsize_local, SUDO_DEBUG_UTIL);
-
-    /* Store new window size in log. */
-    if (store_winsize(msg, closure) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "failed to store ChangeWindowSize");
-	closure->errstr = _("error writing ChangeWindowSize");
-	debug_return_bool(false);
-    }
-
-    debug_return_bool(true);
-}
-
-static bool
 handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
@@ -907,23 +666,6 @@ handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     if (!enable_commit(closure))
 	debug_return_bool(false);
-
-    debug_return_bool(true);
-}
-
-static bool
-store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
-{
-    debug_decl(store_suspend_local, SUDO_DEBUG_UTIL);
-
-    /* Store suspend signal in log. */
-    if (store_suspend(msg, closure) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "failed to store CommandSuspend");
-	closure->errstr = _("error writing CommandSuspend");
-	debug_return_bool(false);
-    }
 
     debug_return_bool(true);
 }
@@ -2045,7 +1787,6 @@ main(int argc, char *argv[])
 {
     struct sudo_event_base *evbase;
     bool nofork = false;
-    char *ep;
     int ch;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -2089,11 +1830,8 @@ main(int argc, char *argv[])
 	    break;
 	case 'R':
 	    /* random connection drop probability as a percentage (debug) */
-            errno = 0;
-	    random_drop = strtod(optarg, &ep);
-            if (*ep != '\0' || errno != 0)
+	    if (!set_random_drop(optarg))
                 sudo_fatalx(U_("invalid random drop value: %s"), optarg);
-	    random_drop /= 100.0;	/* convert from percentage */
 	    break;
 	case 'V':
 	    (void)printf(_("%s version %s\n"), getprogname(),
@@ -2130,14 +1868,3 @@ main(int argc, char *argv[])
 
     debug_return_int(1);
 }
-
-struct client_message_switch cms_local = {
-    store_accept_local,
-    store_reject_local,
-    store_exit_local,
-    store_restart_local,
-    store_alert_local,
-    store_iobuf_local,
-    store_suspend_local,
-    store_winsize_local
-};
