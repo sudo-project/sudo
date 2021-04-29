@@ -826,6 +826,8 @@ relay_server_msg_cb(int fd, int what, void *v)
 	    closure->errstr = _("relay server closed connection");
 	    goto send_error;
 	}
+	if (closure->sock == -1)
+	    connection_close(closure);
 	debug_return;
     default:
 	break;
