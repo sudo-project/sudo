@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "April 13, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "April 29, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -126,6 +126,16 @@ Sudo front end configuration
 .TP 26n
 \fI@sysconfdir@/sudo_logsrvd.conf\fR
 Sudo log server configuration file
+.TP 26n
+\fI@relay_dir@/incoming\fR
+Directory where new journals are stored when the
+\fIstore_first relay\fR
+setting is enabled.
+.TP 26n
+\fI@relay_dir@/outgoing\fR
+Directory where completed journals are stored when the
+\fIstore_first relay\fR
+setting is enabled.
 .TP 26n
 \fI@iolog_dir@\fR
 Default I/O log file location

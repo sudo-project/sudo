@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 13, 2021
+.Dd April 29, 2021
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -120,6 +120,14 @@ please refer to its manual.
 Sudo front end configuration
 .It Pa @sysconfdir@/sudo_logsrvd.conf
 Sudo log server configuration file
+.It Pa @relay_dir@/incoming
+Directory where new journals are stored when the
+.Em store_first relay
+setting is enabled.
+.It Pa @relay_dir@/outgoing
+Directory where completed journals are stored when the
+.Em store_first relay
+setting is enabled.
 .It Pa @iolog_dir@
 Default I/O log file location
 .It Pa @rundir@/sudo_logsrvd.pid
