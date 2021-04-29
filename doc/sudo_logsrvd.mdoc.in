@@ -60,11 +60,17 @@ Configuration parameters for
 .Nm
 may be specified in the
 .Xr sudo_logsrvd.conf @mansectform@
-file.
+file or the file specified via the
+.Fl f
+option.
+.Pp
+.Nm
+rereads its configuration file when it receives SIGHUP and writes server
+state to the debug file (if one is configured) when it receives SIGUSR1.
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
-.It Fl f , -file
+.It Fl f Ar file , Fl -file Ns = Ns Ar file
 Read configuration from
 .Ar file
 instead of the default,
@@ -76,7 +82,7 @@ Run
 .Nm
 in the foreground instead of detaching from the terminal and becoming
 a daemon.
-.It Fl R , -random-drop
+.It Fl R Ar percentage , Fl -random-drop Ns = Ns Ar percentage
 For each message, there is a
 .Ar percentage
 chance that the server will drop the connection.

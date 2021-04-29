@@ -1623,6 +1623,83 @@ server_reload(struct sudo_event_base *evbase)
     debug_return;
 }
 
+/*
+ * Dump server information to the debug file.
+ * Includes information about listeners and client connections.
+ */
+static void
+server_dump_stats(void)
+{
+    struct server_address *addr;
+    struct connection_closure *closure;
+    int n;
+    debug_decl(server_dump_stats, SUDO_DEBUG_UTIL);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s", server_id);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "configuration file: %s", conf_file);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "listen addresses:");
+    n = 0;
+    TAILQ_FOREACH(addr, logsrvd_conf_server_listen_address(), entries) {
+	union sockaddr_union *sa_un = &addr->sa_un;
+	char ipaddr[INET6_ADDRSTRLEN];
+
+	switch (sa_un->sa.sa_family) {
+	case AF_INET:
+	    inet_ntop(AF_INET, &sa_un->sin.sin_addr, ipaddr, sizeof(ipaddr));
+	    break;
+	case AF_INET6:
+	    inet_ntop(AF_INET6, &sa_un->sin6.sin6_addr, ipaddr, sizeof(ipaddr));
+	    break;
+	default:
+	    (void)strlcpy(ipaddr, "[unknown]", sizeof(ipaddr));
+	    break;
+	}
+	sudo_debug_printf(SUDO_DEBUG_INFO, "  %d: %s [%s]", ++n,
+	    addr->sa_str, ipaddr);
+    }
+
+    if (!TAILQ_EMPTY(&connections)) {
+	n = 0;
+	sudo_debug_printf(SUDO_DEBUG_INFO, "client connections:");
+	TAILQ_FOREACH(closure, &connections, entries) {
+	    struct relay_closure *relay_closure = closure->relay_closure;
+
+	    n++;
+	    if (closure->sock == -1) {
+		sudo_debug_printf(SUDO_DEBUG_INFO, "  %2d: journal %s", n,
+		    closure->journal_path ? closure->journal_path : "none");
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_INFO, "  %2d: addr %s%s", n,
+		    closure->ipaddr, closure->tls ? " (TLS)" : "");
+	    }
+	    if (relay_closure != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_INFO, "      relay: %s (%s)",
+		    relay_closure->relay_name.name,
+		    relay_closure->relay_name.ipaddr);
+	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "      state: %d", closure->state);
+	    if (closure->errstr != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_INFO, "      error: %s",
+		    closure->errstr);
+	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "      log I/O: %s",
+		closure->log_io ? "true" : "false");
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "      store first: %s",
+		closure->store_first ? "true" : "false");
+	    if (sudo_timespecisset(&closure->elapsed_time)) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "      elapsed time: [%lld, %ld]",
+		    (long long)closure->elapsed_time.tv_sec,
+		    (long)closure->elapsed_time.tv_nsec);
+	    }
+	}
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%d client connection(s)\n", n);
+    }
+
+    debug_return;
+}
+
 static void
 signal_cb(int signo, int what, void *v)
 {
@@ -1637,6 +1714,9 @@ signal_cb(int signo, int what, void *v)
 	case SIGTERM:
 	    /* Shut down active connections. */
 	    server_shutdown(base);
+	    break;
+	case SIGUSR1:
+	    server_dump_stats();
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1860,6 +1940,7 @@ main(int argc, char *argv[])
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);
     register_signal(SIGTERM, evbase);
+    register_signal(SIGUSR1, evbase);
 
     /* Point of no return. */
     daemonize(nofork);
