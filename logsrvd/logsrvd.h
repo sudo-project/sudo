@@ -212,9 +212,6 @@ void logsrvd_conf_cleanup(void);
 
 /* logsrvd_journal.c */
 extern struct client_message_switch cms_journal;
-bool journal_open(struct connection_closure *closure);
-bool journal_finish(struct connection_closure *closure);
-bool journal_write(uint8_t *buf, size_t len, struct connection_closure *closure);
 
 /* logsrvd_local.c */
 extern struct client_message_switch cms_local;

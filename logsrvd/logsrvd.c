@@ -237,6 +237,10 @@ connection_close(struct connection_closure *closure)
     if (closure == NULL)
 	debug_return;
 
+    /* Final state should be FINISHED except on error. */
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"closure %p, final state %d", closure, closure->state);
+
     /*
      * If we finished a client connection in store-and-forward mode,
      * create a new connection for the relay and replay the journal.

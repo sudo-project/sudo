@@ -67,7 +67,6 @@ journal_fdopen(int fd, const char *journal_path,
 
     closure->journal_path = strdup(journal_path);
     if (closure->journal_path == NULL) {
-	closure->errstr = _("unable to allocate memory");
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to allocate memory");
 	debug_return_bool(false);
@@ -77,6 +76,60 @@ journal_fdopen(int fd, const char *journal_path,
     if ((closure->journal = fdopen(fd, "r+")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to fdopen journal file %s", journal_path);
+	debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
+static int
+journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
+{
+    int fd, len;
+    debug_decl(journal_mkstemp, SUDO_DEBUG_UTIL);
+
+    len = snprintf(pathbuf, pathlen, "%s/%s/relay.XXXXXXXX",
+	logsrvd_conf_relay_dir(), parent_dir);
+    if (len >= pathlen) {
+	errno = ENAMETOOLONG;
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "%s/%s/relay.XXXXXXXX", parent_dir, logsrvd_conf_relay_dir());
+	debug_return_int(-1);
+    }
+    if (!sudo_mkdir_parents(pathbuf, ROOT_UID, ROOT_GID,
+	    S_IRWXU|S_IXGRP|S_IXOTH, false)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to create parent dir for %s", pathbuf);
+	debug_return_int(-1);
+    }
+    if ((fd = mkstemp(pathbuf)) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to create journal file %s", pathbuf);
+	debug_return_int(-1);
+    }
+
+    debug_return_int(fd);
+}
+
+/*
+ * Create a temporary file in the relay dir and store it in the closure.
+ */
+static bool
+journal_create(struct connection_closure *closure)
+{
+    char journal_path[PATH_MAX];
+    int fd;
+    debug_decl(journal_create, SUDO_DEBUG_UTIL);
+
+    fd = journal_mkstemp("incoming", journal_path, sizeof(journal_path));
+    if (fd == -1) {
+	closure->errstr = _("unable to create journal file");
+	debug_return_bool(false);
+    }
+    if (!journal_fdopen(fd, journal_path, closure)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to fdopen journal file %s", journal_path);
+	close(fd);
 	closure->errstr = _("unable to allocate memory");
 	debug_return_bool(false);
     }
@@ -85,63 +138,58 @@ journal_fdopen(int fd, const char *journal_path,
 }
 
 /*
- * Create a temporary file in the relay dir and store it in the closure.
+ * Flush any buffered data, rewind journal to the beginning and
+ * move to the outgoing directory.
+ * The actual open file is closed in connection_closure_free().
  */
-bool
-journal_open(struct connection_closure *closure)
+static bool
+journal_finish(struct connection_closure *closure)
 {
-    char journal_path[PATH_MAX];
-    int fd, len;
-    debug_decl(journal_open, SUDO_DEBUG_UTIL);
+    char outgoing_path[PATH_MAX];
+    size_t len;
+    int fd;
+    debug_decl(journal_finish, SUDO_DEBUG_UTIL);
 
-    len = snprintf(journal_path, sizeof(journal_path), "%s/relay.XXXXXXXX",
-	logsrvd_conf_relay_dir());
-    if (len >= ssizeof(journal_path)) {
-	errno = ENAMETOOLONG;
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s/relay.XXXXXXXX", logsrvd_conf_relay_dir());
+    if (fflush(closure->journal) != 0) {
+	closure->errstr = _("unable to write journal file");
 	debug_return_bool(false);
     }
-    /* TODO: use same escapes as iolog_path? */
-    if (!sudo_mkdir_parents(journal_path, ROOT_UID, ROOT_GID,
-	    S_IRWXU|S_IXGRP|S_IXOTH, false)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to create parent dir for %s", journal_path);
-	closure->errstr = _("unable to create journal file");
+    rewind(closure->journal);
+
+    /* Move journal to the outgoing directory. */
+    fd = journal_mkstemp("outgoing", outgoing_path, sizeof(outgoing_path));
+    if (fd == -1) {
+	closure->errstr = _("unable to rename journal file");
 	debug_return_bool(false);
     }
-    if ((fd = mkstemp(journal_path)) == -1) {
+    close(fd);
+    if (rename(closure->journal_path, outgoing_path) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to create journal file %s", journal_path);
-	closure->errstr = _("unable to create journal file");
+	    "unable to rename %s -> %s", closure->journal_path, outgoing_path);
+	closure->errstr = _("unable to rename journal file");
+	unlink(outgoing_path);
 	debug_return_bool(false);
     }
-    if (!journal_fdopen(fd, journal_path, closure)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to fdopen journal file %s", journal_path);
-	close(fd);
-	debug_return_bool(false);
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"renamed %s -> %s", closure->journal_path, outgoing_path);
+    len = strlen(outgoing_path);
+    if (strlen(closure->journal_path) == len) {
+	/* This should always be true. */
+	memcpy(closure->journal_path, outgoing_path, len);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "length mismatch %zu != %zu", strlen(closure->journal_path), len);
+	free(closure->journal_path);
+	closure->journal_path = strdup(outgoing_path);
+	if (closure->journal_path == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to strdup new journal path %s", outgoing_path);
+	    closure->errstr = _("unable to allocate memory");
+	    debug_return_bool(false);
+	}
     }
 
     debug_return_bool(true);
-}
-
-/*
- * Flush any buffered data and rewind journal to the beginning.
- * The actual open file is closed in connection_closure_free().
- */
-bool
-journal_finish(struct connection_closure *closure)
-{
-    bool ret;
-    debug_decl(journal_finish, SUDO_DEBUG_UTIL);
-
-    ret = fflush(closure->journal) == 0;
-    if (!ret)
-	closure->errstr = _("unable to write journal file");
-    rewind(closure->journal);
-
-    debug_return_bool(ret);
 }
 
 /*
@@ -301,12 +349,12 @@ journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
     } else {
     	cp = msg->log_id;
     }
-    len = snprintf(journal_path, sizeof(journal_path), "%s/%s",
+    len = snprintf(journal_path, sizeof(journal_path), "%s/incoming/%s",
 	logsrvd_conf_relay_dir(), cp);
     if (len >= ssizeof(journal_path)) {
 	errno = ENAMETOOLONG;
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s/%s", logsrvd_conf_relay_dir(), cp);
+	    "%s/incoming/%s", logsrvd_conf_relay_dir(), cp);
 	closure->errstr = _("unable to create journal file");
 	debug_return_bool(false);
     }
@@ -320,6 +368,7 @@ journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to fdopen journal file %s", journal_path);
 	close(fd);
+	closure->errstr = _("unable to allocate memory");
 	debug_return_bool(false);
     }
 
@@ -336,7 +385,7 @@ journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
     debug_return_bool(true);
 }
 
-bool
+static bool
 journal_write(uint8_t *buf, size_t len, struct connection_closure *closure)
 {
     uint32_t msg_len;
@@ -366,7 +415,7 @@ journal_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
     debug_decl(journal_accept, SUDO_DEBUG_UTIL);
 
     /* Store message in a journal for later relaying. */
-    if (!journal_open(closure))
+    if (!journal_create(closure))
 	debug_return_bool(false);
     if (!journal_write(buf, len, closure))
 	debug_return_bool(false);
@@ -396,7 +445,7 @@ journal_reject(RejectMessage *msg, uint8_t *buf, size_t len,
     debug_decl(journal_reject, SUDO_DEBUG_UTIL);
 
     /* Store message in a journal for later relaying. */
-    if (!journal_open(closure))
+    if (!journal_create(closure))
 	debug_return_bool(false);
     if (!journal_write(buf, len, closure))
 	debug_return_bool(false);
