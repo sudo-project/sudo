@@ -400,6 +400,7 @@ bad:
     if (sock != -1)
 	close(sock);
     sudo_rcstr_delref(relay_closure->relay_name.name);
+    relay_closure->relay_name.name = NULL;
     sudo_ev_free(relay_closure->connect_ev);
     relay_closure->connect_ev = NULL;
     debug_return_int(-1);
