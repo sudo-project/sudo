@@ -365,6 +365,8 @@ connect_relay_next(struct connection_closure *closure)
     relay_closure->relay_name.name = sudo_rcstr_addref(relay->sa_host);
 
     if (ret == 0) {
+	if (relay_closure->sock != -1)
+	    close(relay_closure->sock);
 	relay_closure->sock = sock;
 #if defined(HAVE_OPENSSL)
 	/* Relay connection succeeded, start TLS handshake. */
@@ -390,6 +392,8 @@ connect_relay_next(struct connection_closure *closure)
 		"unable to add server connect event");
 	    goto bad;
 	}
+	if (relay_closure->sock != -1)
+	    close(relay_closure->sock);
 	relay_closure->sock = sock;
 	closure->state = CONNECTING;
     }

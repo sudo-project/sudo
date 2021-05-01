@@ -110,6 +110,11 @@ connection_closure_free(struct connection_closure *closure)
 	struct connection_buffer *buf;
 
 	TAILQ_REMOVE(&connections, closure, entries);
+
+	if (closure->state == CONNECTING && closure->journal != NULL) {
+	    /* Failed to relay journal file, retry later. */
+	    logsrvd_queue_insert(closure);
+	}
 	if (closure->relay_closure != NULL)
 	    relay_closure_free(closure->relay_closure);
 #if defined(HAVE_OPENSSL)
@@ -159,7 +164,7 @@ connection_closure_free(struct connection_closure *closure)
 /*
  * Allocate a new connection closure.
  */
-static struct connection_closure *
+struct connection_closure *
 connection_closure_alloc(int fd, bool tls, bool relay_only,
     struct sudo_event_base *base)
 {
@@ -269,6 +274,9 @@ connection_close(struct connection_closure *closure)
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "removing journal file %s", closure->journal_path);
 	unlink(closure->journal_path);
+
+	/* Process the next outgoing file (if any). */
+	logsrvd_queue_enable(0, closure->evbase);
     }
     connection_closure_free(closure);
 
@@ -1669,14 +1677,20 @@ server_dump_stats(void)
 	    if (closure->sock == -1) {
 		sudo_debug_printf(SUDO_DEBUG_INFO, "  %2d: journal %s", n,
 		    closure->journal_path ? closure->journal_path : "none");
+		sudo_debug_printf(SUDO_DEBUG_INFO, "  %2d: fd %d", n,
+		    closure->journal ? fileno(closure->journal) : -1);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_INFO, "  %2d: addr %s%s", n,
 		    closure->ipaddr, closure->tls ? " (TLS)" : "");
+		sudo_debug_printf(SUDO_DEBUG_INFO, "  %2d: sock %d", n,
+		    closure->sock);
 	    }
 	    if (relay_closure != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_INFO, "      relay: %s (%s)",
 		    relay_closure->relay_name.name,
 		    relay_closure->relay_name.ipaddr);
+		sudo_debug_printf(SUDO_DEBUG_INFO, "      relay sock: %d",
+		    relay_closure->sock);
 	    }
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "      state: %d", closure->state);
 	    if (closure->errstr != NULL) {
@@ -1696,6 +1710,7 @@ server_dump_stats(void)
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%d client connection(s)\n", n);
     }
+    logsrvd_queue_dump();
 
     debug_return;
 }
@@ -1946,6 +1961,7 @@ main(int argc, char *argv[])
     daemonize(nofork);
     signal(SIGPIPE, SIG_IGN);
 
+    logsrvd_queue_scan(evbase);
     sudo_ev_dispatch(evbase);
     if (!nofork && logsrvd_conf_pid_file() != NULL)
 	unlink(logsrvd_conf_pid_file());

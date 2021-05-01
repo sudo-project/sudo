@@ -88,12 +88,12 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
     int fd, len;
     debug_decl(journal_mkstemp, SUDO_DEBUG_UTIL);
 
-    len = snprintf(pathbuf, pathlen, "%s/%s/relay.XXXXXXXX",
-	logsrvd_conf_relay_dir(), parent_dir);
+    len = snprintf(pathbuf, pathlen, "%s/%s/%s",
+	logsrvd_conf_relay_dir(), parent_dir, RELAY_TEMPLATE);
     if (len >= pathlen) {
 	errno = ENAMETOOLONG;
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s/%s/relay.XXXXXXXX", parent_dir, logsrvd_conf_relay_dir());
+	    "%s/%s/%s", logsrvd_conf_relay_dir(), parent_dir, RELAY_TEMPLATE);
 	debug_return_int(-1);
     }
     if (!sudo_mkdir_parents(pathbuf, ROOT_UID, ROOT_GID,
@@ -126,9 +126,18 @@ journal_create(struct connection_closure *closure)
 	closure->errstr = _("unable to create journal file");
 	debug_return_bool(false);
     }
+    if (!sudo_lock_file(fd, SUDO_TLOCK)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to lock journal file %s", journal_path);
+	unlink(journal_path);
+	close(fd);
+	closure->errstr = _("unable to lock journal file");
+	debug_return_bool(false);
+    }
     if (!journal_fdopen(fd, journal_path, closure)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to fdopen journal file %s", journal_path);
+	unlink(journal_path);
 	close(fd);
 	closure->errstr = _("unable to allocate memory");
 	debug_return_bool(false);

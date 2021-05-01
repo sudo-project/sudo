@@ -41,6 +41,9 @@
 /* Shutdown timeout (in seconds) in case client connections time out. */
 #define SHUTDOWN_TIMEO	10
 
+/* Template for mkstemp(3) when creating temporary files. */
+#define RELAY_TEMPLATE	"relay.XXXXXXXX"
+
 /*
  * Connection status.
  * In the RUNNING state we expect I/O log buffers.
@@ -168,6 +171,15 @@ struct listener {
 };
 TAILQ_HEAD(listener_list, listener);
 
+/*
+ * Queue of finished journal files to be relayed.
+ */
+struct outgoing_journal {
+    TAILQ_ENTRY(outgoing_journal) entries;
+    char *journal_path;
+};
+TAILQ_HEAD(outgoing_journal_queue, outgoing_journal);
+
 /* iolog_writer.c */
 struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen, struct connection_closure *closure);
 bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
@@ -184,6 +196,7 @@ bool schedule_commit_point(TimeSpec *commit_point, struct connection_closure *cl
 bool fmt_log_id_message(const char *id, struct connection_closure *closure);
 bool schedule_error_message(const char *errstr, struct connection_closure *closure);
 struct connection_buffer *get_free_buf(size_t, struct connection_closure *closure);
+struct connection_closure *connection_closure_alloc(int fd, bool tls, bool relay_only, struct sudo_event_base *base);
 
 /* logsrvd_conf.c */
 bool logsrvd_conf_read(const char *path);
@@ -224,6 +237,12 @@ bool store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len, struct conne
 bool store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len, struct connection_closure *closure);
 bool store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
 bool store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+
+/* logsrvd_queue.c */
+bool logsrvd_queue_enable(int timeout, struct sudo_event_base *evbase);
+bool logsrvd_queue_insert(struct connection_closure *closure);
+bool logsrvd_queue_scan(struct sudo_event_base *evbase);
+void logsrvd_queue_dump(void);
 
 /* logsrvd_relay.c */
 extern struct client_message_switch cms_relay;

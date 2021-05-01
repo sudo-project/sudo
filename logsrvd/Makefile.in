@@ -121,7 +121,7 @@ PROGS = sudo_logsrvd sudo_sendlog
 
 LOGSRVD_OBJS = logsrv_util.o iolog_writer.o logsrvd.o logsrvd_conf.o \
 	       logsrvd_journal.o logsrvd_local.o logsrvd_relay.o \
-	       tls_client.o tls_init.o
+	       logsrvd_queue.o tls_client.o tls_init.o
 
 SENDLOG_OBJS = logsrv_util.o sendlog.o tls_client.o tls_init.o
 
@@ -430,6 +430,28 @@ logsrvd_local.i: $(srcdir)/logsrvd_local.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 logsrvd_local.plog: logsrvd_local.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrvd_local.c --i-file $< --output-file $@
+logsrvd_queue.o: $(srcdir)/logsrvd_queue.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                 $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
+                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+                 $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                 $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd_queue.c
+logsrvd_queue.i: $(srcdir)/logsrvd_queue.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                 $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
+                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+                 $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                 $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+logsrvd_queue.plog: logsrvd_queue.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrvd_queue.c --i-file $< --output-file $@
 logsrvd_relay.o: $(srcdir)/logsrvd_relay.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
