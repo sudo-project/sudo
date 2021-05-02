@@ -66,6 +66,9 @@ What's new in Sudo 1.9.6p1
    error message instead of a usage message when sudo is run with
    no arguments.
 
+ * Fixed a bug that prevented the "log_server_verify" sudoers option
+   from taking effect.
+
 What's new in Sudo 1.9.6
 
  * Fixed a sudo_sendlog compilation problem with the AIX xlC compiler.
