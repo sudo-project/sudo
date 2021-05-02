@@ -249,25 +249,26 @@ logsrvd_queue_scan(struct sudo_event_base *evbase)
 	path[dirlen] = '\0';
 	if (strlcat(path, dent->d_name, sizeof(path)) >= sizeof(path))
 	    continue;
-	if ((oj = malloc(sizeof(*oj))) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to allocate memory");
-	    debug_return_bool(false);
-	}
+	if ((oj = malloc(sizeof(*oj))) == NULL)
+	    goto oom;
 	if ((oj->journal_path = strdup(path)) == NULL) {
 	    free(oj);
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to allocate memory");
-	    debug_return_bool(false);
+	    goto oom;
 	}
 	TAILQ_INSERT_TAIL(&outgoing_journal_queue, oj, entries);
     }
+    closedir(dirp);
 
     /* Process the queue immediately. */
     if (!logsrvd_queue_enable(0, evbase))
 	debug_return_bool(false);
 
     debug_return_bool(true);
+oom:
+    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	"unable to allocate memory");
+    closedir(dirp);
+    debug_return_bool(false);
 }
 
 /*
