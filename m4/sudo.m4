@@ -155,8 +155,8 @@ SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LECTURE_DIR, "$vardir/lectured")
 
 dnl
 dnl Where the sudo_logsrvd relay temporary log files go, use
-dnl /var/log/logsrvd-relay if /var/log exists, else
-dnl /{var,usr}/adm/logsrvd-relay
+dnl /var/log/sudo_logsrvd if /var/log exists, else
+dnl /{var,usr}/adm/sudo_logsrvd
 dnl
 AC_DEFUN([SUDO_RELAY_DIR], [
     AC_MSG_CHECKING(for sudo_logsrvd relay dir location)
@@ -166,7 +166,7 @@ AC_DEFUN([SUDO_RELAY_DIR], [
 	# Default value of relay_dir set in configure.ac
 	for d in /var/log /var/adm /usr/adm; do
 	    if test -d "$d"; then
-		relay_dir="$d/logsrvd-relay"
+		relay_dir="$d/sudo_logsrvd"
 		break
 	    fi
 	done

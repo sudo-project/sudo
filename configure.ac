@@ -178,7 +178,7 @@ AC_SUBST([plugindir])
 iolog_dir=/var/log/sudo-io
 log_dir=/var/log
 logpath=/var/log/sudo.log
-relay_dir=/var/log/logsrvd-relay
+relay_dir=/var/log/sudo_logsrvd
 rundir=/var/run/sudo
 vardir=/var/adm/sudo
 timeout=5

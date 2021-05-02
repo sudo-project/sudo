@@ -750,8 +750,8 @@ Sudo log server configuration file
 
 # The directory to store messages in before they are sent to the relay.
 # Messages are stored in wire format.
-# The default value is /var/log/logsrvd-relay.
-#relay_dir = /var/log/logsrvd-relay
+# The default value is /var/log/sudo_logsrvd.
+#relay_dir = /var/log/sudo_logsrvd
 
 # The number of seconds to wait after a connection error before
 # making a new attempt to forward a message to a relay host.

@@ -135,7 +135,7 @@
 
 /*
  * Where to store sudo_logsrvd relay temporary files. Defaults to
- * /var/log/logsrvd-relay, /var/adm/logsrvd-relay or /usr/adm/logsrvd-relay
+ * /var/log/sudo_logsrvd, /var/adm/sudo_logsrvd or /usr/adm/sudo_logsrvd
  * depending on what exists.
  */
 #ifndef _PATH_SUDO_RELAY_DIR

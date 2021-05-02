@@ -3548,7 +3548,7 @@ printf "%s\n" "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 iolog_dir=/var/log/sudo-io
 log_dir=/var/log
 logpath=/var/log/sudo.log
-relay_dir=/var/log/logsrvd-relay
+relay_dir=/var/log/sudo_logsrvd
 rundir=/var/run/sudo
 vardir=/var/adm/sudo
 timeout=5
@@ -27889,7 +27889,7 @@ printf %s "checking for sudo_logsrvd relay dir location... " >&6; }
 	# Default value of relay_dir set in configure.ac
 	for d in /var/log /var/adm /usr/adm; do
 	    if test -d "$d"; then
-		relay_dir="$d/logsrvd-relay"
+		relay_dir="$d/sudo_logsrvd"
 		break
 	    fi
 	done
