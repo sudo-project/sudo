@@ -212,6 +212,7 @@ const char *logsrvd_conf_pid_file(void);
 struct timespec *logsrvd_conf_server_timeout(void);
 struct timespec *logsrvd_conf_relay_connect_timeout(void);
 struct timespec *logsrvd_conf_relay_timeout(void);
+time_t logsrvd_conf_relay_retry_interval(void);
 #if defined(HAVE_OPENSSL)
 bool logsrvd_conf_server_tls_check_peer(void);
 SSL_CTX *logsrvd_server_tls_ctx(void);
@@ -239,7 +240,7 @@ bool store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t len, struct
 bool store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
 
 /* logsrvd_queue.c */
-bool logsrvd_queue_enable(int timeout, struct sudo_event_base *evbase);
+bool logsrvd_queue_enable(time_t timeout, struct sudo_event_base *evbase);
 bool logsrvd_queue_insert(struct connection_closure *closure);
 bool logsrvd_queue_scan(struct sudo_event_base *evbase);
 void logsrvd_queue_dump(void);

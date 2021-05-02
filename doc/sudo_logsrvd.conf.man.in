@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "April 14, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "May 1, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -288,7 +288,7 @@ The default value is 30.
 relay_dir = path
 The directory in which log messages are temporarily stored before they
 are sent to the relay host.
-Messages are stored in the wire format used by
+Messages are stored in the wire format specified by
 sudo_logsrv.proto(@mansectform@)
 The default value is
 \fI@relay_dir@\fR.
@@ -317,6 +317,11 @@ protocol.
 If multiple
 \fIrelay_host\fR
 lines are specified, the first available relay host will be used.
+.TP 10n
+retry_interval = number
+The number of seconds to wait after a connection error before making
+a new attempt to forward a message to a relay host.
+The default value is 30 seconds.
 .TP 10n
 store_first = boolean
 If true,
@@ -811,6 +816,21 @@ Sudo log server configuration file
 # to the relay server to complete.  A value of 0 will disable the timeout.
 # The default value is 30.
 #connect_timeout = 30
+
+# The directory to store messages in before they are sent to the relay.
+# Messages are stored in wire format.
+# The default value is /var/log/logsrvd-relay.
+#relay_dir = /var/log/logsrvd-relay
+
+# The number of seconds to wait after a connection error before
+# making a new attempt to forward a message to a relay host.
+# The default value is 30.
+#retry_interval = 30
+
+# Whether to store the log before relaying it.  If true, enable store
+# and forward mode.  If false, the client connection is immediately
+# relayed.  Defaults to false.
+#store_first = true
 
 # If true, enable the SO_KEEPALIVE socket option on relay connections.
 #tcp_keepalive = true

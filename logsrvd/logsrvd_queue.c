@@ -142,7 +142,7 @@ outgoing_queue_cb(int unused, int what, void *v)
  * The event will fire after the specified timeout elapses.
  */
 bool
-logsrvd_queue_enable(int timeout, struct sudo_event_base *evbase)
+logsrvd_queue_enable(time_t timeout, struct sudo_event_base *evbase)
 {
     debug_decl(logsrvd_queue_enable, SUDO_DEBUG_UTIL);
 
@@ -193,7 +193,8 @@ logsrvd_queue_insert(struct connection_closure *closure)
     closure->journal_path = NULL;
     TAILQ_INSERT_TAIL(&outgoing_journal_queue, oj, entries);
 
-    if (!logsrvd_queue_enable(30, closure->evbase))
+    if (!logsrvd_queue_enable(logsrvd_conf_relay_retry_interval(),
+	    closure->evbase))
 	debug_return_bool(false);
 
     debug_return_bool(true);

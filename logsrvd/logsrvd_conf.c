@@ -119,6 +119,7 @@ static struct logsrvd_config {
         struct address_list_container relays;
         struct timespec connect_timeout;
         struct timespec timeout;
+	time_t retry_interval;
 	char *relay_dir;
         bool tcp_keepalive;
 	bool store_first;
@@ -268,6 +269,12 @@ logsrvd_conf_relay_connect_timeout(void)
     }
 
     return NULL;
+}
+
+time_t
+logsrvd_conf_relay_retry_interval(void)
+{
+    return logsrvd_config->relay.retry_interval;
 }
 
 #if defined(HAVE_OPENSSL)
@@ -1225,6 +1232,7 @@ logsrvd_conf_alloc(void)
     config->relay.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->relay.connect_timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->relay.tcp_keepalive = true;
+    config->relay.retry_interval = 30;
     if (!cb_relay_dir(config, _PATH_SUDO_RELAY_DIR, 0))
 	goto bad;
 #if defined(HAVE_OPENSSL)
