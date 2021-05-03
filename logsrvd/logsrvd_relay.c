@@ -285,6 +285,7 @@ connect_relay_tls(struct connection_closure *closure)
     if (tls_client->tls_connect_ev == NULL)
         goto bad;
     tls_client->peer_name = &closure->relay_closure->relay_name;
+    tls_client->connect_timeout = *logsrvd_conf_relay_connect_timeout();
     tls_client->start_fn = tls_client_start_fn;
     if (!tls_ctx_client_setup(ssl_ctx, closure->relay_closure->sock, tls_client))
         goto bad;

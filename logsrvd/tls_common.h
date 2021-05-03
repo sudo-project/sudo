@@ -30,6 +30,7 @@ struct tls_client_closure {
     struct sudo_event_base *evbase;	/* duplicated */
     struct sudo_event *tls_connect_ev;
     struct peer_info *peer_name;
+    struct timespec connect_timeout;
     bool (*start_fn)(struct tls_client_closure *);
     bool tls_connect_state;
 };

@@ -50,8 +50,6 @@
 #include "logsrv_util.h"
 #include "tls_common.h"
 
-#define TLS_HANDSHAKE_TIMEO_SEC 10
-
 #if defined(HAVE_OPENSSL)
 
 /*
@@ -104,7 +102,7 @@ tls_connect_cb(int sock, int what, void *v)
 {
     struct tls_client_closure *tls_client = v;
     struct sudo_event_base *evbase = tls_client->evbase;
-    struct timespec timeo = { TLS_HANDSHAKE_TIMEO_SEC, 0 };
+    const struct timespec *timeout = &tls_client->connect_timeout;
     const char *errstr;
     int con_stat;
     debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
@@ -134,7 +132,7 @@ tls_connect_cb(int sock, int what, void *v)
 			goto bad;
 		    }
 		}
-                if (sudo_ev_add(evbase, tls_client->tls_connect_ev, &timeo, false) == -1) {
+                if (sudo_ev_add(evbase, tls_client->tls_connect_ev, timeout, false) == -1) {
                     sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
@@ -150,7 +148,7 @@ tls_connect_cb(int sock, int what, void *v)
 			goto bad;
 		    }
 		}
-                if (sudo_ev_add(evbase, tls_client->tls_connect_ev, &timeo, false) == -1) {
+                if (sudo_ev_add(evbase, tls_client->tls_connect_ev, timeout, false) == -1) {
                     sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }

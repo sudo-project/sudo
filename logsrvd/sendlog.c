@@ -1441,6 +1441,7 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
 	closure->tls_client.evbase = base;
 	closure->tls_client.parent_closure = closure;
 	closure->tls_client.peer_name = &server_info;
+	closure->tls_client.connect_timeout.tv_sec = TLS_HANDSHAKE_TIMEO_SEC;
 	closure->tls_client.start_fn = tls_start_fn;
     }
 #endif
