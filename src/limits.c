@@ -210,7 +210,7 @@ disable_coredump(void)
     }
     if (prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "prctl(PR_SET_DUMPABLE, %d, 0, 0, 0)", dumpflag);
+	    "prctl(PR_SET_DUMPABLE, 0, 0, 0, 0)");
     }
 #endif /* __linux__ */
     coredump_disabled = true;
