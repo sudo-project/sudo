@@ -548,7 +548,7 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
 {
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    bool ret;
+    bool ret = true;
     debug_decl(handle_restart, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
@@ -561,8 +561,10 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
 	"%s: received RestartMessage for %s from %s", __func__, msg->log_id,
 	source);
 
-    ret = closure->cms->restart(msg, buf, len, closure);
-    if (ret) {
+    /* Only I/O logs are restartable. */
+    closure->log_io = true;
+
+    if (closure->cms->restart(msg, buf, len, closure)) {
 	/* Successfully restarted. */
 	closure->state = RUNNING;
     } else {

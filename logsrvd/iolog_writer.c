@@ -123,7 +123,6 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    "calloc(1, %zu)", sizeof(*evlog));
 	goto bad;
     }
-    memset(evlog, 0, sizeof(*evlog));
 
     /* Client/peer IP address. */
     evlog->peeraddr = closure->ipaddr;

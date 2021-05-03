@@ -240,7 +240,6 @@ bool
 store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    struct eventlog *evlog = closure->evlog;
     struct timespec target;
     struct stat sb;
     int iofd;
@@ -249,36 +248,46 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
     target.tv_sec = msg->resume_point->tv_sec;
     target.tv_nsec = msg->resume_point->tv_nsec;
 
-    if ((evlog->iolog_path = strdup(msg->log_id)) == NULL) {
+    /* We must allocate closure->evlog for iolog_path. */
+    closure->evlog = calloc(1, sizeof(*closure->evlog));
+    if (closure->evlog == NULL) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+            "calloc(1, %zu)", sizeof(*closure->evlog));
+	closure->errstr = _("unable to allocate memory");
+        goto bad;
+    }
+    closure->evlog->iolog_path = strdup(msg->log_id);
+    if (closure->evlog->iolog_path == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "strdup");
+	closure->errstr = _("unable to allocate memory");
 	goto bad;
     }
 
     /* We use iolog_dir_fd in calls to openat(2) */
     closure->iolog_dir_fd =
-	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY);
+	iolog_openat(AT_FDCWD, closure->evlog->iolog_path, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s", evlog->iolog_path);
+	    "%s", closure->evlog->iolog_path);
 	goto bad;
     }
 
     /* If the timing file write bit is clear, log is already complete. */
     if (fstatat(closure->iolog_dir_fd, "timing", &sb, 0) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to stat %s/timing", evlog->iolog_path);
+	    "unable to stat %s/timing", closure->evlog->iolog_path);
 	goto bad;
     }
     if (!ISSET(sb.st_mode, S_IWUSR)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s already complete", evlog->iolog_path);
+	    "%s already complete", closure->evlog->iolog_path);
 	closure->errstr = _("log is already complete, cannot be restarted");
 	goto bad;
     }
 
     /* Open existing I/O log files. */
-    if (!iolog_open_all(closure->iolog_dir_fd, evlog->iolog_path,
+    if (!iolog_open_all(closure->iolog_dir_fd, closure->evlog->iolog_path,
 	    closure->iolog_files, "r+"))
 	goto bad;
 
@@ -289,7 +298,7 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
     }
 
     /* Parse timing file until we reach the target point. */
-    if (!iolog_seekto(closure->iolog_dir_fd, evlog->iolog_path,
+    if (!iolog_seekto(closure->iolog_dir_fd, closure->evlog->iolog_path,
 	    closure->iolog_files, &closure->elapsed_time, &target))
 	goto bad;
 
