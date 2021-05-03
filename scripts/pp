@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2021 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20210310"
+pp_revision="20210503"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -4203,13 +4203,15 @@ pp_deb_make_data() {
         case "$t" in
         f) # Files
            pp_deb_fakeroot install -D -o $o -g $g -m ${m} $pp_destdir/$p $data/$p;
-           if [ x"$f" = x"v" ]
-           then
+           case "$f" in
+           *v*)
                # File marked as "volatile". Assume this means it's a conffile
-	       # TODO: check this as admins like modified conffiles to be left
-	       #       behind
+               # TODO: check this as admins like modified conffiles to be left
+               #       behind
                echo "$p" >> $pp_wrkdir/%conffiles.$cmp
-           fi;;
+               ;;
+           esac
+           ;;
 
         d) # Directories
            pp_deb_fakeroot install -m ${m} -o $o -g $g -d $data/$p;;
@@ -4222,7 +4224,7 @@ pp_deb_make_data() {
 	   # the debian policy of relative links when in the same top-level
 	   # directory
            (cd $data; ln -sf $st $rel_p);;
-	    *) pp_error "Unsupported data file type: $t";;
+        *) pp_error "Unsupported data file type: $t";;
 	esac
     done
 
@@ -8172,20 +8174,24 @@ pp_bsd_make_data() {
         path=$p
         case "$t" in
             f) # Files
-                # For now just skip the file if it is volatile, we will need to remove it in the pre uninstall script
-                if [ x"$f" != x"v" ]; then
-                    # If the directory doesn't exist where we are going to copy this file, then create it first
-                    if [ ! -d `dirname "$datadir$path"` ]; then
-                        pp_debug "creating directory `dirname "$datadir$path"`"
-                        mkdir -p `dirname "$datadir$path"`
-                    fi
+                case "$f" in
+                    *v*)
+                        # For now just skip the file if it is volatile, we
+                        # will need to remove it in the pre uninstall script
+                        pp_warn "file $path was marked as volatile, skipping"
+                        ;; 
+                    *)
+                        # If the directory doesn't exist where we are going to copy this file, then create it first
+                        if [ ! -d `dirname "$datadir$path"` ]; then
+                            pp_debug "creating directory `dirname "$datadir$path"`"
+                            mkdir -p `dirname "$datadir$path"`
+                        fi
 
-                    pp_debug "install -D $datadir -o $o -g $g -h sha256 -m ${m} -v $pp_destdir$p $datadir$path";
-                    pp_bsd_fakeroot install -D $datadir -o $o -g $g -h sha256 -m ${m} -v $pp_destdir$p $datadir$path;
-                    echo "  \"$path\": \"-\", \"$path\": {uname: $o, gname: $g, perm: ${m}}" >> $outfilelist;
-                else
-                    pp_warn "file $f was marked as volatile, skipping"
-                fi;
+                        pp_debug "install -D $datadir -o $o -g $g -h sha256 -m ${m} -v $pp_destdir$p $datadir$path"
+                        pp_bsd_fakeroot install -D $datadir -o $o -g $g -h sha256 -m ${m} -v $pp_destdir$p $datadir$path
+                        echo "  \"$path\": \"-\", \"$path\": {uname: $o, gname: $g, perm: ${m}}" >> $outfilelist
+                        ;; 
+                esac
                 ;; 
             d) # Directories
                 pp_debug "install -D $datadir -o $o -g $g -m ${m} -d -v $datadir$path";
