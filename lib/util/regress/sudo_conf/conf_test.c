@@ -31,6 +31,12 @@ static void sudo_conf_dump(void);
 
 sudo_dso_public int main(int argc, char *argv[]);
 
+/* Awful hack for macOS where the default group source is dynamic. */
+#ifdef __APPLE__
+# undef GROUP_SOURCE_ADAPTIVE
+# define GROUP_SOURCE_ADAPTIVE GROUP_SOURCE_DYNAMIC
+#endif
+
 /*
  * Simple test driver for sudo_conf().
  * Parses the given configuration file and dumps the resulting
