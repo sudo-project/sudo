@@ -521,7 +521,7 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
     ret = closure->cms->exit(msg, buf, len, closure);
     if (ret) {
 	if (sudo_timespecisset(&closure->elapsed_time)) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: elapsed time: %lld, %ld",
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: elapsed time: [%lld, %ld]",
 		__func__, (long long)closure->elapsed_time.tv_sec,
 		closure->elapsed_time.tv_nsec);
 	}

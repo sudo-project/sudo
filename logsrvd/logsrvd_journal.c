@@ -209,7 +209,6 @@ static bool
 journal_seek(struct timespec *target, struct connection_closure *closure)
 {
     ClientMessage *msg = NULL;
-    struct timespec elapsed_time = { 0, 0 };
     size_t nread, bufsize = 0;
     uint8_t *buf = NULL;
     uint32_t msg_len;
@@ -241,6 +240,9 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 
 	/* Read actual message now that we know the size. */
 	if (msg_len != 0) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"%s: reading message %u bytes", closure->journal_path, msg_len);
+
 	    if (msg_len > bufsize) {
 		bufsize = sudo_pow2_roundup(msg_len);
 		free(buf);
@@ -273,33 +275,70 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 
 	switch (msg->type_case) {
 	case CLIENT_MESSAGE__TYPE_HELLO_MSG:
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"seeking past ClientHello (%d)", msg->type_case);
+	    break;
 	case CLIENT_MESSAGE__TYPE_ACCEPT_MSG:
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"seeking past AcceptMessage (%d)", msg->type_case);
+	    break;
 	case CLIENT_MESSAGE__TYPE_REJECT_MSG:
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"seeking past RejectMessage (%d)", msg->type_case);
+	    break;
 	case CLIENT_MESSAGE__TYPE_EXIT_MSG:
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"seeking past ExitMessage (%d)", msg->type_case);
+	    break;
 	case CLIENT_MESSAGE__TYPE_RESTART_MSG:
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"seeking past RestartMessage (%d)", msg->type_case);
+	    break;
 	case CLIENT_MESSAGE__TYPE_ALERT_MSG:
-	    /* No associated delay. */
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"seeking past AlertMessage (%d)", msg->type_case);
 	    break;
 	case CLIENT_MESSAGE__TYPE_TTYIN_BUF:
 	    delay = msg->u.ttyin_buf->delay;
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"read IoBuffer (%d), delay [%lld, %ld]", msg->type_case,
+		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_TTYOUT_BUF:
 	    delay = msg->u.ttyout_buf->delay;
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"read IoBuffer (%d), delay [%lld, %ld]", msg->type_case,
+		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_STDIN_BUF:
 	    delay = msg->u.stdin_buf->delay;
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"read IoBuffer (%d), delay [%lld, %ld]", msg->type_case,
+		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_STDOUT_BUF:
 	    delay = msg->u.stdout_buf->delay;
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"read stdout_buf (%d), delay [%lld, %ld]", msg->type_case,
+		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_STDERR_BUF:
 	    delay = msg->u.stderr_buf->delay;
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"read stderr_buf (%d), delay [%lld, %ld]", msg->type_case,
+		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_WINSIZE_EVENT:
 	    delay = msg->u.winsize_event->delay;
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"read ChangeWindowSize (%d), delay [%lld, %ld]", msg->type_case,
+		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_SUSPEND_EVENT:
 	    delay = msg->u.suspend_event->delay;
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"read CommandSuspend (%d), delay [%lld, %ld]", msg->type_case,
+		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -307,16 +346,15 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 	    break;
 	}
 	if (delay != NULL) {
-	    elapsed_time.tv_sec += delay->tv_sec;
-	    elapsed_time.tv_nsec += delay->tv_nsec;
-	    if (elapsed_time.tv_nsec >= 1000000000) {
-		elapsed_time.tv_sec++;
-		elapsed_time.tv_nsec -= 1000000000;
-	    }
+	    update_elapsed_time(delay, &closure->elapsed_time);
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"%s: elapsed time now [%lld, %ld]", closure->journal_path,
+		(long long)closure->elapsed_time.tv_sec,
+		closure->elapsed_time.tv_nsec);
 	}
 
-	if (sudo_timespeccmp(&elapsed_time, target, >=)) {
-	    if (sudo_timespeccmp(&elapsed_time, target, ==)) {
+	if (sudo_timespeccmp(&closure->elapsed_time, target, >=)) {
+	    if (sudo_timespeccmp(&closure->elapsed_time, target, ==)) {
 		ret = true;
 		break;
 	    }

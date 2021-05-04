@@ -126,7 +126,7 @@ iolog_seekto(int iolog_dir_fd, const char *iolog_path,
     for (;;) {
 	if (iolog_read_timing_record(&iolog_files[IOFD_TIMING], &timing) != 0)
 	    goto bad;
-	sudo_timespecadd(&timing.delay, elapsed_time, elapsed_time);
+	sudo_timespecadd(elapsed_time, &timing.delay, elapsed_time);
 	if (timing.event < IOFD_TIMING) {
 	    if (!iolog_files[timing.event].enabled) {
 		/* Missing log file. */
