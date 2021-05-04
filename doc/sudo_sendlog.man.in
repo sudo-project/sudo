@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_SENDLOG" "@mansectsu@" "May 12, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_SENDLOG" "@mansectsu@" "May 4, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -31,6 +31,7 @@
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-i\fR\ \fIiolog-id\fR]
 [\fB\-k\fR\ \fIkey_file\fR]
+[\fB\-m\fR\ \fIelapsed\fR]
 [\fB\-p\fR\ \fIport\fR]
 [\fB\-r\fR\ \fIrestart-point\fR]
 [\fB\-R\fR\ \fIreject-reason\fR]
@@ -88,6 +89,19 @@ option.
 The path to the client's private key file in PEM format.
 This setting is required when the connection to the remote log server
 is secured with TLS.
+.TP 12n
+\fB\-m\fR, \fB\--max-time\fR
+Stop sending log records and close the connection when the
+\fIelapsed\fR
+time is reached.
+This can be used for testing purposes to send a partial I/O log to the server.
+Partial logs can be restarted using the
+\fB\-r\fR
+option.
+The
+\fIelapsed\fR
+time is specified in the form
+\(lqseconds,nanoseconds\(rq.
 .TP 12n
 \fB\-n\fR, \fB\--no-verify\fR
 If specified, the server's certificate will not be verified during
