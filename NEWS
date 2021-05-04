@@ -60,12 +60,6 @@ What's new in Sudo 1.9.7
    unescaped backslash.  Also fixed the handling of quote characters
    that are escaped by a backslash.  GitHub issue #99.
 
-What's new in Sudo 1.9.6p1
-
- * Fixed a regression introduced in sudo 1.9.6 that resulted in an
-   error message instead of a usage message when sudo is run with
-   no arguments.
-
  * Fixed a bug that prevented the "log_server_verify" sudoers option
    from taking effect.
 
@@ -78,6 +72,12 @@ What's new in Sudo 1.9.6p1
 
  * The TLS connection timeout in the sudoers log client was previously
    hard-coded to 10 seconds.  It now uses the value of log_server_timeout.
+
+What's new in Sudo 1.9.6p1
+
+ * Fixed a regression introduced in sudo 1.9.6 that resulted in an
+   error message instead of a usage message when sudo is run with
+   no arguments.
 
 What's new in Sudo 1.9.6
 
