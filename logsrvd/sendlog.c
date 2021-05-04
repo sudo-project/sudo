@@ -103,11 +103,11 @@ usage(bool fatal)
 {
 #if defined(HAVE_OPENSSL)
     fprintf(stderr, "usage: %s [-AnV] [-b ca_bundle] [-c cert_file] [-h host] "
-	"[-i iolog-id] [-k key_file] [-m elapsed] [-p port] "
+	"[-i iolog-id] [-k key_file] [-p port] "
 #else
-    fprintf(stderr, "usage: %s [-AnV] [-h host] [-i iolog-id] [-m elapsed] [-p port] "
+    fprintf(stderr, "usage: %s [-AnV] [-h host] [-i iolog-id] [-p port] "
 #endif
-	"[-r restart-point] [-R reject-reason] [-t number] /path/to/iolog\n",
+	"[-r restart-point] [-R reject-reason] [-s stop-point] [-t number] /path/to/iolog\n",
         getprogname());
     if (fatal)
 	exit(EXIT_FAILURE);
@@ -137,10 +137,6 @@ help(void)
 #if defined(HAVE_OPENSSL)
     printf("  -k, --key             %s\n",
 	_("private key file"));
-#endif
-    printf("  -m, --max-time        %s\n",
-	_("only transmit records less than this time"));
-#if defined(HAVE_OPENSSL)
     printf("  -n, --no-verify       %s\n",
 	_("do not verify server certificate"));
 #endif
@@ -150,6 +146,8 @@ help(void)
 	_("restart previous I/O log transfer"));
     printf("  -R, --reject          %s\n",
 	_("reject the command with the given reason"));
+    printf("  -s, --stop-after        %s\n",
+	_("stop transfer after reaching this time"));
     printf("  -t, --test            %s\n",
 	_("test audit server by sending selected I/O log n times in parallel"));
     printf("  -V, --version         %s\n",
@@ -853,9 +851,9 @@ again:
     /* Track elapsed time for comparison with commit points. */
     sudo_timespecadd(&closure->elapsed, &timing->delay, &closure->elapsed);
 
-    /* If there is a max time limit, make sure we haven't reached it. */
-    if (sudo_timespecisset(&closure->max_time)) {
-	if (sudo_timespeccmp(&closure->elapsed, &closure->max_time, >)) {
+    /* If there is a stopping point, make sure we haven't reached it. */
+    if (sudo_timespecisset(&closure->stop_after)) {
+	if (sudo_timespeccmp(&closure->elapsed, &closure->stop_after, >)) {
 	    /* Reached limit, force premature end. */
 	    sudo_timespecsub(&closure->elapsed, &timing->delay, &closure->elapsed);
 	    debug_return_bool(false);
@@ -1404,8 +1402,7 @@ client_closure_free(struct client_closure *closure)
  */
 static struct client_closure *
 client_closure_alloc(int sock, struct sudo_event_base *base,
-    struct timespec *elapsed, struct timespec *max_time, 
-    struct timespec *restart, const char *iolog_id,
+    struct timespec *restart, struct timespec *stop_after, const char *iolog_id,
     char *reject_reason, bool accept_only, struct eventlog *evlog)
 {
     struct client_closure *closure;
@@ -1424,12 +1421,10 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
     closure->reject_reason = reject_reason;
     closure->evlog = evlog;
 
-    closure->elapsed.tv_sec = elapsed->tv_sec;
-    closure->elapsed.tv_nsec = elapsed->tv_nsec;
-    closure->max_time.tv_sec = max_time->tv_sec;
-    closure->max_time.tv_nsec = max_time->tv_nsec;
     closure->restart.tv_sec = restart->tv_sec;
     closure->restart.tv_nsec = restart->tv_nsec;
+    closure->stop_after.tv_sec = stop_after->tv_sec;
+    closure->stop_after.tv_nsec = stop_after->tv_nsec;
 
     closure->iolog_id = iolog_id;
 
@@ -1469,19 +1464,19 @@ bad:
 }
 
 #if defined(HAVE_OPENSSL)
-static const char short_opts[] = "Ah:i:m:np:r:R:t:b:c:k:V";
+static const char short_opts[] = "Ah:i:np:r:R:s:t:b:c:k:V";
 #else
-static const char short_opts[] = "Ah:i:Im:p:r:R:t:V";
+static const char short_opts[] = "Ah:i:Ip:r:R:t:s:V";
 #endif
 static struct option long_opts[] = {
     { "accept",		no_argument,		NULL,	'A' },
     { "help",		no_argument,		NULL,	1 },
     { "host",		required_argument,	NULL,	'h' },
     { "iolog-id",	required_argument,	NULL,	'i' },
-    { "max-time",	required_argument,	NULL,	'm' },
     { "port",		required_argument,	NULL,	'p' },
     { "restart",	required_argument,	NULL,	'r' },
     { "reject",		required_argument,	NULL,	'R' },
+    { "stop-after",	required_argument,	NULL,	's' },
     { "test",	    	optional_argument,	NULL,	't' },
 #if defined(HAVE_OPENSSL)
     { "ca-bundle",	required_argument,	NULL,	'b' },
@@ -1503,8 +1498,7 @@ main(int argc, char *argv[])
     struct eventlog *evlog;
     const char *port = NULL;
     struct timespec restart = { 0, 0 };
-    struct timespec elapsed = { 0, 0 };
-    struct timespec max_time = { 0, 0 };
+    struct timespec stop_after = { 0, 0 };
     bool accept_only = false;
     char *reject_reason = NULL;
     const char *iolog_id = NULL;
@@ -1547,10 +1541,6 @@ main(int argc, char *argv[])
 	case 'i':
 	    iolog_id = optarg;
 	    break;
-	case 'm':
-	    if (!parse_timespec(&max_time, optarg))
-		goto bad;
-	    break;
 	case 'p':
 	    port = optarg;
 	    break;
@@ -1561,6 +1551,10 @@ main(int argc, char *argv[])
 	    if (!parse_timespec(&restart, optarg))
 		goto bad;
 	    open_mode = "r+";
+	    break;
+	case 's':
+	    if (!parse_timespec(&stop_after, optarg))
+		goto bad;
 	    break;
 	case 't':
 	    nr_of_conns = sudo_strtonum(optarg, 1, INT_MAX, &errstr);
@@ -1646,8 +1640,8 @@ main(int argc, char *argv[])
         if (!testrun)
             printf("Connected to %s:%s\n", server_info.name, port);
 
-        closure = client_closure_alloc(sock, evbase, &elapsed, &max_time,
-	    &restart, iolog_id, reject_reason, accept_only, evlog);
+        closure = client_closure_alloc(sock, evbase, &restart, &stop_after,
+	    iolog_id, reject_reason, accept_only, evlog);
         if (closure == NULL)
             goto bad;
 

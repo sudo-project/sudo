@@ -52,7 +52,7 @@ struct client_closure {
     bool write_instead_of_read;
     bool temporary_write_event;
     struct timespec restart;
-    struct timespec max_time;
+    struct timespec stop_after;
     struct timespec elapsed;
     struct timespec committed;
     struct timing_closure timing;
