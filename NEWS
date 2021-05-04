@@ -69,6 +69,16 @@ What's new in Sudo 1.9.6p1
  * Fixed a bug that prevented the "log_server_verify" sudoers option
    from taking effect.
 
+ * The sudo_sendlog utility has a new -s option to cause it to stop
+   sending I/O records after a user-specified elapsed time.  This
+   can be used to test the I/O log restart functionality of sudo_logsrvd.
+
+ * Fixed a crash introduced in sudo 1.9.4 in sudo_logsrvd when
+   attempting to restart an interrupted I/O log transfer.
+
+ * The TLS connection timeout in the sudoers log client was previously
+   hard-coded to 10 seconds.  It now uses the value of log_server_timeout.
+
 What's new in Sudo 1.9.6
 
  * Fixed a sudo_sendlog compilation problem with the AIX xlC compiler.
