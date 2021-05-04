@@ -395,25 +395,32 @@ fmt_error_message(const char *errstr, struct connection_closure *closure)
 bool
 schedule_error_message(const char *errstr, struct connection_closure *closure)
 {
+    bool ret = false;
     debug_decl(schedule_error_message, SUDO_DEBUG_UTIL);
 
-    if (errstr == NULL || closure->state == ERROR || closure->write_ev == NULL)
-	debug_return_bool(false);
+    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	"send error to client: %s", errstr ? errstr : "none");
 
-    /* Set state to ERROR regardless of whether we can send the message. */
-    closure->state = ERROR;
+    /* Prevent further reads from the client, just write the error. */
+    sudo_ev_del(closure->evbase, closure->read_ev);
+
+    if (errstr == NULL || closure->state == ERROR || closure->write_ev == NULL)
+	goto done;
 
     /* Format error message and add to the write queue. */
     if (!fmt_error_message(errstr, closure))
-	debug_return_bool(false);
+	goto done;
     if (sudo_ev_add(closure->evbase, closure->write_ev,
-	    logsrvd_conf_server_timeout(), false) == -1) {
+	    logsrvd_conf_server_timeout(), true) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to add server write event");
-	debug_return_bool(false);
+	goto done;
     }
+    ret = true;
 
-    debug_return_bool(true);
+done:
+    closure->state = ERROR;
+    debug_return_bool(ret);
 }
 
 /*
@@ -571,7 +578,6 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
 	/* Report error to client before closing the connection. */
 	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log",
 	    __func__);
-	sudo_ev_del(closure->evbase, closure->read_ev);
 	if (!schedule_error_message(closure->errstr, closure))
 	    ret = false;
     }
@@ -1118,7 +1124,6 @@ send_error:
     /*
      * Try to send client an error message before closing the connection.
      */
-    sudo_ev_del(closure->evbase, closure->read_ev);
     if (!schedule_error_message(closure->errstr, closure))
 	goto close_connection;
     debug_return;

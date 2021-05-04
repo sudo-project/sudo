@@ -605,7 +605,10 @@ handle_server_error(char *errmsg, struct connection_closure *closure)
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
 	errmsg);
 
-    sudo_ev_del(closure->evbase, relay_closure->read_ev);
+    /* Server will drop connection after the error message. */
+    sudo_ev_del(closure->evbase, closure->relay_closure->read_ev);
+    sudo_ev_del(closure->evbase, closure->relay_closure->write_ev);
+
     if (!schedule_error_message(errmsg, closure))
 	debug_return_bool(false);
 
@@ -627,7 +630,6 @@ handle_server_abort(char *errmsg, struct connection_closure *closure)
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
 	errmsg);
 
-    sudo_ev_del(closure->evbase, relay_closure->read_ev);
     if (!schedule_error_message(errmsg, closure))
 	debug_return_bool(false);
 
@@ -878,7 +880,6 @@ send_error:
      * Try to send client an error message before closing connection.
      * If we are already in an error state, just give up.
      */
-    sudo_ev_del(closure->evbase, relay_closure->read_ev);
     if (!schedule_error_message(closure->errstr, closure))
 	goto close_connection;
     debug_return;
@@ -1015,7 +1016,6 @@ send_error:
      * Try to send client an error message before closing connection.
      * If we are already in an error state, just give up.
      */
-    sudo_ev_del(closure->evbase, relay_closure->read_ev);
     if (!schedule_error_message(closure->errstr, closure))
 	goto close_connection;
     debug_return;
