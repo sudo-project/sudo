@@ -477,19 +477,6 @@ AC_ARG_WITH(libraries, [AS_HELP_STRING([--with-libraries], [additional libraries
 		;;
 esac])
 
-AC_ARG_WITH(efence, [AS_HELP_STRING([--with-efence], [link with -lefence for malloc() debugging])],
-[case $with_efence in
-    yes)	AC_MSG_NOTICE([Sudo will link with -lefence (Electric Fence)])
-		LIBS="${LIBS} -lefence"
-		if test -f /usr/local/lib/libefence.a; then
-		    with_libpath="${with_libpath} /usr/local/lib"
-		fi
-		;;
-    no)		;;
-    *)		AC_MSG_WARN([Ignoring unknown argument to --with-efence: $with_efence])
-		;;
-esac])
-
 AC_ARG_WITH(csops, [AS_HELP_STRING([--with-csops], [add CSOps standard options])],
 [case $with_csops in
     yes)	AC_MSG_NOTICE([Adding CSOps standard options])

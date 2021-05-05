@@ -639,9 +639,6 @@ Development options:
 	and set up the Makefile to be able to regenerate the sudoers parser
 	as well as the manual pages.
 
-  --with-efence
-	Link with the "electric fence" debugging malloc.
-
 Options that set runtime-changeable default values:
   --disable-authentication
 	By default, sudo requires the user to authenticate via a

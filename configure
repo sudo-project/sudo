@@ -919,7 +919,6 @@ with_sssd_lib
 with_incpath
 with_libpath
 with_libraries
-with_efence
 with_csops
 with_passwd
 with_skey
@@ -1776,7 +1775,6 @@ Optional Packages:
   --with-incpath          additional places to look for include files
   --with-libpath          additional places to look for libraries
   --with-libraries        additional libraries to link with
-  --with-efence           link with -lefence for malloc() debugging
   --with-csops            add CSOps standard options
   --without-passwd        don't use passwd/shadow file for authentication
   --with-skey[=DIR]       enable S/Key support
@@ -5158,26 +5156,6 @@ then :
 		;;
     *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Adding ${with_libraries} to LIBS" >&5
 printf "%s\n" "$as_me: Adding ${with_libraries} to LIBS" >&6;}
-		;;
-esac
-fi
-
-
-
-# Check whether --with-efence was given.
-if test ${with_efence+y}
-then :
-  withval=$with_efence; case $with_efence in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Sudo will link with -lefence (Electric Fence)" >&5
-printf "%s\n" "$as_me: Sudo will link with -lefence (Electric Fence)" >&6;}
-		LIBS="${LIBS} -lefence"
-		if test -f /usr/local/lib/libefence.a; then
-		    with_libpath="${with_libpath} /usr/local/lib"
-		fi
-		;;
-    no)		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --with-efence: $with_efence" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --with-efence: $with_efence" >&2;}
 		;;
 esac
 fi
