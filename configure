@@ -3404,8 +3404,8 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
-printf "%s\n" "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: configuring Sudo version $PACKAGE_VERSION" >&5
+printf "%s\n" "$as_me: configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
@@ -4882,8 +4882,8 @@ fi
 if test ${with_devel+y}
 then :
   withval=$with_devel; case $with_devel in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting up for development: -Wall, flex, yacc" >&5
-printf "%s\n" "$as_me: Setting up for development: -Wall, flex, yacc" >&6;}
+    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting up for development: -Wall, flex, yacc" >&5
+printf "%s\n" "$as_me: setting up for development: -Wall, flex, yacc" >&6;}
 
 if test ${CPPFLAGS+y}
 then :
@@ -4968,7 +4968,7 @@ then :
 		SUDOERS_OBJS="${SUDOERS_OBJS} bsm_audit.lo"
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-bsm-audit does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-bsm-audit does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5007,7 +5007,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-linux-audit does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-linux-audit does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5024,7 +5024,7 @@ then :
 		SUDOERS_OBJS="${SUDOERS_OBJS} solaris_audit.lo"
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-solaris-audit does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-solaris-audit does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5044,7 +5044,7 @@ then :
 
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-sssd does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-sssd does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5083,12 +5083,12 @@ EOF
 if test ${with_incpath+y}
 then :
   withval=$with_incpath; case $with_incpath in
-    yes)	as_fn_error $? "\"must give --with-incpath an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-incpath an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-incpath not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-incpath not supported." "$LINENO" 5
 		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Adding ${with_incpath} to CPPFLAGS" >&5
-printf "%s\n" "$as_me: Adding ${with_incpath} to CPPFLAGS" >&6;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: adding ${with_incpath} to CPPFLAGS" >&5
+printf "%s\n" "$as_me: adding ${with_incpath} to CPPFLAGS" >&6;}
 		for i in ${with_incpath}; do
 
 if test ${CPPFLAGS+y}
@@ -5134,12 +5134,12 @@ fi
 if test ${with_libpath+y}
 then :
   withval=$with_libpath; case $with_libpath in
-    yes)	as_fn_error $? "\"must give --with-libpath an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-libpath an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-libpath not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-libpath not supported." "$LINENO" 5
 		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Adding ${with_libpath} to LDFLAGS" >&5
-printf "%s\n" "$as_me: Adding ${with_libpath} to LDFLAGS" >&6;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: adding ${with_libpath} to LDFLAGS" >&5
+printf "%s\n" "$as_me: adding ${with_libpath} to LDFLAGS" >&6;}
 		;;
 esac
 fi
@@ -5150,12 +5150,12 @@ fi
 if test ${with_libraries+y}
 then :
   withval=$with_libraries; case $with_libraries in
-    yes)	as_fn_error $? "\"must give --with-libraries an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-libraries an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-libraries not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-libraries not supported." "$LINENO" 5
 		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Adding ${with_libraries} to LIBS" >&5
-printf "%s\n" "$as_me: Adding ${with_libraries} to LIBS" >&6;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: adding ${with_libraries} to LIBS" >&5
+printf "%s\n" "$as_me: adding ${with_libraries} to LIBS" >&6;}
 		;;
 esac
 fi
@@ -5166,8 +5166,8 @@ fi
 if test ${with_csops+y}
 then :
   withval=$with_csops; case $with_csops in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Adding CSOps standard options" >&5
-printf "%s\n" "$as_me: Adding CSOps standard options" >&6;}
+    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: adding CSOps standard options" >&5
+printf "%s\n" "$as_me: adding CSOps standard options" >&6;}
 		CHECKSIA=false
 		with_ignore_dot=yes
 		insults=on
@@ -5193,7 +5193,7 @@ then :
     yes|no)	AUTH_DEF=""
 		test "$with_passwd" = "yes" && AUTH_REG="$AUTH_REG passwd"
 		;;
-    *)		as_fn_error $? "\"Sorry, --with-passwd does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "sorry, --with-passwd does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5238,7 +5238,7 @@ then :
 		;;
     no)		long_otp_prompt=off
 		;;
-    *)		as_fn_error $? "\"--with-long-otp-prompt does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-long-otp-prompt does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5291,7 +5291,7 @@ then :
   withval=$with_aixauth; case $with_aixauth in
     yes)	AUTH_EXCL="$AUTH_EXCL AIX_AUTH";;
     no)		;;
-    *)		as_fn_error $? "\"--with-aixauth does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-aixauth does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5304,7 +5304,7 @@ then :
   withval=$with_pam; case $with_pam in
     yes)	AUTH_EXCL="$AUTH_EXCL PAM";;
     no)		;;
-    *)		as_fn_error $? "\"--with-pam does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-pam does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5320,7 +5320,7 @@ then :
 		AUTH_REG="$AUTH_REG AFS"
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-AFS does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-AFS does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5336,7 +5336,7 @@ then :
 		AUTH_REG="$AUTH_REG DCE"
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-DCE does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-DCE does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5348,7 +5348,7 @@ if test ${with_logincap+y}
 then :
   withval=$with_logincap; case $with_logincap in
     yes|no)	;;
-    *)		as_fn_error $? "\"--with-logincap does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-logincap does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5361,7 +5361,7 @@ then :
   withval=$with_bsdauth; case $with_bsdauth in
     yes)	AUTH_EXCL="$AUTH_EXCL BSD_AUTH";;
     no)		;;
-    *)		as_fn_error $? "\"--with-bsdauth does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-bsdauth does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5374,7 +5374,7 @@ then :
   withval=$with_project; case $with_project in
     yes|no)	;;
     no)		;;
-    *)		as_fn_error $? "\"--with-project does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-project does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5391,7 +5391,7 @@ then :
 			printf "%s\n" "#define NO_LECTURE 1" >>confdefs.h
 
 			;;
-    *)		as_fn_error $? "\"unknown argument to --with-lecture: $with_lecture\"" "$LINENO" 5
+    *)		as_fn_error $? "unknown argument to --with-lecture: $with_lecture" "$LINENO" 5
 		;;
 esac
 fi
@@ -5402,9 +5402,9 @@ fi
 if test ${with_logging+y}
 then :
   withval=$with_logging; case $with_logging in
-    yes)	as_fn_error $? "\"must give --with-logging an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-logging an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-logging not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-logging not supported." "$LINENO" 5
 		;;
     syslog)	printf "%s\n" "#define LOGGING SLOG_SYSLOG" >>confdefs.h
 
@@ -5415,7 +5415,7 @@ then :
     both)	printf "%s\n" "#define LOGGING SLOG_BOTH" >>confdefs.h
 
 		;;
-    *)		as_fn_error $? "\"unknown argument to --with-logging: $with_logging\"" "$LINENO" 5
+    *)		as_fn_error $? "unknown argument to --with-logging: $with_logging" "$LINENO" 5
 		;;
 esac
 else $as_nop
@@ -5432,13 +5432,13 @@ fi
 if test ${with_logfac+y}
 then :
   withval=$with_logfac; case $with_logfac in
-    yes)	as_fn_error $? "\"must give --with-logfac an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-logfac an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-logfac not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-logfac not supported." "$LINENO" 5
 		;;
     authpriv|auth|daemon|user|local0|local1|local2|local3|local4|local5|local6|local7)		logfac=$with_logfac
 		;;
-    *)		as_fn_error $? "\"$with_logfac is not a supported syslog facility.\"" "$LINENO" 5
+    *)		as_fn_error $? "$with_logfac is not a supported syslog facility." "$LINENO" 5
 		;;
 esac
 fi
@@ -5449,14 +5449,14 @@ fi
 if test ${with_goodpri+y}
 then :
   withval=$with_goodpri; case $with_goodpri in
-    yes)	as_fn_error $? "\"must give --with-goodpri an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-goodpri an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-goodpri not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-goodpri not supported." "$LINENO" 5
 		;;
     alert|crit|debug|emerg|err|info|notice|warning)
 		goodpri=$with_goodpri
 		;;
-    *)		as_fn_error $? "\"$with_goodpri is not a supported syslog priority.\"" "$LINENO" 5
+    *)		as_fn_error $? "$with_goodpri is not a supported syslog priority." "$LINENO" 5
 		;;
 esac
 fi
@@ -5470,9 +5470,9 @@ printf "%s\n" "#define PRI_SUCCESS \"$goodpri\"" >>confdefs.h
 if test ${with_badpri+y}
 then :
   withval=$with_badpri; case $with_badpri in
-    yes)	as_fn_error $? "\"must give --with-badpri an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-badpri an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-badpri not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-badpri not supported." "$LINENO" 5
 		;;
     alert|crit|debug|emerg|err|info|notice|warning)
 		badpri=$with_badpri
@@ -5491,9 +5491,9 @@ printf "%s\n" "#define PRI_FAILURE \"$badpri\"" >>confdefs.h
 if test ${with_logpath+y}
 then :
   withval=$with_logpath; case $with_logpath in
-    yes)	as_fn_error $? "\"must give --with-logpath an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-logpath an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-logpath not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-logpath not supported." "$LINENO" 5
 		;;
 esac
 fi
@@ -5504,13 +5504,13 @@ fi
 if test ${with_loglen+y}
 then :
   withval=$with_loglen; case $with_loglen in
-    yes)	as_fn_error $? "\"must give --with-loglen an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-loglen an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-loglen not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-loglen not supported." "$LINENO" 5
 		;;
     [0-9]*)	loglen=$with_loglen
 		;;
-    *)		as_fn_error $? "\"you must enter a number, not $with_loglen\"" "$LINENO" 5
+    *)		as_fn_error $? "you must enter a number, not $with_loglen" "$LINENO" 5
 		;;
 esac
 fi
@@ -5530,7 +5530,7 @@ then :
 		;;
     no)		ignore_dot=off
 		;;
-    *)		as_fn_error $? "\"--with-ignore-dot does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-ignore-dot does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5545,7 +5545,7 @@ then :
 		;;
     no)		mail_no_user=off
 		;;
-    *)		as_fn_error $? "\"--with-mail-if-no-user does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-mail-if-no-user does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5566,7 +5566,7 @@ then :
 		;;
     no)		mail_no_host=off
 		;;
-    *)		as_fn_error $? "\"--with-mail-if-no-host does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-mail-if-no-host does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5583,7 +5583,7 @@ then :
 		;;
     no)		mail_noperms=off
 		;;
-    *)		as_fn_error $? "\"--with-mail-if-noperms does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-mail-if-noperms does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5594,9 +5594,9 @@ fi
 if test ${with_mailto+y}
 then :
   withval=$with_mailto; case $with_mailto in
-    yes)	as_fn_error $? "\"must give --with-mailto an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-mailto an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-mailto not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-mailto not supported." "$LINENO" 5
 		;;
     *)		mailto=$with_mailto
 		;;
@@ -5612,10 +5612,10 @@ printf "%s\n" "#define MAILTO \"$mailto\"" >>confdefs.h
 if test ${with_mailsubject+y}
 then :
   withval=$with_mailsubject; case $with_mailsubject in
-    yes)	as_fn_error $? "\"must give --with-mailsubject an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-mailsubject an argument." "$LINENO" 5
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Sorry, --without-mailsubject not supported." >&5
-printf "%s\n" "$as_me: WARNING: Sorry, --without-mailsubject not supported." >&2;}
+    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: sorry, --without-mailsubject not supported." >&5
+printf "%s\n" "$as_me: WARNING: sorry, --without-mailsubject not supported." >&2;}
 		;;
     *)		mailsub="$with_mailsubject"
 		;;
@@ -5631,10 +5631,10 @@ printf "%s\n" "#define MAILSUBJECT \"$mailsub\"" >>confdefs.h
 if test ${with_passprompt+y}
 then :
   withval=$with_passprompt; case $with_passprompt in
-    yes)	as_fn_error $? "\"must give --with-passprompt an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-passprompt an argument." "$LINENO" 5
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Sorry, --without-passprompt not supported." >&5
-printf "%s\n" "$as_me: WARNING: Sorry, --without-passprompt not supported." >&2;}
+    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: sorry, --without-passprompt not supported." >&5
+printf "%s\n" "$as_me: WARNING: sorry, --without-passprompt not supported." >&2;}
 		;;
     *)		passprompt="$with_passprompt"
 esac
@@ -5649,10 +5649,10 @@ printf "%s\n" "#define PASSPROMPT \"$passprompt\"" >>confdefs.h
 if test ${with_badpass_message+y}
 then :
   withval=$with_badpass_message; case $with_badpass_message in
-    yes)	as_fn_error $? "\"Must give --with-badpass-message an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-badpass-message an argument." "$LINENO" 5
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Sorry, --without-badpass-message not supported." >&5
-printf "%s\n" "$as_me: WARNING: Sorry, --without-badpass-message not supported." >&2;}
+    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: sorry, --without-badpass-message not supported." >&5
+printf "%s\n" "$as_me: WARNING: sorry, --without-badpass-message not supported." >&2;}
 		;;
     *)		badpass_message="$with_badpass_message"
 		;;
@@ -5674,7 +5674,7 @@ then :
 		;;
     no)		fqdn=off
 		;;
-    *)		as_fn_error $? "\"--with-fqdn does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-fqdn does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5685,7 +5685,7 @@ fi
 if test ${with_timedir+y}
 then :
   withval=$with_timedir; case $with_timedir in
-    *)		as_fn_error $? "\"--without-timedir no longer supported, see --with-rundir.\"" "$LINENO" 5
+    *)		as_fn_error $? "--without-timedir no longer supported, see --with-rundir." "$LINENO" 5
 		;;
 esac
 fi
@@ -5696,9 +5696,9 @@ fi
 if test ${with_rundir+y}
 then :
   withval=$with_rundir; case $with_rundir in
-    yes)	as_fn_error $? "\"must give --with-rundir an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-rundir an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-rundir not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-rundir not supported." "$LINENO" 5
 		;;
 esac
 fi
@@ -5709,9 +5709,9 @@ fi
 if test ${with_vardir+y}
 then :
   withval=$with_vardir; case $with_vardir in
-    yes)	as_fn_error $? "\"must give --with-vardir an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-vardir an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-vardir not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-vardir not supported." "$LINENO" 5
 		;;
 esac
 fi
@@ -5723,7 +5723,7 @@ if test ${with_iologdir+y}
 then :
   withval=$with_iologdir; case $with_iologdir in
     yes)    ;;
-    no)     as_fn_error $? "\"--without-iologdir not supported.\"" "$LINENO" 5
+    no)     as_fn_error $? "--without-iologdir not supported." "$LINENO" 5
 	    ;;
 esac
 fi
@@ -5735,7 +5735,7 @@ if test ${with_relaydir+y}
 then :
   withval=$with_relaydir; case $with_relaydir in
     yes)    ;;
-    no)     as_fn_error $? "\"--without-relaydir not supported.\"" "$LINENO" 5
+    no)     as_fn_error $? "--without-relaydir not supported." "$LINENO" 5
 	    ;;
 esac
 fi
@@ -5746,7 +5746,7 @@ fi
 if test ${with_tzdir+y}
 then :
   withval=$with_tzdir; case $with_tzdir in
-    yes)	as_fn_error $? "\"must give --with-tzdir an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-tzdir an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5774,15 +5774,15 @@ fi
 if test ${with_sudoers_mode+y}
 then :
   withval=$with_sudoers_mode; case $with_sudoers_mode in
-    yes)	as_fn_error $? "\"must give --with-sudoers-mode an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-sudoers-mode an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-sudoers-mode not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-sudoers-mode not supported." "$LINENO" 5
 		;;
     [1-9]*)	SUDOERS_MODE=0${with_sudoers_mode}
 		;;
     0*)		SUDOERS_MODE=$with_sudoers_mode
 		;;
-    *)		as_fn_error $? "\"you must use an octal mode, not a name.\"" "$LINENO" 5
+    *)		as_fn_error $? "you must use an octal mode, not a name." "$LINENO" 5
 		;;
 esac
 fi
@@ -5793,13 +5793,13 @@ fi
 if test ${with_sudoers_uid+y}
 then :
   withval=$with_sudoers_uid; case $with_sudoers_uid in
-    yes)	as_fn_error $? "\"must give --with-sudoers-uid an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-sudoers-uid an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-sudoers-uid not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-sudoers-uid not supported." "$LINENO" 5
 		;;
     [0-9]*)	SUDOERS_UID=$with_sudoers_uid
 		;;
-    *)		as_fn_error $? "\"you must use an unsigned numeric uid, not a name.\"" "$LINENO" 5
+    *)		as_fn_error $? "you must use an unsigned numeric uid, not a name." "$LINENO" 5
 		;;
 esac
 fi
@@ -5810,13 +5810,13 @@ fi
 if test ${with_sudoers_gid+y}
 then :
   withval=$with_sudoers_gid; case $with_sudoers_gid in
-    yes)	as_fn_error $? "\"must give --with-sudoers-gid an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-sudoers-gid an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-sudoers-gid not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-sudoers-gid not supported." "$LINENO" 5
 		;;
     [0-9]*)	SUDOERS_GID=$with_sudoers_gid
 		;;
-    *)		as_fn_error $? "\"you must use an unsigned numeric gid, not a name.\"" "$LINENO" 5
+    *)		as_fn_error $? "you must use an unsigned numeric gid, not a name." "$LINENO" 5
 		;;
 esac
 fi
@@ -5827,13 +5827,13 @@ fi
 if test ${with_umask+y}
 then :
   withval=$with_umask; case $with_umask in
-    yes)	as_fn_error $? "\"must give --with-umask an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-umask an argument." "$LINENO" 5
 		;;
     no)		sudo_umask=0777
 		;;
     [0-9]*)	sudo_umask=$with_umask
 		;;
-    *)		as_fn_error $? "\"you must enter a numeric mask.\"" "$LINENO" 5
+    *)		as_fn_error $? "you must enter a numeric mask." "$LINENO" 5
 		;;
 esac
 fi
@@ -5853,7 +5853,7 @@ then :
 		;;
     no)		umask_override=off
 		;;
-    *)		as_fn_error $? "\"--with-umask-override does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-umask-override does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5864,9 +5864,9 @@ fi
 if test ${with_runas_default+y}
 then :
   withval=$with_runas_default; case $with_runas_default in
-    yes)	as_fn_error $? "\"must give --with-runas-default an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-runas-default an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-runas-default not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-runas-default not supported." "$LINENO" 5
 		;;
     *)		runas_default="$with_runas_default"
 		;;
@@ -5882,9 +5882,9 @@ printf "%s\n" "#define RUNAS_DEFAULT \"$runas_default\"" >>confdefs.h
 if test ${with_exempt+y}
 then :
   withval=$with_exempt; case $with_exempt in
-    yes)	as_fn_error $? "\"must give --with-exempt an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-exempt an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-exempt not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-exempt not supported." "$LINENO" 5
 		;;
     *)
 printf "%s\n" "#define EXEMPTGROUP \"$with_exempt\"" >>confdefs.h
@@ -5899,9 +5899,9 @@ fi
 if test ${with_editor+y}
 then :
   withval=$with_editor; case $with_editor in
-    yes)	as_fn_error $? "\"must give --with-editor an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-editor an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-editor not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-editor not supported." "$LINENO" 5
 		;;
     *)
 printf "%s\n" "#define EDITOR \"$with_editor\"" >>confdefs.h
@@ -5924,7 +5924,7 @@ then :
 		;;
     no)		env_editor=off
 		;;
-    *)		as_fn_error $? "\"--with-env-editor does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-env-editor does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -5940,11 +5940,11 @@ if test ${with_passwd_tries+y}
 then :
   withval=$with_passwd_tries; case $with_passwd_tries in
     yes)	;;
-    no)		as_fn_error $? "\"--without-editor not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-editor not supported." "$LINENO" 5
 		;;
     [1-9]*)	passwd_tries=$with_passwd_tries
 		;;
-    *)		as_fn_error $? "\"you must enter the number of tries, > 0\"" "$LINENO" 5
+    *)		as_fn_error $? "you must enter the number of tries, > 0" "$LINENO" 5
 		;;
 esac
 fi
@@ -5963,7 +5963,7 @@ then :
 		;;
     [0-9]*)	timeout=$with_timeout
 		;;
-    *)		as_fn_error $? "\"you must enter the number of minutes.\"" "$LINENO" 5
+    *)		as_fn_error $? "you must enter the number of minutes." "$LINENO" 5
 		;;
 esac
 fi
@@ -5982,7 +5982,7 @@ then :
 		;;
     [0-9]*)	password_timeout=$with_password_timeout
 		;;
-    *)		as_fn_error $? "\"you must enter the number of minutes.\"" "$LINENO" 5
+    *)		as_fn_error $? "you must enter the number of minutes." "$LINENO" 5
 		;;
 esac
 fi
@@ -6000,7 +6000,7 @@ then :
 		;;
     no)		timestamp_type=global
 		;;
-    *)		as_fn_error $? "\"--with-tty-tickets does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-tty-tickets does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -6023,7 +6023,7 @@ then :
 		;;
     no)		insults=off
 		;;
-    *)		as_fn_error $? "\"--with-insults does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-insults does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -6041,7 +6041,7 @@ then :
 		with_python_insults=yes
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-all-insults does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-all-insults does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -6056,7 +6056,7 @@ then :
 
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-classic-insults does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-classic-insults does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -6071,7 +6071,7 @@ then :
 
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-csops-insults does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-csops-insults does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -6086,7 +6086,7 @@ then :
 
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-hal-insults does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-hal-insults does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -6101,7 +6101,7 @@ then :
 
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-goons-insults does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-goons-insults does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -6116,7 +6116,7 @@ then :
 
         ;;
     no)		;;
-    *)		as_fn_error $? "\"--with-python-insults does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-python-insults does not take an argument." "$LINENO" 5
         ;;
 esac
 fi
@@ -6202,7 +6202,7 @@ then :
     no)		printf "%s\n" "#define STUB_LOAD_INTERFACES 1" >>confdefs.h
 
 		;;
-    *)		as_fn_error $? "\"--with-interfaces does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-interfaces does not take an argument." "$LINENO" 5
 		;;
 esac
 fi
@@ -6213,7 +6213,7 @@ fi
 if test ${with_askpass+y}
 then :
   withval=$with_askpass; case $with_askpass in
-    yes)	as_fn_error $? "\"--with-askpass takes a path as an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "--with-askpass takes a path as an argument." "$LINENO" 5
 		;;
     no)		;;
     *)		;;
@@ -6241,9 +6241,9 @@ fi
 if test ${with_exampledir+y}
 then :
   withval=$with_exampledir; case $with_exampledir in
-    yes)	as_fn_error $? "\"must give --with-exampledir an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-exampledir an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-exampledir not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-exampledir not supported." "$LINENO" 5
 		;;
     *)		exampledir="$with_exampledir"
 esac
@@ -6255,9 +6255,9 @@ fi
 if test ${with_plugindir+y}
 then :
   withval=$with_plugindir; case $with_plugindir in
-    yes)	as_fn_error $? "\"must give --with-plugindir an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "must give --with-plugindir an argument." "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-plugindir not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-plugindir not supported." "$LINENO" 5
 		;;
     *)		plugindir="$with_plugindir"
 		;;
@@ -6272,10 +6272,10 @@ then :
   withval=$with_man; case $with_man in
     yes)	MANTYPE=man
 		;;
-    no)		as_fn_error $? "\"--without-man not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-man not supported." "$LINENO" 5
 		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: \"ignoring unknown argument to --with-man: $with_man.\"" >&5
-printf "%s\n" "$as_me: WARNING: \"ignoring unknown argument to --with-man: $with_man.\"" >&2;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --with-man: $with_man." >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --with-man: $with_man." >&2;}
 		;;
 esac
 fi
@@ -6288,10 +6288,10 @@ then :
   withval=$with_mdoc; case $with_mdoc in
     yes)	MANTYPE=mdoc
 		;;
-    no)		as_fn_error $? "\"--without-mdoc not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-mdoc not supported." "$LINENO" 5
 		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: \"ignoring unknown argument to --with-mdoc: $with_mdoc.\"" >&5
-printf "%s\n" "$as_me: WARNING: \"ignoring unknown argument to --with-mdoc: $with_mdoc.\"" >&2;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --with-mdoc: $with_mdoc." >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --with-mdoc: $with_mdoc." >&2;}
 		;;
 esac
 fi
@@ -6378,7 +6378,7 @@ then :
 
 		root_sudo=off
 		;;
-    *)		as_fn_error $? "\"--enable-root-sudo does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--enable-root-sudo does not take an argument." "$LINENO" 5
 		;;
   esac
 
@@ -6614,7 +6614,7 @@ fi
 if test ${enable_fuzzer_engine+y}
 then :
   enableval=$enable_fuzzer_engine;  case "$enableval" in
-    yes)    as_fn_error $? "\"must give --enable-fuzzer-engine an argument.\"" "$LINENO" 5
+    yes)    as_fn_error $? "must give --enable-fuzzer-engine an argument." "$LINENO" 5
 	    ;;
     no)	    ;;
     *)	    FUZZ_ENGINE="$enableval"
@@ -6628,7 +6628,7 @@ fi
 if test ${enable_fuzzer_linker+y}
 then :
   enableval=$enable_fuzzer_linker;  case "$enableval" in
-    yes)    as_fn_error $? "\"must give --enable-fuzzer-linker an argument.\"" "$LINENO" 5
+    yes)    as_fn_error $? "must give --enable-fuzzer-linker an argument." "$LINENO" 5
 	    ;;
     no)	    ;;
     *)	    FUZZ_LD="$enableval"
@@ -6809,7 +6809,7 @@ fi
 
 		;;
     no)		;;
-    *)		as_fn_error $? "\"--with-selinux does not take an argument.\"" "$LINENO" 5
+    *)		as_fn_error $? "--with-selinux does not take an argument." "$LINENO" 5
 		;;
 esac
 else $as_nop
@@ -15522,7 +15522,7 @@ if test ${with_libtool+y}
 then :
   withval=$with_libtool; case $with_libtool in
     yes|builtin) ;;
-    no)		as_fn_error $? "\"--without-libtool not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "--without-libtool not supported." "$LINENO" 5
 		;;
     system)	LIBTOOL=libtool
 		;;
@@ -16815,7 +16815,7 @@ if test -n "$AUTH_EXCL"; then
     fi
 fi
 if test X"${with_skey}${with_opie}" = X"yesyes"; then
-    as_fn_error $? "\"cannot use both S/Key and OPIE\"" "$LINENO" 5
+    as_fn_error $? "cannot use both S/Key and OPIE" "$LINENO" 5
 fi
 
 : ${mansectsu='8'}
@@ -17100,8 +17100,8 @@ printf "%s\n" "no" >&6; }
 
 printf "%s\n" "#define NO_VARIADIC_MACROS 1" >>confdefs.h
 
- { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
-printf "%s\n" "$as_me: WARNING: Your C preprocessor doesn't support variadic macros, debugging support will be limited" >&2;}
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
+printf "%s\n" "$as_me: WARNING: your C preprocessor doesn't support variadic macros, debugging support will be limited" >&2;}
 
     for _sym in sudo_debug_printf_nvm_v1; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
@@ -18183,7 +18183,7 @@ fi
 printf "%s\n" "$ac_cv_sys_posix_termios" >&6; }
 
 if test "$ac_cv_sys_posix_termios" != "yes"; then
-    as_fn_error $? "Must have POSIX termios to build sudo" "$LINENO" 5
+    as_fn_error $? "must have POSIX termios to build sudo" "$LINENO" 5
 fi
 
 maildir=no
@@ -18523,7 +18523,7 @@ printf "%s\n" "#define HAVE_LONG_LONG_INT 1" >>confdefs.h
   fi
 
 if test X"$ac_cv_type_long_long_int" != X"yes"; then
-    as_fn_error $? "\"C compiler does not appear to support the long long int type\"" "$LINENO" 5
+    as_fn_error $? "C compiler does not appear to support the long long int type" "$LINENO" 5
 fi
 ac_fn_c_check_type "$LINENO" "intmax_t" "ac_cv_type_intmax_t" "$ac_includes_default"
 if test "x$ac_cv_type_intmax_t" = xyes
@@ -21985,6 +21985,7 @@ printf "%s\n" "#define HAVE_STRUCT_DIRENT_D_NAMLEN 1" >>confdefs.h
 
 fi
 
+openssl_missing=no
 if test "${enable_openssl-no}" != no; then
     # Use pkg-config to find the openssl cflags and libs if possible.
     if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
@@ -22448,8 +22449,7 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 else $as_nop
 
 	    if test "$enable_openssl" = "maybe"; then
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted." >&5
-printf "%s\n" "$as_me: WARNING: OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted." >&2;}
+		openssl_missing=yes
 		enable_openssl=no
 	    else
 		as_fn_error $? "OpenSSL development libraries not found." "$LINENO" 5
@@ -23906,7 +23906,7 @@ case "$enable_zlib" in
 
 	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"; then
 	    if test "$enable_zlib" = "shared"; then
-		as_fn_error $? "\"Unable to build shared libraries on this system\"" "$LINENO" 5
+		as_fn_error $? "unable to build shared libraries on this system" "$LINENO" 5
 	    fi
 	    # Build as convenience library
 	    ZLIB_LDFLAGS=-no-install
@@ -24456,17 +24456,17 @@ done
 	with_pam=yes
     elif test "$with_pam" = "yes"; then
 	if test "$found_pam_lib" = "no"; then
-	    as_fn_error $? "\"--with-pam specified but unable to locate PAM development library.\"" "$LINENO" 5
+	    as_fn_error $? "--with-pam specified but unable to locate PAM development library." "$LINENO" 5
 	fi
 	if test "$found_pam_hdrs" = "no"; then
-	    as_fn_error $? "\"--with-pam specified but unable to locate PAM development headers.\"" "$LINENO" 5
+	    as_fn_error $? "--with-pam specified but unable to locate PAM development headers." "$LINENO" 5
 	fi
     elif test "$found_pam_lib" != "$found_pam_hdrs"; then
 	if test "$found_pam_lib" = "no"; then
-	    as_fn_error $? "\"found PAM headers but no PAM development library; specify --without-pam to build without PAM\"" "$LINENO" 5
+	    as_fn_error $? "found PAM headers but no PAM development library; specify --without-pam to build without PAM" "$LINENO" 5
 	fi
 	if test "$found_pam_hdrs" = "no"; then
-	    as_fn_error $? "\"found PAM library but no PAM development headers; specify --without-pam to build without PAM\"" "$LINENO" 5
+	    as_fn_error $? "found PAM library but no PAM development headers; specify --without-pam to build without PAM" "$LINENO" 5
 	fi
     fi
 
@@ -24500,7 +24500,7 @@ then :
 			pam_login_service="sudo-i"
 			;;
 	    no)		;;
-	    *)		as_fn_error $? "\"--with-pam-login does not take an argument.\"" "$LINENO" 5
+	    *)		as_fn_error $? "--with-pam-login does not take an argument." "$LINENO" 5
 			;;
 	esac
 fi
@@ -24957,8 +24957,8 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 	    done
 	    if test X"$found" = X"no"; then
 		CPPFLAGS="$O_CPPFLAGS"
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&5
-printf "%s\n" "$as_me: WARNING: Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&2;}
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&5
+printf "%s\n" "$as_me: WARNING: unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&2;}
 	    fi
 	else
 
@@ -25241,7 +25241,7 @@ done
 if test ${enable_kerb5_instance+y}
 then :
   enableval=$enable_kerb5_instance;  case "$enableval" in
-	    yes)	as_fn_error $? "\"must give --enable-kerb5-instance an argument.\"" "$LINENO" 5
+	    yes)	as_fn_error $? "must give --enable-kerb5-instance an argument." "$LINENO" 5
 			;;
 	    no)		;;
 	    *)		cat >>confdefs.h <<EOF
@@ -25334,8 +25334,8 @@ fi
 	fi
     done
     if test -z "$FOUND_AFSLIBDIR"; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options." >&5
-printf "%s\n" "$as_me: WARNING: Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options." >&2;}
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options." >&5
+printf "%s\n" "$as_me: WARNING: unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options." >&2;}
     fi
 
     # Order is important here.  Note that we build AFS_LIBS from right to left
@@ -25394,8 +25394,8 @@ fi
     done
 
     if test -z "$FOUND_AFSLIBDIR"; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options." >&5
-printf "%s\n" "$as_me: WARNING: Unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options." >&2;}
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options." >&5
+printf "%s\n" "$as_me: WARNING: unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options." >&2;}
     fi
 
     AUTH_OBJS="$AUTH_OBJS afs.lo"
@@ -25612,8 +25612,8 @@ fi
 
 	fi
 	if test "$found" = "no"; then
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&5
-printf "%s\n" "$as_me: WARNING: Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&2;}
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&5
+printf "%s\n" "$as_me: WARNING: unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&2;}
 	fi
     fi
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lskey" >&5
@@ -25652,8 +25652,8 @@ if test "x$ac_cv_lib_skey_main" = xyes
 then :
   found=yes
 else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS" >&5
-printf "%s\n" "$as_me: WARNING: Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS" >&2;}
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS" >&5
+printf "%s\n" "$as_me: WARNING: unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS" >&2;}
 fi
 
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for skeyaccess in -lskey" >&5
@@ -25959,8 +25959,8 @@ fi
 
 	fi
 	if test "$found" = "no"; then
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&5
-printf "%s\n" "$as_me: WARNING: Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&2;}
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&5
+printf "%s\n" "$as_me: WARNING: unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&2;}
 	fi
     fi
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lopie" >&5
@@ -25999,8 +25999,8 @@ if test "x$ac_cv_lib_opie_main" = xyes
 then :
   found=yes
 else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS" >&5
-printf "%s\n" "$as_me: WARNING: Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS" >&2;}
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS" >&5
+printf "%s\n" "$as_me: WARNING: unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS" >&2;}
 fi
 
     LDFLAGS="$O_LDFLAGS"
@@ -26826,10 +26826,10 @@ fi
 done
 	if test X${enable_sasl} = X"yes"; then
 	    if test X"$found_sasl_h" != X"yes"; then
-		as_fn_error $? "\"--enable-sasl specified but unable to locate SASL development headers.\"" "$LINENO" 5
+		as_fn_error $? "--enable-sasl specified but unable to locate SASL development headers." "$LINENO" 5
 	    fi
 	    if test X"$ac_cv_func_ldap_sasl_interactive_bind_s" != X"yes"; then :
-		as_fn_error $? "\"--enable-sasl specified but SASL support is missing in your LDAP library\"" "$LINENO" 5
+		as_fn_error $? "--enable-sasl specified but SASL support is missing in your LDAP library" "$LINENO" 5
 	    fi
 	fi
     fi
@@ -27092,8 +27092,8 @@ fi
 
 	elif test X"$ac_cv_header_gssapi_h" = X"no"; then
 	    CPPFLAGS="$O_CPPFLAGS"
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&5
-printf "%s\n" "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&2;}
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&5
+printf "%s\n" "$as_me: WARNING: unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&2;}
 	fi
     fi
 
@@ -27267,7 +27267,7 @@ fi
 	;;
     *)
 	if test X"${ac_cv_func_dlopen}" = X"yes"; then
-	    as_fn_error $? "\"dlopen present but libtool doesn't appear to support your platform.\"" "$LINENO" 5
+	    as_fn_error $? "dlopen present but libtool doesn't appear to support your platform." "$LINENO" 5
 	fi
 	# Preload sudoers module symbols
 	printf "%s\n" "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
@@ -27291,7 +27291,7 @@ fi
 #
 if test "$enable_shared_libutil" = "no"; then
     if test X"$STATIC_SUDOERS" = X""; then
-	as_fn_error $? "\"--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled.\"" "$LINENO" 5
+	as_fn_error $? "--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled." "$LINENO" 5
     else
 	# Do not install sudoers or libsudo_util.
 
@@ -29199,8 +29199,8 @@ case "$with_passwd" in
 yes|maybe)
     AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
     if test "${ac_cv_search_crypt}" = "no"; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: No crypt function found, assuming plaintext passwords" >&5
-printf "%s\n" "$as_me: WARNING: No crypt function found, assuming plaintext passwords" >&2;}
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: no crypt function found, assuming plaintext passwords" >&5
+printf "%s\n" "$as_me: WARNING: no crypt function found, assuming plaintext passwords" >&2;}
     fi
     ;;
 *)
@@ -31748,19 +31748,23 @@ if test "${enable_env_debug+set}" = "set"; then
 fi
 echo "" >&6
 
+if test "$openssl_missing" = "yes"; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted." >&5
+printf "%s\n" "$as_me: WARNING: OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted." >&2;}
+fi
 if test "$with_pam" = "yes"; then
     case $host_os in
 	hpux*|hiuxmpp*)
 	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: You may wish to add the following line to /etc/pam.conf" >&5
-printf "%s\n" "$as_me: You may wish to add the following line to /etc/pam.conf" >&6;}
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: you may wish to add the following line to /etc/pam.conf" >&5
+printf "%s\n" "$as_me: you may wish to add the following line to /etc/pam.conf" >&6;}
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login" >&5
 printf "%s\n" "$as_me: sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login" >&6;}
 	    fi
 	    ;;
 	linux*)
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: You will need to customize examples/pam.conf and install it as /etc/pam.d/sudo" >&5
-printf "%s\n" "$as_me: You will need to customize examples/pam.conf and install it as /etc/pam.d/sudo" >&6;}
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: you will need to customize examples/pam.conf and install it as /etc/pam.d/sudo" >&5
+printf "%s\n" "$as_me: you will need to customize examples/pam.conf and install it as /etc/pam.d/sudo" >&6;}
 	    ;;
     esac
 fi
@@ -31773,8 +31777,8 @@ case "$rundir" in
 	;;
 esac
 if test $clear_rundir -eq 1; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Warning: the $rundir/ts directory must be cleared at boot time." >&5
-printf "%s\n" "$as_me: Warning: the $rundir/ts directory must be cleared at boot time." >&6;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: warning: the $rundir/ts directory must be cleared at boot time." >&5
+printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot time." >&6;}
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi

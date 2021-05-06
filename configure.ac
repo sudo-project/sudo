@@ -25,7 +25,7 @@ AC_CONFIG_AUX_DIR([scripts])
 dnl
 dnl Note: this must come after AC_INIT
 dnl
-AC_MSG_NOTICE([Configuring Sudo version $PACKAGE_VERSION])
+AC_MSG_NOTICE([configuring Sudo version $PACKAGE_VERSION])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
@@ -348,7 +348,7 @@ dnl
 
 AC_ARG_WITH(devel, [AS_HELP_STRING([--with-devel], [add development options])],
 [case $with_devel in
-    yes)	AC_MSG_NOTICE([Setting up for development: -Wall, flex, yacc])
+    yes)	AC_MSG_NOTICE([setting up for development: -Wall, flex, yacc])
 		AX_APPEND_FLAG([-DSUDO_DEVEL], [CPPFLAGS])
 		DEVEL="true"
 		devdir=.
@@ -380,7 +380,7 @@ AC_ARG_WITH(bsm-audit, [AS_HELP_STRING([--with-bsm-audit], [enable BSM audit sup
 		SUDOERS_OBJS="${SUDOERS_OBJS} bsm_audit.lo"
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-bsm-audit does not take an argument."])
+    *)		AC_MSG_ERROR([--with-bsm-audit does not take an argument.])
 		;;
 esac])
 
@@ -399,7 +399,7 @@ AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux aud
 		])
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-linux-audit does not take an argument."])
+    *)		AC_MSG_ERROR([--with-linux-audit does not take an argument.])
 		;;
 esac])
 
@@ -413,7 +413,7 @@ AC_ARG_WITH(solaris-audit, [AS_HELP_STRING([--with-solaris-audit], [enable Solar
 		SUDOERS_OBJS="${SUDOERS_OBJS} solaris_audit.lo"
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-solaris-audit does not take an argument."])
+    *)		AC_MSG_ERROR([--with-solaris-audit does not take an argument.])
 		;;
 esac])
 
@@ -430,7 +430,7 @@ AC_ARG_WITH(sssd, [AS_HELP_STRING([--with-sssd], [enable SSSD support])],
 		AC_DEFINE(HAVE_SSSD)
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-sssd does not take an argument."])
+    *)		AC_MSG_ERROR([--with-sssd does not take an argument.])
 		;;
 esac])
 
@@ -446,11 +446,11 @@ SUDO_DEFINE_UNQUOTED(_PATH_SSSD_LIB, "$sssd_lib", [Path to the SSSD library])
 
 AC_ARG_WITH(incpath, [AS_HELP_STRING([--with-incpath], [additional places to look for include files])],
 [case $with_incpath in
-    yes)	AC_MSG_ERROR(["must give --with-incpath an argument."])
+    yes)	AC_MSG_ERROR([must give --with-incpath an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-incpath not supported."])
+    no)		AC_MSG_ERROR([--without-incpath not supported.])
 		;;
-    *)		AC_MSG_NOTICE([Adding ${with_incpath} to CPPFLAGS])
+    *)		AC_MSG_NOTICE([adding ${with_incpath} to CPPFLAGS])
 		for i in ${with_incpath}; do
 		    AX_APPEND_FLAG([-I${i}], [CPPFLAGS])
 		done
@@ -459,27 +459,27 @@ esac])
 
 AC_ARG_WITH(libpath, [AS_HELP_STRING([--with-libpath], [additional places to look for libraries])],
 [case $with_libpath in
-    yes)	AC_MSG_ERROR(["must give --with-libpath an argument."])
+    yes)	AC_MSG_ERROR([must give --with-libpath an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-libpath not supported."])
+    no)		AC_MSG_ERROR([--without-libpath not supported.])
 		;;
-    *)		AC_MSG_NOTICE([Adding ${with_libpath} to LDFLAGS])
+    *)		AC_MSG_NOTICE([adding ${with_libpath} to LDFLAGS])
 		;;
 esac])
 
 AC_ARG_WITH(libraries, [AS_HELP_STRING([--with-libraries], [additional libraries to link with])],
 [case $with_libraries in
-    yes)	AC_MSG_ERROR(["must give --with-libraries an argument."])
+    yes)	AC_MSG_ERROR([must give --with-libraries an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-libraries not supported."])
+    no)		AC_MSG_ERROR([--without-libraries not supported.])
 		;;
-    *)		AC_MSG_NOTICE([Adding ${with_libraries} to LIBS])
+    *)		AC_MSG_NOTICE([adding ${with_libraries} to LIBS])
 		;;
 esac])
 
 AC_ARG_WITH(csops, [AS_HELP_STRING([--with-csops], [add CSOps standard options])],
 [case $with_csops in
-    yes)	AC_MSG_NOTICE([Adding CSOps standard options])
+    yes)	AC_MSG_NOTICE([adding CSOps standard options])
 		CHECKSIA=false
 		with_ignore_dot=yes
 		insults=on
@@ -499,7 +499,7 @@ AC_ARG_WITH(passwd, [AS_HELP_STRING([--without-passwd], [don't use passwd/shadow
     yes|no)	AUTH_DEF=""
 		test "$with_passwd" = "yes" && AUTH_REG="$AUTH_REG passwd"
 		;;
-    *)		AC_MSG_ERROR(["Sorry, --with-passwd does not take an argument."])
+    *)		AC_MSG_ERROR([sorry, --with-passwd does not take an argument.])
 		;;
 esac])
 
@@ -526,7 +526,7 @@ AC_ARG_WITH(long-otp-prompt, [AS_HELP_STRING([--with-long-otp-prompt], [use a tw
 		;;
     no)		long_otp_prompt=off
 		;;
-    *)		AC_MSG_ERROR(["--with-long-otp-prompt does not take an argument."])
+    *)		AC_MSG_ERROR([--with-long-otp-prompt does not take an argument.])
 		;;
 esac])
 
@@ -557,7 +557,7 @@ AC_ARG_WITH(aixauth, [AS_HELP_STRING([--with-aixauth], [enable AIX general authe
 [case $with_aixauth in
     yes)	AUTH_EXCL="$AUTH_EXCL AIX_AUTH";;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-aixauth does not take an argument."])
+    *)		AC_MSG_ERROR([--with-aixauth does not take an argument.])
 		;;
 esac])
 
@@ -565,7 +565,7 @@ AC_ARG_WITH(pam, [AS_HELP_STRING([--with-pam], [enable PAM support])],
 [case $with_pam in
     yes)	AUTH_EXCL="$AUTH_EXCL PAM";;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-pam does not take an argument."])
+    *)		AC_MSG_ERROR([--with-pam does not take an argument.])
 		;;
 esac])
 
@@ -575,7 +575,7 @@ AC_ARG_WITH(AFS, [AS_HELP_STRING([--with-AFS], [enable AFS support])],
 		AUTH_REG="$AUTH_REG AFS"
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-AFS does not take an argument."])
+    *)		AC_MSG_ERROR([--with-AFS does not take an argument.])
 		;;
 esac])
 
@@ -585,14 +585,14 @@ AC_ARG_WITH(DCE, [AS_HELP_STRING([--with-DCE], [enable DCE support])],
 		AUTH_REG="$AUTH_REG DCE"
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-DCE does not take an argument."])
+    *)		AC_MSG_ERROR([--with-DCE does not take an argument.])
 		;;
 esac])
 
 AC_ARG_WITH(logincap, [AS_HELP_STRING([--with-logincap], [enable BSD login class support])],
 [case $with_logincap in
     yes|no)	;;
-    *)		AC_MSG_ERROR(["--with-logincap does not take an argument."])
+    *)		AC_MSG_ERROR([--with-logincap does not take an argument.])
 		;;
 esac])
 
@@ -600,7 +600,7 @@ AC_ARG_WITH(bsdauth, [AS_HELP_STRING([--with-bsdauth], [enable BSD authenticatio
 [case $with_bsdauth in
     yes)	AUTH_EXCL="$AUTH_EXCL BSD_AUTH";;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-bsdauth does not take an argument."])
+    *)		AC_MSG_ERROR([--with-bsdauth does not take an argument.])
 		;;
 esac])
 
@@ -608,7 +608,7 @@ AC_ARG_WITH(project, [AS_HELP_STRING([--with-project], [enable Solaris project s
 [case $with_project in
     yes|no)	;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-project does not take an argument."])
+    *)		AC_MSG_ERROR([--with-project does not take an argument.])
 		;;
 esac])
 
@@ -619,15 +619,15 @@ AC_ARG_WITH(lecture, [AS_HELP_STRING([--without-lecture], [don't print lecture f
     no|none|never)	lecture=never
 			AC_DEFINE(NO_LECTURE)
 			;;
-    *)		AC_MSG_ERROR(["unknown argument to --with-lecture: $with_lecture"])
+    *)		AC_MSG_ERROR([unknown argument to --with-lecture: $with_lecture])
 		;;
 esac])
 
 AC_ARG_WITH(logging, [AS_HELP_STRING([--with-logging], [log via syslog, file, or both])],
 [case $with_logging in
-    yes)	AC_MSG_ERROR(["must give --with-logging an argument."])
+    yes)	AC_MSG_ERROR([must give --with-logging an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-logging not supported."])
+    no)		AC_MSG_ERROR([--without-logging not supported.])
 		;;
     syslog)	AC_DEFINE(LOGGING, SLOG_SYSLOG)
 		;;
@@ -635,7 +635,7 @@ AC_ARG_WITH(logging, [AS_HELP_STRING([--with-logging], [log via syslog, file, or
 		;;
     both)	AC_DEFINE(LOGGING, SLOG_BOTH)
 		;;
-    *)		AC_MSG_ERROR(["unknown argument to --with-logging: $with_logging"])
+    *)		AC_MSG_ERROR([unknown argument to --with-logging: $with_logging])
 		;;
 esac], [
     with_logging=syslog
@@ -644,35 +644,35 @@ esac], [
 
 AC_ARG_WITH(logfac, [AS_HELP_STRING([--with-logfac], [syslog facility to log with (default is "auth")])],
 [case $with_logfac in
-    yes)	AC_MSG_ERROR(["must give --with-logfac an argument."])
+    yes)	AC_MSG_ERROR([must give --with-logfac an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-logfac not supported."])
+    no)		AC_MSG_ERROR([--without-logfac not supported.])
 		;;
     authpriv|auth|daemon|user|local0|local1|local2|local3|local4|local5|local6|local7)		logfac=$with_logfac
 		;;
-    *)		AC_MSG_ERROR(["$with_logfac is not a supported syslog facility."])
+    *)		AC_MSG_ERROR([$with_logfac is not a supported syslog facility.])
 		;;
 esac])
 
 AC_ARG_WITH(goodpri, [AS_HELP_STRING([--with-goodpri], [syslog priority for commands (def is "notice")])],
 [case $with_goodpri in
-    yes)	AC_MSG_ERROR(["must give --with-goodpri an argument."])
+    yes)	AC_MSG_ERROR([must give --with-goodpri an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-goodpri not supported."])
+    no)		AC_MSG_ERROR([--without-goodpri not supported.])
 		;;
     alert|crit|debug|emerg|err|info|notice|warning)
 		goodpri=$with_goodpri
 		;;
-    *)		AC_MSG_ERROR(["$with_goodpri is not a supported syslog priority."])
+    *)		AC_MSG_ERROR([$with_goodpri is not a supported syslog priority.])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(PRI_SUCCESS, "$goodpri", [The syslog priority sudo will use for successful attempts.])
 
 AC_ARG_WITH(badpri, [AS_HELP_STRING([--with-badpri], [syslog priority for failures (def is "alert")])],
 [case $with_badpri in
-    yes)	AC_MSG_ERROR(["must give --with-badpri an argument."])
+    yes)	AC_MSG_ERROR([must give --with-badpri an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-badpri not supported."])
+    no)		AC_MSG_ERROR([--without-badpri not supported.])
 		;;
     alert|crit|debug|emerg|err|info|notice|warning)
 		badpri=$with_badpri
@@ -684,21 +684,21 @@ AC_DEFINE_UNQUOTED(PRI_FAILURE, "$badpri", [The syslog priority sudo will use fo
 
 AC_ARG_WITH(logpath, [AS_HELP_STRING([--with-logpath], [path to the sudo log file])],
 [case $with_logpath in
-    yes)	AC_MSG_ERROR(["must give --with-logpath an argument."])
+    yes)	AC_MSG_ERROR([must give --with-logpath an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-logpath not supported."])
+    no)		AC_MSG_ERROR([--without-logpath not supported.])
 		;;
 esac])
 
 AC_ARG_WITH(loglen, [AS_HELP_STRING([--with-loglen], [maximum length of a log file line (default is 80)])],
 [case $with_loglen in
-    yes)	AC_MSG_ERROR(["must give --with-loglen an argument."])
+    yes)	AC_MSG_ERROR([must give --with-loglen an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-loglen not supported."])
+    no)		AC_MSG_ERROR([--without-loglen not supported.])
 		;;
     [[0-9]]*)	loglen=$with_loglen
 		;;
-    *)		AC_MSG_ERROR(["you must enter a number, not $with_loglen"])
+    *)		AC_MSG_ERROR([you must enter a number, not $with_loglen])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(MAXLOGFILELEN, $loglen, [The max number of chars per log file line (for line wrapping).])
@@ -710,7 +710,7 @@ AC_ARG_WITH(ignore-dot, [AS_HELP_STRING([--with-ignore-dot], [ignore '.' in the 
 		;;
     no)		ignore_dot=off
 		;;
-    *)		AC_MSG_ERROR(["--with-ignore-dot does not take an argument."])
+    *)		AC_MSG_ERROR([--with-ignore-dot does not take an argument.])
 		;;
 esac])
 
@@ -720,7 +720,7 @@ AC_ARG_WITH(mail-if-no-user, [AS_HELP_STRING([--without-mail-if-no-user], [do no
 		;;
     no)		mail_no_user=off
 		;;
-    *)		AC_MSG_ERROR(["--with-mail-if-no-user does not take an argument."])
+    *)		AC_MSG_ERROR([--with-mail-if-no-user does not take an argument.])
 		;;
 esac])
 if test "$mail_no_user" = "on"; then
@@ -734,7 +734,7 @@ AC_ARG_WITH(mail-if-no-host, [AS_HELP_STRING([--with-mail-if-no-host], [send mai
 		;;
     no)		mail_no_host=off
 		;;
-    *)		AC_MSG_ERROR(["--with-mail-if-no-host does not take an argument."])
+    *)		AC_MSG_ERROR([--with-mail-if-no-host does not take an argument.])
 		;;
 esac])
 
@@ -745,15 +745,15 @@ AC_ARG_WITH(mail-if-noperms, [AS_HELP_STRING([--with-mail-if-noperms], [send mai
 		;;
     no)		mail_noperms=off
 		;;
-    *)		AC_MSG_ERROR(["--with-mail-if-noperms does not take an argument."])
+    *)		AC_MSG_ERROR([--with-mail-if-noperms does not take an argument.])
 		;;
 esac])
 
 AC_ARG_WITH(mailto, [AS_HELP_STRING([--with-mailto], [who should get sudo mail (default is "root")])],
 [case $with_mailto in
-    yes)	AC_MSG_ERROR(["must give --with-mailto an argument."])
+    yes)	AC_MSG_ERROR([must give --with-mailto an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-mailto not supported."])
+    no)		AC_MSG_ERROR([--without-mailto not supported.])
 		;;
     *)		mailto=$with_mailto
 		;;
@@ -762,9 +762,9 @@ AC_DEFINE_UNQUOTED(MAILTO, "$mailto", [The user or email address that sudo mail 
 
 AC_ARG_WITH(mailsubject, [AS_HELP_STRING([--with-mailsubject], [subject of sudo mail])],
 [case $with_mailsubject in
-    yes)	AC_MSG_ERROR(["must give --with-mailsubject an argument."])
+    yes)	AC_MSG_ERROR([must give --with-mailsubject an argument.])
 		;;
-    no)		AC_MSG_WARN([Sorry, --without-mailsubject not supported.])
+    no)		AC_MSG_WARN([sorry, --without-mailsubject not supported.])
 		;;
     *)		mailsub="$with_mailsubject"
 		;;
@@ -773,9 +773,9 @@ AC_DEFINE_UNQUOTED(MAILSUBJECT, "$mailsub", [The subject of the mail sent by sud
 
 AC_ARG_WITH(passprompt, [AS_HELP_STRING([--with-passprompt], [default password prompt])],
 [case $with_passprompt in
-    yes)	AC_MSG_ERROR(["must give --with-passprompt an argument."])
+    yes)	AC_MSG_ERROR([must give --with-passprompt an argument.])
 		;;
-    no)		AC_MSG_WARN([Sorry, --without-passprompt not supported.])
+    no)		AC_MSG_WARN([sorry, --without-passprompt not supported.])
 		;;
     *)		passprompt="$with_passprompt"
 esac])
@@ -783,9 +783,9 @@ AC_DEFINE_UNQUOTED(PASSPROMPT, "$passprompt", [The default password prompt.])
 
 AC_ARG_WITH(badpass-message, [AS_HELP_STRING([--with-badpass-message], [message the user sees when the password is wrong])],
 [case $with_badpass_message in
-    yes)	AC_MSG_ERROR(["Must give --with-badpass-message an argument."])
+    yes)	AC_MSG_ERROR([must give --with-badpass-message an argument.])
 		;;
-    no)		AC_MSG_WARN([Sorry, --without-badpass-message not supported.])
+    no)		AC_MSG_WARN([sorry, --without-badpass-message not supported.])
 		;;
     *)		badpass_message="$with_badpass_message"
 		;;
@@ -799,49 +799,49 @@ AC_ARG_WITH(fqdn, [AS_HELP_STRING([--with-fqdn], [expect fully qualified hosts i
 		;;
     no)		fqdn=off
 		;;
-    *)		AC_MSG_ERROR(["--with-fqdn does not take an argument."])
+    *)		AC_MSG_ERROR([--with-fqdn does not take an argument.])
 		;;
 esac])
 
 AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir=DIR], [deprecated])],
 [case $with_timedir in
-    *)		AC_MSG_ERROR(["--without-timedir no longer supported, see --with-rundir."])
+    *)		AC_MSG_ERROR([--without-timedir no longer supported, see --with-rundir.])
 		;;
 esac])
 
 AC_ARG_WITH(rundir, [AS_HELP_STRING([--with-rundir=DIR], [directory for sudo-specific files that do not survive a system reboot, e.g. `/var/run/sudo'])],
 [case $with_rundir in
-    yes)	AC_MSG_ERROR(["must give --with-rundir an argument."])
+    yes)	AC_MSG_ERROR([must give --with-rundir an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-rundir not supported."])
+    no)		AC_MSG_ERROR([--without-rundir not supported.])
 		;;
 esac])
 
 AC_ARG_WITH(vardir, [AS_HELP_STRING([--with-vardir=DIR], [directory for sudo-specific files that survive a system reboot, e.g. `/var/db/sudo' or `/var/lib/sudo'])],
 [case $with_vardir in
-    yes)	AC_MSG_ERROR(["must give --with-vardir an argument."])
+    yes)	AC_MSG_ERROR([must give --with-vardir an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-vardir not supported."])
+    no)		AC_MSG_ERROR([--without-vardir not supported.])
 		;;
 esac])
 
 AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory to store sudo I/O log files in])],
 [case $with_iologdir in
     yes)    ;;
-    no)     AC_MSG_ERROR(["--without-iologdir not supported."])
+    no)     AC_MSG_ERROR([--without-iologdir not supported.])
 	    ;;
 esac])
 
 AC_ARG_WITH(relaydir, [AS_HELP_STRING([--with-relaydir=DIR], [directory to store sudo_logsrvd relay temporary files in])],
 [case $with_relaydir in
     yes)    ;;
-    no)     AC_MSG_ERROR(["--without-relaydir not supported."])
+    no)     AC_MSG_ERROR([--without-relaydir not supported.])
 	    ;;
 esac])
 
 AC_ARG_WITH(tzdir, [AS_HELP_STRING([--with-tzdir=DIR], [path to the time zone data directory])],
 [case $with_tzdir in
-    yes)	AC_MSG_ERROR(["must give --with-tzdir an argument."])
+    yes)	AC_MSG_ERROR([must give --with-tzdir an argument.])
 		;;
 esac])
 
@@ -857,52 +857,52 @@ esac])
 
 AC_ARG_WITH(sudoers-mode, [AS_HELP_STRING([--with-sudoers-mode], [mode of sudoers file (defaults to 0440)])],
 [case $with_sudoers_mode in
-    yes)	AC_MSG_ERROR(["must give --with-sudoers-mode an argument."])
+    yes)	AC_MSG_ERROR([must give --with-sudoers-mode an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-sudoers-mode not supported."])
+    no)		AC_MSG_ERROR([--without-sudoers-mode not supported.])
 		;;
     [[1-9]]*)	SUDOERS_MODE=0${with_sudoers_mode}
 		;;
     0*)		SUDOERS_MODE=$with_sudoers_mode
 		;;
-    *)		AC_MSG_ERROR(["you must use an octal mode, not a name."])
+    *)		AC_MSG_ERROR([you must use an octal mode, not a name.])
 		;;
 esac])
 
 AC_ARG_WITH(sudoers-uid, [AS_HELP_STRING([--with-sudoers-uid], [uid that owns sudoers file (defaults to 0)])],
 [case $with_sudoers_uid in
-    yes)	AC_MSG_ERROR(["must give --with-sudoers-uid an argument."])
+    yes)	AC_MSG_ERROR([must give --with-sudoers-uid an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-sudoers-uid not supported."])
+    no)		AC_MSG_ERROR([--without-sudoers-uid not supported.])
 		;;
     [[0-9]]*)	SUDOERS_UID=$with_sudoers_uid
 		;;
-    *)		AC_MSG_ERROR(["you must use an unsigned numeric uid, not a name."])
+    *)		AC_MSG_ERROR([you must use an unsigned numeric uid, not a name.])
 		;;
 esac])
 
 AC_ARG_WITH(sudoers-gid, [AS_HELP_STRING([--with-sudoers-gid], [gid that owns sudoers file (defaults to 0)])],
 [case $with_sudoers_gid in
-    yes)	AC_MSG_ERROR(["must give --with-sudoers-gid an argument."])
+    yes)	AC_MSG_ERROR([must give --with-sudoers-gid an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-sudoers-gid not supported."])
+    no)		AC_MSG_ERROR([--without-sudoers-gid not supported.])
 		;;
     [[0-9]]*)	SUDOERS_GID=$with_sudoers_gid
 		;;
-    *)		AC_MSG_ERROR(["you must use an unsigned numeric gid, not a name."])
+    *)		AC_MSG_ERROR([you must use an unsigned numeric gid, not a name.])
 		;;
 esac])
 
 AC_ARG_WITH(umask, [AS_HELP_STRING([--with-umask], [umask with which the prog should run (default is 022)])
 AS_HELP_STRING([--without-umask], [Preserves the umask of the user invoking sudo.])],
 [case $with_umask in
-    yes)	AC_MSG_ERROR(["must give --with-umask an argument."])
+    yes)	AC_MSG_ERROR([must give --with-umask an argument.])
 		;;
     no)		sudo_umask=0777
 		;;
     [[0-9]]*)	sudo_umask=$with_umask
 		;;
-    *)		AC_MSG_ERROR(["you must enter a numeric mask."])
+    *)		AC_MSG_ERROR([you must enter a numeric mask.])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(SUDO_UMASK, $sudo_umask, [The umask that the sudo-run prog should use.])
@@ -914,15 +914,15 @@ AC_ARG_WITH(umask-override, [AS_HELP_STRING([--with-umask-override], [Use the um
 		;;
     no)		umask_override=off
 		;;
-    *)		AC_MSG_ERROR(["--with-umask-override does not take an argument."])
+    *)		AC_MSG_ERROR([--with-umask-override does not take an argument.])
 		;;
 esac])
 
 AC_ARG_WITH(runas-default, [AS_HELP_STRING([--with-runas-default], [User to run commands as (default is "root")])],
 [case $with_runas_default in
-    yes)	AC_MSG_ERROR(["must give --with-runas-default an argument."])
+    yes)	AC_MSG_ERROR([must give --with-runas-default an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-runas-default not supported."])
+    no)		AC_MSG_ERROR([--without-runas-default not supported.])
 		;;
     *)		runas_default="$with_runas_default"
 		;;
@@ -931,9 +931,9 @@ AC_DEFINE_UNQUOTED(RUNAS_DEFAULT, "$runas_default", [The user sudo should run co
 
 AC_ARG_WITH(exempt, [AS_HELP_STRING([--with-exempt=group], [no passwd needed for users in this group])],
 [case $with_exempt in
-    yes)	AC_MSG_ERROR(["must give --with-exempt an argument."])
+    yes)	AC_MSG_ERROR([must give --with-exempt an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-exempt not supported."])
+    no)		AC_MSG_ERROR([--without-exempt not supported.])
 		;;
     *)		AC_DEFINE_UNQUOTED(EXEMPTGROUP, "$with_exempt", [If defined, users in this group need not enter a passwd (ie "sudo").])
 		;;
@@ -941,9 +941,9 @@ esac])
 
 AC_ARG_WITH(editor, [AS_HELP_STRING([--with-editor=path], [Default editor for visudo (defaults to vi)])],
 [case $with_editor in
-    yes)	AC_MSG_ERROR(["must give --with-editor an argument."])
+    yes)	AC_MSG_ERROR([must give --with-editor an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-editor not supported."])
+    no)		AC_MSG_ERROR([--without-editor not supported.])
 		;;
     *)		AC_DEFINE_UNQUOTED(EDITOR, "$with_editor", [A colon-separated list of pathnames to be used as the editor for visudo.])
 		editor="$with_editor"
@@ -956,7 +956,7 @@ AC_ARG_WITH(env-editor, [AS_HELP_STRING([--with-env-editor], [Use the environmen
 		;;
     no)		env_editor=off
 		;;
-    *)		AC_MSG_ERROR(["--with-env-editor does not take an argument."])
+    *)		AC_MSG_ERROR([--with-env-editor does not take an argument.])
 		;;
 esac])
 if test "$env_editor" = "on"; then
@@ -966,11 +966,11 @@ fi
 AC_ARG_WITH(passwd-tries, [AS_HELP_STRING([--with-passwd-tries], [number of tries to enter password (default is 3)])],
 [case $with_passwd_tries in
     yes)	;;
-    no)		AC_MSG_ERROR(["--without-editor not supported."])
+    no)		AC_MSG_ERROR([--without-editor not supported.])
 		;;
     [[1-9]]*)	passwd_tries=$with_passwd_tries
 		;;
-    *)		AC_MSG_ERROR(["you must enter the number of tries, > 0"])
+    *)		AC_MSG_ERROR([you must enter the number of tries, > 0])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $passwd_tries, [The number of tries a user gets to enter their password.])
@@ -982,7 +982,7 @@ AC_ARG_WITH(timeout, [AS_HELP_STRING([--with-timeout], [minutes before sudo asks
 		;;
     [[0-9]]*)	timeout=$with_timeout
 		;;
-    *)		AC_MSG_ERROR(["you must enter the number of minutes."])
+    *)		AC_MSG_ERROR([you must enter the number of minutes.])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(TIMEOUT, $timeout, [The number of minutes before sudo asks for a password again.])
@@ -994,7 +994,7 @@ AC_ARG_WITH(password-timeout, [AS_HELP_STRING([--with-password-timeout], [passwd
 		;;
     [[0-9]]*)	password_timeout=$with_password_timeout
 		;;
-    *)		AC_MSG_ERROR(["you must enter the number of minutes."])
+    *)		AC_MSG_ERROR([you must enter the number of minutes.])
 		;;
 esac])
 AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout, [The passwd prompt timeout (in minutes).])
@@ -1005,7 +1005,7 @@ AC_ARG_WITH(tty-tickets, [AS_HELP_STRING([--with-tty-tickets], [use a different 
 		;;
     no)		timestamp_type=global
 		;;
-    *)		AC_MSG_ERROR(["--with-tty-tickets does not take an argument."])
+    *)		AC_MSG_ERROR([--with-tty-tickets does not take an argument.])
 		;;
 esac])
 
@@ -1022,7 +1022,7 @@ AC_ARG_WITH(insults, [AS_HELP_STRING([--with-insults], [insult the user for ente
 		;;
     no)		insults=off
 		;;
-    *)		AC_MSG_ERROR(["--with-insults does not take an argument."])
+    *)		AC_MSG_ERROR([--with-insults does not take an argument.])
 		;;
 esac])
 
@@ -1035,7 +1035,7 @@ AC_ARG_WITH(all-insults, [AS_HELP_STRING([--with-all-insults], [include all the 
 		with_python_insults=yes
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-all-insults does not take an argument."])
+    *)		AC_MSG_ERROR([--with-all-insults does not take an argument.])
 		;;
 esac])
 
@@ -1044,7 +1044,7 @@ AC_ARG_WITH(classic-insults, [AS_HELP_STRING([--with-classic-insults], [include 
     yes)	AC_DEFINE(CLASSIC_INSULTS)
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-classic-insults does not take an argument."])
+    *)		AC_MSG_ERROR([--with-classic-insults does not take an argument.])
 		;;
 esac])
 
@@ -1053,7 +1053,7 @@ AC_ARG_WITH(csops-insults, [AS_HELP_STRING([--with-csops-insults], [include CSOp
     yes)	AC_DEFINE(CSOPS_INSULTS)
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-csops-insults does not take an argument."])
+    *)		AC_MSG_ERROR([--with-csops-insults does not take an argument.])
 		;;
 esac])
 
@@ -1062,7 +1062,7 @@ AC_ARG_WITH(hal-insults, [AS_HELP_STRING([--with-hal-insults], [include 2001-lik
     yes)	AC_DEFINE(HAL_INSULTS)
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-hal-insults does not take an argument."])
+    *)		AC_MSG_ERROR([--with-hal-insults does not take an argument.])
 		;;
 esac])
 
@@ -1071,7 +1071,7 @@ AC_ARG_WITH(goons-insults, [AS_HELP_STRING([--with-goons-insults], [include the 
     yes)	AC_DEFINE(GOONS_INSULTS)
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-goons-insults does not take an argument."])
+    *)		AC_MSG_ERROR([--with-goons-insults does not take an argument.])
 		;;
 esac])
 
@@ -1080,7 +1080,7 @@ AC_ARG_WITH(python-insults, [AS_HELP_STRING([--with-python-insults], [include th
     yes)	AC_DEFINE(PYTHON_INSULTS)
         ;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-python-insults does not take an argument."])
+    *)		AC_MSG_ERROR([--with-python-insults does not take an argument.])
         ;;
 esac])
 
@@ -1124,13 +1124,13 @@ AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to re
     yes)	;;
     no)		AC_DEFINE(STUB_LOAD_INTERFACES)
 		;;
-    *)		AC_MSG_ERROR(["--with-interfaces does not take an argument."])
+    *)		AC_MSG_ERROR([--with-interfaces does not take an argument.])
 		;;
 esac])
 
 AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pathname of askpass helper])],
 [case $with_askpass in
-    yes)	AC_MSG_ERROR(["--with-askpass takes a path as an argument."])
+    yes)	AC_MSG_ERROR([--with-askpass takes a path as an argument.])
 		;;
     no)		;;
     *)		;;
@@ -1145,18 +1145,18 @@ fi
 
 AC_ARG_WITH(exampledir, [AS_HELP_STRING([--with-exampledir=DIR], [path to install sudo examples in])],
 [case $with_exampledir in
-    yes)	AC_MSG_ERROR(["must give --with-exampledir an argument."])
+    yes)	AC_MSG_ERROR([must give --with-exampledir an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-exampledir not supported."])
+    no)		AC_MSG_ERROR([--without-exampledir not supported.])
 		;;
     *)		exampledir="$with_exampledir"
 esac])
 
 AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir=DIR], [set directory to load plugins from])],
 [case $with_plugindir in
-    yes)	AC_MSG_ERROR(["must give --with-plugindir an argument."])
+    yes)	AC_MSG_ERROR([must give --with-plugindir an argument.])
 		;;
-    no)		AC_MSG_ERROR(["--without-plugindir not supported."])
+    no)		AC_MSG_ERROR([--without-plugindir not supported.])
 		;;
     *)		plugindir="$with_plugindir"
 		;;
@@ -1166,9 +1166,9 @@ AC_ARG_WITH(man, [AS_HELP_STRING([--with-man], [manual pages use man macros])],
 [case $with_man in
     yes)	MANTYPE=man
 		;;
-    no)		AC_MSG_ERROR(["--without-man not supported."])
+    no)		AC_MSG_ERROR([--without-man not supported.])
 		;;
-    *)		AC_MSG_WARN(["ignoring unknown argument to --with-man: $with_man."])
+    *)		AC_MSG_WARN([ignoring unknown argument to --with-man: $with_man.])
 		;;
 esac])
 
@@ -1176,9 +1176,9 @@ AC_ARG_WITH(mdoc, [AS_HELP_STRING([--with-mdoc], [manual pages use mdoc macros])
 [case $with_mdoc in
     yes)	MANTYPE=mdoc
 		;;
-    no)		AC_MSG_ERROR(["--without-mdoc not supported."])
+    no)		AC_MSG_ERROR([--without-mdoc not supported.])
 		;;
-    *)		AC_MSG_WARN(["ignoring unknown argument to --with-mdoc: $with_mdoc."])
+    *)		AC_MSG_WARN([ignoring unknown argument to --with-mdoc: $with_mdoc.])
 		;;
 esac])
 
@@ -1244,7 +1244,7 @@ AC_ARG_ENABLE(root-sudo,
     no)		AC_DEFINE(NO_ROOT_SUDO)
 		root_sudo=off
 		;;
-    *)		AC_MSG_ERROR(["--enable-root-sudo does not take an argument."])
+    *)		AC_MSG_ERROR([--enable-root-sudo does not take an argument.])
 		;;
   esac
 ])
@@ -1373,7 +1373,7 @@ AC_ARG_ENABLE(fuzzer,
 AC_ARG_ENABLE(fuzzer-engine,
 [AS_HELP_STRING([--enable-fuzzer-engine], [Link fuzz targets with the specified fuzzer engine instead of the default.])],
 [ case "$enableval" in
-    yes)    AC_MSG_ERROR(["must give --enable-fuzzer-engine an argument."])
+    yes)    AC_MSG_ERROR([must give --enable-fuzzer-engine an argument.])
 	    ;;
     no)	    ;;
     *)	    FUZZ_ENGINE="$enableval"
@@ -1384,7 +1384,7 @@ AC_ARG_ENABLE(fuzzer-engine,
 AC_ARG_ENABLE(fuzzer-linker,
 [AS_HELP_STRING([--enable-fuzzer-linker], [Use the specified linker when building fuzz targets instead of the default C compiler.])],
 [ case "$enableval" in
-    yes)    AC_MSG_ERROR(["must give --enable-fuzzer-linker an argument."])
+    yes)    AC_MSG_ERROR([must give --enable-fuzzer-linker an argument.])
 	    ;;
     no)	    ;;
     *)	    FUZZ_LD="$enableval"
@@ -1470,7 +1470,7 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
 		    [AC_DEFINE(HAVE_SETKEYCREATECON)])
 		;;
     no)		;;
-    *)		AC_MSG_ERROR(["--with-selinux does not take an argument."])
+    *)		AC_MSG_ERROR([--with-selinux does not take an argument.])
 		;;
 esac], [with_selinux=no])
 
@@ -1650,7 +1650,7 @@ dnl
 AC_ARG_WITH(libtool, [AS_HELP_STRING([--with-libtool=PATH], [specify path to libtool])],
 [case $with_libtool in
     yes|builtin) ;;
-    no)		AC_MSG_ERROR(["--without-libtool not supported."])
+    no)		AC_MSG_ERROR([--without-libtool not supported.])
 		;;
     system)	LIBTOOL=libtool
 		;;
@@ -2286,7 +2286,7 @@ dnl
 dnl Only one of S/Key and OPIE may be specified
 dnl
 if test X"${with_skey}${with_opie}" = X"yesyes"; then
-    AC_MSG_ERROR(["cannot use both S/Key and OPIE"])
+    AC_MSG_ERROR([cannot use both S/Key and OPIE])
 fi
 
 dnl
@@ -2332,7 +2332,7 @@ AC_INCLUDES_DEFAULT
 ], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
 [AC_MSG_RESULT([no])
  AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
- AC_MSG_WARN([Your C preprocessor doesn't support variadic macros, debugging support will be limited])
+ AC_MSG_WARN([your C preprocessor doesn't support variadic macros, debugging support will be limited])
  SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm_v1)
 ])
 
@@ -2410,7 +2410,7 @@ case "$host_os" in
 esac
 AC_SYS_POSIX_TERMIOS
 if test "$ac_cv_sys_posix_termios" != "yes"; then
-    AC_MSG_ERROR([Must have POSIX termios to build sudo])
+    AC_MSG_ERROR([must have POSIX termios to build sudo])
 fi
 SUDO_MAILDIR
 if test ${with_logincap-'no'} != "no"; then
@@ -2445,7 +2445,7 @@ AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
 AC_TYPE_LONG_LONG_INT
 if test X"$ac_cv_type_long_long_int" != X"yes"; then
-    AC_MSG_ERROR(["C compiler does not appear to support the long long int type"])
+    AC_MSG_ERROR([C compiler does not appear to support the long long int type])
 fi
 AC_CHECK_TYPE(intmax_t, long long)
 AC_CHECK_TYPE(uintmax_t, unsigned long long)
@@ -2894,6 +2894,7 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl Check for functions only present in OpenSSL 1.1 and above
 dnl
+openssl_missing=no
 if test "${enable_openssl-no}" != no; then
     # Use pkg-config to find the openssl cflags and libs if possible.
     if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
@@ -2977,7 +2978,7 @@ if test "${enable_openssl-no}" != no; then
 ])
 	], [
 	    if test "$enable_openssl" = "maybe"; then
-		AC_MSG_WARN([OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted.])
+		openssl_missing=yes
 		enable_openssl=no
 	    else
 		AC_MSG_ERROR([OpenSSL development libraries not found.])
@@ -3362,7 +3363,7 @@ case "$enable_zlib" in
 	AC_CONFIG_FILES([lib/zlib/Makefile])
 	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"; then
 	    if test "$enable_zlib" = "shared"; then
-		AC_MSG_ERROR(["Unable to build shared libraries on this system"])
+		AC_MSG_ERROR([unable to build shared libraries on this system])
 	    fi
 	    # Build as convenience library
 	    ZLIB_LDFLAGS=-no-install
@@ -3564,17 +3565,17 @@ if test ${with_pam-"no"} != "no"; then
 	with_pam=yes
     elif test "$with_pam" = "yes"; then
 	if test "$found_pam_lib" = "no"; then
-	    AC_MSG_ERROR(["--with-pam specified but unable to locate PAM development library."])
+	    AC_MSG_ERROR([--with-pam specified but unable to locate PAM development library.])
 	fi
 	if test "$found_pam_hdrs" = "no"; then
-	    AC_MSG_ERROR(["--with-pam specified but unable to locate PAM development headers."])
+	    AC_MSG_ERROR([--with-pam specified but unable to locate PAM development headers.])
 	fi
     elif test "$found_pam_lib" != "$found_pam_hdrs"; then
 	if test "$found_pam_lib" = "no"; then
-	    AC_MSG_ERROR(["found PAM headers but no PAM development library; specify --without-pam to build without PAM"])
+	    AC_MSG_ERROR([found PAM headers but no PAM development library; specify --without-pam to build without PAM])
 	fi
 	if test "$found_pam_hdrs" = "no"; then
-	    AC_MSG_ERROR(["found PAM library but no PAM development headers; specify --without-pam to build without PAM"])
+	    AC_MSG_ERROR([found PAM library but no PAM development headers; specify --without-pam to build without PAM])
 	fi
     fi
 
@@ -3597,7 +3598,7 @@ if test ${with_pam-"no"} != "no"; then
 			pam_login_service="sudo-i"
 			;;
 	    no)		;;
-	    *)		AC_MSG_ERROR(["--with-pam-login does not take an argument."])
+	    *)		AC_MSG_ERROR([--with-pam-login does not take an argument.])
 			;;
 	esac])
 
@@ -3738,7 +3739,7 @@ if test ${with_kerb5-'no'} != "no"; then
 	    done
 	    if test X"$found" = X"no"; then
 		CPPFLAGS="$O_CPPFLAGS"
-		AC_MSG_WARN([Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS])
+		AC_MSG_WARN([unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS])
 	    fi
 	else
 	    dnl XXX - try to include krb5.h here too
@@ -3785,7 +3786,7 @@ if test ${with_kerb5-'no'} != "no"; then
     AC_ARG_ENABLE(kerb5-instance,
     [AS_HELP_STRING([--enable-kerb5-instance], [instance string to append to the username (separated by a slash)])],
 	[ case "$enableval" in
-	    yes)	AC_MSG_ERROR(["must give --enable-kerb5-instance an argument."])
+	    yes)	AC_MSG_ERROR([must give --enable-kerb5-instance an argument.])
 			;;
 	    no)		;;
 	    *)		SUDO_DEFINE_UNQUOTED(SUDO_KRB5_INSTANCE, "$enableval")
@@ -3807,7 +3808,7 @@ if test ${with_AFS-'no'} = "yes"; then
 	fi
     done
     if test -z "$FOUND_AFSLIBDIR"; then
-	AC_MSG_WARN([Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options.])
+	AC_MSG_WARN([unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options.])
     fi
 
     # Order is important here.  Note that we build AFS_LIBS from right to left
@@ -3834,7 +3835,7 @@ if test ${with_AFS-'no'} = "yes"; then
     done
 
     if test -z "$FOUND_AFSLIBDIR"; then
-	AC_MSG_WARN([Unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options.])
+	AC_MSG_WARN([unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options.])
     fi
 
     AUTH_OBJS="$AUTH_OBJS afs.lo"
@@ -3874,10 +3875,10 @@ if test "${with_skey-'no'}" = "yes"; then
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
 	if test "$found" = "no"; then
-	    AC_MSG_WARN([Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS])
+	    AC_MSG_WARN([unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS])
 	fi
     fi
-    AC_CHECK_LIB(skey, main, [found=yes], [AC_MSG_WARN([Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS])])
+    AC_CHECK_LIB(skey, main, [found=yes], [AC_MSG_WARN([unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS])])
     AC_CHECK_LIB(skey, skeyaccess, AC_DEFINE(HAVE_SKEYACCESS))
 
     AC_MSG_CHECKING([for RFC1938-compliant skeychallenge])
@@ -3923,10 +3924,10 @@ if test "${with_opie-'no'}" = "yes"; then
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
 	if test "$found" = "no"; then
-	    AC_MSG_WARN([Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS])
+	    AC_MSG_WARN([unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS])
 	fi
     fi
-    AC_CHECK_LIB(opie, main, [found=yes], [AC_MSG_WARN([Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS])])
+    AC_CHECK_LIB(opie, main, [found=yes], [AC_MSG_WARN([unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS])])
     LDFLAGS="$O_LDFLAGS"
     SUDOERS_LIBS="${SUDOERS_LIBS} -lopie"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
@@ -4109,10 +4110,10 @@ if test ${with_ldap-'no'} != "no"; then
 	])
 	if test X${enable_sasl} = X"yes"; then
 	    if test X"$found_sasl_h" != X"yes"; then
-		AC_MSG_ERROR(["--enable-sasl specified but unable to locate SASL development headers."])
+		AC_MSG_ERROR([--enable-sasl specified but unable to locate SASL development headers.])
 	    fi
 	    if test X"$ac_cv_func_ldap_sasl_interactive_bind_s" != X"yes"; then :
-		AC_MSG_ERROR(["--enable-sasl specified but SASL support is missing in your LDAP library"])
+		AC_MSG_ERROR([--enable-sasl specified but SASL support is missing in your LDAP library])
 	    fi
 	fi
     fi
@@ -4154,7 +4155,7 @@ if test ${with_ldap-'no'} != "no"; then
 	    AC_CHECK_HEADERS([gssapi/gssapi_krb5.h])
 	elif test X"$ac_cv_header_gssapi_h" = X"no"; then
 	    CPPFLAGS="$O_CPPFLAGS"
-	    AC_MSG_WARN([Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS])
+	    AC_MSG_WARN([unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS])
 	fi
     fi
 
@@ -4196,7 +4197,7 @@ case "$lt_cv_dlopen" in
 	;;
     *)
 	if test X"${ac_cv_func_dlopen}" = X"yes"; then
-	    AC_MSG_ERROR(["dlopen present but libtool doesn't appear to support your platform."])
+	    AC_MSG_ERROR([dlopen present but libtool doesn't appear to support your platform.])
 	fi
 	# Preload sudoers module symbols
 	AC_DEFINE(STATIC_SUDOERS_PLUGIN)
@@ -4219,7 +4220,7 @@ fi
 #
 if test "$enable_shared_libutil" = "no"; then
     if test X"$STATIC_SUDOERS" = X""; then
-	AC_MSG_ERROR(["--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled."])
+	AC_MSG_ERROR([--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled.])
     else
 	# Do not install sudoers or libsudo_util.
 	AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
@@ -4608,7 +4609,7 @@ case "$with_passwd" in
 yes|maybe)
     AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
     if test "${ac_cv_search_crypt}" = "no"; then
-	AC_MSG_WARN([No crypt function found, assuming plaintext passwords])
+	AC_MSG_WARN([no crypt function found, assuming plaintext passwords])
     fi
     ;;
 *)
@@ -4975,18 +4976,21 @@ fi
 echo "" >&AS_MESSAGE_FD
 
 dnl
-dnl Spew any text the user needs to know about
+dnl Display any warnings/info the user needs to know about at the end.
 dnl
+if test "$openssl_missing" = "yes"; then
+    AC_MSG_WARN([OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted.])
+fi
 if test "$with_pam" = "yes"; then
     case $host_os in
 	hpux*|hiuxmpp*)
 	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
-		AC_MSG_NOTICE([You may wish to add the following line to /etc/pam.conf])
+		AC_MSG_NOTICE([you may wish to add the following line to /etc/pam.conf])
 		AC_MSG_NOTICE([sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login])
 	    fi
 	    ;;
 	linux*)
-	    AC_MSG_NOTICE([You will need to customize examples/pam.conf and install it as /etc/pam.d/sudo])
+	    AC_MSG_NOTICE([you will need to customize examples/pam.conf and install it as /etc/pam.d/sudo])
 	    ;;
     esac
 fi
@@ -5002,7 +5006,7 @@ case "$rundir" in
 	;;
 esac
 if test $clear_rundir -eq 1; then
-    AC_MSG_NOTICE([Warning: the $rundir/ts directory must be cleared at boot time.])
+    AC_MSG_NOTICE([warning: the $rundir/ts directory must be cleared at boot time.])
     AC_MSG_NOTICE([         You may need to create a startup item to do this.])
 fi
 
