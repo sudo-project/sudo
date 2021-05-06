@@ -1030,6 +1030,7 @@ enable_log_server
 enable_log_client
 enable_openssl
 enable_gcrypt
+enable_python
 enable_shared
 enable_static
 with_pic
@@ -1043,7 +1044,6 @@ with_noexec
 with_netsvc
 enable_sia
 enable_largefile
-enable_python
 with_pam_login
 enable_pam_session
 enable_kerb5_instance
@@ -1744,6 +1744,7 @@ Optional Features:
                           log server.
   --enable-openssl        Use OpenSSL's TLS and sha2 functions
   --enable-gcrypt         Use GNU crypt's sha2 functions
+  --enable-python         Compile python plugin support
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1751,7 +1752,6 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-sia           Disable SIA on Digital UNIX
   --disable-largefile     omit support for large files
-  --enable-python         Compile python plugin support
   --disable-pam-session   Disable PAM session support
   --enable-kerb5-instance instance string to append to the username (separated
                           by a slash)
@@ -4921,8 +4921,8 @@ fi
 		devdir=.
 		;;
     no)		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --with-devel: $with_devel" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --with-devel: $with_devel" >&2;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --with-devel: $with_devel" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --with-devel: $with_devel" >&2;}
 		;;
 esac
 fi
@@ -5178,8 +5178,8 @@ printf "%s\n" "$as_me: Adding CSOps standard options" >&6;}
 		: ${mansectform='5'}
 		;;
     no)		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --with-csops: $with_csops" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --with-csops: $with_csops" >&2;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --with-csops: $with_csops" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --with-csops: $with_csops" >&2;}
 		;;
 esac
 fi
@@ -5190,11 +5190,7 @@ fi
 if test ${with_passwd+y}
 then :
   withval=$with_passwd; case $with_passwd in
-    yes|no)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use shadow/passwd file authentication" >&5
-printf %s "checking whether to use shadow/passwd file authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $with_passwd" >&5
-printf "%s\n" "$with_passwd" >&6; }
-		AUTH_DEF=""
+    yes|no)	AUTH_DEF=""
 		test "$with_passwd" = "yes" && AUTH_REG="$AUTH_REG passwd"
 		;;
     *)		as_fn_error $? "\"Sorry, --with-passwd does not take an argument.\"" "$LINENO" 5
@@ -5211,10 +5207,6 @@ then :
     no)		;;
     *)		printf "%s\n" "#define HAVE_SKEY 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to try S/Key authentication" >&5
-printf %s "checking whether to try S/Key authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 		AUTH_REG="$AUTH_REG S/Key"
 		;;
 esac
@@ -5229,10 +5221,6 @@ then :
     no)		;;
     *)		printf "%s\n" "#define HAVE_OPIE 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to try NRL OPIE authentication" >&5
-printf %s "checking whether to try NRL OPIE authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 		AUTH_REG="$AUTH_REG NRL_OPIE"
 		;;
 esac
@@ -5246,10 +5234,6 @@ then :
   withval=$with_long_otp_prompt; case $with_long_otp_prompt in
     yes)	printf "%s\n" "#define LONG_OTP_PROMPT 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use a two line prompt for OTP authentication" >&5
-printf %s "checking whether to use a two line prompt for OTP authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 		long_otp_prompt=on
 		;;
     no)		long_otp_prompt=off
@@ -5268,10 +5252,6 @@ then :
     no)		;;
     *)		printf "%s\n" "#define HAVE_SECURID 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use SecurID for authentication" >&5
-printf %s "checking whether to use SecurID for authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 		AUTH_EXCL="$AUTH_EXCL SecurID"
 		;;
 esac
@@ -5286,10 +5266,6 @@ then :
     no)		;;
     *)		printf "%s\n" "#define HAVE_FWTK 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use FWTK AuthSRV for authentication" >&5
-printf %s "checking whether to use FWTK AuthSRV for authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 		AUTH_EXCL="$AUTH_EXCL FWTK"
 		;;
 esac
@@ -5302,11 +5278,7 @@ if test ${with_kerb5+y}
 then :
   withval=$with_kerb5; case $with_kerb5 in
     no)		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to try Kerberos V authentication" >&5
-printf %s "checking whether to try Kerberos V authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		AUTH_REG="$AUTH_REG kerb5"
+    *)		AUTH_REG="$AUTH_REG kerb5"
 		;;
 esac
 fi
@@ -5345,10 +5317,6 @@ then :
   withval=$with_AFS; case $with_AFS in
     yes)	printf "%s\n" "#define HAVE_AFS 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to try AFS (kerberos) authentication" >&5
-printf %s "checking whether to try AFS (kerberos) authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 		AUTH_REG="$AUTH_REG AFS"
 		;;
     no)		;;
@@ -5365,10 +5333,6 @@ then :
   withval=$with_DCE; case $with_DCE in
     yes)	printf "%s\n" "#define HAVE_DCE 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to try DCE (kerberos) authentication" >&5
-printf %s "checking whether to try DCE (kerberos) authentication... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 		AUTH_REG="$AUTH_REG DCE"
 		;;
     no)		;;
@@ -5409,41 +5373,30 @@ if test ${with_project+y}
 then :
   withval=$with_project; case $with_project in
     yes|no)	;;
-    no)	;;
+    no)		;;
     *)		as_fn_error $? "\"--with-project does not take an argument.\"" "$LINENO" 5
 		;;
 esac
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to lecture users the first time they run sudo" >&5
-printf %s "checking whether to lecture users the first time they run sudo... " >&6; }
 
 # Check whether --with-lecture was given.
 if test ${with_lecture+y}
 then :
   withval=$with_lecture; case $with_lecture in
     yes|short|always)	lecture=once
-		;;
+			;;
     no|none|never)	lecture=never
-		;;
+			printf "%s\n" "#define NO_LECTURE 1" >>confdefs.h
+
+			;;
     *)		as_fn_error $? "\"unknown argument to --with-lecture: $with_lecture\"" "$LINENO" 5
 		;;
 esac
 fi
 
-if test "$lecture" = "once"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-    printf "%s\n" "#define NO_LECTURE 1" >>confdefs.h
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether sudo should log via syslog or to a file by default" >&5
-printf %s "checking whether sudo should log via syslog or to a file by default... " >&6; }
 
 # Check whether --with-logging was given.
 if test ${with_logging+y}
@@ -5455,26 +5408,22 @@ then :
 		;;
     syslog)	printf "%s\n" "#define LOGGING SLOG_SYSLOG" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: syslog" >&5
-printf "%s\n" "syslog" >&6; }
 		;;
     file)	printf "%s\n" "#define LOGGING SLOG_FILE" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: file" >&5
-printf "%s\n" "file" >&6; }
 		;;
     both)	printf "%s\n" "#define LOGGING SLOG_BOTH" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: both" >&5
-printf "%s\n" "both" >&6; }
 		;;
     *)		as_fn_error $? "\"unknown argument to --with-logging: $with_logging\"" "$LINENO" 5
 		;;
 esac
 else $as_nop
-  printf "%s\n" "#define LOGGING SLOG_SYSLOG" >>confdefs.h
- { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: syslog" >&5
-printf "%s\n" "syslog" >&6; }
+
+    with_logging=syslog
+    printf "%s\n" "#define LOGGING SLOG_SYSLOG" >>confdefs.h
+
+
 fi
 
 
@@ -5495,8 +5444,6 @@ esac
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking at which syslog priority to log commands" >&5
-printf %s "checking at which syslog priority to log commands... " >&6; }
 
 # Check whether --with-goodpri was given.
 if test ${with_goodpri+y}
@@ -5517,11 +5464,7 @@ fi
 
 printf "%s\n" "#define PRI_SUCCESS \"$goodpri\"" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $goodpri" >&5
-printf "%s\n" "$goodpri" >&6; }
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking at which syslog priority to log failures" >&5
-printf %s "checking at which syslog priority to log failures... " >&6; }
 
 # Check whether --with-badpri was given.
 if test ${with_badpri+y}
@@ -5542,8 +5485,6 @@ fi
 
 printf "%s\n" "#define PRI_FAILURE \"$badpri\"" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $badpri" >&5
-printf "%s\n" "$badpri" >&6; }
 
 
 # Check whether --with-logpath was given.
@@ -5558,8 +5499,6 @@ esac
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking how long a line in the log file should be" >&5
-printf %s "checking how long a line in the log file should be... " >&6; }
 
 # Check whether --with-loglen was given.
 if test ${with_loglen+y}
@@ -5579,17 +5518,15 @@ fi
 
 printf "%s\n" "#define MAXLOGFILELEN $loglen" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $loglen" >&5
-printf "%s\n" "$loglen" >&6; }
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether sudo should ignore '.' or '' in \$PATH" >&5
-printf %s "checking whether sudo should ignore '.' or '' in \$PATH... " >&6; }
 
 # Check whether --with-ignore-dot was given.
 if test ${with_ignore_dot+y}
 then :
   withval=$with_ignore_dot; case $with_ignore_dot in
     yes)	ignore_dot=on
+		printf "%s\n" "#define IGNORE_DOT_PATH 1" >>confdefs.h
+
 		;;
     no)		ignore_dot=off
 		;;
@@ -5598,18 +5535,7 @@ then :
 esac
 fi
 
-if test "$ignore_dot" = "on"; then
-    printf "%s\n" "#define IGNORE_DOT_PATH 1" >>confdefs.h
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to send mail when a user is not in sudoers" >&5
-printf %s "checking whether to send mail when a user is not in sudoers... " >&6; }
 
 # Check whether --with-mail-if-no-user was given.
 if test ${with_mail_if_no_user+y}
@@ -5627,21 +5553,16 @@ fi
 if test "$mail_no_user" = "on"; then
     printf "%s\n" "#define SEND_MAIL_WHEN_NO_USER 1" >>confdefs.h
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to send mail when user listed but not for this host" >&5
-printf %s "checking whether to send mail when user listed but not for this host... " >&6; }
 
 # Check whether --with-mail-if-no-host was given.
 if test ${with_mail_if_no_host+y}
 then :
   withval=$with_mail_if_no_host; case $with_mail_if_no_host in
     yes)	mail_no_host=on
+		printf "%s\n" "#define SEND_MAIL_WHEN_NO_HOST 1" >>confdefs.h
+
 		;;
     no)		mail_no_host=off
 		;;
@@ -5650,24 +5571,15 @@ then :
 esac
 fi
 
-if test "$mail_no_host" = "on"; then
-    printf "%s\n" "#define SEND_MAIL_WHEN_NO_HOST 1" >>confdefs.h
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to send mail when a user tries a disallowed command" >&5
-printf %s "checking whether to send mail when a user tries a disallowed command... " >&6; }
 
 # Check whether --with-mail-if-noperms was given.
 if test ${with_mail_if_noperms+y}
 then :
   withval=$with_mail_if_noperms; case $with_mail_if_noperms in
     yes)	mail_noperms=on
+		printf "%s\n" "#define SEND_MAIL_WHEN_NOT_OK 1" >>confdefs.h
+
 		;;
     no)		mail_noperms=off
 		;;
@@ -5676,18 +5588,7 @@ then :
 esac
 fi
 
-if test "$mail_noperms" = "on"; then
-    printf "%s\n" "#define SEND_MAIL_WHEN_NOT_OK 1" >>confdefs.h
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking who should get the mail that sudo sends" >&5
-printf %s "checking who should get the mail that sudo sends... " >&6; }
 
 # Check whether --with-mailto was given.
 if test ${with_mailto+y}
@@ -5705,8 +5606,6 @@ fi
 
 printf "%s\n" "#define MAILTO \"$mailto\"" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $mailto" >&5
-printf "%s\n" "$mailto" >&6; }
 
 
 # Check whether --with-mailsubject was given.
@@ -5719,10 +5618,6 @@ then :
 printf "%s\n" "$as_me: WARNING: Sorry, --without-mailsubject not supported." >&2;}
 		;;
     *)		mailsub="$with_mailsubject"
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking sudo mail subject" >&5
-printf %s "checking sudo mail subject... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Using alert mail subject: $mailsub" >&5
-printf "%s\n" "Using alert mail subject: $mailsub" >&6; }
 		;;
 esac
 fi
@@ -5731,8 +5626,6 @@ fi
 printf "%s\n" "#define MAILSUBJECT \"$mailsub\"" >>confdefs.h
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for bad password prompt" >&5
-printf %s "checking for bad password prompt... " >&6; }
 
 # Check whether --with-passprompt was given.
 if test ${with_passprompt+y}
@@ -5747,14 +5640,10 @@ printf "%s\n" "$as_me: WARNING: Sorry, --without-passprompt not supported." >&2;
 esac
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $passprompt" >&5
-printf "%s\n" "$passprompt" >&6; }
 
 printf "%s\n" "#define PASSPROMPT \"$passprompt\"" >>confdefs.h
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for bad password message" >&5
-printf %s "checking for bad password message... " >&6; }
 
 # Check whether --with-badpass-message was given.
 if test ${with_badpass_message+y}
@@ -5773,17 +5662,15 @@ fi
 
 printf "%s\n" "#define INCORRECT_PASSWORD \"$badpass_message\"" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $badpass_message" >&5
-printf "%s\n" "$badpass_message" >&6; }
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to expect fully qualified hosts in sudoers" >&5
-printf %s "checking whether to expect fully qualified hosts in sudoers... " >&6; }
 
 # Check whether --with-fqdn was given.
 if test ${with_fqdn+y}
 then :
   withval=$with_fqdn; case $with_fqdn in
     yes)	fqdn=on
+		printf "%s\n" "#define FQDN 1" >>confdefs.h
+
 		;;
     no)		fqdn=off
 		;;
@@ -5792,15 +5679,6 @@ then :
 esac
 fi
 
-if test "$fqdn" = "on"; then
-    printf "%s\n" "#define FQDN 1" >>confdefs.h
-
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
 
 
 # Check whether --with-timedir was given.
@@ -5944,8 +5822,6 @@ esac
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for umask programs should be run with" >&5
-printf %s "checking for umask programs should be run with... " >&6; }
 
 # Check whether --with-umask was given.
 if test ${with_umask+y}
@@ -5965,13 +5841,6 @@ fi
 
 printf "%s\n" "#define SUDO_UMASK $sudo_umask" >>confdefs.h
 
-if test "$sudo_umask" = "0777"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: user" >&5
-printf "%s\n" "user" >&6; }
-else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_umask" >&5
-printf "%s\n" "$sudo_umask" >&6; }
-fi
 
 
 # Check whether --with-umask-override was given.
@@ -5990,8 +5859,6 @@ esac
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for default user to run commands as" >&5
-printf %s "checking for default user to run commands as... " >&6; }
 
 # Check whether --with-runas-default was given.
 if test ${with_runas_default+y}
@@ -6009,8 +5876,6 @@ fi
 
 printf "%s\n" "#define RUNAS_DEFAULT \"$runas_default\"" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $runas_default" >&5
-printf "%s\n" "$runas_default" >&6; }
 
 
 # Check whether --with-exempt was given.
@@ -6024,17 +5889,11 @@ then :
     *)
 printf "%s\n" "#define EXEMPTGROUP \"$with_exempt\"" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for group to be exempt from password" >&5
-printf %s "checking for group to be exempt from password... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $with_exempt" >&5
-printf "%s\n" "$with_exempt" >&6; }
 		;;
 esac
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for editor that visudo should use" >&5
-printf %s "checking for editor that visudo should use... " >&6; }
 
 # Check whether --with-editor was given.
 if test ${with_editor+y}
@@ -6047,20 +5906,15 @@ then :
     *)
 printf "%s\n" "#define EDITOR \"$with_editor\"" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $with_editor" >&5
-printf "%s\n" "$with_editor" >&6; }
 		editor="$with_editor"
 		;;
 esac
 else $as_nop
   printf "%s\n" "#define EDITOR _PATH_VI" >>confdefs.h
- { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: vi" >&5
-printf "%s\n" "vi" >&6; }
+
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to obey EDITOR and VISUAL environment variables" >&5
-printf %s "checking whether to obey EDITOR and VISUAL environment variables... " >&6; }
 
 # Check whether --with-env-editor was given.
 if test ${with_env_editor+y}
@@ -6078,15 +5932,8 @@ fi
 if test "$env_editor" = "on"; then
     printf "%s\n" "#define ENV_EDITOR 1" >>confdefs.h
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking number of tries a user gets to enter their password" >&5
-printf %s "checking number of tries a user gets to enter their password... " >&6; }
 
 # Check whether --with-passwd-tries was given.
 if test ${with_passwd_tries+y}
@@ -6105,11 +5952,7 @@ fi
 
 printf "%s\n" "#define TRIES_FOR_PASSWORD $passwd_tries" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $passwd_tries" >&5
-printf "%s\n" "$passwd_tries" >&6; }
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking time in minutes after which sudo will ask for a password again" >&5
-printf %s "checking time in minutes after which sudo will ask for a password again... " >&6; }
 
 # Check whether --with-timeout was given.
 if test ${with_timeout+y}
@@ -6128,11 +5971,7 @@ fi
 
 printf "%s\n" "#define TIMEOUT $timeout" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $timeout" >&5
-printf "%s\n" "$timeout" >&6; }
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking time in minutes after the password prompt will time out" >&5
-printf %s "checking time in minutes after the password prompt will time out... " >&6; }
 
 # Check whether --with-password-timeout was given.
 if test ${with_password_timeout+y}
@@ -6151,8 +5990,6 @@ fi
 
 printf "%s\n" "#define PASSWORD_TIMEOUT $password_timeout" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $password_timeout" >&5
-printf "%s\n" "$password_timeout" >&6; }
 
 
 # Check whether --with-tty-tickets was given.
@@ -6169,14 +6006,14 @@ esac
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to include insults" >&5
-printf %s "checking whether to include insults... " >&6; }
 
 # Check whether --with-insults was given.
 if test ${with_insults+y}
 then :
   withval=$with_insults; case $with_insults in
     yes)	insults=on
+		printf "%s\n" "#define USE_INSULTS 1" >>confdefs.h
+
 		with_classic_insults=yes
 		with_csops_insults=yes
 		;;
@@ -6191,15 +6028,6 @@ then :
 esac
 fi
 
-if test "$insults" = "on"; then
-    printf "%s\n" "#define USE_INSULTS 1" >>confdefs.h
-
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
 
 
 # Check whether --with-all-insults was given.
@@ -6315,10 +6143,6 @@ then :
     no)		;;
     *)		printf "%s\n" "#define HAVE_LDAP 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use sudoers from LDAP" >&5
-printf %s "checking whether to use sudoers from LDAP... " >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 		;;
 esac
 fi
@@ -6350,21 +6174,6 @@ cat >>confdefs.h <<EOF
 EOF
 
 
-if test "$insults" = "on"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking which insult sets to include" >&5
-printf %s "checking which insult sets to include... " >&6; }
-    i=""
-    test "$with_python_insults" = "yes" && i="python ${i}"
-    test "$with_goons_insults" = "yes" && i="goons ${i}"
-    test "$with_hal_insults" = "yes" && i="hal ${i}"
-    test "$with_csops_insults" = "yes" && i="csops ${i}"
-    test "$with_classic_insults" = "yes" && i="classic ${i}"
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $i" >&5
-printf "%s\n" "$i" >&6; }
-fi
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to override the user's path" >&5
-printf %s "checking whether to override the user's path... " >&6; }
 
 # Check whether --with-secure-path was given.
 if test ${with_secure_path+y}
@@ -6373,52 +6182,32 @@ then :
     yes)	with_secure_path="/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc"
 		printf "%s\n" "#define SECURE_PATH \"$with_secure_path\"" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $with_secure_path" >&5
-printf "%s\n" "$with_secure_path" >&6; }
 		secure_path="set to $with_secure_path"
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		;;
+    no)		;;
     *)		printf "%s\n" "#define SECURE_PATH \"$with_secure_path\"" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $with_secure_path" >&5
-printf "%s\n" "$with_secure_path" >&6; }
-		secure_path="set to F<$with_secure_path>"
+		secure_path="set to $with_secure_path"
 		;;
 esac
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to get ip addresses from the network interfaces" >&5
-printf %s "checking whether to get ip addresses from the network interfaces... " >&6; }
 
 # Check whether --with-interfaces was given.
 if test ${with_interfaces+y}
 then :
   withval=$with_interfaces; case $with_interfaces in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		;;
+    yes)	;;
     no)		printf "%s\n" "#define STUB_LOAD_INTERFACES 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 		;;
     *)		as_fn_error $? "\"--with-interfaces does not take an argument.\"" "$LINENO" 5
 		;;
 esac
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use an askpass helper" >&5
-printf %s "checking whether to use an askpass helper... " >&6; }
 
 # Check whether --with-askpass was given.
 if test ${with_askpass+y}
@@ -6432,8 +6221,6 @@ esac
 else $as_nop
 
     with_askpass=no
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 
 fi
 
@@ -6487,7 +6274,8 @@ then :
 		;;
     no)		as_fn_error $? "\"--without-man not supported.\"" "$LINENO" 5
 		;;
-    *)		as_fn_error $? "\"ignoring unknown argument to --with-man: $with_man.\"" "$LINENO" 5
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: \"ignoring unknown argument to --with-man: $with_man.\"" >&5
+printf "%s\n" "$as_me: WARNING: \"ignoring unknown argument to --with-man: $with_man.\"" >&2;}
 		;;
 esac
 fi
@@ -6502,64 +6290,43 @@ then :
 		;;
     no)		as_fn_error $? "\"--without-mdoc not supported.\"" "$LINENO" 5
 		;;
-    *)		as_fn_error $? "\"ignoring unknown argument to --with-mdoc: $with_mdoc.\"" "$LINENO" 5
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: \"ignoring unknown argument to --with-mdoc: $with_mdoc.\"" >&5
+printf "%s\n" "$as_me: WARNING: \"ignoring unknown argument to --with-mdoc: $with_mdoc.\"" >&2;}
 		;;
 esac
 fi
 
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to do user authentication by default" >&5
-printf %s "checking whether to do user authentication by default... " >&6; }
 # Check whether --enable-authentication was given.
 if test ${enable_authentication+y}
 then :
   enableval=$enable_authentication;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		printf "%s\n" "#define NO_AUTHENTICATION 1" >>confdefs.h
+    yes)	;;
+    no)		printf "%s\n" "#define NO_AUTHENTICATION 1" >>confdefs.h
 
 		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-authentication: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-authentication: $enableval" >&2;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-authentication: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-authentication: $enableval" >&2;}
 		;;
   esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to disable running the mailer as root" >&5
-printf %s "checking whether to disable running the mailer as root... " >&6; }
 # Check whether --enable-root-mailer was given.
 if test ${enable_root_mailer+y}
 then :
   enableval=$enable_root_mailer;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		printf "%s\n" "#define NO_ROOT_MAILER 1" >>confdefs.h
+    yes)	;;
+    no)		printf "%s\n" "#define NO_ROOT_MAILER 1" >>confdefs.h
 
 		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-root-mailer: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-root-mailer: $enableval" >&2;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-root-mailer: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-root-mailer: $enableval" >&2;}
 		;;
   esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 
@@ -6587,75 +6354,47 @@ then :
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to disable shadow password support" >&5
-printf %s "checking whether to disable shadow password support... " >&6; }
 # Check whether --enable-shadow was given.
 if test ${enable_shadow+y}
 then :
   enableval=$enable_shadow;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
+    yes)	;;
+    no)		CHECKSHADOW="false"
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		CHECKSHADOW="false"
-		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-shadow: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-shadow: $enableval" >&2;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-shadow: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-shadow: $enableval" >&2;}
 		;;
   esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether root should be allowed to use sudo" >&5
-printf %s "checking whether root should be allowed to use sudo... " >&6; }
 # Check whether --enable-root-sudo was given.
 if test ${enable_root_sudo+y}
 then :
   enableval=$enable_root_sudo;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		;;
+    yes)	;;
     no)		printf "%s\n" "#define NO_ROOT_SUDO 1" >>confdefs.h
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 		root_sudo=off
 		;;
     *)		as_fn_error $? "\"--enable-root-sudo does not take an argument.\"" "$LINENO" 5
 		;;
   esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to log the hostname in the log file" >&5
-printf %s "checking whether to log the hostname in the log file... " >&6; }
 # Check whether --enable-log-host was given.
 if test ${enable_log_host+y}
 then :
   enableval=$enable_log_host;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		printf "%s\n" "#define HOST_IN_LOG 1" >>confdefs.h
+    yes)	printf "%s\n" "#define HOST_IN_LOG 1" >>confdefs.h
 
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-log-host: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-log-host: $enableval" >&2;}
+    no)		;;
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-log-host: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-log-host: $enableval" >&2;}
 		;;
   esac
 
@@ -6665,112 +6404,68 @@ printf "%s\n" "no" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to invoke a shell if sudo is given no arguments" >&5
-printf %s "checking whether to invoke a shell if sudo is given no arguments... " >&6; }
 # Check whether --enable-noargs-shell was given.
 if test ${enable_noargs_shell+y}
 then :
   enableval=$enable_noargs_shell;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		printf "%s\n" "#define SHELL_IF_NO_ARGS 1" >>confdefs.h
+    yes)	printf "%s\n" "#define SHELL_IF_NO_ARGS 1" >>confdefs.h
 
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-noargs-shell: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-noargs-shell: $enableval" >&2;}
+    no)		;;
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-noargs-shell: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-noargs-shell: $enableval" >&2;}
 		;;
   esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to set \$HOME to target user in shell mode" >&5
-printf %s "checking whether to set \$HOME to target user in shell mode... " >&6; }
 # Check whether --enable-shell-sets-home was given.
 if test ${enable_shell_sets_home+y}
 then :
   enableval=$enable_shell_sets_home;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		printf "%s\n" "#define SHELL_SETS_HOME 1" >>confdefs.h
+    yes)	printf "%s\n" "#define SHELL_SETS_HOME 1" >>confdefs.h
 
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-shell-sets-home: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-shell-sets-home: $enableval" >&2;}
+    no)		;;
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-shell-sets-home: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-shell-sets-home: $enableval" >&2;}
 		;;
   esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to disable 'command not found' messages" >&5
-printf %s "checking whether to disable 'command not found' messages... " >&6; }
 # Check whether --enable-path_info was given.
 if test ${enable_path_info+y}
 then :
   enableval=$enable_path_info;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		printf "%s\n" "#define DONT_LEAK_PATH_INFO 1" >>confdefs.h
+    yes)	;;
+    no)		printf "%s\n" "#define DONT_LEAK_PATH_INFO 1" >>confdefs.h
 
 		path_info=off
 		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-path-info: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-path-info: $enableval" >&2;}
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-path-info: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-path-info: $enableval" >&2;}
 		;;
   esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to enable environment debugging" >&5
-printf %s "checking whether to enable environment debugging... " >&6; }
 # Check whether --enable-env_debug was given.
 if test ${enable_env_debug+y}
 then :
   enableval=$enable_env_debug;  case "$enableval" in
-    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-		printf "%s\n" "#define ENV_DEBUG 1" >>confdefs.h
+    yes)	printf "%s\n" "#define ENV_DEBUG 1" >>confdefs.h
 
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-		;;
-    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-env-debug: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-env-debug: $enableval" >&2;}
+    no)		;;
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-env-debug: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-env-debug: $enableval" >&2;}
 		;;
   esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 
@@ -6816,8 +6511,6 @@ else $as_nop
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to enable environment resetting by default" >&5
-printf %s "checking whether to enable environment resetting by default... " >&6; }
 # Check whether --enable-env_reset was given.
 if test ${enable_env_reset+y}
 then :
@@ -6827,21 +6520,17 @@ then :
     no)		env_reset=off
 		;;
     *)		env_reset=on
-    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-env-reset: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-env-reset: $enableval" >&2;}
+    		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-env-reset: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-env-reset: $enableval" >&2;}
 		;;
   esac
 
 fi
 
 if test "$env_reset" = "on"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
     printf "%s\n" "#define ENV_RESET 1" >>confdefs.h
 
 else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
     printf "%s\n" "#define ENV_RESET 0" >>confdefs.h
 
 fi
@@ -6852,8 +6541,8 @@ then :
   enableval=$enable_warnings;  case "$enableval" in
     yes)    ;;
     no)	    ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&2;}
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-warnings: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-warnings: $enableval" >&2;}
 	    ;;
   esac
 
@@ -6866,8 +6555,8 @@ then :
   enableval=$enable_werror;  case "$enableval" in
     yes)    ;;
     no)	    ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&2;}
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-werror: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-werror: $enableval" >&2;}
 	    ;;
   esac
 
@@ -6957,8 +6646,8 @@ then :
     no)	    printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
 
 	    ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --disable-leaks: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --disable-leaks: $enableval" >&2;}
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --disable-leaks: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --disable-leaks: $enableval" >&2;}
 	    ;;
   esac
 
@@ -7051,8 +6740,8 @@ then :
   enableval=$enable_devsearch; case $enableval in
     yes)	# use default value
 		;;
-    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring attempt to disable the device search path" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring attempt to disable the device search path" >&2;}
+    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring attempt to disable the device search path" >&5
+printf "%s\n" "$as_me: WARNING: ignoring attempt to disable the device search path" >&2;}
 		;;
     *)		devsearch="$enableval"
 		;;
@@ -7133,8 +6822,8 @@ if test ${enable_sasl+y}
 then :
   enableval=$enable_sasl;  case "$enableval" in
     yes|no) ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-sasl: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-sasl: $enableval" >&2;}
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-sasl: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-sasl: $enableval" >&2;}
 	    ;;
   esac
 
@@ -7148,8 +6837,8 @@ then :
     global|ppid|tty)
 	    timestamp_type=$enableval
 	    ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-timestamp-type: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-timestamp-type: $enableval" >&2;}
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-timestamp-type: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-timestamp-type: $enableval" >&2;}
 	    ;;
   esac
 
@@ -7207,8 +6896,8 @@ then :
 	    LOGSRVD_SRC=
 	    LOGSRVD_CONF=
 	    ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-log-server: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-log-server: $enableval" >&2;}
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-log-server: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-log-server: $enableval" >&2;}
 	    ;;
   esac
 
@@ -7225,8 +6914,8 @@ then :
 	    ;;
     no)
 	    ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-log-client: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-log-client: $enableval" >&2;}
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-log-client: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-log-client: $enableval" >&2;}
 	    ;;
   esac
 
@@ -7264,10 +6953,24 @@ if test ${enable_gcrypt+y}
 then :
   enableval=$enable_gcrypt;
     if test "${enable_openssl-no}" != no; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring --enable-gcrypt when OpenSSL is enabled." >&5
-printf "%s\n" "$as_me: WARNING: Ignoring --enable-gcrypt when OpenSSL is enabled." >&2;}
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring --enable-gcrypt when OpenSSL is enabled." >&5
+printf "%s\n" "$as_me: WARNING: ignoring --enable-gcrypt when OpenSSL is enabled." >&2;}
 	enable_gcrypt=no
     fi
+
+fi
+
+
+# Check whether --enable-python was given.
+if test ${enable_python+y}
+then :
+  enableval=$enable_python;  case "$enableval" in
+    yes|no)
+	;;
+    *) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-python: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-python: $enableval" >&2;}
+	;;
+  esac
 
 fi
 
@@ -7617,8 +7320,8 @@ if test "x$ac_cv_prog_cc_c89" = "xno"; then
 fi
 
 if test "$enable_static" = "no"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring --disable-static, sudo does not install static libs" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring --disable-static, sudo does not install static libs" >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring --disable-static, sudo does not install static libs" >&5
+printf "%s\n" "$as_me: WARNING: ignoring --disable-static, sudo does not install static libs" >&2;}
     enable_static=yes
 fi
 
@@ -15840,8 +15543,6 @@ fi
 LIBDL="$lt_cv_dlopen_libs"
 SHLIB_ENABLE="$enable_dlopen"
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking path to sudo_noexec.so" >&5
-printf %s "checking path to sudo_noexec.so... " >&6; }
 
 # Check whether --with-noexec was given.
 if test ${with_noexec+y}
@@ -15856,8 +15557,6 @@ else $as_nop
   with_noexec="$noexec_file"
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $with_noexec" >&5
-printf "%s\n" "$with_noexec" >&6; }
 NOEXECFILE="sudo_noexec.so"
 NOEXECDIR="`echo $noexec_file|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\(.*\)/[^/]*:\1:'`"
 
@@ -16080,29 +15779,15 @@ fi
 if test -n "$sudo_cv_prev_host"; then
     if test "$sudo_cv_prev_host" != "$host"; then
 	as_fn_error $? "config.cache was created on a different host; remove it and re-run configure." "$LINENO" 5
-    else
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking previous host type" >&5
-printf %s "checking previous host type... " >&6; }
-	if test ${sudo_cv_prev_host+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  sudo_cv_prev_host="$host"
-fi
-
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_prev_host" >&5
-printf "%s\n" "$sudo_cv_prev_host" >&6; }
     fi
-else
-    # this will produce no output since there is no cached value
-    if test ${sudo_cv_prev_host+y}
+fi
+if test ${sudo_cv_prev_host+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   sudo_cv_prev_host="$host"
 fi
 
-fi
 
 if test -n "$host_os"; then
     OS=`echo $host_os | sed 's/[0-9].*//'`
@@ -16565,30 +16250,19 @@ fi
 
 
 		: ${CHECKSIA='true'}
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to disable sia support on Digital UNIX" >&5
-printf %s "checking whether to disable sia support on Digital UNIX... " >&6; }
 		# Check whether --enable-sia was given.
 if test ${enable_sia+y}
 then :
   enableval=$enable_sia;  case "$enableval" in
-		    yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-				CHECKSIA=true
+		    yes)	CHECKSIA=true
 				;;
-		    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-				CHECKSIA=false
+		    no)		CHECKSIA=false
 				;;
-		    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-				{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-sia: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-sia: $enableval" >&2;}
+		    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-sia: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-sia: $enableval" >&2;}
 				;;
 		  esac
 
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 
@@ -17129,6 +16803,8 @@ EOF
 EOF
 
     fi
+else
+    noexec_file=disabled
 fi
 
 AUTH_REG=${AUTH_REG# }
@@ -17732,6 +17408,7 @@ fi
 EOF
 
 
+    with_sendmail="$ac_cv_path_SENDMAILPROG"
 fi
 
     # Extract the first word of "vi", so it can be a program name with args.
@@ -17784,31 +17461,20 @@ fi
 EOF
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking which syslog facility sudo should log with" >&5
-printf %s "checking which syslog facility sudo should log with... " >&6; }
+if test -z "$with_editor"; then
+    editor="$ac_cv_path_VIPROG"
+fi
 if test X"$with_logfac" = X""; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <syslog.h>
-int
-main (void)
-{
-int i = LOG_AUTHPRIV; (void)i;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
+    ac_fn_check_decl "$LINENO" "LOG_AUTHPRIV" "ac_cv_have_decl_LOG_AUTHPRIV" "#include <syslog.h>
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_LOG_AUTHPRIV" = xyes
 then :
   logfac=authpriv
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
 printf "%s\n" "#define LOGFAC \"$logfac\"" >>confdefs.h
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $logfac" >&5
-printf "%s\n" "$logfac" >&6; }
 ac_header_dirent=no
 for ac_hdr in dirent.h sys/ndir.h sys/dir.h ndir.h; do
   as_ac_Header=`printf "%s\n" "ac_cv_header_dirent_$ac_hdr" | $as_tr_sh`
@@ -18587,6 +18253,7 @@ if test "x$ac_cv_header_login_cap_h" = xyes
 then :
   printf "%s\n" "#define HAVE_LOGIN_CAP_H 1" >>confdefs.h
  LOGINCAP_USAGE='[-c class] '; LCMAN=1
+	with_logincap=yes
 	case "$OS" in
 	    freebsd*|netbsd*)
 		SUDO_LIBS="${SUDO_LIBS} -lutil"
@@ -18648,6 +18315,8 @@ then :
 fi
 
 
+else $as_nop
+  with_project=no
 fi
 
 fi
@@ -19434,30 +19103,7 @@ fi
 
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to compile python plugin support" >&5
-printf %s "checking whether to compile python plugin support... " >&6; }
-# Check whether --enable-python was given.
-if test ${enable_python+y}
-then :
-  enableval=$enable_python;  case "$enableval" in
-    yes|no)
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
-printf "%s\n" "$enableval" >&6; }
-        USE_PYTHON=$enableval
-        ;;
-    *)
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-python: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-python: $enableval" >&2;}
-        ;;
-  esac
-
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
-
-if test ${USE_PYTHON-'no'} = "yes"; then
+if test ${enable_python-'no'} = "yes"; then
 
 
 
@@ -19805,12 +19451,8 @@ fi
     if test -z "$PYTHON_INCLUDE"
 then :
 
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking python include flags" >&5
-printf %s "checking python include flags... " >&6; }
       # Pull out python include path, ignore other flags
       PYTHON_INCLUDE=`$PYTHON_CONFIG --cflags | tr " " "\n" | grep "^-I" | sort -u | tr "\n" " "`
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $PYTHON_INCLUDE" >&5
-printf "%s\n" "$PYTHON_INCLUDE" >&6; }
 
 fi
 
@@ -19823,12 +19465,8 @@ then :
       else
         PY_EMBED=
       fi
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking python linker flags" >&5
-printf %s "checking python linker flags... " >&6; }
       PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED`
       PYTHON_LIBS=`$PYTHON_CONFIG --ldflags $PY_EMBED | tr " " "\n" | grep "^-[lL]" | tr "\n" " "`
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $PYTHON_LIBS" >&5
-printf "%s\n" "$PYTHON_LIBS" >&6; }
 
 fi
 
@@ -22360,6 +21998,9 @@ if test "${enable_openssl-no}" != no; then
     if $PKG_CONFIG --exists "openssl >= 1.0.1" >/dev/null 2>&1; then
 	printf "%s\n" "#define HAVE_OPENSSL 1" >>confdefs.h
 
+	if test "$enable_openssl" = "maybe"; then
+	    enable_openssl=yes
+	fi
 
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
@@ -22739,6 +22380,8 @@ fi
 
     fi
 
+	    else
+		enable_openssl=yes
 	    fi
 	    LIBTLS="${LIBTLS} -lcrypto -lssl"
 
@@ -24854,10 +24497,6 @@ then :
   withval=$with_pam_login; case $with_pam_login in
 	    yes)	printf "%s\n" "#define HAVE_PAM_LOGIN 1" >>confdefs.h
 
-			{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use PAM login" >&5
-printf %s "checking whether to use PAM login... " >&6; }
-			{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 			pam_login_service="sudo-i"
 			;;
 	    no)		;;
@@ -24867,30 +24506,19 @@ printf "%s\n" "yes" >&6; }
 fi
 
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use PAM session support" >&5
-printf %s "checking whether to use PAM session support... " >&6; }
 	# Check whether --enable-pam_session was given.
 if test ${enable_pam_session+y}
 then :
   enableval=$enable_pam_session;  case "$enableval" in
-		yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-			;;
-		no)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-			printf "%s\n" "#define NO_PAM_SESSION 1" >>confdefs.h
+		yes)	;;
+		no)	printf "%s\n" "#define NO_PAM_SESSION 1" >>confdefs.h
 
 			pam_session=off
 			;;
-		*)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-			{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-pam-session: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: Ignoring unknown argument to --enable-pam-session: $enableval" >&2;}
+		*)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-pam-session: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-pam-session: $enableval" >&2;}
 			;;
 	    esac
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
 fi
 
     fi
@@ -25609,28 +25237,19 @@ done
 
     fi
     LIBS="$_LIBS"
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use an instance name for Kerberos V" >&5
-printf %s "checking whether to use an instance name for Kerberos V... " >&6; }
     # Check whether --enable-kerb5-instance was given.
 if test ${enable_kerb5_instance+y}
 then :
   enableval=$enable_kerb5_instance;  case "$enableval" in
 	    yes)	as_fn_error $? "\"must give --enable-kerb5-instance an argument.\"" "$LINENO" 5
 			;;
-	    no)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-			;;
+	    no)		;;
 	    *)		cat >>confdefs.h <<EOF
 #define SUDO_KRB5_INSTANCE "$enableval"
 EOF
 
-			{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
-printf "%s\n" "$enableval" >&6; }
 			;;
 	esac
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
 fi
 
 fi
@@ -29593,9 +29212,6 @@ printf "%s\n" "$as_me: WARNING: No crypt function found, assuming plaintext pass
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
-_AUTH=`echo "$AUTH_OBJS" | sed -e 's/\.lo//g' -e 's/getspwuid *//'`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: using the following authentication methods: $_AUTH" >&5
-printf "%s\n" "$as_me: using the following authentication methods: $_AUTH" >&6;}
 
 if test -n "$LIBS"; then
     L="$LIBS"
@@ -29792,6 +29408,15 @@ fi
 if test X"$ZLIB_R" != X""; then
     ZLIB="$ZLIB_R $ZLIB"
 fi
+
+CFLAGS=${CFLAGS# }
+CPPFLAGS=${CPPFLAGS# }
+LDFLAGS=${LDFLAGS# }
+SUDO_LDFLAGS=${SUDOERS_LDFLAGS# }
+SUDOERS_LDFLAGS=${SUDOERS_LDFLAGS# }
+LIBS=${LIBS# }
+SUDO_LIBS=${SUDO_LIBS# }
+SUDOERS_LIBS=${SUDOERS_LIBS# }
 
 if test X"$prefix" = X"NONE"; then
     test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
@@ -31967,6 +31592,161 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 printf "%s\n" "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+
+echo "" >&6
+echo "Configured Sudo version $PACKAGE_VERSION" >&6
+echo " Compiler settings:" >&6
+echo "  prefix			: $prefix" >&6
+echo "  compiler			: $CC" >&6
+echo "  compiler options		: $CFLAGS" >&6
+echo "  preprocessor options		: $CPPFLAGS" >&6
+echo "  linker options		: $LDFLAGS" >&6
+echo "  front-end libraries		: $SUDO_LIBS" >&6
+echo "  sudoers libraries		: $SUDOERS_LIBS" >&6
+echo "  extra libraries		: $LIBS" >&6
+if test "${enable_sanitizer-no}" != "no"; then
+    echo "  sanitizer options		: ${enable_sanitizer}" >&6
+fi
+if test X"$FUZZ_LD" != X"\$(CC)"; then
+    echo "  fuzzing linker		: ${FUZZ_LD}" >&6
+fi
+if test X"$FUZZ_ENGINE" != X"\$(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la"; then
+    echo "  fuzzing engine		: ${FUZZ_ENGINE}" >&6
+fi
+echo " Plugin options:" >&6
+echo "  plugin support		: ${SHLIB_ENABLE}" >&6
+echo "  Sudoers plugin static		: ${enable_static_sudoers-no}" >&6
+echo "  Python plugin			: ${enable_python-no}" >&6
+if test "${enable_python-no}" != "no"; then
+    echo "   Python CFLAGS		: ${PYTHON_INCLUDE}" >&6
+    echo "   Python LDFLAGS		: ${PYTHON_LIBS}" >&6
+fi
+echo " Optional features:" >&6
+echo "  log client			: ${enable_log_client-yes}" >&6
+echo "  log server			: ${enable_log_server-yes}" >&6
+echo "  log client/server TLS		: ${enable_openssl-no}" >&6
+case "$host_os" in
+    linux*) echo "  SELinux RBAC			: ${with_selinux-yes}" >&6;;
+esac
+echo " Optional sudoers back-ends:" >&6
+echo "  LDAP				: ${with_ldap-no}" >&6
+if test "${with_ldap-no}" != "no"; then
+    echo "   ldap configuration		: ${ldap_conf}" >&6
+    echo "   ldap secret			: ${ldap_secret}" >&6
+    echo "   SASL authentication		: ${enable_sasl-no}" >&6
+fi
+echo "  SSSD				: ${with_sssd-no}" >&6
+if test "${with_sssd-no}" != "no"; then
+    echo "   SSSD config path		: ${sssd_conf}" >&6
+    if test "${sssd_lib}" = \""LIBDIR\""; then
+	echo "   SSSD lib dir			: ${libdir}" >&6
+    else
+	echo "   SSSD lib dir			: ${sssd_lib}" >&6
+    fi
+fi
+echo " Authentication options:" >&6
+echo "  require authentication	: ${enable_authentication-yes}" >&6
+auth_methods=`echo "$AUTH_OBJS" | sed -e 's/\.lo//g' -e 's/getspwuid *//'`
+echo "  authentication methods	: ${auth_methods}" >&6
+if test "${with_pam-no}" = "yes"; then
+    echo "  pam session support		: ${pam_session}" >&6
+    echo "  pam login service		: ${pam_login_service}" >&6
+fi
+if test "${with_kerb5-no}" != "no"; then
+    echo "  kerb5 instance string	: ${with_kerb5-none}" >&6
+fi
+if test "${with_opie-no}-${with_skey-no}" != "no-no"; then
+    echo "  long OTP prompt		: ${long_otp_prompt-no}" >&6
+fi
+echo "  group exempt from passwords	: ${with_exempt-none}" >&6
+echo "  password prompt		: ${passprompt}" >&6
+echo "  password prompt timeout	: ${password_timeout} minutes" >&6
+echo "  password tries		: ${passwd_tries}" >&6
+echo "  bad password message		: ${badpass_message}" >&6
+if test "$insults" = "on"; then
+    i=""
+    test "$enable_offensive_insults" = "yes" && i="offensive ${i}"
+    test "$with_python_insults" = "yes" && i="python ${i}"
+    test "$with_goons_insults" = "yes" && i="goons ${i}"
+    test "$with_hal_insults" = "yes" && i="hal ${i}"
+    test "$with_csops_insults" = "yes" && i="csops ${i}"
+    test "$with_classic_insults" = "yes" && i="classic ${i}"
+else
+    i=no
+fi
+echo "  insults			: $i" >&6
+echo "  display lecture		: ${lecture}" >&6
+echo "  timestamp (credential) type	: ${timestamp_type}" >&6
+echo "  timestamp (credential) timeout: ${timeout} minutes" >&6
+echo " Logging options:" >&6
+echo "  logging default		: ${with_logging}" >&6
+echo "  syslog facility		: ${logfac}" >&6
+echo "  syslog priority allowed	: ${goodpri}" >&6
+echo "  syslog priority denied	: ${badpri}" >&6
+echo "  log file path			: ${logpath}" >&6
+echo "  log file includes hostname	: ${enable_log_host-no}" >&6
+echo "  log file line length		: ${loglen}" >&6
+echo "  compress I/O logs		: ${enable_zlib}" >&6
+case "$host_os" in
+    linux*) echo "  Linux audit			: ${with_linux_audit-no}" >&6;;
+    solaris2.11*) echo "  Solaris audit			: ${with_solaris_audit-no}" >&6;;
+    *) echo "  BSM audit			: ${with_bsm_audit-no}" >&6;;
+esac
+echo "  run mailer as root		: ${enable_root_mailer-yes}" >&6
+echo "  warning/error mail recipient	: ${mailto}" >&6
+echo "  warning/error mail subject	: ${mailsub}" >&6
+echo "  mail if user not in sudoers	: ${mail_no_user}" >&6
+echo "  mail if user not on host	: ${mail_no_host}" >&6
+echo "  mail if command not allowed	: ${mail_no_perms}" >&6
+echo " Pathnames:" >&6
+echo "  log directory			: ${log_dir}" >&6
+echo "  plugin directory		: ${plugindir}" >&6
+echo "  run directory			: ${rundir}" >&6
+echo "  var directory			: ${vardir}" >&6
+echo "  I/O log directory		: ${iolog_dir}" >&6
+echo "  sudo_logsrvd relay directory	: ${relay_dir}" >&6
+echo "  time zone directory		: ${tzdir}" >&6
+echo "  path to sendmail		: ${with_sendmail}" >&6
+if test -n "$TMPFILES_D"; then
+    echo "  systemd tempfiles dir	: ${TMPFILES_D}" >&6
+fi
+if test ${with_netsvc-"no"} != "no"; then
+    echo "  netsvc file			: ${netsvc_conf}" >&6
+elif test ${with_nsswitch-"yes"} != "no"; then
+    echo "  nsswitch file			: ${nsswitch_conf}" >&6
+fi
+echo "  noexec file			: ${noexec_file}" >&6
+echo "  secure path			: ${with_secure_path-no}" >&6
+echo "  askpass helper file		: ${with_askpass-no}" >&6
+echo "  device search path		: ${devsearch}" >&6
+echo " Other options:" >&6
+if test "${with_devel-no}" != "no"; then
+    echo "  development build		: ${with_devel}" >&6
+fi
+case "$host_os" in
+    solaris2*) echo "  Solaris project support	: ${with_project-no}" >&6;;
+esac
+if test "${with_logincap+set}" = "set"; then
+    echo "  /etc/login.conf support	: ${with_logincap}" >&6
+fi
+echo "  fully-qualified domain names	: ${fqdn}" >&6
+echo "  default umask			: ${sudo_umask}" >&6
+echo "  umask override		: ${umask_override}" >&6
+echo "  default runas user		: ${runas_default}" >&6
+echo "  probe network interfaces	: ${with_interfaces-yes}" >&6
+echo "  allow root to run sudo	: ${root_sudo}" >&6
+echo "  reset environment for commands: ${env_reset}" >&6
+echo "  run shell if no args		: ${enable_noargs_shell-no}" >&6
+echo "  ignore '.' or '' in \$PATH	: ${ignore_dot}" >&6
+echo "  disable path info		: ${enable_path_info-no}" >&6
+echo "  sudoers file mode		: ${SUDOERS_MODE}" >&6
+echo "  sudoers file owner		: ${SUDOERS_UID}:${SUDOERS_GID}" >&6
+echo "  default visudo editor		: ${editor}" >&6
+echo "  visudo supports \$EDITOR	: ${env_editor}" >&6
+if test "${enable_env_debug+set}" = "set"; then
+    echo "  environment debugging	: ${enable_env_debug-no}" >&6
+fi
+echo "" >&6
 
 if test "$with_pam" = "yes"; then
     case $host_os in

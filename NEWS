@@ -73,6 +73,10 @@ What's new in Sudo 1.9.7
  * The TLS connection timeout in the sudoers log client was previously
    hard-coded to 10 seconds.  It now uses the value of log_server_timeout.
 
+ * The configure script now outputs a summary of the user-configurable
+   options at the end, separate from output of configure script tests.
+   Bug #820.
+
 What's new in Sudo 1.9.6p1
 
  * Fixed a regression introduced in sudo 1.9.6 that resulted in an
