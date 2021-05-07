@@ -174,7 +174,7 @@ case "$osversion" in
 			    # Encrypted remote I/O log support.
 			    with_openssl=true
 			fi
-			if [ $osmajor -ge 7 ]; then
+			if [ $osmajor -ge 6 ]; then
 			    # Python plugins
 			    with_python=true
 			fi
