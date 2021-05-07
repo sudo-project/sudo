@@ -77,6 +77,9 @@ What's new in Sudo 1.9.7
    options at the end, separate from output of configure script tests.
    Bug #820.
 
+ * Corrected the description of which groups may be specified via the
+   -g option in the Runas_Spec section.  Bug #975.
+
 What's new in Sudo 1.9.6p1
 
  * Fixed a regression introduced in sudo 1.9.6 that resulted in an

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "March 3, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "May 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1224,19 +1224,16 @@ The first
 indicates which users the command may be run as via the
 \fB\-u\fR
 option.
-The second defines a list of groups that can be specified via the
+The second defines a list of groups that may be specified via the
 \fB\-g\fR
-option in addition to any of the target user's groups.
+option (in addition to any of the target user's groups).
 If both
 \fRRunas_List\fRs
 are specified, the command may be run with any combination of users
 and groups listed in their respective
 \fRRunas_List\fRs.
 If only the first is specified, the command may be run as any user
-in the list but no
-\fB\-g\fR
-option
-may be specified.
+in the list and, optionally, with any group the target user belongs to.
 If the first
 \fRRunas_List\fR
 is empty but the
@@ -1245,13 +1242,15 @@ with the group set to any listed in the
 \fRRunas_List\fR.
 If both
 \fRRunas_List\fRs
-are empty, the command may only be run as the invoking user.
+are empty, the command may only be run as the invoking user and the
+group, if specified, must be one that the invoking user is a member of.
 If no
 \fRRunas_Spec\fR
-is specified the command may be run as
+is specified, the command may only be run as
 \fBroot\fR
-and
-no group may be specified.
+and the group, if specified, must be one that
+\fBroot\fR
+is a member of.
 .PP
 A
 \fRRunas_Spec\fR
