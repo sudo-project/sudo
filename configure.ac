@@ -23,10 +23,6 @@ AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
 dnl
-dnl Note: this must come after AC_INIT
-dnl
-AC_MSG_NOTICE([configuring Sudo version $PACKAGE_VERSION])
-dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
 AC_SUBST([SHELL])

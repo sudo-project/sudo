@@ -3404,8 +3404,6 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: configuring Sudo version $PACKAGE_VERSION" >&5
-printf "%s\n" "$as_me: configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
