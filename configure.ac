@@ -4596,7 +4596,6 @@ if test "$enable_hardening" != "no" && test "$enable_ssp" != "no"; then
 	SSP_CFLAGS="$sudo_cv_var_stack_protector"
 	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
-    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
 fi
 if test "$enable_hardening" != "no"; then
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
