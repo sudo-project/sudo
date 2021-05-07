@@ -214,12 +214,12 @@ python_plugin_policy_validate(const char **errstr)
 }
 
 void
-python_plugin_policy_invalidate(int remove)
+python_plugin_policy_invalidate(int unlinkit)
 {
     debug_decl(python_plugin_policy_invalidate, PYTHON_DEBUG_CALLBACKS);
     PyThreadState_Swap(plugin_ctx.py_interpreter);
     python_plugin_api_rc_call(&plugin_ctx, CALLBACK_PYNAME(invalidate),
-                              Py_BuildValue("(i)", remove));
+                              Py_BuildValue("(i)", unlinkit));
     debug_return;
 }
 

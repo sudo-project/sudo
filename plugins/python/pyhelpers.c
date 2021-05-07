@@ -238,11 +238,11 @@ py_str_array_from_tuple(PyObject *py_tuple)
 }
 
 PyObject *
-py_tuple_get(PyObject *py_tuple, Py_ssize_t index, PyTypeObject *expected_type)
+py_tuple_get(PyObject *py_tuple, Py_ssize_t idx, PyTypeObject *expected_type)
 {
     debug_decl(py_tuple_get, PYTHON_DEBUG_INTERNAL);
 
-    PyObject *py_item = PyTuple_GetItem(py_tuple, index);
+    PyObject *py_item = PyTuple_GetItem(py_tuple, idx);
     if (py_item == NULL) {
         debug_return_ptr(NULL);
     }
@@ -250,7 +250,7 @@ py_tuple_get(PyObject *py_tuple, Py_ssize_t index, PyTypeObject *expected_type)
     if (!PyObject_TypeCheck(py_item, expected_type)) {
         PyErr_Format(PyExc_ValueError, "Value error: tuple element %d should "
                                        "be a '%s' (but it is '%s')",
-                     index, expected_type->tp_name, Py_TYPENAME(py_item));
+                     idx, expected_type->tp_name, Py_TYPENAME(py_item));
         debug_return_ptr(NULL);
     }
 
