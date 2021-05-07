@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.6b1\n"
+"Project-Id-Version: sudoers 1.9.7b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2021-03-02 19:29-0700\n"
-"PO-Revision-Date: 2021-03-07 01:00+0200\n"
+"POT-Creation-Date: 2021-05-01 16:27-0600\n"
+"PO-Revision-Date: 2021-05-05 21:29+0300\n"
 "Last-Translator: Lauri Nurmi <lanurmi@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "Language: fi\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: confstr.sh:1 gram.y:1183
 msgid "syntax error"
@@ -59,10 +59,14 @@ msgstr "Yritä uudelleen."
 #: lib/iolog/iolog_legacy.c:111 lib/iolog/iolog_legacy.c:123
 #: lib/iolog/iolog_legacy.c:133 lib/iolog/iolog_legacy.c:139
 #: lib/iolog/iolog_loginfo.c:76 lib/iolog/iolog_loginfo.c:210
-#: logsrvd/sendlog.c:496 plugins/sudoers/audit.c:115
+#: logsrvd/logsrvd.c:1021 logsrvd/logsrvd.c:1089 logsrvd/logsrvd_journal.c:142
+#: logsrvd/logsrvd_journal.c:196 logsrvd/logsrvd_journal.c:248
+#: logsrvd/logsrvd_journal.c:380 logsrvd/logsrvd_relay.c:443
+#: logsrvd/logsrvd_relay.c:743 logsrvd/logsrvd_relay.c:857
+#: logsrvd/sendlog.c:500 plugins/sudoers/audit.c:115
 #: plugins/sudoers/audit.c:263 plugins/sudoers/auth/bsdauth.c:143
 #: plugins/sudoers/auth/kerb5.c:118 plugins/sudoers/auth/kerb5.c:144
-#: plugins/sudoers/auth/pam.c:689 plugins/sudoers/auth/rfc1938.c:111
+#: plugins/sudoers/auth/pam.c:692 plugins/sudoers/auth/rfc1938.c:111
 #: plugins/sudoers/auth/sia.c:59 plugins/sudoers/check_aliases.c:95
 #: plugins/sudoers/cvtsudoers.c:119 plugins/sudoers/cvtsudoers.c:160
 #: plugins/sudoers/cvtsudoers.c:177 plugins/sudoers/cvtsudoers.c:188
@@ -79,7 +83,7 @@ msgstr "Yritä uudelleen."
 #: plugins/sudoers/cvtsudoers_ldif.c:460 plugins/sudoers/cvtsudoers_ldif.c:468
 #: plugins/sudoers/cvtsudoers_ldif.c:615 plugins/sudoers/defaults.c:638
 #: plugins/sudoers/defaults.c:933 plugins/sudoers/defaults.c:1108
-#: plugins/sudoers/editor.c:181 plugins/sudoers/env.c:262
+#: plugins/sudoers/editor.c:187 plugins/sudoers/env.c:262
 #: plugins/sudoers/exptilde.c:92 plugins/sudoers/filedigest.c:54
 #: plugins/sudoers/filedigest.c:70 plugins/sudoers/gc.c:57
 #: plugins/sudoers/group_plugin.c:133 plugins/sudoers/interfaces.c:72
@@ -125,9 +129,9 @@ msgstr "Yritä uudelleen."
 #: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:195
 #: plugins/sudoers/pwutil.c:266 plugins/sudoers/pwutil.c:344
 #: plugins/sudoers/pwutil.c:518 plugins/sudoers/pwutil.c:583
-#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:854
-#: plugins/sudoers/pwutil.c:910 plugins/sudoers/pwutil.c:954
-#: plugins/sudoers/pwutil.c:1011 plugins/sudoers/sssd.c:145
+#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:853
+#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:953
+#: plugins/sudoers/pwutil.c:1010 plugins/sudoers/sssd.c:145
 #: plugins/sudoers/sssd.c:407 plugins/sudoers/sssd.c:470
 #: plugins/sudoers/sssd.c:514 plugins/sudoers/sssd.c:561
 #: plugins/sudoers/sssd.c:754 plugins/sudoers/strvec_join.c:53
@@ -139,10 +143,10 @@ msgstr "Yritä uudelleen."
 #: plugins/sudoers/sudoers.c:1241 plugins/sudoers/sudoreplay.c:552
 #: plugins/sudoers/sudoreplay.c:555 plugins/sudoers/sudoreplay.c:1259
 #: plugins/sudoers/sudoreplay.c:1469 plugins/sudoers/sudoreplay.c:1473
-#: plugins/sudoers/testsudoers.c:128 plugins/sudoers/testsudoers.c:225
-#: plugins/sudoers/testsudoers.c:242 plugins/sudoers/testsudoers.c:581
-#: plugins/sudoers/timestamp.c:422 plugins/sudoers/timestamp.c:466
-#: plugins/sudoers/timestamp.c:967 plugins/sudoers/timestamp.c:1105
+#: plugins/sudoers/testsudoers.c:120 plugins/sudoers/testsudoers.c:224
+#: plugins/sudoers/testsudoers.c:241 plugins/sudoers/testsudoers.c:580
+#: plugins/sudoers/timestamp.c:424 plugins/sudoers/timestamp.c:468
+#: plugins/sudoers/timestamp.c:980 plugins/sudoers/timestamp.c:1118
 #: plugins/sudoers/toke_util.c:77 plugins/sudoers/toke_util.c:105
 #: plugins/sudoers/toke_util.c:130 plugins/sudoers/toke_util.c:155
 #: plugins/sudoers/toke_util.c:193 plugins/sudoers/tsdump.c:123
@@ -204,11 +208,11 @@ msgstr "Alias ”%s” on jo määritelty"
 #: lib/iolog/iolog_legacy.c:100 lib/iolog/iolog_legacy.c:111
 #: lib/iolog/iolog_legacy.c:123 lib/iolog/iolog_legacy.c:133
 #: lib/iolog/iolog_legacy.c:139 lib/iolog/iolog_loginfo.c:76
-#: lib/iolog/iolog_loginfo.c:210 logsrvd/logsrvd.c:1291 logsrvd/logsrvd.c:1304
-#: logsrvd/logsrvd.c:1349 logsrvd/sendlog.c:496 logsrvd/sendlog.c:1337
-#: logsrvd/sendlog.c:1344 logsrvd/sendlog.c:1762 plugins/sudoers/audit.c:115
-#: plugins/sudoers/audit.c:263 plugins/sudoers/auth/pam.c:502
-#: plugins/sudoers/auth/pam.c:689 plugins/sudoers/auth/rfc1938.c:111
+#: lib/iolog/iolog_loginfo.c:210 logsrvd/sendlog.c:500 logsrvd/sendlog.c:1343
+#: logsrvd/sendlog.c:1350 logsrvd/sendlog.c:1545 logsrvd/tls_init.c:221
+#: logsrvd/tls_init.c:242 logsrvd/tls_init.c:252 plugins/sudoers/audit.c:115
+#: plugins/sudoers/audit.c:263 plugins/sudoers/auth/pam.c:505
+#: plugins/sudoers/auth/pam.c:692 plugins/sudoers/auth/rfc1938.c:111
 #: plugins/sudoers/check_aliases.c:95 plugins/sudoers/cvtsudoers.c:119
 #: plugins/sudoers/cvtsudoers.c:159 plugins/sudoers/cvtsudoers.c:176
 #: plugins/sudoers/cvtsudoers.c:187 plugins/sudoers/cvtsudoers.c:299
@@ -224,7 +228,7 @@ msgstr "Alias ”%s” on jo määritelty"
 #: plugins/sudoers/cvtsudoers_ldif.c:446 plugins/sudoers/cvtsudoers_ldif.c:459
 #: plugins/sudoers/cvtsudoers_ldif.c:467 plugins/sudoers/cvtsudoers_ldif.c:614
 #: plugins/sudoers/defaults.c:638 plugins/sudoers/defaults.c:933
-#: plugins/sudoers/defaults.c:1108 plugins/sudoers/editor.c:181
+#: plugins/sudoers/defaults.c:1108 plugins/sudoers/editor.c:187
 #: plugins/sudoers/env.c:262 plugins/sudoers/exptilde.c:92
 #: plugins/sudoers/filedigest.c:54 plugins/sudoers/filedigest.c:70
 #: plugins/sudoers/gc.c:57 plugins/sudoers/group_plugin.c:132
@@ -279,9 +283,9 @@ msgstr "Alias ”%s” on jo määritelty"
 #: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:195
 #: plugins/sudoers/pwutil.c:266 plugins/sudoers/pwutil.c:344
 #: plugins/sudoers/pwutil.c:518 plugins/sudoers/pwutil.c:583
-#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:854
-#: plugins/sudoers/pwutil.c:910 plugins/sudoers/pwutil.c:954
-#: plugins/sudoers/pwutil.c:1011 plugins/sudoers/set_perms.c:359
+#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:853
+#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:953
+#: plugins/sudoers/pwutil.c:1010 plugins/sudoers/set_perms.c:359
 #: plugins/sudoers/set_perms.c:698 plugins/sudoers/set_perms.c:1061
 #: plugins/sudoers/set_perms.c:1364 plugins/sudoers/set_perms.c:1529
 #: plugins/sudoers/sssd.c:144 plugins/sudoers/sssd.c:407
@@ -295,11 +299,11 @@ msgstr "Alias ”%s” on jo määritelty"
 #: plugins/sudoers/sudoers.c:975 plugins/sudoers/sudoers.c:1241
 #: plugins/sudoers/sudoreplay.c:552 plugins/sudoers/sudoreplay.c:555
 #: plugins/sudoers/sudoreplay.c:1259 plugins/sudoers/sudoreplay.c:1469
-#: plugins/sudoers/sudoreplay.c:1473 plugins/sudoers/testsudoers.c:128
-#: plugins/sudoers/testsudoers.c:225 plugins/sudoers/testsudoers.c:242
-#: plugins/sudoers/testsudoers.c:581 plugins/sudoers/timestamp.c:422
-#: plugins/sudoers/timestamp.c:466 plugins/sudoers/timestamp.c:967
-#: plugins/sudoers/timestamp.c:1105 plugins/sudoers/toke_util.c:77
+#: plugins/sudoers/sudoreplay.c:1473 plugins/sudoers/testsudoers.c:120
+#: plugins/sudoers/testsudoers.c:224 plugins/sudoers/testsudoers.c:241
+#: plugins/sudoers/testsudoers.c:580 plugins/sudoers/timestamp.c:424
+#: plugins/sudoers/timestamp.c:468 plugins/sudoers/timestamp.c:980
+#: plugins/sudoers/timestamp.c:1118 plugins/sudoers/toke_util.c:77
 #: plugins/sudoers/toke_util.c:105 plugins/sudoers/toke_util.c:130
 #: plugins/sudoers/toke_util.c:154 plugins/sudoers/toke_util.c:193
 #: plugins/sudoers/tsdump.c:123 plugins/sudoers/visudo.c:143
@@ -322,7 +326,7 @@ msgstr "%s: %s"
 #: plugins/sudoers/linux_audit.c:92 plugins/sudoers/policy.c:573
 #: plugins/sudoers/policy.c:728 plugins/sudoers/policy.c:738
 #: plugins/sudoers/prompt.c:161 plugins/sudoers/strvec_join.c:62
-#: plugins/sudoers/testsudoers.c:246 plugins/sudoers/toke_util.c:206
+#: plugins/sudoers/testsudoers.c:245 plugins/sudoers/toke_util.c:206
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "sisäinen virhe, %s-ylivuoto"
@@ -492,14 +496,6 @@ msgstr "virhe luettaessa ajoitustiedostoa: %s"
 msgid "invalid timing file line: %s"
 msgstr "virheellinen ajoitustiedostorivi: %s"
 
-#: logsrvd/iolog_writer.c:946
-msgid "log is already complete, cannot be restarted"
-msgstr "loki on jo valmis, ei voi aloittaa uudelleen"
-
-#: logsrvd/iolog_writer.c:977
-msgid "unable to restart log"
-msgstr "lokia ei voi aloittaa uudelleen"
-
 #  Avaamisen kohde voi olla timestamp file, sudoers file tai pathbuf
 #: logsrvd/logsrv_util.c:99 logsrvd/logsrv_util.c:106
 #: plugins/sudoers/sudoreplay.c:352 plugins/sudoers/sudoreplay.c:358
@@ -523,133 +519,54 @@ msgstr "%s/%s: siirtyminen %zu tavua eteenpäin epäonnistui"
 msgid "unable to find resume point [%lld, %ld] in %s/%s"
 msgstr "jatkopistettä [%lld, %ld] ei löydy tiedostosta %s/%s"
 
-#: logsrvd/logsrvd.c:294 logsrvd/logsrvd.c:357 logsrvd/logsrvd.c:398
-#: logsrvd/logsrvd.c:453 logsrvd/logsrvd.c:522 logsrvd/logsrvd.c:573
-#: logsrvd/logsrvd.c:605 logsrvd/logsrvd.c:637
+#: logsrvd/logsrvd.c:434 logsrvd/logsrvd.c:473 logsrvd/logsrvd.c:507
+#: logsrvd/logsrvd.c:557 logsrvd/logsrvd.c:632 logsrvd/logsrvd.c:664
+#: logsrvd/logsrvd.c:696 logsrvd/logsrvd.c:726 logsrvd/logsrvd_relay.c:511
+#: logsrvd/logsrvd_relay.c:544
 msgid "state machine error"
 msgstr "tilakoneen virhe"
 
-#: logsrvd/logsrvd.c:303
+#: logsrvd/logsrvd.c:443
 msgid "invalid AcceptMessage"
 msgstr "virheellinen AcceptMessage"
 
-#: logsrvd/logsrvd.c:311
-msgid "error parsing AcceptMessage"
-msgstr "virhe jäsennettäessä AcceptMessagea"
-
-#: logsrvd/logsrvd.c:318
-msgid "error creating I/O log"
-msgstr "virhe luotaessa siirräntälokia"
-
-#: logsrvd/logsrvd.c:325
-msgid "error logging accept event"
-msgstr "virhe hyväksymistapahtuman lokiin kirjaamisessa"
-
-#: logsrvd/logsrvd.c:366
+#: logsrvd/logsrvd.c:482
 msgid "invalid RejectMessage"
 msgstr "virheellinen RejectMessage"
 
-#: logsrvd/logsrvd.c:374
-msgid "error parsing RejectMessage"
-msgstr "virhe jäsennettäessä RejectMessagea"
-
-#: logsrvd/logsrvd.c:380
-msgid "error logging reject event"
-msgstr "virhe hylkäystapahtuman lokiin kirjaamisessa"
-
-#: logsrvd/logsrvd.c:490
+#: logsrvd/logsrvd.c:593
 msgid "invalid AlertMessage"
 msgstr "virheellinen AlertMessage"
 
-#: logsrvd/logsrvd.c:499
-msgid "error parsing AlertMessage"
-msgstr "virhe jäsennettäessä AlertMessagea"
-
-#: logsrvd/logsrvd.c:507
-msgid "error logging alert event"
-msgstr "virhe hälytystapahtuman lokiin kirjaamisessa"
-
-#: logsrvd/logsrvd.c:528 logsrvd/logsrvd.c:579 logsrvd/logsrvd.c:611
+#: logsrvd/logsrvd.c:638 logsrvd/logsrvd.c:670 logsrvd/logsrvd.c:702
 msgid "protocol error"
 msgstr "protokollavirhe"
 
-#: logsrvd/logsrvd.c:538
-msgid "error writing IoBuffer"
-msgstr "virhe kirjoitettaessa IoBufferia"
-
-#: logsrvd/logsrvd.c:590
-msgid "error writing ChangeWindowSize"
-msgstr "virhe kirjoitettaessa ChangeWindowSizeä"
-
-#: logsrvd/logsrvd.c:622
-msgid "error writing CommandSuspend"
-msgstr "virhe kirjoitettaessa CommandSuspendia"
-
-#: logsrvd/logsrvd.c:707
+#: logsrvd/logsrvd.c:797
 msgid "unrecognized ClientMessage type"
 msgstr "tunnistamaton ClientMessage-tyyppi"
 
-#: logsrvd/logsrvd.c:978
+#: logsrvd/logsrvd.c:1082 logsrvd/logsrvd_journal.c:238
 msgid "client message too large"
 msgstr "asiakassanoma on liian suuri"
 
-#: logsrvd/logsrvd.c:1208 logsrvd/logsrvd.c:1216
-#, c-format
-msgid "unable to set TLS 1.2 ciphersuite to %s: %s"
-msgstr "ei voida asettaa TLS 1.2 -algoritmisarjaksi %s: %s"
+#: logsrvd/logsrvd.c:1102
+msgid "invalid ClientMessage"
+msgstr "virheellinen ClientMessage"
 
-#: logsrvd/logsrvd.c:1236 logsrvd/logsrvd.c:1244
-#, c-format
-msgid "unable to set TLS 1.3 ciphersuite to %s: %s"
-msgstr "ei voida asettaa TLS 1.3 -algoritmisarjaksi %s: %s"
-
-#: logsrvd/logsrvd.c:1280
-#, c-format
-msgid "unable to get TLS server method: %s"
-msgstr "TLS-palvelinmenetelmää ei saada noudettua: %s"
-
-#: logsrvd/logsrvd.c:1285
-#, c-format
-msgid "unable to create TLS context: %s"
-msgstr "TLS-kontekstia ei voi luoda: %s"
-
-#: logsrvd/logsrvd.c:1292 plugins/sudoers/log_client.c:236
-#, c-format
-msgid "unable to load certificate %s"
-msgstr "sertifikaatin %s lataaminen epäonnistui"
-
-#: logsrvd/logsrvd.c:1305 plugins/sudoers/log_client.c:216
-#, c-format
-msgid "unable to load certificate authority bundle %s"
-msgstr "varmenteen myöntäjän pakettia %s ei voitu ladata"
-
-#: logsrvd/logsrvd.c:1350 plugins/sudoers/log_client.c:249
-#, c-format
-msgid "unable to load private key %s"
-msgstr "yksityistä avainta %s ei voi ladata"
-
-#: logsrvd/logsrvd.c:1367 logsrvd/logsrvd.c:1376
-#, c-format
-msgid "unable to set diffie-hellman parameters: %s"
-msgstr "diffie-hellman-parametreja ei voi asettaa: %s"
-
-#: logsrvd/logsrvd.c:1389
-#, c-format
-msgid "unable to set minimum protocol version to TLS 1.2: %s"
-msgstr "protokollaversion vähimmäisversiota ei voi asettaa TLS 1.2:ksi: %s"
-
-#: logsrvd/logsrvd.c:1574
+#: logsrvd/logsrvd.c:1408
 msgid "unable to get remote IP addr"
 msgstr "vastapään IP-osoitteen noutaminen ei onnistu"
 
-#: logsrvd/logsrvd.c:1602 plugins/sudoers/log_client.c:263
+#: logsrvd/logsrvd.c:1436 logsrvd/tls_client.c:203
+#: plugins/sudoers/log_client.c:263
 #, c-format
 msgid "Unable to attach user data to the ssl object: %s"
 msgstr "Käyttäjätietoja ei voi liittää ssl-objektiin: %s"
 
-#: logsrvd/logsrvd.c:1610 logsrvd/logsrvd.c:1732 logsrvd/logsrvd.c:1834
-#: logsrvd/sendlog.c:1141 logsrvd/sendlog.c:1497 logsrvd/sendlog.c:1512
-#: logsrvd/sendlog.c:1570 plugins/sudoers/iolog.c:969
+#: logsrvd/logsrvd.c:1444 logsrvd/logsrvd.c:1570 logsrvd/logsrvd.c:1755
+#: logsrvd/sendlog.c:1146 logsrvd/tls_client.c:138 logsrvd/tls_client.c:154
+#: logsrvd/tls_client.c:216 plugins/sudoers/iolog.c:969
 #: plugins/sudoers/iolog.c:1102 plugins/sudoers/iolog.c:1200
 #: plugins/sudoers/log_client.c:109 plugins/sudoers/log_client.c:324
 #: plugins/sudoers/log_client.c:340 plugins/sudoers/log_client.c:386
@@ -667,286 +584,459 @@ msgstr "Käyttäjätietoja ei voi liittää ssl-objektiin: %s"
 msgid "unable to add event to queue"
 msgstr "tapahtuman lisääminen jonoon epäonnistui"
 
-#: logsrvd/logsrvd.c:1786 logsrvd/logsrvd.c:2033
-msgid "unable setup listen socket"
+#: logsrvd/logsrvd.c:1620 logsrvd/logsrvd.c:1953
+msgid "unable to setup listen socket"
 msgstr "kuuntelusoketin valmistelu epäonnistui"
 
-#: logsrvd/logsrvd.c:1934
+#: logsrvd/logsrvd.c:1855
 msgid "sudo log server"
 msgstr "sudo-lokipalvelin"
 
-#: logsrvd/logsrvd.c:1936 logsrvd/sendlog.c:127
+#: logsrvd/logsrvd.c:1857 logsrvd/sendlog.c:122
 msgid "Options:"
 msgstr "Valitsimet:"
 
-#: logsrvd/logsrvd.c:1938
+#: logsrvd/logsrvd.c:1859
 msgid "path to configuration file"
 msgstr "asetustiedoston polku"
 
-#: logsrvd/logsrvd.c:1940 logsrvd/sendlog.c:129
+#: logsrvd/logsrvd.c:1861 logsrvd/sendlog.c:124
 msgid "display help message and exit"
 msgstr "näytä opasteviesti ja poistu"
 
-#: logsrvd/logsrvd.c:1942
+#: logsrvd/logsrvd.c:1863
 msgid "do not fork, run in the foreground"
 msgstr "älä haarauta, vaan suorita edustalla"
 
-#: logsrvd/logsrvd.c:1944
+#: logsrvd/logsrvd.c:1865
 msgid "percent chance connections will drop"
 msgstr "prosentin mahdollisuus yhteyksien katkeamiseen"
 
-#: logsrvd/logsrvd.c:1946 logsrvd/sendlog.c:157
+#: logsrvd/logsrvd.c:1867 logsrvd/sendlog.c:152
 msgid "display version information and exit"
 msgstr "näytä versiotiedot ja poistu"
 
-#: logsrvd/logsrvd.c:1994 logsrvd/sendlog.c:1735
+#: logsrvd/logsrvd.c:1917 logsrvd/sendlog.c:1518
 msgid "Protobuf-C version 1.3 or higher required"
 msgstr "Protobuf-C:n versio 1.3 tai uudempi vaaditaan"
 
-#: logsrvd/logsrvd.c:2012
+#: logsrvd/logsrvd.c:1933
 #, c-format
 msgid "invalid random drop value: %s"
 msgstr "virheellinen satunnaispudotusarvo: %s"
 
-#: logsrvd/logsrvd.c:2016 logsrvd/sendlog.c:1785
+#: logsrvd/logsrvd.c:1936 logsrvd/sendlog.c:1568
 #: plugins/sudoers/cvtsudoers.c:228 plugins/sudoers/sudoreplay.c:299
 #: plugins/sudoers/visudo.c:175
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s versio %s\n"
 
-#: logsrvd/logsrvd_conf.c:332
+#: logsrvd/logsrvd_conf.c:446
 msgid "TLS not supported"
 msgstr "TLS ei ole tuettu"
 
-#: logsrvd/logsrvd_conf.c:344
+#: logsrvd/logsrvd_conf.c:468
 #, c-format
 msgid "%s:%s"
 msgstr "%s:%s"
 
-#: logsrvd/logsrvd_conf.c:411 logsrvd/logsrvd_conf.c:656
+#: logsrvd/logsrvd_conf.c:541 logsrvd/logsrvd_conf.c:876
 #, c-format
 msgid "%s: not a fully qualified path"
 msgstr "%s: ei ole täydellinen polku"
 
 #  Ensimmäinen parametri on auth name
-#: logsrvd/logsrvd_conf.c:770
+#: logsrvd/logsrvd_conf.c:1035
 #, c-format
 msgid "%s:%d unmatched '[': %s"
 msgstr "%s:%d täsmäämätön ”[”: %s"
 
-#: logsrvd/logsrvd_conf.c:781
+#: logsrvd/logsrvd_conf.c:1046
 #, c-format
 msgid "%s:%d invalid config section: %s"
 msgstr "%s:%d: virheellinen asetusosio: %s"
 
-#: logsrvd/logsrvd_conf.c:789
+#: logsrvd/logsrvd_conf.c:1054
 #, c-format
 msgid "%s:%d invalid configuration line: %s"
 msgstr "%s:%d virheellinen asetusrivi: %s"
 
-#: logsrvd/logsrvd_conf.c:795
+#: logsrvd/logsrvd_conf.c:1060
 #, c-format
 msgid "%s:%d expected section name: %s"
 msgstr "%s:%d odotettiin osion nimeä: %s"
 
-#: logsrvd/logsrvd_conf.c:809
+#: logsrvd/logsrvd_conf.c:1074
 #, c-format
 msgid "invalid value for %s: %s"
 msgstr "virheellinen %s-arvo: %s"
 
-#: logsrvd/logsrvd_conf.c:817
+#: logsrvd/logsrvd_conf.c:1082
 #, c-format
 msgid "%s:%d unknown key: %s"
 msgstr "%s:%d tuntematon avain: %s"
 
-#: logsrvd/logsrvd_conf.c:1006
+#: logsrvd/logsrvd_conf.c:1294
 #, c-format
 msgid "unknown syslog facility %s"
 msgstr "tuntematon syslog-lähde %s"
 
-#: logsrvd/logsrvd_conf.c:1010 logsrvd/logsrvd_conf.c:1014
-#: logsrvd/logsrvd_conf.c:1018
+#: logsrvd/logsrvd_conf.c:1298 logsrvd/logsrvd_conf.c:1302
+#: logsrvd/logsrvd_conf.c:1306
 #, c-format
 msgid "unknown syslog priority %s"
 msgstr "tuntematon syslog-prioriteetti %s"
 
-#: logsrvd/sendlog.c:125
+#: logsrvd/logsrvd_conf.c:1374
+msgid "unable to initialize server TLS context"
+msgstr "TLS-kontekstia ei voi alustaa: %s"
+
+#: logsrvd/logsrvd_conf.c:1394
+msgid "unable to initialize relay TLS context"
+msgstr "välittimen TLS-kontekstia ei voi alustaa"
+
+#: logsrvd/logsrvd_journal.c:126 logsrvd/logsrvd_journal.c:367
+#: logsrvd/logsrvd_journal.c:373
+msgid "unable to create journal file"
+msgstr "kirjanpitotiedostoa ei voi luoda"
+
+#: logsrvd/logsrvd_journal.c:134
+msgid "unable to lock journal file"
+msgstr "kirjanpitotiedostoa ei voi lukita"
+
+#: logsrvd/logsrvd_journal.c:163 logsrvd/logsrvd_journal.c:406
+#: logsrvd/logsrvd_journal.c:411
+msgid "unable to write journal file"
+msgstr "kirjauskansiotiedostoa ei voi kirjoittaa"
+
+#: logsrvd/logsrvd_journal.c:171 logsrvd/logsrvd_journal.c:178
+msgid "unable to rename journal file"
+msgstr "kirjauskansiotiedostoa ei voi nimetä uudelleen"
+
+#: logsrvd/logsrvd_journal.c:228 logsrvd/logsrvd_journal.c:258
+msgid "unexpected EOF reading journal file"
+msgstr "odottamaton tiedoston loppu luettaessa kirjanpitotiedostoa"
+
+#: logsrvd/logsrvd_journal.c:230 logsrvd/logsrvd_journal.c:260
+msgid "error reading journal file"
+msgstr "virhe luettaessa kirjanpitotiedostoa"
+
+#: logsrvd/logsrvd_journal.c:270 logsrvd/logsrvd_journal.c:325
+msgid "invalid journal file, unable to restart"
+msgstr "virheellinen kirjanpitotiedosto, ei voida käynnistää uudelleen"
+
+#: logsrvd/logsrvd_local.c:149
+msgid "error parsing AcceptMessage"
+msgstr "virhe jäsennettäessä AcceptMessagea"
+
+#: logsrvd/logsrvd_local.c:156
+msgid "error creating I/O log"
+msgstr "virhe luotaessa siirräntälokia"
+
+#: logsrvd/logsrvd_local.c:164
+msgid "error logging accept event"
+msgstr "virhe hyväksymistapahtuman lokiin kirjaamisessa"
+
+#: logsrvd/logsrvd_local.c:196
+msgid "error parsing RejectMessage"
+msgstr "virhe jäsennettäessä RejectMessagea"
+
+#: logsrvd/logsrvd_local.c:202
+msgid "error logging reject event"
+msgstr "virhe hylkäystapahtuman lokiin kirjaamisessa"
+
+#: logsrvd/logsrvd_local.c:276
+msgid "log is already complete, cannot be restarted"
+msgstr "loki on jo valmis, ei voi aloittaa uudelleen"
+
+#: logsrvd/logsrvd_local.c:307
+msgid "unable to restart log"
+msgstr "lokia ei voi aloittaa uudelleen"
+
+#: logsrvd/logsrvd_local.c:322
+msgid "error parsing AlertMessage"
+msgstr "virhe jäsennettäessä AlertMessagea"
+
+#: logsrvd/logsrvd_local.c:330
+msgid "error logging alert event"
+msgstr "virhe hälytystapahtuman lokiin kirjaamisessa"
+
+#: logsrvd/logsrvd_local.c:397
+msgid "error writing IoBuffer"
+msgstr "virhe kirjoitettaessa IoBufferia"
+
+#: logsrvd/logsrvd_local.c:434
+msgid "error writing ChangeWindowSize"
+msgstr "virhe kirjoitettaessa ChangeWindowSizeä"
+
+#: logsrvd/logsrvd_local.c:474
+msgid "error writing CommandSuspend"
+msgstr "virhe kirjoitettaessa CommandSuspendia"
+
+#: logsrvd/logsrvd_relay.c:434
+msgid "TLS handshake with relay host failed"
+msgstr "TLS-kättely välitinkoneen kanssa epäonnistui"
+
+#: logsrvd/logsrvd_relay.c:462
+msgid "unable to connect to relay host"
+msgstr "yhteyden muodostaminen välitinkoneeseen ei onnistu"
+
+#: logsrvd/logsrvd_relay.c:519 logsrvd/sendlog.c:951
+#: plugins/sudoers/log_client.c:1466
+msgid "invalid ServerHello"
+msgstr "virheellinen ServerHello"
+
+#: logsrvd/logsrvd_relay.c:677
+msgid "unrecognized ServerMessage type"
+msgstr "tunnistamaton ServerMessage-tyyppi"
+
+#: logsrvd/logsrvd_relay.c:709
+msgid "timeout reading from relay"
+msgstr "aikakatkaisu luettaessa välittimeltä"
+
+#: logsrvd/logsrvd_relay.c:761
+msgid "relay host name does not match certificate"
+msgstr "välitinkoneen nimi ei vastaa sertifikaattia"
+
+#: logsrvd/logsrvd_relay.c:765 logsrvd/logsrvd_relay.c:786
+#: logsrvd/logsrvd_relay.c:794
+msgid "error reading from relay"
+msgstr "virhe luettaessa välittimeltä"
+
+#: logsrvd/logsrvd_relay.c:817
+msgid "unable to read from relay"
+msgstr "ei voi lukea välittimeltä"
+
+#: logsrvd/logsrvd_relay.c:831 logsrvd/logsrvd_relay.c:951
+msgid "relay server closed connection"
+msgstr "välitinpalvelin sulki yhteyden"
+
+#: logsrvd/logsrvd_relay.c:850
+msgid "server message too large"
+msgstr "palvelinsanoma on liian suuri"
+
+#: logsrvd/logsrvd_relay.c:915
+msgid "timeout writing to relay"
+msgstr "aikakatkaisu kirjoitettaessa välittimelle"
+
+#: logsrvd/logsrvd_relay.c:973 logsrvd/logsrvd_relay.c:981
+#: logsrvd/logsrvd_relay.c:993
+msgid "error writing to relay"
+msgstr "virhe kirjoitettaessa välittimelle"
+
+#: logsrvd/sendlog.c:120
 msgid "send sudo I/O log to remote server"
 msgstr "%s - lähetä sudon siirräntäloki etäpalvelimelle"
 
-#: logsrvd/sendlog.c:131
+#: logsrvd/sendlog.c:126
 msgid "only send an accept event (no I/O)"
 msgstr "lähetä vain hyväksyntätapahtuma (ei siirräntää)"
 
-#: logsrvd/sendlog.c:134
+#: logsrvd/sendlog.c:129
 msgid "certificate bundle file to verify server's cert against"
 msgstr "varmennepakettitiedosto, jolla palvelimen varmenne tarkistetaan"
 
-#: logsrvd/sendlog.c:136
+#: logsrvd/sendlog.c:131
 msgid "certificate file for TLS handshake"
 msgstr "TLS-kättelyn varmennetiedosto"
 
-#: logsrvd/sendlog.c:139
+#: logsrvd/sendlog.c:134
 msgid "host to send logs to"
 msgstr "kone, johon lokit lähetetään"
 
-#: logsrvd/sendlog.c:141
+#: logsrvd/sendlog.c:136
 msgid "remote ID of I/O log to be resumed"
 msgstr "jatkettavan I/O-lokin etätunnus"
 
-#: logsrvd/sendlog.c:144
+#: logsrvd/sendlog.c:139
 msgid "private key file"
 msgstr "salainen avain"
 
-#: logsrvd/sendlog.c:146
+#: logsrvd/sendlog.c:141
 msgid "do not verify server certificate"
 msgstr "älä tarkista palvelinvarmennetta"
 
-#: logsrvd/sendlog.c:149
+#: logsrvd/sendlog.c:144
 msgid "port to use when connecting to host"
 msgstr "koneeseen yhteyttä muodostettaessa käytettävä portti"
 
-#: logsrvd/sendlog.c:151
+#: logsrvd/sendlog.c:146
 msgid "restart previous I/O log transfer"
 msgstr "käynnistä aiempi siirräntälokin siirto uudelleen"
 
-#: logsrvd/sendlog.c:153
+#: logsrvd/sendlog.c:148
 msgid "reject the command with the given reason"
 msgstr "hylkää komento annetulla syyllä"
 
-#: logsrvd/sendlog.c:155
+#: logsrvd/sendlog.c:150
 msgid "test audit server by sending selected I/O log n times in parallel"
 msgstr "testaa audit-palvelinta lähettämällä valittu siirräntäloki n kertaa rinnakkain"
 
-#: logsrvd/sendlog.c:180 plugins/sudoers/log_client.c:432
+#: logsrvd/sendlog.c:175 plugins/sudoers/log_client.c:432
 #, c-format
 msgid "unable to look up %s:%s: %s"
 msgstr "kohteen %s:%s nimenselvitys epäonnistui: %s"
 
-#: logsrvd/sendlog.c:218
+#: logsrvd/sendlog.c:213
 msgid "unable to get server IP addr"
 msgstr "palvelimen IP-osoitteen noutaminen ei onnistu"
 
-#: logsrvd/sendlog.c:272 plugins/sudoers/sudoreplay.c:851
+#: logsrvd/sendlog.c:267 plugins/sudoers/sudoreplay.c:851
 #, c-format
 msgid "unable to read %s/%s: %s"
 msgstr "tiedostosta %s/%s lukeminen epäonnistui: %s"
 
-#: logsrvd/sendlog.c:293 plugins/sudoers/log_client.c:692
+#: logsrvd/sendlog.c:288 plugins/sudoers/log_client.c:692
 #, c-format
 msgid "client message too large: %zu"
 msgstr "asiakassanoma on liian suuri: %zu"
 
-#: logsrvd/sendlog.c:826
+#: logsrvd/sendlog.c:830
 #, c-format
 msgid "%s: write buffer already in use"
 msgstr "%s: kirjoituspuskuri on jo käytössä"
 
-#: logsrvd/sendlog.c:878 plugins/sudoers/iolog.c:893
+#: logsrvd/sendlog.c:882 plugins/sudoers/iolog.c:893
 #: plugins/sudoers/iolog.c:962
 #, c-format
 msgid "unexpected I/O event %d"
 msgstr "odottamaton siirräntätapahtuma %d"
 
-#: logsrvd/sendlog.c:924 logsrvd/sendlog.c:941 logsrvd/sendlog.c:975
+#: logsrvd/sendlog.c:928 logsrvd/sendlog.c:945 logsrvd/sendlog.c:979
 #: plugins/sudoers/log_client.c:1124 plugins/sudoers/log_client.c:1392
 #: plugins/sudoers/log_client.c:1460 plugins/sudoers/log_client.c:1496
 #, c-format
 msgid "%s: unexpected state %d"
 msgstr "%s: odottamaton tila %d"
 
-#: logsrvd/sendlog.c:947 plugins/sudoers/log_client.c:1466
-msgid "invalid ServerHello"
-msgstr "virheellinen ServerHello"
-
-#: logsrvd/sendlog.c:1011 plugins/sudoers/log_client.c:1540
+#: logsrvd/sendlog.c:1015 plugins/sudoers/log_client.c:1540
 #, c-format
 msgid "error message received from server: %s"
 msgstr "virhesanoma vastaanotettu palvelimelta: %s"
 
-#: logsrvd/sendlog.c:1024 plugins/sudoers/log_client.c:1553
+#: logsrvd/sendlog.c:1028 plugins/sudoers/log_client.c:1553
 #, c-format
 msgid "abort message received from server: %s"
 msgstr "keskeytyssanoma vastaanotettu palvelimelta: %s"
 
-#: logsrvd/sendlog.c:1043 plugins/sudoers/log_client.c:1572
+#: logsrvd/sendlog.c:1047 plugins/sudoers/log_client.c:1572
 msgid "unable to unpack ServerMessage"
 msgstr "ServerMessage-viestiä ei voi purkaa"
 
-#: logsrvd/sendlog.c:1083 plugins/sudoers/log_client.c:1603
+#: logsrvd/sendlog.c:1087 plugins/sudoers/log_client.c:1603
 #, c-format
 msgid "%s: unexpected type_case value %d"
 msgstr "%s: odottamaton type_case-arvo %d"
 
-#: logsrvd/sendlog.c:1112
+#: logsrvd/sendlog.c:1116
 msgid "timeout reading from server"
 msgstr "aikakatkaisu luettaessa palvelimelta"
 
-#: logsrvd/sendlog.c:1190
+#: logsrvd/sendlog.c:1195
 msgid "premature EOF"
 msgstr "ennenaikainen tiedoston loppu"
 
-#: logsrvd/sendlog.c:1203 plugins/sudoers/log_client.c:1761
+#: logsrvd/sendlog.c:1208 plugins/sudoers/log_client.c:1761
 #, c-format
 msgid "server message too large: %u"
 msgstr "palvelinsanoma on liian suuri: %u"
 
-#: logsrvd/sendlog.c:1254
+#: logsrvd/sendlog.c:1259
 msgid "timeout writing to server"
 msgstr "aikakatkaisu kirjoitettaessa palvelimelle"
 
-#: logsrvd/sendlog.c:1473 plugins/sudoers/log_client.c:296
-msgid "TLS handshake timeout occurred"
-msgstr "TLS-kättelyn aikakatkaisu tapahtui"
-
-#: logsrvd/sendlog.c:1492 logsrvd/sendlog.c:1507
-#: plugins/sudoers/log_client.c:318 plugins/sudoers/log_client.c:334
-msgid "unable to set event"
-msgstr "tapahtuman asettaminen ei onnistu"
-
-#: logsrvd/sendlog.c:1517 logsrvd/sendlog.c:1521
-#, c-format
-msgid "TLS connection failed: %s"
-msgstr "TLS-yhteys epäonnistui: %s"
-
-#: logsrvd/sendlog.c:1554
-#, c-format
-msgid "Unable to initialize ssl context: %s"
-msgstr "Ssl-kontekstia ei voi alustaa: %s"
-
-#: logsrvd/sendlog.c:1559 plugins/sudoers/log_client.c:258
-#, c-format
-msgid "Unable to allocate ssl object: %s"
-msgstr "Ssl-objektia ei voi varata: %s"
-
-#: logsrvd/sendlog.c:1564
-#, c-format
-msgid "Unable to attach socket to the ssl object: %s"
-msgstr "Sokettia ei voi liittää SSL-objektiin: %s"
-
-#: logsrvd/sendlog.c:1808
+#: logsrvd/sendlog.c:1591
 msgid "both restart point and iolog ID must be specified"
 msgstr "sekä aloituspiste että iolog-tunnus on annettava"
 
-#: logsrvd/sendlog.c:1812
+#: logsrvd/sendlog.c:1595
 msgid "a restart point may not be set when no I/O is sent"
 msgstr "uudelleenkäynnistyspistettä ei ehkä aseteta, kun I/O:ta ei lähetetä"
 
-#: logsrvd/sendlog.c:1887
+#: logsrvd/sendlog.c:1671
 #, c-format
 msgid "exited prematurely with state %d"
 msgstr "poistui ennenaikaisesti tilalla %d"
 
-#: logsrvd/sendlog.c:1888
+#: logsrvd/sendlog.c:1672
 #, c-format
 msgid "elapsed time sent to server [%lld, %ld]"
 msgstr "kulunut aika lähetetty palvelimelle [%lld, %ld]"
 
-#: logsrvd/sendlog.c:1890
+#: logsrvd/sendlog.c:1674
 #, c-format
 msgid "commit point received from server [%lld, %ld]"
 msgstr "toimituspiste vastaanotettu palvelimelta [%lld, %ld]"
+
+#: logsrvd/tls_client.c:113 plugins/sudoers/log_client.c:296
+msgid "TLS handshake timeout occurred"
+msgstr "TLS-kättelyn aikakatkaisu tapahtui"
+
+#: logsrvd/tls_client.c:133 logsrvd/tls_client.c:149
+#: plugins/sudoers/log_client.c:318 plugins/sudoers/log_client.c:334
+msgid "unable to set event"
+msgstr "tapahtuman asettaminen ei onnistu"
+
+#: logsrvd/tls_client.c:159 logsrvd/tls_client.c:163
+#, c-format
+msgid "TLS connection failed: %s"
+msgstr "TLS-yhteys epäonnistui: %s"
+
+#: logsrvd/tls_client.c:197
+#, c-format
+msgid "unable to allocate ssl object: %s"
+msgstr "ssl-objektia ei voi varata: %s"
+
+#: logsrvd/tls_client.c:210
+#, c-format
+msgid "Unable to attach socket to the ssl object: %s"
+msgstr "Sokettia ei voi liittää SSL-objektiin: %s"
+
+#: logsrvd/tls_client.c:238
+msgid "unable to initialize TLS context"
+msgstr "TLS-kontekstia ei voi alustaa"
+
+#: logsrvd/tls_init.c:129 logsrvd/tls_init.c:137
+#, c-format
+msgid "unable to set TLS 1.2 ciphersuite to %s: %s"
+msgstr "ei voida asettaa TLS 1.2 -algoritmisarjaksi %s: %s"
+
+#: logsrvd/tls_init.c:157 logsrvd/tls_init.c:165
+#, c-format
+msgid "unable to set TLS 1.3 ciphersuite to %s: %s"
+msgstr "ei voida asettaa TLS 1.3 -algoritmisarjaksi %s: %s"
+
+#: logsrvd/tls_init.c:200
+#, c-format
+msgid "unable to create TLS context: %s"
+msgstr "TLS-kontekstia ei voi luoda: %s"
+
+#: logsrvd/tls_init.c:206
+#, c-format
+msgid "unable to set minimum protocol version to TLS 1.2: %s"
+msgstr "protokollaversion vähimmäisversiota ei voi asettaa TLS 1.2:ksi: %s"
+
+#: logsrvd/tls_init.c:282
+#, c-format
+msgid "unable to set diffie-hellman parameters: %s"
+msgstr "diffie-hellman-parametreja ei voi asettaa: %s"
+
+#: logsrvd/tls_init.c:291
+#, c-format
+msgid "unable to read diffie-hellman parameters: %s"
+msgstr "diffie-hellman-parametreja ei voi lukea: %s"
+
+#  Avaamisen kohde voi olla timestamp file, sudoers file tai pathbuf
+#: logsrvd/tls_init.c:296 plugins/sudoers/check.c:274
+#: plugins/sudoers/cvtsudoers.c:618 plugins/sudoers/cvtsudoers.c:639
+#: plugins/sudoers/cvtsudoers.c:1249 plugins/sudoers/cvtsudoers_json.c:872
+#: plugins/sudoers/cvtsudoers_ldif.c:688 plugins/sudoers/sudoers.c:1028
+#: plugins/sudoers/sudoreplay.c:1435 plugins/sudoers/timestamp.c:433
+#: plugins/sudoers/tsdump.c:128 plugins/sudoers/visudo.c:913
+#, c-format
+msgid "unable to open %s"
+msgstr "kohteen %s avaaminen epäonnistui"
 
 #: plugins/sudoers/audit.c:259 plugins/sudoers/audit.c:398
 #: plugins/sudoers/log_client.c:960 plugins/sudoers/log_client.c:1008
@@ -1058,33 +1148,33 @@ msgstr "%s: TGT-lipun todentaminen epäonnistui! Mahdollinen hyökkäys!: %s"
 msgid "unable to initialize PAM: %s"
 msgstr "PAMin alustaminen epäonnistui: %s"
 
-#: plugins/sudoers/auth/pam.c:337
+#: plugins/sudoers/auth/pam.c:340
 #, c-format
 msgid "PAM authentication error: %s"
 msgstr "PAM-todentamisvirhe: %s"
 
-#: plugins/sudoers/auth/pam.c:356
+#: plugins/sudoers/auth/pam.c:359
 msgid "account validation failure, is your account locked?"
 msgstr "tilikelpuutushäiriö, onko tilisi lukittu?"
 
-#: plugins/sudoers/auth/pam.c:367
+#: plugins/sudoers/auth/pam.c:370
 msgid "Account or password is expired, reset your password and try again"
 msgstr "Tili tai salasana on vanhentunut, nollaa salasanasi tai yritä uudelleen"
 
-#: plugins/sudoers/auth/pam.c:373
+#: plugins/sudoers/auth/pam.c:376
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr "vanhentuneen salasanan vaihtaminen epäonnistui: %s"
 
-#: plugins/sudoers/auth/pam.c:384
+#: plugins/sudoers/auth/pam.c:387
 msgid "Password expired, contact your system administrator"
 msgstr "Salasana vanhentunut, ota yhteyttä järjestelmän ylläpitäjään"
 
-#: plugins/sudoers/auth/pam.c:389
+#: plugins/sudoers/auth/pam.c:392
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
 msgstr "Tili vanhentunut tai PAM-asetuksista puuttuu ”account”-lohko sudo-komennolle, ota yhteyttä järjestelmän ylläpitäjään"
 
-#: plugins/sudoers/auth/pam.c:397 plugins/sudoers/auth/pam.c:402
+#: plugins/sudoers/auth/pam.c:400 plugins/sudoers/auth/pam.c:405
 #, c-format
 msgid "PAM account management error: %s"
 msgstr "PAM-tilin hallintavirhe: %s"
@@ -1172,17 +1262,6 @@ msgstr "virhe luettaessa saarnatiedostoa: %s"
 msgid "ignoring lecture file %s: not a regular file"
 msgstr "ohitetaan saarnatiedosto %s: ei ole tavallinen tiedosto"
 
-#  Avaamisen kohde voi olla timestamp file, sudoers file tai pathbuf
-#: plugins/sudoers/check.c:274 plugins/sudoers/cvtsudoers.c:618
-#: plugins/sudoers/cvtsudoers.c:639 plugins/sudoers/cvtsudoers.c:1249
-#: plugins/sudoers/cvtsudoers_json.c:872 plugins/sudoers/cvtsudoers_ldif.c:688
-#: plugins/sudoers/sudoers.c:1028 plugins/sudoers/sudoreplay.c:1435
-#: plugins/sudoers/timestamp.c:431 plugins/sudoers/tsdump.c:128
-#: plugins/sudoers/visudo.c:913
-#, c-format
-msgid "unable to open %s"
-msgstr "kohteen %s avaaminen epäonnistui"
-
 #: plugins/sudoers/check.c:283
 msgid ""
 "\n"
@@ -1213,7 +1292,7 @@ msgstr "tuntematon uid-käyttäjätunniste: %u"
 #: plugins/sudoers/check.c:330 plugins/sudoers/exptilde.c:85
 #: plugins/sudoers/iolog.c:118 plugins/sudoers/policy.c:1123
 #: plugins/sudoers/sudoers.c:432 plugins/sudoers/sudoers.c:1283
-#: plugins/sudoers/testsudoers.c:216 plugins/sudoers/testsudoers.c:383
+#: plugins/sudoers/testsudoers.c:215 plugins/sudoers/testsudoers.c:382
 #, c-format
 msgid "unknown user: %s"
 msgstr "tuntematon käyttäjä: %s"
@@ -1260,7 +1339,7 @@ msgstr "järjestyksen tasaus: %s: %s"
 msgid "%s grammar version %d\n"
 msgstr "%s kielioppiversio %d\n"
 
-#: plugins/sudoers/cvtsudoers.c:247 plugins/sudoers/testsudoers.c:167
+#: plugins/sudoers/cvtsudoers.c:247 plugins/sudoers/testsudoers.c:159
 #, c-format
 msgid "unsupported input format %s"
 msgstr "syötemuotoa %s ei tueta"
@@ -1276,7 +1355,7 @@ msgid "%s: input and output files must be different"
 msgstr "%s: syöte- ja tulostetiedostojen on oltava erilaiset"
 
 #: plugins/sudoers/cvtsudoers.c:330 plugins/sudoers/sudoers.c:177
-#: plugins/sudoers/testsudoers.c:255 plugins/sudoers/visudo.c:247
+#: plugins/sudoers/testsudoers.c:254 plugins/sudoers/visudo.c:247
 #: plugins/sudoers/visudo.c:597 plugins/sudoers/visudo.c:917
 msgid "unable to initialize sudoers default values"
 msgstr "sudoers-oletusarvojen alustaminen epäonnistui"
@@ -1323,7 +1402,7 @@ msgstr "jäsentämisvirhe tiedostossa %s\n"
 
 #  Kirjoittamisen kohde voi olla timestamp file tai pathbuf
 #: plugins/sudoers/cvtsudoers.c:1296 plugins/sudoers/sudoreplay.c:1124
-#: plugins/sudoers/timestamp.c:315 plugins/sudoers/timestamp.c:318
+#: plugins/sudoers/timestamp.c:317 plugins/sudoers/timestamp.c:320
 #, c-format
 msgid "unable to write to %s"
 msgstr "kohteeseen %s kirjoittaminen epäonnistui"
@@ -2141,7 +2220,7 @@ msgid "Local IP address and netmask pairs:\n"
 msgstr "Paikallinen verkko-osoite ja verkkopeiteparit:\n"
 
 #: plugins/sudoers/iolog.c:143 plugins/sudoers/sudoers.c:437
-#: plugins/sudoers/sudoers.c:1317 plugins/sudoers/testsudoers.c:407
+#: plugins/sudoers/sudoers.c:1317 plugins/sudoers/testsudoers.c:406
 #, c-format
 msgid "unknown group: %s"
 msgstr "tuntematon ryhmä: %s"
@@ -2170,8 +2249,8 @@ msgid "%s: internal error, I/O log file for event %d not open"
 msgstr "%s: sisäinen virhe, tapahtuman %d siirräntälokitiedosto ei ole avoin"
 
 #: plugins/sudoers/iolog.c:992 plugins/sudoers/iolog.c:1120
-#: plugins/sudoers/iolog.c:1225 plugins/sudoers/timestamp.c:836
-#: plugins/sudoers/timestamp.c:928 plugins/sudoers/visudo.c:487
+#: plugins/sudoers/iolog.c:1225 plugins/sudoers/timestamp.c:849
+#: plugins/sudoers/timestamp.c:941 plugins/sudoers/visudo.c:487
 #: plugins/sudoers/visudo.c:493
 msgid "unable to read the clock"
 msgstr "kellon lukeminen epäonnistui"
@@ -2254,6 +2333,26 @@ msgstr "virhe tapahtumasilmukassa"
 #, c-format
 msgid "Creation of new SSL_CTX object failed: %s"
 msgstr "Uuden SSL_CTX-objektin luominen epäonnistui: %s"
+
+#: plugins/sudoers/log_client.c:216
+#, c-format
+msgid "unable to load certificate authority bundle %s"
+msgstr "varmenteen myöntäjän pakettia %s ei voitu ladata"
+
+#: plugins/sudoers/log_client.c:236
+#, c-format
+msgid "unable to load certificate %s"
+msgstr "sertifikaatin %s lataaminen epäonnistui"
+
+#: plugins/sudoers/log_client.c:249
+#, c-format
+msgid "unable to load private key %s"
+msgstr "yksityistä avainta %s ei voi ladata"
+
+#: plugins/sudoers/log_client.c:258
+#, c-format
+msgid "Unable to allocate ssl object: %s"
+msgstr "Ssl-objektia ei voi varata: %s"
 
 #: plugins/sudoers/log_client.c:345 plugins/sudoers/log_client.c:350
 #, c-format
@@ -2432,7 +2531,7 @@ msgstr "virheellinen LDIF-määrite: %s"
 msgid "invalid %.*s set by sudo front-end"
 msgstr "virheellinen sudo-edustaohjelman asettama %.*s"
 
-#: plugins/sudoers/policy.c:314 plugins/sudoers/testsudoers.c:269
+#: plugins/sudoers/policy.c:314 plugins/sudoers/testsudoers.c:268
 msgid "unable to parse network address list"
 msgstr "verkko-osoiteluettelon jäsentäminen epäonnistui"
 
@@ -2552,7 +2651,7 @@ msgid "unable to cache gid %u, already exists"
 msgstr "ryhmä-id:n %u välimuistittaminen epäonnistui, on jo olemassa"
 
 #: plugins/sudoers/pwutil.c:601 plugins/sudoers/pwutil.c:619
-#: plugins/sudoers/pwutil.c:680 plugins/sudoers/pwutil.c:730
+#: plugins/sudoers/pwutil.c:680 plugins/sudoers/pwutil.c:729
 #, c-format
 msgid "unable to cache group %s"
 msgstr "%s-ryhmän välimuistittaminen epäonnistui"
@@ -2562,24 +2661,24 @@ msgstr "%s-ryhmän välimuistittaminen epäonnistui"
 msgid "unable to cache group %s, already exists"
 msgstr "%s-ryhmän välimuistittaminen epäonnistui, on jo olemassa"
 
-#: plugins/sudoers/pwutil.c:877 plugins/sudoers/pwutil.c:928
-#: plugins/sudoers/pwutil.c:978 plugins/sudoers/pwutil.c:1030
+#: plugins/sudoers/pwutil.c:876 plugins/sudoers/pwutil.c:927
+#: plugins/sudoers/pwutil.c:977 plugins/sudoers/pwutil.c:1029
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "%s-käyttäjän ryhmäluettelon välimuistittaminen epäonnistui, on jo olemassa"
 
-#: plugins/sudoers/pwutil.c:883 plugins/sudoers/pwutil.c:933
-#: plugins/sudoers/pwutil.c:984 plugins/sudoers/pwutil.c:1035
+#: plugins/sudoers/pwutil.c:882 plugins/sudoers/pwutil.c:932
+#: plugins/sudoers/pwutil.c:983 plugins/sudoers/pwutil.c:1034
 #, c-format
 msgid "unable to cache group list for %s"
 msgstr "%s-käyttäjän ryhmäluettelon välimuistittaminen epäonnistui"
 
-#: plugins/sudoers/pwutil.c:922
+#: plugins/sudoers/pwutil.c:921
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "%s-käyttäjän ryhmien jäsentäminen epäonnistui"
 
-#: plugins/sudoers/pwutil.c:1024
+#: plugins/sudoers/pwutil.c:1023
 #, c-format
 msgid "unable to parse gids for %s"
 msgstr "%s-käyttäjän ryhmä-id:iden jäsentäminen epäonnistui"
@@ -2939,11 +3038,11 @@ msgstr ""
 "  -s, --speed=luku       nopeuta tai hidasta tulostusta\n"
 "  -V, --version          näytä versiotiedot ja poistu"
 
-#: plugins/sudoers/testsudoers.c:345
+#: plugins/sudoers/testsudoers.c:344
 msgid "\thost  unmatched"
 msgstr "\ttietokone täsmäämätön"
 
-#: plugins/sudoers/testsudoers.c:348
+#: plugins/sudoers/testsudoers.c:347
 msgid ""
 "\n"
 "Command allowed"
@@ -2951,7 +3050,7 @@ msgstr ""
 "\n"
 "Komento sallittu"
 
-#: plugins/sudoers/testsudoers.c:349
+#: plugins/sudoers/testsudoers.c:348
 msgid ""
 "\n"
 "Command denied"
@@ -2959,7 +3058,7 @@ msgstr ""
 "\n"
 "Komento kielletty"
 
-#: plugins/sudoers/testsudoers.c:349
+#: plugins/sudoers/testsudoers.c:348
 msgid ""
 "\n"
 "Command unmatched"
@@ -2972,26 +3071,26 @@ msgstr ""
 msgid "%s is group writable"
 msgstr "%s on ryhmäkirjoitettava"
 
-#: plugins/sudoers/timestamp.c:326 plugins/sudoers/timestamp.c:661
+#: plugins/sudoers/timestamp.c:328 plugins/sudoers/timestamp.c:663
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "aikaleimatiedoston typistäminen %lld-tavun kokoiseksi epäonnistui"
 
-#: plugins/sudoers/timestamp.c:847
+#: plugins/sudoers/timestamp.c:860
 msgid "ignoring time stamp from the future"
 msgstr "ohitetaan aikaleima tulevaisuudesta"
 
-#: plugins/sudoers/timestamp.c:870
+#: plugins/sudoers/timestamp.c:883
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr "aikaleima liian kaukana tulevaisuudessa: %20.20s"
 
-#: plugins/sudoers/timestamp.c:992
+#: plugins/sudoers/timestamp.c:1005
 #, c-format
 msgid "unable to lock time stamp file %s"
 msgstr "aikaleimatiedoston %s lukitseminen epäonnistui"
 
-#: plugins/sudoers/timestamp.c:1036 plugins/sudoers/timestamp.c:1056
+#: plugins/sudoers/timestamp.c:1049 plugins/sudoers/timestamp.c:1069
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr "saarnatilan polku on liian pitkä: %s/%s"
@@ -3196,6 +3295,9 @@ msgstr "odottamaton rivinkatkaisu merkkijonossa"
 msgid "too many levels of includes"
 msgstr "liian monta include-tasoa"
 
+#~ msgid "unable to get TLS server method: %s"
+#~ msgstr "TLS-palvelinmenetelmää ei saada noudettua: %s"
+
 #  Ensimmäinen parametri on auth name
 #, fuzzy
 #~ msgid "%s:%u unable to parse \"%s\""
@@ -3223,9 +3325,6 @@ msgstr "liian monta include-tasoa"
 
 #~ msgid "sudo_ldap_conf_add_ports: port too large"
 #~ msgstr "sudo_ldap_conf_add_ports: portti on liian suuri"
-
-#~ msgid "unable to lock log file: %s"
-#~ msgstr "lokitiedoston lukitseminen epäonnistui: %s"
 
 #~ msgid "SSL_connect failed: ssl_error=%d, stack=%s\n"
 #~ msgstr "SSL_connect epäonnistui: ssl_error=%d, pino=%s\n"
