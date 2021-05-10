@@ -475,8 +475,6 @@ store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t buflen,
 
     update_elapsed_time(msg->delay, &closure->elapsed_time);
 
-    debug_return_int(0);
-
     debug_return_bool(true);
 bad:
     if (closure->errstr == NULL)
