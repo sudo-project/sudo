@@ -1196,7 +1196,7 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
 	if (WIFEXITED(exit_status)) {
 	    exit_msg.exit_value = WEXITSTATUS(exit_status);
 	} else if (WIFSIGNALED(exit_status)) {
-	    int signo = WTERMSIG(exit_status);
+	    const int signo = WTERMSIG(exit_status);
 	    if (signo <= 0 || sig2str(signo, signame) == -1) {
 		sudo_warnx(U_("%s: internal error, invalid signal %d"),
 		    __func__, signo);
@@ -1206,6 +1206,15 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
 	    if (WCOREDUMP(exit_status))
 		exit_msg.dumped_core = true;
 	    exit_msg.exit_value = WTERMSIG(exit_status) | 128;
+	} else if (WIFSTOPPED(exit_status)) {
+	    const int signo = WSTOPSIG(exit_status);
+	    sudo_warnx(U_("%s: internal error, invalid signal %d"),
+		__func__, signo);
+	    goto done;
+	} else if (WIFCONTINUED(exit_status)) {
+	    sudo_warnx(U_("%s: internal error, invalid signal %d"),
+		__func__, SIGCONT);
+	    goto done;
 	} else {
 	    sudo_warnx(U_("%s: internal error, invalid exit status %d"),
 		__func__, exit_status);
