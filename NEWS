@@ -1,3 +1,85 @@
+What's new in Sudo 1.9.7
+
+ * The "fuzz" Makefile target now runs all the fuzzers for 8192
+   passes (can be overridden via the FUZZ_RUNS variable).  This makes
+   it easier to run the fuzzers in-tree.  To run a fuzzer indefinitely,
+   set FUZZ_RUNS=-1, e.g. "make FUZZ_RUNS=-1 fuzz".
+
+ * Fixed fuzzing on FreeBSD where the ld.lld linker returns an
+   error by default when a symbol is multiply-defined.
+
+ * Added support for determining local IPv6 addresses on systems
+   that lack the getifaddrs() function.  This now works on AIX,
+   HP-UX and Solaris (at least).  Bug #969.
+
+ * Fixed a bug introduced in sudo 1.9.6 that caused "sudo -V" to
+   report a usage error.  Also, when invoked as sudoedit, sudo now
+   allows a more restricted set of options that matches the usage
+   statement and documentation.  GitHub issue #95.
+
+ * Fixed a crash in sudo_sendlog when the specified certificate
+   or key does not exist or is invalid.  Bug #970
+
+ * Fixed a compilation error when sudo is configured with the
+   --disable-log-client option.
+
+ * Sudo's limited support for SUCCESS=return entries in nsswitch.conf
+   is now documented.  Bug #971.
+
+ * Sudo now requires autoconf 2.70 or higher to regenerate the
+   configure script.  Bug #972.
+
+ * sudo_logsrvd now has a relay mode which can be used to create
+   a hierarchy of log servers.  By default, when a relay server is
+   defined, messages from the client are forwarded immediately to
+   the relay.  However, if the "store_first" setting is enabled,
+   the log will be stored locally until the command completes and
+   then relayed.  Bug #965.
+
+ * Sudo now links with OpenSSL by default if it is available unless
+   the --disable-openssl configure option is used or both the
+   --disable-log-client and --disable-log-server configure options
+   are specified.
+
+ * Fixed configure's Python version detection when the version minor
+   number is more than a single digit, for example Python 3.10.
+
+ * The sudo Python module tests now pass for Python 3.10.
+
+ * Sudo will now avoid changing the datasize resource limit
+   as long as the existing value is at least 1GB.  This works around
+   a problem on 64-bit HP-UX where it is not possible to exactly
+   restore the original datasize limit.  Bug #973.
+
+ * Fixed a race condition that could result in a hang when sudo is
+   executed by a process where the SIGCHLD handler is set to SIG_IGN.
+   This fixes the bug described by GitHub PR #98.
+
+ * Fixed an out-of-bounds read in sudoedit and visudo when the
+   EDITOR, VISUAL or SUDO_EDITOR environment variables end in an
+   unescaped backslash.  Also fixed the handling of quote characters
+   that are escaped by a backslash.  GitHub issue #99.
+
+ * Fixed a bug that prevented the "log_server_verify" sudoers option
+   from taking effect.
+
+ * The sudo_sendlog utility has a new -s option to cause it to stop
+   sending I/O records after a user-specified elapsed time.  This
+   can be used to test the I/O log restart functionality of sudo_logsrvd.
+
+ * Fixed a crash introduced in sudo 1.9.4 in sudo_logsrvd when
+   attempting to restart an interrupted I/O log transfer.
+
+ * The TLS connection timeout in the sudoers log client was previously
+   hard-coded to 10 seconds.  It now uses the value of log_server_timeout.
+
+ * The configure script now outputs a summary of the user-configurable
+   options at the end, separate from output of configure script tests.
+   Bug #820.
+
+ * Corrected the description of which groups may be specified via the
+   -g option in the Runas_Spec section.  Bug #975.
+
 What's new in Sudo 1.9.6p1
 
  * Fixed a regression introduced in sudo 1.9.6 that resulted in an

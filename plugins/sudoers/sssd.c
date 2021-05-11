@@ -363,7 +363,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
     /* We only have a single userspec */
     if ((us = calloc(1, sizeof(*us))) == NULL)
 	goto oom;
-    us->file = rcstr_dup("SSSD");
+    us->file = sudo_rcstr_dup("SSSD");
     TAILQ_INIT(&us->users);
     TAILQ_INIT(&us->privileges);
     STAILQ_INIT(&us->comments);
@@ -441,7 +441,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    char *cp;
 	    if (asprintf(&cp, "sudoRole %s", cn_array[0]) == -1)
 		goto oom;
-	    source = rcstr_dup(cp);
+	    source = sudo_rcstr_dup(cp);
 	    free(cp);
 	    if (source == NULL)
 		goto oom;
@@ -450,7 +450,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	cn_array = NULL;
     }
     if (source == NULL) {
-	if ((source = rcstr_dup("sudoRole UNKNOWN")) == NULL)
+	if ((source = sudo_rcstr_dup("sudoRole UNKNOWN")) == NULL)
 	    goto oom;
     }
 
@@ -470,7 +470,7 @@ oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
 done:
-    rcstr_delref(source);
+    sudo_rcstr_delref(source);
     handle->fn_free_values(val_array);
     debug_return_bool(ret);
 }

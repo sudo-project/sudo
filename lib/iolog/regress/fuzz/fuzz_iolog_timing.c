@@ -88,6 +88,7 @@ cleanup:
 	close(dfd);
     }
     rmdir(logdir);
+    fflush(stdout);
 
     return 0;
 }

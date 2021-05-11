@@ -41,7 +41,7 @@ static const char *
 wordsplit(const char *str, const char *endstr, const char **last)
 {
     const char *cp;
-    debug_decl(wordsplit, SUDO_DEBUG_UTIL);
+    debug_decl(wordsplit, SUDOERS_DEBUG_UTIL);
 
     /* If no str specified, use last ptr (if any). */
     if (str == NULL) {
@@ -63,16 +63,22 @@ wordsplit(const char *str, const char *endstr, const char **last)
 
     /* If word is quoted, skip to end quote and return. */
     if (*str == '"' || *str == '\'') {
-	const char *endquote = memchr(str + 1, *str, endstr - str);
-	if (endquote != NULL) {
-	    *last = endquote;
-	    debug_return_const_ptr(str + 1);
+	const char *endquote;
+	for (cp = str + 1; cp < endstr; cp = endquote + 1) {
+	    endquote = memchr(cp, *str, endstr - cp);
+	    if (endquote == NULL)
+		break;
+	    /* ignore escaped quotes */
+	    if (endquote[-1] != '\\') {
+		*last = endquote;
+		debug_return_const_ptr(str + 1);
+	    }
 	}
     }
 
     /* Scan str until we encounter white space. */
     for (cp = str; cp < endstr; cp++) {
-	if (*cp == '\\') {
+	if (cp[0] == '\\' && cp[1] != '\0') {
 	    /* quoted char, do not interpret */
 	    cp++;
 	    continue;
@@ -96,7 +102,7 @@ copy_arg(const char *src, size_t len)
 
     if ((copy = malloc(len + 1)) != NULL) {
 	for (dst = copy; src < src_end; ) {
-	    if (*src == '\\') {
+	    if (src[0] == '\\' && src[1] != '\0') {
 		src++;
 		continue;
 	    }

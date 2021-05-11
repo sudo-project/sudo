@@ -641,8 +641,8 @@ parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
     if (sudoersparse() && !parse_error) {
 	sudo_warnx(U_("failed to parse %s file, unknown error"), input_file);
 	parse_error = true;
-	rcstr_delref(errorfile);
-	if ((errorfile = rcstr_dup(input_file)) == NULL)
+	sudo_rcstr_delref(errorfile);
+	if ((errorfile = sudo_rcstr_dup(input_file)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     if (parse_error) {

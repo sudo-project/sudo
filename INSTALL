@@ -149,6 +149,12 @@ Directory and file names:
 	    /var/db/sudo, /var/lib/sudo, /var/adm/sudo, /usr/adm/sudo
 	This directory should *not* be cleared when the system boots.
 
+  --with-relaydir=DIR
+	The directory to be used for sudo_logsrvd relay temporary files.
+	When sudo_logsrvd is configured as a store-and-forward relay,
+	the journaled data is written to this directory before it is
+	forwarded to a relay server.
+
   --with-tzdir=DIR
         The directory to the system's time zone data files.  This
         is only used when sanitizing the TZ environment variable
@@ -180,9 +186,14 @@ Compilation options:
 	Enable building sudo with the LLVM libFuzzer, see
 	https://www.llvm.org/docs/LibFuzzer.html for details.
 	The resulting binaries, beginning with "fuzz_" can be used
-	to test sudo.  This option is generally used in conjunction
-	with --enable-sanitizer.  This option requires the clang
-	C compiler--it is not supported by gcc.
+	to test sudo.  To run all the fuzzers for 8192 iterations,
+	"make fuzz" can be used.  This option is generally used in
+	conjunction with --enable-sanitizer.
+
+	Fuzzing currently requires the clang C compiler--it is not
+	supported by gcc.  For best results, it is suggested to use
+	clang 11 or higher.  Some of the fuzzers are known to hang
+	when used with earlier versions.
 
 	This option should only be used for testing and not in a
 	production environment.
@@ -593,18 +604,22 @@ Authentication options:
         is not supported by all Kerberos V and SASL combinations.
 
   --enable-gcrypt[=DIR]
-        Use GNU crypt's SHA-2 message digest functions instead of the
-        ones bundled with sudo (or in the system's C library).
-        If specified, DIR should contain the GNU crypt include and
-        lib directories.  This option is ignored when the
-        --enable-openssl option is also specified.
+        Use GNU crypt's SHA-2 message digest functions instead of
+        OpenSSL or the ones bundled with sudo (or in the system's
+        C library).  If specified, DIR should contain the GNU crypt
+        include and lib directories.  This option only has an effect
+        when OpenSSL 1.0.1 or higher is not present on the system
+        or the --disable-openssl option is also specified.
 
   --enable-openssl[=DIR]
-        Use OpenSSL's TLS and SHA-2 message digest functions.
-        By default, sudo does not support TLS and will use either its
-        own SHA-2 functions or the ones in the system's C library.
-        If specified, DIR should contain the OpenSSL include and
-        lib directories.
+        Use OpenSSL's TLS and SHA-2 message digest functions.  If
+        it is detected, OpenSSL will be used by default unless the
+        sudo log client and server are disabled via the
+        --disable-log-client and --disable-log-server options.  To
+        explicitly disable the use of OpenSSL, the --disable-openssl
+        option can be used.  OpenSSL versions prior to 1.0.1 will
+        not be used as they do not support TLS 1.2.  If specified,
+        DIR should contain the OpenSSL include and lib directories.
 
 Development options:
   --enable-env-debug
@@ -623,9 +638,6 @@ Development options:
         Configure development options.  This will enable compiler warnings
 	and set up the Makefile to be able to regenerate the sudoers parser
 	as well as the manual pages.
-
-  --with-efence
-	Link with the "electric fence" debugging malloc.
 
 Options that set runtime-changeable default values:
   --disable-authentication

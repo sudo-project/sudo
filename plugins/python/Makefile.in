@@ -40,7 +40,7 @@ SED = @SED@
 AWK = @AWK@
 
 # Our install program supports extra flags...
-INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+INSTALL = $(SHELL) $(scriptdir)/install-sh -c
 INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 INSTALL_BACKUP = @INSTALL_BACKUP@
 
@@ -222,7 +222,9 @@ cleandir: realclean
 
 fuzz:
 
-check: $(TEST_PROGS)
+check-fuzzer:
+
+check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
@@ -232,7 +234,8 @@ check: $(TEST_PROGS)
 	    unset LANG || LANG=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
-            ./check_python_examples ".libs/python_plugin.so"; \
+	    LSAN_OPTIONS=suppressions=$(srcdir)/lsan_suppr.txt \
+		./check_python_examples ".libs/python_plugin.so"; \
 	fi
 
 update_test_data: $(TEST_PROGS)

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -129,41 +129,47 @@ struct environment {
  * Available command line options, both short and long.
  * Note that we must disable arg permutation to support setting environment
  * variables and to better support the optional arg of the -h flag.
+ * There is a more limited set of options for sudoedit (the sudo-specific
+ * long options are listed first).
  */
-static const char short_opts[] =  "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:R:r:SsT:t:U:u:Vv";
-static struct option long_opts[] = {
+static const char sudo_short_opts[] = "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:R:r:SsT:t:U:u:Vv";
+static const char edit_short_opts[] = "+Aa:BC:c:D:g:h::knp:R:r:ST:t:u:V";
+static struct option sudo_long_opts[] = {
+    /* sudo-specific long options */
+    { "background",	no_argument,		NULL,	'b' },
+    { "preserve-env",	optional_argument,	NULL,	'E' },
+    { "edit",		no_argument,		NULL,	'e' },
+    { "set-home",	no_argument,		NULL,	'H' },
+    { "login",		no_argument,		NULL,	'i' },
+    { "remove-timestamp", no_argument,		NULL,	'K' },
+    { "list",		no_argument,		NULL,	'l' },
+    { "preserve-groups", no_argument,		NULL,	'P' },
+    { "shell",		no_argument,		NULL,	's' },
+    { "other-user",	required_argument,	NULL,	'U' },
+    { "validate",	no_argument,		NULL,	'v' },
+    /* common long options */
     { "askpass",	no_argument,		NULL,	'A' },
     { "auth-type",	required_argument,	NULL,	'a' },
-    { "background",	no_argument,		NULL,	'b' },
     { "bell",	        no_argument,		NULL,	'B' },
     { "close-from",	required_argument,	NULL,	'C' },
     { "login-class",	required_argument,	NULL,	'c' },
     { "chdir",		required_argument,	NULL,	'D' },
-    { "preserve-env",	optional_argument,	NULL,	'E' },
-    { "edit",		no_argument,		NULL,	'e' },
     { "group",		required_argument,	NULL,	'g' },
-    { "set-home",	no_argument,		NULL,	'H' },
     { "help",		no_argument,		NULL,	'h' },
     { "host",		required_argument,	NULL,	OPT_HOSTNAME },
-    { "login",		no_argument,		NULL,	'i' },
-    { "remove-timestamp", no_argument,		NULL,	'K' },
     { "reset-timestamp", no_argument,		NULL,	'k' },
-    { "list",		no_argument,		NULL,	'l' },
     { "non-interactive", no_argument,		NULL,	'n' },
-    { "preserve-groups", no_argument,		NULL,	'P' },
     { "prompt",		required_argument,	NULL,	'p' },
     { "chroot",		required_argument,	NULL,	'R' },
     { "role",		required_argument,	NULL,	'r' },
     { "stdin",		no_argument,		NULL,	'S' },
-    { "shell",		no_argument,		NULL,	's' },
-    { "type",		required_argument,	NULL,	't' },
     { "command-timeout",required_argument,	NULL,	'T' },
-    { "other-user",	required_argument,	NULL,	'U' },
+    { "type",		required_argument,	NULL,	't' },
     { "user",		required_argument,	NULL,	'u' },
     { "version",	no_argument,		NULL,	'V' },
-    { "validate",	no_argument,		NULL,	'v' },
     { NULL,		no_argument,		NULL,	'\0' },
 };
+static struct option *edit_long_opts = &sudo_long_opts[11];
 
 /*
  * Insert a key=value pair into the specified environment.
@@ -241,13 +247,14 @@ int
 parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     struct sudo_settings **settingsp, char ***env_addp)
 {
+    const char *progname, *short_opts = sudo_short_opts;
+    struct option *long_opts = sudo_long_opts;
     struct environment extra_env;
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
     int valid_flags = DEFAULT_VALID_FLAGS;
     int ch, i;
     char *cp;
-    const char *progname;
     debug_decl(parse_args, SUDO_DEBUG_ARGS);
 
     /* Is someone trying something funny? */
@@ -263,6 +270,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	mode = MODE_EDIT;
 	sudo_settings[ARG_SUDOEDIT].value = "true";
 	valid_flags = EDIT_VALID_FLAGS;
+	short_opts = edit_short_opts;
+	long_opts = edit_long_opts;
     }
 
     /* Load local IP addresses and masks. */
@@ -511,8 +520,10 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    valid_flags = VALIDATE_VALID_FLAGS;
 		    break;
 		case 'V':
-		    if (mode && mode != MODE_VERSION)
-			usage_excl();
+		    if (mode && mode != MODE_VERSION) {
+			if (strcmp(progname, "sudoedit") != 0)
+			    usage_excl();
+		    }
 		    mode = MODE_VERSION;
 		    valid_flags = 0;
 		    break;
@@ -715,8 +726,9 @@ display_usage(int (*output)(const char *))
      * Use usage vectors appropriate to the progname.
      */
     if (strcmp(getprogname(), "sudoedit") == 0) {
-	uvec[0] = &SUDO_USAGE5[3];
-	uvec[1] = NULL;
+	uvec[0] = SUDO_USAGE0;
+	uvec[1] = &SUDO_USAGE5[3];	/* skip the leading "-e " */
+	uvec[2] = NULL;
     } else {
 	uvec[0] = SUDO_USAGE1;
 	uvec[1] = SUDO_USAGE2;
@@ -769,13 +781,16 @@ help(void)
     struct sudo_lbuf lbuf;
     const int indent = 32;
     const char *pname = getprogname();
+    bool sudoedit = false;
     debug_decl(help, SUDO_DEBUG_ARGS);
 
     sudo_lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
-    if (strcmp(pname, "sudoedit") == 0)
+    if (strcmp(pname, "sudoedit") == 0) {
+	sudoedit = true;
 	sudo_lbuf_append(&lbuf, _("%s - edit files as another user\n\n"), pname);
-    else
+    } else {
 	sudo_lbuf_append(&lbuf, _("%s - execute a command as another user\n\n"), pname);
+    }
     sudo_lbuf_print(&lbuf);
 
     display_usage(usage_out);
@@ -787,8 +802,10 @@ help(void)
     sudo_lbuf_append(&lbuf, "  -a, --auth-type=type          %s\n",
 	_("use specified BSD authentication type"));
 #endif
-    sudo_lbuf_append(&lbuf, "  -b, --background              %s\n",
-	_("run command in the background"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -b, --background              %s\n",
+	    _("run command in the background"));
+    }
     sudo_lbuf_append(&lbuf, "  -B, --bell                    %s\n",
 	_("ring bell when prompting"));
     sudo_lbuf_append(&lbuf, "  -C, --close-from=num          %s\n",
@@ -799,32 +816,42 @@ help(void)
 #endif
     sudo_lbuf_append(&lbuf, "  -D, --chdir=directory         %s\n",
 	_("change the working directory before running command"));
-    sudo_lbuf_append(&lbuf, "  -E, --preserve-env            %s\n",
-	_("preserve user environment when running command"));
-    sudo_lbuf_append(&lbuf, "      --preserve-env=list       %s\n",
-	_("preserve specific environment variables"));
-    sudo_lbuf_append(&lbuf, "  -e, --edit                    %s\n",
-	_("edit files instead of running a command"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -E, --preserve-env            %s\n",
+	    _("preserve user environment when running command"));
+	sudo_lbuf_append(&lbuf, "      --preserve-env=list       %s\n",
+	    _("preserve specific environment variables"));
+	sudo_lbuf_append(&lbuf, "  -e, --edit                    %s\n",
+	    _("edit files instead of running a command"));
+    }
     sudo_lbuf_append(&lbuf, "  -g, --group=group             %s\n",
 	_("run command as the specified group name or ID"));
-    sudo_lbuf_append(&lbuf, "  -H, --set-home                %s\n",
-	_("set HOME variable to target user's home dir"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -H, --set-home                %s\n",
+	    _("set HOME variable to target user's home dir"));
+    }
     sudo_lbuf_append(&lbuf, "  -h, --help                    %s\n",
 	_("display help message and exit"));
     sudo_lbuf_append(&lbuf, "  -h, --host=host               %s\n",
 	_("run command on host (if supported by plugin)"));
-    sudo_lbuf_append(&lbuf, "  -i, --login                   %s\n",
-	_("run login shell as the target user; a command may also be specified"));
-    sudo_lbuf_append(&lbuf, "  -K, --remove-timestamp        %s\n",
-	_("remove timestamp file completely"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -i, --login                   %s\n",
+	    _("run login shell as the target user; a command may also be specified"));
+	sudo_lbuf_append(&lbuf, "  -K, --remove-timestamp        %s\n",
+	    _("remove timestamp file completely"));
+    }
     sudo_lbuf_append(&lbuf, "  -k, --reset-timestamp         %s\n",
 	_("invalidate timestamp file"));
-    sudo_lbuf_append(&lbuf, "  -l, --list                    %s\n",
-	_("list user's privileges or check a specific command; use twice for longer format"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -l, --list                    %s\n",
+	    _("list user's privileges or check a specific command; use twice for longer format"));
+    }
     sudo_lbuf_append(&lbuf, "  -n, --non-interactive         %s\n",
 	_("non-interactive mode, no prompts are used"));
-    sudo_lbuf_append(&lbuf, "  -P, --preserve-groups         %s\n",
-	_("preserve group vector instead of setting to target's"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -P, --preserve-groups         %s\n",
+	    _("preserve group vector instead of setting to target's"));
+    }
     sudo_lbuf_append(&lbuf, "  -p, --prompt=prompt           %s\n",
 	_("use the specified password prompt"));
     sudo_lbuf_append(&lbuf, "  -R, --chroot=directory        %s\n",
@@ -835,22 +862,28 @@ help(void)
 #endif
     sudo_lbuf_append(&lbuf, "  -S, --stdin                   %s\n",
 	_("read password from standard input"));
-    sudo_lbuf_append(&lbuf, "  -s, --shell                   %s\n",
-	_("run shell as the target user; a command may also be specified"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -s, --shell                   %s\n",
+	    _("run shell as the target user; a command may also be specified"));
+    }
 #ifdef HAVE_SELINUX
     sudo_lbuf_append(&lbuf, "  -t, --type=type               %s\n",
 	_("create SELinux security context with specified type"));
 #endif
     sudo_lbuf_append(&lbuf, "  -T, --command-timeout=timeout %s\n",
 	_("terminate command after the specified time limit"));
-    sudo_lbuf_append(&lbuf, "  -U, --other-user=user         %s\n",
-	_("in list mode, display privileges for user"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -U, --other-user=user         %s\n",
+	    _("in list mode, display privileges for user"));
+    }
     sudo_lbuf_append(&lbuf, "  -u, --user=user               %s\n",
 	_("run command (or edit file) as specified user name or ID"));
     sudo_lbuf_append(&lbuf, "  -V, --version                 %s\n",
 	_("display version information and exit"));
-    sudo_lbuf_append(&lbuf, "  -v, --validate                %s\n",
-	_("update user's timestamp without running a command"));
+    if (!sudoedit) {
+	sudo_lbuf_append(&lbuf, "  -v, --validate                %s\n",
+	    _("update user's timestamp without running a command"));
+    }
     sudo_lbuf_append(&lbuf, "  --                            %s\n",
 	_("stop processing command line arguments"));
     sudo_lbuf_print(&lbuf);

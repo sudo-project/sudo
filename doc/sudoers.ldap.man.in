@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "October 29, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "April 5, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1318,11 +1318,12 @@ search order.
 Sudo looks for a line beginning with
 \fRsudoers\fR:
 and uses this to determine the search order.
-Note that
+Note that by default,
 \fBsudo\fR
-does
-not stop searching after the first match and later matches take
-precedence over earlier ones.
+does not stop searching after the first match and later matches take
+precedence over earlier ones (unless
+\fR[SUCCESS=return]\fR
+is used, see below).
 The following sources are recognized:
 .PP
 .RS 4n
@@ -1337,10 +1338,21 @@ read sudoers from LDAP
 .RE
 .PD
 .PP
-In addition, the entry
-\fR[NOTFOUND=return]\fR
-will short-circuit the search if the user was not found in the
-preceding source.
+In addition, a subset of
+\fInsswitch.conf\fR-style
+action statements is supported, specifically
+\fR[SUCCESS=return]\fR
+and
+\fR[NOTFOUND=return]\fR.
+These will unconditionally terminate the search if the user was either
+found
+(\fR[SUCCESS=return]\fR)
+or not found
+(\fR[NOTFOUND=return]\fR)
+in the immediately preceding source.
+Other action statements tokens are not supported, nor is test
+negation with
+\(oq\&!\(cq.
 .PP
 To consult LDAP first followed by the local sudoers file (if it
 exists), use:
@@ -1348,6 +1360,15 @@ exists), use:
 .sp
 .RS 4n
 sudoers: ldap files
+.RE
+.fi
+.PP
+To consult LDAP only when no match is found in the local sudoers
+file (if it exists), use:
+.nf
+.sp
+.RS 4n
+sudoers: files [SUCCESS=return] ldap
 .RE
 .fi
 .PP

@@ -81,6 +81,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	eventlog_free(evlog);
     }
     fclose(fp);
+    fflush(stdout);
 
     return 0;
 }

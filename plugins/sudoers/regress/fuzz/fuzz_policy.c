@@ -458,6 +458,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     sudoers_debug_deregister();
 
+    fflush(stdout);
+
     return 0;
 }
 

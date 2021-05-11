@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "November 24, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "May 1, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -62,6 +62,9 @@ The following configuration sections are recognized:
 .TP 4n
 \fB\(bu\fR
 server
+.TP 4n
+\fB\(bu\fR
+relay
 .TP 4n
 \fB\(bu\fR
 iolog
@@ -146,7 +149,8 @@ If true,
 \fBsudo_logsrvd\fR
 will enable the TCP keepalive socket option on the client connection.
 This enables the periodic transmission of keepalive messages to the client.
-If the client does not respond to a message, the connection will be closed.
+If the client does not respond to a message in time, the connection will
+be closed.
 .TP 10n
 timeout = number
 The amount of time, in seconds,
@@ -170,7 +174,8 @@ The default value is
 \fI/etc/ssl/sudo/certs/logsrvd_cert.pem\fR.
 .TP 10n
 tls_checkpeer = bool
-If true, client certificates will be validated by the server;
+If true, client certificates will be validated by
+\fBsudo_logsrvd\fR;
 clients without a valid certificate will be unable to connect.
 If false, no validation of client certificates will be performed.
 It true and client certificates are created using a private certificate
@@ -252,6 +257,172 @@ by the server or the client.
 When using self-signed certificates without a certificate authority,
 this setting should be set to false.
 The default value is true.
+.SS "relay"
+The
+\fIrelay\fR
+section configures the optional logsrv relay host and port the server will
+connect to.
+The TLS configuration keys are optional, by default the corresponding
+keys in the
+\fIserver\fR
+section will be used.
+They are only present in this section to make it possible for the relay
+connection to use a different set of TLS parameters from the client-facing
+server.
+The following keys are recognized:
+.TP 10n
+connect_timeout = number
+The amount of time, in seconds,
+\fBsudo_logsrvd\fR
+will wait for the connection to a
+\fIrelay_host\fR
+(see below) to complete.
+Once the connection is complete, the
+\fItimeout\fR
+setting controls the amount of time
+\fBsudo_logsrvd\fR
+will wait for the relay to respond.
+A value of 0 will disable the timeout.
+The default value is 30.
+.TP 10n
+relay_dir = path
+The directory in which log messages are temporarily stored before they
+are sent to the relay host.
+Messages are stored in the wire format specified by
+sudo_logsrv.proto(@mansectform@)
+The default value is
+\fI@relay_dir@\fR.
+.TP 10n
+relay_host = host[:port][(tls)]
+The relay host name or IP address, optional port to connect to and
+an optional Transport Layer Security (TLS) flag in parentheses.
+The syntax is identical to
+\fIlisten_address\fR
+in the
+\fIserver\fR
+section with one exception: the wild card
+\(oq*\(cq
+syntax is not supported.
+.sp
+When this setting is enabled, messages from the client will be forwarded
+to one of the specified relay hosts instead of being stored locally.
+The
+\fIhost\fR
+could be running an instance of
+\fBsudo_logsrvd\fR
+or another server that supports the
+sudo_logsrv.proto(@mansectform@)
+protocol.
+.sp
+If multiple
+\fIrelay_host\fR
+lines are specified, the first available relay host will be used.
+.TP 10n
+retry_interval = number
+The number of seconds to wait after a connection error before making
+a new attempt to forward a message to a relay host.
+The default value is 30 seconds.
+.TP 10n
+store_first = boolean
+If true,
+\fBsudo_logsrvd\fR
+will store logs locally before relaying them.
+Once the log is complete, a connection to the relay host is opened
+and the log is relayed.
+If the network connection is interrupted before the log can be fully
+transferred, it will be retransmitted later.
+The default is to relay logs in real-time.
+.TP 10n
+tcp_keepalive = boolean
+If true,
+\fBsudo_logsrvd\fR
+will enable the TCP keepalive socket option on the relay connection.
+This enables the periodic transmission of keepalive messages to the relay
+server.
+If the relay does not respond to a message in time, the connection will
+be closed.
+.TP 10n
+timeout = number
+The amount of time, in seconds,
+\fBsudo_logsrvd\fR
+will wait for the relay server to respond after a connection has succeeded.
+A value of 0 will disable the timeout.
+The default value is 30.
+.TP 10n
+tls_cacert = path
+The path to a certificate authority bundle file, in PEM format,
+to use instead of the system's default certificate authority database
+when authenticating clients.
+The default is to use the value specified in the
+\fIserver\fR
+section, or the system's default certificate authority database if
+no value is set.
+.TP 10n
+tls_cert = path
+The path to the server's certificate file, in PEM format.
+The default is to use the value specified in the
+\fIserver\fR
+section.
+.TP 10n
+tls_checkpeer = bool
+If true, the relay host's certificate will be validated by
+\fBsudo_logsrvd\fR;
+connections to a relay without a valid certificate will fail.
+If false, no validation of relay certificates will be performed.
+It true and relay certificates are created using a private certificate
+authority, the
+\fItls_cacert\fR
+setting must be set to a CA bundle that contains the CA certificate
+used to generate the relay certificate.
+The default is to use the value specified in the
+\fIserver\fR
+section.
+.TP 10n
+tls_ciphers_v12 = string
+A list of ciphers to use for connections secured by TLS version 1.2 only,
+separated by a colon
+\(oq:\&\(cq.
+See the
+\fICIPHER LIST FORMAT\fR
+section in
+openssl-ciphers(1)
+for full details.
+The default is to use the value specified in the
+\fIserver\fR
+section.
+.TP 10n
+tls_ciphers_v13 = string
+A list of ciphers to use for connections secured by TLS version 1.3 only,
+separated by a colon
+\(oq:\&\(cq.
+Supported cipher suites depend on the version of OpenSSL used,
+see the
+\fIserver\fR
+section for more information.
+The default is to use the value specified in the
+\fIserver\fR
+section.
+.TP 10n
+tls_dhparams = path
+The path to a file containing custom Diffie-Hellman parameters in PEM format.
+The default is to use the value specified in the
+\fIserver\fR
+section.
+.TP 10n
+tls_key = path
+The path to the server's private key file, in PEM format.
+The default is to use the value specified in the
+\fIserver\fR
+section.
+.TP 10n
+tls_verify = bool
+If true, the server's certificate used for relaying will be verified at startup.
+If false, no verification is performed of the server certificate.
+When using self-signed certificates without a certificate authority,
+this setting should be set to false.
+The default is to use the value specified in the
+\fIserver\fR
+section.
 .SS "iolog"
 The
 \fIiolog\fR
@@ -565,7 +736,7 @@ Sudo log server configuration file
 .nf
 .RS 0n
 #
-# sudo logsrv configuration
+# sudo logsrv daemon configuration
 #
 
 [server]
@@ -590,24 +761,24 @@ Sudo log server configuration file
 # The file containing the ID of the running sudo_logsrvd process.
 #pid_file = @rundir@/sudo_logsrvd.pid
 
-# If set, enable the SO_KEEPALIVE socket option on the connected socket.
+# If true, enable the SO_KEEPALIVE socket option on client connections.
 #tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 #timeout = 30
 
-# If set, server certificate will be verified at server startup and
-# also connecting clients will perform server authentication by
-# verifying the server's certificate and identity.
+# If true, the server certificate will be verified at startup and clients
+# will authenticate the server by verifying its certificate and identity.
 #tls_verify = true
 
-# Whether to verify client certificates for TLS connections.
-# By default client certs are not checked.
+# If true, client certificates will be validated by the server;
+# clients without a valid certificate will be unable to connect.
+# By default, client certs are not checked.
 #tls_checkpeer = false
 
-# Path to the certificate authority bundle file in PEM format.
-# Required if 'tls_verify' or 'tls_checkpeer' is set.
+# Path to a certificate authority bundle file in PEM format to use
+# instead of the system's default certificate authority database.
 #tls_cacert = /etc/ssl/sudo/cacert.pem
 
 # Path to the server's certificate file in PEM format.
@@ -630,6 +801,77 @@ Sudo log server configuration file
 
 # Path to the Diffie-Hellman parameter file in PEM format.
 # If not set, the server will use the OpenSSL defaults.
+#tls_dhparams = /etc/ssl/sudo/logsrvd_dhparams.pem
+
+[relay]
+# The host name or IP address and port to send logs to in relay mode.
+# The syntax is identical to listen_address with the exception of
+# the wild card ('*') syntax.  When this setting is enabled, logs will
+# be relayed to the specified host instead of being stored locally.
+# This setting is not enabled by default.
+#relay_host = relayhost.dom.ain
+#relay_host = relayhost.dom.ain(tls)
+
+# The amount of time, in seconds, the server will wait for a connection
+# to the relay server to complete.  A value of 0 will disable the timeout.
+# The default value is 30.
+#connect_timeout = 30
+
+# The directory to store messages in before they are sent to the relay.
+# Messages are stored in wire format.
+# The default value is /var/log/sudo_logsrvd.
+#relay_dir = /var/log/sudo_logsrvd
+
+# The number of seconds to wait after a connection error before
+# making a new attempt to forward a message to a relay host.
+# The default value is 30.
+#retry_interval = 30
+
+# Whether to store the log before relaying it.  If true, enable store
+# and forward mode.  If false, the client connection is immediately
+# relayed.  Defaults to false.
+#store_first = true
+
+# If true, enable the SO_KEEPALIVE socket option on relay connections.
+#tcp_keepalive = true
+
+# The amount of time, in seconds, the server will wait for the relay to
+# respond.  A value of 0 will disable the timeout.  The default value is 30.
+#timeout = 30
+
+# If true, the server's relay certificate will be verified at startup.
+# The default is to use the value in the [server] section.
+#tls_verify = true
+
+# Whether to verify the relay's certificate for TLS connections.
+# The default is to use the value in the [server] section.
+#tls_checkpeer = false
+
+# Path to a certificate authority bundle file in PEM format to use
+# instead of the system's default certificate authority database.
+# The default is to use the value in the [server] section.
+#tls_cacert = /etc/ssl/sudo/cacert.pem
+
+# Path to the server's certificate file in PEM format.
+# The default is to use the certificate in the [server] section.
+#tls_cert = /etc/ssl/sudo/certs/logsrvd_cert.pem
+
+# Path to the server's private key file in PEM format.
+# The default is to use the key in the [server] section.
+#tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
+
+# TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
+# NOTE that this setting is only effective if the negotiated protocol
+# is TLS version 1.2.
+# The default is to use the value in the [server] section.
+#tls_ciphers_v12 = HIGH:!aNULL
+
+# TLS cipher list if the negotiated protocol is TLS version 1.3.
+# The default is to use the value in the [server] section.
+#tls_ciphers_v13 = TLS_AES_256_GCM_SHA384
+
+# Path to the Diffie-Hellman parameter file in PEM format.
+# The default is to use the value in the [server] section.
 #tls_dhparams = /etc/ssl/sudo/logsrvd_dhparams.pem
 
 [iolog]

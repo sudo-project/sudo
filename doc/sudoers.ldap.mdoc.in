@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 29, 2020
+.Dd April 5, 2021
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1211,11 +1211,12 @@ search order.
 Sudo looks for a line beginning with
 .Li sudoers :
 and uses this to determine the search order.
-Note that
+Note that by default,
 .Nm sudo
-does
-not stop searching after the first match and later matches take
-precedence over earlier ones.
+does not stop searching after the first match and later matches take
+precedence over earlier ones (unless
+.Li [SUCCESS=return]
+is used, see below).
 The following sources are recognized:
 .Pp
 .Bl -tag -width 8n -offset 4n -compact
@@ -1226,15 +1227,32 @@ read sudoers from
 read sudoers from LDAP
 .El
 .Pp
-In addition, the entry
-.Li [NOTFOUND=return]
-will short-circuit the search if the user was not found in the
-preceding source.
+In addition, a subset of
+.Pa nsswitch.conf Ns -style
+action statements is supported, specifically
+.Li [SUCCESS=return]
+and
+.Li [NOTFOUND=return] .
+These will unconditionally terminate the search if the user was either
+found
+.Pq Li [SUCCESS=return]
+or not found
+.Pq Li [NOTFOUND=return]
+in the immediately preceding source.
+Other action statements tokens are not supported, nor is test
+negation with
+.Ql \&! .
 .Pp
 To consult LDAP first followed by the local sudoers file (if it
 exists), use:
 .Bd -literal -offset 4n
 sudoers: ldap files
+.Ed
+.Pp
+To consult LDAP only when no match is found in the local sudoers
+file (if it exists), use:
+.Bd -literal -offset 4n
+sudoers: files [SUCCESS=return] ldap
 .Ed
 .Pp
 The local

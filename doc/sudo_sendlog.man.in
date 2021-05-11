@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_SENDLOG" "@mansectsu@" "May 12, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_SENDLOG" "@mansectsu@" "May 4, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -34,6 +34,7 @@
 [\fB\-p\fR\ \fIport\fR]
 [\fB\-r\fR\ \fIrestart-point\fR]
 [\fB\-R\fR\ \fIreject-reason\fR]
+[\fB\-s\fR\ \fIstop-point\fR]
 [\fB\-t\fR\ \fInumber\fR]
 \fIpath\fR
 .SH "DESCRIPTION"
@@ -125,6 +126,19 @@ Send a reject event for the command using the specified
 even though it was actually accepted locally.
 This can be used to test the logging of reject events; no I/O
 will be sent.
+.TP 12n
+\fB\-s\fR, \fB\--stop-after\fR
+Stop sending log records and close the connection when
+\fIstop-point\fR
+is reached.
+This can be used for testing purposes to send a partial I/O log to the server.
+Partial logs can be restarted using the
+\fB\-r\fR
+option.
+The
+\fIstop-point\fR
+is an elapsed time specified in the form
+\(lqseconds,nanoseconds\(rq.
 .TP 12n
 \fB\-t\fR, \fB\--test\fR
 Open

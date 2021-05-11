@@ -5084,16 +5084,16 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    continue;
 	}
 	len = strlen(dirpath) + 1 + NAMLEN(dent);
-	if ((path = rcstr_alloc(len)) == NULL)
+	if ((path = sudo_rcstr_alloc(len)) == NULL)
 	    goto oom;
 	(void)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name);
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
-	    rcstr_delref(path);
+	    sudo_rcstr_delref(path);
 	    continue;
 	}
 	pl = malloc(sizeof(*pl));
 	if (pl == NULL) {
-	    rcstr_delref(path);
+	    sudo_rcstr_delref(path);
 	    goto oom;
 	}
 	pl->path = path;
@@ -5102,7 +5102,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    max_paths <<= 1;
 	    tmp = reallocarray(paths, max_paths, sizeof(*paths));
 	    if (tmp == NULL) {
-		rcstr_delref(path);
+		sudo_rcstr_delref(path);
 		free(pl);
 		goto oom;
 	    }
@@ -5125,7 +5125,7 @@ bad:
     if (dir != NULL)
 	closedir(dir);
     for (i = 0; i < count; i++) {
-	rcstr_delref(paths[i]->path);
+	sudo_rcstr_delref(paths[i]->path);
 	free(paths[i]);
     }
     free(paths);
@@ -5180,10 +5180,10 @@ init_lexer(void)
 	idepth--;
 	while ((pl = SLIST_FIRST(&istack[idepth].more)) != NULL) {
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
-	    rcstr_delref(pl->path);
+	    sudo_rcstr_delref(pl->path);
 	    free(pl);
 	}
-	rcstr_delref(istack[idepth].path);
+	sudo_rcstr_delref(istack[idepth].path);
 	if (idepth && !istack[idepth].keepopen)
 	    fclose(istack[idepth].bs->yy_input_file);
 	sudoers_delete_buffer(istack[idepth].bs);
@@ -5246,7 +5246,7 @@ expand_include(const char *opath)
     }
 
     /* Make a copy of the fully-qualified path and return it. */
-    path = pp = rcstr_alloc(len + dirlen);
+    path = pp = sudo_rcstr_alloc(len + dirlen);
     if (path == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
@@ -5302,7 +5302,7 @@ push_include(const char *opath, bool isdir)
 	    if (sudoers_warnings)
 		sudo_warnx(U_("%s: %s"), path, U_("too many levels of includes"));
 	    sudoerserror(NULL);
-	    rcstr_delref(path);
+	    sudo_rcstr_delref(path);
 	    debug_return_bool(false);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
@@ -5310,7 +5310,7 @@ push_include(const char *opath, bool isdir)
 	if (new_istack == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudoerserror(NULL);
-	    rcstr_delref(path);
+	    sudo_rcstr_delref(path);
 	    debug_return_bool(false);
 	}
 	istack = new_istack;
@@ -5346,19 +5346,19 @@ push_include(const char *opath, bool isdir)
 		}
 	    }
 	    /* A missing or insecure include dir is not a fatal error. */
-	    rcstr_delref(path);
+	    sudo_rcstr_delref(path);
 	    debug_return_bool(true);
 	}
 	count = switch_dir(&istack[idepth], path);
 	if (count <= 0) {
 	    /* switch_dir() called sudoerserror() for us */
-	    rcstr_delref(path);
+	    sudo_rcstr_delref(path);
 	    debug_return_bool(count ? false : true);
 	}
 
 	/* Parse the first dir entry we can open, leave the rest for later. */
 	do {
-	    rcstr_delref(path);
+	    sudo_rcstr_delref(path);
 	    if ((pl = SLIST_FIRST(&istack[idepth].more)) == NULL) {
 		/* Unable to open any files in include dir, not an error. */
 		debug_return_bool(true);
@@ -5371,7 +5371,7 @@ push_include(const char *opath, bool isdir)
 	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
 	    /* The error was already printed by open_sudoers() */
 	    sudoerserror(NULL);
-	    rcstr_delref(path);
+	    sudo_rcstr_delref(path);
 	    debug_return_bool(false);
 	}
     }
@@ -5415,7 +5415,7 @@ pop_include(void)
 	if (fp != NULL) {
 	    sudolinebuf.len = sudolinebuf.off = 0;
 	    sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
-	    rcstr_delref(sudoers);
+	    sudo_rcstr_delref(sudoers);
 	    sudoers = pl->path;
 	    sudolineno = 1;
 	    sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
@@ -5423,7 +5423,7 @@ pop_include(void)
 	    break;
 	}
 	/* Unable to open path in include dir, go to next one. */
-	rcstr_delref(pl->path);
+	sudo_rcstr_delref(pl->path);
 	free(pl);
     }
     /* If no path list, just pop the last dir on the stack. */
@@ -5432,7 +5432,7 @@ pop_include(void)
 	sudoers_switch_to_buffer(istack[idepth].bs);
 	free(sudolinebuf.buf);
 	sudolinebuf = istack[idepth].line;
-	rcstr_delref(sudoers);
+	sudo_rcstr_delref(sudoers);
 	sudoers = istack[idepth].path;
 	sudolineno = istack[idepth].lineno;
 	keepopen = istack[idepth].keepopen;

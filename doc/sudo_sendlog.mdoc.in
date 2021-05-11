@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 12, 2020
+.Dd May 4, 2021
 .Dt SUDO_SENDLOG @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -32,6 +32,7 @@
 .Op Fl p Ar port
 .Op Fl r Ar restart-point
 .Op Fl R Ar reject-reason
+.Op Fl s Ar stop-point
 .Op Fl t Ar number
 .Ar path
 .Sh DESCRIPTION
@@ -112,6 +113,18 @@ Send a reject event for the command using the specified
 even though it was actually accepted locally.
 This can be used to test the logging of reject events; no I/O
 will be sent.
+.It Fl s , -stop-after
+Stop sending log records and close the connection when
+.Ar stop-point
+is reached.
+This can be used for testing purposes to send a partial I/O log to the server.
+Partial logs can be restarted using the
+.Fl r
+option.
+The
+.Ar stop-point
+is an elapsed time specified in the form
+.Dq seconds,nanoseconds .
 .It Fl t , -test
 Open
 .Ar number

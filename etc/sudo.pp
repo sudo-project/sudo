@@ -90,9 +90,6 @@ still allow people to get their work done."
 	if test -n "$linux_audit"; then
 		pp_rpm_requires="audit-libs >= $linux_audit"
 	fi
-	if test -z "$libssl_dep"; then
-		libssl_dep="libssl1.1"
-	fi
 	# The package manager will handle an existing sudoers file
 	rm -f ${pp_destdir}$sudoersdir/sudoers.dist
 %else
@@ -155,6 +152,10 @@ still allow people to get their work done."
 	$name: unstripped-binary-or-object
 	EOF
 	chmod 644 ${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name}
+	# If libssl_dep not passed in, try to figure it out
+	if test -z "$libssl_dep"; then
+	    libssl_dep="`ldd $libexecdir/sudo/sudoers.so 2>&1 | sed -n 's/^[ 	]*libssl\.so\([0-9.]*\).*/libssl\1/p'`"
+	fi
 %endif
 
 %if [rpm]
@@ -315,6 +316,7 @@ still allow people to get their work done."
 	ln -s -f ${sbindir}/visudo ${pp_destdir}/usr/sbin
 %endif
 
+%if [!rpm,deb]
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}${mandir}/[mc]* | sed "s#${pp_destdir}##g"`
@@ -329,6 +331,7 @@ still allow people to get their work done."
 	    done
 	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
 	fi
+%endif
 
 %depend [deb]
 	libc6, libpam0g, libpam-modules, zlib1g, libselinux1

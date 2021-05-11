@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "March 28, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "April 29, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -35,10 +35,18 @@ is a high-performance log server that accepts event and I/O logs from
 It can be used to implement centralized logging of
 \fBsudo\fR
 logs.
-Event log entries may be logged either via
+The server has two modes of operation: local and relay.
+By default,
+\fBsudo_logsrvd\fR
+stores the logs locally but it can also be configured to
+relay them to another server that supports the
+sudo_logsrv.proto(@mansectform@)
+protocol.
+.PP
+When not relaying, event log entries may be logged either via
 syslog(3)
-or to a file.
-I/O Logs created by
+or to a local file.
+I/O Logs stored locally by
 \fBsudo_logsrvd\fR
 can be replayed via the
 sudoreplay(@mansectsu@)
@@ -54,11 +62,17 @@ Configuration parameters for
 \fBsudo_logsrvd\fR
 may be specified in the
 sudo_logsrvd.conf(@mansectform@)
-file.
+file or the file specified via the
+\fB\-f\fR
+option.
+.PP
+\fBsudo_logsrvd\fR
+rereads its configuration file when it receives SIGHUP and writes server
+state to the debug file (if one is configured) when it receives SIGUSR1.
 .PP
 The options are as follows:
 .TP 12n
-\fB\-f\fR, \fB\--file\fR
+\fB\-f\fR \fIfile\fR, \fB\--file\fR=\fIfile\fR
 Read configuration from
 \fIfile\fR
 instead of the default,
@@ -73,7 +87,7 @@ Run
 in the foreground instead of detaching from the terminal and becoming
 a daemon.
 .TP 12n
-\fB\-R\fR, \fB\--random-drop\fR
+\fB\-R\fR \fIpercentage\fR, \fB\--random-drop\fR=\fIpercentage\fR
 For each message, there is a
 \fIpercentage\fR
 chance that the server will drop the connection.
@@ -118,6 +132,16 @@ Sudo front end configuration
 .TP 26n
 \fI@sysconfdir@/sudo_logsrvd.conf\fR
 Sudo log server configuration file
+.TP 26n
+\fI@relay_dir@/incoming\fR
+Directory where new journals are stored when the
+\fIstore_first relay\fR
+setting is enabled.
+.TP 26n
+\fI@relay_dir@/outgoing\fR
+Directory where completed journals are stored when the
+\fIstore_first relay\fR
+setting is enabled.
 .TP 26n
 \fI@iolog_dir@\fR
 Default I/O log file location
@@ -376,8 +400,8 @@ names used earlier:
 .nf
 .sp
 .RS 6n
-# If set, secure connections with TLS 1.2 or 1.3.
-tls = true
+# Listen on port 30344 for TLS connections to any address.
+listen_address = *:30344(tls)
 
 # Path to the certificate authority bundle file in PEM format.
 tls_cacert = /etc/ssl/sudo/cacert.pem

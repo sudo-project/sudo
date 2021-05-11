@@ -1002,8 +1002,8 @@ backchannel_cb(int fd, int what, void *v)
 		/* Command exited or was killed, either way we are done. */
 		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited or was killed");
 		sudo_ev_loopexit(ec->evbase);
+		*ec->cstat = cstat;
 	    }
-	    *ec->cstat = cstat;
 	    break;
 	case CMD_ERRNO:
 	    /* Monitor was unable to execute command or broken pipe. */

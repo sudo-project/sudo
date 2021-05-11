@@ -31,7 +31,7 @@ scriptdir = $(top_srcdir)/scripts
 cross_compiling = @CROSS_COMPILING@
 
 # Our install program supports extra flags...
-INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+INSTALL = $(SHELL) $(scriptdir)/install-sh -c
 INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
 # Where to install things...
@@ -92,7 +92,9 @@ pvs-studio:
 
 fuzz:
 
-check:
+check-fuzzer:
+
+check: check-fuzzer
 
 clean:
 

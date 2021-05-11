@@ -437,7 +437,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    if ((source = rcstr_dup(cp)) == NULL) {
+    if ((source = sudo_rcstr_dup(cp)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	free(cp);
 	goto done;
@@ -458,7 +458,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs
     ret = true;
 
 done:
-    rcstr_delref(source);
+    sudo_rcstr_delref(source);
     if (cn)
 	ldap_memfree(cn);
     ldap_value_free_len(bv);
@@ -1251,7 +1251,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     /* We only have a single userspec */
     if ((us = calloc(1, sizeof(*us))) == NULL)
 	goto oom;
-    us->file = rcstr_dup("LDAP");
+    us->file = sudo_rcstr_dup("LDAP");
     TAILQ_INIT(&us->users);
     TAILQ_INIT(&us->privileges);
     STAILQ_INIT(&us->comments);

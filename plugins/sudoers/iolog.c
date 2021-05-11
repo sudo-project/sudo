@@ -489,7 +489,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
             if (strncmp(*cur, "log_server_verify=", sizeof("log_server_verify=") - 1) == 0) {
                 int val = sudo_strtobool(*cur + sizeof("log_server_verify=") - 1);
                 if (val != -1) {
-                    details->keepalive = val;
+                    details->verify_server = val;
                 } else {
                     sudo_debug_printf(SUDO_DEBUG_WARN,
                         "%s: unable to parse %s", __func__, *cur);

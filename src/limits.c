@@ -74,31 +74,108 @@ static struct saved_limit {
     int resource;		/* RLIMIT_FOO definition */
     bool override;		/* override limit while sudo executes? */
     bool saved;			/* true if we were able to get the value */
+    rlim_t minlimit;		/* only modify limit if less than this value */
     struct rlimit *fallback;	/* fallback if we fail to set to newlimit */
     struct rlimit newlimit;	/* new limit to use if override is true */
     struct rlimit oldlimit;	/* original limit, valid if saved is true */
 } saved_limits[] = {
 #ifdef RLIMIT_AS
-    { "rlimit_as", RLIMIT_AS, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    {
+	"rlimit_as",
+	RLIMIT_AS,
+	true,					/* override */
+	false,					/* saved */
+	1 * 1024 * 1024 * 1024,			/* minlimit */
+	NULL,					/* fallback */
+	{ RLIM_INFINITY, RLIM_INFINITY }	/* newlimit */
+    },
 #endif
-    { "rlimit_core", RLIMIT_CORE, false },
-    { "rlimit_cpu", RLIMIT_CPU, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { "rlimit_data", RLIMIT_DATA, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
-    { "rlimit_fsize", RLIMIT_FSIZE, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    {
+	"rlimit_core",
+	RLIMIT_CORE,
+	false					/* override */
+    },
+    {
+	"rlimit_cpu",
+	RLIMIT_CPU,
+	true,					/* override */
+	false,					/* saved */
+	RLIM_INFINITY,				/* minlimit */
+	NULL,
+	{ RLIM_INFINITY, RLIM_INFINITY }
+    },
+    {
+	"rlimit_data",
+	RLIMIT_DATA,
+	true,					/* override */
+	false,					/* saved */
+	1 * 1024 * 1024 * 1024,			/* minlimit */
+	NULL,
+	{ RLIM_INFINITY, RLIM_INFINITY }
+    },
+    {
+	"rlimit_fsize",
+	RLIMIT_FSIZE,
+	true,					/* override */
+	false,					/* saved */
+	RLIM_INFINITY,				/* minlimit */
+	NULL,
+	{ RLIM_INFINITY, RLIM_INFINITY }
+    },
 #ifdef RLIMIT_LOCKS
-    { "rlimit_locks", RLIMIT_LOCKS, false },
+    {
+	"rlimit_locks",
+	RLIMIT_LOCKS,
+	false					/* override */
+    },
 #endif
 #ifdef RLIMIT_MEMLOCK
-    { "rlimit_memlock", RLIMIT_MEMLOCK, false },
+    {
+	"rlimit_memlock",
+	RLIMIT_MEMLOCK,
+	false					/* override */
+    },
 #endif
-    { "rlimit_nofile", RLIMIT_NOFILE, true, false, &nofile_fallback, { RLIM_INFINITY, RLIM_INFINITY } },
+    {
+	"rlimit_nofile",
+	RLIMIT_NOFILE,
+	true,					/* override */
+	false,					/* saved */
+	RLIM_INFINITY,				/* minlimit */
+	&nofile_fallback,
+	{ RLIM_INFINITY, RLIM_INFINITY }
+    },
 #ifdef RLIMIT_NPROC
-    { "rlimit_nproc", RLIMIT_NPROC, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    {
+	"rlimit_nproc",
+	RLIMIT_NPROC,
+	true,					/* override */
+	false,					/* saved */
+	RLIM_INFINITY,				/* minlimit */
+	NULL,
+	{ RLIM_INFINITY, RLIM_INFINITY }
+    },
 #endif
 #ifdef RLIMIT_RSS
-    { "rlimit_rss", RLIMIT_RSS, true, false, NULL, { RLIM_INFINITY, RLIM_INFINITY } },
+    {
+	"rlimit_rss",
+	RLIMIT_RSS,
+	true,					/* override */
+	false,					/* saved */
+	RLIM_INFINITY,				/* minlimit */
+	NULL,
+	{ RLIM_INFINITY, RLIM_INFINITY }
+    },
 #endif
-    { "rlimit_stack", RLIMIT_STACK, true, false, &stack_fallback, { SUDO_STACK_MIN, RLIM_INFINITY } }
+    {
+	"rlimit_stack",
+	RLIMIT_STACK,
+	true,					/* override */
+	false,					/* saved */
+	RLIM_INFINITY,				/* minlimit */
+	&stack_fallback,
+	{ SUDO_STACK_MIN, RLIM_INFINITY }
+    }
 };
 
 static struct rlimit corelimit;
@@ -133,7 +210,7 @@ disable_coredump(void)
     }
     if (prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "prctl(PR_SET_DUMPABLE, %d, 0, 0, 0)", dumpflag);
+	    "prctl(PR_SET_DUMPABLE, 0, 0, 0, 0)");
     }
 #endif /* __linux__ */
     coredump_disabled = true;
@@ -237,14 +314,19 @@ unlimit_sudo(void)
 	if (getrlimit(lim->resource, &lim->oldlimit) == -1)
 	    continue;
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "getrlimit(lim->name) -> [%lld, %lld]",
+	    "getrlimit(%s) -> [%lld, %lld]", lim->name,
 	    (long long)lim->oldlimit.rlim_cur,
 	    (long long)lim->oldlimit.rlim_max);
-
 	lim->saved = true;
+
+	/* Only override the existing limit if it is smaller than minlimit. */
+	if (lim->minlimit != RLIM_INFINITY) {
+	    if (lim->oldlimit.rlim_cur >= lim->minlimit)
+		lim->override = false;
+	}
+
 	if (!lim->override)
 	    continue;
-
 	if (lim->newlimit.rlim_cur != RLIM_INFINITY) {
 	    /* Don't reduce the soft resource limit. */
 	    if (lim->oldlimit.rlim_cur == RLIM_INFINITY ||

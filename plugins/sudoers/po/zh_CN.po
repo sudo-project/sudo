@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.6b1\n"
+"Project-Id-Version: sudoers 1.9.7b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2021-03-02 19:29-0700\n"
-"PO-Revision-Date: 2021-03-03 20:26-0500\n"
+"POT-Creation-Date: 2021-05-01 16:27-0600\n"
+"PO-Revision-Date: 2021-05-05 21:23-0400\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -58,10 +58,14 @@ msgstr "对不起，请重试。"
 #: lib/iolog/iolog_legacy.c:111 lib/iolog/iolog_legacy.c:123
 #: lib/iolog/iolog_legacy.c:133 lib/iolog/iolog_legacy.c:139
 #: lib/iolog/iolog_loginfo.c:76 lib/iolog/iolog_loginfo.c:210
-#: logsrvd/sendlog.c:496 plugins/sudoers/audit.c:115
+#: logsrvd/logsrvd.c:1021 logsrvd/logsrvd.c:1089 logsrvd/logsrvd_journal.c:142
+#: logsrvd/logsrvd_journal.c:196 logsrvd/logsrvd_journal.c:248
+#: logsrvd/logsrvd_journal.c:380 logsrvd/logsrvd_relay.c:443
+#: logsrvd/logsrvd_relay.c:743 logsrvd/logsrvd_relay.c:857
+#: logsrvd/sendlog.c:500 plugins/sudoers/audit.c:115
 #: plugins/sudoers/audit.c:263 plugins/sudoers/auth/bsdauth.c:143
 #: plugins/sudoers/auth/kerb5.c:118 plugins/sudoers/auth/kerb5.c:144
-#: plugins/sudoers/auth/pam.c:689 plugins/sudoers/auth/rfc1938.c:111
+#: plugins/sudoers/auth/pam.c:692 plugins/sudoers/auth/rfc1938.c:111
 #: plugins/sudoers/auth/sia.c:59 plugins/sudoers/check_aliases.c:95
 #: plugins/sudoers/cvtsudoers.c:119 plugins/sudoers/cvtsudoers.c:160
 #: plugins/sudoers/cvtsudoers.c:177 plugins/sudoers/cvtsudoers.c:188
@@ -78,7 +82,7 @@ msgstr "对不起，请重试。"
 #: plugins/sudoers/cvtsudoers_ldif.c:460 plugins/sudoers/cvtsudoers_ldif.c:468
 #: plugins/sudoers/cvtsudoers_ldif.c:615 plugins/sudoers/defaults.c:638
 #: plugins/sudoers/defaults.c:933 plugins/sudoers/defaults.c:1108
-#: plugins/sudoers/editor.c:181 plugins/sudoers/env.c:262
+#: plugins/sudoers/editor.c:187 plugins/sudoers/env.c:262
 #: plugins/sudoers/exptilde.c:92 plugins/sudoers/filedigest.c:54
 #: plugins/sudoers/filedigest.c:70 plugins/sudoers/gc.c:57
 #: plugins/sudoers/group_plugin.c:133 plugins/sudoers/interfaces.c:72
@@ -124,9 +128,9 @@ msgstr "对不起，请重试。"
 #: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:195
 #: plugins/sudoers/pwutil.c:266 plugins/sudoers/pwutil.c:344
 #: plugins/sudoers/pwutil.c:518 plugins/sudoers/pwutil.c:583
-#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:854
-#: plugins/sudoers/pwutil.c:910 plugins/sudoers/pwutil.c:954
-#: plugins/sudoers/pwutil.c:1011 plugins/sudoers/sssd.c:145
+#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:853
+#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:953
+#: plugins/sudoers/pwutil.c:1010 plugins/sudoers/sssd.c:145
 #: plugins/sudoers/sssd.c:407 plugins/sudoers/sssd.c:470
 #: plugins/sudoers/sssd.c:514 plugins/sudoers/sssd.c:561
 #: plugins/sudoers/sssd.c:754 plugins/sudoers/strvec_join.c:53
@@ -138,10 +142,10 @@ msgstr "对不起，请重试。"
 #: plugins/sudoers/sudoers.c:1241 plugins/sudoers/sudoreplay.c:552
 #: plugins/sudoers/sudoreplay.c:555 plugins/sudoers/sudoreplay.c:1259
 #: plugins/sudoers/sudoreplay.c:1469 plugins/sudoers/sudoreplay.c:1473
-#: plugins/sudoers/testsudoers.c:128 plugins/sudoers/testsudoers.c:225
-#: plugins/sudoers/testsudoers.c:242 plugins/sudoers/testsudoers.c:581
-#: plugins/sudoers/timestamp.c:422 plugins/sudoers/timestamp.c:466
-#: plugins/sudoers/timestamp.c:967 plugins/sudoers/timestamp.c:1105
+#: plugins/sudoers/testsudoers.c:120 plugins/sudoers/testsudoers.c:224
+#: plugins/sudoers/testsudoers.c:241 plugins/sudoers/testsudoers.c:580
+#: plugins/sudoers/timestamp.c:424 plugins/sudoers/timestamp.c:468
+#: plugins/sudoers/timestamp.c:980 plugins/sudoers/timestamp.c:1118
 #: plugins/sudoers/toke_util.c:77 plugins/sudoers/toke_util.c:105
 #: plugins/sudoers/toke_util.c:130 plugins/sudoers/toke_util.c:155
 #: plugins/sudoers/toke_util.c:193 plugins/sudoers/tsdump.c:123
@@ -203,11 +207,11 @@ msgstr "别名“%s”已定义过"
 #: lib/iolog/iolog_legacy.c:100 lib/iolog/iolog_legacy.c:111
 #: lib/iolog/iolog_legacy.c:123 lib/iolog/iolog_legacy.c:133
 #: lib/iolog/iolog_legacy.c:139 lib/iolog/iolog_loginfo.c:76
-#: lib/iolog/iolog_loginfo.c:210 logsrvd/logsrvd.c:1291 logsrvd/logsrvd.c:1304
-#: logsrvd/logsrvd.c:1349 logsrvd/sendlog.c:496 logsrvd/sendlog.c:1337
-#: logsrvd/sendlog.c:1344 logsrvd/sendlog.c:1762 plugins/sudoers/audit.c:115
-#: plugins/sudoers/audit.c:263 plugins/sudoers/auth/pam.c:502
-#: plugins/sudoers/auth/pam.c:689 plugins/sudoers/auth/rfc1938.c:111
+#: lib/iolog/iolog_loginfo.c:210 logsrvd/sendlog.c:500 logsrvd/sendlog.c:1343
+#: logsrvd/sendlog.c:1350 logsrvd/sendlog.c:1545 logsrvd/tls_init.c:221
+#: logsrvd/tls_init.c:242 logsrvd/tls_init.c:252 plugins/sudoers/audit.c:115
+#: plugins/sudoers/audit.c:263 plugins/sudoers/auth/pam.c:505
+#: plugins/sudoers/auth/pam.c:692 plugins/sudoers/auth/rfc1938.c:111
 #: plugins/sudoers/check_aliases.c:95 plugins/sudoers/cvtsudoers.c:119
 #: plugins/sudoers/cvtsudoers.c:159 plugins/sudoers/cvtsudoers.c:176
 #: plugins/sudoers/cvtsudoers.c:187 plugins/sudoers/cvtsudoers.c:299
@@ -223,7 +227,7 @@ msgstr "别名“%s”已定义过"
 #: plugins/sudoers/cvtsudoers_ldif.c:446 plugins/sudoers/cvtsudoers_ldif.c:459
 #: plugins/sudoers/cvtsudoers_ldif.c:467 plugins/sudoers/cvtsudoers_ldif.c:614
 #: plugins/sudoers/defaults.c:638 plugins/sudoers/defaults.c:933
-#: plugins/sudoers/defaults.c:1108 plugins/sudoers/editor.c:181
+#: plugins/sudoers/defaults.c:1108 plugins/sudoers/editor.c:187
 #: plugins/sudoers/env.c:262 plugins/sudoers/exptilde.c:92
 #: plugins/sudoers/filedigest.c:54 plugins/sudoers/filedigest.c:70
 #: plugins/sudoers/gc.c:57 plugins/sudoers/group_plugin.c:132
@@ -278,9 +282,9 @@ msgstr "别名“%s”已定义过"
 #: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:195
 #: plugins/sudoers/pwutil.c:266 plugins/sudoers/pwutil.c:344
 #: plugins/sudoers/pwutil.c:518 plugins/sudoers/pwutil.c:583
-#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:854
-#: plugins/sudoers/pwutil.c:910 plugins/sudoers/pwutil.c:954
-#: plugins/sudoers/pwutil.c:1011 plugins/sudoers/set_perms.c:359
+#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:853
+#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:953
+#: plugins/sudoers/pwutil.c:1010 plugins/sudoers/set_perms.c:359
 #: plugins/sudoers/set_perms.c:698 plugins/sudoers/set_perms.c:1061
 #: plugins/sudoers/set_perms.c:1364 plugins/sudoers/set_perms.c:1529
 #: plugins/sudoers/sssd.c:144 plugins/sudoers/sssd.c:407
@@ -294,11 +298,11 @@ msgstr "别名“%s”已定义过"
 #: plugins/sudoers/sudoers.c:975 plugins/sudoers/sudoers.c:1241
 #: plugins/sudoers/sudoreplay.c:552 plugins/sudoers/sudoreplay.c:555
 #: plugins/sudoers/sudoreplay.c:1259 plugins/sudoers/sudoreplay.c:1469
-#: plugins/sudoers/sudoreplay.c:1473 plugins/sudoers/testsudoers.c:128
-#: plugins/sudoers/testsudoers.c:225 plugins/sudoers/testsudoers.c:242
-#: plugins/sudoers/testsudoers.c:581 plugins/sudoers/timestamp.c:422
-#: plugins/sudoers/timestamp.c:466 plugins/sudoers/timestamp.c:967
-#: plugins/sudoers/timestamp.c:1105 plugins/sudoers/toke_util.c:77
+#: plugins/sudoers/sudoreplay.c:1473 plugins/sudoers/testsudoers.c:120
+#: plugins/sudoers/testsudoers.c:224 plugins/sudoers/testsudoers.c:241
+#: plugins/sudoers/testsudoers.c:580 plugins/sudoers/timestamp.c:424
+#: plugins/sudoers/timestamp.c:468 plugins/sudoers/timestamp.c:980
+#: plugins/sudoers/timestamp.c:1118 plugins/sudoers/toke_util.c:77
 #: plugins/sudoers/toke_util.c:105 plugins/sudoers/toke_util.c:130
 #: plugins/sudoers/toke_util.c:154 plugins/sudoers/toke_util.c:193
 #: plugins/sudoers/tsdump.c:123 plugins/sudoers/visudo.c:143
@@ -321,7 +325,7 @@ msgstr "%s：%s"
 #: plugins/sudoers/linux_audit.c:92 plugins/sudoers/policy.c:573
 #: plugins/sudoers/policy.c:728 plugins/sudoers/policy.c:738
 #: plugins/sudoers/prompt.c:161 plugins/sudoers/strvec_join.c:62
-#: plugins/sudoers/testsudoers.c:246 plugins/sudoers/toke_util.c:206
+#: plugins/sudoers/testsudoers.c:245 plugins/sudoers/toke_util.c:206
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "内部错误，%s 溢出"
@@ -367,7 +371,7 @@ msgstr "期望得到 JSON_STRING，但得到了 %d"
 
 #: lib/iolog/iolog_json.c:120
 msgid "JSON_ARRAY too large"
-msgstr ""
+msgstr "JSON_ARRAY 过大"
 
 #: lib/iolog/iolog_json.c:352
 msgid "missing double quote in name"
@@ -375,7 +379,7 @@ msgstr "名称中缺少双引号"
 
 #: lib/iolog/iolog_json.c:449
 msgid "missing JSON_OBJECT"
-msgstr ""
+msgstr "缺少 JSON_OBJECT"
 
 #: lib/iolog/iolog_json.c:453
 #, c-format
@@ -385,18 +389,18 @@ msgstr "期望得到 JSON_OBJECT，但得到了 %d"
 #: lib/iolog/iolog_json.c:599
 #, c-format
 msgid "json stack exhausted (max %u frames)"
-msgstr ""
+msgstr "json 栈耗尽（最大 %u 帧）"
 
 #: lib/iolog/iolog_json.c:673
 msgid "objects must consist of name:value pairs"
-msgstr ""
+msgstr "对象必须包含 名称:值 对"
 
 #: lib/iolog/iolog_json.c:678 lib/iolog/iolog_json.c:709
 #: lib/iolog/iolog_json.c:753 lib/iolog/iolog_json.c:775
 #: lib/iolog/iolog_json.c:797 lib/iolog/iolog_json.c:819
 #: lib/iolog/iolog_json.c:841
 msgid "missing separator between values"
-msgstr ""
+msgstr "值之间缺少分隔符"
 
 #: lib/iolog/iolog_json.c:693 lib/iolog/iolog_json.c:867
 msgid "unmatched close brace"
@@ -491,14 +495,6 @@ msgstr "读取时序文件出错：%s"
 msgid "invalid timing file line: %s"
 msgstr "无效的时序文件行：%s"
 
-#: logsrvd/iolog_writer.c:946
-msgid "log is already complete, cannot be restarted"
-msgstr "日志已完成，无法重新启动"
-
-#: logsrvd/iolog_writer.c:977
-msgid "unable to restart log"
-msgstr "无法重新启动 log"
-
 #: logsrvd/logsrv_util.c:99 logsrvd/logsrv_util.c:106
 #: plugins/sudoers/sudoreplay.c:352 plugins/sudoers/sudoreplay.c:358
 #, c-format
@@ -520,133 +516,54 @@ msgstr "%s/%s：无法向前查找 %zu"
 msgid "unable to find resume point [%lld, %ld] in %s/%s"
 msgstr "无法找到恢复点 [%lld, %ld]（在 %s/%s 中）"
 
-#: logsrvd/logsrvd.c:294 logsrvd/logsrvd.c:357 logsrvd/logsrvd.c:398
-#: logsrvd/logsrvd.c:453 logsrvd/logsrvd.c:522 logsrvd/logsrvd.c:573
-#: logsrvd/logsrvd.c:605 logsrvd/logsrvd.c:637
+#: logsrvd/logsrvd.c:434 logsrvd/logsrvd.c:473 logsrvd/logsrvd.c:507
+#: logsrvd/logsrvd.c:557 logsrvd/logsrvd.c:632 logsrvd/logsrvd.c:664
+#: logsrvd/logsrvd.c:696 logsrvd/logsrvd.c:726 logsrvd/logsrvd_relay.c:511
+#: logsrvd/logsrvd_relay.c:544
 msgid "state machine error"
 msgstr "状态机错误"
 
-#: logsrvd/logsrvd.c:303
+#: logsrvd/logsrvd.c:443
 msgid "invalid AcceptMessage"
 msgstr "无效的 AcceptMessage"
 
-#: logsrvd/logsrvd.c:311
-msgid "error parsing AcceptMessage"
-msgstr "解析 AcceptMessage 出错"
-
-#: logsrvd/logsrvd.c:318
-msgid "error creating I/O log"
-msgstr "创建 I/O 日志出错"
-
-#: logsrvd/logsrvd.c:325
-msgid "error logging accept event"
-msgstr "记录接受事件时出错"
-
-#: logsrvd/logsrvd.c:366
+#: logsrvd/logsrvd.c:482
 msgid "invalid RejectMessage"
 msgstr "无效的 RejectMessage"
 
-#: logsrvd/logsrvd.c:374
-msgid "error parsing RejectMessage"
-msgstr "解析 RejectMessage 出错"
-
-#: logsrvd/logsrvd.c:380
-msgid "error logging reject event"
-msgstr "记录拒绝事件时出错"
-
-#: logsrvd/logsrvd.c:490
+#: logsrvd/logsrvd.c:593
 msgid "invalid AlertMessage"
 msgstr "无效的 AlertMessage"
 
-#: logsrvd/logsrvd.c:499
-msgid "error parsing AlertMessage"
-msgstr "解析 AlertMessage 出错"
-
-#: logsrvd/logsrvd.c:507
-msgid "error logging alert event"
-msgstr "记录警告事件时出错"
-
-#: logsrvd/logsrvd.c:528 logsrvd/logsrvd.c:579 logsrvd/logsrvd.c:611
+#: logsrvd/logsrvd.c:638 logsrvd/logsrvd.c:670 logsrvd/logsrvd.c:702
 msgid "protocol error"
 msgstr "协议错误"
 
-#: logsrvd/logsrvd.c:538
-msgid "error writing IoBuffer"
-msgstr "写入 IoBuffer 出错"
-
-#: logsrvd/logsrvd.c:590
-msgid "error writing ChangeWindowSize"
-msgstr "写入 ChangeWindowSize 出错"
-
-#: logsrvd/logsrvd.c:622
-msgid "error writing CommandSuspend"
-msgstr "写入 CommandSuspend 出错"
-
-#: logsrvd/logsrvd.c:707
+#: logsrvd/logsrvd.c:797
 msgid "unrecognized ClientMessage type"
 msgstr "无法识别的 ClientMessage 类型"
 
-#: logsrvd/logsrvd.c:978
+#: logsrvd/logsrvd.c:1082 logsrvd/logsrvd_journal.c:238
 msgid "client message too large"
 msgstr "客户端消息过长"
 
-#: logsrvd/logsrvd.c:1208 logsrvd/logsrvd.c:1216
-#, c-format
-msgid "unable to set TLS 1.2 ciphersuite to %s: %s"
-msgstr "无法将 TLS 1.2 密码套件设置为 %s: %s"
+#: logsrvd/logsrvd.c:1102
+msgid "invalid ClientMessage"
+msgstr "无效的 ClientMessage"
 
-#: logsrvd/logsrvd.c:1236 logsrvd/logsrvd.c:1244
-#, c-format
-msgid "unable to set TLS 1.3 ciphersuite to %s: %s"
-msgstr "无法将 TLS 1.3 密码套件设置为 %s: %s"
-
-#: logsrvd/logsrvd.c:1280
-#, c-format
-msgid "unable to get TLS server method: %s"
-msgstr "无法获取 TLS 服务器方法：%s"
-
-#: logsrvd/logsrvd.c:1285
-#, c-format
-msgid "unable to create TLS context: %s"
-msgstr "无法创建 TLS 上下文：%s"
-
-#: logsrvd/logsrvd.c:1292 plugins/sudoers/log_client.c:236
-#, c-format
-msgid "unable to load certificate %s"
-msgstr "无法加载证书 %s"
-
-#: logsrvd/logsrvd.c:1305 plugins/sudoers/log_client.c:216
-#, c-format
-msgid "unable to load certificate authority bundle %s"
-msgstr "无法加载数字证书认证机构集合（CA bundle） %s"
-
-#: logsrvd/logsrvd.c:1350 plugins/sudoers/log_client.c:249
-#, c-format
-msgid "unable to load private key %s"
-msgstr "无法加载私钥 %s"
-
-#: logsrvd/logsrvd.c:1367 logsrvd/logsrvd.c:1376
-#, c-format
-msgid "unable to set diffie-hellman parameters: %s"
-msgstr "无法设置 diffie-hellman 参数：%s"
-
-#: logsrvd/logsrvd.c:1389
-#, c-format
-msgid "unable to set minimum protocol version to TLS 1.2: %s"
-msgstr "无法将最低协议版本设置为 TLS 1.2：%s"
-
-#: logsrvd/logsrvd.c:1574
+#: logsrvd/logsrvd.c:1408
 msgid "unable to get remote IP addr"
 msgstr "无法获取远程 IP 地址"
 
-#: logsrvd/logsrvd.c:1602 plugins/sudoers/log_client.c:263
+#: logsrvd/logsrvd.c:1436 logsrvd/tls_client.c:203
+#: plugins/sudoers/log_client.c:263
 #, c-format
 msgid "Unable to attach user data to the ssl object: %s"
 msgstr "无法将用户数据附加到 ssl 对象上：%s"
 
-#: logsrvd/logsrvd.c:1610 logsrvd/logsrvd.c:1732 logsrvd/logsrvd.c:1834
-#: logsrvd/sendlog.c:1141 logsrvd/sendlog.c:1497 logsrvd/sendlog.c:1512
-#: logsrvd/sendlog.c:1570 plugins/sudoers/iolog.c:969
+#: logsrvd/logsrvd.c:1444 logsrvd/logsrvd.c:1570 logsrvd/logsrvd.c:1755
+#: logsrvd/sendlog.c:1146 logsrvd/tls_client.c:138 logsrvd/tls_client.c:154
+#: logsrvd/tls_client.c:216 plugins/sudoers/iolog.c:969
 #: plugins/sudoers/iolog.c:1102 plugins/sudoers/iolog.c:1200
 #: plugins/sudoers/log_client.c:109 plugins/sudoers/log_client.c:324
 #: plugins/sudoers/log_client.c:340 plugins/sudoers/log_client.c:386
@@ -664,286 +581,459 @@ msgstr "无法将用户数据附加到 ssl 对象上：%s"
 msgid "unable to add event to queue"
 msgstr "无法将事件添加到队列"
 
-#: logsrvd/logsrvd.c:1786 logsrvd/logsrvd.c:2033
-msgid "unable setup listen socket"
+#: logsrvd/logsrvd.c:1620 logsrvd/logsrvd.c:1953
+msgid "unable to setup listen socket"
 msgstr "无法设置监听套接字"
 
-#: logsrvd/logsrvd.c:1934
+#: logsrvd/logsrvd.c:1855
 msgid "sudo log server"
 msgstr "sudo 日志服务器"
 
-#: logsrvd/logsrvd.c:1936 logsrvd/sendlog.c:127
+#: logsrvd/logsrvd.c:1857 logsrvd/sendlog.c:122
 msgid "Options:"
 msgstr "选项："
 
-#: logsrvd/logsrvd.c:1938
+#: logsrvd/logsrvd.c:1859
 msgid "path to configuration file"
 msgstr "配置文件路径"
 
-#: logsrvd/logsrvd.c:1940 logsrvd/sendlog.c:129
+#: logsrvd/logsrvd.c:1861 logsrvd/sendlog.c:124
 msgid "display help message and exit"
 msgstr "显示帮助信息并退出"
 
-#: logsrvd/logsrvd.c:1942
+#: logsrvd/logsrvd.c:1863
 msgid "do not fork, run in the foreground"
 msgstr "不要进行 fork，在前台运行"
 
-#: logsrvd/logsrvd.c:1944
+#: logsrvd/logsrvd.c:1865
 msgid "percent chance connections will drop"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1946 logsrvd/sendlog.c:157
+#: logsrvd/logsrvd.c:1867 logsrvd/sendlog.c:152
 msgid "display version information and exit"
 msgstr "显示版本信息并退出"
 
-#: logsrvd/logsrvd.c:1994 logsrvd/sendlog.c:1735
+#: logsrvd/logsrvd.c:1917 logsrvd/sendlog.c:1518
 msgid "Protobuf-C version 1.3 or higher required"
 msgstr "需要 Protobuf-C 1.3 版或更高版本"
 
-#: logsrvd/logsrvd.c:2012
+#: logsrvd/logsrvd.c:1933
 #, c-format
 msgid "invalid random drop value: %s"
 msgstr "无效的随机丢弃值：%s"
 
-#: logsrvd/logsrvd.c:2016 logsrvd/sendlog.c:1785
+#: logsrvd/logsrvd.c:1936 logsrvd/sendlog.c:1568
 #: plugins/sudoers/cvtsudoers.c:228 plugins/sudoers/sudoreplay.c:299
 #: plugins/sudoers/visudo.c:175
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s 版本 %s\n"
 
-#: logsrvd/logsrvd_conf.c:332
+#: logsrvd/logsrvd_conf.c:446
 msgid "TLS not supported"
 msgstr "不支持 TLS"
 
-#: logsrvd/logsrvd_conf.c:344
+#: logsrvd/logsrvd_conf.c:468
 #, c-format
 msgid "%s:%s"
 msgstr "%s:%s"
 
-#: logsrvd/logsrvd_conf.c:411 logsrvd/logsrvd_conf.c:656
+#: logsrvd/logsrvd_conf.c:541 logsrvd/logsrvd_conf.c:876
 #, c-format
 msgid "%s: not a fully qualified path"
 msgstr "%s：不是完全合格的路径"
 
-#: logsrvd/logsrvd_conf.c:770
+#: logsrvd/logsrvd_conf.c:1035
 #, c-format
 msgid "%s:%d unmatched '[': %s"
 msgstr "%s:%d 不匹配的 '['：%s"
 
-#: logsrvd/logsrvd_conf.c:781
+#: logsrvd/logsrvd_conf.c:1046
 #, c-format
 msgid "%s:%d invalid config section: %s"
 msgstr "%s:%d 无效的配置段：%s"
 
-#: logsrvd/logsrvd_conf.c:789
+#: logsrvd/logsrvd_conf.c:1054
 #, c-format
 msgid "%s:%d invalid configuration line: %s"
 msgstr "%s:%d 无效的配置行：%s"
 
-#: logsrvd/logsrvd_conf.c:795
+#: logsrvd/logsrvd_conf.c:1060
 #, c-format
 msgid "%s:%d expected section name: %s"
 msgstr ""
 
-#: logsrvd/logsrvd_conf.c:809
+#: logsrvd/logsrvd_conf.c:1074
 #, c-format
 msgid "invalid value for %s: %s"
 msgstr "用于 %s 的无效的值：%s"
 
-#: logsrvd/logsrvd_conf.c:817
+#: logsrvd/logsrvd_conf.c:1082
 #, c-format
 msgid "%s:%d unknown key: %s"
 msgstr "%s:%d 未知的键：%s"
 
-#: logsrvd/logsrvd_conf.c:1006
-#, fuzzy, c-format
-#| msgid "unknown login class: %s"
+#: logsrvd/logsrvd_conf.c:1294
+#, c-format
 msgid "unknown syslog facility %s"
-msgstr "未知的登录类别：%s"
+msgstr "未知的 syslog 设施 %s"
 
-#: logsrvd/logsrvd_conf.c:1010 logsrvd/logsrvd_conf.c:1014
-#: logsrvd/logsrvd_conf.c:1018
+#: logsrvd/logsrvd_conf.c:1298 logsrvd/logsrvd_conf.c:1302
+#: logsrvd/logsrvd_conf.c:1306
 #, c-format
 msgid "unknown syslog priority %s"
 msgstr "位置的 syslog 优先级 %s"
 
-#: logsrvd/sendlog.c:125
+#: logsrvd/logsrvd_conf.c:1374
+msgid "unable to initialize server TLS context"
+msgstr "无法初始化服务器 TLS 上下文"
+
+#: logsrvd/logsrvd_conf.c:1394
+msgid "unable to initialize relay TLS context"
+msgstr "无法初始化中继 TLS 上下文"
+
+#: logsrvd/logsrvd_journal.c:126 logsrvd/logsrvd_journal.c:367
+#: logsrvd/logsrvd_journal.c:373
+msgid "unable to create journal file"
+msgstr "无法创建日志文件"
+
+#: logsrvd/logsrvd_journal.c:134
+msgid "unable to lock journal file"
+msgstr "无法锁定日志文件"
+
+#: logsrvd/logsrvd_journal.c:163 logsrvd/logsrvd_journal.c:406
+#: logsrvd/logsrvd_journal.c:411
+msgid "unable to write journal file"
+msgstr "无法写入日志文件"
+
+#: logsrvd/logsrvd_journal.c:171 logsrvd/logsrvd_journal.c:178
+msgid "unable to rename journal file"
+msgstr "无法重命名日志文件"
+
+#: logsrvd/logsrvd_journal.c:228 logsrvd/logsrvd_journal.c:258
+msgid "unexpected EOF reading journal file"
+msgstr "读取日志文件时未预期的 EOF"
+
+#: logsrvd/logsrvd_journal.c:230 logsrvd/logsrvd_journal.c:260
+msgid "error reading journal file"
+msgstr "读取日志文件出错"
+
+#: logsrvd/logsrvd_journal.c:270 logsrvd/logsrvd_journal.c:325
+msgid "invalid journal file, unable to restart"
+msgstr "无效的日志文件，无法重新启动"
+
+#: logsrvd/logsrvd_local.c:149
+msgid "error parsing AcceptMessage"
+msgstr "解析 AcceptMessage 出错"
+
+#: logsrvd/logsrvd_local.c:156
+msgid "error creating I/O log"
+msgstr "创建 I/O 日志出错"
+
+#: logsrvd/logsrvd_local.c:164
+msgid "error logging accept event"
+msgstr "记录接受事件时出错"
+
+#: logsrvd/logsrvd_local.c:196
+msgid "error parsing RejectMessage"
+msgstr "解析 RejectMessage 出错"
+
+#: logsrvd/logsrvd_local.c:202
+msgid "error logging reject event"
+msgstr "记录拒绝事件时出错"
+
+#: logsrvd/logsrvd_local.c:276
+msgid "log is already complete, cannot be restarted"
+msgstr "日志已完成，无法重新启动"
+
+#: logsrvd/logsrvd_local.c:307
+msgid "unable to restart log"
+msgstr "无法重新启动 log"
+
+#: logsrvd/logsrvd_local.c:322
+msgid "error parsing AlertMessage"
+msgstr "解析 AlertMessage 出错"
+
+#: logsrvd/logsrvd_local.c:330
+msgid "error logging alert event"
+msgstr "记录警告事件时出错"
+
+#: logsrvd/logsrvd_local.c:397
+msgid "error writing IoBuffer"
+msgstr "写入 IoBuffer 出错"
+
+#: logsrvd/logsrvd_local.c:434
+msgid "error writing ChangeWindowSize"
+msgstr "写入 ChangeWindowSize 出错"
+
+#: logsrvd/logsrvd_local.c:474
+msgid "error writing CommandSuspend"
+msgstr "写入 CommandSuspend 出错"
+
+#: logsrvd/logsrvd_relay.c:434
+msgid "TLS handshake with relay host failed"
+msgstr "与中继主机的 TLS 握手失败"
+
+#: logsrvd/logsrvd_relay.c:462
+msgid "unable to connect to relay host"
+msgstr "无法连接到中继主机"
+
+#: logsrvd/logsrvd_relay.c:519 logsrvd/sendlog.c:951
+#: plugins/sudoers/log_client.c:1466
+msgid "invalid ServerHello"
+msgstr "无效的 ServerHello"
+
+#: logsrvd/logsrvd_relay.c:677
+msgid "unrecognized ServerMessage type"
+msgstr "无法识别的 ServerMessage 类型"
+
+#: logsrvd/logsrvd_relay.c:709
+#, fuzzy
+#| msgid "timeout reading from server"
+msgid "timeout reading from relay"
+msgstr "从服务器读取超时"
+
+#: logsrvd/logsrvd_relay.c:761
+msgid "relay host name does not match certificate"
+msgstr ""
+
+#: logsrvd/logsrvd_relay.c:765 logsrvd/logsrvd_relay.c:786
+#: logsrvd/logsrvd_relay.c:794
+msgid "error reading from relay"
+msgstr "从中继读取出错"
+
+#: logsrvd/logsrvd_relay.c:817
+msgid "unable to read from relay"
+msgstr "无法从中继读取"
+
+#: logsrvd/logsrvd_relay.c:831 logsrvd/logsrvd_relay.c:951
+msgid "relay server closed connection"
+msgstr "中继服务器关闭了连接"
+
+#: logsrvd/logsrvd_relay.c:850
+msgid "server message too large"
+msgstr "服务器消息过大"
+
+#: logsrvd/logsrvd_relay.c:915
+msgid "timeout writing to relay"
+msgstr "写入中继时超时"
+
+#: logsrvd/logsrvd_relay.c:973 logsrvd/logsrvd_relay.c:981
+#: logsrvd/logsrvd_relay.c:993
+msgid "error writing to relay"
+msgstr "写入中继时出错"
+
+#: logsrvd/sendlog.c:120
 msgid "send sudo I/O log to remote server"
 msgstr "将 sudo I/O 日志发送到远程服务器"
 
-#: logsrvd/sendlog.c:131
+#: logsrvd/sendlog.c:126
 msgid "only send an accept event (no I/O)"
-msgstr ""
+msgstr "只发送一个 accept 事件（没有 I/O）"
 
-#: logsrvd/sendlog.c:134
+#: logsrvd/sendlog.c:129
 msgid "certificate bundle file to verify server's cert against"
 msgstr ""
 
-#: logsrvd/sendlog.c:136
+#: logsrvd/sendlog.c:131
 msgid "certificate file for TLS handshake"
-msgstr ""
+msgstr "用于 TLS 握手的证书文件"
 
-#: logsrvd/sendlog.c:139
+#: logsrvd/sendlog.c:134
 msgid "host to send logs to"
 msgstr ""
 
-#: logsrvd/sendlog.c:141
+#: logsrvd/sendlog.c:136
 msgid "remote ID of I/O log to be resumed"
 msgstr ""
 
-#: logsrvd/sendlog.c:144
+#: logsrvd/sendlog.c:139
 msgid "private key file"
 msgstr ""
 
-#: logsrvd/sendlog.c:146
+#: logsrvd/sendlog.c:141
 msgid "do not verify server certificate"
 msgstr "不要验证服务器证书"
 
-#: logsrvd/sendlog.c:149
+#: logsrvd/sendlog.c:144
 msgid "port to use when connecting to host"
 msgstr "连接到主机时使用的端口"
 
-#: logsrvd/sendlog.c:151
+#: logsrvd/sendlog.c:146
 msgid "restart previous I/O log transfer"
 msgstr ""
 
-#: logsrvd/sendlog.c:153
+#: logsrvd/sendlog.c:148
 msgid "reject the command with the given reason"
 msgstr ""
 
-#: logsrvd/sendlog.c:155
+#: logsrvd/sendlog.c:150
 msgid "test audit server by sending selected I/O log n times in parallel"
 msgstr ""
 
-#: logsrvd/sendlog.c:180 plugins/sudoers/log_client.c:432
+#: logsrvd/sendlog.c:175 plugins/sudoers/log_client.c:432
 #, c-format
 msgid "unable to look up %s:%s: %s"
 msgstr "无法查找 %s:%s：%s"
 
-#: logsrvd/sendlog.c:218
+#: logsrvd/sendlog.c:213
 msgid "unable to get server IP addr"
 msgstr "无法获取服务器 IP 地址"
 
-#: logsrvd/sendlog.c:272 plugins/sudoers/sudoreplay.c:851
+#: logsrvd/sendlog.c:267 plugins/sudoers/sudoreplay.c:851
 #, c-format
 msgid "unable to read %s/%s: %s"
 msgstr "无法读取 %s/%s：%s"
 
-#: logsrvd/sendlog.c:293 plugins/sudoers/log_client.c:692
+#: logsrvd/sendlog.c:288 plugins/sudoers/log_client.c:692
 #, c-format
 msgid "client message too large: %zu"
 msgstr "客户端消息过大：%zu"
 
-#: logsrvd/sendlog.c:826
+#: logsrvd/sendlog.c:830
 #, c-format
 msgid "%s: write buffer already in use"
 msgstr "%s：写缓冲已在使用"
 
-#: logsrvd/sendlog.c:878 plugins/sudoers/iolog.c:893
+#: logsrvd/sendlog.c:882 plugins/sudoers/iolog.c:893
 #: plugins/sudoers/iolog.c:962
 #, c-format
 msgid "unexpected I/O event %d"
 msgstr "未预期的 I/O 事件 %d"
 
-#: logsrvd/sendlog.c:924 logsrvd/sendlog.c:941 logsrvd/sendlog.c:975
+#: logsrvd/sendlog.c:928 logsrvd/sendlog.c:945 logsrvd/sendlog.c:979
 #: plugins/sudoers/log_client.c:1124 plugins/sudoers/log_client.c:1392
 #: plugins/sudoers/log_client.c:1460 plugins/sudoers/log_client.c:1496
 #, c-format
 msgid "%s: unexpected state %d"
 msgstr "%s：未预期的状态 %d"
 
-#: logsrvd/sendlog.c:947 plugins/sudoers/log_client.c:1466
-msgid "invalid ServerHello"
-msgstr "无效的 ServerHello"
-
-#: logsrvd/sendlog.c:1011 plugins/sudoers/log_client.c:1540
+#: logsrvd/sendlog.c:1015 plugins/sudoers/log_client.c:1540
 #, c-format
 msgid "error message received from server: %s"
 msgstr "从服务器收到了错误消息：%s"
 
-#: logsrvd/sendlog.c:1024 plugins/sudoers/log_client.c:1553
+#: logsrvd/sendlog.c:1028 plugins/sudoers/log_client.c:1553
 #, c-format
 msgid "abort message received from server: %s"
 msgstr "从服务器收到了中止消息：%s"
 
-#: logsrvd/sendlog.c:1043 plugins/sudoers/log_client.c:1572
+#: logsrvd/sendlog.c:1047 plugins/sudoers/log_client.c:1572
 msgid "unable to unpack ServerMessage"
 msgstr "无法解包 ServerMessage"
 
-#: logsrvd/sendlog.c:1083 plugins/sudoers/log_client.c:1603
+#: logsrvd/sendlog.c:1087 plugins/sudoers/log_client.c:1603
 #, c-format
 msgid "%s: unexpected type_case value %d"
-msgstr ""
+msgstr "%s：未预期的 type_case 值 %d"
 
-#: logsrvd/sendlog.c:1112
+#: logsrvd/sendlog.c:1116
 msgid "timeout reading from server"
 msgstr "从服务器读取超时"
 
-#: logsrvd/sendlog.c:1190
+#: logsrvd/sendlog.c:1195
 msgid "premature EOF"
 msgstr "过早的文件结束"
 
-#: logsrvd/sendlog.c:1203 plugins/sudoers/log_client.c:1761
+#: logsrvd/sendlog.c:1208 plugins/sudoers/log_client.c:1761
 #, c-format
 msgid "server message too large: %u"
 msgstr "服务器消息过大：%u"
 
-#: logsrvd/sendlog.c:1254
+#: logsrvd/sendlog.c:1259
 msgid "timeout writing to server"
 msgstr "写入服务器时超时"
 
-#: logsrvd/sendlog.c:1473 plugins/sudoers/log_client.c:296
-msgid "TLS handshake timeout occurred"
-msgstr "TLS 握手超时"
-
-#: logsrvd/sendlog.c:1492 logsrvd/sendlog.c:1507
-#: plugins/sudoers/log_client.c:318 plugins/sudoers/log_client.c:334
-msgid "unable to set event"
-msgstr "无法设置事件"
-
-#: logsrvd/sendlog.c:1517 logsrvd/sendlog.c:1521
-#, c-format
-msgid "TLS connection failed: %s"
-msgstr "TLS 连接失败：%s"
-
-#: logsrvd/sendlog.c:1554
-#, c-format
-msgid "Unable to initialize ssl context: %s"
-msgstr "无法初始化 ssl 上下文：%s"
-
-#: logsrvd/sendlog.c:1559 plugins/sudoers/log_client.c:258
-#, c-format
-msgid "Unable to allocate ssl object: %s"
-msgstr "无法分配 ssl 对象：%s"
-
-#: logsrvd/sendlog.c:1564
-#, c-format
-msgid "Unable to attach socket to the ssl object: %s"
-msgstr "无法将套接字附加给 ssl 对象：%s"
-
-#: logsrvd/sendlog.c:1808
+#: logsrvd/sendlog.c:1591
 msgid "both restart point and iolog ID must be specified"
 msgstr ""
 
-#: logsrvd/sendlog.c:1812
+#: logsrvd/sendlog.c:1595
 msgid "a restart point may not be set when no I/O is sent"
 msgstr ""
 
-#: logsrvd/sendlog.c:1887
+#: logsrvd/sendlog.c:1671
 #, c-format
 msgid "exited prematurely with state %d"
 msgstr "过早地退出，状态码为 %d"
 
-#: logsrvd/sendlog.c:1888
+#: logsrvd/sendlog.c:1672
 #, c-format
 msgid "elapsed time sent to server [%lld, %ld]"
 msgstr ""
 
-#: logsrvd/sendlog.c:1890
+#: logsrvd/sendlog.c:1674
 #, c-format
 msgid "commit point received from server [%lld, %ld]"
 msgstr ""
+
+#: logsrvd/tls_client.c:113 plugins/sudoers/log_client.c:296
+msgid "TLS handshake timeout occurred"
+msgstr "TLS 握手超时"
+
+#: logsrvd/tls_client.c:133 logsrvd/tls_client.c:149
+#: plugins/sudoers/log_client.c:318 plugins/sudoers/log_client.c:334
+msgid "unable to set event"
+msgstr "无法设置事件"
+
+#: logsrvd/tls_client.c:159 logsrvd/tls_client.c:163
+#, c-format
+msgid "TLS connection failed: %s"
+msgstr "TLS 连接失败：%s"
+
+#: logsrvd/tls_client.c:197
+#, c-format
+msgid "unable to allocate ssl object: %s"
+msgstr "无法分配 ssl 对象：%s"
+
+#: logsrvd/tls_client.c:210
+#, c-format
+msgid "Unable to attach socket to the ssl object: %s"
+msgstr "无法将套接字附加给 ssl 对象：%s"
+
+#: logsrvd/tls_client.c:238
+msgid "unable to initialize TLS context"
+msgstr "无法初始化 TLS 上下文"
+
+#: logsrvd/tls_init.c:129 logsrvd/tls_init.c:137
+#, c-format
+msgid "unable to set TLS 1.2 ciphersuite to %s: %s"
+msgstr "无法将 TLS 1.2 密码套件设置为 %s: %s"
+
+#: logsrvd/tls_init.c:157 logsrvd/tls_init.c:165
+#, c-format
+msgid "unable to set TLS 1.3 ciphersuite to %s: %s"
+msgstr "无法将 TLS 1.3 密码套件设置为 %s: %s"
+
+#: logsrvd/tls_init.c:200
+#, c-format
+msgid "unable to create TLS context: %s"
+msgstr "无法创建 TLS 上下文：%s"
+
+#: logsrvd/tls_init.c:206
+#, c-format
+msgid "unable to set minimum protocol version to TLS 1.2: %s"
+msgstr "无法将最低协议版本设置为 TLS 1.2：%s"
+
+#: logsrvd/tls_init.c:282
+#, c-format
+msgid "unable to set diffie-hellman parameters: %s"
+msgstr "无法设置 diffie-hellman 参数：%s"
+
+#: logsrvd/tls_init.c:291
+#, c-format
+msgid "unable to read diffie-hellman parameters: %s"
+msgstr "无法读取 diffie-hellman 参数：%s"
+
+#: logsrvd/tls_init.c:296 plugins/sudoers/check.c:274
+#: plugins/sudoers/cvtsudoers.c:618 plugins/sudoers/cvtsudoers.c:639
+#: plugins/sudoers/cvtsudoers.c:1249 plugins/sudoers/cvtsudoers_json.c:872
+#: plugins/sudoers/cvtsudoers_ldif.c:688 plugins/sudoers/sudoers.c:1028
+#: plugins/sudoers/sudoreplay.c:1435 plugins/sudoers/timestamp.c:433
+#: plugins/sudoers/tsdump.c:128 plugins/sudoers/visudo.c:913
+#, c-format
+msgid "unable to open %s"
+msgstr "无法打开 %s"
 
 #: plugins/sudoers/audit.c:259 plugins/sudoers/audit.c:398
 #: plugins/sudoers/log_client.c:960 plugins/sudoers/log_client.c:1008
@@ -1054,33 +1144,33 @@ msgstr "%s：无法验证目标！可能遭到了攻击！：%s"
 msgid "unable to initialize PAM: %s"
 msgstr "无法初始化 PAM：%s"
 
-#: plugins/sudoers/auth/pam.c:337
+#: plugins/sudoers/auth/pam.c:340
 #, c-format
 msgid "PAM authentication error: %s"
 msgstr "PAM 认证出错：%s"
 
-#: plugins/sudoers/auth/pam.c:356
+#: plugins/sudoers/auth/pam.c:359
 msgid "account validation failure, is your account locked?"
 msgstr "账户验证失败，您的账户是不是上锁了？"
 
-#: plugins/sudoers/auth/pam.c:367
+#: plugins/sudoers/auth/pam.c:370
 msgid "Account or password is expired, reset your password and try again"
 msgstr "账户或密码过期，重置您的密码并重试"
 
-#: plugins/sudoers/auth/pam.c:373
+#: plugins/sudoers/auth/pam.c:376
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr "无法更改过期的密码：%s"
 
-#: plugins/sudoers/auth/pam.c:384
+#: plugins/sudoers/auth/pam.c:387
 msgid "Password expired, contact your system administrator"
 msgstr "密码过期，联系您的系统管理员"
 
-#: plugins/sudoers/auth/pam.c:389
+#: plugins/sudoers/auth/pam.c:392
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
 msgstr "账户过期，或 PAM 配置缺少 sudo 使用的“account”节，联系您的系统管理员"
 
-#: plugins/sudoers/auth/pam.c:397 plugins/sudoers/auth/pam.c:402
+#: plugins/sudoers/auth/pam.c:400 plugins/sudoers/auth/pam.c:405
 #, c-format
 msgid "PAM account management error: %s"
 msgstr "PAM 账户管理出错：%s"
@@ -1170,16 +1260,6 @@ msgstr "读取时序文件出错：%s"
 msgid "ignoring lecture file %s: not a regular file"
 msgstr "%s 不是常规文件"
 
-#: plugins/sudoers/check.c:274 plugins/sudoers/cvtsudoers.c:618
-#: plugins/sudoers/cvtsudoers.c:639 plugins/sudoers/cvtsudoers.c:1249
-#: plugins/sudoers/cvtsudoers_json.c:872 plugins/sudoers/cvtsudoers_ldif.c:688
-#: plugins/sudoers/sudoers.c:1028 plugins/sudoers/sudoreplay.c:1435
-#: plugins/sudoers/timestamp.c:431 plugins/sudoers/tsdump.c:128
-#: plugins/sudoers/visudo.c:913
-#, c-format
-msgid "unable to open %s"
-msgstr "无法打开 %s"
-
 #: plugins/sudoers/check.c:283
 msgid ""
 "\n"
@@ -1210,7 +1290,7 @@ msgstr "未知的用户 ID：%u"
 #: plugins/sudoers/check.c:330 plugins/sudoers/exptilde.c:85
 #: plugins/sudoers/iolog.c:118 plugins/sudoers/policy.c:1123
 #: plugins/sudoers/sudoers.c:432 plugins/sudoers/sudoers.c:1283
-#: plugins/sudoers/testsudoers.c:216 plugins/sudoers/testsudoers.c:383
+#: plugins/sudoers/testsudoers.c:215 plugins/sudoers/testsudoers.c:382
 #, c-format
 msgid "unknown user: %s"
 msgstr "未知用户：%s"
@@ -1255,7 +1335,7 @@ msgstr "顺序填充：%s: %s"
 msgid "%s grammar version %d\n"
 msgstr "%s 语法版本 %d\n"
 
-#: plugins/sudoers/cvtsudoers.c:247 plugins/sudoers/testsudoers.c:167
+#: plugins/sudoers/cvtsudoers.c:247 plugins/sudoers/testsudoers.c:159
 #, c-format
 msgid "unsupported input format %s"
 msgstr "不支持的输入格式 %s"
@@ -1271,7 +1351,7 @@ msgid "%s: input and output files must be different"
 msgstr "%s：输入和输出文件不能相同"
 
 #: plugins/sudoers/cvtsudoers.c:330 plugins/sudoers/sudoers.c:177
-#: plugins/sudoers/testsudoers.c:255 plugins/sudoers/visudo.c:247
+#: plugins/sudoers/testsudoers.c:254 plugins/sudoers/visudo.c:247
 #: plugins/sudoers/visudo.c:597 plugins/sudoers/visudo.c:917
 msgid "unable to initialize sudoers default values"
 msgstr "无法初始化 sudoers 默认值"
@@ -1317,7 +1397,7 @@ msgid "parse error in %s\n"
 msgstr "%s 中出现解析错误\n"
 
 #: plugins/sudoers/cvtsudoers.c:1296 plugins/sudoers/sudoreplay.c:1124
-#: plugins/sudoers/timestamp.c:315 plugins/sudoers/timestamp.c:318
+#: plugins/sudoers/timestamp.c:317 plugins/sudoers/timestamp.c:320
 #, c-format
 msgid "unable to write to %s"
 msgstr "无法写入 %s"
@@ -2140,7 +2220,7 @@ msgid "Local IP address and netmask pairs:\n"
 msgstr "本地 IP 地址和网络掩码对：\n"
 
 #: plugins/sudoers/iolog.c:143 plugins/sudoers/sudoers.c:437
-#: plugins/sudoers/sudoers.c:1317 plugins/sudoers/testsudoers.c:407
+#: plugins/sudoers/sudoers.c:1317 plugins/sudoers/testsudoers.c:406
 #, c-format
 msgid "unknown group: %s"
 msgstr "未知组：%s"
@@ -2168,8 +2248,8 @@ msgid "%s: internal error, I/O log file for event %d not open"
 msgstr "%s：内部错误，事件 %d 的 I/O 日志文件未打开"
 
 #: plugins/sudoers/iolog.c:992 plugins/sudoers/iolog.c:1120
-#: plugins/sudoers/iolog.c:1225 plugins/sudoers/timestamp.c:836
-#: plugins/sudoers/timestamp.c:928 plugins/sudoers/visudo.c:487
+#: plugins/sudoers/iolog.c:1225 plugins/sudoers/timestamp.c:849
+#: plugins/sudoers/timestamp.c:941 plugins/sudoers/visudo.c:487
 #: plugins/sudoers/visudo.c:493
 msgid "unable to read the clock"
 msgstr "无法读取时钟"
@@ -2251,6 +2331,26 @@ msgstr "事件循环中出错"
 #, c-format
 msgid "Creation of new SSL_CTX object failed: %s"
 msgstr "创建新的 SSL_CTX 对象失败：%s"
+
+#: plugins/sudoers/log_client.c:216
+#, c-format
+msgid "unable to load certificate authority bundle %s"
+msgstr "无法加载数字证书认证机构集合（CA bundle） %s"
+
+#: plugins/sudoers/log_client.c:236
+#, c-format
+msgid "unable to load certificate %s"
+msgstr "无法加载证书 %s"
+
+#: plugins/sudoers/log_client.c:249
+#, c-format
+msgid "unable to load private key %s"
+msgstr "无法加载私钥 %s"
+
+#: plugins/sudoers/log_client.c:258
+#, c-format
+msgid "Unable to allocate ssl object: %s"
+msgstr "无法分配 ssl 对象：%s"
 
 #: plugins/sudoers/log_client.c:345 plugins/sudoers/log_client.c:350
 #, c-format
@@ -2428,7 +2528,7 @@ msgstr "无效的 LDIF 属性：%s"
 msgid "invalid %.*s set by sudo front-end"
 msgstr "sudo 前端设置了无效的 %.*s"
 
-#: plugins/sudoers/policy.c:314 plugins/sudoers/testsudoers.c:269
+#: plugins/sudoers/policy.c:314 plugins/sudoers/testsudoers.c:268
 msgid "unable to parse network address list"
 msgstr "无法解析网络地址列表"
 
@@ -2547,7 +2647,7 @@ msgid "unable to cache gid %u, already exists"
 msgstr "无法缓存组 ID %u，已存在"
 
 #: plugins/sudoers/pwutil.c:601 plugins/sudoers/pwutil.c:619
-#: plugins/sudoers/pwutil.c:680 plugins/sudoers/pwutil.c:730
+#: plugins/sudoers/pwutil.c:680 plugins/sudoers/pwutil.c:729
 #, c-format
 msgid "unable to cache group %s"
 msgstr "无法缓存组 %s"
@@ -2557,24 +2657,24 @@ msgstr "无法缓存组 %s"
 msgid "unable to cache group %s, already exists"
 msgstr "无法缓存组 %s，已存在"
 
-#: plugins/sudoers/pwutil.c:877 plugins/sudoers/pwutil.c:928
-#: plugins/sudoers/pwutil.c:978 plugins/sudoers/pwutil.c:1030
+#: plugins/sudoers/pwutil.c:876 plugins/sudoers/pwutil.c:927
+#: plugins/sudoers/pwutil.c:977 plugins/sudoers/pwutil.c:1029
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "无法缓存组列表 %s，已存在"
 
-#: plugins/sudoers/pwutil.c:883 plugins/sudoers/pwutil.c:933
-#: plugins/sudoers/pwutil.c:984 plugins/sudoers/pwutil.c:1035
+#: plugins/sudoers/pwutil.c:882 plugins/sudoers/pwutil.c:932
+#: plugins/sudoers/pwutil.c:983 plugins/sudoers/pwutil.c:1034
 #, c-format
 msgid "unable to cache group list for %s"
 msgstr "无法缓存组列表 %s"
 
-#: plugins/sudoers/pwutil.c:922
+#: plugins/sudoers/pwutil.c:921
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "无法对 %s 解析组"
 
-#: plugins/sudoers/pwutil.c:1024
+#: plugins/sudoers/pwutil.c:1023
 #, c-format
 msgid "unable to parse gids for %s"
 msgstr "无法解析 %s 的组 ID"
@@ -2933,11 +3033,11 @@ msgstr ""
 "  -s, --speed=数值       加速或减慢输出\n"
 "  -V, --version          显示版本信息并退出"
 
-#: plugins/sudoers/testsudoers.c:345
+#: plugins/sudoers/testsudoers.c:344
 msgid "\thost  unmatched"
 msgstr "\t主机不匹配"
 
-#: plugins/sudoers/testsudoers.c:348
+#: plugins/sudoers/testsudoers.c:347
 msgid ""
 "\n"
 "Command allowed"
@@ -2945,7 +3045,7 @@ msgstr ""
 "\n"
 "命令允许"
 
-#: plugins/sudoers/testsudoers.c:349
+#: plugins/sudoers/testsudoers.c:348
 msgid ""
 "\n"
 "Command denied"
@@ -2953,7 +3053,7 @@ msgstr ""
 "\n"
 "命令被拒"
 
-#: plugins/sudoers/testsudoers.c:349
+#: plugins/sudoers/testsudoers.c:348
 msgid ""
 "\n"
 "Command unmatched"
@@ -2966,26 +3066,26 @@ msgstr ""
 msgid "%s is group writable"
 msgstr "%s 可被组写"
 
-#: plugins/sudoers/timestamp.c:326 plugins/sudoers/timestamp.c:661
+#: plugins/sudoers/timestamp.c:328 plugins/sudoers/timestamp.c:663
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "无法将时间戳文件截短为 %lld 字节"
 
-#: plugins/sudoers/timestamp.c:847
+#: plugins/sudoers/timestamp.c:860
 msgid "ignoring time stamp from the future"
 msgstr "将忽略超前的时间戳"
 
-#: plugins/sudoers/timestamp.c:870
+#: plugins/sudoers/timestamp.c:883
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr "时间戳太超前：%20.20s"
 
-#: plugins/sudoers/timestamp.c:992
+#: plugins/sudoers/timestamp.c:1005
 #, c-format
 msgid "unable to lock time stamp file %s"
 msgstr "无法锁定时间戳文件 %s"
 
-#: plugins/sudoers/timestamp.c:1036 plugins/sudoers/timestamp.c:1056
+#: plugins/sudoers/timestamp.c:1049 plugins/sudoers/timestamp.c:1069
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr "致辞(lecture)状态路径过长：%s/%s"
@@ -3190,6 +3290,9 @@ msgstr "字符串中未预期的换行"
 msgid "too many levels of includes"
 msgstr "include 嵌套层数过多"
 
+#~ msgid "unable to get TLS server method: %s"
+#~ msgstr "无法获取 TLS 服务器方法：%s"
+
 #~ msgid "%s:%u unable to parse \"%s\""
 #~ msgstr "%s:%u 无法解析 \"%s\""
 
@@ -3212,9 +3315,6 @@ msgstr "include 嵌套层数过多"
 
 #~ msgid "Preload the dummy exec functions contained in the sudo_noexec library"
 #~ msgstr "预加载“sudo_noexec”库中包含的哑 exec 函数"
-
-#~ msgid "unable to lock log file: %s"
-#~ msgstr "无法锁定日志文件：%s"
 
 #~ msgid "sudo_ldap_conf_add_ports: port too large"
 #~ msgstr "sudo_ldap_conf_add_ports：端口太大"

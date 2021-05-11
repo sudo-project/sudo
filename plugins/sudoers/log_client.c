@@ -89,7 +89,7 @@ connect_cb(int sock, int what, void *v)
  */
 static int
 timed_connect(int sock, const struct sockaddr *addr, socklen_t addrlen,
-    const struct timespec *timo)
+    const struct timespec *timeout)
 {
     struct sudo_event_base *evbase = NULL;
     struct sudo_event *connect_event = NULL;
@@ -105,7 +105,7 @@ timed_connect(int sock, const struct sockaddr *addr, socklen_t addrlen,
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	if (sudo_ev_add(evbase, connect_event, timo, false) == -1) {
+	if (sudo_ev_add(evbase, connect_event, timeout, false) == -1) {
 	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    goto done;
 	}
@@ -280,6 +280,7 @@ struct tls_connect_closure {
     SSL *ssl;
     const char *host;
     const char *port;
+    const struct timespec *timeout;
     struct sudo_event_base *evbase;
     struct sudo_event *tls_connect_ev;
 };
@@ -288,7 +289,7 @@ static void
 tls_connect_cb(int sock, int what, void *v)
 {
     struct tls_connect_closure *closure = v;
-    struct timespec timeo = { 10, 0 };
+    const struct timespec *timeout = closure->timeout;
     int tls_con;
     debug_decl(tls_connect_cb, SUDOERS_DEBUG_UTIL);
 
@@ -320,7 +321,7 @@ tls_connect_cb(int sock, int what, void *v)
 		    }
 		}
 		if (sudo_ev_add(closure->evbase, closure->tls_connect_ev,
-			&timeo, false) == -1) {
+			timeout, false) == -1) {
                     sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
@@ -336,7 +337,7 @@ tls_connect_cb(int sock, int what, void *v)
 		    }
 		}
 		if (sudo_ev_add(closure->evbase, closure->tls_connect_ev,
-			&timeo, false) == -1) {
+			timeout, false) == -1) {
                     sudo_warnx("%s", U_("unable to add event to queue"));
 		    goto bad;
                 }
@@ -364,7 +365,7 @@ bad:
 
 static bool
 tls_timed_connect(SSL *ssl, const char *host, const char *port,
-    const struct timespec *timo)
+    const struct timespec *timeout)
 {
     struct tls_connect_closure closure;
     debug_decl(tls_timed_connect, SUDOERS_DEBUG_UTIL);
@@ -373,6 +374,7 @@ tls_timed_connect(SSL *ssl, const char *host, const char *port,
     closure.ssl = ssl;
     closure.host = host;
     closure.port = port;
+    closure.timeout = timeout;
     closure.evbase = sudo_ev_base_alloc();
     closure.tls_connect_ev = sudo_ev_alloc(SSL_get_fd(ssl),
         SUDO_PLUGIN_EV_WRITE, tls_connect_cb, &closure);
@@ -382,7 +384,7 @@ tls_timed_connect(SSL *ssl, const char *host, const char *port,
 	goto done;
     }
 
-    if (sudo_ev_add(closure.evbase, closure.tls_connect_ev, timo, false) == -1) {
+    if (sudo_ev_add(closure.evbase, closure.tls_connect_ev, timeout, false) == -1) {
 	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
@@ -410,7 +412,7 @@ static int
 connect_server(const char *host, const char *port, bool tls,
     struct client_closure *closure, const char **reason)
 {
-    const struct timespec *timo = &closure->log_details->server_timeout;
+    const struct timespec *timeout = &closure->log_details->server_timeout;
     struct addrinfo hints, *res, *res0;
     const char *addr, *cause = NULL;
     int error, sock = -1;
@@ -471,7 +473,7 @@ connect_server(const char *host, const char *port, bool tls,
                 continue;
             }
         }
-	if (timed_connect(sock, res->ai_addr, res->ai_addrlen, timo) == -1) {
+	if (timed_connect(sock, res->ai_addr, res->ai_addrlen, timeout) == -1) {
 	    /* No need to set cause, caller's error message is sufficient. */
 	    save_errno = errno;
 	    close(sock);
@@ -524,7 +526,7 @@ connect_server(const char *host, const char *port, bool tls,
                 continue;
             }
             /* Perform TLS handshake. */
-            if (!tls_timed_connect(closure->ssl, host, port, timo)) {
+            if (!tls_timed_connect(closure->ssl, host, port, timeout)) {
                 cause = U_("TLS handshake was unsuccessful");
                 save_errno = errno;
                 close(sock);
@@ -1194,7 +1196,7 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
 	if (WIFEXITED(exit_status)) {
 	    exit_msg.exit_value = WEXITSTATUS(exit_status);
 	} else if (WIFSIGNALED(exit_status)) {
-	    int signo = WTERMSIG(exit_status);
+	    const int signo = WTERMSIG(exit_status);
 	    if (signo <= 0 || sig2str(signo, signame) == -1) {
 		sudo_warnx(U_("%s: internal error, invalid signal %d"),
 		    __func__, signo);
@@ -1204,6 +1206,15 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
 	    if (WCOREDUMP(exit_status))
 		exit_msg.dumped_core = true;
 	    exit_msg.exit_value = WTERMSIG(exit_status) | 128;
+	} else if (WIFSTOPPED(exit_status)) {
+	    const int signo = WSTOPSIG(exit_status);
+	    sudo_warnx(U_("%s: internal error, invalid signal %d"),
+		__func__, signo);
+	    goto done;
+	} else if (WIFCONTINUED(exit_status)) {
+	    sudo_warnx(U_("%s: internal error, invalid signal %d"),
+		__func__, SIGCONT);
+	    goto done;
 	} else {
 	    sudo_warnx(U_("%s: internal error, invalid exit status %d"),
 		__func__, exit_status);

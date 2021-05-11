@@ -76,6 +76,15 @@ This makes it possible to have all sudo I/O logs on a central server."
 	odocdir="${docdir}"
 	oexampledir="${exampledir}"
 
+	# docdir and exampledir are installed with "sudo" as the package
+	# name which may not be correct.
+	docdir="`echo \"${docdir}\" | sed 's#/sudo$#/'\"${name}\"'#'`"
+	if test "${exampledir}" = "${odocdir}/examples"; then
+	    exampledir="${docdir}/examples"
+	else
+	    exampledir="`echo \"${exampledir}\" | sed 's#/sudo$#/'\"${name}\"'#'`"
+	fi
+
 	# For RedHat the doc dir is expected to include version and release
 	case "$pp_rpm_distro" in
 	centos*|rhel*|f[0-9]*)
@@ -83,11 +92,6 @@ This makes it possible to have all sudo I/O logs on a central server."
 		exampledir="${docdir}/examples"
 		;;
 	esac
-
-	# docdir and exampledir are installed with "sudo" as the package
-	# name which may not be correct.
-	docdir="`echo \"${docdir}\" | sed \"s#/sudo#/${name}#g\"`"
-	exampledir="`echo \"${exampledir}\" | sed \"s#/sudo#/${name}#g\"`"
 
 	# Copy docdir and exampledir to new names if needed
 	if test ! -d "${pp_destdir}${docdir}"; then
@@ -117,6 +121,10 @@ This makes it possible to have all sudo I/O logs on a central server."
 	$name: unstripped-binary-or-object
 	EOF
 	chmod 644 ${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name}
+	# If libssl_dep not passed in, try to figure it out
+	if test -z "$libssl_dep"; then
+	    libssl_dep="`ldd $libexecdir/sudo/sudoers.so 2>&1 | sed -n 's/^[ 	]*libssl\.so\([0-9.]*\).*/libssl\1/p'`"
+	fi
 %endif
 
 %if [rpm]
@@ -146,6 +154,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 	ln -s -f ${sbindir}/sudo_logsrvd ${pp_destdir}/usr/sbin
 %endif
 
+%if [!rpm,deb]
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}${mandir}/[mc]* | sed "s#${pp_destdir}##g"`
@@ -159,6 +168,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 	    done
 	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
 	fi
+%endif
 
 %depend [deb]
 	libc6, zlib1g, sudo

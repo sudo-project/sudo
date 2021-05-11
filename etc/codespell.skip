@@ -5,9 +5,7 @@ Makefile\.in
 ^MANIFEST$
 ^aclocal\.m4$
 ^autogen\.sh$
-^config\.guess$
 ^config\.h\.in$
-^config\.sub$
 ^configure$
 ^doc/.*\.man\.in$
 ^doc/CONTRIBUTORS$
@@ -16,10 +14,12 @@ Makefile\.in
 ^lib/util/getaddrinfo\.c$
 ^lib/zlib/
 ^libtool$
-^ltmain\.sh$
 ^m4/libtool\.m4$
 ^m4/lt.*\.m4$
-^mkinstalldirs$
 ^plugins/sudoers/po/
 ^po/
+^scripts/config\.guess$
+^scripts/config\.sub$
+^scripts/ltmain\.sh$
+^scripts/mkinstalldirs$
 ^scripts/pp$

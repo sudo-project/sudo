@@ -133,6 +133,18 @@ init_signals(void)
 	    case SIGTTOU:
 		/* Don't install these until exec time. */
 		break;
+	    case SIGCHLD:
+		/* Sudo needs to be able to catch SIGCHLD. */
+		if (ss->sa.sa_handler == SIG_IGN) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"will restore signal %d on exec", SIGCHLD);
+		    ss->restore = true;
+		}
+		if (sigaction(SIGCHLD, &sa, NULL) != 0) {
+		    sudo_warn(U_("unable to set handler for signal %d"),
+			SIGCHLD);
+		}
+		break;
 	    default:
 		if (ss->sa.sa_handler != SIG_IGN) {
 		    if (sigaction(ss->signo, &sa, NULL) != 0) {

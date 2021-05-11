@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010, 2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,51 +24,19 @@
 
 #include <config.h>
 
-/*
- * Define away the system prototypes so we don't have any conflicts.
- */
-
-#define setgrfile	sys_setgrfile
-#define setgrent	sys_setgrent
-#define endgrent	sys_endgrent
-#define getgrent	sys_getgrent
-#define getgrnam	sys_getgrnam
-#define getgrgid	sys_getgrgid
-
-#define setpwfile	sys_setpwfile
-#define setpwent	sys_setpwent
-#define endpwent	sys_endpwent
-#define getpwent	sys_getpwent
-#define getpwnam	sys_getpwnam
-#define getpwuid	sys_getpwuid
-
 #include <pwd.h>
 #include <grp.h>
 
-#undef setgrfile
-#undef setgrent
-#undef endgrent
-#undef getgrent
-#undef getgrnam
-#undef getgrgid
+void testsudoers_setgrfile(const char *);
+void testsudoers_setgrent(void);
+void testsudoers_endgrent(void);
+struct group *testsudoers_getgrent(void);
+struct group *testsudoers_getgrnam(const char *);
+struct group *testsudoers_getgrgid(gid_t);
 
-void setgrfile(const char *);
-void setgrent(void);
-void endgrent(void);
-struct group *getgrent(void);
-struct group *getgrnam(const char *);
-struct group *getgrgid(gid_t);
-
-#undef setpwfile
-#undef setpwent
-#undef endpwent
-#undef getpwent
-#undef getpwnam
-#undef getpwuid
-
-void setpwfile(const char *);
-void setpwent(void);
-void endpwent(void);
-struct passwd *getpwent(void);
-struct passwd *getpwnam(const char *);
-struct passwd *getpwuid(uid_t);
+void testsudoers_setpwfile(const char *);
+void testsudoers_setpwent(void);
+void testsudoers_endpwent(void);
+struct passwd *testsudoers_getpwent(void);
+struct passwd *testsudoers_getpwnam(const char *);
+struct passwd *testsudoers_getpwuid(uid_t);

@@ -77,7 +77,9 @@ main(int argc, char *argv[])
 	    errors++;
 	}
     }
-    printf("check_gentime: %d tests run, %d errors, %d%% success rate\n",
-	ntests, errors, (ntests - errors) * 100 / ntests);
+    if (ntests != 0) {
+	printf("%s: %d tests run, %d errors, %d%% success rate\n",
+	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
+    }
     exit(errors);
 }

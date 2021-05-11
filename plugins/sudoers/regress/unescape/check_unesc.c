@@ -136,8 +136,10 @@ main(int argc, char *argv[])
     test_strvec_join(' ', &ntests, &errors);
     test_strvec_join('\n', &ntests, &errors);
 
-    printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
-	ntests, errors, (ntests - errors) * 100 / ntests);
+    if (ntests != 0) {
+	printf("%s: %d tests run, %d errors, %d%% success rate\n",
+	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
+    }
 
     exit(errors);
 }

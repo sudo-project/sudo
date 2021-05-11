@@ -250,6 +250,12 @@ sudo_dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned in
 sudo_dso_public void initprogname(const char *);
 sudo_dso_public void initprogname2(const char *, const char * const *);
 
+/* rcstr.c */
+sudo_dso_public char *sudo_rcstr_dup(const char *src);
+sudo_dso_public char *sudo_rcstr_alloc(size_t len);
+sudo_dso_public char *sudo_rcstr_addref(const char *s);
+sudo_dso_public void sudo_rcstr_delref(const char *s);
+
 /* roundup.c */
 sudo_dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
 #define sudo_pow2_roundup(_a) sudo_pow2_roundup_v1((_a))

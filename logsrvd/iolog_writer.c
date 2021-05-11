@@ -123,7 +123,6 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    "calloc(1, %zu)", sizeof(*evlog));
 	goto bad;
     }
-    memset(evlog, 0, sizeof(*evlog));
 
     /* Client/peer IP address. */
     evlog->peeraddr = closure->ipaddr;
@@ -635,7 +634,7 @@ bad:
     debug_return_bool(false);
 }
 
-static bool
+bool
 iolog_create(int iofd, struct connection_closure *closure)
 {
     debug_decl(iolog_create, SUDO_DEBUG_UTIL);
@@ -755,7 +754,7 @@ iolog_rename(const char *from, const char *to)
 }
 
 /* Compressed logs don't support random access, need to rewrite them. */
-static bool
+bool
 iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 {
     const struct eventlog *evlog = closure->evlog;
@@ -907,82 +906,11 @@ done:
     debug_return_bool(ret);
 }
 
-bool
-iolog_restart(RestartMessage *msg, struct connection_closure *closure)
-{
-    struct eventlog *evlog = closure->evlog;
-    struct timespec target;
-    struct stat sb;
-    int iofd;
-    debug_decl(iolog_restart, SUDO_DEBUG_UTIL);
-
-    target.tv_sec = msg->resume_point->tv_sec;
-    target.tv_nsec = msg->resume_point->tv_nsec;
-
-    if ((evlog->iolog_path = strdup(msg->log_id)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "strdup");
-	goto bad;
-    }
-
-    /* We use iolog_dir_fd in calls to openat(2) */
-    closure->iolog_dir_fd =
-	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY);
-    if (closure->iolog_dir_fd == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s", evlog->iolog_path);
-	goto bad;
-    }
-
-    /* If the timing file write bit is clear, log is already complete. */
-    if (fstatat(closure->iolog_dir_fd, "timing", &sb, 0) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to stat %s/timing", evlog->iolog_path);
-	goto bad;
-    }
-    if (!ISSET(sb.st_mode, S_IWUSR)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s already complete", evlog->iolog_path);
-	closure->errstr = _("log is already complete, cannot be restarted");
-	goto bad;
-    }
-
-    /* Open existing I/O log files. */
-    if (!iolog_open_all(closure->iolog_dir_fd, evlog->iolog_path,
-	    closure->iolog_files, "r+"))
-	goto bad;
-
-    /* Compressed logs don't support random access, so rewrite them. */
-    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
-	if (closure->iolog_files[iofd].compressed)
-	    debug_return_bool(iolog_rewrite(&target, closure));
-    }
-
-    /* Parse timing file until we reach the target point. */
-    if (!iolog_seekto(closure->iolog_dir_fd, evlog->iolog_path,
-	    closure->iolog_files, &closure->elapsed_time, &target))
-	goto bad;
-
-    /* Must seek or flush before switching from read -> write. */
-    if (iolog_seek(&closure->iolog_files[IOFD_TIMING], 0, SEEK_CUR) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "lseek(IOFD_TIMING, 0, SEEK_CUR)");
-	goto bad;
-    }
-
-    /* Ready to log I/O buffers. */
-    debug_return_bool(true);
-bad:
-    if (closure->errstr == NULL)
-	closure->errstr = _("unable to restart log");
-    debug_return_bool(false);
-}
-
 /*
  * Add given delta to elapsed time.
  * We cannot use timespecadd here since delta is not struct timespec.
  */
-static void
+void
 update_elapsed_time(TimeSpec *delta, struct timespec *elapsed)
 {
     debug_decl(update_elapsed_time, SUDO_DEBUG_UTIL);
@@ -996,120 +924,4 @@ update_elapsed_time(TimeSpec *delta, struct timespec *elapsed)
     }
 
     debug_return;
-}
-
-int
-store_iobuf(int iofd, IoBuffer *msg, struct connection_closure *closure)
-{
-    const struct eventlog *evlog = closure->evlog;
-    const char *errstr;
-    char tbuf[1024];
-    int len;
-    debug_decl(store_iobuf, SUDO_DEBUG_UTIL);
-
-    /* Open log file as needed. */
-    if (!closure->iolog_files[iofd].enabled) {
-	if (!iolog_create(iofd, closure))
-	    debug_return_int(-1);
-    }
-
-    /* Format timing data. */
-    /* FIXME - assumes IOFD_* matches IO_EVENT_* */
-    len = snprintf(tbuf, sizeof(tbuf), "%d %lld.%09d %zu\n",
-	iofd, (long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
-	msg->data.len);
-    if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d", len);
-	debug_return_int(-1);
-    }
-
-    /* Write to specified I/O log file. */
-    if (!iolog_write(&closure->iolog_files[iofd], msg->data.data,
-	    msg->data.len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", evlog->iolog_path,
-	    iolog_fd_to_name(iofd), errstr);
-	debug_return_int(-1);
-    }
-
-    /* Write timing data. */
-    if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", evlog->iolog_path,
-	    iolog_fd_to_name(IOFD_TIMING), errstr);
-	debug_return_int(-1);
-    }
-
-    update_elapsed_time(msg->delay, &closure->elapsed_time);
-
-    debug_return_int(0);
-}
-
-int
-store_suspend(CommandSuspend *msg, struct connection_closure *closure)
-{
-    const struct eventlog *evlog = closure->evlog;
-    const char *errstr;
-    char tbuf[1024];
-    int len;
-    debug_decl(store_suspend, SUDO_DEBUG_UTIL);
-
-    /* Format timing data including suspend signal. */
-    len = snprintf(tbuf, sizeof(tbuf), "%d %lld.%09d %s\n", IO_EVENT_SUSPEND,
-	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
-	msg->signal);
-    if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d, signal %s",
-	    len, msg->signal);
-	debug_return_int(-1);
-    }
-
-    /* Write timing data. */
-    if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", evlog->iolog_path,
-	    iolog_fd_to_name(IOFD_TIMING), errstr);
-	debug_return_int(-1);
-    }
-
-    update_elapsed_time(msg->delay, &closure->elapsed_time);
-
-    debug_return_int(0);
-}
-
-int
-store_winsize(ChangeWindowSize *msg, struct connection_closure *closure)
-{
-    const struct eventlog *evlog = closure->evlog;
-    const char *errstr;
-    char tbuf[1024];
-    int len;
-    debug_decl(store_winsize, SUDO_DEBUG_UTIL);
-
-    /* Format timing data including new window size. */
-    len = snprintf(tbuf, sizeof(tbuf), "%d %lld.%09d %d %d\n", IO_EVENT_WINSIZE,
-	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
-	msg->rows, msg->cols);
-    if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d", len);
-	debug_return_int(-1);
-    }
-
-    /* Write timing data. */
-    if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", evlog->iolog_path,
-	    iolog_fd_to_name(IOFD_TIMING), errstr);
-	debug_return_int(-1);
-    }
-
-    update_elapsed_time(msg->delay, &closure->elapsed_time);
-
-    debug_return_int(0);
 }

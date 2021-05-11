@@ -753,7 +753,7 @@ sudo_fakegrnam(const char *group)
 	debug_return_ptr(NULL);
     }
 
-    debug_return_ptr(sudo_mkgrent(group, gid, NULL));
+    debug_return_ptr(sudo_mkgrent(group, gid, (char *)NULL));
 }
 
 void

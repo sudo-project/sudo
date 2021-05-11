@@ -150,7 +150,9 @@ pvs-log-files: $(POBJS)
 
 fuzz:
 
-check:
+check-fuzzer:
+
+check: check-fuzzer
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la

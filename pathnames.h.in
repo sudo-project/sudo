@@ -134,6 +134,15 @@
 #endif /* _PATH_SUDO_LOGDIR */
 
 /*
+ * Where to store sudo_logsrvd relay temporary files. Defaults to
+ * /var/log/sudo_logsrvd, /var/adm/sudo_logsrvd or /usr/adm/sudo_logsrvd
+ * depending on what exists.
+ */
+#ifndef _PATH_SUDO_RELAY_DIR
+# undef _PATH_SUDO_RELAY_DIR
+#endif /* _PATH_SUDO_RELAY_DIR */
+
+/*
  * Where to put the sudo log file when logging to a file.  Defaults to
  * /var/log/sudo.log if /var/log exists, else /var/adm/sudo.log.
  */

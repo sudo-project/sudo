@@ -30,6 +30,7 @@
 #endif
 
 #include "logsrv_util.h"
+#include "tls_common.h"
 
 enum client_state {
     ERROR,
@@ -51,6 +52,7 @@ struct client_closure {
     bool write_instead_of_read;
     bool temporary_write_event;
     struct timespec restart;
+    struct timespec stop_after;
     struct timespec elapsed;
     struct timespec committed;
     struct timing_closure timing;
@@ -58,9 +60,7 @@ struct client_closure {
     struct connection_buffer read_buf;
     struct connection_buffer write_buf;
 #if defined(HAVE_OPENSSL)
-    SSL *ssl;
-    struct sudo_event *tls_connect_ev;
-    bool tls_connect_state;
+    struct tls_client_closure tls_client;
 #endif
     struct sudo_event *read_ev;
     struct sudo_event *write_ev;

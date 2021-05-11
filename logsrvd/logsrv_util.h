@@ -19,6 +19,8 @@
 #ifndef SUDO_LOGSRV_UTIL_H
 #define SUDO_LOGSRV_UTIL_H
 
+#include <netinet/in.h>		/* for INET_ADDRSTRLEN and INET6_ADDRSTRLEN */
+
 /* Default ports to listen on */
 #define DEFAULT_PORT		"30343"
 #define DEFAULT_PORT_TLS	"30344"
@@ -26,12 +28,23 @@
 /* Maximum message size (2Mb) */
 #define MESSAGE_SIZE_MAX	(2 * 1024 * 1024)
 
+struct peer_info {
+    const char *name;
+#if defined(HAVE_STRUCT_IN6_ADDR)
+    char ipaddr[INET6_ADDRSTRLEN];
+#else
+    char ipaddr[INET_ADDRSTRLEN];
+#endif
+};
+
 struct connection_buffer {
+    TAILQ_ENTRY(connection_buffer) entries;
     uint8_t *data;
     unsigned int size;
     unsigned int len;
     unsigned int off;
 };
+TAILQ_HEAD(connection_buffer_list, connection_buffer);
 
 /* logsrv_util.c */
 struct iolog_file;

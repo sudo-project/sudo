@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd March 3, 2020
+.Dd May 7, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1176,19 +1176,16 @@ The first
 indicates which users the command may be run as via the
 .Fl u
 option.
-The second defines a list of groups that can be specified via the
+The second defines a list of groups that may be specified via the
 .Fl g
-option in addition to any of the target user's groups.
+option (in addition to any of the target user's groups).
 If both
 .Li Runas_List Ns s
 are specified, the command may be run with any combination of users
 and groups listed in their respective
 .Li Runas_List Ns s.
 If only the first is specified, the command may be run as any user
-in the list but no
-.Fl g
-option
-may be specified.
+in the list and, optionally, with any group the target user belongs to.
 If the first
 .Li Runas_List
 is empty but the
@@ -1197,13 +1194,15 @@ with the group set to any listed in the
 .Li Runas_List .
 If both
 .Li Runas_List Ns s
-are empty, the command may only be run as the invoking user.
+are empty, the command may only be run as the invoking user and the
+group, if specified, must be one that the invoking user is a member of.
 If no
 .Li Runas_Spec
-is specified the command may be run as
+is specified, the command may only be run as
 .Sy root
-and
-no group may be specified.
+and the group, if specified, must be one that
+.Sy root
+is a member of.
 .Pp
 A
 .Li Runas_Spec
