@@ -1980,7 +1980,7 @@ log_server_open(struct log_details *details, struct timespec *now,
     /* Connect to log first available log server. */
     if (!log_server_connect(closure)) {
 	/* TODO: support offline logs if server unreachable */
-	sudo_warn("%s", U_("unable to connect to log server"));
+	sudo_warnx("%s", U_("unable to connect to log server"));
 	goto bad;
     }
 
