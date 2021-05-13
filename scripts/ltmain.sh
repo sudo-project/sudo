@@ -8742,9 +8742,6 @@ func_mode_link ()
 	eval libname=\"$libname_spec\"
 	;;
       *)
-	test no = "$module" \
-	  && func_fatal_help "libtool library '$output' must begin with 'lib'"
-
 	if test no != "$need_lib_prefix"; then
 	  # Add the "lib" prefix for modules if required
 	  func_stripname '' '.la' "$outputname"

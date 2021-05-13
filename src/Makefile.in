@@ -64,6 +64,9 @@ LT_LDFLAGS = @LT_LDFLAGS@
 # Flags to pass to libtool
 LTFLAGS = --tag=disable-static
 
+# Build sudo_noexec as a module instead of a shared lib (except on macOS)
+NOEXEC_MODULE = @NOEXEC_MODULE@
+
 # Address sanitizer flags
 ASAN_CFLAGS = @ASAN_CFLAGS@
 ASAN_LDFLAGS = @ASAN_LDFLAGS@
@@ -175,15 +178,8 @@ Makefile: $(srcdir)/Makefile.in
 sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(OBJS) $(SUDO_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
-# We can't use -module here since you cannot preload a module on Darwin
-libsudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) @LIBDL@ -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir) -shrext .so
-
-# Some hackery is required to install this as sudo_noexec, not libsudo_noexec
-sudo_noexec.la: libsudo_noexec.la
-	sed 's/libsudo_noexec/sudo_noexec/g' libsudo_noexec.la > sudo_noexec.la
-	if test -f .libs/libsudo_noexec.lai; then sed 's/libsudo_noexec/sudo_noexec/g' .libs/libsudo_noexec.lai > .libs/sudo_noexec.lai; fi
-	cp -p .libs/libsudo_noexec.so .libs/sudo_noexec.so
+sudo_noexec.la: sudo_noexec.lo
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) @LIBDL@ -o $@ sudo_noexec.lo $(NOEXEC_MODULE) -avoid-version -rpath $(noexecdir) -shrext .so
 
 sesh: $(SESH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)

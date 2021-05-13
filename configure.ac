@@ -76,6 +76,7 @@ AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_BACKUP])
 AC_SUBST([INSTALL_NOEXEC])
 AC_SUBST([CHECK_NOEXEC])
+AC_SUBST([NOEXEC_MODULE])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
 AC_SUBST([SELINUX_USAGE])
@@ -227,6 +228,7 @@ dnl
 INSTALL_BACKUP=
 INSTALL_NOEXEC=
 CHECK_NOEXEC=
+NOEXEC_MODULE=-module
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
@@ -2169,6 +2171,10 @@ case "$host" in
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+
+		# Build sudo_noexec.so as a shared library, not a module.
+		# On Darwin, modules and shared libraries are incompatible.
+		NOEXEC_MODULE=
 
 		# Mach monotonic timer that runs while sleeping
 		AC_CHECK_FUNCS([mach_continuous_time])
