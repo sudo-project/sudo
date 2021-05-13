@@ -29244,6 +29244,10 @@ printf "%s\n" "$sudo_cv_var_fallthrough_attribute" >&6; }
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
     fi
+    case "$host" in
+	# Avoid unwanted warnings on macOS
+	darwin*) CFLAGS="${CFLAGS} -Wno-deprecated-declarations";;
+    esac
 fi
 
 CROSS_COMPILING="$cross_compiling"
