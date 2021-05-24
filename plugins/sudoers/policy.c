@@ -588,7 +588,7 @@ bad:
  * Store the execution environment and other front-end settings.
  * Builds up the command_info list and sets argv and envp.
  * Consumes iolog_path if not NULL.
- * Returns 1 on success and -1 on error.
+ * Returns true on success, else false.
  */
 bool
 sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
