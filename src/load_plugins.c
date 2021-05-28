@@ -47,9 +47,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 
     if (info->path[0] == '/') {
 	if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
-	    sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    sudo_warnx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+	    errno = ENAMETOOLONG;
 	    goto done;
 	}
 	status = stat(fullpath, sb);
@@ -60,9 +58,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	/* Check static symbols. */
 	if (strcmp(info->path, SUDOERS_PLUGIN) == 0) {
 	    if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
-		sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-		    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-		sudo_warnx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+		errno = ENAMETOOLONG;
 		goto done;
 	    }
 	    /* Plugin is static, fake up struct stat. */
@@ -82,10 +78,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	len = snprintf(fullpath, pathsize, "%s%s", sudo_conf_plugin_dir_path(),
 	    info->path);
 	if (len < 0 || (size_t)len >= pathsize) {
-	    sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    sudo_warnx(U_("%s%s: %s"), sudo_conf_plugin_dir_path(), info->path,
-		strerror(ENAMETOOLONG));
+	    errno = ENAMETOOLONG;
 	    goto done;
 	}
 	/* Try parent dir for compatibility with old plugindir default. */
