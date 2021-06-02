@@ -194,7 +194,7 @@ static bool
 plugin_exists(struct plugin_container_list *plugins, const char *symbol_name)
 {
     struct plugin_container *container;
-    debug_decl(find_plugin, SUDO_DEBUG_PLUGIN);
+    debug_decl(plugin_exists, SUDO_DEBUG_PLUGIN);
 
     TAILQ_FOREACH(container, plugins, entries) {
 	if (strcmp(container->name, symbol_name) == 0)
@@ -208,8 +208,9 @@ typedef struct generic_plugin * (plugin_clone_func)(void);
 struct generic_plugin *
 sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
 {
-    debug_decl(sudo_plugin_clone, SUDO_DEBUG_PLUGIN);
+    debug_decl(sudo_plugin_try_to_clone, SUDO_DEBUG_PLUGIN);
     struct generic_plugin * plugin = NULL;
+    plugin_clone_func *clone_func;
     char *clone_func_name = NULL;
 
     if (asprintf(&clone_func_name, "%s_clone", symbol_name) < 0) {
@@ -217,7 +218,7 @@ sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
         goto cleanup;
     }
 
-    plugin_clone_func *clone_func = (plugin_clone_func *)sudo_dso_findsym(so_handle, clone_func_name);
+    clone_func = sudo_dso_findsym(so_handle, clone_func_name);
     if (clone_func) {
         plugin = (*clone_func)();
     }
