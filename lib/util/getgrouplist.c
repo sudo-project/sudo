@@ -41,6 +41,7 @@
 #endif
 
 #include "sudo_compat.h"
+#include "sudo_debug.h"
 #include "sudo_util.h"
 
 #ifndef HAVE_GETGROUPLIST
@@ -70,16 +71,17 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 #ifndef HAVE_GETGROUPLIST_2
     int grpsize, tries;
 #endif
+    debug_decl(sudo_getgrouplist2, SUDO_DEBUG_UTIL);
 
     /* For static group vector, just use getgrouplist(3). */
     if (groups != NULL)
-	return getgrouplist(name, basegid, groups, ngroupsp);
+	debug_return_int(getgrouplist(name, basegid, groups, ngroupsp));
 
 #ifdef HAVE_GETGROUPLIST_2
     if ((ngroups = getgrouplist_2(name, basegid, groupsp)) == -1)
-	return -1;
+	debug_return_int(-1);
     *ngroupsp = ngroups;
-    return 0;
+    debug_return_int(0);
 #else
     grpsize = (int)sysconf(_SC_NGROUPS_MAX);
     if (grpsize < 0)
@@ -93,12 +95,12 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	free(groups);
 	groups = reallocarray(NULL, grpsize, sizeof(*groups));
 	if (groups == NULL)
-	    return -1;
+	    debug_return_int(-1);
 	ngroups = grpsize;
 	if (getgrouplist(name, basegid, groups, &ngroups) != -1) {
 	    *groupsp = groups;
 	    *ngroupsp = ngroups;
-	    return 0;
+	    debug_return_int(0);
 	}
 	if (ngroups == grpsize) {
 	    /* Failed for some reason other than ngroups too small. */
@@ -108,7 +110,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	grpsize = ngroups;
     }
     free(groups);
-    return -1;
+    debug_return_int(-1);
 #endif /* HAVE_GETGROUPLIST_2 */
 }
 
@@ -128,6 +130,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     int grpsize = *ngroupsp;
     int ret = -1;
     gid_t gid;
+    debug_decl(sudo_getgrouplist2, SUDO_DEBUG_UTIL);
 
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb((char *) name, NULL);
@@ -147,11 +150,11 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	}
 	groups = reallocarray(NULL, grpsize, sizeof(*groups));
 	if (groups == NULL)
-	    return -1;
+	    debug_return_int(-1);
     } else {
 	/* Static group vector. */
 	if (grpsize < 1)
-	    return -1;
+	    debug_return_int(-1);
     }
 
     /* We support BSD semantics where the first element is the base gid */
@@ -175,7 +178,7 @@ done:
     *groupsp = groups;
     *ngroupsp = ngroups;
 
-    return ret;
+    debug_return_int(ret);
 }
 
 #elif defined(HAVE_NSS_SEARCH)
@@ -211,11 +214,12 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     const char *errstr;
     int yp = 0;
     id_t id;
+    debug_decl(str2grp, SUDO_DEBUG_UTIL);
 
     /* Must at least have space to copy instr -> buf. */
     if (inlen >= buflen)
-	return NSS_STR_PARSE_ERANGE;
-
+	debug_return_int(NSS_STR_PARSE_ERANGE);
+    
     /* Paranoia: buf and instr should be distinct. */
     if (buf != instr) {
 	memmove(buf, instr, inlen);
@@ -223,7 +227,7 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     }
 
     if ((fieldsep = strchr(cp = fieldsep, ':')) == NULL)
-	return NSS_STR_PARSE_PARSE;
+	debug_return_int(NSS_STR_PARSE_PARSE);
     *fieldsep++ = '\0';
     grp->gr_name = cp;
 
@@ -237,12 +241,12 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     }
 
     if ((fieldsep = strchr(cp = fieldsep, ':')) == NULL)
-	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
+	debug_return_int(yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE);
     *fieldsep++ = '\0';
     grp->gr_passwd = cp;
 
     if ((fieldsep = strchr(cp = fieldsep, ':')) == NULL)
-	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
+	debug_return_int(yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE);
     *fieldsep++ = '\0';
     id = sudo_strtoid(cp, &errstr);
     if (errstr != NULL) {
@@ -251,8 +255,8 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
 	 * at the end of YP entries since it has no meaning.
 	 */
 	if (errno == ERANGE)
-	    return NSS_STR_PARSE_ERANGE;
-	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
+	    debug_return_int(NSS_STR_PARSE_ERANGE);
+	debug_return_int(yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE);
     }
 #ifdef GID_NOBODY
     /* Negative gids get mapped to nobody on Solaris. */
@@ -269,7 +273,7 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
 	gr_end = (char **)((unsigned long)(buf + buflen) & ~ALIGNBYTES);
 	for (;;) {
 	    if (gr_mem == gr_end)
-		return NSS_STR_PARSE_ERANGE;	/* out of space! */
+		debug_return_int(NSS_STR_PARSE_ERANGE);	/* out of space! */
 	    *gr_mem++ = cp;
 	    if (fieldsep == NULL)
 		break;
@@ -278,7 +282,7 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
 	}
 	*gr_mem = NULL;
     }
-    return NSS_STR_PARSE_SUCCESS;
+    debug_return_int(NSS_STR_PARSE_SUCCESS);
 }
 
 static nss_status_t
@@ -291,6 +295,10 @@ process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm,
     struct group *grp;
     char **gr_mem;
     int	error, i;
+    debug_decl(process_cstr, SUDO_DEBUG_UTIL);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: parsing %.*s", __func__,
+	inlen, instr);
 
     /* Hack to let us check whether the query was handled by nscd or us. */
     if (gbm->force_slow_way != 0)
@@ -298,7 +306,7 @@ process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm,
 
     buf = _nss_XbyY_buf_alloc(sizeof(struct group), NSS_BUFLEN_GROUP);
     if (buf == NULL)
-	return NSS_UNAVAIL;
+	debug_return_int(NSS_UNAVAIL);
 
     /* Parse groups file string -> struct group. */
     grp = buf->result;
@@ -334,7 +342,7 @@ process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm,
     }
 done:
     _nss_XbyY_buf_free(buf);
-    return ret;
+    debug_return_int(ret);
 }
 
 static nss_status_t
@@ -358,6 +366,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 {
     struct nss_groupsbymem gbm;
     static DEFINE_NSS_DB_ROOT(db_root);
+    debug_decl(sudo_getgrouplist2, SUDO_DEBUG_UTIL);
 
     memset(&gbm, 0, sizeof(gbm));
     gbm.username = name;
@@ -374,13 +383,13 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	    gbm.maxgids = NGROUPS_MAX;
 	gbm.gid_array = reallocarray(NULL, gbm.maxgids, 4 * sizeof(GETGROUPS_T));
 	if (gbm.gid_array == NULL)
-	    return -1;
+	    debug_return_int(-1);
 	gbm.maxgids <<= 2;
 	gbm.process_cstr = process_cstr_dynamic;
     } else {
 	/* Static group vector. */
 	if (gbm.maxgids <= 0)
-	    return -1;
+	    debug_return_int(-1);
 	gbm.process_cstr = process_cstr_static;
     }
 
@@ -414,7 +423,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	tmp = reallocarray(gbm.gid_array, gbm.maxgids, 2 * sizeof(GETGROUPS_T));
 	if (tmp == NULL) {
 	    free(gbm.gid_array);
-	    return -1;
+	    debug_return_int(-1);
 	}
 	gbm.gid_array = tmp;
 	gbm.maxgids <<= 1;
@@ -424,10 +433,10 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     *groupsp = gbm.gid_array;
     if (gbm.numgids <= gbm.maxgids) {
         *ngroupsp = gbm.numgids;
-        return 0;
+	debug_return_int(0);
     }
     *ngroupsp = gbm.maxgids;
-    return -1;
+    debug_return_int(-1);
 }
 
 #else /* !HAVE_GETGROUPLIST && !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
@@ -444,6 +453,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     int i, ngroups = 1;
     int ret = -1;
     struct group *grp;
+    debug_decl(sudo_getgrouplist2, SUDO_DEBUG_UTIL);
 
     if (groups == NULL) {
 	/* Dynamically-sized group vector. */
@@ -452,12 +462,12 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	    grpsize = NGROUPS_MAX;
 	groups = reallocarray(NULL, grpsize, 4 * sizeof(*groups));
 	if (groups == NULL)
-	    return -1;
+	    debug_return_int(-1);
 	grpsize <<= 2;
     } else {
 	/* Static group vector. */
 	if (grpsize < 1)
-	    return -1;
+	    debug_return_int(-1);
     }
 
     /* We support BSD semantics where the first element is the base gid */
@@ -508,6 +518,6 @@ done:
     *groupsp = groups;
     *ngroupsp = ngroups;
 
-    return ret;
+    debug_return_int(ret);
 }
 #endif /* !HAVE_GETGROUPLIST && !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
