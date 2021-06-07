@@ -270,9 +270,9 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     grp->gr_mem = NULL;
     if (*fieldsep != '\0') {
 	grp->gr_mem = gr_mem = (char **)ALIGN(buf + inlen + 1);
-	gr_end = (char **)((unsigned long)(buf + buflen) & ~ALIGNBYTES);
+	gr_end = (char **)((unsigned long)(buf + buflen) & ~ALIGNBYTES) - 1;
 	for (;;) {
-	    if (gr_mem == gr_end)
+	    if (gr_mem >= gr_end)
 		debug_return_int(NSS_STR_PARSE_ERANGE);	/* out of space! */
 	    *gr_mem++ = cp;
 	    if (fieldsep == NULL)
@@ -311,13 +311,15 @@ process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm,
     /* Parse groups file string -> struct group. */
     grp = buf->result;
     error = (*gbm->str2ent)(instr, inlen, grp, buf->buffer, buf->buflen);
-    if (error || grp->gr_mem == NULL)
+    if (error != NSS_STR_PARSE_SUCCESS || grp->gr_mem == NULL)
 	goto done;
 
     for (gr_mem = grp->gr_mem; *gr_mem != NULL; gr_mem++) {
 	if (strcmp(*gr_mem, user) == 0) {
+	    const int numgids = MIN(gbm->numgids, gbm->maxgids);
+
 	    /* Append to gid_array unless gr_gid is a dupe. */
-	    for (i = 0; i < gbm->numgids; i++) {
+	    for (i = 0; i < numgids; i++) {
 		if (gbm->gid_array[i] == grp->gr_gid)
 		    goto done;			/* already present */
 	    }
