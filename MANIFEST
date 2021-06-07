@@ -237,6 +237,7 @@ lib/util/regress/fnmatch/fnm_test.in
 lib/util/regress/fuzz/fuzz_sudo_conf.c
 lib/util/regress/fuzz/fuzz_sudo_conf.dict
 lib/util/regress/getdelim/getdelim_test.c
+lib/util/regress/getgrouplist/getgids.c
 lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
