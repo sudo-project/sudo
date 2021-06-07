@@ -44,6 +44,8 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
+sudo_dso_public int main(int argc, char *argv[]);
+
 /*
  * Simple driver for fuzzers built for LLVM libfuzzer.
  * This stub library allows fuzz targets to be built and run without
