@@ -35,7 +35,8 @@
 typedef enum {
     NSS_SUCCESS,
     NSS_NOTFOUND,
-    NSS_UNAVAIL
+    NSS_UNAVAIL,
+    NSS_TRYAGAIN
 } nss_status_t;
 
 typedef struct nss_db_params {
@@ -55,19 +56,20 @@ struct nss_groupsbymem {
     gid_t *gid_array;
     int maxgids;
     int force_slow_way;
-    int (*str2ent)(const char *, int, void *, char *, int);
-    nss_status_t (*process_cstr)(const char *, int, struct nss_groupsbymem *);
+    int (*str2ent)(const char *instr, int instr_len, void *ent, char *buffer, int buflen);
+    nss_status_t (*process_cstr)(const char *instr, int instr_len, struct nss_groupsbymem *);
     int numgids;
 };
 
 typedef struct {
     void *result;	/* group struct to fill in. */
     char *buffer;	/* string buffer for above */
-    size_t buflen;	/* string buffer size */
+    int buflen;		/* string buffer size */
 } nss_XbyY_buf_t;
 
+struct nss_db_state;
 typedef struct {
-    void *state;	/* really struct nss_db_state * */
+    struct nss_db_state *s;
 #ifdef NEED_HPUX_MUTEX
     lwp_mutex_t lock;
 #endif
@@ -78,7 +80,7 @@ typedef struct {
 #else
 # define NSS_DB_ROOT_INIT		{ 0 }
 #endif
-# define DEFINE_NSS_DB_ROOT(name)	nss_db_root_t name = NSS_DB_ROOT_INIT
+#define DEFINE_NSS_DB_ROOT(name)	nss_db_root_t name = NSS_DB_ROOT_INIT
 
 /* Backend function to find all groups a user belongs to for initgroups(). */
 #define NSS_DBOP_GROUP_BYMEMBER		6
@@ -101,8 +103,8 @@ typedef struct {
 #endif
 
 typedef void (*nss_db_initf_t)(nss_db_params_t *);
-extern nss_status_t nss_search(nss_db_root_t *, nss_db_initf_t, int, void *);
-extern nss_XbyY_buf_t *_nss_XbyY_buf_alloc(int, int);
+extern nss_status_t nss_search(nss_db_root_t *, nss_db_initf_t, int search_fnum, void *search_args);
+extern nss_XbyY_buf_t *_nss_XbyY_buf_alloc(int struct_size, int buffer_size);
 extern void _nss_XbyY_buf_free(nss_XbyY_buf_t *);
 
 #endif /* COMPAT_NSS_DBDEFS_H */
