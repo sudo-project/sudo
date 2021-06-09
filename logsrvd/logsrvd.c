@@ -244,7 +244,10 @@ connection_close(struct connection_closure *closure)
 
     /* Final state should be FINISHED except on error. */
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"closure %p, final state %d", closure, closure->state);
+	"%s: closure %p, final state %d, relay_closure %p, "
+	"journal file %p, journal path %s", __func__, closure,
+	closure->state, closure->relay_closure, closure->journal,
+	closure->journal_path ? closure->journal_path : "");
 
     /*
      * If we finished a client connection in store-and-forward mode,
@@ -404,7 +407,7 @@ schedule_error_message(const char *errstr, struct connection_closure *closure)
     /* Prevent further reads from the client, just write the error. */
     sudo_ev_del(closure->evbase, closure->read_ev);
 
-    if (errstr == NULL || closure->state == ERROR || closure->write_ev == NULL)
+    if (errstr == NULL || closure->error || closure->write_ev == NULL)
 	goto done;
 
     /* Format error message and add to the write queue. */
@@ -419,7 +422,7 @@ schedule_error_message(const char *errstr, struct connection_closure *closure)
     ret = true;
 
 done:
-    closure->state = ERROR;
+    closure->error = true;
     debug_return_bool(ret);
 }
 
@@ -963,8 +966,8 @@ server_msg_cb(int fd, int what, void *v)
 	if (TAILQ_EMPTY(&closure->write_bufs)) {
 	    /* Write queue empty, check state. */
 	    sudo_ev_del(closure->evbase, closure->write_ev);
-	    if (closure->state == FINISHED || closure->state == SHUTDOWN ||
-		    closure->state == ERROR)
+	    if (closure->error || closure->state == FINISHED ||
+		    closure->state == SHUTDOWN)
 		goto finished;
 	}
     }
