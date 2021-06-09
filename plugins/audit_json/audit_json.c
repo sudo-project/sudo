@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -553,10 +553,20 @@ audit_write_record(const char *audit_str, const char *plugin_name,
 	goto oom;
 
     /* Write key=value objects. */
-    if (!add_key_value_object(&json, "options", state.settings, settings_filter))
-	goto oom;
-    if (!add_key_value_object(&json, "user_info", state.user_info, NULL))
-	goto oom;
+    if (state.settings != NULL) {
+	if (!add_key_value_object(&json, "options", state.settings, settings_filter))
+	    goto oom;
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "missing settings list");
+    }
+    if (state.user_info != NULL) {
+	if (!add_key_value_object(&json, "user_info", state.user_info, NULL))
+	    goto oom;
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "missing user_info list");
+    }
     if (command_info != NULL) {
 	if (!add_key_value_object(&json, "command_info", command_info, NULL))
 	    goto oom;
@@ -568,10 +578,20 @@ audit_write_record(const char *audit_str, const char *plugin_name,
     if (!sudo_json_add_value(&json, "submit_optind", &json_value))
 	goto oom;
 
-    if (!add_array(&json, "submit_argv", state.submit_argv))
-	goto oom;
-    if (!add_array(&json, "submit_envp", state.submit_envp))
-	goto oom;
+    if (state.submit_argv != NULL) {
+	if (!add_array(&json, "submit_argv", state.submit_argv))
+	    goto oom;
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "missing submit_argv array");
+    }
+    if (state.submit_envp != NULL) {
+	if (!add_array(&json, "submit_envp", state.submit_envp))
+	    goto oom;
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "missing submit_envp array");
+    }
     if (run_argv != NULL) {
 	if (!add_array(&json, "run_argv", run_argv))
 	    goto oom;
