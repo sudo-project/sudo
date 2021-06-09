@@ -2553,15 +2553,16 @@ AC_CHECK_FUNCS([getgrouplist], [], [
 		    ])
 		])
 	    ], [
-		# HP-UX
-		AC_CHECK_FUNC([__nss_XbyY_buf_alloc], [
-		    AC_CHECK_FUNC([__nss_initf_group], [
-			AC_CHECK_HEADERS([nss_dbdefs.h])
-			AC_DEFINE([HAVE_NSS_SEARCH])
-			AC_DEFINE([HAVE___NSS_XBYY_BUF_ALLOC])
-			AC_DEFINE([HAVE___NSS_INITF_GROUP])
-		    ])
-		])
+		dnl HP-UX support disabled until "group: compat" fixed
+		dnl # HP-UX
+		dnl AC_CHECK_FUNC([__nss_XbyY_buf_alloc], [
+		dnl     AC_CHECK_FUNC([__nss_initf_group], [
+		dnl	AC_CHECK_HEADERS([nss_dbdefs.h])
+		dnl	AC_DEFINE([HAVE_NSS_SEARCH])
+		dnl	AC_DEFINE([HAVE___NSS_XBYY_BUF_ALLOC])
+		dnl	AC_DEFINE([HAVE___NSS_INITF_GROUP])
+		dnl    ])
+		dnl])
 	    ])
 	])
 	;;

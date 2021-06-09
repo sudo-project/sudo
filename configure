@@ -19842,34 +19842,6 @@ fi
 
 else $as_nop
 
-		# HP-UX
-		ac_fn_c_check_func "$LINENO" "__nss_XbyY_buf_alloc" "ac_cv_func___nss_XbyY_buf_alloc"
-if test "x$ac_cv_func___nss_XbyY_buf_alloc" = xyes
-then :
-
-		    ac_fn_c_check_func "$LINENO" "__nss_initf_group" "ac_cv_func___nss_initf_group"
-if test "x$ac_cv_func___nss_initf_group" = xyes
-then :
-
-			ac_fn_c_check_header_compile "$LINENO" "nss_dbdefs.h" "ac_cv_header_nss_dbdefs_h" "$ac_includes_default"
-if test "x$ac_cv_header_nss_dbdefs_h" = xyes
-then :
-  printf "%s\n" "#define HAVE_NSS_DBDEFS_H 1" >>confdefs.h
-
-fi
-
-			printf "%s\n" "#define HAVE_NSS_SEARCH 1" >>confdefs.h
-
-			printf "%s\n" "#define HAVE___NSS_XBYY_BUF_ALLOC 1" >>confdefs.h
-
-			printf "%s\n" "#define HAVE___NSS_INITF_GROUP 1" >>confdefs.h
-
-
-fi
-
-
-fi
-
 
 fi
 
