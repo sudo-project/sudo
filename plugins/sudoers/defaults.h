@@ -104,7 +104,7 @@ struct early_default {
 #undef T_TIMESPEC
 #define T_TIMESPEC	0x010
 #undef T_TIMEOUT
-#define T_TIMEOUT	0x020
+#define T_TIMEOUT	0x011
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL

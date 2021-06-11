@@ -132,10 +132,10 @@ fi
 # Choose compiler options by osversion if not cross-compiling.
 if [ "$crossbuild" = "false" ]; then
     case "$osversion" in
-	macos*)
-	    # Use clang on macOS if present
-	    if [ -z "$CC" -a -x /usr/bin/clang ]; then
-		CC=/usr/bin/clang; export CC
+	FreeBSD*|macos*)
+	    # Use the system compiler on FreeBSD and macOS
+	    if [ -z "$CC" -a -x /usr/bin/cc ]; then
+		CC=/usr/bin/cc; export CC
 	    fi
 	    ;;
     esac

@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.7], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.7p1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -76,6 +76,7 @@ AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_BACKUP])
 AC_SUBST([INSTALL_NOEXEC])
 AC_SUBST([CHECK_NOEXEC])
+AC_SUBST([NOEXEC_MODULE])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
 AC_SUBST([SELINUX_USAGE])
@@ -227,6 +228,7 @@ dnl
 INSTALL_BACKUP=
 INSTALL_NOEXEC=
 CHECK_NOEXEC=
+NOEXEC_MODULE=-module
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
@@ -2170,6 +2172,10 @@ case "$host" in
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 
+		# Build sudo_noexec.so as a shared library, not a module.
+		# On Darwin, modules and shared libraries are incompatible.
+		NOEXEC_MODULE=
+
 		# Mach monotonic timer that runs while sleeping
 		AC_CHECK_FUNCS([mach_continuous_time])
 
@@ -2547,15 +2553,16 @@ AC_CHECK_FUNCS([getgrouplist], [], [
 		    ])
 		])
 	    ], [
-		# HP-UX
-		AC_CHECK_FUNC([__nss_XbyY_buf_alloc], [
-		    AC_CHECK_FUNC([__nss_initf_group], [
-			AC_CHECK_HEADERS([nss_dbdefs.h])
-			AC_DEFINE([HAVE_NSS_SEARCH])
-			AC_DEFINE([HAVE___NSS_XBYY_BUF_ALLOC])
-			AC_DEFINE([HAVE___NSS_INITF_GROUP])
-		    ])
-		])
+		dnl HP-UX support disabled until "group: compat" fixed
+		dnl # HP-UX
+		dnl AC_CHECK_FUNC([__nss_XbyY_buf_alloc], [
+		dnl     AC_CHECK_FUNC([__nss_initf_group], [
+		dnl	AC_CHECK_HEADERS([nss_dbdefs.h])
+		dnl	AC_DEFINE([HAVE_NSS_SEARCH])
+		dnl	AC_DEFINE([HAVE___NSS_XBYY_BUF_ALLOC])
+		dnl	AC_DEFINE([HAVE___NSS_INITF_GROUP])
+		dnl    ])
+		dnl])
 	    ])
 	])
 	;;
@@ -4681,6 +4688,10 @@ if test -n "$GCC"; then
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
     fi
+    case "$host" in
+	# Avoid unwanted warnings on macOS
+	darwin*) CFLAGS="${CFLAGS} -Wno-deprecated-declarations";;
+    esac
 fi
 
 dnl

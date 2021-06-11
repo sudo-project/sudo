@@ -47,9 +47,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 
     if (info->path[0] == '/') {
 	if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
-	    sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    sudo_warnx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+	    errno = ENAMETOOLONG;
 	    goto done;
 	}
 	status = stat(fullpath, sb);
@@ -60,9 +58,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	/* Check static symbols. */
 	if (strcmp(info->path, SUDOERS_PLUGIN) == 0) {
 	    if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
-		sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-		    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-		sudo_warnx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+		errno = ENAMETOOLONG;
 		goto done;
 	    }
 	    /* Plugin is static, fake up struct stat. */
@@ -82,10 +78,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	len = snprintf(fullpath, pathsize, "%s%s", sudo_conf_plugin_dir_path(),
 	    info->path);
 	if (len < 0 || (size_t)len >= pathsize) {
-	    sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    sudo_warnx(U_("%s%s: %s"), sudo_conf_plugin_dir_path(), info->path,
-		strerror(ENAMETOOLONG));
+	    errno = ENAMETOOLONG;
 	    goto done;
 	}
 	/* Try parent dir for compatibility with old plugindir default. */
@@ -201,7 +194,7 @@ static bool
 plugin_exists(struct plugin_container_list *plugins, const char *symbol_name)
 {
     struct plugin_container *container;
-    debug_decl(find_plugin, SUDO_DEBUG_PLUGIN);
+    debug_decl(plugin_exists, SUDO_DEBUG_PLUGIN);
 
     TAILQ_FOREACH(container, plugins, entries) {
 	if (strcmp(container->name, symbol_name) == 0)
@@ -215,8 +208,9 @@ typedef struct generic_plugin * (plugin_clone_func)(void);
 struct generic_plugin *
 sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
 {
-    debug_decl(sudo_plugin_clone, SUDO_DEBUG_PLUGIN);
+    debug_decl(sudo_plugin_try_to_clone, SUDO_DEBUG_PLUGIN);
     struct generic_plugin * plugin = NULL;
+    plugin_clone_func *clone_func;
     char *clone_func_name = NULL;
 
     if (asprintf(&clone_func_name, "%s_clone", symbol_name) < 0) {
@@ -224,7 +218,7 @@ sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
         goto cleanup;
     }
 
-    plugin_clone_func *clone_func = (plugin_clone_func *)sudo_dso_findsym(so_handle, clone_func_name);
+    clone_func = sudo_dso_findsym(so_handle, clone_func_name);
     if (clone_func) {
         plugin = (*clone_func)();
     }

@@ -54,8 +54,7 @@ enum connection_status {
     RUNNING,
     EXITED,
     SHUTDOWN,
-    FINISHED,
-    ERROR
+    FINISHED
 };
 
 /*
@@ -106,6 +105,7 @@ struct connection_closure {
     int iolog_dir_fd;
     int sock;
     enum connection_status state;
+    bool error;
     bool tls;
     bool log_io;
     bool store_first;

@@ -104,7 +104,7 @@ LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
 FUZZ_PROGS = fuzz_logsrvd_conf
 FUZZ_SEED_CORPUS = ${FUZZ_PROGS:=_seed_corpus.zip}
-FUZZ_LIBS = $(LIBS) $(LIB_FUZZING_ENGINE)
+FUZZ_LIBS = $(LIB_FUZZING_ENGINE) $(LIBS)
 FUZZ_LDFLAGS = $(LDFLAGS)
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192

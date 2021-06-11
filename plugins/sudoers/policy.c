@@ -588,7 +588,7 @@ bad:
  * Store the execution environment and other front-end settings.
  * Builds up the command_info list and sets argv and envp.
  * Consumes iolog_path if not NULL.
- * Returns 1 on success and -1 on error.
+ * Returns true on success, else false.
  */
 bool
 sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
@@ -638,7 +638,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 		goto oom;
 	}
 	if (def_maxseq != NULL) {
-	    if (asprintf(&command_info[info_len++], "maxseq=%s", def_maxseq) == -1)
+	    if ((command_info[info_len++] = sudo_new_key_val("maxseq", def_maxseq)) == NULL)
 		goto oom;
 	}
     }
@@ -715,8 +715,10 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	glsize = sizeof("runas_groups=") - 1 +
 	    ((gidlist->ngids + 1) * (MAX_UID_T_LEN + 1));
 	gid_list = malloc(glsize);
-	if (gid_list == NULL)
+	if (gid_list == NULL) {
+	    sudo_gidlist_delref(gidlist);
 	    goto oom;
+	}
 	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
 	cp = gid_list + sizeof("runas_groups=") - 1;
 
@@ -727,6 +729,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    free(gid_list);
+	    sudo_gidlist_delref(gidlist);
 	    goto bad;
 	}
 	cp += len;
@@ -737,6 +740,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 		if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    free(gid_list);
+		    sudo_gidlist_delref(gidlist);
 		    goto bad;
 		}
 		cp += len;

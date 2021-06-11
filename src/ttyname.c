@@ -131,8 +131,8 @@ get_process_ttyname(char *name, size_t namelen)
 	    ret = sudo_ttyname_dev(ki_proc->sudo_kp_tdev, name, namelen);
 	    if (ret == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "unable to map device number %u to name",
-		    ki_proc->sudo_kp_tdev);
+		    "unable to map device number %lu to name",
+		    (unsigned long)ki_proc->sudo_kp_tdev);
 	    }
 	}
     } else {
