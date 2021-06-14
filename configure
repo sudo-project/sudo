@@ -21819,33 +21819,6 @@ fi
 
 fi
 
-
-  for ac_func in vsyslog
-do :
-  ac_fn_c_check_func "$LINENO" "vsyslog" "ac_cv_func_vsyslog"
-if test "x$ac_cv_func_vsyslog" = xyes
-then :
-  printf "%s\n" "#define HAVE_VSYSLOG 1" >>confdefs.h
-
-else $as_nop
-
-    case " $LIBOBJS " in
-  *" vsyslog.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS vsyslog.$ac_objext"
- ;;
-esac
-
-
-    for _sym in sudo_vsyslog; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
-    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }vsyslog_test"
-
-fi
-
-done
 ac_fn_c_check_func "$LINENO" "setpassent" "ac_cv_func_setpassent"
 if test "x$ac_cv_func_setpassent" = xyes
 then :

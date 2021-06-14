@@ -2863,11 +2863,6 @@ AC_CHECK_MEMBER([struct stat.st_mtim],
 	[AC_CHECK_MEMBER([struct stat.st_nmtime], AC_DEFINE(HAVE_ST_NMTIME))])
     ]
 )
-AC_CHECK_FUNCS([vsyslog], [], [
-    AC_LIBOBJ(vsyslog)
-    SUDO_APPEND_COMPAT_EXP(sudo_vsyslog)
-    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }vsyslog_test"
-])
 dnl
 dnl 4.4BSD-based systems can force the password or group file to be held open
 dnl

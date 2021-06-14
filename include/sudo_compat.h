@@ -553,11 +553,6 @@ sudo_dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # undef reallocarray
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
-#ifndef HAVE_VSYSLOG
-sudo_dso_public void sudo_vsyslog(int pri, const char *fmt, va_list ap);
-# undef vsyslog
-# define vsyslog(_a, _b, _c) sudo_vsyslog((_a), (_b), (_c))
-#endif /* HAVE_VSYSLOG */
 #ifndef HAVE_DUP3
 sudo_dso_public int sudo_dup3(int oldd, int newd, int flags);
 # undef dup3
