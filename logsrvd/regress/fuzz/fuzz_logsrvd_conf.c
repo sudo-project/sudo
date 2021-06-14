@@ -41,6 +41,12 @@
 #include "log_server.pb-c.h"
 #include "logsrvd.h"
 
+bool
+logsrvd_is_early(void)
+{
+    return true;
+}
+
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {

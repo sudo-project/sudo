@@ -1282,6 +1282,10 @@ logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
     int i;
     debug_decl(logsrvd_conv_syslog, SUDO_DEBUG_UTIL);
 
+    if (logsrvd_config == NULL) {
+	debug_return_int(logsrvd_conv_stderr(num_msgs, msgs, replies, callback));
+    }
+
     /* Also write to stderr if still in the foreground. */
     if (logsrvd_is_early()) {
 	(void)logsrvd_conv_stderr(num_msgs, msgs, replies, callback);
@@ -1361,6 +1365,10 @@ logsrvd_conv_logfile(int num_msgs, const struct sudo_conv_message msgs[],
     size_t proglen;
     int i;
     debug_decl(logsrvd_conv_logfile, SUDO_DEBUG_UTIL);
+
+    if (logsrvd_config == NULL) {
+	debug_return_int(logsrvd_conv_stderr(num_msgs, msgs, replies, callback));
+    }
 
     /* Also write to stderr if still in the foreground. */
     if (logsrvd_is_early()) {
