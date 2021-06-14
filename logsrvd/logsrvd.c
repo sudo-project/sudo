@@ -87,6 +87,7 @@ static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
 static const char server_id[] = "Sudo Audit Server " PACKAGE_VERSION;
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
+static bool is_early = true;
 
 /* Event loop callbacks. */
 static void client_msg_cb(int fd, int what, void *v);
@@ -1819,6 +1820,9 @@ daemonize(bool nofork)
     int fd;
     debug_decl(daemonize, SUDO_DEBUG_UTIL);
 
+    if (chdir("/") == -1)
+	sudo_warn("chdir(\"/\")");
+
     if (!nofork) {
 	switch (sudo_debug_fork()) {
 	case -1:
@@ -1835,19 +1839,36 @@ daemonize(bool nofork)
 	if (setsid() == -1)
 	    sudo_fatal("setsid");
 	write_pidfile();
-    }
 
-    if (chdir("/") == -1)
-	sudo_warn("chdir(\"/\")");
-    if ((fd = open(_PATH_DEVNULL, O_RDWR)) != -1) {
-	(void) dup2(fd, STDIN_FILENO);
-	(void) dup2(fd, STDOUT_FILENO);
-	(void) dup2(fd, STDERR_FILENO);
-	if (fd > STDERR_FILENO)
-	    (void) close(fd);
+	if ((fd = open(_PATH_DEVNULL, O_RDWR)) != -1) {
+	    (void) dup2(fd, STDIN_FILENO);
+	    (void) dup2(fd, STDOUT_FILENO);
+	    (void) dup2(fd, STDERR_FILENO);
+	    if (fd > STDERR_FILENO)
+		(void) close(fd);
+	}
+    } else {
+	if ((fd = open(_PATH_DEVNULL, O_RDWR)) != -1) {
+	    /* Preserve stdout/stderr in nofork mode (if open). */
+	    (void) dup2(fd, STDIN_FILENO);
+	    if (fcntl(STDOUT_FILENO, F_GETFL) == -1)
+		(void) dup2(fd, STDOUT_FILENO);
+	    if (fcntl(STDERR_FILENO, F_GETFL) == -1)
+		(void) dup2(fd, STDERR_FILENO);
+	    if (fd > STDERR_FILENO)
+		(void) close(fd);
+	}
     }
+    is_early = false;
 
     debug_return;
+}
+
+/* The early flag is used to decide whether sudo_warn() goes to stderr too. */
+bool
+logsrvd_is_early(void)
+{
+    return is_early;
 }
 
 static void

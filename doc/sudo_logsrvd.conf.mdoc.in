@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 1, 2021
+.Dd June 13, 2021
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -114,6 +114,22 @@ plaintext and TLS connections.
 Multiple
 .Em listen_address
 lines may be specified to listen on more than one port or interface.
+.It server_log = string
+Where to log server warning and error messages.
+Supported values are
+.Em none ,
+.Em stderr ,
+.Em syslog ,
+or a path name beginning with the
+.Ql /
+character.
+Note that a value of
+.Em stderr
+is only effective when used in conjunction with the
+.Fl n
+option.
+The default value is
+.Em syslog .
 .It pid_file = path
 The path to the file containing the process ID of the running
 .Nm sudo_logsrvd .
@@ -634,6 +650,11 @@ When a message is split, additional parts will include the string
 after the user name and before the continued command line arguments.
 JSON-format log entries are never split and are not affected by
 .Em maxlen .
+.It server_facility = string
+Syslog facility if syslog is being used for server warning messages.
+See above for a list of supported facilities.
+Defaults to
+.Li daemon
 .El
 .Ss logfile
 The
@@ -691,6 +712,9 @@ Sudo log server configuration file
 
 # The file containing the ID of the running sudo_logsrvd process.
 #pid_file = @rundir@/sudo_logsrvd.pid
+
+# Where to log server warnings: none, stderr, syslog, or a path name.
+#server_log = syslog
 
 # If true, enable the SO_KEEPALIVE socket option on client connections.
 #tcp_keepalive = true
@@ -885,6 +909,10 @@ Sudo log server configuration file
 # Syslog priority to use for event log alert messages reported by the
 # client.
 #alert_priority = alert
+
+# The syslog facility to use for server warning messages.
+# Defaults to daemon.
+#server_facility = daemon
 
 [logfile]
 # The path to the file-based event log.

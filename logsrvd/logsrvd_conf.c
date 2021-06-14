@@ -78,6 +78,13 @@
     ((_c)->relay._f != -1 ? (_c)->relay._f : (_c)->server._f)
 #endif
 
+enum server_log_type {
+    SERVER_LOG_NONE,
+    SERVER_LOG_STDERR,
+    SERVER_LOG_SYSLOG,
+    SERVER_LOG_FILE
+};
+
 struct logsrvd_config;
 typedef bool (*logsrvd_conf_cb_t)(struct logsrvd_config *, const char *, size_t);
 
@@ -102,6 +109,9 @@ static struct logsrvd_config {
         struct address_list_container addresses;
         struct timespec timeout;
         bool tcp_keepalive;
+	enum server_log_type log_type;
+	FILE *log_stream;
+	char *log_file;
 	char *pid_file;
 #if defined(HAVE_OPENSSL)
 	char *tls_key_path;
@@ -152,6 +162,7 @@ static struct logsrvd_config {
     } eventlog;
     struct logsrvd_config_syslog {
 	unsigned int maxlen;
+	int server_facility;
 	int facility;
 	int acceptpri;
 	int rejectpri;
@@ -560,6 +571,37 @@ cb_server_pid_file(struct logsrvd_config *config, const char *str, size_t offset
     debug_return_bool(true);
 }
 
+static bool
+cb_server_log(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    char *copy = NULL;
+    enum server_log_type log_type = SERVER_LOG_NONE;
+    debug_decl(cb_server_log, SUDO_DEBUG_UTIL);
+
+    /* An empty value means to disable the server log. */
+    if (*str != '\0') {
+	if (*str != '/') {
+	    log_type = SERVER_LOG_FILE;
+	    if ((copy = strdup(str)) == NULL) {
+		sudo_warn(NULL);
+		debug_return_bool(false);
+	    }
+	} else if (strcmp(str, "stderr") == 0) {
+	    log_type = SERVER_LOG_STDERR;
+	} else if (strcmp(str, "syslog") == 0) {
+	    log_type = SERVER_LOG_SYSLOG;
+	} else {
+	    debug_return_bool(false);
+	}
+    }
+
+    free(config->server.log_file);
+    config->server.log_file = copy;
+    config->server.log_type = log_type;
+
+    debug_return_bool(true);
+}
+
 #if defined(HAVE_OPENSSL)
 static bool
 cb_tls_key(struct logsrvd_config *config, const char *path, size_t offset)
@@ -807,6 +849,23 @@ cb_syslog_maxlen(struct logsrvd_config *config, const char *str, size_t offset)
 }
 
 static bool
+cb_syslog_server_facility(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    int logfac;
+    debug_decl(cb_syslog_server_facility, SUDO_DEBUG_UTIL);
+
+    if (!sudo_str2logfac(str, &logfac)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid syslog priority %s", str);
+	debug_return_bool(false);
+    }
+
+    config->syslog.server_facility = logfac;
+
+    debug_return_bool(true);
+}
+
+static bool
 cb_syslog_facility(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int logfac;
@@ -940,6 +999,7 @@ static struct logsrvd_config_entry server_conf_entries[] = {
     { "timeout", cb_server_timeout },
     { "tcp_keepalive", cb_server_keepalive },
     { "pid_file", cb_server_pid_file },
+    { "server_log", cb_server_log },
 #if defined(HAVE_OPENSSL)
     { "tls_key", cb_tls_key, offsetof(struct logsrvd_config, server.tls_key_path) },
     { "tls_cacert", cb_tls_cacert, offsetof(struct logsrvd_config, server.tls_cacert_path) },
@@ -993,6 +1053,7 @@ static struct logsrvd_config_entry eventlog_conf_entries[] = {
 
 static struct logsrvd_config_entry syslog_conf_entries[] = {
     { "maxlen", cb_syslog_maxlen },
+    { "server_facility", cb_syslog_server_facility },
     { "facility", cb_syslog_facility },
     { "reject_priority", cb_syslog_rejectpri },
     { "accept_priority", cb_syslog_acceptpri },
@@ -1098,33 +1159,45 @@ done:
 }
 
 static FILE *
-logsrvd_open_eventlog(struct logsrvd_config *config)
+logsrvd_open_log_file(const char *path, int flags)
 {
     mode_t oldmask;
     FILE *fp = NULL;
     const char *omode;
-    int fd, flags;
-    debug_decl(logsrvd_open_eventlog, SUDO_DEBUG_UTIL);
+    int fd;
+    debug_decl(logsrvd_open_log_file, SUDO_DEBUG_UTIL);
 
-    /* Cannot append to a JSON file. */
-    if (config->eventlog.log_format == EVLOG_JSON) {
-	flags = O_RDWR|O_CREAT;
-	omode = "w";
-    } else {
-	flags = O_WRONLY|O_APPEND|O_CREAT;
+    if (ISSET(flags, O_APPEND)) {
 	omode = "a";
+    } else {
+	omode = "w";
     }
     oldmask = umask(S_IRWXG|S_IRWXO);
-    fd = open(config->logfile.path, flags, S_IRUSR|S_IWUSR);
+    fd = open(path, flags, S_IRUSR|S_IWUSR);
     (void)umask(oldmask);
     if (fd == -1 || (fp = fdopen(fd, omode)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to open log file %s", config->logfile.path);
+	    "unable to open log file %s", path);
 	if (fd != -1)
 	    close(fd);
     }
 
     debug_return_ptr(fp);
+}
+
+static FILE *
+logsrvd_open_eventlog(struct logsrvd_config *config)
+{
+    int flags;
+    debug_decl(logsrvd_open_eventlog, SUDO_DEBUG_UTIL);
+
+    /* Cannot append to a JSON file. */
+    if (config->eventlog.log_format == EVLOG_JSON) {
+	flags = O_RDWR|O_CREAT;
+    } else {
+	flags = O_WRONLY|O_APPEND|O_CREAT;
+    }
+    debug_return_ptr(logsrvd_open_log_file(config->logfile.path, flags));
 }
 
 static FILE *
@@ -1160,6 +1233,175 @@ logsrvd_conf_eventlog_setconf(struct logsrvd_config *config)
     debug_return;
 }
 
+/*
+ * Conversation function for use by sudo_warn/sudo_fatal.
+ * Logs to stdout/stderr.
+ */
+static int
+logsrvd_conv_stderr(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    int i;
+    debug_decl(logsrvd_conv_stderr, SUDO_DEBUG_UTIL);
+
+    for (i = 0; i < num_msgs; i++) {
+	if (fputs(msgs[i].msg, stderr) == EOF)
+	    debug_return_int(-1);
+    }
+
+    debug_return_int(0);
+}
+
+/*
+ * Conversation function for use by sudo_warn/sudo_fatal.
+ * Acts as a no-op log sink.
+ */
+static int
+logsrvd_conv_none(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    /* Also write to stderr if still in the foreground. */
+    if (logsrvd_is_early()) {
+	(void)logsrvd_conv_stderr(num_msgs, msgs, replies, callback);
+    }
+
+    return 0;
+}
+
+/*
+ * Conversation function for use by sudo_warn/sudo_fatal.
+ * Logs to syslog.
+ */
+static int
+logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    char *buf = NULL, *cp = NULL;
+    const char *progname;
+    size_t proglen, bufsize = 0;
+    int i;
+    debug_decl(logsrvd_conv_syslog, SUDO_DEBUG_UTIL);
+
+    /* Also write to stderr if still in the foreground. */
+    if (logsrvd_is_early()) {
+	(void)logsrvd_conv_stderr(num_msgs, msgs, replies, callback);
+    }
+
+    /*
+     * Concat messages into a flag string that we can syslog.
+     */
+    progname = getprogname();
+    proglen = strlen(progname);
+    for (i = 0; i < num_msgs; i++) {
+	const char *msg = msgs[i].msg;
+	size_t len = strlen(msg);
+	size_t used = (size_t)(cp - buf);
+
+	/* Strip leading "sudo_logsrvd: " prefix. */
+	if (strncmp(msg, progname, proglen) == 0) {
+	    msg += proglen;
+	    len -= proglen;
+	    if (len == 0) {
+		/* Skip over ": " string that follows program name. */
+		if (i + 1 < num_msgs && strcmp(msgs[i + 1].msg, ": ") == 0) {
+		    i++;
+		    continue;
+		}
+	    } else if (msg[0] == ':' && msg[1] == ' ') {
+		/* Handle "progname: " */
+		msg += 2;
+		len -= 2;
+	    }
+	}
+
+	/* Strip off trailing newlines. */
+	while (len > 1 && msgs[i].msg[len - 1] == '\n')
+	    len--;
+	if (len == 0)
+	    continue;
+
+	if (len >= bufsize - used) {
+	    bufsize += 1024;
+	    char *tmp = realloc(buf, bufsize);
+	    if (tmp == NULL) {
+		free(buf);
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
+		debug_return_int(-1);
+	    }
+	    buf = tmp;
+	    cp = tmp + used;
+	}
+	memcpy(cp, msgs[i].msg, len);
+	cp[len] = '\0';
+	cp += len;
+    }
+    if (buf != NULL) {
+	openlog(progname, 0, logsrvd_config->syslog.server_facility);
+	syslog(LOG_ERR, "%s", buf);
+	free(buf);
+
+	/* Restore old syslog settings. */
+	if (logsrvd_config->eventlog.log_type == EVLOG_SYSLOG)
+	    openlog("sudo", 0, logsrvd_config->syslog.facility);
+    }
+
+    debug_return_int(0);
+}
+
+/*
+ * Conversation function for use by sudo_warn/sudo_fatal.
+ * Logs to an already-open log file.
+ */
+static int
+logsrvd_conv_logfile(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    const char *progname;
+    size_t proglen;
+    int i;
+    debug_decl(logsrvd_conv_logfile, SUDO_DEBUG_UTIL);
+
+    /* Also write to stderr if still in the foreground. */
+    if (logsrvd_is_early()) {
+	(void)logsrvd_conv_stderr(num_msgs, msgs, replies, callback);
+    }
+
+    if (logsrvd_config->server.log_stream == NULL) {
+	errno = EBADF;
+	debug_return_int(-1);
+    }
+
+    progname = getprogname();
+    proglen = strlen(progname);
+    for (i = 0; i < num_msgs; i++) {
+	const char *msg = msgs[i].msg;
+	size_t len = strlen(msg);
+
+	/* Strip leading "sudo_logsrvd: " prefix. */
+	if (strncmp(msg, progname, proglen) == 0) {
+	    msg += proglen;
+	    len -= proglen;
+	    if (len == 0) {
+		/* Skip over ": " string that follows program name. */
+		if (i + 1 < num_msgs && strcmp(msgs[i + 1].msg, ": ") == 0) {
+		    i++;
+		    continue;
+		}
+	    } else if (msg[0] == ':' && msg[1] == ' ') {
+		/* Handle "progname: " */
+		msg += 2;
+		len -= 2;
+	    }
+	}
+
+	if (fwrite(msgs[i].msg, len, 1, logsrvd_config->server.log_stream) != 1)
+	    debug_return_int(-1);
+    }
+
+    debug_return_int(0);
+}
+
 /* Free the specified struct logsrvd_config and its contents. */
 static void
 logsrvd_conf_free(struct logsrvd_config *config)
@@ -1172,6 +1414,9 @@ logsrvd_conf_free(struct logsrvd_config *config)
     /* struct logsrvd_config_server */
     address_list_delref(&config->server.addresses.addrs);
     free(config->server.pid_file);
+    free(config->server.log_file);
+    if (config->server.log_stream != NULL)
+	fclose(config->server.log_stream);
 #if defined(HAVE_OPENSSL)
     free(config->server.tls_key_path);
     free(config->server.tls_cert_path);
@@ -1245,6 +1490,7 @@ logsrvd_conf_alloc(void)
     config->server.addresses.refcnt = 1;
     config->server.timeout.tv_sec = DEFAULT_SOCKET_TIMEOUT_SEC;
     config->server.tcp_keepalive = true;
+    config->server.log_type = SERVER_LOG_SYSLOG;
     config->server.pid_file = strdup(_PATH_SUDO_LOGSRVD_PID);
     if (config->server.pid_file == NULL) {
 	sudo_warn(NULL);
@@ -1298,6 +1544,7 @@ logsrvd_conf_alloc(void)
 
     /* Syslog defaults */
     config->syslog.maxlen = 960;
+    config->syslog.server_facility = LOG_DAEMON;
     if (!cb_syslog_facility(config, LOGFAC, 0)) {
 	sudo_warnx(U_("unknown syslog facility %s"), LOGFAC);
 	goto bad;
@@ -1410,6 +1657,31 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     /* Clear store_first if not relaying. */
     if (TAILQ_EMPTY(&config->relay.relays.addrs))
 	config->relay.store_first = false;
+
+    /* Open server log if specified. */
+    switch (config->server.log_type) {
+    case SERVER_LOG_SYSLOG:
+	sudo_warn_set_conversation(logsrvd_conv_syslog);
+	break;
+    case SERVER_LOG_FILE:
+	config->server.log_stream =
+	    logsrvd_open_log_file(config->server.log_file, O_WRONLY|O_APPEND|O_CREAT);
+	if (config->server.log_stream == NULL)
+	    debug_return_bool(false);
+	sudo_warn_set_conversation(logsrvd_conv_logfile);
+	break;
+    case SERVER_LOG_NONE:
+	sudo_warn_set_conversation(logsrvd_conv_none);
+	break;
+    case SERVER_LOG_STDERR:
+	/* Default is stderr. */
+	sudo_warn_set_conversation(NULL);
+	break;
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "cannot open unknown log type %d", config->eventlog.log_type);
+	break;
+    }
 
     /* Open event log if specified. */
     switch (config->eventlog.log_type) {
