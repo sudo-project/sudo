@@ -222,11 +222,13 @@ libsudo_util.la: $(LTOBJS) @LT_LDDEP@
 	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBINTL@ @LIBMD@ @LIBPTHREAD@ @LIBDL@ @LIBRT@ @NET_LIBS@;; \
 	esac
 
+MKSIGTOOLSPATH ?= .
+
 siglist.c: mksiglist
-	./mksiglist > $@
+	$(MKSIGTOOLSPATH)/mksiglist > $@
 
 signame.c: mksigname
-	./mksigname > $@
+	$(MKSIGTOOLSPATH)/mksigname > $@
 
 mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksiglist.c -o $@
