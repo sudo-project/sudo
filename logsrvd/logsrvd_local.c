@@ -228,7 +228,7 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 	mode = logsrvd_conf_iolog_mode();
 	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
 	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
-	    sudo_warn("chmod 0%o %s/%s", mode, "timing",
+	    sudo_warn("chmod 0%o %s/%s", (unsigned int)mode, "timing",
 		logsrvd_conf_iolog_dir());
 	}
     }
