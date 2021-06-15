@@ -299,8 +299,7 @@ fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
 	free(buf->data);
 	buf->size = sudo_pow2_roundup(len);
 	if ((buf->data = malloc(buf->size)) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to malloc %u", buf->size);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    buf->size = 0;
 	    goto done;
 	}
@@ -1055,7 +1054,7 @@ handle_server_message(uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx("%s", U_("unable to unpack ServerMessage"));
+	sudo_warnx("unable to unpack %s size %zu", "ServerMessage", len);
 	debug_return_bool(false);
     }
 

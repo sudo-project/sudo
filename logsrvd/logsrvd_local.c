@@ -49,6 +49,7 @@
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_eventlog.h"
+#include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_json.h"
 #include "sudo_iolog.h"
@@ -121,8 +122,8 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 	    break;
 	}
 	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected value case %d", info->value_case);
+	    sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
+		info->value_case, "InfoMessage", "local");
 	    goto bad;
 	}
     }
@@ -171,8 +172,7 @@ store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
 	    debug_return_bool(false);
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    debug_return_bool(false);
 	}
     }
@@ -228,8 +228,8 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 	mode = logsrvd_conf_iolog_mode();
 	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
 	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"unable to fchmodat timing file");
+	    sudo_warn("chmod 0%o %s/%s", mode, "timing",
+		logsrvd_conf_iolog_dir());
 	}
     }
 
@@ -251,15 +251,13 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
     /* We must allocate closure->evlog for iolog_path. */
     closure->evlog = calloc(1, sizeof(*closure->evlog));
     if (closure->evlog == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-            "calloc(1, %zu)", sizeof(*closure->evlog));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	closure->errstr = _("unable to allocate memory");
         goto bad;
     }
     closure->evlog->iolog_path = strdup(msg->log_id);
     if (closure->evlog->iolog_path == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "strdup");
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	closure->errstr = _("unable to allocate memory");
 	goto bad;
     }
@@ -268,20 +266,18 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
     closure->iolog_dir_fd =
 	iolog_openat(AT_FDCWD, closure->evlog->iolog_path, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s", closure->evlog->iolog_path);
+	sudo_warn("%s", closure->evlog->iolog_path);
 	goto bad;
     }
 
     /* If the timing file write bit is clear, log is already complete. */
     if (fstatat(closure->iolog_dir_fd, "timing", &sb, 0) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to stat %s/timing", closure->evlog->iolog_path);
+	sudo_warn("%s/timing", closure->evlog->iolog_path);
 	goto bad;
     }
     if (!ISSET(sb.st_mode, S_IWUSR)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s already complete", closure->evlog->iolog_path);
+	sudo_warn(U_("%s: %s"), closure->evlog->iolog_path,
+	    U_("log is already complete, cannot be restarted"));
 	closure->errstr = _("log is already complete, cannot be restarted");
 	goto bad;
     }
@@ -304,8 +300,7 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
 
     /* Must seek or flush before switching from read -> write. */
     if (iolog_seek(&closure->iolog_files[IOFD_TIMING], 0, SEEK_CUR) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "lseek(IOFD_TIMING, 0, SEEK_CUR)");
+	sudo_warn("%s/timing", closure->evlog->iolog_path);
 	goto bad;
     }
 
@@ -365,25 +360,22 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
 	iofd, (long long)iobuf->delay->tv_sec, (int)iobuf->delay->tv_nsec,
 	iobuf->data.len);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d", len);
+	sudo_warnx(U_("unable to format timing buffer, length %d"), len);
 	goto bad;
     }
 
     /* Write to specified I/O log file. */
     if (!iolog_write(&closure->iolog_files[iofd], iobuf->data.data,
 	    iobuf->data.len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", evlog->iolog_path,
-	    iolog_fd_to_name(iofd), errstr);
+	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path, iolog_fd_to_name(iofd),
+	    errstr);
 	goto bad;
     }
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", evlog->iolog_path,
+	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
     }
@@ -421,16 +413,14 @@ store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t buflen,
 	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->rows, msg->cols);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d", len);
+	sudo_warnx(U_("unable to format timing buffer, length %d"), len);
 	goto bad;
     }
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->evlog->iolog_path,
+	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
     }
@@ -458,17 +448,14 @@ store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t buflen,
 	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->signal);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d, signal %s",
-	    len, msg->signal);
+	sudo_warnx(U_("unable to format timing buffer, length %d"), len);
 	goto bad;
     }
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->evlog->iolog_path,
+	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
     }

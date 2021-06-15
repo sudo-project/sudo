@@ -54,6 +54,7 @@ static bool
 verify_cert_chain(SSL_CTX *ctx, const char *cert_file)
 {
 #ifdef HAVE_SSL_CTX_GET0_CERTIFICATE
+    const char *errstr;
     bool ret = false;
     X509_STORE_CTX *store_ctx = NULL;
     X509_STORE *ca_store;
@@ -62,23 +63,20 @@ verify_cert_chain(SSL_CTX *ctx, const char *cert_file)
     debug_decl(verify_cert_chain, SUDO_DEBUG_UTIL);
 
     if ((x509 = SSL_CTX_get0_certificate(ctx)) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to get X509 object from SSL_CTX: %s",
-            ERR_error_string(ERR_peek_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx("SSL_CTX_get0_certificate: %s", errstr);
         goto done;
     }
 
     if ((store_ctx = X509_STORE_CTX_new()) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to allocate X509_STORE_CTX object: %s",
-            ERR_error_string(ERR_peek_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx("X509_STORE_CTX_new: %s", errstr);
         goto done;
     }
 
     if (!SSL_CTX_get0_chain_certs(ctx, &chain_certs)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to get chain certs: %s",
-            ERR_error_string(ERR_peek_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx("SSL_CTX_get0_chain_certs: %s", errstr);
         goto done;
     }
 
@@ -86,16 +84,14 @@ verify_cert_chain(SSL_CTX *ctx, const char *cert_file)
         X509_STORE_set_flags(ca_store, X509_V_FLAG_X509_STRICT);
 
     if (!X509_STORE_CTX_init(store_ctx, ca_store, x509, chain_certs)) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to initialize X509_STORE_CTX object: %s",
-            ERR_error_string(ERR_peek_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx("X509_STORE_CTX_init: %s", errstr);
         goto done;
     }
 
     if (X509_verify_cert(store_ctx) <= 0) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to verify cert %s: %s", cert_file,
-            ERR_error_string(ERR_peek_error(), NULL));
+	errstr = ERR_reason_error_string(ERR_get_error());
+	sudo_warnx("X509_verify_cert: %s", errstr);
         goto done;
     }
 

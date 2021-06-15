@@ -49,6 +49,7 @@
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_eventlog.h"
+#include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
 #include "sudo_util.h"
@@ -67,8 +68,7 @@ journal_fdopen(int fd, const char *journal_path,
 
     closure->journal_path = strdup(journal_path);
     if (closure->journal_path == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to allocate memory");
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_bool(false);
     }
 
@@ -92,8 +92,8 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
 	logsrvd_conf_relay_dir(), parent_dir, RELAY_TEMPLATE);
     if (len >= pathlen) {
 	errno = ENAMETOOLONG;
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s/%s/%s", logsrvd_conf_relay_dir(), parent_dir, RELAY_TEMPLATE);
+	sudo_warn("%s/%s/%s", logsrvd_conf_relay_dir(), parent_dir,
+	    RELAY_TEMPLATE);
 	debug_return_int(-1);
     }
     if (!sudo_mkdir_parents(pathbuf, ROOT_UID, ROOT_GID,
@@ -103,8 +103,7 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
 	debug_return_int(-1);
     }
     if ((fd = mkstemp(pathbuf)) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to create journal file %s", pathbuf);
+	sudo_warn(U_("%s: %s"), "mkstemp", pathbuf);
 	debug_return_int(-1);
     }
 
@@ -127,8 +126,7 @@ journal_create(struct connection_closure *closure)
 	debug_return_bool(false);
     }
     if (!sudo_lock_file(fd, SUDO_TLOCK)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to lock journal file %s", journal_path);
+	sudo_warn(U_("unable to lock %s"), journal_path);
 	unlink(journal_path);
 	close(fd);
 	closure->errstr = _("unable to lock journal file");
@@ -139,7 +137,7 @@ journal_create(struct connection_closure *closure)
 	    "unable to fdopen journal file %s", journal_path);
 	unlink(journal_path);
 	close(fd);
-	closure->errstr = _("unable to allocate memory");
+	closure->errstr = _("unable to open journal file");
 	debug_return_bool(false);
     }
 
@@ -173,8 +171,8 @@ journal_finish(struct connection_closure *closure)
     }
     close(fd);
     if (rename(closure->journal_path, outgoing_path) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to rename %s -> %s", closure->journal_path, outgoing_path);
+	sudo_warn(U_("unable to rename %s to %s"), closure->journal_path,
+	    outgoing_path);
 	closure->errstr = _("unable to rename journal file");
 	unlink(outgoing_path);
 	debug_return_bool(false);
@@ -191,8 +189,7 @@ journal_finish(struct connection_closure *closure)
 	free(closure->journal_path);
 	closure->journal_path = strdup(outgoing_path);
 	if (closure->journal_path == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to strdup new journal path %s", outgoing_path);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    closure->errstr = _("unable to allocate memory");
 	    debug_return_bool(false);
 	}
@@ -221,19 +218,21 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 	/* Read message size (uint32_t in network byte order). */
 	nread = fread(&msg_len, sizeof(msg_len), 1, closure->journal);
 	if (nread != 1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to read message length from %s", closure->journal_path);
-	    if (feof(closure->journal))
+	    if (feof(closure->journal)) {
+		sudo_warnx(U_("%s: %s"), closure->journal_path,
+		    U_("unexpected EOF reading journal file"));
 		closure->errstr = _("unexpected EOF reading journal file");
-	    else
+	    } else {
+		sudo_warn(U_("%s: %s"), closure->journal_path,
+		    U_("error reading journal file"));
 		closure->errstr = _("error reading journal file");
+	    }
 	    break;
 	}
 	msg_len = ntohl(msg_len);
 	if (msg_len > MESSAGE_SIZE_MAX) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: client message too large %u > %u",
-		closure->journal_path, msg_len, MESSAGE_SIZE_MAX);
+	    sudo_warnx(U_("%s: %s"), closure->journal_path,
+		U_("client message too large"));
 	    closure->errstr = _("client message too large");
 	    break;
 	}
@@ -254,12 +253,15 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 
 	    nread = fread(buf, msg_len, 1, closure->journal);
 	    if (nread != 1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to read message from %s", closure->journal_path);
-		if (feof(closure->journal))
+		if (feof(closure->journal)) {
+		    sudo_warnx(U_("%s: %s"), closure->journal_path,
+			U_("unexpected EOF reading journal file"));
 		    closure->errstr = _("unexpected EOF reading journal file");
-		else
+		} else {
+		    sudo_warn(U_("%s: %s"), closure->journal_path,
+			U_("error reading journal file"));
 		    closure->errstr = _("error reading journal file");
+		}
 		break;
 	    }
 	}
@@ -267,8 +269,8 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 	client_message__free_unpacked(msg, NULL);
 	msg = client_message__unpack(NULL, msg_len, buf);
 	if (msg == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to unpack ClientMessage size %u", msg_len);
+	    sudo_warnx("unable to unpack %s size %zu", "ClientMessage",
+		(size_t)msg_len);
 	    closure->errstr = _("invalid journal file, unable to restart");
 	    break;
 	}
@@ -341,8 +343,8 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected type_case value %d", msg->type_case);
+	    sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
+		msg->type_case, "ClientMessage", closure->journal_path);
 	    break;
 	}
 	if (delay != NULL) {
@@ -361,10 +363,9 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 
 	    /* Mismatch between resume point and stored log. */
 	    closure->errstr = _("invalid journal file, unable to restart");
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to find resume point [%lld, %ld] in %s",
-		(long long)target->tv_sec, target->tv_nsec,
-		closure->journal_path);
+	    sudo_warnx(U_("%s: unable to find resume point [%lld, %ld]"),
+		closure->journal_path, (long long)target->tv_sec,
+		target->tv_nsec);
 	    break;
 	}
     }
@@ -400,20 +401,17 @@ journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
 	logsrvd_conf_relay_dir(), cp);
     if (len >= ssizeof(journal_path)) {
 	errno = ENAMETOOLONG;
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s/incoming/%s", logsrvd_conf_relay_dir(), cp);
+	sudo_warn("%s/incoming/%s", logsrvd_conf_relay_dir(), cp);
 	closure->errstr = _("unable to create journal file");
 	debug_return_bool(false);
     }
     if ((fd = open(journal_path, O_RDWR)) == -1) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-            "unable to open journal file %s", journal_path);
+	sudo_warn(U_("unable to open %s"), journal_path);
 	closure->errstr = _("unable to create journal file");
         debug_return_bool(false);
     }
     if (!journal_fdopen(fd, journal_path, closure)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to fdopen journal file %s", journal_path);
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	close(fd);
 	closure->errstr = _("unable to allocate memory");
 	debug_return_bool(false);
@@ -423,8 +421,7 @@ journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
     target.tv_sec = msg->resume_point->tv_sec;
     target.tv_nsec = msg->resume_point->tv_nsec;
     if (!journal_seek(&target, closure)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to seek to [%lld, %ld] in journal file %s",
+	sudo_warn(U_("unable to seek to [%lld, %ld] in journal file %s"),
 	    (long long)target.tv_sec, target.tv_nsec, journal_path);
 	debug_return_bool(false);
     }
@@ -473,8 +470,7 @@ journal_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
 	    debug_return_bool(false);
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    debug_return_bool(false);
 	}
     }

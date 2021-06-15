@@ -366,8 +366,7 @@ cb_iolog_user(struct logsrvd_config *config, const char *user, size_t offset)
     debug_decl(cb_iolog_user, SUDO_DEBUG_UTIL);
 
     if ((pw = getpwnam(user)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unknown user %s", user);
+	sudo_warnx(U_("unknown user %s"), user);
 	debug_return_bool(false);
     }
     config->iolog.uid = pw->pw_uid;
@@ -384,8 +383,7 @@ cb_iolog_group(struct logsrvd_config *config, const char *group, size_t offset)
     debug_decl(cb_iolog_group, SUDO_DEBUG_UTIL);
 
     if ((gr = getgrnam(group)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unknown group %s", group);
+	sudo_warnx(U_("unknown group %s"), group);
 	debug_return_bool(false);
     }
     config->iolog.gid = gr->gr_gid;
@@ -403,8 +401,7 @@ cb_iolog_mode(struct logsrvd_config *config, const char *str, size_t offset)
 
     mode = sudo_strtomode(str, &errstr);
     if (errstr != NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to parse iolog mode %s", str);
+	sudo_warnx(U_("unable to parse iolog mode %s"), str);
 	debug_return_bool(false);
     }
     config->iolog.mode = mode;
@@ -421,8 +418,7 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str, size_t offset)
     value = sudo_strtonum(str, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
         if (errno != ERANGE) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "bad maxseq: %s: %s", str, errstr);
+	    sudo_warnx(U_("invalid value for %s: %s"), "maxseq", errstr);
             debug_return_bool(false);
         }
         /* Out of range, clamp to SESSID_MAX as documented. */
@@ -855,8 +851,7 @@ cb_syslog_server_facility(struct logsrvd_config *config, const char *str, size_t
     debug_decl(cb_syslog_server_facility, SUDO_DEBUG_UTIL);
 
     if (!sudo_str2logfac(str, &logfac)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid syslog priority %s", str);
+	sudo_warnx(U_("unknown syslog facility %s"), str);
 	debug_return_bool(false);
     }
 
@@ -872,8 +867,7 @@ cb_syslog_facility(struct logsrvd_config *config, const char *str, size_t offset
     debug_decl(cb_syslog_facility, SUDO_DEBUG_UTIL);
 
     if (!sudo_str2logfac(str, &logfac)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid syslog priority %s", str);
+	sudo_warnx(U_("unknown syslog facility %s"), str);
 	debug_return_bool(false);
     }
 
@@ -889,8 +883,7 @@ cb_syslog_acceptpri(struct logsrvd_config *config, const char *str, size_t offse
     debug_decl(cb_syslog_acceptpri, SUDO_DEBUG_UTIL);
 
     if (!sudo_str2logpri(str, &logpri)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid syslog priority %s", str);
+	sudo_warnx(U_("unknown syslog priority %s"), str);
 	debug_return_bool(false);
     }
 
@@ -905,8 +898,10 @@ cb_syslog_rejectpri(struct logsrvd_config *config, const char *str, size_t offse
     int logpri;
     debug_decl(cb_syslog_rejectpri, SUDO_DEBUG_UTIL);
 
-    if (!sudo_str2logpri(str, &logpri))
+    if (!sudo_str2logpri(str, &logpri)) {
+	sudo_warnx(U_("unknown syslog priority %s"), str);
 	debug_return_bool(false);
+    }
 
     config->syslog.rejectpri = logpri;
 
@@ -920,8 +915,7 @@ cb_syslog_alertpri(struct logsrvd_config *config, const char *str, size_t offset
     debug_decl(cb_syslog_alertpri, SUDO_DEBUG_UTIL);
 
     if (!sudo_str2logpri(str, &logpri)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid syslog priority %s", str);
+	sudo_warnx(U_("unknown syslog priority %s"), str);
 	debug_return_bool(false);
     }
 
@@ -1176,8 +1170,7 @@ logsrvd_open_log_file(const char *path, int flags)
     fd = open(path, flags, S_IRUSR|S_IWUSR);
     (void)umask(oldmask);
     if (fd == -1 || (fp = fdopen(fd, omode)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to open log file %s", path);
+	sudo_warn(U_("unable to open log file %s"), path);
 	if (fd != -1)
 	    close(fd);
     }
@@ -1328,9 +1321,8 @@ logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
 	    bufsize += 1024;
 	    char *tmp = realloc(buf, bufsize);
 	    if (tmp == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		free(buf);
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to allocate memory");
 		debug_return_int(-1);
 	    }
 	    buf = tmp;

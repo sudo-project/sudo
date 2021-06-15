@@ -50,6 +50,7 @@
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_eventlog.h"
+#include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
 #include "sudo_queue.h"
@@ -101,16 +102,14 @@ outgoing_queue_cb(int unused, int what, void *v)
 	    continue;
 	}
 	if (!sudo_lock_file(fd, SUDO_TLOCK)) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"unable to lock fd %d (%s)", fd, oj->journal_path);
+	    sudo_warn(U_("unable to lock %s"), oj->journal_path);
 	    close(fd);
 	    continue;
 	}
 	fp = fdopen(fd, "r");
 	if (fp == NULL) {
+	    sudo_warn(U_("unable to open %s"), oj->journal_path);
 	    close(fd);
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"unable to fdopen %s", oj->journal_path);
 	    break;
 	}
 
@@ -129,8 +128,7 @@ outgoing_queue_cb(int unused, int what, void *v)
 
 	success = connect_relay(closure);
 	if (!success) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to connect to relay");
+	    sudo_warnx(U_("unable to connect to relay"));
 	    connection_close(closure);
 	}
 	break;
@@ -153,14 +151,13 @@ logsrvd_queue_enable(time_t timeout, struct sudo_event_base *evbase)
 	    outgoing_queue_event = sudo_ev_alloc(-1, SUDO_EV_TIMEOUT,
 		outgoing_queue_cb, evbase);
 	    if (outgoing_queue_event == NULL) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to allocate memory");
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
 		debug_return_bool(false);
 	    }
 	}
 	if (sudo_ev_add(evbase, outgoing_queue_event, &tv, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    debug_return_bool(false);
 	}
     }
@@ -185,8 +182,7 @@ logsrvd_queue_insert(struct connection_closure *closure)
     }
 
     if ((oj = malloc(sizeof(*oj))) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to allocate memory");
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_bool(false);
     }
     oj->journal_path = closure->journal_path;
@@ -222,8 +218,7 @@ logsrvd_queue_scan(struct sudo_event_base *evbase)
 	logsrvd_conf_relay_dir(), RELAY_TEMPLATE);
     if (dirlen >= ssizeof(path)) {
 	errno = ENAMETOOLONG;
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s/outgoing/%s", logsrvd_conf_relay_dir(), RELAY_TEMPLATE);
+	sudo_warn("%s/outgoing/%s", logsrvd_conf_relay_dir(), RELAY_TEMPLATE);
 	debug_return_bool(false);
     }
     dirlen -= sizeof(RELAY_TEMPLATE) - 1;
@@ -231,8 +226,7 @@ logsrvd_queue_scan(struct sudo_event_base *evbase)
 
     dirp = opendir(path);
     if (dirp == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to opendir %s", path);
+	sudo_warn("opendir %s", path);
 	debug_return_bool(false);
     }
     prefix_len = strcspn(RELAY_TEMPLATE, "X");
@@ -265,8 +259,7 @@ logsrvd_queue_scan(struct sudo_event_base *evbase)
 
     debug_return_bool(true);
 oom:
-    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	"unable to allocate memory");
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     closedir(dirp);
     debug_return_bool(false);
 }

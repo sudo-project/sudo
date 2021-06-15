@@ -59,8 +59,7 @@ expand_buf(struct connection_buffer *buf, unsigned int needed)
 	/* Expand buffer. */
 	needed = sudo_pow2_roundup(needed);
 	if ((newdata = malloc(needed)) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: unable to malloc %u", __func__, needed);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
 	if (buf->off > 0)
@@ -147,9 +146,9 @@ iolog_seekto(int iolog_dir_fd, const char *iolog_path,
 		break;
 
 	    /* Mismatch between resume point and stored log. */
-	    sudo_warnx(U_("unable to find resume point [%lld, %ld] in %s/%s"),
-		(long long)target->tv_sec, target->tv_nsec, iolog_path,
-		"timing");
+	    sudo_warnx(U_("%s/%s: unable to find resume point [%lld, %ld]"),
+		iolog_path, "timing", (long long)target->tv_sec,
+		target->tv_nsec);
 	    goto bad;
 	}
     }

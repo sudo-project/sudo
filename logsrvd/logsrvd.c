@@ -267,8 +267,7 @@ connection_close(struct connection_closure *closure)
 
 	    /* Connect to the first relay available asynchronously. */
 	    if (!connect_relay(new_closure)) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to connect to relay");
+		sudo_warnx(U_("unable to connect to relay"));
 		connection_closure_free(new_closure);
 	    }
 	}
@@ -294,17 +293,20 @@ get_free_buf(size_t len, struct connection_closure *closure)
     debug_decl(get_free_buf, SUDO_DEBUG_UTIL);
 
     buf = TAILQ_FIRST(&closure->free_bufs);
-    if (buf != NULL)
+    if (buf != NULL) {
         TAILQ_REMOVE(&closure->free_bufs, buf, entries);
-    else
-        buf = calloc(1, sizeof(*buf));
+    } else {
+        if ((buf = calloc(1, sizeof(*buf))) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_ptr(NULL);
+	}
+    }
 
-    if (buf != NULL && len > buf->size) {
+    if (len > buf->size) {
 	free(buf->data);
 	buf->size = sudo_pow2_roundup(len);
 	if ((buf->data = malloc(buf->size)) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to malloc %u", buf->size);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(buf);
 	    buf = NULL;
 	}
@@ -324,8 +326,7 @@ fmt_server_message(struct connection_closure *closure, ServerMessage *msg)
 
     len = server_message__get_packed_size(msg);
     if (len > MESSAGE_SIZE_MAX) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "server message too large: %zu", len);
+	sudo_warnx(U_("server message too large: %zu"), len);
         goto done;
     }
 
@@ -393,7 +394,7 @@ fmt_error_message(const char *errstr, struct connection_closure *closure)
 
 /*
  * Format a ServerMessage with the error string and add it to the write queue.
- * Also sets the state to ERROR.
+ * Also sets the error flag state to true.
  * Returns true if successfully scheduled, else false.
  */
 bool
@@ -416,8 +417,7 @@ schedule_error_message(const char *errstr, struct connection_closure *closure)
 	goto done;
     if (sudo_ev_add(closure->evbase, closure->write_ev,
 	    logsrvd_conf_server_timeout(), true) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to add server write event");
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
     ret = true;
@@ -440,17 +440,14 @@ handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
     debug_decl(handle_accept, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d for %s", closure->state, source);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
     /* Check that message is valid. */
     if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid AcceptMessage from %s, submit_time: %p, n_info_msgs: %zu",
-	    source, msg->submit_time, msg->n_info_msgs);
+	sudo_warnx(U_("%s: %s"), source, U_("invalid AcceptMessage"));
 	closure->errstr = _("invalid AcceptMessage");
 	debug_return_bool(false);
     }
@@ -479,17 +476,14 @@ handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
     debug_decl(handle_reject, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d for %s", closure->state, source);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
     /* Check that message is valid. */
     if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid RejectMessage from %s, submit_time: %p, n_info_msgs: %zu",
-	    source, msg->submit_time, msg->n_info_msgs);
+	sudo_warnx(U_("%s: %s"), source, U_("invalid RejectMessage"));
 	closure->errstr = _("invalid RejectMessage");
 	debug_return_bool(false);
     }
@@ -513,8 +507,7 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
     debug_decl(handle_exit, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d for %s", closure->state, source);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
@@ -538,8 +531,7 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 	    if (closure->relay_closure == NULL) {
 		struct timespec tv = { 0, 0 };
 		if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"unable to add commit point event");
+		    sudo_warnx("%s", U_("unable to add event to queue"));
 		    ret = false;
 		}
 	    }
@@ -563,8 +555,7 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     debug_decl(handle_restart, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d for %s", closure->state, source);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
@@ -599,9 +590,7 @@ handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
 
     /* Check that message is valid. */
     if (msg->alert_time == NULL || msg->reason == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid AlertMessage, alert_time: %p, reason: %p",
-	    msg->alert_time, msg->reason);
+	sudo_warnx(U_("%s: %s"), source, U_("invalid AlertMessage"));
 	closure->errstr = _("invalid AlertMessage");
 	debug_return_bool(false);
     }
@@ -621,8 +610,7 @@ enable_commit(struct connection_closure *closure)
 	if (!ISSET(closure->commit_ev->flags, SUDO_EVQ_INSERTED)) {
 	    struct timespec tv = { ACK_FREQUENCY, 0 };
 	    if (sudo_ev_add(closure->evbase, closure->commit_ev, &tv, false) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to add commit point event");
+		sudo_warnx("%s", U_("unable to add event to queue"));
 		debug_return_bool(false);
 	    }
 	}
@@ -639,14 +627,12 @@ handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
     debug_decl(handle_iobuf, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d for %s", closure->state, source);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
     if (!closure->log_io) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "not logging I/O for %s", source);
+	sudo_warnx(U_("%s: unexpected IoBuffer"), source);
 	closure->errstr = _("protocol error");
 	debug_return_bool(false);
     }
@@ -671,14 +657,12 @@ handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
     debug_decl(handle_winsize, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d for %s", closure->state, source);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
     if (!closure->log_io) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "not logging I/O for %s", source);
+	sudo_warnx(U_("%s: unexpected IoBuffer"), source);
 	closure->errstr = _("protocol error");
 	debug_return_bool(false);
     }
@@ -703,14 +687,12 @@ handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
     debug_decl(handle_syspend, SUDO_DEBUG_UTIL);
 
     if (closure->state != RUNNING) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d for %s", closure->state, source);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
     if (!closure->log_io) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "not logging I/O for %s", source);
+	sudo_warnx(U_("%s: unexpected IoBuffer"), source);
 	closure->errstr = _("protocol error");
 	debug_return_bool(false);
     }
@@ -730,11 +712,12 @@ static bool
 handle_client_hello(ClientHello *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    const char *source = closure->journal_path ? closure->journal_path :
+	closure->ipaddr;
     debug_decl(handle_client_hello, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
@@ -751,6 +734,8 @@ static bool
 handle_client_message(uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    const char *source = closure->journal_path ? closure->journal_path :
+        closure->ipaddr;
     ClientMessage *msg;
     bool ret = false;
     debug_decl(handle_client_message, SUDO_DEBUG_UTIL);
@@ -758,8 +743,7 @@ handle_client_message(uint8_t *buf, size_t len,
     /* TODO: can we extract type_case without unpacking for relay case? */
     msg = client_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to unpack ClientMessage size %zu", len);
+	sudo_warnx("unable to unpack %s size %zu", "ClientMessage", len);
 	debug_return_bool(false);
     }
 
@@ -804,8 +788,8 @@ handle_client_message(uint8_t *buf, size_t len,
 	ret = handle_client_hello(msg->u.hello_msg, buf, len, closure);
 	break;
     default:
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected type_case value %d", msg->type_case);
+	sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
+	    msg->type_case, "ClientMessage", source);
 	closure->errstr = _("unrecognized ClientMessage type");
 	break;
     }
@@ -850,8 +834,7 @@ server_shutdown(struct sudo_event_base *base)
 	} else if (closure->log_io) {
 	    /* Schedule final commit point for the connection. */
 	    if (sudo_ev_add(base, closure->commit_ev, &tv, false) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to add commit point event");
+		sudo_warnx("%s", U_("unable to add event to queue"));
 	    }
 	} else {
 	    /* No commit point, close connection immediately. */
@@ -865,8 +848,7 @@ server_shutdown(struct sudo_event_base *base)
 	if (ev != NULL) {
 	    tv.tv_sec = SHUTDOWN_TIMEO;
 	    if (sudo_ev_add(base, ev, &tv, false) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to add shutdown event");
+		sudo_warnx("%s", U_("unable to add event to queue"));
 	    }
 	}
     }
@@ -882,6 +864,7 @@ server_msg_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
     struct connection_buffer *buf;
+    const char *errstr;
     ssize_t nwritten;
     debug_decl(server_msg_cb, SUDO_DEBUG_UTIL);
 
@@ -898,14 +881,12 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "timed out writing to client (%s)", closure->ipaddr);
+	sudo_warnx(U_("timed out writing to client %s"), closure->ipaddr);
         goto finished;
     }
 
     if ((buf = TAILQ_FIRST(&closure->write_bufs)) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "missing write buffer");
+	sudo_warnx(U_("missing write buffer for client %s"), closure->ipaddr);
         goto finished;
     }
 
@@ -932,14 +913,11 @@ server_msg_cb(int fd, int what, void *v)
 			"SSL_write returns SSL_ERROR_WANT_WRITE");
                     debug_return;
 		case SSL_ERROR_SYSCALL:
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"unexpected error during SSL_write(): %d (%s)",
-			err, strerror(errno));
+		    sudo_warn("%s: SSL_write", closure->ipaddr);
 		    goto finished;
                 default:
-                    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                        "unexpected error during SSL_write(): %d (%s)",
-                        err, ERR_error_string(ERR_get_error(), NULL));
+		    errstr = ERR_reason_error_string(ERR_get_error());
+		    sudo_warnx("%s: SSL_write: %s", closure->ipaddr, errstr);
                     goto finished;
             }
         }
@@ -950,8 +928,7 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     if (nwritten == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to send %u bytes", buf->len - buf->off);
+	sudo_warn("%s: write", closure->ipaddr);
 	goto finished;
     }
     buf->off += nwritten;
@@ -987,6 +964,9 @@ client_msg_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
     struct connection_buffer *buf = &closure->read_buf;
+    const char *source = closure->journal_path ? closure->journal_path :
+        closure->ipaddr;
+    const char *errstr;
     uint32_t msg_len;
     ssize_t nread;
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL);
@@ -999,8 +979,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "timed out reading from client (%s)", closure->ipaddr);
+	sudo_warnx(U_("timed out reading from client %s"), closure->ipaddr);
         goto close_connection;
     }
 
@@ -1028,8 +1007,7 @@ client_msg_cb(int fd, int what, void *v)
 			/* Enable a temporary write event. */
 			if (sudo_ev_add(closure->evbase, closure->write_ev,
 			    logsrvd_conf_server_timeout(), false) == -1) {
-			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-				"unable to add event to queue");
+			    sudo_warnx("%s", U_("unable to add event to queue"));
 			    closure->errstr = _("unable to allocate memory");
 			    goto send_error;
 			}
@@ -1041,20 +1019,16 @@ client_msg_cb(int fd, int what, void *v)
 		case SSL_ERROR_SYSCALL:
 		    if (nread == 0) {
 			/* EOF, handled below */
-			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			    "EOF from %s without proper TLS shutdown",
+			sudo_warnx(U_("EOF from %s without proper TLS shutdown"),
 			    closure->ipaddr);
 			break;
 		    }
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_read from %s: %s", closure->ipaddr,
-			strerror(errno));
+		    sudo_warn("%s: SSL_read", closure->ipaddr);
                     goto close_connection;
                 default:
-                    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                        "unexpected error during SSL_read(): %d (%s)",
-                        err, ERR_error_string(ERR_get_error(), NULL));
-                        goto close_connection;
+		    errstr = ERR_reason_error_string(ERR_get_error());
+		    sudo_warnx("%s: SSL_read: %s", closure->ipaddr, errstr);
+		    goto close_connection;
             }
         }
     } else
@@ -1069,8 +1043,7 @@ client_msg_cb(int fd, int what, void *v)
     case -1:
 	if (errno == EAGAIN)
 	    debug_return;
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to receive %u bytes", buf->size - buf->len);
+	sudo_warn("%s: read", closure->ipaddr);
 	goto close_connection;
     case 0:
         if (closure->state != FINISHED) {
@@ -1089,8 +1062,7 @@ client_msg_cb(int fd, int what, void *v)
 	msg_len = ntohl(msg_len);
 
 	if (msg_len > MESSAGE_SIZE_MAX) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"client message too large: %u", msg_len);
+	    sudo_warnx(U_("client message too large: %zu"), (size_t)msg_len);
 	    closure->errstr = _("client message too large");
 	    goto send_error;
 	}
@@ -1109,8 +1081,7 @@ client_msg_cb(int fd, int what, void *v)
 	    "%s: parsing ClientMessage, size %u", __func__, msg_len);
 	buf->off += sizeof(msg_len);
 	if (!handle_client_message(buf->data + buf->off, msg_len, closure)) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to parse ClientMessage, size %u", msg_len);
+	    sudo_warnx(U_("%s: %s"), source, U_("invalid ClientMessage"));
 	    closure->errstr = _("invalid ClientMessage");
 	    goto send_error;
 	}
@@ -1156,15 +1127,11 @@ schedule_commit_point(TimeSpec *commit_point,
 	    "%s: sending commit point [%lld, %ld]", __func__,
 	    (long long)commit_point->tv_sec, (long)commit_point->tv_nsec);
 
-	if (!fmt_server_message(closure, &msg)) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to format ServerMessage (commit point)");
+	if (!fmt_server_message(closure, &msg))
 	    goto bad;
-	}
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 	    logsrvd_conf_server_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    goto bad;
 	}
     }
@@ -1302,11 +1269,11 @@ static void
 tls_handshake_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
+    const char *errstr;
     debug_decl(tls_handshake_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "TLS handshake timed out");
+	sudo_warnx("TLS handshake with %s timed out", closure->ipaddr);
         goto bad;
     }
 
@@ -1332,8 +1299,7 @@ tls_handshake_cb(int fd, int what, void *v)
 	    }
             if (sudo_ev_add(closure->evbase, closure->ssl_accept_ev,
                 logsrvd_conf_server_timeout(), false) == -1) {
-                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                    "unable to add ssl_accept_ev to queue");
+		sudo_warnx("%s", U_("unable to add event to queue"));
                 goto bad;
             }
             debug_return;
@@ -1351,20 +1317,16 @@ tls_handshake_cb(int fd, int what, void *v)
 	    }
             if (sudo_ev_add(closure->evbase, closure->ssl_accept_ev,
 		    logsrvd_conf_server_timeout(), false) == -1) {
-                sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                    "unable to add ssl_accept_ev to queue");
+		sudo_warnx("%s", U_("unable to add event to queue"));
                 goto bad;
             }
             debug_return;
 	case SSL_ERROR_SYSCALL:
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unexpected error during TLS handshake: %d (%s)",
-                err, strerror(errno));
+	    sudo_warn("%s: SSL_accept", closure->ipaddr);
             goto bad;
         default:
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unexpected error during TLS handshake: %d (%s)",
-                err, ERR_error_string(ERR_get_error(), NULL));
+	    errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx("%s: SSL_accept: %s", closure->ipaddr, errstr);
             goto bad;
     }
 
@@ -1398,6 +1360,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
     struct sudo_event_base *evbase)
 {
     struct connection_closure *closure;
+    const char *errstr;
     debug_decl(new_connection, SUDO_DEBUG_UTIL);
 
     if ((closure = connection_closure_alloc(sock, tls, false, evbase)) == NULL)
@@ -1427,16 +1390,14 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
     if (tls) {
         /* Create the SSL object for the closure and attach it to the socket */
         if ((closure->ssl = SSL_new(logsrvd_server_tls_ctx())) == NULL) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to create new ssl object: %s",
-                ERR_error_string(ERR_get_error(), NULL));
+	    errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("%s: %s"), "SSL_new", errstr);
             goto bad;
         }
 
         if (SSL_set_fd(closure->ssl, closure->sock) != 1) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-                "unable to set fd for TLS: %s",
-                ERR_error_string(ERR_get_error(), NULL));
+	    errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("%s: %s"), "SSL_set_fd", errstr);
             goto bad;
         }
 
@@ -1444,15 +1405,16 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
         available during hostname matching
         */
         if (SSL_set_ex_data(closure->ssl, 1, closure) <= 0) {
+	    errstr = ERR_reason_error_string(ERR_get_error());
             sudo_warnx(U_("Unable to attach user data to the ssl object: %s"),
-                ERR_error_string(ERR_get_error(), NULL));
+		errstr);
             goto bad;
         }
 
         /* Enable SSL_accept to begin handshake with client. */
         if (sudo_ev_add(evbase, closure->ssl_accept_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {
-            sudo_fatal("%s", U_("unable to add event to queue"));
+	    sudo_warnx("%s", U_("unable to add event to queue"));
             goto bad;
         }
     }
@@ -1538,8 +1500,7 @@ listener_cb(int fd, int what, void *v)
 	    int keepalive = 1;
 	    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
 		sizeof(keepalive)) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "unable to set SO_KEEPALIVE option");
+		sudo_warn("SO_KEEPALIVE");
 	    }
 	}
 	if (!new_connection(sock, l->tls, &s_un.sa, evbase)) {
@@ -1548,10 +1509,8 @@ listener_cb(int fd, int what, void *v)
 		"unable to start new connection");
 	}
     } else {
-	if (errno != EAGAIN) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"unable to accept new connection");
-	}
+	if (errno != EAGAIN)
+	    sudo_warn("accept");
 	/* TODO: pause accepting on ENFILE and EMFILE */
     }
 
@@ -1745,8 +1704,7 @@ signal_cb(int signo, int what, void *v)
 	    server_dump_stats();
 	    break;
 	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected signal %d", signo);
+	    sudo_warnx(U_("unexpected signal %d"), signo);
 	    break;
     }
 

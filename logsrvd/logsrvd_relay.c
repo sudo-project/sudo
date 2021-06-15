@@ -57,6 +57,7 @@
 #include "sudo_eventlog.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
+#include "sudo_fatal.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"
 
@@ -166,8 +167,7 @@ relay_enqueue_write(uint8_t *msgbuf, size_t len,
     buf->len = sizeof(msg_len) + len;
 
     if (sudo_ev_add(closure->evbase, relay_closure->write_ev, NULL, false) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to add server write event");
+	sudo_warnx("%s", U_("unable to add event to queue"));
 	goto done;
     }
 
@@ -200,8 +200,7 @@ fmt_client_message(struct connection_closure *closure, ClientMessage *msg)
 
     len = client_message__get_packed_size(msg);
     if (len > MESSAGE_SIZE_MAX) {
-    	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "client message too large: %zu", len);
+	sudo_warnx(U_("client message too large: %zu"), len);
         goto done;
     }
 
@@ -245,13 +244,11 @@ fmt_client_hello(struct connection_closure *closure)
     ret = fmt_client_message(closure, &client_msg);
     if (ret) {
 	if (sudo_ev_add(closure->evbase, relay_closure->read_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server read event");
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    ret = false;
 	}
 	if (sudo_ev_add(closure->evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    ret = false;
 	}
     }
@@ -324,22 +321,19 @@ connect_relay_next(struct connection_closure *closure)
 
     sock = socket(relay->sa_un.sa.sa_family, SOCK_STREAM, 0);
     if (sock == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to allocate relay socket");
+	sudo_warn("socket");
 	goto bad;
     }
     if (logsrvd_conf_relay_tcp_keepalive()) {
 	int keepalive = 1;
 	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
 		sizeof(keepalive)) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"unable to set SO_KEEPALIVE option");
+	    sudo_warn("SO_KEEPALIVE");
 	}
     }
     ret = fcntl(sock, F_GETFL, 0);
     if (ret == -1 || fcntl(sock, F_SETFL, ret | O_NONBLOCK) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "fcntl(O_NONBLOCK) failed");
+	sudo_warn("fcntl(O_NONBLOCK)");
 	goto bad;
     }
 
@@ -355,9 +349,8 @@ connect_relay_next(struct connection_closure *closure)
 	addr = (char *)&relay->sa_un.sin6.sin6_addr;
 	break;
     default:
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unsupported address family from connect(): %d",
-	    relay->sa_un.sa.sa_family);
+	errno = EAFNOSUPPORT;
+	sudo_warn("connect");
 	goto bad;
     }
     inet_ntop(relay->sa_un.sa.sa_family, addr,
@@ -389,8 +382,7 @@ connect_relay_next(struct connection_closure *closure)
 	    goto bad;
 	if (sudo_ev_add(closure->evbase, relay_closure->connect_ev,
 		logsrvd_conf_relay_connect_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server connect event");
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    goto bad;
 	}
 	if (relay_closure->sock != -1)
@@ -507,16 +499,16 @@ handle_server_hello(ServerHello *msg, struct connection_closure *closure)
     debug_decl(handle_server_hello, SUDO_DEBUG_UTIL);
 
     if (closure->state != INITIAL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state,
+	    relay_closure->relay_name.ipaddr);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
 
     /* Check that ServerHello is valid. */
     if (msg->server_id == NULL || msg->server_id[0] == '\0') {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid ServerHello, missing server_id");
+	sudo_warnx(U_("%s: invalid ServerHello, missing server_id"),
+	    relay_closure->relay_name.ipaddr);
 	closure->errstr = _("invalid ServerHello");
 	debug_return_bool(false);
     }
@@ -540,8 +532,8 @@ handle_commit_point(TimeSpec *commit_point, struct connection_closure *closure)
     debug_decl(handle_commit_point, SUDO_DEBUG_UTIL);
 
     if (closure->state < RUNNING) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected state %d", closure->state);
+	sudo_warnx(U_("unexpected state %d for %s"), closure->state,
+	    closure->relay_closure->relay_name.ipaddr);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
     }
@@ -578,8 +570,7 @@ handle_log_id(char *id, struct connection_closure *closure)
 	if (fmt_log_id_message(id, closure)) {
 	    if (sudo_ev_add(closure->evbase, closure->write_ev,
 		    logsrvd_conf_relay_timeout(), false) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to add server write event");
+		sudo_warnx("%s", U_("unable to add event to queue"));
 	    } else {
 		ret = true;
 	    }
@@ -650,8 +641,7 @@ handle_server_message(uint8_t *buf, size_t len, struct connection_closure *closu
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to unpack ServerMessage size %zu", len);
+	sudo_warnx("unable to unpack %s size %zu", "ServerMessage", len);
 	debug_return_bool(false);
     }
 
@@ -675,9 +665,10 @@ handle_server_message(uint8_t *buf, size_t len, struct connection_closure *closu
 	ret = handle_server_abort(msg->u.abort, closure);
 	break;
     default:
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unexpected type_case value %d", msg->type_case);
-	    closure->errstr = _("unrecognized ServerMessage type");
+	sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
+	    msg->type_case, "ServerMessage",
+	    closure->relay_closure->relay_name.ipaddr);
+	closure->errstr = _("unrecognized ServerMessage type");
 	break;
     }
 
@@ -706,8 +697,7 @@ relay_server_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "timed out reading from relay %s (%s)",
+	sudo_warnx(U_("timed out reading from relay %s (%s)"),
 	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 	closure->errstr = _("timeout reading from relay");
         goto send_error;
@@ -741,8 +731,7 @@ relay_server_msg_cb(int fd, int what, void *v)
 		    if (!sudo_ev_pending(relay_closure->write_ev, SUDO_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
 			if (sudo_ev_add(closure->evbase, relay_closure->write_ev, NULL, false) == -1) {
-			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-				"unable to add server write event");
+			    sudo_warnx("%s", U_("unable to add event to queue"));
 			    closure->errstr = _("unable to allocate memory");
 			    goto send_error;
 			}
@@ -767,32 +756,22 @@ relay_server_msg_cb(int fd, int what, void *v)
                         errstr = ERR_reason_error_string(err);
 			closure->errstr = _("error reading from relay");
                     }
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_read from %s (%s): %s",
-			relay_closure->relay_name.name,
+		    sudo_warnx("%s: SSL_read: %s",
 			relay_closure->relay_name.ipaddr, errstr);
                     goto send_error;
                 case SSL_ERROR_SYSCALL:
 		    if (nread == 0) {
 			/* EOF, handled below */
-			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			    "EOF from %s (%s) without proper TLS shutdown",
-			    relay_closure->relay_name.name,
+			sudo_warnx(U_("EOF from %s without proper TLS shutdown"),
 			    relay_closure->relay_name.ipaddr);
 			break;
 		    }
-                    errstr = strerror(errno);
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_read from %s (%s): %s",
-			relay_closure->relay_name.name,
-			relay_closure->relay_name.ipaddr, errstr);
+		    sudo_warn("%s: SSL_read", relay_closure->relay_name.ipaddr);
 		    closure->errstr = _("error reading from relay");
                     goto send_error;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_read from %s (%s): %s",
-			relay_closure->relay_name.name,
+		    sudo_warnx("%s: SSL_read: %s",
 			relay_closure->relay_name.ipaddr, errstr);
 		    closure->errstr = _("error reading from relay");
                     goto send_error;
@@ -814,9 +793,7 @@ relay_server_msg_cb(int fd, int what, void *v)
     case -1:
 	if (errno == EAGAIN)
 	    debug_return;
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "read from %s (%s)", relay_closure->relay_name.name,
-	    relay_closure->relay_name.ipaddr);
+	sudo_warn("%s: read", relay_closure->relay_name.ipaddr);
 	closure->errstr = _("unable to read from relay");
 	goto send_error;
     case 0:
@@ -848,8 +825,7 @@ relay_server_msg_cb(int fd, int what, void *v)
 	msg_len = ntohl(msg_len);
 
 	if (msg_len > MESSAGE_SIZE_MAX) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"server message too large: %u", msg_len);
+	    sudo_warnx(U_("server message too large: %zu"), (size_t)msg_len);
 	    closure->errstr = _("server message too large");
 	    goto send_error;
 	}
@@ -914,16 +890,15 @@ relay_client_msg_cb(int fd, int what, void *v)
     }
 
     if (what == SUDO_EV_TIMEOUT) {
-	closure->errstr = _("timeout writing to relay");
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "timed out writing to relay %s (%s)",
+	sudo_warnx(U_("timed out writing to relay %s (%s)"),
 	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
+	closure->errstr = _("timeout writing to relay");
         goto send_error;
     }
 
     if ((buf = TAILQ_FIRST(&relay_closure->write_bufs)) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "missing write buffer");
+	sudo_warnx(U_("missing write buffer for client %s"),
+	    relay_closure->relay_name.ipaddr);
         goto close_connection;
     }
 
@@ -968,17 +943,13 @@ relay_client_msg_cb(int fd, int what, void *v)
                     debug_return;
                 case SSL_ERROR_SYSCALL:
 		    errstr = strerror(errno);
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_write to %s (%s): %s",
-			relay_closure->relay_name.name,
-			relay_closure->relay_name.ipaddr, errstr);
+		    sudo_warn("%s: SSL_write",
+			relay_closure->relay_name.ipaddr);
 		    closure->errstr = _("error writing to relay");
 		    goto send_error;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"SSL_write to %s (%s): %s",
-			relay_closure->relay_name.name,
+		    sudo_warnx("%s: SSL_write: %s",
 			relay_closure->relay_name.ipaddr, errstr);
 		    closure->errstr = _("error writing to relay");
 		    goto send_error;
@@ -989,9 +960,7 @@ relay_client_msg_cb(int fd, int what, void *v)
     {
 	nwritten = write(fd, buf->data + buf->off, buf->len - buf->off);
 	if (nwritten == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"write to %s (%s)", relay_closure->relay_name.name,
-		relay_closure->relay_name.ipaddr);
+	    sudo_warn("%s: write", relay_closure->relay_name.ipaddr);
 	    closure->errstr = _("error writing to relay");
 	    goto send_error;
 	}
@@ -1142,8 +1111,7 @@ relay_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     ret = fmt_client_message(closure, &client_msg);
     if (ret) {
 	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
+	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    ret = false;
 	}
     }
