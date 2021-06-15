@@ -864,7 +864,6 @@ server_msg_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
     struct connection_buffer *buf;
-    const char *errstr;
     ssize_t nwritten;
     debug_decl(server_msg_cb, SUDO_DEBUG_UTIL);
 
@@ -898,6 +897,7 @@ server_msg_cb(int fd, int what, void *v)
         nwritten = SSL_write(closure->ssl, buf->data + buf->off,
 	    buf->len - buf->off);
         if (nwritten <= 0) {
+	    const char *errstr;
             int err = SSL_get_error(closure->ssl, nwritten);
             switch (err) {
                 case SSL_ERROR_WANT_READ:
@@ -966,7 +966,6 @@ client_msg_cb(int fd, int what, void *v)
     struct connection_buffer *buf = &closure->read_buf;
     const char *source = closure->journal_path ? closure->journal_path :
         closure->ipaddr;
-    const char *errstr;
     uint32_t msg_len;
     ssize_t nread;
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL);
@@ -987,6 +986,7 @@ client_msg_cb(int fd, int what, void *v)
     if (closure->ssl != NULL) {
        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
         if (nread <= 0) {
+	    const char *errstr;
             int err = SSL_get_error(closure->ssl, nread);
             switch (err) {
 		case SSL_ERROR_ZERO_RETURN:
@@ -1360,7 +1360,6 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
     struct sudo_event_base *evbase)
 {
     struct connection_closure *closure;
-    const char *errstr;
     debug_decl(new_connection, SUDO_DEBUG_UTIL);
 
     if ((closure = connection_closure_alloc(sock, tls, false, evbase)) == NULL)
@@ -1388,6 +1387,8 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 #if defined(HAVE_OPENSSL)
     /* If TLS is enabled, perform the TLS handshake first. */
     if (tls) {
+	const char *errstr;
+
         /* Create the SSL object for the closure and attach it to the socket */
         if ((closure->ssl = SSL_new(logsrvd_server_tls_ctx())) == NULL) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
