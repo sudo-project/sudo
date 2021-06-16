@@ -87,7 +87,6 @@ static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
 static const char server_id[] = "Sudo Audit Server " PACKAGE_VERSION;
 static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
-static bool is_early = true;
 
 /* Event loop callbacks. */
 static void client_msg_cb(int fd, int what, void *v);
@@ -1818,16 +1817,11 @@ daemonize(bool nofork)
 		(void) close(fd);
 	}
     }
-    is_early = false;
+
+    /* Disable logging to stderr after we become a daemon. */
+    logsrvd_warn_stderr(false);
 
     debug_return;
-}
-
-/* The early flag is used to decide whether sudo_warn() goes to stderr too. */
-bool
-logsrvd_is_early(void)
-{
-    return is_early;
 }
 
 static void

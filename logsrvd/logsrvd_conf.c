@@ -175,6 +175,8 @@ static struct logsrvd_config {
     } logfile;
 } *logsrvd_config;
 
+static bool logsrvd_warn_enable_stderr = true;
+
 /* iolog getters */
 mode_t
 logsrvd_conf_iolog_mode(void)
@@ -1254,7 +1256,7 @@ logsrvd_conv_none(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
     /* Also write to stderr if still in the foreground. */
-    if (logsrvd_is_early()) {
+    if (logsrvd_warn_enable_stderr) {
 	(void)logsrvd_conv_stderr(num_msgs, msgs, replies, callback);
     }
 
@@ -1280,7 +1282,7 @@ logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
     }
 
     /* Also write to stderr if still in the foreground. */
-    if (logsrvd_is_early()) {
+    if (logsrvd_warn_enable_stderr) {
 	(void)logsrvd_conv_stderr(num_msgs, msgs, replies, callback);
     }
 
@@ -1363,7 +1365,7 @@ logsrvd_conv_logfile(int num_msgs, const struct sudo_conv_message msgs[],
     }
 
     /* Also write to stderr if still in the foreground. */
-    if (logsrvd_is_early()) {
+    if (logsrvd_warn_enable_stderr) {
 	(void)logsrvd_conv_stderr(num_msgs, msgs, replies, callback);
     }
 
@@ -1764,4 +1766,10 @@ logsrvd_conf_cleanup(void)
     logsrvd_config = NULL;
 
     debug_return;
+}
+
+void
+logsrvd_warn_stderr(bool enabled)
+{
+    logsrvd_warn_enable_stderr = enabled;
 }

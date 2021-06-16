@@ -197,7 +197,6 @@ bool fmt_log_id_message(const char *id, struct connection_closure *closure);
 bool schedule_error_message(const char *errstr, struct connection_closure *closure);
 struct connection_buffer *get_free_buf(size_t, struct connection_closure *closure);
 struct connection_closure *connection_closure_alloc(int fd, bool tls, bool relay_only, struct sudo_event_base *base);
-bool logsrvd_is_early(void);
 
 /* logsrvd_conf.c */
 bool logsrvd_conf_read(const char *path);
@@ -224,6 +223,7 @@ mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);
 void address_list_delref(struct server_address_list *);
 void logsrvd_conf_cleanup(void);
+void logsrvd_warn_stderr(bool enabled);
 
 /* logsrvd_journal.c */
 extern struct client_message_switch cms_journal;
