@@ -216,9 +216,22 @@ add_key_value(struct json_container *json, const char *str)
 
     /* Check for bool or number. */
     json_value.type = JSON_NULL;
-    switch (*cp) {
-    case '+': case '-': case '0': case '1': case '2': case '3':
-    case '4': case '5': case '6': case '7': case '8': case '9':
+    switch (cp[0]) {
+    case '0':
+	if (cp[1] == '\0') {
+	    /* Only treat a plain "0" as number 0. */
+	    json_value.u.number = 0;
+	    json_value.type = JSON_NUMBER;
+	}
+	break;
+    case '+': case '-':
+	if (cp[1] == '0') {
+	    /* Encode octal numbers as strings. */
+	    break;
+	}
+	FALLTHROUGH;
+    case '1': case '2': case '3': case '4': case '5':
+    case '6': case '7': case '8': case '9':
 	json_value.u.number = sudo_strtonum(cp, INT_MIN, INT_MAX, &errstr);
 	if (errstr == NULL)
 	    json_value.type = JSON_NUMBER;
