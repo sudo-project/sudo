@@ -1314,7 +1314,7 @@ logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
 	}
 
 	/* Strip off trailing newlines. */
-	while (len > 1 && msgs[i].msg[len - 1] == '\n')
+	while (len > 1 && msg[len - 1] == '\n')
 	    len--;
 	if (len == 0)
 	    continue;
@@ -1330,7 +1330,7 @@ logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
 	    buf = tmp;
 	    cp = tmp + used;
 	}
-	memcpy(cp, msgs[i].msg, len);
+	memcpy(cp, msg, len);
 	cp[len] = '\0';
 	cp += len;
     }
@@ -1397,7 +1397,7 @@ logsrvd_conv_logfile(int num_msgs, const struct sudo_conv_message msgs[],
 	    }
 	}
 
-	if (fwrite(msgs[i].msg, len, 1, logsrvd_config->server.log_stream) != 1)
+	if (fwrite(msg, len, 1, logsrvd_config->server.log_stream) != 1)
 	    debug_return_int(-1);
     }
 
