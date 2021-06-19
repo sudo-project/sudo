@@ -942,7 +942,6 @@ relay_client_msg_cb(int fd, int what, void *v)
 			"SSL_write returns SSL_ERROR_WANT_WRITE");
                     debug_return;
                 case SSL_ERROR_SYSCALL:
-		    errstr = strerror(errno);
 		    sudo_warn("%s: SSL_write",
 			relay_closure->relay_name.ipaddr);
 		    closure->errstr = _("error writing to relay");
