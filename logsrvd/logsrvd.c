@@ -1269,6 +1269,7 @@ tls_handshake_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
     const char *errstr;
+    int err, handshake_status;
     debug_decl(tls_handshake_cb, SUDO_DEBUG_UTIL);
 
     if (what == SUDO_EV_TIMEOUT) {
@@ -1276,9 +1277,9 @@ tls_handshake_cb(int fd, int what, void *v)
         goto bad;
     }
 
-    int handshake_status = SSL_accept(closure->ssl);
-    int err = SSL_ERROR_NONE;
-    switch (err = SSL_get_error(closure->ssl, handshake_status)) {
+    handshake_status = SSL_accept(closure->ssl);
+    err = SSL_get_error(closure->ssl, handshake_status);
+    switch (err) {
         case SSL_ERROR_NONE:
 	    /* ssl handshake was successful */
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
