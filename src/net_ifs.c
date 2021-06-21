@@ -82,6 +82,10 @@ struct rtentry;
 # define INET6_ADDRSTRLEN 46
 #endif
 
+#ifndef INADDR_NONE
+# define INADDR_NONE	0xffffffffU
+#endif
+
 #if defined(STUB_LOAD_INTERFACES) || \
     !(defined(HAVE_GETIFADDRS) || defined(SIOCGIFCONF) || defined(SIOCGLIFCONF))
 
