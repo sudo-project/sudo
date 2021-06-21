@@ -57,10 +57,11 @@ main(int argc, char *argv[])
 {
     struct timespec start_time, stop_time;
     size_t filesize, bufsize = 0;
-    ssize_t nread, ms;
+    ssize_t nread;
     struct stat sb;
     uint8_t *buf = NULL;
     int fd, i, errors = 0;
+    long ms;
 
     /* Test provided input files. */
     for (i = 1; i < argc; i++) {
@@ -112,7 +113,7 @@ main(int argc, char *argv[])
 	sudo_gettime_mono(&stop_time);
 	sudo_timespecsub(&stop_time, &start_time, &stop_time);
 	ms = (stop_time.tv_sec * 1000) + (stop_time.tv_nsec / 1000000);
-	fprintf(stderr, "Executed %s in %zd ms\n", argv[i], ms);
+	fprintf(stderr, "Executed %s in %ld ms\n", argv[i], ms);
     }
     free(buf);
 
