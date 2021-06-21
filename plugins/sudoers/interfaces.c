@@ -40,10 +40,6 @@
 #include "sudoers.h"
 #include "interfaces.h"
 
-#ifndef INADDR_NONE
-# define INADDR_NONE ((unsigned int)-1)
-#endif
-
 static struct interface_list interfaces = SLIST_HEAD_INITIALIZER(interfaces);
 
 /*
