@@ -399,16 +399,16 @@ sesh_sudoedit(int argc, char *argv[])
      */
     run_cred.uid = run_cred.euid = geteuid();
     run_cred.gid = run_cred.egid = getegid();
-    run_cred.ngroups = getgroups(0, NULL); // -V575
-    if (run_cred.ngroups > 0) {
-	run_cred.groups = reallocarray(NULL, run_cred.ngroups,
+    int ngroups = getgroups(0, NULL); // -V575
+    if (ngroups > 0) {
+	run_cred.groups = reallocarray(NULL, ngroups,
 	    sizeof(GETGROUPS_T));
 	if (run_cred.groups == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	    debug_return_int(SESH_ERR_FAILURE);
 	}
-	if (getgroups(run_cred.ngroups, run_cred.groups) < 0) {
+	if ((run_cred.ngroups = getgroups(ngroups, run_cred.groups)) < 0) {
 	    sudo_warn("%s", U_("unable to get group list"));
 	    debug_return_int(SESH_ERR_FAILURE);
 	}

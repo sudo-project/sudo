@@ -81,15 +81,15 @@ set_tmpdir(struct sudo_cred *user_cred)
     saved_cred.euid = geteuid();
     saved_cred.gid = getgid();
     saved_cred.egid = getegid();
-    saved_cred.ngroups = getgroups(0, NULL); // -V575
-    if (saved_cred.ngroups > 0) {
+    int ngroups = getgroups(0, NULL); // -V575
+    if (ngroups > 0) {
 	saved_cred.groups =
-	    reallocarray(NULL, saved_cred.ngroups, sizeof(GETGROUPS_T));
+	    reallocarray(NULL, ngroups, sizeof(GETGROUPS_T));
 	if (saved_cred.groups == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
-	if (getgroups(saved_cred.ngroups, saved_cred.groups) < 0) {
+	if ((saved_cred.ngroups = getgroups(ngroups, saved_cred.groups)) < 0) {
 	    sudo_warn("%s", U_("unable to get group list"));
 	    free(saved_cred.groups);
 	    debug_return_bool(false);

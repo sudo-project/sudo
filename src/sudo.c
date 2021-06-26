@@ -436,14 +436,14 @@ get_user_groups(const char *user, struct sudo_cred *cred)
 	    maxgroups = NGROUPS_MAX;
 
 	/* Note that macOS may return ngroups > NGROUPS_MAX. */
-	cred->ngroups = getgroups(0, NULL); // -V575
-	if (cred->ngroups > 0) {
+	int ngroups = getgroups(0, NULL); // -V575
+	if (ngroups > 0) {
 	    /* Use groups from kernel if not at limit or source is static. */
-	    if (cred->ngroups != maxgroups || group_source == GROUP_SOURCE_STATIC) {
-		cred->groups = reallocarray(NULL, cred->ngroups, sizeof(GETGROUPS_T));
+	    if (ngroups != maxgroups || group_source == GROUP_SOURCE_STATIC) {
+		cred->groups = reallocarray(NULL, ngroups, sizeof(GETGROUPS_T));
 		if (cred->groups == NULL)
 		    goto done;
-		if (getgroups(cred->ngroups, cred->groups) < 0) {
+		if ((cred->ngroups = getgroups(ngroups, cred->groups)) < 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 			"%s: unable to get %d groups via getgroups()",
 			__func__, cred->ngroups);
