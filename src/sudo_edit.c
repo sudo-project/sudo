@@ -89,7 +89,8 @@ set_tmpdir(struct sudo_cred *user_cred)
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
-	if (getgroups(saved_cred.ngroups, saved_cred.groups) < 0) {
+	saved_cred.ngroups = getgroups(saved_cred.ngroups, saved_cred.groups);
+	if (saved_cred.ngroups < 0) {
 	    sudo_warn("%s", U_("unable to get group list"));
 	    free(saved_cred.groups);
 	    debug_return_bool(false);

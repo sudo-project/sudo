@@ -408,8 +408,10 @@ sesh_sudoedit(int argc, char *argv[])
 		U_("unable to allocate memory"));
 	    debug_return_int(SESH_ERR_FAILURE);
 	}
-	if (getgroups(run_cred.ngroups, run_cred.groups) < 0) {
+	run_cred.ngroups = getgroups(run_cred.ngroups, run_cred.groups);
+	if (run_cred.ngroups < 0) {
 	    sudo_warn("%s", U_("unable to get group list"));
+	    free(run_cred.groups);
 	    debug_return_int(SESH_ERR_FAILURE);
 	}
     } else {

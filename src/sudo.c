@@ -443,7 +443,8 @@ get_user_groups(const char *user, struct sudo_cred *cred)
 		cred->groups = reallocarray(NULL, cred->ngroups, sizeof(GETGROUPS_T));
 		if (cred->groups == NULL)
 		    goto done;
-		if (getgroups(cred->ngroups, cred->groups) < 0) {
+		cred->ngroups = getgroups(cred->ngroups, cred->groups);
+		if (cred->ngroups < 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 			"%s: unable to get %d groups via getgroups()",
 			__func__, cred->ngroups);
