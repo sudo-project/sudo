@@ -59,7 +59,7 @@ _lookup_value(char * const keyvalues[], const char *key)
 }
 
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-int
+static int
 _append_python_path(const char *module_dir)
 {
     debug_decl(_append_python_path, PYTHON_DEBUG_PLUGIN_LOAD);
@@ -92,6 +92,7 @@ _append_python_path(const char *module_dir)
 static PyObject *
 _import_module(const char *path)
 {
+    PyObject *module;
     debug_decl(_import_module, PYTHON_DEBUG_PLUGIN_LOAD);
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "importing module: %s\n", path);
@@ -118,7 +119,22 @@ _import_module(const char *path)
     if (_append_python_path(module_dir) < 0)
         debug_return_ptr(NULL);
 
-    debug_return_ptr(PyImport_ImportModule(module_name));
+    module = PyImport_ImportModule(module_name);
+    if (module != NULL) {
+	PyObject *py_loaded_path = PyObject_GetAttrString(module, "__file__");
+	if (py_loaded_path != NULL) {
+	    const char *loaded_path = PyUnicode_AsUTF8(py_loaded_path);
+	    /* If path is a directory, loaded_path may be a file inside it. */
+	    if (strncmp(loaded_path, path, strlen(path)) != 0) {
+		PyErr_Format(PyExc_Exception,
+		    "module name conflict, tried to load %s, got %s",
+		    path, loaded_path);
+		Py_CLEAR(module);
+	    }
+	    Py_DECREF(py_loaded_path);
+	}
+    }
+    debug_return_ptr(module);
 }
 
 static PyThreadState *
