@@ -210,17 +210,27 @@ bool
 store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    const char *signame = NULL;
+    struct timespec run_time = { msg->run_time->tv_sec, msg->run_time->tv_nsec };
+    int flags = 0;
     mode_t mode;
     debug_decl(store_exit_local, SUDO_DEBUG_UTIL);
 
-    /* Sudo I/O logs don't store this info. */
     if (msg->signal != NULL && msg->signal[0] != '\0') {
+	signame = msg->signal;
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "command was killed by SIG%s%s", msg->signal,
 	    msg->dumped_core ? " (core dumped)" : "");
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "command exited with %d", msg->exit_value);
+    }
+    if (logsrvd_conf_log_exit()) {
+	if (!eventlog_exit(closure->evlog, flags, &run_time, msg->exit_value,
+		signame, msg->dumped_core, NULL, NULL)) {
+	    closure->errstr = _("error logging exit event");
+	    debug_return_bool(false);
+	}
     }
 
     if (closure->log_io) {

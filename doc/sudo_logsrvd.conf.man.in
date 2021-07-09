@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "June 13, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "July 9, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -168,6 +168,7 @@ will enable the TCP keepalive socket option on the client connection.
 This enables the periodic transmission of keepalive messages to the client.
 If the client does not respond to a message in time, the connection will
 be closed.
+Defaults to true.
 .TP 10n
 timeout = number
 The amount of time, in seconds,
@@ -618,6 +619,12 @@ and
 The default value is
 \fIsyslog\fR.
 .TP 6n
+log_exit = boolean
+If true,
+\fBsudo_logsrvd\fR
+will log an event when a command exits or is terminated by a signal.
+Defaults to false.
+.TP 6n
 log_format = string
 The event log format.
 Supported log formats are
@@ -625,7 +632,7 @@ Supported log formats are
 for traditional sudo-style logs and
 \(lqjson\(rq
 for JSON-format logs.
-The JSON log entries contain the full contents of the accept, reject
+The JSON log entries contain the full contents of the accept, reject, exit
 and alert messages.
 The default value is
 \fIsudo\fR.
@@ -788,6 +795,7 @@ Sudo log server configuration file
 #server_log = syslog
 
 # If true, enable the SO_KEEPALIVE socket option on client connections.
+# Defaults to true.
 #tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the client to
@@ -859,6 +867,7 @@ Sudo log server configuration file
 #store_first = true
 
 # If true, enable the SO_KEEPALIVE socket option on relay connections.
+# Defaults to true.
 #tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the relay to
@@ -945,10 +954,14 @@ Sudo log server configuration file
 #maxseq = 2176782336
 
 [eventlog]
-# Where to log accept, reject and alert events.
+# Where to log accept, reject, exit and alert events.
 # Accepted values are syslog, logfile, or none.
 # Defaults to syslog
 #log_type = syslog
+
+# Whether to log an event when a command exits or is terminated by a signal.
+# Defaults to false
+#log_exit = true
 
 # Event log format.
 # Currently only sudo-style event logs are supported.

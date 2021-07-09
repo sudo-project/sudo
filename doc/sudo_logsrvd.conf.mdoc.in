@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 13, 2021
+.Dd July 9, 2021
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -152,6 +152,7 @@ will enable the TCP keepalive socket option on the client connection.
 This enables the periodic transmission of keepalive messages to the client.
 If the client does not respond to a message in time, the connection will
 be closed.
+Defaults to true.
 .It timeout = number
 The amount of time, in seconds,
 .Nm sudo_logsrvd
@@ -550,6 +551,11 @@ and
 .Em none .
 The default value is
 .Em syslog .
+.It log_exit = boolean
+If true,
+.Nm sudo_logsrvd
+will log an event when a command exits or is terminated by a signal.
+Defaults to false.
 .It log_format = string
 The event log format.
 Supported log formats are
@@ -557,7 +563,7 @@ Supported log formats are
 for traditional sudo-style logs and
 .Dq json
 for JSON-format logs.
-The JSON log entries contain the full contents of the accept, reject
+The JSON log entries contain the full contents of the accept, reject, exit
 and alert messages.
 The default value is
 .Em sudo .
@@ -717,6 +723,7 @@ Sudo log server configuration file
 #server_log = syslog
 
 # If true, enable the SO_KEEPALIVE socket option on client connections.
+# Defaults to true.
 #tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the client to
@@ -788,6 +795,7 @@ Sudo log server configuration file
 #store_first = true
 
 # If true, enable the SO_KEEPALIVE socket option on relay connections.
+# Defaults to true.
 #tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the relay to
@@ -874,10 +882,14 @@ Sudo log server configuration file
 #maxseq = 2176782336
 
 [eventlog]
-# Where to log accept, reject and alert events.
+# Where to log accept, reject, exit and alert events.
 # Accepted values are syslog, logfile, or none.
 # Defaults to syslog
 #log_type = syslog
+
+# Whether to log an event when a command exits or is terminated by a signal.
+# Defaults to false
+#log_exit = true
 
 # Event log format.
 # Currently only sudo-style event logs are supported.

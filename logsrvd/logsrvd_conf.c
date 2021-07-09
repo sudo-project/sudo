@@ -158,6 +158,7 @@ static struct logsrvd_config {
     } iolog;
     struct logsrvd_config_eventlog {
 	int log_type;
+        bool log_exit;
 	enum eventlog_format log_format;
     } eventlog;
     struct logsrvd_config_syslog {
@@ -176,6 +177,13 @@ static struct logsrvd_config {
 } *logsrvd_config;
 
 static bool logsrvd_warn_enable_stderr = true;
+
+/* eventlog getters */
+bool
+logsrvd_conf_log_exit(void)
+{
+    return logsrvd_config->eventlog.log_exit;
+}
 
 /* iolog getters */
 mode_t
@@ -829,6 +837,19 @@ cb_eventlog_format(struct logsrvd_config *config, const char *str, size_t offset
     debug_return_bool(true);
 }
 
+static bool
+cb_eventlog_exit(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    int val;
+    debug_decl(cb_eventlog_exit, SUDO_DEBUG_UTIL);
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->eventlog.log_exit = val;
+    debug_return_bool(true);
+}
+
 /* syslog callbacks */
 static bool
 cb_syslog_maxlen(struct logsrvd_config *config, const char *str, size_t offset)
@@ -1044,6 +1065,7 @@ static struct logsrvd_config_entry iolog_conf_entries[] = {
 static struct logsrvd_config_entry eventlog_conf_entries[] = {
     { "log_type", cb_eventlog_type },
     { "log_format", cb_eventlog_format },
+    { "log_exit", cb_eventlog_exit },
     { NULL }
 };
 
@@ -1543,6 +1565,7 @@ logsrvd_conf_alloc(void)
     /* Event log defaults */
     config->eventlog.log_type = EVLOG_SYSLOG;
     config->eventlog.log_format = EVLOG_SUDO;
+    config->eventlog.log_exit = false;
 
     /* Syslog defaults */
     config->syslog.maxlen = 960;
