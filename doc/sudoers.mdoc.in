@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 7, 2021
+.Dd July 9, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2573,6 +2573,16 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.29 or higher.
+.It log_exit_status
+If set,
+.Nm
+will log the exit value of commands that are run to syslog and/or a log file.
+If a command was terminated by a signal, the signal name is logged as well.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.9.8 or higher.
 .It log_host
 If set, the host name will be included in log entries written to
 the file configured by the

@@ -57,6 +57,7 @@ int sudoers_getlocale(void);
 int audit_failure(char *const argv[], char const *const fmt, ...) __printflike(2, 3);
 int vaudit_failure(char *const argv[], char const *const fmt, va_list ap) __printflike(2, 0);
 bool log_allowed(void);
+bool log_exit_status(int exit_status);
 bool log_auth_failure(int status, unsigned int tries);
 bool log_denial(int status, bool inform_user);
 bool log_failure(int status, int flags);

@@ -961,10 +961,11 @@ sudoers_policy_close(int exit_status, int error_code)
 	/* Close the session we opened in sudoers_policy_init_session(). */
 	(void)sudo_auth_end_session(runas_pw);
 
-	/* We do not currently log the exit status. */
 	if (error_code) {
 	    errno = error_code;
 	    sudo_warn(U_("unable to execute %s"), safe_cmnd);
+	} else {
+	    log_exit_status(exit_status);
 	}
     }
 
@@ -1044,8 +1045,8 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 #ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
-	if (!def_log_input && !def_log_output && !def_use_pty &&
-	    !sudo_auth_needs_end_session())
+	if (!def_log_input && !def_log_output && !def_log_exit_status &&
+	    !def_use_pty && !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
 #endif

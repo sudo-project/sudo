@@ -578,6 +578,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Path to the file that is created the first time sudo is run: %s"),
 	NULL,
     }, {
+	"log_exit_status", T_FLAG,
+	N_("Log the exit status of commands"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

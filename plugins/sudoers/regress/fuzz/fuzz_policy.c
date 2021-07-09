@@ -705,6 +705,13 @@ log_failure(int status, int flags)
 }
 
 /* STUB */
+bool
+log_exit_status(int exit_status)
+{
+    return true;
+}
+
+/* STUB */
 int
 audit_failure(char *const argv[], char const *const fmt, ...)
 {

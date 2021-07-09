@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "May 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "July 9, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2727,6 +2727,17 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.8.29 or higher.
+.TP 18n
+log_exit_status
+If set,
+\fBsudoers\fR
+will log the exit value of commands that are run to syslog and/or a log file.
+If a command was terminated by a signal, the signal name is logged as well.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.9.8 or higher.
 .TP 18n
 log_host
 If set, the host name will be included in log entries written to

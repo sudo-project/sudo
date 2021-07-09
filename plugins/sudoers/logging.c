@@ -492,6 +492,63 @@ log_allowed(void)
     debug_return_bool(ret);
 }
 
+bool
+log_exit_status(int exit_status)
+{
+    struct eventlog evlog;
+    int evl_flags = 0;
+    int ecode = 0;
+    int oldlocale;
+    struct timespec run_time;
+    char sigbuf[SIG2STR_MAX];
+    char *signame = NULL;
+    bool dumped_core = false;
+    bool ret = true;
+    debug_decl(log_exit_status, SUDOERS_DEBUG_LOGGING);
+
+    if (def_log_exit_status || def_mail_always) {
+	if (sudo_gettime_real(&run_time) == -1) {
+	    sudo_warn("%s", U_("unable to get time of day"));
+	    ret = false;
+	    goto done;
+	}
+	sudo_timespecsub(&run_time, &sudo_user.submit_time, &run_time);
+
+        if (WIFEXITED(exit_status)) {
+	    ecode = WEXITSTATUS(exit_status);
+        } else if (WIFSIGNALED(exit_status)) {
+            int signo = WTERMSIG(exit_status);
+            if (signo <= 0 || sig2str(signo, sigbuf) == -1)
+                (void)snprintf(sigbuf, sizeof(sigbuf), "%d", signo);
+	    signame = sigbuf;
+	    ecode = signo | 128;
+	    dumped_core = WCOREDUMP(exit_status);
+        } else {
+            sudo_warnx("invalid exit status 0x%x", exit_status);
+	    ret = false;
+	    goto done;
+        }
+
+	/* Log and mail messages should be in the sudoers locale. */
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+
+	sudoers_to_eventlog(&evlog, NewArgv, env_get());
+	if (def_mail_always) {
+	    SET(evl_flags, EVLOG_MAIL);
+	    if (!def_log_exit_status)
+		SET(evl_flags, EVLOG_MAIL_ONLY);
+	}
+	if (!eventlog_exit(&evlog, evl_flags, &run_time, ecode, signame,
+		dumped_core, NULL, NULL))
+	    ret = false;
+
+	sudoers_setlocale(oldlocale, NULL);
+    }
+
+done:
+    debug_return_bool(ret);
+}
+
 /*
  * Perform logging for log_warning()/log_warningx().
  */
