@@ -1958,7 +1958,11 @@ which is probably not what was intended.
 In most cases it is better to do command line processing
 outside of the
 \fIsudoers\fR
-file in a scripting language.
+file in a scripting language. An alternative is to use regular
+expression matching such as:
+.sp
+.RS 4n
+%operator ALL = /bin/cat m{/var/log/messages(\.[0-9]+|-[0-9]+)?$}
 .SS "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
 .TP 10n
@@ -6053,6 +6057,18 @@ Any user may mount or unmount a CD-ROM on the machines in the CDROM
 (orion, perseus, hercules) without entering a password.
 This is a bit tedious for users to type, so it is a prime candidate
 for encapsulating in a shell script.
+.nf
+.sp
+.RS 0n
+%containers ALL = /usr/bin/docker \\
+    m{(run|exec)\\\\s+-it?\\\\s+[^\\\\s]+\\\\s+/bin/bash}
+.RE
+.fi
+.PP
+Any member of
+\fRcontainers\fR
+group may execute docker with run or exec commands, interactively with or without a TTY, providing they use /bin/bash shell. Only non-breaking m{} is understood as regular expression match. Regular expression matches are  anchored with ^ and $.
+
 .SH "SECURITY NOTES"
 .SS "Limitations of the \(oq!\&\(cq operator"
 It is generally not effective to

@@ -32,8 +32,12 @@
     "Where did you learn to type?",
     "Are you on drugs?",
     "My pet ferret can type better than you!",
-    "You type like i drive.",
+    "You type like I drive.",
     "Do you think like you type?",
     "Your mind just hasn't been the same since the electro-shock, has it?",
+    "And you went to college for that?",
+    "Ha!",
+    "You truly are trying the hunt-and-peck method.",
+    "They're watching you. Every single bad command. Santa will be unhappy.",
 
 #endif /* SUDOERS_INS_CLASSIC_H */

@@ -43,6 +43,11 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <regex.h>
+
+#include "sudoers.h"
+#include <gram.h>
+
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
@@ -673,6 +678,9 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
     char *saved_user_cmnd = NULL;
     struct stat saved_user_stat;
     bool rc = false;
+    regex_t re;
+    int status;
+
     debug_decl(command_matches, SUDOERS_DEBUG_MATCH);
 
     if (user_runchroot != NULL) {
@@ -734,6 +742,39 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
 	    rc = command_matches_glob(sudoers_cmnd, sudoers_args, runchroot, digests);
     } else {
 	rc = command_matches_normal(sudoers_cmnd, sudoers_args, runchroot, digests);
+    }
+
+    if (rc == false) {
+        /*
+         * only process regex args, regex on the initial command would
+         * conflict with other checks that visudo parsing performs, m{bash} !=
+         * /bin/bash, 'bash' itself would cause visudo to complain since
+         * there is no initial path. removing this seems a bad idea.
+         */
+        if (user_args && sudoers_args) {
+            char *ptr;
+            int len = strlen(sudoers_args);
+            if (len > 2
+                    && sudoers_args[0] == 'm'
+                    && sudoers_args[1] == '{'
+                    && sudoers_args[len-1] == '}') {
+                rc = false;
+                ptr = strdup(sudoers_args+1);
+                if (ptr) {
+                    ptr[0] = '^';
+                    ptr[len-2] = 0;
+                    ptr[len-3] = '$';
+                    if (regcomp(&re, ptr, REG_EXTENDED|REG_NOSUB) == 0) {
+                        status = regexec(&re, user_args, (size_t)0, NULL, 0);
+                        regfree(&re);
+                        if (status == 0) {
+                            rc = true;
+                        }
+                    }
+                    free(ptr);
+                }
+           }
+        }
     }
 done:
     if (saved_user_cmnd != NULL) {
