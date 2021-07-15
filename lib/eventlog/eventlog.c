@@ -1321,7 +1321,7 @@ eventlog_alert(const struct eventlog *evlog, int flags,
 bool
 eventlog_exit(const struct eventlog *evlog, int flags,
     struct timespec *run_time, int exit_value, const char *signal_name,
-    bool core_dumped, eventlog_json_callback_t info_cb, void *info)
+    bool core_dumped)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const int log_type = evl_conf->type;
@@ -1333,8 +1333,6 @@ eventlog_exit(const struct eventlog *evlog, int flags,
     args.core_dumped = core_dumped;
     args.exit_value = exit_value;
     args.event_time = run_time;
-    args.json_info_cb = info_cb;
-    args.json_info = info;
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
 	if (!do_syslog(EVLOG_EXIT, flags, &args, evlog))

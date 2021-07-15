@@ -539,7 +539,7 @@ log_exit_status(int exit_status)
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
 	if (!eventlog_exit(&evlog, evl_flags, &run_time, ecode, signame,
-		dumped_core, NULL, NULL))
+		dumped_core))
 	    ret = false;
 
 	sudoers_setlocale(oldlocale, NULL);

@@ -227,7 +227,7 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     }
     if (logsrvd_conf_log_exit()) {
 	if (!eventlog_exit(closure->evlog, flags, &run_time, msg->exit_value,
-		signame, msg->dumped_core, NULL, NULL)) {
+		signame, msg->dumped_core)) {
 	    closure->errstr = _("error logging exit event");
 	    debug_return_bool(false);
 	}
