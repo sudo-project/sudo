@@ -130,6 +130,7 @@ struct sudo_user {
     uid_t uid;
     uid_t gid;
     pid_t sid;
+    char uuid_str[37];
 };
 
 /*

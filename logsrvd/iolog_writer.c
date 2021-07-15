@@ -115,6 +115,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
     struct eventlog *evlog;
+    unsigned char uuid[16];
     size_t idx;
     debug_decl(evlog_new, SUDO_DEBUG_UTIL);
 
@@ -122,6 +123,13 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
     if (evlog == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
+    }
+
+    /* Create a UUID to store in the event log. */
+    sudo_uuid_create(uuid);
+    if (sudo_uuid_to_string(uuid, evlog->uuid_str, sizeof(evlog->uuid_str)) == NULL) {
+       sudo_warnx("%s", U_("unable to generate UUID"));
+       goto bad;
     }
 
     /* Client/peer IP address. */

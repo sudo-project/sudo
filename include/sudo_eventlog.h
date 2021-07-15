@@ -116,6 +116,7 @@ struct eventlog {
     uid_t runuid;
     gid_t rungid;
     char sessid[7];
+    char uuid_str[37];
 };
 
 /* Callback from eventlog code to write log info */

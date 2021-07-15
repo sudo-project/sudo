@@ -97,6 +97,7 @@ sudoers_policy_deserialize_info(void *v)
     struct sudoers_open_info *info = v;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
+    unsigned char uuid[16];
     char * const *cur;
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN);
@@ -523,6 +524,13 @@ sudoers_policy_deserialize_info(void *v)
 
     /* Some systems support fexecve() which we use for digest matches. */
     cmnd_fd = -1;
+
+    /* Create a UUID to store in the event log. */
+    sudo_uuid_create(uuid);
+    if (sudo_uuid_to_string(uuid, sudo_user.uuid_str, sizeof(sudo_user.uuid_str)) == NULL) {
+	sudo_warnx("%s", U_("unable to generate UUID"));
+	goto bad;
+    }
 
 #ifdef NO_ROOT_MAILER
     eventlog_set_mailuid(user_uid);

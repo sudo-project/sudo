@@ -752,6 +752,7 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
 	evlog->runuid = (uid_t)-1;
 	evlog->runuser = sudo_user.runas_user;
     }
+    strlcpy(evlog->uuid_str, sudo_user.uuid_str, sizeof(evlog->uuid_str));
 
     debug_return;
 }
