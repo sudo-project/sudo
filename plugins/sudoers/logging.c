@@ -47,6 +47,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <syslog.h>
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
