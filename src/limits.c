@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1999-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,6 +35,10 @@
 
 #include "sudo.h"
 
+/*
+ * Avoid using RLIM_INFINITY for the nofile soft limit to prevent
+ * closefrom_fallback() from closing too many file descriptors.
+ */
 #if defined(OPEN_MAX) && OPEN_MAX > 256
 # define SUDO_OPEN_MAX	OPEN_MAX
 #else
@@ -66,7 +70,6 @@
  * the stack hard limit to be infinite.
  * Linux containers have a problem with an infinite stack soft limit.
  */
-static struct rlimit nofile_fallback = { SUDO_OPEN_MAX, RLIM_INFINITY };
 static struct rlimit stack_fallback = { SUDO_STACK_MIN, 65532 * 1024 };
 
 static struct saved_limit {
@@ -141,9 +144,9 @@ static struct saved_limit {
 	RLIMIT_NOFILE,
 	true,					/* override */
 	false,					/* saved */
-	RLIM_INFINITY,				/* minlimit */
-	&nofile_fallback,
-	{ RLIM_INFINITY, RLIM_INFINITY }
+	SUDO_OPEN_MAX,				/* minlimit */
+	NULL,
+	{ SUDO_OPEN_MAX, RLIM_INFINITY }
     },
 #ifdef RLIMIT_NPROC
     {
