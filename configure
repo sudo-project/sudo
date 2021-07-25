@@ -23316,6 +23316,78 @@ fi
 esac
 LIBS="$OLIBS"
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for va_copy" >&5
+printf %s "checking for va_copy... " >&6; }
+if test ${sudo_cv_func_va_copy+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdarg.h>
+	va_list ap1, ap2;
+int
+main (void)
+{
+va_copy(ap1, ap2);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  sudo_cv_func_va_copy=yes
+else $as_nop
+  sudo_cv_func_va_copy=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_va_copy" >&5
+printf "%s\n" "$sudo_cv_func_va_copy" >&6; }
+if test "$sudo_cv_func_va_copy" = "yes"; then
+    printf "%s\n" "#define HAVE_VA_COPY 1" >>confdefs.h
+
+else
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __va_copy" >&5
+printf %s "checking for __va_copy... " >&6; }
+if test ${sudo_cv_func___va_copy+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdarg.h>
+	    va_list ap1, ap2;
+int
+main (void)
+{
+__va_copy(ap1, ap2);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  sudo_cv_func___va_copy=yes
+else $as_nop
+  sudo_cv_func___va_copy=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func___va_copy" >&5
+printf "%s\n" "$sudo_cv_func___va_copy" >&6; }
+    if test "$sudo_cv_func___va_copy" = "yes"; then
+	printf "%s\n" "#define HAVE___VA_COPY 1" >>confdefs.h
+
+    fi
+fi
+
 
   for ac_func in getprogname
 do :
@@ -31665,6 +31737,8 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
+
 
 
 

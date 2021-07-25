@@ -91,8 +91,8 @@
 /*
  * Pre-C99 compilers may lack a va_copy macro.
  */
-#ifndef va_copy
-# ifdef __va_copy
+#ifndef HAVE_VA_COPY
+# ifdef HAVE___VA_COPY
 #  define va_copy(d, s) __va_copy(d, s)
 # else
 #  define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
