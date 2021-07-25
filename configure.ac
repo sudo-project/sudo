@@ -3232,6 +3232,27 @@ esac
 LIBS="$OLIBS"
 
 dnl
+dnl Check for va_copy or __va_copy in stdarg.h
+dnl
+AC_CACHE_CHECK([for va_copy], sudo_cv_func_va_copy, [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdarg.h>
+	va_list ap1, ap2;]], [[va_copy(ap1, ap2);]])],
+	[sudo_cv_func_va_copy=yes], [sudo_cv_func_va_copy=no])
+])
+if test "$sudo_cv_func_va_copy" = "yes"; then
+    AC_DEFINE(HAVE_VA_COPY)
+else
+    AC_CACHE_CHECK([for __va_copy], sudo_cv_func___va_copy, [
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdarg.h>
+	    va_list ap1, ap2;]], [[__va_copy(ap1, ap2);]])],
+	    [sudo_cv_func___va_copy=yes], [sudo_cv_func___va_copy=no])
+    ])
+    if test "$sudo_cv_func___va_copy" = "yes"; then
+	AC_DEFINE(HAVE___VA_COPY)
+    fi
+fi
+
+dnl
 dnl Check for getprogname()/setprogname() or __progname
 dnl
 AC_CHECK_FUNCS([getprogname], [
@@ -5133,6 +5154,8 @@ AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SS
 AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.])
 AH_TEMPLATE(SUDOERS_LOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd in the sudoers plugin.])
 AH_TEMPLATE(HAVE_FALLTHROUGH_ATTRIBUTE, [Define to 1 if the compiler supports the fallthrough attribute.])
+AH_TEMPLATE(HAVE_VA_COPY, [Define to 1 if you have the `va_copy' function.])
+AH_TEMPLATE(HAVE___VA_COPY, [Define to 1 if you have the `__va_copy' function.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
