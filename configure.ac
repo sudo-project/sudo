@@ -2811,13 +2811,11 @@ AC_CHECK_FUNCS([clock_gettime], [], [
 AC_CHECK_FUNCS([getopt_long], [], [
     AC_LIBOBJ(getopt_long)
     SUDO_APPEND_COMPAT_EXP(sudo_getopt_long sudo_getopt_long_only)
-    AC_MSG_CHECKING([for optreset])
-    AC_CACHE_VAL(sudo_cv_optreset, [
+    AC_CACHE_CHECK([for optreset], sudo_cv_optreset, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern int optreset; optreset = 1; return optreset;]])], [sudo_cv_optreset=yes], [sudo_cv_optreset=no])])
     if test "$sudo_cv_optreset" = "yes"; then
 	AC_DEFINE(HAVE_OPTRESET)
     fi
-    AC_MSG_RESULT($sudo_cv_optreset)
 ])
 AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
     SUDO_APPEND_COMPAT_EXP(sudo_closefrom)
@@ -3253,30 +3251,24 @@ dnl
 AC_CHECK_FUNCS([getprogname], [
     AC_CHECK_FUNCS([setprogname], [], [SUDO_APPEND_COMPAT_EXP(sudo_setprogname)])
 ], [
-    AC_MSG_CHECKING([for __progname])
-    AC_CACHE_VAL(sudo_cv___progname, [
+    AC_CACHE_CHECK([for __progname], sudo_cv___progname, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; if (__progname[0] == '\0') return 1;]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
     if test "$sudo_cv___progname" = "yes"; then
 	AC_DEFINE(HAVE___PROGNAME)
     fi
-    AC_MSG_RESULT($sudo_cv___progname)
     SUDO_APPEND_COMPAT_EXP(sudo_getprogname)
     SUDO_APPEND_COMPAT_EXP(sudo_setprogname)
 ])
 dnl
 dnl Check for __func__ or __FUNCTION__
 dnl
-AC_MSG_CHECKING([for __func__])
-AC_CACHE_VAL(sudo_cv___func__, [
+AC_CACHE_CHECK([for __func__], sudo_cv___func__, [
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__func__[0] == '\0') return 1;]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])])
-AC_MSG_RESULT($sudo_cv___func__)
 if test "$sudo_cv___func__" = "yes"; then
     AC_DEFINE(HAVE___FUNC__)
 elif test -n "$GCC"; then
-    AC_MSG_CHECKING([for __FUNCTION__])
-    AC_CACHE_VAL(sudo_cv___FUNCTION__, [
+    AC_CACHE_CHECK([for __FUNCTION__], sudo_cv___FUNCTION__, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if(__FUNCTION__[0] == '\0') return 1;]])], [sudo_cv___FUNCTION__=yes], [sudo_cv___FUNCTION__=no])])
-    AC_MSG_RESULT($sudo_cv___FUNCTION__)
     if test "$sudo_cv___FUNCTION__" = "yes"; then
 	AC_DEFINE(HAVE___FUNC__)
 	AC_DEFINE(__func__, __FUNCTION__, [Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not __func__])
