@@ -22461,16 +22461,10 @@ then :
   printf "%s\n" "#define HAVE_SSL_CTX_GET0_CERTIFICATE 1" >>confdefs.h
 
 fi
-ac_fn_c_check_func "$LINENO" "TLS_client_method" "ac_cv_func_TLS_client_method"
-if test "x$ac_cv_func_TLS_client_method" = xyes
+ac_fn_c_check_func "$LINENO" "TLS_method" "ac_cv_func_TLS_method"
+if test "x$ac_cv_func_TLS_method" = xyes
 then :
-  printf "%s\n" "#define HAVE_TLS_CLIENT_METHOD 1" >>confdefs.h
-
-fi
-ac_fn_c_check_func "$LINENO" "TLS_server_method" "ac_cv_func_TLS_server_method"
-if test "x$ac_cv_func_TLS_server_method" = xyes
-then :
-  printf "%s\n" "#define HAVE_TLS_SERVER_METHOD 1" >>confdefs.h
+  printf "%s\n" "#define HAVE_TLS_METHOD 1" >>confdefs.h
 
 fi
 

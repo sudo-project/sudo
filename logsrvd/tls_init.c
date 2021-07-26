@@ -195,7 +195,7 @@ init_tls_context(const char *ca_bundle_file, const char *cert_file,
     }
 
     /* Create the ssl context and enforce TLS 1.2 or higher. */
-    if ((ctx = SSL_CTX_new(TLS_client_method())) == NULL) {
+    if ((ctx = SSL_CTX_new(TLS_method())) == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
 	sudo_warnx(U_("unable to create TLS context: %s"), errstr);
         goto bad;

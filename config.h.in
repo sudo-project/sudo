@@ -928,11 +928,8 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define to 1 if you have the `TLS_client_method' function. */
-#undef HAVE_TLS_CLIENT_METHOD
-
-/* Define to 1 if you have the `TLS_server_method' function. */
-#undef HAVE_TLS_SERVER_METHOD
+/* Define to 1 if you have the `TLS_method' function. */
+#undef HAVE_TLS_METHOD
 
 /* Define to 1 if you have the `ttyslot' function. */
 #undef HAVE_TTYSLOT
