@@ -1,3 +1,35 @@
+What's new in Sudo 1.9.7p2
+
+ * When formatting JSON output, octal numbers are now stored as
+   strings, not numbers.  The JSON spec does not actually support
+   octal numbers with a '0' prefix.
+
+ * Fixed a compilation issue on Solaris 9.
+
+ * Sudo now can handle the getgroups() function returning a different
+   number of groups for subsequent invocations.  GitHub PR #106.
+
+ * When loading a Python plugin, python_plugin.so now verifies
+   that the module loaded matches the one we tried to load.  This
+   allows sudo to display a more useful error message when trying
+   to load a plugin with a name that conflicts with a Python module
+   installed in the system location.
+
+ * Sudo no longer sets the the open files resource limit to "unlimited"
+   while it runs.  This avoids a problem where sudo's closefrom()
+   emulation would need to close a very large number of descriptors
+   on systems without a way to determine which ones are actually open.
+
+ * Sudo now includes a configure check for va_copy or __va_copy and
+   only defines its own version if the configure test fails.
+
+ * Fixed a bug in sudo's utmp file handling which prevented old
+   entries from being reused.  As a result, the utmp (or utmpx)
+   file was appended to unnecessarily.  GitHub PR #108.
+
+ * Fixed a bug introduced in sudo 1.9.7 that prevented sudo_logsrvd
+   from accepting TLS connections when OpenSSL is used.  Bug #988.
+
 What's new in Sudo 1.9.7p1
 
  * Fixed an SELinux sudoedit bug when the edited temporary file
