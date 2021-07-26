@@ -967,6 +967,9 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #undef HAVE_VASPRINTF
 
+/* Define to 1 if you have the `va_copy' function. */
+#undef HAVE_VA_COPY
+
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
 
@@ -1017,6 +1020,9 @@
 
 /* Define to 1 if your crt0.o defines the __progname symbol for you. */
 #undef HAVE___PROGNAME
+
+/* Define to 1 if you have the `__va_copy' function. */
+#undef HAVE___VA_COPY
 
 /* Define to 1 if you want the hostname to be entered into the log file. */
 #undef HOST_IN_LOG

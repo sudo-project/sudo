@@ -18599,7 +18599,8 @@ if test ${sudo_cv_uid_t_len+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  rm -f conftestdata
+
+rm -f conftestdata
 if test "$cross_compiling" = yes
 then :
   sudo_cv_uid_t_len=10
@@ -18638,10 +18639,9 @@ fi
 
 
 fi
-
-rm -f conftestdata
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_uid_t_len" >&5
 printf "%s\n" "$sudo_cv_uid_t_len" >&6; }
+rm -f conftestdata
 
 printf "%s\n" "#define MAX_UID_T_LEN $sudo_cv_uid_t_len" >>confdefs.h
 
@@ -20771,14 +20771,15 @@ done
 fi
 
 done
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for working fnmatch with FNM_CASEFOLD" >&5
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for working fnmatch with FNM_CASEFOLD" >&5
 printf %s "checking for working fnmatch with FNM_CASEFOLD... " >&6; }
 if test ${sudo_cv_func_fnmatch+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  rm -f conftestdata; > conftestdata
-if test "$cross_compiling" = yes
+
+	if test "$cross_compiling" = yes
 then :
   sudo_cv_func_fnmatch=no
 else $as_nop
@@ -20797,12 +20798,11 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-rm -f core core.* *.core
-fi
 
+fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_fnmatch" >&5
 printf "%s\n" "$sudo_cv_func_fnmatch" >&6; }
-if test $sudo_cv_func_fnmatch = yes
+    if test $sudo_cv_func_fnmatch = yes
 then :
   printf "%s\n" "#define HAVE_FNMATCH 1" >>confdefs.h
 
@@ -20823,6 +20823,7 @@ esac
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 
 fi
+
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for isblank" >&5
 printf %s "checking for isblank... " >&6; }
 if test ${sudo_cv_func_isblank+y}
@@ -21463,7 +21464,7 @@ esac
 
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for optreset" >&5
 printf %s "checking for optreset... " >&6; }
-    if test ${sudo_cv_optreset+y}
+if test ${sudo_cv_optreset+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -21488,13 +21489,12 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 fi
-
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_optreset" >&5
+printf "%s\n" "$sudo_cv_optreset" >&6; }
     if test "$sudo_cv_optreset" = "yes"; then
 	printf "%s\n" "#define HAVE_OPTRESET 1" >>confdefs.h
 
     fi
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_optreset" >&5
-printf "%s\n" "$sudo_cv_optreset" >&6; }
 
 fi
 
@@ -23316,6 +23316,78 @@ fi
 esac
 LIBS="$OLIBS"
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for va_copy" >&5
+printf %s "checking for va_copy... " >&6; }
+if test ${sudo_cv_func_va_copy+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdarg.h>
+	va_list ap1, ap2;
+int
+main (void)
+{
+va_copy(ap1, ap2);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  sudo_cv_func_va_copy=yes
+else $as_nop
+  sudo_cv_func_va_copy=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_va_copy" >&5
+printf "%s\n" "$sudo_cv_func_va_copy" >&6; }
+if test "$sudo_cv_func_va_copy" = "yes"; then
+    printf "%s\n" "#define HAVE_VA_COPY 1" >>confdefs.h
+
+else
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __va_copy" >&5
+printf %s "checking for __va_copy... " >&6; }
+if test ${sudo_cv_func___va_copy+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdarg.h>
+	    va_list ap1, ap2;
+int
+main (void)
+{
+__va_copy(ap1, ap2);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  sudo_cv_func___va_copy=yes
+else $as_nop
+  sudo_cv_func___va_copy=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func___va_copy" >&5
+printf "%s\n" "$sudo_cv_func___va_copy" >&6; }
+    if test "$sudo_cv_func___va_copy" = "yes"; then
+	printf "%s\n" "#define HAVE___VA_COPY 1" >>confdefs.h
+
+    fi
+fi
+
 
   for ac_func in getprogname
 do :
@@ -23347,7 +23419,7 @@ else $as_nop
 
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __progname" >&5
 printf %s "checking for __progname... " >&6; }
-    if test ${sudo_cv___progname+y}
+if test ${sudo_cv___progname+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -23372,13 +23444,12 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 fi
-
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___progname" >&5
+printf "%s\n" "$sudo_cv___progname" >&6; }
     if test "$sudo_cv___progname" = "yes"; then
 	printf "%s\n" "#define HAVE___PROGNAME 1" >>confdefs.h
 
     fi
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___progname" >&5
-printf "%s\n" "$sudo_cv___progname" >&6; }
 
     for _sym in sudo_getprogname; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
@@ -23422,7 +23493,6 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 fi
-
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___func__" >&5
 printf "%s\n" "$sudo_cv___func__" >&6; }
 if test "$sudo_cv___func__" = "yes"; then
@@ -23431,7 +23501,7 @@ if test "$sudo_cv___func__" = "yes"; then
 elif test -n "$GCC"; then
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __FUNCTION__" >&5
 printf %s "checking for __FUNCTION__... " >&6; }
-    if test ${sudo_cv___FUNCTION__+y}
+if test ${sudo_cv___FUNCTION__+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -23456,8 +23526,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 fi
-
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___FUNCTION__" >&5
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___FUNCTION__" >&5
 printf "%s\n" "$sudo_cv___FUNCTION__" >&6; }
     if test "$sudo_cv___FUNCTION__" = "yes"; then
 	printf "%s\n" "#define HAVE___FUNC__ 1" >>confdefs.h
@@ -28759,14 +28828,15 @@ if test x"$ax_cv_check_ldflags___pie" = xyes
 then :
 
 		    if test "$enable_pie" = "maybe"; then
-			{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for working PIE support" >&5
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for working PIE support" >&5
 printf %s "checking for working PIE support... " >&6; }
 if test ${sudo_cv_working_pie+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  rm -f conftestdata; > conftestdata
-if test "$cross_compiling" = yes
+
+	if test "$cross_compiling" = yes
 then :
   sudo_cv_working_pie=no
 else $as_nop
@@ -28785,15 +28855,15 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-rm -f core core.* *.core
-fi
 
+fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_working_pie" >&5
 printf "%s\n" "$sudo_cv_working_pie" >&6; }
-if test $sudo_cv_working_pie = yes
+    if test $sudo_cv_working_pie = yes
 then :
   enable_pie=yes
 fi
+
 		    fi
 		    if test "$enable_pie" = "yes"; then
 			PIE_CFLAGS="-fPIE"
@@ -31665,6 +31735,8 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
+
 
 
 
