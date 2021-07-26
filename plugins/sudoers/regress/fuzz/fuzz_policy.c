@@ -148,12 +148,18 @@ fuzz_hook_stub(struct sudo_hook *hook)
     return 0;
 }
 
+/*
+ * The fuzzing environment may not have DNS available, this may result
+ * in long delays that cause a timeout when fuzzing.  This getaddrinfo()
+ * can look up "localhost" and returns an error for anything else.
+ */
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 int
-#ifdef HAVE_GETADDRINFO
+# ifdef HAVE_GETADDRINFO
 getaddrinfo(
-#else
+# else
 sudo_getaddrinfo(
-#endif
+# endif
     const char *nodename, const char *servname,
     const struct addrinfo *hints, struct addrinfo **res)
 {
@@ -185,11 +191,11 @@ sudo_getaddrinfo(
 }
 
 void
-#ifdef HAVE_GETADDRINFO
+# ifdef HAVE_GETADDRINFO
 freeaddrinfo(struct addrinfo *ai)
-#else
+# else
 sudo_freeaddrinfo(struct addrinfo *ai)
-#endif
+# endif
 {
     struct addrinfo *next;
 
@@ -200,6 +206,7 @@ sudo_freeaddrinfo(struct addrinfo *ai)
 	ai = next;
     }
 }
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 
 enum fuzz_policy_pass {
     PASS_NONE,
