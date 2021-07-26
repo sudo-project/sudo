@@ -188,7 +188,7 @@ tls_init(struct client_closure *closure)
     SSL_load_error_strings();
     
     /* Create the ssl context and enforce TLS 1.2 or higher. */
-    if ((closure->ssl_ctx = SSL_CTX_new(TLS_client_method())) == NULL) {
+    if ((closure->ssl_ctx = SSL_CTX_new(TLS_method())) == NULL) {
         errstr = ERR_reason_error_string(ERR_get_error());
         sudo_warnx(U_("Creation of new SSL_CTX object failed: %s"), errstr);
         goto bad;

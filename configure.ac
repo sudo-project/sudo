@@ -2992,7 +2992,7 @@ dnl
 if test "${enable_openssl-no}" != no; then
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
-    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate TLS_client_method TLS_server_method])
+    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate TLS_method])
     # SSL_CTX_set_min_proto_version may be a macro
     AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
 	AC_INCLUDES_DEFAULT

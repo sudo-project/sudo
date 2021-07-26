@@ -358,11 +358,8 @@ int getdomainname(char *, size_t);
 # ifndef HAVE_ASN1_STRING_GET0_DATA
 #  define ASN1_STRING_get0_data(x)      ASN1_STRING_data(x)
 # endif
-# ifndef HAVE_TLS_CLIENT_METHOD
-#  define TLS_client_method()           SSLv23_client_method()
-# endif
-# ifndef HAVE_TLS_SERVER_METHOD
-#  define TLS_server_method()           SSLv23_server_method()
+# ifndef HAVE_TLS_METHOD
+#  define TLS_method()                  SSLv23_method()
 # endif
 #endif /* HAVE_OPENSSL */
 
