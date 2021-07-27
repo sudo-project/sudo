@@ -106,12 +106,14 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     debug_decl(new_logline, SUDO_DEBUG_UTIL);
 
     if (ISSET(flags, EVLOG_RAW)) {
-	if (args->errstr != NULL) {
-	    if (asprintf(&line, "%s: %s", args->reason, args->errstr) == -1)
-		goto oom;
-	} else {
-	    if ((line = strdup(args->reason)) == NULL)
-		goto oom;
+	if (args->reason != NULL) {
+	    if (args->errstr != NULL) {
+		if (asprintf(&line, "%s: %s", args->reason, args->errstr) == -1)
+		    goto oom;
+	    } else {
+		if ((line = strdup(args->reason)) == NULL)
+		    goto oom;
+	    }
 	}
 	debug_return_str(line);
     }
