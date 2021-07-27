@@ -608,13 +608,13 @@ json_add_timestamp(struct json_container *json, const char *name,
 	if ((tm = gmtime(&secs)) != NULL) {
 	    strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tm);
 	    json_value.type = JSON_STRING;
-	    json_value.u.string = timebuf;
+	    json_value.u.string = timebuf; // -V507
 	    if (!sudo_json_add_value(json, "iso8601", &json_value))
 		goto oom;
 
 	    strftime(timebuf, sizeof(timebuf), timefmt, tm);
 	    json_value.type = JSON_STRING;
-	    json_value.u.string = timebuf;
+	    json_value.u.string = timebuf; // -V507
 	    if (!sudo_json_add_value(json, "localtime", &json_value))
 		goto oom;
 	}
@@ -827,7 +827,7 @@ format_json(int event_type, struct eventlog_args *args,
     if (!sudo_json_open_object(&json, type_str))
 	goto bad;
 
-    if (evlog->uuid_str[0] != '\0') {
+    if (evlog != NULL && evlog->uuid_str[0] != '\0') {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->uuid_str;
 	if (!sudo_json_add_value(&json, "uuid", &json_value))
@@ -872,8 +872,10 @@ format_json(int event_type, struct eventlog_args *args,
 
     if (event_type == EVLOG_EXIT) {
 	/* Exit events don't need evlog details if there is a UUID. */
-	if (evlog->uuid_str[0] != '\0' && args->json_info == NULL)
-	    info = NULL;
+	if (evlog != NULL && evlog->uuid_str[0] != '\0') {
+	    if (args->json_info == NULL)
+		info = NULL;
+	}
 
 	if (args->signal_name != NULL) {
 	    json_value.type = JSON_STRING;
