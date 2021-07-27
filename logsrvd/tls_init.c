@@ -90,7 +90,8 @@ verify_cert_chain(SSL_CTX *ctx, const char *cert_file)
     }
 
     if (X509_verify_cert(store_ctx) <= 0) {
-	errstr = ERR_reason_error_string(ERR_get_error());
+	errstr =
+	    X509_verify_cert_error_string(X509_STORE_CTX_get_error(store_ctx));
 	sudo_warnx("X509_verify_cert: %s", errstr);
         goto done;
     }
