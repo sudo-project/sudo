@@ -243,6 +243,20 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	}
     }
 
+    /* Only lists support append/remove. */
+    if ((op == '+' || op == '-') && (def->type & T_MASK) != T_LIST) {
+	if (!quiet) {
+	    if (line > 0) {
+		sudo_warnx(U_("%s:%d:%d: invalid operator \"%c=\" for \"%s\""),
+		    file, line, column, op, def->name);
+	    } else {
+		sudo_warnx(U_("%s: invalid operator \"%c=\" for \"%s\""),
+		    file, op, def->name);
+	    }
+	}
+	debug_return_bool(false);
+    }
+
     switch (def->type & T_MASK) {
 	case T_LOGFAC:
 	    rc = store_syslogfac(val, &def->sd_un);
