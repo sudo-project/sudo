@@ -1015,6 +1015,7 @@ new_sudoers(const char *path, bool doedit)
 bad:
     if (entry->fd != -1)
 	close(entry->fd);
+    free(entry->path);
     free(entry);
     debug_return_ptr(NULL);
 }
