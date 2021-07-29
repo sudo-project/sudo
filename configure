@@ -28320,6 +28320,39 @@ if test ${ASAN_LDFLAGS+y}
 then :
 
   case " $ASAN_LDFLAGS " in #(
+  *" -XCClinker "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS already contains -XCClinker"; } >&5
+  (: ASAN_LDFLAGS already contains -XCClinker) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append ASAN_LDFLAGS " -XCClinker"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  ASAN_LDFLAGS=-XCClinker
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+if test ${ASAN_LDFLAGS+y}
+then :
+
+  case " $ASAN_LDFLAGS " in #(
   *" $enable_sanitizer "*) :
     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS already contains \$enable_sanitizer"; } >&5
   (: ASAN_LDFLAGS already contains $enable_sanitizer) 2>&5
@@ -28492,6 +28525,39 @@ else $as_nop
   ASAN_CFLAGS=-fsanitize=fuzzer-no-link
   { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_CFLAGS=\"\$ASAN_CFLAGS\""; } >&5
   (: ASAN_CFLAGS="$ASAN_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+if test ${ASAN_LDFLAGS+y}
+then :
+
+  case " $ASAN_LDFLAGS " in #(
+  *" -XCClinker "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS already contains -XCClinker"; } >&5
+  (: ASAN_LDFLAGS already contains -XCClinker) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append ASAN_LDFLAGS " -XCClinker"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  ASAN_LDFLAGS=-XCClinker
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }

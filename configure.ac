@@ -4473,6 +4473,7 @@ dnl
 if test "$enable_sanitizer" != "no"; then
     AX_CHECK_COMPILE_FLAG([$enable_sanitizer], [
 	AX_APPEND_FLAG([$enable_sanitizer], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([-XCClinker], [ASAN_LDFLAGS])
 	AX_APPEND_FLAG([$enable_sanitizer], [ASAN_LDFLAGS])
 	AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
 	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
@@ -4485,6 +4486,7 @@ fi
 if test "$enable_fuzzer" = "yes"; then
     AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
 	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([-XCClinker], [ASAN_LDFLAGS])
 	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_LDFLAGS])
 	if test -z "$FUZZ_ENGINE"; then
 	    FUZZ_ENGINE="-fsanitize=fuzzer"
