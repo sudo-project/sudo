@@ -48,11 +48,16 @@
 bool
 iolog_mkdtemp(char *path)
 {
+    const mode_t iolog_filemode = iolog_get_file_mode();
     const mode_t iolog_dirmode = iolog_get_dir_mode();
     const uid_t iolog_uid = iolog_get_uid();
     const gid_t iolog_gid = iolog_get_gid();
     bool ok, uid_changed = false;
+    mode_t omask;
     debug_decl(iolog_mkdtemp, SUDO_DEBUG_UTIL);
+
+    /* umask must not be more restrictive than the file modes. */
+    omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
 
     ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
     if (!ok && errno == EACCES) {
@@ -78,6 +83,8 @@ iolog_mkdtemp(char *path)
 	    }
 	}
     }
+
+    umask(omask);
 
     if (uid_changed) {
 	if (!iolog_swapids(true))
