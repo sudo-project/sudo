@@ -97,6 +97,9 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
     int len;
     debug_decl(find_path, SUDOERS_DEBUG_UTIL);
 
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"resolving %s", infile);
+
     /*
      * If we were given a fully qualified or relative path
      * there is no need to look at $PATH.
@@ -159,6 +162,8 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 
 done:
     if (found) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "found %s", command);
 	if ((*outfile = strdup(command)) == NULL)
 	    debug_return_int(NOT_FOUND_ERROR);
 	debug_return_int(FOUND);
