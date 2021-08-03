@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 9, 2021
+.Dd August 3, 2021
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -228,11 +228,11 @@ The path to the server's private key file, in PEM format.
 The default value is
 .Pa /etc/ssl/sudo/private/logsrvd_key.pem .
 .It tls_verify = bool
-If true, the server certificate will be verified at startup and
-clients will authenticate the server by verifying its certificate
-and identity.
-If false, no verification is performed of the server certificate
-by the server or the client.
+If true,
+.Nm
+will validate its own certificate at startup time or when the
+configuration is changed.
+If false, no verification is performed of the server certificate.
 When using self-signed certificates without a certificate authority,
 this setting should be set to false.
 The default value is true.
@@ -730,8 +730,8 @@ Sudo log server configuration file
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 #timeout = 30
 
-# If true, the server certificate will be verified at startup and clients
-# will authenticate the server by verifying its certificate and identity.
+# If true, the server will validate its own certificate at startup.
+# Defaults to true.
 #tls_verify = true
 
 # If true, client certificates will be validated by the server;
