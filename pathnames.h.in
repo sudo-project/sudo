@@ -182,6 +182,10 @@
 # undef _PATH_SUDO_DEVSEARCH
 #endif /* _PATH_SUDO_DEVSEARCH */
 
+#ifndef _PATH_ASAN_LIB
+# undef	_PATH_ASAN_LIB
+#endif /* _PATH_ASAN_LIB */
+
 #ifndef _PATH_VI
 # undef _PATH_VI
 #endif /* _PATH_VI */

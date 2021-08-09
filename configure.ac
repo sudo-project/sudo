@@ -80,7 +80,6 @@ AC_SUBST([INSTALL_BACKUP])
 AC_SUBST([INSTALL_INTERCEPT])
 AC_SUBST([INSTALL_NOEXEC])
 AC_SUBST([CHECK_INTERCEPT])
-AC_SUBST([CHECK_NOEXEC])
 AC_SUBST([PRELOAD_MODULE])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
@@ -235,7 +234,6 @@ INSTALL_BACKUP=
 INSTALL_INTERCEPT=
 INSTALL_NOEXEC=
 CHECK_INTERCEPT=
-CHECK_NOEXEC=
 PRELOAD_MODULE=-module
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
@@ -4511,6 +4509,18 @@ if test "$enable_sanitizer" != "no"; then
 	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
 	])
 	AC_DEFINE(NO_LEAKS)
+	dnl
+	dnl check for libasan.so so we can preload it before sudo_intercept.so
+	dnl gcc links asan dynamically, clang links it statically.
+	dnl
+	case `$CC --version 2>&1` in
+	*gcc*)
+	    libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
+	    if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
+		SUDO_DEFINE_UNQUOTED(_PATH_ASAN_LIB, "$libasan", [Path to the libasan.so shared library])
+	    fi
+	    ;;
+	esac
     ], [
 	AC_MSG_ERROR([$CC does not support the $enable_sanitizer flag])
     ])
@@ -4806,11 +4816,6 @@ fi
 if test X"$with_noexec" != X"no"; then
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"
-
-    # Can't use sanitizers with LD_PRELOAD
-    if test "$enable_sanitizer" != "yes"; then
-	CHECK_NOEXEC=check_noexec
-    fi
 
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
 else

@@ -41,7 +41,7 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 {
     char *preload = NULL;
     char **nenvp = NULL;
-    int env_len;
+    int env_len, len;
     int preload_idx = -1;
     int intercept_idx = -1;
     bool fd_present = false;
@@ -51,7 +51,21 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 # else
     const bool dso_enabled = true;
 # endif
+# ifdef _PATH_ASAN_LIB
+    char *dso_buf = NULL;
+# endif
     debug_decl(sudo_preload_dso, SUDO_DEBUG_UTIL);
+
+# ifdef _PATH_ASAN_LIB
+    /*
+     * The address sanitizer DSO needs to be first in the list.
+     */
+    len = asprintf(&dso_buf, "%s%c%s", _PATH_ASAN_LIB, RTLD_PRELOAD_DELIM,
+	dso_file);
+    if (len == -1)
+       goto oom;
+    dso_file = dso_buf;
+# endif
 
     /*
      * Preload a DSO file.  For a list of LD_PRELOAD-alikes, see
@@ -138,18 +152,21 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
     if (!dso_present) {
 	if (preload_idx == -1) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	    asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR, dso_file,
+	    len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR, dso_file,
 		RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+	    if (len == -1) {
+		goto oom;
+	    }
 # else
 	    preload = sudo_new_key_val(RTLD_PRELOAD_VAR, dso_file);
-# endif
 	    if (preload == NULL) {
 		goto oom;
 	    }
+# endif
 	    envp[env_len++] = preload;
 	    envp[env_len] = NULL;
 	} else {
-	    int len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR,
+	    len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR,
 		dso_file, RTLD_PRELOAD_DELIM, envp[preload_idx]);
 	    if (len == -1) {
 		goto oom;
@@ -165,7 +182,6 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 # endif
     if (!fd_present && intercept_fd != -1) {
 	char *fdstr;
-	int len;
 
 	len = asprintf(&fdstr, "SUDO_INTERCEPT_FD=%d", intercept_fd);
 	if (len == -1) {
@@ -178,10 +194,16 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	    envp[env_len] = NULL;
 	}
     }
+# ifdef _PATH_ASAN_LIB
+    free(dso_buf);
+# endif
 
     debug_return_ptr(envp);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+# ifdef _PATH_ASAN_LIB
+    free(dso_buf);
+# endif
     free(preload);
     free(nenvp);
     debug_return_ptr(NULL);

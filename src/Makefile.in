@@ -120,7 +120,7 @@ INIT_DIR=@INIT_DIR@
 INIT_SCRIPT=@INIT_SCRIPT@
 RC_LINK=@RC_LINK@
 
-TEST_PROGS = check_net_ifs @CHECK_NOEXEC@ check_ttyname
+TEST_PROGS = check_net_ifs check_noexec check_ttyname
 TEST_LIBS = @LIBS@ $(LT_LIBS)
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -317,7 +317,7 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    ./check_net_ifs; \
-	    if test X"@CHECK_NOEXEC@" != X""; then \
+	    if [ -f .libs/$(noexecfile) ]; then \
 		./check_noexec .libs/$(noexecfile); \
 	    fi; \
 	    ./check_ttyname; \

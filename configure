@@ -28505,6 +28505,17 @@ fi
 
 	printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
 
+					case `$CC --version 2>&1` in
+	*gcc*)
+	    libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
+	    if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
+		cat >>confdefs.h <<EOF
+#define _PATH_ASAN_LIB "$libasan"
+EOF
+
+	    fi
+	    ;;
+	esac
 
 else $as_nop
 
