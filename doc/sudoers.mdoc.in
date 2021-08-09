@@ -2871,6 +2871,24 @@ above as well as the
 section at the end of this manual.
 This flag is
 .Em off
+by default.
+.Pp
+This setting is only supported by version 1.9.8 or higher.
+.It intercept_authenticate
+If set, commands run by an intercepted process must be authenticated
+when the user's time stamp is not current.
+For example, if a shell is run with
+.Em intercept
+enabled, as soon as the invoking user's time stamp is out of date,
+subsequent commands will need to be authenticated.
+This flag has no effect unless the
+.Em intercept
+flag is enabled or the
+.Em INTERCEPT
+tag has been set for the command.
+This flag is
+.Em off
+by default.
 .Pp
 This setting is only supported by version 1.9.8 or higher.
 .It netgroup_tuple

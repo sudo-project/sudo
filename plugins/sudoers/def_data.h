@@ -272,6 +272,8 @@
 #define def_log_children        (sudo_defs_table[I_LOG_CHILDREN].sd_un.flag)
 #define I_LOG_EXIT_STATUS       135
 #define def_log_exit_status     (sudo_defs_table[I_LOG_EXIT_STATUS].sd_un.flag)
+#define I_INTERCEPT_AUTHENTICATE 136
+#define def_intercept_authenticate (sudo_defs_table[I_INTERCEPT_AUTHENTICATE].sd_un.flag)
 
 enum def_tuple {
     never,

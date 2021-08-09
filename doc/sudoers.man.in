@@ -3049,6 +3049,25 @@ above as well as the
 section at the end of this manual.
 This flag is
 \fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.9.8 or higher.
+.TP 18n
+intercept_authenticate
+If set, commands run by an intercepted process must be authenticated
+when the user's time stamp is not current.
+For example, if a shell is run with
+\fIintercept\fR
+enabled, as soon as the invoking user's time stamp is out of date,
+subsequent commands will need to be authenticated.
+This flag has no effect unless the
+\fIintercept\fR
+flag is enabled or the
+\fIINTERCEPT\fR
+tag has been set for the command.
+This flag is
+\fIoff\fR
+by default.
 .sp
 This setting is only supported by version 1.9.8 or higher.
 .TP 18n

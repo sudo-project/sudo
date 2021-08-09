@@ -590,6 +590,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Log the exit status of commands"),
 	NULL,
     }, {
+	"intercept_authenticate", T_FLAG,
+	N_("Subsequent commands in an intercepted session must be authenticated"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

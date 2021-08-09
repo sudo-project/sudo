@@ -424,3 +424,6 @@ log_children
 log_exit_status
 	T_FLAG
 	"Log the exit status of commands"
+intercept_authenticate
+	T_FLAG
+	"Subsequent commands in an intercepted session must be authenticated"

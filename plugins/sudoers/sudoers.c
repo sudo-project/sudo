@@ -383,6 +383,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	debug_return_int(-1);
     }
 
+    /* Was previous command was intercepted? */
+    if (def_intercept)
+	SET(sudo_mode, MODE_POLICY_INTERCEPTED);
+
+    /* Only certain mode flags are legal for intercepted commands. */
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	sudo_mode &= MODE_INTERCEPT_MASK;
+
     /* Re-initialize defaults if we are called multiple times. */
     if (need_reinit) {
 	if (!sudoers_reinit_defaults())

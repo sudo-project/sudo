@@ -299,8 +299,14 @@ user_is_exempt(void)
     bool ret = false;
     debug_decl(user_is_exempt, SUDOERS_DEBUG_AUTH);
 
-    if (def_exempt_group)
-	ret = user_in_group(sudo_user.pw, def_exempt_group);
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+	if (!def_intercept_authenticate)
+	    ret = true;
+    }
+    if (def_exempt_group) {
+	if (user_in_group(sudo_user.pw, def_exempt_group))
+	    ret = true;
+    }
     debug_return_bool(ret);
 }
 
