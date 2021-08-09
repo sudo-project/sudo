@@ -81,6 +81,7 @@ include/compat/nss_dbdefs.h
 include/compat/sha2.h
 include/compat/stdbool.h
 include/hostcheck.h
+include/intercept.pb-c.h
 include/log_server.pb-c.h
 include/protobuf-c/protobuf-c.h
 include/sudo_compat.h
@@ -1107,6 +1108,8 @@ src/exec_nopty.c
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c
+src/intercept.pb-c.c
+src/intercept.proto
 src/limits.c
 src/load_plugins.c
 src/net_ifs.c

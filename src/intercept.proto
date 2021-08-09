@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+/*
+ * Intercept message from sudo_intercept.so.  Messages on the
+ * wire are prefixed with a 32-bit size in network byte order.
+ */
+message InterceptMessage {
+  oneof type {
+    PolicyCheckRequest policy_check_req = 1;
+  }
+}
+
+/*
+ * Policy check request from sudo_intercept.so.
+ * Note that the plugin API only currently supports passing
+ * the new environment in to the open() function.
+ */
+message PolicyCheckRequest {
+  string command = 1;
+  repeated string argv = 2;
+  repeated string envp = 3;
+}
+
+message PolicyAcceptMessage {
+  string run_command = 1;
+  repeated string run_argv = 2;
+  repeated string run_envp = 3;
+}
+
+message PolicyRejectMessage {
+  string reject_message = 1;
+}
+
+message PolicyErrorMessage {
+  string error_message = 1;
+}
+
+/*
+ * Policy check result sent back to sudo_intercept.so.
+ */
+message PolicyCheckResult {
+  oneof type {
+    PolicyAcceptMessage accept_msg = 1;
+    PolicyRejectMessage reject_msg = 2;
+    PolicyErrorMessage error_msg = 3;
+  }
+}
