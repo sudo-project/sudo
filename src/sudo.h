@@ -223,12 +223,12 @@ int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
 bool set_user_groups(struct command_details *details);
 struct sudo_plugin_event *sudo_plugin_event_alloc(void);
-void audit_accept(const char *plugin_name, unsigned int plugin_type,
+bool audit_accept(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
     char * const run_envp[]);
-void audit_reject(const char *plugin_name, unsigned int plugin_type,
+bool audit_reject(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
-void audit_error(const char *plugin_name, unsigned int plugin_type,
+bool audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
 extern const char *list_user;
 extern struct user_details user_details;

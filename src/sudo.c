@@ -108,7 +108,7 @@ static void policy_open(struct sudo_settings *settings,
     char * const user_info[], char * const user_env[]);
 static void policy_close(int exit_status, int error);
 static int policy_show_version(int verbose);
-static void policy_check(int argc, char * const argv[], char *env_add[],
+static bool policy_check(int argc, char * const argv[], char *env_add[],
     char **command_info[], char **argv_out[], char **user_env_out[]);
 static void policy_list(int argc, char * const argv[],
     int verbose, const char *user, char * const envp[]);
@@ -116,7 +116,7 @@ static void policy_validate(char * const argv[], char * const envp[]);
 static void policy_invalidate(int unlinkit);
 
 /* I/O log plugin convenience functions. */
-static void iolog_open(struct sudo_settings *settings, char * const user_info[],
+static bool iolog_open(struct sudo_settings *settings, char * const user_info[],
     char * const command_details[], int argc, char * const argv[],
     char * const user_env[]);
 static void iolog_close(int exit_status, int error);
@@ -133,7 +133,7 @@ static void audit_close(int exit_status, int error);
 static void audit_show_version(int verbose);
 
 /* Approval plugin convenience functions. */
-static void approval_check(struct sudo_settings *settings,
+static bool approval_check(struct sudo_settings *settings,
     char * const user_info[], int submit_optind, char * const submit_argv[],
     char * const submit_envp[], char * const command_info[],
     char * const run_argv[], char * const run_envp[]);
@@ -263,8 +263,9 @@ main(int argc, char *argv[], char *envp[])
 	    break;
 	case MODE_EDIT:
 	case MODE_RUN:
-	    policy_check(nargc, nargv, env_add, &command_info, &argv_out,
-		&user_env_out);
+	    if (!policy_check(nargc, nargv, env_add, &command_info, &argv_out,
+		    &user_env_out))
+		goto access_denied;
 
 	    /* Reset nargv/nargc based on argv_out. */
 	    /* XXX - leaks old nargv in shell mode */
@@ -275,16 +276,19 @@ main(int argc, char *argv[], char *envp[])
 		    U_("plugin did not return a command to execute"));
 
 	    /* Approval plugins run after policy plugin accepts the command. */
-	    approval_check(settings, user_info, submit_optind, argv, envp,
-		command_info, nargv, user_env_out);
+	    if (!approval_check(settings, user_info, submit_optind, argv, envp,
+		    command_info, nargv, user_env_out))
+		goto access_denied;
 
 	    /* Open I/O plugin once policy and approval plugins succeed. */
-	    iolog_open(settings, user_info, command_info, nargc, nargv,
-		user_env_out);
+	    if (!iolog_open(settings, user_info, command_info, nargc, nargv,
+		    user_env_out))
+		goto access_denied;
 
 	    /* Audit the accept event on behalf of the sudo front-end. */
-	    audit_accept("sudo", SUDO_FRONT_END, command_info,
-		nargv, user_env_out);
+	    if (!audit_accept("sudo", SUDO_FRONT_END, command_info,
+		    nargv, user_env_out))
+		goto access_denied;
 
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
@@ -329,6 +333,15 @@ main(int argc, char *argv[], char *envp[])
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
 	WEXITSTATUS(status));
     exit(WEXITSTATUS(status));
+
+access_denied:
+    /* Policy/approval failure, close policy and audit plugins before exit. */
+    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
+	policy_close(0, EACCES);
+    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
+	EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 int
@@ -1158,7 +1171,7 @@ policy_show_version(int verbose)
     debug_return_int(ret);
 }
 
-static void
+static bool
 policy_check(int argc, char * const argv[],
     char *env_add[], char **command_info[], char **argv_out[],
     char **user_env_out[])
@@ -1195,17 +1208,10 @@ policy_check(int argc, char * const argv[],
 	    usage();
 	    break;
 	}
-
-	/* Policy must be closed after auditing to avoid use after free. */
-	if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
-	    policy_close(0, 0);
-	audit_close(SUDO_PLUGIN_NO_STATUS, 0);
-	exit(EXIT_FAILURE); /* policy plugin printed error message */
+	debug_return_bool(false);
     }
-    audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, *command_info,
-	*argv_out, *user_env_out);
-
-    debug_return;
+    debug_return_bool(audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN,
+	*command_info, *argv_out, *user_env_out));
 }
 
 static void
@@ -1411,7 +1417,7 @@ iolog_open_int(struct plugin_container *plugin, struct sudo_settings *settings,
     debug_return_int(ret);
 }
 
-static void
+static bool
 iolog_open(struct sudo_settings *settings, char * const user_info[],
     char * const command_info[], int argc, char * const argv[],
     char * const user_env[])
@@ -1420,7 +1426,6 @@ iolog_open(struct sudo_settings *settings, char * const user_info[],
     const char *errstr = NULL;
     debug_decl(iolog_open, SUDO_DEBUG_PCOMM);
 
-    /* XXX - iolog_open should audit errors */
     TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
 	int ok = iolog_open_int(plugin, settings, user_info,
 	    command_info, argc, argv, user_env, &errstr);
@@ -1429,20 +1434,22 @@ iolog_open(struct sudo_settings *settings, char * const user_info[],
 	    break;
 	case 0:
 	    /* I/O plugin asked to be disabled, remove and free. */
-	    /* XXX - audit */
 	    unlink_plugin(&io_plugins, plugin);
 	    break;
 	case -2:
 	    usage();
 	    break;
 	default:
-	    /* XXX - audit error */
-	    sudo_fatalx(U_("error initializing I/O plugin %s"),
+	    sudo_warnx(U_("error initializing I/O plugin %s"),
 		plugin->name);
+	    audit_error(plugin->name, SUDO_IO_PLUGIN,
+		errstr ? errstr : _("error initializing I/O plugin"),
+		command_info);
+	    debug_return_bool(false);
 	}
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 static void
@@ -1640,12 +1647,13 @@ audit_show_version(int verbose)
  * Error from plugin or front-end.
  * The error will not be sent to plugin source, if specified.
  */
-static void
+static bool
 audit_error2(struct plugin_container *source, const char *plugin_name,
     unsigned int plugin_type, const char *audit_msg, char * const command_info[])
 {
     struct plugin_container *plugin;
     const char *errstr = NULL;
+    bool ret = true;
     int ok;
     debug_decl(audit_error2, SUDO_DEBUG_PCOMM);
 
@@ -1671,10 +1679,11 @@ audit_error2(struct plugin_container *source, const char *plugin_name,
 		plugin->name, ok);
 	    sudo_warnx(U_("%s: unable to log error event%s%s"),
 		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
+	    ret = false;
 	}
     }
 
-    debug_return;
+    debug_return_bool(ret);
 }
 
 /*
@@ -1682,7 +1691,7 @@ audit_error2(struct plugin_container *source, const char *plugin_name,
  * See command_info[] for additional info.
  * XXX - actual environment may be updated by policy_init_session().
  */
-void
+bool
 audit_accept(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
     char * const run_envp[])
@@ -1707,26 +1716,26 @@ audit_accept(const char *plugin_name, unsigned int plugin_type,
 	    sudo_warnx(U_("%s: unable to log accept event%s%s"),
 		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
 
-	    /* Notify other audit plugins and exit. */
+	    /* Notify other audit plugins and return. */
 	    audit_error2(plugin, plugin->name, SUDO_AUDIT_PLUGIN,
 		errstr ? errstr : _("audit plugin error"), command_info);
-	    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
-	    exit(EXIT_FAILURE);
+	    debug_return_bool(false);
 	}
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
  * Command rejected by policy or I/O plugin.
  */
-void
+bool
 audit_reject(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[])
 {
     struct plugin_container *plugin;
     const char *errstr = NULL;
+    bool ret = true;
     int ok;
     debug_decl(audit_reject, SUDO_DEBUG_PCOMM);
 
@@ -1748,20 +1757,24 @@ audit_reject(const char *plugin_name, unsigned int plugin_type,
 	    /* Notify other audit plugins. */
 	    audit_error2(plugin, plugin->name, SUDO_AUDIT_PLUGIN,
 		errstr ? errstr : _("audit plugin error"), command_info);
+
+	    ret = false;
+	    break;
 	}
     }
 
-    debug_return;
+    debug_return_bool(ret);
 }
 
 /*
  * Error from plugin or front-end.
  */
-void
+bool
 audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[])
 {
-    audit_error2(NULL, plugin_name, plugin_type, audit_msg, command_info);
+    return audit_error2(NULL, plugin_name, plugin_type, audit_msg,
+	command_info);
 }
 
 static int
@@ -1843,7 +1856,7 @@ approval_show_version(int verbose, struct sudo_settings *settings,
  * This is a "one-shot" plugin that has no open/close and is only
  * called if the policy plugin accepts the command first.
  */
-static void
+static bool
 approval_check(struct sudo_settings *settings, char * const user_info[],
     int submit_optind, char * const submit_argv[], char * const submit_envp[],
     char * const command_info[], char * const run_argv[],
@@ -1880,8 +1893,9 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
 		command_info);
 	    break;
 	case 1:
-	    audit_accept(plugin->name, SUDO_APPROVAL_PLUGIN, command_info,
-		run_argv, run_envp);
+	    if (!audit_accept(plugin->name, SUDO_APPROVAL_PLUGIN, command_info,
+		    run_argv, run_envp))
+		ok = -1;
 	    break;
 	case -1:
 	    audit_error(plugin->name, SUDO_APPROVAL_PLUGIN,
@@ -1900,16 +1914,11 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
 	    sudo_debug_set_active_instance(sudo_debug_instance);
 	}
 
-	/* On error, close policy and audit plugins then exit. */
-	if (ok != 1) {
-	    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
-		policy_close(0, EPERM);
-	    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
-	    exit(EXIT_FAILURE); /* approval plugin printed error message */
-	}
+	if (ok != 1)
+	    debug_return_bool(false);
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 static void
