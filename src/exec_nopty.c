@@ -38,10 +38,8 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
+/* Note that details and evbase must come first. */
 struct exec_closure_nopty {
-    pid_t cmnd_pid;
-    pid_t ppgrp;
-    struct command_status *cstat;
     struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *errpipe_event;
@@ -58,6 +56,9 @@ struct exec_closure_nopty {
     struct sudo_event *sigchld_event;
     struct sudo_event *sigcont_event;
     struct sudo_event *siginfo_event;
+    struct command_status *cstat;
+    pid_t cmnd_pid;
+    pid_t ppgrp;
 };
 
 static void handle_sigchld_nopty(struct exec_closure_nopty *ec);
@@ -220,7 +221,7 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     /* Event for sudo_intercept.so (optional). */
     if (intercept_fd != -1) {
 	ec->intercept_event = sudo_ev_alloc(intercept_fd,
-	    SUDO_EV_READ|SUDO_EV_PERSIST, intercept_fd_cb, ec->evbase);
+	    SUDO_EV_READ|SUDO_EV_PERSIST, intercept_fd_cb, ec);
 	if (ec->intercept_event == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	if (sudo_ev_add(ec->evbase, ec->intercept_event, NULL, false) == -1)

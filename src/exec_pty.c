@@ -55,13 +55,8 @@ struct monitor_message {
 };
 TAILQ_HEAD(monitor_message_list, monitor_message);
 
+/* Note that details and evbase must come first. */
 struct exec_closure_pty {
-    pid_t monitor_pid;
-    pid_t cmnd_pid;
-    pid_t ppgrp;
-    short rows;
-    short cols;
-    struct command_status *cstat;
     struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *backchannel_event;
@@ -77,7 +72,13 @@ struct exec_closure_pty {
     struct sudo_event *sigusr2_event;
     struct sudo_event *sigchld_event;
     struct sudo_event *sigwinch_event;
+    struct command_status *cstat;
     struct monitor_message_list monitor_messages;
+    pid_t monitor_pid;
+    pid_t cmnd_pid;
+    pid_t ppgrp;
+    short rows;
+    short cols;
 };
 
 /*

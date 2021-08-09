@@ -480,7 +480,15 @@ terminate_command(pid_t pid, bool use_pgrp)
     debug_return;
 }
 
+/* Must match start of exec_closure_nopty and monitor_closure.  */
+struct intercept_fd_closure {
+    struct command_details *details;
+    struct sudo_event_base *evbase;
+};
+
+/* Closure for intercept_cb() */
 struct intercept_closure {
+    struct command_details *details;
     struct sudo_event ev;
     const char *errstr;
     char *command;		/* dynamically allocated */
@@ -548,14 +556,14 @@ intercept_check_policy(PolicyCheckRequest *req,
 {
     char **command_info = NULL;
     char **user_env_out = NULL;
-    char **argv, **run_argv = NULL;
+    char **argv = NULL, **run_argv = NULL;
+    int ret = 1;
     size_t n;
-    int ok;
     debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
 
     if (req->command == NULL || req->n_argv == 0 || req->n_envp == 0) {
 	*errstr = N_("invalid PolicyCheckRequest");
-	goto error;
+	goto bad;
     }
 
     if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
@@ -571,104 +579,127 @@ intercept_check_policy(PolicyCheckRequest *req,
     argv = reallocarray(NULL, req->n_argv + 1, sizeof(char *));
     if (argv == NULL) {
 	*errstr = N_("unable to allocate memory");
-	goto error;
+	goto bad;
     }
-    for (n = 0; n < req->n_argv; n++) {
+    argv[0] = req->command;
+    for (n = 1; n < req->n_argv; n++) {
 	argv[n] = req->argv[n];
     }
     argv[n] = NULL;
 
-    /* We don't currently have a good way to validate the environment. */
-    /* TODO: make sure LD_PRELOAD is preserved in environment */
-    sudo_debug_set_active_instance(policy_plugin.debug_instance);
-    ok = policy_plugin.u.policy->check_policy(n, argv, NULL,
-	&command_info, &run_argv, &user_env_out, errstr);
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    free(argv);
+    if (ISSET(closure->details->flags, CD_INTERCEPT)) {
+	/* We don't currently have a good way to validate the environment. */
+	sudo_debug_set_active_instance(policy_plugin.debug_instance);
+	ret = policy_plugin.u.policy->check_policy(n, argv, NULL,
+	    &command_info, &run_argv, &user_env_out, errstr);
+	sudo_debug_set_active_instance(sudo_debug_instance);
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "check_policy returns %d", ret);
 
-    switch (ok) {
-    case 1:
-	/* Extract command path from command_info[] */
-	if (command_info != NULL) {
-	    for (n = 0; command_info[n] != NULL; n++) {
-		const char *cp = command_info[n];
-		if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
-		    closure->command = strdup(cp + sizeof("command=") - 1);
-		    if (closure->command == NULL) {
-			*errstr = N_("unable to allocate memory");
-			goto error;
+	switch (ret) {
+	case 1:
+	    /* Extract command path from command_info[] */
+	    if (command_info != NULL) {
+		for (n = 0; command_info[n] != NULL; n++) {
+		    const char *cp = command_info[n];
+		    if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
+			closure->command = strdup(cp + sizeof("command=") - 1);
+			if (closure->command == NULL) {
+			    *errstr = N_("unable to allocate memory");
+			    goto bad;
+			}
+			break;
 		    }
-		    break;
 		}
 	    }
+	    break;
+	case 0:
+	    if (*errstr == NULL)
+		*errstr = N_("command rejected by policy");
+	    audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN, *errstr,
+		command_info);
+	    goto done;
+	default:
+	    goto bad;
 	}
-
-	if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	       "run_command: %s", closure->command);
-	    for (n = 0; run_argv[n] != NULL; n++) {
-		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "run_argv[%zu]: %s", n, run_argv[n]);
-	    }
-	}
-
-	/* run_argv strings may be part of PolicyCheckReq, make a copy. */
-	for (n = 0; run_argv[n] != NULL; n++)
-	    continue;
-	closure->run_argv = reallocarray(NULL, n + 1, sizeof(char *));
-	if (closure->run_argv == NULL) {
+    } else {
+	/* No actual policy check, just logging child processes. */
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "not checking policy, audit only");
+	closure->command = strdup(req->command);
+	if (closure->command == NULL) {
 	    *errstr = N_("unable to allocate memory");
-	    goto error;
+	    goto bad;
 	}
+	command_info = (char **)closure->details->info;
+	run_argv = argv;
+    }
+
+    if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	   "run_command: %s", closure->command);
 	for (n = 0; run_argv[n] != NULL; n++) {
-	    closure->run_argv[n] = strdup(run_argv[n]);
-	    if (closure->run_argv[n] == NULL) {
-		*errstr = N_("unable to allocate memory");
-		goto error;
-	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"run_argv[%zu]: %s", n, run_argv[n]);
 	}
-	closure->run_argv[n] = NULL;
+    }
 
-	/* envp strings are part of PolicyCheckReq, make a copy. */
-	closure->run_envp = reallocarray(NULL, req->n_envp + 1, sizeof(char *));
-	if (closure->run_envp == NULL) {
+    /* run_argv strings may be part of PolicyCheckReq, make a copy. */
+    for (n = 0; run_argv[n] != NULL; n++)
+	continue;
+    closure->run_argv = reallocarray(NULL, n + 1, sizeof(char *));
+    if (closure->run_argv == NULL) {
+	*errstr = N_("unable to allocate memory");
+	goto bad;
+    }
+    for (n = 0; run_argv[n] != NULL; n++) {
+	closure->run_argv[n] = strdup(run_argv[n]);
+	if (closure->run_argv[n] == NULL) {
 	    *errstr = N_("unable to allocate memory");
-	    goto error;
+	    goto bad;
 	}
-	for (n = 0; n < req->n_envp; n++) {
-	    closure->run_envp[n] = strdup(req->envp[n]);
-	    if (closure->run_envp[n] == NULL) {
-		*errstr = N_("unable to allocate memory");
-		goto error;
-	    }
-	}
-	closure->run_envp[n] = NULL;
+    }
+    closure->run_argv[n] = NULL;
 
+    /* envp strings are part of PolicyCheckReq, make a copy. */
+    closure->run_envp = reallocarray(NULL, req->n_envp + 1, sizeof(char *));
+    if (closure->run_envp == NULL) {
+	*errstr = N_("unable to allocate memory");
+	goto bad;
+    }
+    for (n = 0; n < req->n_envp; n++) {
+	closure->run_envp[n] = strdup(req->envp[n]);
+	if (closure->run_envp[n] == NULL) {
+	    *errstr = N_("unable to allocate memory");
+	    goto bad;
+	}
+    }
+    closure->run_envp[n] = NULL;
+
+    if (ISSET(closure->details->flags, CD_INTERCEPT)) {
 	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, command_info,
 		closure->run_argv, closure->run_envp);
 
 	/* Call approval plugins and audit the result. */
 	if (!approval_check(command_info, closure->run_argv, closure->run_envp))
 	    debug_return_int(0);
-
-	/* Audit the event again for the sudo front-end. */
-	audit_accept("sudo", SUDO_FRONT_END, command_info, closure->run_argv,
-	    closure->run_envp);
-	debug_return_int(1);
-    case 0:
-	if (*errstr == NULL)
-	    *errstr = N_("command rejected by policy");
-	audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN, *errstr,
-	    command_info);
-	debug_return_int(0);
-    default:
-    error:
-	if (*errstr == NULL)
-	    *errstr = N_("policy plugin error");
-	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, *errstr,
-	    command_info);
-	debug_return_int(-1);
     }
+
+    /* Audit the event again for the sudo front-end. */
+    audit_accept("sudo", SUDO_FRONT_END, command_info, closure->run_argv,
+	closure->run_envp);
+
+done:
+    free(argv);
+    debug_return_int(ret);
+
+bad:
+    free(argv);
+    if (*errstr == NULL)
+	*errstr = N_("policy plugin error");
+    audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, *errstr,
+	command_info);
+    debug_return_int(ret);
 }
 
 /*
@@ -945,7 +976,7 @@ void
 intercept_fd_cb(int fd, int what, void *v)
 {
     struct intercept_closure *closure = NULL;
-    struct sudo_event_base *base = v;
+    struct intercept_fd_closure *fdc = v;
     struct msghdr msg;
     union {
 	struct cmsghdr hdr;
@@ -962,6 +993,7 @@ intercept_fd_cb(int fd, int what, void *v)
 	sudo_warnx("%s", U_("unable to allocate memory"));
 	goto bad;
     }
+    closure->details = fdc->details;
 
     /*
      * We send a single byte of data along with the fd; some systems
@@ -1006,7 +1038,7 @@ intercept_fd_cb(int fd, int what, void *v)
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto bad;
     }
-    if (sudo_ev_add(base, &closure->ev, NULL, false) == -1) {
+    if (sudo_ev_add(fdc->evbase, &closure->ev, NULL, false) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto bad;
     }
