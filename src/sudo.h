@@ -230,6 +230,8 @@ bool audit_reject(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
 bool audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
+bool approval_check(char * const command_info[], char * const run_argv[],
+    char * const run_envp[]);
 extern const char *list_user;
 extern struct user_details user_details;
 extern int sudo_debug_instance;

@@ -123,14 +123,12 @@ static void iolog_show_version(int verbose, int argc, char * const argv[],
 static void unlink_plugin(struct plugin_container_list *plugin_list, struct plugin_container *plugin);
 static void free_plugin_container(struct plugin_container *plugin, bool ioplugin);
 
-/* Audit plugin convenience functions. */
+/* Audit plugin convenience functions (some are public). */
 static void audit_open(void);
 static void audit_close(int exit_status, int error);
 static void audit_show_version(int verbose);
 
-/* Approval plugin convenience functions. */
-static bool approval_check(char * const command_info[], char * const run_argv[],
-    char * const run_envp[]);
+/* Approval plugin convenience functions (some are public). */
 static void approval_show_version(int verbose);
 
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
@@ -1832,7 +1830,7 @@ approval_show_version(int verbose)
  * This is a "one-shot" plugin that has no open/close and is only
  * called if the policy plugin accepts the command first.
  */
-static bool
+bool
 approval_check(char * const command_info[], char * const run_argv[],
     char * const run_envp[])
 {

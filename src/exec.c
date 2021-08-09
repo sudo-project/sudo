@@ -582,8 +582,6 @@ intercept_check_policy(PolicyCheckRequest *req,
 
     switch (ok) {
     case 1:
-	/* TODO: call approval plugin too */
-
 	/* Extract command path from command_info[] */
 	if (command_info != NULL) {
 	    for (n = 0; command_info[n] != NULL; n++) {
@@ -640,11 +638,16 @@ intercept_check_policy(PolicyCheckRequest *req,
 	}
 	closure->run_envp[n] = NULL;
 
-	/* Audit the event twice: once for the plugin, once for sudo. */
 	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, command_info,
 		closure->run_argv, closure->run_envp);
-	audit_accept("sudo", SUDO_FRONT_END, command_info,
-		closure->run_argv, closure->run_envp);
+
+	/* Call approval plugins and audit the result. */
+	if (!approval_check(command_info, closure->run_argv, closure->run_envp))
+	    debug_return_int(0);
+
+	/* Audit the event again for the sudo front-end. */
+	audit_accept("sudo", SUDO_FRONT_END, command_info, closure->run_argv,
+	    closure->run_envp);
 	debug_return_int(1);
     case 0:
 	if (*errstr == NULL)
@@ -743,8 +746,7 @@ intercept_read(int fd, struct intercept_closure *closure)
     ret = true;
 
 done:
-    // XXX
-    //intercept_message__free_unpacked(msg, NULL);
+    intercept_message__free_unpacked(msg, NULL);
     free(buf);
     debug_return_bool(ret);
 }
