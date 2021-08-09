@@ -79,6 +79,9 @@
 #define SESH_ERR_NO_FILES   32		/* copy error, no files copied */
 #define SESH_ERR_SOME_FILES 33		/* copy error, some files copied */
 
+#define INTERCEPT_FD_MIN    64		/* minimum fd so shell won't close it */
+#define MESSAGE_SIZE_MAX    2097152	/* 2Mib max intercept message size */
+
 /*
  * Symbols shared between exec.c, exec_nopty.c, exec_pty.c and exec_monitor.c
  */

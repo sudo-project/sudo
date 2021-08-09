@@ -23,6 +23,7 @@
 
 #include <config.h>
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,10 +41,10 @@
  * Add a DSO file to LD_PRELOAD or the system equivalent.
  */
 static char **
-preload_dso(char *envp[], const char *dso_file)
+preload_dso(char *envp[], const char *dso_file, char * const extra_envp[])
 {
     char *preload = NULL;
-    int env_len;
+    int env_len, extra_len = 0;
     int preload_idx = -1;
     bool present = false;
 # ifdef RTLD_PRELOAD_ENABLE_VAR
@@ -92,19 +93,28 @@ preload_dso(char *envp[], const char *dso_file)
 	}
 # endif
     }
+    if (extra_envp != NULL) {
+	for (extra_len = 0; extra_envp[extra_len] != NULL; extra_len++) {
+	    continue;
+	}
+    }
 
     /*
      * Make a new copy of envp as needed.
      * It would be nice to realloc the old envp[] but we don't know
      * whether it was dynamically allocated. [TODO: plugin API]
      */
-    if (preload_idx == -1 || !enabled) {
-	const int env_size = env_len + 1 + (preload_idx == -1) + enabled; // -V547
+    if (preload_idx == -1 || !enabled || extra_len != 0) {
+	const int env_size = env_len + 1 + (preload_idx == -1) + enabled + extra_len; // -V547
 
 	char **nenvp = reallocarray(NULL, env_size, sizeof(*envp));
 	if (nenvp == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	memcpy(nenvp, envp, env_len * sizeof(*envp));
+	if (extra_envp != NULL) {
+	    for (extra_len = 0; extra_envp[extra_len] != NULL; extra_len++)
+		nenvp[env_len++] = extra_envp[extra_len];
+	}
 	nenvp[env_len] = NULL;
 	envp = nenvp;
     }
@@ -167,7 +177,7 @@ disable_execute(char *envp[], const char *dso)
 
 #ifdef RTLD_PRELOAD_VAR
     if (dso != NULL)
-	envp = preload_dso(envp, dso);
+	envp = preload_dso(envp, dso, NULL);
 #endif /* RTLD_PRELOAD_VAR */
 
     debug_return_ptr(envp);
@@ -178,15 +188,29 @@ disable_execute(char *envp[], const char *dso)
  * Uses LD_PRELOAD and the like to perform a policy check on child commands.
  */
 static char **
-enable_intercept(char *envp[], const char *dso, int backchannel)
+enable_intercept(char *envp[], const char *dso, int intercept_fd)
 {
+#ifdef RTLD_PRELOAD_VAR
+    char *env_add[] = { NULL, NULL };
     debug_decl(enable_intercept, SUDO_DEBUG_UTIL);
 
-#ifdef RTLD_PRELOAD_VAR
-    if (dso != NULL) {
-	/* XXX - add backchannel fd number to environment too (minimum 64) */
-	envp = preload_dso(envp, dso);
+    if (dso == NULL)
+	sudo_fatalx("%s: missing DSO", __func__);
+    if (intercept_fd == -1)
+	sudo_fatalx("%s: no intercept fd", __func__);
+
+    if (intercept_fd < INTERCEPT_FD_MIN) {
+	intercept_fd = fcntl(intercept_fd, F_DUPFD, INTERCEPT_FD_MIN);
+	if (intercept_fd == -1)
+	    sudo_fatal("%s", U_("unable to dup intercept fd"));
     }
+    if (asprintf(&env_add[0], "SUDO_INTERCEPT_FD=%d", intercept_fd) == -1)
+	debug_return_ptr(NULL);
+    envp = preload_dso(envp, dso, env_add);
+#else
+    /* Intercept not supported, envp unchanged. */
+    if (intercept_fd != -1)
+	close(intercept_fd);
 #endif /* RTLD_PRELOAD_VAR */
 
     debug_return_ptr(envp);
@@ -198,7 +222,7 @@ enable_intercept(char *envp[], const char *dso, int backchannel)
  */
 int
 sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
-    int backchannel, int flags)
+    int intercept_fd, int flags)
 {
     debug_decl(sudo_execve, SUDO_DEBUG_UTIL);
 
@@ -208,7 +232,7 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
     if (ISSET(flags, CD_NOEXEC))
 	envp = disable_execute(envp, sudo_conf_noexec_path());
     else if (ISSET(flags, CD_INTERCEPT|CD_LOG_CHILDREN))
-	envp = enable_intercept(envp, sudo_conf_intercept_path(), backchannel);
+	envp = enable_intercept(envp, sudo_conf_intercept_path(), intercept_fd);
 
 #ifdef HAVE_FEXECVE
     if (fd != -1)

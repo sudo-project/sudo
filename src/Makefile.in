@@ -102,6 +102,8 @@ libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+interceptfile = @INTERCEPTFILE@
+interceptdir = @INTERCEPTDIR@
 noexecfile = @NOEXECFILE@
 noexecdir = @NOEXECDIR@
 tmpfiles_d = @TMPFILES_D@
@@ -199,6 +201,9 @@ $(devdir)/intercept.pb-c.c: $(srcdir)/intercept.proto
 sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(OBJS) $(SUDO_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
+sudo_intercept.la: sudo_intercept.lo sudo_intercept_common.lo intercept.pb-c.lo
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) $(LT_LIBS) @LIBDL@ -o $@ sudo_intercept.lo sudo_intercept_common.lo intercept.pb-c.lo $(PRELOAD_MODULE) -avoid-version -rpath $(interceptdir) -shrext .so
+
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) @LIBDL@ -o $@ sudo_noexec.lo $(PRELOAD_MODULE) -avoid-version -rpath $(noexecdir) -shrext .so
 
@@ -216,12 +221,13 @@ check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
 
 pre-install:
 
-install: install-binaries install-rc @INSTALL_NOEXEC@
+install: install-binaries install-rc @INSTALL_INTERCEPT@ @INSTALL_NOEXEC@
 
 install-dirs:
 	# We only create the rc.d dir when installing to the actual system dir
 	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(bindir) \
-	    $(DESTDIR)$(libexecdir)/sudo $(DESTDIR)$(noexecdir)
+	    $(DESTDIR)$(libexecdir)/sudo $(DESTDIR)$(noexecdir) \
+	    $(DESTDIR)$(interceptdir)
 	if test -n "$(INIT_SCRIPT)"; then \
 	    $(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR); \
 	    if test -z "$(DESTDIR)"; then \
@@ -256,6 +262,9 @@ install-doc:
 
 install-includes:
 
+install-intercept: install-dirs sudo_intercept.la
+	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_intercept.la $(DESTDIR)$(interceptdir)
+
 install-noexec: install-dirs sudo_noexec.la
 	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_noexec.la $(DESTDIR)$(noexecdir)
 
@@ -265,7 +274,8 @@ install-fuzzer:
 
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall \
-	    rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
+	    rm -f $(DESTDIR)$(interceptdir)/sudo_intercept.la \
+		  $(DESTDIR)$(noexecdir)/sudo_noexec.la
 	-rm -f	$(DESTDIR)$(bindir)/sudo \
 		$(DESTDIR)$(bindir)/sudoedit \
 		$(DESTDIR)$(libexecdir)/sudo/sesh \
@@ -273,6 +283,7 @@ uninstall:
 	-test -z "$(INSTALL_BACKUP)" || \
 	    rm -f $(DESTDIR)$(bindir)/sudo$(INSTALL_BACKUP) \
 		  $(DESTDIR)$(libexecdir)/sudo/sesh$(INSTALL_BACKUP) \
+		  $(DESTDIR)$(interceptdir)/sudo_intercept.so$(INSTALL_BACKUP) \
 		  $(DESTDIR)$(noexecdir)/sudo_noexec.so$(INSTALL_BACKUP)
 	-test -z "$(INIT_SCRIPT)" || \
 	    rm -f $(DESTDIR)$(RC_LINK) $(DESTDIR)$(INIT_DIR)/sudo
@@ -333,6 +344,20 @@ cleandir: realclean
 .PHONY: clean mostlyclean distclean cleandir clobber realclean
 
 # *Not* auto-generated to avoid building with ASAN
+sudo_intercept.lo: $(srcdir)/sudo_intercept.c $(incdir)/sudo_compat.h \
+                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_intercept.c
+
+sudo_intercept_common.lo: $(srcdir)/sudo_intercept_common.c \
+			  $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+			  $(incdir)/sudo_gettext.h $(incdir)/intercept.pb-c.h \
+			  $(srcdir)/sudo_exec.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_intercept_common.c
+
+intercept.pb-c.lo: $(srcdir)/intercept.pb-c.c $(incdir)/intercept.pb-c.h \
+                   $(incdir)/protobuf-c/protobuf-c.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/intercept.pb-c.c
+
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/sudo_compat.h \
                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_noexec.c
