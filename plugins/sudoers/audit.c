@@ -335,7 +335,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
 	ret = false;
 
-    if (!log_allowed() && !def_ignore_logfile_errors)
+    if (!log_allowed(run_argv, run_envp) && !def_ignore_logfile_errors)
 	ret = false;
 
     if (!log_server_accept(command_info, run_argv, run_envp)) {

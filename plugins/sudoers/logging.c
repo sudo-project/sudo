@@ -463,7 +463,7 @@ log_auth_failure(int status, unsigned int tries)
  * Log and potentially mail the allowed command.
  */
 bool
-log_allowed(void)
+log_allowed(char *const argv[], char *const envp[])
 {
     struct eventlog evlog;
     int oldlocale;
@@ -478,7 +478,7 @@ log_allowed(void)
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	sudoers_to_eventlog(&evlog, NewArgv, env_get());
+	sudoers_to_eventlog(&evlog, argv, envp);
 	if (mailit) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_allowed)
