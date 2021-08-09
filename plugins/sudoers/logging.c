@@ -121,27 +121,45 @@ bool
 log_server_reject(struct eventlog *evlog, const char *message,
     struct sudo_plugin_event * (*event_alloc)(void))
 {
-    struct client_closure *client_closure;
-    struct log_details details;
     bool ret = false;
     debug_decl(log_server_reject, SUDOERS_DEBUG_LOGGING);
 
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
-    if (!init_log_details(&details, evlog))
-	debug_return_bool(false);
-
-    /* Open connection to log server, send hello and reject messages. */
-    client_closure = log_server_open(&details, &sudo_user.submit_time, false,
-	SEND_REJECT, message, event_alloc);
     if (client_closure != NULL) {
-	client_closure_free(client_closure);
-	ret = true;
+	/* Older servers don't support multiple commands per session. */
+	if (!client_closure->subcommands)
+	    debug_return_bool(true);
+
+	/* Use existing client closure. */
+        if (fmt_reject_message(client_closure, evlog)) {
+            if (client_closure->write_ev->add(client_closure->write_ev,
+                    &client_closure->log_details->server_timeout) == -1) {
+                sudo_warn("%s", U_("unable to add event to queue"));
+                goto done;
+            }
+            ret = true;
+        }
+    } else {
+	struct log_details details;
+
+	if (!init_log_details(&details, evlog))
+	    debug_return_bool(false);
+
+	/* Open connection to log server, send hello and reject messages. */
+	client_closure = log_server_open(&details, &sudo_user.submit_time,
+	    false, SEND_REJECT, message, event_alloc);
+	if (client_closure != NULL) {
+	    client_closure_free(client_closure);
+	    ret = true;
+	}
+
+	/* Only the log_servers string list is dynamically allocated. */
+	str_list_free(details.log_servers);
     }
 
-    /* Only the log_servers string list is dynamically allocated. */
-    str_list_free(details.log_servers);
+done:
     debug_return_bool(ret);
 }
 
@@ -150,7 +168,6 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
     const char *message, const char *errstr,
     struct sudo_plugin_event * (*event_alloc)(void))
 {
-    struct client_closure *client_closure;
     struct log_details details;
     char *emessage = NULL;
     bool ret = false;
@@ -159,9 +176,6 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
-    if (!init_log_details(&details, evlog))
-	goto done;
-
     if (errstr != NULL) {
 	if (asprintf(&emessage, _("%s: %s"), message, errstr) == -1) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -169,18 +183,38 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
 	}
     }
 
-    /* Open connection to log server, send hello and alert messages. */
-    client_closure = log_server_open(&details, now, false,
-	SEND_ALERT, emessage ? emessage : message, event_alloc);
     if (client_closure != NULL) {
-	client_closure_free(client_closure);
-	ret = true;
+	/* Older servers don't support multiple commands per session. */
+	if (!client_closure->subcommands)
+	    debug_return_bool(true);
+
+	/* Use existing client closure. */
+        if (fmt_reject_message(client_closure, evlog)) {
+            if (client_closure->write_ev->add(client_closure->write_ev,
+                    &client_closure->log_details->server_timeout) == -1) {
+                sudo_warn("%s", U_("unable to add event to queue"));
+                goto done;
+            }
+            ret = true;
+        }
+    } else {
+	if (!init_log_details(&details, evlog))
+	    goto done;
+
+	/* Open connection to log server, send hello and alert messages. */
+	client_closure = log_server_open(&details, now, false,
+	    SEND_ALERT, emessage ? emessage : message, event_alloc);
+	if (client_closure != NULL) {
+	    client_closure_free(client_closure);
+	    ret = true;
+	}
+
+	/* Only the log_servers string list is dynamically allocated. */
+	str_list_free(details.log_servers);
     }
 
 done:
-    /* Only the log_servers string list is dynamically allocated. */
     free(emessage);
-    str_list_free(details.log_servers);
     debug_return_bool(ret);
 }
 #else

@@ -63,6 +63,9 @@
 #include "hostcheck.h"
 #include "log_client.h"
 
+/* Shared between iolog.c and audit.c */
+struct client_closure *client_closure;
+
 /* Server callback may redirect to client callback for TLS. */
 static void client_msg_cb(int fd, int what, void *v);
 static void server_msg_cb(int fd, int what, void *v);
@@ -698,6 +701,9 @@ fmt_client_message(struct client_closure *closure, ClientMessage *msg)
     msg_len = htonl((uint32_t)len);
     len += sizeof(msg_len);
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: new ClientMessage, %zu bytes",
+	__func__, len);
+
     /* Resize buffer as needed. */
     if (len > buf->size) {
 	free(buf->data);
@@ -775,10 +781,9 @@ free_info_messages(InfoMessage **info_msgs, size_t n)
 }
 
 static InfoMessage **
-fmt_info_messages(struct client_closure *closure, size_t *n_info_msgs)
+fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
+    size_t *n_info_msgs)
 {
-    struct log_details *details = closure->log_details;
-    struct eventlog *evlog = details->evlog;
     InfoMessage__StringList *runargv = NULL;
     InfoMessage__StringList *runenv = NULL;
     InfoMessage **info_msgs = NULL;
@@ -945,8 +950,8 @@ bad:
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
  */
-static bool
-fmt_accept_message(struct client_closure *closure)
+bool
+fmt_accept_message(struct client_closure *closure, struct eventlog *evlog)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     AcceptMessage accept_msg = ACCEPT_MESSAGE__INIT;
@@ -969,7 +974,8 @@ fmt_accept_message(struct client_closure *closure)
     /* Client will send IoBuffer messages. */
     accept_msg.expect_iobufs = closure->log_io;
 
-    accept_msg.info_msgs = fmt_info_messages(closure, &accept_msg.n_info_msgs);
+    accept_msg.info_msgs = fmt_info_messages(closure, evlog,
+	&accept_msg.n_info_msgs);
     if (accept_msg.info_msgs == NULL)
 	goto done;
 
@@ -993,8 +999,8 @@ done:
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
  */
-static bool
-fmt_reject_message(struct client_closure *closure)
+bool
+fmt_reject_message(struct client_closure *closure, struct eventlog *evlog)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     RejectMessage reject_msg = REJECT_MESSAGE__INIT;
@@ -1017,7 +1023,8 @@ fmt_reject_message(struct client_closure *closure)
     /* Reason for rejecting the request. */
     reject_msg.reason = (char *)closure->reason;
 
-    reject_msg.info_msgs = fmt_info_messages(closure, &reject_msg.n_info_msgs);
+    reject_msg.info_msgs = fmt_info_messages(closure, evlog,
+	&reject_msg.n_info_msgs);
     if (reject_msg.info_msgs == NULL)
 	goto done;
 
@@ -1042,7 +1049,7 @@ done:
  * Returns true on success, false on failure.
  */
 static bool
-fmt_alert_message(struct client_closure *closure)
+fmt_alert_message(struct client_closure *closure, struct eventlog *evlog)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     AlertMessage alert_msg = ALERT_MESSAGE__INIT;
@@ -1065,7 +1072,8 @@ fmt_alert_message(struct client_closure *closure)
     /* Reason for the alert. */
     alert_msg.reason = (char *)closure->reason;
 
-    alert_msg.info_msgs = fmt_info_messages(closure, &alert_msg.n_info_msgs);
+    alert_msg.info_msgs = fmt_info_messages(closure, evlog,
+	&alert_msg.n_info_msgs);
     if (alert_msg.info_msgs == NULL)
 	goto done;
 
@@ -1100,7 +1108,7 @@ fmt_initial_message(struct client_closure *closure)
     switch (closure->state) {
     case SEND_ACCEPT:
 	/* Format and schedule AcceptMessage. */
-	if ((ret = fmt_accept_message(closure))) {
+	if ((ret = fmt_accept_message(closure, closure->log_details->evlog))) {
 	    /*
 	     * Move read/write events back to main sudo event loop.
 	     * Server messages may occur at any time, so no timeout.
@@ -1116,11 +1124,11 @@ fmt_initial_message(struct client_closure *closure)
 	break;
     case SEND_REJECT:
 	/* Format and schedule RejectMessage. */
-	ret = fmt_reject_message(closure);
+	ret = fmt_reject_message(closure, closure->log_details->evlog);
 	break;
     case SEND_ALERT:
 	/* Format and schedule AlertMessage. */
-	ret = fmt_alert_message(closure);
+	ret = fmt_alert_message(closure, closure->log_details->evlog);
 	break;
     default:
 	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
@@ -1489,6 +1497,9 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: server %zu: %s",
 	    __func__, n + 1, msg->servers[n]);
     }
+
+    /* Does the server support logging sub-commands in a session? */
+    closure->subcommands = msg->subcommands;
 
     debug_return_bool(true);
 }

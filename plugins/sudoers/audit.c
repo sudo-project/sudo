@@ -43,7 +43,6 @@
 #endif
 
 #ifdef SUDOERS_LOG_CLIENT
-static struct client_closure *client_closure = NULL;
 static struct log_details audit_details;
 #endif
 char *audit_msg = NULL;
@@ -251,9 +250,18 @@ log_server_accept(char * const command_info[], char * const run_argv[],
     bool ret = false;
     debug_decl(log_server_accept, SUDOERS_DEBUG_PLUGIN);
 
-    /* Only send accept event to log server if I/O log plugin did not. */
-    if (SLIST_EMPTY(&def_log_servers) || def_log_input || def_log_output)
+    if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
+
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+	/* Older servers don't support multiple commands per session. */
+	if (!client_closure->subcommands)
+	    debug_return_bool(true);
+    } else {
+	/* Only send accept event to log server if I/O log plugin did not. */
+	if (def_log_input || def_log_output)
+	    debug_return_bool(true);
+    }
 
     if (sudo_gettime_real(&now) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
@@ -263,16 +271,29 @@ log_server_accept(char * const command_info[], char * const run_argv[],
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-
     audit_to_eventlog(evlog, command_info, run_argv, run_envp);
-    if (!init_log_details(&audit_details, evlog))
-	goto done;
 
-    /* Open connection to log server, send hello and accept messages. */
-    client_closure = log_server_open(&audit_details, &now, false,
-	SEND_ACCEPT, NULL, sudoers_audit.event_alloc);
-    if (client_closure != NULL)
-	ret = true;
+    if (client_closure != NULL) {
+	/* Use existing client closure. */
+	if (fmt_accept_message(client_closure, evlog)) {
+	    if (client_closure->write_ev->add(client_closure->write_ev,
+		    &client_closure->log_details->server_timeout) == -1) {
+		sudo_warn("%s", U_("unable to add event to queue"));
+		goto done;
+	    }
+	    ret = true;
+	}
+    } else {
+	if (!init_log_details(&audit_details, evlog))
+	    goto done;
+
+	/* Open connection to log server, send hello and accept messages. */
+	client_closure = log_server_open(&audit_details, &now, false,
+	    SEND_ACCEPT, NULL, sudoers_audit.event_alloc);
+	if (client_closure != NULL)
+	    ret = true;
+    }
+
 done:
     debug_return_bool(ret);
 }

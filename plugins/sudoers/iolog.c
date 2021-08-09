@@ -64,9 +64,6 @@ static struct sudoers_io_operations {
 	const char **errstr);
 } io_operations;
 
-#ifdef SUDOERS_LOG_CLIENT
-static struct client_closure *client_closure;
-#endif
 static struct log_details iolog_details;
 static bool warned = false;
 static int iolog_dir_fd = -1;
