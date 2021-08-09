@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -611,13 +611,17 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	debug_return_bool(true);	/* nothing to do */
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(55, sizeof(char *));
+    command_info = calloc(57, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
     if (safe_cmnd != NULL) {
 	command_info[info_len] = sudo_new_key_val("command", safe_cmnd);
 	if (command_info[info_len++] == NULL)
+	    goto oom;
+    }
+    if (def_log_children) {
+	if ((command_info[info_len++] = strdup("log_children=true")) == NULL)
 	    goto oom;
     }
     if (def_log_input || def_log_output) {
@@ -763,6 +767,10 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
     if (def_ignore_iolog_errors) {
 	if ((command_info[info_len++] = strdup("ignore_iolog_errors=true")) == NULL)
+	    goto oom;
+    }
+    if (def_intercept) {
+	if ((command_info[info_len++] = strdup("intercept=true")) == NULL)
 	    goto oom;
     }
     if (def_noexec) {

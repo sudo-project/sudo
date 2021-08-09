@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -300,6 +300,11 @@ apply_cmndspec(struct cmndspec *cs)
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"def_noexec -> %s", def_noexec ? "true" : "false");
 	}
+	if (cs->tags.intercept != UNSPEC) {
+	    def_intercept = cs->tags.intercept;
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_intercept -> %s", def_intercept ? "true" : "false");
+	}
 	if (cs->tags.setenv != UNSPEC) {
 	    def_setenv = cs->tags.setenv;
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -566,6 +571,8 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    sudo_lbuf_append(lbuf, "%ssetenv, ", cs->tags.setenv ? "" : "!");
 		if (TAG_SET(cs->tags.noexec))
 		    sudo_lbuf_append(lbuf, "%snoexec, ", cs->tags.noexec ? "" : "!");
+		if (TAG_SET(cs->tags.intercept))
+		    sudo_lbuf_append(lbuf, "%sintercept, ", cs->tags.intercept ? "" : "!");
 		if (TAG_SET(cs->tags.nopasswd))
 		    sudo_lbuf_append(lbuf, "%sauthenticate, ", cs->tags.nopasswd ? "!" : "");
 		if (TAG_SET(cs->tags.log_input))

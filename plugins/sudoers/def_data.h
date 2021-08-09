@@ -266,7 +266,11 @@
 #define def_selinux             (sudo_defs_table[I_SELINUX].sd_un.flag)
 #define I_ADMIN_FLAG            132
 #define def_admin_flag          (sudo_defs_table[I_ADMIN_FLAG].sd_un.str)
-#define I_LOG_EXIT_STATUS       133
+#define I_INTERCEPT             133
+#define def_intercept           (sudo_defs_table[I_INTERCEPT].sd_un.flag)
+#define I_LOG_CHILDREN          134
+#define def_log_children        (sudo_defs_table[I_LOG_CHILDREN].sd_un.flag)
+#define I_LOG_EXIT_STATUS       135
 #define def_log_exit_status     (sudo_defs_table[I_LOG_EXIT_STATUS].sd_un.flag)
 
 enum def_tuple {

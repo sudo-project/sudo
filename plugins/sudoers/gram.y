@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2020
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2021
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -129,6 +129,8 @@ static void alias_error(const char *name, int errnum);
 %token <tok>	 NOMAIL			/* don't mail log message */
 %token <tok>	 FOLLOWLNK		/* follow symbolic links */
 %token <tok>	 NOFOLLOWLNK		/* don't follow symbolic links */
+%token <tok>	 INTERCEPT		/* intercept children of command */
+%token <tok>	 NOINTERCEPT		/* disable intercepting of children */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
@@ -468,6 +470,8 @@ cmndspeclist	:	cmndspec
 				$3->tags.nopasswd = prev->tags.nopasswd;
 			    if ($3->tags.noexec == UNSPEC)
 				$3->tags.noexec = prev->tags.noexec;
+			    if ($3->tags.intercept == UNSPEC)
+				$3->tags.intercept = prev->tags.intercept;
 			    if ($3->tags.setenv == UNSPEC &&
 				prev->tags.setenv != IMPLIED)
 				$3->tags.setenv = prev->tags.setenv;
@@ -875,6 +879,12 @@ cmndtag		:	/* empty */ {
 			}
 		|	cmndtag EXEC {
 			    $$.noexec = false;
+			}
+		|	cmndtag INTERCEPT {
+			    $$.intercept = true;
+			}
+		|	cmndtag NOINTERCEPT {
+			    $$.intercept = false;
 			}
 		|	cmndtag SETENV {
 			    $$.setenv = true;

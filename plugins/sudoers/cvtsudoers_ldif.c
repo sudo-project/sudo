@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -385,6 +385,10 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	if (tag.noexec != UNSPEC) {
 	    print_attribute_ldif(fp, "sudoOption",
 		tag.noexec ? "noexec" : "!noexec");
+	}
+	if (tag.intercept != UNSPEC) {
+	    print_attribute_ldif(fp, "sudoOption",
+		tag.intercept ? "intercept" : "!intercept");
 	}
 	if (tag.send_mail != UNSPEC) {
 	    if (tag.send_mail) {

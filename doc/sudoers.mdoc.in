@@ -1143,8 +1143,9 @@ Chroot_Spec ::= 'CHROOT=directory'
 
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
-              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
-              'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
+              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'INTERCEPT:' |
+              'NOINTERCEPT:' | 'PASSWD:' | 'NOPASSWD:' | 'SETENV:' |
+              'NOSETENV:')
 .Ed
 .Pp
 A
@@ -1527,6 +1528,8 @@ The following tag values are supported:
 .Li NOLOG_OUTPUT ,
 .Li MAIL ,
 .Li NOMAIL ,
+.Li INTERCEPT ,
+.Li NOINTERCEPT ,
 .Li PASSWD ,
 .Li NOPASSWD ,
 .Li SETENV ,
@@ -1673,7 +1676,9 @@ and
 .Pa /usr/bin/lprm
 as
 .Sy root
-on the machine rushmore without authenticating himself.
+on the machine
+.Dq rushmore
+without authenticating himself.
 If we only want
 .Sy ray
 to be able to
@@ -1733,6 +1738,36 @@ the
 tag is implied for that command; this default may be overridden by use of the
 .Li NOSETENV
 tag.
+.It Em INTERCEPT No and Em NOINTERCEPT
+.sp
+If
+.Nm sudo
+has been compiled with
+.Em intercept
+support and the underlying operating system supports it, the
+.Li INTERCEPT
+tag can be used to cause programs spawned by a command to be checked against
+.Em sudoers
+and logged just like they would be if run through
+.Nm sudo
+directly.
+This is useful in conjunction with commands that allow shell escapes
+such as editors, shells and paginators.
+.Pp
+In the following example, user
+.Sy chuck
+may run any command on the machine
+.Dq research
+in intercept mode.
+.Bd -literal
+chuck	research = INTERCEPT: ALL
+.Ed
+.Pp
+See the
+.Sx Preventing shell escapes
+section below for more details on how
+.Li INTERCEPT
+works and whether or not it will work on your system.
 .El
 .Ss Wildcards
 .Nm sudo
@@ -2563,6 +2598,28 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.29 or higher.
+.It log_children
+If set,
+.Nm
+will log when a command runs a child process.
+For example, if a shell is run by
+.Nm sudo ,
+the individual commands run via the shell will be logged.
+This flag is
+.Em off
+by default.
+.Pp
+The
+.Em log_children
+flag uses the same underlying mechanism as the
+.Em intercept
+and
+.Em noexec
+settings.
+See
+.Sx Preventing shell escapes
+for more information on what systems support this option and its limitations.
+This setting is only supported by version 1.9.8 or higher.
 .It log_denied
 If set,
 .Nm
@@ -2799,6 +2856,23 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.18 or higher.
+.It intercept
+If set, all commands run via
+.Nm sudo
+will behave as if the
+.Li INTERCEPT
+tag has been set, unless overridden by an
+.Li NOINTERCEPT
+tag.
+See the description of
+.Em INTERCEPT and NOINTERCEPT
+above as well as the
+.Sx Preventing shell escapes
+section at the end of this manual.
+This flag is
+.Em off
+.Pp
+This setting is only supported by version 1.9.8 or higher.
 .It netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
 tuple: host name, user name and domain (if one is set).
@@ -5678,7 +5752,7 @@ access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
 .Pp
-There are two basic approaches to this problem:
+There are three basic approaches to this problem:
 .Bl -tag -width 8n
 .It restrict
 Avoid giving users access to commands that allow the user to run
@@ -5692,7 +5766,7 @@ running editors via
 Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
 do not is often unworkable.
-.It noexec
+.It intercept
 Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually
@@ -5700,19 +5774,24 @@ variable (usually
 to an alternate shared library.
 On such systems,
 .Nm sudo Ns 's
-.Em noexec
-functionality can be used to prevent a program run by
-.Nm sudo
-from executing any other programs.
+.Em intercept
+functionality can be used to transparently intercept an attempt to
+run a new command, allow or deny it based on
+.Em sudoers ,
+and log the result.
+For example, this can be used to restrict the commands run from
+within a shell.
 Note, however, that this applies only to dynamically-linked
 executables.
 Statically-linked executables and executables
 running under binary emulation are not affected.
+Also, many shells support built-in commands that cannot be intercepted by
+.Nm sudo .
 .Pp
 The
-.Em noexec
-feature is known to work on SunOS, Solaris, *BSD,
-Linux, IRIX, Tru64 UNIX, macOS, HP-UX 11.x and AIX 5.3 and above.
+.Em intercept
+feature is known to work on Solaris, *BSD, Linux, macOS, HP-UX 11.x
+and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 .Ev LD_PRELOAD
 environment variable.
@@ -5721,6 +5800,40 @@ Check your operating system's manual pages for the dynamic linker
 .Ev LD_PRELOAD
 is supported.
 .Pp
+To enable intercept mode on a per-command basis, use the
+.Li INTERCEPT
+tag as documented in the User Specification section above.
+Here is that example again:
+.Bd -literal
+chuck	research = INTERCEPT: ALL
+.Ed
+.Pp
+This allows user
+.Sy chuck
+to run any command on the machine
+.Dq research
+in intercept mode.
+Any commands run via shell escapes will be validated and logged by
+.Nm sudo .
+If you are unsure whether or not your system is capable of supporting
+.Em intercept ,
+you can always just try it out and check whether or not external
+commands run via a shell are logged when
+.Em intercept
+is enabled.
+.It noexec
+.Nm sudo Ns 's
+.Em noexec
+functionality can be used to prevent a program run by
+.Nm sudo
+from executing any other programs.
+On most systems, it uses the same mechanism as
+.Em intercept
+(see above) and thus the same caveats apply.
+On Linux, a
+.Fn seccomp
+filter is used to implement
+.Em noexec .
 On Solaris 10 and higher,
 .Em noexec
 uses Solaris privileges instead of the
@@ -5731,8 +5844,7 @@ To enable
 .Em noexec
 for a command, use the
 .Li NOEXEC
-tag as documented
-in the User Specification section above.
+tag as documented in the User Specification section above.
 Here is that example again:
 .Bd -literal
 aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi

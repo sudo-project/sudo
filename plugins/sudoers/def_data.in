@@ -415,6 +415,12 @@ selinux
 admin_flag
 	T_STR|T_BOOL|T_CHPATH
 	"Path to the file that is created the first time sudo is run: %s"
+intercept
+	T_FLAG
+	"Intercept further commands and apply sudoers restrictions to them"
+log_children
+	T_FLAG
+	"Log any child processes run by the command"
 log_exit_status
 	T_FLAG
 	"Log the exit status of commands"

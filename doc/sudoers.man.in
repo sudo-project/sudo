@@ -1190,8 +1190,9 @@ Chroot_Spec ::= 'CHROOT=directory'
 
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
-              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
-              'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
+              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'INTERCEPT:' |
+              'NOINTERCEPT:' | 'PASSWD:' | 'NOPASSWD:' | 'SETENV:' |
+              'NOSETENV:')
 .RE
 .fi
 .PP
@@ -1607,6 +1608,8 @@ The following tag values are supported:
 \fRNOLOG_OUTPUT\fR,
 \fRMAIL\fR,
 \fRNOMAIL\fR,
+\fRINTERCEPT\fR,
+\fRNOINTERCEPT\fR,
 \fRPASSWD\fR,
 \fRNOPASSWD\fR,
 \fRSETENV\fR,
@@ -1767,7 +1770,9 @@ and
 \fI/usr/bin/lprm\fR
 as
 \fBroot\fR
-on the machine rushmore without authenticating himself.
+on the machine
+\(lqrushmore\(rq
+without authenticating himself.
 If we only want
 \fBray\fR
 to be able to
@@ -1832,6 +1837,42 @@ the
 tag is implied for that command; this default may be overridden by use of the
 \fRNOSETENV\fR
 tag.
+.TP 2n
+\fIINTERCEPT\fR and \fINOINTERCEPT\fR
+.sp
+If
+\fBsudo\fR
+has been compiled with
+\fIintercept\fR
+support and the underlying operating system supports it, the
+\fRINTERCEPT\fR
+tag can be used to cause programs spawned by a command to be checked against
+\fIsudoers\fR
+and logged just like they would be if run through
+\fBsudo\fR
+directly.
+This is useful in conjunction with commands that allow shell escapes
+such as editors, shells and paginators.
+.sp
+In the following example, user
+\fBchuck\fR
+may run any command on the machine
+\(lqresearch\(rq
+in intercept mode.
+.nf
+.sp
+.RS 2n
+chuck	research = INTERCEPT: ALL
+.RE
+.fi
+.RS 2n
+.sp
+See the
+\fIPreventing shell escapes\fR
+section below for more details on how
+\fRINTERCEPT\fR
+works and whether or not it will work on your system.
+.RE
 .SS "Wildcards"
 \fBsudo\fR
 allows shell-style
@@ -2717,6 +2758,29 @@ by default.
 .sp
 This setting is only supported by version 1.8.29 or higher.
 .TP 18n
+log_children
+If set,
+\fBsudoers\fR
+will log when a command runs a child process.
+For example, if a shell is run by
+\fBsudo\fR,
+the individual commands run via the shell will be logged.
+This flag is
+\fIoff\fR
+by default.
+.sp
+The
+\fIlog_children\fR
+flag uses the same underlying mechanism as the
+\fIintercept\fR
+and
+\fInoexec\fR
+settings.
+See
+\fIPreventing shell escapes\fR
+for more information on what systems support this option and its limitations.
+This setting is only supported by version 1.9.8 or higher.
+.TP 18n
 log_denied
 If set,
 \fBsudoers\fR
@@ -2969,6 +3033,24 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.8.18 or higher.
+.TP 18n
+intercept
+If set, all commands run via
+\fBsudo\fR
+will behave as if the
+\fRINTERCEPT\fR
+tag has been set, unless overridden by an
+\fRNOINTERCEPT\fR
+tag.
+See the description of
+\fIINTERCEPT and NOINTERCEPT\fR
+above as well as the
+\fIPreventing shell escapes\fR
+section at the end of this manual.
+This flag is
+\fIoff\fR
+.sp
+This setting is only supported by version 1.9.8 or higher.
 .TP 18n
 netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
@@ -6145,7 +6227,7 @@ access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
 .PP
-There are two basic approaches to this problem:
+There are three basic approaches to this problem:
 .TP 10n
 restrict
 Avoid giving users access to commands that allow the user to run
@@ -6160,7 +6242,8 @@ Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
 do not is often unworkable.
 .TP 10n
-noexec
+intercept
+.br
 Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually
@@ -6168,19 +6251,24 @@ variable (usually
 to an alternate shared library.
 On such systems,
 \fBsudo\fR's
-\fInoexec\fR
-functionality can be used to prevent a program run by
-\fBsudo\fR
-from executing any other programs.
+\fIintercept\fR
+functionality can be used to transparently intercept an attempt to
+run a new command, allow or deny it based on
+\fIsudoers\fR,
+and log the result.
+For example, this can be used to restrict the commands run from
+within a shell.
 Note, however, that this applies only to dynamically-linked
 executables.
 Statically-linked executables and executables
 running under binary emulation are not affected.
+Also, many shells support built-in commands that cannot be intercepted by
+\fBsudo\fR.
 .sp
 The
-\fInoexec\fR
-feature is known to work on SunOS, Solaris, *BSD,
-Linux, IRIX, Tru64 UNIX, macOS, HP-UX 11.x and AIX 5.3 and above.
+\fIintercept\fR
+feature is known to work on Solaris, *BSD, Linux, macOS, HP-UX 11.x
+and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 \fRLD_PRELOAD\fR
 environment variable.
@@ -6189,6 +6277,46 @@ Check your operating system's manual pages for the dynamic linker
 \fRLD_PRELOAD\fR
 is supported.
 .sp
+To enable intercept mode on a per-command basis, use the
+\fRINTERCEPT\fR
+tag as documented in the User Specification section above.
+Here is that example again:
+.nf
+.sp
+.RS 10n
+chuck	research = INTERCEPT: ALL
+.RE
+.fi
+.RS 10n
+.sp
+This allows user
+\fBchuck\fR
+to run any command on the machine
+\(lqresearch\(rq
+in intercept mode.
+Any commands run via shell escapes will be validated and logged by
+\fBsudo\fR.
+If you are unsure whether or not your system is capable of supporting
+\fIintercept\fR,
+you can always just try it out and check whether or not external
+commands run via a shell are logged when
+\fIintercept\fR
+is enabled.
+.RE
+.TP 10n
+noexec
+\fBsudo\fR's
+\fInoexec\fR
+functionality can be used to prevent a program run by
+\fBsudo\fR
+from executing any other programs.
+On most systems, it uses the same mechanism as
+\fIintercept\fR
+(see above) and thus the same caveats apply.
+On Linux, a
+\fBseccomp\fR()
+filter is used to implement
+\fInoexec\fR.
 On Solaris 10 and higher,
 \fInoexec\fR
 uses Solaris privileges instead of the
@@ -6199,8 +6327,7 @@ To enable
 \fInoexec\fR
 for a command, use the
 \fRNOEXEC\fR
-tag as documented
-in the User Specification section above.
+tag as documented in the User Specification section above.
 Here is that example again:
 .nf
 .sp

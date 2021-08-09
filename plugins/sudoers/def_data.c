@@ -578,6 +578,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Path to the file that is created the first time sudo is run: %s"),
 	NULL,
     }, {
+	"intercept", T_FLAG,
+	N_("Intercept further commands and apply sudoers restrictions to them"),
+	NULL,
+    }, {
+	"log_children", T_FLAG,
+	N_("Log any child processes run by the command"),
+	NULL,
+    }, {
 	"log_exit_status", T_FLAG,
 	N_("Log the exit status of commands"),
 	NULL,

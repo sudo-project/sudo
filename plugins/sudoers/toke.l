@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2020
+ * Copyright (c) 1996, 1998-2005, 2007-2021
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -444,6 +444,16 @@ NOEXEC[[:blank:]]*:	{
 EXEC[[:blank:]]*:	{
 			    	LEXTRACE("EXEC ");
 			    	return EXEC;
+			}
+
+INTERCEPT[[:blank:]]*:	{
+			    	LEXTRACE("INTERCEPT ");
+			    	return INTERCEPT;
+			}
+
+NOINTERCEPT[[:blank:]]*: {
+			    	LEXTRACE("NOINTERCEPT ");
+			    	return NOINTERCEPT;
 			}
 
 SETENV[[:blank:]]*:	{

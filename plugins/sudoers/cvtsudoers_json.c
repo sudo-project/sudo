@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -681,6 +681,11 @@ print_cmndspec_json(struct json_container *jsonc,
 	    value.type = JSON_BOOL;
 	    value.u.boolean = tag.noexec;
 	    sudo_json_add_value_as_object(jsonc, "noexec", &value);
+	}
+	if (tag.intercept != UNSPEC) {
+	    value.type = JSON_BOOL;
+	    value.u.boolean = tag.intercept;
+	    sudo_json_add_value_as_object(jsonc, "intercept", &value);
 	}
 	if (tag.send_mail != UNSPEC) {
 	    value.type = JSON_BOOL;

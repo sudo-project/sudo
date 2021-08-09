@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -152,6 +152,8 @@ sudoers_defaults_to_tags(const char *var, const char *val, int op,
 	    tags->log_output = op == true;
 	} else if (strcmp(var, "noexec") == 0) {
 	    tags->noexec = op == true;
+	} else if (strcmp(var, "intercept") == 0) {
+	    tags->intercept = op == true;
 	} else if (strcmp(var, "setenv") == 0) {
 	    tags->setenv = op == true;
 	} else if (strcmp(var, "mail_all_cmnds") == 0 ||
@@ -251,6 +253,8 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     }
     if (TAG_CHANGED(prev_cs, cs, tags, setenv))
 	sudo_lbuf_append(lbuf, tags.setenv ? "SETENV: " : "NOSETENV: ");
+    if (TAG_CHANGED(prev_cs, cs, tags, intercept))
+	sudo_lbuf_append(lbuf, tags.intercept ? "INTERCEPT: " : "NOINTERCEPT: ");
     if (TAG_CHANGED(prev_cs, cs, tags, noexec))
 	sudo_lbuf_append(lbuf, tags.noexec ? "NOEXEC: " : "EXEC: ");
     if (TAG_CHANGED(prev_cs, cs, tags, nopasswd))
