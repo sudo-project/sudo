@@ -416,10 +416,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	sudo_user.env_vars = env_add;
 
     /*
-     * Make a local copy of argc/argv, with special handling
-     * for the '-i' option.
+     * Make a local copy of argc/argv, with special handling for the
+     * '-i' option.  We also allocate an extra slot for bash's --login.
      */
-    /* Must leave an extra slot before NewArgv for bash's --login */
+    if (NewArgv != NULL) {
+	sudoers_gc_remove(GC_PTR, NewArgv);
+	free(NewArgv);
+    }
     NewArgc = argc;
     NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
     if (NewArgv == NULL) {
@@ -427,7 +430,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	goto done;
     }
     sudoers_gc_add(GC_PTR, NewArgv);
-    NewArgv++;	/* reserve an extra slot for --login */
     memcpy(NewArgv, argv, argc * sizeof(char *));
     NewArgv[NewArgc] = NULL;
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
@@ -722,11 +724,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	 */
 	if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0 &&
 	    strcmp(NewArgv[1], "-c") == 0) {
-	    /* Use the extra slot before NewArgv so we can store --login. */
-	    NewArgv--;
-	    NewArgc++;
-	    NewArgv[0] = NewArgv[1];
+	    /* We allocated extra space for the --login above. */
+	    memmove(&NewArgv[2], &NewArgv[1], sizeof(char *) * (NewArgc - 1));
 	    NewArgv[1] = "--login";
+	    NewArgc++;
 	}
 
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))

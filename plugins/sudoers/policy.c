@@ -606,12 +606,21 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     mode_t cmnd_umask, char *iolog_path, void *v)
 {
     struct sudoers_exec_args *exec_args = v;
-    char **command_info;
+    static char **command_info;
     int info_len = 0;
     debug_decl(sudoers_policy_store_result, SUDOERS_DEBUG_PLUGIN);
 
     if (exec_args == NULL)
 	debug_return_bool(true);	/* nothing to do */
+
+    /* Free old data, if any. */
+    if (command_info != NULL) {
+	char **cur;
+	sudoers_gc_remove(GC_VECTOR, command_info);
+	for (cur = command_info; *cur != NULL; cur++)
+	    free(*cur);
+	free(command_info);
+    }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
     command_info = calloc(57, sizeof(char *));
