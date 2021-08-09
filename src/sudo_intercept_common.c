@@ -44,6 +44,7 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "sudo_compat.h"
+#include "sudo_conf.h"
 #include "sudo_fatal.h"
 #include "sudo_exec.h"
 #include "sudo_gettext.h"
@@ -51,7 +52,6 @@
 
 extern char **environ;
 
-static pid_t mainpid = -1;
 static int intercept_sock = -1;
 
 /*
@@ -66,7 +66,6 @@ sudo_interposer_init(void)
 
     if (!initialized) {
         initialized = true;
-        mainpid = getpid();
 
         /*
          * Missing SUDO_INTERCEPT_FD will result in execve() failure.
@@ -203,14 +202,6 @@ command_allowed(const char *cmnd, char * const argv[], char * const envp[],
         goto done;
     }
 
-    /* Don't allow the original process to be replaced. */
-    if (getpid() == mainpid) {
-	sudo_warnx("shell overwrite denied"); // XXX
-	// XXX debugging
-        errno = EACCES;
-        goto done;
-    }
-
     /*
      * We communicate with the main sudo process over a socket pair
      * which is passed over the intercept_sock.  The reason for not
@@ -285,8 +276,8 @@ command_allowed(const char *cmnd, char * const argv[], char * const envp[],
 	    (*nargv)[len] = strdup(res->u.accept_msg->run_argv[len]);
 	}
 	(*nargv)[len] = NULL;
-	/* XXX - add SUDO_INTERCEPT_FD to environment as needed. */
-	*nenvp = (char **)envp;
+	// XXX - bogus cast
+	*nenvp = sudo_preload_dso((char **)envp, sudo_conf_intercept_path(), intercept_sock);
 	ret = true;
 	break;
     case POLICY_CHECK_RESULT__TYPE_REJECT_MSG:

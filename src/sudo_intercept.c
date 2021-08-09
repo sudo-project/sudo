@@ -63,14 +63,19 @@ my_execve(const char *cmnd, char * const argv[], char * const envp[])
 {
     char *ncmnd = NULL, **nargv = NULL, **nenvp = NULL;
 
-    /* XXX - add SUDO_INTERCEPT_FD to environment as needed. */
     if (command_allowed(cmnd, argv, envp, &ncmnd, &nargv, &nenvp)) {
 	/* Execute the command using the "real" execve() function. */
 	execve(ncmnd, nargv, nenvp);
     } else {
 	errno = EACCES;
     }
-    /* XXX - free ncmnd, nargv, nenvp */
+    if (ncmnd != cmnd)
+	free(ncmnd);
+    if (nargv != argv)
+	free(nargv);
+    if (nenvp != envp)
+	free(nenvp);
+
     return -1;
 }
 
@@ -113,14 +118,19 @@ execve(const char *cmnd, char * const argv[], char * const envp[])
         return -1;
     }
 
-    /* XXX - add SUDO_INTERCEPT_FD to environment as needed. */
     if (command_allowed(cmnd, argv, envp, &ncmnd, &nargv, &nenvp)) {
 	/* Execute the command using the "real" execve() function. */
 	return ((sudo_fn_execve_t)fn)(ncmnd, nargv, nenvp);
     } else {
 	errno = EACCES;
     }
-    /* XXX - free ncmnd, nargv, nenvp */
+    if (ncmnd != cmnd)
+	free(ncmnd);
+    if (nargv != argv)
+	free(nargv);
+    if (nenvp != envp)
+	free(nenvp);
+
     return -1;
 }
 #endif /* HAVE___INTERPOSE) */

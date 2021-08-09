@@ -36,125 +36,6 @@
 #include "sudo.h"
 #include "sudo_exec.h"
 
-#ifdef RTLD_PRELOAD_VAR
-/*
- * Add a DSO file to LD_PRELOAD or the system equivalent.
- */
-static char **
-preload_dso(char *envp[], const char *dso_file, char * const extra_envp[])
-{
-    char *preload = NULL;
-    int env_len, extra_len = 0;
-    int preload_idx = -1;
-    bool present = false;
-# ifdef RTLD_PRELOAD_ENABLE_VAR
-    bool enabled = false;
-# else
-    const bool enabled = true;
-# endif
-    debug_decl(preload_dso, SUDO_DEBUG_UTIL);
-
-    /*
-     * Preload a DSO file.  For a list of LD_PRELOAD-alikes, see
-     * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
-     * XXX - need to support 32-bit and 64-bit variants
-     */
-
-    /* Count entries in envp, looking for LD_PRELOAD as we go. */
-    for (env_len = 0; envp[env_len] != NULL; env_len++) {
-	if (preload_idx == -1 && strncmp(envp[env_len], RTLD_PRELOAD_VAR "=",
-	    sizeof(RTLD_PRELOAD_VAR)) == 0) {
-	    const char *cp = envp[env_len] + sizeof(RTLD_PRELOAD_VAR);
-	    const char *end = cp + strlen(cp);
-	    const char *ep;
-	    const size_t dso_len = strlen(dso_file);
-
-	    /* Check to see if dso_file is already present. */
-	    for (cp = sudo_strsplit(cp, end, RTLD_PRELOAD_DELIM, &ep);
-		cp != NULL; cp = sudo_strsplit(NULL, end, RTLD_PRELOAD_DELIM,
-		&ep)) {
-		if ((size_t)(ep - cp) == dso_len) {
-		    if (memcmp(cp, dso_file, dso_len) == 0) {
-			/* already present */
-			present = true;
-			break;
-		    }
-		}
-	    }
-
-	    /* Save index of existing LD_PRELOAD variable. */
-	    preload_idx = env_len;
-	    continue;
-	}
-# ifdef RTLD_PRELOAD_ENABLE_VAR
-	if (strncmp(envp[env_len], RTLD_PRELOAD_ENABLE_VAR "=", sizeof(RTLD_PRELOAD_ENABLE_VAR)) == 0) {
-	    enabled = true;
-	    continue;
-	}
-# endif
-    }
-    if (extra_envp != NULL) {
-	for (extra_len = 0; extra_envp[extra_len] != NULL; extra_len++) {
-	    continue;
-	}
-    }
-
-    /*
-     * Make a new copy of envp as needed.
-     * It would be nice to realloc the old envp[] but we don't know
-     * whether it was dynamically allocated. [TODO: plugin API]
-     */
-    if (preload_idx == -1 || !enabled || extra_len != 0) {
-	const int env_size = env_len + 1 + (preload_idx == -1) + enabled + extra_len; // -V547
-
-	char **nenvp = reallocarray(NULL, env_size, sizeof(*envp));
-	if (nenvp == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	memcpy(nenvp, envp, env_len * sizeof(*envp));
-	if (extra_envp != NULL) {
-	    for (extra_len = 0; extra_envp[extra_len] != NULL; extra_len++)
-		nenvp[env_len++] = extra_envp[extra_len];
-	}
-	nenvp[env_len] = NULL;
-	envp = nenvp;
-    }
-
-    /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
-    if (!present) {
-	if (preload_idx == -1) {
-# ifdef RTLD_PRELOAD_DEFAULT
-	    asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, dso_file,
-		RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
-# else
-	    preload = sudo_new_key_val(RTLD_PRELOAD_VAR, dso_file);
-# endif
-	    if (preload == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
-	    envp[env_len++] = preload;
-	    envp[env_len] = NULL;
-	} else {
-	    int len = asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR,
-		dso_file, RTLD_PRELOAD_DELIM, envp[preload_idx]);
-	    if (len == -1) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
-	    envp[preload_idx] = preload;
-	}
-    }
-# ifdef RTLD_PRELOAD_ENABLE_VAR
-    if (!enabled) {
-	envp[env_len++] = RTLD_PRELOAD_ENABLE_VAR "=";
-	envp[env_len] = NULL;
-    }
-# endif
-
-    debug_return_ptr(envp);
-}
-#endif /* RTLD_PRELOAD_VAR */
-
 /*
  * Disable execution of child processes in the command we are about
  * to run.  On systems with privilege sets, we can remove the exec
@@ -177,7 +58,7 @@ disable_execute(char *envp[], const char *dso)
 
 #ifdef RTLD_PRELOAD_VAR
     if (dso != NULL)
-	envp = preload_dso(envp, dso, NULL);
+	envp = sudo_preload_dso(envp, dso, -1);
 #endif /* RTLD_PRELOAD_VAR */
 
     debug_return_ptr(envp);
@@ -191,7 +72,6 @@ static char **
 enable_intercept(char *envp[], const char *dso, int intercept_fd)
 {
 #ifdef RTLD_PRELOAD_VAR
-    char *env_add[] = { NULL, NULL };
     debug_decl(enable_intercept, SUDO_DEBUG_UTIL);
 
     if (dso == NULL)
@@ -204,9 +84,7 @@ enable_intercept(char *envp[], const char *dso, int intercept_fd)
 	if (intercept_fd == -1)
 	    sudo_fatal("%s", U_("unable to dup intercept fd"));
     }
-    if (asprintf(&env_add[0], "SUDO_INTERCEPT_FD=%d", intercept_fd) == -1)
-	debug_return_ptr(NULL);
-    envp = preload_dso(envp, dso, env_add);
+    envp = sudo_preload_dso(envp, dso, intercept_fd);
 #else
     /* Intercept not supported, envp unchanged. */
     if (intercept_fd != -1)

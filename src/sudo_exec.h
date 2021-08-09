@@ -117,4 +117,7 @@ bool utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user);
 bool utmp_logout(const char *line, int status);
 
+/* exec_preload.c */
+char **sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd);
+
 #endif /* SUDO_EXEC_H */
