@@ -132,4 +132,5 @@ message ServerHello {
   string server_id = 1;		/* free-form server description */
   string redirect = 2;		/* optional redirect if busy */
   repeated string servers = 3;	/* optional list of known servers */
+  bool subcommands = 4;		/* flag: server supports sub-commands */
 }

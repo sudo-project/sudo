@@ -361,6 +361,7 @@ fmt_hello_message(struct connection_closure *closure)
 
     /* TODO: implement redirect and servers array.  */
     hello.server_id = (char *)server_id;
+    hello.subcommands = true;
     msg.u.hello = &hello;
     msg.type_case = SERVER_MESSAGE__TYPE_HELLO;
 
@@ -438,7 +439,8 @@ handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
     bool ret;
     debug_decl(handle_accept, SUDO_DEBUG_UTIL);
 
-    if (closure->state != INITIAL) {
+    /* We can get an AcceptMessage for a sub-command during a session. */
+    if (closure->state == EXITED || closure->state == FINISHED) {
 	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
@@ -454,7 +456,7 @@ handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
 	__func__, source);
 
     ret = closure->cms->accept(msg, buf, len, closure);
-    if (ret) {
+    if (ret && closure->state == INITIAL) {
 	if (msg->expect_iobufs)
 	    closure->log_io = true;
 	closure->state = RUNNING;
@@ -474,7 +476,8 @@ handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
     bool ret;
     debug_decl(handle_reject, SUDO_DEBUG_UTIL);
 
-    if (closure->state != INITIAL) {
+    /* We can get a RejectMessage for a sub-command during a session. */
+    if (closure->state == EXITED || closure->state == FINISHED) {
 	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
 	debug_return_bool(false);
@@ -490,8 +493,9 @@ handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
 	__func__, source);
 
     ret = closure->cms->reject(msg, buf, len, closure);
-    if (ret)
+    if (ret && closure->state == INITIAL) {
 	closure->state = FINISHED;
+    }
 
     debug_return_bool(ret);
 }
