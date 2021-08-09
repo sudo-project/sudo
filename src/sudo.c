@@ -131,9 +131,6 @@ static void audit_open(struct sudo_settings *settings, char * const user_info[],
     int submit_optind, char * const submit_argv[], char * const submit_envp[]);
 static void audit_close(int exit_status, int error);
 static void audit_show_version(int verbose);
-static void audit_accept(const char *plugin_name,
-    unsigned int plugin_type, char * const command_info[],
-    char * const run_argv[], char * const run_envp[]);
 
 /* Approval plugin convenience functions. */
 static void approval_check(struct sudo_settings *settings,
@@ -1685,7 +1682,7 @@ audit_error2(struct plugin_container *source, const char *plugin_name,
  * See command_info[] for additional info.
  * XXX - actual environment may be updated by policy_init_session().
  */
-static void
+void
 audit_accept(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
     char * const run_envp[])

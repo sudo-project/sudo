@@ -54,6 +54,9 @@
 #include "sudo_exec.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
+#include "intercept.pb-c.h"
+
+static void intercept_cb(int fd, int what, void *v);
 
 static void
 close_fds(struct command_details *details, int errfd, int intercept_fd)
@@ -471,37 +474,393 @@ terminate_command(pid_t pid, bool use_pgrp)
     debug_return;
 }
 
+struct intercept_closure {
+    struct sudo_event ev;
+    const char *errstr;
+    char *command;		/* dynamically allocated */
+    char **run_argv;		/* owned by plugin */
+    char **run_envp;		/* dynamically allocated */
+    char *buf;			/* dynamically allocated */
+    size_t len;
+    int policy_result;
+};
+
+/*
+ * Reset intercept closure for re-use.
+ */
+static void
+intercept_closure_reset(struct intercept_closure *closure)
+{
+    debug_decl(intercept_closure_reset, SUDO_DEBUG_EXEC);
+
+    /* Other parts of closure are freed at policy close time. */
+    /* TODO: can we cause them to be freed earlier? */
+    free(closure->buf);
+    free(closure->command);
+    free(closure->run_envp);
+    sudo_ev_del(NULL, &closure->ev);
+
+    /* Reset all but the event. */
+    closure->errstr = NULL;
+    closure->command = NULL;
+    closure->run_argv = NULL;
+    closure->run_envp = NULL;
+    closure->buf = NULL;
+    closure->len = 0;
+    closure->policy_result = -1;
+
+    debug_return;
+}
+
+/*
+ * Close intercept fd and free closure.
+ * Called on EOF from sudo_intercept.so due to program exit.
+ */
+static void
+intercept_close(int fd, struct intercept_closure *closure)
+{
+    debug_decl(intercept_close, SUDO_DEBUG_EXEC);
+
+    intercept_closure_reset(closure);
+    free(closure);
+    close(fd);
+
+    debug_return;
+}
+
+static int
+intercept_check_policy(PolicyCheckRequest *req,
+    struct intercept_closure *closure, const char **errstr)
+{
+    char **command_info = NULL;
+    char **user_env_out = NULL;
+    char **vec;
+    size_t n;
+    int ok;
+    debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
+
+    if (req->command == NULL || req->n_argv == 0 || req->n_envp == 0) {
+	*errstr = N_("invalid PolicyCheckRequest");
+	goto error;
+    }
+
+    if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "req_command: %s", req->command);
+	for (n = 0; n < req->n_argv; n++) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "req_argv[%zu]: %s", n, req->argv[n]);
+	}
+    }
+
+    /* Rebuild argv from PolicyCheckReq so it is NULL-terminated. */
+    vec = reallocarray(NULL, req->n_argv + 1, sizeof(char *));
+    if (vec == NULL) {
+	*errstr = N_("unable to allocate memory");
+	goto error;
+    }
+    for (n = 0; n < req->n_argv; n++) {
+	vec[n] = req->argv[n];
+    }
+    vec[n] = NULL;
+
+    /* We don't currently have a good way to validate the environment. */
+    /* TODO: make sure LD_PRELOAD is preserved in environment */
+    sudo_debug_set_active_instance(policy_plugin.debug_instance);
+    ok = policy_plugin.u.policy->check_policy(n, vec, NULL,
+	&command_info, &closure->run_argv, &user_env_out, errstr);
+    sudo_debug_set_active_instance(sudo_debug_instance);
+    free(vec);
+
+    /* Extract command path from command_info[] */
+    if (command_info != NULL) {
+	for (n = 0; command_info[n] != NULL; n++) {
+	    const char *cp = command_info[n];
+	    if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
+		closure->command = strdup(cp + sizeof("command=") - 1);
+		if (closure->command == NULL) {
+		    *errstr = N_("unable to allocate memory");
+		    goto error;
+		}
+		break;
+	    }
+	}
+    }
+
+    switch (ok) {
+    case 1:
+	/* TODO: call approval plugin too */
+
+	/* Rebuild envp from PolicyCheckReq so it is NULL-terminated. */
+	vec = reallocarray(NULL, req->n_envp + 1, sizeof(char *));
+	if (vec == NULL) {
+	    *errstr = N_("unable to allocate memory");
+	    goto error;
+	}
+	for (n = 0; n < req->n_envp; n++) {
+	    vec[n] = req->envp[n];
+	}
+	vec[n] = NULL;
+	closure->run_envp = vec;
+
+	/* Audit the event twice: once for the plugin, once for sudo. */
+	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, command_info,
+		closure->run_argv, closure->run_envp);
+	audit_accept("sudo", SUDO_FRONT_END, command_info,
+		closure->run_argv, closure->run_envp);
+	debug_return_int(1);
+    case 0:
+	if (*errstr == NULL)
+	    *errstr = N_("command rejected by policy");
+	audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN, *errstr,
+	    command_info);
+	debug_return_int(0);
+    default:
+    error:
+	if (*errstr == NULL)
+	    *errstr = N_("policy plugin error");
+	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, *errstr,
+	    command_info);
+	debug_return_int(-1);
+    }
+}
+
+#define MESSAGE_SIZE_MAX	(2 * 1024 * 1024)
+
 /*
  * Read a single message from sudo_intercept.so.
  */
 static void
-intercept_cb(int fd, int what, void *v)
+intercept_read(int fd, struct intercept_closure *closure)
 {
+    InterceptMessage *msg;
     uint32_t msg_len;
     ssize_t nread;
-    char buf[8192];
-    debug_decl(intercept_cb, SUDO_DEBUG_EXEC);
+    char *buf = NULL;
+    debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
     /* Read message size (uint32_t in host byte order). */
     nread = read(fd, &msg_len, sizeof(msg_len));
     if (nread != sizeof(msg_len)) {
-	sudo_warn("read");
-	debug_return;
-    }
-
-    /* TODO: actually parse message. */
-    while (msg_len > 0) {
-	size_t len = MIN(msg_len, sizeof(buf));
-	nread = read(fd, buf, len);
-	if (nread == -1) {
+	if (nread != 0)
 	    sudo_warn("read");
-	    debug_return;
-	}
-	msg_len -= nread;
+	goto bad;
     }
 
-    /* TODO: perform policy check */
-    /* TODO: switch event to write mode and write response */
+    if (msg_len > MESSAGE_SIZE_MAX) {
+	sudo_warnx(U_("client message too large: %zu"), (size_t)msg_len);
+	goto bad;
+    }
+
+    if (msg_len > 0) {
+	if ((buf = malloc(msg_len)) == NULL) {
+	    sudo_warnx("%s", U_("unable to allocate memory"));
+	    goto bad;
+	}
+	do {
+	    size_t len = MIN(msg_len, sizeof(buf));
+	    nread = read(fd, buf, len);
+	    switch (nread) {
+	    case 0:
+		/* EOF, other side must have exited. */
+		goto bad;
+	    case -1:
+		sudo_warn("read");
+		goto bad;
+	    default:
+		msg_len -= nread;
+		break;
+	    }
+	} while (msg_len > 0);
+    }
+
+    msg = intercept_message__unpack(NULL, msg_len, buf);
+    if (msg == NULL) {
+	sudo_warnx("unable to unpack %s size %zu", "InterceptMessage",
+	    (size_t)msg_len);
+	goto bad;
+    }
+    if (msg->type_case != INTERCEPT_MESSAGE__TYPE_POLICY_CHECK_REQ) {
+	sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
+	    msg->type_case, "InterceptMessage", "sudo_intercept.so");
+	goto bad;
+    }
+
+    closure->policy_result = intercept_check_policy(msg->u.policy_check_req,
+	closure, &closure->errstr);
+
+    /* Switch event to write mode for the reply. */
+    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_WRITE, intercept_cb, closure) == -1) {
+	/* This cannot (currently) fail. */
+	sudo_warn("%s", U_("unable to add event to queue"));
+	goto bad;
+    }
+
+    goto done;
+
+bad:
+    intercept_close(fd, closure);
+
+done:
+    free(buf);
+    debug_return;
+}
+
+static bool
+fmt_policy_check_result(PolicyCheckResult *msg, struct intercept_closure *closure)
+{
+    uint32_t msg_len;
+    bool ret = false;
+    debug_decl(fmt_policy_check_result, SUDO_DEBUG_EXEC);
+
+    closure->len = policy_check_result__get_packed_size(msg);
+    if (closure->len > MESSAGE_SIZE_MAX) {
+	sudo_warnx(U_("server message too large: %zu"), closure->len);
+	goto done;
+    }
+
+    /* Wire message size is used for length encoding, precedes message. */
+    msg_len = closure->len;
+    closure->len += sizeof(msg_len);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"size + PolicyCheckResult %zu bytes", closure->len);
+
+    if ((closure->buf = malloc(closure->len)) == NULL) {
+	sudo_warnx("%s", U_("unable to allocate memory"));
+	goto done;
+    }
+    memcpy(closure->buf, &msg_len, sizeof(msg_len));
+    policy_check_result__pack(msg, closure->buf + sizeof(msg_len));
+
+    ret = true;
+
+done:
+    debug_return_bool(ret);
+}
+
+static bool
+fmt_accept_message(struct intercept_closure *closure)
+{
+    PolicyAcceptMessage msg = POLICY_ACCEPT_MESSAGE__INIT;
+    PolicyCheckResult res = POLICY_CHECK_RESULT__INIT;
+    size_t n;
+    debug_decl(fmt_accept_message, SUDO_DEBUG_EXEC);
+
+    msg.run_command = closure->command;
+    msg.run_argv = closure->run_argv;
+    for (n = 0; closure->run_argv[n] != NULL; n++)
+	continue;
+    msg.n_run_argv = n;
+    msg.run_envp = closure->run_envp;
+    for (n = 0; closure->run_envp[n] != NULL; n++)
+	continue;
+    msg.n_run_envp = n;
+
+    res.u.accept_msg = &msg;
+    res.type_case = POLICY_CHECK_RESULT__TYPE_ACCEPT_MSG;
+
+    debug_return_bool(fmt_policy_check_result(&res, closure));
+}
+
+static bool
+fmt_reject_message(struct intercept_closure *closure)
+{
+    PolicyRejectMessage msg = POLICY_REJECT_MESSAGE__INIT;
+    PolicyCheckResult res = POLICY_CHECK_RESULT__INIT;
+    debug_decl(fmt_reject_message, SUDO_DEBUG_EXEC);
+
+    msg.reject_message = (char *)closure->errstr;
+
+    res.u.reject_msg = &msg;
+    res.type_case = POLICY_CHECK_RESULT__TYPE_REJECT_MSG;
+
+    debug_return_bool(fmt_policy_check_result(&res, closure));
+}
+
+static bool
+fmt_error_message(struct intercept_closure *closure)
+{
+    PolicyErrorMessage msg = POLICY_ERROR_MESSAGE__INIT;
+    PolicyCheckResult res = POLICY_CHECK_RESULT__INIT;
+    debug_decl(fmt_error_message, SUDO_DEBUG_EXEC);
+
+    msg.error_message = (char *)closure->errstr;
+
+    res.u.error_msg = &msg;
+    res.type_case = POLICY_CHECK_RESULT__TYPE_ERROR_MSG;
+
+    debug_return_bool(fmt_policy_check_result(&res, closure));
+}
+
+/*
+ * Write a response to sudo_intercept.so.
+ */
+static void
+intercept_write(int fd, struct intercept_closure *closure)
+{
+    size_t len = closure->len;
+    char *buf = closure->buf;
+    ssize_t nwritten;
+    debug_decl(intercept_write, SUDO_DEBUG_EXEC);
+
+    switch (closure->policy_result) {
+	case 1:
+	    if (!fmt_accept_message(closure))
+		goto bad;
+	    break;
+	case 0:
+	    if (!fmt_reject_message(closure))
+		goto bad;
+	    break;
+	default:
+	    if (!fmt_error_message(closure))
+		goto bad;
+	    break;
+    }
+
+    do {
+	nwritten = write(fd, buf, len);
+	if (nwritten == -1) {
+	    sudo_warn("write");
+	    goto bad;
+	}
+	buf += nwritten;
+	len -= nwritten;
+    } while (len > 0);
+
+    intercept_closure_reset(closure);
+
+    /* Switch event to read mode for the next request. */
+    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ, intercept_cb, closure) == -1) {
+	/* This cannot (currently) fail. */
+	sudo_warn("%s", U_("unable to add event to queue"));
+    }
+
+    debug_return;
+
+bad:
+    intercept_close(fd, closure);
+    debug_return;
+}
+
+static void
+intercept_cb(int fd, int what, void *v)
+{
+    struct intercept_closure *closure = v;
+    debug_decl(intercept_cb, SUDO_DEBUG_EXEC);
+
+    switch (what) {
+    case SUDO_EV_READ:
+	intercept_read(fd, closure);
+	break;
+    case SUDO_EV_WRITE:
+	intercept_write(fd, closure);
+	break;
+    default:
+	sudo_warnx("%s: unexpected event type %d", __func__, what);
+	break;
+    }
 
     debug_return;
 }
@@ -514,8 +873,8 @@ intercept_cb(int fd, int what, void *v)
 void
 intercept_fd_cb(int fd, int what, void *v)
 {
+    struct intercept_closure *closure = NULL;
     struct sudo_event_base *base = v;
-    struct sudo_event *ev;
     struct msghdr msg;
     union {
 	struct cmsghdr hdr;
@@ -527,8 +886,8 @@ intercept_fd_cb(int fd, int what, void *v)
     char ch;
     debug_decl(intercept_fd_cb, SUDO_DEBUG_EXEC);
 
-    ev = malloc(sizeof(*ev));
-    if (ev == NULL) {
+    closure = calloc(1, sizeof(*closure));
+    if (closure == NULL) {
 	sudo_warnx("%s", U_("unable to allocate memory"));
 	goto bad;
     }
@@ -547,10 +906,16 @@ intercept_fd_cb(int fd, int what, void *v)
     msg.msg_control = &cmsgbuf.buf;
     msg.msg_controllen = sizeof(cmsgbuf.buf);
 
-    if (recvmsg(fd, &msg, 0) == -1) {
+    switch (recvmsg(fd, &msg, 0)) {
+    case -1:
 	if (errno != EAGAIN && errno != EINTR)
 	    sudo_warn("recvmsg");
 	goto bad;
+    case 0:
+	/* EOF */
+	goto bad;
+    default:
+	break;
     }
 
     cmsg = CMSG_FIRSTHDR(&msg);
@@ -566,11 +931,11 @@ intercept_fd_cb(int fd, int what, void *v)
     }
 
     newfd = (*(int *)CMSG_DATA(cmsg));
-    if (sudo_ev_set(ev, newfd, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_cb, ev) == -1) {
+    if (sudo_ev_set(&closure->ev, newfd, SUDO_EV_READ, intercept_cb, closure) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto bad;
     }
-    if (sudo_ev_add(base, ev, NULL, false) == -1) {
+    if (sudo_ev_add(base, &closure->ev, NULL, false) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto bad;
     }
@@ -579,6 +944,6 @@ intercept_fd_cb(int fd, int what, void *v)
 bad:
     if (newfd != -1)
 	close(newfd);
-    free(ev);
+    free(closure);
     debug_return;
 }
