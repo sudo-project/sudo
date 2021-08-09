@@ -38,6 +38,8 @@
 #include "sudoers_version.h"
 #include "interfaces.h"
 
+static char **command_info;
+
 /*
  * Command execution args to be filled in: argv, envp and command info.
  */
@@ -606,7 +608,6 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     mode_t cmnd_umask, char *iolog_path, void *v)
 {
     struct sudoers_exec_args *exec_args = v;
-    static char **command_info;
     int info_len = 0;
     debug_decl(sudoers_policy_store_result, SUDOERS_DEBUG_PLUGIN);
 
@@ -1007,11 +1008,12 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Free sudoers sources, sudo_user and passwd/group caches. */
     sudoers_cleanup();
 
+    /* command_info is freed by the g/c code. */
+    command_info = NULL;
+
     /* Free error message passed back to front-end, if any. */
     free(audit_msg);
     audit_msg = NULL;
-
-    /* XXX - leaks NewArgv */
 
     /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
     sudoers_debug_deregister();
