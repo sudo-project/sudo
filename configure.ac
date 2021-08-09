@@ -2913,6 +2913,13 @@ AC_INCLUDES_DEFAULT
 #include <$ac_header_dirent>
 ])
 dnl
+dnl Check for POSIX sendmsg() ancillary data support.
+dnl
+AC_CHECK_MEMBERS(struct msghdr.msg_control, [], [], [
+AC_INCLUDES_DEFAULT
+#include <sys/socket.h>
+])
+dnl
 dnl Check for functions only present in OpenSSL 1.1 and above
 dnl
 openssl_missing=no

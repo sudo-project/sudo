@@ -978,11 +978,13 @@ intercept_fd_cb(int fd, int what, void *v)
     struct intercept_closure *closure = NULL;
     struct intercept_fd_closure *fdc = v;
     struct msghdr msg;
+#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
     union {
 	struct cmsghdr hdr;
 	char buf[CMSG_SPACE(sizeof(int))];
     } cmsgbuf;
     struct cmsghdr *cmsg;
+#endif
     struct iovec iov[1];
     int newfd = -1;
     char ch;
@@ -1003,11 +1005,16 @@ intercept_fd_cb(int fd, int what, void *v)
     iov[0].iov_base = &ch;
     iov[0].iov_len = 1;
     memset(&msg, 0, sizeof(msg));
-    memset(&cmsgbuf, 0, sizeof(cmsgbuf));
     msg.msg_iov = iov;
     msg.msg_iovlen = 1;
+#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
+    memset(&cmsgbuf, 0, sizeof(cmsgbuf));
     msg.msg_control = &cmsgbuf.buf;
     msg.msg_controllen = sizeof(cmsgbuf.buf);
+#else
+    msg.msg_accrights = (caddr_t)&fd;
+    msg.msg_accrightslen = sizeof(fd);
+#endif /* HAVE_STRUCT_MSGHDR_MSG_CONTROL */
 
     switch (recvmsg(fd, &msg, 0)) {
     case -1:
@@ -1021,6 +1028,7 @@ intercept_fd_cb(int fd, int what, void *v)
 	break;
     }
 
+#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
     cmsg = CMSG_FIRSTHDR(&msg);
     if (cmsg == NULL) {
 	sudo_warnx(U_("%s: missing message header"), __func__);
@@ -1032,8 +1040,14 @@ intercept_fd_cb(int fd, int what, void *v)
 	    SCM_RIGHTS, cmsg->cmsg_type);
 	goto bad;
     }
+    memcpy(&newfd, CMSG_DATA(cmsg), sizeof(newfd));
+#else
+    if (msg.msg_accrightslen != sizeof(fd)) {
+	sudo_warnx(U_("%s: missing message header"), __func__);
+	goto bad;
+    }
+#endif /* HAVE_STRUCT_MSGHDR_MSG_CONTROL */
 
-    newfd = (*(int *)CMSG_DATA(cmsg));
     if (sudo_ev_set(&closure->ev, newfd, SUDO_EV_READ, intercept_cb, closure) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto bad;

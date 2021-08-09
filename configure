@@ -21972,6 +21972,19 @@ printf "%s\n" "#define HAVE_STRUCT_DIRENT_D_NAMLEN 1" >>confdefs.h
 
 fi
 
+ac_fn_c_check_member "$LINENO" "struct msghdr" "msg_control" "ac_cv_member_struct_msghdr_msg_control" "
+$ac_includes_default
+#include <sys/socket.h>
+
+"
+if test "x$ac_cv_member_struct_msghdr_msg_control" = xyes
+then :
+
+printf "%s\n" "#define HAVE_STRUCT_MSGHDR_MSG_CONTROL 1" >>confdefs.h
+
+
+fi
+
 openssl_missing=no
 if test "${enable_openssl-no}" != no; then
     # Use pkg-config to find the openssl cflags and libs if possible.

@@ -153,11 +153,13 @@ static bool
 intercept_send_fd(int sock, int fd)
 {
     struct msghdr msg;
+#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
     union {
 	struct cmsghdr hdr;
 	char buf[CMSG_SPACE(sizeof(int))];
     } cmsgbuf;
     struct cmsghdr *cmsg;
+#endif
     struct iovec iov[1];
     char ch = '\0';
     ssize_t nsent;
@@ -171,17 +173,21 @@ intercept_send_fd(int sock, int fd)
     iov[0].iov_base = &ch;
     iov[0].iov_len = 1;
     memset(&msg, 0, sizeof(msg));
-    memset(&cmsgbuf, 0, sizeof(cmsgbuf));
     msg.msg_iov = iov;
     msg.msg_iovlen = 1;
+#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
+    memset(&cmsgbuf, 0, sizeof(cmsgbuf));
     msg.msg_control = &cmsgbuf.buf;
     msg.msg_controllen = sizeof(cmsgbuf.buf);
-
     cmsg = CMSG_FIRSTHDR(&msg);
     cmsg->cmsg_len = CMSG_LEN(sizeof(int));
     cmsg->cmsg_level = SOL_SOCKET;
     cmsg->cmsg_type = SCM_RIGHTS;
-    *(int *)CMSG_DATA(cmsg) = fd;
+    memcpy(CMSG_DATA(cmsg), &fd, sizeof(fd));
+#else
+    msg.msg_accrights = (caddr_t)&fd;
+    msg.msg_accrightslen = sizeof(fd);
+#endif /* HAVE_STRUCT_MSGHDR_MSG_CONTROL */
 
     for (;;) {
 	nsent = sendmsg(sock, &msg, 0);
