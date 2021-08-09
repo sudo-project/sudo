@@ -39,6 +39,7 @@
 #include <fcntl.h>
 #include <pwd.h>
 #include <signal.h>
+#include <termios.h>
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 # ifndef LOGIN_SETENV
@@ -55,6 +56,11 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 #include "intercept.pb-c.h"
+
+/* TCSASOFT is a BSD extension that ignores control flags and speed. */
+#ifndef TCSASOFT
+# define TCSASOFT	0
+#endif
 
 static void intercept_cb(int fd, int what, void *v);
 
@@ -674,9 +680,12 @@ intercept_read(int fd, struct intercept_closure *closure)
     struct sudo_event_base *base = sudo_ev_get_base(&closure->ev);
     InterceptMessage *msg = NULL;
     uint8_t *cp, *buf = NULL;
+    pid_t saved_pgrp = -1;
+    struct termios oterm;
     uint32_t msg_len;
-    ssize_t nread;
     bool ret = false;
+    int ttyfd = -1;
+    ssize_t nread;
     debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
     /* Read message size (uint32_t in host byte order). */
@@ -729,8 +738,24 @@ intercept_read(int fd, struct intercept_closure *closure)
 	goto done;
     }
 
+    /* Take back control of the tty, if necessary, for the policy check. */
+    ttyfd = open(_PATH_TTY, O_RDWR);
+    if (ttyfd != -1) {
+	saved_pgrp = tcgetpgrp(ttyfd);
+	if (saved_pgrp == -1 || tcsetpgrp(ttyfd, getpgid(0)) == -1 ||
+		tcgetattr(ttyfd, &oterm) == -1) {
+	    close(ttyfd);
+	    ttyfd = -1;
+	}
+    }
+
     closure->policy_result = intercept_check_policy(msg->u.policy_check_req,
 	closure, &closure->errstr);
+
+    if (ttyfd != -1) {
+	(void)tcsetattr(ttyfd, TCSASOFT|TCSAFLUSH, &oterm);
+	(void)tcsetpgrp(ttyfd, saved_pgrp);
+    }
 
     /* Switch event to write mode for the reply. */
     if (sudo_ev_set(&closure->ev, fd, SUDO_EV_WRITE, intercept_cb, closure) == -1) {
@@ -746,6 +771,8 @@ intercept_read(int fd, struct intercept_closure *closure)
     ret = true;
 
 done:
+    if (ttyfd != -1)
+	close(ttyfd);
     intercept_message__free_unpacked(msg, NULL);
     free(buf);
     debug_return_bool(ret);
