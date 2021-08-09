@@ -71,9 +71,9 @@ disable_execute(char *envp[], const char *dso)
 static char **
 enable_intercept(char *envp[], const char *dso, int intercept_fd)
 {
-#ifdef RTLD_PRELOAD_VAR
     debug_decl(enable_intercept, SUDO_DEBUG_UTIL);
 
+#ifdef RTLD_PRELOAD_VAR
     if (dso == NULL)
 	sudo_fatalx("%s: missing DSO", __func__);
     if (intercept_fd == -1)
