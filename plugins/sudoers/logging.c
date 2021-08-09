@@ -240,17 +240,21 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
 static bool
 log_reject(const char *message, bool logit, bool mailit)
 {
-    int evl_flags = 0;
+    const char *uuid_str = NULL;
     struct eventlog evlog;
+    int evl_flags = 0;
     bool ret = true;
     debug_decl(log_reject, SUDOERS_DEBUG_LOGGING);
+
+    if (!ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	uuid_str = sudo_user.uuid_str;
 
     if (mailit) {
 	SET(evl_flags, EVLOG_MAIL);
 	if (!logit)
 	    SET(evl_flags, EVLOG_MAIL_ONLY);
     }
-    sudoers_to_eventlog(&evlog, NewArgv, env_get());
+    sudoers_to_eventlog(&evlog, NewArgv, env_get(), uuid_str);
     if (!eventlog_reject(&evlog, evl_flags, message, NULL, NULL))
 	ret = false;
 
@@ -499,6 +503,7 @@ log_auth_failure(int status, unsigned int tries)
 bool
 log_allowed(char *const argv[], char *const envp[])
 {
+    const char *uuid_str = NULL;
     struct eventlog evlog;
     int oldlocale;
     int evl_flags = 0;
@@ -508,11 +513,14 @@ log_allowed(char *const argv[], char *const envp[])
     /* Send mail based on status. */
     mailit = should_mail(VALIDATE_SUCCESS);
 
+    if (!ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	uuid_str = sudo_user.uuid_str;
+
     if (def_log_allowed || mailit) {
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	sudoers_to_eventlog(&evlog, argv, envp);
+	sudoers_to_eventlog(&evlog, argv, envp, uuid_str);
 	if (mailit) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_allowed)
@@ -567,7 +575,7 @@ log_exit_status(int exit_status)
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	sudoers_to_eventlog(&evlog, NewArgv, env_get());
+	sudoers_to_eventlog(&evlog, NewArgv, env_get(), sudo_user.uuid_str);
 	if (def_mail_always) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_exit_status)
@@ -647,7 +655,7 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
 	    if (ISSET(flags, SLOG_NO_LOG))
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
-	sudoers_to_eventlog(&evlog, NewArgv, env_get());
+	sudoers_to_eventlog(&evlog, NewArgv, env_get(), sudo_user.uuid_str);
 	eventlog_alert(&evlog, evl_flags, &now, message, errstr);
 
 	log_server_alert(&evlog, &now, message, errstr,
@@ -742,7 +750,7 @@ should_mail(int status)
  */
 void
 sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
-    char * const envp[])
+    char * const envp[], const char *uuid_str)
 {
     struct group *grp;
     debug_decl(sudoers_to_eventlog, SUDOERS_DEBUG_LOGGING);
@@ -787,7 +795,15 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
 	evlog->runuid = (uid_t)-1;
 	evlog->runuser = sudo_user.runas_user;
     }
-    strlcpy(evlog->uuid_str, sudo_user.uuid_str, sizeof(evlog->uuid_str));
+    if (uuid_str == NULL) {
+	unsigned char uuid[16];
+
+	sudo_uuid_create(uuid);
+	if (sudo_uuid_to_string(uuid, evlog->uuid_str, sizeof(evlog->uuid_str)) == NULL)
+	    sudo_warnx("%s", U_("unable to generate UUID"));
+    } else {
+	strlcpy(evlog->uuid_str, uuid_str, sizeof(evlog->uuid_str));
+    }
 
     debug_return;
 }
