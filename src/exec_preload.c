@@ -40,6 +40,7 @@ char **
 sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 {
     char *preload = NULL;
+    char **nenvp = NULL;
     int env_len;
     int preload_idx = -1;
     int intercept_idx = -1;
@@ -59,7 +60,6 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
      */
 
     /* Count entries in envp, looking for LD_PRELOAD as we go. */
-    /* XXX - If multiple LD_PRELOAD should remove extras */
     for (env_len = 0; envp[env_len] != NULL; env_len++) {
 	if (strncmp(envp[env_len], RTLD_PRELOAD_VAR "=", sizeof(RTLD_PRELOAD_VAR)) == 0) {
 	    if (preload_idx == -1) {
@@ -130,7 +130,7 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
     if (preload_idx == -1 || !dso_enabled || intercept_idx == -1) {
 	const int env_size = env_len + 1 + (preload_idx == -1) + dso_enabled + (intercept_idx == -1); // -V547
 
-	char **nenvp = reallocarray(NULL, env_size, sizeof(*envp));
+	nenvp = reallocarray(NULL, env_size, sizeof(*nenvp));
 	if (nenvp == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_ptr(NULL);
@@ -150,10 +150,7 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	    preload = sudo_new_key_val(RTLD_PRELOAD_VAR, dso_file);
 # endif
 	    if (preload == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-		/* XXX - leak */
-		debug_return_ptr(NULL);
+		goto oom;
 	    }
 	    envp[env_len++] = preload;
 	    envp[env_len] = NULL;
@@ -161,10 +158,7 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	    int len = asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR,
 		dso_file, RTLD_PRELOAD_DELIM, envp[preload_idx]);
 	    if (len == -1) {
-		sudo_warnx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-		/* XXX - leak */
-		debug_return_ptr(NULL);
+		goto oom;
 	    }
 	    envp[preload_idx] = preload;
 	}
@@ -181,10 +175,7 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 
 	len = asprintf(&fdstr, "SUDO_INTERCEPT_FD=%d", intercept_fd);
 	if (len == -1) {
-	    sudo_warnx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	    /* XXX - leak */
-	    debug_return_ptr(NULL);
+	    goto oom;
 	}
 	if (intercept_idx != -1) {
 	    envp[preload_idx] = fdstr;
@@ -195,5 +186,10 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
     }
 
     debug_return_ptr(envp);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    free(preload);
+    free(nenvp);
+    debug_return_ptr(NULL);
 }
 #endif /* RTLD_PRELOAD_VAR */
