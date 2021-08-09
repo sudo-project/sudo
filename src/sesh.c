@@ -80,16 +80,19 @@ main(int argc, char *argv[], char *envp[])
     if (strcmp(argv[1], "-e") == 0) {
 	ret = sesh_sudoedit(argc, argv);
     } else {
-	bool login_shell, noexec = false;
+	bool login_shell;
 	char *cp, *cmnd;
+	int flags = 0;
 	int fd = -1;
 
 	/* If the first char of argv[0] is '-', we are running a login shell. */
 	login_shell = argv[0][0] == '-';
 
 	/* If argv[0] ends in -noexec, pass the flag to sudo_execve() */
-	if ((cp = strrchr(argv[0], '-')) != NULL && cp != argv[0])
-	    noexec = strcmp(cp, "-noexec") == 0;
+	if ((cp = strrchr(argv[0], '-')) != NULL && cp != argv[0]) {
+	    if (strcmp(cp, "-noexec") == 0)
+		SET(flags, CD_NOEXEC);
+	}
 
 	/* If argv[1] is --execfd=%d, extract the fd to exec with. */
 	if (strncmp(argv[1], "--execfd=", 9) == 0) {
@@ -116,7 +119,7 @@ main(int argc, char *argv[], char *envp[])
 	    *cp = '-';
 	    argv[0] = cp;
 	}
-	sudo_execve(fd, cmnd, argv, envp, noexec);
+	sudo_execve(fd, cmnd, argv, envp, flags);
 	sudo_warn(U_("unable to execute %s"), cmnd);
 	ret = SESH_ERR_FAILURE;
     }

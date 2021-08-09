@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd March 2, 2021
+.Dd June 22, 2021
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -209,6 +209,7 @@ line consists of the
 keyword, followed by the name of the path to set and its value.
 For example:
 .Bd -literal -offset indent
+Path intercept @intercept_file@
 Path noexec @noexec_file@
 Path askpass /usr/X11R6/bin/ssh-askpass
 .Ed
@@ -262,6 +263,34 @@ or
 functions, for example
 .Bx ,
 macOS and Solaris.
+.It intercept
+The fully-qualified path to a shared library containing wrappers
+for the
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn exect ,
+.Fn execv ,
+.Fn execve ,
+.Fn execvP ,
+.Fn execvp ,
+.Fn execvpe ,
+.Fn fexecve ,
+.Fn popen ,
+.Fn posix_spawn ,
+.Fn posix_spawnp ,
+.Fn system ,
+and
+.Fn wordexp
+library functions that intercept attempts to run further commands and
+perform a policy check before allowing them to be executed.
+This is used to implement the
+.Em intercept
+functionality on systems that support
+.Ev LD_PRELOAD
+or its equivalent.
+The default value is
+.Pa @intercept_file@ .
 .It noexec
 The fully-qualified path to a shared library containing wrappers
 for the
@@ -671,6 +700,21 @@ front end configuration
 # terminal device.
 #
 #Path devsearch /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
+
+#
+# Sudo command interception:
+#   Path intercept /path/to/sudo_intercept.so
+#
+# Path to a shared library containing replacements for the execv(),
+# execve() and fexecve() library functions that perform a policy check
+# to verify the command is allowed and simply return an error if not.
+# This is used to implement the "intercept" functionality on systems that
+# support LD_PRELOAD or its equivalent.
+#
+# The compiled-in value is usually sufficient and should only be changed
+# if you rename or move the sudo_intercept.so file.
+#
+#Path intercept @plugindir@/sudo_intercept.so
 
 #
 # Sudo noexec:

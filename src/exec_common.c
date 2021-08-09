@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -174,19 +174,38 @@ disable_execute(char *envp[], const char *dso)
 }
 
 /*
+ * Trap execution of child processes in the command we are about to run.
+ * Uses LD_PRELOAD and the like to perform a policy check on child commands.
+ */
+char **
+enable_intercept(char *envp[], const char *dso)
+{
+    debug_decl(enable_intercept, SUDO_DEBUG_UTIL);
+
+#ifdef RTLD_PRELOAD_VAR
+    if (dso != NULL)
+	envp = preload_dso(envp, dso);
+#endif /* RTLD_PRELOAD_VAR */
+
+    debug_return_ptr(envp);
+}
+
+/*
  * Like execve(2) but falls back to running through /bin/sh
  * ala execvp(3) if we get ENOEXEC.
  */
 int
-sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec)
+sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int flags)
 {
     debug_decl(sudo_execve, SUDO_DEBUG_UTIL);
 
     sudo_debug_execve(SUDO_DEBUG_INFO, path, argv, envp);
 
-    /* Modify the environment as needed to disable further execve(). */
-    if (noexec)
+    /* Modify the environment as needed to trap execve(). */
+    if (ISSET(flags, CD_NOEXEC))
 	envp = disable_execute(envp, sudo_conf_noexec_path());
+    else if (ISSET(flags, CD_INTERCEPT|CD_LOG_CHILDREN))
+	envp = enable_intercept(envp, sudo_conf_intercept_path());
 
 #ifdef HAVE_FEXECVE
     if (fd != -1)

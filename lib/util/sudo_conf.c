@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -104,13 +104,15 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
 /* Indexes into path_table[] below (order is important). */
 #define SUDO_CONF_PATH_ASKPASS		0
 #define SUDO_CONF_PATH_SESH		1
-#define SUDO_CONF_PATH_NOEXEC		2
-#define SUDO_CONF_PATH_PLUGIN_DIR	3
-#define SUDO_CONF_PATH_DEVSEARCH	4
+#define SUDO_CONF_PATH_INTERCEPT	2
+#define SUDO_CONF_PATH_NOEXEC		3
+#define SUDO_CONF_PATH_PLUGIN_DIR	4
+#define SUDO_CONF_PATH_DEVSEARCH	5
 
 #define SUDO_CONF_PATH_INITIALIZER	{				\
     { "askpass", sizeof("askpass") - 1, false, _PATH_SUDO_ASKPASS },	\
     { "sesh", sizeof("sesh") - 1, false, _PATH_SUDO_SESH },		\
+    { "intercept", sizeof("intercept") - 1, false, _PATH_SUDO_INTERCEPT },	\
     { "noexec", sizeof("noexec") - 1, false, _PATH_SUDO_NOEXEC },	\
     { "plugin_dir", sizeof("plugin_dir") - 1, false, _PATH_SUDO_PLUGIN_DIR }, \
     { "devsearch", sizeof("devsearch") - 1, false, _PATH_SUDO_DEVSEARCH }, \
@@ -141,7 +143,7 @@ static struct sudo_conf_data {
     struct sudo_conf_settings settings;
     struct sudo_conf_debug_list debugging;
     struct plugin_info_list plugins;
-    struct sudo_conf_path_table path_table[6];
+    struct sudo_conf_path_table path_table[7];
 } sudo_conf_data = {
     SUDO_CONF_SETTINGS_INITIALIZER,
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),
@@ -478,6 +480,12 @@ const char *
 sudo_conf_sesh_path_v1(void)
 {
     return sudo_conf_data.path_table[SUDO_CONF_PATH_SESH].pval;
+}
+
+const char *
+sudo_conf_intercept_path_v1(void)
+{
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_INTERCEPT].pval;
 }
 
 const char *

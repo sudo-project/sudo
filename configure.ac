@@ -69,14 +69,19 @@ AC_SUBST([SEMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
+AC_SUBST([INTERCEPTFILE])
+AC_SUBST([INTERCEPTDIR])
+AC_SUBST([intercept_file])
 AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
 AC_SUBST([noexec_file])
 AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_BACKUP])
+AC_SUBST([INSTALL_INTERCEPT])
 AC_SUBST([INSTALL_NOEXEC])
+AC_SUBST([CHECK_INTERCEPT])
 AC_SUBST([CHECK_NOEXEC])
-AC_SUBST([NOEXEC_MODULE])
+AC_SUBST([PRELOAD_MODULE])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
 AC_SUBST([SELINUX_USAGE])
@@ -209,6 +214,7 @@ path_info=on
 ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
+intercept_file="$libexecdir/sudo/sudo_intercept.so"
 noexec_file="$libexecdir/sudo/sudo_noexec.so"
 sesh_file="$libexecdir/sudo/sesh"
 nsswitch_conf=/etc/nsswitch.conf
@@ -226,9 +232,11 @@ dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
 INSTALL_BACKUP=
+INSTALL_INTERCEPT=
 INSTALL_NOEXEC=
+CHECK_INTERCEPT=
 CHECK_NOEXEC=
-NOEXEC_MODULE=-module
+PRELOAD_MODULE=-module
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
@@ -1657,9 +1665,10 @@ AC_ARG_WITH(libtool, [AS_HELP_STRING([--with-libtool=PATH], [specify path to lib
 esac])
 
 dnl
-dnl Defer with_noexec until after libtool magic runs
+dnl Defer enable_intercept and with_noexec until after libtool magic runs
 dnl
 if test "$enable_shared" = "no"; then
+    enable_intercept=no
     with_noexec=no
     enable_dlopen=no
     lt_cv_dlopen=none
@@ -1669,6 +1678,18 @@ if test "$enable_shared" = "no"; then
 fi
 LIBDL="$lt_cv_dlopen_libs"
 SHLIB_ENABLE="$enable_dlopen"
+
+AC_ARG_ENABLE(intercept,
+[AS_HELP_STRING([--enable-intercept], [fully qualified pathname of sudo_intercept.so])],
+[ case "$enableval" in
+    yes)	;;
+    no)		;;
+    *)		intercept_file="$enableval"
+		;;
+  esac
+], [enable_intercept="$intercept_file"])
+INTERCEPTFILE="sudo_intercept.so"
+INTERCEPTDIR="`echo $intercept_file|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
 
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[[=PATH]]], [fully qualified pathname of sudo_noexec.so])],
 [case $with_noexec in
@@ -2174,7 +2195,7 @@ case "$host" in
 
 		# Build sudo_noexec.so as a shared library, not a module.
 		# On Darwin, modules and shared libraries are incompatible.
-		NOEXEC_MODULE=
+		PRELOAD_MODULE=
 
 		# Mach monotonic timer that runs while sleeping
 		AC_CHECK_FUNCS([mach_continuous_time])
@@ -2261,7 +2282,13 @@ fi
 dnl
 dnl Library preloading to support NOEXEC
 dnl
-if test X"$with_noexec" != X"no"; then
+if test X"$enable_intercept" = X"no"; then
+    intercept_file=disabled
+fi
+if test X"$with_noexec" = X"no"; then
+    noexec_file=disabled
+fi
+if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"; then
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_VAR, "$RTLD_PRELOAD_VAR")
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, "$RTLD_PRELOAD_DELIM")
     if test -n "$RTLD_PRELOAD_DEFAULT"; then
@@ -2270,8 +2297,6 @@ if test X"$with_noexec" != X"no"; then
     if test -n "$RTLD_PRELOAD_ENABLE_VAR"; then
 	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_ENABLE_VAR, "$RTLD_PRELOAD_ENABLE_VAR")
     fi
-else
-    noexec_file=disabled
 fi
 
 dnl
@@ -4726,6 +4751,13 @@ if test "$exec_prefix" = '$(prefix)'; then
     fi
 fi
 
+# Update exec_prefix in intercept_file
+_intercept_file=
+while test X"$intercept_file" != X"$_intercept_file"; do
+    _intercept_file="$intercept_file"
+    eval intercept_file="$_intercept_file"
+done
+
 # Update exec_prefix in noexec_file
 _noexec_file=
 while test X"$noexec_file" != X"$_noexec_file"; do
@@ -4751,6 +4783,19 @@ exec_prefix="$oexec_prefix"
 dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
 dnl
+if test X"$enable_intercept" != X"no"; then
+    PROGS="${PROGS} sudo_intercept.la"
+    INSTALL_INTERCEPT="install-intercept"
+
+    # Can't use sanitizers with LD_PRELOAD
+    if test "$enable_sanitizer" != "yes"; then
+	CHECK_INTERCEPT=check_intercept
+    fi
+
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_INTERCEPT, "$intercept_file", [The fully qualified pathname of sudo_intercept.so])
+else
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_INTERCEPT, NULL)
+fi
 if test X"$with_noexec" != X"no"; then
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"

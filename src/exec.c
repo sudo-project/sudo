@@ -248,7 +248,7 @@ exec_cmnd(struct command_details *details, int errfd)
 #endif
 	{
 	    sudo_execve(details->execfd, details->command, details->argv,
-		details->envp, ISSET(details->flags, CD_NOEXEC));
+		details->envp, details->flags);
 	}
     }
     sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
@@ -317,7 +317,7 @@ sudo_needs_pty(struct command_details *details)
 {
     struct plugin_container *plugin;
 
-    if (ISSET(details->flags, CD_USE_PTY))
+    if (ISSET(details->flags, CD_USE_PTY|CD_INTERCEPT|CD_LOG_CHILDREN))
 	return true;
 
     TAILQ_FOREACH(plugin, &io_plugins, entries) {

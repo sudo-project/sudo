@@ -502,7 +502,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
     memcpy(&nargv[nargc], &argv[1], argc * sizeof(char *)); /* copies NULL */
 
     /* sesh will handle noexec for us. */
-    sudo_execve(-1, sesh, nargv, envp, false);
+    sudo_execve(-1, sesh, nargv, envp, 0);
     serrno = errno;
     free(nargv);
     errno = serrno;

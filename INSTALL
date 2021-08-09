@@ -257,8 +257,8 @@ Compilation options:
         policy and I/O logging plugins.  If the --disable-shared
         option is specified, this support is disabled and the default
         sudoers policy and I/O plugins are embedded in the sudo
-        binary itself.  This will also disable the noexec option
-        as it too relies on dynamic shared object support.
+        binary itself.  This will also disable the intercept and noexec
+        options as they also rely on dynamic shared object support.
 
   --disable-shared-libutil
         Disable the use of the dynamic libsudo_util library.  By
@@ -274,8 +274,8 @@ Compilation options:
         dynamic shared object.  When the --enable-static-sudoers
         option is specified, the sudoers plugin is compiled directly
         into the sudo binary.  Unlike --disable-shared, this does
-        not prevent other plugins from being used and the noexec
-        option will continue to function.
+        not prevent other plugins from being used and the intercept
+        and noexec options will continue to function.
 
   --enable-tmpfiles.d=DIR
         Set the directory to be used when installing the sudo
@@ -381,16 +381,30 @@ Optional features:
 	not work, which may be the case on some SysV-based OS's
 	using STREAMS.
 
+  --enable-intercept[=PATH]
+        Enable support for the "intercept" functionality which allows
+        sudo to perform a policy check when a dynamically-linked
+        program run by sudo attempts to execute another program.
+        For example, this means that for a shell run through sudo,
+        the individual commands run by the shell are also subject
+        to rules in the sudoers file.  Please see the "Preventing
+        Shell Escapes" section in the sudoers man page for details.
+        If specified, PATH should be a fully qualified path name,
+        e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH is
+        "no", intercept support will not be compiled in.  The default
+        is to compile intercept support if libtool supports building
+        shared objects on your system.
+
   --with-noexec[=PATH]
 	Enable support for the "noexec" functionality which prevents
 	a dynamically-linked program being run by sudo from executing
 	another program (think shell escapes).  Please see the
-	"PREVENTING SHELL ESCAPES" section in the sudoers man page
+	"Preventing Shell Escapes" section in the sudoers man page
 	for details.  If specified, PATH should be a fully qualified
 	path name, e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH
 	is "no", noexec support will not be compiled in.  The default
 	is to compile noexec support if libtool supports building
-	shared objects on your OS.
+	shared objects on your system.
 
   --with-selinux 
 	Enable support for role based access control (RBAC) on

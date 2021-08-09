@@ -724,8 +724,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		break;
+	    case 'i':
+		SET_FLAG("intercept=", CD_INTERCEPT)
+		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)
+		SET_FLAG("log_children=", CD_LOG_CHILDREN)
 		break;
 	    case 'n':
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {

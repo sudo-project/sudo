@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "March 2, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "June 22, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -229,6 +229,7 @@ For example:
 .nf
 .sp
 .RS 6n
+Path intercept @intercept_file@
 Path noexec @noexec_file@
 Path askpass /usr/X11R6/bin/ssh-askpass
 .RE
@@ -285,6 +286,36 @@ or
 functions, for example
 BSD,
 macOS and Solaris.
+.TP 10n
+intercept
+.br
+The fully-qualified path to a shared library containing wrappers
+for the
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexect\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecvP\fR(),
+\fBexecvp\fR(),
+\fBexecvpe\fR(),
+\fBfexecve\fR(),
+\fBpopen\fR(),
+\fBposix_spawn\fR(),
+\fBposix_spawnp\fR(),
+\fBsystem\fR(),
+and
+\fBwordexp\fR()
+library functions that intercept attempts to run further commands and
+perform a policy check before allowing them to be executed.
+This is used to implement the
+\fIintercept\fR
+functionality on systems that support
+\fRLD_PRELOAD\fR
+or its equivalent.
+The default value is
+\fI@intercept_file@\fR.
 .TP 10n
 noexec
 The fully-qualified path to a shared library containing wrappers
@@ -737,6 +768,21 @@ front end configuration
 # terminal device.
 #
 #Path devsearch /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
+
+#
+# Sudo command interception:
+#   Path intercept /path/to/sudo_intercept.so
+#
+# Path to a shared library containing replacements for the execv(),
+# execve() and fexecve() library functions that perform a policy check
+# to verify the command is allowed and simply return an error if not.
+# This is used to implement the "intercept" functionality on systems that
+# support LD_PRELOAD or its equivalent.
+#
+# The compiled-in value is usually sufficient and should only be changed
+# if you rename or move the sudo_intercept.so file.
+#
+#Path intercept @plugindir@/sudo_intercept.so
 
 #
 # Sudo noexec:

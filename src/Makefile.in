@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2021
+# Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -64,8 +64,9 @@ LT_LDFLAGS = @LT_LDFLAGS@
 # Flags to pass to libtool
 LTFLAGS = --tag=disable-static
 
-# Build sudo_noexec as a module instead of a shared lib (except on macOS)
-NOEXEC_MODULE = @NOEXEC_MODULE@
+# Flag to build sudo_module.so and sudo_noexec.so as modules instead of
+# shared libs (except on macOS)
+PRELOAD_MODULE = @PRELOAD_MODULE@
 
 # Address sanitizer flags
 ASAN_CFLAGS = @ASAN_CFLAGS@
@@ -179,7 +180,7 @@ sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(OBJS) $(SUDO_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
 sudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) @LIBDL@ -o $@ sudo_noexec.lo $(NOEXEC_MODULE) -avoid-version -rpath $(noexecdir) -shrext .so
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) @LIBDL@ -o $@ sudo_noexec.lo $(PRELOAD_MODULE) -avoid-version -rpath $(noexecdir) -shrext .so
 
 sesh: $(SESH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
@@ -243,7 +244,8 @@ install-plugin:
 install-fuzzer:
 
 uninstall:
-	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
+	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall \
+	    rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
 	-rm -f	$(DESTDIR)$(bindir)/sudo \
 		$(DESTDIR)$(bindir)/sudoedit \
 		$(DESTDIR)$(libexecdir)/sudo/sesh \

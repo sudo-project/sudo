@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2017, 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -65,6 +65,7 @@ sudo_dso_public int sudo_conf_read_v1(const char *conf_file, int conf_types);
 /* Accessor functions. */
 sudo_dso_public const char *sudo_conf_askpass_path_v1(void);
 sudo_dso_public const char *sudo_conf_sesh_path_v1(void);
+sudo_dso_public const char *sudo_conf_intercept_path_v1(void);
 sudo_dso_public const char *sudo_conf_noexec_path_v1(void);
 sudo_dso_public const char *sudo_conf_plugin_dir_path_v1(void);
 sudo_dso_public const char *sudo_conf_devsearch_path_v1(void);
@@ -79,6 +80,7 @@ sudo_dso_public int sudo_conf_max_groups_v1(void);
 sudo_dso_public void sudo_conf_clear_paths_v1(void);
 #define sudo_conf_askpass_path() sudo_conf_askpass_path_v1()
 #define sudo_conf_sesh_path() sudo_conf_sesh_path_v1()
+#define sudo_conf_intercept_path() sudo_conf_intercept_path_v1()
 #define sudo_conf_noexec_path() sudo_conf_noexec_path_v1()
 #define sudo_conf_plugin_dir_path() sudo_conf_plugin_dir_path_v1()
 #define sudo_conf_devsearch_path() sudo_conf_devsearch_path_v1()
