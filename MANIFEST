@@ -169,7 +169,8 @@ lib/iolog/regress/iolog_timing/check_iolog_timing.c
 lib/logsrv/Makefile.in
 lib/logsrv/log_server.pb-c.c
 lib/logsrv/log_server.proto
-lib/logsrv/protobuf-c.c
+lib/protobuf-c/Makefile.in
+lib/protobuf-c/protobuf-c.c
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/arc4random.c

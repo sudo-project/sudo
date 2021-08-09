@@ -29518,7 +29518,7 @@ elif test X"$TMPFILES_D" != X""; then
 
 fi
 
-ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 
 cat >confcache <<\_ACEOF
@@ -30518,6 +30518,7 @@ do
     "lib/fuzzstub/Makefile") CONFIG_FILES="$CONFIG_FILES lib/fuzzstub/Makefile" ;;
     "lib/iolog/Makefile") CONFIG_FILES="$CONFIG_FILES lib/iolog/Makefile" ;;
     "lib/logsrv/Makefile") CONFIG_FILES="$CONFIG_FILES lib/logsrv/Makefile" ;;
+    "lib/protobuf-c/Makefile") CONFIG_FILES="$CONFIG_FILES lib/protobuf-c/Makefile" ;;
     "lib/util/Makefile") CONFIG_FILES="$CONFIG_FILES lib/util/Makefile" ;;
     "lib/util/util.exp") CONFIG_FILES="$CONFIG_FILES lib/util/util.exp" ;;
     "logsrvd/Makefile") CONFIG_FILES="$CONFIG_FILES logsrvd/Makefile" ;;
