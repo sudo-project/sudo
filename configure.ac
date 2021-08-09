@@ -2290,7 +2290,7 @@ if test X"$with_noexec" = X"no"; then
 fi
 if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"; then
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_VAR, "$RTLD_PRELOAD_VAR")
-    SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, "$RTLD_PRELOAD_DELIM")
+    SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, '$RTLD_PRELOAD_DELIM')
     if test -n "$RTLD_PRELOAD_DEFAULT"; then
 	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DEFAULT, "$RTLD_PRELOAD_DEFAULT")
     fi

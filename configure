@@ -16832,7 +16832,7 @@ if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"; then
 EOF
 
     cat >>confdefs.h <<EOF
-#define RTLD_PRELOAD_DELIM "$RTLD_PRELOAD_DELIM"
+#define RTLD_PRELOAD_DELIM '$RTLD_PRELOAD_DELIM'
 EOF
 
     if test -n "$RTLD_PRELOAD_DEFAULT"; then

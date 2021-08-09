@@ -64,21 +64,15 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	if (strncmp(envp[env_len], RTLD_PRELOAD_VAR "=", sizeof(RTLD_PRELOAD_VAR)) == 0) {
 	    if (preload_idx == -1) {
 		const char *cp = envp[env_len] + sizeof(RTLD_PRELOAD_VAR);
-		const char *end = cp + strlen(cp);
-		const char *ep;
 		const size_t dso_len = strlen(dso_file);
 
-		/* Check to see if dso_file is already present. */
-		for (cp = sudo_strsplit(cp, end, RTLD_PRELOAD_DELIM, &ep);
-		    cp != NULL; cp = sudo_strsplit(NULL, end, RTLD_PRELOAD_DELIM,
-		    &ep)) {
-		    if ((size_t)(ep - cp) == dso_len) {
-			if (memcmp(cp, dso_file, dso_len) == 0) {
-			    /* already present */
-			    dso_present = true;
-			    break;
-			}
-		    }
+		/*
+		 * Check to see if dso_file is already first in the list.
+		 * We don't bother checking for it later in the list.
+		 */
+		if (strncmp(cp, dso_file, dso_len) == 0) {
+		    if (cp[dso_len] == '\0' || cp[dso_len] == RTLD_PRELOAD_DELIM)
+			dso_present = true;
 		}
 
 		/* Save index of existing LD_PRELOAD variable. */
@@ -144,7 +138,7 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
     if (!dso_present) {
 	if (preload_idx == -1) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	    asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, dso_file,
+	    asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR, dso_file,
 		RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 # else
 	    preload = sudo_new_key_val(RTLD_PRELOAD_VAR, dso_file);
@@ -155,7 +149,7 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	    envp[env_len++] = preload;
 	    envp[env_len] = NULL;
 	} else {
-	    int len = asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR,
+	    int len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR,
 		dso_file, RTLD_PRELOAD_DELIM, envp[preload_idx]);
 	    if (len == -1) {
 		goto oom;
