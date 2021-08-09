@@ -45,12 +45,12 @@ expand_prompt(const char *old_prompt, const char *auth_user)
     size_t len, n;
     int subst;
     const char *p;
-    char *np, *new_prompt, *endp;
+    char *np, *new_prompt;
     debug_decl(expand_prompt, SUDOERS_DEBUG_AUTH);
 
     /* How much space do we need to malloc for the prompt? */
     subst = 0;
-    for (p = old_prompt, len = strlen(old_prompt); *p; p++) {
+    for (p = old_prompt, len = strlen(old_prompt); *p != '\0'; p++) {
 	if (p[0] =='%') {
 	    switch (p[1]) {
 		case 'h':
@@ -95,44 +95,48 @@ expand_prompt(const char *old_prompt, const char *auth_user)
     }
 
     if (subst) {
-	endp = new_prompt + len;
-	for (p = old_prompt, np = new_prompt; *p; p++) {
+	for (p = old_prompt, np = new_prompt; *p != '\0'; p++) {
 	    if (p[0] =='%') {
 		switch (p[1]) {
 		    case 'h':
 			p++;
-			n = strlcpy(np, user_shost, np - endp);
-			if (n >= (size_t)(np - endp))
+			n = strlcpy(np, user_shost, len);
+			if (n >= len)
 			    goto oflow;
 			np += n;
+			len -= n;
 			continue;
 		    case 'H':
 			p++;
-			n = strlcpy(np, user_host, np - endp);
-			if (n >= (size_t)(np - endp))
+			n = strlcpy(np, user_host, len);
+			if (n >= len)
 			    goto oflow;
 			np += n;
+			len -= n;
 			continue;
 		    case 'p':
 			p++;
-			n = strlcpy(np, auth_user, np - endp);
-			if (n >= (size_t)(np - endp))
-				goto oflow;
+			n = strlcpy(np, auth_user, len);
+			if (n >= len)
+			    goto oflow;
 			np += n;
+			len -= n;
 			continue;
 		    case 'u':
 			p++;
-			n = strlcpy(np, user_name, np - endp);
-			if (n >= (size_t)(np - endp))
+			n = strlcpy(np, user_name, len);
+			if (n >= len)
 			    goto oflow;
 			np += n;
+			len -= n;
 			continue;
 		    case 'U':
 			p++;
-			n = strlcpy(np,  runas_pw->pw_name, np - endp);
-			if (n >= (size_t)(np - endp))
+			n = strlcpy(np,  runas_pw->pw_name, len);
+			if (n >= len)
 			    goto oflow;
 			np += n;
+			len -= n;
 			continue;
 		    case '%':
 			/* convert %% -> % */
@@ -143,10 +147,13 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 			break;
 		}
 	    }
-	    *np++ = *p;
-	    if (np >= endp)
+	    if (len < 2)			/* len includes NUL */
 		goto oflow;
+	    *np++ = *p;
+	    len--;
 	}
+	if (len != 1)
+	    goto oflow;
 	*np = '\0';
     } else {
 	/* Nothing to expand. */
