@@ -87,12 +87,13 @@ struct command_status;
 struct stat;
 
 /* exec.c */
-void exec_cmnd(struct command_details *details, int errfd);
+void exec_cmnd(struct command_details *details, int intercept_fd, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);
 bool sudo_terminated(struct command_status *cstat);
+void intercept_fd_cb(int fd, int what, void *v);
 
 /* exec_common.c */
-int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int flags);
+int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, int flags);
 char **disable_execute(char *envp[], const char *dso);
 char **enable_monitor(char *envp[], const char *dso);
 
@@ -106,7 +107,7 @@ int pty_make_controlling(void);
 extern int io_fds[6];
 
 /* exec_monitor.c */
-int exec_monitor(struct command_details *details, sigset_t *omask, bool foreground, int backchannel);
+int exec_monitor(struct command_details *details, sigset_t *omask, bool foreground, int backchannel, int intercept_fd);
 
 /* utmp.c */
 bool utmp_login(const char *from_line, const char *to_line, int ttyfd,

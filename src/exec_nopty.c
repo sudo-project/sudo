@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <sys/wait.h>
+#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,6 +45,7 @@ struct exec_closure_nopty {
     struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *errpipe_event;
+    struct sudo_event *intercept_event;
     struct sudo_event *sigint_event;
     struct sudo_event *sigquit_event;
     struct sudo_event *sigtstp_event;
@@ -192,7 +194,8 @@ signal_cb_nopty(int signo, int what, void *v)
  */
 static void
 fill_exec_closure_nopty(struct exec_closure_nopty *ec,
-    struct command_status *cstat, struct command_details *details, int errfd)
+    struct command_status *cstat, struct command_details *details,
+    int intercept_fd, int errfd)
 {
     debug_decl(fill_exec_closure_nopty, SUDO_DEBUG_EXEC);
 
@@ -213,6 +216,17 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     if (sudo_ev_add(ec->evbase, ec->errpipe_event, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
     sudo_debug_printf(SUDO_DEBUG_INFO, "error pipe fd %d\n", errfd);
+
+    /* Event for sudo_intercept.so (optional). */
+    if (intercept_fd != -1) {
+	ec->intercept_event = sudo_ev_alloc(intercept_fd,
+	    SUDO_EV_READ|SUDO_EV_PERSIST, intercept_fd_cb, ec->evbase);
+	if (ec->intercept_event == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if (sudo_ev_add(ec->evbase, ec->intercept_event, NULL, false) == -1)
+	    sudo_fatal("%s", U_("unable to add event to queue"));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "intercept fd %d\n", intercept_fd);
+    }
 
     /* Events for local signals. */
     ec->sigint_event = sudo_ev_alloc(SIGINT,
@@ -340,6 +354,7 @@ void
 exec_nopty(struct command_details *details, struct command_status *cstat)
 {
     struct exec_closure_nopty ec = { 0 };
+    int intercept_sv[2] = { -1, -1 };
     sigset_t set, oset;
     int errpipe[2];
     debug_decl(exec_nopty, SUDO_DEBUG_EXEC);
@@ -356,6 +371,15 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      */
     if (pipe2(errpipe, O_CLOEXEC) != 0)
 	sudo_fatal("%s", U_("unable to create pipe"));
+
+    /*
+     * Allocate a socketpair for communicating with sudo_intercept.so.
+     * This must be inherited across exec, hence no FD_CLOEXEC.
+     */
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_CHILDREN)) {
+	if (socketpair(PF_UNIX, SOCK_DGRAM, 0, intercept_sv) == -1)
+	    sudo_fatal("%s", U_("unable to create sockets"));
+    }
 
     /*
      * Block signals until we have our handlers setup in the parent so
@@ -390,7 +414,9 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	/* child */
 	sigprocmask(SIG_SETMASK, &oset, NULL);
 	close(errpipe[0]);
-	exec_cmnd(details, errpipe[1]);
+	if (intercept_sv[0] != -1)
+	    close(intercept_sv[0]);
+	exec_cmnd(details, intercept_sv[1], errpipe[1]);
 	while (write(errpipe[1], &errno, sizeof(int)) == -1) {
 	    if (errno != EINTR)
 		break;
@@ -401,6 +427,8 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
 	(int)ec.cmnd_pid);
     close(errpipe[1]);
+    if (intercept_sv[1] != -1)
+        close(intercept_sv[1]);
 
     /* No longer need execfd. */
     if (details->execfd != -1) {
@@ -416,7 +444,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      * Fill in exec closure, allocate event base, signal events and
      * the error pipe event.
      */
-    fill_exec_closure_nopty(&ec, cstat, details, errpipe[0]);
+    fill_exec_closure_nopty(&ec, cstat, details, intercept_sv[0], errpipe[0]);
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, &oset, NULL);

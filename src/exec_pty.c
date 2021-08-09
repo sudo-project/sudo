@@ -66,6 +66,7 @@ struct exec_closure_pty {
     struct sudo_event_base *evbase;
     struct sudo_event *backchannel_event;
     struct sudo_event *fwdchannel_event;
+    struct sudo_event *intercept_event;
     struct sudo_event *sigint_event;
     struct sudo_event *sigquit_event;
     struct sudo_event *sigtstp_event;
@@ -1197,7 +1198,8 @@ fwdchannel_cb(int sock, int what, void *v)
  */
 static void
 fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
-    struct command_details *details, pid_t ppgrp, int backchannel)
+    struct command_details *details, pid_t ppgrp, int backchannel,
+    int intercept_fd)
 {
     debug_decl(fill_exec_closure_pty, SUDO_DEBUG_EXEC);
 
@@ -1226,6 +1228,17 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     if (sudo_ev_add(ec->evbase, ec->backchannel_event, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
     sudo_debug_printf(SUDO_DEBUG_INFO, "backchannel fd %d\n", backchannel);
+
+    /* Event for sudo_intercept.so (optional). */
+    if (intercept_fd != -1) {
+	ec->intercept_event = sudo_ev_alloc(intercept_fd,
+	    SUDO_EV_READ|SUDO_EV_PERSIST, intercept_fd_cb, ec);
+	if (ec->intercept_event == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if (sudo_ev_add(ec->evbase, ec->intercept_event, NULL, false) == -1)
+	    sudo_fatal("%s", U_("unable to add event to queue"));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "intercept fd %d\n", intercept_fd);
+    }
 
     /* Events for local signals. */
     ec->sigint_event = sudo_ev_alloc(SIGINT,
@@ -1352,6 +1365,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     bool interpose[3] = { false, false, false };
+    int sv[2], intercept_sv[2] = { -1, -1 };
     struct exec_closure_pty ec = { 0 };
     struct plugin_container *plugin;
     int evloop_retries = -1;
@@ -1359,7 +1373,6 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     struct sigaction sa;
     struct stat sb;
     pid_t ppgrp;
-    int sv[2];
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /*
@@ -1380,6 +1393,15 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    fcntl(sv[0], F_SETFD, FD_CLOEXEC) == -1 ||
 	    fcntl(sv[1], F_SETFD, FD_CLOEXEC) == -1)
 	sudo_fatal("%s", U_("unable to create sockets"));
+
+    /*
+     * Allocate a socketpair for communicating with sudo_intercept.so.
+     * This must be inherited across exec, hence no FD_CLOEXEC.
+     */
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_CHILDREN)) {
+	if (socketpair(PF_UNIX, SOCK_DGRAM, 0, intercept_sv) == -1)
+	    sudo_fatal("%s", U_("unable to create sockets"));
+    }
 
     /*
      * We don't want to receive SIGTTIN/SIGTTOU.
@@ -1553,6 +1575,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     case 0:
 	/* child */
 	close(sv[0]);
+	if (intercept_sv[0] != -1)
+	    close(intercept_sv[0]);
 	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	if (io_pipe[STDIN_FILENO][1] != -1)
 	    close(io_pipe[STDIN_FILENO][1]);
@@ -1566,7 +1590,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	 * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
 	 * when it needs access to the controlling tty.
 	 */                                                              
-	exec_monitor(details, &oset, foreground && !pipeline, sv[1]);
+	exec_monitor(details, &oset, foreground && !pipeline, sv[1],
+	    intercept_sv[1]);
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
 	if (send(sv[1], cstat, sizeof(*cstat), 0) == -1) {
@@ -1617,7 +1642,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * Fill in exec closure, allocate event base, signal events and
      * the backchannel event.
      */
-    fill_exec_closure_pty(&ec, cstat, details, ppgrp, sv[0]);
+    fill_exec_closure_pty(&ec, cstat, details, ppgrp, sv[0], intercept_sv[0]);
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, &oset, NULL);

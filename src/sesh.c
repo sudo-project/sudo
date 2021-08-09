@@ -119,7 +119,7 @@ main(int argc, char *argv[], char *envp[])
 	    *cp = '-';
 	    argv[0] = cp;
 	}
-	sudo_execve(fd, cmnd, argv, envp, flags);
+	sudo_execve(fd, cmnd, argv, envp, -1, flags);
 	sudo_warn(U_("unable to execute %s"), cmnd);
 	ret = SESH_ERR_FAILURE;
     }

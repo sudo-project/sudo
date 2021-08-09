@@ -24,7 +24,14 @@
 #include <config.h>
 
 #include <sys/resource.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/uio.h>
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -49,7 +56,7 @@
 #include "sudo_plugin_int.h"
 
 static void
-close_fds(struct command_details *details, int errfd)
+close_fds(struct command_details *details, int errfd, int intercept_fd)
 {
     int fd, maxfd;
     unsigned char *debug_fds;
@@ -66,6 +73,8 @@ close_fds(struct command_details *details, int errfd)
     }
     if (errfd != -1)
 	add_preserved_fd(&details->preserved_fds, errfd);
+    if (intercept_fd != -1)
+	add_preserved_fd(&details->preserved_fds, intercept_fd);
 
     /* Close all fds except those explicitly preserved. */
     closefrom_except(details->closefrom, &details->preserved_fds);
@@ -79,7 +88,7 @@ close_fds(struct command_details *details, int errfd)
  * Returns true on success and false on failure.
  */
 static bool
-exec_setup(struct command_details *details, int errfd)
+exec_setup(struct command_details *details, int intercept_fd, int errfd)
 {
     bool ret = false;
     debug_decl(exec_setup, SUDO_DEBUG_EXEC);
@@ -163,7 +172,7 @@ exec_setup(struct command_details *details, int errfd)
 	(void) umask(details->umask);
 
     /* Close fds before chroot (need /dev) or uid change (prlimit on Linux). */
-    close_fds(details, errfd);
+    close_fds(details, errfd, intercept_fd);
 
     if (details->chroot) {
 	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
@@ -233,12 +242,12 @@ done:
  * If the exec fails, cstat is filled in with the value of errno.
  */
 void
-exec_cmnd(struct command_details *details, int errfd)
+exec_cmnd(struct command_details *details, int intercept_fd, int errfd)
 {
     debug_decl(exec_cmnd, SUDO_DEBUG_EXEC);
 
     restore_signals();
-    if (exec_setup(details, errfd) == true) {
+    if (exec_setup(details, intercept_fd, errfd) == true) {
 	/* headed for execve() */
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
@@ -248,7 +257,7 @@ exec_cmnd(struct command_details *details, int errfd)
 #endif
 	{
 	    sudo_execve(details->execfd, details->command, details->argv,
-		details->envp, details->flags);
+		details->envp, intercept_fd, details->flags);
 	}
     }
     sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
@@ -409,7 +418,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      */
     if (direct_exec_allowed(details)) {
 	if (!sudo_terminated(cstat)) {
-	    exec_cmnd(details, -1);
+	    exec_cmnd(details, -1, -1);
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
 	}
@@ -459,5 +468,117 @@ terminate_command(pid_t pid, bool use_pgrp)
 	kill(pid, SIGKILL);
     }
 
+    debug_return;
+}
+
+/*
+ * Read a single message from sudo_intercept.so.
+ */
+static void
+intercept_cb(int fd, int what, void *v)
+{
+    uint32_t msg_len;
+    ssize_t nread;
+    char buf[8192];
+    debug_decl(intercept_cb, SUDO_DEBUG_EXEC);
+
+    /* Read message size (uint32_t in host byte order). */
+    nread = read(fd, &msg_len, sizeof(msg_len));
+    if (nread != sizeof(msg_len)) {
+	sudo_warn("read");
+	debug_return;
+    }
+
+    /* TODO: actually parse message. */
+    while (msg_len > 0) {
+	size_t len = MIN(msg_len, sizeof(buf));
+	nread = read(fd, buf, len);
+	if (nread == -1) {
+	    sudo_warn("read");
+	    debug_return;
+	}
+	msg_len -= nread;
+    }
+
+    /* TODO: perform policy check */
+    /* TODO: switch event to write mode and write response */
+
+    debug_return;
+}
+
+/*
+ * Accept a single fd passed from the child to use for policy checks.
+ * This acts a bit like accept() in reverse since the client allocates
+ * the socketpair() that is used for the actual communication.
+ */
+void
+intercept_fd_cb(int fd, int what, void *v)
+{
+    struct sudo_event_base *base = v;
+    struct sudo_event *ev;
+    struct msghdr msg;
+    union {
+	struct cmsghdr hdr;
+	char buf[CMSG_SPACE(sizeof(int))];
+    } cmsgbuf;
+    struct cmsghdr *cmsg;
+    struct iovec iov[1];
+    int newfd = -1;
+    char ch;
+    debug_decl(intercept_fd_cb, SUDO_DEBUG_EXEC);
+
+    ev = malloc(sizeof(*ev));
+    if (ev == NULL) {
+	sudo_warnx("%s", U_("unable to allocate memory"));
+	goto bad;
+    }
+
+    /*
+     * We send a single byte of data along with the fd; some systems
+     * don't support sending file descriptors without data.
+     * Note that the intercept fd is *blocking*.
+     */
+    iov[0].iov_base = &ch;
+    iov[0].iov_len = 1;
+    memset(&msg, 0, sizeof(msg));
+    memset(&cmsgbuf, 0, sizeof(cmsgbuf));
+    msg.msg_iov = iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = &cmsgbuf.buf;
+    msg.msg_controllen = sizeof(cmsgbuf.buf);
+
+    if (recvmsg(fd, &msg, 0) == -1) {
+	if (errno != EAGAIN && errno != EINTR)
+	    sudo_warn("recvmsg");
+	goto bad;
+    }
+
+    cmsg = CMSG_FIRSTHDR(&msg);
+    if (cmsg == NULL) {
+	sudo_warnx(U_("%s: missing message header"), __func__);
+	goto bad;
+    }
+
+    if (cmsg->cmsg_type != SCM_RIGHTS) {
+	sudo_warnx(U_("%s: expected message type %d, got %d"), __func__,
+	    SCM_RIGHTS, cmsg->cmsg_type);
+	goto bad;
+    }
+
+    newfd = (*(int *)CMSG_DATA(cmsg));
+    if (sudo_ev_set(ev, newfd, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_cb, ev) == -1) {
+	sudo_warn("%s", U_("unable to add event to queue"));
+	goto bad;
+    }
+    if (sudo_ev_add(base, ev, NULL, false) == -1) {
+	sudo_warn("%s", U_("unable to add event to queue"));
+	goto bad;
+    }
+
+    debug_return;
+bad:
+    if (newfd != -1)
+	close(newfd);
+    free(ev);
     debug_return;
 }
