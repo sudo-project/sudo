@@ -383,21 +383,24 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		sudoers_policy.show_version(true);
 		break;
 	    case PASS_CHECK_LOG_LOCAL: {
-		struct list_members savedlist;
-
 		/* sudo command w/ local I/O logging (MODE_RUN) */
-		memcpy(&savedlist, &def_log_servers, sizeof(savedlist));
-		SLIST_INIT(&def_log_servers);
+		sudoers_policy.check_policy(argv.len, argv.entries,
+		    env_add.entries, &command_info, &argv_out, &user_env_out,
+		    &errstr);
+		/* call check_policy() again to check for leaks. */
 		sudoers_policy.check_policy(argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
 		sudoers_policy.init_session(NULL, NULL, NULL);
-		memcpy(&def_log_servers, &savedlist, sizeof(savedlist));
 		break;
 	    }
 	    case PASS_CHECK_LOG_REMOTE:
 		/* sudo command w/ remote I/O logging (MODE_RUN) */
+		sudoers_policy.check_policy(argv.len, argv.entries,
+		    env_add.entries, &command_info, &argv_out, &user_env_out,
+		    &errstr);
+		/* call check_policy() again to check for leaks. */
 		sudoers_policy.check_policy(argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
@@ -417,28 +420,43 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		sudoers_policy.check_policy(argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
+		/* call check_policy() again to check for leaks. */
+		sudoers_policy.check_policy(argv.len, argv.entries,
+		    env_add.entries, &command_info, &argv_out, &user_env_out,
+		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
 		sudoers_policy.init_session(NULL, NULL, NULL);
 		break;
 	    case PASS_LIST:
 		/* sudo -l (MODE_LIST) */
 		sudoers_policy.list(0, NULL, false, NULL, &errstr);
+		/* call list() again to check for leaks. */
+		sudoers_policy.list(0, NULL, false, NULL, &errstr);
 		break;
 	    case PASS_LIST_OTHER:
 		/* sudo -l -U root (MODE_LIST) */
+		sudoers_policy.list(0, NULL, false, "root", &errstr);
+		/* call list() again to check for leaks. */
 		sudoers_policy.list(0, NULL, false, "root", &errstr);
 		break;
 	    case PASS_LIST_CHECK:
 		/* sudo -l command (MODE_CHECK) */
 		sudoers_policy.list(argv.len, argv.entries, false, NULL,
 		    &errstr);
+		/* call list() again to check for leaks. */
+		sudoers_policy.list(argv.len, argv.entries, false, NULL,
+		    &errstr);
 		break;
 	    case PASS_VALIDATE:
 		/* sudo -v (MODE_VALIDATE) */
 		sudoers_policy.validate(&errstr);
+		/* call validate() again to check for leaks. */
+		sudoers_policy.validate(&errstr);
 		break;
 	    case PASS_INVALIDATE:
 		/* sudo -k */
+		sudoers_policy.invalidate(false);
+		/* call invalidate() again to check for leaks. */
 		sudoers_policy.invalidate(false);
 		break;
 	    }
@@ -608,11 +626,13 @@ sudo_file_getdefs(struct sudo_nss *nss)
     set_default("iolog_mode", "0640", true, "sudoers", 1, 1, false);
     set_default("iolog_user", NULL, false, "sudoers", 1, 1, false);
     set_default("iolog_group", NULL, false, "sudoers", 1, 1, false);
-    set_default("log_servers", "localhost", true, "sudoers", 1, 1, false);
-    set_default("log_server_timeout", "30", true, "sudoers", 1, 1, false);
-    set_default("log_server_cabundle", "/etc/ssl/cacert.pem", true, "sudoers", 1, 1, false);
-    set_default("log_server_peer_cert", "/etc/ssl/localhost.crt", true, "sudoers", 1, 1, false);
-    set_default("log_server_peer_key", "/etc/ssl/private/localhost.key", true, "sudoers", 1, 1, false);
+    if (pass != PASS_CHECK_LOG_LOCAL) {
+	set_default("log_servers", "localhost", true, "sudoers", 1, 1, false);
+	set_default("log_server_timeout", "30", true, "sudoers", 1, 1, false);
+	set_default("log_server_cabundle", "/etc/ssl/cacert.pem", true, "sudoers", 1, 1, false);
+	set_default("log_server_peer_cert", "/etc/ssl/localhost.crt", true, "sudoers", 1, 1, false);
+	set_default("log_server_peer_key", "/etc/ssl/private/localhost.key", true, "sudoers", 1, 1, false);
+    }
 
     return 0;
 }

@@ -449,7 +449,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs
 	int op;
 
 	op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
-	if (!sudo_ldap_add_default(var, val, op, source, defs)) {
+	if (!append_default(var, val, op, source, defs)) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}

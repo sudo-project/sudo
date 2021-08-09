@@ -59,7 +59,7 @@ static bool session_opened;
 extern sudo_dso_public struct policy_plugin sudoers_policy;
 
 #ifdef HAVE_BSD_AUTH_H
-extern char *login_style;
+char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 
 static int
@@ -92,7 +92,7 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
  * Fills in struct sudo_user and other common sudoers state.
  */
 int
-sudoers_policy_deserialize_info(void *v)
+sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 {
     struct sudoers_open_info *info = v;
     const char *p, *errstr, *groups = NULL;
@@ -221,7 +221,8 @@ sudoers_policy_deserialize_info(void *v)
 	if (MATCHES(*cur, "prompt=")) {
 	    /* Allow epmpty prompt. */
 	    user_prompt = *cur + sizeof("prompt=") - 1;
-	    def_passprompt_override = true;
+	    if (!append_default("passprompt_override", "true", true, NULL, defaults))
+		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "set_home=")) {
@@ -281,7 +282,8 @@ sudoers_policy_deserialize_info(void *v)
 	if (MATCHES(*cur, "login_class=")) {
 	    CHECK(*cur, "login_class=");
 	    login_class = *cur + sizeof("login_class=") - 1;
-	    def_use_loginclass = true;
+	    if (!append_default("use_loginclass", "true", true, NULL, defaults))
+		goto oom;
 	    continue;
 	}
 #ifdef HAVE_SELINUX
@@ -304,7 +306,7 @@ sudoers_policy_deserialize_info(void *v)
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
-	    CHECK(*cur, "login_style=");
+	    CHECK(*cur, "bsdauth_type=");
 	    login_style = *cur + sizeof("bsdauth_type=") - 1;
 	    continue;
 	}
@@ -965,6 +967,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
 	    *errstr = audit_msg;
     }
+
     debug_return_int(ret);
 }
 

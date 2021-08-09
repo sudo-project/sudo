@@ -426,7 +426,7 @@ bool sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file
 void sudoers_debug_deregister(void);
 
 /* policy.c */
-int sudoers_policy_deserialize_info(void *v);
+int sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 extern const char *path_ldap_conf;
 extern const char *path_ldap_secret;

@@ -192,8 +192,12 @@ bsdauth_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 
     if (state != NULL) {
 	auth_close(state->as);
+	state->as = NULL;
 	login_close(state->lc);
+	state->lc = NULL;
+	auth->data = NULL;
     }
+    login_style = NULL;
 
     debug_return_int(AUTH_SUCCESS);
 }

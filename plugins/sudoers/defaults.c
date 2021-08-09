@@ -450,7 +450,7 @@ free_defs_val(int type, union sudo_defs_val *sd_un)
 bool
 init_defaults(void)
 {
-    static int firsttime = 1;
+    static bool firsttime = true;
     struct sudo_defs_types *def;
     debug_decl(init_defaults, SUDOERS_DEBUG_DEFAULTS);
 
@@ -645,7 +645,7 @@ init_defaults(void)
     /* Init eventlog config. */
     init_eventlog_config();
 
-    firsttime = 0;
+    firsttime = false;
 
     debug_return_bool(true);
 oom:
@@ -1126,4 +1126,37 @@ list_op(const char *str, size_t len, union sudo_defs_val *sd_un,
 	SLIST_INSERT_HEAD(&sd_un->list, cur, entries);
     }
     debug_return_bool(true);
+}
+
+bool
+append_default(const char *var, const char *val, int op,
+    char *source, struct defaults_list *defs)
+{
+    struct defaults *def;
+    debug_decl(append_default, SUDOERS_DEBUG_DEFAULTS);
+
+    if ((def = calloc(1, sizeof(*def))) == NULL)
+	goto oom;
+
+    def->type = DEFAULTS;
+    def->op = op;
+    if ((def->var = strdup(var)) == NULL) {
+	goto oom;
+    }
+    if (val != NULL) {
+	if ((def->val = strdup(val)) == NULL)
+	    goto oom;
+    }
+    def->file = source;
+    sudo_rcstr_addref(source);
+    TAILQ_INSERT_TAIL(defs, def, entries);
+    debug_return_bool(true);
+
+oom:
+    if (def != NULL) {
+	free(def->var);
+	free(def->val);
+	free(def);
+    }
+    debug_return_bool(false);
 }

@@ -528,7 +528,6 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	    if (!env_init(*user_envp) || !env_merge(pam_envp))
 		status = AUTH_FATAL;
 	    *user_envp = env_get();
-	    (void)env_init(NULL);
 	    free(pam_envp);
 	    /* XXX - we leak any duplicates that were in pam_envp */
 	}

@@ -242,39 +242,6 @@ oom:
     debug_return_ptr(NULL);
 }
 
-bool
-sudo_ldap_add_default(const char *var, const char *val, int op,
-    char *source, struct defaults_list *defs)
-{
-    struct defaults *def;
-    debug_decl(sudo_ldap_add_default, SUDOERS_DEBUG_LDAP);
-
-    if ((def = calloc(1, sizeof(*def))) == NULL)
-	goto oom;
-
-    def->type = DEFAULTS;
-    def->op = op;
-    if ((def->var = strdup(var)) == NULL) {
-	goto oom;
-    }
-    if (val != NULL) {
-	if ((def->val = strdup(val)) == NULL)
-	    goto oom;
-    }
-    def->file = source;
-    sudo_rcstr_addref(source);
-    TAILQ_INSERT_TAIL(defs, def, entries);
-    debug_return_bool(true);
-
-oom:
-    if (def != NULL) {
-	free(def->var);
-	free(def->val);
-	free(def);
-    }
-    debug_return_bool(false);
-}
-
 /*
  * If a digest prefix is present, add it to struct command_digest_list
  * and update cmnd to point to the command after the digest.
@@ -583,7 +550,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			    break;
 #endif /* HAVE_PRIV_SET */
 		    } else if (store_options) {
-			if (!sudo_ldap_add_default(var, val, op, source,
+			if (!append_default(var, val, op, source,
 			    &priv->defaults)) {
 			    break;
 			}
