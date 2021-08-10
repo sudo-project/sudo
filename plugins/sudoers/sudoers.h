@@ -454,7 +454,6 @@ bool expand_tilde(char **path, const char *user);
 enum sudoers_gc_types {
     GC_UNKNOWN,
     GC_VECTOR,
-    GC_EDIT_ARGS,
     GC_PTR
 };
 bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);

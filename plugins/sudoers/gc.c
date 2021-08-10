@@ -62,7 +62,6 @@ sudoers_gc_add(enum sudoers_gc_types type, void *v)
 	gc->u.ptr = v;
 	break;
     case GC_VECTOR:
-    case GC_EDIT_ARGS:
 	gc->u.vec = v;
 	break;
     default:
@@ -95,7 +94,6 @@ sudoers_gc_remove(enum sudoers_gc_types type, void *v)
 	    	goto found;
 	    break;
 	case GC_VECTOR:
-	case GC_EDIT_ARGS:
 	    if (gc->u.vec == v)
 	    	goto found;
 	    break;
@@ -143,16 +141,6 @@ sudoers_gc_run(void)
 	case GC_VECTOR:
 	    for (cur = gc->u.vec; *cur != NULL; cur++)
 		free(*cur);
-	    free(gc->u.vec);
-	    free(gc);
-	    break;
-	case GC_EDIT_ARGS:
-	    for (cur = gc->u.vec; *cur != NULL; cur++) {
-		/* The "--" separates dynamic from non-dynamic args. */
-		if (strcmp(*cur, "--") == 0)
-		    break;
-		free(*cur);
-	    }
 	    free(gc->u.vec);
 	    free(gc);
 	    break;

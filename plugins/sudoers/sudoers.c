@@ -420,7 +420,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * '-i' option.  We also allocate an extra slot for bash's --login.
      */
     if (NewArgv != NULL) {
-	/* XXX - could be edit_argv instead, see gc.c for how to free. */
 	sudoers_gc_remove(GC_PTR, NewArgv);
 	free(NewArgv);
     }
@@ -780,7 +779,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		env_editor ? env_editor : def_editor);
 	    goto bad;
 	}
-	sudoers_gc_add(GC_EDIT_ARGS, edit_argv);
+	/* find_editor() already g/c'd edit_argv[] */
 	sudoers_gc_remove(GC_PTR, NewArgv);
 	free(NewArgv);
 	NewArgv = edit_argv;
