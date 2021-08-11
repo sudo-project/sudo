@@ -122,7 +122,8 @@ connection_closure_free(struct connection_closure *closure)
 	    /* Must call SSL_shutdown() before closing closure->sock. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"closing down TLS connection from %s", closure->ipaddr);
-	    SSL_shutdown(closure->ssl);
+	    if (SSL_shutdown(closure->ssl) == 0)
+		SSL_shutdown(closure->ssl);
 	    SSL_free(closure->ssl);
 	}
 #endif

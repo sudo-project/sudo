@@ -83,7 +83,8 @@ relay_closure_free(struct relay_closure *relay_closure)
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "closing down TLS connection to %s",
 	    relay_closure->relay_name.name);
-	SSL_shutdown(relay_closure->tls_client.ssl);
+	if (SSL_shutdown(relay_closure->tls_client.ssl) == 0)
+	    SSL_shutdown(relay_closure->tls_client.ssl);
 	SSL_free(relay_closure->tls_client.ssl);
     }
 #endif

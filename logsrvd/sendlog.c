@@ -1379,7 +1379,8 @@ client_closure_free(struct client_closure *closure)
 	TAILQ_REMOVE(&connections, closure, entries);
 #if defined(HAVE_OPENSSL)
         if (closure->tls_client.ssl != NULL) {
-            SSL_shutdown(closure->tls_client.ssl);
+            if (SSL_shutdown(closure->tls_client.ssl) == 0)
+		SSL_shutdown(closure->tls_client.ssl);
             SSL_free(closure->tls_client.ssl);
         }
 	sudo_ev_free(closure->tls_client.tls_connect_ev);

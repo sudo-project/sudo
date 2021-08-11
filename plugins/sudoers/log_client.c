@@ -627,7 +627,8 @@ client_closure_free(struct client_closure *closure)
 #if defined(HAVE_OPENSSL)
     /* Shut down the TLS connection cleanly and free SSL data. */
     if (closure->ssl != NULL) {
-	SSL_shutdown(closure->ssl);
+	if (SSL_shutdown(closure->ssl) == 0)
+	    SSL_shutdown(closure->ssl);
 	SSL_free(closure->ssl);
     }
     SSL_CTX_free(closure->ssl_ctx);
