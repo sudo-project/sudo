@@ -151,6 +151,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     /* If we can't find the editor in the user's PATH, give up. */
     if (find_path(editor, &editor_path, &user_editor_sb, getenv("PATH"), NULL,
 	    0, allowlist) != FOUND) {
+	sudoers_gc_remove(GC_PTR, editor);
 	free(editor);
 	errno = ENOENT;
 	debug_return_str(NULL);
@@ -187,6 +188,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     debug_return_str(editor_path);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudoers_gc_remove(GC_PTR, editor);
     free(editor);
     free(editor_path);
     if (nargv != NULL) {
@@ -259,5 +261,6 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
 	}
     }
 
+    /* Caller is responsible for freeing editor_path, not g/c'd. */
     debug_return_str(editor_path);
 }
