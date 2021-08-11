@@ -1,6 +1,5 @@
 /* public domain */
 
-sudo_sys_signame[0] = "Signal 0";
 #ifdef SIGHUP
     if (sudo_sys_signame[SIGHUP] == NULL)
 	sudo_sys_signame[SIGHUP] = "HUP";

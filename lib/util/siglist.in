@@ -17,11 +17,11 @@
     EMT     EMT trap
     FPE     Floating point exception
     KILL    Killed
-# before BUS (Older Linux doesn't really have a BUS, but defines it to UNUSED)
-    UNUSED  Unused
     BUS     Bus error
     SEGV    Memory fault
+# before UNUSED (SYS and UNUSED share the same value in musl libc).
     SYS     Bad system call
+    UNUSED  Unused
     PIPE    Broken pipe
     ALRM    Alarm clock
     TERM    Terminated
