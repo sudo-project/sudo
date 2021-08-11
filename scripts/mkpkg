@@ -399,6 +399,25 @@ case "$osversion" in
 		$configure_opts"
 	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=true"
 	;;
+    FreeBSD*)
+	# Encrypted remote I/O log support.
+	with_openssl=true
+
+	# Python plugins
+	with_python=true
+
+	configure_opts="
+		--sysconfdir=/usr/local/etc
+		--with-ignore-dot
+		--with-tty-tickets
+		--with-env-editor
+		--with-logincap
+		--with-long-otp-prompt
+		--with-rundir=/var/run/sudo
+		--enable-zlib=system
+		--disable-nls
+		$configure_opts"
+	;;
     *)
 	# For Solaris, add project support and use let configure choose zlib.
 	# For all others, use the builtin zlib and disable NLS support.
