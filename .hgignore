@@ -47,7 +47,9 @@ Makefile$
 ^lib/iolog/host_port_test$
 
 ^lib/util/mksiglist$
+^lib/util/mksiglist.h$
 ^lib/util/mksigname$
+^lib/util/mksigname.h$
 ^lib/util/siglist\.c$
 ^lib/util/signame\.c$
 ^lib/util/util\.exp$
