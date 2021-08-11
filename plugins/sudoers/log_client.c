@@ -494,6 +494,7 @@ connect_server(const char *host, const char *port, bool tls,
 	default:
             cause = "ai_family";
 	    save_errno = EAFNOSUPPORT;
+	    shutdown(sock, SHUT_RDWR);
 	    close(sock);
 	    errno = save_errno;
 	    sock = -1;
@@ -503,6 +504,7 @@ connect_server(const char *host, const char *port, bool tls,
                 sizeof(closure->server_ip)) == NULL) {
             cause = "inet_ntop";
 	    save_errno = errno;
+	    shutdown(sock, SHUT_RDWR);
 	    close(sock);
 	    errno = save_errno;
 	    sock = -1;
@@ -512,6 +514,7 @@ connect_server(const char *host, const char *port, bool tls,
 	if ((closure->server_name = strdup(host)) == NULL) {
 	    cause = "strdup";
 	    save_errno = errno;
+	    shutdown(sock, SHUT_RDWR);
 	    close(sock);
 	    errno = save_errno;
 	    sock = -1;
@@ -523,6 +526,7 @@ connect_server(const char *host, const char *port, bool tls,
             if (!tls_init(closure) || !SSL_set_fd(closure->ssl, sock)) {
                 cause = U_("TLS initialization was unsuccessful");
                 save_errno = errno;
+		shutdown(sock, SHUT_RDWR);
                 close(sock);
                 errno = save_errno;
                 sock = -1;
@@ -532,6 +536,7 @@ connect_server(const char *host, const char *port, bool tls,
             if (!tls_timed_connect(closure->ssl, host, port, timeout)) {
                 cause = U_("TLS handshake was unsuccessful");
                 save_errno = errno;
+		shutdown(sock, SHUT_RDWR);
                 close(sock);
                 errno = save_errno;
                 sock = -1;
@@ -634,8 +639,10 @@ client_closure_free(struct client_closure *closure)
     SSL_CTX_free(closure->ssl_ctx);
 #endif
 
-    if (closure->sock != -1)
+    if (closure->sock != -1) {
+	shutdown(closure->sock, SHUT_RDWR);
 	close(closure->sock);
+    }
     free(closure->server_name);
     while ((buf = TAILQ_FIRST(&closure->write_bufs)) != NULL) {
 	TAILQ_REMOVE(&closure->write_bufs, buf, entries);

@@ -1390,6 +1390,7 @@ client_closure_free(struct client_closure *closure)
         free(closure->read_buf.data);
         free(closure->write_buf.data);
         free(closure->buf);
+	shutdown(closure->sock, SHUT_RDWR);
         close(closure->sock);
         free(closure);
     }

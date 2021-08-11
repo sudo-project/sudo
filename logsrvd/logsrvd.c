@@ -127,8 +127,10 @@ connection_closure_free(struct connection_closure *closure)
 	    SSL_free(closure->ssl);
 	}
 #endif
-	if (closure->sock != -1)
+	if (closure->sock != -1) {
+	    shutdown(closure->sock, SHUT_RDWR);
 	    close(closure->sock);
+	}
 	iolog_close_all(closure);
 	sudo_ev_free(closure->commit_ev);
 	sudo_ev_free(closure->read_ev);

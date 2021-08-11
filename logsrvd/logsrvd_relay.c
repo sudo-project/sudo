@@ -100,8 +100,10 @@ relay_closure_free(struct relay_closure *relay_closure)
 	free(buf->data);
 	free(buf);
     }
-    if (relay_closure->sock != -1)
+    if (relay_closure->sock != -1) {
+	shutdown(relay_closure->sock, SHUT_RDWR);
 	close(relay_closure->sock);
+    }
     free(relay_closure);
 
     debug_return;
@@ -360,8 +362,10 @@ connect_relay_next(struct connection_closure *closure)
     relay_closure->relay_name.name = sudo_rcstr_addref(relay->sa_host);
 
     if (ret == 0) {
-	if (relay_closure->sock != -1)
+	if (relay_closure->sock != -1) {
+	    shutdown(relay_closure->sock, SHUT_RDWR);
 	    close(relay_closure->sock);
+	}
 	relay_closure->sock = sock;
 #if defined(HAVE_OPENSSL)
 	/* Relay connection succeeded, start TLS handshake. */
@@ -386,8 +390,10 @@ connect_relay_next(struct connection_closure *closure)
 	    sudo_warnx("%s", U_("unable to add event to queue"));
 	    goto bad;
 	}
-	if (relay_closure->sock != -1)
+	if (relay_closure->sock != -1) {
+	    shutdown(relay_closure->sock, SHUT_RDWR);
 	    close(relay_closure->sock);
+	}
 	relay_closure->sock = sock;
 	closure->state = CONNECTING;
     }
@@ -395,8 +401,10 @@ connect_relay_next(struct connection_closure *closure)
 
 bad:
     /* Connection or system error. */
-    if (sock != -1)
+    if (sock != -1) {
+	shutdown(sock, SHUT_RDWR);
 	close(sock);
+    }
     sudo_rcstr_delref(relay_closure->relay_name.name);
     relay_closure->relay_name.name = NULL;
     sudo_ev_free(relay_closure->connect_ev);
@@ -799,6 +807,7 @@ relay_server_msg_cb(int fd, int what, void *v)
 	goto send_error;
     case 0:
 	/* EOF from relay server, close the socket. */
+	shutdown(relay_closure->sock, SHUT_RDWR);
 	close(relay_closure->sock);
 	relay_closure->sock = -1;
 	sudo_ev_del(closure->evbase, relay_closure->read_ev);
@@ -917,6 +926,7 @@ relay_client_msg_cb(int fd, int what, void *v)
             switch (SSL_get_error(ssl, nwritten)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
+		    shutdown(relay_closure->sock, SHUT_RDWR);
 		    close(relay_closure->sock);
 		    relay_closure->sock = -1;
 		    sudo_ev_del(closure->evbase, relay_closure->read_ev);
