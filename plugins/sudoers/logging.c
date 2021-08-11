@@ -127,7 +127,7 @@ log_server_reject(struct eventlog *evlog, const char *message,
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
-    if (client_closure != NULL) {
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
 	/* Older servers don't support multiple commands per session. */
 	if (!client_closure->subcommands)
 	    debug_return_bool(true);
@@ -183,7 +183,7 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
 	}
     }
 
-    if (client_closure != NULL) {
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
 	/* Older servers don't support multiple commands per session. */
 	if (!client_closure->subcommands)
 	    debug_return_bool(true);
