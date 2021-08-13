@@ -2600,7 +2600,10 @@ AC_CHECK_FUNCS([getdelim], [
     SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
 ])
-AC_CHECK_FUNCS([getusershell], [], [
+AC_CHECK_FUNCS([getusershell], [
+    # Older Solaris has getusershell() et al but does not declare it.
+    AC_CHECK_DECLS([getusershell])
+], [
     AC_LIBOBJ(getusershell)
     SUDO_APPEND_COMPAT_EXP(sudo_getusershell)
 ])

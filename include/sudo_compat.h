@@ -441,6 +441,11 @@ sudo_dso_public void sudo_setusershell(void);
 sudo_dso_public void sudo_endusershell(void);
 # undef endusershell
 # define endusershell() sudo_endusershell()
+#elif HAVE_DECL_GETUSERSHELL == 0
+/* Older Solaris has getusershell() et al but does not declare it. */
+char *getusershell(void);
+void setusershell(void);
+void endusershell(void);
 #endif /* HAVE_GETUSERSHELL */
 #ifndef HAVE_UTIMENSAT
 sudo_dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
