@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 26, 2021
+.Dd August 13, 2021
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -28,7 +28,7 @@
 .Op Fl f Ar filter
 .Op Fl m Ar num
 .Op Fl s Ar num
-ID
+.No ID Ns Op Ar @offset
 .Pp
 .Nm
 .Op Fl h
@@ -50,6 +50,16 @@ should either be a six character sequence of digits and
 upper case letters, e.g.,
 .Li 0100A5
 or a path name.
+The
+.Em ID
+may include an optional
+.Ar @offset
+suffix which may be used to start replaying at a specific time offset.
+The
+.Ar @offset
+is specified as a number in seconds since the start of the session
+with an optional decimal fraction.
+.Pp
 Path names may be relative to the I/O log directory
 .Pa @iolog_dir@
 (unless overridden by the
