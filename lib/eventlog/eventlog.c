@@ -134,7 +134,8 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 	}
 	if (sudo_timespecisset(&evlog->iolog_offset)) {
 	    (void)snprintf(offsetstr, sizeof(offsetstr), "@%lld.%09ld",
-		evlog->iolog_offset.tv_sec, evlog->iolog_offset.tv_nsec);
+		(long long)evlog->iolog_offset.tv_sec,
+		evlog->iolog_offset.tv_nsec);
 	}
     }
 
