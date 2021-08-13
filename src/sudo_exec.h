@@ -80,6 +80,7 @@
 #define SESH_ERR_SOME_FILES 33		/* copy error, some files copied */
 
 #define INTERCEPT_FD_MIN    64		/* minimum fd so shell won't close it */
+#define INTERCEPT_REQ_SEC   42		/* request intercept secret */
 #define MESSAGE_SIZE_MAX    2097152	/* 2Mib max intercept message size */
 
 /*

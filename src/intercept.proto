@@ -44,4 +44,5 @@ message PolicyCheckResult {
     PolicyRejectMessage reject_msg = 2;
     PolicyErrorMessage error_msg = 3;
   }
+  fixed64 secret = 4;
 }

@@ -40,6 +40,7 @@
 
 /* Note that details and evbase must come first. */
 struct exec_closure_nopty {
+    uint64_t secret;
     struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *errpipe_event;
@@ -201,6 +202,7 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     debug_decl(fill_exec_closure_nopty, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
+    ec->secret = arc4random() | ((uint64_t)arc4random() << 32);
     ec->ppgrp = getpgrp();
     ec->cstat = cstat;
     ec->details = details;

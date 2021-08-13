@@ -57,6 +57,7 @@ TAILQ_HEAD(monitor_message_list, monitor_message);
 
 /* Note that details and evbase must come first. */
 struct exec_closure_pty {
+    uint64_t secret;
     struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *backchannel_event;
@@ -1205,6 +1206,7 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     debug_decl(fill_exec_closure_pty, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
+    ec->secret = arc4random() | ((uint64_t)arc4random() << 32);
     ec->cmnd_pid = -1;
     ec->ppgrp = ppgrp;
     ec->cstat = cstat;

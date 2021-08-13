@@ -53,6 +53,7 @@
 extern char **environ;
 
 static int intercept_sock = -1;
+static uint64_t secret;
 
 /*
  * Look up SUDO_INTERCEPT_FD in the environment.
@@ -82,6 +83,7 @@ sudo_interposer_init(void)
             if (strncmp(*p, "SUDO_INTERCEPT_FD=", sizeof("SUDO_INTERCEPT_FD=") -1) == 0) {
                 const char *fdstr = *p + sizeof("SUDO_INTERCEPT_FD=") - 1;
 		const char *errstr;
+		char ch = INTERCEPT_REQ_SEC;
                 int fd;
 
 		fd = sudo_strtonum(fdstr, 0, INT_MAX, &errstr);
@@ -90,6 +92,19 @@ sudo_interposer_init(void)
 			"invalid SUDO_INTERCEPT_FD: %s: %s", fdstr, errstr);
                     break;
                 }
+
+		/* Request secret from parent. */
+		if (send(fd, &ch, sizeof(ch), 0) != sizeof(ch)) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unable to request secret: %s", strerror(errno));
+                    break;
+		}
+		if (recv(fd, &secret, sizeof(secret), 0) != sizeof(secret)) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unable to read secret: %s", strerror(errno));
+                    break;
+		}
+
                 intercept_sock = fd;
                 break;
             }
@@ -307,6 +322,10 @@ command_allowed(const char *cmnd, char * const argv[], char * const envp[],
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to unpack %s size %u", "PolicyCheckResult", res_len);
         goto done;
+    }
+    if (res->secret != secret) {
+	sudo_warnx("secret mismatch\r");
+	goto done;
     }
     switch (res->type_case) {
     case POLICY_CHECK_RESULT__TYPE_ACCEPT_MSG:

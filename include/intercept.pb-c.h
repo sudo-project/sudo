@@ -118,6 +118,7 @@ typedef enum {
 struct  _PolicyCheckResult
 {
   ProtobufCMessage base;
+  uint64_t secret;
   PolicyCheckResult__TypeCase type_case;
   union {
     PolicyAcceptMessage *accept_msg;
@@ -127,7 +128,7 @@ struct  _PolicyCheckResult
 };
 #define POLICY_CHECK_RESULT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&policy_check_result__descriptor) \
-    , POLICY_CHECK_RESULT__TYPE__NOT_SET, {0} }
+    , 0, POLICY_CHECK_RESULT__TYPE__NOT_SET, {0} }
 
 
 /* InterceptMessage methods */

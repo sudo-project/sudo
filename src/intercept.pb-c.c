@@ -519,7 +519,7 @@ const ProtobufCMessageDescriptor policy_error_message__descriptor =
   (ProtobufCMessageInit) policy_error_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor policy_check_result__field_descriptors[3] =
+static const ProtobufCFieldDescriptor policy_check_result__field_descriptors[4] =
 {
   {
     "accept_msg",
@@ -557,16 +557,29 @@ static const ProtobufCFieldDescriptor policy_check_result__field_descriptors[3] 
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "secret",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_FIXED64,
+    0,   /* quantifier_offset */
+    offsetof(PolicyCheckResult, secret),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned policy_check_result__field_indices_by_name[] = {
   0,   /* field[0] = accept_msg */
   2,   /* field[2] = error_msg */
   1,   /* field[1] = reject_msg */
+  3,   /* field[3] = secret */
 };
 static const ProtobufCIntRange policy_check_result__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 3 }
+  { 0, 4 }
 };
 const ProtobufCMessageDescriptor policy_check_result__descriptor =
 {
@@ -576,7 +589,7 @@ const ProtobufCMessageDescriptor policy_check_result__descriptor =
   "PolicyCheckResult",
   "",
   sizeof(PolicyCheckResult),
-  3,
+  4,
   policy_check_result__field_descriptors,
   policy_check_result__field_indices_by_name,
   1,  policy_check_result__number_ranges,

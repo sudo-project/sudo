@@ -52,6 +52,7 @@ static void intercept_cb(int fd, int what, void *v);
 
 /* Must match start of exec_closure_nopty and monitor_closure.  */
 struct intercept_fd_closure {
+    uint64_t secret;
     struct command_details *details;
     struct sudo_event_base *evbase;
 };
@@ -65,6 +66,7 @@ struct intercept_closure {
     char **run_argv;		/* owned by plugin */
     char **run_envp;		/* dynamically allocated */
     uint8_t *buf;		/* dynamically allocated */
+    uint64_t secret;
     size_t len;
     int policy_result;
 };
@@ -380,13 +382,14 @@ done:
 }
 
 static bool
-fmt_policy_check_result(PolicyCheckResult *msg, struct intercept_closure *closure)
+fmt_policy_check_result(PolicyCheckResult *res, struct intercept_closure *closure)
 {
     uint32_t msg_len;
     bool ret = false;
     debug_decl(fmt_policy_check_result, SUDO_DEBUG_EXEC);
 
-    closure->len = policy_check_result__get_packed_size(msg);
+    res->secret = closure->secret;
+    closure->len = policy_check_result__get_packed_size(res);
     if (closure->len > MESSAGE_SIZE_MAX) {
 	sudo_warnx(U_("server message too large: %zu"), closure->len);
 	goto done;
@@ -404,7 +407,7 @@ fmt_policy_check_result(PolicyCheckResult *msg, struct intercept_closure *closur
 	goto done;
     }
     memcpy(closure->buf, &msg_len, sizeof(msg_len));
-    policy_check_result__pack(msg, closure->buf + sizeof(msg_len));
+    policy_check_result__pack(res, closure->buf + sizeof(msg_len));
 
     ret = true;
 
@@ -565,6 +568,7 @@ intercept_fd_cb(int fd, int what, void *v)
 	sudo_warnx("%s", U_("unable to allocate memory"));
 	goto bad;
     }
+    closure->secret = fdc->secret;
     closure->details = fdc->details;
 
     /*
@@ -596,6 +600,13 @@ intercept_fd_cb(int fd, int what, void *v)
 	goto bad;
     default:
 	break;
+    }
+
+    if (ch == INTERCEPT_REQ_SEC) {
+	/* Client requested secret from ctor, no fd is present. */
+	if (write(fd, &fdc->secret, sizeof(fdc->secret)) != sizeof(fdc->secret))
+	    goto bad;
+	debug_return;
     }
 
 #if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
