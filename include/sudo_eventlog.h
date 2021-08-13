@@ -111,6 +111,7 @@ struct eventlog {
     char **env_add;
     char **envp;
     struct timespec submit_time;
+    struct timespec iolog_offset;
     int lines;
     int columns;
     uid_t runuid;

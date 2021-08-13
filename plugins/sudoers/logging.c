@@ -804,6 +804,14 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     } else {
 	strlcpy(evlog->uuid_str, uuid_str, sizeof(evlog->uuid_str));
     }
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+	struct timespec now;
+	if (sudo_gettime_real(&now) == -1) {
+	    sudo_warn("%s", U_("unable to get time of day"));
+	} else {
+	    sudo_timespecsub(&now, &sudo_user.submit_time, &evlog->iolog_offset);
+	}
+    }
 
     debug_return;
 }

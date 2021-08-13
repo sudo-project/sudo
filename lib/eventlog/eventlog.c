@@ -100,7 +100,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     const char *iolog_file = evlog->iolog_file;
     const char *tty, *tsid = NULL;
     char exit_str[(((sizeof(int) * 8) + 2) / 3) + 2];
-    char sessid[7];
+    char sessid[7], offsetstr[64] = "";
     size_t len = 0;
     int i;
     debug_decl(new_logline, SUDO_DEBUG_UTIL);
@@ -132,6 +132,10 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 	} else {
 	    tsid = iolog_file;
 	}
+	if (sudo_timespecisset(&evlog->iolog_offset)) {
+	    (void)snprintf(offsetstr, sizeof(offsetstr), "@%lld.%09ld",
+		evlog->iolog_offset.tv_sec, evlog->iolog_offset.tv_nsec);
+	}
     }
 
     /* Sudo-format logs use the short form of the ttyname. */
@@ -159,8 +163,9 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 	len += sizeof(LL_USER_STR) + 2 + strlen(evlog->runuser);
     if (evlog->rungroup != NULL)
 	len += sizeof(LL_GROUP_STR) + 2 + strlen(evlog->rungroup);
-    if (tsid != NULL)
-	len += sizeof(LL_TSID_STR) + 2 + strlen(tsid);
+    if (tsid != NULL) {
+	len += sizeof(LL_TSID_STR) + 2 + strlen(tsid) + strlen(offsetstr);
+    }
     if (evlog->env_add != NULL) {
 	size_t evlen = 0;
 	char * const *ep;
@@ -251,6 +256,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     if (tsid != NULL) {
 	if (strlcat(line, LL_TSID_STR, len) >= len ||
 	    strlcat(line, tsid, len) >= len ||
+	    strlcat(line, offsetstr, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
@@ -860,14 +866,14 @@ format_json(int event_type, struct eventlog_args *args,
 
     /* Log event time on server (set earlier) */
     if (!json_add_timestamp(&json, "server_time", &now, true)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable format timestamp");
 	goto bad;
     }
 
     /* Log event time from client */
     if (!json_add_timestamp(&json, time_str, args->event_time, format_timestamp)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable format timestamp");
 	goto bad;
     }
@@ -910,6 +916,14 @@ format_json(int event_type, struct eventlog_args *args,
 	    json_value.u.string = evlog->iolog_path;
 	    if (!sudo_json_add_value(&json, "iolog_path", &json_value))
 		goto bad;
+
+	    if (sudo_timespecisset(&evlog->iolog_offset)) {
+		if (!json_add_timestamp(&json, "iolog_offset", &evlog->iolog_offset, false)) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unable format timestamp");
+		    goto bad;
+		}
+	    }
 	}
     }
 

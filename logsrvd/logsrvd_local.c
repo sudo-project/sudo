@@ -166,6 +166,20 @@ store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
 	    closure->log_io = true;
 	    log_id = closure->evlog->iolog_path;
 	}
+    } else if (closure->log_io) {
+	/* Sub-command from an existing session, set iolog and offset. */
+	evlog->iolog_path = strdup(closure->evlog->iolog_path);
+	if (evlog->iolog_path == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    closure->errstr = _("unable to allocate memory");
+	    goto done;
+	}
+	if (closure->evlog->iolog_file != NULL) {
+	    evlog->iolog_file = evlog->iolog_path +
+		(closure->evlog->iolog_file - closure->evlog->iolog_path);
+	}
+	sudo_timespecsub(&evlog->submit_time, &closure->evlog->submit_time,
+	    &evlog->iolog_offset);
     }
 
     if (!eventlog_accept(evlog, 0, logsrvd_json_log_cb, &info)) {
@@ -215,6 +229,20 @@ store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len,
     if (closure->evlog == NULL) {
 	/* Initial command in session. */
 	closure->evlog = evlog;
+    } else if (closure->log_io) {
+	/* Sub-command from an existing session, set iolog and offset. */
+	evlog->iolog_path = strdup(closure->evlog->iolog_path);
+	if (evlog->iolog_path == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    closure->errstr = _("unable to allocate memory");
+	    goto done;
+	}
+	if (closure->evlog->iolog_file != NULL) {
+	    evlog->iolog_file = evlog->iolog_path +
+		(closure->evlog->iolog_file - closure->evlog->iolog_path);
+	}
+	sudo_timespecsub(&evlog->submit_time, &closure->evlog->submit_time,
+	    &evlog->iolog_offset);
     }
 
     if (!eventlog_reject(evlog, 0, msg->reason, logsrvd_json_log_cb, &info)) {
