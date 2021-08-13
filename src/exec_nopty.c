@@ -25,6 +25,12 @@
 
 #include <sys/wait.h>
 #include <sys/socket.h>
+
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,6 +43,7 @@
 #include "sudo_exec.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
+#include "sudo_rand.h"
 
 /* Note that details and evbase must come first. */
 struct exec_closure_nopty {

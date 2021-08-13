@@ -28,6 +28,12 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
+
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +47,7 @@
 #include "sudo_exec.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
+#include "sudo_rand.h"
 
 /* Evaluates to true if the event has /dev/tty as its fd. */
 #define USERTTY_EVENT(_ev)	(sudo_ev_get_fd((_ev)) == io_fds[SFD_USERTTY])
