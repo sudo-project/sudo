@@ -139,43 +139,56 @@ bool
 store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    char *log_id = NULL;
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
+    struct eventlog *evlog = NULL;
+    char *log_id = NULL;
+    bool ret = false;
     debug_decl(store_accept_local, SUDO_DEBUG_UTIL);
 
     /* Store sudo-style event and I/O logs. */
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs, closure);
-    if (closure->evlog == NULL) {
+    evlog = evlog_new(msg->submit_time, msg->info_msgs, msg->n_info_msgs,
+	closure);
+    if (evlog == NULL) {
 	closure->errstr = _("error parsing AcceptMessage");
-	debug_return_bool(false);
+	goto done;
     }
 
-    /* Create I/O log info file and parent directories. */
-    if (msg->expect_iobufs) {
-	if (!iolog_init(msg, closure)) {
-	    closure->errstr = _("error creating I/O log");
-	    debug_return_bool(false);
+    /* Additional setup for the initial command in the session. */
+    if (closure->evlog == NULL) {
+	closure->evlog = evlog;
+
+	/* Create I/O log info file and parent directories. */
+	if (msg->expect_iobufs) {
+	    if (!iolog_init(msg, closure)) {
+		closure->errstr = _("error creating I/O log");
+		goto done;
+	    }
+	    closure->log_io = true;
+	    log_id = closure->evlog->iolog_path;
 	}
-	closure->log_io = true;
-	log_id = closure->evlog->iolog_path;
     }
 
-    if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
+    if (!eventlog_accept(evlog, 0, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging accept event");
-	debug_return_bool(false);
+	goto done;
     }
 
     if (log_id != NULL) {
 	/* Send log ID to client for restarting connections. */
 	if (!fmt_log_id_message(log_id, closure))
-	    debug_return_bool(false);
+	    goto done;
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {
 	    sudo_warnx("%s", U_("unable to add event to queue"));
-	    debug_return_bool(false);
+	    goto done;
 	}
     }
+
+    ret = true;
+
+done:
+    if (closure->evlog != evlog)
+	eventlog_free(evlog);
 
     debug_return_bool(true);
 }
@@ -188,22 +201,34 @@ store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
+    struct eventlog *evlog = NULL;
+    bool ret = false;
     debug_decl(store_reject_local, SUDO_DEBUG_UTIL);
 
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs, closure);
-    if (closure->evlog == NULL) {
+    evlog = evlog_new(msg->submit_time, msg->info_msgs, msg->n_info_msgs,
+	closure);
+    if (evlog == NULL) {
 	closure->errstr = _("error parsing RejectMessage");
-	debug_return_bool(false);
+	goto done;
     }
 
-    if (!eventlog_reject(closure->evlog, 0, msg->reason,
-	    logsrvd_json_log_cb, &info)) {
+    if (closure->evlog == NULL) {
+	/* Initial command in session. */
+	closure->evlog = evlog;
+    }
+
+    if (!eventlog_reject(evlog, 0, msg->reason, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging reject event");
-	debug_return_bool(false);
+	goto done;
     }
 
-    debug_return_bool(true);
+    ret = true;
+
+done:
+    if (closure->evlog != evlog)
+	eventlog_free(evlog);
+
+    debug_return_bool(ret);
 }
 
 bool
@@ -326,13 +351,13 @@ bool
 store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    struct eventlog *evlog = NULL;
     struct timespec alert_time;
     debug_decl(store_alert_local, SUDO_DEBUG_UTIL);
 
     if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
-	closure->evlog = evlog_new(NULL, msg->info_msgs,
-	    msg->n_info_msgs, closure);
-	if (closure->evlog == NULL) {
+	evlog = evlog_new(NULL, msg->info_msgs, msg->n_info_msgs, closure);
+	if (evlog == NULL) {
 	    closure->errstr = _("error parsing AlertMessage");
 	    debug_return_bool(false);
 	}
@@ -340,9 +365,15 @@ store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len,
 
     alert_time.tv_sec = msg->alert_time->tv_sec;
     alert_time.tv_nsec = msg->alert_time->tv_nsec;
-    if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
+    if (!eventlog_alert(evlog, 0, &alert_time, msg->reason, NULL)) {
 	closure->errstr = _("error logging alert event");
 	debug_return_bool(false);
+    }
+
+    if (closure->evlog == NULL) {
+	closure->evlog = evlog;
+    } else {
+	eventlog_free(evlog);
     }
 
     debug_return_bool(true);
