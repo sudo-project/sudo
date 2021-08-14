@@ -564,14 +564,6 @@ intercept_fd_cb(int fd, int what, void *v)
     char ch;
     debug_decl(intercept_fd_cb, SUDO_DEBUG_EXEC);
 
-    closure = calloc(1, sizeof(*closure));
-    if (closure == NULL) {
-	sudo_warnx("%s", U_("unable to allocate memory"));
-	goto bad;
-    }
-    closure->secret = fdc->secret;
-    closure->details = fdc->details;
-
     /*
      * We send a single byte of data along with the fd; some systems
      * don't support sending file descriptors without data.
@@ -629,6 +621,14 @@ intercept_fd_cb(int fd, int what, void *v)
 	goto bad;
     }
 #endif /* HAVE_STRUCT_MSGHDR_MSG_CONTROL */
+
+    closure = calloc(1, sizeof(*closure));
+    if (closure == NULL) {
+	sudo_warnx("%s", U_("unable to allocate memory"));
+	goto bad;
+    }
+    closure->secret = fdc->secret;
+    closure->details = fdc->details;
 
     if (sudo_ev_set(&closure->ev, newfd, SUDO_EV_READ, intercept_cb, closure) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
