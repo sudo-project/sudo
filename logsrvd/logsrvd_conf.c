@@ -186,6 +186,18 @@ logsrvd_conf_log_exit(void)
 }
 
 /* iolog getters */
+uid_t
+logsrvd_conf_iolog_uid(void)
+{
+    return logsrvd_config->iolog.uid;
+}
+
+gid_t
+logsrvd_conf_iolog_gid(void)
+{
+    return logsrvd_config->iolog.gid;
+}
+
 mode_t
 logsrvd_conf_iolog_mode(void)
 {

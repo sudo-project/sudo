@@ -85,8 +85,17 @@ journal_fdopen(int fd, const char *journal_path,
 static int
 journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
 {
-    int fd, len;
+    int len, fd = -1;
+    mode_t dirmode, oldmask;
     debug_decl(journal_mkstemp, SUDO_DEBUG_UTIL);
+
+    /* umask must not be more restrictive than the file modes. */
+    dirmode = logsrvd_conf_iolog_mode() | S_IXUSR;
+    if (dirmode & (S_IRGRP|S_IWGRP))
+        dirmode |= S_IXGRP;
+    if (dirmode & (S_IROTH|S_IWOTH))
+        dirmode |= S_IXOTH;
+    oldmask = umask(ACCESSPERMS & ~dirmode);
 
     len = snprintf(pathbuf, pathlen, "%s/%s/%s",
 	logsrvd_conf_relay_dir(), parent_dir, RELAY_TEMPLATE);
@@ -94,18 +103,21 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
 	errno = ENAMETOOLONG;
 	sudo_warn("%s/%s/%s", logsrvd_conf_relay_dir(), parent_dir,
 	    RELAY_TEMPLATE);
-	debug_return_int(-1);
+	goto done;
     }
-    if (!sudo_mkdir_parents(pathbuf, ROOT_UID, ROOT_GID,
-	    S_IRWXU|S_IXGRP|S_IXOTH, false)) {
+    if (!sudo_mkdir_parents(pathbuf, logsrvd_conf_iolog_uid(),
+	    logsrvd_conf_iolog_gid(), S_IRWXU|S_IXGRP|S_IXOTH, false)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to create parent dir for %s", pathbuf);
-	debug_return_int(-1);
+	goto done;
     }
     if ((fd = mkstemp(pathbuf)) == -1) {
 	sudo_warn(U_("%s: %s"), "mkstemp", pathbuf);
-	debug_return_int(-1);
+	goto done;
     }
+
+done:
+    umask(oldmask);
 
     debug_return_int(fd);
 }

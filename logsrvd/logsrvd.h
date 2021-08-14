@@ -220,6 +220,8 @@ bool logsrvd_conf_relay_tls_check_peer(void);
 SSL_CTX *logsrvd_relay_tls_ctx(void);
 #endif
 bool logsrvd_conf_log_exit(void);
+uid_t logsrvd_conf_iolog_uid(void);
+gid_t logsrvd_conf_iolog_gid(void);
 mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);
 void address_list_delref(struct server_address_list *);
