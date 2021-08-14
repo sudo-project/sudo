@@ -245,7 +245,7 @@ static bool
 log_server_accept(char * const command_info[], char * const run_argv[],
     char * const run_envp[])
 {
-    struct eventlog *evlog;
+    struct eventlog *evlog = NULL;
     struct timespec now;
     bool ret = false;
     debug_decl(log_server_accept, SUDOERS_DEBUG_PLUGIN);
@@ -286,6 +286,7 @@ log_server_accept(char * const command_info[], char * const run_argv[],
     } else {
 	if (!init_log_details(&audit_details, evlog))
 	    goto done;
+	evlog = NULL;
 
 	/* Open connection to log server, send hello and accept messages. */
 	client_closure = log_server_open(&audit_details, &now, false,
@@ -295,6 +296,8 @@ log_server_accept(char * const command_info[], char * const run_argv[],
     }
 
 done:
+    /* Contents of evlog are not dynamically allocated so no eventlog_free(). */
+    free(evlog);
     debug_return_bool(ret);
 }
 
