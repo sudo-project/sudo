@@ -97,7 +97,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
     char *line = NULL, *evstr = NULL;
-    const char *iolog_file = evlog->iolog_file;
+    const char *iolog_file;
     const char *tty, *tsid = NULL;
     char exit_str[(((sizeof(int) * 8) + 2) / 3) + 2];
     char sessid[7], offsetstr[64] = "";
@@ -105,7 +105,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     int i;
     debug_decl(new_logline, SUDO_DEBUG_UTIL);
 
-    if (ISSET(flags, EVLOG_RAW)) {
+    if (ISSET(flags, EVLOG_RAW) || evlog == NULL) {
 	if (args->reason != NULL) {
 	    if (args->errstr != NULL) {
 		if (asprintf(&line, "%s: %s", args->reason, args->errstr) == -1)
@@ -119,6 +119,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     }
 
     /* A TSID may be a sudoers-style session ID or a free-form string. */
+    iolog_file = evlog->iolog_file;
     if (iolog_file != NULL) {
 	if (IS_SESSID(iolog_file)) {
 	    sessid[0] = iolog_file[0];
