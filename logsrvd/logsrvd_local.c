@@ -381,30 +381,33 @@ store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len,
 {
     struct eventlog *evlog = NULL;
     struct timespec alert_time;
+    bool ret = false;
     debug_decl(store_alert_local, SUDO_DEBUG_UTIL);
 
     if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
 	evlog = evlog_new(NULL, msg->info_msgs, msg->n_info_msgs, closure);
 	if (evlog == NULL) {
 	    closure->errstr = _("error parsing AlertMessage");
-	    debug_return_bool(false);
+	    goto done;
 	}
+	if (closure->evlog == NULL)
+	    closure->evlog = evlog;
     }
-
     alert_time.tv_sec = msg->alert_time->tv_sec;
     alert_time.tv_nsec = msg->alert_time->tv_nsec;
+
     if (!eventlog_alert(evlog, 0, &alert_time, msg->reason, NULL)) {
 	closure->errstr = _("error logging alert event");
-	debug_return_bool(false);
+	goto done;
     }
 
-    if (closure->evlog == NULL) {
-	closure->evlog = evlog;
-    } else {
+    ret = true;
+
+done:
+    if (closure->evlog != evlog)
 	eventlog_free(evlog);
-    }
 
-    debug_return_bool(true);
+    debug_return_bool(ret);
 }
 
 bool
