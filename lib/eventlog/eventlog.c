@@ -134,9 +134,15 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 	    tsid = iolog_file;
 	}
 	if (sudo_timespecisset(&evlog->iolog_offset)) {
-	    (void)snprintf(offsetstr, sizeof(offsetstr), "@%lld.%09ld",
-		(long long)evlog->iolog_offset.tv_sec,
-		evlog->iolog_offset.tv_nsec);
+	    /* Only write up to two significant digits for the decimal part. */
+	    if (evlog->iolog_offset.tv_nsec > 10000000) {
+		(void)snprintf(offsetstr, sizeof(offsetstr), "@%lld.%02ld",
+		    (long long)evlog->iolog_offset.tv_sec,
+		    evlog->iolog_offset.tv_nsec / 10000000);
+	    } else if (evlog->iolog_offset.tv_sec != 0) {
+		(void)snprintf(offsetstr, sizeof(offsetstr), "@%lld",
+		    (long long)evlog->iolog_offset.tv_sec);
+	    }
 	}
     }
 
