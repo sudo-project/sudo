@@ -204,7 +204,7 @@ done:
     if (closure->evlog != evlog)
 	eventlog_free(evlog);
 
-    debug_return_bool(true);
+    debug_return_bool(ret);
 }
 
 /*
