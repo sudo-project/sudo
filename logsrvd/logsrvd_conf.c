@@ -1177,7 +1177,8 @@ logsrvd_conf_parse(struct logsrvd_config *config, FILE *fp, const char *path)
 	    }
 	}
 	if (entry->conf_str == NULL) {
-	    sudo_warnx(U_("%s:%d unknown key: %s"), path, lineno, line);
+	    sudo_warnx(U_("%s:%d [%s] illegal key: %s"), path, lineno,
+		conf_section->name, line);
 	    goto done;
 	}
     }
