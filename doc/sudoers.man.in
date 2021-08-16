@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 15, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "August 16, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1049,7 +1049,7 @@ Warning, if the user has write access to the command itself (directly or via a
 command), it may be possible for the user to replace the command after the
 digest check has been performed but before the command is executed.
 A similar race condition exists on systems that lack the
-fexecve(2)
+\fBfexecve\fR()
 system call when the directory in which the command is located
 is writable by the user.
 See the description of the
@@ -1846,7 +1846,7 @@ has been compiled with
 \fIintercept\fR
 support and the underlying operating system supports it, the
 \fRINTERCEPT\fR
-tag can be used to cause programs spawned by a command to be checked against
+tag can be used to cause programs spawned by a command to be validated against
 \fIsudoers\fR
 and logged just like they would be if run through
 \fBsudo\fR
@@ -2761,7 +2761,10 @@ This setting is only supported by version 1.8.29 or higher.
 log_children
 If set,
 \fBsudoers\fR
-will log when a command runs a child process.
+will log when a command spawns a child process and executes a program
+using the
+\fBexecve\fR()
+system call.
 For example, if a shell is run by
 \fBsudo\fR,
 the individual commands run via the shell will be logged.
@@ -4490,7 +4493,7 @@ alias.
 .sp
 This setting is only supported by version 1.8.20 or higher.
 If the operating system does not support the
-fexecve(2)
+\fBfexecve\fR()
 system call, this setting has no effect.
 .RE
 .TP 14n
@@ -5547,12 +5550,12 @@ if no terminal was present.
 .TP 10n
 runargv
 A JSON array representing the command's argument vector as passed to the
-execve(2)
+\fBexecve\fR()
 system call.
 .TP 10n
 runenv
 A JSON array representing the command's environment as passed to the
-execve(2)
+\fBexecve\fR()
 system call.
 .TP 10n
 rungid
@@ -6250,7 +6253,7 @@ access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
 .PP
-There are three basic approaches to this problem:
+There are four basic approaches to this problem:
 .TP 10n
 restrict
 Avoid giving users access to commands that allow the user to run
@@ -6277,15 +6280,25 @@ On such systems,
 \fIintercept\fR
 functionality can be used to transparently intercept an attempt to
 run a new command, allow or deny it based on
-\fIsudoers\fR,
-and log the result.
+\fIsudoers\fR
+rules, and log the result.
 For example, this can be used to restrict the commands run from
-within a shell.
+within a privileged shell.
 Note, however, that this applies only to dynamically-linked
 executables.
 Statically-linked executables and executables
 running under binary emulation are not affected.
-Also, many shells support built-in commands that cannot be intercepted by
+Also, most shells support built-in commands and the ability to read
+or write sensitive files that cannot be intercepted by
+\fBsudo\fR.
+.sp
+Currently,
+\fBsudo\fR's
+\fIintercept\fR
+functionality only works for programs that use the
+\fBexecve\fR()
+system call to run the new command.
+This may be expanded in a future release of
 \fBsudo\fR.
 .sp
 The
@@ -6327,6 +6340,29 @@ commands run via a shell are logged when
 is enabled.
 .RE
 .TP 10n
+log
+There are two separate but related ways to log additional commands.
+The first is to enable I/O logging using the
+\fIlog_output\fR
+flag.
+This will log the command's output but will not create an event log
+entry when the additional command is run.
+The second is to enable the
+\fIlog_children\fR
+flag in
+\fIsudoers\fR
+which will create an event log entry every time a new command is run.
+If I/O logging is also enabled, the log entry will include a time offset
+into the I/O log to indicate when the command was run.
+This offset can be passed to the
+sudoreplay(@mansectsu@)
+utility to replay the I/O log at the exact moment when the command was run.
+The
+\fIlog_children\fR
+flag uses the same mechanism as
+\fIintercept\fR
+(see above) and has the same limitations.
+.TP 10n
 noexec
 \fBsudo\fR's
 \fInoexec\fR
@@ -6336,6 +6372,28 @@ from executing any other programs.
 On most systems, it uses the same mechanism as
 \fIintercept\fR
 (see above) and thus the same caveats apply.
+The
+\fInoexec\fR
+functionality
+is capable of blocking execution of commands run via the
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexecv\fR(),
+\fBexecveat\fR(),
+\fBexecvp\fR(),
+\fBexecve\fR(),
+\fBexecvP\fR(),
+\fBexecvpe\fR(),
+\fBexect\fR(),
+\fBfexecve\fR(),
+\fBposix_spawn\fR(),
+\fBposix_spawnp\fR(),
+\fBsystem\fR(),
+\fBpopen\fR(),
+and
+\fBwordexp\fR()
+functions.
 On Linux, a
 \fBseccomp\fR()
 filter is used to implement

@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 15, 2021
+.Dd August 16, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1006,7 +1006,7 @@ Warning, if the user has write access to the command itself (directly or via a
 command), it may be possible for the user to replace the command after the
 digest check has been performed but before the command is executed.
 A similar race condition exists on systems that lack the
-.Xr fexecve 2
+.Fn fexecve
 system call when the directory in which the command is located
 is writable by the user.
 See the description of the
@@ -1746,7 +1746,7 @@ has been compiled with
 .Em intercept
 support and the underlying operating system supports it, the
 .Li INTERCEPT
-tag can be used to cause programs spawned by a command to be checked against
+tag can be used to cause programs spawned by a command to be validated against
 .Em sudoers
 and logged just like they would be if run through
 .Nm sudo
@@ -2601,7 +2601,10 @@ This setting is only supported by version 1.8.29 or higher.
 .It log_children
 If set,
 .Nm
-will log when a command runs a child process.
+will log when a command spawns a child process and executes a program
+using the
+.Fn execve
+system call.
 For example, if a shell is run by
 .Nm sudo ,
 the individual commands run via the shell will be logged.
@@ -4210,7 +4213,7 @@ alias.
 .Pp
 This setting is only supported by version 1.8.20 or higher.
 If the operating system does not support the
-.Xr fexecve 2
+.Fn fexecve
 system call, this setting has no effect.
 .It group_plugin
 A string containing a
@@ -5171,11 +5174,11 @@ The number of lines of the terminal the command ran on, or zero
 if no terminal was present.
 .It runargv
 A JSON array representing the command's argument vector as passed to the
-.Xr execve 2
+.Fn execve
 system call.
 .It runenv
 A JSON array representing the command's environment as passed to the
-.Xr execve 2
+.Fn execve
 system call.
 .It rungid
 The group ID the command ran as.
@@ -5774,7 +5777,7 @@ access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
 .Pp
-There are three basic approaches to this problem:
+There are four basic approaches to this problem:
 .Bl -tag -width 8n
 .It restrict
 Avoid giving users access to commands that allow the user to run
@@ -5799,15 +5802,25 @@ On such systems,
 .Em intercept
 functionality can be used to transparently intercept an attempt to
 run a new command, allow or deny it based on
-.Em sudoers ,
-and log the result.
+.Em sudoers
+rules, and log the result.
 For example, this can be used to restrict the commands run from
-within a shell.
+within a privileged shell.
 Note, however, that this applies only to dynamically-linked
 executables.
 Statically-linked executables and executables
 running under binary emulation are not affected.
-Also, many shells support built-in commands that cannot be intercepted by
+Also, most shells support built-in commands and the ability to read
+or write sensitive files that cannot be intercepted by
+.Nm sudo .
+.Pp
+Currently,
+.Nm sudo Ns 's
+.Em intercept
+functionality only works for programs that use the
+.Fn execve
+system call to run the new command.
+This may be expanded in a future release of
 .Nm sudo .
 .Pp
 The
@@ -5843,6 +5856,28 @@ you can always just try it out and check whether or not external
 commands run via a shell are logged when
 .Em intercept
 is enabled.
+.It log
+There are two separate but related ways to log additional commands.
+The first is to enable I/O logging using the
+.Em log_output
+flag.
+This will log the command's output but will not create an event log
+entry when the additional command is run.
+The second is to enable the
+.Em log_children
+flag in
+.Em sudoers
+which will create an event log entry every time a new command is run.
+If I/O logging is also enabled, the log entry will include a time offset
+into the I/O log to indicate when the command was run.
+This offset can be passed to the
+.Xr sudoreplay @mansectsu@
+utility to replay the I/O log at the exact moment when the command was run.
+The
+.Em log_children
+flag uses the same mechanism as
+.Em intercept
+(see above) and has the same limitations.
 .It noexec
 .Nm sudo Ns 's
 .Em noexec
@@ -5852,6 +5887,28 @@ from executing any other programs.
 On most systems, it uses the same mechanism as
 .Em intercept
 (see above) and thus the same caveats apply.
+The
+.Em noexec
+functionality
+is capable of blocking execution of commands run via the
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn execv ,
+.Fn execveat ,
+.Fn execvp ,
+.Fn execve ,
+.Fn execvP ,
+.Fn execvpe ,
+.Fn exect ,
+.Fn fexecve ,
+.Fn posix_spawn ,
+.Fn posix_spawnp ,
+.Fn system ,
+.Fn popen ,
+and
+.Fn wordexp
+functions.
 On Linux, a
 .Fn seccomp
 filter is used to implement
