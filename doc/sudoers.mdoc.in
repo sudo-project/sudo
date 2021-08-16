@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd July 9, 2021
+.Dd August 15, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3887,14 +3887,18 @@ is set and the remote log server is secured with TLS.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
 .It log_server_peer_cert
-The path to the client's certificate file, in PEM format.
+The path to the
+.Nm sudo
+client's certificate file, in PEM format.
 This setting is required when
 .Em log_servers
 is set and the remote log server is secured with TLS.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
 .It log_server_peer_key
-The path to the client's private key file, in PEM format.
+The path to the
+.Nm sudo
+client's private key file, in PEM format.
 This setting is required when
 .Em log_servers
 is set and the remote log server is secured with TLS.

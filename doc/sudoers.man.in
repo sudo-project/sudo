@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "July 9, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "August 15, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4132,7 +4132,9 @@ is set and the remote log server is secured with TLS.
 This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 log_server_peer_cert
-The path to the client's certificate file, in PEM format.
+The path to the
+\fBsudo\fR
+client's certificate file, in PEM format.
 This setting is required when
 \fIlog_servers\fR
 is set and the remote log server is secured with TLS.
@@ -4140,7 +4142,9 @@ is set and the remote log server is secured with TLS.
 This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 log_server_peer_key
-The path to the client's private key file, in PEM format.
+The path to the
+\fBsudo\fR
+client's private key file, in PEM format.
 This setting is required when
 \fIlog_servers\fR
 is set and the remote log server is secured with TLS.
