@@ -547,18 +547,18 @@ exec_nopty.o: $(srcdir)/exec_nopty.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
-              $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(incdir)/sudo_rand.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
+              $(srcdir)/sudo_exec.h $(srcdir)/sudo_plugin_int.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exec_nopty.c
 exec_nopty.i: $(srcdir)/exec_nopty.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
-              $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(incdir)/sudo_rand.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
+              $(srcdir)/sudo_exec.h $(srcdir)/sudo_plugin_int.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 exec_nopty.plog: exec_nopty.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_nopty.c --i-file $< --output-file $@
@@ -585,18 +585,18 @@ exec_pty.o: $(srcdir)/exec_pty.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
-            $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
-            $(top_builddir)/pathnames.h
+            $(incdir)/sudo_rand.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
+            $(srcdir)/sudo_exec.h $(srcdir)/sudo_plugin_int.h \
+            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exec_pty.c
 exec_pty.i: $(srcdir)/exec_pty.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
-            $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
-            $(top_builddir)/pathnames.h
+            $(incdir)/sudo_rand.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
+            $(srcdir)/sudo_exec.h $(srcdir)/sudo_plugin_int.h \
+            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 exec_pty.plog: exec_pty.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_pty.c --i-file $< --output-file $@
