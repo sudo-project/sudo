@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 16, 2021
+.Dd August 18, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2874,6 +2874,27 @@ above as well as the
 section at the end of this manual.
 This flag is
 .Em off
+by default.
+.Pp
+This setting is only supported by version 1.9.8 or higher.
+.It intercept_allow_setid
+On most systems, the dynamic loader will ignore
+.Ev LD_PRELOAD
+(or the equivalent) when running set user-ID and set group-ID
+programs, effectively disabling intercept mode.
+To prevent this from happening,
+.Nm
+will not permit a set user-ID or set group-ID program to be run in
+intercept mode unless
+.Em intercept_allow_setid
+is set.
+This flag has no effect unless the
+.Em intercept
+flag is enabled or the
+.Em INTERCEPT
+tag has been set for the command.
+This flag is
+.Em on
 by default.
 .Pp
 This setting is only supported by version 1.9.8 or higher.
@@ -5822,6 +5843,13 @@ functionality only works for programs that use the
 system call to run the new command.
 This may be expanded in a future release of
 .Nm sudo .
+Because most dynamic loaders ignore
+.Ev LD_PRELOAD
+(or the equivalent) when running set user-ID and set group-ID programs,
+.Nm
+will not permit such programs to be run in
+.Em intercept
+mode.
 .Pp
 The
 .Em intercept

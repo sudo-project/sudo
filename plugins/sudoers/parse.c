@@ -124,6 +124,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
     debug_decl(sudoers_lookup_check, SUDOERS_DEBUG_PARSER);
 
     memset(info, 0, sizeof(*info));
+    if (def_intercept || ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	info->intercepted = true;
 
     TAILQ_FOREACH_REVERSE(us, &nss->parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(nss->parse_tree, pw, &us->users) != ALLOW)

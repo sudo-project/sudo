@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 16, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "August 18, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3052,6 +3052,28 @@ above as well as the
 section at the end of this manual.
 This flag is
 \fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.9.8 or higher.
+.TP 18n
+intercept_allow_setid
+On most systems, the dynamic loader will ignore
+\fRLD_PRELOAD\fR
+(or the equivalent) when running set user-ID and set group-ID
+programs, effectively disabling intercept mode.
+To prevent this from happening,
+\fBsudoers\fR
+will not permit a set user-ID or set group-ID program to be run in
+intercept mode unless
+\fIintercept_allow_setid\fR
+is set.
+This flag has no effect unless the
+\fIintercept\fR
+flag is enabled or the
+\fIINTERCEPT\fR
+tag has been set for the command.
+This flag is
+\fIon\fR
 by default.
 .sp
 This setting is only supported by version 1.9.8 or higher.
@@ -6300,6 +6322,13 @@ functionality only works for programs that use the
 system call to run the new command.
 This may be expanded in a future release of
 \fBsudo\fR.
+Because most dynamic loaders ignore
+\fRLD_PRELOAD\fR
+(or the equivalent) when running set user-ID and set group-ID programs,
+\fBsudoers\fR
+will not permit such programs to be run in
+\fIintercept\fR
+mode.
 .sp
 The
 \fIintercept\fR

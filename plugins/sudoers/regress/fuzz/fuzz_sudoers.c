@@ -48,6 +48,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
 bool sudoers_recovery = true;
+int sudo_mode;
 
 FILE *
 open_sudoers(const char *file, bool doedit, bool *keepopen)

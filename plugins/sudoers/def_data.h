@@ -274,6 +274,8 @@
 #define def_log_exit_status     (sudo_defs_table[I_LOG_EXIT_STATUS].sd_un.flag)
 #define I_INTERCEPT_AUTHENTICATE 136
 #define def_intercept_authenticate (sudo_defs_table[I_INTERCEPT_AUTHENTICATE].sd_un.flag)
+#define I_INTERCEPT_ALLOW_SETID 137
+#define def_intercept_allow_setid (sudo_defs_table[I_INTERCEPT_ALLOW_SETID].sd_un.flag)
 
 enum def_tuple {
     never,

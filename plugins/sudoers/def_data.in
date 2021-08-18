@@ -427,3 +427,6 @@ log_exit_status
 intercept_authenticate
 	T_FLAG
 	"Subsequent commands in an intercepted session must be authenticated"
+intercept_allow_setid
+	T_FLAG
+	"Allow an intercepted command to run set setuid or setgid programs"

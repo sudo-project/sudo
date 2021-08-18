@@ -594,6 +594,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Subsequent commands in an intercepted session must be authenticated"),
 	NULL,
     }, {
+	"intercept_allow_setid", T_FLAG,
+	N_("Allow an intercepted command to run set setuid or setgid programs"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
