@@ -396,11 +396,6 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m,
 
     switch (m->type) {
 	case ALL:
-	    if (m->name == NULL) {
-		matched = !m->negated;
-		break;
-	    }
-	    FALLTHROUGH;
 	case COMMAND:
 	    c = (struct sudo_command *)m->name;
 	    if (command_matches(c->cmnd, c->args, runchroot, info, &c->digests))

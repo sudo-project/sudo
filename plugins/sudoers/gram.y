@@ -617,14 +617,6 @@ digcmnd		:	opcmnd {
 				sudoerserror(N_("a digest requires a path name"));
 				YYERROR;
 			    }
-			    if (c == NULL) {
-				/* lazy-allocate sudo_command for ALL */
-				if ((c = new_command(NULL, NULL)) == NULL) {
-				    sudoerserror(N_("unable to allocate memory"));
-				    YYERROR;
-				}
-				$2->name = (char *)c;
-			    }
 			    parser_leak_remove(LEAK_DIGEST, $1);
 			    HLTQ_TO_TAILQ(&c->digests, $1, entries);
 			    $$ = $2;
@@ -919,7 +911,13 @@ cmndtag		:	/* empty */ {
 		;
 
 cmnd		:	ALL {
-			    $$ = new_member(NULL, ALL);
+			    struct sudo_command *c;
+
+			    if ((c = new_command(NULL, NULL)) == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
+			    $$ = new_member((char *)c, ALL);
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
