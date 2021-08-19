@@ -82,7 +82,7 @@ expand_tilde(char **path, const char *user)
 	*slash = '/';
     if (pw == NULL) {
 	/* Unknown user. */
-	sudo_warnx(U_("unknown user: %s"), user);
+	sudo_warnx(U_("unknown user %s"), user);
 	debug_return_bool(false);
     }
 

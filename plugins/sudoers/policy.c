@@ -1156,7 +1156,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
-	    sudo_warnx(U_("unknown user: %s"), list_user);
+	    sudo_warnx(U_("unknown user %s"), list_user);
 	    debug_return_int(-1);
 	}
     }

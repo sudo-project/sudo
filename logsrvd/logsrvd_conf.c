@@ -388,7 +388,7 @@ cb_iolog_user(struct logsrvd_config *config, const char *user, size_t offset)
     debug_decl(cb_iolog_user, SUDO_DEBUG_UTIL);
 
     if ((pw = getpwnam(user)) == NULL) {
-	sudo_warnx(U_("unknown user: %s"), user);
+	sudo_warnx(U_("unknown user %s"), user);
 	debug_return_bool(false);
     }
     config->iolog.uid = pw->pw_uid;
@@ -405,7 +405,7 @@ cb_iolog_group(struct logsrvd_config *config, const char *group, size_t offset)
     debug_decl(cb_iolog_group, SUDO_DEBUG_UTIL);
 
     if ((gr = getgrnam(group)) == NULL) {
-	sudo_warnx(U_("unknown group: %s"), group);
+	sudo_warnx(U_("unknown group %s"), group);
 	debug_return_bool(false);
     }
     config->iolog.gid = gr->gr_gid;
@@ -1207,7 +1207,7 @@ logsrvd_open_log_file(const char *path, int flags)
     fd = open(path, flags, S_IRUSR|S_IWUSR);
     (void)umask(oldmask);
     if (fd == -1 || (fp = fdopen(fd, omode)) == NULL) {
-	sudo_warn(U_("unable to open log file: %s"), path);
+	sudo_warn(U_("unable to open log file %s"), path);
 	if (fd != -1)
 	    close(fd);
     }

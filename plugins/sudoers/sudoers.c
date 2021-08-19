@@ -483,12 +483,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Defer uid/gid checks until after defaults have been updated. */
     if (unknown_runas_uid && !def_runas_allow_unknown_id) {
-	log_warningx(SLOG_AUDIT, N_("unknown user: %s"), runas_pw->pw_name);
+	log_warningx(SLOG_AUDIT, N_("unknown user %s"), runas_pw->pw_name);
 	goto done;
     }
     if (runas_gr != NULL) {
 	if (unknown_runas_gid && !def_runas_allow_unknown_id) {
-	    log_warningx(SLOG_AUDIT, N_("unknown group: %s"),
+	    log_warningx(SLOG_AUDIT, N_("unknown group %s"),
 		runas_gr->gr_name);
 	    goto done;
 	}
@@ -873,7 +873,7 @@ init_vars(char * const envp[])
 	     * YP/NIS/NIS+/LDAP/etc daemon has died.
 	     */
 	    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
-		sudo_warnx(U_("unknown uid: %u"), (unsigned int) user_uid);
+		sudo_warnx(U_("unknown uid %u"), (unsigned int) user_uid);
 		debug_return_bool(false);
 	    }
 
@@ -894,7 +894,7 @@ init_vars(char * const envp[])
 
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
-	log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"),
+	log_warningx(SLOG_SEND_MAIL, N_("unknown uid %u"),
 	    (unsigned int) user_uid);
 	debug_return_bool(false);
     }
@@ -1177,7 +1177,7 @@ set_loginclass(struct passwd *pw)
 	 * class themselves.  We do this because if login.conf gets
 	 * corrupted we want the admin to be able to use sudo to fix it.
 	 */
-	log_warningx(errflags, N_("unknown login class: %s"), login_class);
+	log_warningx(errflags, N_("unknown login class %s"), login_class);
 	def_use_loginclass = false;
 	if (login_class)
 	    ret = false;
@@ -1335,7 +1335,7 @@ set_runaspw(const char *user, bool quiet)
     if (pw == NULL) {
 	if ((pw = sudo_getpwnam(user)) == NULL) {
 	    if (!quiet)
-		log_warningx(SLOG_AUDIT, N_("unknown user: %s"), user);
+		log_warningx(SLOG_AUDIT, N_("unknown user %s"), user);
 	    debug_return_bool(false);
 	}
     }
@@ -1369,7 +1369,7 @@ set_runasgr(const char *group, bool quiet)
     if (gr == NULL) {
 	if ((gr = sudo_getgrnam(group)) == NULL) {
 	    if (!quiet)
-		log_warningx(SLOG_AUDIT, N_("unknown group: %s"), group);
+		log_warningx(SLOG_AUDIT, N_("unknown group %s"), group);
 	    debug_return_bool(false);
 	}
     }

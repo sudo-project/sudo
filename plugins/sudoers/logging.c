@@ -853,7 +853,7 @@ sudoers_log_open(int type, const char *log_file)
 		if (!warned) {
 		    warned = true;
 		    log_warning(SLOG_SEND_MAIL|SLOG_NO_LOG,
-			N_("unable to open log file: %s"), log_file);
+			N_("unable to open log file %s"), log_file);
 		}
 		if (fd != -1)
 		    close(fd);
