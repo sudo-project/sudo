@@ -23,6 +23,12 @@ What's new in Sudo 1.9.8
    would only apply intercept mode to user "chuck" when running one
    of the listed shells.
 
+   In intercept mode, sudo will not prompt for a password before
+   running a sub-command and will not allow a set-user-ID or
+   set-group-ID program to be run by default.  The new
+   intercept_authenticate and intercept_allow_setid sudoers settings
+   can be used to change this behavior.
+
  * The new "log_children" sudoers setting can be used to log commands
    run in a privileged shell.  It uses the same mechanism as the
    intercept support described above and has the same limitations.
@@ -45,6 +51,10 @@ What's new in Sudo 1.9.8
    parameter that was passed to the strlcpy() function was incorrect.
    No overflow was possible since the correct amount of memory was
    already pre-allocated.
+
+ * The mksigname and mksiglist helper programs are now built with
+   the host compiler, not the target compiler, when cross-compiling.
+   Bug #989.
 
 What's new in Sudo 1.9.7p2
 
