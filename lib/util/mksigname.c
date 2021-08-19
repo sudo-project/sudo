@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2012, 2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2012, 2015, 2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,17 +34,12 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    static char *sudo_sys_signame[NSIG];
-    int i;
+    unsigned int i;
 
 #include "mksigname.h"
 
-    printf("#include <config.h>\n");
-    printf("#include <sys/types.h>\n");
-    printf("#include <signal.h>\n");
-    printf("#include \"sudo_compat.h\"\n\n");
-    printf("const char *const sudo_sys_signame[NSIG] = {\n");
-    for (i = 0; i < NSIG; i++) {
+    printf("const char *const sudo_sys_signame[] = {\n");
+    for (i = 0; i < nitems(sudo_sys_signame); i++) {
 	if (sudo_sys_signame[i] != NULL) {
 	    printf("    \"%s\",\n", sudo_sys_signame[i]);
 	} else {

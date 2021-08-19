@@ -50,6 +50,9 @@ shlib_opt = util.opt
 
 # Compiler & tools to use
 CC = @CC@
+HOSTCC = @CC_FOR_BUILD@
+CPP = @CPP@
+HOSTCPP = @CPP_FOR_BUILD@
 LIBTOOL = @LIBTOOL@
 SED = @SED@
 AWK = @AWK@
@@ -65,9 +68,12 @@ CPPDEFS = -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) $(CPPDEFS) @CPPFLAGS@ \
 	   -DDEFAULT_TEXT_DOMAIN=\"@PACKAGE_NAME@\"
+HOSTCPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) $(CPPDEFS) \
+	       @CPPFLAGS_FOR_BUILD@ -DDEFAULT_TEXT_DOMAIN=\"@PACKAGE_NAME@\"
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
+HOSTCFLAGS = @CFLAGS_FOR_BUILD@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
@@ -227,20 +233,26 @@ signame.c: mksigname
 	./mksigname > $@
 
 mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksiglist.c -o $@
+	$(HOSTCC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksiglist.c -o $@
 
 mksigname: $(srcdir)/mksigname.c $(srcdir)/mksigname.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksigname.c -o $@
+	$(HOSTCC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksigname.c -o $@
 
-$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
+$(srcdir)/sys_siglist.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
-	    $(AWK) 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_siglist[SIG%s] == NULL)\n\tsudo_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
+	    $(AWK) 'BEGIN {print "/* public domain */\n\n#include <config.h>\n#include <sys/types.h>\n#include <signal.h>\n#include \"sudo_compat.h\"\n\nint sudo_end_of_headers;\nstatic char *sudo_sys_siglist[NSIG];\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_siglist[SIG%s] == NULL)\n\tsudo_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
 	fi
 
-$(srcdir)/mksigname.h: $(srcdir)/siglist.in
+$(srcdir)/sys_signame.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
-	    $(AWK) 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_signame[SIG%s] == NULL)\n\tsudo_sys_signame[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, $$1)}' < $(srcdir)/siglist.in > $@; \
+	    $(AWK) 'BEGIN {print "/* public domain */\n\n#include <config.h>\n#include <sys/types.h>\n#include <signal.h>\n#include \"sudo_compat.h\"\n\nint sudo_end_of_headers;\nstatic char *sudo_sys_signame[NSIG];\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_signame[SIG%s] == NULL)\n\tsudo_sys_signame[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, $$1)}' < $(srcdir)/siglist.in > $@; \
 	fi
+
+mksiglist.h: $(srcdir)/sys_siglist.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/sys_siglist.h | sed -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksiglist.h
+
+mksigname.h: $(srcdir)/sys_signame.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/sys_signame.h | sed -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksigname.h
 
 conf_test: $(CONF_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -488,8 +500,8 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile mksiglist siglist.c mksigname signame.c .libs \
-	    $(shlib_exp) $(shlib_map) $(shlib_opt)
+	-rm -rf Makefile mksiglist mksiglist.h siglist.c mksigname \
+	    mksigname.h signame.c .libs $(shlib_exp) $(shlib_map) $(shlib_opt)
 
 clobber: distclean
 
