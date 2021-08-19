@@ -232,10 +232,10 @@ siglist.c: mksiglist
 signame.c: mksigname
 	./mksigname > $@
 
-mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
+mksiglist: $(srcdir)/mksiglist.c mksiglist.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(HOSTCC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksiglist.c -o $@
 
-mksigname: $(srcdir)/mksigname.c $(srcdir)/mksigname.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
+mksigname: $(srcdir)/mksigname.c mksigname.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(HOSTCC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksigname.c -o $@
 
 $(srcdir)/sys_siglist.h: $(srcdir)/siglist.in
@@ -1220,15 +1220,15 @@ sig2str.i: $(srcdir)/sig2str.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sig2str.plog: sig2str.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sig2str.c --i-file $< --output-file $@
-siglist.lo: siglist.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+siglist.lo: siglist.c 
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) siglist.c
-siglist.i: siglist.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+siglist.i: siglist.c 
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 siglist.plog: siglist.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file siglist.c --i-file $< --output-file $@
-signame.lo: signame.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+signame.lo: signame.c 
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) signame.c
-signame.i: signame.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+signame.i: signame.c 
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 signame.plog: signame.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file signame.c --i-file $< --output-file $@
