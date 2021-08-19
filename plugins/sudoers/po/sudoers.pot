@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.9.8\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2021-08-16 10:46-0600\n"
+"POT-Creation-Date: 2021-08-19 09:50-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: confstr.sh:1 gram.y:1193
+#: confstr.sh:1 gram.y:1191
 msgid "syntax error"
 msgstr ""
 
@@ -43,11 +43,11 @@ msgstr ""
 
 #: gram.y:235 gram.y:302 gram.y:311 gram.y:320 gram.y:330 gram.y:340 gram.y:364
 #: gram.y:391 gram.y:400 gram.y:408 gram.y:417 gram.y:426 gram.y:500 gram.y:510
-#: gram.y:522 gram.y:566 gram.y:575 gram.y:584 gram.y:593 gram.y:623 gram.y:720
-#: gram.y:728 gram.y:739 gram.y:751 gram.y:770 gram.y:924 gram.y:932 gram.y:942
-#: gram.y:948 gram.y:1070 gram.y:1079 gram.y:1087 gram.y:1096 gram.y:1105
-#: gram.y:1134 gram.y:1143 gram.y:1151 gram.y:1241 gram.y:1353 gram.y:1660
-#: gram.y:1710 lib/eventlog/eventlog.c:308 lib/eventlog/eventlog.c:381
+#: gram.y:522 gram.y:566 gram.y:575 gram.y:584 gram.y:593 gram.y:712 gram.y:720
+#: gram.y:731 gram.y:743 gram.y:762 gram.y:917 gram.y:922 gram.y:930 gram.y:940
+#: gram.y:946 gram.y:1068 gram.y:1077 gram.y:1085 gram.y:1094 gram.y:1103
+#: gram.y:1132 gram.y:1141 gram.y:1149 gram.y:1239 gram.y:1351 gram.y:1658
+#: gram.y:1708 lib/eventlog/eventlog.c:308 lib/eventlog/eventlog.c:381
 #: lib/eventlog/eventlog.c:783 lib/eventlog/eventlog.c:862
 #: lib/eventlog/eventlog.c:1146 lib/iolog/iolog_json.c:125
 #: lib/iolog/iolog_json.c:330 lib/iolog/iolog_json.c:360
@@ -122,12 +122,12 @@ msgstr ""
 #: plugins/sudoers/log_client.c:2037 plugins/sudoers/logging.c:101
 #: plugins/sudoers/logging.c:181 plugins/sudoers/logging.c:465
 #: plugins/sudoers/logging.c:485 plugins/sudoers/logging.c:627
-#: plugins/sudoers/match_command.c:286 plugins/sudoers/match_command.c:484
-#: plugins/sudoers/match_command.c:533 plugins/sudoers/match_command.c:604
-#: plugins/sudoers/match_command.c:650 plugins/sudoers/match_digest.c:93
-#: plugins/sudoers/parse.c:199 plugins/sudoers/parse.c:216
-#: plugins/sudoers/parse.c:236 plugins/sudoers/parse.c:253
-#: plugins/sudoers/parse.c:276 plugins/sudoers/parse.c:287
+#: plugins/sudoers/match_command.c:297 plugins/sudoers/match_command.c:497
+#: plugins/sudoers/match_command.c:546 plugins/sudoers/match_command.c:618
+#: plugins/sudoers/match_command.c:666 plugins/sudoers/match_digest.c:93
+#: plugins/sudoers/parse.c:201 plugins/sudoers/parse.c:218
+#: plugins/sudoers/parse.c:238 plugins/sudoers/parse.c:255
+#: plugins/sudoers/parse.c:278 plugins/sudoers/parse.c:289
 #: plugins/sudoers/parse_ldif.c:153 plugins/sudoers/parse_ldif.c:184
 #: plugins/sudoers/parse_ldif.c:253 plugins/sudoers/parse_ldif.c:260
 #: plugins/sudoers/parse_ldif.c:265 plugins/sudoers/parse_ldif.c:341
@@ -174,46 +174,46 @@ msgstr ""
 msgid "a digest requires a path name"
 msgstr ""
 
-#: gram.y:647
+#: gram.y:639
 msgid "values for \"CWD\" must start with a '/', '~', or '*'"
 msgstr ""
 
-#: gram.y:659
+#: gram.y:651
 msgid "values for \"CHROOT\" must start with a '/', '~', or '*'"
 msgstr ""
 
-#: gram.y:790
+#: gram.y:782
 #, c-format
 msgid "syntax error, reserved word %s used as an alias name"
 msgstr ""
 
-#: gram.y:813
+#: gram.y:805
 msgid "invalid notbefore value"
 msgstr ""
 
-#: gram.y:822
+#: gram.y:814
 msgid "invalid notafter value"
 msgstr ""
 
-#: gram.y:832 plugins/sudoers/policy.c:345
+#: gram.y:824 plugins/sudoers/policy.c:345
 msgid "timeout value too large"
 msgstr ""
 
-#: gram.y:834 plugins/sudoers/policy.c:347
+#: gram.y:826 plugins/sudoers/policy.c:347
 msgid "invalid timeout value"
 msgstr ""
 
-#: gram.y:1195
+#: gram.y:1193
 #, c-format
 msgid "%s:%d:%d: %s\n"
 msgstr ""
 
-#: gram.y:1239
+#: gram.y:1237
 #, c-format
 msgid "Alias \"%s\" already defined"
 msgstr ""
 
-#: gram.y:1660 gram.y:1710 lib/eventlog/eventlog.c:308
+#: gram.y:1658 gram.y:1708 lib/eventlog/eventlog.c:308
 #: lib/eventlog/eventlog.c:783 lib/eventlog/eventlog.c:858
 #: lib/eventlog/eventlog.c:861 lib/eventlog/eventlog.c:1146
 #: lib/iolog/iolog_json.c:125 lib/iolog/iolog_json.c:329
@@ -293,12 +293,12 @@ msgstr ""
 #: plugins/sudoers/logging.c:101 plugins/sudoers/logging.c:180
 #: plugins/sudoers/logging.c:181 plugins/sudoers/logging.c:464
 #: plugins/sudoers/logging.c:484 plugins/sudoers/logging.c:627
-#: plugins/sudoers/match_command.c:285 plugins/sudoers/match_command.c:483
-#: plugins/sudoers/match_command.c:532 plugins/sudoers/match_command.c:604
-#: plugins/sudoers/match_command.c:649 plugins/sudoers/match_digest.c:93
-#: plugins/sudoers/parse.c:198 plugins/sudoers/parse.c:215
-#: plugins/sudoers/parse.c:235 plugins/sudoers/parse.c:252
-#: plugins/sudoers/parse.c:275 plugins/sudoers/parse.c:286
+#: plugins/sudoers/match_command.c:296 plugins/sudoers/match_command.c:496
+#: plugins/sudoers/match_command.c:545 plugins/sudoers/match_command.c:618
+#: plugins/sudoers/match_command.c:665 plugins/sudoers/match_digest.c:93
+#: plugins/sudoers/parse.c:200 plugins/sudoers/parse.c:217
+#: plugins/sudoers/parse.c:237 plugins/sudoers/parse.c:254
+#: plugins/sudoers/parse.c:277 plugins/sudoers/parse.c:288
 #: plugins/sudoers/parse_ldif.c:152 plugins/sudoers/parse_ldif.c:183
 #: plugins/sudoers/parse_ldif.c:252 plugins/sudoers/parse_ldif.c:259
 #: plugins/sudoers/parse_ldif.c:264 plugins/sudoers/parse_ldif.c:340
@@ -823,12 +823,18 @@ msgstr ""
 msgid "%s version %s\n"
 msgstr ""
 
-#: logsrvd/logsrvd_conf.c:391
+#: logsrvd/logsrvd_conf.c:391 plugins/sudoers/check.c:336
+#: plugins/sudoers/exptilde.c:85 plugins/sudoers/iolog.c:115
+#: plugins/sudoers/policy.c:1159 plugins/sudoers/sudoers.c:486
+#: plugins/sudoers/sudoers.c:1338 plugins/sudoers/testsudoers.c:215
+#: plugins/sudoers/testsudoers.c:382
 #, c-format
 msgid "unknown user %s"
 msgstr ""
 
-#: logsrvd/logsrvd_conf.c:408
+#: logsrvd/logsrvd_conf.c:408 plugins/sudoers/iolog.c:140
+#: plugins/sudoers/sudoers.c:491 plugins/sudoers/sudoers.c:1372
+#: plugins/sudoers/testsudoers.c:406
 #, c-format
 msgid "unknown group %s"
 msgstr ""
@@ -895,7 +901,7 @@ msgstr ""
 msgid "%s:%d [%s] illegal key: %s"
 msgstr ""
 
-#: logsrvd/logsrvd_conf.c:1210
+#: logsrvd/logsrvd_conf.c:1210 plugins/sudoers/logging.c:856
 #, c-format
 msgid "unable to open log file %s"
 msgstr ""
@@ -1527,15 +1533,7 @@ msgstr ""
 #: plugins/sudoers/sudoers.c:876 plugins/sudoers/sudoers.c:897
 #: plugins/sudoers/tsdump.c:119
 #, c-format
-msgid "unknown uid: %u"
-msgstr ""
-
-#: plugins/sudoers/check.c:336 plugins/sudoers/exptilde.c:85
-#: plugins/sudoers/iolog.c:115 plugins/sudoers/policy.c:1159
-#: plugins/sudoers/sudoers.c:486 plugins/sudoers/sudoers.c:1338
-#: plugins/sudoers/testsudoers.c:215 plugins/sudoers/testsudoers.c:382
-#, c-format
-msgid "unknown user: %s"
+msgid "unknown uid %u"
 msgstr ""
 
 #: plugins/sudoers/check_aliases.c:56
@@ -1607,7 +1605,7 @@ msgstr ""
 
 #: plugins/sudoers/cvtsudoers.c:475
 #, c-format
-msgid "%s: unknown key word: %s"
+msgid "%s: unknown key word %s"
 msgstr ""
 
 #: plugins/sudoers/cvtsudoers.c:521
@@ -2317,6 +2315,10 @@ msgstr ""
 msgid "Subsequent commands in an intercepted session must be authenticated"
 msgstr ""
 
+#: plugins/sudoers/def_data.c:598
+msgid "Allow an intercepted command to run set setuid or setgid programs"
+msgstr ""
+
 #: plugins/sudoers/defaults.c:185
 #, c-format
 msgid "%s:%d:%d: unknown defaults entry \"%s\""
@@ -2468,12 +2470,6 @@ msgstr ""
 
 #: plugins/sudoers/interfaces.c:126
 msgid "Local IP address and netmask pairs:\n"
-msgstr ""
-
-#: plugins/sudoers/iolog.c:140 plugins/sudoers/sudoers.c:491
-#: plugins/sudoers/sudoers.c:1372 plugins/sudoers/testsudoers.c:406
-#, c-format
-msgid "unknown group: %s"
 msgstr ""
 
 #: plugins/sudoers/iolog.c:632
@@ -2702,11 +2698,6 @@ msgstr ""
 msgid "a password is required"
 msgstr ""
 
-#: plugins/sudoers/logging.c:856
-#, c-format
-msgid "unable to open log file: %s"
-msgstr ""
-
 #: plugins/sudoers/logging.c:889
 #, c-format
 msgid "unable to write log file: %s"
@@ -2717,51 +2708,51 @@ msgstr ""
 msgid "digest for %s (%s) is not in %s form"
 msgstr ""
 
-#: plugins/sudoers/parse.c:535
+#: plugins/sudoers/parse.c:537
 #, c-format
 msgid ""
 "\n"
 "LDAP Role: %s\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:538
+#: plugins/sudoers/parse.c:540
 msgid ""
 "\n"
 "Sudoers entry:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:540
+#: plugins/sudoers/parse.c:542
 msgid "    RunAsUsers: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:555
+#: plugins/sudoers/parse.c:557
 msgid "    RunAsGroups: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:565
+#: plugins/sudoers/parse.c:567
 msgid "    Options: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:621
+#: plugins/sudoers/parse.c:623
 msgid "    Commands:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:812
+#: plugins/sudoers/parse.c:814
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:830
+#: plugins/sudoers/parse.c:832
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:848
+#: plugins/sudoers/parse.c:850
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:863
+#: plugins/sudoers/parse.c:865
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr ""
@@ -3130,7 +3121,7 @@ msgstr ""
 
 #: plugins/sudoers/sudoers.c:1180
 #, c-format
-msgid "unknown login class: %s"
+msgid "unknown login class %s"
 msgstr ""
 
 #: plugins/sudoers/sudoers.c:1266 plugins/sudoers/sudoers.c:1281
