@@ -4,10 +4,10 @@
 # If the user hasn't chosen one themselves, we do here.
 if [ "`/usr/bin/uname 2>&1`" = "OpenBSD" ]; then
     if [ X"$AUTOMAKE_VERSION" = X"" ]; then
-	AUTOMAKE_VERSION=1.16; export AUTOMAKE_VERSION
+        AUTOMAKE_VERSION=1.16; export AUTOMAKE_VERSION
     fi
     if [ X"$AUTOCONF_VERSION" = X"" ]; then
-	AUTOCONF_VERSION=2.69; export AUTOCONF_VERSION
+        AUTOCONF_VERSION=2.69; export AUTOCONF_VERSION
     fi
 fi
 

@@ -406,7 +406,7 @@ Optional features:
 	is to compile noexec support if libtool supports building
 	shared objects on your system.
 
-  --with-selinux 
+  --with-selinux
 	Enable support for role based access control (RBAC) on
 	systems that support SELinux.
 

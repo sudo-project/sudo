@@ -20,13 +20,13 @@ Sudo is distributed under the following license:
    Materiel Command, USAF, under agreement number F39502-99-1-0512.
 
 The Python plugin bindings bear the following license:
-  
+
    Copyright (c) 2019-2020 Robert Manner <robert.manner@oneidentity.com>
-  
+
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -42,7 +42,7 @@ The files hostcheck.c and hostcheck.h bear the following license:
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -54,13 +54,13 @@ The files hostcheck.c and hostcheck.h bear the following license:
 The file redblack.c bears the following license:
 
    Copyright (c) 2001 Emin Martinian
-  
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that neither the name of Emin
    Martinian nor the names of any contributors are be used to endorse or
    promote products derived from this software without specific prior
    written permission.
-  
+
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -76,13 +76,13 @@ The file redblack.c bears the following license:
 The file sssd.c bears the following license:
 
    Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
-  
+
    This code is derived from software contributed by Aaron Spangler.
-  
+
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -94,11 +94,11 @@ The file sssd.c bears the following license:
 The files bsm_audit.c and bsm_audit.h bear the following license:
 
    Copyright (c) 2009 Christian S.J. Peron
-  
+
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -110,11 +110,11 @@ The files bsm_audit.c and bsm_audit.h bear the following license:
 The files solaris_audit.c and solaris_audit.h bear the following license:
 
    Copyright (c) 2014, Oracle and/or its affiliates.
-  
+
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -126,11 +126,11 @@ The files solaris_audit.c and solaris_audit.h bear the following license:
 The file reallocarray.c bears the following license:
 
    Copyright (c) 2008 Otto Moerbeek <otto@drijf.net>
-  
+
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -173,7 +173,7 @@ The file fnmatch.c bears the following license:
 
    Copyright (c) 2011, VMware, Inc.
    All rights reserved.
-   
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are met:
        * Redistributions of source code must retain the above copyright
@@ -184,7 +184,7 @@ The file fnmatch.c bears the following license:
        * Neither the name of the VMware, Inc. nor the names of its contributors
          may be used to endorse or promote products derived from this software
          without specific prior written permission.
-   
+
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -248,11 +248,11 @@ The file arc4random.c bears the following license:
    Copyright (c) 2008, Damien Miller <djm@openbsd.org>
    Copyright (c) 2013, Markus Friedl <markus@openbsd.org>
    Copyright (c) 2014, Theo de Raadt <deraadt@openbsd.org>
-  
+
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -260,15 +260,15 @@ The file arc4random.c bears the following license:
    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-  
+
 The file arc4random_uniform.c bears the following license:
 
    Copyright (c) 2008, Damien Miller <djm@openbsd.org>
-  
+
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -281,11 +281,11 @@ The file getentropy.c bears the following license:
 
    Copyright (c) 2014 Theo de Raadt <deraadt@openbsd.org>
    Copyright (c) 2014 Bob Beck <beck@obtuse.com>
-  
+
    Permission to use, copy, modify, and distribute this software for any
    purpose with or without fee is hereby granted, provided that the above
    copyright notice and this permission notice appear in all copies.
-  
+
    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -321,19 +321,19 @@ The embedded copy of protobuf-c bears the following license:
 
    Copyright (c) 2008-2018, Dave Benson and the protobuf-c authors.
    All rights reserved.
-  
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-  
+
        * Redistributions of source code must retain the above copyright
          notice, this list of conditions and the following disclaimer.
-  
+
        * Redistributions in binary form must reproduce the above
          copyright notice, this list of conditions and the following
          disclaimer in the documentation and/or other materials
          provided with the distribution.
-  
+
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
