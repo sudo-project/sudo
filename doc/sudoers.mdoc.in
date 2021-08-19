@@ -2880,11 +2880,11 @@ This setting is only supported by version 1.9.8 or higher.
 .It intercept_allow_setid
 On most systems, the dynamic loader will ignore
 .Ev LD_PRELOAD
-(or the equivalent) when running set user-ID and set group-ID
+(or the equivalent) when running set-user-ID and set-group-ID
 programs, effectively disabling intercept mode.
 To prevent this from happening,
 .Nm
-will not permit a set user-ID or set group-ID program to be run in
+will not permit a set-user-ID or set-group-ID program to be run in
 intercept mode unless
 .Em intercept_allow_setid
 is set.
@@ -5855,7 +5855,7 @@ This may be expanded in a future release of
 .Nm sudo .
 Because most dynamic loaders ignore
 .Ev LD_PRELOAD
-(or the equivalent) when running set user-ID and set group-ID programs,
+(or the equivalent) when running set-user-ID and set-group-ID programs,
 .Nm
 will not permit such programs to be run in
 .Em intercept

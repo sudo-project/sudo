@@ -3059,11 +3059,11 @@ This setting is only supported by version 1.9.8 or higher.
 intercept_allow_setid
 On most systems, the dynamic loader will ignore
 \fRLD_PRELOAD\fR
-(or the equivalent) when running set user-ID and set group-ID
+(or the equivalent) when running set-user-ID and set-group-ID
 programs, effectively disabling intercept mode.
 To prevent this from happening,
 \fBsudoers\fR
-will not permit a set user-ID or set group-ID program to be run in
+will not permit a set-user-ID or set-group-ID program to be run in
 intercept mode unless
 \fIintercept_allow_setid\fR
 is set.
@@ -6334,7 +6334,7 @@ This may be expanded in a future release of
 \fBsudo\fR.
 Because most dynamic loaders ignore
 \fRLD_PRELOAD\fR
-(or the equivalent) when running set user-ID and set group-ID programs,
+(or the equivalent) when running set-user-ID and set-group-ID programs,
 \fBsudoers\fR
 will not permit such programs to be run in
 \fIintercept\fR
