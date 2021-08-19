@@ -579,8 +579,8 @@ intercept_fd_cb(int fd, int what, void *v)
     msg.msg_control = &cmsgbuf.buf;
     msg.msg_controllen = sizeof(cmsgbuf.buf);
 #else
-    msg.msg_accrights = (caddr_t)&fd;
-    msg.msg_accrightslen = sizeof(fd);
+    msg.msg_accrights = (caddr_t)&newfd;
+    msg.msg_accrightslen = sizeof(newfd);
 #endif /* HAVE_STRUCT_MSGHDR_MSG_CONTROL */
 
     switch (recvmsg(fd, &msg, 0)) {
@@ -616,7 +616,7 @@ intercept_fd_cb(int fd, int what, void *v)
     }
     memcpy(&newfd, CMSG_DATA(cmsg), sizeof(newfd));
 #else
-    if (msg.msg_accrightslen != sizeof(fd)) {
+    if (msg.msg_accrightslen != sizeof(newfd)) {
 	sudo_warnx(U_("%s: missing message header"), __func__);
 	goto bad;
     }
