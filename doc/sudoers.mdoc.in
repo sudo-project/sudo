@@ -3914,18 +3914,28 @@ This setting is only supported by version 1.9.0 or higher.
 The path to the
 .Nm sudo
 client's certificate file, in PEM format.
-This setting is required when
-.Em log_servers
-is set and the remote log server is secured with TLS.
+This setting is required when the remote log server is secured
+with TLS and client certificate validation is enabled.
+For
+.Nm sudo_logsrvd ,
+client certificate validation is controlled by the
+.Em tls_checkpeer
+option, which defaults to
+.Em false .
 .Pp
 This setting is only supported by version 1.9.0 or higher.
 .It log_server_peer_key
 The path to the
 .Nm sudo
 client's private key file, in PEM format.
-This setting is required when
-.Em log_servers
-is set and the remote log server is secured with TLS.
+This setting is required when the remote log server is secured
+with TLS and client certificate validation is enabled.
+For
+.Nm sudo_logsrvd ,
+client certificate validation is controlled by the
+.Em tls_checkpeer
+option, which defaults to
+.Em false .
 .Pp
 This setting is only supported by version 1.9.0 or higher.
 .It mailsub

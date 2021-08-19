@@ -4160,9 +4160,14 @@ log_server_peer_cert
 The path to the
 \fBsudo\fR
 client's certificate file, in PEM format.
-This setting is required when
-\fIlog_servers\fR
-is set and the remote log server is secured with TLS.
+This setting is required when the remote log server is secured
+with TLS and client certificate validation is enabled.
+For
+\fBsudo_logsrvd\fR,
+client certificate validation is controlled by the
+\fItls_checkpeer\fR
+option, which defaults to
+\fIfalse\fR.
 .sp
 This setting is only supported by version 1.9.0 or higher.
 .TP 18n
@@ -4170,9 +4175,14 @@ log_server_peer_key
 The path to the
 \fBsudo\fR
 client's private key file, in PEM format.
-This setting is required when
-\fIlog_servers\fR
-is set and the remote log server is secured with TLS.
+This setting is required when the remote log server is secured
+with TLS and client certificate validation is enabled.
+For
+\fBsudo_logsrvd\fR,
+client certificate validation is controlled by the
+\fItls_checkpeer\fR
+option, which defaults to
+\fIfalse\fR.
 .sp
 This setting is only supported by version 1.9.0 or higher.
 .TP 18n
