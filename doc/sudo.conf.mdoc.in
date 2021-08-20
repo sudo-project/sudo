@@ -503,10 +503,10 @@ This setting is only available in
 .Nm sudo
 version 1.8.10 and higher.
 .El
-.Ss Debug flags
+.Ss Debug settings
 .Nm sudo
 versions 1.8.4 and higher support a flexible debugging framework
-that can help track down what
+that can log what
 .Nm sudo
 is doing internally if there is a problem.
 .Pp
@@ -514,20 +514,19 @@ A
 .Li Debug
 line consists of the
 .Li Debug
-keyword, followed by the name of the program (or plugin) to debug
-.Pq Nm sudo , Nm visudo , Nm sudoreplay , Nm sudoers ,
+keyword, followed by the name of the program, plugin or shared object to debug,
 the debug file name and a comma-separated list of debug flags.
 The debug flag syntax used by
-.Nm sudo
-and the
+.Nm sudo ,
+the
 .Nm sudoers
-plugin is
+plugin and its associated programs and shared objects is
 .Em subsystem Ns @ Ns Em priority
-but a plugin is free to use a different format so long as it does
-not include a comma
+but a third-party plugin is free to use a different format so long
+as it does not include a comma
 .Pq Ql \&, .
 .Pp
-For example:
+Examples:
 .Bd -literal -offset indent
 Debug sudo /var/log/sudo_debug all@warn,plugin@info
 .Ed
@@ -537,6 +536,16 @@ would log all debugging statements at the
 level and higher in addition to those at the
 .Em info
 level for the plugin subsystem.
+.Pp
+.Bd -literal -offset indent
+Debug sudo_intercept.so /var/log/intercept_debug all@debug
+.Ed
+.Pp
+would log all debugging statements, regardless of level, for the
+.Pa sudo_intercept.so
+shared object that implements
+.Nm sudo Ns 's
+intercept functionality.
 .Pp
 As of
 .Nm sudo
