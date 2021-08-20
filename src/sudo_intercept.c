@@ -44,6 +44,8 @@
 #endif
 
 #include "sudo_compat.h"
+#include "sudo_debug.h"
+#include "sudo_util.h"
 #include "pathnames.h"
 
 extern bool command_allowed(const char *cmnd, char * const argv[], char * const envp[], char **ncmnd, char ***nargv, char ***nenvp);
@@ -89,29 +91,42 @@ __attribute__((__section__("__DATA,__interpose"))) = {
 
 typedef int (*sudo_fn_execve_t)(const char *, char *const *, char *const *);
 
-sudo_dso_public int
-execve(const char *cmnd, char * const argv[], char * const envp[])
+# if defined(HAVE_SHL_LOAD)
+static void *
+sudo_shl_get_next(const char *symbol, short type)
 {
-    char *ncmnd = NULL, **nargv = NULL, **nenvp = NULL;
-# if defined(HAVE_DLOPEN)
-    void *fn = dlsym(RTLD_NEXT, "execve");
-# elif defined(HAVE_SHL_LOAD)
-    const char *name, *myname = _PATH_SUDO_INTERCEPT;
+    const char *name, *myname;
     struct shl_descriptor *desc;
     void *fn = NULL;
     int idx = 0;
+    debug_decl(sudo_shl_get_next, SUDO_DEBUG_EXEC);
 
-    /* Search for execve() but skip this shared object. */
-    myname = sudo_basename(myname);
+    /* Search for symbol but skip this shared object. */
+    /* XXX - could be set to a different path in sudo.conf */
+    myname = sudo_basename(_PATH_SUDO_INTERCEPT);
     while (shl_get(idx++, &desc) == 0) {
         name = sudo_basename(desc->filename);
         if (strcmp(name, myname) == 0)
             continue;
-        if (shl_findsym(&desc->handle, "execve", TYPE_PROCEDURE, &fn) == 0)
+        if (shl_findsym(&desc->handle, symbol, type, &fn) == 0)
             break;
     }
-# else
+
+    debug_return_ptr(fn);
+}
+# endif /* HAVE_SHL_LOAD */
+
+sudo_dso_public int
+execve(const char *cmnd, char * const argv[], char * const envp[])
+{
+    char *ncmnd = NULL, **nargv = NULL, **nenvp = NULL;
     void *fn = NULL;
+    debug_decl(execve, SUDO_DEBUG_EXEC);
+
+# if defined(HAVE_DLOPEN)
+    fn = dlsym(RTLD_NEXT, "execve");
+# elif defined(HAVE_SHL_LOAD)
+    fn = sudo_shl_get_next("execve", TYPE_PROCEDURE);
 # endif
     if (fn == NULL) {
         errno = EACCES;

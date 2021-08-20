@@ -863,12 +863,14 @@ sudo_edit.i: $(srcdir)/sudo_edit.c $(incdir)/compat/stdbool.h \
 sudo_edit.plog: sudo_edit.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_edit.c --i-file $< --output-file $@
 sudo_intercept.lo: $(srcdir)/sudo_intercept.c $(incdir)/compat/stdbool.h \
-                   $(incdir)/sudo_compat.h $(top_builddir)/config.h \
-                   $(top_builddir)/pathnames.h
+                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_intercept.c
 sudo_intercept.i: $(srcdir)/sudo_intercept.c $(incdir)/compat/stdbool.h \
-                   $(incdir)/sudo_compat.h $(top_builddir)/config.h \
-                   $(top_builddir)/pathnames.h
+                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sudo_intercept.plog: sudo_intercept.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_intercept.c --i-file $< --output-file $@

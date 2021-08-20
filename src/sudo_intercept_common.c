@@ -79,6 +79,7 @@ sudo_interposer_init(void)
 	    sudo_debug_register("sudo_intercept.so", NULL, NULL,
 		sudo_conf_debug_files("sudo_intercept.so"));
 	}
+	sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 
         /*
          * Missing SUDO_INTERCEPT_FD will result in execve() failure.
@@ -91,33 +92,35 @@ sudo_interposer_init(void)
 		char ch = INTERCEPT_REQ_SEC;
                 int fd;
 
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "%s", *p);
+
 		fd = sudo_strtonum(fdstr, 0, INT_MAX, &errstr);
 		if (errstr != NULL) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"invalid SUDO_INTERCEPT_FD: %s: %s", fdstr, errstr);
-                    break;
+                    debug_return;
                 }
 
 		/* Request secret from parent. */
 		if (send(fd, &ch, sizeof(ch), 0) != sizeof(ch)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"unable to request secret: %s", strerror(errno));
-                    break;
+			"unable to request secret on fd %d: %s", fd,
+			strerror(errno));
+                    debug_return;
 		}
 		if (recv(fd, &secret, sizeof(secret), 0) != sizeof(secret)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"unable to read secret: %s", strerror(errno));
-                    break;
+			"unable to read secret on fd %d: %s", fd,
+			strerror(errno));
+                    debug_return;
 		}
 
                 intercept_sock = fd;
-                break;
+                debug_return;
             }
         }
-	if (intercept_sock == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"SUDO_INTERCEPT_FD not found in environment");
-	}
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "SUDO_INTERCEPT_FD not found in environment");
     }
     debug_return;
 }
@@ -216,7 +219,7 @@ intercept_send_fd(int sock, int fd)
 	if (errno != EAGAIN && errno != EINTR)
 	    break;
     }
-    sudo_warn("sendmsg");
+    sudo_warn("sendmsg(%d)", sock);
     debug_return_bool(false);
 }
 
