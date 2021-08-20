@@ -2542,7 +2542,16 @@ dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval fseeko])
-AC_CHECK_FUNCS([pread], [], [
+AC_CHECK_FUNCS([pread], [
+    # pread/pwrite on 32-bit HP-UX 11.x may not support large files
+    case "$host_os" in
+	hpux*|hiuxmpp*)
+	    AC_CHECK_FUNCS([pread64 pwrite64], [
+		AC_CHECK_DECLS([pread64, pwrite64])
+	    ])
+	    ;;
+    esac
+], [
     AC_LIBOBJ(pread)
     SUDO_APPEND_COMPAT_EXP(sudo_pread)
 ])

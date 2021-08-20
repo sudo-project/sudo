@@ -20904,6 +20904,44 @@ if test "x$ac_cv_func_pread" = xyes
 then :
   printf "%s\n" "#define HAVE_PREAD 1" >>confdefs.h
 
+    # pread/pwrite on 32-bit HP-UX 11.x may not support large files
+    case "$host_os" in
+	hpux*|hiuxmpp*)
+
+  for ac_func in pread64 pwrite64
+do :
+  as_ac_var=`printf "%s\n" "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"
+then :
+  cat >>confdefs.h <<_ACEOF
+#define `printf "%s\n" "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+		ac_fn_check_decl "$LINENO" "pread64" "ac_cv_have_decl_pread64" "$ac_includes_default" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_pread64" = xyes
+then :
+  ac_have_decl=1
+else $as_nop
+  ac_have_decl=0
+fi
+printf "%s\n" "#define HAVE_DECL_PREAD64 $ac_have_decl" >>confdefs.h
+ac_fn_check_decl "$LINENO" "pwrite64" "ac_cv_have_decl_pwrite64" "$ac_includes_default" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_pwrite64" = xyes
+then :
+  ac_have_decl=1
+else $as_nop
+  ac_have_decl=0
+fi
+printf "%s\n" "#define HAVE_DECL_PWRITE64 $ac_have_decl" >>confdefs.h
+
+
+fi
+
+done
+	    ;;
+    esac
+
 else $as_nop
 
     case " $LIBOBJS " in

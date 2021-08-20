@@ -347,17 +347,23 @@ int getdomainname(char *, size_t);
 #endif
 
 /*
- * HP-UX 11.00 has broken pread/pwrite that can't handle a 64-bit off_t
- * on 32-bit machines.
+ * HP-UX 11.00 has broken pread/pwrite on 32-bit machines when
+ * _FILE_OFFSET_BITS == 64.  Use pread64/pwrite64 instead.
  */
 #if defined(__hpux) && !defined(__LP64__)
 # ifdef HAVE_PREAD64
 #  undef pread
 #  define pread(_a, _b, _c, _d) pread64((_a), (_b), (_c), (_d))
+#  if defined(HAVE_DECL_PREAD64) && !HAVE_DECL_PREAD64
+    ssize_t pread64(int fd, void *buf, size_t nbytes, off64_t offset);
+#  endif
 # endif
 # ifdef HAVE_PWRITE64
 #  undef pwrite
 #  define pwrite(_a, _b, _c, _d) pwrite64((_a), (_b), (_c), (_d))
+#  if defined(HAVE_DECL_PWRITE64) && !HAVE_DECL_PWRITE64
+    ssize_t pwrite64(int fd, const void *buf, size_t nbytes, off64_t offset);
+#  endif
 # endif
 #endif /* __hpux && !__LP64__ */
 
