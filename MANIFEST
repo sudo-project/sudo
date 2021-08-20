@@ -1111,6 +1111,7 @@ src/exec_preload.c
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c
+src/intercept.exp
 src/intercept.pb-c.c
 src/intercept.proto
 src/limits.c

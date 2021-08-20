@@ -36,6 +36,7 @@ cross_compiling = @CROSS_COMPILING@
 CC = @CC@
 LIBTOOL = @LIBTOOL@
 SED = @SED@
+AWK = @AWK@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(scriptdir)/install-sh -c
@@ -60,7 +61,8 @@ CFLAGS = @CFLAGS@
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
 SUDO_LDFLAGS = $(LDFLAGS) @SUDO_LDFLAGS@
-LT_LDFLAGS = @LT_LDFLAGS@
+INTERCEPT_LDFLAGS = @LT_LDFLAGS@ @LT_LDEXPORTS@
+NOEXEC_LDFLAGS = @LT_LDFLAGS@
 
 # Flags to pass to libtool
 LTFLAGS = --tag=disable-static
@@ -112,8 +114,12 @@ tmpfiles_d = @TMPFILES_D@
 install_uid = 0
 install_gid = 0
 
-# File mode to use for shared libraries
+# File extension, mode and map file to use for shared libraries/objects
+shlib_enable = @SHLIB_ENABLE@
 shlib_mode = @SHLIB_MODE@
+shlib_exp = $(srcdir)/intercept.exp
+shlib_map = intercept.map
+shlib_opt = intercept.opt
 
 # Optional init script and rc.d link
 INIT_DIR=@INIT_DIR@
@@ -204,11 +210,17 @@ $(devdir)/intercept.pb-c.c: $(srcdir)/intercept.proto
 sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(OBJS) $(SUDO_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
-sudo_intercept.la: $(INTERCEPT_OBJS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LIBS) @LIBDL@ -o $@ $(INTERCEPT_OBJS) $(PRELOAD_MODULE) -avoid-version -rpath $(interceptdir) -shrext .so
+$(shlib_map): $(shlib_exp)
+	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
+
+$(shlib_opt): $(shlib_exp)
+	@$(SED) 's/^/+e /' $(shlib_exp) > $@
+
+sudo_intercept.la: $(INTERCEPT_OBJS) @LT_LDDEP@
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(INTERCEPT_LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LIBS) @LIBDL@ -o $@ $(INTERCEPT_OBJS) $(PRELOAD_MODULE) -avoid-version -rpath $(interceptdir) -shrext .so
 
 sudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) @LIBDL@ -o $@ sudo_noexec.lo $(PRELOAD_MODULE) -avoid-version -rpath $(noexecdir) -shrext .so
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(NOEXEC_LDFLAGS) $(SSP_LDFLAGS) @LIBDL@ -o $@ sudo_noexec.lo $(PRELOAD_MODULE) -avoid-version -rpath $(noexecdir) -shrext .so
 
 sesh: $(SESH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
@@ -266,10 +278,14 @@ install-doc:
 install-includes:
 
 install-intercept: install-dirs sudo_intercept.la
-	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_intercept.la $(DESTDIR)$(interceptdir)
+	if [ X"$(shlib_enable)" = X"yes" ]; then \
+	    INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_intercept.la $(DESTDIR)$(interceptdir); \
+	fi
 
 install-noexec: install-dirs sudo_noexec.la
-	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_noexec.la $(DESTDIR)$(noexecdir)
+	if [ X"$(shlib_enable)" = X"yes" ]; then \
+	    INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_noexec.la $(DESTDIR)$(noexecdir); \
+	fi
 
 install-plugin:
 
@@ -331,7 +347,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile .libs sudo_usage.h
+	-rm -rf Makefile .libs $(shlib_map) $(shlib_opt) sudo_usage.h
 	@if [ -n "$(DEVEL)" -a "$(devdir)" != "$(srcdir)" ]; then \
 	    cmd='rm -rf $(GENERATED)'; \
 	    echo "$$cmd"; eval $$cmd; \
