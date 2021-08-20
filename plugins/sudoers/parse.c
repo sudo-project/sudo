@@ -742,10 +742,10 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
 	    sudo_lbuf_append(lbuf, "    Defaults%s", dsep);
 	    TAILQ_FOREACH(m, binding, entries) {
 		if (m != TAILQ_FIRST(binding))
-		    sudo_lbuf_append(lbuf, ",");
+		    sudo_lbuf_append(lbuf, ", ");
 		sudoers_format_member(lbuf, parse_tree, m, ", ", atype);
-		sudo_lbuf_append(lbuf, " ");
 	    }
+	    sudo_lbuf_append(lbuf, " ");
 	} else
 	    sudo_lbuf_append(lbuf, ", ");
 	sudoers_format_default(lbuf, d);
