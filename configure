@@ -3246,7 +3246,6 @@ as_fn_append ac_func_c_list " nl_langinfo HAVE_NL_LANGINFO"
 as_fn_append ac_func_c_list " faccessat HAVE_FACCESSAT"
 as_fn_append ac_func_c_list " wordexp HAVE_WORDEXP"
 as_fn_append ac_func_c_list " getauxval HAVE_GETAUXVAL"
-as_fn_append ac_func_c_list " fseeko HAVE_FSEEKO"
 as_fn_append ac_func_c_list " seteuid HAVE_SETEUID"
 
 # Auxiliary files required by this configure script.
@@ -20875,6 +20874,75 @@ printf "%s\n" "#define HAVE_GETGROUPS 1" >>confdefs.h
 esac
 LIBS=$ac_save_LIBS
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _LARGEFILE_SOURCE value needed for large files" >&5
+printf %s "checking for _LARGEFILE_SOURCE value needed for large files... " >&6; }
+if test ${ac_cv_sys_largefile_source+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  while :; do
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h> /* for off_t */
+     #include <stdio.h>
+int
+main (void)
+{
+int (*fp) (FILE *, off_t, int) = fseeko;
+     return fseeko (stdin, 0, 0) && fp (stdin, 0, 0);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_sys_largefile_source=no; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#define _LARGEFILE_SOURCE 1
+#include <sys/types.h> /* for off_t */
+     #include <stdio.h>
+int
+main (void)
+{
+int (*fp) (FILE *, off_t, int) = fseeko;
+     return fseeko (stdin, 0, 0) && fp (stdin, 0, 0);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_sys_largefile_source=1; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  ac_cv_sys_largefile_source=unknown
+  break
+done
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_largefile_source" >&5
+printf "%s\n" "$ac_cv_sys_largefile_source" >&6; }
+case $ac_cv_sys_largefile_source in #(
+  no | unknown) ;;
+  *)
+printf "%s\n" "#define _LARGEFILE_SOURCE $ac_cv_sys_largefile_source" >>confdefs.h
+;;
+esac
+rm -rf conftest*
+
+# We used to try defining _XOPEN_SOURCE=500 too, to work around a bug
+# in glibc 2.1.3, but that breaks too many other things.
+# If you want fseeko and ftello with glibc, upgrade to a fixed glibc.
+if test $ac_cv_sys_largefile_source != unknown; then
+
+printf "%s\n" "#define HAVE_FSEEKO 1" >>confdefs.h
+
+fi
+
 ac_func=
 for ac_item in $ac_func_c_list
 do
@@ -20888,7 +20956,6 @@ do
     ac_func=$ac_item
   fi
 done
-
 
 
 
