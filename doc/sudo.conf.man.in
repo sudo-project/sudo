@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "June 22, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "August 20, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -289,26 +289,10 @@ macOS and Solaris.
 .TP 10n
 intercept
 .br
-The fully-qualified path to a shared library containing wrappers
-for the
-\fBexecl\fR(),
-\fBexecle\fR(),
-\fBexeclp\fR(),
-\fBexect\fR(),
-\fBexecv\fR(),
-\fBexecve\fR(),
-\fBexecvP\fR(),
-\fBexecvp\fR(),
-\fBexecvpe\fR(),
-\fBfexecve\fR(),
-\fBpopen\fR(),
-\fBposix_spawn\fR(),
-\fBposix_spawnp\fR(),
-\fBsystem\fR(),
-and
-\fBwordexp\fR()
-library functions that intercept attempts to run further commands and
-perform a policy check before allowing them to be executed.
+The fully-qualified path to a shared library containing a wrapper for the
+\fBexecve\fR()
+system call that intercepts attempts to run further commands and
+performs a policy check before allowing them to be executed.
 This is used to implement the
 \fIintercept\fR
 functionality on systems that support
