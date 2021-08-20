@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 18, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "August 20, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -6743,16 +6743,14 @@ SSSD-based sudoers
 .TP 10n
 \fIutil\fR
 utility functions
-.PD 0
 .PP
 For example:
 .nf
 .sp
 .RS 0n
-Debug sudo /var/log/sudo_debug match@info,nss@info
+Debug sudoers.so /var/log/sudoers_debug match@info,nss@info
 .RE
 .fi
-.PD
 .PP
 For more information, see the
 sudo.conf(@mansectform@)

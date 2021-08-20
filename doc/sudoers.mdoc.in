@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 18, 2021
+.Dd August 20, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -6233,9 +6233,10 @@ SSSD-based sudoers
 .It Em util
 utility functions
 .El
+.Pp
 For example:
 .Bd -literal
-Debug sudo /var/log/sudo_debug match@info,nss@info
+Debug sudoers.so /var/log/sudoers_debug match@info,nss@info
 .Ed
 .Pp
 For more information, see the
