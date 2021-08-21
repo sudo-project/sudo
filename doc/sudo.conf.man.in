@@ -310,6 +310,7 @@ for the
 \fBexect\fR(),
 \fBexecv\fR(),
 \fBexecve\fR(),
+\fBexecveat\fR(),
 \fBexecvP\fR(),
 \fBexecvp\fR(),
 \fBexecvpe\fR(),

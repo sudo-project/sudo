@@ -284,6 +284,7 @@ for the
 .Fn exect ,
 .Fn execv ,
 .Fn execve ,
+.Fn execveat ,
 .Fn execvP ,
 .Fn execvp ,
 .Fn execvpe ,
