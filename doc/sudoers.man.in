@@ -2763,8 +2763,10 @@ If set,
 \fBsudoers\fR
 will log when a command spawns a child process and executes a program
 using the
+\fBexecv\fR()
+or
 \fBexecve\fR()
-system call.
+library functions.
 For example, if a shell is run by
 \fBsudo\fR,
 the individual commands run via the shell will be logged.

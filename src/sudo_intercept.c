@@ -48,6 +48,7 @@
 #include "sudo_util.h"
 #include "pathnames.h"
 
+extern char **environ;
 extern bool command_allowed(const char *cmnd, char * const argv[], char * const envp[], char **ncmnd, char ***nargv, char ***nenvp);
 
 #ifdef HAVE___INTERPOSE
@@ -81,10 +82,17 @@ my_execve(const char *cmnd, char * const argv[], char * const envp[])
     return -1;
 }
 
+static int
+my_execv(const char *cmnd, char * const argv[])
+{
+    return my_execve(cmnd, argv, environ);
+}
+
 /* Magic to tell dyld to do symbol interposition. */
 __attribute__((__used__)) static const interpose_t interposers[]
 __attribute__((__section__("__DATA,__interpose"))) = {
     { (void *)my_execve, (void *)execve }
+    { (void *)my_execv, (void *)execv }
 };
 
 #else /* HAVE___INTERPOSE */
@@ -147,5 +155,11 @@ execve(const char *cmnd, char * const argv[], char * const envp[])
 	free(nenvp);
 
     return -1;
+}
+
+sudo_dso_public int
+execv(const char *cmnd, char * const argv[])
+{
+    return execve(cmnd, argv, environ);
 }
 #endif /* HAVE___INTERPOSE) */

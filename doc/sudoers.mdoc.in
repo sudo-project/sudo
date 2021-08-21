@@ -2603,8 +2603,10 @@ If set,
 .Nm
 will log when a command spawns a child process and executes a program
 using the
+.Fn execv
+or
 .Fn execve
-system call.
+library functions.
 For example, if a shell is run by
 .Nm sudo ,
 the individual commands run via the shell will be logged.
