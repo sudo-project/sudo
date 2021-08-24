@@ -73,13 +73,17 @@ struct intercept_closure {
 };
 
 /*
- * Reset intercept closure for re-use.
+ * Close intercept fd and free closure.
+ * Called on EOF from sudo_intercept.so due to program exit.
  */
 static void
-intercept_closure_reset(struct intercept_closure *closure)
+intercept_close(int fd, struct intercept_closure *closure)
 {
     size_t n;
-    debug_decl(intercept_closure_reset, SUDO_DEBUG_EXEC);
+    debug_decl(intercept_close, SUDO_DEBUG_EXEC);
+
+    sudo_ev_del(NULL, &closure->ev);
+    close(fd);
 
     free(closure->buf);
     free(closure->command);
@@ -93,32 +97,7 @@ intercept_closure_reset(struct intercept_closure *closure)
 	    free(closure->run_envp[n]);
 	free(closure->run_envp);
     }
-    sudo_ev_del(NULL, &closure->ev);
-
-    /* Reset all but the event (which we may reuse). */
-    closure->errstr = NULL;
-    closure->command = NULL;
-    closure->run_argv = NULL;
-    closure->run_envp = NULL;
-    closure->buf = NULL;
-    closure->len = 0;
-    closure->policy_result = -1;
-
-    debug_return;
-}
-
-/*
- * Close intercept fd and free closure.
- * Called on EOF from sudo_intercept.so due to program exit.
- */
-static void
-intercept_close(int fd, struct intercept_closure *closure)
-{
-    debug_decl(intercept_close, SUDO_DEBUG_EXEC);
-
-    intercept_closure_reset(closure);
     free(closure);
-    close(fd);
 
     debug_return;
 }
