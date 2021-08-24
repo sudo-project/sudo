@@ -101,9 +101,9 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	    continue;
 	}
 	if (intercept_fd != -1 && strncmp(envp[env_len], "SUDO_INTERCEPT_FD=",
-		sizeof("SUDO_INTERCEPT_FD=")) == 0) {
+		sizeof("SUDO_INTERCEPT_FD=") - 1) == 0) {
 	    if (intercept_idx == -1) {
-		const char *cp = envp[env_len] + sizeof("SUDO_INTERCEPT_FD=");
+		const char *cp = envp[env_len] + sizeof("SUDO_INTERCEPT_FD=") - 1;
 		const char *errstr;
 		int fd;
 
