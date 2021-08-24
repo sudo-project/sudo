@@ -91,7 +91,7 @@ my_execv(const char *cmnd, char * const argv[])
 /* Magic to tell dyld to do symbol interposition. */
 __attribute__((__used__)) static const interpose_t interposers[]
 __attribute__((__section__("__DATA,__interpose"))) = {
-    { (void *)my_execve, (void *)execve }
+    { (void *)my_execve, (void *)execve },
     { (void *)my_execv, (void *)execv }
 };
 
