@@ -188,7 +188,7 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	    goto oom;
 	}
 	if (intercept_idx != -1) {
-	    envp[preload_idx] = fdstr;
+	    envp[intercept_idx] = fdstr;
 	} else {
 	    envp[env_len++] = fdstr;
 	    envp[env_len] = NULL;
