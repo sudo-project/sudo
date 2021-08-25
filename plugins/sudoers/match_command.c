@@ -719,6 +719,7 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
     }
 
     if (sudoers_cmnd == NULL) {
+	sudoers_cmnd = "ALL";
 	rc = command_matches_all(runchroot, intercepted, digests);
 	goto done;
     }
