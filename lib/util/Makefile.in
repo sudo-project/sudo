@@ -233,10 +233,10 @@ signame.c: mksigname
 	./mksigname > $@
 
 mksiglist: $(srcdir)/mksiglist.c mksiglist.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(HOSTCC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksiglist.c -o $@
+	$(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(srcdir)/mksiglist.c -o $@
 
 mksigname: $(srcdir)/mksigname.c mksigname.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(HOSTCC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksigname.c -o $@
+	$(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(srcdir)/mksigname.c -o $@
 
 $(srcdir)/sys_siglist.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
