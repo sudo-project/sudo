@@ -24,7 +24,7 @@
 #include <config.h>
 
 #include <sys/socket.h>
-#include <sys/uio.h>
+#include <netinet/in.h>
 
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -42,21 +42,13 @@
 #include "sudo_exec.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
+#include "sudo_rand.h"
 #include "intercept.pb-c.h"
 
 /* TCSASOFT is a BSD extension that ignores control flags and speed. */
 #ifndef TCSASOFT
 # define TCSASOFT	0
 #endif
-
-static void intercept_cb(int fd, int what, void *v);
-
-/* Must match start of exec_closure_nopty and monitor_closure.  */
-struct intercept_fd_closure {
-    uint64_t secret;
-    struct command_details *details;
-    struct sudo_event_base *evbase;
-};
 
 /* Closure for intercept_cb() */
 struct intercept_closure {
@@ -67,23 +59,68 @@ struct intercept_closure {
     char **run_argv;		/* owned by plugin */
     char **run_envp;		/* dynamically allocated */
     uint8_t *buf;		/* dynamically allocated */
-    uint64_t secret;
     size_t len;
+    int listen_sock;
     int policy_result;
 };
 
+static uint64_t intercept_secret;
+static in_port_t intercept_listen_port;
+static void intercept_accept_cb(int fd, int what, void *v);
+static void intercept_cb(int fd, int what, void *v);
+
+bool
+intercept_setup(int fd, struct sudo_event_base *evbase,
+    struct command_details *details)
+{
+    struct intercept_closure *closure;
+    debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"intercept fd %d\n", fd);
+
+    closure = calloc(1, sizeof(*closure));
+    if (closure == NULL) {
+	sudo_warnx("%s", U_("unable to allocate memory"));
+	goto bad;
+    }
+
+    closure->details = details;
+    /* XXX - add proper state variable */
+    closure->policy_result = intercept_secret ? -1 : 1;
+    closure->listen_sock = -1;
+
+    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ, intercept_cb, closure) == -1) {
+	/* This cannot (currently) fail. */
+	sudo_warn("%s", U_("unable to add event to queue"));
+	goto bad;
+    }
+    if (sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+	sudo_warn("%s", U_("unable to add event to queue"));
+	goto bad;
+    }
+
+    debug_return_bool(true);
+
+bad:
+    free(closure);
+    debug_return_bool(false);
+}
+
 /*
- * Close intercept fd and free closure.
- * Called on EOF from sudo_intercept.so due to program exit.
+ * Close intercept socket and free closure when we are done with
+ * the connection.
  */
 static void
-intercept_close(int fd, struct intercept_closure *closure)
+intercept_connection_close(int fd, struct intercept_closure *closure)
 {
     size_t n;
-    debug_decl(intercept_close, SUDO_DEBUG_EXEC);
+    debug_decl(intercept_connection_close, SUDO_DEBUG_EXEC);
 
     sudo_ev_del(NULL, &closure->ev);
     close(fd);
+    if (closure->listen_sock != -1)
+	close(closure->listen_sock);
 
     free(closure->buf);
     free(closure->command);
@@ -102,6 +139,59 @@ intercept_close(int fd, struct intercept_closure *closure)
     debug_return;
 }
 
+/*
+ * Prepare to listen on localhost using an ephemeral port.
+ * Sets intercept_secret and intercept_listen_port as side effects.
+ */
+static bool
+prepare_listener(struct intercept_closure *closure)
+{
+    struct sockaddr_in sin;
+    socklen_t sin_len = sizeof(sin);
+    int sock;
+    debug_decl(prepare_listener, SUDO_DEBUG_EXEC);
+
+    /* Secret must be non-zero. */
+    do {
+	intercept_secret = arc4random() | ((uint64_t)arc4random() << 32);
+    } while (intercept_secret == 0);
+
+    /* Create localhost listener socket (currently AF_INET only). */
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == -1) {
+	sudo_warn("socket");
+	goto bad;
+    }
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    sin.sin_port = 0;
+    if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
+	sudo_warn("bind");
+	goto bad;
+    }
+    if (getsockname(sock, (struct sockaddr *)&sin, &sin_len) == -1) {
+	sudo_warn("getsockname");
+	goto bad;
+    }
+    if (listen(sock, SOMAXCONN) == -1) {
+	sudo_warn("listen");
+	goto bad;
+    }
+
+    closure->listen_sock = sock;
+    intercept_listen_port = ntohs(sin.sin_port);
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"%s: listening on port %hu", __func__, intercept_listen_port);
+
+    debug_return_bool(true);
+
+bad:
+    if (sock != -1)
+	close(sock);
+    debug_return_bool(false);
+}
+
 static int
 intercept_check_policy(PolicyCheckRequest *req,
     struct intercept_closure *closure, const char **errstr)
@@ -115,6 +205,13 @@ intercept_check_policy(PolicyCheckRequest *req,
 
     if (req->command == NULL || req->n_argv == 0 || req->n_envp == 0) {
 	*errstr = N_("invalid PolicyCheckRequest");
+	goto bad;
+    }
+    if (req->secret != intercept_secret) {
+	*errstr = N_("invalid PolicyCheckRequest");
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "secret mismatch: got %" PRIu64 ", expected %" PRIu64, req->secret,
+	    intercept_secret);
 	goto bad;
     }
 
@@ -255,45 +352,41 @@ bad:
 }
 
 /*
- * Read a single message from sudo_intercept.so.
+ * Read a single message from sudo_intercept.so and unpack it.
+ * Assumes fd is in blocking mode.
  */
-static bool
-intercept_read(int fd, struct intercept_closure *closure)
+static InterceptRequest *
+intercept_recv_request(int fd)
 {
-    struct sudo_event_base *base = sudo_ev_get_base(&closure->ev);
-    InterceptMessage *msg = NULL;
+    InterceptRequest *req = NULL;
     uint8_t *cp, *buf = NULL;
-    pid_t saved_pgrp = -1;
-    struct termios oterm;
-    uint32_t msg_len;
-    bool ret = false;
-    int ttyfd = -1;
+    uint32_t req_len;
     ssize_t nread;
-    debug_decl(intercept_read, SUDO_DEBUG_EXEC);
+    debug_decl(intercept_recv_request, SUDO_DEBUG_EXEC);
 
     /* Read message size (uint32_t in host byte order). */
-    nread = read(fd, &msg_len, sizeof(msg_len));
-    if (nread != sizeof(msg_len)) {
+    nread = recv(fd, &req_len, sizeof(req_len), 0);
+    if (nread != sizeof(req_len)) {
 	if (nread != 0)
 	    sudo_warn("read");
 	goto done;
     }
 
-    if (msg_len > MESSAGE_SIZE_MAX) {
-	sudo_warnx(U_("client message too large: %zu"), (size_t)msg_len);
+    if (req_len > MESSAGE_SIZE_MAX) {
+	sudo_warnx(U_("client request too large: %zu"), (size_t)req_len);
 	goto done;
     }
 
-    if (msg_len > 0) {
-	size_t rem = msg_len;
+    if (req_len > 0) {
+	size_t rem = req_len;
 
-	if ((buf = malloc(msg_len)) == NULL) {
+	if ((buf = malloc(req_len)) == NULL) {
 	    sudo_warnx("%s", U_("unable to allocate memory"));
 	    goto done;
 	}
 	cp = buf;
 	do {
-	    nread = read(fd, cp, rem);
+	    nread = recv(fd, cp, rem, 0);
 	    switch (nread) {
 	    case 0:
 		/* EOF, other side must have exited. */
@@ -309,35 +402,83 @@ intercept_read(int fd, struct intercept_closure *closure)
 	} while (rem > 0);
     }
 
-    msg = intercept_message__unpack(NULL, msg_len, buf);
-    if (msg == NULL) {
-	sudo_warnx("unable to unpack %s size %zu", "InterceptMessage",
-	    (size_t)msg_len);
-	goto done;
-    }
-    if (msg->type_case != INTERCEPT_MESSAGE__TYPE_POLICY_CHECK_REQ) {
-	sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
-	    msg->type_case, "InterceptMessage", "sudo_intercept.so");
+    req = intercept_request__unpack(NULL, req_len, buf);
+    if (req == NULL) {
+	sudo_warnx("unable to unpack %s size %zu", "InterceptRequest",
+	    (size_t)req_len);
 	goto done;
     }
 
-    /* Take back control of the tty, if necessary, for the policy check. */
-    ttyfd = open(_PATH_TTY, O_RDWR);
-    if (ttyfd != -1) {
-	saved_pgrp = tcgetpgrp(ttyfd);
-	if (saved_pgrp == -1 || tcsetpgrp(ttyfd, getpgid(0)) == -1 ||
-		tcgetattr(ttyfd, &oterm) == -1) {
-	    close(ttyfd);
-	    ttyfd = -1;
+done:
+    free(buf);
+    debug_return_ptr(req);
+}
+
+/*
+ * Read a message from sudo_intercept.so and act on it.
+ */
+static bool
+intercept_read(int fd, struct intercept_closure *closure)
+{
+    struct sudo_event_base *base = sudo_ev_get_base(&closure->ev);
+    InterceptRequest *req;
+    pid_t saved_pgrp = -1;
+    struct termios oterm;
+    bool ret = false;
+    int ttyfd = -1;
+    debug_decl(intercept_read, SUDO_DEBUG_EXEC);
+
+    req = intercept_recv_request(fd);
+    if (req == NULL)
+	goto done;
+
+    switch (req->type_case) {
+    case INTERCEPT_REQUEST__TYPE_POLICY_CHECK_REQ:
+	if (closure->policy_result != -1) {
+	    /* Only a single policy check request is allowed. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"got another PolicyCheckRequest on the socket (%d)",
+		closure->policy_result);
+	    goto done;
 	}
-    }
 
-    closure->policy_result = intercept_check_policy(msg->u.policy_check_req,
-	closure, &closure->errstr);
+	/* Take back control of the tty, if necessary, for the policy check. */
+	ttyfd = open(_PATH_TTY, O_RDWR);
+	if (ttyfd != -1) {
+	    saved_pgrp = tcgetpgrp(ttyfd);
+	    if (saved_pgrp == -1 || tcsetpgrp(ttyfd, getpgid(0)) == -1 ||
+		    tcgetattr(ttyfd, &oterm) == -1) {
+		close(ttyfd);
+		ttyfd = -1;
+	    }
+	}
 
-    if (ttyfd != -1) {
-	(void)tcsetattr(ttyfd, TCSASOFT|TCSAFLUSH, &oterm);
-	(void)tcsetpgrp(ttyfd, saved_pgrp);
+	closure->policy_result = intercept_check_policy(req->u.policy_check_req,
+	    closure, &closure->errstr);
+
+	if (ttyfd != -1) {
+	    (void)tcsetattr(ttyfd, TCSASOFT|TCSAFLUSH, &oterm);
+	    (void)tcsetpgrp(ttyfd, saved_pgrp);
+	}
+	break;
+    case INTERCEPT_REQUEST__TYPE_HELLO:
+	if (closure->policy_result != 1) {
+	    /* Only accept hello on a socket with an accepted command. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"got ClientHello without an accepted command");
+	    goto done;
+	}
+
+	/* Start listener after first Hello. */
+	if (intercept_secret == 0 && !prepare_listener(closure))
+	    goto done;
+
+	closure->policy_result = 2; /* XXX */
+	break;
+    default:
+	sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
+	    req->type_case, "InterceptRequest", "sudo_intercept.so");
+	goto done;
     }
 
     /* Switch event to write mode for the reply. */
@@ -356,38 +497,37 @@ intercept_read(int fd, struct intercept_closure *closure)
 done:
     if (ttyfd != -1)
 	close(ttyfd);
-    intercept_message__free_unpacked(msg, NULL);
-    free(buf);
+    intercept_request__free_unpacked(req, NULL);
     debug_return_bool(ret);
 }
 
 static bool
-fmt_policy_check_result(PolicyCheckResult *res, struct intercept_closure *closure)
+fmt_intercept_response(InterceptResponse *resp,
+    struct intercept_closure *closure)
 {
-    uint32_t msg_len;
+    uint32_t resp_len;
     bool ret = false;
-    debug_decl(fmt_policy_check_result, SUDO_DEBUG_EXEC);
+    debug_decl(fmt_intercept_response, SUDO_DEBUG_EXEC);
 
-    res->secret = closure->secret;
-    closure->len = policy_check_result__get_packed_size(res);
+    closure->len = intercept_response__get_packed_size(resp);
     if (closure->len > MESSAGE_SIZE_MAX) {
 	sudo_warnx(U_("server message too large: %zu"), closure->len);
 	goto done;
     }
 
     /* Wire message size is used for length encoding, precedes message. */
-    msg_len = closure->len;
-    closure->len += sizeof(msg_len);
+    resp_len = closure->len;
+    closure->len += sizeof(resp_len);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"size + PolicyCheckResult %zu bytes", closure->len);
+	"size + InterceptResponse %zu bytes", closure->len);
 
     if ((closure->buf = malloc(closure->len)) == NULL) {
 	sudo_warnx("%s", U_("unable to allocate memory"));
 	goto done;
     }
-    memcpy(closure->buf, &msg_len, sizeof(msg_len));
-    policy_check_result__pack(res, closure->buf + sizeof(msg_len));
+    memcpy(closure->buf, &resp_len, sizeof(resp_len));
+    intercept_response__pack(resp, closure->buf + sizeof(resp_len));
 
     ret = true;
 
@@ -396,10 +536,26 @@ done:
 }
 
 static bool
+fmt_hello_response(struct intercept_closure *closure)
+{
+    HelloResponse hello_resp = HELLO_RESPONSE__INIT;
+    InterceptResponse resp = INTERCEPT_RESPONSE__INIT;
+    debug_decl(fmt_hello_response, SUDO_DEBUG_EXEC);
+
+    hello_resp.portno = intercept_listen_port;
+    hello_resp.secret = intercept_secret;
+
+    resp.u.hello_resp = &hello_resp;
+    resp.type_case = INTERCEPT_RESPONSE__TYPE_HELLO_RESP;
+
+    debug_return_bool(fmt_intercept_response(&resp, closure));
+}
+
+static bool
 fmt_accept_message(struct intercept_closure *closure)
 {
     PolicyAcceptMessage msg = POLICY_ACCEPT_MESSAGE__INIT;
-    PolicyCheckResult res = POLICY_CHECK_RESULT__INIT;
+    InterceptResponse resp = INTERCEPT_RESPONSE__INIT;
     size_t n;
     debug_decl(fmt_accept_message, SUDO_DEBUG_EXEC);
 
@@ -413,40 +569,40 @@ fmt_accept_message(struct intercept_closure *closure)
 	continue;
     msg.n_run_envp = n;
 
-    res.u.accept_msg = &msg;
-    res.type_case = POLICY_CHECK_RESULT__TYPE_ACCEPT_MSG;
+    resp.u.accept_msg = &msg;
+    resp.type_case = INTERCEPT_RESPONSE__TYPE_ACCEPT_MSG;
 
-    debug_return_bool(fmt_policy_check_result(&res, closure));
+    debug_return_bool(fmt_intercept_response(&resp, closure));
 }
 
 static bool
 fmt_reject_message(struct intercept_closure *closure)
 {
     PolicyRejectMessage msg = POLICY_REJECT_MESSAGE__INIT;
-    PolicyCheckResult res = POLICY_CHECK_RESULT__INIT;
+    InterceptResponse resp = INTERCEPT_RESPONSE__INIT;
     debug_decl(fmt_reject_message, SUDO_DEBUG_EXEC);
 
     msg.reject_message = (char *)closure->errstr;
 
-    res.u.reject_msg = &msg;
-    res.type_case = POLICY_CHECK_RESULT__TYPE_REJECT_MSG;
+    resp.u.reject_msg = &msg;
+    resp.type_case = INTERCEPT_RESPONSE__TYPE_REJECT_MSG;
 
-    debug_return_bool(fmt_policy_check_result(&res, closure));
+    debug_return_bool(fmt_intercept_response(&resp, closure));
 }
 
 static bool
 fmt_error_message(struct intercept_closure *closure)
 {
     PolicyErrorMessage msg = POLICY_ERROR_MESSAGE__INIT;
-    PolicyCheckResult res = POLICY_CHECK_RESULT__INIT;
+    InterceptResponse resp = INTERCEPT_RESPONSE__INIT;
     debug_decl(fmt_error_message, SUDO_DEBUG_EXEC);
 
     msg.error_message = (char *)closure->errstr;
 
-    res.u.error_msg = &msg;
-    res.type_case = POLICY_CHECK_RESULT__TYPE_ERROR_MSG;
+    resp.u.error_msg = &msg;
+    resp.type_case = INTERCEPT_RESPONSE__TYPE_ERROR_MSG;
 
-    debug_return_bool(fmt_policy_check_result(&res, closure));
+    debug_return_bool(fmt_intercept_response(&resp, closure));
 }
 
 /*
@@ -455,13 +611,19 @@ fmt_error_message(struct intercept_closure *closure)
 static bool
 intercept_write(int fd, struct intercept_closure *closure)
 {
-    size_t rem;
-    uint8_t *cp;
+    struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     ssize_t nwritten;
     bool ret = false;
+    uint8_t *cp;
+    size_t rem;
     debug_decl(intercept_write, SUDO_DEBUG_EXEC);
 
+    /* XXX - proper state variable */
     switch (closure->policy_result) {
+	case 2:
+	    if (!fmt_hello_response(closure))
+		goto done;
+	    break;
 	case 1:
 	    if (!fmt_accept_message(closure))
 		goto done;
@@ -479,14 +641,54 @@ intercept_write(int fd, struct intercept_closure *closure)
     cp = closure->buf;
     rem = closure->len;
     do {
-	nwritten = write(fd, cp, rem);
+	nwritten = send(fd, cp, rem, 0);
 	if (nwritten == -1) {
-	    sudo_warn("write");
+	    sudo_warn("send");
 	    goto done;
 	}
 	cp += nwritten;
 	rem -= nwritten;
     } while (rem > 0);
+
+    switch (closure->policy_result) {
+    case 1:
+	/* Switch event to read mode for sudo_intercept.so ctor. */
+	if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ, intercept_cb, closure) == -1) {
+	    /* This cannot (currently) fail. */
+	    sudo_warn("%s", U_("unable to add event to queue"));
+	    goto done;
+	}
+	if (sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+	    sudo_warn("%s", U_("unable to add event to queue"));
+	    goto done;
+	}
+	break;
+    case 2:
+	if (closure->listen_sock != -1) {
+	    /* Re-use intercept_event for the listener. */
+	    if (sudo_ev_set(&closure->ev, closure->listen_sock, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_accept_cb, closure) == -1) {
+		/* This cannot (currently) fail. */
+		sudo_warn("%s", U_("unable to add event to queue"));
+		goto done;
+	    }
+	    if (sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+		sudo_warn("%s", U_("unable to add event to queue"));
+		goto done;
+	    }
+	    close(fd);
+
+	    /* Reset bits of closure we used for Hello. */
+	    free(closure->buf);
+	    closure->buf = NULL;
+	    closure->len = 0;
+	    closure->listen_sock = -1;
+	    break;
+	}
+	FALLTHROUGH;
+    default:
+	/* Done with this connection. */
+	intercept_connection_close(fd, closure);
+    }
 
     ret = true;
 
@@ -513,115 +715,40 @@ intercept_cb(int fd, int what, void *v)
 	break;
     }
 
-    if (!success || what == SUDO_EV_WRITE) {
-	intercept_close(fd, closure);
-    }
+    if (!success)
+	intercept_connection_close(fd, closure);
 
     debug_return;
 }
 
 /*
- * Accept a single fd passed from the child to use for policy checks.
- * This acts a bit like accept() in reverse since the client allocates
- * the socketpair() that is used for the actual communication.
+ * Accept a new connection from the client and fill in a client closure.
+ * Registers a new event for the connection.
  */
-void
-intercept_fd_cb(int fd, int what, void *v)
+static void
+intercept_accept_cb(int fd, int what, void *v)
 {
-    struct intercept_closure *closure = NULL;
-    struct intercept_fd_closure *fdc = v;
-    struct msghdr msg;
-#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
-    union {
-	struct cmsghdr hdr;
-	char buf[CMSG_SPACE(sizeof(int))];
-    } cmsgbuf;
-    struct cmsghdr *cmsg;
-#endif
-    struct iovec iov[1];
-    int newfd = -1;
-    char ch;
-    debug_decl(intercept_fd_cb, SUDO_DEBUG_EXEC);
+    struct intercept_closure *closure = v;
+    struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
+    struct sockaddr_in sin;
+    socklen_t sin_len = sizeof(sin);
+    int client_sock;
+    debug_decl(intercept_accept_cb, SUDO_DEBUG_EXEC);
 
-    /*
-     * We send a single byte of data along with the fd; some systems
-     * don't support sending file descriptors without data.
-     * Note that the intercept fd is *blocking*.
-     */
-    iov[0].iov_base = &ch;
-    iov[0].iov_len = 1;
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_iov = iov;
-    msg.msg_iovlen = 1;
-#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
-    memset(&cmsgbuf, 0, sizeof(cmsgbuf));
-    msg.msg_control = &cmsgbuf.buf;
-    msg.msg_controllen = sizeof(cmsgbuf.buf);
-#else
-    msg.msg_accrights = (caddr_t)&newfd;
-    msg.msg_accrightslen = sizeof(newfd);
-#endif /* HAVE_STRUCT_MSGHDR_MSG_CONTROL */
-
-    switch (recvmsg(fd, &msg, 0)) {
-    case -1:
-	if (errno != EAGAIN && errno != EINTR)
-	    sudo_warn("recvmsg");
-	goto bad;
-    case 0:
-	/* EOF */
-	goto bad;
-    default:
-	break;
-    }
-
-    if (ch == INTERCEPT_REQ_SEC) {
-	/* Client requested secret from ctor, no fd is present. */
-	if (write(fd, &fdc->secret, sizeof(fdc->secret)) != sizeof(fdc->secret))
-	    goto bad;
-	debug_return;
-    }
-
-#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
-    cmsg = CMSG_FIRSTHDR(&msg);
-    if (cmsg == NULL) {
-	sudo_warnx(U_("%s: missing message header"), __func__);
+    client_sock = accept(fd, (struct sockaddr *)&sin, &sin_len);
+    if (client_sock == -1) {
+	sudo_warn("accept");
 	goto bad;
     }
 
-    if (cmsg->cmsg_type != SCM_RIGHTS) {
-	sudo_warnx(U_("%s: expected message type %d, got %d"), __func__,
-	    SCM_RIGHTS, cmsg->cmsg_type);
-	goto bad;
-    }
-    memcpy(&newfd, CMSG_DATA(cmsg), sizeof(newfd));
-#else
-    if (msg.msg_accrightslen != sizeof(newfd)) {
-	sudo_warnx(U_("%s: missing message header"), __func__);
-	goto bad;
-    }
-#endif /* HAVE_STRUCT_MSGHDR_MSG_CONTROL */
-
-    closure = calloc(1, sizeof(*closure));
-    if (closure == NULL) {
-	sudo_warnx("%s", U_("unable to allocate memory"));
-	goto bad;
-    }
-    closure->secret = fdc->secret;
-    closure->details = fdc->details;
-
-    if (sudo_ev_set(&closure->ev, newfd, SUDO_EV_READ, intercept_cb, closure) == -1) {
-	sudo_warn("%s", U_("unable to add event to queue"));
-	goto bad;
-    }
-    if (sudo_ev_add(fdc->evbase, &closure->ev, NULL, false) == -1) {
-	sudo_warn("%s", U_("unable to add event to queue"));
+    if (!intercept_setup(client_sock, evbase, closure->details)) {
 	goto bad;
     }
 
     debug_return;
+
 bad:
-    if (newfd != -1)
-	close(newfd);
-    free(closure);
+    if (client_sock != -1)
+	close(client_sock);
     debug_return;
 }

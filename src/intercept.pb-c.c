@@ -7,49 +7,139 @@
 #endif
 
 #include "intercept.pb-c.h"
-void   intercept_message__init
-                     (InterceptMessage         *message)
+void   intercept_request__init
+                     (InterceptRequest         *message)
 {
-  static const InterceptMessage init_value = INTERCEPT_MESSAGE__INIT;
+  static const InterceptRequest init_value = INTERCEPT_REQUEST__INIT;
   *message = init_value;
 }
-size_t intercept_message__get_packed_size
-                     (const InterceptMessage *message)
+size_t intercept_request__get_packed_size
+                     (const InterceptRequest *message)
 {
-  assert(message->base.descriptor == &intercept_message__descriptor);
+  assert(message->base.descriptor == &intercept_request__descriptor);
   return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
-size_t intercept_message__pack
-                     (const InterceptMessage *message,
+size_t intercept_request__pack
+                     (const InterceptRequest *message,
                       uint8_t       *out)
 {
-  assert(message->base.descriptor == &intercept_message__descriptor);
+  assert(message->base.descriptor == &intercept_request__descriptor);
   return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
-size_t intercept_message__pack_to_buffer
-                     (const InterceptMessage *message,
+size_t intercept_request__pack_to_buffer
+                     (const InterceptRequest *message,
                       ProtobufCBuffer *buffer)
 {
-  assert(message->base.descriptor == &intercept_message__descriptor);
+  assert(message->base.descriptor == &intercept_request__descriptor);
   return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
-InterceptMessage *
-       intercept_message__unpack
+InterceptRequest *
+       intercept_request__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data)
 {
-  return (InterceptMessage *)
-     protobuf_c_message_unpack (&intercept_message__descriptor,
+  return (InterceptRequest *)
+     protobuf_c_message_unpack (&intercept_request__descriptor,
                                 allocator, len, data);
 }
-void   intercept_message__free_unpacked
-                     (InterceptMessage *message,
+void   intercept_request__free_unpacked
+                     (InterceptRequest *message,
                       ProtobufCAllocator *allocator)
 {
   if(!message)
     return;
-  assert(message->base.descriptor == &intercept_message__descriptor);
+  assert(message->base.descriptor == &intercept_request__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   client_hello__init
+                     (ClientHello         *message)
+{
+  static const ClientHello init_value = CLIENT_HELLO__INIT;
+  *message = init_value;
+}
+size_t client_hello__get_packed_size
+                     (const ClientHello *message)
+{
+  assert(message->base.descriptor == &client_hello__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t client_hello__pack
+                     (const ClientHello *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &client_hello__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t client_hello__pack_to_buffer
+                     (const ClientHello *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &client_hello__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ClientHello *
+       client_hello__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ClientHello *)
+     protobuf_c_message_unpack (&client_hello__descriptor,
+                                allocator, len, data);
+}
+void   client_hello__free_unpacked
+                     (ClientHello *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &client_hello__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   hello_response__init
+                     (HelloResponse         *message)
+{
+  static const HelloResponse init_value = HELLO_RESPONSE__INIT;
+  *message = init_value;
+}
+size_t hello_response__get_packed_size
+                     (const HelloResponse *message)
+{
+  assert(message->base.descriptor == &hello_response__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t hello_response__pack
+                     (const HelloResponse *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &hello_response__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t hello_response__pack_to_buffer
+                     (const HelloResponse *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &hello_response__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+HelloResponse *
+       hello_response__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (HelloResponse *)
+     protobuf_c_message_unpack (&hello_response__descriptor,
+                                allocator, len, data);
+}
+void   hello_response__free_unpacked
+                     (HelloResponse *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &hello_response__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 void   policy_check_request__init
@@ -232,90 +322,192 @@ void   policy_error_message__free_unpacked
   assert(message->base.descriptor == &policy_error_message__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-void   policy_check_result__init
-                     (PolicyCheckResult         *message)
+void   intercept_response__init
+                     (InterceptResponse         *message)
 {
-  static const PolicyCheckResult init_value = POLICY_CHECK_RESULT__INIT;
+  static const InterceptResponse init_value = INTERCEPT_RESPONSE__INIT;
   *message = init_value;
 }
-size_t policy_check_result__get_packed_size
-                     (const PolicyCheckResult *message)
+size_t intercept_response__get_packed_size
+                     (const InterceptResponse *message)
 {
-  assert(message->base.descriptor == &policy_check_result__descriptor);
+  assert(message->base.descriptor == &intercept_response__descriptor);
   return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
-size_t policy_check_result__pack
-                     (const PolicyCheckResult *message,
+size_t intercept_response__pack
+                     (const InterceptResponse *message,
                       uint8_t       *out)
 {
-  assert(message->base.descriptor == &policy_check_result__descriptor);
+  assert(message->base.descriptor == &intercept_response__descriptor);
   return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
-size_t policy_check_result__pack_to_buffer
-                     (const PolicyCheckResult *message,
+size_t intercept_response__pack_to_buffer
+                     (const InterceptResponse *message,
                       ProtobufCBuffer *buffer)
 {
-  assert(message->base.descriptor == &policy_check_result__descriptor);
+  assert(message->base.descriptor == &intercept_response__descriptor);
   return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
-PolicyCheckResult *
-       policy_check_result__unpack
+InterceptResponse *
+       intercept_response__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data)
 {
-  return (PolicyCheckResult *)
-     protobuf_c_message_unpack (&policy_check_result__descriptor,
+  return (InterceptResponse *)
+     protobuf_c_message_unpack (&intercept_response__descriptor,
                                 allocator, len, data);
 }
-void   policy_check_result__free_unpacked
-                     (PolicyCheckResult *message,
+void   intercept_response__free_unpacked
+                     (InterceptResponse *message,
                       ProtobufCAllocator *allocator)
 {
   if(!message)
     return;
-  assert(message->base.descriptor == &policy_check_result__descriptor);
+  assert(message->base.descriptor == &intercept_response__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor intercept_message__field_descriptors[1] =
+static const ProtobufCFieldDescriptor intercept_request__field_descriptors[2] =
 {
   {
     "policy_check_req",
     1,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(InterceptMessage, type_case),
-    offsetof(InterceptMessage, u.policy_check_req),
+    offsetof(InterceptRequest, type_case),
+    offsetof(InterceptRequest, u.policy_check_req),
     &policy_check_request__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "hello",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(InterceptRequest, type_case),
+    offsetof(InterceptRequest, u.hello),
+    &client_hello__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
-static const unsigned intercept_message__field_indices_by_name[] = {
+static const unsigned intercept_request__field_indices_by_name[] = {
+  1,   /* field[1] = hello */
   0,   /* field[0] = policy_check_req */
 };
-static const ProtobufCIntRange intercept_message__number_ranges[1 + 1] =
+static const ProtobufCIntRange intercept_request__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor intercept_request__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "InterceptRequest",
+  "InterceptRequest",
+  "InterceptRequest",
+  "",
+  sizeof(InterceptRequest),
+  2,
+  intercept_request__field_descriptors,
+  intercept_request__field_indices_by_name,
+  1,  intercept_request__number_ranges,
+  (ProtobufCMessageInit) intercept_request__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor client_hello__field_descriptors[1] =
+{
+  {
+    "pid",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(ClientHello, pid),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned client_hello__field_indices_by_name[] = {
+  0,   /* field[0] = pid */
+};
+static const ProtobufCIntRange client_hello__number_ranges[1 + 1] =
 {
   { 1, 0 },
   { 0, 1 }
 };
-const ProtobufCMessageDescriptor intercept_message__descriptor =
+const ProtobufCMessageDescriptor client_hello__descriptor =
 {
   PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "InterceptMessage",
-  "InterceptMessage",
-  "InterceptMessage",
+  "ClientHello",
+  "ClientHello",
+  "ClientHello",
   "",
-  sizeof(InterceptMessage),
+  sizeof(ClientHello),
   1,
-  intercept_message__field_descriptors,
-  intercept_message__field_indices_by_name,
-  1,  intercept_message__number_ranges,
-  (ProtobufCMessageInit) intercept_message__init,
+  client_hello__field_descriptors,
+  client_hello__field_indices_by_name,
+  1,  client_hello__number_ranges,
+  (ProtobufCMessageInit) client_hello__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[3] =
+static const ProtobufCFieldDescriptor hello_response__field_descriptors[2] =
+{
+  {
+    "secret",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_FIXED64,
+    0,   /* quantifier_offset */
+    offsetof(HelloResponse, secret),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "portno",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(HelloResponse, portno),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned hello_response__field_indices_by_name[] = {
+  1,   /* field[1] = portno */
+  0,   /* field[0] = secret */
+};
+static const ProtobufCIntRange hello_response__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor hello_response__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "HelloResponse",
+  "HelloResponse",
+  "HelloResponse",
+  "",
+  sizeof(HelloResponse),
+  2,
+  hello_response__field_descriptors,
+  hello_response__field_indices_by_name,
+  1,  hello_response__number_ranges,
+  (ProtobufCMessageInit) hello_response__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[5] =
 {
   {
     "command",
@@ -353,16 +545,42 @@ static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[3]
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "intercept_fd",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(PolicyCheckRequest, intercept_fd),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "secret",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_FIXED64,
+    0,   /* quantifier_offset */
+    offsetof(PolicyCheckRequest, secret),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned policy_check_request__field_indices_by_name[] = {
   1,   /* field[1] = argv */
   0,   /* field[0] = command */
   2,   /* field[2] = envp */
+  3,   /* field[3] = intercept_fd */
+  4,   /* field[4] = secret */
 };
 static const ProtobufCIntRange policy_check_request__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 3 }
+  { 0, 5 }
 };
 const ProtobufCMessageDescriptor policy_check_request__descriptor =
 {
@@ -372,7 +590,7 @@ const ProtobufCMessageDescriptor policy_check_request__descriptor =
   "PolicyCheckRequest",
   "",
   sizeof(PolicyCheckRequest),
-  3,
+  5,
   policy_check_request__field_descriptors,
   policy_check_request__field_indices_by_name,
   1,  policy_check_request__number_ranges,
@@ -519,15 +737,27 @@ const ProtobufCMessageDescriptor policy_error_message__descriptor =
   (ProtobufCMessageInit) policy_error_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor policy_check_result__field_descriptors[4] =
+static const ProtobufCFieldDescriptor intercept_response__field_descriptors[4] =
 {
   {
-    "accept_msg",
+    "hello_resp",
     1,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(PolicyCheckResult, type_case),
-    offsetof(PolicyCheckResult, u.accept_msg),
+    offsetof(InterceptResponse, type_case),
+    offsetof(InterceptResponse, u.hello_resp),
+    &hello_response__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "accept_msg",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(InterceptResponse, type_case),
+    offsetof(InterceptResponse, u.accept_msg),
     &policy_accept_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -535,11 +765,11 @@ static const ProtobufCFieldDescriptor policy_check_result__field_descriptors[4] 
   },
   {
     "reject_msg",
-    2,
+    3,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(PolicyCheckResult, type_case),
-    offsetof(PolicyCheckResult, u.reject_msg),
+    offsetof(InterceptResponse, type_case),
+    offsetof(InterceptResponse, u.reject_msg),
     &policy_reject_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
@@ -547,52 +777,40 @@ static const ProtobufCFieldDescriptor policy_check_result__field_descriptors[4] 
   },
   {
     "error_msg",
-    3,
+    4,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(PolicyCheckResult, type_case),
-    offsetof(PolicyCheckResult, u.error_msg),
+    offsetof(InterceptResponse, type_case),
+    offsetof(InterceptResponse, u.error_msg),
     &policy_error_message__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
-  {
-    "secret",
-    4,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_FIXED64,
-    0,   /* quantifier_offset */
-    offsetof(PolicyCheckResult, secret),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
 };
-static const unsigned policy_check_result__field_indices_by_name[] = {
-  0,   /* field[0] = accept_msg */
-  2,   /* field[2] = error_msg */
-  1,   /* field[1] = reject_msg */
-  3,   /* field[3] = secret */
+static const unsigned intercept_response__field_indices_by_name[] = {
+  1,   /* field[1] = accept_msg */
+  3,   /* field[3] = error_msg */
+  0,   /* field[0] = hello_resp */
+  2,   /* field[2] = reject_msg */
 };
-static const ProtobufCIntRange policy_check_result__number_ranges[1 + 1] =
+static const ProtobufCIntRange intercept_response__number_ranges[1 + 1] =
 {
   { 1, 0 },
   { 0, 4 }
 };
-const ProtobufCMessageDescriptor policy_check_result__descriptor =
+const ProtobufCMessageDescriptor intercept_response__descriptor =
 {
   PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "PolicyCheckResult",
-  "PolicyCheckResult",
-  "PolicyCheckResult",
+  "InterceptResponse",
+  "InterceptResponse",
+  "InterceptResponse",
   "",
-  sizeof(PolicyCheckResult),
+  sizeof(InterceptResponse),
   4,
-  policy_check_result__field_descriptors,
-  policy_check_result__field_indices_by_name,
-  1,  policy_check_result__number_ranges,
-  (ProtobufCMessageInit) policy_check_result__init,
+  intercept_response__field_descriptors,
+  intercept_response__field_indices_by_name,
+  1,  intercept_response__number_ranges,
+  (ProtobufCMessageInit) intercept_response__init,
   NULL,NULL,NULL    /* reserved[123] */
 };

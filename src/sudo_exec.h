@@ -80,7 +80,6 @@
 #define SESH_ERR_SOME_FILES 33		/* copy error, some files copied */
 
 #define INTERCEPT_FD_MIN    64		/* minimum fd so shell won't close it */
-#define INTERCEPT_REQ_SEC   42		/* request intercept secret */
 #define MESSAGE_SIZE_MAX    2097152	/* 2Mib max intercept message size */
 
 /*
@@ -88,18 +87,21 @@
  */
 struct command_details;
 struct command_status;
+struct sudo_event_base;
 struct stat;
 
 /* exec.c */
 void exec_cmnd(struct command_details *details, int intercept_fd, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);
 bool sudo_terminated(struct command_status *cstat);
-void intercept_fd_cb(int fd, int what, void *v);
 
 /* exec_common.c */
 int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, int flags);
 char **disable_execute(char *envp[], const char *dso);
 char **enable_monitor(char *envp[], const char *dso);
+
+/* exec_intercept.c */
+bool intercept_setup(int fd, struct sudo_event_base *evbase, struct command_details *details);
 
 /* exec_nopty.c */
 void exec_nopty(struct command_details *details, struct command_status *cstat);

@@ -25,6 +25,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -57,102 +58,49 @@
 
 extern char **environ;
 
-static int intercept_sock = -1;
 static uint64_t secret;
+static in_port_t intercept_port;
 
-/*
- * Look up SUDO_INTERCEPT_FD in the environment.
- * This function is run when the shared library is loaded.
- */
-__attribute__((constructor)) static void
-sudo_interposer_init(void)
+/* Send entire request to sudo (blocking). */
+static bool
+send_req(int sock, const uint8_t *buf, size_t len)
 {
-    static bool initialized;
-    char **p;
-    debug_decl(sudo_interposer_init, SUDO_DEBUG_EXEC);
+    const uint8_t *cp = buf;
+    ssize_t nwritten;
+    debug_decl(send_req, SUDO_DEBUG_EXEC);
 
-    if (!initialized) {
-        initialized = true;
-
-	/* Read debug section of sudo.conf and init debugging. */
-	if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
-	    sudo_debug_register("sudo_intercept.so", NULL, NULL,
-		sudo_conf_debug_files("sudo_intercept.so"));
+    do {
+	nwritten = send(sock, cp, len, 0);
+	if (nwritten == -1) {
+	    debug_return_bool(false);
 	}
-	sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	len -= nwritten;
+	cp += nwritten;
+    } while (len > 0);
 
-        /*
-         * Missing SUDO_INTERCEPT_FD will result in execve() failure.
-         * Note that we cannot use getenv(3) here on Linux at least.
-         */
-        for (p = environ; *p != NULL; p++) {
-            if (strncmp(*p, "SUDO_INTERCEPT_FD=", sizeof("SUDO_INTERCEPT_FD=") -1) == 0) {
-                const char *fdstr = *p + sizeof("SUDO_INTERCEPT_FD=") - 1;
-		const char *errstr;
-		char ch = INTERCEPT_REQ_SEC;
-                int fd;
-
-		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "%s", *p);
-
-		fd = sudo_strtonum(fdstr, 0, INT_MAX, &errstr);
-		if (errstr != NULL) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"invalid SUDO_INTERCEPT_FD: %s: %s", fdstr, errstr);
-                    debug_return;
-                }
-
-		/* Request secret from parent. */
-		if (send(fd, &ch, sizeof(ch), 0) != sizeof(ch)) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"unable to request secret on fd %d: %s", fd,
-			strerror(errno));
-                    debug_return;
-		}
-		if (recv(fd, &secret, sizeof(secret), 0) != sizeof(secret)) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"unable to read secret on fd %d: %s", fd,
-			strerror(errno));
-                    debug_return;
-		}
-
-                intercept_sock = fd;
-                debug_return;
-            }
-        }
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "SUDO_INTERCEPT_FD not found in environment");
-    }
-    debug_return;
+    debug_return_bool(true);
 }
 
-static uint8_t *
-fmt_policy_check_req(const char *cmnd, char * const argv[], char * const envp[],
-    size_t *buflen)
+static bool
+send_client_hello(int sock)
 {
-    InterceptMessage msg = INTERCEPT_MESSAGE__INIT;
-    PolicyCheckRequest req = POLICY_CHECK_REQUEST__INIT;
+    InterceptRequest msg = INTERCEPT_REQUEST__INIT;
+    ClientHello hello = CLIENT_HELLO__INIT;
     uint8_t *buf = NULL;
     uint32_t msg_len;
     size_t len;
-    debug_decl(sudo_interposer_init, SUDO_DEBUG_EXEC);
+    bool ret = false;
+    debug_decl(send_client_hello, SUDO_DEBUG_EXEC);
 
     /* Setup policy check request. */
-    req.command = (char *)cmnd;
-    req.argv = (char **)argv;
-    for (len = 0; argv[len] != NULL; len++)
-	continue;
-    req.n_argv = len;
-    req.envp = (char **)envp;
-    for (len = 0; envp[len] != NULL; len++)
-	continue;
-    req.n_envp = len;
-    msg.type_case = INTERCEPT_MESSAGE__TYPE_POLICY_CHECK_REQ;
-    msg.u.policy_check_req = &req;
+    hello.pid = getpid();
+    msg.type_case = INTERCEPT_REQUEST__TYPE_HELLO;;
+    msg.u.hello = &hello;
 
-    len = intercept_message__get_packed_size(&msg);
+    len = intercept_request__get_packed_size(&msg);
     if (len > MESSAGE_SIZE_MAX) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "InterceptMessage too large: %zu", len);
+	    "InterceptRequest too large: %zu", len);
 	goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
@@ -164,78 +112,239 @@ fmt_policy_check_req(const char *cmnd, char * const argv[], char * const envp[],
 	goto done;
     }
     memcpy(buf, &msg_len, sizeof(msg_len));
-    intercept_message__pack(&msg, buf + sizeof(msg_len));
-    *buflen = len;
+    intercept_request__pack(&msg, buf + sizeof(msg_len));
+
+    ret = send_req(sock, buf, len);
 
 done:
-    debug_return_ptr(buf);
+    free(buf);
+    debug_return_bool(ret);
 }
 
-/* Send fd over a unix domain socket. */
-static bool
-intercept_send_fd(int sock, int fd)
+/*
+ * Receive HelloResponse from sudo over fd.
+ */
+InterceptResponse *
+recv_intercept_response(int fd)
 {
-    struct msghdr msg;
-#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
-    union {
-	struct cmsghdr hdr;
-	char buf[CMSG_SPACE(sizeof(int))];
-    } cmsgbuf;
-    struct cmsghdr *cmsg;
-#endif
-    struct iovec iov[1];
-    char ch = '\0';
-    ssize_t nsent;
-    debug_decl(intercept_send_fd, SUDO_DEBUG_EXEC);
+    InterceptResponse *res = NULL;
+    ssize_t nread;
+    uint32_t res_len;
+    uint8_t *buf = NULL;
+    debug_decl(recv_intercept_response, SUDO_DEBUG_EXEC);
+
+    /* Read message size (uint32_t in host byte order). */
+    nread = recv(fd, &res_len, sizeof(res_len), 0);
+    if ((size_t)nread != sizeof(res_len)) {
+        if (nread == 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected EOF reading response size");
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"error reading response size");
+	}
+        goto done;
+    }
+    if (res_len > MESSAGE_SIZE_MAX) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "InterceptResponse too large: %u", res_len);
+        goto done;
+    }
+
+    /* Read response from sudo (blocking). */
+    if ((buf = malloc(res_len)) == NULL) {
+	goto done;
+    }
+    nread = recv(fd, buf, res_len, 0);
+    if ((size_t)nread != res_len) {
+        if (nread == 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected EOF reading response");
+        } else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"error reading response");
+	}
+        goto done;
+    }
+    res = intercept_response__unpack(NULL, res_len, buf);
+    if (res == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to unpack %s size %u", "InterceptResponse", res_len);
+        goto done;
+    }
+
+done:
+    free(buf);
+    debug_return_ptr(res);
+}
+
+/*
+ * Look up SUDO_INTERCEPT_FD in the environment.
+ * This function is run when the shared library is loaded.
+ */
+__attribute__((constructor)) static void
+sudo_interposer_init(void)
+{
+    InterceptResponse *res = NULL;
+    static bool initialized;
+    int fd = -1;
+    char **p;
+    debug_decl(sudo_interposer_init, SUDO_DEBUG_EXEC);
+
+    if (initialized)
+	debug_return;
+    initialized = true;
+
+    /* Read debug section of sudo.conf and init debugging. */
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
+	sudo_debug_register("sudo_intercept.so", NULL, NULL,
+	    sudo_conf_debug_files("sudo_intercept.so"));
+    }
+    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 
     /*
-    * We send a single byte of data along with the fd; some systems
-    * don't support sending file descriptors without data.
-    * Note that the intercept fd is *blocking*.
-    */
-    iov[0].iov_base = &ch;
-    iov[0].iov_len = 1;
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_iov = iov;
-    msg.msg_iovlen = 1;
-#if defined(HAVE_STRUCT_MSGHDR_MSG_CONTROL) && HAVE_STRUCT_MSGHDR_MSG_CONTROL == 1
-    memset(&cmsgbuf, 0, sizeof(cmsgbuf));
-    msg.msg_control = &cmsgbuf.buf;
-    msg.msg_controllen = sizeof(cmsgbuf.buf);
-    cmsg = CMSG_FIRSTHDR(&msg);
-    cmsg->cmsg_len = CMSG_LEN(sizeof(int));
-    cmsg->cmsg_level = SOL_SOCKET;
-    cmsg->cmsg_type = SCM_RIGHTS;
-    memcpy(CMSG_DATA(cmsg), &fd, sizeof(fd));
-#else
-    msg.msg_accrights = (caddr_t)&fd;
-    msg.msg_accrightslen = sizeof(fd);
-#endif /* HAVE_STRUCT_MSGHDR_MSG_CONTROL */
+     * Missing SUDO_INTERCEPT_FD will result in execve() failure.
+     * Note that we cannot use getenv(3) here on Linux at least.
+     */
+    for (p = environ; *p != NULL; p++) {
+	if (strncmp(*p, "SUDO_INTERCEPT_FD=", sizeof("SUDO_INTERCEPT_FD=") -1) == 0) {
+	    const char *fdstr = *p + sizeof("SUDO_INTERCEPT_FD=") - 1;
+	    const char *errstr;
 
-    for (;;) {
-	nsent = sendmsg(sock, &msg, 0);
-	if (nsent != -1)
-	    debug_return_bool(true);
-	if (errno != EAGAIN && errno != EINTR)
-	    break;
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "%s", *p);
+
+	    fd = sudo_strtonum(fdstr, 0, INT_MAX, &errstr);
+	    if (errstr != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "invalid SUDO_INTERCEPT_FD: %s: %s", fdstr, errstr);
+		goto done;
+	    }
+	}
     }
-    sudo_warn("sendmsg(%d)", sock);
-    debug_return_bool(false);
+    if (fd == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "SUDO_INTERCEPT_FD not found in environment");
+	goto done;
+    }
+
+    /*
+     * Send ClientHello message to over the fd.
+     */
+    if (!send_client_hello(fd))
+	goto done;
+
+    res = recv_intercept_response(fd);
+    if (res != NULL) {
+	secret = res->u.hello_resp->secret;
+	intercept_port = res->u.hello_resp->portno;
+	intercept_response__free_unpacked(res, NULL);
+    }
+
+done:
+    if (fd != -1)
+	close(fd);
+
+    debug_return;
+}
+
+static bool
+send_policy_check_req(int sock, const char *cmnd, char * const argv[],
+    char * const envp[])
+{
+    InterceptRequest msg = INTERCEPT_REQUEST__INIT;
+    PolicyCheckRequest req = POLICY_CHECK_REQUEST__INIT;
+    uint8_t *buf = NULL;
+    bool ret = false;
+    uint32_t msg_len;
+    size_t len;
+    debug_decl(fmt_policy_check_req, SUDO_DEBUG_EXEC);
+
+    /* Setup policy check request. */
+    req.secret = secret;
+    req.intercept_fd = sock;
+    req.command = (char *)cmnd;
+    req.argv = (char **)argv;
+    for (len = 0; argv[len] != NULL; len++)
+	continue;
+    req.n_argv = len;
+    req.envp = (char **)envp;
+    for (len = 0; envp[len] != NULL; len++)
+	continue;
+    req.n_envp = len;
+    msg.type_case = INTERCEPT_REQUEST__TYPE_POLICY_CHECK_REQ;
+    msg.u.policy_check_req = &req;
+
+    len = intercept_request__get_packed_size(&msg);
+    if (len > MESSAGE_SIZE_MAX) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "InterceptRequest too large: %zu", len);
+	goto done;
+    }
+    /* Wire message size is used for length encoding, precedes message. */
+    msg_len = len;
+    len += sizeof(msg_len);
+
+    if ((buf = malloc(len)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    memcpy(buf, &msg_len, sizeof(msg_len));
+    intercept_request__pack(&msg, buf + sizeof(msg_len));
+
+    ret = send_req(sock, buf, len);
+
+done:
+    free(buf);
+    debug_return_bool(ret);
+}
+
+/* 
+ * Connect back to sudo process at localhost:intercept_port
+ */
+static int
+intercept_connect(void)
+{
+    int sock = -1;
+    struct sockaddr_in sin;
+    debug_decl(command_allowed, SUDO_DEBUG_EXEC);
+
+    if (intercept_port == 0) {
+	sudo_warnx(U_("intercept port not set"));
+	goto done;
+    }
+
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    sin.sin_port = htons(intercept_port);
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == -1) {
+	sudo_warn("socket");
+	goto done;
+    }
+
+    if (connect(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
+	sudo_warn("connect");
+	close(sock);
+	sock = -1;
+	goto done;
+    }
+
+done:
+    debug_return_int(sock);
 }
 
 bool
-command_allowed(const char *cmnd, char * const argv[], char * const envp[],
-    char **ncmndp, char ***nargvp, char ***nenvpp)
+command_allowed(const char *cmnd, char * const argv[],
+    char * const envp[], char **ncmndp, char ***nargvp, char ***nenvpp)
 {
     char *ncmnd = NULL, **nargv = NULL, **nenvp = NULL;
-    PolicyCheckResult *res = NULL;
-    int sv[2] = { -1, -1 };
-    ssize_t nread, nwritten;
-    uint8_t *cp, *buf = NULL;
+    InterceptResponse *res = NULL;
     bool ret = false;
-    uint32_t res_len;
-    size_t idx, len;
-    debug_decl(intercept_send_fd, SUDO_DEBUG_EXEC);
+    size_t idx, len = 0;
+    int sock;
+    debug_decl(command_allowed, SUDO_DEBUG_EXEC);
 
     if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -246,97 +355,19 @@ command_allowed(const char *cmnd, char * const argv[], char * const envp[],
 	}
     }
 
-    if (intercept_sock < INTERCEPT_FD_MIN) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "invalid intercept fd: %d", intercept_sock);
-        errno = EINVAL;
-        goto done;
-    }
-    if (fcntl(intercept_sock, F_GETFD, 0) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "intercept fd %d not open", intercept_sock);
-        errno = EINVAL;
-        goto done;
-    }
-
-    /*
-     * We communicate with the main sudo process over a socket pair
-     * which is passed over the intercept_sock.  The reason for not
-     * using intercept_sock directly is that multiple processes
-     * could be trying to use it at once.  Sending an fd like this
-     * is atomic but regular communication is not.
-     */
-    if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1) {
-	sudo_warn("socketpair");
-	goto done;
-    }
-    if (!intercept_send_fd(intercept_sock, sv[1]))
-	goto done;
-    close(sv[1]);
-    sv[1] = -1;
-
-    buf = fmt_policy_check_req(cmnd, argv, envp, &len);
-    if (buf == NULL)
+    sock = intercept_connect();
+    if (sock == -1)
 	goto done;
 
-    /* Send request to sudo (blocking). */
-    cp = buf;
-    do {
-	nwritten = write(sv[0], cp, len);
-	if (nwritten == -1) {
-	    goto done;
-	}
-	len -= nwritten;
-	cp += nwritten;
-    } while (len > 0);
-    free(buf);
-    buf = NULL;
-
-    /* Read message size (uint32_t in host byte order). */
-    nread = read(sv[0], &res_len, sizeof(res_len));
-    if ((size_t)nread != sizeof(res_len)) {
-        if (nread == 0) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected EOF reading result size");
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"error reading result size");
-	}
-        goto done;
-    }
-    if (res_len > MESSAGE_SIZE_MAX) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "PolicyCheckResult too large: %zu", len);
-        goto done;
-    }
-
-    /* Read result from sudo (blocking). */
-    if ((buf = malloc(res_len)) == NULL) {
+    if (!send_policy_check_req(sock, cmnd, argv, envp))
 	goto done;
-    }
-    nread = read(sv[0], buf, res_len);
-    if ((size_t)nread != res_len) {
-        if (nread == 0) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected EOF reading result");
-        } else {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"error reading result");
-	}
-        goto done;
-    }
-    res = policy_check_result__unpack(NULL, res_len, buf);
-    if (res == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to unpack %s size %u", "PolicyCheckResult", res_len);
-        goto done;
-    }
-    if (res->secret != secret) {
-	sudo_warnx("secret mismatch\r");
+
+    res = recv_intercept_response(sock);
+    if (res == NULL)
 	goto done;
-    }
+
     switch (res->type_case) {
-    case POLICY_CHECK_RESULT__TYPE_ACCEPT_MSG:
+    case INTERCEPT_RESPONSE__TYPE_ACCEPT_MSG:
 	if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"run_command: %s", res->u.accept_msg->run_command);
@@ -360,7 +391,7 @@ command_allowed(const char *cmnd, char * const argv[], char * const envp[],
 	nargv[len] = NULL;
 	// XXX - bogus cast
 	nenvp = sudo_preload_dso((char **)envp, sudo_conf_intercept_path(),
-	    intercept_sock);
+	    sock);
 	if (nenvp == NULL)
 	    goto oom;
 	*ncmndp = ncmnd;
@@ -368,11 +399,11 @@ command_allowed(const char *cmnd, char * const argv[], char * const envp[],
 	*nenvpp = nenvp;
 	ret = true;
 	goto done;
-    case POLICY_CHECK_RESULT__TYPE_REJECT_MSG:
+    case INTERCEPT_RESPONSE__TYPE_REJECT_MSG:
 	/* Policy module displayed reject message but we are in raw mode. */
 	fputc('\r', stderr);
 	goto done;
-    case POLICY_CHECK_RESULT__TYPE_ERROR_MSG:
+    case INTERCEPT_RESPONSE__TYPE_ERROR_MSG:
 	/* Policy module may display error message but we are in raw mode. */
 	fputc('\r', stderr);
 	sudo_warnx("%s", res->u.error_msg->error_message);
@@ -380,7 +411,7 @@ command_allowed(const char *cmnd, char * const argv[], char * const envp[],
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected type_case value %d in %s from %s",
-            res->type_case, "PolicyCheckResult", "sudo");
+            res->type_case, "InterceptResponse", "sudo");
 	goto done;
     }
 
@@ -390,12 +421,10 @@ oom:
 	free(nargv[--len]);
 
 done:
-    policy_check_result__free_unpacked(res, NULL);
-    if (sv[0] != -1)
-	close(sv[0]);
-    if (sv[1] != -1)
-	close(sv[1]);
-    free(buf);
+    /* Keep socket open for ctor when we execute the command. */
+    if (!ret && sock != -1)
+	close(sock);
+    intercept_response__free_unpacked(res, NULL);
 
     debug_return_bool(ret);
 }

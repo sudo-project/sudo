@@ -842,9 +842,6 @@
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
 
-/* Define to 1 if `msg_control' is a member of `struct msghdr'. */
-#undef HAVE_STRUCT_MSGHDR_MSG_CONTROL
-
 /* Define to 1 if `pr_ttydev' is a member of `struct psinfo'. */
 #undef HAVE_STRUCT_PSINFO_PR_TTYDEV
 

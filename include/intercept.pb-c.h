@@ -15,12 +15,14 @@ PROTOBUF_C__BEGIN_DECLS
 #endif
 
 
-typedef struct _InterceptMessage InterceptMessage;
+typedef struct _InterceptRequest InterceptRequest;
+typedef struct _ClientHello ClientHello;
+typedef struct _HelloResponse HelloResponse;
 typedef struct _PolicyCheckRequest PolicyCheckRequest;
 typedef struct _PolicyAcceptMessage PolicyAcceptMessage;
 typedef struct _PolicyRejectMessage PolicyRejectMessage;
 typedef struct _PolicyErrorMessage PolicyErrorMessage;
-typedef struct _PolicyCheckResult PolicyCheckResult;
+typedef struct _InterceptResponse InterceptResponse;
 
 
 /* --- enums --- */
@@ -29,30 +31,62 @@ typedef struct _PolicyCheckResult PolicyCheckResult;
 /* --- messages --- */
 
 typedef enum {
-  INTERCEPT_MESSAGE__TYPE__NOT_SET = 0,
-  INTERCEPT_MESSAGE__TYPE_POLICY_CHECK_REQ = 1
-    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(INTERCEPT_MESSAGE__TYPE)
-} InterceptMessage__TypeCase;
+  INTERCEPT_REQUEST__TYPE__NOT_SET = 0,
+  INTERCEPT_REQUEST__TYPE_POLICY_CHECK_REQ = 1,
+  INTERCEPT_REQUEST__TYPE_HELLO = 2
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(INTERCEPT_REQUEST__TYPE)
+} InterceptRequest__TypeCase;
 
 /*
  * Intercept message from sudo_intercept.so.  Messages on the
  * wire are prefixed with a 32-bit size in network byte order.
  */
-struct  _InterceptMessage
+struct  _InterceptRequest
 {
   ProtobufCMessage base;
-  InterceptMessage__TypeCase type_case;
+  InterceptRequest__TypeCase type_case;
   union {
     PolicyCheckRequest *policy_check_req;
+    ClientHello *hello;
   } u;
 };
-#define INTERCEPT_MESSAGE__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&intercept_message__descriptor) \
-    , INTERCEPT_MESSAGE__TYPE__NOT_SET, {0} }
+#define INTERCEPT_REQUEST__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&intercept_request__descriptor) \
+    , INTERCEPT_REQUEST__TYPE__NOT_SET, {0} }
+
+
+/*
+ * Hello message from sudo_intercept.so to main sudo process.
+ * Sudo sends back the secret and localhost port number.
+ */
+struct  _ClientHello
+{
+  ProtobufCMessage base;
+  int32_t pid;
+};
+#define CLIENT_HELLO__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&client_hello__descriptor) \
+    , 0 }
+
+
+/*
+ * Sudo response to a ClientHello from sudo_intercept.so.
+ * The client uses the port number and secret to connect back to sudo.
+ */
+struct  _HelloResponse
+{
+  ProtobufCMessage base;
+  uint64_t secret;
+  int32_t portno;
+};
+#define HELLO_RESPONSE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&hello_response__descriptor) \
+    , 0, 0 }
 
 
 /*
  * Policy check request from sudo_intercept.so.
+ * Must include the correct secret value.
  * Note that the plugin API only currently supports passing
  * the new environment in to the open() function.
  */
@@ -64,10 +98,12 @@ struct  _PolicyCheckRequest
   char **argv;
   size_t n_envp;
   char **envp;
+  int32_t intercept_fd;
+  uint64_t secret;
 };
 #define POLICY_CHECK_REQUEST__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&policy_check_request__descriptor) \
-    , (char *)protobuf_c_empty_string, 0,NULL, 0,NULL }
+    , (char *)protobuf_c_empty_string, 0,NULL, 0,NULL, 0, 0 }
 
 
 struct  _PolicyAcceptMessage
@@ -105,50 +141,89 @@ struct  _PolicyErrorMessage
 
 
 typedef enum {
-  POLICY_CHECK_RESULT__TYPE__NOT_SET = 0,
-  POLICY_CHECK_RESULT__TYPE_ACCEPT_MSG = 1,
-  POLICY_CHECK_RESULT__TYPE_REJECT_MSG = 2,
-  POLICY_CHECK_RESULT__TYPE_ERROR_MSG = 3
-    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(POLICY_CHECK_RESULT__TYPE)
-} PolicyCheckResult__TypeCase;
+  INTERCEPT_RESPONSE__TYPE__NOT_SET = 0,
+  INTERCEPT_RESPONSE__TYPE_HELLO_RESP = 1,
+  INTERCEPT_RESPONSE__TYPE_ACCEPT_MSG = 2,
+  INTERCEPT_RESPONSE__TYPE_REJECT_MSG = 3,
+  INTERCEPT_RESPONSE__TYPE_ERROR_MSG = 4
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(INTERCEPT_RESPONSE__TYPE)
+} InterceptResponse__TypeCase;
 
 /*
- * Policy check result sent back to sudo_intercept.so.
+ * Response sent back to sudo_intercept.so.
  */
-struct  _PolicyCheckResult
+struct  _InterceptResponse
 {
   ProtobufCMessage base;
-  uint64_t secret;
-  PolicyCheckResult__TypeCase type_case;
+  InterceptResponse__TypeCase type_case;
   union {
+    HelloResponse *hello_resp;
     PolicyAcceptMessage *accept_msg;
     PolicyRejectMessage *reject_msg;
     PolicyErrorMessage *error_msg;
   } u;
 };
-#define POLICY_CHECK_RESULT__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&policy_check_result__descriptor) \
-    , 0, POLICY_CHECK_RESULT__TYPE__NOT_SET, {0} }
+#define INTERCEPT_RESPONSE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&intercept_response__descriptor) \
+    , INTERCEPT_RESPONSE__TYPE__NOT_SET, {0} }
 
 
-/* InterceptMessage methods */
-void   intercept_message__init
-                     (InterceptMessage         *message);
-size_t intercept_message__get_packed_size
-                     (const InterceptMessage   *message);
-size_t intercept_message__pack
-                     (const InterceptMessage   *message,
+/* InterceptRequest methods */
+void   intercept_request__init
+                     (InterceptRequest         *message);
+size_t intercept_request__get_packed_size
+                     (const InterceptRequest   *message);
+size_t intercept_request__pack
+                     (const InterceptRequest   *message,
                       uint8_t             *out);
-size_t intercept_message__pack_to_buffer
-                     (const InterceptMessage   *message,
+size_t intercept_request__pack_to_buffer
+                     (const InterceptRequest   *message,
                       ProtobufCBuffer     *buffer);
-InterceptMessage *
-       intercept_message__unpack
+InterceptRequest *
+       intercept_request__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   intercept_message__free_unpacked
-                     (InterceptMessage *message,
+void   intercept_request__free_unpacked
+                     (InterceptRequest *message,
+                      ProtobufCAllocator *allocator);
+/* ClientHello methods */
+void   client_hello__init
+                     (ClientHello         *message);
+size_t client_hello__get_packed_size
+                     (const ClientHello   *message);
+size_t client_hello__pack
+                     (const ClientHello   *message,
+                      uint8_t             *out);
+size_t client_hello__pack_to_buffer
+                     (const ClientHello   *message,
+                      ProtobufCBuffer     *buffer);
+ClientHello *
+       client_hello__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   client_hello__free_unpacked
+                     (ClientHello *message,
+                      ProtobufCAllocator *allocator);
+/* HelloResponse methods */
+void   hello_response__init
+                     (HelloResponse         *message);
+size_t hello_response__get_packed_size
+                     (const HelloResponse   *message);
+size_t hello_response__pack
+                     (const HelloResponse   *message,
+                      uint8_t             *out);
+size_t hello_response__pack_to_buffer
+                     (const HelloResponse   *message,
+                      ProtobufCBuffer     *buffer);
+HelloResponse *
+       hello_response__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   hello_response__free_unpacked
+                     (HelloResponse *message,
                       ProtobufCAllocator *allocator);
 /* PolicyCheckRequest methods */
 void   policy_check_request__init
@@ -226,29 +301,35 @@ PolicyErrorMessage *
 void   policy_error_message__free_unpacked
                      (PolicyErrorMessage *message,
                       ProtobufCAllocator *allocator);
-/* PolicyCheckResult methods */
-void   policy_check_result__init
-                     (PolicyCheckResult         *message);
-size_t policy_check_result__get_packed_size
-                     (const PolicyCheckResult   *message);
-size_t policy_check_result__pack
-                     (const PolicyCheckResult   *message,
+/* InterceptResponse methods */
+void   intercept_response__init
+                     (InterceptResponse         *message);
+size_t intercept_response__get_packed_size
+                     (const InterceptResponse   *message);
+size_t intercept_response__pack
+                     (const InterceptResponse   *message,
                       uint8_t             *out);
-size_t policy_check_result__pack_to_buffer
-                     (const PolicyCheckResult   *message,
+size_t intercept_response__pack_to_buffer
+                     (const InterceptResponse   *message,
                       ProtobufCBuffer     *buffer);
-PolicyCheckResult *
-       policy_check_result__unpack
+InterceptResponse *
+       intercept_response__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   policy_check_result__free_unpacked
-                     (PolicyCheckResult *message,
+void   intercept_response__free_unpacked
+                     (InterceptResponse *message,
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
 
-typedef void (*InterceptMessage_Closure)
-                 (const InterceptMessage *message,
+typedef void (*InterceptRequest_Closure)
+                 (const InterceptRequest *message,
+                  void *closure_data);
+typedef void (*ClientHello_Closure)
+                 (const ClientHello *message,
+                  void *closure_data);
+typedef void (*HelloResponse_Closure)
+                 (const HelloResponse *message,
                   void *closure_data);
 typedef void (*PolicyCheckRequest_Closure)
                  (const PolicyCheckRequest *message,
@@ -262,8 +343,8 @@ typedef void (*PolicyRejectMessage_Closure)
 typedef void (*PolicyErrorMessage_Closure)
                  (const PolicyErrorMessage *message,
                   void *closure_data);
-typedef void (*PolicyCheckResult_Closure)
-                 (const PolicyCheckResult *message,
+typedef void (*InterceptResponse_Closure)
+                 (const InterceptResponse *message,
                   void *closure_data);
 
 /* --- services --- */
@@ -271,12 +352,14 @@ typedef void (*PolicyCheckResult_Closure)
 
 /* --- descriptors --- */
 
-extern const ProtobufCMessageDescriptor intercept_message__descriptor;
+extern const ProtobufCMessageDescriptor intercept_request__descriptor;
+extern const ProtobufCMessageDescriptor client_hello__descriptor;
+extern const ProtobufCMessageDescriptor hello_response__descriptor;
 extern const ProtobufCMessageDescriptor policy_check_request__descriptor;
 extern const ProtobufCMessageDescriptor policy_accept_message__descriptor;
 extern const ProtobufCMessageDescriptor policy_reject_message__descriptor;
 extern const ProtobufCMessageDescriptor policy_error_message__descriptor;
-extern const ProtobufCMessageDescriptor policy_check_result__descriptor;
+extern const ProtobufCMessageDescriptor intercept_response__descriptor;
 
 PROTOBUF_C__END_DECLS
 

@@ -4,14 +4,33 @@ syntax = "proto3";
  * Intercept message from sudo_intercept.so.  Messages on the
  * wire are prefixed with a 32-bit size in network byte order.
  */
-message InterceptMessage {
+message InterceptRequest {
   oneof type {
     PolicyCheckRequest policy_check_req = 1;
+    ClientHello hello = 2;
   }
 }
 
 /*
+ * Hello message from sudo_intercept.so to main sudo process.
+ * Sudo sends back the secret and localhost port number.
+ */
+message ClientHello {
+    int32 pid = 1;
+}
+
+/*
+ * Sudo response to a ClientHello from sudo_intercept.so.
+ * The client uses the port number and secret to connect back to sudo.
+ */
+message HelloResponse {
+  fixed64 secret = 1;
+  int32 portno = 2;
+}
+
+/*
  * Policy check request from sudo_intercept.so.
+ * Must include the correct secret value.
  * Note that the plugin API only currently supports passing
  * the new environment in to the open() function.
  */
@@ -19,6 +38,8 @@ message PolicyCheckRequest {
   string command = 1;
   repeated string argv = 2;
   repeated string envp = 3;
+  int32 intercept_fd = 4;
+  fixed64 secret = 5;
 }
 
 message PolicyAcceptMessage {
@@ -36,13 +57,13 @@ message PolicyErrorMessage {
 }
 
 /*
- * Policy check result sent back to sudo_intercept.so.
+ * Response sent back to sudo_intercept.so.
  */
-message PolicyCheckResult {
+message InterceptResponse {
   oneof type {
-    PolicyAcceptMessage accept_msg = 1;
-    PolicyRejectMessage reject_msg = 2;
-    PolicyErrorMessage error_msg = 3;
+    HelloResponse hello_resp = 1;
+    PolicyAcceptMessage accept_msg = 2;
+    PolicyRejectMessage reject_msg = 3;
+    PolicyErrorMessage error_msg = 4;
   }
-  fixed64 secret = 4;
 }
