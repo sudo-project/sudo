@@ -501,10 +501,8 @@ log_auth_failure(int status, unsigned int tries)
  * Log and potentially mail the allowed command.
  */
 bool
-log_allowed(char *const argv[], char *const envp[])
+log_allowed(struct eventlog *evlog)
 {
-    const char *uuid_str = NULL;
-    struct eventlog evlog;
     int oldlocale;
     int evl_flags = 0;
     bool mailit, ret = true;
@@ -513,20 +511,16 @@ log_allowed(char *const argv[], char *const envp[])
     /* Send mail based on status. */
     mailit = should_mail(VALIDATE_SUCCESS);
 
-    if (!ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
-	uuid_str = sudo_user.uuid_str;
-
     if (def_log_allowed || mailit) {
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	sudoers_to_eventlog(&evlog, argv, envp, uuid_str);
 	if (mailit) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_allowed)
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
-	if (!eventlog_accept(&evlog, evl_flags, NULL, NULL))
+	if (!eventlog_accept(evlog, evl_flags, NULL, NULL))
 	    ret = false;
 
 	sudoers_setlocale(oldlocale, NULL);
