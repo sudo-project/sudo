@@ -980,6 +980,14 @@ sudo_debug_get_fds_v1(unsigned char **fds)
 }
 #else /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 int
+sudo_debug_register_v2(const char *program, const char *const subsystems[],
+    unsigned int ids[], struct sudo_conf_debug_file_list *debug_files,
+    int minfd)
+{
+    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+}
+
+int
 sudo_debug_register_v1(const char *program, const char *const subsystems[],
     unsigned int ids[], struct sudo_conf_debug_file_list *debug_files)
 {
