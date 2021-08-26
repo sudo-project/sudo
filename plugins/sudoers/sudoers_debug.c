@@ -90,7 +90,7 @@ sudoers_debug_register(const char *program,
     if (debug_files != NULL && !TAILQ_EMPTY(debug_files)) {
 	if (program != NULL) {
 	    instance = sudo_debug_register(program, sudoers_subsystem_names,
-		sudoers_subsystem_ids, debug_files);
+		sudoers_subsystem_ids, debug_files, -1);
 	}
 	TAILQ_FOREACH_SAFE(debug_file, debug_files, entries, debug_next) {
 	    TAILQ_REMOVE(debug_files, debug_file, entries);

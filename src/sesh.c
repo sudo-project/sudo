@@ -75,7 +75,7 @@ main(int argc, char *argv[], char *envp[])
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
 	exit(EXIT_FAILURE);
     sudo_debug_register(getprogname(), NULL, NULL,
-	sudo_conf_debug_files(getprogname()));
+	sudo_conf_debug_files(getprogname()), -1);
 
     if (strcmp(argv[1], "-e") == 0) {
 	ret = sesh_sudoedit(argc, argv);

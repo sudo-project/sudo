@@ -39,6 +39,7 @@ sudo_debug_needed_v1
 sudo_debug_parse_flags_v1
 sudo_debug_printf2_v1
 sudo_debug_register_v1
+sudo_debug_register_v2
 sudo_debug_set_active_instance_v1
 sudo_debug_update_fd_v1
 sudo_debug_vprintf2_v1

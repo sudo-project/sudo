@@ -234,7 +234,7 @@ main(int argc, char *argv[])
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
 	exit(EXIT_FAILURE);
     sudo_debug_register(getprogname(), NULL, NULL,
-	sudo_conf_debug_files(getprogname()));
+	sudo_conf_debug_files(getprogname()), -1);
 
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {

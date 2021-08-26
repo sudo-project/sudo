@@ -1602,7 +1602,7 @@ server_reload(struct sudo_event_base *evbase)
 	logsrvd_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
 	    logsrvd_debug_instance = sudo_debug_register(getprogname(),
-		NULL, NULL, sudo_conf_debug_files(getprogname()));
+		NULL, NULL, sudo_conf_debug_files(getprogname()), -1);
 	}
     }
 
@@ -1909,7 +1909,7 @@ main(int argc, char *argv[])
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
         exit(EXIT_FAILURE);
     logsrvd_debug_instance = sudo_debug_register(getprogname(), NULL, NULL,
-        sudo_conf_debug_files(getprogname()));
+        sudo_conf_debug_files(getprogname()), -1);
 
     if (protobuf_c_version_number() < 1003000)
 	sudo_fatalx("%s", U_("Protobuf-C version 1.3 or higher required"));

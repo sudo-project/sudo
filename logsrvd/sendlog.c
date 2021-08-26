@@ -1526,7 +1526,7 @@ main(int argc, char *argv[])
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
         exit(EXIT_FAILURE);
     sudo_debug_register(getprogname(), NULL, NULL,
-        sudo_conf_debug_files(getprogname()));
+        sudo_conf_debug_files(getprogname()), -1);
 
     if (protobuf_c_version_number() < 1003000)
 	sudo_fatalx("%s", U_("Protobuf-C version 1.3 or higher required"));

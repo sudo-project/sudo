@@ -198,7 +198,7 @@ sudo_interposer_init(void)
     /* Read debug section of sudo.conf and init debugging. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
 	sudo_debug_register("sudo_intercept.so", NULL, NULL,
-	    sudo_conf_debug_files("sudo_intercept.so"));
+	    sudo_conf_debug_files("sudo_intercept.so"), INTERCEPT_FD_MIN);
     }
     sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 
