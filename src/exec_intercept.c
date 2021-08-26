@@ -226,7 +226,8 @@ update_command_info(char * const *old_command_info, const char *cmnd,
     for (n = 0; old_command_info[n] != NULL; n++) {
 	const char *cp = old_command_info[n];
 	if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
-	    free(tmp_command);
+	    if (tmp_command != NULL)
+		continue;
 	    tmp_command = sudo_new_key_val("command", cmnd);
 	    if (tmp_command == NULL) {
 		goto bad;
@@ -411,7 +412,7 @@ done:
 	if (closure->errstr == NULL)
 	    closure->errstr = N_("policy plugin error");
 	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
-	    command_info);
+	    command_info ? command_info : closure->details->info);
 	closure->state = POLICY_ERROR;
     }
     if (!ISSET(closure->details->flags, CD_INTERCEPT)) {
