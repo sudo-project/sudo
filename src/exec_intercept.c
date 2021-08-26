@@ -202,6 +202,49 @@ bad:
     debug_return_bool(false);
 }
 
+/*
+ * Allocate a new command_info[] and update the command in it.
+ * Only allocates new space for command_info[] itseld and the new command.
+ * Stores a pointer to the new command in the tofree parameter.
+ */
+static char **
+update_command_info(char * const *old_command_info, const char *cmnd,
+    char **tofree)
+{
+    char **command_info;
+    char *tmp_command = NULL;
+    size_t n;
+    debug_decl(update_command_info, SUDO_DEBUG_EXEC);
+
+    /* Rebuild command_info[] with new command. */
+    for (n = 0; old_command_info[n] != NULL; n++)
+	continue;
+    command_info = reallocarray(NULL, n + 1, sizeof(char *));
+    if (command_info == NULL) {
+	goto bad;
+    }
+    for (n = 0; old_command_info[n] != NULL; n++) {
+	const char *cp = old_command_info[n];
+	if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
+	    free(tmp_command);
+	    tmp_command = sudo_new_key_val("command", cmnd);
+	    if (tmp_command == NULL) {
+		goto bad;
+	    }
+	    cp = tmp_command;
+	}
+	command_info[n] = (char *)cp;
+    }
+    command_info[n] = NULL;
+    *tofree = tmp_command;
+
+    debug_return_ptr(command_info);
+bad:
+    free(command_info);
+    free(tmp_command);
+    debug_return_ptr(NULL);
+}
+
 static bool
 intercept_check_policy(PolicyCheckRequest *req,
     struct intercept_closure *closure)
@@ -209,20 +252,22 @@ intercept_check_policy(PolicyCheckRequest *req,
     char **command_info = NULL;
     char **user_env_out = NULL;
     char **argv = NULL, **run_argv = NULL;
+    char *tofree = NULL;
+    bool ret = false;
     int result;
     size_t n;
     debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
 
     if (req->command == NULL || req->n_argv == 0 || req->n_envp == 0) {
 	closure->errstr = N_("invalid PolicyCheckRequest");
-	goto bad;
+	goto done;
     }
     if (req->secret != intercept_secret) {
 	closure->errstr = N_("invalid PolicyCheckRequest");
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "secret mismatch: got %" PRIu64 ", expected %" PRIu64, req->secret,
 	    intercept_secret);
-	goto bad;
+	goto done;
     }
 
     if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
@@ -238,7 +283,7 @@ intercept_check_policy(PolicyCheckRequest *req,
     argv = reallocarray(NULL, req->n_argv + 1, sizeof(char *));
     if (argv == NULL) {
 	closure->errstr = N_("unable to allocate memory");
-	goto bad;
+	goto done;
     }
     argv[0] = req->command;
     for (n = 1; n < req->n_argv; n++) {
@@ -264,7 +309,7 @@ intercept_check_policy(PolicyCheckRequest *req,
 		    closure->command = strdup(cp + sizeof("command=") - 1);
 		    if (closure->command == NULL) {
 			closure->errstr = N_("unable to allocate memory");
-			goto bad;
+			goto done;
 		    }
 		    break;
 		}
@@ -279,7 +324,7 @@ intercept_check_policy(PolicyCheckRequest *req,
 	    closure->state = POLICY_REJECT;
 	    goto done;
 	default:
-	    goto bad;
+	    goto done;
 	}
     } else {
 	/* No actual policy check, just logging child processes. */
@@ -288,9 +333,16 @@ intercept_check_policy(PolicyCheckRequest *req,
 	closure->command = strdup(req->command);
 	if (closure->command == NULL) {
 	    closure->errstr = N_("unable to allocate memory");
-	    goto bad;
+	    goto done;
 	}
-	command_info = (char **)closure->details->info;
+
+	/* Rebuild command_info[] with new command. */
+	command_info = update_command_info(closure->details->info,
+	    req->command, &tofree);
+	if (command_info == NULL) {
+	    closure->errstr = N_("unable to allocate memory");
+	    goto done;
+	}
 	closure->state = POLICY_ACCEPT;
 	run_argv = argv;
     }
@@ -298,6 +350,10 @@ intercept_check_policy(PolicyCheckRequest *req,
     if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "run_command: %s", closure->command);
+	for (n = 0; command_info[n] != NULL; n++) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"command_info[%zu]: %s", n, command_info[n]);
+	}
 	for (n = 0; run_argv[n] != NULL; n++) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"run_argv[%zu]: %s", n, run_argv[n]);
@@ -310,13 +366,13 @@ intercept_check_policy(PolicyCheckRequest *req,
     closure->run_argv = reallocarray(NULL, n + 1, sizeof(char *));
     if (closure->run_argv == NULL) {
 	closure->errstr = N_("unable to allocate memory");
-	goto bad;
+	goto done;
     }
     for (n = 0; run_argv[n] != NULL; n++) {
 	closure->run_argv[n] = strdup(run_argv[n]);
 	if (closure->run_argv[n] == NULL) {
 	    closure->errstr = N_("unable to allocate memory");
-	    goto bad;
+	    goto done;
 	}
     }
     closure->run_argv[n] = NULL;
@@ -325,13 +381,13 @@ intercept_check_policy(PolicyCheckRequest *req,
     closure->run_envp = reallocarray(NULL, req->n_envp + 1, sizeof(char *));
     if (closure->run_envp == NULL) {
 	closure->errstr = N_("unable to allocate memory");
-	goto bad;
+	goto done;
     }
     for (n = 0; n < req->n_envp; n++) {
 	closure->run_envp[n] = strdup(req->envp[n]);
 	if (closure->run_envp[n] == NULL) {
 	    closure->errstr = N_("unable to allocate memory");
-	    goto bad;
+	    goto done;
 	}
     }
     closure->run_envp[n] = NULL;
@@ -349,18 +405,23 @@ intercept_check_policy(PolicyCheckRequest *req,
     audit_accept("sudo", SUDO_FRONT_END, command_info, closure->run_argv,
 	closure->run_envp);
 
-done:
-    free(argv);
-    debug_return_bool(true);
+    ret = true;
 
-bad:
+done:
+    if (!ISSET(closure->details->flags, CD_INTERCEPT)) {
+	free(tofree);
+	free(command_info);
+    }
     free(argv);
-    if (closure->errstr == NULL)
-	closure->errstr = N_("policy plugin error");
-    audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
-	command_info);
-    closure->state = POLICY_ERROR;
-    debug_return_bool(false);
+
+    if (!ret) {
+	if (closure->errstr == NULL)
+	    closure->errstr = N_("policy plugin error");
+	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
+	    command_info);
+	closure->state = POLICY_ERROR;
+    }
+    debug_return_bool(ret);
 }
 
 /*
