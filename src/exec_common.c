@@ -79,11 +79,6 @@ enable_intercept(char *envp[], const char *dso, int intercept_fd)
     if (intercept_fd == -1)
 	sudo_fatalx("%s: no intercept fd", __func__);
 
-    if (intercept_fd < INTERCEPT_FD_MIN) {
-	intercept_fd = fcntl(intercept_fd, F_DUPFD, INTERCEPT_FD_MIN);
-	if (intercept_fd == -1)
-	    sudo_fatal("%s", U_("unable to dup intercept fd"));
-    }
     envp = sudo_preload_dso(envp, dso, intercept_fd);
 #else
     /* Intercept not supported, envp unchanged. */
