@@ -104,7 +104,7 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
     /* Modify the environment as needed to trap execve(). */
     if (ISSET(flags, CD_NOEXEC))
 	envp = disable_execute(envp, sudo_conf_noexec_path());
-    else if (ISSET(flags, CD_INTERCEPT|CD_LOG_CHILDREN))
+    else if (ISSET(flags, CD_INTERCEPT|CD_LOG_SUBCMDS))
 	envp = enable_intercept(envp, sudo_conf_intercept_path(), intercept_fd);
 
 #ifdef HAVE_FEXECVE

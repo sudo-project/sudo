@@ -730,7 +730,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)
-		SET_FLAG("log_children=", CD_LOG_CHILDREN)
+		SET_FLAG("log_subcmds=", CD_LOG_SUBCMDS)
 		break;
 	    case 'n':
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {

@@ -2598,33 +2598,6 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.29 or higher.
-.It log_children
-If set,
-.Nm
-will log when a command spawns a child process and executes a program
-using the
-.Fn execv
-or
-.Fn execve
-library functions.
-For example, if a shell is run by
-.Nm sudo ,
-the individual commands run via the shell will be logged.
-This flag is
-.Em off
-by default.
-.Pp
-The
-.Em log_children
-flag uses the same underlying mechanism as the
-.Em intercept
-and
-.Em noexec
-settings.
-See
-.Sx Preventing shell escapes
-for more information on what systems support this option and its limitations.
-This setting is only supported by version 1.9.8 or higher.
 .It log_denied
 If set,
 .Nm
@@ -2713,6 +2686,33 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
+.It log_subcmds
+If set,
+.Nm
+will log when a command spawns a child process and executes a program
+using the
+.Fn execv
+or
+.Fn execve
+library functions.
+For example, if a shell is run by
+.Nm sudo ,
+the individual commands run via the shell will be logged.
+This flag is
+.Em off
+by default.
+.Pp
+The
+.Em log_subcmds
+flag uses the same underlying mechanism as the
+.Em intercept
+and
+.Em noexec
+settings.
+See
+.Sx Preventing shell escapes
+for more information on what systems support this option and its limitations.
+This setting is only supported by version 1.9.8 or higher.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -5904,7 +5904,7 @@ flag.
 This will log the command's output but will not create an event log
 entry when the additional command is run.
 The second is to enable the
-.Em log_children
+.Em log_subcmds
 flag in
 .Em sudoers
 which will create an event log entry every time a new command is run.
@@ -5914,7 +5914,7 @@ This offset can be passed to the
 .Xr sudoreplay @mansectsu@
 utility to replay the I/O log at the exact moment when the command was run.
 The
-.Em log_children
+.Em log_subcmds
 flag uses the same mechanism as
 .Em intercept
 (see above) and has the same limitations.

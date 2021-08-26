@@ -268,8 +268,8 @@
 #define def_admin_flag          (sudo_defs_table[I_ADMIN_FLAG].sd_un.str)
 #define I_INTERCEPT             133
 #define def_intercept           (sudo_defs_table[I_INTERCEPT].sd_un.flag)
-#define I_LOG_CHILDREN          134
-#define def_log_children        (sudo_defs_table[I_LOG_CHILDREN].sd_un.flag)
+#define I_LOG_SUBCMDS           134
+#define def_log_subcmds         (sudo_defs_table[I_LOG_SUBCMDS].sd_un.flag)
 #define I_LOG_EXIT_STATUS       135
 #define def_log_exit_status     (sudo_defs_table[I_LOG_EXIT_STATUS].sd_un.flag)
 #define I_INTERCEPT_AUTHENTICATE 136

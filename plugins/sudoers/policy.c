@@ -633,8 +633,8 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if (command_info[info_len++] == NULL)
 	    goto oom;
     }
-    if (def_log_children) {
-	if ((command_info[info_len++] = strdup("log_children=true")) == NULL)
+    if (def_log_subcmds) {
+	if ((command_info[info_len++] = strdup("log_subcmds=true")) == NULL)
 	    goto oom;
     }
     if (def_log_input || def_log_output) {

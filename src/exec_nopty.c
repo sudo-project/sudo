@@ -369,7 +369,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      * Allocate a socketpair for communicating with sudo_intercept.so.
      * This must be inherited across exec, hence no FD_CLOEXEC.
      */
-    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_CHILDREN)) {
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
 	    sudo_fatal("%s", U_("unable to create sockets"));
     }

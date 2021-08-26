@@ -139,7 +139,7 @@ struct user_details {
 #define CD_SET_GROUPS		0x040000
 #define CD_LOGIN_SHELL		0x080000
 #define CD_OVERRIDE_UMASK	0x100000
-#define CD_LOG_CHILDREN		0x200000
+#define CD_LOG_SUBCMDS		0x200000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;

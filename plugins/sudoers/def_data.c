@@ -582,8 +582,8 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Intercept further commands and apply sudoers restrictions to them"),
 	NULL,
     }, {
-	"log_children", T_FLAG,
-	N_("Log any child processes run by the command"),
+	"log_subcmds", T_FLAG,
+	N_("Log sub-commands run by the original command"),
 	NULL,
     }, {
 	"log_exit_status", T_FLAG,

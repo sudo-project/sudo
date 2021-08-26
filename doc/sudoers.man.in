@@ -2758,34 +2758,6 @@ by default.
 .sp
 This setting is only supported by version 1.8.29 or higher.
 .TP 18n
-log_children
-If set,
-\fBsudoers\fR
-will log when a command spawns a child process and executes a program
-using the
-\fBexecv\fR()
-or
-\fBexecve\fR()
-library functions.
-For example, if a shell is run by
-\fBsudo\fR,
-the individual commands run via the shell will be logged.
-This flag is
-\fIoff\fR
-by default.
-.sp
-The
-\fIlog_children\fR
-flag uses the same underlying mechanism as the
-\fIintercept\fR
-and
-\fInoexec\fR
-settings.
-See
-\fIPreventing shell escapes\fR
-for more information on what systems support this option and its limitations.
-This setting is only supported by version 1.9.8 or higher.
-.TP 18n
 log_denied
 If set,
 \fBsudoers\fR
@@ -2881,6 +2853,34 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.9.0 or higher.
+.TP 18n
+log_subcmds
+If set,
+\fBsudoers\fR
+will log when a command spawns a child process and executes a program
+using the
+\fBexecv\fR()
+or
+\fBexecve\fR()
+library functions.
+For example, if a shell is run by
+\fBsudo\fR,
+the individual commands run via the shell will be logged.
+This flag is
+\fIoff\fR
+by default.
+.sp
+The
+\fIlog_subcmds\fR
+flag uses the same underlying mechanism as the
+\fIintercept\fR
+and
+\fInoexec\fR
+settings.
+See
+\fIPreventing shell escapes\fR
+for more information on what systems support this option and its limitations.
+This setting is only supported by version 1.9.8 or higher.
 .TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
@@ -6389,7 +6389,7 @@ flag.
 This will log the command's output but will not create an event log
 entry when the additional command is run.
 The second is to enable the
-\fIlog_children\fR
+\fIlog_subcmds\fR
 flag in
 \fIsudoers\fR
 which will create an event log entry every time a new command is run.
@@ -6399,7 +6399,7 @@ This offset can be passed to the
 sudoreplay(@mansectsu@)
 utility to replay the I/O log at the exact moment when the command was run.
 The
-\fIlog_children\fR
+\fIlog_subcmds\fR
 flag uses the same mechanism as
 \fIintercept\fR
 (see above) and has the same limitations.

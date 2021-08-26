@@ -29,9 +29,9 @@ What's new in Sudo 1.9.8
    intercept_authenticate and intercept_allow_setid sudoers settings
    can be used to change this behavior.
 
- * The new "log_children" sudoers setting can be used to log commands
-   run in a privileged shell.  It uses the same mechanism as the
-   intercept support described above and has the same limitations.
+ * The new "log_subcmds" sudoers setting can be used to log additional
+   commands run in a privileged shell.  It uses the same mechanism as
+   the intercept support described above and has the same limitations.
 
  * Support for logging sudo_logsrvd errors via syslog or to a file.
    Previously, most sudo_logsrvd errors were only visible in the
