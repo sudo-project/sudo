@@ -241,7 +241,6 @@ update_command_info(char * const *old_command_info, const char *cmnd,
     debug_return_ptr(command_info);
 bad:
     free(command_info);
-    free(tmp_command);
     debug_return_ptr(NULL);
 }
 
@@ -408,12 +407,6 @@ intercept_check_policy(PolicyCheckRequest *req,
     ret = true;
 
 done:
-    if (!ISSET(closure->details->flags, CD_INTERCEPT)) {
-	free(tofree);
-	free(command_info);
-    }
-    free(argv);
-
     if (!ret) {
 	if (closure->errstr == NULL)
 	    closure->errstr = N_("policy plugin error");
@@ -421,6 +414,12 @@ done:
 	    command_info);
 	closure->state = POLICY_ERROR;
     }
+    if (!ISSET(closure->details->flags, CD_INTERCEPT)) {
+	free(tofree);
+	free(command_info);
+    }
+    free(argv);
+
     debug_return_bool(ret);
 }
 
