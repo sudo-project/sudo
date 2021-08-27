@@ -166,8 +166,9 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	    envp[env_len++] = preload;
 	    envp[env_len] = NULL;
 	} else {
+	    const char *old_val = envp[preload_idx] + sizeof(RTLD_PRELOAD_VAR);
 	    len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR,
-		dso_file, RTLD_PRELOAD_DELIM, envp[preload_idx]);
+		dso_file, RTLD_PRELOAD_DELIM, old_val);
 	    if (len == -1) {
 		goto oom;
 	    }
