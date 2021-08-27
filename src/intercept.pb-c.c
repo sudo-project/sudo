@@ -507,7 +507,7 @@ const ProtobufCMessageDescriptor hello_response__descriptor =
   (ProtobufCMessageInit) hello_response__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[5] =
+static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[6] =
 {
   {
     "command",
@@ -522,8 +522,20 @@ static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[5]
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "argv",
+    "cwd",
     2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(PolicyCheckRequest, cwd),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "argv",
+    3,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_STRING,
     offsetof(PolicyCheckRequest, n_argv),
@@ -535,7 +547,7 @@ static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[5]
   },
   {
     "envp",
-    3,
+    4,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_STRING,
     offsetof(PolicyCheckRequest, n_envp),
@@ -547,7 +559,7 @@ static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[5]
   },
   {
     "intercept_fd",
-    4,
+    5,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -559,7 +571,7 @@ static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[5]
   },
   {
     "secret",
-    5,
+    6,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_FIXED64,
     0,   /* quantifier_offset */
@@ -571,16 +583,17 @@ static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[5]
   },
 };
 static const unsigned policy_check_request__field_indices_by_name[] = {
-  1,   /* field[1] = argv */
+  2,   /* field[2] = argv */
   0,   /* field[0] = command */
-  2,   /* field[2] = envp */
-  3,   /* field[3] = intercept_fd */
-  4,   /* field[4] = secret */
+  1,   /* field[1] = cwd */
+  3,   /* field[3] = envp */
+  4,   /* field[4] = intercept_fd */
+  5,   /* field[5] = secret */
 };
 static const ProtobufCIntRange policy_check_request__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 5 }
+  { 0, 6 }
 };
 const ProtobufCMessageDescriptor policy_check_request__descriptor =
 {
@@ -590,7 +603,7 @@ const ProtobufCMessageDescriptor policy_check_request__descriptor =
   "PolicyCheckRequest",
   "",
   sizeof(PolicyCheckRequest),
-  5,
+  6,
   policy_check_request__field_descriptors,
   policy_check_request__field_indices_by_name,
   1,  policy_check_request__number_ranges,

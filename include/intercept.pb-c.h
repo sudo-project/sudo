@@ -94,6 +94,7 @@ struct  _PolicyCheckRequest
 {
   ProtobufCMessage base;
   char *command;
+  char *cwd;
   size_t n_argv;
   char **argv;
   size_t n_envp;
@@ -103,7 +104,7 @@ struct  _PolicyCheckRequest
 };
 #define POLICY_CHECK_REQUEST__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&policy_check_request__descriptor) \
-    , (char *)protobuf_c_empty_string, 0,NULL, 0,NULL, 0, 0 }
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL, 0,NULL, 0, 0 }
 
 
 struct  _PolicyAcceptMessage

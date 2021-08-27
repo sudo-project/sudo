@@ -253,6 +253,7 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
 {
     InterceptRequest msg = INTERCEPT_REQUEST__INIT;
     PolicyCheckRequest req = POLICY_CHECK_REQUEST__INIT;
+    char cwdbuf[PATH_MAX];
     uint8_t *buf = NULL;
     bool ret = false;
     uint32_t msg_len;
@@ -271,6 +272,9 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     for (len = 0; envp[len] != NULL; len++)
 	continue;
     req.n_envp = len;
+    if (getcwd(cwdbuf, sizeof(cwdbuf)) != NULL) {
+	req.cwd = cwdbuf;
+    }
     msg.type_case = INTERCEPT_REQUEST__TYPE_POLICY_CHECK_REQ;
     msg.u.policy_check_req = &req;
 

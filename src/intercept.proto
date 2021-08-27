@@ -36,10 +36,11 @@ message HelloResponse {
  */
 message PolicyCheckRequest {
   string command = 1;
-  repeated string argv = 2;
-  repeated string envp = 3;
-  int32 intercept_fd = 4;
-  fixed64 secret = 5;
+  string cwd = 2;
+  repeated string argv = 3;
+  repeated string envp = 4;
+  int32 intercept_fd = 5;
+  fixed64 secret = 6;
 }
 
 message PolicyAcceptMessage {

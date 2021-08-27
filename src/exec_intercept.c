@@ -203,45 +203,76 @@ bad:
 }
 
 /*
- * Allocate a new command_info[] and update the command in it.
- * Only allocates new space for command_info[] itseld and the new command.
- * Stores a pointer to the new command in the tofree parameter.
+ * Allocate a new command_info[] and update command and runcwd in it.
+ * Fills in cmnd_out with a copy of the command if not NULL.
+ * Returns the new command_info[] which the caller must free.
  */
 static char **
 update_command_info(char * const *old_command_info, const char *cmnd,
-    char **tofree)
+    const char *runcwd, char **cmnd_out)
 {
     char **command_info;
-    char *tmp_command = NULL;
+    char * const *oci;
     size_t n;
     debug_decl(update_command_info, SUDO_DEBUG_EXEC);
 
-    /* Rebuild command_info[] with new command. */
+    /* Rebuild command_info[] with new command and add a runcwd. */
     for (n = 0; old_command_info[n] != NULL; n++)
 	continue;
-    command_info = reallocarray(NULL, n + 1, sizeof(char *));
+    command_info = reallocarray(NULL, n + 2, sizeof(char *));
     if (command_info == NULL) {
 	goto bad;
     }
-    for (n = 0; old_command_info[n] != NULL; n++) {
-	const char *cp = old_command_info[n];
-	if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
-	    if (tmp_command != NULL)
-		continue;
-	    tmp_command = sudo_new_key_val("command", cmnd);
-	    if (tmp_command == NULL) {
-		goto bad;
+    for (oci = old_command_info, n = 0; *oci != NULL; oci++) {
+	const char *cp = *oci;
+	switch (*cp) {
+	case 'c':
+	    if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
+		if (cmnd != NULL) {
+		    command_info[n] = sudo_new_key_val("command", cmnd);
+		    if (command_info[n] == NULL) {
+			goto bad;
+		    }
+		    n++;
+		    continue;
+		} else if (cmnd_out != NULL) {
+		    *cmnd_out = strdup(cp + sizeof("command=") - 1);
+		    if (*cmnd_out == NULL) {
+			goto bad;
+		    }
+		}
 	    }
-	    cp = tmp_command;
+	    break;
+	case 'r':
+	    if (strncmp(cp, "runcwd=", sizeof("runcwd=") - 1) == 0) {
+		/* Filled in at the end. */
+		continue;
+	    }
+	    break;
 	}
-	command_info[n] = (char *)cp;
+	command_info[n] = strdup(cp);
+	if (command_info[n] == NULL) {
+	    goto bad;
+	}
+	n++;
     }
+    /* Append actual runcwd. */
+    command_info[n] = sudo_new_key_val("runcwd", runcwd);
+    if (command_info[n] == NULL) {
+	goto bad;
+    }
+    n++;
+
     command_info[n] = NULL;
-    *tofree = tmp_command;
 
     debug_return_ptr(command_info);
 bad:
-    free(command_info);
+    if (command_info != NULL) {
+	for (n = 0; command_info[n] != NULL; n++) {
+	    free(command_info[n]);
+	}
+	free(command_info);
+    }
     debug_return_ptr(NULL);
 }
 
@@ -252,7 +283,6 @@ intercept_check_policy(PolicyCheckRequest *req,
     char **command_info = NULL;
     char **user_env_out = NULL;
     char **argv = NULL, **run_argv = NULL;
-    char *tofree = NULL;
     bool ret = false;
     int result;
     size_t n;
@@ -302,17 +332,12 @@ intercept_check_policy(PolicyCheckRequest *req,
 
 	switch (result) {
 	case 1:
-	    /* Extract command path from command_info[] */
-	    for (n = 0; command_info[n] != NULL; n++) {
-		const char *cp = command_info[n];
-		if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
-		    closure->command = strdup(cp + sizeof("command=") - 1);
-		    if (closure->command == NULL) {
-			closure->errstr = N_("unable to allocate memory");
-			goto done;
-		    }
-		    break;
-		}
+	    /* Rebuild command_info[] with runcwd and extract command. */
+	    command_info = update_command_info(command_info, NULL,
+		req->cwd ? req->cwd : "unknown", &closure->command);
+	    if (command_info == NULL) {
+		closure->errstr = N_("unable to allocate memory");
+		goto done;
 	    }
 	    closure->state = POLICY_ACCEPT;
 	    break;
@@ -336,9 +361,9 @@ intercept_check_policy(PolicyCheckRequest *req,
 	    goto done;
 	}
 
-	/* Rebuild command_info[] with new command. */
+	/* Rebuild command_info[] with new command and runcwd. */
 	command_info = update_command_info(closure->details->info,
-	    req->command, &tofree);
+	    req->command, req->cwd ? req->cwd : "unknown", NULL);
 	if (command_info == NULL) {
 	    closure->errstr = N_("unable to allocate memory");
 	    goto done;
@@ -415,8 +440,10 @@ done:
 	    command_info ? command_info : closure->details->info);
 	closure->state = POLICY_ERROR;
     }
-    if (!ISSET(closure->details->flags, CD_INTERCEPT)) {
-	free(tofree);
+    if (command_info != NULL) {
+	for (n = 0; command_info[n] != NULL; n++) {
+	    free(command_info[n]);
+	}
 	free(command_info);
     }
     free(argv);
