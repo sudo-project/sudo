@@ -69,7 +69,8 @@ struct intercept_closure {
     char **run_argv;		/* owned by plugin */
     char **run_envp;		/* dynamically allocated */
     uint8_t *buf;		/* dynamically allocated */
-    size_t len;
+    uint32_t len;
+    uint32_t off;
     int listen_sock;
     enum intercept_state state;
 };
@@ -100,7 +101,7 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     closure->details = details;
     closure->listen_sock = -1;
 
-    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ, intercept_cb, closure) == -1) {
+    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_cb, closure) == -1) {
 	/* This cannot (currently) fail. */
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto bad;
@@ -306,7 +307,7 @@ intercept_check_policy(PolicyCheckRequest *req,
 	    "req_command: %s", req->command);
 	for (n = 0; n < req->n_argv; n++) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "req_argv[%zu]: %s", n, req->argv[n]);
+		"req_argv[%zu]: %s", n, req->argv[n]);
 	}
     }
 
@@ -455,85 +456,89 @@ done:
 }
 
 /*
- * Read a single message from sudo_intercept.so and unpack it.
- * Assumes fd is in blocking mode.
- */
-static InterceptRequest *
-intercept_recv_request(int fd)
-{
-    InterceptRequest *req = NULL;
-    uint8_t *cp, *buf = NULL;
-    uint32_t req_len;
-    ssize_t nread;
-    debug_decl(intercept_recv_request, SUDO_DEBUG_EXEC);
-
-    /* Read message size (uint32_t in host byte order). */
-    nread = recv(fd, &req_len, sizeof(req_len), 0);
-    if (nread != sizeof(req_len)) {
-	if (nread != 0)
-	    sudo_warn("read");
-	goto done;
-    }
-
-    if (req_len > MESSAGE_SIZE_MAX) {
-	sudo_warnx(U_("client request too large: %zu"), (size_t)req_len);
-	goto done;
-    }
-
-    if (req_len > 0) {
-	size_t rem = req_len;
-
-	if ((buf = malloc(req_len)) == NULL) {
-	    sudo_warnx("%s", U_("unable to allocate memory"));
-	    goto done;
-	}
-	cp = buf;
-	do {
-	    nread = recv(fd, cp, rem, 0);
-	    switch (nread) {
-	    case 0:
-		/* EOF, other side must have exited. */
-		goto done;
-	    case -1:
-		sudo_warn("read");
-		goto done;
-	    default:
-		rem -= nread;
-		cp += nread;
-		break;
-	    }
-	} while (rem > 0);
-    }
-
-    req = intercept_request__unpack(NULL, req_len, buf);
-    if (req == NULL) {
-	sudo_warnx("unable to unpack %s size %zu", "InterceptRequest",
-	    (size_t)req_len);
-	goto done;
-    }
-
-done:
-    free(buf);
-    debug_return_ptr(req);
-}
-
-/*
  * Read a message from sudo_intercept.so and act on it.
  */
 static bool
 intercept_read(int fd, struct intercept_closure *closure)
 {
-    struct sudo_event_base *base = sudo_ev_get_base(&closure->ev);
-    InterceptRequest *req;
+    struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
+    InterceptRequest *req = NULL;
     pid_t saved_pgrp = -1;
     struct termios oterm;
+    ssize_t nread;
     bool ret = false;
     int ttyfd = -1;
     debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
-    req = intercept_recv_request(fd);
-    if (req == NULL)
+    if (closure->len == 0) {
+	uint32_t req_len;
+
+	/* Read message size (uint32_t in host byte order). */
+	nread = recv(fd, &req_len, sizeof(req_len), 0);
+	if (nread != sizeof(req_len)) {
+	    if (nread == -1) {
+		if (errno == EINTR || errno == EAGAIN)
+		    debug_return_bool(true);
+		sudo_warn("read");
+	    }
+	    goto done;
+	}
+
+	if (req_len == 0) {
+	    /* zero-length message is possible */
+	    goto unpack;
+	}
+	if (req_len > MESSAGE_SIZE_MAX) {
+	    sudo_warnx(U_("client request too large: %zu"), (size_t)req_len);
+	    goto done;
+	}
+	if ((closure->buf = malloc(req_len)) == NULL) {
+	    sudo_warnx("%s", U_("unable to allocate memory"));
+	    goto done;
+	}
+	closure->len = req_len;
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: expecting %u bytes from client",
+	    __func__, closure->len);
+    }
+
+    nread = recv(fd, closure->buf + closure->off, closure->len - closure->off,
+	0);
+    switch (nread) {
+    case 0:
+	/* EOF, other side must have exited. */
 	goto done;
+    case -1:
+	if (errno == EINTR || errno == EAGAIN)
+	    debug_return_bool(true);
+	sudo_warn("read");
+	goto done;
+    default:
+	closure->off += nread;
+	break;
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client",
+	__func__, nread);
+
+    if (closure->off != closure->len) {
+	/* Partial read. */
+	debug_return_bool(true);
+    }
+
+unpack:
+    req = intercept_request__unpack(NULL, closure->len, closure->buf);
+    if (req == NULL) {
+	sudo_warnx("unable to unpack %s size %zu", "InterceptRequest",
+	    (size_t)closure->len);
+	goto done;
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: finished receiving %u bytes from client", __func__, closure->len);
+    sudo_ev_del(evbase, &closure->ev);
+    free(closure->buf);
+    closure->buf = NULL;
+    closure->len = 0;
+    closure->off = 0;
 
     switch (req->type_case) {
     case INTERCEPT_REQUEST__TYPE_POLICY_CHECK_REQ:
@@ -588,12 +593,12 @@ intercept_read(int fd, struct intercept_closure *closure)
     }
 
     /* Switch event to write mode for the reply. */
-    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_WRITE, intercept_cb, closure) == -1) {
+    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_WRITE|SUDO_EV_PERSIST, intercept_cb, closure) == -1) {
 	/* This cannot (currently) fail. */
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto done;
     }
-    if (sudo_ev_add(base, &closure->ev, NULL, false) == -1) {
+    if (sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto done;
     }
@@ -617,7 +622,7 @@ fmt_intercept_response(InterceptResponse *resp,
 
     closure->len = intercept_response__get_packed_size(resp);
     if (closure->len > MESSAGE_SIZE_MAX) {
-	sudo_warnx(U_("server message too large: %zu"), closure->len);
+	sudo_warnx(U_("server message too large: %zu"), (size_t)closure->len);
 	goto done;
     }
 
@@ -626,7 +631,7 @@ fmt_intercept_response(InterceptResponse *resp,
     closure->len += sizeof(resp_len);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"size + InterceptResponse %zu bytes", closure->len);
+	"size + InterceptResponse %zu bytes", (size_t)closure->len);
 
     if ((closure->buf = malloc(closure->len)) == NULL) {
 	sudo_warnx("%s", U_("unable to allocate memory"));
@@ -720,48 +725,63 @@ intercept_write(int fd, struct intercept_closure *closure)
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     ssize_t nwritten;
     bool ret = false;
-    uint8_t *cp;
-    size_t rem;
     debug_decl(intercept_write, SUDO_DEBUG_EXEC);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "state %d",
 	closure->state);
 
-    switch (closure->state) {
-	case RECV_HELLO_INITIAL:
-	case RECV_HELLO:
-	    if (!fmt_hello_response(closure))
-		goto done;
-	    break;
-	case POLICY_ACCEPT:
-	    if (!fmt_accept_message(closure))
-		goto done;
-	    break;
-	case POLICY_REJECT:
-	    if (!fmt_reject_message(closure))
-		goto done;
-	    break;
-	default:
-	    if (!fmt_error_message(closure))
-		goto done;
-	    break;
+    if (closure->len == 0) {
+	/* Format new message. */
+	switch (closure->state) {
+	    case RECV_HELLO_INITIAL:
+	    case RECV_HELLO:
+		if (!fmt_hello_response(closure))
+		    goto done;
+		break;
+	    case POLICY_ACCEPT:
+		if (!fmt_accept_message(closure))
+		    goto done;
+		break;
+	    case POLICY_REJECT:
+		if (!fmt_reject_message(closure))
+		    goto done;
+		break;
+	    default:
+		if (!fmt_error_message(closure))
+		    goto done;
+		break;
+	}
     }
 
-    cp = closure->buf;
-    rem = closure->len;
-    do {
-	nwritten = send(fd, cp, rem, 0);
-	if (nwritten == -1) {
-	    sudo_warn("send");
-	    goto done;
-	}
-	cp += nwritten;
-	rem -= nwritten;
-    } while (rem > 0);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to client",
+	__func__, closure->len - closure->off);
+    nwritten = send(fd, closure->buf + closure->off,
+	closure->len - closure->off, 0);
+    if (nwritten == -1) {
+	if (errno == EINTR || errno == EAGAIN)
+	    debug_return_bool(true);
+	sudo_warn("send");
+	goto done;
+    }
+    closure->off += nwritten;
+
+    if (closure->off != closure->len) {
+	/* Partial write. */
+	debug_return_bool(true);
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sent %u bytes to client",
+	__func__, closure->len);
+    sudo_ev_del(evbase, &closure->ev);
+    free(closure->buf);
+    closure->buf = NULL;
+    closure->len = 0;
+    closure->off = 0;
 
     switch (closure->state) {
     case RECV_HELLO_INITIAL:
 	/* Re-use event for the listener. */
+	close(fd);
 	if (sudo_ev_set(&closure->ev, closure->listen_sock, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_accept_cb, closure) == -1) {
 	    /* This cannot (currently) fail. */
 	    sudo_warn("%s", U_("unable to add event to queue"));
@@ -771,18 +791,12 @@ intercept_write(int fd, struct intercept_closure *closure)
 	    sudo_warn("%s", U_("unable to add event to queue"));
 	    goto done;
 	}
-	close(fd);
-
-	/* Reset bits of closure we used for ClientHello. */
-	free(closure->buf);
-	closure->buf = NULL;
-	closure->len = 0;
 	closure->listen_sock = -1;
 	closure->state = RECV_CONNECTION;
 	break;
     case POLICY_ACCEPT:
 	/* Re-use event to read ClientHello from sudo_intercept.so ctor. */
-	if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ, intercept_cb, closure) == -1) {
+	if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_cb, closure) == -1) {
 	    /* This cannot (currently) fail. */
 	    sudo_warn("%s", U_("unable to add event to queue"));
 	    goto done;
