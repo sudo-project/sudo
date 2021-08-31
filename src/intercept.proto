@@ -30,7 +30,6 @@ message HelloResponse {
 
 /*
  * Policy check request from sudo_intercept.so.
- * Must include the correct secret value.
  * Note that the plugin API only currently supports passing
  * the new environment in to the open() function.
  */
@@ -40,7 +39,6 @@ message PolicyCheckRequest {
   repeated string argv = 3;
   repeated string envp = 4;
   int32 intercept_fd = 5;
-  fixed64 secret = 6;
 }
 
 message PolicyAcceptMessage {

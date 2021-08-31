@@ -86,7 +86,6 @@ struct  _HelloResponse
 
 /*
  * Policy check request from sudo_intercept.so.
- * Must include the correct secret value.
  * Note that the plugin API only currently supports passing
  * the new environment in to the open() function.
  */
@@ -100,11 +99,10 @@ struct  _PolicyCheckRequest
   size_t n_envp;
   char **envp;
   int32_t intercept_fd;
-  uint64_t secret;
 };
 #define POLICY_CHECK_REQUEST__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&policy_check_request__descriptor) \
-    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL, 0,NULL, 0, 0 }
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL, 0,NULL, 0 }
 
 
 struct  _PolicyAcceptMessage

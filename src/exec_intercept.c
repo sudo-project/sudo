@@ -53,6 +53,7 @@
 enum intercept_state {
     RECV_HELLO_INITIAL,
     RECV_HELLO,
+    RECV_SECRET,
     RECV_POLICY_CHECK,
     RECV_CONNECTION,
     POLICY_ACCEPT,
@@ -97,7 +98,7 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     }
 
     /* If we've already seen a ClientHello, expect a policy check first. */
-    closure->state = intercept_secret ? RECV_POLICY_CHECK : RECV_HELLO_INITIAL;
+    closure->state = intercept_secret ? RECV_SECRET : RECV_HELLO_INITIAL;
     closure->details = details;
     closure->listen_sock = -1;
 
@@ -294,13 +295,6 @@ intercept_check_policy(PolicyCheckRequest *req,
 	closure->errstr = N_("invalid PolicyCheckRequest");
 	goto done;
     }
-    if (req->secret != intercept_secret) {
-	closure->errstr = N_("invalid PolicyCheckRequest");
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "secret mismatch: got %" PRIu64 ", expected %" PRIu64, req->secret,
-	    intercept_secret);
-	goto done;
-    }
 
     if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -456,6 +450,37 @@ done:
 }
 
 /*
+ * Read shared secret from sudo_intercept.so and verify w/ intercept_secret.
+ * Returns true on success, false on mismatch and -1 on error.
+ */
+static int
+intercept_verify_secret(int fd)
+{
+    uint64_t secret;
+    ssize_t nread;
+    debug_decl(intercept_read_secret, SUDO_DEBUG_EXEC);
+
+    /* Read shared secret (uint64_t in host byte order). */
+    nread = recv(fd, &secret, sizeof(secret), 0);
+    if (nread != sizeof(secret)) {
+	if (nread == -1)
+	    debug_return_int(-1);
+	/* Treat short read as a secret mismatch. */
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "short read, expected %zu, got %zd", sizeof(secret), nread);
+	debug_return_int(false);
+    }
+    if (secret != intercept_secret) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "secret mismatch: got %" PRIu64 ", expected %" PRIu64, secret,
+	    intercept_secret);
+	debug_return_int(false);
+    }
+
+    debug_return_int(true);
+}
+
+/*
  * Read a message from sudo_intercept.so and act on it.
  */
 static bool
@@ -470,6 +495,20 @@ intercept_read(int fd, struct intercept_closure *closure)
     int ttyfd = -1;
     debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
+    if (closure->state == RECV_SECRET) {
+	switch (intercept_verify_secret(fd)) {
+	case true:
+	    closure->state = RECV_POLICY_CHECK;
+	    break;
+	case false:
+	    goto done;
+	default:
+	    if (errno == EINTR || errno == EAGAIN)
+		debug_return_bool(true);
+	    goto done;
+	}
+    }
+
     if (closure->len == 0) {
 	uint32_t req_len;
 
@@ -479,7 +518,7 @@ intercept_read(int fd, struct intercept_closure *closure)
 	    if (nread == -1) {
 		if (errno == EINTR || errno == EAGAIN)
 		    debug_return_bool(true);
-		sudo_warn("read");
+		sudo_warn("recv");
 	    }
 	    goto done;
 	}
@@ -510,7 +549,7 @@ intercept_read(int fd, struct intercept_closure *closure)
     case -1:
 	if (errno == EINTR || errno == EAGAIN)
 	    debug_return_bool(true);
-	sudo_warn("read");
+	sudo_warn("recv");
 	goto done;
     default:
 	closure->off += nread;

@@ -63,7 +63,7 @@ static in_port_t intercept_port;
 
 /* Send entire request to sudo (blocking). */
 static bool
-send_req(int sock, const uint8_t *buf, size_t len)
+send_req(int sock, const void *buf, size_t len)
 {
     const uint8_t *cp = buf;
     ssize_t nwritten;
@@ -94,7 +94,7 @@ send_client_hello(int sock)
     bool ret = false;
     debug_decl(send_client_hello, SUDO_DEBUG_EXEC);
 
-    /* Setup policy check request. */
+    /* Setup client hello. */
     hello.pid = getpid();
     msg.type_case = INTERCEPT_REQUEST__TYPE_HELLO;;
     msg.u.hello = &hello;
@@ -272,8 +272,14 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     size_t len;
     debug_decl(fmt_policy_check_req, SUDO_DEBUG_EXEC);
 
+    /* Send secret first (out of band) to initiate connection. */
+    if (!send_req(sock, &secret, sizeof(secret))) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to send secret back to sudo");
+	goto done;
+    }
+
     /* Setup policy check request. */
-    req.secret = secret;
     req.intercept_fd = sock;
     req.command = (char *)cmnd;
     req.argv = (char **)argv;

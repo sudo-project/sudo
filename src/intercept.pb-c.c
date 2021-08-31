@@ -507,7 +507,7 @@ const ProtobufCMessageDescriptor hello_response__descriptor =
   (ProtobufCMessageInit) hello_response__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[6] =
+static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[5] =
 {
   {
     "command",
@@ -569,18 +569,6 @@ static const ProtobufCFieldDescriptor policy_check_request__field_descriptors[6]
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
-  {
-    "secret",
-    6,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_FIXED64,
-    0,   /* quantifier_offset */
-    offsetof(PolicyCheckRequest, secret),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
 };
 static const unsigned policy_check_request__field_indices_by_name[] = {
   2,   /* field[2] = argv */
@@ -588,12 +576,11 @@ static const unsigned policy_check_request__field_indices_by_name[] = {
   1,   /* field[1] = cwd */
   3,   /* field[3] = envp */
   4,   /* field[4] = intercept_fd */
-  5,   /* field[5] = secret */
 };
 static const ProtobufCIntRange policy_check_request__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 6 }
+  { 0, 5 }
 };
 const ProtobufCMessageDescriptor policy_check_request__descriptor =
 {
@@ -603,7 +590,7 @@ const ProtobufCMessageDescriptor policy_check_request__descriptor =
   "PolicyCheckRequest",
   "",
   sizeof(PolicyCheckRequest),
-  6,
+  5,
   policy_check_request__field_descriptors,
   policy_check_request__field_indices_by_name,
   1,  policy_check_request__number_ranges,
