@@ -30463,6 +30463,112 @@ printf "%s\n" "$sudo_cv_var_stack_protector" >&6; }
     fi
 fi
 if test "$enable_hardening" != "no"; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-clash-protection" >&5
+printf %s "checking whether the linker accepts -fstack-clash-protection... " >&6; }
+if test ${ax_cv_check_ldflags___fstack_clash_protection+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -fstack-clash-protection"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___fstack_clash_protection=yes
+else $as_nop
+  ax_cv_check_ldflags___fstack_clash_protection=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_clash_protection" >&5
+printf "%s\n" "$ax_cv_check_ldflags___fstack_clash_protection" >&6; }
+if test x"$ax_cv_check_ldflags___fstack_clash_protection" = xyes
+then :
+
+
+if test ${SSP_CFLAGS+y}
+then :
+
+  case " $SSP_CFLAGS " in #(
+  *" -fstack-clash-protection "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS already contains -fstack-clash-protection"; } >&5
+  (: SSP_CFLAGS already contains -fstack-clash-protection) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SSP_CFLAGS " -fstack-clash-protection"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS=\"\$SSP_CFLAGS\""; } >&5
+  (: SSP_CFLAGS="$SSP_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  SSP_CFLAGS=-fstack-clash-protection
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS=\"\$SSP_CFLAGS\""; } >&5
+  (: SSP_CFLAGS="$SSP_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+if test ${SSP_LDFLAGS+y}
+then :
+
+  case " $SSP_LDFLAGS " in #(
+  *" -Wc,-fstack-clash-protection "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS already contains -Wc,-fstack-clash-protection"; } >&5
+  (: SSP_LDFLAGS already contains -Wc,-fstack-clash-protection) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SSP_LDFLAGS " -Wc,-fstack-clash-protection"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS=\"\$SSP_LDFLAGS\""; } >&5
+  (: SSP_LDFLAGS="$SSP_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  SSP_LDFLAGS=-Wc,-fstack-clash-protection
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS=\"\$SSP_LDFLAGS\""; } >&5
+  (: SSP_LDFLAGS="$SSP_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+else $as_nop
+  :
+fi
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5
 printf %s "checking whether the linker accepts -Wl,-z,relro... " >&6; }
 if test ${ax_cv_check_ldflags___Wl__z_relro+y}
@@ -30522,6 +30628,77 @@ esac
 else $as_nop
 
   LDFLAGS=-Wl,-z,relro
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+else $as_nop
+  :
+fi
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,noexecstack" >&5
+printf %s "checking whether the linker accepts -Wl,-z,noexecstack... " >&6; }
+if test ${ax_cv_check_ldflags___Wl__z_noexecstack+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,-z,noexecstack"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___Wl__z_noexecstack=yes
+else $as_nop
+  ax_cv_check_ldflags___Wl__z_noexecstack=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_noexecstack" >&5
+printf "%s\n" "$ax_cv_check_ldflags___Wl__z_noexecstack" >&6; }
+if test x"$ax_cv_check_ldflags___Wl__z_noexecstack" = xyes
+then :
+
+if test ${LDFLAGS+y}
+then :
+
+  case " $LDFLAGS " in #(
+  *" -Wl,-z,noexecstack "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,-z,noexecstack"; } >&5
+  (: LDFLAGS already contains -Wl,-z,noexecstack) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -Wl,-z,noexecstack"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LDFLAGS=-Wl,-z,noexecstack
   { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
   (: LDFLAGS="$LDFLAGS") 2>&5
   ac_status=$?
