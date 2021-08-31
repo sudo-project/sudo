@@ -854,7 +854,7 @@ intercept_accept_cb(int fd, int what, void *v)
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     struct sockaddr_in sin;
     socklen_t sin_len = sizeof(sin);
-    int client_sock;
+    int client_sock, flags;
     debug_decl(intercept_accept_cb, SUDO_DEBUG_EXEC);
 
     if (closure->state != RECV_CONNECTION) {
@@ -870,6 +870,9 @@ intercept_accept_cb(int fd, int what, void *v)
 	sudo_warn("accept");
 	goto bad;
     }
+    flags = fcntl(client_sock, F_GETFL, 0);
+    if (flags != -1)
+	(void)fcntl(client_sock, F_SETFL, flags | O_NONBLOCK);
 
     if (!intercept_setup(client_sock, evbase, closure->details)) {
 	goto bad;
