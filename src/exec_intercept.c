@@ -281,6 +281,7 @@ intercept_check_policy(PolicyCheckRequest *req,
     struct intercept_closure *closure)
 {
     char **command_info = NULL;
+    char **command_info_copy = NULL;
     char **user_env_out = NULL;
     char **argv = NULL, **run_argv = NULL;
     bool ret = false;
@@ -333,20 +334,22 @@ intercept_check_policy(PolicyCheckRequest *req,
 	switch (result) {
 	case 1:
 	    /* Rebuild command_info[] with runcwd and extract command. */
-	    command_info = update_command_info(command_info, NULL,
+	    command_info_copy = update_command_info(command_info, NULL,
 		req->cwd ? req->cwd : "unknown", &closure->command);
-	    if (command_info == NULL) {
+	    if (command_info_copy == NULL) {
 		closure->errstr = N_("unable to allocate memory");
 		goto done;
 	    }
+	    command_info = command_info_copy;
 	    closure->state = POLICY_ACCEPT;
 	    break;
 	case 0:
 	    if (closure->errstr == NULL)
 		closure->errstr = N_("command rejected by policy");
-	    audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
-		command_info);
+	    audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
+		closure->errstr, command_info);
 	    closure->state = POLICY_REJECT;
+	    ret = true;
 	    goto done;
 	default:
 	    goto done;
@@ -440,11 +443,11 @@ done:
 	    command_info ? command_info : closure->details->info);
 	closure->state = POLICY_ERROR;
     }
-    if (command_info != NULL) {
-	for (n = 0; command_info[n] != NULL; n++) {
-	    free(command_info[n]);
+    if (command_info_copy != NULL) {
+	for (n = 0; command_info_copy[n] != NULL; n++) {
+	    free(command_info_copy[n]);
 	}
-	free(command_info);
+	free(command_info_copy);
     }
     free(argv);
 
