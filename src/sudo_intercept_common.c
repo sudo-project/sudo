@@ -72,6 +72,8 @@ send_req(int sock, const uint8_t *buf, size_t len)
     do {
 	nwritten = send(sock, cp, len, 0);
 	if (nwritten == -1) {
+	    if (errno == EINTR)
+		continue;
 	    debug_return_bool(false);
 	}
 	len -= nwritten;
@@ -129,8 +131,8 @@ recv_intercept_response(int fd)
 {
     InterceptResponse *res = NULL;
     ssize_t nread;
-    uint32_t res_len;
-    uint8_t *buf = NULL;
+    uint32_t rem, res_len;
+    uint8_t *cp, *buf = NULL;
     debug_decl(recv_intercept_response, SUDO_DEBUG_EXEC);
 
     /* Read message size (uint32_t in host byte order). */
@@ -155,17 +157,27 @@ recv_intercept_response(int fd)
     if ((buf = malloc(res_len)) == NULL) {
 	goto done;
     }
-    nread = recv(fd, buf, res_len, 0);
-    if ((size_t)nread != res_len) {
-        if (nread == 0) {
+    cp = buf;
+    rem = res_len;
+    do {
+	nread = recv(fd, cp, rem, 0);
+	switch (nread) {
+	case 0:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unexpected EOF reading response");
-        } else {
+	    goto done;
+	case -1:
+	    if (errno == EINTR)
+		continue;
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"error reading response");
+	    goto done;
+	default:
+	    rem -= nread;
+	    cp += nread;
+	    break;
 	}
-        goto done;
-    }
+    } while (rem > 0);
     res = intercept_response__unpack(NULL, res_len, buf);
     if (res == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
