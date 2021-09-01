@@ -51,6 +51,13 @@
 #include "sudo_util.h"
 #include "pathnames.h"
 
+#ifndef _PATH_SUDO_INTERCEPT
+# define _PATH_SUDO_INTERCEPT NULL
+#endif
+#ifndef _PATH_SUDO_NOEXEC
+# define _PATH_SUDO_NOEXEC NULL
+#endif
+
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;

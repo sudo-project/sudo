@@ -4813,6 +4813,7 @@ dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
 dnl
 if test X"$enable_intercept" != X"no"; then
+    SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.lo"
     PROGS="${PROGS} sudo_intercept.la"
     INSTALL_INTERCEPT="install-intercept"
 
@@ -4822,16 +4823,12 @@ if test X"$enable_intercept" != X"no"; then
     fi
 
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_INTERCEPT, "$intercept_file", [The fully qualified pathname of sudo_intercept.so])
-else
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_INTERCEPT, NULL)
 fi
 if test X"$with_noexec" != X"no"; then
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"
 
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
-else
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, NULL)
 fi
 if test X"$with_selinux" != X"no"; then
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")

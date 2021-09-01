@@ -45,10 +45,12 @@
 #include "sudo_rand.h"
 #include "intercept.pb-c.h"
 
+#ifdef _PATH_SUDO_INTERCEPT
+
 /* TCSASOFT is a BSD extension that ignores control flags and speed. */
-#ifndef TCSASOFT
-# define TCSASOFT	0
-#endif
+# ifndef TCSASOFT
+#  define TCSASOFT	0
+# endif
 
 enum intercept_state {
     RECV_HELLO_INITIAL,
@@ -938,3 +940,15 @@ bad:
 	close(client_sock);
     debug_return;
 }
+#else /* _PATH_SUDO_INTERCEPT */
+bool
+intercept_setup(int fd, struct sudo_event_base *evbase,
+    struct command_details *details)
+{
+    debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
+
+    /* Intercept support not compiled in. */
+
+    debug_return_bool(false);
+}
+#endif /* _PATH_SUDO_INTERCEPT */

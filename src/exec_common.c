@@ -73,18 +73,18 @@ enable_intercept(char *envp[], const char *dso, int intercept_fd)
 {
     debug_decl(enable_intercept, SUDO_DEBUG_UTIL);
 
+    if (dso != NULL) {
 #ifdef RTLD_PRELOAD_VAR
-    if (dso == NULL)
-	sudo_fatalx("%s: missing DSO", __func__);
-    if (intercept_fd == -1)
-	sudo_fatalx("%s: no intercept fd", __func__);
+	if (intercept_fd == -1)
+	    sudo_fatalx("%s: no intercept fd", __func__);
 
-    envp = sudo_preload_dso(envp, dso, intercept_fd);
+	envp = sudo_preload_dso(envp, dso, intercept_fd);
 #else
-    /* Intercept not supported, envp unchanged. */
-    if (intercept_fd != -1)
-	close(intercept_fd);
+	/* Intercept not supported, envp unchanged. */
+	if (intercept_fd != -1)
+	    close(intercept_fd);
 #endif /* RTLD_PRELOAD_VAR */
+    }
 
     debug_return_ptr(envp);
 }
