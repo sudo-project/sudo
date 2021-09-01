@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 20, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 1, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -6330,8 +6330,10 @@ Currently,
 \fBsudo\fR's
 \fIintercept\fR
 functionality only works for programs that use the
+\fBexecv\fR()
+and
 \fBexecve\fR()
-system call to run the new command.
+library functions to run the new command.
 This may be expanded in a future release of
 \fBsudo\fR.
 Because most dynamic loaders ignore
@@ -6353,6 +6355,11 @@ Check your operating system's manual pages for the dynamic linker
 (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
 \fRLD_PRELOAD\fR
 is supported.
+It is
+\fInot\fR
+supported when
+\fBsudo\fR's
+SELinux RBAC support is in use due to a fundamental incompatibility.
 .sp
 To enable intercept mode on a per-command basis, use the
 \fRINTERCEPT\fR

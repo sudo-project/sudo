@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 20, 2021
+.Dd September 1, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -5851,8 +5851,10 @@ Currently,
 .Nm sudo Ns 's
 .Em intercept
 functionality only works for programs that use the
+.Fn execv
+and
 .Fn execve
-system call to run the new command.
+library functions to run the new command.
 This may be expanded in a future release of
 .Nm sudo .
 Because most dynamic loaders ignore
@@ -5874,6 +5876,11 @@ Check your operating system's manual pages for the dynamic linker
 (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
 .Ev LD_PRELOAD
 is supported.
+It is
+.Em not
+supported when
+.Nm sudo Ns 's
+SELinux RBAC support is in use due to a fundamental incompatibility.
 .Pp
 To enable intercept mode on a per-command basis, use the
 .Li INTERCEPT
