@@ -57,7 +57,7 @@ struct  _InterceptRequest
 
 /*
  * Hello message from sudo_intercept.so to main sudo process.
- * Sudo sends back the secret and localhost port number.
+ * Sudo sends back the token and localhost port number.
  */
 struct  _ClientHello
 {
@@ -71,17 +71,18 @@ struct  _ClientHello
 
 /*
  * Sudo response to a ClientHello from sudo_intercept.so.
- * The client uses the port number and secret to connect back to sudo.
+ * The client uses the port number and token to connect back to sudo.
  */
 struct  _HelloResponse
 {
   ProtobufCMessage base;
-  uint64_t secret;
+  uint64_t token_lo;
+  uint64_t token_hi;
   int32_t portno;
 };
 #define HELLO_RESPONSE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&hello_response__descriptor) \
-    , 0, 0 }
+    , 0, 0, 0 }
 
 
 /*

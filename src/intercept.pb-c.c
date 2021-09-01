@@ -456,15 +456,27 @@ const ProtobufCMessageDescriptor client_hello__descriptor =
   (ProtobufCMessageInit) client_hello__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor hello_response__field_descriptors[2] =
+static const ProtobufCFieldDescriptor hello_response__field_descriptors[3] =
 {
   {
-    "secret",
+    "token_lo",
     1,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_FIXED64,
     0,   /* quantifier_offset */
-    offsetof(HelloResponse, secret),
+    offsetof(HelloResponse, token_lo),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "token_hi",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_FIXED64,
+    0,   /* quantifier_offset */
+    offsetof(HelloResponse, token_hi),
     NULL,
     NULL,
     0,             /* flags */
@@ -472,7 +484,7 @@ static const ProtobufCFieldDescriptor hello_response__field_descriptors[2] =
   },
   {
     "portno",
-    2,
+    3,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -484,13 +496,14 @@ static const ProtobufCFieldDescriptor hello_response__field_descriptors[2] =
   },
 };
 static const unsigned hello_response__field_indices_by_name[] = {
-  1,   /* field[1] = portno */
-  0,   /* field[0] = secret */
+  2,   /* field[2] = portno */
+  1,   /* field[1] = token_hi */
+  0,   /* field[0] = token_lo */
 };
 static const ProtobufCIntRange hello_response__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 3 }
 };
 const ProtobufCMessageDescriptor hello_response__descriptor =
 {
@@ -500,7 +513,7 @@ const ProtobufCMessageDescriptor hello_response__descriptor =
   "HelloResponse",
   "",
   sizeof(HelloResponse),
-  2,
+  3,
   hello_response__field_descriptors,
   hello_response__field_indices_by_name,
   1,  hello_response__number_ranges,

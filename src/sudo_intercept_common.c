@@ -58,7 +58,7 @@
 
 extern char **environ;
 
-static uint64_t secret;
+static union sudo_token_un intercept_token;
 static in_port_t intercept_port;
 
 /* Send entire request to sudo (blocking). */
@@ -247,7 +247,8 @@ sudo_interposer_init(void)
 
     res = recv_intercept_response(fd);
     if (res != NULL) {
-	secret = res->u.hello_resp->secret;
+	intercept_token.u64[0] = res->u.hello_resp->token_lo;
+	intercept_token.u64[1] = res->u.hello_resp->token_hi;
 	intercept_port = res->u.hello_resp->portno;
 	intercept_response__free_unpacked(res, NULL);
     }
@@ -272,10 +273,10 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     size_t len;
     debug_decl(fmt_policy_check_req, SUDO_DEBUG_EXEC);
 
-    /* Send secret first (out of band) to initiate connection. */
-    if (!send_req(sock, &secret, sizeof(secret))) {
+    /* Send token first (out of band) to initiate connection. */
+    if (!send_req(sock, &intercept_token, sizeof(intercept_token))) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to send secret back to sudo");
+	    "unable to send token back to sudo");
 	goto done;
     }
 

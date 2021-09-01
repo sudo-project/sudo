@@ -63,6 +63,7 @@ enum intercept_state {
 
 /* Closure for intercept_cb() */
 struct intercept_closure {
+    union sudo_token_un token;
     struct command_details *details;
     struct sudo_event ev;
     const char *errstr;
@@ -76,7 +77,7 @@ struct intercept_closure {
     enum intercept_state state;
 };
 
-static uint64_t intercept_secret;
+static union sudo_token_un intercept_token;
 static in_port_t intercept_listen_port;
 static void intercept_accept_cb(int fd, int what, void *v);
 static void intercept_cb(int fd, int what, void *v);
@@ -98,7 +99,8 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     }
 
     /* If we've already seen a ClientHello, expect a policy check first. */
-    closure->state = intercept_secret ? RECV_SECRET : RECV_HELLO_INITIAL;
+    closure->state = sudo_token_isset(intercept_token) ?
+	RECV_SECRET : RECV_HELLO_INITIAL;
     closure->details = details;
     closure->listen_sock = -1;
 
@@ -153,7 +155,7 @@ intercept_connection_close(int fd, struct intercept_closure *closure)
 
 /*
  * Prepare to listen on localhost using an ephemeral port.
- * Sets intercept_secret and intercept_listen_port as side effects.
+ * Sets intercept_token and intercept_listen_port as side effects.
  */
 static bool
 prepare_listener(struct intercept_closure *closure)
@@ -163,10 +165,10 @@ prepare_listener(struct intercept_closure *closure)
     int sock;
     debug_decl(prepare_listener, SUDO_DEBUG_EXEC);
 
-    /* Secret must be non-zero. */
+    /* Generate a random token. */
     do {
-	intercept_secret = arc4random() | ((uint64_t)arc4random() << 32);
-    } while (intercept_secret == 0);
+	arc4random_buf(&intercept_token, sizeof(intercept_token));
+    } while (!sudo_token_isset(intercept_token));
 
     /* Create localhost listener socket (currently AF_INET only). */
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -450,33 +452,43 @@ done:
 }
 
 /*
- * Read shared secret from sudo_intercept.so and verify w/ intercept_secret.
+ * Read token from sudo_intercept.so and verify w/ intercept_token.
  * Returns true on success, false on mismatch and -1 on error.
  */
 static int
-intercept_verify_secret(int fd)
+intercept_verify_token(int fd, struct intercept_closure *closure)
 {
-    uint64_t secret;
     ssize_t nread;
-    debug_decl(intercept_read_secret, SUDO_DEBUG_EXEC);
+    debug_decl(intercept_read_token, SUDO_DEBUG_EXEC);
 
-    /* Read shared secret (uint64_t in host byte order). */
-    nread = recv(fd, &secret, sizeof(secret), 0);
-    if (nread != sizeof(secret)) {
-	if (nread == -1)
-	    debug_return_int(-1);
-	/* Treat short read as a secret mismatch. */
+    nread = recv(fd, &closure->token + closure->off,
+	sizeof(closure->token) - closure->off, 0);
+    switch (nread) {
+    case 0:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "short read, expected %zu, got %zd", sizeof(secret), nread);
+	    "EOF reading token");
+	debug_return_int(false);
+    case -1:
+	debug_return_int(-1);
+    default:
+	if (nread + closure->off == sizeof(closure->token))
+	    break;
+	/* partial read, update offset and try again */
+	closure->off += nread;
+	errno = EAGAIN;
+	debug_return_int(-1);
+    }
+
+    closure->off = 0;
+    if (memcmp(&closure->token, &intercept_token, sizeof(closure->token)) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "token mismatch: got 0x%8x%8x%8x%8x, expected 0x%8x%8x%8x%8x",
+	    closure->token.u32[3], closure->token.u32[2],
+	    closure->token.u32[1], closure->token.u32[0],
+	    intercept_token.u32[3], intercept_token.u32[2],
+	    intercept_token.u32[1], intercept_token.u32[0]);
 	debug_return_int(false);
     }
-    if (secret != intercept_secret) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "secret mismatch: got %" PRIu64 ", expected %" PRIu64, secret,
-	    intercept_secret);
-	debug_return_int(false);
-    }
-
     debug_return_int(true);
 }
 
@@ -496,7 +508,7 @@ intercept_read(int fd, struct intercept_closure *closure)
     debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
     if (closure->state == RECV_SECRET) {
-	switch (intercept_verify_secret(fd)) {
+	switch (intercept_verify_token(fd, closure)) {
 	case true:
 	    closure->state = RECV_POLICY_CHECK;
 	    break;
@@ -505,6 +517,7 @@ intercept_read(int fd, struct intercept_closure *closure)
 	default:
 	    if (errno == EINTR || errno == EAGAIN)
 		debug_return_bool(true);
+	    sudo_warn("recv");
 	    goto done;
 	}
     }
@@ -693,7 +706,8 @@ fmt_hello_response(struct intercept_closure *closure)
     debug_decl(fmt_hello_response, SUDO_DEBUG_EXEC);
 
     hello_resp.portno = intercept_listen_port;
-    hello_resp.secret = intercept_secret;
+    hello_resp.token_lo = intercept_token.u64[0];
+    hello_resp.token_hi = intercept_token.u64[1];
 
     resp.u.hello_resp = &hello_resp;
     resp.type_case = INTERCEPT_RESPONSE__TYPE_HELLO_RESP;

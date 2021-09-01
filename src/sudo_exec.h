@@ -82,6 +82,14 @@
 #define INTERCEPT_FD_MIN    64		/* minimum fd so shell won't close it */
 #define MESSAGE_SIZE_MAX    2097152	/* 2Mib max intercept message size */
 
+union sudo_token_un {
+    unsigned char u8[16];
+    unsigned int u32[4];
+    unsigned long long u64[2];
+};
+
+#define sudo_token_isset(_t) ((_t).u64[0] || (_t).u64[1])
+
 /*
  * Symbols shared between exec.c, exec_nopty.c, exec_pty.c and exec_monitor.c
  */

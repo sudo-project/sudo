@@ -13,7 +13,7 @@ message InterceptRequest {
 
 /*
  * Hello message from sudo_intercept.so to main sudo process.
- * Sudo sends back the secret and localhost port number.
+ * Sudo sends back the token and localhost port number.
  */
 message ClientHello {
     int32 pid = 1;
@@ -21,11 +21,12 @@ message ClientHello {
 
 /*
  * Sudo response to a ClientHello from sudo_intercept.so.
- * The client uses the port number and secret to connect back to sudo.
+ * The client uses the port number and token to connect back to sudo.
  */
 message HelloResponse {
-  fixed64 secret = 1;
-  int32 portno = 2;
+  fixed64 token_lo = 1;
+  fixed64 token_hi = 2;
+  int32 portno = 3;
 }
 
 /*
