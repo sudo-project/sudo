@@ -109,9 +109,10 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test hltq_test parseln_test progname_test strsplit_test \
-	     strtobool_test strtoid_test strtomode_test strtonum_test \
-	     parse_gids_test getgids getgrouplist_test @COMPAT_TEST_PROGS@
+TEST_PROGS = conf_test hltq_test parseln_test progname_test \
+	     strsplit_test strtobool_test strtoid_test strtomode_test \
+	     strtonum_test parse_gids_test getgids getgrouplist_test \
+	     uuid_test @COMPAT_TEST_PROGS@
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -181,6 +182,8 @@ GETGIDS_OBJS = getgids.lo getgrouplist.lo
 GETGROUPLIST_TEST_OBJS = getgrouplist_test.lo getgrouplist.lo
 
 STRSIG_TEST_OBJS = strsig_test.lo sig2str.lo str2sig.lo @SIGNAME@
+
+UUID_TEST_OBJS = uuid_test.lo uuid.lo
 
 FUZZ_SUDO_CONF_OBJS = fuzz_sudo_conf.lo
 
@@ -304,6 +307,9 @@ strtonum_test: $(STRTONUM_TEST_OBJS) libsudo_util.la
 
 strtoid_test: $(STRTOID_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STRTOID_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+uuid_test: $(UUID_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(UUID_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 fuzz_sudo_conf: $(FUZZ_SUDO_CONF_OBJS) $(LIBFUZZSTUB) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FUZZ_SUDO_CONF_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) libsudo_util.la
@@ -436,6 +442,7 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./strtoid_test || rval=`expr $$rval + $$?`; \
 	    ./strtomode_test || rval=`expr $$rval + $$?`; \
 	    ./strtonum_test || rval=`expr $$rval + $$?`; \
+	    ./uuid_test || rval=`expr $$rval + $$?`; \
 	    ./hltq_test || rval=`expr $$rval + $$?`; \
 	    ./progname_test || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
@@ -1514,3 +1521,15 @@ uuid.i: $(srcdir)/uuid.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 uuid.plog: uuid.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/uuid.c --i-file $< --output-file $@
+uuid_test.lo: $(srcdir)/regress/uuid/uuid_test.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/uuid/uuid_test.c
+uuid_test.i: $(srcdir)/regress/uuid/uuid_test.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+uuid_test.plog: uuid_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/uuid/uuid_test.c --i-file $< --output-file $@

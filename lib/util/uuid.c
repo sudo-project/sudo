@@ -39,13 +39,15 @@
 struct uuid {
     uint32_t time_low;
     uint16_t time_mid;
-    uint16_t time_high_and_version;
-    uint16_t clock_seq_and_variant;
-    unsigned char node[6];
+    uint16_t time_hi_and_version;
+    uint8_t clock_seq_hi_and_reserved;
+    uint8_t clock_seq_low;
+    uint8_t node[6];
 };
 
 /*
  * Create a type 4 (random), variant 1 universally unique identifier (UUID).
+ * As per RFC 4122 section 4.4.
  */
 void
 sudo_uuid_create_v1(unsigned char uuid_out[16])
@@ -57,25 +59,14 @@ sudo_uuid_create_v1(unsigned char uuid_out[16])
 
     arc4random_buf(&uuid, sizeof(uuid));
 
-    /* Convert fields to host by order. */
-    uuid.id.time_low = ntohl(uuid.id.time_low);
-    uuid.id.time_mid = ntohs(uuid.id.time_mid);
-    uuid.id.time_high_and_version = ntohs(uuid.id.time_high_and_version);
-    uuid.id.clock_seq_and_variant = ntohs(uuid.id.clock_seq_and_variant);
+    /* Set version to 4 (random), 4 most significant bits (12-15) are 0010. */
+    uuid.id.time_hi_and_version &= 0x0fff;
+    uuid.id.time_hi_and_version |= 0x4000;
 
-    /* Set version to 4 (random) in the high nibble. */
-    uuid.id.time_high_and_version &= 0x0fff;
-    uuid.id.time_high_and_version |= 0x4000;
+    /* Set variant to 1: two most significant bits (6 and 7) are 01. */
+    uuid.id.clock_seq_hi_and_reserved &= 0x3f;
+    uuid.id.clock_seq_hi_and_reserved |= 0x80;
 
-    /* Set variant to 1 (first two bits are 10) */
-    uuid.id.clock_seq_and_variant &= 0x3fff;
-    uuid.id.clock_seq_and_variant |= 0x8000;
-
-    /* Store fields in network byte order (big endian). */
-    uuid.id.time_low = htonl(uuid.id.time_low);
-    uuid.id.time_mid = htons(uuid.id.time_mid);
-    uuid.id.time_high_and_version = htons(uuid.id.time_high_and_version);
-    uuid.id.clock_seq_and_variant = htons(uuid.id.clock_seq_and_variant);
     memcpy(uuid_out, &uuid, 16);
 }
 
