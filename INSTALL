@@ -382,18 +382,19 @@ Optional features:
 	using STREAMS.
 
   --enable-intercept[=PATH]
-        Enable support for the "intercept" functionality which allows
-        sudo to perform a policy check when a dynamically-linked
+        Enable support for the "intercept" functionality which
+        allows sudo to perform a policy check when a dynamically-linked
         program run by sudo attempts to execute another program.
-        For example, this means that for a shell run through sudo,
-        the individual commands run by the shell are also subject
-        to rules in the sudoers file.  Please see the "Preventing
-        Shell Escapes" section in the sudoers man page for details.
-        If specified, PATH should be a fully qualified path name,
-        e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH is
-        "no", intercept support will not be compiled in.  The default
-        is to compile intercept support if libtool supports building
-        shared objects on your system.
+        This is also used to support the "log_subcmds" sudoers
+        setting.  For example, this means that for a shell run
+        through sudo, the individual commands run by the shell are
+        also subject to rules in the sudoers file.  Please see the
+        "Preventing Shell Escapes" section in the sudoers man page
+        for details.  If specified, PATH should be a fully qualified
+        path name, e.g.  /usr/local/libexec/sudo/sudo_intercept.so.
+        If PATH is "no", intercept support will not be compiled in.
+        The default is to compile intercept support if libtool
+        supports building shared objects on your system.
 
   --with-noexec[=PATH]
 	Enable support for the "noexec" functionality which prevents
