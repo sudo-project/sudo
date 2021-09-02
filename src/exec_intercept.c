@@ -463,7 +463,7 @@ intercept_verify_token(int fd, struct intercept_closure *closure)
     ssize_t nread;
     debug_decl(intercept_read_token, SUDO_DEBUG_EXEC);
 
-    nread = recv(fd, &closure->token + closure->off,
+    nread = recv(fd, closure->token.u8 + closure->off,
 	sizeof(closure->token) - closure->off, 0);
     switch (nread) {
     case 0:
