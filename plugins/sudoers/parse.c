@@ -229,11 +229,13 @@ apply_cmndspec(struct cmndspec *cs)
 	}
 	if (user_role != NULL || user_type != NULL) {
 	    if (def_intercept) {
-		sudo_warnx(U_("SELinux RBAC is not supported when intercept mode is enabled"));
+		sudo_warnx("%s",
+		    U_("SELinux RBAC is not supported when intercept mode is enabled"));
 		debug_return_bool(false);
 	    }
 	    if (def_log_subcmds) {
-		sudo_warnx(U_("SELinux RBAC is not supported when the log_subcmds flag is enabled"));
+		sudo_warnx("%s",
+		    U_("SELinux RBAC is not supported when the log_subcmds flag is enabled"));
 		debug_return_bool(false);
 	    }
 	}
