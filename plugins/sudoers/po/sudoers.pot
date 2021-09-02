@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.9.8\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2021-08-19 09:50-0600\n"
+"POT-Creation-Date: 2021-09-01 13:39-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,96 +77,96 @@ msgstr ""
 #: logsrvd/logsrvd_queue.c:262 logsrvd/logsrvd_relay.c:445
 #: logsrvd/logsrvd_relay.c:744 logsrvd/logsrvd_relay.c:846
 #: logsrvd/sendlog.c:302 logsrvd/sendlog.c:501 plugins/sudoers/audit.c:114
-#: plugins/sudoers/audit.c:271 plugins/sudoers/auth/bsdauth.c:143
-#: plugins/sudoers/auth/kerb5.c:118 plugins/sudoers/auth/kerb5.c:144
-#: plugins/sudoers/auth/pam.c:691 plugins/sudoers/auth/rfc1938.c:111
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/check_aliases.c:95
-#: plugins/sudoers/cvtsudoers.c:119 plugins/sudoers/cvtsudoers.c:160
-#: plugins/sudoers/cvtsudoers.c:177 plugins/sudoers/cvtsudoers.c:188
-#: plugins/sudoers/cvtsudoers.c:300 plugins/sudoers/cvtsudoers.c:428
-#: plugins/sudoers/cvtsudoers.c:561 plugins/sudoers/cvtsudoers.c:578
-#: plugins/sudoers/cvtsudoers.c:646 plugins/sudoers/cvtsudoers.c:761
-#: plugins/sudoers/cvtsudoers.c:769 plugins/sudoers/cvtsudoers.c:1183
-#: plugins/sudoers/cvtsudoers.c:1187 plugins/sudoers/cvtsudoers.c:1289
-#: plugins/sudoers/cvtsudoers_json.c:76 plugins/sudoers/cvtsudoers_ldif.c:151
-#: plugins/sudoers/cvtsudoers_ldif.c:194 plugins/sudoers/cvtsudoers_ldif.c:235
-#: plugins/sudoers/cvtsudoers_ldif.c:300 plugins/sudoers/cvtsudoers_ldif.c:371
-#: plugins/sudoers/cvtsudoers_ldif.c:425 plugins/sudoers/cvtsudoers_ldif.c:433
-#: plugins/sudoers/cvtsudoers_ldif.c:444 plugins/sudoers/cvtsudoers_ldif.c:451
-#: plugins/sudoers/cvtsudoers_ldif.c:464 plugins/sudoers/cvtsudoers_ldif.c:472
-#: plugins/sudoers/cvtsudoers_ldif.c:619 plugins/sudoers/defaults.c:652
-#: plugins/sudoers/defaults.c:947 plugins/sudoers/defaults.c:1122
-#: plugins/sudoers/editor.c:190 plugins/sudoers/env.c:262
-#: plugins/sudoers/exptilde.c:92 plugins/sudoers/filedigest.c:54
-#: plugins/sudoers/filedigest.c:70 plugins/sudoers/gc.c:57
-#: plugins/sudoers/group_plugin.c:133 plugins/sudoers/interfaces.c:68
-#: plugins/sudoers/iolog.c:606 plugins/sudoers/iolog.c:623
-#: plugins/sudoers/ldap.c:184 plugins/sudoers/ldap.c:422
-#: plugins/sudoers/ldap.c:432 plugins/sudoers/ldap.c:437
-#: plugins/sudoers/ldap.c:441 plugins/sudoers/ldap.c:453
-#: plugins/sudoers/ldap.c:744 plugins/sudoers/ldap.c:908
-#: plugins/sudoers/ldap.c:1281 plugins/sudoers/ldap.c:1709
-#: plugins/sudoers/ldap.c:1746 plugins/sudoers/ldap.c:1827
-#: plugins/sudoers/ldap.c:1962 plugins/sudoers/ldap.c:2063
-#: plugins/sudoers/ldap.c:2079 plugins/sudoers/ldap_conf.c:218
-#: plugins/sudoers/ldap_conf.c:249 plugins/sudoers/ldap_conf.c:301
-#: plugins/sudoers/ldap_conf.c:337 plugins/sudoers/ldap_conf.c:441
-#: plugins/sudoers/ldap_conf.c:456 plugins/sudoers/ldap_conf.c:553
-#: plugins/sudoers/ldap_conf.c:586 plugins/sudoers/ldap_conf.c:678
-#: plugins/sudoers/ldap_conf.c:760 plugins/sudoers/ldap_util.c:293
-#: plugins/sudoers/ldap_util.c:300 plugins/sudoers/ldap_util.c:615
-#: plugins/sudoers/linux_audit.c:86 plugins/sudoers/log_client.c:108
-#: plugins/sudoers/log_client.c:386 plugins/sudoers/log_client.c:699
-#: plugins/sudoers/log_client.c:720 plugins/sudoers/log_client.c:1440
-#: plugins/sudoers/log_client.c:1656 plugins/sudoers/log_client.c:1980
-#: plugins/sudoers/log_client.c:2037 plugins/sudoers/logging.c:101
-#: plugins/sudoers/logging.c:181 plugins/sudoers/logging.c:465
-#: plugins/sudoers/logging.c:485 plugins/sudoers/logging.c:627
-#: plugins/sudoers/match_command.c:297 plugins/sudoers/match_command.c:497
-#: plugins/sudoers/match_command.c:546 plugins/sudoers/match_command.c:618
-#: plugins/sudoers/match_command.c:666 plugins/sudoers/match_digest.c:93
-#: plugins/sudoers/parse.c:201 plugins/sudoers/parse.c:218
-#: plugins/sudoers/parse.c:238 plugins/sudoers/parse.c:255
-#: plugins/sudoers/parse.c:278 plugins/sudoers/parse.c:289
-#: plugins/sudoers/parse_ldif.c:153 plugins/sudoers/parse_ldif.c:184
-#: plugins/sudoers/parse_ldif.c:253 plugins/sudoers/parse_ldif.c:260
-#: plugins/sudoers/parse_ldif.c:265 plugins/sudoers/parse_ldif.c:341
-#: plugins/sudoers/parse_ldif.c:352 plugins/sudoers/parse_ldif.c:379
-#: plugins/sudoers/parse_ldif.c:396 plugins/sudoers/parse_ldif.c:408
-#: plugins/sudoers/parse_ldif.c:412 plugins/sudoers/parse_ldif.c:426
-#: plugins/sudoers/parse_ldif.c:483 plugins/sudoers/parse_ldif.c:596
-#: plugins/sudoers/parse_ldif.c:626 plugins/sudoers/parse_ldif.c:651
-#: plugins/sudoers/parse_ldif.c:709 plugins/sudoers/parse_ldif.c:726
-#: plugins/sudoers/parse_ldif.c:754 plugins/sudoers/parse_ldif.c:761
-#: plugins/sudoers/policy.c:556 plugins/sudoers/policy.c:923
-#: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:195
-#: plugins/sudoers/pwutil.c:266 plugins/sudoers/pwutil.c:344
-#: plugins/sudoers/pwutil.c:518 plugins/sudoers/pwutil.c:583
-#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:853
-#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:953
-#: plugins/sudoers/pwutil.c:1010 plugins/sudoers/sssd.c:145
-#: plugins/sudoers/sssd.c:407 plugins/sudoers/sssd.c:470
-#: plugins/sudoers/sssd.c:514 plugins/sudoers/sssd.c:561
-#: plugins/sudoers/sssd.c:754 plugins/sudoers/strvec_join.c:53
-#: plugins/sudoers/stubs.c:111 plugins/sudoers/stubs.c:119
-#: plugins/sudoers/sudoers.c:335 plugins/sudoers/sudoers.c:361
-#: plugins/sudoers/sudoers.c:429 plugins/sudoers/sudoers.c:438
-#: plugins/sudoers/sudoers.c:479 plugins/sudoers/sudoers.c:833
-#: plugins/sudoers/sudoers.c:971 plugins/sudoers/sudoers.c:1030
-#: plugins/sudoers/sudoers.c:1296 plugins/sudoers/sudoreplay.c:562
-#: plugins/sudoers/sudoreplay.c:565 plugins/sudoers/sudoreplay.c:1280
-#: plugins/sudoers/sudoreplay.c:1490 plugins/sudoers/sudoreplay.c:1494
-#: plugins/sudoers/testsudoers.c:120 plugins/sudoers/testsudoers.c:224
-#: plugins/sudoers/testsudoers.c:241 plugins/sudoers/testsudoers.c:580
-#: plugins/sudoers/timestamp.c:424 plugins/sudoers/timestamp.c:468
-#: plugins/sudoers/timestamp.c:980 plugins/sudoers/timestamp.c:1118
-#: plugins/sudoers/toke_util.c:77 plugins/sudoers/toke_util.c:105
-#: plugins/sudoers/toke_util.c:130 plugins/sudoers/toke_util.c:155
-#: plugins/sudoers/toke_util.c:193 plugins/sudoers/tsdump.c:123
-#: plugins/sudoers/visudo.c:143 plugins/sudoers/visudo.c:321
-#: plugins/sudoers/visudo.c:327 plugins/sudoers/visudo.c:433
-#: plugins/sudoers/visudo.c:609 plugins/sudoers/visudo.c:926
-#: plugins/sudoers/visudo.c:999 toke.l:938 toke.l:1067 toke.l:1127
+#: plugins/sudoers/auth/bsdauth.c:143 plugins/sudoers/auth/kerb5.c:118
+#: plugins/sudoers/auth/kerb5.c:144 plugins/sudoers/auth/pam.c:691
+#: plugins/sudoers/auth/rfc1938.c:111 plugins/sudoers/auth/sia.c:59
+#: plugins/sudoers/check_aliases.c:95 plugins/sudoers/cvtsudoers.c:119
+#: plugins/sudoers/cvtsudoers.c:160 plugins/sudoers/cvtsudoers.c:177
+#: plugins/sudoers/cvtsudoers.c:188 plugins/sudoers/cvtsudoers.c:300
+#: plugins/sudoers/cvtsudoers.c:428 plugins/sudoers/cvtsudoers.c:561
+#: plugins/sudoers/cvtsudoers.c:578 plugins/sudoers/cvtsudoers.c:646
+#: plugins/sudoers/cvtsudoers.c:761 plugins/sudoers/cvtsudoers.c:769
+#: plugins/sudoers/cvtsudoers.c:1183 plugins/sudoers/cvtsudoers.c:1187
+#: plugins/sudoers/cvtsudoers.c:1289 plugins/sudoers/cvtsudoers_json.c:76
+#: plugins/sudoers/cvtsudoers_ldif.c:151 plugins/sudoers/cvtsudoers_ldif.c:194
+#: plugins/sudoers/cvtsudoers_ldif.c:235 plugins/sudoers/cvtsudoers_ldif.c:300
+#: plugins/sudoers/cvtsudoers_ldif.c:371 plugins/sudoers/cvtsudoers_ldif.c:425
+#: plugins/sudoers/cvtsudoers_ldif.c:433 plugins/sudoers/cvtsudoers_ldif.c:444
+#: plugins/sudoers/cvtsudoers_ldif.c:451 plugins/sudoers/cvtsudoers_ldif.c:464
+#: plugins/sudoers/cvtsudoers_ldif.c:472 plugins/sudoers/cvtsudoers_ldif.c:619
+#: plugins/sudoers/defaults.c:652 plugins/sudoers/defaults.c:947
+#: plugins/sudoers/defaults.c:1122 plugins/sudoers/editor.c:190
+#: plugins/sudoers/env.c:262 plugins/sudoers/exptilde.c:92
+#: plugins/sudoers/filedigest.c:54 plugins/sudoers/filedigest.c:70
+#: plugins/sudoers/gc.c:57 plugins/sudoers/group_plugin.c:133
+#: plugins/sudoers/interfaces.c:68 plugins/sudoers/iolog.c:606
+#: plugins/sudoers/iolog.c:623 plugins/sudoers/ldap.c:184
+#: plugins/sudoers/ldap.c:422 plugins/sudoers/ldap.c:432
+#: plugins/sudoers/ldap.c:437 plugins/sudoers/ldap.c:441
+#: plugins/sudoers/ldap.c:453 plugins/sudoers/ldap.c:744
+#: plugins/sudoers/ldap.c:908 plugins/sudoers/ldap.c:1281
+#: plugins/sudoers/ldap.c:1709 plugins/sudoers/ldap.c:1746
+#: plugins/sudoers/ldap.c:1827 plugins/sudoers/ldap.c:1962
+#: plugins/sudoers/ldap.c:2063 plugins/sudoers/ldap.c:2079
+#: plugins/sudoers/ldap_conf.c:218 plugins/sudoers/ldap_conf.c:249
+#: plugins/sudoers/ldap_conf.c:301 plugins/sudoers/ldap_conf.c:337
+#: plugins/sudoers/ldap_conf.c:441 plugins/sudoers/ldap_conf.c:456
+#: plugins/sudoers/ldap_conf.c:553 plugins/sudoers/ldap_conf.c:586
+#: plugins/sudoers/ldap_conf.c:678 plugins/sudoers/ldap_conf.c:760
+#: plugins/sudoers/ldap_util.c:293 plugins/sudoers/ldap_util.c:300
+#: plugins/sudoers/ldap_util.c:615 plugins/sudoers/linux_audit.c:86
+#: plugins/sudoers/log_client.c:108 plugins/sudoers/log_client.c:386
+#: plugins/sudoers/log_client.c:699 plugins/sudoers/log_client.c:720
+#: plugins/sudoers/log_client.c:1440 plugins/sudoers/log_client.c:1656
+#: plugins/sudoers/log_client.c:1980 plugins/sudoers/log_client.c:2037
+#: plugins/sudoers/logging.c:101 plugins/sudoers/logging.c:181
+#: plugins/sudoers/logging.c:465 plugins/sudoers/logging.c:485
+#: plugins/sudoers/logging.c:621 plugins/sudoers/match_command.c:297
+#: plugins/sudoers/match_command.c:497 plugins/sudoers/match_command.c:546
+#: plugins/sudoers/match_command.c:618 plugins/sudoers/match_command.c:666
+#: plugins/sudoers/match_digest.c:93 plugins/sudoers/parse.c:201
+#: plugins/sudoers/parse.c:218 plugins/sudoers/parse.c:248
+#: plugins/sudoers/parse.c:265 plugins/sudoers/parse.c:288
+#: plugins/sudoers/parse.c:299 plugins/sudoers/parse_ldif.c:153
+#: plugins/sudoers/parse_ldif.c:184 plugins/sudoers/parse_ldif.c:253
+#: plugins/sudoers/parse_ldif.c:260 plugins/sudoers/parse_ldif.c:265
+#: plugins/sudoers/parse_ldif.c:341 plugins/sudoers/parse_ldif.c:352
+#: plugins/sudoers/parse_ldif.c:379 plugins/sudoers/parse_ldif.c:396
+#: plugins/sudoers/parse_ldif.c:408 plugins/sudoers/parse_ldif.c:412
+#: plugins/sudoers/parse_ldif.c:426 plugins/sudoers/parse_ldif.c:483
+#: plugins/sudoers/parse_ldif.c:596 plugins/sudoers/parse_ldif.c:626
+#: plugins/sudoers/parse_ldif.c:651 plugins/sudoers/parse_ldif.c:709
+#: plugins/sudoers/parse_ldif.c:726 plugins/sudoers/parse_ldif.c:754
+#: plugins/sudoers/parse_ldif.c:761 plugins/sudoers/policy.c:556
+#: plugins/sudoers/policy.c:923 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/pwutil.c:195 plugins/sudoers/pwutil.c:266
+#: plugins/sudoers/pwutil.c:344 plugins/sudoers/pwutil.c:518
+#: plugins/sudoers/pwutil.c:583 plugins/sudoers/pwutil.c:655
+#: plugins/sudoers/pwutil.c:853 plugins/sudoers/pwutil.c:909
+#: plugins/sudoers/pwutil.c:953 plugins/sudoers/pwutil.c:1010
+#: plugins/sudoers/sssd.c:145 plugins/sudoers/sssd.c:407
+#: plugins/sudoers/sssd.c:470 plugins/sudoers/sssd.c:514
+#: plugins/sudoers/sssd.c:561 plugins/sudoers/sssd.c:754
+#: plugins/sudoers/strvec_join.c:53 plugins/sudoers/stubs.c:111
+#: plugins/sudoers/stubs.c:119 plugins/sudoers/sudoers.c:335
+#: plugins/sudoers/sudoers.c:361 plugins/sudoers/sudoers.c:429
+#: plugins/sudoers/sudoers.c:438 plugins/sudoers/sudoers.c:479
+#: plugins/sudoers/sudoers.c:833 plugins/sudoers/sudoers.c:971
+#: plugins/sudoers/sudoers.c:1030 plugins/sudoers/sudoers.c:1296
+#: plugins/sudoers/sudoreplay.c:562 plugins/sudoers/sudoreplay.c:565
+#: plugins/sudoers/sudoreplay.c:1280 plugins/sudoers/sudoreplay.c:1490
+#: plugins/sudoers/sudoreplay.c:1494 plugins/sudoers/testsudoers.c:120
+#: plugins/sudoers/testsudoers.c:224 plugins/sudoers/testsudoers.c:241
+#: plugins/sudoers/testsudoers.c:580 plugins/sudoers/timestamp.c:424
+#: plugins/sudoers/timestamp.c:468 plugins/sudoers/timestamp.c:980
+#: plugins/sudoers/timestamp.c:1118 plugins/sudoers/toke_util.c:77
+#: plugins/sudoers/toke_util.c:105 plugins/sudoers/toke_util.c:130
+#: plugins/sudoers/toke_util.c:155 plugins/sudoers/toke_util.c:193
+#: plugins/sudoers/tsdump.c:123 plugins/sudoers/visudo.c:143
+#: plugins/sudoers/visudo.c:321 plugins/sudoers/visudo.c:327
+#: plugins/sudoers/visudo.c:433 plugins/sudoers/visudo.c:609
+#: plugins/sudoers/visudo.c:926 plugins/sudoers/visudo.c:999 toke.l:938
+#: toke.l:1067 toke.l:1127
 msgid "unable to allocate memory"
 msgstr ""
 
@@ -247,106 +247,106 @@ msgstr ""
 #: logsrvd/logsrvd_queue.c:262 logsrvd/sendlog.c:302 logsrvd/sendlog.c:501
 #: logsrvd/sendlog.c:1353 logsrvd/sendlog.c:1360 logsrvd/sendlog.c:1563
 #: logsrvd/tls_init.c:218 logsrvd/tls_init.c:239 logsrvd/tls_init.c:249
-#: plugins/sudoers/audit.c:114 plugins/sudoers/audit.c:271
-#: plugins/sudoers/auth/pam.c:505 plugins/sudoers/auth/pam.c:691
-#: plugins/sudoers/auth/rfc1938.c:111 plugins/sudoers/check_aliases.c:95
-#: plugins/sudoers/cvtsudoers.c:119 plugins/sudoers/cvtsudoers.c:159
-#: plugins/sudoers/cvtsudoers.c:176 plugins/sudoers/cvtsudoers.c:187
-#: plugins/sudoers/cvtsudoers.c:299 plugins/sudoers/cvtsudoers.c:427
-#: plugins/sudoers/cvtsudoers.c:560 plugins/sudoers/cvtsudoers.c:577
-#: plugins/sudoers/cvtsudoers.c:646 plugins/sudoers/cvtsudoers.c:761
-#: plugins/sudoers/cvtsudoers.c:768 plugins/sudoers/cvtsudoers.c:1183
-#: plugins/sudoers/cvtsudoers.c:1187 plugins/sudoers/cvtsudoers.c:1289
-#: plugins/sudoers/cvtsudoers_json.c:75 plugins/sudoers/cvtsudoers_ldif.c:150
-#: plugins/sudoers/cvtsudoers_ldif.c:193 plugins/sudoers/cvtsudoers_ldif.c:234
-#: plugins/sudoers/cvtsudoers_ldif.c:299 plugins/sudoers/cvtsudoers_ldif.c:370
-#: plugins/sudoers/cvtsudoers_ldif.c:424 plugins/sudoers/cvtsudoers_ldif.c:432
-#: plugins/sudoers/cvtsudoers_ldif.c:443 plugins/sudoers/cvtsudoers_ldif.c:450
-#: plugins/sudoers/cvtsudoers_ldif.c:463 plugins/sudoers/cvtsudoers_ldif.c:471
-#: plugins/sudoers/cvtsudoers_ldif.c:618 plugins/sudoers/defaults.c:652
-#: plugins/sudoers/defaults.c:947 plugins/sudoers/defaults.c:1122
-#: plugins/sudoers/editor.c:190 plugins/sudoers/env.c:262
-#: plugins/sudoers/exptilde.c:92 plugins/sudoers/filedigest.c:54
-#: plugins/sudoers/filedigest.c:70 plugins/sudoers/gc.c:57
-#: plugins/sudoers/group_plugin.c:132 plugins/sudoers/interfaces.c:68
-#: plugins/sudoers/iolog.c:606 plugins/sudoers/iolog.c:623
-#: plugins/sudoers/ldap.c:184 plugins/sudoers/ldap.c:422
-#: plugins/sudoers/ldap.c:432 plugins/sudoers/ldap.c:437
-#: plugins/sudoers/ldap.c:441 plugins/sudoers/ldap.c:453
-#: plugins/sudoers/ldap.c:744 plugins/sudoers/ldap.c:908
-#: plugins/sudoers/ldap.c:1281 plugins/sudoers/ldap.c:1709
-#: plugins/sudoers/ldap.c:1746 plugins/sudoers/ldap.c:1827
-#: plugins/sudoers/ldap.c:1962 plugins/sudoers/ldap.c:2063
-#: plugins/sudoers/ldap.c:2079 plugins/sudoers/ldap_conf.c:218
-#: plugins/sudoers/ldap_conf.c:249 plugins/sudoers/ldap_conf.c:301
-#: plugins/sudoers/ldap_conf.c:337 plugins/sudoers/ldap_conf.c:441
-#: plugins/sudoers/ldap_conf.c:456 plugins/sudoers/ldap_conf.c:553
-#: plugins/sudoers/ldap_conf.c:586 plugins/sudoers/ldap_conf.c:677
-#: plugins/sudoers/ldap_conf.c:760 plugins/sudoers/ldap_util.c:292
-#: plugins/sudoers/ldap_util.c:299 plugins/sudoers/ldap_util.c:615
-#: plugins/sudoers/linux_audit.c:86 plugins/sudoers/log_client.c:108
-#: plugins/sudoers/log_client.c:217 plugins/sudoers/log_client.c:238
-#: plugins/sudoers/log_client.c:251 plugins/sudoers/log_client.c:386
-#: plugins/sudoers/log_client.c:699 plugins/sudoers/log_client.c:720
-#: plugins/sudoers/log_client.c:1440 plugins/sudoers/log_client.c:1656
-#: plugins/sudoers/log_client.c:1980 plugins/sudoers/log_client.c:2037
-#: plugins/sudoers/logging.c:101 plugins/sudoers/logging.c:180
-#: plugins/sudoers/logging.c:181 plugins/sudoers/logging.c:464
-#: plugins/sudoers/logging.c:484 plugins/sudoers/logging.c:627
-#: plugins/sudoers/match_command.c:296 plugins/sudoers/match_command.c:496
-#: plugins/sudoers/match_command.c:545 plugins/sudoers/match_command.c:618
-#: plugins/sudoers/match_command.c:665 plugins/sudoers/match_digest.c:93
-#: plugins/sudoers/parse.c:200 plugins/sudoers/parse.c:217
-#: plugins/sudoers/parse.c:237 plugins/sudoers/parse.c:254
-#: plugins/sudoers/parse.c:277 plugins/sudoers/parse.c:288
-#: plugins/sudoers/parse_ldif.c:152 plugins/sudoers/parse_ldif.c:183
-#: plugins/sudoers/parse_ldif.c:252 plugins/sudoers/parse_ldif.c:259
-#: plugins/sudoers/parse_ldif.c:264 plugins/sudoers/parse_ldif.c:340
-#: plugins/sudoers/parse_ldif.c:351 plugins/sudoers/parse_ldif.c:378
-#: plugins/sudoers/parse_ldif.c:395 plugins/sudoers/parse_ldif.c:407
-#: plugins/sudoers/parse_ldif.c:411 plugins/sudoers/parse_ldif.c:425
-#: plugins/sudoers/parse_ldif.c:483 plugins/sudoers/parse_ldif.c:596
-#: plugins/sudoers/parse_ldif.c:625 plugins/sudoers/parse_ldif.c:650
-#: plugins/sudoers/parse_ldif.c:708 plugins/sudoers/parse_ldif.c:725
-#: plugins/sudoers/parse_ldif.c:753 plugins/sudoers/parse_ldif.c:760
-#: plugins/sudoers/policy.c:152 plugins/sudoers/policy.c:161
-#: plugins/sudoers/policy.c:170 plugins/sudoers/policy.c:197
-#: plugins/sudoers/policy.c:330 plugins/sudoers/policy.c:345
-#: plugins/sudoers/policy.c:347 plugins/sudoers/policy.c:377
-#: plugins/sudoers/policy.c:386 plugins/sudoers/policy.c:434
-#: plugins/sudoers/policy.c:444 plugins/sudoers/policy.c:453
-#: plugins/sudoers/policy.c:462 plugins/sudoers/policy.c:556
-#: plugins/sudoers/policy.c:923 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:195 plugins/sudoers/pwutil.c:266
-#: plugins/sudoers/pwutil.c:344 plugins/sudoers/pwutil.c:518
-#: plugins/sudoers/pwutil.c:583 plugins/sudoers/pwutil.c:655
-#: plugins/sudoers/pwutil.c:853 plugins/sudoers/pwutil.c:909
-#: plugins/sudoers/pwutil.c:953 plugins/sudoers/pwutil.c:1010
-#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:706
-#: plugins/sudoers/set_perms.c:1073 plugins/sudoers/set_perms.c:1380
-#: plugins/sudoers/set_perms.c:1549 plugins/sudoers/sssd.c:144
-#: plugins/sudoers/sssd.c:407 plugins/sudoers/sssd.c:470
-#: plugins/sudoers/sssd.c:514 plugins/sudoers/sssd.c:561
-#: plugins/sudoers/sssd.c:754 plugins/sudoers/strvec_join.c:53
-#: plugins/sudoers/stubs.c:111 plugins/sudoers/stubs.c:119
-#: plugins/sudoers/sudoers.c:335 plugins/sudoers/sudoers.c:361
-#: plugins/sudoers/sudoers.c:429 plugins/sudoers/sudoers.c:438
-#: plugins/sudoers/sudoers.c:479 plugins/sudoers/sudoers.c:833
-#: plugins/sudoers/sudoers.c:971 plugins/sudoers/sudoers.c:1030
-#: plugins/sudoers/sudoers.c:1296 plugins/sudoers/sudoreplay.c:562
-#: plugins/sudoers/sudoreplay.c:565 plugins/sudoers/sudoreplay.c:1280
-#: plugins/sudoers/sudoreplay.c:1490 plugins/sudoers/sudoreplay.c:1494
-#: plugins/sudoers/testsudoers.c:120 plugins/sudoers/testsudoers.c:224
-#: plugins/sudoers/testsudoers.c:241 plugins/sudoers/testsudoers.c:580
-#: plugins/sudoers/timestamp.c:424 plugins/sudoers/timestamp.c:468
-#: plugins/sudoers/timestamp.c:980 plugins/sudoers/timestamp.c:1118
-#: plugins/sudoers/toke_util.c:77 plugins/sudoers/toke_util.c:105
-#: plugins/sudoers/toke_util.c:130 plugins/sudoers/toke_util.c:154
-#: plugins/sudoers/toke_util.c:193 plugins/sudoers/tsdump.c:123
-#: plugins/sudoers/visudo.c:143 plugins/sudoers/visudo.c:321
-#: plugins/sudoers/visudo.c:327 plugins/sudoers/visudo.c:433
-#: plugins/sudoers/visudo.c:609 plugins/sudoers/visudo.c:926
-#: plugins/sudoers/visudo.c:999 toke.l:938 toke.l:1067 toke.l:1119 toke.l:1127
+#: plugins/sudoers/audit.c:114 plugins/sudoers/auth/pam.c:505
+#: plugins/sudoers/auth/pam.c:691 plugins/sudoers/auth/rfc1938.c:111
+#: plugins/sudoers/check_aliases.c:95 plugins/sudoers/cvtsudoers.c:119
+#: plugins/sudoers/cvtsudoers.c:159 plugins/sudoers/cvtsudoers.c:176
+#: plugins/sudoers/cvtsudoers.c:187 plugins/sudoers/cvtsudoers.c:299
+#: plugins/sudoers/cvtsudoers.c:427 plugins/sudoers/cvtsudoers.c:560
+#: plugins/sudoers/cvtsudoers.c:577 plugins/sudoers/cvtsudoers.c:646
+#: plugins/sudoers/cvtsudoers.c:761 plugins/sudoers/cvtsudoers.c:768
+#: plugins/sudoers/cvtsudoers.c:1183 plugins/sudoers/cvtsudoers.c:1187
+#: plugins/sudoers/cvtsudoers.c:1289 plugins/sudoers/cvtsudoers_json.c:75
+#: plugins/sudoers/cvtsudoers_ldif.c:150 plugins/sudoers/cvtsudoers_ldif.c:193
+#: plugins/sudoers/cvtsudoers_ldif.c:234 plugins/sudoers/cvtsudoers_ldif.c:299
+#: plugins/sudoers/cvtsudoers_ldif.c:370 plugins/sudoers/cvtsudoers_ldif.c:424
+#: plugins/sudoers/cvtsudoers_ldif.c:432 plugins/sudoers/cvtsudoers_ldif.c:443
+#: plugins/sudoers/cvtsudoers_ldif.c:450 plugins/sudoers/cvtsudoers_ldif.c:463
+#: plugins/sudoers/cvtsudoers_ldif.c:471 plugins/sudoers/cvtsudoers_ldif.c:618
+#: plugins/sudoers/defaults.c:652 plugins/sudoers/defaults.c:947
+#: plugins/sudoers/defaults.c:1122 plugins/sudoers/editor.c:190
+#: plugins/sudoers/env.c:262 plugins/sudoers/exptilde.c:92
+#: plugins/sudoers/filedigest.c:54 plugins/sudoers/filedigest.c:70
+#: plugins/sudoers/gc.c:57 plugins/sudoers/group_plugin.c:132
+#: plugins/sudoers/interfaces.c:68 plugins/sudoers/iolog.c:606
+#: plugins/sudoers/iolog.c:623 plugins/sudoers/ldap.c:184
+#: plugins/sudoers/ldap.c:422 plugins/sudoers/ldap.c:432
+#: plugins/sudoers/ldap.c:437 plugins/sudoers/ldap.c:441
+#: plugins/sudoers/ldap.c:453 plugins/sudoers/ldap.c:744
+#: plugins/sudoers/ldap.c:908 plugins/sudoers/ldap.c:1281
+#: plugins/sudoers/ldap.c:1709 plugins/sudoers/ldap.c:1746
+#: plugins/sudoers/ldap.c:1827 plugins/sudoers/ldap.c:1962
+#: plugins/sudoers/ldap.c:2063 plugins/sudoers/ldap.c:2079
+#: plugins/sudoers/ldap_conf.c:218 plugins/sudoers/ldap_conf.c:249
+#: plugins/sudoers/ldap_conf.c:301 plugins/sudoers/ldap_conf.c:337
+#: plugins/sudoers/ldap_conf.c:441 plugins/sudoers/ldap_conf.c:456
+#: plugins/sudoers/ldap_conf.c:553 plugins/sudoers/ldap_conf.c:586
+#: plugins/sudoers/ldap_conf.c:677 plugins/sudoers/ldap_conf.c:760
+#: plugins/sudoers/ldap_util.c:292 plugins/sudoers/ldap_util.c:299
+#: plugins/sudoers/ldap_util.c:615 plugins/sudoers/linux_audit.c:86
+#: plugins/sudoers/log_client.c:108 plugins/sudoers/log_client.c:217
+#: plugins/sudoers/log_client.c:238 plugins/sudoers/log_client.c:251
+#: plugins/sudoers/log_client.c:386 plugins/sudoers/log_client.c:699
+#: plugins/sudoers/log_client.c:720 plugins/sudoers/log_client.c:1440
+#: plugins/sudoers/log_client.c:1656 plugins/sudoers/log_client.c:1980
+#: plugins/sudoers/log_client.c:2037 plugins/sudoers/logging.c:101
+#: plugins/sudoers/logging.c:180 plugins/sudoers/logging.c:181
+#: plugins/sudoers/logging.c:464 plugins/sudoers/logging.c:484
+#: plugins/sudoers/logging.c:621 plugins/sudoers/match_command.c:296
+#: plugins/sudoers/match_command.c:496 plugins/sudoers/match_command.c:545
+#: plugins/sudoers/match_command.c:618 plugins/sudoers/match_command.c:665
+#: plugins/sudoers/match_digest.c:93 plugins/sudoers/parse.c:200
+#: plugins/sudoers/parse.c:217 plugins/sudoers/parse.c:247
+#: plugins/sudoers/parse.c:264 plugins/sudoers/parse.c:287
+#: plugins/sudoers/parse.c:298 plugins/sudoers/parse_ldif.c:152
+#: plugins/sudoers/parse_ldif.c:183 plugins/sudoers/parse_ldif.c:252
+#: plugins/sudoers/parse_ldif.c:259 plugins/sudoers/parse_ldif.c:264
+#: plugins/sudoers/parse_ldif.c:340 plugins/sudoers/parse_ldif.c:351
+#: plugins/sudoers/parse_ldif.c:378 plugins/sudoers/parse_ldif.c:395
+#: plugins/sudoers/parse_ldif.c:407 plugins/sudoers/parse_ldif.c:411
+#: plugins/sudoers/parse_ldif.c:425 plugins/sudoers/parse_ldif.c:483
+#: plugins/sudoers/parse_ldif.c:596 plugins/sudoers/parse_ldif.c:625
+#: plugins/sudoers/parse_ldif.c:650 plugins/sudoers/parse_ldif.c:708
+#: plugins/sudoers/parse_ldif.c:725 plugins/sudoers/parse_ldif.c:753
+#: plugins/sudoers/parse_ldif.c:760 plugins/sudoers/policy.c:152
+#: plugins/sudoers/policy.c:161 plugins/sudoers/policy.c:170
+#: plugins/sudoers/policy.c:197 plugins/sudoers/policy.c:330
+#: plugins/sudoers/policy.c:345 plugins/sudoers/policy.c:347
+#: plugins/sudoers/policy.c:377 plugins/sudoers/policy.c:386
+#: plugins/sudoers/policy.c:434 plugins/sudoers/policy.c:444
+#: plugins/sudoers/policy.c:453 plugins/sudoers/policy.c:462
+#: plugins/sudoers/policy.c:556 plugins/sudoers/policy.c:923
+#: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:195
+#: plugins/sudoers/pwutil.c:266 plugins/sudoers/pwutil.c:344
+#: plugins/sudoers/pwutil.c:518 plugins/sudoers/pwutil.c:583
+#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:853
+#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:953
+#: plugins/sudoers/pwutil.c:1010 plugins/sudoers/set_perms.c:363
+#: plugins/sudoers/set_perms.c:706 plugins/sudoers/set_perms.c:1073
+#: plugins/sudoers/set_perms.c:1380 plugins/sudoers/set_perms.c:1549
+#: plugins/sudoers/sssd.c:144 plugins/sudoers/sssd.c:407
+#: plugins/sudoers/sssd.c:470 plugins/sudoers/sssd.c:514
+#: plugins/sudoers/sssd.c:561 plugins/sudoers/sssd.c:754
+#: plugins/sudoers/strvec_join.c:53 plugins/sudoers/stubs.c:111
+#: plugins/sudoers/stubs.c:119 plugins/sudoers/sudoers.c:335
+#: plugins/sudoers/sudoers.c:361 plugins/sudoers/sudoers.c:429
+#: plugins/sudoers/sudoers.c:438 plugins/sudoers/sudoers.c:479
+#: plugins/sudoers/sudoers.c:833 plugins/sudoers/sudoers.c:971
+#: plugins/sudoers/sudoers.c:1030 plugins/sudoers/sudoers.c:1296
+#: plugins/sudoers/sudoreplay.c:562 plugins/sudoers/sudoreplay.c:565
+#: plugins/sudoers/sudoreplay.c:1280 plugins/sudoers/sudoreplay.c:1490
+#: plugins/sudoers/sudoreplay.c:1494 plugins/sudoers/testsudoers.c:120
+#: plugins/sudoers/testsudoers.c:224 plugins/sudoers/testsudoers.c:241
+#: plugins/sudoers/testsudoers.c:580 plugins/sudoers/timestamp.c:424
+#: plugins/sudoers/timestamp.c:468 plugins/sudoers/timestamp.c:980
+#: plugins/sudoers/timestamp.c:1118 plugins/sudoers/toke_util.c:77
+#: plugins/sudoers/toke_util.c:105 plugins/sudoers/toke_util.c:130
+#: plugins/sudoers/toke_util.c:154 plugins/sudoers/toke_util.c:193
+#: plugins/sudoers/tsdump.c:123 plugins/sudoers/visudo.c:143
+#: plugins/sudoers/visudo.c:321 plugins/sudoers/visudo.c:327
+#: plugins/sudoers/visudo.c:433 plugins/sudoers/visudo.c:609
+#: plugins/sudoers/visudo.c:926 plugins/sudoers/visudo.c:999 toke.l:938
+#: toke.l:1067 toke.l:1119 toke.l:1127
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -532,7 +532,7 @@ msgstr ""
 msgid "invalid timing file line: %s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:131 plugins/sudoers/logging.c:803
+#: logsrvd/iolog_writer.c:131 plugins/sudoers/logging.c:797
 #: plugins/sudoers/policy.c:536
 msgid "unable to generate UUID"
 msgstr ""
@@ -660,7 +660,7 @@ msgstr ""
 #: logsrvd/logsrvd_relay.c:390 logsrvd/logsrvd_relay.c:582
 #: logsrvd/logsrvd_relay.c:743 logsrvd/logsrvd_relay.c:1124
 #: logsrvd/sendlog.c:1156 logsrvd/tls_client.c:136 logsrvd/tls_client.c:152
-#: logsrvd/tls_client.c:214 plugins/sudoers/audit.c:281
+#: logsrvd/tls_client.c:214 plugins/sudoers/audit.c:274
 #: plugins/sudoers/iolog.c:966 plugins/sudoers/iolog.c:1099
 #: plugins/sudoers/iolog.c:1197 plugins/sudoers/log_client.c:112
 #: plugins/sudoers/log_client.c:328 plugins/sudoers/log_client.c:344
@@ -901,7 +901,7 @@ msgstr ""
 msgid "%s:%d [%s] illegal key: %s"
 msgstr ""
 
-#: logsrvd/logsrvd_conf.c:1210 plugins/sudoers/logging.c:856
+#: logsrvd/logsrvd_conf.c:1210 plugins/sudoers/logging.c:850
 #, c-format
 msgid "unable to open log file %s"
 msgstr ""
@@ -1289,11 +1289,11 @@ msgstr ""
 msgid "unable to read diffie-hellman parameters: %s"
 msgstr ""
 
-#: plugins/sudoers/audit.c:267 plugins/sudoers/audit.c:422
+#: plugins/sudoers/audit.c:265 plugins/sudoers/audit.c:417
 #: plugins/sudoers/log_client.c:975 plugins/sudoers/log_client.c:1024
 #: plugins/sudoers/log_client.c:1073 plugins/sudoers/log_client.c:1199
-#: plugins/sudoers/logging.c:554 plugins/sudoers/logging.c:648
-#: plugins/sudoers/logging.c:810 plugins/sudoers/policy.c:123
+#: plugins/sudoers/logging.c:548 plugins/sudoers/logging.c:642
+#: plugins/sudoers/logging.c:804 plugins/sudoers/policy.c:123
 msgid "unable to get time of day"
 msgstr ""
 
@@ -2304,7 +2304,7 @@ msgid "Intercept further commands and apply sudoers restrictions to them"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:586
-msgid "Log any child processes run by the command"
+msgid "Log sub-commands run by the original command"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:590
@@ -2698,7 +2698,7 @@ msgstr ""
 msgid "a password is required"
 msgstr ""
 
-#: plugins/sudoers/logging.c:889
+#: plugins/sudoers/logging.c:883
 #, c-format
 msgid "unable to write log file: %s"
 msgstr ""
@@ -2708,51 +2708,59 @@ msgstr ""
 msgid "digest for %s (%s) is not in %s form"
 msgstr ""
 
-#: plugins/sudoers/parse.c:537
+#: plugins/sudoers/parse.c:232
+msgid "SELinux RBAC is not supported when intercept mode is enabled"
+msgstr ""
+
+#: plugins/sudoers/parse.c:236
+msgid "SELinux RBAC is not supported when the log_subcmds flag is enabled"
+msgstr ""
+
+#: plugins/sudoers/parse.c:547
 #, c-format
 msgid ""
 "\n"
 "LDAP Role: %s\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:540
+#: plugins/sudoers/parse.c:550
 msgid ""
 "\n"
 "Sudoers entry:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:542
+#: plugins/sudoers/parse.c:552
 msgid "    RunAsUsers: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:557
+#: plugins/sudoers/parse.c:567
 msgid "    RunAsGroups: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:567
+#: plugins/sudoers/parse.c:577
 msgid "    Options: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:623
+#: plugins/sudoers/parse.c:633
 msgid "    Commands:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:814
+#: plugins/sudoers/parse.c:824
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:832
+#: plugins/sudoers/parse.c:842
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:850
+#: plugins/sudoers/parse.c:860
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:865
+#: plugins/sudoers/parse.c:875
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr ""

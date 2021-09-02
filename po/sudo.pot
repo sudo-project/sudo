@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.9.8\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2021-08-16 10:46-0600\n"
+"POT-Creation-Date: 2021-09-01 13:39-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,77 +30,78 @@ msgid "unable to restore registry"
 msgstr ""
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/gidlist.c:76
-#: lib/util/json.c:54 lib/util/json.c:183 lib/util/sudo_conf.c:211
-#: lib/util/sudo_conf.c:297 lib/util/sudo_conf.c:374 lib/util/sudo_conf.c:658
+#: lib/util/json.c:54 lib/util/json.c:183 lib/util/sudo_conf.c:218
+#: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:665
 #: src/conversation.c:80 src/exec_monitor.c:206 src/exec_monitor.c:456
 #: src/exec_monitor.c:462 src/exec_monitor.c:470 src/exec_monitor.c:478
 #: src/exec_monitor.c:485 src/exec_monitor.c:492 src/exec_monitor.c:499
 #: src/exec_monitor.c:506 src/exec_monitor.c:513 src/exec_monitor.c:520
-#: src/exec_monitor.c:527 src/exec_nopty.c:225 src/exec_nopty.c:235
-#: src/exec_nopty.c:245 src/exec_nopty.c:252 src/exec_nopty.c:259
-#: src/exec_nopty.c:266 src/exec_nopty.c:273 src/exec_nopty.c:280
-#: src/exec_nopty.c:287 src/exec_nopty.c:294 src/exec_nopty.c:301
-#: src/exec_nopty.c:308 src/exec_nopty.c:315 src/exec_nopty.c:323
-#: src/exec_nopty.c:511 src/exec_preload.c:143 src/exec_preload.c:203
-#: src/exec_pty.c:844 src/exec_pty.c:853 src/exec_pty.c:910 src/exec_pty.c:1063
-#: src/exec_pty.c:1237 src/exec_pty.c:1247 src/exec_pty.c:1257
-#: src/exec_pty.c:1264 src/exec_pty.c:1271 src/exec_pty.c:1278
-#: src/exec_pty.c:1285 src/exec_pty.c:1292 src/exec_pty.c:1299
-#: src/exec_pty.c:1306 src/exec_pty.c:1313 src/exec_pty.c:1320
-#: src/exec_pty.c:1328 src/exec_pty.c:1782 src/load_plugins.c:156
-#: src/load_plugins.c:181 src/load_plugins.c:217 src/load_plugins.c:449
-#: src/load_plugins.c:455 src/parse_args.c:190 src/parse_args.c:211
-#: src/parse_args.c:285 src/parse_args.c:630 src/parse_args.c:652
-#: src/parse_args.c:677 src/preserve_fds.c:46 src/preserve_fds.c:131
-#: src/selinux.c:90 src/selinux.c:360 src/selinux.c:489 src/selinux.c:498
-#: src/sesh.c:113 src/sesh.c:146 src/sesh.c:152 src/sesh.c:159 src/sesh.c:165
-#: src/sesh.c:410 src/sudo.c:636 src/sudo.c:706 src/sudo.c:716 src/sudo.c:741
-#: src/sudo.c:760 src/sudo.c:769 src/sudo.c:778 src/sudo.c:795 src/sudo.c:837
-#: src/sudo.c:847 src/sudo.c:876 src/sudo.c:1061 src/sudo.c:1082
-#: src/sudo.c:1374 src/sudo.c:1543 src/sudo.c:1770 src/sudo.c:2104
-#: src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:429
-#: src/sudo_edit.c:438 src/sudo_edit.c:539 src/sudo_edit.c:546
-#: src/sudo_edit.c:686 src/sudo_edit.c:706 src/sudo_intercept_common.c:160
+#: src/exec_monitor.c:527 src/exec_nopty.c:219 src/exec_nopty.c:228
+#: src/exec_nopty.c:235 src/exec_nopty.c:242 src/exec_nopty.c:249
+#: src/exec_nopty.c:256 src/exec_nopty.c:263 src/exec_nopty.c:270
+#: src/exec_nopty.c:277 src/exec_nopty.c:284 src/exec_nopty.c:291
+#: src/exec_nopty.c:298 src/exec_nopty.c:306 src/exec_nopty.c:500
+#: src/exec_preload.c:143 src/exec_preload.c:204 src/exec_pty.c:840
+#: src/exec_pty.c:849 src/exec_pty.c:906 src/exec_pty.c:1059
+#: src/exec_pty.c:1231 src/exec_pty.c:1240 src/exec_pty.c:1247
+#: src/exec_pty.c:1254 src/exec_pty.c:1261 src/exec_pty.c:1268
+#: src/exec_pty.c:1275 src/exec_pty.c:1282 src/exec_pty.c:1289
+#: src/exec_pty.c:1296 src/exec_pty.c:1303 src/exec_pty.c:1311
+#: src/exec_pty.c:1771 src/load_plugins.c:156 src/load_plugins.c:181
+#: src/load_plugins.c:217 src/load_plugins.c:449 src/load_plugins.c:455
+#: src/parse_args.c:190 src/parse_args.c:211 src/parse_args.c:285
+#: src/parse_args.c:630 src/parse_args.c:652 src/parse_args.c:677
+#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:90
+#: src/selinux.c:360 src/selinux.c:489 src/selinux.c:498 src/sesh.c:113
+#: src/sesh.c:146 src/sesh.c:152 src/sesh.c:159 src/sesh.c:165 src/sesh.c:410
+#: src/sudo.c:636 src/sudo.c:706 src/sudo.c:716 src/sudo.c:741 src/sudo.c:760
+#: src/sudo.c:769 src/sudo.c:778 src/sudo.c:795 src/sudo.c:837 src/sudo.c:847
+#: src/sudo.c:876 src/sudo.c:1061 src/sudo.c:1082 src/sudo.c:1374
+#: src/sudo.c:1543 src/sudo.c:1770 src/sudo.c:2104 src/sudo_edit.c:89
+#: src/sudo_edit.c:149 src/sudo_edit.c:429 src/sudo_edit.c:438
+#: src/sudo_edit.c:539 src/sudo_edit.c:546 src/sudo_edit.c:686
+#: src/sudo_edit.c:706 src/sudo_intercept_common.c:113
+#: src/sudo_intercept_common.c:311
 #, c-format
 msgid "%s: %s"
 msgstr ""
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:55
-#: lib/util/json.c:184 lib/util/sudo_conf.c:212 lib/util/sudo_conf.c:297
-#: lib/util/sudo_conf.c:374 lib/util/sudo_conf.c:658 src/conversation.c:81
-#: src/exec_intercept.c:154 src/exec_intercept.c:181 src/exec_intercept.c:204
-#: src/exec_intercept.c:225 src/exec_intercept.c:231 src/exec_intercept.c:240
-#: src/exec_intercept.c:246 src/exec_intercept.c:312 src/exec_intercept.c:407
-#: src/exec_intercept.c:627 src/exec_monitor.c:456 src/exec_monitor.c:462
-#: src/exec_monitor.c:470 src/exec_monitor.c:478 src/exec_monitor.c:485
-#: src/exec_monitor.c:492 src/exec_monitor.c:499 src/exec_monitor.c:506
-#: src/exec_monitor.c:513 src/exec_monitor.c:520 src/exec_monitor.c:527
-#: src/exec_nopty.c:225 src/exec_nopty.c:235 src/exec_nopty.c:245
-#: src/exec_nopty.c:252 src/exec_nopty.c:259 src/exec_nopty.c:266
-#: src/exec_nopty.c:273 src/exec_nopty.c:280 src/exec_nopty.c:287
-#: src/exec_nopty.c:294 src/exec_nopty.c:301 src/exec_nopty.c:308
-#: src/exec_nopty.c:315 src/exec_nopty.c:323 src/exec_preload.c:143
-#: src/exec_preload.c:203 src/exec_pty.c:844 src/exec_pty.c:853
-#: src/exec_pty.c:910 src/exec_pty.c:1237 src/exec_pty.c:1247
-#: src/exec_pty.c:1257 src/exec_pty.c:1264 src/exec_pty.c:1271
-#: src/exec_pty.c:1278 src/exec_pty.c:1285 src/exec_pty.c:1292
-#: src/exec_pty.c:1299 src/exec_pty.c:1306 src/exec_pty.c:1313
-#: src/exec_pty.c:1320 src/exec_pty.c:1328 src/exec_pty.c:1782
-#: src/load_plugins.c:156 src/load_plugins.c:181 src/load_plugins.c:217
-#: src/load_plugins.c:449 src/load_plugins.c:455 src/parse_args.c:190
-#: src/parse_args.c:212 src/parse_args.c:285 src/parse_args.c:630
-#: src/parse_args.c:652 src/parse_args.c:677 src/preserve_fds.c:46
-#: src/preserve_fds.c:131 src/selinux.c:90 src/selinux.c:360 src/selinux.c:489
-#: src/selinux.c:498 src/sesh.c:113 src/sesh.c:411 src/sudo.c:227
-#: src/sudo.c:636 src/sudo.c:876 src/sudo.c:1061 src/sudo.c:1082
-#: src/sudo.c:1374 src/sudo.c:1543 src/sudo.c:1770 src/sudo.c:2104
-#: src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:429
-#: src/sudo_edit.c:438 src/sudo_edit.c:539 src/sudo_edit.c:546
-#: src/sudo_edit.c:686 src/sudo_edit.c:706 src/sudo_intercept_common.c:160
+#: lib/util/json.c:184 lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304
+#: lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:665 src/conversation.c:81
+#: src/exec_intercept.c:99 src/exec_intercept.c:315 src/exec_intercept.c:339
+#: src/exec_intercept.c:362 src/exec_intercept.c:370 src/exec_intercept.c:395
+#: src/exec_intercept.c:401 src/exec_intercept.c:410 src/exec_intercept.c:416
+#: src/exec_intercept.c:550 src/exec_intercept.c:691 src/exec_monitor.c:456
+#: src/exec_monitor.c:462 src/exec_monitor.c:470 src/exec_monitor.c:478
+#: src/exec_monitor.c:485 src/exec_monitor.c:492 src/exec_monitor.c:499
+#: src/exec_monitor.c:506 src/exec_monitor.c:513 src/exec_monitor.c:520
+#: src/exec_monitor.c:527 src/exec_nopty.c:219 src/exec_nopty.c:228
+#: src/exec_nopty.c:235 src/exec_nopty.c:242 src/exec_nopty.c:249
+#: src/exec_nopty.c:256 src/exec_nopty.c:263 src/exec_nopty.c:270
+#: src/exec_nopty.c:277 src/exec_nopty.c:284 src/exec_nopty.c:291
+#: src/exec_nopty.c:298 src/exec_nopty.c:306 src/exec_preload.c:143
+#: src/exec_preload.c:204 src/exec_pty.c:840 src/exec_pty.c:849
+#: src/exec_pty.c:906 src/exec_pty.c:1231 src/exec_pty.c:1240
+#: src/exec_pty.c:1247 src/exec_pty.c:1254 src/exec_pty.c:1261
+#: src/exec_pty.c:1268 src/exec_pty.c:1275 src/exec_pty.c:1282
+#: src/exec_pty.c:1289 src/exec_pty.c:1296 src/exec_pty.c:1303
+#: src/exec_pty.c:1311 src/exec_pty.c:1771 src/load_plugins.c:156
+#: src/load_plugins.c:181 src/load_plugins.c:217 src/load_plugins.c:449
+#: src/load_plugins.c:455 src/parse_args.c:190 src/parse_args.c:212
+#: src/parse_args.c:285 src/parse_args.c:630 src/parse_args.c:652
+#: src/parse_args.c:677 src/preserve_fds.c:46 src/preserve_fds.c:131
+#: src/selinux.c:90 src/selinux.c:360 src/selinux.c:489 src/selinux.c:498
+#: src/sesh.c:113 src/sesh.c:411 src/sudo.c:227 src/sudo.c:636 src/sudo.c:876
+#: src/sudo.c:1061 src/sudo.c:1082 src/sudo.c:1374 src/sudo.c:1543
+#: src/sudo.c:1770 src/sudo.c:2104 src/sudo_edit.c:89 src/sudo_edit.c:149
+#: src/sudo_edit.c:429 src/sudo_edit.c:438 src/sudo_edit.c:539
+#: src/sudo_edit.c:546 src/sudo_edit.c:686 src/sudo_edit.c:706
+#: src/sudo_intercept_common.c:113 src/sudo_intercept_common.c:311
 msgid "unable to allocate memory"
 msgstr ""
 
-#: lib/util/mkdir_parents.c:69 lib/util/sudo_conf.c:697 src/selinux.c:234
+#: lib/util/mkdir_parents.c:69 lib/util/sudo_conf.c:704 src/selinux.c:234
 #: src/selinux.c:264 src/sudo.c:368 src/sudo_edit.c:494 src/sudo_edit.c:559
 #, c-format
 msgid "unable to open %s"
@@ -111,7 +112,7 @@ msgstr ""
 msgid "unable to mkdir %s"
 msgstr ""
 
-#: lib/util/mkdir_parents.c:93 lib/util/sudo_conf.c:674 src/copy_file.c:150
+#: lib/util/mkdir_parents.c:93 lib/util/sudo_conf.c:681 src/copy_file.c:150
 #, c-format
 msgid "unable to stat %s"
 msgstr ""
@@ -138,42 +139,42 @@ msgstr ""
 msgid "value too small"
 msgstr ""
 
-#: lib/util/sudo_conf.c:230
+#: lib/util/sudo_conf.c:237
 #, c-format
 msgid "invalid Path value \"%s\" in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:396 lib/util/sudo_conf.c:412 lib/util/sudo_conf.c:465
+#: lib/util/sudo_conf.c:403 lib/util/sudo_conf.c:419 lib/util/sudo_conf.c:472
 #, c-format
 msgid "invalid value for %s \"%s\" in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:433
+#: lib/util/sudo_conf.c:440
 #, c-format
 msgid "unsupported group source \"%s\" in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:449
+#: lib/util/sudo_conf.c:456
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:677
+#: lib/util/sudo_conf.c:684
 #, c-format
 msgid "%s is not a regular file"
 msgstr ""
 
-#: lib/util/sudo_conf.c:680 src/copy_file.c:163
+#: lib/util/sudo_conf.c:687 src/copy_file.c:163
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:684
+#: lib/util/sudo_conf.c:691
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: lib/util/sudo_conf.c:687
+#: lib/util/sudo_conf.c:694
 #, c-format
 msgid "%s is group writable"
 msgstr ""
@@ -246,8 +247,8 @@ msgid "starting from %s"
 msgstr ""
 
 #: src/exec.c:302 src/exec_monitor.c:565 src/exec_monitor.c:567
-#: src/exec_nopty.c:569 src/exec_pty.c:585 src/exec_pty.c:1425
-#: src/exec_pty.c:1427 src/signal.c:144 src/signal.c:151 src/signal.c:165
+#: src/exec_nopty.c:558 src/exec_pty.c:581 src/exec_pty.c:1408
+#: src/exec_pty.c:1410 src/signal.c:144 src/signal.c:151 src/signal.c:165
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr ""
@@ -256,66 +257,52 @@ msgstr ""
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
-#: src/exec_common.c:85
-msgid "unable to dup intercept fd"
+#: src/exec_intercept.c:111 src/exec_intercept.c:115 src/exec_intercept.c:652
+#: src/exec_intercept.c:656 src/exec_intercept.c:842 src/exec_intercept.c:846
+#: src/exec_intercept.c:856 src/exec_intercept.c:860 src/exec_monitor.c:464
+#: src/exec_monitor.c:472 src/exec_monitor.c:480 src/exec_monitor.c:487
+#: src/exec_monitor.c:494 src/exec_monitor.c:501 src/exec_monitor.c:508
+#: src/exec_monitor.c:515 src/exec_monitor.c:522 src/exec_monitor.c:529
+#: src/exec_nopty.c:221 src/exec_nopty.c:230 src/exec_nopty.c:237
+#: src/exec_nopty.c:244 src/exec_nopty.c:251 src/exec_nopty.c:258
+#: src/exec_nopty.c:265 src/exec_nopty.c:272 src/exec_nopty.c:279
+#: src/exec_nopty.c:286 src/exec_nopty.c:293 src/exec_nopty.c:300
+#: src/exec_nopty.c:308 src/exec_pty.c:706 src/exec_pty.c:711
+#: src/exec_pty.c:808 src/exec_pty.c:815 src/exec_pty.c:912 src/exec_pty.c:1233
+#: src/exec_pty.c:1242 src/exec_pty.c:1249 src/exec_pty.c:1256
+#: src/exec_pty.c:1263 src/exec_pty.c:1270 src/exec_pty.c:1277
+#: src/exec_pty.c:1284 src/exec_pty.c:1291 src/exec_pty.c:1298
+#: src/exec_pty.c:1305 src/exec_pty.c:1724 src/exec_pty.c:1734
+#: src/exec_pty.c:1779 src/exec_pty.c:1786 src/exec_pty.c:1813
+msgid "unable to add event to queue"
 msgstr ""
 
-#: src/exec_intercept.c:138
+#: src/exec_intercept.c:299
 msgid "invalid PolicyCheckRequest"
 msgstr ""
 
-#: src/exec_intercept.c:191 src/sudo.c:1187 src/sudo.c:1232 src/sudo.c:1276
+#: src/exec_intercept.c:347 src/sudo.c:1187 src/sudo.c:1232 src/sudo.c:1276
 msgid "command rejected by policy"
 msgstr ""
 
-#: src/exec_intercept.c:272 src/sudo.c:1192 src/sudo.c:1237 src/sudo.c:1281
+#: src/exec_intercept.c:440 src/sudo.c:1192 src/sudo.c:1237 src/sudo.c:1281
 #: src/sudo.c:1355
 msgid "policy plugin error"
 msgstr ""
 
-#: src/exec_intercept.c:304
+#: src/exec_intercept.c:546
 #, c-format
-msgid "client message too large: %zu"
+msgid "client request too large: %zu"
 msgstr ""
 
-#: src/exec_intercept.c:340
+#: src/exec_intercept.c:644
 #, c-format
 msgid "unexpected type_case value %d in %s from %s"
 msgstr ""
 
-#: src/exec_intercept.c:367 src/exec_intercept.c:371 src/exec_intercept.c:634
-#: src/exec_intercept.c:638 src/exec_monitor.c:464 src/exec_monitor.c:472
-#: src/exec_monitor.c:480 src/exec_monitor.c:487 src/exec_monitor.c:494
-#: src/exec_monitor.c:501 src/exec_monitor.c:508 src/exec_monitor.c:515
-#: src/exec_monitor.c:522 src/exec_monitor.c:529 src/exec_nopty.c:227
-#: src/exec_nopty.c:237 src/exec_nopty.c:247 src/exec_nopty.c:254
-#: src/exec_nopty.c:261 src/exec_nopty.c:268 src/exec_nopty.c:275
-#: src/exec_nopty.c:282 src/exec_nopty.c:289 src/exec_nopty.c:296
-#: src/exec_nopty.c:303 src/exec_nopty.c:310 src/exec_nopty.c:317
-#: src/exec_nopty.c:325 src/exec_pty.c:710 src/exec_pty.c:715
-#: src/exec_pty.c:812 src/exec_pty.c:819 src/exec_pty.c:916 src/exec_pty.c:1239
-#: src/exec_pty.c:1249 src/exec_pty.c:1259 src/exec_pty.c:1266
-#: src/exec_pty.c:1273 src/exec_pty.c:1280 src/exec_pty.c:1287
-#: src/exec_pty.c:1294 src/exec_pty.c:1301 src/exec_pty.c:1308
-#: src/exec_pty.c:1315 src/exec_pty.c:1322 src/exec_pty.c:1735
-#: src/exec_pty.c:1745 src/exec_pty.c:1790 src/exec_pty.c:1797
-#: src/exec_pty.c:1824
-msgid "unable to add event to queue"
-msgstr ""
-
-#: src/exec_intercept.c:395
+#: src/exec_intercept.c:679
 #, c-format
 msgid "server message too large: %zu"
-msgstr ""
-
-#: src/exec_intercept.c:608 src/exec_intercept.c:620
-#, c-format
-msgid "%s: missing message header"
-msgstr ""
-
-#: src/exec_intercept.c:613
-#, c-format
-msgid "%s: expected message type %d, got %d"
 msgstr ""
 
 #: src/exec_monitor.c:360
@@ -331,8 +318,8 @@ msgstr ""
 msgid "unable to set controlling tty"
 msgstr ""
 
-#: src/exec_monitor.c:591 src/exec_nopty.c:383 src/exec_pty.c:1504
-#: src/exec_pty.c:1525 src/exec_pty.c:1545 src/tgetpass.c:307
+#: src/exec_monitor.c:591 src/exec_nopty.c:366 src/exec_pty.c:1487
+#: src/exec_pty.c:1508 src/exec_pty.c:1528 src/tgetpass.c:307
 msgid "unable to create pipe"
 msgstr ""
 
@@ -340,12 +327,12 @@ msgstr ""
 msgid "unable to receive message from parent"
 msgstr ""
 
-#: src/exec_monitor.c:617 src/exec_nopty.c:421 src/exec_pty.c:1583
+#: src/exec_monitor.c:617 src/exec_nopty.c:404 src/exec_pty.c:1566
 #: src/sudo_edit.c:361 src/tgetpass.c:311
 msgid "unable to fork"
 msgstr ""
 
-#: src/exec_monitor.c:621 src/exec_monitor.c:722 src/exec_nopty.c:479
+#: src/exec_monitor.c:621 src/exec_monitor.c:722 src/exec_nopty.c:468
 msgid "unable to restore tty label"
 msgstr ""
 
@@ -354,46 +341,46 @@ msgstr ""
 msgid "unable to execute %s"
 msgstr ""
 
-#: src/exec_nopty.c:377 src/exec_pty.c:1434
+#: src/exec_nopty.c:360 src/exec_pty.c:1417
 msgid "policy plugin failed session initialization"
 msgstr ""
 
-#: src/exec_nopty.c:391 src/exec_pty.c:1405 src/exec_pty.c:1413
+#: src/exec_nopty.c:374 src/exec_pty.c:1388 src/exec_pty.c:1396
 msgid "unable to create sockets"
 msgstr ""
 
-#: src/exec_nopty.c:467 src/exec_pty.c:1674
+#: src/exec_nopty.c:456 src/exec_pty.c:1663
 msgid "error in event loop"
 msgstr ""
 
-#: src/exec_nopty.c:577 src/exec_pty.c:623 src/signal.c:101
+#: src/exec_nopty.c:566 src/exec_pty.c:619 src/signal.c:101
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr ""
 
-#: src/exec_pty.c:162
+#: src/exec_pty.c:158
 msgid "unable to allocate pty"
+msgstr ""
+
+#: src/exec_pty.c:222 src/exec_pty.c:262 src/exec_pty.c:302 src/exec_pty.c:353
+#: src/exec_pty.c:404
+msgid "I/O plugin error"
 msgstr ""
 
 #: src/exec_pty.c:226 src/exec_pty.c:266 src/exec_pty.c:306 src/exec_pty.c:357
 #: src/exec_pty.c:408
-msgid "I/O plugin error"
-msgstr ""
-
-#: src/exec_pty.c:230 src/exec_pty.c:270 src/exec_pty.c:310 src/exec_pty.c:361
-#: src/exec_pty.c:412
 msgid "command rejected by I/O plugin"
 msgstr ""
 
-#: src/exec_pty.c:459
+#: src/exec_pty.c:455
 msgid "error logging suspend"
 msgstr ""
 
-#: src/exec_pty.c:493
+#: src/exec_pty.c:489
 msgid "error changing window size"
 msgstr ""
 
-#: src/exec_pty.c:1629
+#: src/exec_pty.c:1612
 msgid "unable to send message to monitor process"
 msgstr ""
 
@@ -1023,6 +1010,10 @@ msgstr ""
 
 #: src/sudo_edit.c:722 src/sudo_edit.c:732
 msgid "unable to read the clock"
+msgstr ""
+
+#: src/sudo_intercept_common.c:335
+msgid "intercept port not set"
 msgstr ""
 
 #: src/tgetpass.c:95
