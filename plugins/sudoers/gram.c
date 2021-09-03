@@ -112,9 +112,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <unistd.h>
-#if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
-# include <alloca.h>
-#endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
 #include <errno.h>
 
 #include "sudoers.h"
@@ -167,7 +164,7 @@ static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(int, char *);
 static void alias_error(const char *name, int errnum);
 
-#line 165 "gram.c"
+#line 162 "gram.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -328,7 +325,7 @@ extern int sudoersdebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 88 "gram.y"
+#line 85 "gram.y"
 
     struct cmndspec *cmndspec;
     struct defaults *defaults;
@@ -342,7 +339,7 @@ union YYSTYPE
     char *string;
     int tok;
 
-#line 340 "gram.c"
+#line 337 "gram.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -862,22 +859,22 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   199,   199,   202,   205,   206,   209,   212,   215,   224,
-     233,   239,   242,   245,   248,   251,   255,   259,   263,   267,
-     273,   276,   282,   285,   291,   292,   299,   308,   317,   327,
-     337,   349,   350,   355,   361,   378,   382,   388,   397,   405,
-     414,   423,   434,   435,   497,   563,   572,   581,   590,   601,
-     602,   609,   612,   626,   630,   636,   648,   660,   665,   669,
-     674,   679,   684,   688,   693,   696,   701,   717,   728,   740,
-     751,   769,   770,   771,   772,   773,   774,   775,   776,   777,
-     778,   781,   787,   790,   795,   800,   809,   818,   830,   837,
-     844,   851,   860,   863,   866,   869,   872,   875,   878,   881,
-     884,   887,   890,   893,   896,   899,   902,   905,   908,   913,
-     927,   936,   955,   956,   959,   959,   971,   974,   975,   982,
-     983,   986,   986,   998,  1001,  1002,  1009,  1010,  1013,  1013,
-    1025,  1028,  1029,  1032,  1032,  1044,  1047,  1048,  1055,  1059,
-    1065,  1074,  1082,  1091,  1100,  1111,  1112,  1119,  1123,  1129,
-    1138,  1146
+       0,   196,   196,   199,   202,   203,   206,   209,   212,   221,
+     230,   236,   239,   242,   245,   248,   252,   256,   260,   264,
+     270,   273,   279,   282,   288,   289,   296,   305,   314,   324,
+     334,   346,   347,   352,   358,   375,   379,   385,   394,   402,
+     411,   420,   431,   432,   494,   560,   569,   578,   587,   598,
+     599,   606,   609,   623,   627,   633,   645,   657,   662,   666,
+     671,   676,   681,   685,   690,   693,   698,   714,   725,   737,
+     748,   766,   767,   768,   769,   770,   771,   772,   773,   774,
+     775,   778,   784,   787,   792,   797,   806,   815,   827,   834,
+     841,   848,   857,   860,   863,   866,   869,   872,   875,   878,
+     881,   884,   887,   890,   893,   896,   899,   902,   905,   910,
+     924,   933,   952,   953,   956,   956,   968,   971,   972,   979,
+     980,   983,   983,   995,   998,   999,  1006,  1007,  1010,  1010,
+    1022,  1025,  1026,  1029,  1029,  1041,  1044,  1045,  1052,  1056,
+    1062,  1071,  1079,  1088,  1097,  1108,  1109,  1116,  1120,  1126,
+    1135,  1143
 };
 #endif
 
@@ -1648,31 +1645,31 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* file: %empty  */
-#line 199 "gram.y"
+#line 196 "gram.y"
                         {
 			    ; /* empty file */
 			}
-#line 1650 "gram.c"
+#line 1647 "gram.c"
     break;
 
   case 6: /* entry: '\n'  */
-#line 209 "gram.y"
+#line 206 "gram.y"
                              {
 			    ; /* blank line */
 			}
-#line 1658 "gram.c"
+#line 1655 "gram.c"
     break;
 
   case 7: /* entry: error '\n'  */
-#line 212 "gram.y"
+#line 209 "gram.y"
                                    {
 			    yyerrok;
 			}
-#line 1666 "gram.c"
+#line 1663 "gram.c"
     break;
 
   case 8: /* entry: include  */
-#line 215 "gram.y"
+#line 212 "gram.y"
                                 {
 			    if (!push_include((yyvsp[0].string), false)) {
 				parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -1682,11 +1679,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    free((yyvsp[0].string));
 			}
-#line 1680 "gram.c"
+#line 1677 "gram.c"
     break;
 
   case 9: /* entry: includedir  */
-#line 224 "gram.y"
+#line 221 "gram.y"
                                    {
 			    if (!push_include((yyvsp[0].string), true)) {
 				parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -1696,143 +1693,143 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    free((yyvsp[0].string));
 			}
-#line 1694 "gram.c"
+#line 1691 "gram.c"
     break;
 
   case 10: /* entry: userlist privileges '\n'  */
-#line 233 "gram.y"
+#line 230 "gram.y"
                                                  {
 			    if (!add_userspec((yyvsp[-2].member), (yyvsp[-1].privilege))) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			}
-#line 1705 "gram.c"
+#line 1702 "gram.c"
     break;
 
   case 11: /* entry: USERALIAS useraliases '\n'  */
+#line 236 "gram.y"
+                                                   {
+			    ;
+			}
+#line 1710 "gram.c"
+    break;
+
+  case 12: /* entry: HOSTALIAS hostaliases '\n'  */
 #line 239 "gram.y"
                                                    {
 			    ;
 			}
-#line 1713 "gram.c"
+#line 1718 "gram.c"
     break;
 
-  case 12: /* entry: HOSTALIAS hostaliases '\n'  */
+  case 13: /* entry: CMNDALIAS cmndaliases '\n'  */
 #line 242 "gram.y"
                                                    {
 			    ;
 			}
-#line 1721 "gram.c"
-    break;
-
-  case 13: /* entry: CMNDALIAS cmndaliases '\n'  */
-#line 245 "gram.y"
-                                                   {
-			    ;
-			}
-#line 1729 "gram.c"
+#line 1726 "gram.c"
     break;
 
   case 14: /* entry: RUNASALIAS runasaliases '\n'  */
-#line 248 "gram.y"
+#line 245 "gram.y"
                                                      {
 			    ;
 			}
-#line 1737 "gram.c"
+#line 1734 "gram.c"
     break;
 
   case 15: /* entry: DEFAULTS defaults_list '\n'  */
-#line 251 "gram.y"
+#line 248 "gram.y"
                                                     {
 			    if (!add_defaults(DEFAULTS, NULL, (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1746 "gram.c"
+#line 1743 "gram.c"
     break;
 
   case 16: /* entry: DEFAULTS_USER userlist defaults_list '\n'  */
-#line 255 "gram.y"
+#line 252 "gram.y"
                                                                   {
 			    if (!add_defaults(DEFAULTS_USER, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1755 "gram.c"
+#line 1752 "gram.c"
     break;
 
   case 17: /* entry: DEFAULTS_RUNAS userlist defaults_list '\n'  */
-#line 259 "gram.y"
+#line 256 "gram.y"
                                                                    {
 			    if (!add_defaults(DEFAULTS_RUNAS, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1764 "gram.c"
+#line 1761 "gram.c"
     break;
 
   case 18: /* entry: DEFAULTS_HOST hostlist defaults_list '\n'  */
-#line 263 "gram.y"
+#line 260 "gram.y"
                                                                   {
 			    if (!add_defaults(DEFAULTS_HOST, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1773 "gram.c"
+#line 1770 "gram.c"
     break;
 
   case 19: /* entry: DEFAULTS_CMND cmndlist defaults_list '\n'  */
-#line 267 "gram.y"
+#line 264 "gram.y"
                                                                   {
 			    if (!add_defaults(DEFAULTS_CMND, (yyvsp[-2].member), (yyvsp[-1].defaults)))
 				YYERROR;
 			}
-#line 1782 "gram.c"
+#line 1779 "gram.c"
     break;
 
   case 20: /* include: INCLUDE WORD '\n'  */
-#line 273 "gram.y"
+#line 270 "gram.y"
                                           {
 			    (yyval.string) = (yyvsp[-1].string);
 			}
-#line 1790 "gram.c"
+#line 1787 "gram.c"
     break;
 
   case 21: /* include: INCLUDE WORD error '\n'  */
-#line 276 "gram.y"
+#line 273 "gram.y"
                                                 {
 			    yyerrok;
 			    (yyval.string) = (yyvsp[-2].string);
 			}
-#line 1799 "gram.c"
+#line 1796 "gram.c"
     break;
 
   case 22: /* includedir: INCLUDEDIR WORD '\n'  */
-#line 282 "gram.y"
+#line 279 "gram.y"
                                              {
 			    (yyval.string) = (yyvsp[-1].string);
 			}
-#line 1807 "gram.c"
+#line 1804 "gram.c"
     break;
 
   case 23: /* includedir: INCLUDEDIR WORD error '\n'  */
-#line 285 "gram.y"
+#line 282 "gram.y"
                                                    {
 			    yyerrok;
 			    (yyval.string) = (yyvsp[-2].string);
 			}
-#line 1816 "gram.c"
+#line 1813 "gram.c"
     break;
 
   case 25: /* defaults_list: defaults_list ',' defaults_entry  */
-#line 292 "gram.y"
+#line 289 "gram.y"
                                                          {
 			    parser_leak_remove(LEAK_DEFAULTS, (yyvsp[0].defaults));
 			    HLTQ_CONCAT((yyvsp[-2].defaults), (yyvsp[0].defaults), entries);
 			    (yyval.defaults) = (yyvsp[-2].defaults);
 			}
-#line 1826 "gram.c"
+#line 1823 "gram.c"
     break;
 
   case 26: /* defaults_entry: DEFVAR  */
-#line 299 "gram.y"
+#line 296 "gram.y"
                                {
 			    (yyval.defaults) = new_default((yyvsp[0].string), NULL, true);
 			    if ((yyval.defaults) == NULL) {
@@ -1842,11 +1839,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1840 "gram.c"
+#line 1837 "gram.c"
     break;
 
   case 27: /* defaults_entry: '!' DEFVAR  */
-#line 308 "gram.y"
+#line 305 "gram.y"
                                    {
 			    (yyval.defaults) = new_default((yyvsp[0].string), NULL, false);
 			    if ((yyval.defaults) == NULL) {
@@ -1856,11 +1853,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1854 "gram.c"
+#line 1851 "gram.c"
     break;
 
   case 28: /* defaults_entry: DEFVAR '=' WORD  */
-#line 317 "gram.y"
+#line 314 "gram.y"
                                         {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), true);
 			    if ((yyval.defaults) == NULL) {
@@ -1871,11 +1868,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1869 "gram.c"
+#line 1866 "gram.c"
     break;
 
   case 29: /* defaults_entry: DEFVAR '+' WORD  */
-#line 327 "gram.y"
+#line 324 "gram.y"
                                         {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), '+');
 			    if ((yyval.defaults) == NULL) {
@@ -1886,11 +1883,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1884 "gram.c"
+#line 1881 "gram.c"
     break;
 
   case 30: /* defaults_entry: DEFVAR '-' WORD  */
-#line 337 "gram.y"
+#line 334 "gram.y"
                                         {
 			    (yyval.defaults) = new_default((yyvsp[-2].string), (yyvsp[0].string), '-');
 			    if ((yyval.defaults) == NULL) {
@@ -1901,30 +1898,30 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DEFAULTS, (yyval.defaults));
 			}
-#line 1899 "gram.c"
+#line 1896 "gram.c"
     break;
 
   case 32: /* privileges: privileges ':' privilege  */
-#line 350 "gram.y"
+#line 347 "gram.y"
                                                  {
 			    parser_leak_remove(LEAK_PRIVILEGE, (yyvsp[0].privilege));
 			    HLTQ_CONCAT((yyvsp[-2].privilege), (yyvsp[0].privilege), entries);
 			    (yyval.privilege) = (yyvsp[-2].privilege);
 			}
-#line 1909 "gram.c"
+#line 1906 "gram.c"
     break;
 
   case 33: /* privileges: privileges ':' error  */
-#line 355 "gram.y"
+#line 352 "gram.y"
                                              {
 			    yyerrok;
 			    (yyval.privilege) = (yyvsp[-2].privilege);
 			}
-#line 1918 "gram.c"
+#line 1915 "gram.c"
     break;
 
   case 34: /* privilege: hostlist '=' cmndspeclist  */
-#line 361 "gram.y"
+#line 358 "gram.y"
                                                   {
 			    struct privilege *p = calloc(1, sizeof(*p));
 			    if (p == NULL) {
@@ -1940,29 +1937,29 @@ yyreduce:
 			    HLTQ_INIT(p, entries);
 			    (yyval.privilege) = p;
 			}
-#line 1938 "gram.c"
+#line 1935 "gram.c"
     break;
 
   case 35: /* ophost: host  */
-#line 378 "gram.y"
+#line 375 "gram.y"
                              {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 1947 "gram.c"
+#line 1944 "gram.c"
     break;
 
   case 36: /* ophost: '!' host  */
-#line 382 "gram.y"
+#line 379 "gram.y"
                                  {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 1956 "gram.c"
+#line 1953 "gram.c"
     break;
 
   case 37: /* host: ALIAS  */
-#line 388 "gram.y"
+#line 385 "gram.y"
                               {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
@@ -1972,11 +1969,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 1970 "gram.c"
+#line 1967 "gram.c"
     break;
 
   case 38: /* host: ALL  */
-#line 397 "gram.y"
+#line 394 "gram.y"
                             {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
@@ -1985,11 +1982,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 1983 "gram.c"
+#line 1980 "gram.c"
     break;
 
   case 39: /* host: NETGROUP  */
-#line 405 "gram.y"
+#line 402 "gram.y"
                                  {
 			    (yyval.member) = new_member((yyvsp[0].string), NETGROUP);
 			    if ((yyval.member) == NULL) {
@@ -1999,11 +1996,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 1997 "gram.c"
+#line 1994 "gram.c"
     break;
 
   case 40: /* host: NTWKADDR  */
-#line 414 "gram.y"
+#line 411 "gram.y"
                                  {
 			    (yyval.member) = new_member((yyvsp[0].string), NTWKADDR);
 			    if ((yyval.member) == NULL) {
@@ -2013,11 +2010,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2011 "gram.c"
+#line 2008 "gram.c"
     break;
 
   case 41: /* host: WORD  */
-#line 423 "gram.y"
+#line 420 "gram.y"
                              {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
@@ -2027,11 +2024,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2025 "gram.c"
+#line 2022 "gram.c"
     break;
 
   case 43: /* cmndspeclist: cmndspeclist ',' cmndspec  */
-#line 435 "gram.y"
+#line 432 "gram.y"
                                                   {
 			    struct cmndspec *prev;
 			    prev = HLTQ_LAST((yyvsp[-2].cmndspec), cmndspec, entries);
@@ -2092,11 +2089,11 @@ yyreduce:
 			    }
 			    (yyval.cmndspec) = (yyvsp[-2].cmndspec);
 			}
-#line 2090 "gram.c"
+#line 2087 "gram.c"
     break;
 
   case 44: /* cmndspec: runasspec options cmndtag digcmnd  */
-#line 497 "gram.y"
+#line 494 "gram.y"
                                                           {
 			    struct cmndspec *cs = calloc(1, sizeof(*cs));
 			    if (cs == NULL) {
@@ -2161,11 +2158,11 @@ yyreduce:
 				cs->tags.setenv = IMPLIED;
 			    (yyval.cmndspec) = cs;
 			}
-#line 2159 "gram.c"
+#line 2156 "gram.c"
     break;
 
   case 45: /* digestspec: SHA224_TOK ':' DIGEST  */
-#line 563 "gram.y"
+#line 560 "gram.y"
                                               {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA224, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
@@ -2175,11 +2172,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DIGEST, (yyval.digest));
 			}
-#line 2173 "gram.c"
+#line 2170 "gram.c"
     break;
 
   case 46: /* digestspec: SHA256_TOK ':' DIGEST  */
-#line 572 "gram.y"
+#line 569 "gram.y"
                                               {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA256, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
@@ -2189,11 +2186,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DIGEST, (yyval.digest));
 			}
-#line 2187 "gram.c"
+#line 2184 "gram.c"
     break;
 
   case 47: /* digestspec: SHA384_TOK ':' DIGEST  */
-#line 581 "gram.y"
+#line 578 "gram.y"
                                               {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA384, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
@@ -2203,11 +2200,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DIGEST, (yyval.digest));
 			}
-#line 2201 "gram.c"
+#line 2198 "gram.c"
     break;
 
   case 48: /* digestspec: SHA512_TOK ':' DIGEST  */
-#line 590 "gram.y"
+#line 587 "gram.y"
                                               {
 			    (yyval.digest) = new_digest(SUDO_DIGEST_SHA512, (yyvsp[0].string));
 			    if ((yyval.digest) == NULL) {
@@ -2217,29 +2214,29 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_DIGEST, (yyval.digest));
 			}
-#line 2215 "gram.c"
+#line 2212 "gram.c"
     break;
 
   case 50: /* digestlist: digestlist ',' digestspec  */
-#line 602 "gram.y"
+#line 599 "gram.y"
                                                   {
 			    parser_leak_remove(LEAK_DIGEST, (yyvsp[0].digest));
 			    HLTQ_CONCAT((yyvsp[-2].digest), (yyvsp[0].digest), entries);
 			    (yyval.digest) = (yyvsp[-2].digest);
 			}
-#line 2225 "gram.c"
+#line 2222 "gram.c"
     break;
 
   case 51: /* digcmnd: opcmnd  */
-#line 609 "gram.y"
+#line 606 "gram.y"
                                {
 			    (yyval.member) = (yyvsp[0].member);
 			}
-#line 2233 "gram.c"
+#line 2230 "gram.c"
     break;
 
   case 52: /* digcmnd: digestlist opcmnd  */
-#line 612 "gram.y"
+#line 609 "gram.y"
                                           {
 			    struct sudo_command *c =
 				(struct sudo_command *) (yyvsp[0].member)->name;
@@ -2252,29 +2249,29 @@ yyreduce:
 			    HLTQ_TO_TAILQ(&c->digests, (yyvsp[-1].digest), entries);
 			    (yyval.member) = (yyvsp[0].member);
 			}
-#line 2250 "gram.c"
+#line 2247 "gram.c"
     break;
 
   case 53: /* opcmnd: cmnd  */
-#line 626 "gram.y"
+#line 623 "gram.y"
                              {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 2259 "gram.c"
+#line 2256 "gram.c"
     break;
 
   case 54: /* opcmnd: '!' cmnd  */
-#line 630 "gram.y"
+#line 627 "gram.y"
                                  {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 2268 "gram.c"
+#line 2265 "gram.c"
     break;
 
   case 55: /* chdirspec: CWD '=' WORD  */
-#line 636 "gram.y"
+#line 633 "gram.y"
                                      {
 			    if ((yyvsp[0].string)[0] != '/' && (yyvsp[0].string)[0] != '~') {
 				if (strcmp((yyvsp[0].string), "*") != 0) {
@@ -2285,11 +2282,11 @@ yyreduce:
 			    }
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2283 "gram.c"
+#line 2280 "gram.c"
     break;
 
   case 56: /* chrootspec: CHROOT '=' WORD  */
-#line 648 "gram.y"
+#line 645 "gram.y"
                                         {
 			    if ((yyvsp[0].string)[0] != '/' && (yyvsp[0].string)[0] != '~') {
 				if (strcmp((yyvsp[0].string), "*") != 0) {
@@ -2300,83 +2297,83 @@ yyreduce:
 			    }
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2298 "gram.c"
+#line 2295 "gram.c"
     break;
 
   case 57: /* timeoutspec: CMND_TIMEOUT '=' WORD  */
-#line 660 "gram.y"
+#line 657 "gram.y"
                                               {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2306 "gram.c"
+#line 2303 "gram.c"
     break;
 
   case 58: /* notbeforespec: NOTBEFORE '=' WORD  */
-#line 665 "gram.y"
+#line 662 "gram.y"
                                            {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2314 "gram.c"
+#line 2311 "gram.c"
     break;
 
   case 59: /* notafterspec: NOTAFTER '=' WORD  */
-#line 669 "gram.y"
+#line 666 "gram.y"
                                           {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2322 "gram.c"
+#line 2319 "gram.c"
     break;
 
   case 60: /* rolespec: ROLE '=' WORD  */
-#line 674 "gram.y"
+#line 671 "gram.y"
                                       {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2330 "gram.c"
+#line 2327 "gram.c"
     break;
 
   case 61: /* typespec: TYPE '=' WORD  */
-#line 679 "gram.y"
+#line 676 "gram.y"
                                       {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2338 "gram.c"
+#line 2335 "gram.c"
     break;
 
   case 62: /* privsspec: PRIVS '=' WORD  */
-#line 684 "gram.y"
+#line 681 "gram.y"
                                        {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2346 "gram.c"
+#line 2343 "gram.c"
     break;
 
   case 63: /* limitprivsspec: LIMITPRIVS '=' WORD  */
-#line 688 "gram.y"
+#line 685 "gram.y"
                                             {
 			    (yyval.string) = (yyvsp[0].string);
 			}
-#line 2354 "gram.c"
+#line 2351 "gram.c"
     break;
 
   case 64: /* runasspec: %empty  */
-#line 693 "gram.y"
+#line 690 "gram.y"
                                     {
 			    (yyval.runas) = NULL;
 			}
-#line 2362 "gram.c"
+#line 2359 "gram.c"
     break;
 
   case 65: /* runasspec: '(' runaslist ')'  */
-#line 696 "gram.y"
+#line 693 "gram.y"
                                           {
 			    (yyval.runas) = (yyvsp[-1].runas);
 			}
-#line 2370 "gram.c"
+#line 2367 "gram.c"
     break;
 
   case 66: /* runaslist: %empty  */
-#line 701 "gram.y"
+#line 698 "gram.y"
                                     {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) != NULL) {
@@ -2393,11 +2390,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_RUNAS, (yyval.runas));
 			}
-#line 2391 "gram.c"
+#line 2388 "gram.c"
     break;
 
   case 67: /* runaslist: userlist  */
-#line 717 "gram.y"
+#line 714 "gram.y"
                                  {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
@@ -2409,11 +2406,11 @@ yyreduce:
 			    (yyval.runas)->runasusers = (yyvsp[0].member);
 			    /* $$->runasgroups = NULL; */
 			}
-#line 2407 "gram.c"
+#line 2404 "gram.c"
     break;
 
   case 68: /* runaslist: userlist ':' grouplist  */
-#line 728 "gram.y"
+#line 725 "gram.y"
                                                {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
@@ -2426,11 +2423,11 @@ yyreduce:
 			    (yyval.runas)->runasusers = (yyvsp[-2].member);
 			    (yyval.runas)->runasgroups = (yyvsp[0].member);
 			}
-#line 2424 "gram.c"
+#line 2421 "gram.c"
     break;
 
   case 69: /* runaslist: ':' grouplist  */
-#line 740 "gram.y"
+#line 737 "gram.y"
                                       {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) == NULL) {
@@ -2442,11 +2439,11 @@ yyreduce:
 			    /* $$->runasusers = NULL; */
 			    (yyval.runas)->runasgroups = (yyvsp[0].member);
 			}
-#line 2440 "gram.c"
+#line 2437 "gram.c"
     break;
 
   case 70: /* runaslist: ':'  */
-#line 751 "gram.y"
+#line 748 "gram.y"
                             {
 			    (yyval.runas) = calloc(1, sizeof(struct runascontainer));
 			    if ((yyval.runas) != NULL) {
@@ -2463,108 +2460,108 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_RUNAS, (yyval.runas));
 			}
-#line 2461 "gram.c"
+#line 2458 "gram.c"
     break;
 
   case 71: /* reserved_word: ALL  */
-#line 769 "gram.y"
+#line 766 "gram.y"
                                         { (yyval.string) = "ALL"; }
-#line 2467 "gram.c"
+#line 2464 "gram.c"
     break;
 
   case 72: /* reserved_word: CHROOT  */
-#line 770 "gram.y"
+#line 767 "gram.y"
                                         { (yyval.string) = "CHROOT"; }
-#line 2473 "gram.c"
+#line 2470 "gram.c"
     break;
 
   case 73: /* reserved_word: CWD  */
-#line 771 "gram.y"
+#line 768 "gram.y"
                                         { (yyval.string) = "CWD"; }
-#line 2479 "gram.c"
+#line 2476 "gram.c"
     break;
 
   case 74: /* reserved_word: CMND_TIMEOUT  */
-#line 772 "gram.y"
+#line 769 "gram.y"
                                         { (yyval.string) = "CMND_TIMEOUT"; }
-#line 2485 "gram.c"
+#line 2482 "gram.c"
     break;
 
   case 75: /* reserved_word: NOTBEFORE  */
-#line 773 "gram.y"
+#line 770 "gram.y"
                                         { (yyval.string) = "NOTBEFORE"; }
-#line 2491 "gram.c"
+#line 2488 "gram.c"
     break;
 
   case 76: /* reserved_word: NOTAFTER  */
-#line 774 "gram.y"
+#line 771 "gram.y"
                                         { (yyval.string) = "NOTAFTER"; }
-#line 2497 "gram.c"
+#line 2494 "gram.c"
     break;
 
   case 77: /* reserved_word: ROLE  */
-#line 775 "gram.y"
+#line 772 "gram.y"
                                         { (yyval.string) = "ROLE"; }
-#line 2503 "gram.c"
+#line 2500 "gram.c"
     break;
 
   case 78: /* reserved_word: TYPE  */
-#line 776 "gram.y"
+#line 773 "gram.y"
                                         { (yyval.string) = "TYPE"; }
-#line 2509 "gram.c"
+#line 2506 "gram.c"
     break;
 
   case 79: /* reserved_word: PRIVS  */
-#line 777 "gram.y"
+#line 774 "gram.y"
                                         { (yyval.string) = "PRIVS"; }
-#line 2515 "gram.c"
+#line 2512 "gram.c"
     break;
 
   case 80: /* reserved_word: LIMITPRIVS  */
-#line 778 "gram.y"
+#line 775 "gram.y"
                                         { (yyval.string) = "LIMITPRIVS"; }
-#line 2521 "gram.c"
+#line 2518 "gram.c"
     break;
 
   case 81: /* reserved_alias: reserved_word  */
-#line 781 "gram.y"
+#line 778 "gram.y"
                                       {
 			    sudoerserrorf(U_("syntax error, reserved word %s used as an alias name"), (yyvsp[0].string));
 			    YYERROR;
 			}
-#line 2530 "gram.c"
+#line 2527 "gram.c"
     break;
 
   case 82: /* options: %empty  */
-#line 787 "gram.y"
+#line 784 "gram.y"
                                     {
 			    init_options(&(yyval.options));
 			}
-#line 2538 "gram.c"
+#line 2535 "gram.c"
     break;
 
   case 83: /* options: options chdirspec  */
-#line 790 "gram.y"
+#line 787 "gram.y"
                                           {
 			    parser_leak_remove(LEAK_PTR, (yyval.options).runcwd);
 			    free((yyval.options).runcwd);
 			    (yyval.options).runcwd = (yyvsp[0].string);
 			}
-#line 2548 "gram.c"
+#line 2545 "gram.c"
     break;
 
   case 84: /* options: options chrootspec  */
-#line 795 "gram.y"
+#line 792 "gram.y"
                                            {
 			    parser_leak_remove(LEAK_PTR, (yyval.options).runchroot);
 			    free((yyval.options).runchroot);
 			    (yyval.options).runchroot = (yyvsp[0].string);
 			}
-#line 2558 "gram.c"
+#line 2555 "gram.c"
     break;
 
   case 85: /* options: options notbeforespec  */
-#line 800 "gram.y"
+#line 797 "gram.y"
                                               {
 			    (yyval.options).notbefore = parse_gentime((yyvsp[0].string));
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -2574,11 +2571,11 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2572 "gram.c"
+#line 2569 "gram.c"
     break;
 
   case 86: /* options: options notafterspec  */
-#line 809 "gram.y"
+#line 806 "gram.y"
                                              {
 			    (yyval.options).notafter = parse_gentime((yyvsp[0].string));
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -2588,11 +2585,11 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2586 "gram.c"
+#line 2583 "gram.c"
     break;
 
   case 87: /* options: options timeoutspec  */
-#line 818 "gram.y"
+#line 815 "gram.y"
                                             {
 			    (yyval.options).timeout = parse_timeout((yyvsp[0].string));
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
@@ -2605,11 +2602,11 @@ yyreduce:
 				YYERROR;
 			    }
 			}
-#line 2603 "gram.c"
+#line 2600 "gram.c"
     break;
 
   case 88: /* options: options rolespec  */
-#line 830 "gram.y"
+#line 827 "gram.y"
                                          {
 #ifdef HAVE_SELINUX
 			    parser_leak_remove(LEAK_PTR, (yyval.options).role);
@@ -2617,11 +2614,11 @@ yyreduce:
 			    (yyval.options).role = (yyvsp[0].string);
 #endif
 			}
-#line 2615 "gram.c"
+#line 2612 "gram.c"
     break;
 
   case 89: /* options: options typespec  */
-#line 837 "gram.y"
+#line 834 "gram.y"
                                          {
 #ifdef HAVE_SELINUX
 			    parser_leak_remove(LEAK_PTR, (yyval.options).type);
@@ -2629,11 +2626,11 @@ yyreduce:
 			    (yyval.options).type = (yyvsp[0].string);
 #endif
 			}
-#line 2627 "gram.c"
+#line 2624 "gram.c"
     break;
 
   case 90: /* options: options privsspec  */
-#line 844 "gram.y"
+#line 841 "gram.y"
                                           {
 #ifdef HAVE_PRIV_SET
 			    parser_leak_remove(LEAK_PTR, (yyval.options).privs);
@@ -2641,11 +2638,11 @@ yyreduce:
 			    (yyval.options).privs = (yyvsp[0].string);
 #endif
 			}
-#line 2639 "gram.c"
+#line 2636 "gram.c"
     break;
 
   case 91: /* options: options limitprivsspec  */
-#line 851 "gram.y"
+#line 848 "gram.y"
                                                {
 #ifdef HAVE_PRIV_SET
 			    parser_leak_remove(LEAK_PTR, (yyval.options).limitprivs);
@@ -2653,147 +2650,147 @@ yyreduce:
 			    (yyval.options).limitprivs = (yyvsp[0].string);
 #endif
 			}
-#line 2651 "gram.c"
+#line 2648 "gram.c"
     break;
 
   case 92: /* cmndtag: %empty  */
-#line 860 "gram.y"
+#line 857 "gram.y"
                                     {
 			    TAGS_INIT(&(yyval.tag));
 			}
-#line 2659 "gram.c"
+#line 2656 "gram.c"
     break;
 
   case 93: /* cmndtag: cmndtag NOPASSWD  */
-#line 863 "gram.y"
+#line 860 "gram.y"
                                          {
 			    (yyval.tag).nopasswd = true;
 			}
-#line 2667 "gram.c"
+#line 2664 "gram.c"
     break;
 
   case 94: /* cmndtag: cmndtag PASSWD  */
-#line 866 "gram.y"
+#line 863 "gram.y"
                                        {
 			    (yyval.tag).nopasswd = false;
 			}
-#line 2675 "gram.c"
+#line 2672 "gram.c"
     break;
 
   case 95: /* cmndtag: cmndtag NOEXEC  */
-#line 869 "gram.y"
+#line 866 "gram.y"
                                        {
 			    (yyval.tag).noexec = true;
 			}
-#line 2683 "gram.c"
+#line 2680 "gram.c"
     break;
 
   case 96: /* cmndtag: cmndtag EXEC  */
-#line 872 "gram.y"
+#line 869 "gram.y"
                                      {
 			    (yyval.tag).noexec = false;
 			}
-#line 2691 "gram.c"
+#line 2688 "gram.c"
     break;
 
   case 97: /* cmndtag: cmndtag INTERCEPT  */
-#line 875 "gram.y"
+#line 872 "gram.y"
                                           {
 			    (yyval.tag).intercept = true;
 			}
-#line 2699 "gram.c"
+#line 2696 "gram.c"
     break;
 
   case 98: /* cmndtag: cmndtag NOINTERCEPT  */
-#line 878 "gram.y"
+#line 875 "gram.y"
                                             {
 			    (yyval.tag).intercept = false;
 			}
-#line 2707 "gram.c"
+#line 2704 "gram.c"
     break;
 
   case 99: /* cmndtag: cmndtag SETENV  */
-#line 881 "gram.y"
+#line 878 "gram.y"
                                        {
 			    (yyval.tag).setenv = true;
 			}
-#line 2715 "gram.c"
+#line 2712 "gram.c"
     break;
 
   case 100: /* cmndtag: cmndtag NOSETENV  */
-#line 884 "gram.y"
+#line 881 "gram.y"
                                          {
 			    (yyval.tag).setenv = false;
 			}
-#line 2723 "gram.c"
+#line 2720 "gram.c"
     break;
 
   case 101: /* cmndtag: cmndtag LOG_INPUT  */
-#line 887 "gram.y"
+#line 884 "gram.y"
                                           {
 			    (yyval.tag).log_input = true;
 			}
-#line 2731 "gram.c"
+#line 2728 "gram.c"
     break;
 
   case 102: /* cmndtag: cmndtag NOLOG_INPUT  */
-#line 890 "gram.y"
+#line 887 "gram.y"
                                             {
 			    (yyval.tag).log_input = false;
 			}
-#line 2739 "gram.c"
+#line 2736 "gram.c"
     break;
 
   case 103: /* cmndtag: cmndtag LOG_OUTPUT  */
-#line 893 "gram.y"
+#line 890 "gram.y"
                                            {
 			    (yyval.tag).log_output = true;
 			}
-#line 2747 "gram.c"
+#line 2744 "gram.c"
     break;
 
   case 104: /* cmndtag: cmndtag NOLOG_OUTPUT  */
-#line 896 "gram.y"
+#line 893 "gram.y"
                                              {
 			    (yyval.tag).log_output = false;
 			}
-#line 2755 "gram.c"
+#line 2752 "gram.c"
     break;
 
   case 105: /* cmndtag: cmndtag FOLLOWLNK  */
-#line 899 "gram.y"
+#line 896 "gram.y"
                                           {
 			    (yyval.tag).follow = true;
 			}
-#line 2763 "gram.c"
+#line 2760 "gram.c"
     break;
 
   case 106: /* cmndtag: cmndtag NOFOLLOWLNK  */
-#line 902 "gram.y"
+#line 899 "gram.y"
                                             {
 			    (yyval.tag).follow = false;
 			}
-#line 2771 "gram.c"
+#line 2768 "gram.c"
     break;
 
   case 107: /* cmndtag: cmndtag MAIL  */
-#line 905 "gram.y"
+#line 902 "gram.y"
                                      {
 			    (yyval.tag).send_mail = true;
 			}
-#line 2779 "gram.c"
+#line 2776 "gram.c"
     break;
 
   case 108: /* cmndtag: cmndtag NOMAIL  */
-#line 908 "gram.y"
+#line 905 "gram.y"
                                        {
 			    (yyval.tag).send_mail = false;
 			}
-#line 2787 "gram.c"
+#line 2784 "gram.c"
     break;
 
   case 109: /* cmnd: ALL  */
-#line 913 "gram.y"
+#line 910 "gram.y"
                             {
 			    struct sudo_command *c;
 
@@ -2808,11 +2805,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2806 "gram.c"
+#line 2803 "gram.c"
     break;
 
   case 110: /* cmnd: ALIAS  */
-#line 927 "gram.y"
+#line 924 "gram.y"
                               {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
@@ -2822,11 +2819,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2820 "gram.c"
+#line 2817 "gram.c"
     break;
 
   case 111: /* cmnd: COMMAND  */
-#line 936 "gram.y"
+#line 933 "gram.y"
                                 {
 			    struct sudo_command *c;
 
@@ -2844,20 +2841,20 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].command).args);
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2842 "gram.c"
+#line 2839 "gram.c"
     break;
 
   case 114: /* $@1: %empty  */
-#line 959 "gram.y"
+#line 956 "gram.y"
                               {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2851 "gram.c"
+#line 2848 "gram.c"
     break;
 
   case 115: /* hostalias: ALIAS $@1 '=' hostlist  */
-#line 962 "gram.y"
+#line 959 "gram.y"
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), HOSTALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
@@ -2867,30 +2864,30 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
-#line 2865 "gram.c"
+#line 2862 "gram.c"
     break;
 
   case 118: /* hostlist: hostlist ',' ophost  */
-#line 975 "gram.y"
+#line 972 "gram.y"
                                             {
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2875 "gram.c"
+#line 2872 "gram.c"
     break;
 
   case 121: /* $@2: %empty  */
-#line 986 "gram.y"
+#line 983 "gram.y"
                               {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2884 "gram.c"
+#line 2881 "gram.c"
     break;
 
   case 122: /* cmndalias: ALIAS $@2 '=' cmndlist  */
-#line 989 "gram.y"
+#line 986 "gram.y"
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), CMNDALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
@@ -2900,30 +2897,30 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
-#line 2898 "gram.c"
+#line 2895 "gram.c"
     break;
 
   case 125: /* cmndlist: cmndlist ',' digcmnd  */
-#line 1002 "gram.y"
+#line 999 "gram.y"
                                              {
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2908 "gram.c"
+#line 2905 "gram.c"
     break;
 
   case 128: /* $@3: %empty  */
-#line 1013 "gram.y"
+#line 1010 "gram.y"
                               {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2917 "gram.c"
+#line 2914 "gram.c"
     break;
 
   case 129: /* runasalias: ALIAS $@3 '=' userlist  */
-#line 1016 "gram.y"
+#line 1013 "gram.y"
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), RUNASALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
@@ -2933,20 +2930,20 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
-#line 2931 "gram.c"
+#line 2928 "gram.c"
     break;
 
   case 133: /* $@4: %empty  */
-#line 1032 "gram.y"
+#line 1029 "gram.y"
                               {
 			    alias_line = this_lineno;
 			    alias_column = sudolinebuf.toke_start + 1;
 			}
-#line 2940 "gram.c"
+#line 2937 "gram.c"
     break;
 
   case 134: /* useralias: ALIAS $@4 '=' userlist  */
-#line 1035 "gram.y"
+#line 1032 "gram.y"
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), USERALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
@@ -2956,39 +2953,39 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			}
-#line 2954 "gram.c"
+#line 2951 "gram.c"
     break;
 
   case 137: /* userlist: userlist ',' opuser  */
-#line 1048 "gram.y"
+#line 1045 "gram.y"
                                             {
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 2964 "gram.c"
+#line 2961 "gram.c"
     break;
 
   case 138: /* opuser: user  */
-#line 1055 "gram.y"
+#line 1052 "gram.y"
                              {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 2973 "gram.c"
+#line 2970 "gram.c"
     break;
 
   case 139: /* opuser: '!' user  */
-#line 1059 "gram.y"
+#line 1056 "gram.y"
                                  {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 2982 "gram.c"
+#line 2979 "gram.c"
     break;
 
   case 140: /* user: ALIAS  */
-#line 1065 "gram.y"
+#line 1062 "gram.y"
                               {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
@@ -2998,11 +2995,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 2996 "gram.c"
+#line 2993 "gram.c"
     break;
 
   case 141: /* user: ALL  */
-#line 1074 "gram.y"
+#line 1071 "gram.y"
                             {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
@@ -3011,11 +3008,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3009 "gram.c"
+#line 3006 "gram.c"
     break;
 
   case 142: /* user: NETGROUP  */
-#line 1082 "gram.y"
+#line 1079 "gram.y"
                                  {
 			    (yyval.member) = new_member((yyvsp[0].string), NETGROUP);
 			    if ((yyval.member) == NULL) {
@@ -3025,11 +3022,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3023 "gram.c"
+#line 3020 "gram.c"
     break;
 
   case 143: /* user: USERGROUP  */
-#line 1091 "gram.y"
+#line 1088 "gram.y"
                                   {
 			    (yyval.member) = new_member((yyvsp[0].string), USERGROUP);
 			    if ((yyval.member) == NULL) {
@@ -3039,11 +3036,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3037 "gram.c"
+#line 3034 "gram.c"
     break;
 
   case 144: /* user: WORD  */
-#line 1100 "gram.y"
+#line 1097 "gram.y"
                              {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
@@ -3053,39 +3050,39 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3051 "gram.c"
+#line 3048 "gram.c"
     break;
 
   case 146: /* grouplist: grouplist ',' opgroup  */
-#line 1112 "gram.y"
+#line 1109 "gram.y"
                                               {
 			    parser_leak_remove(LEAK_MEMBER, (yyvsp[0].member));
 			    HLTQ_CONCAT((yyvsp[-2].member), (yyvsp[0].member), entries);
 			    (yyval.member) = (yyvsp[-2].member);
 			}
-#line 3061 "gram.c"
+#line 3058 "gram.c"
     break;
 
   case 147: /* opgroup: group  */
-#line 1119 "gram.y"
+#line 1116 "gram.y"
                               {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = false;
 			}
-#line 3070 "gram.c"
+#line 3067 "gram.c"
     break;
 
   case 148: /* opgroup: '!' group  */
-#line 1123 "gram.y"
+#line 1120 "gram.y"
                                   {
 			    (yyval.member) = (yyvsp[0].member);
 			    (yyval.member)->negated = true;
 			}
-#line 3079 "gram.c"
+#line 3076 "gram.c"
     break;
 
   case 149: /* group: ALIAS  */
-#line 1129 "gram.y"
+#line 1126 "gram.y"
                               {
 			    (yyval.member) = new_member((yyvsp[0].string), ALIAS);
 			    if ((yyval.member) == NULL) {
@@ -3095,11 +3092,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3093 "gram.c"
+#line 3090 "gram.c"
     break;
 
   case 150: /* group: ALL  */
-#line 1138 "gram.y"
+#line 1135 "gram.y"
                             {
 			    (yyval.member) = new_member(NULL, ALL);
 			    if ((yyval.member) == NULL) {
@@ -3108,11 +3105,11 @@ yyreduce:
 			    }
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3106 "gram.c"
+#line 3103 "gram.c"
     break;
 
   case 151: /* group: WORD  */
-#line 1146 "gram.y"
+#line 1143 "gram.y"
                              {
 			    (yyval.member) = new_member((yyvsp[0].string), WORD);
 			    if ((yyval.member) == NULL) {
@@ -3122,11 +3119,11 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    parser_leak_add(LEAK_MEMBER, (yyval.member));
 			}
-#line 3120 "gram.c"
+#line 3117 "gram.c"
     break;
 
 
-#line 3124 "gram.c"
+#line 3121 "gram.c"
 
       default: break;
     }
@@ -3320,7 +3317,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 1156 "gram.y"
+#line 1153 "gram.y"
 
 /* Like yyerror() but takes a printf-style format string. */
 void

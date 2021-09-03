@@ -29,9 +29,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <unistd.h>
-#if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
-# include <alloca.h>
-#endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
 #include <errno.h>
 
 #include "sudoers.h"
