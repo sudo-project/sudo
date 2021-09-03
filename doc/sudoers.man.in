@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 1, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 3, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1411,6 +1411,7 @@ On systems with SELinux support,
 \fIsudoers\fR
 file entries may optionally have an SELinux role and/or type associated
 with a command.
+This can be used to implement a form of role-based access control (RBAC).
 If a role or
 type is specified with the command it will override any default values
 specified in
@@ -2874,13 +2875,12 @@ The
 \fIlog_subcmds\fR
 flag uses the same underlying mechanism as the
 \fIintercept\fR
-and
-\fInoexec\fR
-settings.
+setting.
 See
 \fIPreventing shell escapes\fR
 for more information on what systems support this option and its limitations.
-This setting is only supported by version 1.9.8 or higher.
+This setting is only supported by version 1.9.8 or higher
+and is incompatible with SELinux RBAC support.
 .TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
@@ -3056,7 +3056,8 @@ This flag is
 \fIoff\fR
 by default.
 .sp
-This setting is only supported by version 1.9.8 or higher.
+This setting is only supported by version 1.9.8 or higher
+and is incompatible with SELinux RBAC support.
 .TP 18n
 intercept_allow_setid
 On most systems, the dynamic loader will ignore

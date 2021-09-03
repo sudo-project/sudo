@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 1, 2021
+.Dd September 3, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1339,6 +1339,7 @@ On systems with SELinux support,
 .Em sudoers
 file entries may optionally have an SELinux role and/or type associated
 with a command.
+This can be used to implement a form of role-based access control (RBAC).
 If a role or
 type is specified with the command it will override any default values
 specified in
@@ -2706,13 +2707,12 @@ The
 .Em log_subcmds
 flag uses the same underlying mechanism as the
 .Em intercept
-and
-.Em noexec
-settings.
+setting.
 See
 .Sx Preventing shell escapes
 for more information on what systems support this option and its limitations.
-This setting is only supported by version 1.9.8 or higher.
+This setting is only supported by version 1.9.8 or higher
+and is incompatible with SELinux RBAC support.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -2878,7 +2878,8 @@ This flag is
 .Em off
 by default.
 .Pp
-This setting is only supported by version 1.9.8 or higher.
+This setting is only supported by version 1.9.8 or higher
+and is incompatible with SELinux RBAC support.
 .It intercept_allow_setid
 On most systems, the dynamic loader will ignore
 .Ev LD_PRELOAD
