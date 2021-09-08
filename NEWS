@@ -57,6 +57,10 @@ What's new in Sudo 1.9.8
    the host compiler, not the target compiler, when cross-compiling.
    Bug #989.
 
+ * Fixed compilation error when the --enable-static-sudoers configure
+   option was specified.  This was due to a typo introduced in sudo
+   1.9.7.  GitHub PR #113.
+
 What's new in Sudo 1.9.7p2
 
  * When formatting JSON output, octal numbers are now stored as
