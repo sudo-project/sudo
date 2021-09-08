@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <errno.h>
 #include <stdarg.h>
@@ -31,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <limits.h>
 #include <string.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
@@ -58,18 +60,89 @@ extern bool command_allowed(const char *cmnd, char * const argv[], char * const 
 
 typedef int (*sudo_fn_execve_t)(const char *, char *const *, char *const *);
 
+/*
+ * We do PATH resolution here rather than in the policy because we
+ * want to use the PATH in the current environment.
+ */
+static bool
+resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
+{
+    struct stat sb;
+    int errval = ENOENT;
+    char path[PATH_MAX];
+    char **p, *cp, *endp;
+    int dirlen, len;
+
+    for (p = environ; (cp = *p) != NULL; p++) {
+	if (strncmp(cp, "PATH=", sizeof("PATH=") - 1) == 0) {
+	    cp += sizeof("PATH=") - 1;
+	    break;
+	}
+    }
+    if (cp == NULL) {
+	errno = ENOENT;
+	return false;
+    }
+
+    endp = cp + strlen(cp);
+    while (cp < endp) {
+	char *colon = strchr(cp, ':');
+	dirlen = colon ? (colon - cp) : (endp - cp);
+	if (dirlen == 0) {
+	    /* empty PATH component is the same as "." */
+	    len = snprintf(path, sizeof(path), "./%s", cmnd);
+	} else {
+	    len = snprintf(path, sizeof(path), "%.*s/%s", dirlen, cp, cmnd);
+	}
+	cp = colon ? colon + 1 : endp;
+	if (len >= ssizeof(path)) {
+	    /* skip too long path */
+	    errval = ENAMETOOLONG;
+	    continue;
+	}
+
+	if (stat(path, &sb) == 0) {
+	    if (strlcpy(out_cmnd, path, out_size) >= out_size) {
+		errval = ENAMETOOLONG;
+		break;
+	    }
+	    return true;
+	}
+	switch (errno) {
+	case EACCES:
+	    errval = EACCES;
+	    break;
+	case ELOOP:
+	case ENOTDIR:
+	case ENOENT:
+	    break;
+	default:
+	    return false;
+	}
+    }
+    errno = errval;
+    return false;
+}
+
 static int
 exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
     bool is_execvp)
 {
     char *ncmnd = NULL, **nargv = NULL, **nenvp = NULL;
+    char cmnd_buf[PATH_MAX];
     void *fn = NULL;
     debug_decl(exec_wrapper, SUDO_DEBUG_EXEC);
 
     /* Only check PATH for the command for execlp/execvp/execvpe. */
-    if (!is_execvp && strchr(cmnd, '/') == NULL) {
-	errno = ENOENT;
-        debug_return_int(-1);
+    if (strchr(cmnd, '/') == NULL) {
+	if (!is_execvp) {
+	    errno = ENOENT;
+	    debug_return_int(-1);
+	}
+	if (!resolve_path(cmnd, cmnd_buf, sizeof(cmnd_buf))) {
+	    debug_return_int(-1);
+	}
+	cmnd = cmnd_buf;
     }
 
 # if defined(HAVE___INTERPOSE)
