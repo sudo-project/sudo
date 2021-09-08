@@ -241,11 +241,13 @@ my_execv(const char *cmnd, char * const argv[])
     return execve(cmnd, argv, environ);
 }
 
+#ifdef HAVE_EXECVPE
 static int
 my_execvpe(const char *cmnd, char * const argv[], char * const envp[])
 {
     return exec_wrapper(cmnd, argv, envp, true);
 }
+#endif
 
 static int
 my_execvp(const char *cmnd, char * const argv[])
@@ -298,7 +300,9 @@ __attribute__((__section__("__DATA,__interpose"))) = {
     { (void *)my_execv, (void *)execv },
     { (void *)my_execve, (void *)execve },
     { (void *)my_execvp, (void *)execvp },
+#ifdef HAVE_EXECVPE
     { (void *)my_execvpe, (void *)execvpe }
+#endif
 };
 
 #else /* HAVE___INTERPOSE */
@@ -340,11 +344,13 @@ execv(const char *cmnd, char * const argv[])
     return execve(cmnd, argv, environ);
 }
 
+#ifdef HAVE_EXECVPE
 sudo_dso_public int
 execvpe(const char *cmnd, char * const argv[], char * const envp[])
 {
     return exec_wrapper(cmnd, argv, envp, true);
 }
+#endif
 
 sudo_dso_public int
 execvp(const char *cmnd, char * const argv[])

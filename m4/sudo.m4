@@ -505,6 +505,17 @@ AC_DEFUN([SUDO_APPEND_COMPAT_EXP], [
 ])
 
 dnl
+dnl
+dnl Append one or more symbols to INTERCEPT_EXP
+dnl
+AC_DEFUN([SUDO_APPEND_INTERCEPT_EXP], [
+    for _sym in $1; do
+	INTERCEPT_EXP="${INTERCEPT_EXP}${_sym}
+"
+    done
+])
+
+dnl
 dnl Determine the mail spool location
 dnl NOTE: must be run *after* check for paths.h
 dnl

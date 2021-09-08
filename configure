@@ -771,6 +771,7 @@ relay_dir
 logpath
 log_dir
 iolog_dir
+INTERCEPT_EXP
 FUZZ_LD
 FUZZ_ENGINE
 PPFILES
@@ -3557,6 +3558,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3651,6 +3653,7 @@ COMPAT_EXP=
 SIGNAME=
 FUZZ_ENGINE=
 FUZZ_LD='$(CC)'
+INTERCEPT_EXP=
 WEAK_ALIAS=no
 CHECKSHADOW=true
 shadow_funcs=
@@ -20964,6 +20967,22 @@ done
 
 
 
+  for ac_func in execvpe
+do :
+  ac_fn_c_check_func "$LINENO" "execvpe" "ac_cv_func_execvpe"
+if test "x$ac_cv_func_execvpe" = xyes
+then :
+  printf "%s\n" "#define HAVE_EXECVPE 1" >>confdefs.h
+
+    for _sym in execvpe; do
+	INTERCEPT_EXP="${INTERCEPT_EXP}${_sym}
+"
+    done
+
+fi
+
+done
+
   for ac_func in pread
 do :
   ac_fn_c_check_func "$LINENO" "pread" "ac_cv_func_pread"
@@ -30976,7 +30995,7 @@ elif test X"$TMPFILES_D" != X""; then
 
 fi
 
-ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 
 cat >confcache <<\_ACEOF
@@ -31980,6 +31999,7 @@ do
     "lib/util/Makefile") CONFIG_FILES="$CONFIG_FILES lib/util/Makefile" ;;
     "lib/util/util.exp") CONFIG_FILES="$CONFIG_FILES lib/util/util.exp" ;;
     "logsrvd/Makefile") CONFIG_FILES="$CONFIG_FILES logsrvd/Makefile" ;;
+    "src/intercept.exp") CONFIG_FILES="$CONFIG_FILES src/intercept.exp" ;;
     "src/sudo_usage.h") CONFIG_FILES="$CONFIG_FILES src/sudo_usage.h" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "plugins/audit_json/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/audit_json/Makefile" ;;

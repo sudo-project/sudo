@@ -117,7 +117,7 @@ install_gid = 0
 # File extension, mode and map file to use for shared libraries/objects
 shlib_enable = @SHLIB_ENABLE@
 shlib_mode = @SHLIB_MODE@
-shlib_exp = $(srcdir)/intercept.exp
+shlib_exp = ./intercept.exp
 shlib_map = intercept.map
 shlib_opt = intercept.opt
 

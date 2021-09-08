@@ -126,6 +126,7 @@ AC_SUBST([LIBLOGSRV])
 AC_SUBST([PPFILES])
 AC_SUBST([FUZZ_ENGINE])
 AC_SUBST([FUZZ_LD])
+AC_SUBST([INTERCEPT_EXP])
 
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -271,6 +272,7 @@ COMPAT_EXP=
 SIGNAME=
 FUZZ_ENGINE=
 FUZZ_LD='$(CC)'
+INTERCEPT_EXP=
 dnl
 dnl Other variables
 dnl
@@ -2543,6 +2545,7 @@ dnl
 AC_FUNC_GETGROUPS
 AC_FUNC_FSEEKO
 AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval])
+AC_CHECK_FUNCS([execvpe], [SUDO_APPEND_INTERCEPT_EXP(execvpe)])
 AC_CHECK_FUNCS([pread], [
     # pread/pwrite on 32-bit HP-UX 11.x may not support large files
     case "$host_os" in
@@ -4895,7 +4898,7 @@ elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
 
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 
 AC_OUTPUT
 
