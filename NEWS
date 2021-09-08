@@ -5,8 +5,9 @@ What's new in Sudo 1.9.8
    is implemented using LD_PRELOAD (or the equivalent supported by
    the system) and so has some limitations.  The two main limitations
    are that only dynamic executables are supported and only the
-   execve() system call is currently intercepted.  Its main use
-   case is to support restricting privileged shells run via sudo.
+   execl, execle, execlp, execv, execve, execvp, and execvpe library
+   functions are currently intercepted. Its main use case is to
+   support restricting privileged shells run via sudo.
 
    To support this, there is a new "intercept" Defaults setting and
    an INTERCEPT command tag that can be used in sudoers.  For example:
