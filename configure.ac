@@ -4223,7 +4223,6 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
 	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
 	    LT_STATIC=""
 	else
@@ -4236,7 +4235,6 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
 	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
 	    LT_STATIC=""
 	else

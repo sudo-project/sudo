@@ -1667,7 +1667,7 @@ Fine tuning of the installation directories:
   --bindir=DIR            user executables [EPREFIX/bin]
   --sbindir=DIR           system admin executables [EPREFIX/sbin]
   --libexecdir=DIR        program executables [EPREFIX/libexec]
-  --sysconfdir=DIR        read-only single-machine data [/etc]
+  --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
   --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
@@ -9890,7 +9890,21 @@ haiku*)
   ;;
 
 hpux10.20* | hpux11*)
-  lt_cv_deplibs_check_method=pass_all
+  lt_cv_file_magic_cmd=/usr/bin/file
+  case $host_cpu in
+  ia64*)
+    lt_cv_deplibs_check_method='file_magic (s[0-9][0-9][0-9]|ELF-[0-9][0-9]) shared object file - IA64'
+    lt_cv_file_magic_test_file=/usr/lib/hpux32/libc.so
+    ;;
+  hppa*64*)
+    lt_cv_deplibs_check_method='file_magic (s[0-9][0-9][0-9]|ELF[ -][0-9][0-9])(-bit)?( [LM]SB)? shared object( file)?[, -]* PA-RISC [0-9]\.[0-9]'
+    lt_cv_file_magic_test_file=/usr/lib/pa20_64/libc.sl
+    ;;
+  *)
+    lt_cv_deplibs_check_method='file_magic (s[0-9][0-9][0-9]|PA-RISC[0-9]\.[0-9]) shared library'
+    lt_cv_file_magic_test_file=/usr/lib/libc.sl
+    ;;
+  esac
   ;;
 
 interix[3-9]*)
@@ -12194,16 +12208,11 @@ printf "%s\n" "$lt_cv_ld_force_load" >&6; }
       _lt_dar_allow_undefined='$wl-undefined ${wl}suppress' ;;
     darwin1.*)
       _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
-    darwin*) # darwin 5.x on
-      # if running on 10.5 or later, the deployment target defaults
-      # to the OS version, if on x86, and 10.4, the deployment
-      # target defaults to 10.4. Don't you love it?
-      case ${MACOSX_DEPLOYMENT_TARGET-10.0},$host in
-	10.0,*86*-darwin8*|10.0,*-darwin[91]*)
-	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
-	10.[012][,.]*)
+    darwin*)
+      case ${MACOSX_DEPLOYMENT_TARGET},$host in
+	10.[012],*|,*powerpc*)
 	  _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
-	10.*)
+	*)
 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
       esac
     ;;
@@ -13472,8 +13481,6 @@ printf %s "checking whether the $compiler linker ($LD) supports shared libraries
   hardcode_libdir_separator=
   hardcode_minus_L=no
   hardcode_shlibpath_var=unsupported
-  fix_hardcoded_libdir_flag_spec=
-  fix_hardcoded_libdir_flag_spec_ld=
   inherit_rpath=no
   link_all_deplibs=unknown
   module_cmds=
@@ -14307,14 +14314,12 @@ fi
 
     hpux10*)
       if test yes,no = "$GCC,$with_gnu_ld"; then
-	archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	module_cmds='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
       else
-	archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
-	module_cmds='$LD -b -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+	archive_cmds='$LD -b +h $soname +b $install_libdir -o $lib $libobjs $deplibs $linker_flags'
       fi
       if test no = "$with_gnu_ld"; then
-	hardcode_libdir_flag_spec='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
+	hardcode_libdir_flag_spec='$wl+b $wl$libdir'
 	hardcode_libdir_separator=:
 	hardcode_direct=yes
 	hardcode_direct_absolute=yes
@@ -14322,45 +14327,6 @@ fi
 	# hardcode_minus_L: Not really in the search PATH,
 	# but as the default location of the library.
 	hardcode_minus_L=yes
-	# gcc-3.0.1 (collect2) breaks on -Wl,+cdp.
-	# HP-cc ignores -Wl,+cdp, and we test the linker for +cdp support.
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking if +cdp linker flag works" >&5
-printf %s "checking if +cdp linker flag works... " >&6; }
-if test ${lt_cv_ldflag_cdp_works+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  lt_cv_ldflag_cdp_works=no
-	  save_LDFLAGS=$LDFLAGS
-	  LDFLAGS="$LDFLAGS -Wl,+cdp -Wl,/usr/lib/libc.1:/nonexistent -Wl,+cdp -Wl,/lib/libc.1:/nonexistent"
-	  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  lt_cv_ldflag_cdp_works=yes
-else $as_nop
-  lt_cv_ldflag_cdp_works=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-	  LDFLAGS="$save_LDFLAGS"
-
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $lt_cv_ldflag_cdp_works" >&5
-printf "%s\n" "$lt_cv_ldflag_cdp_works" >&6; }
-	if test "$lt_cv_ldflag_cdp_works" = yes; then
-	  fix_hardcoded_libdir_flag_spec='${wl}+cdp ${wl}${linkdir}/${dlname}:${libdir}/${dlname}'
-	  fix_hardcoded_libdir_flag_spec_ld='+cdp ${linkdir}/${dlname}:${libdir}/${dlname}'
-	fi
       fi
       ;;
 
@@ -14369,26 +14335,21 @@ printf "%s\n" "$lt_cv_ldflag_cdp_works" >&6; }
 	case $host_cpu in
 	hppa*64*)
 	  archive_cmds='$CC -shared $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags'
-	  module_cmds='$CC -shared -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
 	  archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
-	  module_cmds='$CC -shared $pic_flag $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
-	  archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	  module_cmds='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	  archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	esac
       else
 	case $host_cpu in
 	hppa*64*)
 	  archive_cmds='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags'
-	  module_cmds='$CC -b -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
 	  archive_cmds='$CC -b $wl+h $wl$soname $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
-	  module_cmds='$CC -b $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
 
@@ -14427,22 +14388,16 @@ fi
 printf "%s\n" "$lt_cv_prog_compiler__b" >&6; }
 
 if test yes = "$lt_cv_prog_compiler__b"; then
-
-	      archive_cmds='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	      module_cmds='$CC -b -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-
+    archive_cmds='$CC -b $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
 else
-
-	      archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
-	      module_cmds='$LD -b -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
-
+    archive_cmds='$LD -b +h $soname +b $install_libdir -o $lib $libobjs $deplibs $linker_flags'
 fi
 
 	  ;;
 	esac
       fi
       if test no = "$with_gnu_ld"; then
-	hardcode_libdir_flag_spec='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
+	hardcode_libdir_flag_spec='$wl+b $wl$libdir'
 	hardcode_libdir_separator=:
 
 	case $host_cpu in
@@ -14458,45 +14413,6 @@ fi
 	  # hardcode_minus_L: Not really in the search PATH,
 	  # but as the default location of the library.
 	  hardcode_minus_L=yes
-	  # gcc-3.0.1 (collect2) breaks on -Wl,+cdp.
-	  # HP-cc ignores -Wl,+cdp, and we test the linker for +cdp support.
-	  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking if +cdp linker flag works" >&5
-printf %s "checking if +cdp linker flag works... " >&6; }
-if test ${lt_cv_ldflag_cdp_works+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  lt_cv_ldflag_cdp_works=no
-	    save_LDFLAGS=$LDFLAGS
-	    LDFLAGS="$LDFLAGS -Wl,+cdp -Wl,/usr/lib/libc.1:/nonexistent -Wl,+cdp -Wl,/lib/libc.1:/nonexistent"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  lt_cv_ldflag_cdp_works=yes
-else $as_nop
-  lt_cv_ldflag_cdp_works=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-	    LDFLAGS="$save_LDFLAGS"
-
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $lt_cv_ldflag_cdp_works" >&5
-printf "%s\n" "$lt_cv_ldflag_cdp_works" >&6; }
-	  if test "$lt_cv_ldflag_cdp_works" = yes; then
-	    fix_hardcoded_libdir_flag_spec='${wl}+cdp ${wl}${linkdir}/${dlname}:${libdir}/${dlname}'
-	    fix_hardcoded_libdir_flag_spec_ld='+cdp ${linkdir}/${dlname}:${libdir}/${dlname}'
-	  fi
 	  ;;
 	esac
       fi
@@ -14901,16 +14817,6 @@ printf "%s\n" "$lt_cv_archive_cmds_need_lc" >&6; }
   fi
   ;;
 esac
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -16019,7 +15925,6 @@ if test -n "$hardcode_libdir_flag_spec" ||
      # have to relink, otherwise we might link with an installed library
      # when we should be linking with a yet-to-be-installed one
      ## test no != "$_LT_TAGVAR(hardcode_shlibpath_var, )" &&
-     test -z "$fix_hardcoded_libdir_flag_spec" &&
      test no != "$hardcode_minus_L"; then
     # Linking always hardcodes the temporary library directory.
     hardcode_action=relink
@@ -23279,7 +23184,7 @@ if test "${enable_openssl-no}" != no; then
 	# Check whether --static is needed
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_new in -lssl" >&5
 printf %s "checking for SSL_new in -lssl... " >&6; }
-if test ${ac_cv_lib_ssl_SSL_new_lcrypto+y}
+if test ${ac_cv_lib_ssl_SSL_new+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -23302,17 +23207,17 @@ return SSL_new ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_ssl_SSL_new_lcrypto=yes
+  ac_cv_lib_ssl_SSL_new=yes
 else $as_nop
-  ac_cv_lib_ssl_SSL_new_lcrypto=no
+  ac_cv_lib_ssl_SSL_new=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_new_lcrypto" >&5
-printf "%s\n" "$ac_cv_lib_ssl_SSL_new_lcrypto" >&6; }
-if test "x$ac_cv_lib_ssl_SSL_new_lcrypto" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_new" >&5
+printf "%s\n" "$ac_cv_lib_ssl_SSL_new" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_new" = xyes
 then :
   STATIC=""
 else $as_nop
@@ -23416,7 +23321,7 @@ fi
 	fi
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_new in -lssl" >&5
 printf %s "checking for SSL_new in -lssl... " >&6; }
-if test ${ac_cv_lib_ssl_SSL_new_lcrypto+y}
+if test ${ac_cv_lib_ssl_SSL_new+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -23439,17 +23344,17 @@ return SSL_new ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_ssl_SSL_new_lcrypto=yes
+  ac_cv_lib_ssl_SSL_new=yes
 else $as_nop
-  ac_cv_lib_ssl_SSL_new_lcrypto=no
+  ac_cv_lib_ssl_SSL_new=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_new_lcrypto" >&5
-printf "%s\n" "$ac_cv_lib_ssl_SSL_new_lcrypto" >&6; }
-if test "x$ac_cv_lib_ssl_SSL_new_lcrypto" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_new" >&5
+printf "%s\n" "$ac_cv_lib_ssl_SSL_new" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_new" = xyes
 then :
 
 	    # Check OPENSSL_VERSION_NUMBER in headers
@@ -25725,10 +25630,9 @@ if test ${with_pam-"no"} != "no"; then
     # Check for pam_start() in libpam first, then for pam_appl.h.
     #
     found_pam_lib=no
-    as_ac_Lib=`printf "%s\n" "ac_cv_lib_pam_pam_start$lt_cv_dlopen_libs" | $as_tr_sh`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pam_start in -lpam" >&5
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pam_start in -lpam" >&5
 printf %s "checking for pam_start in -lpam... " >&6; }
-if eval test \${$as_ac_Lib+y}
+if test ${ac_cv_lib_pam_pam_start+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -25751,18 +25655,17 @@ return pam_start ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  eval "$as_ac_Lib=yes"
+  ac_cv_lib_pam_pam_start=yes
 else $as_nop
-  eval "$as_ac_Lib=no"
+  ac_cv_lib_pam_pam_start=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-eval ac_res=\$$as_ac_Lib
-	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-printf "%s\n" "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_Lib"\" = x"yes"
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pam_pam_start" >&5
+printf "%s\n" "$ac_cv_lib_pam_pam_start" >&6; }
+if test "x$ac_cv_lib_pam_pam_start" = xyes
 then :
   found_pam_lib=yes
 fi
@@ -28454,39 +28357,6 @@ if test ${SUDOERS_LDFLAGS+y}
 then :
 
   case " $SUDOERS_LDFLAGS " in #(
-  *" --tag=disable-shared "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains --tag=disable-shared"; } >&5
-  (: SUDOERS_LDFLAGS already contains --tag=disable-shared) 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } ;; #(
-  *) :
-
-     as_fn_append SUDOERS_LDFLAGS " --tag=disable-shared"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
-  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-     ;;
-esac
-
-else $as_nop
-
-  SUDOERS_LDFLAGS=--tag=disable-shared
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
-  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-
-fi
-
-
-if test ${SUDOERS_LDFLAGS+y}
-then :
-
-  case " $SUDOERS_LDFLAGS " in #(
   *" -static "*) :
     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -static"; } >&5
   (: SUDOERS_LDFLAGS already contains -static) 2>&5
@@ -28528,39 +28398,6 @@ fi
 
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-
-if test ${SUDOERS_LDFLAGS+y}
-then :
-
-  case " $SUDOERS_LDFLAGS " in #(
-  *" --tag=disable-shared "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains --tag=disable-shared"; } >&5
-  (: SUDOERS_LDFLAGS already contains --tag=disable-shared) 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } ;; #(
-  *) :
-
-     as_fn_append SUDOERS_LDFLAGS " --tag=disable-shared"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
-  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-     ;;
-esac
-
-else $as_nop
-
-  SUDOERS_LDFLAGS=--tag=disable-shared
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
-  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-
-fi
-
 
 if test ${SUDOERS_LDFLAGS+y}
 then :
@@ -31773,8 +31610,6 @@ hardcode_direct_absolute='`$ECHO "$hardcode_direct_absolute" | $SED "$delay_sing
 hardcode_minus_L='`$ECHO "$hardcode_minus_L" | $SED "$delay_single_quote_subst"`'
 hardcode_shlibpath_var='`$ECHO "$hardcode_shlibpath_var" | $SED "$delay_single_quote_subst"`'
 hardcode_automatic='`$ECHO "$hardcode_automatic" | $SED "$delay_single_quote_subst"`'
-fix_hardcoded_libdir_flag_spec='`$ECHO "$fix_hardcoded_libdir_flag_spec" | $SED "$delay_single_quote_subst"`'
-fix_hardcoded_libdir_flag_spec_ld='`$ECHO "$fix_hardcoded_libdir_flag_spec_ld" | $SED "$delay_single_quote_subst"`'
 inherit_rpath='`$ECHO "$inherit_rpath" | $SED "$delay_single_quote_subst"`'
 link_all_deplibs='`$ECHO "$link_all_deplibs" | $SED "$delay_single_quote_subst"`'
 always_export_symbols='`$ECHO "$always_export_symbols" | $SED "$delay_single_quote_subst"`'
@@ -31880,8 +31715,6 @@ allow_undefined_flag \
 no_undefined_flag \
 hardcode_libdir_flag_spec \
 hardcode_libdir_separator \
-fix_hardcoded_libdir_flag_spec \
-fix_hardcoded_libdir_flag_spec_ld \
 exclude_expsyms \
 include_expsyms \
 file_list_spec \
@@ -32957,12 +32790,6 @@ hardcode_shlibpath_var=$hardcode_shlibpath_var
 # into the library and all subsequent libraries and executables linked
 # against it.
 hardcode_automatic=$hardcode_automatic
-
-# Flag to modify a path being hardcoded into the resulting binary.
-fix_hardcoded_libdir_flag_spec=$lt_fix_hardcoded_libdir_flag_spec
-
-# If ld is used when linking,flag to modify a path being hardcoded into the resulting binary.
-fix_hardcoded_libdir_flag_spec_ld=$lt_fix_hardcoded_libdir_flag_spec_ld
 
 # Set to yes if linker adds runtime paths of dependent libraries
 # to runtime path list.

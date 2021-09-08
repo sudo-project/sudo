@@ -1067,16 +1067,11 @@ _LT_EOF
       _lt_dar_allow_undefined='$wl-undefined ${wl}suppress' ;;
     darwin1.*)
       _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
-    darwin*) # darwin 5.x on
-      # if running on 10.5 or later, the deployment target defaults
-      # to the OS version, if on x86, and 10.4, the deployment
-      # target defaults to 10.4. Don't you love it?
-      case ${MACOSX_DEPLOYMENT_TARGET-10.0},$host in
-	10.0,*86*-darwin8*|10.0,*-darwin[[91]]*)
-	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
-	10.[[012]][[,.]]*)
+    darwin*)
+      case ${MACOSX_DEPLOYMENT_TARGET},$host in
+	10.[[012]],*|,*powerpc*)
 	  _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
-	10.*)
+	*)
 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
       esac
     ;;
@@ -2172,7 +2167,6 @@ if test -n "$_LT_TAGVAR(hardcode_libdir_flag_spec, $1)" ||
      # have to relink, otherwise we might link with an installed library
      # when we should be linking with a yet-to-be-installed one
      ## test no != "$_LT_TAGVAR(hardcode_shlibpath_var, $1)" &&
-     test -z "$_LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)" &&
      test no != "$_LT_TAGVAR(hardcode_minus_L, $1)"; then
     # Linking always hardcodes the temporary library directory.
     _LT_TAGVAR(hardcode_action, $1)=relink
@@ -3510,7 +3504,21 @@ haiku*)
   ;;
 
 hpux10.20* | hpux11*)
-  lt_cv_deplibs_check_method=pass_all
+  lt_cv_file_magic_cmd=/usr/bin/file
+  case $host_cpu in
+  ia64*)
+    lt_cv_deplibs_check_method='file_magic (s[[0-9]][[0-9]][[0-9]]|ELF-[[0-9]][[0-9]]) shared object file - IA64'
+    lt_cv_file_magic_test_file=/usr/lib/hpux32/libc.so
+    ;;
+  hppa*64*)
+    [lt_cv_deplibs_check_method='file_magic (s[0-9][0-9][0-9]|ELF[ -][0-9][0-9])(-bit)?( [LM]SB)? shared object( file)?[, -]* PA-RISC [0-9]\.[0-9]']
+    lt_cv_file_magic_test_file=/usr/lib/pa20_64/libc.sl
+    ;;
+  *)
+    lt_cv_deplibs_check_method='file_magic (s[[0-9]][[0-9]][[0-9]]|PA-RISC[[0-9]]\.[[0-9]]) shared library'
+    lt_cv_file_magic_test_file=/usr/lib/libc.sl
+    ;;
+  esac
   ;;
 
 interix[[3-9]]*)
@@ -4944,8 +4952,6 @@ m4_if([$1], [CXX], [
   _LT_TAGVAR(hardcode_libdir_separator, $1)=
   _LT_TAGVAR(hardcode_minus_L, $1)=no
   _LT_TAGVAR(hardcode_shlibpath_var, $1)=unsupported
-  _LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)=
-  _LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)=
   _LT_TAGVAR(inherit_rpath, $1)=no
   _LT_TAGVAR(link_all_deplibs, $1)=unknown
   _LT_TAGVAR(module_cmds, $1)=
@@ -5664,14 +5670,12 @@ _LT_EOF
 
     hpux10*)
       if test yes,no = "$GCC,$with_gnu_ld"; then
-	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	_LT_TAGVAR(module_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
       else
-	_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
-	_LT_TAGVAR(module_cmds, $1)='$LD -b -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+	_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname +b $install_libdir -o $lib $libobjs $deplibs $linker_flags'
       fi
       if test no = "$with_gnu_ld"; then
-	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
+	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)='$wl+b $wl$libdir'
 	_LT_TAGVAR(hardcode_libdir_separator, $1)=:
 	_LT_TAGVAR(hardcode_direct, $1)=yes
 	_LT_TAGVAR(hardcode_direct_absolute, $1)=yes
@@ -5679,22 +5683,6 @@ _LT_EOF
 	# hardcode_minus_L: Not really in the search PATH,
 	# but as the default location of the library.
 	_LT_TAGVAR(hardcode_minus_L, $1)=yes
-	# gcc-3.0.1 (collect2) breaks on -Wl,+cdp.
-	# HP-cc ignores -Wl,+cdp, and we test the linker for +cdp support.
-	AC_CACHE_CHECK([if +cdp linker flag works],
-	  [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)],
-	  [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=no
-	  save_LDFLAGS=$LDFLAGS
-	  LDFLAGS="$LDFLAGS -Wl,+cdp -Wl,/usr/lib/libc.1:/nonexistent -Wl,+cdp -Wl,/lib/libc.1:/nonexistent"
-	  AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],
-	    [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=yes],
-	    [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=no])
-	  LDFLAGS="$save_LDFLAGS"
-	])
-	if test "$_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)" = yes; then
-	  _LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)='${wl}+cdp ${wl}${linkdir}/${dlname}:${libdir}/${dlname}'
-	  _LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)='+cdp ${linkdir}/${dlname}:${libdir}/${dlname}'
-	fi
       fi
       ;;
 
@@ -5703,26 +5691,21 @@ _LT_EOF
 	case $host_cpu in
 	hppa*64*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags'
-	  _LT_TAGVAR(module_cmds, $1)='$CC -shared -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
-	  _LT_TAGVAR(module_cmds, $1)='$CC -shared $pic_flag $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
-	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	  _LT_TAGVAR(module_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	esac
       else
 	case $host_cpu in
 	hppa*64*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags'
-	  _LT_TAGVAR(module_cmds, $1)='$CC -b -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
-	  _LT_TAGVAR(module_cmds, $1)='$CC -b $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
 	m4_if($1, [], [
@@ -5730,22 +5713,14 @@ _LT_EOF
 	  # (HP92453-01 A.11.01.20 doesn't, HP92453-01 B.11.X.35175-35176.GP does)
 	  _LT_LINKER_OPTION([if $CC understands -b],
 	    _LT_TAGVAR(lt_cv_prog_compiler__b, $1), [-b],
-	    [
-	      _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	      _LT_TAGVAR(module_cmds, $1)='$CC -b -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	    ], [
-	      _LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
-	      _LT_TAGVAR(module_cmds, $1)='$LD -b -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
-	    ])],
-	  [
-	    _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	    _LT_TAGVAR(module_cmds, $1)='$CC -b -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
-	  ])
+	    [_LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $libobjs $deplibs $compiler_flags'],
+	    [_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname +b $install_libdir -o $lib $libobjs $deplibs $linker_flags'])],
+	  [_LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $libobjs $deplibs $compiler_flags'])
 	  ;;
 	esac
       fi
       if test no = "$with_gnu_ld"; then
-	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
+	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)='$wl+b $wl$libdir'
 	_LT_TAGVAR(hardcode_libdir_separator, $1)=:
 
 	case $host_cpu in
@@ -5761,22 +5736,6 @@ _LT_EOF
 	  # hardcode_minus_L: Not really in the search PATH,
 	  # but as the default location of the library.
 	  _LT_TAGVAR(hardcode_minus_L, $1)=yes
-	  # gcc-3.0.1 (collect2) breaks on -Wl,+cdp.
-	  # HP-cc ignores -Wl,+cdp, and we test the linker for +cdp support.
-	  AC_CACHE_CHECK([if +cdp linker flag works],
-	    [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)],
-	    [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=no
-	    save_LDFLAGS=$LDFLAGS
-	    LDFLAGS="$LDFLAGS -Wl,+cdp -Wl,/usr/lib/libc.1:/nonexistent -Wl,+cdp -Wl,/lib/libc.1:/nonexistent"
-	    AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],
-	      [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=yes],
-	      [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=no])
-	    LDFLAGS="$save_LDFLAGS"
-	  ])
-	  if test "$_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)" = yes; then
-	    _LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)='${wl}+cdp ${wl}${linkdir}/${dlname}:${libdir}/${dlname}'
-	    _LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)='+cdp ${linkdir}/${dlname}:${libdir}/${dlname}'
-	  fi
 	  ;;
 	esac
       fi
@@ -6200,10 +6159,6 @@ _LT_TAGDECL([], [hardcode_automatic], [0],
     [Set to "yes" if building a shared library automatically hardcodes DIR
     into the library and all subsequent libraries and executables linked
     against it])
-_LT_TAGDECL([], [fix_hardcoded_libdir_flag_spec], [1],
-    [Flag to modify a path being hardcoded into the resulting binary])
-_LT_TAGDECL([], [fix_hardcoded_libdir_flag_spec_ld], [1],
-    [If ld is used when linking, flag to modify a path being hardcoded into the resulting binary])
 _LT_TAGDECL([], [inherit_rpath], [0],
     [Set to yes if linker adds runtime paths of dependent libraries
     to runtime path list])
@@ -6349,8 +6304,6 @@ _LT_TAGVAR(hardcode_libdir_separator, $1)=
 _LT_TAGVAR(hardcode_minus_L, $1)=no
 _LT_TAGVAR(hardcode_shlibpath_var, $1)=unsupported
 _LT_TAGVAR(hardcode_automatic, $1)=no
-_LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)=
-_LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)=
 _LT_TAGVAR(inherit_rpath, $1)=no
 _LT_TAGVAR(module_cmds, $1)=
 _LT_TAGVAR(module_expsym_cmds, $1)=
@@ -6852,7 +6805,7 @@ if test yes != "$_lt_caught_CXX_error"; then
 
       hpux10*|hpux11*)
         if test no = "$with_gnu_ld"; then
-	  _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
+	  _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='$wl+b $wl$libdir'
 	  _LT_TAGVAR(hardcode_libdir_separator, $1)=:
 
           case $host_cpu in
@@ -6874,21 +6827,6 @@ if test yes != "$_lt_caught_CXX_error"; then
             _LT_TAGVAR(hardcode_minus_L, $1)=yes # Not in the search PATH,
 					         # but as the default
 					         # location of the library.
-	    # gcc-3.0.1 (collect2) breaks on -Wl,+cdp.
-	    # HP-aCC ignores -Wl,+cdp, and we test the linker for +cdp support.
-	    AC_CACHE_CHECK([if +cdp linker flag works],
-	      [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)],
-	      [_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=no
-	      save_LDFLAGS=$LDFLAGS
-	      LDFLAGS="$LDFLAGS -Wl,+cdp -Wl,/usr/lib/libc.1:/nonexistent -Wl,+cdp -Wl,/lib/libc.1:/nonexistent"
-	      AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],
-		[_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=yes],
-		[_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)=no])
-	      LDFLAGS="$save_LDFLAGS"
-	    ])
-	    if test "$_LT_TAGVAR(lt_cv_ldflag_cdp_works, $1)" = yes; then
-	      _LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)='${wl}+cdp ${wl}${linkdir}/${dlname}:${libdir}/${dlname}'
-	    fi
             ;;
         esac
 
@@ -6906,7 +6844,7 @@ if test yes != "$_lt_caught_CXX_error"; then
 	        _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname $wl+nodefaultrpath -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
 	        ;;
 	      *)
-	        _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags $fix_hardcoded_libdir_flag'
+	        _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
 	        ;;
 	    esac
 	    # Commands to make compiler produce verbose output that lists
@@ -6930,7 +6868,7 @@ if test yes != "$_lt_caught_CXX_error"; then
 	            _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $pic_flag $wl+h $wl$soname $wl+nodefaultrpath -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
 	            ;;
 	          *)
-	            _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $pic_flag $wl+h $wl$soname -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags $fix_hardcoded_libdir_flag'
+	            _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $pic_flag $wl+h $wl$soname $wl+b $wl$install_libdir -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
 	            ;;
 	        esac
 	      fi
@@ -7727,10 +7665,6 @@ _LT_TAGVAR(hardcode_libdir_flag_spec, $1)=
 _LT_TAGVAR(hardcode_libdir_separator, $1)=
 _LT_TAGVAR(hardcode_minus_L, $1)=no
 _LT_TAGVAR(hardcode_automatic, $1)=no
-_LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)=
-_LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)=
-_LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)=
-_LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)=
 _LT_TAGVAR(inherit_rpath, $1)=no
 _LT_TAGVAR(module_cmds, $1)=
 _LT_TAGVAR(module_expsym_cmds, $1)=
