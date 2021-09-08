@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "September 1, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "September 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -290,9 +290,14 @@ macOS and Solaris.
 intercept
 .br
 The fully-qualified path to a shared library containing a wrappers for the
-\fBexecv\fR()
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecvp\fR(),
 and
-\fBexecve\fR()
+\fBexecvpe\fR()
 library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the

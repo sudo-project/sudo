@@ -1,2 +1,7 @@
+execl
+execle
+execlp
 execv
 execve
+execvp
+execvpe

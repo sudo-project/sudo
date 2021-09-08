@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 3, 2021
+.Dd September 7, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2692,9 +2692,14 @@ If set,
 .Nm
 will log when a command spawns a child process and executes a program
 using the
-.Fn execv
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn execv ,
+.Fn execve ,
+.Fn execvp ,
 or
-.Fn execve
+.Fn execvpe
 library functions.
 For example, if a shell is run by
 .Nm sudo ,
@@ -5852,9 +5857,14 @@ Currently,
 .Nm sudo Ns 's
 .Em intercept
 functionality only works for programs that use the
-.Fn execv
-and
-.Fn execve
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn execv ,
+.Fn execve ,
+.Fn execvp ,
+or
+.Fn execvpe
 library functions to run the new command.
 This may be expanded in a future release of
 .Nm sudo .

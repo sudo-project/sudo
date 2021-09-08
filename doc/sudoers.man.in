@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 3, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2860,9 +2860,14 @@ If set,
 \fBsudoers\fR
 will log when a command spawns a child process and executes a program
 using the
-\fBexecv\fR()
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecvp\fR(),
 or
-\fBexecve\fR()
+\fBexecvpe\fR()
 library functions.
 For example, if a shell is run by
 \fBsudo\fR,
@@ -6331,9 +6336,14 @@ Currently,
 \fBsudo\fR's
 \fIintercept\fR
 functionality only works for programs that use the
-\fBexecv\fR()
-and
-\fBexecve\fR()
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecvp\fR(),
+or
+\fBexecvpe\fR()
 library functions to run the new command.
 This may be expanded in a future release of
 \fBsudo\fR.

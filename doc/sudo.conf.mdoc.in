@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd September 1, 2021
+.Dd September 7, 2021
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -265,9 +265,14 @@ functions, for example
 macOS and Solaris.
 .It intercept
 The fully-qualified path to a shared library containing a wrappers for the
-.Fn execv
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn execv ,
+.Fn execve ,
+.Fn execvp ,
 and
-.Fn execve
+.Fn execvpe
 library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the
