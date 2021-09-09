@@ -37,6 +37,7 @@ Makefile$
 ^src/sudo$
 ^src/sesh$
 ^src/check_(noexec|ttyname)$
+^src/intercept\.exp$
 ^src/sudo_usage\.h$
 
 ^lib/eventlog/check_wrap$

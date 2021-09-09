@@ -41,6 +41,7 @@ src/sudo
 src/sesh
 src/check_noexec
 src/check_ttyname
+src/intercept.exp
 src/sudo_usage.h
 
 lib/eventlog/check_wrap
