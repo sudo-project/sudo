@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -82,6 +82,7 @@ struct replay_closure {
     struct sudo_event *sigquit_ev;
     struct sudo_event *sigterm_ev;
     struct sudo_event *sigtstp_ev;
+    struct timespec *offset;
     struct timespec *max_delay;
     struct timing_closure timing;
     int iolog_dir_fd;
@@ -176,8 +177,8 @@ static int parse_expr(struct search_node_list *, char **, bool);
 static void read_keyboard(int fd, int what, void *v);
 static void help(void) __attribute__((__noreturn__));
 static int replay_session(int iolog_dir_fd, const char *iolog_dir,
-    struct timespec *max_wait, const char *decimal, bool interactive,
-    bool suspend_wait);
+    struct timespec *offset, struct timespec *max_wait, const char *decimal,
+    bool interactive, bool suspend_wait);
 static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
@@ -195,7 +196,7 @@ static void setup_terminal(struct eventlog *evlog, bool interactive, bool resize
     isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
     (s)[5] == '/' && \
     isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
-    (s)[8] == '\0')
+    (s)[6] == '\0')
 
 sudo_dso_public int main(int argc, char *argv[]);
 
@@ -207,6 +208,7 @@ main(int argc, char *argv[])
     bool interactive = true, suspend_wait = false, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, iolog_dir[PATH_MAX];
+    struct timespec offset = { 0, 0};
     struct eventlog *evlog;
     struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
@@ -232,7 +234,7 @@ main(int argc, char *argv[])
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
 	exit(EXIT_FAILURE);
     sudo_debug_register(getprogname(), NULL, NULL,
-	sudo_conf_debug_files(getprogname()));
+	sudo_conf_debug_files(getprogname()), -1);
 
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
@@ -323,8 +325,16 @@ main(int argc, char *argv[])
 	iolog_files[IOFD_TTYOUT].enabled = true;
     }
 
-    /* 6 digit ID in base 36, e.g. 01G712AB or free-form name */
+    /* Check for offset in @sec.nsec form at the end of the id. */
     id = argv[0];
+    if ((cp = strchr(id, '@')) != NULL) {
+	ep = iolog_parse_delay(cp + 1, &offset, decimal);
+	if (ep == NULL || *ep != '\0')
+	    sudo_fatalx(U_("invalid time offset %s"), cp + 1);
+	*cp = '\0';
+    }
+
+    /* 6 digit ID in base 36, e.g. 01G712AB or free-form name */
     if (VALID_ID(id)) {
 	len = snprintf(iolog_dir, sizeof(iolog_dir), "%s/%.2s/%.2s/%.2s",
 	    session_dir, id, &id[2], &id[4]);
@@ -376,8 +386,8 @@ main(int argc, char *argv[])
     evlog = NULL;
 
     /* Replay session corresponding to iolog_files[]. */
-    exitcode = replay_session(iolog_dir_fd, iolog_dir, max_delay, decimal,
-	interactive, suspend_wait);
+    exitcode = replay_session(iolog_dir_fd, iolog_dir, &offset, max_delay,
+	decimal, interactive, suspend_wait);
 
     restore_terminal_size();
     sudo_term_restore(ttyfd, true);
@@ -774,6 +784,16 @@ get_timing_record(struct replay_closure *closure)
 	    closure->iobuf.toread = timing->u.nbytes;
 	}
 
+	if (sudo_timespecisset(closure->offset)) {
+	    if (sudo_timespeccmp(&timing->delay, closure->offset, >)) {
+		sudo_timespecsub(&timing->delay, closure->offset, &timing->delay);
+		sudo_timespecclear(closure->offset);
+	    } else {
+		sudo_timespecsub(closure->offset, &timing->delay, closure->offset);
+		sudo_timespecclear(&timing->delay);
+	    }
+	}
+
 	if (nodelay) {
 	    /* Already waited, fire immediately. */
 	    timing->delay.tv_sec = 0;
@@ -957,8 +977,8 @@ signal_cb(int signo, int what, void *v)
 
 static struct replay_closure *
 replay_closure_alloc(int iolog_dir_fd, const char *iolog_dir,
-    struct timespec *max_delay, const char *decimal, bool interactive,
-    bool suspend_wait)
+    struct timespec *offset, struct timespec *max_delay, const char *decimal,
+    bool interactive, bool suspend_wait)
 {
     struct replay_closure *closure;
     debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL);
@@ -969,6 +989,7 @@ replay_closure_alloc(int iolog_dir_fd, const char *iolog_dir,
     closure->iolog_dir_fd = iolog_dir_fd;
     closure->iolog_dir = iolog_dir;
     closure->interactive = interactive;
+    closure->offset = offset;
     closure->suspend_wait = suspend_wait;
     closure->max_delay = max_delay;
     closure->timing.decimal = decimal;
@@ -1042,7 +1063,7 @@ bad:
 }
 
 static int
-replay_session(int iolog_dir_fd, const char *iolog_dir,
+replay_session(int iolog_dir_fd, const char *iolog_dir, struct timespec *offset,
     struct timespec *max_delay, const char *decimal, bool interactive,
     bool suspend_wait)
 {
@@ -1051,8 +1072,8 @@ replay_session(int iolog_dir_fd, const char *iolog_dir,
     debug_decl(replay_session, SUDO_DEBUG_UTIL);
 
     /* Allocate the delay closure and read the first timing record. */
-    closure = replay_closure_alloc(iolog_dir_fd, iolog_dir, max_delay, decimal,
-	interactive, suspend_wait);
+    closure = replay_closure_alloc(iolog_dir_fd, iolog_dir, offset, max_delay,
+	decimal, interactive, suspend_wait);
     if (get_timing_record(closure) != 0) {
 	ret = 1;
 	goto done;

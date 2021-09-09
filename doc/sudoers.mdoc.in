@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 7, 2021
+.Dd September 7, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1006,7 +1006,7 @@ Warning, if the user has write access to the command itself (directly or via a
 command), it may be possible for the user to replace the command after the
 digest check has been performed but before the command is executed.
 A similar race condition exists on systems that lack the
-.Xr fexecve 2
+.Fn fexecve
 system call when the directory in which the command is located
 is writable by the user.
 See the description of the
@@ -1143,8 +1143,9 @@ Chroot_Spec ::= 'CHROOT=directory'
 
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
-              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
-              'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
+              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'INTERCEPT:' |
+              'NOINTERCEPT:' | 'PASSWD:' | 'NOPASSWD:' | 'SETENV:' |
+              'NOSETENV:')
 .Ed
 .Pp
 A
@@ -1338,6 +1339,7 @@ On systems with SELinux support,
 .Em sudoers
 file entries may optionally have an SELinux role and/or type associated
 with a command.
+This can be used to implement a form of role-based access control (RBAC).
 If a role or
 type is specified with the command it will override any default values
 specified in
@@ -1527,6 +1529,8 @@ The following tag values are supported:
 .Li NOLOG_OUTPUT ,
 .Li MAIL ,
 .Li NOMAIL ,
+.Li INTERCEPT ,
+.Li NOINTERCEPT ,
 .Li PASSWD ,
 .Li NOPASSWD ,
 .Li SETENV ,
@@ -1673,7 +1677,9 @@ and
 .Pa /usr/bin/lprm
 as
 .Sy root
-on the machine rushmore without authenticating himself.
+on the machine
+.Dq rushmore
+without authenticating himself.
 If we only want
 .Sy ray
 to be able to
@@ -1733,6 +1739,36 @@ the
 tag is implied for that command; this default may be overridden by use of the
 .Li NOSETENV
 tag.
+.It Em INTERCEPT No and Em NOINTERCEPT
+.sp
+If
+.Nm sudo
+has been compiled with
+.Em intercept
+support and the underlying operating system supports it, the
+.Li INTERCEPT
+tag can be used to cause programs spawned by a command to be validated against
+.Em sudoers
+and logged just like they would be if run through
+.Nm sudo
+directly.
+This is useful in conjunction with commands that allow shell escapes
+such as editors, shells and paginators.
+.Pp
+In the following example, user
+.Sy chuck
+may run any command on the machine
+.Dq research
+in intercept mode.
+.Bd -literal
+chuck	research = INTERCEPT: ALL
+.Ed
+.Pp
+See the
+.Sx Preventing shell escapes
+section below for more details on how
+.Li INTERCEPT
+works and whether or not it will work on your system.
 .El
 .Ss Wildcards
 .Nm sudo
@@ -2573,6 +2609,16 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.29 or higher.
+.It log_exit_status
+If set,
+.Nm
+will log the exit value of commands that are run to syslog and/or a log file.
+If a command was terminated by a signal, the signal name is logged as well.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.9.8 or higher.
 .It log_host
 If set, the host name will be included in log entries written to
 the file configured by the
@@ -2641,6 +2687,37 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
+.It log_subcmds
+If set,
+.Nm
+will log when a command spawns a child process and executes a program
+using the
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn execv ,
+.Fn execve ,
+.Fn execvp ,
+or
+.Fn execvpe
+library functions.
+For example, if a shell is run by
+.Nm sudo ,
+the individual commands run via the shell will be logged.
+This flag is
+.Em off
+by default.
+.Pp
+The
+.Em log_subcmds
+flag uses the same underlying mechanism as the
+.Em intercept
+setting.
+See
+.Sx Preventing shell escapes
+for more information on what systems support this option and its limitations.
+This setting is only supported by version 1.9.8 or higher
+and is incompatible with SELinux RBAC support.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -2789,6 +2866,63 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.18 or higher.
+.It intercept
+If set, all commands run via
+.Nm sudo
+will behave as if the
+.Li INTERCEPT
+tag has been set, unless overridden by an
+.Li NOINTERCEPT
+tag.
+See the description of
+.Em INTERCEPT and NOINTERCEPT
+above as well as the
+.Sx Preventing shell escapes
+section at the end of this manual.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.9.8 or higher
+and is incompatible with SELinux RBAC support.
+.It intercept_allow_setid
+On most systems, the dynamic loader will ignore
+.Ev LD_PRELOAD
+(or the equivalent) when running set-user-ID and set-group-ID
+programs, effectively disabling intercept mode.
+To prevent this from happening,
+.Nm
+will not permit a set-user-ID or set-group-ID program to be run in
+intercept mode unless
+.Em intercept_allow_setid
+is set.
+This flag has no effect unless the
+.Em intercept
+flag is enabled or the
+.Em INTERCEPT
+tag has been set for the command.
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.9.8 or higher.
+.It intercept_authenticate
+If set, commands run by an intercepted process must be authenticated
+when the user's time stamp is not current.
+For example, if a shell is run with
+.Em intercept
+enabled, as soon as the invoking user's time stamp is out of date,
+subsequent commands will need to be authenticated.
+This flag has no effect unless the
+.Em intercept
+flag is enabled or the
+.Em INTERCEPT
+tag has been set for the command.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.9.8 or higher.
 .It netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
 tuple: host name, user name and domain (if one is set).
@@ -3785,17 +3919,31 @@ is set and the remote log server is secured with TLS.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
 .It log_server_peer_cert
-The path to the client's certificate file, in PEM format.
-This setting is required when
-.Em log_servers
-is set and the remote log server is secured with TLS.
+The path to the
+.Nm sudo
+client's certificate file, in PEM format.
+This setting is required when the remote log server is secured
+with TLS and client certificate validation is enabled.
+For
+.Nm sudo_logsrvd ,
+client certificate validation is controlled by the
+.Em tls_checkpeer
+option, which defaults to
+.Em false .
 .Pp
 This setting is only supported by version 1.9.0 or higher.
 .It log_server_peer_key
-The path to the client's private key file, in PEM format.
-This setting is required when
-.Em log_servers
-is set and the remote log server is secured with TLS.
+The path to the
+.Nm sudo
+client's private key file, in PEM format.
+This setting is required when the remote log server is secured
+with TLS and client certificate validation is enabled.
+For
+.Nm sudo_logsrvd ,
+client certificate validation is controlled by the
+.Em tls_checkpeer
+option, which defaults to
+.Em false .
 .Pp
 This setting is only supported by version 1.9.0 or higher.
 .It mailsub
@@ -4104,7 +4252,7 @@ alias.
 .Pp
 This setting is only supported by version 1.8.20 or higher.
 If the operating system does not support the
-.Xr fexecve 2
+.Fn fexecve
 system call, this setting has no effect.
 .It group_plugin
 A string containing a
@@ -5065,11 +5213,11 @@ The number of lines of the terminal the command ran on, or zero
 if no terminal was present.
 .It runargv
 A JSON array representing the command's argument vector as passed to the
-.Xr execve 2
+.Fn execve
 system call.
 .It runenv
 A JSON array representing the command's environment as passed to the
-.Xr execve 2
+.Fn execve
 system call.
 .It rungid
 The group ID the command ran as.
@@ -5668,7 +5816,7 @@ access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
 .Pp
-There are two basic approaches to this problem:
+There are four basic approaches to this problem:
 .Bl -tag -width 8n
 .It restrict
 Avoid giving users access to commands that allow the user to run
@@ -5682,7 +5830,7 @@ running editors via
 Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
 do not is often unworkable.
-.It noexec
+.It intercept
 Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually
@@ -5690,19 +5838,48 @@ variable (usually
 to an alternate shared library.
 On such systems,
 .Nm sudo Ns 's
-.Em noexec
-functionality can be used to prevent a program run by
-.Nm sudo
-from executing any other programs.
+.Em intercept
+functionality can be used to transparently intercept an attempt to
+run a new command, allow or deny it based on
+.Em sudoers
+rules, and log the result.
+For example, this can be used to restrict the commands run from
+within a privileged shell.
 Note, however, that this applies only to dynamically-linked
 executables.
 Statically-linked executables and executables
 running under binary emulation are not affected.
+Also, most shells support built-in commands and the ability to read
+or write sensitive files that cannot be intercepted by
+.Nm sudo .
+.Pp
+Currently,
+.Nm sudo Ns 's
+.Em intercept
+functionality only works for programs that use the
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn execv ,
+.Fn execve ,
+.Fn execvp ,
+or
+.Fn execvpe
+library functions to run the new command.
+This may be expanded in a future release of
+.Nm sudo .
+Because most dynamic loaders ignore
+.Ev LD_PRELOAD
+(or the equivalent) when running set-user-ID and set-group-ID programs,
+.Nm
+will not permit such programs to be run in
+.Em intercept
+mode.
 .Pp
 The
-.Em noexec
-feature is known to work on SunOS, Solaris, *BSD,
-Linux, IRIX, Tru64 UNIX, macOS, HP-UX 11.x and AIX 5.3 and above.
+.Em intercept
+feature is known to work on Solaris, *BSD, Linux, macOS, HP-UX 11.x
+and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 .Ev LD_PRELOAD
 environment variable.
@@ -5710,7 +5887,90 @@ Check your operating system's manual pages for the dynamic linker
 (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
 .Ev LD_PRELOAD
 is supported.
+It is
+.Em not
+supported when
+.Nm sudo Ns 's
+SELinux RBAC support is in use due to a fundamental incompatibility.
 .Pp
+To enable intercept mode on a per-command basis, use the
+.Li INTERCEPT
+tag as documented in the User Specification section above.
+Here is that example again:
+.Bd -literal
+chuck	research = INTERCEPT: ALL
+.Ed
+.Pp
+This allows user
+.Sy chuck
+to run any command on the machine
+.Dq research
+in intercept mode.
+Any commands run via shell escapes will be validated and logged by
+.Nm sudo .
+If you are unsure whether or not your system is capable of supporting
+.Em intercept ,
+you can always just try it out and check whether or not external
+commands run via a shell are logged when
+.Em intercept
+is enabled.
+.It log
+There are two separate but related ways to log additional commands.
+The first is to enable I/O logging using the
+.Em log_output
+flag.
+This will log the command's output but will not create an event log
+entry when the additional command is run.
+The second is to enable the
+.Em log_subcmds
+flag in
+.Em sudoers
+which will create an event log entry every time a new command is run.
+If I/O logging is also enabled, the log entry will include a time offset
+into the I/O log to indicate when the command was run.
+This offset can be passed to the
+.Xr sudoreplay @mansectsu@
+utility to replay the I/O log at the exact moment when the command was run.
+The
+.Em log_subcmds
+flag uses the same mechanism as
+.Em intercept
+(see above) and has the same limitations.
+.It noexec
+.Nm sudo Ns 's
+.Em noexec
+functionality can be used to prevent a program run by
+.Nm sudo
+from executing any other programs.
+On most systems, it uses the same mechanism as
+.Em intercept
+(see above) and thus the same caveats apply.
+The
+.Em noexec
+functionality
+is capable of blocking execution of commands run via the
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn exect ,
+.Fn execv ,
+.Fn execve ,
+.Fn execveat ,
+.Fn execvP ,
+.Fn execvp ,
+.Fn execvpe ,
+.Fn fexecve ,
+.Fn popen ,
+.Fn posix_spawn ,
+.Fn posix_spawnp ,
+.Fn system ,
+and
+.Fn wordexp
+functions.
+On Linux, a
+.Fn seccomp
+filter is used to implement
+.Em noexec .
 On Solaris 10 and higher,
 .Em noexec
 uses Solaris privileges instead of the
@@ -5721,8 +5981,7 @@ To enable
 .Em noexec
 for a command, use the
 .Li NOEXEC
-tag as documented
-in the User Specification section above.
+tag as documented in the User Specification section above.
 Here is that example again:
 .Bd -literal
 aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
@@ -5994,9 +6253,10 @@ SSSD-based sudoers
 .It Em util
 utility functions
 .El
+.Pp
 For example:
 .Bd -literal
-Debug sudo /var/log/sudo_debug match@info,nss@info
+Debug sudoers.so /var/log/sudoers_debug match@info,nss@info
 .Ed
 .Pp
 For more information, see the

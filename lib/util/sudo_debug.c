@@ -142,7 +142,7 @@ sudo_debug_free_output(struct sudo_debug_output *output)
  */
 static struct sudo_debug_output *
 sudo_debug_new_output(struct sudo_debug_instance *instance,
-    struct sudo_debug_file *debug_file)
+    struct sudo_debug_file *debug_file, int minfd)
 {
     char *buf, *cp, *last, *subsys, *pri;
     struct sudo_debug_output *output;
@@ -180,6 +180,15 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	    goto bad;
 	}
 	ignore_result(fchown(output->fd, (uid_t)-1, 0));
+    }
+    if (output->fd < minfd) {
+	int newfd = fcntl(output->fd, F_DUPFD, minfd);
+	if (newfd == -1) {
+	    sudo_warn_nodebug("%s", output->filename);
+	    goto bad;
+	}
+	close(output->fd);
+	output->fd = newfd;
     }
     if (fcntl(output->fd, F_SETFD, FD_CLOEXEC) == -1) {
 	sudo_warn_nodebug("%s", output->filename);
@@ -259,8 +268,9 @@ bad:
  * on error.
  */
 int
-sudo_debug_register_v1(const char *program, const char *const subsystems[],
-    unsigned int ids[], struct sudo_conf_debug_file_list *debug_files)
+sudo_debug_register_v2(const char *program, const char *const subsystems[],
+    unsigned int ids[], struct sudo_conf_debug_file_list *debug_files,
+    int minfd)
 {
     struct sudo_debug_instance *instance = NULL;
     struct sudo_debug_output *output;
@@ -346,7 +356,7 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
     }
 
     TAILQ_FOREACH(debug_file, debug_files, entries) {
-	output = sudo_debug_new_output(instance, debug_file);
+	output = sudo_debug_new_output(instance, debug_file, minfd);
 	if (output != NULL)
 	    SLIST_INSERT_HEAD(&instance->outputs, output, entries);
     }
@@ -362,6 +372,13 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
     }
 
     return idx;
+}
+
+int
+sudo_debug_register_v1(const char *program, const char *const subsystems[],
+    unsigned int ids[], struct sudo_conf_debug_file_list *debug_files)
+{
+    return sudo_debug_register_v2(program, subsystems, ids, debug_files, -1);
 }
 
 /*
@@ -962,6 +979,14 @@ sudo_debug_get_fds_v1(unsigned char **fds)
     return sudo_debug_max_fd;
 }
 #else /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+int
+sudo_debug_register_v2(const char *program, const char *const subsystems[],
+    unsigned int ids[], struct sudo_conf_debug_file_list *debug_files,
+    int minfd)
+{
+    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+}
+
 int
 sudo_debug_register_v1(const char *program, const char *const subsystems[],
     unsigned int ids[], struct sudo_conf_debug_file_list *debug_files)

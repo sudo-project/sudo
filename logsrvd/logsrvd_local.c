@@ -49,6 +49,7 @@
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_eventlog.h"
+#include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_json.h"
 #include "sudo_iolog.h"
@@ -121,8 +122,8 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 	    break;
 	}
 	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unexpected value case %d", info->value_case);
+	    sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
+		info->value_case, "InfoMessage", "local");
 	    goto bad;
 	}
     }
@@ -138,46 +139,72 @@ bool
 store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    char *log_id = NULL;
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
+    struct eventlog *evlog = NULL;
+    char *log_id = NULL;
+    bool ret = false;
     debug_decl(store_accept_local, SUDO_DEBUG_UTIL);
 
     /* Store sudo-style event and I/O logs. */
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs, closure);
-    if (closure->evlog == NULL) {
+    evlog = evlog_new(msg->submit_time, msg->info_msgs, msg->n_info_msgs,
+	closure);
+    if (evlog == NULL) {
 	closure->errstr = _("error parsing AcceptMessage");
-	debug_return_bool(false);
+	goto done;
     }
 
-    /* Create I/O log info file and parent directories. */
-    if (msg->expect_iobufs) {
-	if (!iolog_init(msg, closure)) {
-	    closure->errstr = _("error creating I/O log");
-	    debug_return_bool(false);
+    /* Additional setup for the initial command in the session. */
+    if (closure->evlog == NULL) {
+	closure->evlog = evlog;
+
+	/* Create I/O log info file and parent directories. */
+	if (msg->expect_iobufs) {
+	    if (!iolog_init(msg, closure)) {
+		closure->errstr = _("error creating I/O log");
+		goto done;
+	    }
+	    closure->log_io = true;
+	    log_id = closure->evlog->iolog_path;
 	}
-	closure->log_io = true;
-	log_id = closure->evlog->iolog_path;
+    } else if (closure->log_io) {
+	/* Sub-command from an existing session, set iolog and offset. */
+	evlog->iolog_path = strdup(closure->evlog->iolog_path);
+	if (evlog->iolog_path == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    closure->errstr = _("unable to allocate memory");
+	    goto done;
+	}
+	if (closure->evlog->iolog_file != NULL) {
+	    evlog->iolog_file = evlog->iolog_path +
+		(closure->evlog->iolog_file - closure->evlog->iolog_path);
+	}
+	sudo_timespecsub(&evlog->submit_time, &closure->evlog->submit_time,
+	    &evlog->iolog_offset);
     }
 
-    if (!eventlog_accept(closure->evlog, 0, logsrvd_json_log_cb, &info)) {
+    if (!eventlog_accept(evlog, 0, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging accept event");
-	debug_return_bool(false);
+	goto done;
     }
 
     if (log_id != NULL) {
 	/* Send log ID to client for restarting connections. */
 	if (!fmt_log_id_message(log_id, closure))
-	    debug_return_bool(false);
+	    goto done;
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to add server write event");
-	    debug_return_bool(false);
+	    sudo_warnx("%s", U_("unable to add event to queue"));
+	    goto done;
 	}
     }
 
-    debug_return_bool(true);
+    ret = true;
+
+done:
+    if (closure->evlog != evlog)
+	eventlog_free(evlog);
+
+    debug_return_bool(ret);
 }
 
 /*
@@ -188,33 +215,62 @@ store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
+    struct eventlog *evlog = NULL;
+    bool ret = false;
     debug_decl(store_reject_local, SUDO_DEBUG_UTIL);
 
-    closure->evlog = evlog_new(msg->submit_time, msg->info_msgs,
-	msg->n_info_msgs, closure);
-    if (closure->evlog == NULL) {
+    evlog = evlog_new(msg->submit_time, msg->info_msgs, msg->n_info_msgs,
+	closure);
+    if (evlog == NULL) {
 	closure->errstr = _("error parsing RejectMessage");
-	debug_return_bool(false);
+	goto done;
     }
 
-    if (!eventlog_reject(closure->evlog, 0, msg->reason,
-	    logsrvd_json_log_cb, &info)) {
+    if (closure->evlog == NULL) {
+	/* Initial command in session. */
+	closure->evlog = evlog;
+    } else if (closure->log_io) {
+	/* Sub-command from an existing session, set iolog and offset. */
+	evlog->iolog_path = strdup(closure->evlog->iolog_path);
+	if (evlog->iolog_path == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    closure->errstr = _("unable to allocate memory");
+	    goto done;
+	}
+	if (closure->evlog->iolog_file != NULL) {
+	    evlog->iolog_file = evlog->iolog_path +
+		(closure->evlog->iolog_file - closure->evlog->iolog_path);
+	}
+	sudo_timespecsub(&evlog->submit_time, &closure->evlog->submit_time,
+	    &evlog->iolog_offset);
+    }
+
+    if (!eventlog_reject(evlog, 0, msg->reason, logsrvd_json_log_cb, &info)) {
 	closure->errstr = _("error logging reject event");
-	debug_return_bool(false);
+	goto done;
     }
 
-    debug_return_bool(true);
+    ret = true;
+
+done:
+    if (closure->evlog != evlog)
+	eventlog_free(evlog);
+
+    debug_return_bool(ret);
 }
 
 bool
 store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    const char *signame = NULL;
+    struct timespec run_time = { msg->run_time->tv_sec, msg->run_time->tv_nsec };
+    int flags = 0;
     mode_t mode;
     debug_decl(store_exit_local, SUDO_DEBUG_UTIL);
 
-    /* Sudo I/O logs don't store this info. */
     if (msg->signal != NULL && msg->signal[0] != '\0') {
+	signame = msg->signal;
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "command was killed by SIG%s%s", msg->signal,
 	    msg->dumped_core ? " (core dumped)" : "");
@@ -222,14 +278,21 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "command exited with %d", msg->exit_value);
     }
+    if (logsrvd_conf_log_exit()) {
+	if (!eventlog_exit(closure->evlog, flags, &run_time, msg->exit_value,
+		signame, msg->dumped_core)) {
+	    closure->errstr = _("error logging exit event");
+	    debug_return_bool(false);
+	}
+    }
 
     if (closure->log_io) {
 	/* Clear write bits from I/O timing file to indicate completion. */
 	mode = logsrvd_conf_iolog_mode();
 	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
 	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		"unable to fchmodat timing file");
+	    sudo_warn("chmod 0%o %s/%s", (unsigned int)mode, "timing",
+		logsrvd_conf_iolog_dir());
 	}
     }
 
@@ -251,15 +314,13 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
     /* We must allocate closure->evlog for iolog_path. */
     closure->evlog = calloc(1, sizeof(*closure->evlog));
     if (closure->evlog == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-            "calloc(1, %zu)", sizeof(*closure->evlog));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	closure->errstr = _("unable to allocate memory");
         goto bad;
     }
     closure->evlog->iolog_path = strdup(msg->log_id);
     if (closure->evlog->iolog_path == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "strdup");
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	closure->errstr = _("unable to allocate memory");
 	goto bad;
     }
@@ -268,20 +329,18 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
     closure->iolog_dir_fd =
 	iolog_openat(AT_FDCWD, closure->evlog->iolog_path, O_RDONLY);
     if (closure->iolog_dir_fd == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s", closure->evlog->iolog_path);
+	sudo_warn("%s", closure->evlog->iolog_path);
 	goto bad;
     }
 
     /* If the timing file write bit is clear, log is already complete. */
     if (fstatat(closure->iolog_dir_fd, "timing", &sb, 0) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to stat %s/timing", closure->evlog->iolog_path);
+	sudo_warn("%s/timing", closure->evlog->iolog_path);
 	goto bad;
     }
     if (!ISSET(sb.st_mode, S_IWUSR)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s already complete", closure->evlog->iolog_path);
+	sudo_warn(U_("%s: %s"), closure->evlog->iolog_path,
+	    U_("log is already complete, cannot be restarted"));
 	closure->errstr = _("log is already complete, cannot be restarted");
 	goto bad;
     }
@@ -304,8 +363,7 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
 
     /* Must seek or flush before switching from read -> write. */
     if (iolog_seek(&closure->iolog_files[IOFD_TIMING], 0, SEEK_CUR) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "lseek(IOFD_TIMING, 0, SEEK_CUR)");
+	sudo_warn("%s/timing", closure->evlog->iolog_path);
 	goto bad;
     }
 
@@ -321,26 +379,35 @@ bool
 store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    struct eventlog *evlog = NULL;
     struct timespec alert_time;
+    bool ret = false;
     debug_decl(store_alert_local, SUDO_DEBUG_UTIL);
 
     if (msg->info_msgs != NULL && msg->n_info_msgs != 0) {
-	closure->evlog = evlog_new(NULL, msg->info_msgs,
-	    msg->n_info_msgs, closure);
-	if (closure->evlog == NULL) {
+	evlog = evlog_new(NULL, msg->info_msgs, msg->n_info_msgs, closure);
+	if (evlog == NULL) {
 	    closure->errstr = _("error parsing AlertMessage");
-	    debug_return_bool(false);
+	    goto done;
 	}
+	if (closure->evlog == NULL)
+	    closure->evlog = evlog;
     }
-
     alert_time.tv_sec = msg->alert_time->tv_sec;
     alert_time.tv_nsec = msg->alert_time->tv_nsec;
-    if (!eventlog_alert(closure->evlog, 0, &alert_time, msg->reason, NULL)) {
+
+    if (!eventlog_alert(evlog, 0, &alert_time, msg->reason, NULL)) {
 	closure->errstr = _("error logging alert event");
-	debug_return_bool(false);
+	goto done;
     }
 
-    debug_return_bool(true);
+    ret = true;
+
+done:
+    if (closure->evlog != evlog)
+	eventlog_free(evlog);
+
+    debug_return_bool(ret);
 }
 
 bool
@@ -365,25 +432,22 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
 	iofd, (long long)iobuf->delay->tv_sec, (int)iobuf->delay->tv_nsec,
 	iobuf->data.len);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d", len);
+	sudo_warnx(U_("unable to format timing buffer, length %d"), len);
 	goto bad;
     }
 
     /* Write to specified I/O log file. */
     if (!iolog_write(&closure->iolog_files[iofd], iobuf->data.data,
 	    iobuf->data.len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", evlog->iolog_path,
-	    iolog_fd_to_name(iofd), errstr);
+	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path, iolog_fd_to_name(iofd),
+	    errstr);
 	goto bad;
     }
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", evlog->iolog_path,
+	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
     }
@@ -421,16 +485,14 @@ store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t buflen,
 	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->rows, msg->cols);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d", len);
+	sudo_warnx(U_("unable to format timing buffer, length %d"), len);
 	goto bad;
     }
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->evlog->iolog_path,
+	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
     }
@@ -458,17 +520,14 @@ store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t buflen,
 	(long long)msg->delay->tv_sec, (int)msg->delay->tv_nsec,
 	msg->signal);
     if (len < 0 || len >= ssizeof(tbuf)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to format timing buffer, len %d, signal %s",
-	    len, msg->signal);
+	sudo_warnx(U_("unable to format timing buffer, length %d"), len);
 	goto bad;
     }
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
 	    len, &errstr)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to write to %s/%s: %s", closure->evlog->iolog_path,
+	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
     }

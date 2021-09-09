@@ -34,6 +34,9 @@ incdir = $(top_srcdir)/include
 CC = @CC@
 LIBTOOL = @LIBTOOL@
 
+# Libraries
+LT_LIBS = $(top_builddir)/lib/protobuf-c/libprotobuf-c.la
+
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
 
@@ -73,7 +76,7 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-LIBLOGSRV_OBJS = protobuf-c.lo log_server.pb-c.lo
+LIBLOGSRV_OBJS = log_server.pb-c.lo
 
 IOBJS = $(LIBLOGSRV_OBJS:.lo=.i)
 
@@ -121,8 +124,8 @@ $(devdir)/log_server.pb-c.c: $(srcdir)/log_server.proto
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
-liblogsrv.la: $(LIBLOGSRV_OBJS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBLOGSRV_OBJS)
+liblogsrv.la: $(LIBLOGSRV_OBJS) $(LT_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBLOGSRV_OBJS) $(LT_LIBS)
 
 pre-install:
 
@@ -185,11 +188,3 @@ log_server.pb-c.i: $(srcdir)/log_server.pb-c.c $(incdir)/log_server.pb-c.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 log_server.pb-c.plog: log_server.pb-c.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/log_server.pb-c.c --i-file $< --output-file $@
-protobuf-c.lo: $(srcdir)/protobuf-c.c $(incdir)/protobuf-c/protobuf-c.h \
-               $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/protobuf-c.c
-protobuf-c.i: $(srcdir)/protobuf-c.c $(incdir)/protobuf-c/protobuf-c.h \
-               $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-protobuf-c.plog: protobuf-c.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/protobuf-c.c --i-file $< --output-file $@

@@ -31,6 +31,7 @@
 enum event_type {
     EVLOG_ACCEPT,
     EVLOG_REJECT,
+    EVLOG_EXIT,
     EVLOG_ALERT
 };
 
@@ -110,11 +111,13 @@ struct eventlog {
     char **env_add;
     char **envp;
     struct timespec submit_time;
+    struct timespec iolog_offset;
     int lines;
     int columns;
     uid_t runuid;
     gid_t rungid;
     char sessid[7];
+    char uuid_str[37];
 };
 
 /* Callback from eventlog code to write log info */
@@ -122,6 +125,7 @@ struct json_container;
 typedef bool (*eventlog_json_callback_t)(struct json_container *, void *);
 
 bool eventlog_accept(const struct eventlog *evlog, int flags, eventlog_json_callback_t info_cb, void *info);
+bool eventlog_exit(const struct eventlog *evlog, int flags, struct timespec *run_time, int exit_value, const char *signal_name, bool core_dumped);
 bool eventlog_alert(const struct eventlog *evlog, int flags, struct timespec *alert_time, const char *reason, const char *errstr);
 bool eventlog_reject(const struct eventlog *evlog, int flags, const char *reason, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_store_json(struct json_container *json, const struct eventlog *evlog);

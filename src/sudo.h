@@ -123,21 +123,23 @@ struct user_details {
 #define CD_SET_GID		0x000004
 #define CD_SET_EGID		0x000008
 #define CD_PRESERVE_GROUPS	0x000010
-#define CD_NOEXEC		0x000020
-#define CD_SET_PRIORITY		0x000040
-#define CD_SET_UMASK		0x000080
-#define CD_SET_TIMEOUT		0x000100
-#define CD_SUDOEDIT		0x000200
-#define CD_BACKGROUND		0x000400
-#define CD_RBAC_ENABLED		0x000800
-#define CD_USE_PTY		0x001000
-#define CD_SET_UTMP		0x002000
-#define CD_EXEC_BG		0x004000
-#define CD_SUDOEDIT_FOLLOW	0x008000
-#define CD_SUDOEDIT_CHECKDIR	0x010000
-#define CD_SET_GROUPS		0x020000
-#define CD_LOGIN_SHELL		0x040000
-#define CD_OVERRIDE_UMASK	0x080000
+#define CD_INTERCEPT		0x000020
+#define CD_NOEXEC		0x000040
+#define CD_SET_PRIORITY		0x000080
+#define CD_SET_UMASK		0x000100
+#define CD_SET_TIMEOUT		0x000200
+#define CD_SUDOEDIT		0x000400
+#define CD_BACKGROUND		0x000800
+#define CD_RBAC_ENABLED		0x001000
+#define CD_USE_PTY		0x002000
+#define CD_SET_UTMP		0x004000
+#define CD_EXEC_BG		0x008000
+#define CD_SUDOEDIT_FOLLOW	0x010000
+#define CD_SUDOEDIT_CHECKDIR	0x020000
+#define CD_SET_GROUPS		0x040000
+#define CD_LOGIN_SHELL		0x080000
+#define CD_OVERRIDE_UMASK	0x100000
+#define CD_LOG_SUBCMDS		0x200000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -221,10 +223,15 @@ int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
 bool set_user_groups(struct command_details *details);
 struct sudo_plugin_event *sudo_plugin_event_alloc(void);
-void audit_reject(const char *plugin_name, unsigned int plugin_type,
+bool audit_accept(const char *plugin_name, unsigned int plugin_type,
+    char * const command_info[], char * const run_argv[],
+    char * const run_envp[]);
+bool audit_reject(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
-void audit_error(const char *plugin_name, unsigned int plugin_type,
+bool audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
+bool approval_check(char * const command_info[], char * const run_argv[],
+    char * const run_envp[]);
 extern const char *list_user;
 extern struct user_details user_details;
 extern int sudo_debug_instance;

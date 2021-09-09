@@ -49,7 +49,7 @@
 #include "sudo_plugin_int.h"
 
 static void
-close_fds(struct command_details *details, int errfd)
+close_fds(struct command_details *details, int errfd, int intercept_fd)
 {
     int fd, maxfd;
     unsigned char *debug_fds;
@@ -66,6 +66,8 @@ close_fds(struct command_details *details, int errfd)
     }
     if (errfd != -1)
 	add_preserved_fd(&details->preserved_fds, errfd);
+    if (intercept_fd != -1)
+	add_preserved_fd(&details->preserved_fds, intercept_fd);
 
     /* Close all fds except those explicitly preserved. */
     closefrom_except(details->closefrom, &details->preserved_fds);
@@ -79,7 +81,7 @@ close_fds(struct command_details *details, int errfd)
  * Returns true on success and false on failure.
  */
 static bool
-exec_setup(struct command_details *details, int errfd)
+exec_setup(struct command_details *details, int intercept_fd, int errfd)
 {
     bool ret = false;
     debug_decl(exec_setup, SUDO_DEBUG_EXEC);
@@ -163,7 +165,7 @@ exec_setup(struct command_details *details, int errfd)
 	(void) umask(details->umask);
 
     /* Close fds before chroot (need /dev) or uid change (prlimit on Linux). */
-    close_fds(details, errfd);
+    close_fds(details, errfd, intercept_fd);
 
     if (details->chroot) {
 	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
@@ -233,12 +235,12 @@ done:
  * If the exec fails, cstat is filled in with the value of errno.
  */
 void
-exec_cmnd(struct command_details *details, int errfd)
+exec_cmnd(struct command_details *details, int intercept_fd, int errfd)
 {
     debug_decl(exec_cmnd, SUDO_DEBUG_EXEC);
 
     restore_signals();
-    if (exec_setup(details, errfd) == true) {
+    if (exec_setup(details, intercept_fd, errfd) == true) {
 	/* headed for execve() */
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
@@ -248,7 +250,7 @@ exec_cmnd(struct command_details *details, int errfd)
 #endif
 	{
 	    sudo_execve(details->execfd, details->command, details->argv,
-		details->envp, ISSET(details->flags, CD_NOEXEC));
+		details->envp, intercept_fd, details->flags);
 	}
     }
     sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
@@ -317,7 +319,7 @@ sudo_needs_pty(struct command_details *details)
 {
     struct plugin_container *plugin;
 
-    if (ISSET(details->flags, CD_USE_PTY))
+    if (ISSET(details->flags, CD_USE_PTY|CD_INTERCEPT|CD_LOG_SUBCMDS))
 	return true;
 
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
@@ -409,7 +411,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      */
     if (direct_exec_allowed(details)) {
 	if (!sudo_terminated(cstat)) {
-	    exec_cmnd(details, -1);
+	    exec_cmnd(details, -1, -1);
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
 	}

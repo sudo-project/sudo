@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2021 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20210503"
+pp_revision="20210811"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -8171,6 +8171,12 @@ pp_bsd_make_data() {
     cat $pp_wrkdir/%files.${cmp} | while read t m o g f p st; do
         test x"$o" = x"-" && o="${pp_bsd_defattr_uid:-root}"
         test x"$g" = x"-" && g="${pp_bsd_defattr_gid:-wheel}"
+        if test x"$m" = x"-"; then
+            case "$t" in
+                d) m=755;;
+                f) m=644;;
+            esac
+        fi
         path=$p
         case "$t" in
             f) # Files

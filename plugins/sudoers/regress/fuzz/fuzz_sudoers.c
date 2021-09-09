@@ -48,6 +48,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
 bool sudoers_recovery = true;
+int sudo_mode;
 
 FILE *
 open_sudoers(const char *file, bool doedit, bool *keepopen)
@@ -304,7 +305,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		sudo_pw_delref(sudo_user.pw);
 	    sudo_user.pw = sudo_getpwnam(user_name);
 	    if (sudo_user.pw == NULL) {
-		fprintf(stderr, "unknown user: %s\n", user_name);
+		fprintf(stderr, "unknown user %s\n", user_name);
 		continue;
 	    }
 
@@ -321,7 +322,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		runas_pw = sudo_getpwnam("root");
 	    }
 	    if (runas_pw == NULL) {
-		fprintf(stderr, "unknown run user: %s\n",
+		fprintf(stderr, "unknown run user %s\n",
 		    sudo_user.runas_user);
 		continue;
 	    }
@@ -334,7 +335,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
 		runas_gr = sudo_getgrnam(sudo_user.runas_group);
 		if (runas_gr == NULL) {
-		    fprintf(stderr, "unknown run group: %s\n",
+		    fprintf(stderr, "unknown run group %s\n",
 			sudo_user.runas_group);
 		    continue;
 		}

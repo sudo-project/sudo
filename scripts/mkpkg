@@ -220,7 +220,6 @@ case "$osversion" in
 		--with-editor=/bin/vi
 		--with-env-editor
 		--with-ignore-dot
-		--with-tty-tickets
 		--with-ldap
 		--with-passprompt=[sudo] password for %p: 
 		--with-sendmail=/usr/sbin/sendmail
@@ -253,7 +252,6 @@ case "$osversion" in
 		--with-logfac=auth
 		--with-all-insults
 		--with-ignore-dot
-		--with-tty-tickets
 		--enable-shell-sets-home
 		--with-sudoers-mode=0440
 		--with-pam
@@ -368,7 +366,7 @@ case "$osversion" in
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--with-pam
 		--with-bsm-audit
-		--without-tty-tickets
+		--with-password-timeout=0
 		--enable-zlib=system
 		--with-ldap
 		--with-insults=disabled
@@ -400,6 +398,25 @@ case "$osversion" in
 		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=true"
+	;;
+    FreeBSD*)
+	# Encrypted remote I/O log support.
+	with_openssl=true
+
+	# Python plugins
+	with_python=true
+
+	configure_opts="
+		--sysconfdir=/usr/local/etc
+		--with-ignore-dot
+		--with-tty-tickets
+		--with-env-editor
+		--with-logincap
+		--with-long-otp-prompt
+		--with-rundir=/var/run/sudo
+		--enable-zlib=system
+		--disable-nls
+		$configure_opts"
 	;;
     *)
 	# For Solaris, add project support and use let configure choose zlib.

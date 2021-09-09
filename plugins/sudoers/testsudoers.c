@@ -212,7 +212,7 @@ main(int argc, char *argv[])
 	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
-	sudo_fatalx(U_("unknown user: %s"), user_name);
+	sudo_fatalx(U_("unknown user %s"), user_name);
 
     if (user_host == NULL) {
 	if ((user_host = sudo_gethostname()) == NULL)
@@ -379,7 +379,7 @@ set_runaspw(const char *user)
     }
     if (pw == NULL) {
 	if ((pw = sudo_getpwnam(user)) == NULL)
-	    sudo_fatalx(U_("unknown user: %s"), user);
+	    sudo_fatalx(U_("unknown user %s"), user);
     }
     if (runas_pw != NULL)
 	sudo_pw_delref(runas_pw);
@@ -403,7 +403,7 @@ set_runasgr(const char *group)
     }
     if (gr == NULL) {
 	if ((gr = sudo_getgrnam(group)) == NULL)
-	    sudo_fatalx(U_("unknown group: %s"), group);
+	    sudo_fatalx(U_("unknown group %s"), group);
     }
     if (runas_gr != NULL)
 	sudo_gr_delref(runas_gr);

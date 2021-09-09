@@ -299,8 +299,7 @@ fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
 	free(buf->data);
 	buf->size = sudo_pow2_roundup(len);
 	if ((buf->data = malloc(buf->size)) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to malloc %u", buf->size);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    buf->size = 0;
 	    goto done;
 	}
@@ -1055,7 +1054,7 @@ handle_server_message(uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx("%s", U_("unable to unpack ServerMessage"));
+	sudo_warnx("unable to unpack %s size %zu", "ServerMessage", len);
 	debug_return_bool(false);
     }
 
@@ -1380,7 +1379,8 @@ client_closure_free(struct client_closure *closure)
 	TAILQ_REMOVE(&connections, closure, entries);
 #if defined(HAVE_OPENSSL)
         if (closure->tls_client.ssl != NULL) {
-            SSL_shutdown(closure->tls_client.ssl);
+            if (SSL_shutdown(closure->tls_client.ssl) == 0)
+		SSL_shutdown(closure->tls_client.ssl);
             SSL_free(closure->tls_client.ssl);
         }
 	sudo_ev_free(closure->tls_client.tls_connect_ev);
@@ -1390,6 +1390,7 @@ client_closure_free(struct client_closure *closure)
         free(closure->read_buf.data);
         free(closure->write_buf.data);
         free(closure->buf);
+	shutdown(closure->sock, SHUT_RDWR);
         close(closure->sock);
         free(closure);
     }
@@ -1525,7 +1526,7 @@ main(int argc, char *argv[])
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
         exit(EXIT_FAILURE);
     sudo_debug_register(getprogname(), NULL, NULL,
-        sudo_conf_debug_files(getprogname()));
+        sudo_conf_debug_files(getprogname()), -1);
 
     if (protobuf_c_version_number() < 1003000)
 	sudo_fatalx("%s", U_("Protobuf-C version 1.3 or higher required"));

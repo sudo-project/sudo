@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "May 26, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "August 13, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -30,7 +30,7 @@
 [\fB\-f\fR\ \fIfilter\fR]
 [\fB\-m\fR\ \fInum\fR]
 [\fB\-s\fR\ \fInum\fR]
-ID
+ID[\fI@offset\fR]
 .HP 11n
 \fBsudoreplay\fR
 [\fB\-h\fR]
@@ -52,6 +52,16 @@ should either be a six character sequence of digits and
 upper case letters, e.g.,
 \fR0100A5\fR
 or a path name.
+The
+\fIID\fR
+may include an optional
+\fI@offset\fR
+suffix which may be used to start replaying at a specific time offset.
+The
+\fI@offset\fR
+is specified as a number in seconds since the start of the session
+with an optional decimal fraction.
+.PP
 Path names may be relative to the I/O log directory
 \fI@iolog_dir@\fR
 (unless overridden by the

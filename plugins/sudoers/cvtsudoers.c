@@ -472,7 +472,7 @@ cvtsudoers_conf_read(const char *conf_file)
 
 	/* Look up keyword in config tables */
 	if (!cvtsudoers_parse_keyword(conf_file, keyword, value, cvtsudoers_conf_vars))
-	    sudo_warnx(U_("%s: unknown key word: %s"), conf_file, keyword);
+	    sudo_warnx(U_("%s: unknown key word %s"), conf_file, keyword);
     }
     free(line);
     fclose(fp);

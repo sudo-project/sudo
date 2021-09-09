@@ -415,3 +415,18 @@ selinux
 admin_flag
 	T_STR|T_BOOL|T_CHPATH
 	"Path to the file that is created the first time sudo is run: %s"
+intercept
+	T_FLAG
+	"Intercept further commands and apply sudoers restrictions to them"
+log_subcmds
+	T_FLAG
+	"Log sub-commands run by the original command"
+log_exit_status
+	T_FLAG
+	"Log the exit status of commands"
+intercept_authenticate
+	T_FLAG
+	"Subsequent commands in an intercepted session must be authenticated"
+intercept_allow_setid
+	T_FLAG
+	"Allow an intercepted command to run set setuid or setgid programs"

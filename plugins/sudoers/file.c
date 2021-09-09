@@ -60,6 +60,7 @@ sudo_file_open(struct sudo_nss *nss)
     debug_decl(sudo_file_open, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle;
 
+    /* Note: relies on defaults being initialized early. */
     if (def_ignore_local_sudoers)
 	debug_return_int(-1);
 

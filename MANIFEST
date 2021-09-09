@@ -81,6 +81,7 @@ include/compat/nss_dbdefs.h
 include/compat/sha2.h
 include/compat/stdbool.h
 include/hostcheck.h
+include/intercept.pb-c.h
 include/log_server.pb-c.h
 include/protobuf-c/protobuf-c.h
 include/sudo_compat.h
@@ -156,7 +157,7 @@ lib/iolog/regress/fuzz/fuzz_iolog_json.c
 lib/iolog/regress/fuzz/fuzz_iolog_json.dict
 lib/iolog/regress/fuzz/fuzz_iolog_legacy.c
 lib/iolog/regress/fuzz/fuzz_iolog_timing.c
-lib/iolog/regress/host_port/host_port_test.c  
+lib/iolog/regress/host_port/host_port_test.c
 lib/iolog/regress/iolog_json/check_iolog_json.c
 lib/iolog/regress/iolog_json/test1.in
 lib/iolog/regress/iolog_json/test2.in
@@ -169,7 +170,8 @@ lib/iolog/regress/iolog_timing/check_iolog_timing.c
 lib/logsrv/Makefile.in
 lib/logsrv/log_server.pb-c.c
 lib/logsrv/log_server.proto
-lib/logsrv/protobuf-c.c
+lib/protobuf-c/Makefile.in
+lib/protobuf-c/protobuf-c.c
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/arc4random.c
@@ -215,9 +217,7 @@ lib/util/logpri.c
 lib/util/memrchr.c
 lib/util/mkdir_parents.c
 lib/util/mksiglist.c
-lib/util/mksiglist.h
 lib/util/mksigname.c
-lib/util/mksigname.h
 lib/util/mktemp.c
 lib/util/nanosleep.c
 lib/util/openat.c
@@ -285,7 +285,7 @@ lib/util/regress/sudo_parseln/test5.out.ok
 lib/util/regress/sudo_parseln/test6.in
 lib/util/regress/sudo_parseln/test6.out.ok
 lib/util/regress/tailq/hltq_test.c
-lib/util/regress/vsyslog/vsyslog_test.c
+lib/util/regress/uuid/uuid_test.c
 lib/util/roundup.c
 lib/util/secure_path.c
 lib/util/setgroups.c
@@ -307,6 +307,8 @@ lib/util/strtonum.c
 lib/util/sudo_conf.c
 lib/util/sudo_debug.c
 lib/util/sudo_dso.c
+lib/util/sys_siglist.h
+lib/util/sys_signame.h
 lib/util/term.c
 lib/util/ttyname_dev.c
 lib/util/ttysize.c
@@ -314,7 +316,6 @@ lib/util/unlinkat.c
 lib/util/util.exp.in
 lib/util/utimens.c
 lib/util/uuid.c
-lib/util/vsyslog.c
 lib/zlib/Makefile.in
 lib/zlib/adler32.c
 lib/zlib/compress.c
@@ -372,6 +373,7 @@ m4/ax_check_compile_flag.m4
 m4/ax_check_link_flag.m4
 m4/ax_func_getaddrinfo.m4
 m4/ax_func_snprintf.m4
+m4/ax_prog_cc_for_build.m4
 m4/libtool.m4
 m4/ltoptions.m4
 m4/ltsugar.m4
@@ -1103,11 +1105,16 @@ src/edit_open.c
 src/env_hooks.c
 src/exec.c
 src/exec_common.c
+src/exec_intercept.c
 src/exec_monitor.c
 src/exec_nopty.c
+src/exec_preload.c
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c
+src/intercept.exp.in
+src/intercept.pb-c.c
+src/intercept.proto
 src/limits.c
 src/load_plugins.c
 src/net_ifs.c
@@ -1127,6 +1134,8 @@ src/sudo.h
 src/sudo_edit.c
 src/sudo_edit.h
 src/sudo_exec.h
+src/sudo_intercept.c
+src/sudo_intercept_common.c
 src/sudo_noexec.c
 src/sudo_plugin_int.h
 src/sudo_usage.h.in

@@ -64,9 +64,6 @@ static struct sudoers_io_operations {
 	const char **errstr);
 } io_operations;
 
-#ifdef SUDOERS_LOG_CLIENT
-static struct client_closure *client_closure;
-#endif
 static struct log_details iolog_details;
 static bool warned = false;
 static int iolog_dir_fd = -1;
@@ -115,7 +112,7 @@ cb_iolog_user(const union sudo_defs_val *sd_un)
 	iolog_set_owner(ROOT_UID, ROOT_GID);
     } else {
 	if ((pw = sudo_getpwnam(name)) == NULL) {
-	    log_warningx(SLOG_SEND_MAIL, N_("unknown user: %s"), name);
+	    log_warningx(SLOG_SEND_MAIL, N_("unknown user %s"), name);
 	    debug_return_bool(false);
 	}
 	iolog_set_owner(pw->pw_uid, pw->pw_gid);
@@ -140,7 +137,7 @@ cb_iolog_group(const union sudo_defs_val *sd_un)
 	iolog_set_gid(ROOT_GID);
     } else {
 	if ((gr = sudo_getgrnam(name)) == NULL) {
-	    log_warningx(SLOG_SEND_MAIL, N_("unknown group: %s"), name);
+	    log_warningx(SLOG_SEND_MAIL, N_("unknown group %s"), name);
 	    debug_return_bool(false);
 	}
 	iolog_set_gid(gr->gr_gid);

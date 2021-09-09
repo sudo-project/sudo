@@ -39,6 +39,21 @@
 #Path devsearch /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
 
 #
+# Sudo command interception:
+#   Path intercept /path/to/sudo_intercept.so
+#
+# Path to a shared library containing replacements for the execv(),
+# execve() and fexecve() library functions that perform a policy check
+# to verify the command is allowed and simply return an error if not.
+# This is used to implement the "intercept" functionality on systems that
+# support LD_PRELOAD or its equivalent.
+#
+# The compiled-in value is usually sufficient and should only be changed
+# if you rename or move the sudo_intercept.so file.
+#
+#Path intercept @plugindir@/sudo_intercept.so
+
+#
 # Sudo noexec:
 #   Path noexec /path/to/sudo_noexec.so
 #

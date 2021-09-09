@@ -50,6 +50,9 @@ shlib_opt = util.opt
 
 # Compiler & tools to use
 CC = @CC@
+HOSTCC = @CC_FOR_BUILD@
+CPP = @CPP@
+HOSTCPP = @CPP_FOR_BUILD@
 LIBTOOL = @LIBTOOL@
 SED = @SED@
 AWK = @AWK@
@@ -65,9 +68,12 @@ CPPDEFS = -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) $(CPPDEFS) @CPPFLAGS@ \
 	   -DDEFAULT_TEXT_DOMAIN=\"@PACKAGE_NAME@\"
+HOSTCPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) $(CPPDEFS) \
+	       @CPPFLAGS_FOR_BUILD@ -DDEFAULT_TEXT_DOMAIN=\"@PACKAGE_NAME@\"
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
+HOSTCFLAGS = @CFLAGS_FOR_BUILD@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
@@ -103,9 +109,10 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test hltq_test parseln_test progname_test strsplit_test \
-	     strtobool_test strtoid_test strtomode_test strtonum_test \
-	     parse_gids_test getgids getgrouplist_test @COMPAT_TEST_PROGS@
+TEST_PROGS = conf_test hltq_test parseln_test progname_test \
+	     strsplit_test strtobool_test strtoid_test strtomode_test \
+	     strtonum_test parse_gids_test getgids getgrouplist_test \
+	     uuid_test @COMPAT_TEST_PROGS@
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -176,7 +183,7 @@ GETGROUPLIST_TEST_OBJS = getgrouplist_test.lo getgrouplist.lo
 
 STRSIG_TEST_OBJS = strsig_test.lo sig2str.lo str2sig.lo @SIGNAME@
 
-VSYSLOG_TEST_OBJS = vsyslog_test.lo vsyslog.lo
+UUID_TEST_OBJS = uuid_test.lo uuid.lo
 
 FUZZ_SUDO_CONF_OBJS = fuzz_sudo_conf.lo
 
@@ -228,21 +235,27 @@ siglist.c: mksiglist
 signame.c: mksigname
 	./mksigname > $@
 
-mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksiglist.c -o $@
+mksiglist: $(srcdir)/mksiglist.c mksiglist.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
+	$(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(srcdir)/mksiglist.c -o $@
 
-mksigname: $(srcdir)/mksigname.c $(srcdir)/mksigname.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksigname.c -o $@
+mksigname: $(srcdir)/mksigname.c mksigname.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
+	$(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(srcdir)/mksigname.c -o $@
 
-$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
+$(srcdir)/sys_siglist.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
-	    $(AWK) 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_siglist[SIG%s] == NULL)\n\tsudo_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
+	    $(AWK) 'BEGIN {print "/* public domain */\n\n#include <config.h>\n#include <sys/types.h>\n#include <signal.h>\n#include \"sudo_compat.h\"\n\nint sudo_end_of_headers;\nstatic char *sudo_sys_siglist[NSIG];\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_siglist[SIG%s] == NULL)\n\tsudo_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
 	fi
 
-$(srcdir)/mksigname.h: $(srcdir)/siglist.in
+$(srcdir)/sys_signame.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
-	    $(AWK) 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_signame[SIG%s] == NULL)\n\tsudo_sys_signame[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, $$1)}' < $(srcdir)/siglist.in > $@; \
+	    $(AWK) 'BEGIN {print "/* public domain */\n\n#include <config.h>\n#include <sys/types.h>\n#include <signal.h>\n#include \"sudo_compat.h\"\n\nint sudo_end_of_headers;\nstatic char *sudo_sys_signame[NSIG];\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_signame[SIG%s] == NULL)\n\tsudo_sys_signame[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, $$1)}' < $(srcdir)/siglist.in > $@; \
 	fi
+
+mksiglist.h: $(srcdir)/sys_siglist.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/sys_siglist.h | sed -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksiglist.h
+
+mksigname.h: $(srcdir)/sys_signame.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/sys_signame.h | sed -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksigname.h
 
 conf_test: $(CONF_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -295,8 +308,8 @@ strtonum_test: $(STRTONUM_TEST_OBJS) libsudo_util.la
 strtoid_test: $(STRTOID_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STRTOID_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-vsyslog_test: $(VSYSLOG_TEST_OBJS) libsudo_util.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(VSYSLOG_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+uuid_test: $(UUID_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(UUID_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 fuzz_sudo_conf: $(FUZZ_SUDO_CONF_OBJS) $(LIBFUZZSTUB) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FUZZ_SUDO_CONF_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) libsudo_util.la
@@ -429,14 +442,12 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./strtoid_test || rval=`expr $$rval + $$?`; \
 	    ./strtomode_test || rval=`expr $$rval + $$?`; \
 	    ./strtonum_test || rval=`expr $$rval + $$?`; \
+	    ./uuid_test || rval=`expr $$rval + $$?`; \
 	    ./hltq_test || rval=`expr $$rval + $$?`; \
 	    ./progname_test || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
 	    ./progname_test2 || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; \
-	    if test -f vsyslog_test; then \
-		./vsyslog_test || rval=`expr $$rval + $$?`; \
-	    fi; \
 	    build_dir=`pwd`; \
 	    cd $(srcdir); \
 	    for dir in sudo_conf sudo_parseln; do \
@@ -496,8 +507,8 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile mksiglist siglist.c mksigname signame.c .libs \
-	    $(shlib_exp) $(shlib_map) $(shlib_opt)
+	-rm -rf Makefile mksiglist mksiglist.h siglist.c mksigname \
+	    mksigname.h signame.c .libs $(shlib_exp) $(shlib_map) $(shlib_opt)
 
 clobber: distclean
 
@@ -1216,15 +1227,15 @@ sig2str.i: $(srcdir)/sig2str.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sig2str.plog: sig2str.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sig2str.c --i-file $< --output-file $@
-siglist.lo: siglist.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+siglist.lo: siglist.c 
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) siglist.c
-siglist.i: siglist.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+siglist.i: siglist.c 
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 siglist.plog: siglist.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file siglist.c --i-file $< --output-file $@
-signame.lo: signame.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+signame.lo: signame.c 
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) signame.c
-signame.i: signame.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+signame.i: signame.c 
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 signame.plog: signame.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file signame.c --i-file $< --output-file $@
@@ -1510,21 +1521,15 @@ uuid.i: $(srcdir)/uuid.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 uuid.plog: uuid.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/uuid.c --i-file $< --output-file $@
-vsyslog.lo: $(srcdir)/vsyslog.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/vsyslog.c
-vsyslog.i: $(srcdir)/vsyslog.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+uuid_test.lo: $(srcdir)/regress/uuid/uuid_test.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/uuid/uuid_test.c
+uuid_test.i: $(srcdir)/regress/uuid/uuid_test.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
-vsyslog.plog: vsyslog.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/vsyslog.c --i-file $< --output-file $@
-vsyslog_test.lo: $(srcdir)/regress/vsyslog/vsyslog_test.c \
-                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-                 $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
-                 $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/vsyslog/vsyslog_test.c
-vsyslog_test.i: $(srcdir)/regress/vsyslog/vsyslog_test.c \
-                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-                 $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
-                 $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-vsyslog_test.plog: vsyslog_test.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/vsyslog/vsyslog_test.c --i-file $< --output-file $@
+uuid_test.plog: uuid_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/uuid/uuid_test.c --i-file $< --output-file $@

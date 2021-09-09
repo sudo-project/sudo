@@ -512,7 +512,7 @@ still allow people to get their work done."
 			print "On Debian we normally use gid 27 for \"sudo\".\n";
 			$gname = getgrgid(27);
 			print "However, on your system gid 27 is group \"$gname\".\n\n";
-			print "Would you like me to stop configuring sudo so that you can change this? [n] "; 
+			print "Would you like me to stop configuring sudo so that you can change this? [n] ";
 			$ans = <STDIN>;
 			if ($ans =~ /^[yY]/) {
 				print "\"dpkg --pending --configure\" will restart the configuration.\n\n";

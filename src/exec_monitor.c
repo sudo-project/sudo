@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -386,7 +386,8 @@ mon_backchannel_cb(int fd, int what, void *v)
  * Returns only if execve() fails.
  */
 static void
-exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
+exec_cmnd_pty(struct command_details *details, bool foreground,
+    int intercept_fd, int errfd)
 {
     volatile pid_t self = getpid();
     debug_decl(exec_cmnd_pty, SUDO_DEBUG_EXEC);
@@ -429,7 +430,7 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
     /* Execute command; only returns on error. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "executing %s in the %s",
 	details->command, foreground ? "foreground" : "background");
-    exec_cmnd(details, errfd);
+    exec_cmnd(details, intercept_fd, errfd);
 
     debug_return;
 }
@@ -543,7 +544,7 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
  */
 int
 exec_monitor(struct command_details *details, sigset_t *oset,
-    bool foreground, int backchannel)
+    bool foreground, int backchannel, int intercept_fd)
 {
     struct monitor_closure mc = { 0 };
     struct command_status cstat;
@@ -586,16 +587,20 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     /*
      * We use a pipe to get errno if execve(2) fails in the child.
      */
-    if (pipe2(errpipe, O_CLOEXEC) != 0)
-	sudo_fatal("%s", U_("unable to create pipe"));
+    if (pipe2(errpipe, O_CLOEXEC) != 0) {
+	sudo_warn("%s", U_("unable to create pipe"));
+	goto bad;
+    }
 
     /*
      * Before forking, wait for the main sudo process to tell us to go.
      * Avoids race conditions when the command exits quickly.
      */
     while (recv(backchannel, &cstat, sizeof(cstat), MSG_WAITALL) == -1) {
-	if (errno != EINTR && errno != EAGAIN)
-	    sudo_fatal("%s", U_("unable to receive message from parent"));
+	if (errno != EINTR && errno != EAGAIN) {
+	    sudo_warn("%s", U_("unable to receive message from parent"));
+	    goto bad;
+	}
     }
 
 #ifdef HAVE_SELINUX
@@ -627,12 +632,14 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	restore_signals();
 
 	/* setup tty and exec command */
-	exec_cmnd_pty(details, foreground, errpipe[1]);
+	exec_cmnd_pty(details, foreground, intercept_fd, errpipe[1]);
 	if (write(errpipe[1], &errno, sizeof(int)) == -1)
 	    sudo_warn(U_("unable to execute %s"), details->command);
 	_exit(EXIT_FAILURE);
     }
     close(errpipe[1]);
+    if (intercept_fd != -1)
+	close(intercept_fd);
 
     /* No longer need execfd. */
     if (details->execfd != -1) {

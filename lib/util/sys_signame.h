@@ -1,6 +1,13 @@
 /* public domain */
 
-sudo_sys_signame[0] = "Signal 0";
+#include <config.h>
+#include <sys/types.h>
+#include <signal.h>
+#include "sudo_compat.h"
+
+int sudo_end_of_headers;
+static char *sudo_sys_signame[NSIG];
+
 #ifdef SIGHUP
     if (sudo_sys_signame[SIGHUP] == NULL)
 	sudo_sys_signame[SIGHUP] = "HUP";

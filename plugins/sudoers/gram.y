@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2020
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2021
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -29,9 +29,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <unistd.h>
-#if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
-# include <alloca.h>
-#endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
 #include <errno.h>
 
 #include "sudoers.h"
@@ -129,6 +126,8 @@ static void alias_error(const char *name, int errnum);
 %token <tok>	 NOMAIL			/* don't mail log message */
 %token <tok>	 FOLLOWLNK		/* follow symbolic links */
 %token <tok>	 NOFOLLOWLNK		/* don't follow symbolic links */
+%token <tok>	 INTERCEPT		/* intercept children of command */
+%token <tok>	 NOINTERCEPT		/* disable intercepting of children */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
@@ -468,6 +467,8 @@ cmndspeclist	:	cmndspec
 				$3->tags.nopasswd = prev->tags.nopasswd;
 			    if ($3->tags.noexec == UNSPEC)
 				$3->tags.noexec = prev->tags.noexec;
+			    if ($3->tags.intercept == UNSPEC)
+				$3->tags.intercept = prev->tags.intercept;
 			    if ($3->tags.setenv == UNSPEC &&
 				prev->tags.setenv != IMPLIED)
 				$3->tags.setenv = prev->tags.setenv;
@@ -612,14 +613,6 @@ digcmnd		:	opcmnd {
 			    if ($2->type != COMMAND && $2->type != ALL) {
 				sudoerserror(N_("a digest requires a path name"));
 				YYERROR;
-			    }
-			    if (c == NULL) {
-				/* lazy-allocate sudo_command for ALL */
-				if ((c = new_command(NULL, NULL)) == NULL) {
-				    sudoerserror(N_("unable to allocate memory"));
-				    YYERROR;
-				}
-				$2->name = (char *)c;
 			    }
 			    parser_leak_remove(LEAK_DIGEST, $1);
 			    HLTQ_TO_TAILQ(&c->digests, $1, entries);
@@ -876,6 +869,12 @@ cmndtag		:	/* empty */ {
 		|	cmndtag EXEC {
 			    $$.noexec = false;
 			}
+		|	cmndtag INTERCEPT {
+			    $$.intercept = true;
+			}
+		|	cmndtag NOINTERCEPT {
+			    $$.intercept = false;
+			}
 		|	cmndtag SETENV {
 			    $$.setenv = true;
 			}
@@ -909,7 +908,13 @@ cmndtag		:	/* empty */ {
 		;
 
 cmnd		:	ALL {
-			    $$ = new_member(NULL, ALL);
+			    struct sudo_command *c;
+
+			    if ((c = new_command(NULL, NULL)) == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
+			    $$ = new_member((char *)c, ALL);
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;

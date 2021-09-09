@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2021
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 1, 2020
+.Dd August 16, 2021
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1010,7 +1010,7 @@ Because of this, care must be taken when giving users access to commands via
 .Nm
 to verify that the command does not inadvertently give the user an
 effective root shell.
-For more information, please see the
+For information on ways to address this, please see the
 .Em Preventing shell escapes
 section in
 .Xr sudoers @mansectform@ .

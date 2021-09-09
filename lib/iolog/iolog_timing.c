@@ -114,6 +114,11 @@ iolog_parse_delay(const char *cp, struct timespec *delay,
 
     /* Radix may be in user's locale for sudo < 1.7.4 so accept that too. */
     if (*ep != '.' && *ep != *decimal_point) {
+	if (*ep == '\0' || isspace((unsigned char)*ep)) {
+	    /* No fractional part. */
+	    delay->tv_nsec = 0;
+	    goto done;
+	}
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "invalid characters after seconds: %s", ep);
 	debug_return_ptr(NULL);
@@ -152,6 +157,7 @@ iolog_parse_delay(const char *cp, struct timespec *delay,
     }
     delay->tv_nsec = (long)llval;
 
+done:
     /* Advance to the next field. */
     while (isspace((unsigned char)*ep))
 	ep++;

@@ -8,7 +8,7 @@ BreakBeforeBinaryOperators: None
 ColumnLimit:     80
 IndentWidth: 4
 ContinuationIndentWidth: 8
-ForEachMacros:   
+ForEachMacros:
   - HLTQ_FOREACH
   - HLTQ_FOREACH_REVERSE
   - HLTQ_FOREACH_REVERSE_SAFE

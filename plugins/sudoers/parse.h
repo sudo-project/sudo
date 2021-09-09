@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2020
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2021
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -48,6 +48,7 @@
  */
 #define TAGS_INIT(t)	do {						       \
     (t)->follow = UNSPEC;						       \
+    (t)->intercept = UNSPEC;						       \
     (t)->log_input = UNSPEC;						       \
     (t)->log_output = UNSPEC;						       \
     (t)->noexec = UNSPEC;						       \
@@ -62,6 +63,8 @@
 #define TAGS_MERGE(t, t2) do {						       \
     if ((t2).follow != UNSPEC)						       \
 	(t).follow = (t2).follow;					       \
+    if ((t2).intercept != UNSPEC)					       \
+	(t).intercept = (t2).intercept;					       \
     if ((t2).log_input != UNSPEC)					       \
 	(t).log_input = (t2).log_input;					       \
     if ((t2).log_output != UNSPEC)					       \
@@ -80,10 +83,10 @@
  * Returns true if any tag are not UNSPEC, else false.
  */
 #define TAGS_SET(t)							       \
-    ((t).follow != UNSPEC || (t).log_input != UNSPEC ||			       \
-     (t).log_output != UNSPEC || (t).noexec != UNSPEC ||		       \
-     (t).nopasswd != UNSPEC || (t).send_mail != UNSPEC ||		       \
-     (t).setenv != UNSPEC)
+    ((t).follow != UNSPEC || (t).intercept != UNSPEC ||			       \
+     (t).log_input != UNSPEC || (t).log_output != UNSPEC ||		       \
+     (t).noexec != UNSPEC || (t).nopasswd != UNSPEC ||			       \
+     (t).send_mail != UNSPEC ||	(t).setenv != UNSPEC)
 
 /*
  * Returns true if the specified tag is not UNSPEC or IMPLIED, else false.
@@ -96,6 +99,7 @@
  */
 #define TAGS_CHANGED(ot, nt) \
     ((TAG_SET((nt).follow) && (nt).follow != (ot).follow) || \
+    (TAG_SET((nt).intercept) && (nt).intercept != (ot).intercept) || \
     (TAG_SET((nt).log_input) && (nt).log_input != (ot).log_input) || \
     (TAG_SET((nt).log_output) && (nt).log_output != (ot).log_output) || \
     (TAG_SET((nt).noexec) && (nt).noexec != (ot).noexec) || \
@@ -121,13 +125,14 @@ struct command_digest {
  * Possible values: true, false, IMPLIED, UNSPEC.
  */
 struct cmndtag {
-    signed int nopasswd: 3;
-    signed int noexec: 3;
-    signed int setenv: 3;
+    signed int follow: 3;
+    signed int intercept: 3;
     signed int log_input: 3;
     signed int log_output: 3;
+    signed int noexec: 3;
+    signed int nopasswd: 3;
     signed int send_mail: 3;
-    signed int follow: 3;
+    signed int setenv: 3;
 };
 
 /*
@@ -297,6 +302,7 @@ struct cmnd_info {
     struct stat cmnd_stat;
     char *cmnd_path;
     int status;
+    bool intercepted;
 };
 
 /*

@@ -80,7 +80,7 @@ rewind_perms(void)
 {
     debug_decl(rewind_perms, SUDOERS_DEBUG_PERMS);
 
-    if (perm_stack_depth != 0) {
+    if (perm_stack_depth > 0) {
 	while (perm_stack_depth > 1) {
 	    if (!restore_perms())
 		debug_return_bool(false);
@@ -116,8 +116,11 @@ set_perms(int perm)
 	goto bad;
     }
 
-    state = &perm_stack[perm_stack_depth];
-    if (perm != PERM_INITIAL) {
+    if (perm == PERM_INITIAL) {
+	if (perm_stack_depth > 1)
+	    rewind_perms();
+	perm_stack_depth = 0;
+    } else {
 	if (perm_stack_depth == 0) {
 	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
@@ -125,6 +128,7 @@ set_perms(int perm)
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
     }
+    state = &perm_stack[perm_stack_depth];
 
     switch (perm) {
     case PERM_INITIAL:
@@ -443,8 +447,11 @@ set_perms(int perm)
 	goto bad;
     }
 
-    state = &perm_stack[perm_stack_depth];
-    if (perm != PERM_INITIAL) {
+    if (perm == PERM_INITIAL) {
+	if (perm_stack_depth > 1)
+	    rewind_perms();
+	perm_stack_depth = 0;
+    } else {
 	if (perm_stack_depth == 0) {
 	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
@@ -452,6 +459,7 @@ set_perms(int perm)
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
     }
+    state = &perm_stack[perm_stack_depth];
 
     switch (perm) {
     case PERM_INITIAL:
@@ -846,8 +854,11 @@ set_perms(int perm)
 	goto bad;
     }
 
-    state = &perm_stack[perm_stack_depth];
-    if (perm != PERM_INITIAL) {
+    if (perm == PERM_INITIAL) {
+	if (perm_stack_depth > 1)
+	    rewind_perms();
+	perm_stack_depth = 0;
+    } else {
 	if (perm_stack_depth == 0) {
 	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
@@ -855,6 +866,7 @@ set_perms(int perm)
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
     }
+    state = &perm_stack[perm_stack_depth];
 
     switch (perm) {
     case PERM_INITIAL:
@@ -1152,8 +1164,11 @@ set_perms(int perm)
 	goto bad;
     }
 
-    state = &perm_stack[perm_stack_depth];
-    if (perm != PERM_INITIAL) {
+    if (perm == PERM_INITIAL) {
+	if (perm_stack_depth > 1)
+	    rewind_perms();
+	perm_stack_depth = 0;
+    } else {
 	if (perm_stack_depth == 0) {
 	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
@@ -1161,6 +1176,7 @@ set_perms(int perm)
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
     }
+    state = &perm_stack[perm_stack_depth];
 
     /*
      * Since we only have setuid() and seteuid() and semantics
@@ -1446,8 +1462,11 @@ set_perms(int perm)
 	goto bad;
     }
 
-    state = &perm_stack[perm_stack_depth];
-    if (perm != PERM_INITIAL) {
+    if (perm == PERM_INITIAL) {
+	if (perm_stack_depth > 1)
+	    rewind_perms();
+	perm_stack_depth = 0;
+    } else {
 	if (perm_stack_depth == 0) {
 	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
@@ -1455,6 +1474,7 @@ set_perms(int perm)
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
     }
+    state = &perm_stack[perm_stack_depth];
 
     switch (perm) {
     case PERM_INITIAL:

@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 6, 2020
+.Dd August 3, 2021
 .Dt SUDO_LOGSRV.PROTO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -427,6 +427,7 @@ message ServerHello {
   string server_id = 1;
   string redirect = 2;
   repeated string servers = 3;
+  bool subcommands = 4;
 }
 .Ed
 .Pp
@@ -457,6 +458,23 @@ This can be used to implement log server redundancy and allows the
 client to discover all other log servers simply by connecting to
 one known server.
 This member may be omitted when there is only a single log server.
+.It subcommands
+If set, the server supports logging additional commands during a session.
+The client may send an
+.Em AcceptMessage
+or
+.Em RejectMessage
+when
+.Nm sudo
+is running in
+.Em intercept
+mode.
+In this mode, commands spawned from the initial command authorized by
+.Nm sudo
+are subject to policy restrictions and/or are logged.
+If
+.Em subcommands
+is false, the client must not attempt to log additional commands.
 .El
 .Ss TimeSpec commit_point
 A periodic time stamp sent by the server to indicate when I/O log

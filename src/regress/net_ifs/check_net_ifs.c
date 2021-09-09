@@ -38,8 +38,9 @@ extern int get_net_ifs(char **addrinfo);
 int
 main(int argc, char *argv[])
 {
-    char *interfaces;
+    char *interfaces = NULL;
     int ninterfaces;
+    int ret = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_net_ifs");
 
@@ -47,7 +48,8 @@ main(int argc, char *argv[])
     switch (ninterfaces) {
     case -1:
 	sudo_warn_nodebug("unable to get network interfaces");
-	return 1;
+	ret = 1;
+	break;
     case 0:
 	/* no interfaces or STUB_LOAD_INTERFACES defined. */
 	sudo_warnx_nodebug("OK: (0 interfaces)");
@@ -58,5 +60,7 @@ main(int argc, char *argv[])
 	break;
     }
 
-    return 0;
+    free(interfaces);
+
+    return ret;
 }

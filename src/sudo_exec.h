@@ -79,21 +79,37 @@
 #define SESH_ERR_NO_FILES   32		/* copy error, no files copied */
 #define SESH_ERR_SOME_FILES 33		/* copy error, some files copied */
 
+#define INTERCEPT_FD_MIN    64		/* minimum fd so shell won't close it */
+#define MESSAGE_SIZE_MAX    2097152	/* 2Mib max intercept message size */
+
+union sudo_token_un {
+    unsigned char u8[16];
+    unsigned int u32[4];
+    unsigned long long u64[2];
+};
+
+#define sudo_token_isset(_t) ((_t).u64[0] || (_t).u64[1])
+
 /*
  * Symbols shared between exec.c, exec_nopty.c, exec_pty.c and exec_monitor.c
  */
 struct command_details;
 struct command_status;
+struct sudo_event_base;
 struct stat;
 
 /* exec.c */
-void exec_cmnd(struct command_details *details, int errfd);
+void exec_cmnd(struct command_details *details, int intercept_fd, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);
 bool sudo_terminated(struct command_status *cstat);
 
 /* exec_common.c */
-int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec);
+int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, int flags);
 char **disable_execute(char *envp[], const char *dso);
+char **enable_monitor(char *envp[], const char *dso);
+
+/* exec_intercept.c */
+bool intercept_setup(int fd, struct sudo_event_base *evbase, struct command_details *details);
 
 /* exec_nopty.c */
 void exec_nopty(struct command_details *details, struct command_status *cstat);
@@ -105,11 +121,14 @@ int pty_make_controlling(void);
 extern int io_fds[6];
 
 /* exec_monitor.c */
-int exec_monitor(struct command_details *details, sigset_t *omask, bool foreground, int backchannel);
+int exec_monitor(struct command_details *details, sigset_t *omask, bool foreground, int backchannel, int intercept_fd);
 
 /* utmp.c */
 bool utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user);
 bool utmp_logout(const char *line, int status);
+
+/* exec_preload.c */
+char **sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd);
 
 #endif /* SUDO_EXEC_H */

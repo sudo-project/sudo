@@ -41,6 +41,7 @@ src/sudo
 src/sesh
 src/check_noexec
 src/check_ttyname
+src/intercept.exp
 src/sudo_usage.h
 
 lib/eventlog/check_wrap
@@ -51,7 +52,9 @@ lib/iolog/fuzz_iolog_[a-z]*
 lib/iolog/host_port_test
 
 lib/util/mksiglist
+lib/util/mksiglist.h
 lib/util/mksigname
+lib/util/mksigname.h
 lib/util/siglist.c
 lib/util/signame.c
 lib/util/util.exp

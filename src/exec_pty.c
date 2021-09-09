@@ -28,6 +28,12 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
+
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,12 +62,6 @@ struct monitor_message {
 TAILQ_HEAD(monitor_message_list, monitor_message);
 
 struct exec_closure_pty {
-    pid_t monitor_pid;
-    pid_t cmnd_pid;
-    pid_t ppgrp;
-    short rows;
-    short cols;
-    struct command_status *cstat;
     struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *backchannel_event;
@@ -76,7 +76,13 @@ struct exec_closure_pty {
     struct sudo_event *sigusr2_event;
     struct sudo_event *sigchld_event;
     struct sudo_event *sigwinch_event;
+    struct command_status *cstat;
     struct monitor_message_list monitor_messages;
+    pid_t monitor_pid;
+    pid_t cmnd_pid;
+    pid_t ppgrp;
+    short rows;
+    short cols;
 };
 
 /*
@@ -1352,6 +1358,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     bool interpose[3] = { false, false, false };
+    int sv[2], intercept_sv[2] = { -1, -1 };
     struct exec_closure_pty ec = { 0 };
     struct plugin_container *plugin;
     int evloop_retries = -1;
@@ -1359,7 +1366,6 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     struct sigaction sa;
     struct stat sb;
     pid_t ppgrp;
-    int sv[2];
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /*
@@ -1380,6 +1386,15 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    fcntl(sv[0], F_SETFD, FD_CLOEXEC) == -1 ||
 	    fcntl(sv[1], F_SETFD, FD_CLOEXEC) == -1)
 	sudo_fatal("%s", U_("unable to create sockets"));
+
+    /*
+     * Allocate a socketpair for communicating with sudo_intercept.so.
+     * This must be inherited across exec, hence no FD_CLOEXEC.
+     */
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
+	if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
+	    sudo_fatal("%s", U_("unable to create sockets"));
+    }
 
     /*
      * We don't want to receive SIGTTIN/SIGTTOU.
@@ -1553,6 +1568,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     case 0:
 	/* child */
 	close(sv[0]);
+	if (intercept_sv[0] != -1)
+	    close(intercept_sv[0]);
 	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	if (io_pipe[STDIN_FILENO][1] != -1)
 	    close(io_pipe[STDIN_FILENO][1]);
@@ -1566,7 +1583,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	 * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
 	 * when it needs access to the controlling tty.
 	 */                                                              
-	exec_monitor(details, &oset, foreground && !pipeline, sv[1]);
+	exec_monitor(details, &oset, foreground && !pipeline, sv[1],
+	    intercept_sv[1]);
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
 	if (send(sv[1], cstat, sizeof(*cstat), 0) == -1) {
@@ -1618,6 +1636,12 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * the backchannel event.
      */
     fill_exec_closure_pty(&ec, cstat, details, ppgrp, sv[0]);
+
+    /* Create event and closure for intercept mode. */
+    if (intercept_sv[0] != -1) {
+	if (!intercept_setup(intercept_sv[0], ec.evbase, details))
+	    exit(EXIT_FAILURE);
+    }
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, &oset, NULL);

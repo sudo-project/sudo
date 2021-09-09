@@ -429,10 +429,14 @@ struct  _ServerHello
    */
   size_t n_servers;
   char **servers;
+  /*
+   * flag: server supports sub-commands 
+   */
+  protobuf_c_boolean subcommands;
 };
 #define SERVER_HELLO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&server_hello__descriptor) \
-    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL }
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL, 0 }
 
 
 /* ClientMessage methods */

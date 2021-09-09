@@ -104,57 +104,46 @@ static void command_info_to_details(char * const info[],
 static void gc_init(void);
 
 /* Policy plugin convenience functions. */
-static void policy_open(struct sudo_settings *settings,
-    char * const user_info[], char * const user_env[]);
+static void policy_open(void);
 static void policy_close(int exit_status, int error);
 static int policy_show_version(int verbose);
-static void policy_check(int argc, char * const argv[], char *env_add[],
-    char **command_info[], char **argv_out[], char **user_env_out[]);
+static bool policy_check(int argc, char * const argv[], char *env_add[],
+    char **command_info[], char **run_argv[], char **run_envp[]);
 static void policy_list(int argc, char * const argv[],
-    int verbose, const char *user, char * const envp[]);
-static void policy_validate(char * const argv[], char * const envp[]);
+    int verbose, const char *user);
+static void policy_validate(char * const argv[]);
 static void policy_invalidate(int unlinkit);
 
 /* I/O log plugin convenience functions. */
-static void iolog_open(struct sudo_settings *settings, char * const user_info[],
-    char * const command_details[], int argc, char * const argv[],
-    char * const user_env[]);
+static bool iolog_open(char * const command_info[], int run_argc,
+    char * const run_argv[], char * const run_envp[]);
 static void iolog_close(int exit_status, int error);
-static void iolog_show_version(int verbose, struct sudo_settings *settings,
-    char * const user_info[], int argc, char * const argv[],
-    char * const user_env[]);
+static void iolog_show_version(int verbose, int argc, char * const argv[],
+    char * const envp[]);
 static void unlink_plugin(struct plugin_container_list *plugin_list, struct plugin_container *plugin);
 static void free_plugin_container(struct plugin_container *plugin, bool ioplugin);
 
-/* Audit plugin convenience functions. */
-static void audit_open(struct sudo_settings *settings, char * const user_info[],
-    int submit_optind, char * const submit_argv[], char * const submit_envp[]);
+/* Audit plugin convenience functions (some are public). */
+static void audit_open(void);
 static void audit_close(int exit_status, int error);
 static void audit_show_version(int verbose);
-static void audit_accept(const char *plugin_name,
-    unsigned int plugin_type, char * const command_info[],
-    char * const run_argv[], char * const run_envp[]);
 
-/* Approval plugin convenience functions. */
-static void approval_check(struct sudo_settings *settings,
-    char * const user_info[], int submit_optind, char * const submit_argv[],
-    char * const submit_envp[], char * const command_info[],
-    char * const run_argv[], char * const run_envp[]);
-static void approval_show_version(int verbose, struct sudo_settings *settings,
-    char * const user_info[], int submit_optind, char * const submit_argv[],
-    char * const submit_envp[]);
+/* Approval plugin convenience functions (some are public). */
+static void approval_show_version(int verbose);
 
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
+
+static struct sudo_settings *sudo_settings;
+static char * const *user_info, * const *submit_argv, * const *submit_envp;
+static int submit_optind;
 
 int
 main(int argc, char *argv[], char *envp[])
 {
     int nargc, status = 0;
-    char **nargv, **env_add, **user_info;
-    char **command_info = NULL, **argv_out = NULL, **user_env_out = NULL;
+    char **nargv, **env_add;
+    char **command_info = NULL, **argv_out = NULL, **run_envp = NULL;
     const char * const allowed_prognames[] = { "sudo", "sudoedit", NULL };
-    struct sudo_settings *settings;
-    int submit_optind;
     sigset_t mask;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -186,7 +175,7 @@ main(int argc, char *argv[], char *envp[])
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
 	exit(EXIT_FAILURE);
     sudo_debug_instance = sudo_debug_register(getprogname(),
-	NULL, NULL, sudo_conf_debug_files(getprogname()));
+	NULL, NULL, sudo_conf_debug_files(getprogname()), -1);
     if (sudo_debug_instance == SUDO_DEBUG_INSTANCE_ERROR)
 	exit(EXIT_FAILURE);
 
@@ -212,9 +201,11 @@ main(int argc, char *argv[], char *envp[])
     if (sudo_conf_disable_coredump())
 	disable_coredump();
 
-    /* Parse command line arguments. */
+    /* Parse command line arguments, preserving the original argv/envp. */
+    submit_argv = argv;
+    submit_envp = envp;
     sudo_mode = parse_args(argc, argv, &submit_optind, &nargc, &nargv,
-	&settings, &env_add);
+	&sudo_settings, &env_add);
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_mode %d", sudo_mode);
 
     /* Print sudo version early, in case of plugin init failure. */
@@ -237,21 +228,20 @@ main(int argc, char *argv[], char *envp[])
 
     /* Open policy and audit plugins. */
     /* XXX - audit policy_open errors */
-    audit_open(settings, user_info, submit_optind, argv, envp);
-    policy_open(settings, user_info, envp);
+    audit_open();
+    policy_open();
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
 	    policy_show_version(!user_details.cred.uid);
-	    iolog_show_version(!user_details.cred.uid, settings, user_info,
-		nargc, nargv, envp);
-	    approval_show_version(!user_details.cred.uid, settings, user_info,
-		submit_optind, argv, envp);
+	    iolog_show_version(!user_details.cred.uid, nargc, nargv,
+		submit_envp);
+	    approval_show_version(!user_details.cred.uid);
 	    audit_show_version(!user_details.cred.uid);
 	    break;
 	case MODE_VALIDATE:
 	case MODE_VALIDATE|MODE_INVALIDATE:
-	    policy_validate(nargv, envp);
+	    policy_validate(nargv);
 	    break;
 	case MODE_KILL:
 	case MODE_INVALIDATE:
@@ -262,12 +252,13 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_LIST:
 	case MODE_LIST|MODE_INVALIDATE:
 	    policy_list(nargc, nargv, ISSET(sudo_mode, MODE_LONG_LIST),
-		list_user, envp);
+		list_user);
 	    break;
 	case MODE_EDIT:
 	case MODE_RUN:
-	    policy_check(nargc, nargv, env_add, &command_info, &argv_out,
-		&user_env_out);
+	    if (!policy_check(nargc, nargv, env_add, &command_info, &argv_out,
+		    &run_envp))
+		goto access_denied;
 
 	    /* Reset nargv/nargc based on argv_out. */
 	    /* XXX - leaks old nargv in shell mode */
@@ -278,22 +269,23 @@ main(int argc, char *argv[], char *envp[])
 		    U_("plugin did not return a command to execute"));
 
 	    /* Approval plugins run after policy plugin accepts the command. */
-	    approval_check(settings, user_info, submit_optind, argv, envp,
-		command_info, nargv, user_env_out);
+	    if (!approval_check(command_info, nargv, run_envp))
+		goto access_denied;
 
 	    /* Open I/O plugin once policy and approval plugins succeed. */
-	    iolog_open(settings, user_info, command_info, nargc, nargv,
-		user_env_out);
+	    if (!iolog_open(command_info, nargc, nargv, run_envp))
+		goto access_denied;
 
 	    /* Audit the accept event on behalf of the sudo front-end. */
-	    audit_accept("sudo", SUDO_FRONT_END, command_info,
-		nargv, user_env_out);
+	    if (!audit_accept("sudo", SUDO_FRONT_END, command_info,
+		    nargv, run_envp))
+		goto access_denied;
 
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
 	    command_details.tty = user_details.tty;
 	    command_details.argv = argv_out;
-	    command_details.envp = user_env_out;
+	    command_details.envp = run_envp;
 	    command_details.evbase = sudo_event_base;
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 		SET(command_details.flags, CD_LOGIN_SHELL);
@@ -332,6 +324,15 @@ main(int argc, char *argv[], char *envp[])
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
 	WEXITSTATUS(status));
     exit(WEXITSTATUS(status));
+
+access_denied:
+    /* Policy/approval failure, close policy and audit plugins before exit. */
+    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
+	policy_close(0, EACCES);
+    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
+	EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 int
@@ -493,8 +494,8 @@ done:
 static char **
 get_user_info(struct user_details *ud)
 {
-    char *cp, **user_info, path[PATH_MAX];
-    size_t user_info_max = 32 + RLIM_NLIMITS;
+    char *cp, **info, path[PATH_MAX];
+    size_t info_max = 32 + RLIM_NLIMITS;
     unsigned int i = 0;
     mode_t mask;
     struct passwd *pw;
@@ -517,8 +518,8 @@ get_user_info(struct user_details *ud)
     memset(ud, 0, sizeof(*ud));
 
     /* XXX - bound check number of entries */
-    user_info = reallocarray(NULL, user_info_max, sizeof(char *));
-    if (user_info == NULL)
+    info = reallocarray(NULL, info_max, sizeof(char *));
+    if (info == NULL)
 	goto oom;
 
     ud->pid = getpid();
@@ -548,10 +549,10 @@ get_user_info(struct user_details *ud)
     if (pw == NULL)
 	sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
 
-    user_info[i] = sudo_new_key_val("user", pw->pw_name);
-    if (user_info[i] == NULL)
+    info[i] = sudo_new_key_val("user", pw->pw_name);
+    if (info[i] == NULL)
 	goto oom;
-    ud->username = user_info[i] + sizeof("user=") - 1;
+    ud->username = info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
     if ((ud->shell = getenv("SHELL")) == NULL || ud->shell[0] == '\0') {
@@ -560,46 +561,46 @@ get_user_info(struct user_details *ud)
     if ((ud->shell = strdup(ud->shell)) == NULL)
 	goto oom;
 
-    if (asprintf(&user_info[++i], "pid=%d", (int)ud->pid) == -1)
+    if (asprintf(&info[++i], "pid=%d", (int)ud->pid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "ppid=%d", (int)ud->ppid) == -1)
+    if (asprintf(&info[++i], "ppid=%d", (int)ud->ppid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "pgid=%d", (int)ud->pgid) == -1)
+    if (asprintf(&info[++i], "pgid=%d", (int)ud->pgid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
+    if (asprintf(&info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
+    if (asprintf(&info[++i], "sid=%d", (int)ud->sid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "uid=%u", (unsigned int)ud->cred.uid) == -1)
+    if (asprintf(&info[++i], "uid=%u", (unsigned int)ud->cred.uid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "euid=%u", (unsigned int)ud->cred.euid) == -1)
+    if (asprintf(&info[++i], "euid=%u", (unsigned int)ud->cred.euid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "gid=%u", (unsigned int)ud->cred.gid) == -1)
+    if (asprintf(&info[++i], "gid=%u", (unsigned int)ud->cred.gid) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "egid=%u", (unsigned int)ud->cred.egid) == -1)
+    if (asprintf(&info[++i], "egid=%u", (unsigned int)ud->cred.egid) == -1)
 	goto oom;
 
     if ((cp = get_user_groups(ud->username, &ud->cred)) == NULL)
 	goto oom;
-    user_info[++i] = cp;
+    info[++i] = cp;
 
     mask = umask(0);
     umask(mask);
-    if (asprintf(&user_info[++i], "umask=0%o", (unsigned int)mask) == -1)
+    if (asprintf(&info[++i], "umask=0%o", (unsigned int)mask) == -1)
 	goto oom;
 
     if (getcwd(path, sizeof(path)) != NULL) {
-	user_info[++i] = sudo_new_key_val("cwd", path);
-	if (user_info[i] == NULL)
+	info[++i] = sudo_new_key_val("cwd", path);
+	if (info[i] == NULL)
 	    goto oom;
-	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
+	ud->cwd = info[i] + sizeof("cwd=") - 1;
     }
 
     if (get_process_ttyname(path, sizeof(path)) != NULL) {
-	user_info[++i] = sudo_new_key_val("tty", path);
-	if (user_info[i] == NULL)
+	info[++i] = sudo_new_key_val("tty", path);
+	if (info[i] == NULL)
 	    goto oom;
-	ud->tty = user_info[i] + sizeof("tty=") - 1;
+	ud->tty = info[i] + sizeof("tty=") - 1;
     } else {
 	/* tty may not always be present */
 	if (errno != ENOENT)
@@ -607,36 +608,36 @@ get_user_info(struct user_details *ud)
     }
 
     cp = sudo_gethostname();
-    user_info[++i] = sudo_new_key_val("host", cp ? cp : "localhost");
+    info[++i] = sudo_new_key_val("host", cp ? cp : "localhost");
     free(cp);
-    if (user_info[i] == NULL)
+    if (info[i] == NULL)
 	goto oom;
-    ud->host = user_info[i] + sizeof("host=") - 1;
+    ud->host = info[i] + sizeof("host=") - 1;
 
     sudo_get_ttysize(&ud->ts_rows, &ud->ts_cols);
-    if (asprintf(&user_info[++i], "lines=%d", ud->ts_rows) == -1)
+    if (asprintf(&info[++i], "lines=%d", ud->ts_rows) == -1)
 	goto oom;
-    if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
+    if (asprintf(&info[++i], "cols=%d", ud->ts_cols) == -1)
 	goto oom;
 
-    n = serialize_limits(&user_info[i + 1], user_info_max - (i + 1));
+    n = serialize_limits(&info[i + 1], info_max - (i + 1));
     if (n == -1)
 	goto oom;
     i += n;
 
-    user_info[++i] = NULL;
+    info[++i] = NULL;
 
     /* Add to list of vectors to be garbage collected at exit. */
-    if (!gc_add(GC_VECTOR, user_info))
+    if (!gc_add(GC_VECTOR, info))
 	goto bad;
 
-    debug_return_ptr(user_info);
+    debug_return_ptr(info);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
     while (i--)
-	free(user_info[i]);
-    free(user_info);
+	free(info[i]);
+    free(info);
     debug_return_ptr(NULL);
 }
 
@@ -724,8 +725,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		break;
+	    case 'i':
+		SET_FLAG("intercept=", CD_INTERCEPT)
+		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)
+		SET_FLAG("log_subcmds=", CD_LOG_SUBCMDS)
 		break;
 	    case 'n':
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
@@ -1006,8 +1011,7 @@ run_command(struct command_details *details)
  * to consume.  Returns a NULL-terminated plugin-style array of pairs.
  */
 static char **
-format_plugin_settings(struct plugin_container *plugin,
-    struct sudo_settings *sudo_settings)
+format_plugin_settings(struct plugin_container *plugin)
 {
     size_t plugin_settings_size;
     struct sudo_debug_file *debug_file;
@@ -1065,8 +1069,7 @@ bad:
 }
 
 static void
-policy_open(struct sudo_settings *settings, char * const user_info[],
-    char * const user_env[])
+policy_open(void)
 {
     char **plugin_settings;
     const char *errstr = NULL;
@@ -1074,7 +1077,7 @@ policy_open(struct sudo_settings *settings, char * const user_info[],
     debug_decl(policy_open, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
-    plugin_settings = format_plugin_settings(&policy_plugin, settings);
+    plugin_settings = format_plugin_settings(&policy_plugin);
     if (plugin_settings == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
@@ -1087,11 +1090,11 @@ policy_open(struct sudo_settings *settings, char * const user_info[],
     case SUDO_API_MKVERSION(1, 1):
 	ok = policy_plugin.u.policy_1_0->open(policy_plugin.u.io_1_0->version,
 	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
-	    user_info, user_env);
+	    user_info, submit_envp);
 	break;
     default:
 	ok = policy_plugin.u.policy->open(SUDO_API_VERSION, sudo_conversation,
-	    sudo_conversation_printf, plugin_settings, user_info, user_env,
+	    sudo_conversation_printf, plugin_settings, user_info, submit_envp,
 	    policy_plugin.options, &errstr);
     }
 
@@ -1157,10 +1160,9 @@ policy_show_version(int verbose)
     debug_return_int(ret);
 }
 
-static void
-policy_check(int argc, char * const argv[],
-    char *env_add[], char **command_info[], char **argv_out[],
-    char **user_env_out[])
+static bool
+policy_check(int argc, char * const argv[], char *env_add[],
+    char **command_info[], char **run_argv[], char **run_envp[])
 {
     const char *errstr = NULL;
     int ok;
@@ -1172,7 +1174,7 @@ policy_check(int argc, char * const argv[],
     }
     sudo_debug_set_active_instance(policy_plugin.debug_instance);
     ok = policy_plugin.u.policy->check_policy(argc, argv, env_add,
-	command_info, argv_out, user_env_out, &errstr);
+	command_info, run_argv, run_envp, &errstr);
     sudo_debug_set_active_instance(sudo_debug_instance);
     sudo_debug_printf(SUDO_DEBUG_INFO, "policy plugin returns %d (%s)",
 	ok, errstr ? errstr : "");
@@ -1194,22 +1196,14 @@ policy_check(int argc, char * const argv[],
 	    usage();
 	    break;
 	}
-
-	/* Policy must be closed after auditing to avoid use after free. */
-	if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
-	    policy_close(0, 0);
-	audit_close(SUDO_PLUGIN_NO_STATUS, 0);
-	exit(EXIT_FAILURE); /* policy plugin printed error message */
+	debug_return_bool(false);
     }
-    audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, *command_info,
-	*argv_out, *user_env_out);
-
-    debug_return;
+    debug_return_bool(audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN,
+	*command_info, *run_argv, *run_envp));
 }
 
 static void
-policy_list(int argc, char * const argv[], int verbose,
-    const char *user, char * const envp[])
+policy_list(int argc, char * const argv[], int verbose, const char *user)
 {
     const char *errstr = NULL;
     /* TODO: add list_user */
@@ -1231,7 +1225,7 @@ policy_list(int argc, char * const argv[], int verbose,
     switch (ok) {
     case 1:
 	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN,
-	    command_info, argv, envp);
+	    command_info, argv, submit_envp);
 	break;
     case 0:
 	audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
@@ -1254,7 +1248,7 @@ policy_list(int argc, char * const argv[], int verbose,
 }
 
 static void
-policy_validate(char * const argv[], char * const envp[])
+policy_validate(char * const argv[])
 {
     const char *errstr = NULL;
     char * const command_info[] = {
@@ -1275,7 +1269,7 @@ policy_validate(char * const argv[], char * const envp[])
     switch (ok) {
     case 1:
 	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, command_info,
-	    argv, envp);
+	    argv, submit_envp);
 	break;
     case 0:
 	audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
@@ -1367,16 +1361,15 @@ done:
 }
 
 static int
-iolog_open_int(struct plugin_container *plugin, struct sudo_settings *settings,
-    char * const user_info[], char * const command_info[],
-    int argc, char * const argv[], char * const user_env[], const char **errstr)
+iolog_open_int(struct plugin_container *plugin, char * const command_info[],
+    int argc, char * const argv[], char * const run_envp[], const char **errstr)
 {
     char **plugin_settings;
     int ret;
     debug_decl(iolog_open_int, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
-    plugin_settings = format_plugin_settings(plugin, settings);
+    plugin_settings = format_plugin_settings(plugin);
     if (plugin_settings == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
@@ -1390,17 +1383,17 @@ iolog_open_int(struct plugin_container *plugin, struct sudo_settings *settings,
     case SUDO_API_MKVERSION(1, 0):
 	ret = plugin->u.io_1_0->open(plugin->u.io_1_0->version,
 	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
-	    user_info, argc, argv, user_env);
+	    user_info, argc, argv, run_envp);
 	break;
     case SUDO_API_MKVERSION(1, 1):
 	ret = plugin->u.io_1_1->open(plugin->u.io_1_1->version,
 	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
-	    user_info, command_info, argc, argv, user_env);
+	    user_info, command_info, argc, argv, run_envp);
 	break;
     default:
 	ret = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
 	    sudo_conversation_printf, plugin_settings, user_info, command_info,
-	    argc, argv, user_env, plugin->options, errstr);
+	    argc, argv, run_envp, plugin->options, errstr);
     }
 
     /* Stash plugin debug instance ID if set in open() function. */
@@ -1410,38 +1403,38 @@ iolog_open_int(struct plugin_container *plugin, struct sudo_settings *settings,
     debug_return_int(ret);
 }
 
-static void
-iolog_open(struct sudo_settings *settings, char * const user_info[],
-    char * const command_info[], int argc, char * const argv[],
-    char * const user_env[])
+static bool
+iolog_open(char * const command_info[], int argc, char * const argv[],
+    char * const run_envp[])
 {
     struct plugin_container *plugin, *next;
     const char *errstr = NULL;
     debug_decl(iolog_open, SUDO_DEBUG_PCOMM);
 
-    /* XXX - iolog_open should audit errors */
     TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
-	int ok = iolog_open_int(plugin, settings, user_info,
-	    command_info, argc, argv, user_env, &errstr);
+	int ok = iolog_open_int(plugin, command_info, argc, argv, run_envp,
+	    &errstr);
 	switch (ok) {
 	case 1:
 	    break;
 	case 0:
 	    /* I/O plugin asked to be disabled, remove and free. */
-	    /* XXX - audit */
 	    unlink_plugin(&io_plugins, plugin);
 	    break;
 	case -2:
 	    usage();
 	    break;
 	default:
-	    /* XXX - audit error */
-	    sudo_fatalx(U_("error initializing I/O plugin %s"),
+	    sudo_warnx(U_("error initializing I/O plugin %s"),
 		plugin->name);
+	    audit_error(plugin->name, SUDO_IO_PLUGIN,
+		errstr ? errstr : _("error initializing I/O plugin"),
+		command_info);
+	    debug_return_bool(false);
 	}
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 static void
@@ -1471,17 +1464,15 @@ iolog_close(int exit_status, int error_code)
 }
 
 static void
-iolog_show_version(int verbose, struct sudo_settings *settings,
-    char * const user_info[], int argc, char * const argv[],
-    char * const user_env[])
+iolog_show_version(int verbose, int argc, char * const argv[],
+    char * const envp[])
 {
     const char *errstr = NULL;
     struct plugin_container *plugin;
     debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM);
 
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	int ok = iolog_open_int(plugin, settings, user_info, NULL,
-	    argc, argv, user_env, &errstr);
+	int ok = iolog_open_int(plugin, NULL, argc, argv, envp, &errstr);
 	if (ok != -1) {
 	    sudo_debug_set_active_instance(plugin->debug_instance);
 	    if (plugin->u.io->show_version != NULL) {
@@ -1540,16 +1531,14 @@ unlink_plugin(struct plugin_container_list *plugin_list,
 }
 
 static int
-audit_open_int(struct plugin_container *plugin, struct sudo_settings *settings,
-    char * const user_info[], int submit_optind, char * const submit_argv[],
-    char * const submit_envp[], const char **errstr)
+audit_open_int(struct plugin_container *plugin, const char **errstr)
 {
     char **plugin_settings;
     int ret;
     debug_decl(audit_open_int, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
-    plugin_settings = format_plugin_settings(plugin, settings);
+    plugin_settings = format_plugin_settings(plugin);
     if (plugin_settings == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
@@ -1568,16 +1557,14 @@ audit_open_int(struct plugin_container *plugin, struct sudo_settings *settings,
 }
 
 static void
-audit_open(struct sudo_settings *settings, char * const user_info[],
-    int submit_optind, char * const submit_argv[], char * const submit_envp[])
+audit_open(void)
 {
     struct plugin_container *plugin, *next;
     const char *errstr = NULL;
     debug_decl(audit_open, SUDO_DEBUG_PCOMM);
 
     TAILQ_FOREACH_SAFE(plugin, &audit_plugins, entries, next) {
-	int ok = audit_open_int(plugin, settings, user_info,
-	    submit_optind, submit_argv, submit_envp, &errstr);
+	int ok = audit_open_int(plugin, &errstr);
 	switch (ok) {
 	case 1:
 	    break;
@@ -1639,12 +1626,13 @@ audit_show_version(int verbose)
  * Error from plugin or front-end.
  * The error will not be sent to plugin source, if specified.
  */
-static void
+static bool
 audit_error2(struct plugin_container *source, const char *plugin_name,
     unsigned int plugin_type, const char *audit_msg, char * const command_info[])
 {
     struct plugin_container *plugin;
     const char *errstr = NULL;
+    bool ret = true;
     int ok;
     debug_decl(audit_error2, SUDO_DEBUG_PCOMM);
 
@@ -1670,10 +1658,11 @@ audit_error2(struct plugin_container *source, const char *plugin_name,
 		plugin->name, ok);
 	    sudo_warnx(U_("%s: unable to log error event%s%s"),
 		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
+	    ret = false;
 	}
     }
 
-    debug_return;
+    debug_return_bool(ret);
 }
 
 /*
@@ -1681,7 +1670,7 @@ audit_error2(struct plugin_container *source, const char *plugin_name,
  * See command_info[] for additional info.
  * XXX - actual environment may be updated by policy_init_session().
  */
-static void
+bool
 audit_accept(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
     char * const run_envp[])
@@ -1706,26 +1695,26 @@ audit_accept(const char *plugin_name, unsigned int plugin_type,
 	    sudo_warnx(U_("%s: unable to log accept event%s%s"),
 		plugin->name, errstr ? ": " : "", errstr ? errstr : "");
 
-	    /* Notify other audit plugins and exit. */
+	    /* Notify other audit plugins and return. */
 	    audit_error2(plugin, plugin->name, SUDO_AUDIT_PLUGIN,
 		errstr ? errstr : _("audit plugin error"), command_info);
-	    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
-	    exit(EXIT_FAILURE);
+	    debug_return_bool(false);
 	}
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
  * Command rejected by policy or I/O plugin.
  */
-void
+bool
 audit_reject(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[])
 {
     struct plugin_container *plugin;
     const char *errstr = NULL;
+    bool ret = true;
     int ok;
     debug_decl(audit_reject, SUDO_DEBUG_PCOMM);
 
@@ -1747,26 +1736,28 @@ audit_reject(const char *plugin_name, unsigned int plugin_type,
 	    /* Notify other audit plugins. */
 	    audit_error2(plugin, plugin->name, SUDO_AUDIT_PLUGIN,
 		errstr ? errstr : _("audit plugin error"), command_info);
+
+	    ret = false;
+	    break;
 	}
     }
 
-    debug_return;
+    debug_return_bool(ret);
 }
 
 /*
  * Error from plugin or front-end.
  */
-void
+bool
 audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[])
 {
-    audit_error2(NULL, plugin_name, plugin_type, audit_msg, command_info);
+    return audit_error2(NULL, plugin_name, plugin_type, audit_msg,
+	command_info);
 }
 
 static int
-approval_open_int(struct plugin_container *plugin,
-    struct sudo_settings *settings, char * const user_info[],
-    int submit_optind, char * const submit_argv[], char * const submit_envp[])
+approval_open_int(struct plugin_container *plugin)
 {
     char **plugin_settings;
     const char *errstr = NULL;
@@ -1774,7 +1765,7 @@ approval_open_int(struct plugin_container *plugin,
     debug_decl(approval_open_int, SUDO_DEBUG_PCOMM);
 
     /* Convert struct sudo_settings to plugin_settings[] */
-    plugin_settings = format_plugin_settings(plugin, settings);
+    plugin_settings = format_plugin_settings(plugin);
     if (plugin_settings == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
@@ -1807,9 +1798,7 @@ approval_open_int(struct plugin_container *plugin,
 }
 
 static void
-approval_show_version(int verbose, struct sudo_settings *settings,
-    char * const user_info[], int submit_optind, char * const submit_argv[],
-    char * const submit_envp[])
+approval_show_version(int verbose)
 {
     struct plugin_container *plugin, *next;
     int ok;
@@ -1822,8 +1811,7 @@ approval_show_version(int verbose, struct sudo_settings *settings,
 	if (plugin->u.approval->show_version == NULL)
 	    continue;
 
-	ok = approval_open_int(plugin, settings, user_info, submit_optind,
-	    submit_argv, submit_envp);
+	ok = approval_open_int(plugin);
 	if (ok == 1) {
 	    /* Return value of show_version currently ignored. */
 	    sudo_debug_set_active_instance(plugin->debug_instance);
@@ -1842,10 +1830,8 @@ approval_show_version(int verbose, struct sudo_settings *settings,
  * This is a "one-shot" plugin that has no open/close and is only
  * called if the policy plugin accepts the command first.
  */
-static void
-approval_check(struct sudo_settings *settings, char * const user_info[],
-    int submit_optind, char * const submit_argv[], char * const submit_envp[],
-    char * const command_info[], char * const run_argv[],
+bool
+approval_check(char * const command_info[], char * const run_argv[],
     char * const run_envp[])
 {
     struct plugin_container *plugin, *next;
@@ -1854,14 +1840,13 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
     debug_decl(approval_check, SUDO_DEBUG_PCOMM);
 
     /*
-     * Approval plugin us only open for the life of the check() call.
+     * Approval plugin is only open for the life of the check() call.
      */
     TAILQ_FOREACH_SAFE(plugin, &approval_plugins, entries, next) {
 	if (plugin->u.approval->check == NULL)
 	    continue;
 
-	ok = approval_open_int(plugin, settings, user_info, submit_optind,
-	    submit_argv, submit_envp);
+	ok = approval_open_int(plugin);
 	if (ok != 1)
 	    continue;
 
@@ -1879,8 +1864,9 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
 		command_info);
 	    break;
 	case 1:
-	    audit_accept(plugin->name, SUDO_APPROVAL_PLUGIN, command_info,
-		run_argv, run_envp);
+	    if (!audit_accept(plugin->name, SUDO_APPROVAL_PLUGIN, command_info,
+		    run_argv, run_envp))
+		ok = -1;
 	    break;
 	case -1:
 	    audit_error(plugin->name, SUDO_APPROVAL_PLUGIN,
@@ -1899,16 +1885,11 @@ approval_check(struct sudo_settings *settings, char * const user_info[],
 	    sudo_debug_set_active_instance(sudo_debug_instance);
 	}
 
-	/* On error, close policy and audit plugins then exit. */
-	if (ok != 1) {
-	    if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
-		policy_close(0, EPERM);
-	    audit_close(SUDO_PLUGIN_NO_STATUS, 0);
-	    exit(EXIT_FAILURE); /* approval plugin printed error message */
-	}
+	if (ok != 1)
+	    debug_return_bool(false);
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 static void

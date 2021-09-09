@@ -1,3 +1,66 @@
+What's new in Sudo 1.9.8
+
+ * It is now possible to transparently intercepting sub-commands
+   executed by the original command run via sudo.  Intercept support
+   is implemented using LD_PRELOAD (or the equivalent supported by
+   the system) and so has some limitations.  The two main limitations
+   are that only dynamic executables are supported and only the
+   execl, execle, execlp, execv, execve, execvp, and execvpe library
+   functions are currently intercepted. Its main use case is to
+   support restricting privileged shells run via sudo.
+
+   To support this, there is a new "intercept" Defaults setting and
+   an INTERCEPT command tag that can be used in sudoers.  For example:
+
+    Cmnd_Alias SHELLS=/bin/bash, /bin/sh, /bin/csh, /bin/ksh, /bin/zsh
+    Defaults!SHELLS intercept
+
+   would cause sudo to run the listed shells in intercept mode.
+   This can also be set on a per-rule basis.  For example:
+
+    Cmnd_Alias SHELLS=/bin/bash, /bin/sh, /bin/csh, /bin/ksh, /bin/zsh
+    chuck ALL = INTERCEPT: SHELLS
+
+   would only apply intercept mode to user "chuck" when running one
+   of the listed shells.
+
+   In intercept mode, sudo will not prompt for a password before
+   running a sub-command and will not allow a set-user-ID or
+   set-group-ID program to be run by default.  The new
+   intercept_authenticate and intercept_allow_setid sudoers settings
+   can be used to change this behavior.
+
+ * The new "log_subcmds" sudoers setting can be used to log additional
+   commands run in a privileged shell.  It uses the same mechanism as
+   the intercept support described above and has the same limitations.
+
+ * Support for logging sudo_logsrvd errors via syslog or to a file.
+   Previously, most sudo_logsrvd errors were only visible in the
+   debug log.
+
+ * Better diagnostics when there is a TLS certificate validation error.
+
+ * Using the "+=" or "-=" operators in a Defaults setting that takes
+   a string, not a list, now produces a warning from sudo and a
+   syntax error from inside visudo.
+
+ * Fixed a bug where the "iolog_mode" setting in sudoers and sudo_logsrvd
+   had no effect when creating I/O log parent directories if the I/O log
+   file name ended with the string "XXXXXX".
+
+ * Fixed a bug in the sudoers custom prompt code where the size
+   parameter that was passed to the strlcpy() function was incorrect.
+   No overflow was possible since the correct amount of memory was
+   already pre-allocated.
+
+ * The mksigname and mksiglist helper programs are now built with
+   the host compiler, not the target compiler, when cross-compiling.
+   Bug #989.
+
+ * Fixed compilation error when the --enable-static-sudoers configure
+   option was specified.  This was due to a typo introduced in sudo
+   1.9.7.  GitHub PR #113.
+
 What's new in Sudo 1.9.7p2
 
  * When formatting JSON output, octal numbers are now stored as

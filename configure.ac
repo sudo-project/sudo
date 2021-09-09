@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.7p2], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.8], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -69,14 +69,18 @@ AC_SUBST([SEMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
+AC_SUBST([INTERCEPTFILE])
+AC_SUBST([INTERCEPTDIR])
+AC_SUBST([intercept_file])
 AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
 AC_SUBST([noexec_file])
 AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_BACKUP])
+AC_SUBST([INSTALL_INTERCEPT])
 AC_SUBST([INSTALL_NOEXEC])
-AC_SUBST([CHECK_NOEXEC])
-AC_SUBST([NOEXEC_MODULE])
+AC_SUBST([CHECK_INTERCEPT])
+AC_SUBST([PRELOAD_MODULE])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
 AC_SUBST([SELINUX_USAGE])
@@ -122,6 +126,7 @@ AC_SUBST([LIBLOGSRV])
 AC_SUBST([PPFILES])
 AC_SUBST([FUZZ_ENGINE])
 AC_SUBST([FUZZ_LD])
+AC_SUBST([INTERCEPT_EXP])
 
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -209,6 +214,7 @@ path_info=on
 ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
+intercept_file="$libexecdir/sudo/sudo_intercept.so"
 noexec_file="$libexecdir/sudo/sudo_noexec.so"
 sesh_file="$libexecdir/sudo/sesh"
 nsswitch_conf=/etc/nsswitch.conf
@@ -226,9 +232,10 @@ dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
 INSTALL_BACKUP=
+INSTALL_INTERCEPT=
 INSTALL_NOEXEC=
-CHECK_NOEXEC=
-NOEXEC_MODULE=-module
+CHECK_INTERCEPT=
+PRELOAD_MODULE=-module
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
@@ -265,6 +272,7 @@ COMPAT_EXP=
 SIGNAME=
 FUZZ_ENGINE=
 FUZZ_LD='$(CC)'
+INTERCEPT_EXP=
 dnl
 dnl Other variables
 dnl
@@ -1590,6 +1598,7 @@ AC_CHECK_TOOL(RANLIB, ranlib, :)
 if test X"$AR" = X"false"; then
     AC_MSG_ERROR([the "ar" utility is required to build sudo])
 fi
+AX_PROG_CC_FOR_BUILD
 
 if test "x$ac_cv_prog_cc_c89" = "xno"; then
     AC_MSG_ERROR([Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build.])
@@ -1657,9 +1666,10 @@ AC_ARG_WITH(libtool, [AS_HELP_STRING([--with-libtool=PATH], [specify path to lib
 esac])
 
 dnl
-dnl Defer with_noexec until after libtool magic runs
+dnl Defer enable_intercept and with_noexec until after libtool magic runs
 dnl
 if test "$enable_shared" = "no"; then
+    enable_intercept=no
     with_noexec=no
     enable_dlopen=no
     lt_cv_dlopen=none
@@ -1669,6 +1679,18 @@ if test "$enable_shared" = "no"; then
 fi
 LIBDL="$lt_cv_dlopen_libs"
 SHLIB_ENABLE="$enable_dlopen"
+
+AC_ARG_ENABLE(intercept,
+[AS_HELP_STRING([--enable-intercept], [fully qualified pathname of sudo_intercept.so])],
+[ case "$enableval" in
+    yes)	;;
+    no)		;;
+    *)		intercept_file="$enableval"
+		;;
+  esac
+], [enable_intercept="$intercept_file"])
+INTERCEPTFILE="sudo_intercept.so"
+INTERCEPTDIR="`echo $intercept_file|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
 
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[[=PATH]]], [fully qualified pathname of sudo_noexec.so])],
 [case $with_noexec in
@@ -2174,7 +2196,7 @@ case "$host" in
 
 		# Build sudo_noexec.so as a shared library, not a module.
 		# On Darwin, modules and shared libraries are incompatible.
-		NOEXEC_MODULE=
+		PRELOAD_MODULE=
 
 		# Mach monotonic timer that runs while sleeping
 		AC_CHECK_FUNCS([mach_continuous_time])
@@ -2261,17 +2283,21 @@ fi
 dnl
 dnl Library preloading to support NOEXEC
 dnl
-if test X"$with_noexec" != X"no"; then
+if test X"$enable_intercept" = X"no"; then
+    intercept_file=disabled
+fi
+if test X"$with_noexec" = X"no"; then
+    noexec_file=disabled
+fi
+if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"; then
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_VAR, "$RTLD_PRELOAD_VAR")
-    SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, "$RTLD_PRELOAD_DELIM")
+    SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, '$RTLD_PRELOAD_DELIM')
     if test -n "$RTLD_PRELOAD_DEFAULT"; then
 	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DEFAULT, "$RTLD_PRELOAD_DEFAULT")
     fi
     if test -n "$RTLD_PRELOAD_ENABLE_VAR"; then
 	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_ENABLE_VAR, "$RTLD_PRELOAD_ENABLE_VAR")
     fi
-else
-    noexec_file=disabled
 fi
 
 dnl
@@ -2517,8 +2543,19 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval fseeko])
-AC_CHECK_FUNCS([pread], [], [
+AC_FUNC_FSEEKO
+AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval])
+AC_CHECK_FUNCS([execvpe], [SUDO_APPEND_INTERCEPT_EXP(execvpe)])
+AC_CHECK_FUNCS([pread], [
+    # pread/pwrite on 32-bit HP-UX 11.x may not support large files
+    case "$host_os" in
+	hpux*|hiuxmpp*)
+	    AC_CHECK_FUNCS([pread64 pwrite64], [
+		AC_CHECK_DECLS([pread64, pwrite64])
+	    ])
+	    ;;
+    esac
+], [
     AC_LIBOBJ(pread)
     SUDO_APPEND_COMPAT_EXP(sudo_pread)
 ])
@@ -2577,7 +2614,10 @@ AC_CHECK_FUNCS([getdelim], [
     SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
 ])
-AC_CHECK_FUNCS([getusershell], [], [
+AC_CHECK_FUNCS([getusershell], [
+    # Older Solaris has getusershell() et al but does not declare it.
+    AC_CHECK_DECLS([getusershell])
+], [
     AC_LIBOBJ(getusershell)
     SUDO_APPEND_COMPAT_EXP(sudo_getusershell)
 ])
@@ -2811,13 +2851,11 @@ AC_CHECK_FUNCS([clock_gettime], [], [
 AC_CHECK_FUNCS([getopt_long], [], [
     AC_LIBOBJ(getopt_long)
     SUDO_APPEND_COMPAT_EXP(sudo_getopt_long sudo_getopt_long_only)
-    AC_MSG_CHECKING([for optreset])
-    AC_CACHE_VAL(sudo_cv_optreset, [
+    AC_CACHE_CHECK([for optreset], sudo_cv_optreset, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern int optreset; optreset = 1; return optreset;]])], [sudo_cv_optreset=yes], [sudo_cv_optreset=no])])
     if test "$sudo_cv_optreset" = "yes"; then
 	AC_DEFINE(HAVE_OPTRESET)
     fi
-    AC_MSG_RESULT($sudo_cv_optreset)
 ])
 AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
     SUDO_APPEND_COMPAT_EXP(sudo_closefrom)
@@ -2863,11 +2901,6 @@ AC_CHECK_MEMBER([struct stat.st_mtim],
 	[AC_CHECK_MEMBER([struct stat.st_nmtime], AC_DEFINE(HAVE_ST_NMTIME))])
     ]
 )
-AC_CHECK_FUNCS([vsyslog], [], [
-    AC_LIBOBJ(vsyslog)
-    SUDO_APPEND_COMPAT_EXP(sudo_vsyslog)
-    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }vsyslog_test"
-])
 dnl
 dnl 4.4BSD-based systems can force the password or group file to be held open
 dnl
@@ -3258,30 +3291,24 @@ dnl
 AC_CHECK_FUNCS([getprogname], [
     AC_CHECK_FUNCS([setprogname], [], [SUDO_APPEND_COMPAT_EXP(sudo_setprogname)])
 ], [
-    AC_MSG_CHECKING([for __progname])
-    AC_CACHE_VAL(sudo_cv___progname, [
+    AC_CACHE_CHECK([for __progname], sudo_cv___progname, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; if (__progname[0] == '\0') return 1;]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
     if test "$sudo_cv___progname" = "yes"; then
 	AC_DEFINE(HAVE___PROGNAME)
     fi
-    AC_MSG_RESULT($sudo_cv___progname)
     SUDO_APPEND_COMPAT_EXP(sudo_getprogname)
     SUDO_APPEND_COMPAT_EXP(sudo_setprogname)
 ])
 dnl
 dnl Check for __func__ or __FUNCTION__
 dnl
-AC_MSG_CHECKING([for __func__])
-AC_CACHE_VAL(sudo_cv___func__, [
+AC_CACHE_CHECK([for __func__], sudo_cv___func__, [
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__func__[0] == '\0') return 1;]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])])
-AC_MSG_RESULT($sudo_cv___func__)
 if test "$sudo_cv___func__" = "yes"; then
     AC_DEFINE(HAVE___FUNC__)
 elif test -n "$GCC"; then
-    AC_MSG_CHECKING([for __FUNCTION__])
-    AC_CACHE_VAL(sudo_cv___FUNCTION__, [
+    AC_CACHE_CHECK([for __FUNCTION__], sudo_cv___FUNCTION__, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if(__FUNCTION__[0] == '\0') return 1;]])], [sudo_cv___FUNCTION__=yes], [sudo_cv___FUNCTION__=no])])
-    AC_MSG_RESULT($sudo_cv___FUNCTION__)
     if test "$sudo_cv___FUNCTION__" = "yes"; then
 	AC_DEFINE(HAVE___FUNC__)
 	AC_DEFINE(__func__, __FUNCTION__, [Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not __func__])
@@ -4486,11 +4513,24 @@ dnl
 if test "$enable_sanitizer" != "no"; then
     AX_CHECK_COMPILE_FLAG([$enable_sanitizer], [
 	AX_APPEND_FLAG([$enable_sanitizer], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([-XCClinker], [ASAN_LDFLAGS])
 	AX_APPEND_FLAG([$enable_sanitizer], [ASAN_LDFLAGS])
 	AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
 	    AX_APPEND_FLAG([-fno-omit-frame-pointer], [CFLAGS])
 	])
 	AC_DEFINE(NO_LEAKS)
+	dnl
+	dnl check for libasan.so so we can preload it before sudo_intercept.so
+	dnl gcc links asan dynamically, clang links it statically.
+	dnl
+	case `$CC --version 2>&1` in
+	*gcc*)
+	    libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
+	    if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
+		SUDO_DEFINE_UNQUOTED(_PATH_ASAN_LIB, "$libasan", [Path to the libasan.so shared library])
+	    fi
+	    ;;
+	esac
     ], [
 	AC_MSG_ERROR([$CC does not support the $enable_sanitizer flag])
     ])
@@ -4498,6 +4538,7 @@ fi
 if test "$enable_fuzzer" = "yes"; then
     AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
 	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_CFLAGS])
+	AX_APPEND_FLAG([-XCClinker], [ASAN_LDFLAGS])
 	AX_APPEND_FLAG([-fsanitize=fuzzer-no-link], [ASAN_LDFLAGS])
 	if test -z "$FUZZ_ENGINE"; then
 	    FUZZ_ENGINE="-fsanitize=fuzzer"
@@ -4622,7 +4663,12 @@ if test "$enable_hardening" != "no" && test "$enable_ssp" != "no"; then
     fi
 fi
 if test "$enable_hardening" != "no"; then
+    AX_CHECK_LINK_FLAG([-fstack-clash-protection], [
+	AX_APPEND_FLAG([-fstack-clash-protection], [SSP_CFLAGS])
+	AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [SSP_LDFLAGS])
+    ])
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
+    AX_CHECK_LINK_FLAG([-Wl,-z,noexecstack], [AX_APPEND_FLAG([-Wl,-z,noexecstack], [LDFLAGS])])
 fi
 
 dnl
@@ -4737,6 +4783,13 @@ if test "$exec_prefix" = '$(prefix)'; then
     fi
 fi
 
+# Update exec_prefix in intercept_file
+_intercept_file=
+while test X"$intercept_file" != X"$_intercept_file"; do
+    _intercept_file="$intercept_file"
+    eval intercept_file="$_intercept_file"
+done
+
 # Update exec_prefix in noexec_file
 _noexec_file=
 while test X"$noexec_file" != X"$_noexec_file"; do
@@ -4762,18 +4815,23 @@ exec_prefix="$oexec_prefix"
 dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
 dnl
+if test X"$enable_intercept" != X"no"; then
+    SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.lo"
+    PROGS="${PROGS} sudo_intercept.la"
+    INSTALL_INTERCEPT="install-intercept"
+
+    # Can't use sanitizers with LD_PRELOAD
+    if test "$enable_sanitizer" != "yes"; then
+	CHECK_INTERCEPT=check_intercept
+    fi
+
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_INTERCEPT, "$intercept_file", [The fully qualified pathname of sudo_intercept.so])
+fi
 if test X"$with_noexec" != X"no"; then
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"
 
-    # Can't use sanitizers with LD_PRELOAD
-    if test "$enable_sanitizer" != "yes"; then
-	CHECK_NOEXEC=check_noexec
-    fi
-
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
-else
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, NULL)
 fi
 if test X"$with_selinux" != X"no"; then
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
@@ -4806,7 +4864,7 @@ dnl
 CFLAGS=${CFLAGS# }
 CPPFLAGS=${CPPFLAGS# }
 LDFLAGS=${LDFLAGS# }
-SUDO_LDFLAGS=${SUDOERS_LDFLAGS# }
+SUDO_LDFLAGS=${SUDO_LDFLAGS# }
 SUDOERS_LDFLAGS=${SUDOERS_LDFLAGS# }
 LIBS=${LIBS# }
 SUDO_LIBS=${SUDO_LIBS# }
@@ -4840,7 +4898,7 @@ elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
 
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 
 AC_OUTPUT
 

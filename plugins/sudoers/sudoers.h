@@ -130,6 +130,7 @@ struct sudo_user {
     uid_t uid;
     uid_t gid;
     pid_t sid;
+    char uuid_str[37];
 };
 
 /*
@@ -193,6 +194,10 @@ struct sudo_user {
 #define MODE_PRESERVE_ENV	0x00400000
 #define MODE_NONINTERACTIVE	0x00800000
 #define MODE_IGNORE_TICKET	0x01000000
+#define MODE_POLICY_INTERCEPTED	0x02000000
+
+/* Mode bits allowed for intercepted commands. */
+#define MODE_INTERCEPT_MASK	(MODE_RUN|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_POLICY_INTERCEPTED)
 
 /*
  * Used with set_perms()
@@ -425,7 +430,7 @@ bool sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file
 void sudoers_debug_deregister(void);
 
 /* policy.c */
-int sudoers_policy_deserialize_info(void *v);
+int sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 extern const char *path_ldap_conf;
 extern const char *path_ldap_secret;
@@ -449,7 +454,6 @@ bool expand_tilde(char **path, const char *user);
 enum sudoers_gc_types {
     GC_UNKNOWN,
     GC_VECTOR,
-    GC_EDIT_ARGS,
     GC_PTR
 };
 bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);

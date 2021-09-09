@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "May 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1049,7 +1049,7 @@ Warning, if the user has write access to the command itself (directly or via a
 command), it may be possible for the user to replace the command after the
 digest check has been performed but before the command is executed.
 A similar race condition exists on systems that lack the
-fexecve(2)
+\fBfexecve\fR()
 system call when the directory in which the command is located
 is writable by the user.
 See the description of the
@@ -1190,8 +1190,9 @@ Chroot_Spec ::= 'CHROOT=directory'
 
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
-              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
-              'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
+              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'INTERCEPT:' |
+              'NOINTERCEPT:' | 'PASSWD:' | 'NOPASSWD:' | 'SETENV:' |
+              'NOSETENV:')
 .RE
 .fi
 .PP
@@ -1410,6 +1411,7 @@ On systems with SELinux support,
 \fIsudoers\fR
 file entries may optionally have an SELinux role and/or type associated
 with a command.
+This can be used to implement a form of role-based access control (RBAC).
 If a role or
 type is specified with the command it will override any default values
 specified in
@@ -1607,6 +1609,8 @@ The following tag values are supported:
 \fRNOLOG_OUTPUT\fR,
 \fRMAIL\fR,
 \fRNOMAIL\fR,
+\fRINTERCEPT\fR,
+\fRNOINTERCEPT\fR,
 \fRPASSWD\fR,
 \fRNOPASSWD\fR,
 \fRSETENV\fR,
@@ -1767,7 +1771,9 @@ and
 \fI/usr/bin/lprm\fR
 as
 \fBroot\fR
-on the machine rushmore without authenticating himself.
+on the machine
+\(lqrushmore\(rq
+without authenticating himself.
 If we only want
 \fBray\fR
 to be able to
@@ -1832,6 +1838,42 @@ the
 tag is implied for that command; this default may be overridden by use of the
 \fRNOSETENV\fR
 tag.
+.TP 2n
+\fIINTERCEPT\fR and \fINOINTERCEPT\fR
+.sp
+If
+\fBsudo\fR
+has been compiled with
+\fIintercept\fR
+support and the underlying operating system supports it, the
+\fRINTERCEPT\fR
+tag can be used to cause programs spawned by a command to be validated against
+\fIsudoers\fR
+and logged just like they would be if run through
+\fBsudo\fR
+directly.
+This is useful in conjunction with commands that allow shell escapes
+such as editors, shells and paginators.
+.sp
+In the following example, user
+\fBchuck\fR
+may run any command on the machine
+\(lqresearch\(rq
+in intercept mode.
+.nf
+.sp
+.RS 2n
+chuck	research = INTERCEPT: ALL
+.RE
+.fi
+.RS 2n
+.sp
+See the
+\fIPreventing shell escapes\fR
+section below for more details on how
+\fRINTERCEPT\fR
+works and whether or not it will work on your system.
+.RE
 .SS "Wildcards"
 \fBsudo\fR
 allows shell-style
@@ -2728,6 +2770,17 @@ by default.
 .sp
 This setting is only supported by version 1.8.29 or higher.
 .TP 18n
+log_exit_status
+If set,
+\fBsudoers\fR
+will log the exit value of commands that are run to syslog and/or a log file.
+If a command was terminated by a signal, the signal name is logged as well.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.9.8 or higher.
+.TP 18n
 log_host
 If set, the host name will be included in log entries written to
 the file configured by the
@@ -2801,6 +2854,38 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.9.0 or higher.
+.TP 18n
+log_subcmds
+If set,
+\fBsudoers\fR
+will log when a command spawns a child process and executes a program
+using the
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecvp\fR(),
+or
+\fBexecvpe\fR()
+library functions.
+For example, if a shell is run by
+\fBsudo\fR,
+the individual commands run via the shell will be logged.
+This flag is
+\fIoff\fR
+by default.
+.sp
+The
+\fIlog_subcmds\fR
+flag uses the same underlying mechanism as the
+\fIintercept\fR
+setting.
+See
+\fIPreventing shell escapes\fR
+for more information on what systems support this option and its limitations.
+This setting is only supported by version 1.9.8 or higher
+and is incompatible with SELinux RBAC support.
 .TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
@@ -2958,6 +3043,66 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.8.18 or higher.
+.TP 18n
+intercept
+If set, all commands run via
+\fBsudo\fR
+will behave as if the
+\fRINTERCEPT\fR
+tag has been set, unless overridden by an
+\fRNOINTERCEPT\fR
+tag.
+See the description of
+\fIINTERCEPT and NOINTERCEPT\fR
+above as well as the
+\fIPreventing shell escapes\fR
+section at the end of this manual.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.9.8 or higher
+and is incompatible with SELinux RBAC support.
+.TP 18n
+intercept_allow_setid
+On most systems, the dynamic loader will ignore
+\fRLD_PRELOAD\fR
+(or the equivalent) when running set-user-ID and set-group-ID
+programs, effectively disabling intercept mode.
+To prevent this from happening,
+\fBsudoers\fR
+will not permit a set-user-ID or set-group-ID program to be run in
+intercept mode unless
+\fIintercept_allow_setid\fR
+is set.
+This flag has no effect unless the
+\fIintercept\fR
+flag is enabled or the
+\fIINTERCEPT\fR
+tag has been set for the command.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.9.8 or higher.
+.TP 18n
+intercept_authenticate
+If set, commands run by an intercepted process must be authenticated
+when the user's time stamp is not current.
+For example, if a shell is run with
+\fIintercept\fR
+enabled, as soon as the invoking user's time stamp is out of date,
+subsequent commands will need to be authenticated.
+This flag has no effect unless the
+\fIintercept\fR
+flag is enabled or the
+\fIINTERCEPT\fR
+tag has been set for the command.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.9.8 or higher.
 .TP 18n
 netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
@@ -4020,18 +4165,32 @@ is set and the remote log server is secured with TLS.
 This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 log_server_peer_cert
-The path to the client's certificate file, in PEM format.
-This setting is required when
-\fIlog_servers\fR
-is set and the remote log server is secured with TLS.
+The path to the
+\fBsudo\fR
+client's certificate file, in PEM format.
+This setting is required when the remote log server is secured
+with TLS and client certificate validation is enabled.
+For
+\fBsudo_logsrvd\fR,
+client certificate validation is controlled by the
+\fItls_checkpeer\fR
+option, which defaults to
+\fIfalse\fR.
 .sp
 This setting is only supported by version 1.9.0 or higher.
 .TP 18n
 log_server_peer_key
-The path to the client's private key file, in PEM format.
-This setting is required when
-\fIlog_servers\fR
-is set and the remote log server is secured with TLS.
+The path to the
+\fBsudo\fR
+client's private key file, in PEM format.
+This setting is required when the remote log server is secured
+with TLS and client certificate validation is enabled.
+For
+\fBsudo_logsrvd\fR,
+client certificate validation is controlled by the
+\fItls_checkpeer\fR
+option, which defaults to
+\fIfalse\fR.
 .sp
 This setting is only supported by version 1.9.0 or higher.
 .TP 18n
@@ -4374,7 +4533,7 @@ alias.
 .sp
 This setting is only supported by version 1.8.20 or higher.
 If the operating system does not support the
-fexecve(2)
+\fBfexecve\fR()
 system call, this setting has no effect.
 .RE
 .TP 14n
@@ -5431,12 +5590,12 @@ if no terminal was present.
 .TP 10n
 runargv
 A JSON array representing the command's argument vector as passed to the
-execve(2)
+\fBexecve\fR()
 system call.
 .TP 10n
 runenv
 A JSON array representing the command's environment as passed to the
-execve(2)
+\fBexecve\fR()
 system call.
 .TP 10n
 rungid
@@ -6134,7 +6293,7 @@ access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
 .PP
-There are two basic approaches to this problem:
+There are four basic approaches to this problem:
 .TP 10n
 restrict
 Avoid giving users access to commands that allow the user to run
@@ -6149,7 +6308,8 @@ Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
 do not is often unworkable.
 .TP 10n
-noexec
+intercept
+.br
 Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually
@@ -6157,19 +6317,48 @@ variable (usually
 to an alternate shared library.
 On such systems,
 \fBsudo\fR's
-\fInoexec\fR
-functionality can be used to prevent a program run by
-\fBsudo\fR
-from executing any other programs.
+\fIintercept\fR
+functionality can be used to transparently intercept an attempt to
+run a new command, allow or deny it based on
+\fIsudoers\fR
+rules, and log the result.
+For example, this can be used to restrict the commands run from
+within a privileged shell.
 Note, however, that this applies only to dynamically-linked
 executables.
 Statically-linked executables and executables
 running under binary emulation are not affected.
+Also, most shells support built-in commands and the ability to read
+or write sensitive files that cannot be intercepted by
+\fBsudo\fR.
+.sp
+Currently,
+\fBsudo\fR's
+\fIintercept\fR
+functionality only works for programs that use the
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecvp\fR(),
+or
+\fBexecvpe\fR()
+library functions to run the new command.
+This may be expanded in a future release of
+\fBsudo\fR.
+Because most dynamic loaders ignore
+\fRLD_PRELOAD\fR
+(or the equivalent) when running set-user-ID and set-group-ID programs,
+\fBsudoers\fR
+will not permit such programs to be run in
+\fIintercept\fR
+mode.
 .sp
 The
-\fInoexec\fR
-feature is known to work on SunOS, Solaris, *BSD,
-Linux, IRIX, Tru64 UNIX, macOS, HP-UX 11.x and AIX 5.3 and above.
+\fIintercept\fR
+feature is known to work on Solaris, *BSD, Linux, macOS, HP-UX 11.x
+and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 \fRLD_PRELOAD\fR
 environment variable.
@@ -6177,7 +6366,97 @@ Check your operating system's manual pages for the dynamic linker
 (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
 \fRLD_PRELOAD\fR
 is supported.
+It is
+\fInot\fR
+supported when
+\fBsudo\fR's
+SELinux RBAC support is in use due to a fundamental incompatibility.
 .sp
+To enable intercept mode on a per-command basis, use the
+\fRINTERCEPT\fR
+tag as documented in the User Specification section above.
+Here is that example again:
+.nf
+.sp
+.RS 10n
+chuck	research = INTERCEPT: ALL
+.RE
+.fi
+.RS 10n
+.sp
+This allows user
+\fBchuck\fR
+to run any command on the machine
+\(lqresearch\(rq
+in intercept mode.
+Any commands run via shell escapes will be validated and logged by
+\fBsudo\fR.
+If you are unsure whether or not your system is capable of supporting
+\fIintercept\fR,
+you can always just try it out and check whether or not external
+commands run via a shell are logged when
+\fIintercept\fR
+is enabled.
+.RE
+.TP 10n
+log
+There are two separate but related ways to log additional commands.
+The first is to enable I/O logging using the
+\fIlog_output\fR
+flag.
+This will log the command's output but will not create an event log
+entry when the additional command is run.
+The second is to enable the
+\fIlog_subcmds\fR
+flag in
+\fIsudoers\fR
+which will create an event log entry every time a new command is run.
+If I/O logging is also enabled, the log entry will include a time offset
+into the I/O log to indicate when the command was run.
+This offset can be passed to the
+sudoreplay(@mansectsu@)
+utility to replay the I/O log at the exact moment when the command was run.
+The
+\fIlog_subcmds\fR
+flag uses the same mechanism as
+\fIintercept\fR
+(see above) and has the same limitations.
+.TP 10n
+noexec
+\fBsudo\fR's
+\fInoexec\fR
+functionality can be used to prevent a program run by
+\fBsudo\fR
+from executing any other programs.
+On most systems, it uses the same mechanism as
+\fIintercept\fR
+(see above) and thus the same caveats apply.
+The
+\fInoexec\fR
+functionality
+is capable of blocking execution of commands run via the
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexect\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecveat\fR(),
+\fBexecvP\fR(),
+\fBexecvp\fR(),
+\fBexecvpe\fR(),
+\fBfexecve\fR(),
+\fBpopen\fR(),
+\fBposix_spawn\fR(),
+\fBposix_spawnp\fR(),
+\fBsystem\fR(),
+and
+\fBwordexp\fR()
+functions.
+On Linux, a
+\fBseccomp\fR()
+filter is used to implement
+\fInoexec\fR.
 On Solaris 10 and higher,
 \fInoexec\fR
 uses Solaris privileges instead of the
@@ -6188,8 +6467,7 @@ To enable
 \fInoexec\fR
 for a command, use the
 \fRNOEXEC\fR
-tag as documented
-in the User Specification section above.
+tag as documented in the User Specification section above.
 Here is that example again:
 .nf
 .sp
@@ -6485,16 +6763,14 @@ SSSD-based sudoers
 .TP 10n
 \fIutil\fR
 utility functions
-.PD 0
 .PP
 For example:
 .nf
 .sp
 .RS 0n
-Debug sudo /var/log/sudo_debug match@info,nss@info
+Debug sudoers.so /var/log/sudoers_debug match@info,nss@info
 .RE
 .fi
-.PD
 .PP
 For more information, see the
 sudo.conf(@mansectform@)

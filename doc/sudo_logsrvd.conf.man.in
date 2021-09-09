@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "May 1, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "August 3, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -128,6 +128,23 @@ Multiple
 lines may be specified to listen on more than one port or interface.
 .RE
 .TP 10n
+server_log = string
+Where to log server warning and error messages.
+Supported values are
+\fInone\fR,
+\fIstderr\fR,
+\fIsyslog\fR,
+or a path name beginning with the
+\(oq/\(cq
+character.
+Note that a value of
+\fIstderr\fR
+is only effective when used in conjunction with the
+\fB\-n\fR
+option.
+The default value is
+\fIsyslog\fR.
+.TP 10n
 pid_file = path
 The path to the file containing the process ID of the running
 \fBsudo_logsrvd\fR.
@@ -151,6 +168,7 @@ will enable the TCP keepalive socket option on the client connection.
 This enables the periodic transmission of keepalive messages to the client.
 If the client does not respond to a message in time, the connection will
 be closed.
+Defaults to true.
 .TP 10n
 timeout = number
 The amount of time, in seconds,
@@ -249,11 +267,11 @@ The default value is
 \fI/etc/ssl/sudo/private/logsrvd_key.pem\fR.
 .TP 10n
 tls_verify = bool
-If true, the server certificate will be verified at startup and
-clients will authenticate the server by verifying its certificate
-and identity.
-If false, no verification is performed of the server certificate
-by the server or the client.
+If true,
+\fBsudo_logsrvd.conf\fR
+will validate its own certificate at startup time or when the
+configuration is changed.
+If false, no verification is performed of the server certificate.
 When using self-signed certificates without a certificate authority,
 this setting should be set to false.
 The default value is true.
@@ -601,6 +619,12 @@ and
 The default value is
 \fIsyslog\fR.
 .TP 6n
+log_exit = boolean
+If true,
+\fBsudo_logsrvd\fR
+will log an event when a command exits or is terminated by a signal.
+Defaults to false.
+.TP 6n
 log_format = string
 The event log format.
 Supported log formats are
@@ -608,7 +632,7 @@ Supported log formats are
 for traditional sudo-style logs and
 \(lqjson\(rq
 for JSON-format logs.
-The JSON log entries contain the full contents of the accept, reject
+The JSON log entries contain the full contents of the accept, reject, exit
 and alert messages.
 The default value is
 \fIsudo\fR.
@@ -704,6 +728,12 @@ When a message is split, additional parts will include the string
 after the user name and before the continued command line arguments.
 JSON-format log entries are never split and are not affected by
 \fImaxlen\fR.
+.TP 6n
+server_facility = string
+Syslog facility if syslog is being used for server warning messages.
+See above for a list of supported facilities.
+Defaults to
+\fRdaemon\fR
 .SS "logfile"
 The
 \fIlogfile\fR
@@ -761,15 +791,19 @@ Sudo log server configuration file
 # The file containing the ID of the running sudo_logsrvd process.
 #pid_file = @rundir@/sudo_logsrvd.pid
 
+# Where to log server warnings: none, stderr, syslog, or a path name.
+#server_log = syslog
+
 # If true, enable the SO_KEEPALIVE socket option on client connections.
+# Defaults to true.
 #tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 #timeout = 30
 
-# If true, the server certificate will be verified at startup and clients
-# will authenticate the server by verifying its certificate and identity.
+# If true, the server will validate its own certificate at startup.
+# Defaults to true.
 #tls_verify = true
 
 # If true, client certificates will be validated by the server;
@@ -833,6 +867,7 @@ Sudo log server configuration file
 #store_first = true
 
 # If true, enable the SO_KEEPALIVE socket option on relay connections.
+# Defaults to true.
 #tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the relay to
@@ -919,10 +954,14 @@ Sudo log server configuration file
 #maxseq = 2176782336
 
 [eventlog]
-# Where to log accept, reject and alert events.
+# Where to log accept, reject, exit and alert events.
 # Accepted values are syslog, logfile, or none.
 # Defaults to syslog
 #log_type = syslog
+
+# Whether to log an event when a command exits or is terminated by a signal.
+# Defaults to false
+#log_exit = true
 
 # Event log format.
 # Currently only sudo-style event logs are supported.
@@ -954,6 +993,10 @@ Sudo log server configuration file
 # Syslog priority to use for event log alert messages reported by the
 # client.
 #alert_priority = alert
+
+# The syslog facility to use for server warning messages.
+# Defaults to daemon.
+#server_facility = daemon
 
 [logfile]
 # The path to the file-based event log.

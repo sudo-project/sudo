@@ -460,7 +460,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	int op;
 
 	op = sudo_ldap_parse_option(val_array[i], &var, &val);
-	if (!sudo_ldap_add_default(var, val, op, source, defs))
+	if (!append_default(var, val, op, source, defs))
 	    goto oom;
     }
     ret = true;

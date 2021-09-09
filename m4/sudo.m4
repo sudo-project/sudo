@@ -225,16 +225,14 @@ AC_DEFUN([SUDO_LOGDIR], [
 dnl
 dnl check for working fnmatch(3)
 dnl
-AC_DEFUN([SUDO_FUNC_FNMATCH],
-[AC_MSG_CHECKING([for working fnmatch with FNM_CASEFOLD])
-AC_CACHE_VAL(sudo_cv_func_fnmatch,
-[rm -f conftestdata; > conftestdata
-AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <fnmatch.h>
-int main() { return(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", FNM_CASEFOLD)); }]])], [sudo_cv_func_fnmatch=yes], [sudo_cv_func_fnmatch=no],
-  [sudo_cv_func_fnmatch=no])
-rm -f core core.* *.core])
-AC_MSG_RESULT($sudo_cv_func_fnmatch)
-AS_IF([test $sudo_cv_func_fnmatch = yes], [$1], [$2])])
+AC_DEFUN([SUDO_FUNC_FNMATCH], [
+    AC_CACHE_CHECK([for working fnmatch with FNM_CASEFOLD],
+    sudo_cv_func_fnmatch, [
+	AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <fnmatch.h>
+int main() { return(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", FNM_CASEFOLD)); }]])], [sudo_cv_func_fnmatch=yes], [sudo_cv_func_fnmatch=no], [sudo_cv_func_fnmatch=no])
+    ])
+    AS_IF([test $sudo_cv_func_fnmatch = yes], [$1], [$2])
+])
 
 dnl
 dnl Attempt to check for working PIE support.
@@ -242,16 +240,13 @@ dnl This is a bit of a hack but on Solaris 10 with GNU ld and GNU as
 dnl we can end up with strange values from malloc().
 dnl A better check would be to verify that ASLR works with PIE.
 dnl
-AC_DEFUN([SUDO_WORKING_PIE],
-[AC_MSG_CHECKING([for working PIE support])
-AC_CACHE_VAL(sudo_cv_working_pie,
-[rm -f conftestdata; > conftestdata
-AC_RUN_IFELSE([AC_LANG_SOURCE([AC_INCLUDES_DEFAULT
-int main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }])], [sudo_cv_working_pie=yes], [sudo_cv_working_pie=no],
-  [sudo_cv_working_pie=no])
-rm -f core core.* *.core])
-AC_MSG_RESULT($sudo_cv_working_pie)
-AS_IF([test $sudo_cv_working_pie = yes], [$1], [$2])])
+AC_DEFUN([SUDO_WORKING_PIE], [
+    AC_CACHE_CHECK([for working PIE support], sudo_cv_working_pie, [
+	AC_RUN_IFELSE([AC_LANG_SOURCE([AC_INCLUDES_DEFAULT
+int main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }])], [sudo_cv_working_pie=yes], [sudo_cv_working_pie=no], [sudo_cv_working_pie=no])
+    ])
+    AS_IF([test $sudo_cv_working_pie = yes], [$1], [$2])
+])
 
 dnl
 dnl check for isblank(3)
@@ -399,9 +394,8 @@ dnl only for backward compatibility.
 dnl
 AC_DEFUN([SUDO_UID_T_LEN],
 [AC_REQUIRE([AC_TYPE_UID_T])
-AC_MSG_CHECKING(max length of uid_t)
-AC_CACHE_VAL(sudo_cv_uid_t_len,
-[rm -f conftestdata
+AC_CACHE_CHECK([max length of uid_t], sudo_cv_uid_t_len, [
+rm -f conftestdata
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <string.h>
@@ -423,7 +417,6 @@ int main() {
 }]])], [sudo_cv_uid_t_len=`cat conftestdata`], [sudo_cv_uid_t_len=10], [sudo_cv_uid_t_len=10])
 ])
 rm -f conftestdata
-AC_MSG_RESULT($sudo_cv_uid_t_len)
 AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len, [Define to the max length of a uid_t in string context (excluding the NUL).])
 ])
 
@@ -507,6 +500,17 @@ dnl
 AC_DEFUN([SUDO_APPEND_COMPAT_EXP], [
     for _sym in $1; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+])
+
+dnl
+dnl
+dnl Append one or more symbols to INTERCEPT_EXP
+dnl
+AC_DEFUN([SUDO_APPEND_INTERCEPT_EXP], [
+    for _sym in $1; do
+	INTERCEPT_EXP="${INTERCEPT_EXP}${_sym}
 "
     done
 ])

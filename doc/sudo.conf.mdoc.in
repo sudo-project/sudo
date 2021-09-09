@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd March 2, 2021
+.Dd September 7, 2021
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -209,6 +209,7 @@ line consists of the
 keyword, followed by the name of the path to set and its value.
 For example:
 .Bd -literal -offset indent
+Path intercept @intercept_file@
 Path noexec @noexec_file@
 Path askpass /usr/X11R6/bin/ssh-askpass
 .Ed
@@ -262,6 +263,25 @@ or
 functions, for example
 .Bx ,
 macOS and Solaris.
+.It intercept
+The fully-qualified path to a shared library containing a wrappers for the
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn execv ,
+.Fn execve ,
+.Fn execvp ,
+and
+.Fn execvpe
+library functions that intercepts attempts to run further commands and
+performs a policy check before allowing them to be executed.
+This is used to implement the
+.Em intercept
+functionality on systems that support
+.Ev LD_PRELOAD
+or its equivalent.
+The default value is
+.Pa @intercept_file@ .
 .It noexec
 The fully-qualified path to a shared library containing wrappers
 for the
@@ -271,6 +291,7 @@ for the
 .Fn exect ,
 .Fn execv ,
 .Fn execve ,
+.Fn execveat ,
 .Fn execvP ,
 .Fn execvp ,
 .Fn execvpe ,
@@ -490,10 +511,10 @@ This setting is only available in
 .Nm sudo
 version 1.8.10 and higher.
 .El
-.Ss Debug flags
+.Ss Debug settings
 .Nm sudo
 versions 1.8.4 and higher support a flexible debugging framework
-that can help track down what
+that can log what
 .Nm sudo
 is doing internally if there is a problem.
 .Pp
@@ -501,20 +522,19 @@ A
 .Li Debug
 line consists of the
 .Li Debug
-keyword, followed by the name of the program (or plugin) to debug
-.Pq Nm sudo , Nm visudo , Nm sudoreplay , Nm sudoers ,
+keyword, followed by the name of the program, plugin or shared object to debug,
 the debug file name and a comma-separated list of debug flags.
 The debug flag syntax used by
-.Nm sudo
-and the
+.Nm sudo ,
+the
 .Nm sudoers
-plugin is
+plugin and its associated programs and shared objects is
 .Em subsystem Ns @ Ns Em priority
-but a plugin is free to use a different format so long as it does
-not include a comma
+but a third-party plugin is free to use a different format so long
+as it does not include a comma
 .Pq Ql \&, .
 .Pp
-For example:
+Examples:
 .Bd -literal -offset indent
 Debug sudo /var/log/sudo_debug all@warn,plugin@info
 .Ed
@@ -524,6 +544,16 @@ would log all debugging statements at the
 level and higher in addition to those at the
 .Em info
 level for the plugin subsystem.
+.Pp
+.Bd -literal -offset indent
+Debug sudo_intercept.so /var/log/intercept_debug all@debug
+.Ed
+.Pp
+would log all debugging statements, regardless of level, for the
+.Pa sudo_intercept.so
+shared object that implements
+.Nm sudo Ns 's
+intercept functionality.
 .Pp
 As of
 .Nm sudo
@@ -673,13 +703,28 @@ front end configuration
 #Path devsearch /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
 
 #
+# Sudo command interception:
+#   Path intercept /path/to/sudo_intercept.so
+#
+# Path to a shared library containing replacements for the execv()
+# and execve() library functions that perform a policy check to verify
+# the command is allowed and simply return an error if not.  This is
+# used to implement the "intercept" functionality on systems that
+# support LD_PRELOAD or its equivalent.
+#
+# The compiled-in value is usually sufficient and should only be changed
+# if you rename or move the sudo_intercept.so file.
+#
+#Path intercept @plugindir@/sudo_intercept.so
+
+#
 # Sudo noexec:
 #   Path noexec /path/to/sudo_noexec.so
 #
-# Path to a shared library containing replacements for the execv(),
-# execve() and fexecve() library functions that just return an error.
-# This is used to implement the "noexec" functionality on systems that
-# support LD_PRELOAD or its equivalent.
+# Path to a shared library containing replacements for the execv()
+# family of library functions that just return an error.  This is
+# used to implement the "noexec" functionality on systems that support
+# LD_PRELOAD or its equivalent.
 #
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_noexec.so file.

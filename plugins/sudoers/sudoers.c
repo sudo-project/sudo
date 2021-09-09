@@ -85,9 +85,6 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 uid_t timestamp_uid;
 gid_t timestamp_gid;
-#ifdef HAVE_BSD_AUTH_H
-char *login_style;
-#endif /* HAVE_BSD_AUTH_H */
 bool force_umask;
 int sudo_mode;
 
@@ -96,6 +93,7 @@ static struct sudo_nss_list *snl;
 static bool unknown_runas_uid;
 static bool unknown_runas_gid;
 static int cmnd_status = -1;
+static struct defaults_list initial_defaults = TAILQ_HEAD_INITIALIZER(initial_defaults);
 
 #ifdef __linux__
 static struct rlimit nproclimit;
@@ -151,6 +149,36 @@ restore_nproc(void)
 #endif /* __linux__ */
 }
 
+static bool
+sudoers_reinit_defaults(void)
+{
+    struct sudo_nss *nss, *nss_next;
+    debug_decl(sudoers_reinit_defaults, SUDOERS_DEBUG_PLUGIN);
+
+    if (!init_defaults()) {
+	sudo_warnx("%s", U_("unable to initialize sudoers default values"));
+	debug_return_bool(false);
+    }
+
+    if (!update_defaults(NULL, &initial_defaults,
+	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+	    N_("problem with defaults entries"));
+	debug_return_bool(false);
+    }
+
+    TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
+	if (nss->getdefs(nss) == -1 || !update_defaults(nss->parse_tree, NULL,
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+		N_("problem with defaults entries"));
+	    /* not a fatal error */
+	}
+    }
+
+    debug_return_int(true);
+}
+
 int
 sudoers_init(void *info, char * const envp[])
 {
@@ -179,7 +207,7 @@ sudoers_init(void *info, char * const envp[])
     }
 
     /* Parse info from front-end. */
-    sudo_mode = sudoers_policy_deserialize_info(info);
+    sudo_mode = sudoers_policy_deserialize_info(info, &initial_defaults);
     if (ISSET(sudo_mode, MODE_ERROR))
 	debug_return_int(-1);
 
@@ -192,6 +220,14 @@ sudoers_init(void *info, char * const envp[])
     /* LDAP or NSS may modify the euid so we need to be root for the open. */
     if (!set_perms(PERM_ROOT))
 	debug_return_int(-1);
+
+    /* Update defaults set by front-end. */
+    if (!update_defaults(NULL, &initial_defaults,
+	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+	    N_("problem with defaults entries"));
+	debug_return_int(-1);
+    }
 
     /*
      * Open and parse sudoers, set global defaults.
@@ -329,13 +365,14 @@ check_user_runcwd(void)
     debug_return_bool(true);
 }
 
+static bool need_reinit;
+
 int
 sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     bool verbose, void *closure)
 {
     char *iolog_path = NULL;
     mode_t cmnd_umask = ACCESSPERMS;
-    struct sudo_nss *nss;
     int oldlocale, validated, ret = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN);
 
@@ -345,6 +382,21 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	sudo_warnx("%s", U_("no command specified"));
 	debug_return_int(-1);
     }
+
+    /* Was previous command was intercepted? */
+    if (def_intercept)
+	SET(sudo_mode, MODE_POLICY_INTERCEPTED);
+
+    /* Only certain mode flags are legal for intercepted commands. */
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	sudo_mode &= MODE_INTERCEPT_MASK;
+
+    /* Re-initialize defaults if we are called multiple times. */
+    if (need_reinit) {
+	if (!sudoers_reinit_defaults())
+	    debug_return_int(-1);
+    }
+    need_reinit = true;
 
     unlimit_nproc();
 
@@ -364,10 +416,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	sudo_user.env_vars = env_add;
 
     /*
-     * Make a local copy of argc/argv, with special handling
-     * for the '-i' option.
+     * Make a local copy of argc/argv, with special handling for the
+     * '-i' option.  We also allocate an extra slot for bash's --login.
      */
-    /* Must leave an extra slot before NewArgv for bash's --login */
+    if (NewArgv != NULL) {
+	sudoers_gc_remove(GC_PTR, NewArgv);
+	free(NewArgv);
+    }
     NewArgc = argc;
     NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
     if (NewArgv == NULL) {
@@ -375,7 +430,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	goto done;
     }
     sudoers_gc_add(GC_PTR, NewArgv);
-    NewArgv++;	/* reserve an extra slot for --login */
     memcpy(NewArgv, argv, argc * sizeof(char *));
     NewArgv[NewArgc] = NULL;
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
@@ -429,12 +483,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Defer uid/gid checks until after defaults have been updated. */
     if (unknown_runas_uid && !def_runas_allow_unknown_id) {
-	log_warningx(SLOG_AUDIT, N_("unknown user: %s"), runas_pw->pw_name);
+	log_warningx(SLOG_AUDIT, N_("unknown user %s"), runas_pw->pw_name);
 	goto done;
     }
     if (runas_gr != NULL) {
 	if (unknown_runas_gid && !def_runas_allow_unknown_id) {
-	    log_warningx(SLOG_AUDIT, N_("unknown group: %s"),
+	    log_warningx(SLOG_AUDIT, N_("unknown group %s"),
 		runas_gr->gr_name);
 	    goto done;
 	}
@@ -670,11 +724,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	 */
 	if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0 &&
 	    strcmp(NewArgv[1], "-c") == 0) {
-	    /* Use the extra slot before NewArgv so we can store --login. */
-	    NewArgv--;
-	    NewArgc++;
-	    NewArgv[0] = NewArgv[1];
+	    /* We allocated extra space for the --login above. */
+	    memmove(&NewArgv[2], &NewArgv[1], sizeof(char *) * (NewArgc - 1));
 	    NewArgv[1] = "--login";
+	    NewArgc++;
 	}
 
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
@@ -726,7 +779,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		env_editor ? env_editor : def_editor);
 	    goto bad;
 	}
-	sudoers_gc_add(GC_EDIT_ARGS, edit_argv);
+	/* find_editor() already g/c'd edit_argv[] */
+	sudoers_gc_remove(GC_PTR, NewArgv);
+	free(NewArgv);
 	NewArgv = edit_argv;
 	NewArgc = edit_argc;
 
@@ -740,11 +795,6 @@ bad:
     ret = false;
 
 done:
-    /* Cleanup sudoers sources */
-    TAILQ_FOREACH(nss, snl, entries) {
-	nss->close(nss);
-    }
-    snl = NULL;
     if (def_group_plugin)
 	group_plugin_unload();
     init_parser(NULL, false, false);
@@ -763,10 +813,6 @@ done:
 	ret = -1;
 
     restore_nproc();
-
-    /* Destroy the password and group caches and free the contents. */
-    sudo_freepwcache();
-    sudo_freegrcache();
 
     sudo_warn_set_locale_func(NULL);
 
@@ -827,7 +873,7 @@ init_vars(char * const envp[])
 	     * YP/NIS/NIS+/LDAP/etc daemon has died.
 	     */
 	    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
-		sudo_warnx(U_("unknown uid: %u"), (unsigned int) user_uid);
+		sudo_warnx(U_("unknown uid %u"), (unsigned int) user_uid);
 		debug_return_bool(false);
 	    }
 
@@ -848,7 +894,7 @@ init_vars(char * const envp[])
 
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
-	log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"),
+	log_warningx(SLOG_SEND_MAIL, N_("unknown uid %u"),
 	    (unsigned int) user_uid);
 	debug_return_bool(false);
     }
@@ -884,6 +930,8 @@ set_cmnd_path(const char *runchroot)
     int ret;
     debug_decl(set_cmnd_path, SUDOERS_DEBUG_PLUGIN);
 
+    free(user_cmnd);
+    user_cmnd = NULL;
     if (def_secure_path && !user_is_exempt())
 	path = def_secure_path;
     if (!set_perms(PERM_RUNAS))
@@ -917,11 +965,16 @@ set_cmnd(void)
     debug_decl(set_cmnd, SUDOERS_DEBUG_PLUGIN);
 
     /* Allocate user_stat for find_path() and match functions. */
+    free(user_stat);
     user_stat = calloc(1, sizeof(struct stat));
     if (user_stat == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(NOT_FOUND_ERROR);
     }
+
+    /* Re-initialize for when we are called multiple times. */
+    free(safe_cmnd);
+    safe_cmnd = NULL;
 
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT|MODE_CHECK)) {
 	if (!ISSET(sudo_mode, MODE_EDIT)) {
@@ -941,6 +994,8 @@ set_cmnd(void)
 	}
 
 	/* set user_args */
+	free(user_args);
+	user_args = NULL;
 	if (NewArgc > 1) {
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL) &&
 		    ISSET(sudo_mode, MODE_RUN)) {
@@ -1122,7 +1177,7 @@ set_loginclass(struct passwd *pw)
 	 * class themselves.  We do this because if login.conf gets
 	 * corrupted we want the admin to be able to use sudo to fix it.
 	 */
-	log_warningx(errflags, N_("unknown login class: %s"), login_class);
+	log_warningx(errflags, N_("unknown login class %s"), login_class);
 	def_use_loginclass = false;
 	if (login_class)
 	    ret = false;
@@ -1280,7 +1335,7 @@ set_runaspw(const char *user, bool quiet)
     if (pw == NULL) {
 	if ((pw = sudo_getpwnam(user)) == NULL) {
 	    if (!quiet)
-		log_warningx(SLOG_AUDIT, N_("unknown user: %s"), user);
+		log_warningx(SLOG_AUDIT, N_("unknown user %s"), user);
 	    debug_return_bool(false);
 	}
     }
@@ -1314,7 +1369,7 @@ set_runasgr(const char *group, bool quiet)
     if (gr == NULL) {
 	if ((gr = sudo_getgrnam(group)) == NULL) {
 	    if (!quiet)
-		log_warningx(SLOG_AUDIT, N_("unknown group: %s"), group);
+		log_warningx(SLOG_AUDIT, N_("unknown group %s"), group);
 	    debug_return_bool(false);
 	}
     }
@@ -1600,11 +1655,13 @@ set_callbacks(void)
 
 /*
  * Cleanup hook for sudo_fatal()/sudo_fatalx()
+ * Also called at policy close time.
  */
 void
 sudoers_cleanup(void)
 {
     struct sudo_nss *nss;
+    struct defaults *def;
     debug_decl(sudoers_cleanup, SUDOERS_DEBUG_PLUGIN);
 
     if (snl != NULL) {
@@ -1614,11 +1671,24 @@ sudoers_cleanup(void)
 	snl = NULL;
 	init_parser(NULL, false, false);
     }
+    while ((def = TAILQ_FIRST(&initial_defaults)) != NULL) {
+	TAILQ_REMOVE(&initial_defaults, def, entries);
+	free(def->var);
+	free(def->val);
+	free(def);
+    }
+    need_reinit = false;
     if (def_group_plugin)
 	group_plugin_unload();
     sudo_user_free();
     sudo_freepwcache();
     sudo_freegrcache();
+
+    /* Clear globals */
+    list_pw = NULL;
+    NewArgv = NULL;
+    NewArgc = 0;
+    prev_user = NULL;
 
     debug_return;
 }

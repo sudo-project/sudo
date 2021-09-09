@@ -101,6 +101,7 @@ copy_arg(const char *src, size_t len)
     debug_decl(copy_arg, SUDOERS_DEBUG_UTIL);
 
     if ((copy = malloc(len + 1)) != NULL) {
+	sudoers_gc_add(GC_PTR, copy);
 	for (dst = copy; src < src_end; ) {
 	    if (src[0] == '\\' && src[1] != '\0') {
 		src++;
@@ -150,6 +151,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     /* If we can't find the editor in the user's PATH, give up. */
     if (find_path(editor, &editor_path, &user_editor_sb, getenv("PATH"), NULL,
 	    0, allowlist) != FOUND) {
+	sudoers_gc_remove(GC_PTR, editor);
 	free(editor);
 	errno = ENOENT;
 	debug_return_str(NULL);
@@ -163,6 +165,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     nargv = reallocarray(NULL, nargc + 1, sizeof(char *));
     if (nargv == NULL)
 	goto oom;
+    sudoers_gc_add(GC_PTR, nargv);
 
     /* Fill in editor argv (assumes files[] is NULL-terminated). */
     nargv[0] = editor;
@@ -185,11 +188,15 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     debug_return_str(editor_path);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudoers_gc_remove(GC_PTR, editor);
     free(editor);
     free(editor_path);
     if (nargv != NULL) {
-	while (nargc--)
+	while (nargc--) {
+	    sudoers_gc_remove(GC_PTR, nargv[nargc]);
 	    free(nargv[nargc]);
+	}
+	sudoers_gc_remove(GC_PTR, nargv);
 	free(nargv);
     }
     debug_return_str(NULL);
@@ -254,5 +261,6 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
 	}
     }
 
+    /* Caller is responsible for freeing editor_path, not g/c'd. */
     debug_return_str(editor_path);
 }

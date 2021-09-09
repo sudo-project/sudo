@@ -25,6 +25,9 @@
 #define SUDO_COMPAT_H
 
 #include <sys/types.h>	/* for gid_t, mode_t, size_t, ssize_t, uid_t */
+#if defined(__hpux) && !defined(__LP64__)
+# include <unistd.h>	/* for pread/pread64, and pwrite/pwrite64 */
+#endif
 #include <stdio.h>
 #if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \
     !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
@@ -97,6 +100,26 @@
 # else
 #  define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
 # endif
+#endif
+
+#ifndef CMSG_ALIGN
+# define CMSG_ALIGN(p) \
+    (((size_t)(p) + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1))
+#endif
+
+/* Length of the contents of a control message of length len. */
+#ifndef CMSG_LEN
+# define CMSG_LEN(len) (CMSG_ALIGN(sizeof(struct cmsghdr)) + (len))
+#endif
+
+/* Length of the space taken up by a padded control message of length len. */
+#ifndef CMSG_SPACE
+# define CMSG_SPACE(len) (CMSG_ALIGN(sizeof(struct cmsghdr)) + CMSG_ALIGN(len))
+#endif
+
+/* Given a pointer to struct cmsghdr, return a pointer to data. */
+#ifndef CMSG_DATA
+# define CMSG_DATA(cmsg) ((unsigned char *)(cmsg) + CMSG_ALIGN(sizeof(struct cmsghdr)))
 #endif
 
 /*
@@ -327,17 +350,23 @@ int getdomainname(char *, size_t);
 #endif
 
 /*
- * HP-UX 11.00 has broken pread/pwrite that can't handle a 64-bit off_t
- * on 32-bit machines.
+ * HP-UX 11.00 has broken pread/pwrite on 32-bit machines when
+ * _FILE_OFFSET_BITS == 64.  Use pread64/pwrite64 instead.
  */
 #if defined(__hpux) && !defined(__LP64__)
 # ifdef HAVE_PREAD64
 #  undef pread
 #  define pread(_a, _b, _c, _d) pread64((_a), (_b), (_c), (_d))
+#  if defined(HAVE_DECL_PREAD64) && !HAVE_DECL_PREAD64
+    ssize_t pread64(int fd, void *buf, size_t nbytes, off64_t offset);
+#  endif
 # endif
 # ifdef HAVE_PWRITE64
 #  undef pwrite
 #  define pwrite(_a, _b, _c, _d) pwrite64((_a), (_b), (_c), (_d))
+#  if defined(HAVE_DECL_PWRITE64) && !HAVE_DECL_PWRITE64
+    ssize_t pwrite64(int fd, const void *buf, size_t nbytes, off64_t offset);
+#  endif
 # endif
 #endif /* __hpux && !__LP64__ */
 
@@ -421,6 +450,11 @@ sudo_dso_public void sudo_setusershell(void);
 sudo_dso_public void sudo_endusershell(void);
 # undef endusershell
 # define endusershell() sudo_endusershell()
+#elif HAVE_DECL_GETUSERSHELL == 0
+/* Older Solaris has getusershell() et al but does not declare it. */
+char *getusershell(void);
+void setusershell(void);
+void endusershell(void);
 #endif /* HAVE_GETUSERSHELL */
 #ifndef HAVE_UTIMENSAT
 sudo_dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
@@ -550,11 +584,6 @@ sudo_dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # undef reallocarray
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
-#ifndef HAVE_VSYSLOG
-sudo_dso_public void sudo_vsyslog(int pri, const char *fmt, va_list ap);
-# undef vsyslog
-# define vsyslog(_a, _b, _c) sudo_vsyslog((_a), (_b), (_c))
-#endif /* HAVE_VSYSLOG */
 #ifndef HAVE_DUP3
 sudo_dso_public int sudo_dup3(int oldd, int newd, int flags);
 # undef dup3
@@ -566,12 +595,12 @@ sudo_dso_public int sudo_pipe2(int fildes[2], int flags);
 # define pipe2(_a, _b) sudo_pipe2((_a), (_b))
 #endif /* HAVE_PIPE2 */
 #ifndef HAVE_PREAD
-sudo_dso_public int sudo_pread(int fd, void *buf, size_t nbytes, off_t offset);
+sudo_dso_public ssize_t sudo_pread(int fd, void *buf, size_t nbytes, off_t offset);
 # undef pread
 # define pread(_a, _b, _c, _d) sudo_pread((_a), (_b), (_c), (_d))
 #endif /* HAVE_PREAD */
 #ifndef HAVE_PWRITE
-sudo_dso_public int sudo_pwrite(int fd, const void *buf, size_t nbytes, off_t offset);
+sudo_dso_public ssize_t sudo_pwrite(int fd, const void *buf, size_t nbytes, off_t offset);
 # undef pwrite
 # define pwrite(_a, _b, _c, _d) sudo_pwrite((_a), (_b), (_c), (_d))
 #endif /* HAVE_PWRITE */

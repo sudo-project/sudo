@@ -122,7 +122,7 @@ audit_json_open(unsigned int version, sudo_conv_t conversation,
     }
     if (plugin_path != NULL && !TAILQ_EMPTY(&debug_files)) {
 	audit_debug_instance =
-	    sudo_debug_register(plugin_path, NULL, NULL, &debug_files);
+	    sudo_debug_register(plugin_path, NULL, NULL, &debug_files, -1);
 	if (audit_debug_instance == SUDO_DEBUG_INSTANCE_ERROR) {
 	    *errstr = U_("unable to initialize debugging");
 	    goto bad;

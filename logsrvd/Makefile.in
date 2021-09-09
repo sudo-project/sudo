@@ -301,8 +301,9 @@ fuzz_logsrvd_conf.plog: fuzz_logsrvd_conf.i
 iolog_writer.o: $(srcdir)/iolog_writer.c $(incdir)/compat/stdbool.h \
                 $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-                $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
-                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                 $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
                 $(top_builddir)/config.h
@@ -310,8 +311,9 @@ iolog_writer.o: $(srcdir)/iolog_writer.c $(incdir)/compat/stdbool.h \
 iolog_writer.i: $(srcdir)/iolog_writer.c $(incdir)/compat/stdbool.h \
                 $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-                $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
-                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                 $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
                 $(top_builddir)/config.h
@@ -389,7 +391,8 @@ logsrvd_journal.o: $(srcdir)/logsrvd_journal.c $(incdir)/compat/stdbool.h \
                    $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
                    $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
                    $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
-                   $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                   $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
                    $(srcdir)/tls_common.h $(top_builddir)/config.h
@@ -399,7 +402,8 @@ logsrvd_journal.i: $(srcdir)/logsrvd_journal.c $(incdir)/compat/stdbool.h \
                    $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
                    $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
                    $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
-                   $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                   $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
                    $(srcdir)/tls_common.h $(top_builddir)/config.h
@@ -410,8 +414,9 @@ logsrvd_local.o: $(srcdir)/logsrvd_local.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                  $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
-                 $(incdir)/sudo_iolog.h $(incdir)/sudo_json.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                 $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h \
                  $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                  $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
@@ -421,8 +426,9 @@ logsrvd_local.i: $(srcdir)/logsrvd_local.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                  $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
-                 $(incdir)/sudo_iolog.h $(incdir)/sudo_json.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                 $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h \
                  $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                  $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
@@ -434,8 +440,9 @@ logsrvd_queue.o: $(srcdir)/logsrvd_queue.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                  $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
-                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                 $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                  $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
                  $(top_builddir)/config.h
@@ -444,8 +451,9 @@ logsrvd_queue.i: $(srcdir)/logsrvd_queue.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                  $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_gettext.h \
-                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                 $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                  $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
                  $(top_builddir)/config.h
@@ -456,7 +464,8 @@ logsrvd_relay.o: $(srcdir)/logsrvd_relay.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
-                 $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
                  $(srcdir)/tls_common.h $(top_builddir)/config.h
@@ -465,7 +474,8 @@ logsrvd_relay.i: $(srcdir)/logsrvd_relay.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
-                 $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
                  $(srcdir)/tls_common.h $(top_builddir)/config.h

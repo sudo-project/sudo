@@ -190,8 +190,8 @@ SUDOERS_OBJS = $(AUTH_OBJS) audit.lo boottime.lo check.lo editor.lo env.lo \
 
 SUDOERS_IOBJS = $(SUDOERS_OBJS:.lo=.i)
 
-VISUDO_OBJS = check_aliases.o editor.lo find_path.lo goodpath.lo locale.lo \
-	      stubs.o sudo_printf.o visudo.o
+VISUDO_OBJS = check_aliases.o editor.lo find_path.lo gc.lo goodpath.lo \
+	      locale.lo stubs.o sudo_printf.o visudo.o
 
 VISUDO_IOBJS = sudo_printf.i visudo.i
 
@@ -225,7 +225,7 @@ CHECK_BASE64_OBJS = check_base64.o b64_decode.lo b64_encode.o sudoers_debug.lo
 
 CHECK_DIGEST_OBJS = check_digest.o filedigest.lo digestname.lo sudoers_debug.lo
 
-CHECK_EDITOR_OBJS = check_editor.o editor.lo sudoers_debug.lo
+CHECK_EDITOR_OBJS = check_editor.o gc.lo editor.lo sudoers_debug.lo
 
 CHECK_ENV_MATCH_OBJS = check_env_pattern.o env_pattern.lo sudoers_debug.lo
 

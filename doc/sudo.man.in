@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2020
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2021
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "September 1, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "August 16, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1069,7 +1069,7 @@ Because of this, care must be taken when giving users access to commands via
 \fBsudo\fR
 to verify that the command does not inadvertently give the user an
 effective root shell.
-For more information, please see the
+For information on ways to address this, please see the
 \fIPreventing shell escapes\fR
 section in
 sudoers(@mansectform@).

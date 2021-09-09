@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -124,6 +124,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
     debug_decl(sudoers_lookup_check, SUDOERS_DEBUG_PARSER);
 
     memset(info, 0, sizeof(*info));
+    if (def_intercept || ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	info->intercepted = true;
 
     TAILQ_FOREACH_REVERSE(us, &nss->parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(nss->parse_tree, pw, &us->users) != ALLOW)
@@ -225,6 +227,18 @@ apply_cmndspec(struct cmndspec *cs)
 		    "user_type -> %s", user_type);
 	    }
 	}
+	if (user_role != NULL || user_type != NULL) {
+	    if (def_intercept) {
+		sudo_warnx("%s",
+		    U_("SELinux RBAC is not supported when intercept mode is enabled"));
+		debug_return_bool(false);
+	    }
+	    if (def_log_subcmds) {
+		sudo_warnx("%s",
+		    U_("SELinux RBAC is not supported when the log_subcmds flag is enabled"));
+		debug_return_bool(false);
+	    }
+	}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 	/* Set Solaris privilege sets */
@@ -299,6 +313,11 @@ apply_cmndspec(struct cmndspec *cs)
 	    def_noexec = cs->tags.noexec;
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"def_noexec -> %s", def_noexec ? "true" : "false");
+	}
+	if (cs->tags.intercept != UNSPEC) {
+	    def_intercept = cs->tags.intercept;
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"def_intercept -> %s", def_intercept ? "true" : "false");
 	}
 	if (cs->tags.setenv != UNSPEC) {
 	    def_setenv = cs->tags.setenv;
@@ -566,6 +585,8 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    sudo_lbuf_append(lbuf, "%ssetenv, ", cs->tags.setenv ? "" : "!");
 		if (TAG_SET(cs->tags.noexec))
 		    sudo_lbuf_append(lbuf, "%snoexec, ", cs->tags.noexec ? "" : "!");
+		if (TAG_SET(cs->tags.intercept))
+		    sudo_lbuf_append(lbuf, "%sintercept, ", cs->tags.intercept ? "" : "!");
 		if (TAG_SET(cs->tags.nopasswd))
 		    sudo_lbuf_append(lbuf, "%sauthenticate, ", cs->tags.nopasswd ? "!" : "");
 		if (TAG_SET(cs->tags.log_input))
@@ -733,10 +754,10 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
 	    sudo_lbuf_append(lbuf, "    Defaults%s", dsep);
 	    TAILQ_FOREACH(m, binding, entries) {
 		if (m != TAILQ_FIRST(binding))
-		    sudo_lbuf_append(lbuf, ",");
+		    sudo_lbuf_append(lbuf, ", ");
 		sudoers_format_member(lbuf, parse_tree, m, ", ", atype);
-		sudo_lbuf_append(lbuf, " ");
 	    }
+	    sudo_lbuf_append(lbuf, " ");
 	} else
 	    sudo_lbuf_append(lbuf, ", ");
 	sudoers_format_default(lbuf, d);

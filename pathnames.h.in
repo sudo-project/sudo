@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998, 1999, 2001, 2004, 2005, 2007-2014
+ * Copyright (c) 1996, 1998, 1999, 2001, 2004, 2005, 2007-2021
  *	Todd C. Miller <Todd.Miller@sudo.ws>.
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -162,6 +162,10 @@
 # undef _PATH_SUDO_SENDMAIL
 #endif /* _PATH_SUDO_SENDMAIL */
 
+#ifndef _PATH_SUDO_INTERCEPT
+# undef _PATH_SUDO_INTERCEPT
+#endif /* _PATH_SUDO_INTERCEPT */
+
 #ifndef _PATH_SUDO_NOEXEC
 # undef _PATH_SUDO_NOEXEC
 #endif /* _PATH_SUDO_NOEXEC */
@@ -177,6 +181,10 @@
 #ifndef _PATH_SUDO_DEVSEARCH
 # undef _PATH_SUDO_DEVSEARCH
 #endif /* _PATH_SUDO_DEVSEARCH */
+
+#ifndef _PATH_ASAN_LIB
+# undef	_PATH_ASAN_LIB
+#endif /* _PATH_ASAN_LIB */
 
 #ifndef _PATH_VI
 # undef _PATH_VI

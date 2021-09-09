@@ -129,6 +129,10 @@
    don't. */
 #undef HAVE_DECL_GETRESUID
 
+/* Define to 1 if you have the declaration of `getusershell', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETUSERSHELL
+
 /* Define to 1 if you have the declaration of `h_errno', and to 0 if you
    don't. */
 #undef HAVE_DECL_H_ERRNO
@@ -148,6 +152,14 @@
 /* Define to 1 if you have the declaration of `PATH_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_PATH_MAX
+
+/* Define to 1 if you have the declaration of `pread64', and to 0 if you
+   don't. */
+#undef HAVE_DECL_PREAD64
+
+/* Define to 1 if you have the declaration of `pwrite64', and to 0 if you
+   don't. */
+#undef HAVE_DECL_PWRITE64
 
 /* Define to 1 if you have the declaration of `QUAD_MAX', and to 0 if you
    don't. */
@@ -298,7 +310,7 @@
 /* Define to 1 if you have the `freezero' function. */
 #undef HAVE_FREEZERO
 
-/* Define to 1 if you have the `fseeko' function. */
+/* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
 #undef HAVE_FSEEKO
 
 /* Define to 1 if you have the `fstatat' function. */
@@ -647,6 +659,9 @@
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD
 
+/* Define to 1 if you have the `pread64' function. */
+#undef HAVE_PREAD64
+
 /* Define to 1 if you have the `priv_set' function. */
 #undef HAVE_PRIV_SET
 
@@ -673,6 +688,9 @@
 
 /* Define to 1 if you have the `pwrite' function. */
 #undef HAVE_PWRITE
+
+/* Define to 1 if you have the `pwrite64' function. */
+#undef HAVE_PWRITE64
 
 /* Define to 1 if you have the `pw_dup' function. */
 #undef HAVE_PW_DUP
@@ -969,9 +987,6 @@
 
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
-
-/* Define to 1 if you have the `vsyslog' function. */
-#undef HAVE_VSYSLOG
 
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H
@@ -1328,6 +1343,9 @@
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #undef _FILE_OFFSET_BITS
+
+/* Define to 1 to make fseeko visible on some hosts (e.g. glibc 2.2). */
+#undef _LARGEFILE_SOURCE
 
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES

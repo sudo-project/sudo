@@ -219,10 +219,14 @@ SSL_CTX *logsrvd_server_tls_ctx(void);
 bool logsrvd_conf_relay_tls_check_peer(void);
 SSL_CTX *logsrvd_relay_tls_ctx(void);
 #endif
+bool logsrvd_conf_log_exit(void);
+uid_t logsrvd_conf_iolog_uid(void);
+gid_t logsrvd_conf_iolog_gid(void);
 mode_t logsrvd_conf_iolog_mode(void);
 void address_list_addref(struct server_address_list *);
 void address_list_delref(struct server_address_list *);
 void logsrvd_conf_cleanup(void);
+void logsrvd_warn_stderr(bool enabled);
 
 /* logsrvd_journal.c */
 extern struct client_message_switch cms_journal;

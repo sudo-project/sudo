@@ -116,7 +116,7 @@ main(int argc, char *argv[])
 
 	if (user == NULL) {
 	    if ((pw = getpwuid(geteuid())) == NULL)
-		sudo_fatalx(U_("unknown uid: %u"), (unsigned int)geteuid());
+		sudo_fatalx(U_("unknown uid %u"), (unsigned int)geteuid());
 	    user = pw->pw_name;
 	}
 	if (asprintf(&fname, "%s/%s", _PATH_SUDO_TIMEDIR, user) == -1)

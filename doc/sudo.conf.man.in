@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "March 2, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "September 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -229,6 +229,7 @@ For example:
 .nf
 .sp
 .RS 6n
+Path intercept @intercept_file@
 Path noexec @noexec_file@
 Path askpass /usr/X11R6/bin/ssh-askpass
 .RE
@@ -286,6 +287,27 @@ functions, for example
 BSD,
 macOS and Solaris.
 .TP 10n
+intercept
+.br
+The fully-qualified path to a shared library containing a wrappers for the
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecvp\fR(),
+and
+\fBexecvpe\fR()
+library functions that intercepts attempts to run further commands and
+performs a policy check before allowing them to be executed.
+This is used to implement the
+\fIintercept\fR
+functionality on systems that support
+\fRLD_PRELOAD\fR
+or its equivalent.
+The default value is
+\fI@intercept_file@\fR.
+.TP 10n
 noexec
 The fully-qualified path to a shared library containing wrappers
 for the
@@ -295,6 +317,7 @@ for the
 \fBexect\fR(),
 \fBexecv\fR(),
 \fBexecve\fR(),
+\fBexecveat\fR(),
 \fBexecvP\fR(),
 \fBexecvp\fR(),
 \fBexecvpe\fR(),
@@ -538,10 +561,10 @@ This setting is only available in
 \fBsudo\fR
 version 1.8.10 and higher.
 .RE
-.SS "Debug flags"
+.SS "Debug settings"
 \fBsudo\fR
 versions 1.8.4 and higher support a flexible debugging framework
-that can help track down what
+that can log what
 \fBsudo\fR
 is doing internally if there is a problem.
 .PP
@@ -549,20 +572,19 @@ A
 \fRDebug\fR
 line consists of the
 \fRDebug\fR
-keyword, followed by the name of the program (or plugin) to debug
-(\fBsudo\fR, \fBvisudo\fR, \fBsudoreplay\fR, \fBsudoers\fR),
+keyword, followed by the name of the program, plugin or shared object to debug,
 the debug file name and a comma-separated list of debug flags.
 The debug flag syntax used by
-\fBsudo\fR
-and the
+\fBsudo\fR,
+the
 \fBsudoers\fR
-plugin is
+plugin and its associated programs and shared objects is
 \fIsubsystem\fR@\fIpriority\fR
-but a plugin is free to use a different format so long as it does
-not include a comma
+but a third-party plugin is free to use a different format so long
+as it does not include a comma
 (\(oq\&,\(cq).
 .PP
-For example:
+Examples:
 .nf
 .sp
 .RS 6n
@@ -575,6 +597,18 @@ would log all debugging statements at the
 level and higher in addition to those at the
 \fIinfo\fR
 level for the plugin subsystem.
+.nf
+.sp
+.RS 6n
+Debug sudo_intercept.so /var/log/intercept_debug all@debug
+.RE
+.fi
+.PP
+would log all debugging statements, regardless of level, for the
+\fIsudo_intercept.so\fR
+shared object that implements
+\fBsudo\fR's
+intercept functionality.
 .PP
 As of
 \fBsudo\fR
@@ -739,13 +773,28 @@ front end configuration
 #Path devsearch /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
 
 #
+# Sudo command interception:
+#   Path intercept /path/to/sudo_intercept.so
+#
+# Path to a shared library containing replacements for the execv()
+# and execve() library functions that perform a policy check to verify
+# the command is allowed and simply return an error if not.  This is
+# used to implement the "intercept" functionality on systems that
+# support LD_PRELOAD or its equivalent.
+#
+# The compiled-in value is usually sufficient and should only be changed
+# if you rename or move the sudo_intercept.so file.
+#
+#Path intercept @plugindir@/sudo_intercept.so
+
+#
 # Sudo noexec:
 #   Path noexec /path/to/sudo_noexec.so
 #
-# Path to a shared library containing replacements for the execv(),
-# execve() and fexecve() library functions that just return an error.
-# This is used to implement the "noexec" functionality on systems that
-# support LD_PRELOAD or its equivalent.
+# Path to a shared library containing replacements for the execv()
+# family of library functions that just return an error.  This is
+# used to implement the "noexec" functionality on systems that support
+# LD_PRELOAD or its equivalent.
 #
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_noexec.so file.

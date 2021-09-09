@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,6 +38,8 @@
 #include "sudoers_version.h"
 #include "interfaces.h"
 
+static char **command_info;
+
 /*
  * Command execution args to be filled in: argv, envp and command info.
  */
@@ -59,7 +61,7 @@ static bool session_opened;
 extern sudo_dso_public struct policy_plugin sudoers_policy;
 
 #ifdef HAVE_BSD_AUTH_H
-extern char *login_style;
+char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 
 static int
@@ -81,7 +83,7 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
     }
 }
 
-#define RUN_VALID_FLAGS	(MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_IMPLIED_SHELL|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_PRESERVE_GROUPS|MODE_SHELL|MODE_RUN)
+#define RUN_VALID_FLAGS	(MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_IMPLIED_SHELL|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_PRESERVE_GROUPS|MODE_SHELL|MODE_RUN|MODE_POLICY_INTERCEPTED)
 #define EDIT_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_EDIT)
 #define LIST_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_LIST|MODE_CHECK)
 #define VALIDATE_VALID_FLAGS	(MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_VALIDATE)
@@ -92,11 +94,12 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
  * Fills in struct sudo_user and other common sudoers state.
  */
 int
-sudoers_policy_deserialize_info(void *v)
+sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 {
     struct sudoers_open_info *info = v;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
+    unsigned char uuid[16];
     char * const *cur;
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN);
@@ -183,6 +186,7 @@ sudoers_policy_deserialize_info(void *v)
     }
 
     /* Parse command line settings. */
+    sudo_mode = 0;
     user_closefrom = -1;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
@@ -220,7 +224,8 @@ sudoers_policy_deserialize_info(void *v)
 	if (MATCHES(*cur, "prompt=")) {
 	    /* Allow epmpty prompt. */
 	    user_prompt = *cur + sizeof("prompt=") - 1;
-	    def_passprompt_override = true;
+	    if (!append_default("passprompt_override", "true", true, NULL, defaults))
+		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "set_home=")) {
@@ -280,7 +285,8 @@ sudoers_policy_deserialize_info(void *v)
 	if (MATCHES(*cur, "login_class=")) {
 	    CHECK(*cur, "login_class=");
 	    login_class = *cur + sizeof("login_class=") - 1;
-	    def_use_loginclass = true;
+	    if (!append_default("use_loginclass", "true", true, NULL, defaults))
+		goto oom;
 	    continue;
 	}
 #ifdef HAVE_SELINUX
@@ -303,7 +309,7 @@ sudoers_policy_deserialize_info(void *v)
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
-	    CHECK(*cur, "login_style=");
+	    CHECK(*cur, "bsdauth_type=");
 	    login_style = *cur + sizeof("bsdauth_type=") - 1;
 	    continue;
 	}
@@ -524,6 +530,13 @@ sudoers_policy_deserialize_info(void *v)
     /* Some systems support fexecve() which we use for digest matches. */
     cmnd_fd = -1;
 
+    /* Create a UUID to store in the event log. */
+    sudo_uuid_create(uuid);
+    if (sudo_uuid_to_string(uuid, sudo_user.uuid_str, sizeof(sudo_user.uuid_str)) == NULL) {
+	sudo_warnx("%s", U_("unable to generate UUID"));
+	goto bad;
+    }
+
 #ifdef NO_ROOT_MAILER
     eventlog_set_mailuid(user_uid);
 #endif
@@ -595,21 +608,33 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     mode_t cmnd_umask, char *iolog_path, void *v)
 {
     struct sudoers_exec_args *exec_args = v;
-    char **command_info;
     int info_len = 0;
     debug_decl(sudoers_policy_store_result, SUDOERS_DEBUG_PLUGIN);
 
     if (exec_args == NULL)
 	debug_return_bool(true);	/* nothing to do */
 
+    /* Free old data, if any. */
+    if (command_info != NULL) {
+	char **cur;
+	sudoers_gc_remove(GC_VECTOR, command_info);
+	for (cur = command_info; *cur != NULL; cur++)
+	    free(*cur);
+	free(command_info);
+    }
+
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(55, sizeof(char *));
+    command_info = calloc(57, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
     if (safe_cmnd != NULL) {
 	command_info[info_len] = sudo_new_key_val("command", safe_cmnd);
 	if (command_info[info_len++] == NULL)
+	    goto oom;
+    }
+    if (def_log_subcmds) {
+	if ((command_info[info_len++] = strdup("log_subcmds=true")) == NULL)
 	    goto oom;
     }
     if (def_log_input || def_log_output) {
@@ -755,6 +780,10 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
     if (def_ignore_iolog_errors) {
 	if ((command_info[info_len++] = strdup("ignore_iolog_errors=true")) == NULL)
+	    goto oom;
+    }
+    if (def_intercept) {
+	if ((command_info[info_len++] = strdup("intercept=true")) == NULL)
 	    goto oom;
     }
     if (def_noexec) {
@@ -949,6 +978,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	if (sudo_version >= SUDO_API_MKVERSION(1, 15))
 	    *errstr = audit_msg;
     }
+
     debug_return_int(ret);
 }
 
@@ -961,10 +991,11 @@ sudoers_policy_close(int exit_status, int error_code)
 	/* Close the session we opened in sudoers_policy_init_session(). */
 	(void)sudo_auth_end_session(runas_pw);
 
-	/* We do not currently log the exit status. */
 	if (error_code) {
 	    errno = error_code;
 	    sudo_warn(U_("unable to execute %s"), safe_cmnd);
+	} else {
+	    log_exit_status(exit_status);
 	}
     }
 
@@ -977,11 +1008,12 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Free sudoers sources, sudo_user and passwd/group caches. */
     sudoers_cleanup();
 
+    /* command_info is freed by the g/c code. */
+    command_info = NULL;
+
     /* Free error message passed back to front-end, if any. */
     free(audit_msg);
     audit_msg = NULL;
-
-    /* XXX - leaks NewArgv */
 
     /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
     sudoers_debug_deregister();
@@ -1044,8 +1076,8 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 #ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
-	if (!def_log_input && !def_log_output && !def_use_pty &&
-	    !sudo_auth_needs_end_session())
+	if (!def_log_input && !def_log_output && !def_log_exit_status &&
+	    !def_use_pty && !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
 #endif
@@ -1124,7 +1156,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
-	    sudo_warnx(U_("unknown user: %s"), list_user);
+	    sudo_warnx(U_("unknown user %s"), list_user);
 	    debug_return_int(-1);
 	}
     }

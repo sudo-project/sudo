@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "November 6, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "August 3, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -463,6 +463,7 @@ message ServerHello {
   string server_id = 1;
   string redirect = 2;
   repeated string servers = 3;
+  bool subcommands = 4;
 }
 .RE
 .fi
@@ -497,6 +498,24 @@ This can be used to implement log server redundancy and allows the
 client to discover all other log servers simply by connecting to
 one known server.
 This member may be omitted when there is only a single log server.
+.TP 8n
+subcommands
+If set, the server supports logging additional commands during a session.
+The client may send an
+\fIAcceptMessage\fR
+or
+\fIRejectMessage\fR
+when
+\fBsudo\fR
+is running in
+\fIintercept\fR
+mode.
+In this mode, commands spawned from the initial command authorized by
+\fBsudo\fR
+are subject to policy restrictions and/or are logged.
+If
+\fIsubcommands\fR
+is false, the client must not attempt to log additional commands.
 .SS "TimeSpec commit_point"
 A periodic time stamp sent by the server to indicate when I/O log
 buffers have been committed to storage.

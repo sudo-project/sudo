@@ -578,6 +578,26 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Path to the file that is created the first time sudo is run: %s"),
 	NULL,
     }, {
+	"intercept", T_FLAG,
+	N_("Intercept further commands and apply sudoers restrictions to them"),
+	NULL,
+    }, {
+	"log_subcmds", T_FLAG,
+	N_("Log sub-commands run by the original command"),
+	NULL,
+    }, {
+	"log_exit_status", T_FLAG,
+	N_("Log the exit status of commands"),
+	NULL,
+    }, {
+	"intercept_authenticate", T_FLAG,
+	N_("Subsequent commands in an intercepted session must be authenticated"),
+	NULL,
+    }, {
+	"intercept_allow_setid", T_FLAG,
+	N_("Allow an intercepted command to run set setuid or setgid programs"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -56,7 +56,8 @@ bool sudoers_setlocale(int locale_type, int *prev_locale);
 int sudoers_getlocale(void);
 int audit_failure(char *const argv[], char const *const fmt, ...) __printflike(2, 3);
 int vaudit_failure(char *const argv[], char const *const fmt, va_list ap) __printflike(2, 0);
-bool log_allowed(void);
+bool log_allowed(struct eventlog *evlog);
+bool log_exit_status(int exit_status);
 bool log_auth_failure(int status, unsigned int tries);
 bool log_denial(int status, bool inform_user);
 bool log_failure(int status, int flags);
@@ -67,7 +68,7 @@ bool log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 bool gai_log_warning(int flags, int errnum, const char *fmt, ...) __printflike(3, 4);
 bool sudoers_initlocale(const char *ulocale, const char *slocale);
 bool sudoers_locale_callback(const union sudo_defs_val *);
-void sudoers_to_eventlog(struct eventlog *evlog, char * const argv[], char *const envp[]);
+void sudoers_to_eventlog(struct eventlog *evlog, char * const argv[], char *const envp[], const char *uuid_str);
 void init_eventlog_config(void);
 bool init_log_details(struct log_details *details, struct eventlog *evlog);
 
