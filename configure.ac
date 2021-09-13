@@ -4843,7 +4843,7 @@ dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
 dnl
 if test X"$enable_intercept" != X"no"; then
-    SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.lo"
+    SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.o"
     PROGS="${PROGS} sudo_intercept.la"
     INSTALL_INTERCEPT="install-intercept"
 

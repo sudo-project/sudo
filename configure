@@ -31216,7 +31216,7 @@ done
 exec_prefix="$oexec_prefix"
 
 if test X"$enable_intercept" != X"no"; then
-    SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.lo"
+    SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.o"
     PROGS="${PROGS} sudo_intercept.la"
     INSTALL_INTERCEPT="install-intercept"
 
