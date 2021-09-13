@@ -88,9 +88,9 @@ static MERIDIAN	yyMeridian;
 static time_t	yyRelMonth;
 static time_t	yyRelSeconds;
 
-static int	yyerror(const char *s);
 static int	yylex(void);
        int	yyparse(void);
+       void	yyerror(const char *s);
 
 %}
 
@@ -99,12 +99,12 @@ static int	yylex(void);
     enum _MERIDIAN	Meridian;
 }
 
-%token	tAGO tDAY tDAYZONE tID tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
-%token	tSEC_UNIT tSNUMBER tUNUMBER tZONE tDST
+%token	tAGO tID tDST
+%token	<Number>	tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
+%token	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tZONE
+%token	<Meridian>	tMERIDIAN
 
-%type	<Number>	tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
-%type	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tZONE
-%type	<Meridian>	tMERIDIAN o_merid
+%type	<Meridian>	o_merid
 
 %%
 
@@ -502,10 +502,10 @@ static TABLE const MilitaryTable[] = {
 
 
 /* ARGSUSED */
-static int
+void
 yyerror(const char *s)
 {
-  return 0;
+    return;
 }
 
 
