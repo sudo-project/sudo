@@ -2961,14 +2961,36 @@ if test "${enable_openssl-no}" != no; then
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
-	LIBTLS=`$PKG_CONFIG $STATIC --libs $pkg_openssl`
+	for f in `$PKG_CONFIG $STATIC --libs $pkg_openssl`; do
+	    case "$f" in
+		-L*)
+		    f="${f#-L}"
+		    SUDO_APPEND_LIBPATH([LIBTLS], [$f])
+		    ;;
+		*)
+		    AX_APPEND_FLAG([$f], [LIBTLS])
+		    ;;
+	    esac
+	done
 	if test "$DIGEST" = "digest_openssl.lo"; then
 	    pkg_libcrypto=lib`printf $enable_openssl_pkgconfig_template "crypto"`
 	    if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
 		LIBMD=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
+		for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
+		    case "$f" in
+			-L*)
+			    f="${f#-L}"
+			    SUDO_APPEND_LIBPATH([LIBMD], [$f])
+			    ;;
+			*)
+			    AX_APPEND_FLAG([$f], [LIBMD])
+			    ;;
+		    esac
+		done
 	    else
 		# No separate pkg config for libcrypto
 		LIBMD="$LIBTLS"
+		LIBMD_R="$LIBTLS_R"
 	    fi
 	fi
 	for f in `$PKG_CONFIG --cflags-only-I $pkg_openssl`; do
@@ -2978,7 +3000,7 @@ if test "${enable_openssl-no}" != no; then
 	# No pkg-config file present, try to do it manually
 	O_LDFLAGS="$LDFLAGS"
 	if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
-	    LDFLAGS="$LDFLAGS -L${enable_openssl}/lib"
+	    SUDO_APPEND_LIBPATH(LDFLAGS, [${enable_openssl}/lib])
 	fi
 	AC_CHECK_LIB(ssl, SSL_new, [
 	    # Check OPENSSL_VERSION_NUMBER in headers
@@ -4861,6 +4883,12 @@ if test X"$SUDOERS_LDFLAGS_R" != X""; then
 fi
 if test X"$ZLIB_R" != X""; then
     ZLIB="$ZLIB_R $ZLIB"
+fi
+if test X"$LIBMD_R" != X""; then
+    LIBMD="$LIBMD_R $LIBMD"
+fi
+if test X"$LIBTLS_R" != X""; then
+    LIBTLS="$LIBTLS_R $LIBTLS"
 fi
 
 dnl
