@@ -1043,6 +1043,7 @@ enable_pvs_studio
 enable_log_server
 enable_log_client
 enable_openssl
+enable_openssl_pkgconfig_template
 enable_gcrypt
 enable_python
 enable_shared
@@ -1758,6 +1759,9 @@ Optional Features:
   --disable-log-client    Disable sudoers support for using the sudo_logsrvd
                           log server.
   --enable-openssl        Use OpenSSL's TLS and sha2 functions
+  --enable-openssl-pkgconfig-template
+                          A printf format string used to contruct the OpenSSL
+                          pkg-config name
   --enable-gcrypt         Use GNU crypt's sha2 functions
   --enable-python         Compile python plugin support
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -6968,6 +6972,14 @@ else $as_nop
 	enable_openssl=maybe
     fi
 
+fi
+
+# Check whether --enable-openssl-pkgconfig-template was given.
+if test ${enable_openssl_pkgconfig_template+y}
+then :
+  enableval=$enable_openssl_pkgconfig_template;
+else $as_nop
+  enable_openssl_pkgconfig_template="%s"
 fi
 
 
@@ -23286,7 +23298,8 @@ if test "${enable_openssl-no}" != no; then
 	PKG_CONFIG=false
     fi
     : ${PKG_CONFIG='pkg-config'}
-    if $PKG_CONFIG --exists "openssl >= 1.0.1" >/dev/null 2>&1; then
+    pkg_openssl=`printf $enable_openssl_pkgconfig_template "openssl"`
+    if $PKG_CONFIG --exists "$pkg_openssl >= 1.0.1" >/dev/null 2>&1; then
 	printf "%s\n" "#define HAVE_OPENSSL 1" >>confdefs.h
 
 	if test "$enable_openssl" = "maybe"; then
@@ -23294,7 +23307,7 @@ if test "${enable_openssl-no}" != no; then
 	fi
 
 	O_LDFLAGS="$LDFLAGS"
-	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
 	# Check whether --static is needed
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_new in -lssl" >&5
 printf %s "checking for SSL_new in -lssl... " >&6; }
@@ -23383,16 +23396,17 @@ fi
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
-	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
+	LIBTLS=`$PKG_CONFIG $STATIC --libs $pkg_openssl`
 	if test "$DIGEST" = "digest_openssl.lo"; then
-	    if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
-		LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	    pkg_libcrypto=lib`printf $enable_openssl_pkgconfig_template "crypto"`
+	    if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
+		LIBMD=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
 	    else
 		# No separate pkg config for libcrypto
 		LIBMD="$LIBTLS"
 	    fi
 	fi
-	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
+	for f in `$PKG_CONFIG --cflags-only-I $pkg_openssl`; do
 
 if test ${CPPFLAGS+y}
 then :

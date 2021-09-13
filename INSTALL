@@ -636,6 +636,13 @@ Authentication options:
         not be used as they do not support TLS 1.2.  If specified,
         DIR should contain the OpenSSL include and lib directories.
 
+  --enable-openssl-pkgconfig-template=template
+        A printf-style template used to construct the name of the
+        openssl and libcrypto pkg-config files.  For example, a
+        template of "e%s30" would cause "eopenssl30" and "libecrypto30"
+        to be used instead.  This makes it possible to link with
+        the OpenSSL 3.0 package on OpenBSD.  Defaults to "%s".
+
 Development options:
   --enable-env-debug
         Enable debugging of the environment setting functions.  This

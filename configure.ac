@@ -1570,6 +1570,9 @@ AC_ARG_ENABLE(openssl,
 	enable_openssl=maybe
     fi
 ])
+AC_ARG_ENABLE(openssl-pkgconfig-template,
+[AS_HELP_STRING([--enable-openssl-pkgconfig-template], [A printf format string used to contruct the OpenSSL pkg-config name])],
+[], [enable_openssl_pkgconfig_template="%s"])
 
 AC_ARG_ENABLE(gcrypt,
 [AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
@@ -2941,14 +2944,15 @@ if test "${enable_openssl-no}" != no; then
 	PKG_CONFIG=false
     fi
     : ${PKG_CONFIG='pkg-config'}
-    if $PKG_CONFIG --exists "openssl >= 1.0.1" >/dev/null 2>&1; then
+    pkg_openssl=`printf $enable_openssl_pkgconfig_template "openssl"`
+    if $PKG_CONFIG --exists "$pkg_openssl >= 1.0.1" >/dev/null 2>&1; then
 	AC_DEFINE(HAVE_OPENSSL)
 	if test "$enable_openssl" = "maybe"; then
 	    enable_openssl=yes
 	fi
 
 	O_LDFLAGS="$LDFLAGS"
-	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
 	# Check whether --static is needed
 	AC_CHECK_LIB(ssl, SSL_new, [STATIC=""], [STATIC="--static"], [-lcrypto])
 
@@ -2957,16 +2961,17 @@ if test "${enable_openssl-no}" != no; then
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
-	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
+	LIBTLS=`$PKG_CONFIG $STATIC --libs $pkg_openssl`
 	if test "$DIGEST" = "digest_openssl.lo"; then
-	    if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
-		LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
+	    pkg_libcrypto=lib`printf $enable_openssl_pkgconfig_template "crypto"`
+	    if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
+		LIBMD=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
 	    else
 		# No separate pkg config for libcrypto
 		LIBMD="$LIBTLS"
 	    fi
 	fi
-	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
+	for f in `$PKG_CONFIG --cflags-only-I $pkg_openssl`; do
 	    AX_APPEND_FLAG([$f], [CPPFLAGS])
 	done
     else
