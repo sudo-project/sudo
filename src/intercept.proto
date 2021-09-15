@@ -7,7 +7,7 @@ syntax = "proto3";
 message InterceptRequest {
   oneof type {
     PolicyCheckRequest policy_check_req = 1;
-    ClientHello hello = 2;
+    InterceptHello hello = 2;
   }
 }
 
@@ -15,12 +15,12 @@ message InterceptRequest {
  * Hello message from sudo_intercept.so to main sudo process.
  * Sudo sends back the token and localhost port number.
  */
-message ClientHello {
+message InterceptHello {
     int32 pid = 1;
 }
 
 /*
- * Sudo response to a ClientHello from sudo_intercept.so.
+ * Sudo response to an InterceptHello from sudo_intercept.so.
  * The client uses the port number and token to connect back to sudo.
  */
 message HelloResponse {

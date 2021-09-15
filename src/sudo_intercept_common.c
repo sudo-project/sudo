@@ -87,7 +87,7 @@ static bool
 send_client_hello(int sock)
 {
     InterceptRequest msg = INTERCEPT_REQUEST__INIT;
-    ClientHello hello = CLIENT_HELLO__INIT;
+    InterceptHello hello = INTERCEPT_HELLO__INIT;
     uint8_t *buf = NULL;
     uint32_t msg_len;
     size_t len;
@@ -124,7 +124,7 @@ done:
 }
 
 /*
- * Receive HelloResponse from sudo over fd.
+ * Receive InterceptResponse from sudo over fd.
  */
 InterceptResponse *
 recv_intercept_response(int fd)
@@ -240,7 +240,7 @@ sudo_interposer_init(void)
     }
 
     /*
-     * Send ClientHello message to over the fd.
+     * Send InterceptHello message to over the fd.
      */
     if (!send_client_hello(fd))
 	goto done;

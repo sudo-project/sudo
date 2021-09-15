@@ -100,7 +100,7 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
 	goto bad;
     }
 
-    /* If we've already seen a ClientHello, expect a policy check first. */
+    /* If we've already seen an InterceptHello, expect a policy check first. */
     closure->state = sudo_token_isset(intercept_token) ?
 	RECV_SECRET : RECV_HELLO_INITIAL;
     closure->details = details;
@@ -636,7 +636,7 @@ unpack:
 	default:
 	    /* Only accept hello on a socket with an accepted command. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"got ClientHello without an accepted command");
+		"got InterceptHello without an accepted command");
 	    goto done;
 	}
 	break;
@@ -850,7 +850,7 @@ intercept_write(int fd, struct intercept_closure *closure)
 	closure->state = RECV_CONNECTION;
 	break;
     case POLICY_ACCEPT:
-	/* Re-use event to read ClientHello from sudo_intercept.so ctor. */
+	/* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
 	if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_cb, closure) == -1) {
 	    /* This cannot (currently) fail. */
 	    sudo_warn("%s", U_("unable to add event to queue"));

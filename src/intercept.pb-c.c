@@ -52,49 +52,49 @@ void   intercept_request__free_unpacked
   assert(message->base.descriptor == &intercept_request__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-void   client_hello__init
-                     (ClientHello         *message)
+void   intercept_hello__init
+                     (InterceptHello         *message)
 {
-  static const ClientHello init_value = CLIENT_HELLO__INIT;
+  static const InterceptHello init_value = INTERCEPT_HELLO__INIT;
   *message = init_value;
 }
-size_t client_hello__get_packed_size
-                     (const ClientHello *message)
+size_t intercept_hello__get_packed_size
+                     (const InterceptHello *message)
 {
-  assert(message->base.descriptor == &client_hello__descriptor);
+  assert(message->base.descriptor == &intercept_hello__descriptor);
   return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
-size_t client_hello__pack
-                     (const ClientHello *message,
+size_t intercept_hello__pack
+                     (const InterceptHello *message,
                       uint8_t       *out)
 {
-  assert(message->base.descriptor == &client_hello__descriptor);
+  assert(message->base.descriptor == &intercept_hello__descriptor);
   return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
-size_t client_hello__pack_to_buffer
-                     (const ClientHello *message,
+size_t intercept_hello__pack_to_buffer
+                     (const InterceptHello *message,
                       ProtobufCBuffer *buffer)
 {
-  assert(message->base.descriptor == &client_hello__descriptor);
+  assert(message->base.descriptor == &intercept_hello__descriptor);
   return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
-ClientHello *
-       client_hello__unpack
+InterceptHello *
+       intercept_hello__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data)
 {
-  return (ClientHello *)
-     protobuf_c_message_unpack (&client_hello__descriptor,
+  return (InterceptHello *)
+     protobuf_c_message_unpack (&intercept_hello__descriptor,
                                 allocator, len, data);
 }
-void   client_hello__free_unpacked
-                     (ClientHello *message,
+void   intercept_hello__free_unpacked
+                     (InterceptHello *message,
                       ProtobufCAllocator *allocator)
 {
   if(!message)
     return;
-  assert(message->base.descriptor == &client_hello__descriptor);
+  assert(message->base.descriptor == &intercept_hello__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 void   hello_response__init
@@ -388,7 +388,7 @@ static const ProtobufCFieldDescriptor intercept_request__field_descriptors[2] =
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(InterceptRequest, type_case),
     offsetof(InterceptRequest, u.hello),
-    &client_hello__descriptor,
+    &intercept_hello__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
@@ -418,7 +418,7 @@ const ProtobufCMessageDescriptor intercept_request__descriptor =
   (ProtobufCMessageInit) intercept_request__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor client_hello__field_descriptors[1] =
+static const ProtobufCFieldDescriptor intercept_hello__field_descriptors[1] =
 {
   {
     "pid",
@@ -426,34 +426,34 @@ static const ProtobufCFieldDescriptor client_hello__field_descriptors[1] =
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
-    offsetof(ClientHello, pid),
+    offsetof(InterceptHello, pid),
     NULL,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
-static const unsigned client_hello__field_indices_by_name[] = {
+static const unsigned intercept_hello__field_indices_by_name[] = {
   0,   /* field[0] = pid */
 };
-static const ProtobufCIntRange client_hello__number_ranges[1 + 1] =
+static const ProtobufCIntRange intercept_hello__number_ranges[1 + 1] =
 {
   { 1, 0 },
   { 0, 1 }
 };
-const ProtobufCMessageDescriptor client_hello__descriptor =
+const ProtobufCMessageDescriptor intercept_hello__descriptor =
 {
   PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "ClientHello",
-  "ClientHello",
-  "ClientHello",
+  "InterceptHello",
+  "InterceptHello",
+  "InterceptHello",
   "",
-  sizeof(ClientHello),
+  sizeof(InterceptHello),
   1,
-  client_hello__field_descriptors,
-  client_hello__field_indices_by_name,
-  1,  client_hello__number_ranges,
-  (ProtobufCMessageInit) client_hello__init,
+  intercept_hello__field_descriptors,
+  intercept_hello__field_indices_by_name,
+  1,  intercept_hello__number_ranges,
+  (ProtobufCMessageInit) intercept_hello__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
 static const ProtobufCFieldDescriptor hello_response__field_descriptors[3] =
