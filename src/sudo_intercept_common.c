@@ -247,9 +247,15 @@ sudo_interposer_init(void)
 
     res = recv_intercept_response(fd);
     if (res != NULL) {
-	intercept_token.u64[0] = res->u.hello_resp->token_lo;
-	intercept_token.u64[1] = res->u.hello_resp->token_hi;
-	intercept_port = res->u.hello_resp->portno;
+	if (res->type_case == INTERCEPT_RESPONSE__TYPE_HELLO_RESP) {
+	    intercept_token.u64[0] = res->u.hello_resp->token_lo;
+	    intercept_token.u64[1] = res->u.hello_resp->token_hi;
+	    intercept_port = res->u.hello_resp->portno;
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected type_case value %d in %s from %s",
+		res->type_case, "InterceptResponse", "sudo");
+	}
 	intercept_response__free_unpacked(res, NULL);
     }
 
