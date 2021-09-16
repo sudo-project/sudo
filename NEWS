@@ -1,7 +1,7 @@
 What's new in Sudo 1.9.8p1
 
  * Fixed support for passing a prompt (sudo -p) or a login class
-   (sudo -l) on the command line.  This is a regression introduced
+   (sudo -c) on the command line.  This is a regression introduced
    in sudo 1.9.8.  Bug #993.
 
  * Fixed a crash with "sudo ALL" rules in the LDAP and SSSD back-ends.
