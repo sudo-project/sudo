@@ -408,15 +408,13 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    free(cmndspec);
 	    goto oom;
 	}
-	if (strcmp(cmnd, "ALL") != 0) {
-	    if ((c = calloc(1, sizeof(*c))) == NULL) {
-		free(cmndspec);
-		free(m);
-		goto oom;
-	    }
-	    m->name = (char *)c;
-	    TAILQ_INIT(&c->digests);
+	if ((c = calloc(1, sizeof(*c))) == NULL) {
+	    free(cmndspec);
+	    free(m);
+	    goto oom;
 	}
+	m->name = (char *)c;
+	TAILQ_INIT(&c->digests);
 
 	/* Negated commands have precedence so insert them at the end. */
 	if (negated)
@@ -584,8 +582,8 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 	/* Fill in command member now that options have been processed. */
 	m->negated = negated;
-	if (c == NULL) {
-	    /* No command name for "ALL" */
+	if (strcmp(cmnd, "ALL") == 0) {
+	    /* TODO: support digests with ALL */
 	    m->type = ALL;
 	    if (cmndspec->tags.setenv == UNSPEC)
 		cmndspec->tags.setenv = IMPLIED;

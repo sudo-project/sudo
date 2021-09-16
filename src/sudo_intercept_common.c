@@ -87,7 +87,7 @@ static bool
 send_client_hello(int sock)
 {
     InterceptRequest msg = INTERCEPT_REQUEST__INIT;
-    ClientHello hello = CLIENT_HELLO__INIT;
+    InterceptHello hello = INTERCEPT_HELLO__INIT;
     uint8_t *buf = NULL;
     uint32_t msg_len;
     size_t len;
@@ -124,7 +124,7 @@ done:
 }
 
 /*
- * Receive HelloResponse from sudo over fd.
+ * Receive InterceptResponse from sudo over fd.
  */
 InterceptResponse *
 recv_intercept_response(int fd)
@@ -240,16 +240,22 @@ sudo_interposer_init(void)
     }
 
     /*
-     * Send ClientHello message to over the fd.
+     * Send InterceptHello message to over the fd.
      */
     if (!send_client_hello(fd))
 	goto done;
 
     res = recv_intercept_response(fd);
     if (res != NULL) {
-	intercept_token.u64[0] = res->u.hello_resp->token_lo;
-	intercept_token.u64[1] = res->u.hello_resp->token_hi;
-	intercept_port = res->u.hello_resp->portno;
+	if (res->type_case == INTERCEPT_RESPONSE__TYPE_HELLO_RESP) {
+	    intercept_token.u64[0] = res->u.hello_resp->token_lo;
+	    intercept_token.u64[1] = res->u.hello_resp->token_hi;
+	    intercept_port = res->u.hello_resp->portno;
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unexpected type_case value %d in %s from %s",
+		res->type_case, "InterceptResponse", "sudo");
+	}
 	intercept_response__free_unpacked(res, NULL);
     }
 

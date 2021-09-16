@@ -224,7 +224,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "prompt=")) {
 	    /* Allow epmpty prompt. */
 	    user_prompt = *cur + sizeof("prompt=") - 1;
-	    if (!append_default("passprompt_override", "true", true, NULL, defaults))
+	    if (!append_default("passprompt_override", NULL, true, NULL, defaults))
 		goto oom;
 	    continue;
 	}
@@ -285,7 +285,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "login_class=")) {
 	    CHECK(*cur, "login_class=");
 	    login_class = *cur + sizeof("login_class=") - 1;
-	    if (!append_default("use_loginclass", "true", true, NULL, defaults))
+	    if (!append_default("use_loginclass", NULL, true, NULL, defaults))
 		goto oom;
 	    continue;
 	}

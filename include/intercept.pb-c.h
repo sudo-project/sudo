@@ -16,7 +16,7 @@ PROTOBUF_C__BEGIN_DECLS
 
 
 typedef struct _InterceptRequest InterceptRequest;
-typedef struct _ClientHello ClientHello;
+typedef struct _InterceptHello InterceptHello;
 typedef struct _HelloResponse HelloResponse;
 typedef struct _PolicyCheckRequest PolicyCheckRequest;
 typedef struct _PolicyAcceptMessage PolicyAcceptMessage;
@@ -47,7 +47,7 @@ struct  _InterceptRequest
   InterceptRequest__TypeCase type_case;
   union {
     PolicyCheckRequest *policy_check_req;
-    ClientHello *hello;
+    InterceptHello *hello;
   } u;
 };
 #define INTERCEPT_REQUEST__INIT \
@@ -59,18 +59,18 @@ struct  _InterceptRequest
  * Hello message from sudo_intercept.so to main sudo process.
  * Sudo sends back the token and localhost port number.
  */
-struct  _ClientHello
+struct  _InterceptHello
 {
   ProtobufCMessage base;
   int32_t pid;
 };
-#define CLIENT_HELLO__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&client_hello__descriptor) \
+#define INTERCEPT_HELLO__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&intercept_hello__descriptor) \
     , 0 }
 
 
 /*
- * Sudo response to a ClientHello from sudo_intercept.so.
+ * Sudo response to an InterceptHello from sudo_intercept.so.
  * The client uses the port number and token to connect back to sudo.
  */
 struct  _HelloResponse
@@ -187,24 +187,24 @@ InterceptRequest *
 void   intercept_request__free_unpacked
                      (InterceptRequest *message,
                       ProtobufCAllocator *allocator);
-/* ClientHello methods */
-void   client_hello__init
-                     (ClientHello         *message);
-size_t client_hello__get_packed_size
-                     (const ClientHello   *message);
-size_t client_hello__pack
-                     (const ClientHello   *message,
+/* InterceptHello methods */
+void   intercept_hello__init
+                     (InterceptHello         *message);
+size_t intercept_hello__get_packed_size
+                     (const InterceptHello   *message);
+size_t intercept_hello__pack
+                     (const InterceptHello   *message,
                       uint8_t             *out);
-size_t client_hello__pack_to_buffer
-                     (const ClientHello   *message,
+size_t intercept_hello__pack_to_buffer
+                     (const InterceptHello   *message,
                       ProtobufCBuffer     *buffer);
-ClientHello *
-       client_hello__unpack
+InterceptHello *
+       intercept_hello__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   client_hello__free_unpacked
-                     (ClientHello *message,
+void   intercept_hello__free_unpacked
+                     (InterceptHello *message,
                       ProtobufCAllocator *allocator);
 /* HelloResponse methods */
 void   hello_response__init
@@ -325,8 +325,8 @@ void   intercept_response__free_unpacked
 typedef void (*InterceptRequest_Closure)
                  (const InterceptRequest *message,
                   void *closure_data);
-typedef void (*ClientHello_Closure)
-                 (const ClientHello *message,
+typedef void (*InterceptHello_Closure)
+                 (const InterceptHello *message,
                   void *closure_data);
 typedef void (*HelloResponse_Closure)
                  (const HelloResponse *message,
@@ -353,7 +353,7 @@ typedef void (*InterceptResponse_Closure)
 /* --- descriptors --- */
 
 extern const ProtobufCMessageDescriptor intercept_request__descriptor;
-extern const ProtobufCMessageDescriptor client_hello__descriptor;
+extern const ProtobufCMessageDescriptor intercept_hello__descriptor;
 extern const ProtobufCMessageDescriptor hello_response__descriptor;
 extern const ProtobufCMessageDescriptor policy_check_request__descriptor;
 extern const ProtobufCMessageDescriptor policy_accept_message__descriptor;

@@ -1,3 +1,17 @@
+What's new in Sudo 1.9.8p1
+
+ * Fixed support for passing a prompt (sudo -p) or a login class
+   (sudo -l) on the command line.  This is a regression introduced
+   in sudo 1.9.8.  Bug #993.
+
+ * Fixed a crash with "sudo ALL" rules in the LDAP and SSSD back-ends.
+   This is a regression introduced in sudo 1.9.8.  Bug #994.
+
+ * Fixed a compilation error when the --enable-static-sudoers configure
+   option was specified.  This is a regression introduced in sudo
+   1.9.8 caused by a symbol clash with the intercept and log server
+   protobuf functions.
+
 What's new in Sudo 1.9.8
 
  * It is now possible to transparently intercepting sub-commands
@@ -34,6 +48,10 @@ What's new in Sudo 1.9.8
    commands run in a privileged shell.  It uses the same mechanism as
    the intercept support described above and has the same limitations.
 
+ * The new "log_exit_status" sudoers setting can be used to log
+   the exit status commands run via sudo.  This is also a corresponding
+   "log_exit" setting in the sudo_logsrvd.conf eventlog stanza.
+ 
  * Support for logging sudo_logsrvd errors via syslog or to a file.
    Previously, most sudo_logsrvd errors were only visible in the
    debug log.

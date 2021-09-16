@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.8], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.8p1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -2995,7 +2995,7 @@ if test "${enable_openssl-no}" != no; then
 	    else
 		enable_openssl=yes
 	    fi
-	    LIBTLS="${LIBTLS} -lcrypto -lssl"
+	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
 	    AC_CHECK_LIB(crypto, SHA224_Update, [

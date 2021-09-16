@@ -206,6 +206,9 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     int rc;
     debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS);
 
+    if (file == NULL)
+	file = "front-end";
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%d:%d: %s=%s op=%d",
 	__func__, file, line, column, def->name, val ? val : "", op);
 
