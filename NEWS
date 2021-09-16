@@ -4,6 +4,9 @@ What's new in Sudo 1.9.8p1
    (sudo -l) on the command line.  This is a regression introduced
    in sudo 1.9.8.  Bug #993.
 
+ * Fixed a crash with "sudo ALL" rules in the LDAP and SSSD back-ends.
+   This is a regression introduced in sudo 1.9.8.  Bug #994.
+
  * Fixed a compilation error when the --enable-static-sudoers configure
    option was specified.  This is a regression introduced in sudo
    1.9.8 caused by a symbol clash with the intercept and log server
