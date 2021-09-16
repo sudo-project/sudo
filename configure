@@ -23674,7 +23674,7 @@ fi
 	    else
 		enable_openssl=yes
 	    fi
-	    LIBTLS="${LIBTLS} -lcrypto -lssl"
+	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SHA224_Update in -lcrypto" >&5

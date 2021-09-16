@@ -2995,7 +2995,7 @@ if test "${enable_openssl-no}" != no; then
 	    else
 		enable_openssl=yes
 	    fi
-	    LIBTLS="${LIBTLS} -lcrypto -lssl"
+	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
 	    AC_CHECK_LIB(crypto, SHA224_Update, [
