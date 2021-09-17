@@ -621,18 +621,22 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    sudo_lbuf_append(lbuf, "    Timeout: %s\n", numbuf);
 		}
 		if (cs->notbefore != UNSPEC) {
-		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
+		    char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
 		    struct tm gmt;
+		    int len;
 		    if (gmtime_r(&cs->notbefore, &gmt) != NULL) {
-			if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt) != 0)
+			len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
+			if (len != 0 && buf[sizeof(buf) - 1] == '\0')
 			    sudo_lbuf_append(lbuf, "    NotBefore: %s\n", buf);
 		    }
 		}
 		if (cs->notafter != UNSPEC) {
-		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
+		    char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
 		    struct tm gmt;
+		    int len;
 		    if (gmtime_r(&cs->notafter, &gmt) != NULL) {
-			if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt) != 0)
+			len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
+			if (len != 0 && buf[sizeof(buf) - 1] == '\0')
 			    sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
 		    }
 		}

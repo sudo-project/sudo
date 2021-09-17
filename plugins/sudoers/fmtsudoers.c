@@ -240,18 +240,20 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
 	sudo_lbuf_append(lbuf, "TIMEOUT=%s ", numbuf);
     }
     if (cs->notbefore != UNSPEC && FIELD_CHANGED(prev_cs, cs, notbefore)) {
-	char buf[sizeof("CCYYMMDDHHMMSSZ")];
+	char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
 	struct tm gmt;
 	if (gmtime_r(&cs->notbefore, &gmt) != NULL) {
-	    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt) != 0)
+	    int len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
+	    if (len != 0 && buf[sizeof(buf) - 1] == '\0')
 		sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", buf);
 	}
     }
     if (cs->notafter != UNSPEC && FIELD_CHANGED(prev_cs, cs, notafter)) {
-	char buf[sizeof("CCYYMMDDHHMMSSZ")];
+	char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
 	struct tm gmt;
 	if (gmtime_r(&cs->notafter, &gmt) != NULL) {
-	    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt) != 0)
+	    int len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
+	    if (len != 0 && buf[sizeof(buf) - 1] == '\0')
 		sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);
 	}
     }

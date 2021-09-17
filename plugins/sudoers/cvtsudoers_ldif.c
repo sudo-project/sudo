@@ -316,12 +316,13 @@ static void
 print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     struct cmndspec *cs, struct cmndspec **nextp, struct defaults_list *options)
 {
+    char timebuf[sizeof("20120727121554Z")];
     struct cmndspec *next = *nextp;
     struct member *m;
     struct tm gmt;
     char *attr_val;
     bool last_one;
-    char timebuf[sizeof("20120727121554Z")];
+    int len;
     debug_decl(print_cmndspec_ldif, SUDOERS_DEBUG_UTIL);
 
     /* Print runasuserlist as sudoRunAsUser attributes */
@@ -345,7 +346,9 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	if (gmtime_r(&cs->notbefore, &gmt) == NULL) {
 	    sudo_warn("%s", U_("unable to get GMT time"));
 	} else {
-	    if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt) == 0) {
+	    timebuf[sizeof(timebuf) - 1] = '\0';
+	    len = strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
+	    if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
 		sudo_warnx("%s", U_("unable to format timestamp"));
 	    } else {
 		print_attribute_ldif(fp, "sudoNotBefore", timebuf);
@@ -356,7 +359,9 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	if (gmtime_r(&cs->notafter, &gmt) == NULL) {
 	    sudo_warn("%s", U_("unable to get GMT time"));
 	} else {
-	    if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt) == 0) {
+	    timebuf[sizeof(timebuf) - 1] = '\0';
+	    len = strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
+	    if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
 		sudo_warnx("%s", U_("unable to format timestamp"));
 	    } else {
 		print_attribute_ldif(fp, "sudoNotAfter", timebuf);

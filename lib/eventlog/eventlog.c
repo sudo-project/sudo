@@ -427,7 +427,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     struct tm gmt;
     time_t now;
     FILE *mail;
-    int fd, pfd[2], status;
+    int fd, len, pfd[2], status;
     pid_t pid, rv;
     struct stat sb;
     va_list ap;
@@ -568,7 +568,18 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 	(void) fprintf(mail, "\nContent-Type: text/plain; charset=\"%s\"\nContent-Transfer-Encoding: 8bit", nl_langinfo(CODESET));
 #endif /* HAVE_NL_LANGINFO && CODESET */
 
-    strftime(timebuf, sizeof(timebuf), timefmt, &gmt);
+    timebuf[sizeof(timebuf) - 1] = '\0';
+    len = strftime(timebuf, sizeof(timebuf), timefmt, &gmt);
+    if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_ERROR,
+	    "strftime() failed to format time: %s", timefmt);
+	/* Fall back to default time format string. */
+	timebuf[sizeof(timebuf) - 1] = '\0';
+	len = strftime(timebuf, sizeof(timebuf), "%h %e %T", &gmt);
+	if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
+	    timebuf[0] = '\0';		/* give up */
+	}
+    }
     if (evlog != NULL) {
 	(void) fprintf(mail, "\n\n%s : %s : %s : ", evlog->submithost, timebuf,
 	    evlog->submituser);
@@ -599,6 +610,7 @@ json_add_timestamp(struct json_container *json, const char *name,
     const struct timespec *ts, bool format_timestamp)
 {
     struct json_value json_value;
+    int len;
     debug_decl(json_add_timestamp, SUDO_DEBUG_PLUGIN);
 
     if (!sudo_json_open_object(json, name))
@@ -622,17 +634,23 @@ json_add_timestamp(struct json_container *json, const char *name,
 	struct tm gmt;
 
 	if (gmtime_r(&secs, &gmt) != NULL) {
-	    strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = timebuf; // -V507
-	    if (!sudo_json_add_value(json, "iso8601", &json_value))
-		goto oom;
+	    timebuf[sizeof(timebuf) - 1] = '\0';
+	    len = strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
+	    if (len != 0 && timebuf[sizeof(timebuf) - 1] == '\0') {
+		json_value.type = JSON_STRING;
+		json_value.u.string = timebuf; // -V507
+		if (!sudo_json_add_value(json, "iso8601", &json_value))
+		    goto oom;
+	    }
 
-	    strftime(timebuf, sizeof(timebuf), timefmt, &gmt);
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = timebuf; // -V507
-	    if (!sudo_json_add_value(json, "localtime", &json_value))
-		goto oom;
+	    timebuf[sizeof(timebuf) - 1] = '\0';
+	    len = strftime(timebuf, sizeof(timebuf), timefmt, &gmt);
+	    if (len != 0 && timebuf[sizeof(timebuf) - 1] == '\0') {
+		json_value.type = JSON_STRING;
+		json_value.u.string = timebuf; // -V507
+		if (!sudo_json_add_value(json, "localtime", &json_value))
+		    goto oom;
+	    }
 	}
     }
 

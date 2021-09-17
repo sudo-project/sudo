@@ -620,8 +620,9 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
 	struct tm tm;
 	size_t tlen;
 	if (localtime_r(&now, &tm) != NULL) {
+	    timebuf[sizeof(timebuf) - 1] = '\0';
 	    tlen = strftime(timebuf, sizeof(timebuf), "%b %e %H:%M:%S", &tm);
-	    if (tlen == 0) {
+	    if (tlen == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
 		/* contents are undefined on error */
 		timebuf[0] = '\0';
 	    } else {

@@ -491,10 +491,11 @@ done:
 static bool
 sudo_ldap_timefilter(char *buffer, size_t buffersize)
 {
+    char timebuffer[sizeof("20120727121554.0Z")];
+    bool ret = false;
     struct tm gmt;
     time_t now;
-    char timebuffer[sizeof("20120727121554.0Z")];
-    int len = -1;
+    int len;
     debug_decl(sudo_ldap_timefilter, SUDOERS_DEBUG_LDAP);
 
     /* Make sure we have a formatted timestamp for __now__. */
@@ -505,7 +506,9 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     }
 
     /* Format the timestamp according to the RFC. */
-    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", &gmt) == 0) {
+    timebuffer[sizeof(timebuffer) - 1] = '\0';
+    len = strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", &gmt);
+    if (len == 0 || timebuffer[sizeof(timebuffer) - 1] != '\0') {
 	sudo_warnx("%s", U_("unable to format timestamp"));
 	goto done;
     }
@@ -516,11 +519,13 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     if (len < 0 || (size_t)len >= buffersize) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	errno = EOVERFLOW;
-	len = -1;
+	goto done;
     }
 
+    ret = true;
+
 done:
-    debug_return_bool(len != -1);
+    debug_return_bool(ret);
 }
 
 /*
