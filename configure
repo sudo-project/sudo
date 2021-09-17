@@ -23299,6 +23299,7 @@ if test "${enable_openssl-no}" != no; then
     fi
     : ${PKG_CONFIG='pkg-config'}
     pkg_openssl=`printf $enable_openssl_pkgconfig_template "openssl"`
+    pkg_libcrypto=lib`printf $enable_openssl_pkgconfig_template "crypto"`
     if $PKG_CONFIG --exists "$pkg_openssl >= 1.0.1" >/dev/null 2>&1; then
 	printf "%s\n" "#define HAVE_OPENSSL 1" >>confdefs.h
 
@@ -23308,15 +23309,19 @@ if test "${enable_openssl-no}" != no; then
 
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
-	# Check whether --static is needed
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_new in -lssl" >&5
-printf %s "checking for SSL_new in -lssl... " >&6; }
-if test ${ac_cv_lib_ssl_SSL_new_lcrypto+y}
+	# Check whether --static is needed (don't assume name of ssl lib)
+	libssl="`$PKG_CONFIG --libs-only-l $pkg_openssl | sed 's/^ *-l//'`"
+	libssl_extra=`echo $libssl | sed 's/^[^ ]* *//'`
+	libssl=`echo $libssl | sed 's/ .*//'`
+	as_ac_Lib=`printf "%s\n" "ac_cv_lib_$libssl''_SSL_new$libssl_extra" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_new in -l$libssl" >&5
+printf %s "checking for SSL_new in -l$libssl... " >&6; }
+if eval test \${$as_ac_Lib+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lssl -lcrypto $LIBS"
+LIBS="-l$libssl $libssl_extra $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -23334,17 +23339,18 @@ return SSL_new ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_ssl_SSL_new_lcrypto=yes
+  eval "$as_ac_Lib=yes"
 else $as_nop
-  ac_cv_lib_ssl_SSL_new_lcrypto=no
+  eval "$as_ac_Lib=no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_new_lcrypto" >&5
-printf "%s\n" "$ac_cv_lib_ssl_SSL_new_lcrypto" >&6; }
-if test "x$ac_cv_lib_ssl_SSL_new_lcrypto" = xyes
+eval ac_res=\$$as_ac_Lib
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"
 then :
   STATIC=""
 else $as_nop
@@ -23352,15 +23358,17 @@ else $as_nop
 fi
 
 
-	# Use OpenSSL's sha2 functions if possible
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_new in -lcrypto" >&5
-printf %s "checking for EVP_MD_CTX_new in -lcrypto... " >&6; }
-if test ${ac_cv_lib_crypto_EVP_MD_CTX_new+y}
+	# Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
+	libcrypto="`$PKG_CONFIG --libs-only-l $pkg_libcrypto | sed -e 's/^ *-l//' -e 's/ .*//'`"
+	as_ac_Lib=`printf "%s\n" "ac_cv_lib_$libcrypto''_EVP_MD_CTX_new" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_new in -l$libcrypto" >&5
+printf %s "checking for EVP_MD_CTX_new in -l$libcrypto... " >&6; }
+if eval test \${$as_ac_Lib+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcrypto  $LIBS"
+LIBS="-l$libcrypto  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -23378,17 +23386,18 @@ return EVP_MD_CTX_new ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_crypto_EVP_MD_CTX_new=yes
+  eval "$as_ac_Lib=yes"
 else $as_nop
-  ac_cv_lib_crypto_EVP_MD_CTX_new=no
+  eval "$as_ac_Lib=no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_EVP_MD_CTX_new" >&5
-printf "%s\n" "$ac_cv_lib_crypto_EVP_MD_CTX_new" >&6; }
-if test "x$ac_cv_lib_crypto_EVP_MD_CTX_new" = xyes
+eval ac_res=\$$as_ac_Lib
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"
 then :
   DIGEST=digest_openssl.lo
 fi
@@ -23509,7 +23518,6 @@ fi
 	    esac
 	done
 	if test "$DIGEST" = "digest_openssl.lo"; then
-	    pkg_libcrypto=lib`printf $enable_openssl_pkgconfig_template "crypto"`
 	    if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
 		LIBMD=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
 		for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
