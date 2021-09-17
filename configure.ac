@@ -2957,7 +2957,7 @@ if test "${enable_openssl-no}" != no; then
 	AC_CHECK_LIB(ssl, SSL_new, [STATIC=""], [STATIC="--static"], [-lcrypto])
 
 	# Use OpenSSL's sha2 functions if possible
-	AC_CHECK_LIB(crypto, SHA224_Update, [DIGEST=digest_openssl.lo])
+	AC_CHECK_LIB(crypto, EVP_MD_CTX_new, [DIGEST=digest_openssl.lo])
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
@@ -3003,7 +3003,7 @@ if test "${enable_openssl-no}" != no; then
 	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
-	    AC_CHECK_LIB(crypto, SHA224_Update, [
+	    AC_CHECK_LIB(crypto, EVP_MD_CTX_new, [
 		DIGEST=digest_openssl.lo
 		LIBMD="${LIBMD} -lcrypto"
 	    ])

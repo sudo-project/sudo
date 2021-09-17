@@ -23353,9 +23353,9 @@ fi
 
 
 	# Use OpenSSL's sha2 functions if possible
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SHA224_Update in -lcrypto" >&5
-printf %s "checking for SHA224_Update in -lcrypto... " >&6; }
-if test ${ac_cv_lib_crypto_SHA224_Update+y}
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_new in -lcrypto" >&5
+printf %s "checking for EVP_MD_CTX_new in -lcrypto... " >&6; }
+if test ${ac_cv_lib_crypto_EVP_MD_CTX_new+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -23367,28 +23367,28 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char SHA224_Update ();
+char EVP_MD_CTX_new ();
 int
 main (void)
 {
-return SHA224_Update ();
+return EVP_MD_CTX_new ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_crypto_SHA224_Update=yes
+  ac_cv_lib_crypto_EVP_MD_CTX_new=yes
 else $as_nop
-  ac_cv_lib_crypto_SHA224_Update=no
+  ac_cv_lib_crypto_EVP_MD_CTX_new=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_SHA224_Update" >&5
-printf "%s\n" "$ac_cv_lib_crypto_SHA224_Update" >&6; }
-if test "x$ac_cv_lib_crypto_SHA224_Update" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_EVP_MD_CTX_new" >&5
+printf "%s\n" "$ac_cv_lib_crypto_EVP_MD_CTX_new" >&6; }
+if test "x$ac_cv_lib_crypto_EVP_MD_CTX_new" = xyes
 then :
   DIGEST=digest_openssl.lo
 fi
@@ -23691,9 +23691,9 @@ fi
 	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SHA224_Update in -lcrypto" >&5
-printf %s "checking for SHA224_Update in -lcrypto... " >&6; }
-if test ${ac_cv_lib_crypto_SHA224_Update+y}
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_new in -lcrypto" >&5
+printf %s "checking for EVP_MD_CTX_new in -lcrypto... " >&6; }
+if test ${ac_cv_lib_crypto_EVP_MD_CTX_new+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -23705,28 +23705,28 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char SHA224_Update ();
+char EVP_MD_CTX_new ();
 int
 main (void)
 {
-return SHA224_Update ();
+return EVP_MD_CTX_new ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_crypto_SHA224_Update=yes
+  ac_cv_lib_crypto_EVP_MD_CTX_new=yes
 else $as_nop
-  ac_cv_lib_crypto_SHA224_Update=no
+  ac_cv_lib_crypto_EVP_MD_CTX_new=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_SHA224_Update" >&5
-printf "%s\n" "$ac_cv_lib_crypto_SHA224_Update" >&6; }
-if test "x$ac_cv_lib_crypto_SHA224_Update" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_EVP_MD_CTX_new" >&5
+printf "%s\n" "$ac_cv_lib_crypto_EVP_MD_CTX_new" >&6; }
+if test "x$ac_cv_lib_crypto_EVP_MD_CTX_new" = xyes
 then :
 
 		DIGEST=digest_openssl.lo
