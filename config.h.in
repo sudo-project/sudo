@@ -408,6 +408,9 @@
 /* Define to 1 if you have the `glob' function. */
 #undef HAVE_GLOB
 
+/* Define to 1 if you have the `gmtime_r' function. */
+#undef HAVE_GMTIME_R
+
 /* Define to 1 if you have the `grantpt' function. */
 #undef HAVE_GRANTPT
 
@@ -544,6 +547,9 @@
 
 /* Define to 1 if you have the <linux/random.h> header file. */
 #undef HAVE_LINUX_RANDOM_H
+
+/* Define to 1 if you have the `localtime_r' function. */
+#undef HAVE_LOCALTIME_R
 
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF

@@ -2570,6 +2570,14 @@ AC_CHECK_FUNCS([cfmakeraw], [], [
     AC_LIBOBJ(cfmakeraw)
     SUDO_APPEND_COMPAT_EXP(sudo_cfmakeraw)
 ])
+AC_CHECK_FUNCS([localtime_r], [], [
+    AC_LIBOBJ(localtime_r)
+    SUDO_APPEND_COMPAT_EXP(sudo_localtime_r)
+])
+AC_CHECK_FUNCS([gmtime_r], [], [
+    AC_LIBOBJ(gmtime_r)
+    SUDO_APPEND_COMPAT_EXP(sudo_gmtime_r)
+])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)

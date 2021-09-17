@@ -205,12 +205,14 @@ lib/util/gettime.c
 lib/util/getusershell.c
 lib/util/gidlist.c
 lib/util/glob.c
+lib/util/gmtime_r.c
 lib/util/inet_ntop.c
 lib/util/inet_pton.c
 lib/util/isblank.c
 lib/util/json.c
 lib/util/key_val.c
 lib/util/lbuf.c
+lib/util/localtime_r.c
 lib/util/locking.c
 lib/util/logfac.c
 lib/util/logpri.c
