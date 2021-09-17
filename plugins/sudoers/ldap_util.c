@@ -582,26 +582,22 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 	/* Fill in command member now that options have been processed. */
 	m->negated = negated;
+	if (!sudo_ldap_extract_digests(&cmnd, &c->digests))
+	    goto oom;
 	if (strcmp(cmnd, "ALL") == 0) {
-	    /* TODO: support digests with ALL */
-	    m->type = ALL;
 	    if (cmndspec->tags.setenv == UNSPEC)
 		cmndspec->tags.setenv = IMPLIED;
+	    m->type = ALL;
 	} else {
-	    char *args;
-
-	    m->type = COMMAND;
-
-	    /* Fill in command with optional digests. */
-	    if (!sudo_ldap_extract_digests(&cmnd, &c->digests))
-		goto oom;
-	    if ((args = strpbrk(cmnd, " \t")) != NULL) {
+	    char *args = strpbrk(cmnd, " \t");
+	    if (args != NULL) {
 		*args++ = '\0';
 		if ((c->args = strdup(args)) == NULL)
 		    goto oom;
 	    }
 	    if ((c->cmnd = strdup(cmnd)) == NULL)
 		goto oom;
+	    m->type = COMMAND;
 	}
     }
     /* Negated commands take precedence so we insert them at the end. */
