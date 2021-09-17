@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2017, 2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -32,42 +32,41 @@
 
 /*
  * Returns the offset from GMT in seconds (algorithm taken from sendmail).
- * Warning: clobbers the static storage used by localtime() and gmtime().
  */
 #ifdef HAVE_STRUCT_TM_TM_GMTOFF
 long
 get_gmtoff(time_t *when)
 {
-	struct tm *local;
+	struct tm local;
 
-	local = localtime(when);
-	return local->tm_gmtoff;
+	if (localtime_r(when, &local) == NULL)
+	    return 0;
+	return local.tm_gmtoff;
 }
 #else
 long
 get_gmtoff(time_t *when)
 {
-	struct tm *gm, gmt, *local;
+	struct tm gmt, local;
 	long offset;
 
-	if ((gm = gmtime(when)) == NULL)
+	if (gmtime_r(when, &gmt) == NULL)
 	    return 0;
-	gmt = *gm;
-	if ((local = localtime(when)) == NULL)
+	if (localtime_r(when, &local) == NULL)
 	    return 0;
 
-	offset = (local->tm_sec - gmt.tm_sec) +
-	    ((local->tm_min - gmt.tm_min) * 60) +
-	    ((local->tm_hour - gmt.tm_hour) * 3600);
+	offset = (local.tm_sec - gmt.tm_sec) +
+	    ((local.tm_min - gmt.tm_min) * 60) +
+	    ((local.tm_hour - gmt.tm_hour) * 3600);
 
 	/* Timezone may cause year rollover to happen on a different day. */
-	if (local->tm_year < gmt.tm_year)
+	if (local.tm_year < gmt.tm_year)
 		offset -= 24 * 3600;
-	else if (local->tm_year > gmt.tm_year)
+	else if (local.tm_year > gmt.tm_year)
 		offset -= 24 * 3600;
-	else if (local->tm_yday < gmt.tm_yday)
+	else if (local.tm_yday < gmt.tm_yday)
 		offset -= 24 * 3600;
-	else if (local->tm_yday > gmt.tm_yday)
+	else if (local.tm_yday > gmt.tm_yday)
 		offset += 24 * 3600;
 
 	return offset;

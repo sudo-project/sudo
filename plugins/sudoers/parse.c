@@ -622,15 +622,19 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		}
 		if (cs->notbefore != UNSPEC) {
 		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
-		    struct tm *tm = gmtime(&cs->notbefore);
-		    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
-			sudo_lbuf_append(lbuf, "    NotBefore: %s\n", buf);
+		    struct tm gmt;
+		    if (gmtime_r(&cs->notbefore, &gmt) != NULL) {
+			if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt) != 0)
+			    sudo_lbuf_append(lbuf, "    NotBefore: %s\n", buf);
+		    }
 		}
 		if (cs->notafter != UNSPEC) {
 		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
-		    struct tm *tm = gmtime(&cs->notafter);
-		    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
-			sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
+		    struct tm gmt;
+		    if (gmtime_r(&cs->notafter, &gmt) != NULL) {
+			if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt) != 0)
+			    sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
+		    }
 		}
 		sudo_lbuf_append(lbuf, "%s", _("    Commands:\n"));
 	    }

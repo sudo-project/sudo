@@ -130,20 +130,19 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
 {
     char dir[PATH_MAX], dir_out[PATH_MAX];
     char file[PATH_MAX], file_out[PATH_MAX];
-    struct tm *timeptr;
+    struct tm tm;
     time_t now;
     int error = 0;
 
     /*
      * Expand any strftime(3) escapes
-     * XXX - want to pass timeptr to expand_iolog_path
+     * XXX - want to pass tm to expand_iolog_path
      */
     time(&now);
-    timeptr = localtime(&now);
-    if (timeptr == NULL)
-	sudo_fatalx("localtime returned NULL");
-    strftime(dir_out, sizeof(dir_out), tdir_out, timeptr);
-    strftime(file_out, sizeof(file_out), tfile_out, timeptr);
+    if (localtime_r(&now, &tm) == NULL)
+	sudo_fatal("localtime_r");
+    strftime(dir_out, sizeof(dir_out), tdir_out, &tm);
+    strftime(file_out, sizeof(file_out), tfile_out, &tm);
 
     if (!expand_iolog_path(dir_in, dir, sizeof(dir), &path_escapes[1], NULL))
 	sudo_fatalx("unable to expand I/O log dir");

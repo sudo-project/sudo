@@ -424,7 +424,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const char *cp, *timefmt = evl_conf->time_fmt;
     char timebuf[1024];
-    struct tm *tm;
+    struct tm gmt;
     time_t now;
     FILE *mail;
     int fd, pfd[2], status;
@@ -445,7 +445,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 	debug_return_bool(false);
 
     time(&now);
-    if ((tm = gmtime(&now)) == NULL)
+    if (gmtime_r(&now, &gmt) == NULL)
 	debug_return_bool(false);
 
     /* Fork and return, child will daemonize. */
@@ -568,7 +568,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 	(void) fprintf(mail, "\nContent-Type: text/plain; charset=\"%s\"\nContent-Transfer-Encoding: 8bit", nl_langinfo(CODESET));
 #endif /* HAVE_NL_LANGINFO && CODESET */
 
-    strftime(timebuf, sizeof(timebuf), timefmt, tm);
+    strftime(timebuf, sizeof(timebuf), timefmt, &gmt);
     if (evlog != NULL) {
 	(void) fprintf(mail, "\n\n%s : %s : %s : ", evlog->submithost, timebuf,
 	    evlog->submituser);
@@ -619,16 +619,16 @@ json_add_timestamp(struct json_container *json, const char *name,
 	const char *timefmt = evl_conf->time_fmt;
 	time_t secs = ts->tv_sec;
 	char timebuf[1024];
-	struct tm *tm;
+	struct tm gmt;
 
-	if ((tm = gmtime(&secs)) != NULL) {
-	    strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tm);
+	if (gmtime_r(&secs, &gmt) != NULL) {
+	    strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = timebuf; // -V507
 	    if (!sudo_json_add_value(json, "iso8601", &json_value))
 		goto oom;
 
-	    strftime(timebuf, sizeof(timebuf), timefmt, tm);
+	    strftime(timebuf, sizeof(timebuf), timefmt, &gmt);
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = timebuf; // -V507
 	    if (!sudo_json_add_value(json, "localtime", &json_value))
@@ -1117,7 +1117,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
     const char *timefmt = evl_conf->time_fmt;
     const char *logfile = evl_conf->logpath;
     time_t tv_sec = event_time->tv_sec;
-    struct tm *timeptr;
+    struct tm tm;
     bool ret = false;
     FILE *fp;
     int len;
@@ -1132,10 +1132,10 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
 	goto done;
     }
 
-    if ((timeptr = localtime(&tv_sec)) != NULL) {
+    if (localtime_r(&tv_sec, &tm) != NULL) {
 	/* strftime() does not guarantee to NUL-terminate so we must check. */
 	timebuf[sizeof(timebuf) - 1] = '\0';
-	if (strftime(timebuf, sizeof(timebuf), timefmt, timeptr) != 0 &&
+	if (strftime(timebuf, sizeof(timebuf), timefmt, &tm) != 0 &&
 		timebuf[sizeof(timebuf) - 1] == '\0') {
 	    timestr = timebuf;
 	}

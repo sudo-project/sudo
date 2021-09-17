@@ -491,7 +491,7 @@ done:
 static bool
 sudo_ldap_timefilter(char *buffer, size_t buffersize)
 {
-    struct tm *tp;
+    struct tm gmt;
     time_t now;
     char timebuffer[sizeof("20120727121554.0Z")];
     int len = -1;
@@ -499,13 +499,13 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
 
     /* Make sure we have a formatted timestamp for __now__. */
     time(&now);
-    if ((tp = gmtime(&now)) == NULL) {
+    if (gmtime_r(&now, &gmt) == NULL) {
 	sudo_warn("%s", U_("unable to get GMT time"));
 	goto done;
     }
 
     /* Format the timestamp according to the RFC. */
-    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", tp) == 0) {
+    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", &gmt) == 0) {
 	sudo_warnx("%s", U_("unable to format timestamp"));
 	goto done;
     }

@@ -597,7 +597,7 @@ print_cmndspec_json(struct json_container *jsonc,
     struct json_value value;
     struct defaults *def;
     struct member *m;
-    struct tm *tp;
+    struct tm gmt;
     char timebuf[sizeof("20120727121554Z")];
     debug_decl(print_cmndspec_json, SUDOERS_DEBUG_UTIL);
 
@@ -647,10 +647,10 @@ print_cmndspec_json(struct json_container *jsonc,
 	    sudo_json_add_value_as_object(jsonc, "command_timeout", &value);
 	}
 	if (cs->notbefore != UNSPEC) {
-	    if ((tp = gmtime(&cs->notbefore)) == NULL) {
+	    if (gmtime_r(&cs->notbefore, &gmt) == NULL) {
 		sudo_warn("%s", U_("unable to get GMT time"));
 	    } else {
-		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
+		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt) == 0) {
 		    sudo_warnx("%s", U_("unable to format timestamp"));
 		} else {
 		    value.type = JSON_STRING;
@@ -660,10 +660,10 @@ print_cmndspec_json(struct json_container *jsonc,
 	    }
 	}
 	if (cs->notafter != UNSPEC) {
-	    if ((tp = gmtime(&cs->notafter)) == NULL) {
+	    if (gmtime_r(&cs->notafter, &gmt) == NULL) {
 		sudo_warn("%s", U_("unable to get GMT time"));
 	    } else {
-		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
+		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt) == 0) {
 		    sudo_warnx("%s", U_("unable to format timestamp"));
 		} else {
 		    value.type = JSON_STRING;

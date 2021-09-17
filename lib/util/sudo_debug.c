@@ -617,9 +617,10 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     timebuf[0] = '\0';
     if (gettimeofday(&tv, NULL) != -1) {
 	time_t now = tv.tv_sec;
-	struct tm *tm = localtime(&now);
-	if (tm != NULL) {
-	    size_t tlen = strftime(timebuf, sizeof(timebuf), "%b %e %H:%M:%S", tm);
+	struct tm tm;
+	size_t tlen;
+	if (localtime_r(&now, &tm) != NULL) {
+	    tlen = strftime(timebuf, sizeof(timebuf), "%b %e %H:%M:%S", &tm);
 	    if (tlen == 0) {
 		/* contents are undefined on error */
 		timebuf[0] = '\0';
