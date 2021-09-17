@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd September 7, 2021
+.Dd September 17, 2021
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -36,7 +36,7 @@ The
 file supports the following directives, described in detail below.
 .Bl -tag -width 8n
 .It Plugin
-a security policy or I/O logging plugin
+an approval, audit, I/O logging or security policy plugin
 .It Path
 a plugin-agnostic path
 .It Set

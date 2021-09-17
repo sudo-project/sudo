@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "September 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -37,7 +37,7 @@ The
 file supports the following directives, described in detail below.
 .TP 10n
 Plugin
-a security policy or I/O logging plugin
+an approval, audit, I/O logging or security policy plugin
 .TP 10n
 Path
 a plugin-agnostic path
