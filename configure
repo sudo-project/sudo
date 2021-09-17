@@ -23788,6 +23788,12 @@ then :
   printf "%s\n" "#define HAVE_SSL_CTX_GET0_CERTIFICATE 1" >>confdefs.h
 
 fi
+ac_fn_c_check_func "$LINENO" "SSL_CTX_set0_tmp_dh_pkey" "ac_cv_func_SSL_CTX_set0_tmp_dh_pkey"
+if test "x$ac_cv_func_SSL_CTX_set0_tmp_dh_pkey" = xyes
+then :
+  printf "%s\n" "#define HAVE_SSL_CTX_SET0_TMP_DH_PKEY 1" >>confdefs.h
+
+fi
 ac_fn_c_check_func "$LINENO" "TLS_method" "ac_cv_func_TLS_method"
 if test "x$ac_cv_func_TLS_method" = xyes
 then :

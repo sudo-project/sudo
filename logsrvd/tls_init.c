@@ -30,6 +30,8 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #if defined(HAVE_OPENSSL)
 # include <openssl/ssl.h>
@@ -173,6 +175,85 @@ init_tls_ciphersuites(SSL_CTX *ctx, const char *ciphers_v12,
     debug_return_bool(true);
 }
 
+/*
+ * Load diffie-hellman parameters from bio and store in ctx.
+ * Returns true on success, else false.
+ */
+#ifdef HAVE_SSL_CTX_SET0_TMP_DH_PKEY
+static bool
+set_dhparams_bio(SSL_CTX *ctx, BIO *bio)
+{
+    EVP_PKEY *dhparams;
+    bool ret = false;
+    debug_decl(set_dhparams_bio, SUDO_DEBUG_UTIL);
+
+    dhparams = PEM_read_bio_Parameters(bio, NULL);
+    if (dhparams != NULL) {
+	/* dhparams is owned by ctx on success. */
+	ret = SSL_CTX_set0_tmp_dh_pkey(ctx, dhparams);
+	if (!ret) {
+	    const char *errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
+		errstr);
+	    EVP_PKEY_free(dhparams);
+	}
+    }
+    debug_return_bool(ret);
+}
+#else
+static bool
+set_dhparams_bio(SSL_CTX *ctx, BIO *bio)
+{
+    DH *dhparams;
+    bool ret = false;
+    debug_decl(set_dhparams_bio, SUDO_DEBUG_UTIL);
+
+    dhparams = PEM_read_bio_DHparams(bio, NULL, NULL, NULL);
+    if (dhparams != NULL) {
+	/* LEAK: dhparams leaked on config reload */
+	ret = SSL_CTX_set_tmp_dh(ctx, dhparams);
+	if (!ret) {
+	    const char *errstr = ERR_reason_error_string(ERR_get_error());
+	    sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
+		errstr);
+	    DH_free(dhparams);
+	}
+    }
+    debug_return_bool(ret);
+}
+#endif /* HAVE_SSL_CTX_SET0_TMP_DH_PKEY */
+
+/*
+ * Load diffie-hellman parameters from the specified file and store in ctx.
+ * Returns true on success, else false.
+ */
+static bool
+set_dhparams(SSL_CTX *ctx, const char *dhparam_file)
+{
+    BIO *bio = NULL;
+    bool ret = false;
+    int fd;
+    debug_decl(set_dhparams, SUDO_DEBUG_UTIL);
+
+    fd = open(dhparam_file, O_RDONLY);
+    if (fd != -1)
+	bio = BIO_new_fd(fd, BIO_CLOSE);
+    if (bio != NULL) {
+	if (set_dhparams_bio(ctx, bio)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"loaded diffie-hellman parameters from %s", dhparam_file);
+	    ret = true;
+	}
+    } else {
+	sudo_warn(U_("unable to open %s"), dhparam_file);
+	if (fd != -1)
+	    close(fd);
+    }
+    BIO_free(bio);
+
+    debug_return_bool(ret);
+}
+
 SSL_CTX *
 init_tls_context(const char *ca_bundle_file, const char *cert_file,
     const char *key_file, const char *dhparam_file, const char *ciphers_v12,
@@ -270,27 +351,9 @@ init_tls_context(const char *ca_bundle_file, const char *cert_file,
      * Failure to open the file is not a fatal error.
      */
     if (dhparam_file != NULL) {
-	FILE *fp = fopen(dhparam_file, "r");
-	if (fp != NULL) {
-	    DH *dhparams = PEM_read_DHparams(fp, NULL, NULL, NULL);
-	    if (dhparams != NULL) {
-		if (!SSL_CTX_set_tmp_dh(ctx, dhparams)) {
-		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
-			errstr);
-		    DH_free(dhparams);
-		} else {
-		    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-			"loaded diffie-hellman parameters from %s", dhparam_file);
-		}
-	    } else {
-		errstr = ERR_reason_error_string(ERR_get_error());
-		sudo_warnx(U_("unable to read diffie-hellman parameters: %s"),
-		    errstr);
-	    }
-	    fclose(fp);
-	} else {
-	    sudo_warn(U_("unable to open %s"), dhparam_file);
+	if (!set_dhparams(ctx, dhparam_file)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"unable to load dhparam file, using default parameters");
 	}
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
