@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 7, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -5744,7 +5744,7 @@ will truncate and re-use any existing I/O logs.
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR
-Sudo front end configuration
+Sudo front-end configuration
 .TP 26n
 \fI@sysconfdir@/sudoers\fR
 List of who can run what

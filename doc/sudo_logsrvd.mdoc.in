@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 29, 2021
+.Dd September 17, 2021
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -123,7 +123,7 @@ please refer to its manual.
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
-Sudo front end configuration
+Sudo front-end configuration
 .It Pa @sysconfdir@/sudo_logsrvd.conf
 Sudo log server configuration file
 .It Pa @relay_dir@/incoming

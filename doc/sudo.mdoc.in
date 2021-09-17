@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 16, 2021
+.Dd September 17, 2021
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -117,7 +117,7 @@ logging.
 Third parties can develop and distribute their own policy and I/O
 logging plugins to work seamlessly with the
 .Nm
-front end.
+front-end.
 The default security policy is
 .Em sudoers ,
 which is configured via the file
@@ -1150,7 +1150,7 @@ is not set.
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
 .Nm
-front end configuration
+front-end configuration
 .El
 .Sh EXAMPLES
 Note: the following examples assume a properly configured security

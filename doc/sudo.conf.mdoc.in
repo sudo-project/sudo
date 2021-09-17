@@ -21,13 +21,13 @@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudo.conf
-.Nd configuration for sudo front end
+.Nd configuration for sudo front-end
 .Sh DESCRIPTION
 The
 .Nm sudo.conf
 file is used to configure the
 .Nm sudo
-front end.
+front-end.
 It specifies the security policy and I/O logging plugins, debug flags
 as well as plugin-agnostic path names and settings.
 .Pp
@@ -40,7 +40,7 @@ an approval, audit, I/O logging or security policy plugin
 .It Path
 a plugin-agnostic path
 .It Set
-a front end setting, such as
+a front-end setting, such as
 .Em disable_coredump
 or
 .Em group_source
@@ -86,7 +86,7 @@ logging.
 Third parties can develop and distribute their own policy and I/O
 logging plugins to work seamlessly with the
 .Nm sudo
-front end.
+front-end.
 Plugins are dynamically loaded based on the contents of
 .Nm .
 .Pp
@@ -330,7 +330,7 @@ The default value is
 .Ss Other settings
 The
 .Nm
-file also supports the following front end settings:
+file also supports the following front-end settings:
 .Bl -tag -width 8n
 .It disable_coredump
 Core dumps of
@@ -579,7 +579,7 @@ plugin shared the same
 .Li Debug
 entry as the
 .Nm sudo
-front end and could not be configured separately.
+front-end and could not be configured separately.
 .Pp
 The following priorities are supported, in order of decreasing severity:
 .Em crit , err , warn , notice , diag , info , trace
@@ -658,7 +658,7 @@ plugin includes support for additional subsystems.
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
 .Nm sudo
-front end configuration
+front-end configuration
 .El
 .Sh EXAMPLES
 .Bd -literal

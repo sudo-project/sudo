@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2020
+.\" Copyright (c) 1996,1998-2005, 2007-2021
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "August 27, 2020" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -354,7 +354,7 @@ is set
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR
-Sudo front end configuration
+Sudo front-end configuration
 .TP 26n
 \fI@sysconfdir@/sudoers\fR
 List of who can run what

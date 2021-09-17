@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "August 16, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -113,7 +113,7 @@ logging.
 Third parties can develop and distribute their own policy and I/O
 logging plugins to work seamlessly with the
 \fBsudo\fR
-front end.
+front-end.
 The default security policy is
 \fIsudoers\fR,
 which is configured via the file
@@ -1226,7 +1226,7 @@ is not set.
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR
 \fBsudo\fR
-front end configuration
+front-end configuration
 .SH "EXAMPLES"
 Note: the following examples assume a properly configured security
 policy.

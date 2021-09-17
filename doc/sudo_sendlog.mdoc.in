@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 4, 2021
+.Dd September 17, 2021
 .Dt SUDO_SENDLOG @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -150,7 +150,7 @@ please refer to its manual.
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
-Sudo front end configuration
+Sudo front-end configuration
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

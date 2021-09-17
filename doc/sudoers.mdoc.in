@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 7, 2021
+.Dd September 17, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -5338,7 +5338,7 @@ will truncate and re-use any existing I/O logs.
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
-Sudo front end configuration
+Sudo front-end configuration
 .It Pa @sysconfdir@/sudoers
 List of who can run what
 .It Pa /etc/group

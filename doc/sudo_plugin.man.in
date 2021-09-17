@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "November 17, 2020" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -257,7 +257,7 @@ Prior to
 \fIdebug_flags\fR
 so the value was always the same as that used by the
 \fBsudo\fR
-front end and did not include a path name, only the flags themselves.
+front-end and did not include a path name, only the flags themselves.
 As of version 1.7 of the plugin interface,
 \fBsudo\fR
 will only pass
@@ -336,7 +336,7 @@ interaction is required.
 plugin_dir=string
 The default plugin directory used by the
 \fBsudo\fR
-front end.
+front-end.
 This is the default directory set at compile time and may not
 correspond to the directory the running plugin was loaded from.
 It may be used by a plugin to locate support files.
@@ -344,7 +344,7 @@ It may be used by a plugin to locate support files.
 plugin_path=string
 The path name of plugin loaded by the
 \fBsudo\fR
-front end.
+front-end.
 The path name will be a fully-qualified unless the plugin was
 statically compiled into
 \fBsudo\fR.
@@ -383,7 +383,7 @@ Support for running the command on a remote host is meant to be implemented
 via a helper program that is executed in place of the user-specified command.
 The
 \fBsudo\fR
-front end is only capable of executing commands on the local host.
+front-end is only capable of executing commands on the local host.
 Only available starting with API version 1.4.
 .TP 6n
 run_shell=bool
@@ -699,7 +699,7 @@ A plugin
 check the API version specified
 by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIplugin_options\fR.
 Failure to do so may result in a crash.
 .TP 6n
@@ -711,7 +711,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -726,7 +726,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -801,7 +801,7 @@ options are set in the
 \fRcommand_info\fR
 list, the
 \fBsudo\fR
-front end may execute the command directly instead of running
+front-end may execute the command directly instead of running
 it as a child process.
 .RE
 .TP 6n
@@ -1334,7 +1334,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -1349,7 +1349,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -1422,7 +1422,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -1437,7 +1437,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -1492,7 +1492,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -1507,7 +1507,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -1590,7 +1590,7 @@ run in, in the form of a
 vector of
 \(lqname=value\(rq
 strings.
-This is the same string passed back to the front end via
+This is the same string passed back to the front-end via
 the Policy Plugin's
 \fIuser_env_out\fR
 parameter.
@@ -1611,7 +1611,7 @@ A plugin
 check the API
 version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIuser_env_out\fR.
 Failure to do so may result in a crash.
 .sp
@@ -1637,7 +1637,7 @@ void (*register_hooks)(int version,
 .sp
 The
 \fBregister_hooks\fR()
-function is called by the sudo front end to
+function is called by the sudo front-end to
 register any hooks the plugin needs.
 If the plugin does not support hooks,
 \fRregister_hooks\fR
@@ -1650,7 +1650,7 @@ The
 argument describes the version of the hooks API
 supported by the
 \fBsudo\fR
-front end.
+front-end.
 .sp
 The
 \fBregister_hook\fR()
@@ -1659,7 +1659,7 @@ hooks the plugin needs.
 It returns 0 on success, 1 if the hook type is not supported and \-1
 if the major version in
 \fRstruct hook\fR
-does not match the front end's major hook API version.
+does not match the front-end's major hook API version.
 .sp
 See the
 \fIHook function API\fR
@@ -1672,7 +1672,7 @@ function is only available starting
 with API version 1.2.
 If the
 \fBsudo\fR
-front end doesn't support API
+front-end doesn't support API
 version 1.2 or higher,
 \fRregister_hooks\fR
 will not be called.
@@ -1689,7 +1689,7 @@ void (*deregister_hooks)(int version,
 .sp
 The
 \fBderegister_hooks\fR()
-function is called by the sudo front end
+function is called by the sudo front-end
 to deregister any hooks the plugin has registered.
 If the plugin does not support hooks,
 \fRderegister_hooks\fR
@@ -1702,7 +1702,7 @@ The
 argument describes the version of the hooks API
 supported by the
 \fBsudo\fR
-front end.
+front-end.
 .sp
 The
 \fBderegister_hook\fR()
@@ -1710,7 +1710,7 @@ function should be used to deregister any
 hooks that were put in place by the
 \fBregister_hook\fR()
 function.
-If the plugin tries to deregister a hook that the front end does not support,
+If the plugin tries to deregister a hook that the front-end does not support,
 \fRderegister_hook\fR
 will return an error.
 .sp
@@ -1725,7 +1725,7 @@ function is only available starting
 with API version 1.2.
 If the
 \fBsudo\fR
-front end doesn't support API
+front-end doesn't support API
 version 1.2 or higher,
 \fRderegister_hooks\fR
 will not be called.
@@ -1750,7 +1750,7 @@ Unlike the other fields, the
 \fBevent_alloc\fR()
 pointer is filled in by the
 \fBsudo\fR
-front end, not by the plugin.
+front-end, not by the plugin.
 .sp
 See the
 \fIEvent API\fR
@@ -1763,7 +1763,7 @@ function is only available starting
 with API version 1.15.
 If the
 \fBsudo\fR
-front end doesn't support API
+front-end doesn't support API
 version 1.15 or higher,
 \fBevent_alloc\fR()
 will not be set.
@@ -1777,7 +1777,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -1792,7 +1792,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PP
@@ -2139,7 +2139,7 @@ A plugin
 check the API version specified
 by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIplugin_options\fR.
 Failure to do so may result in a crash.
 .TP 6n
@@ -2151,7 +2151,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -2166,7 +2166,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -2281,7 +2281,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -2296,7 +2296,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -2340,7 +2340,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -2355,7 +2355,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -2401,7 +2401,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -2416,7 +2416,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -2462,7 +2462,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -2477,7 +2477,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -2523,7 +2523,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -2538,7 +2538,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -2594,7 +2594,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -2609,7 +2609,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .PD 0
@@ -2650,7 +2650,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -2665,7 +2665,7 @@ A plugin
 \fBmust\fR
 check the API version specified by the
 \fBsudo\fR
-front end before using
+front-end before using
 \fIerrstr\fR.
 Failure to do so may result in a crash.
 .TP 6n
@@ -2688,7 +2688,7 @@ Unlike the other fields, the
 \fBevent_alloc\fR()
 pointer is filled in by the
 \fBsudo\fR
-front end, not by the plugin.
+front-end, not by the plugin.
 .sp
 See the
 \fIEvent API\fR
@@ -2701,7 +2701,7 @@ function is only available starting
 with API version 1.15.
 If the
 \fBsudo\fR
-front end doesn't support API
+front-end doesn't support API
 version 1.15 or higher,
 \fBevent_alloc\fR()
 will not be set.
@@ -2965,7 +2965,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -3016,7 +3016,7 @@ system call, or the value of
 \fRerrno\fR
 resulting from an error in the
 \fBsudo\fR
-front end.
+front-end.
 .PD 0
 .PP
 .RE
@@ -3135,7 +3135,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -3222,7 +3222,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -3307,7 +3307,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -3378,7 +3378,7 @@ Unlike the other fields, the
 \fBevent_alloc\fR()
 pointer is filled in by the
 \fBsudo\fR
-front end, not by the plugin.
+front-end, not by the plugin.
 .sp
 See the
 \fIEvent API\fR
@@ -3391,7 +3391,7 @@ function is only available starting
 with API version 1.17.
 If the
 \fBsudo\fR
-front end doesn't support API
+front-end doesn't support API
 version 1.17 or higher,
 \fBevent_alloc\fR()
 will not be set.
@@ -3628,7 +3628,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -3760,7 +3760,7 @@ store a message describing the failure or error in
 \fIerrstr\fR.
 The
 \fBsudo\fR
-front end will then pass this value to any registered audit plugins.
+front-end will then pass this value to any registered audit plugins.
 The string stored in
 \fIerrstr\fR
 must remain valid until the plugin's
@@ -3802,7 +3802,7 @@ ignored.
 .SS "Signal handlers"
 The
 \fBsudo\fR
-front end installs default signal handlers to trap common signals
+front-end installs default signal handlers to trap common signals
 while the plugin functions are run.
 The following signals are trapped by default before the command is
 executed:
@@ -3856,7 +3856,7 @@ restore the original handler before the plugin function returns.
 Beginning with plugin API version 1.2, it is possible to install
 hooks for certain functions called by the
 \fBsudo\fR
-front end.
+front-end.
 .PP
 Currently, the only supported hooks relate to the handling of
 environment variables.
@@ -3865,7 +3865,7 @@ environment variables so that these changes can be reflected in
 the version of the environment that is used to execute a command.
 A future version of the API will support hooking internal
 \fBsudo\fR
-front end functions as well.
+front-end functions as well.
 .PP
 \fIHook structure\fR
 .PP
@@ -4389,7 +4389,7 @@ from the event loop and frees the memory associated with it.
 .SS "Remote command execution"
 The
 \fBsudo\fR
-front end does not support running remote commands.
+front-end does not support running remote commands.
 However, starting with
 \fBsudo\fR
 1.8.8, the
@@ -4407,7 +4407,7 @@ It is anticipated that remote commands will be supported by executing a
 program.
 The policy plugin should setup the execution environment such that the
 \fBsudo\fR
-front end will run the helper which, in turn, will connect to the
+front-end will run the helper which, in turn, will connect to the
 remote host and run the command.
 .PP
 For example, the policy plugin could utilize
@@ -4424,7 +4424,7 @@ Note that remote
 \fBsudoedit\fR
 functionality must be handled by the policy plugin, not
 \fBsudo\fR
-itself as the front end has no knowledge that a remote command is
+itself as the front-end has no knowledge that a remote command is
 being executed.
 This may be addressed in a future revision of the plugin API.
 .SS "Conversation API"
@@ -4939,12 +4939,12 @@ function is defined, a default
 \fBclose\fR()
 function will be provided by the
 \fBsudo\fR
-front end that displays a warning if the command could not be
+front-end that displays a warning if the command could not be
 executed.
 .sp
 The
 \fBsudo\fR
-front end now installs default signal handlers to trap common signals
+front-end now installs default signal handlers to trap common signals
 while the plugin functions are run.
 .TP 6n
 Version 1.4 (sudo 1.8.8)
@@ -4967,7 +4967,7 @@ The behavior when an I/O logging plugin returns an error
 has changed.
 Previously, the
 \fBsudo\fR
-front end took no action when the
+front-end took no action when the
 \fBlog_ttyin\fR(),
 \fBlog_ttyout\fR(),
 \fBlog_stdin\fR(),
