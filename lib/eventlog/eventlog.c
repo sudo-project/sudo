@@ -424,7 +424,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const char *cp, *timefmt = evl_conf->time_fmt;
     char timebuf[1024];
-    struct tm gmt;
+    struct tm tm;
     time_t now;
     FILE *mail;
     int fd, len, pfd[2], status;
@@ -445,7 +445,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 	debug_return_bool(false);
 
     time(&now);
-    if (gmtime_r(&now, &gmt) == NULL)
+    if (localtime_r(&now, &tm) == NULL)
 	debug_return_bool(false);
 
     /* Fork and return, child will daemonize. */
@@ -569,13 +569,13 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 #endif /* HAVE_NL_LANGINFO && CODESET */
 
     timebuf[sizeof(timebuf) - 1] = '\0';
-    len = strftime(timebuf, sizeof(timebuf), timefmt, &gmt);
+    len = strftime(timebuf, sizeof(timebuf), timefmt, &tm);
     if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_ERROR,
 	    "strftime() failed to format time: %s", timefmt);
 	/* Fall back to default time format string. */
 	timebuf[sizeof(timebuf) - 1] = '\0';
-	len = strftime(timebuf, sizeof(timebuf), "%h %e %T", &gmt);
+	len = strftime(timebuf, sizeof(timebuf), "%h %e %T", &tm);
 	if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
 	    timebuf[0] = '\0';		/* give up */
 	}
@@ -631,20 +631,22 @@ json_add_timestamp(struct json_container *json, const char *name,
 	const char *timefmt = evl_conf->time_fmt;
 	time_t secs = ts->tv_sec;
 	char timebuf[1024];
-	struct tm gmt;
+	struct tm tm;
 
-	if (gmtime_r(&secs, &gmt) != NULL) {
+	if (gmtime_r(&secs, &tm) != NULL) {
 	    timebuf[sizeof(timebuf) - 1] = '\0';
-	    len = strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
+	    len = strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &tm);
 	    if (len != 0 && timebuf[sizeof(timebuf) - 1] == '\0') {
 		json_value.type = JSON_STRING;
 		json_value.u.string = timebuf; // -V507
 		if (!sudo_json_add_value(json, "iso8601", &json_value))
 		    goto oom;
 	    }
+	}
 
+	if (localtime_r(&secs, &tm) != NULL) {
 	    timebuf[sizeof(timebuf) - 1] = '\0';
-	    len = strftime(timebuf, sizeof(timebuf), timefmt, &gmt);
+	    len = strftime(timebuf, sizeof(timebuf), timefmt, &tm);
 	    if (len != 0 && timebuf[sizeof(timebuf) - 1] == '\0') {
 		json_value.type = JSON_STRING;
 		json_value.u.string = timebuf; // -V507
