@@ -79,7 +79,6 @@ AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_BACKUP])
 AC_SUBST([INSTALL_INTERCEPT])
 AC_SUBST([INSTALL_NOEXEC])
-AC_SUBST([CHECK_INTERCEPT])
 AC_SUBST([PRELOAD_MODULE])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
@@ -234,7 +233,6 @@ dnl
 INSTALL_BACKUP=
 INSTALL_INTERCEPT=
 INSTALL_NOEXEC=
-CHECK_INTERCEPT=
 PRELOAD_MODULE=-module
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
@@ -4858,11 +4856,6 @@ if test X"$enable_intercept" != X"no"; then
     SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.o"
     PROGS="${PROGS} sudo_intercept.la"
     INSTALL_INTERCEPT="install-intercept"
-
-    # Can't use sanitizers with LD_PRELOAD
-    if test "$enable_sanitizer" != "yes"; then
-	CHECK_INTERCEPT=check_intercept
-    fi
 
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_INTERCEPT, "$intercept_file", [The fully qualified pathname of sudo_intercept.so])
 fi

@@ -818,7 +818,6 @@ SELINUX_USAGE
 BSDAUTH_USAGE
 DONT_LEAK_PATH_INFO
 PRELOAD_MODULE
-CHECK_INTERCEPT
 INSTALL_NOEXEC
 INSTALL_INTERCEPT
 INSTALL_BACKUP
@@ -3562,7 +3561,6 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
-
 #
 # Begin initial values for man page substitution
 #
@@ -3619,7 +3617,6 @@ devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 INSTALL_BACKUP=
 INSTALL_INTERCEPT=
 INSTALL_NOEXEC=
-CHECK_INTERCEPT=
 PRELOAD_MODULE=-module
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
@@ -31279,11 +31276,6 @@ if test X"$enable_intercept" != X"no"; then
     SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.o"
     PROGS="${PROGS} sudo_intercept.la"
     INSTALL_INTERCEPT="install-intercept"
-
-    # Can't use sanitizers with LD_PRELOAD
-    if test "$enable_sanitizer" != "yes"; then
-	CHECK_INTERCEPT=check_intercept
-    fi
 
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_INTERCEPT "$intercept_file"
