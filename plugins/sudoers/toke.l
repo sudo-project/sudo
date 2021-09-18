@@ -875,6 +875,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     int max_paths = 32;
     struct dirent *dent;
     struct path_list **paths = NULL;
+    const size_t dirlen = strlen(dirpath);
     debug_decl(read_dir_files, SUDOERS_DEBUG_PARSER);
 
     dir = opendir(dirpath);
@@ -888,17 +889,18 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     if (paths == NULL)
 	goto oom;
     while ((dent = readdir(dir)) != NULL) {
+	const size_t namelen = NAMLEN(dent);
 	struct path_list *pl;
 	struct stat sb;
 	size_t len;
 	char *path;
 
 	/* Ignore files that end in '~' or have a '.' in them. */
-	if (dent->d_name[0] == '\0' || dent->d_name[NAMLEN(dent) - 1] == '~'
+	if (namelen == 0 || dent->d_name[namelen - 1] == '~'
 	    || strchr(dent->d_name, '.') != NULL) {
 	    continue;
 	}
-	len = strlen(dirpath) + 1 + NAMLEN(dent);
+	len = dirlen + 1 + namelen;
 	if ((path = sudo_rcstr_alloc(len)) == NULL)
 	    goto oom;
 	(void)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name);
