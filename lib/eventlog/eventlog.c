@@ -196,7 +196,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     }
     if (evlog->command != NULL) {
 	len += sizeof(LL_CMND_STR) - 1 + strlen(evlog->command);
-	if (evlog->argv != NULL) {
+	if (evlog->argv != NULL && evlog->argv[0] != NULL) {
 	    for (i = 1; evlog->argv[i] != NULL; i++)
 		len += strlen(evlog->argv[i]) + 1;
 	}
@@ -281,7 +281,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 	    goto toobig;
 	if (strlcat(line, evlog->command, len) >= len)
 	    goto toobig;
-	if (evlog->argv != NULL) {
+	if (evlog->argv != NULL && evlog->argv[0] != NULL) {
 	    for (i = 1; evlog->argv[i] != NULL; i++) {
 		if (strlcat(line, " ", len) >= len ||
 		    strlcat(line, evlog->argv[i], len) >= len)
