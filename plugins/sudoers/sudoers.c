@@ -725,7 +725,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0 &&
 	    strcmp(NewArgv[1], "-c") == 0) {
 	    /* We allocated extra space for the --login above. */
-	    memmove(&NewArgv[2], &NewArgv[1], sizeof(char *) * (NewArgc - 1));
+	    memmove(&NewArgv[2], &NewArgv[1], sizeof(char *) * NewArgc);
 	    NewArgv[1] = "--login";
 	    NewArgc++;
 	}
