@@ -1759,7 +1759,7 @@ Optional Features:
                           log server.
   --enable-openssl        Use OpenSSL's TLS and sha2 functions
   --enable-openssl-pkgconfig-template
-                          A printf format string used to contruct the OpenSSL
+                          A printf format string used to construct the OpenSSL
                           pkg-config name
   --enable-gcrypt         Use GNU crypt's sha2 functions
   --enable-python         Compile python plugin support

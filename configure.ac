@@ -1569,7 +1569,7 @@ AC_ARG_ENABLE(openssl,
     fi
 ])
 AC_ARG_ENABLE(openssl-pkgconfig-template,
-[AS_HELP_STRING([--enable-openssl-pkgconfig-template], [A printf format string used to contruct the OpenSSL pkg-config name])],
+[AS_HELP_STRING([--enable-openssl-pkgconfig-template], [A printf format string used to construct the OpenSSL pkg-config name])],
 [], [enable_openssl_pkgconfig_template="%s"])
 
 AC_ARG_ENABLE(gcrypt,
