@@ -140,6 +140,7 @@ store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
+    bool new_session = closure->evlog == NULL;
     struct eventlog *evlog = NULL;
     char *log_id = NULL;
     bool ret = false;
@@ -154,7 +155,7 @@ store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
     }
 
     /* Additional setup for the initial command in the session. */
-    if (closure->evlog == NULL) {
+    if (new_session) {
 	closure->evlog = evlog;
 
 	/* Create I/O log info file and parent directories. */
@@ -187,7 +188,7 @@ store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
 	goto done;
     }
 
-    if (log_id != NULL) {
+    if (new_session && log_id != NULL) {
 	/* Send log ID to client for restarting connections. */
 	if (!fmt_log_id_message(log_id, closure))
 	    goto done;
