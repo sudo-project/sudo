@@ -1553,8 +1553,10 @@ handle_log_id(char *id, struct client_closure *closure)
     debug_decl(handle_log_id, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: remote log ID: %s", __func__, id);
-    if ((closure->iolog_id = strdup(id)) == NULL)
-	sudo_fatal(NULL);
+    if (closure->iolog_id != NULL) {
+	if ((closure->iolog_id = strdup(id)) == NULL)
+	    sudo_fatal(NULL);
+    }
     debug_return_bool(true);
 }
 
