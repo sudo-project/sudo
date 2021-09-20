@@ -322,6 +322,9 @@ free_exec_closure_nopty(struct exec_closure_nopty *ec)
 {
     debug_decl(free_exec_closure_nopty, SUDO_DEBUG_EXEC);
 
+    /* Free any remaining intercept resources. */
+    intercept_cleanup();
+
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->errpipe_event);
     sudo_ev_free(ec->sigint_event);

@@ -1325,6 +1325,9 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
     struct monitor_message *msg;
     debug_decl(free_exec_closure_pty, SUDO_DEBUG_EXEC);
 
+    /* Free any remaining intercept resources. */
+    intercept_cleanup();
+
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->backchannel_event);
     sudo_ev_free(ec->fwdchannel_event);

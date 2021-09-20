@@ -81,6 +81,7 @@ struct intercept_closure {
 
 static union sudo_token_un intercept_token;
 static in_port_t intercept_listen_port;
+static struct intercept_closure *accept_closure;
 static void intercept_accept_cb(int fd, int what, void *v);
 static void intercept_cb(int fd, int what, void *v);
 
@@ -128,8 +129,9 @@ bad:
  * the connection.
  */
 static void
-intercept_connection_close(int fd, struct intercept_closure *closure)
+intercept_connection_close(struct intercept_closure *closure)
 {
+    const int fd = sudo_ev_get_fd(&closure->ev);
     size_t n;
     debug_decl(intercept_connection_close, SUDO_DEBUG_EXEC);
 
@@ -151,6 +153,19 @@ intercept_connection_close(int fd, struct intercept_closure *closure)
 	free(closure->run_envp);
     }
     free(closure);
+
+    debug_return;
+}
+
+void
+intercept_cleanup(void)
+{
+    debug_decl(intercept_cleanup, SUDO_DEBUG_EXEC);
+
+    if (accept_closure != NULL) {
+	intercept_connection_close(accept_closure);
+	accept_closure = NULL;
+    }
 
     debug_return;
 }
@@ -848,6 +863,7 @@ intercept_write(int fd, struct intercept_closure *closure)
 	}
 	closure->listen_sock = -1;
 	closure->state = RECV_CONNECTION;
+	accept_closure = closure;
 	break;
     case POLICY_ACCEPT:
 	/* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
@@ -864,7 +880,7 @@ intercept_write(int fd, struct intercept_closure *closure)
 	break;
     default:
 	/* Done with this connection. */
-	intercept_connection_close(fd, closure);
+	intercept_connection_close(closure);
     }
 
     ret = true;
@@ -893,7 +909,7 @@ intercept_cb(int fd, int what, void *v)
     }
 
     if (!success)
-	intercept_connection_close(fd, closure);
+	intercept_connection_close(closure);
 
     debug_return;
 }
@@ -916,7 +932,8 @@ intercept_accept_cb(int fd, int what, void *v)
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "state mismatch, expected RECV_CONNECTION (%d), got %d",
 	    RECV_CONNECTION, closure->state);
-	intercept_connection_close(fd, closure);
+	intercept_connection_close(closure);
+	accept_closure = NULL;
 	debug_return;
     }
 
