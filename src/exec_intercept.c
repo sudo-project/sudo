@@ -968,4 +968,14 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
 
     debug_return_bool(false);
 }
+
+void
+intercept_cleanup(void)
+{
+    debug_decl(intercept_cleanup, SUDO_DEBUG_EXEC);
+
+    /* Intercept support not compiled in. */
+
+    debug_return;
+}
 #endif /* _PATH_SUDO_INTERCEPT */
