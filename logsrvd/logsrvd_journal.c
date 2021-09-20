@@ -470,6 +470,11 @@ journal_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
 {
     debug_decl(journal_accept, SUDO_DEBUG_UTIL);
 
+    if (closure->journal_path != NULL) {
+	/* Re-use existing journal file. */
+	debug_return_bool(journal_write(buf, len, closure));
+    }
+
     /* Store message in a journal for later relaying. */
     if (!journal_create(closure))
 	debug_return_bool(false);
@@ -500,8 +505,10 @@ journal_reject(RejectMessage *msg, uint8_t *buf, size_t len,
     debug_decl(journal_reject, SUDO_DEBUG_UTIL);
 
     /* Store message in a journal for later relaying. */
-    if (!journal_create(closure))
-	debug_return_bool(false);
+    if (closure->journal_path == NULL) {
+	if (!journal_create(closure))
+	    debug_return_bool(false);
+    }
     if (!journal_write(buf, len, closure))
 	debug_return_bool(false);
 
