@@ -638,6 +638,10 @@ chdirspec	:	CWD '=' WORD {
 				    YYERROR;
 				}
 			    }
+			    if (strlen($3) >= PATH_MAX) {
+				sudoerserror(N_("\"CWD\" path too long"));
+				YYERROR;
+			    }
 			    $$ = $3;
 			}
 		;
@@ -649,6 +653,10 @@ chrootspec	:	CHROOT '=' WORD {
 					" start with a '/', '~', or '*'"));
 				    YYERROR;
 				}
+			    }
+			    if (strlen($3) >= PATH_MAX) {
+				sudoerserror(N_("\"CHROOT\" path too long"));
+				YYERROR;
 			    }
 			    $$ = $3;
 			}
@@ -933,6 +941,10 @@ cmnd		:	ALL {
 		|	COMMAND {
 			    struct sudo_command *c;
 
+			    if (strlen($1.cmnd) >= PATH_MAX) {
+				sudoerserror(N_("command too long"));
+				YYERROR;
+			    }
 			    if ((c = new_command($1.cmnd, $1.args)) == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;

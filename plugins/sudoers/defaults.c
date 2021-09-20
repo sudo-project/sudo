@@ -1049,6 +1049,18 @@ valid_path(struct sudo_defs_types *def, const char *val,
     bool ret = true;
     debug_decl(valid_path, SUDOERS_DEBUG_DEFAULTS);
 
+    if (strlen(val) >= PATH_MAX) {
+	if (!quiet) {
+	    if (line > 0) {
+		sudo_warnx(U_("%s:%d:%d: path name for \"%s\" too long"),
+		    file, line, column, def->name);
+	    } else {
+		sudo_warnx(U_("%s: path name for \"%s\" too long"),
+		    file, def->name);
+	    }
+	}
+	ret = false;
+    }
     if (ISSET(def->type, T_CHPATH)) {
 	if (val[0] != '/' && val[0] != '~' && (val[0] != '*' || val[1] != '\0')) {
 	    if (!quiet) {

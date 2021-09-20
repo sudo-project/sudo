@@ -202,11 +202,19 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "cmnd_chroot=")) {
 	    CHECK(*cur, "cmnd_chroot=");
 	    user_runchroot = *cur + sizeof("cmnd_chroot=") - 1;
+	    if (strlen(user_runchroot) >= PATH_MAX) {
+		sudo_warnx(U_("path name for \"%s\" too long"), "cmnd_chroot");
+		goto bad;
+	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "cmnd_cwd=")) {
 	    CHECK(*cur, "cmnd_cwd=");
 	    user_runcwd = *cur + sizeof("cmnd_cwd=") - 1;
+	    if (strlen(user_runcwd) >= PATH_MAX) {
+		sudo_warnx(U_("path name for \"%s\" too long"), "cmnd_cwd");
+		goto bad;
+	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_user=")) {
