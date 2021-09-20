@@ -198,12 +198,10 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
     /* Stash pointer to last pam status. */
     auth->data = &pam_status;
 
-#ifdef _AIX
     if (pamh != NULL) {
-	/* Already initialized (may happen with AIX). */
+	/* Already initialized (may happen with AIX or with sub-commands). */
 	debug_return_int(AUTH_SUCCESS);
     }
-#endif /* _AIX */
 
     /* Initial PAM. */
     pam_service = ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
