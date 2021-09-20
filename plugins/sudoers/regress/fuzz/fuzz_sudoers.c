@@ -289,7 +289,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse sudoers. */
     init_defaults();
-    init_parser("sudoers", false, true);
+    init_parser("sudoers", true, true);
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);
@@ -345,7 +345,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		runas_gr = NULL;
 	    }
 
-	    update_defaults(&parse_tree, NULL, SETDEF_ALL, false);
+	    update_defaults(&parse_tree, NULL, SETDEF_ALL, true);
 
 	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, false);
 
@@ -366,8 +366,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	}
 
 	/* Check Defaults and aliases. */
-	check_defaults(&parse_tree, false);
-	check_aliases(&parse_tree, true, false, cb_unused);
+	check_defaults(&parse_tree, true);
+	check_aliases(&parse_tree, true, true, cb_unused);
     }
 
 done:
