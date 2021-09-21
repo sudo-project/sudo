@@ -478,10 +478,13 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 		if (store_options) {
 		    /* Use sudoRole in place of file name in defaults. */
-		    size_t slen = sizeof("sudoRole") + strlen(priv->ldap_role);
+		    size_t slen = sizeof("sudoRole ") + strlen(priv->ldap_role);
 		    if ((source = sudo_rcstr_alloc(slen)) == NULL)
 			goto oom;
-		    (void)snprintf(source, slen, "sudoRole %s", priv->ldap_role);
+		    if ((size_t)snprintf(source, slen, "sudoRole %s", priv->ldap_role) >= slen) {
+			sudo_warnx(U_("internal error, %s overflow"), __func__);
+			goto bad;
+		    }
 		}
 
 		while ((opt = iter(&opts)) != NULL) {
@@ -607,6 +610,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+bad:
     if (priv != NULL) {
 	TAILQ_CONCAT(&priv->hostlist, &negated_hosts, entries);
 	TAILQ_CONCAT(&priv->cmndlist, &negated_cmnds, entries);
