@@ -1,3 +1,19 @@
+What's new in Sudo 1.9.8p2
+
+ * Fixed a potential out-of-bounds read with "sudo -i" when the
+   target user's shell is bash.  This is a regression introduced
+   in sudo 1.9.8.  Bug #998.
+
+ * sudo_logsrvd now only sends a log ID for first command of a session.
+   There is no need to send the log ID for each sub-command.
+
+ * Fixed a few minor memory leaks in intercept mode.
+
+ * Fixed a problem with sudo_logsrvd in relay mode if "store_first"
+   was enabled when handling sub-commands.  A new zero-length journal
+   file was created for each sub-command instead of simply using
+   the existing journal file.
+
 What's new in Sudo 1.9.8p1
 
  * Fixed support for passing a prompt (sudo -p) or a login class
