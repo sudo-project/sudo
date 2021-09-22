@@ -5116,7 +5116,11 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	len = dirlen + 1 + namelen;
 	if ((path = sudo_rcstr_alloc(len)) == NULL)
 	    goto oom;
-	(void)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name);
+	if ((size_t)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name) != len) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    sudo_rcstr_delref(path);
+	    goto bad;
+	}
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
 	    sudo_rcstr_delref(path);
 	    continue;

@@ -1339,7 +1339,7 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 {
     int nfd, ofd = -1;
     ssize_t nread, nwritten = -1;
-    static char new_ccname[sizeof(_PATH_TMP) + sizeof("sudocc_XXXXXXXX") - 1];
+    static char new_ccname[] = _PATH_TMP "sudocc_XXXXXXXX";
     char buf[10240], *ret = NULL;
     debug_decl(sudo_krb5_copy_cc_file, SUDOERS_DEBUG_LDAP);
 
@@ -1355,8 +1355,6 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 	if (ofd != -1) {
 	    (void) fcntl(ofd, F_SETFL, 0);
 	    if (sudo_lock_file(ofd, SUDO_LOCK)) {
-		(void)snprintf(new_ccname, sizeof(new_ccname), "%s%s",
-		    _PATH_TMP, "sudocc_XXXXXXXX");
 		nfd = mkstemp(new_ccname);
 		if (nfd != -1) {
 		    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
