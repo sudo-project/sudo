@@ -478,10 +478,10 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 		if (store_options) {
 		    /* Use sudoRole in place of file name in defaults. */
-		    size_t slen = sizeof("sudoRole ") + strlen(priv->ldap_role);
+		    size_t slen = sizeof("sudoRole ") - 1 + strlen(priv->ldap_role);
 		    if ((source = sudo_rcstr_alloc(slen)) == NULL)
 			goto oom;
-		    if ((size_t)snprintf(source, slen, "sudoRole %s", priv->ldap_role) >= slen) {
+		    if ((size_t)snprintf(source, slen + 1, "sudoRole %s", priv->ldap_role) != slen) {
 			sudo_warnx(U_("internal error, %s overflow"), __func__);
 			goto bad;
 		    }
