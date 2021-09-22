@@ -483,6 +483,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			goto oom;
 		    if ((size_t)snprintf(source, slen + 1, "sudoRole %s", priv->ldap_role) != slen) {
 			sudo_warnx(U_("internal error, %s overflow"), __func__);
+			sudo_rcstr_delref(source);
 			goto bad;
 		    }
 		}
