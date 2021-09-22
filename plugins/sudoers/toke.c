@@ -5250,7 +5250,6 @@ expand_include(const char *opath)
     const char *cp, *ep;
     char *path, *pp;
     size_t len, olen, dirlen = 0;
-    size_t shost_len = 0;
     bool subst = false;
     debug_decl(expand_include, SUDOERS_DEBUG_PARSER);
 
@@ -5270,13 +5269,17 @@ expand_include(const char *opath)
 	    dirlen = (size_t)(dirend - sudoers) + 1;
     }
 
+    cp = opath;
+    ep = opath + olen;
     len = olen;
-    for (cp = opath, ep = opath + olen; cp < ep; cp++) {
+    while (cp < ep) {
 	if (cp[0] == '%' && cp[1] == 'h') {
-	    shost_len = strlen(user_shost);
-	    len += shost_len - 2;
 	    subst = true;
+	    len += strlen(user_shost);
+	    cp += 2;
+	    continue;
 	}
+	cp++;
     }
 
     /* Make a copy of the fully-qualified path and return it. */
@@ -5295,12 +5298,18 @@ expand_include(const char *opath)
 	cp = opath;
 	while (cp < ep) {
 	    if (cp[0] == '%' && cp[1] == 'h') {
-		memcpy(pp, user_shost, shost_len);
-		pp += shost_len;
+		size_t n = strlcpy(pp, user_shost, len + 1);
+		if (n >= len + 1)
+		    goto oflow;
 		cp += 2;
+		pp += n;
+		len -= n;
 		continue;
 	    }
+	    if (len < 1)
+		goto oflow;
 	    *pp++ = *cp++;
+	    len--;
 	}
 	*pp = '\0';
     } else {
@@ -5309,6 +5318,11 @@ expand_include(const char *opath)
     }
 
     debug_return_str(path);
+oflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    sudoerserror(NULL);
+    sudo_rcstr_delref(path);
+    debug_return_str(NULL);
 }
 
 /*
