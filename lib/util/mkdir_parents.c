@@ -52,7 +52,6 @@ sudo_mkdir_parents_v1(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
     char *slash = path;
     debug_decl(sudo_mkdir_parents, SUDO_DEBUG_UTIL);
 
-    /* cppcheck-suppress nullPointerRedundantCheck */
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	struct stat sb;
 	int dfd;
@@ -106,6 +105,7 @@ reopen:
     debug_return_bool(true);
 bad:
     /* We must restore the path before we return. */
+    /* cppcheck-suppress nullPointerRedundantCheck */
     *slash = '/';
     debug_return_bool(false);
 }
