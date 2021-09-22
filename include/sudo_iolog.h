@@ -111,7 +111,7 @@ bool iolog_close(struct iolog_file *iol, const char **errstr);
 bool iolog_eof(struct iolog_file *iol);
 bool iolog_mkdtemp(char *path);
 bool iolog_mkpath(char *path);
-bool iolog_nextid(char *iolog_dir, char sessid[7]);
+bool iolog_nextid(const char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
 bool iolog_write_info_file(int dfd, struct eventlog *evlog);
 char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
