@@ -55,6 +55,10 @@ sudo_secureware_init(struct passwd *pw, sudo_auth *auth)
 {
     debug_decl(sudo_secureware_init, SUDOERS_DEBUG_AUTH);
 
+    /* Only initialize once. */
+    if (auth->data != NULL)
+	debug_return_int(AUTH_SUCCESS);
+
 #ifdef __alpha
     if (crypt_type == INT_MAX)
 	debug_return_int(AUTH_FAILURE);			/* no shadow */

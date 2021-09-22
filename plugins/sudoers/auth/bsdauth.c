@@ -60,6 +60,10 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
     static struct bsdauth_state state;
     debug_decl(bsdauth_init, SUDOERS_DEBUG_AUTH);
 
+    /* Only initialize once. */
+    if (auth->data != NULL)
+	debug_return_int(AUTH_SUCCESS);
+
     /* Get login class based on auth user, which may not be invoking user. */
     if (pw->pw_class && *pw->pw_class)
 	state.lc = login_getclass(pw->pw_class);

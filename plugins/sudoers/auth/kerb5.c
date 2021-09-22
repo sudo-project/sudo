@@ -135,7 +135,9 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
     char		cache_name[64], *pname = pw->pw_name;
     debug_decl(sudo_krb5_init, SUDOERS_DEBUG_AUTH);
 
-    auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
+    /* Only initialize once. */
+    if (auth->data != NULL)
+	debug_return_int(AUTH_SUCCESS);
 
     if (sudo_krb5_instance != NULL) {
 	int len = asprintf(&pname, "%s%s%s", pw->pw_name,
@@ -170,6 +172,8 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 	    auth->name, error_message(error));
 	goto done;
     }
+
+    auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
 
 done:
     if (sudo_krb5_instance != NULL)
