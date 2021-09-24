@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd December 11, 2018
+.Dd September 23, 2021
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -146,6 +146,12 @@ A new sudoers file will be reconstructed from the parsed input file.
 Comments are not preserved and data from any include files will be
 output inline.
 .El
+.It Fl -group-file Ns = Ns Ar file
+When the
+.Fl M
+option is also specified, perform group queries using
+.Ar file
+instead of the system group database.
 .It Fl h , Fl -help
 Display a short help message to the standard output and exit.
 .It Fl i Ar input_format , Fl -input-format Ns = Ns Ar input_format
@@ -245,6 +251,12 @@ option for details.
 Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
+.It Fl -passwd-file Ns = Ns Ar file
+When the
+.Fl M
+option is also specified, perform passwd queries using
+.Ar file
+instead of the system passwd database.
 .It Fl p , Fl -prune-matches
 When the
 .Fl m

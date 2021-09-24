@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "December 11, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "September 23, 2021" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -179,6 +179,13 @@ output inline.
 .RE
 .PD
 .TP 12n
+\fB\--group-file\fR=\fIfile\fR
+When the
+\fB\-M\fR
+option is also specified, perform group queries using
+\fIfile\fR
+instead of the system group database.
+.TP 12n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
 .TP 12n
@@ -292,6 +299,13 @@ option for details.
 Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
+.TP 12n
+\fB\--passwd-file\fR=\fIfile\fR
+When the
+\fB\-M\fR
+option is also specified, perform passwd queries using
+\fIfile\fR
+instead of the system passwd database.
 .TP 12n
 \fB\-p\fR, \fB\--prune-matches\fR
 When the

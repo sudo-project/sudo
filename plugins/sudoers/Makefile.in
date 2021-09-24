@@ -198,7 +198,7 @@ VISUDO_IOBJS = sudo_printf.i visudo.i
 CVTSUDOERS_OBJS = b64_encode.o cvtsudoers.o cvtsudoers_json.o \
 		  cvtsudoers_ldif.o cvtsudoers_pwutil.o fmtsudoers.lo \
 		  fmtsudoers_cvt.lo locale.lo parse_ldif.o stubs.o \
-		  sudo_printf.o ldap_util.lo
+		  sudo_printf.o ldap_util.lo testsudoers_pwutil.o tsgetgrpw.o
 
 CVTSUDOERS_IOBJS = cvtsudoers.i cvtsudoers_json.i cvtsudoers_ldif.i \
 		   cvtsudoers_pwutil.i

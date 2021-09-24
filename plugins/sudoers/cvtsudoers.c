@@ -48,7 +48,12 @@
 #include "sudo_lbuf.h"
 #include "redblack.h"
 #include "cvtsudoers.h"
+#include "tsgetgrpw.h"
 #include <gram.h>
+
+/* Long-only options values. */
+#define OPT_GROUP_FILE	256
+#define OPT_PASSWD_FILE	257
 
 /*
  * Globals
@@ -74,7 +79,9 @@ static struct option long_opts[] = {
     { "output",		required_argument,	NULL,	'o' },
     { "suppress",	required_argument,	NULL,	's' },
     { "version",	no_argument,		NULL,	'V' },
-    { NULL,		no_argument,		NULL,	'\0' },
+    { "group-file",	required_argument,	NULL,	OPT_GROUP_FILE },
+    { "passwd-file",	required_argument,	NULL,	OPT_PASSWD_FILE },
+    { NULL,		no_argument,		NULL,	0 },
 };
 
 sudo_dso_public int main(int argc, char *argv[]);
@@ -104,6 +111,7 @@ main(int argc, char *argv[])
     const char *input_file = "-";
     const char *output_file = "-";
     const char *conf_file = _PATH_CVTSUDOERS_CONF;
+    const char *grfile = NULL, *pwfile = NULL;
     const char *errstr;
     debug_decl(main, SUDOERS_DEBUG_MAIN);
 
@@ -231,6 +239,12 @@ main(int argc, char *argv[])
 		SUDOERS_GRAMMAR_VERSION);
 	    exitcode = EXIT_SUCCESS;
 	    goto done;
+	case OPT_GROUP_FILE:
+	    grfile = optarg;
+	    break;
+	case OPT_PASSWD_FILE:
+	    pwfile = optarg;
+	    break;
 	default:
 	    usage(1);
 	}
@@ -317,9 +331,19 @@ main(int argc, char *argv[])
     }
 
     /* Set pwutil backend to use the filter data. */
-    if (conf->filter != NULL && !match_local) {
+    if (conf->filter != NULL & !match_local) {
 	sudo_pwutil_set_backend(cvtsudoers_make_pwitem, cvtsudoers_make_gritem,
 	    cvtsudoers_make_gidlist_item, cvtsudoers_make_grlist_item);
+    } else {
+	if (grfile != NULL)
+	    testsudoers_setgrfile(grfile);
+	if (pwfile != NULL)
+	    testsudoers_setpwfile(pwfile);
+	sudo_pwutil_set_backend(
+	    pwfile ? testsudoers_make_pwitem : NULL,
+	    grfile ? testsudoers_make_gritem : NULL,
+	    grfile ? testsudoers_make_gidlist_item : NULL,
+	    grfile ? testsudoers_make_grlist_item : NULL);
     }
 
     /* We may need the hostname to resolve %h escapes in include files. */
