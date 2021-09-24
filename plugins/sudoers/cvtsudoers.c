@@ -587,6 +587,7 @@ cvtsudoers_parse_filter(char *expression)
 	STAILQ_INIT(&filters->users);
 	STAILQ_INIT(&filters->groups);
 	STAILQ_INIT(&filters->hosts);
+	STAILQ_INIT(&filters->cmnds);
     }
 
     for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
@@ -612,12 +613,14 @@ cvtsudoers_parse_filter(char *expression)
 	*cp++ = '\0';
 	s->str = cp;
 
-	if (strcmp(keyword, "user") == 0 ){
+	if (strcmp(keyword, "user") == 0) {
 	    STAILQ_INSERT_TAIL(&filters->users, s, entries);
-	} else if (strcmp(keyword, "group") == 0 ){
+	} else if (strcmp(keyword, "group") == 0) {
 	    STAILQ_INSERT_TAIL(&filters->groups, s, entries);
-	} else if (strcmp(keyword, "host") == 0 ){
+	} else if (strcmp(keyword, "host") == 0) {
 	    STAILQ_INSERT_TAIL(&filters->hosts, s, entries);
+	} else if (strcmp(keyword, "cmnd") == 0 || strcmp(keyword, "cmd") == 0) {
+	    STAILQ_INSERT_TAIL(&filters->cmnds, s, entries);
 	} else {
 	    sudo_warnx(U_("invalid filter: %s"), keyword);;
 	    free(s);
@@ -840,7 +843,88 @@ hostlist_matches_filter(struct sudoers_parse_tree *parse_tree,
     }
     free(shosts);
 
-    debug_return_bool(ret == true);
+    debug_return_bool(ret);
+}
+
+static bool
+cmnd_matches_filter(struct sudoers_parse_tree *parse_tree,
+    struct member *m, struct cvtsudoers_config *conf)
+{
+    struct sudoers_string *s;
+    bool matched = false;
+    debug_decl(cmnd_matches_filter, SUDOERS_DEBUG_UTIL);
+
+    /* TODO: match on runasuserlist/runasgrouplist, notbefore/notafter etc */
+    STAILQ_FOREACH(s, &filters->cmnds, entries) {
+	/* An upper case filter entry may be a Cmnd_Alias */
+	/* XXX - doesn't handle nested aliases */
+	if (m->type == ALIAS && !conf->expand_aliases) {
+	    if (strcmp(m->name, s->str) == 0) {
+		matched = true;
+		break;
+	    }
+	}
+
+	/* Only need one command in the filter to match. */
+	user_cmnd = s->str;
+	user_base = sudo_basename(user_cmnd);
+	if (cmnd_matches(parse_tree, m, NULL, NULL) == true) {
+	    matched = true;
+	    break;
+	}
+    }
+    user_base = NULL;
+    user_cmnd = NULL;
+
+    debug_return_bool(matched);
+}
+
+static bool
+cmndlist_matches_filter(struct sudoers_parse_tree *parse_tree,
+    struct member_list *cmndlist, struct cvtsudoers_config *conf)
+{
+    struct member *m, *next;
+    bool ret = false;
+    debug_decl(cmndlist_matches_filter, SUDOERS_DEBUG_UTIL);
+
+    if (filters == NULL || STAILQ_EMPTY(&filters->cmnds))
+	debug_return_bool(true);
+
+    TAILQ_FOREACH_REVERSE_SAFE(m, cmndlist, member_list, entries, next) {
+	bool matched = cmnd_matches_filter(parse_tree, m, conf);
+	if (matched) {
+	    ret = true;
+	} else if (conf->prune_matches) {
+	    TAILQ_REMOVE(cmndlist, m, entries);
+	    free_member(m);
+	}
+    }
+
+    debug_return_bool(ret);
+}
+
+static bool
+cmndspeclist_matches_filter(struct sudoers_parse_tree *parse_tree,
+    struct cmndspec_list *cmndspecs, struct cvtsudoers_config *conf)
+{
+    struct cmndspec *cs, *next;
+    bool ret = false;
+    debug_decl(cmndspeclist_matches_filter, SUDOERS_DEBUG_UTIL);
+
+    if (filters == NULL || STAILQ_EMPTY(&filters->cmnds))
+	debug_return_bool(true);
+
+    TAILQ_FOREACH_REVERSE_SAFE(cs, cmndspecs, cmndspec_list, entries, next) {
+	bool matched = cmnd_matches_filter(parse_tree, cs->cmnd, conf);
+	if (matched) {
+	    ret = true;
+	} else if (conf->prune_matches) {
+	    /* free_cmndspec() removes cs from the list itself. */
+	    free_cmndspec(cs, cmndspecs);
+	}
+    }
+
+    debug_return_bool(ret);
 }
 
 /*
@@ -929,7 +1013,8 @@ filter_userspecs(struct sudoers_parse_tree *parse_tree,
 	    continue;
 	}
 	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, next_priv) {
-	    if (!hostlist_matches_filter(parse_tree, &priv->hostlist, conf)) {
+	    if (!hostlist_matches_filter(parse_tree, &priv->hostlist, conf) ||
+		!cmndspeclist_matches_filter(parse_tree, &priv->cmndlist, conf)) {
 		TAILQ_REMOVE(&us->privileges, priv, entries);
 		free_privilege(priv);
 	    }
@@ -1129,7 +1214,8 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
 	    alias_type = HOSTALIAS;
 	    break;
 	case DEFAULTS_CMND:
-	    if (!ISSET(conf->defaults, CVT_DEFAULTS_CMND))
+	    if (!ISSET(conf->defaults, CVT_DEFAULTS_CMND) ||
+		!cmndlist_matches_filter(parse_tree, def->binding, conf))
 		keep = false;
 	    alias_type = CMNDALIAS;
 	    break;

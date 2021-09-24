@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 23, 2021
+.Dd September 24, 2021
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -186,18 +186,21 @@ pairs, separated by a comma
 The
 .Sy key
 may be
-.Dq user ,
-.Dq group
+.Dq cmnd
+.Pq or Dq cmd ,
+.Dq host ,
+.Dq group ,
 or
-.Dq host .
+.Dq user .
 For example,
 .Sy user No = Ar operator
 or
 .Sy host No = Ar www .
-An upper-case User_Alias or Host_Alias may be specified as the
-.Dq user
+An upper-case Cmnd_Alias, Host_alias, or Host_Alias may be specified as the
+.Dq cmnd ,
+.Dq host ,
 or
-.Dq host .
+.Dq user .
 .Pp
 A matching
 .Em sudoers

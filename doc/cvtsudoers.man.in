@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "September 23, 2021" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "September 24, 2021" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -231,18 +231,21 @@ pairs, separated by a comma
 The
 \fBkey\fR
 may be
-\(lquser\(rq,
-\(lqgroup\(rq
+\(lqcmnd\(rq
+(or \(lqcmd\(rq),
+\(lqhost\(rq,
+\(lqgroup\(rq,
 or
-\(lqhost\(rq.
+\(lquser\(rq.
 For example,
 \fBuser\fR = \fIoperator\fR
 or
 \fBhost\fR = \fIwww\fR.
-An upper-case User_Alias or Host_Alias may be specified as the
-\(lquser\(rq
+An upper-case Cmnd_Alias, Host_alias, or Host_Alias may be specified as the
+\(lqcmnd\(rq,
+\(lqhost\(rq,
 or
-\(lqhost\(rq.
+\(lquser\(rq.
 .sp
 A matching
 \fIsudoers\fR

@@ -357,6 +357,7 @@ extern struct sudoers_parse_tree parsed_policy;
 bool init_parser(const char *path, bool quiet, bool strict);
 void free_member(struct member *m);
 void free_members(struct member_list *members);
+void free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl);
 void free_cmndspecs(struct cmndspec_list *csl);
 void free_privilege(struct privilege *priv);
 void free_userspec(struct userspec *us);

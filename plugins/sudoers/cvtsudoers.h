@@ -77,6 +77,7 @@ struct cvtsudoers_filter {
     struct sudoers_str_list users;
     struct sudoers_str_list groups;
     struct sudoers_str_list hosts;
+    struct sudoers_str_list cmnds;
 };
 
 /* cvtsudoers.c */

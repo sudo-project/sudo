@@ -3644,6 +3644,68 @@ free_default(struct defaults *def, struct member_list **binding)
 }
 
 void
+free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl)
+{
+    struct cmndspec *prev, *next;
+    debug_decl(free_cmndspec, SUDOERS_DEBUG_PARSER);
+
+    prev = TAILQ_PREV(cs, cmndspec_list, entries);
+    next = TAILQ_NEXT(cs, entries);
+    TAILQ_REMOVE(csl, cs, entries);
+
+    /* Don't free runcwd/runchroot that are in use by other entries. */
+    if ((prev == NULL || cs->runcwd != prev->runcwd) &&
+	(next == NULL || cs->runcwd != next->runcwd)) {
+	free(cs->runcwd);
+    }
+    if ((prev == NULL || cs->runchroot != prev->runchroot) &&
+	(next == NULL || cs->runchroot != next->runchroot)) {
+	free(cs->runchroot);
+    }
+#ifdef HAVE_SELINUX
+    /* Don't free root/type that are in use by other entries. */
+    if ((prev == NULL || cs->role != prev->role) &&
+	(next == NULL || cs->role != next->role)) {
+	free(cs->role);
+    }
+    if ((prev == NULL || cs->type != prev->type) &&
+	(next == NULL || cs->type != next->type)) {
+	free(cs->type);
+    }
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+    /* Don't free privs/limitprivs that are in use by other entries. */
+    if ((prev == NULL || cs->privs != prev->privs) &&
+	(next == NULL || cs->privs != next->privs)) {
+	free(cs->privs);
+    }
+    if ((prev == NULL || cs->limitprivs != prev->limitprivs) &&
+	(next == NULL || cs->limitprivs != next->limitprivs)) {
+	free(cs->limitprivs);
+    }
+#endif /* HAVE_PRIV_SET */
+    /* Don't free user/group lists that are in use by other entries. */
+    if (cs->runasuserlist != NULL) {
+	if ((prev == NULL || cs->runasuserlist != prev->runasuserlist) &&
+	    (next == NULL || cs->runasuserlist != next->runasuserlist)) {
+	    free_members(cs->runasuserlist);
+	    free(cs->runasuserlist);
+	}
+    }
+    if (cs->runasgrouplist != NULL) {
+	if ((prev == NULL || cs->runasgrouplist != prev->runasgrouplist) &&
+	    (next == NULL || cs->runasgrouplist != next->runasgrouplist)) {
+	    free_members(cs->runasgrouplist);
+	    free(cs->runasgrouplist);
+	}
+    }
+    free_member(cs->cmnd);
+    free(cs);
+
+    debug_return;
+}
+
+void
 free_cmndspecs(struct cmndspec_list *csl)
 {
     struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
