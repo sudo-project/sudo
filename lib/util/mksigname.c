@@ -36,7 +36,7 @@ main(int argc, char *argv[])
 {
     unsigned int i;
 
-#include "mksigname.h"
+#include "lib/util/mksigname.h"
 
     printf("const char *const sudo_sys_signame[] = {\n");
     for (i = 0; i < nitems(sudo_sys_signame); i++) {
