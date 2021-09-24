@@ -331,7 +331,7 @@ main(int argc, char *argv[])
     }
 
     /* Set pwutil backend to use the filter data. */
-    if (conf->filter != NULL & !match_local) {
+    if (conf->filter != NULL && !match_local) {
 	sudo_pwutil_set_backend(cvtsudoers_make_pwitem, cvtsudoers_make_gritem,
 	    cvtsudoers_make_gidlist_item, cvtsudoers_make_grlist_item);
     } else {
