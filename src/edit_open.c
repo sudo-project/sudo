@@ -185,9 +185,21 @@ dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
+    int fd;
     debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT);
 
-    debug_return_int(openat(dfd, path, oflags|O_NOFOLLOW, mode));
+    fd = openat(dfd, path, oflags|O_NOFOLLOW, mode);
+    if (fd == -1) {
+	/* Handle non-standard O_NOFOLLOW errno values. */
+	if (errno == EMLINK)
+	    errno = ELOOP;		/* FreeBSD */
+#ifdef EFTYPE
+	else if (errno == EFTYPE)
+	    errno = ELOOP;		/* NetBSD */
+#endif
+    }
+
+    debug_return_int(fd);
 }
 #else
 /*
@@ -351,6 +363,15 @@ sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
 	    user_cred, cur_cred);
     } else {
 	fd = open(path, oflags|O_NONBLOCK, mode);
+    }
+    if (fd == -1 && ISSET(oflags, O_NOFOLLOW)) {
+	/* Handle non-standard O_NOFOLLOW errno values. */
+	if (errno == EMLINK)
+	    errno = ELOOP;		/* FreeBSD */
+#ifdef EFTYPE
+	else if (errno == EFTYPE)
+	    errno = ELOOP;		/* NetBSD */
+#endif
     }
     if (fd != -1 && !ISSET(oflags, O_NONBLOCK))
 	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
