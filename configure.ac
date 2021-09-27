@@ -2205,6 +2205,9 @@ case "$host" in
 		# Undocumented API that dynamically allocates the groups.
 		AC_CHECK_FUNCS([getgrouplist_2], [AC_CHECK_DECLS([getgrouplist_2])])
 
+		# We use proc_pidinfo() to emulate closefrom() on macOS.
+		AC_CHECK_HEADERS([libproc.h], [AC_CHECK_FUNCS([proc_pidinfo])])
+
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])])

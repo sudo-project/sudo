@@ -17853,6 +17853,24 @@ fi
 
 done
 
+		# We use proc_pidinfo() to emulate closefrom() on macOS.
+		       for ac_header in libproc.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "libproc.h" "ac_cv_header_libproc_h" "$ac_includes_default"
+if test "x$ac_cv_header_libproc_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_LIBPROC_H 1" >>confdefs.h
+ ac_fn_c_check_func "$LINENO" "proc_pidinfo" "ac_cv_func_proc_pidinfo"
+if test "x$ac_cv_func_proc_pidinfo" = xyes
+then :
+  printf "%s\n" "#define HAVE_PROC_PIDINFO 1" >>confdefs.h
+
+fi
+
+fi
+
+done
+
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-force_flat_namespace" >&5

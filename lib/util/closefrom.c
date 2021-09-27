@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007, 2010, 2012-2015, 2017-2018
+ * Copyright (c) 2004-2005, 2007, 2010, 2012-2015, 2017-2021
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -29,11 +29,15 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <stdlib.h>
 #include <unistd.h>
 #ifdef HAVE_PSTAT_GETPROC
 # include <sys/pstat.h>
 #else
 # include <dirent.h>
+#endif
+#ifdef HAVE_LIBPROC_H
+# include <libproc.h>
 #endif
 
 #include "sudo_compat.h"
@@ -42,6 +46,13 @@
 
 #ifndef OPEN_MAX
 # define OPEN_MAX	256
+#endif
+
+/* Avoid potential libdispatch crash on macOS when we close its fds. */
+#ifdef __APPLE__
+# define closefrom_close(x)	fcntl((x), F_SETFD, FD_CLOEXEC)
+#else
+# define closefrom_close(x)	close(x)
 #endif
 
 /*
@@ -69,12 +80,7 @@ closefrom_fallback(int lowfd)
 	maxfd = INT_MAX;
 
     for (fd = lowfd; fd < maxfd; fd++) {
-#ifdef __APPLE__
-	/* Avoid potential libdispatch crash when we close its fds. */
-	(void) fcntl((int) fd, F_SETFD, FD_CLOEXEC);
-#else
-	(void) close((int) fd);
-#endif
+	(void)closefrom_close((int)fd);
     }
 }
 
@@ -91,12 +97,45 @@ sudo_closefrom(int lowfd)
     const char *path;
     DIR *dirp;
 #endif
+#if defined(HAVE_PROC_PIDINFO)
+    struct proc_fdinfo *buf = NULL;
+    const pid_t pid = getpid();
+    int i, n, len;
+#endif
 
     /* Try the fast method first, if possible. */
 #if defined(HAVE_FCNTL_CLOSEM)
     if (fcntl(lowfd, F_CLOSEM, 0) != -1)
 	return;
-#endif
+#elif defined(HAVE_PROC_PIDINFO)
+    len = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, NULL, 0);
+    switch (len) {
+    case 0:
+	/* No open files. */
+	return;
+    case -1:
+	/* Fall back on other methods. */
+	break;
+    default:
+	/* Allocate space for 4 extra fds to leave some wiggle room. */
+	buf = malloc(len + (PROC_PIDLISTFD_SIZE * 4));
+	if (buf == NULL)
+	    break;
+	n = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, buf, len);
+	if (n == -1 || n > len) {
+	    free(buf);
+	    break;
+	}
+	n /= PROC_PIDLISTFD_SIZE;
+	for (i = 0; i < n; i++) {
+	    if (buf[i].proc_fd >= lowfd) {
+		(void)closefrom_close(buf[i].proc_fd);
+	    }
+	}
+	free(buf);
+	return;
+    }
+#endif /* HAVE_PROC_PIDINFO */
 #if defined(HAVE_PSTAT_GETPROC)
     /*
      * EOVERFLOW is not a fatal error for the fields we use.
@@ -107,7 +146,7 @@ sudo_closefrom(int lowfd)
 	int fd;
 
 	for (fd = lowfd; fd <= pst.pst_highestfd; fd++)
-	    (void) close(fd);
+	    (void)closefrom_close(fd);
 	return;
     }
 #elif defined(HAVE_DIRFD)
@@ -123,15 +162,10 @@ sudo_closefrom(int lowfd)
 	    const char *errstr;
 	    int fd = sudo_strtonum(dent->d_name, lowfd, INT_MAX, &errstr);
 	    if (errstr == NULL && fd != dirfd(dirp)) {
-# ifdef __APPLE__
-		/* Avoid potential libdispatch crash when we close its fds. */
-		(void) fcntl(fd, F_SETFD, FD_CLOEXEC);
-# else
-		(void) close(fd);
-# endif
+		(void)closefrom_close(fd);
 	    }
 	}
-	(void) closedir(dirp);
+	(void)closedir(dirp);
 	return;
     }
 #endif /* HAVE_DIRFD */
