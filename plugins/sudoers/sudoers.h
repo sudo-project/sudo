@@ -445,7 +445,7 @@ extern const char *path_plugin_dir;
 
 /* editor.c */
 char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
-     char * const *allowlist, const char **env_editor, bool env_error);
+     char * const *allowlist, const char **env_editor);
 
 /* exptilde.c */
 bool expand_tilde(char **path, const char *user);

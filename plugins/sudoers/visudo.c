@@ -331,7 +331,7 @@ get_editor(int *editor_argc, char ***editor_argv)
     }
 
     editor_path = find_editor(2, files, editor_argc, editor_argv, allowlist,
-	&env_editor, true);
+	&env_editor);
     if (editor_path == NULL) {
 	if (def_env_editor && env_editor != NULL) {
 	    /* We are honoring $EDITOR so this is a fatal error. */

@@ -105,7 +105,7 @@ main(int argc, char *argv[])
 
 	putenv(data->editor_var);
 	editor_path = find_editor(data->nfiles, data->files, &edit_argc,
-	    &edit_argv, NULL, &env_editor, false);
+	    &edit_argv, NULL, &env_editor);
 	ntests++;
 	if (strcmp(editor_path, data->editor_path) != 0) {
 	    sudo_warnx("test %d: editor_path: expected \"%s\", got \"%s\"",

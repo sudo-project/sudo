@@ -205,8 +205,6 @@ oom:
 /*
  * Determine which editor to use based on the SUDO_EDITOR, VISUAL and
  * EDITOR environment variables as well as the editor path in sudoers.
- * If env_error is true, an editor environment variable that cannot be
- * resolved is an error.
  *
  * Returns the path to be executed on success, else NULL.
  * The caller is responsible for freeing the returned editor path
@@ -214,7 +212,7 @@ oom:
  */
 char *
 find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
-     char * const *allowlist, const char **env_editor, bool env_error)
+     char * const *allowlist, const char **env_editor)
 {
     char *ev[3], *editor_path = NULL;
     unsigned int i;
@@ -240,14 +238,15 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
 		debug_return_str(NULL);
 	}
     }
+
+    /*
+     * If SUDO_EDITOR, VISUAL and EDITOR were either not set or not
+     * allowed (based on the values of def_editor and def_env_editor),
+     * choose the first one in def_editor that exists.
+     */
     if (editor_path == NULL) {
 	const char *def_editor_end = def_editor + strlen(def_editor);
 	const char *cp, *ep;
-
-	if (env_error && *env_editor != NULL) {
-	    /* User-specified editor could not be found. */
-	    debug_return_str(NULL);
-	}
 
 	/* def_editor could be a path, split it up, avoiding strtok() */
 	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);

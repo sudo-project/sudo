@@ -769,7 +769,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 	free(safe_cmnd);
 	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc,
-	    &edit_argv, NULL, &env_editor, false);
+	    &edit_argv, NULL, &env_editor);
 	if (safe_cmnd == NULL) {
 	    if (errno != ENOENT)
 		goto done;

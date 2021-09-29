@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 17, 2021
+.Dd September 29, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2325,7 +2325,7 @@ An alternative is to place a colon-separated list of
 .Dq safe
 editors int the
 .Em editor
-variable.
+setting.
 .Nm visudo
 will then only use
 .Ev SUDO_EDITOR ,
