@@ -30976,6 +30976,112 @@ else $as_nop
   :
 fi
 
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection" >&5
+printf %s "checking whether the linker accepts -fcf-protection... " >&6; }
+if test ${ax_cv_check_ldflags___fcf_protection+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -fcf-protection"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___fcf_protection=yes
+else $as_nop
+  ax_cv_check_ldflags___fcf_protection=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fcf_protection" >&5
+printf "%s\n" "$ax_cv_check_ldflags___fcf_protection" >&6; }
+if test x"$ax_cv_check_ldflags___fcf_protection" = xyes
+then :
+
+
+if test ${SSP_CFLAGS+y}
+then :
+
+  case " $SSP_CFLAGS " in #(
+  *" -fcf-protection "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS already contains -fcf-protection"; } >&5
+  (: SSP_CFLAGS already contains -fcf-protection) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SSP_CFLAGS " -fcf-protection"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS=\"\$SSP_CFLAGS\""; } >&5
+  (: SSP_CFLAGS="$SSP_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  SSP_CFLAGS=-fcf-protection
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS=\"\$SSP_CFLAGS\""; } >&5
+  (: SSP_CFLAGS="$SSP_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+if test ${SSP_LDFLAGS+y}
+then :
+
+  case " $SSP_LDFLAGS " in #(
+  *" -Wc,-fcf-protection "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS already contains -Wc,-fcf-protection"; } >&5
+  (: SSP_LDFLAGS already contains -Wc,-fcf-protection) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SSP_LDFLAGS " -Wc,-fcf-protection"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS=\"\$SSP_LDFLAGS\""; } >&5
+  (: SSP_LDFLAGS="$SSP_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  SSP_LDFLAGS=-Wc,-fcf-protection
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS=\"\$SSP_LDFLAGS\""; } >&5
+  (: SSP_LDFLAGS="$SSP_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+else $as_nop
+  :
+fi
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5
 printf %s "checking whether the linker accepts -Wl,-z,relro... " >&6; }
 if test ${ax_cv_check_ldflags___Wl__z_relro+y}
