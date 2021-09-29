@@ -88,17 +88,17 @@ check_alias(struct sudoers_parse_tree *parse_tree,
     } else {
 	if (!quiet && !alias_warned(warned, name)) {
 	    if (errno == ELOOP) {
-		fprintf(stderr, strict ?
+		sudo_printf(SUDO_CONV_ERROR_MSG, strict ?
 		    U_("Error: %s:%d:%d: cycle in %s \"%s\"") :
 		    U_("Warning: %s:%d:%d: cycle in %s \"%s\""),
 		    file, line, column, alias_type_to_string(type), name);
 	    } else {
-		fprintf(stderr, strict ?
+		sudo_printf(SUDO_CONV_ERROR_MSG, strict ?
 		    U_("Error: %s:%d:%d: %s \"%s\" referenced but not defined") :
 		    U_("Warning: %s:%d:%d: %s \"%s\" referenced but not defined"),
 		    file, line, column, alias_type_to_string(type), name);
 	    }
-	    fputc('\n', stderr);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "\n");
 	    if (strict && errorfile == NULL) {
 		errorfile = sudo_rcstr_addref(file);
 		errorlineno = line;
