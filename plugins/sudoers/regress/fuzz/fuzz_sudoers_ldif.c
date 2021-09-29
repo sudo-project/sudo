@@ -28,9 +28,12 @@
 
 #include "sudoers.h"
 
+static int fuzz_printf(int msg_type, const char *fmt, ...);
+
 /* Required to link with parser. */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
+sudo_printf_t sudo_printf = fuzz_printf;
 
 FILE *
 open_sudoers(const char *file, bool doedit, bool *keepopen)
@@ -41,6 +44,12 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
      * This leads to bug reports that cannot be reproduced.
      */
     return NULL;
+}
+
+static int
+fuzz_printf(int msg_type, const char *fmt, ...)
+{
+    return 0;
 }
 
 bool

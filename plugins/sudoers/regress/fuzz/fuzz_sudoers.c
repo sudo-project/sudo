@@ -42,11 +42,13 @@
 #include "interfaces.h"
 
 static int fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
+static int fuzz_printf(int msg_type, const char *fmt, ...);
 
 /* Required to link with parser. */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
+sudo_printf_t sudo_printf = fuzz_printf;
 bool sudoers_recovery = true;
 int sudo_mode;
 
@@ -59,6 +61,12 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
      * This leads to bug reports that cannot be reproduced.
      */
     return NULL;
+}
+
+static int
+fuzz_printf(int msg_type, const char *fmt, ...)
+{
+    return 0;
 }
 
 static int
@@ -100,16 +108,10 @@ set_cmnd_path(const char *runchroot)
     return NOT_FOUND;
 }
 
+/* STUB */
 bool
 log_warningx(int flags, const char *fmt, ...)
 {
-    va_list ap;
-
-    /* Just display on stderr. */
-    va_start(ap, fmt);
-    sudo_vwarnx_nodebug(fmt, ap);
-    va_end(ap);
-
     return true;
 }
 
@@ -279,7 +281,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse sudoers. */
     init_defaults();
-    init_parser("sudoers", true, true);
+    init_parser("sudoers", false, true);
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);
@@ -295,7 +297,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		sudo_pw_delref(sudo_user.pw);
 	    sudo_user.pw = sudo_getpwnam(user_name);
 	    if (sudo_user.pw == NULL) {
-		fprintf(stderr, "unknown user %s\n", user_name);
+		sudo_warnx_nodebug("unknown user %s", user_name);
 		continue;
 	    }
 
@@ -312,8 +314,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		runas_pw = sudo_getpwnam("root");
 	    }
 	    if (runas_pw == NULL) {
-		fprintf(stderr, "unknown run user %s\n",
-		    sudo_user.runas_user);
+		sudo_warnx_nodebug("unknown run user %s", sudo_user.runas_user);
 		continue;
 	    }
 
@@ -325,7 +326,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
 		runas_gr = sudo_getgrnam(sudo_user.runas_group);
 		if (runas_gr == NULL) {
-		    fprintf(stderr, "unknown run group %s\n",
+		    sudo_warnx_nodebug("unknown run group %s",
 			sudo_user.runas_group);
 		    continue;
 		}
@@ -335,7 +336,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		runas_gr = NULL;
 	    }
 
-	    update_defaults(&parse_tree, NULL, SETDEF_ALL, true);
+	    update_defaults(&parse_tree, NULL, SETDEF_ALL, false);
 
 	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, false);
 
@@ -358,8 +359,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	}
 
 	/* Check Defaults and aliases. */
-	check_defaults(&parse_tree, true);
-	check_aliases(&parse_tree, true, true, cb_unused);
+	check_defaults(&parse_tree, false);
+	check_aliases(&parse_tree, true, false, cb_unused);
     }
 
 done:
