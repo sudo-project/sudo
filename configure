@@ -31047,6 +31047,77 @@ else $as_nop
   :
 fi
 
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,now" >&5
+printf %s "checking whether the linker accepts -Wl,-z,now... " >&6; }
+if test ${ax_cv_check_ldflags___Wl__z_now+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,-z,now"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___Wl__z_now=yes
+else $as_nop
+  ax_cv_check_ldflags___Wl__z_now=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_now" >&5
+printf "%s\n" "$ax_cv_check_ldflags___Wl__z_now" >&6; }
+if test x"$ax_cv_check_ldflags___Wl__z_now" = xyes
+then :
+
+if test ${LDFLAGS+y}
+then :
+
+  case " $LDFLAGS " in #(
+  *" -Wl,-z,now "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,-z,now"; } >&5
+  (: LDFLAGS already contains -Wl,-z,now) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -Wl,-z,now"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LDFLAGS=-Wl,-z,now
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+else $as_nop
+  :
+fi
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,noexecstack" >&5
 printf %s "checking whether the linker accepts -Wl,-z,noexecstack... " >&6; }
 if test ${ax_cv_check_ldflags___Wl__z_noexecstack+y}

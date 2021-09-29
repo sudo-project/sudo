@@ -4708,6 +4708,7 @@ if test "$enable_hardening" != "no"; then
 	AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [SSP_LDFLAGS])
     ])
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
+    AX_CHECK_LINK_FLAG([-Wl,-z,now], [AX_APPEND_FLAG([-Wl,-z,now], [LDFLAGS])])
     AX_CHECK_LINK_FLAG([-Wl,-z,noexecstack], [AX_APPEND_FLAG([-Wl,-z,noexecstack], [LDFLAGS])])
 fi
 
