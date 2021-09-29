@@ -623,19 +623,11 @@ check-fuzzer: $(FUZZ_PROGS)
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_sudoers: verifying corpus"; \
-	    mkdir -p regress/fuzz; \
-	    ./fuzz_sudoers $(FUZZ_SUDOERS_CORPUS) 2>&1 | sed -e 's/^\(Running: \).*\(examples\)/\1\2/' -e 's/^\(Executed \).*\(examples.*\) in [0-9]* ms$$/\1\2/' -e 's/^\(Running: \).*\(regress\)/\1\2/' -e 's/^\(Executed \).*\(regress.*\) in [0-9]* ms$$/\1\2/' -e '/^INFO: /d' -e '/^\*\*\*/d' -e '/: Running [0-9]* inputs 1 time(s) each./d' > regress/fuzz/fuzz_sudoers.out; \
-	    diff $(srcdir)/regress/fuzz/fuzz_sudoers.out.ok regress/fuzz/fuzz_sudoers.out; \
-	    echo "fuzz_sudoers: output in fuzz_sudoers.out"; \
+	    ./fuzz_sudoers $(FUZZ_SUDOERS_CORPUS); \
 	    echo "fuzz_sudoers-ldif: verifying corpus"; \
 	    ./fuzz_sudoers_ldif $(FUZZ_SUDOERS_LDIF_CORPUS); \
 	    echo "fuzz_policy: verifying corpus"; \
-	    ./fuzz_policy $(FUZZ_POLICY_CORPUS) > regress/fuzz/fuzz_policy.out 2>&1; \
-	    if [ $$? -ne 0 ]; then \
-		cat regress/fuzz/fuzz_policy.out; \
-	    else \
-		echo "fuzz_policy: output in regress/fuzz/fuzz_policy.out"; \
-	    fi; \
+	    ./fuzz_policy $(FUZZ_POLICY_CORPUS); \
 	fi
 
 check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer

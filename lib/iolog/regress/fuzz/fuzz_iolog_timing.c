@@ -38,7 +38,15 @@
 #include "sudo_eventlog.h"
 #include "sudo_fatal.h"
 #include "sudo_iolog.h"
+#include "sudo_plugin.h"
 #include "sudo_util.h"
+
+static int
+fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    return 0;
+}
 
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -49,6 +57,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int dfd = -1, fd = -1;
 
     setprogname("fuzz_iolog_timing");
+    sudo_warn_set_conversation(fuzz_conversation);
 
     /* I/O logs consist of multiple files in a directory. */
     if (mkdtemp(logdir) == NULL)

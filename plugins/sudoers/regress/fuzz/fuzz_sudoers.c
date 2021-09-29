@@ -289,7 +289,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse sudoers. */
     init_defaults();
-    init_parser("sudoers", false, true);
+    init_parser("sudoers", true, true);
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);
@@ -352,17 +352,21 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    /* Match again as a pseudo-command (list, validate, etc). */
 	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, true);
 
+#if 0
 	    /* Display privileges. */
 	    display_privs(&snl, sudo_user.pw, false);
 	    display_privs(&snl, sudo_user.pw, true);
+#endif
 	}
 
 	/* Expand tildes in runcwd and runchroot. */
-	if (def_runcwd != NULL && strcmp(def_runcwd, "*") != 0) {
-	    expand_tilde(&def_runcwd, runas_pw->pw_name);
-	}
-	if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
-	    expand_tilde(&def_runchroot, runas_pw->pw_name);
+	if (runas_pw != NULL) {
+	    if (def_runcwd != NULL && strcmp(def_runcwd, "*") != 0) {
+		expand_tilde(&def_runcwd, runas_pw->pw_name);
+	    }
+	    if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
+		expand_tilde(&def_runchroot, runas_pw->pw_name);
+	    }
 	}
 
 	/* Check Defaults and aliases. */
@@ -374,7 +378,7 @@ done:
     /* Cleanup. */
     fclose(fp);
     free_parse_tree(&parse_tree);
-    init_parser(NULL, false, true);
+    init_parser(NULL, true, true);
     if (sudo_user.pw != NULL)
 	sudo_pw_delref(sudo_user.pw);
     if (runas_pw != NULL)

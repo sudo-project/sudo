@@ -29,7 +29,9 @@
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_eventlog.h"
+#include "sudo_fatal.h"
 #include "sudo_iolog.h"
+#include "sudo_plugin.h"
 #include "sudo_util.h"
 
 #include "iolog_json.h"
@@ -60,6 +62,13 @@ open_data(const uint8_t *data, size_t size)
 #endif
 }
 
+static int
+fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    return 0;
+}
+
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -67,6 +76,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     FILE *fp;
 
     setprogname("fuzz_iolog_json");
+    sudo_warn_set_conversation(fuzz_conversation);
 
     fp = open_data(data, size);
     if (fp == NULL)

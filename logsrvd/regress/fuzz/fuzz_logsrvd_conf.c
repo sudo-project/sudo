@@ -35,11 +35,20 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_eventlog.h"
+#include "sudo_fatal.h"
 #include "sudo_iolog.h"
+#include "sudo_plugin.h"
 #include "sudo_util.h"
 
 #include "log_server.pb-c.h"
 #include "logsrvd.h"
+
+static int
+fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    return 0;
+}
 
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -47,6 +56,9 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     char tempfile[] = "/tmp/logsrvd_conf.XXXXXX";
     size_t nwritten;
     int fd;
+
+    setprogname("fuzz_logsrvd_conf");
+    sudo_warn_set_conversation(fuzz_conversation);
 
     /* logsrvd_conf_read() uses a conf file path, not an open file. */
     fd = mkstemp(tempfile);

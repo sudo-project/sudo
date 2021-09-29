@@ -29,7 +29,16 @@
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_fatal.h"
+#include "sudo_plugin.h"
 #include "sudo_util.h"
+
+static int
+fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    return 0;
+}
 
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -39,6 +48,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int fd;
 
     setprogname("fuzz_sudo_conf");
+    sudo_warn_set_conversation(fuzz_conversation);
 
     /* sudo_conf_read() uses a conf file path, not an open file. */
     fd = mkstemp(tempfile);

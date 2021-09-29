@@ -245,6 +245,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     setprogname("fuzz_policy");
     sudoers_debug_register(getprogname(), NULL);
+    sudo_warn_set_conversation(fuzz_conversation);
 
     /* user_info and settings must be non-NULL (even if empty). */
     push(&user_info, NULL);
@@ -678,42 +679,24 @@ group_plugin_unload(void)
     return;
 }
 
+/* STUB */
 bool
 log_warning(int flags, const char *fmt, ...)
 {
-    va_list ap;
-
-    /* Just display on stderr. */
-    va_start(ap, fmt);
-    sudo_vwarn_nodebug(fmt, ap);
-    va_end(ap);
-
     return true;
 }
 
+/* STUB */
 bool
 log_warningx(int flags, const char *fmt, ...)
 {
-    va_list ap;
-
-    /* Just display on stderr. */
-    va_start(ap, fmt);
-    sudo_vwarnx_nodebug(fmt, ap);
-    va_end(ap);
-
     return true;
 }
 
+/* STUB */
 bool
 gai_log_warning(int flags, int errnum, const char *fmt, ...)
 {
-    va_list ap;
-
-    /* Note: ignores errnum */
-    va_start(ap, fmt);
-    sudo_vwarnx_nodebug(fmt, ap);
-    va_end(ap);
-
     return true;
 }
 
