@@ -82,6 +82,32 @@ open_data(const uint8_t *data, size_t size)
 #endif
 }
 
+static int
+fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
+{
+    int n;
+
+    for (n = 0; n < num_msgs; n++) {
+	const struct sudo_conv_message *msg = &msgs[n];
+
+	switch (msg->msg_type & 0xff) {
+	    case SUDO_CONV_PROMPT_ECHO_ON:
+	    case SUDO_CONV_PROMPT_MASK:
+	    case SUDO_CONV_PROMPT_ECHO_OFF:
+		/* input not supported */
+		return -1;
+	    case SUDO_CONV_ERROR_MSG:
+	    case SUDO_CONV_INFO_MSG:
+		/* no output for fuzzers */
+		break;
+	    default:
+		return -1;
+	}
+    }
+    return 0;
+}
+
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -98,6 +124,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     setprogname("fuzz_sudoers_ldif");
     sudoers_debug_register(getprogname(), NULL);
+    sudo_warn_set_conversation(fuzz_conversation);
 
     /* Initialize defaults and parse LDIF-format sudoers. */
     init_defaults();

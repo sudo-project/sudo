@@ -69,7 +69,6 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 
     for (n = 0; n < num_msgs; n++) {
 	const struct sudo_conv_message *msg = &msgs[n];
-	FILE *fp = stdout;
 
 	switch (msg->msg_type & 0xff) {
 	    case SUDO_CONV_PROMPT_ECHO_ON:
@@ -78,18 +77,8 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		/* input not supported */
 		return -1;
 	    case SUDO_CONV_ERROR_MSG:
-		fp = stderr;
-		FALLTHROUGH;
 	    case SUDO_CONV_INFO_MSG:
-		if (msg->msg != NULL) {
-		    size_t len = strlen(msg->msg);
-
-		    if (len == 0)
-			break;
-
-		    if (fwrite(msg->msg, 1, len, fp) == 0 || fputc('\n', fp) == EOF)
-			return -1;
-		}
+		/* no output for fuzzers */
 		break;
 	    default:
 		return -1;
@@ -197,6 +186,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     setprogname("fuzz_sudoers");
     sudoers_debug_register(getprogname(), NULL);
+    sudo_warn_set_conversation(fuzz_conversation);
 
     /* Sudoers locale setup. */
     sudoers_initlocale(setlocale(LC_ALL, ""), "C");
@@ -352,11 +342,9 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    /* Match again as a pseudo-command (list, validate, etc). */
 	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, true);
 
-#if 0
 	    /* Display privileges. */
 	    display_privs(&snl, sudo_user.pw, false);
 	    display_privs(&snl, sudo_user.pw, true);
-#endif
 	}
 
 	/* Expand tildes in runcwd and runchroot. */
