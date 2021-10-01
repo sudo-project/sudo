@@ -491,31 +491,41 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
 
     /* Merge cmd and argv as sudoreplay expects. */
     if (evlog->command != NULL && evlog->argv != NULL && evlog->argv[0] != NULL) {
-	size_t len = strlen(evlog->command) + 1;
-	char *newcmd;
+	size_t len, bufsize = strlen(evlog->command) + 1;
+	char *cp, *buf;
 	int ac;
 
 	/* Skip argv[0], we use evlog->command instead. */
 	for (ac = 1; evlog->argv[ac] != NULL; ac++)
-	    len += strlen(evlog->argv[ac]) + 1;
+	    bufsize += strlen(evlog->argv[ac]) + 1;
 
-	if ((newcmd = malloc(len)) == NULL) {
+	if ((buf = malloc(bufsize)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
+	cp = buf;
 
-	/* TODO: optimize this. */
-	if (strlcpy(newcmd, evlog->command, len) >= len)
+	len = strlcpy(cp, evlog->command, bufsize);
+	if (len >= bufsize)
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
+	cp += len;
+	bufsize -= len;
+
 	for (ac = 1; evlog->argv[ac] != NULL; ac++) {
-	    if (strlcat(newcmd, " ", len) >= len)
+	    if (bufsize < 2)
 		sudo_fatalx(U_("internal error, %s overflow"), __func__);
-	    if (strlcat(newcmd, evlog->argv[ac], len) >= len)
+	    *cp++ = ' ';
+	    bufsize--;
+
+	    len = strlcpy(cp, evlog->argv[ac], bufsize);
+	    if (len >= bufsize)
 		sudo_fatalx(U_("internal error, %s overflow"), __func__);
+	    cp += len;
+	    bufsize -= len;
 	}
 
 	free(evlog->command);
-	evlog->command = newcmd;
+	evlog->command = buf;
     }
 
     ret = true;
