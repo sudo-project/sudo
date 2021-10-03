@@ -36,17 +36,18 @@ Makefile$
 ^pathnames\.h$
 ^src/sudo$
 ^src/sesh$
-^src/check_(noexec|ttyname)$
+^src/check_(net_ifs|noexec|ttyname)$
 ^src/intercept\.exp$
 ^src/sudo_usage\.h$
 
 ^lib/eventlog/check_wrap$
 ^lib/eventlog/regress/logwrap/check_wrap.out$
 
-^lib/iolog/check_iolog_(json|mkpath|path|util)$
+^lib/iolog/check_iolog_(json|mkpath|path|timing)$
 ^lib/iolog/fuzz_iolog_(json|legacy|timing)$
 ^lib/iolog/host_port_test$
 
+^lib/util/getgids$
 ^lib/util/mksiglist$
 ^lib/util/mksiglist.h$
 ^lib/util/mksigname$

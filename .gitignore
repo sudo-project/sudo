@@ -39,6 +39,7 @@ init.d/sudo.conf
 
 src/sudo
 src/sesh
+src/check_net_ifs
 src/check_noexec
 src/check_ttyname
 src/intercept.exp
@@ -51,6 +52,7 @@ lib/iolog/check_iolog_[a-z]*
 lib/iolog/fuzz_iolog_[a-z]*
 lib/iolog/host_port_test
 
+lib/util/getgids
 lib/util/mksiglist
 lib/util/mksiglist.h
 lib/util/mksigname
