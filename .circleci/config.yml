@@ -1,0 +1,45 @@
+# TODO: use matrix to test different build options and linux distros
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: docker.io/sudoproject/debian:latest
+    steps:
+      - checkout
+      - run:
+          name: "Building and packaging sudo"
+          command: ./scripts/mkpkg --flavor=ldap --enable-warnings --enable-werror
+      # Save workspace for subsequent jobs (i.e. test)
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  test:
+    docker:
+      - image: docker.io/sudoproject/debian:latest
+    steps:
+      # Reuse the workspace from the build job
+      - attach_workspace:
+          at: .
+      - run:
+          name: "Running tests"
+          command: make check
+
+# Orchestrate our job run sequence
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          # Only build the "main" branch
+          filters:
+            branches:
+              only: main
+      - test:
+          filters:
+          # Only test the "main" branch
+            branches:
+              only: main
+          requires:
+            - build

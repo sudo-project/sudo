@@ -55,6 +55,14 @@ doc/sudoreplay.man.in
 doc/sudoreplay.mdoc.in
 doc/visudo.man.in
 doc/visudo.mdoc.in
+docker/README
+docker/debian/latest/Dockerfile
+docker/debian/testing/Dockerfile
+docker/fedora/latest/Dockerfile
+docker/fedora/rawhide/Dockerfile
+docker/ubuntu/devel/Dockerfile
+docker/ubuntu/latest/Dockerfile
+docker/ubuntu/rolling/Dockerfile
 etc/codespell.exclude
 etc/codespell.ignore
 etc/codespell.skip
