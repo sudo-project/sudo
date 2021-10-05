@@ -4,7 +4,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: docker.io/sudoproject/debian:latest
+      - image: docker.io/sudoproject/ubuntu:latest
         user: build
     steps:
       - checkout
@@ -18,7 +18,7 @@ jobs:
             - .
   test:
     docker:
-      - image: docker.io/sudoproject/debian:latest
+      - image: docker.io/sudoproject/ubuntu:latest
         user: build
     steps:
       # Reuse the workspace from the build job
