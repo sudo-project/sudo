@@ -27,3 +27,14 @@ Multi-arch containers are supported by creating a manifest, e.g.:
 
 Finally push the manifest to dockerhub:
     podman push sudoproject/debian:latest
+
+Note that memory sanitizer uses ptrace which is not allowed for
+non-root containers by default.  This will cause a failure when
+running the tests if sudo is configured with --enable-sanitizer.
+The simplest solution is to run the container with the SYS_PTRACE
+capability.  E.g.
+    podman run -it --cap-add SYS_PTRACE ...
+
+Alternately, disable leak sanitizer by setting
+    ASAN_OPTIONS=detect_leaks=0
+in the environment of the container doing "make check".

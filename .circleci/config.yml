@@ -10,7 +10,7 @@ jobs:
       - checkout
       - run:
           name: "Building and packaging sudo"
-          command: ./scripts/mkpkg --flavor=ldap --enable-warnings --enable-werror
+          command: ./scripts/mkpkg --flavor=ldap --enable-warnings --enable-werror --enable-sanitizer
       # Save workspace for subsequent jobs (i.e. test)
       - persist_to_workspace:
           root: .
@@ -27,6 +27,9 @@ jobs:
       - run:
           name: "Running tests"
           command: make check
+          environment:
+              # Leak sanitizer requires ptrace, disable it
+              ASAN_OPTIONS: detect_leaks=0
 
 # Orchestrate our job run sequence
 workflows:
