@@ -5,6 +5,7 @@ jobs:
   build:
     docker:
       - image: docker.io/sudoproject/debian:latest
+        user: build
     steps:
       - checkout
       - run:
@@ -18,6 +19,7 @@ jobs:
   test:
     docker:
       - image: docker.io/sudoproject/debian:latest
+        user: build
     steps:
       # Reuse the workspace from the build job
       - attach_workspace:
