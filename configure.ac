@@ -4567,6 +4567,8 @@ if test "$enable_sanitizer" != "no"; then
 	*gcc*)
 	    libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
 	    if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
+		# libasan.so may be a linker script
+		libasan="`awk 'BEGIN {lib=ARGV[1]} /^INPUT/ {lib=$3} END {print lib}' \"$libasan\"`"
 		SUDO_DEFINE_UNQUOTED(_PATH_ASAN_LIB, "$libasan", [Path to the libasan.so shared library])
 	    fi
 	    ;;

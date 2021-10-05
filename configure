@@ -30187,6 +30187,8 @@ fi
 	*gcc*)
 	    libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
 	    if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
+		# libasan.so may be a linker script
+		libasan="`awk 'BEGIN {lib=ARGV1} /^INPUT/ {lib=$3} END {print lib}' \"$libasan\"`"
 		cat >>confdefs.h <<EOF
 #define _PATH_ASAN_LIB "$libasan"
 EOF
