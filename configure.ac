@@ -41,6 +41,7 @@ AC_SUBST([LT_LDEXPORTS])
 AC_SUBST([LT_STATIC])
 AC_SUBST([LT_DEP_LIBS])
 AC_SUBST([COMMON_OBJS])
+AC_SUBST([SUDOERS_LT_STATIC])
 AC_SUBST([SUDOERS_OBJS])
 AC_SUBST([SUDO_OBJS])
 AC_SUBST([LIBS])
@@ -4266,10 +4267,10 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
-	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
+	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
 	else
+	    SUDOERS_LT_STATIC="--tag=disable-static"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;
@@ -4279,10 +4280,11 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
 	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
+	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
 	else
+	    SUDOERS_LT_STATIC="--tag=disable-static"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;

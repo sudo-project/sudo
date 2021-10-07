@@ -165,7 +165,7 @@ LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
 FUZZ_PROGS = fuzz_policy fuzz_sudoers fuzz_sudoers_ldif
 FUZZ_SEED_CORPUS = ${FUZZ_PROGS:=_seed_corpus.zip}
 FUZZ_LIBS = libparsesudoers.la @SUDOERS_LIBS@ $(LIB_FUZZING_ENGINE)
-FUZZ_LDFLAGS = @LDFLAGS@ @SUDOERS_LDFLAGS@
+FUZZ_LDFLAGS = @SUDOERS_LDFLAGS@
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
 
@@ -334,9 +334,9 @@ libparsesudoers.la: $(LIBPARSESUDOERS_OBJS)
 sudoers.la: $(SUDOERS_OBJS) $(LIBIOLOG) $(LIBLOGSRV) libparsesudoers.la @LT_LDDEP@
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) \
-	    $(LIBTOOL) $(LTFLAGS) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module;; \
+	    $(LIBTOOL) $(LTFLAGS) @SUDOERS_LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module;; \
 	*) \
-	    $(LIBTOOL) $(LTFLAGS) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so;; \
+	    $(LIBTOOL) $(LTFLAGS) @SUDOERS_LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so;; \
 	esac
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LIBUTIL)
