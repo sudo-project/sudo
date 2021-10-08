@@ -16,6 +16,10 @@ jobs:
         description: if true, build sudo_logsrvd and sudoers client
         default: true
         type: boolean
+      intercept:
+        description: if true, build intercept support
+        default: true
+        type: boolean
     docker:
       - image: docker.io/sudoproject/ubuntu:latest
         user: build
@@ -23,7 +27,7 @@ jobs:
       - checkout
       - run:
           name: "Building and packaging sudo"
-          command: ./scripts/mkpkg <<# parameters.ldap >>--flavor=ldap --with-sssd --with-sssd-lib=/usr/lib/x86_64-linux-gnu <</ parameters.ldap >><<^ parameters.logsrvd >>--disable-log-server --disable-log-client <</ parameters.logsrvd >><<# parameters.static_sudoers >>--enable-static-sudoers <</ parameters.static_sudoers >>--enable-warnings --enable-werror --enable-sanitizer
+          command: ./scripts/mkpkg <<# parameters.ldap >>--flavor=ldap --with-sssd --with-sssd-lib=/usr/lib/x86_64-linux-gnu <</ parameters.ldap >><<^ parameters.logsrvd >>--disable-log-server --disable-log-client <</ parameters.logsrvd >><<^ parameters.intercept >>--disable-intercept <</ parameters.intercept >><<# parameters.static_sudoers >>--enable-static-sudoers <</ parameters.static_sudoers >>--enable-warnings --enable-werror --enable-sanitizer
       # Save workspace for subsequent jobs (i.e. test)
       - persist_to_workspace:
           root: .
@@ -68,6 +72,12 @@ workflows:
           filters:
             branches:
               only: main
+      - build:
+          name: build-nointercept
+          logsrvd: false
+          filters:
+            branches:
+              only: main
       - test:
           name: test-ldap
           requires:
@@ -80,3 +90,7 @@ workflows:
           name: test-nologsrvd
           requires:
             - build-nologsrvd
+      - test:
+          name: test-nointercept
+          requires:
+            - build-nointercept
