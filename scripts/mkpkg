@@ -509,6 +509,10 @@ IFS="$OIFS"
 if [ -r Makefile ]; then
     ${MAKE} $make_opts distclean
 fi
-${configure} "$@" || exit 1
-${MAKE} $make_opts && ${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
+${configure} "$@" || exit $?
+${MAKE} $make_opts || exit $?
+${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
+exitval=$?
 test $debug -eq 0 && rm -rf destdir
+
+exit $exitval
