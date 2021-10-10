@@ -547,7 +547,7 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
 #ifdef HAVE_SELINUX
     /* Print SELinux role/type */
     if (cs->role != NULL && cs->type != NULL) {
-	fprintf(fp, "%role=%s,type=%s", need_comma ? "," : "",
+	fprintf(fp, "%srole=%s,type=%s", need_comma ? "," : "",
 	    cs->role, cs->type);
 	need_comma = true;
     }
@@ -557,11 +557,11 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {
 	if (cs->privs != NULL) {
-	    fprintf(fp, "%privs=%s", need_comma ? "," : "", cs->privs);
+	    fprintf(fp, "%sprivs=%s", need_comma ? "," : "", cs->privs);
 	    need_comma = true;
 	}
 	if (cs->limitprivs != NULL) {
-	    fprintf(fp, "%limitprivs=%s", need_comma ? "," : "", cs->limitprivs);
+	    fprintf(fp, "%slimitprivs=%s", need_comma ? "," : "", cs->limitprivs);
 	    need_comma = true;
 	}
     }
