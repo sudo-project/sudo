@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "September 24, 2021" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "October 10, 2021" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -135,6 +135,17 @@ The following formats are supported:
 .RS 12n
 .PD 0
 .TP 10n
+CSV
+CSV (comma-separated value) files are often used by spreadsheets
+and report generators.
+For CSV output,
+\fBcvtsudoers\fR
+double quotes strings that contain commas.
+For each literal double quote character present inside the string,
+two double quotes are output.
+This method of quoting commas is compatible with most spreadsheet programs.
+.PD
+.TP 10n
 JSON
 JSON (JavaScript Object Notation) files are usually easier for
 third-party applications to consume than the traditional
@@ -144,7 +155,6 @@ The various values have explicit types which removes much of the
 ambiguity of the
 \fIsudoers\fR
 format.
-.PD
 .TP 10n
 LDIF
 LDIF (LDAP Data Interchange Format) files can be imported into an LDAP
@@ -400,7 +410,7 @@ See the description of the
 \fB\-O\fR
 command line option.
 .TP 6n
-\fBoutput_format =\fR \fIjson\fR | \fIldif\fR | \fIsudoers\fR
+\fBoutput_format =\fR \fIcsv\fR | \fIjson\fR | \fIldif\fR | \fIsudoers\fR
 See the description of the
 \fB\-f\fR
 command line option.

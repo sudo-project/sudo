@@ -23,6 +23,7 @@
 
 /* Supported input/output formats. */
 enum sudoers_formats {
+    format_csv,
     format_json,
     format_ldif,
     format_sudoers
@@ -82,6 +83,9 @@ struct cvtsudoers_filter {
 
 /* cvtsudoers.c */
 extern struct cvtsudoers_filter *filters;
+
+/* cvtsudoers_csv.c */
+bool convert_sudoers_csv(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
 /* cvtsudoers_json.c */
 bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);

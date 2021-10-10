@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 24, 2021
+.Dd October 10, 2021
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -117,6 +117,15 @@ is JSON or sudoers.
 Specify the output format (case-insensitive).
 The following formats are supported:
 .Bl -tag -width 8n
+.It CSV
+CSV (comma-separated value) files are often used by spreadsheets
+and report generators.
+For CSV output,
+.Nm
+double quotes strings that contain commas.
+For each literal double quote character present inside the string,
+two double quotes are output.
+This method of quoting commas is compatible with most spreadsheet programs.
 .It JSON
 JSON (JavaScript Object Notation) files are usually easier for
 third-party applications to consume than the traditional
@@ -342,7 +351,7 @@ command line option.
 See the description of the
 .Fl O
 command line option.
-.It Sy output_format = Ar json | ldif | sudoers
+.It Sy output_format = Ar csv | json | ldif | sudoers
 See the description of the
 .Fl f
 command line option.

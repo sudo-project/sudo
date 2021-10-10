@@ -263,7 +263,10 @@ main(int argc, char *argv[])
 	}
     }
     if (conf->output_format != NULL) {
-	if (strcasecmp(conf->output_format, "json") == 0) {
+	if (strcasecmp(conf->output_format, "csv") == 0) {
+	    output_format = format_csv;
+	    conf->store_options = true;
+	} else if (strcasecmp(conf->output_format, "json") == 0) {
 	    output_format = format_json;
 	    conf->store_options = true;
 	} else if (strcasecmp(conf->output_format, "ldif") == 0) {
@@ -376,6 +379,9 @@ main(int argc, char *argv[])
     }
 
     switch (output_format) {
+    case format_csv:
+	exitcode = !convert_sudoers_csv(&parsed_policy, output_file, conf);
+	break;
     case format_json:
 	exitcode = !convert_sudoers_json(&parsed_policy, output_file, conf);
 	break;

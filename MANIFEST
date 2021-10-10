@@ -546,6 +546,7 @@ plugins/sudoers/check.h
 plugins/sudoers/check_aliases.c
 plugins/sudoers/cvtsudoers.c
 plugins/sudoers/cvtsudoers.h
+plugins/sudoers/cvtsudoers_csv.c
 plugins/sudoers/cvtsudoers_json.c
 plugins/sudoers/cvtsudoers_ldif.c
 plugins/sudoers/cvtsudoers_pwutil.c
