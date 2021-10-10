@@ -5,7 +5,7 @@ There should always be a "latest" tag (or manifest).
 
 When creating a new Dockerfile, use one of the Debian or Fedora files
 as a template.  The examples below use podman rather than docker but it
-should be possible to them interchangably.
+should be possible to them interchangeably.
 
 To build Debian containers for both amd64 and i386 (others only have amd64):
 
