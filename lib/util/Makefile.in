@@ -742,12 +742,14 @@ fstatat.plog: fstatat.i
 fuzz_sudo_conf.lo: $(srcdir)/regress/fuzz/fuzz_sudo_conf.c \
                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                    $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_sudo_conf.c
 fuzz_sudo_conf.i: $(srcdir)/regress/fuzz/fuzz_sudo_conf.c \
                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                    $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<

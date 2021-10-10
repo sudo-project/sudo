@@ -416,14 +416,16 @@ check_iolog_timing.plog: check_iolog_timing.i
 fuzz_iolog_json.lo: $(srcdir)/regress/fuzz/fuzz_iolog_json.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
-                    $(incdir)/sudo_iolog.h $(incdir)/sudo_json.h \
+                    $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
+                    $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
                     $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                     $(srcdir)/iolog_json.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_json.c
 fuzz_iolog_json.i: $(srcdir)/regress/fuzz/fuzz_iolog_json.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
-                    $(incdir)/sudo_iolog.h $(incdir)/sudo_json.h \
+                    $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
+                    $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
                     $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                     $(srcdir)/iolog_json.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
@@ -432,13 +434,15 @@ fuzz_iolog_json.plog: fuzz_iolog_json.i
 fuzz_iolog_legacy.lo: $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                       $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
-                      $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                      $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
+                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                       $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c
 fuzz_iolog_legacy.i: $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                       $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
-                      $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                      $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
+                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                       $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fuzz_iolog_legacy.plog: fuzz_iolog_legacy.i
