@@ -4267,6 +4267,7 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
+	    AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
 	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
 	else
@@ -4280,7 +4281,7 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
 	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
 	else
@@ -4315,8 +4316,7 @@ if test "$enable_shared_libutil" = "no"; then
     if test X"$STATIC_SUDOERS" = X""; then
 	AC_MSG_ERROR([--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled.])
     else
-	# Do not install sudoers or libsudo_util.
-	AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
+	# Do not install libsudo_util.
 	AX_APPEND_FLAG([-no-install], [LIBUTIL_LDFLAGS])
     fi
 fi
