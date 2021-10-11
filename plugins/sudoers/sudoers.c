@@ -633,6 +633,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    audit_failure(NewArgv, N_("%s: command not found"),
 		user_cmnd);
 	    sudo_warnx(U_("%s: command not found"), user_cmnd);
+	    if (strncmp(user_cmnd, "cd", 2) == 0 && (user_cmnd[2] == '\0' ||
+		    isblank((unsigned char)user_cmnd[2]))) {
+		sudo_warnx("%s",
+		    U_("\"cd\" is a shell built-in command, it cannot be run directly."));
+		sudo_warnx("%s",
+		    U_("the -s option may be used to run a privileged shell."));
+		sudo_warnx("%s",
+		    U_("the -D option may be used to run a command in a specific directory."));
+	    }
 	}
 	goto bad;
     }
