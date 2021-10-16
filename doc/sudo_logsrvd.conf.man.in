@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "August 3, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "October 16, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -550,6 +550,8 @@ buffering it.
 This makes it possible to view the logs in real-time as the program is
 executing but may significantly reduce the effectiveness
 of I/O log compression.
+I/O logs are always flushed before sending a commit point to the client
+regardless of this setting.
 The default value is
 \fRtrue\fR.
 .TP 10n

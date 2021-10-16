@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 3, 2021
+.Dd October 16, 2021
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -486,6 +486,8 @@ buffering it.
 This makes it possible to view the logs in real-time as the program is
 executing but may significantly reduce the effectiveness
 of I/O log compression.
+I/O logs are always flushed before sending a commit point to the client
+regardless of this setting.
 The default value is
 .Li true .
 .It iolog_group = name

@@ -1164,7 +1164,10 @@ server_commit_cb(int unused, int what, void *v)
     commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
     if (!schedule_commit_point(&commit_point, closure))
 	connection_close(closure);
-    iolog_flush_all(closure);
+
+    /* Flush I/O logs before sending commit point if needed. */
+    if (!iolog_get_flush())
+	iolog_flush_all(closure);
 
     debug_return;
 }
