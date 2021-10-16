@@ -125,6 +125,7 @@ lib/iolog/iolog_clearerr.c
 lib/iolog/iolog_close.c
 lib/iolog/iolog_conf.c
 lib/iolog/iolog_eof.c
+lib/iolog/iolog_flush.c
 lib/iolog/iolog_gets.c
 lib/iolog/iolog_json.c
 lib/iolog/iolog_json.h

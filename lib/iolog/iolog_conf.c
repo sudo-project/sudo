@@ -45,8 +45,8 @@ static mode_t iolog_dirmode = S_IRWXU;
 static uid_t iolog_uid = ROOT_UID;
 static gid_t iolog_gid = ROOT_GID;
 static bool iolog_gid_set;
-static bool iolog_compress;
-static bool iolog_flush;
+static bool iolog_docompress;
+static bool iolog_doflush;
 
 /*
  * Reset I/O log settings to default values.
@@ -60,8 +60,8 @@ iolog_set_defaults(void)
     iolog_uid = ROOT_UID;
     iolog_gid = ROOT_GID;
     iolog_gid_set = false;
-    iolog_compress = false;
-    iolog_flush = false;
+    iolog_docompress = false;
+    iolog_doflush = false;
 }
 
 /*
@@ -134,24 +134,24 @@ iolog_set_mode(mode_t mode)
 }
 
 /*
- * Set iolog_compress
+ * Set iolog_docompress
  */
 void
 iolog_set_compress(bool newval)
 {
     debug_decl(iolog_set_compress, SUDO_DEBUG_UTIL);
-    iolog_compress = newval;
+    iolog_docompress = newval;
     debug_return;
 }
 
 /*
- * Set iolog_flush
+ * Set iolog_doflush
  */
 void
 iolog_set_flush(bool newval)
 {
     debug_decl(iolog_set_flush, SUDO_DEBUG_UTIL);
-    iolog_flush = newval;
+    iolog_doflush = newval;
     debug_return;
 }
 
@@ -192,11 +192,11 @@ iolog_get_dir_mode(void)
 bool
 iolog_get_compress(void)
 {
-    return iolog_compress;
+    return iolog_docompress;
 }
 
 bool
 iolog_get_flush(void)
 {
-    return iolog_flush;
+    return iolog_doflush;
 }

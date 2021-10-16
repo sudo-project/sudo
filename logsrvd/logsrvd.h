@@ -185,6 +185,7 @@ struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_
 bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
 bool iolog_create(int iofd, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
+bool iolog_flush_all(struct connection_closure *closure);
 bool iolog_rewrite(const struct timespec *target, struct connection_closure *closure);
 void update_elapsed_time(TimeSpec *delta, struct timespec *elapsed);
 

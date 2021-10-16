@@ -98,8 +98,8 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 LIBIOLOG_OBJS = host_port.lo hostcheck.lo iolog_clearerr.lo iolog_close.lo \
-		iolog_conf.lo iolog_eof.lo iolog_gets.lo iolog_json.lo \
-		iolog_legacy.lo iolog_loginfo.lo iolog_mkdirs.lo \
+		iolog_conf.lo iolog_eof.lo iolog_flush.lo iolog_gets.lo \
+		iolog_json.lo iolog_legacy.lo iolog_loginfo.lo iolog_mkdirs.lo \
 		iolog_mkdtemp.lo iolog_mkpath.lo iolog_nextid.lo \
 		iolog_open.lo iolog_openat.lo iolog_path.lo iolog_read.lo \
 		iolog_seek.lo iolog_swapids.lo iolog_timing.lo iolog_util.lo \
@@ -551,6 +551,18 @@ iolog_eof.i: $(srcdir)/iolog_eof.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog_eof.plog: iolog_eof.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_eof.c --i-file $< --output-file $@
+iolog_flush.lo: $(srcdir)/iolog_flush.c $(incdir)/compat/stdbool.h \
+                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_flush.c
+iolog_flush.i: $(srcdir)/iolog_flush.c $(incdir)/compat/stdbool.h \
+                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+iolog_flush.plog: iolog_flush.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_flush.c --i-file $< --output-file $@
 iolog_gets.lo: $(srcdir)/iolog_gets.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \

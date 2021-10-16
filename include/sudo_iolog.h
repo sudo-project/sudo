@@ -121,6 +121,7 @@ off_t iolog_seek(struct iolog_file *iol, off_t offset, int whence);
 ssize_t iolog_read(struct iolog_file *iol, void *buf, size_t nbytes, const char **errstr);
 ssize_t iolog_write(struct iolog_file *iol, const void *buf, size_t len, const char **errstr);
 void iolog_clearerr(struct iolog_file *iol);
+bool iolog_flush(struct iolog_file *iol, const char **errstr);
 void iolog_rewind(struct iolog_file *iol);
 unsigned int iolog_get_maxseq(void);
 uid_t iolog_get_uid(void);

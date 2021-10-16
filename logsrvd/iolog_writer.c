@@ -633,7 +633,7 @@ iolog_close_all(struct connection_closure *closure)
 {
     const char *errstr;
     int i;
-    debug_decl(iolog_close, SUDO_DEBUG_UTIL);
+    debug_decl(iolog_close_all, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!closure->iolog_files[i].enabled)
@@ -646,6 +646,25 @@ iolog_close_all(struct connection_closure *closure)
 	close(closure->iolog_dir_fd);
 
     debug_return;
+}
+
+bool
+iolog_flush_all(struct connection_closure *closure)
+{
+    const char *errstr;
+    int i, ret = true;
+    debug_decl(iolog_flush_all, SUDO_DEBUG_UTIL);
+
+    for (i = 0; i < IOFD_MAX; i++) {
+	if (!closure->iolog_files[i].enabled)
+	    continue;
+	if (!iolog_flush(&closure->iolog_files[i], &errstr)) {
+	    sudo_warnx(U_("error flushing iofd %d: %s"), i, errstr);
+	    ret = false;
+	}
+    }
+
+    debug_return_bool(ret);
 }
 
 bool
