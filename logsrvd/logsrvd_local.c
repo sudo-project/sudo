@@ -264,12 +264,16 @@ bool
 store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
+    struct timespec ts, *run_time = NULL;
     const char *signame = NULL;
-    struct timespec run_time = { msg->run_time->tv_sec, msg->run_time->tv_nsec };
     int flags = 0;
-    mode_t mode;
     debug_decl(store_exit_local, SUDO_DEBUG_UTIL);
 
+    if (msg->run_time != NULL) {
+	ts.tv_sec = msg->run_time->tv_sec;
+	ts.tv_nsec = msg->run_time->tv_nsec;
+	run_time = &ts;
+    }
     if (msg->signal != NULL && msg->signal[0] != '\0') {
 	signame = msg->signal;
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -280,7 +284,7 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 	    "command exited with %d", msg->exit_value);
     }
     if (logsrvd_conf_log_exit()) {
-	if (!eventlog_exit(closure->evlog, flags, &run_time, msg->exit_value,
+	if (!eventlog_exit(closure->evlog, flags, run_time, msg->exit_value,
 		signame, msg->dumped_core)) {
 	    closure->errstr = _("error logging exit event");
 	    debug_return_bool(false);
@@ -289,7 +293,7 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 
     if (closure->log_io) {
 	/* Clear write bits from I/O timing file to indicate completion. */
-	mode = logsrvd_conf_iolog_mode();
+	mode_t mode = logsrvd_conf_iolog_mode();
 	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
 	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
 	    sudo_warn("chmod 0%o %s/%s", (unsigned int)mode, "timing",

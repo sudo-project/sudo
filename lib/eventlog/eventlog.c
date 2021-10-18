@@ -900,10 +900,12 @@ format_json(int event_type, struct eventlog_args *args,
     }
 
     /* Log event time from client */
-    if (!json_add_timestamp(&json, time_str, args->event_time, format_timestamp)) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable format timestamp");
-	goto bad;
+    if (args->event_time != NULL) {
+	if (!json_add_timestamp(&json, time_str, args->event_time, format_timestamp)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable format timestamp");
+	    goto bad;
+	}
     }
 
     if (event_type == EVLOG_EXIT) {
@@ -1136,7 +1138,6 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
     char *full_line, timebuf[8192], *timestr = NULL;
     const char *timefmt = evl_conf->time_fmt;
     const char *logfile = evl_conf->logpath;
-    time_t tv_sec = event_time->tv_sec;
     struct tm tm;
     bool ret = false;
     FILE *fp;
@@ -1152,12 +1153,15 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
 	goto done;
     }
 
-    if (localtime_r(&tv_sec, &tm) != NULL) {
-	/* strftime() does not guarantee to NUL-terminate so we must check. */
-	timebuf[sizeof(timebuf) - 1] = '\0';
-	if (strftime(timebuf, sizeof(timebuf), timefmt, &tm) != 0 &&
-		timebuf[sizeof(timebuf) - 1] == '\0') {
-	    timestr = timebuf;
+    if (event_time != NULL) {
+	time_t tv_sec = event_time->tv_sec;
+	if (localtime_r(&tv_sec, &tm) != NULL) {
+	    /* strftime() does not guarantee to NUL-terminate so we must check. */
+	    timebuf[sizeof(timebuf) - 1] = '\0';
+	    if (strftime(timebuf, sizeof(timebuf), timefmt, &tm) != 0 &&
+		    timebuf[sizeof(timebuf) - 1] == '\0') {
+		timestr = timebuf;
+	    }
 	}
     }
     len = asprintf(&full_line, "%s : %s : %s",
