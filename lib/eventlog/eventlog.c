@@ -920,7 +920,7 @@ format_json(int event_type, struct eventlog_args *args,
 		goto bad;
 
 	    json_value.type = JSON_BOOL;
-	    json_value.u.boolean = args->signal_name;
+	    json_value.u.boolean = args->core_dumped;
 	    if (!sudo_json_add_value(&json, "dumped_core", &json_value))
 		goto bad;
 	}
