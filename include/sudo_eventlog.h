@@ -103,6 +103,7 @@ struct eventlog {
     char *rungroup;
     char *runuser;
     char *peeraddr;
+    char *signal_name;
     char *submithost;
     char *submituser;
     char *submitgroup;
@@ -112,10 +113,13 @@ struct eventlog {
     char **envp;
     struct timespec submit_time;
     struct timespec iolog_offset;
+    struct timespec run_time;
+    int exit_value;
     int lines;
     int columns;
     uid_t runuid;
     gid_t rungid;
+    bool dumped_core;
     char sessid[7];
     char uuid_str[37];
 };

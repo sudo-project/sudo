@@ -146,6 +146,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
     evlog->columns = 80;
     evlog->runuid = (uid_t)-1;
     evlog->rungid = (gid_t)-1;
+    evlog->exit_value = -1;
 
     /* Pull out values by key from info array. */
     for (idx = 0; idx < infolen; idx++) {

@@ -78,6 +78,7 @@ iolog_parse_loginfo(int dfd, const char *iolog_dir)
     }
     evlog->runuid = (uid_t)-1;
     evlog->rungid = (gid_t)-1;
+    evlog->exit_value = -1;
 
     ok = legacy ? iolog_parse_loginfo_legacy(fp, iolog_dir, evlog) :
 	iolog_parse_loginfo_json(fp, iolog_dir, evlog);

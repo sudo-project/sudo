@@ -86,6 +86,31 @@ json_store_command(struct json_item *item, struct eventlog *evlog)
 }
 
 static bool
+json_store_dumped_core(struct json_item *item, struct eventlog *evlog)
+{
+    debug_decl(json_store_dumped_core, SUDO_DEBUG_UTIL);
+
+    evlog->dumped_core = item->u.boolean;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_exit_value(struct json_item *item, struct eventlog *evlog)
+{
+    debug_decl(json_store_exit_value, SUDO_DEBUG_UTIL);
+
+    if (item->u.number < 0 || item->u.number > INT_MAX) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "exit value %lld: out of range", item->u.number);
+	evlog->exit_value = -1;
+	debug_return_bool(false);
+    }
+
+    evlog->exit_value = item->u.number;
+    debug_return_bool(true);
+}
+
+static bool
 json_store_lines(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_lines, SUDO_DEBUG_UTIL);
@@ -230,6 +255,17 @@ json_store_runcwd(struct json_item *item, struct eventlog *evlog)
 }
 
 static bool
+json_store_signal(struct json_item *item, struct eventlog *evlog)
+{
+    debug_decl(json_store_signal, SUDO_DEBUG_UTIL);
+
+    free(evlog->signal_name);
+    evlog->signal_name = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
 json_store_submitcwd(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submitcwd, SUDO_DEBUG_UTIL);
@@ -263,25 +299,37 @@ json_store_submituser(struct json_item *item, struct eventlog *evlog)
 }
 
 static bool
-json_store_timestamp(struct json_item *item, struct eventlog *evlog)
+json_store_timespec(struct json_item *item, struct timespec *ts)
 {
     struct json_object *object;
-    debug_decl(json_store_timestamp, SUDO_DEBUG_UTIL);
+    debug_decl(json_store_timespec, SUDO_DEBUG_UTIL);
 
     object = &item->u.child;
     TAILQ_FOREACH(item, &object->items, entries) {
 	if (item->type != JSON_NUMBER)
 	    continue;
 	if (strcmp(item->name, "seconds") == 0) {
-	    evlog->submit_time.tv_sec = item->u.number;
+	    ts->tv_sec = item->u.number;
 	    continue;
 	}
 	if (strcmp(item->name, "nanoseconds") == 0) {
-	    evlog->submit_time.tv_nsec = item->u.number;
+	    ts->tv_nsec = item->u.number;
 	    continue;
 	}
     }
     debug_return_bool(true);
+}
+
+static bool
+json_store_run_time(struct json_item *item, struct eventlog *evlog)
+{
+    return json_store_timespec(item, &evlog->run_time);
+}
+
+static bool
+json_store_timestamp(struct json_item *item, struct eventlog *evlog)
+{
+    return json_store_timespec(item, &evlog->submit_time);
 }
 
 static bool
@@ -302,7 +350,10 @@ static struct iolog_json_key {
 } iolog_json_keys[] = {
     { "columns", JSON_NUMBER, json_store_columns },
     { "command", JSON_STRING, json_store_command },
+    { "dumped_core", JSON_BOOL, json_store_dumped_core },
+    { "exit_value", JSON_NUMBER, json_store_exit_value },
     { "lines", JSON_NUMBER, json_store_lines },
+    { "run_time", JSON_OBJECT, json_store_run_time },
     { "runargv", JSON_ARRAY, json_store_runargv },
     { "runenv", JSON_ARRAY, json_store_runenv },
     { "rungid", JSON_ID, json_store_rungid },
@@ -311,6 +362,7 @@ static struct iolog_json_key {
     { "runuser", JSON_STRING, json_store_runuser },
     { "runchroot", JSON_STRING, json_store_runchroot },
     { "runcwd", JSON_STRING, json_store_runcwd },
+    { "signal", JSON_STRING, json_store_signal },
     { "submitcwd", JSON_STRING, json_store_submitcwd },
     { "submithost", JSON_STRING, json_store_submithost },
     { "submituser", JSON_STRING, json_store_submituser },
