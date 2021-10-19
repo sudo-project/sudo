@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
@@ -260,6 +261,102 @@ done:
     debug_return_bool(ret);
 }
 
+static bool
+store_exit_info_json(int dfd, struct timespec *run_time, int exit_value,
+    const char *signal_name, bool core_dumped,
+    struct connection_closure *closure)
+{
+    struct json_container json = { 0 };
+    struct json_value json_value;
+    struct iovec iov[3];
+    bool ret = false;
+    int fd = -1;
+    off_t pos;
+    debug_decl(store_exit_info_json, SUDO_DEBUG_UTIL);
+
+    if (!sudo_json_init(&json, 4, false, false))
+        goto done;
+
+    fd = openat(dfd, "log.json", O_RDWR);
+    if (fd == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to open to %s/log.json", closure->evlog->iolog_path);
+	if (errno == ENOENT) {
+	    /* Ignore missing log.json file. */
+	    ret = true;
+	}
+	goto done;
+    }
+
+    if (run_time != NULL) {
+	if (!sudo_json_open_object(&json, "run_time"))
+	    goto done;
+
+	json_value.type = JSON_NUMBER;
+	json_value.u.number = run_time->tv_sec;
+	if (!sudo_json_add_value(&json, "seconds", &json_value))
+	    goto done;
+
+	json_value.type = JSON_NUMBER;
+	json_value.u.number = run_time->tv_nsec;
+	if (!sudo_json_add_value(&json, "nanoseconds", &json_value))
+	    goto done;
+
+	if (!sudo_json_close_object(&json))
+	    goto done;
+    }
+
+    if (signal_name != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = signal_name;
+	if (!sudo_json_add_value(&json, "signal", &json_value))
+	    goto done;
+
+	json_value.type = JSON_BOOL;
+	json_value.u.boolean = core_dumped;
+	if (!sudo_json_add_value(&json, "dumped_core", &json_value))
+	    goto done;
+    }
+
+    json_value.type = JSON_NUMBER;
+    json_value.u.number = exit_value;
+    if (!sudo_json_add_value(&json, "exit_value", &json_value))
+	goto done;
+
+    /* Back up to overwrite the final "\n}\n" */
+    pos = lseek(fd, -3, SEEK_END);
+    if (pos == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to rewind %s/log.json 3 bytes", closure->evlog->iolog_path);
+	goto done;
+    }
+
+    /* Append the exit data and close the object. */
+    iov[0].iov_base = ",";
+    iov[0].iov_len = 1;
+    iov[1].iov_base = sudo_json_get_buf(&json);
+    iov[1].iov_len = sudo_json_get_len(&json);
+    iov[2].iov_base = "\n}\n";
+    iov[2].iov_len = 3;
+    if (writev(fd, iov, 3) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to write %s/log.json", closure->evlog->iolog_path);
+	/* Back up and try to restore to original state. */
+	if (lseek(fd, pos, SEEK_SET) != -1) {
+	    ignore_result(write(fd, "\n}\n", 3));
+	}
+	goto done;
+    }
+
+    ret = true;
+
+done:
+    if (fd != -1)
+	close(fd);
+    sudo_json_free(&json);
+    debug_return_bool(ret);
+}
+
 bool
 store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
@@ -292,6 +389,13 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     }
 
     if (closure->log_io) {
+	/* Store the run time and exit status in log.json. */
+	if (!store_exit_info_json(closure->iolog_dir_fd, run_time,
+		msg->exit_value, signame, msg->dumped_core, closure)) {
+	    closure->errstr = _("error logging exit event");
+	    debug_return_bool(false);
+	}
+
 	/* Clear write bits from I/O timing file to indicate completion. */
 	mode_t mode = logsrvd_conf_iolog_mode();
 	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
