@@ -671,19 +671,34 @@ fmt_exit_message(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     ExitMessage exit_msg = EXIT_MESSAGE__INIT;
+    TimeSpec run_time = TIME_SPEC__INIT;
+    struct eventlog *evlog = closure->evlog;
     bool ret = false;
     debug_decl(fmt_exit_message, SUDO_DEBUG_UTIL);
 
-    /*
-     * We don't have enough data in a sudo I/O log to create a real
-     * exit message.  For example, the exit value and run time are
-     * not known.  This results in a zero-sized message.
-     */
-    exit_msg.exit_value = 0;
+    if (evlog->exit_value != -1)
+	exit_msg.exit_value = evlog->exit_value;
+    if (sudo_timespecisset(&evlog->run_time)) {
+	run_time.tv_sec = evlog->run_time.tv_sec;
+	run_time.tv_nsec = evlog->run_time.tv_nsec;
+	exit_msg.run_time = &run_time;
+    }
+    if (evlog->signal_name != NULL) {
+	exit_msg.signal = evlog->signal_name;
+	exit_msg.dumped_core = evlog->dumped_core;
+    }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: sending ExitMessage, exit value %d",
-	__func__, exit_msg.exit_value);
+    if (evlog->signal_name != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: sending ExitMessage, signal %s, run_time [%lld, %ld]",
+	    __func__, evlog->signal_name, (long long)evlog->run_time.tv_sec,
+	    evlog->run_time.tv_nsec);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: sending ExitMessage, exit value %d, run_time [%lld, %ld]",
+	    __func__, evlog->exit_value, (long long)evlog->run_time.tv_sec,
+	    evlog->run_time.tv_nsec);
+    }
 
     /* Send ClientMessage */
     client_msg.u.exit_msg = &exit_msg;
