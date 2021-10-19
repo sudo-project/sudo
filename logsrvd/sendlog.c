@@ -402,6 +402,59 @@ free_info_messages(InfoMessage **info_msgs, size_t n_info_msgs)
     debug_return;
 }
 
+/*
+ * Build runargv StringList using either argv or command in evlog.
+ * Truncated command in evlog after first space as a side effect.
+ */
+static InfoMessage__StringList *
+fmt_runargv(const struct eventlog *evlog)
+{
+    InfoMessage__StringList *runargv;
+    debug_decl(fmt_runargv, SUDO_DEBUG_UTIL);
+
+    runargv = malloc(sizeof(*runargv));
+    if (runargv == NULL)
+	goto done;
+    info_message__string_list__init(runargv);
+
+    /* We may have runargv from the log.json file. */
+    if (evlog->argv != NULL && evlog->argv[0] != NULL) {
+	/* Convert evlog->argv into a StringList. */
+	char *cp;
+	size_t len;
+
+	for (len = 0; evlog->argv[len] != NULL; len++) {
+	    continue;
+	}
+	runargv->strings = reallocarray(NULL, len, sizeof(char *));
+	if (runargv->strings == NULL) {
+	    free(runargv);
+	    runargv = NULL;
+	    goto done;
+	}
+	runargv->n_strings = len;
+	for (len = 0; evlog->argv[len] != NULL; len++) {
+	    runargv->strings[len] = evlog->argv[len];
+	}
+
+	/* Make sure command doesn't include arguments. */
+	cp = strchr(evlog->command, ' ');
+	if (cp != NULL)
+	    *cp = '\0';
+    } else {
+	/* No log.json file, split command into a StringList. */
+	runargv->strings = split_command(evlog->command, &runargv->n_strings);
+	if (runargv->strings == NULL) {
+	    free(runargv);
+	    runargv = NULL;
+	    goto done;
+	}
+    }
+
+done:
+    debug_return_ptr(runargv);
+}
+
 static InfoMessage **
 fmt_info_messages(const struct eventlog *evlog, char *hostname,
     size_t *n_info_msgs)
@@ -411,13 +464,8 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
     size_t info_msgs_size, n = 0;
     debug_decl(fmt_info_messages, SUDO_DEBUG_UTIL);
 
-    /* Split command into a StringList. */
-    runargv = malloc(sizeof(*runargv));
+    runargv = fmt_runargv(evlog);
     if (runargv == NULL)
-        goto oom;
-    info_message__string_list__init(runargv);
-    runargv->strings = split_command(evlog->command, &runargv->n_strings);
-    if (runargv->strings == NULL)
 	goto oom;
 
     /* The sudo I/O log info file has limited info. */
