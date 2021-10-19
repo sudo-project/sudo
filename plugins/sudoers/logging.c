@@ -575,8 +575,11 @@ log_exit_status(int exit_status)
 	    if (!def_log_exit_status)
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
-	if (!eventlog_exit(&evlog, evl_flags, &run_time, ecode, signame,
-		dumped_core))
+	evlog.run_time = run_time;
+	evlog.exit_value = ecode;
+	evlog.signal_name = signame;
+	evlog.dumped_core = dumped_core;
+	if (!eventlog_exit(&evlog, evl_flags))
 	    ret = false;
 
 	sudoers_setlocale(oldlocale, NULL);

@@ -80,10 +80,7 @@
 struct eventlog_args {
     const char *reason;
     const char *errstr;
-    const char *signal_name;
     const struct timespec *event_time;
-    int exit_value;
-    bool core_dumped;
     eventlog_json_callback_t json_info_cb;
     void *json_info;
 };
@@ -201,10 +198,12 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 		len += strlen(evlog->argv[i]) + 1;
 	}
 	if (event_type == EVLOG_EXIT) {
-	    if (args->signal_name != NULL)
-		len += sizeof(LL_SIGNAL_STR) + 2 + strlen(args->signal_name);
-	    (void)snprintf(exit_str, sizeof(exit_str), "%d", args->exit_value);
-	    len += sizeof(LL_EXIT_STR) + 2 + strlen(exit_str);
+	    if (evlog->signal_name != NULL)
+		len += sizeof(LL_SIGNAL_STR) + 2 + strlen(evlog->signal_name);
+	    if (evlog->exit_value != -1) {
+		(void)snprintf(exit_str, sizeof(exit_str), "%d", evlog->exit_value);
+		len += sizeof(LL_EXIT_STR) + 2 + strlen(exit_str);
+	    }
 	}
     }
 
@@ -289,16 +288,18 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 	    }
 	}
 	if (event_type == EVLOG_EXIT) {
-	    if (args->signal_name != NULL) {
+	    if (evlog->signal_name != NULL) {
 		if (strlcat(line, " ; ", len) >= len ||
 		    strlcat(line, LL_SIGNAL_STR, len) >= len ||
-		    strlcat(line, args->signal_name, len) >= len)
+		    strlcat(line, evlog->signal_name, len) >= len)
 		    goto toobig;
 	    }
-	    if (strlcat(line, " ; ", len) >= len ||
-		strlcat(line, LL_EXIT_STR, len) >= len ||
-		strlcat(line, exit_str, len) >= len)
-		goto toobig;
+	    if (evlog->exit_value != -1) {
+		if (strlcat(line, " ; ", len) >= len ||
+		    strlcat(line, LL_EXIT_STR, len) >= len ||
+		    strlcat(line, exit_str, len) >= len)
+		    goto toobig;
+	    }
 	}
     }
 
@@ -819,7 +820,6 @@ format_json(int event_type, struct eventlog_args *args,
     struct json_container json = { 0 };
     struct json_value json_value;
     const char *time_str, *type_str;
-    bool format_timestamp = true;
     struct timespec now;
     debug_decl(format_json, SUDO_DEBUG_UTIL);
 
@@ -849,8 +849,7 @@ format_json(int event_type, struct eventlog_args *args,
 	break;
     case EVLOG_EXIT:
 	type_str = "exit";
-	time_str = "run_time";
-	format_timestamp = false;
+	time_str = "exit_time";
 	break;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -901,7 +900,7 @@ format_json(int event_type, struct eventlog_args *args,
 
     /* Log event time from client */
     if (args->event_time != NULL) {
-	if (!json_add_timestamp(&json, time_str, args->event_time, format_timestamp)) {
+	if (!json_add_timestamp(&json, time_str, args->event_time, true)) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable format timestamp");
 	    goto bad;
@@ -915,19 +914,26 @@ format_json(int event_type, struct eventlog_args *args,
 		info = NULL;
 	}
 
-	if (args->signal_name != NULL) {
+	if (sudo_timespecisset(&evlog->run_time)) {
+	    if (!json_add_timestamp(&json, "run_time", &evlog->run_time, false)) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable format timestamp");
+		goto bad;
+	    }
+	}
+	if (evlog->signal_name != NULL) {
 	    json_value.type = JSON_STRING;
-	    json_value.u.string = args->signal_name;
+	    json_value.u.string = evlog->signal_name;
 	    if (!sudo_json_add_value(&json, "signal", &json_value))
 		goto bad;
 
 	    json_value.type = JSON_BOOL;
-	    json_value.u.boolean = args->core_dumped;
+	    json_value.u.boolean = evlog->dumped_core;
 	    if (!sudo_json_add_value(&json, "dumped_core", &json_value))
 		goto bad;
 	}
 	json_value.type = JSON_NUMBER;
-	json_value.u.number = args->exit_value;
+	json_value.u.number = evlog->exit_value;
 	if (!sudo_json_add_value(&json, "exit_value", &json_value))
 	    goto bad;
     }
@@ -1369,20 +1375,19 @@ eventlog_alert(const struct eventlog *evlog, int flags,
 }
 
 bool
-eventlog_exit(const struct eventlog *evlog, int flags,
-    struct timespec *run_time, int exit_value, const char *signal_name,
-    bool core_dumped)
+eventlog_exit(const struct eventlog *evlog, int flags)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const int log_type = evl_conf->type;
     struct eventlog_args args = { NULL };
+    struct timespec exit_time;
     bool ret = true;
     debug_decl(eventlog_exit, SUDO_DEBUG_UTIL);
 
-    args.signal_name = signal_name;
-    args.core_dumped = core_dumped;
-    args.exit_value = exit_value;
-    args.event_time = run_time;
+    if (sudo_timespecisset(&evlog->run_time)) {
+	sudo_timespecadd(&evlog->submit_time, &evlog->run_time, &exit_time);
+	args.event_time = &exit_time;
+    }
 
     if (ISSET(log_type, EVLOG_SYSLOG)) {
 	if (!do_syslog(EVLOG_EXIT, flags, &args, evlog))
