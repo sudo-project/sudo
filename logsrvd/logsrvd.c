@@ -1160,14 +1160,14 @@ server_commit_cb(int unused, int what, void *v)
     TimeSpec commit_point = TIME_SPEC__INIT;
     debug_decl(server_commit_cb, SUDO_DEBUG_UTIL);
 
+    /* Flush I/O logs before sending commit point if needed. */
+    if (!iolog_get_flush())
+	iolog_flush_all(closure);
+
     commit_point.tv_sec = closure->elapsed_time.tv_sec;
     commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
     if (!schedule_commit_point(&commit_point, closure))
 	connection_close(closure);
-
-    /* Flush I/O logs before sending commit point if needed. */
-    if (!iolog_get_flush())
-	iolog_flush_all(closure);
 
     debug_return;
 }
