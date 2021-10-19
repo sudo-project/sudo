@@ -106,6 +106,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (evlog != NULL) {
 	evlog->runuid = (uid_t)-1;
 	evlog->rungid = (gid_t)-1;
+	evlog->exit_value = -1;
 
 	/* Try to parse buffer as a JSON-format I/O log info file. */
 	iolog_parse_loginfo_json(fp, "fuzz.json", evlog);
