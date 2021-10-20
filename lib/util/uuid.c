@@ -52,20 +52,17 @@ struct uuid {
 void
 sudo_uuid_create_v1(unsigned char uuid_out[16])
 {
-    union {
-	struct uuid id;
-	unsigned char u8[16];
-    } uuid;
+    struct uuid uuid;
 
     arc4random_buf(&uuid, sizeof(uuid));
 
     /* Set version to 4 (random), 4 most significant bits (12-15) are 0010. */
-    uuid.id.time_hi_and_version &= 0x0fff;
-    uuid.id.time_hi_and_version |= 0x4000;
+    uuid.time_hi_and_version &= 0x0fff;
+    uuid.time_hi_and_version |= 0x4000;
 
     /* Set variant to 1: two most significant bits (6 and 7) are 01. */
-    uuid.id.clock_seq_hi_and_reserved &= 0x3f;
-    uuid.id.clock_seq_hi_and_reserved |= 0x80;
+    uuid.clock_seq_hi_and_reserved &= 0x3f;
+    uuid.clock_seq_hi_and_reserved |= 0x80;
 
     memcpy(uuid_out, &uuid, 16);
 }
