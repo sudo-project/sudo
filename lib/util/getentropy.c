@@ -64,6 +64,9 @@
 #ifdef HAVE_DL_ITERATE_PHDR
 # include <link.h>
 #endif
+#ifdef HAVE_OPENSSL
+# include <openssl/rand.h>
+#endif
 
 #include "sudo_compat.h"
 #include "sudo_digest.h"
@@ -129,6 +132,11 @@ sudo_getentropy(void *buf, size_t len)
 	ret = getentropy_getrandom(buf, len);
 	if (ret != -1)
 		return (ret);
+
+#ifdef HAVE_OPENSSL
+	if (RAND_bytes(buf, len) == 1)
+		return (0);
+#endif
 
 	ret = getentropy_sysctl(buf, len);
 	if (ret != -1)
