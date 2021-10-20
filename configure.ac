@@ -4387,6 +4387,12 @@ dnl
 AC_LANG_WERROR
 
 dnl
+dnl Don't use sys/sysctl.h if it is marked deprecated (Linux).
+dnl This test relies on AC_LANG_WERROR
+dnl
+AC_CHECK_HEADERS([sys/sysctl.h])
+
+dnl
 dnl If compiler supports the -static-libgcc flag use it unless we have
 dnl GNU ld (which can avoid linking in libgcc when it is not needed).
 dnl This test relies on AC_LANG_WERROR

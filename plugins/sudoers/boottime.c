@@ -33,7 +33,7 @@
 #include <limits.h>
 #include <time.h>
 #ifndef __linux__
-# if defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
+# if defined(HAVE_SYS_SYSCTL_H)
 #  include <sys/sysctl.h>
 # elif defined(HAVE_GETUTXID)
 #  include <utmpx.h>

@@ -29331,6 +29331,14 @@ fi
 
 ac_c_werror_flag=yes
 
+ac_fn_c_check_header_compile "$LINENO" "sys/sysctl.h" "ac_cv_header_sys_sysctl_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_sysctl_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_SYS_SYSCTL_H 1" >>confdefs.h
+
+fi
+
+
 if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes" -a -n "$GCC"; then
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -static-libgcc" >&5
 printf %s "checking whether C compiler accepts -static-libgcc... " >&6; }

@@ -29,7 +29,7 @@
 #include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-#ifdef HAVE_SYSCTL
+#ifdef HAVE_SYS_SYSCTL_H
 # include <sys/sysctl.h>
 #endif
 #ifdef HAVE_SYS_STATVFS_H
