@@ -34,10 +34,6 @@
 
 #ifndef HAVE_ARC4RANDOM
 
-#ifdef HAVE_SYS_RANDOM_H
-# include <sys/random.h>
-#endif
-
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
@@ -51,6 +47,7 @@
 #endif
 
 #include "sudo_compat.h"
+#include "sudo_fatal.h"
 #include "sudo_rand.h"
 
 #define KEYSTREAM_ONLY
@@ -96,7 +93,7 @@ _rs_stir(void)
 	unsigned char rnd[KEYSZ + IVSZ];
 
 	if (getentropy(rnd, sizeof rnd) == -1)
-		raise(SIGKILL);
+		sudo_fatal_nodebug("getentropy");
 
 	if (!rs_initialized) {
 		rs_initialized = 1;

@@ -2047,6 +2047,10 @@ case "$host" in
 		])
 		# We call getrandom via syscall(3) in case it is not in libc
 		AC_CHECK_HEADERS([linux/random.h])
+
+		# The glibc getentropy() emulation may fail on older kernels.
+		# We use our own getentropy() by default on Linux.
+		: ${ac_cv_func_getentropy='no'}
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
@@ -2655,7 +2659,6 @@ AC_CHECK_FUNCS([arc4random], [
     SUDO_APPEND_COMPAT_EXP(sudo_arc4random_uniform)
     # arc4random.c needs getentropy()
     AC_CHECK_FUNCS([getentropy], [
-	AC_CHECK_HEADERS([sys/random.h])
     ], [
 	AC_LIBOBJ(getentropy)
 	SUDO_APPEND_COMPAT_EXP(sudo_getentropy)
