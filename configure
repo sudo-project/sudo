@@ -805,6 +805,7 @@ SUDO_NLS
 LIBPTHREAD
 LIBTLS
 LIBMD
+LIBCRYPTO
 LIBINTL
 LIBRT
 LIBDL
@@ -3563,6 +3564,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3635,6 +3637,7 @@ LCMAN=0
 PSMAN=0
 SEMAN=0
 LIBINTL=
+LIBCRYPTO=
 LIBMD=
 LIBTLS=
 ZLIB=
@@ -23583,30 +23586,29 @@ fi
 		    ;;
 	    esac
 	done
-	if test "$DIGEST" = "digest_openssl.lo"; then
-	    if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
-		LIBMD=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
-		for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
-		    case "$f" in
-			-L*)
-			    f="${f#-L}"
+	if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
+	    LIBCRYPTO=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
+	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
+		case "$f" in
+		    -L*)
+			f="${f#-L}"
 
 
-if test ${LIBMD+y}
+if test ${LIBCRYPTO+y}
 then :
 
-  case " $LIBMD " in #(
+  case " $LIBCRYPTO " in #(
   *" -L$f "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD already contains -L\$f"; } >&5
-  (: LIBMD already contains -L$f) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO already contains -L\$f"; } >&5
+  (: LIBCRYPTO already contains -L$f) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append LIBMD " -L$f"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD=\"\$LIBMD\""; } >&5
-  (: LIBMD="$LIBMD") 2>&5
+     as_fn_append LIBCRYPTO " -L$f"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO=\"\$LIBCRYPTO\""; } >&5
+  (: LIBCRYPTO="$LIBCRYPTO") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -23615,9 +23617,9 @@ esac
 
 else $as_nop
 
-  LIBMD=-L$f
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD=\"\$LIBMD\""; } >&5
-  (: LIBMD="$LIBMD") 2>&5
+  LIBCRYPTO=-L$f
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO=\"\$LIBCRYPTO\""; } >&5
+  (: LIBCRYPTO="$LIBCRYPTO") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -23626,21 +23628,21 @@ fi
 
     if test X"$enable_rpath" = X"yes"; then
 
-if test ${LIBMD_R+y}
+if test ${LIBCRYPTO_R+y}
 then :
 
-  case " $LIBMD_R " in #(
+  case " $LIBCRYPTO_R " in #(
   *" -R$f "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD_R already contains -R\$f"; } >&5
-  (: LIBMD_R already contains -R$f) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R already contains -R\$f"; } >&5
+  (: LIBCRYPTO_R already contains -R$f) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append LIBMD_R " -R$f"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD_R=\"\$LIBMD_R\""; } >&5
-  (: LIBMD_R="$LIBMD_R") 2>&5
+     as_fn_append LIBCRYPTO_R " -R$f"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R=\"\$LIBCRYPTO_R\""; } >&5
+  (: LIBCRYPTO_R="$LIBCRYPTO_R") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -23649,9 +23651,9 @@ esac
 
 else $as_nop
 
-  LIBMD_R=-R$f
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD_R=\"\$LIBMD_R\""; } >&5
-  (: LIBMD_R="$LIBMD_R") 2>&5
+  LIBCRYPTO_R=-R$f
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R=\"\$LIBCRYPTO_R\""; } >&5
+  (: LIBCRYPTO_R="$LIBCRYPTO_R") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -23660,24 +23662,24 @@ fi
 
     fi
 
-			    ;;
-			*)
+			;;
+		    *)
 
-if test ${LIBMD+y}
+if test ${LIBCRYPTO+y}
 then :
 
-  case " $LIBMD " in #(
+  case " $LIBCRYPTO " in #(
   *" $f "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD already contains \$f"; } >&5
-  (: LIBMD already contains $f) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO already contains \$f"; } >&5
+  (: LIBCRYPTO already contains $f) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append LIBMD " $f"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD=\"\$LIBMD\""; } >&5
-  (: LIBMD="$LIBMD") 2>&5
+     as_fn_append LIBCRYPTO " $f"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO=\"\$LIBCRYPTO\""; } >&5
+  (: LIBCRYPTO="$LIBCRYPTO") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -23686,23 +23688,22 @@ esac
 
 else $as_nop
 
-  LIBMD=$f
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD=\"\$LIBMD\""; } >&5
-  (: LIBMD="$LIBMD") 2>&5
+  LIBCRYPTO=$f
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO=\"\$LIBCRYPTO\""; } >&5
+  (: LIBCRYPTO="$LIBCRYPTO") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
 
 fi
 
-			    ;;
-		    esac
-		done
-	    else
-		# No separate pkg config for libcrypto
-		LIBMD="$LIBTLS"
-		LIBMD_R="$LIBTLS_R"
-	    fi
+			;;
+		esac
+	    done
+	else
+	    # No separate pkg config for libcrypto
+	    LIBCRYPTO="$LIBTLS"
+	    LIBCRYPTO_R="$LIBTLS_R"
 	fi
 	for f in `$PKG_CONFIG --cflags-only-I $pkg_openssl`; do
 
@@ -23914,21 +23915,21 @@ then :
 	    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
 
 
-if test ${LIBMD+y}
+if test ${LIBCRYPTO+y}
 then :
 
-  case " $LIBMD " in #(
+  case " $LIBCRYPTO " in #(
   *" -L${enable_openssl}/lib "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD already contains -L\${enable_openssl}/lib"; } >&5
-  (: LIBMD already contains -L${enable_openssl}/lib) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO already contains -L\${enable_openssl}/lib"; } >&5
+  (: LIBCRYPTO already contains -L${enable_openssl}/lib) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append LIBMD " -L${enable_openssl}/lib"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD=\"\$LIBMD\""; } >&5
-  (: LIBMD="$LIBMD") 2>&5
+     as_fn_append LIBCRYPTO " -L${enable_openssl}/lib"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO=\"\$LIBCRYPTO\""; } >&5
+  (: LIBCRYPTO="$LIBCRYPTO") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -23937,9 +23938,9 @@ esac
 
 else $as_nop
 
-  LIBMD=-L${enable_openssl}/lib
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD=\"\$LIBMD\""; } >&5
-  (: LIBMD="$LIBMD") 2>&5
+  LIBCRYPTO=-L${enable_openssl}/lib
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO=\"\$LIBCRYPTO\""; } >&5
+  (: LIBCRYPTO="$LIBCRYPTO") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -23948,21 +23949,21 @@ fi
 
     if test X"$enable_rpath" = X"yes"; then
 
-if test ${LIBMD_R+y}
+if test ${LIBCRYPTO_R+y}
 then :
 
-  case " $LIBMD_R " in #(
+  case " $LIBCRYPTO_R " in #(
   *" -R${enable_openssl}/lib "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD_R already contains -R\${enable_openssl}/lib"; } >&5
-  (: LIBMD_R already contains -R${enable_openssl}/lib) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R already contains -R\${enable_openssl}/lib"; } >&5
+  (: LIBCRYPTO_R already contains -R${enable_openssl}/lib) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append LIBMD_R " -R${enable_openssl}/lib"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD_R=\"\$LIBMD_R\""; } >&5
-  (: LIBMD_R="$LIBMD_R") 2>&5
+     as_fn_append LIBCRYPTO_R " -R${enable_openssl}/lib"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R=\"\$LIBCRYPTO_R\""; } >&5
+  (: LIBCRYPTO_R="$LIBCRYPTO_R") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -23971,9 +23972,9 @@ esac
 
 else $as_nop
 
-  LIBMD_R=-R${enable_openssl}/lib
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBMD_R=\"\$LIBMD_R\""; } >&5
-  (: LIBMD_R="$LIBMD_R") 2>&5
+  LIBCRYPTO_R=-R${enable_openssl}/lib
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R=\"\$LIBCRYPTO_R\""; } >&5
+  (: LIBCRYPTO_R="$LIBCRYPTO_R") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -24055,6 +24056,7 @@ fi
 	    else
 		enable_openssl=yes
 	    fi
+	    LIBCRYPTO="${LIBCRYPTO} -lcrypto"
 	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
@@ -24097,7 +24099,6 @@ if test "x$ac_cv_lib_crypto_EVP_MD_CTX_new" = xyes
 then :
 
 		DIGEST=digest_openssl.lo
-		LIBMD="${LIBMD} -lcrypto"
 
 fi
 
@@ -31435,8 +31436,8 @@ fi
 if test X"$ZLIB_R" != X""; then
     ZLIB="$ZLIB_R $ZLIB"
 fi
-if test X"$LIBMD_R" != X""; then
-    LIBMD="$LIBMD_R $LIBMD"
+if test X"$LIBCRYPTO_R" != X""; then
+    LIBCRYPTO="$LIBCRYPTO_R $LIBCRYPTO"
 fi
 if test X"$LIBTLS_R" != X""; then
     LIBTLS="$LIBTLS_R $LIBTLS"

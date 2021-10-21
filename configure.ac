@@ -93,6 +93,7 @@ AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LIBRT])
 AC_SUBST([LIBINTL])
+AC_SUBST([LIBCRYPTO])
 AC_SUBST([LIBMD])
 AC_SUBST([LIBTLS])
 AC_SUBST([LIBPTHREAD])
@@ -250,6 +251,7 @@ LCMAN=0
 PSMAN=0
 SEMAN=0
 LIBINTL=
+LIBCRYPTO=
 LIBMD=
 LIBTLS=
 ZLIB=
@@ -2990,25 +2992,23 @@ if test "${enable_openssl-no}" != no; then
 		    ;;
 	    esac
 	done
-	if test "$DIGEST" = "digest_openssl.lo"; then
-	    if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
-		LIBMD=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
-		for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
-		    case "$f" in
-			-L*)
-			    f="${f#-L}"
-			    SUDO_APPEND_LIBPATH([LIBMD], [$f])
-			    ;;
-			*)
-			    AX_APPEND_FLAG([$f], [LIBMD])
-			    ;;
-		    esac
-		done
-	    else
-		# No separate pkg config for libcrypto
-		LIBMD="$LIBTLS"
-		LIBMD_R="$LIBTLS_R"
-	    fi
+	if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
+	    LIBCRYPTO=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
+	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
+		case "$f" in
+		    -L*)
+			f="${f#-L}"
+			SUDO_APPEND_LIBPATH([LIBCRYPTO], [$f])
+			;;
+		    *)
+			AX_APPEND_FLAG([$f], [LIBCRYPTO])
+			;;
+		esac
+	    done
+	else
+	    # No separate pkg config for libcrypto
+	    LIBCRYPTO="$LIBTLS"
+	    LIBCRYPTO_R="$LIBTLS_R"
 	fi
 	for f in `$PKG_CONFIG --cflags-only-I $pkg_openssl`; do
 	    AX_APPEND_FLAG([$f], [CPPFLAGS])
@@ -3034,17 +3034,17 @@ if test "${enable_openssl-no}" != no; then
 	    # OpenSSL >= 1.0.1 detected, use it.
 	    AC_DEFINE(HAVE_OPENSSL)
 	    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
-		SUDO_APPEND_LIBPATH(LIBMD, [${enable_openssl}/lib])
+		SUDO_APPEND_LIBPATH(LIBCRYPTO, [${enable_openssl}/lib])
 		SUDO_APPEND_LIBPATH(LIBTLS, [${enable_openssl}/lib])
 	    else
 		enable_openssl=yes
 	    fi
+	    LIBCRYPTO="${LIBCRYPTO} -lcrypto"
 	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
 	    AC_CHECK_LIB(crypto, EVP_MD_CTX_new, [
 		DIGEST=digest_openssl.lo
-		LIBMD="${LIBMD} -lcrypto"
 	    ])
 ], [
 	    # OpenSSL < 1.0.1 detected, ignore it.
@@ -4910,8 +4910,8 @@ fi
 if test X"$ZLIB_R" != X""; then
     ZLIB="$ZLIB_R $ZLIB"
 fi
-if test X"$LIBMD_R" != X""; then
-    LIBMD="$LIBMD_R $LIBMD"
+if test X"$LIBCRYPTO_R" != X""; then
+    LIBCRYPTO="$LIBCRYPTO_R $LIBCRYPTO"
 fi
 if test X"$LIBTLS_R" != X""; then
     LIBTLS="$LIBTLS_R $LIBTLS"
