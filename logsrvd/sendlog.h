@@ -58,7 +58,8 @@ struct client_closure {
     struct timing_closure timing;
     struct sudo_event_base *evbase;
     struct connection_buffer read_buf;
-    struct connection_buffer write_buf;
+    struct connection_buffer_list write_bufs;
+    struct connection_buffer_list free_bufs;
 #if defined(HAVE_OPENSSL)
     struct tls_client_closure tls_client;
 #endif

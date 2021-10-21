@@ -236,6 +236,38 @@ connect_server(struct peer_info *server, const char *port)
 }
 
 /*
+ * Get a buffer from the free list if possible, else allocate a new one.
+ */
+struct connection_buffer *
+get_free_buf(size_t len, struct client_closure *closure)
+{
+    struct connection_buffer *buf;
+    debug_decl(get_free_buf, SUDO_DEBUG_UTIL);
+
+    buf = TAILQ_FIRST(&closure->free_bufs);
+    if (buf != NULL) {
+        TAILQ_REMOVE(&closure->free_bufs, buf, entries);
+    } else {
+        if ((buf = calloc(1, sizeof(*buf))) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_ptr(NULL);
+	}
+    }
+
+    if (len > buf->size) {
+	free(buf->data);
+	buf->size = sudo_pow2_roundup(len);
+	if ((buf->data = malloc(buf->size)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(buf);
+	    buf = NULL;
+	}
+    }
+
+    debug_return_ptr(buf);
+}
+
+/*
  * Read the next I/O buffer as described by closure->timing.
  */
 static bool
@@ -278,8 +310,9 @@ read_io_buf(struct client_closure *closure)
  * Returns true on success, false on failure.
  */
 static bool
-fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
+fmt_client_message(struct client_closure *closure, ClientMessage *msg)
 {
+    struct connection_buffer *buf;
     uint32_t msg_len;
     bool ret = false;
     size_t len;
@@ -294,20 +327,16 @@ fmt_client_message(struct connection_buffer *buf, ClientMessage *msg)
     msg_len = htonl((uint32_t)len);
     len += sizeof(msg_len);
 
-    /* Resize buffer as needed. */
-    if (len > buf->size) {
-	free(buf->data);
-	buf->size = sudo_pow2_roundup(len);
-	if ((buf->data = malloc(buf->size)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    buf->size = 0;
-	    goto done;
-	}
+    if ((buf = get_free_buf(len, closure)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
     }
 
     memcpy(buf->data, &msg_len, sizeof(msg_len));
     client_message__pack(msg, buf->data + sizeof(msg_len));
     buf->len = len;
+    TAILQ_INSERT_TAIL(&closure->write_bufs, buf, entries);
+
     ret = true;
 
 done:
@@ -362,7 +391,7 @@ fmt_client_hello(struct client_closure *closure)
     /* Schedule ClientMessage */
     client_msg.u.hello_msg = &hello_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;
-    ret = fmt_client_message(&closure->write_buf, &client_msg);
+    ret = fmt_client_message(closure, &client_msg);
     if (ret) {
 	if (sudo_ev_add(closure->evbase, closure->read_ev, NULL, false) == -1)
 	    ret = false;
@@ -602,7 +631,7 @@ fmt_reject_message(struct client_closure *closure)
     /* Schedule ClientMessage */
     client_msg.u.reject_msg = &reject_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_REJECT_MSG;
-    ret = fmt_client_message(&closure->write_buf, &client_msg);
+    ret = fmt_client_message(closure, &client_msg);
     if (ret) {
 	if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1)
 	    ret = false;
@@ -661,7 +690,7 @@ fmt_accept_message(struct client_closure *closure)
     /* Schedule ClientMessage */
     client_msg.u.accept_msg = &accept_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_ACCEPT_MSG;
-    ret = fmt_client_message(&closure->write_buf, &client_msg);
+    ret = fmt_client_message(closure, &client_msg);
     if (ret) {
 	if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1)
 	    ret = false;
@@ -700,7 +729,7 @@ fmt_restart_message(struct client_closure *closure)
     /* Schedule ClientMessage */
     client_msg.u.restart_msg = &restart_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_RESTART_MSG;
-    ret = fmt_client_message(&closure->write_buf, &client_msg);
+    ret = fmt_client_message(closure, &client_msg);
     if (ret) {
 	if (sudo_ev_add(closure->evbase, closure->write_ev, NULL, false) == -1)
 	    ret = false;
@@ -711,7 +740,7 @@ fmt_restart_message(struct client_closure *closure)
 
 /*
  * Build and format an ExitMessage wrapped in a ClientMessage.
- * Stores the wire format message in the closure's write buffer.
+ * Stores the wire format message in the closure's write buffer list.
  * Returns true on success, false on failure.
  */
 static bool
@@ -751,7 +780,7 @@ fmt_exit_message(struct client_closure *closure)
     /* Send ClientMessage */
     client_msg.u.exit_msg = &exit_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_EXIT_MSG;
-    if (!fmt_client_message(&closure->write_buf, &client_msg))
+    if (!fmt_client_message(closure, &client_msg))
 	goto done;
 
     ret = true;
@@ -762,12 +791,11 @@ done:
 
 /*
  * Build and format an IoBuffer wrapped in a ClientMessage.
- * Stores the wire format message in buf.
+ * Stores the wire format message in the closure's write buffer list.
  * Returns true on success, false on failure.
  */
 static bool
-fmt_io_buf(int type, struct client_closure *closure,
-    struct connection_buffer *buf)
+fmt_io_buf(int type, struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     IoBuffer iobuf_msg = IO_BUFFER__INIT;
@@ -793,7 +821,7 @@ fmt_io_buf(int type, struct client_closure *closure,
     /* Send ClientMessage, it doesn't matter which IoBuffer we set. */
     client_msg.u.ttyout_buf = &iobuf_msg;
     client_msg.type_case = type;
-    if (!fmt_client_message(buf, &client_msg))
+    if (!fmt_client_message(closure, &client_msg))
         goto done;
 
     ret = true;
@@ -804,11 +832,11 @@ done:
 
 /*
  * Build and format a ChangeWindowSize message wrapped in a ClientMessage.
- * Stores the wire format message in buf.
+ * Stores the wire format message in the closure's write buffer list.
  * Returns true on success, false on failure.
  */
 static bool
-fmt_winsize(struct client_closure *closure, struct connection_buffer *buf)
+fmt_winsize(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     ChangeWindowSize winsize_msg = CHANGE_WINDOW_SIZE__INIT;
@@ -830,7 +858,7 @@ fmt_winsize(struct client_closure *closure, struct connection_buffer *buf)
     /* Send ClientMessage */
     client_msg.u.winsize_event = &winsize_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_WINSIZE_EVENT;
-    if (!fmt_client_message(buf, &client_msg))
+    if (!fmt_client_message(closure, &client_msg))
         goto done;
 
     ret = true;
@@ -841,11 +869,11 @@ done:
 
 /*
  * Build and format a CommandSuspend message wrapped in a ClientMessage.
- * Stores the wire format message in buf.
+ * Stores the wire format message in the closure's write buffer list.
  * Returns true on success, false on failure.
  */
 static bool
-fmt_suspend(struct client_closure *closure, struct connection_buffer *buf)
+fmt_suspend(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     CommandSuspend suspend_msg = COMMAND_SUSPEND__INIT;
@@ -868,7 +896,7 @@ fmt_suspend(struct client_closure *closure, struct connection_buffer *buf)
     /* Send ClientMessage */
     client_msg.u.suspend_event = &suspend_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_SUSPEND_EVENT;
-    if (!fmt_client_message(buf, &client_msg))
+    if (!fmt_client_message(closure, &client_msg))
         goto done;
 
     ret = true;
@@ -879,21 +907,15 @@ done:
 
 /*
  * Read the next entry for the I/O log timing file and format a ClientMessage.
- * Stores the wire format message in the closure's write buffer.
+ * Stores the wire format message in the closure's write buffer list.
  * Returns true on success, false on failure.
  */ 
 static bool
 fmt_next_iolog(struct client_closure *closure)
 {
     struct timing_closure *timing = &closure->timing;
-    struct connection_buffer *buf = &closure->write_buf;
     bool ret = false;
     debug_decl(fmt_next_iolog, SUDO_DEBUG_UTIL);
-
-    if (buf->len != 0) {
-	sudo_warnx(U_("%s: write buffer already in use"), __func__);
-	debug_return_bool(false);
-    }
 
     /* TODO: fill write buffer with multiple messages */
 again:
@@ -931,25 +953,25 @@ again:
 
     switch (timing->event) {
     case IO_EVENT_STDIN:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDIN_BUF, closure, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDIN_BUF, closure);
 	break;
     case IO_EVENT_STDOUT:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDOUT_BUF, closure, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDOUT_BUF, closure);
 	break;
     case IO_EVENT_STDERR:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDERR_BUF, closure, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDERR_BUF, closure);
 	break;
     case IO_EVENT_TTYIN:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYIN_BUF, closure, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYIN_BUF, closure);
 	break;
     case IO_EVENT_TTYOUT:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYOUT_BUF, closure, buf);
+	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYOUT_BUF, closure);
 	break;
     case IO_EVENT_WINSIZE:
-	ret = fmt_winsize(closure, buf);
+	ret = fmt_winsize(closure);
 	break;
     case IO_EVENT_SUSPEND:
-	ret = fmt_suspend(closure, buf);
+	ret = fmt_suspend(closure);
 	break;
     default:
 	sudo_warnx(U_("unexpected I/O event %d"), timing->event);
@@ -1312,9 +1334,14 @@ static void
 client_msg_cb(int fd, int what, void *v)
 {
     struct client_closure *closure = v;
-    struct connection_buffer *buf = &closure->write_buf;
+    struct connection_buffer *buf;
     ssize_t nwritten;
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL);
+
+    if ((buf = TAILQ_FIRST(&closure->write_bufs)) == NULL) {
+	sudo_warnx(U_("missing write buffer for client %s"), "localhost");
+	goto bad;
+    }
 
     /* For TLS we may need to write as part of SSL_read(). */
     if (closure->read_instead_of_write) {
@@ -1385,8 +1412,13 @@ client_msg_cb(int fd, int what, void *v)
 	    "%s: finished sending %u bytes to server", __func__, buf->len);
 	buf->off = 0;
 	buf->len = 0;
-	if (!client_message_completion(closure))
-	    goto bad;
+	TAILQ_REMOVE(&closure->write_bufs, buf, entries);
+	TAILQ_INSERT_TAIL(&closure->free_bufs, buf, entries);
+	if (TAILQ_EMPTY(&closure->write_bufs)) {
+	    /* Write queue empty, check state. */
+	    if (!client_message_completion(closure))
+		goto bad;
+	}
     }
     debug_return;
 
@@ -1436,6 +1468,7 @@ parse_timespec(struct timespec *ts, char *strval)
 static void
 client_closure_free(struct client_closure *closure)
 {
+    struct connection_buffer *buf;
     debug_decl(connection_closure_free, SUDO_DEBUG_UTIL);
 
     if (closure != NULL) {
@@ -1451,8 +1484,17 @@ client_closure_free(struct client_closure *closure)
         sudo_ev_free(closure->read_ev);
         sudo_ev_free(closure->write_ev);
         free(closure->read_buf.data);
-        free(closure->write_buf.data);
         free(closure->buf);
+	while ((buf = TAILQ_FIRST(&closure->write_bufs)) != NULL) {
+	    TAILQ_REMOVE(&closure->write_bufs, buf, entries);
+	    free(buf->data);
+	    free(buf);
+	}
+	while ((buf = TAILQ_FIRST(&closure->free_bufs)) != NULL) {
+	    TAILQ_REMOVE(&closure->free_bufs, buf, entries);
+	    free(buf->data);
+	    free(buf);
+	}
 	shutdown(closure->sock, SHUT_RDWR);
         close(closure->sock);
         free(closure);
@@ -1477,6 +1519,8 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
 
     closure->sock = sock;
     closure->evbase = base;
+    TAILQ_INIT(&closure->write_bufs);
+    TAILQ_INIT(&closure->free_bufs);
 
     TAILQ_INSERT_TAIL(&connections, closure, entries);
 
