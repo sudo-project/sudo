@@ -312,7 +312,7 @@ read_io_buf(struct client_closure *closure)
 static bool
 fmt_client_message(struct client_closure *closure, ClientMessage *msg)
 {
-    struct connection_buffer *buf;
+    struct connection_buffer *buf = NULL;
     uint32_t msg_len;
     bool ret = false;
     size_t len;
@@ -327,15 +327,24 @@ fmt_client_message(struct client_closure *closure, ClientMessage *msg)
     msg_len = htonl((uint32_t)len);
     len += sizeof(msg_len);
 
-    if ((buf = get_free_buf(len, closure)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto done;
+    if (!TAILQ_EMPTY(&closure->write_bufs)) {
+	buf = TAILQ_FIRST(&closure->write_bufs);
+	if (len > buf->size - buf->len) {
+	    /* Too small. */
+	    buf = NULL;
+	}
+    }
+    if (buf == NULL) {
+	if ((buf = get_free_buf(len, closure)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+	TAILQ_INSERT_TAIL(&closure->write_bufs, buf, entries);
     }
 
-    memcpy(buf->data, &msg_len, sizeof(msg_len));
-    client_message__pack(msg, buf->data + sizeof(msg_len));
-    buf->len = len;
-    TAILQ_INSERT_TAIL(&closure->write_bufs, buf, entries);
+    memcpy(buf->data + buf->len, &msg_len, sizeof(msg_len));
+    client_message__pack(msg, buf->data + buf->len + sizeof(msg_len));
+    buf->len += len;
 
     ret = true;
 
@@ -917,65 +926,74 @@ fmt_next_iolog(struct client_closure *closure)
     bool ret = false;
     debug_decl(fmt_next_iolog, SUDO_DEBUG_UTIL);
 
-    /* TODO: fill write buffer with multiple messages */
-again:
-    switch (iolog_read_timing_record(&closure->iolog_files[IOFD_TIMING], timing)) {
-    case 0:
-	/* OK */
-	break;
-    case 1:
-	/* no more IO buffers */
-	closure->state = SEND_EXIT;
-	debug_return_bool(fmt_exit_message(closure));
-    case -1:
-    default:
-	debug_return_bool(false);
-    }
-
-    /* Track elapsed time for comparison with commit points. */
-    sudo_timespecadd(&closure->elapsed, &timing->delay, &closure->elapsed);
-
-    /* If there is a stopping point, make sure we haven't reached it. */
-    if (sudo_timespecisset(&closure->stop_after)) {
-	if (sudo_timespeccmp(&closure->elapsed, &closure->stop_after, >)) {
-	    /* Reached limit, force premature end. */
-	    sudo_timespecsub(&closure->elapsed, &timing->delay, &closure->elapsed);
+    for (;;) {
+	const int timing_status = iolog_read_timing_record(
+	    &closure->iolog_files[IOFD_TIMING], timing);
+	switch (timing_status) {
+	case 0:
+	    /* OK */
+	    break;
+	case 1:
+	    /* no more IO buffers */
+	    closure->state = SEND_EXIT;
+	    debug_return_bool(fmt_exit_message(closure));
+	case -1:
+	default:
 	    debug_return_bool(false);
 	}
-    }
 
-    /* If we have a restart point, ignore records until we hit it. */
-    if (sudo_timespecisset(&closure->restart)) {
-	if (sudo_timespeccmp(&closure->restart, &closure->elapsed, >=))
-	    goto again;
-	sudo_timespecclear(&closure->restart);	/* caught up */
-    }
+	/* Track elapsed time for comparison with commit points. */
+	sudo_timespecadd(&closure->elapsed, &timing->delay, &closure->elapsed);
 
-    switch (timing->event) {
-    case IO_EVENT_STDIN:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDIN_BUF, closure);
-	break;
-    case IO_EVENT_STDOUT:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDOUT_BUF, closure);
-	break;
-    case IO_EVENT_STDERR:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDERR_BUF, closure);
-	break;
-    case IO_EVENT_TTYIN:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYIN_BUF, closure);
-	break;
-    case IO_EVENT_TTYOUT:
-	ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYOUT_BUF, closure);
-	break;
-    case IO_EVENT_WINSIZE:
-	ret = fmt_winsize(closure);
-	break;
-    case IO_EVENT_SUSPEND:
-	ret = fmt_suspend(closure);
-	break;
-    default:
-	sudo_warnx(U_("unexpected I/O event %d"), timing->event);
-	break;
+	/* If there is a stopping point, make sure we haven't reached it. */
+	if (sudo_timespecisset(&closure->stop_after)) {
+	    if (sudo_timespeccmp(&closure->elapsed, &closure->stop_after, >)) {
+		/* Reached limit, force premature end. */
+		sudo_timespecsub(&closure->elapsed, &timing->delay,
+		    &closure->elapsed);
+		debug_return_bool(false);
+	    }
+	}
+
+	/* If we have a restart point, ignore records until we hit it. */
+	if (sudo_timespecisset(&closure->restart)) {
+	    if (sudo_timespeccmp(&closure->restart, &closure->elapsed, >=))
+		continue;
+	    sudo_timespecclear(&closure->restart);	/* caught up */
+	}
+
+	switch (timing->event) {
+	case IO_EVENT_STDIN:
+	    ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDIN_BUF, closure);
+	    break;
+	case IO_EVENT_STDOUT:
+	    ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDOUT_BUF, closure);
+	    break;
+	case IO_EVENT_STDERR:
+	    ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_STDERR_BUF, closure);
+	    break;
+	case IO_EVENT_TTYIN:
+	    ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYIN_BUF, closure);
+	    break;
+	case IO_EVENT_TTYOUT:
+	    ret = fmt_io_buf(CLIENT_MESSAGE__TYPE_TTYOUT_BUF, closure);
+	    break;
+	case IO_EVENT_WINSIZE:
+	    ret = fmt_winsize(closure);
+	    break;
+	case IO_EVENT_SUSPEND:
+	    ret = fmt_suspend(closure);
+	    break;
+	default:
+	    sudo_warnx(U_("unexpected I/O event %d"), timing->event);
+	    break;
+	}
+
+	/* Keep filling write buffer as long as we only have one of them. */
+	if (!ret)
+	    break;
+	if (TAILQ_NEXT(TAILQ_FIRST(&closure->write_bufs), entries) != NULL)
+	    break;
     }
 
     debug_return_bool(ret);
@@ -1486,6 +1504,8 @@ client_closure_free(struct client_closure *closure)
         free(closure->read_buf.data);
         free(closure->buf);
 	while ((buf = TAILQ_FIRST(&closure->write_bufs)) != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"discarding write buffer %p, len %u", buf, buf->len - buf->off);
 	    TAILQ_REMOVE(&closure->write_bufs, buf, entries);
 	    free(buf->data);
 	    free(buf);
@@ -1511,6 +1531,7 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
     struct timespec *restart, struct timespec *stop_after, const char *iolog_id,
     char *reject_reason, bool accept_only, struct eventlog *evlog)
 {
+    struct connection_buffer *buf;
     struct client_closure *closure;
     debug_decl(client_closure_alloc, SUDO_DEBUG_UTIL);
 
@@ -1545,6 +1566,11 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
 	server_msg_cb, closure);
     if (closure->read_ev == NULL)
 	goto bad;
+
+    buf = get_free_buf(64 * 1024, closure);
+    if (buf == NULL)
+	goto bad;
+    TAILQ_INSERT_TAIL(&closure->free_bufs, buf, entries);
 
     closure->write_ev = sudo_ev_alloc(sock, SUDO_EV_WRITE|SUDO_EV_PERSIST,
 	client_msg_cb, closure);
