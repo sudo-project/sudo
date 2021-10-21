@@ -76,6 +76,10 @@
 # define MAP_ANON MAP_ANONYMOUS
 #endif
 
+#ifndef MAP_FAILED
+# define MAP_FAILED ((void *) -1)
+#endif
+
 #define REPEAT 5
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
