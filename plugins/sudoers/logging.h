@@ -22,6 +22,21 @@
 
 #include <stdarg.h>
 
+struct sudoers_str_list;
+struct log_details {
+    struct eventlog *evlog;
+    struct sudoers_str_list *log_servers;
+    struct timespec server_timeout;
+# if defined(HAVE_OPENSSL)
+    char *ca_bundle;
+    char *cert_file;
+    char *key_file;
+# endif /* HAVE_OPENSSL */
+    bool keepalive;
+    bool verify_server;
+    bool ignore_log_errors;
+};
+
 /*
  * Values for sudoers_setlocale()
  */

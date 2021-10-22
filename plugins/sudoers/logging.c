@@ -54,7 +54,10 @@
 #endif
 
 #include "sudoers.h"
-#include "log_client.h"
+#ifdef SUDOERS_LOG_CLIENT
+# include "log_client.h"
+# include "strlist.h"
+#endif
 
 static bool should_mail(int);
 static bool warned = false;

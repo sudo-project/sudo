@@ -25,7 +25,6 @@
 #endif /* HAVE_OPENSSL */
 
 #include "log_server.pb-c.h"
-#include "strlist.h"
 
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
@@ -47,20 +46,6 @@ struct connection_buffer {
     unsigned int off;
 };
 TAILQ_HEAD(connection_buffer_list, connection_buffer);
-
-struct log_details {
-    struct eventlog *evlog;
-    struct sudoers_str_list *log_servers;
-    struct timespec server_timeout;
-#if defined(HAVE_OPENSSL)
-    char *ca_bundle;
-    char *cert_file;
-    char *key_file;
-#endif /* HAVE_OPENSSL */
-    bool keepalive;
-    bool verify_server;
-    bool ignore_log_errors;
-};
 
 enum client_state {
     ERROR,

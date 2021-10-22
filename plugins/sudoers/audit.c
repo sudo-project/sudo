@@ -30,7 +30,9 @@
 #include <string.h>
 
 #include "sudoers.h"
-#include "log_client.h"
+#ifdef SUDOERS_LOG_CLIENT
+# include "log_client.h"
+#endif
 
 #ifdef HAVE_BSM_AUDIT
 # include "bsm_audit.h"

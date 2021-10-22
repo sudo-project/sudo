@@ -62,6 +62,7 @@
 #include "sudo_iolog.h"
 #include "hostcheck.h"
 #include "log_client.h"
+#include "strlist.h"
 
 /* Shared between iolog.c and audit.c */
 struct client_closure *client_closure;
