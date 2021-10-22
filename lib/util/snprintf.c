@@ -116,6 +116,10 @@ static int xxxprintf(char **, size_t, int, const char *, va_list);
 # define MAP_ANON MAP_ANONYMOUS
 #endif
 
+#ifndef MAP_FAILED
+# define MAP_FAILED ((void *) -1)
+#endif
+
 /*
  * Allocate "size" bytes via mmap.
  */
