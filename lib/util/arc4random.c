@@ -34,6 +34,10 @@
 
 #ifndef HAVE_ARC4RANDOM
 
+#ifdef HAVE_SYS_RANDOM_H
+# include <sys/random.h>
+#endif
+
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
