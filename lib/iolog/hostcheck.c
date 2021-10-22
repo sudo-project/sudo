@@ -37,6 +37,13 @@
 # include  "sudo_util.h"
 # include  "hostcheck.h"
 
+#ifndef INET_ADDRSTRLEN
+# define INET_ADDRSTRLEN 16
+#endif
+#ifndef INET6_ADDRSTRLEN
+# define INET6_ADDRSTRLEN 46
+#endif
+
 /**
  * @brief Checks if given hostname resolves to the given IP address.
  *

@@ -26,6 +26,13 @@
 
 #include "log_server.pb-c.h"
 
+#ifndef INET_ADDRSTRLEN
+# define INET_ADDRSTRLEN 16
+#endif
+#ifndef INET6_ADDRSTRLEN
+# define INET6_ADDRSTRLEN 46
+#endif
+
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
 #endif

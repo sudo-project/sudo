@@ -52,9 +52,6 @@
 #  define NS_INT16SZ 2
 # endif
 #endif
-#ifndef INET6_ADDRSTRLEN
-# define INET6_ADDRSTRLEN 46
-#endif
 
 /*
  * WARNING: Don't even consider trying to compile this on a system where
