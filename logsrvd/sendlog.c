@@ -352,40 +352,6 @@ done:
     debug_return_bool(ret);
 }
 
-/*
- * Split command + args into an array of strings.
- * Returns an array containing command and args, reusing space in "command".
- * Note that the returned array does not end with a terminating NULL.
- */
-static char **
-split_command(char *command, size_t *lenp)
-{
-    char *cp;
-    char **args;
-    size_t len;
-    debug_decl(split_command, SUDO_DEBUG_UTIL);
-
-    for (cp = command, len = 0;;) {
-	len++;
-	if ((cp = strchr(cp, ' ')) == NULL)
-	    break;
-	cp++;
-    }
-    args = reallocarray(NULL, len, sizeof(char *));
-    if (args == NULL)
-	debug_return_ptr(NULL);
-
-    for (cp = command, len = 0;;) {
-	args[len++] = cp;
-	if ((cp = strchr(cp, ' ')) == NULL)
-	    break;
-	*cp++ = '\0';
-    }
-
-    *lenp = len;
-    debug_return_ptr(args);
-}
-
 static bool
 fmt_client_hello(struct client_closure *closure)
 {
@@ -441,6 +407,83 @@ free_info_messages(InfoMessage **info_msgs, size_t n_info_msgs)
 }
 
 /*
+ * Convert a NULL-terminated string vector (argv, envp) to a
+ * StringList with an associated size.
+ * Performs a shallow copy of the strings (copies pointers).
+ */
+static InfoMessage__StringList *
+vec_to_stringlist(char * const *vec)
+{
+    InfoMessage__StringList *strlist;
+    size_t len;
+    debug_decl(vec_to_stringlist, SUDO_DEBUG_UTIL);
+
+    strlist = malloc(sizeof(*strlist));
+    if (strlist == NULL)
+	goto done;
+    info_message__string_list__init(strlist);
+
+    /* Convert vec into a StringList. */
+    for (len = 0; vec[len] != NULL; len++) {
+	continue;
+    }
+    strlist->strings = reallocarray(NULL, len, sizeof(char *));
+    if (strlist->strings == NULL) {
+	free(strlist);
+	strlist = NULL;
+	goto done;
+    }
+    strlist->n_strings = len;
+    for (len = 0; vec[len] != NULL; len++) {
+	strlist->strings[len] = vec[len];
+    }
+
+done:
+    debug_return_ptr(strlist);
+}
+
+/*
+ * Split command + args separated by whitespace into a StringList.
+ * Returns a StringList containing command and args, reusing the contents
+ * of "command", which is modified.
+ */
+static InfoMessage__StringList *
+command_to_stringlist(char *command)
+{
+    InfoMessage__StringList *strlist;
+    char *cp;
+    size_t len;
+    debug_decl(command_to_stringlist, SUDO_DEBUG_UTIL);
+
+    strlist = malloc(sizeof(*strlist));
+    if (strlist == NULL)
+	debug_return_ptr(NULL);
+    info_message__string_list__init(strlist);
+
+    for (cp = command, len = 0;;) {
+	len++;
+	if ((cp = strchr(cp, ' ')) == NULL)
+	    break;
+	cp++;
+    }
+    strlist->strings = reallocarray(NULL, len, sizeof(char *));
+    if (strlist->strings == NULL) {
+	free(strlist);
+	debug_return_ptr(NULL);
+    }
+    strlist->n_strings = len;
+
+    for (cp = command, len = 0;;) {
+	strlist->strings[len++] = cp;
+	if ((cp = strchr(cp, ' ')) == NULL)
+	    break;
+	*cp++ = '\0';
+    }
+
+    debug_return_ptr(strlist);
+}
+
+/*
  * Build runargv StringList using either argv or command in evlog.
  * Truncated command in evlog after first space as a side effect.
  */
@@ -450,47 +493,37 @@ fmt_runargv(const struct eventlog *evlog)
     InfoMessage__StringList *runargv;
     debug_decl(fmt_runargv, SUDO_DEBUG_UTIL);
 
-    runargv = malloc(sizeof(*runargv));
-    if (runargv == NULL)
-	goto done;
-    info_message__string_list__init(runargv);
-
     /* We may have runargv from the log.json file. */
     if (evlog->argv != NULL && evlog->argv[0] != NULL) {
 	/* Convert evlog->argv into a StringList. */
-	char *cp;
-	size_t len;
-
-	for (len = 0; evlog->argv[len] != NULL; len++) {
-	    continue;
+	runargv = vec_to_stringlist(evlog->argv);
+	if (runargv != NULL) {
+	    /* Make sure command doesn't include arguments. */
+	    char *cp = strchr(evlog->command, ' ');
+	    if (cp != NULL)
+		*cp = '\0';
 	}
-	runargv->strings = reallocarray(NULL, len, sizeof(char *));
-	if (runargv->strings == NULL) {
-	    free(runargv);
-	    runargv = NULL;
-	    goto done;
-	}
-	runargv->n_strings = len;
-	for (len = 0; evlog->argv[len] != NULL; len++) {
-	    runargv->strings[len] = evlog->argv[len];
-	}
-
-	/* Make sure command doesn't include arguments. */
-	cp = strchr(evlog->command, ' ');
-	if (cp != NULL)
-	    *cp = '\0';
     } else {
 	/* No log.json file, split command into a StringList. */
-	runargv->strings = split_command(evlog->command, &runargv->n_strings);
-	if (runargv->strings == NULL) {
-	    free(runargv);
-	    runargv = NULL;
-	    goto done;
-	}
+	runargv = command_to_stringlist(evlog->command);
     }
 
-done:
     debug_return_ptr(runargv);
+}
+
+/*
+ * Build runenv StringList from env in evlog, if present.
+ */
+static InfoMessage__StringList *
+fmt_runenv(const struct eventlog *evlog)
+{
+    debug_decl(fmt_runenv, SUDO_DEBUG_UTIL);
+
+    /* Only present in log.json. */
+    if (evlog->envp == NULL || evlog->envp[0] == NULL)
+	debug_return_ptr(NULL);
+
+    debug_return_ptr(vec_to_stringlist(evlog->envp));
 }
 
 static InfoMessage **
@@ -499,6 +532,7 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
 {
     InfoMessage **info_msgs = NULL;
     InfoMessage__StringList *runargv = NULL;
+    InfoMessage__StringList *runenv = NULL;
     size_t info_msgs_size, n = 0;
     debug_decl(fmt_info_messages, SUDO_DEBUG_UTIL);
 
@@ -506,8 +540,11 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
     if (runargv == NULL)
 	goto oom;
 
+    /* runenv is only present in log.json */
+    runenv = fmt_runenv(evlog);
+
     /* The sudo I/O log info file has limited info. */
-    info_msgs_size = 10;
+    info_msgs_size = 13;
     info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
     if (info_msgs == NULL)
 	goto oom;
@@ -541,10 +578,32 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
     runargv = NULL;
     n++;
 
+    if (runenv != NULL) {
+	info_msgs[n]->key = "runenv";
+	info_msgs[n]->u.strlistval = runenv;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+	runenv = NULL;
+	n++;
+    }
+
+    if (evlog->rungid != (gid_t)-1) {
+	info_msgs[n]->key = "rungid";
+	info_msgs[n]->u.numval = evlog->rungid;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
+	n++;
+    }
+
     if (evlog->rungroup != NULL) {
 	info_msgs[n]->key = "rungroup";
 	info_msgs[n]->u.strval = evlog->rungroup;
 	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
+	n++;
+    }
+
+    if (evlog->runuid != (uid_t)-1) {
+	info_msgs[n]->key = "runuid";
+	info_msgs[n]->u.numval = evlog->runuid;
+	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
 	n++;
     }
 
@@ -589,6 +648,10 @@ oom:
     if (runargv != NULL) {
         free(runargv->strings);
         free(runargv);
+    }
+    if (runenv != NULL) {
+        free(runenv->strings);
+        free(runenv);
     }
     *n_info_msgs = 0;
     debug_return_ptr(NULL);
