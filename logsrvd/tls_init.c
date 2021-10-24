@@ -324,7 +324,7 @@ init_tls_context(const char *ca_bundle_file, const char *cert_file,
 	    /* No explicit key file set, try to use the cert file. */
 	    key_file = cert_file;
 	}
-        if (!SSL_CTX_use_PrivateKey_file(ctx, key_file, X509_FILETYPE_PEM) ||
+        if (!SSL_CTX_use_PrivateKey_file(ctx, key_file, SSL_FILETYPE_PEM) ||
 		!SSL_CTX_check_private_key(ctx)) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
 	    sudo_warnx(U_("%s: %s"), key_file, errstr);
