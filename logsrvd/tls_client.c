@@ -34,11 +34,6 @@
 #include <string.h>
 #include <time.h>
 
-#if defined(HAVE_OPENSSL)
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-#endif
-
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
@@ -46,9 +41,9 @@
 #include "sudo_gettext.h"
 #include "sudo_util.h"
 
-#include "hostcheck.h"
 #include "logsrv_util.h"
 #include "tls_common.h"
+#include "hostcheck.h"
 
 #if defined(HAVE_OPENSSL)
 

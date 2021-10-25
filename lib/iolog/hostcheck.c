@@ -22,6 +22,9 @@
 #include "config.h"
 
 #if defined(HAVE_OPENSSL)
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif
 # include <sys/types.h>
 # include <sys/socket.h>
 # include <netinet/in.h>

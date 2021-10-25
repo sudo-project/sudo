@@ -49,6 +49,9 @@
 #endif
 
 #if defined(HAVE_OPENSSL)
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif
 # include <openssl/ssl.h>
 # include <openssl/err.h>
 # include <openssl/x509v3.h>
@@ -1744,10 +1747,13 @@ server_msg_cb(int fd, int what, void *v)
                      * message and hope that no actual internal error occurs.
                      */
                     err = ERR_get_error();
+#if !defined(HAVE_WOLFSSL)
                     if (closure->state == RECV_HELLO &&
                         ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
                         errstr = "host name does not match certificate";
-                    } else {
+                    } else
+#endif
+		    {
                         errstr = ERR_reason_error_string(err);
                     }
                     sudo_warnx("%s", errstr);

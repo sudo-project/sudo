@@ -44,11 +44,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#if defined(HAVE_OPENSSL)
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-#endif
-
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
 #include "sudo_compat.h"
@@ -756,11 +751,14 @@ relay_server_msg_cb(int fd, int what, void *v)
                      * message and hope that no actual internal error occurs.
                      */
                     err = ERR_get_error();
+#if !defined(HAVE_WOLFSSL)
                     if (closure->state == INITIAL &&
                         ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
                         errstr = _("relay host name does not match certificate");
 			closure->errstr = errstr;
-                    } else {
+                    } else
+#endif
+		    {
                         errstr = ERR_reason_error_string(err);
 			closure->errstr = _("error reading from relay");
                     }

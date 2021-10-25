@@ -22,7 +22,11 @@
 #include "config.h"
 
 #if defined(HAVE_OPENSSL)
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif
 # include <openssl/ssl.h>
+# include <openssl/err.h>
 
 struct tls_client_closure {
     SSL *ssl;

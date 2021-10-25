@@ -49,11 +49,6 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-#if defined(HAVE_OPENSSL)
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-#endif
-
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
 #include "pathnames.h"
@@ -70,8 +65,8 @@
 #include "sudo_rand.h"
 #include "sudo_util.h"
 
-#include "hostcheck.h"
 #include "logsrvd.h"
+#include "hostcheck.h"
 
 #ifndef O_NOFOLLOW
 # define O_NOFOLLOW 0

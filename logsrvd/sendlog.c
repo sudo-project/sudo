@@ -54,11 +54,6 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-#if defined(HAVE_OPENSSL)
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-#endif
-
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -69,8 +64,8 @@
 #include "sudo_iolog.h"
 #include "sudo_util.h"
 
-#include "hostcheck.h"
 #include "sendlog.h"
+#include "hostcheck.h"
 
 #if defined(HAVE_OPENSSL)
 # define TLS_HANDSHAKE_TIMEO_SEC 10
@@ -1334,10 +1329,13 @@ server_msg_cb(int fd, int what, void *v)
                      * message and hope that no actual internal error occurs.
                      */
                     err = ERR_get_error();
+#if !defined(HAVE_WOLFSSL)
                     if (closure->state == RECV_HELLO &&
                         ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
                         errstr = "host name does not match certificate";
-                    } else {
+                    } else
+#endif
+		    {
                         errstr = ERR_reason_error_string(err);
                     }
                     sudo_warnx("%s", errstr);

@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#if defined(HAVE_WOLFSSL)
+# include <wolfssl/options.h>
+#endif
 #include <openssl/evp.h>
 
 #include "sudo_compat.h"

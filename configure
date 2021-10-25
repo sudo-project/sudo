@@ -1045,6 +1045,7 @@ enable_log_server
 enable_log_client
 enable_openssl
 enable_openssl_pkgconfig_template
+enable_wolfssl
 enable_gcrypt
 enable_python
 enable_shared
@@ -1763,6 +1764,7 @@ Optional Features:
   --enable-openssl-pkgconfig-template
                           A printf format string used to construct the OpenSSL
                           pkg-config name
+  --enable-wolfssl        Use WolfSSL's TLS and sha2 functions
   --enable-gcrypt         Use GNU crypt's sha2 functions
   --enable-python         Compile python plugin support
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -6985,13 +6987,22 @@ else $as_nop
 fi
 
 
+# Check whether --enable-wolfssl was given.
+if test ${enable_wolfssl+y}
+then :
+  enableval=$enable_wolfssl;
+    enable_openssl=no
+
+fi
+
+
 # Check whether --enable-gcrypt was given.
 if test ${enable_gcrypt+y}
 then :
   enableval=$enable_gcrypt;
-    if test "${enable_openssl-no}" != no; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring --enable-gcrypt when OpenSSL is enabled." >&5
-printf "%s\n" "$as_me: WARNING: ignoring --enable-gcrypt when OpenSSL is enabled." >&2;}
+    if test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring --enable-gcrypt when OpenSSL or WolfSSL is enabled." >&5
+printf "%s\n" "$as_me: WARNING: ignoring --enable-gcrypt when OpenSSL or WolfSSL is enabled." >&2;}
 	enable_gcrypt=no
     fi
 
@@ -24313,6 +24324,655 @@ fi
 
     fi
 fi
+if test "${enable_wolfssl-no}" != no; then
+    # Use pkg-config to find the wolfssl cflags and libs if possible.
+    if test "$enable_wolfssl" != "yes"; then
+	PKG_CONFIG_LIBDIR="${enable_wolfssl}/lib/pkgconfig:${enable_wolfssl}/lib64/pkgconfig:${enable_wolfssl}/share/pkgconfig"
+	export PKG_CONFIG_LIBDIR
+    elif test "$cross_compiling" = "yes" -a -z "$PKG_CONFIG"; then
+	# Cannot use pkg-config when cross-compiling
+	PKG_CONFIG=false
+    fi
+    : ${PKG_CONFIG='pkg-config'}
+    if $PKG_CONFIG --exists wolfssl >/dev/null 2>&1; then
+	printf "%s\n" "#define HAVE_OPENSSL 1" >>confdefs.h
+
+	printf "%s\n" "#define HAVE_WOLFSSL 1" >>confdefs.h
+
+
+	O_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I wolfssl`"
+	O_LDFLAGS="$LDFLAGS"
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L wolfssl`"
+
+	# Check whether --static is needed
+	libssl="`$PKG_CONFIG --libs-only-l wolfssl | sed 's/^ *-l//'`"
+	libssl_extra=`echo $libssl | sed 's/^[^ ]* *//'`
+	libssl=`echo $libssl | sed 's/ .*//'`
+	as_ac_Lib=`printf "%s\n" "ac_cv_lib_$libssl''_wolfSSL_new$libssl_extra" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for wolfSSL_new in -l$libssl" >&5
+printf %s "checking for wolfSSL_new in -l$libssl... " >&6; }
+if eval test \${$as_ac_Lib+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$libssl $libssl_extra $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char wolfSSL_new ();
+int
+main (void)
+{
+return wolfSSL_new ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  eval "$as_ac_Lib=yes"
+else $as_nop
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"
+then :
+  STATIC=""
+else $as_nop
+  STATIC="--static"
+fi
+
+
+	# Use WolfSSL's sha2 functions if possible
+	ac_fn_check_decl "$LINENO" "EVP_MD_CTX_new" "ac_cv_have_decl_EVP_MD_CTX_new" "
+	    $ac_includes_default
+	    #include <wolfssl/options.h>
+	    #include <wolfssl/openssl/evp.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_EVP_MD_CTX_new" = xyes
+then :
+  DIGEST=digest_openssl.lo
+fi
+	CPPFLAGS="$O_CPPFLAGS"
+	LDFLAGS="$O_LDFLAGS"
+
+	# Use pkg-config to determine WolfSSL libs and cflags
+	for f in `$PKG_CONFIG $STATIC --libs wolfssl`; do
+	    case "$f" in
+		-L*)
+		    f="${f#-L}"
+
+
+if test ${LIBTLS+y}
+then :
+
+  case " $LIBTLS " in #(
+  *" -L$f "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS already contains -L\$f"; } >&5
+  (: LIBTLS already contains -L$f) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBTLS " -L$f"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS=\"\$LIBTLS\""; } >&5
+  (: LIBTLS="$LIBTLS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LIBTLS=-L$f
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS=\"\$LIBTLS\""; } >&5
+  (: LIBTLS="$LIBTLS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if test ${LIBTLS_R+y}
+then :
+
+  case " $LIBTLS_R " in #(
+  *" -R$f "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS_R already contains -R\$f"; } >&5
+  (: LIBTLS_R already contains -R$f) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBTLS_R " -R$f"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS_R=\"\$LIBTLS_R\""; } >&5
+  (: LIBTLS_R="$LIBTLS_R") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LIBTLS_R=-R$f
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS_R=\"\$LIBTLS_R\""; } >&5
+  (: LIBTLS_R="$LIBTLS_R") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
+
+		    ;;
+		*)
+
+if test ${LIBTLS+y}
+then :
+
+  case " $LIBTLS " in #(
+  *" $f "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS already contains \$f"; } >&5
+  (: LIBTLS already contains $f) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBTLS " $f"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS=\"\$LIBTLS\""; } >&5
+  (: LIBTLS="$LIBTLS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LIBTLS=$f
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS=\"\$LIBTLS\""; } >&5
+  (: LIBTLS="$LIBTLS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+		    ;;
+	    esac
+	done
+	# No separate pkg config for libcrypto
+	LIBCRYPTO="$LIBTLS"
+	LIBCRYPTO_R="$LIBTLS_R"
+	for f in `$PKG_CONFIG --cflags-only-I wolfssl`; do
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" $f "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains \$f"; } >&5
+  (: CPPFLAGS already contains $f) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " $f"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CPPFLAGS=$f
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	    # So we find the openssl compat headers under wolfssl
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" $f/wolfssl "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains \$f/wolfssl"; } >&5
+  (: CPPFLAGS already contains $f/wolfssl) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " $f/wolfssl"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CPPFLAGS=$f/wolfssl
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	done
+	if test "$CPPFLAGS" = "$O_CPPFLAGS"; then
+	    # So we find the openssl compat headers under wolfssl (XXX)
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -I/usr/include/wolfssl "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I/usr/include/wolfssl"; } >&5
+  (: CPPFLAGS already contains -I/usr/include/wolfssl) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I/usr/include/wolfssl"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CPPFLAGS=-I/usr/include/wolfssl
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	fi
+    else
+	printf "%s\n" "#define HAVE_OPENSSL 1" >>confdefs.h
+
+	printf "%s\n" "#define HAVE_WOLFSSL 1" >>confdefs.h
+
+
+	# No pkg-config file present, try to do it manually
+	if test "$enable_wolfssl" != "yes"; then
+
+
+if test ${LIBCRYPTO+y}
+then :
+
+  case " $LIBCRYPTO " in #(
+  *" -L${enable_wolfssl}/lib "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO already contains -L\${enable_wolfssl}/lib"; } >&5
+  (: LIBCRYPTO already contains -L${enable_wolfssl}/lib) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBCRYPTO " -L${enable_wolfssl}/lib"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO=\"\$LIBCRYPTO\""; } >&5
+  (: LIBCRYPTO="$LIBCRYPTO") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LIBCRYPTO=-L${enable_wolfssl}/lib
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO=\"\$LIBCRYPTO\""; } >&5
+  (: LIBCRYPTO="$LIBCRYPTO") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if test ${LIBCRYPTO_R+y}
+then :
+
+  case " $LIBCRYPTO_R " in #(
+  *" -R${enable_wolfssl}/lib "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R already contains -R\${enable_wolfssl}/lib"; } >&5
+  (: LIBCRYPTO_R already contains -R${enable_wolfssl}/lib) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBCRYPTO_R " -R${enable_wolfssl}/lib"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R=\"\$LIBCRYPTO_R\""; } >&5
+  (: LIBCRYPTO_R="$LIBCRYPTO_R") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LIBCRYPTO_R=-R${enable_wolfssl}/lib
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBCRYPTO_R=\"\$LIBCRYPTO_R\""; } >&5
+  (: LIBCRYPTO_R="$LIBCRYPTO_R") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
+
+
+
+if test ${LIBTLS+y}
+then :
+
+  case " $LIBTLS " in #(
+  *" -L${enable_wolfssl}/lib "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS already contains -L\${enable_wolfssl}/lib"; } >&5
+  (: LIBTLS already contains -L${enable_wolfssl}/lib) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBTLS " -L${enable_wolfssl}/lib"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS=\"\$LIBTLS\""; } >&5
+  (: LIBTLS="$LIBTLS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LIBTLS=-L${enable_wolfssl}/lib
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS=\"\$LIBTLS\""; } >&5
+  (: LIBTLS="$LIBTLS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if test ${LIBTLS_R+y}
+then :
+
+  case " $LIBTLS_R " in #(
+  *" -R${enable_wolfssl}/lib "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS_R already contains -R\${enable_wolfssl}/lib"; } >&5
+  (: LIBTLS_R already contains -R${enable_wolfssl}/lib) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBTLS_R " -R${enable_wolfssl}/lib"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS_R=\"\$LIBTLS_R\""; } >&5
+  (: LIBTLS_R="$LIBTLS_R") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LIBTLS_R=-R${enable_wolfssl}/lib
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LIBTLS_R=\"\$LIBTLS_R\""; } >&5
+  (: LIBTLS_R="$LIBTLS_R") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
+
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${enable_wolfssl}/include "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${enable_wolfssl}/include"; } >&5
+  (: CPPFLAGS already contains -I${enable_wolfssl}/include) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${enable_wolfssl}/include"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CPPFLAGS=-I${enable_wolfssl}/include
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	    # So we find the openssl compat headers under wolfssl
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${enable_wolfssl}/include/wolfssl "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${enable_wolfssl}/include/wolfssl"; } >&5
+  (: CPPFLAGS already contains -I${enable_wolfssl}/include/wolfssl) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${enable_wolfssl}/include/wolfssl"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CPPFLAGS=-I${enable_wolfssl}/include/wolfssl
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	else
+	    # So we find the openssl compat headers under wolfssl (XXX)
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -I/usr/include/wolfssl "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I/usr/include/wolfssl"; } >&5
+  (: CPPFLAGS already contains -I/usr/include/wolfssl) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I/usr/include/wolfssl"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  CPPFLAGS=-I/usr/include/wolfssl
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+	fi
+	LIBTLS="${LIBTLS} -lwolfssl"
+	LIBCRYPTO="${LIBCRYPTO} -lwolfssl"
+
+	# Use WolfSSL's sha2 functions if possible
+	ac_fn_check_decl "$LINENO" "EVP_MD_CTX_new" "ac_cv_have_decl_EVP_MD_CTX_new" "
+	    $ac_includes_default
+	    #include <wolfssl/options.h>
+	    #include <wolfssl/openssl/evp.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_EVP_MD_CTX_new" = xyes
+then :
+  DIGEST=digest_openssl.lo
+fi
+    fi
+                ac_fn_check_decl "$LINENO" "X509_STORE_CTX_get0_cert" "ac_cv_have_decl_X509_STORE_CTX_get0_cert" "
+	$ac_includes_default
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/x509.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_X509_STORE_CTX_get0_cert" = xyes
+then :
+  printf "%s\n" "#define HAVE_X509_STORE_CTX_GET0_CERT 1" >>confdefs.h
+
+fi
+    ac_fn_check_decl "$LINENO" "ASN1_STRING_get0_data" "ac_cv_have_decl_ASN1_STRING_get0_data" "
+	$ac_includes_default
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/asn1.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_ASN1_STRING_get0_data" = xyes
+then :
+  printf "%s\n" "#define HAVE_ASN1_STRING_GET0_DATA 1" >>confdefs.h
+
+fi
+    ac_fn_check_decl "$LINENO" "SSL_CTX_get0_certificate" "ac_cv_have_decl_SSL_CTX_get0_certificate" "
+	$ac_includes_default
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_SSL_CTX_get0_certificate" = xyes
+then :
+  printf "%s\n" "#define HAVE_SSL_CTX_GET0_CERTIFICATE 1" >>confdefs.h
+
+fi
+    ac_fn_check_decl "$LINENO" "SSL_CTX_set0_tmp_dh_pkey" "ac_cv_have_decl_SSL_CTX_set0_tmp_dh_pkey" "
+	$ac_includes_default
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_SSL_CTX_set0_tmp_dh_pkey" = xyes
+then :
+  printf "%s\n" "#define HAVE_SSL_CTX_SET0_TMP_DH_PKEY 1" >>confdefs.h
+
+fi
+    ac_fn_check_decl "$LINENO" "TLS_method" "ac_cv_have_decl_TLS_method" "
+	$ac_includes_default
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_TLS_method" = xyes
+then :
+  printf "%s\n" "#define HAVE_TLS_METHOD 1" >>confdefs.h
+
+fi
+    ac_fn_check_decl "$LINENO" "SSL_CTX_set_min_proto_version" "ac_cv_have_decl_SSL_CTX_set_min_proto_version" "
+	$ac_includes_default
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_SSL_CTX_set_min_proto_version" = xyes
+then :
+  printf "%s\n" "#define HAVE_SSL_CTX_SET_MIN_PROTO_VERSION 1" >>confdefs.h
+
+fi
+    ac_fn_check_decl "$LINENO" "SSL_CTX_set_ciphersuites" "ac_cv_have_decl_SSL_CTX_set_ciphersuites" "
+	$ac_includes_default
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_SSL_CTX_set_ciphersuites" = xyes
+then :
+  printf "%s\n" "#define HAVE_SSL_CTX_SET_CIPHERSUITES 1" >>confdefs.h
+
+fi
+fi
 if test "$DIGEST" = "digest.lo"; then
     FOUND_SHA2=no
     ac_fn_c_check_header_compile "$LINENO" "sha2.h" "ac_cv_header_sha2_h" "$ac_includes_default"
@@ -33631,6 +34291,9 @@ printf "%s\n" "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2
 fi
 
 
+if test ${LIBTLS+y}; then
+    have_tls=yes
+fi
 echo "" >&6
 echo "Configured Sudo version $PACKAGE_VERSION" >&6
 echo " Compiler settings:" >&6
@@ -33662,7 +34325,7 @@ fi
 echo " Optional features:" >&6
 echo "  log client			: ${enable_log_client-yes}" >&6
 echo "  log server			: ${enable_log_server-yes}" >&6
-echo "  log client/server TLS		: ${enable_openssl-no}" >&6
+echo "  log client/server TLS		: ${have_tls-no}" >&6
 case "$host_os" in
     linux*) echo "  SELinux RBAC			: ${with_selinux-yes}" >&6;;
 esac
@@ -33820,6 +34483,7 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

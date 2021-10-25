@@ -33,19 +33,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#if defined(HAVE_OPENSSL)
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-#endif
-
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 
-#include "hostcheck.h"
 #include "tls_common.h"
+#include "hostcheck.h"
 
 #define DEFAULT_CIPHER_LST12 "HIGH:!aNULL"
 #define DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"
@@ -82,8 +77,10 @@ verify_cert_chain(SSL_CTX *ctx, const char *cert_file)
         goto done;
     }
 
+#if !defined(HAVE_WOLFSSL)
     if ((ca_store = SSL_CTX_get_cert_store(ctx)) != NULL)
         X509_STORE_set_flags(ca_store, X509_V_FLAG_X509_STRICT);
+#endif
 
     if (!X509_STORE_CTX_init(store_ctx, ca_store, x509, chain_certs)) {
 	errstr = ERR_reason_error_string(ERR_get_error());

@@ -1561,7 +1561,7 @@ if test X"$LOGSRVD_SRC" != X""; then
 fi
 
 dnl
-dnl Do OpenSSL / gcrypt after logsrv options
+dnl Do OpenSSL / WolfSSL / gcrypt after logsrv options
 dnl
 AC_ARG_ENABLE(openssl,
 [AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
@@ -1575,10 +1575,15 @@ AC_ARG_ENABLE(openssl-pkgconfig-template,
 [AS_HELP_STRING([--enable-openssl-pkgconfig-template], [A printf format string used to construct the OpenSSL pkg-config name])],
 [], [enable_openssl_pkgconfig_template="%s"])
 
+AC_ARG_ENABLE(wolfssl,
+[AS_HELP_STRING([--enable-wolfssl], [Use WolfSSL's TLS and sha2 functions])], [
+    enable_openssl=no
+])
+
 AC_ARG_ENABLE(gcrypt,
 [AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
-    if test "${enable_openssl-no}" != no; then
-	AC_MSG_WARN([ignoring --enable-gcrypt when OpenSSL is enabled.])
+    if test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"; then
+	AC_MSG_WARN([ignoring --enable-gcrypt when OpenSSL or WolfSSL is enabled.])
 	enable_gcrypt=no
     fi
 ])
@@ -3102,7 +3107,132 @@ elif test "${enable_gcrypt-no}" != no; then
     fi
 fi
 dnl
-dnl Check for sha2 functions if not using openssl or gcrypt
+dnl Check for OpenSSL compatibility functions in WolfSSL
+dnl
+if test "${enable_wolfssl-no}" != no; then
+    # Use pkg-config to find the wolfssl cflags and libs if possible.
+    if test "$enable_wolfssl" != "yes"; then
+	PKG_CONFIG_LIBDIR="${enable_wolfssl}/lib/pkgconfig:${enable_wolfssl}/lib64/pkgconfig:${enable_wolfssl}/share/pkgconfig"
+	export PKG_CONFIG_LIBDIR
+    elif test "$cross_compiling" = "yes" -a -z "$PKG_CONFIG"; then
+	# Cannot use pkg-config when cross-compiling
+	PKG_CONFIG=false
+    fi
+    : ${PKG_CONFIG='pkg-config'}
+    if $PKG_CONFIG --exists wolfssl >/dev/null 2>&1; then
+	AC_DEFINE(HAVE_OPENSSL)
+	AC_DEFINE(HAVE_WOLFSSL)
+
+	O_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I wolfssl`"
+	O_LDFLAGS="$LDFLAGS"
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L wolfssl`"
+
+	# Check whether --static is needed
+	libssl="`$PKG_CONFIG --libs-only-l wolfssl | sed 's/^ *-l//'`"
+	libssl_extra=`echo $libssl | sed 's/^[[^ ]]* *//'`
+	libssl=`echo $libssl | sed 's/ .*//'`
+	AC_CHECK_LIB($libssl, wolfSSL_new, [STATIC=""], [STATIC="--static"], [$libssl_extra])
+
+	# Use WolfSSL's sha2 functions if possible
+	AC_CHECK_DECL([EVP_MD_CTX_new], [DIGEST=digest_openssl.lo], [], [
+	    AC_INCLUDES_DEFAULT
+	    #include <wolfssl/options.h>
+	    #include <wolfssl/openssl/evp.h>
+	])
+	CPPFLAGS="$O_CPPFLAGS"
+	LDFLAGS="$O_LDFLAGS"
+
+	# Use pkg-config to determine WolfSSL libs and cflags
+	for f in `$PKG_CONFIG $STATIC --libs wolfssl`; do
+	    case "$f" in
+		-L*)
+		    f="${f#-L}"
+		    SUDO_APPEND_LIBPATH([LIBTLS], [$f])
+		    ;;
+		*)
+		    AX_APPEND_FLAG([$f], [LIBTLS])
+		    ;;
+	    esac
+	done
+	# No separate pkg config for libcrypto
+	LIBCRYPTO="$LIBTLS"
+	LIBCRYPTO_R="$LIBTLS_R"
+	for f in `$PKG_CONFIG --cflags-only-I wolfssl`; do
+	    AX_APPEND_FLAG([$f], [CPPFLAGS])
+	    # So we find the openssl compat headers under wolfssl
+	    AX_APPEND_FLAG([$f/wolfssl], [CPPFLAGS])
+	done
+	if test "$CPPFLAGS" = "$O_CPPFLAGS"; then
+	    # So we find the openssl compat headers under wolfssl (XXX)
+	    AX_APPEND_FLAG([-I/usr/include/wolfssl], [CPPFLAGS])
+	fi
+    else
+	AC_DEFINE(HAVE_OPENSSL)
+	AC_DEFINE(HAVE_WOLFSSL)
+
+	# No pkg-config file present, try to do it manually
+	if test "$enable_wolfssl" != "yes"; then
+	    SUDO_APPEND_LIBPATH(LIBCRYPTO, [${enable_wolfssl}/lib])
+	    SUDO_APPEND_LIBPATH(LIBTLS, [${enable_wolfssl}/lib])
+	    AX_APPEND_FLAG([-I${enable_wolfssl}/include], [CPPFLAGS])
+	    # So we find the openssl compat headers under wolfssl
+	    AX_APPEND_FLAG([-I${enable_wolfssl}/include/wolfssl], [CPPFLAGS])
+	else
+	    # So we find the openssl compat headers under wolfssl (XXX)
+	    AX_APPEND_FLAG([-I/usr/include/wolfssl], [CPPFLAGS])
+	fi
+	LIBTLS="${LIBTLS} -lwolfssl"
+	LIBCRYPTO="${LIBCRYPTO} -lwolfssl"
+
+	# Use WolfSSL's sha2 functions if possible
+	AC_CHECK_DECL([EVP_MD_CTX_new], [DIGEST=digest_openssl.lo], [], [
+	    AC_INCLUDES_DEFAULT
+	    #include <wolfssl/options.h>
+	    #include <wolfssl/openssl/evp.h>
+	])
+    fi
+    dnl
+    dnl Check for specific OpenSSL API compatibility macros
+    dnl
+    AC_CHECK_DECL([X509_STORE_CTX_get0_cert], [AC_DEFINE(HAVE_X509_STORE_CTX_GET0_CERT)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/x509.h>
+    ])
+    AC_CHECK_DECL([ASN1_STRING_get0_data], [AC_DEFINE(HAVE_ASN1_STRING_GET0_DATA)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/asn1.h>
+    ])
+    AC_CHECK_DECL([SSL_CTX_get0_certificate], [AC_DEFINE(HAVE_SSL_CTX_GET0_CERTIFICATE)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+    AC_CHECK_DECL([SSL_CTX_set0_tmp_dh_pkey], [AC_DEFINE(HAVE_SSL_CTX_SET0_TMP_DH_PKEY)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+    AC_CHECK_DECL([TLS_method], [AC_DEFINE(HAVE_TLS_METHOD)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+    AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+    AC_CHECK_DECL([SSL_CTX_set_ciphersuites], [AC_DEFINE(HAVE_SSL_CTX_SET_CIPHERSUITES)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+fi
+dnl
+dnl Check for sha2 functions if not using openssl, wolfssl or gcrypt
 dnl
 if test "$DIGEST" = "digest.lo"; then
     FOUND_SHA2=no
@@ -4965,6 +5095,9 @@ AC_OUTPUT
 dnl
 dnl Summarize configuration
 dnl
+if test ${LIBTLS+y}; then
+    have_tls=yes
+fi
 echo "" >&AS_MESSAGE_FD
 echo "Configured Sudo version $PACKAGE_VERSION" >&AS_MESSAGE_FD
 echo " Compiler settings:" >&AS_MESSAGE_FD
@@ -4996,7 +5129,7 @@ fi
 echo " Optional features:" >&AS_MESSAGE_FD
 echo "  log client			: ${enable_log_client-yes}" >&AS_MESSAGE_FD
 echo "  log server			: ${enable_log_server-yes}" >&AS_MESSAGE_FD
-echo "  log client/server TLS		: ${enable_openssl-no}" >&AS_MESSAGE_FD
+echo "  log client/server TLS		: ${have_tls-no}" >&AS_MESSAGE_FD
 case "$host_os" in
     linux*) echo "  SELinux RBAC			: ${with_selinux-yes}" >&AS_MESSAGE_FD;;
 esac
@@ -5267,6 +5400,7 @@ AH_TEMPLATE(HAVE_KINFO_PROC_FREEBSD, [Define to 1 if your system has a FreeBSD-s
 AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-style kinfo_proc2 struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
+AH_TEMPLATE(HAVE_WOLFSSL, [Define to 1 if you are using WolfSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.])

@@ -21,6 +21,9 @@
 
 #include <netinet/in.h>			/* for INET6?_ADDRSTRLEN */
 #if defined(HAVE_OPENSSL)
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif /* HAVE_WOLFSSL */
 # include <openssl/ssl.h>
 #endif /* HAVE_OPENSSL */
 

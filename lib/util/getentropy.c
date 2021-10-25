@@ -65,6 +65,9 @@
 # include <link.h>
 #endif
 #ifdef HAVE_OPENSSL
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif
 # include <openssl/rand.h>
 #endif
 
