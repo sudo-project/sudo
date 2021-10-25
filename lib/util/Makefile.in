@@ -533,13 +533,15 @@ aix.i: $(srcdir)/aix.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 aix.plog: aix.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/aix.c --i-file $< --output-file $@
-arc4random.lo: $(srcdir)/arc4random.c $(incdir)/sudo_compat.h \
-               $(incdir)/sudo_rand.h $(srcdir)/chacha_private.h \
-               $(top_builddir)/config.h
+arc4random.lo: $(srcdir)/arc4random.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_rand.h \
+               $(srcdir)/chacha_private.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/arc4random.c
-arc4random.i: $(srcdir)/arc4random.c $(incdir)/sudo_compat.h \
-               $(incdir)/sudo_rand.h $(srcdir)/chacha_private.h \
-               $(top_builddir)/config.h
+arc4random.i: $(srcdir)/arc4random.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_rand.h \
+               $(srcdir)/chacha_private.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 arc4random.plog: arc4random.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/arc4random.c --i-file $< --output-file $@
