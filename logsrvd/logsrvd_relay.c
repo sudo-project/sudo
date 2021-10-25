@@ -61,7 +61,6 @@
 #include "sudo_queue.h"
 #include "sudo_util.h"
 
-#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 static void relay_client_msg_cb(int fd, int what, void *v);

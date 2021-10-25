@@ -40,7 +40,6 @@
 #include "sudo_plugin.h"
 #include "sudo_util.h"
 
-#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 static int

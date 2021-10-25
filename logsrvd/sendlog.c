@@ -70,7 +70,6 @@
 #include "sudo_util.h"
 
 #include "hostcheck.h"
-#include "log_server.pb-c.h"
 #include "sendlog.h"
 
 #if defined(HAVE_OPENSSL)

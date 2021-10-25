@@ -19,6 +19,7 @@
 #ifndef SUDO_LOGSRVD_H
 #define SUDO_LOGSRVD_H
 
+#include "log_server.pb-c.h"
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
 #endif

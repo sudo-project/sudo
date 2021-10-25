@@ -57,7 +57,6 @@
 #include "sudo_rand.h"
 #include "sudo_util.h"
 
-#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 struct logsrvd_info_closure {

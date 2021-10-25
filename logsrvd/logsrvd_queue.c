@@ -56,7 +56,6 @@
 #include "sudo_queue.h"
 #include "sudo_util.h"
 
-#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 #if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
