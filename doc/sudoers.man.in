@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 29, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 26, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2072,8 +2072,8 @@ Files that are included may themselves include other files.
 A hard limit of 128 nested include files is enforced to prevent include
 file loops.
 .PP
-The path to the include file may contain white space if it is
-escaped with a backslash
+Starting with version 1.9.1, the path to the include file may contain
+white space if it is escaped with a backslash
 (\(oq\e\(cq).
 Alternately, the entire path may be enclosed in double quotes
 (\&""),

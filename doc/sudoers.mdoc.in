@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 29, 2021
+.Dd October 26, 2021
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1951,8 +1951,8 @@ Files that are included may themselves include other files.
 A hard limit of 128 nested include files is enforced to prevent include
 file loops.
 .Pp
-The path to the include file may contain white space if it is
-escaped with a backslash
+Starting with version 1.9.1, the path to the include file may contain
+white space if it is escaped with a backslash
 .Pq Ql \e .
 Alternately, the entire path may be enclosed in double quotes
 .Pq \&"" ,
