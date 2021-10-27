@@ -46,6 +46,8 @@
 #define DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"
 
 #if defined(HAVE_OPENSSL)
+# include <openssl/bio.h>
+# include <openssl/dh.h>
 
 static bool
 verify_cert_chain(SSL_CTX *ctx, const char *cert_file)
@@ -227,26 +229,21 @@ set_dhparams_bio(SSL_CTX *ctx, BIO *bio)
 static bool
 set_dhparams(SSL_CTX *ctx, const char *dhparam_file)
 {
-    BIO *bio = NULL;
+    BIO *bio;
     bool ret = false;
-    int fd;
     debug_decl(set_dhparams, SUDO_DEBUG_UTIL);
 
-    fd = open(dhparam_file, O_RDONLY);
-    if (fd != -1)
-	bio = BIO_new_fd(fd, BIO_CLOSE);
+    bio = BIO_new_file(dhparam_file, O_RDONLY);
     if (bio != NULL) {
 	if (set_dhparams_bio(ctx, bio)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"loaded diffie-hellman parameters from %s", dhparam_file);
 	    ret = true;
 	}
+	BIO_free(bio);
     } else {
 	sudo_warn(U_("unable to open %s"), dhparam_file);
-	if (fd != -1)
-	    close(fd);
     }
-    BIO_free(bio);
 
     debug_return_bool(ret);
 }
