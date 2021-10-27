@@ -274,7 +274,7 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
     if (!sudo_json_init(&json, 4, false, false))
         goto done;
 
-    fd = openat(dfd, "log.json", O_RDWR);
+    fd = iolog_openat(dfd, "log.json", O_RDWR);
     if (fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to open to %s/log.json", evlog->iolog_path);
