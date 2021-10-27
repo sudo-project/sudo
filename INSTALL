@@ -644,7 +644,7 @@ Authentication options:
         the OpenSSL 3.0 package on OpenBSD.  Defaults to "%s".
 
   --enable-wolfssl[=DIR]
-        Use WolfSSL's TLS and SHA-2 message digest functions.  If
+        Use wolfSSL's TLS and SHA-2 message digest functions.  If
         specified, DIR should contain the OpenSSL include and lib
         directories.
 

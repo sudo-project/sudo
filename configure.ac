@@ -1561,7 +1561,7 @@ if test X"$LOGSRVD_SRC" != X""; then
 fi
 
 dnl
-dnl Do OpenSSL / WolfSSL / gcrypt after logsrv options
+dnl Do OpenSSL / wolfSSL / gcrypt after logsrv options
 dnl
 AC_ARG_ENABLE(openssl,
 [AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
@@ -1576,14 +1576,14 @@ AC_ARG_ENABLE(openssl-pkgconfig-template,
 [], [enable_openssl_pkgconfig_template="%s"])
 
 AC_ARG_ENABLE(wolfssl,
-[AS_HELP_STRING([--enable-wolfssl], [Use WolfSSL's TLS and sha2 functions])], [
+[AS_HELP_STRING([--enable-wolfssl], [Use wolfSSL's TLS and sha2 functions])], [
     enable_openssl=no
 ])
 
 AC_ARG_ENABLE(gcrypt,
 [AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
     if test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"; then
-	AC_MSG_WARN([ignoring --enable-gcrypt when OpenSSL or WolfSSL is enabled.])
+	AC_MSG_WARN([ignoring --enable-gcrypt when OpenSSL or wolfSSL is enabled.])
 	enable_gcrypt=no
     fi
 ])
@@ -3107,7 +3107,7 @@ elif test "${enable_gcrypt-no}" != no; then
     fi
 fi
 dnl
-dnl Check for OpenSSL compatibility functions in WolfSSL
+dnl Check for OpenSSL compatibility functions in wolfSSL
 dnl
 if test "${enable_wolfssl-no}" != no; then
     # Use pkg-config to find the wolfssl cflags and libs if possible.
@@ -3134,7 +3134,7 @@ if test "${enable_wolfssl-no}" != no; then
 	libssl=`echo $libssl | sed 's/ .*//'`
 	AC_CHECK_LIB($libssl, wolfSSL_new, [STATIC=""], [STATIC="--static"], [$libssl_extra])
 
-	# Use WolfSSL's sha2 functions if possible
+	# Use wolfSSL's sha2 functions if possible
 	AC_CHECK_DECL([EVP_MD_CTX_new], [DIGEST=digest_openssl.lo], [], [
 	    AC_INCLUDES_DEFAULT
 	    #include <wolfssl/options.h>
@@ -3143,7 +3143,7 @@ if test "${enable_wolfssl-no}" != no; then
 	CPPFLAGS="$O_CPPFLAGS"
 	LDFLAGS="$O_LDFLAGS"
 
-	# Use pkg-config to determine WolfSSL libs and cflags
+	# Use pkg-config to determine wolfSSL libs and cflags
 	for f in `$PKG_CONFIG $STATIC --libs wolfssl`; do
 	    case "$f" in
 		-L*)
@@ -3185,7 +3185,7 @@ if test "${enable_wolfssl-no}" != no; then
 	LIBTLS="${LIBTLS} -lwolfssl"
 	LIBCRYPTO="${LIBCRYPTO} -lwolfssl"
 
-	# Use WolfSSL's sha2 functions if possible
+	# Use wolfSSL's sha2 functions if possible
 	AC_CHECK_DECL([EVP_MD_CTX_new], [DIGEST=digest_openssl.lo], [], [
 	    AC_INCLUDES_DEFAULT
 	    #include <wolfssl/options.h>
@@ -5400,7 +5400,7 @@ AH_TEMPLATE(HAVE_KINFO_PROC_FREEBSD, [Define to 1 if your system has a FreeBSD-s
 AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-style kinfo_proc2 struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
-AH_TEMPLATE(HAVE_WOLFSSL, [Define to 1 if you are using WolfSSL's TLS and sha2 functions.])
+AH_TEMPLATE(HAVE_WOLFSSL, [Define to 1 if you are using wolfSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.])

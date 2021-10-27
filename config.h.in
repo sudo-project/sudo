@@ -1009,7 +1009,7 @@
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H
 
-/* Define to 1 if you are using WolfSSL's TLS and sha2 functions. */
+/* Define to 1 if you are using wolfSSL's TLS and sha2 functions. */
 #undef HAVE_WOLFSSL
 
 /* Define to 1 if you have the `wordexp' function. */

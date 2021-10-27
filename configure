@@ -1764,7 +1764,7 @@ Optional Features:
   --enable-openssl-pkgconfig-template
                           A printf format string used to construct the OpenSSL
                           pkg-config name
-  --enable-wolfssl        Use WolfSSL's TLS and sha2 functions
+  --enable-wolfssl        Use wolfSSL's TLS and sha2 functions
   --enable-gcrypt         Use GNU crypt's sha2 functions
   --enable-python         Compile python plugin support
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -7001,8 +7001,8 @@ if test ${enable_gcrypt+y}
 then :
   enableval=$enable_gcrypt;
     if test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring --enable-gcrypt when OpenSSL or WolfSSL is enabled." >&5
-printf "%s\n" "$as_me: WARNING: ignoring --enable-gcrypt when OpenSSL or WolfSSL is enabled." >&2;}
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring --enable-gcrypt when OpenSSL or wolfSSL is enabled." >&5
+printf "%s\n" "$as_me: WARNING: ignoring --enable-gcrypt when OpenSSL or wolfSSL is enabled." >&2;}
 	enable_gcrypt=no
     fi
 
@@ -24394,7 +24394,7 @@ else $as_nop
 fi
 
 
-	# Use WolfSSL's sha2 functions if possible
+	# Use wolfSSL's sha2 functions if possible
 	ac_fn_check_decl "$LINENO" "EVP_MD_CTX_new" "ac_cv_have_decl_EVP_MD_CTX_new" "
 	    $ac_includes_default
 	    #include <wolfssl/options.h>
@@ -24408,7 +24408,7 @@ fi
 	CPPFLAGS="$O_CPPFLAGS"
 	LDFLAGS="$O_LDFLAGS"
 
-	# Use pkg-config to determine WolfSSL libs and cflags
+	# Use pkg-config to determine wolfSSL libs and cflags
 	for f in `$PKG_CONFIG $STATIC --libs wolfssl`; do
 	    case "$f" in
 		-L*)
@@ -24883,7 +24883,7 @@ fi
 	LIBTLS="${LIBTLS} -lwolfssl"
 	LIBCRYPTO="${LIBCRYPTO} -lwolfssl"
 
-	# Use WolfSSL's sha2 functions if possible
+	# Use wolfSSL's sha2 functions if possible
 	ac_fn_check_decl "$LINENO" "EVP_MD_CTX_new" "ac_cv_have_decl_EVP_MD_CTX_new" "
 	    $ac_includes_default
 	    #include <wolfssl/options.h>
