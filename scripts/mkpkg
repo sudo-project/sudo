@@ -340,9 +340,11 @@ case "$osversion" in
 		# Build intel universal binaries for 10.6 and below
 		ARCH_FLAGS="-arch i386 -arch x86_64"
 		;;
-	    macos11*)
-		# Build arm64/x86_64 universal binaries for macOS 11
-		ARCH_FLAGS="-arch arm64 -arch x86_64"
+	    macos1[1-9]*)
+		# Build arm64e/x86_64 universal binaries for macOS 11 and up
+		# We originally used arm64 here but the correct ABI is arm64e.
+		# The arm64 arch will be removed in a future release.
+		ARCH_FLAGS="-arch arm64 -arch arm64e -arch x86_64"
 		;;
 	esac
 	if test "${osversion}" != "`$scriptdir/pp --probe`"; then
