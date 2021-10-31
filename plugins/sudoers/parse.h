@@ -411,9 +411,6 @@ size_t base64_encode(const unsigned char *in, size_t in_len, char *out, size_t o
 /* timeout.c */
 int parse_timeout(const char *timestr);
 
-/* gmtoff.c */
-long get_gmtoff(time_t *clock);
-
 /* gentime.c */
 time_t parse_gentime(const char *expstr);
 

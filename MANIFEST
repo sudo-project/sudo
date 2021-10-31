@@ -215,6 +215,7 @@ lib/util/getusershell.c
 lib/util/gidlist.c
 lib/util/glob.c
 lib/util/gmtime_r.c
+lib/util/timegm.c
 lib/util/inet_ntop.c
 lib/util/inet_pton.c
 lib/util/isblank.c
@@ -571,7 +572,6 @@ plugins/sudoers/gentime.c
 plugins/sudoers/getdate.c
 plugins/sudoers/getdate.y
 plugins/sudoers/getspwuid.c
-plugins/sudoers/gmtoff.c
 plugins/sudoers/goodpath.c
 plugins/sudoers/gram.c
 plugins/sudoers/gram.h

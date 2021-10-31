@@ -172,7 +172,7 @@ FUZZ_RUNS = 8192
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo b64_decode.lo defaults.lo digestname.lo \
-		       exptilde.lo filedigest.lo gentime.lo gmtoff.lo gram.lo \
+		       exptilde.lo filedigest.lo gentime.lo gram.lo \
 		       hexchar.lo match.lo match_addr.lo match_command.lo \
 		       match_digest.lo pwutil.lo pwutil_impl.lo \
 		       redblack.lo strlist.lo sudoers_debug.lo timeout.lo \
@@ -233,7 +233,7 @@ CHECK_EXPTILDE_OBJS = check_exptilde.o exptilde.lo pwutil.lo pwutil_impl.lo redb
 
 CHECK_FILL_OBJS = check_fill.o hexchar.lo toke_util.lo sudoers_debug.lo
 
-CHECK_GENTIME_OBJS = check_gentime.o gentime.lo gmtoff.lo sudoers_debug.lo
+CHECK_GENTIME_OBJS = check_gentime.o gentime.lo sudoers_debug.lo
 
 CHECK_HEXCHAR_OBJS = check_hexchar.o hexchar.lo sudoers_debug.lo
 
@@ -1901,18 +1901,6 @@ getspwuid.i: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 getspwuid.plog: getspwuid.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getspwuid.c --i-file $< --output-file $@
-gmtoff.lo: $(srcdir)/gmtoff.c $(incdir)/compat/stdbool.h \
-           $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-           $(incdir)/sudo_queue.h $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
-           $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/gmtoff.c
-gmtoff.i: $(srcdir)/gmtoff.c $(incdir)/compat/stdbool.h \
-           $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-           $(incdir)/sudo_queue.h $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
-           $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-gmtoff.plog: gmtoff.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/gmtoff.c --i-file $< --output-file $@
 goodpath.lo: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

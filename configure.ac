@@ -2591,6 +2591,10 @@ AC_CHECK_FUNCS([gmtime_r], [], [
     AC_LIBOBJ(gmtime_r)
     SUDO_APPEND_COMPAT_EXP(sudo_gmtime_r)
 ])
+AC_CHECK_FUNCS([timegm], [], [
+    AC_LIBOBJ(timegm)
+    SUDO_APPEND_COMPAT_EXP(sudo_timegm)
+])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)

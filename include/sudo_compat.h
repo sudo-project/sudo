@@ -467,6 +467,9 @@ sudo_dso_public struct tm *sudo_localtime_r(const time_t *, struct tm *);
 # undef localtime_r
 # define localtime_r(_a, _b) sudo_localtime_r((_a), (_b))
 #endif /* HAVE_LOCALTIME_R */
+#ifndef HAVE_TIMEGM
+sudo_dso_public time_t sudo_timegm(struct tm *);
+#endif /* HAVE_TIMEGM */
 #ifndef HAVE_UTIMENSAT
 sudo_dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
 # undef utimensat
