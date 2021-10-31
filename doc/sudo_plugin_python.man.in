@@ -112,9 +112,9 @@ l l.
 .PP
 \fRsudo.RC.REJECT\fR	0
 .PP
-\fRsudo.RC.ERROR\fR	-1
+\fRsudo.RC.ERROR\fR	\-1
 .PP
-\fRsudo.RC.USAGE_ERROR\fR	-2
+\fRsudo.RC.USAGE_ERROR\fR	\-2
 .TE
 .RE
 .PP
@@ -532,7 +532,7 @@ attempts to execute the command.
 The function arguments are as follows:
 .TP 6n
 \fIexit_status\fR
-The exit status of the command if was executed, otherwise -1.
+The exit status of the command if was executed, otherwise \-1.
 .TP 6n
 \fIerror\fR
 .br
@@ -824,7 +824,7 @@ attempts to execute the command.
 The function arguments are as follows:
 .TP 6n
 \fIexit_status\fR
-The exit status of the command if was executed, otherwise -1.
+The exit status of the command if was executed, otherwise \-1.
 .TP 6n
 \fIerror\fR
 .br

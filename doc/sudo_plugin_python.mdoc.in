@@ -94,8 +94,8 @@ The Python sudo module defines the following constants to improve readability:
 .It Dv sudo.RC.OK Ta 1
 .It Dv sudo.RC.ACCEPT Ta 1
 .It Dv sudo.RC.REJECT Ta 0
-.It Dv sudo.RC.ERROR Ta -1
-.It Dv sudo.RC.USAGE_ERROR Ta -2
+.It Dv sudo.RC.ERROR Ta \-1
+.It Dv sudo.RC.USAGE_ERROR Ta \-2
 .El
 .Pp
 If a function returns
@@ -434,7 +434,7 @@ attempts to execute the command.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It Fa exit_status
-The exit status of the command if was executed, otherwise -1.
+The exit status of the command if was executed, otherwise \-1.
 .It Fa error
 If the command could not be executed, this is set to the value of
 errno set by the
@@ -668,7 +668,7 @@ attempts to execute the command.
 The function arguments are as follows:
 .Bl -tag -width 4n
 .It Fa exit_status
-The exit status of the command if was executed, otherwise -1.
+The exit status of the command if was executed, otherwise \-1.
 .It Fa error
 If the command could not be executed, this is set to the value of
 errno set by the

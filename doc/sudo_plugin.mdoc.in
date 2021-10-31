@@ -3666,7 +3666,7 @@ The file or socket descriptor for I/O-based events or the signal
 number for signal events.
 For time-based events,
 .Fa fd
-must be -1.
+must be \-1.
 .It Fa events
 The following values determine what will trigger the event callback:
 .Bl -tag -width 4n
