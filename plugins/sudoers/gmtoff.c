@@ -41,6 +41,11 @@ get_gmtoff(time_t *when)
 
 	if (localtime_r(when, &local) == NULL)
 	    return 0;
+
+	/* Adjust for DST. */
+	if (local.tm_isdst != 0)
+	    local.tm_gmtoff -= local.tm_isdst * 3600;
+
 	return local.tm_gmtoff;
 }
 #else
@@ -61,13 +66,17 @@ get_gmtoff(time_t *when)
 
 	/* Timezone may cause year rollover to happen on a different day. */
 	if (local.tm_year < gmt.tm_year)
-		offset -= 24 * 3600;
+	    offset -= 24 * 3600;
 	else if (local.tm_year > gmt.tm_year)
-		offset -= 24 * 3600;
+	    offset -= 24 * 3600;
 	else if (local.tm_yday < gmt.tm_yday)
-		offset -= 24 * 3600;
+	    offset -= 24 * 3600;
 	else if (local.tm_yday > gmt.tm_yday)
-		offset += 24 * 3600;
+	    offset += 24 * 3600;
+
+	/* Adjust for DST. */
+	if (local.tm_isdst != 0)
+	    offset -= local.tm_isdst * 3600;
 
 	return offset;
 }
