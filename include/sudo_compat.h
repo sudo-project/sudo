@@ -460,12 +460,12 @@ void endusershell(void);
 #ifndef HAVE_GMTIME_R
 sudo_dso_public struct tm *sudo_gmtime_r(const time_t *, struct tm *);
 # undef gmtime_r
-# define gmtime_r(_a, _b, _c, _d) sudo_gmtime_r((_a), (_b))
+# define gmtime_r(_a, _b) sudo_gmtime_r((_a), (_b))
 #endif /* HAVE_GMTIME_R */
 #ifndef HAVE_LOCALTIME_R
 sudo_dso_public struct tm *sudo_localtime_r(const time_t *, struct tm *);
 # undef localtime_r
-# define localtime_r(_a, _b, _c, _d) sudo_localtime_r((_a), (_b))
+# define localtime_r(_a, _b) sudo_localtime_r((_a), (_b))
 #endif /* HAVE_LOCALTIME_R */
 #ifndef HAVE_UTIMENSAT
 sudo_dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
