@@ -544,7 +544,6 @@ would log all debugging statements at the
 level and higher in addition to those at the
 .Em info
 level for the plugin subsystem.
-.Pp
 .Bd -literal -offset indent
 Debug sudo_intercept.so /var/log/intercept_debug all@debug
 .Ed
