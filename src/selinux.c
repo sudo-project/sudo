@@ -308,7 +308,7 @@ bad:
  * Returns a new security context based on the old context and the
  * specified role and type.
  */
-char *
+static char *
 get_exec_context(char * old_context, const char *role, const char *type)
 {
     char * new_context = NULL;
