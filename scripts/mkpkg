@@ -191,6 +191,7 @@ case "$osversion" in
 		with_pam_login=true
 		with_sssd=true
 		with_openssl=true
+		with_python=true
 		;;
 	esac
 
