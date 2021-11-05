@@ -647,7 +647,7 @@ bad:
 static void
 command_info_to_details(char * const info[], struct command_details *details)
 {
-    int i;
+    int i, selinux_rbac = -1;
     id_t id;
     char *cp;
     const char *errstr;
@@ -822,6 +822,14 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("runas_user=", runas_user)
 		break;
 	    case 's':
+		if (strncmp("selinux_rbac=", info[i], sizeof("selinux_rbac=") - 1) == 0) {
+		    selinux_rbac = sudo_strtobool(info[i] + sizeof("selinux_rbac=") - 1);
+		    if (selinux_rbac == -1) {
+			sudo_debug_printf(SUDO_DEBUG_ERROR,
+			    "invalid boolean value for %s", info[i]);
+		    }
+		    break;
+		}
 		SET_STRING("selinux_role=", selinux_role)
 		SET_STRING("selinux_type=", selinux_type)
 		SET_FLAG("set_utmp=", CD_SET_UTMP)
@@ -876,7 +884,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
 #ifdef HAVE_SELINUX
-    if (details->selinux_role != NULL && is_selinux_enabled() > 0)
+    /* Newer sudoers plugin sets selinux_rbac, older only sets role/type. */
+    if (selinux_rbac == -1)
+	selinux_rbac = details->selinux_role || details->selinux_type;
+    if (selinux_rbac && is_selinux_enabled() > 0)
 	SET(details->flags, CD_RBAC_ENABLED);
 #endif
     debug_return;

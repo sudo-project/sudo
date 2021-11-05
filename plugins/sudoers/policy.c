@@ -632,7 +632,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(57, sizeof(char *));
+    command_info = calloc(58, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -897,6 +897,9 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 #endif /* HAVE_LOGIN_CAP_H */
 #ifdef HAVE_SELINUX
+    if (asprintf(&command_info[info_len++], "selinux_rbac=%s",
+	    def_selinux ? "true" : "false") == -1)
+	goto oom;
     if (def_selinux && user_role != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("selinux_role", user_role)) == NULL)
 	    goto oom;

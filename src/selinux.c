@@ -309,18 +309,28 @@ bad:
  * specified role and type.
  */
 static char *
-get_exec_context(char * old_context, const char *role, const char *type)
+get_exec_context(char *old_context, const char *role, const char *type)
 {
-    char * new_context = NULL;
+    char *rolebuf = NULL, *typebuf = NULL;
+    char *new_context = NULL;
     context_t context = NULL;
-    char *typebuf = NULL;
     debug_decl(get_exec_context, SUDO_DEBUG_SELINUX);
-    
-    /* We must have a role, the type is optional (we can use the default). */
-    if (role == NULL) {
-	sudo_warnx(U_("you must specify a role for type %s"), type);
-	errno = EINVAL;
+
+    /*
+     * Expand old_context into a context_t so that we can extract and modify
+     * its components easily.
+     */
+    if ((context = context_new(old_context)) == NULL) {
+	sudo_warn("%s", U_("failed to get new context"));
 	goto bad;
+    }
+
+    if (role == NULL) {
+	/* TODO: if role is unconfined_r and type is NULL, disable SELinux */
+	rolebuf = strdup(context_role_get(context));
+	if (rolebuf == NULL)
+	    goto bad;
+	role = rolebuf;
     }
     if (type == NULL) {
 	if (get_default_type(role, &typebuf)) {
@@ -330,16 +340,7 @@ get_exec_context(char * old_context, const char *role, const char *type)
 	}
 	type = typebuf;
     }
-    
-    /* 
-     * Expand old_context into a context_t so that we can extract and modify 
-     * its components easily. 
-     */
-    if ((context = context_new(old_context)) == NULL) {
-	sudo_warn("%s", U_("failed to get new context"));
-	goto bad;
-    }
-    
+
     /*
      * Replace the role and type in "context" with the role and
      * type we will be running the command as.
@@ -352,7 +353,7 @@ get_exec_context(char * old_context, const char *role, const char *type)
 	sudo_warn(U_("failed to set new type %s"), type);
 	goto bad;
     }
-      
+
     /*
      * Convert "context" back into a string and verify it.
      */
@@ -370,13 +371,14 @@ get_exec_context(char * old_context, const char *role, const char *type)
     debug_return_str(new_context);
 
 bad:
+    free(rolebuf);
     free(typebuf);
     context_free(context);
     freecon(new_context);
     debug_return_str(NULL);
 }
 
-/* 
+/*
  * Determine the exec and tty contexts in preparation for fork/exec.
  * Must run as root, before forking the child process.
  * Sets the tty context but not the exec context (which happens later).
@@ -414,7 +416,7 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: new context %s", __func__,
 	se_state.new_context);
-    
+
     if (label_tty && relabel_tty(ttyn, ptyfd) == -1) {
 	sudo_warn(U_("unable to set tty context to %s"), se_state.new_context);
 	goto done;
