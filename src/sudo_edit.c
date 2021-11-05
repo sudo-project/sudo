@@ -671,15 +671,6 @@ sudo_edit(struct command_details *command_details)
 	goto cleanup;
     }
 
-#ifdef HAVE_SELINUX
-    /* Compute new SELinux security context. */
-    if (ISSET(command_details->flags, CD_RBAC_ENABLED)) {
-	if (selinux_setup(command_details->selinux_role,
-		command_details->selinux_type, NULL, -1, false) != 0)
-	    goto cleanup;
-    }
-#endif
-
     /* Copy editor files to temporaries. */
     tf = calloc(nfiles, sizeof(*tf));
     if (tf == NULL) {
@@ -722,6 +713,10 @@ sudo_edit(struct command_details *command_details)
 	sudo_warn("%s", U_("unable to read the clock"));
 	goto cleanup;
     }
+#ifdef HAVE_SELINUX
+    if (ISSET(command_details->flags, CD_RBAC_ENABLED))
+	selinux_audit_role_change();
+#endif
     memcpy(&saved_command_details, command_details, sizeof(struct command_details));
     command_details->cred = user_details.cred;
     command_details->cred.euid = user_details.cred.uid;

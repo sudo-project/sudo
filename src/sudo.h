@@ -246,9 +246,10 @@ void usage(void) __attribute__((__noreturn__));
 int os_init_openbsd(int argc, char *argv[], char *envp[]);
 
 /* selinux.c */
+int selinux_audit_role_change(void);
+int selinux_getexeccon(const char *role, const char *type);
+int selinux_relabel_tty(const char *ttyn, int ttyfd);
 int selinux_restore_tty(void);
-int selinux_setup(const char *role, const char *type, const char *ttyn,
-    int ttyfd, bool label_tty);
 int selinux_setcon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
     char *envp[], bool noexec);

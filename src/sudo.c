@@ -887,8 +887,19 @@ command_info_to_details(char * const info[], struct command_details *details)
     /* Newer sudoers plugin sets selinux_rbac, older only sets role/type. */
     if (selinux_rbac == -1)
 	selinux_rbac = details->selinux_role || details->selinux_type;
-    if (selinux_rbac && is_selinux_enabled() > 0)
-	SET(details->flags, CD_RBAC_ENABLED);
+    if (selinux_rbac && is_selinux_enabled() > 0) {
+	i = selinux_getexeccon(details->selinux_role, details->selinux_type);
+	switch (i) {
+	case 0:
+	    SET(details->flags, CD_RBAC_ENABLED);
+	    break;
+	case 1:
+	    /* No role change needed. */
+	    break;
+	default:
+	    exit(EXIT_FAILURE);
+	}
+    }
 #endif
     debug_return;
 }
