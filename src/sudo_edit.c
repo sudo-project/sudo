@@ -362,7 +362,7 @@ selinux_run_helper(uid_t uid, gid_t gid, int ngroups, GETGROUPS_T *groups,
 	break;
     case 0:
 	/* child runs sesh in new context */
-	if (selinux_setcon() == 0) {
+	if (selinux_setexeccon() == 0) {
 	    switch_user(uid, gid, ngroups, groups);
 	    execve(sesh, argv, envp);
 	}

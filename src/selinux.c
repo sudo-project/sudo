@@ -84,7 +84,7 @@ selinux_audit_role_change(void)
     } else {
 	/* audit role change using the same format as newrole(1) */
 	rc = asprintf(&message, "newrole: old-context=%s new-context=%s",
-	    se_state.old_context, se_state.new_context ? se_state.new_context : ? "?");
+	    se_state.old_context, se_state.new_context ? se_state.new_context : "?");
 	if (rc == -1)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	rc = audit_log_user_message(au_fd, AUDIT_USER_ROLE_CHANGE,
@@ -432,9 +432,9 @@ done:
 }
 
 int
-selinux_setcon(void)
+selinux_setexeccon(void)
 {
-    debug_decl(selinux_setcon, SUDO_DEBUG_SELINUX);
+    debug_decl(selinux_setexeccon, SUDO_DEBUG_SELINUX);
 
     if (setexeccon(se_state.new_context)) {
 	sudo_warn(U_("unable to set exec context to %s"), se_state.new_context);
@@ -470,7 +470,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
     }
 
     /* Set SELinux exec and keycreate contexts. */
-    if (selinux_setcon() == -1)
+    if (selinux_setexeccon() == -1)
 	debug_return;
 
     /*

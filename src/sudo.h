@@ -250,7 +250,7 @@ int selinux_audit_role_change(void);
 int selinux_getexeccon(const char *role, const char *type);
 int selinux_relabel_tty(const char *ttyn, int ttyfd);
 int selinux_restore_tty(void);
-int selinux_setcon(void);
+int selinux_setexeccon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
     char *envp[], bool noexec);
 
