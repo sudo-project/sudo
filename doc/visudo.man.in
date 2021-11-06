@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "November 6, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -30,7 +30,7 @@
 .SH "SYNOPSIS"
 .HP 7n
 \fBvisudo\fR
-[\fB\-chqsV\fR]
+[\fB\-chOPqsV\fR]
 [[\fB\-f\fR]\ \fIsudoers\fR]
 .SH "DESCRIPTION"
 \fBvisudo\fR
@@ -183,7 +183,11 @@ If the path to the
 \fIsudoers\fR
 file was not specified,
 \fBvisudo\fR
-will also check the file owner and mode.
+will also check the file ownership and permissions (see the
+\fB\-O\fR
+and
+\fB\-P\fR
+options).
 A message will be printed to the standard output describing the status of
 \fIsudoers\fR
 unless the
@@ -208,6 +212,30 @@ option.
 .TP 12n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
+.TP 12n
+\fB\-O\fR, \fB\--owner\fR
+Enforce the default ownership (user and group) of the
+\fIsudoers\fR
+file.
+In edit mode, the owner of the edited file will be set to the default.
+In check mode
+(\fB\-c\fR),
+an error will be reported if the owner is incorrect.
+This option is enabled by default if the
+\fIsudoers\fR
+file was not specified.
+.TP 12n
+\fB\-P\fR, \fB\--perms\fR
+Enforce the default permissions (mode) of the
+\fIsudoers\fR
+file.
+In edit mode, the permissions of the edited file will be set to the default.
+In check mode
+(\fB\-c\fR),
+an error will be reported if the file permissions are incorrect.
+This option is enabled by default if the
+\fIsudoers\fR
+file was not specified.
 .TP 12n
 \fB\-q\fR, \fB\--quiet\fR
 Enable

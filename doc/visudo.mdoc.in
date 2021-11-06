@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd September 17, 2021
+.Dd November 6, 2021
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -28,7 +28,7 @@
 .Nd edit the sudoers file
 .Sh SYNOPSIS
 .Nm visudo
-.Op Fl chqsV
+.Op Fl chOPqsV
 .Op Bo Fl f Bc Ar sudoers
 .Sh DESCRIPTION
 .Nm
@@ -181,7 +181,11 @@ If the path to the
 .Em sudoers
 file was not specified,
 .Nm
-will also check the file owner and mode.
+will also check the file ownership and permissions (see the
+.Fl O
+and
+.Fl P
+options).
 A message will be printed to the standard output describing the status of
 .Em sudoers
 unless the
@@ -204,6 +208,28 @@ path can be specified without using the
 option.
 .It Fl h , -help
 Display a short help message to the standard output and exit.
+.It Fl O , -owner
+Enforce the default ownership (user and group) of the
+.Em sudoers
+file.
+In edit mode, the owner of the edited file will be set to the default.
+In check mode
+.Pq Fl c ,
+an error will be reported if the owner is incorrect.
+This option is enabled by default if the
+.Em sudoers
+file was not specified.
+.It Fl P , -perms
+Enforce the default permissions (mode) of the
+.Em sudoers
+file.
+In edit mode, the permissions of the edited file will be set to the default.
+In check mode
+.Pq Fl c ,
+an error will be reported if the file permissions are incorrect.
+This option is enabled by default if the
+.Em sudoers
+file was not specified.
 .It Fl q , -quiet
 Enable
 .Em quiet

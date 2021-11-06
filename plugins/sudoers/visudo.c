@@ -86,9 +86,9 @@ TAILQ_HEAD(sudoersfile_list, sudoersfile);
 static void quit(int);
 static int whatnow(void);
 static char *get_editor(int *editor_argc, char ***editor_argv);
-static bool check_syntax(const char *, bool, bool, bool);
+static bool check_syntax(const char *, bool, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
-static bool install_sudoers(struct sudoersfile *, bool);
+static bool install_sudoers(struct sudoersfile *, bool, bool);
 static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
 static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(char *, char **);
@@ -107,12 +107,14 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static bool checkonly;
-static const char short_opts[] =  "cf:hqsVx:";
+static const char short_opts[] =  "cf:hOPqsVx:";
 static struct option long_opts[] = {
     { "check",		no_argument,		NULL,	'c' },
     { "export",		required_argument,	NULL,	'x' },
     { "file",		required_argument,	NULL,	'f' },
     { "help",		no_argument,		NULL,	'h' },
+    { "owner",		no_argument,		NULL,	'O' },
+    { "perms",		no_argument,		NULL,	'P' },
     { "quiet",		no_argument,		NULL,	'q' },
     { "strict",		no_argument,		NULL,	's' },
     { "version",	no_argument,		NULL,	'V' },
@@ -128,7 +130,7 @@ main(int argc, char *argv[])
     char *editor, **editor_argv;
     const char *export_path = NULL;
     int ch, oldlocale, editor_argc, exitcode = 0;
-    bool quiet, strict, fflag;
+    bool use_perms, use_owner, quiet, strict, fflag;
     debug_decl(main, SUDOERS_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -168,7 +170,7 @@ main(int argc, char *argv[])
     /*
      * Arg handling.
      */
-    checkonly = fflag = quiet = strict = false;
+    fflag = quiet = strict = use_owner = use_perms = false;
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	    case 'V':
@@ -186,6 +188,12 @@ main(int argc, char *argv[])
 		break;
 	    case 'h':
 		help();
+		break;
+	    case 'O':
+		use_owner = true;	/* check/set owner */
+		break;
+	    case 'P':
+		use_perms = true;	/* check/set perms */
 		break;
 	    case 's':
 		strict = true;		/* strict mode */
@@ -218,6 +226,12 @@ main(int argc, char *argv[])
 	usage(1);
     }
 
+    /* Check/set owner and mode for installed sudoers file. */
+    if (!fflag) {
+	use_owner = true;
+	use_perms = true;
+    }
+
     if (export_path != NULL) {
 	/* Backward compatibility for the time being. */
 	sudo_warnx("%s",
@@ -247,7 +261,8 @@ main(int argc, char *argv[])
 	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     if (checkonly) {
-	exitcode = check_syntax(sudoers_file, quiet, strict, fflag) ? 0 : 1;
+	exitcode = check_syntax(sudoers_file, quiet, strict, use_owner,
+	    use_perms) ? 0 : 1;
 	goto done;
     }
 
@@ -287,7 +302,10 @@ main(int argc, char *argv[])
      */
     if (reparse_sudoers(editor, editor_argc, editor_argv, strict, quiet)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	    (void) install_sudoers(sp, fflag);
+	    if (!install_sudoers(sp, use_owner, use_perms)) {
+		sudo_warnx(U_("contents of edit session left in %s"), sp->tpath);
+		exitcode = 1;
+	    }
 	}
     }
     free(editor);
@@ -496,7 +514,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	/*
 	 * Check for zero length sudoers file.
 	 */
-	if (stat(sp->tpath, &sb) < 0) {
+	if (stat(sp->tpath, &sb) == -1) {
 	    sudo_warnx(U_("unable to stat temporary file (%s), %s unchanged"),
 		sp->tpath, sp->path);
 	    goto done;
@@ -676,7 +694,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
  * move it into place.  Returns true on success, else false.
  */
 static bool
-install_sudoers(struct sudoersfile *sp, bool oldperms)
+install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_perms)
 {
     struct stat sb;
     bool ret = false;
@@ -690,19 +708,22 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	 * No changes but fix owner/mode if needed.
 	 */
 	(void) unlink(sp->tpath);
-	if (!oldperms && fstat(sp->fd, &sb) != -1) {
-	    if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
-		if (chown(sp->path, sudoers_uid, sudoers_gid) != 0) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: unable to chown %d:%d %s", __func__,
-			(int)sudoers_uid, (int)sudoers_gid, sp->path);
+	if (fstat(sp->fd, &sb) == 0) {
+	    if (set_owner) {
+		if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
+		    if (chown(sp->path, sudoers_uid, sudoers_gid) != 0) {
+			sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
+			    sp->path, (unsigned int)sudoers_uid,
+			    (unsigned int)sudoers_gid);
+		    }
 		}
 	    }
-	    if ((sb.st_mode & ACCESSPERMS) != sudoers_mode) {
-		if (chmod(sp->path, sudoers_mode) != 0) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: unable to chmod 0%o %s", __func__,
-			(int)sudoers_mode, sp->path);
+	    if (set_perms) {
+		if ((sb.st_mode & ACCESSPERMS) != sudoers_mode) {
+		    if (chmod(sp->path, sudoers_mode) != 0) {
+			sudo_warn(U_("unable to change mode of %s to 0%o"),
+			    sp->path, (unsigned int)sudoers_mode);
+		    }
 		}
 	    }
 	}
@@ -714,29 +735,34 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
      * Change mode and ownership of temp file so when
      * we move it to sp->path things are kosher.
      */
-    if (oldperms) {
-	/* Use perms of the existing file.  */
+    if (!set_owner || !set_perms) {
+	/* Preserve owner/perms of the existing file.  */
 	if (fstat(sp->fd, &sb) == -1)
 	    sudo_fatal(U_("unable to stat %s"), sp->path);
-	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
-	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
-		sp->tpath, (unsigned int)sb.st_uid, (unsigned int)sb.st_gid);
-	}
-	if (chmod(sp->tpath, sb.st_mode & ACCESSPERMS) != 0) {
-	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
-		(unsigned int)(sb.st_mode & ACCESSPERMS));
-	}
-    } else {
+    }
+    if (set_owner) {
 	if (chown(sp->tpath, sudoers_uid, sudoers_gid) != 0) {
 	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
 		sp->tpath, (unsigned int)sudoers_uid,
 		(unsigned int)sudoers_gid);
 	    goto done;
 	}
+    } else {
+	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
+	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
+		sp->tpath, (unsigned int)sb.st_uid, (unsigned int)sb.st_gid);
+	}
+    }
+    if (set_perms) {
 	if (chmod(sp->tpath, sudoers_mode) != 0) {
 	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
 		(unsigned int)sudoers_mode);
 	    goto done;
+	}
+    } else {
+	if (chmod(sp->tpath, sb.st_mode & ACCESSPERMS) != 0) {
+	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
+		(unsigned int)(sb.st_mode & ACCESSPERMS));
 	}
     }
 
@@ -872,26 +898,32 @@ run_command(char *path, char **argv)
 }
 
 static bool
-check_owner(const char *path, bool quiet)
+check_file(const char *path, bool quiet, bool check_owner, bool check_perms)
 {
     struct stat sb;
     bool ok = true;
-    debug_decl(check_owner, SUDOERS_DEBUG_UTIL);
+    debug_decl(check_file, SUDOERS_DEBUG_UTIL);
 
     if (stat(path, &sb) == 0) {
-	if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
-	    ok = false;
-	    if (!quiet) {
-		fprintf(stderr,
-		    _("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
-		    path, (unsigned int)sudoers_uid, (unsigned int)sudoers_gid);
+	if (check_owner) {
+	    if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
+		ok = false;
+		if (!quiet) {
+		    fprintf(stderr,
+			_("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
+			path, (unsigned int)sudoers_uid,
+			(unsigned int)sudoers_gid);
 		}
+	    }
 	}
-	if ((sb.st_mode & ALLPERMS) != sudoers_mode) {
-	    ok = false;
-	    if (!quiet) {
-		fprintf(stderr, _("%s: bad permissions, should be mode 0%o\n"),
-		    path, (unsigned int)sudoers_mode);
+	if (check_perms) {
+	    if ((sb.st_mode & ALLPERMS) != sudoers_mode) {
+		ok = false;
+		if (!quiet) {
+		    fprintf(stderr,
+			_("%s: bad permissions, should be mode 0%o\n"),
+			path, (unsigned int)sudoers_mode);
+		}
 	    }
 	}
     }
@@ -899,7 +931,8 @@ check_owner(const char *path, bool quiet)
 }
 
 static bool
-check_syntax(const char *file, bool quiet, bool strict, bool oldperms)
+check_syntax(const char *file, bool quiet, bool strict, bool check_owner,
+    bool check_perms)
 {
     bool ok = false;
     int oldlocale;
@@ -937,14 +970,14 @@ check_syntax(const char *file, bool quiet, bool strict, bool oldperms)
 	struct sudoersfile *sp;
 
 	/* Parsed OK, check mode and owner. */
-	if (oldperms || check_owner(file, quiet)) {
+	if (check_file(file, quiet, check_owner, check_perms)) {
 	    if (!quiet)
 		(void) printf(_("%s: parsed OK\n"), file);
 	} else {
 	    ok = false;
 	}
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	    if (oldperms || check_owner(sp->path, quiet)) {
+	    if (check_file(sp->path, quiet, check_owner, check_perms)) {
 		if (!quiet)
 		    (void) printf(_("%s: parsed OK\n"), sp->path);
 	    } else {
