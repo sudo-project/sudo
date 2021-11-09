@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 8, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1161,6 +1161,185 @@ If set,
 will preserve the user's group vector instead of
 initializing the group vector based on
 \fRrunas_user\fR.
+.TP 6n
+rlimit_as=soft,hard
+The maximum size to which the process's address space may grow (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_core=soft,hard
+The largest size core dump file that may be created (in bytes).
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_cpu=soft,hard
+The maximum amount of CPU time that the process may use (in seconds).
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_data=soft,hard
+The maximum size of the data segment for the process (in bytes).
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_fsize=soft,hard
+The largest size file that the process may create (in bytes).
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_locks=soft,hard
+The maximum number of locks that the process may establish,
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_memlock=soft,hard
+The maximum size that the process may lock in memory (in bytes),
+if supported by the operating system.
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_nofile=soft,hard
+The maximum number of files that the process may have open.
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_nproc=soft,hard
+The maximum number of processes that the user may run simultaneously.
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_rss=soft,hard
+The maximum size to which the process's resident set size may grow (in bytes).
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
+.TP 6n
+rlimit_stack=soft,hard
+The maximum size to which the process's stack may grow (in bytes).
+The soft and hard limits are separated by a comma.
+If only a single value is specified, both the hard and soft limits are set.
+A value of
+\(lqinfinity\(rq
+indicates that there is no limit.
+A value of
+\(lquser\(rq
+will cause the invoking user's resource limit to be preserved.
+A value of
+\(lqdefault\(rq
+will cause the target user's default resource limit to be used
+on systems that allow per-user resource limits to be configured.
+Only available starting with API version 1.17.
 .TP 6n
 runas_egid=gid
 Effective group-ID to run the command as.
@@ -5109,6 +5288,11 @@ Version 1.17 (sudo 1.9.4)
 The
 \fIevent_alloc\fR
 field was added to the audit_plugin and approval_plugin structs.
+.TP 6n
+Version 1.18 (sudo 1.9.9)
+The policy may now set resource limit values in the
+\fRcommand_info\fR
+list.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

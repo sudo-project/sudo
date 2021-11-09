@@ -314,7 +314,7 @@ sudo_terminated(struct command_status *cstat)
     debug_return_bool(false);
 }
 
-#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 17)
+#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 18)
 # error "Update sudo_needs_pty() after changing the plugin API"
 #endif
 static bool
