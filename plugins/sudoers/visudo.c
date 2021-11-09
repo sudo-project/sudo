@@ -303,7 +303,12 @@ main(int argc, char *argv[])
     if (reparse_sudoers(editor, editor_argc, editor_argv, strict, quiet)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	    if (!install_sudoers(sp, use_owner, use_perms)) {
-		sudo_warnx(U_("contents of edit session left in %s"), sp->tpath);
+		if (sp->tpath != NULL) {
+		    sudo_warnx(U_("contents of edit session left in %s"),
+			sp->tpath);
+		    free(sp->tpath);
+		    sp->tpath = NULL;
+		}
 		exitcode = 1;
 	    }
 	}
@@ -700,8 +705,10 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
     bool ret = false;
     debug_decl(install_sudoers, SUDOERS_DEBUG_UTIL);
 
-    if (sp->tpath == NULL)
+    if (sp->tpath == NULL) {
+	ret = true;
 	goto done;
+    }
 
     if (!sp->modified) {
 	/*
@@ -787,19 +794,15 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	    av[3] = NULL;
 
 	    /* And run it... */
-	    if (run_command(_PATH_MV, av)) {
+	    if (run_command(_PATH_MV, av) != 0) {
 		sudo_warnx(U_("command failed: '%s %s %s', %s unchanged"),
 		    _PATH_MV, sp->tpath, sp->path, sp->path);
-		(void) unlink(sp->tpath);
-		free(sp->tpath);
-		sp->tpath = NULL;
 		goto done;
 	    }
 	    free(sp->tpath);
 	    sp->tpath = NULL;
 	} else {
 	    sudo_warn(U_("error renaming %s, %s unchanged"), sp->tpath, sp->path);
-	    (void) unlink(sp->tpath);
 	    goto done;
 	}
     }
