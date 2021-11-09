@@ -85,11 +85,13 @@ done:
     debug_return_int(ret);
 }
 
+#if defined(HAVE_FACCESSAT) && defined(AT_EACCESS)
 static int
 switch_user_nonfatal(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 {
     return switch_user_int(euid, egid, ngroups, groups, true);
 }
+#endif
 
 void
 switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
