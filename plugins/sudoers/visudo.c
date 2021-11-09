@@ -694,7 +694,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
  * move it into place.  Returns true on success, else false.
  */
 static bool
-install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_perms)
+install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 {
     struct stat sb;
     bool ret = false;
@@ -718,7 +718,7 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_perms)
 		    }
 		}
 	    }
-	    if (set_perms) {
+	    if (set_mode) {
 		if ((sb.st_mode & ACCESSPERMS) != sudoers_mode) {
 		    if (chmod(sp->path, sudoers_mode) != 0) {
 			sudo_warn(U_("unable to change mode of %s to 0%o"),
@@ -735,7 +735,7 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_perms)
      * Change mode and ownership of temp file so when
      * we move it to sp->path things are kosher.
      */
-    if (!set_owner || !set_perms) {
+    if (!set_owner || !set_mode) {
 	/* Preserve owner/perms of the existing file.  */
 	if (fstat(sp->fd, &sb) == -1)
 	    sudo_fatal(U_("unable to stat %s"), sp->path);
@@ -753,7 +753,7 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_perms)
 		sp->tpath, (unsigned int)sb.st_uid, (unsigned int)sb.st_gid);
 	}
     }
-    if (set_perms) {
+    if (set_mode) {
 	if (chmod(sp->tpath, sudoers_mode) != 0) {
 	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
 		(unsigned int)sudoers_mode);
@@ -898,7 +898,7 @@ run_command(char *path, char **argv)
 }
 
 static bool
-check_file(const char *path, bool quiet, bool check_owner, bool check_perms)
+check_file(const char *path, bool quiet, bool check_owner, bool check_mode)
 {
     struct stat sb;
     bool ok = true;
@@ -916,7 +916,7 @@ check_file(const char *path, bool quiet, bool check_owner, bool check_perms)
 		}
 	    }
 	}
-	if (check_perms) {
+	if (check_mode) {
 	    if ((sb.st_mode & ALLPERMS) != sudoers_mode) {
 		ok = false;
 		if (!quiet) {
@@ -932,7 +932,7 @@ check_file(const char *path, bool quiet, bool check_owner, bool check_perms)
 
 static bool
 check_syntax(const char *file, bool quiet, bool strict, bool check_owner,
-    bool check_perms)
+    bool check_mode)
 {
     bool ok = false;
     int oldlocale;
@@ -970,14 +970,14 @@ check_syntax(const char *file, bool quiet, bool strict, bool check_owner,
 	struct sudoersfile *sp;
 
 	/* Parsed OK, check mode and owner. */
-	if (check_file(file, quiet, check_owner, check_perms)) {
+	if (check_file(file, quiet, check_owner, check_mode)) {
 	    if (!quiet)
 		(void) printf(_("%s: parsed OK\n"), file);
 	} else {
 	    ok = false;
 	}
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	    if (check_file(sp->path, quiet, check_owner, check_perms)) {
+	    if (check_file(sp->path, quiet, check_owner, check_mode)) {
 		if (!quiet)
 		    (void) printf(_("%s: parsed OK\n"), sp->path);
 	    } else {
