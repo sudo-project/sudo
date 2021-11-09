@@ -444,6 +444,7 @@ free_defs_val(int type, union sudo_defs_val *sd_un)
 {
     switch (type & T_MASK) {
 	case T_STR:
+	case T_RLIMIT:
 	    free(sd_un->str);
 	    break;
 	case T_LIST:
