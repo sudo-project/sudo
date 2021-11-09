@@ -876,11 +876,16 @@ check_rlimit(const char *str, bool soft)
 	unsigned long long ullval;
 	char *ep;
 
-	/* XXX - some systems may lack strtoull() */
 	errno = 0;
+#ifdef HAVE_STRTOULL
 	ullval = strtoull(str, &ep, 10);
 	if (str == ep || (errno == ERANGE && ullval == ULLONG_MAX))
 	    debug_return_bool(false);
+#else
+	ullval = strtoul(str, &ep, 10);
+	if (str == ep || (errno == ERANGE && ullval == ULONG_MAX))
+	    debug_return_bool(false);
+#endif
 	if (*ep == '\0' || (soft && *ep == ','))
 	    debug_return_bool(true);
 	debug_return_bool(false);

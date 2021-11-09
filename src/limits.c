@@ -457,11 +457,16 @@ store_rlimit(const char *str, rlim_t *val, bool soft)
 	unsigned long long ullval = 0;
 	char *ep;
 
-	/* XXX - some systems may lack strtoull() */
 	errno = 0;
+#ifdef HAVE_STRTOULL
 	ullval = strtoull(str, &ep, 10);
 	if (str == ep || (errno == ERANGE && ullval == ULLONG_MAX))
 	    debug_return_bool(false);
+#else
+	ullval = strtoul(str, &ep, 10);
+	if (str == ep || (errno == ERANGE && ullval == ULONG_MAX))
+	    debug_return_bool(false);
+#endif
 	if (*ep == '\0' || (soft && *ep == ',')) {
 	    *val = ullval;
 	    debug_return_bool(true);
