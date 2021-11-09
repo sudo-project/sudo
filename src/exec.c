@@ -164,6 +164,9 @@ exec_setup(struct command_details *details, int intercept_fd, int errfd)
     if (ISSET(details->flags, CD_OVERRIDE_UMASK))
 	(void) umask(details->umask);
 
+    /* Apply resource limits specified by the policy, if any. */
+    set_policy_rlimits();
+
     /* Close fds before chroot (need /dev) or uid change (prlimit on Linux). */
     close_fds(details, errfd, intercept_fd);
 

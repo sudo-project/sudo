@@ -30,6 +30,7 @@
 #ifdef __linux__
 # include <sys/prctl.h>
 #endif
+#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 
@@ -77,10 +78,13 @@ static struct saved_limit {
     int resource;		/* RLIMIT_FOO definition */
     bool override;		/* override limit while sudo executes? */
     bool saved;			/* true if we were able to get the value */
+    bool policy;		/* true if policy specified an rlimit */
+    bool preserve;		/* true if policy says to preserve user limit */
     rlim_t minlimit;		/* only modify limit if less than this value */
     struct rlimit *fallback;	/* fallback if we fail to set to newlimit */
     struct rlimit newlimit;	/* new limit to use if override is true */
     struct rlimit oldlimit;	/* original limit, valid if saved is true */
+    struct rlimit policylimit;	/* limit from policy, valid if policy is true */
 } saved_limits[] = {
 #ifdef RLIMIT_AS
     {
@@ -88,6 +92,8 @@ static struct saved_limit {
 	RLIMIT_AS,
 	true,					/* override */
 	false,					/* saved */
+	false,					/* policy */
+	false,					/* preserve */
 	1 * 1024 * 1024 * 1024,			/* minlimit */
 	NULL,					/* fallback */
 	{ RLIM_INFINITY, RLIM_INFINITY }	/* newlimit */
@@ -103,6 +109,8 @@ static struct saved_limit {
 	RLIMIT_CPU,
 	true,					/* override */
 	false,					/* saved */
+	false,					/* policy */
+	false,					/* preserve */
 	RLIM_INFINITY,				/* minlimit */
 	NULL,
 	{ RLIM_INFINITY, RLIM_INFINITY }
@@ -112,6 +120,8 @@ static struct saved_limit {
 	RLIMIT_DATA,
 	true,					/* override */
 	false,					/* saved */
+	false,					/* policy */
+	false,					/* preserve */
 	1 * 1024 * 1024 * 1024,			/* minlimit */
 	NULL,
 	{ RLIM_INFINITY, RLIM_INFINITY }
@@ -121,6 +131,8 @@ static struct saved_limit {
 	RLIMIT_FSIZE,
 	true,					/* override */
 	false,					/* saved */
+	false,					/* policy */
+	false,					/* preserve */
 	RLIM_INFINITY,				/* minlimit */
 	NULL,
 	{ RLIM_INFINITY, RLIM_INFINITY }
@@ -144,6 +156,8 @@ static struct saved_limit {
 	RLIMIT_NOFILE,
 	true,					/* override */
 	false,					/* saved */
+	false,					/* policy */
+	false,					/* preserve */
 	SUDO_OPEN_MAX,				/* minlimit */
 	NULL,
 	{ SUDO_OPEN_MAX, RLIM_INFINITY }
@@ -154,6 +168,8 @@ static struct saved_limit {
 	RLIMIT_NPROC,
 	true,					/* override */
 	false,					/* saved */
+	false,					/* policy */
+	false,					/* preserve */
 	RLIM_INFINITY,				/* minlimit */
 	NULL,
 	{ RLIM_INFINITY, RLIM_INFINITY }
@@ -165,6 +181,8 @@ static struct saved_limit {
 	RLIMIT_RSS,
 	true,					/* override */
 	false,					/* saved */
+	false,					/* policy */
+	false,					/* preserve */
 	RLIM_INFINITY,				/* minlimit */
 	NULL,
 	{ RLIM_INFINITY, RLIM_INFINITY }
@@ -175,6 +193,8 @@ static struct saved_limit {
 	RLIMIT_STACK,
 	true,					/* override */
 	false,					/* saved */
+	false,					/* policy */
+	false,					/* preserve */
 	RLIM_INFINITY,				/* minlimit */
 	&stack_fallback,
 	{ SUDO_STACK_MIN, RLIM_INFINITY }
@@ -427,12 +447,218 @@ restore_limits(void)
     debug_return;
 }
 
+static bool
+store_rlimit(const char *str, rlim_t *val, bool soft)
+{
+    const size_t inflen = sizeof("infinity") - 1;
+    debug_decl(store_rlimit, SUDO_DEBUG_UTIL);
+
+    if (isdigit((unsigned char)*str)) {
+	unsigned long long ullval = 0;
+	char *ep;
+
+	/* XXX - some systems may lack strtoull() */
+	errno = 0;
+	ullval = strtoull(str, &ep, 10);
+	if (str == ep || (errno == ERANGE && ullval == ULLONG_MAX))
+	    debug_return_bool(false);
+	if (*ep == '\0' || (soft && *ep == ',')) {
+	    *val = ullval;
+	    debug_return_bool(true);
+	}
+	goto done;
+    }
+    if (strncmp(str, "infinity", inflen) == 0) {
+	if (str[inflen] == '\0' || (soft && str[inflen] == ',')) {
+	    *val = RLIM_INFINITY;
+	    debug_return_bool(true);
+	}
+    }
+done:
+    debug_return_bool(false);
+}
+
+static bool
+set_policy_rlimit(int resource, const char *val)
+{
+    unsigned int idx;
+    debug_decl(set_policy_rlimit, SUDO_DEBUG_UTIL);
+
+    for (idx = 0; idx < nitems(saved_limits); idx++) {
+	struct saved_limit *lim = &saved_limits[idx];
+	const char *hard, *soft = val;
+
+	if (lim->resource != resource)
+	    continue;
+
+	if (strcmp(val, "default") == 0) {
+	    /* Use system-assigned limit set by begin_session(). */
+	    lim->policy = false;
+	    lim->preserve = false;
+	    debug_return_bool(true);
+	}
+	if (strcmp(val, "user") == 0) {
+	    /* Preserve invoking user's limit. */
+	    lim->policy = false;
+	    lim->preserve = true;
+	    debug_return_bool(true);
+	}
+
+	/*
+	 * Expect limit in the form "soft,hard" or "limit" (both soft+hard).
+	 */
+	hard = strchr(val, ',');
+	if (hard != NULL)
+	    hard++;
+	else
+	    hard = soft;
+
+	if (store_rlimit(soft, &lim->policylimit.rlim_cur, true) &&
+		store_rlimit(hard, &lim->policylimit.rlim_max, false)) {
+	    lim->policy = true;
+	    lim->preserve = false;
+	    debug_return_bool(true);
+	}
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: invalid rlimit: %s", lim->name, val);
+	debug_return_bool(false);
+    }
+    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	"invalid resource limit: %d", resource);
+    debug_return_bool(false);
+}
+
+bool
+parse_policy_rlimit(const char *str)
+{
+    bool ret = false;
+    debug_decl(parse_policy_rlimit, SUDO_DEBUG_UTIL);
+
+#ifdef RLIMIT_AS
+    if (strncmp(str, "as=", sizeof("as=") - 1) == 0) {
+	str += sizeof("as=") - 1;
+	ret = set_policy_rlimit(RLIMIT_AS, str);
+    } else
+#endif
+#ifdef RLIMIT_CORE
+    if (strncmp(str, "core=", sizeof("core=") - 1) == 0) {
+	str += sizeof("core=") - 1;
+	ret = set_policy_rlimit(RLIMIT_CORE, str);
+    } else
+#endif
+#ifdef RLIMIT_CPU
+    if (strncmp(str, "cpu=", sizeof("cpu=") - 1) == 0) {
+	str += sizeof("cpu=") - 1;
+	ret = set_policy_rlimit(RLIMIT_CPU, str);
+    } else
+#endif
+#ifdef RLIMIT_DATA
+    if (strncmp(str, "data=", sizeof("data=") - 1) == 0) {
+	str += sizeof("data=") - 1;
+	ret = set_policy_rlimit(RLIMIT_DATA, str);
+    } else
+#endif
+#ifdef RLIMIT_FSIZE
+    if (strncmp(str, "fsize=", sizeof("fsize=") - 1) == 0) {
+	str += sizeof("fsize=") - 1;
+	ret = set_policy_rlimit(RLIMIT_FSIZE, str);
+    } else
+#endif
+#ifdef RLIMIT_LOCKS
+    if (strncmp(str, "locks=", sizeof("locks=") - 1) == 0) {
+	str += sizeof("locks=") - 1;
+	ret = set_policy_rlimit(RLIMIT_LOCKS, str);
+    } else
+#endif
+#ifdef RLIMIT_MEMLOCK
+    if (strncmp(str, "memlock=", sizeof("memlock=") - 1) == 0) {
+	str += sizeof("memlock=") - 1;
+	ret = set_policy_rlimit(RLIMIT_MEMLOCK, str);
+    } else
+#endif
+#ifdef RLIMIT_NOFILE
+    if (strncmp(str, "nofile=", sizeof("nofile=") - 1) == 0) {
+	str += sizeof("nofile=") - 1;
+	ret = set_policy_rlimit(RLIMIT_NOFILE, str);
+    } else
+#endif
+#ifdef RLIMIT_NPROC
+    if (strncmp(str, "nproc=", sizeof("nproc=") - 1) == 0) {
+	str += sizeof("nproc=") - 1;
+	ret = set_policy_rlimit(RLIMIT_NPROC, str);
+    } else
+#endif
+#ifdef RLIMIT_RSS
+    if (strncmp(str, "rss=", sizeof("rss=") - 1) == 0) {
+	str += sizeof("rss=") - 1;
+	ret = set_policy_rlimit(RLIMIT_RSS, str);
+    } else
+#endif
+#ifdef RLIMIT_STACK
+    if (strncmp(str, "stack=", sizeof("stack=") - 1) == 0) {
+	str += sizeof("stack=") - 1;
+	ret = set_policy_rlimit(RLIMIT_STACK, str);
+    }
+#endif
+    debug_return_bool(ret);
+}
+
+/*
+ * Set resource limits as specified by the security policy (if any).
+ * This should be run as part of the session setup but after PAM,
+ * login.conf, etc.
+ */
+void
+set_policy_rlimits(void)
+{
+    unsigned int idx;
+    debug_decl(set_policy_rlimits, SUDO_DEBUG_UTIL);
+
+    for (idx = 0; idx < nitems(saved_limits); idx++) {
+	struct saved_limit *lim = &saved_limits[idx];
+	struct rlimit *rl;
+	int rc;
+
+	if (!lim->policy && (!lim->preserve || !lim->saved))
+	    continue;
+
+	rl = lim->preserve ? &lim->oldlimit : &lim->policylimit;
+	if ((rc = setrlimit(lim->resource, rl)) == 0) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"setrlimit(%s, [%lld, %lld])", lim->name,
+		(long long)rl->rlim_cur, (long long)rl->rlim_max);
+	    continue;
+	}
+
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "setrlimit(%s, [%lld, %lld])", lim->name,
+	    (long long)rl->rlim_cur, (long long)rl->rlim_max);
+
+	if (rl->rlim_cur > lim->oldlimit.rlim_max || rl->rlim_max > lim->oldlimit.rlim_max) {
+	    /* Try setting policy rlim_cur to old rlim_max. */
+	    if (rl->rlim_cur > lim->oldlimit.rlim_max)
+		rl->rlim_cur = lim->oldlimit.rlim_max;
+	    if (rl->rlim_max > lim->oldlimit.rlim_max)
+		rl->rlim_max = lim->oldlimit.rlim_max;
+	    if ((rc = setrlimit(lim->resource, rl)) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "setrlimit(%s, [%lld, %lld])", lim->name,
+		    (long long)rl->rlim_cur, (long long)rl->rlim_max);
+	    }
+	}
+	if (rc == -1)
+	    sudo_warn("setrlimit(%s)", lim->name);
+    }
+
+    debug_return;
+}
+
 int
-serialize_limits(char **info, size_t info_max)
+serialize_rlimits(char **info, size_t info_max)
 {
     char *str;
     unsigned int idx, nstored = 0;
-    debug_decl(serialize_limits, SUDO_DEBUG_UTIL);
+    debug_decl(serialize_rlimits, SUDO_DEBUG_UTIL);
 
     for (idx = 0; idx < nitems(saved_limits); idx++) {
 	const struct saved_limit *lim = &saved_limits[idx];

@@ -300,8 +300,10 @@ int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
 void disable_coredump();
 void restore_limits(void);
 void restore_nproc(void);
+void set_policy_rlimits(void);
 void unlimit_nproc(void);
 void unlimit_sudo(void);
-int serialize_limits(char **info, size_t info_max);
+int serialize_rlimits(char **info, size_t info_max);
+bool parse_policy_rlimit(const char *str);
 
 #endif /* SUDO_SUDO_H */

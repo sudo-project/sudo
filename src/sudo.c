@@ -620,7 +620,7 @@ get_user_info(struct user_details *ud)
     if (asprintf(&info[++i], "cols=%d", ud->ts_cols) == -1)
 	goto oom;
 
-    n = serialize_limits(&info[i + 1], info_max - (i + 1));
+    n = serialize_rlimits(&info[i + 1], info_max - (i + 1));
     if (n == -1)
 	goto oom;
     i += n;
@@ -753,6 +753,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		break;
 	    case 'r':
+		if (strncmp("rlimit_", info[i], sizeof("rlimit_") - 1) == 0) {
+		    parse_policy_rlimit(info[i] + sizeof("rlimit_") - 1);
+		    break;
+		}
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
 		    id = sudo_strtoid(cp, &errstr);
@@ -1378,6 +1382,7 @@ policy_init_session(struct command_details *details)
 		details->info);
 	}
     }
+
 done:
     debug_return_int(ret);
 }
