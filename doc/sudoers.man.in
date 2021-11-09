@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "October 26, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "November 8, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -607,6 +607,86 @@ file grammar will be described below in Extended Backus-Naur
 Form (EBNF).
 Don't despair if you are unfamiliar with EBNF; it is fairly simple,
 and the definitions below are annotated.
+.SS "Resource limits"
+By default,
+\fBsudoers\fR
+uses the operating system's native method of setting resource limits
+for the target user.
+On Linux systems, resource limits are usually set by the
+\fRpam_limits.so\fR
+PAM module.
+On some BSD systems, the
+\fI/etc/login.conf\fR
+file specifies resource limits for the user.
+On AIX systems, resource limits are configured in the
+\fI/etc/security/limits\fR
+file.
+If there is no system mechanism to set per-user resource limits,
+the command will run with the same limits as the invoking user.
+The one exception to this is the core dump file size, which is set by
+\fBsudoers\fR
+to 0 by default.
+Disabling core dumps by default makes it possible to avoid potential
+security problems where the core file is treated as trusted input.
+.PP
+Resource limits may also be set in the
+\fIsudoers\fR
+file itself, in which case they override those set by the system.
+See the
+\fIrlimit_as,\fR
+\fIrlimit_core,\fR
+\fIrlimit_cpu,\fR
+\fIrlimit_data,\fR
+\fIrlimit_fsize,\fR
+\fIrlimit_locks,\fR
+\fIrlimit_memlock,\fR
+\fIrlimit_nofile,\fR
+\fIrlimit_nproc,\fR
+\fIrlimit_rss,\fR
+\fIrlimit_stack\fR
+options described below.
+Resource limits in
+\fBsudoers\fR
+may be specified in one of the following formats:
+.TP 8n
+\(lqvalue\(rq
+Both the soft and hard resource limits are set to the same value.
+The special value
+\(lqinfinity\(rq
+can be used to indicate that the value is unlimited.
+.TP 8n
+\(lqsoft,hard\(rq
+Two comma-separated values.
+The soft limit is set to the first value and the hard limit is set
+to the second.
+Both values must either be enclosed in a set of double quotes,
+or the comma must be escaped with a backslash
+(\(oq\e\(cq).
+The special value
+\(lqinfinity\(rq
+may be used in place of either value.
+.TP 8n
+\(lqdefault\(rq
+The default resource limit for the user will be used.
+This may be a user-specific value (see above) or the value of the
+resource limit when
+\fBsudo\fR
+was invoked for systems that don't support per-user limits.
+.TP 8n
+\(lquser\(rq
+The invoking user's resource limits will be preserved when running
+the command.
+.PP
+For example, to restore the historic core dump file size behavior,
+a line like the following may be used.
+.sp
+.RS 6n
+Defaults rlimit_core=default
+.RE
+.PP
+Resource limits in
+\fBsudoers\fR
+are only supported by version 1.8.7 or higher.
 .SS "Quick guide to EBNF"
 EBNF is a concise and exact way of describing the grammar of a language.
 Each EBNF definition is made up of
@@ -4712,6 +4792,77 @@ interpreting the
 sign.
 Defaults to
 \fR@mailto@\fR.
+.TP 14n
+rlimit_as
+The maximum size to which the process's address space may grow (in bytes),
+if supported by the operating system.
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_core
+The largest size core dump file that may be created (in bytes).
+See
+\fIResource limits\fR
+for more information.
+Defaults to 0 (no core dump created).
+.TP 14n
+rlimit_cpu
+The maximum amount of CPU time that the process may use (in seconds).
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_data
+The maximum size of the data segment for the process (in bytes).
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_fsize
+The largest size file that the process may create (in bytes).
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_locks
+The maximum number of locks that the process may establish,
+if supported by the operating system.
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_memlock
+The maximum size that the process may lock in memory (in bytes),
+if supported by the operating system.
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_nofile
+.br
+The maximum number of files that the process may have open.
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_nproc
+The maximum number of processes that the user may run simultaneously.
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_rss
+The maximum size to which the process's resident set size may grow (in bytes).
+See
+\fIResource limits\fR
+for more information.
+.TP 14n
+rlimit_stack
+The maximum size to which the process's stack may grow (in bytes).
+See
+\fIResource limits\fR
+for more information.
 .TP 14n
 restricted_env_file
 The
