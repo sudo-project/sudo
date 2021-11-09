@@ -46,6 +46,7 @@ BEGIN {
     type_map["T_TUPLE"] = "tuple"
     type_map["T_TIMESPEC"] = "tspec"
     type_map["T_TIMEOUT"] = "ival"
+    type_map["T_RLIMIT"] = "str"
 }
 {
     sub(/#.*/, "", $0)

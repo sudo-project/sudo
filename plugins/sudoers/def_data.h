@@ -276,6 +276,28 @@
 #define def_intercept_authenticate (sudo_defs_table[I_INTERCEPT_AUTHENTICATE].sd_un.flag)
 #define I_INTERCEPT_ALLOW_SETID 137
 #define def_intercept_allow_setid (sudo_defs_table[I_INTERCEPT_ALLOW_SETID].sd_un.flag)
+#define I_RLIMIT_AS             138
+#define def_rlimit_as           (sudo_defs_table[I_RLIMIT_AS].sd_un.str)
+#define I_RLIMIT_CORE           139
+#define def_rlimit_core         (sudo_defs_table[I_RLIMIT_CORE].sd_un.str)
+#define I_RLIMIT_CPU            140
+#define def_rlimit_cpu          (sudo_defs_table[I_RLIMIT_CPU].sd_un.str)
+#define I_RLIMIT_DATA           141
+#define def_rlimit_data         (sudo_defs_table[I_RLIMIT_DATA].sd_un.str)
+#define I_RLIMIT_FSIZE          142
+#define def_rlimit_fsize        (sudo_defs_table[I_RLIMIT_FSIZE].sd_un.str)
+#define I_RLIMIT_LOCKS          143
+#define def_rlimit_locks        (sudo_defs_table[I_RLIMIT_LOCKS].sd_un.str)
+#define I_RLIMIT_MEMLOCK        144
+#define def_rlimit_memlock      (sudo_defs_table[I_RLIMIT_MEMLOCK].sd_un.str)
+#define I_RLIMIT_NOFILE         145
+#define def_rlimit_nofile       (sudo_defs_table[I_RLIMIT_NOFILE].sd_un.str)
+#define I_RLIMIT_NPROC          146
+#define def_rlimit_nproc        (sudo_defs_table[I_RLIMIT_NPROC].sd_un.str)
+#define I_RLIMIT_RSS            147
+#define def_rlimit_rss          (sudo_defs_table[I_RLIMIT_RSS].sd_un.str)
+#define I_RLIMIT_STACK          148
+#define def_rlimit_stack        (sudo_defs_table[I_RLIMIT_STACK].sd_un.str)
 
 enum def_tuple {
     never,

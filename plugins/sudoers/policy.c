@@ -632,7 +632,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(58, sizeof(char *));
+    command_info = calloc(69, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -889,6 +889,50 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	    if (asprintf(&command_info[info_len++], "execfd=%d", cmnd_fd) == -1)
 		goto oom;
 	}
+    }
+    if (def_rlimit_as != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_as", def_rlimit_as)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_core != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_core", def_rlimit_core)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_cpu != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_cpu", def_rlimit_cpu)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_data != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_data", def_rlimit_data)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_fsize != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_fsize", def_rlimit_fsize)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_locks != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_locks", def_rlimit_locks)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_memlock != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_memlock", def_rlimit_memlock)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_nofile != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_nofile", def_rlimit_nofile)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_nproc != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_nproc", def_rlimit_nproc)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_rss != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_rss", def_rlimit_rss)) == NULL)
+            goto oom;
+    }
+    if (def_rlimit_stack != NULL) {
+        if ((command_info[info_len++] = sudo_new_key_val("rlimit_stack", def_rlimit_stack)) == NULL)
+            goto oom;
     }
 #ifdef HAVE_LOGIN_CAP_H
     if (def_use_loginclass) {

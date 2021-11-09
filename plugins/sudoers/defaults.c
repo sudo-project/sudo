@@ -34,6 +34,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <syslog.h>
 
 #include "sudoers.h"
@@ -67,6 +69,7 @@ static bool store_timeout(const char *str, union sudo_defs_val *sd_un);
 static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_values *tuple_vals);
 static bool store_uint(const char *str, union sudo_defs_val *sd_un);
 static bool store_timespec(const char *str, union sudo_defs_val *sd_un);
+static bool store_rlimit(const char *str, union sudo_defs_val *sd_un);
 static bool list_op(const char *str, size_t, union sudo_defs_val *sd_un, enum list_ops op);
 static bool valid_path(struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
 
@@ -96,6 +99,7 @@ dump_defaults(void)
 			sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", desc);
 		    break;
 		case T_STR:
+		case T_RLIMIT:
 		    if (cur->sd_un.str) {
 			sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.str);
 			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
@@ -313,6 +317,9 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	case T_TIMESPEC:
 	    rc = store_timespec(val, &def->sd_un);
+	    break;
+	case T_RLIMIT:
+	    rc = store_rlimit(val, &def->sd_un);
 	    break;
 	default:
 	    if (!quiet) {
@@ -553,6 +560,8 @@ init_defaults(void)
     if ((def_admin_flag = strdup(_PATH_SUDO_ADMIN_FLAG)) == NULL)
 	goto oom;
 #endif
+    if ((def_rlimit_core = strdup("0,0")) == NULL)
+	goto oom;
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;
@@ -854,6 +863,60 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
 	sd_un->uival = u;
     }
     debug_return_bool(true);
+}
+
+/* Check resource limit syntax, does not save as rlim_t. */
+static bool
+check_rlimit(const char *str, bool soft)
+{
+    const size_t inflen = sizeof("infinity") - 1;
+    debug_decl(check_rlimit, SUDOERS_DEBUG_DEFAULTS);
+
+    if (isdigit((unsigned char)*str)) {
+	unsigned long long ullval;
+	char *ep;
+
+	/* XXX - some systems may lack strtoull() */
+	errno = 0;
+	ullval = strtoull(str, &ep, 10);
+	if (str == ep || (errno == ERANGE && ullval == ULLONG_MAX))
+	    debug_return_bool(false);
+	if (*ep == '\0' || (soft && *ep == ','))
+	    debug_return_bool(true);
+	debug_return_bool(false);
+    }
+    if (strncmp(str, "infinity", inflen) == 0) {
+	if (str[inflen] == '\0' || (soft && str[inflen] == ','))
+	    debug_return_bool(true);
+    }
+    debug_return_bool(false);
+}
+
+static bool
+store_rlimit(const char *str, union sudo_defs_val *sd_un)
+{
+    debug_decl(store_rlimit, SUDOERS_DEBUG_DEFAULTS);
+
+    /* The special values "user" and "default" are not compound. */
+    if (str != NULL && strcmp(str, "user") != 0 && strcmp(str, "default") != 0) {
+	const char *hard, *soft = str;
+	/*
+	 * Expect a limit in the form "soft,hard" or "limit" (both soft+hard).
+	 */
+	hard = strchr(str, ',');
+	if (hard != NULL)
+	    hard++;
+	else
+	    hard = soft;
+
+	if (!check_rlimit(soft, true))
+	    debug_return_bool(false);
+	if (!check_rlimit(hard, false))
+	    debug_return_bool(false);
+    }
+
+    /* Store as string, front-end will parse it as a limit. */
+    debug_return_bool(store_str(str, sd_un));
 }
 
 static bool

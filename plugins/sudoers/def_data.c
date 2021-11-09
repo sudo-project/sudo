@@ -598,6 +598,50 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Allow an intercepted command to run set setuid or setgid programs"),
 	NULL,
     }, {
+	"rlimit_as", T_RLIMIT|T_BOOL,
+	N_("The maximum size to which the process's address space may grow (in bytes): %s"),
+	NULL,
+    }, {
+	"rlimit_core", T_RLIMIT|T_BOOL,
+	N_("The largest size core dump file that may be created (in bytes): %s"),
+	NULL,
+    }, {
+	"rlimit_cpu", T_RLIMIT|T_BOOL,
+	N_("The maximum amount of CPU time that the process may use (in seconds): %s"),
+	NULL,
+    }, {
+	"rlimit_data", T_RLIMIT|T_BOOL,
+	N_("The maximum size of the data segment for the process (in bytes): %s"),
+	NULL,
+    }, {
+	"rlimit_fsize", T_RLIMIT|T_BOOL,
+	N_("The largest size file that the process may create (in bytes): %s"),
+	NULL,
+    }, {
+	"rlimit_locks", T_RLIMIT|T_BOOL,
+	N_("The maximum number of locks that the process may establish: %s"),
+	NULL,
+    }, {
+	"rlimit_memlock", T_RLIMIT|T_BOOL,
+	N_("The maximum size that the process may lock in memory (in bytes): %s"),
+	NULL,
+    }, {
+	"rlimit_nofile", T_RLIMIT|T_BOOL,
+	N_("The maximum number of files that the process may have open: %s"),
+	NULL,
+    }, {
+	"rlimit_nproc", T_RLIMIT|T_BOOL,
+	N_("The maximum number of processes that the user may run simultaneously: %s"),
+	NULL,
+    }, {
+	"rlimit_rss", T_RLIMIT|T_BOOL,
+	N_("The maximum size to which the process's resident set size may grow (in bytes): %s"),
+	NULL,
+    }, {
+	"rlimit_stack", T_RLIMIT|T_BOOL,
+	N_("The maximum size to which the process's stack may grow (in bytes): %s"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
