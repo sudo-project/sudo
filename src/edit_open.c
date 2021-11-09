@@ -341,7 +341,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
     struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
 {
     const int dflags = DIR_OPEN_FLAGS;
-    int dfd, fd, is_writable;
+    int dfd, fd, writable;
     debug_decl(sudo_edit_open_nonwritable, SUDO_DEBUG_EDIT);
 
     if (path[0] == '/') {
@@ -363,8 +363,8 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	 * Look up one component at a time, avoiding symbolic links in
 	 * writable directories.
 	 */
-	is_writable = dir_is_writable(dfd, user_cred, cur_cred);
-	if (is_writable == -1) {
+	writable = dir_is_writable(dfd, user_cred, cur_cred);
+	if (writable == -1) {
 	    close(dfd);
 	    debug_return_int(-1);
 	}
@@ -374,7 +374,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	if (slash == NULL)
 	    break;
 	*slash = '\0';
-	if (is_writable)
+	if (writable)
 	    subdfd = sudo_edit_openat_nofollow(dfd, path, dflags, 0);
 	else
 	    subdfd = openat(dfd, path, dflags, 0);
@@ -386,7 +386,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	dfd = subdfd;
     }
 
-    if (is_writable) {
+    if (writable) {
 	close(dfd);
 	errno = EISDIR;
 	debug_return_int(-1);
