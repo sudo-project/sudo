@@ -44,6 +44,7 @@ cross_compiling = @CROSS_COMPILING@
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
+SHA1SUM = @SHA1SUM@
 FLEX = @FLEX@
 YACC = @YACC@
 SED = @SED@
@@ -407,7 +408,7 @@ fuzz_policy_seed_corpus.zip:
 	tdir=fuzz_policy.$$$$; \
 	mkdir $$tdir; \
 	for f in $(FUZZ_POLICY_CORPUS); do \
-	    cp $$f $$tdir/`sha1sum $$f | cut -d' ' -f1`; \
+	    cp $$f $$tdir/`$(SHA1SUM) $$f | $(SED) -e 's/^.*= *//' -e 's/ .*//'`; \
 	done; \
 	zip -j $@ $$tdir/*; \
 	rm -rf $$tdir
@@ -433,7 +434,7 @@ fuzz_sudoers_seed_corpus.zip:
 	tdir=fuzz_sudoers.$$$$; \
 	mkdir $$tdir; \
 	for f in $(FUZZ_SUDOERS_CORPUS); do \
-	    cp $$f $$tdir/`sha1sum $$f | cut -d' ' -f1`; \
+	    cp $$f $$tdir/`$(SHA1SUM) $$f | $(SED) -e 's/^.*= *//' -e 's/ .*//'`; \
 	done; \
 	zip -j $@ $$tdir/*; \
 	rm -rf $$tdir
@@ -459,7 +460,7 @@ fuzz_sudoers_ldif_seed_corpus.zip:
 	tdir=fuzz_sudoers_ldif.$$$$; \
 	mkdir $$tdir; \
 	for f in $(FUZZ_SUDOERS_LDIF_CORPUS); do \
-	    cp $$f $$tdir/`sha1sum $$f | cut -d' ' -f1`; \
+	    cp $$f $$tdir/`$(SHA1SUM) $$f | $(SED) -e 's/^.*= *//' -e 's/ .*//'`; \
 	done; \
 	zip -j $@ $$tdir/*; \
 	rm -rf $$tdir

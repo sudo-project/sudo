@@ -1714,6 +1714,7 @@ NOEXECDIR="`echo $noexec_file|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[
 dnl
 dnl Find programs we use
 dnl
+AC_PATH_PROG(SHA1SUM, [sha1sum], [openssl dgst -sha1])
 AC_PATH_PROG(UNAMEPROG, [uname], [uname])
 AC_PATH_PROG(TRPROG, [tr], [tr])
 AC_PATH_PROG(MANDOCPROG, [mandoc], [mandoc])

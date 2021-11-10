@@ -34,6 +34,8 @@ cross_compiling = @CROSS_COMPILING@
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
+SHA1SUM = @SHA1SUM@
+SED = @SED@
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/eventlog/libsudo_eventlog.la \
@@ -188,7 +190,7 @@ fuzz_iolog_json_seed_corpus.zip:
 	tdir=fuzz_iolog_json.$$$$; \
 	mkdir $$tdir; \
 	for f in $(FUZZ_IOLOG_JSON_CORPUS); do \
-	    cp $$f $$tdir/`sha1sum $$f | cut -d' ' -f1`; \
+	    cp $$f $$tdir/`$(SHA1SUM) $$f | $(SED) -e 's/^.*= *//' -e 's/ .*//'`; \
 	done; \
 	zip -j $@ $$tdir/*; \
 	rm -rf $$tdir
@@ -214,7 +216,7 @@ fuzz_iolog_legacy_seed_corpus.zip:
 	tdir=fuzz_iolog_legacy.$$$$; \
 	mkdir $$tdir; \
 	for f in $(FUZZ_IOLOG_LEGACY_CORPUS); do \
-	    cp $$f $$tdir/`sha1sum $$f | cut -d' ' -f1`; \
+	    cp $$f $$tdir/`$(SHA1SUM) $$f | $(SED) -e 's/^.*= *//' -e 's/ .*//'`; \
 	done; \
 	zip -j $@ $$tdir/*; \
 	rm -rf $$tdir
@@ -240,7 +242,7 @@ fuzz_iolog_timing_seed_corpus.zip:
 	tdir=fuzz_iolog_timing.$$$$; \
 	mkdir $$tdir; \
 	for f in $(FUZZ_IOLOG_TIMING_CORPUS); do \
-	    cp $$f $$tdir/`sha1sum $$f | cut -d' ' -f1`; \
+	    cp $$f $$tdir/`$(SHA1SUM) $$f | $(SED) -e 's/^.*= *//' -e 's/ .*//'`; \
 	done; \
 	zip -j $@ $$tdir/*; \
 	rm -rf $$tdir

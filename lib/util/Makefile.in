@@ -54,6 +54,7 @@ HOSTCC = @CC_FOR_BUILD@
 CPP = @CPP@
 HOSTCPP = @CPP_FOR_BUILD@
 LIBTOOL = @LIBTOOL@
+SHA1SUM = @SHA1SUM@
 SED = @SED@
 AWK = @AWK@
 
@@ -318,7 +319,7 @@ fuzz_sudo_conf_seed_corpus.zip:
 	tdir=fuzz_sudo_conf.$$$$; \
 	mkdir $$tdir; \
 	for f in $(FUZZ_SUDO_CONF_CORPUS); do \
-	    cp $$f $$tdir/`sha1sum $$f | cut -d' ' -f1`; \
+	    cp $$f $$tdir/`$(SHA1SUM) $$f | $(SED) -e 's/^.*= *//' -e 's/ .*//'`; \
 	done; \
 	zip -j $@ $$tdir/*; \
 	rm -rf $$tdir
