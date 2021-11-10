@@ -253,10 +253,10 @@ $(srcdir)/sys_signame.h: $(srcdir)/siglist.in
 	fi
 
 mksiglist.h: $(srcdir)/sys_siglist.h
-	$(CPP) $(CPPFLAGS) $(srcdir)/sys_siglist.h | sed -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksiglist.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/sys_siglist.h | $(SED) -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksiglist.h
 
 mksigname.h: $(srcdir)/sys_signame.h
-	$(CPP) $(CPPFLAGS) $(srcdir)/sys_signame.h | sed -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksigname.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/sys_signame.h | $(SED) -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksigname.h
 
 conf_test: $(CONF_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
