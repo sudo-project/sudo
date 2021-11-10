@@ -25,9 +25,7 @@
 #define SUDO_COMPAT_H
 
 #include <sys/types.h>	/* for gid_t, mode_t, size_t, ssize_t, time_t, uid_t */
-#if defined(__hpux) && !defined(__LP64__)
-# include <unistd.h>	/* for pread/pread64, and pwrite/pwrite64 */
-#endif
+#include <unistd.h>	/* to avoid problems with mismatched headers and libc */
 #include <stdio.h>
 #if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \
     !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
