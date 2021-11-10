@@ -128,7 +128,7 @@ lint: all
 depend:
 
 Makefile: $(srcdir)/Makefile.in
-	cd $(top_builddir) && ./config.status --file doc/Makefile
+	cd $(top_builddir) && ./config.status --file docs/Makefile
 
 .SUFFIXES: .man
 
@@ -147,7 +147,7 @@ fixman.sed: $(srcdir)/fixman.sh
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -161,7 +161,7 @@ $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/visudo.man.in | $(SED) -f fixman.sed > $@
 
 ./visudo.mdoc: $(top_builddir)/config.status $(srcdir)/visudo.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -175,7 +175,7 @@ $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.conf.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.conf.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in $(srcdir)/sudoers.man.in.sed
 	@if [ -n "$(DEVEL)" ]; then \
@@ -203,7 +203,7 @@ $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.ldap.man.in | $(SED) -f fixman.sed > $@
 
 ./sudoers.ldap.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudoers_timestamp.man.in: $(srcdir)/sudoers_timestamp.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -217,7 +217,7 @@ $(srcdir)/sudoers_timestamp.man.in: $(srcdir)/sudoers_timestamp.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers_timestamp.man.in | $(SED) -f fixman.sed > $@
 
 ./sudoers_timestamp.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers_timestamp.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/cvtsudoers.man.in: $(srcdir)/cvtsudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -231,7 +231,7 @@ $(srcdir)/cvtsudoers.man.in: $(srcdir)/cvtsudoers.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/cvtsudoers.man.in | $(SED) -f fixman.sed > $@
 
 ./cvtsudoers.mdoc: $(top_builddir)/config.status $(srcdir)/cvtsudoers.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -245,7 +245,7 @@ $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoreplay.man.in | $(SED) -f fixman.sed > $@
 
 ./sudoreplay.mdoc: $(top_builddir)/config.status $(srcdir)/sudoreplay.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudo_logsrvd.man.in: $(srcdir)/sudo_logsrvd.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -259,7 +259,7 @@ $(srcdir)/sudo_logsrvd.man.in: $(srcdir)/sudo_logsrvd.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrvd.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_logsrvd.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_logsrvd.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudo_logsrv.proto.man.in: $(srcdir)/sudo_logsrv.proto.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -273,7 +273,7 @@ $(srcdir)/sudo_logsrv.proto.man.in: $(srcdir)/sudo_logsrv.proto.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrv.proto.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_logsrv.proto.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_logsrv.proto.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudo_logsrvd.conf.man.in: $(srcdir)/sudo_logsrvd.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -287,7 +287,7 @@ $(srcdir)/sudo_logsrvd.conf.man.in: $(srcdir)/sudo_logsrvd.conf.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrvd.conf.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_logsrvd.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_logsrvd.conf.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -301,7 +301,7 @@ $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_plugin.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_plugin.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plugin.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudo_plugin_python.man.in: $(srcdir)/sudo_plugin_python.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -315,7 +315,7 @@ $(srcdir)/sudo_plugin_python.man.in: $(srcdir)/sudo_plugin_python.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_plugin_python.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_plugin_python.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plugin_python.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 $(srcdir)/sudo_sendlog.man.in: $(srcdir)/sudo_sendlog.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -329,7 +329,7 @@ $(srcdir)/sudo_sendlog.man.in: $(srcdir)/sudo_sendlog.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_sendlog.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_sendlog.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_sendlog.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
 
 pre-install:
 

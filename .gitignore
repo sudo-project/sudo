@@ -26,9 +26,9 @@ ChangeLog
 PVS-Studio.cfg
 uncrustify.files
 
-doc/*.man
-doc/*.mdoc
-doc/fixman.sed
+docs/*.man
+docs/*.mdoc
+docs/fixman.sed
 
 examples/sudo.conf
 

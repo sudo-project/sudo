@@ -24,10 +24,10 @@ summary of major changes to the current stable release, see the web
 page, https://www.sudo.ws/stable.html.
 
 If you are upgrading from an earlier version of Sudo, please see
-the UPGRADE file in the doc directory.
+the UPGRADE file in the docs directory.
 
-For a history of sudo please see the HISTORY file in the doc directory.
-You can find a list of contributors to sudo in the doc/CONTRIBUTORS file.
+For a history of sudo please see the HISTORY file in the docs directory.
+You can find a list of contributors to sudo in the docs/CONTRIBUTORS file.
 
 Building the release
 ====================
@@ -78,7 +78,7 @@ Bug reports
 If you have found what you believe to be a bug, you can file a bug
 report in the sudo bug database, on the web at https://bugzilla.sudo.ws/.
 
-Please read over the `TROUBLESHOOTING' file in the doc directory *before*
+Please read over the `TROUBLESHOOTING' file in the docs directory *before*
 submitting a bug report.  When reporting bugs, please be sure to include
 the version of sudo you are using as well as the platform you are running
 it on.

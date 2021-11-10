@@ -28,7 +28,7 @@ Simple sudo installation
 For most systems and configurations it is possible simply to:
 
     0) If you are upgrading from a previous version of sudo
-       please read the info in the doc/UPGRADE file before proceeding.
+       please read the info in the docs/UPGRADE file before proceeding.
 
     1) Read the `OS dependent notes' section for any particular
        "gotchas" relating to your operating system.
@@ -44,7 +44,7 @@ For most systems and configurations it is possible simply to:
        make will probably be required.  If `configure' did its job
        properly (and you have a supported configuration) there won't
        be any problems.  If this doesn't work, take a look at the
-       doc/TROUBLESHOOTING file for tips on what might have gone
+       docs/TROUBLESHOOTING file for tips on what might have gone
        wrong.  Please mail us if you have a fix or if you are unable
        to come up with a fix (address at EOF).
 

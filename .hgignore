@@ -22,9 +22,9 @@ Makefile$
 ^ChangeLog$
 ^PVS-Studio\.cfg$
 ^uncrustify\.files$
-^doc/.*\.man$
-^doc/.*\.mdoc$
-^doc/fixman\.sed$
+^docs/.*\.man$
+^docs/.*\.mdoc$
+^docs/fixman\.sed$
 
 ^etc/init\.d/sudo\.conf$
 

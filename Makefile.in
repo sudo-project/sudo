@@ -59,7 +59,7 @@ python_version = @PYTHON_VERSION@
 SUBDIRS = lib/util @ZLIB_SRC@ lib/eventlog lib/fuzzstub lib/iolog \
 	  lib/protobuf-c @LOGSRV_SRC@ @LOGSRVD_SRC@ plugins/audit_json \
 	  plugins/group_file plugins/sample_approval plugins/sudoers \
-	  plugins/system_group @PYTHON_PLUGIN_SRC@ src include doc examples
+	  plugins/system_group @PYTHON_PLUGIN_SRC@ src include docs examples
 
 SAMPLES = plugins/sample
 
