@@ -20,6 +20,7 @@ docker/fedora/rawhide/Dockerfile
 docker/ubuntu/devel/Dockerfile
 docker/ubuntu/latest/Dockerfile
 docker/ubuntu/rolling/Dockerfile
+docs/CONTRIBUTING.md
 docs/CONTRIBUTORS
 docs/HISTORY
 docs/LICENSE
