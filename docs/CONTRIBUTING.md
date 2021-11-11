@@ -5,21 +5,21 @@ number of way you can help make Sudo better.
 
 ## Getting started
 
-To get an overview of Sudo, please read the [README](README).  There
+To get an overview of Sudo, please read the [README](../README).  There
 are multiple ways to contribute, some of which don't require writing
 a single line of code.
 
 ## Filing bug reports/issues
 
-If you find a bug in Sudo, you may open a [GitHub issue]
-(https://github.com/sudo-project/sudo/issues) or file a [Bugzilla bug]
-(https://bugzilla.sudo.ws).  If you would rather use email, messages
-may be sent to the [sudo-workers@sudo.ws mailing list]
-(https://www.sudo.ws/mailman/listinfo/sudo-workers) \(public\) or to
-[sudo@sudo.ws] \(private\).
+If you find a bug in Sudo, you may open a [GitHub
+issue](https://github.com/sudo-project/sudo/issues) or file a
+[Bugzilla bug](https://bugzilla.sudo.ws).  If you would rather use
+email, messages may be sent to the [sudo-workers@sudo.ws
+mailing list](https://www.sudo.ws/mailman/listinfo/sudo-workers)
+(public) or to sudo@sudo.ws (private).
 
-For information on reporting security issues, please see the [SECURITY]
-(docs/SECURITY.md) file.
+For information on reporting security issues, please see the
+[SECURITY](docs/SECURITY.md) file.
 
 Please include the version of sudo you are using, the operating
 system and/or distro that is affected, and step-by-step instructions
@@ -33,25 +33,26 @@ work flows:
  * clone the [sudo repo](https://github.com/sudo-project/sudo), make
    your changes, and submit a Pull Request (PR).
    
- * send a diff with your changes to the [sudo-workers@sudo.ws mailing list]
-   (https://www.sudo.ws/mailman/listinfo/sudo-workers) to start a discussion.
+ * send a diff with your changes to the [sudo-workers@sudo.ws mailing
+   list](https://www.sudo.ws/mailman/listinfo/sudo-workers) to start
+   a discussion.
 
 In addition to the [GitHub repo](https://github.com/sudo-project/sudo),
 there is also a [mercurial repo](https://www.sudo.ws/repos/sudo).
 
 ## sudo-workers mailing list
 
-If you would like to discuss your changes before submitting a PR,
-you may do so on the [sudo-workers@sudo.ws mailing list]
-(https://www.sudo.ws/mailman/listinfo/sudo-workers).
+If you would like to discuss your changes before submitting a
+PR, you may do so on the [sudo-workers@sudo.ws mailing
+list](https://www.sudo.ws/mailman/listinfo/sudo-workers).
 Otherwise, discussion can simply occur as part of the PR work flow.
 
 ## Fuzzing
 
 Sudo uses the [oss-fuzz project](https://github.com/google/oss-fuzz.git)
 to perform fuzzing.  Each commit to the _main_ branch will trigger
-a short fuzzing run via the [CIFuzz action]
-(https://github.com/sudo-project/sudo/actions/workflows/main.yml).
+a short fuzzing run via the [CIFuzz
+action](https://github.com/sudo-project/sudo/actions/workflows/main.yml).
 The history of that action shows successful and failed fuzzing runs.
 
 Longer fuzzing runs occur using the ClusterFuzz infrastructure.  These
@@ -59,8 +60,8 @@ fuzzing runs are longer than those used by CIFuzz.  A [public list of
 failures](https://bugs.chromium.org/p/oss-fuzz/issues/list?q=sudoers)
 is available.
 
-For more information on fuzzing sudo, see the [fuzzing blog post]
-(https://blog.sudo.ws/posts/2021/03/fuzz-testing-sudo/).
+For more information on fuzzing sudo, see the [fuzzing blog
+post](https://blog.sudo.ws/posts/2021/03/fuzz-testing-sudo/).
 
 ## Translations
 
