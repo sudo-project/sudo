@@ -107,6 +107,7 @@ main(int argc, char *argv[])
     int ch, exitcode = EXIT_FAILURE;
     enum sudoers_formats output_format = format_ldif;
     enum sudoers_formats input_format = format_sudoers;
+    struct sudoers_parse_tree *parse_tree;
     struct cvtsudoers_config *conf = NULL;
     bool match_local = false;
     const char *input_file = "-";
@@ -320,20 +321,6 @@ main(int argc, char *argv[])
 	}
     }
 
-    /* Input file (defaults to stdin). */
-    if (argc > 0) {
-	if (argc > 1)
-	    usage(1);
-	input_file = argv[0];
-    }
-
-    if (strcmp(input_file, "-") != 0) {
-	if (strcmp(input_file, output_file) == 0) {
-	    sudo_fatalx(U_("%s: input and output files must be different"),
-		input_file);
-	}
-    }
-
     /* Set pwutil backend to use the filter data. */
     if (conf->filter != NULL && !match_local) {
 	sudo_pwutil_set_backend(cvtsudoers_make_pwitem, cvtsudoers_make_gritem,
@@ -353,47 +340,76 @@ main(int argc, char *argv[])
     /* We may need the hostname to resolve %h escapes in include files. */
     get_hostname();
 
-    /* Setup defaults data structures. */
-    if (!init_defaults())
-	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
+    do {
+	/* Input file (defaults to stdin). */
+	if (argc > 0)
+	    input_file = argv[0];
 
-    switch (input_format) {
-    case format_ldif:
-	if (!parse_ldif(&parsed_policy, input_file, conf))
-	    goto done;
-	break;
-    case format_sudoers:
-	if (!parse_sudoers(input_file, conf))
-	    goto done;
-	break;
-    default:
-	sudo_fatalx("error: unhandled input %d", input_format);
-    }
+	if (strcmp(input_file, "-") != 0) {
+	    if (strcmp(input_file, output_file) == 0) {
+		sudo_fatalx(U_("%s: input and output files must be different"),
+		    input_file);
+	    }
+	}
 
-    /* Apply filters. */
-    filter_userspecs(&parsed_policy, conf);
-    filter_defaults(&parsed_policy, conf);
-    if (filters != NULL) {
-	alias_remove_unused(&parsed_policy);
-	if (conf->prune_matches && conf->expand_aliases)
-	    alias_prune(&parsed_policy, conf);
-    }
+	parse_tree = calloc(1, sizeof(*parse_tree));
+	if (parse_tree == NULL)
+	    sudo_fatalx("%s", U_("unable to allocate memory"));
+	TAILQ_INIT(&parse_tree->userspecs);
+	TAILQ_INIT(&parse_tree->defaults);
 
-    switch (output_format) {
-    case format_csv:
-	exitcode = !convert_sudoers_csv(&parsed_policy, output_file, conf);
-	break;
-    case format_json:
-	exitcode = !convert_sudoers_json(&parsed_policy, output_file, conf);
-	break;
-    case format_ldif:
-	exitcode = !convert_sudoers_ldif(&parsed_policy, output_file, conf);
-	break;
-    case format_sudoers:
-	exitcode = !convert_sudoers_sudoers(&parsed_policy, output_file, conf);
-	break;
-    default:
-	sudo_fatalx("error: unhandled output format %d", output_format);
+	/* Setup defaults data structures. */
+	if (!init_defaults()) {
+	    sudo_fatalx("%s",
+		U_("unable to initialize sudoers default values"));
+	}
+
+	switch (input_format) {
+	case format_ldif:
+	    if (!parse_ldif(parse_tree, input_file, conf))
+		goto done;
+	    break;
+	case format_sudoers:
+	    if (!parse_sudoers(input_file, conf))
+		goto done;
+	    reparent_parse_tree(parse_tree);
+	    break;
+	default:
+	    sudo_fatalx("error: unhandled input %d", input_format);
+	}
+	TAILQ_INSERT_TAIL(&parse_trees, parse_tree, entries);
+
+	/* Apply filters. */
+	filter_userspecs(parse_tree, conf);
+	filter_defaults(parse_tree, conf);
+	if (filters != NULL) {
+	    alias_remove_unused(parse_tree);
+	    if (conf->prune_matches && conf->expand_aliases)
+		alias_prune(parse_tree, conf);
+	}
+
+	argc--;
+	argv++;
+    } while (argc > 0);
+
+    /* TODO: merge parse tree into a single one and output that. */
+    TAILQ_FOREACH(parse_tree, &parse_trees, entries) {
+	switch (output_format) {
+	case format_csv:
+	    exitcode = !convert_sudoers_csv(parse_tree, output_file, conf);
+	    break;
+	case format_json:
+	    exitcode = !convert_sudoers_json(parse_tree, output_file, conf);
+	    break;
+	case format_ldif:
+	    exitcode = !convert_sudoers_ldif(parse_tree, output_file, conf);
+	    break;
+	case format_sudoers:
+	    exitcode = !convert_sudoers_sudoers(parse_tree, output_file, conf);
+	    break;
+	default:
+	    sudo_fatalx("error: unhandled output format %d", output_format);
+	}
     }
 
 done:
