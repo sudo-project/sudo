@@ -177,6 +177,7 @@ TAILQ_HEAD(privilege_list, privilege);
 TAILQ_HEAD(cmndspec_list, cmndspec);
 TAILQ_HEAD(command_digest_list, command_digest);
 STAILQ_HEAD(comment_list, sudoers_comment);
+TAILQ_HEAD(sudoers_parse_tree_list, sudoers_parse_tree);
 
 /*
  * Structure describing a user specification and list thereof.
@@ -289,6 +290,7 @@ struct defaults {
  * Parsed sudoers policy.
  */
 struct sudoers_parse_tree {
+    TAILQ_ENTRY(sudoers_parse_tree) entries;
     struct userspec_list userspecs;
     struct defaults_list defaults;
     struct rbtree *aliases;

@@ -58,6 +58,7 @@
 /*
  * Globals
  */
+struct sudoers_parse_tree_list parse_trees = TAILQ_HEAD_INITIALIZER(parse_trees);
 struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;

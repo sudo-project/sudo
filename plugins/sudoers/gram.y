@@ -62,6 +62,7 @@ static struct parser_leak_list parser_leak_list =
 #endif
 
 struct sudoers_parse_tree parsed_policy = {
+    { NULL, NULL }, /* entries */
     TAILQ_HEAD_INITIALIZER(parsed_policy.userspecs),
     TAILQ_HEAD_INITIALIZER(parsed_policy.defaults),
     NULL, /* aliases */
