@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,7 +58,6 @@
 /*
  * Globals
  */
-struct sudoers_parse_tree_list parse_trees = TAILQ_HEAD_INITIALIZER(parse_trees);
 struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
@@ -104,17 +103,18 @@ static void alias_prune(struct sudoers_parse_tree *parse_tree, struct cvtsudoers
 int
 main(int argc, char *argv[])
 {
-    int ch, exitcode = EXIT_FAILURE;
-    enum sudoers_formats output_format = format_ldif;
-    enum sudoers_formats input_format = format_sudoers;
+    struct sudoers_parse_tree_list parse_trees = TAILQ_HEAD_INITIALIZER(parse_trees);
     struct sudoers_parse_tree *parse_tree;
     struct cvtsudoers_config *conf = NULL;
-    bool match_local = false;
+    enum sudoers_formats output_format = format_ldif;
+    enum sudoers_formats input_format = format_sudoers;
     const char *input_file = "-";
     const char *output_file = "-";
     const char *conf_file = _PATH_CVTSUDOERS_CONF;
     const char *grfile = NULL, *pwfile = NULL;
-    const char *errstr;
+    const char *cp, *errstr;
+    int ch, exitcode = EXIT_FAILURE;
+    bool match_local = false;
     debug_decl(main, SUDOERS_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -341,9 +341,30 @@ main(int argc, char *argv[])
     get_hostname();
 
     do {
+	char *lhost = NULL, *shost = NULL;
+
 	/* Input file (defaults to stdin). */
 	if (argc > 0)
 	    input_file = argv[0];
+
+	/* Check for optional hostname prefix on the input file. */
+	cp = strchr(input_file, ':');
+	if (cp != NULL) {
+	    struct stat sb;
+
+	    if (strcmp(cp, ":-") == 0 || stat(input_file, &sb) == -1) {
+		lhost = strndup(input_file, (size_t)(cp - input_file));
+		if (lhost == NULL)
+		    sudo_fatalx("%s", U_("unable to allocate memory"));
+		input_file = cp + 1;
+		cp = strchr(lhost, '.');
+		if (cp == NULL) {
+		    shost = lhost;
+		} else {
+		    shost = strndup(lhost, (size_t)(cp - lhost));
+		}
+	    }
+	}
 
 	if (strcmp(input_file, "-") != 0) {
 	    if (strcmp(input_file, output_file) == 0) {
@@ -355,6 +376,8 @@ main(int argc, char *argv[])
 	parse_tree = calloc(1, sizeof(*parse_tree));
 	if (parse_tree == NULL)
 	    sudo_fatalx("%s", U_("unable to allocate memory"));
+	parse_tree->lhost = lhost;
+	parse_tree->shost = shost;
 	TAILQ_INIT(&parse_tree->userspecs);
 	TAILQ_INIT(&parse_tree->defaults);
 
