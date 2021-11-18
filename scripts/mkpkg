@@ -347,7 +347,7 @@ case "$osversion" in
 		;;
 	esac
 	if test "${osversion}" != "`$scriptdir/pp --probe`"; then
-	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
+	    sdkvers=`echo "${osversion}" | sed -e 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/' -e 's/\.$//'`
 	    # SDKs may be under Xcode.app or CommandLineTools (for non-Xcode)
 	    if [ -d "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs" ]; then
 		SDK_DIR="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
