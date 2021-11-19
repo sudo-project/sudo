@@ -479,16 +479,141 @@ merge_aliases(struct sudoers_parse_tree_list *parse_trees,
     debug_return_bool(true);
 }
 
+/*
+ * Compare two defaults structs but not their actual value.
+ * Returns true if they refer to the same Defaults variable and binding.
+ */
+static bool
+defaults_var_matches(struct defaults *d1, struct defaults *d2)
+{
+    debug_decl(defaults_var_matches, SUDOERS_DEBUG_DEFAULTS);
+
+    if (d1->type != d2->type)
+	debug_return_bool(false);
+    if (strcmp(d1->var, d2->var) != 0)
+	debug_return_bool(false);
+    if (d1->type != DEFAULTS) {
+	if (!member_list_equivalent(d1->binding, d2->binding))
+	    debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Compare the values of two defaults structs, which must be of the same type.
+ * Returns true if the value and operator match, else false.
+ */
+static bool
+defaults_val_matches(struct defaults *d1, struct defaults *d2)
+{
+    debug_decl(defaults_val_matches, SUDOERS_DEBUG_DEFAULTS);
+
+    /* XXX - what about list operators? */
+    if (d1->op != d2->op)
+	debug_return_bool(false);
+    if (d1->val != NULL && d2->val != NULL && strcmp(d1->val, d2->val) != 0)
+	debug_return_bool(false);
+    if (d1->val != d2->val)
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}
+
+#ifdef notyet
+/*
+ * Returns true if d1 is equivalent to d2, else false.
+ */
+static bool
+defaults_equivalent(struct defaults *d1, struct defaults *d2)
+{
+    debug_decl(defaults_equivalent, SUDOERS_DEBUG_DEFAULTS);
+
+    if (!defaults_var_matches(d1, d2))
+	debug_return_bool(false);
+    debug_return_bool(defaults_val_matches(d1, d2));
+}
+#endif
+
+/*
+ * Check for duplicate and conflicting Defaults entries in later sudoers files.
+ * Returns true if we find a conflict or duplicate, else false.
+ */
+static bool
+defaults_has_conflict(struct defaults *def,
+    struct sudoers_parse_tree *parse_tree0)
+{
+    struct sudoers_parse_tree *parse_tree = parse_tree0;
+    debug_decl(defaults_has_conflict, SUDOERS_DEBUG_DEFAULTS);
+
+    while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
+	struct defaults *d;
+	TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
+	    if (defaults_var_matches(def, d)) {
+		if (!defaults_val_matches(def, d)) {
+		    sudo_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
+			def->file, def->line, def->column, def->var,
+			d->file, d->line, d->column);
+		}
+		debug_return_bool(true);
+	    }
+	}
+    }
+
+    debug_return_bool(false);
+}
+
+/*
+ * Merge Defaults entries in parse_trees and store the result in
+ * merged_tree.  If a hostname was specified with the sudoers source,
+ * create a host-specific Defaults entry where possible.
+ * Returns true on success, else false.
+ */
 static bool
 merge_defaults(struct sudoers_parse_tree_list *parse_trees,
     struct sudoers_parse_tree *merged_tree)
 {
     struct sudoers_parse_tree *parse_tree;
+    struct defaults *def;
     debug_decl(merge_defaults, SUDOERS_DEBUG_DEFAULTS);
 
-    /* XXX - implement */
     TAILQ_FOREACH(parse_tree, parse_trees, entries) {
-	TAILQ_CONCAT(&merged_tree->defaults, &parse_tree->defaults, entries);
+	while ((def = TAILQ_FIRST(&parse_tree->defaults)) != NULL) {
+	    TAILQ_REMOVE(&parse_tree->defaults, def, entries);
+	    /*
+	     * If parse_tree has a host name associated with it,
+	     * try to make the Defaults setting host-specific.
+	     */
+	    if (parse_tree->lhost != NULL && def->type == DEFAULTS) {
+		struct member *m = malloc(sizeof(*m));
+		def->binding = malloc(sizeof(*def->binding));
+		if (m == NULL || def->binding == NULL) {
+		    sudo_fatalx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		}
+		m->name = strdup(parse_tree->lhost);
+		if (m->name == NULL) {
+		    sudo_fatalx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		}
+		m->type = WORD;
+		m->negated = false;
+		TAILQ_INIT(def->binding);
+		TAILQ_INSERT_TAIL(def->binding, m, entries);
+		def->type = DEFAULTS_HOST;
+	    }
+
+	    /*
+	     * Only add Defaults entry if not overridden by subsequent sudoers.
+	     * XXX - leaks def if not merged but can't free due to binding.
+	     */
+	    if (!defaults_has_conflict(def, parse_tree)) {
+		if (def->type != DEFAULTS_HOST) {
+		    sudo_warnx(U_("%s:%d:%d: unable to make Defaults \"%s\" host-specific"), def->file, def->line, def->column, def->var);
+		}
+		TAILQ_INSERT_TAIL(&merged_tree->defaults, def, entries);
+	    }
+	}
     }
 
     debug_return_bool(true);
