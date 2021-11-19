@@ -532,9 +532,6 @@ sudo_sss_close(struct sudo_nss *nss)
 	sudo_dso_unload(handle->ssslib);
 	if (handle->pw != NULL)
 	    sudo_pw_delref(handle->pw);
-	free(handle->ipa_host);
-	if (handle->ipa_host != handle->ipa_shost)
-	    free(handle->ipa_shost);
 	free_parse_tree(&handle->parse_tree);
 	free(handle);
 	nss->handle = NULL;

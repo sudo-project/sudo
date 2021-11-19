@@ -3830,10 +3830,10 @@ free_userspec(struct userspec *us)
 
 /*
  * Initialized a sudoers parse tree.
+ * Takes ownership of lhost and shost.
  */
 void
-init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *lhost,
-    const char *shost)
+init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost)
 {
     TAILQ_INIT(&parse_tree->userspecs);
     TAILQ_INIT(&parse_tree->defaults);
@@ -3864,6 +3864,10 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
     free_defaults(&parse_tree->defaults);
     free_aliases(parse_tree->aliases);
     parse_tree->aliases = NULL;
+    free(parse_tree->lhost);
+    if (parse_tree->shost != parse_tree->lhost)
+	free(parse_tree->shost);
+    parse_tree->lhost = parse_tree->shost = NULL;
 }
 
 /*

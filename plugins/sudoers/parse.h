@@ -294,7 +294,7 @@ struct sudoers_parse_tree {
     struct userspec_list userspecs;
     struct defaults_list defaults;
     struct rbtree *aliases;
-    const char *shost, *lhost;
+    char *shost, *lhost;
 };
 
 /*
@@ -366,7 +366,7 @@ void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
 void free_default(struct defaults *def, struct member_list **binding);
 void free_defaults(struct defaults_list *defs);
-void init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *lhost, const char *shost);
+void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
 void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 bool parser_leak_add(enum parser_leak_types type, void *v);

@@ -273,7 +273,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     /* Only one sudoers source, the sudoers file itself. */
-    init_parse_tree(&parse_tree, user_host, user_shost);
+    init_parse_tree(&parse_tree, NULL, NULL);
     memset(&sudo_nss_fuzz, 0, sizeof(sudo_nss_fuzz));
     sudo_nss_fuzz.parse_tree = &parse_tree;
     sudo_nss_fuzz.query = sudo_fuzz_query;
