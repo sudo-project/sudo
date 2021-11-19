@@ -227,14 +227,14 @@ alias_free(void *v)
  * Find the named alias, remove it from the tree and return it.
  */
 struct alias *
-alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type)
+alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, int type)
 {
     struct rbnode *node;
     struct alias key;
     debug_decl(alias_remove, SUDOERS_DEBUG_ALIAS);
 
     if (parse_tree->aliases != NULL) {
-	key.name = name;
+	key.name = (char *)name;
 	key.type = type;
 	if ((node = rbfind(parse_tree->aliases, &key)) != NULL)
 	    debug_return_ptr(rbdelete(parse_tree->aliases, node));

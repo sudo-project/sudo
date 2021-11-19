@@ -197,12 +197,13 @@ VISUDO_OBJS = check_aliases.o editor.lo find_path.lo gc.lo goodpath.lo \
 VISUDO_IOBJS = sudo_printf.i visudo.i
 
 CVTSUDOERS_OBJS = b64_encode.o cvtsudoers.o cvtsudoers_json.o cvtsudoers_csv.o \
-		  cvtsudoers_ldif.o cvtsudoers_pwutil.o fmtsudoers.lo \
-		  fmtsudoers_cvt.lo locale.lo parse_ldif.o stubs.o \
-		  sudo_printf.o ldap_util.lo testsudoers_pwutil.o tsgetgrpw.o
+		  cvtsudoers_ldif.o cvtsudoers_merge.o cvtsudoers_pwutil.o \
+		  fmtsudoers.lo fmtsudoers_cvt.lo locale.lo parse_ldif.o \
+		  stubs.o sudo_printf.o ldap_util.lo testsudoers_pwutil.o \
+		  tsgetgrpw.o
 
-CVTSUDOERS_IOBJS = cvtsudoers.i cvtsudoers_json.i cvtsudoers_ldif.i \
-		   cvtsudoers_pwutil.i
+CVTSUDOERS_IOBJS = cvtsudoers.i cvtsudoers_csv.i cvtsudoers_json.i \
+		   cvtsudoers_ldif.i cvtsudoers_merge.i cvtsudoers_pwutil.i
 
 REPLAY_OBJS = getdate.o sudoreplay.o
 
@@ -1424,6 +1425,34 @@ cvtsudoers_ldif.i: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 cvtsudoers_ldif.plog: cvtsudoers_ldif.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers_ldif.c --i-file $< --output-file $@
+cvtsudoers_merge.o: $(srcdir)/cvtsudoers_merge.c $(devdir)/def_data.h \
+                    $(devdir)/gram.h $(incdir)/compat/stdbool.h \
+                    $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                    $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
+                    $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                    $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                    $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
+                    $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                    $(srcdir)/redblack.h $(srcdir)/strlist.h \
+                    $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                    $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                    $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers_merge.c
+cvtsudoers_merge.i: $(srcdir)/cvtsudoers_merge.c $(devdir)/def_data.h \
+                    $(devdir)/gram.h $(incdir)/compat/stdbool.h \
+                    $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                    $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
+                    $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                    $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                    $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
+                    $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                    $(srcdir)/redblack.h $(srcdir)/strlist.h \
+                    $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                    $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                    $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+cvtsudoers_merge.plog: cvtsudoers_merge.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers_merge.c --i-file $< --output-file $@
 cvtsudoers_pwutil.o: $(srcdir)/cvtsudoers_pwutil.c $(devdir)/def_data.h \
                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                      $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

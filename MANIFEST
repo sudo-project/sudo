@@ -554,6 +554,7 @@ plugins/sudoers/cvtsudoers.h
 plugins/sudoers/cvtsudoers_csv.c
 plugins/sudoers/cvtsudoers_json.c
 plugins/sudoers/cvtsudoers_ldif.c
+plugins/sudoers/cvtsudoers_merge.c
 plugins/sudoers/cvtsudoers_pwutil.c
 plugins/sudoers/def_data.c
 plugins/sudoers/def_data.h

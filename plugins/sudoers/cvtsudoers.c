@@ -104,7 +104,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoers_parse_tree_list parse_trees = TAILQ_HEAD_INITIALIZER(parse_trees);
-    struct sudoers_parse_tree *parse_tree;
+    struct sudoers_parse_tree *parse_tree, merged_tree;
     struct cvtsudoers_config *conf = NULL;
     enum sudoers_formats output_format = format_ldif;
     enum sudoers_formats input_format = format_sudoers;
@@ -415,24 +415,30 @@ main(int argc, char *argv[])
 	argv++;
     } while (argc > 0);
 
-    /* TODO: merge parse tree into a single one and output that. */
-    TAILQ_FOREACH(parse_tree, &parse_trees, entries) {
-	switch (output_format) {
-	case format_csv:
-	    exitcode = !convert_sudoers_csv(parse_tree, output_file, conf);
-	    break;
-	case format_json:
-	    exitcode = !convert_sudoers_json(parse_tree, output_file, conf);
-	    break;
-	case format_ldif:
-	    exitcode = !convert_sudoers_ldif(parse_tree, output_file, conf);
-	    break;
-	case format_sudoers:
-	    exitcode = !convert_sudoers_sudoers(parse_tree, output_file, conf);
-	    break;
-	default:
-	    sudo_fatalx("error: unhandled output format %d", output_format);
-	}
+    parse_tree = TAILQ_FIRST(&parse_trees);
+    if (parse_tree == TAILQ_LAST(&parse_trees, sudoers_parse_tree_list)) {
+	/* No merging required. */
+	goto output;
+    }
+
+    parse_tree = merge_sudoers(&parse_trees, &merged_tree);
+
+output:
+    switch (output_format) {
+    case format_csv:
+	exitcode = !convert_sudoers_csv(parse_tree, output_file, conf);
+	break;
+    case format_json:
+	exitcode = !convert_sudoers_json(parse_tree, output_file, conf);
+	break;
+    case format_ldif:
+	exitcode = !convert_sudoers_ldif(parse_tree, output_file, conf);
+	break;
+    case format_sudoers:
+	exitcode = !convert_sudoers_sudoers(parse_tree, output_file, conf);
+	break;
+    default:
+	sudo_fatalx("error: unhandled output format %d", output_format);
     }
 
 done:

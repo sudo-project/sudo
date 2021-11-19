@@ -93,6 +93,9 @@ bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *out
 /* cvtsudoers_ldif.c */
 bool convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
+/* cvtsudoers_merge.c */
+struct sudoers_parse_tree *merge_sudoers(struct sudoers_parse_tree_list *parse_trees, struct sudoers_parse_tree *merged_tree);
+
 /* cvtsudoers_pwutil.c */
 struct cache_item *cvtsudoers_make_pwitem(uid_t uid, const char *name);
 struct cache_item *cvtsudoers_make_gritem(gid_t gid, const char *name);
