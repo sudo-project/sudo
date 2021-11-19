@@ -141,10 +141,12 @@ This makes it possible to have all sudo I/O logs on a central server."
 %endif
 
 %if [macos]
+	pp_macos_pkg_type=flat
 	pp_macos_bundle_id=ws.sudo.pkg.sudo-logsrvd
+	pp_macos_pkg_background=${srcdir}/etc/macos-background.png
+	pp_macos_pkg_background_dark=${srcdir}/etc/macos-background.png
 	pp_macos_pkg_license=${pp_destdir}$docdir/LICENSE
 	pp_macos_pkg_readme=${pp_wrkdir}/ReadMe.txt
-	pp_macos_pkg_type=flat
 	perl -pe 'last if (/^What/i && $seen++)' ${pp_destdir}$docdir/NEWS > ${pp_wrkdir}/ReadMe.txt
 %endif
 

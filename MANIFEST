@@ -71,6 +71,7 @@ etc/codespell.skip
 etc/init.d/aix.sh.in
 etc/init.d/hpux.sh.in
 etc/init.d/sudo.conf.in
+etc/macos-background.png
 etc/sudo-logsrvd.pp
 etc/sudo-python.pp
 etc/sudo.pp

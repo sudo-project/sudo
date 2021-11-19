@@ -384,6 +384,7 @@ package: @PPFILES@
 	$(MAKE) install INSTALL_OWNER= DESTDIR=$$DESTDIR && \
 	for p in @PPFILES@; do \
 	    $(SHELL) $(scriptdir)/pp $(PPFLAGS) --destdir=$$DESTDIR $$p \
+		srcdir=$(top_srcdir) \
 		prefix=$(prefix) \
 		bindir=$(bindir) \
 		sbindir=$(sbindir) \
