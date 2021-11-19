@@ -520,7 +520,6 @@ defaults_val_matches(struct defaults *d1, struct defaults *d2)
     debug_return_bool(true);
 }
 
-#ifdef notyet
 /*
  * Returns true if d1 is equivalent to d2, else false.
  */
@@ -533,7 +532,28 @@ defaults_equivalent(struct defaults *d1, struct defaults *d2)
 	debug_return_bool(false);
     debug_return_bool(defaults_val_matches(d1, d2));
 }
-#endif
+
+/*
+ * Returns true if dl1 is equivalent to dl2, else false.
+ */
+static bool
+defaults_list_equivalent(struct defaults_list *dl1, struct defaults_list *dl2)
+{
+    struct defaults *d1 = TAILQ_FIRST(dl1);
+    struct defaults *d2 = TAILQ_FIRST(dl2);
+    debug_decl(defaults_list_equivalent, SUDOERS_DEBUG_DEFAULTS);
+
+    while (d1 != NULL && d2 != NULL) {
+	if (!defaults_equivalent(d1, d2))
+	    debug_return_bool(false);
+	d1 = TAILQ_NEXT(d1, entries);
+	d2 = TAILQ_NEXT(d2, entries);
+    }
+
+    if (d1 != NULL || d2 != NULL)
+	debug_return_bool(false);
+    debug_return_bool(true);
+}
 
 /*
  * Check for duplicate and conflicting Defaults entries in later sudoers files.
@@ -619,16 +639,194 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
     debug_return_bool(true);
 }
 
+/*
+ * Returns true if cs1 is equivalent to cs2, else false.
+ */
+static bool
+cmndspec_equivalent(struct cmndspec *cs1, struct cmndspec *cs2)
+{
+    debug_decl(cmndspec_equivalent, SUDOERS_DEBUG_PARSER);
+
+    if (cs1->runasuserlist != NULL && cs2->runasuserlist != NULL) {
+	if (!member_list_equivalent(cs1->runasuserlist, cs2->runasuserlist))
+	    debug_return_bool(false);
+    } else if (cs1->runasuserlist != cs2->runasuserlist) {
+	debug_return_bool(false);
+    }
+    if (cs1->runasgrouplist != NULL && cs2->runasgrouplist != NULL) {
+	if (!member_list_equivalent(cs1->runasgrouplist, cs2->runasgrouplist))
+	    debug_return_bool(false);
+    } else if (cs1->runasgrouplist != cs2->runasgrouplist) {
+	debug_return_bool(false);
+    }
+    if (!member_equivalent(cs1->cmnd, cs2->cmnd))
+	debug_return_bool(false);
+    if (TAGS_CHANGED(cs1->tags, cs2->tags))
+	debug_return_bool(false);
+    if (cs1->timeout != cs2->timeout)
+	debug_return_bool(false);
+    if (cs1->notbefore != cs2->notbefore)
+	debug_return_bool(false);
+    if (cs1->notafter != cs2->notafter)
+	debug_return_bool(false);
+    if (cs1->runcwd != NULL && cs2->runcwd != NULL) {
+	if (strcmp(cs1->runcwd, cs2->runcwd) != 0)
+	    debug_return_bool(false);
+    } else if (cs1->runcwd != cs2->runcwd) {
+	debug_return_bool(false);
+    }
+    if (cs1->runchroot != NULL && cs2->runchroot != NULL) {
+	if (strcmp(cs1->runchroot, cs2->runchroot) != 0)
+	    debug_return_bool(false);
+    } else if (cs1->runchroot != cs2->runchroot) {
+	debug_return_bool(false);
+    }
+#ifdef HAVE_SELINUX
+    if (cs1->role != NULL && cs2->role != NULL) {
+	if (strcmp(cs1->role, cs2->role) != 0)
+	    debug_return_bool(false);
+    } else if (cs1->role != cs2->role) {
+	debug_return_bool(false);
+    }
+    if (cs1->type != NULL && cs2->type != NULL) {
+	if (strcmp(cs1->type, cs2->type) != 0)
+	    debug_return_bool(false);
+    } else if (cs1->type != cs2->type) {
+	debug_return_bool(false);
+    }
+#endif
+#ifdef HAVE_PRIV_SET
+    if (cs1->privs != NULL && cs2->privs != NULL) {
+	if (strcmp(cs1->privs, cs2->privs) != 0)
+	    debug_return_bool(false);
+    } else if (cs1->privs != cs2->privs) {
+	debug_return_bool(false);
+    }
+    if (cs1->limitprivs != NULL && cs2->limitprivs != NULL) {
+	if (strcmp(cs1->limitprivs, cs2->limitprivs) != 0)
+	    debug_return_bool(false);
+    } else if (cs1->limitprivs != cs2->limitprivs) {
+	debug_return_bool(false);
+    }
+#endif
+
+    debug_return_bool(true);
+}
+
+/*
+ * Returns true if csl1 is equivalent to csl2, else false.
+ */
+static bool
+cmndspec_list_equivalent(struct cmndspec_list *csl1, struct cmndspec_list *csl2)
+{
+    struct cmndspec *cs1 = TAILQ_FIRST(csl1);
+    struct cmndspec *cs2 = TAILQ_FIRST(csl2);
+    debug_decl(cmndspec_list_equivalent, SUDOERS_DEBUG_PARSER);
+
+    while (cs1 != NULL && cs2 != NULL) {
+	if (!cmndspec_equivalent(cs1, cs2))
+	    debug_return_bool(false);
+	cs1 = TAILQ_NEXT(cs1, entries);
+	cs2 = TAILQ_NEXT(cs2, entries);
+    }
+
+    if (cs1 != NULL || cs2 != NULL)
+	debug_return_bool(false);
+    debug_return_bool(true);
+}
+
+/*
+ * Check for duplicate userspecs in later sudoers files.
+ * Returns true if we find a duplicate, else false.
+ */
+static bool
+userspec_is_duplicate(struct userspec *us1,
+    struct sudoers_parse_tree *parse_tree0)
+{
+    struct sudoers_parse_tree *parse_tree = parse_tree0;
+    struct userspec *us2;
+    debug_decl(userspec_is_duplicate, SUDOERS_DEBUG_PARSER);
+
+    while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
+	TAILQ_FOREACH(us2, &parse_tree->userspecs, entries) {
+	    struct privilege *priv1, *priv2;
+	    if (!member_list_equivalent(&us1->users, &us2->users))
+		break;
+
+	    /* XXX - order should not matter */
+	    priv1 = TAILQ_FIRST(&us1->privileges);
+	    priv2 = TAILQ_FIRST(&us2->privileges);
+	    while (priv1 != NULL && priv2 != NULL) {
+		if (!member_list_equivalent(&priv1->hostlist, &priv2->hostlist))
+		    break;
+		if (!defaults_list_equivalent(&priv1->defaults, &priv2->defaults))
+		    break;
+		if (!cmndspec_list_equivalent(&priv1->cmndlist, &priv2->cmndlist))
+		    break;
+		priv1 = TAILQ_NEXT(priv1, entries);
+		priv2 = TAILQ_NEXT(priv2, entries);
+	    }
+	    if (priv1 != NULL || priv2 != NULL)
+		break;
+	}
+	if (us2 == NULL) {
+	    /* exact match */
+	    debug_return_bool(true);
+	}
+    }
+
+    debug_return_bool(false);
+}
+
+/*
+ * Merge userspecs in parse_trees and store the result in merged_tree.
+ * If a hostname was specified with the sudoers source, make the
+ * privilege host-specific where possible.
+ * Returns true on success, else false.
+ */
 static bool
 merge_userspecs(struct sudoers_parse_tree_list *parse_trees,
     struct sudoers_parse_tree *merged_tree)
 {
     struct sudoers_parse_tree *parse_tree;
-    debug_decl(merge_userspecs, SUDOERS_DEBUG_PARSER);
+    struct userspec *us;
+    struct privilege *priv;
+    debug_decl(merge_userspecs, SUDOERS_DEBUG_DEFAULTS);
 
-    /* XXX - implement */
     TAILQ_FOREACH(parse_tree, parse_trees, entries) {
-	TAILQ_CONCAT(&merged_tree->userspecs, &parse_tree->userspecs, entries);
+	while ((us = TAILQ_FIRST(&parse_tree->userspecs)) != NULL) {
+	    TAILQ_REMOVE(&parse_tree->userspecs, us, entries);
+	    TAILQ_FOREACH(priv, &us->privileges, entries) {
+		/*
+		 * If parse_tree has a host name associated with it,
+		 * try to make the privilege host-specific.
+		 */
+		if (parse_tree->lhost != NULL) {
+		    struct member *m;
+		    TAILQ_FOREACH(m, &priv->hostlist, entries) {
+			/* We don't alter !ALL in a hostlist. */
+			if (m->type == ALL && !m->negated) {
+			    m->type = WORD;
+			    m->name = strdup(parse_tree->lhost);
+			    if (m->name == NULL) {
+				sudo_fatalx(U_("%s: %s"), __func__,
+				    U_("unable to allocate memory"));
+			    }
+			}
+		    }
+		}
+	    }
+
+	    /*
+	     * Prune out duplicate userspecs.
+	     * XXX - do this at the privilege/cmndspec level instead.
+	     */
+	    if (userspec_is_duplicate(us, parse_tree)) {
+		free_userspec(us);
+	    } else {
+		TAILQ_INSERT_TAIL(&merged_tree->userspecs, us, entries);
+	    }
+	}
     }
 
     debug_return_bool(true);
