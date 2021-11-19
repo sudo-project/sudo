@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2021 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20210811"
+pp_revision="20211119"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -6689,7 +6689,7 @@ pp_backend_rpm_function () {
 	/etc	root:admin 0755
 	/var    root:admin 0755
 
-    <http://developer.apple.com/documentation/DeveloperTools/Conceptual/SoftwareDistribution4/Concepts/sd_pkg_flags.html>
+    <http://mirror.informatimago.com/next/developer.apple.com/documentation/DeveloperTools/Conceptual/SoftwareDistribution/Concepts/sd_pkg_flags.html>
     Info.plist = {
      CFBundleGetInfoString: "1.2.3, One Identity LLC.",
      CFBundleIdentifier: "com.quest.rc.openssh",
@@ -6724,7 +6724,7 @@ pp_backend_rpm_function () {
 
  # Startup scripts
     'launchd' is a kind of combined inetd and rc/init.d system.
-    <http://developer.apple.com/documentation/MacOSX/Conceptual/BPSystemStartup/Articles/DesigningDaemons.html>
+    <https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/DesigningDaemons.html>
     Create a /Library/LaunchDaemons/$daemonname.plist file
     Examples found in /System/Library/LaunchDaemons/
     See manual page launchd.plist(5) for details:
@@ -6776,6 +6776,8 @@ pp_backend_macos_init () {
     pp_macos_bundle_version=
     pp_macos_bundle_info_string=
     pp_macos_pkg_type=bundle
+    pp_macos_pkg_background=
+    pp_macos_pkg_background_dark=
     pp_macos_pkg_license=
     pp_macos_pkg_readme=
     pp_macos_pkg_welcome=
@@ -7357,7 +7359,7 @@ pp_backend_macos_flat () {
     # Write Distribution file
     cat <<-. >$pkgdir/Distribution
 	<?xml version="1.0" encoding="UTF-8"?>
-	<installer-script minSpecVersion="1.000000" authoringTool="com.quest.rc.PolyPkg" authoringToolVersion="$pp_version" authoringToolBuild="$pp_revision">
+	<installer-gui-script minSpecVersion="1">
 	    <title>$name $version</title>
 	    <options customize="never" allow-external-scripts="no"/>
 	    <domains enable_localSystem="true"/>
@@ -7374,6 +7376,14 @@ pp_backend_macos_flat () {
 	cp -R "${pp_macos_pkg_license}" $Resources
 	echo "    <license file=\"${pp_macos_pkg_license##*/}\"/>" >>$pkgdir/Distribution
     fi
+    if test -n "$pp_macos_pkg_background"; then
+	cp -R "${pp_macos_pkg_background}" $Resources
+	echo "    <background file=\"${pp_macos_pkg_background##*/}\" scaling=\"proportional\" alignment=\"left\"/>" >>$pkgdir/Distribution
+    fi
+    if test -n "$pp_macos_pkg_background_dark"; then
+	cp -R "${pp_macos_pkg_background_dark}" $Resources
+	echo "    <background-darkAqua file=\"${pp_macos_pkg_background_dark##*/}\" scaling=\"proportional\" alignment=\"left\"/>" >>$pkgdir/Distribution
+    fi
     cat <<-. >>$pkgdir/Distribution
 	    <choices-outline>
 	        <line choice="choice0"/>
@@ -7382,7 +7392,7 @@ pp_backend_macos_flat () {
 	        <pkg-ref id="${pp_macos_bundle_id}"/>
 	    </choice>
 	    <pkg-ref id="${pp_macos_bundle_id}" installKBytes="$size" version="$version" auth="Root">#$pkgfile</pkg-ref>
-	</installer-script>
+	</installer-gui-script>
 .
 
     # write scripts archive
