@@ -838,9 +838,6 @@ merge_sudoers(struct sudoers_parse_tree_list *parse_trees,
 {
     debug_decl(merge_sudoers, SUDOERS_DEBUG_UTIL);
 
-    memset(merged_tree, 0, sizeof(*merged_tree));
-    TAILQ_INIT(&merged_tree->userspecs);
-    TAILQ_INIT(&merged_tree->defaults);
     if ((merged_tree->aliases = alloc_aliases()) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 

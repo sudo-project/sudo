@@ -104,7 +104,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoers_parse_tree_list parse_trees = TAILQ_HEAD_INITIALIZER(parse_trees);
-    struct sudoers_parse_tree *parse_tree, merged_tree;
+    struct sudoers_parse_tree merged_tree, *parse_tree = NULL;
     struct cvtsudoers_config *conf = NULL;
     enum sudoers_formats output_format = format_ldif;
     enum sudoers_formats input_format = format_sudoers;
@@ -130,6 +130,9 @@ main(int argc, char *argv[])
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
     bindtextdomain("sudoers", LOCALEDIR);
     textdomain("sudoers");
+
+    /* Initialize early, before any "goto done". */
+    init_parse_tree(&merged_tree, NULL, NULL);
 
     /* Read debug and plugin sections of sudo.conf. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
@@ -373,13 +376,11 @@ main(int argc, char *argv[])
 	    }
 	}
 
-	parse_tree = calloc(1, sizeof(*parse_tree));
+	parse_tree = malloc(sizeof(*parse_tree));
 	if (parse_tree == NULL)
 	    sudo_fatalx("%s", U_("unable to allocate memory"));
-	parse_tree->lhost = lhost;
-	parse_tree->shost = shost;
-	TAILQ_INIT(&parse_tree->userspecs);
-	TAILQ_INIT(&parse_tree->defaults);
+	init_parse_tree(parse_tree, lhost, shost);
+	TAILQ_INSERT_TAIL(&parse_trees, parse_tree, entries);
 
 	/* Setup defaults data structures. */
 	if (!init_defaults()) {
@@ -400,7 +401,6 @@ main(int argc, char *argv[])
 	default:
 	    sudo_fatalx("error: unhandled input %d", input_format);
 	}
-	TAILQ_INSERT_TAIL(&parse_trees, parse_tree, entries);
 
 	/* Apply filters. */
 	filter_userspecs(parse_tree, conf);
@@ -416,14 +416,11 @@ main(int argc, char *argv[])
     } while (argc > 0);
 
     parse_tree = TAILQ_FIRST(&parse_trees);
-    if (parse_tree == TAILQ_LAST(&parse_trees, sudoers_parse_tree_list)) {
-	/* No merging required. */
-	goto output;
+    if (TAILQ_NEXT(parse_tree, entries)) {
+	/* Multiple sudoers files, merge them all. */
+	parse_tree = merge_sudoers(&parse_trees, &merged_tree);
     }
 
-    parse_tree = merge_sudoers(&parse_trees, &merged_tree);
-
-output:
     switch (output_format) {
     case format_csv:
 	exitcode = !convert_sudoers_csv(parse_tree, output_file, conf);
@@ -442,6 +439,12 @@ output:
     }
 
 done:
+    free_parse_tree(&merged_tree);
+    while ((parse_tree = TAILQ_FIRST(&parse_trees)) != NULL) {
+	TAILQ_REMOVE(&parse_trees, parse_tree, entries);
+	free_parse_tree(parse_tree);
+	free(parse_tree);
+    }
     cvtsudoers_conf_free(conf);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     return exitcode;
