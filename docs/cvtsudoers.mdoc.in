@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 10, 2021
+.Dd November 18, 2021
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -35,23 +35,27 @@
 .Op Fl O Ar start_point
 .Op Fl P Ar padding
 .Op Fl s Ar sections
-.Op Ar input_file
+.Op Ar input_file ...
 .Sh DESCRIPTION
+The
 .Nm
-can be used to convert between
+utility accepts one or more security policies in either
 .Em sudoers
-security policy file formats.
-The default input format is sudoers.
+or LDIF format as input, and generates a single
+policy of the specified format as output.
+The default input format is
+.Em sudoers.
 The default output format is LDIF.
-It is only possible to convert a
-.Em sudoers
-file that is syntactically correct.
+It is only possible to convert a policy file that is syntactically correct.
 .Pp
 If no
 .Ar input_file
 is specified, or if it is
 .Ql - ,
 the policy is read from the standard input.
+Input files may be optionally prefixed with a host name followed by a colon
+.Pq Ql :\&
+to make the policy rules specific to a host when merging multiple files.
 By default, the result is written to the standard output.
 .Pp
 The options are as follows:
@@ -319,7 +323,62 @@ and
 .Em sudoers
 grammar versions and exit.
 .El
+.Ss Merging multiple files
+When multiple input files are specified,
+.Nm
+will attempt to merge them into a single policy file.
+It is assumed that user and group names are consistent among
+the policy files to be merged.
+For example, user
+.Dq bob
+on one host is the same as user
+.Dq bob
+on another host.
 .Pp
+When merging policy files, it is possible to prefix the input file name
+with a host name, separated by a colon
+.Pq Ql :\& .
+When the files are merged, the host name will be used to restrict
+the policy rules to that specific host where possible.
+.Pp
+The merging process is performed as follows:
+.Bl -bullet -width 1n
+.It
+Each input file is parsed into internal sudoers data structures.
+.It
+Aliases are merged and renamed as necessary to avoid conflicts.
+In the event of a conflict, the first alias found is left as-is and
+subsequent aliases of the same name are renamed with a numeric suffix
+separated with a underscore
+.Pq Ql _ .
+For example, if there are two different aliases named
+.Li SERVERS ,
+the first will be left as-is and the second will be renamed
+.Li SERVERS_1 .
+References to the renamed alias are also updated in the policy file.
+Duplicate aliases (those with identical contents) are pruned.
+.It
+Defaults settings are merged and duplicates are removed.
+If there are conflicts in the Defaults settings, a warning is emitted for
+each conflict.
+If a host name is specified with the input file,
+.Nm
+will change the global Defaults settings in that file to be host-specific.
+A warning is emitted for command, user or runas-specific Defaults settings
+which cannot be made host-specific.
+.It
+Per-user rules are merged and duplicates are removed.
+If a host name is specified with the input file,
+.Nm
+will change rules that specify a host name of
+.Li ALL
+to the host name associated with the policy file being merged.
+The merging of rules is currently fairly simplistic but will be
+improved in a later release.
+.El
+.Pp
+It is possible to merge policy files with differing formats.
+.Ss The cvtsudoers.conf file
 Options in the form
 .Dq keyword = value
 may also be specified in a configuration file,
@@ -425,6 +484,17 @@ from LDIF to traditional
 format:
 .Bd -literal -offset indent
 $ cvtsudoers -i ldif -f sudoers -o sudoers.new sudoers.ldif
+.Ed
+.Pp
+Merge a global
+.Em sudoers
+file with two host-specific policy files from the hosts
+.Dq xyzzy
+and
+.Dq plugh :
+.Bd -literal -offset indent
+$ cvtsudoers -f sudoers -o sudoers.merged sudoers \e
+    xyzzy:sudoers.xyzzy plugh:sudoers.plugh
 .Ed
 .Sh SEE ALSO
 .Xr sudoers @mansectform@ ,
