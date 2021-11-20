@@ -456,7 +456,7 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	    if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
 		sudo_warnx("%s", U_("unable to format timestamp"));
 	    } else {
-		fprintf(fp, "%snotbefore=%s", need_comma ? "," : "", timebuf);
+		fprintf(fp, "%snotbefore=%s", need_comma ? "," : "", timebuf); // -V547
 		need_comma = true;
 	    }
 	}
