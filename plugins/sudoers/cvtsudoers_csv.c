@@ -288,7 +288,7 @@ print_member_list_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
  */
 static void
 print_defaults_binding_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
-     struct member_list *binding, int type, bool expand_aliases)
+     struct defaults_binding *binding, int type, bool expand_aliases)
 {
     int alias_type;
     debug_decl(print_defaults_binding_csv, SUDOERS_DEBUG_UTIL);
@@ -296,8 +296,8 @@ print_defaults_binding_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
     if (type != DEFAULTS) {
 	/* Print each member object in binding. */
 	alias_type = defaults_to_alias_type(type);
-	print_member_list_csv(fp, parse_tree, binding, false, alias_type,
-	    expand_aliases);
+	print_member_list_csv(fp, parse_tree, &binding->members, false,
+	    alias_type, expand_aliases);
     }
 
     debug_return;

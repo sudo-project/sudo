@@ -252,7 +252,8 @@ ldif_store_options(struct sudoers_parse_tree *parse_tree,
 	    sudo_fatalx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	}
-	TAILQ_INIT(d->binding);
+	TAILQ_INIT(&d->binding->members);
+	d->binding->refcnt = 1;
 	d->type = DEFAULTS;
 	d->op = sudo_ldap_parse_option(ls->str, &var, &val);
 	if ((d->var = strdup(var)) == NULL) {

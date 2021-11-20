@@ -695,11 +695,11 @@ display_defaults(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
-		if (hostlist_matches(parse_tree, pw, d->binding) != ALLOW)
+		if (hostlist_matches(parse_tree, pw, &d->binding->members) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_USER:
-		if (userlist_matches(parse_tree, pw, d->binding) != ALLOW)
+		if (userlist_matches(parse_tree, pw, &d->binding->members) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_RUNAS:
@@ -724,7 +724,7 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
     int deftype, struct sudo_lbuf *lbuf)
 {
     struct defaults *d;
-    struct member_list *binding = NULL;
+    struct defaults_binding *binding = NULL;
     struct member *m;
     char *dsep;
     int atype, nfound = 0;
@@ -760,8 +760,8 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
 	    if (nfound != 1)
 		sudo_lbuf_append(lbuf, "\n");
 	    sudo_lbuf_append(lbuf, "    Defaults%s", dsep);
-	    TAILQ_FOREACH(m, binding, entries) {
-		if (m != TAILQ_FIRST(binding))
+	    TAILQ_FOREACH(m, &binding->members, entries) {
+		if (m != TAILQ_FIRST(&binding->members))
 		    sudo_lbuf_append(lbuf, ", ");
 		sudoers_format_member(lbuf, parse_tree, m, ", ", atype);
 	    }

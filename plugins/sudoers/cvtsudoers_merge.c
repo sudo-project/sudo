@@ -220,48 +220,46 @@ static void
 alias_rename_defaults(const char *old_name, const char *new_name,
     int alias_type, struct defaults_list *defaults)
 {
-    struct defaults *def;
-    struct member_list *prev_binding = NULL;
+    struct defaults *def, *def_next;
     struct member *m;
     debug_decl(alias_rename_defaults, SUDOERS_DEBUG_ALIAS);
 
-    TAILQ_FOREACH(def, defaults, entries) {
-	if (def->binding == prev_binding)
+    TAILQ_FOREACH_SAFE(def, defaults, entries, def_next) {
+	/* Consecutive Defaults can share the same binding. */
+	if (def_next != NULL && def->binding == def_next->binding)
 	    continue;
+
 	switch (def->type) {
 	case DEFAULTS_USER:
 	    if (alias_type != USERALIAS)
-		goto wrong_type;
+		continue;
 	    break;
 	case DEFAULTS_RUNAS:
 	    if (alias_type != RUNASALIAS)
-		goto wrong_type;
+		continue;
 	    break;
 	case DEFAULTS_HOST:
 	    if (alias_type != HOSTALIAS)
-		goto wrong_type;
+		continue;
 	    break;
 	default:
-	wrong_type:
-	    prev_binding = NULL;
 	    continue;
 	}
-	if (def->binding != NULL) {
-	    TAILQ_FOREACH(m, def->binding, entries) {
-		if (m->type != ALIAS)
-		    continue;
-		if (strcmp(m->name, old_name) == 0) {
-		    char *copy = strdup(new_name);
-		    if (copy == NULL) {
-			sudo_fatalx(U_("%s: %s"), __func__,
-			    U_("unable to allocate memory"));
-		    }
-		    free(m->name);
-		    m->name = copy;
+
+	/* Rename matching aliases in the binding's member_list. */
+	TAILQ_FOREACH(m, &def->binding->members, entries) {
+	    if (m->type != ALIAS)
+		continue;
+	    if (strcmp(m->name, old_name) == 0) {
+		char *copy = strdup(new_name);
+		if (copy == NULL) {
+		    sudo_fatalx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
 		}
+		free(m->name);
+		m->name = copy;
 	    }
 	}
-	prev_binding = def->binding;
     }
 
     debug_return;
@@ -493,7 +491,7 @@ defaults_var_matches(struct defaults *d1, struct defaults *d2)
     if (strcmp(d1->var, d2->var) != 0)
 	debug_return_bool(false);
     if (d1->type != DEFAULTS) {
-	if (!member_list_equivalent(d1->binding, d2->binding))
+	if (!member_list_equivalent(&d1->binding->members, &d2->binding->members))
 	    debug_return_bool(false);
     }
 
@@ -618,16 +616,18 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
 		}
 		m->type = WORD;
 		m->negated = false;
-		TAILQ_INIT(def->binding);
-		TAILQ_INSERT_TAIL(def->binding, m, entries);
+		TAILQ_INIT(&def->binding->members);
+		def->binding->refcnt = 1;
+		TAILQ_INSERT_TAIL(&def->binding->members, m, entries);
 		def->type = DEFAULTS_HOST;
 	    }
 
 	    /*
 	     * Only add Defaults entry if not overridden by subsequent sudoers.
-	     * XXX - leaks def if not merged but can't free due to binding.
 	     */
-	    if (!defaults_has_conflict(def, parse_tree)) {
+	    if (defaults_has_conflict(def, parse_tree)) {
+		free_default(def);
+	    } else {
 		if (def->type != DEFAULTS_HOST) {
 		    sudo_warnx(U_("%s:%d:%d: unable to make Defaults \"%s\" host-specific"), def->file, def->line, def->column, def->var);
 		}

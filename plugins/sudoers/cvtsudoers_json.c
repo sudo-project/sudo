@@ -371,18 +371,18 @@ print_alias_json(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v
  */
 static void
 print_binding_json(struct json_container *jsonc,
-    struct sudoers_parse_tree *parse_tree, struct member_list *binding,
+    struct sudoers_parse_tree *parse_tree, struct defaults_binding *binding,
     int type, bool expand_aliases)
 {
     struct member *m;
     debug_decl(print_binding_json, SUDOERS_DEBUG_UTIL);
 
-    if (TAILQ_EMPTY(binding))
+    if (TAILQ_EMPTY(&binding->members))
 	debug_return;
 
     /* Print each member object in binding. */
     sudo_json_open_array(jsonc, "Binding");
-    TAILQ_FOREACH(m, binding, entries) {
+    TAILQ_FOREACH(m, &binding->members, entries) {
 	print_member_json(jsonc, parse_tree, m, defaults_to_word_type(type),
 	     expand_aliases);
     }

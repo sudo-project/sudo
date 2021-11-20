@@ -3421,7 +3421,7 @@ new_default(char *var, char *val, short op)
     d->val = val;
     /* d->type = 0; */
     d->op = op;
-    /* d->binding = NULL */
+    /* d->binding = NULL; */
     d->line = this_lineno;
     d->column = sudolinebuf.toke_start + 1;
     d->file = sudo_rcstr_addref(sudoers);
@@ -3494,6 +3494,22 @@ new_digest(int digest_type, char *digest_str)
     debug_return_ptr(digest);
 }
 
+static void
+free_defaults_binding(struct defaults_binding *binding)
+{
+    debug_decl(free_defaults_binding, SUDOERS_DEBUG_PARSER);
+
+    /* Bindings may be shared among multiple Defaults entries. */
+    if (binding != NULL) {
+	if (--binding->refcnt == 0) {
+	    free_members(&binding->members);
+	    free(binding);
+	}
+    }
+
+    debug_return;
+}
+
 /*
  * Add a list of defaults structures to the defaults list.
  * The binding, if non-NULL, specifies a list of hosts, users, or
@@ -3503,7 +3519,7 @@ static bool
 add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d, *next;
-    struct member_list *binding;
+    struct defaults_binding *binding;
     bool ret = true;
     debug_decl(add_defaults, SUDOERS_DEBUG_PARSER);
 
@@ -3519,10 +3535,11 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	}
 	if (bmem != NULL) {
 	    parser_leak_remove(LEAK_MEMBER, bmem);
-	    HLTQ_TO_TAILQ(binding, bmem, entries);
+	    HLTQ_TO_TAILQ(&binding->members, bmem, entries);
 	} else {
-	    TAILQ_INIT(binding);
+	    TAILQ_INIT(&binding->members);
 	}
+	binding->refcnt = 0;
 
 	/*
 	 * Set type and binding (who it applies to) for new entries.
@@ -3532,6 +3549,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	HLTQ_FOREACH_SAFE(d, defs, entries, next) {
 	    d->type = type;
 	    d->binding = binding;
+	    binding->refcnt++;
 	    TAILQ_INSERT_TAIL(&parsed_policy.defaults, d, entries);
 	}
     }
@@ -3612,30 +3630,23 @@ free_members(struct member_list *members)
 void
 free_defaults(struct defaults_list *defs)
 {
-    struct member_list *prev_binding = NULL;
     struct defaults *def;
     debug_decl(free_defaults, SUDOERS_DEBUG_PARSER);
 
     while ((def = TAILQ_FIRST(defs)) != NULL) {
 	TAILQ_REMOVE(defs, def, entries);
-	free_default(def, &prev_binding);
+	free_default(def);
     }
 
     debug_return;
 }
 
 void
-free_default(struct defaults *def, struct member_list **binding)
+free_default(struct defaults *def)
 {
     debug_decl(free_default, SUDOERS_DEBUG_PARSER);
 
-    if (def->binding != *binding) {
-	*binding = def->binding;
-	if (def->binding != NULL) {
-	    free_members(def->binding);
-	    free(def->binding);
-	}
-    }
+    free_defaults_binding(def->binding);
     sudo_rcstr_delref(def->file);
     free(def->var);
     free(def->val);
@@ -3775,7 +3786,6 @@ free_cmndspecs(struct cmndspec_list *csl)
 void
 free_privilege(struct privilege *priv)
 {
-    struct member_list *prev_binding = NULL;
     struct defaults *def;
     debug_decl(free_privilege, SUDOERS_DEBUG_PARSER);
 
@@ -3784,7 +3794,7 @@ free_privilege(struct privilege *priv)
     free_cmndspecs(&priv->cmndlist);
     while ((def = TAILQ_FIRST(&priv->defaults)) != NULL) {
 	TAILQ_REMOVE(&priv->defaults, def, entries);
-	free_default(def, &prev_binding);
+	free_default(def);
     }
     free(priv);
 

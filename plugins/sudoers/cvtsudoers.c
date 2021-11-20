@@ -1233,7 +1233,6 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
     struct member_list runas_aliases = TAILQ_HEAD_INITIALIZER(runas_aliases);
     struct member_list host_aliases = TAILQ_HEAD_INITIALIZER(host_aliases);
     struct member_list cmnd_aliases = TAILQ_HEAD_INITIALIZER(cmnd_aliases);
-    struct member_list *prev_binding = NULL;
     struct defaults *def, *def_next;
     struct member *m, *m_next;
     int alias_type;
@@ -1253,8 +1252,10 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
 	    break;
 	case DEFAULTS_USER:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_USER) ||
-		!userlist_matches_filter(parse_tree, def->binding, conf))
+		    !userlist_matches_filter(parse_tree, &def->binding->members,
+		    conf)) {
 		keep = false;
+	    }
 	    alias_type = USERALIAS;
 	    break;
 	case DEFAULTS_RUNAS:
@@ -1264,14 +1265,18 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
 	    break;
 	case DEFAULTS_HOST:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_HOST) ||
-		!hostlist_matches_filter(parse_tree, def->binding, conf))
+		    !hostlist_matches_filter(parse_tree, &def->binding->members,
+		    conf)) {
 		keep = false;
+	    }
 	    alias_type = HOSTALIAS;
 	    break;
 	case DEFAULTS_CMND:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_CMND) ||
-		!cmndlist_matches_filter(parse_tree, def->binding, conf))
+		    !cmndlist_matches_filter(parse_tree, &def->binding->members,
+		    conf)) {
 		keep = false;
+	    }
 	    alias_type = CMNDALIAS;
 	    break;
 	default:
@@ -1280,12 +1285,16 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
 	}
 
 	if (!keep) {
-	    /* Look for aliases used by the binding. */
+	    /*
+	     * Look for aliases used by the binding.
+	     * Consecutive Defaults can share the same binding.
+	     */
 	    /* XXX - move to function */
-	    if (alias_type != UNSPEC && def->binding != prev_binding) {
-		TAILQ_FOREACH_SAFE(m, def->binding, entries, m_next) {
+	    if (alias_type != UNSPEC &&
+		    (def_next == NULL || def->binding != def_next->binding)) {
+		TAILQ_FOREACH_SAFE(m, &def->binding->members, entries, m_next) {
 		    if (m->type == ALIAS) {
-			TAILQ_REMOVE(def->binding, m, entries);
+			TAILQ_REMOVE(&def->binding->members, m, entries);
 			switch (alias_type) {
 			case USERALIAS:
 			    TAILQ_INSERT_TAIL(&user_aliases, m, entries);
@@ -1308,18 +1317,7 @@ filter_defaults(struct sudoers_parse_tree *parse_tree,
 		}
 	    }
 	    TAILQ_REMOVE(&parse_tree->defaults, def, entries);
-	    free_default(def, &prev_binding);
-	    if (prev_binding != NULL) {
-		/* Remove and free Defaults that share the same binding. */
-		while (def_next != NULL && def_next->binding == prev_binding) {
-		    def = def_next;
-		    def_next = TAILQ_NEXT(def, entries);
-		    TAILQ_REMOVE(&parse_tree->defaults, def, entries);
-		    free_default(def, &prev_binding);
-		}
-	    }
-	} else {
-	    prev_binding = def->binding;
+	    free_default(def);
 	}
     }
 

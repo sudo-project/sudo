@@ -714,19 +714,19 @@ default_binding_matches(struct sudoers_parse_tree *parse_tree,
     case DEFAULTS:
 	debug_return_bool(true);
     case DEFAULTS_USER:
-	if (userlist_matches(parse_tree, sudo_user.pw, d->binding) == ALLOW)
+	if (userlist_matches(parse_tree, sudo_user.pw, &d->binding->members) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_RUNAS:
-	if (runaslist_matches(parse_tree, d->binding, NULL, NULL, NULL) == ALLOW)
+	if (runaslist_matches(parse_tree, &d->binding->members, NULL, NULL, NULL) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_HOST:
-	if (hostlist_matches(parse_tree, sudo_user.pw, d->binding) == ALLOW)
+	if (hostlist_matches(parse_tree, sudo_user.pw, &d->binding->members) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_CMND:
-	if (cmndlist_matches(parse_tree, d->binding, NULL, NULL) == ALLOW)
+	if (cmndlist_matches(parse_tree, &d->binding->members, NULL, NULL) == ALLOW)
 	    debug_return_bool(true);
 	break;
     }

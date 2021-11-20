@@ -251,6 +251,11 @@ struct runascontainer {
     struct member *runasgroups;
 };
 
+struct defaults_binding {
+    struct member_list members;
+    unsigned int refcnt;
+};
+
 struct sudoers_comment {
     STAILQ_ENTRY(sudoers_comment) entries;
     char *str;
@@ -277,7 +282,7 @@ struct defaults {
     TAILQ_ENTRY(defaults) entries;
     char *var;				/* variable name */
     char *val;				/* variable value */
-    struct member_list *binding;	/* user/host/runas binding */
+    struct defaults_binding *binding;	/* user/host/runas binding */
     char *file;				/* file Defaults entry was in */
     short type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
     char op;				/* true, false, '+', '-' */
@@ -364,7 +369,7 @@ void free_cmndspecs(struct cmndspec_list *csl);
 void free_privilege(struct privilege *priv);
 void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
-void free_default(struct defaults *def, struct member_list **binding);
+void free_default(struct defaults *def);
 void free_defaults(struct defaults_list *defs);
 void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
