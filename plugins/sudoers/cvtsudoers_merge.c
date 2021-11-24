@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -356,6 +357,8 @@ alias_rename(const char *old_name, const char *new_name, int alias_type,
 	sudo_warnx(U_("unable to find alias %s"), old_name);
 	debug_return_bool(false);
     }
+    log_warnx(U_("%s:%d:%d: renaming alias %s to %s"),
+	a->file, a->line, a->column, a->name, new_name);
     free(a->name);
     a->name = strdup(new_name);
     if (a->name == NULL)
@@ -411,6 +414,8 @@ alias_resolve_conflicts(struct sudoers_parse_tree *parse_tree0, struct alias *a,
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"removing duplicate alias %s from %p", a->name, parse_tree);
 	    b = alias_remove(parse_tree, a->name, a->type);
+	    log_warnx(U_("%s:%d:%d: removing duplicate alias %s"),
+		b->file, b->line, b->column, b->name);
 	    alias_free(b);
 	    continue;
 	}
@@ -569,7 +574,7 @@ defaults_has_conflict(struct defaults *def,
 	TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	    if (defaults_var_matches(def, d)) {
 		if (!defaults_val_matches(def, d)) {
-		    sudo_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
+		    log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
 			def->file, def->line, def->column, def->var,
 			d->file, d->line, d->column);
 		}
@@ -609,6 +614,9 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
 		    sudo_fatalx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		}
+		log_warnx(U_("%s:%d:%d: made Defaults \"%s\" specific to host %s"),
+		    def->file, def->line, def->column, def->var,
+		    parse_tree->lhost);
 		m->name = strdup(parse_tree->lhost);
 		if (m->name == NULL) {
 		    sudo_fatalx(U_("%s: %s"), __func__,
@@ -626,10 +634,13 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
 	     * Only add Defaults entry if not overridden by subsequent sudoers.
 	     */
 	    if (defaults_has_conflict(def, parse_tree)) {
+		log_warnx(U_("%s:%d:%d: removing Defaults \"%s\" overridden by subsequent entries"),
+		    def->file, def->line, def->column, def->var);
 		free_default(def);
 	    } else {
 		if (def->type != DEFAULTS_HOST) {
-		    sudo_warnx(U_("%s:%d:%d: unable to make Defaults \"%s\" host-specific"), def->file, def->line, def->column, def->var);
+		    log_warnx(U_("%s:%d:%d: unable to make Defaults \"%s\" host-specific"),
+			def->file, def->line, def->column, def->var);
 		}
 		TAILQ_INSERT_TAIL(&merged_tree->defaults, def, entries);
 	    }
@@ -822,6 +833,8 @@ merge_userspecs(struct sudoers_parse_tree_list *parse_trees,
 	     * XXX - do this at the privilege/cmndspec level instead.
 	     */
 	    if (userspec_is_duplicate(us, parse_tree)) {
+		log_warnx(U_("%s:%d:%d: removing userspec overridden by subsequent entries"),
+		    us->file, us->line, us->column);
 		free_userspec(us);
 	    } else {
 		TAILQ_INSERT_TAIL(&merged_tree->userspecs, us, entries);

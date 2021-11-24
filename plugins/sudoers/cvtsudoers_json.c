@@ -477,7 +477,8 @@ print_defaults_json(struct json_container *jsonc,
     TAILQ_FOREACH_SAFE(def, &parse_tree->defaults, entries, next) {
 	type = get_defaults_type(def);
 	if (type == -1) {
-	    sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
+	    log_warnx(U_("%s:%d:%d: unknown defaults entry \"%s\""),
+		def->file, def->line, def->column, def->var);
 	    /* XXX - just pass it through as a string anyway? */
 	    continue;
 	}
@@ -511,7 +512,8 @@ print_defaults_json(struct json_container *jsonc,
 	    def = next;
 	    type = get_defaults_type(def);
 	    if (type == -1) {
-		sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
+		log_warnx(U_("%s:%d:%d: unknown defaults entry \"%s\""),
+		    def->file, def->line, def->column, def->var);
 		/* XXX - just pass it through as a string anyway? */
 		break;
 	    }
@@ -720,7 +722,8 @@ print_cmndspec_json(struct json_container *jsonc,
 	TAILQ_FOREACH(def, options, entries) {
 	    int type = get_defaults_type(def);
 	    if (type == -1) {
-		sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
+		log_warnx(U_("%s:%d:%d: unknown defaults entry \"%s\""),
+		    def->file, def->line, def->column, def->var);
 		/* XXX - just pass it through as a string anyway? */
 		continue;
 	    }

@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "November 18, 2021" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "November 23, 2021" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -32,6 +32,7 @@
 [\fB\-f\fR\ \fIoutput_format\fR]
 [\fB\-i\fR\ \fIinput_format\fR]
 [\fB\-I\fR\ \fIincrement\fR]
+[\fB\-l\fR\ \fIlog_file\fR]
 [\fB\-m\fR\ \fIfilter\fR]
 [\fB\-o\fR\ \fIoutput_file\fR]
 [\fB\-O\fR\ \fIstart_point\fR]
@@ -232,6 +233,14 @@ This is the default input format.
 When generating LDIF output, increment each sudoOrder attribute by
 the specified number.
 Defaults to an increment of 1.
+.TP 12n
+\fB\-l\fR \fIlog_file\fR, \fB\--logfile\fR=\fIlog_file\fR
+Log conversion warnings to
+\fIlog_file\fR
+instead of to the standard error.
+This is particularly useful when merging multiple
+\fIsudoers\fR
+files, which can generate a large number of warnings.
 .TP 12n
 \fB\-m\fR \fIfilter\fR, \fB\--match\fR=\fIfilter\fR
 Only output rules that match the specified

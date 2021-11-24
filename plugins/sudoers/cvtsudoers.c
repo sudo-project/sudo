@@ -61,7 +61,8 @@
 struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:c:d:ef:hi:I:m:Mo:O:pP:s:V";
+static FILE *logfp;
+static const char short_opts[] =  "b:c:d:ef:hi:I:l:m:Mo:O:pP:s:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
     { "config",		required_argument,	NULL,	'c' },
@@ -71,6 +72,7 @@ static struct option long_opts[] = {
     { "help",		no_argument,		NULL,	'h' },
     { "input-format",	required_argument,	NULL,	'i' },
     { "increment",	required_argument,	NULL,	'I' },
+    { "logfile",	required_argument,	NULL,	'l' },
     { "match",		required_argument,	NULL,	'm' },
     { "match-local",	no_argument,		NULL,	'M' },
     { "prune-matches",	no_argument,		NULL,	'p' },
@@ -208,6 +210,9 @@ main(int argc, char *argv[])
 		usage(1);
 	    }
 	    break;
+	case 'l':
+	    conf->logfile = optarg;
+	    break;
 	case 'm':
 	    conf->filter = optarg;
 	    break;
@@ -256,6 +261,12 @@ main(int argc, char *argv[])
     }
     argc -= optind;
     argv += optind;
+
+    if (conf->logfile != NULL) {
+	logfp = fopen(conf->logfile, "w");
+	if (logfp == NULL)
+	    sudo_fatalx(U_("unable to open log file %s"), conf->logfile);
+    }
 
     if (conf->input_format != NULL) {
 	if (strcasecmp(conf->input_format, "ldif") == 0) {
@@ -450,6 +461,21 @@ done:
     return exitcode;
 }
 
+void
+log_warnx(const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    if (logfp != NULL) {
+	vfprintf(logfp, fmt, ap);
+	fputc('\n', logfp);
+    } else {
+    	sudo_vwarnx_nodebug(fmt, ap);
+    }
+    va_end(ap);
+}
+
 /*
  * cvtsudoers configuration data.
  */
@@ -462,6 +488,7 @@ static struct cvtsudoers_conf_table cvtsudoers_conf_vars[] = {
     { "input_format", CONF_STR, &cvtsudoers_config.input_format },
     { "output_format", CONF_STR, &cvtsudoers_config.output_format },
     { "match", CONF_STR, &cvtsudoers_config.filter },
+    { "logfile", CONF_STR, &cvtsudoers_config.logfile },
     { "defaults", CONF_STR, &cvtsudoers_config.defstr },
     { "suppress", CONF_STR, &cvtsudoers_config.supstr },
     { "expand_aliases", CONF_BOOL, &cvtsudoers_config.expand_aliases },

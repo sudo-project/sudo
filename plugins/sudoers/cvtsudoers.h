@@ -57,6 +57,7 @@ struct cvtsudoers_config {
     char *input_format;
     char *output_format;
     char *filter;
+    char *logfile;
     char *defstr;
     char *supstr;
 };
@@ -83,6 +84,7 @@ struct cvtsudoers_filter {
 
 /* cvtsudoers.c */
 extern struct cvtsudoers_filter *filters;
+void log_warnx(const char *fmt, ...) __printflike(1, 2);
 
 /* cvtsudoers_csv.c */
 bool convert_sudoers_csv(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);

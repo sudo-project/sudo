@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 18, 2021
+.Dd November 23, 2021
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -30,6 +30,7 @@
 .Op Fl f Ar output_format
 .Op Fl i Ar input_format
 .Op Fl I Ar increment
+.Op Fl l Ar log_file
 .Op Fl m Ar filter
 .Op Fl o Ar output_file
 .Op Fl O Ar start_point
@@ -187,6 +188,13 @@ This is the default input format.
 When generating LDIF output, increment each sudoOrder attribute by
 the specified number.
 Defaults to an increment of 1.
+.It Fl l Ar log_file , Fl -logfile Ns = Ns Ar log_file
+Log conversion warnings to
+.Ar log_file
+instead of to the standard error.
+This is particularly useful when merging multiple
+.Em sudoers
+files, which can generate a large number of warnings.
 .It Fl m Ar filter , Fl -match Ns = Ns Ar filter
 Only output rules that match the specified
 .Ar filter .
