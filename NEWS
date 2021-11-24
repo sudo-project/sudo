@@ -1,3 +1,86 @@
+What's new in Sudo 1.9.9
+
+ * Sudo can now be built with OpenSSL 3.0 without generating warnings
+   about deprecated OpenSSL APIs.
+
+ * A digest can now be specified along with the "ALL" command in
+   the LDAP and SSSD back-ends.  Sudo 1.9.0 introduced support for
+   this in the sudoers file but did not include corresponding changes
+   for the other back-ends.
+
+ * visudo now only warns about an undefined alias or a cycle in an
+   alias once for each alias.
+ 
+ * The sudoRole cn was truncated by a single character in warning messages.
+   GitHub issue #115.
+
+ * The cvtsudoers utility has new --group-file and --passwd-file options
+   to use a custom passwd or group file when the --match-local option is
+   also used.
+
+ * The cvtsudoers utility can now filter or match based on a command.
+
+ * The cvtsudoers utility can now produce output in csv (comma-separated
+   value) format.  This can be used to help generate entitlement reports.
+
+ * Fixed a bug in sudo_logsrvd that could result in the connection being
+   dropped for very long command lines.
+
+ * Fixed a bug where sudo_logsrvd would not accept a restore point
+   of zero.
+
+ * Fixed a bug in visudo where the value of the "editor" setting was not
+   used if it did not match the user's EDITOR environment variable.
+   This was only a problem if the "env_editor" setting was not enabled.
+   Bug #1000.
+
+ * Sudo now builds with the -fcf-protection compiler option and the
+   "-z now" linker option if supported.
+
+ * The output of "sudoreplay -l" now more closely matches the
+   traditional sudo log format.
+
+ * The sudo_sendlog utility will now use the full contents of the log.json
+   file, if present.  This makes it possible to send sudo-format I/O logs
+   that use the newer log.json format to sudo_logsrvd without losing any
+   information.
+
+ * Fixed compilation of the arc4random_buf() replacement on systems with
+   arc4random() but no arc4random_buf().  Bug #1008.
+
+ * Sudo now uses its own getentropy() by default on Linux.  The GNU libc
+   version of getentropy() will fail on older kernels that don't support
+   the getrandom() system call.
+
+ * It is now possible to build sudo with WolfSSL's OpenSSL compatibility
+   layer by using the --enable-wolfssl configure option.
+
+ * Fixed a bug related to Daylight Saving Time when parsing timestamps
+   in Generalized Time format.  This affected the NOTBEFORE and
+   NOTAFTER options in sudoers.  Bug #1006
+
+ * On systems where SELinux is enabled and sudo is built with SELinux
+   support, if the user's role is not "unconfined_r" sudo will always
+   execute commands via the "sesh" helper program.  Previously, commands
+   were only executed via "sesh" if a role was specified in the sudoers
+   file rule or by the user on the command line.
+
+ * Added the -O and -P options to visudo, which can be used to check
+   or set the owner and permissions.  This can be used in conjunction
+   with the -c option to check that the sudoers file ownership and
+   permissions are correct.  Bug #1007.
+
+ * It is now possible to set resource limits in the sudoers file itself.
+   The special values "default" and "user" refer to the default system
+   limit and invoking user limit respectively.  The core dump size limit
+   is now set to 0 by default unless overridden by the sudoers file.
+
+ * The cvtsudoers utility can now merge multiple sudoers sources into
+   a single, combined sudoers file.  If there are conflicting entries,
+   cvtsudoers will attempt to resolve them but manual intervention
+   may be required.  The merging of sudoers rules is currently fairly
+   simplistic but will be improved in a future release.
+
 What's new in Sudo 1.9.8p2
 
  * Fixed a potential out-of-bounds read with "sudo -i" when the
