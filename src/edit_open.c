@@ -200,7 +200,7 @@ dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred
 
     if (rc == 0)
 	debug_return_int(true);
-    if (errno == EACCES || errno == EROFS)
+    if (errno == EACCES || errno == EPERM || errno == EROFS)
 	debug_return_int(false);
     debug_return_int(-1);
 
