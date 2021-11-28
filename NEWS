@@ -97,6 +97,10 @@ What's new in Sudo 1.9.8p2
    file was created for each sub-command instead of simply using
    the existing journal file.
 
+ * Fixed a bug where sudoedit would fail if one of the directories
+   in the path to be edited had the immutable flag set (BSD, Linux
+   or macOS).  GitHub issue #122.
+
 What's new in Sudo 1.9.8p1
 
  * Fixed support for passing a prompt (sudo -p) or a login class
