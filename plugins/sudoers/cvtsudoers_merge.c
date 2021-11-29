@@ -108,6 +108,87 @@ member_equivalent(struct member *m1, struct member *m2)
 }
 
 /*
+ * Compare two members, m1 and m2.
+ * Returns true if m2 overrides m1, else false.
+ */
+static bool
+member_overridden(struct member *m1, struct member *m2, bool check_negated)
+{
+    debug_decl(member_overridden, SUDOERS_DEBUG_PARSER);
+
+    if (check_negated && m1->negated != m2->negated)
+	debug_return_bool(false);
+
+    /* "ALL" always wins (modulo digest). */
+    if (m2->type == ALL) {
+	if (m2->name != NULL) {
+	    struct sudo_command *c1 = (struct sudo_command *)m1->name;
+	    struct sudo_command *c2 = (struct sudo_command *)m2->name;
+	    debug_return_bool(digest_list_equivalent(&c1->digests, &c2->digests));
+	}
+	debug_return_bool(true);
+    }
+
+    if (m1->type != m2->type)
+	debug_return_bool(false);
+
+    if (m1->type == COMMAND) {
+	struct sudo_command *c1 = (struct sudo_command *)m1->name;
+	struct sudo_command *c2 = (struct sudo_command *)m2->name;
+	if (strcmp(c1->cmnd, c2->cmnd) != 0)
+	    debug_return_bool(false);
+
+	if (c1->args != NULL && c2->args != NULL) {
+	    if (strcmp(c1->args, c2->args) != 0)
+		debug_return_bool(false);
+	} else if (c1->args != c2->args) {
+	    debug_return_bool(false);
+	}
+
+	if (!digest_list_equivalent(&c1->digests, &c2->digests)) {
+	    debug_return_bool(false);
+	}
+    } else {
+	if (strcmp(m1->name, m2->name) != 0)
+	    debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Given two member lists, ml1 and ml2.
+ * Returns true if the every element of ml1 is overridden by ml2, else false.
+ */
+static bool
+member_list_override(struct member_list *ml1, struct member_list *ml2,
+    bool check_negated)
+{
+    struct member *m1, *m2;
+    debug_decl(member_list_override, SUDOERS_DEBUG_PARSER);
+
+    /* An empty member_list only overrides another empty list. */
+    if (TAILQ_EMPTY(ml2)) {
+	debug_return_bool(TAILQ_EMPTY(ml1));
+    }
+
+    /* Check whether each element of ml1 is also covered by ml2. */
+    TAILQ_FOREACH_REVERSE(m1, ml1, member_list, entries) {
+	bool overridden = false;
+	TAILQ_FOREACH_REVERSE(m2, ml2, member_list, entries) {
+	    if (member_overridden(m1, m2, check_negated)) {
+		overridden = true;
+		break;
+	    }
+	}
+	if (!overridden)
+	    debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
+/*
  * Compare two member lists.
  * Returns true if they are the same, else false.
  * XXX - should not care about order if things are not negated.
@@ -654,18 +735,18 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
  * Returns true if cs1 is equivalent to cs2, else false.
  */
 static bool
-cmndspec_equivalent(struct cmndspec *cs1, struct cmndspec *cs2)
+cmndspec_equivalent(struct cmndspec *cs1, struct cmndspec *cs2, bool check_negated)
 {
     debug_decl(cmndspec_equivalent, SUDOERS_DEBUG_PARSER);
 
     if (cs1->runasuserlist != NULL && cs2->runasuserlist != NULL) {
-	if (!member_list_equivalent(cs1->runasuserlist, cs2->runasuserlist))
+	if (!member_list_override(cs1->runasuserlist, cs2->runasuserlist, check_negated))
 	    debug_return_bool(false);
     } else if (cs1->runasuserlist != cs2->runasuserlist) {
 	debug_return_bool(false);
     }
     if (cs1->runasgrouplist != NULL && cs2->runasgrouplist != NULL) {
-	if (!member_list_equivalent(cs1->runasgrouplist, cs2->runasgrouplist))
+	if (!member_list_override(cs1->runasgrouplist, cs2->runasgrouplist, check_negated))
 	    debug_return_bool(false);
     } else if (cs1->runasgrouplist != cs2->runasgrouplist) {
 	debug_return_bool(false);
@@ -728,14 +809,15 @@ cmndspec_equivalent(struct cmndspec *cs1, struct cmndspec *cs2)
  * Returns true if csl1 is equivalent to csl2, else false.
  */
 static bool
-cmndspec_list_equivalent(struct cmndspec_list *csl1, struct cmndspec_list *csl2)
+cmndspec_list_equivalent(struct cmndspec_list *csl1, struct cmndspec_list *csl2,
+    bool check_negated)
 {
     struct cmndspec *cs1 = TAILQ_FIRST(csl1);
     struct cmndspec *cs2 = TAILQ_FIRST(csl2);
     debug_decl(cmndspec_list_equivalent, SUDOERS_DEBUG_PARSER);
 
     while (cs1 != NULL && cs2 != NULL) {
-	if (!cmndspec_equivalent(cs1, cs2))
+	if (!cmndspec_equivalent(cs1, cs2, check_negated))
 	    debug_return_bool(false);
 	cs1 = TAILQ_NEXT(cs1, entries);
 	cs2 = TAILQ_NEXT(cs2, entries);
@@ -751,41 +833,62 @@ cmndspec_list_equivalent(struct cmndspec_list *csl1, struct cmndspec_list *csl2)
  * Returns true if we find a duplicate, else false.
  */
 static bool
+userspec_overridden(struct userspec *us1,
+    struct sudoers_parse_tree *parse_tree, bool check_negated)
+{
+    struct userspec *us2;
+    debug_decl(userspec_overridden, SUDOERS_DEBUG_PARSER);
+
+    if (TAILQ_EMPTY(&parse_tree->userspecs))
+	debug_return_bool(false);
+
+    TAILQ_FOREACH(us2, &parse_tree->userspecs, entries) {
+	struct privilege *priv1, *priv2;
+	if (!member_list_override(&us1->users, &us2->users, check_negated))
+	    break;
+
+	/* XXX - order should not matter */
+	priv1 = TAILQ_FIRST(&us1->privileges);
+	priv2 = TAILQ_FIRST(&us2->privileges);
+	while (priv1 != NULL && priv2 != NULL) {
+	    if (!member_list_override(&priv1->hostlist, &priv2->hostlist, check_negated))
+		break;
+	    if (!defaults_list_equivalent(&priv1->defaults, &priv2->defaults))
+		break;
+	    if (!cmndspec_list_equivalent(&priv1->cmndlist, &priv2->cmndlist, check_negated))
+		break;
+	    priv1 = TAILQ_NEXT(priv1, entries);
+	    priv2 = TAILQ_NEXT(priv2, entries);
+	}
+	if (priv1 != NULL || priv2 != NULL)
+	    break;
+    }
+    if (us2 == NULL) {
+	/* exact match */
+	debug_return_bool(true);
+    }
+
+    debug_return_bool(false);
+}
+
+/*
+ * Check for duplicate userspecs in later sudoers files or the merged one.
+ * Returns true if we find a duplicate, else false.
+ */
+static bool
 userspec_is_duplicate(struct userspec *us1,
-    struct sudoers_parse_tree *parse_tree0)
+    struct sudoers_parse_tree *parse_tree0,
+    struct sudoers_parse_tree *merged_tree)
 {
     struct sudoers_parse_tree *parse_tree = parse_tree0;
-    struct userspec *us2;
     debug_decl(userspec_is_duplicate, SUDOERS_DEBUG_PARSER);
 
     while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
-	TAILQ_FOREACH(us2, &parse_tree->userspecs, entries) {
-	    struct privilege *priv1, *priv2;
-	    if (!member_list_equivalent(&us1->users, &us2->users))
-		break;
-
-	    /* XXX - order should not matter */
-	    priv1 = TAILQ_FIRST(&us1->privileges);
-	    priv2 = TAILQ_FIRST(&us2->privileges);
-	    while (priv1 != NULL && priv2 != NULL) {
-		if (!member_list_equivalent(&priv1->hostlist, &priv2->hostlist))
-		    break;
-		if (!defaults_list_equivalent(&priv1->defaults, &priv2->defaults))
-		    break;
-		if (!cmndspec_list_equivalent(&priv1->cmndlist, &priv2->cmndlist))
-		    break;
-		priv1 = TAILQ_NEXT(priv1, entries);
-		priv2 = TAILQ_NEXT(priv2, entries);
-	    }
-	    if (priv1 != NULL || priv2 != NULL)
-		break;
-	}
-	if (us2 == NULL) {
-	    /* exact match */
+	if (userspec_overridden(us1, parse_tree, false))
 	    debug_return_bool(true);
-	}
     }
-
+    if (userspec_overridden(us1, merged_tree, true))
+	debug_return_bool(true);
     debug_return_bool(false);
 }
 
@@ -802,37 +905,41 @@ merge_userspecs(struct sudoers_parse_tree_list *parse_trees,
     struct sudoers_parse_tree *parse_tree;
     struct userspec *us;
     struct privilege *priv;
+    struct member *m;
     debug_decl(merge_userspecs, SUDOERS_DEBUG_DEFAULTS);
 
+    /*
+     * If parse_tree has a host name associated with it,
+     * try to make the privilege host-specific.
+     */
     TAILQ_FOREACH(parse_tree, parse_trees, entries) {
-	while ((us = TAILQ_FIRST(&parse_tree->userspecs)) != NULL) {
-	    TAILQ_REMOVE(&parse_tree->userspecs, us, entries);
+	if (parse_tree->lhost == NULL)
+	    continue;
+	TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
 	    TAILQ_FOREACH(priv, &us->privileges, entries) {
-		/*
-		 * If parse_tree has a host name associated with it,
-		 * try to make the privilege host-specific.
-		 */
-		if (parse_tree->lhost != NULL) {
-		    struct member *m;
-		    TAILQ_FOREACH(m, &priv->hostlist, entries) {
-			/* We don't alter !ALL in a hostlist. */
-			if (m->type == ALL && !m->negated) {
-			    m->type = WORD;
-			    m->name = strdup(parse_tree->lhost);
-			    if (m->name == NULL) {
-				sudo_fatalx(U_("%s: %s"), __func__,
-				    U_("unable to allocate memory"));
-			    }
+		TAILQ_FOREACH(m, &priv->hostlist, entries) {
+		    /* We don't alter !ALL in a hostlist (XXX - should we?). */
+		    if (m->type == ALL && !m->negated) {
+			m->type = WORD;
+			m->name = strdup(parse_tree->lhost);
+			if (m->name == NULL) {
+			    sudo_fatalx(U_("%s: %s"), __func__,
+				U_("unable to allocate memory"));
 			}
 		    }
 		}
 	    }
+	}
+    }
 
-	    /*
-	     * Prune out duplicate userspecs.
-	     * XXX - do this at the privilege/cmndspec level instead.
-	     */
-	    if (userspec_is_duplicate(us, parse_tree)) {
+    /*
+     * Prune out duplicate userspecs after substituting hostname(s).
+     * XXX - do this at the privilege/cmndspec level instead.
+     */
+    TAILQ_FOREACH(parse_tree, parse_trees, entries) {
+	while ((us = TAILQ_FIRST(&parse_tree->userspecs)) != NULL) {
+	    TAILQ_REMOVE(&parse_tree->userspecs, us, entries);
+	    if (userspec_is_duplicate(us, parse_tree, merged_tree)) {
 		log_warnx(U_("%s:%d:%d: removing userspec overridden by subsequent entries"),
 		    us->file, us->line, us->column);
 		free_userspec(us);

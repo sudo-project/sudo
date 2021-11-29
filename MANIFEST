@@ -693,6 +693,9 @@ plugins/sudoers/regress/corpus/seed/policy/policy.4
 plugins/sudoers/regress/corpus/seed/policy/policy.5
 plugins/sudoers/regress/cvtsudoers/sudoers
 plugins/sudoers/regress/cvtsudoers/sudoers.defs
+plugins/sudoers/regress/cvtsudoers/sudoers1
+plugins/sudoers/regress/cvtsudoers/sudoers2
+plugins/sudoers/regress/cvtsudoers/sudoers3
 plugins/sudoers/regress/cvtsudoers/test1.out.ok
 plugins/sudoers/regress/cvtsudoers/test1.sh
 plugins/sudoers/regress/cvtsudoers/test10.out.ok
