@@ -67,9 +67,9 @@ INSTALL_BACKUP = @INSTALL_BACKUP@
 CPPDEFS = -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) $(CPPDEFS) @CPPFLAGS@ \
-	   -DDEFAULT_TEXT_DOMAIN=\"@PACKAGE_NAME@\"
-HOSTCPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) $(CPPDEFS) \
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(CPPDEFS) \
+	    @CPPFLAGS@ -DDEFAULT_TEXT_DOMAIN=\"@PACKAGE_NAME@\"
+HOSTCPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(CPPDEFS) \
 	       @CPPFLAGS_FOR_BUILD@ -DDEFAULT_TEXT_DOMAIN=\"@PACKAGE_NAME@\"
 
 # Usually -O and/or -g
