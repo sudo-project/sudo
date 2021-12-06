@@ -44,7 +44,7 @@ Notes on upgrading from an older release
    a syntax error in the sudoers file by discarding the portion
    of the line that contains the error until the end of the line.
    To restore the historic behavior of refusing to run when a
-   syntax error is encountered, add "error_recovery=false" as a
+   syntax error is encountered, add `error_recovery=false` as a
    plugin option in sudo.conf for the "sudoers_audit" plugin, (or
    "sudoers_policy" if there is no "sudoers_audit" plugin configured).
 
@@ -66,7 +66,7 @@ Notes on upgrading from an older release
    to be run as a user or group ID that is not in the password or
    group databases by default.  Previously, sudo would always allow
    unknown user or group IDs if the sudoers entry permitted it,
-   including via the "ALL" alias.  The old behavior can be restored
+   including via the _ALL_ alias.  The old behavior can be restored
    by setting the new "allow_unknown_runas_id" Defaults setting
    in the sudoers file.
 
@@ -107,7 +107,7 @@ Notes on upgrading from an older release
 
  * Upgrading from a version prior to 1.8.23:
 
-   In sudo 1.8.23 the "sudoers2ldif" script and the "visudo -x"
+   In sudo 1.8.23 the "sudoers2ldif" script and the `visudo -x`
    functionality has been superseded by the "cvtsudoers" utility.
    The cvtsudoers utility is intended to be a drop-in replacement
    for "sudoers2ldif".  Because it uses the same parser as sudo
@@ -230,8 +230,8 @@ Notes on upgrading from an older release
    time is stored instead of wall clock time.  As a result, it is
    important that the time stamp files not persist when the system
    reboots.  For this reason, the default location for the time
-   stamp files has changed back to a directory located in /var/run.
-   Systems that do not have /var/run (e.g. AIX) or that do not clear
+   stamp files has changed back to a directory located in `/var/run`.
+   Systems that do not have `/var/run` (e.g. AIX) or that do not clear
    it on boot (e.g. HP-UX) will need to clear the time stamp
    directory via a start up script.  Such a script is installed by
    default on AIX and HP-UX systems.
@@ -240,10 +240,9 @@ Notes on upgrading from an older release
    option will remove all of the user's time stamps, not just the
    time stamp for the current terminal.
 
-   Lecture status is now stored separately from the time stamps
-   in a separate directory: /var/db/sudo/lectured, /var/lib/sudo/lectured
-   or /var/adm/sudo/lectured depending on what is present on the
-   system.
+   Lecture status is now stored separately from the time stamps in a
+   separate directory: `/var/db/sudo/lectured`, `/var/lib/sudo/lectured`
+   or `/var/adm/sudo/lectured` depending on what is present on the system.
 
    LDAP-based sudoers now uses a default search filter of
    (objectClass=sudoRole) for more efficient queries.  It is
@@ -255,7 +254,7 @@ Notes on upgrading from an older release
    Sudo now stores its libexec files in a "sudo" sub-directory
    instead of in libexec itself.  For backward compatibility, if
    the plugin is not found in the default plugin directory, sudo
-   will check the parent directory default directory ends in "/sudo".
+   will check the parent directory default directory ends in `/sudo`.
 
    The default sudo plugins now all use the .so extension, regardless
    of the extension used by system shared libraries.  For backward
@@ -334,11 +333,11 @@ Notes on upgrading from an older release
    that uses the "noexec_file" option, you will need to move the
    definition to the sudo.conf file instead.
 
-   Old style in /etc/sudoers:
+   Old style in `/etc/sudoers`:
 
         Defaults noexec_file=/usr/local/libexec/sudo_noexec.so
 
-   New style in /etc/sudo.conf:
+   New style in `/etc/sudo.conf`:
 
         Path noexec /usr/local/libexec/sudo_noexec.so
 
@@ -348,10 +347,10 @@ Notes on upgrading from an older release
    support policy and I/O logging plugins.  The default policy
    plugin is "sudoers" which provides the traditional sudoers
    evaluation and I/O logging.  Plugins are typically located in
-   /usr/libexec or /usr/local/libexec, though this is system-dependent.
+   `/usr/libexec` or `/usr/local/libexec`, though this is system-dependent.
    The sudoers plugin is named "sudoers.so" on most systems.
 
-   The sudo.conf file, usually stored in /etc, is used to configure
+   The sudo.conf file, usually stored in `/etc`, is used to configure
    plugins.  This file is optional--if no plugins are specified
    in sudo.conf, the "sudoers" plugin is used.  See the example
    sudo.conf file in the docs directory or refer to the updated
@@ -362,11 +361,11 @@ Notes on upgrading from an older release
    "askpass" option, you will need to move the definition to the
    sudo.conf file.
 
-   Old style in /etc/sudoers:
+   Old style in `/etc/sudoers`:
 
         Defaults askpass=/usr/X11R6/bin/ssh-askpass
 
-   New style in /etc/sudo.conf:
+   New style in `/etc/sudo.conf`:
 
         Path askpass /usr/X11R6/bin/ssh-askpass
 
@@ -395,11 +394,12 @@ Notes on upgrading from an older release
  * Upgrading from a version prior to 1.7.4:
 
    Starting with sudo 1.7.4, the time stamp files have moved from
-   /var/run/sudo to either /var/db/sudo, /var/lib/sudo or /var/adm/sudo.
-   The directories are checked for existence in that order.  This
-   prevents users from receiving the sudo lecture every time the
-   system reboots.  Time stamp files older than the boot time are
-   ignored on systems where it is possible to determine this.
+   `/var/run/sudo` to either `/var/db/sudo`, `/var/lib/sudo` or
+   `/var/adm/sudo`.  The directories are checked for existence in
+   that order.  This prevents users from receiving the sudo lecture
+   every time the system reboots.  Time stamp files older than the
+   boot time are ignored on systems where it is possible to determine
+   this.
 
    Additionally, the tty_tickets sudoers option is now enabled by
    default.  To restore the old behavior (single time stamp per user),
@@ -438,9 +438,9 @@ Notes on upgrading from an older release
    ('#').  Otherwise, the comment may be interpreted as a user or
    group-ID.
 
-   When sudo is build with LDAP support the /etc/nsswitch.conf file is
+   When sudo is build with LDAP support the `/etc/nsswitch.conf` file is
    now used to determine the sudoers sea ch order.  sudo will default to
-   only using /etc/sudoers unless /etc/nsswitch.conf says otherwise.
+   only using `/etc/sudoers` unless `/etc/nsswitch.conf` says otherwise.
    This can be changed with an nsswitch.conf line, e.g.:
 
        sudoers: ldap files
@@ -450,7 +450,7 @@ Notes on upgrading from an older release
    `--with-nsswitch=no` flag.
 
    Sudo now ignores user .ldaprc files as well as system LDAP defaults.
-   All LDAP configuration is now in /etc/ldap.conf (or whichever file
+   All LDAP configuration is now in `/etc/ldap.conf` (or whichever file
    was specified by configure's `--with-ldap-conf-file` option).
    If you are using TLS, you may now need to specify:
 
@@ -506,10 +506,10 @@ Notes on upgrading from an older release
 
  * Upgrading from a version prior to 1.6.8:
 
-   Prior to sudo 1.6.8, if /var/run did not exist, sudo would put
-   the time stamp files in /tmp/.odus.  As of sudo 1.6.8, the
-   time stamp files will be placed in /var/adm/sudo or /usr/adm/sudo
-   if there is no /var/run directory.  This directory will be
+   Prior to sudo 1.6.8, if `/var/run` did not exist, sudo would put
+   the time stamp files in `/tmp/.odus`.  As of sudo 1.6.8, the
+   time stamp files will be placed in `/var/adm/sudo` or `/usr/adm/sudo`
+   if there is no `/var/run directory`.  This directory will be
    created if it does not already exist.
 
    Previously, a sudoers entry that explicitly prohibited running
@@ -530,22 +530,22 @@ Notes on upgrading from an older release
 
         millert ALL=(daemon) NOPASSWD:/usr/bin/whoami,/bin/ls
 
-   millert would be able to run /usr/bin/whoami as user daemon
-   without a password and /bin/ls as root with a password.
+   millert would be able to run `/usr/bin/whoami` as user daemon
+   without a password and `/bin/ls` as root with a password.
 
    As of sudo 1.6, the same line now means that millert is able
-   to run run both /usr/bin/whoami and /bin/ls as user daemon
+   to run run both `/usr/bin/whoami` and `/bin/ls` as user daemon
    without a password.  To expand on this, take the following
    example:
 
         millert ALL=(daemon) NOPASSWD:/usr/bin/whoami, (root) /bin/ls, \
             /sbin/dump
 
-   millert can run /usr/bin/whoami as daemon and /bin/ls and
-   /sbin/dump as root.  No password need be given for either
+   millert can run `/usr/bin/whoami` as daemon and `/bin/ls` and
+   `/sbin/dump` as root.  No password need be given for either
    command.  In other words, the "(root)" sets the default runas
    user to root for the rest of the list.  If we wanted to require
-   a password for /bin/ls and /sbin/dump the line could be written
+   a password for `/bin/ls` and `/sbin/dump` the line could be written
    as:
 
         millert ALL=(daemon) NOPASSWD:/usr/bin/whoami, \
@@ -557,9 +557,9 @@ Notes on upgrading from an older release
    default, non-tty case, the time stamp on the directory itself
    is used.
 
-   Also, the temporary file used by visudo is now /etc/sudoers.tmp
+   Also, the temporary file used by visudo is now `/etc/sudoers.tmp`
    since some versions of vipw on systems with shadow passwords use
-   /etc/stmp for the temporary shadow file.
+   `/etc/stmp` for the temporary shadow file.
 
  * Upgrading from a version prior to 1.5:
 

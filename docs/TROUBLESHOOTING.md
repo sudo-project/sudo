@@ -22,7 +22,7 @@ Troubleshooting tips and FAQ for Sudo
 
     /usr/local/bin/sudo must be owned by uid 0 and have the setuid bit set
 
-> Sudo must be setuid root to do its work.  Either /usr/local/bin/sudo
+> Sudo must be setuid root to do its work.  Either `/usr/local/bin/sudo`
 > is not owned by uid 0 or the setuid bit is not set.  This should have
 > been done for you by `make install` but you can fix it manually by
 > running the following as root:
@@ -76,7 +76,7 @@ It just says "Sorry, try again." three times and exits.
 > Don't forget to send a SIGHUP to your syslogd so that it re-reads
 > its conf file.  Also, remember that syslogd does *not* create
 > log files, you need to create the file before syslogd will log
-> to it (ie: touch /var/log/sudo).
+> to it (e.g.: touch /var/log/sudo).
 
 > Note: the facility (e.g. 'auth.debug') must be separated from
 > the destination (e.g. '/var/log/auth' or '@loghost') by tabs,

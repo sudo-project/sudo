@@ -9,8 +9,7 @@ The sudo binary compiled with LDAP support should be totally backward
 compatible and be syntactically and source code equivalent to its
 non LDAP-enabled build.
 
-LDAP philosophy
-===============
+## LDAP philosophy
 
 As times change and servers become cheap, an enterprise can easily have 500+
 UNIX servers.  Using LDAP to synchronize Users, Groups, Hosts, Mounts, and
@@ -26,8 +25,7 @@ available configuration source for sudo.
 
 For information on OpenLDAP, please see http://www.openldap.org/.
 
-Definitions
-===========
+## Definitions
 
 Many times the word 'Directory' is used in the document to refer to the LDAP
 server, structure and contents.
@@ -35,8 +33,7 @@ server, structure and contents.
 Many times 'options' are used in this document to refer to sudoer 'defaults'.
 They are one and the same.
 
-Build instructions
-==================
+## Build instructions
 
 The simplest way to build sudo with LDAP support is to include the
 `--with-ldap` option.
@@ -55,8 +52,7 @@ Your mileage may vary.  Please let the sudo workers mailing list
 sudo-workers@sudo.ws know if special configuration was required
 to build an LDAP-enabled sudo so we can improve sudo.
 
-Schema Changes
-==============
+## Schema Changes
 
 You must add the appropriate schema to your LDAP server before it
 can store sudoers content.
@@ -114,8 +110,7 @@ to your Windows domain controller and run the following command:
 
     ldifde -i -f schema.ActiveDirectory -c dc=X dc=example,dc=com
 
-Importing /etc/sudoers into LDAP
-================================
+## Importing /etc/sudoers into LDAP
 
 Importing sudoers is a two-step process.
 
@@ -149,8 +144,7 @@ convert your sudoers file into LDIF format.
     # ldapsearch -b "$SUDOERS_BASE" -D cn=Manager,dc=example,dc=com -W -x
 ```
 
-Managing LDAP entries
-=====================
+## Managing LDAP entries
 
 Doing a one-time bulk load of your ldap entries is fine.  However what if you
 need to make minor changes on a daily basis?  It doesn't make sense to delete
@@ -185,8 +179,7 @@ I recommend using any of the following LDAP browsers to administer your SUDOers.
 
   There are dozens of others, some Open Source, some free, some not.
 
-Configure your /etc/ldap.conf and /etc/nsswitch.conf
-====================================================
+## Configure your /etc/ldap.conf and /etc/nsswitch.conf
 
 The /etc/ldap.conf file is meant to be shared between sudo, pam_ldap, nss_ldap
 and other ldap applications and modules.  IBM Secureway unfortunately uses
@@ -208,8 +201,7 @@ To disable nsswitch support, run configure with the `--with-nsswitch=no` option.
 This will cause sudo to consult LDAP first and /etc/sudoers second, unless the
 ignore_sudoers_file flag is set in the global LDAP options.
 
-Debugging your LDAP configuration
-=================================
+## Debugging your LDAP configuration
 
 Enable debugging if you believe sudo is not parsing LDAP the way you think it
 should.  Setting the 'sudoers_debug' parameter to a value of 1 shows moderate

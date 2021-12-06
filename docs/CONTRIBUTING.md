@@ -1,4 +1,5 @@
-# Contributing to Sudo
+Contributing to Sudo
+====================
 
 Thank you for your interest in contributing to Sudo!  There are a
 number of way you can help make Sudo better.
