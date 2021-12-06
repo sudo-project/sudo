@@ -5,9 +5,9 @@ number of way you can help make Sudo better.
 
 ## Getting started
 
-To get an overview of Sudo, please read the [README](../README).  There
-are multiple ways to contribute, some of which don't require writing
-a single line of code.
+To get an overview of Sudo, please read the [README.md](../README.md).
+There are multiple ways to contribute, some of which don't require
+writing a single line of code.
 
 ## Filing bug reports/issues
 
@@ -18,8 +18,8 @@ email, messages may be sent to the [sudo-workers@sudo.ws
 mailing list](https://www.sudo.ws/mailman/listinfo/sudo-workers)
 (public) or to sudo@sudo.ws (private).
 
-For information on reporting security issues, please see the
-[SECURITY](docs/SECURITY.md) file.
+For information on reporting security issues, please see
+[SECURITY.md](SECURITY.md).
 
 Please include the version of sudo you are using, the operating
 system and/or distro that is affected, and step-by-step instructions

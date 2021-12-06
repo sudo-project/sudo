@@ -108,7 +108,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 	pp_deb_release="$pp_rpm_release"
 	pp_deb_version="$pp_rpm_version"
 	pp_deb_section=admin
-	install -D -m 644 ${pp_destdir}$docdir/LICENSE ${pp_wrkdir}/${name}/usr/share/doc/${name}/copyright
+	install -D -m 644 ${pp_destdir}$docdir/LICENSE.md ${pp_wrkdir}/${name}/usr/share/doc/${name}/copyright
 	install -D -m 644 ${pp_destdir}$docdir/ChangeLog ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog
 	gzip -9f ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog
 	printf "$name ($pp_deb_version-$pp_deb_release) admin; urgency=low\n\n  * see upstream changelog\n\n -- $pp_deb_maintainer  `date '+%a, %d %b %Y %T %z'`\n" > ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
@@ -145,7 +145,7 @@ This makes it possible to have all sudo I/O logs on a central server."
 	pp_macos_bundle_id=ws.sudo.pkg.sudo-logsrvd
 	pp_macos_pkg_background=${srcdir}/etc/macos-background.png
 	pp_macos_pkg_background_dark=${srcdir}/etc/macos-background.png
-	pp_macos_pkg_license=${pp_destdir}$docdir/LICENSE
+	pp_macos_pkg_license=${pp_destdir}$docdir/LICENSE.md
 	pp_macos_pkg_readme=${pp_wrkdir}/ReadMe.txt
 	perl -pe 'last if (/^What/i && $seen++)' ${pp_destdir}$docdir/NEWS > ${pp_wrkdir}/ReadMe.txt
 %endif

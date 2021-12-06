@@ -1,6 +1,6 @@
-﻿The following list of people, sorted by last name, have contributed
+The following list of people, sorted by last name, have contributed
 code or patches to this implementation of sudo since I began
-maintaining it in 1993.  This list is known to be incomplete--if
+maintaining it in 1993. This list is known to be incomplete--if
 you believe you should be listed, please send a note to sudo@sudo.ws.
 
     Ackeret, Matt

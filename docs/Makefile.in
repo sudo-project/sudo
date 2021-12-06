@@ -88,11 +88,13 @@ DEVDOCS = $(srcdir)/cvtsudoers.man.in $(srcdir)/sudo.conf.man.in \
 	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers_timestamp.man.in \
 	  $(srcdir)/sudoreplay.man.in $(srcdir)/visudo.man.in
 
-OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/README \
-	     $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/CONTRIBUTORS \
-	     $(srcdir)/LICENSE $(srcdir)/TROUBLESHOOTING $(srcdir)/UPGRADE
+OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/NEWS \
+	     $(top_srcdir)/README.md $(srcdir)/CONTRIBUTING.md \
+	     $(srcdir)/CONTRIBUTORS.md $(srcdir)/HISTORY.md \
+	     $(srcdir)/LICENSE.md $(srcdir)/SECURITY.md \
+	     $(srcdir)/TROUBLESHOOTING.md $(srcdir)/UPGRADE.md
 
-OTHER_DOCS_LDAP = $(top_srcdir)/README.LDAP $(srcdir)/schema.*
+OTHER_DOCS_LDAP = $(top_srcdir)/README.LDAP.md $(srcdir)/schema.*
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
