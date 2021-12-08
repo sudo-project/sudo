@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: sudo 1.9.8b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2021-08-16 10:46-0600\n"
-"PO-Revision-Date: 2021-11-20 21:57+0330\n"
+"PO-Revision-Date: 2021-12-01 18:40+0330\n"
 "Last-Translator: eshagh <eshagh094@gmail.com>\n"
 "Language-Team: Persian <translation-team-fa@lists.sourceforge.net>\n"
 "Language: fa\n"
@@ -20,16 +20,16 @@ msgstr ""
 
 #: lib/util/aix.c:89 lib/util/aix.c:169
 msgid "unable to open userdb"
-msgstr "ناتوان در گشودن پایگاه دادهٔ کاربر"
+msgstr "نمی‌توان پایگاه دادهٔ کاربر را گشود"
 
 #: lib/util/aix.c:224
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
-msgstr "ناتوان در تعویض به ریجستری «%s» برای %s"
+msgstr "نمی‌توان ریجستری را به «%s» برای %s تعویض کرد"
 
 #: lib/util/aix.c:249
 msgid "unable to restore registry"
-msgstr "ناتوان در بازگردانی ریجستری"
+msgstr "نمی‌توان ریجستری را بازگرداند"
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/gidlist.c:76
 #: lib/util/json.c:54 lib/util/json.c:183 lib/util/sudo_conf.c:211
@@ -100,18 +100,18 @@ msgstr "%s: %s"
 #: src/sudo_edit.c:438 src/sudo_edit.c:539 src/sudo_edit.c:546
 #: src/sudo_edit.c:686 src/sudo_edit.c:706 src/sudo_intercept_common.c:160
 msgid "unable to allocate memory"
-msgstr "ناتوان در تخصیص حافظه"
+msgstr "نمی‌توان حافظه را تخصیص داد"
 
 #: lib/util/mkdir_parents.c:69 lib/util/sudo_conf.c:697 src/selinux.c:234
 #: src/selinux.c:264 src/sudo.c:368 src/sudo_edit.c:494 src/sudo_edit.c:559
 #, c-format
 msgid "unable to open %s"
-msgstr "ناتوان در گشودن %s"
+msgstr "نمی‌توان %s را گشود"
 
 #: lib/util/mkdir_parents.c:84
 #, c-format
 msgid "unable to mkdir %s"
-msgstr "ناتوان در ایجاد شاخهٔ %s"
+msgstr "نمی‌توان شاخهٔ %s را ایجاد کرد"
 
 #: lib/util/mkdir_parents.c:93 lib/util/sudo_conf.c:674 src/copy_file.c:150
 #, fuzzy, c-format
@@ -153,12 +153,12 @@ msgstr "مقدار نامعتبر برای %s «%s» در %s، خط %u"
 #: lib/util/sudo_conf.c:433
 #, c-format
 msgid "unsupported group source \"%s\" in %s, line %u"
-msgstr "گروه منبع پشتیبانی شده «%s» در %s، خط %u"
+msgstr "گروه منبع پشتیبانی نشدهٔ «%s» در %s، خط %u"
 
 #: lib/util/sudo_conf.c:449
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
-msgstr "بیشینهٔ گروه نامعتبر «%s» در %s، خط %u"
+msgstr "بیشینهٔ گروه‌های نامعتبر «%s» در %s، خط %u"
 
 #: lib/util/sudo_conf.c:677
 #, c-format
@@ -173,12 +173,12 @@ msgstr ""
 #: lib/util/sudo_conf.c:684
 #, c-format
 msgid "%s is world writable"
-msgstr ""
+msgstr "مورد %s توسط همه قابل نوشتن است"
 
 #: lib/util/sudo_conf.c:687
 #, c-format
 msgid "%s is group writable"
-msgstr ""
+msgstr "مورد %s توسط گروه قابل نوشتن است"
 
 # در این رشته از نویسه ایزوله اولین نویسهٔ قوی استفاده شده است
 #: src/copy_file.c:93
@@ -215,16 +215,16 @@ msgstr "%s: حالت پرونده بد: ⁦0%o⁩"
 
 #: src/edit_open.c:265
 msgid "unable to restore current working directory"
-msgstr ""
+msgstr "نمی‌توان شاخه کاری فعلی را بازگرداند"
 
 #: src/exec.c:130
 #, c-format
 msgid "unknown login class %s"
-msgstr ""
+msgstr "کلاس ورود ناشناختهٔ %s"
 
 #: src/exec.c:142
 msgid "unable to set user context"
-msgstr ""
+msgstr "نمی‌توان مفاد کاربر را تنظیم کرد"
 
 #: src/exec.c:158
 msgid "unable to set process priority"
@@ -233,7 +233,7 @@ msgstr ""
 #: src/exec.c:172
 #, c-format
 msgid "unable to change root to %s"
-msgstr ""
+msgstr "نمی‌توان روت را به %s تغییر داد"
 
 #: src/exec.c:185 src/exec.c:191 src/exec.c:198
 #, c-format
@@ -243,12 +243,12 @@ msgstr ""
 #: src/exec.c:216
 #, c-format
 msgid "unable to change directory to %s"
-msgstr ""
+msgstr "نمی‌توان شاخه را به %s تغییر داد"
 
 #: src/exec.c:220
 #, c-format
 msgid "starting from %s"
-msgstr ""
+msgstr "شروع از %s"
 
 #: src/exec.c:302 src/exec_monitor.c:565 src/exec_monitor.c:567
 #: src/exec_nopty.c:569 src/exec_pty.c:585 src/exec_pty.c:1425
@@ -271,17 +271,17 @@ msgstr ""
 
 #: src/exec_intercept.c:191 src/sudo.c:1187 src/sudo.c:1232 src/sudo.c:1276
 msgid "command rejected by policy"
-msgstr ""
+msgstr "دستور توسط خط‌مشی رد شد"
 
 #: src/exec_intercept.c:272 src/sudo.c:1192 src/sudo.c:1237 src/sudo.c:1281
 #: src/sudo.c:1355
 msgid "policy plugin error"
-msgstr ""
+msgstr "خطای افزایهٔ خط‌مشی"
 
 #: src/exec_intercept.c:304
 #, c-format
 msgid "client message too large: %zu"
-msgstr ""
+msgstr "پیام کارخواه بسیار بزرگ: %zu"
 
 #: src/exec_intercept.c:340
 #, c-format
@@ -306,17 +306,17 @@ msgstr ""
 #: src/exec_pty.c:1735 src/exec_pty.c:1745 src/exec_pty.c:1790
 #: src/exec_pty.c:1797 src/exec_pty.c:1824
 msgid "unable to add event to queue"
-msgstr ""
+msgstr "نمی‌توان رویداد را به صف افزود"
 
 #: src/exec_intercept.c:395
 #, c-format
 msgid "server message too large: %zu"
-msgstr ""
+msgstr "پیام کارساز بسیار بزرگ: %zu"
 
 #: src/exec_intercept.c:608 src/exec_intercept.c:620
 #, c-format
 msgid "%s: missing message header"
-msgstr ""
+msgstr "%s: سرایند پیام گمشده"
 
 #: src/exec_intercept.c:613
 #, c-format
@@ -339,16 +339,16 @@ msgstr ""
 #: src/exec_monitor.c:591 src/exec_nopty.c:383 src/exec_pty.c:1504
 #: src/exec_pty.c:1525 src/exec_pty.c:1545 src/tgetpass.c:307
 msgid "unable to create pipe"
-msgstr ""
+msgstr "نمی‌توان لوله را ایجاد کرد"
 
 #: src/exec_monitor.c:601
 msgid "unable to receive message from parent"
-msgstr ""
+msgstr "نمی‌توان پیام را از والد گرفت"
 
 #: src/exec_monitor.c:617 src/exec_nopty.c:421 src/exec_pty.c:1583
 #: src/sudo_edit.c:361 src/tgetpass.c:311
 msgid "unable to fork"
-msgstr ""
+msgstr "نمی‌توان فورک کرد"
 
 #: src/exec_monitor.c:621 src/exec_monitor.c:722 src/exec_nopty.c:479
 msgid "unable to restore tty label"
@@ -357,7 +357,7 @@ msgstr ""
 #: src/exec_monitor.c:637 src/sesh.c:123 src/sudo.c:1138
 #, c-format
 msgid "unable to execute %s"
-msgstr ""
+msgstr "نمی‌توان %s را اجرا کرد"
 
 #: src/exec_nopty.c:377 src/exec_pty.c:1434
 msgid "policy plugin failed session initialization"
@@ -365,11 +365,11 @@ msgstr ""
 
 #: src/exec_nopty.c:391 src/exec_pty.c:1405 src/exec_pty.c:1413
 msgid "unable to create sockets"
-msgstr ""
+msgstr "نمی‌توان سوکت‌ها را ایجاد کرد"
 
 #: src/exec_nopty.c:467 src/exec_pty.c:1674
 msgid "error in event loop"
-msgstr ""
+msgstr "خطایی در حلقهٔ رویداد رخ داد"
 
 #: src/exec_nopty.c:577 src/exec_pty.c:623 src/signal.c:101
 #, c-format
@@ -383,12 +383,12 @@ msgstr ""
 #: src/exec_pty.c:226 src/exec_pty.c:266 src/exec_pty.c:306 src/exec_pty.c:357
 #: src/exec_pty.c:408
 msgid "I/O plugin error"
-msgstr ""
+msgstr "خطای افزایهٔ ورودی/خروجی"
 
 #: src/exec_pty.c:230 src/exec_pty.c:270 src/exec_pty.c:310 src/exec_pty.c:361
 #: src/exec_pty.c:412
 msgid "command rejected by I/O plugin"
-msgstr ""
+msgstr "دستور توسط افزایهٔ ورودی/خروجی رد شد"
 
 #: src/exec_pty.c:459
 msgid "error logging suspend"
@@ -396,7 +396,7 @@ msgstr ""
 
 #: src/exec_pty.c:493
 msgid "error changing window size"
-msgstr ""
+msgstr "هنگام تغییر اندازهٔ پنجره خطایی رخ داد"
 
 #: src/exec_pty.c:1629
 msgid "unable to send message to monitor process"
@@ -412,12 +412,12 @@ msgstr ""
 #: src/load_plugins.c:124
 #, c-format
 msgid "%s must be owned by uid %d"
-msgstr ""
+msgstr "مالک %s باید شناسهٔ کاربری %d باشد"
 
 #: src/load_plugins.c:130
 #, c-format
 msgid "%s must be only be writable by owner"
-msgstr ""
+msgstr "%s باید فقط توسط مالک قابل نوشتن باشد"
 
 #: src/load_plugins.c:241 src/load_plugins.c:312
 #, c-format
@@ -427,12 +427,12 @@ msgstr ""
 #: src/load_plugins.c:279
 #, c-format
 msgid "unable to load %s: %s"
-msgstr ""
+msgstr "نمی‌توان %s را بار کرد: %s"
 
 #: src/load_plugins.c:289
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
-msgstr ""
+msgstr "نمی‌توان نماد «%s» را در %s یافت"
 
 #: src/load_plugins.c:299
 #, c-format
@@ -451,7 +451,7 @@ msgstr ""
 #: src/load_plugins.c:346
 #, c-format
 msgid "unknown plugin type %d found in %s"
-msgstr ""
+msgstr "گونهٔ افزایهٔ ناشناختهٔ %d در %s یافت شد"
 
 #: src/load_plugins.c:529
 #, c-format
@@ -491,7 +491,7 @@ msgstr "گزینهٔ ‎-E در حالت ویرایش معتبر نیست"
 
 #: src/parse_args.c:584
 msgid "you may not specify environment variables in edit mode"
-msgstr ""
+msgstr "شما نباید متغیرهای محیطی را در حالت ویرایش مشخص کنید"
 
 # در این رشته از نویسه LRM استفاده شده است
 #: src/parse_args.c:594
@@ -505,7 +505,7 @@ msgstr "گزینه‌های ‎-A و ‎-S نباید با یکدیگر استف
 
 #: src/parse_args.c:691
 msgid "sudoedit is not supported on this platform"
-msgstr ""
+msgstr "sudoedit در این بن‌سازه پشتیبانی نمی‌شود"
 
 # در این رشته از نویسه LRM استفاده شده است
 #: src/parse_args.c:774
@@ -556,11 +556,11 @@ msgstr "هنگام اعلان صدای زنگ پخش می‌کند"
 
 #: src/parse_args.c:812
 msgid "close all file descriptors >= num"
-msgstr ""
+msgstr "همهٔ توصیف‌گرهای پرونده >= num را می‌بندد"
 
 #: src/parse_args.c:815
 msgid "run command with the specified BSD login class"
-msgstr ""
+msgstr "دستور را همراه کلاس ورود بی‌اس‌دی مشخص‌شده اجرا می‌کند"
 
 #: src/parse_args.c:818
 msgid "change the working directory before running command"
@@ -612,7 +612,7 @@ msgstr "امتیازات کاربر را فهرست یا دستور مشخصی �
 
 #: src/parse_args.c:850
 msgid "non-interactive mode, no prompts are used"
-msgstr "حالت ناتعاملی،هیچ اعلانی استفاده نمی‌شود"
+msgstr "حالت غیرتعاملی، هیچ اعلانی استفاده نمی‌شود"
 
 #: src/parse_args.c:853
 msgid "preserve group vector instead of setting to target's"
@@ -656,7 +656,7 @@ msgstr "دستور به عنوان نام کاربر یا شناسهٔ مشخص�
 
 #: src/parse_args.c:882
 msgid "display version information and exit"
-msgstr "اطّلاعات نگارش را نمایش و خارج می‌شود"
+msgstr "اطّلاعات نگارش را نمایش می‌دهد و خارج می‌شود"
 
 #: src/parse_args.c:885
 msgid "update user's timestamp without running a command"
@@ -774,7 +774,7 @@ msgstr "حداقل به یک آرگومان نیاز است"
 #: src/sesh.c:104
 #, c-format
 msgid "invalid file descriptor number: %s"
-msgstr ""
+msgstr "شمارهٔ توصیف‌گر پرونده نامعتبر: %s"
 
 #: src/sesh.c:118
 #, c-format
@@ -875,7 +875,7 @@ msgstr ""
 #: src/sudo.c:550
 #, c-format
 msgid "you do not exist in the %s database"
-msgstr ""
+msgstr "شما در پایگاه دادهٔ %s وجود ندارید"
 
 #: src/sudo.c:607
 msgid "unable to determine tty"
@@ -884,7 +884,7 @@ msgstr ""
 #: src/sudo.c:922
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
-msgstr ""
+msgstr "مالک %s باید شناسهٔ کاربری %d باشد و بیت setuid نیز تنظیم شده باشد"
 
 #: src/sudo.c:925
 #, c-format
@@ -987,7 +987,7 @@ msgstr ""
 
 #: src/sudo_edit.c:113
 msgid "no writable temporary directory found"
-msgstr "هیچ شاخهٔ موقّتی قابل نوشتن‌ای یافت نشد"
+msgstr "هیچ شاخهٔ موقّتی قابل نوشتنی یافت نشد"
 
 #: src/sudo_edit.c:291
 #, c-format

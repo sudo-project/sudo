@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: sudo-1.9.8b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2021-08-16 10:46-0600\n"
-"PO-Revision-Date: 2021-08-22 18:37-0400\n"
+"PO-Revision-Date: 2021-12-01 12:48-0500\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -284,7 +284,7 @@ msgstr "客户端消息过大：%zu"
 #: src/exec_intercept.c:340
 #, c-format
 msgid "unexpected type_case value %d in %s from %s"
-msgstr ""
+msgstr "未预期的 type_case 值 %d，位于 %s，来自 %s"
 
 #: src/exec_intercept.c:367 src/exec_intercept.c:371 src/exec_intercept.c:634
 #: src/exec_intercept.c:638 src/exec_monitor.c:464 src/exec_monitor.c:472
@@ -988,7 +988,7 @@ msgstr "%s 并未修改"
 #: src/sudo_edit.c:304 src/sudo_edit.c:571
 #, c-format
 msgid "%s unchanged"
-msgstr "%s 已更改"
+msgstr "%s 未更改"
 
 #: src/sudo_edit.c:481
 msgid "sesh: internal error: odd number of paths"
