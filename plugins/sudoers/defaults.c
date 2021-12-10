@@ -930,7 +930,7 @@ store_timespec(const char *str, union sudo_defs_val *sd_un)
 {
     struct timespec ts;
     char sign = '+';
-    int i;
+    long i;
     debug_decl(store_timespec, SUDOERS_DEBUG_DEFAULTS);
 
     sudo_timespecclear(&ts);
