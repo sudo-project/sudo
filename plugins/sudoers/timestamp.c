@@ -185,7 +185,7 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
  * Returns false on failure and displays a warning to stderr.
  */
 static bool
-ts_mkdirs(char *path, uid_t owner, gid_t group, mode_t mode,
+ts_mkdirs(const char *path, uid_t owner, gid_t group, mode_t mode,
     mode_t parent_mode, bool quiet)
 {
     bool ret;

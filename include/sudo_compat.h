@@ -533,6 +533,11 @@ sudo_dso_public void *sudo_memrchr(const void *s, int c, size_t n);
 # undef memrchr
 # define memrchr(_a, _b, _c) sudo_memrchr((_a), (_b), (_c))
 #endif /* HAVE_MEMRCHR */
+#ifndef HAVE_MKDIRAT
+sudo_dso_public int sudo_mkdirat(int dfd, const char *path, mode_t mode);
+# undef mkdirat
+# define mkdirat(_a, _b, _c) sudo_mkdirat((_a), (_b), (_c))
+#endif /* HAVE_MKDIRAT */
 #if !defined(HAVE_MKDTEMP) || !defined(HAVE_MKSTEMPS)
 sudo_dso_public char *sudo_mkdtemp(char *path);
 # undef mkdtemp

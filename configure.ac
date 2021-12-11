@@ -2820,6 +2820,10 @@ AC_CHECK_FUNCS(nanosleep, [], [
 	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
     ])
 ])
+AC_CHECK_FUNCS([mkdirat], [], [
+    AC_LIBOBJ(mkdirat)
+    SUDO_APPEND_COMPAT_EXP(sudo_mkdirat)
+])
 AC_CHECK_FUNCS([openat], [], [
     AC_LIBOBJ(openat)
     SUDO_APPEND_COMPAT_EXP(sudo_openat)

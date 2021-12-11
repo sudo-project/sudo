@@ -230,6 +230,7 @@ lib/util/logfac.c
 lib/util/logpri.c
 lib/util/memrchr.c
 lib/util/mkdir_parents.c
+lib/util/mkdirat.c
 lib/util/mksiglist.c
 lib/util/mksigname.c
 lib/util/mktemp.c

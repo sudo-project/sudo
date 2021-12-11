@@ -1750,7 +1750,7 @@ write_pidfile(void)
     int fd;
     bool success;
     mode_t oldmask;
-    char *pid_file = (char *)logsrvd_conf_pid_file();
+    const char *pid_file = logsrvd_conf_pid_file();
     debug_decl(write_pidfile, SUDO_DEBUG_UTIL);
 
     if (pid_file == NULL)
@@ -1759,7 +1759,6 @@ write_pidfile(void)
     /* Default logsrvd umask is more restrictive (077). */
     oldmask = umask(S_IWGRP|S_IWOTH);
 
-    /* sudo_mkdir_parents() modifies the path but restores it before return. */
     success = sudo_mkdir_parents(pid_file, ROOT_UID, ROOT_GID,
 	S_IRWXU|S_IXGRP|S_IXOTH, false);
     if (success) {

@@ -22534,6 +22534,32 @@ fi
 
 done
 
+  for ac_func in mkdirat
+do :
+  ac_fn_c_check_func "$LINENO" "mkdirat" "ac_cv_func_mkdirat"
+if test "x$ac_cv_func_mkdirat" = xyes
+then :
+  printf "%s\n" "#define HAVE_MKDIRAT 1" >>confdefs.h
+
+else $as_nop
+
+    case " $LIBOBJS " in
+  *" mkdirat.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS mkdirat.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_mkdirat; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+
+done
+
   for ac_func in openat
 do :
   ac_fn_c_check_func "$LINENO" "openat" "ac_cv_func_openat"
