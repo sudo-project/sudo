@@ -1,4 +1,5 @@
-## Security
+Sudo Security Policy
+====================
 
 The Sudo Project takes security seriously.  If you believe you have found a security vulnerability in Sudo, please report it to us as described below.
 
