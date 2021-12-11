@@ -81,6 +81,13 @@ What's new in Sudo 1.9.9
    may be required.  The merging of sudoers rules is currently fairly
    simplistic but will be improved in a future release.
 
+ * Sudo was parsing but not applying the "deref" and "tls_reqcert"
+   ldap.conf settings.  This meant the options were effectively
+   ignored which broke dereferencing of aliases in LDAP.  Bug #1013.
+
+ * Clarified in the sudo man page that the security policy may
+   override the user's PATH environment variable.  Bug #1014.
+
 What's new in Sudo 1.9.8p2
 
  * Fixed a potential out-of-bounds read with "sudo -i" when the
