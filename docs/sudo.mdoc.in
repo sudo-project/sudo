@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 17, 2021
+.Dd December 11, 2021
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -975,11 +975,10 @@ searching for a command in the user's
 .Ev PATH
 (if one or both are in the
 .Ev PATH ) .
-Note, however, that the actual
+Depending on the security policy, the user's
 .Ev PATH
-environment variable is
-.Em not
-modified and is passed unchanged to the program that
+environment variable may be modified, replaced,
+or passed unchanged to the program that
 .Nm
 executes.
 .Pp
