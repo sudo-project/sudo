@@ -43,6 +43,37 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
+#ifndef O_NOFOLLOW
+# define O_NOFOLLOW 0
+#endif
+
+/*
+ * Returns true if fd is a directory, else false.
+ * Warns on failure if not quiet.
+ */
+static bool
+is_dir(int dfd, const char *name, int namelen, bool quiet)
+{
+    struct stat sb;
+    debug_decl(is_dir, SUDO_DEBUG_UTIL);
+
+    if (fstat(dfd, &sb) != 0) {
+	if (!quiet) {
+	    sudo_warn(U_("unable to stat %.*s"), namelen, name);
+	}
+	debug_return_bool(false);
+    }
+    if (!S_ISDIR(sb.st_mode)) {
+	if (!quiet) {
+	    sudo_warnx(U_("%.*s exists but is not a directory (0%o)"),
+		namelen, name, (unsigned int) sb.st_mode);
+	}
+	debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
 /*
  * Create any parent directories needed by path (but not path itself).
  */
@@ -75,7 +106,6 @@ sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool 
     for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && ep != NULL;
 	cp = sudo_strsplit(NULL, pathend, "/", &ep)) {
 
-	struct stat sb;
 	char name[MAXNAMLEN + 1];
 	int dfd, len;
 
@@ -100,12 +130,17 @@ reopen:
 		goto done;
 	    }
 	    if (mkdirat(parentfd, name, mode) == 0) {
-		dfd = openat(parentfd, name, O_RDONLY|O_NONBLOCK, 0);
+		dfd = openat(parentfd, name, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0);
 		if (dfd == -1) {
 		    if (!quiet) {
 			sudo_warn(U_("unable to open %.*s"),
 			    (int)(ep - path), path);
 		    }
+		    goto done;
+		}
+		/* Make sure the path we created is still a directory. */
+		if (!is_dir(dfd, path, ep - path, quiet)) {
+		    close(dfd);
 		    goto done;
 		}
 		if (uid != (uid_t)-1 && gid != (gid_t)-1) {
@@ -126,19 +161,7 @@ reopen:
 	    }
 	} else {
 	    /* Already exists, make sure it is a directory. */
-	    if (fstat(dfd, &sb) != 0) {
-		if (!quiet) {
-		    sudo_warn(U_("unable to stat %.*s"),
-			(int)(ep - path), path);
-		}
-		close(dfd);
-		goto done;
-	    }
-	    if (!S_ISDIR(sb.st_mode)) {
-		if (!quiet) {
-		    sudo_warnx(U_("%.*s exists but is not a directory (0%o)"),
-			(int)(ep - path), path, (unsigned int) sb.st_mode);
-		}
+	    if (!is_dir(dfd, path, ep - path, quiet)) {
 		close(dfd);
 		goto done;
 	    }
