@@ -1,12 +1,12 @@
 ABOUT-NLS
 ChangeLog
-INSTALL.md
 INSTALL.configure
+INSTALL.md
 MANIFEST
 Makefile.in
 NEWS
-README.md
 README.LDAP.md
+README.md
 aclocal.m4
 autogen.sh
 config.h.in
@@ -758,6 +758,8 @@ plugins/sudoers/regress/cvtsudoers/test32.out.ok
 plugins/sudoers/regress/cvtsudoers/test32.sh
 plugins/sudoers/regress/cvtsudoers/test33.out.ok
 plugins/sudoers/regress/cvtsudoers/test33.sh
+plugins/sudoers/regress/cvtsudoers/test34.out.ok
+plugins/sudoers/regress/cvtsudoers/test34.sh
 plugins/sudoers/regress/cvtsudoers/test4.out.ok
 plugins/sudoers/regress/cvtsudoers/test4.sh
 plugins/sudoers/regress/cvtsudoers/test5.out.ok
