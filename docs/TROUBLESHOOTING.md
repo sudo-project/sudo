@@ -194,18 +194,6 @@ It just says "Sorry, try again." three times and exits.
 > Note that `make realclean` will also remove any object files
 > and configure temp files that are laying around as well.
 
-#### Why don't sudo binaries built on Solaris 11 run on Solaris 10?
-
-> Starting with Solaris 11, asprintf(3) is included in the standard
-> C library.  To build a version of sudo on a Solaris 11 machine that
-> will run on an older Solaris release, edit config.h and comment out
-> the lines:
-
-    #define HAVE_ASPRINTF 1
-    #define HAVE_VASPRINTF 1
-
-> and run make.
-
 #### When I run 'visudo' it says "sudoers file busy, try again later."
 
 > Someone else is currently editing the sudoers file with visudo.
