@@ -50,9 +50,10 @@ struct cvtsudoers_config {
     unsigned int order_max;
     short defaults;
     short suppress;
-    bool expand_aliases;
     bool store_options;
+    bool expand_aliases;
     bool prune_matches;
+    bool match_local;
     char *sudoers_base;
     char *input_format;
     char *output_format;
@@ -60,10 +61,12 @@ struct cvtsudoers_config {
     char *logfile;
     char *defstr;
     char *supstr;
+    char *group_file;
+    char *passwd_file;
 };
 
 /* Initial config settings for above. */
-#define INITIAL_CONFIG { 1, 1, 0, 0, CVT_DEFAULTS_ALL, 0, false, true, false }
+#define INITIAL_CONFIG { 1, 1, 0, 0, CVT_DEFAULTS_ALL, 0, true }
 
 #define CONF_BOOL	0
 #define CONF_UINT	1

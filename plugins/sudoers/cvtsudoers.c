@@ -488,9 +488,12 @@ static struct cvtsudoers_conf_table cvtsudoers_conf_vars[] = {
     { "input_format", CONF_STR, &cvtsudoers_config.input_format },
     { "output_format", CONF_STR, &cvtsudoers_config.output_format },
     { "match", CONF_STR, &cvtsudoers_config.filter },
+    { "match_local", CONF_BOOL, &cvtsudoers_config.match_local },
     { "logfile", CONF_STR, &cvtsudoers_config.logfile },
     { "defaults", CONF_STR, &cvtsudoers_config.defstr },
     { "suppress", CONF_STR, &cvtsudoers_config.supstr },
+    { "group_file", CONF_STR, &cvtsudoers_config.group_file },
+    { "passwd_file", CONF_STR, &cvtsudoers_config.passwd_file },
     { "expand_aliases", CONF_BOOL, &cvtsudoers_config.expand_aliases },
     { "prune_matches", CONF_BOOL, &cvtsudoers_config.prune_matches }
 };

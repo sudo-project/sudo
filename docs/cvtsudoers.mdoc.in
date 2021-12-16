@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 23, 2021
+.Dd December 16, 2021
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -402,6 +402,10 @@ command line option.
 See the description of the
 .Fl e
 command line option.
+.It Sy group_file = Ar file
+See the description of the
+.Fl -group-file
+command line option.
 .It Sy input_format = Ar ldif | sudoers
 See the description of the
 .Fl i
@@ -409,6 +413,10 @@ command line option.
 .It Sy match = Ar filter
 See the description of the
 .Fl m
+command line option.
+.It Sy match_local = Ar yes | no
+See the description of the
+.Fl M
 command line option.
 .It Sy order_increment = Ar increment
 See the description of the
@@ -425,6 +433,10 @@ command line option.
 .It Sy padding = Ar padding
 See the description of the
 .Fl P
+command line option.
+.It Sy passwd_file = Ar file
+See the description of the
+.Fl -passwd-file
 command line option.
 .It Sy prune_matches = Ar yes | no
 See the description of the
