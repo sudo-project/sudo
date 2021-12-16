@@ -76,6 +76,7 @@ etc/sudo-logsrvd.pp
 etc/sudo-python.pp
 etc/sudo.pp
 examples/Makefile.in
+examples/cvtsudoers.conf
 examples/pam.conf
 examples/sudo.conf.in
 examples/sudo_logsrvd.conf
