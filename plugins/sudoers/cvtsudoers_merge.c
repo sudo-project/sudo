@@ -690,8 +690,7 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
 	     */
 	    if (parse_tree->lhost != NULL && def->type == DEFAULTS) {
 		struct member *m = malloc(sizeof(*m));
-		def->binding = malloc(sizeof(*def->binding));
-		if (m == NULL || def->binding == NULL) {
+		if (m == NULL) {
 		    sudo_fatalx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		}
@@ -829,7 +828,7 @@ cmndspec_list_equivalent(struct cmndspec_list *csl1, struct cmndspec_list *csl2,
 }
 
 /*
- * Check for duplicate userspecs in later sudoers files.
+ * Check for duplicate userspecs in a sudoers file.
  * Returns true if we find a duplicate, else false.
  */
 static bool
