@@ -3512,8 +3512,8 @@ free_defaults_binding(struct defaults_binding *binding)
 
 /*
  * Add a list of defaults structures to the defaults list.
- * The binding, if non-NULL, specifies a list of hosts, users, or
- * runas users the entries apply to (specified by the type).
+ * The bmem argument, if non-NULL, specifies a list of hosts, users,
+ * or runas users the entries apply to (determined by the type).
  */
 static bool
 add_defaults(int type, struct member *bmem, struct defaults *defs)
@@ -3523,35 +3523,33 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
     bool ret = true;
     debug_decl(add_defaults, SUDOERS_DEBUG_PARSER);
 
-    if (defs != NULL) {
-	/*
-	 * We use a single binding for each entry in defs.
-	 */
-	if ((binding = malloc(sizeof(*binding))) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to allocate memory");
-	    sudoerserror(N_("unable to allocate memory"));
-	    debug_return_bool(false);
-	}
-	if (bmem != NULL) {
-	    parser_leak_remove(LEAK_MEMBER, bmem);
-	    HLTQ_TO_TAILQ(&binding->members, bmem, entries);
-	} else {
-	    TAILQ_INIT(&binding->members);
-	}
-	binding->refcnt = 0;
+    /*
+     * We use a single binding for each entry in defs.
+     */
+    if ((binding = malloc(sizeof(*binding))) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	sudoerserror(N_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
+    if (bmem != NULL) {
+	parser_leak_remove(LEAK_MEMBER, bmem);
+	HLTQ_TO_TAILQ(&binding->members, bmem, entries);
+    } else {
+	TAILQ_INIT(&binding->members);
+    }
+    binding->refcnt = 0;
 
-	/*
-	 * Set type and binding (who it applies to) for new entries.
-	 * Then add to the global defaults list.
-	 */
-	parser_leak_remove(LEAK_DEFAULTS, defs);
-	HLTQ_FOREACH_SAFE(d, defs, entries, next) {
-	    d->type = type;
-	    d->binding = binding;
-	    binding->refcnt++;
-	    TAILQ_INSERT_TAIL(&parsed_policy.defaults, d, entries);
-	}
+    /*
+     * Set type and binding (who it applies to) for new entries.
+     * Then add to the global defaults list.
+     */
+    parser_leak_remove(LEAK_DEFAULTS, defs);
+    HLTQ_FOREACH_SAFE(d, defs, entries, next) {
+	d->type = type;
+	d->binding = binding;
+	binding->refcnt++;
+	TAILQ_INSERT_TAIL(&parsed_policy.defaults, d, entries);
     }
 
     debug_return_bool(ret);
