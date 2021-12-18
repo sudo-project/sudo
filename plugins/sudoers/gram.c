@@ -3523,6 +3523,9 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
     bool ret = true;
     debug_decl(add_defaults, SUDOERS_DEBUG_PARSER);
 
+    if (defs == NULL)
+	debug_return_bool(false);
+
     /*
      * We use a single binding for each entry in defs.
      */
