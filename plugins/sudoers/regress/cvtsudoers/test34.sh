@@ -5,4 +5,4 @@
 
 : ${CVTSUDOERS=cvtsudoers}
 
-$CVTSUDOERS -f sudoers xerxes:${TESTDIR}/sudoers1 ${TESTDIR}/sudoers2 xyzzy:${TESTDIR}/sudoers3 2>/dev/null
+$CVTSUDOERS -f sudoers -l /dev/null xerxes:${TESTDIR}/sudoers1 ${TESTDIR}/sudoers2 xyzzy:${TESTDIR}/sudoers3

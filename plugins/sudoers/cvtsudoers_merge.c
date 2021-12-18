@@ -566,14 +566,20 @@ merge_aliases(struct sudoers_parse_tree_list *parse_trees,
 /*
  * Compare two defaults structs but not their actual value.
  * Returns true if they refer to the same Defaults variable and binding.
+ * If override is true, a Defaults without a binding overrides one with
+ * a binding.
  */
 static bool
-defaults_var_matches(struct defaults *d1, struct defaults *d2)
+defaults_var_matches(struct defaults *d1, struct defaults *d2, bool override)
 {
     debug_decl(defaults_var_matches, SUDOERS_DEBUG_DEFAULTS);
 
-    if (d1->type != d2->type)
+    if (d1->type != d2->type) {
+	/* A non-bound Defaults entry overrides a bound Defaults. */
+	if (override && d2->type == DEFAULTS)
+	    debug_return_bool(true);
 	debug_return_bool(false);
+    }
     if (strcmp(d1->var, d2->var) != 0)
 	debug_return_bool(false);
     if (d1->type != DEFAULTS) {
@@ -612,7 +618,7 @@ defaults_equivalent(struct defaults *d1, struct defaults *d2)
 {
     debug_decl(defaults_equivalent, SUDOERS_DEBUG_DEFAULTS);
 
-    if (!defaults_var_matches(d1, d2))
+    if (!defaults_var_matches(d1, d2, false))
 	debug_return_bool(false);
     debug_return_bool(defaults_val_matches(d1, d2));
 }
@@ -653,7 +659,7 @@ defaults_has_conflict(struct defaults *def,
     while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
 	struct defaults *d;
 	TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
-	    if (defaults_var_matches(def, d)) {
+	    if (defaults_var_matches(def, d, true)) {
 		if (!defaults_val_matches(def, d)) {
 		    log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
 			def->file, def->line, def->column, def->var,
