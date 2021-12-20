@@ -659,7 +659,7 @@ defaults_has_conflict(struct defaults *def,
     while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
 	struct defaults *d;
 	TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
-	    if (defaults_var_matches(def, d, true)) {
+	    if (defaults_var_matches(def, d, parse_tree->lhost == NULL)) {
 		if (!defaults_val_matches(def, d)) {
 		    log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
 			def->file, def->line, def->column, def->var,
