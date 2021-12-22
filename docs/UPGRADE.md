@@ -3,13 +3,6 @@ Notes on upgrading from an older release
 
  * Upgrading from a version prior to 1.9.9:
 
-   On systems where SELinux is enabled and sudo is built with
-   SELinux support, if the user's role is not "unconfined_r" sudo
-   will always execute commands via the "sesh" helper program.
-   Previously, commands were only executed via "sesh" if a role
-   was specified in the sudoers file rule or by the user on the
-   command line.
-
    Sudo now runs commands with the core limit resource limit set
    to 0 by default.  While most operating systems restrict core
    dumps of set-user-ID programs like sudo, this protection is

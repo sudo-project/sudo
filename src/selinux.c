@@ -308,37 +308,21 @@ bad:
 /*
  * Determine the new security context based on the old context and the
  * specified role and type.
- * Returns 0 on success, 1 if SELinux is not needed, and -1 on failure.
+ * Returns 0 on success, and -1 on failure.
  */
 static int
 get_exec_context(const char *role, const char *type)
 {
-    char *rolebuf = NULL, *typebuf = NULL;
     char *new_context = NULL;
     context_t context = NULL;
+    char *typebuf = NULL;
     int ret = -1;
     debug_decl(get_exec_context, SUDO_DEBUG_SELINUX);
 
-    /*
-     * Expand old_context into a context_t so that we can extract and modify
-     * its components easily.
-     */
-    if ((context = context_new(se_state.old_context)) == NULL) {
-	sudo_warn("%s", U_("failed to get new context"));
-	goto done;
-    }
-
     if (role == NULL) {
-	rolebuf = strdup(context_role_get(context));
-	if (rolebuf == NULL)
-	    goto done;
-	role = rolebuf;
-
-	/* Skip SELinux role change for unconfined_r. */
-	if (strcmp(rolebuf, "unconfined_r") == 0 && type == NULL) {
-	    ret = 1;
-	    goto done;
-	}
+	sudo_warnx(U_("you must specify a role for type %s"), type);
+	errno = EINVAL;
+	goto done;
     }
     if (type == NULL) {
 	if (get_default_type(role, &typebuf)) {
@@ -347,6 +331,15 @@ get_exec_context(const char *role, const char *type)
 	    goto done;
 	}
 	type = typebuf;
+    }
+
+    /*
+     * Expand old_context into a context_t so that we can extract and modify
+     * its components easily.
+     */
+    if ((context = context_new(se_state.old_context)) == NULL) {
+	sudo_warn("%s", U_("failed to get new context"));
+	goto done;
     }
 
     /*
@@ -380,7 +373,6 @@ get_exec_context(const char *role, const char *type)
     ret = 0;
 
 done:
-    free(rolebuf);
     free(typebuf);
     context_free(context);
     freecon(new_context);
@@ -389,7 +381,7 @@ done:
 
 /*
  * Determine the exec and tty contexts the command will run in.
- * Returns 0 on success, 1 if SELinux is not needed, and -1 on failure.
+ * Returns 0 on success and -1 on failure.
  */
 int
 selinux_getexeccon(const char *role, const char *type)
@@ -412,20 +404,13 @@ selinux_getexeccon(const char *role, const char *type)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: old context %s", __func__,
 	se_state.old_context);
     ret = get_exec_context(role, type);
-    switch (ret) {
-    case 0:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: new context %s", __func__,
-	    se_state.new_context);
-	break;
-    case 1:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no context change required",
-	    __func__);
-	break;
-    default:
+    if (ret == -1) {
 	/* Audit role change failure (success is logged later). */
 	selinux_audit_role_change();
-	break;
+	goto done;
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: new context %s", __func__,
+	se_state.new_context);
 
 done:
     debug_return_int(ret);

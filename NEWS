@@ -59,12 +59,6 @@ What's new in Sudo 1.9.9
    in Generalized Time format.  This affected the NOTBEFORE and
    NOTAFTER options in sudoers.  Bug #1006
 
- * On systems where SELinux is enabled and sudo is built with SELinux
-   support, if the user's role is not "unconfined_r" sudo will always
-   execute commands via the "sesh" helper program.  Previously, commands
-   were only executed via "sesh" if a role was specified in the sudoers
-   file rule or by the user on the command line.
-
  * Added the -O and -P options to visudo, which can be used to check
    or set the owner and permissions.  This can be used in conjunction
    with the -c option to check that the sudoers file ownership and
