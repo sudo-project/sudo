@@ -2,7 +2,7 @@ Sudo installation instructions
 ==============================
 
 Sudo uses a `configure` script to probe the capabilities and type of the
-system in question.  Sudo's `configure` script has a large numberof options
+system in question.  Sudo's `configure` script has a large number of options
 that control its behavior and enable or disable optional functionality.
 Please read this document fully before configuring and building sudo.
 You may also wish to read the file INSTALL.configure which explains more
