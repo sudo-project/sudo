@@ -45,7 +45,7 @@ how you can help contribute to sudo.
 ## Copyright
 
 Sudo is distributed under an ISC-style license.
-Please refer to [docs/LICENSE.md](docs/LICENSE.md) for details.
+Please refer to [LICENSE.md](LICENSE.md) for details.
 
 ## Mailing lists
 

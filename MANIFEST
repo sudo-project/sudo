@@ -2,6 +2,7 @@ ABOUT-NLS
 ChangeLog
 INSTALL.configure
 INSTALL.md
+LICENSE.md
 MANIFEST
 Makefile.in
 NEWS
@@ -23,7 +24,6 @@ docker/ubuntu/rolling/Dockerfile
 docs/CONTRIBUTING.md
 docs/CONTRIBUTORS.md
 docs/HISTORY.md
-docs/LICENSE.md
 docs/Makefile.in
 docs/SECURITY.md
 docs/TROUBLESHOOTING.md
