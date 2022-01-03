@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2015, 2017-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2015, 2017-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -90,8 +90,8 @@ DEVDOCS = $(srcdir)/cvtsudoers.man.in $(srcdir)/sudo.conf.man.in \
 
 OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/NEWS \
 	     $(top_srcdir)/README.md $(srcdir)/CONTRIBUTING.md \
-	     $(srcdir)/CONTRIBUTORS.md $(srcdir)/HISTORY.md \
-	     $(srcdir)/LICENSE.md $(srcdir)/SECURITY.md \
+	     $(top_srcdir)/LICENSE.md $(srcdir)/CONTRIBUTORS.md \
+	     $(srcdir)/HISTORY.md $(srcdir)/SECURITY.md \
 	     $(srcdir)/TROUBLESHOOTING.md $(srcdir)/UPGRADE.md
 
 OTHER_DOCS_LDAP = $(top_srcdir)/README.LDAP.md $(srcdir)/schema.*
