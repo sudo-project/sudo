@@ -77,6 +77,7 @@ Cmnd_Alias	REBOOT = /sbin/halt, /sbin/reboot, /sbin/poweroff
 ## User privilege specification
 ##
 root ALL=(ALL) ALL
+ALL ALL=(ALL) /usr/bin/id
 
 ## Uncomment to allow members of group wheel to execute any command
 # %wheel ALL=(ALL) ALL

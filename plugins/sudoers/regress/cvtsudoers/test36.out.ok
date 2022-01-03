@@ -11,3 +11,5 @@ Host_Alias WEBSERVERS = www1, www2, www3
 Host_Alias WEBSERVERS_1 = www1, www2, www3, www4
 
 root ALL = (ALL) ALL
+
+ALL ALL = (ALL) /usr/bin/id

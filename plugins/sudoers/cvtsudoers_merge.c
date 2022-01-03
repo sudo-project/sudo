@@ -1014,7 +1014,7 @@ userspec_overridden(struct userspec *us1,
 	struct privilege *priv1, *priv2;
 
 	if (!member_list_override(&us1->users, &us2->users, check_negated))
-	    break;
+	    continue;
 
 	/* XXX - order should not matter */
 	priv1 = TAILQ_LAST(&us1->privileges, privilege_list);
@@ -1031,8 +1031,10 @@ userspec_overridden(struct userspec *us1,
 	    priv1 = TAILQ_PREV(priv1, privilege_list, entries);
 	    priv2 = TAILQ_PREV(priv2, privilege_list, entries);
 	}
-	if (priv1 != NULL || priv2 != NULL)
-	    break;
+	if (priv1 != NULL || priv2 != NULL) {
+	    /* mismatch */
+	    continue;
+	}
 
 	/*
 	 * If we have a match of everything except the host list,
@@ -1075,16 +1077,16 @@ userspec_check_conflict(struct userspec *us1,
     struct sudoers_parse_tree *parse_tree0)
 {
     struct sudoers_parse_tree *parse_tree = parse_tree0;
-    enum cvtsudoers_conflict ret = CONFLICT_NONE;
     debug_decl(userspec_check_conflict, SUDOERS_DEBUG_PARSER);
 
     while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
-	ret = userspec_overridden(us1, parse_tree, false);
+	enum cvtsudoers_conflict ret =
+	    userspec_overridden(us1, parse_tree, false);
 	if (ret != CONFLICT_NONE)
 	    debug_return_int(ret);
     }
 
-    debug_return_int(ret);
+    debug_return_int(CONFLICT_NONE);
 }
 
 /*
