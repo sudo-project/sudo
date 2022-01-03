@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -210,6 +210,97 @@ member_list_equivalent(struct member_list *ml1, struct member_list *ml2)
     if (m1 != NULL || m2 != NULL)
 	debug_return_bool(false);
     debug_return_bool(true);
+}
+
+/*
+ * Attempt to simplify a host list.
+ * If a host list contains all hosts in bound_hosts, replace them with
+ * "ALL".  Also prune hosts on either side of "ALL" when possible.
+ */
+static void
+simplify_host_list(struct member_list *hosts, const char *file, int line,
+    int column, struct member_list *bound_hosts)
+{
+    struct member *m, *n, *next;
+    bool logged = false;
+    debug_decl(simplify_host_list, SUDOERS_DEBUG_PARSER);
+
+    /*
+     * If all sudoers sources have an associated host, replace a
+     * list of those hosts with "ALL".
+     */
+    if (!TAILQ_EMPTY(bound_hosts)) {
+	TAILQ_FOREACH_REVERSE(n, bound_hosts, member_list, entries) {
+	    TAILQ_FOREACH_REVERSE(m, hosts, member_list, entries) {
+		if (m->negated) {
+		    /* Don't try to handled negated entries. */
+		    m = NULL;
+		    break;
+		}
+		if (m->type == n->type && strcmp(m->name, n->name) == 0) {
+		    /* match */
+		    break;
+		}
+	    }
+	    if (m == NULL) {
+		/* no match */
+		break;
+	    }
+	}
+	if (n == NULL) {
+	    /* found all hosts */
+	    log_warnx(U_("%s:%d:%d: converting host list to ALL"),
+		file, line, column);
+	    logged = true;
+
+	    TAILQ_FOREACH_REVERSE(n, bound_hosts, member_list, entries) {
+		TAILQ_FOREACH_REVERSE_SAFE(m, hosts, member_list, entries, next) {
+		    if (m->negated) {
+			/* Don't try to handled negated entries. */
+			m = NULL;
+			break;
+		    }
+		    if (m->type == n->type && strcmp(m->name, n->name) == 0) {
+			/* remove matching host */
+			TAILQ_REMOVE(hosts, m, entries);
+			free_member(m);
+			break;
+		    }
+		}
+	    }
+	    m = calloc(1, sizeof(*m));
+	    if (m == NULL) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    m->type = ALL;
+	    TAILQ_INSERT_TAIL(hosts, m, entries);
+	}
+    }
+
+    /*
+     * A host list that contains ALL with no negated entries past it
+     * is equivalent to a list containing just "ALL".
+     */
+    TAILQ_FOREACH_REVERSE(m, hosts, member_list, entries) {
+	if (m->negated) {
+	    /* Don't try to handled negated entries. */
+	    break;
+	}
+	if (m->type == ALL) {
+	    /* Replace member list with a single ALL entry. */
+	    if (!logged) {
+		log_warnx(U_("%s:%d:%d: converting host list to ALL"),
+		    file, line, column);
+	    }
+	    TAILQ_REMOVE(hosts, m, entries);
+	    free_members(hosts);
+	    TAILQ_INSERT_TAIL(hosts, m, entries);
+	    break;
+	}
+    }
+
+    debug_return;
 }
 
 /*
@@ -563,14 +654,22 @@ merge_aliases(struct sudoers_parse_tree_list *parse_trees,
     debug_return_bool(true);
 }
 
+enum match_result {
+    MATCH_FAILED,
+    MATCH_OK,
+    MATCH_MERGED
+};
+
 /*
  * Compare two defaults structs but not their actual value.
  * Returns true if they refer to the same Defaults variable and binding.
+ * Also sets mergeable if they only differ in the binding.
  * If override is true, a Defaults without a binding overrides one with
  * a binding.
  */
-static bool
-defaults_var_matches(struct defaults *d1, struct defaults *d2, bool override)
+static enum match_result
+defaults_var_matches(struct defaults *d1, struct defaults *d2,
+    bool *mergeable, bool override)
 {
     debug_decl(defaults_var_matches, SUDOERS_DEBUG_DEFAULTS);
 
@@ -583,8 +682,11 @@ defaults_var_matches(struct defaults *d1, struct defaults *d2, bool override)
     if (strcmp(d1->var, d2->var) != 0)
 	debug_return_bool(false);
     if (d1->type != DEFAULTS) {
-	if (!member_list_equivalent(&d1->binding->members, &d2->binding->members))
+	if (!member_list_equivalent(&d1->binding->members, &d2->binding->members)) {
+	    if (mergeable != NULL)
+		*mergeable = true;
 	    debug_return_bool(false);
+	}
     }
 
     debug_return_bool(true);
@@ -618,7 +720,7 @@ defaults_equivalent(struct defaults *d1, struct defaults *d2)
 {
     debug_decl(defaults_equivalent, SUDOERS_DEBUG_DEFAULTS);
 
-    if (!defaults_var_matches(d1, d2, false))
+    if (defaults_var_matches(d1, d2, NULL, false) == MATCH_FAILED)
 	debug_return_bool(false);
     debug_return_bool(defaults_val_matches(d1, d2));
 }
@@ -645,32 +747,57 @@ defaults_list_equivalent(struct defaults_list *dl1, struct defaults_list *dl2)
     debug_return_bool(true);
 }
 
+enum cvtsudoers_conflict {
+    CONFLICT_NONE,
+    CONFLICT_RESOLVED,
+    CONFLICT_UNRESOLVED
+};
+
 /*
  * Check for duplicate and conflicting Defaults entries in later sudoers files.
  * Returns true if we find a conflict or duplicate, else false.
  */
-static bool
-defaults_has_conflict(struct defaults *def,
+static enum cvtsudoers_conflict
+defaults_check_conflict(struct defaults *def,
     struct sudoers_parse_tree *parse_tree0)
 {
     struct sudoers_parse_tree *parse_tree = parse_tree0;
-    debug_decl(defaults_has_conflict, SUDOERS_DEBUG_DEFAULTS);
+    struct defaults *d;
+    debug_decl(defaults_check_conflict, SUDOERS_DEBUG_DEFAULTS);
 
     while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
-	struct defaults *d;
-	TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
-	    if (defaults_var_matches(def, d, parse_tree->lhost == NULL)) {
-		if (!defaults_val_matches(def, d)) {
-		    log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
-			def->file, def->line, def->column, def->var,
-			d->file, d->line, d->column);
-		}
-		debug_return_bool(true);
+	/* If no host specified, plain Defaults overrides bound Defaults. */
+	const bool override = parse_tree->lhost == NULL;
+
+	TAILQ_FOREACH_REVERSE(d, &parse_tree->defaults, defaults_list, entries) {
+	    bool mergeable = false;
+
+	    /*
+	     * We currently only merge host-based Defaults but could do
+	     * others as well.  Lists in Defaults entries can be harder
+	     * to read, especially command lists.
+	     */
+	    if (!defaults_var_matches(def, d, &mergeable, override)) {
+		if (!mergeable || def->type != DEFAULTS_HOST)
+		    continue;
 	    }
+	    if (defaults_val_matches(def, d)) {
+		/* Duplicate Defaults entry (may need to merge binding). */
+		if (mergeable) {
+		    /* Prepend def binding to d (hence double concat). */
+		    TAILQ_CONCAT(&def->binding->members, &d->binding->members, entries);
+		    TAILQ_CONCAT(&d->binding->members, &def->binding->members, entries);
+		}
+		debug_return_int(CONFLICT_RESOLVED);
+	    }
+	    log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
+		def->file, def->line, def->column, def->var,
+		d->file, d->line, d->column);
+	    debug_return_int(CONFLICT_UNRESOLVED);
 	}
     }
 
-    debug_return_bool(false);
+    debug_return_int(CONFLICT_NONE);
 }
 
 /*
@@ -681,21 +808,21 @@ defaults_has_conflict(struct defaults *def,
  */
 static bool
 merge_defaults(struct sudoers_parse_tree_list *parse_trees,
-    struct sudoers_parse_tree *merged_tree)
+    struct sudoers_parse_tree *merged_tree, struct member_list *bound_hosts)
 {
     struct sudoers_parse_tree *parse_tree;
     struct defaults *def;
+    struct member *m;
     debug_decl(merge_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     TAILQ_FOREACH(parse_tree, parse_trees, entries) {
-	while ((def = TAILQ_FIRST(&parse_tree->defaults)) != NULL) {
-	    TAILQ_REMOVE(&parse_tree->defaults, def, entries);
-	    /*
-	     * If parse_tree has a host name associated with it,
-	     * try to make the Defaults setting host-specific.
-	     */
+	/*
+	 * If parse_tree has a host name associated with it,
+	 * try to make the Defaults setting host-specific.
+	 */
+	TAILQ_FOREACH(def, &parse_tree->defaults, entries) {
 	    if (parse_tree->lhost != NULL && def->type == DEFAULTS) {
-		struct member *m = malloc(sizeof(*m));
+		m = calloc(1, sizeof(*m));
 		if (m == NULL) {
 		    sudo_fatalx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
@@ -709,26 +836,57 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
 			U_("unable to allocate memory"));
 		}
 		m->type = WORD;
-		m->negated = false;
 		TAILQ_INIT(&def->binding->members);
 		def->binding->refcnt = 1;
 		TAILQ_INSERT_TAIL(&def->binding->members, m, entries);
 		def->type = DEFAULTS_HOST;
 	    }
+	}
+    }
 
+    TAILQ_FOREACH(parse_tree, parse_trees, entries) {
+	while ((def = TAILQ_FIRST(&parse_tree->defaults)) != NULL) {
 	    /*
 	     * Only add Defaults entry if not overridden by subsequent sudoers.
 	     */
-	    if (defaults_has_conflict(def, parse_tree)) {
-		log_warnx(U_("%s:%d:%d: removing Defaults \"%s\" overridden by subsequent entries"),
-		    def->file, def->line, def->column, def->var);
-		free_default(def);
-	    } else {
+	    TAILQ_REMOVE(&parse_tree->defaults, def, entries);
+	    switch (defaults_check_conflict(def, parse_tree)) {
+	    case CONFLICT_NONE:
 		if (def->type != DEFAULTS_HOST) {
 		    log_warnx(U_("%s:%d:%d: unable to make Defaults \"%s\" host-specific"),
 			def->file, def->line, def->column, def->var);
 		}
 		TAILQ_INSERT_TAIL(&merged_tree->defaults, def, entries);
+		break;
+	    case CONFLICT_RESOLVED:
+		/* Duplicate or merged into a subsequent Defaults setting. */
+		free_default(def);
+		break;
+	    case CONFLICT_UNRESOLVED:
+		log_warnx(U_("%s:%d:%d: removing Defaults \"%s\" overridden by subsequent entries"),
+		    def->file, def->line, def->column, def->var);
+		free_default(def);
+		break;
+	    }
+	}
+    }
+
+    /*
+     * Simplify host lists in the merged Defaults.
+     */
+    TAILQ_FOREACH(def, &merged_tree->defaults, entries) {
+	/* TODO: handle refcnt != 1 */
+	if (def->type == DEFAULTS_HOST && def->binding->refcnt == 1) {
+	    simplify_host_list(&def->binding->members, def->file, def->line,
+		def->column, bound_hosts);
+	    m = TAILQ_FIRST(&def->binding->members);
+	    if (m->type == ALL && !m->negated) {
+		if (TAILQ_NEXT(m, entries) == NULL) {
+		    /* Convert Defaults@ALL -> Defaults */
+		    def->type = DEFAULTS;
+		    free_members(&def->binding->members);
+		    TAILQ_INIT(&def->binding->members);
+		}
 	    }
 	}
     }
@@ -834,67 +992,99 @@ cmndspec_list_equivalent(struct cmndspec_list *csl1, struct cmndspec_list *csl2,
 }
 
 /*
- * Check for duplicate userspecs in a sudoers file.
- * Returns true if we find a duplicate, else false.
+ * Check whether userspec us1 is overridden by another sudoers file entry.
+ * If us1 and another userspec differ only in their host lists, merges
+ * the hosts from us1 into that userspec.
+ * Returns true if overridden, else false.
+ * TODO: merge privs
  */
-static bool
+static enum cvtsudoers_conflict
 userspec_overridden(struct userspec *us1,
     struct sudoers_parse_tree *parse_tree, bool check_negated)
 {
     struct userspec *us2;
+    bool hosts_differ = false;
     debug_decl(userspec_overridden, SUDOERS_DEBUG_PARSER);
 
     if (TAILQ_EMPTY(&parse_tree->userspecs))
-	debug_return_bool(false);
+	debug_return_bool(CONFLICT_NONE);
 
-    TAILQ_FOREACH(us2, &parse_tree->userspecs, entries) {
+    /* Sudoers rules are applied in reverse order (last match wins). */
+    TAILQ_FOREACH_REVERSE(us2, &parse_tree->userspecs, userspec_list, entries) {
 	struct privilege *priv1, *priv2;
+
 	if (!member_list_override(&us1->users, &us2->users, check_negated))
 	    break;
 
 	/* XXX - order should not matter */
-	priv1 = TAILQ_FIRST(&us1->privileges);
-	priv2 = TAILQ_FIRST(&us2->privileges);
+	priv1 = TAILQ_LAST(&us1->privileges, privilege_list);
+	priv2 = TAILQ_LAST(&us2->privileges, privilege_list);
 	while (priv1 != NULL && priv2 != NULL) {
-	    if (!member_list_override(&priv1->hostlist, &priv2->hostlist, check_negated))
-		break;
 	    if (!defaults_list_equivalent(&priv1->defaults, &priv2->defaults))
 		break;
 	    if (!cmndspec_list_equivalent(&priv1->cmndlist, &priv2->cmndlist, check_negated))
 		break;
-	    priv1 = TAILQ_NEXT(priv1, entries);
-	    priv2 = TAILQ_NEXT(priv2, entries);
+
+	    if (!member_list_override(&priv1->hostlist, &priv2->hostlist, check_negated))
+		hosts_differ = true;
+
+	    priv1 = TAILQ_PREV(priv1, privilege_list, entries);
+	    priv2 = TAILQ_PREV(priv2, privilege_list, entries);
 	}
 	if (priv1 != NULL || priv2 != NULL)
 	    break;
-    }
-    if (us2 == NULL) {
-	/* exact match */
-	debug_return_bool(true);
+
+	/*
+	 * If we have a match of everything except the host list,
+	 * merge the differing host lists.
+	 */
+	if (hosts_differ) {
+	    priv1 = TAILQ_LAST(&us1->privileges, privilege_list);
+	    priv2 = TAILQ_LAST(&us2->privileges, privilege_list);
+	    while (priv1 != NULL && priv2 != NULL) {
+		if (!member_list_override(&priv1->hostlist, &priv2->hostlist, check_negated)) {
+		    /*
+		     * Priv matches but hosts differ, prepend priv1 hostlist
+		     * to into priv2 hostlist (hence the double concat).
+		     */
+		    TAILQ_CONCAT(&priv1->hostlist, &priv2->hostlist, entries);
+		    TAILQ_CONCAT(&priv2->hostlist, &priv1->hostlist, entries);
+		    log_warnx(U_("%s:%d:%d: merging userspec into %s:%d:%d"),
+			us1->file, us1->line, us1->column,
+			us2->file, us2->line, us2->column);
+		}
+		priv1 = TAILQ_PREV(priv1, privilege_list, entries);
+		priv2 = TAILQ_PREV(priv2, privilege_list, entries);
+	    }
+	    debug_return_bool(CONFLICT_RESOLVED);
+	}
+	debug_return_bool(CONFLICT_UNRESOLVED);
     }
 
-    debug_return_bool(false);
+    debug_return_bool(CONFLICT_NONE);
 }
 
 /*
- * Check for duplicate userspecs in later sudoers files or the merged one.
- * Returns true if we find a duplicate, else false.
+ * Check whether userspec us1 is overridden by another sudoers file entry.
+ * If us1 and another userspec differ only in their host lists, merges
+ * the hosts from us1 into that userspec.
+ * Returns true if overridden, else false.
  */
-static bool
-userspec_is_duplicate(struct userspec *us1,
-    struct sudoers_parse_tree *parse_tree0,
-    struct sudoers_parse_tree *merged_tree)
+static enum cvtsudoers_conflict
+userspec_check_conflict(struct userspec *us1,
+    struct sudoers_parse_tree *parse_tree0)
 {
     struct sudoers_parse_tree *parse_tree = parse_tree0;
-    debug_decl(userspec_is_duplicate, SUDOERS_DEBUG_PARSER);
+    enum cvtsudoers_conflict ret = CONFLICT_NONE;
+    debug_decl(userspec_check_conflict, SUDOERS_DEBUG_PARSER);
 
     while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
-	if (userspec_overridden(us1, parse_tree, false))
-	    debug_return_bool(true);
+	ret = userspec_overridden(us1, parse_tree, false);
+	if (ret != CONFLICT_NONE)
+	    debug_return_int(ret);
     }
-    if (userspec_overridden(us1, merged_tree, true))
-	debug_return_bool(true);
-    debug_return_bool(false);
+
+    debug_return_int(ret);
 }
 
 /*
@@ -905,7 +1095,7 @@ userspec_is_duplicate(struct userspec *us1,
  */
 static bool
 merge_userspecs(struct sudoers_parse_tree_list *parse_trees,
-    struct sudoers_parse_tree *merged_tree)
+    struct sudoers_parse_tree *merged_tree, struct member_list *bound_hosts)
 {
     struct sudoers_parse_tree *parse_tree;
     struct userspec *us;
@@ -939,18 +1129,38 @@ merge_userspecs(struct sudoers_parse_tree_list *parse_trees,
 
     /*
      * Prune out duplicate userspecs after substituting hostname(s).
+     * Traverse the list in reverse order--in sudoers last match wins.
      * XXX - do this at the privilege/cmndspec level instead.
      */
     TAILQ_FOREACH(parse_tree, parse_trees, entries) {
-	while ((us = TAILQ_FIRST(&parse_tree->userspecs)) != NULL) {
+	while ((us = TAILQ_LAST(&parse_tree->userspecs, userspec_list)) != NULL) {
 	    TAILQ_REMOVE(&parse_tree->userspecs, us, entries);
-	    if (userspec_is_duplicate(us, parse_tree, merged_tree)) {
+	    switch (userspec_check_conflict(us, parse_tree)) {
+	    case CONFLICT_NONE:
+		TAILQ_INSERT_HEAD(&merged_tree->userspecs, us, entries);
+		break;
+	    case CONFLICT_RESOLVED:
+		free_userspec(us);
+		break;
+	    case CONFLICT_UNRESOLVED:
 		log_warnx(U_("%s:%d:%d: removing userspec overridden by subsequent entries"),
 		    us->file, us->line, us->column);
 		free_userspec(us);
-	    } else {
-		TAILQ_INSERT_TAIL(&merged_tree->userspecs, us, entries);
+		break;
 	    }
+	}
+    }
+
+    /*
+     * Simplify member lists in the merged tree.
+     * Convert host lists with all hosts listed to "ALL" and
+     * collapse other entries around "ALL".
+     */
+    TAILQ_FOREACH_REVERSE(us, &merged_tree->userspecs, userspec_list, entries) {
+	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
+	    /* TODO: simplify other lists? */
+	    simplify_host_list(&priv->hostlist, us->file, us->line, us->column,
+		bound_hosts);
 	}
     }
 
@@ -961,19 +1171,51 @@ struct sudoers_parse_tree *
 merge_sudoers(struct sudoers_parse_tree_list *parse_trees,
     struct sudoers_parse_tree *merged_tree)
 {
+    struct member_list bound_hosts = TAILQ_HEAD_INITIALIZER(bound_hosts);
+    struct sudoers_parse_tree *parse_tree;
     debug_decl(merge_sudoers, SUDOERS_DEBUG_UTIL);
+
+    /*
+     * If all sudoers sources have a host associated with them, we
+     * can replace a list of those hosts with "ALL" in Defaults
+     * and userspecs.
+     */
+    TAILQ_FOREACH(parse_tree, parse_trees, entries) {
+	if (parse_tree->lhost == NULL)
+	    break;
+    }
+    if (parse_tree == NULL) {
+	TAILQ_FOREACH(parse_tree, parse_trees, entries) {
+	    struct member *m = calloc(1, sizeof(*m));
+	    if (m == NULL) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    m->type = WORD;
+	    m->name = strdup(parse_tree->lhost);
+	    if (m->name == NULL) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    TAILQ_INSERT_TAIL(&bound_hosts, m, entries);
+	}
+    }
 
     if ((merged_tree->aliases = alloc_aliases()) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     if (!merge_aliases(parse_trees, merged_tree))
-	debug_return_ptr(NULL);
+	goto bad;
 
-    if (!merge_defaults(parse_trees, merged_tree))
-	debug_return_ptr(NULL);
+    if (!merge_defaults(parse_trees, merged_tree, &bound_hosts))
+	goto bad;
 
-    if (!merge_userspecs(parse_trees, merged_tree))
-	debug_return_ptr(NULL);
+    if (!merge_userspecs(parse_trees, merged_tree, &bound_hosts))
+	goto bad;
 
+    free_members(&bound_hosts);
     debug_return_ptr(merged_tree);
+bad:
+    free_members(&bound_hosts);
+    debug_return_ptr(NULL);
 }
