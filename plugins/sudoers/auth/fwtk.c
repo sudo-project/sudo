@@ -54,6 +54,9 @@ sudo_fwtk_init(struct passwd *pw, sudo_auth *auth)
     if (auth->data != NULL)
 	debug_return_int(AUTH_SUCCESS);
 
+    if (IS_NONINTERACTIVE(auth))
+        debug_return_int(AUTH_NONINTERACTIVE);
+
     if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
 	sudo_warnx("%s", U_("unable to read fwtk config"));
 	debug_return_int(AUTH_FATAL);

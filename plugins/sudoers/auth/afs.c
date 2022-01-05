@@ -50,6 +50,9 @@ sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv
     struct ktc_token afs_token;
     debug_decl(sudo_afs_verify, SUDOERS_DEBUG_AUTH);
 
+    if (IS_NONINTERACTIVE(auth))
+	debug_return_int(AUTH_NONINTERACTIVE);
+
     /* Try to just check the password */
     ka_StringToKey(pass, NULL, &afs_key);
     if (ka_GetAdminToken(pw->pw_name,		/* name */

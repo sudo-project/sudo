@@ -114,6 +114,9 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
     auth_session_t *as = ((struct bsdauth_state *) auth->data)->as;
     debug_decl(bsdauth_verify, SUDOERS_DEBUG_AUTH);
 
+    if (IS_NONINTERACTIVE(auth))
+        debug_return_int(AUTH_NONINTERACTIVE);
+
     /* save old signal handler */
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;

@@ -68,6 +68,9 @@ sudo_dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth, struct sudo_
     error_status_t		status;
     debug_decl(sudo_dce_verify, SUDOERS_DEBUG_AUTH);
 
+    if (IS_NONINTERACTIVE(auth))
+	debug_return_int(AUTH_NONINTERACTIVE);
+
     /*
      * Create the local context of the DCE principal necessary
      * to perform authenticated network operations.  The network

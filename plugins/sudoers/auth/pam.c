@@ -92,6 +92,7 @@ static struct sudo_conv_callback *conv_callback;
 static struct pam_conv pam_conv = { converse, &conv_callback };
 static char *def_prompt = PASSPROMPT;
 static bool getpass_error;
+static bool noninteractive;
 static pam_handle_t *pamh;
 static struct conv_filter *conv_filter;
 
@@ -202,6 +203,9 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 	/* Already initialized (may happen with AIX or with sub-commands). */
 	debug_return_int(AUTH_SUCCESS);
     }
+
+    /* Stash value of noninteractive flag for conversation function. */
+    noninteractive = IS_NONINTERACTIVE(auth);
 
     /* Initial PAM. */
     pam_service = ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
@@ -321,7 +325,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 
     if (getpass_error) {
 	/* error or ^C from tgetpass() */
-	debug_return_int(AUTH_INTR);
+	debug_return_int(noninteractive ? AUTH_NONINTERACTIVE : AUTH_INTR);
     }
     switch (*pam_status) {
 	case PAM_SUCCESS:
@@ -706,6 +710,13 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		/* Error out if the last password read was interrupted. */
 		if (getpass_error)
 		    goto done;
+
+		/* Treat non-interactive mode as a getpass error. */
+		if (noninteractive) {
+		    getpass_error = true;
+		    ret = PAM_CONV_ERR;
+		    goto done;
+		}
 
 		/* Choose either the sudo prompt or the PAM one. */
 		prompt = use_pam_prompt(pm->msg) ? pm->msg : def_prompt;

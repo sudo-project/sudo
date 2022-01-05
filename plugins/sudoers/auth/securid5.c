@@ -67,6 +67,9 @@ sudo_securid_init(struct passwd *pw, sudo_auth *auth)
     if (auth->data != NULL)
 	debug_return_int(AUTH_SUCCESS);
 
+    if (IS_NONINTERACTIVE(auth))
+        debug_return_int(AUTH_NONINTERACTIVE);
+
     /* Start communications */
     if (AceInitialize() == SD_FALSE) {
 	sudo_warnx("%s", U_("failed to initialise the ACE API library"));

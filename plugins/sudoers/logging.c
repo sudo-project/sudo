@@ -435,7 +435,7 @@ log_auth_failure(int status, unsigned int tries)
     audit_failure(NewArgv, "%s", N_("authentication failure"));
 
     /* If sudoers denied the command we'll log that separately. */
-    if (!ISSET(status, FLAG_BAD_PASSWORD|FLAG_NON_INTERACTIVE))
+    if (!ISSET(status, FLAG_BAD_PASSWORD|FLAG_NO_USER_INPUT))
 	logit = false;
 
     /*
