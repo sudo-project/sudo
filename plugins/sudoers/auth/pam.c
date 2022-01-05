@@ -245,16 +245,7 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 		"pam_set_item(pamh, PAM_RHOST, %s): %s", user_host, errstr);
 	}
     }
-
-#if defined(__LINUX_PAM__) || defined(__sun__)
-    /*
-     * Some PAM modules assume PAM_TTY is set and will misbehave (or crash)
-     * if it is not.  Known offenders include pam_lastlog and pam_time.
-     */
-    if (ttypath == NULL)
-	ttypath = "";
-#endif
-    if (ttypath != NULL) { // -V547
+    if (ttypath != NULL) {
 	rc = pam_set_item(pamh, PAM_TTY, ttypath);
 	if (rc != PAM_SUCCESS) {
 	    errstr = sudo_pam_strerror(pamh, rc);
