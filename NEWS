@@ -82,6 +82,13 @@ What's new in Sudo 1.9.9
  * Clarified in the sudo man page that the security policy may
    override the user's PATH environment variable.  Bug #1014.
 
+ * When sudo is run in non-interactive mode (with the -n option), it
+   will now attempt PAM authentication and only exit with an error
+   if user interaction is required.  This allows PAM modules that
+   don't interact with the user to succeed.  Previously, sudo
+   would not attempt authentication if the -n option was specified.
+   Bug #956 and GitHub issue #83.
+
 What's new in Sudo 1.9.8p2
 
  * Fixed a potential out-of-bounds read with "sudo -i" when the
