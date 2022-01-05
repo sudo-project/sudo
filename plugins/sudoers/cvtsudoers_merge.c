@@ -654,12 +654,6 @@ merge_aliases(struct sudoers_parse_tree_list *parse_trees,
     debug_return_bool(true);
 }
 
-enum match_result {
-    MATCH_FAILED,
-    MATCH_OK,
-    MATCH_MERGED
-};
-
 /*
  * Compare two defaults structs but not their actual value.
  * Returns true if they refer to the same Defaults variable and binding.
@@ -667,7 +661,7 @@ enum match_result {
  * If override is true, a Defaults without a binding overrides one with
  * a binding.
  */
-static enum match_result
+static bool
 defaults_var_matches(struct defaults *d1, struct defaults *d2,
     bool *mergeable, bool override)
 {
@@ -720,7 +714,7 @@ defaults_equivalent(struct defaults *d1, struct defaults *d2)
 {
     debug_decl(defaults_equivalent, SUDOERS_DEBUG_DEFAULTS);
 
-    if (defaults_var_matches(d1, d2, NULL, false) == MATCH_FAILED)
+    if (!defaults_var_matches(d1, d2, NULL, false))
 	debug_return_bool(false);
     debug_return_bool(defaults_val_matches(d1, d2));
 }
@@ -1007,7 +1001,7 @@ userspec_overridden(struct userspec *us1,
     debug_decl(userspec_overridden, SUDOERS_DEBUG_PARSER);
 
     if (TAILQ_EMPTY(&parse_tree->userspecs))
-	debug_return_bool(CONFLICT_NONE);
+	debug_return_int(CONFLICT_NONE);
 
     /* Sudoers rules are applied in reverse order (last match wins). */
     TAILQ_FOREACH_REVERSE(us2, &parse_tree->userspecs, userspec_list, entries) {
@@ -1058,12 +1052,12 @@ userspec_overridden(struct userspec *us1,
 		priv1 = TAILQ_PREV(priv1, privilege_list, entries);
 		priv2 = TAILQ_PREV(priv2, privilege_list, entries);
 	    }
-	    debug_return_bool(CONFLICT_RESOLVED);
+	    debug_return_int(CONFLICT_RESOLVED);
 	}
-	debug_return_bool(CONFLICT_UNRESOLVED);
+	debug_return_int(CONFLICT_UNRESOLVED);
     }
 
-    debug_return_bool(CONFLICT_NONE);
+    debug_return_int(CONFLICT_NONE);
 }
 
 /*
