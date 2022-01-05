@@ -253,7 +253,7 @@ log_server_accept(struct eventlog *evlog)
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
-    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+    if (client_closure != NULL && ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
 	/* Older servers don't support multiple commands per session. */
 	if (!client_closure->subcommands)
 	    debug_return_bool(true);

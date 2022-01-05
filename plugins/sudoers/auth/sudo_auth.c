@@ -314,7 +314,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 
 	/* Get the password unless the auth function will do it for us */
 	if (!standalone) {
-	    if (IS_NONINTERACTIVE(auth_switch)) {
+	    if (IS_NONINTERACTIVE(&auth_switch[0])) {
 		status = AUTH_NONINTERACTIVE;
 		goto done;
 	    }
