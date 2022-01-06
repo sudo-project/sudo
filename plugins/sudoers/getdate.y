@@ -649,11 +649,14 @@ LookupWord(char *buff)
     const TABLE		*tp;
     int			i;
     int			abbrev;
+    int			bufflen;
 
     /* Make it lowercase. */
-    for (p = buff; *p; p++)
+    for (p = buff; *p; p++) {
 	if (isupper((unsigned char)*p))
 	    *p = tolower((unsigned char)*p);
+    }
+    bufflen = (int)(p - buff);
 
     if (strcmp(buff, "am") == 0 || strcmp(buff, "a.m.") == 0) {
 	yylval.Meridian = MERam;
@@ -665,11 +668,11 @@ LookupWord(char *buff)
     }
 
     /* See if we have an abbreviation for a month. */
-    if (strlen(buff) == 3)
+    if (bufflen == 3)
 	abbrev = 1;
-    else if (strlen(buff) == 4 && buff[3] == '.') {
+    else if (bufflen == 4 && buff[3] == '.') {
 	abbrev = 1;
-	buff[3] = '\0';
+	buff[bufflen = 3] = '\0';
     }
     else
 	abbrev = 0;
@@ -703,7 +706,7 @@ LookupWord(char *buff)
 	}
 
     /* Strip off any plural and try the units table again. */
-    i = strlen(buff) - 1;
+    i = bufflen - 1;
     if (buff[i] == 's') {
 	buff[i] = '\0';
 	for (tp = UnitsTable; tp->name; tp++)
