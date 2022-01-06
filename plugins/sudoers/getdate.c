@@ -684,7 +684,8 @@ LookupWord(char *buff)
 	if (isupper((unsigned char)*p))
 	    *p = tolower((unsigned char)*p);
     }
-    bufflen = (int)(p - buff);
+    if ((bufflen = (int)(p - buff)) == 0)
+	return '\0';
 
     if (strcmp(buff, "am") == 0 || strcmp(buff, "a.m.") == 0) {
 	yylval.Meridian = MERam;
@@ -946,7 +947,7 @@ main(int argc, char *argv[])
     /* NOTREACHED */
 }
 #endif	/* TEST */
-#line 936 "getdate.c"
+#line 937 "getdate.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack(void)
 {
@@ -1426,7 +1427,7 @@ case 41:
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1416 "getdate.c"
+#line 1417 "getdate.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
