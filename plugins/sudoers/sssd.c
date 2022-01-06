@@ -329,22 +329,14 @@ sss_rule_to_priv(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
     rc = 0;
 
 cleanup:
-    if (cn_array != NULL)
-	handle->fn_free_values(cn_array);
-    if (cmnds != NULL)
-	handle->fn_free_values(cmnds);
-    if (hosts != NULL)
-	handle->fn_free_values(hosts);
-    if (runasusers != NULL)
-	handle->fn_free_values(runasusers);
-    if (runasgroups != NULL)
-	handle->fn_free_values(runasgroups);
-    if (opts != NULL)
-	handle->fn_free_values(opts);
-    if (notbefore != NULL)
-	handle->fn_free_values(notbefore);
-    if (notafter != NULL)
-	handle->fn_free_values(notafter);
+    handle->fn_free_values(cn_array);
+    handle->fn_free_values(cmnds);
+    handle->fn_free_values(hosts);
+    handle->fn_free_values(runasusers);
+    handle->fn_free_values(runasgroups);
+    handle->fn_free_values(opts);
+    handle->fn_free_values(notbefore);
+    handle->fn_free_values(notafter);
 
     *rc_out = rc;
 
