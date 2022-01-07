@@ -111,7 +111,7 @@ iolog_write_info_file_legacy(int dfd, struct eventlog *evlog)
     fd = iolog_openat(dfd, "log", O_CREAT|O_TRUNC|O_WRONLY);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to open %s/log", evlog->iolog_path);
+	    "unable to %sopen %s/log", fd == -1 ? "" : "fd", evlog->iolog_path);
 	if (fd != -1)
 	    close(fd);
 	debug_return_bool(false);
@@ -185,8 +185,9 @@ iolog_write_info_file_json(int dfd, struct eventlog *evlog)
 
     fd = iolog_openat(dfd, "log.json", O_CREAT|O_TRUNC|O_WRONLY);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
-        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-            "unable to open %s/log.json", evlog->iolog_path);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to %sopen %s/log.json", fd == -1 ? "" : "fd",
+	    evlog->iolog_path);
         goto done;
     }
     if (fchown(fd, iolog_get_uid(), iolog_get_gid()) != 0) {
