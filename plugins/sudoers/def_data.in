@@ -277,6 +277,9 @@ pam_service
 pam_login_service
 	T_STR
 	"PAM service name to use for login shells: %s"
+pam_askpass_service
+	T_STR
+	"PAM service name to use when sudo is run with the -A option: %s"
 pam_setcred
 	T_FLAG
 	"Attempt to establish PAM credentials for the target user"

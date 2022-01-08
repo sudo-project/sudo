@@ -207,9 +207,13 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
     /* Stash value of noninteractive flag for conversation function. */
     noninteractive = IS_NONINTERACTIVE(auth);
 
-    /* Initial PAM. */
-    pam_service = ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
-	def_pam_login_service : def_pam_service;
+    /* Initialize PAM. */
+    if (ISSET(sudo_mode, MODE_ASKPASS) && def_pam_askpass_service != NULL) {
+	pam_service = def_pam_askpass_service;
+    } else {
+	pam_service = ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
+	    def_pam_login_service : def_pam_service;
+    }
     pam_status = pam_start(pam_service, pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
 	errstr = sudo_pam_strerror(NULL, pam_status);

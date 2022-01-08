@@ -185,7 +185,7 @@ struct sudo_user {
 #define MODE_MASK		0x0000ffff
 
 /* Mode flags */
-#define MODE_BACKGROUND		0x00010000 /* XXX - unused */
+#define MODE_ASKPASS		0x00010000
 #define MODE_SHELL		0x00020000
 #define MODE_LOGIN_SHELL	0x00040000
 #define MODE_IMPLIED_SHELL	0x00080000

@@ -398,6 +398,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("PAM service name to use for login shells: %s"),
 	NULL,
     }, {
+	"pam_askpass_service", T_STR,
+	N_("PAM service name to use when sudo is run with the -A option: %s"),
+	NULL,
+    }, {
 	"pam_setcred", T_FLAG,
 	N_("Attempt to establish PAM credentials for the target user"),
 	NULL,

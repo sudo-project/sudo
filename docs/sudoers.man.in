@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2021
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2022
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 8, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "January 8, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4291,6 +4291,24 @@ version 1.8.1 this option is no longer supported.
 The path to the noexec file should now be set in the
 sudo.conf(@mansectform@)
 file.
+.TP 18n
+pam_askpass_service
+On systems that use PAM for authentication, this is the service
+name used when the
+\fB\-A\fR
+option is specified.
+The default value is either
+\(lq\fR@pam_service@\fR\(rq
+or
+\(lq\fR@pam_login_service@\fR\(rq,
+depending on whether or not the
+\fB\-i\fR
+option is also specified.
+See the description of
+\fIpam_service\fR
+for more information.
+.sp
+This setting is only supported by version 1.9.9 or higher.
 .TP 18n
 pam_login_service
 .br

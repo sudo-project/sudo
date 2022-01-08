@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2021
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2022
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 8, 2021
+.Dd January 8, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4038,6 +4038,23 @@ version 1.8.1 this option is no longer supported.
 The path to the noexec file should now be set in the
 .Xr sudo.conf @mansectform@
 file.
+.It pam_askpass_service
+On systems that use PAM for authentication, this is the service
+name used when the
+.Fl A
+option is specified.
+The default value is either
+.Dq Li @pam_service@
+or
+.Dq Li @pam_login_service@ ,
+depending on whether or not the
+.Fl i
+option is also specified.
+See the description of
+.Em pam_service
+for more information.
+.Pp
+This setting is only supported by version 1.9.9 or higher.
 .It pam_login_service
 On systems that use PAM for authentication, this is the service
 name used when the

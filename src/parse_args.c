@@ -104,7 +104,9 @@ static struct sudo_settings sudo_settings[] = {
     { "cmnd_chroot" },
 #define ARG_CWD 24
     { "cmnd_cwd" },
-#define NUM_SETTINGS 25
+#define ARG_ASKPASS 25
+    { "askpass" },
+#define NUM_SETTINGS 26
     { NULL }
 };
 
@@ -301,7 +303,6 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     /* Space for environment variables is lazy allocated. */
     memset(&extra_env, 0, sizeof(extra_env));
 
-    /* XXX - should fill in settings at the end to avoid dupes */
     for (;;) {
 	/*
 	 * Some trickiness is required to allow environment variables
@@ -311,6 +312,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	    switch (ch) {
 		case 'A':
 		    SET(tgetpass_flags, TGP_ASKPASS);
+		    sudo_settings[ARG_ASKPASS].value = "true";
 		    break;
 #ifdef HAVE_BSD_AUTH_H
 		case 'a':
