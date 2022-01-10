@@ -32,6 +32,9 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#ifdef __linux__
+# include <sys/prctl.h>
+#endif
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -318,7 +321,7 @@ main(int argc, char *argv[], char *envp[])
 	sa.sa_handler = SIG_DFL;
 	sigaction(WTERMSIG(status), &sa, NULL);
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
-	    WTERMSIG(status) | 128);                
+	    WTERMSIG(status) | 128);
 	kill(getpid(), WTERMSIG(status));
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
@@ -899,6 +902,17 @@ sudo_check_suid(const char *sudo)
     debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM);
 
     if (geteuid() != ROOT_UID) {
+#if defined(__linux__) && defined(PR_GET_NO_NEW_PRIVS)
+	/* The no_new_privs flag disables set-user-ID at execve(2) time. */
+	if (prctl(PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0) == 1) {
+	    sudo_warnx(U_("The \"no new privileges\" flag is set, which "
+		"prevents sudo from running as root."));
+	    sudo_warnx(U_("If sudo is running in a container, you may need "
+		"to adjust the container configuration to disable the flag."));
+	    exit(EXIT_FAILURE);
+	}
+#endif /* __linux__ && PR_GET_NO_NEW_PRIVS */
+
 	/* Search for sudo binary in PATH if not fully qualified. */
 	qualified = strchr(sudo, '/') != NULL;
 	if (!qualified) {
