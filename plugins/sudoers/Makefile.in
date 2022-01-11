@@ -536,7 +536,7 @@ $(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
 sudoers: $(srcdir)/sudoers.in
 	cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@
 
-pre-install:
+pre-install: visudo
 	@if test X"$(cross_compiling)" != X"yes" -a X"$(DESTDIR)" = X""; then \
 	    if test -r $(sudoersdir)/sudoers; then \
 		echo "Checking existing sudoers file for syntax errors."; \
