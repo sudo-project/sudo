@@ -328,7 +328,7 @@ void
 unlimit_sudo(void)
 {
     unsigned int idx;
-    int rc;
+    int pass, rc;
     debug_decl(unlimit_sudo, SUDO_DEBUG_UTIL);
 
     /* Set resource limits to unlimited and stash the old values. */
@@ -350,45 +350,46 @@ unlimit_sudo(void)
 	if (!lim->override)
 	    continue;
 
-	if (lim->newlimit.rlim_cur != RLIM_INFINITY) {
-	    /* Don't reduce the soft resource limit. */
-	    if (lim->oldlimit.rlim_cur == RLIM_INFINITY ||
-		    lim->oldlimit.rlim_cur > lim->newlimit.rlim_cur)
-		lim->newlimit.rlim_cur = lim->oldlimit.rlim_cur;
-	}
-	if (lim->newlimit.rlim_max != RLIM_INFINITY) {
-	    /* Don't reduce the hard resource limit. */
-	    if (lim->oldlimit.rlim_max == RLIM_INFINITY ||
-		    lim->oldlimit.rlim_max > lim->newlimit.rlim_max)
-		lim->newlimit.rlim_max = lim->oldlimit.rlim_max;
-	}
-	if ((rc = setrlimit(lim->resource, &lim->newlimit)) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"setrlimit(%s, [%lld, %lld])", lim->name,
-		(long long)lim->newlimit.rlim_cur,
-		(long long)lim->newlimit.rlim_max);
-	    if (lim->fallback != NULL) {
-		if ((rc = setrlimit(lim->resource, lim->fallback)) == -1) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"setrlimit(%s, [%lld, %lld])", lim->name,
-			(long long)lim->fallback->rlim_cur,
-			(long long)lim->fallback->rlim_max);
+	for (pass = 0; pass < 2; pass++) {
+	    if (lim->newlimit.rlim_cur != RLIM_INFINITY) {
+		/* Don't reduce the soft resource limit. */
+		if (lim->oldlimit.rlim_cur == RLIM_INFINITY ||
+			lim->oldlimit.rlim_cur > lim->newlimit.rlim_cur)
+		    lim->newlimit.rlim_cur = lim->oldlimit.rlim_cur;
+	    }
+	    if (lim->newlimit.rlim_max != RLIM_INFINITY) {
+		/* Don't reduce the hard resource limit. */
+		if (lim->oldlimit.rlim_max == RLIM_INFINITY ||
+			lim->oldlimit.rlim_max > lim->newlimit.rlim_max)
+		    lim->newlimit.rlim_max = lim->oldlimit.rlim_max;
+	    }
+	    if ((rc = setrlimit(lim->resource, &lim->newlimit)) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "setrlimit(%s, [%lld, %lld])", lim->name,
+		    (long long)lim->newlimit.rlim_cur,
+		    (long long)lim->newlimit.rlim_max);
+		if (pass == 0 && lim->fallback != NULL) {
+		    /* Try again using fallback values. */
+		    lim->newlimit.rlim_cur = lim->fallback->rlim_cur;
+		    lim->newlimit.rlim_max = lim->fallback->rlim_max;
+		    continue;
 		}
 	    }
-	    if (rc == -1) {
-		/* Try setting new rlim_cur to old rlim_max. */
-		lim->newlimit.rlim_cur = lim->oldlimit.rlim_max;
-		lim->newlimit.rlim_max = lim->oldlimit.rlim_max;
-		if ((rc = setrlimit(lim->resource, &lim->newlimit)) == -1) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"setrlimit(%s, [%lld, %lld])", lim->name,
-			(long long)lim->newlimit.rlim_cur,
-			(long long)lim->newlimit.rlim_max);
-		}
-	    }
-	    if (rc == -1)
-		sudo_warn("setrlimit(%s)", lim->name);
+	    break;
 	}
+	if (rc == -1) {
+	    /* Try setting new rlim_cur to old rlim_max. */
+	    lim->newlimit.rlim_cur = lim->oldlimit.rlim_max;
+	    lim->newlimit.rlim_max = lim->oldlimit.rlim_max;
+	    if ((rc = setrlimit(lim->resource, &lim->newlimit)) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "setrlimit(%s, [%lld, %lld])", lim->name,
+		    (long long)lim->newlimit.rlim_cur,
+		    (long long)lim->newlimit.rlim_max);
+	    }
+	}
+	if (rc == -1)
+	    sudo_warn("setrlimit(%s)", lim->name);
     }
 
     debug_return;
