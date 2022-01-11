@@ -195,7 +195,7 @@ static struct saved_limit {
 	false,					/* saved */
 	false,					/* policy */
 	false,					/* preserve */
-	RLIM_INFINITY,				/* minlimit */
+	SUDO_STACK_MIN,				/* minlimit */
 	&stack_fallback,
 	{ SUDO_STACK_MIN, RLIM_INFINITY }
     }
@@ -347,9 +347,9 @@ unlimit_sudo(void)
 	    if (lim->oldlimit.rlim_cur >= lim->minlimit)
 		lim->override = false;
 	}
-
 	if (!lim->override)
 	    continue;
+
 	if (lim->newlimit.rlim_cur != RLIM_INFINITY) {
 	    /* Don't reduce the soft resource limit. */
 	    if (lim->oldlimit.rlim_cur == RLIM_INFINITY ||
