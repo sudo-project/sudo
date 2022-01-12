@@ -82,6 +82,7 @@ bool
 sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
 {
     const char *cp, *ep, *pathend;
+    char name[PATH_MAX];
     bool ret = false;
     int parentfd;
     debug_decl(sudo_mkdir_parents, SUDO_DEBUG_UTIL);
@@ -106,8 +107,6 @@ sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool 
     pathend = cp + strlen(cp);
     for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && ep != NULL;
 	cp = sudo_strsplit(NULL, pathend, "/", &ep)) {
-
-	char name[NAME_MAX + 1];
 	int dfd, len;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
