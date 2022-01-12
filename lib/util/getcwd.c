@@ -137,7 +137,7 @@ sudo_getcwd(char *pt, size_t size)
 		 * as necessary.  Max length is 3 for "../", the largest
 		 * possible component name, plus a trailing NULL.
 		 */
-		if (bup + 3  + MAXNAMLEN + 1 >= eup) {
+		if (bup + 3  + NAME_MAX + 1 >= eup) {
 			char *nup;
 
 			if ((nup = reallocarray(up, upsize, 2)) == NULL)

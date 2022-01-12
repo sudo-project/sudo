@@ -36,6 +36,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
@@ -106,7 +107,7 @@ sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool 
     for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && ep != NULL;
 	cp = sudo_strsplit(NULL, pathend, "/", &ep)) {
 
-	char name[MAXNAMLEN + 1];
+	char name[NAME_MAX + 1];
 	int dfd, len;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
