@@ -742,6 +742,7 @@ update_defaults(struct sudoers_parse_tree *parse_tree,
     struct defaults_list *defs, int what, bool quiet)
 {
     struct defaults *d;
+    bool global_defaults = false;
     bool ret = true;
     debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS);
 
@@ -749,38 +750,45 @@ update_defaults(struct sudoers_parse_tree *parse_tree,
 	"what: 0x%02x", what);
 
     /* If no defaults list specified, use the global one in the parse tree. */
-    if (defs == NULL)
+    if (defs == NULL) {
 	defs = &parse_tree->defaults;
+	global_defaults = true;
+    }
 
     /*
-     * First apply Defaults values marked as early.
+     * If using the global defaults list, apply Defaults values marked as early.
      */
-    TAILQ_FOREACH(d, defs, entries) {
-	struct early_default *early = is_early_default(d->var);
-	if (early == NULL)
-	    continue;
+    if (global_defaults) {
+	TAILQ_FOREACH(d, defs, entries) {
+	    struct early_default *early = is_early_default(d->var);
+	    if (early == NULL)
+		continue;
 
-	/* Defaults type and binding must match. */
-	if (!default_type_matches(d, what) ||
-	    !default_binding_matches(parse_tree, d, what))
-	    continue;
+	    /* Defaults type and binding must match. */
+	    if (!default_type_matches(d, what) ||
+		!default_binding_matches(parse_tree, d, what))
+		continue;
 
-	/* Copy the value to sudo_defs_table and mark as early. */
-	if (!set_early_default(d->var, d->val, d->op, d->file, d->line,
-	    d->column, quiet, early))
+	    /* Copy the value to sudo_defs_table and mark as early. */
+	    if (!set_early_default(d->var, d->val, d->op, d->file, d->line,
+		d->column, quiet, early))
+		ret = false;
+	}
+
+	/* Run callbacks for early defaults (if any) */
+	if (!run_early_defaults())
 	    ret = false;
     }
-    /* Run callbacks for early defaults (if any) */
-    if (!run_early_defaults())
-	ret = false;
 
     /*
-     * Then set the rest of the defaults.
+     * Set the rest of the defaults and run their callbacks, if any.
      */
     TAILQ_FOREACH(d, defs, entries) {
-	/* Skip Defaults marked as early, we already did them. */
-	if (is_early_default(d->var))
-	    continue;
+	if (global_defaults) {
+	    /* Skip Defaults marked as early, we already did them. */
+	    if (is_early_default(d->var))
+		continue;
+	}
 
 	/* Defaults type and binding must match. */
 	if (!default_type_matches(d, what) ||
