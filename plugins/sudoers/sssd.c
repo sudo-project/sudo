@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
@@ -189,8 +189,13 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     /* Walk through sudoUser values.  */
     for (i = 0; val_array[i] != NULL && !ret; ++i) {
 	const char *val = val_array[i];
+	bool negated = false;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
+	if (*val == '!') {
+	    val++;
+	    negated = false;
+	}
 	switch (*val) {
 	case '+':
 	    /* Netgroup spec found, check membership. */
@@ -214,8 +219,14 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	    break;
 	}
 	sudo_debug_printf(SUDO_DEBUG_DIAG,
-	    "sssd/ldap sudoUser '%s' ... %s (%s)", val,
-	    ret ? "MATCH!" : "not", handle->pw->pw_name);
+	    "sssd/ldap sudoUser '%s%s' ... %s (%s)", negated ? "!" : "",
+	    val, ret ? "MATCH!" : "not", handle->pw->pw_name);
+
+	/* A negated match overrides all other entries. */
+	if (ret && negated) {
+	    ret = false;
+	    break;
+	}
     }
     handle->fn_free_values(val_array);
     debug_return_bool(ret);
