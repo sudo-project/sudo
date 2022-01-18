@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "April 5, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "January 18, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -133,6 +133,16 @@ is defined in the global
 \fIdefaults\fR
 \fRsudoRole\fR
 object.
+If a
+\fRsudoUser\fR
+entry is preceded by an exclamation point,
+\(oq\&!\(cq,
+and the entry matches, the
+\fRsudoRole\fR
+in which it resides will be ignored.
+Negated
+\fRsudoUser\fR
+entries are only supported by version 1.9.9 or higher.
 .TP 6n
 \fBsudoHost\fR
 A host name, IP address, IP network, or host netgroup (prefixed with a
@@ -506,23 +516,6 @@ sudoUser: puddles
 sudoHost: ALL
 sudoCommand: !/bin/sh
 sudoCommand: ALL
-.RE
-.fi
-.PP
-Another difference is that it is not possible to use negation in a
-sudoUser, sudoRunAsUser or sudoRunAsGroup attribute.
-For example, the following attributes do not behave the way one might expect.
-.nf
-.sp
-.RS 4n
-# does not match all but joe
-# rather, does not match anyone
-sudoUser: !joe
-
-# does not match all but joe
-# rather, matches everyone including Joe
-sudoUser: ALL
-sudoUser: !joe
 .RE
 .fi
 .SS "Converting between file-based and LDAP sudoers"

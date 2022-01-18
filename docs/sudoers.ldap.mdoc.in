@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 5, 2021
+.Dd January 18, 2022
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -127,6 +127,16 @@ is defined in the global
 .Em defaults
 .Li sudoRole
 object.
+If a
+.Li sudoUser
+entry is preceded by an exclamation point,
+.Ql \&! ,
+and the entry matches, the
+.Li sudoRole
+in which it resides will be ignored.
+Negated
+.Li sudoUser
+entries are only supported by version 1.9.9 or higher.
 .It Sy sudoHost
 A host name, IP address, IP network, or host netgroup (prefixed with a
 .Ql + ) .
@@ -483,20 +493,6 @@ sudoUser: puddles
 sudoHost: ALL
 sudoCommand: !/bin/sh
 sudoCommand: ALL
-.Ed
-.Pp
-Another difference is that it is not possible to use negation in a
-sudoUser, sudoRunAsUser or sudoRunAsGroup attribute.
-For example, the following attributes do not behave the way one might expect.
-.Bd -literal -offset 4n
-# does not match all but joe
-# rather, does not match anyone
-sudoUser: !joe
-
-# does not match all but joe
-# rather, matches everyone including Joe
-sudoUser: ALL
-sudoUser: !joe
 .Ed
 .Ss Converting between file-based and LDAP sudoers
 The
