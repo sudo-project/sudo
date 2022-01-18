@@ -349,7 +349,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     debug_return_bool(rc == true);
 }
 
-struct early_default *
+static struct early_default *
 is_early_default(const char *name)
 {
     struct early_default *early;
@@ -400,7 +400,7 @@ set_default(const char *var, const char *val, int op, const char *file,
  * Like set_default() but stores the matching default value
  * and does not run callbacks.
  */
-bool
+static bool
 set_early_default(const char *var, const char *val, int op, const char *file,
     int line, int column, bool quiet, struct early_default *early)
 {
@@ -422,7 +422,7 @@ set_early_default(const char *var, const char *val, int op, const char *file,
 /*
  * Run callbacks for early defaults.
  */
-bool
+static bool
 run_early_defaults(void)
 {
     struct early_default *early;
