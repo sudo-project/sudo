@@ -89,6 +89,20 @@ What's new in Sudo 1.9.9
    would not attempt authentication if the -n option was specified.
    Bug #956 and GitHub issue #83.
 
+ * Fixed a regression introduced in version 1.9.1 when sudo is
+   built with the --with-fqdn configure option.  The local host
+   name was being resolved before the sudoers file was processed,
+   making it impossible to disable DNS lookups by negating the
+   "fqdn" sudoers option.  Bug #1016.
+
+ * Added support for negated sudoUser attributes in the LDAP and
+   SSSD sudoers back ends.  A matching sudoUser that is negated
+   will cause the sudoRole containing it to be ignored.
+
+ * Fixed a bug where the stack resource limit could be set to a
+   value smaller than that of the invoking user and not be reset
+   before the command was run.  Bug #1017.
+
 What's new in Sudo 1.9.8p2
 
  * Fixed a potential out-of-bounds read with "sudo -i" when the
