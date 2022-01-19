@@ -61,8 +61,7 @@ fuzzing runs are longer than those used by CIFuzz.  A [public list of
 failures](https://bugs.chromium.org/p/oss-fuzz/issues/list?q=sudoers)
 is available.
 
-For more information on fuzzing sudo, see the [fuzzing blog
-post](https://blog.sudo.ws/posts/2021/03/fuzz-testing-sudo/).
+For more information, see https://www.sudo.ws/security/fuzzing/.
 
 ## Translations
 
