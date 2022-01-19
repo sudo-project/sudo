@@ -248,9 +248,10 @@ oom:
  * Returns 1 if a digest was parsed, 0 if not and -1 on error.
  */
 static int
-sudo_ldap_extract_digest(char **cmnd, struct command_digest_list *digests)
+sudo_ldap_extract_digest(const char *cmnd, char **endptr,
+    struct command_digest_list *digests)
 {
-    char *ep, *cp = *cmnd;
+    const char *ep, *cp = cmnd;
     struct command_digest *digest;
     int digest_type = SUDO_DIGEST_INVALID;
     debug_decl(sudo_ldap_extract_digest, SUDOERS_DEBUG_LDAP);
@@ -303,7 +304,7 @@ sudo_ldap_extract_digest(char **cmnd, struct command_digest_list *digests)
 		    }
 		    while (isblank((unsigned char)*ep))
 			ep++;
-		    *cmnd = ep;
+		    *endptr = (char *)ep;
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
 			"%s digest %s for %s",
 			digest_type_to_name(digest_type),
@@ -330,7 +331,7 @@ sudo_ldap_extract_digests(char **cmnd, struct command_digest_list *digests)
     debug_decl(sudo_ldap_extract_digests, SUDOERS_DEBUG_LDAP);
 
     for (;;) {
-	rc = sudo_ldap_extract_digest(&cp, digests);
+	rc = sudo_ldap_extract_digest(cp, &cp, digests);
 	if (rc != 1)
 	    break;
 
