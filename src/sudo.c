@@ -905,10 +905,10 @@ sudo_check_suid(const char *sudo)
 #if defined(__linux__) && defined(PR_GET_NO_NEW_PRIVS)
 	/* The no_new_privs flag disables set-user-ID at execve(2) time. */
 	if (prctl(PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0) == 1) {
-	    sudo_warnx(U_("The \"no new privileges\" flag is set, which "
+	    sudo_warnx("%s", U_("The \"no new privileges\" flag is set, which "
 		"prevents sudo from running as root."));
-	    sudo_warnx(U_("If sudo is running in a container, you may need "
-		"to adjust the container configuration to disable the flag."));
+	    sudo_warnx("%s", U_("If sudo is running in a container, you may need"
+		" to adjust the container configuration to disable the flag."));
 	    exit(EXIT_FAILURE);
 	}
 #endif /* __linux__ && PR_GET_NO_NEW_PRIVS */
