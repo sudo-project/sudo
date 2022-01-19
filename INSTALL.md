@@ -22,6 +22,12 @@ pre-generated parser).  You'll also have to run configure with the
 http://flex.sourceforge.net/.  You can get GNU bison from
 ftp://ftp.gnu.org/pub/gnu/bison/ or any GNU mirror.
 
+Some systems will also require that development library packages be
+installed.  The sudo source distribution includes docker configurations
+for common Linux distributions that are used for continuous integration
+in the `docker` directory.  See the appropriate OS-specific Dockerfile
+for a list of packages required to build sudo.
+
 ## Simple sudo installation
 
 0. If you are upgrading from a previous version of sudo please read
