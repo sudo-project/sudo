@@ -194,7 +194,7 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 	if (*val == '!') {
 	    val++;
-	    negated = false;
+	    negated = true;
 	}
 	switch (*val) {
 	case '+':
