@@ -567,7 +567,7 @@ Defaults are listed in brackets after the description.
 
     --with-pam
         Enable PAM support.  This is on by default for Darwin, FreeBSD,
-        Linux, Solaris, and HP-UX (version 11 and higher).
+        Linux, NetBSD, Solaris, and HP-UX (version 11 and higher).
 
         NOTE: on RedHat Linux and Fedora you **must** have an `/etc/pam.d/sudo`
         file installed.  You may either use the example pam.conf file included
