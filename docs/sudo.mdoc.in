@@ -1281,6 +1281,20 @@ environment variable.
 .Nm sudoedit
 was unable to find a usable temporary directory in which to store its
 intermediate files.
+.It Li The Do "no new privileges" Dc "flag is set, which prevents sudo from running as root."
+.Nm
+was run by a process that has the Linux
+.Dq no new privileges
+flag is set.
+This causes the set-user-ID bit to be ignored when running an executable,
+preventing
+.Nm
+from functioning.
+The most likely cause for this is running
+.Nm
+within a container that sets this flag.
+Check the documentation to see if it is possible to configure the
+container such that the flag is not set.
 .It Li sudo must be owned by uid 0 and have the setuid bit set
 .Nm
 was not run with root privileges.

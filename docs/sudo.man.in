@@ -1386,6 +1386,21 @@ environment variable.
 was unable to find a usable temporary directory in which to store its
 intermediate files.
 .TP 6n
+\fRThe\fR \(lqno new privileges\(rq flag is set, which prevents sudo from running as root.
+\fBsudo\fR
+was run by a process that has the Linux
+\(lqno new privileges\(rq
+flag is set.
+This causes the set-user-ID bit to be ignored when running an executable,
+preventing
+\fBsudo\fR
+from functioning.
+The most likely cause for this is running
+\fBsudo\fR
+within a container that sets this flag.
+Check the documentation to see if it is possible to configure the
+container such that the flag is not set.
+.TP 6n
 \fRsudo must be owned by uid 0 and have the setuid bit set\fR
 \fBsudo\fR
 was not run with root privileges.
