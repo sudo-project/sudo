@@ -28,7 +28,7 @@ For information on OpenLDAP, please see http://www.openldap.org/.
 ## Definitions
 
 Many times the word 'Directory' is used in the document to refer to the LDAP
-server, structure and contents.
+server, structure, and contents.
 
 Many times 'options' are used in this document to refer to sudoer 'defaults'.
 They are one and the same.
@@ -90,7 +90,7 @@ suitable LDAP browser.  For example:
 
 There is no need to restart slapd when updating on-line configuration.
 
-For Netscape-derived LDAP servers such as SunONE, iPlanet or Fedora Directory,
+For Netscape-derived LDAP servers such as SunONE, iPlanet, or Fedora Directory,
 copy the schema.iPlanet file to the schema directory with the name 99sudo.ldif.
 
 On Solaris, schemas are stored in /var/Sun/mps/slapd-\`hostname\`/config/schema/.

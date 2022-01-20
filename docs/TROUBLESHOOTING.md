@@ -306,7 +306,7 @@ It just says "Sorry, try again." three times and exits.
 > `make`.  If that fixes the problem then your operating system
 > does not properly support position independent executables.
 > Please send a message to sudo@sudo.ws with system details such
-> as the Linux distro, kernel version and CPU architecture.
+> as the Linux distro, kernel version, and CPU architecture.
 
 #### When I run configure I get the following error:
 

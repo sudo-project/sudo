@@ -11,9 +11,9 @@ about the `configure` script itself.
 ## System requirements
 
 To build sudo from the source distribution you need a POSIX-compliant
-operating system (any modern version of BSD, Linux or Unix should work),
+operating system (any modern version of BSD, Linux, or Unix should work),
 an ANSI/ISO C compiler that supports the "long long" type, variadic
-macros (a C99 feature) as well as the ar, make and ranlib utilities.
+macros (a C99 feature) as well as the ar, make, and ranlib utilities.
 
 If you wish to modify the parser then you will need flex version
 2.5.2 or later and either bison or byacc (sudo comes with a
@@ -97,10 +97,10 @@ Defaults are listed in brackets after the description.
         This includes the executables and plugins.  [same as PREFIX]
 
     --bindir=DIR
-        Install cvtsudoers, sudo, sudoedit and sudoreplay in DIR.  [EPREFIX/bin]
+        Install cvtsudoers, sudo, sudoedit, and sudoreplay in DIR. [EPREFIX/bin]
 
     --sbindir=DIR
-        Install sudo_logsrvd, sudo_sendlog and visudo in DIR. [EPREFIX/sbin]
+        Install sudo_logsrvd, sudo_sendlog, and visudo in DIR. [EPREFIX/sbin]
 
     --libexecdir=DIR
         Install plugins and helper programs in DIR/sudo [PREFIX/libexec/sudo]
@@ -245,8 +245,8 @@ Defaults are listed in brackets after the description.
         Use select() instead of poll() in the event loop.  By default,
         sudo will use poll() on systems that support it.  Some systems
         have a broken poll() implementation and need to use select instead.
-        On Mac OS X, select() is always used since its poll() doesn't
-        support devices.
+        On macOS, select() is always used since its poll() doesn't
+        support character devices.
 
     --disable-rpath
         By default, configure will use -Rpath in addition to -Lpath
@@ -291,7 +291,7 @@ Defaults are listed in brackets after the description.
         Enable the use of the zlib compress library when storing
         I/O log files.  If specified, location is the base directory
         containing the zlib include and lib directories.  The special
-        values "system", "builtin", "shared" and "static" can be
+        values "system", "builtin", "shared", and "static" can be
         used to indicate that the system version of zlib should be
         used or that the version of zlib shipped with sudo should
         be used instead.  If "static" is specified, sudo will
@@ -372,7 +372,7 @@ Defaults are listed in brackets after the description.
 
     --with-logincap
         This adds support for login classes specified in `/etc/login.conf`.
-        It is enabled by default on BSD/OS, Darwin, FreeBSD, OpenBSD and
+        It is enabled by default on BSD/OS, Darwin, FreeBSD, OpenBSD, and
         NetBSD (where available).  By default, a login class is not applied
         unless the "use_loginclass" option is defined in sudoers or the user
         specifies a class on the command line.
@@ -472,7 +472,7 @@ Defaults are listed in brackets after the description.
 
     --with-bsm-audit
         Enable support for sudo BSM audit logs on systems that support it.
-        This includes recent versions of FreeBSD, Mac OS X and Solaris.
+        This includes recent versions of FreeBSD, macOS and Solaris.
 
     --with-linux-audit
         Enable audit support for Linux systems.  Audits attempts
@@ -531,7 +531,7 @@ Defaults are listed in brackets after the description.
         Enable DCE support for systems without PAM.  Known to work on
         HP-UX 9.X, 10.X, and 11.0; other systems may require source
         code and/or `configure` changes.  On systems with PAM support
-        (such as HP-UX 11.0 and higher, Solaris, FreeBSD and Linux), the
+        (such as HP-UX 11.0 and higher, Solaris, FreeBSD, and Linux), the
         DCE PAM module (usually libpam_dce) should be used instead.
 
     --with-fwtk[=DIR]
@@ -567,7 +567,7 @@ Defaults are listed in brackets after the description.
 
     --with-pam
         Enable PAM support.  This is on by default for Darwin, FreeBSD,
-        Linux, Solaris and HP-UX (version 11 and higher).
+        Linux, Solaris, and HP-UX (version 11 and higher).
 
         NOTE: on RedHat Linux and Fedora you **must** have an `/etc/pam.d/sudo`
         file installed.  You may either use the example pam.conf file included
@@ -775,13 +775,13 @@ Defaults are listed in brackets after the description.
         Sudoers option: editor
 
     --with-env-editor=no, --without-env-editor
-        By default, visudo will consult the SUDO_EDITOR, VISUAL and EDITOR
+        By default, visudo will consult the SUDO_EDITOR, VISUAL, and EDITOR
         environment variables before falling back on the default editor list
         (as specified by --with-editor).  visudo is typically run as root so
         this option may allow a user with visudo privileges to run arbitrary
         commands as root without logging.  Some sites may with to disable this
         and use a colon-separated list of "safe" editors with the --with-editor
-        option.  visudo will then only use the SUDO_EDITOR, VISUAL or EDITOR
+        option.  visudo will then only use the SUDO_EDITOR, VISUAL, or EDITOR
         variables if they match a value specified via --with-editor.  
         Sudoers option: env_editor
 
@@ -915,7 +915,7 @@ Defaults are listed in brackets after the description.
     --with-passprompt="PASSWORD PROMPT"
         Default prompt to use when asking for a password; can be overridden
         via the -p option and the SUDO_PROMPT environment variable. Supports
-        the "%H", "%h", "%U" and "%u" escapes as documented in the sudo
+        the "%H", "%h", "%U", and "%u" escapes as documented in the sudo
         manual page.  The default value is "Password:".  
         Sudoers option: passprompt
 
@@ -1013,8 +1013,8 @@ also need the "openldap-devel" (rpm) or "libldap2-dev" (deb) package.
 
 #### macOS
 
-The pseudo-tty support in the Mac OS X kernel has bugs related to
-its handling of the SIGTSTP, SIGTTIN and SIGTTOU signals.  It does
+The pseudo-tty support in the Darwin kernel has bugs related to
+its handling of the SIGTSTP, SIGTTIN, and SIGTTOU signals.  It does
 not restart reads and writes when those signals are delivered.  This
 may cause problems for some commands when I/O logging is enabled.
 The issue has been reported to Apple and is bug id #7952709.

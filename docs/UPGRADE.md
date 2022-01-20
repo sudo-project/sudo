@@ -68,7 +68,7 @@ Notes on upgrading from an older release
    Starting with version 1.8.29, if the umask is explicitly set
    in sudoers, that value is used regardless of the umask specified
    by PAM or login.conf.  However, if the umask is not explicitly
-   set in sudoers, PAM or login.conf may now override the default
+   set in sudoers, PAM, or login.conf may now override the default
    sudoers umask.  Previously, the sudoers umask always overrode
    the umask set by PAM, which was not the documented behavior.
 
@@ -89,14 +89,14 @@ Notes on upgrading from an older release
    Starting with version 1.8.26, sudo no long sets the USERNAME
    environment variable when running commands. This is a non-standard
    environment variable that was set on some older Linux systems.
-   Sudo still sets the LOGNAME, USER and, on AIX systems, LOGIN
+   Sudo still sets the LOGNAME, USER, and, on AIX systems, LOGIN
    environment variables.
 
    Handling of the LOGNAME, USER (and on AIX, LOGIN) environment
    variables has changed slightly in version 1.8.26.  Sudo now
    treats those variables as a single unit.  This means that if
    one variable is preserved or removed from the environment using
-   env_keep, env_check or env_delete, the others are too.
+   env_keep, env_check, or env_delete, the others are too.
 
  * Upgrading from a version prior to 1.8.23:
 
@@ -122,18 +122,18 @@ Notes on upgrading from an older release
 
  * Upgrading from a version prior to 1.8.20:
 
-   Due to the addition of the TIMEOUT, NOTBEFORE and NOTAFTTER
+   Due to the addition of the TIMEOUT, NOTBEFORE, and NOTAFTTER
    options, it is no longer possible to declare an alias with one
    of those names.  If a sudoers file has an alias with one of
-   those names, sudo and visudo will report a syntax error with a
+   those names, sudo, and visudo will report a syntax error with a
    message like "syntax error: unexpected TIMEOUT, expecting ALIAS".
 
    Starting with version 1.9.3, sudoers rules must end in either
-   Prior to version 1.8.20, when log_input, log_output or use_pty
-   were enabled, if any of the standard input, output or error
+   Prior to version 1.8.20, when log_input, log_output, or use_pty
+   were enabled, if any of the standard input, output, or error
    were not connected to a terminal, sudo would use a pipe.  The
    pipe allows sudo to interpose itself between the old standard
-   input, output or error and log the contents.  Beginning with
+   input, output, or error and log the contents.  Beginning with
    version 1.8.20, a pipe is only used when I/O logging is enabled.
    If use_pty is set without log_input or log_output, no pipe will
    be used.  Additionally, if log_input is set without log_output,
@@ -365,7 +365,7 @@ Notes on upgrading from an older release
  * Upgrading from a version prior to 1.7.5:
 
    Sudo 1.7.5 includes an updated LDAP schema with support for
-   the sudoNotBefore, sudoNotAfter and sudoOrder attributes.
+   the sudoNotBefore, sudoNotAfter, and sudoOrder attributes.
 
    The sudoNotBefore and sudoNotAfter attribute support is only
    used when the SUDOERS_TIMED setting is enabled in ldap.conf.
@@ -387,7 +387,7 @@ Notes on upgrading from an older release
  * Upgrading from a version prior to 1.7.4:
 
    Starting with sudo 1.7.4, the time stamp files have moved from
-   `/var/run/sudo` to either `/var/db/sudo`, `/var/lib/sudo` or
+   `/var/run/sudo` to either `/var/db/sudo`, `/var/lib/sudo`, or
    `/var/adm/sudo`.  The directories are checked for existence in
    that order.  This prevents users from receiving the sudo lecture
    every time the system reboots.  Time stamp files older than the

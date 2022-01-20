@@ -6,7 +6,7 @@ A Brief History of Sudo
 Sudo was first conceived and implemented by Bob Coggeshall and Cliff Spencer
 around 1980 at the Department of Computer Science at SUNY/Buffalo. It ran on
 a VAX-11/750 running 4.1BSD. An updated version, credited to Phil Betchel,
-Cliff Spencer, Gretchen Phillips, John LoVerso and Don Gworek, was posted to
+Cliff Spencer, Gretchen Phillips, John LoVerso, and Don Gworek, was posted to
 the net.sources Usenet newsgroup in December of 1985.
 
 ## Sudo at CU-Boulder
@@ -44,7 +44,7 @@ authors now work elsewhere). As of version 1.6, Sudo no longer contains any
 of the original "Root Group" code and is available under an ISC-style
 license.
 
-In 2001, the sudo web site, ftp site and mailing lists were moved from
+In 2001, the sudo web site, ftp site, and mailing lists were moved from
 courtesan.com to the sudo.ws domain (sudo.org was already taken).
 
 ## LDAP Integration
