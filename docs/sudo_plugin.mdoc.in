@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 19, 2022
+.Dd January 20, 2022
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -354,12 +354,12 @@ Set to true if the user specified the
 .Fl s
 option, indicating that the user wishes to run a shell.
 .It runas_group=string
-The group name or gid to run the command as, if specified via
+The group name or group-ID to run the command as, if specified via
 the
 .Fl g
 option.
 .It runas_user=string
-The user name or uid to run the command as, if specified via the
+The user name or user-ID to run the command as, if specified via the
 .Fl u
 option.
 .It selinux_role=string
@@ -1553,7 +1553,7 @@ sets up the
 execution environment for the command.
 It is run in the parent
 .Nm sudo
-process and before any uid or gid changes.
+process and before any user-ID or group-ID changes.
 This can be used to perform session setup that is not supported by
 .Em command_info ,
 such as opening the PAM session.
@@ -1566,7 +1566,7 @@ used to tear down the session that was opened by
 The
 .Em pwd
 argument points to a passwd struct for the user the
-command will be run as if the uid the command will run as was found
+command will be run as if the user-ID the command will run as was found
 in the password database, otherwise it will be
 .Dv NULL .
 .Pp

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "January 20, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -304,7 +304,7 @@ will also parse the arguments to the
 \fIsudoers\fR
 plugin to override the default
 \fIsudoers\fR
-path name, UID, GID, and file mode.
+path name, user-ID, group-ID, and file mode.
 These arguments, if present, should be listed after the path to the plugin
 (i.e., after
 \fIsudoers.so\fR).
@@ -326,13 +326,13 @@ argument can be used to override the default path to the
 \fIsudoers\fR
 file.
 .TP 10n
-sudoers_uid=uid
+sudoers_uid=user-ID
 The
 \fIsudoers_uid\fR
 argument can be used to override the default owner of the sudoers file.
 It should be specified as a numeric user-ID.
 .TP 10n
-sudoers_gid=gid
+sudoers_gid=group-ID
 The
 \fIsudoers_gid\fR
 argument can be used to override the default group of the sudoers file.

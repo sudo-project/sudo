@@ -22,9 +22,9 @@ Troubleshooting tips and FAQ for Sudo
 
     /usr/local/bin/sudo must be owned by uid 0 and have the setuid bit set
 
-> Sudo must be setuid root to do its work.  Either `/usr/local/bin/sudo`
-> is not owned by uid 0 or the setuid bit is not set.  This should have
-> been done for you by `make install` but you can fix it manually by
+> Sudo must be set-user-ID root to do its work.  Either `/usr/local/bin/sudo`
+> is not owned by user-ID 0 or the set-user-ID bit is not set.  This should
+> have been done for you by `make install` but you can fix it manually by
 > running the following as root:
 
     chown root /usr/local/bin/sudo; chmod 4755 /usr/local/bin/sudo
@@ -35,16 +35,16 @@ Troubleshooting tips and FAQ for Sudo
     'nosuid' option set or an NFS file system without root privileges?
 
 > The owner and permissions on the sudo binary appear to be OK but when
-> sudo ran, the setuid bit did not have an effect.  There are two common
-> causes for this.  The first is that the file system the sudo binary
-> is located on is mounted with the 'nosuid' mount option, which disables
-> setuid binaries.  The output of the 'mount' command should tell you if
-> the file system is mounted with the 'nosuid' option.  The other possible
-> cause is that sudo is installed on an NFS-mounted file system that is
-> exported without root privileges.  By default, NFS file systems are
-> exported with uid 0 mapped to a non-privileged uid (usually -2).  You
-> should be able to determine whether sudo is located on an NFS-mounted
-> filesystem by running "df \`which sudo\`".
+> sudo ran, the set-user-ID bit did not have an effect.  There are two
+> common causes for this.  The first is that the file system the sudo
+> binary is located on is mounted with the 'nosuid' mount option, which
+> disables set-user-ID binaries.  The output of the 'mount' command should
+> tell you if the file system is mounted with the 'nosuid' option.  The
+> other possible cause is that sudo is installed on an NFS-mounted file
+> system that is exported without root privileges.  By default, NFS file
+> systems are exported with user-ID 0 mapped to a non-privileged ID (usually
+> -2).  You should be able to determine whether sudo is located on an
+> NFS-mounted filesystem by running "df \`which sudo\`".
 
 #### Sudo never gives me a chance to enter a password using PAM
 

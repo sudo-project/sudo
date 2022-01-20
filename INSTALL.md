@@ -182,7 +182,7 @@ Defaults are listed in brackets after the description.
         This option should only be used for testing and not in a
         production environment.  Due to some sanitizers' unchecked
         use of environment variables, it is trivial to exploit a
-        setuid root executable such as sudo.
+        set-user-ID root executable such as sudo.
 
     --enable-fuzzer
         Enable building sudo with the LLVM libFuzzer, see

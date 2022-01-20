@@ -1392,7 +1392,7 @@ was run by a process that has the Linux
 \(lqno new privileges\(rq
 flag is set.
 This causes the set-user-ID bit to be ignored when running an executable,
-preventing
+which will prevent
 \fBsudo\fR
 from functioning.
 The most likely cause for this is running

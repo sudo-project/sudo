@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "January 18, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "January 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -209,7 +209,7 @@ specific to the
 in which it resides.
 .TP 6n
 \fBsudoRunAsUser\fR
-A user name or uid (prefixed with
+A user name or user-ID (prefixed with
 \(oq#\(cq)
 that commands may be run as or a Unix group (prefixed with a
 \(oq%\(cq)
@@ -255,7 +255,7 @@ Negated
 entries are only supported by version 1.8.26 or higher.
 .TP 6n
 \fBsudoRunAsGroup\fR
-A Unix group or gid (prefixed with
+A Unix group or group-ID (prefixed with
 \(oq#\(cq)
 that commands may be run as.
 The special value

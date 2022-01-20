@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 18, 2022
+.Dd January 20, 2022
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -195,7 +195,7 @@ specific to the
 .Li sudoRole
 in which it resides.
 .It Sy sudoRunAsUser
-A user name or uid (prefixed with
+A user name or user-ID (prefixed with
 .Ql # )
 that commands may be run as or a Unix group (prefixed with a
 .Ql % )
@@ -240,7 +240,7 @@ Negated
 .Li sudoRunAsUser
 entries are only supported by version 1.8.26 or higher.
 .It Sy sudoRunAsGroup
-A Unix group or gid (prefixed with
+A Unix group or group-ID (prefixed with
 .Ql # )
 that commands may be run as.
 The special value

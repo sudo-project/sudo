@@ -1287,7 +1287,7 @@ was run by a process that has the Linux
 .Dq no new privileges
 flag is set.
 This causes the set-user-ID bit to be ignored when running an executable,
-preventing
+which will prevent
 .Nm
 from functioning.
 The most likely cause for this is running

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd January 19, 2022
+.Dd January 20, 2022
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -159,7 +159,7 @@ manual for a list of supported arguments.
 .Pp
 The same dynamic shared object may contain multiple plugins,
 each with a different symbol name.
-The file must be owned by uid 0 and only writable by its owner.
+The file must be owned by user-ID 0 and only writable by its owner.
 Because of ambiguities that arise from composite policies, only a single
 policy plugin may be specified.
 This limitation does not apply to I/O plugins.

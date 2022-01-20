@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 19, 2022
+.Dd January 20, 2022
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -296,7 +296,7 @@ will also parse the arguments to the
 .Em sudoers
 plugin to override the default
 .Em sudoers
-path name, UID, GID, and file mode.
+path name, user-ID, group-ID, and file mode.
 These arguments, if present, should be listed after the path to the plugin
 (i.e., after
 .Pa sudoers.so ) .
@@ -314,12 +314,12 @@ The
 argument can be used to override the default path to the
 .Em sudoers
 file.
-.It sudoers_uid=uid
+.It sudoers_uid=user-ID
 The
 .Em sudoers_uid
 argument can be used to override the default owner of the sudoers file.
 It should be specified as a numeric user-ID.
-.It sudoers_gid=gid
+.It sudoers_gid=group-ID
 The
 .Em sudoers_gid
 argument can be used to override the default group of the sudoers file.

@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "January 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -390,13 +390,13 @@ Set to true if the user specified the
 option, indicating that the user wishes to run a shell.
 .TP 6n
 runas_group=string
-The group name or gid to run the command as, if specified via
+The group name or group-ID to run the command as, if specified via
 the
 \fB\-g\fR
 option.
 .TP 6n
 runas_user=string
-The user name or uid to run the command as, if specified via the
+The user name or user-ID to run the command as, if specified via the
 \fB\-u\fR
 option.
 .TP 6n
@@ -1742,7 +1742,7 @@ sets up the
 execution environment for the command.
 It is run in the parent
 \fBsudo\fR
-process and before any uid or gid changes.
+process and before any user-ID or group-ID changes.
 This can be used to perform session setup that is not supported by
 \fIcommand_info\fR,
 such as opening the PAM session.
@@ -1755,7 +1755,7 @@ used to tear down the session that was opened by
 The
 \fIpwd\fR
 argument points to a passwd struct for the user the
-command will be run as if the uid the command will run as was found
+command will be run as if the user-ID the command will run as was found
 in the password database, otherwise it will be
 \fRNULL\fR.
 .sp

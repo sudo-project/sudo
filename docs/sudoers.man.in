@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "January 18, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "January 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -151,13 +151,13 @@ argument can be used to override the default path to the
 \fIsudoers\fR
 file.
 .TP 10n
-sudoers_uid=uid
+sudoers_uid=user-ID
 The
 \fIsudoers_uid\fR
 argument can be used to override the default owner of the sudoers file.
 It should be specified as a numeric user-ID.
 .TP 10n
-sudoers_gid=gid
+sudoers_gid=group-ID
 The
 \fIsudoers_gid\fR
 argument can be used to override the default group of the sudoers file.
@@ -821,9 +821,9 @@ User_List ::= User |
               User ',' User_List
 
 User ::= '!'* user name |
-         '!'* #uid |
+         '!'* #user-ID |
          '!'* %group |
-         '!'* %#gid |
+         '!'* %#group-ID |
          '!'* +netgroup |
          '!'* %:nonunix_group |
          '!'* %:#nonunix_gid |
@@ -860,9 +860,9 @@ the host member is not used when matching.
 .PP
 A
 \fRuser name\fR,
-\fRuid\fR,
+\fRuser-ID\fR,
 \fRgroup\fR,
-\fRgid\fR,
+\fRgroup-ID\fR,
 \fRnetgroup\fR,
 \fRnonunix_group\fR
 or
@@ -911,9 +911,9 @@ Runas_List ::= Runas_Member |
                Runas_Member ',' Runas_List
 
 Runas_Member ::= '!'* user name |
-                 '!'* #uid |
+                 '!'* #user-ID |
                  '!'* %group |
-                 '!'* %#gid |
+                 '!'* %#group-ID |
                  '!'* %:nonunix_group |
                  '!'* %:#nonunix_gid |
                  '!'* +netgroup |
@@ -3593,10 +3593,10 @@ by default.
 stay_setuid
 Normally, when
 \fBsudo\fR
-executes a command the real and effective UIDs are set to the target
+executes a command the real and effective user-IDs are set to the target
 user (root by default).
-This option changes that behavior such that the real UID is left
-as the invoking user's UID.
+This option changes that behavior such that the real user-ID is left
+as the invoking user's user-ID.
 In other words, this makes
 \fBsudo\fR
 act as a set-user-ID wrapper.
