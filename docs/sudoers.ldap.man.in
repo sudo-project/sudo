@@ -46,17 +46,6 @@ When LDAP is used, there are only two or three LDAP queries per invocation.
 This makes it especially fast and particularly usable in LDAP environments.
 .TP 3n
 \fB\(bu\fR
-\fBsudo\fR
-no longer exits if there is a typo in
-\fIsudoers\fR.
-It is not possible to load LDAP data into the server that does
-not conform to the sudoers schema, so proper syntax is guaranteed.
-It is still possible to have typos in a user or host name, but
-this will not prevent
-\fBsudo\fR
-from running.
-.TP 3n
-\fB\(bu\fR
 It is possible to specify per-entry options that override the global
 default options.
 \fI@sysconfdir@/sudoers\fR
