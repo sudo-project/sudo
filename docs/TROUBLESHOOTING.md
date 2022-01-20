@@ -20,6 +20,19 @@ Troubleshooting tips and FAQ for Sudo
 
 #### Sudo compiles and installs successfully but when I try to run it I get:
 
+    The "no new privileges" flag is set, which prevents sudo from
+    running as root.  If sudo is running in a container, you may
+    need to adjust the container configuration to disable the flag.
+
+> Sudo was run by a process that has the Linux "no new privileges"
+> flag set.  This causes the set-user-ID bit to be ignored when running
+> an executable, which will prevent sudo from functioning.  The most
+> likely cause for this is running sudo within a container that sets
+> this flag.  Check the documentation to see if it is possible to
+> configure the container such that the flag is not set.
+
+#### Sudo compiles and installs successfully but when I try to run it I get:
+
     /usr/local/bin/sudo must be owned by uid 0 and have the setuid bit set
 
 > Sudo must be set-user-ID root to do its work.  Either `/usr/local/bin/sudo`
@@ -29,7 +42,7 @@ Troubleshooting tips and FAQ for Sudo
 
     chown root /usr/local/bin/sudo; chmod 4755 /usr/local/bin/sudo
 
-#### Sudo compiles and installs OK but when I try to run it I get:
+#### Sudo compiles and installs successfully but when I try to run it I get:
 
     effective uid is not 0, is /usr/local/bin/sudo on a file system with the
     'nosuid' option set or an NFS file system without root privileges?
