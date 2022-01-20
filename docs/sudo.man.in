@@ -449,10 +449,17 @@ This means that login-specific resource files such as
 or
 \fI.login\fR
 will be read by the shell.
-If a command is specified, it is passed to the shell for execution
-via the shell's
+If a command is specified, it is passed to the shell as a simple
+command using the
 \fB\-c\fR
 option.
+The command and any arguments are concatenated, separated by spaces,
+after escaping each character
+(including white space)
+with a backslash
+(\(oq\e\(cq)
+except for alphanumerics, underscores,
+hyphens, and dollar signs.
 If no command is specified, an interactive shell is executed.
 \fBsudo\fR
 attempts to change to that user's home directory before running the
@@ -624,10 +631,17 @@ Run the shell specified by the
 \fRSHELL\fR
 environment variable if it is set or the shell specified by the
 invoking user's password database entry.
-If a command is specified, it is passed to the shell for execution
-via the shell's
+If a command is specified, it is passed to the shell as a simple
+command using the
 \fB\-c\fR
 option.
+The command and any arguments are concatenated, separated by spaces,
+after escaping each character
+(including white space)
+with a backslash
+(\(oq\e\(cq)
+except for alphanumerics, underscores,
+hyphens, and dollar signs.
 If no command is specified, an interactive shell is executed.
 Note that most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
