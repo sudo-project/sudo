@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "January 8, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "January 18, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -43,7 +43,7 @@ policy plugin.
 The policy is driven by
 the
 \fI@sysconfdir@/sudoers\fR
-file or, optionally in LDAP.
+file or, optionally, in LDAP.
 The policy format is described in detail in the
 \fISUDOERS FILE FORMAT\fR
 section.
@@ -56,14 +56,14 @@ sudoers.ldap(@mansectform@).
 \fBsudo\fR
 consults the
 sudo.conf(@mansectform@)
-file to determine which policy and I/O logging plugins to load.
+file to determine which plugins to load.
 If no
 sudo.conf(@mansectform@)
 file is present, or if it contains no
 \fRPlugin\fR
 lines,
 \fBsudoers\fR
-will be used for policy decisions and I/O logging.
+will be used for auditing, policy decisions and I/O logging.
 To explicitly configure
 sudo.conf(@mansectform@)
 to use the
@@ -300,7 +300,7 @@ for a description of the log file format.
 \fBsudoers\fR
 is also capable of running a command in a pseudo-terminal and logging all
 input and/or output.
-The standard input, standard output and standard error can be logged
+The standard input, standard output, and standard error can be logged
 even when not associated with a terminal.
 I/O logging is not on by default but can be enabled using
 the
@@ -372,7 +372,7 @@ Additional variables, such as
 and
 \fRTERM\fR,
 are preserved from the invoking user's environment if permitted by the
-\fIenv_check\fR
+\fIenv_check\fR,
 or
 \fIenv_keep\fR
 options.
@@ -846,7 +846,7 @@ non-Unix group names and IDs (prefixed with
 \(oq%:\(cq
 and
 \(oq%:#\(cq
-respectively) and
+respectively), and
 \fRUser_Alias\fRes.
 Each list item may be prefixed with zero or more
 \(oq\&!\(cq
@@ -957,7 +957,7 @@ A
 \fRHost_List\fR
 is made up of one or more host names, IP addresses,
 network numbers, netgroups (prefixed with
-\(oq+\(cq)
+\(oq+\(cq),
 and other aliases.
 Again, the value of an item may be negated with the
 \(oq\&!\(cq
@@ -1100,7 +1100,7 @@ Starting with version 1.9.0, the
 \fBALL\fR
 reserved word can be used in conjunction with a
 \fRDigest_List\fR.
-The following digest formats are supported: sha224, sha256, sha384 and sha512.
+The following digest formats are supported: sha224, sha256, sha384, and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).
 There are several utilities capable of generating SHA-2 digests in hex
@@ -1217,7 +1217,7 @@ operator to remove an element
 that does not exist in a list.
 .PP
 Defaults entries are parsed in the following order: generic, host,
-user and runas Defaults first, then command defaults.
+user, and runas Defaults first, then command defaults.
 If there are multiple Defaults settings of the same type, the last
 matching setting is used.
 The following Defaults settings are parsed before all others since
@@ -1586,13 +1586,13 @@ A command may have a timeout associated with it.
 If the timeout expires before the command has exited, the
 command will be terminated.
 The timeout may be specified in combinations of days, hours,
-minutes and seconds with a single-letter case-insensitive suffix
+minutes, and seconds with a single-letter case-insensitive suffix
 that indicates the unit of time.
-For example, a timeout of 7 days, 8 hours, 30 minutes and
+For example, a timeout of 7 days, 8 hours, 30 minutes, and
 10 seconds would be written as
 \fR7d8h30m10s\fR.
 If a number is specified without a unit, seconds are assumed.
-Any of the days, minutes, hours or seconds may be omitted.
+Any of the days, minutes, hours, or seconds may be omitted.
 The order must be from largest to smallest unit and a unit
 may not be specified more than once.
 .PP
@@ -1818,7 +1818,7 @@ section below.
 .sp
 By default,
 \fBsudo\fR
-requires that a user authenticate him or herself
+requires that a user authenticate
 before running a command.
 This behavior can be modified via the
 \fRNOPASSWD\fR
@@ -1933,7 +1933,7 @@ and logged just like they would be if run through
 \fBsudo\fR
 directly.
 This is useful in conjunction with commands that allow shell escapes
-such as editors, shells and paginators.
+such as editors, shells, and paginators.
 .sp
 In the following example, user
 \fBchuck\fR
@@ -1959,7 +1959,7 @@ works and whether or not it will work on your system.
 allows shell-style
 \fIwildcards\fR
 (aka meta or glob characters)
-to be used in host names, path names and command line arguments in the
+to be used in host names, path names, and command line arguments in the
 \fIsudoers\fR
 file.
 Wildcard matching is done via the
@@ -2745,7 +2745,7 @@ This flag is only effective on systems for which
 \fBsudoers\fR
 supports audit logging, including
 FreeBSD,
-Linux, macOS and Solaris.
+Linux, macOS, and Solaris.
 This flag is
 \fIon\fR
 by default.
@@ -3186,7 +3186,7 @@ This setting is only supported by version 1.9.8 or higher.
 .TP 18n
 netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
-tuple: host name, user name and domain (if one is set).
+tuple: host name, user name, and domain (if one is set).
 Historically,
 \fBsudo\fR
 only matched the user name and domain for netgroups used in a
@@ -3549,12 +3549,12 @@ A pseudo-terminal is allocated by
 \fBsudo\fR
 when it is running in a terminal and one or more of the
 \fIlog_input\fR,
-\fIlog_output\fR
+\fIlog_output\fR,
 or
 \fIuse_pty\fR
 flags is enabled.
 By default, the new entry will be a copy of the user's existing utmp
-entry (if any), with the tty, time, type and pid fields updated.
+entry (if any), with the tty, time, type, and pid fields updated.
 This flag is
 \fIon\fR
 by default.
@@ -3823,7 +3823,7 @@ closefrom
 Before it executes a command,
 \fBsudo\fR
 will close all open file descriptors other than standard input,
-standard output and standard error (ie: file descriptors 0-2).
+standard output, and standard error (file descriptors 0-2).
 The
 \fIclosefrom\fR
 option can be used to specify a different file descriptor at which
@@ -3896,7 +3896,7 @@ creates log messages up to 980 bytes which corresponds to the
 historic
 BSD
 syslog implementation which used a 1024 byte buffer
-to store the message, date, hostname and program name.
+to store the message, date, hostname, and program name.
 To prevent syslog messages from being truncated,
 \fBsudoers\fR
 will split up log messages that are larger than
@@ -4178,7 +4178,7 @@ This setting is only supported by version 1.8.19 or higher.
 .TP 18n
 iolog_mode
 The file mode to use when creating I/O log files.
-Mode bits for read and write permissions for owner, group or other
+Mode bits for read and write permissions for owner, group, or other
 are honored, everything else is ignored.
 The file permissions will always include the owner read and
 write bits, even if they are not present in the specified mode.
@@ -4935,7 +4935,7 @@ It is only possible to use
 \fIrunchroot\fR
 as a command-specific Defaults setting if the command exists with
 the same path both inside and outside the chroot jail.
-This restriction does not apply to generic, host or user-based
+This restriction does not apply to generic, host, or user-based
 Defaults settings or to a
 \fICmnd_Spec\fR
 that includes a
@@ -6304,7 +6304,7 @@ The user
 may run any command on any machine except for those in the
 \fISERVERS\fR
 \fRHost_Alias\fR
-(primary, mail, www and ns).
+(primary, mail, www, and ns).
 .nf
 .sp
 .RS 0n
@@ -6460,7 +6460,7 @@ allow shell escapes, which lets a user bypass
 \fBsudo\fR's
 access control and logging.
 Common programs that permit shell escapes include shells (obviously),
-editors, paginators, mail and terminal programs.
+editors, paginators, mail, and terminal programs.
 .PP
 There are four basic approaches to this problem:
 .TP 10n
@@ -6850,7 +6850,7 @@ The priorities used by
 \fBsudoers\fR,
 in order of decreasing severity,
 are:
-\fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR, \fItrace\fR
+\fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR, \fItrace\fR,
 and
 \fIdebug\fR.
 Each priority, when specified, also includes all priorities higher
@@ -6898,7 +6898,7 @@ LDAP-based sudoers
 logging support
 .TP 10n
 \fImatch\fR
-matching of users, groups, hosts and netgroups in the
+matching of users, groups, hosts, and netgroups in the
 \fIsudoers\fR
 file
 .TP 10n

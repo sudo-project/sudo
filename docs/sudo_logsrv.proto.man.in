@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "August 3, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -124,7 +124,7 @@ An
 is used to represent information about the invoking user as well as the
 execution environment the command runs in the form of key-value pairs.
 The key is always a string but the value may be a 64-bit integer,
-a string, an array of strings or an array of 64-bit integers.
+a string, an array of strings, or an array of 64-bit integers.
 The event log data is composed of
 \fIInfoMessage\fR
 entries.
@@ -361,7 +361,7 @@ message IoBuffer {
 An
 \fIIoBuffer\fR
 is used to represent data from terminal input, terminal
-output, standard input, standard output or standard error.
+output, standard input, standard output, or standard error.
 It contains the following members:
 .TP 8n
 delay
@@ -373,7 +373,7 @@ should be calculated using a monotonic clock where possible.
 .TP 8n
 data
 The binary I/O log data from terminal input, terminal output,
-standard input, standard output or standard error.
+standard input, standard output, or standard error.
 .SS "ChangeWindowSize winsize_event"
 .nf
 .RS 0n

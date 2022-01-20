@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 8, 2021
+.Dd January 19, 2022
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -32,11 +32,10 @@ systems that support them) or compiled statically into the
 binary itself.
 By default, the
 .Nm sudoers
-policy plugin and an associated I/O logging plugin are used.
+plugin provides audit, security policy and I/O logging capabilities.
 Via the plugin API,
 .Nm sudo
-can be configured to use alternate policy and/or I/O logging plugins
-provided by third parties.
+can be configured to use alternate plugins provided by third parties.
 The plugins to be used are specified in the
 .Xr sudo.conf @mansectform@
 file.
@@ -265,8 +264,7 @@ from the
 .Fn check_policy
 function, which will cause
 .Nm sudo
-to print a usage message and
-exit.
+to print a usage message and exit.
 .It implied_shell=bool
 If the user does not specify a program on the command line,
 .Nm sudo
@@ -1256,7 +1254,7 @@ SELinux type to use when executing the command.
 .It set_utmp=bool
 Create a utmp (or utmpx) entry when a pseudo-terminal is allocated.
 By default, the new entry will be a copy of the user's existing utmp
-entry (if any), with the tty, time, type and pid fields updated.
+entry (if any), with the tty, time, type, and pid fields updated.
 .It sudoedit=bool
 Set to true when in
 .Em sudoedit
@@ -1380,7 +1378,7 @@ int (*list)(int argc, char * const argv[], int verbose,
 .Ed
 .Pp
 List available privileges for the invoking user.
-Returns 1 on success, 0 on failure and \-1 on error.
+Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 .Fn conversation
 or
@@ -1474,7 +1472,7 @@ function should be
 .Dv NULL
 if the plugin does not support credential caching.
 .Pp
-Returns 1 on success, 0 on failure and \-1 on error.
+Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 .Fn conversation
 or
@@ -1605,7 +1603,7 @@ front-end before using
 .Em user_env_out .
 Failure to do so may result in a crash.
 .Pp
-Returns 1 on success, 0 on failure and \-1 on error.
+Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 .Fn conversation
 or
@@ -1641,7 +1639,7 @@ The
 .Fn register_hook
 function should be used to register any supported
 hooks the plugin needs.
-It returns 0 on success, 1 if the hook type is not supported and \-1
+It returns 0 on success, 1 if the hook type is not supported, and \-1
 if the major version in
 .Li struct hook
 does not match the front-end's major hook API version.
@@ -1828,7 +1826,7 @@ When an I/O plugin is loaded,
 runs the command in a pseudo-terminal.
 This makes it possible to log the input and output from the user's
 session.
-If any of the standard input, standard output or standard error do not
+If any of the standard input, standard output, or standard error do not
 correspond to a tty,
 .Nm sudo
 will open a pipe to capture
@@ -1841,10 +1839,10 @@ The log_ttyout function receives output from the pseudo-terminal that is
 suitable for replaying the user's session at a later time.
 The
 .Fn log_stdin ,
-.Fn log_stdout
+.Fn log_stdout ,
 and
 .Fn log_stderr
-functions are only called if the standard input, standard output
+functions are only called if the standard input, standard output,
 or standard error respectively correspond to something other than
 a tty.
 .Pp
@@ -2192,7 +2190,7 @@ the user but before it is passed to the running command.
 This allows the plugin to reject data if it chooses to (for instance
 if the input contains banned content).
 Returns 1 if the data should be passed to the command, 0 if the data
-is rejected (which will terminate the running command) or \-1 if an
+is rejected (which will terminate the running command), or \-1 if an
 error occurred.
 .Pp
 The function arguments are as follows:
@@ -2243,7 +2241,7 @@ the command but before it is written to the user's terminal.
 This allows the plugin to reject data if it chooses to (for instance
 if the output contains banned content).
 Returns 1 if the data should be passed to the user, 0 if the data is rejected
-(which will terminate the running command) or \-1 if an error occurred.
+(which will terminate the running command), or \-1 if an error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -2294,8 +2292,9 @@ It is called whenever data can be read from the standard input but
 before it is passed to the running command.
 This allows the plugin to reject data if it chooses to
 (for instance if the input contains banned content).
-Returns 1 if the data should be passed to the command, 0 if the data is
-rejected (which will terminate the running command) or \-1 if an error occurred.
+Returns 1 if the data should be passed to the command, 0 if the
+data is rejected (which will terminate the running command), or \-1
+if an error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -2346,8 +2345,9 @@ It is called whenever data can be read from the command but before
 it is written to the standard output.
 This allows the plugin to reject data if it chooses to
 (for instance if the output contains banned content).
-Returns 1 if the data should be passed to the user, 0 if the data is
-rejected (which will terminate the running command) or \-1 if an error occurred.
+Returns 1 if the data should be passed to the user, 0 if the data
+is rejected (which will terminate the running command), or \-1 if
+an error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -2398,8 +2398,9 @@ It is called whenever data can be read from the command but before it
 is written to the standard error.
 This allows the plugin to reject data if it chooses to
 (for instance if the output contains banned content).
-Returns 1 if the data should be passed to the user, 0 if the data is
-rejected (which will terminate the running command) or \-1 if an error occurred.
+Returns 1 if the data should be passed to the user, 0 if the data
+is rejected (which will terminate the running command), or \-1 if
+an error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -2691,7 +2692,7 @@ The
 function may also be used to display additional error message to the user.
 The
 .Fn conversation
-function returns 0 on success and \-1 on failure.
+function returns 0 on success, and \-1 on failure.
 .It plugin_printf
 A pointer to a
 .Fn printf Ns -style
@@ -2884,7 +2885,7 @@ front-end.
 .It plugin_type
 The type of plugin that accepted the command, currently either
 .Dv SUDO_POLICY_PLUGIN ,
-.Dv SUDO_POLICY_APPROVAL
+.Dv SUDO_POLICY_APPROVAL ,
 or
 .Dv SUDO_FRONT_END .
 The
@@ -2991,7 +2992,7 @@ The name of the plugin that rejected the command.
 .It plugin_type
 The type of plugin that rejected the command, currently either
 .Dv SUDO_POLICY_PLUGIN ,
-.Dv SUDO_APPROVAL_PLUGIN
+.Dv SUDO_APPROVAL_PLUGIN ,
 or
 .Dv SUDO_IO_PLUGIN .
 .Pp
@@ -4237,12 +4238,12 @@ or
 try to write the message to the user's terminal.
 If the terminal is unavailable, the standard error or standard output
 will be used, depending upon whether
-The user's terminal is always used when possible for input,
-this flag is only used for output.
 .Dv SUDO_CONV_ERROR_MSG
 or
 .Dv SUDO_CONV_INFO_MSG
 was used.
+The user's terminal is always used when possible for input,
+this flag is only used for output.
 .El
 .Pp
 The
@@ -4333,7 +4334,7 @@ This can be used to query a group source other than the standard Unix
 group database.
 Two sample group plugins are bundled with
 .Nm sudo ,
-.Em group_file
+.Em group_file ,
 and
 .Em system_group ,
 are detailed in
@@ -4344,7 +4345,7 @@ A group plugin must declare and populate a
 .Li sudoers_group_plugin
 struct in the global scope.
 This structure contains pointers to the functions that implement plugin
-initialization, cleanup and group lookup.
+initialization, cleanup, and group lookup.
 .Bd -literal
 struct sudoers_group_plugin {
     unsigned int version;

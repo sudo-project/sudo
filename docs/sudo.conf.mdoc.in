@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd September 17, 2021
+.Dd January 19, 2022
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -28,15 +28,15 @@ The
 file is used to configure the
 .Nm sudo
 front-end.
-It specifies the security policy and I/O logging plugins, debug flags
-as well as plugin-agnostic path names and settings.
+It is used to configure sudo plugins, plugin-agnostic path names,
+debug flags, and other settings.
 .Pp
 The
 .Nm
 file supports the following directives, described in detail below.
 .Bl -tag -width 8n
 .It Plugin
-an approval, audit, I/O logging or security policy plugin
+an approval, audit, I/O logging, or security policy plugin
 .It Path
 a plugin-agnostic path
 .It Set
@@ -171,7 +171,7 @@ file is present, or if it contains no
 lines, the
 .Nm sudoers
 plugin will be used as the default security policy, for I/O logging
-(if enabled by the policy) and for auditing.
+(if enabled by the policy), and for auditing.
 This is equivalent to the following:
 .Bd -literal -offset indent
 Plugin sudoers_policy sudoers.so
@@ -453,7 +453,7 @@ Currently,
 .Nm sudo
 supports efficient group queries on AIX,
 .Bx ,
-HP-UX, Linux, macOS and Solaris.
+HP-UX, Linux, macOS, and Solaris.
 This is the default behavior on macOS in
 .Nm sudo
 1.9.6 and higher.
@@ -522,13 +522,13 @@ A
 .Li Debug
 line consists of the
 .Li Debug
-keyword, followed by the name of the program, plugin or shared object to debug,
-the debug file name and a comma-separated list of debug flags.
+keyword, followed by the name of the program, plugin, or shared object
+to debug, the debug file name, and a comma-separated list of debug flags.
 The debug flag syntax used by
 .Nm sudo ,
 the
 .Nm sudoers
-plugin and its associated programs and shared objects is
+plugin along with its associated programs and shared objects is
 .Em subsystem Ns @ Ns Em priority
 but a third-party plugin is free to use a different format so long
 as it does not include a comma
@@ -581,7 +581,7 @@ entry as the
 front-end and could not be configured separately.
 .Pp
 The following priorities are supported, in order of decreasing severity:
-.Em crit , err , warn , notice , diag , info , trace
+.Em crit , err , warn , notice , diag , info , trace ,
 and
 .Em debug .
 Each priority, when specified, also includes all priorities higher
@@ -608,7 +608,7 @@ sudo[123] <- get_user_groups @ src/sudo.c:429 := groups=10,0,5
 .Pp
 When the function is entered, indicated by a right arrow
 .Ql -> ,
-the program, process ID, function, source file and line number
+the program, process ID, function, source file, and line number
 are logged.
 When the function returns, indicated by a left arrow
 .Ql <- ,
@@ -792,10 +792,10 @@ front-end configuration
 #   Debug program /path/to/debug_log subsystem@priority[,subsyste@priority]
 #
 # Sudo and related programs support logging debug information to a file.
-# The program is typically sudo, sudoers.so, sudoreplay or visudo.
+# The program is typically sudo, sudoers.so, sudoreplay, or visudo.
 #
 # Subsystems vary based on the program; "all" matches all subsystems.
-# Priority may be crit, err, warn, notice, diag, info, trace or debug.
+# Priority may be crit, err, warn, notice, diag, info, trace, or debug.
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
 #Debug sudo /var/log/sudo_debug all@debug

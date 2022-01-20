@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 16, 2021
+.Dd January 19, 2022
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -30,7 +30,7 @@ log server.
 It uses an INI-style format made up of sections in square brackets and
 .Dq key = value
 pairs specific to each section below the section name.
-Depending on the key, values may be integers, booleans or strings.
+Depending on the key, values may be integers, booleans, or strings.
 Section and key names are not case sensitive, but values are.
 .Pp
 The pound sign
@@ -505,7 +505,7 @@ nor
 are set, I/O log files and directories are created with group-ID 0.
 .It iolog_mode = mode
 The file mode to use when creating I/O log files.
-Mode bits for read and write permissions for owner, group or other
+Mode bits for read and write permissions for owner, group, or other
 are honored, everything else is ignored.
 The file permissions will always include the owner read and
 write bits, even if they are not present in the specified mode.
@@ -545,7 +545,7 @@ The
 section configures how (and if) security policy events are logged.
 .Bl -tag -width 4n
 .It log_type = string
-Where to log accept, reject and alert events reported by the policy.
+Where to log accept, reject, and alert events reported by the policy.
 Supported values are
 .Em syslog ,
 .Em logfile ,
@@ -646,7 +646,7 @@ creates log messages up to 960 bytes which corresponds to the
 historic
 .Bx
 syslog implementation which used a 1024 byte buffer
-to store the message, date, hostname and program name.
+to store the message, date, hostname, and program name.
 .Pp
 To prevent syslog messages from being truncated,
 .Nm sudo_logsrvd
@@ -884,7 +884,7 @@ Sudo log server configuration file
 #maxseq = 2176782336
 
 [eventlog]
-# Where to log accept, reject, exit and alert events.
+# Where to log accept, reject, exit, and alert events.
 # Accepted values are syslog, logfile, or none.
 # Defaults to syslog
 #log_type = syslog

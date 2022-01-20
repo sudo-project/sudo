@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "November 8, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -33,11 +33,10 @@ systems that support them) or compiled statically into the
 binary itself.
 By default, the
 \fBsudoers\fR
-policy plugin and an associated I/O logging plugin are used.
+plugin provides audit, security policy and I/O logging capabilities.
 Via the plugin API,
 \fBsudo\fR
-can be configured to use alternate policy and/or I/O logging plugins
-provided by third parties.
+can be configured to use alternate plugins provided by third parties.
 The plugins to be used are specified in the
 sudo.conf(@mansectform@)
 file.
@@ -286,8 +285,7 @@ from the
 \fBcheck_policy\fR()
 function, which will cause
 \fBsudo\fR
-to print a usage message and
-exit.
+to print a usage message and exit.
 .TP 6n
 implied_shell=bool
 If the user does not specify a program on the command line,
@@ -1404,7 +1402,7 @@ SELinux type to use when executing the command.
 set_utmp=bool
 Create a utmp (or utmpx) entry when a pseudo-terminal is allocated.
 By default, the new entry will be a copy of the user's existing utmp
-entry (if any), with the tty, time, type and pid fields updated.
+entry (if any), with the tty, time, type, and pid fields updated.
 .TP 6n
 sudoedit=bool
 Set to true when in
@@ -1546,7 +1544,7 @@ int (*list)(int argc, char * const argv[], int verbose,
 .RS 6n
 .sp
 List available privileges for the invoking user.
-Returns 1 on success, 0 on failure and \-1 on error.
+Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 \fBconversation\fR()
 or
@@ -1651,7 +1649,7 @@ function should be
 \fRNULL\fR
 if the plugin does not support credential caching.
 .sp
-Returns 1 on success, 0 on failure and \-1 on error.
+Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 \fBconversation\fR()
 or
@@ -1794,7 +1792,7 @@ front-end before using
 \fIuser_env_out\fR.
 Failure to do so may result in a crash.
 .sp
-Returns 1 on success, 0 on failure and \-1 on error.
+Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 \fBconversation\fR()
 or
@@ -1835,7 +1833,7 @@ The
 \fBregister_hook\fR()
 function should be used to register any supported
 hooks the plugin needs.
-It returns 0 on success, 1 if the hook type is not supported and \-1
+It returns 0 on success, 1 if the hook type is not supported, and \-1
 if the major version in
 \fRstruct hook\fR
 does not match the front-end's major hook API version.
@@ -2038,7 +2036,7 @@ When an I/O plugin is loaded,
 runs the command in a pseudo-terminal.
 This makes it possible to log the input and output from the user's
 session.
-If any of the standard input, standard output or standard error do not
+If any of the standard input, standard output, or standard error do not
 correspond to a tty,
 \fBsudo\fR
 will open a pipe to capture
@@ -2051,10 +2049,10 @@ The log_ttyout function receives output from the pseudo-terminal that is
 suitable for replaying the user's session at a later time.
 The
 \fBlog_stdin\fR(),
-\fBlog_stdout\fR()
+\fBlog_stdout\fR(),
 and
 \fBlog_stderr\fR()
-functions are only called if the standard input, standard output
+functions are only called if the standard input, standard output,
 or standard error respectively correspond to something other than
 a tty.
 .PP
@@ -2439,7 +2437,7 @@ the user but before it is passed to the running command.
 This allows the plugin to reject data if it chooses to (for instance
 if the input contains banned content).
 Returns 1 if the data should be passed to the command, 0 if the data
-is rejected (which will terminate the running command) or \-1 if an
+is rejected (which will terminate the running command), or \-1 if an
 error occurred.
 .sp
 The function arguments are as follows:
@@ -2499,7 +2497,7 @@ the command but before it is written to the user's terminal.
 This allows the plugin to reject data if it chooses to (for instance
 if the output contains banned content).
 Returns 1 if the data should be passed to the user, 0 if the data is rejected
-(which will terminate the running command) or \-1 if an error occurred.
+(which will terminate the running command), or \-1 if an error occurred.
 .sp
 The function arguments are as follows:
 .TP 6n
@@ -2559,8 +2557,9 @@ It is called whenever data can be read from the standard input but
 before it is passed to the running command.
 This allows the plugin to reject data if it chooses to
 (for instance if the input contains banned content).
-Returns 1 if the data should be passed to the command, 0 if the data is
-rejected (which will terminate the running command) or \-1 if an error occurred.
+Returns 1 if the data should be passed to the command, 0 if the
+data is rejected (which will terminate the running command), or \-1
+if an error occurred.
 .sp
 The function arguments are as follows:
 .TP 6n
@@ -2620,8 +2619,9 @@ It is called whenever data can be read from the command but before
 it is written to the standard output.
 This allows the plugin to reject data if it chooses to
 (for instance if the output contains banned content).
-Returns 1 if the data should be passed to the user, 0 if the data is
-rejected (which will terminate the running command) or \-1 if an error occurred.
+Returns 1 if the data should be passed to the user, 0 if the data
+is rejected (which will terminate the running command), or \-1 if
+an error occurred.
 .sp
 The function arguments are as follows:
 .TP 6n
@@ -2681,8 +2681,9 @@ It is called whenever data can be read from the command but before it
 is written to the standard error.
 This allows the plugin to reject data if it chooses to
 (for instance if the output contains banned content).
-Returns 1 if the data should be passed to the user, 0 if the data is
-rejected (which will terminate the running command) or \-1 if an error occurred.
+Returns 1 if the data should be passed to the user, 0 if the data
+is rejected (which will terminate the running command), or \-1 if
+an error occurred.
 .sp
 The function arguments are as follows:
 .TP 6n
@@ -3009,7 +3010,7 @@ The
 function may also be used to display additional error message to the user.
 The
 \fBconversation\fR()
-function returns 0 on success and \-1 on failure.
+function returns 0 on success, and \-1 on failure.
 .TP 6n
 plugin_printf
 A pointer to a
@@ -3227,7 +3228,7 @@ front-end.
 plugin_type
 The type of plugin that accepted the command, currently either
 \fRSUDO_POLICY_PLUGIN\fR,
-\fRSUDO_POLICY_APPROVAL\fR
+\fRSUDO_POLICY_APPROVAL\fR,
 or
 \fRSUDO_FRONT_END\fR.
 The
@@ -3346,7 +3347,7 @@ The name of the plugin that rejected the command.
 plugin_type
 The type of plugin that rejected the command, currently either
 \fRSUDO_POLICY_PLUGIN\fR,
-\fRSUDO_APPROVAL_PLUGIN\fR
+\fRSUDO_APPROVAL_PLUGIN\fR,
 or
 \fRSUDO_IO_PLUGIN\fR.
 .sp
@@ -4787,12 +4788,12 @@ or
 try to write the message to the user's terminal.
 If the terminal is unavailable, the standard error or standard output
 will be used, depending upon whether
-The user's terminal is always used when possible for input,
-this flag is only used for output.
 \fRSUDO_CONV_ERROR_MSG\fR
 or
 \fRSUDO_CONV_INFO_MSG\fR
 was used.
+The user's terminal is always used when possible for input,
+this flag is only used for output.
 .PP
 The
 \fItimeout\fR
@@ -4891,7 +4892,7 @@ This can be used to query a group source other than the standard Unix
 group database.
 Two sample group plugins are bundled with
 \fBsudo\fR,
-\fIgroup_file\fR
+\fIgroup_file\fR,
 and
 \fIsystem_group\fR,
 are detailed in
@@ -4902,7 +4903,7 @@ A group plugin must declare and populate a
 \fRsudoers_group_plugin\fR
 struct in the global scope.
 This structure contains pointers to the functions that implement plugin
-initialization, cleanup and group lookup.
+initialization, cleanup, and group lookup.
 .nf
 .sp
 .RS 0n

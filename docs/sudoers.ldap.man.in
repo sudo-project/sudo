@@ -194,7 +194,7 @@ only be allowed if the digest matches.
 This may be useful in situations where the user invoking
 \fBsudo\fR
 has write access to the command or its parent directory.
-The following digest formats are supported: sha224, sha256, sha384 and sha512.
+The following digest formats are supported: sha224, sha256, sha384, and sha512.
 The digest name must be followed by a colon
 (\(oq:\&\(cq)
 and then the actual digest, in either hex or base64 format.
@@ -369,7 +369,7 @@ A
 \fRsudoRole\fR
 must contain at least one
 \fRsudoUser\fR,
-\fRsudoHost\fR
+\fRsudoHost\fR,
 and
 \fRsudoCommand\fR.
 .PP
@@ -425,7 +425,7 @@ Match all
 \fRnisNetgroup\fR
 records with a
 \fRnisNetgroupTriple\fR
-containing the user, host and NIS domain.
+containing the user, host, and NIS domain.
 The query will match
 \fRnisNetgroupTriple\fR
 entries with either the short or long form of the host name or
@@ -461,7 +461,7 @@ For the most part, there is little need for
 \fBsudo\fR-specific
 Aliases.
 Unix groups, non-Unix groups (via the
-\fIgroup_plugin\fR)
+\fIgroup_plugin\fR),
 or user netgroups can be used in place of User_Aliases and Runas_Aliases.
 Host netgroups can be used in place of Host_Aliases.
 Since groups and netgroups can also be stored in LDAP there is no real need for
@@ -535,7 +535,7 @@ that contains multiple commands.
 Multiple users and/or groups may be assigned to the
 \fRsudoRole\fR.
 .PP
-Also, host, user, runas and command-based
+Also, host, user, runas, and command-based
 \fRDefaults\fR
 entries are not supported.
 However, a
@@ -941,9 +941,9 @@ If the
 \fBSSL\fR
 parameter is set to
 \fRon\fR,
-\fRtrue\fR
-\fRor\fR
-\fRyes\fR,
+\fRtrue\fR,
+or
+\fRyes\fR
 TLS (SSL) encryption is always used when communicating with the LDAP server.
 Typically, this involves connecting to the server on port 636 (ldaps).
 .TP 6n

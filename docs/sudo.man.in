@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2021
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2022
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "December 11, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -108,10 +108,10 @@ user-ID is used to determine the user name with which
 to query the security policy.
 .PP
 \fBsudo\fR
-supports a plugin architecture for security policies and input/output
-logging.
-Third parties can develop and distribute their own policy and I/O
-logging plugins to work seamlessly with the
+supports a plugin architecture for security policies, auditing,
+and input/output logging.
+Third parties can develop and distribute their own plugins to work
+seamlessly with the
 \fBsudo\fR
 front-end.
 The default security policy is
@@ -178,7 +178,8 @@ the
 \fB\-e\fR
 option (described below), is implied.
 .PP
-Security policies may log successful and failed attempts to use
+Security policies and audit plugins may log successful and failed attempts
+to run
 \fBsudo\fR.
 If an I/O plugin is configured, the running command's input and
 output may be logged as well.
@@ -255,7 +256,7 @@ Values less than three are not permitted.
 By default,
 \fBsudo\fR
 will close all open file descriptors other than standard input,
-standard output and standard error when executing a command.
+standard output, and standard error when executing a command.
 The security policy may restrict the user's ability to use this option.
 The
 \fIsudoers\fR
@@ -444,7 +445,7 @@ Run the shell specified by the target user's password database entry
 as a login shell.
 This means that login-specific resource files such as
 \fI.profile\fR,
-\fI.bash_profile\fR
+\fI.bash_profile\fR,
 or
 \fI.login\fR
 will be read by the shell.
@@ -484,7 +485,7 @@ When used without a command, invalidates the user's cached credentials.
 In other words, the next time
 \fBsudo\fR
 is run a password will be required.
-This option does not require a password and was added to allow a
+This option does not require a password, and was added to allow a
 user to revoke
 \fBsudo\fR
 permissions from a
@@ -551,7 +552,7 @@ policy:
 .PD 0
 .TP 4n
 \fR%H\fR
-expanded to the host name including the domain name (on if the
+expanded to the host name including the domain name (only if the
 machine's host name is fully qualified or the
 \fIfqdn\fR
 option is set in
@@ -693,13 +694,12 @@ Other security policies may not support this.
 \fB\-V\fR, \fB\--version\fR
 Print the
 \fBsudo\fR
-version string as well as the version string of the security
-policy plugin and any I/O plugins.
-If the invoking user is already root the
+version string as well as the version string of any configured plugins.
+If the invoking user is already root, the
 \fB\-V\fR
 option will display the arguments passed to configure when
 \fBsudo\fR
-was built and plugins may display more verbose information such as
+was built; plugins may display additional information such as
 default options.
 .TP 12n
 \fB\-v\fR, \fB\--validate\fR
@@ -867,7 +867,8 @@ first.
 The
 \fIsudoers\fR
 policy plugin will only define a close function when I/O logging
-is enabled, a pty is required, or the
+is enabled, a pty is required, an SELinux role is specified, the
+command has an associated timeout, or the
 \fIpam_session\fR
 or
 \fIpam_setcred\fR
@@ -948,7 +949,7 @@ family of functions instead of
 If no I/O logging plugins are loaded and the policy plugin has not
 defined a
 \fBclose\fR()
-function, set a command timeout or required that the command be
+function, set a command timeout, or required that the command be
 run in a new pty,
 \fBsudo\fR
 may execute the command directly instead of running it as a child process.
@@ -970,7 +971,7 @@ lines,
 \fBsudo\fR
 will use
 sudoers(@mansectform@)
-for the policy, auditing and I/O logging plugins.
+for the policy, auditing, and I/O logging plugins.
 See the
 sudo.conf(@mansectform@)
 manual for details of the
@@ -1001,7 +1002,7 @@ option, the exit value will only be 0 if the command is permitted by the
 security policy, otherwise it will be 1.
 .PP
 If there is an authentication failure, a configuration/permission
-problem or if the given command cannot be executed,
+problem, or if the given command cannot be executed,
 \fBsudo\fR
 exits with a value of 1.
 In the latter case, the error string is printed to the standard error.
@@ -1114,7 +1115,7 @@ is set.
 \fRMAIL\fR
 Set to the mail spool of the target user when the
 \fB\-i\fR
-option is specified or when
+option is specified, or when
 \fIenv_reset\fR
 is enabled in
 \fIsudoers\fR
@@ -1155,7 +1156,7 @@ Set to the login name of the target user when the
 option is specified, when the
 \fIset_logname\fR
 option is enabled in
-\fIsudoers\fR
+\fIsudoers\fR,
 or when the
 \fIenv_reset\fR
 option is enabled in

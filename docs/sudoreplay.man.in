@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "August 13, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -89,7 +89,7 @@ list mode.
 In list mode,
 \fBsudoreplay\fR
 can be used to find the ID of a session based on a number of criteria
-such as the user, tty or command run.
+such as the user, tty, or command run.
 .PP
 In replay mode, if the standard input and output are connected to a terminal
 and the
@@ -131,7 +131,7 @@ instead of the default,
 Select which I/O type(s) to display.
 By default,
 \fBsudoreplay\fR
-will display the command's standard output, standard error and tty output.
+will display the command's standard output, standard error, and tty output.
 The
 \fIfilter\fR
 argument is a comma-separated list, consisting of one or more of following:
@@ -241,7 +241,7 @@ Predicates may be abbreviated to the shortest unique string.
 .sp
 Predicates may be combined using
 \fIand\fR,
-\fIor\fR
+\fIor\fR,
 and
 \fI\&!\fR
 operators as well as

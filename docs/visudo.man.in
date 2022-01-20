@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2021
+.\" Copyright (c) 1996,1998-2005, 2007-2022
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "November 6, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -71,10 +71,7 @@ The
 option should be used with extreme caution because if
 \fBvisudo\fR
 believes there to be a syntax error, so will
-\fBsudo\fR
-and no one will be able to run
-\fBsudo\fR
-again until the error is fixed.
+\fBsudo\fR.
 If
 \(oqe\(cq
 is typed to edit the
@@ -96,7 +93,7 @@ separated list of editors allowed to be used with
 \fBvisudo\fR
 will choose the editor that matches the user's
 \fRSUDO_EDITOR\fR,
-\fRVISUAL\fR
+\fRVISUAL\fR,
 or
 \fREDITOR\fR
 environment variable if possible, or the first editor in the
@@ -105,7 +102,7 @@ Note that
 \fBsudo\fR
 does not preserve the
 \fRSUDO_EDITOR\fR,
-\fRVISUAL\fR
+\fRVISUAL\fR,
 or
 \fREDITOR\fR
 environment variables unless they are present in the
@@ -126,7 +123,7 @@ If set,
 \fBvisudo\fR
 will use the value of the
 \fRSUDO_EDITOR\fR,
-\fRVISUAL\fR
+\fRVISUAL\fR,
 or
 \fREDITOR\fR
 environment variables before falling back on the default editor list.
@@ -143,7 +140,7 @@ variable.
 \fBvisudo\fR
 will then only use
 \fRSUDO_EDITOR\fR,
-\fRVISUAL\fR
+\fRVISUAL\fR,
 or
 \fREDITOR\fR
 if they match a value specified in
@@ -152,7 +149,7 @@ If the
 \fIenv_reset\fR
 flag is enabled, the
 \fRSUDO_EDITOR\fR,
-\fRVISUAL\fR
+\fRVISUAL\fR,
 and/or
 \fREDITOR\fR
 environment variables must be present in the
@@ -307,7 +304,7 @@ will also parse the arguments to the
 \fIsudoers\fR
 plugin to override the default
 \fIsudoers\fR
-path name, UID, GID and file mode.
+path name, UID, GID, and file mode.
 These arguments, if present, should be listed after the path to the plugin
 (i.e., after
 \fIsudoers.so\fR).

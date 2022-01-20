@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018, 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd December 16, 2021
+.Dd January 19, 2022
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -90,7 +90,7 @@ The supported types are:
 All Defaults entries.
 .It global
 Global Defaults entries that are applied regardless of
-user, runas, host or command.
+user, runas, host, or command.
 .It user
 Per-user Defaults entries.
 .It runas
@@ -148,10 +148,10 @@ server for use with
 Conversion to LDIF has the following limitations:
 .Bl -bullet -width 1n
 .It
-Command, host, runas and user-specific Defaults lines cannot be
+Command, host, runas, and user-specific Defaults lines cannot be
 translated as they don't have an equivalent in the sudoers LDAP schema.
 .It
-Command, host, runas and user aliases are not supported by the
+Command, host, runas, and user aliases are not supported by the
 sudoers LDAP schema so they are expanded during the conversion.
 .El
 .It sudoers
@@ -225,10 +225,10 @@ or
 .Pp
 A matching
 .Em sudoers
-rule may also include users, groups and hosts that are not part of the
+rule may also include users, groups, and hosts that are not part of the
 .Ar filter .
-This can happen when a rule includes multiple users, groups or hosts.
-To prune out any non-matching user, group or host from the rules, the
+This can happen when a rule includes multiple users, groups, or hosts.
+To prune out any non-matching user, group, or host from the rules, the
 .Fl p
 option may be used.
 .Pp
@@ -286,7 +286,7 @@ When the
 .Fl m
 option is also specified,
 .Nm
-will prune out non-matching users, groups and hosts from
+will prune out non-matching users, groups, and hosts from
 matching entries.
 .It Fl P Ar padding , Fl -padding Ns = Ns Ar padding
 When generating LDIF output, construct the initial sudoOrder value by
@@ -372,7 +372,7 @@ each conflict.
 If a host name is specified with the input file,
 .Nm
 will change the global Defaults settings in that file to be host-specific.
-A warning is emitted for command, user or runas-specific Defaults settings
+A warning is emitted for command, user, or runas-specific Defaults settings
 which cannot be made host-specific.
 .It
 Per-user rules are merged and duplicates are removed.

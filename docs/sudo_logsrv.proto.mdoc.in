@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 3, 2021
+.Dd January 19, 2022
 .Dt SUDO_LOGSRV.PROTO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -116,7 +116,7 @@ An
 is used to represent information about the invoking user as well as the
 execution environment the command runs in the form of key-value pairs.
 The key is always a string but the value may be a 64-bit integer,
-a string, an array of strings or an array of 64-bit integers.
+a string, an array of strings, or an array of 64-bit integers.
 The event log data is composed of
 .Em InfoMessage
 entries.
@@ -334,7 +334,7 @@ message IoBuffer {
 An
 .Em IoBuffer
 is used to represent data from terminal input, terminal
-output, standard input, standard output or standard error.
+output, standard input, standard output, or standard error.
 It contains the following members:
 .Bl -tag -width Ds
 .It delay
@@ -345,7 +345,7 @@ The
 should be calculated using a monotonic clock where possible.
 .It data
 The binary I/O log data from terminal input, terminal output,
-standard input, standard output or standard error.
+standard input, standard output, or standard error.
 .El
 .Ss ChangeWindowSize winsize_event
 .Bd -literal

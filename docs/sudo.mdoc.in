@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2021
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2022
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 11, 2021
+.Dd January 19, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -112,10 +112,10 @@ user-ID is used to determine the user name with which
 to query the security policy.
 .Pp
 .Nm
-supports a plugin architecture for security policies and input/output
-logging.
-Third parties can develop and distribute their own policy and I/O
-logging plugins to work seamlessly with the
+supports a plugin architecture for security policies, auditing,
+and input/output logging.
+Third parties can develop and distribute their own plugins to work
+seamlessly with the
 .Nm
 front-end.
 The default security policy is
@@ -182,7 +182,8 @@ the
 .Fl e
 option (described below), is implied.
 .Pp
-Security policies may log successful and failed attempts to use
+Security policies and audit plugins may log successful and failed attempts
+to run
 .Nm .
 If an I/O plugin is configured, the running command's input and
 output may be logged as well.
@@ -250,7 +251,7 @@ Values less than three are not permitted.
 By default,
 .Nm
 will close all open file descriptors other than standard input,
-standard output and standard error when executing a command.
+standard output, and standard error when executing a command.
 The security policy may restrict the user's ability to use this option.
 The
 .Em sudoers
@@ -421,7 +422,7 @@ Run the shell specified by the target user's password database entry
 as a login shell.
 This means that login-specific resource files such as
 .Pa .profile ,
-.Pa .bash_profile
+.Pa .bash_profile ,
 or
 .Pa .login
 will be read by the shell.
@@ -459,7 +460,7 @@ When used without a command, invalidates the user's cached credentials.
 In other words, the next time
 .Nm
 is run a password will be required.
-This option does not require a password and was added to allow a
+This option does not require a password, and was added to allow a
 user to revoke
 .Nm
 permissions from a
@@ -519,7 +520,7 @@ escape sequences are supported by the
 policy:
 .Bl -tag -width 2n
 .It Li %H
-expanded to the host name including the domain name (on if the
+expanded to the host name including the domain name (only if the
 machine's host name is fully qualified or the
 .Em fqdn
 option is set in
@@ -646,13 +647,12 @@ Other security policies may not support this.
 .It Fl V , -version
 Print the
 .Nm
-version string as well as the version string of the security
-policy plugin and any I/O plugins.
-If the invoking user is already root the
+version string as well as the version string of any configured plugins.
+If the invoking user is already root, the
 .Fl V
 option will display the arguments passed to configure when
 .Nm
-was built and plugins may display more verbose information such as
+was built; plugins may display additional information such as
 default options.
 .It Fl v , -validate
 Update the user's cached credentials, authenticating the user
@@ -808,7 +808,8 @@ first.
 The
 .Em sudoers
 policy plugin will only define a close function when I/O logging
-is enabled, a pty is required, or the
+is enabled, a pty is required, an SELinux role is specified, the
+command has an associated timeout, or the
 .Em pam_session
 or
 .Em pam_setcred
@@ -889,7 +890,7 @@ family of functions instead of
 If no I/O logging plugins are loaded and the policy plugin has not
 defined a
 .Fn close
-function, set a command timeout or required that the command be
+function, set a command timeout, or required that the command be
 run in a new pty,
 .Nm
 may execute the command directly instead of running it as a child process.
@@ -911,7 +912,7 @@ lines,
 .Nm
 will use
 .Xr sudoers @mansectform@
-for the policy, auditing and I/O logging plugins.
+for the policy, auditing, and I/O logging plugins.
 See the
 .Xr sudo.conf @mansectform@
 manual for details of the
@@ -942,7 +943,7 @@ option, the exit value will only be 0 if the command is permitted by the
 security policy, otherwise it will be 1.
 .Pp
 If there is an authentication failure, a configuration/permission
-problem or if the given command cannot be executed,
+problem, or if the given command cannot be executed,
 .Nm
 exits with a value of 1.
 In the latter case, the error string is printed to the standard error.
@@ -1051,7 +1052,7 @@ is set.
 .It Ev MAIL
 Set to the mail spool of the target user when the
 .Fl i
-option is specified or when
+option is specified, or when
 .Em env_reset
 is enabled in
 .Em sudoers
@@ -1090,7 +1091,7 @@ Set to the login name of the target user when the
 option is specified, when the
 .Em set_logname
 option is enabled in
-.Em sudoers
+.Em sudoers ,
 or when the
 .Em env_reset
 option is enabled in

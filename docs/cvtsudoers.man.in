@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018, 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "December 16, 2021" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -99,7 +99,7 @@ All Defaults entries.
 .TP 10n
 global
 Global Defaults entries that are applied regardless of
-user, runas, host or command.
+user, runas, host, or command.
 .TP 10n
 user
 Per-user Defaults entries.
@@ -172,12 +172,12 @@ Conversion to LDIF has the following limitations:
 .PD 0
 .TP 3n
 \fB\(bu\fR
-Command, host, runas and user-specific Defaults lines cannot be
+Command, host, runas, and user-specific Defaults lines cannot be
 translated as they don't have an equivalent in the sudoers LDAP schema.
 .PD
 .TP 3n
 \fB\(bu\fR
-Command, host, runas and user aliases are not supported by the
+Command, host, runas, and user aliases are not supported by the
 sudoers LDAP schema so they are expanded during the conversion.
 .PD 0
 .PP
@@ -272,10 +272,10 @@ or
 .sp
 A matching
 \fIsudoers\fR
-rule may also include users, groups and hosts that are not part of the
+rule may also include users, groups, and hosts that are not part of the
 \fIfilter\fR.
-This can happen when a rule includes multiple users, groups or hosts.
-To prune out any non-matching user, group or host from the rules, the
+This can happen when a rule includes multiple users, groups, or hosts.
+To prune out any non-matching user, group, or host from the rules, the
 \fB\-p\fR
 option may be used.
 .sp
@@ -338,7 +338,7 @@ When the
 \fB\-m\fR
 option is also specified,
 \fBcvtsudoers\fR
-will prune out non-matching users, groups and hosts from
+will prune out non-matching users, groups, and hosts from
 matching entries.
 .TP 12n
 \fB\-P\fR \fIpadding\fR, \fB\--padding\fR=\fIpadding\fR
@@ -428,7 +428,7 @@ each conflict.
 If a host name is specified with the input file,
 \fBcvtsudoers\fR
 will change the global Defaults settings in that file to be host-specific.
-A warning is emitted for command, user or runas-specific Defaults settings
+A warning is emitted for command, user, or runas-specific Defaults settings
 which cannot be made host-specific.
 .TP 3n
 \fB\(bu\fR

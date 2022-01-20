@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 8, 2022
+.Dd January 18, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -42,7 +42,7 @@ policy plugin.
 The policy is driven by
 the
 .Pa @sysconfdir@/sudoers
-file or, optionally in LDAP.
+file or, optionally, in LDAP.
 The policy format is described in detail in the
 .Sx SUDOERS FILE FORMAT
 section.
@@ -55,14 +55,14 @@ in LDAP, please see
 .Nm sudo
 consults the
 .Xr sudo.conf @mansectform@
-file to determine which policy and I/O logging plugins to load.
+file to determine which plugins to load.
 If no
 .Xr sudo.conf @mansectform@
 file is present, or if it contains no
 .Li Plugin
 lines,
 .Nm
-will be used for policy decisions and I/O logging.
+will be used for auditing, policy decisions and I/O logging.
 To explicitly configure
 .Xr sudo.conf @mansectform@
 to use the
@@ -289,7 +289,7 @@ for a description of the log file format.
 .Nm
 is also capable of running a command in a pseudo-terminal and logging all
 input and/or output.
-The standard input, standard output and standard error can be logged
+The standard input, standard output, and standard error can be logged
 even when not associated with a terminal.
 I/O logging is not on by default but can be enabled using
 the
@@ -361,7 +361,7 @@ Additional variables, such as
 and
 .Ev TERM ,
 are preserved from the invoking user's environment if permitted by the
-.Em env_check
+.Em env_check ,
 or
 .Em env_keep
 options.
@@ -815,7 +815,7 @@ non-Unix group names and IDs (prefixed with
 .Ql %:
 and
 .Ql %:#
-respectively) and
+respectively), and
 .Li User_Alias Ns es.
 Each list item may be prefixed with zero or more
 .Ql \&!
@@ -919,7 +919,7 @@ A
 .Li Host_List
 is made up of one or more host names, IP addresses,
 network numbers, netgroups (prefixed with
-.Ql + )
+.Ql + ) ,
 and other aliases.
 Again, the value of an item may be negated with the
 .Ql \&!
@@ -1059,7 +1059,7 @@ Starting with version 1.9.0, the
 .Sy ALL
 reserved word can be used in conjunction with a
 .Li Digest_List .
-The following digest formats are supported: sha224, sha256, sha384 and sha512.
+The following digest formats are supported: sha224, sha256, sha384, and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).
 There are several utilities capable of generating SHA-2 digests in hex
@@ -1167,7 +1167,7 @@ operator to remove an element
 that does not exist in a list.
 .Pp
 Defaults entries are parsed in the following order: generic, host,
-user and runas Defaults first, then command defaults.
+user, and runas Defaults first, then command defaults.
 If there are multiple Defaults settings of the same type, the last
 matching setting is used.
 The following Defaults settings are parsed before all others since
@@ -1502,13 +1502,13 @@ A command may have a timeout associated with it.
 If the timeout expires before the command has exited, the
 command will be terminated.
 The timeout may be specified in combinations of days, hours,
-minutes and seconds with a single-letter case-insensitive suffix
+minutes, and seconds with a single-letter case-insensitive suffix
 that indicates the unit of time.
-For example, a timeout of 7 days, 8 hours, 30 minutes and
+For example, a timeout of 7 days, 8 hours, 30 minutes, and
 10 seconds would be written as
 .Li 7d8h30m10s .
 If a number is specified without a unit, seconds are assumed.
-Any of the days, minutes, hours or seconds may be omitted.
+Any of the days, minutes, hours, or seconds may be omitted.
 The order must be from largest to smallest unit and a unit
 may not be specified more than once.
 .Pp
@@ -1724,7 +1724,7 @@ section below.
 .sp
 By default,
 .Nm sudo
-requires that a user authenticate him or herself
+requires that a user authenticate
 before running a command.
 This behavior can be modified via the
 .Li NOPASSWD
@@ -1829,7 +1829,7 @@ and logged just like they would be if run through
 .Nm sudo
 directly.
 This is useful in conjunction with commands that allow shell escapes
-such as editors, shells and paginators.
+such as editors, shells, and paginators.
 .Pp
 In the following example, user
 .Sy chuck
@@ -1851,7 +1851,7 @@ works and whether or not it will work on your system.
 allows shell-style
 .Em wildcards
 (aka meta or glob characters)
-to be used in host names, path names and command line arguments in the
+to be used in host names, path names, and command line arguments in the
 .Em sudoers
 file.
 Wildcard matching is done via the
@@ -2589,7 +2589,7 @@ This flag is only effective on systems for which
 .Nm
 supports audit logging, including
 .Fx ,
-Linux, macOS and Solaris.
+Linux, macOS, and Solaris.
 This flag is
 .Em on
 by default.
@@ -3001,7 +3001,7 @@ by default.
 This setting is only supported by version 1.9.8 or higher.
 .It netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
-tuple: host name, user name and domain (if one is set).
+tuple: host name, user name, and domain (if one is set).
 Historically,
 .Nm sudo
 only matched the user name and domain for netgroups used in a
@@ -3343,12 +3343,12 @@ A pseudo-terminal is allocated by
 .Nm sudo
 when it is running in a terminal and one or more of the
 .Em log_input ,
-.Em log_output
+.Em log_output ,
 or
 .Em use_pty
 flags is enabled.
 By default, the new entry will be a copy of the user's existing utmp
-entry (if any), with the tty, time, type and pid fields updated.
+entry (if any), with the tty, time, type, and pid fields updated.
 This flag is
 .Em on
 by default.
@@ -3602,7 +3602,7 @@ by default.
 Before it executes a command,
 .Nm sudo
 will close all open file descriptors other than standard input,
-standard output and standard error (ie: file descriptors 0-2).
+standard output, and standard error (file descriptors 0-2).
 The
 .Em closefrom
 option can be used to specify a different file descriptor at which
@@ -3670,7 +3670,7 @@ creates log messages up to 980 bytes which corresponds to the
 historic
 .Bx
 syslog implementation which used a 1024 byte buffer
-to store the message, date, hostname and program name.
+to store the message, date, hostname, and program name.
 To prevent syslog messages from being truncated,
 .Nm
 will split up log messages that are larger than
@@ -3933,7 +3933,7 @@ are set, I/O log files and directories are created with group-ID 0.
 This setting is only supported by version 1.8.19 or higher.
 .It iolog_mode
 The file mode to use when creating I/O log files.
-Mode bits for read and write permissions for owner, group or other
+Mode bits for read and write permissions for owner, group, or other
 are honored, everything else is ignored.
 The file permissions will always include the owner read and
 write bits, even if they are not present in the specified mode.
@@ -4606,7 +4606,7 @@ It is only possible to use
 .Em runchroot
 as a command-specific Defaults setting if the command exists with
 the same path both inside and outside the chroot jail.
-This restriction does not apply to generic, host or user-based
+This restriction does not apply to generic, host, or user-based
 Defaults settings or to a
 .Em Cmnd_Spec
 that includes a
@@ -5831,7 +5831,7 @@ The user
 may run any command on any machine except for those in the
 .Em SERVERS
 .Li Host_Alias
-(primary, mail, www and ns).
+(primary, mail, www, and ns).
 .Bd -literal
 jill		SERVERS = /usr/bin/, !SU, !SHELLS
 .Ed
@@ -5966,7 +5966,7 @@ allow shell escapes, which lets a user bypass
 .Nm sudo Ns 's
 access control and logging.
 Common programs that permit shell escapes include shells (obviously),
-editors, paginators, mail and terminal programs.
+editors, paginators, mail, and terminal programs.
 .Pp
 There are four basic approaches to this problem:
 .Bl -tag -width 8n
@@ -6339,7 +6339,7 @@ The priorities used by
 .Nm ,
 in order of decreasing severity,
 are:
-.Em crit , err , warn , notice , diag , info , trace
+.Em crit , err , warn , notice , diag , info , trace ,
 and
 .Em debug .
 Each priority, when specified, also includes all priorities higher
@@ -6379,7 +6379,7 @@ LDAP-based sudoers
 .It Em logging
 logging support
 .It Em match
-matching of users, groups, hosts and netgroups in the
+matching of users, groups, hosts, and netgroups in the
 .Em sudoers
 file
 .It Em netif

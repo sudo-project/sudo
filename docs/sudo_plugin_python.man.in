@@ -3,6 +3,7 @@
 .\" SPDX-License-Identifier: ISC
 .\"
 .\" Copyright (c) 2019-2021 Robert Manner <robert.manner@oneidentity.com>
+.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +17,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -97,7 +98,7 @@ The actual methods required depent on the type of the plugin,
 but most return an
 \(lqint\(rq
 result code, as documented in
-sudo_plugin(@mansctsu@),
+sudo_plugin(@mansectsu@),
 that indicates whether or not the method was successful.
 The Python sudo module defines the following constants to improve readability:
 .RS 4n
@@ -327,7 +328,7 @@ strings.
 .sp
 To accept a command, at the very minimum the plugin must set in the
 \fIcommand\fR,
-\fIrunas_uid\fR
+\fIrunas_uid\fR,
 and
 \fIrunas_gid\fR
 keys.
@@ -709,7 +710,7 @@ log_stderr(self, buf: str) -> int
 .RS 6n
 .sp
 Receive the user input or output of the terminal device and
-application standard input / output / error.
+application standard input, standard output, or standard error.
 See the matching calls in
 sudo_plugin(@mansectform@).
 .sp
@@ -1022,7 +1023,7 @@ front-end.
 plugin_type
 The type of plugin that accepted the command, currently either
 \fRsudo.PLUGIN_TYPE.POLICY\fR,
-\fRsudo.PLUGIN_TYPE.APPROVAL\fR
+\fRsudo.PLUGIN_TYPE.APPROVAL\fR,
 or
 \fRsudo.PLUGIN_TYPE.SUDO\fR.
 The
@@ -1082,7 +1083,7 @@ The name of the plugin that rejected the command.
 plugin_type
 The type of plugin that rejected the command, currently either
 \fRsudo.PLUGIN_TYPE.POLICY\fR,
-\fRsudo.PLUGIN_TYPE.APPROVAL\fR
+\fRsudo.PLUGIN_TYPE.APPROVAL\fR,
 or
 \fRsudo.PLUGIN_TYPE.IO\fR.
 .sp

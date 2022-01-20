@@ -186,7 +186,7 @@ only be allowed if the digest matches.
 This may be useful in situations where the user invoking
 .Nm sudo
 has write access to the command or its parent directory.
-The following digest formats are supported: sha224, sha256, sha384 and sha512.
+The following digest formats are supported: sha224, sha256, sha384, and sha512.
 The digest name must be followed by a colon
 .Pq Ql :\&
 and then the actual digest, in either hex or base64 format.
@@ -351,7 +351,7 @@ A
 .Li sudoRole
 must contain at least one
 .Li sudoUser ,
-.Li sudoHost
+.Li sudoHost ,
 and
 .Li sudoCommand .
 .Pp
@@ -404,7 +404,7 @@ Match all
 .Li nisNetgroup
 records with a
 .Li nisNetgroupTriple
-containing the user, host and NIS domain.
+containing the user, host, and NIS domain.
 The query will match
 .Li nisNetgroupTriple
 entries with either the short or long form of the host name or
@@ -440,7 +440,7 @@ For the most part, there is little need for
 .Nm sudo Ns -specific
 Aliases.
 Unix groups, non-Unix groups (via the
-.Em group_plugin )
+.Em group_plugin ) ,
 or user netgroups can be used in place of User_Aliases and Runas_Aliases.
 Host netgroups can be used in place of Host_Aliases.
 Since groups and netgroups can also be stored in LDAP there is no real need for
@@ -511,7 +511,7 @@ that contains multiple commands.
 Multiple users and/or groups may be assigned to the
 .Li sudoRole .
 .Pp
-Also, host, user, runas and command-based
+Also, host, user, runas, and command-based
 .Li Defaults
 entries are not supported.
 However, a
@@ -879,9 +879,9 @@ If the
 .Sy SSL
 parameter is set to
 .Li on ,
-.Li true
-.Li or
-.Li yes ,
+.Li true ,
+or
+.Li yes
 TLS (SSL) encryption is always used when communicating with the LDAP server.
 Typically, this involves connecting to the server on port 636 (ldaps).
 .It Sy SSL Ar start_tls
