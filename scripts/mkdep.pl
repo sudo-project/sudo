@@ -68,8 +68,12 @@ sub fmt_depend {
 	    if ($off != 0) {
 		$ret .= ' ' x $indent;
 		$pos = rindex($deps, ' ', $off + 80 - $indent - 2);
+		if ($pos <= $off) {
+		    # No space found within 78 columns, check beyond
+		    $pos = index($deps, ' ', $off + 80 - $indent - 2);
+		}
 	    } else {
-		$pos = rindex($deps, ' ', $off + 78);
+		$pos = rindex($deps, ' ', 78);
 	    }
 	    $ret .= substr($deps, $off, $pos - $off) . " \\\n";
 	    $off = $pos + 1;
