@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 20, 2022
+.Dd January 27, 2022
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -704,7 +704,7 @@ This is typically used in conjunction with the
 parameter.
 The
 .Ar secret
-may be a plain text password or a base64-encoded string with a
+may be a plaintext password or a base64-encoded string with a
 .Dq base64:
 prefix.
 For example:
@@ -712,7 +712,7 @@ For example:
 BINDPW base64:dGVzdA==
 .Ed
 .Pp
-If a plain text password is used, it should be a simple string without quotes.
+If a plaintext password is used, it should be a simple string without quotes.
 Plain text passwords may not include the comment character
 .Pq Ql #
 and the escaping of special characters with a backslash
@@ -1049,7 +1049,7 @@ contains the password used to decrypt the key database on clients
 using the IBM LDAP library.
 The
 .Ar secret
-may be a plain text password or a base64-encoded string with a
+may be a plaintext password or a base64-encoded string with a
 .Dq base64:
 prefix.
 For example:
@@ -1057,7 +1057,7 @@ For example:
 TLS_KEYPW base64:dGVzdA==
 .Ed
 .Pp
-If a plain text password is used, it should be a simple string without quotes.
+If a plaintext password is used, it should be a simple string without quotes.
 Plain text passwords may not include the comment character
 .Pq Ql #
 and the escaping of special characters with a backslash

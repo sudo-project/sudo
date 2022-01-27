@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "January 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "January 27, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -743,7 +743,7 @@ This is typically used in conjunction with the
 parameter.
 The
 \fIsecret\fR
-may be a plain text password or a base64-encoded string with a
+may be a plaintext password or a base64-encoded string with a
 \(lqbase64:\(rq
 prefix.
 For example:
@@ -755,7 +755,7 @@ BINDPW base64:dGVzdA==
 .fi
 .RS 6n
 .sp
-If a plain text password is used, it should be a simple string without quotes.
+If a plaintext password is used, it should be a simple string without quotes.
 Plain text passwords may not include the comment character
 (\(oq#\(cq)
 and the escaping of special characters with a backslash
@@ -1137,7 +1137,7 @@ contains the password used to decrypt the key database on clients
 using the IBM LDAP library.
 The
 \fIsecret\fR
-may be a plain text password or a base64-encoded string with a
+may be a plaintext password or a base64-encoded string with a
 \(lqbase64:\(rq
 prefix.
 For example:
@@ -1149,7 +1149,7 @@ TLS_KEYPW base64:dGVzdA==
 .fi
 .RS 6n
 .sp
-If a plain text password is used, it should be a simple string without quotes.
+If a plaintext password is used, it should be a simple string without quotes.
 Plain text passwords may not include the comment character
 (\(oq#\(cq)
 and the escaping of special characters with a backslash
