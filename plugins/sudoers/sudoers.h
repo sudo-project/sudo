@@ -157,7 +157,7 @@ struct sudo_user {
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040
 #define FLAG_NO_CHECK		0x080
-#define FLAG_NON_INTERACTIVE	0x100
+#define FLAG_NO_USER_INPUT	0x100
 #define FLAG_BAD_PASSWORD	0x200
 
 /*
@@ -185,7 +185,7 @@ struct sudo_user {
 #define MODE_MASK		0x0000ffff
 
 /* Mode flags */
-#define MODE_BACKGROUND		0x00010000 /* XXX - unused */
+#define MODE_ASKPASS		0x00010000
 #define MODE_SHELL		0x00020000
 #define MODE_LOGIN_SHELL	0x00040000
 #define MODE_IMPLIED_SHELL	0x00080000
@@ -297,7 +297,7 @@ bool sudo_auth_needs_end_session(void);
 int verify_user(struct passwd *pw, char *prompt, int validated, struct sudo_conv_callback *callback);
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
-int sudo_auth_init(struct passwd *pw);
+int sudo_auth_init(struct passwd *pw, int mode);
 int sudo_auth_approval(struct passwd *pw, int validated, bool exempt);
 int sudo_auth_cleanup(struct passwd *pw, bool force);
 
@@ -445,7 +445,7 @@ extern const char *path_plugin_dir;
 
 /* editor.c */
 char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
-     char * const *allowlist, const char **env_editor, bool env_error);
+     char * const *allowlist, const char **env_editor);
 
 /* exptilde.c */
 bool expand_tilde(char **path, const char *user);

@@ -38,7 +38,7 @@ static size_t python_inittab_copy_len = 0;
 #endif
 
 /* Py_FinalizeEx is new in version 3.6 */
-#if PY_MAJOR_VERSION > 3 || PY_MINOR_VERSION < 6
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 6
 # define Py_FinalizeEx()	(Py_Finalize(), 0)
 #endif
 

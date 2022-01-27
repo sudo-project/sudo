@@ -110,6 +110,7 @@ char **enable_monitor(char *envp[], const char *dso);
 
 /* exec_intercept.c */
 bool intercept_setup(int fd, struct sudo_event_base *evbase, struct command_details *details);
+void intercept_cleanup(void);
 
 /* exec_nopty.c */
 void exec_nopty(struct command_details *details, struct command_status *cstat);

@@ -50,11 +50,12 @@
  * Uses file locking to avoid sequence number collisions.
  */
 bool
-iolog_nextid(char *iolog_dir, char sessid[7])
+iolog_nextid(const char *iolog_dir, char sessid[7])
 {
     char buf[32], *ep;
-    int i, len, fd = -1;
+    int i, fd = -1;
     unsigned long id = 0;
+    size_t len;
     ssize_t nread;
     bool ret = false;
     char pathbuf[PATH_MAX];
@@ -66,14 +67,21 @@ iolog_nextid(char *iolog_dir, char sessid[7])
     /*
      * Create I/O log directory if it doesn't already exist.
      */
-    if (!iolog_mkdirs(iolog_dir))
+    len = strlcpy(pathbuf, iolog_dir, sizeof(pathbuf));
+    if (len >= sizeof(pathbuf)) {
+	errno = ENAMETOOLONG;
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: %s", __func__, iolog_dir);
+	goto done;
+    }
+    if (!iolog_mkdirs(pathbuf))
 	goto done;
 
     /*
      * Open sequence file
      */
-    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", iolog_dir);
-    if (len < 0 || len >= ssizeof(pathbuf)) {
+    len = strlcat(pathbuf, "/seq", sizeof(pathbuf));
+    if (len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: %s/seq", __func__, iolog_dir);

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2021 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -68,8 +68,12 @@ sub fmt_depend {
 	    if ($off != 0) {
 		$ret .= ' ' x $indent;
 		$pos = rindex($deps, ' ', $off + 80 - $indent - 2);
+		if ($pos <= $off) {
+		    # No space found within 78 columns, check beyond
+		    $pos = index($deps, ' ', $off + 80 - $indent - 2);
+		}
 	    } else {
-		$pos = rindex($deps, ' ', $off + 78);
+		$pos = rindex($deps, ' ', 78);
 	    }
 	    $ret .= substr($deps, $off, $pos - $off) . " \\\n";
 	    $off = $pos + 1;
@@ -111,12 +115,12 @@ sub mkdep {
     # Expand some configure bits
     $makefile =~ s:\@DEV\@::g;
     $makefile =~ s:\@COMMON_OBJS\@:aix.lo event_poll.lo event_select.lo:;
-    $makefile =~ s:\@SUDO_OBJS\@:intercept.pb-c.lo openbsd.o preload.o selinux.o sesh.o solaris.o:;
+    $makefile =~ s:\@SUDO_OBJS\@:intercept.pb-c.o openbsd.o preload.o selinux.o sesh.o solaris.o:;
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo ldap_util.lo ldap_conf.lo solaris_audit.lo sssd.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo getspwuid.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid5.lo sia.lo:;
     $makefile =~ s:\@DIGEST\@:digest.lo digest_openssl.lo digest_gcrypt.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:arc4random.lo arc4random_uniform.lo cfmakeraw.lo closefrom.lo dup3.lo explicit_bzero.lo fchmodat.lo freezero.lo fstatat.lo fnmatch.lo getaddrinfo.lo getcwd.lo getentropy.lo getgrouplist.lo getdelim.lo getopt_long.lo getusershell.lo glob.lo inet_ntop_lo inet_pton.lo isblank.lo memrchr.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo openat.lo pipe2.lo pread.lo pwrite.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo str2sig.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo unlinkat.lo utimens.lo:;
+    $makefile =~ s:\@LTLIBOBJS\@:arc4random.lo arc4random_buf.lo arc4random_uniform.lo cfmakeraw.lo closefrom.lo dup3.lo explicit_bzero.lo fchmodat.lo freezero.lo fstatat.lo fnmatch.lo getaddrinfo.lo getcwd.lo getentropy.lo getgrouplist.lo getdelim.lo getopt_long.lo getusershell.lo glob.lo gmtime_r.lo inet_ntop_lo inet_pton.lo isblank.lo localtime_r.lo memrchr.lo mkdirat.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo openat.lo pipe2.lo pread.lo pwrite.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo str2sig.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo timegm.lo unlinkat.lo utimens.lo:;
 
     # Parse OBJS lines
     my %objs;
@@ -164,17 +168,29 @@ sub mkdep {
 	$old_deps{$1} = $2;
     }
 
+    # Check whether static objs are disabled for .lo files
+    my $disable_static;
+    if ($makefile =~ /LTFLAGS\s*=\s*(.+)$/m) {
+	my $ltflags = $1;
+	$_ = $implicit{"lo"};
+	if (defined($_)) {
+	    s/\$[\(\{]LTFLAGS[\)\}]/$ltflags/;
+	    $disable_static = /--tag=disable-static/;
+	}
+    }
+
     # Sort files so we do .lo files first
     foreach my $obj (sort keys %objs) {
 	next unless $obj =~ /(\S+)\.(l?o)$/;
-	if ($2 eq "o" && exists($objs{"$1.lo"})) {
+	if (!$disable_static && $2 eq "o" && exists($objs{"$1.lo"})) {
 	    # We have both .lo and .o files, only the .lo should be used
 	    warn "$file: $obj should be $1.lo\n";
 	} else {
 	    # Use old dependencies when mapping objects to their source.
 	    # If no old dependency, use the MANIFEST file to find the source.
-	    my $src = $1 . '.c';
+	    my $base = $1;
 	    my $ext = $2;
+	    my $src = $base . '.c';
 	    if (exists $old_deps{$obj}) {
 		$src = $old_deps{$obj};
 	    } elsif (exists $manifest{$src}) {
@@ -196,20 +212,22 @@ sub mkdep {
 	    $new_makefile .= $deps;
 	    $new_makefile .= "\t$imp\n";
 
-	    # PVS Studio files (.i and .plog)
-	    $imp = $implicit{"i"};
-	    if (exists $implicit{"i"} && exists $implicit{"plog"}) {
+	    # PVS Studio files (.i and .plog) but only do them once.
+	    if ($ext ne "o" || !exists($objs{"$base.lo"})) {
 		$imp = $implicit{"i"};
-		$deps =~ s/\.l?o/.i/;
-		$new_makefile .= $deps;
-		$new_makefile .= "\t$imp\n";
+		if (exists $implicit{"i"} && exists $implicit{"plog"}) {
+		    $imp = $implicit{"i"};
+		    $deps =~ s/\.l?o/.i/;
+		    $new_makefile .= $deps;
+		    $new_makefile .= "\t$imp\n";
 
-		$imp = $implicit{"plog"};
-		$imp =~ s/ifile=\$<; *//;
-		$imp =~ s/\$\$\{ifile\%i\}c/$src/;
-		$obj =~ /(.*)\.[a-z]+$/;
-		$new_makefile .= "${1}.plog: ${1}.i\n";
-		$new_makefile .= "\t$imp\n";
+		    $imp = $implicit{"plog"};
+		    $imp =~ s/ifile=\$<; *//;
+		    $imp =~ s/\$\$\{ifile\%i\}c/$src/;
+		    $obj =~ /(.*)\.[a-z]+$/;
+		    $new_makefile .= "${1}.plog: ${1}.i\n";
+		    $new_makefile .= "\t$imp\n";
+		}
 	    }
 	}
     }

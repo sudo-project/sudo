@@ -103,6 +103,7 @@ struct eventlog {
     char *rungroup;
     char *runuser;
     char *peeraddr;
+    char *signal_name;
     char *submithost;
     char *submituser;
     char *submitgroup;
@@ -112,10 +113,13 @@ struct eventlog {
     char **envp;
     struct timespec submit_time;
     struct timespec iolog_offset;
+    struct timespec run_time;
+    int exit_value;
     int lines;
     int columns;
     uid_t runuid;
     gid_t rungid;
+    bool dumped_core;
     char sessid[7];
     char uuid_str[37];
 };
@@ -125,7 +129,7 @@ struct json_container;
 typedef bool (*eventlog_json_callback_t)(struct json_container *, void *);
 
 bool eventlog_accept(const struct eventlog *evlog, int flags, eventlog_json_callback_t info_cb, void *info);
-bool eventlog_exit(const struct eventlog *evlog, int flags, struct timespec *run_time, int exit_value, const char *signal_name, bool core_dumped);
+bool eventlog_exit(const struct eventlog *evlog, int flags);
 bool eventlog_alert(const struct eventlog *evlog, int flags, struct timespec *alert_time, const char *reason, const char *errstr);
 bool eventlog_reject(const struct eventlog *evlog, int flags, const char *reason, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_store_json(struct json_container *json, const struct eventlog *evlog);

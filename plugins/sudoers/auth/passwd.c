@@ -45,6 +45,10 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 {
     debug_decl(sudo_passwd_init, SUDOERS_DEBUG_AUTH);
 
+    /* Only initialize once. */
+    if (auth->data != NULL)
+	debug_return_int(AUTH_SUCCESS);
+
 #ifdef HAVE_SKEYACCESS
     if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
 	debug_return_int(AUTH_FAILURE);

@@ -1,0 +1,110 @@
+version: 2.1
+
+jobs:
+  build:
+    description: Configure, build and package sudo
+    parameters:
+      ldap:
+        description: if true, build sudo's LDAP support
+        default: false
+        type: boolean
+      wolfssl:
+        description: if true, build sudo with wolfSSL support
+        default: false
+        type: boolean
+      static_sudoers:
+        description: if true, build sudoers statically
+        default: false
+        type: boolean
+      logsrvd:
+        description: if true, build sudo_logsrvd and sudoers client
+        default: true
+        type: boolean
+      intercept:
+        description: if true, build intercept support
+        default: true
+        type: boolean
+    docker:
+      - image: docker.io/sudoproject/ubuntu:latest
+        user: build
+    steps:
+      - checkout
+      - run:
+          name: "Building and packaging sudo"
+          command: ./scripts/mkpkg <<# parameters.ldap >>--flavor=ldap --with-sssd --with-sssd-lib=/usr/lib/x86_64-linux-gnu <</ parameters.ldap >><<# parameters.wolfssl >>--enable-wolfssl <</ parameters.wolfssl >><<^ parameters.logsrvd >>--disable-log-server --disable-log-client <</ parameters.logsrvd >><<^ parameters.intercept >>--disable-intercept <</ parameters.intercept >><<# parameters.static_sudoers >>--enable-static-sudoers <</ parameters.static_sudoers >>--enable-warnings --enable-werror --enable-sanitizer
+      # Save workspace for subsequent jobs (i.e. test)
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  test:
+    description: run sudo tests in a pre-built workspace
+    docker:
+      - image: docker.io/sudoproject/ubuntu:latest
+        user: build
+    steps:
+      # Reuse the workspace from the build job
+      - attach_workspace:
+          at: .
+      - run:
+          name: "Running tests"
+          command: make check
+          environment:
+              # Leak sanitizer requires ptrace, disable it
+              ASAN_OPTIONS: detect_leaks=0
+
+# Orchestrate our job run sequence
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          name: build-ldap
+          ldap: true
+          filters:
+            branches:
+              only: main
+      - build:
+          name: build-wolfssl
+          wolfssl: true
+          filters:
+            branches:
+              only: main
+      - build:
+          name: build-static-sudoers
+          static_sudoers: true
+          filters:
+            branches:
+              only: main
+      - build:
+          name: build-nologsrvd
+          logsrvd: false
+          filters:
+            branches:
+              only: main
+      - build:
+          name: build-nointercept
+          logsrvd: false
+          filters:
+            branches:
+              only: main
+      - test:
+          name: test-ldap
+          requires:
+            - build-ldap
+      - test:
+          name: test-wolfssl
+          requires:
+            - build-wolfssl
+      - test:
+          name: test-static-sudoers
+          requires:
+            - build-static-sudoers
+      - test:
+          name: test-nologsrvd
+          requires:
+            - build-nologsrvd
+      - test:
+          name: test-nointercept
+          requires:
+            - build-nointercept

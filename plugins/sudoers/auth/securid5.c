@@ -63,14 +63,22 @@ sudo_securid_init(struct passwd *pw, sudo_auth *auth)
     static SDI_HANDLE sd_dat;			/* SecurID handle */
     debug_decl(sudo_securid_init, SUDOERS_DEBUG_AUTH);
 
-    auth->data = (void *) &sd_dat;		/* For method-specific data */
-
-    /* Start communications */
-    if (AceInitialize() != SD_FALSE)
+    /* Only initialize once. */
+    if (auth->data != NULL)
 	debug_return_int(AUTH_SUCCESS);
 
-    sudo_warnx("%s", U_("failed to initialise the ACE API library"));
-    debug_return_int(AUTH_FATAL);
+    if (IS_NONINTERACTIVE(auth))
+        debug_return_int(AUTH_NONINTERACTIVE);
+
+    /* Start communications */
+    if (AceInitialize() == SD_FALSE) {
+	sudo_warnx("%s", U_("failed to initialise the ACE API library"));
+	debug_return_int(AUTH_FATAL);
+    }
+
+    auth->data = (void *) &sd_dat;		/* For method-specific data */
+
+    debug_return_int(AUTH_SUCCESS);
 }
 
 /*

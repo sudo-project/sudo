@@ -236,6 +236,9 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
     int ret = AUTH_SUCCESS;
     debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH);
 
+    if (IS_NONINTERACTIVE(auth))
+        debug_return_int(AUTH_NONINTERACTIVE);
+
     do {
 	pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass == NULL)

@@ -54,7 +54,10 @@
 #endif
 
 #include "sudoers.h"
-#include "log_client.h"
+#ifdef SUDOERS_LOG_CLIENT
+# include "log_client.h"
+# include "strlist.h"
+#endif
 
 static bool should_mail(int);
 static bool warned = false;
@@ -432,7 +435,7 @@ log_auth_failure(int status, unsigned int tries)
     audit_failure(NewArgv, "%s", N_("authentication failure"));
 
     /* If sudoers denied the command we'll log that separately. */
-    if (!ISSET(status, FLAG_BAD_PASSWORD|FLAG_NON_INTERACTIVE))
+    if (!ISSET(status, FLAG_BAD_PASSWORD|FLAG_NO_USER_INPUT))
 	logit = false;
 
     /*
@@ -575,8 +578,11 @@ log_exit_status(int exit_status)
 	    if (!def_log_exit_status)
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
-	if (!eventlog_exit(&evlog, evl_flags, &run_time, ecode, signame,
-		dumped_core))
+	evlog.run_time = run_time;
+	evlog.exit_value = ecode;
+	evlog.signal_name = signame;
+	evlog.dumped_core = dumped_core;
+	if (!eventlog_exit(&evlog, evl_flags))
 	    ret = false;
 
 	sudoers_setlocale(oldlocale, NULL);

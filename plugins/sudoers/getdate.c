@@ -105,9 +105,9 @@ static MERIDIAN	yyMeridian;
 static time_t	yyRelMonth;
 static time_t	yyRelSeconds;
 
-static int	yyerror(const char *s);
 static int	yylex(void);
        int	yyparse(void);
+       void	yyerror(const char *s);
 
 #line 97 "getdate.y"
 #ifndef YYSTYPE_DEFINED
@@ -119,10 +119,10 @@ typedef union {
 #endif /* YYSTYPE_DEFINED */
 #line 115 "getdate.c"
 #define tAGO 257
-#define tDAY 258
-#define tDAYZONE 259
-#define tID 260
-#define tMERIDIAN 261
+#define tID 258
+#define tDST 259
+#define tDAY 260
+#define tDAYZONE 261
 #define tMINUTE_UNIT 262
 #define tMONTH 263
 #define tMONTH_UNIT 264
@@ -130,7 +130,7 @@ typedef union {
 #define tSNUMBER 266
 #define tUNUMBER 267
 #define tZONE 268
-#define tDST 269
+#define tMERIDIAN 269
 #define YYERRCODE 256
 const short yylhs[] =
 	{                                        -1,
@@ -152,9 +152,9 @@ const short yydefred[] =
 	{                                      1,
     0,    0,   15,   32,    0,   38,   35,    0,    0,    0,
     2,    3,    4,    5,    6,    7,    8,    0,   18,    0,
-   31,   36,   33,   19,    9,   30,    0,   37,   34,    0,
+   31,   36,   33,   19,   30,    0,   37,   34,    0,    9,
     0,    0,   16,   28,    0,   23,   27,   22,    0,    0,
-   25,   41,   11,    0,   10,    0,    0,   21,   13,   12,
+   25,   11,   41,    0,   10,    0,    0,   21,   13,   12,
 };
 const short yydgoto[] =
 	{                                       1,
@@ -162,32 +162,32 @@ const short yydgoto[] =
 };
 const short yysindex[] =
 	{                                      0,
- -249,  -38,    0,    0, -260,    0,    0, -240,  -47, -248,
-    0,    0,    0,    0,    0,    0,    0, -237,    0,  -18,
-    0,    0,    0,    0,    0,    0, -262,    0,    0, -239,
- -238, -236,    0,    0, -235,    0,    0,    0,  -56,  -19,
-    0,    0,    0, -234,    0, -232, -258,    0,    0,    0,};
+ -199,  -38,    0,    0, -254,    0,    0, -260,  -47, -245,
+    0,    0,    0,    0,    0,    0,    0, -242,    0,  -28,
+    0,    0,    0,    0,    0, -259,    0,    0, -249,    0,
+ -247, -246,    0,    0, -244,    0,    0,    0,  -55,  -29,
+    0,    0,    0, -243,    0, -241, -257,    0,    0,    0,};
 const short yyrindex[] =
 	{                                      0,
-    0,    1,    0,    0,    0,    0,    0,    0,   69,   12,
-    0,    0,    0,    0,    0,    0,    0,   23,    0,   34,
-    0,    0,    0,    0,    0,    0,   67,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,   56,   45,
-    0,    0,    0,    0,    0,    0,   56,    0,    0,    0,};
+    0,    1,    0,    0,    0,    0,    0,    0,   60,   10,
+    0,    0,    0,    0,    0,    0,    0,   19,    0,   28,
+    0,    0,    0,    0,    0,   55,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,   46,   37,
+    0,    0,    0,    0,    0,    0,   46,    0,    0,    0,};
 const short yygindex[] =
 	{                                      0,
-  -17,    0,    0,    0,    0,    0,    0,    0,    0,
+  -25,    0,    0,    0,    0,    0,    0,    0,    0,
 };
-#define YYTABLESIZE 337
+#define YYTABLESIZE 328
 const short yytable[] =
 	{                                      32,
-   17,   44,   42,   36,   37,   19,   20,   49,    2,    3,
-   31,   14,    4,    5,    6,    7,    8,    9,   10,   34,
-   33,   21,   29,   22,   23,   35,   38,   46,   39,   50,
-   40,   41,   47,   24,   48,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,   20,    0,    0,    0,    0,    0,
+   17,   21,   44,   22,   23,   19,   36,   37,   49,   14,
+   31,   43,   20,   33,   34,   35,   38,   46,   29,   39,
+   40,   50,   41,   47,    0,   48,    0,   24,    0,    0,
+    0,    0,    0,    0,    0,    0,   20,    0,    0,    0,
     0,    0,    0,    0,    0,   40,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,   26,    0,   39,    0,
+    0,    0,    0,    0,   26,    0,    0,    0,    0,   39,
+    2,    3,    4,    5,    6,    7,    8,    9,   10,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -201,30 +201,29 @@ const short yytable[] =
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,   42,    0,    0,    0,    0,   43,
-   24,    0,    0,   25,   26,   27,   28,   29,   30,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+   42,    0,   24,   43,   25,   26,   27,   28,   29,    0,
+    0,   30,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,   17,   17,
-    0,    0,   17,   17,   17,   17,   17,   17,   17,   14,
-   14,    0,    0,   14,   14,   14,   14,   14,   14,   14,
-   29,   29,    0,    0,   29,   29,   29,   29,   29,   29,
-   29,   24,   24,    0,    0,   24,   24,   24,   24,   24,
-   24,   24,   20,   20,    0,    0,   20,   20,   20,   20,
-   20,   20,   20,   40,   40,    0,    0,   40,   40,   40,
-   40,    0,   40,   40,   26,   26,    0,   39,   26,   26,
-   26,   26,    0,    0,   26,   39,   39,
+   17,   17,   17,   17,   17,   17,   17,   17,   17,   14,
+   14,   14,   14,   14,   14,   14,   14,   14,   29,   29,
+   29,   29,   29,   29,   29,   29,   29,   24,   24,   24,
+   24,   24,   24,   24,   24,   24,   20,   20,   20,   20,
+   20,   20,   20,   20,   20,   40,   40,   40,   40,   40,
+   40,    0,   40,   40,   26,   26,   26,   26,   26,   26,
+   39,    0,   26,    0,    0,    0,   39,   39,
 };
 const short yycheck[] =
 	{                                      47,
-    0,   58,  261,  266,  267,   44,  267,  266,  258,  259,
-   58,    0,  262,  263,  264,  265,  266,  267,  268,  257,
-  269,  262,    0,  264,  265,   44,  266,   47,  267,   47,
-  267,  267,  267,    0,  267,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,   -1,
+    0,  262,   58,  264,  265,   44,  266,  267,  266,    0,
+   58,  269,  267,  259,  257,   44,  266,   47,    0,  267,
+  267,   47,  267,  267,   -1,  267,   -1,    0,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,    0,   -1,    0,   -1,
+   -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,    0,
+  260,  261,  262,  263,  264,  265,  266,  267,  268,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
@@ -238,20 +237,19 @@ const short yycheck[] =
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,  261,   -1,   -1,   -1,   -1,  266,
-  258,   -1,   -1,  261,  262,  263,  264,  265,  266,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+  266,   -1,  260,  269,  262,  263,  264,  265,  266,   -1,
+   -1,  269,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  258,  259,
-   -1,   -1,  262,  263,  264,  265,  266,  267,  268,  258,
-  259,   -1,   -1,  262,  263,  264,  265,  266,  267,  268,
-  258,  259,   -1,   -1,  262,  263,  264,  265,  266,  267,
-  268,  258,  259,   -1,   -1,  262,  263,  264,  265,  266,
-  267,  268,  258,  259,   -1,   -1,  262,  263,  264,  265,
-  266,  267,  268,  258,  259,   -1,   -1,  262,  263,  264,
-  265,   -1,  267,  268,  258,  259,   -1,  259,  262,  263,
-  264,  265,   -1,   -1,  268,  267,  268,
+  260,  261,  262,  263,  264,  265,  266,  267,  268,  260,
+  261,  262,  263,  264,  265,  266,  267,  268,  260,  261,
+  262,  263,  264,  265,  266,  267,  268,  260,  261,  262,
+  263,  264,  265,  266,  267,  268,  260,  261,  262,  263,
+  264,  265,  266,  267,  268,  260,  261,  262,  263,  264,
+  265,   -1,  267,  268,  260,  261,  262,  263,  264,  265,
+  261,   -1,  268,   -1,   -1,   -1,  267,  268,
 };
 #define YYFINAL 1
 #ifndef YYDEBUG
@@ -267,9 +265,9 @@ const char * const yyname[] =
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"tAGO","tDAY",
-"tDAYZONE","tID","tMERIDIAN","tMINUTE_UNIT","tMONTH","tMONTH_UNIT","tSEC_UNIT",
-"tSNUMBER","tUNUMBER","tZONE","tDST",
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"tAGO","tID","tDST",
+"tDAY","tDAYZONE","tMINUTE_UNIT","tMONTH","tMONTH_UNIT","tSEC_UNIT","tSNUMBER",
+"tUNUMBER","tZONE","tMERIDIAN",
 };
 const char * const yyrule[] =
 	{"$accept : spec",
@@ -532,10 +530,10 @@ static TABLE const MilitaryTable[] = {
 
 
 /* ARGSUSED */
-static int
+void
 yyerror(const char *s)
 {
-  return 0;
+    return;
 }
 
 
@@ -579,7 +577,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
     static int DaysInMonth[12] = {
 	31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     };
-    struct tm	*tm;
+    struct tm	tm;
     time_t	tod;
     time_t	Julian;
     int		i;
@@ -612,7 +610,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
 	return -1;
     Julian += tod;
     if (DSTmode == DSTon
-     || (DSTmode == DSTmaybe && (tm = localtime(&Julian)) && tm->tm_isdst))
+     || (DSTmode == DSTmaybe && localtime_r(&Julian, &tm) && tm.tm_isdst))
 	Julian -= 60 * 60;
     return Julian;
 }
@@ -621,18 +619,16 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
 static time_t
 DSTcorrect(time_t Start, time_t Future)
 {
-    struct tm	*start_tm;
-    struct tm	*future_tm;
+    struct tm	start_tm;
+    struct tm	future_tm;
     time_t	StartDay;
     time_t	FutureDay;
 
-    start_tm = localtime(&Start);
-    future_tm = localtime(&Future);
-    if (!start_tm || !future_tm)
+    if (!localtime_r(&Start, &start_tm) || !localtime_r(&Future, &future_tm))
 	return -1;
 
-    StartDay = (start_tm->tm_hour + 1) % 24;
-    FutureDay = (future_tm->tm_hour + 1) % 24;
+    StartDay = (start_tm.tm_hour + 1) % 24;
+    FutureDay = (future_tm.tm_hour + 1) % 24;
     return (Future - Start) + (StartDay - FutureDay) * 60L * 60L;
 }
 
@@ -640,13 +636,13 @@ DSTcorrect(time_t Start, time_t Future)
 static time_t
 RelativeDate(time_t Start, time_t DayOrdinal, time_t DayNumber)
 {
-    struct tm	*tm;
+    struct tm	tm;
     time_t	now;
 
     now = Start;
-    if (!(tm = localtime(&now)))
+    if (!localtime_r(&now, &tm))
 	return -1;
-    now += SECSPERDAY * ((DayNumber - tm->tm_wday + 7) % 7);
+    now += SECSPERDAY * ((DayNumber - tm.tm_wday + 7) % 7);
     now += 7 * SECSPERDAY * (DayOrdinal <= 0 ? DayOrdinal : DayOrdinal - 1);
     return DSTcorrect(Start, now);
 }
@@ -655,20 +651,20 @@ RelativeDate(time_t Start, time_t DayOrdinal, time_t DayNumber)
 static time_t
 RelativeMonth(time_t Start, time_t RelMonth)
 {
-    struct tm	*tm;
+    struct tm	tm;
     time_t	Month;
     time_t	Year;
 
     if (RelMonth == 0)
 	return 0;
-    if (!(tm = localtime(&Start)))
+    if (!localtime_r(&Start, &tm))
 	return -1;
-    Month = 12 * (tm->tm_year + 1900) + tm->tm_mon + RelMonth;
+    Month = 12 * (tm.tm_year + 1900) + tm.tm_mon + RelMonth;
     Year = Month / 12;
     Month = Month % 12 + 1;
     return DSTcorrect(Start,
-	    Convert(Month, (time_t)tm->tm_mday, Year,
-		(time_t)tm->tm_hour, (time_t)tm->tm_min, (time_t)tm->tm_sec,
+	    Convert(Month, (time_t)tm.tm_mday, Year,
+		(time_t)tm.tm_hour, (time_t)tm.tm_min, (time_t)tm.tm_sec,
 		MER24, DSTmaybe));
 }
 
@@ -681,11 +677,15 @@ LookupWord(char *buff)
     const TABLE		*tp;
     int			i;
     int			abbrev;
+    int			bufflen;
 
     /* Make it lowercase. */
-    for (p = buff; *p; p++)
+    for (p = buff; *p; p++) {
 	if (isupper((unsigned char)*p))
 	    *p = tolower((unsigned char)*p);
+    }
+    if ((bufflen = (int)(p - buff)) == 0)
+	return '\0';
 
     if (strcmp(buff, "am") == 0 || strcmp(buff, "a.m.") == 0) {
 	yylval.Meridian = MERam;
@@ -697,11 +697,11 @@ LookupWord(char *buff)
     }
 
     /* See if we have an abbreviation for a month. */
-    if (strlen(buff) == 3)
+    if (bufflen == 3)
 	abbrev = 1;
-    else if (strlen(buff) == 4 && buff[3] == '.') {
+    else if (bufflen == 4 && buff[3] == '.') {
 	abbrev = 1;
-	buff[3] = '\0';
+	buff[bufflen = 3] = '\0';
     }
     else
 	abbrev = 0;
@@ -735,7 +735,7 @@ LookupWord(char *buff)
 	}
 
     /* Strip off any plural and try the units table again. */
-    i = strlen(buff) - 1;
+    i = bufflen - 1;
     if (buff[i] == 's') {
 	buff[i] = '\0';
 	for (tp = UnitsTable; tp->name; tp++)
@@ -857,7 +857,7 @@ difftm(struct tm *a, struct tm *b)
 time_t
 get_date(char *p)
 {
-    struct tm		*tm, *gmt, gmtbuf;
+    struct tm		tm, gmt;
     time_t		Start;
     time_t		tod;
     time_t		now;
@@ -866,36 +866,19 @@ get_date(char *p)
     yyInput = p;
     (void)time (&now);
 
-    gmt = gmtime (&now);
-    if (gmt != NULL)
-    {
-	/* Make a copy, in case localtime modifies *tm (I think
-	   that comment now applies to *gmt, but I am too
-	   lazy to dig into how gmtime and locatime allocate the
-	   structures they return pointers to).  */
-	gmtbuf = *gmt;
-	gmt = &gmtbuf;
-    }
-
-    if (! (tm = localtime (&now)))
+    if (gmtime_r (&now, &gmt) == NULL)
 	return -1;
 
-    if (gmt != NULL)
-	tz = difftm (gmt, tm) / 60;
-    else
-	/* We are on a system like VMS, where the system clock is
-	   in local time and the system has no concept of timezones.
-	   Hopefully we can fake this out (for the case in which the
-	   user specifies no timezone) by just saying the timezone
-	   is zero.  */
-	tz = 0;
+    if (localtime_r (&now, &tm) == NULL)
+	return -1;
 
-    if(tm->tm_isdst)
+    tz = difftm (&gmt, &tm) / 60;
+    if (tm.tm_isdst)
 	tz += 60;
 
-    yyYear = tm->tm_year + 1900;
-    yyMonth = tm->tm_mon + 1;
-    yyDay = tm->tm_mday;
+    yyYear = tm.tm_year + 1900;
+    yyMonth = tm.tm_mon + 1;
+    yyDay = tm.tm_mday;
     yyTimezone = tz;
     yyDSTmode = DSTmaybe;
     yyHour = 0;
@@ -923,7 +906,7 @@ get_date(char *p)
     else {
 	Start = now;
 	if (!yyHaveRel)
-	    Start -= ((tm->tm_hour * 60L + tm->tm_min) * 60L) + tm->tm_sec;
+	    Start -= ((tm.tm_hour * 60L + tm.tm_min) * 60L) + tm.tm_sec;
     }
 
     Start += yyRelSeconds;
@@ -964,7 +947,7 @@ main(int argc, char *argv[])
     /* NOTREACHED */
 }
 #endif	/* TEST */
-#line 954 "getdate.c"
+#line 937 "getdate.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack(void)
 {
@@ -1444,7 +1427,7 @@ case 41:
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1434 "getdate.c"
+#line 1417 "getdate.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

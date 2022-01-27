@@ -39,10 +39,12 @@
 
 #if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 
-void
-switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
+static int
+switch_user_int(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups,
+    bool nonfatal)
 {
     int serrno = errno;
+    int ret = -1;
     debug_decl(switch_user, SUDO_DEBUG_EDIT);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -51,72 +53,52 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 
     /* When restoring root, change euid first; otherwise change it last. */
     if (euid == ROOT_UID) {
-	if (seteuid(ROOT_UID) != 0)
+	if (seteuid(ROOT_UID) != 0) {
+	    if (nonfatal)
+		goto done;
 	    sudo_fatal("seteuid(ROOT_UID)");
+	}
     }
-    if (setegid(egid) != 0)
+    if (setegid(egid) != 0) {
+	if (nonfatal)
+	    goto done;
 	sudo_fatal("setegid(%d)", (int)egid);
+    }
     if (ngroups != -1) {
-	if (sudo_setgroups(ngroups, groups) != 0)
+	if (sudo_setgroups(ngroups, groups) != 0) {
+	    if (nonfatal)
+		goto done;
 	    sudo_fatal("setgroups");
+	}
     }
     if (euid != ROOT_UID) {
-	if (seteuid(euid) != 0)
+	if (seteuid(euid) != 0) {
+	    if (nonfatal)
+		goto done;
 	    sudo_fatal("seteuid(%u)", (unsigned int)euid);
+	}
     }
-    errno = serrno;
+    ret = 0;
 
-    debug_return;
+done:
+    errno = serrno;
+    debug_return_int(ret);
 }
 
 #if defined(HAVE_FACCESSAT) && defined(AT_EACCESS)
-/*
- * Returns true if the open directory fd is owned or writable by the user.
- */
-int
-dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
+static int
+switch_user_nonfatal(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 {
-    struct stat sb;
-    int rc;
-    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT);
-
-    if (fstat(dfd, &sb) == -1)
-	debug_return_int(-1);
-
-    /* If the user owns the dir we always consider it writable. */
-    if (sb.st_uid == user_cred->uid) {
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user uid %u matches directory uid %u",
-	    (unsigned int)user_cred->uid, (unsigned int)sb.st_uid);
-	debug_return_int(true);
-    }
-
-    /* Change uid/gid/groups to invoking user, usually needs root perms. */
-    if (cur_cred->euid != ROOT_UID) {
-	if (seteuid(ROOT_UID) != 0)
-	    sudo_fatal("seteuid(ROOT_UID)");
-    }
-    switch_user(user_cred->uid, user_cred->gid, user_cred->ngroups,
-	user_cred->groups);
-
-    /* Access checks are done using the euid/egid and group vector. */
-    rc = faccessat(dfd, ".", W_OK, AT_EACCESS);
-
-    /* Restore uid/gid/groups, may need root perms. */
-    if (user_cred->uid != ROOT_UID) {
-	if (seteuid(ROOT_UID) != 0)
-	    sudo_fatal("seteuid(ROOT_UID)");
-    }
-    switch_user(cur_cred->euid, cur_cred->egid, cur_cred->ngroups,
-	cur_cred->groups);
-
-    if (rc == 0)
-	debug_return_int(true);
-    if (errno == EACCES || errno == EROFS)
-	debug_return_int(false);
-    debug_return_int(-1);
+    return switch_user_int(euid, egid, ngroups, groups, true);
 }
-#else
+#endif
+
+void
+switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
+{
+    (void)switch_user_int(euid, egid, ngroups, groups, false);
+}
+
 static bool
 group_matches(gid_t target, struct sudo_cred *cred)
 {
@@ -140,8 +122,97 @@ group_matches(gid_t target, struct sudo_cred *cred)
     debug_return_bool(false);
 }
 
+static bool
+is_writable(struct sudo_cred *user_cred, struct stat *sb)
+{
+    debug_decl(is_writable, SUDO_DEBUG_EDIT);
+
+    /* Other writable? */
+    if (ISSET(sb->st_mode, S_IWOTH)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "directory is writable by other");
+	debug_return_int(true);
+    }
+
+    /* Group writable? */
+    if (ISSET(sb->st_mode, S_IWGRP)) {
+	if (group_matches(sb->st_gid, user_cred)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"directory is writable by one of the user's groups");
+	    debug_return_int(true);
+	}
+    }
+
+    errno = EACCES;
+    debug_return_int(false);
+}
+
+#if defined(HAVE_FACCESSAT) && defined(AT_EACCESS)
 /*
- * Returns true if the open directory fd is owned or writable by the user.
+ * Checks whether the open directory dfd is owned or writable by the user.
+ * Returns true if writable, false if not, or -1 on error.
+ */
+int
+dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
+{
+    struct stat sb;
+    int rc;
+    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT);
+
+    if (fstat(dfd, &sb) == -1)
+	debug_return_int(-1);
+
+    /* If the user owns the dir we always consider it writable. */
+    if (sb.st_uid == user_cred->uid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user uid %u matches directory uid %u",
+	    (unsigned int)user_cred->uid, (unsigned int)sb.st_uid);
+	debug_return_int(true);
+    }
+
+    /* Change uid/gid/groups to invoking user, usually needs root perms. */
+    if (cur_cred->euid != ROOT_UID) {
+	if (seteuid(ROOT_UID) != 0) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"seteuid(ROOT_UID)");
+	    goto fallback;
+	}
+    }
+    if (switch_user_nonfatal(user_cred->uid, user_cred->gid, user_cred->ngroups,
+	    user_cred->groups) == -1) {
+	sudo_debug_printf(
+	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to switch to user_cred");
+	goto fallback;
+    }
+
+    /* Access checks are done using the euid/egid and group vector. */
+    rc = faccessat(dfd, ".", W_OK, AT_EACCESS);
+
+    /* Restore uid/gid/groups, may need root perms. */
+    if (user_cred->uid != ROOT_UID) {
+	if (seteuid(ROOT_UID) != 0)
+	    sudo_fatal("seteuid(ROOT_UID)");
+    }
+    switch_user(cur_cred->euid, cur_cred->egid, cur_cred->ngroups,
+	cur_cred->groups);
+
+    if (rc == 0)
+	debug_return_int(true);
+    if (errno == EACCES || errno == EPERM || errno == EROFS)
+	debug_return_int(false);
+    debug_return_int(-1);
+
+fallback:
+    debug_return_int(is_writable(user_cred, &sb));
+}
+#endif /* HAVE_FACCESSAT && AT_EACCESS */
+
+#if !defined(HAVE_FACCESSAT) || !defined(AT_EACCESS)
+/*
+ * Checks whether the open directory dfd is owned or writable by the user.
+ * Returns true if writable, false if not, or -1 on error.
  */
 int
 dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
@@ -160,24 +231,7 @@ dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred
 	debug_return_int(true);
     }
 
-    /* Other writable? */
-    if (ISSET(sb.st_mode, S_IWOTH)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "directory is writable by other");
-	debug_return_int(true);
-    }
-
-    /* Group writable? */
-    if (ISSET(sb.st_mode, S_IWGRP)) {
-	if (group_matches(sb.st_gid, user_cred)) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"directory is writable by one of the user's groups");
-	    debug_return_int(true);
-	}
-    }
-
-    errno = EACCES;
-    debug_return_int(false);
+    debug_return_int(is_writable(user_cred, &sb));
 }
 #endif /* HAVE_FACCESSAT && AT_EACCESS */
 
@@ -185,9 +239,21 @@ dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
+    int fd;
     debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT);
 
-    debug_return_int(openat(dfd, path, oflags|O_NOFOLLOW, mode));
+    fd = openat(dfd, path, oflags|O_NOFOLLOW, mode);
+    if (fd == -1) {
+	/* Handle non-standard O_NOFOLLOW errno values. */
+	if (errno == EMLINK)
+	    errno = ELOOP;		/* FreeBSD */
+#ifdef EFTYPE
+	else if (errno == EFTYPE)
+	    errno = ELOOP;		/* NetBSD */
+#endif
+    }
+
+    debug_return_int(fd);
 }
 #else
 /*
@@ -275,7 +341,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
     struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
 {
     const int dflags = DIR_OPEN_FLAGS;
-    int dfd, fd, is_writable;
+    int dfd, fd, writable;
     debug_decl(sudo_edit_open_nonwritable, SUDO_DEBUG_EDIT);
 
     if (path[0] == '/') {
@@ -297,8 +363,8 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	 * Look up one component at a time, avoiding symbolic links in
 	 * writable directories.
 	 */
-	is_writable = dir_is_writable(dfd, user_cred, cur_cred);
-	if (is_writable == -1) {
+	writable = dir_is_writable(dfd, user_cred, cur_cred);
+	if (writable == -1) {
 	    close(dfd);
 	    debug_return_int(-1);
 	}
@@ -308,7 +374,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	if (slash == NULL)
 	    break;
 	*slash = '\0';
-	if (is_writable)
+	if (writable)
 	    subdfd = sudo_edit_openat_nofollow(dfd, path, dflags, 0);
 	else
 	    subdfd = openat(dfd, path, dflags, 0);
@@ -320,7 +386,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	dfd = subdfd;
     }
 
-    if (is_writable) {
+    if (writable) {
 	close(dfd);
 	errno = EISDIR;
 	debug_return_int(-1);
@@ -351,6 +417,15 @@ sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
 	    user_cred, cur_cred);
     } else {
 	fd = open(path, oflags|O_NONBLOCK, mode);
+    }
+    if (fd == -1 && ISSET(oflags, O_NOFOLLOW)) {
+	/* Handle non-standard O_NOFOLLOW errno values. */
+	if (errno == EMLINK)
+	    errno = ELOOP;		/* FreeBSD */
+#ifdef EFTYPE
+	else if (errno == EFTYPE)
+	    errno = ELOOP;		/* NetBSD */
+#endif
     }
     if (fd != -1 && !ISSET(oflags, O_NONBLOCK))
 	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);

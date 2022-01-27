@@ -20,10 +20,11 @@
 #define SUDO_AUTH_H
 
 /* Auth function return values.  */
-#define AUTH_SUCCESS	0
-#define AUTH_FAILURE	1
-#define AUTH_INTR	2
-#define AUTH_FATAL	3
+#define AUTH_SUCCESS		0
+#define AUTH_FAILURE		1
+#define AUTH_INTR		2
+#define AUTH_FATAL		3
+#define AUTH_NONINTERACTIVE	4
 
 typedef struct sudo_auth {
     int flags;			/* various flags, see below */
@@ -40,14 +41,16 @@ typedef struct sudo_auth {
 } sudo_auth;
 
 /* Values for sudo_auth.flags.  */
-#define FLAG_DISABLED	0x02	/* method disabled */
-#define FLAG_STANDALONE	0x04	/* standalone auth method */
-#define FLAG_ONEANDONLY	0x08	/* one and only auth method */
+#define FLAG_DISABLED		0x02	/* method disabled */
+#define FLAG_STANDALONE		0x04	/* standalone auth method */
+#define FLAG_ONEANDONLY		0x08	/* one and only auth method */
+#define FLAG_NONINTERACTIVE	0x10	/* no user input allowed */
 
 /* Shortcuts for using the flags above. */
 #define IS_DISABLED(x)		((x)->flags & FLAG_DISABLED)
 #define IS_STANDALONE(x)	((x)->flags & FLAG_STANDALONE)
 #define IS_ONEANDONLY(x)	((x)->flags & FLAG_ONEANDONLY)
+#define IS_NONINTERACTIVE(x)	((x)->flags & FLAG_NONINTERACTIVE)
 
 /* Like tgetpass() but uses conversation function */
 char *auth_getpass(const char *prompt, int type, struct sudo_conv_callback *callback);

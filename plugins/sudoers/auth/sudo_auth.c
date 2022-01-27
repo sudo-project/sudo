@@ -98,7 +98,7 @@ static bool standalone;
  * Returns 0 on success and -1 on error.
  */
 int
-sudo_auth_init(struct passwd *pw)
+sudo_auth_init(struct passwd *pw, int mode)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
@@ -109,6 +109,8 @@ sudo_auth_init(struct passwd *pw)
 
     /* Initialize auth methods and unconfigure the method if necessary. */
     for (auth = auth_switch; auth->name; auth++) {
+	if (ISSET(mode, MODE_NONINTERACTIVE))
+	    SET(auth->flags, FLAG_NONINTERACTIVE);
 	if (auth->init && !IS_DISABLED(auth)) {
 	    /* Disable if it failed to init unless there was a fatal error. */
 	    status = (auth->init)(pw, auth);
@@ -297,6 +299,8 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 		status = (auth->setup)(pw, &prompt, auth);
 		if (status == AUTH_FAILURE)
 		    SET(auth->flags, FLAG_DISABLED);
+		else if (status == AUTH_NONINTERACTIVE)
+		    goto done;
 		else if (status == AUTH_FATAL || user_interrupted())
 		    goto done;		/* assume error msg already printed */
 	    }
@@ -310,6 +314,10 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 
 	/* Get the password unless the auth function will do it for us */
 	if (!standalone) {
+	    if (IS_NONINTERACTIVE(&auth_switch[0])) {
+		success = AUTH_NONINTERACTIVE;
+		goto done;
+	    }
 	    pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	    if (pass == NULL)
 		break;
@@ -344,10 +352,13 @@ done:
 	case AUTH_INTR:
 	case AUTH_FAILURE:
 	    if (ntries != 0)
-		validated |= FLAG_BAD_PASSWORD;
+		SET(validated, FLAG_BAD_PASSWORD);
 	    log_auth_failure(validated, ntries);
 	    ret = false;
 	    break;
+	case AUTH_NONINTERACTIVE:
+	    SET(validated, FLAG_NO_USER_INPUT);
+	    FALLTHROUGH;
 	case AUTH_FATAL:
 	default:
 	    log_auth_failure(validated, 0);

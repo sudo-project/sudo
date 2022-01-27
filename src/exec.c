@@ -164,6 +164,9 @@ exec_setup(struct command_details *details, int intercept_fd, int errfd)
     if (ISSET(details->flags, CD_OVERRIDE_UMASK))
 	(void) umask(details->umask);
 
+    /* Apply resource limits specified by the policy, if any. */
+    set_policy_rlimits();
+
     /* Close fds before chroot (need /dev) or uid change (prlimit on Linux). */
     close_fds(details, errfd, intercept_fd);
 
@@ -311,7 +314,7 @@ sudo_terminated(struct command_status *cstat)
     debug_return_bool(false);
 }
 
-#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 17)
+#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 18)
 # error "Update sudo_needs_pty() after changing the plugin API"
 #endif
 static bool

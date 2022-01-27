@@ -125,6 +125,9 @@ if ${MAKE} --version 2>&1 | grep GNU >/dev/null; then
 	    ;;
     esac
     if [ $NJOBS -gt 1 ]; then
+	if [ $NJOBS -gt 16 ]; then
+	    NJOBS=16
+	fi
 	make_opts="-j$NJOBS"
     fi
 fi
@@ -188,6 +191,7 @@ case "$osversion" in
 		with_pam_login=true
 		with_sssd=true
 		with_openssl=true
+		with_python=true
 		;;
 	esac
 
@@ -343,7 +347,7 @@ case "$osversion" in
 		;;
 	esac
 	if test "${osversion}" != "`$scriptdir/pp --probe`"; then
-	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
+	    sdkvers=`echo "${osversion}" | sed -e 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/' -e 's/\.$//'`
 	    # SDKs may be under Xcode.app or CommandLineTools (for non-Xcode)
 	    if [ -d "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs" ]; then
 		SDK_DIR="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
@@ -506,6 +510,10 @@ IFS="$OIFS"
 if [ -r Makefile ]; then
     ${MAKE} $make_opts distclean
 fi
-${configure} "$@" || exit 1
-${MAKE} $make_opts && ${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
+${configure} "$@" || exit $?
+${MAKE} $make_opts || exit $?
+${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
+exitval=$?
 test $debug -eq 0 && rm -rf destdir
+
+exit $exitval

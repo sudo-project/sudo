@@ -322,6 +322,9 @@ free_exec_closure_nopty(struct exec_closure_nopty *ec)
 {
     debug_decl(free_exec_closure_nopty, SUDO_DEBUG_EXEC);
 
+    /* Free any remaining intercept resources. */
+    intercept_cleanup();
+
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->errpipe_event);
     sudo_ev_free(ec->sigint_event);
@@ -389,12 +392,12 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
-        if (selinux_setup(details->selinux_role, details->selinux_type,
-		details->tty, -1, true) == -1) {
+        if (selinux_relabel_tty(details->tty, -1) == -1) {
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
 	    debug_return;
 	}
+	selinux_audit_role_change();
     }
 #endif
 

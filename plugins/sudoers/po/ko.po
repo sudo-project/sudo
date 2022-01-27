@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.9.8b2\n"
+"Project-Id-Version: sudoers 1.9.9b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2021-08-19 09:50-0600\n"
-"PO-Revision-Date: 2021-08-23 02:10+0900\n"
+"POT-Creation-Date: 2021-12-08 10:19-0700\n"
+"PO-Revision-Date: 2021-12-14 13:20+0900\n"
 "Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>\n"
 "Language-Team: Korean <translation-team-ko@googlegroups.com>\n"
 "Language: ko\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 2.3.1\n"
 
-#: confstr.sh:1 gram.y:1191
+#: confstr.sh:1 gram.y:1201
 msgid "syntax error"
 msgstr "문법 오류"
 
@@ -43,23 +43,23 @@ msgstr "*** %h 보안 알림 ***"
 msgid "Sorry, try again."
 msgstr "죄송합니다만, 다시 시도하십시오."
 
-#: gram.y:235 gram.y:302 gram.y:311 gram.y:320 gram.y:330 gram.y:340
-#: gram.y:364 gram.y:391 gram.y:400 gram.y:408 gram.y:417 gram.y:426
-#: gram.y:500 gram.y:510 gram.y:522 gram.y:566 gram.y:575 gram.y:584
-#: gram.y:593 gram.y:712 gram.y:720 gram.y:731 gram.y:743 gram.y:762
-#: gram.y:917 gram.y:922 gram.y:930 gram.y:940 gram.y:946 gram.y:1068
-#: gram.y:1077 gram.y:1085 gram.y:1094 gram.y:1103 gram.y:1132 gram.y:1141
-#: gram.y:1149 gram.y:1239 gram.y:1351 gram.y:1658 gram.y:1708
-#: lib/eventlog/eventlog.c:308 lib/eventlog/eventlog.c:381
-#: lib/eventlog/eventlog.c:783 lib/eventlog/eventlog.c:862
-#: lib/eventlog/eventlog.c:1146 lib/iolog/iolog_json.c:125
-#: lib/iolog/iolog_json.c:330 lib/iolog/iolog_json.c:360
-#: lib/iolog/iolog_json.c:503 lib/iolog/iolog_legacy.c:100
+#: gram.y:233 gram.y:300 gram.y:309 gram.y:318 gram.y:328 gram.y:338
+#: gram.y:362 gram.y:389 gram.y:398 gram.y:406 gram.y:415 gram.y:424
+#: gram.y:498 gram.y:508 gram.y:520 gram.y:564 gram.y:573 gram.y:582
+#: gram.y:591 gram.y:718 gram.y:726 gram.y:737 gram.y:749 gram.y:768
+#: gram.y:923 gram.y:928 gram.y:936 gram.y:950 gram.y:956 gram.y:1078
+#: gram.y:1087 gram.y:1095 gram.y:1104 gram.y:1113 gram.y:1142 gram.y:1151
+#: gram.y:1159 gram.y:1249 gram.y:1377 gram.y:1744 gram.y:1794
+#: lib/eventlog/eventlog.c:309 lib/eventlog/eventlog.c:382
+#: lib/eventlog/eventlog.c:804 lib/eventlog/eventlog.c:881
+#: lib/eventlog/eventlog.c:1176 lib/iolog/iolog_json.c:150
+#: lib/iolog/iolog_json.c:382 lib/iolog/iolog_json.c:412
+#: lib/iolog/iolog_json.c:555 lib/iolog/iolog_legacy.c:100
 #: lib/iolog/iolog_legacy.c:111 lib/iolog/iolog_legacy.c:123
 #: lib/iolog/iolog_legacy.c:133 lib/iolog/iolog_legacy.c:139
-#: lib/iolog/iolog_loginfo.c:76 lib/iolog/iolog_loginfo.c:210
-#: logsrvd/iolog_writer.c:85 logsrvd/iolog_writer.c:90
-#: logsrvd/iolog_writer.c:124 logsrvd/iolog_writer.c:172
+#: lib/iolog/iolog_loginfo.c:76 lib/iolog/iolog_loginfo.c:211
+#: logsrvd/iolog_writer.c:84 logsrvd/iolog_writer.c:89
+#: logsrvd/iolog_writer.c:123 logsrvd/iolog_writer.c:172
 #: logsrvd/iolog_writer.c:212 logsrvd/iolog_writer.c:225
 #: logsrvd/iolog_writer.c:261 logsrvd/iolog_writer.c:286
 #: logsrvd/iolog_writer.c:301 logsrvd/iolog_writer.c:314
@@ -67,98 +67,111 @@ msgstr "죄송합니다만, 다시 시도하십시오."
 #: logsrvd/iolog_writer.c:355 logsrvd/iolog_writer.c:393
 #: logsrvd/iolog_writer.c:399 logsrvd/iolog_writer.c:406
 #: logsrvd/iolog_writer.c:412 logsrvd/iolog_writer.c:596
-#: logsrvd/logsrv_util.c:62 logsrvd/logsrvd.c:302 logsrvd/logsrvd.c:311
-#: logsrvd/logsrvd.c:1017 logsrvd/logsrvd.c:1079 logsrvd/logsrvd_conf.c:1361
-#: logsrvd/logsrvd_journal.c:71 logsrvd/logsrvd_journal.c:204
-#: logsrvd/logsrvd_journal.c:205 logsrvd/logsrvd_journal.c:261
-#: logsrvd/logsrvd_journal.c:426 logsrvd/logsrvd_journal.c:428
-#: logsrvd/logsrvd_local.c:173 logsrvd/logsrvd_local.c:174
-#: logsrvd/logsrvd_local.c:236 logsrvd/logsrvd_local.c:237
-#: logsrvd/logsrvd_local.c:317 logsrvd/logsrvd_local.c:318
-#: logsrvd/logsrvd_local.c:323 logsrvd/logsrvd_local.c:324
-#: logsrvd/logsrvd_queue.c:155 logsrvd/logsrvd_queue.c:185
-#: logsrvd/logsrvd_queue.c:262 logsrvd/logsrvd_relay.c:445
-#: logsrvd/logsrvd_relay.c:744 logsrvd/logsrvd_relay.c:846
-#: logsrvd/sendlog.c:302 logsrvd/sendlog.c:501 plugins/sudoers/audit.c:114
-#: plugins/sudoers/audit.c:271 plugins/sudoers/auth/bsdauth.c:143
-#: plugins/sudoers/auth/kerb5.c:118 plugins/sudoers/auth/kerb5.c:144
-#: plugins/sudoers/auth/pam.c:691 plugins/sudoers/auth/rfc1938.c:111
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/check_aliases.c:95
-#: plugins/sudoers/cvtsudoers.c:119 plugins/sudoers/cvtsudoers.c:160
-#: plugins/sudoers/cvtsudoers.c:177 plugins/sudoers/cvtsudoers.c:188
-#: plugins/sudoers/cvtsudoers.c:300 plugins/sudoers/cvtsudoers.c:428
-#: plugins/sudoers/cvtsudoers.c:561 plugins/sudoers/cvtsudoers.c:578
-#: plugins/sudoers/cvtsudoers.c:646 plugins/sudoers/cvtsudoers.c:761
-#: plugins/sudoers/cvtsudoers.c:769 plugins/sudoers/cvtsudoers.c:1183
-#: plugins/sudoers/cvtsudoers.c:1187 plugins/sudoers/cvtsudoers.c:1289
-#: plugins/sudoers/cvtsudoers_json.c:76 plugins/sudoers/cvtsudoers_ldif.c:151
-#: plugins/sudoers/cvtsudoers_ldif.c:194 plugins/sudoers/cvtsudoers_ldif.c:235
-#: plugins/sudoers/cvtsudoers_ldif.c:300 plugins/sudoers/cvtsudoers_ldif.c:371
-#: plugins/sudoers/cvtsudoers_ldif.c:425 plugins/sudoers/cvtsudoers_ldif.c:433
-#: plugins/sudoers/cvtsudoers_ldif.c:444 plugins/sudoers/cvtsudoers_ldif.c:451
-#: plugins/sudoers/cvtsudoers_ldif.c:464 plugins/sudoers/cvtsudoers_ldif.c:472
-#: plugins/sudoers/cvtsudoers_ldif.c:619 plugins/sudoers/defaults.c:652
-#: plugins/sudoers/defaults.c:947 plugins/sudoers/defaults.c:1122
+#: logsrvd/logsrv_util.c:64 logsrvd/logsrvd.c:296 logsrvd/logsrvd.c:305
+#: logsrvd/logsrvd.c:1011 logsrvd/logsrvd.c:1073 logsrvd/logsrvd_conf.c:1360
+#: logsrvd/logsrvd_journal.c:70 logsrvd/logsrvd_journal.c:203
+#: logsrvd/logsrvd_journal.c:204 logsrvd/logsrvd_journal.c:260
+#: logsrvd/logsrvd_journal.c:425 logsrvd/logsrvd_journal.c:427
+#: logsrvd/logsrvd_local.c:174 logsrvd/logsrvd_local.c:175
+#: logsrvd/logsrvd_local.c:237 logsrvd/logsrvd_local.c:238
+#: logsrvd/logsrvd_local.c:376 logsrvd/logsrvd_local.c:425
+#: logsrvd/logsrvd_local.c:426 logsrvd/logsrvd_local.c:431
+#: logsrvd/logsrvd_local.c:432 logsrvd/logsrvd_queue.c:154
+#: logsrvd/logsrvd_queue.c:184 logsrvd/logsrvd_queue.c:261
+#: logsrvd/logsrvd_relay.c:439 logsrvd/logsrvd_relay.c:738
+#: logsrvd/logsrvd_relay.c:843 logsrvd/sendlog.c:246 logsrvd/sendlog.c:255
+#: logsrvd/sendlog.c:333 logsrvd/sendlog.c:640 plugins/sudoers/audit.c:116
+#: plugins/sudoers/auth/bsdauth.c:147 plugins/sudoers/auth/kerb5.c:118
+#: plugins/sudoers/auth/kerb5.c:146 plugins/sudoers/auth/pam.c:689
+#: plugins/sudoers/auth/rfc1938.c:111 plugins/sudoers/auth/sia.c:59
+#: plugins/sudoers/check_aliases.c:134 plugins/sudoers/cvtsudoers.c:131
+#: plugins/sudoers/cvtsudoers.c:175 plugins/sudoers/cvtsudoers.c:192
+#: plugins/sudoers/cvtsudoers.c:203 plugins/sudoers/cvtsudoers.c:333
+#: plugins/sudoers/cvtsudoers.c:372 plugins/sudoers/cvtsudoers.c:392
+#: plugins/sudoers/cvtsudoers.c:534 plugins/sudoers/cvtsudoers.c:667
+#: plugins/sudoers/cvtsudoers.c:685 plugins/sudoers/cvtsudoers.c:755
+#: plugins/sudoers/cvtsudoers.c:870 plugins/sudoers/cvtsudoers.c:878
+#: plugins/sudoers/cvtsudoers.c:1373 plugins/sudoers/cvtsudoers.c:1377
+#: plugins/sudoers/cvtsudoers.c:1479 plugins/sudoers/cvtsudoers_csv.c:183
+#: plugins/sudoers/cvtsudoers_csv.c:246 plugins/sudoers/cvtsudoers_json.c:76
+#: plugins/sudoers/cvtsudoers_ldif.c:151 plugins/sudoers/cvtsudoers_ldif.c:194
+#: plugins/sudoers/cvtsudoers_ldif.c:235 plugins/sudoers/cvtsudoers_ldif.c:300
+#: plugins/sudoers/cvtsudoers_ldif.c:376 plugins/sudoers/cvtsudoers_ldif.c:430
+#: plugins/sudoers/cvtsudoers_ldif.c:438 plugins/sudoers/cvtsudoers_ldif.c:449
+#: plugins/sudoers/cvtsudoers_ldif.c:456 plugins/sudoers/cvtsudoers_ldif.c:469
+#: plugins/sudoers/cvtsudoers_ldif.c:477 plugins/sudoers/cvtsudoers_ldif.c:624
+#: plugins/sudoers/cvtsudoers_merge.c:246
+#: plugins/sudoers/cvtsudoers_merge.c:292
+#: plugins/sudoers/cvtsudoers_merge.c:339
+#: plugins/sudoers/cvtsudoers_merge.c:360
+#: plugins/sudoers/cvtsudoers_merge.c:446
+#: plugins/sudoers/cvtsudoers_merge.c:457
+#: plugins/sudoers/cvtsudoers_merge.c:526
+#: plugins/sudoers/cvtsudoers_merge.c:696
+#: plugins/sudoers/cvtsudoers_merge.c:704
+#: plugins/sudoers/cvtsudoers_merge.c:927
+#: plugins/sudoers/cvtsudoers_merge.c:962 plugins/sudoers/defaults.c:665
+#: plugins/sudoers/defaults.c:1019 plugins/sudoers/defaults.c:1206
 #: plugins/sudoers/editor.c:190 plugins/sudoers/env.c:262
 #: plugins/sudoers/exptilde.c:92 plugins/sudoers/filedigest.c:54
 #: plugins/sudoers/filedigest.c:70 plugins/sudoers/gc.c:57
 #: plugins/sudoers/group_plugin.c:133 plugins/sudoers/interfaces.c:68
-#: plugins/sudoers/iolog.c:606 plugins/sudoers/iolog.c:623
+#: plugins/sudoers/iolog.c:609 plugins/sudoers/iolog.c:635
 #: plugins/sudoers/ldap.c:184 plugins/sudoers/ldap.c:422
 #: plugins/sudoers/ldap.c:432 plugins/sudoers/ldap.c:437
 #: plugins/sudoers/ldap.c:441 plugins/sudoers/ldap.c:453
-#: plugins/sudoers/ldap.c:744 plugins/sudoers/ldap.c:908
-#: plugins/sudoers/ldap.c:1281 plugins/sudoers/ldap.c:1709
-#: plugins/sudoers/ldap.c:1746 plugins/sudoers/ldap.c:1827
-#: plugins/sudoers/ldap.c:1962 plugins/sudoers/ldap.c:2063
-#: plugins/sudoers/ldap.c:2079 plugins/sudoers/ldap_conf.c:218
+#: plugins/sudoers/ldap.c:749 plugins/sudoers/ldap.c:913
+#: plugins/sudoers/ldap.c:1286 plugins/sudoers/ldap.c:1712
+#: plugins/sudoers/ldap.c:1749 plugins/sudoers/ldap.c:1830
+#: plugins/sudoers/ldap.c:1965 plugins/sudoers/ldap.c:2066
+#: plugins/sudoers/ldap.c:2082 plugins/sudoers/ldap_conf.c:218
 #: plugins/sudoers/ldap_conf.c:249 plugins/sudoers/ldap_conf.c:301
 #: plugins/sudoers/ldap_conf.c:337 plugins/sudoers/ldap_conf.c:441
 #: plugins/sudoers/ldap_conf.c:456 plugins/sudoers/ldap_conf.c:553
 #: plugins/sudoers/ldap_conf.c:586 plugins/sudoers/ldap_conf.c:678
 #: plugins/sudoers/ldap_conf.c:760 plugins/sudoers/ldap_util.c:293
-#: plugins/sudoers/ldap_util.c:300 plugins/sudoers/ldap_util.c:615
-#: plugins/sudoers/linux_audit.c:86 plugins/sudoers/log_client.c:108
-#: plugins/sudoers/log_client.c:386 plugins/sudoers/log_client.c:699
-#: plugins/sudoers/log_client.c:720 plugins/sudoers/log_client.c:1440
-#: plugins/sudoers/log_client.c:1656 plugins/sudoers/log_client.c:1980
-#: plugins/sudoers/log_client.c:2037 plugins/sudoers/logging.c:101
-#: plugins/sudoers/logging.c:181 plugins/sudoers/logging.c:465
-#: plugins/sudoers/logging.c:485 plugins/sudoers/logging.c:627
+#: plugins/sudoers/ldap_util.c:300 plugins/sudoers/ldap_util.c:613
+#: plugins/sudoers/linux_audit.c:86 plugins/sudoers/log_client.c:112
+#: plugins/sudoers/log_client.c:390 plugins/sudoers/log_client.c:703
+#: plugins/sudoers/log_client.c:724 plugins/sudoers/log_client.c:1444
+#: plugins/sudoers/log_client.c:1662 plugins/sudoers/log_client.c:1989
+#: plugins/sudoers/log_client.c:2046 plugins/sudoers/logging.c:104
+#: plugins/sudoers/logging.c:184 plugins/sudoers/logging.c:468
+#: plugins/sudoers/logging.c:488 plugins/sudoers/logging.c:627
 #: plugins/sudoers/match_command.c:297 plugins/sudoers/match_command.c:497
 #: plugins/sudoers/match_command.c:546 plugins/sudoers/match_command.c:618
 #: plugins/sudoers/match_command.c:666 plugins/sudoers/match_digest.c:93
 #: plugins/sudoers/parse.c:201 plugins/sudoers/parse.c:218
-#: plugins/sudoers/parse.c:238 plugins/sudoers/parse.c:255
-#: plugins/sudoers/parse.c:278 plugins/sudoers/parse.c:289
+#: plugins/sudoers/parse.c:250 plugins/sudoers/parse.c:267
+#: plugins/sudoers/parse.c:290 plugins/sudoers/parse.c:301
 #: plugins/sudoers/parse_ldif.c:153 plugins/sudoers/parse_ldif.c:184
-#: plugins/sudoers/parse_ldif.c:253 plugins/sudoers/parse_ldif.c:260
-#: plugins/sudoers/parse_ldif.c:265 plugins/sudoers/parse_ldif.c:341
-#: plugins/sudoers/parse_ldif.c:352 plugins/sudoers/parse_ldif.c:379
-#: plugins/sudoers/parse_ldif.c:396 plugins/sudoers/parse_ldif.c:408
-#: plugins/sudoers/parse_ldif.c:412 plugins/sudoers/parse_ldif.c:426
-#: plugins/sudoers/parse_ldif.c:483 plugins/sudoers/parse_ldif.c:596
-#: plugins/sudoers/parse_ldif.c:626 plugins/sudoers/parse_ldif.c:651
-#: plugins/sudoers/parse_ldif.c:709 plugins/sudoers/parse_ldif.c:726
-#: plugins/sudoers/parse_ldif.c:754 plugins/sudoers/parse_ldif.c:761
-#: plugins/sudoers/policy.c:556 plugins/sudoers/policy.c:923
-#: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:195
-#: plugins/sudoers/pwutil.c:266 plugins/sudoers/pwutil.c:344
-#: plugins/sudoers/pwutil.c:518 plugins/sudoers/pwutil.c:583
-#: plugins/sudoers/pwutil.c:655 plugins/sudoers/pwutil.c:853
-#: plugins/sudoers/pwutil.c:909 plugins/sudoers/pwutil.c:953
-#: plugins/sudoers/pwutil.c:1010 plugins/sudoers/sssd.c:145
+#: plugins/sudoers/parse_ldif.c:253 plugins/sudoers/parse_ldif.c:261
+#: plugins/sudoers/parse_ldif.c:266 plugins/sudoers/parse_ldif.c:342
+#: plugins/sudoers/parse_ldif.c:353 plugins/sudoers/parse_ldif.c:380
+#: plugins/sudoers/parse_ldif.c:397 plugins/sudoers/parse_ldif.c:409
+#: plugins/sudoers/parse_ldif.c:413 plugins/sudoers/parse_ldif.c:427
+#: plugins/sudoers/parse_ldif.c:484 plugins/sudoers/parse_ldif.c:597
+#: plugins/sudoers/parse_ldif.c:627 plugins/sudoers/parse_ldif.c:652
+#: plugins/sudoers/parse_ldif.c:710 plugins/sudoers/parse_ldif.c:727
+#: plugins/sudoers/parse_ldif.c:755 plugins/sudoers/parse_ldif.c:762
+#: plugins/sudoers/policy.c:564 plugins/sudoers/policy.c:978
+#: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:199
+#: plugins/sudoers/pwutil.c:270 plugins/sudoers/pwutil.c:348
+#: plugins/sudoers/pwutil.c:522 plugins/sudoers/pwutil.c:587
+#: plugins/sudoers/pwutil.c:659 plugins/sudoers/pwutil.c:857
+#: plugins/sudoers/pwutil.c:913 plugins/sudoers/pwutil.c:957
+#: plugins/sudoers/pwutil.c:1014 plugins/sudoers/sssd.c:145
 #: plugins/sudoers/sssd.c:407 plugins/sudoers/sssd.c:470
-#: plugins/sudoers/sssd.c:514 plugins/sudoers/sssd.c:561
-#: plugins/sudoers/sssd.c:754 plugins/sudoers/strvec_join.c:53
+#: plugins/sudoers/sssd.c:514 plugins/sudoers/sssd.c:558
+#: plugins/sudoers/sssd.c:751 plugins/sudoers/strvec_join.c:53
 #: plugins/sudoers/stubs.c:111 plugins/sudoers/stubs.c:119
 #: plugins/sudoers/sudoers.c:335 plugins/sudoers/sudoers.c:361
 #: plugins/sudoers/sudoers.c:429 plugins/sudoers/sudoers.c:438
-#: plugins/sudoers/sudoers.c:479 plugins/sudoers/sudoers.c:833
-#: plugins/sudoers/sudoers.c:971 plugins/sudoers/sudoers.c:1030
-#: plugins/sudoers/sudoers.c:1296 plugins/sudoers/sudoreplay.c:562
+#: plugins/sudoers/sudoers.c:479 plugins/sudoers/sudoers.c:842
+#: plugins/sudoers/sudoers.c:980 plugins/sudoers/sudoers.c:1039
+#: plugins/sudoers/sudoers.c:1305 plugins/sudoers/sudoreplay.c:562
 #: plugins/sudoers/sudoreplay.c:565 plugins/sudoers/sudoreplay.c:1280
-#: plugins/sudoers/sudoreplay.c:1490 plugins/sudoers/sudoreplay.c:1494
+#: plugins/sudoers/sudoreplay.c:1500 plugins/sudoers/sudoreplay.c:1504
 #: plugins/sudoers/testsudoers.c:120 plugins/sudoers/testsudoers.c:224
 #: plugins/sudoers/testsudoers.c:241 plugins/sudoers/testsudoers.c:580
 #: plugins/sudoers/timestamp.c:424 plugins/sudoers/timestamp.c:468
@@ -166,66 +179,78 @@ msgstr "죄송합니다만, 다시 시도하십시오."
 #: plugins/sudoers/toke_util.c:77 plugins/sudoers/toke_util.c:105
 #: plugins/sudoers/toke_util.c:130 plugins/sudoers/toke_util.c:155
 #: plugins/sudoers/toke_util.c:193 plugins/sudoers/tsdump.c:123
-#: plugins/sudoers/visudo.c:143 plugins/sudoers/visudo.c:321
-#: plugins/sudoers/visudo.c:327 plugins/sudoers/visudo.c:433
-#: plugins/sudoers/visudo.c:609 plugins/sudoers/visudo.c:926
-#: plugins/sudoers/visudo.c:999 toke.l:938 toke.l:1067 toke.l:1127
+#: plugins/sudoers/visudo.c:145 plugins/sudoers/visudo.c:344
+#: plugins/sudoers/visudo.c:350 plugins/sudoers/visudo.c:456
+#: plugins/sudoers/visudo.c:632 plugins/sudoers/visudo.c:962
+#: plugins/sudoers/visudo.c:1035 toke.l:944 toke.l:1076 toke.l:1147
 msgid "unable to allocate memory"
 msgstr "메모리를 할당할 수 없습니다"
 
-#: gram.y:617
+#: gram.y:615
 msgid "a digest requires a path name"
 msgstr "다이제스트에 경로 이름이 필요합니다"
 
-#: gram.y:639
+#: gram.y:637
 msgid "values for \"CWD\" must start with a '/', '~', or '*'"
 msgstr "%s: \"CWD\" 값은 '/'; '~'; '*' 문자로 시작해야합니다"
 
-#: gram.y:651
+#: gram.y:643
+msgid "\"CWD\" path too long"
+msgstr "\"CWD\" 경로가 너무 깁니다"
+
+#: gram.y:653
 msgid "values for \"CHROOT\" must start with a '/', '~', or '*'"
 msgstr "%s: \"CHROOT\" 값은 '/'; '~'; '*' 문자로 시작해야합니다"
 
-#: gram.y:782
+#: gram.y:659
+msgid "\"CHROOT\" path too long"
+msgstr "\"CHROOT\" 경로가 너무 깁니다"
+
+#: gram.y:788
 #, c-format
 msgid "syntax error, reserved word %s used as an alias name"
 msgstr "문법 오류. %s 예약어를 별칭으로 썼습니다"
 
-#: gram.y:805
+#: gram.y:811
 msgid "invalid notbefore value"
 msgstr "부적절한 notbefore 값"
 
-#: gram.y:814
+#: gram.y:820
 msgid "invalid notafter value"
 msgstr "부적절한 notafter 값"
 
-#: gram.y:824 plugins/sudoers/policy.c:345
+#: gram.y:830 plugins/sudoers/policy.c:353
 msgid "timeout value too large"
 msgstr "제한 시간 값이 너무 큽니다"
 
-#: gram.y:826 plugins/sudoers/policy.c:347
+#: gram.y:832 plugins/sudoers/policy.c:355
 msgid "invalid timeout value"
 msgstr "부적절한 제한 시간 값"
 
-#: gram.y:1193
+#: gram.y:946 plugins/sudoers/sudoers.c:998
+msgid "command too long"
+msgstr "명령이 너무 깁니다"
+
+#: gram.y:1203
 #, c-format
 msgid "%s:%d:%d: %s\n"
 msgstr "%s:%d:%d: %s\n"
 
-#: gram.y:1237
+#: gram.y:1247
 #, c-format
 msgid "Alias \"%s\" already defined"
 msgstr "\"%s\" 별칭을 이미 정의했습니다"
 
-#: gram.y:1658 gram.y:1708 lib/eventlog/eventlog.c:308
-#: lib/eventlog/eventlog.c:783 lib/eventlog/eventlog.c:858
-#: lib/eventlog/eventlog.c:861 lib/eventlog/eventlog.c:1146
-#: lib/iolog/iolog_json.c:125 lib/iolog/iolog_json.c:329
-#: lib/iolog/iolog_json.c:360 lib/iolog/iolog_json.c:503
+#: gram.y:1744 gram.y:1794 lib/eventlog/eventlog.c:309
+#: lib/eventlog/eventlog.c:804 lib/eventlog/eventlog.c:877
+#: lib/eventlog/eventlog.c:880 lib/eventlog/eventlog.c:1176
+#: lib/iolog/iolog_json.c:150 lib/iolog/iolog_json.c:381
+#: lib/iolog/iolog_json.c:412 lib/iolog/iolog_json.c:555
 #: lib/iolog/iolog_legacy.c:100 lib/iolog/iolog_legacy.c:111
 #: lib/iolog/iolog_legacy.c:123 lib/iolog/iolog_legacy.c:133
 #: lib/iolog/iolog_legacy.c:139 lib/iolog/iolog_loginfo.c:76
-#: lib/iolog/iolog_loginfo.c:210 logsrvd/iolog_writer.c:85
-#: logsrvd/iolog_writer.c:90 logsrvd/iolog_writer.c:124
+#: lib/iolog/iolog_loginfo.c:211 logsrvd/iolog_writer.c:84
+#: logsrvd/iolog_writer.c:89 logsrvd/iolog_writer.c:123
 #: logsrvd/iolog_writer.c:162 logsrvd/iolog_writer.c:171
 #: logsrvd/iolog_writer.c:189 logsrvd/iolog_writer.c:211
 #: logsrvd/iolog_writer.c:224 logsrvd/iolog_writer.c:251
@@ -235,110 +260,124 @@ msgstr "\"%s\" 별칭을 이미 정의했습니다"
 #: logsrvd/iolog_writer.c:339 logsrvd/iolog_writer.c:354
 #: logsrvd/iolog_writer.c:393 logsrvd/iolog_writer.c:399
 #: logsrvd/iolog_writer.c:406 logsrvd/iolog_writer.c:412
-#: logsrvd/iolog_writer.c:596 logsrvd/logsrv_util.c:62 logsrvd/logsrvd.c:302
-#: logsrvd/logsrvd.c:311 logsrvd/logsrvd.c:454 logsrvd/logsrvd.c:491
-#: logsrvd/logsrvd.c:599 logsrvd/logsrvd.c:1090 logsrvd/logsrvd.c:1402
-#: logsrvd/logsrvd.c:1408 logsrvd/logsrvd_conf.c:1361
-#: logsrvd/logsrvd_journal.c:71 logsrvd/logsrvd_journal.c:115
-#: logsrvd/logsrvd_journal.c:204 logsrvd/logsrvd_journal.c:234
-#: logsrvd/logsrvd_journal.c:238 logsrvd/logsrvd_journal.c:246
-#: logsrvd/logsrvd_journal.c:269 logsrvd/logsrvd_journal.c:273
-#: logsrvd/logsrvd_journal.c:426 logsrvd/logsrvd_local.c:173
-#: logsrvd/logsrvd_local.c:236 logsrvd/logsrvd_local.c:317
-#: logsrvd/logsrvd_local.c:323 logsrvd/logsrvd_local.c:342
-#: logsrvd/logsrvd_queue.c:154 logsrvd/logsrvd_queue.c:185
-#: logsrvd/logsrvd_queue.c:262 logsrvd/sendlog.c:302 logsrvd/sendlog.c:501
-#: logsrvd/sendlog.c:1353 logsrvd/sendlog.c:1360 logsrvd/sendlog.c:1563
-#: logsrvd/tls_init.c:218 logsrvd/tls_init.c:239 logsrvd/tls_init.c:249
-#: plugins/sudoers/audit.c:114 plugins/sudoers/audit.c:271
-#: plugins/sudoers/auth/pam.c:505 plugins/sudoers/auth/pam.c:691
-#: plugins/sudoers/auth/rfc1938.c:111 plugins/sudoers/check_aliases.c:95
-#: plugins/sudoers/cvtsudoers.c:119 plugins/sudoers/cvtsudoers.c:159
-#: plugins/sudoers/cvtsudoers.c:176 plugins/sudoers/cvtsudoers.c:187
-#: plugins/sudoers/cvtsudoers.c:299 plugins/sudoers/cvtsudoers.c:427
-#: plugins/sudoers/cvtsudoers.c:560 plugins/sudoers/cvtsudoers.c:577
-#: plugins/sudoers/cvtsudoers.c:646 plugins/sudoers/cvtsudoers.c:761
-#: plugins/sudoers/cvtsudoers.c:768 plugins/sudoers/cvtsudoers.c:1183
-#: plugins/sudoers/cvtsudoers.c:1187 plugins/sudoers/cvtsudoers.c:1289
+#: logsrvd/iolog_writer.c:596 logsrvd/logsrv_util.c:64 logsrvd/logsrvd.c:296
+#: logsrvd/logsrvd.c:305 logsrvd/logsrvd.c:448 logsrvd/logsrvd.c:485
+#: logsrvd/logsrvd.c:593 logsrvd/logsrvd.c:1084 logsrvd/logsrvd.c:1400
+#: logsrvd/logsrvd.c:1406 logsrvd/logsrvd_conf.c:1360
+#: logsrvd/logsrvd_journal.c:70 logsrvd/logsrvd_journal.c:114
+#: logsrvd/logsrvd_journal.c:203 logsrvd/logsrvd_journal.c:233
+#: logsrvd/logsrvd_journal.c:237 logsrvd/logsrvd_journal.c:245
+#: logsrvd/logsrvd_journal.c:268 logsrvd/logsrvd_journal.c:272
+#: logsrvd/logsrvd_journal.c:425 logsrvd/logsrvd_local.c:174
+#: logsrvd/logsrvd_local.c:237 logsrvd/logsrvd_local.c:425
+#: logsrvd/logsrvd_local.c:431 logsrvd/logsrvd_local.c:450
+#: logsrvd/logsrvd_queue.c:153 logsrvd/logsrvd_queue.c:184
+#: logsrvd/logsrvd_queue.c:261 logsrvd/sendlog.c:246 logsrvd/sendlog.c:255
+#: logsrvd/sendlog.c:333 logsrvd/sendlog.c:640 logsrvd/sendlog.c:1526
+#: logsrvd/sendlog.c:1533 logsrvd/sendlog.c:1756 logsrvd/tls_init.c:293
+#: logsrvd/tls_init.c:314 logsrvd/tls_init.c:324 plugins/sudoers/audit.c:116
+#: plugins/sudoers/auth/pam.c:503 plugins/sudoers/auth/pam.c:689
+#: plugins/sudoers/auth/rfc1938.c:111 plugins/sudoers/check_aliases.c:134
+#: plugins/sudoers/cvtsudoers.c:131 plugins/sudoers/cvtsudoers.c:174
+#: plugins/sudoers/cvtsudoers.c:191 plugins/sudoers/cvtsudoers.c:202
+#: plugins/sudoers/cvtsudoers.c:332 plugins/sudoers/cvtsudoers.c:533
+#: plugins/sudoers/cvtsudoers.c:666 plugins/sudoers/cvtsudoers.c:684
+#: plugins/sudoers/cvtsudoers.c:755 plugins/sudoers/cvtsudoers.c:870
+#: plugins/sudoers/cvtsudoers.c:877 plugins/sudoers/cvtsudoers.c:1373
+#: plugins/sudoers/cvtsudoers.c:1377 plugins/sudoers/cvtsudoers.c:1479
+#: plugins/sudoers/cvtsudoers_csv.c:182 plugins/sudoers/cvtsudoers_csv.c:245
 #: plugins/sudoers/cvtsudoers_json.c:75 plugins/sudoers/cvtsudoers_ldif.c:150
 #: plugins/sudoers/cvtsudoers_ldif.c:193 plugins/sudoers/cvtsudoers_ldif.c:234
-#: plugins/sudoers/cvtsudoers_ldif.c:299 plugins/sudoers/cvtsudoers_ldif.c:370
-#: plugins/sudoers/cvtsudoers_ldif.c:424 plugins/sudoers/cvtsudoers_ldif.c:432
-#: plugins/sudoers/cvtsudoers_ldif.c:443 plugins/sudoers/cvtsudoers_ldif.c:450
-#: plugins/sudoers/cvtsudoers_ldif.c:463 plugins/sudoers/cvtsudoers_ldif.c:471
-#: plugins/sudoers/cvtsudoers_ldif.c:618 plugins/sudoers/defaults.c:652
-#: plugins/sudoers/defaults.c:947 plugins/sudoers/defaults.c:1122
+#: plugins/sudoers/cvtsudoers_ldif.c:299 plugins/sudoers/cvtsudoers_ldif.c:375
+#: plugins/sudoers/cvtsudoers_ldif.c:429 plugins/sudoers/cvtsudoers_ldif.c:437
+#: plugins/sudoers/cvtsudoers_ldif.c:448 plugins/sudoers/cvtsudoers_ldif.c:455
+#: plugins/sudoers/cvtsudoers_ldif.c:468 plugins/sudoers/cvtsudoers_ldif.c:476
+#: plugins/sudoers/cvtsudoers_ldif.c:623
+#: plugins/sudoers/cvtsudoers_merge.c:246
+#: plugins/sudoers/cvtsudoers_merge.c:292
+#: plugins/sudoers/cvtsudoers_merge.c:338
+#: plugins/sudoers/cvtsudoers_merge.c:359
+#: plugins/sudoers/cvtsudoers_merge.c:446
+#: plugins/sudoers/cvtsudoers_merge.c:454
+#: plugins/sudoers/cvtsudoers_merge.c:457
+#: plugins/sudoers/cvtsudoers_merge.c:523
+#: plugins/sudoers/cvtsudoers_merge.c:526
+#: plugins/sudoers/cvtsudoers_merge.c:695
+#: plugins/sudoers/cvtsudoers_merge.c:703
+#: plugins/sudoers/cvtsudoers_merge.c:926
+#: plugins/sudoers/cvtsudoers_merge.c:962 plugins/sudoers/defaults.c:665
+#: plugins/sudoers/defaults.c:1019 plugins/sudoers/defaults.c:1206
 #: plugins/sudoers/editor.c:190 plugins/sudoers/env.c:262
 #: plugins/sudoers/exptilde.c:92 plugins/sudoers/filedigest.c:54
 #: plugins/sudoers/filedigest.c:70 plugins/sudoers/gc.c:57
 #: plugins/sudoers/group_plugin.c:132 plugins/sudoers/interfaces.c:68
-#: plugins/sudoers/iolog.c:606 plugins/sudoers/iolog.c:623
+#: plugins/sudoers/iolog.c:609 plugins/sudoers/iolog.c:635
 #: plugins/sudoers/ldap.c:184 plugins/sudoers/ldap.c:422
 #: plugins/sudoers/ldap.c:432 plugins/sudoers/ldap.c:437
 #: plugins/sudoers/ldap.c:441 plugins/sudoers/ldap.c:453
-#: plugins/sudoers/ldap.c:744 plugins/sudoers/ldap.c:908
-#: plugins/sudoers/ldap.c:1281 plugins/sudoers/ldap.c:1709
-#: plugins/sudoers/ldap.c:1746 plugins/sudoers/ldap.c:1827
-#: plugins/sudoers/ldap.c:1962 plugins/sudoers/ldap.c:2063
-#: plugins/sudoers/ldap.c:2079 plugins/sudoers/ldap_conf.c:218
+#: plugins/sudoers/ldap.c:749 plugins/sudoers/ldap.c:913
+#: plugins/sudoers/ldap.c:1286 plugins/sudoers/ldap.c:1712
+#: plugins/sudoers/ldap.c:1749 plugins/sudoers/ldap.c:1830
+#: plugins/sudoers/ldap.c:1965 plugins/sudoers/ldap.c:2066
+#: plugins/sudoers/ldap.c:2082 plugins/sudoers/ldap_conf.c:218
 #: plugins/sudoers/ldap_conf.c:249 plugins/sudoers/ldap_conf.c:301
 #: plugins/sudoers/ldap_conf.c:337 plugins/sudoers/ldap_conf.c:441
 #: plugins/sudoers/ldap_conf.c:456 plugins/sudoers/ldap_conf.c:553
 #: plugins/sudoers/ldap_conf.c:586 plugins/sudoers/ldap_conf.c:677
 #: plugins/sudoers/ldap_conf.c:760 plugins/sudoers/ldap_util.c:292
-#: plugins/sudoers/ldap_util.c:299 plugins/sudoers/ldap_util.c:615
-#: plugins/sudoers/linux_audit.c:86 plugins/sudoers/log_client.c:108
-#: plugins/sudoers/log_client.c:217 plugins/sudoers/log_client.c:238
-#: plugins/sudoers/log_client.c:251 plugins/sudoers/log_client.c:386
-#: plugins/sudoers/log_client.c:699 plugins/sudoers/log_client.c:720
-#: plugins/sudoers/log_client.c:1440 plugins/sudoers/log_client.c:1656
-#: plugins/sudoers/log_client.c:1980 plugins/sudoers/log_client.c:2037
-#: plugins/sudoers/logging.c:101 plugins/sudoers/logging.c:180
-#: plugins/sudoers/logging.c:181 plugins/sudoers/logging.c:464
-#: plugins/sudoers/logging.c:484 plugins/sudoers/logging.c:627
+#: plugins/sudoers/ldap_util.c:299 plugins/sudoers/ldap_util.c:613
+#: plugins/sudoers/linux_audit.c:86 plugins/sudoers/log_client.c:112
+#: plugins/sudoers/log_client.c:221 plugins/sudoers/log_client.c:242
+#: plugins/sudoers/log_client.c:255 plugins/sudoers/log_client.c:390
+#: plugins/sudoers/log_client.c:703 plugins/sudoers/log_client.c:724
+#: plugins/sudoers/log_client.c:1444 plugins/sudoers/log_client.c:1662
+#: plugins/sudoers/log_client.c:1989 plugins/sudoers/log_client.c:2046
+#: plugins/sudoers/logging.c:104 plugins/sudoers/logging.c:183
+#: plugins/sudoers/logging.c:184 plugins/sudoers/logging.c:467
+#: plugins/sudoers/logging.c:487 plugins/sudoers/logging.c:627
 #: plugins/sudoers/match_command.c:296 plugins/sudoers/match_command.c:496
 #: plugins/sudoers/match_command.c:545 plugins/sudoers/match_command.c:618
 #: plugins/sudoers/match_command.c:665 plugins/sudoers/match_digest.c:93
 #: plugins/sudoers/parse.c:200 plugins/sudoers/parse.c:217
-#: plugins/sudoers/parse.c:237 plugins/sudoers/parse.c:254
-#: plugins/sudoers/parse.c:277 plugins/sudoers/parse.c:288
+#: plugins/sudoers/parse.c:249 plugins/sudoers/parse.c:266
+#: plugins/sudoers/parse.c:289 plugins/sudoers/parse.c:300
 #: plugins/sudoers/parse_ldif.c:152 plugins/sudoers/parse_ldif.c:183
-#: plugins/sudoers/parse_ldif.c:252 plugins/sudoers/parse_ldif.c:259
-#: plugins/sudoers/parse_ldif.c:264 plugins/sudoers/parse_ldif.c:340
-#: plugins/sudoers/parse_ldif.c:351 plugins/sudoers/parse_ldif.c:378
-#: plugins/sudoers/parse_ldif.c:395 plugins/sudoers/parse_ldif.c:407
-#: plugins/sudoers/parse_ldif.c:411 plugins/sudoers/parse_ldif.c:425
-#: plugins/sudoers/parse_ldif.c:483 plugins/sudoers/parse_ldif.c:596
-#: plugins/sudoers/parse_ldif.c:625 plugins/sudoers/parse_ldif.c:650
-#: plugins/sudoers/parse_ldif.c:708 plugins/sudoers/parse_ldif.c:725
-#: plugins/sudoers/parse_ldif.c:753 plugins/sudoers/parse_ldif.c:760
+#: plugins/sudoers/parse_ldif.c:252 plugins/sudoers/parse_ldif.c:260
+#: plugins/sudoers/parse_ldif.c:265 plugins/sudoers/parse_ldif.c:341
+#: plugins/sudoers/parse_ldif.c:352 plugins/sudoers/parse_ldif.c:379
+#: plugins/sudoers/parse_ldif.c:396 plugins/sudoers/parse_ldif.c:408
+#: plugins/sudoers/parse_ldif.c:412 plugins/sudoers/parse_ldif.c:426
+#: plugins/sudoers/parse_ldif.c:484 plugins/sudoers/parse_ldif.c:597
+#: plugins/sudoers/parse_ldif.c:626 plugins/sudoers/parse_ldif.c:651
+#: plugins/sudoers/parse_ldif.c:709 plugins/sudoers/parse_ldif.c:726
+#: plugins/sudoers/parse_ldif.c:754 plugins/sudoers/parse_ldif.c:761
 #: plugins/sudoers/policy.c:152 plugins/sudoers/policy.c:161
 #: plugins/sudoers/policy.c:170 plugins/sudoers/policy.c:197
-#: plugins/sudoers/policy.c:330 plugins/sudoers/policy.c:345
-#: plugins/sudoers/policy.c:347 plugins/sudoers/policy.c:377
-#: plugins/sudoers/policy.c:386 plugins/sudoers/policy.c:434
-#: plugins/sudoers/policy.c:444 plugins/sudoers/policy.c:453
-#: plugins/sudoers/policy.c:462 plugins/sudoers/policy.c:556
-#: plugins/sudoers/policy.c:923 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:195 plugins/sudoers/pwutil.c:266
-#: plugins/sudoers/pwutil.c:344 plugins/sudoers/pwutil.c:518
-#: plugins/sudoers/pwutil.c:583 plugins/sudoers/pwutil.c:655
-#: plugins/sudoers/pwutil.c:853 plugins/sudoers/pwutil.c:909
-#: plugins/sudoers/pwutil.c:953 plugins/sudoers/pwutil.c:1010
+#: plugins/sudoers/policy.c:338 plugins/sudoers/policy.c:353
+#: plugins/sudoers/policy.c:355 plugins/sudoers/policy.c:385
+#: plugins/sudoers/policy.c:394 plugins/sudoers/policy.c:442
+#: plugins/sudoers/policy.c:452 plugins/sudoers/policy.c:461
+#: plugins/sudoers/policy.c:470 plugins/sudoers/policy.c:564
+#: plugins/sudoers/policy.c:978 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/pwutil.c:199 plugins/sudoers/pwutil.c:270
+#: plugins/sudoers/pwutil.c:348 plugins/sudoers/pwutil.c:522
+#: plugins/sudoers/pwutil.c:587 plugins/sudoers/pwutil.c:659
+#: plugins/sudoers/pwutil.c:857 plugins/sudoers/pwutil.c:913
+#: plugins/sudoers/pwutil.c:957 plugins/sudoers/pwutil.c:1014
 #: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:706
 #: plugins/sudoers/set_perms.c:1073 plugins/sudoers/set_perms.c:1380
 #: plugins/sudoers/set_perms.c:1549 plugins/sudoers/sssd.c:144
 #: plugins/sudoers/sssd.c:407 plugins/sudoers/sssd.c:470
-#: plugins/sudoers/sssd.c:514 plugins/sudoers/sssd.c:561
-#: plugins/sudoers/sssd.c:754 plugins/sudoers/strvec_join.c:53
+#: plugins/sudoers/sssd.c:514 plugins/sudoers/sssd.c:558
+#: plugins/sudoers/sssd.c:751 plugins/sudoers/strvec_join.c:53
 #: plugins/sudoers/stubs.c:111 plugins/sudoers/stubs.c:119
 #: plugins/sudoers/sudoers.c:335 plugins/sudoers/sudoers.c:361
 #: plugins/sudoers/sudoers.c:429 plugins/sudoers/sudoers.c:438
-#: plugins/sudoers/sudoers.c:479 plugins/sudoers/sudoers.c:833
-#: plugins/sudoers/sudoers.c:971 plugins/sudoers/sudoers.c:1030
-#: plugins/sudoers/sudoers.c:1296 plugins/sudoers/sudoreplay.c:562
+#: plugins/sudoers/sudoers.c:479 plugins/sudoers/sudoers.c:842
+#: plugins/sudoers/sudoers.c:980 plugins/sudoers/sudoers.c:1039
+#: plugins/sudoers/sudoers.c:1305 plugins/sudoers/sudoreplay.c:562
 #: plugins/sudoers/sudoreplay.c:565 plugins/sudoers/sudoreplay.c:1280
-#: plugins/sudoers/sudoreplay.c:1490 plugins/sudoers/sudoreplay.c:1494
+#: plugins/sudoers/sudoreplay.c:1500 plugins/sudoers/sudoreplay.c:1504
 #: plugins/sudoers/testsudoers.c:120 plugins/sudoers/testsudoers.c:224
 #: plugins/sudoers/testsudoers.c:241 plugins/sudoers/testsudoers.c:580
 #: plugins/sudoers/timestamp.c:424 plugins/sudoers/timestamp.c:468
@@ -346,135 +385,138 @@ msgstr "\"%s\" 별칭을 이미 정의했습니다"
 #: plugins/sudoers/toke_util.c:77 plugins/sudoers/toke_util.c:105
 #: plugins/sudoers/toke_util.c:130 plugins/sudoers/toke_util.c:154
 #: plugins/sudoers/toke_util.c:193 plugins/sudoers/tsdump.c:123
-#: plugins/sudoers/visudo.c:143 plugins/sudoers/visudo.c:321
-#: plugins/sudoers/visudo.c:327 plugins/sudoers/visudo.c:433
-#: plugins/sudoers/visudo.c:609 plugins/sudoers/visudo.c:926
-#: plugins/sudoers/visudo.c:999 toke.l:938 toke.l:1067 toke.l:1119 toke.l:1127
+#: plugins/sudoers/visudo.c:145 plugins/sudoers/visudo.c:344
+#: plugins/sudoers/visudo.c:350 plugins/sudoers/visudo.c:456
+#: plugins/sudoers/visudo.c:632 plugins/sudoers/visudo.c:962
+#: plugins/sudoers/visudo.c:1035 toke.l:944 toke.l:1076 toke.l:1139
+#: toke.l:1147
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: lib/eventlog/eventlog.c:313 lib/iolog/iolog_json.c:509
-#: lib/iolog/iolog_json.c:512 lib/iolog/iolog_json.c:514
+#: lib/eventlog/eventlog.c:314 lib/iolog/iolog_json.c:562
+#: lib/iolog/iolog_json.c:568 lib/iolog/iolog_json.c:574
+#: plugins/sudoers/cvtsudoers_csv.c:192 plugins/sudoers/cvtsudoers_csv.c:199
 #: plugins/sudoers/cvtsudoers_ldif.c:244 plugins/sudoers/cvtsudoers_ldif.c:251
-#: plugins/sudoers/cvtsudoers_ldif.c:575 plugins/sudoers/env.c:326
+#: plugins/sudoers/cvtsudoers_ldif.c:580 plugins/sudoers/env.c:326
 #: plugins/sudoers/env.c:333 plugins/sudoers/env.c:444
-#: plugins/sudoers/iolog.c:628 plugins/sudoers/ldap.c:517
-#: plugins/sudoers/ldap.c:748 plugins/sudoers/ldap.c:1081
-#: plugins/sudoers/ldap_conf.c:222 plugins/sudoers/ldap_conf.c:312
-#: plugins/sudoers/linux_audit.c:92 plugins/sudoers/policy.c:586
-#: plugins/sudoers/policy.c:755 plugins/sudoers/policy.c:766
+#: plugins/sudoers/ldap.c:520 plugins/sudoers/ldap.c:753
+#: plugins/sudoers/ldap.c:1086 plugins/sudoers/ldap_conf.c:222
+#: plugins/sudoers/ldap_conf.c:312 plugins/sudoers/ldap_util.c:485
+#: plugins/sudoers/linux_audit.c:92 plugins/sudoers/policy.c:594
+#: plugins/sudoers/policy.c:763 plugins/sudoers/policy.c:774
 #: plugins/sudoers/prompt.c:168 plugins/sudoers/strvec_join.c:62
 #: plugins/sudoers/testsudoers.c:245 plugins/sudoers/toke_util.c:206
+#: toke.l:908 toke.l:1110
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "내부 오류. %s 오버플로우"
 
-#: lib/eventlog/eventlog.c:372
+#: lib/eventlog/eventlog.c:373
 #, c-format
 msgid "unable to dup stdin: %m"
 msgstr "표준 입력을 복제할 수 없습니다: %m"
 
-#: lib/eventlog/eventlog.c:414
+#: lib/eventlog/eventlog.c:415
 #, c-format
 msgid "unable to execute %s: %m"
 msgstr "%s을(를) 실행할 수 없습니다: %m"
 
-#: lib/eventlog/eventlog.c:455 plugins/sudoers/auth/aix_auth.c:198
+#: lib/eventlog/eventlog.c:456 plugins/sudoers/auth/aix_auth.c:198
 msgid "unable to fork"
 msgstr "포킹할 수 없습니다"
 
-#: lib/eventlog/eventlog.c:463 lib/eventlog/eventlog.c:517
+#: lib/eventlog/eventlog.c:464 lib/eventlog/eventlog.c:518
 #, c-format
 msgid "unable to fork: %m"
 msgstr "포킹할 수 없습니다: %m"
 
-#: lib/eventlog/eventlog.c:507
+#: lib/eventlog/eventlog.c:508
 #, c-format
 msgid "unable to open pipe: %m"
 msgstr "파이프를 열 수 없습니다: %m"
 
-#: lib/eventlog/eventlog.c:979
+#: lib/eventlog/eventlog.c:1007
 #, c-format
 msgid "%8s : %s"
 msgstr "%8s : %s"
 
-#: lib/eventlog/eventlog.c:1008
+#: lib/eventlog/eventlog.c:1036
 #, c-format
 msgid "%8s : (command continued) %s"
 msgstr "%8s : (명령 계속 실행) %s"
 
-#: lib/iolog/iolog_json.c:115
+#: lib/iolog/iolog_json.c:140
 #, c-format
 msgid "expected JSON_STRING, got %d"
 msgstr "JSON_STRING 값을 기대했지만, %d 결과가 나왔습니다"
 
-#: lib/iolog/iolog_json.c:120
+#: lib/iolog/iolog_json.c:145
 msgid "JSON_ARRAY too large"
 msgstr "JSON_ARRAY 값이 너무 큽니다"
 
-#: lib/iolog/iolog_json.c:352
+#: lib/iolog/iolog_json.c:404
 msgid "missing double quote in name"
 msgstr "이름에 이중 따옴표가 빠졌습니다"
 
-#: lib/iolog/iolog_json.c:449
+#: lib/iolog/iolog_json.c:501
 msgid "missing JSON_OBJECT"
 msgstr "JSON_OBJECT 값이 빠졌습니다"
 
-#: lib/iolog/iolog_json.c:453
+#: lib/iolog/iolog_json.c:505
 #, c-format
 msgid "expected JSON_OBJECT, got %d"
 msgstr "JSON_OBJECT 값을 기대했지만, %d 결과가 나왔습니다"
 
-#: lib/iolog/iolog_json.c:599
+#: lib/iolog/iolog_json.c:661
 #, c-format
 msgid "json stack exhausted (max %u frames)"
 msgstr "json 스택 용량이 부족합니다 (최대 %u 프레임)"
 
-#: lib/iolog/iolog_json.c:673
+#: lib/iolog/iolog_json.c:735
 msgid "objects must consist of name:value pairs"
 msgstr "객체는 이름:값 쌍으로 구성해야 합니다"
 
-#: lib/iolog/iolog_json.c:678 lib/iolog/iolog_json.c:709
-#: lib/iolog/iolog_json.c:753 lib/iolog/iolog_json.c:775
-#: lib/iolog/iolog_json.c:797 lib/iolog/iolog_json.c:819
-#: lib/iolog/iolog_json.c:841
+#: lib/iolog/iolog_json.c:740 lib/iolog/iolog_json.c:771
+#: lib/iolog/iolog_json.c:815 lib/iolog/iolog_json.c:837
+#: lib/iolog/iolog_json.c:859 lib/iolog/iolog_json.c:881
+#: lib/iolog/iolog_json.c:903
 msgid "missing separator between values"
 msgstr "값을 구분하는 구분자가 빠졌습니다"
 
-#: lib/iolog/iolog_json.c:693 lib/iolog/iolog_json.c:867
+#: lib/iolog/iolog_json.c:755 lib/iolog/iolog_json.c:929
 msgid "unmatched close brace"
 msgstr "일치하지 않는 중괄호 닫기 표시"
 
-#: lib/iolog/iolog_json.c:704
+#: lib/iolog/iolog_json.c:766
 msgid "unexpected array"
 msgstr "예기치 않은 배열 발견"
 
-#: lib/iolog/iolog_json.c:724 lib/iolog/iolog_json.c:870
+#: lib/iolog/iolog_json.c:786 lib/iolog/iolog_json.c:932
 msgid "unmatched close bracket"
 msgstr "일치하지 않는 각괄호 닫기 표시"
 
-#: lib/iolog/iolog_json.c:735
+#: lib/iolog/iolog_json.c:797
 msgid "unexpected string"
 msgstr "예기치 않은 문자열 값 발견"
 
-#: lib/iolog/iolog_json.c:746
+#: lib/iolog/iolog_json.c:808
 msgid "missing colon after name"
 msgstr "이름 뒤에 콜론이 빠졌습니다"
 
-#: lib/iolog/iolog_json.c:767 lib/iolog/iolog_json.c:789
+#: lib/iolog/iolog_json.c:829 lib/iolog/iolog_json.c:851
 msgid "unexpected boolean"
 msgstr "예기치 않은 부울린 값 발견"
 
-#: lib/iolog/iolog_json.c:811
+#: lib/iolog/iolog_json.c:873
 msgid "unexpected null"
 msgstr "예기치 않은 NULL 값 발견"
 
-#: lib/iolog/iolog_json.c:832
+#: lib/iolog/iolog_json.c:894
 msgid "unexpected number"
 msgstr "예기치 않은 숫자 값 발견"
 
-#: lib/iolog/iolog_json.c:879
+#: lib/iolog/iolog_json.c:941
 msgid "parse error"
 msgstr "해석 오류"
 
@@ -514,13 +556,13 @@ msgid "%s exists but is not a directory (0%o)"
 msgstr "%s이(가) 있지만 디렉터리가 아닙니다(0%o)"
 
 #: lib/iolog/iolog_mkdirs.c:119 lib/iolog/iolog_mkdtemp.c:77
-#: logsrvd/iolog_writer.c:788 plugins/sudoers/timestamp.c:205
+#: logsrvd/iolog_writer.c:807 plugins/sudoers/timestamp.c:205
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "mkdir %s 명령을 실행할 수 없습니다"
 
-#: lib/iolog/iolog_mkdtemp.c:81 plugins/sudoers/visudo.c:726
-#: plugins/sudoers/visudo.c:737
+#: lib/iolog/iolog_mkdtemp.c:81 plugins/sudoers/visudo.c:731
+#: plugins/sudoers/visudo.c:765 plugins/sudoers/visudo.c:771
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "%s 모드를 0%o 값으로 바꿀 수 없습니다"
@@ -535,8 +577,8 @@ msgstr "타이밍 파일 읽기 오류: %s"
 msgid "invalid timing file line: %s"
 msgstr "부적절한 타이밍 파일 행: %s"
 
-#: logsrvd/iolog_writer.c:131 plugins/sudoers/logging.c:803
-#: plugins/sudoers/policy.c:536
+#: logsrvd/iolog_writer.c:130 plugins/sudoers/logging.c:803
+#: plugins/sudoers/policy.c:544
 msgid "unable to generate UUID"
 msgstr "UUID를 만들 수 없습니다"
 
@@ -590,90 +632,95 @@ msgstr "부적절한 입출력 파일 서술자 %d번"
 msgid "error closing iofd %d: %s"
 msgstr "%d 입출력 파일 서술자 닫기 오류: %s"
 
-#: logsrvd/iolog_writer.c:758
+#: logsrvd/iolog_writer.c:662
+#, c-format
+msgid "error flushing iofd %d: %s"
+msgstr "%d 입출력 파일 서술자 제거 오류: %s"
+
+#: logsrvd/iolog_writer.c:777
 #, c-format
 msgid "invalid I/O log %s: %s referenced but not present"
 msgstr "부적절한 %s 입출력 로그: %s을(를) 참조했지만 없습니다"
 
-#: logsrvd/iolog_writer.c:770 logsrvd/logsrvd_journal.c:378
+#: logsrvd/iolog_writer.c:789 logsrvd/logsrvd_journal.c:377
 #, c-format
 msgid "%s: unable to find resume point [%lld, %ld]"
 msgstr "%s:  [%lld, %ld] 재개 지점을 찾을 수 없습니다"
 
-#: logsrvd/iolog_writer.c:792 logsrvd/logsrvd_journal.c:421
-#: logsrvd/logsrvd_queue.c:111 logsrvd/tls_init.c:293
-#: plugins/sudoers/check.c:274 plugins/sudoers/cvtsudoers.c:618
-#: plugins/sudoers/cvtsudoers.c:639 plugins/sudoers/cvtsudoers.c:1249
-#: plugins/sudoers/cvtsudoers_json.c:877 plugins/sudoers/cvtsudoers_ldif.c:692
-#: plugins/sudoers/sudoers.c:1083 plugins/sudoers/sudoreplay.c:1456
-#: plugins/sudoers/timestamp.c:433 plugins/sudoers/tsdump.c:128
-#: plugins/sudoers/visudo.c:913
+#: logsrvd/iolog_writer.c:811 logsrvd/logsrvd_journal.c:420
+#: logsrvd/logsrvd_queue.c:110 logsrvd/tls_init.c:245
+#: plugins/sudoers/check.c:274 plugins/sudoers/cvtsudoers.c:727
+#: plugins/sudoers/cvtsudoers.c:748 plugins/sudoers/cvtsudoers.c:1439
+#: plugins/sudoers/cvtsudoers_csv.c:681 plugins/sudoers/cvtsudoers_json.c:885
+#: plugins/sudoers/cvtsudoers_ldif.c:697 plugins/sudoers/sudoers.c:1092
+#: plugins/sudoers/sudoreplay.c:1466 plugins/sudoers/timestamp.c:433
+#: plugins/sudoers/tsdump.c:128 plugins/sudoers/visudo.c:949
 #, c-format
 msgid "unable to open %s"
 msgstr "%s을(를) 열 수 없습니다"
 
-#: logsrvd/iolog_writer.c:804 logsrvd/logsrv_util.c:98
-#: logsrvd/logsrv_util.c:105 plugins/sudoers/sudoreplay.c:362
+#: logsrvd/iolog_writer.c:823 logsrvd/logsrv_util.c:100
+#: logsrvd/logsrv_util.c:107 plugins/sudoers/sudoreplay.c:362
 #: plugins/sudoers/sudoreplay.c:368
 #, c-format
 msgid "unable to open %s/%s"
 msgstr "%s/%s을(를) 열 수 없습니다"
 
-#: logsrvd/iolog_writer.c:817
+#: logsrvd/iolog_writer.c:836
 #, c-format
 msgid "unable to copy %s/%s to %s/%s: %s"
 msgstr "%s/%s을(를) %s/%s(으)로 복사할 수 없습니다: %s"
 
-#: logsrvd/iolog_writer.c:846 logsrvd/logsrvd_journal.c:186
+#: logsrvd/iolog_writer.c:865 logsrvd/logsrvd_journal.c:185
 #, c-format
 msgid "unable to rename %s to %s"
 msgstr "%s을(를) %s(으)로 이름을 바꿀 수 없습니다"
 
-#: logsrvd/logsrv_util.c:132
-#, c-format
-msgid "missing I/O log file %s/%s"
-msgstr "입출력 로그 파일 %s/%s 빠짐"
-
-#: logsrvd/logsrv_util.c:139
-#, c-format
-msgid "%s/%s: unable to seek forward %zu"
-msgstr "%s/%s: %zu회 이전 탐색을 진행할 수 없습니다"
-
-#: logsrvd/logsrv_util.c:149
+#: logsrvd/logsrv_util.c:139 logsrvd/logsrv_util.c:168
 #, c-format
 msgid "%s/%s: unable to find resume point [%lld, %ld]"
 msgstr "%s/%s: [%lld, %ld] 재개 지점을 찾을 수 없습니다"
 
-#: logsrvd/logsrvd.c:272 logsrvd/logsrvd_queue.c:131
+#: logsrvd/logsrv_util.c:151
+#, c-format
+msgid "missing I/O log file %s/%s"
+msgstr "입출력 로그 파일 %s/%s 빠짐"
+
+#: logsrvd/logsrv_util.c:158
+#, c-format
+msgid "%s/%s: unable to seek forward %zu"
+msgstr "%s/%s: %zu회 이전 탐색을 진행할 수 없습니다"
+
+#: logsrvd/logsrvd.c:266 logsrvd/logsrvd_queue.c:130
 msgid "unable to connect to relay"
 msgstr "릴레이에 연결할 수 없습니다"
 
-#: logsrvd/logsrvd.c:331 logsrvd/logsrvd_relay.c:838
+#: logsrvd/logsrvd.c:325 logsrvd/logsrvd_relay.c:835
 #, c-format
 msgid "server message too large: %zu"
 msgstr "서버 메시지가 너무 깁니다: %zu"
 
-#: logsrvd/logsrvd.c:423 logsrvd/logsrvd.c:540 logsrvd/logsrvd.c:619
-#: logsrvd/logsrvd.c:843 logsrvd/logsrvd.c:857 logsrvd/logsrvd.c:1016
-#: logsrvd/logsrvd.c:1140 logsrvd/logsrvd.c:1309 logsrvd/logsrvd.c:1327
-#: logsrvd/logsrvd.c:1425 logsrvd/logsrvd.c:1548 logsrvd/logsrvd.c:1732
-#: logsrvd/logsrvd_journal.c:485 logsrvd/logsrvd_local.c:196
-#: logsrvd/logsrvd_queue.c:160 logsrvd/logsrvd_relay.c:173
-#: logsrvd/logsrvd_relay.c:250 logsrvd/logsrvd_relay.c:254
-#: logsrvd/logsrvd_relay.c:390 logsrvd/logsrvd_relay.c:582
-#: logsrvd/logsrvd_relay.c:743 logsrvd/logsrvd_relay.c:1124
-#: logsrvd/sendlog.c:1156 logsrvd/tls_client.c:136 logsrvd/tls_client.c:152
-#: logsrvd/tls_client.c:214 plugins/sudoers/audit.c:281
-#: plugins/sudoers/iolog.c:966 plugins/sudoers/iolog.c:1099
-#: plugins/sudoers/iolog.c:1197 plugins/sudoers/log_client.c:112
-#: plugins/sudoers/log_client.c:328 plugins/sudoers/log_client.c:344
-#: plugins/sudoers/log_client.c:391 plugins/sudoers/log_client.c:595
-#: plugins/sudoers/log_client.c:602 plugins/sudoers/log_client.c:1127
-#: plugins/sudoers/log_client.c:1409 plugins/sudoers/log_client.c:1450
-#: plugins/sudoers/log_client.c:1458 plugins/sudoers/log_client.c:1612
-#: plugins/sudoers/log_client.c:1728 plugins/sudoers/log_client.c:2045
-#: plugins/sudoers/log_client.c:2053 plugins/sudoers/logging.c:139
-#: plugins/sudoers/logging.c:195 plugins/sudoers/sudoreplay.c:522
+#: logsrvd/logsrvd.c:417 logsrvd/logsrvd.c:534 logsrvd/logsrvd.c:613
+#: logsrvd/logsrvd.c:837 logsrvd/logsrvd.c:851 logsrvd/logsrvd.c:1010
+#: logsrvd/logsrvd.c:1134 logsrvd/logsrvd.c:1307 logsrvd/logsrvd.c:1325
+#: logsrvd/logsrvd.c:1423 logsrvd/logsrvd.c:1546 logsrvd/logsrvd.c:1730
+#: logsrvd/logsrvd_journal.c:489 logsrvd/logsrvd_local.c:197
+#: logsrvd/logsrvd_queue.c:159 logsrvd/logsrvd_relay.c:167
+#: logsrvd/logsrvd_relay.c:244 logsrvd/logsrvd_relay.c:248
+#: logsrvd/logsrvd_relay.c:384 logsrvd/logsrvd_relay.c:576
+#: logsrvd/logsrvd_relay.c:737 logsrvd/logsrvd_relay.c:1121
+#: logsrvd/sendlog.c:1316 logsrvd/tls_client.c:131 logsrvd/tls_client.c:147
+#: logsrvd/tls_client.c:209 plugins/sudoers/audit.c:276
+#: plugins/sudoers/iolog.c:963 plugins/sudoers/iolog.c:1096
+#: plugins/sudoers/iolog.c:1194 plugins/sudoers/log_client.c:116
+#: plugins/sudoers/log_client.c:332 plugins/sudoers/log_client.c:348
+#: plugins/sudoers/log_client.c:395 plugins/sudoers/log_client.c:599
+#: plugins/sudoers/log_client.c:606 plugins/sudoers/log_client.c:1131
+#: plugins/sudoers/log_client.c:1413 plugins/sudoers/log_client.c:1454
+#: plugins/sudoers/log_client.c:1462 plugins/sudoers/log_client.c:1618
+#: plugins/sudoers/log_client.c:1734 plugins/sudoers/log_client.c:2054
+#: plugins/sudoers/log_client.c:2062 plugins/sudoers/logging.c:142
+#: plugins/sudoers/logging.c:198 plugins/sudoers/sudoreplay.c:522
 #: plugins/sudoers/sudoreplay.c:569 plugins/sudoers/sudoreplay.c:811
 #: plugins/sudoers/sudoreplay.c:923 plugins/sudoers/sudoreplay.c:1014
 #: plugins/sudoers/sudoreplay.c:1029 plugins/sudoers/sudoreplay.c:1036
@@ -682,620 +729,611 @@ msgstr "서버 메시지가 너무 깁니다: %zu"
 msgid "unable to add event to queue"
 msgstr "큐에 이벤트를 추가할 수 없습니다"
 
-#: logsrvd/logsrvd.c:447 logsrvd/logsrvd.c:484 logsrvd/logsrvd.c:516
-#: logsrvd/logsrvd.c:564 logsrvd/logsrvd.c:636 logsrvd/logsrvd.c:666
-#: logsrvd/logsrvd.c:696 logsrvd/logsrvd.c:726 logsrvd/logsrvd_relay.c:511
-#: logsrvd/logsrvd_relay.c:544
+#: logsrvd/logsrvd.c:441 logsrvd/logsrvd.c:478 logsrvd/logsrvd.c:510
+#: logsrvd/logsrvd.c:558 logsrvd/logsrvd.c:630 logsrvd/logsrvd.c:660
+#: logsrvd/logsrvd.c:690 logsrvd/logsrvd.c:720 logsrvd/logsrvd_relay.c:505
+#: logsrvd/logsrvd_relay.c:538
 #, c-format
 msgid "unexpected state %d for %s"
 msgstr "%2$s의 예기치 않은 상태 %1$d번"
 
-#: logsrvd/logsrvd.c:448 logsrvd/logsrvd.c:485 logsrvd/logsrvd.c:517
-#: logsrvd/logsrvd.c:565 logsrvd/logsrvd.c:637 logsrvd/logsrvd.c:667
-#: logsrvd/logsrvd.c:697 logsrvd/logsrvd.c:727 logsrvd/logsrvd_relay.c:513
-#: logsrvd/logsrvd_relay.c:546
+#: logsrvd/logsrvd.c:442 logsrvd/logsrvd.c:479 logsrvd/logsrvd.c:511
+#: logsrvd/logsrvd.c:559 logsrvd/logsrvd.c:631 logsrvd/logsrvd.c:661
+#: logsrvd/logsrvd.c:691 logsrvd/logsrvd.c:721 logsrvd/logsrvd_relay.c:507
+#: logsrvd/logsrvd_relay.c:540
 msgid "state machine error"
 msgstr "상태 머신 오류"
 
-#: logsrvd/logsrvd.c:454 logsrvd/logsrvd.c:455
+#: logsrvd/logsrvd.c:448 logsrvd/logsrvd.c:449
 msgid "invalid AcceptMessage"
 msgstr "부적절한 AcceptMessage"
 
-#: logsrvd/logsrvd.c:491 logsrvd/logsrvd.c:492
+#: logsrvd/logsrvd.c:485 logsrvd/logsrvd.c:486
 msgid "invalid RejectMessage"
 msgstr "부적절한 RejectMessage"
 
-#: logsrvd/logsrvd.c:599 logsrvd/logsrvd.c:600
+#: logsrvd/logsrvd.c:593 logsrvd/logsrvd.c:594
 msgid "invalid AlertMessage"
 msgstr "부적절한 AlertMessage"
 
-#: logsrvd/logsrvd.c:641 logsrvd/logsrvd.c:671 logsrvd/logsrvd.c:701
+#: logsrvd/logsrvd.c:635 logsrvd/logsrvd.c:665 logsrvd/logsrvd.c:695
 #, c-format
 msgid "%s: unexpected IoBuffer"
 msgstr "%s: 예기치 않은 입출력 버퍼 발견"
 
-#: logsrvd/logsrvd.c:642 logsrvd/logsrvd.c:672 logsrvd/logsrvd.c:702
+#: logsrvd/logsrvd.c:636 logsrvd/logsrvd.c:666 logsrvd/logsrvd.c:696
 msgid "protocol error"
 msgstr "프로토콜 오류"
 
-#: logsrvd/logsrvd.c:797 logsrvd/logsrvd_journal.c:358
-#: logsrvd/logsrvd_local.c:125 logsrvd/logsrvd_relay.c:677
+#: logsrvd/logsrvd.c:791 logsrvd/logsrvd_journal.c:357
+#: logsrvd/logsrvd_local.c:125 logsrvd/logsrvd_relay.c:671
 #, c-format
 msgid "unexpected type_case value %d in %s from %s"
 msgstr "%3$s의 %2$s에서 예기지 않은 type_case 값 %1$d"
 
-#: logsrvd/logsrvd.c:799
+#: logsrvd/logsrvd.c:793
 msgid "unrecognized ClientMessage type"
 msgstr "인식할 수 없는 ClientMessage 형식"
 
-#: logsrvd/logsrvd.c:889
+#: logsrvd/logsrvd.c:883
 #, c-format
 msgid "timed out writing to client %s"
 msgstr "%s 클라이언트 기록 시간 초과"
 
-#: logsrvd/logsrvd.c:894 logsrvd/logsrvd_relay.c:910
+#: logsrvd/logsrvd.c:888 logsrvd/logsrvd_relay.c:907 logsrvd/sendlog.c:1420
 #, c-format
 msgid "missing write buffer for client %s"
 msgstr "%s 클라이언트에서 기록 버퍼 빠짐"
 
-#: logsrvd/logsrvd.c:987
+#: logsrvd/logsrvd.c:981
 #, c-format
 msgid "timed out reading from client %s"
 msgstr "%s 클라이언트에서 읽기 시간 초과"
 
-#: logsrvd/logsrvd.c:1028 logsrvd/logsrvd_relay.c:774
+#: logsrvd/logsrvd.c:1022 logsrvd/logsrvd_relay.c:771
 #, c-format
 msgid "EOF from %s without proper TLS shutdown"
 msgstr "적절한 TLS 셧다운 미이행을 동반한 %s의 파일끝(EOF)"
 
-#: logsrvd/logsrvd.c:1071 logsrvd/logsrvd_relay.c:206 logsrvd/sendlog.c:290
-#: plugins/sudoers/log_client.c:705
+#: logsrvd/logsrvd.c:1065 logsrvd/logsrvd_relay.c:200 logsrvd/sendlog.c:317
+#: plugins/sudoers/log_client.c:709
 #, c-format
 msgid "client message too large: %zu"
 msgstr "클라이언드 메시지가 너무 깁니다: %zu"
 
-#: logsrvd/logsrvd.c:1072 logsrvd/logsrvd_journal.c:247
-#: logsrvd/logsrvd_journal.c:248
+#: logsrvd/logsrvd.c:1066 logsrvd/logsrvd_journal.c:246
+#: logsrvd/logsrvd_journal.c:247
 msgid "client message too large"
 msgstr "클라이언트 메시지가 너무 깁니다"
 
-#: logsrvd/logsrvd.c:1090 logsrvd/logsrvd.c:1091
+#: logsrvd/logsrvd.c:1084 logsrvd/logsrvd.c:1085
 msgid "invalid ClientMessage"
 msgstr "부적절한 ClientMessage"
 
-#: logsrvd/logsrvd.c:1388
+#: logsrvd/logsrvd.c:1386
 msgid "unable to get remote IP addr"
 msgstr "원격 IP 주소를 가져올 수 없습니다"
 
-#: logsrvd/logsrvd.c:1417 logsrvd/tls_client.c:201
-#: plugins/sudoers/log_client.c:266
+#: logsrvd/logsrvd.c:1415 logsrvd/tls_client.c:196
+#: plugins/sudoers/log_client.c:270
 #, c-format
 msgid "Unable to attach user data to the ssl object: %s"
 msgstr "ssl 객체에 사용자 데이터를 붙일 수 없습니다: %s"
 
-#: logsrvd/logsrvd.c:1598 logsrvd/logsrvd.c:1951
+#: logsrvd/logsrvd.c:1596 logsrvd/logsrvd.c:1949
 msgid "unable to setup listen socket"
 msgstr "감청 소켓을 설정할 수 없습니다"
 
-#: logsrvd/logsrvd.c:1715
+#: logsrvd/logsrvd.c:1713
 #, c-format
 msgid "unexpected signal %d"
 msgstr "예기치 않은 시그널 %d번"
 
-#: logsrvd/logsrvd.c:1853
+#: logsrvd/logsrvd.c:1851
 msgid "sudo log server"
 msgstr "sudo 로그 서버"
 
-#: logsrvd/logsrvd.c:1855 logsrvd/sendlog.c:122
+#: logsrvd/logsrvd.c:1853 logsrvd/sendlog.c:116
 msgid "Options:"
 msgstr "옵션:"
 
-#: logsrvd/logsrvd.c:1857
+#: logsrvd/logsrvd.c:1855
 msgid "path to configuration file"
 msgstr "설정 파일 경로"
 
-#: logsrvd/logsrvd.c:1859 logsrvd/sendlog.c:124
+#: logsrvd/logsrvd.c:1857 logsrvd/sendlog.c:118
 msgid "display help message and exit"
 msgstr "도움말 메시지를 표시한 후 빠져나갑니다"
 
-#: logsrvd/logsrvd.c:1861
+#: logsrvd/logsrvd.c:1859
 msgid "do not fork, run in the foreground"
 msgstr "프로세스를 포킹하지 않고, 포그라운드에서 실행"
 
-#: logsrvd/logsrvd.c:1863
+#: logsrvd/logsrvd.c:1861
 msgid "percent chance connections will drop"
 msgstr "연결이 끊을 확률에 대한 백분율"
 
-#: logsrvd/logsrvd.c:1865 logsrvd/sendlog.c:154
+#: logsrvd/logsrvd.c:1863 logsrvd/sendlog.c:148
 msgid "display version information and exit"
 msgstr "버전 정보를 표시하고 빠져나갑니다"
 
-#: logsrvd/logsrvd.c:1915 logsrvd/sendlog.c:1532
+#: logsrvd/logsrvd.c:1913 logsrvd/sendlog.c:1725
 msgid "Protobuf-C version 1.3 or higher required"
 msgstr "Protobuf-C 1.3 이상의 버전이 필요합니다"
 
-#: logsrvd/logsrvd.c:1931
+#: logsrvd/logsrvd.c:1929
 #, c-format
 msgid "invalid random drop value: %s"
 msgstr "부적절한 임의 철회 값: %s"
 
-#: logsrvd/logsrvd.c:1934 logsrvd/sendlog.c:1586
-#: plugins/sudoers/cvtsudoers.c:228 plugins/sudoers/sudoreplay.c:301
-#: plugins/sudoers/visudo.c:175
+#: logsrvd/logsrvd.c:1932 logsrvd/sendlog.c:1779
+#: plugins/sudoers/cvtsudoers.c:246 plugins/sudoers/sudoreplay.c:301
+#: plugins/sudoers/visudo.c:177
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s 버전 %s\n"
 
-#: logsrvd/logsrvd_conf.c:391 plugins/sudoers/check.c:336
-#: plugins/sudoers/exptilde.c:85 plugins/sudoers/iolog.c:115
-#: plugins/sudoers/policy.c:1159 plugins/sudoers/sudoers.c:486
-#: plugins/sudoers/sudoers.c:1338 plugins/sudoers/testsudoers.c:215
+#: logsrvd/logsrvd_conf.c:390 plugins/sudoers/check.c:336
+#: plugins/sudoers/exptilde.c:85 plugins/sudoers/iolog.c:118
+#: plugins/sudoers/policy.c:1214 plugins/sudoers/sudoers.c:486
+#: plugins/sudoers/sudoers.c:1347 plugins/sudoers/testsudoers.c:215
 #: plugins/sudoers/testsudoers.c:382
 #, c-format
 msgid "unknown user %s"
 msgstr "알 수 없는 사용자 %s"
 
-#: logsrvd/logsrvd_conf.c:408 plugins/sudoers/iolog.c:140
-#: plugins/sudoers/sudoers.c:491 plugins/sudoers/sudoers.c:1372
+#: logsrvd/logsrvd_conf.c:407 plugins/sudoers/iolog.c:143
+#: plugins/sudoers/sudoers.c:491 plugins/sudoers/sudoers.c:1381
 #: plugins/sudoers/testsudoers.c:406
 #, c-format
 msgid "unknown group %s"
 msgstr "알 수 없는 그룹 %s"
 
-#: logsrvd/logsrvd_conf.c:426
+#: logsrvd/logsrvd_conf.c:425
 #, c-format
 msgid "unable to parse iolog mode %s"
 msgstr "%s 입출력 로그 모드를 해석할 수 없습니다"
 
-#: logsrvd/logsrvd_conf.c:443 logsrvd/logsrvd_conf.c:1172
+#: logsrvd/logsrvd_conf.c:442 logsrvd/logsrvd_conf.c:1171
 #, c-format
 msgid "invalid value for %s: %s"
 msgstr "부적절한 %s 값: %s"
 
-#: logsrvd/logsrvd_conf.c:482
+#: logsrvd/logsrvd_conf.c:481
 msgid "TLS not supported"
 msgstr "TLS를 지원하지 않습니다"
 
-#: logsrvd/logsrvd_conf.c:504
+#: logsrvd/logsrvd_conf.c:503
 #, c-format
 msgid "%s:%s"
 msgstr "%s:%s"
 
-#: logsrvd/logsrvd_conf.c:577 logsrvd/logsrvd_conf.c:971
+#: logsrvd/logsrvd_conf.c:576 logsrvd/logsrvd_conf.c:970
 #, c-format
 msgid "%s: not a fully qualified path"
 msgstr "%s: 완전하지 않은 경로"
 
-#: logsrvd/logsrvd_conf.c:889 logsrvd/logsrvd_conf.c:905
-#: logsrvd/logsrvd_conf.c:1587
+#: logsrvd/logsrvd_conf.c:888 logsrvd/logsrvd_conf.c:904
+#: logsrvd/logsrvd_conf.c:1586
 #, c-format
 msgid "unknown syslog facility %s"
 msgstr "알 수 없는 syslog 수단 %s"
 
-#: logsrvd/logsrvd_conf.c:921 logsrvd/logsrvd_conf.c:937
-#: logsrvd/logsrvd_conf.c:953 logsrvd/logsrvd_conf.c:1591
-#: logsrvd/logsrvd_conf.c:1595 logsrvd/logsrvd_conf.c:1599
+#: logsrvd/logsrvd_conf.c:920 logsrvd/logsrvd_conf.c:936
+#: logsrvd/logsrvd_conf.c:952 logsrvd/logsrvd_conf.c:1590
+#: logsrvd/logsrvd_conf.c:1594 logsrvd/logsrvd_conf.c:1598
 #, c-format
 msgid "unknown syslog priority %s"
 msgstr "알 수 없는 syslog 우선 순위 %s"
 
-#: logsrvd/logsrvd_conf.c:1133
+#: logsrvd/logsrvd_conf.c:1132
 #, c-format
 msgid "%s:%d unmatched '[': %s"
 msgstr "%s:%d 일치하지 않는 '[': %s"
 
-#: logsrvd/logsrvd_conf.c:1144
+#: logsrvd/logsrvd_conf.c:1143
 #, c-format
 msgid "%s:%d invalid config section: %s"
 msgstr "%s:%d 부적절한 설정 섹션: %s"
 
-#: logsrvd/logsrvd_conf.c:1152
+#: logsrvd/logsrvd_conf.c:1151
 #, c-format
 msgid "%s:%d invalid configuration line: %s"
 msgstr "%s:%d 부적절한 설정 행: %s"
 
-#: logsrvd/logsrvd_conf.c:1158
+#: logsrvd/logsrvd_conf.c:1157
 #, c-format
 msgid "%s:%d expected section name: %s"
 msgstr "%s:%d(에)서 섹션 이름이 나와야 합니다: %s"
 
-#: logsrvd/logsrvd_conf.c:1180
+#: logsrvd/logsrvd_conf.c:1179
 #, c-format
 msgid "%s:%d [%s] illegal key: %s"
 msgstr "%s:%d [%s] 잘못된 키: %s"
 
-#: logsrvd/logsrvd_conf.c:1210 plugins/sudoers/logging.c:856
+#: logsrvd/logsrvd_conf.c:1209 plugins/sudoers/cvtsudoers.c:268
+#: plugins/sudoers/logging.c:856
 #, c-format
 msgid "unable to open log file %s"
 msgstr "%s 로그 파일을 열 수 없습니다"
 
-#: logsrvd/logsrvd_conf.c:1667
+#: logsrvd/logsrvd_conf.c:1666
 msgid "unable to initialize server TLS context"
 msgstr "서버 TLS 컨텍스트를 초기화할 수 없습니다"
 
-#: logsrvd/logsrvd_conf.c:1687
+#: logsrvd/logsrvd_conf.c:1686
 msgid "unable to initialize relay TLS context"
 msgstr "릴레이 TLS 컨텍스트를 초기화할 수 없습니다"
 
-#: logsrvd/logsrvd_journal.c:137 logsrvd/logsrvd_journal.c:417
-#: logsrvd/logsrvd_journal.c:422
+#: logsrvd/logsrvd_journal.c:136 logsrvd/logsrvd_journal.c:416
+#: logsrvd/logsrvd_journal.c:421
 msgid "unable to create journal file"
 msgstr "저널 파일을 만들 수 없습니다"
 
-#: logsrvd/logsrvd_journal.c:141 logsrvd/logsrvd_queue.c:105
-#: plugins/sudoers/visudo.c:971
+#: logsrvd/logsrvd_journal.c:140 logsrvd/logsrvd_queue.c:104
+#: plugins/sudoers/visudo.c:1007
 #, c-format
 msgid "unable to lock %s"
 msgstr "%s을(를) 잠글 수 없습니다"
 
-#: logsrvd/logsrvd_journal.c:144
+#: logsrvd/logsrvd_journal.c:143
 msgid "unable to lock journal file"
 msgstr "저널 파일을 잠글 수 없습니다"
 
-#: logsrvd/logsrvd_journal.c:152
+#: logsrvd/logsrvd_journal.c:151
 msgid "unable to open journal file"
 msgstr "저널 파일을 열 수 없습니다"
 
-#: logsrvd/logsrvd_journal.c:173 logsrvd/logsrvd_journal.c:453
-#: logsrvd/logsrvd_journal.c:458
+#: logsrvd/logsrvd_journal.c:172 logsrvd/logsrvd_journal.c:452
+#: logsrvd/logsrvd_journal.c:457
 msgid "unable to write journal file"
 msgstr "저널 파일을 기록할 수 없습니다"
 
-#: logsrvd/logsrvd_journal.c:181 logsrvd/logsrvd_journal.c:188
+#: logsrvd/logsrvd_journal.c:180 logsrvd/logsrvd_journal.c:187
 msgid "unable to rename journal file"
 msgstr "저널 파일 이름을 바꿀 수 없습니다"
 
-#: logsrvd/logsrvd_journal.c:235 logsrvd/logsrvd_journal.c:236
-#: logsrvd/logsrvd_journal.c:270 logsrvd/logsrvd_journal.c:271
+#: logsrvd/logsrvd_journal.c:234 logsrvd/logsrvd_journal.c:235
+#: logsrvd/logsrvd_journal.c:269 logsrvd/logsrvd_journal.c:270
 msgid "unexpected EOF reading journal file"
 msgstr "저널 파일 읽는 중 예기치 않은 파일 끝 발견"
 
-#: logsrvd/logsrvd_journal.c:239 logsrvd/logsrvd_journal.c:240
-#: logsrvd/logsrvd_journal.c:274 logsrvd/logsrvd_journal.c:275
+#: logsrvd/logsrvd_journal.c:238 logsrvd/logsrvd_journal.c:239
+#: logsrvd/logsrvd_journal.c:273 logsrvd/logsrvd_journal.c:274
 msgid "error reading journal file"
 msgstr "저널 파일 읽기 오류"
 
-#: logsrvd/logsrvd_journal.c:286 logsrvd/logsrvd_journal.c:377
+#: logsrvd/logsrvd_journal.c:285 logsrvd/logsrvd_journal.c:376
 msgid "invalid journal file, unable to restart"
 msgstr "부적절한 저널 파일. 다시 시작할 수 없습니다"
 
-#: logsrvd/logsrvd_journal.c:436
+#: logsrvd/logsrvd_journal.c:435
 #, c-format
 msgid "unable to seek to [%lld, %ld] in journal file %s"
 msgstr "%3$s 저널 파일에서 [%1$lld, %2$ld] 위치를 탐색할 수 없습니다"
 
-#: logsrvd/logsrvd_local.c:152
+#: logsrvd/logsrvd_local.c:153
 msgid "error parsing AcceptMessage"
 msgstr "AcceptMessage 해석 오류"
 
-#: logsrvd/logsrvd_local.c:163
+#: logsrvd/logsrvd_local.c:164
 msgid "error creating I/O log"
 msgstr "입출력 로그 만드는 중 오류"
 
-#: logsrvd/logsrvd_local.c:186
+#: logsrvd/logsrvd_local.c:187
 msgid "error logging accept event"
 msgstr "수락 이벤트 로깅 중 오류"
 
-#: logsrvd/logsrvd_local.c:225
+#: logsrvd/logsrvd_local.c:226
 msgid "error parsing RejectMessage"
 msgstr "RejectMessage 해석 오류"
 
-#: logsrvd/logsrvd_local.c:249
+#: logsrvd/logsrvd_local.c:250
 msgid "error logging reject event"
 msgstr "거절 이벤트 로깅 중 오류"
 
-#: logsrvd/logsrvd_local.c:284
+#: logsrvd/logsrvd_local.c:386 logsrvd/logsrvd_local.c:394
 msgid "error logging exit event"
 msgstr "끝내기 이벤트 기록 오류"
 
-#: logsrvd/logsrvd_local.c:343 logsrvd/logsrvd_local.c:344
+#: logsrvd/logsrvd_local.c:451 logsrvd/logsrvd_local.c:452
 msgid "log is already complete, cannot be restarted"
 msgstr "로그를 이미 끝냈으며, 다시 시작할 수 없습니다"
 
-#: logsrvd/logsrvd_local.c:374
+#: logsrvd/logsrvd_local.c:482
 msgid "unable to restart log"
 msgstr "로그를 다시 시작할 수 없습니다"
 
-#: logsrvd/logsrvd_local.c:390
+#: logsrvd/logsrvd_local.c:498
 msgid "error parsing AlertMessage"
 msgstr "AlertMessage 해석 오류"
 
-#: logsrvd/logsrvd_local.c:400
+#: logsrvd/logsrvd_local.c:508
 msgid "error logging alert event"
 msgstr "경고 이벤트 로깅 중 오류"
 
-#: logsrvd/logsrvd_local.c:435 logsrvd/logsrvd_local.c:488
-#: logsrvd/logsrvd_local.c:523
+#: logsrvd/logsrvd_local.c:543 logsrvd/logsrvd_local.c:596
+#: logsrvd/logsrvd_local.c:631
 #, c-format
 msgid "unable to format timing buffer, length %d"
 msgstr "길이 %d인 타이밍 버퍼를 포매팅할 수 없습니다"
 
-#: logsrvd/logsrvd_local.c:442 logsrvd/logsrvd_local.c:450
-#: logsrvd/logsrvd_local.c:495 logsrvd/logsrvd_local.c:530
+#: logsrvd/logsrvd_local.c:550 logsrvd/logsrvd_local.c:558
+#: logsrvd/logsrvd_local.c:603 logsrvd/logsrvd_local.c:638
 #: plugins/sudoers/sudoreplay.c:351
 #, c-format
 msgid "%s/%s: %s"
 msgstr "%s/%s: %s"
 
-#: logsrvd/logsrvd_local.c:470
+#: logsrvd/logsrvd_local.c:578
 msgid "error writing IoBuffer"
 msgstr "입출력 버퍼 기록 중 오류"
 
-#: logsrvd/logsrvd_local.c:505
+#: logsrvd/logsrvd_local.c:613
 msgid "error writing ChangeWindowSize"
 msgstr "ChangeWindowSize 기록 중 오류"
 
-#: logsrvd/logsrvd_local.c:540
+#: logsrvd/logsrvd_local.c:648
 msgid "error writing CommandSuspend"
 msgstr "CommandSuspend 기록 중 오류"
 
-#: logsrvd/logsrvd_relay.c:436
+#: logsrvd/logsrvd_relay.c:430
 msgid "TLS handshake with relay host failed"
 msgstr "릴레이 호스트와의 TLS 핸드 셰이크 실패"
 
-#: logsrvd/logsrvd_relay.c:464
+#: logsrvd/logsrvd_relay.c:458
 msgid "unable to connect to relay host"
 msgstr "릴레이 호스트에 연결할 수 없습니다"
 
-#: logsrvd/logsrvd_relay.c:519
+#: logsrvd/logsrvd_relay.c:513
 #, c-format
 msgid "%s: invalid ServerHello, missing server_id"
 msgstr "%s: 부적절한 ServerHello, server_id가 빠졌습니다"
 
-#: logsrvd/logsrvd_relay.c:521 logsrvd/sendlog.c:961
-#: plugins/sudoers/log_client.c:1493
+#: logsrvd/logsrvd_relay.c:515 logsrvd/sendlog.c:1121
+#: plugins/sudoers/log_client.c:1497
 msgid "invalid ServerHello"
 msgstr "부적절한 ServerHello"
 
-#: logsrvd/logsrvd_relay.c:680
+#: logsrvd/logsrvd_relay.c:674
 msgid "unrecognized ServerMessage type"
 msgstr "인식할 수 없는 ServerMessage 형식"
 
-#: logsrvd/logsrvd_relay.c:709
+#: logsrvd/logsrvd_relay.c:703
 #, c-format
 msgid "timed out reading from relay %s (%s)"
 msgstr "릴레이 %s에서 읽기 시간 초과 (%s)"
 
-#: logsrvd/logsrvd_relay.c:711
+#: logsrvd/logsrvd_relay.c:705
 msgid "timeout reading from relay"
 msgstr "릴레이 데이터 읽기 시간 초과"
 
-#: logsrvd/logsrvd_relay.c:762
+#: logsrvd/logsrvd_relay.c:757
 msgid "relay host name does not match certificate"
 msgstr "릴레이 호스트 이름이 인증서와 일치하지 않습니다"
 
-#: logsrvd/logsrvd_relay.c:766 logsrvd/logsrvd_relay.c:779
-#: logsrvd/logsrvd_relay.c:785
+#: logsrvd/logsrvd_relay.c:763 logsrvd/logsrvd_relay.c:776
+#: logsrvd/logsrvd_relay.c:782
 msgid "error reading from relay"
 msgstr "릴레이 데이터 읽는 중 오류"
 
-#: logsrvd/logsrvd_relay.c:806
+#: logsrvd/logsrvd_relay.c:803
 msgid "unable to read from relay"
 msgstr "릴레이 데이터를 읽을 수 없습니다"
 
-#: logsrvd/logsrvd_relay.c:821 logsrvd/logsrvd_relay.c:939
+#: logsrvd/logsrvd_relay.c:818 logsrvd/logsrvd_relay.c:936
 msgid "relay server closed connection"
 msgstr "릴레이 서버 연결을 끊었습니다"
 
-#: logsrvd/logsrvd_relay.c:839
+#: logsrvd/logsrvd_relay.c:836
 msgid "server message too large"
 msgstr "서버 메시지가 너무 깁니다"
 
-#: logsrvd/logsrvd_relay.c:903
+#: logsrvd/logsrvd_relay.c:900
 #, c-format
 msgid "timed out writing to relay %s (%s)"
 msgstr "릴레이 %s에 기록 시간 초과 (%s)"
 
-#: logsrvd/logsrvd_relay.c:905
+#: logsrvd/logsrvd_relay.c:902
 msgid "timeout writing to relay"
 msgstr "릴레이 기록 시간 초과"
 
-#: logsrvd/logsrvd_relay.c:958 logsrvd/logsrvd_relay.c:964
-#: logsrvd/logsrvd_relay.c:974
+#: logsrvd/logsrvd_relay.c:955 logsrvd/logsrvd_relay.c:961
+#: logsrvd/logsrvd_relay.c:971
 msgid "error writing to relay"
 msgstr "릴레이 기록 중 오류"
 
-#: logsrvd/sendlog.c:120
+#: logsrvd/sendlog.c:114
 msgid "send sudo I/O log to remote server"
 msgstr "원격 서버에 sudo 입출력 로그를 보냅니다"
 
-#: logsrvd/sendlog.c:126
+#: logsrvd/sendlog.c:120
 msgid "only send an accept event (no I/O)"
 msgstr "허용 이벤트만 보냅니다 (입출력 안함)"
 
-#: logsrvd/sendlog.c:129
+#: logsrvd/sendlog.c:123
 msgid "certificate bundle file to verify server's cert against"
 msgstr "서버의 인증서 검증에 활용할 인증서 번들 파일"
 
-#: logsrvd/sendlog.c:131
+#: logsrvd/sendlog.c:125
 msgid "certificate file for TLS handshake"
 msgstr "TLS 암호 키 교환에 사용할 인증서 파일"
 
-#: logsrvd/sendlog.c:134
+#: logsrvd/sendlog.c:128
 msgid "host to send logs to"
 msgstr "로그를 보낼 호스트"
 
-#: logsrvd/sendlog.c:136
+#: logsrvd/sendlog.c:130
 msgid "remote ID of I/O log to be resumed"
 msgstr "다시 진행할 입출력 로그의 원격 ID"
 
-#: logsrvd/sendlog.c:139
+#: logsrvd/sendlog.c:133
 msgid "private key file"
 msgstr "개인 키 파일"
 
-#: logsrvd/sendlog.c:141
+#: logsrvd/sendlog.c:135
 msgid "do not verify server certificate"
 msgstr "서버 인증서를 검증하지 않습니다"
 
-#: logsrvd/sendlog.c:144
+#: logsrvd/sendlog.c:138
 msgid "port to use when connecting to host"
 msgstr "호스트에 연결할 때 활용할 포트 번호"
 
-#: logsrvd/sendlog.c:146
+#: logsrvd/sendlog.c:140
 msgid "restart previous I/O log transfer"
 msgstr "이전 입출력 로그 전송을 다시 시작합니다"
 
-#: logsrvd/sendlog.c:148
+#: logsrvd/sendlog.c:142
 msgid "reject the command with the given reason"
 msgstr "주어진 사유로 명령 실행을 거절합니다"
 
-#: logsrvd/sendlog.c:150
+#: logsrvd/sendlog.c:144
 msgid "stop transfer after reaching this time"
 msgstr "이 시간에 도달한 후 전송 중단"
 
-#: logsrvd/sendlog.c:152
+#: logsrvd/sendlog.c:146
 msgid "test audit server by sending selected I/O log n times in parallel"
 msgstr "선택한 입출력 로그를 동시에 N번 보내어 감사 서버 시험"
 
-#: logsrvd/sendlog.c:177 plugins/sudoers/log_client.c:437
+#: logsrvd/sendlog.c:171 plugins/sudoers/log_client.c:441
 #, c-format
 msgid "unable to look up %s:%s: %s"
 msgstr "%s:%s을(를) 찾을 수 없습니다: %s"
 
-#: logsrvd/sendlog.c:215
+#: logsrvd/sendlog.c:209
 msgid "unable to get server IP addr"
 msgstr "서버 IP 주소를 가져올 수 없습니다"
 
-#: logsrvd/sendlog.c:269 plugins/sudoers/sudoreplay.c:871
+#: logsrvd/sendlog.c:295 plugins/sudoers/sudoreplay.c:871
 #, c-format
 msgid "unable to read %s/%s: %s"
 msgstr "%s/%s을(를) 읽을 수 없습니다: %s"
 
-#: logsrvd/sendlog.c:831
-#, c-format
-msgid "%s: write buffer already in use"
-msgstr "%s: 쓰기 버퍼를 이미 사용중입니다"
-
-#: logsrvd/sendlog.c:892 plugins/sudoers/iolog.c:890
-#: plugins/sudoers/iolog.c:959
+#: logsrvd/sendlog.c:1045 plugins/sudoers/iolog.c:887
+#: plugins/sudoers/iolog.c:956
 #, c-format
 msgid "unexpected I/O event %d"
 msgstr "예기치 않은 입출력 이벤트 %d"
 
-#: logsrvd/sendlog.c:938 logsrvd/sendlog.c:955 logsrvd/sendlog.c:989
-#: plugins/sudoers/log_client.c:1142 plugins/sudoers/log_client.c:1419
-#: plugins/sudoers/log_client.c:1487 plugins/sudoers/log_client.c:1526
+#: logsrvd/sendlog.c:1098 logsrvd/sendlog.c:1115 logsrvd/sendlog.c:1149
+#: plugins/sudoers/log_client.c:1146 plugins/sudoers/log_client.c:1423
+#: plugins/sudoers/log_client.c:1491 plugins/sudoers/log_client.c:1530
 #, c-format
 msgid "%s: unexpected state %d"
 msgstr "%s: 예기치 않은 상태 번호 %d"
 
-#: logsrvd/sendlog.c:1025 plugins/sudoers/log_client.c:1570
+#: logsrvd/sendlog.c:1185 plugins/sudoers/log_client.c:1576
 #, c-format
 msgid "error message received from server: %s"
 msgstr "서버로부터 오류 메시지를 받았습니다: %s"
 
-#: logsrvd/sendlog.c:1038 plugins/sudoers/log_client.c:1583
+#: logsrvd/sendlog.c:1198 plugins/sudoers/log_client.c:1589
 #, c-format
 msgid "abort message received from server: %s"
 msgstr "서버로부터 중단 메시지를 받았습니다: %s"
 
-#: logsrvd/sendlog.c:1097 plugins/sudoers/log_client.c:1633
+#: logsrvd/sendlog.c:1257 plugins/sudoers/log_client.c:1639
 #, c-format
 msgid "%s: unexpected type_case value %d"
 msgstr "%s: 예기지 않은 type_case 값 %d"
 
-#: logsrvd/sendlog.c:1126
+#: logsrvd/sendlog.c:1286
 msgid "timeout reading from server"
 msgstr "서버 데이터 읽기 시간 초과"
 
-#: logsrvd/sendlog.c:1205
+#: logsrvd/sendlog.c:1368
 msgid "premature EOF"
 msgstr "갑작스러운 EOF"
 
-#: logsrvd/sendlog.c:1218 plugins/sudoers/log_client.c:1791
+#: logsrvd/sendlog.c:1381 plugins/sudoers/log_client.c:1800
 #, c-format
 msgid "server message too large: %u"
 msgstr "서버 메시지가 너무 깁니다: %u"
 
-#: logsrvd/sendlog.c:1269
+#: logsrvd/sendlog.c:1437
 msgid "timeout writing to server"
 msgstr "서버 기록 시간 초과"
 
-#: logsrvd/sendlog.c:1609
+#: logsrvd/sendlog.c:1802
 msgid "both restart point and iolog ID must be specified"
 msgstr "다시 시작 지점과 입출력 로그 ID를 반드시 지정해야합니다"
 
-#: logsrvd/sendlog.c:1613
+#: logsrvd/sendlog.c:1806
 msgid "a restart point may not be set when no I/O is sent"
 msgstr "입출력을 보내지 않을 때 다시 시작 지점을 지정하지 않습니다"
 
-#: logsrvd/sendlog.c:1689
+#: logsrvd/sendlog.c:1882
 #, c-format
 msgid "exited prematurely with state %d"
 msgstr "%d 상태로 갑자기 빠져나왔습니다"
 
-#: logsrvd/sendlog.c:1690
+#: logsrvd/sendlog.c:1883
 #, c-format
 msgid "elapsed time sent to server [%lld, %ld]"
 msgstr "경과 시간을 서버로 보냈습니다 [%lld, %ld]"
 
-#: logsrvd/sendlog.c:1692
+#: logsrvd/sendlog.c:1885
 #, c-format
 msgid "commit point received from server [%lld, %ld]"
 msgstr "제출 지점 정보를 서버로부터 받았습니다 [%lld, %ld]"
 
-#: logsrvd/tls_client.c:111 plugins/sudoers/log_client.c:300
+#: logsrvd/tls_client.c:106 plugins/sudoers/log_client.c:304
 msgid "TLS handshake timeout occurred"
 msgstr "TLS 핸드셰이크 시간을 초과했습니다"
 
-#: logsrvd/tls_client.c:131 logsrvd/tls_client.c:147
-#: plugins/sudoers/log_client.c:322 plugins/sudoers/log_client.c:338
+#: logsrvd/tls_client.c:126 logsrvd/tls_client.c:142
+#: plugins/sudoers/log_client.c:326 plugins/sudoers/log_client.c:342
 msgid "unable to set event"
 msgstr "이벤트를 설정할 수 없습니다"
 
-#: logsrvd/tls_client.c:157 logsrvd/tls_client.c:161
+#: logsrvd/tls_client.c:152 logsrvd/tls_client.c:156
 #, c-format
 msgid "TLS connection failed: %s"
 msgstr "TLS 연결 실패: %s"
 
-#: logsrvd/tls_client.c:195
+#: logsrvd/tls_client.c:190
 #, c-format
 msgid "unable to allocate ssl object: %s"
 msgstr "SSL 객체를 할당할 수 없습니다: %s"
 
-#: logsrvd/tls_client.c:208
+#: logsrvd/tls_client.c:203
 #, c-format
 msgid "Unable to attach socket to the ssl object: %s"
 msgstr "SSL 객체에 소켓을 붙일 수 없습니다: %s"
 
-#: logsrvd/tls_client.c:236
+#: logsrvd/tls_client.c:231
 msgid "unable to initialize TLS context"
 msgstr "TLS 컨텍스트를 초기화할 수 없습니다"
 
-#: logsrvd/tls_init.c:126 logsrvd/tls_init.c:134
+#: logsrvd/tls_init.c:127 logsrvd/tls_init.c:135
 #, c-format
 msgid "unable to set TLS 1.2 ciphersuite to %s: %s"
 msgstr "%s에 TLS 1.2 암호 모음을 설정할 수 없습니다: %s"
 
-#: logsrvd/tls_init.c:154 logsrvd/tls_init.c:162
+#: logsrvd/tls_init.c:155 logsrvd/tls_init.c:163
 #, c-format
 msgid "unable to set TLS 1.3 ciphersuite to %s: %s"
 msgstr "%s에 TLS 1.3 암호 모음을 설정할 수 없습니다: %s"
 
-#: logsrvd/tls_init.c:197
-#, c-format
-msgid "unable to create TLS context: %s"
-msgstr "TLS 컨텍스트를 만들 수 없습니다: %s"
-
-#: logsrvd/tls_init.c:203
-#, c-format
-msgid "unable to set minimum protocol version to TLS 1.2: %s"
-msgstr "TLS 프로토콜 최소 버전을 1.2로 설정할 수 없습니다: %s"
-
-#: logsrvd/tls_init.c:279
+#: logsrvd/tls_init.c:195 logsrvd/tls_init.c:216
 #, c-format
 msgid "unable to set diffie-hellman parameters: %s"
 msgstr "디피-헬먼 매개변수를 설정할 수 없습니다: %s"
 
-#: logsrvd/tls_init.c:288
+#: logsrvd/tls_init.c:272
 #, c-format
-msgid "unable to read diffie-hellman parameters: %s"
-msgstr "디피-헬먼 매개변수를 읽을 수 없습니다: %s"
+msgid "unable to create TLS context: %s"
+msgstr "TLS 컨텍스트를 만들 수 없습니다: %s"
 
-#: plugins/sudoers/audit.c:267 plugins/sudoers/audit.c:422
-#: plugins/sudoers/log_client.c:975 plugins/sudoers/log_client.c:1024
-#: plugins/sudoers/log_client.c:1073 plugins/sudoers/log_client.c:1199
-#: plugins/sudoers/logging.c:554 plugins/sudoers/logging.c:648
+#: logsrvd/tls_init.c:278
+#, c-format
+msgid "unable to set minimum protocol version to TLS 1.2: %s"
+msgstr "TLS 프로토콜 최소 버전을 1.2로 설정할 수 없습니다: %s"
+
+#: plugins/sudoers/audit.c:267 plugins/sudoers/audit.c:419
+#: plugins/sudoers/log_client.c:979 plugins/sudoers/log_client.c:1028
+#: plugins/sudoers/log_client.c:1077 plugins/sudoers/log_client.c:1203
+#: plugins/sudoers/logging.c:551 plugins/sudoers/logging.c:648
 #: plugins/sudoers/logging.c:810 plugins/sudoers/policy.c:123
 msgid "unable to get time of day"
 msgstr "일시 정보를 가져올 수 없습니다"
@@ -1305,45 +1343,45 @@ msgstr "일시 정보를 가져올 수 없습니다"
 msgid "unable to change password for %s"
 msgstr "%s의 암호를 바꿀 수 없습니다"
 
-#: plugins/sudoers/auth/bsdauth.c:70
+#: plugins/sudoers/auth/bsdauth.c:74
 #, c-format
 msgid "unable to get login class for user %s"
 msgstr "%s 사용자의 로그인 클래스를 가져올 수 없습니다"
 
-#: plugins/sudoers/auth/bsdauth.c:75
+#: plugins/sudoers/auth/bsdauth.c:79
 msgid "unable to begin bsd authentication"
 msgstr "BSD 인증을 시작할 수 없습니다"
 
-#: plugins/sudoers/auth/bsdauth.c:83
+#: plugins/sudoers/auth/bsdauth.c:87
 msgid "invalid authentication type"
 msgstr "부적절한 인증 형식"
 
-#: plugins/sudoers/auth/bsdauth.c:92
+#: plugins/sudoers/auth/bsdauth.c:96
 msgid "unable to initialize BSD authentication"
 msgstr "BSD 인증을 초기화할 수 없습니다"
 
-#: plugins/sudoers/auth/bsdauth.c:179
+#: plugins/sudoers/auth/bsdauth.c:183
 msgid "your account has expired"
 msgstr "계정 유효 기간이 지났습니다"
 
-#: plugins/sudoers/auth/bsdauth.c:181
+#: plugins/sudoers/auth/bsdauth.c:185
 msgid "approval failed"
 msgstr "승인 실패"
 
-#: plugins/sudoers/auth/fwtk.c:54
+#: plugins/sudoers/auth/fwtk.c:58
 msgid "unable to read fwtk config"
 msgstr "fwtk 설정을 읽을 수 없습니다"
 
-#: plugins/sudoers/auth/fwtk.c:59
+#: plugins/sudoers/auth/fwtk.c:63
 msgid "unable to connect to authentication server"
 msgstr "인증 서버에 연결할 수 없습니다"
 
-#: plugins/sudoers/auth/fwtk.c:65 plugins/sudoers/auth/fwtk.c:89
-#: plugins/sudoers/auth/fwtk.c:121
+#: plugins/sudoers/auth/fwtk.c:69 plugins/sudoers/auth/fwtk.c:94
+#: plugins/sudoers/auth/fwtk.c:126
 msgid "lost connection to authentication server"
 msgstr "인증 서버의 연결이 끊어졌습니다"
 
-#: plugins/sudoers/auth/fwtk.c:69
+#: plugins/sudoers/auth/fwtk.c:73
 #, c-format
 msgid ""
 "authentication server error:\n"
@@ -1357,83 +1395,83 @@ msgstr ""
 msgid "%s: unable to convert principal to string ('%s'): %s"
 msgstr "%s: 본인 정보를 문자열('%s')로 변환할 수 없습니다: %s"
 
-#: plugins/sudoers/auth/kerb5.c:160
+#: plugins/sudoers/auth/kerb5.c:162
 #, c-format
 msgid "%s: unable to parse '%s': %s"
 msgstr "%s: '%s'을(를) 해석할 수 없습니다: %s"
 
-#: plugins/sudoers/auth/kerb5.c:169
+#: plugins/sudoers/auth/kerb5.c:171
 #, c-format
 msgid "%s: unable to resolve credential cache: %s"
 msgstr "%s: 자격 정보 캐시를 해석할 수 없습니다: %s"
 
-#: plugins/sudoers/auth/kerb5.c:216
+#: plugins/sudoers/auth/kerb5.c:220
 #, c-format
 msgid "%s: unable to allocate options: %s"
 msgstr "%s: 옵션을 할당할 수 없습니다: %s"
 
-#: plugins/sudoers/auth/kerb5.c:231
+#: plugins/sudoers/auth/kerb5.c:235
 #, c-format
 msgid "%s: unable to get credentials: %s"
 msgstr "%s: 자격 정보를 가져올 수 없습니다: %s"
 
-#: plugins/sudoers/auth/kerb5.c:244
+#: plugins/sudoers/auth/kerb5.c:248
 #, c-format
 msgid "%s: unable to initialize credential cache: %s"
 msgstr "%s: 자격 정보 캐시를 초기화할 수 없습니다: %s"
 
-#: plugins/sudoers/auth/kerb5.c:247
+#: plugins/sudoers/auth/kerb5.c:251
 #, c-format
 msgid "%s: unable to store credential in cache: %s"
 msgstr "%s: 캐시에 자격 정보를 저장할 수 없습니다: %s"
 
-#: plugins/sudoers/auth/kerb5.c:311
+#: plugins/sudoers/auth/kerb5.c:315
 #, c-format
 msgid "%s: unable to get host principal: %s"
 msgstr "%s: 호스트 정보를 가져올 수 없습니다: %s"
 
-#: plugins/sudoers/auth/kerb5.c:325
+#: plugins/sudoers/auth/kerb5.c:329
 #, c-format
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr "%s: TGT를 검증할 수 없습니다! 공격 가능성이 있습니다!: %s"
 
-#: plugins/sudoers/auth/pam.c:218
+#: plugins/sudoers/auth/pam.c:216
 #, c-format
 msgid "unable to initialize PAM: %s"
 msgstr "PAM을 초기화할 수 없습니다: %s"
 
-#: plugins/sudoers/auth/pam.c:340
+#: plugins/sudoers/auth/pam.c:338
 #, c-format
 msgid "PAM authentication error: %s"
 msgstr "PAM 인증 오류: %s"
 
-#: plugins/sudoers/auth/pam.c:359
+#: plugins/sudoers/auth/pam.c:357
 msgid "account validation failure, is your account locked?"
 msgstr "계정 검증 실패, 계정이 잠겼습니까?"
 
-#: plugins/sudoers/auth/pam.c:370
+#: plugins/sudoers/auth/pam.c:368
 msgid "Account or password is expired, reset your password and try again"
 msgstr "계정 또는 암호 기한이 지났습니다. 암호를 다시 설정한 후 시도하십시오"
 
-#: plugins/sudoers/auth/pam.c:376
+#: plugins/sudoers/auth/pam.c:374
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr "기한이 지난 암호를 바꿀 수 없습니다: %s"
 
-#: plugins/sudoers/auth/pam.c:387
+#: plugins/sudoers/auth/pam.c:385
 msgid "Password expired, contact your system administrator"
 msgstr "암호 기한이 지났습니다. 시스템 관리자에게 문의하십시오"
 
-#: plugins/sudoers/auth/pam.c:392
+#: plugins/sudoers/auth/pam.c:390
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
 msgstr "계정 기한이 지났거나 PAM 설정에 sudo에서 확인할 \"account\" 섹션이 빠졌습니다. 시스템 관리자에게 문의하십시오."
 
-#: plugins/sudoers/auth/pam.c:400 plugins/sudoers/auth/pam.c:405
+#: plugins/sudoers/auth/pam.c:398 plugins/sudoers/auth/pam.c:403
 #, c-format
 msgid "PAM account management error: %s"
 msgstr "PAM 계정 관리 오류: %s"
 
-#: plugins/sudoers/auth/rfc1938.c:99 plugins/sudoers/visudo.c:241
+#: plugins/sudoers/auth/rfc1938.c:99 plugins/sudoers/visudo.c:255
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "%s 데이터베이스에 없습니다"
@@ -1442,31 +1480,31 @@ msgstr "%s 데이터베이스에 없습니다"
 msgid "failed to initialise the ACE API library"
 msgstr "ACE API 라이브러리 초기화에 실패했습니다"
 
-#: plugins/sudoers/auth/securid5.c:98
+#: plugins/sudoers/auth/securid5.c:103
 msgid "unable to contact the SecurID server"
 msgstr "SecurID 서버에 연결할 수 없습니다"
 
-#: plugins/sudoers/auth/securid5.c:107
+#: plugins/sudoers/auth/securid5.c:112
 msgid "User ID locked for SecurID Authentication"
 msgstr "SecurID 인증 과정에 사용자 ID가 잠겼습니다"
 
-#: plugins/sudoers/auth/securid5.c:111 plugins/sudoers/auth/securid5.c:162
+#: plugins/sudoers/auth/securid5.c:116 plugins/sudoers/auth/securid5.c:167
 msgid "invalid username length for SecurID"
 msgstr "SecurID용 사용자 이름 길이가 잘못되었습니다"
 
-#: plugins/sudoers/auth/securid5.c:115 plugins/sudoers/auth/securid5.c:167
+#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:172
 msgid "invalid Authentication Handle for SecurID"
 msgstr "SecurID용 인증 핸들이 잘못되었습니다"
 
-#: plugins/sudoers/auth/securid5.c:119
+#: plugins/sudoers/auth/securid5.c:124
 msgid "SecurID communication failed"
 msgstr "SecurID 통신에 실패했습니다"
 
-#: plugins/sudoers/auth/securid5.c:123 plugins/sudoers/auth/securid5.c:210
+#: plugins/sudoers/auth/securid5.c:128 plugins/sudoers/auth/securid5.c:215
 msgid "unknown SecurID error"
 msgstr "알 수 없는 SecurID 오류"
 
-#: plugins/sudoers/auth/securid5.c:157
+#: plugins/sudoers/auth/securid5.c:162
 msgid "invalid passcode length for SecurID"
 msgstr "SecurID용 암호 길이가 잘못되었습니다"
 
@@ -1537,121 +1575,121 @@ msgstr ""
 "\n"
 
 #: plugins/sudoers/check.c:331 plugins/sudoers/check.c:341
-#: plugins/sudoers/sudoers.c:876 plugins/sudoers/sudoers.c:897
+#: plugins/sudoers/sudoers.c:885 plugins/sudoers/sudoers.c:906
 #: plugins/sudoers/tsdump.c:119
 #, c-format
 msgid "unknown uid %u"
 msgstr "알 수 없는 uid %u"
 
-#: plugins/sudoers/check_aliases.c:56
+#: plugins/sudoers/check_aliases.c:92
 #, c-format
 msgid "Error: %s:%d:%d: cycle in %s \"%s\""
 msgstr "오류: %4$s \"%5$s\"의 %1$s:%2$d:%3$d: 사이클"
 
-#: plugins/sudoers/check_aliases.c:57
+#: plugins/sudoers/check_aliases.c:93
 #, c-format
 msgid "Warning: %s:%d:%d: cycle in %s \"%s\""
 msgstr "경고: %4$s \"%5$s\"의 %1$s:%2$d:%3$d: 사이클"
 
-#: plugins/sudoers/check_aliases.c:61
+#: plugins/sudoers/check_aliases.c:97
 #, c-format
 msgid "Error: %s:%d:%d: %s \"%s\" referenced but not defined"
 msgstr "오류: %s:%d:%d: %s \"%s\"을(를) 참조했지만 정의하지 않았습니다"
 
-#: plugins/sudoers/check_aliases.c:62
+#: plugins/sudoers/check_aliases.c:98
 #, c-format
 msgid "Warning: %s:%d:%d: %s \"%s\" referenced but not defined"
 msgstr "경고: %s:%d:%d: %s \"%s\"을(를) 참조했지만 정의하지 않았습니다"
 
-#: plugins/sudoers/cvtsudoers.c:194
+#: plugins/sudoers/cvtsudoers.c:209
 #, c-format
 msgid "order increment: %s: %s"
 msgstr "순서 증가: %s: %s"
 
-#: plugins/sudoers/cvtsudoers.c:210
+#: plugins/sudoers/cvtsudoers.c:228
 #, c-format
 msgid "starting order: %s: %s"
 msgstr "순서 시작: %s: %s"
 
-#: plugins/sudoers/cvtsudoers.c:220
+#: plugins/sudoers/cvtsudoers.c:238
 #, c-format
 msgid "order padding: %s: %s"
 msgstr "순서 패딩: %s: %s"
 
-#: plugins/sudoers/cvtsudoers.c:230 plugins/sudoers/visudo.c:177
+#: plugins/sudoers/cvtsudoers.c:248 plugins/sudoers/visudo.c:179
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr "%s 문법 버전 %d\n"
 
-#: plugins/sudoers/cvtsudoers.c:247 plugins/sudoers/testsudoers.c:159
+#: plugins/sudoers/cvtsudoers.c:277 plugins/sudoers/testsudoers.c:159
 #, c-format
 msgid "unsupported input format %s"
 msgstr "지원하지 않는 %s 입력 형식"
 
-#: plugins/sudoers/cvtsudoers.c:262
+#: plugins/sudoers/cvtsudoers.c:295
 #, c-format
 msgid "unsupported output format %s"
 msgstr "지원하지 않는 %s 출력 형식"
 
-#: plugins/sudoers/cvtsudoers.c:314
+#: plugins/sudoers/cvtsudoers.c:385
 #, c-format
 msgid "%s: input and output files must be different"
 msgstr "%s: 입출력 파일은 달라야합니다"
 
-#: plugins/sudoers/cvtsudoers.c:330 plugins/sudoers/sudoers.c:159
+#: plugins/sudoers/cvtsudoers.c:399 plugins/sudoers/sudoers.c:159
 #: plugins/sudoers/sudoers.c:205 plugins/sudoers/testsudoers.c:254
-#: plugins/sudoers/visudo.c:247 plugins/sudoers/visudo.c:597
-#: plugins/sudoers/visudo.c:917
+#: plugins/sudoers/visudo.c:261 plugins/sudoers/visudo.c:620
+#: plugins/sudoers/visudo.c:953
 msgid "unable to initialize sudoers default values"
 msgstr "sudoers 기본 값을 초기화할 수 없습니다"
 
-#: plugins/sudoers/cvtsudoers.c:416 plugins/sudoers/ldap_conf.c:431
+#: plugins/sudoers/cvtsudoers.c:522 plugins/sudoers/ldap_conf.c:431
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr "%s: %s: %s: %s"
 
-#: plugins/sudoers/cvtsudoers.c:475
+#: plugins/sudoers/cvtsudoers.c:581
 #, c-format
 msgid "%s: unknown key word %s"
 msgstr "%s: 알 수 없는 키워드 %s"
 
-#: plugins/sudoers/cvtsudoers.c:521
+#: plugins/sudoers/cvtsudoers.c:627
 #, c-format
 msgid "invalid defaults type: %s"
 msgstr "부적절한 기본 형식: %s"
 
-#: plugins/sudoers/cvtsudoers.c:544
+#: plugins/sudoers/cvtsudoers.c:650
 #, c-format
 msgid "invalid suppression type: %s"
 msgstr "부적절한 생략 형식: %s"
 
-#: plugins/sudoers/cvtsudoers.c:584 plugins/sudoers/cvtsudoers.c:598
+#: plugins/sudoers/cvtsudoers.c:691 plugins/sudoers/cvtsudoers.c:707
 #, c-format
 msgid "invalid filter: %s"
 msgstr "부적절한 필터: %s"
 
-#: plugins/sudoers/cvtsudoers.c:642 plugins/sudoers/visudo.c:922
+#: plugins/sudoers/cvtsudoers.c:751 plugins/sudoers/visudo.c:958
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "%s 파일 해석에 실패했습니다. 알 수 없는 오류."
 
-#: plugins/sudoers/cvtsudoers.c:650
+#: plugins/sudoers/cvtsudoers.c:759
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "%s %d번째 줄 인근 해석 오류\n"
 
-#: plugins/sudoers/cvtsudoers.c:653
+#: plugins/sudoers/cvtsudoers.c:762
 #, c-format
 msgid "parse error in %s\n"
 msgstr "%s 해석 오류\n"
 
-#: plugins/sudoers/cvtsudoers.c:1296 plugins/sudoers/sudoreplay.c:1145
+#: plugins/sudoers/cvtsudoers.c:1486 plugins/sudoers/sudoreplay.c:1145
 #: plugins/sudoers/timestamp.c:317 plugins/sudoers/timestamp.c:320
 #, c-format
 msgid "unable to write to %s"
 msgstr "%s에 기록할 수 없습니다"
 
-#: plugins/sudoers/cvtsudoers.c:1319
+#: plugins/sudoers/cvtsudoers.c:1509
 #, c-format
 msgid ""
 "%s - convert between sudoers file formats\n"
@@ -1660,7 +1698,7 @@ msgstr ""
 "%s - sudoers 파일 형식을 변환합니다\n"
 "\n"
 
-#: plugins/sudoers/cvtsudoers.c:1321
+#: plugins/sudoers/cvtsudoers.c:1511
 msgid ""
 "\n"
 "Options:\n"
@@ -1700,32 +1738,74 @@ msgstr ""
 "  -s, --suppress=<섹션>    지정 <섹션> 출력은 제외합니다\n"
 "  -V, --version              버전 정보를 표시하고 빠져나갑니다"
 
-#: plugins/sudoers/cvtsudoers_json.c:480 plugins/sudoers/cvtsudoers_json.c:514
-#: plugins/sudoers/cvtsudoers_json.c:718
-#, c-format
-msgid "unknown defaults entry \"%s\""
-msgstr "알 수 없는 \"%s\" 기본 항목"
-
-#: plugins/sudoers/cvtsudoers_json.c:651 plugins/sudoers/cvtsudoers_json.c:664
-#: plugins/sudoers/cvtsudoers_ldif.c:346 plugins/sudoers/cvtsudoers_ldif.c:357
-#: plugins/sudoers/ldap.c:503
+#: plugins/sudoers/cvtsudoers_csv.c:452 plugins/sudoers/cvtsudoers_csv.c:466
+#: plugins/sudoers/cvtsudoers_json.c:654 plugins/sudoers/cvtsudoers_json.c:669
+#: plugins/sudoers/cvtsudoers_ldif.c:347 plugins/sudoers/cvtsudoers_ldif.c:360
+#: plugins/sudoers/ldap.c:504
 msgid "unable to get GMT time"
 msgstr "GMT 시간을 가져올 수 없습니다"
 
-#: plugins/sudoers/cvtsudoers_json.c:654 plugins/sudoers/cvtsudoers_json.c:667
-#: plugins/sudoers/cvtsudoers_ldif.c:349 plugins/sudoers/cvtsudoers_ldif.c:360
-#: plugins/sudoers/ldap.c:509
+#: plugins/sudoers/cvtsudoers_csv.c:457 plugins/sudoers/cvtsudoers_csv.c:471
+#: plugins/sudoers/cvtsudoers_json.c:659 plugins/sudoers/cvtsudoers_json.c:674
+#: plugins/sudoers/cvtsudoers_ldif.c:352 plugins/sudoers/cvtsudoers_ldif.c:365
+#: plugins/sudoers/ldap.c:512
 msgid "unable to format timestamp"
 msgstr "타임스탬프를 형식에 맞출 수 없습니다"
 
-#: plugins/sudoers/cvtsudoers_ldif.c:644
+#: plugins/sudoers/cvtsudoers_json.c:480 plugins/sudoers/cvtsudoers_json.c:515
+#: plugins/sudoers/cvtsudoers_json.c:725 plugins/sudoers/defaults.c:189
+#, c-format
+msgid "%s:%d:%d: unknown defaults entry \"%s\""
+msgstr "%s:%d:%d: 알 수 없는 \"%s\" 기본 항목"
+
+#: plugins/sudoers/cvtsudoers_ldif.c:649
 #, c-format
 msgid "too many sudoers entries, maximum %u"
 msgstr "sudoers 항목이 너무 많습니다. 최대 갯수는 %u개 입니다"
 
-#: plugins/sudoers/cvtsudoers_ldif.c:687
+#: plugins/sudoers/cvtsudoers_ldif.c:692
 msgid "the SUDOERS_BASE environment variable is not set and the -b option was not specified."
 msgstr "SUDOERS_BASE 환경 변수를 설정하지 않았으며 -b 옵션을 지정하지 않았습니다."
+
+#: plugins/sudoers/cvtsudoers_merge.c:438
+#, c-format
+msgid "unable to find alias %s"
+msgstr "%s 별칭을 찾을 수 없습니다"
+
+#: plugins/sudoers/cvtsudoers_merge.c:441
+#, c-format
+msgid "%s:%d:%d: renaming alias %s to %s"
+msgstr "%s:%d:%d: %s 별칭을 %s(으)로 바꿈"
+
+#: plugins/sudoers/cvtsudoers_merge.c:498
+#, c-format
+msgid "%s:%d:%d: removing duplicate alias %s"
+msgstr "%s:%d:%d: %s 중복 별칭 제거 중"
+
+#: plugins/sudoers/cvtsudoers_merge.c:658
+#, c-format
+msgid "%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"
+msgstr "%1$s:%2$d:%3$d: %5$s:%6$d:%7$d에서 호스트별 \"%4$s\" 기본 항목 중복"
+
+#: plugins/sudoers/cvtsudoers_merge.c:698
+#, c-format
+msgid "%s:%d:%d: made Defaults \"%s\" specific to host %s"
+msgstr "%s:%d:%d: \"%s\"에 대한 %s 호스트를 기본으로 지정"
+
+#: plugins/sudoers/cvtsudoers_merge.c:718
+#, c-format
+msgid "%s:%d:%d: removing Defaults \"%s\" overridden by subsequent entries"
+msgstr "%s:%d:%d: 하위 항목이 우선하는 기본 \"%s\" 항목 제거 중"
+
+#: plugins/sudoers/cvtsudoers_merge.c:723
+#, c-format
+msgid "%s:%d:%d: unable to make Defaults \"%s\" host-specific"
+msgstr "%s:%d:%d: 호스트별 \"%s\" 기본 항목을 설정할 수 없습니다"
+
+#: plugins/sudoers/cvtsudoers_merge.c:943
+#, c-format
+msgid "%s:%d:%d: removing userspec overridden by subsequent entries"
+msgstr "%s:%d:%d: 하위 항목이 우선하는 사용자 지정 항목 제거 중"
 
 #: plugins/sudoers/def_data.c:50
 #, c-format
@@ -2320,8 +2400,8 @@ msgid "Intercept further commands and apply sudoers restrictions to them"
 msgstr "추가 명령을 가로채고 sudoer 제한을 적용합니다"
 
 #: plugins/sudoers/def_data.c:586
-msgid "Log any child processes run by the command"
-msgstr "명령으로 실행하는 어떤 하위 프로세스든 기록"
+msgid "Log sub-commands run by the original command"
+msgstr "원본 명령으로 실행하는 하위 명령 기록"
 
 #: plugins/sudoers/def_data.c:590
 msgid "Log the exit status of commands"
@@ -2335,82 +2415,142 @@ msgstr "가로챈 세션에서의 순차 명령 실행시 인증해야 합니다
 msgid "Allow an intercepted command to run set setuid or setgid programs"
 msgstr "setuid 또는 setgid 프로그램을 실행할 가로채기 명령 실행 허용"
 
-#: plugins/sudoers/defaults.c:185
+#: plugins/sudoers/def_data.c:602
 #, c-format
-msgid "%s:%d:%d: unknown defaults entry \"%s\""
-msgstr "%s:%d:%d: 알 수 없는 \"%s\" 기본 항목"
+msgid "The maximum size to which the process's address space may grow (in bytes): %s"
+msgstr "프로세스 주소 영역을 확장할 최대 크기(바이트 단위): %s"
 
-#: plugins/sudoers/defaults.c:188
+#: plugins/sudoers/def_data.c:606
+#, c-format
+msgid "The largest size core dump file that may be created (in bytes): %s"
+msgstr "코어 덤프 파일 최대 생성 크기(바이트 단위): %s"
+
+#: plugins/sudoers/def_data.c:610
+#, c-format
+msgid "The maximum amount of CPU time that the process may use (in seconds): %s"
+msgstr "프로세스 최대 CPU 사용 시간(초 단위): %s"
+
+#: plugins/sudoers/def_data.c:614
+#, c-format
+msgid "The maximum size of the data segment for the process (in bytes): %s"
+msgstr "프로세스 데이터 세그먼트 최대 크기(바이트 단위): %s"
+
+#: plugins/sudoers/def_data.c:618
+#, c-format
+msgid "The largest size file that the process may create (in bytes): %s"
+msgstr "프로세스에서 만들 최대 파일 크기(바이트 단위): %s"
+
+#: plugins/sudoers/def_data.c:622
+#, c-format
+msgid "The maximum number of locks that the process may establish: %s"
+msgstr "프로세스 실행 최대 잠금 횟수: %s"
+
+#: plugins/sudoers/def_data.c:626
+#, c-format
+msgid "The maximum size that the process may lock in memory (in bytes): %s"
+msgstr "메모리에서 잠글 프로세스 최대 크기(바이트 단위): %s"
+
+#: plugins/sudoers/def_data.c:630
+#, c-format
+msgid "The maximum number of files that the process may have open: %s"
+msgstr "프로세스에서 열 파일 최대 갯수: %s"
+
+#: plugins/sudoers/def_data.c:634
+#, c-format
+msgid "The maximum number of processes that the user may run simultaneously: %s"
+msgstr "사용자가 동시 실행할 최대 프로세스 갯수: %s"
+
+#: plugins/sudoers/def_data.c:638
+#, c-format
+msgid "The maximum size to which the process's resident set size may grow (in bytes): %s"
+msgstr "프로세스 상주시 최대 확장 크기(바이트 단위): %s"
+
+#: plugins/sudoers/def_data.c:642
+#, c-format
+msgid "The maximum size to which the process's stack may grow (in bytes): %s"
+msgstr "프로세스 스택 크기 증가 최대 크기(바이트 단위): %s"
+
+#: plugins/sudoers/defaults.c:192
 #, c-format
 msgid "%s: unknown defaults entry \"%s\""
 msgstr "%s: 알 수 없는 \"%s\" 기본 항목"
 
-#: plugins/sudoers/defaults.c:234
+#: plugins/sudoers/defaults.c:241
 #, c-format
 msgid "%s:%d:%d: no value specified for \"%s\""
 msgstr "%s:%d:%d \"%s\"에 지정한 값이 없습니다"
 
-#: plugins/sudoers/defaults.c:237
+#: plugins/sudoers/defaults.c:244
 #, c-format
 msgid "%s: no value specified for \"%s\""
 msgstr "%s: \"%s\"에 지정한 값이 없습니다"
 
-#: plugins/sudoers/defaults.c:250
+#: plugins/sudoers/defaults.c:257
 #, c-format
 msgid "%s:%d:%d: invalid operator \"%c=\" for \"%s\""
 msgstr "%1$s:%2$d:%3$d: \"%5$s\"에 부적절한 연산자 \"%4$c=\""
 
-#: plugins/sudoers/defaults.c:253
+#: plugins/sudoers/defaults.c:260
 #, c-format
 msgid "%s: invalid operator \"%c=\" for \"%s\""
 msgstr "%1$s: \"%3$s\"의 부적절한 연산자 \"%2$c=\""
 
-#: plugins/sudoers/defaults.c:289
+#: plugins/sudoers/defaults.c:296
 #, c-format
 msgid "%s:%d:%d: option \"%s\" does not take a value"
 msgstr "%s:%d:%d: \"%s\" 옵션에 값이 없습니다"
 
-#: plugins/sudoers/defaults.c:292
+#: plugins/sudoers/defaults.c:299
 #, c-format
 msgid "%s: option \"%s\" does not take a value"
 msgstr "%s: \"%s\" 옵션에 값이 없습니다"
 
-#: plugins/sudoers/defaults.c:317
+#: plugins/sudoers/defaults.c:327
 #, c-format
 msgid "%s:%d:%d: invalid Defaults type 0x%x for option \"%s\""
 msgstr "%1$s:%2$d:%3$d \"%5$s\" 옵션의 부적절한 기본 형식 0x%4$x"
 
-#: plugins/sudoers/defaults.c:320
+#: plugins/sudoers/defaults.c:330
 #, c-format
 msgid "%s: invalid Defaults type 0x%x for option \"%s\""
 msgstr "%1$s: \"%3$s\" 옵션의 부적절한 기본 형식 0x%2$x"
 
-#: plugins/sudoers/defaults.c:330
+#: plugins/sudoers/defaults.c:340
 #, c-format
 msgid "%s:%d:%d: value \"%s\" is invalid for option \"%s\""
 msgstr "%s:%d:%d: \"%s\" 값은 \"%s\" 옵션에 맞지 않습니다"
 
-#: plugins/sudoers/defaults.c:333
+#: plugins/sudoers/defaults.c:343
 #, c-format
 msgid "%s: value \"%s\" is invalid for option \"%s\""
 msgstr "%s: \"%s\" 값은 \"%s\" 옵션에 맞지 않습니다"
 
-#: plugins/sudoers/defaults.c:1054
+#: plugins/sudoers/defaults.c:1124
+#, c-format
+msgid "%s:%d:%d: path name for \"%s\" too long"
+msgstr "%s:%d:%d: \"%s\" 경로 이름이 너무 깁니다"
+
+#: plugins/sudoers/defaults.c:1127
+#, c-format
+msgid "%s: path name for \"%s\" too long"
+msgstr "%s: \"%s\" 경로 이름이 너무 깁니다"
+
+#: plugins/sudoers/defaults.c:1138
 #, c-format
 msgid "%s:%d:%d: values for \"%s\" must start with a '/', '~', or '*'"
 msgstr "%s:%d:%d: \"%s\" 값은 '/'; '~'; '*' 문자로 시작해야합니다"
 
-#: plugins/sudoers/defaults.c:1058
+#: plugins/sudoers/defaults.c:1142
 #, c-format
 msgid "%s: values for \"%s\" must start with a '/', '~', or '*'"
 msgstr "%s: \"%s\" 값은 '/'; '~'; '*' 문자로 시작해야합니다"
 
-#: plugins/sudoers/defaults.c:1069
+#: plugins/sudoers/defaults.c:1153
 #, c-format
 msgid "%s:%d:%d: values for \"%s\" must start with a '/'"
 msgstr "%s:%d:%d: \"%s\" 값은 '/' 문자로 시작해야합니다"
 
-#: plugins/sudoers/defaults.c:1073
+#: plugins/sudoers/defaults.c:1157
 #, c-format
 msgid "%s: values for \"%s\" must start with a '/'"
 msgstr "%s: \"%s\" 값은 '/' 문자로 시작해야합니다"
@@ -2458,7 +2598,7 @@ msgstr "%s은(는) %d uid가 소유해야 합니다"
 msgid "%s must only be writable by owner"
 msgstr "%s은(는) 소유자만 쓸 수 있습니다"
 
-#: plugins/sudoers/group_plugin.c:96 plugins/sudoers/sssd.c:569
+#: plugins/sudoers/group_plugin.c:96 plugins/sudoers/sssd.c:566
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "%s을(를) 불러올 수 없습니다: %s"
@@ -2487,37 +2627,37 @@ msgstr "\"%s\" 네트워크 마스크 주소를 해석할 수 없습니다"
 msgid "Local IP address and netmask pairs:\n"
 msgstr "로컬 IP 주소 및 넷마스크 쌍:\n"
 
-#: plugins/sudoers/iolog.c:632
+#: plugins/sudoers/iolog.c:626
 msgid "unable to update sequence file"
 msgstr "시퀀스 파일을 업데이트할 수 없습니다"
 
-#: plugins/sudoers/iolog.c:663 plugins/sudoers/iolog.c:851
-#: plugins/sudoers/iolog.c:1004 plugins/sudoers/iolog.c:1011
-#: plugins/sudoers/iolog.c:1132 plugins/sudoers/iolog.c:1139
-#: plugins/sudoers/iolog.c:1238 plugins/sudoers/iolog.c:1245
+#: plugins/sudoers/iolog.c:660 plugins/sudoers/iolog.c:848
+#: plugins/sudoers/iolog.c:1001 plugins/sudoers/iolog.c:1008
+#: plugins/sudoers/iolog.c:1129 plugins/sudoers/iolog.c:1136
+#: plugins/sudoers/iolog.c:1235 plugins/sudoers/iolog.c:1242
 #, c-format
 msgid "unable to write to I/O log file: %s"
 msgstr "입출력 로그에 기록할 수 없습니다: %s"
 
-#: plugins/sudoers/iolog.c:671
+#: plugins/sudoers/iolog.c:668
 #, c-format
 msgid "unable to create %s/%s"
 msgstr "%s/%s을(를) 만들 수 없습니다"
 
-#: plugins/sudoers/iolog.c:896
+#: plugins/sudoers/iolog.c:893
 #, c-format
 msgid "%s: internal error, I/O log file for event %d not open"
 msgstr "%s: 내부 오류. 이벤트 %d 번의 입출력 로그 파일을 열지 않았습니다"
 
-#: plugins/sudoers/iolog.c:989 plugins/sudoers/iolog.c:1117
-#: plugins/sudoers/iolog.c:1222 plugins/sudoers/timestamp.c:849
-#: plugins/sudoers/timestamp.c:941 plugins/sudoers/visudo.c:487
-#: plugins/sudoers/visudo.c:493
+#: plugins/sudoers/iolog.c:986 plugins/sudoers/iolog.c:1114
+#: plugins/sudoers/iolog.c:1219 plugins/sudoers/timestamp.c:849
+#: plugins/sudoers/timestamp.c:941 plugins/sudoers/visudo.c:510
+#: plugins/sudoers/visudo.c:516
 msgid "unable to read the clock"
 msgstr "클록을 읽을 수 없습니다"
 
-#: plugins/sudoers/iolog.c:1214 plugins/sudoers/log_client.c:1217
-#: plugins/sudoers/log_client.c:1227 plugins/sudoers/log_client.c:1231
+#: plugins/sudoers/iolog.c:1211 plugins/sudoers/log_client.c:1221
+#: plugins/sudoers/log_client.c:1231 plugins/sudoers/log_client.c:1235
 #, c-format
 msgid "%s: internal error, invalid signal %d"
 msgstr "%s: 내부 오류. 부적절한 시그널 %d번"
@@ -2536,16 +2676,16 @@ msgstr "SSL 인증서 및 키 DB를 초기화할 수 없습니다: %s"
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "SSL을 사용하려면 %s에서 TLS_CERT를 설정해야 합니다"
 
-#: plugins/sudoers/ldap.c:1660
+#: plugins/sudoers/ldap.c:1663
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "LDAP를 초기화할 수 없습니다: %s"
 
-#: plugins/sudoers/ldap.c:1697
+#: plugins/sudoers/ldap.c:1700
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls를 지정했지만 LDAP 라이브러리에서 ldap_start_tls_s() 또는 ldap_start_tls_s_np() 함수를 지원하지 않습니다"
 
-#: plugins/sudoers/ldap.c:1834 plugins/sudoers/parse_ldif.c:746
+#: plugins/sudoers/ldap.c:1837 plugins/sudoers/parse_ldif.c:747
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "부적절한 sudoOrder 속성: %s"
@@ -2564,15 +2704,15 @@ msgstr "지원하지 않는 LDAP URI 형식: %s"
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "ldap 및 ldaps URI를 함께 사용할 수 없습니다"
 
-#: plugins/sudoers/ldap_util.c:496 plugins/sudoers/ldap_util.c:503
-#: plugins/sudoers/ldap_util.c:511 plugins/sudoers/ldap_util.c:520
-#: plugins/sudoers/ldap_util.c:528 plugins/sudoers/ldap_util.c:538
-#: plugins/sudoers/ldap_util.c:546
+#: plugins/sudoers/ldap_util.c:498 plugins/sudoers/ldap_util.c:505
+#: plugins/sudoers/ldap_util.c:513 plugins/sudoers/ldap_util.c:522
+#: plugins/sudoers/ldap_util.c:530 plugins/sudoers/ldap_util.c:540
+#: plugins/sudoers/ldap_util.c:548
 #, c-format
 msgid "duplicate sudoOption: %s%s%s"
 msgstr "sudoOption 복제: %s%s%s"
 
-#: plugins/sudoers/ldap_util.c:565 plugins/sudoers/ldap_util.c:567
+#: plugins/sudoers/ldap_util.c:567 plugins/sudoers/ldap_util.c:569
 #, c-format
 msgid "unable to convert sudoOption: %s%s%s"
 msgstr "sudoOption을 변환할 수 없습니다: %s%s%s"
@@ -2585,111 +2725,111 @@ msgstr "감시 시스템을 열 수 없습니다"
 msgid "unable to send audit message"
 msgstr "감시 메시지를 보낼 수 없습니다"
 
-#: plugins/sudoers/log_client.c:116 plugins/sudoers/log_client.c:396
-#: plugins/sudoers/log_client.c:1464 plugins/sudoers/log_client.c:2061
+#: plugins/sudoers/log_client.c:120 plugins/sudoers/log_client.c:400
+#: plugins/sudoers/log_client.c:1468 plugins/sudoers/log_client.c:2070
 msgid "error in event loop"
 msgstr "이벤트 루프 오류"
 
-#: plugins/sudoers/log_client.c:196
+#: plugins/sudoers/log_client.c:200
 #, c-format
 msgid "Creation of new SSL_CTX object failed: %s"
 msgstr "SSL_CTX 객체 만들기 실패: %s"
 
-#: plugins/sudoers/log_client.c:219
+#: plugins/sudoers/log_client.c:223
 #, c-format
 msgid "unable to load certificate authority bundle %s"
 msgstr "%s 인증서 인증 번들을 불러올 수 없습니다"
 
-#: plugins/sudoers/log_client.c:239
+#: plugins/sudoers/log_client.c:243
 #, c-format
 msgid "unable to load certificate %s"
 msgstr "%s 인증서를 불러올 수 없습니다"
 
-#: plugins/sudoers/log_client.c:252
+#: plugins/sudoers/log_client.c:256
 #, c-format
 msgid "unable to load private key %s"
 msgstr "%s 개인 키를 불러올 수 없습니다"
 
-#: plugins/sudoers/log_client.c:261
+#: plugins/sudoers/log_client.c:265
 #, c-format
 msgid "Unable to allocate ssl object: %s"
 msgstr "SSL 객체를 할당할 수 없습니다: %s"
 
-#: plugins/sudoers/log_client.c:349 plugins/sudoers/log_client.c:354
+#: plugins/sudoers/log_client.c:353 plugins/sudoers/log_client.c:358
 #, c-format
 msgid "TLS connection to %s:%s failed: %s"
 msgstr "%s:%s로의 TLS 연결 실패: %s"
 
-#: plugins/sudoers/log_client.c:527
+#: plugins/sudoers/log_client.c:531
 msgid "TLS initialization was unsuccessful"
 msgstr "TLS 초기화에 실패했습니다"
 
-#: plugins/sudoers/log_client.c:537
+#: plugins/sudoers/log_client.c:541
 msgid "TLS handshake was unsuccessful"
 msgstr "TLS 핸드셰이킹에 실패했습니다"
 
-#: plugins/sudoers/log_client.c:1235
+#: plugins/sudoers/log_client.c:1239
 #, c-format
 msgid "%s: internal error, invalid exit status %d"
 msgstr "%s: 내부 오류. 부적절한 종료 상태 %d"
 
-#: plugins/sudoers/log_client.c:1602
+#: plugins/sudoers/log_client.c:1608
 msgid "unable to unpack ServerMessage"
 msgstr "ServerMessage를 언팩할 수 없습니다"
 
-#: plugins/sudoers/log_client.c:1754 plugins/sudoers/log_client.c:1778
+#: plugins/sudoers/log_client.c:1763 plugins/sudoers/log_client.c:1787
 msgid "lost connection to log server"
 msgstr "로그 서버의 연결이 끊어졌습니다"
 
-#: plugins/sudoers/log_client.c:1855
+#: plugins/sudoers/log_client.c:1864
 msgid "missing write buffer"
 msgstr "기록 버퍼 빠짐"
 
-#: plugins/sudoers/log_client.c:2002
+#: plugins/sudoers/log_client.c:2011
 msgid "unable to connect to log server"
 msgstr "로그 서버에 연결할 수 없습니다"
 
-#: plugins/sudoers/logging.c:283
+#: plugins/sudoers/logging.c:286
 msgid "user NOT in sudoers"
 msgstr "사용자가 sudoers에 없습니다"
 
-#: plugins/sudoers/logging.c:285
+#: plugins/sudoers/logging.c:288
 msgid "user NOT authorized on host"
 msgstr "사용자가 호스트에서 인증하지 않았습니다"
 
-#: plugins/sudoers/logging.c:287
+#: plugins/sudoers/logging.c:290
 msgid "command not allowed"
 msgstr "명령을 허용하지 않았습니다"
 
-#: plugins/sudoers/logging.c:308
+#: plugins/sudoers/logging.c:311
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
 msgstr "%s은(는) sudoers 설정 파일에 없습니다.  이 시도를 보고합니다.\n"
 
-#: plugins/sudoers/logging.c:311
+#: plugins/sudoers/logging.c:314
 #, c-format
 msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
 msgstr "%s은(는) %s에서 sudo를 실행하도록 허가받지 않았습니다.  이 시도를 보고합니다.\n"
 
-#: plugins/sudoers/logging.c:315
+#: plugins/sudoers/logging.c:318
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
 msgstr "죄송하지만, %s 사용자는 %s에서 sudo를 실행하면 안됩니다.\n"
 
-#: plugins/sudoers/logging.c:318
+#: plugins/sudoers/logging.c:321
 #, c-format
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
 msgstr "죄송하지만 %1$s 사용자는 '%2$s%3$s%4$s'을(를) %8$s의 %5$s%6$s%7$s(으)로 실행하도록 허가받지 않았습니다.\n"
 
-#: plugins/sudoers/logging.c:355 plugins/sudoers/sudoers.c:629
+#: plugins/sudoers/logging.c:358 plugins/sudoers/sudoers.c:629
 #: plugins/sudoers/sudoers.c:631 plugins/sudoers/sudoers.c:633
-#: plugins/sudoers/sudoers.c:635 plugins/sudoers/sudoers.c:776
-#: plugins/sudoers/sudoers.c:778
+#: plugins/sudoers/sudoers.c:635 plugins/sudoers/sudoers.c:785
+#: plugins/sudoers/sudoers.c:787
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: 명령이 없습니다"
 
-#: plugins/sudoers/logging.c:357 plugins/sudoers/sudoers.c:625
+#: plugins/sudoers/logging.c:360 plugins/sudoers/sudoers.c:625
 #, c-format
 msgid ""
 "ignoring \"%s\" found in '.'\n"
@@ -2698,17 +2838,17 @@ msgstr ""
 "'.'에 무시 중인 \"%1$s\" 요소가 있습니다.\n"
 "\"%3$s\" 명령을 실행하려면, \"sudo ./%2$s\" 명령을 사용하십시오."
 
-#: plugins/sudoers/logging.c:376
+#: plugins/sudoers/logging.c:379
 #, c-format
 msgid "%u incorrect password attempt"
 msgid_plural "%u incorrect password attempts"
 msgstr[0] "잘못된 암호 입력 시도 %u번"
 
-#: plugins/sudoers/logging.c:432
+#: plugins/sudoers/logging.c:435
 msgid "authentication failure"
 msgstr "인증 실패"
 
-#: plugins/sudoers/logging.c:472 plugins/sudoers/logging.c:492
+#: plugins/sudoers/logging.c:475 plugins/sudoers/logging.c:495
 msgid "a password is required"
 msgstr "암호가 필요합니다"
 
@@ -2722,7 +2862,15 @@ msgstr "로그 파일에 기록할 수 없습니다: %s"
 msgid "digest for %s (%s) is not in %s form"
 msgstr "%s 다이제스트(%s)는 %s 형식이 아닙니다"
 
-#: plugins/sudoers/parse.c:537
+#: plugins/sudoers/parse.c:233
+msgid "SELinux RBAC is not supported when intercept mode is enabled"
+msgstr "차단 모드를 활성화하면 SELinux RBAC를 지원하지 않습니다"
+
+#: plugins/sudoers/parse.c:238
+msgid "SELinux RBAC is not supported when the log_subcmds flag is enabled"
+msgstr "log_subcmds 플래그를 켜두면 SELinux RBAC를 지원하지 않습니다"
+
+#: plugins/sudoers/parse.c:549
 #, c-format
 msgid ""
 "\n"
@@ -2731,7 +2879,7 @@ msgstr ""
 "\n"
 "LDAP 역할: %s\n"
 
-#: plugins/sudoers/parse.c:540
+#: plugins/sudoers/parse.c:552
 msgid ""
 "\n"
 "Sudoers entry:\n"
@@ -2739,48 +2887,48 @@ msgstr ""
 "\n"
 "Sudoers 항목:\n"
 
-#: plugins/sudoers/parse.c:542
+#: plugins/sudoers/parse.c:554
 msgid "    RunAsUsers: "
 msgstr "    실행 사용자: "
 
-#: plugins/sudoers/parse.c:557
+#: plugins/sudoers/parse.c:569
 msgid "    RunAsGroups: "
 msgstr "    실행 그룹: "
 
-#: plugins/sudoers/parse.c:567
+#: plugins/sudoers/parse.c:579
 msgid "    Options: "
 msgstr "    옵션: "
 
-#: plugins/sudoers/parse.c:623
+#: plugins/sudoers/parse.c:643
 msgid "    Commands:\n"
 msgstr "    명령:\n"
 
-#: plugins/sudoers/parse.c:814
+#: plugins/sudoers/parse.c:834
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr "%2$s에서 %1$s에 일치하는 기본 항목:\n"
 
-#: plugins/sudoers/parse.c:832
+#: plugins/sudoers/parse.c:852
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr "%s의 실행 권한 및 명령별 기본 값:\n"
 
-#: plugins/sudoers/parse.c:850
+#: plugins/sudoers/parse.c:870
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr "%s 사용자는  %s에서 다음 명령을 실행해야 합니다:\n"
 
-#: plugins/sudoers/parse.c:865
+#: plugins/sudoers/parse.c:885
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "%s 사용자는 %s에서 sudo를 실행하도록 허가받지 않았습니다.\n"
 
-#: plugins/sudoers/parse_ldif.c:616
+#: plugins/sudoers/parse_ldif.c:617
 #, c-format
 msgid "ignoring incomplete sudoRole: cn: %s"
 msgstr "미완결 sudoRole 무시: cn: %s"
 
-#: plugins/sudoers/parse_ldif.c:676
+#: plugins/sudoers/parse_ldif.c:677
 #, c-format
 msgid "invalid LDIF attribute: %s"
 msgstr "부적절한 LDIF 속성: %s"
@@ -2790,59 +2938,64 @@ msgstr "부적절한 LDIF 속성: %s"
 msgid "invalid %.*s set by sudo front-end"
 msgstr "sudo 프론트엔드의 %.*s 설정이 잘못되었습니다"
 
-#: plugins/sudoers/policy.c:320 plugins/sudoers/testsudoers.c:268
+#: plugins/sudoers/policy.c:206 plugins/sudoers/policy.c:215
+#, c-format
+msgid "path name for \"%s\" too long"
+msgstr "\"%s\" 경로 이름이 너무 깁니다"
+
+#: plugins/sudoers/policy.c:328 plugins/sudoers/testsudoers.c:268
 msgid "unable to parse network address list"
 msgstr "네트워크 주소 목록을 해석할 수 없습니다"
 
-#: plugins/sudoers/policy.c:471
+#: plugins/sudoers/policy.c:479
 msgid "user name not set by sudo front-end"
 msgstr "sudo 프론트엔드에서 사용자 이름을 설정하지 않았습니다"
 
-#: plugins/sudoers/policy.c:475
+#: plugins/sudoers/policy.c:483
 msgid "user-ID not set by sudo front-end"
 msgstr "sudo 프론트엔드에서 사용자 ID를 설정하지 않았습니다"
 
-#: plugins/sudoers/policy.c:479
+#: plugins/sudoers/policy.c:487
 msgid "group-ID not set by sudo front-end"
 msgstr "sudo 프론트엔드에서 그룹 ID를 지정하지 않았습니다"
 
-#: plugins/sudoers/policy.c:483
+#: plugins/sudoers/policy.c:491
 msgid "host name not set by sudo front-end"
 msgstr "sudo 프론트엔드에서 호스트 이름을 설정하지 않았습니다"
 
-#: plugins/sudoers/policy.c:685
+#: plugins/sudoers/policy.c:693
 #, c-format
 msgid "invalid working directory: %s"
 msgstr "부적절한 작업 디렉터리: %s"
 
-#: plugins/sudoers/policy.c:861
+#: plugins/sudoers/policy.c:869
 #, c-format
 msgid "invalid chroot directory: %s"
 msgstr "부적절한 루트 변경 디렉터리: %s"
 
-#: plugins/sudoers/policy.c:996 plugins/sudoers/visudo.c:229
-#: plugins/sudoers/visudo.c:851
+#: plugins/sudoers/policy.c:1051 plugins/sudoers/visudo.c:243
+#: plugins/sudoers/visudo.c:880
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s을(를) 실행할 수 없습니다"
 
-#: plugins/sudoers/policy.c:1066 plugins/sudoers/policy.c:1103
-#: plugins/sudoers/policy.c:1125 plugins/sudoers/policy.c:1151
+#: plugins/sudoers/policy.c:1121 plugins/sudoers/policy.c:1158
+#: plugins/sudoers/policy.c:1180 plugins/sudoers/policy.c:1206
 #, c-format
 msgid "%s: invalid mode flags from sudo front end: 0x%x"
 msgstr "%s: sudo 프론트엔드의 상태 플래그가 잘못되었습니다: 0x%x"
 
-#: plugins/sudoers/policy.c:1182
+#: plugins/sudoers/policy.c:1237
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Sudoers 정책 플러그인 버전 %s\n"
 
-#: plugins/sudoers/policy.c:1184
+#: plugins/sudoers/policy.c:1239
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Sudoers 파일 문법 버전 %d\n"
 
-#: plugins/sudoers/policy.c:1188
+#: plugins/sudoers/policy.c:1243
 #, c-format
 msgid ""
 "\n"
@@ -2851,91 +3004,91 @@ msgstr ""
 "\n"
 "Sudoers 경로: %s\n"
 
-#: plugins/sudoers/policy.c:1191
+#: plugins/sudoers/policy.c:1246
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "nsswitch 경로: %s\n"
 
-#: plugins/sudoers/policy.c:1193
+#: plugins/sudoers/policy.c:1248
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "ldap.conf 경로: %s\n"
 
-#: plugins/sudoers/policy.c:1194
+#: plugins/sudoers/policy.c:1249
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "ldap.secret 경로: %s\n"
 
-#: plugins/sudoers/policy.c:1227
+#: plugins/sudoers/policy.c:1282
 #, c-format
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr "%d 형식의 후크를 등록할 수 없습니다(버전 %d.%d)"
 
-#: plugins/sudoers/policy.c:1245
+#: plugins/sudoers/policy.c:1300
 #, c-format
 msgid "unable to deregister hook of type %d (version %d.%d)"
 msgstr "%d 형식의 후크 등록을 해제할 수 없습니다(버전 %d.%d)"
 
-#: plugins/sudoers/pwutil.c:218 plugins/sudoers/pwutil.c:236
+#: plugins/sudoers/pwutil.c:222 plugins/sudoers/pwutil.c:240
 #, c-format
 msgid "unable to cache uid %u"
 msgstr "%u uid를 캐시에 적재할 수 없습니다"
 
-#: plugins/sudoers/pwutil.c:230
+#: plugins/sudoers/pwutil.c:234
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr "%u uid를 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:290 plugins/sudoers/pwutil.c:308
-#: plugins/sudoers/pwutil.c:371 plugins/sudoers/pwutil.c:416
+#: plugins/sudoers/pwutil.c:294 plugins/sudoers/pwutil.c:312
+#: plugins/sudoers/pwutil.c:375 plugins/sudoers/pwutil.c:420
 #, c-format
 msgid "unable to cache user %s"
 msgstr "%s 사용자를 캐시에 적재할 수 없습니다"
 
-#: plugins/sudoers/pwutil.c:303
+#: plugins/sudoers/pwutil.c:307
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr "%s 사용자를 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:535 plugins/sudoers/pwutil.c:553
+#: plugins/sudoers/pwutil.c:539 plugins/sudoers/pwutil.c:557
 #, c-format
 msgid "unable to cache gid %u"
 msgstr "%u GID를 캐시에 적재할 수 없습니다"
 
-#: plugins/sudoers/pwutil.c:547
+#: plugins/sudoers/pwutil.c:551
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "%u gid를 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:601 plugins/sudoers/pwutil.c:619
-#: plugins/sudoers/pwutil.c:680 plugins/sudoers/pwutil.c:729
+#: plugins/sudoers/pwutil.c:605 plugins/sudoers/pwutil.c:623
+#: plugins/sudoers/pwutil.c:684 plugins/sudoers/pwutil.c:733
 #, c-format
 msgid "unable to cache group %s"
 msgstr "%s 그룹을 캐시에 적재할 수 없습니다"
 
-#: plugins/sudoers/pwutil.c:614
+#: plugins/sudoers/pwutil.c:618
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "%s 그룹을 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:876 plugins/sudoers/pwutil.c:927
-#: plugins/sudoers/pwutil.c:977 plugins/sudoers/pwutil.c:1029
+#: plugins/sudoers/pwutil.c:880 plugins/sudoers/pwutil.c:931
+#: plugins/sudoers/pwutil.c:981 plugins/sudoers/pwutil.c:1033
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "%s 그룹 목록을 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:882 plugins/sudoers/pwutil.c:932
-#: plugins/sudoers/pwutil.c:983 plugins/sudoers/pwutil.c:1034
+#: plugins/sudoers/pwutil.c:886 plugins/sudoers/pwutil.c:936
+#: plugins/sudoers/pwutil.c:987 plugins/sudoers/pwutil.c:1038
 #, c-format
 msgid "unable to cache group list for %s"
 msgstr "%s 그룹 목록을 캐시에 적재할 수 없습니다"
 
-#: plugins/sudoers/pwutil.c:921
+#: plugins/sudoers/pwutil.c:925
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "%s 그룹을 해석할 수 없습니다"
 
-#: plugins/sudoers/pwutil.c:1023
+#: plugins/sudoers/pwutil.c:1027
 #, c-format
 msgid "unable to parse gids for %s"
 msgstr "%s 그룹 ID를 해석할 수 없습니다"
@@ -2999,20 +3152,20 @@ msgstr "user_cmnd 감사 경로가 잘렸습니다: %s"
 msgid "truncated audit path argv[0]: %s"
 msgstr "argv[0] 감사 경로가 잘렸습니다: %s"
 
-#: plugins/sudoers/sssd.c:572
+#: plugins/sudoers/sssd.c:569
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr "SSS 소스를 초기화할 수 없습니다. 머신에 SSSD를 설치했습니까?"
 
-#: plugins/sudoers/sssd.c:580 plugins/sudoers/sssd.c:589
-#: plugins/sudoers/sssd.c:598 plugins/sudoers/sssd.c:607
-#: plugins/sudoers/sssd.c:616
+#: plugins/sudoers/sssd.c:577 plugins/sudoers/sssd.c:586
+#: plugins/sudoers/sssd.c:595 plugins/sudoers/sssd.c:604
+#: plugins/sudoers/sssd.c:613
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "%2$s에서 \"%1$s\" 심볼을 찾을 수 없습니다"
 
 #: plugins/sudoers/sudoers.c:166 plugins/sudoers/sudoers.c:174
 #: plugins/sudoers/sudoers.c:228 plugins/sudoers/sudoers.c:249
-#: plugins/sudoers/sudoers.c:1040
+#: plugins/sudoers/sudoers.c:1049
 msgid "problem with defaults entries"
 msgstr "기본 항목에 문제 발생"
 
@@ -3078,73 +3231,81 @@ msgstr "%s 사용자에게 부적절한 셸 제공: %s"
 msgid "command in current directory"
 msgstr "현재 디렉터리의 명령"
 
+#: plugins/sudoers/sudoers.c:639
+msgid "\"cd\" is a shell built-in command, it cannot be run directly."
+msgstr "\"cd\"는 셸 내장 명령으로, 직접 실행할 수 없습니다."
+
+#: plugins/sudoers/sudoers.c:641
+msgid "the -s option may be used to run a privileged shell."
+msgstr "-s 옵션은 별도 권한을 부여한 셸에서 실행할 때 사용합니다."
+
 #: plugins/sudoers/sudoers.c:643
+msgid "the -D option may be used to run a command in a specific directory."
+msgstr "-D 옵션은 지정 디렉터리에서 명령을 실행할 때 사용합니다."
+
+#: plugins/sudoers/sudoers.c:652
 msgid "user not allowed to set a command timeout"
 msgstr "사용자가 명령 처리 제한 시간을 설정하도록 허용하지 않았습니다"
 
-#: plugins/sudoers/sudoers.c:645
+#: plugins/sudoers/sudoers.c:654
 msgid "sorry, you are not allowed set a command timeout"
 msgstr "죄송하지만, 명령 처리 제한 시간을 설정할 수 없습니다"
 
-#: plugins/sudoers/sudoers.c:653
+#: plugins/sudoers/sudoers.c:662
 msgid "user not allowed to preserve the environment"
 msgstr "사용자가 환경 설정 값을 유지하도록 허용하지 않았습니다"
 
-#: plugins/sudoers/sudoers.c:655
+#: plugins/sudoers/sudoers.c:664
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "죄송하지만 이 환경 상태를 유지하도록 허가받지 않았습니다"
 
-#: plugins/sudoers/sudoers.c:989
-msgid "command too long"
-msgstr "명령이 너무 깁니다"
-
-#: plugins/sudoers/sudoers.c:1028
+#: plugins/sudoers/sudoers.c:1037
 msgid "sudoedit doesn't need to be run via sudo"
 msgstr "sudoedit는 sudo로 실행할 필요가 없습니다"
 
-#: plugins/sudoers/sudoers.c:1087 plugins/sudoers/sudoreplay.c:1568
+#: plugins/sudoers/sudoers.c:1096 plugins/sudoers/sudoreplay.c:1578
 #: plugins/sudoers/tsdump.c:138
 #, c-format
 msgid "unable to read %s"
 msgstr "%s을(를) 읽을 수 없습니다"
 
-#: plugins/sudoers/sudoers.c:1112 plugins/sudoers/visudo.c:426
-#: plugins/sudoers/visudo.c:720
+#: plugins/sudoers/sudoers.c:1121 plugins/sudoers/visudo.c:449
+#: plugins/sudoers/visudo.c:748
 #, c-format
 msgid "unable to stat %s"
 msgstr "%s의 상태를 가져올 수 없습니다"
 
-#: plugins/sudoers/sudoers.c:1116 plugins/sudoers/visudo.c:1009
+#: plugins/sudoers/sudoers.c:1125 plugins/sudoers/visudo.c:1045
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s은(는) 일반 파일이 아닙니다"
 
-#: plugins/sudoers/sudoers.c:1120 plugins/sudoers/timestamp.c:252 toke.l:1148
+#: plugins/sudoers/sudoers.c:1129 plugins/sudoers/timestamp.c:252 toke.l:1168
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s은(는) %u uid가 소유했지만, %u uid가 소유해야합니다"
 
-#: plugins/sudoers/sudoers.c:1124 toke.l:1153
+#: plugins/sudoers/sudoers.c:1133 toke.l:1173
 #, c-format
 msgid "%s is world writable"
 msgstr "%s에 모두가 기록할 수 있습니다"
 
-#: plugins/sudoers/sudoers.c:1128 toke.l:1156
+#: plugins/sudoers/sudoers.c:1137 toke.l:1176
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "%s은(는) %u gid가 소유했지만, %u gid가 소유해야합니다"
 
-#: plugins/sudoers/sudoers.c:1161
+#: plugins/sudoers/sudoers.c:1170
 #, c-format
 msgid "only root can use \"-c %s\""
 msgstr "루트만 \"-c %s\" 옵션을 사용할 수 있습니다"
 
-#: plugins/sudoers/sudoers.c:1180
+#: plugins/sudoers/sudoers.c:1189
 #, c-format
 msgid "unknown login class %s"
 msgstr "알 수 없는 로그인 클래스 %s"
 
-#: plugins/sudoers/sudoers.c:1266 plugins/sudoers/sudoers.c:1281
+#: plugins/sudoers/sudoers.c:1275 plugins/sudoers/sudoers.c:1290
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "%s 호스트를 해석할 수 없습니다"
@@ -3220,7 +3381,7 @@ msgstr "알 수 없는 검색어 \"%s\""
 msgid "%s requires an argument"
 msgstr "%s에 인자가 필요합니다"
 
-#: plugins/sudoers/sudoreplay.c:1292 plugins/sudoers/sudoreplay.c:1544
+#: plugins/sudoers/sudoreplay.c:1292 plugins/sudoers/sudoreplay.c:1554
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "부적절한 정규 표현식: %s"
@@ -3247,17 +3408,17 @@ msgstr "잘못된 후위 문자 \"!\""
 msgid "unknown search type %d"
 msgstr "알 수 없는 검색 형식 %d"
 
-#: plugins/sudoers/sudoreplay.c:1635
+#: plugins/sudoers/sudoreplay.c:1645
 #, c-format
 msgid "usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"
 msgstr "사용법: %s [-hnRS] [-d <디렉터리>] [-m <숫자>] [-s <숫자>] <ID>\n"
 
-#: plugins/sudoers/sudoreplay.c:1638
+#: plugins/sudoers/sudoreplay.c:1648
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "사용법: %s [-h] [-d <디렉터리>] -l [<검색식>]\n"
 
-#: plugins/sudoers/sudoreplay.c:1647
+#: plugins/sudoers/sudoreplay.c:1657
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -3266,7 +3427,7 @@ msgstr ""
 "%s - sudo 세션 로그를 보여줍니다\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1649
+#: plugins/sudoers/sudoreplay.c:1659
 msgid ""
 "\n"
 "Options:\n"
@@ -3355,93 +3516,99 @@ msgstr "지침 상태 경로가 너무 깁니다: %s/%s"
 msgid "sudoedit should not be specified with a path"
 msgstr "sudoedit에 경로를 지정하면 안됩니다"
 
-#: plugins/sudoers/visudo.c:224
+#: plugins/sudoers/visudo.c:238
 msgid "the -x option will be removed in a future release"
 msgstr "-x 옵션은 추후 릴리스에서 제거 예정입니다"
 
-#: plugins/sudoers/visudo.c:226
+#: plugins/sudoers/visudo.c:240
 msgid "please consider using the cvtsudoers utility instead"
 msgstr "cvtsudoers 유틸리티를 대신 사용해보십시오"
 
-#: plugins/sudoers/visudo.c:277 plugins/sudoers/visudo.c:653
+#: plugins/sudoers/visudo.c:292 plugins/sudoers/visudo.c:676
 #, c-format
 msgid "press return to edit %s: "
-msgstr "%s을(를) 편집하려면 return 키를 누르십시오:"
+msgstr "%s 항목을 편집하려면 return 키를 누르십시오: "
 
-#: plugins/sudoers/visudo.c:338
+#: plugins/sudoers/visudo.c:307
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "%s에 편집 세션 내용이 남았습니다"
+
+#: plugins/sudoers/visudo.c:361
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "지정 편집기(%s)가 없습니다"
 
-#: plugins/sudoers/visudo.c:340
+#: plugins/sudoers/visudo.c:363
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "편집기가 없습니다(편집기 경로 = %s)"
 
-#: plugins/sudoers/visudo.c:446 plugins/sudoers/visudo.c:454
+#: plugins/sudoers/visudo.c:469 plugins/sudoers/visudo.c:477
 msgid "write error"
 msgstr "쓰기 오류"
 
-#: plugins/sudoers/visudo.c:500
+#: plugins/sudoers/visudo.c:523
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "임시 파일 상태를 가져올 수 없습니다(%s). %s을(를) 바꾸지 않았습니다"
 
-#: plugins/sudoers/visudo.c:507
+#: plugins/sudoers/visudo.c:530
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "임시 파일 길이가 0입니다(%s). %s을(를) 바꾸지 않았습니다"
 
-#: plugins/sudoers/visudo.c:513
+#: plugins/sudoers/visudo.c:536
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "편집기(%s) 실패. %s을(를) 바꾸지 않았습니다"
 
-#: plugins/sudoers/visudo.c:535
+#: plugins/sudoers/visudo.c:558
 #, c-format
 msgid "%s unchanged"
 msgstr "%s 바꾸지 않음"
 
-#: plugins/sudoers/visudo.c:592
+#: plugins/sudoers/visudo.c:615
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "임시 파일(%s)을 다시 열 수 없습니다. %s을(를) 바꾸지 않았습니다."
 
-#: plugins/sudoers/visudo.c:604
+#: plugins/sudoers/visudo.c:627
 #, c-format
 msgid "unable to parse temporary file (%s), unknown error"
 msgstr "임시 파일(%s)을 해석할 수 없습니다. 알 수 없는 오류"
 
-#: plugins/sudoers/visudo.c:642
+#: plugins/sudoers/visudo.c:665
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "내부 오류. %s을(를) 목록에서 찾을 수 없습니다!"
 
-#: plugins/sudoers/visudo.c:722 plugins/sudoers/visudo.c:731
+#: plugins/sudoers/visudo.c:722 plugins/sudoers/visudo.c:752
+#: plugins/sudoers/visudo.c:759
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "%s의 uid/gid를 %u/%u 값으로 설정할 수 없습니다"
 
-#: plugins/sudoers/visudo.c:754
+#: plugins/sudoers/visudo.c:787
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s 및 %s은(는) 동일한 파일 시스템에 없습니다. mv 명령으로 이름을 바꿉니다"
 
-#: plugins/sudoers/visudo.c:765
+#: plugins/sudoers/visudo.c:798
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "명령 실행 실패: '%s %s %s', %s을(를) 바꾸지 않았습니다"
 
-#: plugins/sudoers/visudo.c:775
+#: plugins/sudoers/visudo.c:805
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "%s 이름 바꾸기 오류. %s을(를) 바꾸지 않았습니다"
 
-#: plugins/sudoers/visudo.c:796
+#: plugins/sudoers/visudo.c:825
 msgid "What now? "
 msgstr "어떻게 하시겠습니까? "
 
-#: plugins/sudoers/visudo.c:810
+#: plugins/sudoers/visudo.c:839
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -3453,41 +3620,41 @@ msgstr ""
 "  sudoers 파일을 바꾼 상태에서 저장하지 않고 나갑니다(X)\n"
 "  sudoers 파일을 바꾼 상태에서 저장하고 끝냅니다(Q)\n"
 
-#: plugins/sudoers/visudo.c:856
+#: plugins/sudoers/visudo.c:885
 #, c-format
 msgid "unable to run %s"
 msgstr "%s을(를) 실행할 수 없음"
 
-#: plugins/sudoers/visudo.c:886
+#: plugins/sudoers/visudo.c:916
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: 잘못된 소유자 uid/gid를 %u/%u 값으로 설정해야 합니다\n"
 
-#: plugins/sudoers/visudo.c:893
+#: plugins/sudoers/visudo.c:927
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: 잘못된 권한입니다. 0%o 모드 값을 설정해야 합니다\n"
 
-#: plugins/sudoers/visudo.c:942 plugins/sudoers/visudo.c:949
+#: plugins/sudoers/visudo.c:978 plugins/sudoers/visudo.c:985
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: 해석 성공\n"
 
-#: plugins/sudoers/visudo.c:968
+#: plugins/sudoers/visudo.c:1004
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s을(를) 사용중입니다. 나중에 다시 시도하십시오"
 
-#: plugins/sudoers/visudo.c:972
+#: plugins/sudoers/visudo.c:1008
 msgid "Edit anyway? [y/N]"
 msgstr "그래도 편집하시겠습니까? [y/N]"
 
-#: plugins/sudoers/visudo.c:1068
+#: plugins/sudoers/visudo.c:1104
 #, c-format
 msgid "Warning: %s:%d:%d: unused %s \"%s\""
 msgstr "경고: %s:%d:%d 사용하지 않는 %s \"%s\"이(가) 있습니다"
 
-#: plugins/sudoers/visudo.c:1184
+#: plugins/sudoers/visudo.c:1220
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -3496,7 +3663,7 @@ msgstr ""
 "%s - sudoers 파일을 안전하게 편집합니다\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1186
+#: plugins/sudoers/visudo.c:1222
 msgid ""
 "\n"
 "Options:\n"
@@ -3540,9 +3707,18 @@ msgstr "부적절한 IPv6 주소"
 msgid "unexpected line break in string"
 msgstr "예기치 않은 개행 문자 발견"
 
-#: toke.l:1119
+#: toke.l:1139
 msgid "too many levels of includes"
 msgstr "포함 레벨이 너무 많습니다"
+
+#~ msgid "%s: write buffer already in use"
+#~ msgstr "%s: 쓰기 버퍼를 이미 사용중입니다"
+
+#~ msgid "unable to read diffie-hellman parameters: %s"
+#~ msgstr "디피-헬먼 매개변수를 읽을 수 없습니다: %s"
+
+#~ msgid "unknown defaults entry \"%s\""
+#~ msgstr "알 수 없는 \"%s\" 기본 항목"
 
 #~ msgid "%s:%d unknown key: %s"
 #~ msgstr "%s:%d 알 수 없는 키: %s"

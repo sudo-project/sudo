@@ -621,16 +621,24 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    sudo_lbuf_append(lbuf, "    Timeout: %s\n", numbuf);
 		}
 		if (cs->notbefore != UNSPEC) {
-		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
-		    struct tm *tm = gmtime(&cs->notbefore);
-		    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
-			sudo_lbuf_append(lbuf, "    NotBefore: %s\n", buf);
+		    char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
+		    struct tm gmt;
+		    int len;
+		    if (gmtime_r(&cs->notbefore, &gmt) != NULL) {
+			len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
+			if (len != 0 && buf[sizeof(buf) - 1] == '\0')
+			    sudo_lbuf_append(lbuf, "    NotBefore: %s\n", buf);
+		    }
 		}
 		if (cs->notafter != UNSPEC) {
-		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
-		    struct tm *tm = gmtime(&cs->notafter);
-		    if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
-			sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
+		    char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
+		    struct tm gmt;
+		    int len;
+		    if (gmtime_r(&cs->notafter, &gmt) != NULL) {
+			len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
+			if (len != 0 && buf[sizeof(buf) - 1] == '\0')
+			    sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
+		    }
 		}
 		sudo_lbuf_append(lbuf, "%s", _("    Commands:\n"));
 	    }
@@ -687,11 +695,11 @@ display_defaults(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
-		if (hostlist_matches(parse_tree, pw, d->binding) != ALLOW)
+		if (hostlist_matches(parse_tree, pw, &d->binding->members) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_USER:
-		if (userlist_matches(parse_tree, pw, d->binding) != ALLOW)
+		if (userlist_matches(parse_tree, pw, &d->binding->members) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_RUNAS:
@@ -716,7 +724,7 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
     int deftype, struct sudo_lbuf *lbuf)
 {
     struct defaults *d;
-    struct member_list *binding = NULL;
+    struct defaults_binding *binding = NULL;
     struct member *m;
     char *dsep;
     int atype, nfound = 0;
@@ -752,8 +760,8 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
 	    if (nfound != 1)
 		sudo_lbuf_append(lbuf, "\n");
 	    sudo_lbuf_append(lbuf, "    Defaults%s", dsep);
-	    TAILQ_FOREACH(m, binding, entries) {
-		if (m != TAILQ_FIRST(binding))
+	    TAILQ_FOREACH(m, &binding->members, entries) {
+		if (m != TAILQ_FIRST(&binding->members))
 		    sudo_lbuf_append(lbuf, ", ");
 		sudoers_format_member(lbuf, parse_tree, m, ", ", atype);
 	    }

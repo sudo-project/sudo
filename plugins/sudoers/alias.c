@@ -227,14 +227,14 @@ alias_free(void *v)
  * Find the named alias, remove it from the tree and return it.
  */
 struct alias *
-alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type)
+alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, int type)
 {
     struct rbnode *node;
     struct alias key;
     debug_decl(alias_remove, SUDOERS_DEBUG_ALIAS);
 
     if (parse_tree->aliases != NULL) {
-	key.name = name;
+	key.name = (char *)name;
 	key.type = type;
 	if ((node = rbfind(parse_tree->aliases, &key)) != NULL)
 	    debug_return_ptr(rbdelete(parse_tree->aliases, node));
@@ -353,20 +353,20 @@ alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_alias
     TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
-		errors += alias_find_used_members(parse_tree, d->binding,
-		    HOSTALIAS, used_aliases);
+		errors += alias_find_used_members(parse_tree,
+		    &d->binding->members, HOSTALIAS, used_aliases);
 		break;
 	    case DEFAULTS_USER:
-		errors += alias_find_used_members(parse_tree, d->binding,
-		    USERALIAS, used_aliases);
+		errors += alias_find_used_members(parse_tree,
+		    &d->binding->members, USERALIAS, used_aliases);
 		break;
 	    case DEFAULTS_RUNAS:
-		errors += alias_find_used_members(parse_tree, d->binding,
-		    RUNASALIAS, used_aliases);
+		errors += alias_find_used_members(parse_tree,
+		    &d->binding->members, RUNASALIAS, used_aliases);
 		break;
 	    case DEFAULTS_CMND:
-		errors += alias_find_used_members(parse_tree, d->binding,
-		    CMNDALIAS, used_aliases);
+		errors += alias_find_used_members(parse_tree,
+		    &d->binding->members, CMNDALIAS, used_aliases);
 		break;
 	    default:
 		break;

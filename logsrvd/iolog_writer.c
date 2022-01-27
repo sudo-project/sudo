@@ -47,7 +47,6 @@
 #include "sudo_queue.h"
 #include "sudo_util.h"
 
-#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 static inline bool
@@ -146,6 +145,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
     evlog->columns = 80;
     evlog->runuid = (uid_t)-1;
     evlog->rungid = (gid_t)-1;
+    evlog->exit_value = -1;
 
     /* Pull out values by key from info array. */
     for (idx = 0; idx < infolen; idx++) {
@@ -633,7 +633,7 @@ iolog_close_all(struct connection_closure *closure)
 {
     const char *errstr;
     int i;
-    debug_decl(iolog_close, SUDO_DEBUG_UTIL);
+    debug_decl(iolog_close_all, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!closure->iolog_files[i].enabled)
@@ -646,6 +646,25 @@ iolog_close_all(struct connection_closure *closure)
 	close(closure->iolog_dir_fd);
 
     debug_return;
+}
+
+bool
+iolog_flush_all(struct connection_closure *closure)
+{
+    const char *errstr;
+    int i, ret = true;
+    debug_decl(iolog_flush_all, SUDO_DEBUG_UTIL);
+
+    for (i = 0; i < IOFD_MAX; i++) {
+	if (!closure->iolog_files[i].enabled)
+	    continue;
+	if (!iolog_flush(&closure->iolog_files[i], &errstr)) {
+	    sudo_warnx(U_("error flushing iofd %d: %s"), i, errstr);
+	    ret = false;
+	}
+    }
+
+    debug_return_bool(ret);
 }
 
 bool

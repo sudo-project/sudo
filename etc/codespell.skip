@@ -7,8 +7,8 @@ Makefile\.in
 ^autogen\.sh$
 ^config\.h\.in$
 ^configure$
-^doc/.*\.man\.in$
-^doc/CONTRIBUTORS$
+^docs/.*\.man\.in$
+^docs/CONTRIBUTORS$
 ^etc/codespell
 ^lib/util/fnmatch\.c$
 ^lib/util/getaddrinfo\.c$

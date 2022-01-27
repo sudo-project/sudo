@@ -90,10 +90,14 @@ sudo_pwutil_set_backend(sudo_make_pwitem_t pwitem, sudo_make_gritem_t gritem,
 {
     debug_decl(sudo_pwutil_set_backend, SUDOERS_DEBUG_NSS);
 
-    make_pwitem = pwitem;
-    make_gritem = gritem;
-    make_gidlist_item = gidlist_item;
-    make_grlist_item = grlist_item;
+    if (pwitem != NULL)
+	make_pwitem = pwitem;
+    if (gritem != NULL)
+	make_gritem = gritem;
+    if (gidlist_item != NULL)
+	make_gidlist_item = gidlist_item;
+    if (grlist_item != NULL)
+	make_grlist_item = grlist_item;
 
     debug_return;
 }

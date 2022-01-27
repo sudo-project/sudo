@@ -19,6 +19,7 @@
 #ifndef SUDO_LOGSRVD_H
 #define SUDO_LOGSRVD_H
 
+#include "log_server.pb-c.h"
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
 #endif
@@ -26,7 +27,11 @@
 #include "config.h"
 
 #if defined(HAVE_OPENSSL)
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif
 # include <openssl/ssl.h>
+# include <openssl/err.h>
 #endif
 
 #include "logsrv_util.h"
@@ -185,6 +190,7 @@ struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_
 bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
 bool iolog_create(int iofd, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
+bool iolog_flush_all(struct connection_closure *closure);
 bool iolog_rewrite(const struct timespec *target, struct connection_closure *closure);
 void update_elapsed_time(TimeSpec *delta, struct timespec *elapsed);
 

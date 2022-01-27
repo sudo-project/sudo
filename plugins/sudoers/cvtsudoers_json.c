@@ -371,18 +371,18 @@ print_alias_json(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v
  */
 static void
 print_binding_json(struct json_container *jsonc,
-    struct sudoers_parse_tree *parse_tree, struct member_list *binding,
+    struct sudoers_parse_tree *parse_tree, struct defaults_binding *binding,
     int type, bool expand_aliases)
 {
     struct member *m;
     debug_decl(print_binding_json, SUDOERS_DEBUG_UTIL);
 
-    if (TAILQ_EMPTY(binding))
+    if (TAILQ_EMPTY(&binding->members))
 	debug_return;
 
     /* Print each member object in binding. */
     sudo_json_open_array(jsonc, "Binding");
-    TAILQ_FOREACH(m, binding, entries) {
+    TAILQ_FOREACH(m, &binding->members, entries) {
 	print_member_json(jsonc, parse_tree, m, defaults_to_word_type(type),
 	     expand_aliases);
     }
@@ -477,7 +477,8 @@ print_defaults_json(struct json_container *jsonc,
     TAILQ_FOREACH_SAFE(def, &parse_tree->defaults, entries, next) {
 	type = get_defaults_type(def);
 	if (type == -1) {
-	    sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
+	    log_warnx(U_("%s:%d:%d: unknown defaults entry \"%s\""),
+		def->file, def->line, def->column, def->var);
 	    /* XXX - just pass it through as a string anyway? */
 	    continue;
 	}
@@ -511,7 +512,8 @@ print_defaults_json(struct json_container *jsonc,
 	    def = next;
 	    type = get_defaults_type(def);
 	    if (type == -1) {
-		sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
+		log_warnx(U_("%s:%d:%d: unknown defaults entry \"%s\""),
+		    def->file, def->line, def->column, def->var);
 		/* XXX - just pass it through as a string anyway? */
 		break;
 	    }
@@ -593,12 +595,13 @@ print_cmndspec_json(struct json_container *jsonc,
     struct sudoers_parse_tree *parse_tree, struct cmndspec *cs,
     struct cmndspec **nextp, struct defaults_list *options, bool expand_aliases)
 {
+    char timebuf[sizeof("20120727121554Z")];
     struct cmndspec *next = *nextp;
     struct json_value value;
     struct defaults *def;
     struct member *m;
-    struct tm *tp;
-    char timebuf[sizeof("20120727121554Z")];
+    struct tm gmt;
+    int len;
     debug_decl(print_cmndspec_json, SUDOERS_DEBUG_UTIL);
 
     /* Open Cmnd_Spec object. */
@@ -647,10 +650,12 @@ print_cmndspec_json(struct json_container *jsonc,
 	    sudo_json_add_value_as_object(jsonc, "command_timeout", &value);
 	}
 	if (cs->notbefore != UNSPEC) {
-	    if ((tp = gmtime(&cs->notbefore)) == NULL) {
+	    if (gmtime_r(&cs->notbefore, &gmt) == NULL) {
 		sudo_warn("%s", U_("unable to get GMT time"));
 	    } else {
-		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
+		timebuf[sizeof(timebuf) - 1] = '\0';
+		len = strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
+		if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
 		    sudo_warnx("%s", U_("unable to format timestamp"));
 		} else {
 		    value.type = JSON_STRING;
@@ -660,10 +665,12 @@ print_cmndspec_json(struct json_container *jsonc,
 	    }
 	}
 	if (cs->notafter != UNSPEC) {
-	    if ((tp = gmtime(&cs->notafter)) == NULL) {
+	    if (gmtime_r(&cs->notafter, &gmt) == NULL) {
 		sudo_warn("%s", U_("unable to get GMT time"));
 	    } else {
-		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
+		timebuf[sizeof(timebuf) - 1] = '\0';
+		len = strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
+		if (len == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
 		    sudo_warnx("%s", U_("unable to format timestamp"));
 		} else {
 		    value.type = JSON_STRING;
@@ -715,7 +722,8 @@ print_cmndspec_json(struct json_container *jsonc,
 	TAILQ_FOREACH(def, options, entries) {
 	    int type = get_defaults_type(def);
 	    if (type == -1) {
-		sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
+		log_warnx(U_("%s:%d:%d: unknown defaults entry \"%s\""),
+		    def->file, def->line, def->column, def->var);
 		/* XXX - just pass it through as a string anyway? */
 		continue;
 	    }

@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
@@ -56,7 +57,6 @@
 #include "sudo_rand.h"
 #include "sudo_util.h"
 
-#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 struct logsrvd_info_closure {
@@ -260,36 +260,143 @@ done:
     debug_return_bool(ret);
 }
 
+static bool
+store_exit_info_json(int dfd, struct eventlog *evlog)
+{
+    struct json_container json = { 0 };
+    struct json_value json_value;
+    struct iovec iov[3];
+    bool ret = false;
+    int fd = -1;
+    off_t pos;
+    debug_decl(store_exit_info_json, SUDO_DEBUG_UTIL);
+
+    if (!sudo_json_init(&json, 4, false, false))
+        goto done;
+
+    fd = iolog_openat(dfd, "log.json", O_RDWR);
+    if (fd == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to open to %s/log.json", evlog->iolog_path);
+	if (errno == ENOENT) {
+	    /* Ignore missing log.json file. */
+	    ret = true;
+	}
+	goto done;
+    }
+
+    if (sudo_timespecisset(&evlog->run_time)) {
+	if (!sudo_json_open_object(&json, "run_time"))
+	    goto done;
+
+	json_value.type = JSON_NUMBER;
+	json_value.u.number = evlog->run_time.tv_sec;
+	if (!sudo_json_add_value(&json, "seconds", &json_value))
+	    goto done;
+
+	json_value.type = JSON_NUMBER;
+	json_value.u.number = evlog->run_time.tv_nsec;
+	if (!sudo_json_add_value(&json, "nanoseconds", &json_value))
+	    goto done;
+
+	if (!sudo_json_close_object(&json))
+	    goto done;
+    }
+
+    if (evlog->signal_name != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->signal_name;
+	if (!sudo_json_add_value(&json, "signal", &json_value))
+	    goto done;
+
+	json_value.type = JSON_BOOL;
+	json_value.u.boolean = evlog->dumped_core;
+	if (!sudo_json_add_value(&json, "dumped_core", &json_value))
+	    goto done;
+    }
+
+    json_value.type = JSON_NUMBER;
+    json_value.u.number = evlog->exit_value;
+    if (!sudo_json_add_value(&json, "exit_value", &json_value))
+	goto done;
+
+    /* Back up to overwrite the final "\n}\n" */
+    pos = lseek(fd, -3, SEEK_END);
+    if (pos == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to rewind %s/log.json 3 bytes", evlog->iolog_path);
+	goto done;
+    }
+
+    /* Append the exit data and close the object. */
+    iov[0].iov_base = ",";
+    iov[0].iov_len = 1;
+    iov[1].iov_base = sudo_json_get_buf(&json);
+    iov[1].iov_len = sudo_json_get_len(&json);
+    iov[2].iov_base = "\n}\n";
+    iov[2].iov_len = 3;
+    if (writev(fd, iov, 3) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to write %s/log.json", evlog->iolog_path);
+	/* Back up and try to restore to original state. */
+	if (lseek(fd, pos, SEEK_SET) != -1) {
+	    ignore_result(write(fd, "\n}\n", 3));
+	}
+	goto done;
+    }
+
+    ret = true;
+
+done:
+    if (fd != -1)
+	close(fd);
+    sudo_json_free(&json);
+    debug_return_bool(ret);
+}
+
 bool
 store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
-    const char *signame = NULL;
-    struct timespec run_time = { msg->run_time->tv_sec, msg->run_time->tv_nsec };
+    struct eventlog *evlog = closure->evlog;
     int flags = 0;
-    mode_t mode;
     debug_decl(store_exit_local, SUDO_DEBUG_UTIL);
 
+    if (msg->run_time != NULL) {
+	evlog->run_time.tv_sec = msg->run_time->tv_sec;
+	evlog->run_time.tv_nsec = msg->run_time->tv_nsec;
+    }
+    evlog->exit_value = msg->exit_value;
     if (msg->signal != NULL && msg->signal[0] != '\0') {
-	signame = msg->signal;
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "command was killed by SIG%s%s", msg->signal,
 	    msg->dumped_core ? " (core dumped)" : "");
+	evlog->signal_name = strdup(msg->signal);
+	if (evlog->signal_name == NULL) {
+	    closure->errstr = _("unable to allocate memory");
+	    debug_return_bool(false);
+	}
+	evlog->dumped_core = msg->dumped_core;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "command exited with %d", msg->exit_value);
     }
     if (logsrvd_conf_log_exit()) {
-	if (!eventlog_exit(closure->evlog, flags, &run_time, msg->exit_value,
-		signame, msg->dumped_core)) {
+	if (!eventlog_exit(closure->evlog, flags)) {
 	    closure->errstr = _("error logging exit event");
 	    debug_return_bool(false);
 	}
     }
 
     if (closure->log_io) {
+	/* Store the run time and exit status in log.json. */
+	if (!store_exit_info_json(closure->iolog_dir_fd, evlog)) {
+	    closure->errstr = _("error logging exit event");
+	    debug_return_bool(false);
+	}
+
 	/* Clear write bits from I/O timing file to indicate completion. */
-	mode = logsrvd_conf_iolog_mode();
+	mode_t mode = logsrvd_conf_iolog_mode();
 	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
 	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
 	    sudo_warn("chmod 0%o %s/%s", (unsigned int)mode, "timing",

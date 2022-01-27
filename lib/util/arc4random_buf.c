@@ -35,6 +35,8 @@
 #include "sudo_compat.h"
 #include "sudo_rand.h"
 
+#define minimum(a, b) ((a) < (b) ? (a) : (b))
+
 /*
  * Call arc4random() repeatedly to fill buf with n bytes of random data.
  */

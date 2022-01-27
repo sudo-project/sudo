@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2021 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,78 +26,71 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include <openssl/sha.h>
+#if defined(HAVE_WOLFSSL)
+# include <wolfssl/options.h>
+#endif
+#include <openssl/evp.h>
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_digest.h"
 
-union ANY_CTX {
-    SHA256_CTX sha256;
-    SHA512_CTX sha512;
-};
-
-static struct digest_function {
-    const unsigned int digest_len;
-    int (*init)(union ANY_CTX *);
-    int (*update)(union ANY_CTX *, const void *, size_t);
-    int (*final)(unsigned char *, union ANY_CTX *);
-} digest_functions[] = {
-    {
-	SHA224_DIGEST_LENGTH,
-	(int (*)(union ANY_CTX *))SHA224_Init,
-	(int (*)(union ANY_CTX *, const void *, size_t))SHA224_Update,
-	(int (*)(unsigned char *, union ANY_CTX *))SHA224_Final
-    }, {
-	SHA256_DIGEST_LENGTH,
-	(int (*)(union ANY_CTX *))SHA256_Init,
-	(int (*)(union ANY_CTX *, const void *, size_t))SHA256_Update,
-	(int (*)(unsigned char *, union ANY_CTX *))SHA256_Final
-    }, {
-	SHA384_DIGEST_LENGTH,
-	(int (*)(union ANY_CTX *))SHA384_Init,
-	(int (*)(union ANY_CTX *, const void *, size_t))SHA384_Update,
-	(int (*)(unsigned char *, union ANY_CTX *))SHA384_Final
-    }, {
-	SHA512_DIGEST_LENGTH,
-	(int (*)(union ANY_CTX *))SHA512_Init,
-	(int (*)(union ANY_CTX *, const void *, size_t))SHA512_Update,
-	(int (*)(unsigned char *, union ANY_CTX *))SHA512_Final
-    }, {
-	0
-    }
-};
-
 struct sudo_digest {
-    struct digest_function *func;
-    union ANY_CTX ctx;
+    EVP_MD_CTX *ctx;
+    const EVP_MD *md;
 };
+
+static const EVP_MD *
+sudo_digest_type_to_md(int digest_type)
+{
+    const EVP_MD *md = NULL;
+    debug_decl(sudo_digest_type_to_md, SUDO_DEBUG_UTIL);
+
+    switch (digest_type) {
+    case SUDO_DIGEST_SHA224:
+	md = EVP_sha224();
+	break;
+    case SUDO_DIGEST_SHA256:
+	md = EVP_sha256();
+	break;
+    case SUDO_DIGEST_SHA384:
+	md = EVP_sha384();
+	break;
+    case SUDO_DIGEST_SHA512:
+	md = EVP_sha512();
+	break;
+    default:
+	errno = EINVAL;
+	break;
+    }
+    debug_return_const_ptr(md);
+}
 
 struct sudo_digest *
 sudo_digest_alloc_v1(int digest_type)
 {
-    debug_decl(sudo_digest_alloc, SUDO_DEBUG_UTIL);
-    struct digest_function *func = NULL;
     struct sudo_digest *dig;
-    int i;
+    EVP_MD_CTX *mdctx = NULL;
+    const EVP_MD *md;
+    debug_decl(sudo_digest_alloc, SUDO_DEBUG_UTIL);
 
-    for (i = 0; digest_functions[i].digest_len != 0; i++) {
-	if (digest_type == i) {
-	    func = &digest_functions[i];
-	    break;
-	}
-    }
-    if (func == NULL) {
-	errno = EINVAL;
-	debug_return_ptr(NULL);
-    }
+    md = sudo_digest_type_to_md(digest_type);
+    if (md == NULL)
+	goto bad;
+
+    mdctx = EVP_MD_CTX_new();
+    if (mdctx == NULL || !EVP_DigestInit_ex(mdctx, md, NULL))
+	goto bad;
 
     if ((dig = malloc(sizeof(*dig))) == NULL)
-	debug_return_ptr(NULL);
-    func->init(&dig->ctx);
-    dig->func = func;
+	goto bad;
+    dig->md = md;
+    dig->ctx = mdctx;
 
     debug_return_ptr(dig);
+bad:
+    EVP_MD_CTX_free(mdctx);
+    debug_return_ptr(NULL);
 }
 
 void
@@ -105,7 +98,10 @@ sudo_digest_free_v1(struct sudo_digest *dig)
 {
     debug_decl(sudo_digest_free, SUDO_DEBUG_UTIL);
 
-    free(dig);
+    if (dig != NULL) {
+	EVP_MD_CTX_free(dig->ctx);
+	free(dig);
+    }
 
     debug_return;
 }
@@ -115,22 +111,24 @@ sudo_digest_reset_v1(struct sudo_digest *dig)
 {
     debug_decl(sudo_digest_reset, SUDO_DEBUG_UTIL);
 
-    dig->func->init(&dig->ctx);
+    /* These cannot fail. */
+    EVP_MD_CTX_reset(dig->ctx);
+    EVP_DigestInit_ex(dig->ctx, dig->md, NULL);
 
     debug_return;
 }
+
 int
 sudo_digest_getlen_v1(int digest_type)
 {
+    const EVP_MD *md;
     debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL);
-    int i;
 
-    for (i = 0; digest_functions[i].digest_len != 0; i++) {
-	if (digest_type == i)
-	    debug_return_int(digest_functions[i].digest_len);
-    }
+    md = sudo_digest_type_to_md(digest_type);
+    if (md == NULL)
+	debug_return_int(-1);
 
-    debug_return_int(-1);
+    debug_return_int(EVP_MD_size(md));
 }
 
 void
@@ -138,7 +136,7 @@ sudo_digest_update_v1(struct sudo_digest *dig, const void *data, size_t len)
 {
     debug_decl(sudo_digest_update, SUDO_DEBUG_UTIL);
 
-    dig->func->update(&dig->ctx, data, len);
+    EVP_DigestUpdate(dig->ctx, data, len);
 
     debug_return;
 }
@@ -148,7 +146,7 @@ sudo_digest_final_v1(struct sudo_digest *dig, unsigned char *md)
 {
     debug_decl(sudo_digest_final, SUDO_DEBUG_UTIL);
 
-    dig->func->final(md, &dig->ctx);
+    EVP_DigestFinal_ex(dig->ctx, md, NULL);
 
     debug_return;
 }

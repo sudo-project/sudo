@@ -22,6 +22,9 @@
 #include "config.h"
 
 #if defined(HAVE_OPENSSL)
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif
 # include <sys/types.h>
 # include <sys/socket.h>
 # include <netinet/in.h>
@@ -36,6 +39,13 @@
 # include  "sudo_debug.h"
 # include  "sudo_util.h"
 # include  "hostcheck.h"
+
+#ifndef INET_ADDRSTRLEN
+# define INET_ADDRSTRLEN 16
+#endif
+#ifndef INET6_ADDRSTRLEN
+# define INET6_ADDRSTRLEN 46
+#endif
 
 /**
  * @brief Checks if given hostname resolves to the given IP address.

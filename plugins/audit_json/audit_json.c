@@ -341,10 +341,11 @@ add_timestamp(struct json_container *json, struct timespec *ts)
     struct json_value json_value;
     time_t secs = ts->tv_sec;
     char timebuf[1024];
-    struct tm *tm;
+    struct tm gmt;
+    int len;
     debug_decl(add_timestamp, SUDO_DEBUG_PLUGIN);
 
-    if ((tm = gmtime(&secs)) == NULL)
+    if (gmtime_r(&secs, &gmt) == NULL)
 	debug_return_bool(false);
 
     sudo_json_open_object(json, "timestamp");
@@ -357,15 +358,21 @@ add_timestamp(struct json_container *json, struct timespec *ts)
     json_value.u.number = ts->tv_nsec;
     sudo_json_add_value(json, "nanoseconds", &json_value);
 
-    strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tm);
-    json_value.type = JSON_STRING;
-    json_value.u.string = timebuf;
-    sudo_json_add_value(json, "iso8601", &json_value);
+    timebuf[sizeof(timebuf) - 1] = '\0';
+    len = strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", &gmt);
+    if (len != 0 && timebuf[sizeof(timebuf) - 1] == '\0'){
+	json_value.type = JSON_STRING;
+	json_value.u.string = timebuf;
+	sudo_json_add_value(json, "iso8601", &json_value);
+    }
 
-    strftime(timebuf, sizeof(timebuf), "%a %b %e %H:%M:%S %Z %Y", tm);
-    json_value.type = JSON_STRING;
-    json_value.u.string = timebuf;
-    sudo_json_add_value(json, "localtime", &json_value);
+    timebuf[sizeof(timebuf) - 1] = '\0';
+    len = strftime(timebuf, sizeof(timebuf), "%a %b %e %H:%M:%S %Z %Y", &gmt);
+    if (len != 0 && timebuf[sizeof(timebuf) - 1] == '\0'){
+	json_value.type = JSON_STRING;
+	json_value.u.string = timebuf;
+	sudo_json_add_value(json, "localtime", &json_value);
+    }
 
     sudo_json_close_object(json);
 

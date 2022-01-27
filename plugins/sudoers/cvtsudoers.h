@@ -23,6 +23,7 @@
 
 /* Supported input/output formats. */
 enum sudoers_formats {
+    format_csv,
     format_json,
     format_ldif,
     format_sudoers
@@ -49,19 +50,23 @@ struct cvtsudoers_config {
     unsigned int order_max;
     short defaults;
     short suppress;
-    bool expand_aliases;
     bool store_options;
+    bool expand_aliases;
     bool prune_matches;
+    bool match_local;
     char *sudoers_base;
     char *input_format;
     char *output_format;
     char *filter;
+    char *logfile;
     char *defstr;
     char *supstr;
+    char *group_file;
+    char *passwd_file;
 };
 
 /* Initial config settings for above. */
-#define INITIAL_CONFIG { 1, 1, 0, 0, CVT_DEFAULTS_ALL, 0, false, true, false }
+#define INITIAL_CONFIG { 1, 1, 0, 0, CVT_DEFAULTS_ALL, 0, true }
 
 #define CONF_BOOL	0
 #define CONF_UINT	1
@@ -77,10 +82,15 @@ struct cvtsudoers_filter {
     struct sudoers_str_list users;
     struct sudoers_str_list groups;
     struct sudoers_str_list hosts;
+    struct sudoers_str_list cmnds;
 };
 
 /* cvtsudoers.c */
 extern struct cvtsudoers_filter *filters;
+void log_warnx(const char *fmt, ...) __printflike(1, 2);
+
+/* cvtsudoers_csv.c */
+bool convert_sudoers_csv(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
 /* cvtsudoers_json.c */
 bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
@@ -88,11 +98,20 @@ bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *out
 /* cvtsudoers_ldif.c */
 bool convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
+/* cvtsudoers_merge.c */
+struct sudoers_parse_tree *merge_sudoers(struct sudoers_parse_tree_list *parse_trees, struct sudoers_parse_tree *merged_tree);
+
 /* cvtsudoers_pwutil.c */
 struct cache_item *cvtsudoers_make_pwitem(uid_t uid, const char *name);
 struct cache_item *cvtsudoers_make_gritem(gid_t gid, const char *name);
 struct cache_item *cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1, unsigned int type);
 struct cache_item *cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1);
+
+/* testsudoers_pwutil.c */
+struct cache_item *testsudoers_make_gritem(gid_t gid, const char *group);
+struct cache_item *testsudoers_make_grlist_item(const struct passwd *pw, char * const *groups);
+struct cache_item *testsudoers_make_gidlist_item(const struct passwd *pw, char * const *gids, unsigned int type);
+struct cache_item *testsudoers_make_pwitem(uid_t uid, const char *user);
 
 /* stubs.c */
 void get_hostname(void);

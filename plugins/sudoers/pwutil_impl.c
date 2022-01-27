@@ -359,12 +359,12 @@ struct cache_item *
 sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
 {
     char *cp;
-    size_t nsize, ngroups, total, len;
+    size_t groupname_len, len, ngroups, nsize, total;
     struct cache_item_grlist *grlitem;
     struct group_list *grlist;
     struct gid_list *gidlist;
     struct group *grp = NULL;
-    int i, groupname_len;
+    int i;
     debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS);
 
     gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_ANY);
@@ -376,7 +376,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
     }
 
 #ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = MAX((int)sysconf(_SC_LOGIN_NAME_MAX), 32);
+    groupname_len = MAX(sysconf(_SC_LOGIN_NAME_MAX), 32);
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif

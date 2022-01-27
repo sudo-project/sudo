@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/uio.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -606,10 +607,32 @@ void
 sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     const char *str, int len, int errnum)
 {
-    char *timestr, numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
-    time_t now;
+    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+    char timebuf[64];
+    struct timeval tv;
     struct iovec iov[12];
     int iovcnt = 3;
+
+    /* Cannot use sudo_gettime_real() here since it calls sudo_debug. */
+    timebuf[0] = '\0';
+    if (gettimeofday(&tv, NULL) != -1) {
+	time_t now = tv.tv_sec;
+	struct tm tm;
+	size_t tlen;
+	if (localtime_r(&now, &tm) != NULL) {
+	    timebuf[sizeof(timebuf) - 1] = '\0';
+	    tlen = strftime(timebuf, sizeof(timebuf), "%b %e %H:%M:%S", &tm);
+	    if (tlen == 0 || timebuf[sizeof(timebuf) - 1] != '\0') {
+		/* contents are undefined on error */
+		timebuf[0] = '\0';
+	    } else {
+		(void)snprintf(timebuf + tlen, sizeof(timebuf) - tlen,
+		    ".%03d ", (int)tv.tv_usec / 1000);
+	    }
+	}
+    }
+    iov[0].iov_base = timebuf;
+    iov[0].iov_len = strlen(timebuf);
 
     /* Prepend program name and pid with a trailing space. */
     iov[1].iov_base = (char *)getprogname();
@@ -666,14 +689,6 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     iov[iovcnt].iov_base = "\n";
     iov[iovcnt].iov_len = 1;
     iovcnt++;
-
-    /* Do timestamp last due to ctime's static buffer. */
-    time(&now);
-    timestr = ctime(&now) + 4;
-    timestr[15] = ' ';	/* replace year with a space */
-    timestr[16] = '\0';
-    iov[0].iov_base = timestr;
-    iov[0].iov_len = 16;
 
     /* Write message in a single syscall */
     ignore_result(writev(fd, iov, iovcnt));

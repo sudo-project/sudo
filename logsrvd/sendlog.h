@@ -19,6 +19,7 @@
 #ifndef SUDO_SENDLOG_H
 #define SUDO_SENDLOG_H
 
+#include "log_server.pb-c.h"
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
 #endif
@@ -26,7 +27,11 @@
 #include "config.h"
 
 #if defined(HAVE_OPENSSL)
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif
 # include <openssl/ssl.h>
+# include <openssl/err.h>
 #endif
 
 #include "logsrv_util.h"
@@ -58,7 +63,8 @@ struct client_closure {
     struct timing_closure timing;
     struct sudo_event_base *evbase;
     struct connection_buffer read_buf;
-    struct connection_buffer write_buf;
+    struct connection_buffer_list write_bufs;
+    struct connection_buffer_list free_bufs;
 #if defined(HAVE_OPENSSL)
     struct tls_client_closure tls_client;
 #endif

@@ -133,6 +133,25 @@ static int
 fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
+    int n;
+
+    for (n = 0; n < num_msgs; n++) {
+	const struct sudo_conv_message *msg = &msgs[n];
+
+	switch (msg->msg_type & 0xff) {
+	    case SUDO_CONV_PROMPT_ECHO_ON:
+	    case SUDO_CONV_PROMPT_MASK:
+	    case SUDO_CONV_PROMPT_ECHO_OFF:
+		/* input not supported */
+		return -1;
+	    case SUDO_CONV_ERROR_MSG:
+	    case SUDO_CONV_INFO_MSG:
+		/* no output for fuzzers */
+		break;
+	    default:
+		return -1;
+	}
+    }
     return 0;
 }
 
@@ -245,6 +264,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     setprogname("fuzz_policy");
     sudoers_debug_register(getprogname(), NULL);
+    sudo_warn_set_conversation(fuzz_conversation);
 
     /* user_info and settings must be non-NULL (even if empty). */
     push(&user_info, NULL);
@@ -678,42 +698,24 @@ group_plugin_unload(void)
     return;
 }
 
+/* STUB */
 bool
 log_warning(int flags, const char *fmt, ...)
 {
-    va_list ap;
-
-    /* Just display on stderr. */
-    va_start(ap, fmt);
-    sudo_vwarn_nodebug(fmt, ap);
-    va_end(ap);
-
     return true;
 }
 
+/* STUB */
 bool
 log_warningx(int flags, const char *fmt, ...)
 {
-    va_list ap;
-
-    /* Just display on stderr. */
-    va_start(ap, fmt);
-    sudo_vwarnx_nodebug(fmt, ap);
-    va_end(ap);
-
     return true;
 }
 
+/* STUB */
 bool
 gai_log_warning(int flags, int errnum, const char *fmt, ...)
 {
-    va_list ap;
-
-    /* Note: ignores errnum */
-    va_start(ap, fmt);
-    sudo_vwarnx_nodebug(fmt, ap);
-    va_end(ap);
-
     return true;
 }
 

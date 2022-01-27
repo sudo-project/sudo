@@ -105,6 +105,8 @@ struct early_default {
 #define T_TIMESPEC	0x010
 #undef T_TIMEOUT
 #define T_TIMEOUT	0x011
+#undef T_RLIMIT
+#define T_RLIMIT	0x012
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL
@@ -131,9 +133,6 @@ struct defaults_list;
 struct sudoers_parse_tree;
 void dump_default(void);
 bool init_defaults(void);
-struct early_default *is_early_default(const char *name);
-bool run_early_defaults(void);
-bool set_early_default(const char *var, const char *val, int op, const char *file, int line, int column, bool quiet, struct early_default *early);
 bool set_default(const char *var, const char *val, int op, const char *file, int line, int column, bool quiet);
 bool update_defaults(struct sudoers_parse_tree *parse_tree, struct defaults_list *defs, int what, bool quiet);
 bool check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet);

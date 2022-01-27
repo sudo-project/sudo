@@ -43,7 +43,7 @@ main(int argc, char *argv[])
 	if (sudo_sys_signame[i] != NULL) {
 	    printf("    \"%s\",\n", sudo_sys_signame[i]);
 	} else {
-	    printf("    \"Signal %d\",\n", i);
+	    printf("    \"Signal %u\",\n", i);
 	}
     }
     printf("};\n");

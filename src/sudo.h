@@ -246,10 +246,11 @@ void usage(void) __attribute__((__noreturn__));
 int os_init_openbsd(int argc, char *argv[], char *envp[]);
 
 /* selinux.c */
+int selinux_audit_role_change(void);
+int selinux_getexeccon(const char *role, const char *type);
+int selinux_relabel_tty(const char *ttyn, int ttyfd);
 int selinux_restore_tty(void);
-int selinux_setup(const char *role, const char *type, const char *ttyn,
-    int ttyfd, bool label_tty);
-int selinux_setcon(void);
+int selinux_setexeccon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
     char *envp[], bool noexec);
 
@@ -299,8 +300,10 @@ int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
 void disable_coredump();
 void restore_limits(void);
 void restore_nproc(void);
+void set_policy_rlimits(void);
 void unlimit_nproc(void);
 void unlimit_sudo(void);
-int serialize_limits(char **info, size_t info_max);
+int serialize_rlimits(char **info, size_t info_max);
+bool parse_policy_rlimit(const char *str);
 
 #endif /* SUDO_SUDO_H */

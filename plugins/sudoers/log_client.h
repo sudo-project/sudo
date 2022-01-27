@@ -21,11 +21,20 @@
 
 #include <netinet/in.h>			/* for INET6?_ADDRSTRLEN */
 #if defined(HAVE_OPENSSL)
+# if defined(HAVE_WOLFSSL)
+#  include <wolfssl/options.h>
+# endif /* HAVE_WOLFSSL */
 # include <openssl/ssl.h>
 #endif /* HAVE_OPENSSL */
 
 #include "log_server.pb-c.h"
-#include "strlist.h"
+
+#ifndef INET_ADDRSTRLEN
+# define INET_ADDRSTRLEN 16
+#endif
+#ifndef INET6_ADDRSTRLEN
+# define INET6_ADDRSTRLEN 46
+#endif
 
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
@@ -47,20 +56,6 @@ struct connection_buffer {
     unsigned int off;
 };
 TAILQ_HEAD(connection_buffer_list, connection_buffer);
-
-struct log_details {
-    struct eventlog *evlog;
-    struct sudoers_str_list *log_servers;
-    struct timespec server_timeout;
-#if defined(HAVE_OPENSSL)
-    char *ca_bundle;
-    char *cert_file;
-    char *key_file;
-#endif /* HAVE_OPENSSL */
-    bool keepalive;
-    bool verify_server;
-    bool ignore_log_errors;
-};
 
 enum client_state {
     ERROR,

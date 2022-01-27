@@ -5088,6 +5088,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     int max_paths = 32;
     struct dirent *dent;
     struct path_list **paths = NULL;
+    const size_t dirlen = strlen(dirpath);
     debug_decl(read_dir_files, SUDOERS_DEBUG_PARSER);
 
     dir = opendir(dirpath);
@@ -5101,20 +5102,25 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     if (paths == NULL)
 	goto oom;
     while ((dent = readdir(dir)) != NULL) {
+	const size_t namelen = NAMLEN(dent);
 	struct path_list *pl;
 	struct stat sb;
 	size_t len;
 	char *path;
 
 	/* Ignore files that end in '~' or have a '.' in them. */
-	if (dent->d_name[0] == '\0' || dent->d_name[NAMLEN(dent) - 1] == '~'
+	if (namelen == 0 || dent->d_name[namelen - 1] == '~'
 	    || strchr(dent->d_name, '.') != NULL) {
 	    continue;
 	}
-	len = strlen(dirpath) + 1 + NAMLEN(dent);
+	len = dirlen + 1 + namelen;
 	if ((path = sudo_rcstr_alloc(len)) == NULL)
 	    goto oom;
-	(void)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name);
+	if ((size_t)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name) != len) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    sudo_rcstr_delref(path);
+	    goto bad;
+	}
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
 	    sudo_rcstr_delref(path);
 	    continue;
@@ -5244,7 +5250,6 @@ expand_include(const char *opath)
     const char *cp, *ep;
     char *path, *pp;
     size_t len, olen, dirlen = 0;
-    size_t shost_len = 0;
     bool subst = false;
     debug_decl(expand_include, SUDOERS_DEBUG_PARSER);
 
@@ -5264,13 +5269,17 @@ expand_include(const char *opath)
 	    dirlen = (size_t)(dirend - sudoers) + 1;
     }
 
+    cp = opath;
+    ep = opath + olen;
     len = olen;
-    for (cp = opath, ep = opath + olen; cp < ep; cp++) {
+    while (cp < ep) {
 	if (cp[0] == '%' && cp[1] == 'h') {
-	    shost_len = strlen(user_shost);
-	    len += shost_len - 2;
 	    subst = true;
+	    len += strlen(user_shost);
+	    cp += 2;
+	    continue;
 	}
+	cp++;
     }
 
     /* Make a copy of the fully-qualified path and return it. */
@@ -5289,12 +5298,18 @@ expand_include(const char *opath)
 	cp = opath;
 	while (cp < ep) {
 	    if (cp[0] == '%' && cp[1] == 'h') {
-		memcpy(pp, user_shost, shost_len);
-		pp += shost_len;
+		size_t n = strlcpy(pp, user_shost, len + 1);
+		if (n >= len + 1)
+		    goto oflow;
 		cp += 2;
+		pp += n;
+		len -= n;
 		continue;
 	    }
+	    if (len < 1)
+		goto oflow;
 	    *pp++ = *cp++;
+	    len--;
 	}
 	*pp = '\0';
     } else {
@@ -5303,6 +5318,11 @@ expand_include(const char *opath)
     }
 
     debug_return_str(path);
+oflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    sudoerserror(NULL);
+    sudo_rcstr_delref(path);
+    debug_return_str(NULL);
 }
 
 /*

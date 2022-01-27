@@ -45,6 +45,10 @@ Possible values of sudo_auth.flags:
 			to determine whether to return a fatal or nonfatal
 			error.
 
+    FLAG_NONINTERACTIVE	If set, this indicates that the user invoked
+			sudo with the -n option and no user interaction
+			is allowed.
+
 The member functions can return the following values:
     AUTH_SUCCESS	Function succeeded.  For a ``verify'' function
 			this means the user correctly authenticated.
@@ -58,6 +62,14 @@ The member functions can return the following values:
 			sent mail to the administrator.
 			When verify_user() gets AUTH_FATAL from an auth
 			function it does an exit(1).
+
+    AUTH_INTR		An attempt to read the password read was interrupted.
+			Usually this means the user entered ^C at the
+			password prompt.
+
+    AUTH_NONINTERACTIVE	Function failed because user interaction was
+			required but sudo was run in non-interactive
+			mode.
 
 The functions in the struct are as follows:
 

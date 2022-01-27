@@ -52,6 +52,7 @@ eventlog_free(struct eventlog *evlog)
 	free(evlog->runcwd);
 	free(evlog->rungroup);
 	free(evlog->runuser);
+	free(evlog->signal_name);
 	free(evlog->submithost);
 	free(evlog->submituser);
 	free(evlog->submitgroup);

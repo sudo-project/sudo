@@ -16,7 +16,7 @@
 .nr BA @BAMAN@
 .if \n(BA \{\
 .Nd convert between sudoers file formats
-.Nd configuration for sudo front end
+.Nd configuration for sudo front-end
 .Nd execute a command as another user
 .Nd Sudo log server protocol
 .Nd configuration for sudo_logsrvd

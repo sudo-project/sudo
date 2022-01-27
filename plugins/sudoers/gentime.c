@@ -38,6 +38,11 @@
 #include "sudoers_debug.h"
 #include "parse.h"
 
+/* Since timegm() is only used in one place we keep the macro local. */
+#ifndef HAVE_TIMEGM
+# define timegm(_t)	sudo_timegm(_t)
+#endif
+
 /*
  * Parse a timestamp in Generalized Time format as per RFC4517.
  * E.g. yyyymmddHHMMSS.FZ or yyyymmddHHMMSS.F[+-]TZOFF
@@ -152,11 +157,11 @@ parse_gentime(const char *timestr)
     tm.tm_year -= 1900;
     tm.tm_mon--;
 
-    result = mktime(&tm);
-    if (result != -1) {
-	if (!islocal) {
-	    /* Not local time, convert to GMT */
-	    result += get_gmtoff(&result);
+    if (islocal) {
+	result = mktime(&tm);
+    } else {
+	result = timegm(&tm);
+	if (result != -1) {
 	    /* Adjust time based on supplied GMT offset. */
 	    result -= tzoff;
 	}

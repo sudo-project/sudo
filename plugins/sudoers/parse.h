@@ -177,6 +177,7 @@ TAILQ_HEAD(privilege_list, privilege);
 TAILQ_HEAD(cmndspec_list, cmndspec);
 TAILQ_HEAD(command_digest_list, command_digest);
 STAILQ_HEAD(comment_list, sudoers_comment);
+TAILQ_HEAD(sudoers_parse_tree_list, sudoers_parse_tree);
 
 /*
  * Structure describing a user specification and list thereof.
@@ -250,6 +251,11 @@ struct runascontainer {
     struct member *runasgroups;
 };
 
+struct defaults_binding {
+    struct member_list members;
+    unsigned int refcnt;
+};
+
 struct sudoers_comment {
     STAILQ_ENTRY(sudoers_comment) entries;
     char *str;
@@ -276,7 +282,7 @@ struct defaults {
     TAILQ_ENTRY(defaults) entries;
     char *var;				/* variable name */
     char *val;				/* variable value */
-    struct member_list *binding;	/* user/host/runas binding */
+    struct defaults_binding *binding;	/* user/host/runas binding */
     char *file;				/* file Defaults entry was in */
     short type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
     char op;				/* true, false, '+', '-' */
@@ -289,10 +295,11 @@ struct defaults {
  * Parsed sudoers policy.
  */
 struct sudoers_parse_tree {
+    TAILQ_ENTRY(sudoers_parse_tree) entries;
     struct userspec_list userspecs;
     struct defaults_list defaults;
     struct rbtree *aliases;
-    const char *shost, *lhost;
+    char *shost, *lhost;
 };
 
 /*
@@ -343,7 +350,7 @@ bool no_aliases(struct sudoers_parse_tree *parse_tree);
 bool alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type, char *file, int line, int column, struct member *members);
 const char *alias_type_to_string(int alias_type);
 struct alias *alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type);
-struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type);
+struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, int type);
 bool alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_aliases);
 void alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoers_parse_tree *, struct alias *, void *), void *cookie);
 void alias_free(void *a);
@@ -357,13 +364,14 @@ extern struct sudoers_parse_tree parsed_policy;
 bool init_parser(const char *path, bool quiet, bool strict);
 void free_member(struct member *m);
 void free_members(struct member_list *members);
+void free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl);
 void free_cmndspecs(struct cmndspec_list *csl);
 void free_privilege(struct privilege *priv);
 void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
-void free_default(struct defaults *def, struct member_list **binding);
+void free_default(struct defaults *def);
 void free_defaults(struct defaults_list *defs);
-void init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *lhost, const char *shost);
+void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
 void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 bool parser_leak_add(enum parser_leak_types type, void *v);
@@ -409,9 +417,6 @@ size_t base64_encode(const unsigned char *in, size_t in_len, char *out, size_t o
 
 /* timeout.c */
 int parse_timeout(const char *timestr);
-
-/* gmtoff.c */
-long get_gmtoff(time_t *clock);
 
 /* gentime.c */
 time_t parse_gentime(const char *expstr);

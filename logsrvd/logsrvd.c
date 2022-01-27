@@ -49,11 +49,6 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-#if defined(HAVE_OPENSSL)
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-#endif
-
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
 #include "pathnames.h"
@@ -70,9 +65,8 @@
 #include "sudo_rand.h"
 #include "sudo_util.h"
 
-#include "log_server.pb-c.h"
-#include "hostcheck.h"
 #include "logsrvd.h"
+#include "hostcheck.h"
 
 #ifndef O_NOFOLLOW
 # define O_NOFOLLOW 0
@@ -1160,6 +1154,10 @@ server_commit_cb(int unused, int what, void *v)
     TimeSpec commit_point = TIME_SPEC__INIT;
     debug_decl(server_commit_cb, SUDO_DEBUG_UTIL);
 
+    /* Flush I/O logs before sending commit point if needed. */
+    if (!iolog_get_flush())
+	iolog_flush_all(closure);
+
     commit_point.tv_sec = closure->elapsed_time.tv_sec;
     commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
     if (!schedule_commit_point(&commit_point, closure))
@@ -1752,7 +1750,7 @@ write_pidfile(void)
     int fd;
     bool success;
     mode_t oldmask;
-    char *pid_file = (char *)logsrvd_conf_pid_file();
+    const char *pid_file = logsrvd_conf_pid_file();
     debug_decl(write_pidfile, SUDO_DEBUG_UTIL);
 
     if (pid_file == NULL)
@@ -1761,7 +1759,6 @@ write_pidfile(void)
     /* Default logsrvd umask is more restrictive (077). */
     oldmask = umask(S_IWGRP|S_IWOTH);
 
-    /* sudo_mkdir_parents() modifies the path but restores it before return. */
     success = sudo_mkdir_parents(pid_file, ROOT_UID, ROOT_GID,
 	S_IRWXU|S_IXGRP|S_IXOTH, false);
     if (success) {

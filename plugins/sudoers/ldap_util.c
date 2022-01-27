@@ -248,9 +248,10 @@ oom:
  * Returns 1 if a digest was parsed, 0 if not and -1 on error.
  */
 static int
-sudo_ldap_extract_digest(char **cmnd, struct command_digest_list *digests)
+sudo_ldap_extract_digest(const char *cmnd, char **endptr,
+    struct command_digest_list *digests)
 {
-    char *ep, *cp = *cmnd;
+    const char *ep, *cp = cmnd;
     struct command_digest *digest;
     int digest_type = SUDO_DIGEST_INVALID;
     debug_decl(sudo_ldap_extract_digest, SUDOERS_DEBUG_LDAP);
@@ -303,7 +304,7 @@ sudo_ldap_extract_digest(char **cmnd, struct command_digest_list *digests)
 		    }
 		    while (isblank((unsigned char)*ep))
 			ep++;
-		    *cmnd = ep;
+		    *endptr = (char *)ep;
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
 			"%s digest %s for %s",
 			digest_type_to_name(digest_type),
@@ -330,7 +331,7 @@ sudo_ldap_extract_digests(char **cmnd, struct command_digest_list *digests)
     debug_decl(sudo_ldap_extract_digests, SUDOERS_DEBUG_LDAP);
 
     for (;;) {
-	rc = sudo_ldap_extract_digest(&cp, digests);
+	rc = sudo_ldap_extract_digest(cp, &cp, digests);
 	if (rc != 1)
 	    break;
 
@@ -478,10 +479,14 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 		if (store_options) {
 		    /* Use sudoRole in place of file name in defaults. */
-		    size_t slen = sizeof("sudoRole") + strlen(priv->ldap_role);
+		    size_t slen = sizeof("sudoRole ") - 1 + strlen(priv->ldap_role);
 		    if ((source = sudo_rcstr_alloc(slen)) == NULL)
 			goto oom;
-		    (void)snprintf(source, slen, "sudoRole %s", priv->ldap_role);
+		    if ((size_t)snprintf(source, slen + 1, "sudoRole %s", priv->ldap_role) != slen) {
+			sudo_warnx(U_("internal error, %s overflow"), __func__);
+			sudo_rcstr_delref(source);
+			goto bad;
+		    }
 		}
 
 		while ((opt = iter(&opts)) != NULL) {
@@ -582,26 +587,22 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 	/* Fill in command member now that options have been processed. */
 	m->negated = negated;
+	if (!sudo_ldap_extract_digests(&cmnd, &c->digests))
+	    goto oom;
 	if (strcmp(cmnd, "ALL") == 0) {
-	    /* TODO: support digests with ALL */
-	    m->type = ALL;
 	    if (cmndspec->tags.setenv == UNSPEC)
 		cmndspec->tags.setenv = IMPLIED;
+	    m->type = ALL;
 	} else {
-	    char *args;
-
-	    m->type = COMMAND;
-
-	    /* Fill in command with optional digests. */
-	    if (!sudo_ldap_extract_digests(&cmnd, &c->digests))
-		goto oom;
-	    if ((args = strpbrk(cmnd, " \t")) != NULL) {
+	    char *args = strpbrk(cmnd, " \t");
+	    if (args != NULL) {
 		*args++ = '\0';
 		if ((c->args = strdup(args)) == NULL)
 		    goto oom;
 	    }
 	    if ((c->cmnd = strdup(cmnd)) == NULL)
 		goto oom;
+	    m->type = COMMAND;
 	}
     }
     /* Negated commands take precedence so we insert them at the end. */
@@ -611,6 +612,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+bad:
     if (priv != NULL) {
 	TAILQ_CONCAT(&priv->hostlist, &negated_hosts, entries);
 	TAILQ_CONCAT(&priv->cmndlist, &negated_cmnds, entries);

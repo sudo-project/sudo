@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.8p2], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.9], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -41,6 +41,7 @@ AC_SUBST([LT_LDEXPORTS])
 AC_SUBST([LT_STATIC])
 AC_SUBST([LT_DEP_LIBS])
 AC_SUBST([COMMON_OBJS])
+AC_SUBST([SUDOERS_LT_STATIC])
 AC_SUBST([SUDOERS_OBJS])
 AC_SUBST([SUDO_OBJS])
 AC_SUBST([LIBS])
@@ -79,7 +80,6 @@ AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_BACKUP])
 AC_SUBST([INSTALL_INTERCEPT])
 AC_SUBST([INSTALL_NOEXEC])
-AC_SUBST([CHECK_INTERCEPT])
 AC_SUBST([PRELOAD_MODULE])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
@@ -93,6 +93,7 @@ AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LIBRT])
 AC_SUBST([LIBINTL])
+AC_SUBST([LIBCRYPTO])
 AC_SUBST([LIBMD])
 AC_SUBST([LIBTLS])
 AC_SUBST([LIBPTHREAD])
@@ -234,7 +235,6 @@ dnl
 INSTALL_BACKUP=
 INSTALL_INTERCEPT=
 INSTALL_NOEXEC=
-CHECK_INTERCEPT=
 PRELOAD_MODULE=-module
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
@@ -251,6 +251,7 @@ LCMAN=0
 PSMAN=0
 SEMAN=0
 LIBINTL=
+LIBCRYPTO=
 LIBMD=
 LIBTLS=
 ZLIB=
@@ -1560,7 +1561,7 @@ if test X"$LOGSRVD_SRC" != X""; then
 fi
 
 dnl
-dnl Do OpenSSL / gcrypt after logsrv options
+dnl Do OpenSSL / wolfSSL / gcrypt after logsrv options
 dnl
 AC_ARG_ENABLE(openssl,
 [AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
@@ -1570,11 +1571,19 @@ AC_ARG_ENABLE(openssl,
 	enable_openssl=maybe
     fi
 ])
+AC_ARG_ENABLE(openssl-pkgconfig-template,
+[AS_HELP_STRING([--enable-openssl-pkgconfig-template], [A printf format string used to construct the OpenSSL pkg-config name])],
+[], [enable_openssl_pkgconfig_template="%s"])
+
+AC_ARG_ENABLE(wolfssl,
+[AS_HELP_STRING([--enable-wolfssl], [Use wolfSSL's TLS and sha2 functions])], [
+    enable_openssl=no
+])
 
 AC_ARG_ENABLE(gcrypt,
 [AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
-    if test "${enable_openssl-no}" != no; then
-	AC_MSG_WARN([ignoring --enable-gcrypt when OpenSSL is enabled.])
+    if test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"; then
+	AC_MSG_WARN([ignoring --enable-gcrypt when OpenSSL or wolfSSL is enabled.])
 	enable_gcrypt=no
     fi
 ])
@@ -1705,6 +1714,7 @@ NOEXECDIR="`echo $noexec_file|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[
 dnl
 dnl Find programs we use
 dnl
+AC_PATH_PROG(SHA1SUM, [sha1sum], [openssl dgst -sha1])
 AC_PATH_PROG(UNAMEPROG, [uname], [uname])
 AC_PATH_PROG(TRPROG, [tr], [tr])
 AC_PATH_PROG(MANDOCPROG, [mandoc], [mandoc])
@@ -2045,6 +2055,10 @@ case "$host" in
 		])
 		# We call getrandom via syscall(3) in case it is not in libc
 		AC_CHECK_HEADERS([linux/random.h])
+
+		# The glibc getentropy() emulation may fail on older kernels.
+		# We use our own getentropy() by default on Linux.
+		: ${ac_cv_func_getentropy='no'}
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
@@ -2203,6 +2217,9 @@ case "$host" in
 
 		# Undocumented API that dynamically allocates the groups.
 		AC_CHECK_FUNCS([getgrouplist_2], [AC_CHECK_DECLS([getgrouplist_2])])
+
+		# We use proc_pidinfo() to emulate closefrom() on macOS.
+		AC_CHECK_HEADERS([libproc.h], [AC_CHECK_FUNCS([proc_pidinfo])])
 
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
@@ -2544,7 +2561,7 @@ dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
 AC_FUNC_FSEEKO
-AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval])
+AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval strtoull])
 AC_CHECK_FUNCS([execvpe], [SUDO_APPEND_INTERCEPT_EXP(execvpe)])
 AC_CHECK_FUNCS([pread], [
     # pread/pwrite on 32-bit HP-UX 11.x may not support large files
@@ -2566,6 +2583,18 @@ AC_CHECK_FUNCS([pwrite], [], [
 AC_CHECK_FUNCS([cfmakeraw], [], [
     AC_LIBOBJ(cfmakeraw)
     SUDO_APPEND_COMPAT_EXP(sudo_cfmakeraw)
+])
+AC_CHECK_FUNCS([localtime_r], [], [
+    AC_LIBOBJ(localtime_r)
+    SUDO_APPEND_COMPAT_EXP(sudo_localtime_r)
+])
+AC_CHECK_FUNCS([gmtime_r], [], [
+    AC_LIBOBJ(gmtime_r)
+    SUDO_APPEND_COMPAT_EXP(sudo_gmtime_r)
+])
+AC_CHECK_FUNCS([timegm], [], [
+    AC_LIBOBJ(timegm)
+    SUDO_APPEND_COMPAT_EXP(sudo_timegm)
 ])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
@@ -2791,6 +2820,10 @@ AC_CHECK_FUNCS(nanosleep, [], [
 	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
     ])
 ])
+AC_CHECK_FUNCS([mkdirat], [], [
+    AC_LIBOBJ(mkdirat)
+    SUDO_APPEND_COMPAT_EXP(sudo_mkdirat)
+])
 AC_CHECK_FUNCS([openat], [], [
     AC_LIBOBJ(openat)
     SUDO_APPEND_COMPAT_EXP(sudo_openat)
@@ -2941,39 +2974,65 @@ if test "${enable_openssl-no}" != no; then
 	PKG_CONFIG=false
     fi
     : ${PKG_CONFIG='pkg-config'}
-    if $PKG_CONFIG --exists "openssl >= 1.0.1" >/dev/null 2>&1; then
+    pkg_openssl=`printf $enable_openssl_pkgconfig_template "openssl"`
+    pkg_libcrypto=lib`printf $enable_openssl_pkgconfig_template "crypto"`
+    if $PKG_CONFIG --exists "$pkg_openssl >= 1.0.1" >/dev/null 2>&1; then
 	AC_DEFINE(HAVE_OPENSSL)
 	if test "$enable_openssl" = "maybe"; then
 	    enable_openssl=yes
 	fi
 
 	O_LDFLAGS="$LDFLAGS"
-	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L openssl`"
-	# Check whether --static is needed
-	AC_CHECK_LIB(ssl, SSL_new, [STATIC=""], [STATIC="--static"], [-lcrypto])
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
+	# Check whether --static is needed (don't assume name of ssl lib)
+	libssl="`$PKG_CONFIG --libs-only-l $pkg_openssl | sed 's/^ *-l//'`"
+	libssl_extra=`echo $libssl | sed 's/^[[^ ]]* *//'`
+	libssl=`echo $libssl | sed 's/ .*//'`
+	AC_CHECK_LIB($libssl, SSL_new, [STATIC=""], [STATIC="--static"], [$libssl_extra])
 
-	# Use OpenSSL's sha2 functions if possible
-	AC_CHECK_LIB(crypto, SHA224_Update, [DIGEST=digest_openssl.lo])
+	# Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
+	libcrypto="`$PKG_CONFIG --libs-only-l $pkg_libcrypto | sed -e 's/^ *-l//' -e 's/ .*//'`"
+	AC_CHECK_LIB($libcrypto, EVP_MD_CTX_new, [DIGEST=digest_openssl.lo])
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
-	LIBTLS=`$PKG_CONFIG $STATIC --libs openssl`
-	if test "$DIGEST" = "digest_openssl.lo"; then
-	    if $PKG_CONFIG --exists libcrypto >/dev/null 2>&1; then
-		LIBMD=`$PKG_CONFIG $STATIC --libs libcrypto`
-	    else
-		# No separate pkg config for libcrypto
-		LIBMD="$LIBTLS"
-	    fi
+	for f in `$PKG_CONFIG $STATIC --libs $pkg_openssl`; do
+	    case "$f" in
+		-L*)
+		    f="${f#-L}"
+		    SUDO_APPEND_LIBPATH([LIBTLS], [$f])
+		    ;;
+		*)
+		    AX_APPEND_FLAG([$f], [LIBTLS])
+		    ;;
+	    esac
+	done
+	if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
+	    LIBCRYPTO=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
+	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
+		case "$f" in
+		    -L*)
+			f="${f#-L}"
+			SUDO_APPEND_LIBPATH([LIBCRYPTO], [$f])
+			;;
+		    *)
+			AX_APPEND_FLAG([$f], [LIBCRYPTO])
+			;;
+		esac
+	    done
+	else
+	    # No separate pkg config for libcrypto
+	    LIBCRYPTO="$LIBTLS"
+	    LIBCRYPTO_R="$LIBTLS_R"
 	fi
-	for f in `$PKG_CONFIG --cflags-only-I openssl`; do
+	for f in `$PKG_CONFIG --cflags-only-I $pkg_openssl`; do
 	    AX_APPEND_FLAG([$f], [CPPFLAGS])
 	done
     else
 	# No pkg-config file present, try to do it manually
 	O_LDFLAGS="$LDFLAGS"
 	if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
-	    LDFLAGS="$LDFLAGS -L${enable_openssl}/lib"
+	    SUDO_APPEND_LIBPATH(LDFLAGS, [${enable_openssl}/lib])
 	fi
 	AC_CHECK_LIB(ssl, SSL_new, [
 	    # Check OPENSSL_VERSION_NUMBER in headers
@@ -2990,17 +3049,17 @@ if test "${enable_openssl-no}" != no; then
 	    # OpenSSL >= 1.0.1 detected, use it.
 	    AC_DEFINE(HAVE_OPENSSL)
 	    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
-		SUDO_APPEND_LIBPATH(LIBMD, [${enable_openssl}/lib])
+		SUDO_APPEND_LIBPATH(LIBCRYPTO, [${enable_openssl}/lib])
 		SUDO_APPEND_LIBPATH(LIBTLS, [${enable_openssl}/lib])
 	    else
 		enable_openssl=yes
 	    fi
+	    LIBCRYPTO="${LIBCRYPTO} -lcrypto"
 	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
-	    AC_CHECK_LIB(crypto, SHA224_Update, [
+	    AC_CHECK_LIB(crypto, EVP_MD_CTX_new, [
 		DIGEST=digest_openssl.lo
-		LIBMD="${LIBMD} -lcrypto"
 	    ])
 ], [
 	    # OpenSSL < 1.0.1 detected, ignore it.
@@ -3032,7 +3091,7 @@ dnl
 if test "${enable_openssl-no}" != no; then
     OLIBS="$LIBS"
     LIBS="$LIBS $LIBTLS"
-    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate TLS_method])
+    AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set0_tmp_dh_pkey TLS_method])
     # SSL_CTX_set_min_proto_version may be a macro
     AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
 	AC_INCLUDES_DEFAULT
@@ -3057,7 +3116,132 @@ elif test "${enable_gcrypt-no}" != no; then
     fi
 fi
 dnl
-dnl Check for sha2 functions if not using openssl or gcrypt
+dnl Check for OpenSSL compatibility functions in wolfSSL
+dnl
+if test "${enable_wolfssl-no}" != no; then
+    # Use pkg-config to find the wolfssl cflags and libs if possible.
+    if test "$enable_wolfssl" != "yes"; then
+	PKG_CONFIG_LIBDIR="${enable_wolfssl}/lib/pkgconfig:${enable_wolfssl}/lib64/pkgconfig:${enable_wolfssl}/share/pkgconfig"
+	export PKG_CONFIG_LIBDIR
+    elif test "$cross_compiling" = "yes" -a -z "$PKG_CONFIG"; then
+	# Cannot use pkg-config when cross-compiling
+	PKG_CONFIG=false
+    fi
+    : ${PKG_CONFIG='pkg-config'}
+    if $PKG_CONFIG --exists wolfssl >/dev/null 2>&1; then
+	AC_DEFINE(HAVE_OPENSSL)
+	AC_DEFINE(HAVE_WOLFSSL)
+
+	O_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I wolfssl`"
+	O_LDFLAGS="$LDFLAGS"
+	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L wolfssl`"
+
+	# Check whether --static is needed
+	libssl="`$PKG_CONFIG --libs-only-l wolfssl | sed 's/^ *-l//'`"
+	libssl_extra=`echo $libssl | sed 's/^[[^ ]]* *//'`
+	libssl=`echo $libssl | sed 's/ .*//'`
+	AC_CHECK_LIB($libssl, wolfSSL_new, [STATIC=""], [STATIC="--static"], [$libssl_extra])
+
+	# Use wolfSSL's sha2 functions if possible
+	AC_CHECK_DECL([EVP_MD_CTX_new], [DIGEST=digest_openssl.lo], [], [
+	    AC_INCLUDES_DEFAULT
+	    #include <wolfssl/options.h>
+	    #include <wolfssl/openssl/evp.h>
+	])
+	CPPFLAGS="$O_CPPFLAGS"
+	LDFLAGS="$O_LDFLAGS"
+
+	# Use pkg-config to determine wolfSSL libs and cflags
+	for f in `$PKG_CONFIG $STATIC --libs wolfssl`; do
+	    case "$f" in
+		-L*)
+		    f="${f#-L}"
+		    SUDO_APPEND_LIBPATH([LIBTLS], [$f])
+		    ;;
+		*)
+		    AX_APPEND_FLAG([$f], [LIBTLS])
+		    ;;
+	    esac
+	done
+	# No separate pkg config for libcrypto
+	LIBCRYPTO="$LIBTLS"
+	LIBCRYPTO_R="$LIBTLS_R"
+	for f in `$PKG_CONFIG --cflags-only-I wolfssl`; do
+	    AX_APPEND_FLAG([$f], [CPPFLAGS])
+	    # So we find the openssl compat headers under wolfssl
+	    AX_APPEND_FLAG([$f/wolfssl], [CPPFLAGS])
+	done
+	if test "$CPPFLAGS" = "$O_CPPFLAGS"; then
+	    # So we find the openssl compat headers under wolfssl (XXX)
+	    AX_APPEND_FLAG([-I/usr/include/wolfssl], [CPPFLAGS])
+	fi
+    else
+	AC_DEFINE(HAVE_OPENSSL)
+	AC_DEFINE(HAVE_WOLFSSL)
+
+	# No pkg-config file present, try to do it manually
+	if test "$enable_wolfssl" != "yes"; then
+	    SUDO_APPEND_LIBPATH(LIBCRYPTO, [${enable_wolfssl}/lib])
+	    SUDO_APPEND_LIBPATH(LIBTLS, [${enable_wolfssl}/lib])
+	    AX_APPEND_FLAG([-I${enable_wolfssl}/include], [CPPFLAGS])
+	    # So we find the openssl compat headers under wolfssl
+	    AX_APPEND_FLAG([-I${enable_wolfssl}/include/wolfssl], [CPPFLAGS])
+	else
+	    # So we find the openssl compat headers under wolfssl (XXX)
+	    AX_APPEND_FLAG([-I/usr/include/wolfssl], [CPPFLAGS])
+	fi
+	LIBTLS="${LIBTLS} -lwolfssl"
+	LIBCRYPTO="${LIBCRYPTO} -lwolfssl"
+
+	# Use wolfSSL's sha2 functions if possible
+	AC_CHECK_DECL([EVP_MD_CTX_new], [DIGEST=digest_openssl.lo], [], [
+	    AC_INCLUDES_DEFAULT
+	    #include <wolfssl/options.h>
+	    #include <wolfssl/openssl/evp.h>
+	])
+    fi
+    dnl
+    dnl Check for specific OpenSSL API compatibility macros
+    dnl
+    AC_CHECK_DECL([X509_STORE_CTX_get0_cert], [AC_DEFINE(HAVE_X509_STORE_CTX_GET0_CERT)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/x509.h>
+    ])
+    AC_CHECK_DECL([ASN1_STRING_get0_data], [AC_DEFINE(HAVE_ASN1_STRING_GET0_DATA)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/asn1.h>
+    ])
+    AC_CHECK_DECL([SSL_CTX_get0_certificate], [AC_DEFINE(HAVE_SSL_CTX_GET0_CERTIFICATE)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+    AC_CHECK_DECL([SSL_CTX_set0_tmp_dh_pkey], [AC_DEFINE(HAVE_SSL_CTX_SET0_TMP_DH_PKEY)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+    AC_CHECK_DECL([TLS_method], [AC_DEFINE(HAVE_TLS_METHOD)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+    AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+    AC_CHECK_DECL([SSL_CTX_set_ciphersuites], [AC_DEFINE(HAVE_SSL_CTX_SET_CIPHERSUITES)], [], [
+	AC_INCLUDES_DEFAULT
+	#include <wolfssl/options.h>
+	#include <wolfssl/openssl/ssl.h>
+    ])
+fi
+dnl
+dnl Check for sha2 functions if not using openssl, wolfssl or gcrypt
 dnl
 if test "$DIGEST" = "digest.lo"; then
     FOUND_SHA2=no
@@ -4226,10 +4410,11 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
-	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
+	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
 	else
+	    SUDOERS_LT_STATIC="--tag=disable-static"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;
@@ -4239,10 +4424,11 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    AX_APPEND_FLAG([--tag=disable-shared], [SUDOERS_LDFLAGS])
-	    AX_APPEND_FLAG([-static], [SUDOERS_LDFLAGS])
+	    AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
+	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
 	else
+	    SUDOERS_LT_STATIC="--tag=disable-static"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;
@@ -4273,8 +4459,7 @@ if test "$enable_shared_libutil" = "no"; then
     if test X"$STATIC_SUDOERS" = X""; then
 	AC_MSG_ERROR([--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled.])
     else
-	# Do not install sudoers or libsudo_util.
-	AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
+	# Do not install libsudo_util.
 	AX_APPEND_FLAG([-no-install], [LIBUTIL_LDFLAGS])
     fi
 fi
@@ -4340,6 +4525,12 @@ dnl All compiler/loader tests after this point will fail if
 dnl a warning is displayed (normally, warnings are not fatal).
 dnl
 AC_LANG_WERROR
+
+dnl
+dnl Don't use sys/sysctl.h if it is marked deprecated (Linux).
+dnl This test relies on AC_LANG_WERROR
+dnl
+AC_CHECK_HEADERS([sys/sysctl.h])
 
 dnl
 dnl If compiler supports the -static-libgcc flag use it unless we have
@@ -4527,6 +4718,8 @@ if test "$enable_sanitizer" != "no"; then
 	*gcc*)
 	    libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
 	    if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
+		# libasan.so may be a linker script
+		libasan="`awk 'BEGIN {lib=ARGV[[1]]} /^INPUT/ {lib=$3} END {print lib}' \"$libasan\"`"
 		SUDO_DEFINE_UNQUOTED(_PATH_ASAN_LIB, "$libasan", [Path to the libasan.so shared library])
 	    fi
 	    ;;
@@ -4667,7 +4860,12 @@ if test "$enable_hardening" != "no"; then
 	AX_APPEND_FLAG([-fstack-clash-protection], [SSP_CFLAGS])
 	AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [SSP_LDFLAGS])
     ])
+    AX_CHECK_LINK_FLAG([-fcf-protection], [
+	AX_APPEND_FLAG([-fcf-protection], [SSP_CFLAGS])
+	AX_APPEND_FLAG([-Wc,-fcf-protection], [SSP_LDFLAGS])
+    ])
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
+    AX_CHECK_LINK_FLAG([-Wl,-z,now], [AX_APPEND_FLAG([-Wl,-z,now], [LDFLAGS])])
     AX_CHECK_LINK_FLAG([-Wl,-z,noexecstack], [AX_APPEND_FLAG([-Wl,-z,noexecstack], [LDFLAGS])])
 fi
 
@@ -4816,14 +5014,9 @@ dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
 dnl
 if test X"$enable_intercept" != X"no"; then
-    SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.lo"
+    SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.o"
     PROGS="${PROGS} sudo_intercept.la"
     INSTALL_INTERCEPT="install-intercept"
-
-    # Can't use sanitizers with LD_PRELOAD
-    if test "$enable_sanitizer" != "yes"; then
-	CHECK_INTERCEPT=check_intercept
-    fi
 
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_INTERCEPT, "$intercept_file", [The fully qualified pathname of sudo_intercept.so])
 fi
@@ -4856,6 +5049,12 @@ if test X"$SUDOERS_LDFLAGS_R" != X""; then
 fi
 if test X"$ZLIB_R" != X""; then
     ZLIB="$ZLIB_R $ZLIB"
+fi
+if test X"$LIBCRYPTO_R" != X""; then
+    LIBCRYPTO="$LIBCRYPTO_R $LIBCRYPTO"
+fi
+if test X"$LIBTLS_R" != X""; then
+    LIBTLS="$LIBTLS_R $LIBTLS"
 fi
 
 dnl
@@ -4898,13 +5097,16 @@ elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
 
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile docs/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 
 AC_OUTPUT
 
 dnl
 dnl Summarize configuration
 dnl
+if test ${LIBTLS+y}; then
+    have_tls=yes
+fi
 echo "" >&AS_MESSAGE_FD
 echo "Configured Sudo version $PACKAGE_VERSION" >&AS_MESSAGE_FD
 echo " Compiler settings:" >&AS_MESSAGE_FD
@@ -4936,7 +5138,7 @@ fi
 echo " Optional features:" >&AS_MESSAGE_FD
 echo "  log client			: ${enable_log_client-yes}" >&AS_MESSAGE_FD
 echo "  log server			: ${enable_log_server-yes}" >&AS_MESSAGE_FD
-echo "  log client/server TLS		: ${enable_openssl-no}" >&AS_MESSAGE_FD
+echo "  log client/server TLS		: ${have_tls-no}" >&AS_MESSAGE_FD
 case "$host_os" in
     linux*) echo "  SELinux RBAC			: ${with_selinux-yes}" >&AS_MESSAGE_FD;;
 esac
@@ -5207,6 +5409,7 @@ AH_TEMPLATE(HAVE_KINFO_PROC_FREEBSD, [Define to 1 if your system has a FreeBSD-s
 AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-style kinfo_proc2 struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])
+AH_TEMPLATE(HAVE_WOLFSSL, [Define to 1 if you are using wolfSSL's TLS and sha2 functions.])
 AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION, [Define to 1 if you have the `SSL_CTX_set_min_proto_version' function or macro.])
 AH_TEMPLATE(HAVE_SSL_CTX_SET_CIPHERSUITES, [Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.])

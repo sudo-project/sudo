@@ -92,6 +92,7 @@ static struct sudo_conv_callback *conv_callback;
 static struct pam_conv pam_conv = { converse, &conv_callback };
 static char *def_prompt = PASSPROMPT;
 static bool getpass_error;
+static bool noninteractive;
 static pam_handle_t *pamh;
 static struct conv_filter *conv_filter;
 
@@ -203,9 +204,16 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 	debug_return_int(AUTH_SUCCESS);
     }
 
-    /* Initial PAM. */
-    pam_service = ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
-	def_pam_login_service : def_pam_service;
+    /* Stash value of noninteractive flag for conversation function. */
+    noninteractive = IS_NONINTERACTIVE(auth);
+
+    /* Initialize PAM. */
+    if (ISSET(sudo_mode, MODE_ASKPASS) && def_pam_askpass_service != NULL) {
+	pam_service = def_pam_askpass_service;
+    } else {
+	pam_service = ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
+	    def_pam_login_service : def_pam_service;
+    }
     pam_status = pam_start(pam_service, pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
 	errstr = sudo_pam_strerror(NULL, pam_status);
@@ -241,16 +249,7 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 		"pam_set_item(pamh, PAM_RHOST, %s): %s", user_host, errstr);
 	}
     }
-
-#if defined(__LINUX_PAM__) || defined(__sun__)
-    /*
-     * Some PAM modules assume PAM_TTY is set and will misbehave (or crash)
-     * if it is not.  Known offenders include pam_lastlog and pam_time.
-     */
-    if (ttypath == NULL)
-	ttypath = "";
-#endif
-    if (ttypath != NULL) { // -V547
+    if (ttypath != NULL) {
 	rc = pam_set_item(pamh, PAM_TTY, ttypath);
 	if (rc != PAM_SUCCESS) {
 	    errstr = sudo_pam_strerror(pamh, rc);
@@ -321,7 +320,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 
     if (getpass_error) {
 	/* error or ^C from tgetpass() */
-	debug_return_int(AUTH_INTR);
+	debug_return_int(noninteractive ? AUTH_NONINTERACTIVE : AUTH_INTR);
     }
     switch (*pam_status) {
 	case PAM_SUCCESS:
@@ -706,6 +705,13 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		/* Error out if the last password read was interrupted. */
 		if (getpass_error)
 		    goto done;
+
+		/* Treat non-interactive mode as a getpass error. */
+		if (noninteractive) {
+		    getpass_error = true;
+		    ret = PAM_CONV_ERR;
+		    goto done;
+		}
 
 		/* Choose either the sudo prompt or the PAM one. */
 		prompt = use_pam_prompt(pm->msg) ? pm->msg : def_prompt;

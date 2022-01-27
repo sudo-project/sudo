@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -315,18 +315,18 @@ sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, char *attr, int *rc)
 /*
  * Walk through search results and return true if we have a matching
  * non-Unix group (including netgroups), else false.
+ * A matching entry that is negated will always return false.
  */
 static int
 sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 {
     struct berval **bv, **p;
     bool ret = false;
-    char *val;
     int rc;
     debug_decl(sudo_ldap_check_non_unix_group, SUDOERS_DEBUG_LDAP);
 
     if (!entry)
-	debug_return_bool(ret);
+	debug_return_bool(false);
 
     /* get the values from the entry */
     bv = sudo_ldap_get_values_len(ld, entry, "sudoUser", &rc);
@@ -338,18 +338,29 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 
     /* walk through values */
     for (p = bv; *p != NULL && !ret; p++) {
-	val = (*p)->bv_val;
+	bool negated = false;
+	char *val = (*p)->bv_val;
+
+	if (*val == '!') {
+	    val++;
+	    negated = true;
+	}
 	if (*val == '+') {
 	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
 		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
 		ret = true;
-	    DPRINTF2("ldap sudoUser netgroup '%s' ... %s", val,
-		ret ? "MATCH!" : "not");
+	    DPRINTF2("ldap sudoUser netgroup '%s%s' ... %s",
+		negated ? "!" : "", val, ret ? "MATCH!" : "not");
 	} else {
 	    if (group_plugin_query(pw->pw_name, val + 2, pw))
 		ret = true;
-	    DPRINTF2("ldap sudoUser non-Unix group '%s' ... %s", val,
-		ret ? "MATCH!" : "not");
+	    DPRINTF2("ldap sudoUser non-Unix group '%s%s' ... %s",
+		negated ? "!" : "", val, ret ? "MATCH!" : "not");
+	}
+	/* A negated match overrides all other entries. */
+	if (ret && negated) {
+	    ret = false;
+	    break;
 	}
     }
 
@@ -491,21 +502,24 @@ done:
 static bool
 sudo_ldap_timefilter(char *buffer, size_t buffersize)
 {
-    struct tm *tp;
-    time_t now;
     char timebuffer[sizeof("20120727121554.0Z")];
-    int len = -1;
+    bool ret = false;
+    struct tm gmt;
+    time_t now;
+    int len;
     debug_decl(sudo_ldap_timefilter, SUDOERS_DEBUG_LDAP);
 
     /* Make sure we have a formatted timestamp for __now__. */
     time(&now);
-    if ((tp = gmtime(&now)) == NULL) {
+    if (gmtime_r(&now, &gmt) == NULL) {
 	sudo_warn("%s", U_("unable to get GMT time"));
 	goto done;
     }
 
     /* Format the timestamp according to the RFC. */
-    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", tp) == 0) {
+    timebuffer[sizeof(timebuffer) - 1] = '\0';
+    len = strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", &gmt);
+    if (len == 0 || timebuffer[sizeof(timebuffer) - 1] != '\0') {
 	sudo_warnx("%s", U_("unable to format timestamp"));
 	goto done;
     }
@@ -516,11 +530,13 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     if (len < 0 || (size_t)len >= buffersize) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	errno = EOVERFLOW;
-	len = -1;
+	goto done;
     }
 
+    ret = true;
+
 done:
-    debug_return_bool(len != -1);
+    debug_return_bool(ret);
 }
 
 /*
@@ -923,7 +939,8 @@ done:
 static char *
 sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 {
-    char *buf, timebuffer[TIMEFILTER_LENGTH + 1], idbuf[MAX_UID_T_LEN + 1];
+    char timebuffer[TIMEFILTER_LENGTH + 1], idbuf[MAX_UID_T_LEN + 1];
+    char *buf, *notbuf;
     struct ldap_netgroup_list netgroups;
     struct ldap_netgroup *ng = NULL;
     struct gid_list *gidlist;
@@ -935,34 +952,45 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 
     STAILQ_INIT(&netgroups);
 
-    /* If there is a filter, allocate space for the global AND. */
-    if (ldap_conf.timed || ldap_conf.search_filter)
+    if (ldap_conf.timed || ldap_conf.search_filter) {
+	/* Allocate space for the global AND. */
 	sz += 3;
 
-    /* Add LDAP search filter if present. */
-    if (ldap_conf.search_filter)
-	sz += strlen(ldap_conf.search_filter);
+	/* Add LDAP search filter if present. */
+	if (ldap_conf.search_filter)
+	    sz += strlen(ldap_conf.search_filter);
 
-    /* Then add (|(sudoUser=USERNAME)(sudoUser=#uid)(sudoUser=ALL)) + NUL */
-    sz += 29 + (12 + MAX_UID_T_LEN) + sudo_ldap_value_len(pw->pw_name);
+	/* If timed, add space for time limits. */
+	if (ldap_conf.timed)
+	    sz += TIMEFILTER_LENGTH;
+    }
+
+    /* Add space for the global OR clause + (sudoUser=ALL) + NOT + NUL. */
+    sz += sizeof("(|(sudoUser=ALL)(!(|)))");
+
+    /* Add space for username and uid, including the negated versions. */
+    sz += ((sizeof("(sudoUser=)(sudoUser=#)") - 1 +
+	sudo_ldap_value_len(pw->pw_name) + MAX_UID_T_LEN) * 2) + 2;
 
     /* Add space for primary and supplementary groups and gids */
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	sz += 12 + sudo_ldap_value_len(grp->gr_name);
+	sz += ((sizeof("(sudoUser=%)") - 1 +
+	    sudo_ldap_value_len(grp->gr_name)) * 2) + 1;
     }
-    sz += 13 + MAX_UID_T_LEN;
+    sz += ((sizeof("(sudoUser=%#)") - 1 + MAX_UID_T_LEN) * 2) + 1;
     if ((grlist = sudo_get_grlist(pw)) != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
 		continue;
-	    sz += 12 + sudo_ldap_value_len(grlist->groups[i]);
+	    sz += ((sizeof("(sudoUser=%)") - 1 +
+		sudo_ldap_value_len(grlist->groups[i])) * 2) + 1;
 	}
     }
     if ((gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_ANY)) != NULL) {
 	for (i = 0; i < gidlist->ngids; i++) {
 	    if (pw->pw_gid == gidlist->gids[i])
 		continue;
-	    sz += 13 + MAX_UID_T_LEN;
+	    sz += ((sizeof("(sudoUser=%#)") - 1 + MAX_UID_T_LEN) * 2) + 1;
 	}
     }
 
@@ -971,7 +999,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	DPRINTF1("Looking up netgroups for %s", pw->pw_name);
 	if (sudo_netgroup_lookup(ld, pw, &netgroups)) {
 	    STAILQ_FOREACH(ng, &netgroups, entries) {
-		sz += 14 + strlen(ng->name);
+		sz += ((sizeof("(sudoUser=+)") - 1 + strlen(ng->name)) * 2) + 1;
 	    }
 	} else {
 	    /* sudo_netgroup_lookup() failed, clean up. */
@@ -983,12 +1011,12 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	}
     }
 
-    /* If timed, add space for time limits. */
-    if (ldap_conf.timed)
-	sz += TIMEFILTER_LENGTH;
-    if ((buf = malloc(sz)) == NULL)
+    buf = malloc(sz);
+    notbuf = malloc(sz);
+    if (buf == NULL || notbuf == NULL)
 	goto bad;
     *buf = '\0';
+    *notbuf = '\0';
 
     /*
      * If timed or using a search filter, start a global AND clause to
@@ -1004,23 +1032,35 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     CHECK_STRLCAT(buf, "(|(sudoUser=", sz);
     CHECK_LDAP_VCAT(buf, pw->pw_name, sz);
     CHECK_STRLCAT(buf, ")", sz);
+    CHECK_STRLCAT(notbuf, "(sudoUser=!", sz);
+    CHECK_LDAP_VCAT(notbuf, pw->pw_name, sz);
+    CHECK_STRLCAT(notbuf, ")", sz);
 
     /* Append user-ID */
     (void) snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int)pw->pw_uid);
     CHECK_STRLCAT(buf, "(sudoUser=#", sz);
     CHECK_STRLCAT(buf, idbuf, sz);
     CHECK_STRLCAT(buf, ")", sz);
+    CHECK_STRLCAT(notbuf, "(sudoUser=!#", sz);
+    CHECK_STRLCAT(notbuf, idbuf, sz);
+    CHECK_STRLCAT(notbuf, ")", sz);
 
     /* Append primary group and group-ID */
     if (grp != NULL) {
 	CHECK_STRLCAT(buf, "(sudoUser=%", sz);
 	CHECK_LDAP_VCAT(buf, grp->gr_name, sz);
 	CHECK_STRLCAT(buf, ")", sz);
+	CHECK_STRLCAT(notbuf, "(sudoUser=!%", sz);
+	CHECK_LDAP_VCAT(notbuf, grp->gr_name, sz);
+	CHECK_STRLCAT(notbuf, ")", sz);
     }
     (void) snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int)pw->pw_gid);
     CHECK_STRLCAT(buf, "(sudoUser=%#", sz);
     CHECK_STRLCAT(buf, idbuf, sz);
     CHECK_STRLCAT(buf, ")", sz);
+    CHECK_STRLCAT(notbuf, "(sudoUser=!%#", sz);
+    CHECK_STRLCAT(notbuf, idbuf, sz);
+    CHECK_STRLCAT(notbuf, ")", sz);
 
     /* Append supplementary groups and group-IDs */
     if (grlist != NULL) {
@@ -1030,6 +1070,9 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	    CHECK_STRLCAT(buf, "(sudoUser=%", sz);
 	    CHECK_LDAP_VCAT(buf, grlist->groups[i], sz);
 	    CHECK_STRLCAT(buf, ")", sz);
+	    CHECK_STRLCAT(notbuf, "(sudoUser=!%", sz);
+	    CHECK_LDAP_VCAT(notbuf, grlist->groups[i], sz);
+	    CHECK_STRLCAT(notbuf, ")", sz);
 	}
     }
     if (gidlist != NULL) {
@@ -1041,6 +1084,9 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	    CHECK_STRLCAT(buf, "(sudoUser=%#", sz);
 	    CHECK_STRLCAT(buf, idbuf, sz);
 	    CHECK_STRLCAT(buf, ")", sz);
+	    CHECK_STRLCAT(notbuf, "(sudoUser=!%#", sz);
+	    CHECK_STRLCAT(notbuf, idbuf, sz);
+	    CHECK_STRLCAT(notbuf, ")", sz);
 	}
     }
 
@@ -1058,12 +1104,20 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	CHECK_STRLCAT(buf, "(sudoUser=+", sz);
 	CHECK_LDAP_VCAT(buf, ng->name, sz);
 	CHECK_STRLCAT(buf, ")", sz);
+	CHECK_STRLCAT(notbuf, "(sudoUser=!+", sz);
+	CHECK_LDAP_VCAT(notbuf, ng->name, sz);
+	CHECK_STRLCAT(notbuf, ")", sz);
 	free(ng->name);
 	free(ng);
     }
 
-    /* Add ALL to list and end the global OR. */
-    CHECK_STRLCAT(buf, "(sudoUser=ALL)", sz);
+    /* Add ALL to list. */
+    CHECK_STRLCAT(buf, "(sudoUser=ALL))", sz);
+
+    /* Add filter for negated entries. */
+    CHECK_STRLCAT(buf, "(!(|", sz);
+    CHECK_STRLCAT(buf, notbuf, sz);
+    CHECK_STRLCAT(buf, ")", sz);
 
     /* Add the time restriction, or simply end the global OR. */
     if (ldap_conf.timed) {
@@ -1074,8 +1128,10 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     } else if (ldap_conf.search_filter) {
 	CHECK_STRLCAT(buf, ")", sz); /* closes the global OR */
     }
+
     CHECK_STRLCAT(buf, ")", sz); /* closes the global OR or the global AND */
 
+    free(notbuf);
     debug_return_str(buf);
 overflow:
     sudo_warnx(U_("internal error, %s overflow"), __func__);
@@ -1092,6 +1148,7 @@ bad:
 	free(ng);
     }
     free(buf);
+    free(notbuf);
     debug_return_str(NULL);
 }
 
@@ -1128,16 +1185,18 @@ sudo_ldap_build_pass2(void)
      * those get ANDed in to the expression.
      */
     if (query_netgroups && def_group_plugin) {
-	len = asprintf(&filt, "%s%s(|(sudoUser=+*)(sudoUser=%%:*))%s%s",
+	len = asprintf(&filt, "%s%s(|(sudoUser=+*)(sudoUser=!+*)(sudoUser=%%:*)(sudoUser=!%%:*))%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     } else {
-	len = asprintf(&filt, "(&%s(sudoUser=*)(sudoUser=%s*)%s)",
+	len = asprintf(&filt, "%s%s(|(sudoUser=%s*)(sudoUser=!%s*))%s%s",
+	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
-	    query_netgroups ? "+" : "%:",
-	    ldap_conf.timed ? timebuffer : "");
+	    query_netgroups ? "+" : "%:", query_netgroups ? "+" : "%:",
+	    ldap_conf.timed ? timebuffer : "",
+	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     }
     if (len == -1)
 	filt = NULL;
@@ -1334,7 +1393,7 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 {
     int nfd, ofd = -1;
     ssize_t nread, nwritten = -1;
-    static char new_ccname[sizeof(_PATH_TMP) + sizeof("sudocc_XXXXXXXX") - 1];
+    static char new_ccname[] = _PATH_TMP "sudocc_XXXXXXXX";
     char buf[10240], *ret = NULL;
     debug_decl(sudo_krb5_copy_cc_file, SUDOERS_DEBUG_LDAP);
 
@@ -1350,8 +1409,6 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 	if (ofd != -1) {
 	    (void) fcntl(ofd, F_SETFL, 0);
 	    if (sudo_lock_file(ofd, SUDO_LOCK)) {
-		(void)snprintf(new_ccname, sizeof(new_ccname), "%s%s",
-		    _PATH_TMP, "sudocc_XXXXXXXX");
 		nfd = mkstemp(new_ccname);
 		if (nfd != -1) {
 		    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,

@@ -1388,6 +1388,11 @@ list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
     if ((evlog = iolog_parse_loginfo(-1, log_dir)) == NULL)
 	goto done;
 
+    if (evlog->command == NULL || evlog->submituser == NULL ||
+	    evlog->runuser == NULL) {
+	goto done;
+    }
+
     /* Match on search expression if there is one. */
     if (!STAILQ_EMPTY(&search_expr) && !match_expr(&search_expr, evlog, true))
 	goto done;
@@ -1409,13 +1414,18 @@ list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
     }
     /* XXX - print lines + cols? */
     timestr = get_timestr(evlog->submit_time.tv_sec, 1);
-    printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
-	timestr ? timestr : "invalid date",
-	evlog->submituser, evlog->ttyname, evlog->cwd, evlog->runuser);
-    if (evlog->rungroup)
-	printf("GROUP=%s ; ", evlog->rungroup);
-    if (evlog->submithost)
+    printf("%s : %s : ", timestr ? timestr : "invalid date", evlog->submituser);
+    if (evlog->submithost != NULL)
 	printf("HOST=%s ; ", evlog->submithost);
+    if (evlog->ttyname != NULL)
+	printf("TTY=%s ; ", evlog->ttyname);
+    if (evlog->runchroot != NULL)
+	printf("CHROOT=%s ; ", evlog->runchroot);
+    if (evlog->runcwd != NULL || evlog->cwd != NULL)
+	printf("CWD=%s ; ", evlog->runcwd ? evlog->runcwd : evlog->cwd);
+    printf("USER=%s ; ", evlog->runuser);
+    if (evlog->rungroup != NULL)
+	printf("GROUP=%s ; ", evlog->rungroup);
     printf("TSID=%s ; COMMAND=%s\n", idstr, evlog->command);
 
     ret = 0;

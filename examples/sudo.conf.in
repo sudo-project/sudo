@@ -129,10 +129,10 @@
 #   Debug program /path/to/debug_log subsystem@priority[,subsyste@priority]
 #
 # Sudo and related programs support logging debug information to a file.
-# The program is typically sudo, sudoers.so, sudoreplay or visudo.
+# The program is typically sudo, sudoers.so, sudoreplay, or visudo.
 #
 # Subsystems vary based on the program; "all" matches all subsystems.
-# Priority may be crit, err, warn, notice, diag, info, trace or debug.
+# Priority may be crit, err, warn, notice, diag, info, trace, or debug.
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
 #Debug sudo /var/log/sudo_debug all@debug

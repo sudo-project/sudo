@@ -30,7 +30,9 @@
 #include <string.h>
 
 #include "sudoers.h"
-#include "log_client.h"
+#ifdef SUDOERS_LOG_CLIENT
+# include "log_client.h"
+#endif
 
 #ifdef HAVE_BSM_AUDIT
 # include "bsm_audit.h"
@@ -251,7 +253,7 @@ log_server_accept(struct eventlog *evlog)
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
-    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+    if (client_closure != NULL && ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
 	/* Older servers don't support multiple commands per session. */
 	if (!client_closure->subcommands)
 	    debug_return_bool(true);

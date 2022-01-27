@@ -31,6 +31,10 @@
 # endif
 #endif
 
+#ifndef MAP_FAILED
+# define MAP_FAILED ((void *) -1)
+#endif
+
 #define MAX_TEMPLATE_LEN	10
 #define MAX_TRIES		100
 #define MIN_Xs			6

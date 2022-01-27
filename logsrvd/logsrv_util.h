@@ -21,6 +21,13 @@
 
 #include <netinet/in.h>		/* for INET_ADDRSTRLEN and INET6_ADDRSTRLEN */
 
+#ifndef INET_ADDRSTRLEN
+# define INET_ADDRSTRLEN 16
+#endif
+#ifndef INET6_ADDRSTRLEN
+# define INET6_ADDRSTRLEN 46
+#endif
+
 /* Default ports to listen on */
 #define DEFAULT_PORT		"30343"
 #define DEFAULT_PORT_TLS	"30344"

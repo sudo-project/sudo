@@ -42,7 +42,10 @@
 #include "sudoers.h"
 #include "sudo_eventlog.h"
 #include "sudo_iolog.h"
-#include "log_client.h"
+#include "strlist.h"
+#ifdef SUDOERS_LOG_CLIENT
+# include "log_client.h"
+#endif
 
 static struct iolog_file iolog_files[] = {
     { false },	/* IOFD_STDIN */
@@ -612,32 +615,26 @@ sudoers_io_open_local(struct timespec *now)
 {
     struct eventlog *evlog = iolog_details.evlog;
     int i, ret = -1;
-    size_t len;
     debug_decl(sudoers_io_open_local, SUDOERS_DEBUG_PLUGIN);
 
     /* If no I/O log path defined we need to figure it out ourselves. */
     if (evlog->iolog_path == NULL) {
+	int len;
+
 	/* Get next session ID and convert it into a path. */
-	const size_t pathlen = sizeof(_PATH_SUDO_IO_LOGDIR "/00/00/00");
-	if ((evlog->iolog_path = malloc(pathlen)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
-	len = strlcpy(evlog->iolog_path, _PATH_SUDO_IO_LOGDIR, pathlen);
-	if (len + strlen("/00/00/00") >= pathlen) {
-	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    goto done;
-	}
-	if (!iolog_nextid(evlog->iolog_path, evlog->sessid)) {
+	if (!iolog_nextid(_PATH_SUDO_IO_LOGDIR, evlog->sessid)) {
 	    log_warning(SLOG_SEND_MAIL, N_("unable to update sequence file"));
 	    warned = true;
 	    goto done;
 	}
-	(void)snprintf(evlog->iolog_path + strlen(_PATH_SUDO_IO_LOGDIR),
-	    pathlen - strlen(_PATH_SUDO_IO_LOGDIR),
-	    "/%c%c/%c%c/%c%c", evlog->sessid[0], evlog->sessid[1],
-	    evlog->sessid[2], evlog->sessid[3], evlog->sessid[4],
-	    evlog->sessid[5]);
+	len = asprintf(&evlog->iolog_path, "%s/%c%c/%c%c/%c%c",
+	    _PATH_SUDO_IO_LOGDIR,
+	    evlog->sessid[0], evlog->sessid[1], evlog->sessid[2],
+	    evlog->sessid[3], evlog->sessid[4], evlog->sessid[5]);
+	if (len == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
     }
 
     /*

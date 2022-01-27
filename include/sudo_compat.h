@@ -24,10 +24,8 @@
 #ifndef SUDO_COMPAT_H
 #define SUDO_COMPAT_H
 
-#include <sys/types.h>	/* for gid_t, mode_t, size_t, ssize_t, uid_t */
-#if defined(__hpux) && !defined(__LP64__)
-# include <unistd.h>	/* for pread/pread64, and pwrite/pwrite64 */
-#endif
+#include <sys/types.h>	/* for gid_t, mode_t, size_t, ssize_t, time_t, uid_t */
+#include <unistd.h>	/* to avoid problems with mismatched headers and libc */
 #include <stdio.h>
 #if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \
     !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
@@ -380,7 +378,7 @@ int getdomainname(char *, size_t);
 /*
  * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)
  */
-#if defined(HAVE_OPENSSL)
+#if defined(HAVE_OPENSSL) && !defined(HAVE_WOLFSSL)
 # ifndef HAVE_X509_STORE_CTX_GET0_CERT
 #  define X509_STORE_CTX_get0_cert(x)   ((x)->cert)
 # endif
@@ -390,7 +388,7 @@ int getdomainname(char *, size_t);
 # ifndef HAVE_TLS_METHOD
 #  define TLS_method()                  SSLv23_method()
 # endif
-#endif /* HAVE_OPENSSL */
+#endif /* HAVE_OPENSSL && !HAVE_WOLFSSL */
 
 /*
  * Functions "missing" from libc.
@@ -401,6 +399,7 @@ struct passwd;
 struct stat;
 struct timespec;
 struct termios;
+struct tm;
 
 #ifndef HAVE_CFMAKERAW
 sudo_dso_public void sudo_cfmakeraw(struct termios *term);
@@ -456,6 +455,19 @@ char *getusershell(void);
 void setusershell(void);
 void endusershell(void);
 #endif /* HAVE_GETUSERSHELL */
+#ifndef HAVE_GMTIME_R
+sudo_dso_public struct tm *sudo_gmtime_r(const time_t *, struct tm *);
+# undef gmtime_r
+# define gmtime_r(_a, _b) sudo_gmtime_r((_a), (_b))
+#endif /* HAVE_GMTIME_R */
+#ifndef HAVE_LOCALTIME_R
+sudo_dso_public struct tm *sudo_localtime_r(const time_t *, struct tm *);
+# undef localtime_r
+# define localtime_r(_a, _b) sudo_localtime_r((_a), (_b))
+#endif /* HAVE_LOCALTIME_R */
+#ifndef HAVE_TIMEGM
+sudo_dso_public time_t sudo_timegm(struct tm *);
+#endif /* HAVE_TIMEGM */
 #ifndef HAVE_UTIMENSAT
 sudo_dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
 # undef utimensat
@@ -521,6 +533,11 @@ sudo_dso_public void *sudo_memrchr(const void *s, int c, size_t n);
 # undef memrchr
 # define memrchr(_a, _b, _c) sudo_memrchr((_a), (_b), (_c))
 #endif /* HAVE_MEMRCHR */
+#ifndef HAVE_MKDIRAT
+sudo_dso_public int sudo_mkdirat(int dfd, const char *path, mode_t mode);
+# undef mkdirat
+# define mkdirat(_a, _b, _c) sudo_mkdirat((_a), (_b), (_c))
+#endif /* HAVE_MKDIRAT */
 #if !defined(HAVE_MKDTEMP) || !defined(HAVE_MKSTEMPS)
 sudo_dso_public char *sudo_mkdtemp(char *path);
 # undef mkdtemp

@@ -125,13 +125,6 @@ check_user_interactive(int validated, int mode, struct getpass_closure *closure)
 	FALLTHROUGH;
 
     default:
-	/* Bail out if we are non-interactive and a password is required */
-	if (ISSET(mode, MODE_NONINTERACTIVE)) {
-	    validated |= FLAG_NON_INTERACTIVE;
-	    log_auth_failure(validated, 0);
-	    goto done;
-	}
-
 	/* XXX - should not lecture if askpass helper is being used. */
 	lectured = display_lecture(closure->tstat);
 
@@ -170,7 +163,7 @@ check_user(int validated, int mode)
      */
     if ((closure.auth_pw = get_authpw(mode)) == NULL)
 	goto done;
-    if (sudo_auth_init(closure.auth_pw) == -1)
+    if (sudo_auth_init(closure.auth_pw, mode) == -1)
 	goto done;
 
     /*

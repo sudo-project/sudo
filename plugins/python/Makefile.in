@@ -132,7 +132,7 @@ VERSION = @PACKAGE_VERSION@
 
 TEST_PROGS = check_python_examples
 
-CHECK_PYTHON_EXAMPLES_OBJS = check_python_examples.o iohelpers.o testhelpers.o pyhelpers.lo sudo_python_debug.lo
+CHECK_PYTHON_EXAMPLES_OBJS = check_python_examples.o iohelpers.o testhelpers.o pyhelpers.o sudo_python_debug.o
 
 all: python_plugin.la
 
@@ -295,6 +295,13 @@ pyhelpers.i: $(srcdir)/pyhelpers.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 pyhelpers.plog: pyhelpers.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pyhelpers.c --i-file $< --output-file $@
+pyhelpers.o: $(srcdir)/pyhelpers.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(srcdir)/pyhelpers.h $(srcdir)/pyhelpers_cpychecker.h \
+             $(srcdir)/sudo_python_debug.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/pyhelpers.c
 python_baseplugin.lo: $(srcdir)/python_baseplugin.c $(incdir)/compat/stdbool.h \
                       $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
@@ -499,6 +506,13 @@ sudo_python_debug.i: $(srcdir)/sudo_python_debug.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sudo_python_debug.plog: sudo_python_debug.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_python_debug.c --i-file $< --output-file $@
+sudo_python_debug.o: $(srcdir)/sudo_python_debug.c $(incdir)/compat/stdbool.h \
+                     $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                     $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                     $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                     $(incdir)/sudo_queue.h $(srcdir)/sudo_python_debug.h \
+                     $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_python_debug.c
 sudo_python_module.lo: $(srcdir)/sudo_python_module.c \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \

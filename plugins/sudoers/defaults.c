@@ -34,6 +34,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <syslog.h>
 
 #include "sudoers.h"
@@ -67,6 +69,7 @@ static bool store_timeout(const char *str, union sudo_defs_val *sd_un);
 static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_values *tuple_vals);
 static bool store_uint(const char *str, union sudo_defs_val *sd_un);
 static bool store_timespec(const char *str, union sudo_defs_val *sd_un);
+static bool store_rlimit(const char *str, union sudo_defs_val *sd_un);
 static bool list_op(const char *str, size_t, union sudo_defs_val *sd_un, enum list_ops op);
 static bool valid_path(struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
 
@@ -96,6 +99,7 @@ dump_defaults(void)
 			sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", desc);
 		    break;
 		case T_STR:
+		case T_RLIMIT:
 		    if (cur->sd_un.str) {
 			sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.str);
 			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
@@ -314,6 +318,9 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	case T_TIMESPEC:
 	    rc = store_timespec(val, &def->sd_un);
 	    break;
+	case T_RLIMIT:
+	    rc = store_rlimit(val, &def->sd_un);
+	    break;
 	default:
 	    if (!quiet) {
 		if (line > 0) {
@@ -342,7 +349,7 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     debug_return_bool(rc == true);
 }
 
-struct early_default *
+static struct early_default *
 is_early_default(const char *name)
 {
     struct early_default *early;
@@ -393,7 +400,7 @@ set_default(const char *var, const char *val, int op, const char *file,
  * Like set_default() but stores the matching default value
  * and does not run callbacks.
  */
-bool
+static bool
 set_early_default(const char *var, const char *val, int op, const char *file,
     int line, int column, bool quiet, struct early_default *early)
 {
@@ -415,7 +422,7 @@ set_early_default(const char *var, const char *val, int op, const char *file,
 /*
  * Run callbacks for early defaults.
  */
-bool
+static bool
 run_early_defaults(void)
 {
     struct early_default *early;
@@ -437,6 +444,7 @@ free_defs_val(int type, union sudo_defs_val *sd_un)
 {
     switch (type & T_MASK) {
 	case T_STR:
+	case T_RLIMIT:
 	    free(sd_un->str);
 	    break;
 	case T_LIST:
@@ -553,6 +561,8 @@ init_defaults(void)
     if ((def_admin_flag = strdup(_PATH_SUDO_ADMIN_FLAG)) == NULL)
 	goto oom;
 #endif
+    if ((def_rlimit_core = strdup("0,0")) == NULL)
+	goto oom;
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;
@@ -704,19 +714,19 @@ default_binding_matches(struct sudoers_parse_tree *parse_tree,
     case DEFAULTS:
 	debug_return_bool(true);
     case DEFAULTS_USER:
-	if (userlist_matches(parse_tree, sudo_user.pw, d->binding) == ALLOW)
+	if (userlist_matches(parse_tree, sudo_user.pw, &d->binding->members) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_RUNAS:
-	if (runaslist_matches(parse_tree, d->binding, NULL, NULL, NULL) == ALLOW)
+	if (runaslist_matches(parse_tree, &d->binding->members, NULL, NULL, NULL) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_HOST:
-	if (hostlist_matches(parse_tree, sudo_user.pw, d->binding) == ALLOW)
+	if (hostlist_matches(parse_tree, sudo_user.pw, &d->binding->members) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_CMND:
-	if (cmndlist_matches(parse_tree, d->binding, NULL, NULL) == ALLOW)
+	if (cmndlist_matches(parse_tree, &d->binding->members, NULL, NULL) == ALLOW)
 	    debug_return_bool(true);
 	break;
     }
@@ -732,6 +742,7 @@ update_defaults(struct sudoers_parse_tree *parse_tree,
     struct defaults_list *defs, int what, bool quiet)
 {
     struct defaults *d;
+    bool global_defaults = false;
     bool ret = true;
     debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS);
 
@@ -739,38 +750,45 @@ update_defaults(struct sudoers_parse_tree *parse_tree,
 	"what: 0x%02x", what);
 
     /* If no defaults list specified, use the global one in the parse tree. */
-    if (defs == NULL)
+    if (defs == NULL) {
 	defs = &parse_tree->defaults;
+	global_defaults = true;
+    }
 
     /*
-     * First apply Defaults values marked as early.
+     * If using the global defaults list, apply Defaults values marked as early.
      */
-    TAILQ_FOREACH(d, defs, entries) {
-	struct early_default *early = is_early_default(d->var);
-	if (early == NULL)
-	    continue;
+    if (global_defaults) {
+	TAILQ_FOREACH(d, defs, entries) {
+	    struct early_default *early = is_early_default(d->var);
+	    if (early == NULL)
+		continue;
 
-	/* Defaults type and binding must match. */
-	if (!default_type_matches(d, what) ||
-	    !default_binding_matches(parse_tree, d, what))
-	    continue;
+	    /* Defaults type and binding must match. */
+	    if (!default_type_matches(d, what) ||
+		!default_binding_matches(parse_tree, d, what))
+		continue;
 
-	/* Copy the value to sudo_defs_table and mark as early. */
-	if (!set_early_default(d->var, d->val, d->op, d->file, d->line,
-	    d->column, quiet, early))
+	    /* Copy the value to sudo_defs_table and mark as early. */
+	    if (!set_early_default(d->var, d->val, d->op, d->file, d->line,
+		d->column, quiet, early))
+		ret = false;
+	}
+
+	/* Run callbacks for early defaults (if any) */
+	if (!run_early_defaults())
 	    ret = false;
     }
-    /* Run callbacks for early defaults (if any) */
-    if (!run_early_defaults())
-	ret = false;
 
     /*
-     * Then set the rest of the defaults.
+     * Set the rest of the defaults and run their callbacks, if any.
      */
     TAILQ_FOREACH(d, defs, entries) {
-	/* Skip Defaults marked as early, we already did them. */
-	if (is_early_default(d->var))
-	    continue;
+	if (global_defaults) {
+	    /* Skip Defaults marked as early, we already did them. */
+	    if (is_early_default(d->var))
+		continue;
+	}
 
 	/* Defaults type and binding must match. */
 	if (!default_type_matches(d, what) ||
@@ -856,12 +874,71 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
     debug_return_bool(true);
 }
 
+/* Check resource limit syntax, does not save as rlim_t. */
+static bool
+check_rlimit(const char *str, bool soft)
+{
+    const size_t inflen = sizeof("infinity") - 1;
+    debug_decl(check_rlimit, SUDOERS_DEBUG_DEFAULTS);
+
+    if (isdigit((unsigned char)*str)) {
+	unsigned long long ullval;
+	char *ep;
+
+	errno = 0;
+#ifdef HAVE_STRTOULL
+	ullval = strtoull(str, &ep, 10);
+	if (str == ep || (errno == ERANGE && ullval == ULLONG_MAX))
+	    debug_return_bool(false);
+#else
+	ullval = strtoul(str, &ep, 10);
+	if (str == ep || (errno == ERANGE && ullval == ULONG_MAX))
+	    debug_return_bool(false);
+#endif
+	if (*ep == '\0' || (soft && *ep == ','))
+	    debug_return_bool(true);
+	debug_return_bool(false);
+    }
+    if (strncmp(str, "infinity", inflen) == 0) {
+	if (str[inflen] == '\0' || (soft && str[inflen] == ','))
+	    debug_return_bool(true);
+    }
+    debug_return_bool(false);
+}
+
+static bool
+store_rlimit(const char *str, union sudo_defs_val *sd_un)
+{
+    debug_decl(store_rlimit, SUDOERS_DEBUG_DEFAULTS);
+
+    /* The special values "user" and "default" are not compound. */
+    if (str != NULL && strcmp(str, "user") != 0 && strcmp(str, "default") != 0) {
+	const char *hard, *soft = str;
+	/*
+	 * Expect a limit in the form "soft,hard" or "limit" (both soft+hard).
+	 */
+	hard = strchr(str, ',');
+	if (hard != NULL)
+	    hard++;
+	else
+	    hard = soft;
+
+	if (!check_rlimit(soft, true))
+	    debug_return_bool(false);
+	if (!check_rlimit(hard, false))
+	    debug_return_bool(false);
+    }
+
+    /* Store as string, front-end will parse it as a limit. */
+    debug_return_bool(store_str(str, sd_un));
+}
+
 static bool
 store_timespec(const char *str, union sudo_defs_val *sd_un)
 {
     struct timespec ts;
     char sign = '+';
-    int i;
+    long i;
     debug_decl(store_timespec, SUDOERS_DEBUG_DEFAULTS);
 
     sudo_timespecclear(&ts);
@@ -1049,6 +1126,18 @@ valid_path(struct sudo_defs_types *def, const char *val,
     bool ret = true;
     debug_decl(valid_path, SUDOERS_DEBUG_DEFAULTS);
 
+    if (strlen(val) >= PATH_MAX) {
+	if (!quiet) {
+	    if (line > 0) {
+		sudo_warnx(U_("%s:%d:%d: path name for \"%s\" too long"),
+		    file, line, column, def->name);
+	    } else {
+		sudo_warnx(U_("%s: path name for \"%s\" too long"),
+		    file, def->name);
+	    }
+	}
+	ret = false;
+    }
     if (ISSET(def->type, T_CHPATH)) {
 	if (val[0] != '/' && val[0] != '~' && (val[0] != '*' || val[1] != '\0')) {
 	    if (!quiet) {

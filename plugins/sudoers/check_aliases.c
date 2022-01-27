@@ -31,8 +31,44 @@
 #include "sudoers.h"
 #include <gram.h>
 
+struct alias_warned {
+    SLIST_ENTRY(alias_warned) entries;
+    const char *name;
+};
+SLIST_HEAD(alias_warned_list, alias_warned);
+
+static bool
+alias_warned(struct alias_warned_list *warned, char *name)
+{
+    struct alias_warned *w;
+    debug_decl(alias_warned, SUDOERS_DEBUG_ALIAS);
+
+    SLIST_FOREACH(w, warned, entries) {
+	if (strcmp(w->name, name) == 0)
+	    debug_return_bool(true);
+    }
+
+    debug_return_bool(false);
+}
+
+static void
+alias_warned_add(struct alias_warned_list *warned, char *name)
+{
+    struct alias_warned *w;
+    debug_decl(alias_warned_add, SUDOERS_DEBUG_ALIAS);
+
+    w = malloc(sizeof(*w));
+    if (w != NULL) {
+	w->name = name;
+	SLIST_INSERT_HEAD(warned, w, entries);
+    }
+
+    debug_return;
+}
+
 static int
-check_alias(struct sudoers_parse_tree *parse_tree, char *name, int type,
+check_alias(struct sudoers_parse_tree *parse_tree,
+    struct alias_warned_list *warned, char *name, int type,
     char *file, int line, int column, bool strict, bool quiet)
 {
     struct member *m;
@@ -45,28 +81,29 @@ check_alias(struct sudoers_parse_tree *parse_tree, char *name, int type,
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type != ALIAS)
 		continue;
-	    errors += check_alias(parse_tree, m->name, type, a->file, a->line,
-		a->column, strict, quiet);
+	    errors += check_alias(parse_tree, warned, m->name, type,
+		a->file, a->line, a->column, strict, quiet);
 	}
 	alias_put(a);
     } else {
-	if (!quiet) {
+	if (!quiet && !alias_warned(warned, name)) {
 	    if (errno == ELOOP) {
-		fprintf(stderr, strict ?
+		sudo_printf(SUDO_CONV_ERROR_MSG, strict ?
 		    U_("Error: %s:%d:%d: cycle in %s \"%s\"") :
 		    U_("Warning: %s:%d:%d: cycle in %s \"%s\""),
 		    file, line, column, alias_type_to_string(type), name);
 	    } else {
-		fprintf(stderr, strict ?
+		sudo_printf(SUDO_CONV_ERROR_MSG, strict ?
 		    U_("Error: %s:%d:%d: %s \"%s\" referenced but not defined") :
 		    U_("Warning: %s:%d:%d: %s \"%s\" referenced but not defined"),
 		    file, line, column, alias_type_to_string(type), name);
 	    }
-	    fputc('\n', stderr);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "\n");
 	    if (strict && errorfile == NULL) {
 		errorfile = sudo_rcstr_addref(file);
 		errorlineno = line;
 	    }
+	    alias_warned_add(warned, name);
 	}
 	errors++;
     }
@@ -82,7 +119,9 @@ int
 check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet,
     int (*cb_unused)(struct sudoers_parse_tree *, struct alias *, void *))
 {
+    struct alias_warned_list warned = SLIST_HEAD_INITIALIZER(warned);
     struct rbtree *used_aliases;
+    struct alias_warned *w;
     struct cmndspec *cs;
     struct member *m;
     struct privilege *priv;
@@ -100,14 +139,14 @@ check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet,
     TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
 	TAILQ_FOREACH(m, &us->users, entries) {
 	    if (m->type == ALIAS) {
-		errors += check_alias(parse_tree, m->name, USERALIAS,
+		errors += check_alias(parse_tree, &warned, m->name, USERALIAS,
 		    us->file, us->line, us->column, strict, quiet);
 	    }
 	}
 	TAILQ_FOREACH(priv, &us->privileges, entries) {
 	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
 		if (m->type == ALIAS) {
-		    errors += check_alias(parse_tree, m->name, HOSTALIAS,
+		    errors += check_alias(parse_tree, &warned, m->name, HOSTALIAS,
 			us->file, us->line, us->column, strict, quiet);
 		}
 	    }
@@ -115,7 +154,7 @@ check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet,
 		if (cs->runasuserlist != NULL) {
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m->type == ALIAS) {
-			    errors += check_alias(parse_tree, m->name, RUNASALIAS,
+			    errors += check_alias(parse_tree, &warned, m->name, RUNASALIAS,
 				us->file, us->line, us->column, strict, quiet);
 			}
 		    }
@@ -123,17 +162,21 @@ check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet,
 		if (cs->runasgrouplist != NULL) {
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m->type == ALIAS) {
-			    errors += check_alias(parse_tree, m->name, RUNASALIAS,
+			    errors += check_alias(parse_tree, &warned, m->name, RUNASALIAS,
 				us->file, us->line, us->column, strict, quiet);
 			}
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
-		    errors += check_alias(parse_tree, m->name, CMNDALIAS,
+		    errors += check_alias(parse_tree, &warned, m->name, CMNDALIAS,
 			us->file, us->line, us->column, strict, quiet);
 		}
 	    }
 	}
+    }
+    while ((w = SLIST_FIRST(&warned)) != NULL) {
+	SLIST_REMOVE_HEAD(&warned, entries);
+	free(w);
     }
 
     /* Reverse check (destructive) */

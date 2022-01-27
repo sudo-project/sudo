@@ -42,11 +42,13 @@
 #include "interfaces.h"
 
 static int fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
+static int fuzz_printf(int msg_type, const char *fmt, ...);
 
 /* Required to link with parser. */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
+sudo_printf_t sudo_printf = fuzz_printf;
 bool sudoers_recovery = true;
 int sudo_mode;
 
@@ -62,6 +64,12 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
 }
 
 static int
+fuzz_printf(int msg_type, const char *fmt, ...)
+{
+    return 0;
+}
+
+static int
 fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
@@ -69,7 +77,6 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 
     for (n = 0; n < num_msgs; n++) {
 	const struct sudo_conv_message *msg = &msgs[n];
-	FILE *fp = stdout;
 
 	switch (msg->msg_type & 0xff) {
 	    case SUDO_CONV_PROMPT_ECHO_ON:
@@ -78,18 +85,8 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		/* input not supported */
 		return -1;
 	    case SUDO_CONV_ERROR_MSG:
-		fp = stderr;
-		FALLTHROUGH;
 	    case SUDO_CONV_INFO_MSG:
-		if (msg->msg != NULL) {
-		    size_t len = strlen(msg->msg);
-
-		    if (len == 0)
-			break;
-
-		    if (fwrite(msg->msg, 1, len, fp) == 0 || fputc('\n', fp) == EOF)
-			return -1;
-		}
+		/* no output for fuzzers */
 		break;
 	    default:
 		return -1;
@@ -111,16 +108,10 @@ set_cmnd_path(const char *runchroot)
     return NOT_FOUND;
 }
 
+/* STUB */
 bool
 log_warningx(int flags, const char *fmt, ...)
 {
-    va_list ap;
-
-    /* Just display on stderr. */
-    va_start(ap, fmt);
-    sudo_vwarnx_nodebug(fmt, ap);
-    va_end(ap);
-
     return true;
 }
 
@@ -197,6 +188,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     setprogname("fuzz_sudoers");
     sudoers_debug_register(getprogname(), NULL);
+    sudo_warn_set_conversation(fuzz_conversation);
 
     /* Sudoers locale setup. */
     sudoers_initlocale(setlocale(LC_ALL, ""), "C");
@@ -281,7 +273,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     /* Only one sudoers source, the sudoers file itself. */
-    init_parse_tree(&parse_tree, user_host, user_shost);
+    init_parse_tree(&parse_tree, NULL, NULL);
     memset(&sudo_nss_fuzz, 0, sizeof(sudo_nss_fuzz));
     sudo_nss_fuzz.parse_tree = &parse_tree;
     sudo_nss_fuzz.query = sudo_fuzz_query;
@@ -305,7 +297,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		sudo_pw_delref(sudo_user.pw);
 	    sudo_user.pw = sudo_getpwnam(user_name);
 	    if (sudo_user.pw == NULL) {
-		fprintf(stderr, "unknown user %s\n", user_name);
+		sudo_warnx_nodebug("unknown user %s", user_name);
 		continue;
 	    }
 
@@ -322,8 +314,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		runas_pw = sudo_getpwnam("root");
 	    }
 	    if (runas_pw == NULL) {
-		fprintf(stderr, "unknown run user %s\n",
-		    sudo_user.runas_user);
+		sudo_warnx_nodebug("unknown run user %s", sudo_user.runas_user);
 		continue;
 	    }
 
@@ -335,7 +326,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
 		runas_gr = sudo_getgrnam(sudo_user.runas_group);
 		if (runas_gr == NULL) {
-		    fprintf(stderr, "unknown run group %s\n",
+		    sudo_warnx_nodebug("unknown run group %s",
 			sudo_user.runas_group);
 		    continue;
 		}
@@ -358,11 +349,13 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	}
 
 	/* Expand tildes in runcwd and runchroot. */
-	if (def_runcwd != NULL && strcmp(def_runcwd, "*") != 0) {
-	    expand_tilde(&def_runcwd, runas_pw->pw_name);
-	}
-	if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
-	    expand_tilde(&def_runchroot, runas_pw->pw_name);
+	if (runas_pw != NULL) {
+	    if (def_runcwd != NULL && strcmp(def_runcwd, "*") != 0) {
+		expand_tilde(&def_runcwd, runas_pw->pw_name);
+	    }
+	    if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
+		expand_tilde(&def_runchroot, runas_pw->pw_name);
+	    }
 	}
 
 	/* Check Defaults and aliases. */
@@ -374,7 +367,7 @@ done:
     /* Cleanup. */
     fclose(fp);
     free_parse_tree(&parse_tree);
-    init_parser(NULL, false, true);
+    init_parser(NULL, true, true);
     if (sudo_user.pw != NULL)
 	sudo_pw_delref(sudo_user.pw);
     if (runas_pw != NULL)

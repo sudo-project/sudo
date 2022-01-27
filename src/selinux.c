@@ -67,14 +67,13 @@ static struct selinux_state {
     int enforcing;
 } se_state;
 
-#ifdef HAVE_LINUX_AUDIT
-static int
-audit_role_change(const char * old_context,
-    const char * new_context, const char *ttyn, int result)
+int
+selinux_audit_role_change(void)
 {
+#ifdef HAVE_LINUX_AUDIT
     int au_fd, rc = -1;
     char *message;
-    debug_decl(audit_role_change, SUDO_DEBUG_SELINUX);
+    debug_decl(selinux_audit_role_change, SUDO_DEBUG_SELINUX);
 
     au_fd = audit_open();
     if (au_fd == -1) {
@@ -85,11 +84,11 @@ audit_role_change(const char * old_context,
     } else {
 	/* audit role change using the same format as newrole(1) */
 	rc = asprintf(&message, "newrole: old-context=%s new-context=%s",
-	    old_context, new_context);
+	    se_state.old_context, se_state.new_context ? se_state.new_context : "?");
 	if (rc == -1)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	rc = audit_log_user_message(au_fd, AUDIT_USER_ROLE_CHANGE,
-	    message, NULL, NULL, ttyn, result);
+	    message, NULL, NULL, se_state.ttyn, se_state.new_context ? 1 : 0);
 	if (rc <= 0)
 	    sudo_warn("%s", U_("unable to send audit message"));
 	free(message);
@@ -97,8 +96,10 @@ audit_role_change(const char * old_context,
     }
 
     debug_return_int(rc);
+#else
+    return 0;
+#endif /* HAVE_LINUX_AUDIT */
 }
-#endif
 
 /*
  * This function attempts to revert the relabeling done to the tty.
@@ -163,8 +164,8 @@ skip_relabel:
  * This function will not fail if it can not relabel the tty when selinux is
  * in permissive mode.
  */
-static int
-relabel_tty(const char *ttyn, int ptyfd)
+int
+selinux_relabel_tty(const char *ttyn, int ptyfd)
 {
     char * tty_con = NULL;
     char * new_tty_con = NULL;
@@ -305,91 +306,88 @@ bad:
 }
 
 /*
- * Returns a new security context based on the old context and the
+ * Determine the new security context based on the old context and the
  * specified role and type.
+ * Returns 0 on success, and -1 on failure.
  */
-char *
-get_exec_context(char * old_context, const char *role, const char *type)
+static int
+get_exec_context(const char *role, const char *type)
 {
-    char * new_context = NULL;
+    char *new_context = NULL;
     context_t context = NULL;
     char *typebuf = NULL;
+    int ret = -1;
     debug_decl(get_exec_context, SUDO_DEBUG_SELINUX);
-    
-    /* We must have a role, the type is optional (we can use the default). */
+
     if (role == NULL) {
 	sudo_warnx(U_("you must specify a role for type %s"), type);
 	errno = EINVAL;
-	goto bad;
+	goto done;
     }
     if (type == NULL) {
 	if (get_default_type(role, &typebuf)) {
 	    sudo_warnx(U_("unable to get default type for role %s"), role);
 	    errno = EINVAL;
-	    goto bad;
+	    goto done;
 	}
 	type = typebuf;
     }
-    
-    /* 
-     * Expand old_context into a context_t so that we can extract and modify 
-     * its components easily. 
+
+    /*
+     * Expand old_context into a context_t so that we can extract and modify
+     * its components easily.
      */
-    if ((context = context_new(old_context)) == NULL) {
+    if ((context = context_new(se_state.old_context)) == NULL) {
 	sudo_warn("%s", U_("failed to get new context"));
-	goto bad;
+	goto done;
     }
-    
+
     /*
      * Replace the role and type in "context" with the role and
      * type we will be running the command as.
      */
     if (context_role_set(context, role)) {
 	sudo_warn(U_("failed to set new role %s"), role);
-	goto bad;
+	goto done;
     }
     if (context_type_set(context, type)) {
 	sudo_warn(U_("failed to set new type %s"), type);
-	goto bad;
+	goto done;
     }
-      
+
     /*
      * Convert "context" back into a string and verify it.
      */
     if ((new_context = strdup(context_str(context))) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto bad;
+	goto done;
     }
     if (security_check_context(new_context) == -1) {
 	sudo_warnx(U_("%s is not a valid context"), new_context);
 	errno = EINVAL;
-	goto bad;
+	goto done;
     }
 
-    context_free(context);
-    debug_return_str(new_context);
+    se_state.new_context = new_context;
+    new_context = NULL;
+    ret = 0;
 
-bad:
+done:
     free(typebuf);
     context_free(context);
     freecon(new_context);
-    debug_return_str(NULL);
+    debug_return_int(ret);
 }
 
-/* 
- * Determine the exec and tty contexts in preparation for fork/exec.
- * Must run as root, before forking the child process.
- * Sets the tty context but not the exec context (which happens later).
- * If ptyfd is not -1, it indicates we are running
- * in a pty and do not need to reset std{in,out,err}.
+/*
+ * Determine the exec and tty contexts the command will run in.
  * Returns 0 on success and -1 on failure.
  */
 int
-selinux_setup(const char *role, const char *type, const char *ttyn,
-    int ptyfd, bool label_tty)
+selinux_getexeccon(const char *role, const char *type)
 {
     int ret = -1;
-    debug_decl(selinux_setup, SUDO_DEBUG_SELINUX);
+    debug_decl(selinux_getexeccon, SUDO_DEBUG_SELINUX);
 
     /* Store the caller's SID in old_context. */
     if (getprevcon(&se_state.old_context)) {
@@ -405,36 +403,23 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: old context %s", __func__,
 	se_state.old_context);
-    se_state.new_context = get_exec_context(se_state.old_context, role, type);
-    if (se_state.new_context == NULL) {
-#ifdef HAVE_LINUX_AUDIT
-	audit_role_change(se_state.old_context, "?", se_state.ttyn, 0);
-#endif
+    ret = get_exec_context(role, type);
+    if (ret == -1) {
+	/* Audit role change failure (success is logged later). */
+	selinux_audit_role_change();
 	goto done;
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: new context %s", __func__,
 	se_state.new_context);
-    
-    if (label_tty && relabel_tty(ttyn, ptyfd) == -1) {
-	sudo_warn(U_("unable to set tty context to %s"), se_state.new_context);
-	goto done;
-    }
-
-#ifdef HAVE_LINUX_AUDIT
-    audit_role_change(se_state.old_context, se_state.new_context,
-	se_state.ttyn, 1);
-#endif
-
-    ret = 0;
 
 done:
     debug_return_int(ret);
 }
 
 int
-selinux_setcon(void)
+selinux_setexeccon(void)
 {
-    debug_decl(selinux_setcon, SUDO_DEBUG_SELINUX);
+    debug_decl(selinux_setexeccon, SUDO_DEBUG_SELINUX);
 
     if (setexeccon(se_state.new_context)) {
 	sudo_warn(U_("unable to set exec context to %s"), se_state.new_context);
@@ -470,7 +455,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
     }
 
     /* Set SELinux exec and keycreate contexts. */
-    if (selinux_setcon() == -1)
+    if (selinux_setexeccon() == -1)
 	debug_return;
 
     /*

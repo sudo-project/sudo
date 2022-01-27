@@ -32,6 +32,9 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#ifdef __linux__
+# include <sys/prctl.h>
+#endif
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -318,7 +321,7 @@ main(int argc, char *argv[], char *envp[])
 	sa.sa_handler = SIG_DFL;
 	sigaction(WTERMSIG(status), &sa, NULL);
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
-	    WTERMSIG(status) | 128);                
+	    WTERMSIG(status) | 128);
 	kill(getpid(), WTERMSIG(status));
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
@@ -620,7 +623,7 @@ get_user_info(struct user_details *ud)
     if (asprintf(&info[++i], "cols=%d", ud->ts_cols) == -1)
 	goto oom;
 
-    n = serialize_limits(&info[i + 1], info_max - (i + 1));
+    n = serialize_rlimits(&info[i + 1], info_max - (i + 1));
     if (n == -1)
 	goto oom;
     i += n;
@@ -753,6 +756,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		break;
 	    case 'r':
+		if (strncmp("rlimit_", info[i], sizeof("rlimit_") - 1) == 0) {
+		    parse_policy_rlimit(info[i] + sizeof("rlimit_") - 1);
+		    break;
+		}
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
 		    id = sudo_strtoid(cp, &errstr);
@@ -876,8 +883,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
 #ifdef HAVE_SELINUX
-    if (details->selinux_role != NULL && is_selinux_enabled() > 0)
+    if (details->selinux_role != NULL && is_selinux_enabled() > 0) {
 	SET(details->flags, CD_RBAC_ENABLED);
+	i = selinux_getexeccon(details->selinux_role, details->selinux_type);
+	if (i != 0)
+	    exit(EXIT_FAILURE);
+    }
 #endif
     debug_return;
 }
@@ -891,6 +902,17 @@ sudo_check_suid(const char *sudo)
     debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM);
 
     if (geteuid() != ROOT_UID) {
+#if defined(__linux__) && defined(PR_GET_NO_NEW_PRIVS)
+	/* The no_new_privs flag disables set-user-ID at execve(2) time. */
+	if (prctl(PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0) == 1) {
+	    sudo_warnx("%s", U_("The \"no new privileges\" flag is set, which "
+		"prevents sudo from running as root."));
+	    sudo_warnx("%s", U_("If sudo is running in a container, you may need"
+		" to adjust the container configuration to disable the flag."));
+	    exit(EXIT_FAILURE);
+	}
+#endif /* __linux__ && PR_GET_NO_NEW_PRIVS */
+
 	/* Search for sudo binary in PATH if not fully qualified. */
 	qualified = strchr(sudo, '/') != NULL;
 	if (!qualified) {
@@ -1356,6 +1378,7 @@ policy_init_session(struct command_details *details)
 		details->info);
 	}
     }
+
 done:
     debug_return_int(ret);
 }

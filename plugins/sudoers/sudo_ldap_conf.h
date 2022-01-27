@@ -64,6 +64,11 @@
 } while (0)
 #endif
 
+/*
+ * Configuration data types.
+ * When adding a new data type, be sure to update sudo_ldap_parse_keyword()
+ * and sudo_ldap_set_options_table().
+ */
 #define CONF_BOOL		0
 #define CONF_INT		1
 #define CONF_STR		2
@@ -77,7 +82,7 @@
 
 struct ldap_config_table {
     const char *conf_str;	/* config file string */
-    int type;			/* CONF_BOOL, CONF_INT, CONF_STR */
+    int type;			/* CONF_* value, see above */
     int opt_val;		/* LDAP_OPT_* (or -1 for sudo internal) */
     void *valp;			/* pointer into ldap_conf */
 };

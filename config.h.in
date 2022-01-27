@@ -408,6 +408,9 @@
 /* Define to 1 if you have the `glob' function. */
 #undef HAVE_GLOB
 
+/* Define to 1 if you have the `gmtime_r' function. */
+#undef HAVE_GMTIME_R
+
 /* Define to 1 if you have the `grantpt' function. */
 #undef HAVE_GRANTPT
 
@@ -536,6 +539,9 @@
 /* Define to 1 if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
 
+/* Define to 1 if you have the <libproc.h> header file. */
+#undef HAVE_LIBPROC_H
+
 /* Define to 1 if you have the <libutil.h> header file. */
 #undef HAVE_LIBUTIL_H
 
@@ -544,6 +550,9 @@
 
 /* Define to 1 if you have the <linux/random.h> header file. */
 #undef HAVE_LINUX_RANDOM_H
+
+/* Define to 1 if you have the `localtime_r' function. */
+#undef HAVE_LOCALTIME_R
 
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
@@ -577,6 +586,9 @@
 
 /* Define to 1 if you have the <minix/config.h> header file. */
 #undef HAVE_MINIX_CONFIG_H
+
+/* Define to 1 if you have the `mkdirat' function. */
+#undef HAVE_MKDIRAT
 
 /* Define to 1 if you have the `mkdtemp' function. */
 #undef HAVE_MKDTEMP
@@ -667,6 +679,9 @@
 
 /* Define to 1 if you have the <procfs.h> header file. */
 #undef HAVE_PROCFS_H
+
+/* Define to 1 if you have the `proc_pidinfo' function. */
+#undef HAVE_PROC_PIDINFO
 
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
@@ -786,6 +801,9 @@
 /* Define to 1 if you have the `SSL_CTX_get0_certificate' function. */
 #undef HAVE_SSL_CTX_GET0_CERTIFICATE
 
+/* Define to 1 if you have the `SSL_CTX_set0_tmp_dh_pkey' function. */
+#undef HAVE_SSL_CTX_SET0_TMP_DH_PKEY
+
 /* Define to 1 if you have the `SSL_CTX_set_ciphersuites' function or macro.
    */
 #undef HAVE_SSL_CTX_SET_CIPHERSUITES
@@ -832,6 +850,9 @@
 
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
+
+/* Define to 1 if you have the `strtoull' function. */
+#undef HAVE_STRTOULL
 
 /* Define to 1 if `d_namlen' is a member of `struct dirent'. */
 #undef HAVE_STRUCT_DIRENT_D_NAMLEN
@@ -937,6 +958,9 @@
 /* Define to 1 if you have the <sys/syscall.h> header file. */
 #undef HAVE_SYS_SYSCALL_H
 
+/* Define to 1 if you have the <sys/sysctl.h> header file. */
+#undef HAVE_SYS_SYSCTL_H
+
 /* Define to 1 if you have the <sys/sysmacros.h> header file. */
 #undef HAVE_SYS_SYSMACROS_H
 
@@ -945,6 +969,9 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the `timegm' function. */
+#undef HAVE_TIMEGM
 
 /* Define to 1 if you have the `TLS_method' function. */
 #undef HAVE_TLS_METHOD
@@ -990,6 +1017,9 @@
 
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H
+
+/* Define to 1 if you are using wolfSSL's TLS and sha2 functions. */
+#undef HAVE_WOLFSSL
 
 /* Define to 1 if you have the `wordexp' function. */
 #undef HAVE_WORDEXP

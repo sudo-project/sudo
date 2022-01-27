@@ -103,16 +103,16 @@ expand_iolog_path(const char *inpath, char *path, size_t pathlen,
 
     /* Expand strftime escapes as needed. */
     if (strfit) {
+	struct tm tm;
 	time_t now;
-	struct tm *timeptr;
 
 	time(&now);
-	if ((timeptr = localtime(&now)) == NULL)
+	if (localtime_r(&now, &tm) == NULL)
 	    goto bad;
 
 	/* We only call strftime() on the current part of the buffer. */
 	tmpbuf[sizeof(tmpbuf) - 1] = '\0';
-	len = strftime(tmpbuf, sizeof(tmpbuf), path, timeptr);
+	len = strftime(tmpbuf, sizeof(tmpbuf), path, &tm);
 
 	if (len == 0 || tmpbuf[sizeof(tmpbuf) - 1] != '\0')
 	    goto bad;		/* strftime() failed, buf too small? */

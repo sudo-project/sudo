@@ -1,3 +1,108 @@
+What's new in Sudo 1.9.9
+
+ * Sudo can now be built with OpenSSL 3.0 without generating warnings
+   about deprecated OpenSSL APIs.
+
+ * A digest can now be specified along with the "ALL" command in
+   the LDAP and SSSD back-ends.  Sudo 1.9.0 introduced support for
+   this in the sudoers file but did not include corresponding changes
+   for the other back-ends.
+
+ * visudo now only warns about an undefined alias or a cycle in an
+   alias once for each alias.
+ 
+ * The sudoRole cn was truncated by a single character in warning messages.
+   GitHub issue #115.
+
+ * The cvtsudoers utility has new --group-file and --passwd-file options
+   to use a custom passwd or group file when the --match-local option is
+   also used.
+
+ * The cvtsudoers utility can now filter or match based on a command.
+
+ * The cvtsudoers utility can now produce output in csv (comma-separated
+   value) format.  This can be used to help generate entitlement reports.
+
+ * Fixed a bug in sudo_logsrvd that could result in the connection being
+   dropped for very long command lines.
+
+ * Fixed a bug where sudo_logsrvd would not accept a restore point
+   of zero.
+
+ * Fixed a bug in visudo where the value of the "editor" setting was not
+   used if it did not match the user's EDITOR environment variable.
+   This was only a problem if the "env_editor" setting was not enabled.
+   Bug #1000.
+
+ * Sudo now builds with the -fcf-protection compiler option and the
+   "-z now" linker option if supported.
+
+ * The output of "sudoreplay -l" now more closely matches the
+   traditional sudo log format.
+
+ * The sudo_sendlog utility will now use the full contents of the log.json
+   file, if present.  This makes it possible to send sudo-format I/O logs
+   that use the newer log.json format to sudo_logsrvd without losing any
+   information.
+
+ * Fixed compilation of the arc4random_buf() replacement on systems with
+   arc4random() but no arc4random_buf().  Bug #1008.
+
+ * Sudo now uses its own getentropy() by default on Linux.  The GNU libc
+   version of getentropy() will fail on older kernels that don't support
+   the getrandom() system call.
+
+ * It is now possible to build sudo with WolfSSL's OpenSSL compatibility
+   layer by using the --enable-wolfssl configure option.
+
+ * Fixed a bug related to Daylight Saving Time when parsing timestamps
+   in Generalized Time format.  This affected the NOTBEFORE and
+   NOTAFTER options in sudoers.  Bug #1006
+
+ * Added the -O and -P options to visudo, which can be used to check
+   or set the owner and permissions.  This can be used in conjunction
+   with the -c option to check that the sudoers file ownership and
+   permissions are correct.  Bug #1007.
+
+ * It is now possible to set resource limits in the sudoers file itself.
+   The special values "default" and "user" refer to the default system
+   limit and invoking user limit respectively.  The core dump size limit
+   is now set to 0 by default unless overridden by the sudoers file.
+
+ * The cvtsudoers utility can now merge multiple sudoers sources into
+   a single, combined sudoers file.  If there are conflicting entries,
+   cvtsudoers will attempt to resolve them but manual intervention
+   may be required.  The merging of sudoers rules is currently fairly
+   simplistic but will be improved in a future release.
+
+ * Sudo was parsing but not applying the "deref" and "tls_reqcert"
+   ldap.conf settings.  This meant the options were effectively
+   ignored which broke dereferencing of aliases in LDAP.  Bug #1013.
+
+ * Clarified in the sudo man page that the security policy may
+   override the user's PATH environment variable.  Bug #1014.
+
+ * When sudo is run in non-interactive mode (with the -n option), it
+   will now attempt PAM authentication and only exit with an error
+   if user interaction is required.  This allows PAM modules that
+   don't interact with the user to succeed.  Previously, sudo
+   would not attempt authentication if the -n option was specified.
+   Bug #956 and GitHub issue #83.
+
+ * Fixed a regression introduced in version 1.9.1 when sudo is
+   built with the --with-fqdn configure option.  The local host
+   name was being resolved before the sudoers file was processed,
+   making it impossible to disable DNS lookups by negating the
+   "fqdn" sudoers option.  Bug #1016.
+
+ * Added support for negated sudoUser attributes in the LDAP and
+   SSSD sudoers back ends.  A matching sudoUser that is negated
+   will cause the sudoRole containing it to be ignored.
+
+ * Fixed a bug where the stack resource limit could be set to a
+   value smaller than that of the invoking user and not be reset
+   before the command was run.  Bug #1017.
+
 What's new in Sudo 1.9.8p2
 
  * Fixed a potential out-of-bounds read with "sudo -i" when the
@@ -14,10 +119,14 @@ What's new in Sudo 1.9.8p2
    file was created for each sub-command instead of simply using
    the existing journal file.
 
+ * Fixed a bug where sudoedit would fail if one of the directories
+   in the path to be edited had the immutable flag set (BSD, Linux
+   or macOS).  GitHub issue #122.
+
 What's new in Sudo 1.9.8p1
 
  * Fixed support for passing a prompt (sudo -p) or a login class
-   (sudo -l) on the command line.  This is a regression introduced
+   (sudo -c) on the command line.  This is a regression introduced
    in sudo 1.9.8.  Bug #993.
 
  * Fixed a crash with "sudo ALL" rules in the LDAP and SSSD back-ends.

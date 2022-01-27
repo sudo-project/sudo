@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
@@ -189,8 +189,13 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     /* Walk through sudoUser values.  */
     for (i = 0; val_array[i] != NULL && !ret; ++i) {
 	const char *val = val_array[i];
+	bool negated = false;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
+	if (*val == '!') {
+	    val++;
+	    negated = true;
+	}
 	switch (*val) {
 	case '+':
 	    /* Netgroup spec found, check membership. */
@@ -214,8 +219,14 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	    break;
 	}
 	sudo_debug_printf(SUDO_DEBUG_DIAG,
-	    "sssd/ldap sudoUser '%s' ... %s (%s)", val,
-	    ret ? "MATCH!" : "not", handle->pw->pw_name);
+	    "sssd/ldap sudoUser '%s%s' ... %s (%s)", negated ? "!" : "",
+	    val, ret ? "MATCH!" : "not", handle->pw->pw_name);
+
+	/* A negated match overrides all other entries. */
+	if (ret && negated) {
+	    ret = false;
+	    break;
+	}
     }
     handle->fn_free_values(val_array);
     debug_return_bool(ret);
@@ -329,22 +340,14 @@ sss_rule_to_priv(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
     rc = 0;
 
 cleanup:
-    if (cn_array != NULL)
-	handle->fn_free_values(cn_array);
-    if (cmnds != NULL)
-	handle->fn_free_values(cmnds);
-    if (hosts != NULL)
-	handle->fn_free_values(hosts);
-    if (runasusers != NULL)
-	handle->fn_free_values(runasusers);
-    if (runasgroups != NULL)
-	handle->fn_free_values(runasgroups);
-    if (opts != NULL)
-	handle->fn_free_values(opts);
-    if (notbefore != NULL)
-	handle->fn_free_values(notbefore);
-    if (notafter != NULL)
-	handle->fn_free_values(notafter);
+    handle->fn_free_values(cn_array);
+    handle->fn_free_values(cmnds);
+    handle->fn_free_values(hosts);
+    handle->fn_free_values(runasusers);
+    handle->fn_free_values(runasgroups);
+    handle->fn_free_values(opts);
+    handle->fn_free_values(notbefore);
+    handle->fn_free_values(notafter);
 
     *rc_out = rc;
 
@@ -532,9 +535,6 @@ sudo_sss_close(struct sudo_nss *nss)
 	sudo_dso_unload(handle->ssslib);
 	if (handle->pw != NULL)
 	    sudo_pw_delref(handle->pw);
-	free(handle->ipa_host);
-	if (handle->ipa_host != handle->ipa_shost)
-	    free(handle->ipa_shost);
 	free_parse_tree(&handle->parse_tree);
 	free(handle);
 	nss->handle = NULL;

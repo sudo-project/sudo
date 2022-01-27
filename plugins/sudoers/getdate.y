@@ -88,9 +88,9 @@ static MERIDIAN	yyMeridian;
 static time_t	yyRelMonth;
 static time_t	yyRelSeconds;
 
-static int	yyerror(const char *s);
 static int	yylex(void);
        int	yyparse(void);
+       void	yyerror(const char *s);
 
 %}
 
@@ -99,12 +99,12 @@ static int	yylex(void);
     enum _MERIDIAN	Meridian;
 }
 
-%token	tAGO tDAY tDAYZONE tID tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
-%token	tSEC_UNIT tSNUMBER tUNUMBER tZONE tDST
+%token	tAGO tID tDST
+%token	<Number>	tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
+%token	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tZONE
+%token	<Meridian>	tMERIDIAN
 
-%type	<Number>	tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
-%type	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tZONE
-%type	<Meridian>	tMERIDIAN o_merid
+%type	<Meridian>	o_merid
 
 %%
 
@@ -502,10 +502,10 @@ static TABLE const MilitaryTable[] = {
 
 
 /* ARGSUSED */
-static int
+void
 yyerror(const char *s)
 {
-  return 0;
+    return;
 }
 
 
@@ -549,7 +549,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
     static int DaysInMonth[12] = {
 	31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     };
-    struct tm	*tm;
+    struct tm	tm;
     time_t	tod;
     time_t	Julian;
     int		i;
@@ -582,7 +582,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
 	return -1;
     Julian += tod;
     if (DSTmode == DSTon
-     || (DSTmode == DSTmaybe && (tm = localtime(&Julian)) && tm->tm_isdst))
+     || (DSTmode == DSTmaybe && localtime_r(&Julian, &tm) && tm.tm_isdst))
 	Julian -= 60 * 60;
     return Julian;
 }
@@ -591,18 +591,16 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
 static time_t
 DSTcorrect(time_t Start, time_t Future)
 {
-    struct tm	*start_tm;
-    struct tm	*future_tm;
+    struct tm	start_tm;
+    struct tm	future_tm;
     time_t	StartDay;
     time_t	FutureDay;
 
-    start_tm = localtime(&Start);
-    future_tm = localtime(&Future);
-    if (!start_tm || !future_tm)
+    if (!localtime_r(&Start, &start_tm) || !localtime_r(&Future, &future_tm))
 	return -1;
 
-    StartDay = (start_tm->tm_hour + 1) % 24;
-    FutureDay = (future_tm->tm_hour + 1) % 24;
+    StartDay = (start_tm.tm_hour + 1) % 24;
+    FutureDay = (future_tm.tm_hour + 1) % 24;
     return (Future - Start) + (StartDay - FutureDay) * 60L * 60L;
 }
 
@@ -610,13 +608,13 @@ DSTcorrect(time_t Start, time_t Future)
 static time_t
 RelativeDate(time_t Start, time_t DayOrdinal, time_t DayNumber)
 {
-    struct tm	*tm;
+    struct tm	tm;
     time_t	now;
 
     now = Start;
-    if (!(tm = localtime(&now)))
+    if (!localtime_r(&now, &tm))
 	return -1;
-    now += SECSPERDAY * ((DayNumber - tm->tm_wday + 7) % 7);
+    now += SECSPERDAY * ((DayNumber - tm.tm_wday + 7) % 7);
     now += 7 * SECSPERDAY * (DayOrdinal <= 0 ? DayOrdinal : DayOrdinal - 1);
     return DSTcorrect(Start, now);
 }
@@ -625,20 +623,20 @@ RelativeDate(time_t Start, time_t DayOrdinal, time_t DayNumber)
 static time_t
 RelativeMonth(time_t Start, time_t RelMonth)
 {
-    struct tm	*tm;
+    struct tm	tm;
     time_t	Month;
     time_t	Year;
 
     if (RelMonth == 0)
 	return 0;
-    if (!(tm = localtime(&Start)))
+    if (!localtime_r(&Start, &tm))
 	return -1;
-    Month = 12 * (tm->tm_year + 1900) + tm->tm_mon + RelMonth;
+    Month = 12 * (tm.tm_year + 1900) + tm.tm_mon + RelMonth;
     Year = Month / 12;
     Month = Month % 12 + 1;
     return DSTcorrect(Start,
-	    Convert(Month, (time_t)tm->tm_mday, Year,
-		(time_t)tm->tm_hour, (time_t)tm->tm_min, (time_t)tm->tm_sec,
+	    Convert(Month, (time_t)tm.tm_mday, Year,
+		(time_t)tm.tm_hour, (time_t)tm.tm_min, (time_t)tm.tm_sec,
 		MER24, DSTmaybe));
 }
 
@@ -651,11 +649,15 @@ LookupWord(char *buff)
     const TABLE		*tp;
     int			i;
     int			abbrev;
+    int			bufflen;
 
     /* Make it lowercase. */
-    for (p = buff; *p; p++)
+    for (p = buff; *p; p++) {
 	if (isupper((unsigned char)*p))
 	    *p = tolower((unsigned char)*p);
+    }
+    if ((bufflen = (int)(p - buff)) == 0)
+	return '\0';
 
     if (strcmp(buff, "am") == 0 || strcmp(buff, "a.m.") == 0) {
 	yylval.Meridian = MERam;
@@ -667,11 +669,11 @@ LookupWord(char *buff)
     }
 
     /* See if we have an abbreviation for a month. */
-    if (strlen(buff) == 3)
+    if (bufflen == 3)
 	abbrev = 1;
-    else if (strlen(buff) == 4 && buff[3] == '.') {
+    else if (bufflen == 4 && buff[3] == '.') {
 	abbrev = 1;
-	buff[3] = '\0';
+	buff[bufflen = 3] = '\0';
     }
     else
 	abbrev = 0;
@@ -705,7 +707,7 @@ LookupWord(char *buff)
 	}
 
     /* Strip off any plural and try the units table again. */
-    i = strlen(buff) - 1;
+    i = bufflen - 1;
     if (buff[i] == 's') {
 	buff[i] = '\0';
 	for (tp = UnitsTable; tp->name; tp++)
@@ -827,7 +829,7 @@ difftm(struct tm *a, struct tm *b)
 time_t
 get_date(char *p)
 {
-    struct tm		*tm, *gmt, gmtbuf;
+    struct tm		tm, gmt;
     time_t		Start;
     time_t		tod;
     time_t		now;
@@ -836,36 +838,19 @@ get_date(char *p)
     yyInput = p;
     (void)time (&now);
 
-    gmt = gmtime (&now);
-    if (gmt != NULL)
-    {
-	/* Make a copy, in case localtime modifies *tm (I think
-	   that comment now applies to *gmt, but I am too
-	   lazy to dig into how gmtime and locatime allocate the
-	   structures they return pointers to).  */
-	gmtbuf = *gmt;
-	gmt = &gmtbuf;
-    }
-
-    if (! (tm = localtime (&now)))
+    if (gmtime_r (&now, &gmt) == NULL)
 	return -1;
 
-    if (gmt != NULL)
-	tz = difftm (gmt, tm) / 60;
-    else
-	/* We are on a system like VMS, where the system clock is
-	   in local time and the system has no concept of timezones.
-	   Hopefully we can fake this out (for the case in which the
-	   user specifies no timezone) by just saying the timezone
-	   is zero.  */
-	tz = 0;
+    if (localtime_r (&now, &tm) == NULL)
+	return -1;
 
-    if(tm->tm_isdst)
+    tz = difftm (&gmt, &tm) / 60;
+    if (tm.tm_isdst)
 	tz += 60;
 
-    yyYear = tm->tm_year + 1900;
-    yyMonth = tm->tm_mon + 1;
-    yyDay = tm->tm_mday;
+    yyYear = tm.tm_year + 1900;
+    yyMonth = tm.tm_mon + 1;
+    yyDay = tm.tm_mday;
     yyTimezone = tz;
     yyDSTmode = DSTmaybe;
     yyHour = 0;
@@ -893,7 +878,7 @@ get_date(char *p)
     else {
 	Start = now;
 	if (!yyHaveRel)
-	    Start -= ((tm->tm_hour * 60L + tm->tm_min) * 60L) + tm->tm_sec;
+	    Start -= ((tm.tm_hour * 60L + tm.tm_min) * 60L) + tm.tm_sec;
     }
 
     Start += yyRelSeconds;

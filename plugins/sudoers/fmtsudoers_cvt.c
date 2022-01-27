@@ -194,8 +194,8 @@ sudoers_format_default_line(struct sudo_lbuf *lbuf,
 	    alias_type = UNSPEC;
 	    break;
     }
-    TAILQ_FOREACH(m, d->binding, entries) {
-	if (m != TAILQ_FIRST(d->binding))
+    TAILQ_FOREACH(m, &d->binding->members, entries) {
+	if (m != TAILQ_FIRST(&d->binding->members))
 	    sudo_lbuf_append(lbuf, ", ");
 	sudoers_format_member(lbuf, parse_tree, m, ", ", alias_type);
     }

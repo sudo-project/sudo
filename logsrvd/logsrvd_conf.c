@@ -55,7 +55,6 @@
 #include "sudo_iolog.h"
 #include "sudo_util.h"
 
-#include "log_server.pb-c.h"
 #include "logsrvd.h"
 
 #if defined(HAVE_OPENSSL)

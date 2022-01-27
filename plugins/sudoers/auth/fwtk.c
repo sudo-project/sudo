@@ -50,6 +50,13 @@ sudo_fwtk_init(struct passwd *pw, sudo_auth *auth)
     char resp[128];			/* Response from the server */
     debug_decl(sudo_fwtk_init, SUDOERS_DEBUG_AUTH);
 
+    /* Only initialize once. */
+    if (auth->data != NULL)
+	debug_return_int(AUTH_SUCCESS);
+
+    if (IS_NONINTERACTIVE(auth))
+        debug_return_int(AUTH_NONINTERACTIVE);
+
     if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
 	sudo_warnx("%s", U_("unable to read fwtk config"));
 	debug_return_int(AUTH_FATAL);
@@ -69,6 +76,7 @@ sudo_fwtk_init(struct passwd *pw, sudo_auth *auth)
 	sudo_warnx(U_("authentication server error:\n%s"), resp);
 	debug_return_int(AUTH_FATAL);
     }
+    auth->data = (void *) confp;
 
     debug_return_int(AUTH_SUCCESS);
 }

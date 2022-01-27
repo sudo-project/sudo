@@ -128,22 +128,30 @@ static struct iolog_path_escape path_escapes[] = {
 static int
 do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
 {
-    char dir[PATH_MAX], dir_out[PATH_MAX];
-    char file[PATH_MAX], file_out[PATH_MAX];
-    struct tm *timeptr;
-    time_t now;
+    char dir[PATH_MAX], dir_out[PATH_MAX] = "";
+    char file[PATH_MAX], file_out[PATH_MAX] = "";
     int error = 0;
+    struct tm tm;
+    time_t now;
+    int len;
 
     /*
      * Expand any strftime(3) escapes
-     * XXX - want to pass timeptr to expand_iolog_path
+     * XXX - want to pass tm to expand_iolog_path
      */
     time(&now);
-    timeptr = localtime(&now);
-    if (timeptr == NULL)
-	sudo_fatalx("localtime returned NULL");
-    strftime(dir_out, sizeof(dir_out), tdir_out, timeptr);
-    strftime(file_out, sizeof(file_out), tfile_out, timeptr);
+    if (localtime_r(&now, &tm) == NULL)
+	sudo_fatal("localtime_r");
+    if (tdir_out[0] != '\0') {
+	len = strftime(dir_out, sizeof(dir_out), tdir_out, &tm);
+	if (len == 0 || dir_out[sizeof(dir_out) - 1] != '\0')
+	    sudo_fatalx("dir_out: strftime overflow");
+    }
+    if (tfile_out[0] != '\0') {
+	len = strftime(file_out, sizeof(file_out), tfile_out, &tm);
+	if (len == 0 || file_out[sizeof(file_out) - 1] != '\0')
+	    sudo_fatalx("file_out: strftime overflow");
+    }
 
     if (!expand_iolog_path(dir_in, dir, sizeof(dir), &path_escapes[1], NULL))
 	sudo_fatalx("unable to expand I/O log dir");
