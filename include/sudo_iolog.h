@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -55,6 +55,11 @@
 #define IOFD_TTYOUT	4
 #define IOFD_TIMING	5
 #define IOFD_MAX	6
+
+/*
+ * Default password prompt regex.
+ */
+#define PASSPROMPT_REGEX	"[Pp]assword[: ]*"
 
 struct timing_closure {
     struct timespec delay;
@@ -139,5 +144,12 @@ void iolog_set_mode(mode_t mode);
 void iolog_set_owner(uid_t uid, uid_t gid);
 bool iolog_swapids(bool restore);
 bool iolog_mkdirs(char *path);
+
+/* iolog_filter.c */
+void *iolog_pwfilt_alloc();
+bool iolog_pwfilt_add(void *handle, const char *pattern);
+void iolog_pwfilt_free(void *handle);
+bool iolog_pwfilt_remove(void *handle, const char *pattern);
+bool iolog_pwfilt_run(void *handle, int event, const char *buf, unsigned int len, char **newbuf);
 
 #endif /* SUDO_IOLOG_H */

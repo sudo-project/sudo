@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -100,12 +100,12 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 LIBIOLOG_OBJS = host_port.lo hostcheck.lo iolog_clearerr.lo iolog_close.lo \
-		iolog_conf.lo iolog_eof.lo iolog_flush.lo iolog_gets.lo \
-		iolog_json.lo iolog_legacy.lo iolog_loginfo.lo iolog_mkdirs.lo \
-		iolog_mkdtemp.lo iolog_mkpath.lo iolog_nextid.lo \
-		iolog_open.lo iolog_openat.lo iolog_path.lo iolog_read.lo \
-		iolog_seek.lo iolog_swapids.lo iolog_timing.lo iolog_util.lo \
-		iolog_write.lo
+		iolog_conf.lo iolog_eof.lo iolog_filter.lo iolog_flush.lo \
+		iolog_gets.lo iolog_json.lo iolog_legacy.lo iolog_loginfo.lo \
+		iolog_mkdirs.lo iolog_mkdtemp.lo iolog_mkpath.lo \
+		iolog_nextid.lo iolog_open.lo iolog_openat.lo iolog_path.lo \
+		iolog_read.lo iolog_seek.lo iolog_swapids.lo iolog_timing.lo \
+		iolog_util.lo iolog_write.lo
 
 IOBJS = $(LIBIOLOG_OBJS:.lo=.i)
 
@@ -553,6 +553,20 @@ iolog_eof.i: $(srcdir)/iolog_eof.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog_eof.plog: iolog_eof.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_eof.c --i-file $< --output-file $@
+iolog_filter.lo: $(srcdir)/iolog_filter.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_filter.c
+iolog_filter.i: $(srcdir)/iolog_filter.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+iolog_filter.plog: iolog_filter.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_filter.c --i-file $< --output-file $@
 iolog_flush.lo: $(srcdir)/iolog_flush.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
