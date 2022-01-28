@@ -470,5 +470,5 @@ log_passwords
 	T_FLAG
 	"Store plaintext passwords in I/O log input"
 passprompt_regex
-	T_LIST|T_BOOL
+	T_LIST|T_SPACE|T_BOOL
 	"List of regular expressions to use when matching a password prompt"

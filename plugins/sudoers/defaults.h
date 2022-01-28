@@ -115,6 +115,8 @@ struct early_default {
 #define T_PATH		0x200
 #undef T_CHPATH
 #define T_CHPATH	0x400
+#undef T_SPACE
+#define T_SPACE		0x800
 
 /*
  * Argument to update_defaults()
