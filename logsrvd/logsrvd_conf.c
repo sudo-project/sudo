@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -148,12 +148,14 @@ static struct logsrvd_config {
 	bool compress;
 	bool flush;
 	bool gid_set;
+	bool log_passwords;
 	uid_t uid;
 	gid_t gid;
 	mode_t mode;
 	unsigned int maxseq;
 	char *iolog_dir;
 	char *iolog_file;
+	void *passprompt_regex;
     } iolog;
     struct logsrvd_config_eventlog {
 	int log_type;
@@ -213,6 +215,18 @@ const char *
 logsrvd_conf_iolog_file(void)
 {
     return logsrvd_config->iolog.iolog_file;
+}
+
+bool
+logsrvd_conf_iolog_log_passwords(void)
+{
+    return logsrvd_config->iolog.log_passwords;
+}
+
+void *
+logsrvd_conf_iolog_passprompt_regex(void)
+{
+    return logsrvd_config->iolog.passprompt_regex;
 }
 
 /* server getters */
@@ -368,6 +382,19 @@ cb_iolog_compress(struct logsrvd_config *config, const char *str, size_t offset)
 }
 
 static bool
+cb_iolog_log_passwords(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    int val;
+    debug_decl(cb_iolog_log_passwords, SUDO_DEBUG_UTIL);
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    config->iolog.log_passwords = val;
+    debug_return_bool(true);
+}
+
+static bool
 cb_iolog_flush(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int val;
@@ -447,6 +474,20 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str, size_t offset)
     }
     config->iolog.maxseq = value;
     debug_return_bool(true);
+}
+
+static bool
+cb_iolog_passprompt_regex(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    debug_decl(cb_iolog_passprompt_regex, SUDO_DEBUG_UTIL);
+
+    if (config->iolog.passprompt_regex == NULL) {
+	/* Lazy alloc of the passprompt regex handle. */
+	config->iolog.passprompt_regex = iolog_pwfilt_alloc();
+	if (config->iolog.passprompt_regex == NULL)
+	    debug_return_bool(false);
+    }
+    debug_return_bool(iolog_pwfilt_add(config->iolog.passprompt_regex, str));
 }
 
 /* Server callbacks */
@@ -1069,7 +1110,9 @@ static struct logsrvd_config_entry iolog_conf_entries[] = {
     { "iolog_user", cb_iolog_user },
     { "iolog_group", cb_iolog_group },
     { "iolog_mode", cb_iolog_mode },
+    { "log_passwords", cb_iolog_log_passwords },
     { "maxseq", cb_iolog_maxseq },
+    { "passprompt_regex", cb_iolog_passprompt_regex },
     { NULL }
 };
 
@@ -1242,7 +1285,7 @@ logsrvd_stub_close_log(int type, FILE *fp)
     return;
 }
 
-/* Set eventlog configuration settings from on logsrvd config. */
+/* Set eventlog configuration settings from logsrvd config. */
 static void
 logsrvd_conf_eventlog_setconf(struct logsrvd_config *config)
 {
@@ -1258,6 +1301,22 @@ logsrvd_conf_eventlog_setconf(struct logsrvd_config *config)
     eventlog_set_time_fmt(config->logfile.time_format);
     eventlog_set_open_log(logsrvd_stub_open_log);
     eventlog_set_close_log(logsrvd_stub_close_log);
+
+    debug_return;
+}
+
+/* Set I/O log configuration settings from logsrvd config. */
+static void
+logsrvd_conf_iolog_setconf(struct logsrvd_config *config)
+{
+    debug_decl(logsrvd_conf_iolog_setconf, SUDO_DEBUG_UTIL);
+
+    iolog_set_defaults();
+    iolog_set_compress(config->iolog.compress);
+    iolog_set_flush(config->iolog.flush);
+    iolog_set_owner(config->iolog.uid, config->iolog.gid);
+    iolog_set_mode(config->iolog.mode);
+    iolog_set_maxseq(config->iolog.maxseq);
 
     debug_return;
 }
@@ -1483,6 +1542,7 @@ logsrvd_conf_free(struct logsrvd_config *config)
     /* struct logsrvd_config_iolog */
     free(config->iolog.iolog_dir);
     free(config->iolog.iolog_file);
+    iolog_pwfilt_free(config->iolog.passprompt_regex);
 
     /* struct logsrvd_config_logfile */
     free(config->logfile.path);
@@ -1573,6 +1633,7 @@ logsrvd_conf_alloc(void)
     config->iolog.uid = ROOT_UID;
     config->iolog.gid = ROOT_GID;
     config->iolog.gid_set = false;
+    config->iolog.log_passwords = true;
 
     /* Event log defaults */
     config->eventlog.log_type = EVLOG_SYSLOG;
@@ -1618,6 +1679,12 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     struct server_address *addr;
 #endif
     debug_decl(logsrvd_conf_apply, SUDO_DEBUG_UTIL);
+
+    /* There can be multiple passprompt regular expressions. */
+    if (config->iolog.passprompt_regex == NULL) {
+	if (!cb_iolog_passprompt_regex(config, PASSPROMPT_REGEX, 0))
+	    debug_return_bool(false);
+    }
 
     /* There can be multiple addresses so we can't set a default earlier. */
     if (TAILQ_EMPTY(&config->server.addresses.addrs)) {
@@ -1738,15 +1805,12 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	break;
     }
 
-    /* Set I/O log library settings */
-    iolog_set_defaults();
-    iolog_set_compress(config->iolog.compress);
-    iolog_set_flush(config->iolog.flush);
-    iolog_set_owner(config->iolog.uid, config->iolog.gid);
-    iolog_set_mode(config->iolog.mode);
-    iolog_set_maxseq(config->iolog.maxseq);
-
-    /* Set event log config */
+    /*
+     * Update event and I/O log library config and install the new
+     * logsrvd config.  We must not fail past this point or the event
+     * and I/O log config will be inconsistent with the logsrvd config.
+     */
+    logsrvd_conf_iolog_setconf(config);
     logsrvd_conf_eventlog_setconf(config);
 
     logsrvd_conf_free(logsrvd_config);

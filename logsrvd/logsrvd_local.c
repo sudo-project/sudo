@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -523,8 +523,9 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
     struct connection_closure *closure)
 {
     const struct eventlog *evlog = closure->evlog;
+    struct ProtobufCBinaryData data = iobuf->data;
+    char tbuf[1024], *newbuf = NULL;
     const char *errstr;
-    char tbuf[1024];
     int len;
     debug_decl(store_iobuf_local, SUDO_DEBUG_UTIL);
 
@@ -538,19 +539,27 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
     /* FIXME - assumes IOFD_* matches IO_EVENT_* */
     len = snprintf(tbuf, sizeof(tbuf), "%d %lld.%09d %zu\n",
 	iofd, (long long)iobuf->delay->tv_sec, (int)iobuf->delay->tv_nsec,
-	iobuf->data.len);
+	data.len);
     if (len < 0 || len >= ssizeof(tbuf)) {
 	sudo_warnx(U_("unable to format timing buffer, length %d"), len);
 	goto bad;
     }
 
+    if (!logsrvd_conf_iolog_log_passwords()) {
+	if (!iolog_pwfilt_run(logsrvd_conf_iolog_passprompt_regex(), iofd,
+		(char *)data.data, data.len, &newbuf))
+	    goto bad;
+	if (newbuf != NULL)
+	    data.data = (uint8_t *)newbuf;
+    }
+
     /* Write to specified I/O log file. */
-    if (!iolog_write(&closure->iolog_files[iofd], iobuf->data.data,
-	    iobuf->data.len, &errstr)) {
+    if (!iolog_write(&closure->iolog_files[iofd], data.data, data.len, &errstr)) {
 	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path, iolog_fd_to_name(iofd),
 	    errstr);
 	goto bad;
     }
+    free(newbuf);
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
@@ -574,6 +583,7 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
 
     debug_return_bool(true);
 bad:
+    free(newbuf);
     if (closure->errstr == NULL)
 	closure->errstr = _("error writing IoBuffer");
     debug_return_bool(false);
