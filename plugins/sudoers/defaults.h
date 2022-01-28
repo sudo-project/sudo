@@ -137,6 +137,7 @@ bool set_default(const char *var, const char *val, int op, const char *file, int
 bool update_defaults(struct sudoers_parse_tree *parse_tree, struct defaults_list *defs, int what, bool quiet);
 bool check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet);
 bool append_default(const char *var, const char *val, int op, char *source, struct defaults_list *defs);
+bool cb_passprompt_regex(const union sudo_defs_val *sd_un, int op);
 
 extern struct sudo_defs_types sudo_defs_table[];
 

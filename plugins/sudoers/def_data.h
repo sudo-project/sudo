@@ -300,6 +300,10 @@
 #define def_rlimit_rss          (sudo_defs_table[I_RLIMIT_RSS].sd_un.str)
 #define I_RLIMIT_STACK          149
 #define def_rlimit_stack        (sudo_defs_table[I_RLIMIT_STACK].sd_un.str)
+#define I_LOG_PASSWORDS         150
+#define def_log_passwords       (sudo_defs_table[I_LOG_PASSWORDS].sd_un.flag)
+#define I_PASSPROMPT_REGEX      151
+#define def_passprompt_regex    (sudo_defs_table[I_PASSPROMPT_REGEX].sd_un.list)
 
 enum def_tuple {
     never,

@@ -36,10 +36,12 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <regex.h>
 #include <syslog.h>
 
 #include "sudoers.h"
 #include "sudo_eventlog.h"
+#include "sudo_iolog.h"
 #include <gram.h>
 
 static struct early_default early_defaults[] = {
@@ -454,6 +456,24 @@ free_defs_val(int type, union sudo_defs_val *sd_un)
     memset(sd_un, 0, sizeof(*sd_un));
 }
 
+static bool
+init_passprompt_regex(void)
+{
+    struct list_member *lm;
+    debug_decl(init_passprompt_regex, SUDOERS_DEBUG_DEFAULTS);
+
+    /* Add initial defaults setting. */
+    lm = calloc(1, sizeof(struct list_member));
+    if (lm == NULL || (lm->value = strdup(PASSPROMPT_REGEX)) == NULL) {
+	free(lm);
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
+    SLIST_INSERT_HEAD(&def_passprompt_regex, lm, entries);
+
+    debug_return_bool(true);
+}
+
 /*
  * Set default options to compiled-in values.
  * Any of these may be overridden at runtime by a "Defaults" file.
@@ -596,6 +616,7 @@ init_defaults(void)
 #ifdef HAVE_ZLIB_H
     def_compress_io = true;
 #endif
+    def_log_passwords = true;
     def_log_server_timeout = 30;
     def_log_server_verify = true;
     def_log_server_keepalive = true;
@@ -657,6 +678,10 @@ init_defaults(void)
 
     /* Init eventlog config. */
     init_eventlog_config();
+
+    /* Initial iolog password prompt regex. */
+    if (!init_passprompt_regex())
+	debug_return_bool(false);
 
     firsttime = false;
 
@@ -1251,4 +1276,30 @@ oom:
 	free(def);
     }
     debug_return_bool(false);
+}
+
+bool
+cb_passprompt_regex(const union sudo_defs_val *sd_un, int op)
+{
+    struct list_member *lm;
+    int errcode;
+    char errbuf[1024];
+    regex_t re;
+    debug_decl(cb_passprompt_regex, SUDOERS_DEBUG_DEFAULTS);
+
+    /* If adding one or more regexps, validate them with regcomp(). */
+    if (op == '+' || op == true) {
+	SLIST_FOREACH(lm, &sd_un->list, entries) {
+	    errcode = regcomp(&re, lm->value, REG_EXTENDED|REG_NOSUB);
+	    if (errcode != 0) {
+		regerror(errcode, &re, errbuf, sizeof(errbuf));
+		sudo_warnx(U_("invalid regular expression \"%s\": %s"),
+		    lm->value, errbuf);
+		debug_return_bool(false);
+	    }
+	    regfree(&re);
+	}
+    }
+
+    debug_return_bool(true);
 }

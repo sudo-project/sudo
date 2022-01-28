@@ -1658,6 +1658,7 @@ set_callbacks(void)
     sudo_defs_table[I_MAILFROM].callback = cb_mailfrom;
     sudo_defs_table[I_MAILTO].callback = cb_mailto;
     sudo_defs_table[I_MAILSUB].callback = cb_mailsub;
+    sudo_defs_table[I_PASSPROMPT_REGEX].callback = cb_passprompt_regex;
 
     debug_return;
 }

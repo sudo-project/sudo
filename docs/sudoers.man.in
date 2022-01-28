@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "January 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "January 27, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2660,6 +2660,43 @@ This flag is
 \fIoff\fR
 by default.
 .TP 18n
+log_passwords
+Most programs that require a user's password will disable echo before
+reading the password to avoid displaying the plaintext password on
+the screen.
+However, if terminal input is being logged (see
+\fIlog_input\fR),
+the password will still be present in the I/O log.
+If the
+\fIlog_passwords\fR
+option is disabled,
+\fBsudoers\fR
+will attempt to prevent passwords from being logged.
+It does this by using the regular expressions in
+\fIpassprompt_regex\fR
+to match a password prompt in the terminal output buffer.
+When a match is found, input characters in the I/O log will be replaced with
+\(oq*\(cq
+until either a line feed or carriage return is found in the terminal input
+or a new terminal output buffer is received.
+If, however, a program displays characters as the user types
+(such as
+\fBsudo\fR
+when
+\fIpwfeedback\fR
+is set), only the
+first character of the password will be replaced in the I/O log.
+This option has no effect unless
+\fIlog_input\fR
+and
+\fIlog_input\fR
+are also set.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.9.10 or higher.
+.TP 18n
 fqdn
 Set this flag if you want to put fully qualified host names in the
 \fIsudoers\fR
@@ -5261,6 +5298,17 @@ flag (I/O logging enabled) or the
 flag (I/O logging disabled) is set.
 .sp
 This setting is only supported by version 1.9.0 or higher.
+.TP 18n
+passprompt_regex
+A list of POSIX extended regular expressions used to
+match password prompts in the terminal output.
+This option is only used when
+\fIlog_passwords\fR
+has been disabled.
+The default value is
+\(lq[Pp]assword[: ]*\(rq
+.sp
+This setting is only supported by version 1.9.10 or higher.
 .SH "GROUP PROVIDER PLUGINS"
 The
 \fBsudoers\fR

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -575,6 +575,7 @@ bad:
 /*
  * Convert struct list_members to a comma-separated string with
  * the given variable name.
+ * XXX - escape commas in member values
  */
 static char *
 serialize_list(const char *varname, struct list_members *members)
@@ -638,7 +639,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(68, sizeof(char *));
+    command_info = calloc(70, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -675,6 +676,16 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if (def_iolog_flush) {
 	    if ((command_info[info_len++] = strdup("iolog_flush=true")) == NULL)
 		goto oom;
+	}
+	if ((command_info[info_len++] = sudo_new_key_val("log_passwords",
+		def_log_passwords ? "true" : "false")) == NULL)
+	    goto oom;
+	if (!SLIST_EMPTY(&def_passprompt_regex)) {
+	    char *passprompt_regex =
+		serialize_list("passprompt_regex", &def_passprompt_regex);
+	    if (passprompt_regex == NULL)
+		goto oom;
+	    command_info[info_len++] = passprompt_regex;
 	}
 	if (def_maxseq != NULL) {
 	    if ((command_info[info_len++] = sudo_new_key_val("maxseq", def_maxseq)) == NULL)

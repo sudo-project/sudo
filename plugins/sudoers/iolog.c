@@ -69,8 +69,10 @@ static struct sudoers_io_operations {
 
 static struct log_details iolog_details;
 static bool warned = false;
+static bool log_passwords = true;
 static int iolog_dir_fd = -1;
 static struct timespec last_time;
+static void *passprompt_regex_handle;
 static void sudoers_io_setops(void);
 
 /* sudoers_io is declared at the end of this file. */
@@ -209,6 +211,7 @@ free_iolog_details(void)
 
 /*
  * Convert a comma-separated list to a string list.
+ * XXX - handle escaped commas
  */
 static struct sudoers_str_list *
 deserialize_stringlist(const char *s)
@@ -241,6 +244,39 @@ deserialize_stringlist(const char *s)
 
 bad:
     str_list_free(strlist);
+    debug_return_ptr(NULL);
+}
+
+/*
+ * Set passprompt regex filter based on a comma-separated string.
+ * Returns a passprompt regex handle pointer.
+ */
+static void *
+set_passprompt_regex(const char *cstr)
+{
+    void *handle;
+    char *cp, *last, *str;
+    debug_decl(set_passprompt_regex, SUDOERS_DEBUG_UTIL);
+
+    handle = iolog_pwfilt_alloc();
+    str = strdup(cstr);
+    if (handle == NULL || str == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
+
+    /* XXX - handle escaped commas */
+    for ((cp = strtok_r(str, ",", &last)); cp != NULL;
+	    (cp = strtok_r(NULL, ",", &last))) {
+	if (!iolog_pwfilt_add(handle, cp))
+	    goto bad;
+    }
+
+    free(str);
+    debug_return_ptr(handle);
+bad:
+    free(str);
+    iolog_pwfilt_free(handle);
     debug_return_ptr(NULL);
 }
 
@@ -441,6 +477,16 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	    }
 	    break;
 	case 'l':
+	    if (strncmp(*cur, "log_passwords=", sizeof("log_passwords=") - 1) == 0) {
+		int val = sudo_strtobool(*cur + sizeof("log_passwords=") - 1);
+		if (val != -1) {
+		    log_passwords = val;
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_WARN,
+			"%s: unable to parse %s", __func__, *cur);
+		}
+		continue;
+	    }
 	    if (strncmp(*cur, "log_servers=", sizeof("log_servers=") - 1) == 0) {
 		details->log_servers =
 		    deserialize_stringlist(*cur + sizeof("log_servers=") - 1);
@@ -504,6 +550,14 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 		sd_un.str = *cur + sizeof("maxseq=") - 1;
 		cb_maxseq(&sd_un, true);
 		continue;
+	    }
+	    break;
+	case 'p':
+	    if (strncmp(*cur, "passprompt_regex=", sizeof("passprompt_regex=") - 1) == 0) {
+		passprompt_regex_handle =
+		    set_passprompt_regex(*cur + sizeof("passprompt_regex=") - 1);
+		if (passprompt_regex_handle == NULL)
+		    debug_return_int(-1);
 	    }
 	    break;
 	case 'r':
@@ -852,6 +906,8 @@ sudoers_io_close(int exit_status, int error)
     free_iolog_details();
     sudo_freepwcache();
     sudo_freegrcache();
+    iolog_pwfilt_free(passprompt_regex_handle);
+    passprompt_regex_handle = NULL;
 
     /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
     sudoers_debug_deregister();
@@ -879,6 +935,7 @@ sudoers_io_log_local(int event, const char *buf, unsigned int len,
 {
     struct iolog_file *iol;
     char tbuf[1024];
+    char *newbuf = NULL;
     int ret = -1;
     debug_decl(sudoers_io_log_local, SUDOERS_DEBUG_PLUGIN);
 
@@ -895,8 +952,13 @@ sudoers_io_log_local(int event, const char *buf, unsigned int len,
 	debug_return_int(-1);
     }
 
+    if (!log_passwords && passprompt_regex_handle != NULL) {
+	if (!iolog_pwfilt_run(passprompt_regex_handle, event, buf, len, &newbuf))
+	    debug_return_int(-1);
+    }
+
     /* Write I/O log file entry. */
-    if (iolog_write(iol, buf, len, errstr) == -1)
+    if (iolog_write(iol, newbuf ? newbuf : buf, len, errstr) == -1)
 	goto done;
 
     /* Write timing file entry. */
@@ -914,6 +976,7 @@ sudoers_io_log_local(int event, const char *buf, unsigned int len,
     ret = 1;
 
 done:
+    free(newbuf);
     debug_return_int(ret);
 }
 
