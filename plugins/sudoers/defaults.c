@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2007-2020
+ * Copyright (c) 1999-2005, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -363,13 +363,13 @@ is_early_default(const char *name)
 }
 
 static bool
-run_callback(struct sudo_defs_types *def)
+run_callback(struct sudo_defs_types *def, int op)
 {
     debug_decl(run_callback, SUDOERS_DEBUG_DEFAULTS);
 
     if (def->callback == NULL)
 	debug_return_bool(true);
-    debug_return_bool(def->callback(&def->sd_un));
+    debug_return_bool(def->callback(&def->sd_un, op));
 }
 
 /*
@@ -391,7 +391,7 @@ set_default(const char *var, const char *val, int op, const char *file,
 	/* Set parsed value in sudo_defs_table and run callback (if any). */
 	struct sudo_defs_types *def = &sudo_defs_table[idx];
 	if (parse_default_entry(def, val, op, file, line, column, quiet))
-	    debug_return_bool(run_callback(def));
+	    debug_return_bool(run_callback(def, op));
     }
     debug_return_bool(false);
 }
@@ -431,7 +431,7 @@ run_early_defaults(void)
 
     for (early = early_defaults; early->idx != -1; early++) {
 	if (early->run_callback) {
-	    if (!run_callback(&sudo_defs_table[early->idx]))
+	    if (!run_callback(&sudo_defs_table[early->idx], true))
 		ret = false;
 	    early->run_callback = false;
 	}

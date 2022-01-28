@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -811,35 +811,35 @@ iolog_nextid(char *iolog_dir, char sessid[7])
 
 /* STUB */
 bool
-cb_maxseq(const union sudo_defs_val *sd_un)
+cb_maxseq(const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_user(const union sudo_defs_val *sd_un)
+cb_iolog_user(const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_group(const union sudo_defs_val *sd_un)
+cb_iolog_group(const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_mode(const union sudo_defs_val *sd_un)
+cb_iolog_mode(const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_group_plugin(const union sudo_defs_val *sd_un)
+cb_group_plugin(const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }

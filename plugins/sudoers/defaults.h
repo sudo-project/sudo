@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2008-2020
+ * Copyright (c) 1999-2005, 2008-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -66,7 +66,7 @@ struct sudo_defs_types {
     int type;
     char *desc;
     struct def_values *values;
-    bool (*callback)(const union sudo_defs_val *);
+    bool (*callback)(const union sudo_defs_val *, int op);
     union sudo_defs_val sd_un;
 };
 

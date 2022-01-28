@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2020
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -374,10 +374,10 @@ char *get_timestr(time_t, int);
 bool get_boottime(struct timespec *);
 
 /* iolog.c */
-bool cb_maxseq(const union sudo_defs_val *sd_un);
-bool cb_iolog_user(const union sudo_defs_val *sd_un);
-bool cb_iolog_group(const union sudo_defs_val *sd_un);
-bool cb_iolog_mode(const union sudo_defs_val *sd_un);
+bool cb_maxseq(const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_user(const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_group(const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_mode(const union sudo_defs_val *sd_un, int op);
 
 /* iolog_path_escapes.c */
 struct iolog_path_escape;
@@ -440,7 +440,7 @@ int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
-bool cb_group_plugin(const union sudo_defs_val *sd_un);
+bool cb_group_plugin(const union sudo_defs_val *sd_un, int op);
 extern const char *path_plugin_dir;
 
 /* editor.c */

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2012-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2012-2016, 2020, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -142,7 +142,7 @@ sudoers_warn_setlocale(bool restore, int *cookie)
  * Callback for sudoers_locale sudoers setting.
  */
 bool
-sudoers_locale_callback(const union sudo_defs_val *sd_un)
+sudoers_locale_callback(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(sudoers_locale_callback, SUDOERS_DEBUG_UTIL);
 

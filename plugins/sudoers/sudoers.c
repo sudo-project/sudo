@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1254,7 +1254,7 @@ resolve_host(const char *host, char **longp, char **shortp)
  * Sets user_host, user_shost, user_runhost and user_srunhost.
  */
 static bool
-cb_fqdn(const union sudo_defs_val *sd_un)
+cb_fqdn(const union sudo_defs_val *sd_un, int op)
 {
     bool remote;
     int rc;
@@ -1392,7 +1392,7 @@ set_runasgr(const char *group, bool quiet)
  * Callback for runas_default sudoers setting.
  */
 static bool
-cb_runas_default(const union sudo_defs_val *sd_un)
+cb_runas_default(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_runas_default, SUDOERS_DEBUG_PLUGIN);
 
@@ -1406,7 +1406,7 @@ cb_runas_default(const union sudo_defs_val *sd_un)
  * Callback for tty_tickets sudoers setting.
  */
 static bool
-cb_tty_tickets(const union sudo_defs_val *sd_un)
+cb_tty_tickets(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_tty_tickets, SUDOERS_DEBUG_PLUGIN);
 
@@ -1422,7 +1422,7 @@ cb_tty_tickets(const union sudo_defs_val *sd_un)
  * Callback for umask sudoers setting.
  */
 static bool
-cb_umask(const union sudo_defs_val *sd_un)
+cb_umask(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_umask, SUDOERS_DEBUG_PLUGIN);
 
@@ -1436,7 +1436,7 @@ cb_umask(const union sudo_defs_val *sd_un)
  * Callback for runchroot sudoers setting.
  */
 static bool
-cb_runchroot(const union sudo_defs_val *sd_un)
+cb_runchroot(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_runchroot, SUDOERS_DEBUG_PLUGIN);
 
@@ -1453,7 +1453,7 @@ cb_runchroot(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_logfile(const union sudo_defs_val *sd_un)
+cb_logfile(const union sudo_defs_val *sd_un, int op)
 {
     int logtype = def_syslog ? EVLOG_SYSLOG : EVLOG_NONE;
     debug_decl(cb_logfile, SUDOERS_DEBUG_PLUGIN);
@@ -1467,7 +1467,7 @@ cb_logfile(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_log_format(const union sudo_defs_val *sd_un)
+cb_log_format(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_log_format, SUDOERS_DEBUG_PLUGIN);
 
@@ -1477,7 +1477,7 @@ cb_log_format(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_syslog(const union sudo_defs_val *sd_un)
+cb_syslog(const union sudo_defs_val *sd_un, int op)
 {
     int logtype = def_logfile ? EVLOG_FILE : EVLOG_NONE;
     debug_decl(cb_syslog, SUDOERS_DEBUG_PLUGIN);
@@ -1490,7 +1490,7 @@ cb_syslog(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_syslog_goodpri(const union sudo_defs_val *sd_un)
+cb_syslog_goodpri(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_goodpri, SUDOERS_DEBUG_PLUGIN);
 
@@ -1500,7 +1500,7 @@ cb_syslog_goodpri(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_syslog_badpri(const union sudo_defs_val *sd_un)
+cb_syslog_badpri(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_badpri, SUDOERS_DEBUG_PLUGIN);
 
@@ -1511,7 +1511,7 @@ cb_syslog_badpri(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_syslog_maxlen(const union sudo_defs_val *sd_un)
+cb_syslog_maxlen(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
 
@@ -1521,7 +1521,7 @@ cb_syslog_maxlen(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_loglinelen(const union sudo_defs_val *sd_un)
+cb_loglinelen(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_loglinelen, SUDOERS_DEBUG_PLUGIN);
 
@@ -1531,7 +1531,7 @@ cb_loglinelen(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_log_year(const union sudo_defs_val *sd_un)
+cb_log_year(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
 
@@ -1541,7 +1541,7 @@ cb_log_year(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_log_host(const union sudo_defs_val *sd_un)
+cb_log_host(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
 
@@ -1551,7 +1551,7 @@ cb_log_host(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_mailerpath(const union sudo_defs_val *sd_un)
+cb_mailerpath(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailerpath, SUDOERS_DEBUG_PLUGIN);
 
@@ -1561,7 +1561,7 @@ cb_mailerpath(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_mailerflags(const union sudo_defs_val *sd_un)
+cb_mailerflags(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailerflags, SUDOERS_DEBUG_PLUGIN);
 
@@ -1571,7 +1571,7 @@ cb_mailerflags(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_mailfrom(const union sudo_defs_val *sd_un)
+cb_mailfrom(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailfrom, SUDOERS_DEBUG_PLUGIN);
 
@@ -1581,7 +1581,7 @@ cb_mailfrom(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_mailto(const union sudo_defs_val *sd_un)
+cb_mailto(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailto, SUDOERS_DEBUG_PLUGIN);
 
@@ -1591,7 +1591,7 @@ cb_mailto(const union sudo_defs_val *sd_un)
 }
 
 static bool
-cb_mailsub(const union sudo_defs_val *sd_un)
+cb_mailsub(const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailsub, SUDOERS_DEBUG_PLUGIN);
 

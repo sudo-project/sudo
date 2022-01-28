@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2018
+ * Copyright (c) 1996, 1998-2005, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -64,7 +64,7 @@ static void dump_sudoers(struct sudo_lbuf *lbuf);
 static void usage(void) __attribute__((__noreturn__));
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
-static bool cb_runas_default(const union sudo_defs_val *);
+static bool cb_runas_default(const union sudo_defs_val *, int);
 static int testsudoers_error(const char *msg);
 static int testsudoers_output(const char *buf);
 
@@ -415,7 +415,7 @@ set_runasgr(const char *group)
  * Callback for runas_default sudoers setting.
  */
 static bool
-cb_runas_default(const union sudo_defs_val *sd_un)
+cb_runas_default(const union sudo_defs_val *sd_un, int op)
 {
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
