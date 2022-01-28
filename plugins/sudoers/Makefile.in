@@ -158,8 +158,8 @@ PROGS = sudoers.la visudo sudoreplay cvtsudoers testsudoers
 # Regression tests
 TEST_PROGS = check_addr check_base64 check_digest check_editor \
 	     check_env_pattern check_exptilde check_fill check_gentime \
-	     check_hexchar check_iolog_plugin check_starttime \
-	     check_unesc @SUDOERS_TEST_PROGS@
+	     check_hexchar check_iolog_plugin check_serialize_list \
+	     check_starttime check_unesc @SUDOERS_TEST_PROGS@
 
 # Fuzzers
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
@@ -185,9 +185,9 @@ SUDOERS_OBJS = $(AUTH_OBJS) audit.lo boottime.lo check.lo editor.lo env.lo \
 	       sudoers_hooks.lo env_pattern.lo file.lo find_path.lo \
 	       fmtsudoers.lo gc.lo goodpath.lo group_plugin.lo interfaces.lo \
 	       iolog.lo iolog_path_escapes.lo locale.lo log_client.lo \
-	       logging.lo parse.lo policy.lo prompt.lo set_perms.lo \
-	       starttime.lo strlcpy_unesc.lo strvec_join.lo sudo_nss.lo \
-	       sudoers.lo timestamp.lo @SUDOERS_OBJS@
+	       logging.lo parse.lo policy.lo prompt.lo serialize_list.lo \
+	       set_perms.lo starttime.lo strlcpy_unesc.lo strvec_join.lo \
+	       sudo_nss.lo sudoers.lo timestamp.lo unesc_str.lo @SUDOERS_OBJS@
 
 SUDOERS_IOBJS = $(SUDOERS_OBJS:.lo=.i)
 
@@ -241,17 +241,22 @@ CHECK_HEXCHAR_OBJS = check_hexchar.o hexchar.lo sudoers_debug.lo
 
 CHECK_IOLOG_PLUGIN_OBJS = check_iolog_plugin.o iolog.lo log_client.lo \
 			  locale.lo pwutil.lo pwutil_impl.lo redblack.lo \
-			  strlist.lo sudoers_debug.lo
+			  strlist.lo sudoers_debug.lo unesc_str.lo
 
 CHECK_SYMBOLS_OBJS = check_symbols.o
 
 CHECK_STARTTIME_OBJS = check_starttime.o starttime.lo sudoers_debug.lo
 
-CHECK_UNESC_OBJS = check_unesc.o strlcpy_unesc.lo strvec_join.lo sudoers_debug.lo
+CHECK_UNESC_OBJS = check_unesc.o strlcpy_unesc.lo strvec_join.lo \
+		   sudoers_debug.lo unesc_str.lo
+
+CHECK_SERIALIZE_LIST_OBJS = check_serialize_list.lo serialize_list.lo \
+			    sudoers_debug.lo
 
 FUZZ_POLICY_OBJS = editor.lo env.lo env_pattern.lo fuzz_policy.o fuzz_stubs.o \
 		   gc.lo iolog_path_escapes.lo locale.lo policy.lo \
-		   strlcpy_unesc.lo strvec_join.lo sudoers.lo sudoers_hooks.lo
+		   serialize_list.lo strlcpy_unesc.lo strvec_join.lo \
+		   sudoers.lo sudoers_hooks.lo
 
 FUZZ_POLICY_CORPUS = $(srcdir)/regress/corpus/seed/policy/policy.*
 
@@ -385,6 +390,9 @@ check_hexchar: $(CHECK_HEXCHAR_OBJS) $(LIBUTIL)
 
 check_iolog_plugin: $(CHECK_IOLOG_PLUGIN_OBJS) $(LIBUTIL) $(LIBIOLOG) $(LIBLOGSRV)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PLUGIN_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBIOLOG) $(LIBLOGSRV) @LIBTLS@
+
+check_serialize_list: $(CHECK_SERIALIZE_LIST_OBJS) $(LIBUTIL)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_SERIALIZE_LIST_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_starttime: $(CHECK_STARTTIME_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_STARTTIME_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
@@ -659,6 +667,7 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 	    ./check_hexchar || rval=`expr $$rval + $$?`; \
 	    mkdir -p regress/iolog_plugin; \
 	    ./check_iolog_plugin regress/iolog_plugin/iolog || rval=`expr $$rval + $$?`; \
+	    ./check_serialize_list || rval=`expr $$rval + $$?`; \
 	    ./check_starttime || rval=`expr $$rval + $$?`; \
 	    ./check_unesc || rval=`expr $$rval + $$?`; \
 	    if test -f check_symbols; then \
@@ -1259,6 +1268,34 @@ check_iolog_plugin.i: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_iolog_plugin.plog: check_iolog_plugin.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c --i-file $< --output-file $@
+check_serialize_list.lo: \
+                         $(srcdir)/regress/serialize_list/check_serialize_list.c \
+                         $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+                         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                         $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
+                         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                         $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                         $(srcdir)/logging.h $(srcdir)/parse.h \
+                         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                         $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/serialize_list/check_serialize_list.c
+check_serialize_list.i: \
+                         $(srcdir)/regress/serialize_list/check_serialize_list.c \
+                         $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+                         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                         $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
+                         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                         $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                         $(srcdir)/logging.h $(srcdir)/parse.h \
+                         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                         $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_serialize_list.plog: check_serialize_list.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/serialize_list/check_serialize_list.c --i-file $< --output-file $@
 check_starttime.o: $(srcdir)/regress/starttime/check_starttime.c \
                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                    $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
@@ -2671,6 +2708,30 @@ securid5.i: $(authdir)/securid5.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 securid5.plog: securid5.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/securid5.c --i-file $< --output-file $@
+serialize_list.lo: $(srcdir)/serialize_list.c $(devdir)/def_data.h \
+                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                   $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                   $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                   $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/serialize_list.c
+serialize_list.i: $(srcdir)/serialize_list.c $(devdir)/def_data.h \
+                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                   $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                   $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                   $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+serialize_list.plog: serialize_list.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/serialize_list.c --i-file $< --output-file $@
 set_perms.lo: $(srcdir)/set_perms.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -3213,6 +3274,12 @@ tsgetgrpw.i: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 tsgetgrpw.plog: tsgetgrpw.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/tsgetgrpw.c --i-file $< --output-file $@
+unesc_str.lo: $(srcdir)/unesc_str.c 
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/unesc_str.c
+unesc_str.i: $(srcdir)/unesc_str.c 
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+unesc_str.plog: unesc_str.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/unesc_str.c --i-file $< --output-file $@
 visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

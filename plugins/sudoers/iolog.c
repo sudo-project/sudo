@@ -211,7 +211,6 @@ free_iolog_details(void)
 
 /*
  * Convert a comma-separated list to a string list.
- * XXX - handle escaped commas
  */
 static struct sudoers_str_list *
 deserialize_stringlist(const char *s)
@@ -235,6 +234,7 @@ deserialize_stringlist(const char *s)
 	    free(str);
 	    goto bad;
 	}
+	unescape_string(str->str);
 	STAILQ_INSERT_TAIL(strlist, str, entries);
     }
     if (STAILQ_EMPTY(strlist))
@@ -265,9 +265,9 @@ set_passprompt_regex(const char *cstr)
 	goto bad;
     }
 
-    /* XXX - handle escaped commas */
     for ((cp = strtok_r(str, ",", &last)); cp != NULL;
 	    (cp = strtok_r(NULL, ",", &last))) {
+	unescape_string(cp);
 	if (!iolog_pwfilt_add(handle, cp))
 	    goto bad;
     }

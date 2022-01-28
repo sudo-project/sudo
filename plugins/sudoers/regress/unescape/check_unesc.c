@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,10 @@ struct test_data {
     char *result;
     size_t result_len;
     size_t bufsize;
-} test_data[] = {
+};
+
+/* strlcpy_unescape() does not unescape whitespace */
+static struct test_data strlcpy_unescape_test_data[] = {
     { "\\\0ABC", "\\", 1, 2 },			/* 1 */
     { "\\ \\;", "\\ ;", 3, 4 },			/* 2 */
     { "\\\t\\;", "\\\t;", 3, 4 },		/* 3 */
@@ -40,6 +43,20 @@ struct test_data {
     { "foo bar", "f", 7, 2 },			/* 6 */
     { "foo bar", "", 7, 1 },			/* 7 */
     { "foo bar", NULL, 7, 0 },			/* 8 */
+    { NULL }
+};
+
+/* unescape_string() _does_ unescape whitespace */
+static struct test_data unescape_string_test_data[] = {
+    { "foo\\ bar", "foo bar", 7, 8 },		/* 1 */
+    { "foo\\,bar", "foo,bar", 7, 8 },		/* 2 */
+    { "baz \\", "baz \\", 5, 5 },		/* 3 */
+    { "\\foo", "foo", 3, 4 },			/* 4 */
+    { "var=aaa,b\\,b", "var=aaa,b,b", 11, 12 },	/* 5 */
+    { "\\a\\ b\\ c\\\\", "a b c\\", 6, 10 },	/* 6 */
+    { "\\", "\\", 1, 1 },			/* 7 */
+    { "foo", "foo", 3, 3 },			/* 8 */
+    { "", "", 0, 0 },				/* 9 */
     { NULL }
 };
 
@@ -54,7 +71,7 @@ test_strlcpy_unescape(int *ntests_out, int *errors_out)
     char buf[1024];
     size_t len;
 
-    for (td = test_data; td->input != NULL; td++) {
+    for (td = strlcpy_unescape_test_data; td->input != NULL; td++) {
 	ntests++;
 	memset(buf, 'A', sizeof(buf));
 	len = strlcpy_unescape(buf, td->input, td->bufsize);
@@ -77,6 +94,31 @@ test_strlcpy_unescape(int *ntests_out, int *errors_out)
 	if (buf[td->bufsize] != 'A') {
 	    sudo_warnx("%d: \"%s\": wrote past end of buffer at %zu (0x%x)",
 		ntests, td->input, td->bufsize, buf[td->bufsize]);
+	    errors++;
+	}
+    }
+
+    *ntests_out = ntests;
+    *errors_out = errors;
+}
+
+static void
+test_unescape_string(int *ntests_out, int *errors_out)
+{
+    int ntests = *ntests_out;
+    int errors = *errors_out;
+    struct test_data *td;
+    char buf[1024];
+
+    for (td = unescape_string_test_data; td->input != NULL; td++) {
+	ntests++;
+	memset(buf, 'A', sizeof(buf));
+	memcpy(buf, td->input, td->bufsize);
+	buf[td->bufsize] = '\0';
+	unescape_string(buf);
+	if (strcmp(td->result, buf) != 0) {
+	    sudo_warnx("%d: \"%s\": got \"%s\", expected \"%s\"",
+		ntests, td->input, buf, td->result);
 	    errors++;
 	}
     }
@@ -131,6 +173,9 @@ main(int argc, char *argv[])
 
     /* strlcpy_unescape tests */
     test_strlcpy_unescape(&ntests, &errors);
+
+    /* unescape_string test */
+    test_unescape_string(&ntests, &errors);
 
     /* strvec_join test */
     test_strvec_join(' ', &ntests, &errors);

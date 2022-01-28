@@ -467,4 +467,10 @@ size_t strlcpy_unescape(char *dst, const char *src, size_t size);
 /* strvec_join.c */
 char *strvec_join(char *const argv[], char sep, size_t (*cpy)(char *, const char *, size_t));
 
+/* unesc_str.c */
+void unescape_string(char *str);
+
+/* serialize_list.c */
+char *serialize_list(const char *varname, struct list_members *members);
+
 #endif /* SUDOERS_SUDOERS_H */
