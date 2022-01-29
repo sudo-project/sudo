@@ -1169,14 +1169,21 @@ logsrvd_conf_parse(struct logsrvd_config *config, FILE *fp, const char *path)
 
 	/* New section */
 	if (line[0] == '[') {
-	    char *section_name = line + 1;
-	    char *cp = strchr(section_name, ']');
-	    if (cp == NULL) {
+	    char *cp, *section_name = line + 1;
+
+	    if ((ep = strchr(section_name, ']')) == NULL) {
 		sudo_warnx(U_("%s:%d unmatched '[': %s"),
 		    path, lineno, line);
 		goto done;
 	    }
-	    *cp = '\0';
+	    for (cp = ep + 1; *cp != '\0'; cp++) {
+		if (!isspace((unsigned char)*cp)) {
+		    sudo_warnx(U_("%s:%d garbage after ']': %s"),
+			path, lineno, line);
+		    goto done;
+		}
+	    }
+	    *ep = '\0';
 	    for (conf_section = logsrvd_config_sections; conf_section->name != NULL;
 		    conf_section++) {
 		if (strcasecmp(section_name, conf_section->name) == 0)
