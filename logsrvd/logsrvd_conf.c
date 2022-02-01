@@ -579,11 +579,11 @@ cb_server_listen_address(struct logsrvd_config *config, const char *str, size_t 
 static bool
 cb_server_timeout(struct logsrvd_config *config, const char *str, size_t offset)
 {
-    int timeout;
-    const char* errstr;
+    time_t timeout;
+    const char *errstr;
     debug_decl(cb_server_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -784,11 +784,11 @@ cb_relay_host(struct logsrvd_config *config, const char *str, size_t offset)
 static bool
 cb_relay_timeout(struct logsrvd_config *config, const char *str, size_t offset)
 {
-    int timeout;
-    const char* errstr;
+    time_t timeout;
+    const char *errstr;
     debug_decl(cb_relay_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -800,11 +800,11 @@ cb_relay_timeout(struct logsrvd_config *config, const char *str, size_t offset)
 static bool
 cb_relay_connect_timeout(struct logsrvd_config *config, const char *str, size_t offset)
 {
-    int timeout;
-    const char* errstr;
+    time_t timeout;
+    const char *errstr;
     debug_decl(cb_relay_connect_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
