@@ -831,6 +831,22 @@ cb_relay_dir(struct logsrvd_config *config, const char *str, size_t offset)
 }
 
 static bool
+cb_retry_interval(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    time_t interval;
+    const char *errstr;
+    debug_decl(cb_retry_interval, SUDO_DEBUG_UTIL);
+
+    interval = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    if (errstr != NULL)
+	debug_return_bool(false);
+
+    config->relay.retry_interval = interval;
+
+    debug_return_bool(true);
+}
+
+static bool
 cb_relay_store_first(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int val;
@@ -1087,6 +1103,7 @@ static struct logsrvd_config_entry relay_conf_entries[] = {
     { "timeout", cb_relay_timeout },
     { "connect_timeout", cb_relay_connect_timeout },
     { "relay_dir", cb_relay_dir },
+    { "retry_interval", cb_retry_interval },
     { "store_first", cb_relay_store_first },
     { "tcp_keepalive", cb_relay_keepalive },
 #if defined(HAVE_OPENSSL)
