@@ -822,10 +822,16 @@ defaults_check_conflict(struct defaults *def,
 		}
 		debug_return_int(CONFLICT_RESOLVED);
 	    }
-	    log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
-		def->file, def->line, def->column, def->var,
-		d->file, d->line, d->column);
-	    debug_return_int(CONFLICT_UNRESOLVED);
+	    /*
+	     * If the value doesn't match but the Defaults name did we don't
+	     * consider that a conflict.
+	     */
+	    if (!mergeable) {
+		log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
+		    def->file, def->line, def->column, def->var,
+		    d->file, d->line, d->column);
+		debug_return_int(CONFLICT_UNRESOLVED);
+	    }
 	}
     }
 
