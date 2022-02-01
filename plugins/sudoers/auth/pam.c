@@ -319,7 +319,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 	}
 
     if (getpass_error) {
-	/* error or ^C from tgetpass() */
+	/* error or ^C from tgetpass() or running non-interactive */
 	debug_return_int(noninteractive ? AUTH_NONINTERACTIVE : AUTH_INTR);
     }
     switch (*pam_status) {
@@ -673,7 +673,6 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     const char *prompt;
     char *pass;
     int n, type;
-    int ret = PAM_SUCCESS;
     debug_decl(converse, SUDOERS_DEBUG_AUTH);
 
     if (num_msg <= 0 || num_msg > PAM_MAX_NUM_MSG) {
@@ -688,7 +687,6 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(PAM_BUF_ERR);
     }
-    *reply_out = reply;
 
     if (vcallback != NULL)
 	callback = *((struct sudo_conv_callback **)vcallback);
@@ -704,13 +702,12 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	    case PAM_PROMPT_ECHO_OFF:
 		/* Error out if the last password read was interrupted. */
 		if (getpass_error)
-		    goto done;
+		    goto bad;
 
 		/* Treat non-interactive mode as a getpass error. */
 		if (noninteractive) {
 		    getpass_error = true;
-		    ret = PAM_CONV_ERR;
-		    goto done;
+		    goto bad;
 		}
 
 		/* Choose either the sudo prompt or the PAM one. */
@@ -721,15 +718,13 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		if (pass == NULL) {
 		    /* Error (or ^C) reading password, don't try again. */
 		    getpass_error = true;
-		    ret = PAM_CONV_ERR;
-		    goto done;
+		    goto bad;
 		}
 		if (strlen(pass) >= PAM_MAX_RESP_SIZE) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"password longer than %d", PAM_MAX_RESP_SIZE);
-		    ret = PAM_CONV_ERR;
 		    explicit_bzero(pass, strlen(pass));
-		    goto done;
+		    goto bad;
 		}
 		reply[n].resp = pass;	/* auth_getpass() malloc's a copy */
 		break;
@@ -746,26 +741,25 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	    default:
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unsupported message style: %d", pm->msg_style);
-		ret = PAM_CONV_ERR;
-		goto done;
+		goto bad;
 	}
     }
 
-done:
-    if (ret != PAM_SUCCESS) {
-	/* Zero and free allocated memory and return an error. */
-	for (n = 0; n < num_msg; n++) {
-	    struct pam_response *pr = &reply[n];
+    *reply_out = reply;
+    debug_return_int(PAM_SUCCESS);
 
-	    if (pr->resp != NULL) {
-		freezero(pr->resp, strlen(pr->resp));
-		pr->resp = NULL;
-	    }
+bad:
+    /* Zero and free allocated memory and return an error. */
+    for (n = 0; n < num_msg; n++) {
+	struct pam_response *pr = &reply[n];
+
+	if (pr->resp != NULL) {
+	    freezero(pr->resp, strlen(pr->resp));
+	    pr->resp = NULL;
 	}
-	free(reply);
-	*reply_out = NULL;
     }
-    debug_return_int(ret);
+    free(reply);
+    debug_return_int(PAM_CONV_ERR);
 }
 
 #endif /* HAVE_PAM */
