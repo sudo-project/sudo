@@ -109,6 +109,51 @@ iolog_pwfilt_free(void *vhandle)
 }
 
 /*
+ * Like strdup but collapses repeated '?', '*' and '+' ops in a regex.
+ * Glibc regcomp() has a bug where it uses excessive memory for repeated
+ * '+' ops.  Collapse them to avoid running the fuzzer out of memory.
+ */
+static char *
+dup_pattern(const char *src)
+{
+    char *dst, *ret;
+    char ch, prev = '\0';
+    size_t len;
+    debug_decl(dup_pattern, SUDO_DEBUG_UTIL);
+
+    len = strlen(src);
+    ret = malloc(len + 1);
+    if (ret == NULL)
+	debug_return_ptr(NULL);
+
+    dst = ret;
+    while ((ch = *src++) != '\0') {
+	switch (ch) {
+	case '\\':
+	    if (*src != '\0') {
+		*dst++ = '\\';
+		*dst++ = *src++;
+		prev = '\0';
+		continue;
+	    }
+	    break;
+	case '?':
+	case '*':
+	case '+':
+	    if (ch == prev) {
+		continue;
+	    }
+	    break;
+	}
+	*dst++ = ch;
+	prev = ch;
+    }
+    *dst = '\0';
+
+    debug_return_ptr(ret);
+}
+
+/*
  * Add a pattern to the password filter list.
  */
 bool
@@ -123,11 +168,11 @@ iolog_pwfilt_add(void *vhandle, const char *pattern)
     filt = malloc(sizeof(*filt));
     if (filt == NULL)
 	goto oom;
-    filt->pattern = strdup(pattern);
+    filt->pattern = dup_pattern(pattern);
     if (filt->pattern == NULL)
 	goto oom;
 
-    errcode = regcomp(&filt->regex, pattern, REG_EXTENDED|REG_NOSUB);
+    errcode = regcomp(&filt->regex, filt->pattern, REG_EXTENDED|REG_NOSUB);
     if (errcode != 0) {
 	regerror(errcode, &filt->regex, errbuf, sizeof(errbuf));
 	sudo_warnx(U_("invalid regular expression \"%s\": %s"),

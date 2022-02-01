@@ -379,6 +379,7 @@ logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.3
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.4
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.5
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.6
+logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.7
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.c
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.dict
 logsrvd/sendlog.c
