@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "January 27, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "February 1, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3250,6 +3250,23 @@ section at the end of this manual.
 This flag is
 \fIoff\fR
 by default.
+.TP 18n
+noninteractive_auth
+If set, authentication will be attempted even in non-interactive mode
+(when
+\fBsudo\fR's
+\fB\-n\fR
+option is specified).
+This allows authentication methods that don't require user interaction
+to succeed.
+Authentication methods that require input from the user's terminal
+will still fail.
+If disabled, authentication will not be attempted in non-interactive mode.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.9.10 or higher.
 .TP 18n
 pam_acct_mgmt
 On systems that use PAM for authentication,

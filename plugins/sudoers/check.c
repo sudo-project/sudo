@@ -125,6 +125,12 @@ check_user_interactive(int validated, int mode, struct getpass_closure *closure)
 	FALLTHROUGH;
 
     default:
+	if (ISSET(mode, MODE_NONINTERACTIVE) && !def_noninteractive_auth) {
+	    validated |= FLAG_NO_USER_INPUT;
+	    log_auth_failure(validated, 0);
+	    goto done;
+	}
+
 	/* XXX - should not lecture if askpass helper is being used. */
 	lectured = display_lecture(closure->tstat);
 

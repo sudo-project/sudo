@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 27, 2022
+.Dd February 1, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3063,6 +3063,22 @@ section at the end of this manual.
 This flag is
 .Em off
 by default.
+.It noninteractive_auth
+If set, authentication will be attempted even in non-interactive mode
+(when
+.Nm sudo Ns 's
+.Fl n
+option is specified).
+This allows authentication methods that don't require user interaction
+to succeed.
+Authentication methods that require input from the user's terminal
+will still fail.
+If disabled, authentication will not be attempted in non-interactive mode.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.9.10 or higher.
 .It pam_acct_mgmt
 On systems that use PAM for authentication,
 .Nm sudo
