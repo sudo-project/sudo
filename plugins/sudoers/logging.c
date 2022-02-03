@@ -155,6 +155,7 @@ log_server_reject(struct eventlog *evlog, const char *message,
 	    false, SEND_REJECT, message, event_alloc);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
+	    client_closure = NULL;
 	    ret = true;
 	}
 
@@ -209,6 +210,7 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
 	    SEND_ALERT, emessage ? emessage : message, event_alloc);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
+	    client_closure = NULL;
 	    ret = true;
 	}
 

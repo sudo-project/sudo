@@ -1988,7 +1988,6 @@ client_closure_alloc(struct log_details *details, struct timespec *now,
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     client_closure_free(closure);
-    closure = NULL;
     debug_return_ptr(NULL);
 }
 
