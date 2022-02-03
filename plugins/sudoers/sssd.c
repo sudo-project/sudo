@@ -752,11 +752,15 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 	break;
     case ENOMEM:
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	FALLTHROUGH;
+	debug_return_int(-1);
     default:
+	/*
+	 * Unable to connect to the sudo SSSD connector.
+	 * SSSD may not be configured for sudo, treat as non-fatal.
+	 */
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "handle->fn_send_recv_defaults: rc=%d, sss_error=%u", rc, sss_error);
-	debug_return_int(-1);
+	debug_return_int(0);
     }
 
     switch (sss_error) {
