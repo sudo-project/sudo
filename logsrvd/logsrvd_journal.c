@@ -541,7 +541,13 @@ journal_alert(AlertMessage *msg, uint8_t *buf, size_t len,
 {
     debug_decl(journal_alert, SUDO_DEBUG_UTIL);
 
-    debug_return_bool(journal_write(buf, len, closure));
+    /* Store message in a journal for later relaying. */
+    if (closure->journal_path == NULL) {
+	if (!journal_create(closure))
+	    debug_return_bool(false);
+    }
+    if (!journal_write(buf, len, closure))
+	debug_return_bool(false);
 }
 
 /*
