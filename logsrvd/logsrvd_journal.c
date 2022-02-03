@@ -548,6 +548,8 @@ journal_alert(AlertMessage *msg, uint8_t *buf, size_t len,
     }
     if (!journal_write(buf, len, closure))
 	debug_return_bool(false);
+
+    debug_return_bool(true);
 }
 
 /*
