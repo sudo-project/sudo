@@ -65,8 +65,8 @@ Cmnd_Alias	PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
 ##
 
 # root and users in group wheel can run anything on any machine as any user
-root		ALL = (ALL) ALL
-%wheel		ALL = (ALL) ALL
+root		ALL = (ALL:ALL) ALL
+%wheel		ALL = (ALL:ALL) ALL
 
 # full time sysadmins can run anything on any machine without a password
 FULLTIMERS	ALL = NOPASSWD: ALL
