@@ -19,8 +19,8 @@ If you wish to modify the parser then you will need flex version
 2.5.2 or later and either bison or byacc (sudo comes with a
 pre-generated parser).  You'll also have to run configure with the
 --with-devel option or pass DEVEL=1 to make.  You can get flex from
-http://flex.sourceforge.net/.  You can get GNU bison from
-ftp://ftp.gnu.org/pub/gnu/bison/ or any GNU mirror.
+https://github.com/westes/flex/.  You can get GNU bison from
+https://ftp.gnu.org/pub/gnu/bison/ or any GNU mirror.
 
 Some systems will also require that development library packages be
 installed.  The sudo source distribution includes docker configurations
@@ -417,7 +417,7 @@ Defaults are listed in brackets after the description.
     --with-sssd
         Enable support for using the System Security Services Daemon
         (SSSD) as a sudoers data source.  For more information on
-        SSD, see http://fedorahosted.org/sssd/
+        SSD, see https://fedoraproject.org/wiki/Features/SSSD.
 
     --with-sssd-conf=PATH
         Specify the path to the SSSD configuration file, if different
@@ -1028,4 +1028,4 @@ free from www.oracle.com, or install the GNU C compiler (gcc) which
 is can be installed via the pkg utility on Solaris 11 and higher
 and is distributed on the Solaris Companion CD for older Solaris
 releases.  You can also download gcc packages from
-http://www.opencsw.org/packages/CSWgcc4core/.
+https://www.opencsw.org/packages/CSWgcc4core/.

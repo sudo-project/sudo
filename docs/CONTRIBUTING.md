@@ -68,7 +68,7 @@ For more information, see https://www.sudo.ws/security/fuzzing/.
 The Free Translation Project provides translations for Sudo.  If
 you would like to contribute to Sudo's translations, please see the
 ABOUT-NLS file in the Sudo source tree or visit [the Free Translation
-Project's homepage](http://translationproject.org).
+Project's homepage](https://translationproject.org).
 
 There are currently two translation domains: [one for the sudo
 front-end](https://translationproject.org/domain/sudo.html) and a

@@ -23,7 +23,7 @@ by synchronizing changes via CVS/RSYNC/RDIST/RCP/SCP and even NFS.
 By using LDAP for sudoers we gain a centrally administered, globally
 available configuration source for sudo.
 
-For information on OpenLDAP, please see http://www.openldap.org/.
+For information on OpenLDAP, please see https://www.openldap.org/.
 
 ## Definitions
 
@@ -155,7 +155,7 @@ I recommend using any of the following LDAP browsers to administer your SUDOers.
  * GQ - The gentleman's LDAP client - Open Source - I use this a lot on Linux
    and since it is Schema aware, I don't need to create a sudoRole template.
 
-    http://sourceforge.net/projects/gqclient/
+    https://sourceforge.net/projects/gqclient/
 
  * phpQLAdmin - Open Source - phpQLAdmin is an administration tool,
    originally for QmailLDAP, that supports editing sudoRole objects
@@ -167,15 +167,13 @@ I recommend using any of the following LDAP browsers to administer your SUDOers.
    and Solaris.  It runs anywhere in a Java Virtual Machine including
    web pages.  You have to make a template from an existing sudoRole entry.
 
-    http://www.iit.edu/~gawojar/ldap
-    http://www.mcs.anl.gov/~gawor/ldap
-    http://ldapmanager.com
+    http://pi.hv.pl/Gawor%20ldapbrowser/
 
  * Apache Directory Studio - Open Source - an Eclipse-based LDAP
    development platform.  Includes an LDAP browser, and LDIF editor,
    a schema editor and more.
 
-    http://directory.apache.org/studio
+    https://directory.apache.org/studio
 
   There are dozens of others, some Open Source, some free, some not.
 
