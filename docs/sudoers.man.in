@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "February 1, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "February 8, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -917,7 +917,8 @@ Runas_Member ::= '!'* user name |
                  '!'* %:nonunix_group |
                  '!'* %:#nonunix_gid |
                  '!'* +netgroup |
-                 '!'* Runas_Alias
+                 '!'* Runas_Alias |
+                 '!'* ALL
 .RE
 .fi
 .PP
@@ -949,7 +950,8 @@ Host ::= '!'* host name |
          '!'* ip_addr |
          '!'* network(/netmask)? |
          '!'* +netgroup |
-         '!'* Host_Alias
+         '!'* Host_Alias |
+         '!'* ALL
 .RE
 .fi
 .PP
@@ -993,12 +995,12 @@ only the case for non-networked systems.
 .sp
 .RS 0n
 digest ::= [A-Fa-f0-9]+ |
-	   [A-Za-z0-9\e+/=]+
+           [A-Za-z0-9\e+/=]+
 
 Digest_Spec ::= "sha224" ':' digest |
-		"sha256" ':' digest |
-		"sha384" ':' digest |
-		"sha512" ':' digest
+                "sha256" ':' digest |
+                "sha384" ':' digest |
+                "sha512" ':' digest
 
 Digest_List ::= Digest_Spec |
                 Digest_Spec ',' Digest_List
@@ -6767,11 +6769,11 @@ sudo(@mansectsu@).
 .PP
 For example, to allow user operator to edit the
 \(lqmessage of the day\(rq
-file:
+file on any machine:
 .nf
 .sp
 .RS 6n
-operator	sudoedit /etc/motd
+operator ALL = sudoedit /etc/motd
 .RE
 .fi
 .PP
