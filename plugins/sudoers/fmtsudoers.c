@@ -68,11 +68,11 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 	    }
 	    if (negated)
 		sudo_lbuf_append(lbuf, "!");
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s",
+	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED_CMD, "%s",
 		c->cmnd ? c->cmnd : "ALL");
 	    if (c->args) {
 		sudo_lbuf_append(lbuf, " ");
-		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);
+		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED_ARG, "%s", c->args);
 	    }
 	    break;
 	case USERGROUP:

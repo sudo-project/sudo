@@ -24,7 +24,9 @@
 #include "sudo_queue.h"
 
 /* Characters that must be quoted in sudoers. */
-#define SUDOERS_QUOTED	":\\,=#\""
+#define SUDOERS_QUOTED		":\\,=#\""
+#define SUDOERS_QUOTED_CMD	":\\,= \t#"
+#define SUDOERS_QUOTED_ARG	":\\,=#"
 
 /* Returns true if string 's' contains meta characters. */
 #define has_meta(s)	(strpbrk(s, "\\?*[]") != NULL)
