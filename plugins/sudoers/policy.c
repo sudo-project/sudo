@@ -836,7 +836,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 
     if (def_command_timeout > 0 || user_timeout > 0) {
 	int timeout = user_timeout;
-	if (timeout == 0 || def_command_timeout < timeout)
+    if (timeout == 0 || (def_command_timeout > 0 && def_command_timeout < timeout))
 	    timeout = def_command_timeout;
 	if (asprintf(&command_info[info_len++], "timeout=%u", timeout) == -1)
 	    goto oom;
