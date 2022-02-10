@@ -1342,9 +1342,9 @@ When editing a file, the editor is run with the user's environment unmodified.
 .Xr sudoreplay @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh HISTORY
-See the HISTORY file in the
+See the HISTORY.md file in the
 .Nm
-distribution (https://www.sudo.ws/history.html) for a brief
+distribution (https://www.sudo.ws/about/history/) for a brief
 history of sudo.
 .Sh AUTHORS
 Many people have worked on
@@ -1354,9 +1354,9 @@ over the years; this version consists of code written primarily by:
 .An Todd C. Miller
 .Ed
 .Pp
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 .Nm
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 .Nm .
 .Sh CAVEATS
@@ -1406,6 +1406,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 .Nm
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.
