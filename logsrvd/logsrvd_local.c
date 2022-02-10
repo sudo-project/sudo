@@ -559,7 +559,6 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
 	    errstr);
 	goto bad;
     }
-    free(newbuf);
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
@@ -575,12 +574,14 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
     if (random_drop > 0.0) {
 	double randval = arc4random() / (double)UINT32_MAX;
 	if (randval < random_drop) {
+	    closure->errstr = _("randomly dropping connection");
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
 		"randomly dropping connection (%f < %f)", randval, random_drop);
-	    debug_return_bool(false);
+	    goto bad;
 	}
     }
 
+    free(newbuf);
     debug_return_bool(true);
 bad:
     free(newbuf);
