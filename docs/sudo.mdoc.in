@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 19, 2022
+.Dd February 10, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1042,7 +1042,7 @@ crashes, you may wish to re-enable core dumps by setting
 to false in the
 .Xr sudo.conf @mansectform@
 file as follows:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Set disable_coredump false
 .Ed
 .Pp
@@ -1171,36 +1171,36 @@ Note: the following examples assume a properly configured security
 policy.
 .Pp
 To get a file listing of an unreadable directory:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo ls /usr/local/protected
 .Ed
 .Pp
 To list the home directory of user yaz on a machine where the file
 system holding ~yaz is not exported as root:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo -u yaz ls ~yaz
 .Ed
 .Pp
 To edit the
 .Pa index.html
 file as user www:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudoedit -u www ~www/htdocs/index.html
 .Ed
 .Pp
 To view system logs only accessible to root and users in the adm
 group:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo -g adm more /var/log/syslog
 .Ed
 .Pp
 To run an editor as jim with a different primary group:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudoedit -u jim -g audio ~jim/sound.txt
 .Ed
 .Pp
 To shut down a machine:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo shutdown -r +15 "quick reboot"
 .Ed
 .Pp
@@ -1208,7 +1208,7 @@ To make a usage listing of the directories in the /home partition.
 Note that this runs the commands in a sub-shell to make the
 .Li cd
 and file redirection work.
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Ed
 .Sh DIAGNOSTICS
@@ -1376,7 +1376,7 @@ functionality.
 It is not meaningful to run the
 .Li cd
 command directly via sudo, e.g.,
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo cd /usr/local/protected
 .Ed
 .Pp

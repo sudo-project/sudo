@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd January 20, 2022
+.Dd February 10, 2022
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -121,12 +121,12 @@ specified by the
 setting, which defaults to
 .Pa @plugindir@ .
 In other words:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_policy sudoers.so
 .Ed
 .Pp
 is equivalent to:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_policy @plugindir@/sudoers.so
 .Ed
 .Pp
@@ -137,7 +137,7 @@ binary instead of being installed as a dynamic shared object, the
 should be specified without a leading directory,
 as it does not actually exist in the file system.
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_policy sudoers.so
 .Ed
 .Pp
@@ -149,7 +149,7 @@ are passed as arguments to the plugin's
 .Em open
 function.
 For example, to override the compile-time default sudoers file mode:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_policy sudoers.so sudoers_mode=0440
 .Ed
 .Pp
@@ -173,7 +173,7 @@ lines, the
 plugin will be used as the default security policy, for I/O logging
 (if enabled by the policy), and for auditing.
 This is equivalent to the following:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 Plugin sudoers_audit sudoers.so
@@ -208,7 +208,7 @@ line consists of the
 .Li Path
 keyword, followed by the name of the path to set and its value.
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Path intercept @intercept_file@
 Path noexec @noexec_file@
 Path askpass /usr/X11R6/bin/ssh-askpass
@@ -344,7 +344,7 @@ crashes, you may wish to re-enable core dumps by setting
 to false in
 .Nm
 as follows:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Set disable_coredump false
 .Ed
 .Pp
@@ -384,7 +384,7 @@ To make development of a plugin easier, you can disable that by setting
 option to true in
 .Nm sudo.conf
 as follows:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Set developer_mode true
 .Ed
 .Pp
@@ -468,7 +468,7 @@ This is the default behavior on systems other than macOS in
 For example, to cause
 .Nm sudo
 to only use the kernel's static list of groups for the user:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Set group_source static
 .Ed
 .Pp
@@ -503,7 +503,7 @@ On Linux systems with a large number of virtual interfaces, this may
 take a non-negligible amount of time.
 If IP-based matching is not required, network interface probing
 can be disabled as follows:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Set probe_interfaces false
 .Ed
 .Pp
@@ -535,7 +535,7 @@ as it does not include a comma
 .Pq Ql \&, .
 .Pp
 Examples:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Debug sudo /var/log/sudo_debug all@warn,plugin@info
 .Ed
 .Pp
@@ -544,7 +544,7 @@ would log all debugging statements at the
 level and higher in addition to those at the
 .Em info
 level for the plugin subsystem.
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Debug sudo_intercept.so /var/log/intercept_debug all@debug
 .Ed
 .Pp
@@ -601,7 +601,7 @@ entered and when it returns.
 For example, the following trace is for the
 .Fn get_user_groups
 function located in src/sudo.c:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 sudo[123] -> get_user_groups @ src/sudo.c:385
 sudo[123] <- get_user_groups @ src/sudo.c:429 := groups=10,0,5
 .Ed

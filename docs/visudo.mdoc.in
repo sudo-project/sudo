@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 20, 2022
+.Dd February 10, 2022
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -302,7 +302,7 @@ These arguments, if present, should be listed after the path to the plugin
 .Pa sudoers.so ) .
 Multiple arguments may be specified, separated by white space.
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_policy sudoers.so sudoers_mode=0400
 .Ed
 .Pp

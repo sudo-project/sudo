@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "February 10, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1103,7 +1103,7 @@ sudo.conf(@mansectform@)
 file as follows:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Set disable_coredump false
 .RE
 .fi
@@ -1248,7 +1248,7 @@ policy.
 To get a file listing of an unreadable directory:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudo ls /usr/local/protected
 .RE
 .fi
@@ -1257,7 +1257,7 @@ To list the home directory of user yaz on a machine where the file
 system holding ~yaz is not exported as root:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudo -u yaz ls ~yaz
 .RE
 .fi
@@ -1267,7 +1267,7 @@ To edit the
 file as user www:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudoedit -u www ~www/htdocs/index.html
 .RE
 .fi
@@ -1276,7 +1276,7 @@ To view system logs only accessible to root and users in the adm
 group:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudo -g adm more /var/log/syslog
 .RE
 .fi
@@ -1284,7 +1284,7 @@ $ sudo -g adm more /var/log/syslog
 To run an editor as jim with a different primary group:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudoedit -u jim -g audio ~jim/sound.txt
 .RE
 .fi
@@ -1292,7 +1292,7 @@ $ sudoedit -u jim -g audio ~jim/sound.txt
 To shut down a machine:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudo shutdown -r +15 "quick reboot"
 .RE
 .fi
@@ -1303,7 +1303,7 @@ Note that this runs the commands in a sub-shell to make the
 and file redirection work.
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .RE
 .fi
@@ -1488,7 +1488,7 @@ It is not meaningful to run the
 command directly via sudo, e.g.,
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudo cd /usr/local/protected
 .RE
 .fi

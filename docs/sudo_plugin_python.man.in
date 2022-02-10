@@ -17,7 +17,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "January 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "February 10, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -74,7 +74,7 @@ constructor yourself.
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 import sudo
 
 class MySudoPlugin(sudo.Plugin):
@@ -137,7 +137,7 @@ result code the plugin can also provide a message describing the problem.
 This can be done by raising one of the special exceptions:
 .nf
 .sp
-.RS 6n
+.RS 4n
 raise sudo.PluginError("Message")
 raise sudo.PluginReject("Message")
 .RE
@@ -161,7 +161,7 @@ Example usage in
 sudo.conf(@mansectform@):
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
@@ -174,7 +174,7 @@ Example group provider plugin usage in the
 file:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
 .RE
 .fi
@@ -198,7 +198,7 @@ sudo.conf(@mansectform@).
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
@@ -300,7 +300,7 @@ convenience function can be used to convert them to a dictionary.
 This function should return a result code or a tuple in the following format:
 .nf
 .sp
-.RS 12n
+.RS 10n
 return (rc, command_info_out, argv_out, user_env_out)
 .RE
 .fi
@@ -567,7 +567,7 @@ sudo.conf(@mansectform@).
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
@@ -843,7 +843,7 @@ To try it, register it by adding the following lines to
 \fI@sysconfdir@/sudo.conf\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_io_plugin.py \e
     ClassName=SudoIOPlugin
@@ -855,7 +855,7 @@ sudo.conf(@mansectform@).
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
@@ -1159,7 +1159,7 @@ To try it, register it by adding the following lines to
 \fI@sysconfdir@/sudo.conf\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_audit python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_audit_plugin.py \e
     ClassName=SudoAuditPlugin
@@ -1173,7 +1173,7 @@ sudo.conf(@mansectform@).
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
 .RE
 .fi
@@ -1269,7 +1269,7 @@ It can reject execution of the command by returning sudo.RC.REJECT or
 raising the special exception:
 .nf
 .sp
-.RS 12n
+.RS 10n
 raise sudo.PluginReject("some message")
 .RE
 .fi
@@ -1300,7 +1300,7 @@ To try it, register it by adding the following lines to
 \fI@sysconfdir@/sudo.conf\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_approval python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_approval_plugin.py \e
     ClassName=BusinessHoursApprovalPlugin
@@ -1316,7 +1316,7 @@ file.
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
 .RE
 .fi
@@ -1397,7 +1397,7 @@ To try it, register it in the
 file by adding the following lines:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Defaults group_plugin="python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
@@ -1416,7 +1416,7 @@ user.
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 %:mygroup ALL=(ALL) NOPASSWD: ALL
 .RE
 .fi
@@ -1556,7 +1556,7 @@ To try it, register it by adding the following lines to
 \fI@sysconfdir@/sudo.conf\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
@@ -1617,7 +1617,7 @@ For example, to store debug output in
 use a line like the following:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Debug python_plugin.so /var/log/sudo_python_debug \e
     plugin@trace,c_calls@trace
 .RE
@@ -1632,7 +1632,7 @@ For example to just see the debug output of
 calls, use:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Debug python_plugin.so /var/log/sudo_python_debug plugin@trace
 .RE
 .fi
@@ -1735,7 +1735,7 @@ To try it, register it by adding the following lines to
 \fI@sysconfdir@/sudo.conf\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_debugging.py \e
     ClassName=DebugDemoPlugin

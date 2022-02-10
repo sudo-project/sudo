@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "February 8, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "February 10, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -71,7 +71,7 @@ to use the
 plugin, the following configuration can be used.
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin sudoers_audit sudoers.so
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
@@ -104,7 +104,7 @@ Multiple arguments may be specified, separated by white space.
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin sudoers_audit sudoers.so sudoers_mode=0400 error_recovery=false
 .RE
 .fi
@@ -6772,7 +6772,7 @@ For example, to allow user operator to edit the
 file on any machine:
 .nf
 .sp
-.RS 6n
+.RS 4n
 operator ALL = sudoedit /etc/motd
 .RE
 .fi
@@ -6782,7 +6782,7 @@ The operator user then runs
 as follows:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ sudoedit /etc/motd
 .RE
 .fi

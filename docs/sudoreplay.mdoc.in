@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 19, 2022
+.Dd February 10, 2022
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -406,26 +406,26 @@ was used as part of a pipeline for a particular command.
 .Sh EXAMPLES
 List sessions run by user
 .Em millert :
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # sudoreplay -l user millert
 .Ed
 .Pp
 List sessions run by user
 .Em bob
 with a command containing the string vi:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # sudoreplay -l user bob command vi
 .Ed
 .Pp
 List sessions run by user
 .Em jeff
 that match a regular expression:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # sudoreplay -l user jeff command '/bin/[a-z]*sh'
 .Ed
 .Pp
 List sessions run by jeff or bob on the console:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # sudoreplay -l ( user jeff or user bob ) tty console
 .Ed
 .Sh SEE ALSO

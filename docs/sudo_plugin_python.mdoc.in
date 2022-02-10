@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 20, 2022
+.Dd February 10, 2022
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -64,7 +64,7 @@ This is intended as a convenience to allow you to avoid writing the
 constructor yourself.
 .Pp
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 import sudo
 
 class MySudoPlugin(sudo.Plugin):
@@ -115,7 +115,7 @@ or
 .Dv sudo.RC.REJECT
 result code the plugin can also provide a message describing the problem.
 This can be done by raising one of the special exceptions:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 raise sudo.PluginError("Message")
 raise sudo.PluginReject("Message")
 .Ed
@@ -136,7 +136,7 @@ plugin it is loading as arguments.
 .Pp
 Example usage in
 .Xr sudo.conf @mansectform@ :
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
@@ -146,7 +146,7 @@ Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
 Example group provider plugin usage in the
 .Em sudoers
 file:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
 .Ed
 .Pp
@@ -167,7 +167,7 @@ will result in an error.
 Policy plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
@@ -255,7 +255,7 @@ convenience function can be used to convert them to a dictionary.
 .El
 .Pp
 This function should return a result code or a tuple in the following format:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 return (rc, command_info_out, argv_out, user_env_out)
 .Ed
 .Pp
@@ -460,7 +460,7 @@ in addition to another policy plugin, such as
 I/O plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
@@ -681,7 +681,7 @@ system call, otherwise 0.
 Sudo ships a Python I/O plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_io_plugin.py \e
     ClassName=SudoIOPlugin
@@ -690,7 +690,7 @@ Plugin python_io python_plugin.so \e
 Audit plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
@@ -928,7 +928,7 @@ manual for possible values.
 Sudo ships a Python Audit plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_audit python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_audit_plugin.py \e
     ClassName=SudoAuditPlugin
@@ -939,7 +939,7 @@ It will log the plugin accept / reject / error results to the output.
 Approval plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
@@ -1010,7 +1010,7 @@ check(self, command_info: Tuple[str, ...], run_argv: Tuple[str, ...],
 This function is called after policy plugin's check_policy has succeeded.
 It can reject execution of the command by returning sudo.RC.REJECT or
 raising the special exception:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 raise sudo.PluginReject("some message")
 .Ed
 .Pp
@@ -1034,7 +1034,7 @@ The environment the command will be run with.
 Sudo ships a Python Approval plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_approval python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_approval_plugin.py \e
     ClassName=BusinessHoursApprovalPlugin
@@ -1047,7 +1047,7 @@ A group provider plugin is registered in the
 .Xr sudoers @mansectform@
 file.
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
 .Ed
 .Pp
@@ -1111,7 +1111,7 @@ Sudo ships a Python group plugin example.
 To try it, register it in the
 .Em sudoers
 file by adding the following lines:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Defaults group_plugin="python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
@@ -1127,7 +1127,7 @@ If you add a rule that uses this group, it will affect the
 .Em test
 user.
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 %:mygroup ALL=(ALL) NOPASSWD: ALL
 .Ed
 .Pp
@@ -1247,7 +1247,7 @@ or the user interrupted the conversation by pressing control-C.
 Sudo ships with an example plugin demonstrating the Python conversation API.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
@@ -1302,7 +1302,7 @@ with the program set to
 For example, to store debug output in
 .Pa /var/log/sudo_python_debug ,
 use a line like the following:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Debug python_plugin.so /var/log/sudo_python_debug \e
     plugin@trace,c_calls@trace
 .Ed
@@ -1314,7 +1314,7 @@ strings, separated by commas
 For example to just see the debug output of
 .Fn sudo.debug
 calls, use:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Debug python_plugin.so /var/log/sudo_python_debug plugin@trace
 .Ed
 .Pp
@@ -1396,7 +1396,7 @@ for the sudo debug system.
 Sudo ships an example debug plugin by default.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin python_io python_plugin.so \e
     ModulePath=@prefix@/share/doc/sudo/examples/example_debugging.py \e
     ClassName=DebugDemoPlugin

@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 17, 2021
+.Dd February 10, 2022
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -159,7 +159,7 @@ files for the CA.
 We'll create a new directory hierarchy in
 .Pa /etc/ssl/sudo
 for this purpose.
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # mkdir /etc/ssl/sudo
 # cd /etc/ssl/sudo
 # mkdir certs csr newcerts private
@@ -177,7 +177,7 @@ The path to openssl.cnf is system-dependent but
 is the most common location.
 You will need to adjust the example below if it has a different location on
 your system.
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # cp /etc/ssl/openssl.cnf .
 .Ed
 .Pp
@@ -189,7 +189,7 @@ and
 .Dq CA_default
 sections.
 Those sections should include the following settings:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 [ ca ]
 default_ca      = CA_default
 
@@ -212,14 +212,14 @@ setting.
 In order to create and sign our own certificates, we need to create
 a private key and a certificate for the root of the CA.
 First, create the private key and protect it with a pass phrase:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # openssl genrsa -aes256 -out private/cakey.pem 4096
 # chmod 400 private/cakey.pem
 .Ed
 .Pp
 Next, generate the root certificate, using appropriate values for
 the site-specific fields:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # openssl req -config openssl.cnf -key private/cakey.pem \e
     -new -x509 -days 7300 -sha256 -extensions v3_ca \e
     -out cacert.pem
@@ -245,7 +245,7 @@ Email Address []:
 .Ed
 .Pp
 Finally, verify the root certificate:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # openssl x509 -noout -text -in cacert.pem
 .Ed
 .Ss Creating and signing certificates
@@ -260,7 +260,7 @@ In this example we'll skip this part for simplicity's sake and sign the
 CSRs with the root CA.
 .Pp
 First, generate the private key without a pass phrase.
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # openssl genrsa -out private/logsrvd_key.pem 2048
 # chmod 400 private/logsrvd_key.pem
 .Ed
@@ -269,7 +269,7 @@ Next, create a certificate signing request (CSR) for the server's certificate.
 The organization name must match the name given in the root certificate.
 The common name should be either the server's IP address or a fully
 qualified domain name.
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # openssl req -config openssl.cnf -key private/logsrvd_key.pem -new \e
     -sha256 -out csr/logsrvd_csr.pem
 
@@ -297,7 +297,7 @@ An optional company name []:
 .Ed
 .Pp
 Now sign the CSR that was just created:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # openssl ca -config openssl.cnf -days 375 -notext -md sha256 \e
     -in csr/logsrvd_csr.pem -out certs/logsrvd_cert.pem
 
@@ -335,7 +335,7 @@ Data Base Updated
 .Ed
 .Pp
 Finally, verify the new certificate:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # openssl verify -CAfile cacert.pem certs/logsrvd_cert.pem
 certs/logsrvd_cert.pem: OK
 .Ed
@@ -357,7 +357,7 @@ Configuring
 .Nm
 for TLS requires the following settings, assuming the same path
 names used earlier:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 # Listen on port 30344 for TLS connections to any address.
 listen_address = *:30344(tls)
 
