@@ -249,7 +249,7 @@ iolog_pwfilt_run(void *vhandle, int event, const char *buf,
 	copy = malloc(len + 1);
 	if (copy == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_ptr(false);
+	    debug_return_bool(false);
 	}
 	memcpy(copy, buf, len);
 	copy[len] = '\0';
@@ -278,7 +278,7 @@ iolog_pwfilt_run(void *vhandle, int event, const char *buf,
 		if (copy == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
-		    debug_return_ptr(NULL);
+		    debug_return_bool(false);
 		}
 		memset(copy, '*', i);
 		if (i != len) {
