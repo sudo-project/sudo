@@ -133,7 +133,7 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = NULL;
-    while ((ch = getopt(argc, argv, "dg:G:h:i:P:p:tu:U:")) != -1) {
+    while ((ch = getopt(argc, argv, "+dg:G:h:i:P:p:tu:U:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
