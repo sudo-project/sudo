@@ -81,10 +81,12 @@ iolog_pwfilt_free_filter(struct pwfilt_regex_list *filters,
 {
     debug_decl(iolog_pwfilt_free_filter, SUDO_DEBUG_UTIL);
 
-    TAILQ_REMOVE(filters, filt, entries);
-    regfree(&filt->regex);
-    free(filt->pattern);
-    free(filt);
+    if (filt != NULL) {
+	TAILQ_REMOVE(filters, filt, entries);
+	regfree(&filt->regex);
+	free(filt->pattern);
+	free(filt);
+    }
 
     debug_return;
 }

@@ -554,6 +554,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	    break;
 	case 'p':
 	    if (strncmp(*cur, "passprompt_regex=", sizeof("passprompt_regex=") - 1) == 0) {
+		iolog_pwfilt_free(passprompt_regex_handle);
 		passprompt_regex_handle =
 		    set_passprompt_regex(*cur + sizeof("passprompt_regex=") - 1);
 		if (passprompt_regex_handle == NULL)
