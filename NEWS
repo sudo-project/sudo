@@ -1,3 +1,61 @@
+What's new in Sudo 1.9.10
+
+ * Added new "log_passwords" and "passprompt_regex" sudoers options.
+   If "log_passwords" is disabled, sudo will attempt to prevent passwords
+   from being logged.  If sudo detects any of the regular expressions in
+   the "passprompt_regex" list in the terminal output, sudo will log '*'
+   characters instead of the terminal input until a newline or carriage
+   return is found in the input or an output character is received.
+
+ * Fixed a bug in "cvtsudoers" when merging multiple sudoers files
+   with an associated host name when they contain conflicting
+   Defaults entries.
+
+ * In sudo_logsrvd, fixed parsing of "retry_interval" in the [relay]
+   section.  Previously, attempting to set "retry_interval" would
+   result in a parse error.
+
+ * Added a new "noninteractive_auth" sudoers option to control
+   whether PAM authentication is attempted in non-interactive mode.
+   If "noninteractive_auth" is set, authentication methods that do
+   not require input from the user's terminal may proceed.  This
+   option is off by default, which restores the pre-1.9.9 behavior
+   of "sudo -n".  GitHub issue #131.
+
+ * Added a fallback method when determining the terminal name on
+   systems with /proc when /proc/self/stat or /proc/pid/psinfo is
+   missing or invalid.  If the /proc file indicates no terminal is
+   present, there is no fallback.  Bug #1020
+
+ * Fixed compilation on Debian kFreeBSD.  Bug #1021.
+
+ * Fixed a crash in sudo_logsrvd when running in relay mode if
+   an alert message is received.
+
+ * Sudo no longer returns an error if the SSSD back-end is unable
+   to contact to the SSSD sudo connector.  This can happen when
+   nsswitch.conf lists "sss" as a sudoers source but SSSD is not
+   configured for sudo.  Previously, a useless "problem with defaults
+   entries" message would be sent to root when the SSSD back-end
+   attempted to fetch the global defaults. Bug #1022.
+
+ * Removed the text "This incident will be reported." from warnings
+   when the invoking user is not listed in sudoers.  This warning
+   is confusing to users and may not be accurate now that the email
+   settings are configurable in the sudoers file.  GitHub issue #48.
+
+ * Fixed a bug where the user-specified command timeout was not
+   being honored if the sudoers rule did not also specify a timeout.
+
+ * Added support for matching commands and arguments in sudoers
+   using POSIX extended regular expressions.  Either the command,
+   the arguments, or both may be (separate) regular expressions.
+   Regular expressions for commands and arguments must start with
+   a '^' character and end with a '$'.  This makes it possible for
+   the sudoers parser to tell what is, or is not, a regular expression.
+   It also means that partial matches are not possible unless the
+   pattern explicitly allows it.  Bug #578, GitHub issue #15.
+
 What's new in Sudo 1.9.9
 
  * Sudo can now be built with OpenSSL 3.0 without generating warnings
