@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "February 10, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "February 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -641,6 +641,9 @@ One or more POSIX extended regular expressions used to
 match password prompts in the terminal output when
 \fIlog_passwords\fR
 is disabled.
+As an extension, if the regular expression begins with
+\(lq(?i)\(rq,
+it will be matched in a case-insensitive manner.
 Multiple
 \fIpassprompt_regex\fR
 settings may be specified.

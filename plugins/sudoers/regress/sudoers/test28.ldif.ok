@@ -1,3 +1,10 @@
+dn: cn=defaults,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: defaults
+description: Default sudoOption's go here
+sudoOption: passprompt_regex=(?i)password: *
+
 dn: cn=user,ou=SUDOers,dc=sudo,dc=ws
 objectClass: top
 objectClass: sudoRole

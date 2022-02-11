@@ -55,7 +55,7 @@
 
 int sudolineno;			/* current sudoers line number. */
 char *sudoers;			/* sudoers file being parsed. */
-char *sudoers_errstr;		/* description of last error from lexer. */
+const char *sudoers_errstr;	/* description of last error from lexer. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
@@ -297,7 +297,7 @@ DEFVAR			[a-z_]+
 			    BEGIN INITIAL;
 			    continued = false;
 			    if (sudoers_strict) {
-				if (!regex_valid(sudoerstext, &sudoers_errstr)) {
+				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
 				}
@@ -773,7 +773,7 @@ sudoedit		{
 
 {REGEX}			{
 			    if (sudoers_strict) {
-				if (!regex_valid(sudoerstext, &sudoers_errstr)) {
+				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
 				}

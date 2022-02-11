@@ -60,36 +60,20 @@
 static bool
 regex_matches(const char *pattern, const char *str)
 {
-    int errcode, cflags = REG_EXTENDED|REG_NOSUB;
-    char *copy = NULL;
+    const char *errstr;
+    int errcode;
     regex_t re;
     debug_decl(regex_matches, SUDOERS_DEBUG_MATCH);
 
-    /* Check for (?i) to enable case-insensitive matching. */
-    if (strncmp(pattern, "^(?i)", 5) == 0) {
-	cflags |= REG_ICASE;
-	copy = strdup(pattern + 4);
-	if (copy == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_bool(false);
-	}
-	copy[0] = '^';
-	pattern = copy;
-    }
-
-    errcode = regcomp(&re, pattern, cflags);
-    if (errcode == 0) {
-	errcode = regexec(&re, str, 0, NULL, 0);
-	regfree(&re);
-    } else {
-	char errbuf[1024];
-
-	regerror(errcode, &re, errbuf, sizeof(errbuf));
+    if (!sudo_regex_compile(&re, pattern, &errstr)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to compile regular expression \"%s\": %s",
-	    pattern, errbuf);
+	    pattern, errstr);
+	debug_return_bool(false);
     }
-    free(copy);
+
+    errcode = regexec(&re, str, 0, NULL, 0);
+    regfree(&re);
 
     debug_return_bool(errcode == 0);
 }

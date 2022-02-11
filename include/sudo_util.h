@@ -256,6 +256,10 @@ sudo_dso_public char *sudo_rcstr_alloc(size_t len);
 sudo_dso_public char *sudo_rcstr_addref(const char *s);
 sudo_dso_public void sudo_rcstr_delref(const char *s);
 
+/* regex.c */
+sudo_dso_public bool sudo_regex_compile_v1(void *v, const char *pattern, const char **errstr);
+#define sudo_regex_compile(_a, _b, _c) sudo_regex_compile_v1((_a), (_b), (_c))
+
 /* roundup.c */
 sudo_dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
 #define sudo_pow2_roundup(_a) sudo_pow2_roundup_v1((_a))

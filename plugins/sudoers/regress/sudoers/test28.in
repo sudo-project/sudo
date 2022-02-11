@@ -1,3 +1,6 @@
+# Test passprompt_regex
+Defaults passprompt_regex="(?i)password: *"
+
 # Test simple command with regex args
 user ALL = /bin/ls ^/etc/(hosts|motd|issue)$
 

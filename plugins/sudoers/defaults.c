@@ -36,7 +36,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
-#include <regex.h>
 #include <syslog.h>
 
 #include "sudoers.h"
@@ -1287,22 +1286,17 @@ bool
 cb_passprompt_regex(const union sudo_defs_val *sd_un, int op)
 {
     struct list_member *lm;
-    int errcode;
-    char errbuf[1024];
-    regex_t re;
+    const char *errstr;
     debug_decl(cb_passprompt_regex, SUDOERS_DEBUG_DEFAULTS);
 
-    /* If adding one or more regexps, validate them with regcomp(). */
+    /* If adding one or more regexps, make sure they are valid. */
     if (op == '+' || op == true) {
 	SLIST_FOREACH(lm, &sd_un->list, entries) {
-	    errcode = regcomp(&re, lm->value, REG_EXTENDED|REG_NOSUB);
-	    if (errcode != 0) {
-		regerror(errcode, &re, errbuf, sizeof(errbuf));
+	    if (!sudo_regex_compile(NULL, lm->value, &errstr)) {
 		sudo_warnx(U_("invalid regular expression \"%s\": %s"),
-		    lm->value, errbuf);
+		    lm->value, U_(errstr));
 		debug_return_bool(false);
 	    }
-	    regfree(&re);
 	}
     }
 

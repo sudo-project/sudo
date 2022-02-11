@@ -41,6 +41,7 @@
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
 #include "sudo_queue.h"
+#include "sudo_util.h"
 
 struct pwfilt_regex {
     TAILQ_ENTRY(pwfilt_regex) entries;
@@ -111,51 +112,6 @@ iolog_pwfilt_free(void *vhandle)
 }
 
 /*
- * Like strdup but collapses repeated '?', '*' and '+' ops in a regex.
- * Glibc regcomp() has a bug where it uses excessive memory for repeated
- * '+' ops.  Collapse them to avoid running the fuzzer out of memory.
- */
-static char *
-dup_pattern(const char *src)
-{
-    char *dst, *ret;
-    char ch, prev = '\0';
-    size_t len;
-    debug_decl(dup_pattern, SUDO_DEBUG_UTIL);
-
-    len = strlen(src);
-    ret = malloc(len + 1);
-    if (ret == NULL)
-	debug_return_ptr(NULL);
-
-    dst = ret;
-    while ((ch = *src++) != '\0') {
-	switch (ch) {
-	case '\\':
-	    if (*src != '\0') {
-		*dst++ = '\\';
-		*dst++ = *src++;
-		prev = '\0';
-		continue;
-	    }
-	    break;
-	case '?':
-	case '*':
-	case '+':
-	    if (ch == prev) {
-		continue;
-	    }
-	    break;
-	}
-	*dst++ = ch;
-	prev = ch;
-    }
-    *dst = '\0';
-
-    debug_return_ptr(ret);
-}
-
-/*
  * Add a pattern to the password filter list.
  */
 bool
@@ -163,22 +119,19 @@ iolog_pwfilt_add(void *vhandle, const char *pattern)
 {
     struct pwfilt_handle *handle = vhandle;
     struct pwfilt_regex *filt;
-    char errbuf[1024];
-    int errcode;
+    const char *errstr;
     debug_decl(iolog_pwfilt_add, SUDO_DEBUG_UTIL);
 
     filt = malloc(sizeof(*filt));
     if (filt == NULL)
 	goto oom;
-    filt->pattern = dup_pattern(pattern);
+    filt->pattern = strdup(pattern);
     if (filt->pattern == NULL)
 	goto oom;
 
-    errcode = regcomp(&filt->regex, filt->pattern, REG_EXTENDED|REG_NOSUB);
-    if (errcode != 0) {
-	regerror(errcode, &filt->regex, errbuf, sizeof(errbuf));
+    if (!sudo_regex_compile(&filt->regex, filt->pattern, &errstr)) {
 	sudo_warnx(U_("invalid regular expression \"%s\": %s"),
-	    pattern, errbuf);
+	    pattern, U_(errstr));
 	goto bad;
     }
 

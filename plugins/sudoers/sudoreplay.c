@@ -1195,6 +1195,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
     bool or = false, not = false;
     struct search_node *sn;
     char type, **av;
+    const char *errstr;
     debug_decl(parse_expr, SUDO_DEBUG_UTIL);
 
     for (av = argv; *av != NULL; av++) {
@@ -1288,8 +1289,10 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	    if (*(++av) == NULL)
 		sudo_fatalx(U_("%s requires an argument"), av[-1]);
 	    if (type == ST_PATTERN) {
-		if (regcomp(&sn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
-		    sudo_fatalx(U_("invalid regular expression: %s"), *av);
+		if (!sudo_regex_compile(&sn->u.cmdre, *av, &errstr)) {
+		    sudo_fatalx(U_("invalid regular expression \"%s\": %s"),
+			*av, U_(errstr));
+		}
 	    } else if (type == ST_TODATE || type == ST_FROMDATE) {
 		sn->u.tstamp.tv_sec = get_date(*av);
 		sn->u.tstamp.tv_nsec = 0;
@@ -1542,6 +1545,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     const char *tty)
 {
     regex_t rebuf, *re = NULL;
+    const char *errstr;
     debug_decl(list_sessions, SUDO_DEBUG_UTIL);
 
     /* Parse search expression if present */
@@ -1550,8 +1554,10 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     /* optional regex */
     if (pattern) {
 	re = &rebuf;
-	if (regcomp(re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
-	    sudo_fatalx(U_("invalid regular expression: %s"), pattern);
+	if (!sudo_regex_compile(re, pattern, &errstr)) {
+	    sudo_fatalx(U_("invalid regular expression \"%s\": %s"),
+		pattern, U_(errstr));
+	}
     }
 
     debug_return_int(find_sessions(session_dir, re, user, tty));

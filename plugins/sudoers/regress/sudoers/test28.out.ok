@@ -1,5 +1,7 @@
 Parses OK
 
+Defaults passprompt_regex="(?i)password: *"
+
 user ALL = /bin/ls ^/etc/(hosts|motd|issue)$
 user ALL = /usr/bin/c* ^/etc/(hosts|motd|issue)$
 user ALL = ^/usr/bin/(who|w|id|whoami)$

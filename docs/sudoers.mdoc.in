@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 10, 2022
+.Dd February 11, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -5062,6 +5062,9 @@ This setting is only supported by version 1.9.0 or higher.
 .It passprompt_regex
 A list of POSIX extended regular expressions used to
 match password prompts in the terminal output.
+As an extension, if the regular expression begins with
+.Dq (?i) ,
+it will be matched in a case-insensitive manner.
 This option is only used when
 .Em log_passwords
 has been disabled.

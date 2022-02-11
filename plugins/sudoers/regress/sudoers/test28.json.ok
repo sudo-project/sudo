@@ -1,4 +1,17 @@
 {
+    "Defaults": [
+        {
+            "Options": [
+                {
+                    "operation": "list_assign",
+                    "passprompt_regex": [
+                        "(?i)password:",
+                        "*"
+                    ]
+                }
+            ]
+        }
+    ],
     "User_Specs": [
         {
             "User_List": [

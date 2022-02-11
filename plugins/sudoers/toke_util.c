@@ -39,7 +39,6 @@
 
 static unsigned int arg_len = 0;
 static unsigned int arg_size = 0;
-static char errbuf[1024];
 
 /*
  * Copy the string and collapse any escaped characters.
@@ -246,37 +245,4 @@ ipv6_valid(const char *s)
     }
 
     debug_return_bool(nmatch <= 1);
-}
-
-bool
-regex_valid(const char *pattern, char **errstr)
-{
-    int errcode, cflags = REG_EXTENDED|REG_NOSUB;
-    char *copy = NULL;
-    regex_t re;
-    debug_decl(regex_valid, SUDOERS_DEBUG_PARSER);
-
-    /* Check for (?i) to enable case-insensitive matching. */
-    if (strncmp(pattern, "^(?i)", 5) == 0) {
-	cflags |= REG_ICASE;
-	copy = strdup(pattern + 4);
-	if (copy == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    sudoerserror(NULL);
-	    debug_return_bool(false);
-	}
-	copy[0] = '^';
-	pattern = copy;
-    }
-
-    errcode = regcomp(&re, pattern, cflags);
-    if (errcode == 0) {
-	regfree(&re);
-    } else {
-	regerror(errcode, &re, errbuf, sizeof(errbuf));
-	*errstr = errbuf;
-    }
-    free(copy);
-
-    debug_return_bool(errcode == 0);
 }

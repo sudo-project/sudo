@@ -245,6 +245,7 @@ lib/util/progname.c
 lib/util/pw_dup.c
 lib/util/pwrite.c
 lib/util/rcstr.c
+lib/util/regex.c
 lib/util/reallocarray.c
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.1
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.2

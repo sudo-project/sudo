@@ -3083,7 +3083,7 @@ char *sudoerstext;
 
 int sudolineno;			/* current sudoers line number. */
 char *sudoers;			/* sudoers file being parsed. */
-char *sudoers_errstr;		/* description of last error from lexer. */
+const char *sudoers_errstr;	/* description of last error from lexer. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
@@ -3648,7 +3648,7 @@ YY_RULE_SETUP
 			    BEGIN INITIAL;
 			    continued = false;
 			    if (sudoers_strict) {
-				if (!regex_valid(sudoerstext, &sudoers_errstr)) {
+				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
 				}
@@ -4283,7 +4283,7 @@ YY_RULE_SETUP
 #line 774 "toke.l"
 {
 			    if (sudoers_strict) {
-				if (!regex_valid(sudoerstext, &sudoers_errstr)) {
+				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
 				}
