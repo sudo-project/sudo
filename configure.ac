@@ -70,6 +70,7 @@ AC_SUBST([SEMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
+AC_SUBST([mansectmisc])
 AC_SUBST([INTERCEPTFILE])
 AC_SUBST([INTERCEPTDIR])
 AC_SUBST([intercept_file])
@@ -495,6 +496,7 @@ AC_ARG_WITH(csops, [AS_HELP_STRING([--with-csops], [add CSOps standard options])
 		with_env_editor=yes
 		: ${mansectsu='8'}
 		: ${mansectform='5'}
+		: ${mansectmisc='7'}
 		;;
     no)		;;
     *)		AC_MSG_WARN([ignoring unknown argument to --with-csops: $with_csops])
@@ -1790,6 +1792,7 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		AC_CHECK_FUNCS([priv_set], [PSMAN=1])
 		;;
@@ -1884,6 +1887,7 @@ case "$host" in
 
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
@@ -1908,6 +1912,7 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
@@ -2022,6 +2027,7 @@ case "$host" in
 		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='8'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-irix*)
 		AC_DEFINE([_BSD_TYPES])
@@ -2041,6 +2047,7 @@ case "$host" in
 		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-linux*|*-*-k*bsd*-gnu)
 		shadow_funcs="getspnam"
@@ -2069,28 +2076,33 @@ case "$host" in
 		shadow_libs="-lprot -lx"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     m88k-motorola-sysv*)
 		# motorolla's cc (a variant of gcc) does -O but not -O2
 		CFLAGS=`echo $CFLAGS | sed 's/-O2/-O/g'`
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-sequent-sysv*)
 		shadow_funcs="getspnam"
 		shadow_libs="-lsec"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		AC_CHECK_LIB(c89, strcasecmp, [LIBS="${LIBS} -lc89"])
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
@@ -2239,10 +2251,12 @@ case "$host" in
     *-*-*sysv4*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-*sco3.2*)	# SCO OpenServer 5
 		: ${mansectsu='1'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		shadow_funcs="getprpwnam"
 		shadow_libs="-lprot"
 		;;
@@ -2250,6 +2264,7 @@ case "$host" in
     *-*-*sysv5*)
 		: ${mansectsu='1'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 	case "$host" in
 	*-*-sysv5SCO_SV*)	# SCO OpenServer 6.x
 		shadow_funcs="getprpwnam"
@@ -2263,6 +2278,7 @@ case "$host" in
     *-*-sysv*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
 esac
 
@@ -2339,6 +2355,7 @@ dnl Use BSD-style man sections by default
 dnl
 : ${mansectsu='8'}
 : ${mansectform='5'}
+: ${mansectmisc='7'}
 
 dnl
 dnl Add in any libpaths or libraries specified via configure

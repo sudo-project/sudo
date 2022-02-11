@@ -968,13 +968,20 @@ Digest_List ::= Digest_Spec |
 Cmnd_List ::= Cmnd |
               Cmnd ',' Cmnd_List
 
-command name ::= file name |
-                 file name args |
-                 file name '""'
+command name ::= regex |
+                 file name
 
-Edit_Spec ::= "sudoedit" file name+
+command ::= command name |
+            command name args |
+            command name regex |
+            command name '""' |
+            ALL
 
-Cmnd ::= Digest_List? '!'* command name |
+Edit_Spec ::= "sudoedit" file name+ |
+              "sudoedit" regex |
+              "sudoedit"
+
+Cmnd ::= Digest_List? '!'* command |
          '!'* directory |
          '!'* Edit_Spec |
          '!'* Cmnd_Alias
@@ -982,21 +989,18 @@ Cmnd ::= Digest_List? '!'* command name |
 .Pp
 A
 .Li Cmnd_List
-is a list of one or more command names, directories, and other aliases.
-A command name is a fully qualified file name which may include
+is a list of one or more commands, directories, or aliases.
+A command is a fully qualified file name, which may include
 shell-style wildcards (see the
 .Sx Wildcards
+section below),
+or a regular expression that starts with
+.Ql ^
+and ends with
+.Ql $
+(see the
+.Sx Regular expressions
 section below).
-A simple file name allows the user to run the command with any
-arguments they wish.
-However, you may also specify command line arguments (including
-wildcards).
-Alternately, you can specify
-.Li \&""
-to indicate that the command
-may only be run
-.Sy without
-command line arguments.
 A directory is a
 fully qualified path name ending in a
 .Ql / .
@@ -1004,21 +1008,49 @@ When you specify a directory in a
 .Li Cmnd_List ,
 the user will be able to run any file within that directory
 (but not in any sub-directories therein).
+If no command line arguments are specified, the user may run the
+command with any arguments they choose.
+Command line arguments can include wildcards or be a regular
+expression that starts with
+.Ql ^
+and ends with
+.Ql $ .
+If the command line arguments consist of
+.Li \&"" ,
+the command may only be run with
+.Em no
+arguments.
 .Pp
 If a
 .Li Cmnd
-has associated command line arguments, then the arguments
+has associated command line arguments, the arguments
 in the
 .Li Cmnd
-must match exactly those given by the user on the command line
-(or match the wildcards if there are any).
-Note that the following characters must be escaped with a
+must match those given by the user on the command line.
+If the arguments in a
+.Li Cmnd
+begin with the
+.Ql ^
+character, they will be interpreted as a regular expression
+and matched accordingly.
+Otherwise, shell-style wildcards are used when matching.
+Unless a regular expression is specified, the following characters must
+be escaped with a
 .Ql \e
 if they are used in command arguments:
 .Ql ,\& ,
 .Ql :\& ,
 .Ql =\& ,
 .Ql \e .
+To prevent arguments in a
+.Li Cmnd
+that begin with a
+.Ql ^
+character from being interpreted as a regular expression, the
+.Ql ^
+must be escaped with a
+.Ql \e .
+.Pp
 The built-in command
 .Dq Li sudoedit
 is used to permit a user to run
@@ -1035,7 +1067,7 @@ is a command built into
 itself and must be specified in the
 .Em sudoers
 file
-.Sy without
+.Em without
 a leading path.
 If a leading path is present, for example
 .Pa /usr/bin/sudoedit ,
@@ -1047,7 +1079,7 @@ is treated as an error by
 .Nm visudo .
 .Pp
 A
-.Li command name
+.Li command
 may be preceded by a
 .Li Digest_List ,
 a comma-separated list of one or more
@@ -1156,6 +1188,8 @@ This is due to there being two levels of escaping, one in the
 .Em sudoers
 parser itself and another when command line arguments are matched by the
 .Xr fnmatch 3
+or
+.Xr regexec 3
 function.
 .Pp
 Lists have two additional assignment operators,
@@ -1979,6 +2013,69 @@ built-in command should always be path names, so a forward slash
 .Pq Ql /
 will not be matched by a wildcard.
 .El
+.Ss Regular expressions
+Starting with version 1.9.10, it is possible to use
+regular expressions for path names and command line arguments.
+Regular expressions are more expressive than shell-style
+.Em wildcards
+and are usually safer because they provide a greater degree of
+control when matching.
+The type of regular expressions supported by
+.Nm
+are POSIX extended regular expressions, similar to those used by the
+.Xr egrep 1
+utility.
+They are usually documented in the
+.Xr regex @mansectmisc@
+or
+.Xr re_format @mansectmisc@
+manual, depending on the system.
+As an extension, if the regular expression begins with
+.Dq (?i) ,
+it will be matched in a case-insensitive manner.
+.Pp
+In
+.Em sudoers ,
+regular expressions must start with a
+.Ql ^
+character and end with a
+.Ql $ .
+This makes it explicit what is, or is not, a regular expression.
+Either the path name, the command line arguments or both may
+be regular expressions.
+Because the path name and arguments are matched separately, it is
+even possible to use wildcards for the path name and regular
+expressions for the arguments.
+It is not possible to use a single regular expression to match
+both the command and its arguments.
+.Pp
+There is no need to escape
+.Em sudoers
+special characters in a regular expression other than the pound sign
+.Pq Ql # .
+.Pp
+In the following example, user
+.Sy john
+can run the passwd, chsh and chfn commands as root on any host but
+is not allowed to change root's password database entry.
+This kind of rule is impossible to express safely using wildcards.
+.Bd -literal -offset 4n
+john	ALL = ^/usr/bin/(passwd|chsh|chfn)$ ^[a-zA-Z0-9_]+$,\e
+              !^/usr/bin/(passwd|chsh|chfn)$ root
+.Ed
+.Pp
+It is also possible to use a regular expression in conjunction with
+.Nm sudoedit
+rules.
+The following rule would give user bob the ability to edit the
+.Pa /etc/motd ,
+.Pa /etc/issue ,
+and
+.Pa /etc/hosts
+files only.
+.Bd -literal -offset 4n
+bob    ALL = sudoedit ^/etc/(motd|issue|hosts)$
+.Ed
 .Ss Including other files from within sudoers
 It is possible to include other
 .Em sudoers

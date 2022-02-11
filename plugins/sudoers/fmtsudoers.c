@@ -68,11 +68,22 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 	    }
 	    if (negated)
 		sudo_lbuf_append(lbuf, "!");
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED_CMD, "%s",
-		c->cmnd ? c->cmnd : "ALL");
-	    if (c->args) {
+	    if (c->cmnd == NULL || c->cmnd[0] == '^') {
+		/* No additional quoting of characters inside a regex. */
+		sudo_lbuf_append(lbuf, "%s", c->cmnd ? c->cmnd : "ALL");
+	    } else {
+		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED_CMD, "%s",
+		    c->cmnd);
+	    }
+	    if (c->args != NULL) {
 		sudo_lbuf_append(lbuf, " ");
-		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED_ARG, "%s", c->args);
+		if (c->args[0] == '^') {
+		    /* No additional quoting of characters inside a regex. */
+		    sudo_lbuf_append(lbuf, "%s", c->args);
+		} else {
+		    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED_ARG, "%s",
+			c->args);
+		}
 	    }
 	    break;
 	case USERGROUP:

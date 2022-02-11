@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <regex.h>
 
 #include "sudoers.h"
 #include "toke.h"
@@ -38,6 +39,7 @@
 
 static unsigned int arg_len = 0;
 static unsigned int arg_size = 0;
+static char errbuf[1024];
 
 /*
  * Copy the string and collapse any escaped characters.
@@ -133,27 +135,33 @@ fill_cmnd(const char *src, size_t len)
     }
     sudoerslval.command.args = NULL;
 
-    /* Copy the string and collapse any escaped sudo-specific characters. */
-    for (i = 0; i < len; i++) {
-	if (src[i] == '\\' && i != len - 1 && SPECIAL(src[i + 1]))
-	    *dst++ = src[++i];
-	else
-	    *dst++ = src[i];
-    }
-    *dst = '\0';
+    if (src[0] == '^') {
+	/* Copy the regular expression, no escaped sudo-specific characters. */
+	memcpy(dst, src, len);
+	dst[len] = '\0';
+    } else {
+	/* Copy the string and collapse any escaped sudo-specific characters. */
+	for (i = 0; i < len; i++) {
+	    if (src[i] == '\\' && i != len - 1 && SPECIAL(src[i + 1]))
+		*dst++ = src[++i];
+	    else
+		*dst++ = src[i];
+	}
+	*dst = '\0';
 
-    /* Check for sudoedit specified as a fully-qualified path. */
-    if ((dst = strrchr(sudoerslval.command.cmnd, '/')) != NULL) { // -V575
-	if (strcmp(dst, "/sudoedit") == 0) {
-	    if (sudoers_strict) {
-		sudoerserror(
-		    N_("sudoedit should not be specified with a path"));
-	    }
-	    free(sudoerslval.command.cmnd);
-	    if ((sudoerslval.command.cmnd = strdup("sudoedit")) == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-		debug_return_bool(false);
+	/* Check for sudoedit specified as a fully-qualified path. */
+	if ((dst = strrchr(sudoerslval.command.cmnd, '/')) != NULL) { // -V575
+	    if (strcmp(dst, "/sudoedit") == 0) {
+		if (sudoers_strict) {
+		    sudoerserror(
+			N_("sudoedit should not be specified with a path"));
+		}
+		free(sudoerslval.command.cmnd);
+		if ((sudoerslval.command.cmnd = strdup("sudoedit")) == NULL) {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		    debug_return_bool(false);
+		}
 	    }
 	}
     }
@@ -238,4 +246,37 @@ ipv6_valid(const char *s)
     }
 
     debug_return_bool(nmatch <= 1);
+}
+
+bool
+regex_valid(const char *pattern, char **errstr)
+{
+    int errcode, cflags = REG_EXTENDED|REG_NOSUB;
+    char *copy = NULL;
+    regex_t re;
+    debug_decl(regex_valid, SUDOERS_DEBUG_PARSER);
+
+    /* Check for (?i) to enable case-insensitive matching. */
+    if (strncmp(pattern, "^(?i)", 5) == 0) {
+	cflags |= REG_ICASE;
+	copy = strdup(pattern + 4);
+	if (copy == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    sudoerserror(NULL);
+	    debug_return_bool(false);
+	}
+	copy[0] = '^';
+	pattern = copy;
+    }
+
+    errcode = regcomp(&re, pattern, cflags);
+    if (errcode == 0) {
+	regfree(&re);
+    } else {
+	regerror(errcode, &re, errbuf, sizeof(errbuf));
+	*errstr = errbuf;
+    }
+    free(copy);
+
+    debug_return_bool(errcode == 0);
 }

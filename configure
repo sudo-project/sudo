@@ -830,6 +830,7 @@ NOEXECFILE
 intercept_file
 INTERCEPTDIR
 INTERCEPTFILE
+mansectmisc
 mansectform
 mansectsu
 devdir
@@ -3569,6 +3570,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -5209,6 +5211,7 @@ printf "%s\n" "$as_me: adding CSOps standard options" >&6;}
 		with_env_editor=yes
 		: ${mansectsu='8'}
 		: ${mansectform='5'}
+		: ${mansectmisc='7'}
 		;;
     no)		;;
     *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --with-csops: $with_csops" >&5
@@ -17094,6 +17097,7 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 
   for ac_func in priv_set
@@ -17339,6 +17343,7 @@ printf "%s\n" "#define HAVE_DECL_SETAUTHDB $ac_have_decl" >>confdefs.h
 
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
@@ -17376,6 +17381,7 @@ fi
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
@@ -17587,6 +17593,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='8'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-irix*)
 		printf "%s\n" "#define _BSD_TYPES 1" >>confdefs.h
@@ -17646,6 +17653,7 @@ fi
 		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-linux*|*-*-k*bsd*-gnu)
 		shadow_funcs="getspnam"
@@ -17689,18 +17697,21 @@ fi
 		shadow_libs="-lprot -lx"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     m88k-motorola-sysv*)
 		# motorolla's cc (a variant of gcc) does -O but not -O2
 		CFLAGS=`echo $CFLAGS | sed 's/-O2/-O/g'`
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-sequent-sysv*)
 		shadow_funcs="getspnam"
 		shadow_libs="-lsec"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for strcasecmp in -lc89" >&5
@@ -17745,11 +17756,13 @@ fi
 
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
@@ -18022,10 +18035,12 @@ fi
     *-*-*sysv4*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-*sco3.2*)	# SCO OpenServer 5
 		: ${mansectsu='1'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		shadow_funcs="getprpwnam"
 		shadow_libs="-lprot"
 		;;
@@ -18033,6 +18048,7 @@ fi
     *-*-*sysv5*)
 		: ${mansectsu='1'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 	case "$host" in
 	*-*-sysv5SCO_SV*)	# SCO OpenServer 6.x
 		shadow_funcs="getprpwnam"
@@ -18046,6 +18062,7 @@ fi
     *-*-sysv*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
 esac
 
@@ -18122,6 +18139,7 @@ fi
 
 : ${mansectsu='8'}
 : ${mansectform='5'}
+: ${mansectmisc='7'}
 
 if test -n "$with_libpath"; then
     for i in ${with_libpath}; do

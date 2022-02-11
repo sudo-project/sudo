@@ -1008,13 +1008,20 @@ Digest_List ::= Digest_Spec |
 Cmnd_List ::= Cmnd |
               Cmnd ',' Cmnd_List
 
-command name ::= file name |
-                 file name args |
-                 file name '""'
+command name ::= regex |
+                 file name
 
-Edit_Spec ::= "sudoedit" file name+
+command ::= command name |
+            command name args |
+            command name regex |
+            command name '""' |
+            ALL
 
-Cmnd ::= Digest_List? '!'* command name |
+Edit_Spec ::= "sudoedit" file name+ |
+              "sudoedit" regex |
+              "sudoedit"
+
+Cmnd ::= Digest_List? '!'* command |
          '!'* directory |
          '!'* Edit_Spec |
          '!'* Cmnd_Alias
@@ -1023,21 +1030,18 @@ Cmnd ::= Digest_List? '!'* command name |
 .PP
 A
 \fRCmnd_List\fR
-is a list of one or more command names, directories, and other aliases.
-A command name is a fully qualified file name which may include
+is a list of one or more commands, directories, or aliases.
+A command is a fully qualified file name, which may include
 shell-style wildcards (see the
 \fIWildcards\fR
+section below),
+or a regular expression that starts with
+\(oq^\(cq
+and ends with
+\(oq$\(cq
+(see the
+\fIRegular expressions\fR
 section below).
-A simple file name allows the user to run the command with any
-arguments they wish.
-However, you may also specify command line arguments (including
-wildcards).
-Alternately, you can specify
-\fR\&""\fR
-to indicate that the command
-may only be run
-\fBwithout\fR
-command line arguments.
 A directory is a
 fully qualified path name ending in a
 \(oq/\(cq.
@@ -1045,21 +1049,49 @@ When you specify a directory in a
 \fRCmnd_List\fR,
 the user will be able to run any file within that directory
 (but not in any sub-directories therein).
+If no command line arguments are specified, the user may run the
+command with any arguments they choose.
+Command line arguments can include wildcards or be a regular
+expression that starts with
+\(oq^\(cq
+and ends with
+\(oq$\(cq.
+If the command line arguments consist of
+\fR\&""\fR,
+the command may only be run with
+\fIno\fR
+arguments.
 .PP
 If a
 \fRCmnd\fR
-has associated command line arguments, then the arguments
+has associated command line arguments, the arguments
 in the
 \fRCmnd\fR
-must match exactly those given by the user on the command line
-(or match the wildcards if there are any).
-Note that the following characters must be escaped with a
+must match those given by the user on the command line.
+If the arguments in a
+\fRCmnd\fR
+begin with the
+\(oq^\(cq
+character, they will be interpreted as a regular expression
+and matched accordingly.
+Otherwise, shell-style wildcards are used when matching.
+Unless a regular expression is specified, the following characters must
+be escaped with a
 \(oq\e\(cq
 if they are used in command arguments:
 \(oq,\&\(cq,
 \(oq:\&\(cq,
 \(oq=\&\(cq,
 \(oq\e\(cq.
+To prevent arguments in a
+\fRCmnd\fR
+that begin with a
+\(oq^\(cq
+character from being interpreted as a regular expression, the
+\(oq^\(cq
+must be escaped with a
+\(oq\e\(cq.
+.PP
 The built-in command
 \(lq\fRsudoedit\fR\(rq
 is used to permit a user to run
@@ -1076,7 +1108,7 @@ is a command built into
 itself and must be specified in the
 \fIsudoers\fR
 file
-\fBwithout\fR
+\fIwithout\fR
 a leading path.
 If a leading path is present, for example
 \fI/usr/bin/sudoedit\fR,
@@ -1088,7 +1120,7 @@ is treated as an error by
 \fBvisudo\fR.
 .PP
 A
-\fRcommand name\fR
+\fRcommand\fR
 may be preceded by a
 \fRDigest_List\fR,
 a comma-separated list of one or more
@@ -1206,6 +1238,8 @@ This is due to there being two levels of escaping, one in the
 \fIsudoers\fR
 parser itself and another when command line arguments are matched by the
 fnmatch(3)
+or
+regexec(3)
 function.
 .PP
 Lists have two additional assignment operators,
@@ -2101,6 +2135,75 @@ Command line arguments to the
 built-in command should always be path names, so a forward slash
 (\(oq/\(cq)
 will not be matched by a wildcard.
+.SS "Regular expressions"
+Starting with version 1.9.10, it is possible to use
+regular expressions for path names and command line arguments.
+Regular expressions are more expressive than shell-style
+\fIwildcards\fR
+and are usually safer because they provide a greater degree of
+control when matching.
+The type of regular expressions supported by
+\fBsudoers\fR
+are POSIX extended regular expressions, similar to those used by the
+egrep(1)
+utility.
+They are usually documented in the
+regex(@mansectmisc@)
+or
+re_format(@mansectmisc@)
+manual, depending on the system.
+As an extension, if the regular expression begins with
+\(lq(?i)\(rq,
+it will be matched in a case-insensitive manner.
+.PP
+In
+\fIsudoers\fR,
+regular expressions must start with a
+\(oq^\(cq
+character and end with a
+\(oq$\(cq.
+This makes it explicit what is, or is not, a regular expression.
+Either the path name, the command line arguments or both may
+be regular expressions.
+Because the path name and arguments are matched separately, it is
+even possible to use wildcards for the path name and regular
+expressions for the arguments.
+It is not possible to use a single regular expression to match
+both the command and its arguments.
+.PP
+There is no need to escape
+\fIsudoers\fR
+special characters in a regular expression other than the pound sign
+(\(oq#\(cq).
+.PP
+In the following example, user
+\fBjohn\fR
+can run the passwd, chsh and chfn commands as root on any host but
+is not allowed to change root's password database entry.
+This kind of rule is impossible to express safely using wildcards.
+.nf
+.sp
+.RS 4n
+john	ALL = ^/usr/bin/(passwd|chsh|chfn)$ ^[a-zA-Z0-9_]+$,\e
+              !^/usr/bin/(passwd|chsh|chfn)$ root
+.RE
+.fi
+.PP
+It is also possible to use a regular expression in conjunction with
+\fBsudoedit\fR
+rules.
+The following rule would give user bob the ability to edit the
+\fI/etc/motd\fR,
+\fI/etc/issue\fR,
+and
+\fI/etc/hosts\fR
+files only.
+.nf
+.sp
+.RS 4n
+bob    ALL = sudoedit ^/etc/(motd|issue|hosts)$
+.RE
+.fi
 .SS "Including other files from within sudoers"
 It is possible to include other
 \fIsudoers\fR
