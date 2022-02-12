@@ -1977,17 +1977,17 @@ or
 will match across word boundaries, which may be unexpected.
 For example, while a sudoers entry like:
 .Bd -literal -offset 4n
-%operator ALL = /bin/cat /var/log/messages*
+%operator ALL = /bin/cat @log_dir@/messages*
 .Ed
 .Pp
 will allow command like:
 .Bd -literal -offset 4n
-$ sudo cat /var/log/messages.1
+$ sudo cat @log_dir@/messages.1
 .Ed
 .Pp
 It will also allow:
 .Bd -literal -offset 4n
-$ sudo cat /var/log/messages /etc/shadow
+$ sudo cat @log_dir@/messages /etc/shadow
 .Ed
 .Pp
 which is probably not what was intended.
@@ -5423,7 +5423,7 @@ If the
 option is set,
 .Nm
 will log to a local file, such as
-.Pa /var/log/sudo .
+.Pa @log_dir@/sudo .
 When logging to a file,
 .Nm
 uses a format similar to
@@ -5773,7 +5773,7 @@ Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
 Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
-Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
+Defaults@SERVERS	log_year, logfile=@log_dir@/sudo.log
 Defaults!PAGERS		noexec
 .Ed
 .Pp
@@ -6572,7 +6572,7 @@ utility functions
 .Pp
 For example:
 .Bd -literal
-Debug sudoers.so /var/log/sudoers_debug match@info,nss@info
+Debug sudoers.so @log_dir@/sudoers_debug match@info,nss@info
 .Ed
 .Pp
 For more information, see the

@@ -824,8 +824,8 @@ Sudo log server configuration file
 
 # The directory to store messages in before they are sent to the relay.
 # Messages are stored in wire format.
-# The default value is /var/log/sudo_logsrvd.
-#relay_dir = /var/log/sudo_logsrvd
+# The default value is @relay_dir@.
+#relay_dir = @relay_dir@
 
 # The number of seconds to wait after a connection error before
 # making a new attempt to forward a message to a relay host.
@@ -883,7 +883,7 @@ Sudo log server configuration file
 [iolog]
 # The top-level directory to use when constructing the path name for the
 # I/O log directory.  The session sequence number, if any, is stored here.
-#iolog_dir = /var/log/sudo-io
+#iolog_dir = @iolog_dir@
 
 # The path name, relative to iolog_dir, in which to store I/O logs.
 # Note that iolog_file may contain directory components.
@@ -960,20 +960,20 @@ Sudo log server configuration file
 # The following syslog facilities are supported: authpriv (if your OS
 # supports it), auth, daemon, user, local0, local1, local2, local3,
 # local4, local5, local6, and local7.
-#facility = authpriv
+#facility = @logfac@
 
 # Syslog priority to use for event log accept messages, when the command
 # is allowed by the security policy.  The following syslog priorities are
 # supported: alert, crit, debug, emerg, err, info, notice, warning, none.
-#accept_priority = notice
+#accept_priority = @goodpri@
 
 # Syslog priority to use for event log reject messages, when the command
 # is not allowed by the security policy.
-#reject_priority = alert
+#reject_priority = @badpri@
 
 # Syslog priority to use for event log alert messages reported by the
 # client.
-#alert_priority = alert
+#alert_priority = @badpri@
 
 # The syslog facility to use for server warning messages.
 # Defaults to daemon.
@@ -982,7 +982,7 @@ Sudo log server configuration file
 [logfile]
 # The path to the file-based event log.
 # This path must be fully-qualified and start with a '/' character.
-#path = /var/log/sudo
+#path = @logpath@
 
 # The format string used when formatting the date and time for
 # file-based event logs.  Formatting is performed via strftime(3) so

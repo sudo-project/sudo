@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 10, 2022
+.Dd February 11, 2022
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1300,10 +1300,10 @@ line to
 with the program set to
 .Pa python_plugin.so .
 For example, to store debug output in
-.Pa /var/log/sudo_python_debug ,
+.Pa @log_dir@/sudo_python_debug ,
 use a line like the following:
 .Bd -literal -offset 4n
-Debug python_plugin.so /var/log/sudo_python_debug \e
+Debug python_plugin.so @log_dir@/sudo_python_debug \e
     plugin@trace,c_calls@trace
 .Ed
 .Pp
@@ -1315,7 +1315,7 @@ For example to just see the debug output of
 .Fn sudo.debug
 calls, use:
 .Bd -literal -offset 4n
-Debug python_plugin.so /var/log/sudo_python_debug plugin@trace
+Debug python_plugin.so @log_dir@/sudo_python_debug plugin@trace
 .Ed
 .Pp
 See
@@ -1402,7 +1402,7 @@ Plugin python_io python_plugin.so \e
     ClassName=DebugDemoPlugin
 
 Debug python_plugin.so \e
-    /var/log/sudo_python_debug plugin@trace,c_calls@trace
+    @log_dir@/sudo_python_debug plugin@trace,c_calls@trace
 .Ed
 .Ss Option conversion API
 The Python plugin API includes two convenience functions to

@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 10, 2022
+.Dd February 11, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1191,7 +1191,7 @@ $ sudoedit -u www ~www/htdocs/index.html
 To view system logs only accessible to root and users in the adm
 group:
 .Bd -literal -offset 4n
-$ sudo -g adm more /var/log/syslog
+$ sudo -g adm more @log_dir@/syslog
 .Ed
 .Pp
 To run an editor as jim with a different primary group:

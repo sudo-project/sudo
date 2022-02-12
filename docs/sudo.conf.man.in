@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "February 10, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "February 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -588,7 +588,7 @@ Examples:
 .nf
 .sp
 .RS 4n
-Debug sudo /var/log/sudo_debug all@warn,plugin@info
+Debug sudo @log_dir@/sudo_debug all@warn,plugin@info
 .RE
 .fi
 .PP
@@ -600,7 +600,7 @@ level for the plugin subsystem.
 .nf
 .sp
 .RS 4n
-Debug sudo_intercept.so /var/log/intercept_debug all@debug
+Debug sudo_intercept.so @log_dir@/intercept_debug all@debug
 .RE
 .fi
 .PP
@@ -869,8 +869,8 @@ front-end configuration
 # Priority may be crit, err, warn, notice, diag, info, trace, or debug.
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
-#Debug sudo /var/log/sudo_debug all@debug
-#Debug sudoers.so /var/log/sudoers_debug all@debug
+#Debug sudo @log_dir@/sudo_debug all@debug
+#Debug sudoers.so @log_dir@/sudoers_debug all@debug
 .RE
 .fi
 .SH "SEE ALSO"

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd February 10, 2022
+.Dd February 11, 2022
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -536,7 +536,7 @@ as it does not include a comma
 .Pp
 Examples:
 .Bd -literal -offset 4n
-Debug sudo /var/log/sudo_debug all@warn,plugin@info
+Debug sudo @log_dir@/sudo_debug all@warn,plugin@info
 .Ed
 .Pp
 would log all debugging statements at the
@@ -545,7 +545,7 @@ level and higher in addition to those at the
 .Em info
 level for the plugin subsystem.
 .Bd -literal -offset 4n
-Debug sudo_intercept.so /var/log/intercept_debug all@debug
+Debug sudo_intercept.so @log_dir@/intercept_debug all@debug
 .Ed
 .Pp
 would log all debugging statements, regardless of level, for the
@@ -798,8 +798,8 @@ front-end configuration
 # Priority may be crit, err, warn, notice, diag, info, trace, or debug.
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
-#Debug sudo /var/log/sudo_debug all@debug
-#Debug sudoers.so /var/log/sudoers_debug all@debug
+#Debug sudo @log_dir@/sudo_debug all@debug
+#Debug sudoers.so @log_dir@/sudoers_debug all@debug
 .Ed
 .Sh SEE ALSO
 .Xr sudo_plugin @mansectform@ ,

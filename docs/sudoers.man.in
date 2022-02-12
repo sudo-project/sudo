@@ -2092,7 +2092,7 @@ For example, while a sudoers entry like:
 .nf
 .sp
 .RS 4n
-%operator ALL = /bin/cat /var/log/messages*
+%operator ALL = /bin/cat @log_dir@/messages*
 .RE
 .fi
 .PP
@@ -2100,7 +2100,7 @@ will allow command like:
 .nf
 .sp
 .RS 4n
-$ sudo cat /var/log/messages.1
+$ sudo cat @log_dir@/messages.1
 .RE
 .fi
 .PP
@@ -2108,7 +2108,7 @@ It will also allow:
 .nf
 .sp
 .RS 4n
-$ sudo cat /var/log/messages /etc/shadow
+$ sudo cat @log_dir@/messages /etc/shadow
 .RE
 .fi
 .PP
@@ -5817,7 +5817,7 @@ If the
 option is set,
 \fBsudoers\fR
 will log to a local file, such as
-\fI/var/log/sudo\fR.
+\fI@log_dir@/sudo\fR.
 When logging to a file,
 \fBsudoers\fR
 uses a format similar to
@@ -6215,7 +6215,7 @@ Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
 Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
-Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
+Defaults@SERVERS	log_year, logfile=@log_dir@/sudo.log
 Defaults!PAGERS		noexec
 .RE
 .fi
@@ -7110,7 +7110,7 @@ For example:
 .nf
 .sp
 .RS 0n
-Debug sudoers.so /var/log/sudoers_debug match@info,nss@info
+Debug sudoers.so @log_dir@/sudoers_debug match@info,nss@info
 .RE
 .fi
 .PP

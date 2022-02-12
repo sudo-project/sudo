@@ -17,7 +17,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "February 10, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "February 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1613,12 +1613,12 @@ sudo.conf(@mansectform@)
 with the program set to
 \fIpython_plugin.so\fR.
 For example, to store debug output in
-\fI/var/log/sudo_python_debug\fR,
+\fI@log_dir@/sudo_python_debug\fR,
 use a line like the following:
 .nf
 .sp
 .RS 4n
-Debug python_plugin.so /var/log/sudo_python_debug \e
+Debug python_plugin.so @log_dir@/sudo_python_debug \e
     plugin@trace,c_calls@trace
 .RE
 .fi
@@ -1633,7 +1633,7 @@ calls, use:
 .nf
 .sp
 .RS 4n
-Debug python_plugin.so /var/log/sudo_python_debug plugin@trace
+Debug python_plugin.so @log_dir@/sudo_python_debug plugin@trace
 .RE
 .fi
 .PP
@@ -1741,7 +1741,7 @@ Plugin python_io python_plugin.so \e
     ClassName=DebugDemoPlugin
 
 Debug python_plugin.so \e
-    /var/log/sudo_python_debug plugin@trace,c_calls@trace
+    @log_dir@/sudo_python_debug plugin@trace,c_calls@trace
 .RE
 .fi
 .SS "Option conversion API"

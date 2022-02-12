@@ -12,7 +12,7 @@ Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
 Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
-Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
+Defaults@SERVERS	log_year, logfile=@log_dir@/sudo.log
 Defaults!PAGERS		noexec
 
 ##

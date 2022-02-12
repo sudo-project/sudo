@@ -79,8 +79,8 @@ examples/Makefile.in
 examples/cvtsudoers.conf
 examples/pam.conf
 examples/sudo.conf.in
-examples/sudo_logsrvd.conf
-examples/sudoers
+examples/sudo_logsrvd.conf.in
+examples/sudoers.in
 examples/syslog.conf
 include/Makefile.in
 include/compat/charclass.h
@@ -245,8 +245,8 @@ lib/util/progname.c
 lib/util/pw_dup.c
 lib/util/pwrite.c
 lib/util/rcstr.c
-lib/util/regex.c
 lib/util/reallocarray.c
+lib/util/regex.c
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.1
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.2
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.3
