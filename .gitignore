@@ -31,6 +31,9 @@ docs/*.mdoc
 docs/fixman.sed
 
 examples/sudo.conf
+examples/sudo_logsrvd.conf
+examples/sudoers
+examples/syslog.conf
 
 etc/init.d/sudo.conf
 

@@ -29,6 +29,9 @@ Makefile$
 ^etc/init\.d/sudo\.conf$
 
 ^examples/sudo\.conf$
+^examples/sudo_logsrvd\.conf$
+^examples/sudoers$
+^examples/syslog\.conf$
 
 ^init\.d/.*\.sh$
 ^init\.d/sudo\.conf$

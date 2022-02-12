@@ -135,5 +135,5 @@
 # Priority may be crit, err, warn, notice, diag, info, trace, or debug.
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
-#Debug sudo /var/log/sudo_debug all@debug
-#Debug sudoers.so /var/log/sudoers_debug all@debug
+#Debug sudo @log_dir@/sudo_debug all@debug
+#Debug sudoers.so @log_dir@/sudoers_debug all@debug

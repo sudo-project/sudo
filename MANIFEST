@@ -81,7 +81,7 @@ examples/pam.conf
 examples/sudo.conf.in
 examples/sudo_logsrvd.conf.in
 examples/sudoers.in
-examples/syslog.conf
+examples/syslog.conf.in
 include/Makefile.in
 include/compat/charclass.h
 include/compat/endian.h

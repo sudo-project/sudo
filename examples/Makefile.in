@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2014, 2017-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2014, 2017-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -55,7 +55,7 @@ SHELL = @SHELL@
 LOGSRVD_CONF = @LOGSRVD_CONF@
 
 EXAMPLES = $(srcdir)/cvtsudoers.conf $(srcdir)/pam.conf sudo.conf \
-	   $(LOGSRVD_CONF) sudoers $(srcdir)/syslog.conf
+	   $(LOGSRVD_CONF) sudoers syslog.conf
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
@@ -75,6 +75,9 @@ sudo.conf: $(srcdir)/sudo.conf.in
 
 sudo_logsrvd.conf: $(srcdir)/sudo_logsrvd.conf.in
 	cd $(top_builddir) && ./config.status --file examples/sudo_logsrvd.conf
+
+syslog.conf: $(srcdir)/syslog.conf.in
+	cd $(top_builddir) && ./config.status --file examples/syslog.conf
 
 pre-install:
 
@@ -121,7 +124,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile sudo.conf
+	-rm -rf Makefile sudo.conf sudo_logsrvd.conf sudoers syslog.conf
 
 clobber: distclean
 
