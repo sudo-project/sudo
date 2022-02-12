@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.9.10\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2022-02-11 18:33-0700\n"
+"POT-Creation-Date: 2022-02-12 09:31-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -67,7 +67,7 @@ msgid "%s: %s"
 msgstr ""
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:55
-#: lib/util/json.c:184 lib/util/regex.c:107 lib/util/regex.c:115
+#: lib/util/json.c:184 lib/util/regex.c:113 lib/util/regex.c:121
 #: lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381
 #: lib/util/sudo_conf.c:665 src/conversation.c:81 src/exec_intercept.c:100
 #: src/exec_intercept.c:330 src/exec_intercept.c:354 src/exec_intercept.c:377
@@ -127,6 +127,10 @@ msgstr ""
 #: lib/util/mkdir_parents.c:157
 #, c-format
 msgid "unable to mkdir %.*s"
+msgstr ""
+
+#: lib/util/regex.c:103
+msgid "regular expression too large"
 msgstr ""
 
 #: lib/util/strsignal.c:50

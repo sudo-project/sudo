@@ -98,6 +98,12 @@ sudo_regex_compile_v1(void *v, const char *pattern, const char **errstr)
     /* Some callers just want to check the validity of the pattern. */
     preg = v ? v : &rebuf;
 
+    /* Limit the length of regular expressions to avoid fuzzer issues. */
+    if (strlen(pattern) > 1024) {
+	*errstr = N_("regular expression too large");
+	debug_return_bool(false);
+    }
+
     /* Check for (?i) to enable case-insensitive matching. */
     cp = pattern[0] == '^' ? pattern + 1 : pattern;
     if (strncmp(cp, "(?i)", 4) == 0) {

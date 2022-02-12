@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "February 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "February 12, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2170,6 +2170,9 @@ even possible to use wildcards for the path name and regular
 expressions for the arguments.
 It is not possible to use a single regular expression to match
 both the command and its arguments.
+Regular expressions in
+\fIsudoers\fR
+are limited to 1024 characters.
 .PP
 There is no need to escape
 \fIsudoers\fR
@@ -5427,6 +5430,7 @@ match password prompts in the terminal output.
 As an extension, if the regular expression begins with
 \(lq(?i)\(rq,
 it will be matched in a case-insensitive manner.
+Each regular expression is limited to 1024 characters.
 This option is only used when
 \fIlog_passwords\fR
 has been disabled.

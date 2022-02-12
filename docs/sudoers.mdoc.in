@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 11, 2022
+.Dd February 12, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2048,6 +2048,9 @@ even possible to use wildcards for the path name and regular
 expressions for the arguments.
 It is not possible to use a single regular expression to match
 both the command and its arguments.
+Regular expressions in
+.Em sudoers
+are limited to 1024 characters.
 .Pp
 There is no need to escape
 .Em sudoers
@@ -5065,6 +5068,7 @@ match password prompts in the terminal output.
 As an extension, if the regular expression begins with
 .Dq (?i) ,
 it will be matched in a case-insensitive manner.
+Each regular expression is limited to 1024 characters.
 This option is only used when
 .Em log_passwords
 has been disabled.

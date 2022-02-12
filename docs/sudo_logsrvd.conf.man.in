@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "February 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "February 12, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -647,6 +647,7 @@ it will be matched in a case-insensitive manner.
 Multiple
 \fIpassprompt_regex\fR
 settings may be specified.
+Each regular expression is limited to 1024 characters.
 The default value is
 \(lq[Pp]assword[: ]*\(rq.
 .SS "eventlog"
