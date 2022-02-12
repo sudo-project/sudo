@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.9\n"
+"Project-Id-Version: sudo 1.9.10\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2022-01-18 16:50-0700\n"
+"POT-Creation-Date: 2022-02-11 18:33-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -67,37 +67,38 @@ msgid "%s: %s"
 msgstr ""
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:55
-#: lib/util/json.c:184 lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304
-#: lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:665 src/conversation.c:81
-#: src/exec_intercept.c:100 src/exec_intercept.c:330 src/exec_intercept.c:354
-#: src/exec_intercept.c:377 src/exec_intercept.c:385 src/exec_intercept.c:410
-#: src/exec_intercept.c:416 src/exec_intercept.c:425 src/exec_intercept.c:431
-#: src/exec_intercept.c:565 src/exec_intercept.c:706 src/exec_monitor.c:456
-#: src/exec_monitor.c:462 src/exec_monitor.c:470 src/exec_monitor.c:478
-#: src/exec_monitor.c:485 src/exec_monitor.c:492 src/exec_monitor.c:499
-#: src/exec_monitor.c:506 src/exec_monitor.c:513 src/exec_monitor.c:520
-#: src/exec_monitor.c:527 src/exec_nopty.c:219 src/exec_nopty.c:228
-#: src/exec_nopty.c:235 src/exec_nopty.c:242 src/exec_nopty.c:249
-#: src/exec_nopty.c:256 src/exec_nopty.c:263 src/exec_nopty.c:270
-#: src/exec_nopty.c:277 src/exec_nopty.c:284 src/exec_nopty.c:291
-#: src/exec_nopty.c:298 src/exec_nopty.c:306 src/exec_preload.c:143
-#: src/exec_preload.c:204 src/exec_pty.c:840 src/exec_pty.c:849
-#: src/exec_pty.c:906 src/exec_pty.c:1231 src/exec_pty.c:1240
-#: src/exec_pty.c:1247 src/exec_pty.c:1254 src/exec_pty.c:1261
-#: src/exec_pty.c:1268 src/exec_pty.c:1275 src/exec_pty.c:1282
-#: src/exec_pty.c:1289 src/exec_pty.c:1296 src/exec_pty.c:1303
-#: src/exec_pty.c:1311 src/exec_pty.c:1774 src/load_plugins.c:156
-#: src/load_plugins.c:181 src/load_plugins.c:217 src/load_plugins.c:449
-#: src/load_plugins.c:455 src/parse_args.c:192 src/parse_args.c:214
-#: src/parse_args.c:287 src/parse_args.c:632 src/parse_args.c:654
-#: src/parse_args.c:679 src/preserve_fds.c:46 src/preserve_fds.c:131
-#: src/selinux.c:89 src/selinux.c:362 src/selinux.c:474 src/selinux.c:483
-#: src/sesh.c:113 src/sesh.c:411 src/sudo.c:230 src/sudo.c:639 src/sudo.c:883
-#: src/sudo.c:1083 src/sudo.c:1104 src/sudo.c:1397 src/sudo.c:1566
-#: src/sudo.c:1793 src/sudo.c:2127 src/sudo_edit.c:89 src/sudo_edit.c:149
-#: src/sudo_edit.c:429 src/sudo_edit.c:438 src/sudo_edit.c:539
-#: src/sudo_edit.c:546 src/sudo_edit.c:677 src/sudo_edit.c:697
-#: src/sudo_intercept_common.c:113 src/sudo_intercept_common.c:317
+#: lib/util/json.c:184 lib/util/regex.c:107 lib/util/regex.c:115
+#: lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381
+#: lib/util/sudo_conf.c:665 src/conversation.c:81 src/exec_intercept.c:100
+#: src/exec_intercept.c:330 src/exec_intercept.c:354 src/exec_intercept.c:377
+#: src/exec_intercept.c:385 src/exec_intercept.c:410 src/exec_intercept.c:416
+#: src/exec_intercept.c:425 src/exec_intercept.c:431 src/exec_intercept.c:565
+#: src/exec_intercept.c:706 src/exec_monitor.c:456 src/exec_monitor.c:462
+#: src/exec_monitor.c:470 src/exec_monitor.c:478 src/exec_monitor.c:485
+#: src/exec_monitor.c:492 src/exec_monitor.c:499 src/exec_monitor.c:506
+#: src/exec_monitor.c:513 src/exec_monitor.c:520 src/exec_monitor.c:527
+#: src/exec_nopty.c:219 src/exec_nopty.c:228 src/exec_nopty.c:235
+#: src/exec_nopty.c:242 src/exec_nopty.c:249 src/exec_nopty.c:256
+#: src/exec_nopty.c:263 src/exec_nopty.c:270 src/exec_nopty.c:277
+#: src/exec_nopty.c:284 src/exec_nopty.c:291 src/exec_nopty.c:298
+#: src/exec_nopty.c:306 src/exec_preload.c:143 src/exec_preload.c:204
+#: src/exec_pty.c:840 src/exec_pty.c:849 src/exec_pty.c:906 src/exec_pty.c:1231
+#: src/exec_pty.c:1240 src/exec_pty.c:1247 src/exec_pty.c:1254
+#: src/exec_pty.c:1261 src/exec_pty.c:1268 src/exec_pty.c:1275
+#: src/exec_pty.c:1282 src/exec_pty.c:1289 src/exec_pty.c:1296
+#: src/exec_pty.c:1303 src/exec_pty.c:1311 src/exec_pty.c:1774
+#: src/load_plugins.c:156 src/load_plugins.c:181 src/load_plugins.c:217
+#: src/load_plugins.c:449 src/load_plugins.c:455 src/parse_args.c:192
+#: src/parse_args.c:214 src/parse_args.c:287 src/parse_args.c:632
+#: src/parse_args.c:654 src/parse_args.c:679 src/preserve_fds.c:46
+#: src/preserve_fds.c:131 src/selinux.c:89 src/selinux.c:362 src/selinux.c:474
+#: src/selinux.c:483 src/sesh.c:113 src/sesh.c:411 src/sudo.c:230
+#: src/sudo.c:639 src/sudo.c:883 src/sudo.c:1083 src/sudo.c:1104
+#: src/sudo.c:1397 src/sudo.c:1566 src/sudo.c:1793 src/sudo.c:2127
+#: src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:429
+#: src/sudo_edit.c:438 src/sudo_edit.c:539 src/sudo_edit.c:546
+#: src/sudo_edit.c:677 src/sudo_edit.c:697 src/sudo_intercept_common.c:113
+#: src/sudo_intercept_common.c:317
 msgid "unable to allocate memory"
 msgstr ""
 
