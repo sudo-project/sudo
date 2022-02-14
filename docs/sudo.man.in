@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "February 11, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "February 14, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -664,11 +664,12 @@ option to list the privileges for
 \fIuser\fR
 instead of for the invoking user.
 The security policy may restrict listing other users' privileges.
-The
+When using the
 \fIsudoers\fR
-policy only allows root or a user with the
-\fRALL\fR
-privilege on the current host to use this option.
+policy, only root or a user with the ability to run any command as
+either root or the specified
+\fIuser\fR
+on the current host may use this option.
 .TP 12n
 \fB\-T\fR \fItimeout\fR, \fB\--command-timeout\fR=\fItimeout\fR
 Used to set a timeout for the command.

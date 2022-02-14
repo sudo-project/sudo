@@ -1188,6 +1188,11 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	    sudo_warnx(U_("unknown user %s"), list_user);
 	    debug_return_int(-1);
 	}
+	/* A user may only list another user they have runas access to. */
+	if (runas_pw != NULL)
+	    sudo_pw_delref(runas_pw);
+	runas_pw = list_pw;
+	sudo_pw_addref(list_pw);
     }
     ret = sudoers_policy_main(argc, argv, I_LISTPW, NULL, verbose, NULL);
     if (list_user) {

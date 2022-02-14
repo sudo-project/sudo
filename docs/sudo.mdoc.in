@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 11, 2022
+.Dd February 14, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -620,11 +620,12 @@ option to list the privileges for
 .Ar user
 instead of for the invoking user.
 The security policy may restrict listing other users' privileges.
-The
+When using the
 .Em sudoers
-policy only allows root or a user with the
-.Li ALL
-privilege on the current host to use this option.
+policy, only root or a user with the ability to run any command as
+either root or the specified
+.Ar user
+on the current host may use this option.
 .It Fl T Ar timeout , Fl -command-timeout Ns = Ns Ar timeout
 Used to set a timeout for the command.
 If the timeout expires before the command has exited, the
