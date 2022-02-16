@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "February 12, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2082,41 +2082,12 @@ arbitrary strings and not just path names.
 .PP
 \fBWildcards in command line arguments should be used with care.\fR
 .br
-Command line arguments are matched as a single, concatenated string.
-This mean a wildcard character such as
-\(oq\&?\(cq
-or
-\(oq*\(cq
-will match across word boundaries, which may be unexpected.
-For example, while a sudoers entry like:
-.nf
-.sp
-.RS 4n
-%operator ALL = /bin/cat @log_dir@/messages*
-.RE
-.fi
-.PP
-will allow command like:
-.nf
-.sp
-.RS 4n
-$ sudo cat @log_dir@/messages.1
-.RE
-.fi
-.PP
-It will also allow:
-.nf
-.sp
-.RS 4n
-$ sudo cat @log_dir@/messages /etc/shadow
-.RE
-.fi
-.PP
-which is probably not what was intended.
-In most cases it is better to do command line processing
-outside of the
-\fIsudoers\fR
-file in a scripting language.
+Wildcards can match any character, including white space.
+In most cases, it is safer to use a regular expression to match
+command line arguments.
+For more information, see
+\fIWildcards in command arguments\fR
+below.
 .SS "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
 .TP 10n
@@ -2181,14 +2152,15 @@ special characters in a regular expression other than the pound sign
 .PP
 In the following example, user
 \fBjohn\fR
-can run the passwd, chsh and chfn commands as root on any host but
-is not allowed to change root's password database entry.
+can run the
+passwd(1)
+command as root on any host but is not allowed to change root's password.
 This kind of rule is impossible to express safely using wildcards.
 .nf
 .sp
 .RS 4n
-john	ALL = ^/usr/bin/(passwd|chsh|chfn)$ ^[a-zA-Z0-9_]+$,\e
-              !^/usr/bin/(passwd|chsh|chfn)$ root
+john	ALL = /usr/bin/passwd ^[a-zA-Z0-9_]+$,\e
+              !/usr/bin/passwd root
 .RE
 .fi
 .PP
@@ -2207,6 +2179,42 @@ files only.
 bob    ALL = sudoedit ^/etc/(motd|issue|hosts)$
 .RE
 .fi
+.PP
+Regular expressions may also be used to match the command itself.
+In this example, a regular expression is used to allow user
+\fBsid\fR
+to run the
+\fI/usr/sbin/groupadd\fR,
+\fI/usr/sbin/groupmod\fR,
+\fI/usr/sbin/groupdel\fR,
+\fI/usr/sbin/useradd\fR,
+\fI/usr/sbin/usermod\fR,
+and
+\fI/usr/sbin/userdel\fR
+commands as root.
+.nf
+.sp
+.RS 4n
+sid    ALL = ^/usr/sbin/(group|user)(add|mod|del)$
+.RE
+.fi
+.PP
+One disadvantage of using a regular expression to match the command
+name is that it is not possible to match relative paths such as
+\fI./useradd\fR
+or
+\fI../sbin/useradd\fR.
+This has security implications when a regular expression is used
+for the command name in conjunction with the negation operator,
+\(oq!\&\(cq,
+as such rules can be trivially bypassed.
+Because of this, using a negated regular expression for the command name is
+\fBstrongly discouraged\fR.
+This does not apply to negated commands that only use a regular
+expression to match the command arguments.
+See
+\fIRegular expressions in command names\fR
+below for more information.
 .SS "Including other files from within sudoers"
 It is possible to include other
 \fIsudoers\fR
@@ -2752,7 +2760,7 @@ fnmatch(3)
 function, which does not access the file system to do its matching.
 The disadvantage of
 \fIfast_glob\fR
-is that it is unable to match relative path names such as
+is that it is unable to match relative paths such as
 \fI./ls\fR
 or
 \fI../bin/ls\fR.
@@ -4097,7 +4105,7 @@ timestamp_timeout
 .br
 Number of minutes that can elapse before
 \fBsudo\fR
-will ask for a passwd again.
+will ask for a password again.
 The timeout may include a fractional component if
 minute granularity is insufficient, for example
 \fR2.5\fR.
@@ -6627,6 +6635,84 @@ is enabled by changing to
 and running
 \fR./passwd root\fR
 instead.
+.PP
+Another potential issue is that when
+\fBsudo\fR
+executes the command, it must use the command or path specified by
+the user instead of a path listed in the
+\fIsudoers\fR
+file.
+This may lead to a time of check versus time of use race condition.
+.SS "Wildcards in command arguments"
+Command line arguments are matched as a single, concatenated string.
+This mean a wildcard character such as
+\(oq\&?\(cq
+or
+\(oq*\(cq
+will match across word boundaries, which may be unexpected.
+For example, while a sudoers entry like:
+.nf
+.sp
+.RS 4n
+%operator ALL = /bin/cat @log_dir@/messages*
+.RE
+.fi
+.PP
+will allow command like:
+.nf
+.sp
+.RS 4n
+$ sudo cat @log_dir@/messages.1
+.RE
+.fi
+.PP
+It will also allow:
+.nf
+.sp
+.RS 4n
+$ sudo cat @log_dir@/messages /etc/shadow
+.RE
+.fi
+.PP
+which is probably not what was intended.
+A safer alternative is to use a regular expression for matching
+command line arguments.
+The above example can be rewritten as a regular expression:
+.nf
+.sp
+.RS 4n
+%operator ALL = /bin/cat ^@log_dir@/messages[^[:space:]]*$
+.RE
+.fi
+.PP
+The regular expression will only match a single file with a
+name that begins with
+\fI@log_dir@/messages\fR
+and does not include any white space in the name.
+It is often better to do command line processing outside of the
+\fIsudoers\fR
+file in a scripting language for anything non-trivial.
+.SS "Regular expressions in command names"
+Using a regular expression to match a command name has the same
+security implications as using the
+\fIfast_glob\fR
+option:
+.TP 3n
+\fB\(bu\fR
+It is not possible to reliably negate commands when the
+path name is a regular expression.
+.TP 3n
+\fB\(bu\fR
+When
+\fBsudo\fR
+executes the command, it must use the command or path specified by
+the user instead of a path listed in the
+\fIsudoers\fR
+file.
+This may lead to a time of check versus time of use race condition.
+.PP
+These issues do not apply to rules where only the command line
+options are matched using a regular expression.
 .SS "Preventing shell escapes"
 Once
 \fBsudo\fR

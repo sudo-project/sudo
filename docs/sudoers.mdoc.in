@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 12, 2022
+.Dd February 16, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1969,32 +1969,12 @@ arbitrary strings and not just path names.
 Wildcards in command line arguments should be used with care.
 .Ef
 .br
-Command line arguments are matched as a single, concatenated string.
-This mean a wildcard character such as
-.Ql \&?
-or
-.Ql *
-will match across word boundaries, which may be unexpected.
-For example, while a sudoers entry like:
-.Bd -literal -offset 4n
-%operator ALL = /bin/cat @log_dir@/messages*
-.Ed
-.Pp
-will allow command like:
-.Bd -literal -offset 4n
-$ sudo cat @log_dir@/messages.1
-.Ed
-.Pp
-It will also allow:
-.Bd -literal -offset 4n
-$ sudo cat @log_dir@/messages /etc/shadow
-.Ed
-.Pp
-which is probably not what was intended.
-In most cases it is better to do command line processing
-outside of the
-.Em sudoers
-file in a scripting language.
+Wildcards can match any character, including white space.
+In most cases, it is safer to use a regular expression to match
+command line arguments.
+For more information, see
+.Sx Wildcards in command arguments
+below.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
 .Bl -tag -width 8n
@@ -2059,12 +2039,13 @@ special characters in a regular expression other than the pound sign
 .Pp
 In the following example, user
 .Sy john
-can run the passwd, chsh and chfn commands as root on any host but
-is not allowed to change root's password database entry.
+can run the
+.Xr passwd 1
+command as root on any host but is not allowed to change root's password.
 This kind of rule is impossible to express safely using wildcards.
 .Bd -literal -offset 4n
-john	ALL = ^/usr/bin/(passwd|chsh|chfn)$ ^[a-zA-Z0-9_]+$,\e
-              !^/usr/bin/(passwd|chsh|chfn)$ root
+john	ALL = /usr/bin/passwd ^[a-zA-Z0-9_]+$,\e
+              !/usr/bin/passwd root
 .Ed
 .Pp
 It is also possible to use a regular expression in conjunction with
@@ -2079,6 +2060,39 @@ files only.
 .Bd -literal -offset 4n
 bob    ALL = sudoedit ^/etc/(motd|issue|hosts)$
 .Ed
+.Pp
+Regular expressions may also be used to match the command itself.
+In this example, a regular expression is used to allow user
+.Sy sid
+to run the
+.Pa /usr/sbin/groupadd ,
+.Pa /usr/sbin/groupmod ,
+.Pa /usr/sbin/groupdel ,
+.Pa /usr/sbin/useradd ,
+.Pa /usr/sbin/usermod ,
+and
+.Pa /usr/sbin/userdel
+commands as root.
+.Bd -literal -offset 4n
+sid    ALL = ^/usr/sbin/(group|user)(add|mod|del)$
+.Ed
+.Pp
+One disadvantage of using a regular expression to match the command
+name is that it is not possible to match relative paths such as
+.Pa ./useradd
+or
+.Pa ../sbin/useradd .
+This has security implications when a regular expression is used
+for the command name in conjunction with the negation operator,
+.Ql !\& ,
+as such rules can be trivially bypassed.
+Because of this, using a negated regular expression for the command name is
+.Sy strongly discouraged .
+This does not apply to negated commands that only use a regular
+expression to match the command arguments.
+See
+.Sx Regular expressions in command names
+below for more information.
 .Ss Including other files from within sudoers
 It is possible to include other
 .Em sudoers
@@ -2594,7 +2608,7 @@ to use the
 function, which does not access the file system to do its matching.
 The disadvantage of
 .Em fast_glob
-is that it is unable to match relative path names such as
+is that it is unable to match relative paths such as
 .Pa ./ls
 or
 .Pa ../bin/ls .
@@ -3861,7 +3875,7 @@ default is
 .It timestamp_timeout
 Number of minutes that can elapse before
 .Nm sudo
-will ask for a passwd again.
+will ask for a password again.
 The timeout may include a fractional component if
 minute granularity is insufficient, for example
 .Li 2.5 .
@@ -6124,6 +6138,72 @@ is enabled by changing to
 and running
 .Li ./passwd root
 instead.
+.Pp
+Another potential issue is that when
+.Nm sudo
+executes the command, it must use the command or path specified by
+the user instead of a path listed in the
+.Em sudoers
+file.
+This may lead to a time of check versus time of use race condition.
+.Ss Wildcards in command arguments
+Command line arguments are matched as a single, concatenated string.
+This mean a wildcard character such as
+.Ql \&?
+or
+.Ql *
+will match across word boundaries, which may be unexpected.
+For example, while a sudoers entry like:
+.Bd -literal -offset 4n
+%operator ALL = /bin/cat @log_dir@/messages*
+.Ed
+.Pp
+will allow command like:
+.Bd -literal -offset 4n
+$ sudo cat @log_dir@/messages.1
+.Ed
+.Pp
+It will also allow:
+.Bd -literal -offset 4n
+$ sudo cat @log_dir@/messages /etc/shadow
+.Ed
+.Pp
+which is probably not what was intended.
+A safer alternative is to use a regular expression for matching
+command line arguments.
+The above example can be rewritten as a regular expression:
+.Bd -literal -offset 4n
+%operator ALL = /bin/cat ^@log_dir@/messages[^[:space:]]*$
+.Ed
+.Pp
+The regular expression will only match a single file with a
+name that begins with
+.Pa @log_dir@/messages
+and does not include any white space in the name.
+It is often better to do command line processing outside of the
+.Em sudoers
+file in a scripting language for anything non-trivial.
+.Ss Regular expressions in command names
+Using a regular expression to match a command name has the same
+security implications as using the
+.Em fast_glob
+option:
+.Bl -bullet -width 1n
+.It
+It is not possible to reliably negate commands when the
+path name is a regular expression.
+.It
+When
+.Nm sudo
+executes the command, it must use the command or path specified by
+the user instead of a path listed in the
+.Em sudoers
+file.
+This may lead to a time of check versus time of use race condition.
+.El
+.Pp
+These issues do not apply to rules where only the command line
+options are matched using a regular expression.
 .Ss Preventing shell escapes
 Once
 .Nm sudo
