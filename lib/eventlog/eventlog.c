@@ -1177,6 +1177,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
 	goto done;
     }
     eventlog_writeln(fp, full_line, len, evl_conf->file_maxlen);
+    free(full_line);
     (void)fflush(fp);
     if (ferror(fp)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
