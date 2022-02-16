@@ -1,6 +1,20 @@
 Notes on upgrading from an older release
 ========================================
 
+ * Upgrading from a version prior to 1.9.10:
+
+   Sudo now interprets a command line argument in sudoers that
+   begins with a '^' character as a regular expression.  To start
+   a command argument with a literal '^' character, it must be
+   escaped with a backslash ('\').  This may result in a syntax
+   error after upgrading for existing sudoers rules where the command
+   line arguments begin with a '^'.
+
+   A user may now only run "sudo -U otheruser -l" if they have a
+   "sudo ALL" privilege where the RunAs user contains either "root"
+   or "otheruser".  Previously, having "sudo ALL" was sufficient,
+   regardless of the RunAs user.
+
  * Upgrading from a version prior to 1.9.9:
 
    Sudo now runs commands with the core limit resource limit set
