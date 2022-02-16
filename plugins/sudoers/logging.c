@@ -189,8 +189,10 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
 
     if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
 	/* Older servers don't support multiple commands per session. */
-	if (!client_closure->subcommands)
-	    debug_return_bool(true);
+	if (!client_closure->subcommands) {
+            ret = true;
+	    goto done;
+	}
 
 	/* Use existing client closure. */
         if (fmt_reject_message(client_closure, evlog)) {
