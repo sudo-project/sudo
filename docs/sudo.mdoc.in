@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 14, 2022
+.Dd February 16, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1007,7 +1007,7 @@ that reside in a directory that is writable by the user.
 If the user can modify or replace the command there is no way
 to limit what additional commands they can run.
 .Pp
-Please note that
+Note that
 .Nm
 will normally only log the command it explicitly runs.
 If a user runs a command such as
@@ -1025,7 +1025,7 @@ Because of this, care must be taken when giving users access to commands via
 .Nm
 to verify that the command does not inadvertently give the user an
 effective root shell.
-For information on ways to address this, please see the
+For information on ways to address this, see the
 .Em Preventing shell escapes
 section in
 .Xr sudoers @mansectform@ .
@@ -1383,7 +1383,7 @@ $ sudo cd /usr/local/protected
 .Pp
 since when the command exits the parent process (your shell) will
 still be the same.
-Please see the
+See the
 .Sx EXAMPLES
 section for more information.
 .Pp
@@ -1393,9 +1393,9 @@ can expose the same kernel bugs that make set-user-ID shell scripts
 unsafe on some operating systems (if your OS has a /dev/fd/ directory,
 set-user-ID shell scripts are generally safe).
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

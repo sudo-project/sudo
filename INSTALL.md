@@ -4,7 +4,7 @@ Sudo installation instructions
 Sudo uses a `configure` script to probe the capabilities and type of the
 system in question.  Sudo's `configure` script has a large number of options
 that control its behavior and enable or disable optional functionality.
-Please read this document fully before configuring and building sudo.
+Be sure to read this document fully before configuring and building sudo.
 You may also wish to read the file INSTALL.configure which explains more
 about the `configure` script itself.
 
@@ -30,8 +30,8 @@ for a list of packages required to build sudo.
 
 ## Simple sudo installation
 
-0. If you are upgrading from a previous version of sudo please read
-   the info in [docs/UPGRADE.md](docs/UPGRADE.md) before proceeding.
+0. If you are upgrading from a previous version of sudo, read
+   [docs/UPGRADE.md](docs/UPGRADE.md) before proceeding.
 
 1. Read the "OS dependent notes" section for any particular
    "gotchas" relating to your operating system.
@@ -45,8 +45,9 @@ for a list of packages required to build sudo.
 4. Type `make` to compile sudo.  If `configure` did its job properly (and
    you have a supported configuration) there won't be any problems.  If you
    have a problem, check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
-   for tips on what might have gone wrong.  Please mail us if you have a
-   fix or if you are unable to come up with a fix (address at EOF).
+   for tips on what might have gone wrong.  If your problem is not covered,
+   you may file a bug report at https://bugzilla.sudo.ws/ or an issue at
+   https://github.com/sudo-project/sudo/issues/ (not both).
 
 5. Type `make install` (as root) to install sudo, visudo, the
    man pages, and a skeleton sudoers file.  Note that the install
@@ -352,7 +353,7 @@ Defaults are listed in brackets after the description.
 
     --with-ldap[=DIR]
         Enable LDAP support.  If specified, DIR is the base directory
-        containing the LDAP include and lib directories.  Please see
+        containing the LDAP include and lib directories.  See
         [README.LDAP.md](README.LDAP.md) for more information.
 
     --with-ldap-conf-file=PATH
@@ -391,7 +392,7 @@ Defaults are listed in brackets after the description.
         This is also used to support the "log_subcmds" sudoers
         setting.  For example, this means that for a shell run
         through sudo, the individual commands run by the shell are
-        also subject to rules in the sudoers file.  Please see the
+        also subject to rules in the sudoers file.  See the
         "Preventing Shell Escapes" section in the sudoers man page
         for details.  If specified, PATH should be a fully qualified
         path name, e.g.  /usr/local/libexec/sudo/sudo_intercept.so.
@@ -402,11 +403,11 @@ Defaults are listed in brackets after the description.
     --with-noexec[=PATH]
         Enable support for the "noexec" functionality which prevents
         a dynamically-linked program being run by sudo from executing
-        another program (think shell escapes).  Please see the
-        "Preventing Shell Escapes" section in the sudoers man page
-        for details.  If specified, PATH should be a fully qualified
-        path name, e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH
-        is "no", noexec support will not be compiled in.  The default
+        another program (think shell escapes).  See the "Preventing
+        Shell Escapes" section in the sudoers man page for details.
+        If specified, PATH should be a fully qualified path name,
+        e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH is
+        "no", noexec support will not be compiled in.  The default
         is to compile noexec support if libtool supports building
         shared objects on your system.
 

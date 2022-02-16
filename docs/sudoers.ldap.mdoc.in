@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 10, 2022
+.Dd February 16, 2022
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1329,7 +1329,7 @@ Note that the
 file is not used by the SSSD
 .Nm sudo
 back end.
-Please see
+See
 .Xr sssd-sudo @mansectform@
 for more information on configuring
 .Nm sudo
@@ -1573,9 +1573,9 @@ See the
 .Sx Differences between LDAP and non-LDAP sudoers
 section for more information.
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm sudo ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

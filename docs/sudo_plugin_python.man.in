@@ -17,7 +17,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "February 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1833,9 +1833,9 @@ exhaustive list of people who have contributed to
 .SH "BUGS"
 Python plugin support is currently considered experimental.
 .PP
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBsudo\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SECURITY CONSIDERATIONS"
 All Python plugin handling is implemented inside the
 \fRpython_plugin.so\fR
@@ -1871,10 +1871,9 @@ For example:
 Set developer_mode true
 .RE
 .PP
-Please note that this creates a security risk, so it is not recommended
-on critical systems such as a desktop machine for daily use, but is intended
-to be used in development environments (VM, container, etc).
-Before enabling developer mode, ensure you understand the implications.
+This creates a security risk and is not recommended for production systems,
+it is intended to be used in a development environment (VM, container, etc).
+Before enabling developer mode, be sure that you understand the implications.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

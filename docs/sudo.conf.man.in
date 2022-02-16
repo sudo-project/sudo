@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "February 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -422,10 +422,9 @@ Set developer_mode true
 .fi
 .RS 10n
 .sp
-Please note that this creates a security risk, so it is not recommended
-on critical systems such as a desktop machine for daily use, but is intended
-to be used in development environments (VM, container, etc).
-Before enabling developer mode, ensure you understand the implications.
+This creates a security risk and is not recommended for production systems,
+it is intended to be used in a development environment (VM, container, etc).
+Before enabling developer mode, be sure that you understand the implications.
 .sp
 This setting is only available in
 \fBsudo\fR
@@ -892,9 +891,9 @@ distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBsudo\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

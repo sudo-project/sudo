@@ -23,7 +23,7 @@ by synchronizing changes via CVS/RSYNC/RDIST/RCP/SCP and even NFS.
 By using LDAP for sudoers we gain a centrally administered, globally
 available configuration source for sudo.
 
-For information on OpenLDAP, please see https://www.openldap.org/.
+For information on OpenLDAP, see https://www.openldap.org/.
 
 ## Definitions
 
@@ -46,11 +46,11 @@ to specify them at configure time.  E.g.
     $ ./configure --with-ldap=/usr/local/ldapsdk
 
 Sudo is developed using OpenLDAP but Netscape-based LDAP libraries
-(such as those present in Solaris) are also known to work.
+(such as those present in Solaris) and IBM LDAP are also known to work.
 
-Your mileage may vary.  Please let the sudo workers mailing list
-sudo-workers@sudo.ws know if special configuration was required
-to build an LDAP-enabled sudo so we can improve sudo.
+If special configuration was required to build an LDAP-enabled sudo,
+let the sudo workers mailing list <sudo-workers@sudo.ws> know so
+we can improve sudo.
 
 ## Schema Changes
 

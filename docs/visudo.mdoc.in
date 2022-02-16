@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 10, 2022
+.Dd February 16, 2022
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -333,7 +333,7 @@ It should be specified as an octal value.
 .Pp
 For more information on configuring
 .Xr sudo.conf @mansectform@ ,
-please refer to its manual.
+refer to its manual.
 .Sh ENVIRONMENT
 The following environment variables may be consulted depending on
 the value of the
@@ -461,9 +461,9 @@ the editor used by
 .Nm
 allows shell escapes.
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

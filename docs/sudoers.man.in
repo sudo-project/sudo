@@ -50,7 +50,7 @@ section.
 For information on storing
 \fBsudoers\fR
 policy information
-in LDAP, please see
+in LDAP, see
 sudoers.ldap(@mansectform@).
 .SS "Configuring sudo.conf for sudoers"
 \fBsudo\fR
@@ -171,7 +171,7 @@ It should be specified as an octal value.
 .PP
 For more information on configuring
 sudo.conf(@mansectform@),
-please refer to its manual.
+refer to its manual.
 .SS "User Authentication"
 The
 \fBsudoers\fR
@@ -471,7 +471,7 @@ is displayed when
 is run by root with the
 \fB\-V\fR
 option.
-Please note that the list of environment variables to remove
+Note that the list of environment variables to remove
 varies based on the operating system
 \fBsudo\fR
 is running on.
@@ -2395,7 +2395,7 @@ Attempting to define an
 named
 \fBALL\fR
 will result in a syntax error.
-Please note that using
+Note that using
 \fBALL\fR
 can be dangerous since in a command context, it allows the user to run
 \fIany\fR
@@ -5719,7 +5719,7 @@ The
 file has the wrong owner.
 If you wish to change the
 \fIsudoers\fR
-file owner, please add
+file owner, add
 \(lqsudoers_uid=N\(rq
 (where
 \(oqN\(cq
@@ -5755,7 +5755,7 @@ The
 file has the wrong group ownership.
 If you wish to change the
 \fIsudoers\fR
-file group ownership, please add
+file group ownership, add
 \(lqsudoers_gid=N\(rq
 (where
 \(oqN\(cq
@@ -7269,9 +7269,9 @@ command or use the
 option in
 \fIsudoers\fR.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBsudo\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "February 10, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -346,7 +346,7 @@ It should be specified as an octal value.
 .PP
 For more information on configuring
 sudo.conf(@mansectform@),
-please refer to its manual.
+refer to its manual.
 .SH "ENVIRONMENT"
 The following environment variables may be consulted depending on
 the value of the
@@ -481,9 +481,9 @@ the editor used by
 \fBvisudo\fR
 allows shell escapes.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBvisudo\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

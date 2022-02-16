@@ -49,7 +49,7 @@ section.
 For information on storing
 .Nm
 policy information
-in LDAP, please see
+in LDAP, see
 .Xr sudoers.ldap @mansectform@ .
 .Ss Configuring sudo.conf for sudoers
 .Nm sudo
@@ -159,7 +159,7 @@ It should be specified as an octal value.
 .Pp
 For more information on configuring
 .Xr sudo.conf @mansectform@ ,
-please refer to its manual.
+refer to its manual.
 .Ss User Authentication
 The
 .Nm
@@ -457,7 +457,7 @@ is displayed when
 is run by root with the
 .Fl V
 option.
-Please note that the list of environment variables to remove
+Note that the list of environment variables to remove
 varies based on the operating system
 .Nm sudo
 is running on.
@@ -2261,7 +2261,7 @@ Attempting to define an
 named
 .Sy ALL
 will result in a syntax error.
-Please note that using
+Note that using
 .Sy ALL
 can be dangerous since in a command context, it allows the user to run
 .Em any
@@ -5336,7 +5336,7 @@ The
 file has the wrong owner.
 If you wish to change the
 .Em sudoers
-file owner, please add
+file owner, add
 .Dq sudoers_uid=N
 (where
 .Sq N
@@ -5370,7 +5370,7 @@ The
 file has the wrong group ownership.
 If you wish to change the
 .Em sudoers
-file group ownership, please add
+file group ownership, add
 .Dq sudoers_gid=N
 (where
 .Sq N
@@ -6723,9 +6723,9 @@ command or use the
 option in
 .Em sudoers .
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm sudo ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

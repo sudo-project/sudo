@@ -6,7 +6,7 @@ number of way you can help make Sudo better.
 
 ## Getting started
 
-To get an overview of Sudo, please read the [README.md](../README.md).
+To get an overview of Sudo, see the [README.md](../README.md) file.
 There are multiple ways to contribute, some of which don't require
 writing a single line of code.
 
@@ -19,12 +19,11 @@ email, messages may be sent to the [sudo-workers@sudo.ws
 mailing list](https://www.sudo.ws/mailman/listinfo/sudo-workers)
 (public) or to sudo@sudo.ws (private).
 
-For information on reporting security issues, please see
-[SECURITY.md](SECURITY.md).
+For information on reporting security issues, see [SECURITY.md](SECURITY.md).
 
-Please include the version of sudo you are using, the operating
-system and/or distro that is affected, and step-by-step instructions
-to reproduce the problem.
+Include the version of sudo you are using, the operating system
+and/or distro that is affected, and, if possible, step-by-step
+instructions to reproduce the problem.
 
 ## Making changes to Sudo
 
@@ -66,7 +65,7 @@ For more information, see https://www.sudo.ws/security/fuzzing/.
 ## Translations
 
 The Free Translation Project provides translations for Sudo.  If
-you would like to contribute to Sudo's translations, please see the
+you would like to contribute to Sudo's translations, see the
 ABOUT-NLS file in the Sudo source tree or visit [the Free Translation
 Project's homepage](https://translationproject.org).
 

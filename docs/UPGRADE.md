@@ -466,9 +466,6 @@ Notes on upgrading from an older release
    in sudo's ldap.conf unless ldap.conf references a valid certificate
    authority file(s).
 
-   Please also see the NEWS file for a list of new features in
-   sudo 1.7.0.
-
  * Upgrading from a version prior to 1.6.9:
 
    Starting with sudo 1.6.9, if an OS supports a modular authentication

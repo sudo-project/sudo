@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 11, 2022
+.Dd February 16, 2022
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1486,9 +1486,9 @@ exhaustive list of people who have contributed to
 .Sh BUGS
 Python plugin support is currently considered experimental.
 .Pp
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm sudo ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SECURITY CONSIDERATIONS
 All Python plugin handling is implemented inside the
 .Li python_plugin.so
@@ -1522,10 +1522,9 @@ option can be used to disable it.
 For example:
 .Dl Set developer_mode true
 .Pp
-Please note that this creates a security risk, so it is not recommended
-on critical systems such as a desktop machine for daily use, but is intended
-to be used in development environments (VM, container, etc).
-Before enabling developer mode, ensure you understand the implications.
+This creates a security risk and is not recommended for production systems,
+it is intended to be used in a development environment (VM, container, etc).
+Before enabling developer mode, be sure that you understand the implications.
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
