@@ -370,55 +370,90 @@ log_failure(int status, int flags)
  * Format an authentication failure message, using either
  * authfail_message from sudoers or a locale-specific message.
  */
-static int
-fmt_authfail_message(char **str, unsigned int tries)
+static char *
+fmt_authfail_message(unsigned int tries)
 {
-    char *src, *dst0, *dst, *dst_end;
-    size_t size;
-    int len;
+    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+    char *dst, *dst_end, *ret = NULL;
+    const char *src;
+    size_t len;
     debug_decl(fmt_authfail_message, SUDOERS_DEBUG_LOGGING);
 
     if (def_authfail_message == NULL) {
-	debug_return_int(asprintf(str, ngettext("%u incorrect password attempt",
-	    "%u incorrect password attempts", tries), tries));
+	if (asprintf(&ret, ngettext("%u incorrect password attempt",
+		"%u incorrect password attempts", tries), tries) == -1)
+	    goto oom;
+	debug_return_ptr(ret);
     }
 
-    src = def_authfail_message;
-    size = strlen(src) + 33;
-    if ((dst0 = dst = malloc(size)) == NULL)
-	debug_return_int(-1);
-    dst_end = dst + size;
+    len = snprintf(numbuf, sizeof(numbuf), "%u", tries);
+    if (len >= sizeof(numbuf))
+	goto overflow;
 
-    /* Always leave space for the terminating NUL. */
-    while (*src != '\0' && dst + 1 < dst_end) {
+    src = def_authfail_message;
+    len = strlen(src) + 1;
+    while (*src != '\0') {
+	if (src[0] == '%') {
+	    switch (src[1]) {
+	    case '%':
+		len--;
+		src++;
+		break;
+	    case 'd':
+		len -= 2;
+		len += strlen(numbuf);
+		src++;
+		break;
+	    default:
+		/* pass through as-is */
+		break;
+	    }
+	}
+	src++;
+    }
+
+    if ((ret = malloc(len)) == NULL)
+	goto oom;
+    dst = ret;
+    dst_end = ret + len;
+
+    src = def_authfail_message;
+    while (*src != '\0') {
+	/* Always leave space for the terminating NUL. */
+	if (dst + 1 >= dst_end)
+	    goto overflow;
 	if (src[0] == '%') {
 	    switch (src[1]) {
 	    case '%':
 		src++;
 		break;
 	    case 'd':
-		len = snprintf(dst, dst_end - dst, "%u", tries);
-		if (len < 0 || len >= (int)(dst_end - dst))
-		    goto done;
+		len = strlcpy(dst, numbuf, dst_end - dst);
+		if (len >= (size_t)(dst_end - dst))
+		    goto overflow;
 		dst += len;
 		src += 2;
 		continue;
 	    default:
+		/* pass through as-is */
 		break;
 	    }
 	}
 	*dst++ = *src++;
     }
-done:
     *dst = '\0';
 
-    *str = dst0;
-#ifdef __clang_analyzer__
-    /* clang analyzer false positive */
-    if (__builtin_expect(dst < dst0, 0))
-	__builtin_trap();
-#endif
-    debug_return_int(dst - dst0);
+    debug_return_ptr(ret);
+
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_ptr(NULL);
+
+overflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    free(ret);
+    errno = ERANGE;
+    debug_return_ptr(NULL);
 }
 
 /*
@@ -466,9 +501,8 @@ log_auth_failure(int status, unsigned int tries)
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
 	if (ISSET(status, FLAG_BAD_PASSWORD)) {
-	    if (fmt_authfail_message(&message, tries) == -1) {
-		sudo_warnx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
+	    message = fmt_authfail_message(tries);
+	    if (message == NULL) {
 		ret = false;
 	    } else {
 		ret = log_reject(message, logit, mailit);
@@ -486,9 +520,8 @@ log_auth_failure(int status, unsigned int tries)
     sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 
     if (ISSET(status, FLAG_BAD_PASSWORD)) {
-	if (fmt_authfail_message(&message, tries) == -1) {
-	    sudo_warnx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
+	message = fmt_authfail_message(tries);
+	if (message == NULL) {
 	    ret = false;
 	} else {
 	    sudo_warnx("%s", message);
