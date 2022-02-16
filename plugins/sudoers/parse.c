@@ -60,6 +60,8 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     CLR(validated, FLAG_NO_HOST);
     if (list_pw != NULL) {
 	root_pw = sudo_getpwuid(ROOT_UID);
+	if (root_pw == NULL)
+	    log_warningx(SLOG_SEND_MAIL, N_("unknown uid %u"), ROOT_UID);
     } else {
 	SET(validated, FLAG_NO_CHECK);
     }
@@ -100,13 +102,17 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 		    }
 		    /* Runas user must match list user or root. */
 		    if (userlist_matches(nss->parse_tree, list_pw,
-			    cs->runasuserlist) == DENY ||
-			    userlist_matches(nss->parse_tree, root_pw,
-			    cs->runasuserlist) != ALLOW)
+			    cs->runasuserlist) == DENY) {
 			continue;
+		    }
+		    if (root_pw == NULL || userlist_matches(nss->parse_tree,
+			    root_pw, cs->runasuserlist) != ALLOW) {
+			continue;
+		    }
 		    if (cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot,
-			    NULL) == ALLOW)
+			    NULL) == ALLOW) {
 			match = ALLOW;
+		    }
 		}
 	    }
 	}
