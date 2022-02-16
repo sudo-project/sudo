@@ -53,6 +53,11 @@ What's new in Sudo 1.9.10
    either one (or both) may be a regular expression.
    Bug #578, GitHub issue #15.
 
+ * A user may now only run "sudo -U otheruser -l" if they have a
+   "sudo ALL" privilege where the RunAs user contains either "root"
+   or "otheruser".  Previously, having "sudo ALL" was sufficient,
+   regardless of the RunAs user.  GitHub issue #134.
+
 What's new in Sudo 1.9.9
 
  * Sudo can now be built with OpenSSL 3.0 without generating warnings
