@@ -208,7 +208,7 @@ Defaults entry
 (described later) and defaults to
 \fR@mailto@\fR.
 .PP
-Note that no mail will be sent if an unauthorized user tries to run
+No mail will be sent if an unauthorized user tries to run
 \fBsudo\fR
 with the
 \fB\-l\fR
@@ -471,7 +471,7 @@ is displayed when
 is run by root with the
 \fB\-V\fR
 option.
-Note that the list of environment variables to remove
+The list of environment variables to remove
 varies based on the operating system
 \fBsudo\fR
 is running on.
@@ -508,9 +508,9 @@ match a pattern in the
 \fIenv_delete\fR
 list.
 .PP
-Note that the dynamic linker on most operating systems will remove
-variables that can control dynamic linking from the environment of
-set-user-ID executables, including
+The dynamic linker on most operating systems will remove variables
+that can control dynamic linking from the environment of set-user-ID
+executables, including
 \fBsudo\fR.
 Depending on the operating
 system this may include
@@ -896,7 +896,7 @@ See
 \fIGROUP PROVIDER PLUGINS\fR
 for more information.
 .PP
-Note that quotes around group names are optional.
+Quotes around group names are optional.
 Unquoted strings must use a backslash
 (\(oq\e\(cq)
 to escape spaces and special characters.
@@ -931,13 +931,12 @@ of
 \fRUser_Alias\fRes
 it can contain
 \fRRunas_Alias\fRes.
-Note that
-user names and groups are matched as strings.
+User names and groups are matched as strings.
 In other words, two users (groups) with the same user (group) ID
 are considered to be distinct.
 If you wish to match all user names with the same user-ID (e.g., root and
 toor), you can use a user-ID instead of a name (#0 in the example given).
-Note that the user-ID or group-ID specified in a
+The user-ID or group-ID specified in a
 \fRRunas_Member\fR
 need not be listed in the password or group database.
 .nf
@@ -983,7 +982,6 @@ command on your machine returns the fully
 qualified host name, you'll need to use the
 \fIfqdn\fR
 flag for wildcards to be useful.
-Note that
 \fBsudo\fR
 only inspects actual network interfaces; this means that IP address
 127.0.0.1 (localhost) will never match.
@@ -1101,9 +1099,9 @@ with the
 option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
-Note that
+Unlike other commands,
 \(lq\fRsudoedit\fR\(rq
-is a command built into
+is built into
 \fBsudo\fR
 itself and must be specified in the
 \fIsudoers\fR
@@ -1180,7 +1178,7 @@ values at run-time via one or more
 lines.
 These may affect all users on any host, all users on a specific host, a
 specific user, a specific command, or commands being run as a specific user.
-Note that per-command entries may not include command line arguments.
+Per-command entries may not include command line arguments.
 If you need to specify arguments, define a
 \fRCmnd_Alias\fR
 and reference
@@ -1438,7 +1436,7 @@ dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill,\e
 .RE
 .fi
 .PP
-Note that while the group portion of the
+While the group portion of the
 \fRRunas_Spec\fR
 permits the
 user to run as command with that group, it does not force the user
@@ -1468,8 +1466,7 @@ tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu,\e
 .RE
 .fi
 .PP
-Note that in this example only the group will be set, the command
-still runs as user
+In this example only the group will be set, the command still runs as user
 \fBtcm\fR.
 E.g.\&
 .nf
@@ -1517,7 +1514,7 @@ subsequent
 in the
 \fRCmnd_Spec_List\fR,
 inherit that option unless it is overridden by another option.
-Note that the option names are reserved words in
+Option names are reserved words in
 \fIsudoers\fR.
 This means that none of the valid option names (see below) can be used
 when declaring an alias.
@@ -1933,7 +1930,7 @@ options.
 These tags override the value of the
 \fIsetenv\fR
 flag on a per-command basis.
-Note that if
+If
 \fRSETENV\fR
 has been set for a command, the user may disable the
 \fIenv_reset\fR
@@ -2031,7 +2028,7 @@ This is used to escape special characters such as:
 and
 \(oq]\&\(cq.
 .PP
-\fBNote that these are not regular expressions.\fR
+\fBThese are not regular expressions.\fR
 Unlike a regular expression there is no way to match one or more
 characters within a range.
 .PP
@@ -2056,7 +2053,7 @@ For example:
 .PP
 Would match any file name beginning with a letter.
 .PP
-Note that a forward slash
+A forward slash
 (\(oq/\(cq)
 will
 \fInot\fR
@@ -2355,7 +2352,7 @@ file that contained the
 \fR@includedir\fR
 directive.
 .PP
-Note that unlike files included via
+Unlike files included via
 \fR@include\fR,
 \fBvisudo\fR
 will not edit the files in a
@@ -2395,7 +2392,7 @@ Attempting to define an
 named
 \fBALL\fR
 will result in a syntax error.
-Note that using
+Using
 \fBALL\fR
 can be dangerous since in a command context, it allows the user to run
 \fIany\fR
@@ -2658,7 +2655,6 @@ will use the value of the
 or
 \fREDITOR\fR
 environment variables before falling back on the default editor list.
-Note that
 \fBvisudo\fR
 is typically run as root so this flag may allow a user with
 \fBvisudo\fR
@@ -2873,7 +2869,7 @@ to make DNS lookups which renders
 \fBsudo\fR
 unusable if DNS stops working (for example if the machine is disconnected
 from the network).
-Also note that just like with the hosts file, you must use the
+Just like with the hosts file, you must use the
 \(lqcanonical\(rq
 name as DNS knows it.
 That is, you may not use a host alias
@@ -3251,7 +3247,7 @@ must look up any group name listed in the
 file and use the group-ID instead of the group name when determining
 whether the user is a member of the group.
 .sp
-Note that if
+If
 \fImatch_group_by_gid\fR
 is enabled, group database lookups performed by
 \fBsudoers\fR
@@ -3548,7 +3544,7 @@ When
 is set,
 \fBsudo\fR
 will provide visual feedback when the user presses a key.
-Note that this does have a security impact as an onlooker may be able to
+This does have a security impact as an onlooker may be able to
 determine the length of the password being entered.
 This flag is
 \fIoff\fR
@@ -3695,9 +3691,9 @@ However, since some programs (including the RCS revision control system) use
 to determine the real identity of the user, it may be desirable to
 change this behavior.
 This can be done by negating the set_logname option.
-Note that
+The
 \fIset_logname\fR
-will have no effect
+option will have no effect
 if the
 \fIenv_reset\fR
 option has not been disabled and the
@@ -3846,7 +3842,7 @@ option (defaults to
 \fRroot\fR)
 instead of the password of the invoking user
 when running a command or editing a file.
-Note that this flag precludes the use of a user-ID not listed in the passwd
+This flag precludes the use of a user-ID not listed in the passwd
 database as an argument to the
 \fB\-u\fR
 option.
@@ -4284,7 +4280,6 @@ options are enabled or when the
 or
 \fRLOG_OUTPUT\fR
 tags are present for a command.
-Note that
 \fIiolog_file\fR
 may contain directory components.
 The default is
@@ -4611,7 +4606,7 @@ This defaults to
 sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
 sending email.
-Note that changing the locale may affect how sudoers is interpreted.
+Changing the locale may affect how sudoers is interpreted.
 Defaults to
 \(lq\fRC\fR\(rq.
 .TP 18n
@@ -4778,7 +4773,6 @@ The default value is
 This avoids a time of check versus time of use race condition when
 the command is located in a directory writable by the invoking user.
 .sp
-Note that
 \fIfdexec\fR
 will change the first element of the argument vector for scripts
 ($0 in the shell) due to the way the kernel runs script interpreters.
@@ -5337,8 +5331,8 @@ The global list of environment variables to remove is displayed when
 is run by root with the
 \fB\-V\fR
 option.
-Note that many operating systems will remove potentially dangerous
-variables from the environment of any set-user-ID process (such as
+Many operating systems will remove potentially dangerous variables
+from the environment of any set-user-ID process (such as
 \fBsudo\fR).
 .TP 18n
 env_keep
@@ -6045,8 +6039,7 @@ a pipe or file.
 .TP 10n
 \fIttyout\fR
 Output from the pseudo-terminal (what the command writes to the screen).
-Note that terminal-specific post-processing is performed before the
-data is logged.
+Terminal-specific post-processing is performed before the data is logged.
 This means that, for example, line feeds are usually converted to
 line feed/carriage return pairs and tabs may be expanded to spaces.
 .TP 10n
@@ -6075,9 +6068,9 @@ The output portion of an I/O log file can be viewed with the
 sudoreplay(@mansectsu@)
 utility, which can also be used to list or search the available logs.
 .PP
-Note that user input may contain sensitive information such as
-passwords (even if they are not echoed to the screen), which will
-be stored in the log file unencrypted.
+User input may contain sensitive information such as passwords (even
+if they are not echoed to the screen), which will be stored in the
+log file unencrypted.
 In most cases, logging the command output via
 \fIlog_output\fR
 or
@@ -6137,8 +6130,8 @@ First, we allow a few environment variables to pass and then define our
 .sp
 .RS 0n
 # Run X applications through sudo; HOME is used to find the
-# .Xauthority file.  Note that other programs use HOME to find
-# configuration files and this may lead to privilege escalation!
+# .Xauthority file.  Other programs use HOME to locate configuration
+# files and this may lead to privilege escalation!
 Defaults env_keep += "DISPLAY HOME"
 
 # User alias specification
@@ -6215,7 +6208,7 @@ Lastly, we disable shell escapes for the commands in the PAGERS
 and
 \fI/usr/bin/less\fR)
 \&.
-Note that this will not effectively constrain users with
+This will not effectively constrain users with
 \fBsudo\fR
 \fBALL\fR
 privileges.
@@ -6327,7 +6320,7 @@ Here, those are commands related to backups, killing processes, the
 printing system, shutting down the system, and any commands in the
 directory
 \fI/usr/oper/bin/\fR.
-Note that one command in the
+One command in the
 \fRDUMPS\fR
 Cmnd_Alias includes a sha224 digest,
 \fI/home/operator/bin/start_backups\fR.
@@ -6386,7 +6379,9 @@ words.
 This example assumes that
 passwd(1)
 does not take multiple user names on the command line.
-Note that on GNU systems, options to
+On systems with GNU
+getopt(3),
+options to
 passwd(1)
 may be specified after the user argument.
 As a result, this rule will also allow:
@@ -6927,7 +6922,7 @@ you can always just try it out and check whether shell escapes work when
 is enabled.
 .RE
 .PP
-Note that restricting shell escapes is not a panacea.
+Restricting shell escapes is not a panacea.
 Programs running as root are still capable of many potentially hazardous
 operations (such as changing or overwriting files) that could lead
 to unintended privilege escalation.

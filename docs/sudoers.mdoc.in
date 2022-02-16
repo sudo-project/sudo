@@ -196,7 +196,7 @@ Defaults entry
 (described later) and defaults to
 .Li @mailto@ .
 .Pp
-Note that no mail will be sent if an unauthorized user tries to run
+No mail will be sent if an unauthorized user tries to run
 .Nm sudo
 with the
 .Fl l
@@ -457,7 +457,7 @@ is displayed when
 is run by root with the
 .Fl V
 option.
-Note that the list of environment variables to remove
+The list of environment variables to remove
 varies based on the operating system
 .Nm sudo
 is running on.
@@ -494,9 +494,9 @@ match a pattern in the
 .Em env_delete
 list.
 .Pp
-Note that the dynamic linker on most operating systems will remove
-variables that can control dynamic linking from the environment of
-set-user-ID executables, including
+The dynamic linker on most operating systems will remove variables
+that can control dynamic linking from the environment of set-user-ID
+executables, including
 .Nm sudo .
 Depending on the operating
 system this may include
@@ -864,7 +864,7 @@ See
 .Sx "GROUP PROVIDER PLUGINS"
 for more information.
 .Pp
-Note that quotes around group names are optional.
+Quotes around group names are optional.
 Unquoted strings must use a backslash
 .Pq Ql \e
 to escape spaces and special characters.
@@ -896,13 +896,12 @@ of
 .Li User_Alias Ns es
 it can contain
 .Li Runas_Alias Ns es .
-Note that
-user names and groups are matched as strings.
+User names and groups are matched as strings.
 In other words, two users (groups) with the same user (group) ID
 are considered to be distinct.
 If you wish to match all user names with the same user-ID (e.g., root and
 toor), you can use a user-ID instead of a name (#0 in the example given).
-Note that the user-ID or group-ID specified in a
+The user-ID or group-ID specified in a
 .Li Runas_Member
 need not be listed in the password or group database.
 .Bd -literal
@@ -945,7 +944,6 @@ command on your machine returns the fully
 qualified host name, you'll need to use the
 .Em fqdn
 flag for wildcards to be useful.
-Note that
 .Nm sudo
 only inspects actual network interfaces; this means that IP address
 127.0.0.1 (localhost) will never match.
@@ -1060,9 +1058,9 @@ with the
 option (or as
 .Nm sudoedit ) .
 It may take command line arguments just as a normal command does.
-Note that
+Unlike other commands,
 .Dq Li sudoedit
-is a command built into
+is built into
 .Nm sudo
 itself and must be specified in the
 .Em sudoers
@@ -1133,7 +1131,7 @@ values at run-time via one or more
 lines.
 These may affect all users on any host, all users on a specific host, a
 specific user, a specific command, or commands being run as a specific user.
-Note that per-command entries may not include command line arguments.
+Per-command entries may not include command line arguments.
 If you need to specify arguments, define a
 .Li Cmnd_Alias
 and reference
@@ -1374,7 +1372,7 @@ dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill,\e
 	/usr/bin/lprm
 .Ed
 .Pp
-Note that while the group portion of the
+While the group portion of the
 .Li Runas_Spec
 permits the
 user to run as command with that group, it does not force the user
@@ -1398,8 +1396,7 @@ tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu,\e
 	/usr/local/bin/minicom
 .Ed
 .Pp
-Note that in this example only the group will be set, the command
-still runs as user
+In this example only the group will be set, the command still runs as user
 .Sy tcm .
 E.g.\&
 .Bd -literal
@@ -1441,7 +1438,7 @@ subsequent
 in the
 .Li Cmnd_Spec_List ,
 inherit that option unless it is overridden by another option.
-Note that the option names are reserved words in
+Option names are reserved words in
 .Em sudoers .
 This means that none of the valid option names (see below) can be used
 when declaring an alias.
@@ -1830,7 +1827,7 @@ options.
 These tags override the value of the
 .Em setenv
 flag on a per-command basis.
-Note that if
+If
 .Li SETENV
 has been set for a command, the user may disable the
 .Em env_reset
@@ -1921,7 +1918,7 @@ and
 .El
 .Pp
 .Bf -symbolic
-Note that these are not regular expressions.
+These are not regular expressions.
 .Ef
 Unlike a regular expression there is no way to match one or more
 characters within a range.
@@ -1944,7 +1941,7 @@ For example:
 .Pp
 Would match any file name beginning with a letter.
 .Pp
-Note that a forward slash
+A forward slash
 .Pq Ql /
 will
 .Em not
@@ -2221,7 +2218,7 @@ file that contained the
 .Li @includedir
 directive.
 .Pp
-Note that unlike files included via
+Unlike files included via
 .Li @include ,
 .Nm visudo
 will not edit the files in a
@@ -2261,7 +2258,7 @@ Attempting to define an
 named
 .Sy ALL
 will result in a syntax error.
-Note that using
+Using
 .Sy ALL
 can be dangerous since in a command context, it allows the user to run
 .Em any
@@ -2508,7 +2505,6 @@ will use the value of the
 or
 .Ev EDITOR
 environment variables before falling back on the default editor list.
-Note that
 .Nm visudo
 is typically run as root so this flag may allow a user with
 .Nm visudo
@@ -2716,7 +2712,7 @@ to make DNS lookups which renders
 .Nm sudo
 unusable if DNS stops working (for example if the machine is disconnected
 from the network).
-Also note that just like with the hosts file, you must use the
+Just like with the hosts file, you must use the
 .Dq canonical
 name as DNS knows it.
 That is, you may not use a host alias
@@ -3069,7 +3065,7 @@ must look up any group name listed in the
 file and use the group-ID instead of the group name when determining
 whether the user is a member of the group.
 .Pp
-Note that if
+If
 .Em match_group_by_gid
 is enabled, group database lookups performed by
 .Nm
@@ -3351,7 +3347,7 @@ When
 is set,
 .Nm sudo
 will provide visual feedback when the user presses a key.
-Note that this does have a security impact as an onlooker may be able to
+This does have a security impact as an onlooker may be able to
 determine the length of the password being entered.
 This flag is
 .Em off
@@ -3488,9 +3484,9 @@ However, since some programs (including the RCS revision control system) use
 to determine the real identity of the user, it may be desirable to
 change this behavior.
 This can be done by negating the set_logname option.
-Note that
+The
 .Em set_logname
-will have no effect
+option will have no effect
 if the
 .Em env_reset
 option has not been disabled and the
@@ -3630,7 +3626,7 @@ option (defaults to
 .Li root )
 instead of the password of the invoking user
 when running a command or editing a file.
-Note that this flag precludes the use of a user-ID not listed in the passwd
+This flag precludes the use of a user-ID not listed in the passwd
 database as an argument to the
 .Fl u
 option.
@@ -4040,7 +4036,6 @@ options are enabled or when the
 or
 .Li LOG_OUTPUT
 tags are present for a command.
-Note that
 .Em iolog_file
 may contain directory components.
 The default is
@@ -4338,7 +4333,7 @@ This defaults to
 .It sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
 sending email.
-Note that changing the locale may affect how sudoers is interpreted.
+Changing the locale may affect how sudoers is interpreted.
 Defaults to
 .Dq Li C .
 .It timestamp_type
@@ -4490,7 +4485,6 @@ The default value is
 This avoids a time of check versus time of use race condition when
 the command is located in a directory writable by the invoking user.
 .Pp
-Note that
 .Em fdexec
 will change the first element of the argument vector for scripts
 ($0 in the shell) due to the way the kernel runs script interpreters.
@@ -4984,8 +4978,8 @@ The global list of environment variables to remove is displayed when
 is run by root with the
 .Fl V
 option.
-Note that many operating systems will remove potentially dangerous
-variables from the environment of any set-user-ID process (such as
+Many operating systems will remove potentially dangerous variables
+from the environment of any set-user-ID process (such as
 .Nm sudo ) .
 .It env_keep
 Environment variables to be preserved in the user's environment when the
@@ -5620,8 +5614,7 @@ The standard input when no terminal is present, or input redirected from
 a pipe or file.
 .It Pa ttyout
 Output from the pseudo-terminal (what the command writes to the screen).
-Note that terminal-specific post-processing is performed before the
-data is logged.
+Terminal-specific post-processing is performed before the data is logged.
 This means that, for example, line feeds are usually converted to
 line feed/carriage return pairs and tabs may be expanded to spaces.
 .It Pa stdout
@@ -5649,9 +5642,9 @@ The output portion of an I/O log file can be viewed with the
 .Xr sudoreplay @mansectsu@
 utility, which can also be used to list or search the available logs.
 .Pp
-Note that user input may contain sensitive information such as
-passwords (even if they are not echoed to the screen), which will
-be stored in the log file unencrypted.
+User input may contain sensitive information such as passwords (even
+if they are not echoed to the screen), which will be stored in the
+log file unencrypted.
 In most cases, logging the command output via
 .Em log_output
 or
@@ -5703,8 +5696,8 @@ First, we allow a few environment variables to pass and then define our
 .Em aliases :
 .Bd -literal
 # Run X applications through sudo; HOME is used to find the
-# .Xauthority file.  Note that other programs use HOME to find
-# configuration files and this may lead to privilege escalation!
+# .Xauthority file.  Other programs use HOME to locate configuration
+# files and this may lead to privilege escalation!
 Defaults env_keep += "DISPLAY HOME"
 
 # User alias specification
@@ -5781,7 +5774,7 @@ Lastly, we disable shell escapes for the commands in the PAGERS
 and
 .Pa /usr/bin/less
 .Pc .
-Note that this will not effectively constrain users with
+This will not effectively constrain users with
 .Nm sudo
 .Sy ALL
 privileges.
@@ -5874,7 +5867,7 @@ Here, those are commands related to backups, killing processes, the
 printing system, shutting down the system, and any commands in the
 directory
 .Pa /usr/oper/bin/ .
-Note that one command in the
+One command in the
 .Li DUMPS
 Cmnd_Alias includes a sha224 digest,
 .Pa /home/operator/bin/start_backups .
@@ -5927,7 +5920,9 @@ words.
 This example assumes that
 .Xr passwd 1
 does not take multiple user names on the command line.
-Note that on GNU systems, options to
+On systems with GNU
+.Xr getopt 3 ,
+options to
 .Xr passwd 1
 may be specified after the user argument.
 As a result, this rule will also allow:
@@ -6405,7 +6400,7 @@ you can always just try it out and check whether shell escapes work when
 is enabled.
 .El
 .Pp
-Note that restricting shell escapes is not a panacea.
+Restricting shell escapes is not a panacea.
 Programs running as root are still capable of many potentially hazardous
 operations (such as changing or overwriting files) that could lead
 to unintended privilege escalation.

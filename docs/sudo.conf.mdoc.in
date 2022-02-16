@@ -63,8 +63,8 @@ the line, are ignored.
 Long lines can be continued with a backslash
 .Pq Ql \e
 as the last character on the line.
-Note that leading white space is removed from the beginning of lines
-even when the continuation character is used.
+Leading white space is removed from the beginning of lines
+even when a continuation character is used.
 .Pp
 Non-comment lines that don't begin with
 .Li Plugin ,

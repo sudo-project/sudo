@@ -238,8 +238,8 @@ Ring the bell as part of the password prompt when a terminal is present.
 This option has no effect if an askpass program is used.
 .It Fl b , -background
 Run the given command in the background.
-Note that it is not possible to use shell job control to manipulate
-background processes started by
+It is not possible to use shell job control to manipulate background
+processes started by
 .Nm .
 Most interactive commands will fail to work properly in background
 mode.
@@ -358,7 +358,7 @@ not be edited unless that user is root (version 1.8.16 and higher).
 Users are never allowed to edit device special files.
 .Pp
 If the specified file does not exist, it will be created.
-Note that unlike most commands run by
+Unlike most commands run by
 .Em sudo ,
 the editor is run with the invoking user's environment unmodified.
 If the temporary file becomes empty after editing, the user will
@@ -411,7 +411,7 @@ Display a short help message to the standard output and exit.
 Run the command on the specified
 .Ar host
 if the security policy plugin supports remote commands.
-Note that the
+The
 .Em sudoers
 plugin does not currently support running remote commands.
 This may also be used in conjunction with the
@@ -443,7 +443,7 @@ attempts to change to that user's home directory before running the
 shell.
 The command is run with an environment similar to the one
 a user would receive at log in.
-Note that most shells behave differently when a command is specified
+Most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
 for details.
 The
@@ -601,7 +601,7 @@ with a backslash
 except for alphanumerics, underscores,
 hyphens, and dollar signs.
 If no command is specified, an interactive shell is executed.
-Note that most shells behave differently when a command is specified
+Most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
 for details.
 .if \n(SL \{\
@@ -829,7 +829,7 @@ command has an associated timeout, or the
 or
 .Em pam_setcred
 options are enabled.
-Note that
+Both
 .Em pam_session
 and
 .Em pam_setcred
@@ -1007,9 +1007,9 @@ that reside in a directory that is writable by the user.
 If the user can modify or replace the command there is no way
 to limit what additional commands they can run.
 .Pp
-Note that
+By default,
 .Nm
-will normally only log the command it explicitly runs.
+will only log the command it explicitly runs.
 If a user runs a command such as
 .Li sudo su
 or
@@ -1168,8 +1168,7 @@ is not set.
 front-end configuration
 .El
 .Sh EXAMPLES
-Note: the following examples assume a properly configured security
-policy.
+The following examples assume a properly configured security policy.
 .Pp
 To get a file listing of an unreadable directory:
 .Bd -literal -offset 4n
@@ -1206,9 +1205,9 @@ $ sudo shutdown -r +15 "quick reboot"
 .Ed
 .Pp
 To make a usage listing of the directories in the /home partition.
-Note that this runs the commands in a sub-shell to make the
+The commands are run in a sub-shell to allow the
 .Li cd
-and file redirection work.
+command and file redirection to work.
 .Bd -literal -offset 4n
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Ed

@@ -652,11 +652,9 @@ entries are recognized, but not required:
 The server must accept other variables not listed above but may
 ignore them.
 .Sh EXAMPLES
-The Protocol Buffers description of the log server protocol is included
-in full below.
-Note that this uses the newer
+The Protocol Buffers description of the log server protocol, using
 .Dq proto3
-syntax.
+syntax, is included in full below.
 .Bd -literal
 syntax = "proto3";
 

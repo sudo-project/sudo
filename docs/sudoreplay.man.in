@@ -153,7 +153,7 @@ similar to
 \(lqtail -f\(rq.
 An I/O log file is considered to be complete when the write bits
 have been cleared on the session's timing file.
-Note that versions of
+Versions of
 \fBsudo\fR
 prior to 1.9.1 do not clear the write bits upon completion.
 .TP 12n
@@ -196,7 +196,7 @@ for a description of supported date and time formats.
 group \fIrunas_group\fR
 Evaluates to true if the command was run with the specified
 \fIrunas_group\fR.
-Note that unless a
+Unless a
 \fIrunas_group\fR
 was explicitly specified when
 \fBsudo\fR
@@ -209,11 +209,11 @@ Evaluates to true if the command was run on the specified
 runas \fIrunas_user\fR
 Evaluates to true if the command was run as the specified
 \fIrunas_user\fR.
-Note that
+By default,
 \fBsudo\fR
-runs commands as user
+runs commands as the
 \fIroot\fR
-by default.
+user.
 .TP 8n
 todate \fIdate\fR
 Evaluates to true if the command was run on or prior to
@@ -248,7 +248,7 @@ operators as well as
 \(oq\&(\(cq
 and
 \(oq\&)\(cq
-grouping (note that parentheses must generally be escaped from the shell).
+grouping (parentheses must generally be escaped from the shell).
 The
 \fIand\fR
 operator is optional, adjacent predicates have an implied
@@ -326,7 +326,7 @@ HH:MM:SS am MM/DD/CCYY timezone
 HH:MM:SS am Month, Day Year timezone
 24 hour time may be used in place of am/pm, and month and day names
 may be abbreviated.
-Note that month and day of the week names must be specified in English.
+Month and day of the week names must be specified in English.
 .TP 8n
 CCYY-MM-DD HH:MM:SS
 ISO time format
@@ -383,7 +383,7 @@ The current time but 14 days ago.
 10:01 am Sep 17, 2009
 10:01 am, September 17, 2009.
 .PP
-Note that relative time specifications do not always work as expected.
+Relative time specifications do not always work as expected.
 For example, the
 \(lqnext\(rq
 qualifier is intended to be used in conjunction with a day such as
@@ -440,7 +440,7 @@ Example session tty output file.
 \fI@iolog_dir@/00/00/01/timing\fR
 Example session timing file.
 .PP
-Note that the
+The
 \fIstdin\fR,
 \fIstdout\fR
 and

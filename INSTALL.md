@@ -49,11 +49,11 @@ for a list of packages required to build sudo.
    you may file a bug report at https://bugzilla.sudo.ws/ or an issue at
    https://github.com/sudo-project/sudo/issues/ (not both).
 
-5. Type `make install` (as root) to install sudo, visudo, the
-   man pages, and a skeleton sudoers file.  Note that the install
-   will not overwrite an existing sudoers file.  You can also
-   install various pieces the package via the install-binaries,
-   install-doc, and install-sudoers make targets.
+5. Type `make install` (as root) to install sudo, visudo, the man
+   pages, and a skeleton sudoers file.  The install will not overwrite
+   an existing sudoers file.  You can also install various pieces of
+   the package via the install-binaries, install-doc, and install-sudoers
+   make targets.
 
 6. Edit the sudoers file with `visudo` as necessary for your
    site.  You will probably want to refer the example sudoers
@@ -349,7 +349,7 @@ Defaults are listed in brackets after the description.
         Disable natural language support.  By default, sudo will
         use the gettext() family of functions, if available, to
         implement messages in the invoking user's native language.
-        Note that translations do not exist for all languages.
+        Translations do not exist for all languages.
 
     --with-ldap[=DIR]
         Enable LDAP support.  If specified, DIR is the base directory
@@ -524,9 +524,9 @@ Defaults are listed in brackets after the description.
         for BSD/OS and OpenBSD systems that support it.
         It is not possible to mix BSD authentication with other
         authentication methods (and there really should be no need
-        to do so).  Note that only the newer BSD authentication API
-        is supported.  If you don't have /usr/include/bsd_auth.h
-        then you cannot use this.
+        to do so).  Only the newer BSD authentication API is
+        supported.  If you don't have /usr/include/bsd_auth.h then
+        you cannot use this.
 
     --with-DCE
         Enable DCE support for systems without PAM.  Known to work on
@@ -570,7 +570,7 @@ Defaults are listed in brackets after the description.
         Enable PAM support.  This is on by default for Darwin, FreeBSD,
         Linux, NetBSD, Solaris, and HP-UX (version 11 and higher).
 
-        NOTE: on RedHat Linux and Fedora you **must** have an `/etc/pam.d/sudo`
+        On RedHat Linux and Fedora you **must** have an `/etc/pam.d/sudo`
         file installed.  You may either use the example pam.conf file included
         with sudo or use `/etc/pam.d/su` as a reference.  The pam.conf file
         included with sudo may or may not work with other Linux distributions.
@@ -798,10 +798,10 @@ Defaults are listed in brackets after the description.
         file.  Ie: instead of myhost you would use myhost.mydomain.edu.  You may
         still use the short form if you wish (and even mix the two).  Beware
         that turning FQDN on requires sudo to make DNS lookups which may make
-        sudo unusable if your DNS is totally hosed.  Also note that you must
-        use the host's official name as DNS knows it.  That is, you may not use
-        a host alias (CNAME entry) due to performance issues and the fact that
-        there is no way to get all aliases from DNS.  
+        sudo unusable if your DNS is totally hosed.  You must use the host's
+        official name as DNS knows it.  That is, you may not use a host alias
+        (CNAME entry) due to performance issues and the fact that there is no
+        way to get all aliases from DNS.  
         Sudoers option: fqdn
 
     --with-goodpri=PRIORITY
@@ -940,7 +940,7 @@ Defaults are listed in brackets after the description.
         users to have a reasonable PATH environment variable you may want
         to use this.  Another use is if you want to have the "root path"
         be separate from the "user path."  You will need to customize the
-        path for your site.  NOTE: this is not applied to users in the group
+        path for your site.  This is not applied to users in the group
         specified by --with-exemptgroup.  If you do not specify a path,
         "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" is used.  
         Sudoers option: secure_path
@@ -955,22 +955,20 @@ Defaults are listed in brackets after the description.
         Sudoers options: !mailerpath or !mailto
 
     --with-sudoers-mode=MODE
-        File mode for the sudoers file (octal).  Note that if you
-        wish to NFS-mount the sudoers file this must be group
-        readable.  This value may overridden at run-time in the
-        sudo.conf file.  The default mode is 0440.
+        File mode for the sudoers file (octal).  If you wish to
+        NFS-mount the sudoers file this must be group readable.
+        This value may overridden at run-time in the sudo.conf file.
+        The default mode is 0440.
 
     --with-sudoers-uid=UID
-        User id that "owns" the sudoers file.  Note that this is
-        the numeric id, **not** the symbolic name.  This value may
-        overridden at run-time in the sudo.conf file.  The default
-        is 0.
+        User id that "owns" the sudoers file.  This is the numeric
+        id, **not** the symbolic name.  This value may overridden
+        at run-time in the sudo.conf file.  The default is 0.
 
     --with-sudoers-gid=GID
-        Group id that "owns" the sudoers file.  Note that this is
-        the numeric id, **not** the symbolic name.  This value may
-        overridden at run-time in the sudo.conf file.  The default
-        is 0.
+        Group id that "owns" the sudoers file.  This is the numeric
+        id, **not** the symbolic name.  This value may overridden
+        at run-time in the sudo.conf file.  The default is 0.
 
     --with-timeout=NUMBER
         Number of minutes that can elapse before sudo will ask for a passwd

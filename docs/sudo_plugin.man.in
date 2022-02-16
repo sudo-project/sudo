@@ -688,7 +688,7 @@ will be the
 \fRNULL\fR
 pointer.
 .sp
-NOTE: the
+The
 \fIplugin_options\fR
 parameter is only available starting with
 API version 1.2.
@@ -716,7 +716,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -874,8 +874,7 @@ in the user's environment, such as
 \fREDITOR\fR,
 and include it in
 \fIargv_out\fR
-(note that environment
-variables may include command line options).
+(environment variables may include command line options).
 The files to be edited should be copied from
 \fIargv\fR
 into
@@ -1518,7 +1517,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -1606,7 +1605,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -1676,7 +1675,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -1779,7 +1778,7 @@ pointer stored in
 The expected use case is to merge the contents of the PAM environment
 (if any) with the contents of
 \fIuser_env_out\fR.
-NOTE: the
+The
 \fIuser_env_out\fR
 parameter is only available
 starting with API version 1.2.
@@ -1843,7 +1842,7 @@ See the
 section below for more information
 about hooks.
 .sp
-NOTE: the
+The
 \fBregister_hooks\fR()
 function is only available starting
 with API version 1.2.
@@ -1896,7 +1895,7 @@ See the
 section below for more information
 about hooks.
 .sp
-NOTE: the
+The
 \fBderegister_hooks\fR()
 function is only available starting
 with API version 1.2.
@@ -1934,7 +1933,7 @@ See the
 section below for more information
 about events.
 .sp
-NOTE: the
+The
 \fBevent_alloc\fR()
 function is only available starting
 with API version 1.15.
@@ -1961,7 +1960,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2043,7 +2042,7 @@ will open a pipe to capture
 the I/O for logging before passing it on.
 .PP
 The log_ttyin function receives the raw user input from the terminal
-device (note that this will include input even when echo is disabled,
+device (this will include input even when echo is disabled,
 such as when a password is read).
 The log_ttyout function receives output from the pseudo-terminal that is
 suitable for replaying the user's session at a later time.
@@ -2307,7 +2306,7 @@ will be the
 \fRNULL\fR
 pointer.
 .sp
-NOTE: the
+The
 \fIplugin_options\fR
 parameter is only available starting with
 API version 1.2.
@@ -2335,7 +2334,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2465,7 +2464,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2524,7 +2523,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2586,7 +2585,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2648,7 +2647,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2710,7 +2709,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2781,7 +2780,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2837,7 +2836,7 @@ must remain valid until the plugin's
 \fBclose\fR()
 function is called.
 .sp
-NOTE: the
+The
 \fIerrstr\fR
 parameter is only available starting with
 API version 1.15.
@@ -2875,7 +2874,7 @@ See the
 section below for more information
 about events.
 .sp
-NOTE: the
+The
 \fBevent_alloc\fR()
 function is only available starting
 with API version 1.15.
@@ -3565,7 +3564,7 @@ See the
 section below for more information
 about events.
 .sp
-NOTE: the
+The
 \fBevent_alloc\fR()
 function is only available starting
 with API version 1.17.
@@ -4222,8 +4221,8 @@ unchanged.
 .RE
 .PD
 .PP
-Note that it is very easy to create an infinite loop when hooking
-C library functions.
+Care must be taken when hooking C library functions,
+it is very easy to create an infinite loop.
 For example, a
 getenv(3)
 hook that calls the
@@ -4600,7 +4599,7 @@ that the remote host will accept and run a program
 on the remote host that would setup the execution environment
 accordingly.
 .PP
-Note that remote
+Remote
 \fBsudoedit\fR
 functionality must be handled by the policy plugin, not
 \fBsudo\fR
@@ -4724,7 +4723,7 @@ will return a value of \-1.
 The intended use is to allow the plugin to release resources, such as locks,
 that should not be held indefinitely while suspended and then reacquire them
 when the process is resumed.
-Note that the functions are not actually invoked from within a signal handler.
+The functions are not actually invoked from within a signal handler.
 .PP
 The
 \fImsg_type\fR

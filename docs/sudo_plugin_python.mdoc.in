@@ -1387,7 +1387,7 @@ logger will get forwarded to sudo log system, as it would call sudo.debug.
 .Pp
 The log handler of sudo will map each Python log level of a message to
 the appropriate sudo debug level.
-Note however, that sudo debug system will only get the messages not filtered
+The sudo debug system will only receive messages that are not filtered
 out by the Python loggers.
 For example, the log level of the python logger will be an additional filter
 for the log messages, and is usually very different from what level is set in sudo.conf
@@ -1443,7 +1443,7 @@ The function arguments are as follows:
 .Bl -tag -width 4n
 .It Fa options_dict
 A dictionary where both the key and the value are strings.
-Note that the key should not contain an equal sign
+The key should not contain an equal sign
 .Pq Sq \&= ,
 otherwise the resulting string will have a different meaning.
 However, this is not currently enforced.

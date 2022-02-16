@@ -91,7 +91,7 @@ It just says "Sorry, try again." three times and exits.
 > log files, you need to create the file before syslogd will log
 > to it (e.g.: touch /var/log/sudo).
 
-> Note: the facility (e.g. 'auth.debug') must be separated from
+> The facility (e.g. 'auth.debug') must be separated from
 > the destination (e.g. '/var/log/auth' or '@loghost') by tabs,
 > *not* spaces.  This is a common error.
 
@@ -104,8 +104,8 @@ It just says "Sorry, try again." three times and exits.
 > look ups was detected.  For instance, for SVR4-style shadow
 > passwords, `HAVE_GETSPNAM` should be defined (you can search for
 > the string 'shadow passwords' in config.h with your editor).
-> Note that there is no define for 4.4BSD-based shadow passwords
-> since that just uses the standard getpw* routines.
+> There is no define needed for 4.4BSD-based shadow passwords
+> which just use the standard getpw* routines.
 
 #### Can sudo use the ssh agent instead of asking for the user's password?
 
@@ -203,9 +203,8 @@ It just says "Sorry, try again." three times and exits.
 > config.cache to make re-running configure speedy.  However,
 > if you are building sudo for a different platform the results
 > in config.cache will be wrong so you need to remove the config.cache file.
-> You can do this via `rm config.cache` or `make realclean`.
-> Note that `make realclean` will also remove any object files
-> and configure temp files that are laying around as well.
+> You can do this via `rm config.cache`, or `make realclean` to also
+> remove any object files and configure temp files that are present.
 
 #### When I run 'visudo' it says "sudoers file busy, try again later."
 

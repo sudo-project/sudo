@@ -96,7 +96,6 @@ or
 .Ev EDITOR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
-Note that
 .Nm sudo
 does not preserve the
 .Ev SUDO_EDITOR ,
@@ -124,7 +123,6 @@ will use the value of the
 or
 .Ev EDITOR
 environment variables before falling back on the default editor list.
-Note that
 .Nm visudo
 is typically run as root so this option may allow a user with
 .Nm visudo
@@ -246,9 +244,9 @@ If an alias is referenced but not actually defined
 or if there is a cycle in an alias,
 .Nm
 will consider this a syntax error.
-Note that it is not possible to differentiate between an
-alias and a host name or user name that consists solely of uppercase
-letters, digits, and the underscore
+It is not possible to differentiate between an alias and a host
+name or user name that consists solely of uppercase letters, digits,
+and the underscore
 .Pq Ql _
 character.
 .It Fl V , -version

@@ -98,7 +98,6 @@ or
 \fREDITOR\fR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
-Note that
 \fBsudo\fR
 does not preserve the
 \fRSUDO_EDITOR\fR,
@@ -127,7 +126,6 @@ will use the value of the
 or
 \fREDITOR\fR
 environment variables before falling back on the default editor list.
-Note that
 \fBvisudo\fR
 is typically run as root so this option may allow a user with
 \fBvisudo\fR
@@ -254,9 +252,9 @@ If an alias is referenced but not actually defined
 or if there is a cycle in an alias,
 \fBvisudo\fR
 will consider this a syntax error.
-Note that it is not possible to differentiate between an
-alias and a host name or user name that consists solely of uppercase
-letters, digits, and the underscore
+It is not possible to differentiate between an alias and a host
+name or user name that consists solely of uppercase letters, digits,
+and the underscore
 (\(oq_\(cq)
 character.
 .TP 12n

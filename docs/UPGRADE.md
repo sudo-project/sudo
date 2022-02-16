@@ -130,9 +130,9 @@ Notes on upgrading from an older release
 
    cvtsudoers -f json -o output_file sudoers_file
 
-   Note that unlike "visudo -x", "cvtsudoers" reads from the
-   standard input by default.  Also, the base DN may be specified
-   on the command line, if desired, using the -b option.
+   Unlike "visudo -x", "cvtsudoers" reads from the standard input
+   by default.  Also, the base DN may be specified on the command
+   line, if desired, using the -b option.
 
  * Upgrading from a version prior to 1.8.20:
 
@@ -429,9 +429,9 @@ Notes on upgrading from an older release
 
    to preserve the old value of MAIL.
 
-   NOTE: preserving HOME has security implications since many programs
-   use it when searching for configuration files.  Adding HOME to env_keep
-   may enable a user to run unrestricted commands via sudo.
+   Preserving HOME has security implications since many programs
+   use it when searching for configuration files.  Adding HOME to
+   env_keep may enable a user to run unrestricted commands via sudo.
 
    The default syslog facility has changed from "local2" to "authpriv"
    (or "auth" if the operating system doesn't have "authpriv").
@@ -501,9 +501,8 @@ Notes on upgrading from an older release
    when env_reset was set (which is now on by default).  Starting
    with sudo 1.6.9, environment variables listed in env_check are
    also preserved in the env_reset case, provided that they do not
-   contain a '/' or '%' character.  Note that it is not necessary
-   to also list a variable in env_keep--having it in env_check is
-   sufficient.
+   contain a '/' or '%' character.  It is not necessary to also
+   list a variable in env_keep--having it in env_check is sufficient.
 
    The default lists of variables to be preserved and/or checked
    are displayed when sudo is run by root with the -V flag.

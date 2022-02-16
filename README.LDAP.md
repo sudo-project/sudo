@@ -191,13 +191,14 @@ for a list of supported ldap.conf parameters and an example ldap.conf
 Make sure you sudoers_base matches the location you specified when you
 imported the sudoers ldif data.
 
-After configuring /etc/ldap.conf, you must add a line in /etc/nsswitch.conf
-to tell sudo to look in LDAP for sudoers.  See the "Configuring nsswitch.conf"
-section in the sudoers.ldap manual for details.  Note that sudo will use
-/etc/nsswitch.conf even if the underlying operating system does not support it.
-To disable nsswitch support, run configure with the `--with-nsswitch=no` option.
-This will cause sudo to consult LDAP first and /etc/sudoers second, unless the
-ignore_sudoers_file flag is set in the global LDAP options.
+After configuring /etc/ldap.conf, you must add a line in the
+/etc/nsswitch.conf file to tell sudo to look in LDAP for sudoers.
+See the "Configuring nsswitch.conf" section in the sudoers.ldap
+manual for details.  Sudo will use /etc/nsswitch.conf even if the
+underlying operating system does not support it.  To disable nsswitch
+support, run configure with the `--with-nsswitch=no` option.  This
+will cause sudo to consult LDAP first and /etc/sudoers second,
+unless the ignore_sudoers_file flag is set in the global LDAP options.
 
 ## Debugging your LDAP configuration
 

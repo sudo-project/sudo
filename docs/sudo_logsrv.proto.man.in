@@ -732,11 +732,9 @@ ttyname	string	the terminal the command was submitted from
 The server must accept other variables not listed above but may
 ignore them.
 .SH "EXAMPLES"
-The Protocol Buffers description of the log server protocol is included
-in full below.
-Note that this uses the newer
+The Protocol Buffers description of the log server protocol, using
 \(lqproto3\(rq
-syntax.
+syntax, is included in full below.
 .nf
 .sp
 .RS 0n

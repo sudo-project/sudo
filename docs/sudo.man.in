@@ -242,8 +242,8 @@ This option has no effect if an askpass program is used.
 .TP 12n
 \fB\-b\fR, \fB\--background\fR
 Run the given command in the background.
-Note that it is not possible to use shell job control to manipulate
-background processes started by
+It is not possible to use shell job control to manipulate background
+processes started by
 \fBsudo\fR.
 Most interactive commands will fail to work properly in background
 mode.
@@ -375,7 +375,7 @@ not be edited unless that user is root (version 1.8.16 and higher).
 Users are never allowed to edit device special files.
 .sp
 If the specified file does not exist, it will be created.
-Note that unlike most commands run by
+Unlike most commands run by
 \fIsudo\fR,
 the editor is run with the invoking user's environment unmodified.
 If the temporary file becomes empty after editing, the user will
@@ -433,7 +433,7 @@ Display a short help message to the standard output and exit.
 Run the command on the specified
 \fIhost\fR
 if the security policy plugin supports remote commands.
-Note that the
+The
 \fIsudoers\fR
 plugin does not currently support running remote commands.
 This may also be used in conjunction with the
@@ -466,7 +466,7 @@ attempts to change to that user's home directory before running the
 shell.
 The command is run with an environment similar to the one
 a user would receive at log in.
-Note that most shells behave differently when a command is specified
+Most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
 for details.
 The
@@ -643,7 +643,7 @@ with a backslash
 except for alphanumerics, underscores,
 hyphens, and dollar signs.
 If no command is specified, an interactive shell is executed.
-Note that most shells behave differently when a command is specified
+Most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
 for details.
 .if \n(SL \{\
@@ -888,7 +888,7 @@ command has an associated timeout, or the
 or
 \fIpam_setcred\fR
 options are enabled.
-Note that
+Both
 \fIpam_session\fR
 and
 \fIpam_setcred\fR
@@ -1066,9 +1066,9 @@ that reside in a directory that is writable by the user.
 If the user can modify or replace the command there is no way
 to limit what additional commands they can run.
 .PP
-Note that
+By default,
 \fBsudo\fR
-will normally only log the command it explicitly runs.
+will only log the command it explicitly runs.
 If a user runs a command such as
 \fRsudo su\fR
 or
@@ -1243,8 +1243,7 @@ is not set.
 \fBsudo\fR
 front-end configuration
 .SH "EXAMPLES"
-Note: the following examples assume a properly configured security
-policy.
+The following examples assume a properly configured security policy.
 .PP
 To get a file listing of an unreadable directory:
 .nf
@@ -1299,9 +1298,9 @@ $ sudo shutdown -r +15 "quick reboot"
 .fi
 .PP
 To make a usage listing of the directories in the /home partition.
-Note that this runs the commands in a sub-shell to make the
+The commands are run in a sub-shell to allow the
 \fRcd\fR
-and file redirection work.
+command and file redirection to work.
 .nf
 .sp
 .RS 4n

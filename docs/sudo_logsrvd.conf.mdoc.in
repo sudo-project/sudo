@@ -45,7 +45,7 @@ are also ignored.
 Long lines can be continued with a backslash
 .Pq Ql \e
 as the last character on the line.
-Note that leading white space is removed from the beginning of lines
+Leading white space is removed from the beginning of lines
 even when the continuation character is used.
 .Pp
 The
@@ -123,7 +123,7 @@ Supported values are
 or a path name beginning with the
 .Ql /
 character.
-Note that a value of
+A value of
 .Em stderr
 is only effective when used in conjunction with the
 .Fl n
@@ -449,9 +449,9 @@ should be used.
 The path name, relative to
 .Em iolog_dir ,
 in which to store I/O logs.
-Note that
+It is possible for
 .Em iolog_file
-may contain directory components.
+to contain directory components.
 The default value is
 .Li %{seq} .
 .Pp
@@ -796,9 +796,8 @@ Sudo log server configuration file
 #tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
 
 # TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
-# NOTE that this setting is only effective if the negotiated protocol
-# is TLS version 1.2.
-# The default cipher list is HIGH:!aNULL.
+# This setting is only effective if the negotiated protocol is TLS version
+# 1.2.  The default cipher list is HIGH:!aNULL.
 #tls_ciphers_v12 = HIGH:!aNULL
 
 # TLS cipher list if the negotiated protocol is TLS version 1.3.
@@ -868,9 +867,8 @@ Sudo log server configuration file
 #tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
 
 # TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
-# NOTE that this setting is only effective if the negotiated protocol
-# is TLS version 1.2.
-# The default is to use the value in the [server] section.
+# this setting is only effective if the negotiated protocol is TLS version
+# 1.2.  The default is to use the value in the [server] section.
 #tls_ciphers_v12 = HIGH:!aNULL
 
 # TLS cipher list if the negotiated protocol is TLS version 1.3.
@@ -887,7 +885,7 @@ Sudo log server configuration file
 #iolog_dir = @iolog_dir@
 
 # The path name, relative to iolog_dir, in which to store I/O logs.
-# Note that iolog_file may contain directory components.
+# It is possible for iolog_file to contain directory components.
 #iolog_file = %{seq}
 
 # If set, I/O logs will be compressed using zlib.  Enabling compression can
