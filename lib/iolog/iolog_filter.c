@@ -193,10 +193,8 @@ iolog_pwfilt_run(void *vhandle, int event, const char *buf,
     switch (event) {
     case IO_EVENT_TTYOUT:
 	/* If filtering passwords and we receive output, disable it. */
-	if (handle->is_filtered) {
+	if (handle->is_filtered)
 	    handle->is_filtered = false;
-	    break;
-	}
 
 	/* Make a copy of buf that is NUL-terminated. */
 	copy = malloc(len + 1);
@@ -222,8 +220,10 @@ iolog_pwfilt_run(void *vhandle, int event, const char *buf,
 
 	    for (i = 0; i < len; i++) {
 		/* We will stop filtering after reaching cr/nl. */
-		if (buf[i] == '\r' || buf[i] == '\n')
+		if (buf[i] == '\r' || buf[i] == '\n') {
+		    handle->is_filtered = false;
 		    break;
+		}
 	    }
 	    if (i != 0) {
 		/* Filtered, replace buffer with '*' chars. */
@@ -237,7 +237,6 @@ iolog_pwfilt_run(void *vhandle, int event, const char *buf,
 		if (i != len) {
 		    /* Done filtering, copy cr/nl and subsequent characters. */
 		    memcpy(copy + i, buf + i, len - i);
-		    handle->is_filtered = false;
 		}
 		*newbuf = copy;
 	    }
