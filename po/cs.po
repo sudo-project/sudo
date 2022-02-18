@@ -2,14 +2,14 @@
 # This file is put in the public domain.
 # Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2013
 # Petr Pisar <petr.pisar@atlas.cz>, 2013, 2014, 2015, 2016, 2017, 2018, 2019.
-# Petr Pisar <petr.pisar@atlas.cz>, 2020, 2021.
+# Petr Pisar <petr.pisar@atlas.cz>, 2020, 2021, 2022.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.9b1\n"
+"Project-Id-Version: sudo 1.9.10b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2021-12-08 10:19-0700\n"
-"PO-Revision-Date: 2021-12-12 15:41+01:00\n"
+"POT-Creation-Date: 2022-02-12 09:31-0700\n"
+"PO-Revision-Date: 2022-02-17 20:18+01:00\n"
 "Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -51,15 +51,15 @@ msgstr "registr nelze obnovit"
 #: src/exec_pty.c:1296 src/exec_pty.c:1303 src/exec_pty.c:1311
 #: src/exec_pty.c:1774 src/load_plugins.c:156 src/load_plugins.c:181
 #: src/load_plugins.c:217 src/load_plugins.c:449 src/load_plugins.c:455
-#: src/parse_args.c:190 src/parse_args.c:211 src/parse_args.c:285
-#: src/parse_args.c:630 src/parse_args.c:652 src/parse_args.c:677
+#: src/parse_args.c:192 src/parse_args.c:213 src/parse_args.c:287
+#: src/parse_args.c:632 src/parse_args.c:654 src/parse_args.c:679
 #: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
-#: src/selinux.c:369 src/selinux.c:489 src/selinux.c:498 src/sesh.c:113
+#: src/selinux.c:362 src/selinux.c:474 src/selinux.c:483 src/sesh.c:113
 #: src/sesh.c:146 src/sesh.c:152 src/sesh.c:159 src/sesh.c:165 src/sesh.c:410
-#: src/sudo.c:636 src/sudo.c:706 src/sudo.c:716 src/sudo.c:741 src/sudo.c:764
-#: src/sudo.c:773 src/sudo.c:782 src/sudo.c:799 src/sudo.c:849 src/sudo.c:859
-#: src/sudo.c:888 src/sudo.c:1087 src/sudo.c:1108 src/sudo.c:1401
-#: src/sudo.c:1570 src/sudo.c:1797 src/sudo.c:2131 src/sudo_edit.c:89
+#: src/sudo.c:639 src/sudo.c:709 src/sudo.c:719 src/sudo.c:744 src/sudo.c:767
+#: src/sudo.c:776 src/sudo.c:785 src/sudo.c:802 src/sudo.c:844 src/sudo.c:854
+#: src/sudo.c:883 src/sudo.c:1083 src/sudo.c:1104 src/sudo.c:1397
+#: src/sudo.c:1566 src/sudo.c:1793 src/sudo.c:2127 src/sudo_edit.c:89
 #: src/sudo_edit.c:149 src/sudo_edit.c:429 src/sudo_edit.c:438
 #: src/sudo_edit.c:539 src/sudo_edit.c:546 src/sudo_edit.c:677
 #: src/sudo_edit.c:697 src/sudo_intercept_common.c:113
@@ -69,60 +69,71 @@ msgid "%s: %s"
 msgstr "%s: %s"
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:55
-#: lib/util/json.c:184 lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304
-#: lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:665 src/conversation.c:81
-#: src/exec_intercept.c:100 src/exec_intercept.c:330 src/exec_intercept.c:354
-#: src/exec_intercept.c:377 src/exec_intercept.c:385 src/exec_intercept.c:410
-#: src/exec_intercept.c:416 src/exec_intercept.c:425 src/exec_intercept.c:431
-#: src/exec_intercept.c:565 src/exec_intercept.c:706 src/exec_monitor.c:456
-#: src/exec_monitor.c:462 src/exec_monitor.c:470 src/exec_monitor.c:478
-#: src/exec_monitor.c:485 src/exec_monitor.c:492 src/exec_monitor.c:499
-#: src/exec_monitor.c:506 src/exec_monitor.c:513 src/exec_monitor.c:520
-#: src/exec_monitor.c:527 src/exec_nopty.c:219 src/exec_nopty.c:228
-#: src/exec_nopty.c:235 src/exec_nopty.c:242 src/exec_nopty.c:249
-#: src/exec_nopty.c:256 src/exec_nopty.c:263 src/exec_nopty.c:270
-#: src/exec_nopty.c:277 src/exec_nopty.c:284 src/exec_nopty.c:291
-#: src/exec_nopty.c:298 src/exec_nopty.c:306 src/exec_preload.c:143
-#: src/exec_preload.c:204 src/exec_pty.c:840 src/exec_pty.c:849
-#: src/exec_pty.c:906 src/exec_pty.c:1231 src/exec_pty.c:1240
-#: src/exec_pty.c:1247 src/exec_pty.c:1254 src/exec_pty.c:1261
-#: src/exec_pty.c:1268 src/exec_pty.c:1275 src/exec_pty.c:1282
-#: src/exec_pty.c:1289 src/exec_pty.c:1296 src/exec_pty.c:1303
-#: src/exec_pty.c:1311 src/exec_pty.c:1774 src/load_plugins.c:156
-#: src/load_plugins.c:181 src/load_plugins.c:217 src/load_plugins.c:449
-#: src/load_plugins.c:455 src/parse_args.c:190 src/parse_args.c:212
-#: src/parse_args.c:285 src/parse_args.c:630 src/parse_args.c:652
-#: src/parse_args.c:677 src/preserve_fds.c:46 src/preserve_fds.c:131
-#: src/selinux.c:89 src/selinux.c:369 src/selinux.c:489 src/selinux.c:498
-#: src/sesh.c:113 src/sesh.c:411 src/sudo.c:227 src/sudo.c:636 src/sudo.c:888
-#: src/sudo.c:1087 src/sudo.c:1108 src/sudo.c:1401 src/sudo.c:1570
-#: src/sudo.c:1797 src/sudo.c:2131 src/sudo_edit.c:89 src/sudo_edit.c:149
-#: src/sudo_edit.c:429 src/sudo_edit.c:438 src/sudo_edit.c:539
-#: src/sudo_edit.c:546 src/sudo_edit.c:677 src/sudo_edit.c:697
-#: src/sudo_intercept_common.c:113 src/sudo_intercept_common.c:317
+#: lib/util/json.c:184 lib/util/regex.c:113 lib/util/regex.c:121
+#: lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381
+#: lib/util/sudo_conf.c:665 src/conversation.c:81 src/exec_intercept.c:100
+#: src/exec_intercept.c:330 src/exec_intercept.c:354 src/exec_intercept.c:377
+#: src/exec_intercept.c:385 src/exec_intercept.c:410 src/exec_intercept.c:416
+#: src/exec_intercept.c:425 src/exec_intercept.c:431 src/exec_intercept.c:565
+#: src/exec_intercept.c:706 src/exec_monitor.c:456 src/exec_monitor.c:462
+#: src/exec_monitor.c:470 src/exec_monitor.c:478 src/exec_monitor.c:485
+#: src/exec_monitor.c:492 src/exec_monitor.c:499 src/exec_monitor.c:506
+#: src/exec_monitor.c:513 src/exec_monitor.c:520 src/exec_monitor.c:527
+#: src/exec_nopty.c:219 src/exec_nopty.c:228 src/exec_nopty.c:235
+#: src/exec_nopty.c:242 src/exec_nopty.c:249 src/exec_nopty.c:256
+#: src/exec_nopty.c:263 src/exec_nopty.c:270 src/exec_nopty.c:277
+#: src/exec_nopty.c:284 src/exec_nopty.c:291 src/exec_nopty.c:298
+#: src/exec_nopty.c:306 src/exec_preload.c:143 src/exec_preload.c:204
+#: src/exec_pty.c:840 src/exec_pty.c:849 src/exec_pty.c:906
+#: src/exec_pty.c:1231 src/exec_pty.c:1240 src/exec_pty.c:1247
+#: src/exec_pty.c:1254 src/exec_pty.c:1261 src/exec_pty.c:1268
+#: src/exec_pty.c:1275 src/exec_pty.c:1282 src/exec_pty.c:1289
+#: src/exec_pty.c:1296 src/exec_pty.c:1303 src/exec_pty.c:1311
+#: src/exec_pty.c:1774 src/load_plugins.c:156 src/load_plugins.c:181
+#: src/load_plugins.c:217 src/load_plugins.c:449 src/load_plugins.c:455
+#: src/parse_args.c:192 src/parse_args.c:214 src/parse_args.c:287
+#: src/parse_args.c:632 src/parse_args.c:654 src/parse_args.c:679
+#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
+#: src/selinux.c:362 src/selinux.c:474 src/selinux.c:483 src/sesh.c:113
+#: src/sesh.c:411 src/sudo.c:230 src/sudo.c:639 src/sudo.c:883 src/sudo.c:1083
+#: src/sudo.c:1104 src/sudo.c:1397 src/sudo.c:1566 src/sudo.c:1793
+#: src/sudo.c:2127 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:429
+#: src/sudo_edit.c:438 src/sudo_edit.c:539 src/sudo_edit.c:546
+#: src/sudo_edit.c:677 src/sudo_edit.c:697 src/sudo_intercept_common.c:113
+#: src/sudo_intercept_common.c:317
 msgid "unable to allocate memory"
 msgstr "nelze alokovat paměť"
 
-#: lib/util/mkdir_parents.c:68 lib/util/sudo_conf.c:704 src/selinux.c:235
-#: src/selinux.c:265 src/sudo.c:368 src/sudo_edit.c:494 src/sudo_edit.c:559
+#: lib/util/mkdir_parents.c:63
+#, c-format
+msgid "unable to stat %.*s"
+msgstr "nelze získat údaje o %.*s"
+
+#: lib/util/mkdir_parents.c:69
+#, c-format
+msgid "%.*s exists but is not a directory (0%o)"
+msgstr "%.*s existuje, ale nejedná se o adresář (0%o)"
+
+#: lib/util/mkdir_parents.c:102 lib/util/sudo_conf.c:704 src/selinux.c:235
+#: src/selinux.c:265 src/sudo.c:371 src/sudo_edit.c:494 src/sudo_edit.c:559
 #, c-format
 msgid "unable to open %s"
 msgstr "%s nelze otevřít"
 
-#: lib/util/mkdir_parents.c:83
+#: lib/util/mkdir_parents.c:119 lib/util/mkdir_parents.c:127
+#: lib/util/mkdir_parents.c:136
 #, c-format
-msgid "unable to mkdir %s"
-msgstr "adresář %s nelze vytvořit"
+msgid "unable to open %.*s"
+msgstr "%.*s nelze otevřít"
 
-#: lib/util/mkdir_parents.c:92 lib/util/sudo_conf.c:681 src/copy_file.c:150
+#: lib/util/mkdir_parents.c:157
 #, c-format
-msgid "unable to stat %s"
-msgstr "nelze získat údaje o %s"
+msgid "unable to mkdir %.*s"
+msgstr "adresář %.*s nelze vytvořit"
 
-#: lib/util/mkdir_parents.c:97
-#, c-format
-msgid "%s exists but is not a directory (0%o)"
-msgstr "%s existuje, ale nejedná se o adresář (0%o)"
+#: lib/util/regex.c:103
+msgid "regular expression too large"
+msgstr "regulární výraz je příliš dlouhý"
 
 #: lib/util/strsignal.c:50
 msgid "Unknown signal"
@@ -161,6 +172,11 @@ msgstr "nepodporovaný zdroj skupin „%s“ v %s, řádek %u"
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
 msgstr "neplatné maximum skupin „%s“ v %s, řádek %u"
+
+#: lib/util/sudo_conf.c:681 src/copy_file.c:150
+#, c-format
+msgid "unable to stat %s"
+msgstr "nelze získat údaje o %s"
 
 #: lib/util/sudo_conf.c:684
 #, c-format
@@ -285,12 +301,12 @@ msgstr "událost nelze přidat do fronty"
 msgid "invalid PolicyCheckRequest"
 msgstr "neplatný požadavek PolicyCheckRequest"
 
-#: src/exec_intercept.c:362 src/sudo.c:1213 src/sudo.c:1258 src/sudo.c:1302
+#: src/exec_intercept.c:362 src/sudo.c:1209 src/sudo.c:1254 src/sudo.c:1298
 msgid "command rejected by policy"
 msgstr "příkaz zamítnut politikou"
 
-#: src/exec_intercept.c:455 src/sudo.c:1218 src/sudo.c:1263 src/sudo.c:1307
-#: src/sudo.c:1381
+#: src/exec_intercept.c:455 src/sudo.c:1214 src/sudo.c:1259 src/sudo.c:1303
+#: src/sudo.c:1377
 msgid "policy plugin error"
 msgstr "chyba modulu s politikou"
 
@@ -340,7 +356,7 @@ msgstr "nelze vytvořit potomka"
 msgid "unable to restore tty label"
 msgstr "nelze obnovit značku TTY"
 
-#: src/exec_monitor.c:637 src/sesh.c:123 src/sudo.c:1164
+#: src/exec_monitor.c:637 src/sesh.c:123 src/sudo.c:1160
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s nelze spustit"
@@ -445,53 +461,53 @@ msgid "policy plugin %s does not include a check_policy method"
 msgstr "modul s politikou %s neobsahuje metodu check_policy"
 
 #: src/net_ifs.c:210 src/net_ifs.c:376 src/net_ifs.c:437 src/net_ifs.c:624
-#: src/net_ifs.c:855 src/sudo.c:483 src/sudo_edit.c:398 src/sudo_edit.c:406
+#: src/net_ifs.c:855 src/sudo.c:486 src/sudo_edit.c:398 src/sudo_edit.c:406
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "vnitřní chyba, přetečení v %s"
 
-#: src/parse_args.c:232
+#: src/parse_args.c:234
 #, c-format
 msgid "invalid environment variable name: %s"
 msgstr "neplatný název proměnné prostředí: %s"
 
-#: src/parse_args.c:335
+#: src/parse_args.c:337
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "argument u -C musí být číslo větší nebo rovno 3"
 
-#: src/parse_args.c:566
+#: src/parse_args.c:568
 msgid "you may not specify both the -i and -s options"
 msgstr "nesmíte zadávat přepínače -i a -s spolu"
 
-#: src/parse_args.c:571
+#: src/parse_args.c:573
 msgid "you may not specify both the -i and -E options"
 msgstr "nesmíte zadávat přepínače -i a -E spolu"
 
-#: src/parse_args.c:581
+#: src/parse_args.c:583
 msgid "the -E option is not valid in edit mode"
 msgstr "přepínač -E není platný v režimu úprav"
 
-#: src/parse_args.c:584
+#: src/parse_args.c:586
 msgid "you may not specify environment variables in edit mode"
 msgstr "v režimu úprav nesmíte zadávat proměnné prostředí"
 
-#: src/parse_args.c:594
+#: src/parse_args.c:596
 msgid "the -U option may only be used with the -l option"
 msgstr "přepínač -U smí být použit jen s přepínačem -l"
 
-#: src/parse_args.c:598
+#: src/parse_args.c:600
 msgid "the -A and -S options may not be used together"
 msgstr "přepínače -A a -S smí nesmí být použity spolu"
 
-#: src/parse_args.c:691
+#: src/parse_args.c:693
 msgid "sudoedit is not supported on this platform"
 msgstr "na této platformě není sudoedit podporován"
 
-#: src/parse_args.c:774
+#: src/parse_args.c:776
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Smí být zadán pouze jeden z přepínačů -e, -h, -i, -K, -l, -s, -v nebo -V"
 
-#: src/parse_args.c:790
+#: src/parse_args.c:792
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -500,7 +516,7 @@ msgstr ""
 "%s – upraví soubory jako jiný uživatel\n"
 "\n"
 
-#: src/parse_args.c:792
+#: src/parse_args.c:794
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -509,7 +525,7 @@ msgstr ""
 "%s – vykoná příkaz jako jiný uživatel\n"
 "\n"
 
-#: src/parse_args.c:798
+#: src/parse_args.c:800
 msgid ""
 "\n"
 "Options:\n"
@@ -517,131 +533,131 @@ msgstr ""
 "\n"
 "Přepínače:\n"
 
-#: src/parse_args.c:800
+#: src/parse_args.c:802
 msgid "use a helper program for password prompting"
 msgstr "dotazuje se na heslo prostřednictvím pomocného programu"
 
-#: src/parse_args.c:803
+#: src/parse_args.c:805
 msgid "use specified BSD authentication type"
 msgstr "použije zadaný druh BSD autentizace"
 
-#: src/parse_args.c:807
+#: src/parse_args.c:809
 msgid "run command in the background"
 msgstr "spustí příkaz na pozadí"
 
-#: src/parse_args.c:810
+#: src/parse_args.c:812
 msgid "ring bell when prompting"
 msgstr "při výzvě vydá zvukové znamení"
 
-#: src/parse_args.c:812
+#: src/parse_args.c:814
 msgid "close all file descriptors >= num"
 msgstr "uzavře všechny deskriptory souboru >= číslu"
 
-#: src/parse_args.c:815
+#: src/parse_args.c:817
 msgid "run command with the specified BSD login class"
 msgstr "spustí příkaz se zadanou přihlašovací třídou BSD"
 
-#: src/parse_args.c:818
+#: src/parse_args.c:820
 msgid "change the working directory before running command"
 msgstr "změní pracovní adresář před spuštěním příkazu"
 
-#: src/parse_args.c:821
+#: src/parse_args.c:823
 msgid "preserve user environment when running command"
 msgstr "při spuštění příkazu zachová uživatelské prostředí"
 
-#: src/parse_args.c:823
+#: src/parse_args.c:825
 msgid "preserve specific environment variables"
 msgstr "zachová určité proměnné prostředí"
 
-#: src/parse_args.c:825
+#: src/parse_args.c:827
 msgid "edit files instead of running a command"
 msgstr "místo spuštění příkazu upraví soubory"
 
-#: src/parse_args.c:828
+#: src/parse_args.c:830
 msgid "run command as the specified group name or ID"
 msgstr "spustí příkaz jako skupina určení názvem nebo ID"
 
-#: src/parse_args.c:831
+#: src/parse_args.c:833
 msgid "set HOME variable to target user's home dir"
 msgstr "nastaví proměnnou HOME na domovský adresář uživatele"
 
-#: src/parse_args.c:834
+#: src/parse_args.c:836
 msgid "display help message and exit"
 msgstr "zobrazí nápovědu a skončí"
 
-#: src/parse_args.c:836
+#: src/parse_args.c:838
 msgid "run command on host (if supported by plugin)"
 msgstr "spustí příkaz na stroji (je-li podporováno modulem)"
 
-#: src/parse_args.c:839
+#: src/parse_args.c:841
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "spustí přihlašovací shell jako cílový uživatel; příkaz lze rovněž zadat"
 
-#: src/parse_args.c:841
+#: src/parse_args.c:843
 msgid "remove timestamp file completely"
 msgstr "úplně odstraní soubor s časovými údaji"
 
-#: src/parse_args.c:844
+#: src/parse_args.c:846
 msgid "invalidate timestamp file"
 msgstr "zneplatní soubor s časovými údaji"
 
-#: src/parse_args.c:847
+#: src/parse_args.c:849
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "vypíše oprávnění uživatele nebo zkontroluje určitý příkaz; pro delší výstup použijte dvakrát"
 
-#: src/parse_args.c:850
+#: src/parse_args.c:852
 msgid "non-interactive mode, no prompts are used"
 msgstr "neinteraktivní režim, nepoužijí se žádné dotazy"
 
-#: src/parse_args.c:853
+#: src/parse_args.c:855
 msgid "preserve group vector instead of setting to target's"
 msgstr "zachová vektor skupin namísto nastavení na skupiny cíle"
 
-#: src/parse_args.c:856
+#: src/parse_args.c:858
 msgid "use the specified password prompt"
 msgstr "použije určený dotaz na heslo"
 
-#: src/parse_args.c:858
+#: src/parse_args.c:860
 msgid "change the root directory before running command"
 msgstr "změní kořenový adresář přes spuštěním příkazu"
 
-#: src/parse_args.c:861
+#: src/parse_args.c:863
 msgid "create SELinux security context with specified role"
 msgstr "vytvoří selinuxový bezpečnostní kontext se zadanou rolí"
 
-#: src/parse_args.c:864
+#: src/parse_args.c:866
 msgid "read password from standard input"
 msgstr "načte heslo ze standardní vstupu"
 
-#: src/parse_args.c:867
+#: src/parse_args.c:869
 msgid "run shell as the target user; a command may also be specified"
 msgstr "spustí shell jako cílový uživatel; příkaz lze rovněž zadat"
 
-#: src/parse_args.c:871
+#: src/parse_args.c:873
 msgid "create SELinux security context with specified type"
 msgstr "vytvoří selinuxový bezpečnostní kontext se zadaným typem"
 
-#: src/parse_args.c:874
+#: src/parse_args.c:876
 msgid "terminate command after the specified time limit"
 msgstr "po uplynutí zadaného času ukončí příkaz"
 
-#: src/parse_args.c:877
+#: src/parse_args.c:879
 msgid "in list mode, display privileges for user"
 msgstr "v režimu výpisu zobrazí oprávnění uživatele"
 
-#: src/parse_args.c:880
+#: src/parse_args.c:882
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "spustí příkaz (nebo upraví soubor) jako uživatel určený jménem nebo ID"
 
-#: src/parse_args.c:882
+#: src/parse_args.c:884
 msgid "display version information and exit"
 msgstr "zobrazí údaje o verzi a skončí"
 
-#: src/parse_args.c:885
+#: src/parse_args.c:887
 msgid "update user's timestamp without running a command"
 msgstr "aktualizuje časové údaje uživatele bez spuštění příkazu"
 
-#: src/parse_args.c:888
+#: src/parse_args.c:890
 msgid "stop processing command line arguments"
 msgstr "přestane zpracovávat argumenty příkazového řádku"
 
@@ -694,44 +710,49 @@ msgstr "nelze získat nový kontext TTY, TTY nebude značka přepsána"
 msgid "unable to set new tty context"
 msgstr "nelze nastavit nový kontext TTY"
 
-#: src/selinux.c:327
-msgid "failed to get new context"
-msgstr "nepodařilo se získat nový kontext"
+#: src/selinux.c:323
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "pro typ %s musíte zadat roli"
 
-#: src/selinux.c:345
+#: src/selinux.c:329
 #, c-format
 msgid "unable to get default type for role %s"
 msgstr "výchozí typ pro roli %s nelze získat"
 
-#: src/selinux.c:357
+#: src/selinux.c:341
+msgid "failed to get new context"
+msgstr "nepodařilo se získat nový kontext"
+
+#: src/selinux.c:350
 #, c-format
 msgid "failed to set new role %s"
 msgstr "nepodařilo se nastavit novou roli %s"
 
-#: src/selinux.c:361
+#: src/selinux.c:354
 #, c-format
 msgid "failed to set new type %s"
 msgstr "nepodařilo se nastavit nový typ %s"
 
-#: src/selinux.c:373
+#: src/selinux.c:366
 #, c-format
 msgid "%s is not a valid context"
 msgstr "%s není platný kontext"
 
-#: src/selinux.c:402
+#: src/selinux.c:394
 msgid "failed to get old context"
 msgstr "nepodařilo se získat starý kontext"
 
-#: src/selinux.c:408
+#: src/selinux.c:400
 msgid "unable to determine enforcing mode."
 msgstr "nepodařilo se určit režim vynucování SELinuxu."
 
-#: src/selinux.c:440
+#: src/selinux.c:425
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "nepodařilo se nastavit kontext pro spuštění na %s"
 
-#: src/selinux.c:447
+#: src/selinux.c:432
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "nepodařilo se nastavit kontext pro vytváření klíčů na %s"
@@ -818,139 +839,147 @@ msgstr "volání setproject selhalo u projektu „%s“"
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "pozor, nepodařilo se přiřadit řízení zdrojů projektu „%s“"
 
-#: src/sudo.c:213
+#: src/sudo.c:216
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo verze %s\n"
 
-#: src/sudo.c:215
+#: src/sudo.c:218
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Přepínače configure: %s\n"
 
-#: src/sudo.c:223
+#: src/sudo.c:226
 msgid "fatal error, unable to load plugins"
 msgstr "nepřekonatelná chyba, moduly nelze zavést"
 
-#: src/sudo.c:269
+#: src/sudo.c:272
 msgid "plugin did not return a command to execute"
 msgstr "modul nevrátil příkaz k provedení"
 
-#: src/sudo.c:302
+#: src/sudo.c:305
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "neočekávaný režim programu sudo 0x%x"
 
-#: src/sudo.c:550
+#: src/sudo.c:553
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "neexistujete v databázi %s"
 
-#: src/sudo.c:607
+#: src/sudo.c:610
 msgid "unable to determine tty"
 msgstr "nelze určit terminál"
 
-#: src/sudo.c:948
+#: src/sudo.c:908
+msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
+msgstr "Je nastaven příznak „žádná další oprávnění“, což brání sudu, aby běželo jako root"
+
+#: src/sudo.c:910
+msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
+msgstr "Běží-li sudo v kontejneru, můžete potřebovat upravit nastavení kontejneru, aby se tento příznak vypnul."
+
+#: src/sudo.c:944
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s musí být vlastněn UID %d a mít nastaven bit setuid"
 
-#: src/sudo.c:951
+#: src/sudo.c:947
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "efektivní UID není %d, nalézá se %s na souborovém systému s nastavenou volbou „nosuid“ nebo na souborovém systému NFS bez práv roota?"
 
-#: src/sudo.c:957
+#: src/sudo.c:953
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "efektivní UID není %d, je sudo nainstalované jako setuid vlastněné rootem?"
 
-#: src/sudo.c:973 src/tgetpass.c:333
+#: src/sudo.c:969 src/tgetpass.c:333
 msgid "unable to set supplementary group IDs"
 msgstr "nelze nastavit ID doplňkových skupin"
 
-#: src/sudo.c:980
+#: src/sudo.c:976
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "efektivní GID nelze nastavit na %u"
 
-#: src/sudo.c:986
+#: src/sudo.c:982
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "GID nelze nastavit na %u"
 
-#: src/sudo.c:1029
+#: src/sudo.c:1025
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "neočekávaný důvod ukončení potomka: %d"
 
-#: src/sudo.c:1136
+#: src/sudo.c:1132
 msgid "unable to initialize policy plugin"
 msgstr "modul s politikami nelze inicializovat"
 
-#: src/sudo.c:1198
+#: src/sudo.c:1194
 #, c-format
 msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "modulu s politikami %s chybí metoda „check_policy“"
 
-#: src/sudo.c:1244
+#: src/sudo.c:1240
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "modul s politikami %s nepodporuje získání seznamu oprávnění"
 
-#: src/sudo.c:1288
+#: src/sudo.c:1284
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "modul s politikami %s nepodporuje přepínač -v"
 
-#: src/sudo.c:1326
+#: src/sudo.c:1322
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "modul s politikami %s nepodporuje přepínače -k/-K"
 
-#: src/sudo.c:1455
+#: src/sudo.c:1451
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "chyba při inicializaci vstupně-výstupního modulu %s"
 
-#: src/sudo.c:1458
+#: src/sudo.c:1454
 msgid "error initializing I/O plugin"
 msgstr "chyba při inicializaci vstupně-výstupního modulu"
 
-#: src/sudo.c:1607
+#: src/sudo.c:1603
 #, c-format
 msgid "error initializing audit plugin %s"
 msgstr "chyba při inicializaci auditního modulu %s"
 
-#: src/sudo.c:1686
+#: src/sudo.c:1682
 #, c-format
 msgid "%s: unable to log error event%s%s"
 msgstr "%s nelze zaznamenat chybovou událost%s%s"
 
-#: src/sudo.c:1722
+#: src/sudo.c:1718
 #, c-format
 msgid "%s: unable to log accept event%s%s"
 msgstr "%s nelze zaznamenat přijímací událost%s%s "
 
-#: src/sudo.c:1727 src/sudo.c:1765
+#: src/sudo.c:1723 src/sudo.c:1761
 msgid "audit plugin error"
 msgstr "chyba auditního modulu"
 
-#: src/sudo.c:1760
+#: src/sudo.c:1756
 #, c-format
 msgid "%s: unable to log reject event%s%s"
 msgstr "%s nelze zaznamenat zamítací událost%s%s "
 
-#: src/sudo.c:1820
+#: src/sudo.c:1816
 #, c-format
 msgid "error initializing approval plugin %s"
 msgstr "chyba při inicializaci schvalovacího modulu %s"
 
-#: src/sudo.c:1890
+#: src/sudo.c:1886
 msgid "command rejected by approver"
 msgstr "příkaz zamítnut schvalovatelem"
 
-#: src/sudo.c:1900
+#: src/sudo.c:1896
 msgid "approval plugin error"
 msgstr "chyba schvalovacího modulu"
 
@@ -1065,9 +1094,6 @@ msgstr "standardní vstup nelze obnovit"
 
 #~ msgid "%s: expected message type %d, got %d"
 #~ msgstr "%s: očekávaný typ zprávy %d, obdržen %d"
-
-#~ msgid "you must specify a role for type %s"
-#~ msgstr "pro typ %s musíte zadat roli"
 
 #~ msgid "unable to set tty context to %s"
 #~ msgstr "nepodařilo se nastavit kontext TTY na %s"
