@@ -38,10 +38,13 @@ What's new in Sudo 1.9.10
    the nsswitch.conf file includes "sss" but no sudo provider is
    configured in /etc/sssd/sssd.conf.  Bug #1022.
 
- * Removed the text "This incident will be reported." from warnings
-   when the invoking user is not listed in sudoers.  This warning
-   is confusing to users and may not be accurate now that the email
-   settings are configurable in the sudoers file.  GitHub issue #48.
+ * Updated the warning displayed when the invoking user is not
+   allowed to run sudo.  If sudo has been configured to send mail
+   on failed attempts (see the mail_* flags in sudoers), it will
+   now print "This incident has been reported to the administrator."
+   If the "mailto" or "mailerpath" sudoers settings are disabled,
+   the message will not be printed and no mail will be sent.
+   GitHub issue #48.
 
  * Fixed a bug where the user-specified command timeout was not
    being honored if the sudoers rule did not also specify a timeout.

@@ -329,6 +329,10 @@ log_denial(int status, bool inform_user)
 		runas_pw->pw_name : user_name, runas_gr ? ":" : "",
 		runas_gr ? runas_gr->gr_name : "", user_host);
 	}
+	if (mailit) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s",
+		_("This incident has been reported to the administrator.\n"));
+	}
 	sudoers_setlocale(oldlocale, NULL);
     }
     debug_return_bool(ret);
