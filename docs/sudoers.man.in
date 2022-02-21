@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "February 21, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4946,7 +4946,9 @@ Defaults to
 \fB\-t\fR.
 .TP 14n
 mailerpath
-Path to mail program used to send warning mail.
+Path to mail program used to send warning mail (negate to prevent
+\fBsudo\fR
+from sending mail).
 Defaults to the path to sendmail found at configure time.
 .TP 14n
 mailfrom
@@ -4964,7 +4966,9 @@ Defaults to the name of the user running
 \fBsudo\fR.
 .TP 14n
 mailto
-Address to send warning and error mail to.
+Address to send warning and error mail to (negate to prevent
+\fBsudo\fR
+from sending mail).
 The address should be enclosed in double quotes
 (\&"")
 to protect against

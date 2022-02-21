@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 16, 2022
+.Dd February 21, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4631,7 +4631,9 @@ Flags to use when invoking mailer.
 Defaults to
 .Fl t .
 .It mailerpath
-Path to mail program used to send warning mail.
+Path to mail program used to send warning mail (negate to prevent
+.Nm sudo
+from sending mail).
 Defaults to the path to sendmail found at configure time.
 .It mailfrom
 Address to use for the
@@ -4647,7 +4649,9 @@ sign.
 Defaults to the name of the user running
 .Nm sudo .
 .It mailto
-Address to send warning and error mail to.
+Address to send warning and error mail to (negate to prevent
+.Nm sudo
+from sending mail).
 The address should be enclosed in double quotes
 .Pq \&""
 to protect against
