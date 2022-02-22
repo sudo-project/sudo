@@ -72,21 +72,21 @@ main(int argc, char *argv[])
 	    goto next;
 	}
 
-	ttyout_fd = openat(dfd, "ttyout", O_RDONLY);
+	ttyout_fd = openat(dfd, "ttyout", O_RDONLY, 0644);
 	if (ttyout_fd == -1) {
 	    sudo_warn("ttyout");
 	    errors++;
 	    goto next;
 	}
 
-	ttyin_fd = openat(dfd, "ttyin", O_RDONLY);
+	ttyin_fd = openat(dfd, "ttyin", O_RDONLY, 0644);
 	if (ttyin_fd == -1) {
 	    sudo_warn("ttyin");
 	    errors++;
 	    goto next;
 	}
 
-	ttyin_ok_fd = openat(dfd, "ttyin.filtered", O_RDONLY);
+	ttyin_ok_fd = openat(dfd, "ttyin.filtered", O_RDONLY, 0644);
 	if (ttyin_ok_fd == -1) {
 	    sudo_warn("ttyin.filtered");
 	    errors++;
