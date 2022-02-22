@@ -76,7 +76,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int dfd = -1, fd = -1;
 
     setprogname("fuzz_iolog_timing");
-    sudo_warn_set_conversation(fuzz_conversation);
+    if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
+	sudo_warn_set_conversation(fuzz_conversation);
 
     /* I/O logs consist of multiple files in a directory. */
     if (mkdtemp(logdir) == NULL)

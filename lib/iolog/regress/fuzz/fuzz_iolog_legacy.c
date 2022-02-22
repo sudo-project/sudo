@@ -93,7 +93,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     FILE *fp;
 
     setprogname("fuzz_iolog_legacy");
-    sudo_warn_set_conversation(fuzz_conversation);
+    if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
+	sudo_warn_set_conversation(fuzz_conversation);
 
     fp = open_data(data, size);
     if (fp == NULL)
