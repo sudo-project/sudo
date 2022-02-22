@@ -42,6 +42,7 @@
 
 #include "sudoers.h"
 #include "sudo_auth.h"
+#include "check.h"
 
 int
 sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
@@ -52,6 +53,9 @@ sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv
 
     if (IS_NONINTERACTIVE(auth))
 	debug_return_int(AUTH_NONINTERACTIVE);
+
+    /* Display lecture if needed and we haven't already done so. */
+    display_lecture(callback);
 
     /* Try to just check the password */
     ka_StringToKey(pass, NULL, &afs_key);

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996,1998-2005, 2007-2014
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2015, 2017-2018, 2021-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -83,8 +83,9 @@ bool  timestamp_lock(void *vcookie, struct passwd *pw);
 bool  timestamp_update(void *vcookie, struct passwd *pw);
 int   timestamp_status(void *vcookie, struct passwd *pw);
 int   get_starttime(pid_t pid, struct timespec *starttime);
-bool  already_lectured(int status);
+bool  already_lectured(void);
 int   set_lectured(void);
+void display_lecture(struct sudo_conv_callback *callback);
 int   create_admin_success_flag(void);
 
 #endif /* SUDOERS_CHECK_H */
