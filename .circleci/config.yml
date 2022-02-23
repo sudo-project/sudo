@@ -61,7 +61,7 @@ jobs:
       - checkout
       - run:
           name: "Building and packaging sudo (macOS)"
-          command: ./scripts/mkpkg --enable-warnings --enable-werror
+          command: ./scripts/mkpkg --enable-warnings
       # Save workspace for subsequent jobs (i.e. test)
       - persist_to_workspace:
           root: .
