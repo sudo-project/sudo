@@ -1,8 +1,8 @@
 version: 2.1
 
 jobs:
-  build:
-    description: Configure, build and package sudo
+  build_linux:
+    description: Configure, build and package sudo (Linux)
     parameters:
       ldap:
         description: if true, build sudo's LDAP support
@@ -30,15 +30,15 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Building and packaging sudo"
+          name: "Building and packaging sudo (Linux)"
           command: ./scripts/mkpkg <<# parameters.ldap >>--flavor=ldap --with-sssd --with-sssd-lib=/usr/lib/x86_64-linux-gnu <</ parameters.ldap >><<# parameters.wolfssl >>--enable-wolfssl <</ parameters.wolfssl >><<^ parameters.logsrvd >>--disable-log-server --disable-log-client <</ parameters.logsrvd >><<^ parameters.intercept >>--disable-intercept <</ parameters.intercept >><<# parameters.static_sudoers >>--enable-static-sudoers <</ parameters.static_sudoers >>--enable-warnings --enable-werror --enable-sanitizer
       # Save workspace for subsequent jobs (i.e. test)
       - persist_to_workspace:
           root: .
           paths:
             - .
-  test:
-    description: run sudo tests in a pre-built workspace
+  test_linux:
+    description: run sudo tests in a pre-built workspace (Linux)
     docker:
       - image: docker.io/sudoproject/ubuntu:latest
         user: build
@@ -47,64 +47,99 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: "Running tests"
+          name: "Running tests (Linux)"
           command: make check
           environment:
               # Leak sanitizer requires ptrace, disable it
               ASAN_OPTIONS: detect_leaks=0
+
+  build_macos:
+    description: Configure, build and package sudo (macOS)
+    macos:
+      xcode: 13.2.1 # indicate our selected version of Xcode
+    steps:
+      - checkout
+      - run:
+          name: "Building and packaging sudo (macOS)"
+          command: ./scripts/mkpkg --enable-warnings --enable-werror
+      # Save workspace for subsequent jobs (i.e. test)
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  test_macos:
+    description: run sudo tests in a pre-built workspace (macOS)
+    macos:
+      xcode: 13.2.1 # indicate our selected version of Xcode
+    steps:
+      # Reuse the workspace from the build job
+      - attach_workspace:
+          at: .
+      - run:
+          name: "Running tests (macOS)"
+          command: make check
 
 # Orchestrate our job run sequence
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - build:
-          name: build-ldap
+      - build_linux:
+          name: build-linux-ldap
           ldap: true
           filters:
             branches:
               only: main
-      - build:
-          name: build-wolfssl
+      - build_linux:
+          name: build-linux-wolfssl
           wolfssl: true
           filters:
             branches:
               only: main
-      - build:
-          name: build-static-sudoers
+      - build_linux:
+          name: build-linux-static-sudoers
           static_sudoers: true
           filters:
             branches:
               only: main
-      - build:
-          name: build-nologsrvd
+      - build_linux:
+          name: build-linux-nologsrvd
           logsrvd: false
           filters:
             branches:
               only: main
-      - build:
-          name: build-nointercept
+      - build_linux:
+          name: build-linux-nointercept
           logsrvd: false
           filters:
             branches:
               only: main
-      - test:
-          name: test-ldap
+      - build_macos:
+          name: build-macos
+          filters:
+            branches:
+              only: main
+      - test_linux:
+          name: test-linux-ldap
           requires:
-            - build-ldap
-      - test:
-          name: test-wolfssl
+            - build-linux-ldap
+      - test_linux:
+          name: test-linux-wolfssl
           requires:
-            - build-wolfssl
-      - test:
-          name: test-static-sudoers
+            - build-linux-wolfssl
+      - test_linux:
+          name: test-linux-static-sudoers
           requires:
-            - build-static-sudoers
-      - test:
-          name: test-nologsrvd
+            - build-linux-static-sudoers
+      - test_linux:
+          name: test-linux-nologsrvd
           requires:
-            - build-nologsrvd
-      - test:
-          name: test-nointercept
+            - build-linux-nologsrvd
+      - test_linux:
+          name: test-linux-nointercept
           requires:
-            - build-nointercept
+            - build-linux-nointercept
+      - test_macos:
+          name: test-macos
+          requires:
+            - build-macos
