@@ -61,6 +61,12 @@ What's new in Sudo 1.9.10
    or "otheruser".  Previously, having "sudo ALL" was sufficient,
    regardless of the RunAs user.  GitHub issue #134.
 
+ * The sudo lecture is now displayed immediately before the password
+   prompt.  As a result, sudo will no longer display the lecture
+   unless the user needs to enter a password.  Authentication methods
+   that don't interact with the user via a terminal do not trigger
+   the lecture.
+
 What's new in Sudo 1.9.9
 
  * Sudo can now be built with OpenSSL 3.0 without generating warnings
