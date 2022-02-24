@@ -232,7 +232,7 @@ done:
 void
 display_lecture(struct sudo_conv_callback *callback)
 {
-    struct getpass_closure *closure = callback->closure;
+    struct getpass_closure *closure;
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
     char buf[BUFSIZ];
@@ -240,6 +240,9 @@ display_lecture(struct sudo_conv_callback *callback)
     ssize_t nread;
     int fd;
     debug_decl(lecture, SUDOERS_DEBUG_AUTH);
+
+    if (callback == NULL || (closure = callback->closure) == NULL)
+	debug_return;
 
     if (closure->lectured)
 	debug_return;
