@@ -681,7 +681,7 @@ eventlog_store_json(struct json_container *json, const struct eventlog *evlog)
     debug_decl(eventlog_store_json, SUDO_DEBUG_UTIL);
 
     /* Required settings. */
-    if (evlog->command == NULL || evlog->submituser == NULL ||
+    if (evlog == NULL || evlog->command == NULL || evlog->submituser == NULL ||
 	    evlog->runuser == NULL)
 	debug_return_bool(false);
 
@@ -1170,8 +1170,13 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
 	    }
 	}
     }
-    len = asprintf(&full_line, "%s : %s : %s",
-	timestr ? timestr : "invalid date", evlog->submituser, logline);
+    if (evlog != NULL) {
+	len = asprintf(&full_line, "%s : %s : %s",
+	    timestr ? timestr : "invalid date", evlog->submituser, logline);
+    } else {
+	len = asprintf(&full_line, "%s : %s",
+	    timestr ? timestr : "invalid date", logline);
+    }
     if (len == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
