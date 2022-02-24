@@ -339,11 +339,11 @@ case "$osversion" in
 	case "$osversion" in
 	    macos10[0-6]-i386|macos10[0-6]-x86_64)
 		# Build intel universal binaries for 10.6 and below
-		ARCH_FLAGS="-arch i386 -arch x86_64"
+		: ${ARCH_FLAGS="-arch i386 -arch x86_64"}
 		;;
-	    macos11*)
+	    macos1[1-9]*)
 		# Build arm64/x86_64 universal binaries for macOS 11
-		ARCH_FLAGS="-arch arm64 -arch x86_64"
+		: ${ARCH_FLAGS="-arch arm64 -arch x86_64"}
 		;;
 	esac
 	if [ "${osversion}" != "`$scriptdir/pp --probe`" ]; then
