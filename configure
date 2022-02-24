@@ -18081,7 +18081,7 @@ if test X"$enable_pvs_studio" = X"yes"; then
     esac
 
     # Determine platform (currently linux or macos)
-    case "$host" in
+    case "$host_os" in
     x86_64-*-linux*) pvs_platform=linux64;;
     *86-*-linux*) pvs_platform=linux32;;
     darwin*) pvs_platform=macos;;
