@@ -3584,7 +3584,7 @@ dnl prepend the include dir to make sure we get the right zlib header.
 dnl
 case "$enable_zlib" in
     yes)
-	AC_CHECK_LIB(z, gzdopen, [
+	AC_CHECK_LIB(z, gzclearerr, [
 	    AC_CHECK_HEADERS([zlib.h], [ZLIB="-lz"], [enable_zlib=builtin])
 	])
 	;;

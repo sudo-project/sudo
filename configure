@@ -26241,9 +26241,9 @@ fi
 
 case "$enable_zlib" in
     yes)
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gzdopen in -lz" >&5
-printf %s "checking for gzdopen in -lz... " >&6; }
-if test ${ac_cv_lib_z_gzdopen+y}
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gzclearerr in -lz" >&5
+printf %s "checking for gzclearerr in -lz... " >&6; }
+if test ${ac_cv_lib_z_gzclearerr+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -26255,28 +26255,28 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char gzdopen ();
+char gzclearerr ();
 int
 main (void)
 {
-return gzdopen ();
+return gzclearerr ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_z_gzdopen=yes
+  ac_cv_lib_z_gzclearerr=yes
 else $as_nop
-  ac_cv_lib_z_gzdopen=no
+  ac_cv_lib_z_gzclearerr=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_gzdopen" >&5
-printf "%s\n" "$ac_cv_lib_z_gzdopen" >&6; }
-if test "x$ac_cv_lib_z_gzdopen" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_gzclearerr" >&5
+printf "%s\n" "$ac_cv_lib_z_gzclearerr" >&6; }
+if test "x$ac_cv_lib_z_gzclearerr" = xyes
 then :
 
 	           for ac_header in zlib.h
