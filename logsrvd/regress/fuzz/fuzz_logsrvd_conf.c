@@ -53,8 +53,10 @@ sudo_regex_compile_v1(void *v, const char *pattern, const char **errstr)
 {
     regex_t *preg = v;
 
-    if (strlen(pattern) > 32)
+    if (strlen(pattern) > 32) {
+	*errstr = "invalid regular expression";
 	return false;
+    }
 
     /* hopefully avoid regfree() crashes */
     memset(preg, 0, sizeof(*preg));
