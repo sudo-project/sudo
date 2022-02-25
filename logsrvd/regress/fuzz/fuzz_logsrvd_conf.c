@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +22,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
+#include <regex.h>
 #include <time.h>
 #include <unistd.h>
 #if defined(HAVE_STDINT_H)
@@ -41,6 +43,23 @@
 #include "sudo_util.h"
 
 #include "logsrvd.h"
+
+/*
+ * Stub version that always succeeds for small inputs and fails for large.
+ * We want to fuzz our parser, not libc's regular expression code.
+ */
+bool
+sudo_regex_compile_v1(void *v, const char *pattern, const char **errstr)
+{
+    regex_t *preg = v;
+
+    if (strlen(pattern) > 32)
+	return false;
+
+    /* hopefully avoid regfree() crashes */
+    memset(preg, 0, sizeof(*preg));
+    return true;
+}
 
 static int
 fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],

@@ -251,7 +251,7 @@ check-fuzzer: $(FUZZ_PROGS)
 	    unset LANG || LANG=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
-	    echo "fuzz_logsrvd_conf: verifying corpus (expect 3 errors)"; \
+	    echo "fuzz_logsrvd_conf: verifying corpus"; \
 	    ./fuzz_logsrvd_conf $(FUZZ_LOGSRVD_CONF_CORPUS); \
 	fi
 
