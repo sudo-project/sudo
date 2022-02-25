@@ -2,7 +2,7 @@ Parses OK
 
 Entries for user root:
 
-ALL = ^/usr/bin/w$ ^-[abc]$
+ALL = ^/bin/ls$ ^-[lAt]$
 	host  matched
 	runas matched
 	cmnd  allowed

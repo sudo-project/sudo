@@ -8,8 +8,8 @@
 exec 2>&1
 
 # Command and args: regex
-$TESTSUDOERS root /usr/bin/w -a <<'EOF'
-root ALL = ^/usr/bin/w$ ^-[abc]$
+$TESTSUDOERS root /bin/ls -l <<'EOF'
+root ALL = ^/bin/ls$ ^-[lAt]$
 EOF
 
 # Command: regex, args: wildcard
