@@ -1,0 +1,193 @@
+#!/bin/sh
+#
+# Simple test harness for sudoers tests.
+# usage: harness [-v] test_group [test_name ...]
+#
+srcdir="@srcdir@"
+SHELL=@SHELL@
+verbose=0
+rval=0
+ntests=0
+errors=0
+
+umask 022
+
+if [ "$1" = "-v" ]; then
+    verbose=1
+    shift
+fi
+
+if [ $# -eq 0 ]; then
+    echo "usage: harness test_group [test_name ...]" >&2
+    exit 1
+fi
+group="$1"
+shift
+
+if [ ! -d "$srcdir/regress/$group" ]; then
+    echo "missing test group: $srcdir/regress/$group" >&2
+    exit 1
+fi
+
+case "$group" in
+sudoers)
+    mkdir -p "regress/$group"
+    if [ $# -eq 0 ]; then
+	tests=
+	for t in $srcdir/regress/$group/*.in; do
+	    tests="$tests `basename $t .in`"
+	done
+	set -- $tests
+    fi
+    while [ $# -ne 0 ]; do
+	test="$1"
+	shift
+	in="$srcdir/regress/sudoers/${test}.in"
+	out="regress/sudoers/${test}.out"
+	toke="regress/sudoers/${test}.toke"
+	json="regress/sudoers/${test}.json"
+	ldif="regress/sudoers/${test}.ldif"
+	sudo="regress/sudoers/${test}.sudo"
+	ldif2sudo="regress/sudoers/${test}.ldif2sudo"
+
+	./testsudoers -dt <$in >$out 2>$toke || true
+	ntests=`expr $ntests + 1`
+	if cmp $out $srcdir/$out.ok >/dev/null; then
+	    if [ $verbose -eq 1 ]; then
+		echo "$group/$test (parse): OK"
+	    fi
+	else
+	    errors=`expr $errors + 1`
+	    echo "$group/$test (parse): FAIL"
+	    diff $out $srcdir/$out.ok || true
+	fi
+	ntests=`expr $ntests + 1`
+	if cmp $toke $srcdir/$toke.ok >/dev/null; then
+	    if [ $verbose -eq 1 ]; then
+		echo "$group/$test (toke): OK"
+	    fi
+	else
+	    errors=`expr $errors + 1`
+	    echo "$group/$test (toke): FAIL"
+	    diff $toke $srcdir/$toke.ok || true
+	fi
+
+	./cvtsudoers -c "" -f json $in >$json 2>/dev/null || true
+	ntests=`expr $ntests + 1`
+	if cmp $json $srcdir/$json.ok >/dev/null; then
+	    if [ $verbose -eq 1 ]; then
+		echo "$group/$test (json): OK"
+	    fi
+	else
+	    errors=`expr $errors + 1`
+	    echo "$group/$test (json): FAIL"
+	    diff $json $srcdir/$json.ok || true
+	fi
+
+	SUDOERS_BASE="ou=SUDOers,dc=sudo,dc=ws" \
+	    ./cvtsudoers -c "" -f ldif < $in >$ldif 2>/dev/null || true
+	ntests=`expr $ntests + 1`
+	if cmp $ldif $srcdir/$ldif.ok >/dev/null; then
+	    if [ $verbose -eq 1 ]; then
+		echo "$group/$test (ldif): OK"
+	    fi
+	else
+	    errors=`expr $errors + 1`
+	    echo "$group/$test: (ldif) FAIL"
+	    diff $ldif $srcdir/$ldif.ok || true
+	fi
+
+	./cvtsudoers -c "" -f sudoers $in >$sudo 2>/dev/null || true
+	ntests=`expr $ntests + 1`
+	if ./visudo -qcf $sudo; then
+	    if [ $verbose -eq 1 ]; then
+		echo "$group/$test (reparse): OK"
+	    fi
+	else
+	    errors=`expr $errors + 1`
+	    echo "$group/$test: (reparse) FAIL"
+	    ./visudo -cf $sudo || true
+	fi
+
+	if test -s $srcdir/$ldif.ok; then
+	    ./cvtsudoers -c "" -i ldif -f sudoers $srcdir/$ldif.ok >$ldif2sudo || true
+	    ntests=`expr $ntests + 1`
+	    if cmp $ldif2sudo $srcdir/$ldif2sudo.ok >/dev/null; then
+		if [ $verbose -eq 1 ]; then
+		    echo "$group/$test (ldif2sudo): OK"
+		fi
+	    else
+		errors=`expr $errors + 1`
+		echo "$group/$test: (ldif2sudo) FAIL"
+		diff $ldif $srcdir/$ldif.ok || true
+	    fi
+	fi
+    done
+    ${AWK-awk} -v group=$group -v ntests=$ntests -v errors=$errors \
+	'END {printf("%s: %d tests run, %d errors, %d%% success rate\n", group, ntests, errors, (ntests - errors) * 100 / ntests)}' < /dev/null
+    if test $errors -ne 0; then
+	rval=`expr $rval + $errors`
+    fi
+    ;;
+*)
+    TESTSUDOERS=./testsudoers; export TESTSUDOERS
+    VISUDO=./visudo; export VISUDO
+    CVTSUDOERS=./cvtsudoers; export CVTSUDOERS
+    mkdir -p "regress/$group"
+    if [ $# -eq 0 ]; then
+	tests=
+	for t in $srcdir/regress/$group/*.sh; do
+	    tests="$tests `basename $t .sh`"
+	done
+	set -- $tests
+    fi
+    while [ $# -ne 0 ]; do
+	test="$1"
+	shift
+
+	cmd="$srcdir/regress/$group/${test}.sh"
+	out="regress/$group/${test}.out"
+	err="regress/$group/${test}.err"
+	status=0
+	TESTDIR=$srcdir/regress/$group $SHELL $cmd >$out 2>$err || status=$?
+	ntests=`expr $ntests + 1`
+	if cmp $out $srcdir/$out.ok >/dev/null; then
+	    if test $status -eq 0; then
+		if [ $verbose -eq 1 ]; then
+		    echo "$group/$test: OK"
+		fi
+	    else
+		errors=`expr $errors + 1`
+		echo "$group/$test (exit $status): FAIL"
+	    fi
+	else
+	    errors=`expr $errors + 1`
+	    echo "$group/$test: FAIL"
+	    diff $out $srcdir/$out.ok || true
+	fi
+	if test -s $srcdir/$err.ok; then
+	    ntests=`expr $ntests + 1`
+	    if cmp $err $srcdir/$err.ok >/dev/null; then
+		if [ $verbose -eq 1 ]; then
+		    echo "$group/$test (stderr): OK"
+		fi
+	    else
+		errors=`expr $errors + 1`
+		echo "$group/$test (stderr): FAIL"
+		diff $err $srcdir/$err.ok || true
+	    fi
+	elif test -s $err; then
+	    errors=`expr $errors + 1`
+	    echo "$group/$test (stderr): FAIL"
+	    cat $err 1>&2
+	fi
+    done
+    ${AWK-awk} -v group=$group -v ntests=$ntests -v errors=$errors \
+	'END {printf("%s: %d tests run, %d errors, %d%% success rate\n", group, ntests, errors, (ntests - errors) * 100 / ntests)}' < /dev/null
+    if test $errors -ne 0; then
+	rval=`expr $rval + $errors`
+    fi
+    ;;
+esac
+
+exit $rval

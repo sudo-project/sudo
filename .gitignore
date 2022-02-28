@@ -73,6 +73,7 @@ logsrvd/sudo_sendlog
 logsrvd/fuzz_[a-z]*
 
 plugins/sudoers/cvtsudoers
+plugins/sudoers/harness
 plugins/sudoers/sudoers
 plugins/sudoers/sudoreplay
 plugins/sudoers/testsudoers

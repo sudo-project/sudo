@@ -602,6 +602,7 @@ plugins/sudoers/gram.c
 plugins/sudoers/gram.h
 plugins/sudoers/gram.y
 plugins/sudoers/group_plugin.c
+plugins/sudoers/harness.in
 plugins/sudoers/hexchar.c
 plugins/sudoers/ins_2001.h
 plugins/sudoers/ins_classic.h

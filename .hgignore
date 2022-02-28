@@ -65,7 +65,7 @@ Makefile$
 ^logsrvd/sudo_(logsrvd|sendlog)$
 ^logsrvd/fuzz_logsrvd_conf$
 
-^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|prologue|check_[a-z0-9_]+)$
+^plugins/sudoers/(cvtsudoers|harness|sudoers|sudoreplay|testsudoers|tsdump|visudo|prologue|check_[a-z0-9_]+)$
 ^plugins/sudoers/fuzz_(policy|sudoers(_ldif)?)$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
 ^plugins/sudoers/regress/iolog_plugin/iolog$
