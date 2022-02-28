@@ -3,7 +3,7 @@
 # Simple test harness for sudoers tests.
 # usage: harness [-v] test_group [test_name ...]
 #
-srcdir="@srcdir@"
+srcdir="@abs_srcdir@"
 SHELL=@SHELL@
 verbose=0
 rval=0
@@ -23,6 +23,7 @@ if [ $# -eq 0 ]; then
 fi
 group="$1"
 shift
+srcdir=${srcdir%"/regress"}
 
 if [ ! -d "$srcdir/regress/$group" ]; then
     echo "missing test group: $srcdir/regress/$group" >&2

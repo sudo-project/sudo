@@ -276,6 +276,7 @@ lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
+lib/util/regress/harness.in
 lib/util/regress/mktemp/mktemp_test.c
 lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c
@@ -602,7 +603,6 @@ plugins/sudoers/gram.c
 plugins/sudoers/gram.h
 plugins/sudoers/gram.y
 plugins/sudoers/group_plugin.c
-plugins/sudoers/harness.in
 plugins/sudoers/hexchar.c
 plugins/sudoers/ins_2001.h
 plugins/sudoers/ins_classic.h
@@ -814,6 +814,7 @@ plugins/sudoers/regress/fuzz/fuzz_sudoers.dict
 plugins/sudoers/regress/fuzz/fuzz_sudoers.out.ok
 plugins/sudoers/regress/fuzz/fuzz_sudoers_ldif.c
 plugins/sudoers/regress/fuzz/fuzz_sudoers_ldif.dict
+plugins/sudoers/regress/harness.in
 plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
 plugins/sudoers/regress/parser/check_addr.c
 plugins/sudoers/regress/parser/check_addr.in
