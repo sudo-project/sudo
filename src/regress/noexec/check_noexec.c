@@ -41,7 +41,7 @@
 #include "sudo_util.h"
 #include "sudo_exec.h"
 
-static bool verbose = 0;
+static bool verbose;
 
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 static void usage(void) __attribute__((__noreturn__));
@@ -197,7 +197,7 @@ main(int argc, char *argv[], char *envp[])
     while ((ch = getopt(argc, argv, "v")) != -1) {
 	switch (ch) {
 	case 'v':
-	    verbose = 1;
+	    verbose = true;
 	    break;
 	default:
 	    usage();

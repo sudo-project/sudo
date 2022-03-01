@@ -76,7 +76,7 @@ main(int argc, char *argv[])
     while ((ch = getopt(argc, argv, "v")) != -1) {
 	switch (ch) {
 	case 'v':
-	    verbose = 1;
+	    verbose = true;
 	    break;
 	default:
 	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
