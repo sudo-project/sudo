@@ -2923,6 +2923,7 @@ AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
     ], [
 #	include <limits.h>
 #	include <fcntl.h> ])
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }closefrom_test"
 ])
 AC_CHECK_FUNCS([mkstemps mkdtemp], [], [break])
 if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then

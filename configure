@@ -23111,6 +23111,7 @@ fi
 done
 
 fi
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }closefrom_test"
 
 fi
 
