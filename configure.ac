@@ -2297,11 +2297,11 @@ if test X"$enable_pvs_studio" = X"yes"; then
     esac
 
     # Determine platform (currently linux or macos)
-    case "$host_os" in
+    case "$host" in
     x86_64-*-linux*) pvs_platform=linux64;;
     *86-*-linux*) pvs_platform=linux32;;
-    darwin*) pvs_platform=macos;;
-    *) AC_MSG_ERROR([PVS-Studio does not support $host_os.]);;
+    *-*-darwin*) pvs_platform=macos;;
+    *) AC_MSG_ERROR([PVS-Studio does not support $host.]);;
     esac
 
     # create basic PVS-Studio.cfg file
