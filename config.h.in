@@ -100,6 +100,9 @@
 /* Define to 1 if you have the `closefrom' function. */
 #undef HAVE_CLOSEFROM
 
+/* Define to 1 if you have the `close_range' function. */
+#undef HAVE_CLOSE_RANGE
+
 /* Define to 1 if you have the `crypt' function. */
 #undef HAVE_CRYPT
 
@@ -547,6 +550,9 @@
 
 /* Define to 1 to enable Linux audit support. */
 #undef HAVE_LINUX_AUDIT
+
+/* Define to 1 if you have the <linux/close_range.h> header file. */
+#undef HAVE_LINUX_CLOSE_RANGE_H
 
 /* Define to 1 if you have the <linux/random.h> header file. */
 #undef HAVE_LINUX_RANDOM_H

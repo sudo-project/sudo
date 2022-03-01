@@ -2066,6 +2066,10 @@ case "$host" in
 		# The glibc getentropy() emulation may fail on older kernels.
 		# We use our own getentropy() by default on Linux.
 		: ${ac_cv_func_getentropy='no'}
+
+		# The glibc closefrom() emulation may fail in chroot.
+		# We use our own closefrom() by default on Linux.
+		: ${ac_cv_func_closefrom='no'}
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
@@ -2909,7 +2913,14 @@ AC_CHECK_FUNCS([getopt_long], [], [
 ])
 AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
     SUDO_APPEND_COMPAT_EXP(sudo_closefrom)
-    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [], [
+    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [
+	# Linux has a special header for close_range(2).
+	AC_CHECK_FUNCS([close_range], [
+	    case "$host_os" in
+	    linux*) AC_CHECK_HEADERS([linux/close_range.h]);;
+	    esac
+	])
+    ], [
 #	include <limits.h>
 #	include <fcntl.h> ])
 ])

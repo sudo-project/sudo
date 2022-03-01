@@ -67,6 +67,11 @@ What's new in Sudo 1.9.10
    that don't interact with the user via a terminal do not trigger
    the lecture.
 
+ * Sudo now uses its own closefrom() emulation on Linux systems.
+   The glibc version may not work in a chroot jail where /proc is
+   not available.  If close_range(2) is present, it will be used
+   in preference to /proc/self/fd.
+
 What's new in Sudo 1.9.9
 
  * Sudo can now be built with OpenSSL 3.0 without generating warnings

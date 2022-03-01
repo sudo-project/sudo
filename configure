@@ -17687,6 +17687,10 @@ fi
 		# The glibc getentropy() emulation may fail on older kernels.
 		# We use our own getentropy() by default on Linux.
 		: ${ac_cv_func_getentropy='no'}
+
+		# The glibc closefrom() emulation may fail in chroot.
+		# We use our own closefrom() by default on Linux.
+		: ${ac_cv_func_closefrom='no'}
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
@@ -23080,6 +23084,31 @@ esac
 if test "x$ac_cv_have_decl_F_CLOSEM" = xyes
 then :
   printf "%s\n" "#define HAVE_FCNTL_CLOSEM 1" >>confdefs.h
+
+else $as_nop
+
+	# Linux has a special header for close_range(2).
+
+  for ac_func in close_range
+do :
+  ac_fn_c_check_func "$LINENO" "close_range" "ac_cv_func_close_range"
+if test "x$ac_cv_func_close_range" = xyes
+then :
+  printf "%s\n" "#define HAVE_CLOSE_RANGE 1" >>confdefs.h
+
+	    case "$host_os" in
+	    linux*) ac_fn_c_check_header_compile "$LINENO" "linux/close_range.h" "ac_cv_header_linux_close_range_h" "$ac_includes_default"
+if test "x$ac_cv_header_linux_close_range_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_LINUX_CLOSE_RANGE_H 1" >>confdefs.h
+
+fi
+;;
+	    esac
+
+fi
+
+done
 
 fi
 
