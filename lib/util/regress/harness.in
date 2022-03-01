@@ -1,0 +1,93 @@
+#!/bin/sh
+#
+# Simple test harness for libsudo_util tests.
+# usage: harness [-v] test_group [test_name ...]
+#
+srcdir="@abs_srcdir@"
+SHELL=@SHELL@
+verbose=0
+rval=0
+ntests=0
+errors=0
+
+umask 022
+
+if [ "$1" = "-v" ]; then
+    verbose=1
+    shift
+fi
+
+if [ $# -eq 0 ]; then
+    echo "usage: harness test_group [test_name ...]" >&2
+    exit 1
+fi
+group="$1"
+shift
+srcdir=${srcdir%"/regress"}
+
+if [ ! -d "$srcdir/regress/$group" ]; then
+    echo "missing test group: $srcdir/regress/$group" >&2
+    exit 1
+fi
+
+mkdir -p "regress/$group"
+if [ $# -eq 0 ]; then
+    tests=
+    for t in $srcdir/regress/$group/*.in; do
+	tests="$tests `basename $t .in`"
+    done
+    set -- $tests
+fi
+
+build_dir=`pwd`
+cd $srcdir
+
+while [ $# -ne 0 ]; do
+    test="$1"
+    shift
+    in="regress/$group/${test}.in"
+    out="$build_dir/regress/$group/${test}.out"
+    out_ok="regress/$group/${test}.out.ok"
+    err="$build_dir/regress/$group/${test}.err"
+    err_ok="regress/$group/${test}.err.ok"
+
+    if [ "$group" = "sudo_conf" ]; then
+	$build_dir/conf_test $in >$out 2>$err
+    else
+	$build_dir/parseln_test <$in >$out 2>$err
+    fi
+
+    ntests=`expr $ntests + 1`
+    if cmp $out $out_ok >/dev/null; then
+	if [ $verbose -eq 1 ]; then
+	    echo "$group/$test: OK"
+	fi
+    else
+	errors=`expr $errors + 1`
+	echo "$group/$test: FAIL"
+	diff $out $out_ok || true
+    fi
+
+    ntests=`expr $ntests + 1`
+    if test -s $err_ok; then
+	if cmp $err $err_ok >/dev/null; then
+	    if [ $verbose -eq 1 ]; then
+		echo "$group/$test (stderr): OK"
+	    fi
+	else
+	    errors=`expr $errors + 1`
+	    echo "$group/$test (stderr): FAIL"
+	    diff $err $err_ok || true
+	fi
+    elif test -s $err; then
+	errors=`expr $errors + 1`
+	echo "$group/$test (stderr): FAIL"
+    fi
+done
+${AWK-awk} -v group=$group -v ntests=$ntests -v errors=$errors \
+    'END {printf("%s: %d tests run, %d errors, %d%% success rate\n", group, ntests, errors, (ntests - errors) * 100 / ntests)}' < /dev/null
+if test $errors -ne 0; then
+    rval=`expr $rval + $errors`
+fi
+
+exit $rval
