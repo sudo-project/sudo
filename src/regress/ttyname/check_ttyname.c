@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2020, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -58,15 +63,26 @@ match_ttys(const char *tty1, const char *tty2)
     return 1;
 }
 
-
 int
 main(int argc, char *argv[])
 {
     char *tty_libc = NULL, *tty_sudo = NULL;
     char pathbuf[PATH_MAX];
-    int ret = 1;
+    bool verbose = false;
+    int ch, errors = 0, ntests = 1;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    verbose = 1;
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
 
     /* Lookup tty name using kernel info if possible. */
     if (get_process_ttyname(pathbuf, sizeof(pathbuf)) != NULL)
@@ -84,16 +100,22 @@ main(int argc, char *argv[])
 #endif
 
     /* Compare libc and kernel ttys. */
-    ret = match_ttys(tty_libc, tty_sudo);
-    if (ret == 0) {
-	printf("%s: OK (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
+    if (match_ttys(tty_libc, tty_sudo) == 0) {
+	if (verbose)
+	    printf("%s: OK (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
     } else if (tty_libc == NULL) {
-	printf("%s: SKIP (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
-	ret = 0;
+	if (verbose)
+	    printf("%s: SKIP (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
+	ntests = 0;
     } else {
 	printf("%s: FAIL %s (sudo) vs. %s (libc)\n", getprogname(),
 	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_libc : "none");
+	errors++;
     }
 
-    return ret;
+    if (ntests != 0) {
+	printf("%s: %d tests run, %d errors, %d%% success rate\n",
+	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
+    }
+    return errors;
 }
