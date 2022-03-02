@@ -49,17 +49,20 @@ for a list of packages required to build sudo.
    you may file a bug report at https://bugzilla.sudo.ws/ or an issue at
    https://github.com/sudo-project/sudo/issues/ (not both).
 
-5. Type `make install` (as root) to install sudo, visudo, the man
+5. Optionally, type `make check` to build and run the sudo unit and
+   regression tests.  For more verbose output, use `make check-verbose`.
+
+6. Type `make install` (as root) to install sudo, visudo, the man
    pages, and a skeleton sudoers file.  The install will not overwrite
    an existing sudoers file.  You can also install various pieces of
    the package via the install-binaries, install-doc, and install-sudoers
    make targets.
 
-6. Edit the sudoers file with `visudo` as necessary for your
+7. Edit the sudoers file with `visudo` as necessary for your
    site.  You will probably want to refer the example sudoers
    file and sudoers man page included with the sudo package.
 
-7. If you want to use syslogd(8) to do the logging, you'll need to
+8. If you want to use syslogd(8) to do the logging, you'll need to
    update your `/etc/syslog.conf` file.  See the examples/syslog.conf
    file included in the distribution for an example.
 
