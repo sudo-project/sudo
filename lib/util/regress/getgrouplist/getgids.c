@@ -48,16 +48,26 @@ main(int argc, char *argv[])
     char *username = NULL;
     GETGROUPS_T *groups = NULL;
     struct passwd *pw;
-    int i, ngroups;
+    int ch, i, ngroups;
     gid_t basegid;
+
     initprogname(argc > 0 ? argv[0] : "getgids");
 
-    if (getopt(argc, argv, "") != -1) {
-	fprintf(stderr, "usage: %s [user]\n", getprogname());
-	return EXIT_FAILURE;
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v] [user]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
     }
-    if (argc > 1)
-	username = argv[1];
+    argc -= optind;
+    argv += optind;
+
+    if (argc > 0)
+	username = argv[0];
 
     if (username != NULL) {
 	if ((pw = getpwnam(username)) == NULL)

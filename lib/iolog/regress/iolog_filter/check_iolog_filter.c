@@ -38,10 +38,23 @@ int
 main(int argc, char *argv[])
 {
     int dfd = -1, ttyin_fd = -1, ttyout_fd = -1, ttyin_ok_fd = -1;
-    int i, tests = 0, errors = 0;
+    int ch, i, ntests = 0, errors = 0;
     void *passprompt_regex = NULL;
 
     initprogname(argc > 0 ? argv[0] : "check_iolog_filter");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v] iolog_dir ...\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     passprompt_regex = iolog_pwfilt_alloc();
     if (passprompt_regex == NULL)
@@ -49,14 +62,14 @@ main(int argc, char *argv[])
     if (!iolog_pwfilt_add(passprompt_regex, "(?i)password[: ]*"))
 	exit(1);
 
-    for (i = 1; i < argc; i++) {
+    for (i = 0; i < argc; i++) {
 	struct iolog_file iolog_timing = { true };
 	struct timing_closure timing;
 	const char *logdir = argv[i];
 	char tbuf[8192], fbuf[8192];
 	ssize_t nread;
 
-	tests++;
+	ntests++;
 
 	/* I/O logs consist of multiple files in a directory. */
 	dfd = open(logdir, O_RDONLY);
@@ -180,11 +193,11 @@ next:
     }
     iolog_pwfilt_free(passprompt_regex);
 
-    if (tests != 0) {
-	printf("%s: %d test%s run, %d errors, %d%% success rate\n",
-	    getprogname(), tests, tests == 1 ? "" : "s", errors,
-	    (tests - errors) * 100 / tests);
+    if (ntests != 0) {
+	printf("iolog_filter: %d test%s run, %d errors, %d%% success rate\n",
+	    ntests, ntests == 1 ? "" : "s", errors,
+	    (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }

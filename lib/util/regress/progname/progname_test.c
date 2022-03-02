@@ -36,17 +36,31 @@ int
 main(int argc, char *argv[])
 {
     char *progbase = "progname_test";
+    int ch;
 
     if (argc > 0)
 	progbase = sudo_basename(argv[0]);
     initprogname(progbase);
 
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", progbase);
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
+
     /* Make sure getprogname() matches basename of argv[0]. */
     if (strcmp(getprogname(), progbase) != 0) {
 	printf("%s: FAIL: incorrect program name \"%s\"\n",
 	    progbase, getprogname());
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
     }
 
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }

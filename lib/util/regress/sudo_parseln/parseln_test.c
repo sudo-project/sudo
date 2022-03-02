@@ -39,11 +39,25 @@ main(int argc, char *argv[])
     unsigned int lineno = 0;
     size_t linesize = 0;
     char *line = NULL;
+    int ch;
 
     initprogname(argc > 0 ? argv[0] : "parseln_test");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     while (sudo_parseln(&line, &linesize, &lineno, stdin, 0) != -1)
 	printf("%6u\t%s\n", lineno, line);
     free(line);
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }

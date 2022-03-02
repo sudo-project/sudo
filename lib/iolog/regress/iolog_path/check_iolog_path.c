@@ -180,18 +180,29 @@ main(int argc, char *argv[])
     char line[2048];
     char *file_in = NULL, *file_out = NULL;
     char *dir_in = NULL, *dir_out = NULL;
-    int state = 0;
-    int errors = 0;
-    int tests = 0;
+    int ch, state = 0, errors = 0, ntests = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_iolog_path");
 
-    if (argc != 2)
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v] data\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1)
 	usage();
 
-    fp = fopen(argv[1], "r");
+    fp = fopen(argv[0], "r");
     if (fp == NULL)
-	sudo_fatalx("unable to open %s", argv[1]);
+	sudo_fatalx("unable to open %s", argv[0]);
 
     /*
      * Input consists of 12 lines:
@@ -262,7 +273,7 @@ main(int argc, char *argv[])
 	    break;
 	case 11:
 	    errors += do_check(dir_in, file_in, dir_out, file_out);
-	    tests++;
+	    ntests++;
 	    reset_escape_data(&escape_data);
 	    break;
 	default:
@@ -271,11 +282,11 @@ main(int argc, char *argv[])
 	state = (state + 1) % MAX_STATE;
     }
 
-    if (tests != 0) {
+    if (ntests != 0) {
 	printf("iolog_path: %d test%s run, %d errors, %d%% success rate\n",
-	    tests, tests == 1 ? "" : "s", errors,
-	    (tests - errors) * 100 / tests);
+	    ntests, ntests == 1 ? "" : "s", errors,
+	    (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }

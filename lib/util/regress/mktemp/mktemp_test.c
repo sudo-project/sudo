@@ -15,6 +15,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -132,9 +133,22 @@ main(int argc, char *argv[])
 	char *p;
 	size_t clen;
 	long pg;
-	int i;
+	int ch, i;
 
 	initprogname(argc > 0 ? argv[0] : "mktemp_test");
+
+	while ((ch = getopt(argc, argv, "v")) != -1) {
+	    switch (ch) {
+	    case 'v':
+		/* ignore */
+		break;
+	    default:
+		fprintf(stderr, "usage: %s [-v]\n", getprogname());
+		return EXIT_FAILURE;
+	    }
+	}
+	argc -= optind;
+	argv += optind;
 
 	pg = sysconf(_SC_PAGESIZE);
 	if (getcwd(cwd, sizeof cwd - 1) == NULL)

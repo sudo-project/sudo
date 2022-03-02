@@ -39,8 +39,21 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    int fds[2], flag, maxfd, minfd, errors = 0, ntests = 0;
+    int ch, fds[2], flag, maxfd, minfd, errors = 0, ntests = 0;
     initprogname(argc > 0 ? argv[0] : "closefrom_test");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     /* We use pipe() because it doesn't rely on the filesystem. */
     ntests++;
@@ -103,5 +116,5 @@ done:
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
-    exit(errors);
+    return errors;
 }

@@ -51,14 +51,26 @@ struct uuid {
 int
 main(int argc, char *argv[])
 {
+    int ch, errors = 0, ntests = 0;
     union {
         struct uuid id;
         unsigned char u8[16];
     } uuid;
-    int errors = 0;
-    int ntests = 0;
 
     initprogname(argc > 0 ? argv[0] : "uuid_test");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     /* Do 16 passes. */
     for (ntests = 0; ntests < 16; ntests++) {
@@ -88,5 +100,5 @@ main(int argc, char *argv[])
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
-    return 0;
+    return errors;
 }

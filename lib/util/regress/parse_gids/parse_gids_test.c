@@ -69,14 +69,28 @@ main(int argc, char *argv[])
 {
     GETGROUPS_T *gidlist = NULL;
     int i, j, errors = 0, ntests = 0;
-    int ngids;
+    int ch, ngids;
+
     initprogname(argc > 0 ? argv[0] : "parse_gids_test");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     for (i = 0; test_data[i].gids != NULL; i++) {
 	free(gidlist);
 	ngids = sudo_parse_gids(test_data[i].gids, test_data[i].baseptr, &gidlist);
 	if (ngids == -1)
-	    exit(EXIT_FAILURE);	/* out of memory? */
+	    sudo_fatal_nodebug("sudo_parse_gids");
 	ntests++;
 	if (ngids != test_data[i].ngids) {
 	    sudo_warnx_nodebug("test #%d: expected %d gids, got %d",
@@ -101,5 +115,5 @@ main(int argc, char *argv[])
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
-    exit(errors);
+    return errors;
 }
