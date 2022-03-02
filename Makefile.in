@@ -110,7 +110,7 @@ all: config.status
 	    exit $$?; \
 	done
 
-check check-fuzzer fuzz pre-install: config.status
+check check-verbose check-fuzzer fuzz pre-install: config.status
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
@@ -146,7 +146,7 @@ splint: config.status
 
 cov-build:
 	make clean
-	cov-build --dir cov-int make ${MFLAGS} all
+	cov-build --dir cov-int make $(MFLAGS) all
 
 cov-upload:
 	tar zcf cov-int.tgz cov-int

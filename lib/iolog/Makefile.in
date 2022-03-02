@@ -81,6 +81,7 @@ PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 TEST_PROGS = check_iolog_filter check_iolog_json check_iolog_mkpath check_iolog_path check_iolog_timing host_port_test
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
+TEST_VERBOSE =
 
 # Fuzzers
 LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
@@ -338,6 +339,9 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./host_port_test || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
 	fi
+
+check-verbose:
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) $(FUZZ_PROGS) \

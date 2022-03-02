@@ -129,6 +129,7 @@ RC_LINK=@RC_LINK@
 TEST_PROGS = check_net_ifs check_noexec check_ttyname
 TEST_LIBS = @LIBS@ $(LT_LIBS)
 TEST_LDFLAGS = @LDFLAGS@
+TEST_VERBOSE =
 
 # Set to non-empty for development mode
 DEVEL = @DEVEL@
@@ -332,12 +333,15 @@ check: $(TEST_PROGS) check-fuzzer
 	    unset LANG || LANG=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
-	    ./check_net_ifs; \
+	    ./check_net_ifs $(TEST_VERBOSE); \
 	    if [ -f .libs/$(noexecfile) ]; then \
-		./check_noexec .libs/$(noexecfile); \
+		./check_noexec $(TEST_VERBOSE) .libs/$(noexecfile); \
 	    fi; \
-	    ./check_ttyname; \
+	    ./check_ttyname $(TEST_VERBOSE); \
 	fi
+
+check-verbose:
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \

@@ -96,6 +96,8 @@ check-fuzzer:
 
 check: check-fuzzer
 
+check-verbose: check
+
 clean:
 
 mostlyclean: clean

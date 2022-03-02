@@ -160,6 +160,8 @@ TEST_PROGS = check_addr check_base64 check_digest check_editor \
 	     check_env_pattern check_exptilde check_fill check_gentime \
 	     check_hexchar check_iolog_plugin check_serialize_list \
 	     check_starttime check_unesc @SUDOERS_TEST_PROGS@
+TEST_VERBOSE =
+HARNESS = $(SHELL) regress/harness $(TEST_VERBOSE)
 
 # Fuzzers
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
@@ -676,12 +678,15 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 	    if test -f check_symbols; then \
 		./check_symbols .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`; \
 	    fi; \
-	    AWK=$(AWK) $(SHELL) regress/harness sudoers || rval=`expr $$rval + $$?`; \
-	    AWK=$(AWK) $(SHELL) regress/harness testsudoers || rval=`expr $$rval + $$?`; \
-	    AWK=$(AWK) $(SHELL) regress/harness visudo || rval=`expr $$rval + $$?`; \
-	    AWK=$(AWK) $(SHELL) regress/harness cvtsudoers || rval=`expr $$rval + $$?`; \
+	    AWK=$(AWK) $(HARNESS) sudoers || rval=`expr $$rval + $$?`; \
+	    AWK=$(AWK) $(HARNESS) testsudoers || rval=`expr $$rval + $$?`; \
+	    AWK=$(AWK) $(HARNESS) visudo || rval=`expr $$rval + $$?`; \
+	    AWK=$(AWK) $(HARNESS) cvtsudoers || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
 	fi
+
+check-verbose:
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \

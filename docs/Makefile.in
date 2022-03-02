@@ -414,6 +414,8 @@ check-fuzzer:
 
 check: check-fuzzer
 
+check-verbose: check
+
 clean:
 	-rm -f fixman.sed
 

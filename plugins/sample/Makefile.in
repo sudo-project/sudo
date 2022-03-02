@@ -185,6 +185,8 @@ check-fuzzer:
 
 check: check-fuzzer
 
+check-verbose: check
+
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la
 	-rm -f *.i *.plog stamp-* core *.core core.*
