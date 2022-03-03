@@ -128,6 +128,7 @@ FUZZ_LIBS = $(LIB_FUZZING_ENGINE) @LIBS@
 FUZZ_LDFLAGS = @LDFLAGS@
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
+FUZZ_VERBOSE =
 
 # User and group ids the installed files should be "owned" by
 install_uid = 0
@@ -349,7 +350,7 @@ run-fuzz_sudo_conf: fuzz_sudo_conf
 	for f in $(FUZZ_SUDO_CONF_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_sudo_conf -dict=$(srcdir)/regress/fuzz/fuzz_sudo_conf.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_sudo_conf -dict=$(srcdir)/regress/fuzz/fuzz_sudo_conf.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 pre-install:
 
@@ -406,7 +407,7 @@ check-fuzzer: $(FUZZ_PROGS)
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_sudo_conf: verifying corpus"; \
-	    ./fuzz_sudo_conf $(FUZZ_SUDO_CONF_CORPUS); \
+	    ./fuzz_sudo_conf $(FUZZ_VERBOSE) $(FUZZ_SUDO_CONF_CORPUS); \
 	fi
 
 # Note: some regress checks are run from srcdir for consistent error messages
@@ -468,7 +469,7 @@ check: $(TEST_PROGS) check-fuzzer
 	fi
 
 check-verbose:
-	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v check
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v FUZZ_VERBOSE=-verbosity=1 check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) $(FUZZ_PROGS) \

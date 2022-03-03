@@ -170,7 +170,7 @@ check: $(TEST_PROGS) check-fuzzer
 	fi
 
 check-verbose:
-	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v check
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v FUZZ_VERBOSE=-verbosity=1 check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la $(TEST_PROGS)

@@ -171,6 +171,7 @@ FUZZ_LIBS = libparsesudoers.la @SUDOERS_LIBS@ $(LIB_FUZZING_ENGINE)
 FUZZ_LDFLAGS = @SUDOERS_LDFLAGS@
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
+FUZZ_VERBOSE =
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
@@ -442,7 +443,7 @@ run-fuzz_policy: fuzz_policy
 	for f in $(FUZZ_POLICY_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_policy -dict=$(srcdir)/regress/fuzz/fuzz_policy.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_policy -dict=$(srcdir)/regress/fuzz/fuzz_policy.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 fuzz_sudoers_seed_corpus.zip:
 	tdir=fuzz_sudoers.$$$$; \
@@ -468,7 +469,7 @@ run-fuzz_sudoers: fuzz_sudoers
 	for f in $(FUZZ_SUDOERS_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_sudoers -dict=$(srcdir)/regress/fuzz/fuzz_sudoers.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_sudoers -dict=$(srcdir)/regress/fuzz/fuzz_sudoers.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 fuzz_sudoers_ldif_seed_corpus.zip:
 	tdir=fuzz_sudoers_ldif.$$$$; \
@@ -494,7 +495,7 @@ run-fuzz_sudoers_ldif: fuzz_sudoers_ldif
 	for f in $(FUZZ_SUDOERS_LDIF_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_sudoers_ldif -dict=$(srcdir)/regress/fuzz/fuzz_sudoers_ldif.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_sudoers_ldif -dict=$(srcdir)/regress/fuzz/fuzz_sudoers_ldif.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
@@ -638,11 +639,11 @@ check-fuzzer: $(FUZZ_PROGS)
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_sudoers: verifying corpus"; \
-	    ./fuzz_sudoers $(FUZZ_SUDOERS_CORPUS); \
+	    ./fuzz_sudoers $(FUZZ_VERBOSE) $(FUZZ_SUDOERS_CORPUS); \
 	    echo "fuzz_sudoers-ldif: verifying corpus"; \
-	    ./fuzz_sudoers_ldif $(FUZZ_SUDOERS_LDIF_CORPUS); \
+	    ./fuzz_sudoers_ldif $(FUZZ_VERBOSE) $(FUZZ_SUDOERS_LDIF_CORPUS); \
 	    echo "fuzz_policy: verifying corpus"; \
-	    ./fuzz_policy $(FUZZ_POLICY_CORPUS); \
+	    ./fuzz_policy $(FUZZ_VERBOSE) $(FUZZ_POLICY_CORPUS); \
 	fi
 
 check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
@@ -686,7 +687,7 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 	fi
 
 check-verbose:
-	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v check
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v FUZZ_VERBOSE=-verbosity=1 check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \

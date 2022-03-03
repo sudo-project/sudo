@@ -92,6 +92,7 @@ FUZZ_LIBS = $(LIB_FUZZING_ENGINE) @LIBS@
 FUZZ_LDFLAGS = @LDFLAGS@
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
+FUZZ_VERBOSE =
 
 # Set to non-empty for development mode
 DEVEL = @DEVEL@
@@ -216,7 +217,7 @@ run-fuzz_iolog_json: fuzz_iolog_json
 	for f in $(FUZZ_IOLOG_JSON_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_iolog_json -dict=$(srcdir)/regress/fuzz/fuzz_iolog_json.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_iolog_json -dict=$(srcdir)/regress/fuzz/fuzz_iolog_json.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 fuzz_iolog_legacy_seed_corpus.zip:
 	tdir=fuzz_iolog_legacy.$$$$; \
@@ -242,7 +243,7 @@ run-fuzz_iolog_legacy: fuzz_iolog_legacy
 	for f in $(FUZZ_IOLOG_LEGACY_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_iolog_legacy -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_iolog_legacy -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 fuzz_iolog_timing_seed_corpus.zip:
 	tdir=fuzz_iolog_timing.$$$$; \
@@ -268,7 +269,7 @@ run-fuzz_iolog_timing: fuzz_iolog_timing
 	for f in $(FUZZ_IOLOG_TIMING_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_iolog_timing -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_iolog_timing -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 pre-install:
 
@@ -313,11 +314,11 @@ check-fuzzer: $(FUZZ_PROGS)
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_iolog_legacy: verifying corpus"; \
-	    ./fuzz_iolog_legacy $(FUZZ_IOLOG_LEGACY_CORPUS); \
+	    ./fuzz_iolog_legacy $(FUZZ_VERBOSE) $(FUZZ_IOLOG_LEGACY_CORPUS); \
 	    echo "fuzz_iolog_json: verifying corpus"; \
-	    ./fuzz_iolog_json $(FUZZ_IOLOG_JSON_CORPUS); \
+	    ./fuzz_iolog_json $(FUZZ_VERBOSE) $(FUZZ_IOLOG_JSON_CORPUS); \
 	    echo "fuzz_iolog_timing: verifying corpus"; \
-	    ./fuzz_iolog_timing $(FUZZ_IOLOG_TIMING_CORPUS); \
+	    ./fuzz_iolog_timing $(FUZZ_VERBOSE) $(FUZZ_IOLOG_TIMING_CORPUS); \
 	fi
 
 check: $(TEST_PROGS) check-fuzzer
@@ -341,7 +342,7 @@ check: $(TEST_PROGS) check-fuzzer
 	fi
 
 check-verbose:
-	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v check
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v FUZZ_VERBOSE=-verbosity=1 check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) $(FUZZ_PROGS) \
