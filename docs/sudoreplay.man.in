@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -153,7 +153,7 @@ similar to
 \(lqtail -f\(rq.
 An I/O log file is considered to be complete when the write bits
 have been cleared on the session's timing file.
-Note that versions of
+Versions of
 \fBsudo\fR
 prior to 1.9.1 do not clear the write bits upon completion.
 .TP 12n
@@ -196,7 +196,7 @@ for a description of supported date and time formats.
 group \fIrunas_group\fR
 Evaluates to true if the command was run with the specified
 \fIrunas_group\fR.
-Note that unless a
+Unless a
 \fIrunas_group\fR
 was explicitly specified when
 \fBsudo\fR
@@ -209,11 +209,11 @@ Evaluates to true if the command was run on the specified
 runas \fIrunas_user\fR
 Evaluates to true if the command was run as the specified
 \fIrunas_user\fR.
-Note that
+By default,
 \fBsudo\fR
-runs commands as user
+runs commands as the
 \fIroot\fR
-by default.
+user.
 .TP 8n
 todate \fIdate\fR
 Evaluates to true if the command was run on or prior to
@@ -248,7 +248,7 @@ operators as well as
 \(oq\&(\(cq
 and
 \(oq\&)\(cq
-grouping (note that parentheses must generally be escaped from the shell).
+grouping (parentheses must generally be escaped from the shell).
 The
 \fIand\fR
 operator is optional, adjacent predicates have an implied
@@ -326,7 +326,7 @@ HH:MM:SS am MM/DD/CCYY timezone
 HH:MM:SS am Month, Day Year timezone
 24 hour time may be used in place of am/pm, and month and day names
 may be abbreviated.
-Note that month and day of the week names must be specified in English.
+Month and day of the week names must be specified in English.
 .TP 8n
 CCYY-MM-DD HH:MM:SS
 ISO time format
@@ -383,7 +383,7 @@ The current time but 14 days ago.
 10:01 am Sep 17, 2009
 10:01 am, September 17, 2009.
 .PP
-Note that relative time specifications do not always work as expected.
+Relative time specifications do not always work as expected.
 For example, the
 \(lqnext\(rq
 qualifier is intended to be used in conjunction with a day such as
@@ -407,7 +407,7 @@ file.
 .PP
 For more information on configuring
 sudo.conf(@mansectform@),
-please refer to its manual.
+refer to its manual.
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR
@@ -440,7 +440,7 @@ Example session tty output file.
 \fI@iolog_dir@/00/00/01/timing\fR
 Example session timing file.
 .PP
-Note that the
+The
 \fIstdin\fR,
 \fIstdout\fR
 and
@@ -453,7 +453,7 @@ List sessions run by user
 \fImillert\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # sudoreplay -l user millert
 .RE
 .fi
@@ -463,7 +463,7 @@ List sessions run by user
 with a command containing the string vi:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # sudoreplay -l user bob command vi
 .RE
 .fi
@@ -473,7 +473,7 @@ List sessions run by user
 that match a regular expression:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # sudoreplay -l user jeff command '/bin/[a-z]*sh'
 .RE
 .fi
@@ -481,7 +481,7 @@ that match a regular expression:
 List sessions run by jeff or bob on the console:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # sudoreplay -l ( user jeff or user bob ) tty console
 .RE
 .fi
@@ -498,15 +498,15 @@ over the years; this version consists of code written primarily by:
 Todd C. Miller
 .RE
 .PP
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 \fBsudo\fR
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBsudoreplay\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -518,6 +518,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 \fBsudo\fR
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

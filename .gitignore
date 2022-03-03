@@ -31,6 +31,9 @@ docs/*.mdoc
 docs/fixman.sed
 
 examples/sudo.conf
+examples/sudo_logsrvd.conf
+examples/sudoers
+examples/syslog.conf
 
 etc/init.d/sudo.conf
 
@@ -64,6 +67,7 @@ lib/util/[a-z]*_test
 lib/util/fuzz_[a-z]*
 lib/util/regress/**/*.out
 lib/util/regress/**/*.err
+lib/util/regress/harness
 
 logsrvd/sudo_logsrvd
 logsrvd/sudo_sendlog
@@ -85,6 +89,7 @@ plugins/sudoers/regress/**/*.json
 plugins/sudoers/regress/**/*.ldif
 plugins/sudoers/regress/**/*.sudo
 plugins/sudoers/regress/**/*.ldif2sudo
+plugins/sudoers/regress/harness
 plugins/sudoers/regress/iolog_plugin/iolog
 plugins/sudoers/regress/testsudoers/test3.d/root
 

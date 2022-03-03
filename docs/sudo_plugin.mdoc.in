@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 20, 2022
+.Dd February 16, 2022
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -609,7 +609,7 @@ will be the
 .Dv NULL
 pointer.
 .Pp
-NOTE: the
+The
 .Em plugin_options
 parameter is only available starting with
 API version 1.2.
@@ -636,7 +636,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -775,8 +775,7 @@ in the user's environment, such as
 .Li EDITOR ,
 and include it in
 .Em argv_out
-(note that environment
-variables may include command line options).
+(environment variables may include command line options).
 The files to be edited should be copied from
 .Em argv
 into
@@ -1359,7 +1358,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -1436,7 +1435,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -1499,7 +1498,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -1590,7 +1589,7 @@ pointer stored in
 The expected use case is to merge the contents of the PAM environment
 (if any) with the contents of
 .Em user_env_out .
-NOTE: the
+The
 .Em user_env_out
 parameter is only available
 starting with API version 1.2.
@@ -1649,7 +1648,7 @@ See the
 section below for more information
 about hooks.
 .Pp
-NOTE: the
+The
 .Fn register_hooks
 function is only available starting
 with API version 1.2.
@@ -1697,7 +1696,7 @@ See the
 section below for more information
 about hooks.
 .Pp
-NOTE: the
+The
 .Fn deregister_hooks
 function is only available starting
 with API version 1.2.
@@ -1730,7 +1729,7 @@ See the
 section below for more information
 about events.
 .Pp
-NOTE: the
+The
 .Fn event_alloc
 function is only available starting
 with API version 1.15.
@@ -1755,7 +1754,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -1833,7 +1832,7 @@ will open a pipe to capture
 the I/O for logging before passing it on.
 .Pp
 The log_ttyin function receives the raw user input from the terminal
-device (note that this will include input even when echo is disabled,
+device (this will include input even when echo is disabled,
 such as when a password is read).
 The log_ttyout function receives output from the pseudo-terminal that is
 suitable for replaying the user's session at a later time.
@@ -2083,7 +2082,7 @@ will be the
 .Dv NULL
 pointer.
 .Pp
-NOTE: the
+The
 .Em plugin_options
 parameter is only available starting with
 API version 1.2.
@@ -2110,7 +2109,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -2216,7 +2215,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -2266,7 +2265,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -2319,7 +2318,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -2372,7 +2371,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -2425,7 +2424,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -2484,7 +2483,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -2531,7 +2530,7 @@ must remain valid until the plugin's
 .Fn close
 function is called.
 .Pp
-NOTE: the
+The
 .Fa errstr
 parameter is only available starting with
 API version 1.15.
@@ -2565,7 +2564,7 @@ See the
 section below for more information
 about events.
 .Pp
-NOTE: the
+The
 .Fn event_alloc
 function is only available starting
 with API version 1.15.
@@ -3181,7 +3180,7 @@ See the
 section below for more information
 about events.
 .Pp
-NOTE: the
+The
 .Fn event_alloc
 function is only available starting
 with API version 1.17.
@@ -3749,8 +3748,8 @@ unchanged.
 .El
 .El
 .Pp
-Note that it is very easy to create an infinite loop when hooking
-C library functions.
+Care must be taken when hooking C library functions,
+it is very easy to create an infinite loop.
 For example, a
 .Xr getenv 3
 hook that calls the
@@ -4060,7 +4059,7 @@ that the remote host will accept and run a program
 on the remote host that would setup the execution environment
 accordingly.
 .Pp
-Note that remote
+Remote
 .Nm sudoedit
 functionality must be handled by the policy plugin, not
 .Nm sudo
@@ -4178,7 +4177,7 @@ will return a value of \-1.
 The intended use is to allow the plugin to release resources, such as locks,
 that should not be held indefinitely while suspended and then reacquire them
 when the process is resumed.
-Note that the functions are not actually invoked from within a signal handler.
+The functions are not actually invoked from within a signal handler.
 .Pp
 The
 .Em msg_type
@@ -4701,15 +4700,15 @@ over the years; this version consists of code written primarily by:
 .An Todd C. Miller
 .Ed
 .Pp
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 .Nm sudo
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm sudo ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -4721,6 +4720,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 .Nm sudo
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

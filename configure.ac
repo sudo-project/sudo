@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.9], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.10], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -70,6 +70,7 @@ AC_SUBST([SEMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
+AC_SUBST([mansectmisc])
 AC_SUBST([INTERCEPTFILE])
 AC_SUBST([INTERCEPTDIR])
 AC_SUBST([intercept_file])
@@ -287,7 +288,7 @@ PYTHON_PLUGIN=#
 LOGSRVD=
 LOGSRVD_SRC=logsrvd
 LOGSRV_SRC=lib/logsrv
-LOGSRVD_CONF='$(srcdir)/sudo_logsrvd.conf'
+LOGSRVD_CONF='sudo_logsrvd.conf'
 LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
 PPFILES='$(srcdir)/etc/sudo.pp'
 
@@ -495,6 +496,7 @@ AC_ARG_WITH(csops, [AS_HELP_STRING([--with-csops], [add CSOps standard options])
 		with_env_editor=yes
 		: ${mansectsu='8'}
 		: ${mansectform='5'}
+		: ${mansectmisc='7'}
 		;;
     no)		;;
     *)		AC_MSG_WARN([ignoring unknown argument to --with-csops: $with_csops])
@@ -1790,6 +1792,7 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		AC_CHECK_FUNCS([priv_set], [PSMAN=1])
 		;;
@@ -1884,6 +1887,7 @@ case "$host" in
 
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
@@ -1908,6 +1912,7 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
@@ -2022,6 +2027,7 @@ case "$host" in
 		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='8'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-irix*)
 		AC_DEFINE([_BSD_TYPES])
@@ -2041,6 +2047,7 @@ case "$host" in
 		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-linux*|*-*-k*bsd*-gnu)
 		shadow_funcs="getspnam"
@@ -2059,6 +2066,10 @@ case "$host" in
 		# The glibc getentropy() emulation may fail on older kernels.
 		# We use our own getentropy() by default on Linux.
 		: ${ac_cv_func_getentropy='no'}
+
+		# The glibc closefrom() emulation may fail in chroot.
+		# We use our own closefrom() by default on Linux.
+		: ${ac_cv_func_closefrom='no'}
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
@@ -2069,28 +2080,33 @@ case "$host" in
 		shadow_libs="-lprot -lx"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     m88k-motorola-sysv*)
 		# motorolla's cc (a variant of gcc) does -O but not -O2
 		CFLAGS=`echo $CFLAGS | sed 's/-O2/-O/g'`
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-sequent-sysv*)
 		shadow_funcs="getspnam"
 		shadow_libs="-lsec"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		AC_CHECK_LIB(c89, strcasecmp, [LIBS="${LIBS} -lc89"])
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
@@ -2197,7 +2213,7 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
-		# Darwin has a broken poll()
+		# Darwin has a broken poll(), Apple radar 3710161
 		: ${enable_poll='no'}
 		# Darwin 8 and above can interpose library symbols cleanly
 		if test $OSMAJOR -ge 8; then
@@ -2239,10 +2255,12 @@ case "$host" in
     *-*-*sysv4*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
     *-*-*sco3.2*)	# SCO OpenServer 5
 		: ${mansectsu='1'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		shadow_funcs="getprpwnam"
 		shadow_libs="-lprot"
 		;;
@@ -2250,6 +2268,7 @@ case "$host" in
     *-*-*sysv5*)
 		: ${mansectsu='1'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 	case "$host" in
 	*-*-sysv5SCO_SV*)	# SCO OpenServer 6.x
 		shadow_funcs="getprpwnam"
@@ -2263,6 +2282,7 @@ case "$host" in
     *-*-sysv*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		: ${mansectmisc='5'}
 		;;
 esac
 
@@ -2284,8 +2304,8 @@ if test X"$enable_pvs_studio" = X"yes"; then
     case "$host" in
     x86_64-*-linux*) pvs_platform=linux64;;
     *86-*-linux*) pvs_platform=linux32;;
-    darwin*) pvs_platform=macos;;
-    *) AC_MSG_ERROR([PVS-Studio does not support $host_os.]);;
+    *-*-darwin*) pvs_platform=macos;;
+    *) AC_MSG_ERROR([PVS-Studio does not support $host.]);;
     esac
 
     # create basic PVS-Studio.cfg file
@@ -2339,6 +2359,7 @@ dnl Use BSD-style man sections by default
 dnl
 : ${mansectsu='8'}
 : ${mansectform='5'}
+: ${mansectmisc='7'}
 
 dnl
 dnl Add in any libpaths or libraries specified via configure
@@ -2892,9 +2913,17 @@ AC_CHECK_FUNCS([getopt_long], [], [
 ])
 AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
     SUDO_APPEND_COMPAT_EXP(sudo_closefrom)
-    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [], [
+    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [
+	# Linux has a special header for close_range(2).
+	AC_CHECK_FUNCS([close_range], [
+	    case "$host_os" in
+	    linux*) AC_CHECK_HEADERS([linux/close_range.h]);;
+	    esac
+	])
+    ], [
 #	include <limits.h>
 #	include <fcntl.h> ])
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }closefrom_test"
 ])
 AC_CHECK_FUNCS([mkstemps mkdtemp], [], [break])
 if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
@@ -3567,7 +3596,7 @@ dnl prepend the include dir to make sure we get the right zlib header.
 dnl
 case "$enable_zlib" in
     yes)
-	AC_CHECK_LIB(z, gzdopen, [
+	AC_CHECK_LIB(z, gzclearerr, [
 	    AC_CHECK_HEADERS([zlib.h], [ZLIB="-lz"], [enable_zlib=builtin])
 	])
 	;;
@@ -5097,7 +5126,8 @@ elif test X"$TMPFILES_D" != X""; then
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 fi
 
-AC_CONFIG_FILES([Makefile docs/Makefile examples/Makefile examples/sudo.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile docs/Makefile examples/Makefile examples/sudoers examples/sudo.conf examples/sudo_logsrvd.conf examples/syslog.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/regress/harness lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/regress/harness plugins/sudoers/sudoers])
+AC_CONFIG_COMMANDS([harness], [chmod +x lib/util/regress/harness plugins/sudoers/regress/harness])
 
 AC_OUTPUT
 

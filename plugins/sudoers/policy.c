@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -573,45 +573,6 @@ bad:
 }
 
 /*
- * Convert struct list_members to a comma-separated string with
- * the given variable name.
- */
-static char *
-serialize_list(const char *varname, struct list_members *members)
-{
-    struct list_member *lm, *next;
-    size_t len, result_size;
-    char *result;
-    debug_decl(serialize_list, SUDOERS_DEBUG_PLUGIN);
-
-    result_size = strlen(varname) + 1;
-    SLIST_FOREACH(lm, members, entries) {
-	result_size += strlen(lm->value) + 1;
-    }
-    if ((result = malloc(result_size)) == NULL)
-	goto bad;
-    /* No need to check len for overflow here. */
-    len = strlcpy(result, varname, result_size);
-    result[len++] = '=';
-    result[len] = '\0';
-    SLIST_FOREACH_SAFE(lm, members, entries, next) {
-	len = strlcat(result, lm->value, result_size);
-	if (len + (next != NULL) >= result_size) {
-	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    goto bad;
-	}
-	if (next != NULL) {
-	    result[len++] = ',';
-	    result[len] = '\0';
-	}
-    }
-    debug_return_str(result);
-bad:
-    free(result);
-    debug_return_str(NULL);
-}
-
-/*
  * Store the execution environment and other front-end settings.
  * Builds up the command_info list and sets argv and envp.
  * Consumes iolog_path if not NULL.
@@ -638,7 +599,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(68, sizeof(char *));
+    command_info = calloc(70, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -675,6 +636,16 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if (def_iolog_flush) {
 	    if ((command_info[info_len++] = strdup("iolog_flush=true")) == NULL)
 		goto oom;
+	}
+	if ((command_info[info_len++] = sudo_new_key_val("log_passwords",
+		def_log_passwords ? "true" : "false")) == NULL)
+	    goto oom;
+	if (!SLIST_EMPTY(&def_passprompt_regex)) {
+	    char *passprompt_regex =
+		serialize_list("passprompt_regex", &def_passprompt_regex);
+	    if (passprompt_regex == NULL)
+		goto oom;
+	    command_info[info_len++] = passprompt_regex;
 	}
 	if (def_maxseq != NULL) {
 	    if ((command_info[info_len++] = sudo_new_key_val("maxseq", def_maxseq)) == NULL)
@@ -865,7 +836,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 
     if (def_command_timeout > 0 || user_timeout > 0) {
 	int timeout = user_timeout;
-	if (timeout == 0 || def_command_timeout < timeout)
+    if (timeout == 0 || (def_command_timeout > 0 && def_command_timeout < timeout))
 	    timeout = def_command_timeout;
 	if (asprintf(&command_info[info_len++], "timeout=%u", timeout) == -1)
 	    goto oom;
@@ -1217,6 +1188,11 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	    sudo_warnx(U_("unknown user %s"), list_user);
 	    debug_return_int(-1);
 	}
+	/* A user may only list another user they have runas access to. */
+	if (runas_pw != NULL)
+	    sudo_pw_delref(runas_pw);
+	runas_pw = list_pw;
+	sudo_pw_addref(list_pw);
     }
     ret = sudoers_policy_main(argc, argv, I_LISTPW, NULL, verbose, NULL);
     if (list_user) {

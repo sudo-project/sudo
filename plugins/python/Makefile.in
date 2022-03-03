@@ -131,6 +131,7 @@ LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 VERSION = @PACKAGE_VERSION@
 
 TEST_PROGS = check_python_examples
+TEST_VERBOSE =
 
 CHECK_PYTHON_EXAMPLES_OBJS = check_python_examples.o iohelpers.o testhelpers.o pyhelpers.o sudo_python_debug.o
 
@@ -237,6 +238,9 @@ check: $(TEST_PROGS) check-fuzzer
 	    LSAN_OPTIONS=suppressions=$(srcdir)/lsan_suppr.txt \
 		./check_python_examples ".libs/python_plugin.so"; \
 	fi
+
+check-verbose:
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v FUZZ_VERBOSE=-verbosity=1 check
 
 update_test_data: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \

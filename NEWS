@@ -1,3 +1,77 @@
+What's new in Sudo 1.9.10
+
+ * Added new "log_passwords" and "passprompt_regex" sudoers options.
+   If "log_passwords" is disabled, sudo will attempt to prevent passwords
+   from being logged.  If sudo detects any of the regular expressions in
+   the "passprompt_regex" list in the terminal output, sudo will log '*'
+   characters instead of the terminal input until a newline or carriage
+   return is found in the input or an output character is received.
+
+ * Added new "log_passwords" and "passprompt_regex" settings to
+   sudo_logsrvd that operate like the sudoers options when logging
+   terminal input.
+
+ * Fixed several few bugs in the cvtsudoers utility when merging
+   multiple sudoers sources.
+
+ * Fixed a bug in sudo_logsrvd when parsing the sudo_logsrvd.conf
+   file, where the "retry_interval" in the [relay] section was not
+   being recognized.
+
+ * Restored the pre-1.9.9 behavior of not performing authentication
+   when sudo's -n option is specified.  A new "noninteractive_auth"
+   sudoers option has been added to enable PAM authentication in
+   non-interactive mode.  GitHub issue #131.
+
+ * On systems with /proc, if the /proc/self/stat (Linux) or
+   /proc/pid/psinfo (other systems) file is missing or invalid,
+   sudo will now check file descriptors 0-2 to determine the user's
+   terminal.  Bug #1020.
+
+ * Fixed a compilation problem on Debian kFreeBSD.  Bug #1021.
+
+ * Fixed a crash in sudo_logsrvd when running in relay mode if
+   an alert message is received.
+
+ * Fixed an issue that resulting in "problem with defaults entries"
+   email to be sent if a user ran sudo when the sudoers entry in
+   the nsswitch.conf file includes "sss" but no sudo provider is
+   configured in /etc/sssd/sssd.conf.  Bug #1022.
+
+ * Updated the warning displayed when the invoking user is not
+   allowed to run sudo.  If sudo has been configured to send mail
+   on failed attempts (see the mail_* flags in sudoers), it will
+   now print "This incident has been reported to the administrator."
+   If the "mailto" or "mailerpath" sudoers settings are disabled,
+   the message will not be printed and no mail will be sent.
+   GitHub issue #48.
+
+ * Fixed a bug where the user-specified command timeout was not
+   being honored if the sudoers rule did not also specify a timeout.
+
+ * Added support for using POSIX extended regular expressions in
+   sudoers rules.  A command and/or arguments in sudoers are treated
+   as a regular expression if they start with a '^' character and
+   end with a '$'.  The command and arguments are matched separately,
+   either one (or both) may be a regular expression.
+   Bug #578, GitHub issue #15.
+
+ * A user may now only run "sudo -U otheruser -l" if they have a
+   "sudo ALL" privilege where the RunAs user contains either "root"
+   or "otheruser".  Previously, having "sudo ALL" was sufficient,
+   regardless of the RunAs user.  GitHub issue #134.
+
+ * The sudo lecture is now displayed immediately before the password
+   prompt.  As a result, sudo will no longer display the lecture
+   unless the user needs to enter a password.  Authentication methods
+   that don't interact with the user via a terminal do not trigger
+   the lecture.
+
+ * Sudo now uses its own closefrom() emulation on Linux systems.
+   The glibc version may not work in a chroot jail where /proc is
+   not available.  If close_range(2) is present, it will be used
+   in preference to /proc/self/fd.
+
 What's new in Sudo 1.9.9
 
  * Sudo can now be built with OpenSSL 3.0 without generating warnings
@@ -3153,7 +3227,7 @@ What's new in Sudo 1.8.2?
    language support (NLS). This can be disabled by passing configure
    the --disable-nls option.  Sudo will use gettext(), if available,
    to display translated messages.  All translations are coordinated
-   via The Translation Project, http://translationproject.org/.
+   via The Translation Project, https://translationproject.org/.
 
  * Plug-ins are now loaded with the RTLD_GLOBAL flag instead of
    RTLD_LOCAL.  This fixes missing symbol problems in PAM modules
@@ -3510,7 +3584,7 @@ What's new in Sudo 1.7.4?
  * The default PATH environment variable, used when no PATH variable
     exists, now includes /usr/sbin and /sbin.
 
- * Sudo now uses polypkg (http://rc.quest.com/topics/polypkg/)
+ * Sudo now uses polypkg (https://github.com/OneIdentity/Polypkg)
    for cross-platform packing.
 
  * On Linux, sudo will now restore the nproc resource limit before

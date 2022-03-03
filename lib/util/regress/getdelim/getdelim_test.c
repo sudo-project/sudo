@@ -154,8 +154,22 @@ main(int argc, char *argv[])
 {
     size_t buflen = 0;
     char *buf = NULL;
+    int ch;
 
     initprogname(argc > 0 ? argv[0] : "getdelim_test");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     runtests(&buf, &buflen);
 
@@ -164,5 +178,5 @@ main(int argc, char *argv[])
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
-    exit(errors);
+    return errors;
 }

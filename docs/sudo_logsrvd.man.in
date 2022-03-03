@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "September 17, 2021" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -124,7 +124,7 @@ file.
 .PP
 For more information on configuring
 sudo.conf(@mansectform@),
-please refer to its manual.
+refer to its manual.
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR
@@ -171,7 +171,7 @@ We'll create a new directory hierarchy in
 for this purpose.
 .nf
 .sp
-.RS 6n
+.RS 4n
 # mkdir /etc/ssl/sudo
 # cd /etc/ssl/sudo
 # mkdir certs csr newcerts private
@@ -192,7 +192,7 @@ You will need to adjust the example below if it has a different location on
 your system.
 .nf
 .sp
-.RS 6n
+.RS 4n
 # cp /etc/ssl/openssl.cnf .
 .RE
 .fi
@@ -207,7 +207,7 @@ sections.
 Those sections should include the following settings:
 .nf
 .sp
-.RS 6n
+.RS 4n
 [ ca ]
 default_ca      = CA_default
 
@@ -233,7 +233,7 @@ a private key and a certificate for the root of the CA.
 First, create the private key and protect it with a pass phrase:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # openssl genrsa -aes256 -out private/cakey.pem 4096
 # chmod 400 private/cakey.pem
 .RE
@@ -243,7 +243,7 @@ Next, generate the root certificate, using appropriate values for
 the site-specific fields:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # openssl req -config openssl.cnf -key private/cakey.pem \e
     -new -x509 -days 7300 -sha256 -extensions v3_ca \e
     -out cacert.pem
@@ -272,7 +272,7 @@ Email Address []:
 Finally, verify the root certificate:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # openssl x509 -noout -text -in cacert.pem
 .RE
 .fi
@@ -290,7 +290,7 @@ CSRs with the root CA.
 First, generate the private key without a pass phrase.
 .nf
 .sp
-.RS 6n
+.RS 4n
 # openssl genrsa -out private/logsrvd_key.pem 2048
 # chmod 400 private/logsrvd_key.pem
 .RE
@@ -302,7 +302,7 @@ The common name should be either the server's IP address or a fully
 qualified domain name.
 .nf
 .sp
-.RS 6n
+.RS 4n
 # openssl req -config openssl.cnf -key private/logsrvd_key.pem -new \e
     -sha256 -out csr/logsrvd_csr.pem
 
@@ -333,7 +333,7 @@ An optional company name []:
 Now sign the CSR that was just created:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # openssl ca -config openssl.cnf -days 375 -notext -md sha256 \e
     -in csr/logsrvd_csr.pem -out certs/logsrvd_cert.pem
 
@@ -374,7 +374,7 @@ Data Base Updated
 Finally, verify the new certificate:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # openssl verify -CAfile cacert.pem certs/logsrvd_cert.pem
 certs/logsrvd_cert.pem: OK
 .RE
@@ -399,7 +399,7 @@ for TLS requires the following settings, assuming the same path
 names used earlier:
 .nf
 .sp
-.RS 6n
+.RS 4n
 # Listen on port 30344 for TLS connections to any address.
 listen_address = *:30344(tls)
 
@@ -437,15 +437,15 @@ over the years; this version consists of code written primarily by:
 Todd C. Miller
 .RE
 .PP
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 \fBsudo\fR
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBsudo_logsrvd\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -457,6 +457,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 \fBsudo\fR
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

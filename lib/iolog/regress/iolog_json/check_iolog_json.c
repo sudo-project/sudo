@@ -171,7 +171,7 @@ int
 main(int argc, char *argv[])
 {
     struct json_object root;
-    int ch, i, tests = 0, errors = 0;
+    int ch, i, ntests = 0, errors = 0;
     bool cat = false;
 
     initprogname(argc > 0 ? argv[0] : "check_iolog_json");
@@ -200,7 +200,7 @@ main(int argc, char *argv[])
 	FILE *infp = NULL;
 	FILE *outfp = NULL;
 
-	tests++;
+	ntests++;
 
 	if (!sudo_json_init(&json, 4, false, true)) {
 	    errors++;
@@ -255,11 +255,11 @@ next:
 	    fclose(outfp);
     }
 
-    if (tests != 0) {
+    if (ntests != 0) {
 	printf("iolog_json: %d test%s run, %d errors, %d%% success rate\n",
-	    tests, tests == 1 ? "" : "s", errors,
-	    (tests - errors) * 100 / tests);
+	    ntests, ntests == 1 ? "" : "s", errors,
+	    (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }

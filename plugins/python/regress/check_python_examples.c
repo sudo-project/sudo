@@ -44,6 +44,7 @@ DECL_PLUGIN(audit_plugin, python_audit);
 DECL_PLUGIN(sudoers_group_plugin, group_plugin);
 
 static struct passwd example_pwd;
+static bool verbose;
 
 static int _init_symbols(void);
 static int _unlink_symbols(void);
@@ -1511,13 +1512,26 @@ _unlink_symbols(void)
 int
 main(int argc, char *argv[])
 {
-    int errors = 0;
+    int ch, errors = 0, ntests = 0;
 
-    if (argc != 2) {
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+        switch (ch) {
+        case 'v':
+            verbose = true;
+            break;
+        default:
+            fprintf(stderr, "usage: %s [-v]\n", getprogname());
+            return EXIT_FAILURE;
+        }
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1) {
         printf("Please specify the python_plugin.so as argument!\n");
         return EXIT_FAILURE;
     }
-    python_plugin_so_path = argv[1];
+    python_plugin_so_path = argv[0];
 
     RUN_TEST(check_example_io_plugin_version_display(true));
     RUN_TEST(check_example_io_plugin_version_display(false));
@@ -1594,6 +1608,11 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_debugging("py_calls@info"));
     RUN_TEST(check_example_debugging("plugin@err"));
     RUN_TEST(check_plugin_unload());
+
+    if (ntests != 0) {
+        printf("%s: %d tests run, %d errors, %d%% success rate\n",
+            getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
+    }
 
     return errors;
 }

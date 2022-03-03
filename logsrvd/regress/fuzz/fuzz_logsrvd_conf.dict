@@ -24,7 +24,9 @@
 "iolog_group"
 "iolog_user"
 "iolog_mode"
+"log_passwords"
 "maxseq"
+"passprompt_regex"
 
 "[eventlog]"
 "log_type"

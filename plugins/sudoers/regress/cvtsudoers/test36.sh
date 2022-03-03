@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Test cvtsudoers merge
+#  * three files, each bound to a host
 #
 
 : ${CVTSUDOERS=cvtsudoers}

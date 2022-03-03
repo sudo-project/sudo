@@ -36,3 +36,6 @@ foo\:bar\" hoste = (root) ALL
 
 # sudoRole +netgr
 +netgr hosth = (root) ALL
+
+# sudoRole user
+user ALL = /bin/ls "", /bin/echo " ", /bin/foo"bar ""

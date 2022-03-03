@@ -130,19 +130,32 @@ test_adjust_delay(int *ntests, int *nerrors)
 int
 main(int argc, char *argv[])
 {
-    int tests = 0, errors = 0;
+    int ch, ntests = 0, errors = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_iolog_timing");
 
-    test_parse_delay(&tests, &errors);
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
-    test_adjust_delay(&tests, &errors);
+    test_parse_delay(&ntests, &errors);
 
-    if (tests != 0) {
+    test_adjust_delay(&ntests, &errors);
+
+    if (ntests != 0) {
 	printf("iolog_timing: %d test%s run, %d errors, %d%% success rate\n",
-	    tests, tests == 1 ? "" : "s", errors,
-	    (tests - errors) * 100 / tests);
+	    ntests, ntests == 1 ? "" : "s", errors,
+	    (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }

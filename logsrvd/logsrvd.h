@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -208,6 +208,8 @@ struct connection_closure *connection_closure_alloc(int fd, bool tls, bool relay
 bool logsrvd_conf_read(const char *path);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
+bool logsrvd_conf_iolog_log_passwords(void);
+void *logsrvd_conf_iolog_passprompt_regex(void);
 struct server_address_list *logsrvd_conf_server_listen_address(void);
 struct server_address_list *logsrvd_conf_relay_address(void);
 const char *logsrvd_conf_relay_dir(void);

@@ -25,6 +25,7 @@
 #define SUDO_COMPAT_H
 
 #include <sys/types.h>	/* for gid_t, mode_t, size_t, ssize_t, time_t, uid_t */
+#include <sys/stat.h>	/* to avoid problems with mismatched headers and libc */
 #include <unistd.h>	/* to avoid problems with mismatched headers and libc */
 #include <stdio.h>
 #if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \

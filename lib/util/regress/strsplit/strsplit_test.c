@@ -62,9 +62,23 @@ int
 main(int argc, char *argv[])
 {
     const char *cp, *ep, *input_end;
-    int i, j, errors = 0, ntests = 0;
+    int ch, i, j, errors = 0, ntests = 0;
     size_t len;
+
     initprogname(argc > 0 ? argv[0] : "strsplit_test");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     for (i = 0; test_data[i].input != NULL; i++) {
 	input_end = test_data[i].input + test_data[i].input_len;

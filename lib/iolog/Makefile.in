@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -78,9 +78,10 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = check_iolog_json check_iolog_mkpath check_iolog_path check_iolog_timing host_port_test
+TEST_PROGS = check_iolog_filter check_iolog_json check_iolog_mkpath check_iolog_path check_iolog_timing host_port_test
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
+TEST_VERBOSE =
 
 # Fuzzers
 LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
@@ -91,6 +92,7 @@ FUZZ_LIBS = $(LIB_FUZZING_ENGINE) @LIBS@
 FUZZ_LDFLAGS = @LDFLAGS@
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
+FUZZ_VERBOSE =
 
 # Set to non-empty for development mode
 DEVEL = @DEVEL@
@@ -100,12 +102,12 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 LIBIOLOG_OBJS = host_port.lo hostcheck.lo iolog_clearerr.lo iolog_close.lo \
-		iolog_conf.lo iolog_eof.lo iolog_flush.lo iolog_gets.lo \
-		iolog_json.lo iolog_legacy.lo iolog_loginfo.lo iolog_mkdirs.lo \
-		iolog_mkdtemp.lo iolog_mkpath.lo iolog_nextid.lo \
-		iolog_open.lo iolog_openat.lo iolog_path.lo iolog_read.lo \
-		iolog_seek.lo iolog_swapids.lo iolog_timing.lo iolog_util.lo \
-		iolog_write.lo
+		iolog_conf.lo iolog_eof.lo iolog_filter.lo iolog_flush.lo \
+		iolog_gets.lo iolog_json.lo iolog_legacy.lo iolog_loginfo.lo \
+		iolog_mkdirs.lo iolog_mkdtemp.lo iolog_mkpath.lo \
+		iolog_nextid.lo iolog_open.lo iolog_openat.lo iolog_path.lo \
+		iolog_read.lo iolog_seek.lo iolog_swapids.lo iolog_timing.lo \
+		iolog_util.lo iolog_write.lo
 
 IOBJS = $(LIBIOLOG_OBJS:.lo=.i)
 
@@ -116,6 +118,8 @@ CHECK_IOLOG_MKPATH_OBJS = check_iolog_mkpath.lo
 CHECK_IOLOG_PATH_OBJS = check_iolog_path.lo
 
 CHECK_IOLOG_TIMING_OBJS = check_iolog_timing.lo
+
+CHECK_IOLOG_FILTER_OBJS = check_iolog_filter.lo
 
 CHECK_IOLOG_JSON_OBJS = check_iolog_json.lo
 
@@ -171,6 +175,9 @@ check_iolog_mkpath: $(CHECK_IOLOG_MKPATH_OBJS) libsudo_iolog.la
 check_iolog_timing: $(CHECK_IOLOG_TIMING_OBJS) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_TIMING_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+check_iolog_filter: $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 check_iolog_json: $(CHECK_IOLOG_JSON_OBJS) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_JSON_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
@@ -210,7 +217,7 @@ run-fuzz_iolog_json: fuzz_iolog_json
 	for f in $(FUZZ_IOLOG_JSON_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_iolog_json -dict=$(srcdir)/regress/fuzz/fuzz_iolog_json.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_iolog_json -dict=$(srcdir)/regress/fuzz/fuzz_iolog_json.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 fuzz_iolog_legacy_seed_corpus.zip:
 	tdir=fuzz_iolog_legacy.$$$$; \
@@ -236,7 +243,7 @@ run-fuzz_iolog_legacy: fuzz_iolog_legacy
 	for f in $(FUZZ_IOLOG_LEGACY_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_iolog_legacy -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_iolog_legacy -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 fuzz_iolog_timing_seed_corpus.zip:
 	tdir=fuzz_iolog_timing.$$$$; \
@@ -262,7 +269,7 @@ run-fuzz_iolog_timing: fuzz_iolog_timing
 	for f in $(FUZZ_IOLOG_TIMING_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_iolog_timing -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_iolog_timing -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 pre-install:
 
@@ -307,11 +314,11 @@ check-fuzzer: $(FUZZ_PROGS)
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_iolog_legacy: verifying corpus"; \
-	    ./fuzz_iolog_legacy $(FUZZ_IOLOG_LEGACY_CORPUS); \
+	    ./fuzz_iolog_legacy $(FUZZ_VERBOSE) $(FUZZ_IOLOG_LEGACY_CORPUS); \
 	    echo "fuzz_iolog_json: verifying corpus"; \
-	    ./fuzz_iolog_json $(FUZZ_IOLOG_JSON_CORPUS); \
+	    ./fuzz_iolog_json $(FUZZ_VERBOSE) $(FUZZ_IOLOG_JSON_CORPUS); \
 	    echo "fuzz_iolog_timing: verifying corpus"; \
-	    ./fuzz_iolog_timing $(FUZZ_IOLOG_TIMING_CORPUS); \
+	    ./fuzz_iolog_timing $(FUZZ_VERBOSE) $(FUZZ_IOLOG_TIMING_CORPUS); \
 	fi
 
 check: $(TEST_PROGS) check-fuzzer
@@ -325,6 +332,7 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
+	    ./check_iolog_filter $(srcdir)/regress/iolog_filter/test[1-9]* || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_json $(srcdir)/regress/iolog_json/*.in || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_mkpath || rval=`expr $$rval + $$?`; \
@@ -332,6 +340,9 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./host_port_test || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
 	fi
+
+check-verbose:
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v FUZZ_VERBOSE=-verbosity=1 check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) $(FUZZ_PROGS) \
@@ -357,6 +368,20 @@ cleandir: realclean
 	run-fuzz_iolog_timing
 
 # Autogenerated dependencies, do not modify
+check_iolog_filter.lo: $(srcdir)/regress/iolog_filter/check_iolog_filter.c \
+                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                       $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
+                       $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+                       $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_filter/check_iolog_filter.c
+check_iolog_filter.i: $(srcdir)/regress/iolog_filter/check_iolog_filter.c \
+                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                       $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
+                       $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+                       $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_iolog_filter.plog: check_iolog_filter.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_filter/check_iolog_filter.c --i-file $< --output-file $@
 check_iolog_json.lo: $(srcdir)/regress/iolog_json/check_iolog_json.c \
                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_json.h \
@@ -553,6 +578,22 @@ iolog_eof.i: $(srcdir)/iolog_eof.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog_eof.plog: iolog_eof.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_eof.c --i-file $< --output-file $@
+iolog_filter.lo: $(srcdir)/iolog_filter.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_filter.c
+iolog_filter.i: $(srcdir)/iolog_filter.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                 $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+iolog_filter.plog: iolog_filter.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_filter.c --i-file $< --output-file $@
 iolog_flush.lo: $(srcdir)/iolog_flush.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \

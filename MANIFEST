@@ -79,9 +79,9 @@ examples/Makefile.in
 examples/cvtsudoers.conf
 examples/pam.conf
 examples/sudo.conf.in
-examples/sudo_logsrvd.conf
-examples/sudoers
-examples/syslog.conf
+examples/sudo_logsrvd.conf.in
+examples/sudoers.in
+examples/syslog.conf.in
 include/Makefile.in
 include/compat/charclass.h
 include/compat/endian.h
@@ -129,6 +129,7 @@ lib/iolog/iolog_clearerr.c
 lib/iolog/iolog_close.c
 lib/iolog/iolog_conf.c
 lib/iolog/iolog_eof.c
+lib/iolog/iolog_filter.c
 lib/iolog/iolog_flush.c
 lib/iolog/iolog_gets.c
 lib/iolog/iolog_json.c
@@ -171,6 +172,22 @@ lib/iolog/regress/fuzz/fuzz_iolog_json.dict
 lib/iolog/regress/fuzz/fuzz_iolog_legacy.c
 lib/iolog/regress/fuzz/fuzz_iolog_timing.c
 lib/iolog/regress/host_port/host_port_test.c
+lib/iolog/regress/iolog_filter/check_iolog_filter.c
+lib/iolog/regress/iolog_filter/test1/log
+lib/iolog/regress/iolog_filter/test1/timing
+lib/iolog/regress/iolog_filter/test1/ttyin
+lib/iolog/regress/iolog_filter/test1/ttyin.filtered
+lib/iolog/regress/iolog_filter/test1/ttyout
+lib/iolog/regress/iolog_filter/test2/log
+lib/iolog/regress/iolog_filter/test2/timing
+lib/iolog/regress/iolog_filter/test2/ttyin
+lib/iolog/regress/iolog_filter/test2/ttyin.filtered
+lib/iolog/regress/iolog_filter/test2/ttyout
+lib/iolog/regress/iolog_filter/test3/log
+lib/iolog/regress/iolog_filter/test3/timing
+lib/iolog/regress/iolog_filter/test3/ttyin
+lib/iolog/regress/iolog_filter/test3/ttyin.filtered
+lib/iolog/regress/iolog_filter/test3/ttyout
 lib/iolog/regress/iolog_json/check_iolog_json.c
 lib/iolog/regress/iolog_json/test1.in
 lib/iolog/regress/iolog_json/test2.in
@@ -245,6 +262,8 @@ lib/util/pw_dup.c
 lib/util/pwrite.c
 lib/util/rcstr.c
 lib/util/reallocarray.c
+lib/util/regex.c
+lib/util/regress/closefrom/closefrom_test.c
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.1
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.2
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.3
@@ -258,6 +277,7 @@ lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
+lib/util/regress/harness.in
 lib/util/regress/mktemp/mktemp_test.c
 lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c
@@ -378,6 +398,7 @@ logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.3
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.4
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.5
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.6
+logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.7
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.c
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.dict
 logsrvd/sendlog.c
@@ -700,6 +721,7 @@ plugins/sudoers/regress/cvtsudoers/sudoers.defs
 plugins/sudoers/regress/cvtsudoers/sudoers1
 plugins/sudoers/regress/cvtsudoers/sudoers2
 plugins/sudoers/regress/cvtsudoers/sudoers3
+plugins/sudoers/regress/cvtsudoers/sudoers4
 plugins/sudoers/regress/cvtsudoers/test1.out.ok
 plugins/sudoers/regress/cvtsudoers/test1.sh
 plugins/sudoers/regress/cvtsudoers/test10.out.ok
@@ -765,6 +787,10 @@ plugins/sudoers/regress/cvtsudoers/test35.out.ok
 plugins/sudoers/regress/cvtsudoers/test35.sh
 plugins/sudoers/regress/cvtsudoers/test36.out.ok
 plugins/sudoers/regress/cvtsudoers/test36.sh
+plugins/sudoers/regress/cvtsudoers/test37.out.ok
+plugins/sudoers/regress/cvtsudoers/test37.sh
+plugins/sudoers/regress/cvtsudoers/test38.out.ok
+plugins/sudoers/regress/cvtsudoers/test38.sh
 plugins/sudoers/regress/cvtsudoers/test4.out.ok
 plugins/sudoers/regress/cvtsudoers/test4.sh
 plugins/sudoers/regress/cvtsudoers/test5.out.ok
@@ -789,6 +815,7 @@ plugins/sudoers/regress/fuzz/fuzz_sudoers.dict
 plugins/sudoers/regress/fuzz/fuzz_sudoers.out.ok
 plugins/sudoers/regress/fuzz/fuzz_sudoers_ldif.c
 plugins/sudoers/regress/fuzz/fuzz_sudoers_ldif.dict
+plugins/sudoers/regress/harness.in
 plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
 plugins/sudoers/regress/parser/check_addr.c
 plugins/sudoers/regress/parser/check_addr.in
@@ -798,6 +825,7 @@ plugins/sudoers/regress/parser/check_digest.out.ok
 plugins/sudoers/regress/parser/check_fill.c
 plugins/sudoers/regress/parser/check_gentime.c
 plugins/sudoers/regress/parser/check_hexchar.c
+plugins/sudoers/regress/serialize_list/check_serialize_list.c
 plugins/sudoers/regress/starttime/check_starttime.c
 plugins/sudoers/regress/sudoers/test1.in
 plugins/sudoers/regress/sudoers/test1.json.ok
@@ -913,6 +941,17 @@ plugins/sudoers/regress/sudoers/test27.ldif.ok
 plugins/sudoers/regress/sudoers/test27.ldif2sudo.ok
 plugins/sudoers/regress/sudoers/test27.out.ok
 plugins/sudoers/regress/sudoers/test27.toke.ok
+plugins/sudoers/regress/sudoers/test28.in
+plugins/sudoers/regress/sudoers/test28.json.ok
+plugins/sudoers/regress/sudoers/test28.ldif.ok
+plugins/sudoers/regress/sudoers/test28.ldif2sudo.ok
+plugins/sudoers/regress/sudoers/test28.out.ok
+plugins/sudoers/regress/sudoers/test28.toke.ok
+plugins/sudoers/regress/sudoers/test29.in
+plugins/sudoers/regress/sudoers/test29.json.ok
+plugins/sudoers/regress/sudoers/test29.ldif.ok
+plugins/sudoers/regress/sudoers/test29.out.ok
+plugins/sudoers/regress/sudoers/test29.toke.ok
 plugins/sudoers/regress/sudoers/test3.in
 plugins/sudoers/regress/sudoers/test3.json.ok
 plugins/sudoers/regress/sudoers/test3.ldif.ok
@@ -969,6 +1008,8 @@ plugins/sudoers/regress/testsudoers/test16.out.ok
 plugins/sudoers/regress/testsudoers/test16.sh
 plugins/sudoers/regress/testsudoers/test17.out.ok
 plugins/sudoers/regress/testsudoers/test17.sh
+plugins/sudoers/regress/testsudoers/test18.out.ok
+plugins/sudoers/regress/testsudoers/test18.sh
 plugins/sudoers/regress/testsudoers/test2.inc
 plugins/sudoers/regress/testsudoers/test2.out.ok
 plugins/sudoers/regress/testsudoers/test2.sh
@@ -1010,6 +1051,7 @@ plugins/sudoers/regress/visudo/test8.out.ok
 plugins/sudoers/regress/visudo/test8.sh
 plugins/sudoers/regress/visudo/test9.out.ok
 plugins/sudoers/regress/visudo/test9.sh
+plugins/sudoers/serialize_list.c
 plugins/sudoers/set_perms.c
 plugins/sudoers/solaris_audit.c
 plugins/sudoers/solaris_audit.h
@@ -1046,6 +1088,7 @@ plugins/sudoers/toke_util.c
 plugins/sudoers/tsdump.c
 plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/tsgetgrpw.h
+plugins/sudoers/unesc_str.c
 plugins/sudoers/visudo.c
 plugins/system_group/Makefile.in
 plugins/system_group/system_group.c

@@ -129,6 +129,9 @@ iolog_seekto(int iolog_dir_fd, const char *iolog_path,
 	debug_return_bool(true);
     }
 
+    memset(&timing, 0, sizeof(timing));
+    timing.decimal = ".";
+
     /* Parse timing file until we reach the target point. */
     for (;;) {
 	switch (iolog_read_timing_record(&iolog_files[IOFD_TIMING], &timing)) {

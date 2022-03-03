@@ -288,10 +288,22 @@ void init_sigrt(void)
 int
 main(int argc, char *argv[])
 {
-    int errors = 0;
-    int ntests = 0;
+    int ch, errors = 0, ntests = 0;
 
     initprogname(argc > 0 ? argv[0] : "strsig_test");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     init_sigrt();
     errors += test_sig2str(&ntests);
@@ -302,5 +314,5 @@ main(int argc, char *argv[])
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }

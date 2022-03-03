@@ -81,6 +81,7 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 TEST_PROGS = check_wrap
+TEST_VERBOSE =
 
 LIBEVENTLOG_OBJS = eventlog.lo eventlog_conf.lo eventlog_free.lo logwrap.lo
 
@@ -167,6 +168,9 @@ check: $(TEST_PROGS) check-fuzzer
 	    diff regress/logwrap/check_wrap.out $(srcdir)/regress/logwrap/check_wrap.out.ok || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
 	fi
+
+check-verbose:
+	exec $(MAKE) $(MFLAGS) TEST_VERBOSE=-v FUZZ_VERBOSE=-verbosity=1 check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la $(TEST_PROGS)

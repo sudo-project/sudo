@@ -763,6 +763,9 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
     bool ret = false;
     debug_decl(iolog_rewrite, SUDO_DEBUG_UTIL);
 
+    memset(&timing, 0, sizeof(timing));
+    timing.decimal = ".";
+
     /* Parse timing file until we reach the target point. */
     /* TODO: use iolog_seekto with a callback? */
     for (;;) {

@@ -119,6 +119,7 @@ sudo_rcstr_addref
 sudo_rcstr_alloc
 sudo_rcstr_delref
 sudo_rcstr_dup
+sudo_regex_compile_v1
 sudo_secure_dir_v1
 sudo_secure_file_v1
 sudo_setgroups_v1

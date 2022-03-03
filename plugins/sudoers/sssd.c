@@ -168,21 +168,25 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     const char *host = handle->ipa_host ? handle->ipa_host : user_runhost;
     const char *shost = handle->ipa_shost ? handle->ipa_shost : user_srunhost;
     char **val_array;
-    int i, ret = false;
+    int i, rc, ret = false;
     debug_decl(sudo_sss_check_user, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
 	debug_return_bool(false);
 
-    switch (handle->fn_get_values(rule, "sudoUser", &val_array)) {
+    rc = handle->fn_get_values(rule, "sudoUser", &val_array);
+    switch (rc) {
     case 0:
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
 	debug_return_bool(false);
+    case ENOMEM:
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	FALLTHROUGH;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
-	    "handle->fn_get_values(sudoUser): != 0");
+	    "handle->fn_get_values(sudoOption): rc=%d", rc);
 	debug_return_bool(false);
     }
 
@@ -415,7 +419,7 @@ oom:
 static bool
 sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule, struct defaults_list *defs)
 {
-    int i;
+    int i, rc;
     char *source = NULL;
     bool ret = false;
     char **val_array = NULL;
@@ -425,7 +429,8 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
     if (rule == NULL)
 	debug_return_bool(true);
 
-    switch (handle->fn_get_values(rule, "sudoOption", &val_array)) {
+    rc = handle->fn_get_values(rule, "sudoOption", &val_array);
+    switch (rc) {
     case 0:
 	break;
     case ENOENT:
@@ -434,7 +439,8 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
     case ENOMEM:
 	goto oom;
     default:
-	sudo_debug_printf(SUDO_DEBUG_ERROR, "handle->fn_get_values(sudoOption): != 0");
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "handle->fn_get_values(sudoOption): rc=%d", rc);
 	debug_return_bool(false);
     }
 
@@ -494,30 +500,31 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
 	handle->domainname, &sss_error, &sss_result);
     switch (rc) {
     case 0:
-	switch (sss_error) {
-	case 0:
-	    if (sss_result != NULL) {
-		sudo_debug_printf(SUDO_DEBUG_INFO, "Received %u rule(s)",
-		    sss_result->num_rules);
-	    } else {
-		sudo_debug_printf(SUDO_DEBUG_ERROR,
-		    "Internal error: sss_result == NULL && sss_error == 0");
-		debug_return_ptr(NULL);
-	    }
-	    break;
-	case ENOENT:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "The user was not found in SSSD.");
-	    debug_return_ptr(NULL);
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR, "sss_error=%u\n", sss_error);
-	    debug_return_ptr(NULL);
-	}
 	break;
     case ENOMEM:
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	FALLTHROUGH;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "handle->fn_send_recv: rc=%d", rc);
+	debug_return_ptr(NULL);
+    }
+
+    switch (sss_error) {
+    case 0:
+	if (sss_result != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "Received %u rule(s)",
+		sss_result->num_rules);
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"Internal error: sss_result == NULL && sss_error == 0");
+	    debug_return_ptr(NULL);
+	}
+	break;
+    case ENOENT:
+	sudo_debug_printf(SUDO_DEBUG_INFO, "The user was not found in SSSD.");
+	debug_return_ptr(NULL);
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR, "sss_error=%u\n", sss_error);
 	debug_return_ptr(NULL);
     }
 
@@ -752,11 +759,15 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 	break;
     case ENOMEM:
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	FALLTHROUGH;
+	debug_return_int(-1);
     default:
+	/*
+	 * Unable to connect to the sudo SSSD connector.
+	 * SSSD may not be configured for sudo, treat as non-fatal.
+	 */
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "handle->fn_send_recv_defaults: rc=%d, sss_error=%u", rc, sss_error);
-	debug_return_int(-1);
+	debug_return_int(0);
     }
 
     switch (sss_error) {

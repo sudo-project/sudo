@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 19, 2022
+.Dd February 16, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -238,8 +238,8 @@ Ring the bell as part of the password prompt when a terminal is present.
 This option has no effect if an askpass program is used.
 .It Fl b , -background
 Run the given command in the background.
-Note that it is not possible to use shell job control to manipulate
-background processes started by
+It is not possible to use shell job control to manipulate background
+processes started by
 .Nm .
 Most interactive commands will fail to work properly in background
 mode.
@@ -358,7 +358,7 @@ not be edited unless that user is root (version 1.8.16 and higher).
 Users are never allowed to edit device special files.
 .Pp
 If the specified file does not exist, it will be created.
-Note that unlike most commands run by
+Unlike most commands run by
 .Em sudo ,
 the editor is run with the invoking user's environment unmodified.
 If the temporary file becomes empty after editing, the user will
@@ -411,7 +411,7 @@ Display a short help message to the standard output and exit.
 Run the command on the specified
 .Ar host
 if the security policy plugin supports remote commands.
-Note that the
+The
 .Em sudoers
 plugin does not currently support running remote commands.
 This may also be used in conjunction with the
@@ -443,7 +443,7 @@ attempts to change to that user's home directory before running the
 shell.
 The command is run with an environment similar to the one
 a user would receive at log in.
-Note that most shells behave differently when a command is specified
+Most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
 for details.
 The
@@ -601,7 +601,7 @@ with a backslash
 except for alphanumerics, underscores,
 hyphens, and dollar signs.
 If no command is specified, an interactive shell is executed.
-Note that most shells behave differently when a command is specified
+Most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
 for details.
 .if \n(SL \{\
@@ -620,11 +620,12 @@ option to list the privileges for
 .Ar user
 instead of for the invoking user.
 The security policy may restrict listing other users' privileges.
-The
+When using the
 .Em sudoers
-policy only allows root or a user with the
-.Li ALL
-privilege on the current host to use this option.
+policy, only root or a user with the ability to run any command as
+either root or the specified
+.Ar user
+on the current host may use this option.
 .It Fl T Ar timeout , Fl -command-timeout Ns = Ns Ar timeout
 Used to set a timeout for the command.
 If the timeout expires before the command has exited, the
@@ -828,7 +829,7 @@ command has an associated timeout, or the
 or
 .Em pam_setcred
 options are enabled.
-Note that
+Both
 .Em pam_session
 and
 .Em pam_setcred
@@ -1006,9 +1007,9 @@ that reside in a directory that is writable by the user.
 If the user can modify or replace the command there is no way
 to limit what additional commands they can run.
 .Pp
-Please note that
+By default,
 .Nm
-will normally only log the command it explicitly runs.
+will only log the command it explicitly runs.
 If a user runs a command such as
 .Li sudo su
 or
@@ -1024,7 +1025,7 @@ Because of this, care must be taken when giving users access to commands via
 .Nm
 to verify that the command does not inadvertently give the user an
 effective root shell.
-For information on ways to address this, please see the
+For information on ways to address this, see the
 .Em Preventing shell escapes
 section in
 .Xr sudoers @mansectform@ .
@@ -1042,7 +1043,7 @@ crashes, you may wish to re-enable core dumps by setting
 to false in the
 .Xr sudo.conf @mansectform@
 file as follows:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Set disable_coredump false
 .Ed
 .Pp
@@ -1167,48 +1168,47 @@ is not set.
 front-end configuration
 .El
 .Sh EXAMPLES
-Note: the following examples assume a properly configured security
-policy.
+The following examples assume a properly configured security policy.
 .Pp
 To get a file listing of an unreadable directory:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo ls /usr/local/protected
 .Ed
 .Pp
 To list the home directory of user yaz on a machine where the file
 system holding ~yaz is not exported as root:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo -u yaz ls ~yaz
 .Ed
 .Pp
 To edit the
 .Pa index.html
 file as user www:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudoedit -u www ~www/htdocs/index.html
 .Ed
 .Pp
 To view system logs only accessible to root and users in the adm
 group:
-.Bd -literal -offset indent
-$ sudo -g adm more /var/log/syslog
+.Bd -literal -offset 4n
+$ sudo -g adm more @log_dir@/syslog
 .Ed
 .Pp
 To run an editor as jim with a different primary group:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudoedit -u jim -g audio ~jim/sound.txt
 .Ed
 .Pp
 To shut down a machine:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo shutdown -r +15 "quick reboot"
 .Ed
 .Pp
 To make a usage listing of the directories in the /home partition.
-Note that this runs the commands in a sub-shell to make the
+The commands are run in a sub-shell to allow the
 .Li cd
-and file redirection work.
-.Bd -literal -offset indent
+command and file redirection to work.
+.Bd -literal -offset 4n
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Ed
 .Sh DIAGNOSTICS
@@ -1342,9 +1342,9 @@ When editing a file, the editor is run with the user's environment unmodified.
 .Xr sudoreplay @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh HISTORY
-See the HISTORY file in the
+See the HISTORY.md file in the
 .Nm
-distribution (https://www.sudo.ws/history.html) for a brief
+distribution (https://www.sudo.ws/about/history/) for a brief
 history of sudo.
 .Sh AUTHORS
 Many people have worked on
@@ -1354,9 +1354,9 @@ over the years; this version consists of code written primarily by:
 .An Todd C. Miller
 .Ed
 .Pp
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 .Nm
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 .Nm .
 .Sh CAVEATS
@@ -1376,13 +1376,13 @@ functionality.
 It is not meaningful to run the
 .Li cd
 command directly via sudo, e.g.,
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudo cd /usr/local/protected
 .Ed
 .Pp
 since when the command exits the parent process (your shell) will
 still be the same.
-Please see the
+See the
 .Sx EXAMPLES
 section for more information.
 .Pp
@@ -1392,9 +1392,9 @@ can expose the same kernel bugs that make set-user-ID shell scripts
 unsafe on some operating systems (if your OS has a /dev/fd/ directory,
 set-user-ID shell scripts are generally safe).
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -1406,6 +1406,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 .Nm
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

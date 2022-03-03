@@ -1,17 +1,17 @@
 Sudo Security Policy
 ====================
 
-The Sudo Project takes security seriously.  If you believe you have found a security vulnerability in Sudo, please report it to us as described below.
+The Sudo Project takes security seriously.  If you believe you have found a security vulnerability in Sudo, you can report it to us as described below.
 
 ## Reporting Security Issues
 
-**Please do not report security vulnerabilities through public GitHub issues or Bugzilla.**
+**Do not report security vulnerabilities through public GitHub issues or Bugzilla.**
 
-Instead, please report them via email to <Todd.Miller@sudo.ws>.  You may encrypt your message with PGP if you would like.  The current PGP key has the fingerprint 59D1 E9CC BA2B 3767 04FD D35B A9F4 C021 CEA4 70FB and may be downloaded from [the sudo.ws web site](https://www.sudo.ws/dist/PGPKEYS) or the [OpenPGP Key Server](https://keys.openpgp.org/search?q=0xa9f4c021cea470fb).
+Instead, report them via email to <Todd.Miller@sudo.ws>.  You may encrypt your message with PGP if you would like.  The current PGP key has the fingerprint 59D1 E9CC BA2B 3767 04FD D35B A9F4 C021 CEA4 70FB and may be downloaded from [the sudo.ws web site](https://www.sudo.ws/dist/PGPKEYS) or the [OpenPGP Key Server](https://keys.openpgp.org/search?q=0xa9f4c021cea470fb).
 
-We try to respond to security issues in a timely manner but please understand that Sudo is a volunteer project.
+We try to respond to security issues in a timely manner but understand that Sudo is a volunteer project.
 
-Please include as much of the following information as possible to help us better understand the nature and scope of the potential issue:
+Include as much of the following information as possible to help us better understand the nature and scope of the potential issue:
 
   * Type of issue (e.g. buffer overflow, privilege escalation, etc.)
   * Full paths of source file(s) related to the issue

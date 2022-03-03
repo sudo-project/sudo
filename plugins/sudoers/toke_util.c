@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <regex.h>
 
 #include "sudoers.h"
 #include "toke.h"
@@ -133,27 +134,33 @@ fill_cmnd(const char *src, size_t len)
     }
     sudoerslval.command.args = NULL;
 
-    /* Copy the string and collapse any escaped sudo-specific characters. */
-    for (i = 0; i < len; i++) {
-	if (src[i] == '\\' && i != len - 1 && SPECIAL(src[i + 1]))
-	    *dst++ = src[++i];
-	else
-	    *dst++ = src[i];
-    }
-    *dst = '\0';
+    if (src[0] == '^') {
+	/* Copy the regular expression, no escaped sudo-specific characters. */
+	memcpy(dst, src, len);
+	dst[len] = '\0';
+    } else {
+	/* Copy the string and collapse any escaped sudo-specific characters. */
+	for (i = 0; i < len; i++) {
+	    if (src[i] == '\\' && i != len - 1 && SPECIAL(src[i + 1]))
+		*dst++ = src[++i];
+	    else
+		*dst++ = src[i];
+	}
+	*dst = '\0';
 
-    /* Check for sudoedit specified as a fully-qualified path. */
-    if ((dst = strrchr(sudoerslval.command.cmnd, '/')) != NULL) { // -V575
-	if (strcmp(dst, "/sudoedit") == 0) {
-	    if (sudoers_strict) {
-		sudoerserror(
-		    N_("sudoedit should not be specified with a path"));
-	    }
-	    free(sudoerslval.command.cmnd);
-	    if ((sudoerslval.command.cmnd = strdup("sudoedit")) == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-		debug_return_bool(false);
+	/* Check for sudoedit specified as a fully-qualified path. */
+	if ((dst = strrchr(sudoerslval.command.cmnd, '/')) != NULL) { // -V575
+	    if (strcmp(dst, "/sudoedit") == 0) {
+		if (sudoers_strict) {
+		    sudoerserror(
+			N_("sudoedit should not be specified with a path"));
+		}
+		free(sudoerslval.command.cmnd);
+		if ((sudoerslval.command.cmnd = strdup("sudoedit")) == NULL) {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		    debug_return_bool(false);
+		}
 	    }
 	}
     }

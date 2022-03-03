@@ -421,38 +421,31 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry, int *rc)
 static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs)
 {
-    struct berval **bv, **p;
-    char *cn, *cp, *source = NULL;
+    struct berval **p, **bv = NULL;
+    char *cp, *cn = NULL, *source = NULL;
     bool ret = false;
     int rc;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP);
 
     bv = sudo_ldap_get_values_len(ld, entry, "sudoOption", &rc);
     if (bv == NULL) {
-	if (rc == LDAP_NO_MEMORY) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_bool(false);
-	}
+	if (rc == LDAP_NO_MEMORY)
+	    goto oom;
 	debug_return_bool(true);
     }
 
     /* Use sudoRole in place of file name in defaults. */
     cn = sudo_ldap_get_first_rdn(ld, entry, &rc);
     if (cn == NULL) {
-	if (rc == LDAP_NO_MEMORY) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
+	if (rc == LDAP_NO_MEMORY)
+	    goto oom;
     }
-    if (asprintf(&cp, "sudoRole %s", cn ? cn : "UNKNOWN") == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto done;
-    }
-    if ((source = sudo_rcstr_dup(cp)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	free(cp);
-	goto done;
-    }
+    if (asprintf(&cp, "sudoRole %s", cn ? cn : "UNKNOWN") == -1)
+	goto oom;
+    source = sudo_rcstr_dup(cp);
+    free(cp);
+    if (source == NULL)
+	goto oom;
 
     /* Walk through options, appending to defs. */
     for (p = bv; *p != NULL; p++) {
@@ -460,13 +453,15 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs
 	int op;
 
 	op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
-	if (!append_default(var, val, op, source, defs)) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
+	if (!append_default(var, val, op, source, defs))
+	    goto oom;
     }
 
     ret = true;
+    goto done;
+
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
 done:
     sudo_rcstr_delref(source);

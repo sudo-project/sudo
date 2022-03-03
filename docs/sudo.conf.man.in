@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "January 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -66,8 +66,8 @@ the line, are ignored.
 Long lines can be continued with a backslash
 (\(oq\e\(cq)
 as the last character on the line.
-Note that leading white space is removed from the beginning of lines
-even when the continuation character is used.
+Leading white space is removed from the beginning of lines
+even when a continuation character is used.
 .PP
 Non-comment lines that don't begin with
 \fRPlugin\fR,
@@ -126,7 +126,7 @@ setting, which defaults to
 In other words:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin sudoers_policy sudoers.so
 .RE
 .fi
@@ -134,7 +134,7 @@ Plugin sudoers_policy sudoers.so
 is equivalent to:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin sudoers_policy @plugindir@/sudoers.so
 .RE
 .fi
@@ -148,7 +148,7 @@ as it does not actually exist in the file system.
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin sudoers_policy sudoers.so
 .RE
 .fi
@@ -163,7 +163,7 @@ function.
 For example, to override the compile-time default sudoers file mode:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin sudoers_policy sudoers.so sudoers_mode=0440
 .RE
 .fi
@@ -190,7 +190,7 @@ plugin will be used as the default security policy, for I/O logging
 This is equivalent to the following:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 Plugin sudoers_audit sudoers.so
@@ -228,7 +228,7 @@ keyword, followed by the name of the path to set and its value.
 For example:
 .nf
 .sp
-.RS 6n
+.RS 4n
 Path intercept @intercept_file@
 Path noexec @noexec_file@
 Path askpass /usr/X11R6/bin/ssh-askpass
@@ -373,7 +373,7 @@ to false in
 as follows:
 .nf
 .sp
-.RS 16n
+.RS 14n
 Set disable_coredump false
 .RE
 .fi
@@ -416,16 +416,15 @@ option to true in
 as follows:
 .nf
 .sp
-.RS 16n
+.RS 14n
 Set developer_mode true
 .RE
 .fi
 .RS 10n
 .sp
-Please note that this creates a security risk, so it is not recommended
-on critical systems such as a desktop machine for daily use, but is intended
-to be used in development environments (VM, container, etc).
-Before enabling developer mode, ensure you understand the implications.
+This creates a security risk and is not recommended for production systems,
+it is intended to be used in a development environment (VM, container, etc).
+Before enabling developer mode, be sure that you understand the implications.
 .sp
 This setting is only available in
 \fBsudo\fR
@@ -510,7 +509,7 @@ For example, to cause
 to only use the kernel's static list of groups for the user:
 .nf
 .sp
-.RS 16n
+.RS 14n
 Set group_source static
 .RE
 .fi
@@ -551,7 +550,7 @@ If IP-based matching is not required, network interface probing
 can be disabled as follows:
 .nf
 .sp
-.RS 16n
+.RS 14n
 Set probe_interfaces false
 .RE
 .fi
@@ -587,8 +586,8 @@ as it does not include a comma
 Examples:
 .nf
 .sp
-.RS 6n
-Debug sudo /var/log/sudo_debug all@warn,plugin@info
+.RS 4n
+Debug sudo @log_dir@/sudo_debug all@warn,plugin@info
 .RE
 .fi
 .PP
@@ -599,8 +598,8 @@ level and higher in addition to those at the
 level for the plugin subsystem.
 .nf
 .sp
-.RS 6n
-Debug sudo_intercept.so /var/log/intercept_debug all@debug
+.RS 4n
+Debug sudo_intercept.so @log_dir@/intercept_debug all@debug
 .RE
 .fi
 .PP
@@ -659,7 +658,7 @@ For example, the following trace is for the
 function located in src/sudo.c:
 .nf
 .sp
-.RS 6n
+.RS 4n
 sudo[123] -> get_user_groups @ src/sudo.c:385
 sudo[123] <- get_user_groups @ src/sudo.c:429 := groups=10,0,5
 .RE
@@ -869,19 +868,14 @@ front-end configuration
 # Priority may be crit, err, warn, notice, diag, info, trace, or debug.
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
-#Debug sudo /var/log/sudo_debug all@debug
-#Debug sudoers.so /var/log/sudoers_debug all@debug
+#Debug sudo @log_dir@/sudo_debug all@debug
+#Debug sudoers.so @log_dir@/sudoers_debug all@debug
 .RE
 .fi
 .SH "SEE ALSO"
 sudo_plugin(@mansectform@),
 sudoers(@mansectform@),
 sudo(@mansectsu@)
-.SH "HISTORY"
-See the HISTORY file in the
-\fBsudo\fR
-distribution (https://www.sudo.ws/history.html) for a brief
-history of sudo.
 .SH "AUTHORS"
 Many people have worked on
 \fBsudo\fR
@@ -891,15 +885,15 @@ over the years; this version consists of code written primarily by:
 Todd C. Miller
 .RE
 .PP
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 \fBsudo\fR
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBsudo\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -911,6 +905,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 \fBsudo\fR
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

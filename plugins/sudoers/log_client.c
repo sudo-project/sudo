@@ -1968,13 +1968,13 @@ client_closure_alloc(struct log_details *details, struct timespec *now,
     closure->start_time.tv_sec = now->tv_sec;
     closure->start_time.tv_nsec = now->tv_nsec;
 
+    TAILQ_INIT(&closure->write_bufs);
+    TAILQ_INIT(&closure->free_bufs);
+
     closure->read_buf.size = 64 * 1024;
     closure->read_buf.data = malloc(closure->read_buf.size);
     if (closure->read_buf.data == NULL)
 	goto oom;
-
-    TAILQ_INIT(&closure->write_bufs);
-    TAILQ_INIT(&closure->free_bufs);
 
     if ((closure->read_ev = event_alloc()) == NULL)
 	goto oom;
@@ -1988,7 +1988,6 @@ client_closure_alloc(struct log_details *details, struct timespec *now,
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     client_closure_free(closure);
-    closure = NULL;
     debug_return_ptr(NULL);
 }
 

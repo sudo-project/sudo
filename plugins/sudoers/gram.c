@@ -3344,10 +3344,7 @@ sudoerserrorf(const char *fmt, ...)
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 
 	    va_start(ap, fmt);
-	    if (sudoerschar == ERROR) {
-		/* Use error string from lexer. */
-		s = _(sudoers_errstr);
-	    } else if (strcmp(fmt, "%s") == 0) {
+	    if (strcmp(fmt, "%s") == 0) {
 		/* Optimize common case, a single string. */
 		s = _(va_arg(ap, char *));
 	    } else {
@@ -3389,6 +3386,12 @@ sudoerserrorf(const char *fmt, ...)
 void
 sudoerserror(const char *s)
 {
+    if (sudoerschar == ERROR) {
+	/* Use error string from lexer. */
+	s = sudoers_errstr;
+	sudoers_errstr = NULL;
+    }
+
     // -V:sudoerserror:575, 618
     if (s == NULL)
 	sudoerserrorf(NULL);

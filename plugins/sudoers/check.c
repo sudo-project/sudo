@@ -42,14 +42,14 @@
 #include "sudoers.h"
 #include "check.h"
 
-static bool display_lecture(int);
-static struct passwd *get_authpw(int);
-
 struct getpass_closure {
     int tstat;
+    int lectured;
     void *cookie;
     struct passwd *auth_pw;
 };
+
+static struct passwd *get_authpw(int);
 
 /*
  * Called when getpass is suspended so we can drop the lock.
@@ -87,26 +87,30 @@ getpass_resume(int signo, void *vclosure)
 static int
 check_user_interactive(int validated, int mode, struct getpass_closure *closure)
 {
-    struct sudo_conv_callback cb, *callback = NULL;
+    struct sudo_conv_callback callback;
     int ret = -1;
     char *prompt;
-    bool lectured;
     debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH);
+
+    /* Construct callback for getpass function. */
+    memset(&callback, 0, sizeof(callback));
+    callback.version = SUDO_CONV_CALLBACK_VERSION;
+    callback.closure = closure;
+    callback.on_suspend = getpass_suspend;
+    callback.on_resume = getpass_resume;
 
     /* Open, lock and read time stamp file if we are using it. */
     if (!ISSET(mode, MODE_IGNORE_TICKET)) {
 	/* Open time stamp file and check its status. */
 	closure->cookie = timestamp_open(user_name, user_sid);
-	if (timestamp_lock(closure->cookie, closure->auth_pw))
-	    closure->tstat = timestamp_status(closure->cookie, closure->auth_pw);
-
-	/* Construct callback for getpass function. */
-	memset(&cb, 0, sizeof(cb));
-	cb.version = SUDO_CONV_CALLBACK_VERSION;
-	cb.closure = closure;
-	cb.on_suspend = getpass_suspend;
-	cb.on_resume = getpass_resume;
-	callback = &cb;
+	if (closure->cookie != NULL) {
+	    if (timestamp_lock(closure->cookie, closure->auth_pw)) {
+		closure->tstat = timestamp_status(closure->cookie,
+		    closure->auth_pw);
+	    }
+	    callback.on_suspend = getpass_suspend;
+	    callback.on_resume = getpass_resume;
+	}
     }
 
     switch (closure->tstat) {
@@ -125,8 +129,11 @@ check_user_interactive(int validated, int mode, struct getpass_closure *closure)
 	FALLTHROUGH;
 
     default:
-	/* XXX - should not lecture if askpass helper is being used. */
-	lectured = display_lecture(closure->tstat);
+	if (ISSET(mode, MODE_NONINTERACTIVE) && !def_noninteractive_auth) {
+	    validated |= FLAG_NO_USER_INPUT;
+	    log_auth_failure(validated, 0);
+	    goto done;
+	}
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
@@ -134,8 +141,8 @@ check_user_interactive(int validated, int mode, struct getpass_closure *closure)
 	if (prompt == NULL)
 	    goto done;
 
-	ret = verify_user(closure->auth_pw, prompt, validated, callback);
-	if (ret == true && lectured)
+	ret = verify_user(closure->auth_pw, prompt, validated, &callback);
+	if (ret == true && closure->lectured)
 	    (void)set_lectured();	/* lecture error not fatal */
 	free(prompt);
 	break;
@@ -222,9 +229,10 @@ done:
  * Display sudo lecture (standard or custom).
  * Returns true if the user was lectured, else false.
  */
-static bool
-display_lecture(int status)
+void
+display_lecture(struct sudo_conv_callback *callback)
 {
+    struct getpass_closure *closure;
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
     char buf[BUFSIZ];
@@ -233,9 +241,14 @@ display_lecture(int status)
     int fd;
     debug_decl(lecture, SUDOERS_DEBUG_AUTH);
 
-    if (def_lecture == never ||
-	(def_lecture == once && already_lectured(status)))
-	debug_return_bool(false);
+    if (callback == NULL || (closure = callback->closure) == NULL)
+	debug_return;
+
+    if (closure->lectured)
+	debug_return;
+
+    if (def_lecture == never || (def_lecture == once && already_lectured()))
+	debug_return;
 
     memset(&msg, 0, sizeof(msg));
     memset(&repl, 0, sizeof(repl));
@@ -251,13 +264,12 @@ display_lecture(int status)
 		    msg.msg = buf;
 		    sudo_conv(1, &msg, &repl, NULL);
 		}
-		close(fd);
-		if (nread == -1) {
-		    log_warning(SLOG_RAW_MSG,
-			N_("error reading lecture file %s"), def_lecture_file);
-		    debug_return_bool(false);
+		if (nread == 0) {
+		    close(fd);
+		    goto done;
 		}
-		debug_return_bool(true);
+		log_warning(SLOG_RAW_MSG,
+		    N_("error reading lecture file %s"), def_lecture_file);
 	    } else {
 		log_warningx(SLOG_RAW_MSG,
 		    N_("ignoring lecture file %s: not a regular file"),
@@ -280,7 +292,10 @@ display_lecture(int status)
 	"    #2) Think before you type.\n"
 	"    #3) With great power comes great responsibility.\n\n");
     sudo_conv(1, &msg, &repl, NULL);
-    debug_return_bool(true);
+
+done:
+    closure->lectured = true;
+    debug_return;
 }
 
 /*

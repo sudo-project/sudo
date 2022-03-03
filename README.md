@@ -6,10 +6,9 @@ privileges as possible but still allow people to get their work done.
 
 ## Where to find sudo
 
-Before you try and build sudo, *please* make sure you have the current
-version.  The latest sudo may always be gotten via anonymous ftp from
-ftp.sudo.ws in the directory /pub/sudo/ or from the sudo web site,
-https://www.sudo.ws/
+Before building sudo, make sure you have the current version.  The
+latest sudo may always be gotten via anonymous ftp from ftp.sudo.ws
+in the directory /pub/sudo/ or from the sudo web site, https://www.sudo.ws/
 
 The distribution is sudo-M.m.tar.gz where _M_ is the major version
 number and _m_ is the minor version number.  Beta versions of sudo may
@@ -23,19 +22,18 @@ a complete list of changes, see the [ChangeLog](ChangeLog).
 For a summary of major changes to the current stable release, see
 https://www.sudo.ws/releases/stable/.
 
-If you are upgrading from an earlier version of Sudo, please read
+If you are upgrading from an earlier version of Sudo, read
 [docs/UPGRADE.md](docs/UPGRADE.md) for information on changes in
 behavior that may affect you.
 
-For a history of sudo please see [docs/HISTORY.md](docs/HISTORY.md).
+For a history of sudo see [docs/HISTORY.md](docs/HISTORY.md).
 You can find a list of contributors to sudo in
 [docs/CONTRIBUTORS.md](docs/CONTRIBUTORS.md).
 
 ## Building the release
 
-Please read the installation guide, [INSTALL.md](INSTALL.md), before
-trying to build sudo.  Pay special attention to the "OS dependent notes"
-section.
+Read the installation guide, [INSTALL.md](INSTALL.md), before trying
+to build sudo.  Pay special attention to the "OS dependent notes" section.
 
 ## How to contribute
 
@@ -45,7 +43,7 @@ how you can help contribute to sudo.
 ## Copyright
 
 Sudo is distributed under an ISC-style license.
-Please refer to [LICENSE.md](LICENSE.md) for details.
+Refer to [LICENSE.md](LICENSE.md) for details.
 
 ## Mailing lists
 
@@ -94,10 +92,10 @@ report in the sudo bug database, at https://bugzilla.sudo.ws/.
 Alternately, you can file a GitHub issue if that is easier for you
 at https://github.com/sudo-project/sudo/issues/.
 
-Please see [docs/SECURITY.md](docs/SECURITY.md) for our security
-policy and how to report security issues.
+See [docs/SECURITY.md](docs/SECURITY.md) for our security policy
+and how to report security issues.
 
-Please read over [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
-*before* submitting a bug report.  When reporting bugs, please be
-sure to include the version of sudo you are using as well as the
-platform you are running it on.
+Check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) *before*
+submitting a bug report.  When reporting bugs, be sure to include
+the version of sudo you are using as well as the platform you are
+running it on.

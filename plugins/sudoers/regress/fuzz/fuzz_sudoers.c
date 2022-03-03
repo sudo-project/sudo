@@ -188,7 +188,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     setprogname("fuzz_sudoers");
     sudoers_debug_register(getprogname(), NULL);
-    sudo_warn_set_conversation(fuzz_conversation);
+    if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
+	sudo_warn_set_conversation(fuzz_conversation);
 
     /* Sudoers locale setup. */
     sudoers_initlocale(setlocale(LC_ALL, ""), "C");

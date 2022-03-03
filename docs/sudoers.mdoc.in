@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 20, 2022
+.Dd February 21, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -49,7 +49,7 @@ section.
 For information on storing
 .Nm
 policy information
-in LDAP, please see
+in LDAP, see
 .Xr sudoers.ldap @mansectform@ .
 .Ss Configuring sudo.conf for sudoers
 .Nm sudo
@@ -68,7 +68,7 @@ To explicitly configure
 to use the
 .Nm
 plugin, the following configuration can be used.
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_audit sudoers.so
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
@@ -98,7 +98,7 @@ For older versions, it is the
 plugin.
 Multiple arguments may be specified, separated by white space.
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_audit sudoers.so sudoers_mode=0400 error_recovery=false
 .Ed
 .Pp
@@ -159,7 +159,7 @@ It should be specified as an octal value.
 .Pp
 For more information on configuring
 .Xr sudo.conf @mansectform@ ,
-please refer to its manual.
+refer to its manual.
 .Ss User Authentication
 The
 .Nm
@@ -196,7 +196,7 @@ Defaults entry
 (described later) and defaults to
 .Li @mailto@ .
 .Pp
-Note that no mail will be sent if an unauthorized user tries to run
+No mail will be sent if an unauthorized user tries to run
 .Nm sudo
 with the
 .Fl l
@@ -457,7 +457,7 @@ is displayed when
 is run by root with the
 .Fl V
 option.
-Please note that the list of environment variables to remove
+The list of environment variables to remove
 varies based on the operating system
 .Nm sudo
 is running on.
@@ -494,9 +494,9 @@ match a pattern in the
 .Em env_delete
 list.
 .Pp
-Note that the dynamic linker on most operating systems will remove
-variables that can control dynamic linking from the environment of
-set-user-ID executables, including
+The dynamic linker on most operating systems will remove variables
+that can control dynamic linking from the environment of set-user-ID
+executables, including
 .Nm sudo .
 Depending on the operating
 system this may include
@@ -864,7 +864,7 @@ See
 .Sx "GROUP PROVIDER PLUGINS"
 for more information.
 .Pp
-Note that quotes around group names are optional.
+Quotes around group names are optional.
 Unquoted strings must use a backslash
 .Pq Ql \e
 to escape spaces and special characters.
@@ -883,7 +883,8 @@ Runas_Member ::= '!'* user name |
                  '!'* %:nonunix_group |
                  '!'* %:#nonunix_gid |
                  '!'* +netgroup |
-                 '!'* Runas_Alias
+                 '!'* Runas_Alias |
+                 '!'* ALL
 .Ed
 .Pp
 A
@@ -895,13 +896,12 @@ of
 .Li User_Alias Ns es
 it can contain
 .Li Runas_Alias Ns es .
-Note that
-user names and groups are matched as strings.
+User names and groups are matched as strings.
 In other words, two users (groups) with the same user (group) ID
 are considered to be distinct.
 If you wish to match all user names with the same user-ID (e.g., root and
 toor), you can use a user-ID instead of a name (#0 in the example given).
-Note that the user-ID or group-ID specified in a
+The user-ID or group-ID specified in a
 .Li Runas_Member
 need not be listed in the password or group database.
 .Bd -literal
@@ -912,7 +912,8 @@ Host ::= '!'* host name |
          '!'* ip_addr |
          '!'* network(/netmask)? |
          '!'* +netgroup |
-         '!'* Host_Alias
+         '!'* Host_Alias |
+         '!'* ALL
 .Ed
 .Pp
 A
@@ -943,7 +944,6 @@ command on your machine returns the fully
 qualified host name, you'll need to use the
 .Em fqdn
 flag for wildcards to be useful.
-Note that
 .Nm sudo
 only inspects actual network interfaces; this means that IP address
 127.0.0.1 (localhost) will never match.
@@ -953,12 +953,12 @@ will only match if that is the actual host name, which is usually
 only the case for non-networked systems.
 .Bd -literal
 digest ::= [A-Fa-f0-9]+ |
-	   [A-Za-z0-9\e+/=]+
+           [A-Za-z0-9\e+/=]+
 
 Digest_Spec ::= "sha224" ':' digest |
-		"sha256" ':' digest |
-		"sha384" ':' digest |
-		"sha512" ':' digest
+                "sha256" ':' digest |
+                "sha384" ':' digest |
+                "sha512" ':' digest
 
 Digest_List ::= Digest_Spec |
                 Digest_Spec ',' Digest_List
@@ -966,13 +966,20 @@ Digest_List ::= Digest_Spec |
 Cmnd_List ::= Cmnd |
               Cmnd ',' Cmnd_List
 
-command name ::= file name |
-                 file name args |
-                 file name '""'
+command name ::= regex |
+                 file name
 
-Edit_Spec ::= "sudoedit" file name+
+command ::= command name |
+            command name args |
+            command name regex |
+            command name '""' |
+            ALL
 
-Cmnd ::= Digest_List? '!'* command name |
+Edit_Spec ::= "sudoedit" file name+ |
+              "sudoedit" regex |
+              "sudoedit"
+
+Cmnd ::= Digest_List? '!'* command |
          '!'* directory |
          '!'* Edit_Spec |
          '!'* Cmnd_Alias
@@ -980,21 +987,18 @@ Cmnd ::= Digest_List? '!'* command name |
 .Pp
 A
 .Li Cmnd_List
-is a list of one or more command names, directories, and other aliases.
-A command name is a fully qualified file name which may include
+is a list of one or more commands, directories, or aliases.
+A command is a fully qualified file name, which may include
 shell-style wildcards (see the
 .Sx Wildcards
+section below),
+or a regular expression that starts with
+.Ql ^
+and ends with
+.Ql $
+(see the
+.Sx Regular expressions
 section below).
-A simple file name allows the user to run the command with any
-arguments they wish.
-However, you may also specify command line arguments (including
-wildcards).
-Alternately, you can specify
-.Li \&""
-to indicate that the command
-may only be run
-.Sy without
-command line arguments.
 A directory is a
 fully qualified path name ending in a
 .Ql / .
@@ -1002,21 +1006,49 @@ When you specify a directory in a
 .Li Cmnd_List ,
 the user will be able to run any file within that directory
 (but not in any sub-directories therein).
+If no command line arguments are specified, the user may run the
+command with any arguments they choose.
+Command line arguments can include wildcards or be a regular
+expression that starts with
+.Ql ^
+and ends with
+.Ql $ .
+If the command line arguments consist of
+.Li \&"" ,
+the command may only be run with
+.Em no
+arguments.
 .Pp
 If a
 .Li Cmnd
-has associated command line arguments, then the arguments
+has associated command line arguments, the arguments
 in the
 .Li Cmnd
-must match exactly those given by the user on the command line
-(or match the wildcards if there are any).
-Note that the following characters must be escaped with a
+must match those given by the user on the command line.
+If the arguments in a
+.Li Cmnd
+begin with the
+.Ql ^
+character, they will be interpreted as a regular expression
+and matched accordingly.
+Otherwise, shell-style wildcards are used when matching.
+Unless a regular expression is specified, the following characters must
+be escaped with a
 .Ql \e
 if they are used in command arguments:
 .Ql ,\& ,
 .Ql :\& ,
 .Ql =\& ,
 .Ql \e .
+To prevent arguments in a
+.Li Cmnd
+that begin with a
+.Ql ^
+character from being interpreted as a regular expression, the
+.Ql ^
+must be escaped with a
+.Ql \e .
+.Pp
 The built-in command
 .Dq Li sudoedit
 is used to permit a user to run
@@ -1026,14 +1058,14 @@ with the
 option (or as
 .Nm sudoedit ) .
 It may take command line arguments just as a normal command does.
-Note that
+Unlike other commands,
 .Dq Li sudoedit
-is a command built into
+is built into
 .Nm sudo
 itself and must be specified in the
 .Em sudoers
 file
-.Sy without
+.Em without
 a leading path.
 If a leading path is present, for example
 .Pa /usr/bin/sudoedit ,
@@ -1045,7 +1077,7 @@ is treated as an error by
 .Nm visudo .
 .Pp
 A
-.Li command name
+.Li command
 may be preceded by a
 .Li Digest_List ,
 a comma-separated list of one or more
@@ -1099,7 +1131,7 @@ values at run-time via one or more
 lines.
 These may affect all users on any host, all users on a specific host, a
 specific user, a specific command, or commands being run as a specific user.
-Note that per-command entries may not include command line arguments.
+Per-command entries may not include command line arguments.
 If you need to specify arguments, define a
 .Li Cmnd_Alias
 and reference
@@ -1154,6 +1186,8 @@ This is due to there being two levels of escaping, one in the
 .Em sudoers
 parser itself and another when command line arguments are matched by the
 .Xr fnmatch 3
+or
+.Xr regexec 3
 function.
 .Pp
 Lists have two additional assignment operators,
@@ -1338,7 +1372,7 @@ dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill,\e
 	/usr/bin/lprm
 .Ed
 .Pp
-Note that while the group portion of the
+While the group portion of the
 .Li Runas_Spec
 permits the
 user to run as command with that group, it does not force the user
@@ -1362,8 +1396,7 @@ tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu,\e
 	/usr/local/bin/minicom
 .Ed
 .Pp
-Note that in this example only the group will be set, the command
-still runs as user
+In this example only the group will be set, the command still runs as user
 .Sy tcm .
 E.g.\&
 .Bd -literal
@@ -1405,7 +1438,7 @@ subsequent
 in the
 .Li Cmnd_Spec_List ,
 inherit that option unless it is overridden by another option.
-Note that the option names are reserved words in
+Option names are reserved words in
 .Em sudoers .
 This means that none of the valid option names (see below) can be used
 when declaring an alias.
@@ -1794,7 +1827,7 @@ options.
 These tags override the value of the
 .Em setenv
 flag on a per-command basis.
-Note that if
+If
 .Li SETENV
 has been set for a command, the user may disable the
 .Em env_reset
@@ -1885,7 +1918,7 @@ and
 .El
 .Pp
 .Bf -symbolic
-Note that these are not regular expressions.
+These are not regular expressions.
 .Ef
 Unlike a regular expression there is no way to match one or more
 characters within a range.
@@ -1908,7 +1941,7 @@ For example:
 .Pp
 Would match any file name beginning with a letter.
 .Pp
-Note that a forward slash
+A forward slash
 .Pq Ql /
 will
 .Em not
@@ -1933,32 +1966,12 @@ arbitrary strings and not just path names.
 Wildcards in command line arguments should be used with care.
 .Ef
 .br
-Command line arguments are matched as a single, concatenated string.
-This mean a wildcard character such as
-.Ql \&?
-or
-.Ql *
-will match across word boundaries, which may be unexpected.
-For example, while a sudoers entry like:
-.Bd -literal -offset 4n
-%operator ALL = /bin/cat /var/log/messages*
-.Ed
-.Pp
-will allow command like:
-.Bd -literal -offset 4n
-$ sudo cat /var/log/messages.1
-.Ed
-.Pp
-It will also allow:
-.Bd -literal -offset 4n
-$ sudo cat /var/log/messages /etc/shadow
-.Ed
-.Pp
-which is probably not what was intended.
-In most cases it is better to do command line processing
-outside of the
-.Em sudoers
-file in a scripting language.
+Wildcards can match any character, including white space.
+In most cases, it is safer to use a regular expression to match
+command line arguments.
+For more information, see
+.Sx Wildcards in command arguments
+below.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
 .Bl -tag -width 8n
@@ -1977,6 +1990,106 @@ built-in command should always be path names, so a forward slash
 .Pq Ql /
 will not be matched by a wildcard.
 .El
+.Ss Regular expressions
+Starting with version 1.9.10, it is possible to use
+regular expressions for path names and command line arguments.
+Regular expressions are more expressive than shell-style
+.Em wildcards
+and are usually safer because they provide a greater degree of
+control when matching.
+The type of regular expressions supported by
+.Nm
+are POSIX extended regular expressions, similar to those used by the
+.Xr egrep 1
+utility.
+They are usually documented in the
+.Xr regex @mansectmisc@
+or
+.Xr re_format @mansectmisc@
+manual, depending on the system.
+As an extension, if the regular expression begins with
+.Dq (?i) ,
+it will be matched in a case-insensitive manner.
+.Pp
+In
+.Em sudoers ,
+regular expressions must start with a
+.Ql ^
+character and end with a
+.Ql $ .
+This makes it explicit what is, or is not, a regular expression.
+Either the path name, the command line arguments or both may
+be regular expressions.
+Because the path name and arguments are matched separately, it is
+even possible to use wildcards for the path name and regular
+expressions for the arguments.
+It is not possible to use a single regular expression to match
+both the command and its arguments.
+Regular expressions in
+.Em sudoers
+are limited to 1024 characters.
+.Pp
+There is no need to escape
+.Em sudoers
+special characters in a regular expression other than the pound sign
+.Pq Ql # .
+.Pp
+In the following example, user
+.Sy john
+can run the
+.Xr passwd 1
+command as root on any host but is not allowed to change root's password.
+This kind of rule is impossible to express safely using wildcards.
+.Bd -literal -offset 4n
+john	ALL = /usr/bin/passwd ^[a-zA-Z0-9_]+$,\e
+              !/usr/bin/passwd root
+.Ed
+.Pp
+It is also possible to use a regular expression in conjunction with
+.Nm sudoedit
+rules.
+The following rule would give user bob the ability to edit the
+.Pa /etc/motd ,
+.Pa /etc/issue ,
+and
+.Pa /etc/hosts
+files only.
+.Bd -literal -offset 4n
+bob    ALL = sudoedit ^/etc/(motd|issue|hosts)$
+.Ed
+.Pp
+Regular expressions may also be used to match the command itself.
+In this example, a regular expression is used to allow user
+.Sy sid
+to run the
+.Pa /usr/sbin/groupadd ,
+.Pa /usr/sbin/groupmod ,
+.Pa /usr/sbin/groupdel ,
+.Pa /usr/sbin/useradd ,
+.Pa /usr/sbin/usermod ,
+and
+.Pa /usr/sbin/userdel
+commands as root.
+.Bd -literal -offset 4n
+sid    ALL = ^/usr/sbin/(group|user)(add|mod|del)$
+.Ed
+.Pp
+One disadvantage of using a regular expression to match the command
+name is that it is not possible to match relative paths such as
+.Pa ./useradd
+or
+.Pa ../sbin/useradd .
+This has security implications when a regular expression is used
+for the command name in conjunction with the negation operator,
+.Ql !\& ,
+as such rules can be trivially bypassed.
+Because of this, using a negated regular expression for the command name is
+.Sy strongly discouraged .
+This does not apply to negated commands that only use a regular
+expression to match the command arguments.
+See
+.Sx Regular expressions in command names
+below for more information.
 .Ss Including other files from within sudoers
 It is possible to include other
 .Em sudoers
@@ -2105,7 +2218,7 @@ file that contained the
 .Li @includedir
 directive.
 .Pp
-Note that unlike files included via
+Unlike files included via
 .Li @include ,
 .Nm visudo
 will not edit the files in a
@@ -2145,7 +2258,7 @@ Attempting to define an
 named
 .Sy ALL
 will result in a syntax error.
-Please note that using
+Using
 .Sy ALL
 can be dangerous since in a command context, it allows the user to run
 .Em any
@@ -2392,7 +2505,6 @@ will use the value of the
 or
 .Ev EDITOR
 environment variables before falling back on the default editor list.
-Note that
 .Nm visudo
 is typically run as root so this flag may allow a user with
 .Nm visudo
@@ -2492,7 +2604,7 @@ to use the
 function, which does not access the file system to do its matching.
 The disadvantage of
 .Em fast_glob
-is that it is unable to match relative path names such as
+is that it is unable to match relative paths such as
 .Pa ./ls
 or
 .Pa ../bin/ls .
@@ -2507,6 +2619,42 @@ characters.
 This flag is
 .Em off
 by default.
+.It log_passwords
+Most programs that require a user's password will disable echo before
+reading the password to avoid displaying the plaintext password on
+the screen.
+However, if terminal input is being logged (see
+.Em log_input ) ,
+the password will still be present in the I/O log.
+If the
+.Em log_passwords
+option is disabled,
+.Nm
+will attempt to prevent passwords from being logged.
+It does this by using the regular expressions in
+.Em passprompt_regex
+to match a password prompt in the terminal output buffer.
+When a match is found, input characters in the I/O log will be replaced with
+.Ql *
+until either a line feed or carriage return is found in the terminal input
+or a new terminal output buffer is received.
+If, however, a program displays characters as the user types
+(such as
+.Nm sudo
+when
+.Em pwfeedback
+is set), only the
+first character of the password will be replaced in the I/O log.
+This option has no effect unless
+.Em log_input
+and
+.Em log_input
+are also set.
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.9.10 or higher.
 .It fqdn
 Set this flag if you want to put fully qualified host names in the
 .Em sudoers
@@ -2564,7 +2712,7 @@ to make DNS lookups which renders
 .Nm sudo
 unusable if DNS stops working (for example if the machine is disconnected
 from the network).
-Also note that just like with the hosts file, you must use the
+Just like with the hosts file, you must use the
 .Dq canonical
 name as DNS knows it.
 That is, you may not use a host alias
@@ -2917,7 +3065,7 @@ must look up any group name listed in the
 file and use the group-ID instead of the group name when determining
 whether the user is a member of the group.
 .Pp
-Note that if
+If
 .Em match_group_by_gid
 is enabled, group database lookups performed by
 .Nm
@@ -3027,6 +3175,22 @@ section at the end of this manual.
 This flag is
 .Em off
 by default.
+.It noninteractive_auth
+If set, authentication will be attempted even in non-interactive mode
+(when
+.Nm sudo Ns 's
+.Fl n
+option is specified).
+This allows authentication methods that don't require user interaction
+to succeed.
+Authentication methods that require input from the user's terminal
+will still fail.
+If disabled, authentication will not be attempted in non-interactive mode.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.9.10 or higher.
 .It pam_acct_mgmt
 On systems that use PAM for authentication,
 .Nm sudo
@@ -3183,7 +3347,7 @@ When
 is set,
 .Nm sudo
 will provide visual feedback when the user presses a key.
-Note that this does have a security impact as an onlooker may be able to
+This does have a security impact as an onlooker may be able to
 determine the length of the password being entered.
 This flag is
 .Em off
@@ -3320,9 +3484,9 @@ However, since some programs (including the RCS revision control system) use
 to determine the real identity of the user, it may be desirable to
 change this behavior.
 This can be done by negating the set_logname option.
-Note that
+The
 .Em set_logname
-will have no effect
+option will have no effect
 if the
 .Em env_reset
 option has not been disabled and the
@@ -3462,7 +3626,7 @@ option (defaults to
 .Li root )
 instead of the password of the invoking user
 when running a command or editing a file.
-Note that this flag precludes the use of a user-ID not listed in the passwd
+This flag precludes the use of a user-ID not listed in the passwd
 database as an argument to the
 .Fl u
 option.
@@ -3707,7 +3871,7 @@ default is
 .It timestamp_timeout
 Number of minutes that can elapse before
 .Nm sudo
-will ask for a passwd again.
+will ask for a password again.
 The timeout may include a fractional component if
 minute granularity is insufficient, for example
 .Li 2.5 .
@@ -3872,7 +4036,6 @@ options are enabled or when the
 or
 .Li LOG_OUTPUT
 tags are present for a command.
-Note that
 .Em iolog_file
 may contain directory components.
 The default is
@@ -4170,7 +4333,7 @@ This defaults to
 .It sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
 sending email.
-Note that changing the locale may affect how sudoers is interpreted.
+Changing the locale may affect how sudoers is interpreted.
 Defaults to
 .Dq Li C .
 .It timestamp_type
@@ -4322,7 +4485,6 @@ The default value is
 This avoids a time of check versus time of use race condition when
 the command is located in a directory writable by the invoking user.
 .Pp
-Note that
 .Em fdexec
 will change the first element of the argument vector for scripts
 ($0 in the shell) due to the way the kernel runs script interpreters.
@@ -4469,7 +4631,9 @@ Flags to use when invoking mailer.
 Defaults to
 .Fl t .
 .It mailerpath
-Path to mail program used to send warning mail.
+Path to mail program used to send warning mail (negate to prevent
+.Nm sudo
+from sending mail).
 Defaults to the path to sendmail found at configure time.
 .It mailfrom
 Address to use for the
@@ -4485,7 +4649,9 @@ sign.
 Defaults to the name of the user running
 .Nm sudo .
 .It mailto
-Address to send warning and error mail to.
+Address to send warning and error mail to (negate to prevent
+.Nm sudo
+from sending mail).
 The address should be enclosed in double quotes
 .Pq \&""
 to protect against
@@ -4816,8 +4982,8 @@ The global list of environment variables to remove is displayed when
 is run by root with the
 .Fl V
 option.
-Note that many operating systems will remove potentially dangerous
-variables from the environment of any set-user-ID process (such as
+Many operating systems will remove potentially dangerous variables
+from the environment of any set-user-ID process (such as
 .Nm sudo ) .
 .It env_keep
 Environment variables to be preserved in the user's environment when the
@@ -4908,6 +5074,20 @@ flag (I/O logging enabled) or the
 flag (I/O logging disabled) is set.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
+.It passprompt_regex
+A list of POSIX extended regular expressions used to
+match password prompts in the terminal output.
+As an extension, if the regular expression begins with
+.Dq (?i) ,
+it will be matched in a case-insensitive manner.
+Each regular expression is limited to 1024 characters.
+This option is only used when
+.Em log_passwords
+has been disabled.
+The default value is
+.Dq [Pp]assword[: ]*
+.Pp
+This setting is only supported by version 1.9.10 or higher.
 .El
 .Sh GROUP PROVIDER PLUGINS
 The
@@ -5154,7 +5334,7 @@ The
 file has the wrong owner.
 If you wish to change the
 .Em sudoers
-file owner, please add
+file owner, add
 .Dq sudoers_uid=N
 (where
 .Sq N
@@ -5188,7 +5368,7 @@ The
 file has the wrong group ownership.
 If you wish to change the
 .Em sudoers
-file group ownership, please add
+file group ownership, add
 .Dq sudoers_gid=N
 (where
 .Sq N
@@ -5259,7 +5439,7 @@ If the
 option is set,
 .Nm
 will log to a local file, such as
-.Pa /var/log/sudo .
+.Pa @log_dir@/sudo .
 When logging to a file,
 .Nm
 uses a format similar to
@@ -5438,8 +5618,7 @@ The standard input when no terminal is present, or input redirected from
 a pipe or file.
 .It Pa ttyout
 Output from the pseudo-terminal (what the command writes to the screen).
-Note that terminal-specific post-processing is performed before the
-data is logged.
+Terminal-specific post-processing is performed before the data is logged.
 This means that, for example, line feeds are usually converted to
 line feed/carriage return pairs and tabs may be expanded to spaces.
 .It Pa stdout
@@ -5467,9 +5646,9 @@ The output portion of an I/O log file can be viewed with the
 .Xr sudoreplay @mansectsu@
 utility, which can also be used to list or search the available logs.
 .Pp
-Note that user input may contain sensitive information such as
-passwords (even if they are not echoed to the screen), which will
-be stored in the log file unencrypted.
+User input may contain sensitive information such as passwords (even
+if they are not echoed to the screen), which will be stored in the
+log file unencrypted.
 In most cases, logging the command output via
 .Em log_output
 or
@@ -5521,8 +5700,8 @@ First, we allow a few environment variables to pass and then define our
 .Em aliases :
 .Bd -literal
 # Run X applications through sudo; HOME is used to find the
-# .Xauthority file.  Note that other programs use HOME to find
-# configuration files and this may lead to privilege escalation!
+# .Xauthority file.  Other programs use HOME to locate configuration
+# files and this may lead to privilege escalation!
 Defaults env_keep += "DISPLAY HOME"
 
 # User alias specification
@@ -5599,7 +5778,7 @@ Lastly, we disable shell escapes for the commands in the PAGERS
 and
 .Pa /usr/bin/less
 .Pc .
-Note that this will not effectively constrain users with
+This will not effectively constrain users with
 .Nm sudo
 .Sy ALL
 privileges.
@@ -5609,7 +5788,7 @@ Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
 Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
-Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
+Defaults@SERVERS	log_year, logfile=@log_dir@/sudo.log
 Defaults!PAGERS		noexec
 .Ed
 .Pp
@@ -5692,7 +5871,7 @@ Here, those are commands related to backups, killing processes, the
 printing system, shutting down the system, and any commands in the
 directory
 .Pa /usr/oper/bin/ .
-Note that one command in the
+One command in the
 .Li DUMPS
 Cmnd_Alias includes a sha224 digest,
 .Pa /home/operator/bin/start_backups .
@@ -5745,7 +5924,9 @@ words.
 This example assumes that
 .Xr passwd 1
 does not take multiple user names on the command line.
-Note that on GNU systems, options to
+On systems with GNU
+.Xr getopt 3 ,
+options to
 .Xr passwd 1
 may be specified after the user argument.
 As a result, this rule will also allow:
@@ -5956,6 +6137,72 @@ is enabled by changing to
 and running
 .Li ./passwd root
 instead.
+.Pp
+Another potential issue is that when
+.Nm sudo
+executes the command, it must use the command or path specified by
+the user instead of a path listed in the
+.Em sudoers
+file.
+This may lead to a time of check versus time of use race condition.
+.Ss Wildcards in command arguments
+Command line arguments are matched as a single, concatenated string.
+This mean a wildcard character such as
+.Ql \&?
+or
+.Ql *
+will match across word boundaries, which may be unexpected.
+For example, while a sudoers entry like:
+.Bd -literal -offset 4n
+%operator ALL = /bin/cat @log_dir@/messages*
+.Ed
+.Pp
+will allow command like:
+.Bd -literal -offset 4n
+$ sudo cat @log_dir@/messages.1
+.Ed
+.Pp
+It will also allow:
+.Bd -literal -offset 4n
+$ sudo cat @log_dir@/messages /etc/shadow
+.Ed
+.Pp
+which is probably not what was intended.
+A safer alternative is to use a regular expression for matching
+command line arguments.
+The above example can be rewritten as a regular expression:
+.Bd -literal -offset 4n
+%operator ALL = /bin/cat ^@log_dir@/messages[^[:space:]]*$
+.Ed
+.Pp
+The regular expression will only match a single file with a
+name that begins with
+.Pa @log_dir@/messages
+and does not include any white space in the name.
+It is often better to do command line processing outside of the
+.Em sudoers
+file in a scripting language for anything non-trivial.
+.Ss Regular expressions in command names
+Using a regular expression to match a command name has the same
+security implications as using the
+.Em fast_glob
+option:
+.Bl -bullet -width 1n
+.It
+It is not possible to reliably negate commands when the
+path name is a regular expression.
+.It
+When
+.Nm sudo
+executes the command, it must use the command or path specified by
+the user instead of a path listed in the
+.Em sudoers
+file.
+This may lead to a time of check versus time of use race condition.
+.El
+.Pp
+These issues do not apply to rules where only the command line
+options are matched using a regular expression.
 .Ss Preventing shell escapes
 Once
 .Nm sudo
@@ -6157,7 +6404,7 @@ you can always just try it out and check whether shell escapes work when
 is enabled.
 .El
 .Pp
-Note that restricting shell escapes is not a panacea.
+Restricting shell escapes is not a panacea.
 Programs running as root are still capable of many potentially hazardous
 operations (such as changing or overwriting files) that could lead
 to unintended privilege escalation.
@@ -6195,15 +6442,15 @@ option in
 .Pp
 For example, to allow user operator to edit the
 .Dq message of the day
-file:
-.Bd -literal -offset indent
-operator	sudoedit /etc/motd
+file on any machine:
+.Bd -literal -offset 4n
+operator ALL = sudoedit /etc/motd
 .Ed
 .Pp
 The operator user then runs
 .Nm sudoedit
 as follows:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 $ sudoedit /etc/motd
 .Ed
 .Pp
@@ -6408,7 +6655,7 @@ utility functions
 .Pp
 For example:
 .Bd -literal
-Debug sudoers.so /var/log/sudoers_debug match@info,nss@info
+Debug sudoers.so @log_dir@/sudoers_debug match@info,nss@info
 .Ed
 .Pp
 For more information, see the
@@ -6435,9 +6682,9 @@ over the years; this version consists of code written primarily by:
 .An Todd C. Miller
 .Ed
 .Pp
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 .Nm sudo
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh CAVEATS
@@ -6475,9 +6722,9 @@ command or use the
 option in
 .Em sudoers .
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm sudo ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -6489,6 +6736,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 .Nm sudo
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

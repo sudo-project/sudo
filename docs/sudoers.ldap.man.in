@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "January 27, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -168,9 +168,9 @@ with the
 option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
-Note that
+Unlike other commands,
 \(lq\fRsudoedit\fR\(rq
-is a command built into
+is a built into
 \fBsudo\fR
 itself and must be specified in without a leading path.
 .sp
@@ -288,7 +288,7 @@ will be valid.
 If multiple
 \fRsudoNotBefore\fR
 entries are present, the earliest is used.
-Note that timestamps must be in Coordinated Universal Time (UTC),
+Timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
 The minute and seconds portions are optional, but some LDAP servers
 require that they be present (contrary to the RFC).
@@ -311,7 +311,7 @@ will no longer be valid.
 If multiple
 \fRsudoNotAfter\fR
 entries are present, the last one is used.
-Note that timestamps must be in Coordinated Universal Time (UTC),
+Timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
 The minute and seconds portions are optional, but some LDAP servers
 require that they be present (contrary to the RFC).
@@ -671,10 +671,10 @@ file for LDAP-specific configuration.
 Typically, this file is shared between different LDAP-aware clients.
 As such, most of the settings are not
 \fBsudo\fR-specific.
-Note that
-\fBsudo\fR
-parses
+The
 \fI@ldap_conf@\fR
+file is parsed by
+\fBsudo\fR
 itself and may support options that differ from those described in the
 system's
 ldap.conf(@mansectform@)
@@ -686,8 +686,7 @@ may be overridden via the
 plugin argument in
 sudo.conf(@mansectform@).
 .PP
-Also note that on systems using the OpenLDAP libraries, default
-values specified in
+On systems using the OpenLDAP libraries, default values specified in
 \fI/etc/openldap/ldap.conf\fR
 or the user's
 \fI.ldaprc\fR
@@ -1089,7 +1088,7 @@ will be unable to connect to it.
 If
 \fBTLS_CHECKPEER\fR
 is disabled, no check is made.
-Note that disabling the check creates an opportunity for man-in-the-middle
+Disabling this check creates an opportunity for man-in-the-middle
 attacks since the server's identity will not be authenticated.
 If possible, the CA's certificate should be installed locally so it can
 be verified.
@@ -1300,7 +1299,7 @@ search order.
 Sudo looks for a line beginning with
 \fRsudoers\fR:
 and uses this to determine the search order.
-Note that by default,
+By default,
 \fBsudo\fR
 does not stop searching after the first match and later matches take
 precedence over earlier ones (unless
@@ -1375,10 +1374,10 @@ sudoers: files
 .RE
 .fi
 .PP
-Note that
+The
 \fI@nsswitch_conf@\fR
-is supported even when the underlying operating system does not use
-an nsswitch.conf file, except on AIX (see below).
+file is supported even when the underlying operating system does not
+support it, except on AIX (see below).
 .SS "Configuring netsvc.conf"
 On AIX systems, the
 \fI@netsvc_conf@\fR
@@ -1420,7 +1419,7 @@ sudoers = ldap = auth, files
 .RE
 .fi
 .PP
-Note that in the above example, the
+In the above example, the
 \fRauth\fR
 qualifier only affects user lookups; both LDAP and
 \fIsudoers\fR
@@ -1455,12 +1454,12 @@ instead of
 \fRldap\fR
 for the sudoers entry in
 \fI@nsswitch_conf@\fR.
-Note that the
+The
 \fI@ldap_conf@\fR
 file is not used by the SSSD
 \fBsudo\fR
 back end.
-Please see
+See
 sssd-sudo(@mansectform@)
 for more information on configuring
 \fBsudo\fR
@@ -1697,13 +1696,13 @@ over the years; this version consists of code written primarily by:
 Todd C. Miller
 .RE
 .PP
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 \fBsudo\fR
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "CAVEATS"
-Note that there are differences in the way that LDAP-based
+There are differences in the way that LDAP-based
 \fIsudoers\fR
 is parsed compared to file-based
 \fIsudoers\fR.
@@ -1711,9 +1710,9 @@ See the
 \fIDifferences between LDAP and non-LDAP sudoers\fR
 section for more information.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBsudo\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -1725,6 +1724,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 \fBsudo\fR
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

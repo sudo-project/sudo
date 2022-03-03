@@ -24,15 +24,19 @@ listen_address = *:30344(tls)
 # The file containing the ID of the running sudo_logsrvd process.
 pid_file = /var/run/sudo/sudo_logsrvd.pid
 
+# Where to log server warnings: none, stderr, syslog, or a path name.
+server_log = syslog
+
 # If true, enable the SO_KEEPALIVE socket option on client connections.
+# Defaults to true.
 tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the client to
 # respond.  A value of 0 will disable the timeout.  The default value is 30.
 timeout = 30
 
-# If true, the server certificate will be verified at startup and clients
-# will authenticate the server by verifying its certificate and identity.
+# If true, the server will validate its own certificate at startup.
+# Defaults to true.
 tls_verify = true
 
 # If true, client certificates will be validated by the server;
@@ -73,6 +77,7 @@ tls_dhparams = /etc/ssl/sudo/logsrvd_dhparams.pem
 # be relayed to the specified host instead of being stored locally.
 # This setting is not enabled by default.
 #relay_host = relayhost.dom.ain
+#relay_host = relayhost.dom.ain(tls)
 relay_host = localhost(tls)
 
 # The amount of time, in seconds, the server will wait for a connection
@@ -80,7 +85,23 @@ relay_host = localhost(tls)
 # The default value is 30.
 connect_timeout = 30
 
+# The directory to store messages in before they are sent to the relay.
+# Messages are stored in wire format.
+# The default value is /var/log/sudo_logsrvd.
+relay_dir = /var/log/sudo_logsrvd
+
+# The number of seconds to wait after a connection error before
+# making a new attempt to forward a message to a relay host.
+# The default value is 30.
+retry_interval = 30
+
+# Whether to store the log before relaying it.  If true, enable store
+# and forward mode.  If false, the client connection is immediately
+# relayed.  Defaults to false.
+#store_first = true
+
 # If true, enable the SO_KEEPALIVE socket option on relay connections.
+# Defaults to true.
 tcp_keepalive = true
 
 # The amount of time, in seconds, the server will wait for the relay to
@@ -159,6 +180,10 @@ iolog_user = root
 # specified by iolog_mode.
 iolog_mode = 0600
 
+# If disabled, sudo_logsrvd will attempt to avoid logging plaintext
+# password in the terminal input using passprompt_regex.
+log_passwords = true
+
 # The maximum sequence number that will be substituted for the "%{seq}"
 # escape in the I/O log file.  While the value substituted for "%{seq}"
 # is in base 36, maxseq itself should be expressed in decimal.  Values
@@ -166,11 +191,22 @@ iolog_mode = 0600
 # number "ZZZZZZ") will be silently truncated to 2176782336.
 maxseq = 2176782336
 
+# One or more POSIX extended regular expressions used to match
+# password prompts in the terminal output when log_passwords is
+# disabled.  Multiple passprompt_regex settings may be specified.
+#passprompt_regex = [Pp]assword[: ]*
+#passprompt_regex = [Pp]assword for [a-z0-9]+: *
+passprompt_regex = [Pp]assword[: ]*
+
 [eventlog]
-# Where to log accept, reject and alert events.
+# Where to log accept, reject, exit, and alert events.
 # Accepted values are syslog, logfile, or none.
 # Defaults to syslog
 log_type = syslog
+
+# Whether to log an event when a command exits or is terminated by a signal.
+# Defaults to false
+log_exit = true
 
 # Event log format.
 # Supported log formats are "sudo" and "json"
@@ -203,6 +239,10 @@ reject_priority = alert
 # Syslog priority to use for event log alert messages reported by the
 # client.
 alert_priority = high
+
+# The syslog facility to use for server warning messages.
+# Defaults to daemon.
+server_facility = daemon
 
 [logfile]
 # The path to the file-based event log.

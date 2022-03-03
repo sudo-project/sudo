@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2008-2020
+ * Copyright (c) 1999-2005, 2008-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -66,7 +66,7 @@ struct sudo_defs_types {
     int type;
     char *desc;
     struct def_values *values;
-    bool (*callback)(const union sudo_defs_val *);
+    bool (*callback)(const union sudo_defs_val *, int op);
     union sudo_defs_val sd_un;
 };
 
@@ -115,6 +115,8 @@ struct early_default {
 #define T_PATH		0x200
 #undef T_CHPATH
 #define T_CHPATH	0x400
+#undef T_SPACE
+#define T_SPACE		0x800
 
 /*
  * Argument to update_defaults()
@@ -137,6 +139,7 @@ bool set_default(const char *var, const char *val, int op, const char *file, int
 bool update_defaults(struct sudoers_parse_tree *parse_tree, struct defaults_list *defs, int what, bool quiet);
 bool check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet);
 bool append_default(const char *var, const char *val, int op, char *source, struct defaults_list *defs);
+bool cb_passprompt_regex(const union sudo_defs_val *sd_un, int op);
 
 extern struct sudo_defs_types sudo_defs_table[];
 

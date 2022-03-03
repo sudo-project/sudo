@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 17, 2021
+.Dd February 16, 2022
 .Dt SUDO_SENDLOG @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -146,7 +146,7 @@ file.
 .Pp
 For more information on configuring
 .Xr sudo.conf @mansectform@ ,
-please refer to its manual.
+refer to its manual.
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
@@ -164,15 +164,15 @@ over the years; this version consists of code written primarily by:
 .An Todd C. Miller
 .Ed
 .Pp
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 .Nm sudo
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -184,6 +184,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 .Nm sudo
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

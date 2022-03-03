@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1033,7 +1033,7 @@ done:
  * Returns true if the user has already been lectured.
  */
 bool
-already_lectured(int unused)
+already_lectured(void)
 {
     char status_file[PATH_MAX];
     struct stat sb;

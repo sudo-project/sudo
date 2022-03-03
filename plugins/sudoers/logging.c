@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -155,6 +155,7 @@ log_server_reject(struct eventlog *evlog, const char *message,
 	    false, SEND_REJECT, message, event_alloc);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
+	    client_closure = NULL;
 	    ret = true;
 	}
 
@@ -188,8 +189,10 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
 
     if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
 	/* Older servers don't support multiple commands per session. */
-	if (!client_closure->subcommands)
-	    debug_return_bool(true);
+	if (!client_closure->subcommands) {
+            ret = true;
+	    goto done;
+	}
 
 	/* Use existing client closure. */
         if (fmt_reject_message(client_closure, evlog)) {
@@ -209,6 +212,7 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
 	    SEND_ALERT, emessage ? emessage : message, event_alloc);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
+	    client_closure = NULL;
 	    ret = true;
 	}
 
@@ -309,11 +313,10 @@ log_denial(int status, bool inform_user)
 
 	if (ISSET(status, FLAG_NO_USER)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not in the sudoers "
-		"file.  This incident will be reported.\n"), user_name);
+		"file.\n"), user_name);
 	} else if (ISSET(status, FLAG_NO_HOST)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not allowed to run sudo "
-		"on %s.  This incident will be reported.\n"),
-		user_name, user_srunhost);
+		"on %s.\n"), user_name, user_srunhost);
 	} else if (ISSET(status, FLAG_NO_CHECK)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s may not run "
 		"sudo on %s.\n"), user_name, user_srunhost);
@@ -325,6 +328,10 @@ log_denial(int status, bool inform_user)
 		list_pw ? list_pw->pw_name : runas_pw ?
 		runas_pw->pw_name : user_name, runas_gr ? ":" : "",
 		runas_gr ? runas_gr->gr_name : "", user_host);
+	}
+	if (mailit) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s",
+		_("This incident has been reported to the administrator.\n"));
 	}
 	sudoers_setlocale(oldlocale, NULL);
     }
@@ -367,55 +374,90 @@ log_failure(int status, int flags)
  * Format an authentication failure message, using either
  * authfail_message from sudoers or a locale-specific message.
  */
-static int
-fmt_authfail_message(char **str, unsigned int tries)
+static char *
+fmt_authfail_message(unsigned int tries)
 {
-    char *src, *dst0, *dst, *dst_end;
-    size_t size;
-    int len;
+    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+    char *dst, *dst_end, *ret = NULL;
+    const char *src;
+    size_t len;
     debug_decl(fmt_authfail_message, SUDOERS_DEBUG_LOGGING);
 
     if (def_authfail_message == NULL) {
-	debug_return_int(asprintf(str, ngettext("%u incorrect password attempt",
-	    "%u incorrect password attempts", tries), tries));
+	if (asprintf(&ret, ngettext("%u incorrect password attempt",
+		"%u incorrect password attempts", tries), tries) == -1)
+	    goto oom;
+	debug_return_ptr(ret);
     }
 
-    src = def_authfail_message;
-    size = strlen(src) + 33;
-    if ((dst0 = dst = malloc(size)) == NULL)
-	debug_return_int(-1);
-    dst_end = dst + size;
+    len = snprintf(numbuf, sizeof(numbuf), "%u", tries);
+    if (len >= sizeof(numbuf))
+	goto overflow;
 
-    /* Always leave space for the terminating NUL. */
-    while (*src != '\0' && dst + 1 < dst_end) {
+    src = def_authfail_message;
+    len = strlen(src) + 1;
+    while (*src != '\0') {
+	if (src[0] == '%') {
+	    switch (src[1]) {
+	    case '%':
+		len--;
+		src++;
+		break;
+	    case 'd':
+		len -= 2;
+		len += strlen(numbuf);
+		src++;
+		break;
+	    default:
+		/* pass through as-is */
+		break;
+	    }
+	}
+	src++;
+    }
+
+    if ((ret = malloc(len)) == NULL)
+	goto oom;
+    dst = ret;
+    dst_end = ret + len;
+
+    src = def_authfail_message;
+    while (*src != '\0') {
+	/* Always leave space for the terminating NUL. */
+	if (dst + 1 >= dst_end)
+	    goto overflow;
 	if (src[0] == '%') {
 	    switch (src[1]) {
 	    case '%':
 		src++;
 		break;
 	    case 'd':
-		len = snprintf(dst, dst_end - dst, "%u", tries);
-		if (len < 0 || len >= (int)(dst_end - dst))
-		    goto done;
+		len = strlcpy(dst, numbuf, dst_end - dst);
+		if (len >= (size_t)(dst_end - dst))
+		    goto overflow;
 		dst += len;
 		src += 2;
 		continue;
 	    default:
+		/* pass through as-is */
 		break;
 	    }
 	}
 	*dst++ = *src++;
     }
-done:
     *dst = '\0';
 
-    *str = dst0;
-#ifdef __clang_analyzer__
-    /* clang analyzer false positive */
-    if (__builtin_expect(dst < dst0, 0))
-	__builtin_trap();
-#endif
-    debug_return_int(dst - dst0);
+    debug_return_ptr(ret);
+
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_ptr(NULL);
+
+overflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    free(ret);
+    errno = ERANGE;
+    debug_return_ptr(NULL);
 }
 
 /*
@@ -463,9 +505,8 @@ log_auth_failure(int status, unsigned int tries)
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
 	if (ISSET(status, FLAG_BAD_PASSWORD)) {
-	    if (fmt_authfail_message(&message, tries) == -1) {
-		sudo_warnx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
+	    message = fmt_authfail_message(tries);
+	    if (message == NULL) {
 		ret = false;
 	    } else {
 		ret = log_reject(message, logit, mailit);
@@ -483,9 +524,8 @@ log_auth_failure(int status, unsigned int tries)
     sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 
     if (ISSET(status, FLAG_BAD_PASSWORD)) {
-	if (fmt_authfail_message(&message, tries) == -1) {
-	    sudo_warnx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
+	message = fmt_authfail_message(tries);
+	if (message == NULL) {
 	    ret = false;
 	} else {
 	    sudo_warnx("%s", message);
@@ -736,6 +776,9 @@ static bool
 should_mail(int status)
 {
     debug_decl(should_mail, SUDOERS_DEBUG_LOGGING);
+
+    if (!def_mailto || !def_mailerpath || access(def_mailerpath, X_OK) == -1)
+	debug_return_bool(false);
 
     debug_return_bool(def_mail_always || ISSET(status, VALIDATE_ERROR) ||
 	(def_mail_all_cmnds && ISSET(sudo_mode, (MODE_RUN|MODE_EDIT))) ||

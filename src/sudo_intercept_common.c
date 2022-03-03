@@ -448,6 +448,7 @@ oom:
     free(ncmnd);
     while (len > 0)
 	free(nargv[--len]);
+    free(nargv);
 
 done:
     /* Keep socket open for ctor when we execute the command. */

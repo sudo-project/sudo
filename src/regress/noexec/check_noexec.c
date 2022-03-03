@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2016, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,7 +41,10 @@
 #include "sudo_util.h"
 #include "sudo_exec.h"
 
+static bool verbose;
+
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
+static void usage(void) __attribute__((__noreturn__));
 
 static bool
 report_status(int status, const char *what)
@@ -50,7 +53,8 @@ report_status(int status, const char *what)
 
     /* system() returns -1 for exec failure. */
     if (status == -1) {
-	printf("%s: OK (%s)\n", getprogname(), what);
+	if (verbose)
+	    printf("%s: OK (%s)\n", getprogname(), what);
 	return true;
     }
 
@@ -58,7 +62,8 @@ report_status(int status, const char *what)
     if (WIFEXITED(status)) {
 	int exitval = WEXITSTATUS(status);
 	if (exitval == 127) {
-	    printf("%s: OK (%s)\n", getprogname(), what);
+	    if (verbose)
+		printf("%s: OK (%s)\n", getprogname(), what);
 	    ret = true;
 	} else {
 	    printf("%s: FAIL (%s) [%d]\n", getprogname(), what, exitval);
@@ -137,16 +142,19 @@ try_wordexp(void)
     case WRDE_ERRNO:
 	/* Solaris 11 wordexp() returns WRDE_ERRNO for execve() failure. */
 #endif
-	printf("%s: OK (wordexp) [%d]\n", getprogname(), rc);
+	if (verbose)
+	    printf("%s: OK (wordexp) [%d]\n", getprogname(), rc);
 	ret = 0;
 	break;
     case WRDE_SYNTAX:
 	/* FreeBSD returns WRDE_SYNTAX if it can't write to the shell process */
-	printf("%s: OK (wordexp) [WRDE_SYNTAX]\n", getprogname());
+	if (verbose)
+	    printf("%s: OK (wordexp) [WRDE_SYNTAX]\n", getprogname());
 	ret = 0;
 	break;
     case WRDE_CMDSUB:
-	printf("%s: OK (wordexp) [WRDE_CMDSUB]\n", getprogname());
+	if (verbose)
+	    printf("%s: OK (wordexp) [WRDE_CMDSUB]\n", getprogname());
 	ret = 0;
 	break;
     case 0:
@@ -155,7 +163,8 @@ try_wordexp(void)
 	 * but the execve() wrapper prevents the command substitution.
 	 */
 	if (we.we_wordc == 0) {
-	    printf("%s: OK (wordexp) [%d]\n", getprogname(), rc);
+	    if (verbose)
+		printf("%s: OK (wordexp) [%d]\n", getprogname(), rc);
 	    wordfree(&we);
 	    ret = 0;
 	    break;
@@ -170,31 +179,54 @@ try_wordexp(void)
 }
 #endif
 
+static void
+usage(void)
+{
+    fprintf(stderr, "usage: %s [-v] rexec | /path/to/sudo_noexec.so\n",
+	getprogname());
+    exit(EXIT_FAILURE);
+}
+
 int
 main(int argc, char *argv[], char *envp[])
 {
-    int errors = 0;
+    int ch, errors = 0, ntests = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_noexec");
 
-    if (argc != 2) {
-	fprintf(stderr, "usage: %s regress | /path/to/sudo_noexec.so\n", getprogname());
-	exit(EXIT_FAILURE);
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    verbose = true;
+	    break;
+	default:
+	    usage();
+	}
     }
 
+    if (argc - optind != 1)
+	usage();
+
     /* Disable execution for post-exec and re-exec ourself. */
-    if (strcmp(argv[1], "rexec") != 0) {
-	const char *noexec = argv[1];
-	argv[1] = "rexec";
+    if (strcmp(argv[optind], "rexec") != 0) {
+	const char *noexec = argv[optind];
+	argv[optind] = "rexec";
 	execve(argv[0], argv, disable_execute(envp, noexec));
 	sudo_fatalx_nodebug("execve");
     }
 
+    ntests++;
     errors += try_execl();
+    ntests++;
     errors += try_system();
 #ifdef HAVE_WORDEXP_H
+    ntests++;
     errors += try_wordexp();
 #endif
 
+    if (ntests != 0) {
+        printf("%s: %d tests run, %d errors, %d%% success rate\n",
+            getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
+    }
     return errors;
 }

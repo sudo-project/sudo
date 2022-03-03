@@ -37,6 +37,13 @@ sudo_dso_public int main(int argc, char *argv[]);
 # define GROUP_SOURCE_ADAPTIVE GROUP_SOURCE_DYNAMIC
 #endif
 
+static void
+usage(void)
+{
+    fprintf(stderr, "usage: %s [-v] conf_file\n", getprogname());
+    exit(EXIT_FAILURE);
+}
+
 /*
  * Simple test driver for sudo_conf().
  * Parses the given configuration file and dumps the resulting
@@ -45,17 +52,31 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
+    int ch;
+
     initprogname(argc > 0 ? argv[0] : "conf_test");
-    if (argc != 2) {
-	fprintf(stderr, "usage: %s conf_file\n", getprogname());
-	exit(EXIT_FAILURE);
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    usage();
+	}
     }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1)
+	usage();
+
     sudo_conf_clear_paths();
-    if (sudo_conf_read(argv[1], SUDO_CONF_ALL) == -1)
-	exit(EXIT_FAILURE);
+    if (sudo_conf_read(argv[0], SUDO_CONF_ALL) == -1)
+	return EXIT_FAILURE;
     sudo_conf_dump();
 
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
 
 static void

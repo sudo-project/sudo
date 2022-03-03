@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 19, 2022
+.Dd February 16, 2022
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -45,7 +45,7 @@ are also ignored.
 Long lines can be continued with a backslash
 .Pq Ql \e
 as the last character on the line.
-Note that leading white space is removed from the beginning of lines
+Leading white space is removed from the beginning of lines
 even when the continuation character is used.
 .Pp
 The
@@ -123,7 +123,7 @@ Supported values are
 or a path name beginning with the
 .Ql /
 character.
-Note that a value of
+A value of
 .Em stderr
 is only effective when used in conjunction with the
 .Fl n
@@ -229,7 +229,7 @@ The default value is
 .Pa /etc/ssl/sudo/private/logsrvd_key.pem .
 .It tls_verify = bool
 If true,
-.Nm
+.Nm sudo_logsrvd
 will validate its own certificate at startup time or when the
 configuration is changed.
 If false, no verification is performed of the server certificate.
@@ -449,9 +449,9 @@ should be used.
 The path name, relative to
 .Em iolog_dir ,
 in which to store I/O logs.
-Note that
+It is possible for
 .Em iolog_file
-may contain directory components.
+to contain directory components.
 The default value is
 .Li %{seq} .
 .Pp
@@ -522,6 +522,34 @@ If
 is set, it will be used instead of the user's primary group-ID.
 By default, I/O log files and directories are created with user and
 group-ID 0.
+.It log_passwords = bool
+Most programs that require a user's password will disable echo before
+reading the password to avoid displaying the plaintext password on
+the screen.
+However, if terminal input is being logged,
+the password will still be present in the I/O log.
+If
+.Em log_passwords
+is set to
+.Li false ,
+.Nm sudo_logsrvd
+will attempt to prevent passwords from being logged.
+It does this by using the regular expressions in
+.Em passprompt_regex
+to match a password prompt in the terminal output buffer.
+When a match is found, input characters in the I/O log will be replaced with
+.Ql *
+until either a line feed or carriage return is found in the terminal input
+or a new terminal output buffer is received.
+If, however, a program displays characters as the user types them
+(such as
+.Nm sudo
+when the
+.Em pwfeedback
+option is set), only the
+first character of the password will be replaced in the I/O log.
+The default value is
+.Li true .
 .It maxseq = number
 The maximum sequence number that will be substituted for the
 .Dq Li %{seq}
@@ -538,6 +566,20 @@ base 36 sequence number
 .Dq ZZZZZZ )
 will be silently truncated to 2176782336.
 The default value is 2176782336.
+.It passprompt_regex = string
+One or more POSIX extended regular expressions used to
+match password prompts in the terminal output when
+.Em log_passwords
+is disabled.
+As an extension, if the regular expression begins with
+.Dq (?i) ,
+it will be matched in a case-insensitive manner.
+Multiple
+.Em passprompt_regex
+settings may be specified.
+Each regular expression is limited to 1024 characters.
+The default value is
+.Dq [Pp]assword[: ]* .
 .El
 .Ss eventlog
 The
@@ -754,9 +796,8 @@ Sudo log server configuration file
 #tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
 
 # TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
-# NOTE that this setting is only effective if the negotiated protocol
-# is TLS version 1.2.
-# The default cipher list is HIGH:!aNULL.
+# This setting is only effective if the negotiated protocol is TLS version
+# 1.2.  The default cipher list is HIGH:!aNULL.
 #tls_ciphers_v12 = HIGH:!aNULL
 
 # TLS cipher list if the negotiated protocol is TLS version 1.3.
@@ -783,8 +824,8 @@ Sudo log server configuration file
 
 # The directory to store messages in before they are sent to the relay.
 # Messages are stored in wire format.
-# The default value is /var/log/sudo_logsrvd.
-#relay_dir = /var/log/sudo_logsrvd
+# The default value is @relay_dir@.
+#relay_dir = @relay_dir@
 
 # The number of seconds to wait after a connection error before
 # making a new attempt to forward a message to a relay host.
@@ -826,9 +867,8 @@ Sudo log server configuration file
 #tls_key = /etc/ssl/sudo/private/logsrvd_key.pem
 
 # TLS cipher list (see "CIPHER LIST FORMAT" in the openssl-ciphers manual).
-# NOTE that this setting is only effective if the negotiated protocol
-# is TLS version 1.2.
-# The default is to use the value in the [server] section.
+# this setting is only effective if the negotiated protocol is TLS version
+# 1.2.  The default is to use the value in the [server] section.
 #tls_ciphers_v12 = HIGH:!aNULL
 
 # TLS cipher list if the negotiated protocol is TLS version 1.3.
@@ -842,10 +882,10 @@ Sudo log server configuration file
 [iolog]
 # The top-level directory to use when constructing the path name for the
 # I/O log directory.  The session sequence number, if any, is stored here.
-#iolog_dir = /var/log/sudo-io
+#iolog_dir = @iolog_dir@
 
 # The path name, relative to iolog_dir, in which to store I/O logs.
-# Note that iolog_file may contain directory components.
+# It is possible for iolog_file to contain directory components.
 #iolog_file = %{seq}
 
 # If set, I/O logs will be compressed using zlib.  Enabling compression can
@@ -876,12 +916,22 @@ Sudo log server configuration file
 # specified by iolog_mode.
 #iolog_mode = 0600
 
+# If disabled, sudo_logsrvd will attempt to avoid logging plaintext
+# password in the terminal input using passprompt_regex.
+#log_passwords = true
+
 # The maximum sequence number that will be substituted for the "%{seq}"
 # escape in the I/O log file.  While the value substituted for "%{seq}"
 # is in base 36, maxseq itself should be expressed in decimal.  Values
 # larger than 2176782336 (which corresponds to the base 36 sequence
 # number "ZZZZZZ") will be silently truncated to 2176782336.
 #maxseq = 2176782336
+
+# One or more POSIX extended regular expressions used to match
+# password prompts in the terminal output when log_passwords is
+# disabled.  Multiple passprompt_regex settings may be specified.
+#passprompt_regex = [Pp]assword[: ]*
+#passprompt_regex = [Pp]assword for [a-z0-9]+: *
 
 [eventlog]
 # Where to log accept, reject, exit, and alert events.
@@ -909,20 +959,20 @@ Sudo log server configuration file
 # The following syslog facilities are supported: authpriv (if your OS
 # supports it), auth, daemon, user, local0, local1, local2, local3,
 # local4, local5, local6, and local7.
-#facility = authpriv
+#facility = @logfac@
 
 # Syslog priority to use for event log accept messages, when the command
 # is allowed by the security policy.  The following syslog priorities are
 # supported: alert, crit, debug, emerg, err, info, notice, warning, none.
-#accept_priority = notice
+#accept_priority = @goodpri@
 
 # Syslog priority to use for event log reject messages, when the command
 # is not allowed by the security policy.
-#reject_priority = alert
+#reject_priority = @badpri@
 
 # Syslog priority to use for event log alert messages reported by the
 # client.
-#alert_priority = alert
+#alert_priority = @badpri@
 
 # The syslog facility to use for server warning messages.
 # Defaults to daemon.
@@ -931,7 +981,7 @@ Sudo log server configuration file
 [logfile]
 # The path to the file-based event log.
 # This path must be fully-qualified and start with a '/' character.
-#path = /var/log/sudo
+#path = @logpath@
 
 # The format string used when formatting the date and time for
 # file-based event logs.  Formatting is performed via strftime(3) so
@@ -944,11 +994,6 @@ Sudo log server configuration file
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@ ,
 .Xr sudo_logsrvd @mansectsu@
-.Sh HISTORY
-See the HISTORY file in the
-.Nm sudo
-distribution (https://www.sudo.ws/history.html) for a brief
-history of sudo.
 .Sh AUTHORS
 Many people have worked on
 .Nm sudo
@@ -957,15 +1002,15 @@ over the years; this version consists of code written primarily by:
 .An Todd C. Miller
 .Ed
 .Pp
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 .Nm sudo
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm sudo ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -977,6 +1022,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 .Nm sudo
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

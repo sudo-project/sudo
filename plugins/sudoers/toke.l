@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2021
+ * Copyright (c) 1996, 1998-2005, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -55,7 +55,7 @@
 
 int sudolineno;			/* current sudoers line number. */
 char *sudoers;			/* sudoers file being parsed. */
-char *sudoers_errstr;		/* description of last error from lexer. */
+const char *sudoers_errstr;	/* description of last error from lexer. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
@@ -102,6 +102,7 @@ HOSTNAME		[[:alnum:]_-]+
 WORD			([^#>!=:,\(\) \t\r\n\\\"]|\\[^\t\n])+
 ID			#-?[0-9]+
 PATH			\/(\\[\,:= \t#]|[^\,:=\\ \t\r\n#])+
+REGEX			\^([^#\r\n\$]|\\[#\$])*\$
 ENVAR			([^#!=, \t\r\n\\\"]|\\[^\r\n])([^#=, \t\r\n\\\"]|\\[^\r\n])*
 DEFVAR			[a-z_]+
 
@@ -112,6 +113,7 @@ DEFVAR			[a-z_]+
 
 %s	GOTDEFS
 %x	GOTCMND
+%x	GOTREGEX
 %x	STARTDEFS
 %x	INDEFS
 %x	INSTR
@@ -232,7 +234,7 @@ DEFVAR			[a-z_]+
 }
 
 <GOTCMND>{
-    \\[\*\?\[\]\!]	{
+    \\[\*\?\[\]\!^]	{
 			    /* quoted fnmatch glob char, pass verbatim */
 			    LEXTRACE("QUOTEDCHAR ");
 			    if (!fill_args(sudoerstext, 2, sawspace))
@@ -256,11 +258,67 @@ DEFVAR			[a-z_]+
 			}			/* end of command line args */
 
     [^#\\:, \t\r\n]+ 	{
-			    LEXTRACE("ARG ");
-			    if (!fill_args(sudoerstext, sudoersleng, sawspace))
-				yyterminate();
-			    sawspace = false;
+			    if (sudoerslval.command.args == NULL && sudoerstext[0] == '^') {
+				LEXTRACE("ARG REGEX ");
+				BEGIN GOTREGEX;
+				sudoersless(0);
+				yy_set_bol(0);
+			    } else {
+				LEXTRACE("ARG ");
+				if (!fill_args(sudoerstext, sudoersleng, sawspace))
+				    yyterminate();
+				sawspace = false;
+			    }
 			}			/* a command line arg */
+}
+
+<GOTREGEX>{
+    \\[^\r\n]		{
+			    /* quoted character, pass verbatim */
+			    LEXTRACE("QUOTEDCHAR ");
+			    if (!fill_args(sudoerstext, 2, false))
+				yyterminate();
+			}
+
+    [#\r\n]		{
+			    /* Let the parser attempt to recover. */
+			    sudoersless(0);
+			    yy_set_bol(0);
+			    BEGIN INITIAL;
+
+			    sudoers_errstr = N_("unterminated regular expression");
+			    LEXTRACE("ERROR ");
+			    return ERROR;
+			}			/* illegal inside regex */
+
+    \$			{
+			    if (!fill_args("$", 1, false))
+				yyterminate();
+			    BEGIN INITIAL;
+			    continued = false;
+			    if (sudoers_strict) {
+				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
+				    LEXTRACE("ERROR ");
+				    return ERROR;
+				}
+			    }
+			    return COMMAND;
+			}
+
+    [^#\\\r\n$]+ 	{
+			    if (continued) {
+				/* remove whitespace after line continuation */
+				while (isblank((unsigned char)*sudoerstext)) {
+				    sudoerstext++;
+				    sudoersleng--;
+				}
+				continued = false;
+			    }
+			    if (sudoersleng != 0) {
+				if (!fill_args(sudoerstext, sudoersleng, false))
+				    yyterminate();
+			    }
+			}
 }
 
 <WANTDIGEST>[[:xdigit:]]+ {
@@ -647,7 +705,7 @@ ALL {
 			    return ALIAS;
 			}
 
-<GOTDEFS>({PATH}|sudoedit) {
+<GOTDEFS>({PATH}|{REGEX}|sudoedit) {
 			    /* XXX - no way to specify digest for command */
 			    /* no command args allowed for Defaults!/path */
 			    if (!fill_cmnd(sudoerstext, sudoersleng))
@@ -712,6 +770,19 @@ sudoedit		{
 			    if (!fill_cmnd(sudoerstext, sudoersleng))
 				yyterminate();
 			}			/* a pathname */
+
+{REGEX}			{
+			    if (sudoers_strict) {
+				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
+				    LEXTRACE("ERROR ");
+				    return ERROR;
+				}
+			    }
+			    BEGIN GOTCMND;
+			    LEXTRACE("COMMAND ");
+			    if (!fill_cmnd(sudoerstext, sudoersleng))
+				yyterminate();
+			}			/* a regex */
 
 <INITIAL,GOTDEFS>\"	{
 			    LEXTRACE("BEGINSTR ");

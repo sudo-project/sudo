@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -537,7 +537,7 @@ of my-domain,dc=com, storing the result in
 \fIsudoers.ldif\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ cvtsudoers -b ou=SUDOers,dc=my-domain,dc=com -o sudoers.ldif \e
              /etc/sudoers
 .RE
@@ -549,7 +549,7 @@ to JSON format, storing the result in
 \fIsudoers.json\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ cvtsudoers -f json -o sudoers.json /etc/sudoers
 .RE
 .fi
@@ -562,7 +562,7 @@ on host
 \fIhastur\fR:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ cvtsudoers -f sudoers -m user=ambrose,host=hastur /etc/sudoers
 .RE
 .fi
@@ -571,7 +571,7 @@ Same as above, but expand aliases and prune out any non-matching
 users and hosts from the expanded entries.
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ cvtsudoers -ep -f sudoers -m user=ambrose,host=hastur /etc/sudoers
 .RE
 .fi
@@ -583,7 +583,7 @@ from LDIF to traditional
 format:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ cvtsudoers -i ldif -f sudoers -o sudoers.new sudoers.ldif
 .RE
 .fi
@@ -596,7 +596,7 @@ and
 \(lqplugh\(rq:
 .nf
 .sp
-.RS 6n
+.RS 4n
 $ cvtsudoers -f sudoers -o sudoers.merged sudoers \e
     xyzzy:sudoers.xyzzy plugh:sudoers.plugh
 .RE
@@ -614,15 +614,15 @@ over the years; this version consists of code written primarily by:
 Todd C. Miller
 .RE
 .PP
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 \fBsudo\fR
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBcvtsudoers\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -634,6 +634,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 \fBsudo\fR
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

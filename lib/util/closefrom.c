@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007, 2010, 2012-2015, 2017-2021
+ * Copyright (c) 2004-2005, 2007, 2010, 2012-2015, 2017-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -38,6 +38,9 @@
 #endif
 #ifdef HAVE_LIBPROC_H
 # include <libproc.h>
+#endif
+#ifdef HAVE_LINUX_CLOSE_RANGE_H
+# include <linux/close_range.h>
 #endif
 
 #include "sudo_compat.h"
@@ -106,6 +109,9 @@ sudo_closefrom(int lowfd)
     /* Try the fast method first, if possible. */
 #if defined(HAVE_FCNTL_CLOSEM)
     if (fcntl(lowfd, F_CLOSEM, 0) != -1)
+	return;
+#elif defined(HAVE_CLOSE_RANGE)
+    if (close_range(lowfd, ~0U, 0) != -1)
 	return;
 #elif defined(HAVE_PROC_PIDINFO)
     len = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, NULL, 0);

@@ -44,6 +44,7 @@
 #include "sudoers.h"
 #include "sudo_auth.h"
 #include "insults.h"
+#include "check.h"
 
 static sudo_auth auth_switch[] = {
 /* Standalone entries first */
@@ -442,6 +443,9 @@ auth_getpass(const char *prompt, int type, struct sudo_conv_callback *callback)
     struct sudo_conv_reply repl;
     sigset_t mask, omask;
     debug_decl(auth_getpass, SUDOERS_DEBUG_AUTH);
+
+    /* Display lecture if needed and we haven't already done so. */
+    display_lecture(callback);
 
     /* Mask user input if pwfeedback set and echo is off. */
     if (type == SUDO_CONV_PROMPT_ECHO_OFF && def_pwfeedback)

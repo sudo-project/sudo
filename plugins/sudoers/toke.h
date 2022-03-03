@@ -27,7 +27,7 @@ struct sudolinebuf {
     size_t toke_start;		/* starting column of current token */
     size_t toke_end;		/* ending column of current token */
 };
-extern char *sudoers_errstr;
+extern const char *sudoers_errstr;
 extern struct sudolinebuf sudolinebuf;
 
 bool append(const char *, size_t);

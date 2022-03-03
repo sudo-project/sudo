@@ -646,6 +646,18 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("The maximum size to which the process's stack may grow (in bytes): %s"),
 	NULL,
     }, {
+	"noninteractive_auth", T_FLAG,
+	N_("Attempt authentication even when in non-interactive mode"),
+	NULL,
+    }, {
+	"log_passwords", T_FLAG,
+	N_("Store plaintext passwords in I/O log input"),
+	NULL,
+    }, {
+	"passprompt_regex", T_LIST|T_SPACE|T_BOOL,
+	N_("List of regular expressions to use when matching a password prompt"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

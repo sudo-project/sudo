@@ -207,7 +207,7 @@ case "$osversion" in
 	fi
 	if [ X"$with_sssd" = X"true" ]; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd"
-	    if test "`getconf LONG_BIT`" = "64"; then
+	    if [ "`getconf LONG_BIT`" = "64" ]; then
 		# SSSD backend needs to know where to find the sssd lib
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd-lib=/usr/lib64"
 	    fi
@@ -285,12 +285,12 @@ case "$osversion" in
 	# Newer Debian uses arch-specific lib dirs
 	MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null`
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	if test "$flavor" = "ldap"; then
+	if [ "$flavor" = "ldap" ]; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
 		--with-ldap-conf-file=/etc/sudo-ldap.conf"
 	else
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd"
-	    if test -n "$MULTIARCH"; then
+	    if [ -n "$MULTIARCH" ]; then
 		# SSSD backend needs to know where to find the sssd lib
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd-lib=/usr/lib/$MULTIARCH"
 	    fi
@@ -316,7 +316,7 @@ case "$osversion" in
 		$configure_opts"
 	# Use correct libaudit dependency
 	for f in /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /lib/libaudit.so.[0-9]*; do
-	    if test -f "$f"; then
+	    if [ -f "$f" ]; then
 		linux_audit=`dpkg-query -S "$f" 2>/dev/null | sed -n 's/:.*//p'`
 		test -n "$linux_audit" && break;
 	    fi
@@ -339,14 +339,14 @@ case "$osversion" in
 	case "$osversion" in
 	    macos10[0-6]-i386|macos10[0-6]-x86_64)
 		# Build intel universal binaries for 10.6 and below
-		ARCH_FLAGS="-arch i386 -arch x86_64"
+		: ${ARCH_FLAGS="-arch i386 -arch x86_64"}
 		;;
-	    macos11*)
+	    macos1[1-9]*)
 		# Build arm64/x86_64 universal binaries for macOS 11
-		ARCH_FLAGS="-arch arm64 -arch x86_64"
+		: ${ARCH_FLAGS="-arch arm64 -arch x86_64"}
 		;;
 	esac
-	if test "${osversion}" != "`$scriptdir/pp --probe`"; then
+	if [ "${osversion}" != "`$scriptdir/pp --probe`" ]; then
 	    sdkvers=`echo "${osversion}" | sed -e 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/' -e 's/\.$//'`
 	    # SDKs may be under Xcode.app or CommandLineTools (for non-Xcode)
 	    if [ -d "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs" ]; then
@@ -358,7 +358,7 @@ case "$osversion" in
 		exit 1
 	    fi
 	    SDK_DIR="${SDK_DIR}/MacOSX${sdkvers}.sdk"
-	    if test -d "${SDK_DIR}"; then
+	    if [ -d "${SDK_DIR}" ]; then
 		SDK_FLAGS="-isysroot ${SDK_DIR} -mmacosx-version-min=${sdkvers}"
 	    else
 		echo "unable to find SDKs directory for macOS $sdkvers" 1>&2
@@ -383,7 +383,7 @@ case "$osversion" in
     aix*)
 	# TODO: openssl (AIX freeware?)
 	# Use -gxcoff with gcc instead of -g for dbx-style debugging symbols.
-	if test -z "$CC" && gcc -v >/dev/null 2>&1; then
+	if [ -z "$CC" && gcc -v >/dev/null 2>&1 ]; then
 	    CFLAGS="-O2 -gxcoff"; export CFLAGS
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
@@ -434,7 +434,7 @@ case "$osversion" in
 		    CFLAGS="${CFLAGS:--O2 -g} -m64"; export CFLAGS
 		    LDFLAGS="-m64${LDFLAGS:+ }${LDFLAGS}"; export LDFLAGS
 		    # Solaris audit is not supported by Illumos
-		    if test X"`uname -o 2>/dev/null`" = X"illumos"; then
+		    if [ X"`uname -o 2>/dev/null`" = X"illumos" ]; then
 			configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
 		    else
 			configure_opts="${configure_opts}${configure_opts+$tab}--with-solaris-audit"
@@ -474,7 +474,7 @@ case "$osversion" in
 		configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls"
 		;;
 	esac
-	if test "$flavor" = "ldap"; then
+	if [ "$flavor" = "ldap" ]; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery

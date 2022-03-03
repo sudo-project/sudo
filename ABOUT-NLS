@@ -110,7 +110,7 @@ people who like their own language and write it well, and who are also
 able to synergize with other translators speaking the same language.
 Each translation team has its own mailing list.  The up-to-date list of
 teams can be found at the Free Translation Project's homepage,
-'http://translationproject.org/', in the "Teams" area.
+'https://translationproject.org/', in the "Teams" area.
 
    If you'd like to volunteer to _work_ at translating messages, you
 should become a member of the translating team for your own language.
@@ -1385,7 +1385,7 @@ mere existence a PO file and its wide availability in a distribution.
    If Jun 2014 seems to be old, you may fetch a more recent copy of this
 'ABOUT-NLS' file on most GNU archive sites.  The most up-to-date matrix
 with full percentage details can be found at
-'http://translationproject.org/extra/matrix.html'.
+'https://translationproject.org/extra/matrix.html'.
 
 1.5 Using 'gettext' in new packages
 ===================================

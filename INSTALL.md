@@ -4,7 +4,7 @@ Sudo installation instructions
 Sudo uses a `configure` script to probe the capabilities and type of the
 system in question.  Sudo's `configure` script has a large number of options
 that control its behavior and enable or disable optional functionality.
-Please read this document fully before configuring and building sudo.
+Be sure to read this document fully before configuring and building sudo.
 You may also wish to read the file INSTALL.configure which explains more
 about the `configure` script itself.
 
@@ -19,8 +19,8 @@ If you wish to modify the parser then you will need flex version
 2.5.2 or later and either bison or byacc (sudo comes with a
 pre-generated parser).  You'll also have to run configure with the
 --with-devel option or pass DEVEL=1 to make.  You can get flex from
-http://flex.sourceforge.net/.  You can get GNU bison from
-ftp://ftp.gnu.org/pub/gnu/bison/ or any GNU mirror.
+https://github.com/westes/flex/.  You can get GNU bison from
+https://ftp.gnu.org/pub/gnu/bison/ or any GNU mirror.
 
 Some systems will also require that development library packages be
 installed.  The sudo source distribution includes docker configurations
@@ -30,8 +30,8 @@ for a list of packages required to build sudo.
 
 ## Simple sudo installation
 
-0. If you are upgrading from a previous version of sudo please read
-   the info in [docs/UPGRADE.md](docs/UPGRADE.md) before proceeding.
+0. If you are upgrading from a previous version of sudo, read
+   [docs/UPGRADE.md](docs/UPGRADE.md) before proceeding.
 
 1. Read the "OS dependent notes" section for any particular
    "gotchas" relating to your operating system.
@@ -45,20 +45,24 @@ for a list of packages required to build sudo.
 4. Type `make` to compile sudo.  If `configure` did its job properly (and
    you have a supported configuration) there won't be any problems.  If you
    have a problem, check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
-   for tips on what might have gone wrong.  Please mail us if you have a
-   fix or if you are unable to come up with a fix (address at EOF).
+   for tips on what might have gone wrong.  If your problem is not covered,
+   you may file a bug report at https://bugzilla.sudo.ws/ or an issue at
+   https://github.com/sudo-project/sudo/issues/ (not both).
 
-5. Type `make install` (as root) to install sudo, visudo, the
-   man pages, and a skeleton sudoers file.  Note that the install
-   will not overwrite an existing sudoers file.  You can also
-   install various pieces the package via the install-binaries,
-   install-doc, and install-sudoers make targets.
+5. Optionally, type `make check` to build and run the sudo unit and
+   regression tests.  For more verbose output, use `make check-verbose`.
 
-6. Edit the sudoers file with `visudo` as necessary for your
+6. Type `make install` (as root) to install sudo, visudo, the man
+   pages, and a skeleton sudoers file.  The install will not overwrite
+   an existing sudoers file.  You can also install various pieces of
+   the package via the install-binaries, install-doc, and install-sudoers
+   make targets.
+
+7. Edit the sudoers file with `visudo` as necessary for your
    site.  You will probably want to refer the example sudoers
    file and sudoers man page included with the sudo package.
 
-7. If you want to use syslogd(8) to do the logging, you'll need to
+8. If you want to use syslogd(8) to do the logging, you'll need to
    update your `/etc/syslog.conf` file.  See the examples/syslog.conf
    file included in the distribution for an example.
 
@@ -348,11 +352,11 @@ Defaults are listed in brackets after the description.
         Disable natural language support.  By default, sudo will
         use the gettext() family of functions, if available, to
         implement messages in the invoking user's native language.
-        Note that translations do not exist for all languages.
+        Translations do not exist for all languages.
 
     --with-ldap[=DIR]
         Enable LDAP support.  If specified, DIR is the base directory
-        containing the LDAP include and lib directories.  Please see
+        containing the LDAP include and lib directories.  See
         [README.LDAP.md](README.LDAP.md) for more information.
 
     --with-ldap-conf-file=PATH
@@ -391,7 +395,7 @@ Defaults are listed in brackets after the description.
         This is also used to support the "log_subcmds" sudoers
         setting.  For example, this means that for a shell run
         through sudo, the individual commands run by the shell are
-        also subject to rules in the sudoers file.  Please see the
+        also subject to rules in the sudoers file.  See the
         "Preventing Shell Escapes" section in the sudoers man page
         for details.  If specified, PATH should be a fully qualified
         path name, e.g.  /usr/local/libexec/sudo/sudo_intercept.so.
@@ -402,11 +406,11 @@ Defaults are listed in brackets after the description.
     --with-noexec[=PATH]
         Enable support for the "noexec" functionality which prevents
         a dynamically-linked program being run by sudo from executing
-        another program (think shell escapes).  Please see the
-        "Preventing Shell Escapes" section in the sudoers man page
-        for details.  If specified, PATH should be a fully qualified
-        path name, e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH
-        is "no", noexec support will not be compiled in.  The default
+        another program (think shell escapes).  See the "Preventing
+        Shell Escapes" section in the sudoers man page for details.
+        If specified, PATH should be a fully qualified path name,
+        e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH is
+        "no", noexec support will not be compiled in.  The default
         is to compile noexec support if libtool supports building
         shared objects on your system.
 
@@ -417,7 +421,7 @@ Defaults are listed in brackets after the description.
     --with-sssd
         Enable support for using the System Security Services Daemon
         (SSSD) as a sudoers data source.  For more information on
-        SSD, see http://fedorahosted.org/sssd/
+        SSD, see https://fedoraproject.org/wiki/Features/SSSD.
 
     --with-sssd-conf=PATH
         Specify the path to the SSSD configuration file, if different
@@ -523,9 +527,9 @@ Defaults are listed in brackets after the description.
         for BSD/OS and OpenBSD systems that support it.
         It is not possible to mix BSD authentication with other
         authentication methods (and there really should be no need
-        to do so).  Note that only the newer BSD authentication API
-        is supported.  If you don't have /usr/include/bsd_auth.h
-        then you cannot use this.
+        to do so).  Only the newer BSD authentication API is
+        supported.  If you don't have /usr/include/bsd_auth.h then
+        you cannot use this.
 
     --with-DCE
         Enable DCE support for systems without PAM.  Known to work on
@@ -569,7 +573,7 @@ Defaults are listed in brackets after the description.
         Enable PAM support.  This is on by default for Darwin, FreeBSD,
         Linux, NetBSD, Solaris, and HP-UX (version 11 and higher).
 
-        NOTE: on RedHat Linux and Fedora you **must** have an `/etc/pam.d/sudo`
+        On RedHat Linux and Fedora you **must** have an `/etc/pam.d/sudo`
         file installed.  You may either use the example pam.conf file included
         with sudo or use `/etc/pam.d/su` as a reference.  The pam.conf file
         included with sudo may or may not work with other Linux distributions.
@@ -797,10 +801,10 @@ Defaults are listed in brackets after the description.
         file.  Ie: instead of myhost you would use myhost.mydomain.edu.  You may
         still use the short form if you wish (and even mix the two).  Beware
         that turning FQDN on requires sudo to make DNS lookups which may make
-        sudo unusable if your DNS is totally hosed.  Also note that you must
-        use the host's official name as DNS knows it.  That is, you may not use
-        a host alias (CNAME entry) due to performance issues and the fact that
-        there is no way to get all aliases from DNS.  
+        sudo unusable if your DNS is totally hosed.  You must use the host's
+        official name as DNS knows it.  That is, you may not use a host alias
+        (CNAME entry) due to performance issues and the fact that there is no
+        way to get all aliases from DNS.  
         Sudoers option: fqdn
 
     --with-goodpri=PRIORITY
@@ -939,7 +943,7 @@ Defaults are listed in brackets after the description.
         users to have a reasonable PATH environment variable you may want
         to use this.  Another use is if you want to have the "root path"
         be separate from the "user path."  You will need to customize the
-        path for your site.  NOTE: this is not applied to users in the group
+        path for your site.  This is not applied to users in the group
         specified by --with-exemptgroup.  If you do not specify a path,
         "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" is used.  
         Sudoers option: secure_path
@@ -954,22 +958,20 @@ Defaults are listed in brackets after the description.
         Sudoers options: !mailerpath or !mailto
 
     --with-sudoers-mode=MODE
-        File mode for the sudoers file (octal).  Note that if you
-        wish to NFS-mount the sudoers file this must be group
-        readable.  This value may overridden at run-time in the
-        sudo.conf file.  The default mode is 0440.
+        File mode for the sudoers file (octal).  If you wish to
+        NFS-mount the sudoers file this must be group readable.
+        This value may overridden at run-time in the sudo.conf file.
+        The default mode is 0440.
 
     --with-sudoers-uid=UID
-        User id that "owns" the sudoers file.  Note that this is
-        the numeric id, **not** the symbolic name.  This value may
-        overridden at run-time in the sudo.conf file.  The default
-        is 0.
+        User id that "owns" the sudoers file.  This is the numeric
+        id, **not** the symbolic name.  This value may overridden
+        at run-time in the sudo.conf file.  The default is 0.
 
     --with-sudoers-gid=GID
-        Group id that "owns" the sudoers file.  Note that this is
-        the numeric id, **not** the symbolic name.  This value may
-        overridden at run-time in the sudo.conf file.  The default
-        is 0.
+        Group id that "owns" the sudoers file.  This is the numeric
+        id, **not** the symbolic name.  This value may overridden
+        at run-time in the sudo.conf file.  The default is 0.
 
     --with-timeout=NUMBER
         Number of minutes that can elapse before sudo will ask for a passwd
@@ -1028,4 +1030,4 @@ free from www.oracle.com, or install the GNU C compiler (gcc) which
 is can be installed via the pkg utility on Solaris 11 and higher
 and is distributed on the Solaris Companion CD for older Solaris
 releases.  You can also download gcc packages from
-http://www.opencsw.org/packages/CSWgcc4core/.
+https://www.opencsw.org/packages/CSWgcc4core/.

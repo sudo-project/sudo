@@ -62,7 +62,10 @@ char ** create_str_array(size_t count, ...);
 #define RUN_TEST(testcase) \
     do { \
         int success = 1; \
-        printf("Running test " #testcase " ... \n"); \
+        ntests++; \
+        if (verbose) { \
+            printf("Running test " #testcase " ... \n"); \
+        } \
         if (!init()) { \
             printf("FAILED: initialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
             success = 0; \

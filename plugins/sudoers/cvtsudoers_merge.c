@@ -36,6 +36,27 @@
 #include "cvtsudoers.h"
 #include <gram.h>
 
+static struct member *
+new_member(const char *name, int type)
+{
+    struct member *m;
+    debug_decl(digest_list_equivalent, SUDOERS_DEBUG_PARSER);
+
+    m = calloc(1, sizeof(struct member));
+    if (m == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (name != NULL) {
+	m->name = strdup(name);
+	if (m->name == NULL) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+    }
+    m->type = type;
+
+    debug_return_ptr(m);
+}
+
 /*
  * Compare two digest lists.
  * Returns true if they are the same, else false.
@@ -268,12 +289,7 @@ simplify_host_list(struct member_list *hosts, const char *file, int line,
 		    }
 		}
 	    }
-	    m = calloc(1, sizeof(*m));
-	    if (m == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
-	    m->type = ALL;
+	    m = new_member(NULL, ALL);
 	    TAILQ_INSERT_TAIL(hosts, m, entries);
 	}
     }
@@ -658,23 +674,24 @@ merge_aliases(struct sudoers_parse_tree_list *parse_trees,
  * Compare two defaults structs but not their actual value.
  * Returns true if they refer to the same Defaults variable and binding.
  * Also sets mergeable if they only differ in the binding.
- * If override is true, a Defaults without a binding overrides one with
- * a binding.
  */
 static bool
 defaults_var_matches(struct defaults *d1, struct defaults *d2,
-    bool *mergeable, bool override)
+    bool *mergeable)
 {
     debug_decl(defaults_var_matches, SUDOERS_DEBUG_DEFAULTS);
 
-    if (d1->type != d2->type) {
-	/* A non-bound Defaults entry overrides a bound Defaults. */
-	if (override && d2->type == DEFAULTS)
-	    debug_return_bool(true);
-	debug_return_bool(false);
-    }
     if (strcmp(d1->var, d2->var) != 0)
 	debug_return_bool(false);
+    if (d1->type != d2->type) {
+	if ((d1->type == DEFAULTS && d2->type == DEFAULTS_HOST) ||
+	    (d1->type == DEFAULTS_HOST && d2->type == DEFAULTS)) {
+	    /* We can merge host and global bindings. */
+	    if (mergeable != NULL)
+		*mergeable = true;
+	}
+	debug_return_bool(false);
+    }
     if (d1->type != DEFAULTS) {
 	if (!member_list_equivalent(&d1->binding->members, &d2->binding->members)) {
 	    if (mergeable != NULL)
@@ -698,10 +715,15 @@ defaults_val_matches(struct defaults *d1, struct defaults *d2)
     /* XXX - what about list operators? */
     if (d1->op != d2->op)
 	debug_return_bool(false);
-    if (d1->val != NULL && d2->val != NULL && strcmp(d1->val, d2->val) != 0)
-	debug_return_bool(false);
-    if (d1->val != d2->val)
-	debug_return_bool(false);
+
+    /* Either both must be NULL or both non-NULL _and_ matching. */
+    if (d1->val != NULL && d2->val != NULL) {
+	if (strcmp(d1->val, d2->val) != 0)
+	    debug_return_bool(false);
+    } else {
+	if (d1->val != NULL || d2->val != NULL)
+	    debug_return_bool(false);
+    }
 
     debug_return_bool(true);
 }
@@ -714,7 +736,7 @@ defaults_equivalent(struct defaults *d1, struct defaults *d2)
 {
     debug_decl(defaults_equivalent, SUDOERS_DEBUG_DEFAULTS);
 
-    if (!defaults_var_matches(d1, d2, NULL, false))
+    if (!defaults_var_matches(d1, d2, NULL))
 	debug_return_bool(false);
     debug_return_bool(defaults_val_matches(d1, d2));
 }
@@ -760,9 +782,6 @@ defaults_check_conflict(struct defaults *def,
     debug_decl(defaults_check_conflict, SUDOERS_DEBUG_DEFAULTS);
 
     while ((parse_tree = TAILQ_NEXT(parse_tree, entries)) != NULL) {
-	/* If no host specified, plain Defaults overrides bound Defaults. */
-	const bool override = parse_tree->lhost == NULL;
-
 	TAILQ_FOREACH_REVERSE(d, &parse_tree->defaults, defaults_list, entries) {
 	    bool mergeable = false;
 
@@ -771,23 +790,48 @@ defaults_check_conflict(struct defaults *def,
 	     * others as well.  Lists in Defaults entries can be harder
 	     * to read, especially command lists.
 	     */
-	    if (!defaults_var_matches(def, d, &mergeable, override)) {
-		if (!mergeable || def->type != DEFAULTS_HOST)
+	    if (!defaults_var_matches(def, d, &mergeable)) {
+		if (!mergeable || (def->type != DEFAULTS && def->type != DEFAULTS_HOST))
 		    continue;
 	    }
 	    if (defaults_val_matches(def, d)) {
 		/* Duplicate Defaults entry (may need to merge binding). */
 		if (mergeable) {
+		    if (d->type != def->type &&
+			    (d->type == DEFAULTS || def->type == DEFAULTS)) {
+			/*
+			 * To be able to merge two Defaults, they both must
+			 * have the same binding type.  Convert a global
+			 * Defaults to one bound to single "ALL" member.
+			 */
+			if (d->type == DEFAULTS) {
+			    struct member *m = new_member(NULL, ALL);
+			    TAILQ_INSERT_TAIL(&d->binding->members, m, entries);
+			    d->type = def->type;
+			}
+			if (def->type == DEFAULTS) {
+			    struct member *m = new_member(NULL, ALL);
+			    TAILQ_INSERT_TAIL(&def->binding->members, m, entries);
+			    def->type = d->type;
+			}
+		    }
+
 		    /* Prepend def binding to d (hence double concat). */
 		    TAILQ_CONCAT(&def->binding->members, &d->binding->members, entries);
 		    TAILQ_CONCAT(&d->binding->members, &def->binding->members, entries);
 		}
 		debug_return_int(CONFLICT_RESOLVED);
 	    }
-	    log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
-		def->file, def->line, def->column, def->var,
-		d->file, d->line, d->column);
-	    debug_return_int(CONFLICT_UNRESOLVED);
+	    /*
+	     * If the value doesn't match but the Defaults name did we don't
+	     * consider that a conflict.
+	     */
+	    if (!mergeable) {
+		log_warnx(U_("%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"),
+		    def->file, def->line, def->column, def->var,
+		    d->file, d->line, d->column);
+		debug_return_int(CONFLICT_UNRESOLVED);
+	    }
 	}
     }
 
@@ -816,22 +860,10 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
 	 */
 	TAILQ_FOREACH(def, &parse_tree->defaults, entries) {
 	    if (parse_tree->lhost != NULL && def->type == DEFAULTS) {
-		m = calloc(1, sizeof(*m));
-		if (m == NULL) {
-		    sudo_fatalx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-		}
+		m = new_member(parse_tree->lhost, WORD);
 		log_warnx(U_("%s:%d:%d: made Defaults \"%s\" specific to host %s"),
 		    def->file, def->line, def->column, def->var,
 		    parse_tree->lhost);
-		m->name = strdup(parse_tree->lhost);
-		if (m->name == NULL) {
-		    sudo_fatalx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-		}
-		m->type = WORD;
-		TAILQ_INIT(&def->binding->members);
-		def->binding->refcnt = 1;
 		TAILQ_INSERT_TAIL(&def->binding->members, m, entries);
 		def->type = DEFAULTS_HOST;
 	    }
@@ -1182,17 +1214,7 @@ merge_sudoers(struct sudoers_parse_tree_list *parse_trees,
     }
     if (parse_tree == NULL) {
 	TAILQ_FOREACH(parse_tree, parse_trees, entries) {
-	    struct member *m = calloc(1, sizeof(*m));
-	    if (m == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
-	    m->type = WORD;
-	    m->name = strdup(parse_tree->lhost);
-	    if (m->name == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
+	    struct member *m = new_member(parse_tree->lhost, WORD);
 	    TAILQ_INSERT_TAIL(&bound_hosts, m, entries);
 	}
     }

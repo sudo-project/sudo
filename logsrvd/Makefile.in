@@ -109,6 +109,7 @@ FUZZ_LIBS = $(LIB_FUZZING_ENGINE) $(LIBS)
 FUZZ_LDFLAGS = $(LDFLAGS)
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
+FUZZ_VERBOSE =
 
 # User and group IDs the installed files should be "owned" by
 install_uid = 0
@@ -195,7 +196,7 @@ run-fuzz_logsrvd_conf: fuzz_logsrvd_conf
 	for f in $(FUZZ_LOGSRVD_CONF_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_logsrvd_conf -dict=$(srcdir)/regress/fuzz/fuzz_logsrvd_conf.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $$corpus
+	./fuzz_logsrvd_conf -dict=$(srcdir)/regress/fuzz/fuzz_logsrvd_conf.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 pre-install:
 
@@ -251,11 +252,13 @@ check-fuzzer: $(FUZZ_PROGS)
 	    unset LANG || LANG=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
-	    echo "fuzz_logsrvd_conf: verifying corpus (expect 3 errors)"; \
-	    ./fuzz_logsrvd_conf $(FUZZ_LOGSRVD_CONF_CORPUS); \
+	    echo "fuzz_logsrvd_conf: verifying corpus"; \
+	    ./fuzz_logsrvd_conf $(FUZZ_VERBOSE) $(FUZZ_LOGSRVD_CONF_CORPUS); \
 	fi
 
 check: check-fuzzer
+
+check-verbose: check
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(FUZZ_PROGS) \

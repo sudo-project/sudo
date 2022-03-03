@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 27, 2022
+.Dd February 16, 2022
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -161,9 +161,9 @@ with the
 option (or as
 .Nm sudoedit ) .
 It may take command line arguments just as a normal command does.
-Note that
+Unlike other commands,
 .Dq Li sudoedit
-is a command built into
+is a built into
 .Nm sudo
 itself and must be specified in without a leading path.
 .Pp
@@ -272,7 +272,7 @@ will be valid.
 If multiple
 .Li sudoNotBefore
 entries are present, the earliest is used.
-Note that timestamps must be in Coordinated Universal Time (UTC),
+Timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
 The minute and seconds portions are optional, but some LDAP servers
 require that they be present (contrary to the RFC).
@@ -294,7 +294,7 @@ will no longer be valid.
 If multiple
 .Li sudoNotAfter
 entries are present, the last one is used.
-Note that timestamps must be in Coordinated Universal Time (UTC),
+Timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
 The minute and seconds portions are optional, but some LDAP servers
 require that they be present (contrary to the RFC).
@@ -634,10 +634,10 @@ file for LDAP-specific configuration.
 Typically, this file is shared between different LDAP-aware clients.
 As such, most of the settings are not
 .Nm sudo Ns -specific.
-Note that
-.Nm sudo
-parses
+The
 .Pa @ldap_conf@
+file is parsed by
+.Nm sudo
 itself and may support options that differ from those described in the
 system's
 .Xr ldap.conf @mansectform@
@@ -649,8 +649,7 @@ may be overridden via the
 plugin argument in
 .Xr sudo.conf @mansectform@ .
 .Pp
-Also note that on systems using the OpenLDAP libraries, default
-values specified in
+On systems using the OpenLDAP libraries, default values specified in
 .Pa /etc/openldap/ldap.conf
 or the user's
 .Pa .ldaprc
@@ -1010,7 +1009,7 @@ will be unable to connect to it.
 If
 .Sy TLS_CHECKPEER
 is disabled, no check is made.
-Note that disabling the check creates an opportunity for man-in-the-middle
+Disabling this check creates an opportunity for man-in-the-middle
 attacks since the server's identity will not be authenticated.
 If possible, the CA's certificate should be installed locally so it can
 be verified.
@@ -1197,7 +1196,7 @@ search order.
 Sudo looks for a line beginning with
 .Li sudoers :
 and uses this to determine the search order.
-Note that by default,
+By default,
 .Nm sudo
 does not stop searching after the first match and later matches take
 precedence over earlier ones (unless
@@ -1256,10 +1255,10 @@ default is assumed:
 sudoers: files
 .Ed
 .Pp
-Note that
+The
 .Pa @nsswitch_conf@
-is supported even when the underlying operating system does not use
-an nsswitch.conf file, except on AIX (see below).
+file is supported even when the underlying operating system does not
+support it, except on AIX (see below).
 .Ss Configuring netsvc.conf
 On AIX systems, the
 .Pa @netsvc_conf@
@@ -1292,7 +1291,7 @@ if the user is not present in LDAP, use:
 sudoers = ldap = auth, files
 .Ed
 .Pp
-Note that in the above example, the
+In the above example, the
 .Li auth
 qualifier only affects user lookups; both LDAP and
 .Em sudoers
@@ -1324,12 +1323,12 @@ instead of
 .Li ldap
 for the sudoers entry in
 .Pa @nsswitch_conf@ .
-Note that the
+The
 .Pa @ldap_conf@
 file is not used by the SSSD
 .Nm sudo
 back end.
-Please see
+See
 .Xr sssd-sudo @mansectform@
 for more information on configuring
 .Nm sudo
@@ -1559,13 +1558,13 @@ over the years; this version consists of code written primarily by:
 .An Todd C. Miller
 .Ed
 .Pp
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 .Nm sudo
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh CAVEATS
-Note that there are differences in the way that LDAP-based
+There are differences in the way that LDAP-based
 .Em sudoers
 is parsed compared to file-based
 .Em sudoers .
@@ -1573,9 +1572,9 @@ See the
 .Sx Differences between LDAP and non-LDAP sudoers
 section for more information.
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm sudo ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -1587,6 +1586,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 .Nm sudo
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

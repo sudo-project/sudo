@@ -29,6 +29,9 @@ Makefile$
 ^etc/init\.d/sudo\.conf$
 
 ^examples/sudo\.conf$
+^examples/sudo_logsrvd\.conf$
+^examples/sudoers$
+^examples/syslog\.conf$
 
 ^init\.d/.*\.sh$
 ^init\.d/sudo\.conf$
@@ -57,6 +60,7 @@ Makefile$
 ^lib/util/util\.exp$
 ^lib/util/[a-z0-9_]+_test$
 ^lib/util/fuzz_sudo_conf$
+^lib/util/regress/harness
 ^lib/util/regress/.*\.(out|err)$
 
 ^logsrvd/sudo_(logsrvd|sendlog)$
@@ -65,6 +69,7 @@ Makefile$
 ^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|prologue|check_[a-z0-9_]+)$
 ^plugins/sudoers/fuzz_(policy|sudoers(_ldif)?)$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
+^plugins/sudoers/regress/harness
 ^plugins/sudoers/regress/iolog_plugin/iolog$
 ^plugins/sudoers/regress/testsudoers/test3\.d/root$
 

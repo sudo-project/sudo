@@ -23,7 +23,7 @@ by synchronizing changes via CVS/RSYNC/RDIST/RCP/SCP and even NFS.
 By using LDAP for sudoers we gain a centrally administered, globally
 available configuration source for sudo.
 
-For information on OpenLDAP, please see http://www.openldap.org/.
+For information on OpenLDAP, see https://www.openldap.org/.
 
 ## Definitions
 
@@ -46,11 +46,11 @@ to specify them at configure time.  E.g.
     $ ./configure --with-ldap=/usr/local/ldapsdk
 
 Sudo is developed using OpenLDAP but Netscape-based LDAP libraries
-(such as those present in Solaris) are also known to work.
+(such as those present in Solaris) and IBM LDAP are also known to work.
 
-Your mileage may vary.  Please let the sudo workers mailing list
-sudo-workers@sudo.ws know if special configuration was required
-to build an LDAP-enabled sudo so we can improve sudo.
+If special configuration was required to build an LDAP-enabled sudo,
+let the sudo workers mailing list <sudo-workers@sudo.ws> know so
+we can improve sudo.
 
 ## Schema Changes
 
@@ -155,7 +155,7 @@ I recommend using any of the following LDAP browsers to administer your SUDOers.
  * GQ - The gentleman's LDAP client - Open Source - I use this a lot on Linux
    and since it is Schema aware, I don't need to create a sudoRole template.
 
-    http://sourceforge.net/projects/gqclient/
+    https://sourceforge.net/projects/gqclient/
 
  * phpQLAdmin - Open Source - phpQLAdmin is an administration tool,
    originally for QmailLDAP, that supports editing sudoRole objects
@@ -167,15 +167,13 @@ I recommend using any of the following LDAP browsers to administer your SUDOers.
    and Solaris.  It runs anywhere in a Java Virtual Machine including
    web pages.  You have to make a template from an existing sudoRole entry.
 
-    http://www.iit.edu/~gawojar/ldap
-    http://www.mcs.anl.gov/~gawor/ldap
-    http://ldapmanager.com
+    http://pi.hv.pl/Gawor%20ldapbrowser/
 
  * Apache Directory Studio - Open Source - an Eclipse-based LDAP
    development platform.  Includes an LDAP browser, and LDIF editor,
    a schema editor and more.
 
-    http://directory.apache.org/studio
+    https://directory.apache.org/studio
 
   There are dozens of others, some Open Source, some free, some not.
 
@@ -193,13 +191,14 @@ for a list of supported ldap.conf parameters and an example ldap.conf
 Make sure you sudoers_base matches the location you specified when you
 imported the sudoers ldif data.
 
-After configuring /etc/ldap.conf, you must add a line in /etc/nsswitch.conf
-to tell sudo to look in LDAP for sudoers.  See the "Configuring nsswitch.conf"
-section in the sudoers.ldap manual for details.  Note that sudo will use
-/etc/nsswitch.conf even if the underlying operating system does not support it.
-To disable nsswitch support, run configure with the `--with-nsswitch=no` option.
-This will cause sudo to consult LDAP first and /etc/sudoers second, unless the
-ignore_sudoers_file flag is set in the global LDAP options.
+After configuring /etc/ldap.conf, you must add a line in the
+/etc/nsswitch.conf file to tell sudo to look in LDAP for sudoers.
+See the "Configuring nsswitch.conf" section in the sudoers.ldap
+manual for details.  Sudo will use /etc/nsswitch.conf even if the
+underlying operating system does not support it.  To disable nsswitch
+support, run configure with the `--with-nsswitch=no` option.  This
+will cause sudo to consult LDAP first and /etc/sudoers second,
+unless the ignore_sudoers_file flag is set in the global LDAP options.
 
 ## Debugging your LDAP configuration
 

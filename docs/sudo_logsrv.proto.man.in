@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "January 19, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRV.PROTO" "@mansectform@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -732,11 +732,9 @@ ttyname	string	the terminal the command was submitted from
 The server must accept other variables not listed above but may
 ignore them.
 .SH "EXAMPLES"
-The Protocol Buffers description of the log server protocol is included
-in full below.
-Note that this uses the newer
+The Protocol Buffers description of the log server protocol, using
 \(lqproto3\(rq
-syntax.
+syntax, is included in full below.
 .nf
 .sp
 .RS 0n
@@ -879,11 +877,6 @@ sudo_logsrvd(8)
 .PP
 \fIProtocol Buffers\fR,
 https://developers.google.com/protocol-buffers/.
-.SH "HISTORY"
-See the HISTORY file in the
-\fBsudo\fR
-distribution (https://www.sudo.ws/history.html) for a brief
-history of sudo.
 .SH "AUTHORS"
 Many people have worked on
 \fBsudo\fR
@@ -893,15 +886,15 @@ over the years; this version consists of code written primarily by:
 Todd C. Miller
 .RE
 .PP
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 \fBsudo\fR
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
-If you feel you have found a bug in
+If you believe you have found a bug in
 \fBsudo\fR,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -913,6 +906,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 \fBsudo\fR
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

@@ -466,3 +466,12 @@ rlimit_rss
 rlimit_stack
 	T_RLIMIT|T_BOOL
 	"The maximum size to which the process's stack may grow (in bytes): %s"
+noninteractive_auth
+	T_FLAG
+	"Attempt authentication even when in non-interactive mode"
+log_passwords
+	T_FLAG
+	"Store plaintext passwords in I/O log input"
+passprompt_regex
+	T_LIST|T_SPACE|T_BOOL
+	"List of regular expressions to use when matching a password prompt"

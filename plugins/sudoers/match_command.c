@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2019
+ * Copyright (c) 1996, 1998-2005, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -48,6 +48,7 @@
 #else
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
+#include <regex.h>
 
 #include "sudoers.h"
 #include <gram.h>
@@ -57,8 +58,30 @@
 #endif
 
 static bool
+regex_matches(const char *pattern, const char *str)
+{
+    const char *errstr;
+    int errcode;
+    regex_t re;
+    debug_decl(regex_matches, SUDOERS_DEBUG_MATCH);
+
+    if (!sudo_regex_compile(&re, pattern, &errstr)) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to compile regular expression \"%s\": %s",
+	    pattern, errstr);
+	debug_return_bool(false);
+    }
+
+    errcode = regexec(&re, str, 0, NULL, 0);
+    regfree(&re);
+
+    debug_return_bool(errcode == 0);
+}
+
+static bool
 command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
 {
+    const char *args = user_args ? user_args : "";
     int flags = 0;
     debug_decl(command_args_match, SUDOERS_DEBUG_MATCH);
 
@@ -71,14 +94,18 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
 
     /*
      * If args are specified in sudoers, they must match the user args.
-     * If running as sudoedit, all args are assumed to be paths.
+     * Args are matched either as a regular expression or glob pattern.
      */
+    if (sudoers_args[0] == '^') {
+	size_t len = strlen(sudoers_args);
+	if (len > 0 && sudoers_args[len - 1] == '$')
+	    debug_return_bool(regex_matches(sudoers_args, args));
+    }
+
+    /* If running as sudoedit, all args are assumed to be paths. */
     if (strcmp(sudoers_cmnd, "sudoedit") == 0)
 	flags = FNM_PATHNAME;
-    if (fnmatch(sudoers_args, user_args ? user_args : "", flags) == 0)
-	debug_return_bool(true);
-
-    debug_return_bool(false);
+    debug_return_bool(fnmatch(sudoers_args, args, flags) == 0);
 }
 
 #ifndef SUDOERS_NAME_MATCH
@@ -416,6 +443,49 @@ bad:
     debug_return_bool(false);
 }
 
+static bool
+command_matches_regex(const char *sudoers_cmnd, const char *sudoers_args,
+    const char *runchroot, bool intercepted,
+    const struct command_digest_list *digests)
+{
+    int fd = -1;
+    debug_decl(command_matches_regex, SUDOERS_DEBUG_MATCH);
+
+    /*
+     * Return true if sudoers_cmnd regex matches user_cmnd AND
+     *  a) there are no args in sudoers OR
+     *  b) there are no args on command line and none required by sudoers OR
+     *  c) there are args in sudoers and on command line and they match
+     *     else return false.
+     *
+     * Neither sudoers_cmnd nor user_cmnd are relative to runchroot.
+     */
+    if (!regex_matches(sudoers_cmnd, user_cmnd))
+	debug_return_bool(false);
+
+    if (command_args_match(sudoers_cmnd, sudoers_args)) {
+	/* Open the file for fdexec or for digest matching. */
+	if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
+	    goto bad;
+#ifndef SUDOERS_NAME_MATCH
+	if (!do_stat(fd, user_cmnd, runchroot, intercepted, NULL))
+	    goto bad;
+#endif
+	/* Check digest of user_cmnd since sudoers_cmnd is a pattern. */
+	if (!digest_matches(fd, user_cmnd, runchroot, digests))
+	    goto bad;
+	set_cmnd_fd(fd);
+
+	/* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
+	debug_return_bool(true);
+bad:
+	if (fd != -1)
+	    close(fd);
+	debug_return_bool(false);
+    }
+    debug_return_bool(false);
+}
+
 #ifndef SUDOERS_NAME_MATCH
 static bool
 command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
@@ -721,6 +791,13 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
     if (sudoers_cmnd == NULL) {
 	sudoers_cmnd = "ALL";
 	rc = command_matches_all(runchroot, intercepted, digests);
+	goto done;
+    }
+
+    /* Check for regular expressions first. */
+    if (sudoers_cmnd[0] == '^') {
+	rc = command_matches_regex(sudoers_cmnd, sudoers_args, runchroot, 
+	    intercepted, digests);
 	goto done;
     }
 

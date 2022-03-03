@@ -67,7 +67,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int fd;
 
     setprogname("fuzz_sudo_conf");
-    sudo_warn_set_conversation(fuzz_conversation);
+    if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
+	sudo_warn_set_conversation(fuzz_conversation);
 
     /* sudo_conf_read() uses a conf file path, not an open file. */
     fd = mkstemp(tempfile);

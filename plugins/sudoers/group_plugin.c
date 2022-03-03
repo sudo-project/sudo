@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2020, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -220,7 +220,7 @@ group_plugin_query(const char *user, const char *group,
  * Group plugin sudoers callback.
  */
 bool
-cb_group_plugin(const union sudo_defs_val *sd_un)
+cb_group_plugin(const union sudo_defs_val *sd_un, int op)
 {
     bool rc = true;
     debug_decl(cb_group_plugin, SUDOERS_DEBUG_PLUGIN);

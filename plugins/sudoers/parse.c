@@ -43,24 +43,28 @@ static int
 sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     int validated, int pwflag)
 {
-    int match;
+    struct passwd *root_pw = NULL;
     struct sudo_nss *nss;
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
     struct defaults *def;
-    int nopass;
+    int nopass, match = DENY;
     enum def_tuple pwcheck;
     debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER);
 
     pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
     nopass = (pwcheck == never || pwcheck == all) ? true : false;
 
-    if (list_pw == NULL)
-	SET(validated, FLAG_NO_CHECK);
     CLR(validated, FLAG_NO_USER);
     CLR(validated, FLAG_NO_HOST);
-    match = DENY;
+    if (list_pw != NULL) {
+	root_pw = sudo_getpwuid(ROOT_UID);
+	if (root_pw == NULL)
+	    log_warningx(SLOG_SEND_MAIL, N_("unknown uid %u"), ROOT_UID);
+    } else {
+	SET(validated, FLAG_NO_CHECK);
+    }
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->query(nss, pw) == -1) {
 	    /* The query function should have printed an error message. */
@@ -89,16 +93,32 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 		    }
 		    if (match == ALLOW)
 			continue;
-		    /* Only check the command when listing another user. */
+
+		    /* Only check runas/command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
-			user_uid == list_pw->pw_uid ||
-			cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot,
-			NULL) == ALLOW)
-			    match = ALLOW;
+			    user_uid == list_pw->pw_uid) {
+			match = ALLOW;
+			continue;
+		    }
+		    /* Runas user must match list user or root. */
+		    if (userlist_matches(nss->parse_tree, list_pw,
+			    cs->runasuserlist) == DENY) {
+			continue;
+		    }
+		    if (root_pw == NULL || userlist_matches(nss->parse_tree,
+			    root_pw, cs->runasuserlist) != ALLOW) {
+			continue;
+		    }
+		    if (cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot,
+			    NULL) == ALLOW) {
+			match = ALLOW;
+		    }
 		}
 	    }
 	}
     }
+    if (root_pw != NULL)
+	sudo_pw_delref(root_pw);
     if (match == ALLOW || user_uid == 0) {
 	/* User has an entry for this host. */
 	SET(validated, VALIDATE_SUCCESS);

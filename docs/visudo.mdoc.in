@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 20, 2022
+.Dd February 16, 2022
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -96,7 +96,6 @@ or
 .Ev EDITOR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
-Note that
 .Nm sudo
 does not preserve the
 .Ev SUDO_EDITOR ,
@@ -124,7 +123,6 @@ will use the value of the
 or
 .Ev EDITOR
 environment variables before falling back on the default editor list.
-Note that
 .Nm visudo
 is typically run as root so this option may allow a user with
 .Nm visudo
@@ -246,9 +244,9 @@ If an alias is referenced but not actually defined
 or if there is a cycle in an alias,
 .Nm
 will consider this a syntax error.
-Note that it is not possible to differentiate between an
-alias and a host name or user name that consists solely of uppercase
-letters, digits, and the underscore
+It is not possible to differentiate between an alias and a host
+name or user name that consists solely of uppercase letters, digits,
+and the underscore
 .Pq Ql _
 character.
 .It Fl V , -version
@@ -302,7 +300,7 @@ These arguments, if present, should be listed after the path to the plugin
 .Pa sudoers.so ) .
 Multiple arguments may be specified, separated by white space.
 For example:
-.Bd -literal -offset indent
+.Bd -literal -offset 4n
 Plugin sudoers_policy sudoers.so sudoers_mode=0400
 .Ed
 .Pp
@@ -333,7 +331,7 @@ It should be specified as an octal value.
 .Pp
 For more information on configuring
 .Xr sudo.conf @mansectform@ ,
-please refer to its manual.
+refer to its manual.
 .Sh ENVIRONMENT
 The following environment variables may be consulted depending on
 the value of the
@@ -450,9 +448,9 @@ over the years; this version consists of code written primarily by:
 .An Todd C. Miller
 .Ed
 .Pp
-See the CONTRIBUTORS file in the
+See the CONTRIBUTORS.md file in the
 .Nm sudo
-distribution (https://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/about/contributors/) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh CAVEATS
@@ -461,9 +459,9 @@ the editor used by
 .Nm
 allows shell escapes.
 .Sh BUGS
-If you feel you have found a bug in
+If you believe you have found a bug in
 .Nm ,
-please submit a bug report at https://bugzilla.sudo.ws/
+you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -475,6 +473,6 @@ is provided
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
-See the LICENSE file distributed with
+See the LICENSE.md file distributed with
 .Nm sudo
-or https://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/about/license/ for complete details.

@@ -58,3 +58,6 @@ Defaults>"some one" set_home
 "%:C/non_UNIX_0 c"	"hostf" = ("root") ALL
 "%:C/non\'UNIX_3 c"	"hostg" = ("root") ALL
 "+netgr"		"hosth" = ("root") ALL
+
+# Check that quotes don't need escaping in command and args
+user ALL = /bin/ls "", /bin/echo " ", /bin/foo"bar ""

@@ -12,7 +12,7 @@ Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
 Defaults:FULLTIMERS	!lecture,runchroot=*
 Defaults:millert	!authenticate
-Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
+Defaults@SERVERS	log_year, logfile=@log_dir@/sudo.log
 Defaults!PAGERS		noexec
 
 ##
@@ -65,13 +65,13 @@ Cmnd_Alias	PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
 ##
 
 # root and users in group wheel can run anything on any machine as any user
-root		ALL = (ALL) ALL
-%wheel		ALL = (ALL) ALL
+root		ALL = (ALL:ALL) ALL
+%wheel		ALL = (ALL:ALL) ALL
 
 # full time sysadmins can run anything on any machine without a password
-FULLTIMERS	ALL = NOPASSWD: ALL
+FULLTIMERS	ALL = (ALL:ALL) NOPASSWD: ALL
 
-# part time sysadmins may run anything but need a password
+# part time sysadmins may run anything as root but need a password
 PARTTIMERS	ALL = ALL
 
 # jack may run anything on machines in CSNETS
@@ -88,7 +88,7 @@ operator	ALL = DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,\
 joe		ALL = /usr/bin/su operator
 
 # pete may change passwords for anyone but root on the hp snakes
-pete		HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd *root*
+pete		HPPA = /usr/bin/passwd ^[a-zA-Z0-9_]+$, !/usr/bin/passwd root
 
 # bob may run anything on the sparc and sgi machines as any user
 # listed in the Runas_Alias "OP" (ie: root and operator)
@@ -104,8 +104,8 @@ jim		+biglab = ALL
 # fred can run commands as oracle or sybase without a password
 fred		ALL = (DB) NOPASSWD: ALL
 
-# on the alphas, john may su to anyone but root and flags are not allowed
-john		ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
+# on the alphas, john may su to anyone except root, no flags are allowed.
+john		ALPHA = /usr/bin/su ^[a-zA-Z0-9_]+$, !/usr/bin/su root
 
 # jen can run anything on all machines except the ones
 # in the "SERVERS" Host_Alias

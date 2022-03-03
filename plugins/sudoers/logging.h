@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2009-2018
+ * Copyright (c) 1999-2005, 2009-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -82,7 +82,7 @@ bool log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
 bool log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 bool gai_log_warning(int flags, int errnum, const char *fmt, ...) __printflike(3, 4);
 bool sudoers_initlocale(const char *ulocale, const char *slocale);
-bool sudoers_locale_callback(const union sudo_defs_val *);
+bool sudoers_locale_callback(const union sudo_defs_val *sd_un, int op);
 void sudoers_to_eventlog(struct eventlog *evlog, char * const argv[], char *const envp[], const char *uuid_str);
 void init_eventlog_config(void);
 bool init_log_details(struct log_details *details, struct eventlog *evlog);

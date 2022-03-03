@@ -61,13 +61,21 @@ main(int argc, char *argv[])
     struct stat sb;
     uint8_t *buf = NULL;
     int fd, i, errors = 0;
+    int verbose = 0;
     long ms;
 
     /* Test provided input files. */
     for (i = 1; i < argc; i++) {
-	fd = open(argv[i], O_RDONLY);
+	const char *arg = argv[i];
+	if (*arg == '-') {
+	    if (strncmp(arg, "-verbosity=", sizeof("-verbosity=") - 1) == 0) {
+		verbose = atoi(arg + sizeof("-verbosity=") - 1);
+	    }
+	    continue;
+	}
+	fd = open(arg, O_RDONLY);
 	if (fd == -1 || fstat(fd, &sb) != 0) {
-	    fprintf(stderr, "open %s: %s\n", argv[i], strerror(errno));
+	    fprintf(stderr, "open %s: %s\n", arg, strerror(errno));
 	    if (fd != -1)
 		close(fd);
 	    errors++;
@@ -76,7 +84,7 @@ main(int argc, char *argv[])
 #ifndef __LP64__
 	if (sizeof(sb.st_size) > sizeof(size_t) && sb.st_size > SSIZE_MAX) {
 	    errno = E2BIG;
-	    fprintf(stderr, "%s: %s\n", argv[i], strerror(errno));
+	    fprintf(stderr, "%s: %s\n", arg, strerror(errno));
 	    close(fd);
 	    errors++;
 	    continue;
@@ -97,9 +105,9 @@ main(int argc, char *argv[])
 	nread = read(fd, buf, filesize);
 	if ((size_t)nread != filesize) {
 	    if (nread == -1)
-		fprintf(stderr, "read %s: %s\n", argv[i], strerror(errno));
+		fprintf(stderr, "read %s: %s\n", arg, strerror(errno));
 	    else
-		fprintf(stderr, "read %s: short read\n", argv[i]);
+		fprintf(stderr, "read %s: short read\n", arg);
 	    close(fd);
 	    errors++;
 	    continue;
@@ -107,13 +115,17 @@ main(int argc, char *argv[])
 	close(fd);
 
 	/* NOTE: doesn't support LLVMFuzzerInitialize() (but we don't use it) */
-	fprintf(stderr, "Running: %s\n", argv[i]);
-	sudo_gettime_mono(&start_time);
+	if (verbose > 0) {
+	    fprintf(stderr, "Running: %s\n", arg);
+	    sudo_gettime_mono(&start_time);
+	}
 	LLVMFuzzerTestOneInput(buf, nread);
-	sudo_gettime_mono(&stop_time);
-	sudo_timespecsub(&stop_time, &start_time, &stop_time);
-	ms = (stop_time.tv_sec * 1000) + (stop_time.tv_nsec / 1000000);
-	fprintf(stderr, "Executed %s in %ld ms\n", argv[i], ms);
+	if (verbose > 0) {
+	    sudo_gettime_mono(&stop_time);
+	    sudo_timespecsub(&stop_time, &start_time, &stop_time);
+	    ms = (stop_time.tv_sec * 1000) + (stop_time.tv_nsec / 1000000);
+	    fprintf(stderr, "Executed %s in %ld ms\n", arg, ms);
+	}
     }
     free(buf);
 

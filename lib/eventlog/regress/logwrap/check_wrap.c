@@ -36,27 +36,40 @@ sudo_dso_public int main(int argc, char *argv[]);
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: %s inputfile\n", getprogname());
+    fprintf(stderr, "usage: %s [-v] inputfile\n", getprogname());
     exit(EXIT_FAILURE);
 }
 
 int
 main(int argc, char *argv[])
 {
+    int ch, lineno = 0, which = 0;
+    char *line, lines[2][2048];
+    const char *infile;
     size_t len;
     FILE *fp;
-    char *line, lines[2][2048];
-    int lineno = 0;
-    int which = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_wrap");
 
-    if (argc != 2)
-	usage();
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    usage();
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
-    fp = fopen(argv[1], "r");
+    if (argc != 1)
+	usage();
+    infile = argv[0];
+
+    fp = fopen(infile, "r");
     if (fp == NULL)
-	sudo_fatalx("unable to open %s", argv[1]);
+	sudo_fatalx("unable to open %s", infile);
 
     /*
      * Each test record consists of a log entry on one line and a list of
@@ -89,8 +102,9 @@ main(int argc, char *argv[])
 		} else {
 		    len = maxlen = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		}
-		if (errstr != NULL)
-		    sudo_fatalx("%s: invalid length on line %d\n", argv[1], lineno);
+		if (errstr != NULL) {
+		    sudo_fatalx("%s: invalid length on line %d\n", infile, lineno);
+		}
 		while (len <= maxlen) {
 		    if (len == 0)
 			printf("# word wrap disabled\n");
@@ -104,5 +118,5 @@ main(int argc, char *argv[])
 	which = !which;
     }
 
-    exit(0);
+    return EXIT_SUCCESS;
 }

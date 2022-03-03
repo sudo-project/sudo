@@ -2,6 +2,8 @@ Defaults@xerxes, xyzzy log_output
 Defaults!/usr/bin/sudoreplay !log_output
 Defaults!/usr/local/bin/sudoreplay !log_output
 Defaults!REBOOT !log_output
+Defaults\
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
 
 User_Alias ADMINS = millert, dowdy, mikef
 Cmnd_Alias PROCESSES = /usr/bin/nice, /bin/kill, /usr/bin/renice,\
