@@ -564,7 +564,7 @@ done:
 
 /*
  * Check Defaults and Alias entries.
- * Sets parse_error on error and errorfile/errorlineno if possible.
+ * Sets parse_error on error and error{file,lineno,column} if possible.
  */
 static void
 check_defaults_and_aliases(bool strict, bool quiet)
@@ -576,12 +576,14 @@ check_defaults_and_aliases(bool strict, bool quiet)
 	sudo_rcstr_delref(errorfile);
 	errorfile = NULL;
 	errorlineno = -1;
+	errorcolumn = -1;
 	/* XXX - should edit all files with errors */
 	TAILQ_FOREACH(d, &parsed_policy.defaults, entries) {
-	    if (d->error) {
-		/* Defaults parse error, set errorfile/errorlineno. */
+	    if (d->error && errorlineno == -1) {
+		/* Defaults parse error, set error{file,lineno,column}. */
 		errorfile = sudo_rcstr_addref(d->file);
 		errorlineno = d->line;
+		errorcolumn = d->column;
 		break;
 	    }
 	}

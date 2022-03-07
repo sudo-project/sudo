@@ -312,6 +312,8 @@ int sudoersparse(void);
 extern char *login_style;
 extern char *errorfile;
 extern int errorlineno;
+extern int errorcolumn;
+extern char *errorstring;
 extern bool parse_error;
 extern bool sudoers_warnings;
 extern bool sudoers_recovery;

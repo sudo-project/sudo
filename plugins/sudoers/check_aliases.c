@@ -1,7 +1,8 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2018, 2021-2022
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -102,6 +103,8 @@ check_alias(struct sudoers_parse_tree *parse_tree,
 	    if (strict && errorfile == NULL) {
 		errorfile = sudo_rcstr_addref(file);
 		errorlineno = line;
+		errorcolumn = column;
+		/* No need to set errorstring, visudo doesn't use it. */
 	    }
 	    alias_warned_add(warned, name);
 	}

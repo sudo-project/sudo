@@ -757,15 +757,7 @@ parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
 	if ((errorfile = sudo_rcstr_dup(input_file)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
-    if (parse_error) {
-	if (errorlineno != -1)
-	    sudo_warnx(U_("parse error in %s near line %d\n"),
-		errorfile, errorlineno);
-	else if (errorfile != NULL)
-	    sudo_warnx(U_("parse error in %s\n"), errorfile);
-	debug_return_bool(false);
-    }
-    debug_return_bool(true);
+    debug_return_bool(!parse_error);
 }
 
 FILE *

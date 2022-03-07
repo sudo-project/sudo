@@ -52,7 +52,9 @@ bool sudoers_warnings = true;
 bool sudoers_strict = false;
 bool parse_error = false;
 int errorlineno = -1;
+int errorcolumn = -1;
 char *errorfile = NULL;
+char *errorstring = NULL;
 
 static int alias_line, alias_column;
 
@@ -1168,13 +1170,26 @@ group		:	ALIAS {
 void
 sudoerserrorf(const char *fmt, ...)
 {
+    va_list ap;
     debug_decl(sudoerserrorf, SUDOERS_DEBUG_PARSER);
 
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
-	errorlineno = this_lineno;
 	sudo_rcstr_delref(errorfile);
 	errorfile = sudo_rcstr_addref(sudoers);
+	errorlineno = this_lineno;
+	errorcolumn = sudolinebuf.toke_start + 1;
+	if (fmt != NULL) {
+	    va_start(ap, fmt);
+	    if (strcmp(fmt, "%s") == 0) {
+		/* Optimize common case, a single string. */
+		errorstring = strdup(_(va_arg(ap, char *)));
+	    } else {
+		if (vasprintf(&errorstring, fmt, ap) == -1)
+		    errorstring = NULL;
+	    }
+	    va_end(ap);
+	}
     }
     if (sudoers_warnings && fmt != NULL) {
 	LEXTRACE("<*> ");
@@ -1182,7 +1197,6 @@ sudoerserrorf(const char *fmt, ...)
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
 	    char *s, *tofree = NULL;
 	    int oldlocale;
-	    va_list ap;
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
@@ -1754,6 +1768,9 @@ init_parser(const char *path, bool quiet, bool strict)
 
     parse_error = false;
     errorlineno = -1;
+    errorcolumn = -1;
+    free(errorstring);
+    errorstring = NULL;
     sudo_rcstr_delref(errorfile);
     errorfile = NULL;
     sudoers_warnings = !quiet;

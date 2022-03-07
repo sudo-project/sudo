@@ -104,11 +104,12 @@ sudo_file_parse(struct sudo_nss *nss)
     error = sudoersparse();
     if (error || parse_error) {
 	if (errorlineno != -1) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("parse error in %s near line %d"), errorfile, errorlineno);
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR, N_("%s:%d:%d: %s"),
+		errorfile, errorlineno, errorcolumn,
+		errorstring ? errorstring : N_("syntax error"));
 	} else {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("parse error in %s"), errorfile);
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR, N_("%s: %s"),
+		errorfile, errorstring ? errorstring : N_("syntax error"));
 	}
 	if (error || !sudoers_recovery) {
 	    /* unrecoverable error */
