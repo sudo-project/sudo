@@ -103,7 +103,7 @@ main(int argc, char *argv[])
 		    len = maxlen = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		}
 		if (errstr != NULL) {
-		    sudo_fatalx("%s: invalid length on line %d\n", infile, lineno);
+		    sudo_fatalx("%s: invalid length on line %d", infile, lineno);
 		}
 		while (len <= maxlen) {
 		    if (len == 0)

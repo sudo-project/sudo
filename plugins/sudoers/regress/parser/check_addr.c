@@ -125,7 +125,7 @@ main(int argc, char *argv[])
 	    errors += check_addr(line + sizeof("address:") - 1);
 	    ntests++;
 	} else {
-	    sudo_warnx("unexpected data line: %s\n", line);
+	    sudo_warnx("unexpected data line: %s", line);
 	    continue;
 	}
     }
