@@ -292,17 +292,17 @@ main(int argc, char *argv[])
 	}
         break;
     case format_sudoers:
-	if (sudoersparse() != 0 || parse_error)
+	if (sudoersparse() != 0)
 	    parse_error = true;
         break;
     default:
         sudo_fatalx("error: unhandled input %d", input_format);
     }
+    if (!update_defaults(&parsed_policy, NULL, SETDEF_ALL, false))
+	parse_error = true;
+
     if (!parse_error)
 	(void) puts("Parses OK");
-
-    if (!update_defaults(&parsed_policy, NULL, SETDEF_ALL, false))
-	(void) puts("Problem with defaults entries");
 
     if (dflag) {
 	(void) putchar('\n');

@@ -161,15 +161,19 @@ sudoers_reinit_defaults(void)
     }
 
     if (!update_defaults(NULL, &initial_defaults,
-	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
 	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 	    N_("problem with defaults entries"));
 	debug_return_bool(false);
     }
 
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
-	if (nss->getdefs(nss) == -1 || !update_defaults(nss->parse_tree, NULL,
-	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	if (nss->getdefs(nss) == -1) {
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+		N_("unable to get defaults from %s"), nss->source);
+	}
+	if (!update_defaults(nss->parse_tree, NULL,
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("problem with defaults entries"));
 	    /* not a fatal error */
@@ -223,7 +227,7 @@ sudoers_init(void *info, char * const envp[])
 
     /* Update defaults set by front-end. */
     if (!update_defaults(NULL, &initial_defaults,
-	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
 	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 	    N_("problem with defaults entries"));
 	debug_return_int(-1);
@@ -243,8 +247,12 @@ sudoers_init(void *info, char * const envp[])
 	}
 
 	sources++;
-	if (nss->getdefs(nss) == -1 || !update_defaults(nss->parse_tree, NULL,
-	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	if (nss->getdefs(nss) == -1) {
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+		N_("unable to get defaults from %s"), nss->source);
+	}
+	if (!update_defaults(nss->parse_tree, NULL,
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("problem with defaults entries"));
 	}

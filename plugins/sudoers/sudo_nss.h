@@ -27,6 +27,7 @@ struct defaults_list;
 /* XXX - parse_tree, ret_if_found and ret_if_notfound should be private */
 struct sudo_nss {
     TAILQ_ENTRY(sudo_nss) entries;
+    const char *source;
     int (*open)(struct sudo_nss *nss);
     int (*close)(struct sudo_nss *nss);
     struct sudoers_parse_tree *(*parse)(struct sudo_nss *nss);

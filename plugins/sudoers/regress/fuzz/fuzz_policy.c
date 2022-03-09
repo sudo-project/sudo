@@ -660,6 +660,7 @@ sudo_file_getdefs(struct sudo_nss *nss)
 
 static struct sudo_nss sudo_nss_file = {
     { NULL, NULL },
+    "sudoers",
     sudo_file_open,
     sudo_file_close,
     sudo_file_parse,
