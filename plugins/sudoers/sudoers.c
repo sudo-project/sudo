@@ -162,8 +162,6 @@ sudoers_reinit_defaults(void)
 
     if (!update_defaults(NULL, &initial_defaults,
 	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-	    N_("problem with defaults entries"));
 	debug_return_bool(false);
     }
 
@@ -172,19 +170,16 @@ sudoers_reinit_defaults(void)
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("unable to get defaults from %s"), nss->source);
 	}
-	if (!update_defaults(nss->parse_tree, NULL,
-		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("problem with defaults entries"));
-	    /* not a fatal error */
-	}
+	/* Not a fatal error. */
+	(void)update_defaults(nss->parse_tree, NULL,
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false);
     }
 
     debug_return_int(true);
 }
 
 int
-sudoers_init(void *info, char * const envp[])
+sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 {
     struct sudo_nss *nss, *nss_next;
     int oldlocale, sources = 0;
@@ -196,6 +191,9 @@ sudoers_init(void *info, char * const envp[])
 	debug_return_int(ret);
 
     bindtextdomain("sudoers", LOCALEDIR);
+
+    /* Hook up logging function for parse errors. */
+    sudoers_error_hook = logger;
 
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(sudoers_cleanup);
@@ -228,8 +226,6 @@ sudoers_init(void *info, char * const envp[])
     /* Update defaults set by front-end. */
     if (!update_defaults(NULL, &initial_defaults,
 	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-	    N_("problem with defaults entries"));
 	debug_return_int(-1);
     }
 
@@ -251,11 +247,9 @@ sudoers_init(void *info, char * const envp[])
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("unable to get defaults from %s"), nss->source);
 	}
-	if (!update_defaults(nss->parse_tree, NULL,
-		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("problem with defaults entries"));
-	}
+	/* Not a fatal error. */
+	(void)update_defaults(nss->parse_tree, NULL,
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false);
     }
     if (sources == 0) {
 	sudo_warnx("%s", U_("no valid sudoers sources found, quitting"));
@@ -1052,10 +1046,8 @@ set_cmnd(void)
     }
 
     TAILQ_FOREACH(nss, snl, entries) {
-	if (!update_defaults(nss->parse_tree, NULL, SETDEF_CMND, false)) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("problem with defaults entries"));
-	}
+	/* Not a fatal error. */
+	(void)update_defaults(nss->parse_tree, NULL, SETDEF_CMND, false);
     }
 
     debug_return_int(ret);

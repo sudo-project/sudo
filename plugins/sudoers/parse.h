@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2021
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -361,8 +361,9 @@ void alias_put(struct alias *a);
 /* check_aliases.c */
 int check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet, int (*cb_unused)(struct sudoers_parse_tree *, struct alias *, void *));
 
-/* gram.c */
+/* gram.y */
 extern struct sudoers_parse_tree parsed_policy;
+extern bool (*sudoers_error_hook)(const char *file, int line, int column, const char *fmt, va_list args);
 bool init_parser(const char *path, bool quiet, bool strict);
 void free_member(struct member *m);
 void free_members(struct member_list *members);

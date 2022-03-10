@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -102,19 +102,9 @@ sudo_file_parse(struct sudo_nss *nss)
 
     sudoersin = handle->fp;
     error = sudoersparse();
-    if (error || parse_error) {
-	if (errorlineno != -1) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR, N_("%s:%d:%d: %s"),
-		errorfile, errorlineno, errorcolumn,
-		errorstring ? errorstring : N_("syntax error"));
-	} else {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR, N_("%s: %s"),
-		errorfile, errorstring ? errorstring : N_("syntax error"));
-	}
-	if (error || !sudoers_recovery) {
-	    /* unrecoverable error */
-	    debug_return_ptr(NULL);
-	}
+    if (error || (parse_error && !sudoers_recovery)) {
+	/* unrecoverable error */
+	debug_return_ptr(NULL);
     }
 
     /* Move parsed sudoers policy to nss handle. */

@@ -57,6 +57,8 @@ struct log_details {
 #define SLOG_NO_LOG		0x20	/* do not log via file or syslog */
 #define SLOG_AUDIT		0x40	/* send message to audit as well */
 
+typedef bool (*sudoers_logger_t)(const char *file, int line, int column, const char *fmt, va_list args);
+
 /* XXX - needed for auditing */
 extern int NewArgc;
 extern char **NewArgv;
@@ -86,5 +88,6 @@ bool sudoers_locale_callback(const union sudo_defs_val *sd_un, int op);
 void sudoers_to_eventlog(struct eventlog *evlog, char * const argv[], char *const envp[], const char *uuid_str);
 void init_eventlog_config(void);
 bool init_log_details(struct log_details *details, struct eventlog *evlog);
+bool log_parse_error(const char *file, int line, int column, const char *fmt, va_list ap) __printflike(4, 0);
 
 #endif /* SUDOERS_LOGGING_H */

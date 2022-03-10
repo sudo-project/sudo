@@ -770,6 +770,37 @@ gai_log_warning(int flags, int errnum, const char *fmt, ...)
 }
 
 /*
+ * Log and mail a parse error using log_warningx().
+ * Does not write the message to stderr.
+ */
+bool
+log_parse_error(const char *file, int line, int column, const char *fmt,
+    va_list args)
+{
+    const int flags = SLOG_SEND_MAIL|SLOG_NO_STDERR;
+    char *errstr, *tofree = NULL;
+    bool ret;
+    debug_decl(log_parse_error, SUDOERS_DEBUG_LOGGING);
+
+    if (strcmp(fmt, "%s") == 0) {
+	/* Optimize common case, a single string. */
+	errstr = _(va_arg(args, char *));
+    } else {
+	if (vasprintf(&errstr, _(fmt), args) == -1)
+	    debug_return_bool(false);
+	tofree = errstr;
+    }
+
+    if (line > 0)
+	ret = log_warningx(flags, _("%s:%d:%d: %s"), file, line, column, errstr);
+    else
+	ret = log_warningx(flags, _("%s: %s"), file, errstr);
+    free(tofree);
+
+    debug_return_bool(ret);
+}
+
+/*
  * Determine whether we should send mail based on "status" and defaults options.
  */
 static bool

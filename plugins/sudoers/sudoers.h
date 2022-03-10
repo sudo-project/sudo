@@ -310,10 +310,6 @@ int pam_prep_user(struct passwd *);
 /* gram.y */
 int sudoersparse(void);
 extern char *login_style;
-extern char *errorfile;
-extern int errorlineno;
-extern int errorcolumn;
-extern char *errorstring;
 extern bool parse_error;
 extern bool sudoers_warnings;
 extern bool sudoers_recovery;
@@ -413,7 +409,7 @@ bool matches_env_pattern(const char *pattern, const char *var, bool *full_match)
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
 int set_cmnd_path(const char *runchroot);
-int sudoers_init(void *info, char * const envp[]);
+int sudoers_init(void *info, sudoers_logger_t logger, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
 void sudo_user_free(void);

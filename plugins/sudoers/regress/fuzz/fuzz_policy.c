@@ -743,6 +743,14 @@ log_exit_status(int exit_status)
 }
 
 /* STUB */
+bool
+log_parse_error(const char *file, int line, int column, const char *fmt,
+    va_list args)
+{
+    return true;
+}
+
+/* STUB */
 int
 audit_failure(char *const argv[], char const *const fmt, ...)
 {

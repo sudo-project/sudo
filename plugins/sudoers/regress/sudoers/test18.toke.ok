@@ -6,5 +6,5 @@ WORD(6) ALL = CMND_TIMEOUT = WORD(6) <*> COMMAND
 WORD(6) ALL = CMND_TIMEOUT = WORD(6) <*> COMMAND 
 WORD(6) ALL = CMND_TIMEOUT = WORD(6) <*> COMMAND 
 WORD(6) ALL = CMND_TIMEOUT = WORD(6) <*> COMMAND 
-testsudoers: sudoers:2:26: value "2d8h10m59ss" is invalid for option "command_timeout"
-testsudoers: sudoers:3:31: value "15f" is invalid for option "command_timeout"
+sudoers:2:26: value "2d8h10m59ss" is invalid for option "command_timeout"
+sudoers:3:31: value "15f" is invalid for option "command_timeout"

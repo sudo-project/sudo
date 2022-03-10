@@ -73,6 +73,7 @@ static bool store_timespec(const char *str, struct sudo_defs_types *def);
 static bool store_rlimit(const char *str, struct sudo_defs_types *def);
 static bool list_op(const char *str, size_t, struct list_members *list, enum list_ops op);
 static bool valid_path(struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
+static bool defaults_warnx(const char *file, int line, int column, bool quiet, const char *fmt, ...) __printflike(5, 6);
 
 /*
  * Table describing compile-time and run-time options.
@@ -185,17 +186,9 @@ find_default(const char *name, const char *file, int line, int column, bool quie
 	if (strcmp(name, sudo_defs_table[i].name) == 0)
 	    debug_return_int(i);
     }
-    if (!quiet && !def_ignore_unknown_defaults) {
-	if (line > 0) {
-	    sudo_warnx(U_("%s:%d:%d: unknown defaults entry \"%s\""),
-		file, line, column + 1, name);
-	} else {
-	    sudo_warnx(U_("%s: unknown defaults entry \"%s\""),
-		file, name);
-	}
-    } else {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s: unknown defaults entry \"%s\"", __func__, name);
+    if (!def_ignore_unknown_defaults) {
+	defaults_warnx(file, line, column, quiet,
+	    N_("unknown defaults entry \"%s\""), name);
     }
     debug_return_int(-1);
 }
@@ -237,15 +230,8 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	default:
 	    if (!ISSET(def->type, T_BOOL) || op != false) {
-		if (!quiet) {
-		    if (line > 0) {
-			sudo_warnx(U_("%s:%d:%d: no value specified for \"%s\""),
-			    file, line, column, def->name);
-		    } else {
-			sudo_warnx(U_("%s: no value specified for \"%s\""),
-			    file, def->name);
-		    }
-		}
+		defaults_warnx(file, line, column, quiet,
+		    N_("no value specified for \"%s\""), def->name);
 		debug_return_bool(false);
 	    }
 	}
@@ -253,15 +239,8 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 
     /* Only lists support append/remove. */
     if ((op == '+' || op == '-') && (def->type & T_MASK) != T_LIST) {
-	if (!quiet) {
-	    if (line > 0) {
-		sudo_warnx(U_("%s:%d:%d: invalid operator \"%c=\" for \"%s\""),
-		    file, line, column, op, def->name);
-	    } else {
-		sudo_warnx(U_("%s: invalid operator \"%c=\" for \"%s\""),
-		    file, op, def->name);
-	    }
-	}
+	defaults_warnx(file, line, column, quiet,
+	    N_("invalid operator \"%c=\" for \"%s\""), op, def->name);
 	debug_return_bool(false);
     }
 
@@ -292,15 +271,8 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	case T_FLAG:
 	    if (val != NULL) {
-		if (!quiet) {
-		    if (line > 0) {
-			sudo_warnx(U_("%s:%d:%d: option \"%s\" does not take a value"),
-			    file, line, column, def->name);
-		    } else {
-			sudo_warnx(U_("%s: option \"%s\" does not take a value"),
-			    file, def->name);
-		    }
-		}
+		defaults_warnx(file, line, column, quiet,
+		    N_("option \"%s\" does not take a value"), def->name);
 		rc = -1;
 		break;
 	    }
@@ -323,28 +295,15 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    rc = store_rlimit(val, def);
 	    break;
 	default:
-	    if (!quiet) {
-		if (line > 0) {
-		    sudo_warnx(U_("%s:%d:%d: invalid Defaults type 0x%x for option \"%s\""),
-			file, line, column, def->type, def->name);
-		} else {
-		    sudo_warnx(U_("%s: invalid Defaults type 0x%x for option \"%s\""),
-			file, def->type, def->name);
-		}
-	    }
+	    defaults_warnx(file, line, column, quiet,
+		N_("invalid Defaults type 0x%x for option \"%s\""),
+		def->type, def->name);
 	    rc = -1;
 	    break;
     }
     if (rc == false) {
-	if (!quiet) {
-	    if (line > 0) {
-		sudo_warnx(U_("%s:%d:%d: value \"%s\" is invalid for option \"%s\""),
-		    file, line, column, val, def->name);
-	    } else {
-		sudo_warnx(U_("%s: value \"%s\" is invalid for option \"%s\""),
-		    file, val, def->name);
-	    }
-	}
+	defaults_warnx(file, line, column, quiet,
+	    N_("value \"%s\" is invalid for option \"%s\""), val, def->name);
     }
 
     debug_return_bool(rc == true);
@@ -1156,45 +1115,21 @@ valid_path(struct sudo_defs_types *def, const char *val,
     debug_decl(valid_path, SUDOERS_DEBUG_DEFAULTS);
 
     if (strlen(val) >= PATH_MAX) {
-	if (!quiet) {
-	    if (line > 0) {
-		sudo_warnx(U_("%s:%d:%d: path name for \"%s\" too long"),
-		    file, line, column, def->name);
-	    } else {
-		sudo_warnx(U_("%s: path name for \"%s\" too long"),
-		    file, def->name);
-	    }
-	}
+	defaults_warnx(file, line, column, quiet,
+	    N_("path name for \"%s\" too long"), def->name);
 	ret = false;
     }
     if (ISSET(def->type, T_CHPATH)) {
 	if (val[0] != '/' && val[0] != '~' && (val[0] != '*' || val[1] != '\0')) {
-	    if (!quiet) {
-		if (line > 0) {
-		    sudo_warnx(
-			U_("%s:%d:%d: values for \"%s\" must start with a '/', '~', or '*'"),
-			file, line, column, def->name);
-		} else {
-		    sudo_warnx(
-			U_("%s: values for \"%s\" must start with a '/', '~', or '*'"),
-			file, def->name);
-		}
-	    }
+	    defaults_warnx(file, line, column, quiet,
+		N_("values for \"%s\" must start with a '/', '~', or '*'"),
+		def->name);
 	    ret = false;
 	}
     } else {
 	if (val[0] != '/') {
-	    if (!quiet) {
-		if (line > 0) {
-		    sudo_warnx(
-			U_("%s:%d:%d: values for \"%s\" must start with a '/'"),
-			file, line, column, def->name);
-		} else {
-		    sudo_warnx(
-			U_("%s: values for \"%s\" must start with a '/'"),
-			file, def->name);
-		}
-	    }
+	    defaults_warnx(file, line, column, quiet,
+		N_("values for \"%s\" must start with a '/'"), def->name);
 	    ret = false;
 	}
 
@@ -1293,7 +1228,9 @@ cb_passprompt_regex(const union sudo_defs_val *sd_un, int op)
     if (op == '+' || op == true) {
 	SLIST_FOREACH(lm, &sd_un->list, entries) {
 	    if (!sudo_regex_compile(NULL, lm->value, &errstr)) {
-		sudo_warnx(U_("invalid regular expression \"%s\": %s"),
+		/* XXX - need to pass file/file/col/quiet to callbacks */
+		defaults_warnx(sudoers, -1, -1, false,
+		    U_("invalid regular expression \"%s\": %s"),
 		    lm->value, U_(errstr));
 		debug_return_bool(false);
 	    }
@@ -1301,4 +1238,42 @@ cb_passprompt_regex(const union sudo_defs_val *sd_un, int op)
     }
 
     debug_return_bool(true);
+}
+
+static bool
+defaults_warnx(const char *file, int line, int column, bool quiet,
+    const char *fmt, ...)
+{
+    bool ret = true;
+    va_list ap;
+    debug_decl(defaults_warnx, SUDOERS_DEBUG_DEFAULTS);
+
+    if (sudoers_error_hook != NULL) {
+	va_start(ap, fmt);
+	ret = sudoers_error_hook(file, line, column, fmt, ap);
+	va_end(ap);
+    }
+
+    if (!quiet) {
+	int oldlocale;
+	char *errstr;
+
+	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+	va_start(ap, fmt);
+	if (vasprintf(&errstr, _(fmt), ap) == -1) {
+	    errstr = NULL;
+	    ret = false;
+	} else if (line > 0) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), file,
+		line, column, errstr);
+	} else {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s: %s\n"), file, errstr);
+	}
+	va_end(ap);
+	sudoers_setlocale(oldlocale, NULL);
+
+	free(errstr);
+    }
+
+    debug_return_bool(ret);
 }

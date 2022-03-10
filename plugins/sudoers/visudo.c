@@ -77,6 +77,7 @@ struct sudoersfile {
     bool modified;
     bool doedit;
     int fd;
+    int errorline;
 };
 TAILQ_HEAD(sudoersfile_list, sudoersfile);
 
@@ -89,6 +90,7 @@ static char *get_editor(int *editor_argc, char ***editor_argv);
 static bool check_syntax(const char *, bool, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
 static bool install_sudoers(struct sudoersfile *, bool, bool);
+static bool visudo_track_error(const char *file, int line, int column, const char *fmt, va_list args);
 static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
 static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(char *, char **);
@@ -107,6 +109,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static bool checkonly;
+static unsigned int errors;
 static const char short_opts[] =  "cf:hOPqsVx:";
 static struct option long_opts[] = {
     { "check",		no_argument,		NULL,	'c' },
@@ -256,6 +259,9 @@ main(int argc, char *argv[])
     }
     get_hostname();
 
+    /* Hook the sudoers parser to track files with parse errors. */
+    sudoers_error_hook = visudo_track_error;
+
     /* Setup defaults data structures. */
     if (!init_defaults())
 	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
@@ -318,6 +324,28 @@ main(int argc, char *argv[])
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
+}
+
+static bool
+visudo_track_error(const char *file, int line, int column, const char *fmt,
+     va_list args)
+{
+    struct sudoersfile *sp;
+    debug_decl(visudo_track_error, SUDOERS_DEBUG_UTIL);
+
+    TAILQ_FOREACH(sp, &sudoerslist, entries) {
+	if (sp->errorline > 0)
+	    continue;		/* preserve the first error */
+
+	if (strcmp(file, sp->path) == 0 ||
+		(sp->tpath != NULL && strcmp(file, sp->tpath) == 0)) {
+	    sp->errorline = line;
+	    break;
+	}
+    }
+    errors++;
+
+    debug_return_bool(true);
 }
 
 static char *
@@ -564,7 +592,7 @@ done:
 
 /*
  * Check Defaults and Alias entries.
- * Sets parse_error on error and error{file,lineno,column} if possible.
+ * On error, visudo_track_error() will set the line number in sudoerslist.
  */
 static void
 check_defaults_and_aliases(bool strict, bool quiet)
@@ -572,21 +600,6 @@ check_defaults_and_aliases(bool strict, bool quiet)
     debug_decl(check_defaults_and_aliases, SUDOERS_DEBUG_UTIL);
 
     if (!check_defaults(&parsed_policy, quiet)) {
-	struct defaults *d;
-	sudo_rcstr_delref(errorfile);
-	errorfile = NULL;
-	errorlineno = -1;
-	errorcolumn = -1;
-	/* XXX - should edit all files with errors */
-	TAILQ_FOREACH(d, &parsed_policy.defaults, entries) {
-	    if (d->error && errorlineno == -1) {
-		/* Defaults parse error, set error{file,lineno,column}. */
-		errorfile = sudo_rcstr_addref(d->file);
-		errorlineno = d->line;
-		errorcolumn = d->column;
-		break;
-	    }
-	}
 	parse_error = true;
     }
     if (check_aliases(&parsed_policy, strict, quiet, print_unused) != 0) {
@@ -610,6 +623,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
     /*
      * Parse the edited sudoers files.
      */
+    errors = 0;
     while ((sp = TAILQ_FIRST(&sudoerslist)) != NULL) {
 	last = TAILQ_LAST(&sudoerslist, sudoersfile_list);
 	fp = fopen(sp->tpath, "r+");
@@ -621,6 +635,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	if (!init_defaults())
 	    sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 	init_parser(sp->path, quiet, true);
+	sp->errorline = -1;
 
 	/* Parse the sudoers temp file(s) */
 	sudoersrestart(fp);
@@ -629,9 +644,6 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    sudo_warnx(U_("unable to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = true;
-	    sudo_rcstr_delref(errorfile);
-	    if ((errorfile = sudo_rcstr_dup(sp->path)) == NULL)
-		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	}
 	fclose(sudoersin);
 	if (!parse_error) {
@@ -656,16 +668,10 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    default:
 		/* Edit file with the parse error */
 		TAILQ_FOREACH(sp, &sudoerslist, entries) {
-		    if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
+		    if (errors == 0 || sp->errorline > 0) {
 			edit_sudoers(sp, editor, editor_argc, editor_argv,
-			    errorlineno);
-			if (errorfile != NULL)
-			    break;
+			    sp->errorline);
 		    }
-		}
-		if (errorfile != NULL && sp == NULL) {
-		    sudo_fatalx(U_("internal error, unable to find %s in list!"),
-			sudoers);
 		}
 		break;
 	    }
@@ -959,9 +965,6 @@ check_syntax(const char *file, bool quiet, bool strict, bool check_owner,
 	if (!quiet)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), file);
 	parse_error = true;
-	sudo_rcstr_delref(errorfile);
-	if ((errorfile = sudo_rcstr_dup(file)) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     if (!parse_error) {
 	(void) update_defaults(&parsed_policy, NULL,
@@ -1186,13 +1189,9 @@ visudo_cleanup(void)
 static void
 quit(int signo)
 {
-    struct sudoersfile *sp;
     struct iovec iov[4];
 
-    TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	if (sp->tpath != NULL)
-	    (void) unlink(sp->tpath);
-    }
+    visudo_cleanup();
 
 #define	emsg	 " exiting due to signal: "
     iov[0].iov_base = (char *)getprogname();
