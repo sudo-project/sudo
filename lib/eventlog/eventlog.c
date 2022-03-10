@@ -681,8 +681,7 @@ eventlog_store_json(struct json_container *json, const struct eventlog *evlog)
     debug_decl(eventlog_store_json, SUDO_DEBUG_UTIL);
 
     /* Required settings. */
-    if (evlog == NULL || evlog->command == NULL || evlog->submituser == NULL ||
-	    evlog->runuser == NULL)
+    if (evlog == NULL || evlog->submituser == NULL)
 	debug_return_bool(false);
 
     /*
@@ -696,15 +695,19 @@ eventlog_store_json(struct json_container *json, const struct eventlog *evlog)
     if (!sudo_json_add_value(json, "submituser", &json_value))
 	goto oom;
 
-    json_value.type = JSON_STRING;
-    json_value.u.string = evlog->command;
-    if (!sudo_json_add_value(json, "command", &json_value))
-        goto oom;
+    if (evlog->command != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->command;
+	if (!sudo_json_add_value(json, "command", &json_value))
+	    goto oom;
+    }
 
-    json_value.type = JSON_STRING;
-    json_value.u.string = evlog->runuser;
-    if (!sudo_json_add_value(json, "runuser", &json_value))
-	goto oom;
+    if (evlog->runuser != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->runuser;
+	if (!sudo_json_add_value(json, "runuser", &json_value))
+	    goto oom;
+    }
 
     if (evlog->rungroup != NULL) {
 	json_value.type = JSON_STRING;
