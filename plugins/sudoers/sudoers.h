@@ -372,10 +372,10 @@ char *get_timestr(time_t, int);
 bool get_boottime(struct timespec *);
 
 /* iolog.c */
-bool cb_maxseq(const union sudo_defs_val *sd_un, int op);
-bool cb_iolog_user(const union sudo_defs_val *sd_un, int op);
-bool cb_iolog_group(const union sudo_defs_val *sd_un, int op);
-bool cb_iolog_mode(const union sudo_defs_val *sd_un, int op);
+bool cb_maxseq(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_user(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_group(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_mode(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 
 /* iolog_path_escapes.c */
 struct iolog_path_escape;
@@ -438,7 +438,7 @@ int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
-bool cb_group_plugin(const union sudo_defs_val *sd_un, int op);
+bool cb_group_plugin(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 extern const char *path_plugin_dir;
 
 /* editor.c */

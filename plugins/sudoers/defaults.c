@@ -323,13 +323,14 @@ is_early_default(const char *name)
 }
 
 static bool
-run_callback(struct sudo_defs_types *def, int op)
+run_callback(const char *file, int line, int column,
+    struct sudo_defs_types *def, int op)
 {
     debug_decl(run_callback, SUDOERS_DEBUG_DEFAULTS);
 
     if (def->callback == NULL)
 	debug_return_bool(true);
-    debug_return_bool(def->callback(&def->sd_un, op));
+    debug_return_bool(def->callback(file, line, column, &def->sd_un, op));
 }
 
 /*
@@ -351,7 +352,7 @@ set_default(const char *var, const char *val, int op, const char *file,
 	/* Set parsed value in sudo_defs_table and run callback (if any). */
 	struct sudo_defs_types *def = &sudo_defs_table[idx];
 	if (parse_default_entry(def, val, op, file, line, column, quiet))
-	    debug_return_bool(run_callback(def, op));
+	    debug_return_bool(run_callback(file, line, column, def, op));
     }
     debug_return_bool(false);
 }
@@ -372,6 +373,11 @@ set_early_default(const char *var, const char *val, int op, const char *file,
 	/* Set parsed value in sudo_defs_table but defer callback (if any). */
 	struct sudo_defs_types *def = &sudo_defs_table[idx];
 	if (parse_default_entry(def, val, op, file, line, column, quiet)) {
+	    if (early->file != NULL)
+		sudo_rcstr_delref(early->file);
+	    early->file = sudo_rcstr_addref(file);
+	    early->line = line;
+	    early->column = column;
 	    early->run_callback = true;
 	    debug_return_bool(true);
 	}
@@ -391,7 +397,8 @@ run_early_defaults(void)
 
     for (early = early_defaults; early->idx != -1; early++) {
 	if (early->run_callback) {
-	    if (!run_callback(&sudo_defs_table[early->idx], true))
+	    if (!run_callback(early->file, early->line, early->column,
+		    &sudo_defs_table[early->idx], true))
 		ret = false;
 	    early->run_callback = false;
 	}
@@ -1218,7 +1225,8 @@ oom:
 }
 
 bool
-cb_passprompt_regex(const union sudo_defs_val *sd_un, int op)
+cb_passprompt_regex(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     struct list_member *lm;
     const char *errstr;
@@ -1228,8 +1236,7 @@ cb_passprompt_regex(const union sudo_defs_val *sd_un, int op)
     if (op == '+' || op == true) {
 	SLIST_FOREACH(lm, &sd_un->list, entries) {
 	    if (!sudo_regex_compile(NULL, lm->value, &errstr)) {
-		/* XXX - need to pass file/file/col/quiet to callbacks */
-		defaults_warnx(sudoers, -1, -1, false,
+		defaults_warnx(file, line, column, false,
 		    U_("invalid regular expression \"%s\": %s"),
 		    lm->value, U_(errstr));
 		debug_return_bool(false);

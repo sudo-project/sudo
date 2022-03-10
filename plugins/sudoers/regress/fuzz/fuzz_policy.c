@@ -821,35 +821,40 @@ iolog_nextid(char *iolog_dir, char sessid[7])
 
 /* STUB */
 bool
-cb_maxseq(const union sudo_defs_val *sd_un, int op)
+cb_maxseq(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_user(const union sudo_defs_val *sd_un, int op)
+cb_iolog_user(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_group(const union sudo_defs_val *sd_un, int op)
+cb_iolog_group(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_mode(const union sudo_defs_val *sd_un, int op)
+cb_iolog_mode(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_group_plugin(const union sudo_defs_val *sd_un, int op)
+cb_group_plugin(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
