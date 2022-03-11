@@ -38,6 +38,8 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
+ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+
 /*
  * Test that sudo_getdelim() works as expected.
  */
@@ -48,7 +50,7 @@ struct getdelim_test {
     int delim;
 };
 
-static char longstr[LINE_MAX * 2];
+static char longstr[LINE_MAX * 4];
 static struct getdelim_test test_data[] = {
     { "a\nb\nc\n", { "a\n", "b\n", "c\n", NULL }, '\n' },
     { "a\nb\nc", { "a\n", "b\n", "c", NULL }, '\n' },
@@ -100,8 +102,8 @@ runtests(char **buf, size_t *buflen)
 	for (j = 0; test_data[i].output[j] != NULL; j++) {
 	    ntests++;
 	    alarm(10);
-	    if (getdelim(buf, buflen, test_data[i].delim, fp) == -1)
-		sudo_fatal_nodebug("getdelim");
+	    if (sudo_getdelim(buf, buflen, test_data[i].delim, fp) == -1)
+		sudo_fatal_nodebug("sudo_getdelim");
 	    alarm(0);
 	    if (strcmp(*buf, test_data[i].output[j]) != 0) {
 		sudo_warnx_nodebug("failed test #%d: expected %s, got %s",
@@ -113,7 +115,7 @@ runtests(char **buf, size_t *buflen)
 	/* test EOF */
 	ntests++;
 	alarm(30);
-	if (getdelim(buf, buflen, test_data[i].delim, fp) != -1) {
+	if (sudo_getdelim(buf, buflen, test_data[i].delim, fp) != -1) {
 	    sudo_warnx_nodebug("failed test #%d: expected EOF, got %s",
 		ntests, *buf);
 	    errors++;
@@ -130,7 +132,7 @@ runtests(char **buf, size_t *buflen)
 	close(fileno(fp));
 	ntests++;
 	alarm(30);
-	if (getdelim(buf, buflen, test_data[i].delim, fp) != -1) {
+	if (sudo_getdelim(buf, buflen, test_data[i].delim, fp) != -1) {
 	    sudo_warnx_nodebug("failed test #%d: expected error, got %s",
 		ntests, *buf);
 	    errors++;
@@ -172,6 +174,7 @@ main(int argc, char *argv[])
     argv += optind;
 
     runtests(&buf, &buflen);
+    free(buf);
 
     /* XXX - redo tests with preallocated buffer filled with junk */
     if (ntests != 0) {
