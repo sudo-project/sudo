@@ -34,27 +34,28 @@
  * Verify that path is the right type and not writable by other users.
  */
 static int
-sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, struct stat *sbp)
+sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, struct stat *sb)
 {
-    struct stat sb;
+    struct stat stat_buf;
     int ret = SUDO_PATH_MISSING;
     debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL);
 
-    if (path != NULL && stat(path, &sb) == 0) {
-	if ((sb.st_mode & S_IFMT) != type) {
+    if (sb == NULL)
+	sb = &stat_buf;
+
+    if (path != NULL && stat(path, sb) == 0) {
+	if ((sb->st_mode & S_IFMT) != type) {
 	    ret = SUDO_PATH_BAD_TYPE;
-	} else if (uid != (uid_t)-1 && sb.st_uid != uid) {
+	} else if (uid != (uid_t)-1 && sb->st_uid != uid) {
 	    ret = SUDO_PATH_WRONG_OWNER;
-	} else if (sb.st_mode & S_IWOTH) {
+	} else if (sb->st_mode & S_IWOTH) {
 	    ret = SUDO_PATH_WORLD_WRITABLE;
-	} else if (ISSET(sb.st_mode, S_IWGRP) &&
-	    (gid == (gid_t)-1 || sb.st_gid != gid)) {
+	} else if (ISSET(sb->st_mode, S_IWGRP) &&
+	    (gid == (gid_t)-1 || sb->st_gid != gid)) {
 	    ret = SUDO_PATH_GROUP_WRITABLE;
 	} else {
 	    ret = SUDO_PATH_SECURE;
 	}
-	if (sbp)
-	    (void) memcpy(sbp, &sb, sizeof(struct stat));
     }
 
     debug_return_int(ret);
@@ -64,16 +65,16 @@ sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, stru
  * Verify that path is a regular file and not writable by other users.
  */
 int
-sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
+sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *st)
 {
-    return sudo_secure_path(path, S_IFREG, uid, gid, sbp);
+    return sudo_secure_path(path, S_IFREG, uid, gid, st);
 }
 
 /*
  * Verify that path is a directory and not writable by other users.
  */
 int
-sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
+sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *st)
 {
-    return sudo_secure_path(path, S_IFDIR, uid, gid, sbp);
+    return sudo_secure_path(path, S_IFDIR, uid, gid, st);
 }
