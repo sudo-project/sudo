@@ -77,8 +77,11 @@ alias_warnx(const char *file, int line, int column, bool strict, bool quiet,
     va_list ap;
     debug_decl(alias_warnx, SUDOERS_DEBUG_ALIAS);
 
-    if (strict && sudoers_error_hook != NULL)
+    if (strict && sudoers_error_hook != NULL) {
+	va_start(ap, fmt);
 	ret = sudoers_error_hook(file, line, column, fmt, ap);
+	va_end(ap);
+    }
 
     if (!quiet) {
 	int oldlocale;
