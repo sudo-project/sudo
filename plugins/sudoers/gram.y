@@ -1421,7 +1421,8 @@ add_userspec(struct member *members, struct privilege *privs)
 	    "unable to allocate memory");
 	debug_return_bool(false);
     }
-    u->line = this_lineno;
+    /* We already parsed the newline so sudolineno is off by one. */
+    u->line = sudolineno - 1;
     u->column = sudolinebuf.toke_start + 1;
     u->file = sudo_rcstr_addref(sudoers);
     parser_leak_remove(LEAK_MEMBER, members);
