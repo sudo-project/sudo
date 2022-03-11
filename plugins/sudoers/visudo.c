@@ -229,8 +229,16 @@ main(int argc, char *argv[])
 	usage(1);
     }
 
-    /* Check/set owner and mode for installed sudoers file. */
-    if (!fflag) {
+    if (fflag) {
+	/* Looser owner/permission checks for an uninstalled sudoers file. */
+	if (!use_owner) {
+	    sudoers_uid = -1;
+	    sudoers_gid = -1;
+	}
+	if (!use_perms)
+	    SET(sudoers_mode, S_IWUSR);
+    } else {
+	/* Check/set owner and mode for installed sudoers file. */
 	use_owner = true;
 	use_perms = true;
     }
