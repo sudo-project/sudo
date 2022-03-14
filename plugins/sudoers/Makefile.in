@@ -435,6 +435,7 @@ run-fuzz_policy: fuzz_policy
 	    LC_ALL=C; export LC_ALL; \
 	fi; \
 	unset LANG || LANG=; \
+	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	umask 022; \
@@ -461,6 +462,7 @@ run-fuzz_sudoers: fuzz_sudoers
 	    LC_ALL=C; export LC_ALL; \
 	fi; \
 	unset LANG || LANG=; \
+	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	umask 022; \
@@ -487,6 +489,7 @@ run-fuzz_sudoers_ldif: fuzz_sudoers_ldif
 	    LC_ALL=C; export LC_ALL; \
 	fi; \
 	unset LANG || LANG=; \
+	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	umask 022; \
@@ -636,6 +639,7 @@ check-fuzzer: $(FUZZ_PROGS)
 		LC_ALL=C; export LC_ALL; \
 	    fi; \
 	    unset LANG || LANG=; \
+	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_sudoers: verifying corpus"; \
@@ -654,6 +658,7 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 		LC_ALL=C; export LC_ALL; \
 	    fi; \
 	    unset LANG || LANG=; \
+	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    umask 022; \
