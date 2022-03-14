@@ -200,8 +200,10 @@ mon_handle_sigchld(struct monitor_closure *mc)
     } while (pid == -1 && errno == EINTR);
     switch (pid) {
     case 0:
-	errno = ECHILD;
-	FALLTHROUGH;
+	/* Nothing to wait for. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
+	    __func__);
+	debug_return;
     case -1:
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;

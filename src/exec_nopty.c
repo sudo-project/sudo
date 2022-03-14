@@ -493,18 +493,23 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 
     /* Read command status. */
     do {
-	pid = waitpid(ec->cmnd_pid, &status, WUNTRACED|WNOHANG);
+	pid = waitpid(ec->cmnd_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
     switch (pid) {
     case 0:
-	/* waitpid() will return 0 for SIGCONT, which we don't care about */
+	/* Nothing to wait for. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
+	    __func__);
 	debug_return;
     case -1:
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;
     }
 
-    if (WIFSTOPPED(status)) {
+    if (WIFCONTINUED(status)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) resumed",
+	    __func__, (int)ec->cmnd_pid);
+    } else if (WIFSTOPPED(status)) {
 	/*
 	 * Save the controlling terminal's process group so we can restore it
 	 * after we resume, if needed.  Most well-behaved shells change the

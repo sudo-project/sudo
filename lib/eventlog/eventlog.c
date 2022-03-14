@@ -424,7 +424,9 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const char *cp, *timefmt = evl_conf->time_fmt;
+    struct sigaction sa;
     char timebuf[1024];
+    sigset_t chldmask;
     struct tm tm;
     time_t now;
     FILE *mail;
@@ -449,13 +451,20 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     if (localtime_r(&now, &tm) == NULL)
 	debug_return_bool(false);
 
+    /* Block SIGCHLD for the duration since we call waitpid() below. */
+    sigemptyset(&chldmask);
+    sigaddset(&chldmask, SIGCHLD);
+    (void)sigprocmask(SIG_BLOCK, &chldmask, NULL);
+
     /* Fork and return, child will daemonize. */
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
 	    sudo_warn("%s", U_("unable to fork"));
+
+	    /* Unblock SIGCHLD and return. */
+	    (void)sigprocmask(SIG_UNBLOCK, &chldmask, NULL);
 	    debug_return_bool(false);
-	    break;
 	case 0:
 	    /* Child. */
 	    switch (fork()) {
@@ -486,8 +495,19 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 	    }
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"child (%d) exit value %d", (int)rv, status);
+
+	    /* Unblock SIGCHLD and return. */
+	    (void)sigprocmask(SIG_UNBLOCK, &chldmask, NULL);
 	    debug_return_bool(true);
     }
+
+    /* Reset SIGCHLD to default and unblock it. */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_DFL;
+    (void)sigaction(SIGCHLD, &sa, NULL);
+    (void)sigprocmask(SIG_UNBLOCK, &chldmask, NULL);
 
     /* Daemonize - disassociate from session/tty. */
     if (setsid() == -1)

@@ -1049,12 +1049,14 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
      * Monitor process was signaled; wait for it as needed.
      */
     do {
-	pid = waitpid(ec->monitor_pid, &status, WUNTRACED|WNOHANG);
+	pid = waitpid(ec->monitor_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
     switch (pid) {
     case 0:
-	errno = ECHILD;
-	FALLTHROUGH;
+	/* Nothing to wait for. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
+	    __func__);
+	debug_return;
     case -1:
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;
@@ -1065,7 +1067,10 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
      * If it was stopped, we should stop too (the command keeps
      * running in its pty) and continue it when we come back.
      */
-    if (WIFSTOPPED(status)) {
+    if (WIFCONTINUED(status)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) resumed",
+	    __func__, (int)ec->monitor_pid);
+    } else if (WIFSTOPPED(status)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "monitor stopped, suspending sudo");
 	n = suspend_sudo(ec, WSTOPSIG(status));
