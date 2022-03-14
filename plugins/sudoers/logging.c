@@ -59,6 +59,14 @@
 # include "strlist.h"
 #endif
 
+struct parse_error {
+    STAILQ_ENTRY(parse_error) entries;
+    char *errstr;
+};
+STAILQ_HEAD(parse_error_list, parse_error);
+static struct parse_error_list parse_error_list =
+    STAILQ_HEAD_INITIALIZER(parse_error_list);
+
 static bool should_mail(int);
 static bool warned = false;
 
@@ -770,15 +778,91 @@ gai_log_warning(int flags, int errnum, const char *fmt, ...)
 }
 
 /*
- * Log and mail a parse error using log_warningx().
+ * Send mail about accumulated parser errors.
+ * Frees the list of parse errors when done.
+ */
+bool
+mail_parse_errors(void)
+{
+    const int evl_flags = EVLOG_MAIL|EVLOG_MAIL_ONLY|EVLOG_RAW;
+    struct parse_error *pe;
+    struct eventlog evlog;
+    char *cp, *mailbody = NULL;
+    struct timespec now;
+    size_t len, n;
+    bool ret;
+    debug_decl(mail_parse_errors, SUDOERS_DEBUG_LOGGING);
+
+    if (STAILQ_EMPTY(&parse_error_list))
+	debug_return_bool(true);
+
+    if (sudo_gettime_real(&now) == -1) {
+	sudo_warn("%s", U_("unable to get time of day"));
+	ret = false;
+	goto done;
+    }
+    sudoers_to_eventlog(&evlog, NewArgv, env_get(), sudo_user.uuid_str);
+
+    len = sizeof(_("problem parsing sudoers"));
+    STAILQ_FOREACH(pe, &parse_error_list, entries) {
+	len += strlen(_(pe->errstr)) + 1;
+    }
+    mailbody = malloc(len);
+    if (mailbody == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	ret = false;
+	goto done;
+    }
+    cp = mailbody;
+
+    n = strlcpy(cp, _("problem parsing sudoers"), len);
+    if (n >= len) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
+	ret = false;
+	goto done;
+    }
+    cp += n;
+    len -= n;
+
+    STAILQ_FOREACH(pe, &parse_error_list, entries) {
+	n = snprintf(cp, len, "\n%s", _(pe->errstr));
+	if (n >= len) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    ret = false;
+	    goto done;
+	}
+	cp += n;
+	len -= n;
+    }
+
+    ret = eventlog_alert(&evlog, evl_flags, &now, mailbody, NULL);
+    if (!log_server_alert(&evlog, &now, mailbody, NULL,
+	    sudoers_policy.event_alloc)) {
+	ret = false;
+    }
+
+done:
+    free(mailbody);
+    while ((pe = STAILQ_FIRST(&parse_error_list)) != NULL) {
+	STAILQ_REMOVE_HEAD(&parse_error_list, entries);
+	free(pe->errstr);
+	free(pe);
+    }
+    debug_return_bool(ret);
+}
+
+/*
+ * Log a parse error using log_warningx().
+ * Journals the message to be mailed after parsing is complete.
  * Does not write the message to stderr.
  */
 bool
 log_parse_error(const char *file, int line, int column, const char *fmt,
     va_list args)
 {
-    const int flags = SLOG_SEND_MAIL|SLOG_NO_STDERR;
+    const int flags = SLOG_RAW_MSG|SLOG_NO_STDERR;
     char *errstr, *tofree = NULL;
+    struct parse_error *pe;
     bool ret;
     debug_decl(log_parse_error, SUDOERS_DEBUG_LOGGING);
 
@@ -791,10 +875,31 @@ log_parse_error(const char *file, int line, int column, const char *fmt,
 	tofree = errstr;
     }
 
-    if (line > 0)
-	ret = log_warningx(flags, _("%s:%d:%d: %s"), file, line, column, errstr);
-    else
-	ret = log_warningx(flags, _("%s: %s"), file, errstr);
+    if (line > 0) {
+	ret = log_warningx(flags, N_("%s:%d:%d: %s"), file, line, column,
+	    errstr);
+    } else {
+	ret = log_warningx(flags, N_("%s: %s"), file, errstr);
+    }
+
+    /* Journal parse error for later mailing. */
+    pe = malloc(sizeof(*pe));
+    if (pe != NULL) {
+	int len;
+
+	if (line > 0) {
+	    len = asprintf(&pe->errstr, _("%s:%d:%d: %s"), file, line, column,
+		errstr);
+	} else {
+	    len = asprintf(&pe->errstr, _("%s: %s"), file, errstr);
+	}
+	if (len != -1) {
+	    STAILQ_INSERT_TAIL(&parse_error_list, pe, entries);
+	} else {
+	    free(pe);
+	}
+    }
+
     free(tofree);
 
     debug_return_bool(ret);

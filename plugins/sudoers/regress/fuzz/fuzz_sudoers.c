@@ -110,6 +110,13 @@ set_cmnd_path(const char *runchroot)
 
 /* STUB */
 bool
+mail_parse_errors(void)
+{
+    return true;
+}
+
+/* STUB */
+bool
 log_warningx(int flags, const char *fmt, ...)
 {
     return true;

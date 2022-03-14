@@ -744,6 +744,13 @@ log_exit_status(int exit_status)
 
 /* STUB */
 bool
+mail_parse_errors(void)
+{
+    return true;
+}
+
+/* STUB */
+bool
 log_parse_error(const char *file, int line, int column, const char *fmt,
     va_list args)
 {

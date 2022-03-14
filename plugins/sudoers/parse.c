@@ -434,7 +434,7 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
 	    *cmnd_status = info.status;
 	}
 	if (defs != NULL)
-	    update_defaults(parse_tree, defs, SETDEF_GENERIC, false);
+	    (void)update_defaults(parse_tree, defs, SETDEF_GENERIC, false);
 	if (!apply_cmndspec(cs))
 	    SET(validated, VALIDATE_ERROR);
 	else if (match == ALLOW)

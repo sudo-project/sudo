@@ -89,5 +89,6 @@ void sudoers_to_eventlog(struct eventlog *evlog, char * const argv[], char *cons
 void init_eventlog_config(void);
 bool init_log_details(struct log_details *details, struct eventlog *evlog);
 bool log_parse_error(const char *file, int line, int column, const char *fmt, va_list ap) __printflike(4, 0);
+bool mail_parse_errors(void);
 
 #endif /* SUDOERS_LOGGING_H */

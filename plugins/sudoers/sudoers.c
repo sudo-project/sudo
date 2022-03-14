@@ -149,6 +149,12 @@ restore_nproc(void)
 #endif /* __linux__ */
 }
 
+/*
+ * Re-initialize Defaults settings.
+ * We do not send mail for errors when reinitializing, mail would have
+ * already been sent the first time.
+ * TODO: prevent Defaults error logging too
+ */
 static bool
 sudoers_reinit_defaults(void)
 {
@@ -161,21 +167,21 @@ sudoers_reinit_defaults(void)
     }
 
     if (!update_defaults(NULL, &initial_defaults,
-	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false))
 	debug_return_bool(false);
-    }
 
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
+	/* Missing/invalid defaults is not a fatal error. */
 	if (nss->getdefs(nss) == -1) {
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("unable to get defaults from %s"), nss->source);
+	} else {
+	    (void)update_defaults(nss->parse_tree, NULL,
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false);
 	}
-	/* Not a fatal error. */
-	(void)update_defaults(nss->parse_tree, NULL,
-	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false);
     }
 
-    debug_return_int(true);
+    debug_return_bool(true);
 }
 
 int
@@ -223,33 +229,33 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
     if (!set_perms(PERM_ROOT))
 	debug_return_int(-1);
 
+    /* Use the C locale unless another is specified in sudoers. */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+    sudo_warn_set_locale_func(sudoers_warn_setlocale);
+
     /* Update defaults set by front-end. */
     if (!update_defaults(NULL, &initial_defaults,
 	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-	debug_return_int(-1);
+	goto cleanup;
     }
 
-    /*
-     * Open and parse sudoers, set global defaults.
-     * Uses the C locale unless another is specified in sudoers.
-     */
-    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-    sudo_warn_set_locale_func(sudoers_warn_setlocale);
+    /* Open and parse sudoers, set global defaults.  */
     init_parser(sudoers_file, false, false);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
 	if (nss->open(nss) == -1 || (nss->parse_tree = nss->parse(nss)) == NULL) {
 	    TAILQ_REMOVE(snl, nss, entries);
 	    continue;
 	}
-
 	sources++;
+
+	/* Missing/invalid defaults is not a fatal error. */
 	if (nss->getdefs(nss) == -1) {
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("unable to get defaults from %s"), nss->source);
+	} else {
+	    (void)update_defaults(nss->parse_tree, NULL,
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false);
 	}
-	/* Not a fatal error. */
-	(void)update_defaults(nss->parse_tree, NULL,
-	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false);
     }
     if (sources == 0) {
 	sudo_warnx("%s", U_("no valid sudoers sources found, quitting"));
@@ -261,6 +267,8 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 	ret = true;
 
 cleanup:
+    mail_parse_errors();
+
     if (!restore_perms())
 	ret = -1;
 
@@ -806,6 +814,8 @@ bad:
     ret = false;
 
 done:
+    mail_parse_errors();
+
     if (def_group_plugin)
 	group_plugin_unload();
     init_parser(NULL, false, false);
@@ -1046,7 +1056,7 @@ set_cmnd(void)
     }
 
     TAILQ_FOREACH(nss, snl, entries) {
-	/* Not a fatal error. */
+	/* Missing/invalid defaults is not a fatal error. */
 	(void)update_defaults(nss->parse_tree, NULL, SETDEF_CMND, false);
     }
 
