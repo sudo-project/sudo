@@ -151,14 +151,14 @@ restore_nproc(void)
 
 /*
  * Re-initialize Defaults settings.
- * We do not send mail for errors when reinitializing, mail would have
- * already been sent the first time.
- * TODO: prevent Defaults error logging too
+ * We do not warn, log or send mail for errors when reinitializing,
+ * this would have already been done the first time through.
  */
 static bool
 sudoers_reinit_defaults(void)
 {
     struct sudo_nss *nss, *nss_next;
+    sudoers_logger_t logger = sudoers_error_hook;
     debug_decl(sudoers_reinit_defaults, SUDOERS_DEBUG_PLUGIN);
 
     if (!init_defaults()) {
@@ -166,20 +166,24 @@ sudoers_reinit_defaults(void)
 	debug_return_bool(false);
     }
 
+    /* It should not be possible for the initial defaults to fail to apply. */
     if (!update_defaults(NULL, &initial_defaults,
 	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false))
 	debug_return_bool(false);
 
+    /* Disable error logging while re-processing defaults. */
+    sudoers_error_hook = NULL;
+
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
 	/* Missing/invalid defaults is not a fatal error. */
-	if (nss->getdefs(nss) == -1) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("unable to get defaults from %s"), nss->source);
-	} else {
+	if (nss->getdefs(nss) != -1) {
 	    (void)update_defaults(nss->parse_tree, NULL,
-		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false);
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, true);
 	}
     }
+
+    /* Restore error logging. */
+    sudoers_error_hook = logger;
 
     debug_return_bool(true);
 }
