@@ -189,7 +189,7 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);
 	va_end(ap);
 	if (len >= 0 && crnl != NULL) {
-	    len += fwrite(crnl, 1, 2, fp);
+	    len += fwrite(crnl, 1, 2, ttyfp ? ttyfp : fp);
 	}
 	break;
     default:
