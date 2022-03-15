@@ -154,8 +154,10 @@ sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
 int
 sudo_conversation_printf(int msg_type, const char *fmt, ...)
 {
-    FILE *fp = stdout;
+    const char *crnl = NULL;
     FILE *ttyfp = NULL;
+    FILE *fp = stdout;
+    char fmt2[1024];
     va_list ap;
     int len;
     const int conv_debug_instance = sudo_debug_get_active_instance();
@@ -173,9 +175,22 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 	fp = stderr;
 	FALLTHROUGH;
     case SUDO_CONV_INFO_MSG:
+	/* Convert nl -> cr nl in case tty is in raw mode. */
+	len = strlen(fmt);
+	if (len < ssizeof(fmt2) && len > 0 && fmt[len - 1] == '\n') {
+	    if (len == 1 || fmt[len - 2] != '\r') {
+		memcpy(fmt2, fmt, len - 1);
+		fmt2[len - 1] = '\0';
+		fmt = fmt2;
+		crnl = "\r\n";
+	    }
+	}
 	va_start(ap, fmt);
 	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);
 	va_end(ap);
+	if (len >= 0 && crnl != NULL) {
+	    len += fwrite(crnl, 1, 2, fp);
+	}
 	break;
     default:
 	len = -1;
