@@ -92,8 +92,8 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     static char	*krb5_prompt;
     debug_decl(sudo_krb5_init, SUDOERS_DEBUG_AUTH);
 
-    /* Don't set prompt if user has set a custom one with -p */
-    if (promptp && strcmp(*promptp, PASSPROMPT)) {
+    /* Don't overrride the prompt if the user specified their own. */
+    if (strcmp(*promptp, PASSPROMPT) != 0) {
         debug_return_int(AUTH_SUCCESS);
     }
 
@@ -117,14 +117,11 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 	    debug_return_int(AUTH_FAILURE);
 	}
 
-	/* Only rewrite prompt if user didn't specify their own. */
-	/*if (!strcmp(prompt, PASSPROMPT)) { */
-	    if (asprintf(&krb5_prompt, "Password for %s: ", pname) == -1) {
-		log_warningx(0, N_("unable to allocate memory"));
-		free(pname);
-		debug_return_int(AUTH_FATAL);
-	    }
-	/*}*/
+	if (asprintf(&krb5_prompt, "Password for %s: ", pname) == -1) {
+	    log_warningx(0, N_("unable to allocate memory"));
+	    free(pname);
+	    debug_return_int(AUTH_FATAL);
+	}
 	free(pname);
     }
     *promptp = krb5_prompt;
