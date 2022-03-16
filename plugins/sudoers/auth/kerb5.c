@@ -92,6 +92,11 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     static char	*krb5_prompt;
     debug_decl(sudo_krb5_init, SUDOERS_DEBUG_AUTH);
 
+    /* Don't set prompt if user has set a custom one with -p */
+    if (promptp && strcmp(*promptp, PASSPROMPT)) {
+        debug_return_int(AUTH_SUCCESS);
+    }
+
     if (krb5_prompt == NULL) {
 	krb5_context	sudo_context;
 	krb5_principal	princ;
