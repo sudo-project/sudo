@@ -318,7 +318,7 @@ case "$osversion" in
 	for f in /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /lib/libaudit.so.[0-9]*; do
 	    if [ -f "$f" ]; then
 		linux_audit=`dpkg-query -S "$f" 2>/dev/null | sed -n 's/:.*//p'`
-		test -n "$linux_audit" && break;
+		test -n "$linux_audit" && break
 	    fi
 	done
 	if [ -z "$linux_audit" ]; then
@@ -383,7 +383,7 @@ case "$osversion" in
     aix*)
 	# TODO: openssl (AIX freeware?)
 	# Use -gxcoff with gcc instead of -g for dbx-style debugging symbols.
-	if [ -z "$CC" && gcc -v >/dev/null 2>&1 ]; then
+	if test -z "$CC" && gcc -v >/dev/null 2>&1; then
 	    CFLAGS="-O2 -gxcoff"; export CFLAGS
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
