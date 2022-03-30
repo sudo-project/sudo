@@ -23522,8 +23522,16 @@ openssl_missing=no
 if test "${enable_openssl-no}" != no; then
     # Use pkg-config to find the openssl cflags and libs if possible.
     if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
-	PKG_CONFIG_LIBDIR="${enable_openssl}/lib/pkgconfig:${enable_openssl}/lib64/pkgconfig:${enable_openssl}/share/pkgconfig"
-	export PKG_CONFIG_LIBDIR
+	PKG_CONFIG_LIBDIR=
+	for d in ${enable_openssl}/*/pkgconfig; do
+	    if test -d "$d"; then
+		PKG_CONFIG_LIBDIR="$PKG_CONFIG_LIBDIR:$d"
+	    fi
+	done
+	if test -n "$PKG_CONFIG_LIBDIR"; then
+	    PKG_CONFIG_LIBDIR=${PKG_CONFIG_LIBDIR#:}
+	    export PKG_CONFIG_LIBDIR
+	fi
     elif test "$cross_compiling" = "yes" -a -z "$PKG_CONFIG"; then
 	# Cannot use pkg-config when cross-compiling
 	PKG_CONFIG=false
@@ -24294,7 +24302,7 @@ fi
 	LDFLAGS="$O_LDFLAGS"
     fi
     if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
-	unset PKG_CONFIG_LIBDIRS
+	unset PKG_CONFIG_LIBDIR
     fi
 fi
 if test "${enable_openssl-no}" != no; then
