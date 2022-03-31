@@ -3019,17 +3019,13 @@ if test "${enable_openssl-no}" != no; then
 	    enable_openssl=yes
 	fi
 
+	# Check whether --static is needed (don't assume name of ssl lib)
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
-	# Check whether --static is needed (don't assume name of ssl lib)
 	libssl="`$PKG_CONFIG --libs-only-l $pkg_openssl | sed 's/^ *-l//'`"
-	libssl_extra=`echo $libssl | sed 's/^[[^ ]]* *//'`
-	libssl=`echo $libssl | sed 's/ .*//'`
+	libssl_extra="`echo $libssl | sed 's/^[[^ ]]* *//'`"
+	libssl="`echo $libssl | sed 's/ .*//'`"
 	AC_CHECK_LIB($libssl, SSL_new, [STATIC=""], [STATIC="--static"], [$libssl_extra])
-
-	# Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
-	libcrypto="`$PKG_CONFIG --libs-only-l $pkg_libcrypto | sed -e 's/^ *-l//' -e 's/ .*//'`"
-	AC_CHECK_LIB($libcrypto, EVP_MD_CTX_new, [DIGEST=digest_openssl.lo])
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
@@ -3045,7 +3041,16 @@ if test "${enable_openssl-no}" != no; then
 	    esac
 	done
 	if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
-	    LIBCRYPTO=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
+	    # Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
+	    O_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS `$PKG_CONFIG $STATIC --libs-only-L $pkg_openssl`"
+	    libcrypto="`$PKG_CONFIG $STATIC --libs-only-l $pkg_libcrypto | sed 's/^ *-l//'`"
+	    libcrypto_extra="`echo $libcrypto | sed 's/^[[^ ]]* *//'`"
+	    libcrypto="`echo $libcrypto | sed 's/ .*//'`"
+	    AC_CHECK_LIB($libcrypto, EVP_MD_CTX_new, [DIGEST=digest_openssl.lo], [], [$libcrypto_extra])
+	    LDFLAGS="$O_LDFLAGS"
+
+	    # Use pkg-config to determine libcrypto libs and cflags
 	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
 		case "$f" in
 		    -L*)

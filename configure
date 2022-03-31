@@ -23546,12 +23546,12 @@ if test "${enable_openssl-no}" != no; then
 	    enable_openssl=yes
 	fi
 
+	# Check whether --static is needed (don't assume name of ssl lib)
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
-	# Check whether --static is needed (don't assume name of ssl lib)
 	libssl="`$PKG_CONFIG --libs-only-l $pkg_openssl | sed 's/^ *-l//'`"
-	libssl_extra=`echo $libssl | sed 's/^[^ ]* *//'`
-	libssl=`echo $libssl | sed 's/ .*//'`
+	libssl_extra="`echo $libssl | sed 's/^[^ ]* *//'`"
+	libssl="`echo $libssl | sed 's/ .*//'`"
 	as_ac_Lib=`printf "%s\n" "ac_cv_lib_$libssl''_SSL_new$libssl_extra" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SSL_new in -l$libssl" >&5
 printf %s "checking for SSL_new in -l$libssl... " >&6; }
@@ -23594,51 +23594,6 @@ then :
   STATIC=""
 else $as_nop
   STATIC="--static"
-fi
-
-
-	# Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
-	libcrypto="`$PKG_CONFIG --libs-only-l $pkg_libcrypto | sed -e 's/^ *-l//' -e 's/ .*//'`"
-	as_ac_Lib=`printf "%s\n" "ac_cv_lib_$libcrypto''_EVP_MD_CTX_new" | $as_tr_sh`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_new in -l$libcrypto" >&5
-printf %s "checking for EVP_MD_CTX_new in -l$libcrypto... " >&6; }
-if eval test \${$as_ac_Lib+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$libcrypto  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-char EVP_MD_CTX_new ();
-int
-main (void)
-{
-return EVP_MD_CTX_new ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  eval "$as_ac_Lib=yes"
-else $as_nop
-  eval "$as_ac_Lib=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-eval ac_res=\$$as_ac_Lib
-	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-printf "%s\n" "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_Lib"\" = x"yes"
-then :
-  DIGEST=digest_openssl.lo
 fi
 
 	LDFLAGS="$O_LDFLAGS"
@@ -23757,7 +23712,57 @@ fi
 	    esac
 	done
 	if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
-	    LIBCRYPTO=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
+	    # Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
+	    O_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS `$PKG_CONFIG $STATIC --libs-only-L $pkg_openssl`"
+	    libcrypto="`$PKG_CONFIG $STATIC --libs-only-l $pkg_libcrypto | sed 's/^ *-l//'`"
+	    libcrypto_extra="`echo $libcrypto | sed 's/^[^ ]* *//'`"
+	    libcrypto="`echo $libcrypto | sed 's/ .*//'`"
+	    as_ac_Lib=`printf "%s\n" "ac_cv_lib_$libcrypto''_EVP_MD_CTX_new$libcrypto_extra" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_new in -l$libcrypto" >&5
+printf %s "checking for EVP_MD_CTX_new in -l$libcrypto... " >&6; }
+if eval test \${$as_ac_Lib+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$libcrypto $libcrypto_extra $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char EVP_MD_CTX_new ();
+int
+main (void)
+{
+return EVP_MD_CTX_new ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  eval "$as_ac_Lib=yes"
+else $as_nop
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"
+then :
+  DIGEST=digest_openssl.lo
+fi
+
+	    LDFLAGS="$O_LDFLAGS"
+
+	    # Use pkg-config to determine libcrypto libs and cflags
 	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
 		case "$f" in
 		    -L*)
