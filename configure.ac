@@ -107,8 +107,8 @@ AC_SUBST([ASAN_LDFLAGS])
 AC_SUBST([ASAN_CFLAGS])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
-AC_SUBST([SSP_LDFLAGS])
-AC_SUBST([SSP_CFLAGS])
+AC_SUBST([HARDENING_LDFLAGS])
+AC_SUBST([HARDENING_CFLAGS])
 AC_SUBST([INIT_SCRIPT])
 AC_SUBST([INIT_DIR])
 AC_SUBST([RC_LINK])
@@ -4893,18 +4893,18 @@ if test "$enable_hardening" != "no" && test "$enable_ssp" != "no"; then
 	]
     )
     if test X"$sudo_cv_var_stack_protector" != X"no"; then
-	SSP_CFLAGS="$sudo_cv_var_stack_protector"
-	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
+	HARDENING_CFLAGS="$sudo_cv_var_stack_protector"
+	HARDENING_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
 fi
 if test "$enable_hardening" != "no"; then
     AX_CHECK_LINK_FLAG([-fstack-clash-protection], [
-	AX_APPEND_FLAG([-fstack-clash-protection], [SSP_CFLAGS])
-	AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [SSP_LDFLAGS])
+	AX_APPEND_FLAG([-fstack-clash-protection], [HARDENING_CFLAGS])
+	AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [HARDENING_LDFLAGS])
     ])
     AX_CHECK_LINK_FLAG([-fcf-protection], [
-	AX_APPEND_FLAG([-fcf-protection], [SSP_CFLAGS])
-	AX_APPEND_FLAG([-Wc,-fcf-protection], [SSP_LDFLAGS])
+	AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
+	AX_APPEND_FLAG([-Wc,-fcf-protection], [HARDENING_LDFLAGS])
     ])
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
     AX_CHECK_LINK_FLAG([-Wl,-z,now], [AX_APPEND_FLAG([-Wl,-z,now], [LDFLAGS])])

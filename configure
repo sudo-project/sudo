@@ -793,8 +793,8 @@ COMPAT_EXP
 RC_LINK
 INIT_DIR
 INIT_SCRIPT
-SSP_CFLAGS
-SSP_LDFLAGS
+HARDENING_CFLAGS
+HARDENING_LDFLAGS
 PIE_CFLAGS
 PIE_LDFLAGS
 ASAN_CFLAGS
@@ -31742,8 +31742,8 @@ fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_stack_protector" >&5
 printf "%s\n" "$sudo_cv_var_stack_protector" >&6; }
     if test X"$sudo_cv_var_stack_protector" != X"no"; then
-	SSP_CFLAGS="$sudo_cv_var_stack_protector"
-	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
+	HARDENING_CFLAGS="$sudo_cv_var_stack_protector"
+	HARDENING_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
 fi
 if test "$enable_hardening" != "no"; then
@@ -31783,21 +31783,21 @@ if test x"$ax_cv_check_ldflags___fstack_clash_protection" = xyes
 then :
 
 
-if test ${SSP_CFLAGS+y}
+if test ${HARDENING_CFLAGS+y}
 then :
 
-  case " $SSP_CFLAGS " in #(
+  case " $HARDENING_CFLAGS " in #(
   *" -fstack-clash-protection "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS already contains -fstack-clash-protection"; } >&5
-  (: SSP_CFLAGS already contains -fstack-clash-protection) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS already contains -fstack-clash-protection"; } >&5
+  (: HARDENING_CFLAGS already contains -fstack-clash-protection) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SSP_CFLAGS " -fstack-clash-protection"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS=\"\$SSP_CFLAGS\""; } >&5
-  (: SSP_CFLAGS="$SSP_CFLAGS") 2>&5
+     as_fn_append HARDENING_CFLAGS " -fstack-clash-protection"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
+  (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -31806,9 +31806,9 @@ esac
 
 else $as_nop
 
-  SSP_CFLAGS=-fstack-clash-protection
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS=\"\$SSP_CFLAGS\""; } >&5
-  (: SSP_CFLAGS="$SSP_CFLAGS") 2>&5
+  HARDENING_CFLAGS=-fstack-clash-protection
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
+  (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -31816,21 +31816,21 @@ else $as_nop
 fi
 
 
-if test ${SSP_LDFLAGS+y}
+if test ${HARDENING_LDFLAGS+y}
 then :
 
-  case " $SSP_LDFLAGS " in #(
+  case " $HARDENING_LDFLAGS " in #(
   *" -Wc,-fstack-clash-protection "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS already contains -Wc,-fstack-clash-protection"; } >&5
-  (: SSP_LDFLAGS already contains -Wc,-fstack-clash-protection) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS already contains -Wc,-fstack-clash-protection"; } >&5
+  (: HARDENING_LDFLAGS already contains -Wc,-fstack-clash-protection) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SSP_LDFLAGS " -Wc,-fstack-clash-protection"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS=\"\$SSP_LDFLAGS\""; } >&5
-  (: SSP_LDFLAGS="$SSP_LDFLAGS") 2>&5
+     as_fn_append HARDENING_LDFLAGS " -Wc,-fstack-clash-protection"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
+  (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -31839,9 +31839,9 @@ esac
 
 else $as_nop
 
-  SSP_LDFLAGS=-Wc,-fstack-clash-protection
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS=\"\$SSP_LDFLAGS\""; } >&5
-  (: SSP_LDFLAGS="$SSP_LDFLAGS") 2>&5
+  HARDENING_LDFLAGS=-Wc,-fstack-clash-protection
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
+  (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -31889,21 +31889,21 @@ if test x"$ax_cv_check_ldflags___fcf_protection" = xyes
 then :
 
 
-if test ${SSP_CFLAGS+y}
+if test ${HARDENING_CFLAGS+y}
 then :
 
-  case " $SSP_CFLAGS " in #(
+  case " $HARDENING_CFLAGS " in #(
   *" -fcf-protection "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS already contains -fcf-protection"; } >&5
-  (: SSP_CFLAGS already contains -fcf-protection) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS already contains -fcf-protection"; } >&5
+  (: HARDENING_CFLAGS already contains -fcf-protection) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SSP_CFLAGS " -fcf-protection"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS=\"\$SSP_CFLAGS\""; } >&5
-  (: SSP_CFLAGS="$SSP_CFLAGS") 2>&5
+     as_fn_append HARDENING_CFLAGS " -fcf-protection"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
+  (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -31912,9 +31912,9 @@ esac
 
 else $as_nop
 
-  SSP_CFLAGS=-fcf-protection
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_CFLAGS=\"\$SSP_CFLAGS\""; } >&5
-  (: SSP_CFLAGS="$SSP_CFLAGS") 2>&5
+  HARDENING_CFLAGS=-fcf-protection
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
+  (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -31922,21 +31922,21 @@ else $as_nop
 fi
 
 
-if test ${SSP_LDFLAGS+y}
+if test ${HARDENING_LDFLAGS+y}
 then :
 
-  case " $SSP_LDFLAGS " in #(
+  case " $HARDENING_LDFLAGS " in #(
   *" -Wc,-fcf-protection "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS already contains -Wc,-fcf-protection"; } >&5
-  (: SSP_LDFLAGS already contains -Wc,-fcf-protection) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS already contains -Wc,-fcf-protection"; } >&5
+  (: HARDENING_LDFLAGS already contains -Wc,-fcf-protection) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append SSP_LDFLAGS " -Wc,-fcf-protection"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS=\"\$SSP_LDFLAGS\""; } >&5
-  (: SSP_LDFLAGS="$SSP_LDFLAGS") 2>&5
+     as_fn_append HARDENING_LDFLAGS " -Wc,-fcf-protection"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
+  (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -31945,9 +31945,9 @@ esac
 
 else $as_nop
 
-  SSP_LDFLAGS=-Wc,-fcf-protection
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SSP_LDFLAGS=\"\$SSP_LDFLAGS\""; } >&5
-  (: SSP_LDFLAGS="$SSP_LDFLAGS") 2>&5
+  HARDENING_LDFLAGS=-Wc,-fcf-protection
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
+  (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
