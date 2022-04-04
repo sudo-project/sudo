@@ -3020,6 +3020,7 @@ if test "${enable_openssl-no}" != no; then
 	fi
 
 	# Check whether --static is needed (don't assume name of ssl lib)
+	# There may be dependent libraries or -pthread.
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
 	libssl="`$PKG_CONFIG --libs-only-l $pkg_openssl | sed 's/^ *-l//'`"
@@ -3043,10 +3044,22 @@ if test "${enable_openssl-no}" != no; then
 	if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
 	    # Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
 	    O_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS `$PKG_CONFIG $STATIC --libs-only-L $pkg_openssl`"
-	    libcrypto="`$PKG_CONFIG $STATIC --libs-only-l $pkg_libcrypto | sed 's/^ *-l//'`"
-	    libcrypto_extra="`echo $libcrypto | sed 's/^[[^ ]]* *//'`"
-	    libcrypto="`echo $libcrypto | sed 's/ .*//'`"
+	    libcrypto=
+	    libcrypto_extra=
+	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
+		case "$f" in
+		    -l*)
+			if test -z "$libcrypto"; then
+			    libcrypto="${f#-l}"
+			else
+			    libcrypto_extra="$libcrypto_extra $f"
+			fi
+			;;
+		    *)
+			AX_APPEND_FLAG([$f], [LDFLAGS])
+			;;
+		    esac
+	    done
 	    AC_CHECK_LIB($libcrypto, EVP_MD_CTX_new, [DIGEST=digest_openssl.lo], [], [$libcrypto_extra])
 	    LDFLAGS="$O_LDFLAGS"
 

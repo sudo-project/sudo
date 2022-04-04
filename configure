@@ -23685,6 +23685,7 @@ if test "${enable_openssl-no}" != no; then
 	fi
 
 	# Check whether --static is needed (don't assume name of ssl lib)
+	# There may be dependent libraries or -pthread.
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
 	libssl="`$PKG_CONFIG --libs-only-l $pkg_openssl | sed 's/^ *-l//'`"
@@ -23852,10 +23853,54 @@ fi
 	if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
 	    # Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
 	    O_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS `$PKG_CONFIG $STATIC --libs-only-L $pkg_openssl`"
-	    libcrypto="`$PKG_CONFIG $STATIC --libs-only-l $pkg_libcrypto | sed 's/^ *-l//'`"
-	    libcrypto_extra="`echo $libcrypto | sed 's/^[^ ]* *//'`"
-	    libcrypto="`echo $libcrypto | sed 's/ .*//'`"
+	    libcrypto=
+	    libcrypto_extra=
+	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
+		case "$f" in
+		    -l*)
+			if test -z "$libcrypto"; then
+			    libcrypto="${f#-l}"
+			else
+			    libcrypto_extra="$libcrypto_extra $f"
+			fi
+			;;
+		    *)
+
+if test ${LDFLAGS+y}
+then :
+
+  case " $LDFLAGS " in #(
+  *" $f "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains \$f"; } >&5
+  (: LDFLAGS already contains $f) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " $f"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  LDFLAGS=$f
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+			;;
+		    esac
+	    done
 	    as_ac_Lib=`printf "%s\n" "ac_cv_lib_$libcrypto''_EVP_MD_CTX_new$libcrypto_extra" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_new in -l$libcrypto" >&5
 printf %s "checking for EVP_MD_CTX_new in -l$libcrypto... " >&6; }
