@@ -2447,9 +2447,20 @@ AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_t
 ])]
 break)
 #
-# Check for large file support.
+# Check for large file and 64-bit time support.
+# GNU libc only allows setting _TIME_BITS when FILE_OFFSET_BITS is also set.
+# GNU libc defines __TIMESIZE on systems where _TIME_BITS can be set.
 #
 AC_SYS_LARGEFILE
+if test X"$ac_cv_sys_file_offset_bits" = X"yes"; then
+    AC_CHECK_DECL(__TIMESIZE, [
+	AC_DEFINE([_TIME_BITS], [64], [Number of bits in a time_t, on hosts where this is settable.])
+    ], [], [
+AC_INCLUDES_DEFAULT
+#include <time.h>
+    ])
+fi
+
 #
 # HP-UX may need to define _XOPEN_SOURCE_EXTENDED to expose MSG_WAITALL.
 # Also, HP-UX 11.23 has a broken sys/types.h when large files support

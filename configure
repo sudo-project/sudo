@@ -19341,7 +19341,9 @@ fi
 
 done
 #
-# Check for large file support.
+# Check for large file and 64-bit time support.
+# GNU libc only allows setting _TIME_BITS when FILE_OFFSET_BITS is also set.
+# GNU libc defines __TIMESIZE on systems where _TIME_BITS can be set.
 #
 # Check whether --enable-largefile was given.
 if test ${enable_largefile+y}
@@ -19545,6 +19547,22 @@ printf "%s\n" "#define _LARGE_FILES $ac_cv_sys_large_files" >>confdefs.h
 esac
 rm -rf conftest*
   fi
+fi
+
+if test X"$ac_cv_sys_file_offset_bits" = X"yes"; then
+    ac_fn_check_decl "$LINENO" "__TIMESIZE" "ac_cv_have_decl___TIMESIZE" "
+$ac_includes_default
+#include <time.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl___TIMESIZE" = xyes
+then :
+
+
+printf "%s\n" "#define _TIME_BITS 64" >>confdefs.h
+
+
+fi
 fi
 
 #
