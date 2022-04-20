@@ -75,9 +75,15 @@ It just says "Sorry, try again." three times and exits.
     Account expired or PAM config lacks an 'account' section for sudo,
     contact your system administrator`
 
-> when the account has not expired, your PAM config probably lacks
-> an 'account' specification.  On Linux this usually means you are
-> missing a line in /etc/pam.d/sudo similar to:
+> double-check the `/etc/shadow` file to verify that the target user
+> (for example, root) does not have the password expiration field set.
+> A common way to disable access to an account is to set the expiration
+> date to 1, such as via `usermod -e 1`.  If the account is marked as
+> expired, sudo will not allow you to access it.
+>
+> If, however, the account has not expired, it is possible that the PAM
+> configuration lacks an 'account' specification.  On Linux this usually
+> means you are missing a line in /etc/pam.d/sudo similar to:
 
     account    required    pam_unix.so
 
