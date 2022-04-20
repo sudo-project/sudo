@@ -43,11 +43,7 @@
 #include "sudo_plugin_int.h"
 
 struct monitor_closure {
-    pid_t cmnd_pid;
-    pid_t cmnd_pgrp;
-    pid_t mon_pgrp;
-    int backchannel;
-    struct command_status *cstat;
+    struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *errpipe_event;
     struct sudo_event *backchannel_event;
@@ -59,6 +55,11 @@ struct monitor_closure {
     struct sudo_event *sigusr1_event;
     struct sudo_event *sigusr2_event;
     struct sudo_event *sigchld_event;
+    struct command_status *cstat;
+    pid_t cmnd_pid;
+    pid_t cmnd_pgrp;
+    pid_t mon_pgrp;
+    int backchannel;
 };
 
 static bool tty_initialized;
@@ -443,11 +444,13 @@ exec_cmnd_pty(struct command_details *details, bool foreground,
  */
 static void
 fill_exec_closure_monitor(struct monitor_closure *mc,
-    struct command_status *cstat, int errfd, int backchannel)
+    struct command_details *details, struct command_status *cstat,
+    int errfd, int backchannel)
 {
     debug_decl(fill_exec_closure_monitor, SUDO_DEBUG_EXEC);
     
     /* Fill in the non-event part of the closure. */
+    mc->details = details;
     mc->cstat = cstat;
     mc->backchannel = backchannel;
     mc->mon_pgrp = getpgrp();
@@ -658,7 +661,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * Create new event base and register read events for the
      * signal pipe, error pipe, and backchannel.
      */
-    fill_exec_closure_monitor(&mc, &cstat, errpipe[0], backchannel);
+    fill_exec_closure_monitor(&mc, details, &cstat, errpipe[0], backchannel);
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, oset, NULL);
