@@ -36,7 +36,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <termios.h>
 
 #include "sudo.h"
 #include "sudo_exec.h"
@@ -517,11 +516,8 @@ intercept_read(int fd, struct intercept_closure *closure)
 {
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     InterceptRequest *req = NULL;
-    pid_t saved_pgrp = -1;
-    struct termios oterm;
     ssize_t nread;
     bool ret = false;
-    int ttyfd = -1;
     debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
     if (closure->state == RECV_SECRET) {
@@ -619,24 +615,7 @@ unpack:
 	    goto done;
 	}
 
-	/* Take back control of the tty, if necessary, for the policy check. */
-	ttyfd = open(_PATH_TTY, O_RDWR);
-	if (ttyfd != -1) {
-	    saved_pgrp = tcgetpgrp(ttyfd);
-	    if (saved_pgrp == -1 || tcsetpgrp(ttyfd, getpgid(0)) == -1 ||
-		    tcgetattr(ttyfd, &oterm) == -1) {
-		close(ttyfd);
-		ttyfd = -1;
-	    }
-	}
-
 	ret = intercept_check_policy(req->u.policy_check_req, closure);
-
-	/* We must restore tty before any error handling. */
-	if (ttyfd != -1) {
-	    (void)tcsetattr(ttyfd, TCSASOFT|TCSAFLUSH, &oterm);
-	    (void)tcsetpgrp(ttyfd, saved_pgrp);
-	}
 	if (!ret)
 	    goto done;
 	break;
@@ -675,8 +654,6 @@ unpack:
     ret = true;
 
 done:
-    if (ttyfd != -1)
-	close(ttyfd);
     intercept_request__free_unpacked(req, NULL);
     debug_return_bool(ret);
 }

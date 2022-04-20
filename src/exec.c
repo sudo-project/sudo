@@ -322,7 +322,7 @@ sudo_needs_pty(struct command_details *details)
 {
     struct plugin_container *plugin;
 
-    if (ISSET(details->flags, CD_USE_PTY|CD_INTERCEPT|CD_LOG_SUBCMDS))
+    if (ISSET(details->flags, CD_USE_PTY))
 	return true;
 
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
