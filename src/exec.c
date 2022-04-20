@@ -93,18 +93,18 @@ exec_setup(struct command_details *details, int intercept_fd, int errfd)
 #ifdef HAVE_PRIV_SET
 	if (details->privs != NULL) {
 	    if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
-		sudo_warn("unable to set privileges");
+		sudo_warn("%s", U_("unable to set privileges"));
 		goto done;
 	    }
 	}
 	if (details->limitprivs != NULL) {
 	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
-		sudo_warn("unable to set limit privileges");
+		sudo_warn("%s", U_("unable to set limit privileges"));
 		goto done;
 	    }
 	} else if (details->privs != NULL) {
 	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
-		sudo_warn("unable to set limit privileges");
+		sudo_warn("%s", U_("unable to set limit privileges"));
 		goto done;
 	    }
 	}
