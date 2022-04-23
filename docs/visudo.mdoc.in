@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 16, 2022
+.Dd April 23, 2022
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -129,7 +129,7 @@ is typically run as root so this option may allow a user with
 privileges to run arbitrary commands as root without logging.
 An alternative is to place a colon-separated list of
 .Dq safe
-editors int the
+editors in the
 .Em editor
 variable.
 .Nm
