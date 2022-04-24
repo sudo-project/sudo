@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -358,13 +358,8 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 		msg->type_case, "ClientMessage", closure->journal_path);
 	    break;
 	}
-	if (delay != NULL) {
+	if (delay != NULL)
 	    update_elapsed_time(delay, &closure->elapsed_time);
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"%s: elapsed time now [%lld, %ld]", closure->journal_path,
-		(long long)closure->elapsed_time.tv_sec,
-		closure->elapsed_time.tv_nsec);
-	}
 
 	if (sudo_timespeccmp(&closure->elapsed_time, target, >=)) {
 	    if (sudo_timespeccmp(&closure->elapsed_time, target, ==)) {
@@ -577,6 +572,8 @@ journal_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
 {
     debug_decl(journal_suspend, SUDO_DEBUG_UTIL);
 
+    update_elapsed_time(msg->delay, &closure->elapsed_time);
+
     debug_return_bool(journal_write(buf, len, closure));
 }
 
@@ -588,6 +585,8 @@ journal_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     debug_decl(journal_winsize, SUDO_DEBUG_UTIL);
+
+    update_elapsed_time(msg->delay, &closure->elapsed_time);
 
     debug_return_bool(journal_write(buf, len, closure));
 }

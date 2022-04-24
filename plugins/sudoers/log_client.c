@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1531,10 +1531,13 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: commit point: [%lld, %d]",
-	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec);
     closure->committed.tv_sec = commit_point->tv_sec;
     closure->committed.tv_nsec = commit_point->tv_nsec;
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: received [%lld, %d], elapsed [%lld, %ld], committed [%lld, %ld]",
+	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec,
+	(long long)closure->elapsed.tv_sec, closure->elapsed.tv_nsec,
+	(long long)closure->committed.tv_sec, closure->committed.tv_nsec);
 
     if (closure->state == CLOSING) {
 	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
@@ -1715,7 +1718,9 @@ server_msg_cb(int fd, int what, void *v)
 
             switch (SSL_get_error(closure->ssl, nread)) {
 		case SSL_ERROR_ZERO_RETURN:
-		    /* ssl connection shutdown cleanly */
+		    /* TLS connection shutdown cleanly */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"TLS connection shut down cleanly");
 		    nread = 0;
 		    break;
                 case SSL_ERROR_WANT_READ:
@@ -1876,7 +1881,9 @@ client_msg_cb(int fd, int what, void *v)
 
             switch (SSL_get_error(closure->ssl, nwritten)) {
 		case SSL_ERROR_ZERO_RETURN:
-		    /* ssl connection shutdown */
+		    /* TLS connection shutdown cleanly */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"TLS connection shut down cleanly");
 		    goto bad;
                 case SSL_ERROR_WANT_READ:
 		    /* ssl wants to read, read event always active */
