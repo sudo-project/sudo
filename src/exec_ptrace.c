@@ -48,6 +48,9 @@
 # include <linux/seccomp.h>
 # include <linux/filter.h>
 
+/* Align address to a word boundary. */
+#define WORDALIGN(_a)	(((_a) + (sizeof(long) - 1L)) & ~(sizeof(long) - 1L))
+
 /*
  * See syscall(2) for a list of registers used in system calls.
  * For example code, see tools/testing/selftests/seccomp/seccomp_bpf.c
@@ -61,6 +64,7 @@
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->orig_rax
 # define reg_retval(x)		(x)->rax
+# define reg_sp(x)		(x)->rsp
 # define reg_arg1(x)		(x)->rdi
 # define reg_arg2(x)		(x)->rsi
 # define reg_arg3(x)		(x)->rdx
@@ -68,6 +72,7 @@
 #elif defined(__aarch64__)
 # define reg_syscall(x)		(x)->regs[8]	/* w8 */
 # define reg_retval(x)		(x)->regs[0]	/* x0 */
+# define reg_sp(x)		(x)->sp		/* sp */
 # define reg_arg1(x)		(x)->regs[0]	/* x0 */
 # define reg_arg2(x)		(x)->regs[1]	/* x1 */
 # define reg_arg3(x)		(x)->regs[2]	/* x2 */
@@ -78,6 +83,7 @@
 # define user_pt_regs		pt_regs
 # define reg_syscall(x)		(x)->ARM_r7
 # define reg_retval(x)		(x)->ARM_r0
+# define reg_sp(x)		(x)->ARM_sp
 # define reg_arg1(x)		(x)->ARM_r0
 # define reg_arg2(x)		(x)->ARM_r1
 # define reg_arg3(x)		(x)->ARM_r2
@@ -87,6 +93,7 @@
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->gr[20]	/* r20 */
 # define reg_retval(x)		(x)->gr[28]	/* r28 */
+# define reg_sp(x)		(x)->gr[30]	/* r30 */
 # define reg_arg1(x)		(x)->gr[26]	/* r26 */
 # define reg_arg2(x)		(x)->gr[25]	/* r25 */
 # define reg_arg3(x)		(x)->gr[24]	/* r24 */
@@ -95,6 +102,7 @@
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->orig_eax
 # define reg_retval(x)		(x)->eax
+# define reg_sp(x)		(x)->esp
 # define reg_arg1(x)		(x)->ebx
 # define reg_arg2(x)		(x)->ecx
 # define reg_arg3(x)		(x)->edx
@@ -104,6 +112,7 @@
 # define user_pt_regs		pt_regs
 # define reg_syscall(x)		(x)->gpr[0]	/* r0 */
 # define reg_retval(x)		(x)->gpr[3]	/* r3 */
+# define reg_sp(x)		(x)->gpr[1]	/* r1 */
 # define reg_arg1(x)		(x)->gpr[3]	/* r3 */
 # define reg_arg2(x)		(x)->gpr[4]	/* r4 */
 # define reg_arg3(x)		(x)->gpr[5]	/* r5 */
@@ -113,6 +122,7 @@
 # define user_pt_regs		pt_regs
 # define reg_syscall(x)		(x)->gpr[0]	/* r0 */
 # define reg_retval(x)		(x)->gpr[3]	/* r3 */
+# define reg_sp(x)		(x)->gpr[1]	/* r1 */
 # define reg_arg1(x)		(x)->gpr[3]	/* r3 */
 # define reg_arg2(x)		(x)->gpr[4]	/* r4 */
 # define reg_arg3(x)		(x)->gpr[5]	/* r5 */
@@ -122,6 +132,7 @@
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->a7
 # define reg_retval(x)		(x)->a0
+# define reg_sp(x)		(x)->sp
 # define reg_arg1(x)		(x)->a0
 # define reg_arg2(x)		(x)->a1
 # define reg_arg3(x)		(x)->a2
@@ -131,6 +142,7 @@
 # define user_pt_regs		s390_regs
 # define reg_syscall(x)		(x)->gprs[1]	/* r1 */
 # define reg_retval(x)		(x)->gprs[2]	/* r2 */
+# define reg_sp(x)		(x)->gprs[15]	/* r15 */
 # define reg_arg1(x)		(x)->gprs[2]	/* r2 */
 # define reg_arg2(x)		(x)->gprs[3]	/* r3 */
 # define reg_arg3(x)		(x)->gprs[4]	/* r4 */
@@ -154,9 +166,10 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
 
     /* Read the string via ptrace(2) one word at a time. */
     for (;;) {
-	word = ptrace(PTRACE_PEEKTEXT, pid, addr, NULL);
+	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	if (word == -1) {
-	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, 0x%lx, NULL)", pid, addr);
+	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
+		(int)pid, addr);
 	    debug_return_ssize_t(-1);
 	}
 
@@ -166,11 +179,11 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
 	    if (bufsize == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "%s: %d: out of space reading string", __func__, (int)pid);
-		debug_return_ssize_t(-1);
+		debug_return_size_t(-1);
 	    }
 	    *buf = cp[i];
 	    if (*buf++ == '\0')
-		debug_return_ssize_t(buf - buf0);
+		debug_return_size_t(buf - buf0);
 	    bufsize--;
 	}
 	addr += sizeof(long);
@@ -192,10 +205,11 @@ ptrace_read_vec(pid_t pid, long addr, char **vec, char *buf, size_t bufsize)
 
     /* Fill in vector. */
     for (;;) {
-	long word = ptrace(PTRACE_PEEKTEXT, pid, addr, NULL);
+	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	switch (word) {
 	case -1:
-	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, 0x%lx, NULL)", pid, addr);
+	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
+		(int)pid, addr);
 	    goto bad;
 	case 0:
 	    vec[len] = NULL;
@@ -229,10 +243,11 @@ ptrace_get_vec_len(pid_t pid, long addr)
     debug_decl(ptrace_get_vec_len, SUDO_DEBUG_EXEC);
 
     for (;;) {
-	long word = ptrace(PTRACE_PEEKTEXT, pid, addr, NULL);
+	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	switch (word) {
 	case -1:
-	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, 0x%lx, NULL)", pid, addr);
+	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
+		(int)pid, addr);
 	    debug_return_int(-1);
 	case 0:
 	    debug_return_int(len);
@@ -241,6 +256,43 @@ ptrace_get_vec_len(pid_t pid, long addr)
 	    addr += sizeof(word);
 	    continue;
 	}
+    }
+}
+
+/*
+ * Write the NUL-terminated string str to addr in the tracee.
+ * The number of bytes written will be rounded up to the nearest
+ * word, with extra bytes set to NUL.
+ * Returns the number of bytes written, including trailing NULs.
+ */
+static size_t
+ptrace_write_string(pid_t pid, long addr, const char *str)
+{
+    long start_addr = addr;
+    unsigned int i;
+    union {
+	long word;
+	char buf[sizeof(long)];
+    } u;
+    debug_decl(ptrace_write_string, SUDO_DEBUG_EXEC);
+
+    /* Write the string via ptrace(2) one word at a time. */
+    for (;;) {
+	for (i = 0; i < sizeof(u.buf); i++) {
+	    if (*str == '\0') {
+		u.buf[i] = '\0';
+	    } else {
+		u.buf[i] = *str++;
+	    }
+	}
+	if (ptrace(PTRACE_POKEDATA, pid, addr, u.word) == -1) {
+	    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, %.*s)",
+		pid, addr, (int)sizeof(u.buf), u.buf);
+	    debug_return_size_t(-1);
+	}
+	addr += sizeof(long);
+	if (*str == '\0')
+	    debug_return_size_t(addr - start_addr);
     }
 }
 
@@ -527,7 +579,7 @@ exec_ptrace_seize(pid_t child)
  * Reads current registers and execve(2) arguments.
  * If the command is not allowed by policy, fail with EACCES.
  * If the command is allowed, update argv if needed before continuing.
- * Returns false on error, else true.
+ * Returns true on success and false on error.
  */
 static bool
 ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
@@ -535,6 +587,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     char *pathname, **argv, **envp, *buf;
     struct user_pt_regs regs;
     char cwd[PATH_MAX];
+    bool ret = false;
     int argc, envc;
     debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
 
@@ -567,9 +620,9 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	 * Update argv if the policy modified it.
 	 * We don't currently ever modify envp.
 	 */
+	int i;
 	bool match = strcmp(pathname, closure->command) == 0;
 	if (match) {
-	    int i;
 	    for (i = 0; closure->run_argv[i] != NULL && argv[i] != NULL; i++) {
 		if (strcmp(closure->run_argv[i], argv[i]) != 0) {
 		    match = false;
@@ -578,17 +631,75 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    }
 	}
 	if (!match) {
-	    /* Need to replace argv with run_argv. */
-	    /* XXX */
+	    /*
+	     * Need to replace argv with run_argv.  We can use space below
+	     * the stack pointer to store the new copy of argv.
+	     * On amd64 there is a 128 byte red zone that must be avoided.
+	     * Note: on pa-risc the stack grows up, not down.
+	     */
+	    long sp = reg_sp(&regs) - 128;
+	    long new_argv, strtab;
+	    struct iovec iov;
+	    size_t len;
+
+	    /* Calculate the amount of space required for argv + strings. */
+	    size_t argv_size = sizeof(long);
+	    for (argc = 0; closure->run_argv[argc] != NULL; argc++) {
+		/* Align length to word boundary to simplify writes. */
+		len = WORDALIGN(strlen(closure->run_argv[argc]) + 1);
+	    	argv_size += sizeof(long) + len;
+	    }
+
+	    /* Reserve stack space for argv (w/ NULL) and its strings. */
+	    sp -= argv_size;
+	    new_argv = sp;
+	    strtab = sp + ((argc + 1) * sizeof(long));
+
+	    /* Copy new argv into tracee one word at a time. */
+	    for (i = 0; i < argc; i++) {
+		/* Store string address as new_argv[i]. */
+		if (ptrace(PTRACE_POKEDATA, pid, sp, strtab) == -1) {
+		    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
+			pid, sp, strtab);
+		    goto done;
+		}
+		sp += sizeof(long);
+
+		/* Write new_argv[i] to the string table. */
+		len = ptrace_write_string(pid, strtab, closure->run_argv[i]);
+		if (len == (size_t)-1)
+		    goto done;
+		strtab += len;
+	    }
+
+	    /* Write terminating NULL pointer. */
+	    if (ptrace(PTRACE_POKEDATA, pid, sp, NULL) == -1) {
+		sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
+		    (int)pid, sp);
+		goto done;
+	    }
+
+	    /* Update argv address in the tracee to our new value. */
+	    iov.iov_base = &regs;
+	    iov.iov_len = sizeof(regs);
+	    reg_arg2(&regs) = new_argv;
+	    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
+		sudo_warn(U_("unable to set registers for process %d"),
+		    (int)pid);
+		goto done;
+	    }
 	}
     } else {
 	/* If denied, fake the syscall and set return to EACCES */
 	ptrace_fail_syscall(pid, &regs, EACCES);
     }
 
+    ret = true;
+
+done:
     intercept_closure_reset(closure);
 
-    debug_return_bool(true);
+    debug_return_bool(ret);
 }
 
 /*
