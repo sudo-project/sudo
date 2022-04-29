@@ -487,133 +487,145 @@ static void
 handle_sigchld_nopty(struct exec_closure_nopty *ec)
 {
     pid_t pid;
-    int status;
+    int status, wflags = WUNTRACED|WNOHANG;
     char signame[SIG2STR_MAX];
     debug_decl(handle_sigchld_nopty, SUDO_DEBUG_EXEC);
 
-    /* Read command status. */
-    do {
-	pid = waitpid(ec->cmnd_pid, &status, WUNTRACED|WNOHANG);
-    } while (pid == -1 && errno == EINTR);
-    switch (pid) {
-    case -1:
-	if (errno != ECHILD) {
-	    sudo_warn(U_("%s: %s"), __func__, "waitpid");
+    /* There may be multiple children in intercept mode. */
+    for (;;) {
+	/* Read command status. */
+	do {
+	    pid = waitpid(-1, &status, wflags);
+	} while (pid == -1 && errno == EINTR);
+	switch (pid) {
+	case -1:
+	    if (errno != ECHILD) {
+		sudo_warn(U_("%s: %s"), __func__, "waitpid");
+		debug_return;
+	    }
+	    FALLTHROUGH;
+	case 0:
+	    /* Nothing left to wait for. */
 	    debug_return;
 	}
-	FALLTHROUGH;
-    case 0:
-	/* Nothing to wait for. */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
-	    __func__);
-	debug_return;
-    }
 
-    if (WIFSTOPPED(status)) {
-	/*
-	 * Save the controlling terminal's process group so we can restore it
-	 * after we resume, if needed.  Most well-behaved shells change the
-	 * pgrp back to its original value before suspending so we must
-	 * not try to restore in that case, lest we race with the command upon
-	 * resume, potentially stopping sudo with SIGTTOU while the command
-	 * continues to run.
-	 */
-	struct sigaction sa, osa;
-	pid_t saved_pgrp = -1;
-	int fd, signo = WSTOPSIG(status);
+	if (WIFSTOPPED(status)) {
+	    struct sigaction sa, osa;
+	    pid_t saved_pgrp = -1;
+	    int fd, signo = WSTOPSIG(status);
 
-	if (sig2str(signo, signame) == -1)
-	    (void)snprintf(signame, sizeof(signame), "%d", signo);
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
-	    __func__, (int)ec->cmnd_pid, signame);
+	    if (sig2str(signo, signame) == -1)
+		(void)snprintf(signame, sizeof(signame), "%d", signo);
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"%s: command (%d) stopped, SIG%s", __func__, (int)pid, signame);
 
-	fd = open(_PATH_TTY, O_RDWR);
-	if (fd != -1) {
-	    saved_pgrp = tcgetpgrp(fd);
-	    if (saved_pgrp == -1) {
-		close(fd);
-		fd = -1;
-	    }
-	}
-	if (saved_pgrp != -1) {
+	    /* Only report status for the main command. */
+	    if (ec->cmnd_pid != pid)
+		continue;
+
 	    /*
-	     * Command was stopped trying to access the controlling terminal.
-	     * If the command has a different pgrp and we own the controlling
-	     * terminal, give it to the command's pgrp and let it continue.
+	     * Save the controlling terminal's process group so we can restore
+	     * it after we resume, if needed.  Most well-behaved shells change
+	     * the pgrp back to its original value before suspending so we must
+	     * not try to restore in that case, lest we race with the command
+	     * upon resume, potentially stopping sudo with SIGTTOU while the
+	     * command continues to run.
 	     */
-	    if (signo == SIGTTOU || signo == SIGTTIN) {
-		if (saved_pgrp == ec->ppgrp) {
-		    pid_t cmnd_pgrp = getpgid(ec->cmnd_pid);
-		    if (cmnd_pgrp != ec->ppgrp) {
-			if (tcsetpgrp_nobg(fd, cmnd_pgrp) == 0) {
-			    if (killpg(cmnd_pgrp, SIGCONT) != 0) {
-				sudo_warn("kill(%d, SIGCONT)",
-				    (int)cmnd_pgrp);
+	    fd = open(_PATH_TTY, O_RDWR);
+	    if (fd != -1) {
+		saved_pgrp = tcgetpgrp(fd);
+		if (saved_pgrp == -1) {
+		    close(fd);
+		    fd = -1;
+		}
+	    }
+	    if (saved_pgrp != -1) {
+		/*
+		 * Command was stopped trying to access the controlling
+		 * terminal.  If the command has a different pgrp and we
+		 * own the controlling terminal, give it to the command's
+		 * pgrp and let it continue.
+		 */
+		if (signo == SIGTTOU || signo == SIGTTIN) {
+		    if (saved_pgrp == ec->ppgrp) {
+			pid_t cmnd_pgrp = getpgid(ec->cmnd_pid);
+			if (cmnd_pgrp != ec->ppgrp) {
+			    if (tcsetpgrp_nobg(fd, cmnd_pgrp) == 0) {
+				if (killpg(cmnd_pgrp, SIGCONT) != 0) {
+				    sudo_warn("kill(%d, SIGCONT)",
+					(int)cmnd_pgrp);
+				}
+				close(fd);
+				continue;
 			    }
-			    close(fd);
-			    goto done;
 			}
 		    }
 		}
 	    }
-	}
-	if (signo == SIGTSTP) {
-	    memset(&sa, 0, sizeof(sa));
-	    sigemptyset(&sa.sa_mask);
-	    sa.sa_flags = SA_RESTART;
-	    sa.sa_handler = SIG_DFL;
-	    if (sudo_sigaction(SIGTSTP, &sa, &osa) != 0) {
-		sudo_warn(U_("unable to set handler for signal %d"),
-		    SIGTSTP);
+	    if (signo == SIGTSTP) {
+		memset(&sa, 0, sizeof(sa));
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = SA_RESTART;
+		sa.sa_handler = SIG_DFL;
+		if (sudo_sigaction(SIGTSTP, &sa, &osa) != 0) {
+		    sudo_warn(U_("unable to set handler for signal %d"),
+			SIGTSTP);
+		}
 	    }
-	}
-	if (kill(getpid(), signo) != 0)
-	    sudo_warn("kill(%d, SIG%s)", (int)getpid(), signame);
-	if (signo == SIGTSTP) {
-	    if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0) {
-		sudo_warn(U_("unable to restore handler for signal %d"),
-		    SIGTSTP);
+	    if (kill(getpid(), signo) != 0)
+		sudo_warn("kill(%d, SIG%s)", (int)getpid(), signame);
+	    if (signo == SIGTSTP) {
+		if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0) {
+		    sudo_warn(U_("unable to restore handler for signal %d"),
+			SIGTSTP);
+		}
 	    }
-	}
-	if (saved_pgrp != -1) {
-	    /*
-	     * On resume, restore foreground process group, if different.
-	     * Otherwise, we cannot resume some shells (pdksh).
-	     *
-	     * It is possible that we are no longer the foreground process so
-	     * use tcsetpgrp_nobg() to prevent sudo from receiving SIGTTOU.
-	     */
-	    if (saved_pgrp != ec->ppgrp)
-		tcsetpgrp_nobg(fd, saved_pgrp);
-	    close(fd);
-	}
-    } else {
-	/* Command has exited or been killed, we are done. */
-	if (WIFSIGNALED(status)) {
-	    if (sig2str(WTERMSIG(status), signame) == -1)
-		(void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
-		__func__, (int)ec->cmnd_pid, signame);
-	} else if (WIFEXITED(status)) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) exited: %d",
-		__func__, (int)ec->cmnd_pid, WEXITSTATUS(status));
+	    if (saved_pgrp != -1) {
+		/*
+		 * On resume, restore foreground process group, if different.
+		 * Otherwise, we cannot resume some shells (pdksh).
+		 *
+		 * It is possible that we are no longer the foreground process,
+		 * use tcsetpgrp_nobg() to prevent sudo from receiving SIGTTOU.
+		 */
+		if (saved_pgrp != ec->ppgrp)
+		    tcsetpgrp_nobg(fd, saved_pgrp);
+		close(fd);
+	    }
 	} else {
-	    sudo_debug_printf(SUDO_DEBUG_WARN,
-		"%s: unexpected wait status 0x%x for command (%d)",
-		__func__, status, (int)ec->cmnd_pid);
-	}
+	    if (WIFSIGNALED(status)) {
+		if (sig2str(WTERMSIG(status), signame) == -1) {
+		    (void)snprintf(signame, sizeof(signame), "%d",
+			WTERMSIG(status));
+		}
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "%s: command (%d) killed, SIG%s", __func__,
+		    (int)pid, signame);
+	    } else if (WIFEXITED(status)) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "%s: command (%d) exited: %d", __func__,
+		    (int)pid, WEXITSTATUS(status));
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_WARN,
+		    "%s: unexpected wait status 0x%x for process %d",
+		    __func__, status, (int)pid);
+	    }
 
-	/* Don't overwrite execve() failure with command exit status. */
-	if (ec->cstat->type == CMD_INVALID) {
-	    ec->cstat->type = CMD_WSTATUS;
-	    ec->cstat->val = status;
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_WARN,
-		"%s: not overwriting command status %d,%d with %d,%d",
-		__func__, ec->cstat->type, ec->cstat->val, CMD_WSTATUS, status);
+	    /* Only report status for the main command. */
+	    if (ec->cmnd_pid != pid)
+		continue;
+
+	    /* Don't overwrite execve() failure with command exit status. */
+	    if (ec->cstat->type == CMD_INVALID) {
+		ec->cstat->type = CMD_WSTATUS;
+		ec->cstat->val = status;
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_WARN,
+		    "%s: not overwriting command status %d,%d with %d,%d",
+		    __func__, ec->cstat->type, ec->cstat->val,
+		    CMD_WSTATUS, status);
+	    }
+	    ec->cmnd_pid = -1;
 	}
-	ec->cmnd_pid = -1;
     }
-done:
-    debug_return;
 }

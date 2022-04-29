@@ -1041,60 +1041,63 @@ backchannel_cb(int fd, int what, void *v)
 static void
 handle_sigchld_pty(struct exec_closure_pty *ec)
 {
-    int n, status;
+    int n, status, wflags = WUNTRACED|WNOHANG;
     pid_t pid;
     debug_decl(handle_sigchld_pty, SUDO_DEBUG_EXEC);
 
-    /*
-     * Monitor process was signaled; wait for it as needed.
-     */
-    do {
-	pid = waitpid(ec->monitor_pid, &status, WUNTRACED|WNOHANG);
-    } while (pid == -1 && errno == EINTR);
-    switch (pid) {
-    case -1:
-	if (errno != ECHILD) {
-	    sudo_warn(U_("%s: %s"), __func__, "waitpid");
+    /* There may be multiple children in intercept mode. */
+    for (;;) {
+	do {
+	    pid = waitpid(-1, &status, wflags);
+	} while (pid == -1 && errno == EINTR);
+	switch (pid) {
+	case -1:
+	    if (errno != ECHILD) {
+		sudo_warn(U_("%s: %s"), __func__, "waitpid");
+		debug_return;
+	    }
+	    FALLTHROUGH;
+	case 0:
+	    /* Nothing left to wait for. */
 	    debug_return;
 	}
-	FALLTHROUGH;
-    case 0:
-	/* Nothing to wait for. */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
-	    __func__);
-	debug_return;
-    }
 
-    /*
-     * If the monitor dies we get notified via backchannel_cb().
-     * If it was stopped, we should stop too (the command keeps
-     * running in its pty) and continue it when we come back.
-     */
-    if (WIFSTOPPED(status)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "monitor stopped, suspending sudo");
-	n = suspend_sudo(ec, WSTOPSIG(status));
-	kill(pid, SIGCONT);
-	schedule_signal(ec, n);
-	/* Re-enable I/O events */
-	add_io_events(ec->evbase);
-    } else if (WIFSIGNALED(status)) {
-	char signame[SIG2STR_MAX];
-	if (sig2str(WTERMSIG(status), signame) == -1)
-	    (void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) killed, SIG%s",
-	    __func__, (int)ec->monitor_pid, signame);
-	ec->monitor_pid = -1;
-    } else if (WIFEXITED(status)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: monitor exited, status %d", __func__, WEXITSTATUS(status));
-	ec->monitor_pid = -1;
-    } else {
-	sudo_debug_printf(SUDO_DEBUG_WARN,
-	    "%s: unexpected wait status 0x%x for monitor (%d)",
-	    __func__, status, (int)ec->monitor_pid);
+	if (WIFEXITED(status)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: process %d exited: %d",
+		__func__, (int)pid, WEXITSTATUS(status));
+	    if (pid == ec->monitor_pid)
+		ec->monitor_pid = -1;
+	} else if (WIFSIGNALED(status)) {
+	    char signame[SIG2STR_MAX];
+
+	    if (sig2str(WTERMSIG(status), signame) == -1)
+		(void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: process %d killed, SIG%s",
+		__func__, (int)pid, signame);
+	    if (pid == ec->monitor_pid)
+		ec->monitor_pid = -1;
+	} else if (WIFSTOPPED(status)) {
+	    if (pid != ec->monitor_pid)
+		continue;
+
+	    /*
+	     * If the monitor dies we get notified via backchannel_cb().
+	     * If it was stopped, we should stop too (the command keeps
+	     * running in its pty) and continue it when we come back.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"monitor stopped, suspending sudo");
+	    n = suspend_sudo(ec, WSTOPSIG(status));
+	    kill(pid, SIGCONT);
+	    schedule_signal(ec, n);
+	    /* Re-enable I/O events */
+	    add_io_events(ec->evbase);
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_WARN,
+		"%s: unexpected wait status 0x%x for process (%d)",
+		__func__, status, (int)pid);
+	}
     }
-    debug_return;
 }
 
 /* Signal callback */
