@@ -62,9 +62,9 @@
  * For example code, see tools/testing/selftests/seccomp/seccomp_bpf.c
  *
  * The structs and registers vary among the different platforms.
- * We define user_regs_struct as the struct to use for the
- * PTRACE_GETREGSET/PTRACE_SETREGSET command and define accessor
- * macros to get/set the struct members.
+ * We define user_regs_struct as the struct to use for gettings
+ * and setting the general registers and define accessor
+ * macros to get/set the individual struct members.
  *
  * The value of SECCOMP_AUDIT_ARCH is used when matching the architecture
  * in the seccomp(2) filter.
@@ -181,6 +181,48 @@
 #else
 # error "Do not know how to find your architecture's registers"
 #endif
+
+/*
+ * Use PTRACE_GETREGS and PTRACE_SETREGS where available.
+ * Otherwise, use PTRACE_GETREGSET and PTRACE_SETREGSET.
+ */
+#if defined(__x86_64__) || defined(__i386__)
+static int
+ptrace_getregs(int pid, struct user_pt_regs *regs)
+{
+    debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
+    debug_return_int(ptrace(PTRACE_GETREGS, pid, NULL, regs));
+}
+
+static int
+ptrace_setregs(int pid, struct user_pt_regs *regs)
+{
+    debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
+    debug_return_int(ptrace(PTRACE_SETREGS, pid, NULL, regs));
+}
+#else
+static int
+ptrace_getregs(int pid, struct user_pt_regs *regs)
+{
+    struct iovec iov;
+    debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
+
+    iov.iov_base = regs;
+    iov.iov_len = sizeof(*regs);
+    debug_return_int(ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov));
+}
+
+static int
+ptrace_setregs(int pid, struct user_pt_regs *regs)
+{
+    struct iovec iov;
+    debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
+
+    iov.iov_base = regs;
+    iov.iov_len = sizeof(*regs);
+    debug_return_int(ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov));
+}
+#endif /* __x86_64__ || __i386__ */
 
 /*
  * Read the string at addr and store in buf.
@@ -438,18 +480,14 @@ bad:
 static bool
 ptrace_fail_syscall(pid_t pid, struct user_pt_regs *regs, int ecode)
 {
-    struct iovec iov;
     sigset_t chldmask;
     bool ret = false;
     int status;
     debug_decl(ptrace_fail_syscall, SUDO_DEBUG_EXEC);
 
-    iov.iov_base = regs;
-    iov.iov_len = sizeof(*regs);
-
     /* Cause the syscall to fail by changing its number to -1. */
     reg_syscall(regs) |= 0xffffffff;
-    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
+    if (ptrace_setregs(pid, regs) == -1) {
 	sudo_warn(U_("unable to set registers for process %d"), (int)pid);
 	debug_return_bool(false);
     }
@@ -474,7 +512,7 @@ ptrace_fail_syscall(pid_t pid, struct user_pt_regs *regs, int ecode)
 	goto done;
     }
     reg_retval(regs) = -ecode;
-    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
+    if (ptrace_setregs(pid, regs) == -1) {
 	sudo_warn(U_("unable to set registers for process %d"), (int)pid);
 	goto done;
     }
@@ -613,7 +651,6 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     int argc, envc, syscallno;
     struct user_pt_regs regs;
     char cwd[PATH_MAX];
-    struct iovec iov;
     bool ret = false;
     debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
 
@@ -624,10 +661,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     }
 
     /* Get the registers. */
-    /* XXX - for amd64 and i386 use PTRACE_GETREGS/PTRACE_SETREGS instead. */
-    iov.iov_base = &regs;
-    iov.iov_len = sizeof(regs);
-    if (ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
+    if (ptrace_getregs(pid, &regs) == -1) {
 	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
 	debug_return_bool(false);
     }
@@ -695,7 +729,6 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	     */
 	    long sp = reg_sp(&regs) - 128;
 	    long new_argv, strtab;
-	    struct iovec iov;
 	    size_t len;
 
 	    /* Calculate the amount of space required for argv + strings. */
@@ -736,10 +769,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    }
 
 	    /* Update argv address in the tracee to our new value. */
-	    iov.iov_base = &regs;
-	    iov.iov_len = sizeof(regs);
 	    reg_arg2(&regs) = new_argv;
-	    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
+	    if (ptrace_setregs(pid, &regs) == -1) {
 		sudo_warn(U_("unable to set registers for process %d"),
 		    (int)pid);
 		goto done;
