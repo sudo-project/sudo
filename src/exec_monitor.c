@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -197,23 +197,23 @@ mon_handle_sigchld(struct monitor_closure *mc)
 
     /* Read command status. */
     do {
-	pid = waitpid(mc->cmnd_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
+	pid = waitpid(mc->cmnd_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
     switch (pid) {
+    case -1:
+	if (errno != ECHILD) {
+	    sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	    debug_return;
+	}
+	FALLTHROUGH;
     case 0:
 	/* Nothing to wait for. */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
 	    __func__);
 	debug_return;
-    case -1:
-	sudo_warn(U_("%s: %s"), __func__, "waitpid");
-	debug_return;
     }
 
-    if (WIFCONTINUED(status)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) resumed",
-	    __func__, (int)mc->cmnd_pid);
-    } else if (WIFSTOPPED(status)) {
+    if (WIFSTOPPED(status)) {
 	if (sig2str(WSTOPSIG(status), signame) == -1)
 	    (void)snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
@@ -230,7 +230,7 @@ mon_handle_sigchld(struct monitor_closure *mc)
 	mc->cmnd_pid = -1;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_WARN,
-	    "%s: unexpected wait status %d for command (%d)",
+	    "%s: unexpected wait status 0x%x for command (%d)",
 	    __func__, status, (int)mc->cmnd_pid);
     }
 
@@ -238,18 +238,15 @@ mon_handle_sigchld(struct monitor_closure *mc)
     if (mc->cstat->type == CMD_INVALID) {
 	/*
 	 * Store wait status in cstat and forward to parent if stopped.
-	 * Parent does not expect SIGCONT so don't bother sending it.
 	 */
-	if (!WIFCONTINUED(status)) {
-	    mc->cstat->type = CMD_WSTATUS;
-	    mc->cstat->val = status;
-	    if (WIFSTOPPED(status)) {
-		/* Save the foreground pgid so we can restore it later. */
-		pid = tcgetpgrp(io_fds[SFD_FOLLOWER]);
-		if (pid != mc->mon_pgrp)
-		    mc->cmnd_pgrp = pid;
-		send_status(mc->backchannel, mc->cstat);
-	    }
+	mc->cstat->type = CMD_WSTATUS;
+	mc->cstat->val = status;
+	if (WIFSTOPPED(status)) {
+	    /* Save the foreground pgid so we can restore it later. */
+	    pid = tcgetpgrp(io_fds[SFD_FOLLOWER]);
+	    if (pid != mc->mon_pgrp)
+		mc->cmnd_pgrp = pid;
+	    send_status(mc->backchannel, mc->cstat);
 	}
     } else {
 	sudo_debug_printf(SUDO_DEBUG_WARN,

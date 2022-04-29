@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -493,23 +493,23 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 
     /* Read command status. */
     do {
-	pid = waitpid(ec->cmnd_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
+	pid = waitpid(ec->cmnd_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
     switch (pid) {
+    case -1:
+	if (errno != ECHILD) {
+	    sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	    debug_return;
+	}
+	FALLTHROUGH;
     case 0:
 	/* Nothing to wait for. */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
 	    __func__);
 	debug_return;
-    case -1:
-	sudo_warn(U_("%s: %s"), __func__, "waitpid");
-	debug_return;
     }
 
-    if (WIFCONTINUED(status)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) resumed",
-	    __func__, (int)ec->cmnd_pid);
-    } else if (WIFSTOPPED(status)) {
+    if (WIFSTOPPED(status)) {
 	/*
 	 * Save the controlling terminal's process group so we can restore it
 	 * after we resume, if needed.  Most well-behaved shells change the
@@ -594,10 +594,15 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 		(void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
 		__func__, (int)ec->cmnd_pid, signame);
-	} else {
+	} else if (WIFEXITED(status)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) exited: %d",
 		__func__, (int)ec->cmnd_pid, WEXITSTATUS(status));
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_WARN,
+		"%s: unexpected wait status 0x%x for command (%d)",
+		__func__, status, (int)ec->cmnd_pid);
 	}
+
 	/* Don't overwrite execve() failure with command exit status. */
 	if (ec->cstat->type == CMD_INVALID) {
 	    ec->cstat->type = CMD_WSTATUS;

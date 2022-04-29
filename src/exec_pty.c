@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1049,16 +1049,19 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
      * Monitor process was signaled; wait for it as needed.
      */
     do {
-	pid = waitpid(ec->monitor_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
+	pid = waitpid(ec->monitor_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
     switch (pid) {
+    case -1:
+	if (errno != ECHILD) {
+	    sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	    debug_return;
+	}
+	FALLTHROUGH;
     case 0:
 	/* Nothing to wait for. */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
 	    __func__);
-	debug_return;
-    case -1:
-	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;
     }
 
@@ -1067,10 +1070,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
      * If it was stopped, we should stop too (the command keeps
      * running in its pty) and continue it when we come back.
      */
-    if (WIFCONTINUED(status)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) resumed",
-	    __func__, (int)ec->monitor_pid);
-    } else if (WIFSTOPPED(status)) {
+    if (WIFSTOPPED(status)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "monitor stopped, suspending sudo");
 	n = suspend_sudo(ec, WSTOPSIG(status));
@@ -1085,10 +1085,14 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) killed, SIG%s",
 	    __func__, (int)ec->monitor_pid, signame);
 	ec->monitor_pid = -1;
-    } else {
+    } else if (WIFEXITED(status)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: monitor exited, status %d", __func__, WEXITSTATUS(status));
 	ec->monitor_pid = -1;
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "%s: unexpected wait status 0x%x for monitor (%d)",
+	    __func__, status, (int)ec->monitor_pid);
     }
     debug_return;
 }

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2018
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -288,12 +288,6 @@ extern int errno;
 /* WCOREDUMP is not POSIX, this usually works (verified on AIX). */
 #ifndef WCOREDUMP
 # define WCOREDUMP(x)	((x) & 0x80)
-#endif
-
-/* Older systems may not support WCONTINUED */
-#if !defined(WCONTINUED) && !defined(WIFCONTINUED)
-# define WCONTINUED		0
-# define WIFCONTINUED(x)	0
 #endif
 
 /* W_EXITCODE is not POSIX but the encoding of wait status is. */
