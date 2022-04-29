@@ -121,7 +121,7 @@ char **disable_execute(char *envp[], const char *dso);
 char **enable_monitor(char *envp[], const char *dso);
 
 /* exec_intercept.c */
-bool intercept_setup(int fd, struct sudo_event_base *evbase, struct command_details *details);
+void *intercept_setup(int fd, struct sudo_event_base *evbase, struct command_details *details);
 void intercept_cleanup(void);
 
 /* exec_nopty.c */
@@ -145,7 +145,7 @@ bool utmp_logout(const char *line, int status);
 char **sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd);
 
 /* exec_ptrace.c */
-bool exec_ptrace_handled(pid_t pid, int status);
+bool exec_ptrace_handled(pid_t pid, int status, void *intercept);
 bool exec_ptrace_seize(pid_t child);
 bool have_seccomp_action(const char *action);
 bool set_exec_filter(void);

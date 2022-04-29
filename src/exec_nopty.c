@@ -61,6 +61,7 @@ struct exec_closure_nopty {
     struct sudo_event *sigcont_event;
     struct sudo_event *siginfo_event;
     struct command_status *cstat;
+    void *intercept;
     pid_t cmnd_pid;
     pid_t ppgrp;
 };
@@ -368,16 +369,18 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     if (pipe2(errpipe, O_CLOEXEC) != 0)
 	sudo_fatal("%s", U_("unable to create pipe"));
 
-    /*
-     * Allocate a socketpair for communicating with sudo_intercept.so.
-     * This must be inherited across exec, hence no FD_CLOEXEC.
-     * Check if the kernel supports the seccomp(2) filter "trap" action.
-     */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
-	if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
-	    sudo_fatal("%s", U_("unable to create sockets"));
-	if (have_seccomp_action("trap"))
+	if (have_seccomp_action("trap")) {
+	    /* Kernel supports the seccomp(2) filter "trap" action. */
 	    SET(details->flags, CD_USE_PTRACE);
+	} else {
+	    /*
+	     * Allocate a socketpair for communicating with sudo_intercept.so.
+	     * This must be inherited across exec, hence no FD_CLOEXEC.
+	     */
+	    if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
+		sudo_fatal("%s", U_("unable to create sockets"));
+	}
     }
 
     /*
@@ -446,8 +449,9 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     fill_exec_closure_nopty(&ec, cstat, details, errpipe[0]);
 
     /* Create event and closure for intercept mode. */
-    if (intercept_sv[0] != -1) {
-	if (!intercept_setup(intercept_sv[0], ec.evbase, details))
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
+	ec.intercept = intercept_setup(intercept_sv[0], ec.evbase, details);
+	if (ec.intercept == NULL)
 	    exit(EXIT_FAILURE);
     }
 
@@ -535,7 +539,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 
 	    if (ISSET(ec->details->flags, CD_USE_PTRACE)) {
 		/* Did exec_ptrace_handled() suppress the signal? */
-		if (exec_ptrace_handled(pid, status))
+		if (exec_ptrace_handled(pid, status, ec->intercept))
 		    continue;
 	    }
 

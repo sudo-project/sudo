@@ -77,6 +77,7 @@ struct exec_closure_pty {
     struct sudo_event *sigchld_event;
     struct sudo_event *sigwinch_event;
     struct command_status *cstat;
+    void *intercept;
     struct monitor_message_list monitor_messages;
     pid_t monitor_pid;
     pid_t cmnd_pid;
@@ -1089,7 +1090,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
 	} else if (WIFSTOPPED(status)) {
 	    if (pid != ec->monitor_pid) {
 		if (ISSET(ec->details->flags, CD_USE_PTRACE))
-		    exec_ptrace_handled(pid, status);
+		    exec_ptrace_handled(pid, status, ec->intercept);
 		continue;
 	    }
 
@@ -1415,16 +1416,18 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    fcntl(sv[1], F_SETFD, FD_CLOEXEC) == -1)
 	sudo_fatal("%s", U_("unable to create sockets"));
 
-    /*
-     * Allocate a socketpair for communicating with sudo_intercept.so.
-     * This must be inherited across exec, hence no FD_CLOEXEC.
-     * Check if the kernel supports the seccomp(2) filter "trap" action.
-     */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
-	if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
-	    sudo_fatal("%s", U_("unable to create sockets"));
-	if (have_seccomp_action("trap"))
+	if (have_seccomp_action("trap")) {
+	    /* Kernel supports the seccomp(2) filter "trap" action. */
 	    SET(details->flags, CD_USE_PTRACE);
+	} else {
+	    /*
+	     * Allocate a socketpair for communicating with sudo_intercept.so.
+	     * This must be inherited across exec, hence no FD_CLOEXEC.
+	     */
+	    if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
+		sudo_fatal("%s", U_("unable to create sockets"));
+	}
     }
 
     /*
@@ -1669,8 +1672,9 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     fill_exec_closure_pty(&ec, cstat, details, ppgrp, sv[0]);
 
     /* Create event and closure for intercept mode. */
-    if (intercept_sv[0] != -1) {
-	if (!intercept_setup(intercept_sv[0], ec.evbase, details))
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
+	ec.intercept = intercept_setup(intercept_sv[0], ec.evbase, details);
+	if (ec.intercept == NULL)
 	    exit(EXIT_FAILURE);
     }
 

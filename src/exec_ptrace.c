@@ -29,12 +29,14 @@
 #include <limits.h>
 #include <signal.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "sudo.h"
 #include "sudo_exec.h"
+#include "exec_intercept.h"
 
 #ifdef HAVE_PTRACE_INTERCEPT
 # include <elf.h>
@@ -57,82 +59,82 @@
  */
 #if defined(__amd64__)
 # define user_pt_regs		user_regs_struct
-# define reg_syscall(x)		(x).orig_rax
-# define reg_retval(x)		(x).rax
-# define reg_arg1(x)		(x).rdi
-# define reg_arg2(x)		(x).rsi
-# define reg_arg3(x)		(x).rdx
-# define reg_arg4(x)		(x).r10
+# define reg_syscall(x)		(x)->orig_rax
+# define reg_retval(x)		(x)->rax
+# define reg_arg1(x)		(x)->rdi
+# define reg_arg2(x)		(x)->rsi
+# define reg_arg3(x)		(x)->rdx
+# define reg_arg4(x)		(x)->r10
 #elif defined(__aarch64__)
-# define reg_syscall(x)		(x).regs[8]	/* w8 */
-# define reg_retval(x)		(x).regs[0]	/* x0 */
-# define reg_arg1(x)		(x).regs[0]	/* x0 */
-# define reg_arg2(x)		(x).regs[1]	/* x1 */
-# define reg_arg3(x)		(x).regs[2]	/* x2 */
-# define reg_arg4(x)		(x).regs[3]	/* x3 */
+# define reg_syscall(x)		(x)->regs[8]	/* w8 */
+# define reg_retval(x)		(x)->regs[0]	/* x0 */
+# define reg_arg1(x)		(x)->regs[0]	/* x0 */
+# define reg_arg2(x)		(x)->regs[1]	/* x1 */
+# define reg_arg3(x)		(x)->regs[2]	/* x2 */
+# define reg_arg4(x)		(x)->regs[3]	/* x3 */
 #elif defined(__arm__)
 /* Note: assumes arm EABI, not OABI */
 /* Untested */
 # define user_pt_regs		pt_regs
-# define reg_syscall(x)		(x).ARM_r7
-# define reg_retval(x)		(x).ARM_r0
-# define reg_arg1(x)		(x).ARM_r0
-# define reg_arg2(x)		(x).ARM_r1
-# define reg_arg3(x)		(x).ARM_r2
-# define reg_arg4(x)		(x).ARM_r3
+# define reg_syscall(x)		(x)->ARM_r7
+# define reg_retval(x)		(x)->ARM_r0
+# define reg_arg1(x)		(x)->ARM_r0
+# define reg_arg2(x)		(x)->ARM_r1
+# define reg_arg3(x)		(x)->ARM_r2
+# define reg_arg4(x)		(x)->ARM_r3
 #elif defined (__hppa__)
 /* Untested */
 # define user_pt_regs		user_regs_struct
-# define reg_syscall(x)		(x).gr[20]	/* r20 */
-# define reg_retval(x)		(x).gr[28]	/* r28 */
-# define reg_arg1(x)		(x).gr[26]	/* r26 */
-# define reg_arg2(x)		(x).gr[25]	/* r25 */
-# define reg_arg3(x)		(x).gr[24]	/* r24 */
-# define reg_arg4(x)		(x).gr[23]	/* r23 */
+# define reg_syscall(x)		(x)->gr[20]	/* r20 */
+# define reg_retval(x)		(x)->gr[28]	/* r28 */
+# define reg_arg1(x)		(x)->gr[26]	/* r26 */
+# define reg_arg2(x)		(x)->gr[25]	/* r25 */
+# define reg_arg3(x)		(x)->gr[24]	/* r24 */
+# define reg_arg4(x)		(x)->gr[23]	/* r23 */
 #elif defined(__i386__)
 # define user_pt_regs		user_regs_struct
-# define reg_syscall(x)		(x).orig_eax
-# define reg_retval(x)		(x).eax
-# define reg_arg1(x)		(x).ebx
-# define reg_arg2(x)		(x).ecx
-# define reg_arg3(x)		(x).edx
-# define reg_arg4(x)		(x).esi
+# define reg_syscall(x)		(x)->orig_eax
+# define reg_retval(x)		(x)->eax
+# define reg_arg1(x)		(x)->ebx
+# define reg_arg2(x)		(x)->ecx
+# define reg_arg3(x)		(x)->edx
+# define reg_arg4(x)		(x)->esi
 #elif defined(__powerpc64__)
 /* Untested */
 # define user_pt_regs		pt_regs
-# define reg_syscall(x)		(x).gpr[0]	/* r0 */
-# define reg_retval(x)		(x).gpr[3]	/* r3 */
-# define reg_arg1(x)		(x).gpr[3]	/* r3 */
-# define reg_arg2(x)		(x).gpr[4]	/* r4 */
-# define reg_arg3(x)		(x).gpr[5]	/* r5 */
-# define reg_arg4(x)		(x).gpr[6]	/* r6 */
+# define reg_syscall(x)		(x)->gpr[0]	/* r0 */
+# define reg_retval(x)		(x)->gpr[3]	/* r3 */
+# define reg_arg1(x)		(x)->gpr[3]	/* r3 */
+# define reg_arg2(x)		(x)->gpr[4]	/* r4 */
+# define reg_arg3(x)		(x)->gpr[5]	/* r5 */
+# define reg_arg4(x)		(x)->gpr[6]	/* r6 */
 #elif defined(__powerpc__)
 /* Untested */
 # define user_pt_regs		pt_regs
-# define reg_syscall(x)		(x).gpr[0]	/* r0 */
-# define reg_retval(x)		(x).gpr[3]	/* r3 */
-# define reg_arg1(x)		(x).gpr[3]	/* r3 */
-# define reg_arg2(x)		(x).gpr[4]	/* r4 */
-# define reg_arg3(x)		(x).gpr[5]	/* r5 */
-# define reg_arg4(x)		(x).gpr[6]	/* r6 */
+# define reg_syscall(x)		(x)->gpr[0]	/* r0 */
+# define reg_retval(x)		(x)->gpr[3]	/* r3 */
+# define reg_arg1(x)		(x)->gpr[3]	/* r3 */
+# define reg_arg2(x)		(x)->gpr[4]	/* r4 */
+# define reg_arg3(x)		(x)->gpr[5]	/* r5 */
+# define reg_arg4(x)		(x)->gpr[6]	/* r6 */
 #elif defined(__riscv) && __riscv_xlen == 64
 /* Untested */
 # define user_pt_regs		user_regs_struct
-# define reg_syscall(x)		(x).a7
-# define reg_retval(x)		(x).a0
-# define reg_arg1(x)		(x).a0
-# define reg_arg2(x)		(x).a1
-# define reg_arg3(x)		(x).a2
-# define reg_arg4(x)		(x).a3
+# define reg_syscall(x)		(x)->a7
+# define reg_retval(x)		(x)->a0
+# define reg_arg1(x)		(x)->a0
+# define reg_arg2(x)		(x)->a1
+# define reg_arg3(x)		(x)->a2
+# define reg_arg4(x)		(x)->a3
 #elif defined(__s390__)
 /* Untested */
 # define user_pt_regs		s390_regs
-# define reg_syscall(x)		(x).gprs[1]	/* r1 */
-# define reg_retval(x)		(x).gprs[2]	/* r2 */
-# define reg_arg1(x)		(x).gprs[2]	/* r2 */
-# define reg_arg2(x)		(x).gprs[3]	/* r3 */
-# define reg_arg3(x)		(x).gprs[4]	/* r4 */
-# define reg_arg4(x)		(x).gprs[5]	/* r6 */
+# define reg_syscall(x)		(x)->gprs[1]	/* r1 */
+# define reg_retval(x)		(x)->gprs[2]	/* r2 */
+# define reg_arg1(x)		(x)->gprs[2]	/* r2 */
+# define reg_arg2(x)		(x)->gprs[3]	/* r3 */
+# define reg_arg3(x)		(x)->gprs[4]	/* r4 */
+# define reg_arg4(x)		(x)->gprs[5]	/* r6 */
 #else
 # error "Do not know how to find your architecture's registers"
 #endif
@@ -154,7 +156,7 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
     for (;;) {
 	word = ptrace(PTRACE_PEEKTEXT, pid, addr, NULL);
 	if (word == -1) {
-	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, %ld, NULL)", pid, addr);
+	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, 0x%lx, NULL)", pid, addr);
 	    debug_return_ssize_t(-1);
 	}
 
@@ -193,7 +195,7 @@ ptrace_read_vec(pid_t pid, long addr, char **vec, char *buf, size_t bufsize)
 	long word = ptrace(PTRACE_PEEKTEXT, pid, addr, NULL);
 	switch (word) {
 	case -1:
-	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, %ld, NULL)", pid, addr);
+	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, 0x%lx, NULL)", pid, addr);
 	    goto bad;
 	case 0:
 	    vec[len] = NULL;
@@ -230,7 +232,7 @@ ptrace_get_vec_len(pid_t pid, long addr)
 	long word = ptrace(PTRACE_PEEKTEXT, pid, addr, NULL);
 	switch (word) {
 	case -1:
-	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, %ld, NULL)", pid, addr);
+	    sudo_warn("ptrace(PTRACE_PEEKTEXT, %d, 0x%lx, NULL)", pid, addr);
 	    debug_return_int(-1);
 	case 0:
 	    debug_return_int(len);
@@ -243,19 +245,42 @@ ptrace_get_vec_len(pid_t pid, long addr)
 }
 
 /*
+ * Use /proc/PID/cwd to determine the current working directory.
+ */
+static bool
+getcwd_by_pid(pid_t pid, char *buf, size_t bufsize)
+{
+    size_t len;
+    char path[PATH_MAX];
+    debug_decl(getcwd_by_pid, SUDO_DEBUG_EXEC);
+
+    len = snprintf(path, sizeof(path), "/proc/%d/cwd", (int)pid);
+    if (len < sizeof(path)) {
+	len = readlink(path, buf, bufsize);
+	if (len != (size_t)-1) {
+	    /* Check for truncation. */
+	    if (len >= bufsize)
+		buf[bufsize - 1] = '\0';
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);
+}
+
+/*
  * Read the filename, argv and envp of the execve(2) system call.
  * Returns a dynamically allocated buffer the parent is responsible for.
  */
 static char *
-get_execve_args(pid_t pid, char **pathname_out, char ***argv_out, char ***envp_out)
+get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
+    int *argc_out, char ***argv_out, int *envc_out, char ***envp_out)
 {
     char *argbuf, *strtab, *pathname, **argv, **envp;
     long path_addr, argv_addr, envp_addr, syscallno;
-    struct user_pt_regs regs;
     struct iovec iov;
     int argc, envc;
     size_t bufsize, len;
-    debug_decl(get_execve_args, SUDO_DEBUG_EXEC);
+    debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
 
     bufsize = sysconf(_SC_ARG_MAX) + PATH_MAX;
     argbuf = malloc(bufsize);
@@ -263,8 +288,8 @@ get_execve_args(pid_t pid, char **pathname_out, char ***argv_out, char ***envp_o
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* XXX - for amd64 and i386 use PTRACE_GETREGS/PTRACE_SETREGS instead. */
-    iov.iov_base = &regs;
-    iov.iov_len = sizeof(regs);
+    iov.iov_base = regs;
+    iov.iov_len = sizeof(*regs);
     if (ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
 	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
 	goto bad;
@@ -281,24 +306,6 @@ get_execve_args(pid_t pid, char **pathname_out, char ***argv_out, char ***envp_o
     path_addr = reg_arg1(regs);
     argv_addr = reg_arg2(regs);
     envp_addr = reg_arg3(regs);
-
-#ifdef notyet
-    /* Cause the syscall to fail by changing its number to -1. */
-    reg_syscall(regs) |= 0xffffffff;
-    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
-	sudo_warn("unable to set registers");
-	goto bad;
-    }
-
-    /* Allow the syscall to complete and change return value to EACCES. */
-    ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
-    waitpid(pid, NULL, 0);
-    reg_retval(regs) = -EACCES;
-    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
-	sudo_warn("unable to set registers");
-	goto bad;
-    }
-#endif
 
     /* Count argv and envp */
     argc = ptrace_get_vec_len(pid, argv_addr);
@@ -347,13 +354,70 @@ get_execve_args(pid_t pid, char **pathname_out, char ***argv_out, char ***envp_o
     sudo_debug_execve(SUDO_DEBUG_INFO, pathname, argv, envp);
 
     *pathname_out = pathname;
+    *argc_out = argc;
     *argv_out = argv;
+    *envc_out = envc;
     *envp_out = envp;
 
     debug_return_ptr(argbuf);
 bad:
     free(argbuf);
     debug_return_ptr(NULL);
+}
+
+/*
+ * Cause the current syscall to fail and set the error value to ecode.
+ */
+static bool
+ptrace_fail_syscall(pid_t pid, struct user_pt_regs *regs, int ecode)
+{
+    struct iovec iov;
+    sigset_t chldmask;
+    bool ret = false;
+    int status;
+    debug_decl(ptrace_fail_syscall, SUDO_DEBUG_EXEC);
+
+    iov.iov_base = regs;
+    iov.iov_len = sizeof(*regs);
+
+    /* Cause the syscall to fail by changing its number to -1. */
+    reg_syscall(regs) |= 0xffffffff;
+    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
+	sudo_warn(U_("unable to set registers for process %d"), (int)pid);
+	debug_return_bool(false);
+    }
+
+    /* Block SIGCHLD for the critical section (waitpid). */
+    sigemptyset(&chldmask);
+    sigaddset(&chldmask, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &chldmask, NULL);
+
+    /* Allow the syscall to continue and change return value to ecode. */
+    ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
+    for (;;) {
+	if (waitpid(pid, &status, WUNTRACED) != -1)
+	    break;
+	if (errno == EINTR)
+	    continue;
+	sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	goto done;
+    }
+    if (!WIFSTOPPED(status)) {
+	sudo_warnx(U_("process %d exited unexpectedly"), (int)pid);
+	goto done;
+    }
+    reg_retval(regs) = -ecode;
+    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
+	sudo_warn(U_("unable to set registers for process %d"), (int)pid);
+	goto done;
+    }
+
+    ret = true;
+
+done:
+    sigprocmask(SIG_UNBLOCK, &chldmask, NULL);
+
+    debug_return_bool(ret);
 }
 
 /*
@@ -459,12 +523,82 @@ exec_ptrace_seize(pid_t child)
 }
 
 /*
+ * Intercept execve(2) and perform a policy check.
+ * Reads current registers and execve(2) arguments.
+ * If the command is not allowed by policy, fail with EACCES.
+ * If the command is allowed, update argv if needed before continuing.
+ * Returns false on error, else true.
+ */
+static bool
+ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
+{
+    char *pathname, **argv, **envp, *buf;
+    struct user_pt_regs regs;
+    char cwd[PATH_MAX];
+    int argc, envc;
+    debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
+
+    /* Get the current working directory and execve info. */
+    if (!getcwd_by_pid(pid, cwd, sizeof(cwd)))
+	(void)strlcpy(cwd, "unknown", sizeof(cwd));
+    buf = get_execve_info(pid, &regs, &pathname, &argc, &argv, &envc, &envp);
+    if (buf == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: %d: unable to get execve info", __func__, (int)pid);
+
+	/* Unrecoverable error, kill the process if it still exists. */
+	if (errno != ESRCH)
+	    kill(pid, SIGKILL);
+	debug_return_bool(false);
+    }
+
+    /* Perform a policy check. */
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d: checking policy for %s",
+	__func__, (int)pid, pathname);
+
+    argv[0] = pathname;
+    if (!intercept_check_policy(pathname, argc, argv, envc, envp, cwd,
+	    closure)) {
+	sudo_warnx("%s", U_(closure->errstr));
+    }
+
+    if (closure->state == POLICY_ACCEPT) {
+	/*
+	 * Update argv if the policy modified it.
+	 * We don't currently ever modify envp.
+	 */
+	bool match = strcmp(pathname, closure->command) == 0;
+	if (match) {
+	    int i;
+	    for (i = 0; closure->run_argv[i] != NULL && argv[i] != NULL; i++) {
+		if (strcmp(closure->run_argv[i], argv[i]) != 0) {
+		    match = false;
+		    break;
+		}
+	    }
+	}
+	if (!match) {
+	    /* Need to replace argv with run_argv. */
+	    /* XXX */
+	}
+    } else {
+	/* If denied, fake the syscall and set return to EACCES */
+	ptrace_fail_syscall(pid, &regs, EACCES);
+    }
+
+    intercept_closure_reset(closure);
+
+    debug_return_bool(true);
+}
+
+/*
  * Handle a process stopped due to ptrace.
  * Returns true if the signal was suppressed and false if it was delivered.
  */
 bool
-exec_ptrace_handled(pid_t pid, int status)
+exec_ptrace_handled(pid_t pid, int status, void *intercept)
 {
+    struct intercept_closure *closure = intercept;
     const int stopsig = WSTOPSIG(status);
     const int sigtrap = status >> 8;
     long signo = 0;
@@ -472,22 +606,8 @@ exec_ptrace_handled(pid_t pid, int status)
     debug_decl(exec_ptrace_handled, SUDO_DEBUG_EXEC);
 
     if (sigtrap == (SIGTRAP | (PTRACE_EVENT_SECCOMP << 8))) {
-	char *pathname, **argv, **envp, *buf;
-
-	/* Trapped child exec. */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d called exec",
-	    __func__, (int)pid);
-
-	/*
-	 * Get the exec arguments and perform a policy check either over
-	 * the socketpair (pty case) or via a direct function call (no pty).
-	 * XXX
-	 */
-	 buf = get_execve_args(pid, &pathname, &argv, &envp);
-	 if (buf == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"%s: %d: unable to get exec args", __func__, (int)pid);
-	}
+	if (!ptrace_intercept_execve(pid, closure))
+	    debug_return_bool(true);
     } else if (sigtrap == (SIGTRAP | (PTRACE_EVENT_CLONE << 8)) ||
 	sigtrap == (SIGTRAP | (PTRACE_EVENT_VFORK << 8)) ||
 	sigtrap == (SIGTRAP | (PTRACE_EVENT_FORK << 8))) {
@@ -568,7 +688,7 @@ have_seccomp_action(const char *action)
 
 /* STUB */
 bool
-exec_ptrace_handled(pid_t pid, int status)
+exec_ptrace_handled(pid_t pid, int status, void *intercept)
 {
     return false;
 }
