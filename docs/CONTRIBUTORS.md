@@ -194,6 +194,7 @@ https://translationproject.org for more details.
     Cho, Seong-ho
     Chornoivan, Yuri
     Diéguez, Francisco
+    Doghonadze, Temuri
     Fontenelle, Rafael
     García-Fontes, Walter
     Gezer, Volkan
