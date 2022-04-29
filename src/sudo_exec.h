@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2017, 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2017, 2020-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -91,6 +91,18 @@ union sudo_token_un {
 #define sudo_token_isset(_t) ((_t).u64[0] || (_t).u64[1])
 
 /*
+ * Use ptrace-based intercept (using seccomp) on Linux if possible.
+ * TODO: test other architectures
+ */
+#if defined(_PATH_SUDO_INTERCEPT) && defined(__linux__)
+# if defined(HAVE_DECL_SECCOMP_SET_MODE_FILTER) && HAVE_DECL_SECCOMP_SET_MODE_FILTER
+#  if defined(__amd64__) || defined(__i386__) || defined(__aarch64__)
+#   define HAVE_PTRACE_INTERCEPT 1
+#  endif /* __amd64__ || __i386__ || __aarch64__ */
+# endif /* HAVE_DECL_SECCOMP_SET_MODE_FILTER */
+#endif /* _PATH_SUDO_INTERCEPT && __linux__ */
+
+/*
  * Symbols shared between exec.c, exec_nopty.c, exec_pty.c and exec_monitor.c
  */
 struct command_details;
@@ -131,5 +143,11 @@ bool utmp_logout(const char *line, int status);
 
 /* exec_preload.c */
 char **sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd);
+
+/* exec_ptrace.c */
+bool exec_ptrace_handled(pid_t pid, int status);
+bool exec_ptrace_seize(pid_t child);
+bool have_seccomp_action(const char *action);
+bool set_exec_filter(void);
 
 #endif /* SUDO_EXEC_H */

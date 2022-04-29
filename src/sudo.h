@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2021
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -140,6 +140,7 @@ struct user_details {
 #define CD_LOGIN_SHELL		0x080000
 #define CD_OVERRIDE_UMASK	0x100000
 #define CD_LOG_SUBCMDS		0x200000
+#define CD_USE_PTRACE		0x400000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;

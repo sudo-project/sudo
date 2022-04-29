@@ -992,6 +992,10 @@ backchannel_cb(int fd, int what, void *v)
 	    ec->cmnd_pid = cstat.val;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
 		ec->details->command, (int)ec->cmnd_pid);
+	    if (ISSET(ec->details->flags, CD_USE_PTRACE)) {
+		/* Seize control of the command using ptrace(2). */
+		exec_ptrace_seize(ec->cmnd_pid);
+	    }
 	    break;
 	case CMD_WSTATUS:
 	    if (WIFSTOPPED(cstat.val)) {
@@ -1041,9 +1045,15 @@ backchannel_cb(int fd, int what, void *v)
 static void
 handle_sigchld_pty(struct exec_closure_pty *ec)
 {
-    int n, status, wflags = WUNTRACED|WNOHANG;
+    int n, status, wflags;
     pid_t pid;
     debug_decl(handle_sigchld_pty, SUDO_DEBUG_EXEC);
+
+#ifdef __WALL
+    wflags = __WALL|WNOHANG;
+#else
+    wflags = WUNTRACED|WNOHANG;
+#endif
 
     /* There may be multiple children in intercept mode. */
     for (;;) {
@@ -1077,8 +1087,11 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
 	    if (pid == ec->monitor_pid)
 		ec->monitor_pid = -1;
 	} else if (WIFSTOPPED(status)) {
-	    if (pid != ec->monitor_pid)
+	    if (pid != ec->monitor_pid) {
+		if (ISSET(ec->details->flags, CD_USE_PTRACE))
+		    exec_ptrace_handled(pid, status);
 		continue;
+	    }
 
 	    /*
 	     * If the monitor dies we get notified via backchannel_cb().
@@ -1405,10 +1418,13 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /*
      * Allocate a socketpair for communicating with sudo_intercept.so.
      * This must be inherited across exec, hence no FD_CLOEXEC.
+     * Check if the kernel supports the seccomp(2) filter "trap" action.
      */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
 	    sudo_fatal("%s", U_("unable to create sockets"));
+	if (have_seccomp_action("trap"))
+	    SET(details->flags, CD_USE_PTRACE);
     }
 
     /*

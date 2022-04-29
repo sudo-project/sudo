@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -89,6 +89,7 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     struct command_details *details)
 {
     struct intercept_closure *closure;
+    int rc;
     debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -99,19 +100,24 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
 	sudo_warnx("%s", U_("unable to allocate memory"));
 	goto bad;
     }
-
-    /* If we've already seen an InterceptHello, expect a policy check first. */
-    closure->state = sudo_token_isset(intercept_token) ?
-	RECV_SECRET : RECV_HELLO_INITIAL;
     closure->details = details;
     closure->listen_sock = -1;
 
-    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_cb, closure) == -1) {
-	/* This cannot (currently) fail. */
-	sudo_warn("%s", U_("unable to add event to queue"));
-	goto bad;
+    if (ISSET(details->flags, CD_USE_PTRACE)) {
+	/* We can perform a policy check immediately using ptrace(2).  */
+	closure->state = RECV_POLICY_CHECK;
+    } else {
+	/*
+	 * Not using ptrace(2), use LD_PRELOAD (or its equivalent).  If
+	 * we've already seen an InterceptHello, expect a policy check first.
+	 */
+	closure->state = sudo_token_isset(intercept_token) ?
+	    RECV_SECRET : RECV_HELLO_INITIAL;
     }
-    if (sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+
+    rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST,
+	intercept_cb, closure);
+    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto bad;
     }
@@ -124,21 +130,18 @@ bad:
 }
 
 /*
- * Close intercept socket and free closure when we are done with
- * the connection.
+ * Reset intercept_closure so it can be re-used.
  */
 static void
-intercept_connection_close(struct intercept_closure *closure)
+intercept_closure_reset(struct intercept_closure *closure)
 {
-    const int fd = sudo_ev_get_fd(&closure->ev);
     size_t n;
-    debug_decl(intercept_connection_close, SUDO_DEBUG_EXEC);
+    debug_decl(intercept_closure_reset, SUDO_DEBUG_EXEC);
 
-    sudo_ev_del(NULL, &closure->ev);
-    close(fd);
-    if (closure->listen_sock != -1)
+    if (closure->listen_sock != -1) {
 	close(closure->listen_sock);
-
+	closure->listen_sock = -1;
+    }
     free(closure->buf);
     free(closure->command);
     if (closure->run_argv != NULL) {
@@ -151,6 +154,31 @@ intercept_connection_close(struct intercept_closure *closure)
 	    free(closure->run_envp[n]);
 	free(closure->run_envp);
     }
+    closure->errstr = NULL;
+    closure->command = NULL;
+    closure->run_argv = NULL;
+    closure->run_envp = NULL;
+    closure->buf = NULL;
+    closure->len = 0;
+    closure->off = 0;
+    /* Does not currently reset token. */
+
+    debug_return;
+}
+
+/*
+ * Close intercept socket and free closure when we are done with
+ * the connection.
+ */
+static void
+intercept_connection_close(struct intercept_closure *closure)
+{
+    const int fd = sudo_ev_get_fd(&closure->ev);
+    debug_decl(intercept_connection_close, SUDO_DEBUG_EXEC);
+
+    sudo_ev_del(NULL, &closure->ev);
+    close(fd);
+    intercept_closure_reset(closure);
     free(closure);
 
     debug_return;
@@ -305,7 +333,7 @@ intercept_check_policy(PolicyCheckRequest *req,
     char **user_env_out = NULL;
     char **argv = NULL, **run_argv = NULL;
     bool ret = false;
-    int result;
+    int rc;
     size_t n;
     debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
 
@@ -338,13 +366,13 @@ intercept_check_policy(PolicyCheckRequest *req,
     if (ISSET(closure->details->flags, CD_INTERCEPT)) {
 	/* We don't currently have a good way to validate the environment. */
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
-	result = policy_plugin.u.policy->check_policy(n, argv, NULL,
+	rc = policy_plugin.u.policy->check_policy(n, argv, NULL,
 	    &command_info, &run_argv, &user_env_out, &closure->errstr);
 	sudo_debug_set_active_instance(sudo_debug_instance);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "check_policy returns %d", result);
+	    "check_policy returns %d", rc);
 
-	switch (result) {
+	switch (rc) {
 	case 1:
 	    /* Rebuild command_info[] with runcwd and extract command. */
 	    command_info_copy = update_command_info(command_info, NULL,
@@ -475,7 +503,7 @@ static int
 intercept_verify_token(int fd, struct intercept_closure *closure)
 {
     ssize_t nread;
-    debug_decl(intercept_read_token, SUDO_DEBUG_EXEC);
+    debug_decl(intercept_verify_token, SUDO_DEBUG_EXEC);
 
     nread = recv(fd, closure->token.u8 + closure->off,
 	sizeof(closure->token) - closure->off, 0);
@@ -516,8 +544,9 @@ intercept_read(int fd, struct intercept_closure *closure)
 {
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     InterceptRequest *req = NULL;
-    ssize_t nread;
     bool ret = false;
+    ssize_t nread;
+    int rc;
     debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
     if (closure->state == RECV_SECRET) {
@@ -641,12 +670,9 @@ unpack:
     }
 
     /* Switch event to write mode for the reply. */
-    if (sudo_ev_set(&closure->ev, fd, SUDO_EV_WRITE|SUDO_EV_PERSIST, intercept_cb, closure) == -1) {
-	/* This cannot (currently) fail. */
-	sudo_warn("%s", U_("unable to add event to queue"));
-	goto done;
-    }
-    if (sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+    rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_WRITE|SUDO_EV_PERSIST,
+	intercept_cb, closure);
+    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
 	goto done;
     }
@@ -770,8 +796,9 @@ static bool
 intercept_write(int fd, struct intercept_closure *closure)
 {
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
-    ssize_t nwritten;
     bool ret = false;
+    ssize_t nwritten;
+    int rc;
     debug_decl(intercept_write, SUDO_DEBUG_EXEC);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "state %d",
@@ -825,39 +852,38 @@ intercept_write(int fd, struct intercept_closure *closure)
     closure->len = 0;
     closure->off = 0;
 
-    switch (closure->state) {
-    case RECV_HELLO_INITIAL:
-	/* Re-use event for the listener. */
-	close(fd);
-	if (sudo_ev_set(&closure->ev, closure->listen_sock, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_accept_cb, closure) == -1) {
-	    /* This cannot (currently) fail. */
-	    sudo_warn("%s", U_("unable to add event to queue"));
-	    goto done;
+    if (ISSET(closure->details->flags, CD_USE_PTRACE)) {
+	/* Ready for the next policy check from the tracer. */
+	closure->state = RECV_POLICY_CHECK;
+    } else {
+	switch (closure->state) {
+	case RECV_HELLO_INITIAL:
+	    /* Re-use event for the listener. */
+	    close(fd);
+	    rc = sudo_ev_set(&closure->ev, closure->listen_sock,
+		SUDO_EV_READ|SUDO_EV_PERSIST, intercept_accept_cb, closure);
+	    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+		sudo_warn("%s", U_("unable to add event to queue"));
+		goto done;
+	    }
+	    closure->listen_sock = -1;
+	    closure->state = RECV_CONNECTION;
+	    accept_closure = closure;
+	    break;
+	case POLICY_ACCEPT:
+	    /* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
+	    rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST,
+		intercept_cb, closure);
+	    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+		sudo_warn("%s", U_("unable to add event to queue"));
+		goto done;
+	    }
+	    closure->state = RECV_HELLO;
+	    break;
+	default:
+	    /* Done with this connection. */
+	    intercept_connection_close(closure);
 	}
-	if (sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-	    sudo_warn("%s", U_("unable to add event to queue"));
-	    goto done;
-	}
-	closure->listen_sock = -1;
-	closure->state = RECV_CONNECTION;
-	accept_closure = closure;
-	break;
-    case POLICY_ACCEPT:
-	/* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
-	if (sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST, intercept_cb, closure) == -1) {
-	    /* This cannot (currently) fail. */
-	    sudo_warn("%s", U_("unable to add event to queue"));
-	    goto done;
-	}
-	if (sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-	    sudo_warn("%s", U_("unable to add event to queue"));
-	    goto done;
-	}
-	closure->state = RECV_HELLO;
-	break;
-    default:
-	/* Done with this connection. */
-	intercept_connection_close(closure);
     }
 
     ret = true;

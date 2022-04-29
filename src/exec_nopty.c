@@ -371,10 +371,13 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     /*
      * Allocate a socketpair for communicating with sudo_intercept.so.
      * This must be inherited across exec, hence no FD_CLOEXEC.
+     * Check if the kernel supports the seccomp(2) filter "trap" action.
      */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
 	    sudo_fatal("%s", U_("unable to create sockets"));
+	if (have_seccomp_action("trap"))
+	    SET(details->flags, CD_USE_PTRACE);
     }
 
     /*
@@ -448,6 +451,11 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	    exit(EXIT_FAILURE);
     }
 
+    if (ISSET(details->flags, CD_USE_PTRACE)) {
+	/* Seize control of the command using ptrace(2). */
+	exec_ptrace_seize(ec.cmnd_pid);
+    }
+
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, &oset, NULL);
 
@@ -487,9 +495,15 @@ static void
 handle_sigchld_nopty(struct exec_closure_nopty *ec)
 {
     pid_t pid;
-    int status, wflags = WUNTRACED|WNOHANG;
+    int status, wflags;
     char signame[SIG2STR_MAX];
     debug_decl(handle_sigchld_nopty, SUDO_DEBUG_EXEC);
+
+#ifdef __WALL
+    wflags = __WALL|WNOHANG;
+#else
+    wflags = WUNTRACED|WNOHANG;
+#endif
 
     /* There may be multiple children in intercept mode. */
     for (;;) {
@@ -518,6 +532,12 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 		(void)snprintf(signame, sizeof(signame), "%d", signo);
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: command (%d) stopped, SIG%s", __func__, (int)pid, signame);
+
+	    if (ISSET(ec->details->flags, CD_USE_PTRACE)) {
+		/* Did exec_ptrace_handled() suppress the signal? */
+		if (exec_ptrace_handled(pid, status))
+		    continue;
+	    }
 
 	    /* Only report status for the main command. */
 	    if (ec->cmnd_pid != pid)

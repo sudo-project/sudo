@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -90,6 +90,31 @@ enable_intercept(char *envp[], const char *dso, int intercept_fd)
 }
 
 /*
+ * Called right before execve(2).
+ * The tracee will be suspended until the tracer resumes it.
+ */
+static void
+enable_ptrace(void)
+{
+#ifdef HAVE_PTRACE_INTERCEPT
+    const pid_t pid = getpid();
+    debug_decl(enable_ptrace, SUDO_DEBUG_UTIL);
+
+    /*
+     * Parent will trace child and intercept execve(2).
+     * We stop the child here so the parent can seize control.
+     */
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: suspending child %d",
+        __func__, (int)pid);
+    kill(pid, SIGSTOP);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: resuming child %d",
+        __func__, (int)pid);
+
+    debug_return;
+#endif /* HAVE_PTRACE_INTERCEPT */
+}
+
+/*
  * Like execve(2) but falls back to running through /bin/sh
  * ala execvp(3) if we get ENOEXEC.
  */
@@ -104,6 +129,8 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
     /* Modify the environment as needed to trap execve(). */
     if (ISSET(flags, CD_NOEXEC))
 	envp = disable_execute(envp, sudo_conf_noexec_path());
+    else if (ISSET(flags, CD_USE_PTRACE))
+	enable_ptrace();
     else if (ISSET(flags, CD_INTERCEPT|CD_LOG_SUBCMDS))
 	envp = enable_intercept(envp, sudo_conf_intercept_path(), intercept_fd);
 
