@@ -255,7 +255,7 @@ exec_cmnd(struct command_details *details, int intercept_fd, int errfd)
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	    selinux_execve(details->execfd, details->command, details->argv,
-		details->envp, ISSET(details->flags, CD_NOEXEC));
+		details->envp, details->flags);
 	} else
 #endif
 	{
@@ -379,6 +379,25 @@ int
 sudo_execute(struct command_details *details, struct command_status *cstat)
 {
     debug_decl(sudo_execute, SUDO_DEBUG_EXEC);
+
+#if defined(HAVE_SELINUX) && !defined(HAVE_PTRACE_INTERCEPT)
+    /*
+     * SELinux prevents LD_PRELOAD from functioning so we must use
+     * ptrace-based intercept mode.
+     */
+    if (details->selinux_role != NULL || details->selinux_type != NULL) {
+	if (ISSET(details->flags, CD_INTERCEPT)) {
+	    sudo_warnx("%s",
+		U_("intercept mode is not supported with SELinux RBAC on this system"));
+	    CLR(details->flags, CD_INTERCEPT);
+	}
+	if (ISSET(details->flags, CD_LOG_SUBCMDS)) {
+	    sudo_warnx("%s",
+		U_("unable to log sub-commands with SELinux RBAC on this system"));
+	    CLR(details->flags, CD_LOG_SUBCMDS);
+	}
+    }
+#endif /* HAVE_SELINUX && !HAVE_PTRACE_INTERCEPT */
 
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {

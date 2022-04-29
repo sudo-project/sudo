@@ -253,7 +253,7 @@ int selinux_relabel_tty(const char *ttyn, int ttyfd);
 int selinux_restore_tty(void);
 int selinux_setexeccon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
-    char *envp[], bool noexec);
+    char *envp[], int flags);
 
 /* solaris.c */
 void set_project(struct passwd *);
