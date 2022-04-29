@@ -49,6 +49,11 @@
 # include <linux/seccomp.h>
 # include <linux/filter.h>
 
+/* Older systems may not support execveat(2). */
+#ifndef __NR_execveat
+# define __NR_execveat	-1
+#endif
+
 /* Align address to a word boundary. */
 #define WORDALIGN(_a)	(((_a) + (sizeof(long) - 1L)) & ~(sizeof(long) - 1L))
 
@@ -60,6 +65,9 @@
  * We define user_regs_struct as the struct to use for the
  * PTRACE_GETREGSET/PTRACE_SETREGSET command and define accessor
  * macros to get/set the struct members.
+ *
+ * The value of SECCOMP_AUDIT_ARCH is used when matching the architecture
+ * in the seccomp(2) filter.
  */
 #if defined(__amd64__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_X86_64
@@ -351,8 +359,7 @@ get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
     int *argc_out, char ***argv_out, int *envc_out, char ***envp_out)
 {
     char *argbuf, *strtab, *pathname, **argv, **envp;
-    long path_addr, argv_addr, envp_addr, syscallno;
-    struct iovec iov;
+    long path_addr, argv_addr, envp_addr;
     int argc, envc;
     size_t bufsize, len;
     debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
@@ -361,21 +368,6 @@ get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
     argbuf = malloc(bufsize);
     if (argbuf == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-
-    /* XXX - for amd64 and i386 use PTRACE_GETREGS/PTRACE_SETREGS instead. */
-    iov.iov_base = regs;
-    iov.iov_len = sizeof(*regs);
-    if (ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
-	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
-	goto bad;
-    }
-
-    /* System call number is stored in the lower 32-bits on 64-bit platforms. */
-    syscallno = reg_syscall(regs) & 0xffffffff;
-    if (syscallno != __NR_execve) {
-	sudo_warnx("%s: unexpected system call %ld", __func__, syscallno);
-	goto bad;
-    }
 
     /* execve(2) takes three arguments: pathname, argv, envp. */
     path_addr = reg_arg1(regs);
@@ -526,8 +518,8 @@ have_seccomp_action(const char *action)
 }
 
 /*
- * Intercept execve(2) using seccomp(2) and ptrace(2).
- * If no tracer is present, execve(2) will fail with ENOSYS.
+ * Intercept execve(2) and execveat(2) using seccomp(2) and ptrace(2).
+ * If no tracer is present, execve(2) and execveat(2) will fail with ENOSYS.
  * Must be called with CAP_SYS_ADMIN, before privs are dropped.
  */
 bool
@@ -537,12 +529,13 @@ set_exec_filter(void)
 	/* Load architecture value (AUDIT_ARCH_*) into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, arch)),
 	/* Jump to the end unless the architecture matches. */
-	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 3),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 4),
 	/* Load syscall number into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
-	/* Jump to trace for execve(2), else allow. */
-	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execve, 0, 1),
-	/* Trace execve(2) syscall */
+	/* Jump to trace for execve(2)/execveat(2), else allow. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execve, 1, 0),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execveat, 0, 1),
+	/* Trace execve(2)/execveat(2) syscalls */
 	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE),
 	/* Allow non-matching syscalls */
 	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
@@ -617,16 +610,41 @@ static bool
 ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 {
     char *pathname, **argv, **envp, *buf;
+    int argc, envc, syscallno;
     struct user_pt_regs regs;
     char cwd[PATH_MAX];
+    struct iovec iov;
     bool ret = false;
-    int argc, envc;
     debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
 
     /* Do not check the policy if we are executing the initial command. */
     if (closure->initial_command != 0) {
 	closure->initial_command--;
 	debug_return_bool(true);
+    }
+
+    /* Get the registers. */
+    /* XXX - for amd64 and i386 use PTRACE_GETREGS/PTRACE_SETREGS instead. */
+    iov.iov_base = &regs;
+    iov.iov_len = sizeof(regs);
+    if (ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1) {
+	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
+	debug_return_bool(false);
+    }
+
+    /* System call number is stored in the lower 32-bits on 64-bit platforms. */
+    syscallno = reg_syscall(&regs) & 0xffffffff;
+    switch (syscallno) {
+    case __NR_execve:
+	/* Handled below. */
+	break;
+    case __NR_execveat:
+	/* We don't currently check execveat(2). */
+	debug_return_bool(true);
+	break;
+    default:
+	sudo_warnx("%s: unexpected system call %d", __func__, syscallno);
+	debug_return_bool(false);
     }
 
     /* Get the current working directory and execve info. */
