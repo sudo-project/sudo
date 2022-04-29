@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd February 16, 2022
+.Dd April 28, 2022
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -549,9 +549,9 @@ Debug sudo_intercept.so @log_dir@/intercept_debug all@debug
 .Pp
 would log all debugging statements, regardless of level, for the
 .Pa sudo_intercept.so
-shared object that implements
+shared library that implements
 .Nm sudo Ns 's
-intercept functionality.
+intercept functionality on some systems.
 .Pp
 As of
 .Nm sudo

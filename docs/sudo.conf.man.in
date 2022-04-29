@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "April 28, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -605,9 +605,9 @@ Debug sudo_intercept.so @log_dir@/intercept_debug all@debug
 .PP
 would log all debugging statements, regardless of level, for the
 \fIsudo_intercept.so\fR
-shared object that implements
+shared library that implements
 \fBsudo\fR's
-intercept functionality.
+intercept functionality on some systems.
 .PP
 As of
 \fBsudo\fR

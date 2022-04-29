@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 21, 2022
+.Dd April 28, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2941,7 +2941,9 @@ See
 .Sx Preventing shell escapes
 for more information on what systems support this option and its limitations.
 This setting is only supported by version 1.9.8 or higher
-and is incompatible with SELinux RBAC support.
+and is incompatible with SELinux RBAC support unless the system supports
+.Xr seccomp 2
+filter mode.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -3108,7 +3110,9 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.9.8 or higher
-and is incompatible with SELinux RBAC support.
+and is incompatible with SELinux RBAC support unless the system supports
+.Xr seccomp 2
+filter mode.
 .It intercept_allow_setid
 On most systems, the dynamic loader will ignore
 .Ev LD_PRELOAD
@@ -6246,14 +6250,35 @@ For example, this can be used to restrict the commands run from
 within a privileged shell.
 Note, however, that this applies only to dynamically-linked
 executables.
-Statically-linked executables and executables
-running under binary emulation are not affected.
-Also, most shells support built-in commands and the ability to read
-or write sensitive files that cannot be intercepted by
-.Nm sudo .
-.Pp
-Currently,
+It is not possible to intercept commands for statically-linked executables
+or executables that run under binary emulation.
+This implementation of the
+.Em intercept
+functionality is incompatible with
 .Nm sudo Ns 's
+SELinux RBAC support (but see below).
+SELinux disables
+.Ev LD_PRELOAD
+by default and interferes with file descriptor inheritance.
+.Pp
+Linux systems that support
+.Xr seccomp 2
+filtering will use a different method involving
+.Xr ptrace 2
+instead of pre-loading a shared library.
+This method supports both static and dynamic executables as well as
+.Nm sudo Ns 's
+SELinux RBAC mode.
+Because it operates at the system call level, not the library function level,
+it is possible to intercept all calls to
+.Xr execve 2 .
+Functions utilizing the
+.Xr execveat 2
+system call, such as
+.Xr fexecve 3 ,
+are not currently intercepted.
+.Pp
+The shared library-based
 .Em intercept
 functionality only works for programs that use the
 .Fn execl ,
@@ -6274,6 +6299,9 @@ Because most dynamic loaders ignore
 will not permit such programs to be run in
 .Em intercept
 mode.
+The Linux
+.Xr seccomp 2 Ns \- Ns based
+implementation does not share these restrictions.
 .Pp
 The
 .Em intercept
@@ -6286,11 +6314,8 @@ Check your operating system's manual pages for the dynamic linker
 (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
 .Ev LD_PRELOAD
 is supported.
-It is
-.Em not
-supported when
-.Nm sudo Ns 's
-SELinux RBAC support is in use due to a fundamental incompatibility.
+It is not possible to intercept shell built-in commands or restrict
+the ability to read or write sensitive files from within a shell.
 .Pp
 To enable intercept mode on a per-command basis, use the
 .Li INTERCEPT
@@ -6341,7 +6366,9 @@ flag uses the same mechanism as
 functionality can be used to prevent a program run by
 .Nm sudo
 from executing any other programs.
-On most systems, it uses the same mechanism as
+On most systems, it uses the same
+.Ev LD_PRELOAD
+mechanism as
 .Em intercept
 (see above) and thus the same caveats apply.
 The
