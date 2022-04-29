@@ -310,7 +310,7 @@ ptrace_write_string(pid_t pid, long addr, const char *str)
 	}
 	if (ptrace(PTRACE_POKEDATA, pid, addr, u.word) == -1) {
 	    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, %.*s)",
-		pid, addr, (int)sizeof(u.buf), u.buf);
+		(int)pid, addr, (int)sizeof(u.buf), u.buf);
 	    debug_return_size_t(-1);
 	}
 	addr += sizeof(long);
@@ -470,7 +470,7 @@ ptrace_fail_syscall(pid_t pid, struct user_pt_regs *regs, int ecode)
     /* Allow the syscall to continue and change return value to ecode. */
     ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
     for (;;) {
-	if (waitpid(pid, &status, WUNTRACED) != -1)
+	if (waitpid(pid, &status, __WALL) != -1)
 	    break;
 	if (errno == EINTR)
 	    continue;
@@ -571,7 +571,6 @@ exec_ptrace_seize(pid_t child)
     const long ptrace_opts = PTRACE_O_TRACESECCOMP|PTRACE_O_TRACECLONE|
 			     PTRACE_O_TRACEFORK|PTRACE_O_TRACEVFORK;
     int status;
-    pid_t pid;
     debug_decl(exec_ptrace_seize, SUDO_DEBUG_UTIL);
 
     /* Seize control of the child process. */
@@ -580,12 +579,18 @@ exec_ptrace_seize(pid_t child)
 	    ptrace_opts);
 	debug_return_bool(false);
     }
+    /* The child is suspended waiting for SIGUSR1, wake it up. */
+    if (kill(child, SIGUSR1) == -1) {
+	sudo_warn("kill(%d, SIGUSR1)", child);
+	debug_return_bool(false);
+    }
 
-    /* The child will stop itself immediately before execve(2). */
-    do {
-	pid = waitpid(child, &status, WUNTRACED);
-    } while (pid == -1 && errno == EINTR);
-    if (pid == -1) {
+    /* Wait for the child to enter trace stop and continue it. */
+    for (;;) {
+	if (waitpid(child, &status, __WALL) != -1)
+	    break;
+	if (errno == EINTR)
+	    continue;
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return_bool(false);
     }
@@ -593,8 +598,8 @@ exec_ptrace_seize(pid_t child)
 	sudo_warnx(U_("process %d exited unexpectedly"), (int)child);
 	debug_return_bool(false);
     }
-    if (ptrace(PTRACE_CONT, child, NULL, NULL) == -1) {
-	sudo_warn("ptrace(PTRACE_CONT, %d, NULL, NULL)", (int)child);
+    if (ptrace(PTRACE_CONT, child, NULL, (long)SIGUSR1) == -1) {
+	sudo_warn("ptrace(PTRACE_CONT, %d, NULL, SIGUSR1)", (int)child);
 	debug_return_bool(false);
     }
 
@@ -687,7 +692,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		/* Store string address as new_argv[i]. */
 		if (ptrace(PTRACE_POKEDATA, pid, sp, strtab) == -1) {
 		    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
-			pid, sp, strtab);
+			(int)pid, sp, strtab);
 		    goto done;
 		}
 		sp += sizeof(long);
@@ -800,11 +805,11 @@ exec_ptrace_handled(pid_t pid, int status, void *intercept)
 	 * until SIGCONT is received (simulate SIGSTOP, etc).
 	 */
 	if (ptrace(PTRACE_LISTEN, pid, NULL, 0L) == -1)
-	    sudo_warn("ptrace(PTRACE_LISTEN,, %d, NULL, %d", pid, stopsig);
+	    sudo_warn("ptrace(PTRACE_LISTEN, %d, NULL, %d)", (int)pid, stopsig);
     } else {
 	/* Restart child. */
 	if (ptrace(PTRACE_CONT, pid, NULL, signo) == -1)
-	    sudo_warn("ptrace(PTRACE_CONT, %d, NULL, %d", pid, stopsig);
+	    sudo_warn("ptrace(PTRACE_CONT, %d, NULL, %d)", (int)pid, stopsig);
     }
 
     debug_return_bool(signo == 0);

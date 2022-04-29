@@ -536,6 +536,14 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     debug_return;
 }
 
+#ifdef HAVE_PTRACE_INTERCEPT
+static void
+handler(int signo)
+{
+    /* just return */
+}
+#endif /* HAVE_PTRACE_INTERCEPT */
+
 /*
  * Monitor process that creates a new session with the controlling tty,
  * resets signal handlers and forks a child to call exec_cmnd_pty().
@@ -626,11 +634,28 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	goto bad;
     case 0:
 	/* child */
-	sigprocmask(SIG_SETMASK, oset, NULL);
 	close(backchannel);
 	close(errpipe[0]);
 	if (io_fds[SFD_USERTTY] != -1)
 	    close(io_fds[SFD_USERTTY]);
+#ifdef HAVE_PTRACE_INTERCEPT
+	if (ISSET(details->flags, CD_USE_PTRACE)) {
+	    sigset_t set;
+
+	    /* Tracer will send us SIGUSR1 when it is time to proceed. */
+	    sa.sa_handler = handler;
+	    if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0) {
+		sudo_warn(U_("unable to set handler for signal %d"),
+		    SIGUSR1);
+	    }
+
+	    /* Suspend child until tracer seizes control and sends SIGUSR1. */
+	    sigfillset(&set);
+	    sigdelset(&set, SIGUSR1);
+	    sigsuspend(&set);
+	}
+#endif /* HAVE_PTRACE_INTERCEPT */
+	sigprocmask(SIG_SETMASK, oset, NULL);
 	restore_signals();
 
 	/* setup tty and exec command */
